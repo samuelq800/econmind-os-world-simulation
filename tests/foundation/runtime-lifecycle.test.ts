@@ -350,4 +350,54 @@ describe('V00.2 runtime lifecycle skeleton', () => {
       }
     },
   );
+
+  it(
+    'covers the alternate SIGTERM and SIGINT shutdown paths',
+    { timeout: 30_000 },
+    async () => {
+      const ports = new Set<number>();
+      while (ports.size < 3) ports.add(await freePort());
+      const [webPort, apiPort, workerPort] = [...ports];
+      if (
+        webPort === undefined ||
+        apiPort === undefined ||
+        workerPort === undefined
+      ) {
+        throw new Error('Failed to allocate three test ports');
+      }
+      const web = startWeb({
+        ECONMIND_ENV: 'local',
+        WORLD_WEB_PORT: String(webPort),
+      });
+      const api = startNodeEntry(apiEntry, {
+        ECONMIND_ENV: 'local',
+        WORLD_API_PORT: String(apiPort),
+      });
+      const worker = startNodeEntry(workerEntry, {
+        ECONMIND_ENV: 'local',
+        WORLD_WORKER_HEALTH_PORT: String(workerPort),
+      });
+      try {
+        await Promise.all([
+          waitForHttp(`http://127.0.0.1:${webPort}/healthz`),
+          waitForHttp(`http://127.0.0.1:${apiPort}/healthz`),
+          waitForHttp(`http://127.0.0.1:${workerPort}/healthz`),
+        ]);
+      } finally {
+        const [webExit, apiExit, workerExit] = await Promise.all([
+          stopChild(web, 'SIGTERM'),
+          stopChild(api, 'SIGINT'),
+          stopChild(worker, 'SIGTERM'),
+        ]);
+        expect(webExit.code).toBe(143);
+        expect(apiExit.code).toBe(0);
+        expect(workerExit.code).toBe(0);
+        expect(api.output()).toContain('SHUTDOWN_COMPLETE');
+        expect(worker.output()).toContain('SHUTDOWN_COMPLETE');
+      }
+      await expect(
+        fetch(`http://127.0.0.1:${webPort}/healthz`),
+      ).rejects.toThrow();
+    },
+  );
 });
