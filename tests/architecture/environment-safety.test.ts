@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { assessEnvironment } from '../../scripts/environment-policy.mjs';
 import { findSensitivePatterns } from '../../scripts/repository-secrets-policy.mjs';
 import { classifySupabaseArguments } from '../../scripts/supabase-policy.mjs';
+import { findForbiddenBrowserVariables } from '../../scripts/vite-environment-policy.mjs';
 
 describe('environment safety policy', () => {
   it('accepts loopback databases for local work', () => {
@@ -32,6 +33,19 @@ describe('environment safety policy', () => {
     ).toContain(
       'VITE_SUPABASE_SERVICE_ROLE_KEY must never be exposed to browser code',
     );
+  });
+
+  it('classifies server-only browser variables without exposing values', () => {
+    expect(
+      findForbiddenBrowserVariables({
+        VITE_PRIVATE_KEY: 'synthetic-value',
+        VITE_SERVER_TOKEN: 'synthetic-value',
+        VITE_WORLD_API_BASE_URL: 'https://safe.example.invalid',
+      }),
+    ).toEqual([
+      { name: 'VITE_PRIVATE_KEY', category: 'private key' },
+      { name: 'VITE_SERVER_TOKEN', category: 'server-only credential' },
+    ]);
   });
 
   it('allows only read-only Supabase wrapper commands', () => {

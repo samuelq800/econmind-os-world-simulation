@@ -1,3 +1,5 @@
+import { findForbiddenBrowserVariables } from './vite-environment-policy.mjs';
+
 const SAFE_LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 const SUPPORTED_ENVIRONMENTS = new Set([
   'local',
@@ -14,13 +16,8 @@ export function assessEnvironment(environment) {
     violations.push(`Unsupported ECONMIND_ENV: ${name}`);
   }
 
-  for (const key of Object.keys(environment)) {
-    if (
-      key.startsWith('VITE_') &&
-      /(SERVICE_ROLE|DATABASE_URL|DB_PASSWORD|SUPABASE_SECRET)/u.test(key)
-    ) {
-      violations.push(`${key} must never be exposed to browser code`);
-    }
+  for (const { name } of findForbiddenBrowserVariables(environment)) {
+    violations.push(`${name} must never be exposed to browser code`);
   }
 
   const databaseUrl = environment.DATABASE_URL;

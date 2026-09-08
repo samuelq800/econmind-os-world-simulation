@@ -55,3 +55,27 @@ not created in V00.1 because they would imply capabilities that do not exist.
 Vitest includes negative fixtures proving the rules detect forbidden imports.
 These are foundation guardrails; they do not replace later dependency graph,
 database policy, or end-to-end authorization tests.
+
+### Resolved module enforcement
+
+After the V00.1 review blocker fix, the scanner uses the TypeScript compiler API
+to parse module references and resolve their targets before applying repository
+ownership rules. It covers `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`,
+and `.cjs` source files. Static imports, side-effect imports, exports from another
+module, import-equals declarations, import types, literal dynamic imports, and
+literal `require` calls are inspected. A dynamic reference without a literal
+module name fails closed.
+
+Workspace package names are mapped to their repository package roots, including
+reserved future package names. Relative `.js` references that TypeScript maps to
+existing `.ts` sources are judged by the resolved source owner. TypeScript path
+aliases are resolved from the nearest repository `tsconfig.json`. A Vite alias
+must also be represented in TypeScript resolution; an unresolved code import
+fails the boundary check rather than being treated as external or safe.
+
+The current active ownership rules prohibit `world-web` from resolving into
+`world-api`, `world-worker`, persistence, or named server-authority
+implementations. Future core rules activate when `packages/core` exists and
+prohibit dependencies on the browser/UI layer, persistence, React, React DOM,
+and Supabase SDKs. V00.1 contains no economic model in `world-api`; later engine
+package rules remain part of the relevant future work package.

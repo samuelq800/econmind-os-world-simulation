@@ -16,7 +16,7 @@
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "vitest run",
-    "test:boundaries": "node scripts/check-boundaries.mjs",
+    "test:boundaries": "vitest run tests/architecture/boundaries.test.ts && node scripts/check-boundaries.mjs",
     "env:check": "node scripts/assert-safe-environment.mjs",
     "secrets:check": "node scripts/check-repository-secrets.mjs",
     "supabase:safe": "node scripts/supabase-safe.mjs",

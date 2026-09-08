@@ -14,3 +14,4 @@ dist/
 coverage/
 *.tsbuildinfo
 supabase/.temp/
+.vite-env-test-*/

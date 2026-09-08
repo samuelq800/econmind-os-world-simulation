@@ -1,6 +1,20 @@
 import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { fileURLToPath } from 'node:url';
+import { defineConfig, loadEnv } from 'vite';
 
-export default defineConfig({
-  plugins: [react()],
+import { assertSafeViteEnvironment } from '../../scripts/vite-environment-policy.mjs';
+
+const worldWebRoot = fileURLToPath(new URL('.', import.meta.url));
+
+export default defineConfig(({ mode }) => {
+  assertSafeViteEnvironment(
+    loadEnv(mode, worldWebRoot, 'VITE_'),
+    `world-web Vite mode ${mode}`,
+  );
+
+  return {
+    envDir: worldWebRoot,
+    plugins: [react()],
+    root: worldWebRoot,
+  };
 });

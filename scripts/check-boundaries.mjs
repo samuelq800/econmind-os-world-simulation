@@ -2,14 +2,27 @@ import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { violationsFor } from './boundary-rules.mjs';
+import {
+  analyzeBoundarySource,
+  createBoundaryContext,
+  SOURCE_EXTENSIONS,
+} from './boundary-rules.mjs';
 
-const repositoryRoot = path.resolve(
+const defaultRepositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
 );
-const roots = ['apps/world-web/src', 'packages/core/src'];
-const extensions = new Set(['.js', '.jsx', '.mjs', '.ts', '.tsx']);
+const guardedRoots = ['apps/world-web/src', 'packages/core/src'];
+
+function parseArguments(arguments_) {
+  if (arguments_.length === 0) {
+    return { repositoryRoot: defaultRepositoryRoot };
+  }
+  if (arguments_.length === 2 && arguments_[0] === '--root') {
+    return { repositoryRoot: path.resolve(arguments_[1]) };
+  }
+  throw new Error('Usage: node scripts/check-boundaries.mjs [--root <path>]');
+}
 
 async function listSourceFiles(directory) {
   let entries;
@@ -28,35 +41,71 @@ async function listSourceFiles(directory) {
       if (entry.isDirectory()) {
         return listSourceFiles(entryPath);
       }
-      return extensions.has(path.extname(entry.name)) ? [entryPath] : [];
+      return SOURCE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())
+        ? [entryPath]
+        : [];
     }),
   );
 
   return nested.flat();
 }
 
-const files = (
-  await Promise.all(
-    roots.map((root) => listSourceFiles(path.join(repositoryRoot, root))),
-  )
-).flat();
-const violations = [];
+export async function scanRepositoryBoundaries(repositoryRoot) {
+  const context = createBoundaryContext(repositoryRoot);
+  const files = (
+    await Promise.all(
+      guardedRoots.map((root) =>
+        listSourceFiles(path.join(context.repositoryRoot, root)),
+      ),
+    )
+  ).flat();
+  const violations = [];
 
-for (const file of files) {
-  const source = await readFile(file, 'utf8');
-  const relativePath = path.relative(repositoryRoot, file);
-  violations.push(...violationsFor(relativePath, source));
+  for (const filePath of files) {
+    const source = await readFile(filePath, 'utf8');
+    violations.push(
+      ...analyzeBoundarySource({
+        ...context,
+        filePath,
+        source,
+      }),
+    );
+  }
+
+  return { files, violations };
 }
 
-if (violations.length > 0) {
-  console.error(JSON.stringify({ status: 'FAIL', violations }, null, 2));
-  process.exit(1);
+async function main() {
+  const { repositoryRoot } = parseArguments(process.argv.slice(2));
+  const { files, violations } = await scanRepositoryBoundaries(repositoryRoot);
+
+  if (violations.length > 0) {
+    console.error(JSON.stringify({ status: 'FAIL', violations }, null, 2));
+    process.exitCode = 1;
+    return;
+  }
+
+  console.log(
+    JSON.stringify(
+      {
+        status: 'PASS',
+        scannedFiles: files.length,
+        guardedRoots,
+        sourceExtensions: [...SOURCE_EXTENSIONS],
+      },
+      null,
+      2,
+    ),
+  );
 }
 
-console.log(
-  JSON.stringify(
-    { status: 'PASS', scannedFiles: files.length, guardedRoots: roots },
-    null,
-    2,
-  ),
-);
+main().catch((error) => {
+  console.error(
+    JSON.stringify(
+      { status: 'FAIL', configurationError: error.message },
+      null,
+      2,
+    ),
+  );
+  process.exitCode = 1;
+});

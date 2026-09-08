@@ -2,6 +2,7 @@
   "work_package": "V00.1",
   "status": "IMPLEMENTED_UNVERIFIED",
   "recorded_at": "2026-09-08T00:35:54Z",
+  "evidence_history_note": "The top-level commands and not_run list preserve the initial V00.1 implementation evidence. review_blocker_fix_round records the later R1/R2 correction evidence.",
   "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
   "validation_environment": {
     "platform": "darwin-arm64",
@@ -135,6 +136,154 @@
       "timestamp": "2026-09-08T00:32:36Z"
     }
   ],
+  "review_blocker_fix_round": {
+    "recorded_at": "2026-09-08T04:29:10Z",
+    "status": "IMPLEMENTED_UNVERIFIED",
+    "review_findings_addressed": ["R1", "R2"],
+    "environment": {
+      "platform": "darwin-arm64",
+      "node": "24.20.0",
+      "pnpm": "12.3.4",
+      "econmind_env": "local",
+      "supabase_target_classification": "PRODUCTION_INTEGRATION_TARGET_ONLY"
+    },
+    "commands": [
+      {
+        "command": "pnpm install --frozen-lockfile",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "stdout_stderr_summary": "Lockfile passed supply-chain policy verification and required no resolution changes.",
+        "environment": "local; exact Node/pnpm launcher"
+      },
+      {
+        "command": "pnpm lint",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "stdout_stderr_summary": "ESLint completed with no findings.",
+        "environment": "local; exact Node/pnpm launcher",
+        "timestamp": "2026-09-08T04:28:52Z"
+      },
+      {
+        "command": "pnpm format:check",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "stdout_stderr_summary": "All matched files conformed to Prettier style.",
+        "environment": "local; exact Node/pnpm launcher",
+        "timestamp": "2026-09-08T04:28:52Z"
+      },
+      {
+        "command": "pnpm typecheck",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "stdout_stderr_summary": "TypeScript checked world-web, world-api, and world-worker successfully.",
+        "environment": "local; exact Node/pnpm launcher",
+        "timestamp": "2026-09-08T04:28:52Z"
+      },
+      {
+        "command": "pnpm test",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "stdout_stderr_summary": "Vitest executed 4 files and 19 tests; all passed, including R1/R2 real-CLI and real-Vite regressions.",
+        "environment": "local; exact Node/pnpm launcher",
+        "timestamp": "2026-09-08T04:28:52Z"
+      },
+      {
+        "command": "pnpm test:boundaries",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "stdout_stderr_summary": "Nine CLI-level boundary regressions passed, including preserved core isolation; the live scanner then covered .ts/.tsx/.mts/.cts/.js/.jsx/.mjs/.cjs and found no live violation.",
+        "environment": "local; exact Node/pnpm launcher",
+        "timestamp": "2026-09-08T04:28:55Z"
+      },
+      {
+        "command": "pnpm env:check",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "stdout_stderr_summary": "Validated effective Vite development and production environments; retained production-integration-only Supabase classification and databaseMutationAllowed=false.",
+        "environment": "local; exact Node/pnpm launcher",
+        "timestamp": "2026-09-08T04:28:58Z"
+      },
+      {
+        "command": "pnpm secrets:check",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "stdout_stderr_summary": "Scanned 52 tracked or unignored candidate files; no configured secret shape was found.",
+        "environment": "local; exact Node/pnpm launcher",
+        "timestamp": "2026-09-08T04:28:58Z"
+      },
+      {
+        "command": "pnpm build",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "stdout_stderr_summary": "Built API and worker with TypeScript and world-web with its guarded Vite production configuration; 15 browser modules transformed.",
+        "environment": "local; exact Node/pnpm launcher",
+        "timestamp": "2026-09-08T04:28:58Z"
+      },
+      {
+        "command": "pnpm check",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "stdout_stderr_summary": "Aggregate gate passed lint, formatting, three-app typecheck, 19 tests, 9 boundary acceptance regressions, effective Vite environment validation, secret scan, and three-app build.",
+        "environment": "local; exact Node/pnpm launcher",
+        "timestamp": "2026-09-08T04:28:52Z"
+      }
+    ],
+    "negative_acceptance_cases": [
+      {
+        "case": "relative world-web import resolving to apps/world-worker/src/index.ts through a .js specifier",
+        "result": "PASS",
+        "observed_exit_code": 1,
+        "expected_exit_code": 1,
+        "stdout_stderr_summary": "Boundary CLI reported FORBIDDEN_ARCHITECTURE_DEPENDENCY and the resolved worker TypeScript target."
+      },
+      {
+        "case": ".mts world-web export from @econmind/world-worker",
+        "result": "PASS",
+        "observed_exit_code": 1,
+        "expected_exit_code": 1,
+        "stdout_stderr_summary": "Boundary CLI scanned the .mts file and rejected the resolved workspace owner."
+      },
+      {
+        "case": "ignored apps/world-web/.env.local containing a synthetic VITE_SUPABASE_SERVICE_ROLE_KEY",
+        "result": "PASS",
+        "observed_exit_code": 1,
+        "expected_exit_code": 1,
+        "stdout_stderr_summary": "pnpm env:check rejected the variable in both development and production effective Vite modes; output named the variable/category and omitted its value."
+      },
+      {
+        "case": "direct world-web Vite production build with the synthetic service-role variable",
+        "result": "PASS",
+        "observed_exit_code": 1,
+        "expected_exit_code": 1,
+        "stdout_stderr_summary": "Vite failed while loading configuration, before bundle emission; diagnostics omitted the synthetic value."
+      },
+      {
+        "case": "synthetic browser secret absent from build output after rejected build",
+        "result": "PASS",
+        "observed_exit_code": 1,
+        "expected_exit_code": 1,
+        "stdout_stderr_summary": "rg returned no match in apps/world-web/dist. Exit 1 is the expected no-match result."
+      }
+    ],
+    "temporary_fixture_cleanup": "PASS; the acceptance .ts, .mts, and .env.local files were deleted and automated temp directories were removed in finally blocks.",
+    "not_run": [
+      "Independent re-review of the blocker-fix commit",
+      "CI-provider execution",
+      "R3 secret-scanner hardening",
+      "R4 governance-file remediation",
+      "V00.2 or later work"
+    ]
+  },
   "not_run": [
     "Independent review",
     "CI-provider execution",

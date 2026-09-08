@@ -204,3 +204,100 @@ Neither gap blocks independent review of this foundation implementation.
 
 V00.1 is ready for independent review. Its implementation status is
 `IMPLEMENTED_UNVERIFIED`, not `VERIFIED`. No `REVIEW.md` was created.
+
+## V00.1 REVIEW BLOCKER FIX ROUND
+
+**Date:** 2026-09-08
+
+**Status after implementation:** `IMPLEMENTED_UNVERIFIED` pending a new
+independent review.
+
+### R1 fix — resolved authority boundaries
+
+The boundary scanner now parses JavaScript/TypeScript syntax with the installed
+TypeScript compiler API and resolves each module target before applying repository
+ownership rules. Relative imports, workspace package names, configured TypeScript
+paths, and `.js` specifiers resolving to `.ts` sources are covered. All eight
+supported source extensions are scanned: `.ts`, `.tsx`, `.mts`, `.cts`, `.js`,
+`.jsx`, `.mjs`, and `.cjs`.
+
+Static imports/exports, import-equals, import types, literal dynamic imports, and
+literal `require` calls are inspected. Non-literal dynamic references and
+unresolved code imports fail closed. `pnpm test:boundaries` now executes the
+CLI-level negative regressions before scanning live source.
+
+### R2 fix — effective Vite browser environment
+
+The actual `world-web` Vite config now loads browser variables through Vite's own
+`loadEnv` behavior using the application root and active mode. The config rejects
+service-role/server secrets, database administrative credentials, private keys,
+and server-only credential namespaces before dev-server startup or build output.
+Diagnostics contain names/categories and omit values.
+
+The root environment command also loads the effective `world-web` development
+and production environments. Regression tests copy the real Vite config into a
+temporary application layout, exercise direct Vite build/dev entry points with
+harmless synthetic values, and remove all fixtures in `finally` blocks.
+
+### Changed files in this round
+
+- `.gitignore`
+- `apps/world-web/tsconfig.json`
+- `apps/world-web/vite.config.ts`
+- `package.json`
+- `scripts/assert-safe-environment.mjs`
+- `scripts/boundary-rules.mjs`
+- `scripts/check-boundaries.mjs`
+- `scripts/environment-policy.mjs`
+- `scripts/vite-environment-policy.d.mts`
+- `scripts/vite-environment-policy.mjs`
+- `tests/architecture/boundaries.test.ts`
+- `tests/architecture/environment-safety.test.ts`
+- `tests/architecture/vite-environment.test.ts`
+- `docs/architecture/REPO_BOUNDARIES.md`
+- `docs/runbooks/ENVIRONMENT_SAFETY.md`
+- `docs/reports/V00.1/IMPLEMENTATION.md`
+- `docs/reports/V00.1/TEST_EVIDENCE.json`
+
+The independent review file was preserved byte-for-byte and included as the
+reviewer's artifact; it was not edited by the blocker-fix implementation.
+
+### New regression coverage
+
+- Direct forbidden workspace/reserved package imports.
+- Relative `world-web` to `world-worker` resolution.
+- `.js` module syntax resolving to an existing `.ts` target.
+- Compact import syntax and `.mts` source traversal.
+- TypeScript path aliases, dynamic imports, `require`, and unresolved dynamic
+  references.
+- Allowed same-layer imports.
+- Safe effective Vite environments and legitimate public variables.
+- Ignored app-local dotenv service-role variables blocking direct Vite build and
+  dev before output, without echoing the synthetic value.
+
+### Commands and observed blocker acceptance results
+
+The exact-version Node 24.20.0/pnpm 12.3.4 launcher was used. Required final
+command results are preserved in `TEST_EVIDENCE.json`. Independent negative
+acceptance probes during implementation observed:
+
+- relative browser-to-worker import: boundary CLI exit `1`;
+- forbidden `.mts` workspace export: boundary CLI exit `1`;
+- ignored `apps/world-web/.env.local` with a synthetic service-role variable:
+  `pnpm env:check` exit `1`;
+- direct `world-web` Vite production build with that variable: exit `1` before
+  Vite emitted output; the synthetic value was absent from existing build output.
+
+The temporary source and dotenv acceptance files were removed immediately after
+their probes.
+
+### Limitations and deferred findings
+
+- R3 secret-scanner hardening remains a non-blocking follow-up and was not changed.
+- R4 `PLANS.md`/R2 governance-file remediation remains required before V00.2 and
+  was not performed here.
+- R5 manual global Supabase CLI bypass remains the accepted deferred V02 risk.
+- Vite-only aliases must also be resolvable through TypeScript configuration;
+  otherwise the boundary scanner fails closed with a configuration violation.
+- No API/worker economic model exists in V00.1. Later authority rules for actual
+  engine packages must be added with those packages rather than invented here.
