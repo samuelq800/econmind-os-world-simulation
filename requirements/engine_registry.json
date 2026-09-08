@@ -1,0 +1,164 @@
+[
+  {
+    "id": "E01",
+    "source_heading": "Engine 01 · Time & Event Engine",
+    "source_refs": [
+      "MASTER-U0042",
+      "MASTER-U0187"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E02",
+    "source_heading": "Engine 02 · Population Engine",
+    "source_refs": [
+      "MASTER-U0043",
+      "MASTER-U0259"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E03",
+    "source_heading": "Engine 03 · Labour & Wage Engine",
+    "source_refs": [
+      "MASTER-U0044",
+      "MASTER-U0329"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E04",
+    "source_heading": "Engine 04 · Education & Human Capital Engine",
+    "source_refs": [
+      "MASTER-U0045",
+      "MASTER-U0431"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E05",
+    "source_heading": "Engine 05 · Healthcare Engine",
+    "source_refs": [
+      "MASTER-U0046",
+      "MASTER-U0510"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E06",
+    "source_heading": "Engine 06 · Housing Engine",
+    "source_refs": [
+      "MASTER-U0047",
+      "MASTER-U0587"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E07",
+    "source_heading": "Engine 07 · Public Safety Engine",
+    "source_refs": [
+      "MASTER-U0048",
+      "MASTER-U0659"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E08",
+    "source_heading": "Engine 08 · Resource & Inventory Engine",
+    "source_refs": [
+      "MASTER-U0049",
+      "MASTER-U0736"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E09",
+    "source_heading": "Engine 09 · Energy Engine",
+    "source_refs": [
+      "MASTER-U0050",
+      "MASTER-U0834"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E10",
+    "source_heading": "Engine 10 · Production Engine",
+    "source_refs": [
+      "MASTER-U0051",
+      "MASTER-U0913"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E11",
+    "source_heading": "Engine 11 · Technology & R&D Engine",
+    "source_refs": [
+      "MASTER-U0052",
+      "MASTER-U1003"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E12",
+    "source_heading": "Engine 12 · Project & Infrastructure Engine",
+    "source_refs": [
+      "MASTER-U0053",
+      "MASTER-U1107"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E13",
+    "source_heading": "Engine 13 · Household & Demand Engine",
+    "source_refs": [
+      "MASTER-U0054",
+      "MASTER-U1235"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E14",
+    "source_heading": "Engine 14 · Fiscal & Treasury Engine",
+    "source_refs": [
+      "MASTER-U0055",
+      "MASTER-U1313"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E15",
+    "source_heading": "Engine 15 · Banking & Monetary Engine",
+    "source_refs": [
+      "MASTER-U0056",
+      "MASTER-U1413"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E16",
+    "source_heading": "Engine 16 · Trade, Contract & Global Market Engine",
+    "source_refs": [
+      "MASTER-U0057",
+      "MASTER-U1511"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E17",
+    "source_heading": "Engine 17 · FX & International Finance Engine",
+    "source_refs": [
+      "MASTER-U0058",
+      "MASTER-U1649"
+    ],
+    "implementation_status": "UNASSESSED"
+  },
+  {
+    "id": "E18",
+    "source_heading": "Engine 18 · National Accounts, Risk & Scoring Engine",
+    "source_refs": [
+      "MASTER-U0059",
+      "MASTER-U1736"
+    ],
+    "implementation_status": "UNASSESSED"
+  }
+]
