@@ -14,11 +14,11 @@ reconstruct missing governance from chat history.
 
 ## Current gate
 
-V00.1 is `IMPLEMENTED_UNVERIFIED` while technical re-review is pending. V00.2
-is not authorized. It remains blocked until V00.1 is independently `VERIFIED`
-and this governance sync is reviewed and merged. Implement only the current
-approved and dependency-ready step. Never continue automatically into later
-work packages.
+V00.1 and the R2 governance sync have independent `APPROVED` reviews and explicit
+project-owner acceptance, so both are `VERIFIED`. V00.2 remains blocked until
+the governance branch is actually merged into `main` and final reconciliation
+passes. Implement only the current approved and dependency-ready step. Never
+continue automatically into later work packages.
 
 ## Architecture and data safety
 
@@ -63,5 +63,6 @@ the review-controlled `CHANGES_REQUIRED` or `VERIFIED` states.
 
 Use the templates under `templates/` and report actual commands, exit codes,
 environment, evidence gaps, affected owners, permissions, migrations, legacy
-impact, and unresolved decisions. Stop after the authorized step and request an
-independent review.
+impact, and unresolved decisions. An implementation agent must never set
+`owner_approved` on its own; only an explicit project-owner instruction may be
+recorded. Stop after the authorized step and request an independent review.

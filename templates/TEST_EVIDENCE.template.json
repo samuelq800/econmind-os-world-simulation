@@ -7,12 +7,7 @@
     "versions": {},
     "production_access": false
   },
-  "result_vocabulary": [
-    "PASS",
-    "FAIL",
-    "NOT_RUN",
-    "INSUFFICIENT_EVIDENCE"
-  ],
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
   "commands": [
     {
       "command": "COMMAND",

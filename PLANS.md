@@ -19,6 +19,13 @@
 READ SPECS → PLAN → IMPLEMENT → RUN REAL TESTS → IMPLEMENTATION REPORT → INDEPENDENT REVIEW → FIX BLOCKERS → RE-REVIEW → VERIFIED → NEXT STEP。
 实施者不得自行把任务标为 VERIFIED。
 
+工作项只能在实施与必要测试完成、需要的独立审查结论为 `APPROVED`、
+项目负责人明确接受该审查，且所有硬依赖均为 `VERIFIED` 后才能成为
+`VERIFIED`。状态记录保存审查决定、被审查提交、仓库内审查文件及
+`owner_approved`。GitHub PR/审查与仓库状态检查是人的信任边界；验证器只检查
+工程一致性，不使用签名、私钥、trust root 或 reviewer registry 证明审查者身份。
+实施者不得默认或自行写入 `owner_approved: true`。
+
 ## 5. 决策纪律
 Codex 可提出 ADR proposal，但需要用户/负责人批准的架构或经济规则不得自动变为 APPROVED。未批准冲突只阻塞依赖它的步骤。
 
@@ -53,11 +60,11 @@ Codex 可提出 ADR proposal，但需要用户/负责人批准的架构或经济
 
 ## 11. 当前执行门槛
 
-- 当前步骤：V00.1。
-- 当前真实状态：`IMPLEMENTED_UNVERIFIED`，技术复审正在进行。
+- 当前步骤：V00.1，已 `VERIFIED`。
+- R2 治理同步：已 `VERIFIED`，等待合并与最终 reconciliation。
 - V00.2：`BLOCKED`，不得开始。
-- V00.2 的解除条件：V00.1 经独立复审成为 `VERIFIED`，且本次治理同步经独立核验、合并到主分支。
-- 治理文件存在、验证器通过或实施者完成修复，均不能代替上述独立复审与合并条件。
+- V00.2 的解除条件：本次治理同步已实际合并到 `main`，且合并后最终
+  reconciliation 通过。
 
 ## 12. 导航
 

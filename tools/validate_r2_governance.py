@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any, Callable
@@ -48,6 +49,45 @@ def validate(root: Path) -> dict[str, Any]:
 
     def load_json(relative: str) -> Any:
         return json.loads(file(relative).read_text(encoding="utf-8"))
+
+    def git(*arguments: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["git", "-C", str(root), *arguments],
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+
+    def commit_exists(commit: Any, label: str) -> str:
+        require(
+            isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit) is not None,
+            f"{label} must be a full Git commit hash",
+        )
+        result = git("cat-file", "-e", f"{commit}^{{commit}}")
+        require(result.returncode == 0, f"{label} does not exist: {commit}")
+        return commit
+
+    def is_ancestor(ancestor: str, descendant: str, label: str) -> None:
+        result = git("merge-base", "--is-ancestor", ancestor, descendant)
+        require(result.returncode == 0, f"{label}: {ancestor} is not an ancestor of {descendant}")
+
+    def approved_review(subject: str, target: Any, review: Any) -> None:
+        require(isinstance(review, dict), f"{subject} requires review metadata")
+        require(review.get("decision") == "APPROVED", f"{subject} review decision must be APPROVED")
+        reviewed_commit = commit_exists(review.get("reviewed_commit"), f"{subject} reviewed_commit")
+        implementation_commit = commit_exists(target, f"{subject} implementation_commit")
+        require(
+            reviewed_commit == implementation_commit,
+            f"{subject} reviewed_commit differs from implementation_commit",
+        )
+        review_file = review.get("review_file")
+        require(
+            isinstance(review_file, str) and review_file.startswith("docs/reports/"),
+            f"{subject} review_file must be a repository report path",
+        )
+        file(review_file)
+        require(review.get("owner_approved") is True, f"{subject} requires explicit owner approval")
 
     def check(name: str, operation: Callable[[], None]) -> None:
         try:
@@ -380,24 +420,93 @@ def validate(root: Path) -> dict[str, Any]:
         states = progress_data["steps"]
         require(set(states) == set(step_by_id), "progress step set differs from manifest")
         valid_states = set(steps_data["status_model"])
+        implementation_commits = progress_data.get("implementation_commits", {})
+        step_reviews = progress_data.get("step_reviews", {})
+        require(
+            isinstance(implementation_commits, dict) and set(implementation_commits) <= set(states),
+            "invalid implementation_commits subjects",
+        )
+        require(
+            isinstance(step_reviews, dict) and set(step_reviews) <= set(states),
+            "invalid step_reviews subjects",
+        )
         for step_id, state in states.items():
             require(state in valid_states, f"invalid progress state {step_id}: {state}")
+            dependencies_ready = all(
+                states[dependency] == "VERIFIED"
+                for dependency in step_by_id[step_id]["hard_dependencies"]
+            )
+            if state in {"IN_PROGRESS", "IMPLEMENTED_UNVERIFIED", "CHANGES_REQUIRED", "VERIFIED"}:
+                require(dependencies_ready, f"impossible {state} dependency claim: {step_id}")
             if state == "VERIFIED":
-                for dependency in step_by_id[step_id]["hard_dependencies"]:
-                    require(
-                        states[dependency] == "VERIFIED",
-                        f"impossible VERIFIED dependency claim: {step_id} <- {dependency}",
-                    )
-        require(states["V00.1"] == "IMPLEMENTED_UNVERIFIED", "V00.1 truth changed")
-        require(states["V00.2"] == "BLOCKED", "V00.2 must remain blocked")
+                approved_review(
+                    step_id,
+                    implementation_commits.get(step_id),
+                    step_reviews.get(step_id),
+                )
+            else:
+                require(step_id not in step_reviews, f"non-VERIFIED step carries approved review: {step_id}")
+
+        require(states["V00.1"] == "VERIFIED", "V00.1 must remain VERIFIED")
+        require(
+            states["V00.2"] in {"BLOCKED", "IN_PROGRESS", "IMPLEMENTED_UNVERIFIED"},
+            "V00.2 has an invalid finalization-session state",
+        )
         for step_id, state in states.items():
             if step_id not in {"V00.1", "V00.2"}:
                 require(state == "PLANNED", f"later work has non-planning state: {step_id}")
+
         sync = progress_data["governance_sync"]
-        require(sync["status"] == "IMPLEMENTED_UNVERIFIED", "governance sync self-verified")
-        require(sync["merge_authorized"] is False, "governance merge cannot be pre-authorized")
+        require(sync.get("status") == "VERIFIED", "governance sync must remain VERIFIED")
+        approved_review("Governance Sync", sync.get("implementation_commit"), sync.get("review"))
+        require("merge_authorized" not in sync, "legacy separate merge authorization is unsupported")
+
+        reconciliation = sync.get("final_reconciliation")
+        require(isinstance(reconciliation, dict), "missing final_reconciliation")
+        require(
+            reconciliation.get("status") in {"PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"},
+            "invalid final_reconciliation status",
+        )
+        integration = sync.get("integration")
+        require(isinstance(integration, dict), "missing governance integration status")
+        require(integration.get("status") in {"PENDING", "MERGED"}, "invalid governance integration status")
+        merged = integration["status"] == "MERGED"
+        if merged:
+            merged_commit = commit_exists(integration.get("merged_commit"), "governance merged_commit")
+            is_ancestor(merged_commit, "refs/remotes/origin/main", "governance remote integration")
+            is_ancestor(merged_commit, "HEAD", "governance local integration")
+        else:
+            require(integration.get("merged_commit") is None, "pending integration cannot name merged_commit")
+
+        v002_ready = merged and reconciliation["status"] == "PASS"
+        require(
+            states["V00.2"] == "BLOCKED" or v002_ready,
+            "V00.2 implementation requires merged governance and passing final reconciliation",
+        )
+        gate = progress_data["current_gate"]
+        require(
+            gate.get("step_id") in states and gate.get("status") == states[gate["step_id"]],
+            "current_gate status differs from step truth",
+        )
+        next_step = gate.get("next_step")
+        require(next_step in states, "current_gate names an unknown next step")
+        next_ready = (
+            v002_ready
+            if next_step == "V00.2"
+            else all(states[dependency] == "VERIFIED" for dependency in step_by_id[next_step]["hard_dependencies"])
+        )
+        require(
+            gate.get("next_step_ready") is next_ready,
+            "current_gate next_step_ready differs from validated readiness",
+        )
         metrics["progress_states"] = dict(
             sorted({state: list(states.values()).count(state) for state in valid_states}.items())
+        )
+        metrics.update(
+            governance_sync_status=sync["status"],
+            governance_integration=integration["status"],
+            approved_reviews=1 + sum(state == "VERIFIED" for state in states.values()),
+            v002_ready=v002_ready,
         )
 
     def decisions() -> None:

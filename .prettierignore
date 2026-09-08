@@ -3,3 +3,14 @@ dist/
 coverage/
 pnpm-lock.yaml
 supabase/.temp/
+docs/governance/r2/source/
+docs/reports/archive/
+docs/reports/governance/
+docs/reports/V00.1/REVIEW_FINAL.md
+specs/extracted/
+planning/
+prompts/
+reference/
+requirements/
+status/decisions.json
+PLANS.md
