@@ -17,6 +17,13 @@ from typing import Any, Callable
 
 
 ROOT = Path(__file__).resolve().parents[1]
+ALLOWED_EXECUTION_MODES = {"NORMAL", "PARALLEL_PREPARATION"}
+IMPLEMENTATION_AGENT_STATUSES = {
+    "IN_PROGRESS",
+    "IMPLEMENTED_UNVERIFIED",
+    "BLOCKED",
+}
+STEP_ID_PATTERN = re.compile(r"^V\d{2}\.\d+$")
 
 
 class GovernanceError(Exception):
@@ -54,6 +61,7 @@ def validate(root: Path) -> dict[str, Any]:
     steps_data: dict[str, Any] = {}
     steps: list[dict[str, Any]] = []
     step_by_id: dict[str, dict[str, Any]] = {}
+    valid_statuses: set[str] = set()
     package_ids = {f"V{index:02d}" for index in range(33)}
 
     def required_files() -> None:
@@ -79,9 +87,22 @@ def validate(root: Path) -> dict[str, Any]:
         metrics["required_files"] = len(required)
 
     def step_manifest() -> None:
-        nonlocal steps_data, steps, step_by_id
+        nonlocal steps_data, steps, step_by_id, valid_statuses
         steps_data = load_json("planning/r2_steps.json")
         require(steps_data["schema_version"] == "R2-101.1", "wrong step schema")
+        status_model = steps_data["status_model"]
+        require(isinstance(status_model, list), "status model must be a list")
+        require(
+            all(isinstance(status, str) and status for status in status_model),
+            "status model contains an invalid value",
+        )
+        require(len(status_model) == len(set(status_model)), "duplicate status value")
+        valid_statuses = set(status_model)
+        require("PARTIAL" not in valid_statuses, "PARTIAL is not an authoritative status")
+        require(
+            IMPLEMENTATION_AGENT_STATUSES <= valid_statuses,
+            "implementation-agent status vocabulary is missing from the status model",
+        )
         steps = steps_data["steps"]
         ids = [step["step_id"] for step in steps]
         require(len(steps) == 101, f"expected 101 steps, found {len(steps)}")
@@ -92,10 +113,52 @@ def validate(root: Path) -> dict[str, Any]:
             "step manifest does not represent V00-V32 exactly",
         )
         for step in steps:
+            step_id = step["step_id"]
+            for key in (
+                "work_package",
+                "stage",
+                "work_package_title",
+                "title",
+                "execution_mode",
+                "hard_dependencies",
+                "purpose",
+                "acceptance",
+                "status_default",
+            ):
+                require(key in step, f"{step_id} missing required field {key}")
+            require(STEP_ID_PATTERN.fullmatch(step_id) is not None, f"invalid step ID: {step_id}")
             require(
-                step["step_id"].startswith(step["work_package"] + "."),
-                f"step/package mismatch: {step['step_id']}",
+                step_id.split(".", 1)[0] == step["work_package"],
+                f"step/package mismatch: {step_id}",
             )
+            require(
+                step["execution_mode"] in ALLOWED_EXECUTION_MODES,
+                f"invalid execution mode {step_id}: {step['execution_mode']}",
+            )
+            require(
+                isinstance(step["hard_dependencies"], list),
+                f"hard dependencies must be a list: {step_id}",
+            )
+            require(
+                isinstance(step["purpose"], str) and step["purpose"].strip(),
+                f"empty purpose: {step_id}",
+            )
+            require(
+                isinstance(step["acceptance"], str) and step["acceptance"].strip(),
+                f"empty acceptance gate: {step_id}",
+            )
+            require(
+                step["status_default"] in valid_statuses,
+                f"invalid default status {step_id}: {step['status_default']}",
+            )
+        metrics["execution_modes"] = dict(
+            sorted(
+                {
+                    mode: sum(step["execution_mode"] == mode for step in steps)
+                    for mode in ALLOWED_EXECUTION_MODES
+                }.items()
+            )
+        )
         metrics.update(work_packages=33, steps=101)
 
     def dependency_graph() -> None:
@@ -123,7 +186,10 @@ def validate(root: Path) -> dict[str, Any]:
             encoding="utf-8"
         )
         package_rows = re.findall(r"^## (V\d{2})｜(.+)$", text, re.MULTILINE)
-        step_rows = re.findall(r"^### (V\d{2}\.\d+)｜(.+)$", text, re.MULTILINE)
+        step_matches = list(
+            re.finditer(r"^### (V\d{2}\.\d+)｜(.+)$", text, re.MULTILINE)
+        )
+        step_rows = [(match.group(1), match.group(2)) for match in step_matches]
         require(len(package_rows) == 33, "human navigation must contain 33 package headings")
         require(len(step_rows) == 101, "human navigation must contain 101 step headings")
         require(len(dict(package_rows)) == 33, "duplicate package heading")
@@ -131,6 +197,45 @@ def validate(root: Path) -> dict[str, Any]:
         for step_id, title in step_rows:
             require(step_id in step_by_id, f"Markdown has unknown step {step_id}")
             require(step_by_id[step_id]["title"] == title, f"title mismatch for {step_id}")
+        for index, match in enumerate(step_matches):
+            step_id = match.group(1)
+            step = step_by_id[step_id]
+            block_end = (
+                step_matches[index + 1].start()
+                if index + 1 < len(step_matches)
+                else len(text)
+            )
+            block = text[match.end() : block_end]
+
+            def navigation_field(label: str) -> str:
+                field_match = re.search(
+                    rf"^- {re.escape(label)}：(.+)$", block, re.MULTILINE
+                )
+                require(field_match is not None, f"Markdown {step_id} missing {label}")
+                return field_match.group(1).strip()
+
+            dependency_text = navigation_field("Hard dependencies")
+            dependencies = (
+                []
+                if dependency_text == "无"
+                else [item.strip() for item in dependency_text.split(",")]
+            )
+            require(
+                navigation_field("执行模式").strip("`") == step["execution_mode"],
+                f"execution mode mismatch for {step_id}",
+            )
+            require(
+                dependencies == step["hard_dependencies"],
+                f"dependency mismatch for {step_id}",
+            )
+            require(
+                navigation_field("目的") == step["purpose"],
+                f"purpose mismatch for {step_id}",
+            )
+            require(
+                navigation_field("Exit gate") == step["acceptance"],
+                f"acceptance mismatch for {step_id}",
+            )
         for package_id, title in package_rows:
             json_titles = {
                 step["work_package_title"]
@@ -174,6 +279,68 @@ def validate(root: Path) -> dict[str, Any]:
             require(match is not None, f"missing prompt heading: {step_id}")
             require(match.group(1) == step_id, f"wrong prompt ID: {step_id}")
             require(match.group(2) == step["title"], f"wrong prompt title: {step_id}")
+
+            def prompt_match(pattern: str, field: str) -> re.Match[str]:
+                field_match = re.search(pattern, text, re.MULTILINE)
+                require(field_match is not None, f"missing prompt {field}: {step_id}")
+                return field_match
+
+            package_match = prompt_match(
+                r"^- Work package: (V\d{2}) — (.+)$", "work package"
+            )
+            require(
+                package_match.groups()
+                == (step["work_package"], step["work_package_title"]),
+                f"prompt work package mismatch: {step_id}",
+            )
+            require(
+                prompt_match(r"^- Stage: (.+)$", "stage").group(1) == step["stage"],
+                f"prompt stage mismatch: {step_id}",
+            )
+            require(
+                prompt_match(
+                    r"^- Execution mode: `([^`]+)`$", "execution mode"
+                ).group(1)
+                == step["execution_mode"],
+                f"prompt execution mode mismatch: {step_id}",
+            )
+            dependency_text = prompt_match(
+                r"^- Hard dependencies: (.+)$", "hard dependencies"
+            ).group(1)
+            prompt_dependencies = (
+                []
+                if dependency_text == "none"
+                else [item.strip() for item in dependency_text.split(",")]
+            )
+            require(
+                prompt_dependencies == step["hard_dependencies"],
+                f"prompt dependency mismatch: {step_id}",
+            )
+            require(
+                prompt_match(r"^## Goal\n([^\n]+)$", "goal").group(1)
+                == step["purpose"],
+                f"prompt goal mismatch: {step_id}",
+            )
+            require(
+                prompt_match(r"^## Exit gate\n([^\n]+)$", "exit gate").group(1)
+                == step["acceptance"],
+                f"prompt exit gate mismatch: {step_id}",
+            )
+            status_declaration = prompt_match(
+                r"^7\. Final status must be one of: (.+)\. "
+                r"Implementation agent may not mark .+$",
+                "allowed status declaration",
+            ).group(1)
+            prompt_statuses = set(re.findall(r"`([^`]+)`", status_declaration))
+            require(
+                prompt_statuses == IMPLEMENTATION_AGENT_STATUSES,
+                f"prompt allowed statuses differ from implementation vocabulary: {step_id}",
+            )
+            require(
+                prompt_statuses <= valid_statuses,
+                f"prompt authorizes a non-authoritative status: {step_id}",
+            )
+            require("PARTIAL" not in text, f"prompt authorizes PARTIAL: {step_id}")
         controls = [
             "ENTRY_CURRENT_STATE.md",
             "EXECUTE_NEXT_READY_STEP.md",
@@ -202,6 +369,9 @@ def validate(root: Path) -> dict[str, Any]:
                 require(file(reference).is_file(), f"missing referenced prompt: {reference}")
                 checked_references += 1
         metrics.update(step_prompts=101, control_prompts=len(controls))
+        metrics["implementation_agent_statuses"] = sorted(
+            IMPLEMENTATION_AGENT_STATUSES
+        )
         metrics["static_prompt_references"] = checked_references
 
     def progress() -> None:

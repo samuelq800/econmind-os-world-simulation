@@ -24,8 +24,16 @@ work packages.
 
 - World V2 has one authoritative World State. Snapshots, projections, caches,
   forecasts, and UI state are derived and must never become a second truth.
-- `apps/world-web` is non-authoritative. It may render authorized projections
-  and submit commands; it may not perform authoritative economic writes.
+- `apps/world-web` is non-authoritative. It may render authorized projections,
+  submit commands, and consume approved shared public contracts, types, and
+  browser-specific client interfaces. It must not import or depend directly on
+  `apps/world-worker` implementation, server-only persistence or mutation
+  implementation, service-role or server-secret implementation, authoritative
+  settlement implementation, or any other server-owned module forbidden by the
+  repository ownership policy. This browser import boundary applies even when
+  an import does not immediately perform an economic write. The durable boundary
+  is documented in `docs/architecture/REPO_BOUNDARIES.md` and enforced by the
+  repository boundary checks.
 - `apps/world-api` is the authentication and command/query boundary.
 - `apps/world-worker` is the authoritative execution host.
 - `packages/core` must remain deterministic and independent of React, browser
@@ -50,8 +58,8 @@ Use the pinned toolchain and frozen lockfile. Run real lint, formatting,
 typecheck, test, boundary, environment, secret, and build checks appropriate to
 the step. A test file is not evidence, `NOT_RUN` is not `PASS`, and
 implementation is not verification. Implementation agents may report
-`IMPLEMENTED_UNVERIFIED` or `CHANGES_REQUIRED`, but may not self-promote work to
-`VERIFIED`.
+`IN_PROGRESS`, `IMPLEMENTED_UNVERIFIED`, or `BLOCKED`; they may not self-award
+the review-controlled `CHANGES_REQUIRED` or `VERIFIED` states.
 
 Use the templates under `templates/` and report actual commands, exit codes,
 environment, evidence gaps, affected owners, permissions, migrations, legacy

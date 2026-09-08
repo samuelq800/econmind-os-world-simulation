@@ -1,0 +1,102 @@
+{
+  "recorded_at": "2026-09-08T06:04:08Z",
+  "scope": "R2_GOVERNANCE_REVIEW_BLOCKER_FIX_READ_ONLY_VALIDATION",
+  "reviewed_governance_commit": "692201de28b51c27fb746e3776b8b1e615c6895f",
+  "previous_base": "6e99560dfeb5581541388ab6a50252933950abe9",
+  "rebased_onto": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
+  "governance_status": "IMPLEMENTED_UNVERIFIED",
+  "application_code_executed": false,
+  "database_access": false,
+  "database_mutation": false,
+  "validator": {
+    "command": "python3 tools/validate_r2_governance.py --json",
+    "exit_code": 0,
+    "status": "PASS",
+    "metrics": {
+      "work_packages": 33,
+      "steps": 101,
+      "dependency_graph": "ACYCLIC",
+      "work_package_dependency_graph": "ACYCLIC",
+      "step_prompts": 101,
+      "control_prompts": 8,
+      "execution_modes": {
+        "NORMAL": 99,
+        "PARALLEL_PREPARATION": 2
+      },
+      "implementation_agent_statuses": [
+        "BLOCKED",
+        "IMPLEMENTED_UNVERIFIED",
+        "IN_PROGRESS"
+      ],
+      "progress_states": {
+        "IMPLEMENTED_UNVERIFIED": 1,
+        "BLOCKED": 1,
+        "PLANNED": 99,
+        "VERIFIED": 0
+      },
+      "decisions": 20,
+      "source_documents": 8,
+      "standard_templates": 6
+    }
+  },
+  "negative_acceptance": [
+    {
+      "case": "missing_step_prompt",
+      "result": "PASS",
+      "observed_exit_code": 1
+    },
+    {
+      "case": "invalid_dependency",
+      "result": "PASS",
+      "observed_exit_code": 1
+    },
+    {
+      "case": "dependency_cycle",
+      "result": "PASS",
+      "observed_exit_code": 1
+    },
+    {
+      "case": "impossible_verified_claim",
+      "result": "PASS",
+      "observed_exit_code": 1
+    },
+    {
+      "case": "adr_self_approval",
+      "result": "PASS",
+      "observed_exit_code": 1
+    },
+    {
+      "case": "prompt_authorizes_partial",
+      "result": "PASS",
+      "observed_exit_code": 1
+    },
+    {
+      "case": "invalid_execution_mode",
+      "result": "PASS",
+      "observed_exit_code": 1
+    }
+  ],
+  "active_partial_instruction_scan": {
+    "result": "PASS",
+    "occurrences": 0,
+    "scope": [
+      "AGENTS.md",
+      "PLANS.md",
+      "planning/r2_steps.json",
+      "prompts/steps",
+      "prompts/control",
+      "templates"
+    ]
+  },
+  "repository_secret_scan": {
+    "toolchain": {
+      "node": "24.20.0",
+      "pnpm": "12.3.4"
+    },
+    "command": "pnpm secrets:check",
+    "result": "PASS",
+    "exit_code": 0,
+    "scanned_files": 220
+  },
+  "errors": []
+}
