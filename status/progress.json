@@ -28,7 +28,7 @@
   "current_gate": {
     "step_id": "V00.2",
     "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "Implementation and local evidence complete; independent review has not started",
+    "review": "Immutable corrected candidate prepared; independent re-review required",
     "next_step": "V00.3",
     "next_step_ready": false,
     "next_step_blockers": ["V00.2 must be independently VERIFIED"]
@@ -43,12 +43,13 @@
     "V00.2": [
       "docs/exec-plans/V00.2.md",
       "docs/reports/V00.2/IMPLEMENTATION.md",
-      "docs/reports/V00.2/TEST_EVIDENCE.json"
+      "docs/reports/V00.2/TEST_EVIDENCE.json",
+      "docs/reports/V00.2/SELF_AUDIT.md"
     ]
   },
   "implementation_commits": {
     "V00.1": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
-    "V00.2": "98b2079b134d9926db960994aa5a2d04d89dd8be"
+    "V00.2": "52f44f962d9f28b27781c4ee74f7c25dea813470"
   },
   "step_reviews": {
     "V00.1": {
