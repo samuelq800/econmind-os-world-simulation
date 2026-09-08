@@ -3,46 +3,59 @@
 本文件是仓库级执行治理入口。经济与工程 P0/P1 以 `requirements.docx` / Constitution 为最高约束。
 
 ## 1. 权威工作分解
+
 - 主工作包：V00–V32，共 33 个。
 - 详细步骤：101 个，权威清单见 `planning/r2_steps.json` 与 `planning/R2_33_WORK_PACKAGES_101_STEPS.md`。
 - Engine：Master E01–E18；Engine ID 不等于 Settlement Phase ID。
 
 ## 2. 状态模型
+
 `UNASSESSED → PLANNED → IN_PROGRESS → IMPLEMENTED_UNVERIFIED → (CHANGES_REQUIRED → …) → VERIFIED`
 另有 `BLOCKED`、`DEFERRED_WITH_APPROVAL`。
 
 ## 3. 依赖门槛
+
 普通步骤只有在所有 `hard_dependencies` 已 `VERIFIED` 后才可开始。
 标记 `PARALLEL_PREPARATION` 的步骤可以按清单提前准备，但不能据此跳过父工作包的正式前置门槛，也不能把父工作包标完成。
 
 ## 4. 标准生命周期
+
 READ SPECS → PLAN → IMPLEMENT → RUN REAL TESTS → IMPLEMENTATION REPORT → INDEPENDENT REVIEW → FIX BLOCKERS → RE-REVIEW → VERIFIED → NEXT STEP。
 实施者不得自行把任务标为 VERIFIED。
 
-治理同步从 `IMPLEMENTED_UNVERIFIED` 提升为 `VERIFIED` 时，必须先取得明确
-`APPROVED` 的独立审查，并把审查证据提交到后续 commit。状态更新可以由实施者
-机械执行，但验证权来自该独立审查；验证器必须从证据 commit 读取审查材料，核对
-被审 commit、祖先关系、证据路径和最终决定，不能信任当前工作树中的自我声明。
-`status/progress.json` 中的 `governance_sync.verification` 必须记录 `decision`、
-`reviewed_commit`、`evidence_commit` 和 `evidence_paths`。Markdown 审查证据使用
-唯一的 `Reviewed HEAD` 字段和 `Final Decision` 章节作为稳定机器字段。
+治理同步及所有详细步骤的 `VERIFIED` 必须由独立可信审查者签署的 JSON attestation 授权。
+统一机制见 `governance/SIGNED_REVIEW_ATTESTATIONS.md`；固定 schema、确定性序列化、
+SSH Ed25519 签名、subject/commit/内容哈希和历史关系均由验证器校验。
+Markdown 仅作人类可读证据，文件名、标题、Git author、APPROVED 文本不能授予验证权。
+实施者可机械记录状态，但不能持有生产审查私钥或自行增加可信 authority。
 
-`VERIFIED` 不等于 `MERGE_AUTHORIZED`。治理合并还要求 V00.1 已独立
-`VERIFIED`、最终 reconciliation gate 为 `PASS`，并单独设置合并授权。
+公钥 registry 与验证策略由仓库外、实施者不可写的 trusted-runner policy 哈希固定。
+修改密钥、权限、schema、签名策略或验证算法属于 `GOVERNANCE_CRITICAL_CHANGE`，
+必须先经独立审查再由负责人更新外部 trust pin，合并前不得自我批准。
+目前生产 registry 为空：`TRUST_ROOT_PROVISIONING_REQUIRED`；不得伪造生产 key 或 attestation。
+
+`VERIFIED` 不等于 `MERGE_AUTHORIZED`。合并授权还要求 Governance 与 V00.1 均经签名
+独立核验为 `VERIFIED`，且 `final_reconciliation.status = PASS`，并单独记录合并授权。
+V00.2 readiness 还要求治理已实际合并并由可信 runner 核实 integration ref；
+验证器支持未来合法生命周期，但本轮不得更改真实状态、合并或启动 V00.2。
 
 ## 5. 决策纪律
+
 Codex 可提出 ADR proposal，但需要用户/负责人批准的架构或经济规则不得自动变为 APPROVED。未批准冲突只阻塞依赖它的步骤。
 
 ## 6. 证据纪律
+
 - 测试文件存在 ≠ 测试通过。
 - `NOT_RUN` 绝不能改写成 `PASS`。
 - 真实数据库/RLS/并发/恢复若未运行，必须明示。
 - 不得删除、skip 或弱化 P0 测试来通过 CI。
 
 ## 7. Scope 纪律
+
 一个月是冲刺窗口，不是静默删减原规范功能的授权。任何延期必须显式 `DEFERRED_WITH_APPROVAL`。
 
 ## 8. 关键里程碑
+
 - V10.4：首个双国真实经济闭环验收。
 - V25：六 Office + 地图完整产品接线。
 - V26：非权威 forecast / realtime / cache。
@@ -51,6 +64,7 @@ Codex 可提出 ADR proposal，但需要用户/负责人批准的架构或经济
 - V31–V32：灰度、生产切换、赛季归档和运营交接。
 
 ## 9. 技术边界
+
 - world-web：Vite + React + TypeScript，非权威。
 - world-api：认证命令/查询边界，不拥有第二经济模型。
 - world-worker：Node/TS authoritative execution。
@@ -60,6 +74,7 @@ Codex 可提出 ADR proposal，但需要用户/负责人批准的架构或经济
 - Rust/WASM/WebGPU：仅 profiling 证明需要后考虑。
 
 ## 10. 数据环境
+
 开发/CI/staging 与共享生产 Supabase 隔离；生产数据库保持唯一受控 migration 发布链。新 repo 不得随意 `db push` 共享生产。
 
 ## 11. 当前执行门槛

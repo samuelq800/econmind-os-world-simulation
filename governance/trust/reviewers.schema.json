@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "reviewers"],
+  "properties": {
+    "schema_version": {
+      "const": "econmind.reviewers.v1"
+    },
+    "reviewers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reviewer_id",
+          "public_key",
+          "allowed_review_types",
+          "status"
+        ],
+        "properties": {
+          "reviewer_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$"
+          },
+          "public_key": {
+            "type": "string",
+            "pattern": "^ssh-ed25519 [A-Za-z0-9+/]+={0,2}$"
+          },
+          "allowed_review_types": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": ["GOVERNANCE", "STEP"]
+            }
+          },
+          "status": {
+            "enum": ["ACTIVE", "DISABLED"]
+          }
+        }
+      }
+    }
+  }
+}
