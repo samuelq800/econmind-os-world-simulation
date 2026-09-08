@@ -11,6 +11,9 @@
   "scripts": {
     "preinstall": "node scripts/verify-toolchain.mjs",
     "dev:web": "pnpm --filter @econmind/world-web dev",
+    "dev:api": "pnpm --filter @econmind/world-api dev",
+    "dev:worker": "pnpm --filter @econmind/world-worker dev",
+    "pretest": "pnpm --filter @econmind/world-api build && pnpm --filter @econmind/world-worker build",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

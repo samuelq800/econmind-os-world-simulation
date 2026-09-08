@@ -25,6 +25,7 @@ export const PACKAGE_OWNERS = new Map([
 ]);
 
 export const BUILD_HELPERS = [
+  'apps/world-web/server.mjs',
   'scripts/vite-environment-policy.mjs',
   'scripts/vite-environment-policy.d.mts',
 ];

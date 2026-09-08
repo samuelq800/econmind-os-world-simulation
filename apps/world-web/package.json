@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b --pretty false"
   },
