@@ -1,0 +1,128 @@
+{
+  "schema_version": "econmind.v00.2-test-evidence.v1",
+  "work_package": "V00.2",
+  "title": "Three Application Runtime Entries and Lifecycle Skeleton",
+  "status": "PASS",
+  "implementation_status": "IMPLEMENTED_UNVERIFIED",
+  "implementation_commit": "98b2079b134d9926db960994aa5a2d04d89dd8be",
+  "recorded_at": "2026-09-08T13:14:00Z",
+  "branch": "feat/v00-2",
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "econmind_env": "local",
+    "supabase_target": "PRODUCTION_INTEGRATION_TARGET_ONLY",
+    "database_mutation_allowed": false
+  },
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm lint",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm format:check",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm test",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "6 test files; 59 tests passed; 6 V00.2 lifecycle tests"
+    },
+    {
+      "command": "pnpm test:boundaries",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "28 tests passed; live scan passed over 12 governed files"
+    },
+    {
+      "command": "pnpm env:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "PRODUCTION_INTEGRATION_TARGET_ONLY; mutation false"
+    },
+    {
+      "command": "pnpm secrets:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "236 candidate files scanned after implementation reports were added"
+    },
+    {
+      "command": "pnpm build",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "world-web, world-api, and world-worker built"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "all constituent gates reran successfully"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "V00.2 dependency gate ready; governance merged; 20 ADRs remain unapproved"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "PASS"
+    }
+  ],
+  "runtime_acceptance": {
+    "independent_entries": "PASS",
+    "concurrent_three_process_start": "PASS",
+    "health_and_readiness": "PASS",
+    "invalid_environment": "PASS_EXPECTED_REJECTION",
+    "invalid_host_or_port": "PASS_EXPECTED_REJECTION",
+    "occupied_ports": "PASS_EXPECTED_REJECTION",
+    "sigint_shutdown": "PASS",
+    "sigterm_shutdown": "PASS",
+    "authority_or_simulation_enabled": false
+  },
+  "implementation_iterations": [
+    {
+      "command": "pnpm test -- tests/foundation/runtime-lifecycle.test.ts",
+      "exit_code": 1,
+      "result": "FAIL",
+      "observed": "Native TypeScript child entries could not resolve compiled-style .js imports; web signal assertion did not match Vite's conventional status.",
+      "resolution": "API and worker now build before executing dist entry points; the web process has an explicit wrapper and signal-specific assertions."
+    },
+    {
+      "command": "pnpm test -- tests/foundation/runtime-lifecycle.test.ts",
+      "exit_code": 1,
+      "result": "FAIL",
+      "observed": "An occupied-port Vite startup retained watcher handles, and SIGTERM returned Vite's conventional 143 status.",
+      "resolution": "Failed web startup now closes the Vite server; SIGINT wrapper and Vite-native SIGTERM are both tested explicitly."
+    }
+  ],
+  "not_run": [
+    "Production or staging deployment",
+    "Supabase or database access/mutation/migration/RLS/recovery",
+    "Browser rendering E2E beyond the real Vite HTTP process",
+    "V00.3 cross-application communication and unified development command"
+  ],
+  "safety": {
+    "database_access": false,
+    "database_mutation": false,
+    "supabase_access": false,
+    "deployment": false,
+    "domain_events_or_commands": false,
+    "v00_3_started": false
+  }
+}
