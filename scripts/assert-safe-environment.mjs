@@ -1,0 +1,47 @@
+import { access } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { assessEnvironment } from './environment-policy.mjs';
+
+const repositoryRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+);
+const linkMarker = path.join(repositoryRoot, 'supabase/.temp/project-ref');
+const assessment = assessEnvironment(process.env);
+
+const linkedProjectDetected = await access(linkMarker).then(
+  () => true,
+  () => false,
+);
+
+if (assessment.violations.length > 0) {
+  console.error(
+    JSON.stringify(
+      {
+        status: 'FAIL',
+        environment: assessment.name,
+        violations: assessment.violations,
+      },
+      null,
+      2,
+    ),
+  );
+  process.exit(1);
+}
+
+console.log(
+  JSON.stringify(
+    {
+      status: 'PASS',
+      environment: assessment.name,
+      linkedSupabaseProject: linkedProjectDetected
+        ? 'PRODUCTION_INTEGRATION_TARGET_ONLY'
+        : 'NOT_LINKED',
+      databaseMutationAllowed: false,
+    },
+    null,
+    2,
+  ),
+);

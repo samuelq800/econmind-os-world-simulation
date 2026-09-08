@@ -1,9 +1,14 @@
 node_modules/
 .next/
 out/
+dist/
+.vite/
 .vercel/
 .env
 .env.local
+.env.*
+!.env.example
+!config/environments/*.env.example
 *.log
 .DS_Store
 coverage/
