@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm build && node --enable-source-maps dist/main.js",
-    "start": "node --enable-source-maps dist/main.js",
+    "dev": "node ../../scripts/run-development-service.mjs worker",
+    "start": "node ../../scripts/run-development-service.mjs worker start",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --pretty false"
   },

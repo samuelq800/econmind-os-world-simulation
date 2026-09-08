@@ -178,34 +178,30 @@ export async function startWorkerRuntime(
 
 export async function runWorkerProcess() {
   const config = readWorkerRuntimeConfig();
-  const runtime = await startWorkerRuntime(config);
-  console.log(
-    JSON.stringify({
-      event: 'LISTENING',
-      service: 'world-worker',
-      environment: config.environment,
-      origin: runtime.origin,
-    }),
+  const startupPromise = Promise.resolve().then(() =>
+    startWorkerRuntime(config),
   );
-  let stopping = false;
-  const shutdown = async (signal: NodeJS.Signals) => {
-    if (stopping) return;
-    stopping = true;
-    console.log(
-      JSON.stringify({
-        event: 'SHUTDOWN_START',
-        service: 'world-worker',
-        signal,
-      }),
-    );
-    await runtime.shutdown();
-    console.log(
-      JSON.stringify({
-        event: 'SHUTDOWN_COMPLETE',
-        service: 'world-worker',
-        signal,
-      }),
-    );
+  let shutdownPromise: Promise<void> | undefined;
+  const shutdown = (signal: NodeJS.Signals) => {
+    shutdownPromise ??= (async () => {
+      const runtime = await startupPromise;
+      console.log(
+        JSON.stringify({
+          event: 'SHUTDOWN_START',
+          service: 'world-worker',
+          signal,
+        }),
+      );
+      await runtime.shutdown();
+      console.log(
+        JSON.stringify({
+          event: 'SHUTDOWN_COMPLETE',
+          service: 'world-worker',
+          signal,
+        }),
+      );
+    })();
+    return shutdownPromise;
   };
   const beginShutdown = (signal: NodeJS.Signals) => {
     void shutdown(signal).catch((error: unknown) => {
@@ -221,6 +217,19 @@ export async function runWorkerProcess() {
       process.exitCode = 1;
     });
   };
-  process.once('SIGINT', () => beginShutdown('SIGINT'));
-  process.once('SIGTERM', () => beginShutdown('SIGTERM'));
+  process.on('SIGINT', () => beginShutdown('SIGINT'));
+  process.on('SIGTERM', () => beginShutdown('SIGTERM'));
+  const runtime = await startupPromise;
+  if (shutdownPromise !== undefined) {
+    await shutdownPromise;
+    return;
+  }
+  console.log(
+    JSON.stringify({
+      event: 'LISTENING',
+      service: 'world-worker',
+      environment: config.environment,
+      origin: runtime.origin,
+    }),
+  );
 }

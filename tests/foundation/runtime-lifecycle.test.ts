@@ -389,9 +389,10 @@ describe('V00.2 runtime lifecycle skeleton', () => {
           stopChild(api, 'SIGINT'),
           stopChild(worker, 'SIGTERM'),
         ]);
-        expect(webExit.code).toBe(143);
+        expect(webExit.code).toBe(0);
         expect(apiExit.code).toBe(0);
         expect(workerExit.code).toBe(0);
+        expect(web.output()).toContain('SHUTDOWN_COMPLETE');
         expect(api.output()).toContain('SHUTDOWN_COMPLETE');
         expect(worker.output()).toContain('SHUTDOWN_COMPLETE');
       }

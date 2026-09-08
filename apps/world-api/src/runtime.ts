@@ -174,30 +174,28 @@ export async function startApiRuntime(
 
 export async function runApiProcess() {
   const config = readApiRuntimeConfig();
-  const runtime = await startApiRuntime(config);
-  console.log(
-    JSON.stringify({
-      event: 'LISTENING',
-      service: 'world-api',
-      environment: config.environment,
-      origin: runtime.origin,
-    }),
-  );
-  let stopping = false;
-  const shutdown = async (signal: NodeJS.Signals) => {
-    if (stopping) return;
-    stopping = true;
-    console.log(
-      JSON.stringify({ event: 'SHUTDOWN_START', service: 'world-api', signal }),
-    );
-    await runtime.shutdown();
-    console.log(
-      JSON.stringify({
-        event: 'SHUTDOWN_COMPLETE',
-        service: 'world-api',
-        signal,
-      }),
-    );
+  const startupPromise = Promise.resolve().then(() => startApiRuntime(config));
+  let shutdownPromise: Promise<void> | undefined;
+  const shutdown = (signal: NodeJS.Signals) => {
+    shutdownPromise ??= (async () => {
+      const runtime = await startupPromise;
+      console.log(
+        JSON.stringify({
+          event: 'SHUTDOWN_START',
+          service: 'world-api',
+          signal,
+        }),
+      );
+      await runtime.shutdown();
+      console.log(
+        JSON.stringify({
+          event: 'SHUTDOWN_COMPLETE',
+          service: 'world-api',
+          signal,
+        }),
+      );
+    })();
+    return shutdownPromise;
   };
   const beginShutdown = (signal: NodeJS.Signals) => {
     void shutdown(signal).catch((error: unknown) => {
@@ -213,6 +211,19 @@ export async function runApiProcess() {
       process.exitCode = 1;
     });
   };
-  process.once('SIGINT', () => beginShutdown('SIGINT'));
-  process.once('SIGTERM', () => beginShutdown('SIGTERM'));
+  process.on('SIGINT', () => beginShutdown('SIGINT'));
+  process.on('SIGTERM', () => beginShutdown('SIGTERM'));
+  const runtime = await startupPromise;
+  if (shutdownPromise !== undefined) {
+    await shutdownPromise;
+    return;
+  }
+  console.log(
+    JSON.stringify({
+      event: 'LISTENING',
+      service: 'world-api',
+      environment: config.environment,
+      origin: runtime.origin,
+    }),
+  );
 }

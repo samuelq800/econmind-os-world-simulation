@@ -1,22 +1,23 @@
 import { createServer } from 'vite';
 
 let server;
-let stopping = false;
+let shutdownPromise;
 
-async function shutdown(signal) {
-  if (stopping) return;
-  stopping = true;
-  console.log(
-    JSON.stringify({ event: 'SHUTDOWN_START', service: 'world-web', signal }),
-  );
-  await server?.close();
-  console.log(
-    JSON.stringify({
-      event: 'SHUTDOWN_COMPLETE',
-      service: 'world-web',
-      signal,
-    }),
-  );
+function shutdown(signal) {
+  shutdownPromise ??= (async () => {
+    console.log(
+      JSON.stringify({ event: 'SHUTDOWN_START', service: 'world-web', signal }),
+    );
+    await server?.close();
+    console.log(
+      JSON.stringify({
+        event: 'SHUTDOWN_COMPLETE',
+        service: 'world-web',
+        signal,
+      }),
+    );
+  })();
+  return shutdownPromise;
 }
 
 function beginShutdown(signal) {
@@ -34,12 +35,22 @@ function beginShutdown(signal) {
   });
 }
 
+process.on('SIGINT', () => beginShutdown('SIGINT'));
+process.on('SIGTERM', () => beginShutdown('SIGTERM'));
+
 try {
   server = await createServer();
-  await server.listen();
-  server.printUrls();
-  console.log(JSON.stringify({ event: 'LISTENING', service: 'world-web' }));
-  process.once('SIGINT', () => beginShutdown('SIGINT'));
+  if (shutdownPromise === undefined) {
+    await server.listen();
+    if (shutdownPromise === undefined) {
+      server.printUrls();
+      console.log(JSON.stringify({ event: 'LISTENING', service: 'world-web' }));
+    } else {
+      await server.close();
+    }
+  } else {
+    await server.close();
+  }
 } catch (error) {
   await server?.close().catch(() => undefined);
   console.error(
