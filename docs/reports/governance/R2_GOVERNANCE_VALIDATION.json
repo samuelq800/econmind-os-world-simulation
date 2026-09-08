@@ -1,0 +1,74 @@
+{
+  "recorded_at": "2026-09-08T05:14:07Z",
+  "scope": "R2_GOVERNANCE_READ_ONLY",
+  "command": "python tools/validate_r2_governance.py --json",
+  "exit_code": 0,
+  "status": "PASS",
+  "application_code_executed": false,
+  "database_access": false,
+  "checks": [
+    "required_governance_files",
+    "r2_step_manifest",
+    "step_dependencies",
+    "human_navigation_matches_json",
+    "work_packages",
+    "control_and_step_prompts",
+    "progress_truth",
+    "decision_register",
+    "source_material",
+    "templates"
+  ],
+  "metrics": {
+    "required_files": 15,
+    "work_packages": 33,
+    "steps": 101,
+    "dependency_graph": "ACYCLIC",
+    "work_package_dependency_graph": "ACYCLIC",
+    "step_prompts": 101,
+    "control_prompts": 8,
+    "static_prompt_references": 1,
+    "progress_states": {
+      "IMPLEMENTED_UNVERIFIED": 1,
+      "BLOCKED": 1,
+      "PLANNED": 99,
+      "VERIFIED": 0
+    },
+    "decisions": 20,
+    "source_documents": 8,
+    "standard_templates": 6
+  },
+  "negative_acceptance": [
+    {
+      "case": "missing_step_prompt",
+      "result": "PASS",
+      "observed_exit_code": 1
+    },
+    {
+      "case": "missing_dependency",
+      "result": "PASS",
+      "observed_exit_code": 1
+    },
+    {
+      "case": "dependency_cycle",
+      "result": "PASS",
+      "observed_exit_code": 1
+    },
+    {
+      "case": "impossible_verified_claim",
+      "result": "PASS",
+      "observed_exit_code": 1
+    },
+    {
+      "case": "adr_self_approval",
+      "result": "PASS",
+      "observed_exit_code": 1
+    }
+  ],
+  "repository_secret_scan": {
+    "command": "pnpm secrets:check",
+    "result": "PASS",
+    "exit_code": 0,
+    "scanned_files": 215
+  },
+  "errors": []
+}

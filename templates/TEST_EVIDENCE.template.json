@@ -1,0 +1,28 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "STEP_ID",
+  "commit": "COMMIT_SHA",
+  "environment": {
+    "name": "ENVIRONMENT_NAME",
+    "versions": {},
+    "production_access": false
+  },
+  "result_vocabulary": [
+    "PASS",
+    "FAIL",
+    "NOT_RUN",
+    "INSUFFICIENT_EVIDENCE"
+  ],
+  "commands": [
+    {
+      "command": "COMMAND",
+      "exit_code": null,
+      "result": "NOT_RUN",
+      "stdout_stderr_summary": "WHY_NOT_RUN_OR_OBSERVED_RESULT"
+    }
+  ],
+  "negative_cases": [],
+  "database_rls_evidence": [],
+  "invariant_evidence": [],
+  "unresolved_gaps": []
+}

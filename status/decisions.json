@@ -1,0 +1,211 @@
+{
+  "schema_version": "R2-101.1",
+  "source": [
+    "reference/02_规范冲突与裁决清单.md",
+    "planning/02_架构裁决与数据库协议.md",
+    "planning/work_packages.json"
+  ],
+  "approval_policy": "Codex may propose but may not approve a human-required architecture or economic decision.",
+  "decisions": [
+    {
+      "id": "ADR-01",
+      "subject": "Engine 与 Settlement Phase 映射及顺序差异",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "保留 Master E01-E18，以 Master 18 阶段为协调基线建立 phase-to-engine operation 映射，并通过批准的附录协调 Constitution 硬约束。",
+      "latest_gate": "V06/V09",
+      "affected_work_packages": ["V01", "V06"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-02",
+      "subject": "技能、库存、设施、存款和外债等逐字段唯一 owner",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "为每个 canonical entity 固定唯一 owner 和 posting service；跨领域通过事件或命令交接，projection 不得回写。",
+      "latest_gate": "V03/V08",
+      "affected_work_packages": ["V01", "V03", "V05", "V08", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V19", "V20", "V22", "V23"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-03",
+      "subject": "Simulation Clock、pause、cutoff 与同时间优先级",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "使用相对 world 起点的 360 日历 sim ticks，暂停排除 elapsed，恢复按确定顺序补算，并冻结命令 cutoff 和同一 sim 时点优先序。",
+      "latest_gate": "V06/V07",
+      "affected_work_packages": ["V01", "V06", "V09"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-04",
+      "subject": "期初、当期、滞后输入与资源能源劳动循环",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "所有输入标注 opening、current_phase、prior_day 或 scheduled_event；禁止当日免费递归，并区分应计、已付和已到账现金。",
+      "latest_gate": "V11-V17",
+      "affected_work_packages": ["V01", "V06", "V09", "V11", "V12", "V13", "V15", "V16", "V17", "V21"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-05",
+      "subject": "库存位置、在途、产权、风险及进出口确认时点",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "分别记录 physical location、reservation、ownership、risk bearer 和 economic recognition；按批次守恒并冻结 title 与进出口确认时点。",
+      "latest_gate": "V10",
+      "affected_work_packages": ["V01", "V08", "V10", "V12", "V21", "V22"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-06",
+      "subject": "粮食、服务、建设、医药供给与固定目录缺口",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "提交 domestic sector、service 和 subledger 映射，补足农业、服务、建设及医药耗材来源；不得静默新增全球商品或无限 seed。",
+      "latest_gate": "V13/V17",
+      "affected_work_packages": ["V03", "V13", "V14", "V15", "V17", "V23", "V27"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-07",
+      "subject": "建设增加值、在建资产、完工与 GDP",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "批准、付款或 commission 本身不增加 GDP；真实施工按中间投入、劳动、产出和在建资产记录，后续运营产出另计。",
+      "latest_gate": "V14",
+      "affected_work_packages": ["V08", "V14", "V17", "V18", "V23"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-08",
+      "subject": "价格、需求、FX、精度、舍入、CPI、率与流量周期",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "统一单位、Money 精度与舍入分录；版本化价格、需求和 FX 函数及参数，并冻结 GDP 与债务比率的时间口径。",
+      "latest_gate": "FORMULA_IMPLEMENTATION",
+      "affected_work_packages": ["V03", "V08", "V11", "V13", "V14", "V15", "V16", "V17", "V18", "V19", "V20", "V21", "V23", "V27"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-09",
+      "subject": "required_offices、阈值、兼任签字与版本撤销",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "建立版本化 required_offices resolver，记录 trigger、owner、role、threshold、country side 和 expiry；同人兼任仍需逐 Office 签字。",
+      "latest_gate": "V05",
+      "affected_work_packages": ["V01", "V05", "V10", "V14", "V16", "V18", "V19", "V20", "V22", "V24", "V25"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-10",
+      "subject": "23 个国际 subtype 与 Trade 和 Industry 家族对照",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "建立 type、subtype、family 映射，并逐种登记 economic adapter、审批、权利义务、结算与失败路径。",
+      "latest_gate": "V21/V22",
+      "affected_work_packages": ["V21", "V22"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-11",
+      "subject": "幂等重复回执与不可变 event 消费状态",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "使用 command_id 与 payload_hash 唯一性；返回明确的原回执且不重新执行，同 key 异 payload 拒绝，消费回执独立于 append-only event。",
+      "latest_gate": "V07",
+      "affected_work_packages": ["V07"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-12",
+      "subject": "world、country、office、谈判和 admin 读取及 forecast 保密",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "分别建立 public、cabinet、office-private、negotiation-party 和 admin 投影；RLS、grants、服务层、cache、Realtime 与 forecast 共用分类策略。",
+      "latest_gate": "V05/V10",
+      "affected_work_packages": ["V05", "V10", "V24", "V25", "V26"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-13",
+      "subject": "无人国家 NPC、默认政策与权限",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "使用可重复、版本化的 baseline 或 NPC controller，经同一命令管道并受资金、库存、权限和审批约束。",
+      "latest_gate": "V27",
+      "affected_work_packages": ["V27"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-14",
+      "subject": "双 orchestrator、旧世界保留与 clean seed",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "每个 world 固定 model_version；V2 Simulation 与 Season 共享 Core、使用不同 orchestrator，旧记录保留适配，新模型使用可追溯 clean seed。",
+      "latest_gate": "V28",
+      "affected_work_packages": ["V28", "V31"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-15",
+      "subject": "评分版本、CPI 归因与季末未到期义务",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "冻结评分版本和初始条件；区分 CPI 会计贡献与因果解释；季末停止新命令但保留未到期权利义务和最终快照。",
+      "latest_gate": "V23/V31",
+      "affected_work_packages": ["V23", "V24", "V26", "V27", "V31", "V32"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-16",
+      "subject": "共享 Supabase namespace 与 migration 发布权",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "V2 核心使用非公开 world_v2 schema；V2 交付带 ID 和 hash 的 SQL 制品，现有主站仓库保持共享生产 Supabase 的唯一 migration 发布源。",
+      "latest_gate": "V02/V31",
+      "affected_work_packages": ["V01", "V02", "V28", "V30", "V31"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-17",
+      "subject": "持久化、提交、重放与故障边界",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "canonical 实体、不可变事件和分录在同一权威事务提交；单 world writer 使用 lease 与 fencing，候选状态私有，outbox 可重投并由消费者去重。",
+      "latest_gate": "V07/V09",
+      "affected_work_packages": ["V07", "V08", "V09", "V30"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-18",
+      "subject": "运行环境与资源隔离",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "Local 和 CI 使用一次性环境，staging 使用隔离项目或分支，production 最后连接共享项目；Web、API、Worker 保持职责隔离。",
+      "latest_gate": "V02/V30",
+      "affected_work_packages": ["V01", "V02", "V30", "V31"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-19",
+      "subject": "域名、登录、代理与缓存",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "首期使用独立 World 域名并允许重新登录；同源代理或登录桥只在 Cookie、PKCE、redirect 和 cache 方案通过验收后启用。",
+      "latest_gate": "V28",
+      "affected_work_packages": ["V01", "V05", "V26", "V28", "V30", "V31"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    },
+    {
+      "id": "ADR-20",
+      "subject": "身份生命周期与经济历史",
+      "status": "PROPOSED_NOT_APPROVED",
+      "proposal": "新命令按当前成员和 Office 权限验证；玩家离开不消除已生效国家义务，个人资料与不可变经济历史分层且不得级联删除。",
+      "latest_gate": "V05/V28",
+      "affected_work_packages": ["V01", "V05", "V28", "V30", "V32"],
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "approval_record": null
+    }
+  ]
+}

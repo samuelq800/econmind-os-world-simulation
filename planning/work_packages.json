@@ -1,0 +1,1081 @@
+[
+  {
+    "id": "V00",
+    "title": "新仓库边界、资料导入与可运行脚手架",
+    "stage": "S0",
+    "depends_on": [],
+    "engines": [],
+    "deliverables": [
+      "三应用/共享包边界",
+      "完整源规范及hash",
+      "安装/构建/测试命令",
+      "环境模板与密钥忽略",
+      "BOOTSTRAP_REPORT"
+    ],
+    "acceptance": [
+      "不连接生产、不修改旧仓库",
+      "不是复制整站再删文件",
+      "执行真实安装/typecheck/build；失败原样报告",
+      "单元/冒烟测试检验真实模块或健康接口；不得只assert(true)"
+    ],
+    "decision_dependencies": "",
+    "parallel_notes": "旧站必要安全修复在旧repo独立进行，不阻塞新repo脚手架。",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V01",
+    "title": "需求追踪、规范协调与两仓库集成契约",
+    "stage": "S0",
+    "depends_on": [
+      "V00"
+    ],
+    "engines": [],
+    "deliverables": [
+      "可验收需求登记",
+      "ADR-01至20状态",
+      "共享身份字段白名单",
+      "旧路由与实际行为清单",
+      "legacy复用登记"
+    ],
+    "acceptance": [
+      "源段落不直接冒充需求数",
+      "未批准冲突不得进正式算法",
+      "固定Master E01–E18编号",
+      "角色/合同/参数/失败/通知逐项归并"
+    ],
+    "decision_dependencies": "首先解决ADR-01/02/03/04/05/09；共享生产前ADR-16/18/19/20。",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V02",
+    "title": "环境隔离与唯一数据库发布链",
+    "stage": "S0",
+    "depends_on": [
+      "V00",
+      "V01"
+    ],
+    "engines": [],
+    "deliverables": [
+      "本地Supabase/CI临时数据库",
+      "独立staging",
+      "环境指纹与生产禁用检查",
+      "主站完整迁移基线及V2迁移产物协议"
+    ],
+    "acceptance": [
+      "preview/CI不能取得生产密钥",
+      "新repo不直接db push共享生产",
+      "从干净基线及既有schema升级两条路径均演练",
+      "不改auth/public共享所有权"
+    ],
+    "decision_dependencies": "ADR-16/18",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V03",
+    "title": "统一基础类型与registry",
+    "stage": "S1",
+    "depends_on": [
+      "V00",
+      "V01"
+    ],
+    "engines": [
+      "ALL"
+    ],
+    "deliverables": [
+      "Money/Quantity/Rate/SimTime类型",
+      "精度舍入策略",
+      "12商品/12部门/22技术/38项目登记",
+      "错误和版本协议"
+    ],
+    "acceptance": [
+      "币种/单位错配拒绝",
+      "固定目录逐项存在",
+      "金额无不受控float累计",
+      "尚未校准参数标来源和状态"
+    ],
+    "decision_dependencies": "ADR-02/06/08",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V04",
+    "title": "可执行工程门禁与负例验证",
+    "stage": "S1",
+    "depends_on": [
+      "V00",
+      "V01",
+      "V02",
+      "V03"
+    ],
+    "engines": [
+      "ALL"
+    ],
+    "deliverables": [
+      "imports/写入边界检查",
+      "需求覆盖验证",
+      "测试矩阵",
+      "PR回报模板",
+      "权限/守恒测试工具"
+    ],
+    "acceptance": [
+      "故意越界的fixture能被拦截",
+      "未实现引擎不能no-op后称完成",
+      "真实DB测试缺失为NOT_RUN",
+      "保护P0测试和原规范"
+    ],
+    "decision_dependencies": "",
+    "parallel_notes": "早期只验证已实现范围；全功能发布gate不会因部分CI通过而打开。",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V05",
+    "title": "身份桥接、Office授权与版本审批内核",
+    "stage": "S1",
+    "depends_on": [
+      "V01",
+      "V02",
+      "V03"
+    ],
+    "engines": [
+      "KERNEL"
+    ],
+    "deliverables": [
+      "主站用户/学校/团队查询适配",
+      "V2 world/country/office assignments",
+      "required_offices resolver",
+      "审批版本与撤销策略",
+      "数据分类"
+    ],
+    "acceptance": [
+      "同人兼任分别签字",
+      "拒绝不能被他人批准复活",
+      "客户端伪造成本不降审批",
+      "成员被移除后新动作拒绝",
+      "明确已接受命令与已签合同如何处理"
+    ],
+    "decision_dependencies": "ADR-02/09/12/19/20",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V06",
+    "title": "E01时钟、规则时间与调度",
+    "stage": "S1",
+    "depends_on": [
+      "V01",
+      "V03"
+    ],
+    "engines": [
+      "E01"
+    ],
+    "deliverables": [
+      "10× Clock",
+      "360日模拟年",
+      "即时/精确到期/日结/年度roll分类",
+      "pause/resume/catch-up",
+      "注入式测试时钟"
+    ],
+    "acceptance": [
+      "8640现实秒=1模拟日",
+      "暂停不累计经济时间",
+      "边界重启不重复到期",
+      "不依赖在线玩家",
+      "UI无round/stage/tick倒计时"
+    ],
+    "decision_dependencies": "ADR-01/03/04",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V07",
+    "title": "命令、事件、回执与确定性重放基础",
+    "stage": "S1",
+    "depends_on": [
+      "V02",
+      "V03",
+      "V05",
+      "V06"
+    ],
+    "engines": [
+      "E01",
+      "KERNEL"
+    ],
+    "deliverables": [
+      "CommandInbox",
+      "不可变events",
+      "consumer receipts",
+      "payload hash",
+      "版本化序列化与seed",
+      "outbox"
+    ],
+    "acceptance": [
+      "accepted!=executed",
+      "同ID同payload返回原回执且不新执行",
+      "同ID异payload拒绝",
+      "不UPDATE历史event来写processed_at",
+      "重放绑定同engine/registry/model版本"
+    ],
+    "decision_dependencies": "ADR-11/17",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V08",
+    "title": "库存与金融posting基础",
+    "stage": "S1",
+    "depends_on": [
+      "V01",
+      "V02",
+      "V03",
+      "V07"
+    ],
+    "engines": [
+      "E08",
+      "E14",
+      "E15"
+    ],
+    "deliverables": [
+      "库存可用/预留/在途",
+      "账户与分录",
+      "期初权益与来源记录",
+      "债权债务接口",
+      "税/消费/投资等流量分类"
+    ],
+    "acceptance": [
+      "同一库存无重复占用",
+      "每笔交易分录平衡",
+      "合法负权益与非法负物理库存分开",
+      "测试seed有期初对手项",
+      "不以快照作为唯一事实源"
+    ],
+    "decision_dependencies": "ADR-02/05/07/08/17",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V09",
+    "title": "单世界writer、原子提交与故障恢复",
+    "stage": "S1",
+    "depends_on": [
+      "V02",
+      "V07",
+      "V08"
+    ],
+    "engines": [
+      "E01",
+      "KERNEL"
+    ],
+    "deliverables": [
+      "lease及fencing token",
+      "候选状态与私有checkpoint",
+      "versioned transaction commit",
+      "事件/回执/outbox同步提交",
+      "崩溃恢复测试"
+    ],
+    "acceptance": [
+      "过期writer无法commit",
+      "commit前崩溃无半笔经济",
+      "commit后重试无重复经济",
+      "下游通知失败可重投",
+      "日结与玩家命令边界有确定顺序"
+    ],
+    "decision_dependencies": "ADR-03/04/17",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V10",
+    "title": "真实读投影与双国交易纵向切片",
+    "stage": "S1",
+    "depends_on": [
+      "V05",
+      "V06",
+      "V07",
+      "V08",
+      "V09"
+    ],
+    "engines": [
+      "E01",
+      "E08",
+      "E14",
+      "E15",
+      "E16"
+    ],
+    "deliverables": [
+      "最薄双国/Office页面",
+      "结构化交易及一组批准的结算条款",
+      "到货付款流程",
+      "授权summary与receipts",
+      "浏览器E2E"
+    ],
+    "acceptance": [
+      "页面无hash/demo充当actual",
+      "不足钱/货正确失败或入批准状态",
+      "同批货并发不双卖",
+      "断线刷新跨Office同版本",
+      "只声称已完成切片，不声称完整E16/18"
+    ],
+    "decision_dependencies": "ADR-05/09/12；简化贸易条款为test fixture，不能替代正式scope。",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V11",
+    "title": "E02人口与E03劳动力工资",
+    "stage": "S2",
+    "depends_on": [
+      "V03",
+      "V06",
+      "V08",
+      "V09"
+    ],
+    "engines": [
+      "E02",
+      "E03"
+    ],
+    "deliverables": [
+      "年龄/cohort/家庭",
+      "出生死亡迁移事件",
+      "劳动参与/技能/岗位/工资",
+      "公共部门人员占用"
+    ],
+    "acceptance": [
+      "人口恒等闭合",
+      "移民出入双边一致",
+      "同一人力不能同时全额占用两岗位",
+      "就业/失业分母明确",
+      "期初/滞后劳动对生产供给按ADR读取"
+    ],
+    "decision_dependencies": "ADR-02/04/08",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V12",
+    "title": "E08完整资源及库存",
+    "stage": "S2",
+    "depends_on": [
+      "V08",
+      "V09",
+      "V11"
+    ],
+    "engines": [
+      "E08"
+    ],
+    "deliverables": [
+      "六类地质资源五层",
+      "探索/开发/开采",
+      "储备/损耗/预留/转移",
+      "与Production对账"
+    ],
+    "acceptance": [
+      "勘探不加地质总量",
+      "唯一开采路径不与E10双采",
+      "reserve不当作可自由库存",
+      "每单位出入可追溯"
+    ],
+    "decision_dependencies": "ADR-02/04/05",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V13",
+    "title": "E09能源与E10生产",
+    "stage": "S2",
+    "depends_on": [
+      "V03",
+      "V11",
+      "V12"
+    ],
+    "engines": [
+      "E09",
+      "E10"
+    ],
+    "deliverables": [
+      "MW/MWh能源",
+      "电网/储能/燃料分配",
+      "12生产部门投入产出",
+      "物流与人员瓶颈",
+      "部门增加值"
+    ],
+    "acceptance": [
+      "缺能真实限产",
+      "检查投入后还必须扣减",
+      "资源开采和发电只记录一次实际产出",
+      "供给缺口不静默造粮或耗材",
+      "所有参数显式可测试"
+    ],
+    "decision_dependencies": "ADR-02/04/06/08",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V14",
+    "title": "E11技术及E12项目全生命周期",
+    "stage": "S2",
+    "depends_on": [
+      "V05",
+      "V06",
+      "V08",
+      "V11",
+      "V12",
+      "V13"
+    ],
+    "engines": [
+      "E11",
+      "E12"
+    ],
+    "deliverables": [
+      "22技术权利及研发",
+      "38项目类型配方/前置/工期",
+      "部门资源请求",
+      "融资承诺/材料/劳动/施工/commission",
+      "设施交接"
+    ],
+    "acceptance": [
+      "有钱无材料不能建成",
+      "许可不等掌握且到期限制使用",
+      "研发完成不自动新增工厂",
+      "批准/付款/完工不直接加GDP",
+      "实际施工账户按批准规则记录"
+    ],
+    "decision_dependencies": "ADR-02/06/07/08/09",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V15",
+    "title": "E04教育及E05医疗",
+    "stage": "S2",
+    "depends_on": [
+      "V06",
+      "V08",
+      "V11",
+      "V14"
+    ],
+    "engines": [
+      "E04",
+      "E05"
+    ],
+    "deliverables": [
+      "教师/座位/入学/毕业",
+      "training/教育时间",
+      "医护/床位/药品/服务/积压",
+      "设施需求及采购接口"
+    ],
+    "acceptance": [
+      "无教师不靠预算生毕业生",
+      "毕业不重复增加技能",
+      "无医药物料形成未满足需求",
+      "人员不重复占用",
+      "public service产出与资金账户闭合"
+    ],
+    "decision_dependencies": "ADR-02/04/06/08",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V16",
+    "title": "E06住房及E07治安",
+    "stage": "S2",
+    "depends_on": [
+      "V06",
+      "V08",
+      "V11",
+      "V14"
+    ],
+    "engines": [
+      "E06",
+      "E07"
+    ],
+    "deliverables": [
+      "房屋/占用/缺口/租金",
+      "住房补贴与建设请求",
+      "警力/部署/事件/积压",
+      "紧急措施审批"
+    ],
+    "acceptance": [
+      "补贴不直接增加住房",
+      "新增房屋来自commission",
+      "治安支出不直接稳定度buff",
+      "失效授权不能执行紧急措施"
+    ],
+    "decision_dependencies": "ADR-02/04/08/09",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V17",
+    "title": "E13家庭、需求与国内供给闭合",
+    "stage": "S2",
+    "depends_on": [
+      "V11",
+      "V13",
+      "V15",
+      "V16"
+    ],
+    "engines": [
+      "E13",
+      "E14",
+      "E15"
+    ],
+    "deliverables": [
+      "收入组和已收现金",
+      "税/转移/债务服务",
+      "消费需求/成交/存货",
+      "生活成本/贫困视图",
+      "粮食/建设/服务/医药供给方案"
+    ],
+    "acceptance": [
+      "未到账福利不能消费",
+      "银行余额不是家庭复制写入",
+      "消费对应商品/服务与支付",
+      "grain供给有来源",
+      "供给不足允许短缺但不能偷偷clamp消费账"
+    ],
+    "decision_dependencies": "ADR-02/04/06/07/08",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V18",
+    "title": "E14完整财政与Treasury",
+    "stage": "S3",
+    "depends_on": [
+      "V05",
+      "V08",
+      "V14",
+      "V17"
+    ],
+    "engines": [
+      "E14"
+    ],
+    "deliverables": [
+      "税制与credits",
+      "预算/承诺/付款优先级",
+      "债券认购/息票/偿还",
+      "担保/或有负债",
+      "SOE/股权/分红/资产出售",
+      "Finance动作与预测"
+    ],
+    "acceptance": [
+      "发行不等资金到账",
+      "transfer不计G",
+      "欠款与付款不同",
+      "担保call与现金时间分开",
+      "Finance不直接选择工程设计"
+    ],
+    "decision_dependencies": "ADR-07/08/09",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V19",
+    "title": "E15完整银行央行",
+    "stage": "S3",
+    "depends_on": [
+      "V05",
+      "V08",
+      "V13",
+      "V17"
+    ],
+    "engines": [
+      "E15"
+    ],
+    "deliverables": [
+      "贷款存款与还款",
+      "CB/银行资产负债表",
+      "OMO/准备金/资本/CCyB",
+      "再融资/ELA/抵押/NPL",
+      "利率走廊/沟通",
+      "M1/M2只读派生"
+    ],
+    "acceptance": [
+      "新增贷款存款双记",
+      "流动性援助不消灭负权益",
+      "private money不等official reserves",
+      "期限利息只按模拟日历",
+      "每个工具有失败路径和分录"
+    ],
+    "decision_dependencies": "ADR-02/08/09",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V20",
+    "title": "E17外汇与国际金融",
+    "stage": "S3",
+    "depends_on": [
+      "V08",
+      "V18",
+      "V19"
+    ],
+    "engines": [
+      "E17"
+    ],
+    "deliverables": [
+      "LC/GCU",
+      "私营换汇",
+      "官方干预及冲销",
+      "资本流/外债/收入汇回",
+      "固定历史成交汇率",
+      "valuation记录"
+    ],
+    "acceptance": [
+      "不维护独立4830条权威FX",
+      "私人进口不直接扣CB外储",
+      "贷款双方资产负债一致",
+      "历史现金不按现价重写",
+      "重估与已结算现金分开"
+    ],
+    "decision_dependencies": "ADR-02/08/09",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V21",
+    "title": "E16完整现货、海关与物流",
+    "stage": "S3",
+    "depends_on": [
+      "V10",
+      "V12",
+      "V13",
+      "V18",
+      "V20"
+    ],
+    "engines": [
+      "E16"
+    ],
+    "deliverables": [
+      "12商品订单簿",
+      "限价/成交/部分成交/取消",
+      "单一tariff resolver",
+      "配额/禁令/制裁",
+      "发货/在途/到货/损失",
+      "港口铁路储运瓶颈"
+    ],
+    "acceptance": [
+      "成交顺序可重放",
+      "同批货不重复占用",
+      "不把在途变成进口可用投入",
+      "关税收入只记一次",
+      "订单性能与经济守恒同时通过"
+    ],
+    "decision_dependencies": "ADR-04/05/08/10",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V22",
+    "title": "E16全部国际合同与专项执行器",
+    "stage": "S3",
+    "depends_on": [
+      "V14",
+      "V18",
+      "V19",
+      "V20",
+      "V21"
+    ],
+    "engines": [
+      "E11",
+      "E12",
+      "E16",
+      "E17"
+    ],
+    "deliverables": [
+      "23 subtype覆盖表",
+      "Trade活动家族映射",
+      "谈判/版本/审批/履约/暂停/违约",
+      "每种货物/现金/债权/产权/技术/义务执行器"
+    ],
+    "acceptance": [
+      "23类型逐条有成功失败边界测试",
+      "Spot及Capital Controls不因23表未列而丢弃",
+      "共同kernel不等各类型已实现",
+      "技术交流扩展与Industry对应",
+      "不能静默延期高阶合同"
+    ],
+    "decision_dependencies": "ADR-02/05/09/10",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V23",
+    "title": "E18国民账户、风险与评分",
+    "stage": "S3",
+    "depends_on": [
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18",
+      "V19",
+      "V20",
+      "V21",
+      "V22"
+    ],
+    "engines": [
+      "E18"
+    ],
+    "deliverables": [
+      "生产GDP权威算法",
+      "支出/BOP/存量流量核对",
+      "CPI篮子与贡献",
+      "风险与正式score",
+      "账户错误隔离"
+    ],
+    "acceptance": [
+      "两GDP不一致报错不取均值",
+      "建设/转移/中间品不重复",
+      "率/流量周期一致",
+      "score只读不回写",
+      "CPI贡献能加总，模型因果链不假装实测贡献"
+    ],
+    "decision_dependencies": "ADR-02/06/07/08/15",
+    "parallel_notes": "账户分类从V08即开始；该包是补齐与总核对，不是最后才设计账户。",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V24",
+    "title": "Captain治理及因果危机Admin",
+    "stage": "S3",
+    "depends_on": [
+      "V05",
+      "V06",
+      "V14",
+      "V18",
+      "V19",
+      "V22",
+      "V23"
+    ],
+    "engines": [
+      "KERNEL",
+      "E18"
+    ],
+    "deliverables": [
+      "strategy/priority/agenda/proposal",
+      "political capital/directives/commitment",
+      "cabinet briefs/冲突/责任",
+      "crisis composer/start/end",
+      "合法pause/resume"
+    ],
+    "acceptance": [
+      "Captain不能绕过拨款签字",
+      "危机只改原因层",
+      "Admin不set GDP/score",
+      "机密简报权限正确",
+      "危机退出后临时权力按规则失效"
+    ],
+    "decision_dependencies": "ADR-09/12/15",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V25",
+    "title": "六Office完整UI及行动覆盖",
+    "stage": "S4",
+    "depends_on": [
+      "V05",
+      "V10",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18",
+      "V19",
+      "V20",
+      "V21",
+      "V22",
+      "V23",
+      "V24"
+    ],
+    "engines": [
+      "ALL"
+    ],
+    "deliverables": [
+      "按规范动作清单",
+      "所有参数/审批/状态/回执",
+      "国家/身份/权限视图",
+      "真实报表/列表/图表",
+      "键盘/小屏/空错误状态"
+    ],
+    "acceptance": [
+      "每动作command->ledger->read->E2E",
+      "forecast不混actual",
+      "无假按钮/假表格/假榜单",
+      "未完项目显示不可用与原因",
+      "Social保留教育医疗治安独立操作空间"
+    ],
+    "decision_dependencies": "ADR-09/12",
+    "parallel_notes": "从V10薄UI起逐包接线；不是等此任务才开始全部页面。",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V26",
+    "title": "预测、可解释性、Realtime与断线恢复",
+    "stage": "S4",
+    "depends_on": [
+      "V07",
+      "V10",
+      "V17",
+      "V20",
+      "V23",
+      "V25"
+    ],
+    "engines": [
+      "ALL"
+    ],
+    "deliverables": [
+      "多政策组合forecast",
+      "授权可见基线与假设",
+      "账户贡献/机制链",
+      "私有channel/outbox",
+      "缓存版本及重同步"
+    ],
+    "acceptance": [
+      "不读取玩家无权未来危机/隐私",
+      "不修改actual或消耗正式seed序列",
+      "同scope缓存key含world/model/version",
+      "掉线乱序重复不会倒退状态",
+      "限流与请求合并可测"
+    ],
+    "decision_dependencies": "ADR-12/15/19",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V27",
+    "title": "70国初态、校准与无人国家控制",
+    "stage": "S4",
+    "depends_on": [
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18",
+      "V19",
+      "V20",
+      "V22",
+      "V23"
+    ],
+    "engines": [
+      "ALL"
+    ],
+    "deliverables": [
+      "全部70国seed",
+      "期初资产负债及地质账",
+      "设施人员技术依赖核对",
+      "供应链差异",
+      "NPC控制器",
+      "parameter provenance"
+    ],
+    "acceptance": [
+      "期初账户全闭合",
+      "archetype不作为持续buff",
+      "未认领不无条件接受报价",
+      "NPC也走命令审批及资金库存约束",
+      "地区/虚构参数标设计假设非真实统计"
+    ],
+    "decision_dependencies": "ADR-06/08/13/15",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V28",
+    "title": "两种orchestrator与主站迁移桥",
+    "stage": "S4",
+    "depends_on": [
+      "V05",
+      "V10",
+      "V23",
+      "V25",
+      "V26",
+      "V27"
+    ],
+    "engines": [
+      "ALL"
+    ],
+    "deliverables": [
+      "Season及普通World运行配置",
+      "主站入口与身份整合",
+      "旧历史读取及继续运行策略",
+      "route/model兼容清单",
+      "跨repo版本契约"
+    ],
+    "acceptance": [
+      "相同物理输入事件产生相同core结果",
+      "旧世界不被V2写入",
+      "不从0-100猜吨或金额",
+      "主站旧链接不静默失效",
+      "同Supabase登录行为真实测试"
+    ],
+    "decision_dependencies": "ADR-14/16/19/20",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V29",
+    "title": "完整功能验证、经济校准与持续运行",
+    "stage": "S5",
+    "depends_on": [
+      "V22",
+      "V23",
+      "V24",
+      "V25",
+      "V26",
+      "V27",
+      "V28"
+    ],
+    "engines": [
+      "ALL"
+    ],
+    "deliverables": [
+      "全需求证据链",
+      "70国×600日正式周期",
+      "1000日长跑",
+      "高密度动作/冲击/到期",
+      "校准说明及缺陷最小复现"
+    ],
+    "acceptance": [
+      "硬守恒/账本0未解释违规",
+      "合法破产危机不是测试自动失败",
+      "非空跑",
+      "固定seed及相同版本重放hash一致",
+      "未执行测试不报PASS"
+    ],
+    "decision_dependencies": "",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V30",
+    "title": "性能、安全与数据库恢复联合验收",
+    "stage": "S5",
+    "depends_on": [
+      "V02",
+      "V09",
+      "V26",
+      "V28",
+      "V29"
+    ],
+    "engines": [
+      "ALL"
+    ],
+    "deliverables": [
+      "50/100/420会话分档",
+      "到期风暴/交易突发/预测负载",
+      "独立web/API/worker故障测试",
+      "RLS/grants/攻击面负例",
+      "共享主站性能影响",
+      "恢复RPO/RTO报告"
+    ],
+    "acceptance": [
+      "披露机器/套餐/负载/版本",
+      "旧主站在共享DB压力下不超批准预算",
+      "过期writer/重复消息无双记",
+      "备份实际恢复成功",
+      "SLO不过不开放正式规模"
+    ],
+    "decision_dependencies": "ADR-16/17/18/19/20",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V31",
+    "title": "发布候选、灰度和生产切换",
+    "stage": "S6",
+    "depends_on": [
+      "V29",
+      "V30"
+    ],
+    "engines": [
+      "ALL"
+    ],
+    "deliverables": [
+      "release manifest及兼容区间",
+      "seed/registry/scoring冻结",
+      "migration rehearsal",
+      "内部测试world灰度",
+      "生产审批及kill switch",
+      "主站入口切换"
+    ],
+    "acceptance": [
+      "无P0/P1未解决发布阻塞",
+      "保护的生产部署链",
+      "API和DB先兼容再发布前端",
+      "新旧世界均只有单writer",
+      "切UI不删除已接受经济事实"
+    ],
+    "decision_dependencies": "ADR-14/15/16/18/19",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  },
+  {
+    "id": "V32",
+    "title": "开赛、结束、归档与运营移交",
+    "stage": "S6",
+    "depends_on": [
+      "V31"
+    ],
+    "engines": [
+      "ALL"
+    ],
+    "deliverables": [
+      "join/claim/start/pause/end/archive",
+      "季末截止及未到期义务",
+      "管理员/玩家手册",
+      "告警/值班/响应流程",
+      "版本升级forward-fix",
+      "完整未完成项声明"
+    ],
+    "acceptance": [
+      "仅到期事项按批准截止结算",
+      "未到期债务和在途货不清零",
+      "可从记录查明每个结果",
+      "开赛后48-72h监测并明确负责人",
+      "RC不能标full release"
+    ],
+    "decision_dependencies": "ADR-15/20",
+    "parallel_notes": "",
+    "status": "PLANNED_NOT_IMPLEMENTED",
+    "evidence": []
+  }
+]

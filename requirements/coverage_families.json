@@ -1,0 +1,2037 @@
+{
+  "note": "高层覆盖登记，不是全量原文要求；每行须拆为参数/权限/状态/失败/事件/UI/测试等可验收项，完成前不得标VERIFIED。另须映射Spot/CapitalControls/Industry技术交流。",
+  "count": 131,
+  "entries": [
+    {
+      "id": "E01",
+      "kind": "engine",
+      "name": "Engine 01 · Time & Event Engine",
+      "source_refs": [
+        "MASTER-U0042",
+        "MASTER-U0187"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E02",
+      "kind": "engine",
+      "name": "Engine 02 · Population Engine",
+      "source_refs": [
+        "MASTER-U0043",
+        "MASTER-U0259"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E03",
+      "kind": "engine",
+      "name": "Engine 03 · Labour & Wage Engine",
+      "source_refs": [
+        "MASTER-U0044",
+        "MASTER-U0329"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E04",
+      "kind": "engine",
+      "name": "Engine 04 · Education & Human Capital Engine",
+      "source_refs": [
+        "MASTER-U0045",
+        "MASTER-U0431"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E05",
+      "kind": "engine",
+      "name": "Engine 05 · Healthcare Engine",
+      "source_refs": [
+        "MASTER-U0046",
+        "MASTER-U0510"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E06",
+      "kind": "engine",
+      "name": "Engine 06 · Housing Engine",
+      "source_refs": [
+        "MASTER-U0047",
+        "MASTER-U0587"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E07",
+      "kind": "engine",
+      "name": "Engine 07 · Public Safety Engine",
+      "source_refs": [
+        "MASTER-U0048",
+        "MASTER-U0659"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E08",
+      "kind": "engine",
+      "name": "Engine 08 · Resource & Inventory Engine",
+      "source_refs": [
+        "MASTER-U0049",
+        "MASTER-U0736"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E09",
+      "kind": "engine",
+      "name": "Engine 09 · Energy Engine",
+      "source_refs": [
+        "MASTER-U0050",
+        "MASTER-U0834"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E10",
+      "kind": "engine",
+      "name": "Engine 10 · Production Engine",
+      "source_refs": [
+        "MASTER-U0051",
+        "MASTER-U0913"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E11",
+      "kind": "engine",
+      "name": "Engine 11 · Technology & R&D Engine",
+      "source_refs": [
+        "MASTER-U0052",
+        "MASTER-U1003"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E12",
+      "kind": "engine",
+      "name": "Engine 12 · Project & Infrastructure Engine",
+      "source_refs": [
+        "MASTER-U0053",
+        "MASTER-U1107"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E13",
+      "kind": "engine",
+      "name": "Engine 13 · Household & Demand Engine",
+      "source_refs": [
+        "MASTER-U0054",
+        "MASTER-U1235"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E14",
+      "kind": "engine",
+      "name": "Engine 14 · Fiscal & Treasury Engine",
+      "source_refs": [
+        "MASTER-U0055",
+        "MASTER-U1313"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E15",
+      "kind": "engine",
+      "name": "Engine 15 · Banking & Monetary Engine",
+      "source_refs": [
+        "MASTER-U0056",
+        "MASTER-U1413"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E16",
+      "kind": "engine",
+      "name": "Engine 16 · Trade, Contract & Global Market Engine",
+      "source_refs": [
+        "MASTER-U0057",
+        "MASTER-U1511"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E17",
+      "kind": "engine",
+      "name": "Engine 17 · FX & International Finance Engine",
+      "source_refs": [
+        "MASTER-U0058",
+        "MASTER-U1649"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "E18",
+      "kind": "engine",
+      "name": "Engine 18 · National Accounts, Risk & Scoring Engine",
+      "source_refs": [
+        "MASTER-U0059",
+        "MASTER-U1736"
+      ],
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "OFFICE-CAPTAIN",
+      "kind": "office_family",
+      "name": "CAPTAIN",
+      "source_document": "CAPTAIN",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "OFFICE-CENTRAL_BANK",
+      "kind": "office_family",
+      "name": "CENTRAL_BANK",
+      "source_document": "CENTRAL_BANK",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "OFFICE-FINANCE",
+      "kind": "office_family",
+      "name": "FINANCE",
+      "source_document": "FINANCE",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "OFFICE-TRADE",
+      "kind": "office_family",
+      "name": "TRADE",
+      "source_document": "TRADE",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "OFFICE-INDUSTRY",
+      "kind": "office_family",
+      "name": "INDUSTRY",
+      "source_document": "INDUSTRY",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "OFFICE-SOCIAL",
+      "kind": "office_family",
+      "name": "SOCIAL",
+      "source_document": "SOCIAL",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-01",
+      "kind": "commodity",
+      "source_cells": [
+        "CRUDE_OIL",
+        "barrel"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-02",
+      "kind": "commodity",
+      "source_cells": [
+        "NATURAL_GAS",
+        "MMBtu"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-03",
+      "kind": "commodity",
+      "source_cells": [
+        "URANIUM",
+        "tonne U"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-04",
+      "kind": "commodity",
+      "source_cells": [
+        "GRAIN",
+        "tonne"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-05",
+      "kind": "commodity",
+      "source_cells": [
+        "IRON_ORE",
+        "tonne"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-06",
+      "kind": "commodity",
+      "source_cells": [
+        "COPPER",
+        "tonne"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-07",
+      "kind": "commodity",
+      "source_cells": [
+        "LITHIUM",
+        "tonne LCE"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-08",
+      "kind": "commodity",
+      "source_cells": [
+        "STEEL",
+        "tonne"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-09",
+      "kind": "commodity",
+      "source_cells": [
+        "REFINED_FUEL",
+        "barrel equivalent"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-10",
+      "kind": "commodity",
+      "source_cells": [
+        "MACHINERY",
+        "equipment unit"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-11",
+      "kind": "commodity",
+      "source_cells": [
+        "SEMICONDUCTORS",
+        "standardised chip unit"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "COMMODITY-12",
+      "kind": "commodity",
+      "source_cells": [
+        "BATTERIES",
+        "MWh-equivalent"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-01",
+      "kind": "sector",
+      "source_cells": [
+        "OIL_EXTRACTION",
+        "Developed Oil Reserve + Electricity + Labour + Machinery → Crude Oil"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-02",
+      "kind": "sector",
+      "source_cells": [
+        "GAS_EXTRACTION",
+        "Developed Gas Reserve + Electricity + Labour + Machinery → Natural Gas"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-03",
+      "kind": "sector",
+      "source_cells": [
+        "URANIUM_MINING",
+        "Developed Uranium Reserve + Electricity + Labour + Machinery → Uranium"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-04",
+      "kind": "sector",
+      "source_cells": [
+        "IRON_ORE_MINING",
+        "Developed Iron Ore Reserve + Electricity + Labour + Machinery → Iron Ore"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-05",
+      "kind": "sector",
+      "source_cells": [
+        "COPPER_MINING",
+        "Developed Copper Reserve + Electricity + Labour + Machinery → Copper"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-06",
+      "kind": "sector",
+      "source_cells": [
+        "LITHIUM_MINING",
+        "Developed Lithium Reserve + Electricity + Labour + Machinery → Lithium"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-07",
+      "kind": "sector",
+      "source_cells": [
+        "STEEL",
+        "Iron Ore + Energy + Labour + Machinery Capacity → Steel"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-08",
+      "kind": "sector",
+      "source_cells": [
+        "REFINED_FUEL",
+        "Crude Oil + Energy + Labour + Refinery Capacity → Refined Fuel"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-09",
+      "kind": "sector",
+      "source_cells": [
+        "BATTERY",
+        "Lithium + Copper + Electricity + Machinery + Battery Technology + Skilled Labour → Batteries"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-10",
+      "kind": "sector",
+      "source_cells": [
+        "MACHINERY",
+        "Steel + Copper + Electricity + Manufacturing Technology + Skilled Labour → Machinery"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-11",
+      "kind": "sector",
+      "source_cells": [
+        "SEMICONDUCTOR",
+        "Copper + Electricity + Machinery + Semiconductor Technology + High Skill Labour → Semiconductors"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "SECTOR-12",
+      "kind": "sector",
+      "source_cells": [
+        "ELECTRICITY",
+        "Fuel/Resource + Generation Capacity + Labour + Grid → Delivered Electricity"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-01",
+      "kind": "tech",
+      "source_cells": [
+        "ENERGY_ADV_SOLAR",
+        "Energy",
+        "Advanced Solar"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-02",
+      "kind": "tech",
+      "source_cells": [
+        "ENERGY_GRID_STORAGE",
+        "Energy",
+        "Grid-scale Storage"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-03",
+      "kind": "tech",
+      "source_cells": [
+        "ENERGY_ADV_NUCLEAR",
+        "Energy",
+        "Advanced Nuclear"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-04",
+      "kind": "tech",
+      "source_cells": [
+        "ENERGY_SMART_GRID",
+        "Energy",
+        "Smart Grid"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-05",
+      "kind": "tech",
+      "source_cells": [
+        "ENERGY_GREEN_H2",
+        "Energy",
+        "Green Hydrogen"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-06",
+      "kind": "tech",
+      "source_cells": [
+        "MFG_AUTOMATION",
+        "Manufacturing",
+        "Industrial Automation"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-07",
+      "kind": "tech",
+      "source_cells": [
+        "MFG_ROBOTICS",
+        "Manufacturing",
+        "Advanced Robotics"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-08",
+      "kind": "tech",
+      "source_cells": [
+        "MFG_PRECISION",
+        "Manufacturing",
+        "Precision Manufacturing"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-09",
+      "kind": "tech",
+      "source_cells": [
+        "MFG_SMART",
+        "Manufacturing",
+        "Smart Manufacturing"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-10",
+      "kind": "tech",
+      "source_cells": [
+        "SEMI_BASIC",
+        "Semiconductor",
+        "Basic Semiconductor"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-11",
+      "kind": "tech",
+      "source_cells": [
+        "SEMI_ADV_FAB",
+        "Semiconductor",
+        "Advanced Fabrication"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-12",
+      "kind": "tech",
+      "source_cells": [
+        "SEMI_PACKAGING",
+        "Semiconductor",
+        "Advanced Packaging"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-13",
+      "kind": "tech",
+      "source_cells": [
+        "SEMI_HPC",
+        "Semiconductor",
+        "High-performance Chips"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-14",
+      "kind": "tech",
+      "source_cells": [
+        "RESOURCE_ADV_EXPLORATION",
+        "Resources & Materials",
+        "Advanced Exploration"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-15",
+      "kind": "tech",
+      "source_cells": [
+        "RESOURCE_ADV_MINING",
+        "Resources & Materials",
+        "Advanced Mining"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-16",
+      "kind": "tech",
+      "source_cells": [
+        "RESOURCE_EFFICIENT_REFINING",
+        "Resources & Materials",
+        "High-efficiency Refining"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-17",
+      "kind": "tech",
+      "source_cells": [
+        "RESOURCE_BATTERY_CHEM",
+        "Resources & Materials",
+        "Battery Chemistry"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-18",
+      "kind": "tech",
+      "source_cells": [
+        "RESOURCE_ADV_MATERIALS",
+        "Resources & Materials",
+        "Advanced Materials"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-19",
+      "kind": "tech",
+      "source_cells": [
+        "INFRA_DIGITAL_NETWORK",
+        "Infrastructure & Digital",
+        "Digital Industrial Network"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-20",
+      "kind": "tech",
+      "source_cells": [
+        "INFRA_AUTO_LOGISTICS",
+        "Infrastructure & Digital",
+        "Automated Logistics"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-21",
+      "kind": "tech",
+      "source_cells": [
+        "INFRA_SMART_PORT",
+        "Infrastructure & Digital",
+        "Smart Port"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "TECH-22",
+      "kind": "tech",
+      "source_cells": [
+        "INFRA_ADV_GRID_MGMT",
+        "Infrastructure & Digital",
+        "Advanced Grid Management"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-01",
+      "kind": "project",
+      "source_cells": [
+        "Resource",
+        "Oil Field Development"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-02",
+      "kind": "project",
+      "source_cells": [
+        "Resource",
+        "Gas Field Development"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-03",
+      "kind": "project",
+      "source_cells": [
+        "Resource",
+        "Uranium Mine"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-04",
+      "kind": "project",
+      "source_cells": [
+        "Resource",
+        "Iron Ore Mine"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-05",
+      "kind": "project",
+      "source_cells": [
+        "Resource",
+        "Copper Mine"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-06",
+      "kind": "project",
+      "source_cells": [
+        "Resource",
+        "Lithium Mine"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-07",
+      "kind": "project",
+      "source_cells": [
+        "Energy",
+        "Gas Power Plant"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-08",
+      "kind": "project",
+      "source_cells": [
+        "Energy",
+        "Fossil Power Plant"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-09",
+      "kind": "project",
+      "source_cells": [
+        "Energy",
+        "Nuclear Power Plant"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-10",
+      "kind": "project",
+      "source_cells": [
+        "Energy",
+        "Solar Farm"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-11",
+      "kind": "project",
+      "source_cells": [
+        "Energy",
+        "Wind Farm"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-12",
+      "kind": "project",
+      "source_cells": [
+        "Energy",
+        "Grid Upgrade"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-13",
+      "kind": "project",
+      "source_cells": [
+        "Energy",
+        "Energy Storage Facility"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-14",
+      "kind": "project",
+      "source_cells": [
+        "Industrial",
+        "Steel Mill"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-15",
+      "kind": "project",
+      "source_cells": [
+        "Industrial",
+        "Refinery"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-16",
+      "kind": "project",
+      "source_cells": [
+        "Industrial",
+        "Machinery Plant"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-17",
+      "kind": "project",
+      "source_cells": [
+        "Industrial",
+        "Semiconductor Fab"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-18",
+      "kind": "project",
+      "source_cells": [
+        "Industrial",
+        "Battery Gigafactory"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-19",
+      "kind": "project",
+      "source_cells": [
+        "Industrial",
+        "Industrial Park"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-20",
+      "kind": "project",
+      "source_cells": [
+        "Industrial",
+        "Special Economic Zone"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-21",
+      "kind": "project",
+      "source_cells": [
+        "Infrastructure",
+        "Deepwater Port"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-22",
+      "kind": "project",
+      "source_cells": [
+        "Infrastructure",
+        "Freight Railway"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-23",
+      "kind": "project",
+      "source_cells": [
+        "Infrastructure",
+        "National Power Grid"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-24",
+      "kind": "project",
+      "source_cells": [
+        "Infrastructure",
+        "Digital Backbone"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-25",
+      "kind": "project",
+      "source_cells": [
+        "Infrastructure",
+        "Logistics Hub"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-26",
+      "kind": "project",
+      "source_cells": [
+        "Infrastructure",
+        "Strategic Reserve Facility"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-27",
+      "kind": "project",
+      "source_cells": [
+        "Research Infrastructure",
+        "National Research Centre"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-28",
+      "kind": "project",
+      "source_cells": [
+        "Research Infrastructure",
+        "Semiconductor Research Facility"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-29",
+      "kind": "project",
+      "source_cells": [
+        "Research Infrastructure",
+        "Energy Research Centre"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-30",
+      "kind": "project",
+      "source_cells": [
+        "Research Infrastructure",
+        "Materials Research Centre"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-31",
+      "kind": "project",
+      "source_cells": [
+        "Social Infrastructure",
+        "Basic Education Facility"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-32",
+      "kind": "project",
+      "source_cells": [
+        "Social Infrastructure",
+        "Vocational Education Facility"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-33",
+      "kind": "project",
+      "source_cells": [
+        "Social Infrastructure",
+        "Higher Education Facility"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-34",
+      "kind": "project",
+      "source_cells": [
+        "Social Infrastructure",
+        "Primary Care Facility"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-35",
+      "kind": "project",
+      "source_cells": [
+        "Social Infrastructure",
+        "Hospital / Emergency Facility"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-36",
+      "kind": "project",
+      "source_cells": [
+        "Social Infrastructure",
+        "Public Housing"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-37",
+      "kind": "project",
+      "source_cells": [
+        "Social Infrastructure",
+        "Worker Housing"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "PROJECT-38",
+      "kind": "project",
+      "source_cells": [
+        "Social Infrastructure",
+        "Police / Emergency Facility"
+      ],
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-01",
+      "kind": "international_subtype",
+      "name": "Commodity Supply Agreement",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-02",
+      "kind": "international_subtype",
+      "name": "Technology Licence",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-03",
+      "kind": "international_subtype",
+      "name": "Foreign Direct Investment",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-04",
+      "kind": "international_subtype",
+      "name": "Sovereign Loan",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-05",
+      "kind": "international_subtype",
+      "name": "Infrastructure Finance",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-06",
+      "kind": "international_subtype",
+      "name": "Resource Development Agreement",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-07",
+      "kind": "international_subtype",
+      "name": "Joint International Project",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-08",
+      "kind": "international_subtype",
+      "name": "Preferential Trade Agreement",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-09",
+      "kind": "international_subtype",
+      "name": "Free Trade Agreement",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-10",
+      "kind": "international_subtype",
+      "name": "Customs Cooperation Agreement",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-11",
+      "kind": "international_subtype",
+      "name": "Sector Market Access Agreement",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-12",
+      "kind": "international_subtype",
+      "name": "Multilateral Economic Agreement",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-13",
+      "kind": "international_subtype",
+      "name": "Reserve Swap",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-14",
+      "kind": "international_subtype",
+      "name": "Sanction Package",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-15",
+      "kind": "international_subtype",
+      "name": "Grant Aid",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-16",
+      "kind": "international_subtype",
+      "name": "Commodity Aid",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-17",
+      "kind": "international_subtype",
+      "name": "Emergency Concessional Loan",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-18",
+      "kind": "international_subtype",
+      "name": "Emergency Supply Contract",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-19",
+      "kind": "international_subtype",
+      "name": "Technical Assistance",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-20",
+      "kind": "international_subtype",
+      "name": "Project Reconstruction Aid",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-21",
+      "kind": "international_subtype",
+      "name": "International Tender",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-22",
+      "kind": "international_subtype",
+      "name": "Strategic Economic Partnership",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    },
+    {
+      "id": "INT-23",
+      "kind": "international_subtype",
+      "name": "Trade Dispute Settlement",
+      "source_document": "MASTER",
+      "implementation_status": "UNASSESSED",
+      "command_or_query": null,
+      "canonical_owner": null,
+      "tests": [],
+      "ui_path": null,
+      "evidence": [],
+      "approved_deferral": null
+    }
+  ]
+}

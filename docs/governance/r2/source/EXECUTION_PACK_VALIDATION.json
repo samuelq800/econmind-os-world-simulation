@@ -1,0 +1,53 @@
+{
+  "scope": "PLANNING_PACK_INTEGRITY_ONLY",
+  "application_tests_run": false,
+  "database_tests_run": false,
+  "production_access": false,
+  "initial_snapshot_checks": true,
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "required_files",
+      "status": "PASS"
+    },
+    {
+      "name": "source_hashes_and_index",
+      "status": "PASS"
+    },
+    {
+      "name": "master_engine_numbering",
+      "status": "PASS"
+    },
+    {
+      "name": "fixed_catalogs",
+      "status": "PASS"
+    },
+    {
+      "name": "work_package_dependencies",
+      "status": "PASS"
+    },
+    {
+      "name": "coverage_status_honesty",
+      "status": "PASS"
+    }
+  ],
+  "metrics": {
+    "required_files_checked": 14,
+    "source_documents": 8,
+    "source_units": 8743,
+    "source_hashes_matched": 8,
+    "engines": 18,
+    "catalog_counts": {
+      "commodities": 12,
+      "production_sectors": 12,
+      "technologies": 22,
+      "projects": 38,
+      "international_activity_types": 23
+    },
+    "work_packages": 33,
+    "dependency_graph": "ACYCLIC",
+    "high_level_coverage_entries": 131,
+    "coverage_is_full_requirement_count": false
+  },
+  "errors": []
+}

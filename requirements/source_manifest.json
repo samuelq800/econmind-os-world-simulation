@@ -1,0 +1,58 @@
+[
+  {
+    "id": "MASTER",
+    "original_path": "specs/original/EconMind_Season1_70_Country_World_Engine_Master_Specification.docx",
+    "sha256": "0d4ea011a1291b5bd49c89c1616a7eee29731c2141a4f958e2930acf7189db13",
+    "extracted_path": "specs/extracted/MASTER.md",
+    "source_units": 2117
+  },
+  {
+    "id": "CENTRAL_BANK",
+    "original_path": "specs/original/EconMind_Season1_Central_Bank_Governor_Function_Specification.docx",
+    "sha256": "c0fb17cc37a912938957a879b828c7b6139dd9e1ceef0976dc6c35ca072c36e9",
+    "extracted_path": "specs/extracted/CENTRAL_BANK.md",
+    "source_units": 833
+  },
+  {
+    "id": "CONSTITUTION",
+    "original_path": "specs/original/EconMind_Season1_Codex_Implementation_Constitution.docx",
+    "sha256": "960a7745a8e18b8f1cb10c754ce6681d46bdfc5933a979c4a989bd3a07ff5d49",
+    "extracted_path": "specs/extracted/CONSTITUTION.md",
+    "source_units": 815
+  },
+  {
+    "id": "CAPTAIN",
+    "original_path": "specs/original/EconMind_Season1_Country_Captain_Function_Specification.docx",
+    "sha256": "e1d007253d3435316eae940185e52bb30316e9f72a411ca98127e3535d4c5a01",
+    "extracted_path": "specs/extracted/CAPTAIN.md",
+    "source_units": 681
+  },
+  {
+    "id": "FINANCE",
+    "original_path": "specs/original/EconMind_Season1_Finance_Economy_Minister_Function_Specification.docx",
+    "sha256": "5970033c01ba9592a8efac5c6e319c1d7424a6df562e1833e08920bf927a5576",
+    "extracted_path": "specs/extracted/FINANCE.md",
+    "source_units": 1051
+  },
+  {
+    "id": "INDUSTRY",
+    "original_path": "specs/original/EconMind_Season1_Industry_Technology_Resources_Minister_Function_Specification.docx",
+    "sha256": "042a62b08e2c260acdb308e3f5aa7303c22003cd2de3b92251afec9dbf7c3f81",
+    "extracted_path": "specs/extracted/INDUSTRY.md",
+    "source_units": 1129
+  },
+  {
+    "id": "SOCIAL",
+    "original_path": "specs/original/EconMind_Season1_Labour_Education_Social_Development_Minister_Function_Specification.docx",
+    "sha256": "7ec7414047f4e2db5fc4c5d318d3e8ebca9f2236f8cd0f9e7d0a8213acf2f130",
+    "extracted_path": "specs/extracted/SOCIAL.md",
+    "source_units": 1039
+  },
+  {
+    "id": "TRADE",
+    "original_path": "specs/original/EconMind_Season1_Trade_Foreign_Affairs_Minister_Function_Specification.docx",
+    "sha256": "f4c74900e6743afec693b7beaa2d88bdf5e574b5bc21164aff89ade043a453c0",
+    "extracted_path": "specs/extracted/TRADE.md",
+    "source_units": 1078
+  }
+]
