@@ -291,5 +291,391 @@
     "Staging or production deployment",
     "Database migration, seed, reset, schema mutation, or business-data write",
     "V00.2 or later work"
-  ]
+  ],
+  "second_review_blocker_fix_round": {
+    "recorded_at": "2026-09-08T05:20:03.745251+00:00",
+    "status": "IMPLEMENTED_UNVERIFIED",
+    "base_reviewed_commit": "6e99560dfeb5581541388ab6a50252933950abe9",
+    "review_findings_addressed": ["R1-RC1", "R2-RC1"],
+    "environment": {
+      "platform": "darwin-arm64",
+      "node": "24.20.0",
+      "pnpm": "12.3.4",
+      "supabase_target_classification": "PRODUCTION_INTEGRATION_TARGET_ONLY",
+      "database_mutation_performed": false
+    },
+    "commands": [
+      {
+        "command": "pnpm install --frozen-lockfile",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "timestamp": "2026-09-08T05:18:11.879867+00:00",
+        "duration_seconds": 0.09,
+        "log": "/tmp/econmind-v001-fix2-xae76kq1/final-install.log"
+      },
+      {
+        "command": "pnpm lint",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "timestamp": "2026-09-08T05:18:11.970487+00:00",
+        "duration_seconds": 1.8,
+        "log": "/tmp/econmind-v001-fix2-xae76kq1/final-lint.log"
+      },
+      {
+        "command": "pnpm format:check",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "timestamp": "2026-09-08T05:18:13.774945+00:00",
+        "duration_seconds": 1.06,
+        "log": "/tmp/econmind-v001-fix2-xae76kq1/final-format-check.log"
+      },
+      {
+        "command": "pnpm typecheck",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "timestamp": "2026-09-08T05:18:14.837080+00:00",
+        "duration_seconds": 2.19,
+        "log": "/tmp/econmind-v001-fix2-xae76kq1/final-typecheck.log"
+      },
+      {
+        "command": "pnpm test",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "timestamp": "2026-09-08T05:18:17.025650+00:00",
+        "duration_seconds": 11.24,
+        "log": "/tmp/econmind-v001-fix2-xae76kq1/final-test.log"
+      },
+      {
+        "command": "pnpm test:boundaries",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "timestamp": "2026-09-08T05:18:28.267539+00:00",
+        "duration_seconds": 8.97,
+        "log": "/tmp/econmind-v001-fix2-xae76kq1/final-test-boundaries.log"
+      },
+      {
+        "command": "pnpm env:check",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "timestamp": "2026-09-08T05:18:37.240927+00:00",
+        "duration_seconds": 0.19,
+        "log": "/tmp/econmind-v001-fix2-xae76kq1/final-env-check.log"
+      },
+      {
+        "command": "pnpm secrets:check",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "timestamp": "2026-09-08T05:18:37.427763+00:00",
+        "duration_seconds": 0.11,
+        "log": "/tmp/econmind-v001-fix2-xae76kq1/final-secrets-check.log"
+      },
+      {
+        "command": "pnpm build",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "timestamp": "2026-09-08T05:18:37.540419+00:00",
+        "duration_seconds": 1.46,
+        "log": "/tmp/econmind-v001-fix2-xae76kq1/final-build.log"
+      },
+      {
+        "command": "pnpm check",
+        "working_directory": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+        "result": "PASS",
+        "exit_code": 0,
+        "timestamp": "2026-09-08T05:18:38.998176+00:00",
+        "duration_seconds": 25.9,
+        "log": "/tmp/econmind-v001-fix2-xae76kq1/final-check.log"
+      }
+    ],
+    "test_counts": {
+      "files": 5,
+      "tests": 53,
+      "boundary_cli_cases": 28,
+      "canonical_boundary_command_tests": 1,
+      "real_vite_tests": 15,
+      "environment_safety_tests": 7,
+      "foundation_tests": 2
+    },
+    "negative_acceptance_cases": [
+      {
+        "case": "R1-RC1-cli",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.56,
+        "synthetic_password_in_diagnostics": false,
+        "command": "node scripts/check-boundaries.mjs"
+      },
+      {
+        "case": "R1-RC1-canonical-boundaries",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 11.3,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm test:boundaries"
+      },
+      {
+        "case": "R2-service-role-direct-dev",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.88,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm --filter @econmind/world-web dev --host 127.0.0.1 --port 4193 --strictPort"
+      },
+      {
+        "case": "R2-service-role-direct-build",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 3.02,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm --filter @econmind/world-web build"
+      },
+      {
+        "case": "R2-service-role-env-check",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.18,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm env:check"
+      },
+      {
+        "case": "R2-database-direct-dev",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.25,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm --filter @econmind/world-web dev --host 127.0.0.1 --port 4193 --strictPort"
+      },
+      {
+        "case": "R2-database-direct-build",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.34,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm --filter @econmind/world-web build"
+      },
+      {
+        "case": "R2-database-env-check",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.19,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm env:check"
+      },
+      {
+        "case": "R2-RC1-root-build",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.38,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm build"
+      },
+      {
+        "case": "R2-unknown-direct-dev",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.24,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm --filter @econmind/world-web dev --host 127.0.0.1 --port 4193 --strictPort"
+      },
+      {
+        "case": "R2-unknown-direct-build",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.36,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm --filter @econmind/world-web build"
+      },
+      {
+        "case": "R2-unknown-env-check",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.2,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm env:check"
+      },
+      {
+        "case": "R2-url-userinfo-direct-dev",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.28,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm --filter @econmind/world-web dev --host 127.0.0.1 --port 4193 --strictPort"
+      },
+      {
+        "case": "R2-url-userinfo-direct-build",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.39,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm --filter @econmind/world-web build"
+      },
+      {
+        "case": "R2-url-userinfo-env-check",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.18,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm env:check"
+      },
+      {
+        "case": "R2-url-database-direct-dev",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.25,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm --filter @econmind/world-web dev --host 127.0.0.1 --port 4193 --strictPort"
+      },
+      {
+        "case": "R2-url-database-direct-build",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.36,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm --filter @econmind/world-web build"
+      },
+      {
+        "case": "R2-url-database-env-check",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.19,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm env:check"
+      },
+      {
+        "case": "R2-RC1-process",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "seconds": 0.2,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm env:check"
+      },
+      {
+        "case": "R2-public-api-build",
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "pass": true,
+        "seconds": 0.48,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm --filter @econmind/world-web build"
+      },
+      {
+        "case": "restored-production-build",
+        "exit_code": 0,
+        "expected_exit_code": 0,
+        "pass": true,
+        "seconds": 1.59,
+        "synthetic_password_in_diagnostics": false,
+        "command": "pnpm build"
+      },
+      {
+        "case": "R1-RC1-canonical-check",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "policy_diagnostic_present": true,
+        "synthetic_password_in_diagnostics": false,
+        "seconds": 12.94,
+        "command": "pnpm check"
+      },
+      {
+        "case": "R2-RC1-root-check",
+        "exit_code": 1,
+        "expected_exit_code": 1,
+        "pass": true,
+        "policy_diagnostic_present": true,
+        "synthetic_password_in_diagnostics": false,
+        "seconds": 25.71,
+        "command": "pnpm check"
+      }
+    ],
+    "negative_acceptance_environment": "/tmp/econmind-v001-fix2-xae76kq1/repo",
+    "acceptance_notes": [
+      "Independent fixtures exercised the real boundary CLI, pnpm test:boundaries, and root pnpm check.",
+      "Direct workspace Vite dev/build rejected service-role, namespaced database, unknown public keys, credential-bearing approved HTTP URLs, and database protocols under approved URL keys.",
+      "Canonical check probes were repeated after documentation formatting so the recorded failures contain the relevant policy diagnostic, not an unrelated formatting error.",
+      "Forbidden browser builds created no browser dist; all rejection diagnostics omitted synthetic-password.",
+      "The approved local API endpoint built successfully, all fixtures were removed, and normal production builds succeeded with no synthetic-password in browser output."
+    ],
+    "toolchain_controls": [
+      {
+        "case": "correct-toolchain",
+        "exit_code": 0,
+        "expected_exit_code": 0
+      },
+      {
+        "case": "wrong-pnpm",
+        "exit_code": 1,
+        "expected_exit_code": 1
+      },
+      {
+        "case": "wrong-node",
+        "exit_code": 1,
+        "expected_exit_code": 1
+      }
+    ],
+    "candidate_security_review": {
+      "rounds": 1,
+      "mode": "read-only",
+      "confirmed_paths": [
+        "Vite glob expansion bypassed module-reference parsing",
+        "Noncanonical JSON JWT headers bypassed a base64-prefix heuristic"
+      ],
+      "red_green_evidence": "Both added focused regressions failed with actual exit 1 before correction and pass in the final 53-test suite. Glob imports now fail explicitly; JWT candidates are structurally decoded."
+    },
+    "history_preservation": {
+      "prior_evidence_objects_unchanged": true,
+      "REVIEW.md_sha256": "db61ab0a9554e7d0168bcce4570ca423ebedd71885aef8ef222f29f73eb78f5b",
+      "REVIEW_RECHECK.md_sha256": "38165329a59371ad5954b173907478cc98932362a4f954b85a0f4a038b725288"
+    },
+    "scope_checks": {
+      "application_business_sources_changed": false,
+      "dependency_versions_changed": false,
+      "lockfile_changed": false,
+      "supabase_wrapper_changed": false,
+      "governance_branch_modified": false,
+      "fixture_cleanup": "PASS"
+    },
+    "deferred": {
+      "R3": "Unchanged, non-blocking secret-scanner hardening",
+      "R4": "Separate governance branch; not modified or marked resolved here",
+      "R5": "Unchanged acceptable deferred V02 isolation risk"
+    },
+    "not_run": [
+      "Second independent V00.1 re-review",
+      "CI-provider execution",
+      "Fresh-cache dependency installation",
+      "Production or staging deployment",
+      "Database migration, push, reset, seed, SQL, or business-data write",
+      "V00.2 or later work"
+    ],
+    "next_action": "REQUEST SECOND INDEPENDENT V00.1 RE-REVIEW. DO NOT START V00.2."
+  }
 }

@@ -31,7 +31,7 @@ describe('environment safety policy', () => {
         VITE_SUPABASE_SERVICE_ROLE_KEY: 'not-a-real-secret',
       }).violations,
     ).toContain(
-      'VITE_SUPABASE_SERVICE_ROLE_KEY must never be exposed to browser code',
+      'VITE_SUPABASE_SERVICE_ROLE_KEY must never be exposed to browser code; reason=Supabase service-role credential',
     );
   });
 
@@ -43,8 +43,8 @@ describe('environment safety policy', () => {
         VITE_WORLD_API_BASE_URL: 'https://safe.example.invalid',
       }),
     ).toEqual([
-      { name: 'VITE_PRIVATE_KEY', category: 'private key' },
-      { name: 'VITE_SERVER_TOKEN', category: 'server-only credential' },
+      { name: 'VITE_PRIVATE_KEY', category: 'SERVER_ONLY_KEY' },
+      { name: 'VITE_SERVER_TOKEN', category: 'UNAPPROVED_PUBLIC_KEY' },
     ]);
   });
 
@@ -65,5 +65,41 @@ describe('environment safety policy', () => {
     expect(
       findSensitivePatterns('VITE_WORLD_API_BASE_URL=http://127.0.0.1'),
     ).toEqual([]);
+  });
+
+  it('validates the values of approved keys, not just their names', () => {
+    const jwt = (role: string) =>
+      [
+        Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
+          'base64url',
+        ),
+        Buffer.from(JSON.stringify({ role })).toString('base64url'),
+        Buffer.from('synthetic-signature').toString('base64url'),
+      ].join('.');
+    const safe = {
+      VITE_WORLD_API_URL: 'http://127.0.0.1:4100',
+      VITE_WORLD_API_BASE_URL: 'https://api.example.invalid/v1',
+      VITE_SUPABASE_ANON_KEY: jwt('anon'),
+      VITE_SUPABASE_PUBLISHABLE_KEY: [
+        'sb',
+        'publishable',
+        'abcdefghijklmnop',
+      ].join('_'),
+      VITE_USER_NODE_ENV: 'production',
+    };
+    expect(findForbiddenBrowserVariables(safe)).toEqual([]);
+    for (const value of [
+      ['sb', 'secret', 'abcdefghijklmnop'].join('_'),
+      jwt('service_role'),
+      ['-----BEGIN', 'PRIVATE KEY-----'].join(' '),
+      'Bearer synthetic-password',
+      'mysql://user:synthetic-password@localhost/test',
+    ]) {
+      for (const name of Object.keys(safe)) {
+        const violations = findForbiddenBrowserVariables({ [name]: value });
+        expect(violations).toHaveLength(1);
+        expect(JSON.stringify(violations)).not.toContain(value);
+      }
+    }
   });
 });

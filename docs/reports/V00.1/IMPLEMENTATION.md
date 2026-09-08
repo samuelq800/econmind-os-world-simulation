@@ -301,3 +301,105 @@ their probes.
   otherwise the boundary scanner fails closed with a configuration violation.
 - No API/worker economic model exists in V00.1. Later authority rules for actual
   engine packages must be added with those packages rather than invented here.
+
+## V00.1 SECOND REVIEW BLOCKER FIX ROUND
+
+**Date:** 2026-09-08. **Status:** `IMPLEMENTED_UNVERIFIED` pending second
+independent re-review. Base commit: `6e99560dfeb5581541388ab6a50252933950abe9`.
+
+### R1-RC1 cause and correction
+
+The first resolver fix classified the whole application as web-owned but scanned
+only `src`. An outside-src `.mjs` re-export, accompanied by its `.d.mts`, could
+therefore import worker code without a boundary failure.
+
+A central `architecture-ownership.mjs` now defines WORLD_WEB, WORLD_API,
+WORLD_WORKER, SHARED_PUBLIC, SERVER_ONLY, UNKNOWN, scan roots, exclusions, and
+allowed local edges. All eight governed JS/TS extensions are enumerated across
+entire app/package directories. Shared-public source is checked independently,
+so declarations and barrels cannot hide executable authority imports. Excluded
+build/dependency directories are not allowed as local import targets; unknown
+ownership, unresolved local/workspace references, and source symlinks fail closed.
+
+The existing TypeScript AST/resolver remains in use. Workspace mapping supplies
+ownership diagnostics without pretending a missing public package resolves.
+Vite postfixes are normalized. The exact Vite config and approved environment
+helpers have a separate build context, are scanned, and cannot import worker/API
+implementation; runtime cannot import these build files. Ordinary installed npm
+imports and legitimate Node build imports remain accepted.
+
+A candidate review also exposed Vite glob expansion as an unchecked module
+reference. A regression first reproduced the gap. V00.1 now explicitly rejects
+`import.meta.glob` pending an approved future resolution policy; no current
+product source uses it. This is an additional route through R1, not later work.
+
+### R2-RC1 cause and correction
+
+Blacklist-only key matching accepted a namespaced database connection string.
+The shared client policy now uses an explicit public contract plus value
+validation. It permits the task-approved `VITE_WORLD_API_URL`, retains the
+previously documented API base URL and public Supabase key categories, and
+narrowly accepts Vite's internal NODE_ENV marker. Other VITE keys fail closed.
+
+HTTP(S) endpoints cannot contain userinfo, queries, fragments, or control
+whitespace. Values are inspected for database connection strings, private-key
+material, server credentials, and server JWTs, including encoded forms. Public
+Supabase keys must have public structure/role. JWT inspection is structural, not
+signature authentication. Native `loadEnv`, root, envDir, mode, interpolation,
+and process precedence are unchanged. All direct and canonical entry points
+continue to call the same policy. Diagnostics include names/reasons, not values.
+
+Candidate review found that equivalent JWT-header whitespace could evade a
+base64-prefix heuristic. A real Vite regression first failed, then passed after
+JWT candidates were decoded independently of that prefix.
+
+### Changed files
+
+- New: `scripts/architecture-ownership.mjs`.
+- Updated: `scripts/boundary-rules.mjs`, `scripts/check-boundaries.mjs`,
+  `scripts/vite-environment-policy.mjs`, `scripts/environment-policy.mjs`.
+- New: `tests/architecture/boundary-command.test.ts`.
+- Updated: boundary, environment-safety, and Vite-environment regression suites.
+- Updated: repository-boundary and environment-safety documentation, this report,
+  and `TEST_EVIDENCE.json` with an additional evidence round.
+- Preserved and included: the previously untracked independent
+  `REVIEW_RECHECK.md`. Neither independent review artifact was edited.
+
+No application business source, dependency version, lockfile, Supabase wrapper,
+production configuration, or governance-branch file was changed.
+
+### Validation and regression coverage
+
+The final full suite contains 53 tests in five files, including 28 boundary
+regressions, one actual canonical boundary-command integration test, 15 real
+Vite tests, seven environment/safety tests, and two foundation tests. The
+original direct-import and service-role protections remain covered. New tests
+exercise outside-src re-exports and alternate extensions, shared-public
+intermediaries, unknown/excluded ownership, build/runtime separation, glob
+rejection, the actual pnpm boundary command, unknown client keys, unsafe allowed
+URL values, process/dotenv loading, native precedence/interpolation, server-token
+representations, and redacted diagnostics. Fixtures are removed after expected
+or unexpected assertion failures; Vite fixture creation also cleans up on error.
+
+All required command results and the separately reproduced negative acceptance
+cases are recorded in `second_review_blocker_fix_round` in `TEST_EVIDENCE.json`.
+Raw local logs are retained separately; synthetic attack source/env files are
+not committed. Final normal builds replace any test build artifacts.
+
+### Limitations and deferred findings
+
+The scanner is a static repository ownership control, not a third-party npm
+security audit or a full economic dependency graph. New package owners, Vite
+aliases, glob loaders, and new public environment keys need an explicit policy
+and appropriate regressions when introduced. No existing economic model or
+database behavior is claimed by these checks.
+
+R3 secret-scanner hardening remains deferred and its implementation is unchanged.
+R4 governance synchronization is handled independently on a separate branch;
+this task does not modify that branch or claim the gap resolved. V00.2 must wait
+for governance sync and technical approval. R5 global CLI/environment isolation
+remains the accepted V02 deferred risk. The linked Supabase project remains
+`PRODUCTION_INTEGRATION_TARGET_ONLY`; no mutation or deployment was performed.
+
+Passing implementation validation does not promote V00.1. Request second
+independent re-review of the new immutable commit. Do not start V00.2.

@@ -56,26 +56,58 @@ Vitest includes negative fixtures proving the rules detect forbidden imports.
 These are foundation guardrails; they do not replace later dependency graph,
 database policy, or end-to-end authorization tests.
 
-### Resolved module enforcement
+### Ownership and complete governed coverage
 
-After the V00.1 review blocker fix, the scanner uses the TypeScript compiler API
-to parse module references and resolve their targets before applying repository
-ownership rules. It covers `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`,
-and `.cjs` source files. Static imports, side-effect imports, exports from another
-module, import-equals declarations, import types, literal dynamic imports, and
-literal `require` calls are inspected. A dynamic reference without a literal
-module name fails closed.
+`scripts/architecture-ownership.mjs` is the single ownership and allowed-edge
+registry. Paths under `apps/world-web`, `apps/world-api`, and `apps/world-worker`
+are WORLD_WEB, WORLD_API, and WORLD_WORKER respectively. Reserved contracts,
+core, registries, and UI paths are SHARED_PUBLIC; persistence, integration, and
+testkit paths are SERVER_ONLY. No product package is created by these reserved
+classifications. New/unclassified packages are UNKNOWN and require an explicit
+architecture decision before their source can pass the gate.
 
-Workspace package names are mapped to their repository package roots, including
-reserved future package names. Relative `.js` references that TypeScript maps to
-existing `.ts` sources are judged by the resolved source owner. TypeScript path
-aliases are resolved from the nearest repository `tsconfig.json`. A Vite alias
-must also be represented in TypeScript resolution; an unresolved code import
-fails the boundary check rather than being treated as external or safe.
+The scanner enumerates all `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`,
+and `.cjs` files throughout `apps/**` and `packages/**`, including declarations,
+outside-src modules and configuration. Every shared-public source is scanned,
+so a public barrel cannot hide an authority import. WORLD_WEB may depend only
+on WORLD_WEB runtime or SHARED_PUBLIC local modules; SHARED_PUBLIC may depend
+only on SHARED_PUBLIC. Core retains its React/React DOM/Supabase/UI isolation.
+API and worker source retain server execution context; this does not implement
+an economic engine or authorize database mutation.
 
-The current active ownership rules prohibit `world-web` from resolving into
-`world-api`, `world-worker`, persistence, or named server-authority
-implementations. Future core rules activate when `packages/core` exists and
-prohibit dependencies on the browser/UI layer, persistence, React, React DOM,
-and Supabase SDKs. V00.1 contains no economic model in `world-api`; later engine
-package rules remain part of the relevant future work package.
+Only the exact `apps/world-web/vite.config.ts` entry and the two environment
+policy files listed in BUILD_HELPERS have WEB_BUILD_CONFIG context. Those
+helpers are scanned too. Build context can import the approved build helpers
+and installed tooling/Node builtins, but cannot import worker, API, arbitrary
+server helpers, or browser runtime implementation. Browser/shared runtime cannot
+import build-context files. Running in Node is not an authority exemption.
+
+`node_modules`, `dist`, `coverage`, and `.vite` directory segments are excluded
+as installed dependencies or generated output. Governed local imports into
+these unverified directories are rejected. Source symlinks fail explicitly;
+resolved import paths are canonicalized before ownership is checked. Temporary
+test fixtures live outside the governed app/package roots and are removed in
+cleanup blocks. No general outside-src or filename-prefix exclusion exists.
+
+Module references are parsed with the TypeScript AST. Static imports, side-effect
+imports, re-exports, import-equals, import types, literal dynamic imports, and
+literal require calls remain checked. TypeScript resolution handles `.js` to
+`.ts` substitution and configured aliases; Vite query/hash postfixes do not
+exempt imports. Runtime JavaScript is scanned independently of any declaration
+file selected by TypeScript. Workspace-name mapping supplies ownership diagnostics
+for reserved packages, not permission to accept a missing target. Unresolved or
+unowned local/workspace references fail with UNRESOLVED_ARCHITECTURE_IMPORT.
+Nonliteral module references and Vite `import.meta.glob` are not approved in
+V00.1 and fail explicitly rather than being silently expanded by the bundler.
+
+Bare external npm dependencies are a separate trust category: they must actually
+resolve into installed node_modules and must not resolve to a workspace owner.
+The checker does not recursively audit third-party package implementations.
+Node builtins/server-only modules are forbidden to browser/shared runtime but
+permitted to build/server contexts. No current Vite aliases exist; any future
+alias must also be safely resolvable by the TypeScript configuration.
+
+`pnpm test:boundaries` runs the CLI regression suite then scans the real repository.
+A separate integration test executes that exact canonical command with a
+controlled outside-src re-export fixture. These checks remain foundation controls,
+not a replacement for future economic invariants, authorization, or RLS tests.

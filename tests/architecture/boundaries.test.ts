@@ -18,6 +18,7 @@ const invalidPackageFixture = path.join(
 
 interface FixtureOptions {
   readonly coreSource?: string;
+  readonly files?: Readonly<Record<string, string>>;
   readonly source: string;
   readonly sourceName?: string;
   readonly tsconfig?: object;
@@ -73,6 +74,12 @@ async function runBoundaryFixture(options: FixtureOptions) {
         ),
         writeFile(path.join(coreRoot, 'src/probe.ts'), options.coreSource),
       ]);
+    }
+
+    for (const [relativePath, source] of Object.entries(options.files ?? {})) {
+      const target = path.join(fixtureRoot, relativePath);
+      await mkdir(path.dirname(target), { recursive: true });
+      await writeFile(target, source);
     }
 
     const result = spawnSync(
@@ -200,5 +207,135 @@ describe('resolved repository authority boundaries', () => {
     expect(result.output).toContain(
       'core cannot depend on @supabase/supabase-js',
     );
+  });
+
+  it.each([
+    [
+      'import.mjs',
+      "import { workerAuthority } from '../world-worker/src/index.js';",
+    ],
+    [
+      'named.mjs',
+      "export { workerAuthority } from '../world-worker/src/index.js';",
+    ],
+    ['star.mjs', "export * from '../world-worker/src/index.js';"],
+    ['alternate.mts', "import '../world-worker/src/index.js';"],
+    [
+      'alternate.cts',
+      "import worker = require('../world-worker/src/index.js');",
+    ],
+    ['alternate.cjs', "require('../world-worker/src/index.js');"],
+    [
+      'compact.js',
+      "import{workerAuthority}from'../world-worker/src/index.js';",
+    ],
+    ['postfix.mjs', "export * from '../world-worker/src/index.js?raw';"],
+    ['vite.config.ts', "export * from '../world-worker/src/index.js';"],
+  ])('governs forbidden imports in outside-src %s', async (name, source) => {
+    const result = await runBoundaryFixture({
+      source: 'export {};',
+      files: { [`apps/world-web/${name}`]: source },
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('FORBIDDEN_ARCHITECTURE_DEPENDENCY');
+    expect(result.output).toContain(name);
+  });
+
+  it('closes the exact .mjs and declaration-file re-export bridge', async () => {
+    const result = await runBoundaryFixture({
+      source:
+        "import { workerAuthority } from '../bridge.mjs'; void workerAuthority;",
+      files: {
+        'apps/world-web/bridge.mjs':
+          "export { workerAuthority } from '../world-worker/src/index.js';",
+        'apps/world-web/bridge.d.mts':
+          'export declare const workerAuthority: boolean;',
+      },
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('bridge.mjs');
+    expect(result.output).toContain('world-web cannot import world-worker');
+  });
+
+  it('permits a controlled shared-public contract and a same-app outside-src module', async () => {
+    const result = await runBoundaryFixture({
+      source:
+        "export * from '../../../packages/contracts/index.js'; export * from '../public.js';",
+      files: {
+        'packages/contracts/index.ts': 'export const version = 1;',
+        'apps/world-web/public.ts': 'export const title = "public";',
+      },
+    });
+    expect(result.exitCode, result.output).toBe(0);
+  });
+
+  it('does not let shared-public re-exports launder worker ownership', async () => {
+    const result = await runBoundaryFixture({
+      source: "export * from '../../../packages/contracts/index.js';",
+      files: {
+        'packages/contracts/index.ts':
+          "export * from '../../apps/world-worker/src/index.js';",
+      },
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('contracts cannot import world-worker');
+  });
+
+  it.each([
+    ['unresolved', "import '../../world-worker/missing.js';", {}],
+    [
+      'unowned',
+      "import '../../../misc/bridge.js';",
+      { 'misc/bridge.ts': 'export {};' },
+    ],
+    [
+      'excluded',
+      "import '../dist/bridge.js';",
+      { 'apps/world-web/dist/bridge.js': 'export {};' },
+    ],
+  ])('fails closed for %s local ownership', async (_name, source, files) => {
+    const result = await runBoundaryFixture({ source, files });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('UNRESOLVED_ARCHITECTURE_IMPORT');
+  });
+
+  it('does not permit a browser import of its Node build config', async () => {
+    const result = await runBoundaryFixture({
+      source: "import '../vite.config.js';",
+      files: { 'apps/world-web/vite.config.ts': 'export {};' },
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('WEB_BUILD_CONFIG');
+  });
+
+  it('does not allow a permitted build helper to import worker code', async () => {
+    const result = await runBoundaryFixture({
+      source: 'export {};',
+      files: {
+        'scripts/vite-environment-policy.mjs':
+          "import '../apps/world-worker/src/index.js';",
+      },
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('FORBIDDEN_ARCHITECTURE_DEPENDENCY');
+  });
+
+  it('keeps the real Vite config, helpers, and installed npm imports valid', () => {
+    const result = spawnSync(process.execPath, [scannerPath], {
+      cwd: repositoryRoot,
+      encoding: 'utf8',
+      timeout: 15_000,
+    });
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout).toContain('"status": "PASS"');
+  });
+
+  it('fails closed on Vite glob imports rather than silently expanding worker code', async () => {
+    const result = await runBoundaryFixture({
+      source:
+        "const workers = import.meta.glob('../../world-worker/src/*.ts', { eager: true }); console.log(workers);",
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('UNRESOLVED_DYNAMIC_REFERENCE');
   });
 });

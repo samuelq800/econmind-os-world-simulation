@@ -16,8 +16,10 @@ export function assessEnvironment(environment) {
     violations.push(`Unsupported ECONMIND_ENV: ${name}`);
   }
 
-  for (const { name } of findForbiddenBrowserVariables(environment)) {
-    violations.push(`${name} must never be exposed to browser code`);
+  for (const { name, category } of findForbiddenBrowserVariables(environment)) {
+    violations.push(
+      `${name} must never be exposed to browser code; reason=${category}`,
+    );
   }
 
   const databaseUrl = environment.DATABASE_URL;

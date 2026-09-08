@@ -1,18 +1,22 @@
-import { readdir, readFile } from 'node:fs/promises';
+import { lstat, readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
   analyzeBoundarySource,
   createBoundaryContext,
-  SOURCE_EXTENSIONS,
 } from './boundary-rules.mjs';
+
+import {
+  GOVERNED_ROOTS,
+  EXCLUDED_DIRECTORIES,
+  SOURCE_EXTENSIONS,
+} from './architecture-ownership.mjs';
 
 const defaultRepositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
 );
-const guardedRoots = ['apps/world-web/src', 'packages/core/src'];
 
 function parseArguments(arguments_) {
   if (arguments_.length === 0) {
@@ -25,25 +29,28 @@ function parseArguments(arguments_) {
 }
 
 async function listSourceFiles(directory) {
-  let entries;
-  try {
-    entries = await readdir(directory, { withFileTypes: true });
-  } catch (error) {
-    if (error && typeof error === 'object' && error.code === 'ENOENT') {
-      return [];
-    }
+  const stat = await lstat(directory).catch((error) => {
+    if (error.code === 'ENOENT') return null;
     throw error;
+  });
+  if (!stat) return [];
+  if (stat.isSymbolicLink()) {
+    throw new Error(
+      `UNRESOLVED_ARCHITECTURE_IMPORT: governed source symlink ${directory}`,
+    );
   }
+  if (!stat.isDirectory()) {
+    return SOURCE_EXTENSIONS.has(path.extname(directory).toLowerCase())
+      ? [directory]
+      : [];
+  }
+  const entries = await readdir(directory, { withFileTypes: true });
 
   const nested = await Promise.all(
     entries.map(async (entry) => {
       const entryPath = path.join(directory, entry.name);
-      if (entry.isDirectory()) {
-        return listSourceFiles(entryPath);
-      }
-      return SOURCE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())
-        ? [entryPath]
-        : [];
+      if (EXCLUDED_DIRECTORIES.has(entry.name)) return [];
+      return listSourceFiles(entryPath);
     }),
   );
 
@@ -54,7 +61,7 @@ export async function scanRepositoryBoundaries(repositoryRoot) {
   const context = createBoundaryContext(repositoryRoot);
   const files = (
     await Promise.all(
-      guardedRoots.map((root) =>
+      GOVERNED_ROOTS.map((root) =>
         listSourceFiles(path.join(context.repositoryRoot, root)),
       ),
     )
@@ -90,7 +97,7 @@ async function main() {
       {
         status: 'PASS',
         scannedFiles: files.length,
-        guardedRoots,
+        guardedRoots: GOVERNED_ROOTS,
         sourceExtensions: [...SOURCE_EXTENSIONS],
       },
       null,

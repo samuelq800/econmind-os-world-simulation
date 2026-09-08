@@ -40,15 +40,43 @@ environment Vite loads from process variables and `.env`, `.env.local`,
 both the development server and production build. Direct workspace Vite commands
 therefore use the same fail-closed check as the root workflow.
 
-Forbidden browser names include Supabase service-role/server secrets, database
-administrative credentials, private keys, and explicitly server-only credential
-namespaces. Diagnostics report only the variable name and category. Values are
-never included. Public values such as `VITE_WORLD_API_BASE_URL` and Supabase
-publishable/anonymous browser keys remain permitted.
+The authoritative public-client contract is
+`scripts/vite-environment-policy.mjs`. Unknown `VITE_*` keys fail closed. Only
+these keys are approved at this foundation stage:
 
-`pnpm env:check` independently validates both the development and production
-Vite modes in addition to process-level local/CI database rules. Other Vite
-modes receive the same check when their dev/build configuration is loaded.
+| Key                             | Accepted value                                                        |
+| ------------------------------- | --------------------------------------------------------------------- |
+| `VITE_WORLD_API_URL`            | Public HTTP(S) API endpoint                                           |
+| `VITE_WORLD_API_BASE_URL`       | Existing documented API endpoint spelling, retained for compatibility |
+| `VITE_SUPABASE_ANON_KEY`        | Structurally valid HS256 JWT whose role is exactly `anon`             |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase public publishable-key format                                |
+| `VITE_USER_NODE_ENV`            | Vite's own marker: `development`, `production`, or `test`             |
+
+These keys are optional. The two existing public Supabase key categories remain
+approved configuration; no Supabase browser integration is added. JWT validation
+classifies the public role and structure, not authenticity or authorization.
+Vite derives its internal marker from dotenv NODE_ENV; accepting its narrowly
+validated values preserves native environment semantics. No speculative app-env
+or other future product keys are added.
+
+API URLs must have HTTP(S) protocol and no username/password, query, fragment,
+or control whitespace. All approved values also undergo credential-class checks:
+database connection strings, private-key material, secret-key prefixes, bearer
+credentials, and non-anonymous JWTs are rejected. Percent encodings are inspected
+through decoding, and malformed encodings fail closed. JWT structure is decoded
+independently of header whitespace or base64 prefixes. Database/server-semantic
+key tokens provide useful denial categories; they cannot grant permission.
+
+Errors contain only key names and reason categories, never values. The same
+contract protects direct Vite dev/build, root build, and root canonical checks.
+`pnpm env:check` validates both effective development and production environments
+as well as process-level local/CI database rules. Other Vite modes receive the
+same validation when their config is loaded. Loading, dotenv expansion, mode,
+root, envDir, and process precedence continue to use Vite's native behavior.
+
+Adding a public key requires an intentional contract update with semantic
+validation and real-entry regressions. A name beginning with VITE_ alone is
+never approval to expose its contents.
 
 ## Safe response to uncertainty
 

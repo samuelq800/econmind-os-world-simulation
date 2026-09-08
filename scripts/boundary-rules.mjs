@@ -1,51 +1,15 @@
 import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import path from 'node:path';
+import { isBuiltin } from 'node:module';
 
 import ts from 'typescript';
 
-export const SOURCE_EXTENSIONS = new Set([
-  '.ts',
-  '.tsx',
-  '.mts',
-  '.cts',
-  '.js',
-  '.jsx',
-  '.mjs',
-  '.cjs',
-]);
-
-const NON_CODE_EXTENSIONS = new Set([
-  '.css',
-  '.scss',
-  '.sass',
-  '.less',
-  '.svg',
-  '.png',
-  '.jpg',
-  '.jpeg',
-  '.gif',
-  '.webp',
-  '.json',
-]);
-
-const RESERVED_WORKSPACE_PACKAGES = new Map([
-  ['@econmind/contracts', 'packages/contracts'],
-  ['@econmind/core', 'packages/core'],
-  ['@econmind/registries', 'packages/registries'],
-  ['@econmind/persistence', 'packages/persistence'],
-  ['@econmind/integration', 'packages/integration'],
-  ['@econmind/ui', 'packages/ui'],
-  ['@econmind/testkit', 'packages/testkit'],
-]);
-
-const WEB_FORBIDDEN_OWNERS = new Set([
-  'world-api',
-  'world-worker',
-  'persistence',
-]);
-const CORE_FORBIDDEN_OWNERS = new Set(['world-web', 'ui', 'persistence']);
-const SERVER_IMPLEMENTATION_MARKERS =
-  /(?:^|\/)(?:server-only|server-secret|service-role|authoritative-settlement)(?:\/|\.|-|$)/iu;
+import {
+  architecturalEdgeViolation,
+  classifyArchitecturePath,
+  OWNERS,
+  PACKAGE_OWNERS,
+} from './architecture-ownership.mjs';
 
 function normalizePath(value) {
   return value.replaceAll(path.sep, '/');
@@ -61,12 +25,6 @@ function isWithin(parent, candidate) {
     relative === '' ||
     (!relative.startsWith('..') && !path.isAbsolute(relative))
   );
-}
-
-function sourceOwner(repositoryRoot, filePath) {
-  const relativePath = normalizePath(path.relative(repositoryRoot, filePath));
-  const match = /^(?:apps|packages)\/([^/]+)(?:\/|$)/u.exec(relativePath);
-  return match?.[1] ?? null;
 }
 
 function packageNameFromSpecifier(specifier) {
@@ -103,7 +61,8 @@ function discoverWorkspacePackages(repositoryRoot) {
     }
   }
 
-  for (const [packageName, relativeRoot] of RESERVED_WORKSPACE_PACKAGES) {
+  for (const relativeRoot of PACKAGE_OWNERS.keys()) {
+    const packageName = `@econmind/${path.basename(relativeRoot)}`;
     if (!packages.has(packageName)) {
       packages.set(packageName, path.join(repositoryRoot, relativeRoot));
     }
@@ -214,7 +173,14 @@ export function parseModuleReferences(source, filePath) {
         : node.argument;
       record(node, 'import-type', argument);
     } else if (ts.isCallExpression(node)) {
-      if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
+      if (
+        ts.isPropertyAccessExpression(node.expression) &&
+        node.expression.name.text === 'glob' &&
+        ts.isMetaProperty(node.expression.expression) &&
+        node.expression.expression.keywordToken === ts.SyntaxKind.ImportKeyword
+      ) {
+        record(node, 'vite-glob', null);
+      } else if (node.expression.kind === ts.SyntaxKind.ImportKeyword) {
         record(node, 'dynamic-import', node.arguments[0]);
       } else if (
         ts.isIdentifier(node.expression) &&
@@ -254,67 +220,47 @@ function workspaceTarget(specifier, workspacePackages) {
   return path.join(packageRoot, subpath);
 }
 
-function resolveTarget({
-  compilerOptions,
-  filePath,
-  specifier,
-  workspacePackages,
-}) {
-  const mappedWorkspaceTarget = workspaceTarget(specifier, workspacePackages);
-  if (mappedWorkspaceTarget) {
-    return safeRealpath(mappedWorkspaceTarget);
-  }
+function cleanSpecifier(specifier) {
+  // Vite postfixes do not change the architectural owner of local modules.
+  return specifier.replace(/[?#].+$/u, (postfix, offset) =>
+    offset === 0 ? postfix : '',
+  );
+}
 
+function resolveTarget({ compilerOptions, filePath, specifier }) {
   const resolution = ts.resolveModuleName(
     specifier,
     filePath,
     compilerOptions,
     ts.sys,
   ).resolvedModule;
-  return resolution ? safeRealpath(resolution.resolvedFileName) : null;
-}
-
-function forbiddenDependencyReason({
-  sourceLayer,
-  specifier,
-  targetLayer,
-  targetRelativePath,
-}) {
-  const packageName = packageNameFromSpecifier(specifier);
-
-  if (sourceLayer === 'world-web') {
-    if (targetLayer && WEB_FORBIDDEN_OWNERS.has(targetLayer)) {
-      return `world-web cannot import ${targetLayer} implementation`;
-    }
-    if (
-      packageName === 'server-only' ||
-      SERVER_IMPLEMENTATION_MARKERS.test(specifier) ||
-      (targetRelativePath &&
-        SERVER_IMPLEMENTATION_MARKERS.test(targetRelativePath))
-    ) {
-      return 'world-web cannot import server-only or authority-bearing implementation';
-    }
+  if (resolution) return safeRealpath(resolution.resolvedFileName);
+  // TypeScript does not resolve styles/images; existing local assets still have
+  // an owner. Never silently exempt an unresolved path based on its extension.
+  if (specifier.startsWith('.') || path.isAbsolute(specifier)) {
+    const assetPath = path.resolve(path.dirname(filePath), specifier);
+    if (existsSync(assetPath)) return safeRealpath(assetPath);
   }
-
-  if (sourceLayer === 'core') {
-    if (targetLayer && CORE_FORBIDDEN_OWNERS.has(targetLayer)) {
-      return `core cannot import ${targetLayer} implementation`;
-    }
-    if (
-      packageName === 'react' ||
-      packageName === 'react-dom' ||
-      packageName.startsWith('@supabase/')
-    ) {
-      return `core cannot depend on ${packageName}`;
-    }
-  }
-
   return null;
 }
 
-function isCodeLikeSpecifier(specifier) {
-  const extension = path.extname(specifier).toLowerCase();
-  return extension === '' || !NON_CODE_EXTENSIONS.has(extension);
+function externalViolation(source, specifier) {
+  const name = packageNameFromSpecifier(specifier);
+  if (
+    source.packageName === 'core' &&
+    (name === 'react' || name === 'react-dom' || name.startsWith('@supabase/'))
+  ) {
+    return `core cannot depend on ${name}`;
+  }
+  if (
+    (source.owner === OWNERS.WORLD_WEB ||
+      source.owner === OWNERS.SHARED_PUBLIC) &&
+    source.context !== 'WEB_BUILD_CONFIG' &&
+    (isBuiltin(specifier) || name === 'server-only')
+  ) {
+    return `${source.packageName} cannot depend on server-only module ${name}`;
+  }
+  return null;
 }
 
 export function analyzeBoundarySource({
@@ -325,7 +271,7 @@ export function analyzeBoundarySource({
   workspacePackages = discoverWorkspacePackages(repositoryRoot),
 }) {
   const relativeFile = normalizePath(path.relative(repositoryRoot, filePath));
-  const sourceLayer = sourceOwner(repositoryRoot, filePath);
+  const sourceArchitecture = classifyArchitecturePath(repositoryRoot, filePath);
   const { references, parseErrors } = parseModuleReferences(source, filePath);
   const violations = parseErrors.map((error) => ({
     file: relativeFile,
@@ -333,6 +279,13 @@ export function analyzeBoundarySource({
     rule: 'PARSE_ERROR',
     detail: error.message,
   }));
+  if (!sourceArchitecture.governed) {
+    violations.push({
+      file: relativeFile,
+      rule: 'UNKNOWN_ARCHITECTURE_SOURCE',
+      detail: 'executable source requires an explicit architectural owner',
+    });
+  }
   const compilerOptions = configuredCompilerOptions(
     repositoryRoot,
     filePath,
@@ -345,52 +298,62 @@ export function analyzeBoundarySource({
         file: relativeFile,
         line: reference.line,
         rule: 'UNRESOLVED_DYNAMIC_REFERENCE',
-        detail: `${reference.kind} must use a statically resolvable module string`,
-      });
-      continue;
-    }
-
-    const target = resolveTarget({
-      compilerOptions,
-      filePath,
-      specifier: reference.specifier,
-      workspacePackages,
-    });
-    const targetWithinRepository = target && isWithin(repositoryRoot, target);
-    const targetRelativePath = targetWithinRepository
-      ? normalizePath(path.relative(repositoryRoot, target))
-      : null;
-    const targetLayer = targetWithinRepository
-      ? sourceOwner(repositoryRoot, target)
-      : null;
-    const reason = forbiddenDependencyReason({
-      sourceLayer,
-      specifier: reference.specifier,
-      targetLayer,
-      targetRelativePath,
-    });
-
-    if (reason) {
-      violations.push({
-        file: relativeFile,
-        line: reference.line,
-        import: reference.specifier,
-        resolvedTarget: targetRelativePath,
-        rule: 'FORBIDDEN_ARCHITECTURE_DEPENDENCY',
-        detail: reason,
-      });
-      continue;
-    }
-
-    if (!target && isCodeLikeSpecifier(reference.specifier)) {
-      violations.push({
-        file: relativeFile,
-        line: reference.line,
-        import: reference.specifier,
-        resolvedTarget: null,
-        rule: 'UNRESOLVED_CODE_IMPORT',
         detail:
-          'code import could not be resolved; boundary check fails closed',
+          reference.kind === 'vite-glob'
+            ? 'Vite glob imports require an explicit architecture policy; not permitted in V00.1'
+            : `${reference.kind} must use a statically resolvable module string`,
+      });
+      continue;
+    }
+
+    const specifier = cleanSpecifier(reference.specifier);
+    const target = resolveTarget({ compilerOptions, filePath, specifier });
+    const hintedTarget = workspaceTarget(specifier, workspacePackages);
+    const targetArchitecture = classifyArchitecturePath(
+      repositoryRoot,
+      target ?? hintedTarget ?? repositoryRoot,
+    );
+    const externalReason = externalViolation(sourceArchitecture, specifier);
+    const localSpecifier =
+      specifier.startsWith('.') || path.isAbsolute(specifier);
+    const installedExternal =
+      !localSpecifier &&
+      !hintedTarget &&
+      target &&
+      normalizePath(target).includes('/node_modules/') &&
+      targetArchitecture.owner === OWNERS.UNKNOWN;
+    let rule;
+    let detail;
+    if (externalReason) {
+      rule = 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';
+      detail = externalReason;
+    } else if (
+      (installedExternal || isBuiltin(specifier)) &&
+      sourceArchitecture.governed
+    ) {
+      continue;
+    } else {
+      rule = architecturalEdgeViolation(sourceArchitecture, targetArchitecture);
+      // A reserved forbidden package retains a useful ownership diagnostic even
+      // before it exists. An unresolved allowed package cannot become safe.
+      if (rule !== 'FORBIDDEN_ARCHITECTURE_DEPENDENCY' && !target) {
+        rule = 'UNRESOLVED_ARCHITECTURE_IMPORT';
+      }
+      detail =
+        rule === 'FORBIDDEN_ARCHITECTURE_DEPENDENCY'
+          ? `${sourceArchitecture.packageName} cannot import ${targetArchitecture.packageName} implementation (${sourceArchitecture.owner}/${sourceArchitecture.context} -> ${targetArchitecture.owner}/${targetArchitecture.context})`
+          : 'local/workspace import has no verified source ownership; boundary check fails closed';
+    }
+    if (rule) {
+      violations.push({
+        file: relativeFile,
+        line: reference.line,
+        import: reference.specifier,
+        resolvedTarget: target
+          ? normalizePath(path.relative(repositoryRoot, target))
+          : null,
+        rule,
+        detail,
       });
     }
   }
