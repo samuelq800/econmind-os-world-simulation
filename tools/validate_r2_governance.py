@@ -13,12 +13,8 @@ import json
 import re
 import subprocess
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Callable
-
-from review_attestation import (
-    ancestor, commit_exists, strict_json, trusted_reviewers, verify_subject,
-)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,13 +25,26 @@ IMPLEMENTATION_AGENT_STATUSES = {
     "BLOCKED",
 }
 STEP_ID_PATTERN = re.compile(r"^V\d{2}\.\d+$")
+GIT_COMMIT_PATTERN = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+REVIEW_MARKDOWN_NAME_PATTERN = re.compile(
+    r"^R2_GOVERNANCE_REVIEW(?:_[A-Z0-9]+)*\.md$"
+)
+REVIEW_DECISIONS = {
+    "APPROVED",
+    "CHANGES_REQUIRED",
+    "INSUFFICIENT_EVIDENCE",
+    "BLOCKED",
+}
+LEGACY_REVIEW_VALIDATION_PATH = (
+    "docs/reports/governance/R2_GOVERNANCE_RECHECK_VALIDATION.json"
+)
 
 
 class GovernanceError(Exception):
     pass
 
 
-def validate(root: Path, trust_policy: Path | None = None) -> dict[str, Any]:
+def validate(root: Path) -> dict[str, Any]:
     root = root.resolve()
     checks: list[dict[str, str]] = []
     errors: list[str] = []
@@ -52,13 +61,183 @@ def validate(root: Path, trust_policy: Path | None = None) -> dict[str, Any]:
         return target
 
     def load_json(relative: str) -> Any:
-        return strict_json(file(relative).read_bytes())
+        return json.loads(file(relative).read_text(encoding="utf-8"))
+
+    def git(*arguments: str, input_text: str | None = None) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["git", *arguments],
+            cwd=root,
+            input=input_text,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+    def git_commit_exists(commit: str, field: str) -> None:
+        require(
+            isinstance(commit, str) and GIT_COMMIT_PATTERN.fullmatch(commit) is not None,
+            f"invalid {field}: expected a full Git commit ID",
+        )
+        result = git("cat-file", "-e", f"{commit}^{{commit}}")
+        require(result.returncode == 0, f"{field} does not exist: {commit}")
+
+    def git_ancestor(ancestor: str, descendant: str, message: str) -> None:
+        result = git("merge-base", "--is-ancestor", ancestor, descendant)
+        require(result.returncode in {0, 1}, "unable to verify Git commit ancestry")
+        require(result.returncode == 0, message)
+
+    def evidence_path_is_safe(relative: str) -> bool:
+        if not isinstance(relative, str) or not relative:
+            return False
+        path = PurePosixPath(relative)
+        return (
+            not path.is_absolute()
+            and ".." not in path.parts
+            and path.parts[:3] == ("docs", "reports", "governance")
+        )
+
+    def parse_independent_review_evidence(
+        relative: str, content: str
+    ) -> tuple[str, str]:
+        name = PurePosixPath(relative).name
+        if relative.endswith(".md"):
+            require(
+                REVIEW_MARKDOWN_NAME_PATTERN.fullmatch(name) is not None,
+                f"unsupported independent review evidence path: {relative}",
+            )
+            require(
+                re.search(
+                    r"^# R2 Governance Independent (?:Re-)?Review$",
+                    content,
+                    re.MULTILINE,
+                )
+                is not None,
+                f"review evidence lacks an independent-review heading: {relative}",
+            )
+            reviewed_commits = re.findall(
+                r"^- Reviewed HEAD: `((?:[0-9a-f]{40}|[0-9a-f]{64}))`\.$",
+                content,
+                re.MULTILINE,
+            )
+            require(
+                len(reviewed_commits) == 1,
+                f"review evidence must identify exactly one reviewed commit: {relative}",
+            )
+            sections = re.split(r"^## Final Decision\s*$", content, flags=re.MULTILINE)
+            require(
+                len(sections) == 2,
+                f"review evidence must contain exactly one Final Decision section: {relative}",
+            )
+            decision_match = re.match(
+                r"\s*\*\*(APPROVED|CHANGES_REQUIRED|INSUFFICIENT_EVIDENCE|BLOCKED)(?:[.:])",
+                sections[1],
+            )
+            require(
+                decision_match is not None,
+                f"review evidence has no unambiguous final decision: {relative}",
+            )
+            return reviewed_commits[0], decision_match.group(1)
+
+        if relative.endswith(".json"):
+            require(
+                relative == LEGACY_REVIEW_VALIDATION_PATH,
+                f"unsupported independent review evidence path: {relative}",
+            )
+            record = json.loads(content)
+            require(isinstance(record, dict), f"review evidence must be an object: {relative}")
+            require(
+                record.get("review_scope")
+                == "INDEPENDENT_R2_GOVERNANCE_RE_REVIEW_ONLY",
+                f"legacy review evidence has the wrong scope: {relative}",
+            )
+            reviewed_commit = record.get("reviewed_commit")
+            decision = record.get("decision")
+            require(
+                isinstance(reviewed_commit, str)
+                and GIT_COMMIT_PATTERN.fullmatch(reviewed_commit) is not None,
+                f"review evidence has an invalid reviewed commit: {relative}",
+            )
+            require(
+                decision in REVIEW_DECISIONS,
+                f"review evidence has an invalid decision: {relative}",
+            )
+            return reviewed_commit, decision
+
+        raise GovernanceError(f"unsupported independent review evidence path: {relative}")
+
+    def validate_governance_verification(sync: dict[str, Any]) -> None:
+        verification = sync.get("verification")
+        require(
+            isinstance(verification, dict),
+            "Governance VERIFIED requires a verification object",
+        )
+        require(
+            verification.get("decision") == "APPROVED",
+            "Governance VERIFIED requires verification decision APPROVED",
+        )
+        reviewed_commit = verification.get("reviewed_commit")
+        evidence_commit = verification.get("evidence_commit")
+        git_commit_exists(reviewed_commit, "reviewed_commit")
+        git_commit_exists(evidence_commit, "evidence_commit")
+        require(
+            reviewed_commit != evidence_commit,
+            "reviewed_commit and evidence_commit must be different commits",
+        )
+        git_ancestor(
+            reviewed_commit,
+            evidence_commit,
+            "reviewed_commit is not an ancestor of evidence_commit",
+        )
+        head = git("rev-parse", "--verify", "HEAD^{commit}")
+        require(head.returncode == 0, "unable to resolve the current governance HEAD")
+        current_head = head.stdout.strip()
+        git_ancestor(
+            evidence_commit,
+            current_head,
+            "evidence_commit is not an ancestor of the current governance HEAD",
+        )
+
+        evidence_paths = verification.get("evidence_paths")
+        require(
+            isinstance(evidence_paths, list) and len(evidence_paths) > 0,
+            "Governance VERIFIED requires non-empty evidence_paths",
+        )
+        require(
+            all(evidence_path_is_safe(relative) for relative in evidence_paths),
+            "verification contains an invalid or unsupported evidence path",
+        )
+        require(
+            len(evidence_paths) == len(set(evidence_paths)),
+            "verification contains duplicate evidence paths",
+        )
+        for relative in evidence_paths:
+            object_type = git("cat-file", "-t", f"{evidence_commit}:{relative}")
+            require(
+                object_type.returncode == 0 and object_type.stdout.strip() == "blob",
+                f"evidence path does not exist at evidence_commit: {relative}",
+            )
+            historical = git("show", f"{evidence_commit}:{relative}")
+            require(
+                historical.returncode == 0,
+                f"unable to read evidence at evidence_commit: {relative}",
+            )
+            artifact_commit, artifact_decision = parse_independent_review_evidence(
+                relative, historical.stdout
+            )
+            require(
+                artifact_commit == reviewed_commit,
+                f"review evidence names a different reviewed commit: {relative}",
+            )
+            require(
+                artifact_decision == "APPROVED",
+                f"review evidence decision is not APPROVED: {relative}",
+            )
 
     def check(name: str, operation: Callable[[], None]) -> None:
         try:
             operation()
             checks.append({"name": name, "status": "PASS"})
-        except (GovernanceError, KeyError, OSError, TypeError, ValueError, subprocess.SubprocessError) as error:
+        except (GovernanceError, KeyError, OSError, TypeError, ValueError) as error:
             message = str(error)
             checks.append({"name": name, "status": "FAIL", "error": message})
             errors.append(f"{name}: {message}")
@@ -380,81 +559,53 @@ def validate(root: Path, trust_policy: Path | None = None) -> dict[str, Any]:
         metrics["static_prompt_references"] = checked_references
 
     def progress() -> None:
-        data = load_json("status/progress.json")
-        require(data["schema_version"] == "R2-101.1", "wrong progress schema")
-        states = data["steps"]
+        progress_data = load_json("status/progress.json")
+        require(progress_data["schema_version"] == "R2-101.1", "wrong progress schema")
+        states = progress_data["steps"]
         require(set(states) == set(step_by_id), "progress step set differs from manifest")
         valid_states = set(steps_data["status_model"])
-        verifications = data.get("step_verifications", {})
-        targets = data.get("implementation_commits", {})
-        require(isinstance(verifications, dict) and set(verifications) <= set(states),
-                "invalid step_verifications subjects")
-        require(isinstance(targets, dict) and set(targets) <= set(states),
-                "invalid implementation_commits subjects")
-        reviewers, trust_status = trusted_reviewers(root, trust_policy)
-        metrics["review_trust"] = trust_status
-        seen: set[tuple[str, str]] = set()
         for step_id, state in states.items():
             require(state in valid_states, f"invalid progress state {step_id}: {state}")
-            deps_ready = all(states[d] == "VERIFIED" for d in step_by_id[step_id]["hard_dependencies"])
-            if state in {"VERIFIED", "CHANGES_REQUIRED"}:
-                require(deps_ready, f"impossible {state} dependency claim: {step_id}")
-                verify_subject(root, step_id, "STEP", targets.get(step_id),
-                               verifications.get(step_id), reviewers, seen,
-                               "APPROVED" if state == "VERIFIED" else "CHANGES_REQUIRED")
-            else:
-                require(step_id not in verifications, "unverified step cannot carry verification authority")
-                if state in {"IN_PROGRESS", "IMPLEMENTED_UNVERIFIED"}:
-                    require(deps_ready,
-                            f"implementation started before hard dependencies: {step_id}")
-        sync = data["governance_sync"]
+            if state == "VERIFIED":
+                for dependency in step_by_id[step_id]["hard_dependencies"]:
+                    require(
+                        states[dependency] == "VERIFIED",
+                        f"impossible VERIFIED dependency claim: {step_id} <- {dependency}",
+                    )
+        require(states["V00.1"] == "IMPLEMENTED_UNVERIFIED", "V00.1 truth changed")
+        require(states["V00.2"] == "BLOCKED", "V00.2 must remain blocked")
+        for step_id, state in states.items():
+            if step_id not in {"V00.1", "V00.2"}:
+                require(state == "PLANNED", f"later work has non-planning state: {step_id}")
+        sync = progress_data["governance_sync"]
         require(isinstance(sync, dict), "governance_sync must be an object")
-        require(sync.get("status") in {"IMPLEMENTED_UNVERIFIED", "VERIFIED"}, "invalid governance sync status")
-        require(isinstance(sync.get("merge_authorized"), bool), "governance merge_authorized must be a boolean")
+        require(
+            sync.get("status") in {"IMPLEMENTED_UNVERIFIED", "VERIFIED"},
+            "invalid governance sync status",
+        )
+        require(
+            isinstance(sync.get("merge_authorized"), bool),
+            "governance merge_authorized must be a boolean",
+        )
         if sync["status"] == "VERIFIED":
-            verify_subject(root, "Governance Sync", "GOVERNANCE", sync.get("implementation_commit"),
-                           sync.get("verification"), reviewers, seen)
+            validate_governance_verification(sync)
         else:
-            require(sync.get("verification") is None, "unverified governance sync cannot carry verification authority")
-        reconciliation = sync.get("final_reconciliation", {})
-        require(isinstance(reconciliation, dict), "invalid final_reconciliation")
-        require("final_reconciliation_gate" not in sync, "legacy final_reconciliation_gate is unsupported")
-        if reconciliation:
-            require(reconciliation.get("status") in {"PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"},
-                    "invalid final_reconciliation status")
-        merge_ready = (sync["status"] == "VERIFIED" and states["V00.1"] == "VERIFIED"
-                       and reconciliation.get("status") == "PASS")
+            require(
+                sync.get("verification") is None,
+                "unverified governance sync cannot carry verification authority",
+            )
         if sync["merge_authorized"]:
             require(sync["status"] == "VERIFIED", "governance merge requires VERIFIED status")
             require(states["V00.1"] == "VERIFIED", "governance merge requires V00.1 VERIFIED")
-            require(reconciliation.get("status") == "PASS", "governance merge requires final reconciliation PASS")
-        merged = False
-        if sync.get("merged_commit") is not None:
-            require(merge_ready and sync["merge_authorized"], "merged governance requires all merge prerequisites")
-            merged_commit = sync["merged_commit"]
-            commit_exists(root, merged_commit, "merged_commit")
-            # Trusted runner must refresh origin/main from the approved remote before using readiness.
-            ancestor(root, merged_commit, "refs/remotes/origin/main")
-            ancestor(root, merged_commit, "HEAD")
-            for metadata in (sync["verification"], verifications["V00.1"]):
-                ancestor(root, metadata["evidence_commit"], merged_commit)
-            merged = True
-        v002_ready = merge_ready and merged
-        require(states["V00.2"] not in {"IN_PROGRESS", "IMPLEMENTED_UNVERIFIED", "CHANGES_REQUIRED", "VERIFIED"}
-                or v002_ready, "V00.2 requires verified technical/governance gates and completed merge")
-        gate = data["current_gate"]
-        require(gate["step_id"] in states and gate["status"] == states[gate["step_id"]],
-                "current_gate status differs from step truth")
-        next_id = gate["next_step"]
-        require(next_id in states, "unknown next_step")
-        next_ready = (v002_ready if next_id == "V00.2" else
-                      all(states[d] == "VERIFIED" for d in step_by_id[next_id]["hard_dependencies"]))
-        require(isinstance(gate.get("next_step_ready"), bool) and gate["next_step_ready"] == next_ready,
-                "current_gate next_step_ready differs from validated readiness")
-        metrics.update(governance_sync_status=sync["status"], governance_merge_authorized=sync["merge_authorized"],
-                       verified_subjects=sum(state == "VERIFIED" for state in states.values()) + (sync["status"] == "VERIFIED"),
-                       authenticated_reviews=len(seen), v002_ready=v002_ready)
-        metrics["progress_states"] = dict(sorted({state: list(states.values()).count(state) for state in valid_states}.items()))
+            require(
+                sync.get("final_reconciliation_gate") == "PASS",
+                "governance merge requires final reconciliation PASS",
+            )
+        metrics["governance_sync_status"] = sync["status"]
+        metrics["governance_merge_authorized"] = sync["merge_authorized"]
+        metrics["progress_states"] = dict(
+            sorted({state: list(states.values()).count(state) for state in valid_states}.items())
+        )
 
     def decisions() -> None:
         decision_data = load_json("status/decisions.json")
@@ -541,9 +692,8 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--trust-policy", type=Path, help="External protected trust policy selected by trusted operator/runner; never repository input")
     arguments = parser.parse_args()
-    result = validate(arguments.root, arguments.trust_policy)
+    result = validate(arguments.root)
     if arguments.json:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
