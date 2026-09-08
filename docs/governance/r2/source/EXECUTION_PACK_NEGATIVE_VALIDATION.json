@@ -1,0 +1,25 @@
+{
+  "scope": "PLANNING_VALIDATOR_NEGATIVE_TESTS_ONLY",
+  "application_tests_run": false,
+  "status": "PASS",
+  "cases": [
+    {
+      "case": "source_tamper",
+      "expected_check": "source_hashes_and_index",
+      "detected": true,
+      "error": "Source hash mismatch: TRADE"
+    },
+    {
+      "case": "dependency_cycle",
+      "expected_check": "work_package_dependencies",
+      "detected": true,
+      "error": "Task dependency cycle: V00"
+    },
+    {
+      "case": "false_completion",
+      "expected_check": "coverage_status_honesty",
+      "detected": true,
+      "error": "VERIFIED without tests/evidence: E01"
+    }
+  ]
+}

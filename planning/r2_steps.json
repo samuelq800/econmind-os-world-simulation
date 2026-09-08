@@ -1,0 +1,1561 @@
+{
+  "schema_version": "R2-101.1",
+  "authority": "EconMind World V2 R2 detailed-step manifest",
+  "counts": {
+    "work_packages": 33,
+    "steps": 101,
+    "engines": 18
+  },
+  "status_model": [
+    "UNASSESSED",
+    "PLANNED",
+    "IN_PROGRESS",
+    "IMPLEMENTED_UNVERIFIED",
+    "CHANGES_REQUIRED",
+    "VERIFIED",
+    "BLOCKED",
+    "DEFERRED_WITH_APPROVAL"
+  ],
+  "rules": {
+    "dependency": "A NORMAL step may start only when all hard_dependencies are VERIFIED. PARALLEL_PREPARATION may start when its listed hard dependencies are VERIFIED but does not unlock the parent package integration step.",
+    "verification": "Implementation agents cannot mark VERIFIED. Independent review is required.",
+    "decision": "Human-required architecture/economic decisions cannot be self-approved by Codex.",
+    "scope": "Original specification scope cannot be silently reduced for schedule reasons."
+  },
+  "steps": [
+    {
+      "step_id": "V00.1",
+      "work_package": "V00",
+      "stage": "S0",
+      "work_package_title": "新仓库边界、资料导入与可运行脚手架",
+      "title": "仓库工具链核验与版本冻结",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [],
+      "purpose": "冻结 Node/pnpm/TypeScript/Vite/React/test/lint 版本、真实命令与环境安全边界。",
+      "acceptance": "干净安装、lint/typecheck/test/build 与生产写保护均有真实证据。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V00.2",
+      "work_package": "V00",
+      "stage": "S0",
+      "work_package_title": "新仓库边界、资料导入与可运行脚手架",
+      "title": "三应用运行入口与生命周期骨架",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V00.1"
+      ],
+      "purpose": "让 world-web、world-api、world-worker 成为可独立启动的真实进程，建立 health/readiness/graceful shutdown。",
+      "acceptance": "三进程可独立/联合启动；错误端口、无效环境和退出信号 fail closed。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V00.3",
+      "work_package": "V00",
+      "stage": "S0",
+      "work_package_title": "新仓库边界、资料导入与可运行脚手架",
+      "title": "启动层集成验证与 Bootstrap 报告",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V00.2"
+      ],
+      "purpose": "建立 Web→API 健康通信、Worker 内部健康检查、统一 dev 命令和 bootstrap evidence。",
+      "acceptance": "不接业务数据库写入；三层运行边界被自动测试；V00 独立审查可执行。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V01.1",
+      "work_package": "V01",
+      "stage": "S0",
+      "work_package_title": "需求追踪、规范协调与两仓库集成契约",
+      "title": "需求来源与覆盖登记",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V00.3"
+      ],
+      "purpose": "把 8 份规范来源、固定目录和高层功能映射为可追踪 requirement registry。",
+      "acceptance": "来源可回查；资料完整不被误报为功能实现。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V01.2",
+      "work_package": "V01",
+      "stage": "S0",
+      "work_package_title": "需求追踪、规范协调与两仓库集成契约",
+      "title": "ADR-01 至 ADR-20 协调与阻塞图",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V01.1"
+      ],
+      "purpose": "登记冲突、提案、批准主体、最晚关口和受影响工作包。",
+      "acceptance": "未批准 ADR 不进入正式算法；Codex 不可自批。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V01.3",
+      "work_package": "V01",
+      "stage": "S0",
+      "work_package_title": "需求追踪、规范协调与两仓库集成契约",
+      "title": "两仓库身份/路由/Legacy 集成契约",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V01.2"
+      ],
+      "purpose": "冻结共享身份字段白名单、旧路由行为、复用资产与 V1/V2 边界。",
+      "acceptance": "不复制旧经济真相；主站与 V2 的 owner/contract 明确。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V02.1",
+      "work_package": "V02",
+      "stage": "S0",
+      "work_package_title": "环境隔离与唯一数据库发布链",
+      "title": "Local/CI 数据库隔离",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V00.3",
+        "V01.3"
+      ],
+      "purpose": "建立本地 Supabase 与 CI 临时数据库策略、合成 fixture 和生产指纹拒绝。",
+      "acceptance": "正常开发命令无法写共享生产；CI 无生产 secret。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V02.2",
+      "work_package": "V02",
+      "stage": "S0",
+      "work_package_title": "环境隔离与唯一数据库发布链",
+      "title": "Staging 与唯一生产 Migration 发布链",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V02.1"
+      ],
+      "purpose": "建立独立 staging、V2 migration artifact 合同和主站唯一生产发布路径。",
+      "acceptance": "两个 repo 不各自 db push；migration hash/顺序/审批可追踪。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V02.3",
+      "work_package": "V02",
+      "stage": "S0",
+      "work_package_title": "环境隔离与唯一数据库发布链",
+      "title": "数据库升级/回退与环境演练",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V02.2"
+      ],
+      "purpose": "从 clean baseline 和既有 schema 两条路径演练升级、forward-fix/rollback 与环境指纹。",
+      "acceptance": "真实 rehearsal 有证据；shared/auth owner 未被 V2 擅改。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V03.1",
+      "work_package": "V03",
+      "stage": "S1",
+      "work_package_title": "统一基础类型与 Registry",
+      "title": "Money/Quantity/Rate/SimTime 基础类型",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V00.3",
+        "V01.3"
+      ],
+      "purpose": "建立 Decimal/fixed-point 金额、带单位数量、0..1 Rate、SimTime 与显式转换。",
+      "acceptance": "币种/单位/比例错配 fail closed；无不受控 money float。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V03.2",
+      "work_package": "V03",
+      "stage": "S1",
+      "work_package_title": "统一基础类型与 Registry",
+      "title": "固定 Registry 与参数来源",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V03.1"
+      ],
+      "purpose": "落地 12 商品、12 部门、22 技术、38 项目、Office、单位等 registry 与 provenance。",
+      "acceptance": "目录数量逐项匹配；archetype 只用于初始化。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V03.3",
+      "work_package": "V03",
+      "stage": "S1",
+      "work_package_title": "统一基础类型与 Registry",
+      "title": "错误码、版本与序列化协议",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V03.2"
+      ],
+      "purpose": "冻结 domain error、schema/model/registry version、稳定序列化和 hash 约定。",
+      "acceptance": "跨进程版本不一致可拒绝；错误不 silent success。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V04.1",
+      "work_package": "V04",
+      "stage": "S1",
+      "work_package_title": "可执行工程门禁与负例验证",
+      "title": "架构/权限/写入门禁",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V00.3",
+        "V01.3",
+        "V02.3",
+        "V03.3"
+      ],
+      "purpose": "扩展边界守卫，覆盖 client authority、跨 Engine direct write、禁用模式等。",
+      "acceptance": "故意违规 fixture 必须被真实 CLI/CI 拦截。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V04.2",
+      "work_package": "V04",
+      "stage": "S1",
+      "work_package_title": "可执行工程门禁与负例验证",
+      "title": "Invariant/Testkit 基础",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V04.1"
+      ],
+      "purpose": "建立守恒、账本、权限、时间、幂等等测试 harness 和 fixture builders。",
+      "acceptance": "已实现范围有真断言；未实现项明确 NOT_RUN。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V04.3",
+      "work_package": "V04",
+      "stage": "S1",
+      "work_package_title": "可执行工程门禁与负例验证",
+      "title": "CI Merge Gate 与证据模板",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V04.2"
+      ],
+      "purpose": "建立 P0/P1 merge gate、报告模板、需求覆盖和禁止弱化测试检查。",
+      "acceptance": "任何 blocker 测试失败不能 merge；无 echo-pass/skip 规避。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V05.1",
+      "work_package": "V05",
+      "stage": "S1",
+      "work_package_title": "身份桥接、Office 授权与版本审批内核",
+      "title": "身份桥接与 Office Assignment",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V01.3",
+        "V02.3",
+        "V03.3"
+      ],
+      "purpose": "实现 shared user/team 查询适配、world/country/office assignment 和服务器再验证。",
+      "acceptance": "错误 country/office/user 均拒绝；移除成员后新命令失权。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V05.2",
+      "work_package": "V05",
+      "stage": "S1",
+      "work_package_title": "身份桥接、Office 授权与版本审批内核",
+      "title": "Required Offices 与版本审批内核",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V05.1"
+      ],
+      "purpose": "实现 required_offices resolver、独立 Office 签字、reject/revise/invalidate/version semantics。",
+      "acceptance": "同人多职不 auto-approve；拒绝不会被后续批准复活。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V05.3",
+      "work_package": "V05",
+      "stage": "S1",
+      "work_package_title": "身份桥接、Office 授权与版本审批内核",
+      "title": "Classified Projection 与授权生命周期",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V05.2"
+      ],
+      "purpose": "建立数据分级、读取投影、撤销权限和已接受命令/已签合同的生命周期规则。",
+      "acceptance": "机密数据不靠前端隐藏；授权变化有真实负例测试。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V06.1",
+      "work_package": "V06",
+      "stage": "S1",
+      "work_package_title": "E01 时钟、规则时间与调度",
+      "title": "10x Simulation Clock 核心",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V01.3",
+        "V03.3"
+      ],
+      "purpose": "实现 1 real day=10 sim days、360-day year、统一 SimTime 转换与注入式测试钟。",
+      "acceptance": "8640 real sec=1 sim day；业务代码不自乘10。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V06.2",
+      "work_package": "V06",
+      "stage": "S1",
+      "work_package_title": "E01 时钟、规则时间与调度",
+      "title": "调度、Pause/Resume 与 Catch-up",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V06.1"
+      ],
+      "purpose": "实现 exact due、daily settlement、annual roll、暂停恢复与 catch-up 语义。",
+      "acceptance": "暂停不累计经济时间；重启不重复到期。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V06.3",
+      "work_package": "V06",
+      "stage": "S1",
+      "work_package_title": "E01 时钟、规则时间与调度",
+      "title": "确定时间顺序与边界测试",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V06.2"
+      ],
+      "purpose": "冻结同时间优先级、day boundary、命令 cutoff 和断电/恢复测试。",
+      "acceptance": "相同输入产生相同事件顺序；不依赖玩家在线。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V07.1",
+      "work_package": "V07",
+      "stage": "S1",
+      "work_package_title": "命令、事件、回执与确定性重放基础",
+      "title": "Command/Event Schema 与不可变 Ledger",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V02.3",
+        "V03.3",
+        "V05.3",
+        "V06.3"
+      ],
+      "purpose": "建立 command_id、event_id、payload hash、simulation/real timestamps、append-only event store。",
+      "acceptance": "同ID异payload拒绝；历史 event 不 UPDATE/DELETE。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V07.2",
+      "work_package": "V07",
+      "stage": "S1",
+      "work_package_title": "命令、事件、回执与确定性重放基础",
+      "title": "Receipts/Outbox/Idempotency",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V07.1"
+      ],
+      "purpose": "实现 accepted/executed 区分、consumer receipt、outbox 和重复消息去重。",
+      "acceptance": "重复命令/事件无重复经济效果；通知可重投。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V07.3",
+      "work_package": "V07",
+      "stage": "S1",
+      "work_package_title": "命令、事件、回执与确定性重放基础",
+      "title": "Replay、Seed 与版本绑定",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V07.2"
+      ],
+      "purpose": "建立 deterministic replay、seeded RNG、engine/model/registry version 绑定和 hash 比较。",
+      "acceptance": "相同 snapshot+events+seed 重放一致；版本不匹配明确阻断。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V08.1",
+      "work_package": "V08",
+      "stage": "S1",
+      "work_package_title": "库存与金融 Posting 基础",
+      "title": "库存可用/预留/在途 Ledger",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V01.3",
+        "V02.3",
+        "V03.3",
+        "V07.3"
+      ],
+      "purpose": "实现 commodity stock buckets、reservation、release、shipment/transit interface。",
+      "acceptance": "同库存不双占；物理 stock 默认不负。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V08.2",
+      "work_package": "V08",
+      "stage": "S1",
+      "work_package_title": "库存与金融 Posting 基础",
+      "title": "金融 Accounts/Postings 基础",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V08.1"
+      ],
+      "purpose": "实现账户、双边/多边 balanced posting、币种、债权债务接口。",
+      "acceptance": "每笔 posting 平衡；cash/asset/liability 不单边变化。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V08.3",
+      "work_package": "V08",
+      "stage": "S1",
+      "work_package_title": "库存与金融 Posting 基础",
+      "title": "期初 Seed/Reconciliation Contract",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V08.2"
+      ],
+      "purpose": "建立 opening balance/source provenance、库存和金融 reconcile 工具。",
+      "acceptance": "测试 seed 有对手项；snapshot 不成为唯一事实源。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V09.1",
+      "work_package": "V09",
+      "stage": "S1",
+      "work_package_title": "单世界 Writer、原子提交与故障恢复",
+      "title": "单 World Lease 与 Fencing",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V02.3",
+        "V07.3",
+        "V08.3"
+      ],
+      "purpose": "实现 logical single writer、lease renewal、fencing token 与 stale writer 拒绝。",
+      "acceptance": "过期 writer 无法 commit。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V09.2",
+      "work_package": "V09",
+      "stage": "S1",
+      "work_package_title": "单世界 Writer、原子提交与故障恢复",
+      "title": "候选状态与原子 Commit",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V09.1"
+      ],
+      "purpose": "建立 private candidate/checkpoint、version recheck、经济事实+event+receipt+outbox 原子提交。",
+      "acceptance": "commit 前崩溃无半笔，commit 后重试不双记。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V09.3",
+      "work_package": "V09",
+      "stage": "S1",
+      "work_package_title": "单世界 Writer、原子提交与故障恢复",
+      "title": "故障注入与恢复矩阵",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V09.2"
+      ],
+      "purpose": "测试 lease 过期、旧版本、DB/worker crash、通知中断、checkpoint 恢复。",
+      "acceptance": "故障后 authoritative state 可恢复且可重放。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V10.1",
+      "work_package": "V10",
+      "stage": "S1",
+      "work_package_title": "真实读投影与双国交易纵向切片",
+      "title": "双国 Fixture 与授权 Read Projection",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V05.3",
+        "V06.3",
+        "V07.3",
+        "V08.3",
+        "V09.3"
+      ],
+      "purpose": "建立最薄 2-country world、Office 页面、真实 summary/receipt read model。",
+      "acceptance": "页面不显示 hash/demo actual；权限投影一致。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V10.2",
+      "work_package": "V10",
+      "stage": "S1",
+      "work_package_title": "真实读投影与双国交易纵向切片",
+      "title": "交易 Command/Approval/Reservation",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V10.1"
+      ],
+      "purpose": "实现一组批准的结构化商品交易，从命令到审批再到库存预留。",
+      "acceptance": "没货/错权限/陈旧版本/重复命令 fail closed。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V10.3",
+      "work_package": "V10",
+      "stage": "S1",
+      "work_package_title": "真实读投影与双国交易纵向切片",
+      "title": "Shipment/Delivery/Payment 原子结算",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V10.2"
+      ],
+      "purpose": "实现发货、在途、到货、买卖双方支付与必要分录。",
+      "acceptance": "货物与资金双边对称；交付前不可作为 buyer 可用库存。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V10.4",
+      "work_package": "V10",
+      "stage": "S1",
+      "work_package_title": "真实读投影与双国交易纵向切片",
+      "title": "浏览器 E2E、并发、重试与崩溃验收",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V10.3"
+      ],
+      "purpose": "跑两国两Office真实 E2E、并发双卖、重复提交、断线刷新和 crash/recovery。",
+      "acceptance": "V10 只在成功/失败路径均通过后 VERIFIED；不得声称完整 E16。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V11.1",
+      "work_package": "V11",
+      "stage": "S2",
+      "work_package_title": "E02 人口与 E03 劳动力工资",
+      "title": "E02 Population Stocks/Flows",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V03.3",
+        "V06.3",
+        "V08.3",
+        "V09.3"
+      ],
+      "purpose": "实现 cohort/家庭、出生死亡、双边 migration 与人口恒等。",
+      "acceptance": "Population_t 恒等闭合；迁移双边一致。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V11.2",
+      "work_package": "V11",
+      "stage": "S2",
+      "work_package_title": "E02 人口与 E03 劳动力工资",
+      "title": "E03 Labour/Skill/Jobs/Wages",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V11.1"
+      ],
+      "purpose": "实现参与、技能、vacancy、job matching、工资与公共部门占用。",
+      "acceptance": "劳动力来自人口；同一人不能重复全额占用。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V11.3",
+      "work_package": "V11",
+      "stage": "S2",
+      "work_package_title": "E02 人口与 E03 劳动力工资",
+      "title": "人口劳动跨引擎 Invariant",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V11.2"
+      ],
+      "purpose": "核对 skill handoff、就业分母、迁移与期初/滞后供给。",
+      "acceptance": "无 instant labour/skill creation；读取时点符合 ADR。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V12.1",
+      "work_package": "V12",
+      "stage": "S2",
+      "work_package_title": "E08 完整资源及库存",
+      "title": "地质资源五层与 Exploration",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V08.3",
+        "V09.3",
+        "V11.3"
+      ],
+      "purpose": "实现 geological→undiscovered/discovered→recoverable→developed→extracted 层级。",
+      "acceptance": "探索只转移 pool，不增加 geological total。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V12.2",
+      "work_package": "V12",
+      "stage": "S2",
+      "work_package_title": "E08 完整资源及库存",
+      "title": "开发/开采/储备/损耗",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V12.1"
+      ],
+      "purpose": "实现 development、extraction、strategic reserve、losses 与库存接口。",
+      "acceptance": "E08/E10 不双采；reserve 不能被自由消费。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V12.3",
+      "work_package": "V12",
+      "stage": "S2",
+      "work_package_title": "E08 完整资源及库存",
+      "title": "资源 Reconciliation 与 Stress",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V12.2"
+      ],
+      "purpose": "建立 per-resource conservation、并发 reservation、极端耗尽测试。",
+      "acceptance": "Initial endowment 永不增加；每单位流可追溯。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V13.1",
+      "work_package": "V13",
+      "stage": "S2",
+      "work_package_title": "E09 能源与 E10 生产",
+      "title": "E09 Energy Generation/Allocation",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V03.3",
+        "V11.3",
+        "V12.3"
+      ],
+      "purpose": "实现 MW/MWh、燃料、grid/storage、allocation、shortage。",
+      "acceptance": "缺能真实限制下游；MW/MWh 不混用。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V13.2",
+      "work_package": "V13",
+      "stage": "S2",
+      "work_package_title": "E09 能源与 E10 生产",
+      "title": "E10 12-Sector Production",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V13.1"
+      ],
+      "purpose": "实现 installed capacity、inputs、labour、energy、logistics bottleneck 与实际扣料。",
+      "acceptance": "检查投入后必须消费；产出只记一次。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V13.3",
+      "work_package": "V13",
+      "stage": "S2",
+      "work_package_title": "E09 能源与 E10 生产",
+      "title": "实体经济 Bottleneck/Reconciliation",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V13.2"
+      ],
+      "purpose": "联合测试资源→能源→生产、物流和 value-added 分类。",
+      "acceptance": "不 silent 造粮/物料；参数显式且可测试。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V14.1",
+      "work_package": "V14",
+      "stage": "S2",
+      "work_package_title": "E11 技术及 E12 项目全生命周期",
+      "title": "E11 Technology Rights/R&D",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V05.3",
+        "V06.3",
+        "V08.3",
+        "V11.3",
+        "V12.3",
+        "V13.3"
+      ],
+      "purpose": "实现 MASTERED/LICENSED/TRANSFER/JOINT/RESTRICTED、R&D 进度与约束。",
+      "acceptance": "Licence≠Mastery；R&D 不直接加产能。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V14.2",
+      "work_package": "V14",
+      "stage": "S2",
+      "work_package_title": "E11 技术及 E12 项目全生命周期",
+      "title": "E12 Project Lifecycle",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V14.1"
+      ],
+      "purpose": "实现融资、审批、材料、劳动、技术、施工、commissioning 的38项目流程。",
+      "acceptance": "批准/付款不等 capacity；施工消耗真实材料劳动。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V14.3",
+      "work_package": "V14",
+      "stage": "S2",
+      "work_package_title": "E11 技术及 E12 项目全生命周期",
+      "title": "Facility Handoff 与项目 Invariant",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V14.2"
+      ],
+      "purpose": "定义项目完工向设施/产能 owner 的唯一交接和建设账户。",
+      "acceptance": "capacity 单一 owner；施工/GDP 不重复。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V15.1",
+      "work_package": "V15",
+      "stage": "S2",
+      "work_package_title": "E04 教育及 E05 医疗",
+      "title": "E04 Education",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V06.3",
+        "V08.3",
+        "V11.3",
+        "V14.3"
+      ],
+      "purpose": "实现 teachers/seats/enrollment/duration/graduates/training 与 skill handoff。",
+      "acceptance": "无教师/座位不能凭预算生毕业生。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V15.2",
+      "work_package": "V15",
+      "stage": "S2",
+      "work_package_title": "E04 教育及 E05 医疗",
+      "title": "E05 Healthcare",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V15.1"
+      ],
+      "purpose": "实现 staff/beds/supplies/delivered care/backlog 与采购/设施接口。",
+      "acceptance": "无医药/人员形成 unmet demand，而非 health buff。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V15.3",
+      "work_package": "V15",
+      "stage": "S2",
+      "work_package_title": "E04 教育及 E05 医疗",
+      "title": "公共服务 Staffing/Material Invariant",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V15.2"
+      ],
+      "purpose": "联合核对人员占用、预算支付、设施与服务产出。",
+      "acceptance": "同一人员不双占；服务与真实 capacity/inputs 绑定。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V16.1",
+      "work_package": "V16",
+      "stage": "S2",
+      "work_package_title": "E06 住房及 E07 治安",
+      "title": "E06 Housing",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V06.3",
+        "V08.3",
+        "V11.3",
+        "V14.3"
+      ],
+      "purpose": "实现 units/occupancy/gap/rent、补贴与统一 Project 请求。",
+      "acceptance": "补贴不直接增加住房；新增 unit 来自 commission。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V16.2",
+      "work_package": "V16",
+      "stage": "S2",
+      "work_package_title": "E06 住房及 E07 治安",
+      "title": "E07 Public Safety",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V16.1"
+      ],
+      "purpose": "实现 personnel/deployment/incidents/backlog 与紧急措施。",
+      "acceptance": "支出不直接 stability buff；人员和事件有真实状态。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V16.3",
+      "work_package": "V16",
+      "stage": "S2",
+      "work_package_title": "E06 住房及 E07 治安",
+      "title": "住房治安权限与应急 Invariant",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V16.2"
+      ],
+      "purpose": "测试迁移/人口影响、过期授权、项目/人员交接。",
+      "acceptance": "失效 emergency authority 不能执行；住房/治安无 hidden buff。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V17.1",
+      "work_package": "V17",
+      "stage": "S2",
+      "work_package_title": "E13 家庭、需求与国内供给闭合",
+      "title": "Household Income/Cash",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V11.3",
+        "V13.3",
+        "V15.3",
+        "V16.3"
+      ],
+      "purpose": "实现 wages、tax、transfer、debt service、已到账收入与账户读取。",
+      "acceptance": "未到账福利不能消费；bank deposit 不复制成第二真相。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V17.2",
+      "work_package": "V17",
+      "stage": "S2",
+      "work_package_title": "E13 家庭、需求与国内供给闭合",
+      "title": "Consumption/Domestic Market",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V17.1"
+      ],
+      "purpose": "实现需求、成交、库存扣减、价格与短缺。",
+      "acceptance": "消费对应真实商品/服务与支付；短缺不 clamp 后假装成交。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V17.3",
+      "work_package": "V17",
+      "stage": "S2",
+      "work_package_title": "E13 家庭、需求与国内供给闭合",
+      "title": "国内供给闭合与生活成本视图",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V17.2"
+      ],
+      "purpose": "闭合 grain/service/construction/medical supply 方案并生成 poverty/cost views。",
+      "acceptance": "供给来源可追溯；派生视图只读。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V18.1",
+      "work_package": "V18",
+      "stage": "S3",
+      "work_package_title": "E14 完整财政与 Treasury",
+      "title": "Tax/Budget/Treasury",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V05.3",
+        "V08.3",
+        "V14.3",
+        "V17.3"
+      ],
+      "purpose": "实现税收、credits、预算、commitment、TGA cash 与 payment priority。",
+      "acceptance": "没钱形成 arrear/delay/default，不假装 paid。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V18.2",
+      "work_package": "V18",
+      "stage": "S3",
+      "work_package_title": "E14 完整财政与 Treasury",
+      "title": "Debt/Guarantee/SOE",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V18.1"
+      ],
+      "purpose": "实现债券认购、coupon/principal、担保、或有负债、SOE equity/dividend/asset sale。",
+      "acceptance": "发行不等现金到账；担保 call 与付款时点分开。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V18.3",
+      "work_package": "V18",
+      "stage": "S3",
+      "work_package_title": "E14 完整财政与 Treasury",
+      "title": "Finance Office 与财政 Reconciliation",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V18.2"
+      ],
+      "purpose": "接入 Finance commands、forecast inputs、Treasury ledger 和权限/审批。",
+      "acceptance": "transfer 不计 G；Finance 不越权选工程设计。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V19.1",
+      "work_package": "V19",
+      "stage": "S3",
+      "work_package_title": "E15 完整银行央行",
+      "title": "Commercial Bank Ledger",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V05.3",
+        "V08.3",
+        "V13.3",
+        "V17.3"
+      ],
+      "purpose": "实现 loan origination/repayment、deposit、NPL 与资产负债表。",
+      "acceptance": "贷款同时增 loan asset+deposit liability；还款对应销毁/转移。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V19.2",
+      "work_package": "V19",
+      "stage": "S3",
+      "work_package_title": "E15 完整银行央行",
+      "title": "Central Bank Tools/Monetary",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V19.1"
+      ],
+      "purpose": "实现 policy rate、OMO、reserve/capital/CCyB、refinancing/ELA/collateral。",
+      "acceptance": "CB posting 平衡；M1/M2 只从账本派生。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V19.3",
+      "work_package": "V19",
+      "stage": "S3",
+      "work_package_title": "E15 完整银行央行",
+      "title": "Liquidity/Solvency 与工具失败测试",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V19.2"
+      ],
+      "purpose": "区分 liquidity vs solvency，测试 ELA、NPL、collateral、期限利息。",
+      "acceptance": "流动性援助不抹负权益；每个工具有失败路径。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V20.1",
+      "work_package": "V20",
+      "stage": "S3",
+      "work_package_title": "E17 外汇与国际金融",
+      "title": "LC/GCU FX Core",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V08.3",
+        "V18.3",
+        "V19.3"
+      ],
+      "purpose": "实现每国 LC/GCU authoritative rate、转换、valuation time 和统一 rounding。",
+      "acceptance": "不建 70x69 权威 pair matrix。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V20.2",
+      "work_package": "V20",
+      "stage": "S3",
+      "work_package_title": "E17 外汇与国际金融",
+      "title": "External Finance/Capital/Intervention",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V20.1"
+      ],
+      "purpose": "实现私营换汇、资本流、外债、income repatriation、official intervention/sterilization。",
+      "acceptance": "私人进口不直接扣官方外储；外债双边一致。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V20.3",
+      "work_package": "V20",
+      "stage": "S3",
+      "work_package_title": "E17 外汇与国际金融",
+      "title": "历史成交与 FX Reconciliation",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V20.2"
+      ],
+      "purpose": "锁定历史成交汇率，区分 cash settlement 与 revaluation。",
+      "acceptance": "不使用 current FX 重写历史现金。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V21.1",
+      "work_package": "V21",
+      "stage": "S3",
+      "work_package_title": "E16 完整现货、海关与物流",
+      "title": "Global Order Book",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V10.4",
+        "V12.3",
+        "V13.3",
+        "V18.3",
+        "V20.3"
+      ],
+      "purpose": "实现12商品限价、价格时间优先、partial fill/cancel 和确定性撮合。",
+      "acceptance": "相同订单序列可重放；库存预留不重复。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V21.2",
+      "work_package": "V21",
+      "stage": "S3",
+      "work_package_title": "E16 完整现货、海关与物流",
+      "title": "Tariff/Customs/Shipment",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V21.1"
+      ],
+      "purpose": "实现单一 tariff resolver、quota/ban/sanction、海关、shipment/transit/delivery/loss。",
+      "acceptance": "X/M 只在批准确认时点；关税只入账一次。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V21.3",
+      "work_package": "V21",
+      "stage": "S3",
+      "work_package_title": "E16 完整现货、海关与物流",
+      "title": "Logistics Bottleneck 与贸易 Replay",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V21.2"
+      ],
+      "purpose": "接 port/rail/storage throughput、部分交付、到期/失败及 replay。",
+      "acceptance": "合同不能绕过基础设施容量；在途不提前可用。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V22.1",
+      "work_package": "V22",
+      "stage": "S3",
+      "work_package_title": "E16 全部国际合同与专项执行器",
+      "title": "Contract Kernel 与23 Subtype Coverage",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V14.3",
+        "V18.3",
+        "V19.3",
+        "V20.3",
+        "V21.3"
+      ],
+      "purpose": "实现谈判/版本/审批/active/suspend/default/dispute 统一内核和23 subtype matrix。",
+      "acceptance": "counteroffer 新版本使旧审批失效；free text 不直接改经济。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V22.2",
+      "work_package": "V22",
+      "stage": "S3",
+      "work_package_title": "E16 全部国际合同与专项执行器",
+      "title": "国际执行器 A：商品/资本/融资/资源",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V22.1"
+      ],
+      "purpose": "实现 commodity agreements、FDI、sovereign loan、infrastructure finance、resource development 等真实 flows。",
+      "acceptance": "每类都有 cash/goods/asset/liability/ownership 结果和失败边界。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V22.3",
+      "work_package": "V22",
+      "stage": "S3",
+      "work_package_title": "E16 全部国际合同与专项执行器",
+      "title": "国际执行器 B：技术/条约/援助/招标/争端",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V22.2"
+      ],
+      "purpose": "实现 technology licence/joint project/FTA-swap/sanction/aid/tender/dispute 等并跑全覆盖测试。",
+      "acceptance": "23类型逐条有证据；共同 kernel 不冒充 subtype 已实现。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V23.1",
+      "work_package": "V23",
+      "stage": "S3",
+      "work_package_title": "E18 国民账户、风险与评分",
+      "title": "Production GDP Authority",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V13.3",
+        "V14.3",
+        "V15.3",
+        "V16.3",
+        "V17.3",
+        "V18.3",
+        "V19.3",
+        "V20.3",
+        "V21.3",
+        "V22.3"
+      ],
+      "purpose": "实现 sector value added + product taxes/subsidies 的唯一权威 GDP 口径。",
+      "acceptance": "其他页面/Engine 不维护第二 GDP。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V23.2",
+      "work_package": "V23",
+      "stage": "S3",
+      "work_package_title": "E18 国民账户、风险与评分",
+      "title": "Expenditure/BOP/CPI Reconciliation",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V23.1"
+      ],
+      "purpose": "实现 C+I+G+X-M 核对、current account、固定 basket CPI 与可加总贡献。",
+      "acceptance": "两 GDP 不一致报错；transfer/intermediate/construction 不双算。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V23.3",
+      "work_package": "V23",
+      "stage": "S3",
+      "work_package_title": "E18 国民账户、风险与评分",
+      "title": "Risk/Score 与总账户验收",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V23.2"
+      ],
+      "purpose": "实现 risk/scoring read-only、账户错误隔离、机制解释与正式 score version。",
+      "acceptance": "score 不回写经济；CPI贡献和 headline reconcile。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V24.1",
+      "work_package": "V24",
+      "stage": "S3",
+      "work_package_title": "Captain 治理及因果危机 Admin",
+      "title": "Captain Strategy/Governance",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V05.3",
+        "V06.3",
+        "V14.3",
+        "V18.3",
+        "V19.3",
+        "V22.3",
+        "V23.3"
+      ],
+      "purpose": "实现 strategy/priority/agenda/proposal、political capital、commitment、cabinet coordination。",
+      "acceptance": "Captain 不直接写财政/货币/生产权威状态。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V24.2",
+      "work_package": "V24",
+      "stage": "S3",
+      "work_package_title": "Captain 治理及因果危机 Admin",
+      "title": "Crisis/Admin Cause-Layer Composer",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V24.1"
+      ],
+      "purpose": "实现 shock cause layer、crisis start/end、合法 pause/resume 与审批。",
+      "acceptance": "Admin 不 set GDP/inflation/score；危机从原因传导。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V24.3",
+      "work_package": "V24",
+      "stage": "S3",
+      "work_package_title": "Captain 治理及因果危机 Admin",
+      "title": "Brief/Conflict/Expiry Tests",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V24.2"
+      ],
+      "purpose": "实现 classified briefs、政策冲突检测、责任日志和临时权力到期。",
+      "acceptance": "机密权限正确；临时权力按规则失效。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V25.1",
+      "work_package": "V25",
+      "stage": "S4",
+      "work_package_title": "六 Office 完整 UI 与地图行动覆盖",
+      "title": "地图技术试验与授权可视化壳",
+      "execution_mode": "PARALLEL_PREPARATION",
+      "hard_dependencies": [
+        "V00.3",
+        "V01.3",
+        "V03.3"
+      ],
+      "purpose": "验证 Vite+MapLibre+deck.gl+PMTiles/MVT/动态GeoJSON 的 build/runtime/降级；仅消费授权投影。",
+      "acceptance": "地图失败不影响核心功能；地图不成为 Source of Truth；可在核心 UI 前平行准备。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V25.2",
+      "work_package": "V25",
+      "stage": "S4",
+      "work_package_title": "六 Office 完整 UI 与地图行动覆盖",
+      "title": "六 Office 完整动作与真实报表接线",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V05.3",
+        "V10.4",
+        "V14.3",
+        "V15.3",
+        "V16.3",
+        "V17.3",
+        "V18.3",
+        "V19.3",
+        "V20.3",
+        "V21.3",
+        "V22.3",
+        "V23.3",
+        "V24.3",
+        "V25.1"
+      ],
+      "purpose": "按六份规范将所有正式动作接 command→approval→ledger/event→read model，补列表/表单/图表。",
+      "acceptance": "无假按钮/假 actual/假榜单；每动作有成功失败回执。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V25.3",
+      "work_package": "V25",
+      "stage": "S4",
+      "work_package_title": "六 Office 完整 UI 与地图行动覆盖",
+      "title": "产品 E2E、可访问性与小屏验收",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V25.2"
+      ],
+      "purpose": "跑跨Office E2E、权限、loading/empty/error、键盘/小屏和 map/table fallback。",
+      "acceptance": "未实现动作明确不可用并说明原因；forecast 与 actual 分离。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V26.1",
+      "work_package": "V26",
+      "stage": "S4",
+      "work_package_title": "预测、可解释性、Realtime 与断线恢复",
+      "title": "Forecast Worker/Comlink 非权威协议",
+      "execution_mode": "PARALLEL_PREPARATION",
+      "hard_dependencies": [
+        "V03.3",
+        "V07.3",
+        "V10.4"
+      ],
+      "purpose": "建立浏览器 Web Worker/Comlink、可取消任务、snapshot contract 和 stale result discard；不写 actual。",
+      "acceptance": "缺输入时明确假设/不可用；不能读取无权秘密。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V26.2",
+      "work_package": "V26",
+      "stage": "S4",
+      "work_package_title": "预测、可解释性、Realtime 与断线恢复",
+      "title": "Realtime/Cache/Reconnect",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V07.3",
+        "V10.4",
+        "V17.3",
+        "V20.3",
+        "V23.3",
+        "V25.3",
+        "V26.1"
+      ],
+      "purpose": "实现 private channel/outbox 消费、versioned IndexedDB/cache、断线重连/乱序/重复处理。",
+      "acceptance": "状态不倒退；scope/model/version 进入 cache key；权限撤销清缓存。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V26.3",
+      "work_package": "V26",
+      "stage": "S4",
+      "work_package_title": "预测、可解释性、Realtime 与断线恢复",
+      "title": "多政策 Forecast 与 Explanation",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V26.2"
+      ],
+      "purpose": "接完整可用模型的组合预测、账户贡献与机制链、限流/请求合并。",
+      "acceptance": "预测不消耗正式 RNG 序列、不回写 actual；贡献与机制叙述不混淆。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V27.1",
+      "work_package": "V27",
+      "stage": "S4",
+      "work_package_title": "70 国初态、校准与无人国家控制",
+      "title": "70国 Seed Schema/Provenance",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V11.3",
+        "V12.3",
+        "V13.3",
+        "V14.3",
+        "V15.3",
+        "V16.3",
+        "V17.3",
+        "V18.3",
+        "V19.3",
+        "V20.3",
+        "V22.3",
+        "V23.3"
+      ],
+      "purpose": "定义70国期初人口、资源、设施、技术、账户、贸易依赖的来源/假设 schema。",
+      "acceptance": "地区/虚构参数标设计假设；旧0-100指数不直接变真实单位。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V27.2",
+      "work_package": "V27",
+      "stage": "S4",
+      "work_package_title": "70 国初态、校准与无人国家控制",
+      "title": "70国生成/校准/闭合",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V27.1"
+      ],
+      "purpose": "生成并核对70国 opening balance、地质、facility/staffing、供应链差异。",
+      "acceptance": "全部期初账与硬约束闭合；archetype 不持续 buff。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V27.3",
+      "work_package": "V27",
+      "stage": "S4",
+      "work_package_title": "70 国初态、校准与无人国家控制",
+      "title": "无人国家 NPC Controller",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V27.2"
+      ],
+      "purpose": "实现默认国家控制器通过同一 command/approval/funding/inventory 规则行动。",
+      "acceptance": "NPC 不无限资源/自动接单；可重放并受预算库存约束。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V28.1",
+      "work_package": "V28",
+      "stage": "S4",
+      "work_package_title": "两种 Orchestrator 与主站迁移桥",
+      "title": "World/Season Orchestrator 配置",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V05.3",
+        "V10.4",
+        "V23.3",
+        "V25.3",
+        "V26.3",
+        "V27.3"
+      ],
+      "purpose": "实现 shared core 上的普通 World 与 Season 配置、时间/参与/截止差异。",
+      "acceptance": "相同物理输入与事件产生相同 core 结果。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V28.2",
+      "work_package": "V28",
+      "stage": "S4",
+      "work_package_title": "两种 Orchestrator 与主站迁移桥",
+      "title": "主站身份/路由/登录桥",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V28.1"
+      ],
+      "purpose": "接主站入口、shared identity/team、跨origin/session策略和版本契约。",
+      "acceptance": "长期token不进URL；真实登录/刷新/退出/撤销测试。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V28.3",
+      "work_package": "V28",
+      "stage": "S4",
+      "work_package_title": "两种 Orchestrator 与主站迁移桥",
+      "title": "Legacy 保留与迁移回归",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V28.2"
+      ],
+      "purpose": "实现旧世界历史读取/继续运行策略、clean seed、route/model compatibility。",
+      "acceptance": "V2不写旧世界；旧链接不静默失效；不从抽象指数猜真实量。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V29.1",
+      "work_package": "V29",
+      "stage": "S5",
+      "work_package_title": "完整功能验证、经济校准与持续运行",
+      "title": "全需求证据链与缺口审计",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V22.3",
+        "V23.3",
+        "V24.3",
+        "V25.3",
+        "V26.3",
+        "V27.3",
+        "V28.3"
+      ],
+      "purpose": "将原规范动作/参数/失败/通知映射到代码、测试和状态。",
+      "acceptance": "未验证不标完成；无静默延期 scope。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V29.2",
+      "work_package": "V29",
+      "stage": "S5",
+      "work_package_title": "完整功能验证、经济校准与持续运行",
+      "title": "70国×600日与1000日长跑",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V29.1"
+      ],
+      "purpose": "运行非空转正式周期和长跑，注入动作、危机、到期、短缺、违约。",
+      "acceptance": "硬守恒/账本无未解释违规；合法危机不误判 bug。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V29.3",
+      "work_package": "V29",
+      "stage": "S5",
+      "work_package_title": "完整功能验证、经济校准与持续运行",
+      "title": "校准/重放/最小复现",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V29.2"
+      ],
+      "purpose": "输出 parameter provenance、固定 seed replay hash、异常最小复现和模型局限。",
+      "acceptance": "相同版本+seed重放一致；经济合理性与程序正确性分报告。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V30.1",
+      "work_package": "V30",
+      "stage": "S5",
+      "work_package_title": "性能、安全与数据库恢复联合验收",
+      "title": "50/100/420会话负载模型与 Harness",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V02.3",
+        "V09.3",
+        "V26.3",
+        "V28.3",
+        "V29.3"
+      ],
+      "purpose": "定义真实操作频率、订单/合同/到期风暴/forecast 场景并运行分档测试。",
+      "acceptance": "披露机器/套餐/版本/负载；记录 P50/P95/P99 与资源。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V30.2",
+      "work_package": "V30",
+      "stage": "S5",
+      "work_package_title": "性能、安全与数据库恢复联合验收",
+      "title": "Security/RLS/Attack 联合验收",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V30.1"
+      ],
+      "purpose": "跑真实DB权限、classified、office/country/season、攻击面、service-role 边界负例。",
+      "acceptance": "错误身份无法读写；高权限路径显式鉴权。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V30.3",
+      "work_package": "V30",
+      "stage": "S5",
+      "work_package_title": "性能、安全与数据库恢复联合验收",
+      "title": "Worker/DB/Backup Failure Recovery",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V30.2"
+      ],
+      "purpose": "演练 worker crash、lease/fencing、DB恢复、snapshot/ledger replay、备份恢复。",
+      "acceptance": "重复消息不双记；实际 restore 成功并记录 RPO/RTO。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V30.4",
+      "work_package": "V30",
+      "stage": "S5",
+      "work_package_title": "性能、安全与数据库恢复联合验收",
+      "title": "共享DB影响、SLO与容量签字",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V30.3"
+      ],
+      "purpose": "在共享主站关键流程下验证世界负载影响，形成 SLO/容量/扩容结论。",
+      "acceptance": "主站不超批准预算；SLO不过则不开放正式规模。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V31.1",
+      "work_package": "V31",
+      "stage": "S6",
+      "work_package_title": "发布候选、灰度和生产切换",
+      "title": "Release Manifest 与版本冻结",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V29.3",
+        "V30.4"
+      ],
+      "purpose": "冻结 code/model/registry/scoring/seed、兼容区间、migration artifact 和 kill switch。",
+      "acceptance": "无 P0/P1 未决发布 blocker；版本可追踪。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V31.2",
+      "work_package": "V31",
+      "stage": "S6",
+      "work_package_title": "发布候选、灰度和生产切换",
+      "title": "Staging Migration Rehearsal 与灰度",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V31.1"
+      ],
+      "purpose": "按唯一发布链在 staging 演练迁移、内部world/canary、回退/forward-fix。",
+      "acceptance": "API/DB 先兼容再前端；灰度有真实观测。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V31.3",
+      "work_package": "V31",
+      "stage": "S6",
+      "work_package_title": "发布候选、灰度和生产切换",
+      "title": "生产切换与主站入口",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V31.2"
+      ],
+      "purpose": "执行批准的生产发布、主站路由切换、监控和 rollback/kill-switch 演练。",
+      "acceptance": "新旧世界各自单writer；UI回退不抹已接受经济事实。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V32.1",
+      "work_package": "V32",
+      "stage": "S6",
+      "work_package_title": "开赛、结束、归档与运营移交",
+      "title": "开赛/加入/认领/暂停 Runbook",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V31.3"
+      ],
+      "purpose": "完成 join/claim/start/pause/resume、管理员和玩家操作手册及权限演练。",
+      "acceptance": "正式开赛路径可重复执行且有审计。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V32.2",
+      "work_package": "V32",
+      "stage": "S6",
+      "work_package_title": "开赛、结束、归档与运营移交",
+      "title": "季末结算与归档",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V32.1"
+      ],
+      "purpose": "实现 end cutoff、到期事项结算、未到期债务/在途/许可保留、archive/export。",
+      "acceptance": "未到期义务不清零；结果可追溯到 ledger/events。",
+      "status_default": "PLANNED"
+    },
+    {
+      "step_id": "V32.3",
+      "work_package": "V32",
+      "stage": "S6",
+      "work_package_title": "开赛、结束、归档与运营移交",
+      "title": "运营移交与未完成声明",
+      "execution_mode": "NORMAL",
+      "hard_dependencies": [
+        "V32.2"
+      ],
+      "purpose": "交付告警/值班/响应、48–72h监测、升级 forward-fix、最终 scope 状态。",
+      "acceptance": "RC 不冒充 full release；负责人和剩余风险明确。",
+      "status_default": "PLANNED"
+    }
+  ]
+}

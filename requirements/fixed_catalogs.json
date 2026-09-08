@@ -1,0 +1,426 @@
+{
+  "commodities": {
+    "headers": [
+      "Commodity",
+      "Unit"
+    ],
+    "rows": [
+      [
+        "CRUDE_OIL",
+        "barrel"
+      ],
+      [
+        "NATURAL_GAS",
+        "MMBtu"
+      ],
+      [
+        "URANIUM",
+        "tonne U"
+      ],
+      [
+        "GRAIN",
+        "tonne"
+      ],
+      [
+        "IRON_ORE",
+        "tonne"
+      ],
+      [
+        "COPPER",
+        "tonne"
+      ],
+      [
+        "LITHIUM",
+        "tonne LCE"
+      ],
+      [
+        "STEEL",
+        "tonne"
+      ],
+      [
+        "REFINED_FUEL",
+        "barrel equivalent"
+      ],
+      [
+        "MACHINERY",
+        "equipment unit"
+      ],
+      [
+        "SEMICONDUCTORS",
+        "standardised chip unit"
+      ],
+      [
+        "BATTERIES",
+        "MWh-equivalent"
+      ]
+    ],
+    "count": 12
+  },
+  "production_sectors": {
+    "headers": [
+      "Sector",
+      "Production Chain"
+    ],
+    "rows": [
+      [
+        "OIL_EXTRACTION",
+        "Developed Oil Reserve + Electricity + Labour + Machinery → Crude Oil"
+      ],
+      [
+        "GAS_EXTRACTION",
+        "Developed Gas Reserve + Electricity + Labour + Machinery → Natural Gas"
+      ],
+      [
+        "URANIUM_MINING",
+        "Developed Uranium Reserve + Electricity + Labour + Machinery → Uranium"
+      ],
+      [
+        "IRON_ORE_MINING",
+        "Developed Iron Ore Reserve + Electricity + Labour + Machinery → Iron Ore"
+      ],
+      [
+        "COPPER_MINING",
+        "Developed Copper Reserve + Electricity + Labour + Machinery → Copper"
+      ],
+      [
+        "LITHIUM_MINING",
+        "Developed Lithium Reserve + Electricity + Labour + Machinery → Lithium"
+      ],
+      [
+        "STEEL",
+        "Iron Ore + Energy + Labour + Machinery Capacity → Steel"
+      ],
+      [
+        "REFINED_FUEL",
+        "Crude Oil + Energy + Labour + Refinery Capacity → Refined Fuel"
+      ],
+      [
+        "BATTERY",
+        "Lithium + Copper + Electricity + Machinery + Battery Technology + Skilled Labour → Batteries"
+      ],
+      [
+        "MACHINERY",
+        "Steel + Copper + Electricity + Manufacturing Technology + Skilled Labour → Machinery"
+      ],
+      [
+        "SEMICONDUCTOR",
+        "Copper + Electricity + Machinery + Semiconductor Technology + High Skill Labour → Semiconductors"
+      ],
+      [
+        "ELECTRICITY",
+        "Fuel/Resource + Generation Capacity + Labour + Grid → Delivered Electricity"
+      ]
+    ],
+    "count": 12
+  },
+  "technologies": {
+    "headers": [
+      "Technology ID",
+      "Domain",
+      "Technology"
+    ],
+    "rows": [
+      [
+        "ENERGY_ADV_SOLAR",
+        "Energy",
+        "Advanced Solar"
+      ],
+      [
+        "ENERGY_GRID_STORAGE",
+        "Energy",
+        "Grid-scale Storage"
+      ],
+      [
+        "ENERGY_ADV_NUCLEAR",
+        "Energy",
+        "Advanced Nuclear"
+      ],
+      [
+        "ENERGY_SMART_GRID",
+        "Energy",
+        "Smart Grid"
+      ],
+      [
+        "ENERGY_GREEN_H2",
+        "Energy",
+        "Green Hydrogen"
+      ],
+      [
+        "MFG_AUTOMATION",
+        "Manufacturing",
+        "Industrial Automation"
+      ],
+      [
+        "MFG_ROBOTICS",
+        "Manufacturing",
+        "Advanced Robotics"
+      ],
+      [
+        "MFG_PRECISION",
+        "Manufacturing",
+        "Precision Manufacturing"
+      ],
+      [
+        "MFG_SMART",
+        "Manufacturing",
+        "Smart Manufacturing"
+      ],
+      [
+        "SEMI_BASIC",
+        "Semiconductor",
+        "Basic Semiconductor"
+      ],
+      [
+        "SEMI_ADV_FAB",
+        "Semiconductor",
+        "Advanced Fabrication"
+      ],
+      [
+        "SEMI_PACKAGING",
+        "Semiconductor",
+        "Advanced Packaging"
+      ],
+      [
+        "SEMI_HPC",
+        "Semiconductor",
+        "High-performance Chips"
+      ],
+      [
+        "RESOURCE_ADV_EXPLORATION",
+        "Resources & Materials",
+        "Advanced Exploration"
+      ],
+      [
+        "RESOURCE_ADV_MINING",
+        "Resources & Materials",
+        "Advanced Mining"
+      ],
+      [
+        "RESOURCE_EFFICIENT_REFINING",
+        "Resources & Materials",
+        "High-efficiency Refining"
+      ],
+      [
+        "RESOURCE_BATTERY_CHEM",
+        "Resources & Materials",
+        "Battery Chemistry"
+      ],
+      [
+        "RESOURCE_ADV_MATERIALS",
+        "Resources & Materials",
+        "Advanced Materials"
+      ],
+      [
+        "INFRA_DIGITAL_NETWORK",
+        "Infrastructure & Digital",
+        "Digital Industrial Network"
+      ],
+      [
+        "INFRA_AUTO_LOGISTICS",
+        "Infrastructure & Digital",
+        "Automated Logistics"
+      ],
+      [
+        "INFRA_SMART_PORT",
+        "Infrastructure & Digital",
+        "Smart Port"
+      ],
+      [
+        "INFRA_ADV_GRID_MGMT",
+        "Infrastructure & Digital",
+        "Advanced Grid Management"
+      ]
+    ],
+    "count": 22
+  },
+  "projects": {
+    "headers": [
+      "Category",
+      "Project Type"
+    ],
+    "rows": [
+      [
+        "Resource",
+        "Oil Field Development"
+      ],
+      [
+        "Resource",
+        "Gas Field Development"
+      ],
+      [
+        "Resource",
+        "Uranium Mine"
+      ],
+      [
+        "Resource",
+        "Iron Ore Mine"
+      ],
+      [
+        "Resource",
+        "Copper Mine"
+      ],
+      [
+        "Resource",
+        "Lithium Mine"
+      ],
+      [
+        "Energy",
+        "Gas Power Plant"
+      ],
+      [
+        "Energy",
+        "Fossil Power Plant"
+      ],
+      [
+        "Energy",
+        "Nuclear Power Plant"
+      ],
+      [
+        "Energy",
+        "Solar Farm"
+      ],
+      [
+        "Energy",
+        "Wind Farm"
+      ],
+      [
+        "Energy",
+        "Grid Upgrade"
+      ],
+      [
+        "Energy",
+        "Energy Storage Facility"
+      ],
+      [
+        "Industrial",
+        "Steel Mill"
+      ],
+      [
+        "Industrial",
+        "Refinery"
+      ],
+      [
+        "Industrial",
+        "Machinery Plant"
+      ],
+      [
+        "Industrial",
+        "Semiconductor Fab"
+      ],
+      [
+        "Industrial",
+        "Battery Gigafactory"
+      ],
+      [
+        "Industrial",
+        "Industrial Park"
+      ],
+      [
+        "Industrial",
+        "Special Economic Zone"
+      ],
+      [
+        "Infrastructure",
+        "Deepwater Port"
+      ],
+      [
+        "Infrastructure",
+        "Freight Railway"
+      ],
+      [
+        "Infrastructure",
+        "National Power Grid"
+      ],
+      [
+        "Infrastructure",
+        "Digital Backbone"
+      ],
+      [
+        "Infrastructure",
+        "Logistics Hub"
+      ],
+      [
+        "Infrastructure",
+        "Strategic Reserve Facility"
+      ],
+      [
+        "Research Infrastructure",
+        "National Research Centre"
+      ],
+      [
+        "Research Infrastructure",
+        "Semiconductor Research Facility"
+      ],
+      [
+        "Research Infrastructure",
+        "Energy Research Centre"
+      ],
+      [
+        "Research Infrastructure",
+        "Materials Research Centre"
+      ],
+      [
+        "Social Infrastructure",
+        "Basic Education Facility"
+      ],
+      [
+        "Social Infrastructure",
+        "Vocational Education Facility"
+      ],
+      [
+        "Social Infrastructure",
+        "Higher Education Facility"
+      ],
+      [
+        "Social Infrastructure",
+        "Primary Care Facility"
+      ],
+      [
+        "Social Infrastructure",
+        "Hospital / Emergency Facility"
+      ],
+      [
+        "Social Infrastructure",
+        "Public Housing"
+      ],
+      [
+        "Social Infrastructure",
+        "Worker Housing"
+      ],
+      [
+        "Social Infrastructure",
+        "Police / Emergency Facility"
+      ]
+    ],
+    "count": 38
+  },
+  "international_activity_types": {
+    "count": 23,
+    "values": [
+      "Commodity Supply Agreement",
+      "Technology Licence",
+      "Foreign Direct Investment",
+      "Sovereign Loan",
+      "Infrastructure Finance",
+      "Resource Development Agreement",
+      "Joint International Project",
+      "Preferential Trade Agreement",
+      "Free Trade Agreement",
+      "Customs Cooperation Agreement",
+      "Sector Market Access Agreement",
+      "Multilateral Economic Agreement",
+      "Reserve Swap",
+      "Sanction Package",
+      "Grant Aid",
+      "Commodity Aid",
+      "Emergency Concessional Loan",
+      "Emergency Supply Contract",
+      "Technical Assistance",
+      "Project Reconstruction Aid",
+      "International Tender",
+      "Strategic Economic Partnership",
+      "Trade Dispute Settlement"
+    ],
+    "note": "Master E16 A lists these types; Trade annex also lists Spot Commodity Trade and Capital Controls as activity families. These must be mapped, not discarded."
+  }
+}

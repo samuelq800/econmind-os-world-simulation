@@ -1,0 +1,210 @@
+{
+  "scope": "planning_and_execution_materials_not_implemented_application",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "bytes": 4220,
+      "sha256": "86db26f6f64623b88129a07f7064ea935940673b9fe7ae5f2a4959a18210cab5"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5079,
+      "sha256": "9b6a3a3822d77df687c0cde710c018cf9ee7c0c5f9f0e35a8386529d03d4e2c4"
+    },
+    {
+      "path": "evidence/package_validation.json",
+      "bytes": 1159,
+      "sha256": "257030ea48a3424b7fb906578f495e89daf820034b2daa2aa93e90d5a4170417"
+    },
+    {
+      "path": "evidence/validator_negative_tests.json",
+      "bytes": 634,
+      "sha256": "1f856b2f466036aec94cd2a57a24a62628f2eabb76d6be7c22d2b25d8a1f6ea4"
+    },
+    {
+      "path": "planning/01_新仓库架构与完整交付路线.md",
+      "bytes": 27696,
+      "sha256": "e65e3abd436ad0619e793d839ef61cf6d8bdc39e58a4c159794c5f3f3ba8a83a"
+    },
+    {
+      "path": "planning/02_架构裁决与数据库协议.md",
+      "bytes": 7576,
+      "sha256": "cde5373bc82f31633087790a554a717b49b062686a1e01058e0c5b79149c4426"
+    },
+    {
+      "path": "planning/03_33个工作包与依赖.md",
+      "bytes": 18962,
+      "sha256": "fe57c97d0e006a853731dfe127a6e10fe93735fb899c629cba72a30e09d708bb"
+    },
+    {
+      "path": "planning/04_完整功能覆盖登记.md",
+      "bytes": 7637,
+      "sha256": "bfb6998fcd352309d90069168dcc5b07adf0e03efed58200322c4484a2a3dfcf"
+    },
+    {
+      "path": "planning/05_验收与交付清单.md",
+      "bytes": 9131,
+      "sha256": "865ba78ca0bf7e82796a991b8ee1730510085d1f1d0b05de31b5de6b01498d2e"
+    },
+    {
+      "path": "planning/08_官方平台依据.md",
+      "bytes": 2086,
+      "sha256": "7d63db77d91d6c414aa78cbc07be8aaaa0b04e4e967642502c43d0e8020dc6c3"
+    },
+    {
+      "path": "planning/work_packages.json",
+      "bytes": 26385,
+      "sha256": "b53c8712c82db6e12b5ad9951d482ce01485c79420ca565ee03cd76e4ca19b35"
+    },
+    {
+      "path": "prompts/01_第一轮_安全脚手架.md",
+      "bytes": 5011,
+      "sha256": "72cffb8070934f93dad0afe4b3cafb74dafa2c394b9e47fe8f3c58dd348a851c"
+    },
+    {
+      "path": "prompts/02_第二轮_基础契约与本地验证.md",
+      "bytes": 2741,
+      "sha256": "2a54367b55c5c60d16f4264f51633c7e4dca779825a6190e789e513088438a5b"
+    },
+    {
+      "path": "prompts/03_第三轮_双国真实闭环.md",
+      "bytes": 2926,
+      "sha256": "d65ae2d344708bbbf04b9aed57402948249d67e9981dbc9d80d09d03b4354621"
+    },
+    {
+      "path": "reference/01_代码审查与证据.md",
+      "bytes": 31339,
+      "sha256": "ad5a5c49927c3def42833407053dc2fe7b7af537d6194bff7086ac1c4f9363de"
+    },
+    {
+      "path": "reference/02_规范冲突与裁决清单.md",
+      "bytes": 12773,
+      "sha256": "b71dbf0b0c54e8eb56f211601cf4c606896b126f2930c3f87405e83131a88364"
+    },
+    {
+      "path": "reference/prior_runtime_probe_results.json",
+      "bytes": 2456,
+      "sha256": "3df985edcc884188affc4133c17d72132c26e6627381794c99130d81ecc009d0"
+    },
+    {
+      "path": "requirements/coverage_families.json",
+      "bytes": 51407,
+      "sha256": "47fc2e9123283a54c46680424db0475973434bb7f0cfe0e4a51676384382ee15"
+    },
+    {
+      "path": "requirements/engine_registry.json",
+      "bytes": 3641,
+      "sha256": "f9361a9c18089329826f6b186e9822305973e4047eccf60cd02312067a95d0d7"
+    },
+    {
+      "path": "requirements/fixed_catalogs.json",
+      "bytes": 8700,
+      "sha256": "ff5a7f1aceaa565c47d078a2051f5d5c2851a71a81de8e66364d6dd08f0c77a7"
+    },
+    {
+      "path": "requirements/source_manifest.json",
+      "bytes": 2408,
+      "sha256": "60e8cf7a8d83b2052fa6d6f82c71087a32075334800ca6c8eb3aef6df6cd2b74"
+    },
+    {
+      "path": "requirements/source_units.jsonl",
+      "bytes": 1611421,
+      "sha256": "d26ba03f9c00013ea8b95841001366d3f4a53952d0f4396db8a31feb46f7ac08"
+    },
+    {
+      "path": "specs/extracted/CAPTAIN.md",
+      "bytes": 45294,
+      "sha256": "b7b1b62a30000797f20390aa809898847e580918cbef04b929e6ee2824fde3eb"
+    },
+    {
+      "path": "specs/extracted/CENTRAL_BANK.md",
+      "bytes": 73133,
+      "sha256": "36019b179fa6d159bae2eb7f8652d2571ffe9c49aa1547f619da20ddb56cc353"
+    },
+    {
+      "path": "specs/extracted/CONSTITUTION.md",
+      "bytes": 77551,
+      "sha256": "5c0fbfff91de9eb34217445fdff408058874c67ca5ab7630b03ce38d9d755f32"
+    },
+    {
+      "path": "specs/extracted/FINANCE.md",
+      "bytes": 71798,
+      "sha256": "6152e2c87a5545e1c354c8a6dbe8b948bbfcb3d396ef54624d9326d0bc1b8385"
+    },
+    {
+      "path": "specs/extracted/INDUSTRY.md",
+      "bytes": 90680,
+      "sha256": "ccfcfa93a0cc281bb9a25d6f75a97897bb4612338a530e3292fc03782c310dee"
+    },
+    {
+      "path": "specs/extracted/MASTER.md",
+      "bytes": 154577,
+      "sha256": "061633bed73326ca04c55e3997fdd4ab0ad8057e448edac45107fc5bf271c88c"
+    },
+    {
+      "path": "specs/extracted/SOCIAL.md",
+      "bytes": 70104,
+      "sha256": "1a2b1b5d7c9d665fdd3f5f533fc24e948993395cab006e12a962f45b06954a11"
+    },
+    {
+      "path": "specs/extracted/TRADE.md",
+      "bytes": 78010,
+      "sha256": "2fd32bb9c644289e58790f3d999275e250287bad5b50c50abe4de937f2d119b9"
+    },
+    {
+      "path": "specs/original/EconMind_Season1_70_Country_World_Engine_Master_Specification.docx",
+      "bytes": 131947,
+      "sha256": "0d4ea011a1291b5bd49c89c1616a7eee29731c2141a4f958e2930acf7189db13"
+    },
+    {
+      "path": "specs/original/EconMind_Season1_Central_Bank_Governor_Function_Specification.docx",
+      "bytes": 75539,
+      "sha256": "c0fb17cc37a912938957a879b828c7b6139dd9e1ceef0976dc6c35ca072c36e9"
+    },
+    {
+      "path": "specs/original/EconMind_Season1_Codex_Implementation_Constitution.docx",
+      "bytes": 79902,
+      "sha256": "960a7745a8e18b8f1cb10c754ce6681d46bdfc5933a979c4a989bd3a07ff5d49"
+    },
+    {
+      "path": "specs/original/EconMind_Season1_Country_Captain_Function_Specification.docx",
+      "bytes": 57357,
+      "sha256": "e1d007253d3435316eae940185e52bb30316e9f72a411ca98127e3535d4c5a01"
+    },
+    {
+      "path": "specs/original/EconMind_Season1_Finance_Economy_Minister_Function_Specification.docx",
+      "bytes": 71667,
+      "sha256": "5970033c01ba9592a8efac5c6e319c1d7424a6df562e1833e08920bf927a5576"
+    },
+    {
+      "path": "specs/original/EconMind_Season1_Industry_Technology_Resources_Minister_Function_Specification.docx",
+      "bytes": 85595,
+      "sha256": "042a62b08e2c260acdb308e3f5aa7303c22003cd2de3b92251afec9dbf7c3f81"
+    },
+    {
+      "path": "specs/original/EconMind_Season1_Labour_Education_Social_Development_Minister_Function_Specification.docx",
+      "bytes": 74004,
+      "sha256": "7ec7414047f4e2db5fc4c5d318d3e8ebca9f2236f8cd0f9e7d0a8213acf2f130"
+    },
+    {
+      "path": "specs/original/EconMind_Season1_Trade_Foreign_Affairs_Minister_Function_Specification.docx",
+      "bytes": 84485,
+      "sha256": "f4c74900e6743afec693b7beaa2d88bdf5e574b5bc21164aff89ade043a453c0"
+    },
+    {
+      "path": "templates/PR_REPORT.md",
+      "bytes": 844,
+      "sha256": "88600f83369c0d938858431deec54896037f0c64d79a1efcc204ff08ccfd8fa9"
+    },
+    {
+      "path": "templates/TASK_PACKET.md",
+      "bytes": 716,
+      "sha256": "24df2c3050a12124e7c79b5422a0407a6f5cd22f33d3ccfbbcc61640b4f1f684"
+    },
+    {
+      "path": "tools/validate_pack.py",
+      "bytes": 10556,
+      "sha256": "cbb1ecc3ed686298797367f7e1c77378205262d3a537627ace8381dceba12350"
+    }
+  ]
+}

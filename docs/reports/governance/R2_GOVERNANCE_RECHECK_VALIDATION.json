@@ -1,0 +1,482 @@
+{
+  "reviewed_commit": "e7f8576ed559bd9167b67cd7493112855f65ca7e",
+  "validator_sha256": "ccbf3a5b6ed71c6f2f2af7ade6179d1fd817ac108d4efa7b5437feaccb5ffa77",
+  "baseline": {
+    "exit_code": 0,
+    "output": {
+      "scope": "R2_GOVERNANCE_READ_ONLY",
+      "status": "PASS",
+      "application_code_executed": false,
+      "database_access": false,
+      "checks": [
+        {
+          "name": "required_governance_files",
+          "status": "PASS"
+        },
+        {
+          "name": "r2_step_manifest",
+          "status": "PASS"
+        },
+        {
+          "name": "step_dependencies",
+          "status": "PASS"
+        },
+        {
+          "name": "human_navigation_matches_json",
+          "status": "PASS"
+        },
+        {
+          "name": "work_packages",
+          "status": "PASS"
+        },
+        {
+          "name": "control_and_step_prompts",
+          "status": "PASS"
+        },
+        {
+          "name": "progress_truth",
+          "status": "PASS"
+        },
+        {
+          "name": "decision_register",
+          "status": "PASS"
+        },
+        {
+          "name": "source_material",
+          "status": "PASS"
+        },
+        {
+          "name": "templates",
+          "status": "PASS"
+        }
+      ],
+      "metrics": {
+        "required_files": 15,
+        "execution_modes": {
+          "NORMAL": 99,
+          "PARALLEL_PREPARATION": 2
+        },
+        "work_packages": 33,
+        "steps": 101,
+        "dependency_graph": "ACYCLIC",
+        "work_package_dependency_graph": "ACYCLIC",
+        "step_prompts": 101,
+        "control_prompts": 8,
+        "implementation_agent_statuses": [
+          "BLOCKED",
+          "IMPLEMENTED_UNVERIFIED",
+          "IN_PROGRESS"
+        ],
+        "static_prompt_references": 1,
+        "progress_states": {
+          "BLOCKED": 1,
+          "CHANGES_REQUIRED": 0,
+          "DEFERRED_WITH_APPROVAL": 0,
+          "IMPLEMENTED_UNVERIFIED": 1,
+          "IN_PROGRESS": 0,
+          "PLANNED": 99,
+          "UNASSESSED": 0,
+          "VERIFIED": 0
+        },
+        "decisions": 20,
+        "source_documents": 8,
+        "standard_templates": 6
+      },
+      "errors": []
+    },
+    "stderr": ""
+  },
+  "negative_acceptance": [
+    {
+      "case": "missing_step_prompt",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "control_and_step_prompts: step prompt set differs from step manifest"
+      ]
+    },
+    {
+      "case": "invalid_dependency",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "step_dependencies: V00.1 has missing dependency V99.9",
+        "human_navigation_matches_json: dependency mismatch for V00.1",
+        "control_and_step_prompts: prompt dependency mismatch: V00.1"
+      ]
+    },
+    {
+      "case": "dependency_cycle",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "step_dependencies: dependency cycle at V00.2",
+        "human_navigation_matches_json: dependency mismatch for V00.1",
+        "control_and_step_prompts: prompt dependency mismatch: V00.1"
+      ]
+    },
+    {
+      "case": "impossible_verified_dependency",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "progress_truth: impossible VERIFIED dependency claim: V00.2 <- V00.1"
+      ]
+    },
+    {
+      "case": "adr_self_approval",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "decision_register: ADR-01 was self-approved"
+      ]
+    },
+    {
+      "case": "prompt_authorizes_PARTIAL",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "control_and_step_prompts: prompt allowed statuses differ from implementation vocabulary: V00.1"
+      ]
+    },
+    {
+      "case": "invalid_execution_mode",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "r2_step_manifest: invalid execution mode V00.1: INVALID_MODE",
+        "human_navigation_matches_json: execution mode mismatch for V00.1",
+        "control_and_step_prompts: prompt execution mode mismatch: V00.1"
+      ]
+    },
+    {
+      "case": "authoritative_model_PARTIAL",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "r2_step_manifest: PARTIAL is not an authoritative status",
+        "human_navigation_matches_json: Markdown has unknown step V00.1",
+        "control_and_step_prompts: step prompt set differs from step manifest",
+        "progress_truth: progress step set differs from manifest"
+      ]
+    },
+    {
+      "case": "empty_purpose",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "r2_step_manifest: empty purpose: V00.1",
+        "human_navigation_matches_json: purpose mismatch for V00.1",
+        "control_and_step_prompts: prompt goal mismatch: V00.1"
+      ]
+    },
+    {
+      "case": "empty_acceptance",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "r2_step_manifest: empty acceptance gate: V00.1",
+        "human_navigation_matches_json: acceptance mismatch for V00.1",
+        "control_and_step_prompts: prompt exit gate mismatch: V00.1"
+      ]
+    },
+    {
+      "case": "invalid_default_status",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "r2_step_manifest: invalid default status V00.1: INVALID_STATUS"
+      ]
+    },
+    {
+      "case": "prompt_invalid_mode",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "control_and_step_prompts: prompt execution mode mismatch: V00.1"
+      ]
+    },
+    {
+      "case": "human_navigation_mode_drift",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "human_navigation_matches_json: execution mode mismatch for V00.1"
+      ]
+    },
+    {
+      "case": "prompt_self_VERIFIED",
+      "exit_code": 1,
+      "status": "FAIL",
+      "errors": [
+        "control_and_step_prompts: prompt allowed statuses differ from implementation vocabulary: V00.1"
+      ]
+    }
+  ],
+  "unmodified_fixture_baseline": {
+    "exit_code": 0,
+    "output": {
+      "scope": "R2_GOVERNANCE_READ_ONLY",
+      "status": "PASS",
+      "application_code_executed": false,
+      "database_access": false,
+      "checks": [
+        {
+          "name": "required_governance_files",
+          "status": "PASS"
+        },
+        {
+          "name": "r2_step_manifest",
+          "status": "PASS"
+        },
+        {
+          "name": "step_dependencies",
+          "status": "PASS"
+        },
+        {
+          "name": "human_navigation_matches_json",
+          "status": "PASS"
+        },
+        {
+          "name": "work_packages",
+          "status": "PASS"
+        },
+        {
+          "name": "control_and_step_prompts",
+          "status": "PASS"
+        },
+        {
+          "name": "progress_truth",
+          "status": "PASS"
+        },
+        {
+          "name": "decision_register",
+          "status": "PASS"
+        },
+        {
+          "name": "source_material",
+          "status": "PASS"
+        },
+        {
+          "name": "templates",
+          "status": "PASS"
+        }
+      ],
+      "metrics": {
+        "required_files": 15,
+        "execution_modes": {
+          "NORMAL": 99,
+          "PARALLEL_PREPARATION": 2
+        },
+        "work_packages": 33,
+        "steps": 101,
+        "dependency_graph": "ACYCLIC",
+        "work_package_dependency_graph": "ACYCLIC",
+        "step_prompts": 101,
+        "control_prompts": 8,
+        "implementation_agent_statuses": [
+          "BLOCKED",
+          "IMPLEMENTED_UNVERIFIED",
+          "IN_PROGRESS"
+        ],
+        "static_prompt_references": 1,
+        "progress_states": {
+          "BLOCKED": 1,
+          "CHANGES_REQUIRED": 0,
+          "DEFERRED_WITH_APPROVAL": 0,
+          "IMPLEMENTED_UNVERIFIED": 1,
+          "IN_PROGRESS": 0,
+          "PLANNED": 99,
+          "UNASSESSED": 0,
+          "VERIFIED": 0
+        },
+        "decisions": 20,
+        "source_documents": 8,
+        "standard_templates": 6
+      },
+      "errors": []
+    },
+    "stderr": ""
+  },
+  "independent_prompt_scan": {
+    "files": 101,
+    "unique_ids": 101,
+    "common_workflow_and_prohibitions_variants": 1,
+    "core_fields_match": true,
+    "active_PARTIAL_occurrences": [],
+    "controls": 8,
+    "templates_inspected": 8,
+    "exact_status_only_diff_for_all_101": true
+  },
+  "manifest_progress_decisions_unchanged_from_original": true,
+  "package_title_differences": [
+    {
+      "id": "V03",
+      "older": "统一基础类型与registry",
+      "r2": "统一基础类型与 Registry"
+    },
+    {
+      "id": "V05",
+      "older": "身份桥接、Office授权与版本审批内核",
+      "r2": "身份桥接、Office 授权与版本审批内核"
+    },
+    {
+      "id": "V06",
+      "older": "E01时钟、规则时间与调度",
+      "r2": "E01 时钟、规则时间与调度"
+    },
+    {
+      "id": "V08",
+      "older": "库存与金融posting基础",
+      "r2": "库存与金融 Posting 基础"
+    },
+    {
+      "id": "V09",
+      "older": "单世界writer、原子提交与故障恢复",
+      "r2": "单世界 Writer、原子提交与故障恢复"
+    },
+    {
+      "id": "V11",
+      "older": "E02人口与E03劳动力工资",
+      "r2": "E02 人口与 E03 劳动力工资"
+    },
+    {
+      "id": "V12",
+      "older": "E08完整资源及库存",
+      "r2": "E08 完整资源及库存"
+    },
+    {
+      "id": "V13",
+      "older": "E09能源与E10生产",
+      "r2": "E09 能源与 E10 生产"
+    },
+    {
+      "id": "V14",
+      "older": "E11技术及E12项目全生命周期",
+      "r2": "E11 技术及 E12 项目全生命周期"
+    },
+    {
+      "id": "V15",
+      "older": "E04教育及E05医疗",
+      "r2": "E04 教育及 E05 医疗"
+    },
+    {
+      "id": "V16",
+      "older": "E06住房及E07治安",
+      "r2": "E06 住房及 E07 治安"
+    },
+    {
+      "id": "V17",
+      "older": "E13家庭、需求与国内供给闭合",
+      "r2": "E13 家庭、需求与国内供给闭合"
+    },
+    {
+      "id": "V18",
+      "older": "E14完整财政与Treasury",
+      "r2": "E14 完整财政与 Treasury"
+    },
+    {
+      "id": "V19",
+      "older": "E15完整银行央行",
+      "r2": "E15 完整银行央行"
+    },
+    {
+      "id": "V20",
+      "older": "E17外汇与国际金融",
+      "r2": "E17 外汇与国际金融"
+    },
+    {
+      "id": "V21",
+      "older": "E16完整现货、海关与物流",
+      "r2": "E16 完整现货、海关与物流"
+    },
+    {
+      "id": "V22",
+      "older": "E16全部国际合同与专项执行器",
+      "r2": "E16 全部国际合同与专项执行器"
+    },
+    {
+      "id": "V23",
+      "older": "E18国民账户、风险与评分",
+      "r2": "E18 国民账户、风险与评分"
+    },
+    {
+      "id": "V24",
+      "older": "Captain治理及因果危机Admin",
+      "r2": "Captain 治理及因果危机 Admin"
+    },
+    {
+      "id": "V25",
+      "older": "六Office完整UI及行动覆盖",
+      "r2": "六 Office 完整 UI 与地图行动覆盖"
+    },
+    {
+      "id": "V26",
+      "older": "预测、可解释性、Realtime与断线恢复",
+      "r2": "预测、可解释性、Realtime 与断线恢复"
+    },
+    {
+      "id": "V27",
+      "older": "70国初态、校准与无人国家控制",
+      "r2": "70 国初态、校准与无人国家控制"
+    },
+    {
+      "id": "V28",
+      "older": "两种orchestrator与主站迁移桥",
+      "r2": "两种 Orchestrator 与主站迁移桥"
+    }
+  ],
+  "recorded_at": "2026-09-08T07:18:39.832281+00:00",
+  "review_scope": "INDEPENDENT_R2_GOVERNANCE_RE_REVIEW_ONLY",
+  "branch_integrity": {
+    "branch": "chore/r2-governance-sync",
+    "HEAD": "e7f8576ed559bd9167b67cd7493112855f65ca7e",
+    "remote_governance": "e7f8576ed559bd9167b67cd7493112855f65ca7e",
+    "origin_main": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
+    "merge_base": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
+    "behind": 0,
+    "ahead": 4,
+    "initial_worktree_clean": true,
+    "head_tree_equals_first_parent": true
+  },
+  "fixture_method": {
+    "source": "git archive e7f8576ed559bd9167b67cd7493112855f65ca7e",
+    "isolation": "Separate copies inside TemporaryDirectory; removed after tests",
+    "command": "python3 <reviewed-repository>/tools/validate_r2_governance.py --root <fixture> --json",
+    "validator_unmodified": true,
+    "unmodified_fixture_passed": true,
+    "harness": "Mutates fixture inputs and executes real validator subprocess; no validator logic mocked or replaced"
+  },
+  "technical_boundary_check": {
+    "command": "pnpm test:boundaries",
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "exit_code": 0,
+    "tests_passed": 28,
+    "repository_scan_status": "PASS",
+    "scanned_source_files": 7
+  },
+  "repository_secret_scan": {
+    "command": "pnpm secrets:check",
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "exit_code": 0,
+    "status": "PASS",
+    "candidate_files_before_review_artifacts": 220,
+    "final_scan_with_review_artifacts": {
+      "status": "PASS",
+      "exit_code": 0,
+      "candidate_files": 222
+    }
+  },
+  "product_runtime_diff": {
+    "command": "git diff --exit-code c41ddd8 HEAD -- apps packages scripts tests package.json pnpm-lock.yaml docs/architecture docs/runbooks docs/reports/V00.1",
+    "exit_code": 0
+  },
+  "reviewed_source_sha256": "960a7745a8e18b8f1cb10c754ce6681d46bdfc5933a979c4a989bd3a07ff5d49",
+  "original_review_sha256": "b2b7f3426a397425a0aebcfce88a1c55ed0fa36372d5e79072099bd16678af66",
+  "database_access": false,
+  "database_mutation": false,
+  "status_modified": false,
+  "decision": "APPROVED"
+}
