@@ -19,17 +19,6 @@
 READ SPECS → PLAN → IMPLEMENT → RUN REAL TESTS → IMPLEMENTATION REPORT → INDEPENDENT REVIEW → FIX BLOCKERS → RE-REVIEW → VERIFIED → NEXT STEP。
 实施者不得自行把任务标为 VERIFIED。
 
-治理同步从 `IMPLEMENTED_UNVERIFIED` 提升为 `VERIFIED` 时，必须先取得明确
-`APPROVED` 的独立审查，并把审查证据提交到后续 commit。状态更新可以由实施者
-机械执行，但验证权来自该独立审查；验证器必须从证据 commit 读取审查材料，核对
-被审 commit、祖先关系、证据路径和最终决定，不能信任当前工作树中的自我声明。
-`status/progress.json` 中的 `governance_sync.verification` 必须记录 `decision`、
-`reviewed_commit`、`evidence_commit` 和 `evidence_paths`。Markdown 审查证据使用
-唯一的 `Reviewed HEAD` 字段和 `Final Decision` 章节作为稳定机器字段。
-
-`VERIFIED` 不等于 `MERGE_AUTHORIZED`。治理合并还要求 V00.1 已独立
-`VERIFIED`、最终 reconciliation gate 为 `PASS`，并单独设置合并授权。
-
 ## 5. 决策纪律
 Codex 可提出 ADR proposal，但需要用户/负责人批准的架构或经济规则不得自动变为 APPROVED。未批准冲突只阻塞依赖它的步骤。
 
