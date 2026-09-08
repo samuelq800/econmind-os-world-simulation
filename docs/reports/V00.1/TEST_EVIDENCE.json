@@ -1,17 +1,18 @@
 {
   "schema_version": "econmind.v00.1-final-validation.v1",
   "work_package": "V00.1",
-  "phase": "PRE_MERGE_FOUNDATION_FINALIZATION",
+  "phase": "POST_MERGE_FOUNDATION_FINALIZATION",
   "status": "PASS",
-  "recorded_at": "2026-09-08T12:45:00Z",
-  "branch": "chore/r2-governance-sync",
+  "recorded_at": "2026-09-08T12:49:00Z",
+  "branch": "main",
+  "validated_commit": "6950a5364940b44a7fdda90bf3ee1f4c0d7074e4",
   "implementation_commit": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
   "governance_reviewed_commit": "e7f8576ed559bd9167b67cd7493112855f65ca7e",
   "environment": {
     "platform": "darwin-arm64",
     "node": "24.20.0",
     "pnpm": "12.3.4",
-    "supabase_link": "NOT_LINKED",
+    "supabase_link": "PRODUCTION_INTEGRATION_TARGET_ONLY",
     "database_mutation_allowed": false
   },
   "commands": [
@@ -57,7 +58,7 @@
       "command": "pnpm secrets:check",
       "exit_code": 0,
       "result": "PASS",
-      "evidence": "225 candidate files scanned"
+      "evidence": "226 candidate files scanned"
     },
     {
       "command": "pnpm build",
@@ -75,7 +76,7 @@
       "command": "python3 tools/validate_r2_governance.py --json",
       "exit_code": 0,
       "result": "PASS",
-      "evidence": "33 packages; 101 steps; 101 step prompts; 8 control prompts; 99 NORMAL; 2 PARALLEL_PREPARATION; both DAGs acyclic; 20 ADRs unapproved; V00.2 not ready"
+      "evidence": "33 packages; 101 steps; 101 step prompts; 8 control prompts; 99 NORMAL; 2 PARALLEL_PREPARATION; both DAGs acyclic; 20 ADRs unapproved; integration merged"
     },
     {
       "command": "git diff --check",
@@ -100,8 +101,9 @@
   "state_confirmation": {
     "v00_1": "VERIFIED",
     "governance_sync": "VERIFIED",
-    "governance_integration": "PENDING",
+    "governance_integration": "MERGED",
     "v00_2": "BLOCKED",
+    "v00_2_dependencies_ready": true,
     "adrs": "20 PROPOSED_NOT_APPROVED",
     "signed_attestation_requirement": false,
     "production_or_supabase_mutation": false,

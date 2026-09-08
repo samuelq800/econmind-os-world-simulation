@@ -60,11 +60,10 @@ Codex 可提出 ADR proposal，但需要用户/负责人批准的架构或经济
 
 ## 11. 当前执行门槛
 
-- 当前步骤：V00.1，已 `VERIFIED`。
-- R2 治理同步：已 `VERIFIED`，等待合并与最终 reconciliation。
-- V00.2：`BLOCKED`，不得开始。
-- V00.2 的解除条件：本次治理同步已实际合并到 `main`，且合并后最终
-  reconciliation 通过。
+- V00.1：已 `VERIFIED`。
+- R2 治理同步：已 `VERIFIED` 并合并到 `main`；合并后 reconciliation 已通过。
+- 当前步骤：V00.2，是唯一可开始的下一步骤。
+- V00.2 必须在专用分支更新执行计划后，才能从 `BLOCKED` 转为 `IN_PROGRESS`；不得自动开始 V00.3。
 
 ## 12. 导航
 

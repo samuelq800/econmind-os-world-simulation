@@ -15,10 +15,11 @@ reconstruct missing governance from chat history.
 ## Current gate
 
 V00.1 and the R2 governance sync have independent `APPROVED` reviews and explicit
-project-owner acceptance, so both are `VERIFIED`. V00.2 remains blocked until
-the governance branch is actually merged into `main` and final reconciliation
-passes. Implement only the current approved and dependency-ready step. Never
-continue automatically into later work packages.
+project-owner acceptance, so both are `VERIFIED`. The governance branch is
+merged into `main` and final reconciliation passed. V00.2 is the next
+dependency-ready step; it may transition from `BLOCKED` to `IN_PROGRESS` only
+on its dedicated branch after its execution plan is current. Implement only
+that step and never continue automatically into later work packages.
 
 ## Architecture and data safety
 
