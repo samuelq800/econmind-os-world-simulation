@@ -1,0 +1,53 @@
+{
+  "schema_version": "R2-101.1",
+  "package_id": "V06",
+  "package_status": "IMPLEMENTED_UNVERIFIED",
+  "review_readiness": "READY_FOR_PACKAGE_REVIEW",
+  "content_commit": "3c6f12b39820f878e7662b9ed7eca734c571a0d7",
+  "steps": {
+    "V06.1": {
+      "code_candidate": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7",
+      "review_target": "390367442fca12cd511e5df7199d6c1dc49c345a",
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "continuation_review": "APPROVED_FOR_CONTINUATION",
+      "automated_evidence": "PASS"
+    },
+    "V06.2": {
+      "code_candidate": "4e35c07758f4d39b05dac402eeb03b080275c3e0",
+      "review_target": "721993d871a72e0f12c9cfd115c5b04fc7abdcab",
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "review_unavailability_history": "UNAVAILABLE_SYSTEM_ERROR",
+      "owner_continuation_authorized": true,
+      "current_continuation_review": "APPROVED_FOR_CONTINUATION",
+      "closed_p0_findings": 2,
+      "automated_evidence": "PASS"
+    },
+    "V06.3": {
+      "code_candidate": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453",
+      "review_target": "3c6f12b39820f878e7662b9ed7eca734c571a0d7",
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "automated_evidence": "PASS"
+    }
+  },
+  "verification": {
+    "focused_v06_1_to_v06_3": "6 files / 36 tests / PASS",
+    "full_repository": "23 files / 325 tests / PASS",
+    "protected_architecture": "3 files / 34 tests / PASS",
+    "authoritative_scanner": "21 core files / 33 total files / PASS",
+    "boundary_scanner": "38 files / PASS",
+    "r2_governance": "14 groups / PASS",
+    "environment_safety": "PASS / no database configured / production mutation disabled",
+    "migration_rehearsal": "PASS / PGlite only",
+    "workspace_build": "PASS"
+  },
+  "finding_state": {
+    "known_open_p0": 0,
+    "known_open_p1": 0,
+    "package_review_pending": true,
+    "package_verified": false
+  },
+  "production_access": false,
+  "database_mutation": false,
+  "v07_started": false,
+  "next_action": "V06_PACKAGE_LEVEL_REVIEW"
+}

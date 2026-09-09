@@ -347,6 +347,11 @@
       "docs/reports/GATE_A_TARGETED_REVIEW_BUNDLE/TEST_EVIDENCE.json",
       "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
       "docs/reports/GATE_A/FINAL_RECONCILIATION.md"
+    ],
+    "V06": [
+      "docs/reports/V06/PACKAGE_REVIEW_BUNDLE.md",
+      "docs/reports/V06/PACKAGE_TEST_EVIDENCE.json",
+      "docs/reports/V06/PACKAGE_REVIEW_TARGET.md"
     ]
   },
   "implementation_commits": {
