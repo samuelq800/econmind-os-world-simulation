@@ -153,6 +153,7 @@ def validate(root: Path) -> dict[str, Any]:
             "requirements/requirement_registry.json",
             "requirements/source_unit_assignments.jsonl",
             "requirements/adr_dependency_map.json",
+            "requirements/two_repository_integration_contract.json",
             "planning/01_新仓库架构与完整交付路线.md",
             "planning/02_架构裁决与数据库协议.md",
             "planning/03_33个工作包与依赖.md",
@@ -739,6 +740,64 @@ def validate(root: Path) -> dict[str, Any]:
             v01_adr_package_edges=len(graph["adr_to_package_edges"]),
         )
 
+    def v01_integration_contract() -> None:
+        contract = load_json("requirements/two_repository_integration_contract.json")
+        require(
+            contract["schema_version"] == "V01.3-INTEGRATION-CONTRACT-1",
+            "wrong V01.3 contract schema",
+        )
+        require(contract["implementation_claim"] is False, "V01.3 falsely claims implementation")
+        require(
+            contract["shared_identity"]["profile_field_whitelist"]
+            == ["user_id", "display_name", "school_id"],
+            "V01.3 identity whitelist changed",
+        )
+        prohibited_identity = set(
+            contract["shared_identity"]["prohibited_shared_fields_or_assumptions"]
+        )
+        require(
+            {"role", "platform_role", "service_role key"} <= prohibited_identity,
+            "V01.3 permits portable authorization or credentials",
+        )
+        never_authority = set(contract["ownership"]["never_world_v2_authority"])
+        require(
+            {"main site", "V1 World", "League", "Legacy World", "browser or UI state"}
+            <= never_authority,
+            "V01.3 creates an alternate World V2 authority",
+        )
+        boundary = contract["world_v2_authoritative_boundary"]
+        require(boundary["source_of_truth_count"] == 1, "V01.3 source-of-truth count changed")
+        require(
+            boundary["authoritative_execution_host"] == "apps/world-worker"
+            and boundary["authentication_command_query_boundary"] == "apps/world-api"
+            and boundary["deterministic_domain_logic"] == "packages/core"
+            and boundary["non_authoritative_ui"] == "apps/world-web",
+            "V01.3 repository ownership boundary changed",
+        )
+        preserved_routes = {
+            item["route"] for item in contract["route_contract"]["main_site_preserved"]
+        }
+        require(
+            preserved_routes
+            == {
+                "/world",
+                "/simulation/world and descendants",
+                "/league/world and descendants",
+                "/simulation/legacy-world and descendants",
+                "/country, /lobby, /room, /results, /replay, /view",
+            },
+            "V01.3 route preservation set changed",
+        )
+        require(
+            contract["next_gate"] == "V01_PACKAGE_LEVEL_REVIEW",
+            "V01.3 must stop at package review",
+        )
+        metrics.update(
+            v01_identity_fields=len(contract["shared_identity"]["profile_field_whitelist"]),
+            v01_preserved_route_groups=len(preserved_routes),
+            v01_next_gate=contract["next_gate"],
+        )
+
     def templates() -> None:
         required_templates = [
             "templates/EXECUTION_PLAN.md",
@@ -769,6 +828,7 @@ def validate(root: Path) -> dict[str, Any]:
         ("source_material", source_material),
         ("v01_traceability", v01_traceability),
         ("v01_adr_graph", v01_adr_graph),
+        ("v01_integration_contract", v01_integration_contract),
         ("templates", templates),
     ):
         check(name, operation)

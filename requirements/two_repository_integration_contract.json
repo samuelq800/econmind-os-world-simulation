@@ -1,0 +1,138 @@
+{
+  "schema_version": "V01.3-INTEGRATION-CONTRACT-1",
+  "status": "FROZEN_FOR_V01_PACKAGE_REVIEW",
+  "authority": "Repository integration boundary only. Future P0 implementation still requires blocking independent review.",
+  "implementation_claim": false,
+  "baselines": {
+    "world_v2_repository": {
+      "url": "https://github.com/samuelq800/econmind-os-world-simulation.git",
+      "commit": "02f5bf2b172cceb1e952c8f5095510b198b6a4e6"
+    },
+    "main_site_repository": {
+      "url": "https://github.com/samuelq800/econmind-os.git",
+      "ref": "origin/main",
+      "commit": "cd559dffba0af3f1007203243771601cb0f81c17",
+      "working_tree_used_as_authority": false
+    }
+  },
+  "shared_identity": {
+    "identity_authority": "main-site Supabase Auth subject",
+    "profile_field_whitelist": ["user_id", "display_name", "school_id"],
+    "field_semantics": {
+      "user_id": "Internal stable subject identifier; never a public display identifier and never sufficient authorization.",
+      "display_name": "Optional presentation field only; never authorization or economic ownership.",
+      "school_id": "Optional organizational context only; server-side current membership and eligibility must still be resolved."
+    },
+    "validated_token_claims": ["sub", "iss", "aud", "exp", "iat"],
+    "authorization_rule": "World V2 verifies the token and resolves current team, country, office, suspension, and assignment authority server-side at command acceptance and again where execution-time policy requires it.",
+    "prohibited_shared_fields_or_assumptions": [
+      "email",
+      "password or credential material",
+      "refresh_token",
+      "service_role key",
+      "role",
+      "platform_role",
+      "team membership as an unverified portable claim",
+      "country assignment as an unverified portable claim",
+      "office assignment as an unverified portable claim",
+      "V1 balances, scores, inventory, contracts, policy state, or world identifiers"
+    ],
+    "lifecycle_rule": "Revocation or membership change must deny new World V2 access without deleting immutable economic history; personal-profile deletion must not cascade into World V2 ledger facts."
+  },
+  "ownership": {
+    "main_site": [
+      "public website and shared navigation",
+      "Supabase Auth user lifecycle",
+      "shared profile and school/team administration",
+      "League, V1 World, and Legacy World product surfaces",
+      "the sole authorized production Supabase migration publication chain"
+    ],
+    "world_v2": [
+      "one authoritative World V2 World State",
+      "World V2 Command/Event/Receipt contracts and authorization boundary",
+      "append-only World V2 economic ledger and postings",
+      "deterministic/idempotent simulation and atomic settlement",
+      "World V2 projections, APIs, worker execution, and non-authoritative web UI"
+    ],
+    "shared_contract_only": [
+      "versioned identity-field whitelist",
+      "validated authentication-token envelope",
+      "versioned cross-repository route links",
+      "versioned migration artefacts delivered by World V2 and published only by the main-site release chain"
+    ],
+    "never_world_v2_authority": [
+      "main site",
+      "V1 World",
+      "League",
+      "Legacy World",
+      "browser or UI state",
+      "cache, projection, snapshot, replay view, or forecast"
+    ]
+  },
+  "route_contract": {
+    "main_site_preserved": [
+      {
+        "route": "/world",
+        "behavior": "redirects to /simulation/world"
+      },
+      {
+        "route": "/simulation/world and descendants",
+        "behavior": "remain the existing V1 Simulation World surface"
+      },
+      {
+        "route": "/league/world and descendants",
+        "behavior": "remain the existing League/V1 World surface"
+      },
+      {
+        "route": "/simulation/legacy-world and descendants",
+        "behavior": "remain the explicit Legacy World compatibility surface"
+      },
+      {
+        "route": "/country, /lobby, /room, /results, /replay, /view",
+        "behavior": "remain existing legacy compatibility entrypoints"
+      }
+    ],
+    "world_v2": {
+      "during_v01": "No existing main-site route is rebound, proxied, or silently redirected to World V2.",
+      "initial_entry": "A separately configured World V2 origin may be linked only after its release gate; until then no live entry is claimed.",
+      "future_same_origin": "Requires an approved ADR-19 deployment/auth/cache design and a separately reviewed route change.",
+      "token_transport": "Access or refresh tokens must never be placed in URLs or copied through unrestricted postMessage."
+    }
+  },
+  "legacy_reuse": {
+    "allowed_with_provenance": [
+      "brand image assets",
+      "country flag SVG assets",
+      "world map SVG and its provenance record",
+      "design tokens and purely presentational styles",
+      "pure presentational components with no state, persistence, authorization, or economic imports",
+      "static explanatory copy after source/license review"
+    ],
+    "prohibited_as_world_v2_state_or_authority": [
+      "V1 or Legacy World database rows, snapshots, identifiers, balances, inventories, contracts, scores, or policy state",
+      "V1 Supabase mutations, RPC adapters, Edge Functions, migrations, RLS policies, or service credentials",
+      "V1 browser, React, Realtime, cache, or local-storage state",
+      "V1 settlement, scoring, policy-effect, calibration, or world-engine outputs",
+      "League membership or client role checks as World V2 command authorization",
+      "components coupled to V1 persistence or economic behavior"
+    ],
+    "copy_rule": "Reuse is copy-by-explicit-version with source path, source commit, license/provenance, and content hash; imports may not cross the repository runtime boundary."
+  },
+  "world_v2_authoritative_boundary": {
+    "source_of_truth_count": 1,
+    "authoritative_execution_host": "apps/world-worker",
+    "authentication_command_query_boundary": "apps/world-api",
+    "deterministic_domain_logic": "packages/core",
+    "non_authoritative_ui": "apps/world-web",
+    "state_change_path": "authorized command -> validated receipt/idempotency -> deterministic worker -> atomic append-only events/postings -> derived projections",
+    "forbidden_paths": [
+      "main site or V1 directly mutates World V2 economic state",
+      "League or Legacy World state is imported as World V2 truth",
+      "UI, projection, snapshot, cache, replay, or forecast writes authoritative state",
+      "a second writer or alternate settlement engine",
+      "direct macro buffs without modeled causal flows"
+    ]
+  },
+  "production_rule": "World V2 never mutates production Supabase or publishes migrations outside an authorized release. Production DDL remains in the main-site publication chain and all P0 review gates remain blocking.",
+  "next_gate": "V01_PACKAGE_LEVEL_REVIEW"
+}

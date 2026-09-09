@@ -139,3 +139,89 @@ describe('V01.2 ADR coordination graph', () => {
     });
   });
 });
+
+describe('V01.3 two-repository integration contract', () => {
+  it('freezes a minimal identity whitelist without portable authorization', () => {
+    const contract = readJson(
+      'requirements/two_repository_integration_contract.json',
+    );
+    expect(contract.shared_identity.profile_field_whitelist).toEqual([
+      'user_id',
+      'display_name',
+      'school_id',
+    ]);
+    expect(
+      contract.shared_identity.prohibited_shared_fields_or_assumptions,
+    ).toEqual(
+      expect.arrayContaining([
+        'role',
+        'platform_role',
+        'team membership as an unverified portable claim',
+        'country assignment as an unverified portable claim',
+        'office assignment as an unverified portable claim',
+        'service_role key',
+      ]),
+    );
+    expect(contract.shared_identity.authorization_rule).toContain(
+      'server-side',
+    );
+  });
+
+  it('preserves V1, League, and Legacy route behavior', () => {
+    const contract = readJson(
+      'requirements/two_repository_integration_contract.json',
+    );
+    const routes = contract.route_contract.main_site_preserved.map(
+      (item) => item.route,
+    );
+    expect(routes).toEqual([
+      '/world',
+      '/simulation/world and descendants',
+      '/league/world and descendants',
+      '/simulation/legacy-world and descendants',
+      '/country, /lobby, /room, /results, /replay, /view',
+    ]);
+    expect(contract.route_contract.world_v2.during_v01).toContain(
+      'No existing',
+    );
+    expect(contract.route_contract.world_v2.token_transport).toContain('never');
+  });
+
+  it('keeps every non-V2 system outside World V2 authority', () => {
+    const contract = readJson(
+      'requirements/two_repository_integration_contract.json',
+    );
+    expect(contract.ownership.never_world_v2_authority).toEqual(
+      expect.arrayContaining([
+        'main site',
+        'V1 World',
+        'League',
+        'Legacy World',
+        'browser or UI state',
+      ]),
+    );
+    expect(contract.world_v2_authoritative_boundary.source_of_truth_count).toBe(
+      1,
+    );
+    expect(
+      contract.world_v2_authoritative_boundary.authoritative_execution_host,
+    ).toBe('apps/world-worker');
+    expect(contract.world_v2_authoritative_boundary.non_authoritative_ui).toBe(
+      'apps/world-web',
+    );
+  });
+
+  it('prohibits legacy economic state and authority reuse', () => {
+    const contract = readJson(
+      'requirements/two_repository_integration_contract.json',
+    );
+    const prohibited =
+      contract.legacy_reuse.prohibited_as_world_v2_state_or_authority.join(' ');
+    expect(prohibited).toContain('balances');
+    expect(prohibited).toContain('Supabase mutations');
+    expect(prohibited).toContain('settlement');
+    expect(prohibited).toContain('client role checks');
+    expect(contract.implementation_claim).toBe(false);
+    expect(contract.next_gate).toBe('V01_PACKAGE_LEVEL_REVIEW');
+  });
+});
