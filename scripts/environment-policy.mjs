@@ -9,10 +9,12 @@ const SUPPORTED_ENVIRONMENTS = new Set([
 ]);
 
 export function assessEnvironment(environment) {
-  const name = environment.ECONMIND_ENV ?? 'local';
+  const name = environment.ECONMIND_ENV;
   const violations = [];
 
-  if (!SUPPORTED_ENVIRONMENTS.has(name)) {
+  if (name === undefined || name === '') {
+    violations.push('ECONMIND_ENV is required');
+  } else if (!SUPPORTED_ENVIRONMENTS.has(name)) {
     violations.push(`Unsupported ECONMIND_ENV: ${name}`);
   }
 
@@ -22,17 +24,80 @@ export function assessEnvironment(environment) {
     );
   }
 
-  const databaseUrl = environment.DATABASE_URL;
-  if ((name === 'local' || name === 'ci') && databaseUrl) {
+  const configuredUrls = [
+    environment.WORLD_DATABASE_URL,
+    environment.DATABASE_URL,
+  ].filter(Boolean);
+  if (configuredUrls.length === 2 && configuredUrls[0] !== configuredUrls[1]) {
+    violations.push('WORLD_DATABASE_URL conflicts with DATABASE_URL');
+  }
+  const databaseUrl = configuredUrls[0];
+  let parsedDatabaseUrl;
+  if (databaseUrl) {
     try {
-      const parsed = new URL(databaseUrl);
-      if (!SAFE_LOCAL_HOSTS.has(parsed.hostname)) {
+      parsedDatabaseUrl = new URL(databaseUrl);
+      if (!['postgres:', 'postgresql:'].includes(parsedDatabaseUrl.protocol)) {
+        violations.push('World database URL must use PostgreSQL');
+      }
+      if (
+        (name === 'local' || name === 'ci') &&
+        !SAFE_LOCAL_HOSTS.has(parsedDatabaseUrl.hostname)
+      ) {
         violations.push(`${name} DATABASE_URL must resolve to a loopback host`);
       }
+      if (
+        name === 'production' &&
+        SAFE_LOCAL_HOSTS.has(parsedDatabaseUrl.hostname)
+      ) {
+        violations.push(
+          'production database URL must not resolve to a development host',
+        );
+      }
     } catch {
-      violations.push('DATABASE_URL is not a valid URL');
+      violations.push('World database URL is not valid');
     }
   }
 
-  return { name, violations };
+  const expectedFingerprint = name ? `world-v2-${name}` : undefined;
+  const fingerprint = environment.WORLD_DATABASE_FINGERPRINT;
+  if (databaseUrl && fingerprint !== expectedFingerprint) {
+    violations.push(
+      `WORLD_DATABASE_FINGERPRINT must identify ${expectedFingerprint ?? 'a valid environment'}`,
+    );
+  }
+  if ((name === 'staging' || name === 'production') && !databaseUrl) {
+    violations.push(`${name} requires an explicit World database URL`);
+  }
+  if (
+    environment.WORLD_DATABASE_NAMESPACE !== undefined &&
+    environment.WORLD_DATABASE_NAMESPACE !== 'world_v2'
+  ) {
+    violations.push('WORLD_DATABASE_NAMESPACE must be world_v2');
+  }
+  if (
+    environment.WORLD_DATABASE_MUTATION_MODE !== undefined &&
+    environment.WORLD_DATABASE_MUTATION_MODE !== 'disabled'
+  ) {
+    violations.push(
+      'World database mutation is disabled during the Foundation Sprint',
+    );
+  }
+  if (name === 'ci') {
+    for (const key of Object.keys(environment)) {
+      if (
+        environment[key] &&
+        /(?:PRODUCTION|SERVICE_ROLE|SUPABASE_DB_PASSWORD)/iu.test(key)
+      ) {
+        violations.push(
+          `CI must not receive production credential variable: ${key}`,
+        );
+      }
+    }
+  }
+
+  return {
+    databaseConfigured: Boolean(parsedDatabaseUrl),
+    name: name ?? 'MISSING',
+    violations,
+  };
 }

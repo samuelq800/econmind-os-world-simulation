@@ -21,13 +21,16 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "vitest run",
     "test:boundaries": "vitest run tests/architecture/boundaries.test.ts && node scripts/check-boundaries.mjs",
-    "env:check": "node scripts/assert-safe-environment.mjs",
+    "env:check": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
+    "migration:validate": "node scripts/validate-migrations.mjs",
+    "migration:rehearse": "node scripts/rehearse-migrations.mjs",
     "secrets:check": "node scripts/check-repository-secrets.mjs",
     "supabase:safe": "node scripts/supabase-safe.mjs",
     "build": "pnpm -r --if-present build",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:boundaries && pnpm env:check && pnpm secrets:check && pnpm build"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:boundaries && pnpm env:check && pnpm migration:validate && pnpm migration:rehearse && pnpm secrets:check && pnpm build"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
     "@eslint/js": "10.0.1",
     "@types/node": "24.13.3",
     "@types/react": "19.2.18",

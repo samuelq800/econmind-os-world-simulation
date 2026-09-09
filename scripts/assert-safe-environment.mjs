@@ -55,6 +55,7 @@ console.log(
     {
       status: 'PASS',
       environment: assessment.name,
+      databaseConfigured: assessment.databaseConfigured,
       validatedViteModes: viteModes,
       linkedSupabaseProject: linkedProjectDetected
         ? 'PRODUCTION_INTEGRATION_TARGET_ONLY'
