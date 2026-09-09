@@ -50,7 +50,7 @@ describe('V04 authoritative architecture gates', () => {
         ),
         writeFile(
           path.join(fixture, 'packages/core/src/engine/alias.ts'),
-          "const Numeric = Number; export const leaked = Numeric('1');",
+          "const Numeric = globalThis['Number']; const Bound = Numeric.bind(null); export const leaked = Reflect.apply(Bound, null, ['1']);",
         ),
       ]);
       const result = run(fixture);

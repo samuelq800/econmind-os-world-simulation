@@ -130,6 +130,26 @@ function unwrapExpression(node) {
   return current;
 }
 
+function coercionReference(node, aliases) {
+  const current = unwrapExpression(node);
+  if (ts.isIdentifier(current)) return aliases.has(current.text);
+  if (ts.isPropertyAccessExpression(current)) {
+    return aliases.has(current.name.text);
+  }
+  if (ts.isElementAccessExpression(current) && current.argumentExpression) {
+    const name = literalText(current.argumentExpression);
+    return name !== null && aliases.has(name);
+  }
+  if (
+    ts.isCallExpression(current) &&
+    ts.isPropertyAccessExpression(current.expression) &&
+    current.expression.name.text === 'bind'
+  ) {
+    return coercionReference(current.expression.expression, aliases);
+  }
+  return false;
+}
+
 function collectCoercionAliases(sourceFile) {
   const aliases = new Set(['Number', 'parseFloat', 'parseInt']);
   let changed = true;
@@ -154,14 +174,30 @@ function collectCoercionAliases(sourceFile) {
         initializer = node.right;
       }
       if (target && initializer) {
-        const resolved = unwrapExpression(initializer);
         if (
-          ts.isIdentifier(resolved) &&
-          aliases.has(resolved.text) &&
+          coercionReference(initializer, aliases) &&
           !aliases.has(target.text)
         ) {
           aliases.add(target.text);
           changed = true;
+        }
+      }
+      if (
+        ts.isVariableDeclaration(node) &&
+        ts.isObjectBindingPattern(node.name) &&
+        node.initializer
+      ) {
+        for (const element of node.name.elements) {
+          const sourceName = element.propertyName ?? element.name;
+          if (
+            ts.isIdentifier(element.name) &&
+            ts.isIdentifier(sourceName) &&
+            aliases.has(sourceName.text) &&
+            !aliases.has(element.name.text)
+          ) {
+            aliases.add(element.name.text);
+            changed = true;
+          }
         }
       }
       ts.forEachChild(node, visit);
@@ -267,14 +303,24 @@ function analyze(file) {
         );
       }
       if (ts.isCallExpression(node)) {
-        const directCoercion = calleeContainsIdentifier(
-          node.expression,
-          forbiddenCoercionCallees,
-        );
+        const directCoercion =
+          calleeContainsIdentifier(node.expression, forbiddenCoercionCallees) ||
+          coercionReference(node.expression, forbiddenCoercionCallees);
+        const reflectiveCoercion =
+          ts.isPropertyAccessExpression(node.expression) &&
+          ts.isIdentifier(node.expression.expression) &&
+          node.expression.expression.text === 'Reflect' &&
+          ['apply', 'construct'].includes(node.expression.name.text) &&
+          node.arguments[0] !== undefined &&
+          coercionReference(node.arguments[0], forbiddenCoercionCallees);
         const toNumber =
           ts.isPropertyAccessExpression(node.expression) &&
           node.expression.name.text === 'toNumber';
-        if (directCoercion || (toNumber && !decimalOwner)) {
+        if (
+          directCoercion ||
+          reflectiveCoercion ||
+          (toNumber && !decimalOwner)
+        ) {
           record(
             file,
             sourceFile,
