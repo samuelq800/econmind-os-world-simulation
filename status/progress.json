@@ -1,6 +1,6 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T12:42:15Z",
+  "derived_at": "2026-09-09T12:49:07Z",
   "source_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
   "note": "Gate A is accepted by the project owner under the scoped PROJECT_OWNER_ACCEPTANCE policy after passing normal baseline and targeted regression evidence. This does not approve ADR-01 or ADR-03.",
   "mainline_mode": "FAST_MAINLINE",
@@ -83,8 +83,8 @@
     "decision": "PASSED",
     "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
     "integration": {
-      "status": "PENDING",
-      "merged_commit": null
+      "status": "MERGED",
+      "merged_commit": "676c5dfb358edda5c25e9bb308242c533783dba0"
     }
   },
   "gate_a_targeted_remediation": {
@@ -117,7 +117,9 @@
     "open_ended_adversarial_probing": "NOT_REQUIRED_BY_OWNER_POLICY",
     "independent_review_claimed": false,
     "owner_approved": true,
-    "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md"
+    "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+    "merged_main_commit": "676c5dfb358edda5c25e9bb308242c533783dba0",
+    "reconciliation_evidence_file": "docs/reports/GATE_A/FINAL_RECONCILIATION.md"
   },
   "current_gate": {
     "step_id": "V05.3",
@@ -126,7 +128,6 @@
     "next_step": "V06.1",
     "next_step_ready": false,
     "next_step_blockers": [
-      "Gate A Foundation integration into main is pending",
       "ADR-01 owner approval is pending",
       "ADR-03 owner approval is pending"
     ],
@@ -256,7 +257,8 @@
       "docs/reports/GATE_A_TARGETED_REVIEW_BUNDLE/README.md",
       "docs/reports/GATE_A_TARGETED_REVIEW_BUNDLE/FINDING_CLOSURE.json",
       "docs/reports/GATE_A_TARGETED_REVIEW_BUNDLE/TEST_EVIDENCE.json",
-      "docs/reports/GATE_A/FINAL_ACCEPTANCE.md"
+      "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "docs/reports/GATE_A/FINAL_RECONCILIATION.md"
     ]
   },
   "implementation_commits": {
