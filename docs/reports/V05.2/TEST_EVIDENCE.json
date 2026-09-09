@@ -1,0 +1,30 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V05.2",
+  "commit": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
+  "environment": {
+    "name": "local synthetic authorization adapter",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm vitest run tests/foundation/authorization-foundation.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "17/17 combined identity, approval, projection, and lifecycle tests passed"
+    }
+  ],
+  "negative_cases": [
+    "stale proposal version",
+    "duplicate Office signature",
+    "forged authorization context",
+    "rejected-version resurrection",
+    "invalidated-version sign or revise"
+  ],
+  "database_rls_evidence": ["No database or RLS access"],
+  "unresolved_gaps": [
+    "ADR-09 required-Office rules remain unapproved and external"
+  ]
+}

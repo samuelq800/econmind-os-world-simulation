@@ -247,6 +247,14 @@ function resolveTarget({ compilerOptions, filePath, specifier }) {
 function externalViolation(source, specifier) {
   const name = packageNameFromSpecifier(specifier);
   if (
+    source.relativePath === 'packages/core/src/serialization/canonical.ts' &&
+    specifier === 'node:util'
+  ) {
+    // Native Proxy identity is the only trap-free way to reject behavioral
+    // Proxy inputs before canonical reflection. Keep this exception exact.
+    return null;
+  }
+  if (
     source.packageName === 'core' &&
     (name === 'react' || name === 'react-dom' || name.startsWith('@supabase/'))
   ) {

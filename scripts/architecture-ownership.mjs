@@ -24,8 +24,9 @@ export const PACKAGE_OWNERS = new Map([
   ['packages/testkit', OWNERS.SERVER_ONLY],
 ]);
 
-export const BUILD_HELPERS = [
-  'apps/world-web/server.mjs',
+export const BUILD_HELPERS = ['apps/world-web/server.mjs'];
+export const POLICY_HELPERS = [
+  'scripts/environment-policy.mjs',
   'scripts/vite-environment-policy.mjs',
   'scripts/vite-environment-policy.d.mts',
 ];
@@ -37,6 +38,7 @@ export const GOVERNED_ROOTS = [
   'apps',
   'packages',
   ...BUILD_HELPERS,
+  ...POLICY_HELPERS,
   ...SERVER_TOOLS,
 ];
 export const EXCLUDED_DIRECTORIES = new Set([
@@ -66,25 +68,40 @@ export function classifyArchitecturePath(repositoryRoot, filePath) {
   const owner = PACKAGE_OWNERS.get(packageRoot) ?? OWNERS.UNKNOWN;
   const excluded = parts.some((part) => EXCLUDED_DIRECTORIES.has(part));
   const helper = BUILD_HELPERS.includes(relativePath);
+  const policyHelper = POLICY_HELPERS.includes(relativePath);
   const serverTool = SERVER_TOOLS.includes(relativePath);
   const buildConfig =
     relativePath === 'apps/world-web/vite.config.ts' || helper;
   return {
-    owner: helper || serverTool ? OWNERS.SERVER_ONLY : owner,
-    context: buildConfig
-      ? 'WEB_BUILD_CONFIG'
-      : serverTool
-        ? 'SERVER_TOOL'
-        : 'RUNTIME',
+    owner: helper || policyHelper || serverTool ? OWNERS.SERVER_ONLY : owner,
+    context: policyHelper
+      ? 'TOOL_POLICY'
+      : buildConfig
+        ? 'WEB_BUILD_CONFIG'
+        : serverTool
+          ? 'SERVER_TOOL'
+          : 'RUNTIME',
     packageName: parts[1] ?? null,
     relativePath,
-    governed: !excluded && (helper || serverTool || owner !== OWNERS.UNKNOWN),
+    governed:
+      !excluded &&
+      (helper || policyHelper || serverTool || owner !== OWNERS.UNKNOWN),
   };
 }
 
 export function architecturalEdgeViolation(source, target) {
   if (!source.governed || !target.governed) {
     return 'UNRESOLVED_ARCHITECTURE_IMPORT';
+  }
+  if (target.context === 'TOOL_POLICY') {
+    return ['WEB_BUILD_CONFIG', 'SERVER_TOOL', 'TOOL_POLICY'].includes(
+      source.context,
+    )
+      ? null
+      : 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';
+  }
+  if (source.context === 'TOOL_POLICY') {
+    return 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';
   }
   if (source.context === 'WEB_BUILD_CONFIG') {
     return target.context === 'WEB_BUILD_CONFIG'

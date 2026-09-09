@@ -11,6 +11,7 @@ describe('environment safety policy', () => {
       assessEnvironment({
         ECONMIND_ENV: 'local',
         DATABASE_URL: 'postgresql://postgres:postgres@127.0.0.1:54322/postgres',
+        WORLD_DATABASE_FINGERPRINT: 'world-v2-local',
       }).violations,
     ).toEqual([]);
   });

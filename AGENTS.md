@@ -69,10 +69,20 @@ Use the templates under `templates/` and report actual commands, exit codes,
 environment, evidence gaps, affected owners, permissions, migrations, legacy
 impact, and unresolved decisions. An implementation agent must never invent
 `owner_approved`; it may record it only from an explicit project-owner
-instruction. Apply the centralized policy to review timing: P0 always blocks on
-independent review; P1 may defer review only to the named Work Package gate;
-P2/P3 may use only the policy-defined fast-track path after required evidence
-passes.
+instruction. Apply the centralized policy to review timing: P0 normally blocks
+on independent review. The explicit Gate A `PROJECT_OWNER_ACCEPTANCE` is a
+one-time, gate-scoped closure after recorded findings and remediation, not a
+reusable P0 fast-track or ADR approval. P1 may defer review only to the named
+Work Package gate; P2/P3 may use only the policy-defined fast-track path after
+required evidence passes.
+
+Use normal engineering verification: authoritative acceptance gates, P0/P1
+invariants, existing regressions, realistic failures, fail-closed boundaries,
+exact arithmetic/conservation, authorization, migration provenance and ordinary
+security checks. Do not proactively expand work into open-ended adversarial
+red-teaming, extreme website exploit chains, unbounded fuzzing or unrealistic
+timing attacks solely to discover new vulnerabilities. Never weaken or delete
+an existing test or ignore a defect that an ordinary required test reveals.
 
 Codex may never downgrade risk, approve its own P0 change, ignore a failed
 mandatory check, weaken Constitution requirements, create another Source of

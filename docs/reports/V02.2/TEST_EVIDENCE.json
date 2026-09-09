@@ -1,0 +1,44 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V02.2",
+  "commit": "43739ceb38c167c44e806361930b7603360647c3",
+  "environment": {
+    "name": "local",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm migration:validate",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "1 ordered migration; hash/path/namespace/publisher checks passed"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "14/14 governance checks passed"
+    }
+  ],
+  "negative_cases": [
+    "duplicate migration identity",
+    "invalid release order",
+    "unauthorized path",
+    "wrong namespace",
+    "shared schema reference",
+    "destructive namespace SQL",
+    "unsafe Supabase command"
+  ],
+  "database_rls_evidence": [
+    "Manifest declares no RLS/grant change; production publication not run"
+  ],
+  "invariant_evidence": [
+    "One hash-addressed migration source and one named production publisher"
+  ],
+  "unresolved_gaps": [
+    "ADR-16 remains unapproved",
+    "No production publication attempted"
+  ]
+}

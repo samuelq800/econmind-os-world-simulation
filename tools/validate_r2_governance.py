@@ -98,6 +98,38 @@ def validate(root: Path) -> dict[str, Any]:
         if method == "INDEPENDENT_REVIEW":
             independent_review(subject, target, record)
             return
+        if method == "PROJECT_OWNER_ACCEPTANCE":
+            expected_foundation_steps = {
+                f"V{package:02d}.{step}"
+                for package in range(2, 6)
+                for step in range(1, 4)
+            }
+            require(
+                subject in expected_foundation_steps,
+                f"{subject} cannot use Gate A project-owner acceptance",
+            )
+            method_policy = review_policy["verification_methods"][method]
+            require(record.get("gate_id") in method_policy["allowed_gates"], f"{subject} has invalid owner-acceptance gate")
+            require(record.get("decision") == method_policy["decision"], f"{subject} owner-acceptance decision must be PASSED")
+            require(record.get("risk_class") in method_policy["allowed_risk_classes"], f"{subject} owner acceptance must remain P0")
+            implementation_commit = commit_exists(target, f"{subject} implementation_commit")
+            require(
+                commit_exists(record.get("reviewed_commit"), f"{subject} reviewed_commit")
+                == implementation_commit,
+                f"{subject} owner-acceptance commit differs from implementation_commit",
+            )
+            evidence_file = record.get("evidence_file")
+            require(
+                isinstance(evidence_file, str) and evidence_file.startswith("docs/reports/"),
+                f"{subject} owner-acceptance evidence_file must be a repository report path",
+            )
+            file(evidence_file)
+            require(record.get("baseline_evidence_status") == "PASS", f"{subject} baseline evidence did not pass")
+            require(record.get("targeted_regression_status") == "PASS", f"{subject} targeted regressions did not pass")
+            require(record.get("independent_review_claimed") is False, f"{subject} incorrectly claims independent review")
+            require(record.get("open_ended_adversarial_required") is False, f"{subject} has invalid owner test-policy boundary")
+            require(record.get("owner_approved") is True, f"{subject} requires explicit project-owner acceptance")
+            return
         require(method == "OWNER_FAST_TRACK", f"{subject} has invalid verification method")
         require(
             record.get("decision") == "OWNER_FAST_TRACK_ACCEPTED",
@@ -188,6 +220,30 @@ def validate(root: Path) -> dict[str, Any]:
             set(review_policy["verification_methods"]["OWNER_FAST_TRACK"]["allowed_risk_classes"])
             == {"P2", "P3"},
             "owner fast-track must be limited to P2/P3",
+        )
+        owner_acceptance = review_policy["verification_methods"].get("PROJECT_OWNER_ACCEPTANCE")
+        require(isinstance(owner_acceptance, dict), "missing Gate A project-owner acceptance policy")
+        require(
+            owner_acceptance.get("allowed_risk_classes") == ["P0"]
+            and owner_acceptance.get("allowed_gates") == ["GATE_A_FOUNDATION_REVIEW"]
+            and owner_acceptance.get("decision") == "PASSED"
+            and owner_acceptance.get("requires_explicit_owner_instruction") is True
+            and owner_acceptance.get("requires_passing_baseline_evidence") is True
+            and owner_acceptance.get("requires_passing_targeted_regressions") is True
+            and owner_acceptance.get("requires_preserved_prior_findings") is True
+            and owner_acceptance.get("independent_review_claimed") is False
+            and owner_acceptance.get("open_ended_adversarial_required") is False
+            and owner_acceptance.get("cannot_approve_adrs") is True,
+            "Gate A project-owner acceptance policy changed",
+        )
+        test_scope = review_policy.get("test_scope")
+        require(
+            isinstance(test_scope, dict)
+            and test_scope.get("mode") == "NORMAL_ENGINEERING_VERIFICATION"
+            and isinstance(test_scope.get("required"), list)
+            and isinstance(test_scope.get("new_proactive_work_not_required"), list)
+            and isinstance(test_scope.get("preservation_rule"), str),
+            "normal engineering verification scope is incomplete",
         )
         required_topics = {
             "authoritative World State",
@@ -506,6 +562,9 @@ def validate(root: Path) -> dict[str, Any]:
         valid_states = set(steps_data["status_model"])
         implementation_commits = progress_data.get("implementation_commits", {})
         step_reviews = progress_data.get("step_reviews", {})
+        foundation_sprint = progress_data.get("foundation_sprint")
+        foundation_steps: set[str] = set()
+        foundation_finalized = False
         require(
             isinstance(implementation_commits, dict) and set(implementation_commits) <= set(states),
             "invalid implementation_commits subjects",
@@ -514,6 +573,85 @@ def validate(root: Path) -> dict[str, Any]:
             isinstance(step_reviews, dict) and set(step_reviews) <= set(states),
             "invalid step_reviews subjects",
         )
+        if foundation_sprint is not None:
+            require(isinstance(foundation_sprint, dict), "invalid foundation_sprint")
+            expected_foundation_steps = {
+                f"V{package:02d}.{step}"
+                for package in range(2, 6)
+                for step in range(1, 4)
+            }
+            foundation_steps = set(foundation_sprint.get("allowed_steps", []))
+            require(
+                foundation_steps == expected_foundation_steps,
+                "Foundation sprint must cover exactly V02.1-V05.3",
+            )
+            foundation_status = foundation_sprint.get("status")
+            require(
+                foundation_status in {"IMPLEMENTED_UNVERIFIED", "VERIFIED"},
+                "invalid Foundation sprint status",
+            )
+            foundation_finalized = foundation_status == "VERIFIED"
+            expected_branch = (
+                "codex/gate-a-targeted-fixes"
+                if foundation_finalized
+                else "codex/foundation-v02-v05"
+            )
+            require(foundation_sprint.get("branch") == expected_branch, "unexpected Foundation sprint branch")
+            require(
+                foundation_sprint.get("review_gate") == "GATE_A_FOUNDATION_REVIEW",
+                "Foundation sprint requires Gate A",
+            )
+            require(foundation_sprint.get("production_mutation") is False, "Foundation sprint cannot mutate production")
+            if foundation_finalized:
+                require(
+                    foundation_sprint.get("merge_allowed") is True
+                    and foundation_sprint.get("independent_review_pending") is False
+                    and foundation_sprint.get("verification_method") == "PROJECT_OWNER_ACCEPTANCE"
+                    and foundation_sprint.get("decision") == "PASSED",
+                    "finalized Foundation sprint acceptance is incomplete",
+                )
+                evidence_commit = commit_exists(
+                    foundation_sprint.get("evidence_commit"),
+                    "Foundation sprint evidence_commit",
+                )
+                integration = foundation_sprint.get("integration")
+                require(isinstance(integration, dict), "missing Foundation integration status")
+                require(integration.get("status") in {"PENDING", "MERGED"}, "invalid Foundation integration status")
+                if integration["status"] == "MERGED":
+                    merged_commit = commit_exists(integration.get("merged_commit"), "Foundation merged_commit")
+                    is_ancestor(merged_commit, "refs/remotes/origin/main", "Foundation remote integration")
+                    is_ancestor(merged_commit, "HEAD", "Foundation local integration")
+                else:
+                    require(integration.get("merged_commit") is None, "pending Foundation integration cannot name merged_commit")
+            else:
+                require(
+                    foundation_sprint.get("merge_allowed") is False
+                    and foundation_sprint.get("independent_review_pending") is True,
+                    "Foundation sprint pending-review flags changed",
+                )
+            candidate_commit = commit_exists(
+                foundation_sprint.get("candidate_commit"),
+                "Foundation sprint candidate_commit",
+            )
+            is_ancestor(candidate_commit, "HEAD", "Foundation sprint candidate")
+            if foundation_finalized:
+                is_ancestor(candidate_commit, evidence_commit, "Foundation candidate evidence")
+                gate_a_final = progress_data.get("gate_a_final")
+                require(isinstance(gate_a_final, dict), "missing Gate A final record")
+                require(
+                    gate_a_final.get("gate") == "A"
+                    and gate_a_final.get("decision") == "PASSED"
+                    and gate_a_final.get("authority") == "PROJECT_OWNER_ACCEPTANCE"
+                    and gate_a_final.get("code_candidate_commit") == candidate_commit
+                    and gate_a_final.get("evidence_commit") == evidence_commit
+                    and gate_a_final.get("test_policy") == "NORMAL_ENGINEERING_VERIFICATION"
+                    and gate_a_final.get("open_ended_adversarial_probing")
+                    == "NOT_REQUIRED_BY_OWNER_POLICY"
+                    and gate_a_final.get("independent_review_claimed") is False
+                    and gate_a_final.get("owner_approved") is True,
+                    "Gate A final record differs from accepted owner policy",
+                )
+                file(gate_a_final.get("evidence_file"))
         for step_id, state in states.items():
             require(state in valid_states, f"invalid progress state {step_id}: {state}")
             dependencies_ready = all(
@@ -521,7 +659,22 @@ def validate(root: Path) -> dict[str, Any]:
                 for dependency in step_by_id[step_id]["hard_dependencies"]
             )
             if state in {"IN_PROGRESS", "IMPLEMENTED_UNVERIFIED", "CHANGES_REQUIRED", "VERIFIED"}:
-                require(dependencies_ready, f"impossible {state} dependency claim: {step_id}")
+                batch_dependencies_ready = (
+                    state in {"IN_PROGRESS", "IMPLEMENTED_UNVERIFIED"}
+                    and step_id in foundation_steps
+                    and all(
+                        states[dependency] == "VERIFIED"
+                        or (
+                            dependency in foundation_steps
+                            and states[dependency] == "IMPLEMENTED_UNVERIFIED"
+                        )
+                        for dependency in step_by_id[step_id]["hard_dependencies"]
+                    )
+                )
+                require(
+                    dependencies_ready or batch_dependencies_ready,
+                    f"impossible {state} dependency claim: {step_id}",
+                )
             if state == "VERIFIED":
                 verification_record(
                     step_id,
@@ -583,11 +736,55 @@ def validate(root: Path) -> dict[str, Any]:
             require(isinstance(required_gate, str) and required_gate, "invalid required_gate")
             require(gate.get("gate_status") in {"PENDING", "PASS"}, "invalid package gate status")
             gate_open = gate["gate_status"] == "PASS"
+        owner_decisions = {
+            decision["id"]: decision
+            for decision in load_json("status/decisions.json")["decisions"]
+        }
+        group_a_ready = all(
+            owner_decisions[decision_id].get("status") == "APPROVED"
+            and owner_decisions[decision_id].get("approval_record")
+            for decision_id in ("ADR-01", "ADR-03")
+        )
+        foundation_integrated = (
+            not foundation_finalized
+            or foundation_sprint.get("integration", {}).get("status") == "MERGED"
+        )
         next_ready = dependency_ready and gate_open
+        if next_step == "V06.1":
+            next_ready = next_ready and foundation_integrated and group_a_ready
         require(
             gate.get("next_step_ready") is next_ready,
             "current_gate next_step_ready differs from validated readiness",
         )
+        if foundation_steps:
+            expected_foundation_state = "VERIFIED" if foundation_finalized else "IMPLEMENTED_UNVERIFIED"
+            require(
+                all(states[step_id] == expected_foundation_state for step_id in foundation_steps),
+                "Foundation step state differs from sprint state",
+            )
+            require(
+                all(states[f"V06.{step}"] == "PLANNED" for step in range(1, 4)),
+                "V06 started before Gate A",
+            )
+            require(required_gate == "GATE_A_FOUNDATION_REVIEW" and next_step == "V06.1", "Foundation current gate changed")
+            require(
+                gate.get("gate_status") == ("PASS" if foundation_finalized else "PENDING"),
+                "Foundation Gate A status differs from sprint state",
+            )
+            require(
+                all(
+                    progress_data.get("work_packages", {}).get(f"V{package:02d}")
+                    == expected_foundation_state
+                    for package in range(2, 6)
+                ),
+                "Foundation package status differs from step truth",
+            )
+            package_evidence = progress_data.get("package_evidence", {}).get(
+                "FOUNDATION_V02_V05", []
+            )
+            require(package_evidence, "Gate A package evidence is missing")
+            for evidence_path in package_evidence:
+                file(evidence_path)
         if states["V01.3"] == "VERIFIED":
             package_evidence = progress_data.get("package_evidence", {}).get("V01", [])
             require(package_evidence, "V01 package review evidence is missing")
@@ -643,6 +840,7 @@ def validate(root: Path) -> dict[str, Any]:
             approved_reviews=1 + sum(state == "VERIFIED" for state in states.values()),
             v002_ready=v002_ready,
             required_gate=required_gate,
+            foundation_candidate_steps=len(foundation_steps),
         )
 
     def decisions() -> None:

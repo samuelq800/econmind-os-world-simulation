@@ -1,0 +1,39 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V04.3",
+  "commit": "b91fb6ec92d9a19ff23eaeb7573b69e838dca0cc",
+  "environment": {
+    "name": "local",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm test:architecture",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "boundary command fixture argument was routed to an appended scanner"
+    },
+    {
+      "command": "pnpm foundation:policy",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "self-test fixture literal was correctly seen as a disabled-test token"
+    },
+    {
+      "command": "pnpm format:check && pnpm foundation:policy && pnpm test:boundaries && pnpm test:property",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "policy passed; 3 boundary files and 33 tests passed; both scanners passed; 6 properties passed"
+    }
+  ],
+  "negative_cases": [
+    "missing protected command",
+    "echo-pass",
+    "unwired scanner",
+    "disabled protected test"
+  ],
+  "database_rls_evidence": ["No database or RLS access"],
+  "unresolved_gaps": ["Independent Gate A review is pending"]
+}

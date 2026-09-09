@@ -1,0 +1,32 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V03.3",
+  "commit": "52e62f1b988a3f0c650cf5f4032fada78c7fe43c",
+  "environment": {
+    "name": "local",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm typecheck && pnpm vitest run tests/foundation/canonical-core.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "all five workspace typechecks and 10/10 V03 tests passed"
+    }
+  ],
+  "negative_cases": [
+    "JS number/bigint",
+    "cyclic record",
+    "Date/custom prototype",
+    "version mismatch"
+  ],
+  "database_rls_evidence": ["No database or RLS access"],
+  "invariant_evidence": [
+    "stable key order",
+    "canonical decimal string output",
+    "stable SHA-256 preimage convention"
+  ],
+  "unresolved_gaps": ["Command/Event/Receipt hashing is future scope"]
+}

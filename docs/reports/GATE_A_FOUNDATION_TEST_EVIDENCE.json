@@ -1,0 +1,72 @@
+{
+  "schema_version": "R2-101.1",
+  "gate": "GATE_A_FOUNDATION_REVIEW",
+  "branch": "codex/foundation-v02-v05",
+  "candidate_commit": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
+  "environment": {
+    "name": "local",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile && pnpm check",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "frozen install, lint, format, five workspace typechecks, 146 tests, 33 protected boundary tests, environment, migration, policy, and secret checks passed; core declaration build then failed on an inferred private branded export"
+    },
+    {
+      "command": "pnpm --filter @econmind/core build",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "core declaration build passed after the exported Office ID array received an explicit public type"
+    },
+    {
+      "command": "pnpm install --frozen-lockfile && pnpm check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "frozen install passed; lint/format/five typechecks passed; 15 files and 146 tests passed; 3 protected boundary files and 33 tests passed; environment, one migration, clean/existing rehearsals, foundation policy, 355-file secret scan, and all four application/core builds passed"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "14/14 governance checks passed; 12 Foundation steps remained IMPLEMENTED_UNVERIFIED and Gate A remained pending"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "no whitespace errors"
+    },
+    {
+      "command": "pnpm test:property",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "1 file and 6 fixed-seed properties passed"
+    },
+    {
+      "command": "pnpm test:architecture",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "7 files and 66 tests passed; ownership and authoritative-pattern scanners passed"
+    }
+  ],
+  "aggregate_result": "PASS",
+  "production_mutation": "NONE",
+  "database_rls_evidence": [
+    "PGlite clean-baseline rehearsal: PASS",
+    "PGlite existing-schema rehearsal: PASS",
+    "Live Supabase staging rehearsal: NOT_RUN",
+    "Production RLS mutation: NOT_RUN"
+  ],
+  "future_scope": {
+    "V06": "NOT_STARTED",
+    "V07": "NOT_STARTED",
+    "V08": "NOT_STARTED",
+    "V09": "NOT_STARTED",
+    "V10": "NOT_STARTED"
+  },
+  "review_status": "PENDING_INDEPENDENT_GATE_A"
+}

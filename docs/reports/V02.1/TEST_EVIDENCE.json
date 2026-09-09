@@ -1,0 +1,43 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V02.1",
+  "commit": "43739ceb38c167c44e806361930b7603360647c3",
+  "environment": {
+    "name": "local",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm vitest run tests/architecture/environment-safety.test.ts tests/foundation/environment-release-foundation.test.ts",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "Legacy loopback positive fixture omitted the newly required world-v2-local fingerprint. No implementation rule was weakened."
+    },
+    {
+      "command": "same targeted command after fixture correction",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "2 files and 14 tests passed"
+    },
+    {
+      "command": "pnpm env:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "local; linked production target detected; mutation disabled"
+    }
+  ],
+  "negative_cases": [
+    "missing/invalid/conflicting environment",
+    "production URL in local",
+    "local URL in production",
+    "wrong namespace",
+    "production mutation request",
+    "CI production secret variable",
+    "diagnostic secret leakage"
+  ],
+  "database_rls_evidence": ["No production access or RLS mutation"],
+  "invariant_evidence": ["All unsafe configurations fail closed"],
+  "unresolved_gaps": ["No live cloud staging validation"]
+}

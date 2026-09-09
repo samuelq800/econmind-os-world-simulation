@@ -1,0 +1,161 @@
+{
+  "schema_version": "GATE_A_TARGETED_TEST_EVIDENCE-1",
+  "recorded_at": "2026-09-09T07:24:00Z",
+  "base_reviewed_head": "1a950a41567900761d4f4313092ab4a3404e6f67",
+  "code_candidate_head": "47fe5c5d465748370d9a8ea046bc443978437203",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "vitest": "5.0.0",
+    "fast_check_seed": 20260909,
+    "fast_check_num_runs": 250
+  },
+  "initial_reproductions": [
+    {
+      "finding": "GATEA-BLK-01",
+      "result": "FAIL",
+      "observation": "Unsafe exact public dev:api reached LISTENING; later blind probe found localhost., 127.1, 2130706433, 0x7f000001, and IPv4-mapped IPv6 loopback aliases."
+    },
+    {
+      "finding": "GATEA-BLK-02",
+      "result": "FAIL",
+      "observation": "120-digit plus one was rounded; 41-by-41 digit product ended 2200 rather than 2209."
+    },
+    {
+      "finding": "GATEA-MAJ-01",
+      "result": "FAIL",
+      "observation": "Copied/stale contexts approved; later blind probe substituted payload, policy, and required Offices under the same id/version."
+    },
+    {
+      "finding": "GATEA-MAJ-02",
+      "result": "FAIL",
+      "observation": "Method/getter output changed A to B; later blind probe demonstrated live Proxy trap behavior."
+    },
+    {
+      "finding": "GATEA-MAJ-03",
+      "result": "FAIL",
+      "observation": "Dynamic decimal/fast-check imports and unary plus passed; later blind probe used a Number alias."
+    },
+    {
+      "finding": "GATEA-MAJ-04",
+      "result": "FAIL",
+      "observation": "A realistic signed UUID auth subject was rejected by the domain UserId grammar."
+    },
+    {
+      "finding": "GATEA-MAJ-05",
+      "result": "FAIL",
+      "observation": "The named source commit lacked the SQL but validation passed; later blind review identified replace-ref resolution."
+    }
+  ],
+  "focused_results": [
+    {
+      "command": "vitest run tests/foundation/gate-a-runtime-environment.test.ts",
+      "result": "PASS",
+      "tests": "105/105"
+    },
+    {
+      "command": "vitest run tests/foundation/gate-a-numeric-exactness.test.ts",
+      "result": "PASS",
+      "tests": "13/13"
+    },
+    {
+      "command": "vitest run tests/property/canonical-properties.test.ts",
+      "result": "PASS",
+      "tests": "8/8"
+    },
+    {
+      "command": "vitest run tests/foundation/authorization-foundation.test.ts",
+      "result": "PASS",
+      "tests": "27/27"
+    },
+    {
+      "command": "vitest run tests/foundation/canonical-core.test.ts",
+      "result": "PASS",
+      "tests": "14/14"
+    },
+    {
+      "command": "vitest run tests/architecture/foundation-gates.test.ts",
+      "result": "PASS",
+      "tests": "3/3"
+    },
+    {
+      "command": "vitest run tests/foundation/environment-release-foundation.test.ts",
+      "result": "PASS",
+      "tests": "14/14"
+    },
+    {
+      "command": "vitest run tests/foundation/public-runtime-lifecycle.test.ts",
+      "result": "PASS",
+      "tests": "20/20"
+    }
+  ],
+  "property_failure_preserved": {
+    "phase": "first focused integration run",
+    "seed": 20260909,
+    "path": "1",
+    "counterexample": ["7", "-6.0667"],
+    "run_configuration": { "numRuns": 250, "endOnFailure": true, "verbose": 2 },
+    "cause": "Test integration omitted the Price import; this was a harness failure, not an arithmetic counterexample.",
+    "resolution": "Import corrected; exact-or-reject properties pass against the independent oracle."
+  },
+  "full_matrix": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "result": "PASS",
+      "observation": "Six-workspace lockfile and supply-chain policy passed under the pinned toolchain."
+    },
+    {
+      "command": "pnpm check",
+      "result": "PASS",
+      "observation": "Final code candidate: 17 files and 288/288 tests; lint, format, five typechecks, environment, migration, policy, secret scan, and all builds passed."
+    },
+    {
+      "command": "pnpm test:boundaries (inside pnpm check)",
+      "result": "PASS",
+      "observation": "3 files and 34/34 tests; AST scanner PASS on 30 files and ownership scanner PASS on 35 files."
+    },
+    {
+      "command": "pnpm migration:validate (inside pnpm check)",
+      "result": "PASS",
+      "observation": "One artifact; no violations."
+    },
+    {
+      "command": "pnpm migration:rehearse (inside pnpm check)",
+      "result": "PASS",
+      "observation": "PGlite clean-baseline and existing-schema modes each recorded one release row; productionAccess=false."
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py",
+      "result": "PASS",
+      "observation": "14 governance sections passed; 12 Foundation steps remain IMPLEMENTED_UNVERIFIED."
+    },
+    { "command": "git diff --check", "result": "PASS" }
+  ],
+  "honest_failures": [
+    {
+      "command": "initial unpinned pnpm install --frozen-lockfile",
+      "result": "FAIL",
+      "cause": "Host Node 26 / pnpm 11 violated the pinned preinstall contract; rerun with Node 24.20.0 / pnpm 12.3.4 passed."
+    },
+    {
+      "command": "first complete pnpm check",
+      "result": "FAIL",
+      "cause": "One unused initial assignment was rejected by ESLint; corrected before final matrix."
+    },
+    {
+      "command": "next complete pnpm check",
+      "result": "FAIL",
+      "cause": "All 288 assertions passed but Node/Undici emitted one transient setTypeOfService EINVAL after a lifecycle test; isolated lifecycle rerun passed 20/20 and two later complete checks passed."
+    },
+    {
+      "command": "mistyped final check launcher",
+      "result": "NOT_A_TEST",
+      "cause": "Operator invoked the Node bin directory instead of the node executable; corrected command then passed."
+    }
+  ],
+  "external_postgresql": "NOT_RUN",
+  "live_staging": "NOT_RUN",
+  "production_access": false,
+  "production_mutation": false,
+  "gate_a_approved": false
+}

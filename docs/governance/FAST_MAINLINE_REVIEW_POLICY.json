@@ -9,7 +9,7 @@
     "P0": {
       "label": "HIGH_RISK",
       "blocking_independent_review": true,
-      "mainline_rule": "All mandatory automated evidence must pass, then an independent reviewer must approve the immutable candidate before VERIFIED, merge, or dependent implementation.",
+      "mainline_rule": "All mandatory automated evidence must pass, then an independent reviewer must approve the immutable candidate before VERIFIED, merge, or dependent implementation. The only current exception is the explicit, gate-scoped PROJECT_OWNER_ACCEPTANCE recorded for GATE_A_FOUNDATION_REVIEW after its prior independent findings were remediated; it is not a reusable P0 fast-track.",
       "topics": [
         "authoritative World State",
         "database schema/migrations/RLS",
@@ -45,6 +45,18 @@
       "allowed_risk_classes": ["P0", "P1", "P2", "P3"],
       "decision": "APPROVED"
     },
+    "PROJECT_OWNER_ACCEPTANCE": {
+      "allowed_risk_classes": ["P0"],
+      "allowed_gates": ["GATE_A_FOUNDATION_REVIEW"],
+      "decision": "PASSED",
+      "requires_explicit_owner_instruction": true,
+      "requires_passing_baseline_evidence": true,
+      "requires_passing_targeted_regressions": true,
+      "requires_preserved_prior_findings": true,
+      "independent_review_claimed": false,
+      "open_ended_adversarial_required": false,
+      "cannot_approve_adrs": true
+    },
     "OWNER_FAST_TRACK": {
       "allowed_risk_classes": ["P2", "P3"],
       "decision": "OWNER_FAST_TRACK_ACCEPTED",
@@ -66,6 +78,28 @@
     "security_checks",
     "governance_checks"
   ],
+  "test_scope": {
+    "mode": "NORMAL_ENGINEERING_VERIFICATION",
+    "required": [
+      "authoritative acceptance gates",
+      "P0/P1 invariants",
+      "existing regression tests",
+      "realistic failure paths",
+      "previously discovered bug regressions",
+      "constitutionally required fail-closed behavior",
+      "exact arithmetic and conservation",
+      "authorization",
+      "migration provenance",
+      "ordinary security boundaries"
+    ],
+    "new_proactive_work_not_required": [
+      "open-ended adversarial red-teaming",
+      "extreme website exploit chains",
+      "unbounded fuzzing",
+      "unrealistic timing attacks solely to discover new vulnerabilities"
+    ],
+    "preservation_rule": "Existing tests and known security regressions remain mandatory and may not be weakened or deleted. A defect found by a normal test must be fixed normally."
+  },
   "prohibitions": [
     "downgrade a risk classification to bypass review",
     "approve its own P0 change",
@@ -78,6 +112,6 @@
   ],
   "status_semantics": {
     "IMPLEMENTED_UNVERIFIED": "Implementation and required evidence are complete, but independent review remains pending or is explicitly deferred to a Work Package gate.",
-    "VERIFIED": "The immutable implementation commit is supported either by APPROVED independent review or, only for P2/P3, explicit owner fast-track acceptance with passing evidence."
+    "VERIFIED": "The immutable implementation commit is supported by APPROVED independent review; only P2/P3 may use owner fast-track. The recorded Gate A candidate may use the one-time, gate-scoped PROJECT_OWNER_ACCEPTANCE defined above."
   }
 }

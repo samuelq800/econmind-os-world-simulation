@@ -1,0 +1,51 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V05.1",
+  "commit": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
+  "environment": {
+    "name": "local synthetic authorization adapter",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm --filter @econmind/core typecheck",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "the branded Office ID type was not safely narrowed for registry indexing"
+    },
+    {
+      "command": "pnpm vitest run tests/foundation/authorization-foundation.test.ts",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "10/16 tests passed; the compile-only authorization brand had no runtime Symbol value"
+    },
+    {
+      "command": "pnpm --filter @econmind/core typecheck && pnpm vitest run tests/foundation/authorization-foundation.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "core typecheck and 17/17 V05 tests passed after safe narrowing and a runtime-private Symbol brand"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "all tests and earlier gates passed, then the core declaration build could not name the inferred private branded Office-ID array type"
+    }
+  ],
+  "negative_cases": [
+    "legacy role/platform_role fields",
+    "token/profile mismatch",
+    "unauthenticated access",
+    "cross-country claim",
+    "unassigned Office",
+    "Finance requesting Central Bank capability"
+  ],
+  "database_rls_evidence": [
+    "NOT_RUN: V05.1 introduces no database or RLS policy"
+  ],
+  "unresolved_gaps": [
+    "Live main-site token verifier integration remains future release work"
+  ]
+}

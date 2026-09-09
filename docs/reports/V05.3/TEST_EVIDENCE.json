@@ -1,0 +1,35 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V05.3",
+  "commit": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
+  "environment": {
+    "name": "local synthetic authorization adapter",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm vitest run tests/foundation/authorization-foundation.test.ts && pnpm test:architecture",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "17/17 V05 tests and 7 files/66 architecture tests passed; both scanners passed"
+    }
+  ],
+  "negative_cases": [
+    "foreign country projection",
+    "unassigned Office-private projection",
+    "non-party negotiation projection",
+    "client-declared admin projection",
+    "new action after membership removal"
+  ],
+  "database_rls_evidence": ["NOT_RUN: no live RLS policy is in V05.3 scope"],
+  "invariant_evidence": [
+    "revocation denies new authority",
+    "accepted fact remains unchanged",
+    "queued execution requires an explicit future policy"
+  ],
+  "unresolved_gaps": [
+    "ADR-12 and ADR-20 remain unapproved; live persistence enforcement is future work"
+  ]
+}

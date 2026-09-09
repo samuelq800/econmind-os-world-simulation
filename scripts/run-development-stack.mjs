@@ -4,6 +4,8 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
+import { assertSafeEnvironment } from './environment-policy.mjs';
+
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -453,6 +455,7 @@ async function run() {
   }
 
   try {
+    assertSafeEnvironment(process.env);
     if (!originalParentIsPnpm || process.ppid !== originalParentPid) {
       throw new Error('bootstrap must remain owned by its pnpm parent');
     }

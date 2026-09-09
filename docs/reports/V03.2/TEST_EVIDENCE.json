@@ -1,0 +1,35 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V03.2",
+  "commit": "52e62f1b988a3f0c650cf5f4032fada78c7fe43c",
+  "environment": {
+    "name": "local",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "python3 tools/build_core_registries.py && pnpm format:check",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "Generated semantic content was correct but not Prettier-formatted"
+    },
+    {
+      "command": "pnpm registry:generate && pnpm format:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "deterministic generation plus canonical formatting passed"
+    }
+  ],
+  "negative_cases": ["duplicate registry ID", "unknown registry ID"],
+  "database_rls_evidence": ["No database or RLS access"],
+  "invariant_evidence": [
+    "catalog counts 18/6/12/12/22/38/23",
+    "registration does not claim implementation"
+  ],
+  "unresolved_gaps": [
+    "ADR-02/06 remain unapproved",
+    "70-country initialization is not started"
+  ]
+}
