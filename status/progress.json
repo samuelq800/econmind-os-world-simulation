@@ -1,7 +1,7 @@
 {
   "schema_version": "R2-101.1",
   "derived_at": "2026-09-09T02:35:00Z",
-  "source_commit": "90f969544fb8745f6080b7dc4a514684bb4b319a",
+  "source_commit": "2d66872278b1c8a586c751390fed94796f00c40a",
   "note": "FAST_MAINLINE is active. P0 still requires blocking independent review; P2/P3 may use explicit evidence-backed owner fast-track.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
@@ -41,16 +41,16 @@
     }
   },
   "current_gate": {
-    "step_id": "V01.1",
+    "step_id": "V01.2",
     "status": "PLANNED",
-    "review": "V00.3 accepted by explicit P2 owner fast-track; V01.1 is dependency-ready",
-    "next_step": "V01.1",
+    "review": "V01.1 accepted by explicit P2 owner fast-track; V01.2 is dependency-ready",
+    "next_step": "V01.2",
     "next_step_ready": true,
     "next_step_blockers": []
   },
   "work_packages": {
     "V00": "COMPLETE",
-    "V01": "NOT_STARTED"
+    "V01": "IN_PROGRESS"
   },
   "step_evidence": {
     "V00.1": [
@@ -73,12 +73,20 @@
       "docs/reports/V00.3/TEST_EVIDENCE.json",
       "docs/reports/V00.3/OWNER_FAST_TRACK_ACCEPTANCE.md",
       "docs/reports/V00.3/FINAL_RECONCILIATION.md"
+    ],
+    "V01.1": [
+      "docs/exec-plans/V01.1.md",
+      "docs/reports/V01.1/IMPLEMENTATION.md",
+      "docs/reports/V01.1/TEST_EVIDENCE.json",
+      "requirements/requirement_registry.json",
+      "requirements/source_unit_assignments.jsonl"
     ]
   },
   "implementation_commits": {
     "V00.1": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
     "V00.2": "002066a52dc089441cda6b84fa83d226678da891",
-    "V00.3": "00e3320e2d3f6e28212f902bfa1f92d5d1561bf4"
+    "V00.3": "00e3320e2d3f6e28212f902bfa1f92d5d1561bf4",
+    "V01.1": "2d66872278b1c8a586c751390fed94796f00c40a"
   },
   "step_reviews": {
     "V00.1": {
@@ -102,13 +110,23 @@
       "automated_evidence_status": "PASS",
       "p0_boundary_changed": false,
       "owner_approved": true
+    },
+    "V01.1": {
+      "method": "OWNER_FAST_TRACK",
+      "decision": "OWNER_FAST_TRACK_ACCEPTED",
+      "risk_class": "P2",
+      "reviewed_commit": "2d66872278b1c8a586c751390fed94796f00c40a",
+      "evidence_file": "docs/reports/V01.1/IMPLEMENTATION.md",
+      "automated_evidence_status": "PASS",
+      "p0_boundary_changed": false,
+      "owner_approved": true
     }
   },
   "steps": {
     "V00.1": "VERIFIED",
     "V00.2": "VERIFIED",
     "V00.3": "VERIFIED",
-    "V01.1": "PLANNED",
+    "V01.1": "VERIFIED",
     "V01.2": "PLANNED",
     "V01.3": "PLANNED",
     "V02.1": "PLANNED",
