@@ -1,0 +1,40 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V04.1",
+  "commit": "b91fb6ec92d9a19ff23eaeb7573b69e838dca0cc",
+  "environment": {
+    "name": "local",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4", "fast-check": "4.9.0" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm test:property",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "collection failed because the root Vitest runner could not resolve fast-check from a sibling workspace"
+    },
+    {
+      "command": "pnpm test:property",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "1 file and 6 properties passed after pinning the same dev-only dependency at the runner root"
+    }
+  ],
+  "property_configuration": {
+    "seed": 20260909,
+    "num_runs_per_property": 250,
+    "path": null,
+    "counterexample": null
+  },
+  "negative_cases": [
+    "invalid decimal syntax",
+    "non-finite attacks",
+    "duplicate registry IDs"
+  ],
+  "database_rls_evidence": ["No database or RLS access"],
+  "unresolved_gaps": [
+    "V06-V10 domain invariants are contracts only and were not run"
+  ]
+}

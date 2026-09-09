@@ -1,0 +1,33 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V04.2",
+  "commit": "b91fb6ec92d9a19ff23eaeb7573b69e838dca0cc",
+  "environment": {
+    "name": "local",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm test:architecture",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "7 files and 66 tests passed; boundary and authoritative-pattern scanners passed"
+    }
+  ],
+  "negative_cases": [
+    "direct decimal.js import",
+    "JS number conversion",
+    "browser global in World Core",
+    "fast-check runtime dependency"
+  ],
+  "database_rls_evidence": ["No database or RLS access"],
+  "future_invariants": {
+    "V06": "NOT_RUN",
+    "V07": "NOT_RUN",
+    "V08": "NOT_RUN",
+    "V09": "NOT_RUN",
+    "V10": "NOT_RUN"
+  }
+}
