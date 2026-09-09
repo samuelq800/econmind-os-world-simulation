@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T15:30:00Z",
-  "source_commit": "7a6ad76d7e43f96a143a4620afc33c8b107261e0",
-  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1, corrected V06.2 and V06.3 remain IMPLEMENTED_UNVERIFIED. A later review of target 80ab3ecac0abbd622a7e2fc450101407db7f66f9 found V06-PKG-BLK-02: restore accepts non-prefix due completion state. The earlier V06-PKG-BLK-01 remains closed, but the package is CHANGES_REQUIRED; no merge is claimed and V07 remains prohibited.",
+  "derived_at": "2026-09-09T16:00:25Z",
+  "source_commit": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1",
+  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1, corrected V06.2 and V06.3 remain IMPLEMENTED_UNVERIFIED. V06-PKG-BLK-02 is confirmed and has a centralized completion-prefix forward fix at d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1 with passing engineering evidence. Independent closure remains pending; no merge is claimed and V07 remains prohibited.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -124,11 +124,11 @@
   "current_gate": {
     "step_id": "V06.3",
     "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "V06_PACKAGE_CHANGES_REQUIRED: V06-PKG-BLK-02 restore completion-prefix bypass",
+    "review": "READY_FOR_REVIEW: V06-PKG-BLK-02 centralized restore-prefix fix frozen",
     "next_step": "V07.1",
     "next_step_ready": false,
     "next_step_blockers": [
-      "V06-PKG-BLK-02 requires a centralized state invariant and independent closure",
+      "V06-PKG-BLK-02 requires focused independent blocker-closure review",
       "V06 package approval and owner-authorized integration are required before V07"
     ],
     "required_gate": "V06_PACKAGE_REVIEW",
@@ -170,6 +170,13 @@
         "evidence_file": "docs/reports/V06/PACKAGE_REVIEW_FINDINGS_RESTORE_PREFIX.md"
       }
     ],
+    "restore_prefix_forward_fix": {
+      "status": "READY_FOR_REVIEW",
+      "finding": "V06-PKG-BLK-02",
+      "code_candidate": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1",
+      "implementation_result": "PASS",
+      "independent_closure_claimed": false
+    },
     "package_verified": false,
     "merge_authorized": false,
     "v07_authorized": false
@@ -236,11 +243,11 @@
         ]
       },
       "V06.3": {
-        "implementation_commit": "7a6ad76d7e43f96a143a4620afc33c8b107261e0",
-        "evidence_file": "docs/reports/V06.3/TEST_EVIDENCE_FORWARD_FIX.json",
+        "implementation_commit": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1",
+        "evidence_file": "docs/reports/V06.3/TEST_EVIDENCE_RESTORE_PREFIX_FIX.json",
         "automated_evidence_status": "PASS",
-        "finding_id": "V06-PKG-BLK-01",
-        "independent_closure": "CLOSED",
+        "finding_ids": ["V06-PKG-BLK-01", "V06-PKG-BLK-02"],
+        "independent_closure": "V06-PKG-BLK-02_PENDING",
         "continuation_review": {
           "decision": "V06_PACKAGE_APPROVED",
           "reviewed_commit": "80ab3ecac0abbd622a7e2fc450101407db7f66f9",
@@ -252,6 +259,13 @@
         "package_review_pending": true,
         "package_verified": false,
         "superseded_candidates": [
+          {
+            "implementation_commit": "7a6ad76d7e43f96a143a4620afc33c8b107261e0",
+            "evidence_commit": "3d21e94483ae923b60dc4a6a8a3e1cd1d64e80ec",
+            "package_review_target": "80ab3ecac0abbd622a7e2fc450101407db7f66f9",
+            "review_result": "V06_PACKAGE_CHANGES_REQUIRED",
+            "finding": "V06-PKG-BLK-02"
+          },
           {
             "implementation_commit": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453",
             "evidence_commit": "3c6f12b39820f878e7662b9ed7eca734c571a0d7",
@@ -394,7 +408,9 @@
       "docs/reports/V06.3/IMPLEMENTATION.md",
       "docs/reports/V06.3/TEST_EVIDENCE.json",
       "docs/reports/V06.3/IMPLEMENTATION_FORWARD_FIX.md",
-      "docs/reports/V06.3/TEST_EVIDENCE_FORWARD_FIX.json"
+      "docs/reports/V06.3/TEST_EVIDENCE_FORWARD_FIX.json",
+      "docs/reports/V06.3/IMPLEMENTATION_RESTORE_PREFIX_FIX.md",
+      "docs/reports/V06.3/TEST_EVIDENCE_RESTORE_PREFIX_FIX.json"
     ]
   },
   "package_evidence": {
@@ -445,7 +461,7 @@
     "V05.3": "47fe5c5d465748370d9a8ea046bc443978437203",
     "V06.1": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7",
     "V06.2": "4e35c07758f4d39b05dac402eeb03b080275c3e0",
-    "V06.3": "7a6ad76d7e43f96a143a4620afc33c8b107261e0"
+    "V06.3": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1"
   },
   "step_reviews": {
     "V00.1": {

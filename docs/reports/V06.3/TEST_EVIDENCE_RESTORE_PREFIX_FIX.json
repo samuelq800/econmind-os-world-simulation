@@ -1,0 +1,101 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V06.3",
+  "finding_id": "V06-PKG-BLK-02",
+  "commit": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1",
+  "supersedes_for_review": {
+    "code_candidate": "7a6ad76d7e43f96a143a4620afc33c8b107261e0",
+    "step_review_target": "3d21e94483ae923b60dc4a6a8a3e1cd1d64e80ec",
+    "package_review_target": "80ab3ecac0abbd622a7e2fc450101407db7f66f9"
+  },
+  "environment": {
+    "name": "local deterministic World Core",
+    "versions": {
+      "node": "24.20.0",
+      "pnpm": "12.3.4"
+    },
+    "production_access": false
+  },
+  "commands": [
+    {
+      "command": "node <canonical restore-prefix reproduction against rejected code>",
+      "exit_code": 0,
+      "result": "BLOCKER_CONFIRMED",
+      "stdout_stderr_summary": "Rejected target behavior returned INVALID_SNAPSHOT_ACCEPTED with EVENT_FIRST=PENDING and EVENT_LAST=COMPLETED"
+    },
+    {
+      "command": "pnpm vitest run <four scheduler/order unit and property files>",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "4 files and 35 tests passed, covering A-H restore-prefix requirements, generated prefix acceptance, restart, exact retry and the prior completion-API blocker"
+    },
+    {
+      "command": "node <canonical restore-prefix reproduction after fix>",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "The same canonical invalid snapshot was rejected with SCHEDULER_STATE_INVALID; no repair or reinterpretation occurred"
+    },
+    {
+      "command": "rg <exported scheduler constructors and schedulerStates.add>",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Narrow API audit found one schedulerStates.add site and confirmed every exported state-producing path converges on createSchedulerState"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Full baseline passed lint, formatting, all typechecks, 23 files/335 tests, 3 files/34 protected architecture tests, authoritative scanner over 21 core and 33 total files, boundary scanner over 38 files, local environment safety, PGlite migration validation/rehearsal, Foundation policy, 427-file secret scan and all workspace builds"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "All 14 R2 governance groups passed after fixed evidence/status finalization"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No whitespace errors in fixed code or evidence/status candidate"
+    }
+  ],
+  "required_regressions": {
+    "A_pending_head_later_completed_rejected": "PASS",
+    "B_completed_prefix_pending_suffix_accepted": "PASS",
+    "C_completed_pending_completed_rejected": "PASS",
+    "D_priority_rank_controls_prefix": "PASS",
+    "E_scheduled_event_id_controls_prefix": "PASS",
+    "F_restore_preserves_next_executable": "PASS",
+    "G_v1_v2_migration_rejects_impossible_prefix": "PASS",
+    "H_exact_retry_unchanged": "PASS",
+    "property_accepted_completed_set_is_prefix": "PASS"
+  },
+  "authoritative_paths": {
+    "central_constructor": "createSchedulerState",
+    "initial_factory": "PASS",
+    "lifecycle_transitions": "PASS",
+    "clock_advance_and_catch_up": "PASS",
+    "event_scheduling": "PASS",
+    "ordered_completion": "PASS",
+    "canonical_v2_restore": "PASS",
+    "v1_to_v2_migration": "PASS",
+    "alternate_state_registration_path": "NONE_FOUND"
+  },
+  "finding_result": {
+    "implementation_side": "PASS",
+    "independent_closure": "PENDING",
+    "V06_PKG_BLK_01_completion_api": "PASS",
+    "V06_PKG_BLK_02_restore_prefix": "PASS_IMPLEMENTATION_SIDE"
+  },
+  "database_rls_evidence": [
+    "NOT_RUN: this fix changes no database schema, RLS policy, connection or production state",
+    "PASS: local environment reported no configured database and production mutation disabled",
+    "PASS: migration validation and both PGlite rehearsal modes remained green"
+  ],
+  "unresolved_gaps": [
+    "Focused independent package blocker-closure review is pending",
+    "V06.3 and V06 remain IMPLEMENTED_UNVERIFIED",
+    "V07 remains NOT_STARTED"
+  ]
+}
