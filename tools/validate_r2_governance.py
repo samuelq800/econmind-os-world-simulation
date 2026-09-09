@@ -1179,6 +1179,40 @@ def validate(root: Path) -> dict[str, Any]:
                         and gate.get("gate_status") == "PENDING",
                         "completed V06 handoff gate differs from progress truth",
                     )
+                    if required_gate == "V07.1_OWNER_ADR_GATE":
+                        v06_integration = progress_data.get("v06_integration")
+                        require(
+                            isinstance(v06_integration, dict)
+                            and v06_integration.get("branch")
+                            == continuation.get("branch")
+                            and v06_integration.get("approved_package_target")
+                            == continuation.get("approved_package_target")
+                            and v06_integration.get("status") == "MERGED"
+                            and v06_integration.get("history_preserved") is True
+                            and v06_integration.get("runtime_equivalence") == "PASS"
+                            and v06_integration.get("production_mutation") is False,
+                            "V06 mainline integration record is incomplete",
+                        )
+                        promotion_commit = commit_exists(
+                            v06_integration.get("promotion_commit"),
+                            "V06 promotion commit",
+                        )
+                        merged_commit = commit_exists(
+                            v06_integration.get("merged_commit"),
+                            "V06 merge commit",
+                        )
+                        is_ancestor(
+                            continuation.get("approved_package_target"),
+                            promotion_commit,
+                            "V06 approved target to promotion",
+                        )
+                        is_ancestor(
+                            promotion_commit,
+                            merged_commit,
+                            "V06 promotion to merge",
+                        )
+                        is_ancestor(merged_commit, "HEAD", "V06 mainline merge")
+                        file(v06_integration.get("evidence_file"))
             elif states["V06.1"] == "IMPLEMENTED_UNVERIFIED":
                 require(
                     gate.get("step_id") == "V06.1"

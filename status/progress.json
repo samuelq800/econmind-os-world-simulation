@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-10T00:00:00Z",
+  "derived_at": "2026-09-10T00:34:00Z",
   "source_commit": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1",
-  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. Independent Review B approved exact V06 package target 33fe26a7e014379b15d4f0f3ab10791b912b8885 with both historical blockers closed and no open blocker or major. The project owner accepted that review; V06.1-V06.3 and package V06 are VERIFIED. Mainline integration remains the next gate; V07.1 remains PLANNED and is also blocked on owner decisions ADR-11/17.",
+  "note": "Gate A and V06 are accepted, verified, and integrated into main. Independent Review B approved exact V06 package target 33fe26a7e014379b15d4f0f3ab10791b912b8885 with both historical blockers closed and no open blocker or major; the project owner accepted that review. V06.1-V06.3 and package V06 are VERIFIED. V07.1 hard dependencies are ready but V07.1 remains PLANNED at READY_PENDING_OWNER_ADR because ADR-11 and the V07 core boundary of ADR-17 remain PROPOSED_NOT_APPROVED.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -121,17 +121,28 @@
     "merged_main_commit": "676c5dfb358edda5c25e9bb308242c533783dba0",
     "reconciliation_evidence_file": "docs/reports/GATE_A/FINAL_RECONCILIATION.md"
   },
+  "v06_integration": {
+    "branch": "codex/world-core-v06-v10",
+    "approved_package_target": "33fe26a7e014379b15d4f0f3ab10791b912b8885",
+    "owner_acceptance_commit": "7dc882c38c8559a547db5793b0c408dc28d82c16",
+    "promotion_commit": "a4dd1147407e3be8ad1ca9a41db5711ed6fa3c4c",
+    "status": "MERGED",
+    "merged_commit": "7b70b9400c9615da41b62847110c51767d400537",
+    "history_preserved": true,
+    "runtime_equivalence": "PASS",
+    "production_mutation": false,
+    "evidence_file": "docs/reports/V06/FINAL_RECONCILIATION.md"
+  },
   "current_gate": {
     "step_id": "V06.3",
     "status": "VERIFIED",
-    "review": "V06_PACKAGE_APPROVED and owner accepted; mainline integration pending",
+    "review": "V06_PACKAGE_APPROVED, owner accepted, promoted and integrated; READY_PENDING_OWNER_ADR",
     "next_step": "V07.1",
     "next_step_ready": false,
     "next_step_blockers": [
-      "V06 promotion must be merged and reconciled into main before V07 dependency recomputation",
       "ADR-11 and the V07 core boundary of ADR-17 require responsible-human approval before V07.1 schema freeze"
     ],
-    "required_gate": "V06_MAINLINE_INTEGRATION",
+    "required_gate": "V07.1_OWNER_ADR_GATE",
     "gate_status": "PENDING"
   },
   "v06_package_review": {
@@ -461,7 +472,8 @@
       "docs/reports/V06/PACKAGE_TEST_EVIDENCE_RESTORE_PREFIX_FIX.json",
       "docs/reports/V06/PACKAGE_REVIEW_TARGET_RESTORE_PREFIX_FIX.md",
       "docs/reports/V06/FINAL_ACCEPTANCE.md",
-      "docs/reports/V06/FINAL_CLOSURE.md"
+      "docs/reports/V06/FINAL_CLOSURE.md",
+      "docs/reports/V06/FINAL_RECONCILIATION.md"
     ]
   },
   "implementation_commits": {

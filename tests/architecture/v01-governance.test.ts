@@ -215,6 +215,20 @@ describe('V06 owner-authorized package continuation', () => {
       status: 'VERIFIED',
       next_step: 'V07.1',
       next_step_ready: false,
+      required_gate: 'V07.1_OWNER_ADR_GATE',
+      gate_status: 'PENDING',
+    });
+    expect(progress.v06_integration).toEqual({
+      branch: 'codex/world-core-v06-v10',
+      approved_package_target: '33fe26a7e014379b15d4f0f3ab10791b912b8885',
+      owner_acceptance_commit: '7dc882c38c8559a547db5793b0c408dc28d82c16',
+      promotion_commit: 'a4dd1147407e3be8ad1ca9a41db5711ed6fa3c4c',
+      status: 'MERGED',
+      merged_commit: '7b70b9400c9615da41b62847110c51767d400537',
+      history_preserved: true,
+      runtime_equivalence: 'PASS',
+      production_mutation: false,
+      evidence_file: 'docs/reports/V06/FINAL_RECONCILIATION.md',
     });
     expect(
       progress.world_core_continuation.completed_steps['V06.3'],
