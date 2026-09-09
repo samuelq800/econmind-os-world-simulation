@@ -2,7 +2,7 @@
 
 - Feature branch: `feat/v00-3`
 - Original V00.3 candidate: `00e3320e2d3f6e28212f902bfa1f92d5d1561bf4`
-- Owner fast-track record commit: `fc9fc841177b241c1d192da7b5ed12a2bf70ee4d`
+- Owner fast-track record commit: `fc9fc84158c62a3174c40e77896119ca41f9f71b`
 - History-preserving merge commit: `90f969544fb8745f6080b7dc4a514684bb4b319a`
 - Merge mode: non-fast-forward `ort`
 - Result: `PASS`
