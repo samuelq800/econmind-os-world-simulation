@@ -506,6 +506,18 @@ export function completeDueSimulationEvent(
       `Scheduled event ${canonicalId} is not due`,
     );
   }
+  const authoritativeHead = pendingDueSimulationEventsInOrder(state)[0];
+  if (authoritativeHead === undefined) {
+    invalidState(
+      'Due scheduled event is missing from authoritative work order',
+    );
+  }
+  if (authoritativeHead.scheduledEventId !== canonicalId) {
+    throw new DomainError(
+      DOMAIN_ERROR_CODES.SCHEDULED_EVENT_ORDER_VIOLATION,
+      `Scheduled event ${canonicalId} cannot complete before ${authoritativeHead.scheduledEventId}`,
+    );
+  }
   const events = [...state.scheduledEvents];
   events[eventIndex] = freezeEvent({ ...event, status: 'COMPLETED' });
   return Object.freeze({

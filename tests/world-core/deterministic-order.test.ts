@@ -205,6 +205,44 @@ describe('V06.3 deterministic work ordering and cutoffs', () => {
     ).toEqual(['EVENT_EARLY', 'EVENT_A', 'EVENT_B', 'EVENT_Z']);
   });
 
+  it('fails closed when completion skips the authoritative due-work head', () => {
+    let state = startSimulationSeason(createSimulationScheduler());
+    state = scheduleSimulationEvent(
+      state,
+      scheduled('EVENT_FIRST', '0', 'ORDER_PRIORITY_000'),
+    );
+    state = scheduleSimulationEvent(
+      state,
+      scheduled('EVENT_LAST', '0', 'ORDER_PRIORITY_200'),
+    );
+
+    expect(
+      pendingDueSimulationEventsInOrder(state).map(
+        (event) => event.scheduledEventId,
+      ),
+    ).toEqual(['EVENT_FIRST', 'EVENT_LAST']);
+    expect(() =>
+      completeDueSimulationEvent(state, scheduledEventId('EVENT_LAST')),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.SCHEDULED_EVENT_ORDER_VIOLATION,
+      }),
+    );
+    expect(
+      state.scheduledEvents.every((event) => event.status === 'PENDING'),
+    ).toBe(true);
+
+    const first = completeDueSimulationEvent(
+      state,
+      scheduledEventId('EVENT_FIRST'),
+    );
+    expect(first.applied).toBe(true);
+    expect(
+      completeDueSimulationEvent(first.state, scheduledEventId('EVENT_LAST'))
+        .applied,
+    ).toBe(true);
+  });
+
   it('does not expose due work while paused and preserves it after resume', () => {
     let state = startSimulationSeason(createSimulationScheduler());
     state = scheduleSimulationEvent(

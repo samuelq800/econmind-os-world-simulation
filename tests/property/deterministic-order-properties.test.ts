@@ -2,9 +2,11 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
 import {
+  DOMAIN_ERROR_CODES,
   SimTime,
   advanceClockInput,
   advanceRunningSimulationScheduler,
+  completeDueSimulationEvent,
   createSimulationScheduler,
   pendingDueSimulationEventsInOrder,
   restoreSimulationSchedulerState,
@@ -76,6 +78,44 @@ describe('V06.3 deterministic ordering properties', () => {
             );
 
           expect(orderedIds(forward)).toEqual(orderedIds(reverse));
+
+          let draining = forward;
+          while (true) {
+            const due = pendingDueSimulationEventsInOrder(draining);
+            const head = due[0];
+            if (head === undefined) break;
+            const nonHead = due.at(-1);
+            if (
+              nonHead !== undefined &&
+              nonHead.scheduledEventId !== head.scheduledEventId
+            ) {
+              expect(() =>
+                completeDueSimulationEvent(draining, nonHead.scheduledEventId),
+              ).toThrowError(
+                expect.objectContaining({
+                  code: DOMAIN_ERROR_CODES.SCHEDULED_EVENT_ORDER_VIOLATION,
+                }),
+              );
+            }
+
+            const completion = completeDueSimulationEvent(
+              draining,
+              head.scheduledEventId,
+            );
+            expect(completion.applied).toBe(true);
+            draining = restoreSimulationSchedulerState(
+              serializeSimulationSchedulerState(completion.state),
+            );
+            expect(
+              completeDueSimulationEvent(draining, head.scheduledEventId)
+                .applied,
+            ).toBe(false);
+          }
+          expect(
+            draining.scheduledEvents.every(
+              (event) => event.status === 'COMPLETED',
+            ),
+          ).toBe(true);
         },
       ),
       FOUNDATION_PROPERTY_CONFIG,
