@@ -237,9 +237,10 @@ describe('V06 owner-authorized package continuation', () => {
     expect(
       progress.v06_package_re_review.restore_prefix_forward_fix,
     ).toMatchObject({
-      status: 'READY_FOR_REVIEW',
+      status: 'READY_FOR_FOCUSED_BLOCKER_CLOSURE_REVIEW',
       finding: 'V06-PKG-BLK-02',
       code_candidate: 'd9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1',
+      step_review_target: '12d81d4fca1d37240a4af39183f69f12d60415aa',
       implementation_result: 'PASS',
       independent_closure_claimed: false,
     });
