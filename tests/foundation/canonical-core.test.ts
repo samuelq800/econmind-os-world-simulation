@@ -154,6 +154,91 @@ describe('V03 canonical serialization and versions', () => {
     expect(() => canonicalSerialize(cyclic)).toThrow('cyclic');
   });
 
+  it('rejects accessors without invoking them', () => {
+    let reads = 0;
+    const changing: Record<string, unknown> = {};
+    Object.defineProperty(changing, 'value', {
+      enumerable: true,
+      get() {
+        reads += 1;
+        return reads === 1 ? 'A' : 'B';
+      },
+    });
+    expect(() => canonicalSerialize(changing)).toThrow('rejects accessors');
+    expect(reads).toBe(0);
+
+    const setterBacked: Record<string, unknown> = {};
+    Object.defineProperty(setterBacked, 'value', {
+      enumerable: true,
+      set(value: unknown) {
+        void value;
+      },
+    });
+    expect(() => canonicalSerialize(setterBacked)).toThrow('rejects accessors');
+  });
+
+  it('rejects duck-typed executable canonicalization without calling it', () => {
+    let calls = 0;
+    const behavioral = {
+      stable: 'data',
+      toCanonicalValue() {
+        calls += 1;
+        return calls === 1 ? 'A' : 'B';
+      },
+    };
+    expect(() => canonicalSerialize(behavioral)).toThrow('rejects function');
+    expect(calls).toBe(0);
+  });
+
+  it('rejects unsupported proxy-like objects and hidden or symbol state', () => {
+    let traps = 0;
+    const liveProxy = new Proxy(
+      { value: 'A' },
+      {
+        get() {
+          traps += 1;
+          return 'B';
+        },
+        getOwnPropertyDescriptor() {
+          traps += 1;
+          return undefined;
+        },
+        getPrototypeOf() {
+          traps += 1;
+          return Object.prototype;
+        },
+        ownKeys() {
+          traps += 1;
+          return ['value'];
+        },
+      },
+    );
+    expect(() => canonicalSerialize(liveProxy)).toThrow('rejects Proxy');
+    expect(traps).toBe(0);
+
+    const revoked = Proxy.revocable({ value: 'A' }, {});
+    revoked.revoke();
+    expect(() => canonicalSerialize(revoked.proxy)).toThrow('rejects Proxy');
+    const hidden = { visible: 'A' };
+    Object.defineProperty(hidden, 'hidden', { value: 'B' });
+    expect(() => canonicalSerialize(hidden)).toThrow('hidden record state');
+    expect(() => canonicalSerialize({ [Symbol('hidden')]: 'B' })).toThrow(
+      'symbol properties',
+    );
+  });
+
+  it('reconstructs inert records byte-identically across insertion order', () => {
+    const first = canonicalSerialize({
+      z: ['A', { y: 'B', x: 'C' }],
+      a: Money.from('10.50', 'GBP'),
+    });
+    const reconstructed = canonicalSerialize({
+      a: Money.from('10.500', 'GBP'),
+      z: ['A', { x: 'C', y: 'B' }],
+    });
+    expect(reconstructed).toBe(first);
+  });
+
   it('fails closed on model, registry, or schema version mismatch', () => {
     expect(() => assertWorldVersions(CURRENT_WORLD_VERSIONS)).not.toThrow();
     expect(() =>

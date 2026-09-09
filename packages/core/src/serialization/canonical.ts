@@ -1,14 +1,115 @@
+import { types as nodeTypes } from 'node:util';
+
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
+import { isMoney } from '../numeric/money.js';
+import { isPrice } from '../numeric/price.js';
+import { isQuantity } from '../numeric/quantity.js';
+import { isRate } from '../numeric/rate.js';
+import { isSimTime } from '../numeric/sim-time.js';
+import { canonicalDecimal } from '../numeric/world-decimal.js';
 
 export const CANONICAL_HASH_ALGORITHM = 'SHA-256' as const;
 
-interface CanonicalValueProvider {
-  toCanonicalValue(): unknown;
+const NO_DOMAIN_ADAPTER = Symbol('NO_DOMAIN_ADAPTER');
+
+function rejected(message: string): never {
+  throw new DomainError(DOMAIN_ERROR_CODES.SERIALIZATION_REJECTED, message);
 }
 
-function isProvider(value: object): value is CanonicalValueProvider {
-  return (
-    'toCanonicalValue' in value && typeof value.toCanonicalValue === 'function'
+function trustedDomainValue(value: object): unknown | typeof NO_DOMAIN_ADAPTER {
+  if (isMoney(value)) {
+    return { amount: canonicalDecimal(value.amount), currency: value.currency };
+  }
+  if (isQuantity(value)) {
+    return { amount: canonicalDecimal(value.amount), unit: value.unit };
+  }
+  if (isPrice(value)) {
+    return {
+      amount: canonicalDecimal(value.amount),
+      currency: value.currency,
+      perUnit: value.perUnit,
+    };
+  }
+  if (isRate(value)) return canonicalDecimal(value.value);
+  if (isSimTime(value)) return value.ticks.toString();
+  return NO_DOMAIN_ADAPTER;
+}
+
+function ownDescriptors(value: object): PropertyDescriptorMap {
+  try {
+    return Object.getOwnPropertyDescriptors(value);
+  } catch {
+    rejected('Canonical serialization rejects uninspectable objects');
+  }
+}
+
+function normalizeArray(
+  value: readonly unknown[],
+  seen: Set<object>,
+): unknown[] {
+  const descriptors = ownDescriptors(value);
+  for (const key of Reflect.ownKeys(descriptors)) {
+    if (typeof key === 'symbol') {
+      rejected('Canonical serialization rejects symbol properties');
+    }
+    if (key === 'length') continue;
+    const descriptor = descriptors[key];
+    if (
+      descriptor === undefined ||
+      !Object.hasOwn(descriptor, 'value') ||
+      descriptor.get !== undefined ||
+      descriptor.set !== undefined
+    ) {
+      rejected('Canonical serialization rejects accessors');
+    }
+    if (!descriptor.enumerable || !/^(?:0|[1-9]\d*)$/u.test(key)) {
+      rejected(
+        'Canonical serialization rejects non-canonical array properties',
+      );
+    }
+  }
+  const result = [];
+  for (let index = 0; index < value.length; index += 1) {
+    const descriptor = descriptors[String(index)];
+    if (descriptor === undefined || !Object.hasOwn(descriptor, 'value')) {
+      rejected('Canonical serialization rejects sparse arrays');
+    }
+    result.push(normalize(descriptor.value, seen));
+  }
+  return result;
+}
+
+function normalizeRecord(value: object, seen: Set<object>): object {
+  let prototype: object | null;
+  try {
+    prototype = Object.getPrototypeOf(value);
+  } catch {
+    rejected('Canonical serialization rejects uninspectable objects');
+  }
+  if (prototype !== Object.prototype) {
+    rejected('Canonical serialization accepts plain domain records only');
+  }
+  const descriptors = ownDescriptors(value);
+  const keys = Reflect.ownKeys(descriptors);
+  if (keys.some((key) => typeof key === 'symbol')) {
+    rejected('Canonical serialization rejects symbol properties');
+  }
+  return Object.fromEntries(
+    (keys as string[]).sort().map((key) => {
+      const descriptor = descriptors[key];
+      if (
+        descriptor === undefined ||
+        !Object.hasOwn(descriptor, 'value') ||
+        descriptor.get !== undefined ||
+        descriptor.set !== undefined
+      ) {
+        rejected('Canonical serialization rejects accessors');
+      }
+      if (!descriptor.enumerable) {
+        rejected('Canonical serialization rejects hidden record state');
+      }
+      return [key, normalize(descriptor.value, seen)];
+    }),
   );
 }
 
@@ -27,35 +128,28 @@ function normalize(value: unknown, seen: Set<object>): unknown {
     typeof value === 'function' ||
     typeof value === 'symbol'
   ) {
-    throw new DomainError(
-      DOMAIN_ERROR_CODES.SERIALIZATION_REJECTED,
-      `Canonical serialization rejects ${typeof value}`,
-    );
+    rejected(`Canonical serialization rejects ${typeof value}`);
+  }
+  // ECMAScript reflection operations can execute Proxy traps. Node's native
+  // identity check does not inspect the target and therefore rejects first.
+  if (nodeTypes.isProxy(value)) {
+    rejected('Canonical serialization rejects Proxy objects');
   }
   if (seen.has(value)) {
-    throw new DomainError(
-      DOMAIN_ERROR_CODES.SERIALIZATION_REJECTED,
-      'Canonical serialization rejects cyclic values',
-    );
+    rejected('Canonical serialization rejects cyclic values');
   }
   seen.add(value);
   try {
-    if (isProvider(value)) return normalize(value.toCanonicalValue(), seen);
-    if (Array.isArray(value)) return value.map((item) => normalize(item, seen));
-    if (Object.getPrototypeOf(value) !== Object.prototype) {
-      throw new DomainError(
-        DOMAIN_ERROR_CODES.SERIALIZATION_REJECTED,
-        'Canonical serialization accepts plain domain records only',
-      );
+    const adapted = trustedDomainValue(value);
+    if (adapted !== NO_DOMAIN_ADAPTER) return normalize(adapted, seen);
+    let array: boolean;
+    try {
+      array = Array.isArray(value);
+    } catch {
+      rejected('Canonical serialization rejects uninspectable objects');
     }
-    return Object.fromEntries(
-      Object.keys(value)
-        .sort()
-        .map((key) => [
-          key,
-          normalize((value as Record<string, unknown>)[key], seen),
-        ]),
-    );
+    if (array) return normalizeArray(value as readonly unknown[], seen);
+    return normalizeRecord(value, seen);
   } finally {
     seen.delete(value);
   }
