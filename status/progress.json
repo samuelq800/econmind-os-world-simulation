@@ -2,7 +2,7 @@
   "schema_version": "R2-101.1",
   "derived_at": "2026-09-09T15:30:00Z",
   "source_commit": "7a6ad76d7e43f96a143a4620afc33c8b107261e0",
-  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1, corrected V06.2 and V06.3 remain IMPLEMENTED_UNVERIFIED. Independent Review B returned V06_PACKAGE_APPROVED for target 80ab3ecac0abbd622a7e2fc450101407db7f66f9 and closed V06-PKG-BLK-01. Owner acceptance and final package bookkeeping remain pending; no merge is claimed and V07 remains prohibited.",
+  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1, corrected V06.2 and V06.3 remain IMPLEMENTED_UNVERIFIED. A later review of target 80ab3ecac0abbd622a7e2fc450101407db7f66f9 found V06-PKG-BLK-02: restore accepts non-prefix due completion state. The earlier V06-PKG-BLK-01 remains closed, but the package is CHANGES_REQUIRED; no merge is claimed and V07 remains prohibited.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -124,11 +124,12 @@
   "current_gate": {
     "step_id": "V06.3",
     "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "V06_PACKAGE_APPROVED: owner acceptance and final package bookkeeping remain pending",
+    "review": "V06_PACKAGE_CHANGES_REQUIRED: V06-PKG-BLK-02 restore completion-prefix bypass",
     "next_step": "V07.1",
     "next_step_ready": false,
     "next_step_blockers": [
-      "Owner package decision and any authorized integration are required before V07"
+      "V06-PKG-BLK-02 requires a centralized state invariant and independent closure",
+      "V06 package approval and owner-authorized integration are required before V07"
     ],
     "required_gate": "V06_PACKAGE_REVIEW",
     "gate_status": "PENDING"
@@ -145,7 +146,7 @@
     "v07_authorized": false
   },
   "v06_package_re_review": {
-    "status": "V06_PACKAGE_APPROVED",
+    "status": "V06_PACKAGE_CHANGES_REQUIRED",
     "finding_id": "V06-PKG-BLK-01",
     "forward_fix_code_candidate": "7a6ad76d7e43f96a143a4620afc33c8b107261e0",
     "forward_fix_step_target": "3d21e94483ae923b60dc4a6a8a3e1cd1d64e80ec",
@@ -154,7 +155,21 @@
     "implementation_result": "PASS",
     "independent_closure_claimed": true,
     "closed_findings": ["V06-PKG-BLK-01"],
-    "review_file": "docs/reports/V06/PACKAGE_REVIEW_CONTINUATION_FORWARD_FIX.md",
+    "open_findings": ["V06-PKG-BLK-02"],
+    "review_file": "docs/reports/V06/PACKAGE_REVIEW_FINDINGS_RESTORE_PREFIX.md",
+    "decision_history": [
+      {
+        "decision": "V06_PACKAGE_APPROVED",
+        "reviewed_commit": "80ab3ecac0abbd622a7e2fc450101407db7f66f9",
+        "evidence_file": "docs/reports/V06/PACKAGE_REVIEW_CONTINUATION_FORWARD_FIX.md"
+      },
+      {
+        "decision": "V06_PACKAGE_CHANGES_REQUIRED",
+        "reviewed_commit": "80ab3ecac0abbd622a7e2fc450101407db7f66f9",
+        "finding": "V06-PKG-BLK-02",
+        "evidence_file": "docs/reports/V06/PACKAGE_REVIEW_FINDINGS_RESTORE_PREFIX.md"
+      }
+    ],
     "package_verified": false,
     "merge_authorized": false,
     "v07_authorized": false
@@ -405,7 +420,8 @@
       "docs/reports/V06/PACKAGE_REVIEW_BUNDLE_FORWARD_FIX.md",
       "docs/reports/V06/PACKAGE_TEST_EVIDENCE_FORWARD_FIX.json",
       "docs/reports/V06/PACKAGE_REVIEW_TARGET_FORWARD_FIX.md",
-      "docs/reports/V06/PACKAGE_REVIEW_CONTINUATION_FORWARD_FIX.md"
+      "docs/reports/V06/PACKAGE_REVIEW_CONTINUATION_FORWARD_FIX.md",
+      "docs/reports/V06/PACKAGE_REVIEW_FINDINGS_RESTORE_PREFIX.md"
     ]
   },
   "implementation_commits": {

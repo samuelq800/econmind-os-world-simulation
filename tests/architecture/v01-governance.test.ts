@@ -235,7 +235,7 @@ describe('V06 owner-authorized package continuation', () => {
       v07_authorized: false,
     });
     expect(progress.v06_package_re_review).toMatchObject({
-      status: 'V06_PACKAGE_APPROVED',
+      status: 'V06_PACKAGE_CHANGES_REQUIRED',
       finding_id: 'V06-PKG-BLK-01',
       forward_fix_code_candidate: '7a6ad76d7e43f96a143a4620afc33c8b107261e0',
       forward_fix_step_target: '3d21e94483ae923b60dc4a6a8a3e1cd1d64e80ec',
@@ -244,6 +244,7 @@ describe('V06 owner-authorized package continuation', () => {
       implementation_result: 'PASS',
       independent_closure_claimed: true,
       closed_findings: ['V06-PKG-BLK-01'],
+      open_findings: ['V06-PKG-BLK-02'],
       package_verified: false,
       merge_authorized: false,
       v07_authorized: false,
