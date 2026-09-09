@@ -61,7 +61,7 @@ export const OFFICE_APPROVAL_CAPABILITY = 'SIGN_OFFICE_APPROVAL' as const;
 export type AuthorizationCapability =
   OfficeCapability | typeof OFFICE_APPROVAL_CAPABILITY;
 
-export const CANONICAL_OFFICE_IDS = Object.freeze(
+export const CANONICAL_OFFICE_IDS: readonly OfficeId[] = Object.freeze(
   Object.keys(OFFICE_DEFINITIONS).map((value) => officeId(value)),
 );
 
