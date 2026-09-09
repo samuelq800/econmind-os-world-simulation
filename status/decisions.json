@@ -10,12 +10,12 @@
     {
       "id": "ADR-01",
       "subject": "Engine 与 Settlement Phase 映射及顺序差异",
-      "status": "PROPOSED_NOT_APPROVED",
-      "proposal": "保留 Master E01-E18，以 Master 18 阶段为协调基线建立 phase-to-engine operation 映射，并通过批准的附录协调 Constitution 硬约束。",
+      "status": "APPROVED",
+      "proposal": "保留 E01-E18 Engine ID；以 Constitution 规定的 15 个 settlement-stage ID 作为唯一版本化 orchestration order，并维护显式、版本化的 Engine-to-Stage 映射。",
       "latest_gate": "V06/V09",
       "affected_work_packages": ["V01", "V06"],
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
-      "approval_record": null
+      "approval_record": "docs/architecture/decisions/ADR-01.md"
     },
     {
       "id": "ADR-02",
@@ -30,12 +30,12 @@
     {
       "id": "ADR-03",
       "subject": "Simulation Clock、pause、cutoff 与同时间优先级",
-      "status": "PROPOSED_NOT_APPROVED",
-      "proposal": "使用相对 world 起点的 360 日历 sim ticks，暂停排除 elapsed，恢复按确定顺序补算，并冻结命令 cutoff 和同一 sim 时点优先序。",
+      "status": "APPROVED",
+      "proposal": "使用非负整数 simulation-millisecond ticks；1 real second 精确等于 10,000 simulation ticks；PAUSED 对 SimTime 贡献为零；RUNNING downtime 采用确定性 catch-up；同时间工作按 (dueSimTime, priorityRank, scheduledEventId) 排序；command cutoff 在 worker 开始 authoritative transaction 时锁定。",
       "latest_gate": "V06/V07",
       "affected_work_packages": ["V01", "V06", "V09"],
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
-      "approval_record": null
+      "approval_record": "docs/architecture/decisions/ADR-03.md"
     },
     {
       "id": "ADR-04",
