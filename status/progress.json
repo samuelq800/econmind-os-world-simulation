@@ -1,6 +1,6 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T04:45:35Z",
+  "derived_at": "2026-09-09T06:53:43Z",
   "source_commit": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
   "note": "FAST_MAINLINE is active. P0 still requires blocking independent review; P2/P3 may use explicit evidence-backed owner fast-track.",
   "mainline_mode": "FAST_MAINLINE",
@@ -79,14 +79,30 @@
     "merge_allowed": false,
     "independent_review_pending": true
   },
+  "gate_a_targeted_remediation": {
+    "branch": "codex/gate-a-targeted-fixes",
+    "base_reviewed_commit": "1a950a41567900761d4f4313092ab4a3404e6f67",
+    "code_candidate_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "status": "IMPLEMENTED_UNVERIFIED",
+    "independent_review_pending": true,
+    "finding_scope": [
+      "GATEA-BLK-01",
+      "GATEA-BLK-02",
+      "GATEA-MAJ-01",
+      "GATEA-MAJ-02",
+      "GATEA-MAJ-03",
+      "GATEA-MAJ-04",
+      "GATEA-MAJ-05"
+    ]
+  },
   "current_gate": {
     "step_id": "V05.3",
     "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "V02-V05 implementation is complete on the feature branch; independent P0 Gate A review is pending",
+    "review": "Gate A targeted remediation is implemented; independent P0 targeted re-review of the seven BLOCKER/MAJOR findings is pending",
     "next_step": "V06.1",
     "next_step_ready": false,
     "next_step_blockers": [
-      "GATE A FOUNDATION REVIEW is pending",
+      "GATE A TARGETED RE-REVIEW is pending",
       "V04.3 and V05.3 are not independently VERIFIED"
     ],
     "required_gate": "GATE_A_FOUNDATION_REVIEW",

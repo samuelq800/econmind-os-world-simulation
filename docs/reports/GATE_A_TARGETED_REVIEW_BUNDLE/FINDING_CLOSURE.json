@@ -1,0 +1,132 @@
+{
+  "schema_version": "GATE_A_TARGETED_CLOSURE-1",
+  "base_reviewed_head": "1a950a41567900761d4f4313092ab4a3404e6f67",
+  "code_candidate_head": "47fe5c5d465748370d9a8ea046bc443978437203",
+  "review_range": "1a950a41567900761d4f4313092ab4a3404e6f67..47fe5c5d465748370d9a8ea046bc443978437203",
+  "changed_file_count": 35,
+  "gate_a_status": "PENDING_RE_REVIEW",
+  "findings": [
+    {
+      "id": "GATEA-BLK-01",
+      "root_cause": "Public launchers did not invoke the environment policy and loopback classification relied on literal host strings.",
+      "files_changed": [
+        "scripts/environment-policy.mjs",
+        "scripts/assert-safe-environment.mjs",
+        "scripts/run-development-service.mjs",
+        "scripts/run-development-stack.mjs",
+        "scripts/architecture-ownership.mjs",
+        "tests/foundation/gate-a-runtime-environment.test.ts",
+        "tests/foundation/bootstrap-lifecycle.test.ts"
+      ],
+      "fix": "Run one fail-closed policy before every public child spawn and normalize loopback-equivalent host syntax deterministically.",
+      "new_regression_tests": "Seven public commands by fifteen unsafe configurations, with exit, no-listener, and port-rebind assertions.",
+      "focused_test_result": "PASS 105/105",
+      "full_test_result": "PASS",
+      "candidate_commit": "3f1b8b6e611e4050230723e0d274e75ba58c0424",
+      "status": "READY_FOR_REVIEW"
+    },
+    {
+      "id": "GATEA-BLK-02",
+      "root_cause": "Accepted 120-digit operands were calculated in an 80-significant-digit context without result-domain validation.",
+      "files_changed": [
+        "packages/core/src/numeric",
+        "packages/core/src/errors.ts",
+        "packages/testkit/src/arbitraries.ts",
+        "packages/testkit/src/exact-decimal-oracle.ts",
+        "tests/foundation/gate-a-numeric-exactness.test.ts",
+        "tests/property/canonical-properties.test.ts"
+      ],
+      "fix": "Use 240-digit exact working precision, validate public results at 120 digits, and return exact-or-DECIMAL_RESULT_OUT_OF_RANGE.",
+      "new_regression_tests": "Boundary examples plus fast-check comparison to an independent BigInt coefficient/scale oracle.",
+      "focused_test_result": "PASS numeric 13/13; property 8/8",
+      "full_test_result": "PASS",
+      "candidate_commit": "4c3646871f00a8009394268485b1ef132ffcbc35",
+      "status": "READY_FOR_REVIEW"
+    },
+    {
+      "id": "GATEA-MAJ-01",
+      "root_cause": "Office authority was structurally copyable, stale at decision time, and incompletely bound to proposal representation.",
+      "files_changed": [
+        "packages/core/src/authorization/approvals.ts",
+        "packages/core/src/authorization/identity.ts",
+        "packages/core/src/authorization/offices.ts",
+        "packages/core/src/authorization/projections.ts",
+        "tests/foundation/authorization-foundation.test.ts"
+      ],
+      "fix": "Use private issued-context identity, re-resolve all current authority, and bind the full immutable proposal decision scope.",
+      "new_regression_tests": "Copy/substitution attacks, revocation/reassignment/suspension/revision attacks, and proposal-representation substitution.",
+      "focused_test_result": "PASS 27/27",
+      "full_test_result": "PASS",
+      "candidate_commit": "0794ede28b6b2dc1f5091ec720665c7125b323b5",
+      "status": "READY_FOR_REVIEW"
+    },
+    {
+      "id": "GATEA-MAJ-02",
+      "root_cause": "Canonical normalization invoked duck-typed methods, property accessors, and Proxy reflection traps.",
+      "files_changed": [
+        "packages/core/src/serialization/canonical.ts",
+        "scripts/boundary-rules.mjs",
+        "tests/foundation/canonical-core.test.ts"
+      ],
+      "fix": "Allow only explicit domain adapters, inspect inert descriptors, and reject native Proxy identity before reflection.",
+      "new_regression_tests": "Methods, getters/setters, live/revoked Proxy with zero traps, hidden/symbol state, and reconstruction ordering.",
+      "focused_test_result": "PASS canonical 14/14; property 8/8",
+      "full_test_result": "PASS",
+      "candidate_commit": "cd685682e44fce6156e12295c976d9924be4b0c3",
+      "status": "READY_FOR_REVIEW"
+    },
+    {
+      "id": "GATEA-MAJ-03",
+      "root_cause": "Regex-only enforcement missed module forms, unary conversion, and aliased numeric coercion.",
+      "files_changed": [
+        "scripts/check-authoritative-patterns.mjs",
+        "tests/architecture/foundation-gates.test.ts"
+      ],
+      "fix": "Parse TypeScript AST module and coercion forms, including assignments, computed/bound aliases, destructuring, and Reflect calls.",
+      "new_regression_tests": "Real scanner CLI fixtures for dynamic/nonliteral modules, unary plus, and computed/bound/reflective Number aliases.",
+      "focused_test_result": "PASS 3/3; repository scanner PASS",
+      "full_test_result": "PASS; protected boundaries 34/34",
+      "candidate_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "status": "READY_FOR_REVIEW"
+    },
+    {
+      "id": "GATEA-MAJ-04",
+      "root_cause": "External Supabase UUID subjects were forced through an incompatible uppercase domain identifier type.",
+      "files_changed": [
+        "packages/core/src/ids.ts",
+        "packages/core/src/authorization/identity.ts",
+        "packages/core/src/authorization/offices.ts",
+        "packages/core/src/authorization/approvals.ts",
+        "tests/foundation/authorization-foundation.test.ts"
+      ],
+      "fix": "Introduce a UUID-safe AuthSubject brand, canonical case normalization, exact profile whitelist, and canonical token/profile equality.",
+      "new_regression_tests": "Realistic UUID, uppercase normalization, malformed/revoked subject, mismatch, and portable-authority-field attacks.",
+      "focused_test_result": "PASS within authorization 27/27",
+      "full_test_result": "PASS",
+      "candidate_commit": "0794ede28b6b2dc1f5091ec720665c7125b323b5",
+      "status": "READY_FOR_REVIEW"
+    },
+    {
+      "id": "GATEA-MAJ-05",
+      "root_cause": "Migration provenance was accepted as caller metadata without verifying artifact bytes at the named Git object, and ordinary Git lookup honored replace refs.",
+      "files_changed": [
+        "database/migrations/README.md",
+        "database/migrations/manifest.json",
+        "scripts/migration-policy.mjs",
+        "scripts/validate-migrations.mjs",
+        "scripts/rehearse-migrations.mjs",
+        "tests/foundation/environment-release-foundation.test.ts"
+      ],
+      "fix": "Use the truthful source commit, verify commit/path/hash with replace refs disabled, and record only verified provenance in rehearsal.",
+      "new_regression_tests": "Nonexistent/absent/mismatched/unverified provenance plus a disposable Git replace-ref attack.",
+      "focused_test_result": "PASS 14/14; validation PASS; PGlite clean/existing PASS",
+      "full_test_result": "PASS",
+      "candidate_commit": "2ce7748a39d226f0c8cf7c0cc920e6aba9bbef7a",
+      "status": "READY_FOR_REVIEW"
+    }
+  ],
+  "minor_backlog": {
+    "GATEA-MIN-01": "UNCHANGED_NOT_FIXED",
+    "GATEA-MIN-02": "MATERIALLY_ADDRESSED_BY_REQUIRED_BLK_02_AND_MAJ_02_REGRESSIONS_READY_FOR_REVIEW"
+  }
+}
