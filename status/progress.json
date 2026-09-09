@@ -47,9 +47,7 @@
       "docs/reports/V00.2/SELF_AUDIT.md",
       "docs/reports/V00.2/REVIEW_FINAL.md"
     ],
-    "V00.3": [
-      "docs/exec-plans/V00.3.md"
-    ]
+    "V00.3": ["docs/exec-plans/V00.3.md"]
   },
   "implementation_commits": {
     "V00.1": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",

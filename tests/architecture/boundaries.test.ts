@@ -320,6 +320,26 @@ describe('resolved repository authority boundaries', () => {
     expect(result.output).toContain('FORBIDDEN_ARCHITECTURE_DEPENDENCY');
   });
 
+  it('keeps bootstrap SERVER_TOOL code out of browser and runtime ownership', async () => {
+    const browserImport = await runBoundaryFixture({
+      source: "import '../../../scripts/run-development-stack.mjs';",
+      files: {
+        'scripts/run-development-stack.mjs': 'export {};',
+      },
+    });
+    const toolImport = await runBoundaryFixture({
+      source: 'export {};',
+      files: {
+        'scripts/run-development-stack.mjs':
+          "import '../apps/world-worker/src/index.js';",
+      },
+    });
+    expect(browserImport.exitCode).toBe(1);
+    expect(browserImport.output).toContain('SERVER_TOOL');
+    expect(toolImport.exitCode).toBe(1);
+    expect(toolImport.output).toContain('FORBIDDEN_ARCHITECTURE_DEPENDENCY');
+  });
+
   it('keeps the real Vite config, helpers, and installed npm imports valid', () => {
     const result = spawnSync(process.execPath, [scannerPath], {
       cwd: repositoryRoot,

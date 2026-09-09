@@ -15,7 +15,9 @@ world-web ──commands/queries──> world-api ──future dispatch──> w
 ```
 
 This diagram is a responsibility model, not a claim that those integrations are
-implemented.
+implemented. V00.3 adds only server-side operational health communication from
+the Web development runtime to the API `/readyz` surface; it does not implement
+the future command/query arrow or a production proxy.
 
 ### `apps/world-web`
 
@@ -42,6 +44,19 @@ implemented.
 When created, it will contain deterministic domain logic. It must not import
 React, React DOM, Supabase SDKs, UI packages, or browser-only APIs. Persistence
 adapters must remain outside core.
+
+### V00.3 bootstrap tooling
+
+`pnpm dev` invokes `scripts/run-development-stack.mjs`, a SERVER_ONLY
+operational coordinator. It starts the existing `pnpm dev:web`, `pnpm dev:api`,
+and `pnpm dev:worker` public boundaries, observes their fixed local readiness
+surfaces, and owns bounded stack cleanup. It does not own World State, economic
+time, commands, events, persistence, or simulation.
+
+The Web development server reserves `GET|HEAD /__bootstrap/api-health` for one
+server-side, no-redirect, no-cache probe to the fixed API `/readyz` target. The
+response is sanitized to `ok` or `unavailable`. It is not an `/api/*` namespace,
+does not forward credentials or upstream content, and does not approve ADR-19.
 
 ## Reserved package names
 
@@ -81,6 +96,11 @@ helpers are scanned too. Build context can import the approved build helpers
 and installed tooling/Node builtins, but cannot import worker, API, arbitrary
 server helpers, or browser runtime implementation. Browser/shared runtime cannot
 import build-context files. Running in Node is not an authority exemption.
+
+The exact public service launcher and unified bootstrap coordinator listed in
+SERVER_TOOLS have SERVER_TOOL context and SERVER_ONLY ownership. They are part
+of complete scan coverage and may use installed tooling and Node builtins, but
+do not grant browser/shared code an import edge into server operational logic.
 
 `node_modules`, `dist`, `coverage`, and `.vite` directory segments are excluded
 as installed dependencies or generated output. Governed local imports into

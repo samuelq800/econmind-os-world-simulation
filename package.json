@@ -10,6 +10,7 @@
   },
   "scripts": {
     "preinstall": "node scripts/verify-toolchain.mjs",
+    "dev": "node scripts/run-development-stack.mjs",
     "dev:web": "node scripts/run-development-service.mjs web",
     "dev:api": "node scripts/run-development-service.mjs api",
     "dev:worker": "node scripts/run-development-service.mjs worker",

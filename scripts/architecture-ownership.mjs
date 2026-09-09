@@ -29,7 +29,16 @@ export const BUILD_HELPERS = [
   'scripts/vite-environment-policy.mjs',
   'scripts/vite-environment-policy.d.mts',
 ];
-export const GOVERNED_ROOTS = ['apps', 'packages', ...BUILD_HELPERS];
+export const SERVER_TOOLS = [
+  'scripts/run-development-service.mjs',
+  'scripts/run-development-stack.mjs',
+];
+export const GOVERNED_ROOTS = [
+  'apps',
+  'packages',
+  ...BUILD_HELPERS,
+  ...SERVER_TOOLS,
+];
 export const EXCLUDED_DIRECTORIES = new Set([
   'node_modules',
   'dist',
@@ -57,14 +66,19 @@ export function classifyArchitecturePath(repositoryRoot, filePath) {
   const owner = PACKAGE_OWNERS.get(packageRoot) ?? OWNERS.UNKNOWN;
   const excluded = parts.some((part) => EXCLUDED_DIRECTORIES.has(part));
   const helper = BUILD_HELPERS.includes(relativePath);
+  const serverTool = SERVER_TOOLS.includes(relativePath);
   const buildConfig =
     relativePath === 'apps/world-web/vite.config.ts' || helper;
   return {
-    owner: helper ? OWNERS.SERVER_ONLY : owner,
-    context: buildConfig ? 'WEB_BUILD_CONFIG' : 'RUNTIME',
+    owner: helper || serverTool ? OWNERS.SERVER_ONLY : owner,
+    context: buildConfig
+      ? 'WEB_BUILD_CONFIG'
+      : serverTool
+        ? 'SERVER_TOOL'
+        : 'RUNTIME',
     packageName: parts[1] ?? null,
     relativePath,
-    governed: !excluded && (helper || owner !== OWNERS.UNKNOWN),
+    governed: !excluded && (helper || serverTool || owner !== OWNERS.UNKNOWN),
   };
 }
 
@@ -78,6 +92,14 @@ export function architecturalEdgeViolation(source, target) {
       : 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';
   }
   if (target.context === 'WEB_BUILD_CONFIG') {
+    return 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';
+  }
+  if (source.context === 'SERVER_TOOL') {
+    return target.context === 'SERVER_TOOL'
+      ? null
+      : 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';
+  }
+  if (target.context === 'SERVER_TOOL') {
     return 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';
   }
   if (source.owner === OWNERS.WORLD_WEB) {
