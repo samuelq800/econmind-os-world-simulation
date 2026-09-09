@@ -20,7 +20,10 @@
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "vitest run",
-    "test:boundaries": "vitest run tests/architecture/boundaries.test.ts && node scripts/check-boundaries.mjs",
+    "test:property": "vitest run tests/property",
+    "test:architecture": "vitest run tests/architecture && node scripts/check-boundaries.mjs && node scripts/check-authoritative-patterns.mjs",
+    "test:boundaries": "vitest run tests/architecture/boundaries.test.ts tests/architecture/foundation-gates.test.ts tests/architecture/foundation-ci-gate.test.ts && node scripts/check-authoritative-patterns.mjs && node scripts/check-boundaries.mjs",
+    "foundation:policy": "node scripts/foundation-gate-policy.mjs",
     "env:check": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
     "migration:validate": "node scripts/validate-migrations.mjs",
     "migration:rehearse": "node scripts/rehearse-migrations.mjs",
@@ -28,7 +31,7 @@
     "secrets:check": "node scripts/check-repository-secrets.mjs",
     "supabase:safe": "node scripts/supabase-safe.mjs",
     "build": "pnpm -r --if-present build",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:boundaries && pnpm env:check && pnpm migration:validate && pnpm migration:rehearse && pnpm secrets:check && pnpm build"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:boundaries && pnpm env:check && pnpm migration:validate && pnpm migration:rehearse && pnpm foundation:policy && pnpm secrets:check && pnpm build"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
@@ -38,6 +41,7 @@
     "@types/react-dom": "19.2.7",
     "@vitejs/plugin-react": "6.1.1",
     "eslint": "10.10.0",
+    "fast-check": "4.9.0",
     "globals": "17.12.0",
     "prettier": "3.9.6",
     "typescript": "6.0.3",
