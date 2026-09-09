@@ -16,7 +16,7 @@ artifact under `docs/exec-plans`, `docs/architecture`, `docs/testing`, and
 `docs/planning`. Repository-current facts override SHA/status examples here.
 Run `docs/exec-plans/V06_EXECUTION_PREFLIGHT.md`; every item must be YES.
 
-Proceed only if the repository contains an independent Gate A `APPROVED`
+Proceed only if the repository contains a policy-valid Gate A `PASSED`
 decision tied to the exact Foundation candidate/evidence, V02.1-V05.3 are
 governance-valid `VERIFIED`, Foundation integration is explicitly authorized
 and complete, and reconciled `main` passes required checks. Otherwise stop and
@@ -25,16 +25,15 @@ The remediation contracts are inherited law for this sprint: do not undo,
 weaken, remodel or replace their environment, numeric, authorization, identity,
 serialization, AST-enforcement or migration-provenance boundaries.
 
-## 1. Branch and Gate B batch governance
+## 1. Branch and lifecycle governance
 
-Create `codex/world-core-v06-v10` from reconciled `main`. Before implementation,
-require an owner-approved narrow batch-candidate record permitting only
-V06.1-V10.4 to depend on earlier `IMPLEMENTED_UNVERIFIED` steps on this branch
-while waiting for Gate B. It must preserve P0 independent review at Gate B, no
-premature `VERIFIED`, no merge, no production mutation/publication, and no V11.
-Do not weaken general P0 policy. If the scoped record is absent, stop.
-`WORLD_CORE_BATCH_CANDIDATE_POLICY_DRAFT.json` is inert and cannot satisfy this
-gate until a separate responsible-human-approved activation is recorded.
+Create `codex/world-core-v06-v10` from reconciled `main`. Use the normal
+per-step lifecycle: do not begin a dependent step until its hard dependency is
+`VERIFIED` through the repository's required evidence and review. Preserve P0
+review requirements, no production mutation/publication and no V11.
+`WORLD_CORE_BATCH_CANDIDATE_POLICY_DRAFT.json` remains inert unless a separate
+responsible-human-approved activation is recorded; it is not required by or
+authority for this normal route.
 
 ## 2. JIT ADR discipline
 

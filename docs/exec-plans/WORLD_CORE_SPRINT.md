@@ -3,16 +3,16 @@
 ## Observed baseline
 
 - Observed on 2026-09-09 after fetching current remotes.
-- Foundation branch: `codex/foundation-v02-v05`.
-- Gate A: `PENDING`; independent approval is not present in the repository.
+- Foundation remediation branch: `codex/gate-a-targeted-fixes`.
+- Gate A: `PASSED` by scoped `PROJECT_OWNER_ACCEPTANCE`.
 - Targeted remediation: code candidate `47fe5c5d465748370d9a8ea046bc443978437203`,
-  evidence HEAD `b383904573b2959b3f22ea6d8ded4d02c3582b83`, status
-  `PENDING_RE_REVIEW`; passing candidate evidence is not approval.
-- V02.1-V05.3: `IMPLEMENTED_UNVERIFIED`.
+  evidence HEAD `b383904573b2959b3f22ea6d8ded4d02c3582b83`; mainline merge
+  `676c5dfb358edda5c25e9bb308242c533783dba0`.
+- V02.1-V05.3: `VERIFIED`.
 - V06.1-V10.4: all `PLANNED`; V06 `next_step_ready=false`.
-- Planning branch: `codex/world-core-planning`, created from Foundation evidence
-  HEAD `1a950a41567900761d4f4313092ab4a3404e6f67` to avoid changing the branch
-  under review.
+- Planning source: `codex/world-core-planning` at
+  `b803e28a3e225842bf2a70d67f492242dfe359c0`, history-preservingly merged
+  after Gate A.
 
 This plan changes no implementation status, runtime, schema, environment, or
 Gate A evidence.
@@ -81,9 +81,10 @@ actually exercised; registration never implies implementation.
 1. Satisfy the entry gate in the implementation sequence.
 2. Create `codex/world-core-v06-v10` from reconciled `main` only after Gate A
    approval/integration.
-3. Add the owner-approved narrow Gate B batch governance record; do not weaken
-   the general P0 policy. The checked-in draft is inert until a separate
-   owner-approved activation after Gate A.
+3. Use the normal per-step lifecycle: a dependency must be `VERIFIED` before
+   its dependent step begins. The checked-in batch draft remains inert; it may
+   be activated only by a separate owner decision and is not required by this
+   normal route.
 4. Resolve JIT decisions at their latest implementation points, not as a bulk
    ADR approval.
 5. Implement steps continuously with meaningful code/evidence commits and

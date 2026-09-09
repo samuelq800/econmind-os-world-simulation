@@ -5,16 +5,17 @@
 Observed after fetching remotes on 2026-09-09:
 
 - remediation branch: `codex/gate-a-targeted-fixes`;
-- branch HEAD/evidence commit: `b383904573b2959b3f22ea6d8ded4d02c3582b83`;
+- evidence commit: `b383904573b2959b3f22ea6d8ded4d02c3582b83`;
 - immutable code candidate: `47fe5c5d465748370d9a8ea046bc443978437203`;
 - reviewed Foundation base: `1a950a41567900761d4f4313092ab4a3404e6f67`;
-- remediation bundle state: `IMPLEMENTATION FIXED / READY_FOR_REVIEW`;
-- authoritative gate state: `PENDING_RE_REVIEW`, `next_step_ready=false`;
-- V02.1-V05.3: `IMPLEMENTED_UNVERIFIED`; V06.1-V10.4: `PLANNED`.
+- remediation acceptance record: `71160c2735f3e21367822717663074b7df307df5`;
+- Gate A mainline merge: `676c5dfb358edda5c25e9bb308242c533783dba0`;
+- authoritative gate state: `PASSED`, `next_step_ready=false`;
+- V02.1-V05.3: `VERIFIED`; V06.1-V10.4: `PLANNED`.
 
-Candidate tests and the remediation bundle are not independent approval. This
-document neither approves nor merges Gate A, activates batch governance, starts
-V06, changes status, nor authorizes a database operation.
+Gate A acceptance and merge are recorded in their dedicated reports. This
+document does not approve ADRs, activate batch governance, start V06, or
+authorize a database operation.
 
 ## Repaired Foundation contracts inherited by World Core
 
@@ -80,6 +81,6 @@ staged, and must remain isolated from the reconciliation commit.
 
 ## Reconciliation result
 
-The planning contracts are aligned to the remediation candidate but remain
-conditional on a fresh independent Gate A decision. Execution authority is
-defined by `V06_EXECUTION_PREFLIGHT.md`, not by this document.
+The planning contracts are aligned to the accepted remediation candidate and
+merged Foundation. Execution authority is defined by
+`V06_EXECUTION_PREFLIGHT.md`; ADR-01 and ADR-03 remain the current blockers.

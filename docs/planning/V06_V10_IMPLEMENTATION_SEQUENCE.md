@@ -5,22 +5,18 @@
 Implementation must not begin until all conditions are observed in the
 repository, not inferred from chat:
 
-1. Gate A has an independent `APPROVED` decision tied to the exact Foundation
-   remediation code candidate and evidence commit; `READY_FOR_REVIEW` and green
-   candidate tests are insufficient.
+1. Gate A has a policy-valid `PASSED` decision tied to the exact Foundation
+   remediation code candidate and evidence commit.
 2. V02.1-V05.3 are governance-valid `VERIFIED` and Foundation integration into
    `main` is explicitly authorized and completed.
 3. `pnpm check`, governance validation, and `git diff --check` pass on the
    reconciled `main` baseline.
 4. The JIT decisions needed before V06.1—at minimum ADR-03 and the scoped
    ordering portion of ADR-01—have responsible-human approval records.
-5. A narrowly scoped World Core batch record is approved and added to
-   governance because the requested Gate B model intentionally keeps internal
-   P0 dependencies `IMPLEMENTED_UNVERIFIED`. It must name only V06.1-V10.4,
-   branch `codex/world-core-v06-v10`, Gate B, no production mutation, no merge,
-   and independent review pending. The validator may accept an unverified
-   dependency only when both steps are inside that exact batch; it must never
-   allow `VERIFIED` or post-V10 work without review.
+5. Normal per-step lifecycle is active: each hard dependency must be
+   `VERIFIED` before its dependent step begins. The checked-in batch policy
+   remains `DRAFT_NOT_ACTIVE`; it is neither an entry condition nor authority
+   to carry unverified dependencies.
 
 If any condition is absent, report the exact blocker. Do not merge Foundation,
 start V06, or emulate approval.
@@ -37,9 +33,9 @@ reconciled main
 ```
 
 Each step gets one execution plan, implementation report, test evidence, trace
-links, and meaningful implementation commit. Each completed step remains
-`IMPLEMENTED_UNVERIFIED`. No intermediate P0 approval, merge, production
-publication, or V11 implementation is permitted.
+links, meaningful implementation commit and its required lifecycle review.
+Only after it is `VERIFIED` may the dependent step begin. No production
+publication or V11 implementation is permitted.
 
 ## Step sequence
 
@@ -58,7 +54,7 @@ publication, or V11 implementation is permitted.
 
 ### V06.2 — Scheduling, Pause/Resume, and catch-up
 
-- **Dependencies:** V06.1 candidate within approved batch.
+- **Dependencies:** V06.1 `VERIFIED`.
 - **Build:** Season state machine, scheduled-event queue contract, exact due
   selection, pause intervals, running-worker catch-up, day/year boundary
   markers. No E02-E18 economic execution.

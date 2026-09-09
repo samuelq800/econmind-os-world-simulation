@@ -2,14 +2,14 @@
 
 ## Status and decision boundary
 
-This is a planning contract, not an implementation or approval. Gate A remains
-pending in `status/progress.json`; V06-V10.4 remain `PLANNED`. The contract may
-be implemented only after an independent Gate A approval is recorded and the
-JIT decisions identified below are approved at their latest implementation
-points. It is reconciled to remediation code candidate
+This is a planning contract, not an implementation or ADR approval. Gate A is
+`PASSED` through the recorded `PROJECT_OWNER_ACCEPTANCE` and the Foundation is
+merged into `main`; V06-V10.4 remain `PLANNED`. The contract may be
+implemented only after the JIT decisions identified below are approved at their
+latest implementation points. It is reconciled to remediation code candidate
 `47fe5c5d465748370d9a8ea046bc443978437203` and evidence HEAD
-`b383904573b2959b3f22ea6d8ded4d02c3582b83`, both still pending targeted
-independent re-review.
+`b383904573b2959b3f22ea6d8ded4d02c3582b83`, accepted in
+`docs/reports/GATE_A/FINAL_ACCEPTANCE.md`.
 
 ## One authoritative path
 
