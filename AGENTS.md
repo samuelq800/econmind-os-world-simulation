@@ -15,8 +15,9 @@ reconstruct missing governance from chat history.
 ## Current gate
 
 V00.1, V00.2, and the R2 governance sync are `VERIFIED`; their approved history
-and final reconciliation are recorded in `status/progress.json`. V00.3 is the
-current implementation step. Do not begin V01.1 or later work.
+and final reconciliation are recorded in `status/progress.json`. V00.3 is
+`IMPLEMENTED_UNVERIFIED` and awaits independent review. Do not begin V01.1 or
+later work.
 
 ## Architecture and data safety
 
