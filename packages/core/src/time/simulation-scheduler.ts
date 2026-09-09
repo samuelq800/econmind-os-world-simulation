@@ -148,6 +148,10 @@ function freezePause(interval: PauseInterval): PauseInterval {
   return Object.freeze({ ...interval });
 }
 
+function compareCanonicalIds(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 function createSchedulerState(input: {
   readonly clock: SimulationClockState;
   readonly pauseIntervals: readonly PauseInterval[];
@@ -160,7 +164,7 @@ function createSchedulerState(input: {
     scheduledEvents: Object.freeze(
       [...input.scheduledEvents]
         .sort((left, right) =>
-          left.scheduledEventId.localeCompare(right.scheduledEventId),
+          compareCanonicalIds(left.scheduledEventId, right.scheduledEventId),
         )
         .map(freezeEvent),
     ),
@@ -536,6 +540,15 @@ export function restoreSimulationSchedulerState(
     new Set(events.map((event) => event.idempotencyKey)).size !== events.length
   ) {
     invalidState('Serialized scheduler contains duplicate event identities');
+  }
+  if (
+    snapshot.seasonStatus === 'PREOPEN' &&
+    (events.some((event) => event.status === 'COMPLETED') ||
+      pauseIntervals.length > 0)
+  ) {
+    invalidState(
+      'PREOPEN scheduler cannot contain completed events or pause history',
+    );
   }
   if (
     events.some(

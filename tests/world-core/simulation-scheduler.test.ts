@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  canonicalSerialize,
   DOMAIN_ERROR_CODES,
   SIMULATION_TICKS_PER_DAY,
   SimTime,
@@ -117,6 +118,27 @@ describe('V06.2 Simulation Scheduler lifecycle', () => {
 });
 
 describe('V06.2 exact due and restart behavior', () => {
+  it('uses locale-independent code-unit order for canonical event state', () => {
+    let state = createSimulationScheduler();
+    const localeCompare = String.prototype.localeCompare;
+    String.prototype.localeCompare = () => {
+      throw new Error('localeCompare must not determine authoritative order');
+    };
+    try {
+      for (const id of ['Z', 'AA', 'A_1', 'A-1']) {
+        state = scheduleSimulationEvent(
+          state,
+          eventInput(id, '100', `IDEMPOTENCY_${id}`),
+        );
+      }
+    } finally {
+      String.prototype.localeCompare = localeCompare;
+    }
+    expect(
+      state.scheduledEvents.map((event) => event.scheduledEventId),
+    ).toEqual(['A-1', 'AA', 'A_1', 'Z']);
+  });
+
   it('executes an event only at or after its exact due SimTime', () => {
     let state = startSimulationSeason(createSimulationScheduler());
     state = scheduleSimulationEvent(state, eventInput());
@@ -231,6 +253,23 @@ describe('V06.2 exact due and restart behavior', () => {
         JSON.stringify(impossible, Object.keys(impossible).sort()),
       ),
     ).toThrowError();
+  });
+
+  it('rejects a canonical PREOPEN snapshot with impossible completed work', () => {
+    const scheduled = scheduleSimulationEvent(
+      createSimulationScheduler(),
+      eventInput('EVENT_PREOPEN', '0', 'IDEMPOTENCY_PREOPEN'),
+    );
+    const impossible = JSON.parse(serializeSimulationSchedulerState(scheduled));
+    impossible.scheduledEvents[0].status = 'COMPLETED';
+
+    expect(() =>
+      restoreSimulationSchedulerState(canonicalSerialize(impossible)),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.SCHEDULER_STATE_INVALID,
+      }),
+    );
   });
 
   it('rejects scheduling and advancement after ENDED', () => {
