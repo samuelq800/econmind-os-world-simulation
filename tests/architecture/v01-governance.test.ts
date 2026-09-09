@@ -219,7 +219,7 @@ describe('V06 owner-authorized package continuation', () => {
       implementation_commit: '7a6ad76d7e43f96a143a4620afc33c8b107261e0',
       automated_evidence_status: 'PASS',
       finding_id: 'V06-PKG-BLK-01',
-      independent_closure: 'PENDING',
+      independent_closure: 'CLOSED',
       package_review_pending: true,
       package_verified: false,
     });
@@ -235,13 +235,15 @@ describe('V06 owner-authorized package continuation', () => {
       v07_authorized: false,
     });
     expect(progress.v06_package_re_review).toMatchObject({
-      status: 'READY',
+      status: 'V06_PACKAGE_APPROVED',
       finding_id: 'V06-PKG-BLK-01',
       forward_fix_code_candidate: '7a6ad76d7e43f96a143a4620afc33c8b107261e0',
       forward_fix_step_target: '3d21e94483ae923b60dc4a6a8a3e1cd1d64e80ec',
+      reviewed_package_target: '80ab3ecac0abbd622a7e2fc450101407db7f66f9',
       review_mode: 'LIGHTWEIGHT_TARGETED_RE_REVIEW',
       implementation_result: 'PASS',
-      independent_closure_claimed: false,
+      independent_closure_claimed: true,
+      closed_findings: ['V06-PKG-BLK-01'],
       package_verified: false,
       merge_authorized: false,
       v07_authorized: false,
