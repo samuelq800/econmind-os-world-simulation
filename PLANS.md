@@ -14,7 +14,9 @@
 ## 3. 依赖门槛
 默认情况下 `hard_dependencies` 需已 `VERIFIED`。P1 若按
 `docs/governance/FAST_MAINLINE_REVIEW_POLICY.json` 明确记录为工作包审查延期，
-可在同一命名 Work Package 内继续；P0 永远不能用延期或 fast-track 解锁。
+可在同一命名 Work Package 内继续；P0 永远不能用延期或 fast-track 解锁。Gate A
+另有一次性、gate-scoped `PROJECT_OWNER_ACCEPTANCE` 记录；它不是通用 P0 fast-track，
+也不批准任何 ADR。
 标记 `PARALLEL_PREPARATION` 的步骤可以按清单提前准备，但不能据此跳过父工作包的正式前置门槛，也不能把父工作包标完成。
 
 ## 4. FAST_MAINLINE 生命周期
@@ -22,7 +24,8 @@
 变更触及的最高边界分类，不能因工作包标题、文件位置或进度目标降级。
 
 - P0 / HIGH RISK：必要自动证据通过后仍须阻塞式独立审查；未批准前不得
-  `VERIFIED`、merge 或开始依赖实现。
+  `VERIFIED`、merge 或开始依赖实现。当前唯一例外是 Gate A 在既有独立发现、
+  修复和回归证据之后由项目负责人明确作出的 scoped acceptance。
 - P1：自动测试、invariant、security、governance 全部通过后可继续 mainline；
   独立审查只能延期到明确命名的 Work Package gate。
 - P2：foundation/docs/tooling/non-authoritative integration 可在证据通过且确认
@@ -30,7 +33,8 @@
 - P3：非行为变更在必要证据通过后不要求独立审查。
 
 `VERIFIED` 可来自独立 `APPROVED`，或仅对 P2/P3 来自负责人明确的
-`OWNER_FAST_TRACK_ACCEPTED`。记录必须绑定不可变 implementation commit、证据
+`OWNER_FAST_TRACK_ACCEPTED`；Gate A 还可使用集中策略内唯一的
+`PROJECT_OWNER_ACCEPTANCE`。记录必须绑定不可变 implementation commit、证据
 文件和真实检查结果。实施者不得虚构 owner approval，也不得自行批准 P0。
 
 ## 5. 决策纪律
@@ -41,6 +45,9 @@ Codex 可提出 ADR proposal，但需要用户/负责人批准的架构或经济
 - `NOT_RUN` 绝不能改写成 `PASS`。
 - 真实数据库/RLS/并发/恢复若未运行，必须明示。
 - 不得删除、skip 或弱化 P0 测试来通过 CI。
+- 默认采用 normal engineering verification，不主动扩展 open-ended red-team、
+  极端网站 exploit chain、无界 fuzz 或仅为发现新漏洞而设计的不现实 timing attack。
+  已有安全回归与正常测试发现的真实缺陷仍必须保留并处理。
 
 ## 7. Scope 纪律
 一个月是冲刺窗口，不是静默删减原规范功能的授权。任何延期必须显式 `DEFERRED_WITH_APPROVAL`。

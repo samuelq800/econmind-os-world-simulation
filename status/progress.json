@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T06:53:43Z",
-  "source_commit": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
-  "note": "FAST_MAINLINE is active. P0 still requires blocking independent review; P2/P3 may use explicit evidence-backed owner fast-track.",
+  "derived_at": "2026-09-09T12:42:15Z",
+  "source_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+  "note": "Gate A is accepted by the project owner under the scoped PROJECT_OWNER_ACCEPTANCE policy after passing normal baseline and targeted regression evidence. This does not approve ADR-01 or ADR-03.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -57,9 +57,10 @@
     "owner_approved": true
   },
   "foundation_sprint": {
-    "branch": "codex/foundation-v02-v05",
-    "status": "IMPLEMENTED_UNVERIFIED",
-    "candidate_commit": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
+    "branch": "codex/gate-a-targeted-fixes",
+    "status": "VERIFIED",
+    "candidate_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "evidence_commit": "b383904573b2959b3f22ea6d8ded4d02c3582b83",
     "review_gate": "GATE_A_FOUNDATION_REVIEW",
     "allowed_steps": [
       "V02.1",
@@ -76,15 +77,25 @@
       "V05.3"
     ],
     "production_mutation": false,
-    "merge_allowed": false,
-    "independent_review_pending": true
+    "merge_allowed": true,
+    "independent_review_pending": false,
+    "verification_method": "PROJECT_OWNER_ACCEPTANCE",
+    "decision": "PASSED",
+    "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+    "integration": {
+      "status": "PENDING",
+      "merged_commit": null
+    }
   },
   "gate_a_targeted_remediation": {
     "branch": "codex/gate-a-targeted-fixes",
     "base_reviewed_commit": "1a950a41567900761d4f4313092ab4a3404e6f67",
     "code_candidate_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
-    "status": "IMPLEMENTED_UNVERIFIED",
-    "independent_review_pending": true,
+    "status": "VERIFIED",
+    "decision": "PASSED",
+    "authority": "PROJECT_OWNER_ACCEPTANCE",
+    "acceptance_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+    "independent_review_pending": false,
     "finding_scope": [
       "GATEA-BLK-01",
       "GATEA-BLK-02",
@@ -95,26 +106,40 @@
       "GATEA-MAJ-05"
     ]
   },
+  "gate_a_final": {
+    "gate": "A",
+    "decision": "PASSED",
+    "authority": "PROJECT_OWNER_ACCEPTANCE",
+    "base_commit": "1a950a41567900761d4f4313092ab4a3404e6f67",
+    "code_candidate_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "evidence_commit": "b383904573b2959b3f22ea6d8ded4d02c3582b83",
+    "test_policy": "NORMAL_ENGINEERING_VERIFICATION",
+    "open_ended_adversarial_probing": "NOT_REQUIRED_BY_OWNER_POLICY",
+    "independent_review_claimed": false,
+    "owner_approved": true,
+    "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md"
+  },
   "current_gate": {
     "step_id": "V05.3",
-    "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "Gate A targeted remediation is implemented; independent P0 targeted re-review of the seven BLOCKER/MAJOR findings is pending",
+    "status": "VERIFIED",
+    "review": "Gate A passed by explicit project-owner acceptance after normal baseline and targeted regression evidence",
     "next_step": "V06.1",
     "next_step_ready": false,
     "next_step_blockers": [
-      "GATE A TARGETED RE-REVIEW is pending",
-      "V04.3 and V05.3 are not independently VERIFIED"
+      "Gate A Foundation integration into main is pending",
+      "ADR-01 owner approval is pending",
+      "ADR-03 owner approval is pending"
     ],
     "required_gate": "GATE_A_FOUNDATION_REVIEW",
-    "gate_status": "PENDING"
+    "gate_status": "PASS"
   },
   "work_packages": {
     "V00": "COMPLETE",
     "V01": "IMPLEMENTED_MERGED",
-    "V02": "IMPLEMENTED_UNVERIFIED",
-    "V03": "IMPLEMENTED_UNVERIFIED",
-    "V04": "IMPLEMENTED_UNVERIFIED",
-    "V05": "IMPLEMENTED_UNVERIFIED"
+    "V02": "VERIFIED",
+    "V03": "VERIFIED",
+    "V04": "VERIFIED",
+    "V05": "VERIFIED"
   },
   "step_evidence": {
     "V00.1": [
@@ -227,7 +252,11 @@
     ],
     "FOUNDATION_V02_V05": [
       "docs/reports/GATE_A_FOUNDATION_REVIEW_BUNDLE.md",
-      "docs/reports/GATE_A_FOUNDATION_TEST_EVIDENCE.json"
+      "docs/reports/GATE_A_FOUNDATION_TEST_EVIDENCE.json",
+      "docs/reports/GATE_A_TARGETED_REVIEW_BUNDLE/README.md",
+      "docs/reports/GATE_A_TARGETED_REVIEW_BUNDLE/FINDING_CLOSURE.json",
+      "docs/reports/GATE_A_TARGETED_REVIEW_BUNDLE/TEST_EVIDENCE.json",
+      "docs/reports/GATE_A/FINAL_ACCEPTANCE.md"
     ]
   },
   "implementation_commits": {
@@ -237,18 +266,18 @@
     "V01.1": "2d66872278b1c8a586c751390fed94796f00c40a",
     "V01.2": "e72f3b131e368c35dea25d1c5e98e7dbce9645dd",
     "V01.3": "5ef35fc3dfe266187bf2f0b6ce557bc450eae2bf",
-    "V02.1": "43739ceb38c167c44e806361930b7603360647c3",
-    "V02.2": "43739ceb38c167c44e806361930b7603360647c3",
-    "V02.3": "43739ceb38c167c44e806361930b7603360647c3",
-    "V03.1": "52e62f1b988a3f0c650cf5f4032fada78c7fe43c",
-    "V03.2": "52e62f1b988a3f0c650cf5f4032fada78c7fe43c",
-    "V03.3": "52e62f1b988a3f0c650cf5f4032fada78c7fe43c",
-    "V04.1": "b91fb6ec92d9a19ff23eaeb7573b69e838dca0cc",
-    "V04.2": "b91fb6ec92d9a19ff23eaeb7573b69e838dca0cc",
-    "V04.3": "b91fb6ec92d9a19ff23eaeb7573b69e838dca0cc",
-    "V05.1": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
-    "V05.2": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
-    "V05.3": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c"
+    "V02.1": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V02.2": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V02.3": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V03.1": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V03.2": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V03.3": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V04.1": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V04.2": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V04.3": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V05.1": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V05.2": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V05.3": "47fe5c5d465748370d9a8ea046bc443978437203"
   },
   "step_reviews": {
     "V00.1": {
@@ -302,6 +331,162 @@
       "automated_evidence_status": "PASS",
       "p0_boundary_changed": false,
       "owner_approved": true
+    },
+    "V02.1": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
+    },
+    "V02.2": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
+    },
+    "V02.3": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
+    },
+    "V03.1": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
+    },
+    "V03.2": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
+    },
+    "V03.3": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
+    },
+    "V04.1": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
+    },
+    "V04.2": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
+    },
+    "V04.3": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
+    },
+    "V05.1": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
+    },
+    "V05.2": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
+    },
+    "V05.3": {
+      "method": "PROJECT_OWNER_ACCEPTANCE",
+      "gate_id": "GATE_A_FOUNDATION_REVIEW",
+      "decision": "PASSED",
+      "risk_class": "P0",
+      "reviewed_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
+      "evidence_file": "docs/reports/GATE_A/FINAL_ACCEPTANCE.md",
+      "baseline_evidence_status": "PASS",
+      "targeted_regression_status": "PASS",
+      "open_ended_adversarial_required": false,
+      "independent_review_claimed": false,
+      "owner_approved": true
     }
   },
   "steps": {
@@ -311,18 +496,18 @@
     "V01.1": "VERIFIED",
     "V01.2": "VERIFIED",
     "V01.3": "VERIFIED",
-    "V02.1": "IMPLEMENTED_UNVERIFIED",
-    "V02.2": "IMPLEMENTED_UNVERIFIED",
-    "V02.3": "IMPLEMENTED_UNVERIFIED",
-    "V03.1": "IMPLEMENTED_UNVERIFIED",
-    "V03.2": "IMPLEMENTED_UNVERIFIED",
-    "V03.3": "IMPLEMENTED_UNVERIFIED",
-    "V04.1": "IMPLEMENTED_UNVERIFIED",
-    "V04.2": "IMPLEMENTED_UNVERIFIED",
-    "V04.3": "IMPLEMENTED_UNVERIFIED",
-    "V05.1": "IMPLEMENTED_UNVERIFIED",
-    "V05.2": "IMPLEMENTED_UNVERIFIED",
-    "V05.3": "IMPLEMENTED_UNVERIFIED",
+    "V02.1": "VERIFIED",
+    "V02.2": "VERIFIED",
+    "V02.3": "VERIFIED",
+    "V03.1": "VERIFIED",
+    "V03.2": "VERIFIED",
+    "V03.3": "VERIFIED",
+    "V04.1": "VERIFIED",
+    "V04.2": "VERIFIED",
+    "V04.3": "VERIFIED",
+    "V05.1": "VERIFIED",
+    "V05.2": "VERIFIED",
+    "V05.3": "VERIFIED",
     "V06.1": "PLANNED",
     "V06.2": "PLANNED",
     "V06.3": "PLANNED",
