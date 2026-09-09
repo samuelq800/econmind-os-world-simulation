@@ -19,17 +19,17 @@
     "reason": "V01.2 records proposals and future gates; it does not select or implement an unapproved proposal."
   },
   "approval_summary": {
-    "approved": 0,
-    "proposed_not_approved": 20,
+    "approved": 2,
+    "proposed_not_approved": 18,
     "bulk_approval_permitted": false
   },
   "adrs": [
     {
       "id": "ADR-01",
       "conflict_subject": "Engine 与 Settlement Phase 映射及顺序差异",
-      "coordination_proposal": "保留 Master E01-E18，以 Master 18 阶段为协调基线建立 phase-to-engine operation 映射，并通过批准的附录协调 Constitution 硬约束。",
-      "decision_status": "PROPOSED_NOT_APPROVED",
-      "approval_record": null,
+      "coordination_proposal": "保留 E01-E18 Engine ID；以 Constitution 规定的 15 个 settlement-stage ID 作为唯一版本化 orchestration order，并维护显式、版本化的 Engine-to-Stage 映射。",
+      "decision_status": "APPROVED",
+      "approval_record": "docs/architecture/decisions/ADR-01.md",
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
       "latest_gate": "V06/V09",
       "affected_work_packages": [
@@ -101,9 +101,9 @@
     {
       "id": "ADR-03",
       "conflict_subject": "Simulation Clock、pause、cutoff 与同时间优先级",
-      "coordination_proposal": "使用相对 world 起点的 360 日历 sim ticks，暂停排除 elapsed，恢复按确定顺序补算，并冻结命令 cutoff 和同一 sim 时点优先序。",
-      "decision_status": "PROPOSED_NOT_APPROVED",
-      "approval_record": null,
+      "coordination_proposal": "使用非负整数 simulation-millisecond ticks；1 real second 精确等于 10,000 simulation ticks；PAUSED 对 SimTime 贡献为零；RUNNING downtime 采用确定性 catch-up；同时间工作按 (dueSimTime, priorityRank, scheduledEventId) 排序；command cutoff 在 worker 开始 authoritative transaction 时锁定。",
+      "decision_status": "APPROVED",
+      "approval_record": "docs/architecture/decisions/ADR-03.md",
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
       "latest_gate": "V06/V07",
       "affected_work_packages": [

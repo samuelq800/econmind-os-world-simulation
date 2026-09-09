@@ -861,13 +861,37 @@ def validate(root: Path) -> dict[str, Any]:
                 "approval_record",
             ):
                 require(key in record, f"{record['id']} missing {key}")
-            require(record["status"] == "PROPOSED_NOT_APPROVED", f"{record['id']} was self-approved")
-            require(record["approval_record"] is None, f"{record['id']} has unsupported approval")
+            require(
+                record["status"] in {"PROPOSED_NOT_APPROVED", "APPROVED"},
+                f"{record['id']} has an invalid decision status",
+            )
+            if record["status"] == "APPROVED":
+                approval_record = record["approval_record"]
+                require(
+                    isinstance(approval_record, str)
+                    and approval_record.startswith("docs/architecture/decisions/"),
+                    f"{record['id']} lacks a supported owner approval record",
+                )
+                approval_text = file(approval_record).read_text(encoding="utf-8")
+                require(
+                    "Decision: APPROVED" in approval_text
+                    and "Authority: RESPONSIBLE_HUMAN_OWNER" in approval_text
+                    and "Codex self-approval" in approval_text,
+                    f"{record['id']} owner approval evidence is incomplete",
+                )
+            else:
+                require(
+                    record["approval_record"] is None,
+                    f"{record['id']} proposed decision carries approval evidence",
+                )
             require(
                 set(record["affected_work_packages"]) <= package_ids,
                 f"{record['id']} names an invalid work package",
             )
         metrics["decisions"] = 20
+        metrics["approved_decisions"] = sum(
+            record["status"] == "APPROVED" for record in records
+        )
 
     def source_material() -> None:
         manifest = load_json("requirements/source_manifest.json")
@@ -943,14 +967,15 @@ def validate(root: Path) -> dict[str, Any]:
         graph = load_json("requirements/adr_dependency_map.json")
         require(graph["schema_version"] == "V01.2-ADR-GRAPH-1", "wrong V01.2 graph schema")
         require(graph["counts"]["adrs"] == 20, "V01.2 graph must contain 20 ADRs")
+        approved = sum(record["status"] == "APPROVED" for record in decision_data["decisions"])
         require(
             graph["approval_summary"]
             == {
-                "approved": 0,
-                "proposed_not_approved": 20,
+                "approved": approved,
+                "proposed_not_approved": 20 - approved,
                 "bulk_approval_permitted": False,
             },
-            "V01.2 graph implies unsupported approval",
+            "V01.2 graph approval summary differs from the decision register",
         )
         require(
             graph["current_gate"]["unresolved_blockers"] == [],
@@ -961,12 +986,12 @@ def validate(root: Path) -> dict[str, Any]:
         require(set(mapped) == set(records), "V01.2 ADR set differs from decision register")
         for adr_id, record in records.items():
             require(
-                record["status"] == mapped[adr_id]["decision_status"] == "PROPOSED_NOT_APPROVED",
+                record["status"] == mapped[adr_id]["decision_status"],
                 f"{adr_id} approval status drift",
             )
             require(
-                record["approval_record"] is None and mapped[adr_id]["approval_record"] is None,
-                f"{adr_id} carries unsupported approval",
+                record["approval_record"] == mapped[adr_id]["approval_record"],
+                f"{adr_id} approval-record drift",
             )
             require(
                 record["affected_work_packages"] == mapped[adr_id]["affected_work_packages"],

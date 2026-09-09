@@ -2,11 +2,10 @@
 
 ## Status
 
-Every entry below is `PROPOSED_NOT_APPROVED`. This document recommends scoped
-resolutions; it is not an approval record and does not change
-`status/decisions.json`. The implementation agent must re-read that register
-after Gate A and stop at the stated latest point if the responsible human has
-not recorded the necessary decision.
+ADR-01 and ADR-03 are `APPROVED` in `status/decisions.json` and bound to
+responsible-human owner records under `docs/architecture/decisions/`. Every
+other entry below remains `PROPOSED_NOT_APPROVED`. This pack summarizes scoped
+resolutions; the individual decision records and register remain authoritative.
 
 The compressed A/B/C owner handoff is
 `docs/architecture/WORLD_CORE_OWNER_ADR_DECISION_PACK.md`. It controls the

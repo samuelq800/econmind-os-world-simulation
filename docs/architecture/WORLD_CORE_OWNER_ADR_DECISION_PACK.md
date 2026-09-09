@@ -2,17 +2,18 @@
 
 ## Status
 
-All twelve records remain `PROPOSED_NOT_APPROVED`. “YES” means a responsible
-human decision is required at the stated gate; it is not an approval request
-embedded in this document. Repaired Foundation mechanics may be inherited
-without pretending that broader economic or release policy has been decided.
+ADR-01 and ADR-03 are `APPROVED` by the responsible human owner and are bound
+to their records under `docs/architecture/decisions/`. The other ten records
+in this pack remain `PROPOSED_NOT_APPROVED`. Repaired Foundation mechanics may
+be inherited without pretending that broader economic or release policy has
+been decided.
 
-## Group A — must be approved before V06 starts
+## Group A — approved for V06
 
-| ADR    | Decision needed now? | Latest safe decision point    | Recommended option                                                                                                                                             | Exact rule being approved                                                                                                        | Intentionally undecided                                                 | Dependent steps                    |
-| ------ | -------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------- |
-| ADR-01 | YES                  | Before V06.1 branch execution | Preserve E01-E18 identifiers; use a versioned settlement-phase appendix mapping Engine operations to the Constitution-mandated stage order.                    | Engine IDs are not renumbered; scheduling uses one approved phase/order registry and never network/row order.                    | E02-E18 operation logic and later phase contents.                       | V06.1-V06.3                        |
-| ADR-03 | YES                  | Before V06.1 code             | One simulation millisecond per tick; PAUSED excludes wall elapsed; recorded RUNNING inputs catch up; order is due tick, approved priority, canonical event ID. | 1 real second maps to exactly 10,000 ticks; 360-day calendar; no ambient clock input; no pause catch-up; versioned cutoff/order. | UI cadence, production scheduler topology and future stochastic timing. | V06.1-V06.3, V09 clock persistence |
+| ADR    | Decision state | Latest safe decision point    | Approved option                                                                                                                                                | Exact rule approved                                                                                                              | Intentionally undecided                                                 | Dependent steps                    |
+| ------ | -------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------- |
+| ADR-01 | APPROVED       | Before V06.1 branch execution | Preserve E01-E18 identifiers; use a versioned settlement-phase appendix mapping Engine operations to the Constitution-mandated stage order.                    | Engine IDs are not renumbered; scheduling uses one approved phase/order registry and never network/row order.                    | E02-E18 operation logic and later phase contents.                       | V06.1-V06.3                        |
+| ADR-03 | APPROVED       | Before V06.1 code             | One simulation millisecond per tick; PAUSED excludes wall elapsed; recorded RUNNING inputs catch up; order is due tick, approved priority, canonical event ID. | 1 real second maps to exactly 10,000 ticks; 360-day calendar; no ambient clock input; no pause catch-up; versioned cutoff/order. | UI cadence, production scheduler topology and future stochastic timing. | V06.1-V06.3, V09 clock persistence |
 
 ## Group B — approve just before the dependent version
 
@@ -36,6 +37,7 @@ without pretending that broader economic or release policy has been decided.
 
 ## Owner friction rule
 
-Only Group A blocks V06 launch. Group B blocks at its named implementation
-boundary. Group C does not block this sprint while work stays exact, candidate-
-only and non-production; crossing its undecided boundary stops execution.
+Only Group A could block V06 launch, and both Group A decisions are now
+approved. Group B blocks at its named implementation boundary. Group C does not
+block this sprint while work stays exact, candidate-only and non-production;
+crossing its undecided boundary stops execution.

@@ -109,6 +109,11 @@ def main() -> None:
         for package in record["affected_work_packages"]
     ]
 
+    approved = sum(record["decision_status"] == "APPROVED" for record in adrs)
+    proposed_not_approved = sum(
+        record["decision_status"] == "PROPOSED_NOT_APPROVED" for record in adrs
+    )
+
     output = {
         "schema_version": "V01.2-ADR-GRAPH-1",
         "authority": "Coordination map only. It does not approve or implement any ADR proposal.",
@@ -130,8 +135,8 @@ def main() -> None:
             "reason": "V01.2 records proposals and future gates; it does not select or implement an unapproved proposal.",
         },
         "approval_summary": {
-            "approved": 0,
-            "proposed_not_approved": len(adrs),
+            "approved": approved,
+            "proposed_not_approved": proposed_not_approved,
             "bulk_approval_permitted": False,
         },
         "adrs": adrs,
