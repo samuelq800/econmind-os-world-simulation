@@ -1,7 +1,7 @@
 {
   "schema_version": "R2-101.1",
   "derived_at": "2026-09-09T02:35:00Z",
-  "source_commit": "00e3320e2d3f6e28212f902bfa1f92d5d1561bf4",
+  "source_commit": "90f969544fb8745f6080b7dc4a514684bb4b319a",
   "note": "FAST_MAINLINE is active. P0 still requires blocking independent review; P2/P3 may use explicit evidence-backed owner fast-track.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
@@ -24,6 +24,20 @@
       "status": "MERGED",
       "merged_commit": "6950a5364940b44a7fdda90bf3ee1f4c0d7074e4",
       "pull_request": "https://github.com/samuelq800/econmind-os-world-simulation/pull/1"
+    }
+  },
+  "v00_3_integration": {
+    "branch": "feat/v00-3",
+    "candidate_commit": "00e3320e2d3f6e28212f902bfa1f92d5d1561bf4",
+    "verification_record_commit": "fc9fc841177b241c1d192da7b5ed12a2bf70ee4d",
+    "status": "MERGED",
+    "merged_commit": "90f969544fb8745f6080b7dc4a514684bb4b319a",
+    "history_preserved": true,
+    "final_reconciliation": {
+      "status": "PASS",
+      "validated_at": "2026-09-09T02:40:00Z",
+      "validated_commit": "90f969544fb8745f6080b7dc4a514684bb4b319a",
+      "evidence_file": "docs/reports/V00.3/FINAL_RECONCILIATION.md"
     }
   },
   "current_gate": {
@@ -57,7 +71,8 @@
       "docs/reports/V00.3/BOOTSTRAP_REPORT.md",
       "docs/reports/V00.3/IMPLEMENTATION.md",
       "docs/reports/V00.3/TEST_EVIDENCE.json",
-      "docs/reports/V00.3/OWNER_FAST_TRACK_ACCEPTANCE.md"
+      "docs/reports/V00.3/OWNER_FAST_TRACK_ACCEPTANCE.md",
+      "docs/reports/V00.3/FINAL_RECONCILIATION.md"
     ]
   },
   "implementation_commits": {
