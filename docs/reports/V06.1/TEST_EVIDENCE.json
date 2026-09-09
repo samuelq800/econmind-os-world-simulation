@@ -1,0 +1,77 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V06.1",
+  "commit": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7",
+  "environment": {
+    "name": "local deterministic World Core",
+    "versions": {
+      "node": "24.20.0",
+      "pnpm": "12.3.4"
+    },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Pinned workspace dependencies installed without lockfile changes"
+    },
+    {
+      "command": "pnpm exec prettier --check docs/exec-plans/V06.1.md docs/reports/V06.1/IMPLEMENTATION.md docs/reports/V06.1/TEST_EVIDENCE.json status/progress.json tools/validate_r2_governance.py",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "Ambient pnpm wrapper rejected unsupported Node 24.19.0/pnpm 11.19.0 before formatting; no file was evaluated"
+    },
+    {
+      "command": "env PATH=<pinned-node-and-pnpm> pnpm exec prettier --check docs/exec-plans/V06.1.md docs/reports/V06.1/IMPLEMENTATION.md docs/reports/V06.1/TEST_EVIDENCE.json status/progress.json",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "All evidence and progress files matched repository formatting under Node 24.20.0/pnpm 12.3.4"
+    },
+    {
+      "command": "pnpm vitest run tests/world-core/simulation-clock.test.ts tests/property/simulation-clock-properties.test.ts tests/architecture/foundation-gates.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "3 files and 14 focused V06.1/architecture tests passed"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "lint, format, typechecks, 19 files/299 tests, 3 files/34 protected architecture tests, authoritative and boundary scanners, environment safety, migration validation/rehearsal, Foundation policy, secret scan and all workspace builds passed"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "All 14 R2 governance check groups passed against the finalized V06.1 status and evidence"
+    }
+  ],
+  "acceptance_evidence": [
+    "8,640 real seconds converts to exactly 86,400,000 ticks, one simulation day",
+    "one real second converts to exactly 10,000 simulation-millisecond ticks",
+    "direct multiply or divide by 10 outside the clock owner fails the architecture scanner",
+    "ambient clock and timer identifiers inside World Core fail the architecture scanner"
+  ],
+  "property_evidence": [
+    "250-run exactness, monotonicity, composition and single-multiplier property",
+    "250-run exact calendar day/remainder reconstruction property"
+  ],
+  "negative_cases": [
+    "non-canonical or negative active-real input",
+    "inexact reverse conversion",
+    "forged clock state",
+    "forged or behavioral advancement input without getter execution",
+    "ambient time use in World Core",
+    "business-code multiply or divide by 10"
+  ],
+  "database_rls_evidence": [
+    "NOT_RUN: V06.1 introduces no database schema, RLS policy, database connection or production mutation"
+  ],
+  "unresolved_gaps": [
+    "Required P0 independent review of the immutable V06.1 candidate is pending",
+    "V06.2 and V06.3 lifecycle, catch-up, ordering, cutoff and recovery behavior is not implemented"
+  ]
+}

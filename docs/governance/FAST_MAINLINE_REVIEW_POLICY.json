@@ -9,7 +9,7 @@
     "P0": {
       "label": "HIGH_RISK",
       "blocking_independent_review": true,
-      "mainline_rule": "All mandatory automated evidence must pass, then an independent reviewer must approve the immutable candidate before VERIFIED, merge, or dependent implementation. The only current exception is the explicit, gate-scoped PROJECT_OWNER_ACCEPTANCE recorded for GATE_A_FOUNDATION_REVIEW after its prior independent findings were remediated; it is not a reusable P0 fast-track.",
+      "mainline_rule": "All mandatory automated evidence must pass, then an independent reviewer must approve the immutable candidate before VERIFIED or merge. Dependent implementation is also blocked by default. A repository-referenced, owner-authorized package-continuation record may allow only its exact adjacent steps to proceed while every candidate remains IMPLEMENTED_UNVERIFIED; it is not verification, fast-track, or merge authority. The Gate A PROJECT_OWNER_ACCEPTANCE remains a separate one-time exception.",
       "topics": [
         "authoritative World State",
         "database schema/migrations/RLS",
@@ -70,8 +70,21 @@
       "requires_named_work_package_gate": true,
       "requires_passing_automated_evidence": true,
       "cannot_mark_verified_before_review": true
+    },
+    "OWNER_AUTHORIZED_PACKAGE_CONTINUATION": {
+      "allowed_risk_classes": ["P0", "P1"],
+      "decision": "ACCEPTED_FOR_MAINLINE_CONTINUATION",
+      "requires_explicit_owner_instruction": true,
+      "requires_exact_branch_and_ordered_step_scope": true,
+      "requires_immutable_candidate_and_passing_applicable_evidence": true,
+      "requires_package_exit_review": true,
+      "cannot_mark_verified": true,
+      "cannot_authorize_merge": true
     }
   },
+  "scoped_continuation_records": [
+    "docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json"
+  ],
   "mandatory_evidence": [
     "tests",
     "invariants",

@@ -1,0 +1,43 @@
+{
+  "schema_version": "R2-101.1",
+  "package_id": "V06",
+  "package_status": "IMPLEMENTED_UNVERIFIED",
+  "review_readiness": "READY_FOR_FOCUSED_BLOCKER_CLOSURE_REVIEW",
+  "content_commit": "12d81d4fca1d37240a4af39183f69f12d60415aa",
+  "finding": {
+    "id": "V06-PKG-BLK-02",
+    "historical_rejected_package_target": "80ab3ecac0abbd622a7e2fc450101407db7f66f9",
+    "finding_record_commit": "8b3af0f04c439018b0c3e37054afa9155b397cde",
+    "fixed_code_candidate": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1",
+    "fixed_step_review_target": "12d81d4fca1d37240a4af39183f69f12d60415aa",
+    "implementation_result": "PASS",
+    "independent_closure": "PENDING"
+  },
+  "verification": {
+    "blocker_reproduction": "CONFIRMED before fix",
+    "focused_scheduler_order_restart_property": "4 files / 35 tests / PASS",
+    "required_A_to_H": "PASS",
+    "completion_prefix_property": "PASS",
+    "fixed_executable_reproduction": "PASS / SCHEDULER_STATE_INVALID",
+    "authoritative_api_surface_audit": "PASS / one scheduler state-registration site",
+    "full_repository": "23 files / 335 tests / PASS",
+    "protected_architecture": "3 files / 34 tests / PASS",
+    "authoritative_scanner": "21 core files / 33 total files / PASS",
+    "boundary_scanner": "38 files / PASS",
+    "r2_governance": "14 groups / PASS",
+    "environment_safety": "PASS / no database configured / production mutation disabled",
+    "migration_rehearsal": "PASS / PGlite only",
+    "workspace_build": "PASS"
+  },
+  "prior_blocker_regressions": {
+    "V06_PKG_BLK_01_completion_api": "PASS",
+    "V06_2_P0_1_locale_order": "PASS",
+    "V06_2_P0_2_impossible_preopen": "PASS"
+  },
+  "production_access": false,
+  "database_mutation": false,
+  "package_verified": false,
+  "merge_authorized": false,
+  "v07_started": false,
+  "next_action": "FOCUSED_INDEPENDENT_PACKAGE_BLOCKER_CLOSURE_REVIEW"
+}

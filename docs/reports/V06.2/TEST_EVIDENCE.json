@@ -1,0 +1,77 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V06.2",
+  "commit": "767b718d995210eafc4742c1a5a93e798329598e",
+  "environment": {
+    "name": "local deterministic World Core",
+    "versions": {
+      "node": "24.20.0",
+      "pnpm": "12.3.4"
+    },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm vitest run tests/world-core/simulation-clock.test.ts tests/world-core/simulation-scheduler.test.ts tests/property/simulation-clock-properties.test.ts tests/property/simulation-scheduler-properties.test.ts tests/architecture/foundation-gates.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "5 focused V06.1/V06.2/architecture files and 26 tests passed"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "Initial full baseline reached 20 passing files and 311 passing tests but the existing bootstrap-lifecycle ready-event test timed out after 30 seconds; no process survived"
+    },
+    {
+      "command": "pnpm vitest run tests/foundation/bootstrap-lifecycle.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Immediate isolated rerun passed 1 file and all 12 bootstrap lifecycle tests in 19.03 seconds; no process survived"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Final full baseline passed lint, formatting, typechecks, 21 files/312 tests, 3 files/34 protected architecture tests, authoritative scanner over 20 core and 32 total files, boundary scanner over 37 files, local environment safety, PGlite migration validation/rehearsal, Foundation policy, 404-file secret scan and all workspace builds"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "All 14 R2 governance check groups passed before evidence finalization"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No whitespace errors were present before the code candidate commit"
+    }
+  ],
+  "acceptance_evidence": [
+    "PAUSED advancement is rejected and pause/resume records the same exact SimTime at both boundaries",
+    "RUNNING catch-up crosses exact day and 360-day year boundaries without floating arithmetic",
+    "due events stay pending while paused and complete only when due in RUNNING state",
+    "canonical restart retains completed identity and a second completion applies no work"
+  ],
+  "property_evidence": [
+    "250-run monotonic RUNNING advancement and exact PAUSED freeze property",
+    "250-run serialize/restore completion idempotency property"
+  ],
+  "negative_cases": [
+    "invalid lifecycle transitions",
+    "forged schedule input or scheduler state",
+    "past-due scheduling and not-yet-due completion",
+    "scheduled ID or idempotency-key reuse with different intent",
+    "non-canonical, duplicate or impossible restored snapshots",
+    "scheduling after ENDED"
+  ],
+  "database_rls_evidence": [
+    "NOT_RUN: V06.2 introduces no database schema, RLS policy, database connection or production mutation"
+  ],
+  "unresolved_gaps": [
+    "Independent V06.2 review and the V06 package-level review remain pending",
+    "V06.3 same-time priority, command cutoff, settlement-stage order and deterministic boundary integration remain unimplemented"
+  ]
+}

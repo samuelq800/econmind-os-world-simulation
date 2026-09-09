@@ -220,6 +220,8 @@ function analyze(file) {
   const core = fileName.startsWith('packages/core/src/');
   const decimalOwner =
     fileName === 'packages/core/src/numeric/world-decimal.ts';
+  const simulationClockOwner =
+    fileName === 'packages/core/src/time/simulation-clock.ts';
   const testOnly = fileName.startsWith('packages/testkit/');
   const forbiddenCoercionCallees = core
     ? collectCoercionAliases(sourceFile)
@@ -290,6 +292,38 @@ function analyze(file) {
     }
 
     if (core) {
+      if (
+        ts.isIdentifier(node) &&
+        ['Date', 'performance', 'setInterval', 'setTimeout'].includes(node.text)
+      ) {
+        record(
+          file,
+          sourceFile,
+          node,
+          'AMBIENT_TIME_LEAK',
+          'World Core must receive recorded time input instead of reading ambient clocks or timers',
+        );
+      }
+      if (
+        !simulationClockOwner &&
+        ts.isBinaryExpression(node) &&
+        [ts.SyntaxKind.AsteriskToken, ts.SyntaxKind.SlashToken].includes(
+          node.operatorToken.kind,
+        ) &&
+        [node.left, node.right].some(
+          (operand) =>
+            (ts.isNumericLiteral(operand) && operand.text === '10') ||
+            (ts.isBigIntLiteral(operand) && operand.text === '10n'),
+        )
+      ) {
+        record(
+          file,
+          sourceFile,
+          node,
+          'CLOCK_MULTIPLIER_LEAK',
+          'Only the Simulation Clock owner may apply the formal 10x conversion',
+        );
+      }
       if (
         ts.isPrefixUnaryExpression(node) &&
         node.operator === ts.SyntaxKind.PlusToken

@@ -1,0 +1,104 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V06.3",
+  "commit": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453",
+  "environment": {
+    "name": "local deterministic World Core",
+    "versions": {
+      "node": "24.20.0",
+      "pnpm": "12.3.4"
+    },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm exec vitest run <V06.1-V06.3 focused files>",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "6 focused files and 36 tests passed: clock/scheduler regressions, exact same-time order, priority registry, scheduledEventId tie-break, 15-stage order, Engine-to-Stage mapping, cutoff, day/year boundaries, V1-to-V2 restart migration and permutation invariance"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "First development run stopped at lint because a destructured legacy priority discard binding was unused; the binding was replaced with an explicit legacy projection before candidate freeze"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "Second development run passed lint, format, typechecks, 23 files/325 tests, protected checks, scanners, environment, migration, policy and secret checks, then declaration build found TS4023 on an inferred exported branded ID; an explicit SchedulerPriorityId annotation fixed it before candidate freeze"
+    },
+    {
+      "command": "pnpm --filter @econmind/core build",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Core declaration build passed after the explicit exported brand annotation"
+    },
+    {
+      "command": "pnpm vitest run tests/architecture/v01-governance.test.ts",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "The first evidence-state run retained the prior IN_PROGRESS expectation for V06.3; the governance assertion was updated to require IMPLEMENTED_UNVERIFIED, package-review pending and V07 PLANNED"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Final full baseline passed lint, formatting, all typechecks, 23 files/325 tests, 3 files/34 protected architecture tests, authoritative scanner over 21 core and 33 total files, boundary scanner over 38 files, local environment safety, PGlite migration validation/rehearsal, Foundation policy, 416-file secret scan and all workspace builds"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "R2 governance validation passed after V06.3 evidence/status finalization"
+    },
+    {
+      "command": "pnpm vitest run tests/architecture/v01-governance.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "The corrected governance state assertion passed all 11 tests"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No whitespace errors were present in the V06.3 code candidate or evidence/status candidate"
+    }
+  ],
+  "contract_results": {
+    "same_time_total_order": "PASS",
+    "versioned_priority_registry": "PASS",
+    "scheduled_event_id_tie_break": "PASS",
+    "day_year_boundaries": "PASS",
+    "constitution_15_stage_order": "PASS",
+    "engine_stage_separation_and_mapping": "PASS",
+    "transaction_start_cutoff": "PASS",
+    "restart_recovery_and_duplicate_prevention": "PASS",
+    "canonical_serialization_replay": "PASS",
+    "player_online_independence": "PASS_STATIC_BOUNDARY_NO_PRESENCE_INPUT"
+  },
+  "v06_2_p0_regressions": [
+    {
+      "finding": "P0-1 locale-dependent canonical ordering",
+      "result": "PASS",
+      "evidence": "Focused regression disables String.localeCompare; authoritative storage and work ordering use explicit code-unit comparison"
+    },
+    {
+      "finding": "P0-2 impossible PREOPEN recovery state",
+      "result": "PASS",
+      "evidence": "Focused regression rejects canonical PREOPEN snapshots containing completed events; pause history remains rejected"
+    }
+  ],
+  "database_rls_evidence": [
+    "NOT_RUN: V06.3 changes no database schema, RLS policy, database connection or production state",
+    "PASS: local safety check reported no configured database and production mutation disabled",
+    "PASS: clean and existing-schema PGlite migration rehearsals remained green"
+  ],
+  "unresolved_gaps": [
+    "V06 package-level independent review is pending",
+    "V06.3 remains IMPLEMENTED_UNVERIFIED and is not authorized for merge or promotion",
+    "V07 remains NOT_STARTED"
+  ]
+}
