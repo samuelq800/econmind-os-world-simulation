@@ -52,6 +52,10 @@ describe('V04 authoritative architecture gates', () => {
           path.join(fixture, 'packages/core/src/engine/alias.ts'),
           "const Numeric = globalThis['Number']; const Bound = Numeric.bind(null); export const leaked = Reflect.apply(Bound, null, ['1']);",
         ),
+        writeFile(
+          path.join(fixture, 'packages/core/src/engine/ambient-time.ts'),
+          'export const now = Date.now(); export const converted = 1n * 10n; setTimeout(() => undefined, 1);',
+        ),
       ]);
       const result = run(fixture);
       expect(result.status).toBe(1);
@@ -61,6 +65,8 @@ describe('V04 authoritative architecture gates', () => {
       expect(result.stdout).toContain('FAST_CHECK_RUNTIME_LEAK');
       expect(result.stdout).toContain('dynamic.ts');
       expect(result.stdout).toContain('alias.ts');
+      expect(result.stdout).toContain('AMBIENT_TIME_LEAK');
+      expect(result.stdout).toContain('CLOCK_MULTIPLIER_LEAK');
     } finally {
       await rm(fixture, { recursive: true, force: true });
     }

@@ -118,3 +118,7 @@ export const canonicalIdArbitrary = fc
     fc.integer({ min: 1, max: 999_999 }),
   )
   .map(([prefix, number]) => `${prefix}_${number}`);
+
+export const activeRealMillisecondsArbitrary = fc
+  .bigInt({ max: 10n ** 24n, min: 0n })
+  .map((value) => value.toString());
