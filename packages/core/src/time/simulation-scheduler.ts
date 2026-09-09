@@ -175,12 +175,34 @@ function freezePause(interval: PauseInterval): PauseInterval {
   return Object.freeze({ ...interval });
 }
 
+function assertDueCompletionPrefixInvariant(
+  clock: SimulationClockState,
+  scheduledEvents: readonly ScheduledEventRecord[],
+): void {
+  const dueEvents = orderScheduledWork(
+    scheduledEvents.filter(
+      (event) => event.dueSimTime.ticks <= clock.simTime.ticks,
+    ),
+  );
+  let pendingSeen = false;
+  for (const event of dueEvents) {
+    if (event.status === 'PENDING') {
+      pendingSeen = true;
+    } else if (pendingSeen) {
+      invalidState(
+        `Completed due event ${event.scheduledEventId} follows pending authoritative work`,
+      );
+    }
+  }
+}
+
 function createSchedulerState(input: {
   readonly clock: SimulationClockState;
   readonly pauseIntervals: readonly PauseInterval[];
   readonly scheduledEvents: readonly ScheduledEventRecord[];
   readonly seasonStatus: SeasonStatus;
 }): SimulationSchedulerState {
+  assertDueCompletionPrefixInvariant(input.clock, input.scheduledEvents);
   const state = Object.freeze({
     clock: input.clock,
     orderVersion: SCHEDULER_ORDER_VERSION,

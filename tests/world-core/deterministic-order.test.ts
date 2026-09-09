@@ -351,3 +351,212 @@ describe('V06.3 deterministic work ordering and cutoffs', () => {
     });
   });
 });
+
+describe('V06.3 due completion-prefix state invariant', () => {
+  function twoEventState(
+    firstId = 'EVENT_FIRST',
+    firstPriority: Parameters<typeof scheduled>[2] = 'ORDER_PRIORITY_000',
+    lastId = 'EVENT_LAST',
+    lastPriority: Parameters<typeof scheduled>[2] = 'ORDER_PRIORITY_200',
+  ) {
+    let state = startSimulationSeason(createSimulationScheduler());
+    state = scheduleSimulationEvent(
+      state,
+      scheduled(firstId, '0', firstPriority),
+    );
+    return scheduleSimulationEvent(state, scheduled(lastId, '0', lastPriority));
+  }
+
+  function withStatuses(
+    state: ReturnType<typeof createSimulationScheduler>,
+    statuses: Readonly<Record<string, 'PENDING' | 'COMPLETED'>>,
+  ) {
+    const snapshot = JSON.parse(serializeSimulationSchedulerState(state));
+    for (const event of snapshot.scheduledEvents) {
+      const status = statuses[event.scheduledEventId];
+      if (status !== undefined) event.status = status;
+    }
+    return canonicalSerialize(snapshot);
+  }
+
+  it('rejects PENDING head plus later COMPLETED during restore', () => {
+    const state = twoEventState();
+    expect(() =>
+      restoreSimulationSchedulerState(
+        withStatuses(state, {
+          EVENT_FIRST: 'PENDING',
+          EVENT_LAST: 'COMPLETED',
+        }),
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.SCHEDULER_STATE_INVALID,
+      }),
+    );
+  });
+
+  it('accepts a COMPLETED prefix and PENDING suffix with exact retry', () => {
+    const state = twoEventState();
+    const completedFirst = completeDueSimulationEvent(
+      state,
+      scheduledEventId('EVENT_FIRST'),
+    );
+    const restored = restoreSimulationSchedulerState(
+      serializeSimulationSchedulerState(completedFirst.state),
+    );
+
+    expect(
+      pendingDueSimulationEventsInOrder(restored).map(
+        (event) => event.scheduledEventId,
+      ),
+    ).toEqual(['EVENT_LAST']);
+    expect(
+      completeDueSimulationEvent(restored, scheduledEventId('EVENT_FIRST'))
+        .applied,
+    ).toBe(false);
+  });
+
+  it('rejects COMPLETED / PENDING / COMPLETED during restore', () => {
+    let state = twoEventState(
+      'EVENT_FIRST',
+      'ORDER_PRIORITY_000',
+      'EVENT_MIDDLE',
+      'ORDER_PRIORITY_100',
+    );
+    state = scheduleSimulationEvent(
+      state,
+      scheduled('EVENT_LAST', '0', 'ORDER_PRIORITY_200'),
+    );
+    expect(() =>
+      restoreSimulationSchedulerState(
+        withStatuses(state, {
+          EVENT_FIRST: 'COMPLETED',
+          EVENT_MIDDLE: 'PENDING',
+          EVENT_LAST: 'COMPLETED',
+        }),
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.SCHEDULER_STATE_INVALID,
+      }),
+    );
+  });
+
+  it('uses priorityRank before scheduledEventId for the prefix invariant', () => {
+    const state = twoEventState(
+      'EVENT_Z_PRIORITY_FIRST',
+      'ORDER_PRIORITY_000',
+      'EVENT_A_PRIORITY_LAST',
+      'ORDER_PRIORITY_200',
+    );
+    expect(() =>
+      restoreSimulationSchedulerState(
+        withStatuses(state, {
+          EVENT_Z_PRIORITY_FIRST: 'PENDING',
+          EVENT_A_PRIORITY_LAST: 'COMPLETED',
+        }),
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.SCHEDULER_STATE_INVALID,
+      }),
+    );
+  });
+
+  it('uses scheduledEventId after equal time and priority', () => {
+    const state = twoEventState(
+      'EVENT_A',
+      'ORDER_PRIORITY_100',
+      'EVENT_Z',
+      'ORDER_PRIORITY_100',
+    );
+    expect(() =>
+      restoreSimulationSchedulerState(
+        withStatuses(state, {
+          EVENT_A: 'PENDING',
+          EVENT_Z: 'COMPLETED',
+        }),
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.SCHEDULER_STATE_INVALID,
+      }),
+    );
+  });
+
+  it('preserves the next executable event across snapshot restore', () => {
+    let state = twoEventState(
+      'EVENT_A',
+      'ORDER_PRIORITY_000',
+      'EVENT_B',
+      'ORDER_PRIORITY_100',
+    );
+    state = scheduleSimulationEvent(
+      state,
+      scheduled('EVENT_C', '0', 'ORDER_PRIORITY_200'),
+    );
+    state = completeDueSimulationEvent(
+      state,
+      scheduledEventId('EVENT_A'),
+    ).state;
+    const before =
+      pendingDueSimulationEventsInOrder(state)[0]?.scheduledEventId;
+    const restored = restoreSimulationSchedulerState(
+      serializeSimulationSchedulerState(state),
+    );
+    const after =
+      pendingDueSimulationEventsInOrder(restored)[0]?.scheduledEventId;
+
+    expect(before).toBe('EVENT_B');
+    expect(after).toBe(before);
+    expect(
+      completeDueSimulationEvent(restored, scheduledEventId('EVENT_B')).applied,
+    ).toBe(true);
+  });
+
+  it('rejects an impossible completion prefix during V1 to V2 migration', () => {
+    const state = twoEventState(
+      'EVENT_A',
+      'ORDER_PRIORITY_100',
+      'EVENT_Z',
+      'ORDER_PRIORITY_100',
+    );
+    const legacy = JSON.parse(
+      withStatuses(state, { EVENT_A: 'PENDING', EVENT_Z: 'COMPLETED' }),
+    );
+    legacy.schedulerVersion = LEGACY_SIMULATION_SCHEDULER_VERSION;
+    delete legacy.orderVersion;
+    for (const event of legacy.scheduledEvents) delete event.priorityId;
+
+    expect(() =>
+      restoreSimulationSchedulerState(canonicalSerialize(legacy)),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.SCHEDULER_STATE_INVALID,
+      }),
+    );
+  });
+
+  it('rejects scheduling that would create a non-prefix due state', () => {
+    let state = startSimulationSeason(createSimulationScheduler());
+    state = scheduleSimulationEvent(
+      state,
+      scheduled('EVENT_COMPLETED', '0', 'ORDER_PRIORITY_200'),
+    );
+    state = completeDueSimulationEvent(
+      state,
+      scheduledEventId('EVENT_COMPLETED'),
+    ).state;
+
+    expect(() =>
+      scheduleSimulationEvent(
+        state,
+        scheduled('EVENT_NEW_HEAD', '0', 'ORDER_PRIORITY_000'),
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.SCHEDULER_STATE_INVALID,
+      }),
+    );
+  });
+});

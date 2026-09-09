@@ -6,6 +6,7 @@ import {
   SimTime,
   advanceClockInput,
   advanceRunningSimulationScheduler,
+  canonicalSerialize,
   completeDueSimulationEvent,
   createSimulationScheduler,
   pendingDueSimulationEventsInOrder,
@@ -116,6 +117,64 @@ describe('V06.3 deterministic ordering properties', () => {
               (event) => event.status === 'COMPLETED',
             ),
           ).toBe(true);
+        },
+      ),
+      FOUNDATION_PROPERTY_CONFIG,
+    );
+  });
+
+  it('accepts restored due completion sets exactly when they are a prefix', () => {
+    fc.assert(
+      fc.property(
+        fc.uniqueArray(
+          fc.record({
+            completed: fc.boolean(),
+            dueUnits: fc.integer({ min: 0, max: 1000 }),
+            id: fc.integer({ min: 0, max: 9999 }),
+            priorityIndex: fc.integer({ min: 0, max: 2 }),
+          }),
+          { maxLength: 60, selector: (record) => record.id },
+        ),
+        (records) => {
+          const state = buildState(records);
+          const completionById = new Map(
+            records.map((record) => [
+              `EVENT_${String(record.id).padStart(4, '0')}`,
+              record.completed,
+            ]),
+          );
+          const orderedDue = pendingDueSimulationEventsInOrder(state);
+          let pendingSeen = false;
+          let isPrefix = true;
+          for (const event of orderedDue) {
+            const completed =
+              completionById.get(event.scheduledEventId) ?? false;
+            if (!completed) pendingSeen = true;
+            else if (pendingSeen) isPrefix = false;
+          }
+
+          const snapshot = JSON.parse(serializeSimulationSchedulerState(state));
+          for (const event of snapshot.scheduledEvents) {
+            event.status = completionById.get(event.scheduledEventId)
+              ? 'COMPLETED'
+              : 'PENDING';
+          }
+          const serialized = canonicalSerialize(snapshot);
+
+          if (isPrefix) {
+            const restored = restoreSimulationSchedulerState(serialized);
+            expect(serializeSimulationSchedulerState(restored)).toBe(
+              serialized,
+            );
+          } else {
+            expect(() =>
+              restoreSimulationSchedulerState(serialized),
+            ).toThrowError(
+              expect.objectContaining({
+                code: DOMAIN_ERROR_CODES.SCHEDULER_STATE_INVALID,
+              }),
+            );
+          }
         },
       ),
       FOUNDATION_PROPERTY_CONFIG,
