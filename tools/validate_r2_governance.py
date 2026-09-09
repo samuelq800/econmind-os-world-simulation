@@ -762,15 +762,39 @@ def validate(root: Path) -> dict[str, Any]:
                 all(states[step_id] == expected_foundation_state for step_id in foundation_steps),
                 "Foundation step state differs from sprint state",
             )
-            require(
-                all(states[f"V06.{step}"] == "PLANNED" for step in range(1, 4)),
-                "V06 started before Gate A",
+            v06_started = any(
+                states[f"V06.{step}"] != "PLANNED" for step in range(1, 4)
             )
-            require(required_gate == "GATE_A_FOUNDATION_REVIEW" and next_step == "V06.1", "Foundation current gate changed")
-            require(
-                gate.get("gate_status") == ("PASS" if foundation_finalized else "PENDING"),
-                "Foundation Gate A status differs from sprint state",
-            )
+            if v06_started:
+                require(
+                    foundation_finalized and foundation_integrated and group_a_ready,
+                    "V06 started before Gate A integration and Group A owner decisions",
+                )
+            else:
+                require(
+                    required_gate == "GATE_A_FOUNDATION_REVIEW"
+                    and next_step == "V06.1",
+                    "Foundation current gate changed before V06 start",
+                )
+                require(
+                    gate.get("gate_status")
+                    == ("PASS" if foundation_finalized else "PENDING"),
+                    "Foundation Gate A status differs from sprint state",
+                )
+            if states["V06.1"] == "IMPLEMENTED_UNVERIFIED":
+                require(
+                    gate.get("step_id") == "V06.1"
+                    and next_step == "V06.2"
+                    and required_gate == "V06.1_INDEPENDENT_REVIEW"
+                    and gate.get("gate_status") == "PENDING"
+                    and gate.get("next_step_ready") is False,
+                    "V06.1 P0 independent-review stop is not recorded",
+                )
+                require(
+                    progress_data.get("work_packages", {}).get("V06")
+                    == "IMPLEMENTED_UNVERIFIED",
+                    "V06 package status differs from V06.1 review state",
+                )
             require(
                 all(
                     progress_data.get("work_packages", {}).get(f"V{package:02d}")

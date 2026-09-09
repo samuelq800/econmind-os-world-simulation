@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T13:10:09Z",
-  "source_commit": "47fe5c5d465748370d9a8ea046bc443978437203",
-  "note": "Gate A is accepted and integrated. The responsible human owner approved ADR-01 and ADR-03; ADR-04 remains PROPOSED_NOT_APPROVED with latest gate V11-V17. V06 is dependency-ready but not yet started.",
+  "derived_at": "2026-09-09T13:29:59Z",
+  "source_commit": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7",
+  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 have responsible-human owner approval; ADR-04 remains PROPOSED_NOT_APPROVED with latest gate V11-V17. V06.1 is implemented with passing evidence and is stopped at required P0 independent review; V06.2 and later work have not started.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -122,14 +122,14 @@
     "reconciliation_evidence_file": "docs/reports/GATE_A/FINAL_RECONCILIATION.md"
   },
   "current_gate": {
-    "step_id": "V05.3",
-    "status": "VERIFIED",
-    "review": "Gate A passed and is integrated; ADR-01 and ADR-03 have responsible-human owner approval records",
-    "next_step": "V06.1",
-    "next_step_ready": true,
-    "next_step_blockers": [],
-    "required_gate": "GATE_A_FOUNDATION_REVIEW",
-    "gate_status": "PASS"
+    "step_id": "V06.1",
+    "status": "IMPLEMENTED_UNVERIFIED",
+    "review": "P0 authoritative time and determinism candidate requires independent review",
+    "next_step": "V06.2",
+    "next_step_ready": false,
+    "next_step_blockers": ["V06.1 required P0 independent review is pending"],
+    "required_gate": "V06.1_INDEPENDENT_REVIEW",
+    "gate_status": "PENDING"
   },
   "work_packages": {
     "V00": "COMPLETE",
@@ -137,7 +137,8 @@
     "V02": "VERIFIED",
     "V03": "VERIFIED",
     "V04": "VERIFIED",
-    "V05": "VERIFIED"
+    "V05": "VERIFIED",
+    "V06": "IMPLEMENTED_UNVERIFIED"
   },
   "step_evidence": {
     "V00.1": [
@@ -240,6 +241,11 @@
       "docs/exec-plans/V05.3.md",
       "docs/reports/V05.3/IMPLEMENTATION.md",
       "docs/reports/V05.3/TEST_EVIDENCE.json"
+    ],
+    "V06.1": [
+      "docs/exec-plans/V06.1.md",
+      "docs/reports/V06.1/IMPLEMENTATION.md",
+      "docs/reports/V06.1/TEST_EVIDENCE.json"
     ]
   },
   "package_evidence": {
@@ -276,7 +282,8 @@
     "V04.3": "47fe5c5d465748370d9a8ea046bc443978437203",
     "V05.1": "47fe5c5d465748370d9a8ea046bc443978437203",
     "V05.2": "47fe5c5d465748370d9a8ea046bc443978437203",
-    "V05.3": "47fe5c5d465748370d9a8ea046bc443978437203"
+    "V05.3": "47fe5c5d465748370d9a8ea046bc443978437203",
+    "V06.1": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7"
   },
   "step_reviews": {
     "V00.1": {
@@ -507,7 +514,7 @@
     "V05.1": "VERIFIED",
     "V05.2": "VERIFIED",
     "V05.3": "VERIFIED",
-    "V06.1": "PLANNED",
+    "V06.1": "IMPLEMENTED_UNVERIFIED",
     "V06.2": "PLANNED",
     "V06.3": "PLANNED",
     "V07.1": "PLANNED",
