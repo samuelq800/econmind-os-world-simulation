@@ -1,0 +1,3536 @@
+{
+  "schema_version": "V01.1-TRACEABILITY-1",
+  "authority": "Traceability and planned ownership only; this registry is not an implementation claim.",
+  "generated_from": [
+    "requirements/source_manifest.json",
+    "requirements/source_units.jsonl",
+    "requirements/coverage_families.json",
+    "planning/r2_steps.json"
+  ],
+  "counts": {
+    "authoritative_sources": 8,
+    "source_units": 8743,
+    "requirements": 139,
+    "fixed_targets": 131
+  },
+  "sources": [
+    {
+      "id": "MASTER",
+      "original_path": "specs/original/EconMind_Season1_70_Country_World_Engine_Master_Specification.docx",
+      "extracted_path": "specs/extracted/MASTER.md",
+      "sha256": "0d4ea011a1291b5bd49c89c1616a7eee29731c2141a4f958e2930acf7189db13",
+      "source_units": 2117,
+      "source_scope_requirement": "REQ-SOURCE-MASTER"
+    },
+    {
+      "id": "CENTRAL_BANK",
+      "original_path": "specs/original/EconMind_Season1_Central_Bank_Governor_Function_Specification.docx",
+      "extracted_path": "specs/extracted/CENTRAL_BANK.md",
+      "sha256": "c0fb17cc37a912938957a879b828c7b6139dd9e1ceef0976dc6c35ca072c36e9",
+      "source_units": 833,
+      "source_scope_requirement": "REQ-SOURCE-CENTRAL_BANK"
+    },
+    {
+      "id": "CONSTITUTION",
+      "original_path": "specs/original/EconMind_Season1_Codex_Implementation_Constitution.docx",
+      "extracted_path": "specs/extracted/CONSTITUTION.md",
+      "sha256": "960a7745a8e18b8f1cb10c754ce6681d46bdfc5933a979c4a989bd3a07ff5d49",
+      "source_units": 815,
+      "source_scope_requirement": "REQ-SOURCE-CONSTITUTION"
+    },
+    {
+      "id": "CAPTAIN",
+      "original_path": "specs/original/EconMind_Season1_Country_Captain_Function_Specification.docx",
+      "extracted_path": "specs/extracted/CAPTAIN.md",
+      "sha256": "e1d007253d3435316eae940185e52bb30316e9f72a411ca98127e3535d4c5a01",
+      "source_units": 681,
+      "source_scope_requirement": "REQ-SOURCE-CAPTAIN"
+    },
+    {
+      "id": "FINANCE",
+      "original_path": "specs/original/EconMind_Season1_Finance_Economy_Minister_Function_Specification.docx",
+      "extracted_path": "specs/extracted/FINANCE.md",
+      "sha256": "5970033c01ba9592a8efac5c6e319c1d7424a6df562e1833e08920bf927a5576",
+      "source_units": 1051,
+      "source_scope_requirement": "REQ-SOURCE-FINANCE"
+    },
+    {
+      "id": "INDUSTRY",
+      "original_path": "specs/original/EconMind_Season1_Industry_Technology_Resources_Minister_Function_Specification.docx",
+      "extracted_path": "specs/extracted/INDUSTRY.md",
+      "sha256": "042a62b08e2c260acdb308e3f5aa7303c22003cd2de3b92251afec9dbf7c3f81",
+      "source_units": 1129,
+      "source_scope_requirement": "REQ-SOURCE-INDUSTRY"
+    },
+    {
+      "id": "SOCIAL",
+      "original_path": "specs/original/EconMind_Season1_Labour_Education_Social_Development_Minister_Function_Specification.docx",
+      "extracted_path": "specs/extracted/SOCIAL.md",
+      "sha256": "7ec7414047f4e2db5fc4c5d318d3e8ebca9f2236f8cd0f9e7d0a8213acf2f130",
+      "source_units": 1039,
+      "source_scope_requirement": "REQ-SOURCE-SOCIAL"
+    },
+    {
+      "id": "TRADE",
+      "original_path": "specs/original/EconMind_Season1_Trade_Foreign_Affairs_Minister_Function_Specification.docx",
+      "extracted_path": "specs/extracted/TRADE.md",
+      "sha256": "f4c74900e6743afec693b7beaa2d88bdf5e574b5bc21164aff89ade043a453c0",
+      "source_units": 1078,
+      "source_scope_requirement": "REQ-SOURCE-TRADE"
+    }
+  ],
+  "requirements": [
+    {
+      "requirement_id": "REQ-SOURCE-MASTER",
+      "kind": "source_scope",
+      "title": "Preserve and decompose the complete MASTER specification",
+      "source_document": "MASTER",
+      "source_unit_selector": {
+        "first": "MASTER-U0001",
+        "last": "MASTER-U2117",
+        "count": 2117
+      },
+      "target_ids": [],
+      "planned_work_packages": [
+        "V01"
+      ],
+      "planned_code_owners": [
+        "requirements",
+        "planning"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_INDEXED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SOURCE-CENTRAL_BANK",
+      "kind": "source_scope",
+      "title": "Preserve and decompose the complete CENTRAL_BANK specification",
+      "source_document": "CENTRAL_BANK",
+      "source_unit_selector": {
+        "first": "CENTRAL_BANK-U0001",
+        "last": "CENTRAL_BANK-U0833",
+        "count": 833
+      },
+      "target_ids": [],
+      "planned_work_packages": [
+        "V01"
+      ],
+      "planned_code_owners": [
+        "requirements",
+        "planning"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_INDEXED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SOURCE-CONSTITUTION",
+      "kind": "source_scope",
+      "title": "Preserve and decompose the complete CONSTITUTION specification",
+      "source_document": "CONSTITUTION",
+      "source_unit_selector": {
+        "first": "CONSTITUTION-U0001",
+        "last": "CONSTITUTION-U0815",
+        "count": 815
+      },
+      "target_ids": [],
+      "planned_work_packages": [
+        "V01"
+      ],
+      "planned_code_owners": [
+        "requirements",
+        "planning"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_INDEXED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SOURCE-CAPTAIN",
+      "kind": "source_scope",
+      "title": "Preserve and decompose the complete CAPTAIN specification",
+      "source_document": "CAPTAIN",
+      "source_unit_selector": {
+        "first": "CAPTAIN-U0001",
+        "last": "CAPTAIN-U0681",
+        "count": 681
+      },
+      "target_ids": [],
+      "planned_work_packages": [
+        "V01"
+      ],
+      "planned_code_owners": [
+        "requirements",
+        "planning"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_INDEXED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SOURCE-FINANCE",
+      "kind": "source_scope",
+      "title": "Preserve and decompose the complete FINANCE specification",
+      "source_document": "FINANCE",
+      "source_unit_selector": {
+        "first": "FINANCE-U0001",
+        "last": "FINANCE-U1051",
+        "count": 1051
+      },
+      "target_ids": [],
+      "planned_work_packages": [
+        "V01"
+      ],
+      "planned_code_owners": [
+        "requirements",
+        "planning"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_INDEXED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SOURCE-INDUSTRY",
+      "kind": "source_scope",
+      "title": "Preserve and decompose the complete INDUSTRY specification",
+      "source_document": "INDUSTRY",
+      "source_unit_selector": {
+        "first": "INDUSTRY-U0001",
+        "last": "INDUSTRY-U1129",
+        "count": 1129
+      },
+      "target_ids": [],
+      "planned_work_packages": [
+        "V01"
+      ],
+      "planned_code_owners": [
+        "requirements",
+        "planning"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_INDEXED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SOURCE-SOCIAL",
+      "kind": "source_scope",
+      "title": "Preserve and decompose the complete SOCIAL specification",
+      "source_document": "SOCIAL",
+      "source_unit_selector": {
+        "first": "SOCIAL-U0001",
+        "last": "SOCIAL-U1039",
+        "count": 1039
+      },
+      "target_ids": [],
+      "planned_work_packages": [
+        "V01"
+      ],
+      "planned_code_owners": [
+        "requirements",
+        "planning"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_INDEXED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SOURCE-TRADE",
+      "kind": "source_scope",
+      "title": "Preserve and decompose the complete TRADE specification",
+      "source_document": "TRADE",
+      "source_unit_selector": {
+        "first": "TRADE-U0001",
+        "last": "TRADE-U1078",
+        "count": 1078
+      },
+      "target_ids": [],
+      "planned_work_packages": [
+        "V01"
+      ],
+      "planned_code_owners": [
+        "requirements",
+        "planning"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_INDEXED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E01",
+      "kind": "engine",
+      "title": "Engine 01 · Time & Event Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0042",
+        "MASTER-U0187"
+      ],
+      "target_ids": [
+        "E01"
+      ],
+      "planned_work_packages": [
+        "V06"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E02",
+      "kind": "engine",
+      "title": "Engine 02 · Population Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0043",
+        "MASTER-U0259"
+      ],
+      "target_ids": [
+        "E02"
+      ],
+      "planned_work_packages": [
+        "V11"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E03",
+      "kind": "engine",
+      "title": "Engine 03 · Labour & Wage Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0044",
+        "MASTER-U0329"
+      ],
+      "target_ids": [
+        "E03"
+      ],
+      "planned_work_packages": [
+        "V11"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E04",
+      "kind": "engine",
+      "title": "Engine 04 · Education & Human Capital Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0045",
+        "MASTER-U0431"
+      ],
+      "target_ids": [
+        "E04"
+      ],
+      "planned_work_packages": [
+        "V15"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E05",
+      "kind": "engine",
+      "title": "Engine 05 · Healthcare Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0046",
+        "MASTER-U0510"
+      ],
+      "target_ids": [
+        "E05"
+      ],
+      "planned_work_packages": [
+        "V15"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E06",
+      "kind": "engine",
+      "title": "Engine 06 · Housing Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0047",
+        "MASTER-U0587"
+      ],
+      "target_ids": [
+        "E06"
+      ],
+      "planned_work_packages": [
+        "V16"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E07",
+      "kind": "engine",
+      "title": "Engine 07 · Public Safety Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0048",
+        "MASTER-U0659"
+      ],
+      "target_ids": [
+        "E07"
+      ],
+      "planned_work_packages": [
+        "V16"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E08",
+      "kind": "engine",
+      "title": "Engine 08 · Resource & Inventory Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0049",
+        "MASTER-U0736"
+      ],
+      "target_ids": [
+        "E08"
+      ],
+      "planned_work_packages": [
+        "V12"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E09",
+      "kind": "engine",
+      "title": "Engine 09 · Energy Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0050",
+        "MASTER-U0834"
+      ],
+      "target_ids": [
+        "E09"
+      ],
+      "planned_work_packages": [
+        "V13"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E10",
+      "kind": "engine",
+      "title": "Engine 10 · Production Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0051",
+        "MASTER-U0913"
+      ],
+      "target_ids": [
+        "E10"
+      ],
+      "planned_work_packages": [
+        "V13"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E11",
+      "kind": "engine",
+      "title": "Engine 11 · Technology & R&D Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0052",
+        "MASTER-U1003"
+      ],
+      "target_ids": [
+        "E11"
+      ],
+      "planned_work_packages": [
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E12",
+      "kind": "engine",
+      "title": "Engine 12 · Project & Infrastructure Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0053",
+        "MASTER-U1107"
+      ],
+      "target_ids": [
+        "E12"
+      ],
+      "planned_work_packages": [
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E13",
+      "kind": "engine",
+      "title": "Engine 13 · Household & Demand Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0054",
+        "MASTER-U1235"
+      ],
+      "target_ids": [
+        "E13"
+      ],
+      "planned_work_packages": [
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E14",
+      "kind": "engine",
+      "title": "Engine 14 · Fiscal & Treasury Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0055",
+        "MASTER-U1313"
+      ],
+      "target_ids": [
+        "E14"
+      ],
+      "planned_work_packages": [
+        "V18"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E15",
+      "kind": "engine",
+      "title": "Engine 15 · Banking & Monetary Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0056",
+        "MASTER-U1413"
+      ],
+      "target_ids": [
+        "E15"
+      ],
+      "planned_work_packages": [
+        "V19"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E16",
+      "kind": "engine",
+      "title": "Engine 16 · Trade, Contract & Global Market Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0057",
+        "MASTER-U1511"
+      ],
+      "target_ids": [
+        "E16"
+      ],
+      "planned_work_packages": [
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E17",
+      "kind": "engine",
+      "title": "Engine 17 · FX & International Finance Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0058",
+        "MASTER-U1649"
+      ],
+      "target_ids": [
+        "E17"
+      ],
+      "planned_work_packages": [
+        "V20"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-E18",
+      "kind": "engine",
+      "title": "Engine 18 · National Accounts, Risk & Scoring Engine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0059",
+        "MASTER-U1736"
+      ],
+      "target_ids": [
+        "E18"
+      ],
+      "planned_work_packages": [
+        "V23"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-OFFICE-CAPTAIN",
+      "kind": "office_family",
+      "title": "CAPTAIN",
+      "source_document": "CAPTAIN",
+      "source_unit_refs": [
+        "CAPTAIN-U0001"
+      ],
+      "target_ids": [
+        "OFFICE-CAPTAIN"
+      ],
+      "planned_work_packages": [
+        "V05",
+        "V24",
+        "V25"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-api",
+        "apps/world-worker",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-OFFICE-CENTRAL_BANK",
+      "kind": "office_family",
+      "title": "CENTRAL_BANK",
+      "source_document": "CENTRAL_BANK",
+      "source_unit_refs": [
+        "CENTRAL_BANK-U0001"
+      ],
+      "target_ids": [
+        "OFFICE-CENTRAL_BANK"
+      ],
+      "planned_work_packages": [
+        "V05",
+        "V19",
+        "V24",
+        "V25"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-api",
+        "apps/world-worker",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-OFFICE-FINANCE",
+      "kind": "office_family",
+      "title": "FINANCE",
+      "source_document": "FINANCE",
+      "source_unit_refs": [
+        "FINANCE-U0001"
+      ],
+      "target_ids": [
+        "OFFICE-FINANCE"
+      ],
+      "planned_work_packages": [
+        "V05",
+        "V18",
+        "V24",
+        "V25"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-api",
+        "apps/world-worker",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-OFFICE-TRADE",
+      "kind": "office_family",
+      "title": "TRADE",
+      "source_document": "TRADE",
+      "source_unit_refs": [
+        "TRADE-U0001"
+      ],
+      "target_ids": [
+        "OFFICE-TRADE"
+      ],
+      "planned_work_packages": [
+        "V05",
+        "V21",
+        "V22",
+        "V24",
+        "V25"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-api",
+        "apps/world-worker",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-OFFICE-INDUSTRY",
+      "kind": "office_family",
+      "title": "INDUSTRY",
+      "source_document": "INDUSTRY",
+      "source_unit_refs": [
+        "INDUSTRY-U0001"
+      ],
+      "target_ids": [
+        "OFFICE-INDUSTRY"
+      ],
+      "planned_work_packages": [
+        "V05",
+        "V12",
+        "V13",
+        "V14",
+        "V24",
+        "V25"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-api",
+        "apps/world-worker",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-OFFICE-SOCIAL",
+      "kind": "office_family",
+      "title": "SOCIAL",
+      "source_document": "SOCIAL",
+      "source_unit_refs": [
+        "SOCIAL-U0001"
+      ],
+      "target_ids": [
+        "OFFICE-SOCIAL"
+      ],
+      "planned_work_packages": [
+        "V05",
+        "V11",
+        "V15",
+        "V16",
+        "V17",
+        "V24",
+        "V25"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-api",
+        "apps/world-worker",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-01",
+      "kind": "commodity",
+      "title": "CRUDE_OIL — barrel",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0741",
+        "MASTER-U0750",
+        "MASTER-U1975"
+      ],
+      "target_ids": [
+        "COMMODITY-01"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-02",
+      "kind": "commodity",
+      "title": "NATURAL_GAS — MMBtu",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0742",
+        "MASTER-U0751",
+        "MASTER-U1976"
+      ],
+      "target_ids": [
+        "COMMODITY-02"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-03",
+      "kind": "commodity",
+      "title": "URANIUM — tonne U",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0743",
+        "MASTER-U0752",
+        "MASTER-U1977"
+      ],
+      "target_ids": [
+        "COMMODITY-03"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-04",
+      "kind": "commodity",
+      "title": "GRAIN — tonne",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0753",
+        "MASTER-U1978"
+      ],
+      "target_ids": [
+        "COMMODITY-04"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-05",
+      "kind": "commodity",
+      "title": "IRON_ORE — tonne",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0744",
+        "MASTER-U0754",
+        "MASTER-U1979"
+      ],
+      "target_ids": [
+        "COMMODITY-05"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-06",
+      "kind": "commodity",
+      "title": "COPPER — tonne",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0745",
+        "MASTER-U0755",
+        "MASTER-U1980"
+      ],
+      "target_ids": [
+        "COMMODITY-06"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-07",
+      "kind": "commodity",
+      "title": "LITHIUM — tonne LCE",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0746",
+        "MASTER-U0756",
+        "MASTER-U1981"
+      ],
+      "target_ids": [
+        "COMMODITY-07"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-08",
+      "kind": "commodity",
+      "title": "STEEL — tonne",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0757",
+        "MASTER-U1982"
+      ],
+      "target_ids": [
+        "COMMODITY-08"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-09",
+      "kind": "commodity",
+      "title": "REFINED_FUEL — barrel equivalent",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0758",
+        "MASTER-U1983"
+      ],
+      "target_ids": [
+        "COMMODITY-09"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-10",
+      "kind": "commodity",
+      "title": "MACHINERY — equipment unit",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0759",
+        "MASTER-U1984"
+      ],
+      "target_ids": [
+        "COMMODITY-10"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-11",
+      "kind": "commodity",
+      "title": "SEMICONDUCTORS — standardised chip unit",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0760",
+        "MASTER-U1985"
+      ],
+      "target_ids": [
+        "COMMODITY-11"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-COMMODITY-12",
+      "kind": "commodity",
+      "title": "BATTERIES — MWh-equivalent",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0761",
+        "MASTER-U1986"
+      ],
+      "target_ids": [
+        "COMMODITY-12"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-01",
+      "kind": "sector",
+      "title": "OIL_EXTRACTION — Developed Oil Reserve + Electricity + Labour + Machinery → Crude Oil",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0917",
+        "MASTER-U1989"
+      ],
+      "target_ids": [
+        "SECTOR-01"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-02",
+      "kind": "sector",
+      "title": "GAS_EXTRACTION — Developed Gas Reserve + Electricity + Labour + Machinery → Natural Gas",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0918",
+        "MASTER-U1990"
+      ],
+      "target_ids": [
+        "SECTOR-02"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-03",
+      "kind": "sector",
+      "title": "URANIUM_MINING — Developed Uranium Reserve + Electricity + Labour + Machinery → Uranium",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0919",
+        "MASTER-U1991"
+      ],
+      "target_ids": [
+        "SECTOR-03"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-04",
+      "kind": "sector",
+      "title": "IRON_ORE_MINING — Developed Iron Ore Reserve + Electricity + Labour + Machinery → Iron Ore",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0920",
+        "MASTER-U1992"
+      ],
+      "target_ids": [
+        "SECTOR-04"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-05",
+      "kind": "sector",
+      "title": "COPPER_MINING — Developed Copper Reserve + Electricity + Labour + Machinery → Copper",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0921",
+        "MASTER-U1993"
+      ],
+      "target_ids": [
+        "SECTOR-05"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-06",
+      "kind": "sector",
+      "title": "LITHIUM_MINING — Developed Lithium Reserve + Electricity + Labour + Machinery → Lithium",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0922",
+        "MASTER-U1994"
+      ],
+      "target_ids": [
+        "SECTOR-06"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-07",
+      "kind": "sector",
+      "title": "STEEL — Iron Ore + Energy + Labour + Machinery Capacity → Steel",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0923",
+        "MASTER-U1995"
+      ],
+      "target_ids": [
+        "SECTOR-07"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-08",
+      "kind": "sector",
+      "title": "REFINED_FUEL — Crude Oil + Energy + Labour + Refinery Capacity → Refined Fuel",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0924",
+        "MASTER-U1996"
+      ],
+      "target_ids": [
+        "SECTOR-08"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-09",
+      "kind": "sector",
+      "title": "BATTERY — Lithium + Copper + Electricity + Machinery + Battery Technology + Skilled Labour → Batteries",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0925",
+        "MASTER-U1997"
+      ],
+      "target_ids": [
+        "SECTOR-09"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-10",
+      "kind": "sector",
+      "title": "MACHINERY — Steel + Copper + Electricity + Manufacturing Technology + Skilled Labour → Machinery",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0926",
+        "MASTER-U1998"
+      ],
+      "target_ids": [
+        "SECTOR-10"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-11",
+      "kind": "sector",
+      "title": "SEMICONDUCTOR — Copper + Electricity + Machinery + Semiconductor Technology + High Skill Labour → Semiconductors",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0927",
+        "MASTER-U1999"
+      ],
+      "target_ids": [
+        "SECTOR-11"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-SECTOR-12",
+      "kind": "sector",
+      "title": "ELECTRICITY — Fuel/Resource + Generation Capacity + Labour + Grid → Delivered Electricity",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0928",
+        "MASTER-U2000"
+      ],
+      "target_ids": [
+        "SECTOR-12"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V12",
+        "V13",
+        "V17"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-01",
+      "kind": "tech",
+      "title": "ENERGY_ADV_SOLAR — Energy — Advanced Solar",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1007",
+        "MASTER-U2003"
+      ],
+      "target_ids": [
+        "TECH-01"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-02",
+      "kind": "tech",
+      "title": "ENERGY_GRID_STORAGE — Energy — Grid-scale Storage",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1008",
+        "MASTER-U2004"
+      ],
+      "target_ids": [
+        "TECH-02"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-03",
+      "kind": "tech",
+      "title": "ENERGY_ADV_NUCLEAR — Energy — Advanced Nuclear",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1009",
+        "MASTER-U2005"
+      ],
+      "target_ids": [
+        "TECH-03"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-04",
+      "kind": "tech",
+      "title": "ENERGY_SMART_GRID — Energy — Smart Grid",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1010",
+        "MASTER-U2006"
+      ],
+      "target_ids": [
+        "TECH-04"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-05",
+      "kind": "tech",
+      "title": "ENERGY_GREEN_H2 — Energy — Green Hydrogen",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1011",
+        "MASTER-U2007"
+      ],
+      "target_ids": [
+        "TECH-05"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-06",
+      "kind": "tech",
+      "title": "MFG_AUTOMATION — Manufacturing — Industrial Automation",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1012",
+        "MASTER-U2008"
+      ],
+      "target_ids": [
+        "TECH-06"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-07",
+      "kind": "tech",
+      "title": "MFG_ROBOTICS — Manufacturing — Advanced Robotics",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1013",
+        "MASTER-U2009"
+      ],
+      "target_ids": [
+        "TECH-07"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-08",
+      "kind": "tech",
+      "title": "MFG_PRECISION — Manufacturing — Precision Manufacturing",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1014",
+        "MASTER-U2010"
+      ],
+      "target_ids": [
+        "TECH-08"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-09",
+      "kind": "tech",
+      "title": "MFG_SMART — Manufacturing — Smart Manufacturing",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1015",
+        "MASTER-U2011"
+      ],
+      "target_ids": [
+        "TECH-09"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-10",
+      "kind": "tech",
+      "title": "SEMI_BASIC — Semiconductor — Basic Semiconductor",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1016",
+        "MASTER-U2012"
+      ],
+      "target_ids": [
+        "TECH-10"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-11",
+      "kind": "tech",
+      "title": "SEMI_ADV_FAB — Semiconductor — Advanced Fabrication",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1017",
+        "MASTER-U2013"
+      ],
+      "target_ids": [
+        "TECH-11"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-12",
+      "kind": "tech",
+      "title": "SEMI_PACKAGING — Semiconductor — Advanced Packaging",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1018",
+        "MASTER-U2014"
+      ],
+      "target_ids": [
+        "TECH-12"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-13",
+      "kind": "tech",
+      "title": "SEMI_HPC — Semiconductor — High-performance Chips",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1019",
+        "MASTER-U2015"
+      ],
+      "target_ids": [
+        "TECH-13"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-14",
+      "kind": "tech",
+      "title": "RESOURCE_ADV_EXPLORATION — Resources & Materials — Advanced Exploration",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1020",
+        "MASTER-U2016"
+      ],
+      "target_ids": [
+        "TECH-14"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-15",
+      "kind": "tech",
+      "title": "RESOURCE_ADV_MINING — Resources & Materials — Advanced Mining",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1021",
+        "MASTER-U2017"
+      ],
+      "target_ids": [
+        "TECH-15"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-16",
+      "kind": "tech",
+      "title": "RESOURCE_EFFICIENT_REFINING — Resources & Materials — High-efficiency Refining",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1022",
+        "MASTER-U2018"
+      ],
+      "target_ids": [
+        "TECH-16"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-17",
+      "kind": "tech",
+      "title": "RESOURCE_BATTERY_CHEM — Resources & Materials — Battery Chemistry",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1023",
+        "MASTER-U2019"
+      ],
+      "target_ids": [
+        "TECH-17"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-18",
+      "kind": "tech",
+      "title": "RESOURCE_ADV_MATERIALS — Resources & Materials — Advanced Materials",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1024",
+        "MASTER-U2020"
+      ],
+      "target_ids": [
+        "TECH-18"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-19",
+      "kind": "tech",
+      "title": "INFRA_DIGITAL_NETWORK — Infrastructure & Digital — Digital Industrial Network",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1025",
+        "MASTER-U2021"
+      ],
+      "target_ids": [
+        "TECH-19"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-20",
+      "kind": "tech",
+      "title": "INFRA_AUTO_LOGISTICS — Infrastructure & Digital — Automated Logistics",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1026",
+        "MASTER-U2022"
+      ],
+      "target_ids": [
+        "TECH-20"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-21",
+      "kind": "tech",
+      "title": "INFRA_SMART_PORT — Infrastructure & Digital — Smart Port",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1027",
+        "MASTER-U2023"
+      ],
+      "target_ids": [
+        "TECH-21"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-TECH-22",
+      "kind": "tech",
+      "title": "INFRA_ADV_GRID_MGMT — Infrastructure & Digital — Advanced Grid Management",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1028",
+        "MASTER-U2024"
+      ],
+      "target_ids": [
+        "TECH-22"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-01",
+      "kind": "project",
+      "title": "Resource — Oil Field Development",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1111",
+        "MASTER-U2027"
+      ],
+      "target_ids": [
+        "PROJECT-01"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-02",
+      "kind": "project",
+      "title": "Resource — Gas Field Development",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1112",
+        "MASTER-U2028"
+      ],
+      "target_ids": [
+        "PROJECT-02"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-03",
+      "kind": "project",
+      "title": "Resource — Uranium Mine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1113",
+        "MASTER-U2029"
+      ],
+      "target_ids": [
+        "PROJECT-03"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-04",
+      "kind": "project",
+      "title": "Resource — Iron Ore Mine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1114",
+        "MASTER-U2030"
+      ],
+      "target_ids": [
+        "PROJECT-04"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-05",
+      "kind": "project",
+      "title": "Resource — Copper Mine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1115",
+        "MASTER-U2031"
+      ],
+      "target_ids": [
+        "PROJECT-05"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-06",
+      "kind": "project",
+      "title": "Resource — Lithium Mine",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1116",
+        "MASTER-U2032"
+      ],
+      "target_ids": [
+        "PROJECT-06"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-07",
+      "kind": "project",
+      "title": "Energy — Gas Power Plant",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1117",
+        "MASTER-U2033"
+      ],
+      "target_ids": [
+        "PROJECT-07"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-08",
+      "kind": "project",
+      "title": "Energy — Fossil Power Plant",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1118",
+        "MASTER-U2034"
+      ],
+      "target_ids": [
+        "PROJECT-08"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-09",
+      "kind": "project",
+      "title": "Energy — Nuclear Power Plant",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1119",
+        "MASTER-U2035"
+      ],
+      "target_ids": [
+        "PROJECT-09"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-10",
+      "kind": "project",
+      "title": "Energy — Solar Farm",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1120",
+        "MASTER-U2036"
+      ],
+      "target_ids": [
+        "PROJECT-10"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-11",
+      "kind": "project",
+      "title": "Energy — Wind Farm",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1121",
+        "MASTER-U2037"
+      ],
+      "target_ids": [
+        "PROJECT-11"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-12",
+      "kind": "project",
+      "title": "Energy — Grid Upgrade",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1122",
+        "MASTER-U2038"
+      ],
+      "target_ids": [
+        "PROJECT-12"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-13",
+      "kind": "project",
+      "title": "Energy — Energy Storage Facility",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1123",
+        "MASTER-U2039"
+      ],
+      "target_ids": [
+        "PROJECT-13"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-14",
+      "kind": "project",
+      "title": "Industrial — Steel Mill",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1124",
+        "MASTER-U2040"
+      ],
+      "target_ids": [
+        "PROJECT-14"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-15",
+      "kind": "project",
+      "title": "Industrial — Refinery",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1125",
+        "MASTER-U2041"
+      ],
+      "target_ids": [
+        "PROJECT-15"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-16",
+      "kind": "project",
+      "title": "Industrial — Machinery Plant",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1126",
+        "MASTER-U2042"
+      ],
+      "target_ids": [
+        "PROJECT-16"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-17",
+      "kind": "project",
+      "title": "Industrial — Semiconductor Fab",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1127",
+        "MASTER-U2043"
+      ],
+      "target_ids": [
+        "PROJECT-17"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-18",
+      "kind": "project",
+      "title": "Industrial — Battery Gigafactory",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1128",
+        "MASTER-U2044"
+      ],
+      "target_ids": [
+        "PROJECT-18"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-19",
+      "kind": "project",
+      "title": "Industrial — Industrial Park",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1129",
+        "MASTER-U2045"
+      ],
+      "target_ids": [
+        "PROJECT-19"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-20",
+      "kind": "project",
+      "title": "Industrial — Special Economic Zone",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1130",
+        "MASTER-U2046"
+      ],
+      "target_ids": [
+        "PROJECT-20"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-21",
+      "kind": "project",
+      "title": "Infrastructure — Deepwater Port",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1131",
+        "MASTER-U2047"
+      ],
+      "target_ids": [
+        "PROJECT-21"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-22",
+      "kind": "project",
+      "title": "Infrastructure — Freight Railway",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1132",
+        "MASTER-U2048"
+      ],
+      "target_ids": [
+        "PROJECT-22"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-23",
+      "kind": "project",
+      "title": "Infrastructure — National Power Grid",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1133",
+        "MASTER-U2049"
+      ],
+      "target_ids": [
+        "PROJECT-23"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-24",
+      "kind": "project",
+      "title": "Infrastructure — Digital Backbone",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1134",
+        "MASTER-U2050"
+      ],
+      "target_ids": [
+        "PROJECT-24"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-25",
+      "kind": "project",
+      "title": "Infrastructure — Logistics Hub",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1135",
+        "MASTER-U2051"
+      ],
+      "target_ids": [
+        "PROJECT-25"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-26",
+      "kind": "project",
+      "title": "Infrastructure — Strategic Reserve Facility",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1136",
+        "MASTER-U2052"
+      ],
+      "target_ids": [
+        "PROJECT-26"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-27",
+      "kind": "project",
+      "title": "Research Infrastructure — National Research Centre",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1137",
+        "MASTER-U2053"
+      ],
+      "target_ids": [
+        "PROJECT-27"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-28",
+      "kind": "project",
+      "title": "Research Infrastructure — Semiconductor Research Facility",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1138",
+        "MASTER-U2054"
+      ],
+      "target_ids": [
+        "PROJECT-28"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-29",
+      "kind": "project",
+      "title": "Research Infrastructure — Energy Research Centre",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1139",
+        "MASTER-U2055"
+      ],
+      "target_ids": [
+        "PROJECT-29"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-30",
+      "kind": "project",
+      "title": "Research Infrastructure — Materials Research Centre",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1140",
+        "MASTER-U2056"
+      ],
+      "target_ids": [
+        "PROJECT-30"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-31",
+      "kind": "project",
+      "title": "Social Infrastructure — Basic Education Facility",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1141",
+        "MASTER-U2057"
+      ],
+      "target_ids": [
+        "PROJECT-31"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-32",
+      "kind": "project",
+      "title": "Social Infrastructure — Vocational Education Facility",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1142",
+        "MASTER-U2058"
+      ],
+      "target_ids": [
+        "PROJECT-32"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-33",
+      "kind": "project",
+      "title": "Social Infrastructure — Higher Education Facility",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1143",
+        "MASTER-U2059"
+      ],
+      "target_ids": [
+        "PROJECT-33"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-34",
+      "kind": "project",
+      "title": "Social Infrastructure — Primary Care Facility",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1144",
+        "MASTER-U2060"
+      ],
+      "target_ids": [
+        "PROJECT-34"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-35",
+      "kind": "project",
+      "title": "Social Infrastructure — Hospital / Emergency Facility",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1145",
+        "MASTER-U2061"
+      ],
+      "target_ids": [
+        "PROJECT-35"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-36",
+      "kind": "project",
+      "title": "Social Infrastructure — Public Housing",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1146",
+        "MASTER-U2062"
+      ],
+      "target_ids": [
+        "PROJECT-36"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-37",
+      "kind": "project",
+      "title": "Social Infrastructure — Worker Housing",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1147",
+        "MASTER-U2063"
+      ],
+      "target_ids": [
+        "PROJECT-37"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-PROJECT-38",
+      "kind": "project",
+      "title": "Social Infrastructure — Police / Emergency Facility",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1148",
+        "MASTER-U2064"
+      ],
+      "target_ids": [
+        "PROJECT-38"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V14"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-01",
+      "kind": "international_subtype",
+      "title": "Commodity Supply Agreement",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1523"
+      ],
+      "target_ids": [
+        "INT-01"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-02",
+      "kind": "international_subtype",
+      "title": "Technology Licence",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U0119",
+        "MASTER-U1524"
+      ],
+      "target_ids": [
+        "INT-02"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-03",
+      "kind": "international_subtype",
+      "title": "Foreign Direct Investment",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1525"
+      ],
+      "target_ids": [
+        "INT-03"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-04",
+      "kind": "international_subtype",
+      "title": "Sovereign Loan",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1526"
+      ],
+      "target_ids": [
+        "INT-04"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-05",
+      "kind": "international_subtype",
+      "title": "Infrastructure Finance",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1527"
+      ],
+      "target_ids": [
+        "INT-05"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-06",
+      "kind": "international_subtype",
+      "title": "Resource Development Agreement",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1528"
+      ],
+      "target_ids": [
+        "INT-06"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-07",
+      "kind": "international_subtype",
+      "title": "Joint International Project",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1529"
+      ],
+      "target_ids": [
+        "INT-07"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-08",
+      "kind": "international_subtype",
+      "title": "Preferential Trade Agreement",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1530"
+      ],
+      "target_ids": [
+        "INT-08"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-09",
+      "kind": "international_subtype",
+      "title": "Free Trade Agreement",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1531"
+      ],
+      "target_ids": [
+        "INT-09"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-10",
+      "kind": "international_subtype",
+      "title": "Customs Cooperation Agreement",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1532"
+      ],
+      "target_ids": [
+        "INT-10"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-11",
+      "kind": "international_subtype",
+      "title": "Sector Market Access Agreement",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1533"
+      ],
+      "target_ids": [
+        "INT-11"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-12",
+      "kind": "international_subtype",
+      "title": "Multilateral Economic Agreement",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1534"
+      ],
+      "target_ids": [
+        "INT-12"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-13",
+      "kind": "international_subtype",
+      "title": "Reserve Swap",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1535",
+        "MASTER-U1685"
+      ],
+      "target_ids": [
+        "INT-13"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-14",
+      "kind": "international_subtype",
+      "title": "Sanction Package",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1536",
+        "MASTER-U1578"
+      ],
+      "target_ids": [
+        "INT-14"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-15",
+      "kind": "international_subtype",
+      "title": "Grant Aid",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1537"
+      ],
+      "target_ids": [
+        "INT-15"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-16",
+      "kind": "international_subtype",
+      "title": "Commodity Aid",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1538"
+      ],
+      "target_ids": [
+        "INT-16"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-17",
+      "kind": "international_subtype",
+      "title": "Emergency Concessional Loan",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1539"
+      ],
+      "target_ids": [
+        "INT-17"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-18",
+      "kind": "international_subtype",
+      "title": "Emergency Supply Contract",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1540"
+      ],
+      "target_ids": [
+        "INT-18"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-19",
+      "kind": "international_subtype",
+      "title": "Technical Assistance",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1541"
+      ],
+      "target_ids": [
+        "INT-19"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-20",
+      "kind": "international_subtype",
+      "title": "Project Reconstruction Aid",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1542"
+      ],
+      "target_ids": [
+        "INT-20"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-21",
+      "kind": "international_subtype",
+      "title": "International Tender",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1543"
+      ],
+      "target_ids": [
+        "INT-21"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-22",
+      "kind": "international_subtype",
+      "title": "Strategic Economic Partnership",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1544"
+      ],
+      "target_ids": [
+        "INT-22"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    },
+    {
+      "requirement_id": "REQ-INT-23",
+      "kind": "international_subtype",
+      "title": "Trade Dispute Settlement",
+      "source_document": "MASTER",
+      "source_unit_refs": [
+        "MASTER-U1545"
+      ],
+      "target_ids": [
+        "INT-23"
+      ],
+      "planned_work_packages": [
+        "V03",
+        "V21",
+        "V22"
+      ],
+      "planned_code_owners": [
+        "packages/core",
+        "apps/world-worker",
+        "apps/world-api",
+        "apps/world-web"
+      ],
+      "implementation_status": "PLANNED_NOT_IMPLEMENTED",
+      "evidence_status": "SOURCE_LINKED_ONLY"
+    }
+  ],
+  "claim_boundary": {
+    "documented": true,
+    "planned": true,
+    "implemented": false,
+    "verified_product_behavior": false
+  }
+}

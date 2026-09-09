@@ -150,6 +150,8 @@ def validate(root: Path) -> dict[str, Any]:
             "AGENTS.md",
             "PLANS.md",
             "requirements.docx",
+            "requirements/requirement_registry.json",
+            "requirements/source_unit_assignments.jsonl",
             "planning/01_新仓库架构与完整交付路线.md",
             "planning/02_架构裁决与数据库协议.md",
             "planning/03_33个工作包与依赖.md",
@@ -634,6 +636,62 @@ def validate(root: Path) -> dict[str, Any]:
         require(constitution_hash == constitution["sha256"], "requirements.docx differs from Constitution")
         metrics["source_documents"] = 8
 
+    def v01_traceability() -> None:
+        registry = load_json("requirements/requirement_registry.json")
+        require(
+            registry["schema_version"] == "V01.1-TRACEABILITY-1",
+            "wrong V01.1 traceability schema",
+        )
+        counts = registry["counts"]
+        require(counts["authoritative_sources"] == 8, "V01.1 must cover eight sources")
+        require(counts["source_units"] == 8743, "V01.1 source-unit count changed")
+        require(counts["fixed_targets"] == 131, "V01.1 fixed-target count changed")
+        require(
+            registry["claim_boundary"]["implemented"] is False
+            and registry["claim_boundary"]["verified_product_behavior"] is False,
+            "V01.1 registry falsely claims implementation",
+        )
+        source_units = {
+            json.loads(line)["source_id"]
+            for line in file("requirements/source_units.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if line.strip()
+        }
+        assignments = [
+            json.loads(line)
+            for line in file("requirements/source_unit_assignments.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if line.strip()
+        ]
+        require(len(assignments) == 8743, "V01.1 assignment count changed")
+        require(
+            {row["source_unit_id"] for row in assignments} == source_units,
+            "V01.1 source-unit assignments are incomplete",
+        )
+        target_requirements = [
+            item for item in registry["requirements"] if item["kind"] != "source_scope"
+        ]
+        require(len(target_requirements) == 131, "V01.1 target requirements are incomplete")
+        for requirement in registry["requirements"]:
+            require(
+                requirement["implementation_status"] == "PLANNED_NOT_IMPLEMENTED",
+                f"V01.1 false implementation claim: {requirement['requirement_id']}",
+            )
+            require(
+                requirement["planned_work_packages"]
+                and requirement["planned_code_owners"],
+                f"V01.1 missing planned ownership: {requirement['requirement_id']}",
+            )
+        for requirement in target_requirements:
+            require(
+                requirement["source_unit_refs"]
+                and set(requirement["source_unit_refs"]) <= source_units,
+                f"V01.1 invalid source evidence: {requirement['requirement_id']}",
+            )
+        metrics.update(v01_requirements=len(registry["requirements"]), v01_source_units=len(assignments))
+
     def templates() -> None:
         required_templates = [
             "templates/EXECUTION_PLAN.md",
@@ -662,6 +720,7 @@ def validate(root: Path) -> dict[str, Any]:
         ("progress_truth", progress),
         ("decision_register", decisions),
         ("source_material", source_material),
+        ("v01_traceability", v01_traceability),
         ("templates", templates),
     ):
         check(name, operation)
