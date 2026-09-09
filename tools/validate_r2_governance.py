@@ -589,21 +589,51 @@ def validate(root: Path) -> dict[str, Any]:
             "current_gate next_step_ready differs from validated readiness",
         )
         if states["V01.3"] == "VERIFIED":
-            require(states["V02.1"] == "PLANNED", "V02.1 started before V01 package review")
-            require(
-                required_gate == "V01_PACKAGE_LEVEL_REVIEW"
-                and gate.get("gate_status") == "PENDING",
-                "V01 completion must stop at pending package review",
-            )
-            require(
-                progress_data.get("work_packages", {}).get("V01")
-                == "IMPLEMENTATION_COMPLETE_PENDING_PACKAGE_REVIEW",
-                "V01 package status is not review-ready",
-            )
             package_evidence = progress_data.get("package_evidence", {}).get("V01", [])
             require(package_evidence, "V01 package review evidence is missing")
             for evidence_path in package_evidence:
                 file(evidence_path)
+            if (
+                required_gate == "V01_PACKAGE_LEVEL_REVIEW"
+                and gate.get("gate_status") == "PENDING"
+            ):
+                require(states["V02.1"] == "PLANNED", "V02.1 started before V01 package review")
+                require(
+                    progress_data.get("work_packages", {}).get("V01")
+                    == "IMPLEMENTATION_COMPLETE_PENDING_PACKAGE_REVIEW",
+                    "V01 package status is not review-ready",
+                )
+            else:
+                integration = progress_data.get("v01_integration")
+                require(isinstance(integration, dict), "missing V01 integration record")
+                require(integration.get("status") == "MERGED", "V01 is not integrated")
+                require(
+                    integration.get("method") == "OWNER_FAST_TRACK"
+                    and integration.get("decision") == "OWNER_FAST_TRACK_ACCEPTED"
+                    and integration.get("risk_class") == "P2",
+                    "V01 integration lacks a valid P2 owner fast-track decision",
+                )
+                require(
+                    integration.get("automated_evidence_status") == "PASS"
+                    and integration.get("p0_boundary_changed") is False
+                    and integration.get("production_mutation") is False
+                    and integration.get("owner_approved") is True,
+                    "V01 integration safety evidence is incomplete",
+                )
+                require(
+                    integration.get("independent_review_claimed") is False,
+                    "V01 integration incorrectly claims independent review",
+                )
+                file(integration.get("evidence_file"))
+                merged_commit = commit_exists(
+                    integration.get("merged_commit"), "V01 merged_commit"
+                )
+                is_ancestor(merged_commit, "HEAD", "V01 local integration")
+                require(
+                    progress_data.get("work_packages", {}).get("V01")
+                    == "IMPLEMENTED_MERGED",
+                    "V01 package status is not integrated",
+                )
         metrics["progress_states"] = dict(
             sorted({state: list(states.values()).count(state) for state in valid_states}.items())
         )

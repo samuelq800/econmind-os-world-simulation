@@ -1,7 +1,7 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T02:55:00Z",
-  "source_commit": "5ef35fc3dfe266187bf2f0b6ce557bc450eae2bf",
+  "derived_at": "2026-09-09T03:44:00Z",
+  "source_commit": "5d10233bb1b2e5c417f9ff44c306a30fbe0ed4de",
   "note": "FAST_MAINLINE is active. P0 still requires blocking independent review; P2/P3 may use explicit evidence-backed owner fast-track.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
@@ -40,19 +40,35 @@
       "evidence_file": "docs/reports/V00.3/FINAL_RECONCILIATION.md"
     }
   },
+  "v01_integration": {
+    "branch": "codex/v01-mainline",
+    "package_candidate_commit": "4f90eda1161f6f24b1a31630128e0e4d01257dbf",
+    "acceptance_record_commit": "e117287dcd091190e116c7835b52a678895f4672",
+    "status": "MERGED",
+    "merged_commit": "5d10233bb1b2e5c417f9ff44c306a30fbe0ed4de",
+    "method": "OWNER_FAST_TRACK",
+    "decision": "OWNER_FAST_TRACK_ACCEPTED",
+    "risk_class": "P2",
+    "automated_evidence_status": "PASS",
+    "p0_boundary_changed": false,
+    "production_mutation": false,
+    "independent_review_claimed": false,
+    "evidence_file": "docs/reports/V01/PACKAGE_FAST_TRACK_ACCEPTANCE.md",
+    "owner_approved": true
+  },
   "current_gate": {
     "step_id": "V01.3",
     "status": "VERIFIED",
-    "review": "V01.1-V01.3 implementation complete; V01 package-level review is required before V02",
+    "review": "V01 package owner-fast-tracked after passing evidence and integrated into main; no independent approval claimed",
     "next_step": "V02.1",
-    "next_step_ready": false,
-    "next_step_blockers": ["V01 PACKAGE-LEVEL REVIEW pending"],
+    "next_step_ready": true,
+    "next_step_blockers": [],
     "required_gate": "V01_PACKAGE_LEVEL_REVIEW",
-    "gate_status": "PENDING"
+    "gate_status": "PASS"
   },
   "work_packages": {
     "V00": "COMPLETE",
-    "V01": "IMPLEMENTATION_COMPLETE_PENDING_PACKAGE_REVIEW"
+    "V01": "IMPLEMENTED_MERGED"
   },
   "step_evidence": {
     "V00.1": [
@@ -100,7 +116,8 @@
   "package_evidence": {
     "V01": [
       "docs/reports/V01/PACKAGE_REVIEW_BUNDLE.md",
-      "docs/reports/V01/PACKAGE_TEST_EVIDENCE.json"
+      "docs/reports/V01/PACKAGE_TEST_EVIDENCE.json",
+      "docs/reports/V01/PACKAGE_FAST_TRACK_ACCEPTANCE.md"
     ]
   },
   "implementation_commits": {
