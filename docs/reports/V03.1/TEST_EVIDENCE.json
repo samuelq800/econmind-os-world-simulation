@@ -1,0 +1,51 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V03.1",
+  "commit": "52e62f1b988a3f0c650cf5f4032fada78c7fe43c",
+  "environment": {
+    "name": "local",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4", "decimal.js": "10.6.0" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile before core importer lock update",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "pnpm refused an unrepresented packages/core importer"
+    },
+    {
+      "command": "pnpm install --lockfile-only && pnpm install --frozen-lockfile",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "core importer and decimal.js 10.6.0 are locked"
+    },
+    {
+      "command": "pnpm --filter @econmind/core typecheck",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "strict TypeScript passed after ESM import correction"
+    },
+    {
+      "command": "pnpm vitest run tests/foundation/canonical-core.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "10/10 example tests passed after structured error-code assertion correction"
+    }
+  ],
+  "negative_cases": [
+    "binary number input",
+    "NaN/infinities",
+    "exponent/whitespace/separators",
+    "currency mismatch",
+    "unit mismatch",
+    "Rate outside 0..1"
+  ],
+  "database_rls_evidence": ["No database or RLS access"],
+  "invariant_evidence": [
+    "0.1 + 0.2 serializes as 0.3",
+    "Price times Quantity remains Money backed by WorldDecimal"
+  ],
+  "unresolved_gaps": ["ADR-08 formula-specific rounding remains unapproved"]
+}
