@@ -7,7 +7,7 @@ export type WorldId = BrandedId<'WorldId'>;
 export type CountryId = BrandedId<'CountryId'>;
 export type OfficeId = BrandedId<'OfficeId'>;
 export type ActorId = BrandedId<'ActorId'>;
-export type UserId = BrandedId<'UserId'>;
+export type AuthSubject = BrandedId<'AuthSubject'>;
 export type TeamId = BrandedId<'TeamId'>;
 export type CommodityId = BrandedId<'CommodityId'>;
 export type TechnologyId = BrandedId<'TechnologyId'>;
@@ -18,6 +18,8 @@ export type InternationalActivityId = BrandedId<'InternationalActivityId'>;
 export type ProposalId = BrandedId<'ProposalId'>;
 
 const CANONICAL_ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
+const CANONICAL_UUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 
 function parseId<Name extends string>(name: Name, value: string) {
   if (!CANONICAL_ID.test(value)) {
@@ -33,7 +35,15 @@ export const worldId = (value: string) => parseId('WorldId', value);
 export const countryId = (value: string) => parseId('CountryId', value);
 export const officeId = (value: string) => parseId('OfficeId', value);
 export const actorId = (value: string) => parseId('ActorId', value);
-export const userId = (value: string) => parseId('UserId', value);
+export const authSubject = (value: string): AuthSubject => {
+  if (!CANONICAL_UUID.test(value)) {
+    throw new DomainError(
+      DOMAIN_ERROR_CODES.INVALID_ID,
+      'AuthSubject must be a canonical UUID',
+    );
+  }
+  return value.toLowerCase() as AuthSubject;
+};
 export const teamId = (value: string) => parseId('TeamId', value);
 export const commodityId = (value: string) => parseId('CommodityId', value);
 export const technologyId = (value: string) => parseId('TechnologyId', value);

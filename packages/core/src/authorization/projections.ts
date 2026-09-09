@@ -52,7 +52,7 @@ function assertCurrentMembership(
 ): MembershipSnapshot {
   if (
     !membership ||
-    membership.userId !== principal.userId ||
+    membership.authSubject !== principal.authSubject ||
     membership.worldId !== worldId ||
     !membership.active ||
     membership.suspended
@@ -76,6 +76,12 @@ export async function authorizeProjection(input: {
       DOMAIN_ERROR_CODES.AUTHENTICATION_REQUIRED,
       'An authenticated principal is required',
     );
+  if (
+    (await input.resolver.resolveCurrentIdentity(input.principal)) !==
+    input.principal.authSubject
+  ) {
+    deny();
+  }
   const membership = assertCurrentMembership(
     await input.resolver.resolveCurrentMembership(
       input.principal,

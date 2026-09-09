@@ -1,16 +1,16 @@
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 import type {
   ActorId,
+  AuthSubject,
   CountryId,
   OfficeId,
   ProposalId,
-  UserId,
   WorldId,
 } from '../ids.js';
 import type { AuthorizedOfficeContext } from './offices.js';
 import {
-  isAuthorizedOfficeContext,
   OFFICE_APPROVAL_CAPABILITY,
+  reauthorizeOfficeDecision,
 } from './offices.js';
 
 export type ApprovalStatus =
@@ -28,7 +28,7 @@ export interface RequiredOfficesResolver<Input> {
 export interface OfficeSignature {
   readonly officeId: OfficeId;
   readonly actorId: ActorId;
-  readonly userId: UserId;
+  readonly authSubject: AuthSubject;
   readonly authorizationVersion: string;
   readonly signedAt: string;
 }
@@ -91,17 +91,11 @@ export function createApprovalProposal(input: {
   });
 }
 
-function assertCanDecide(
+async function assertCanDecide(
   proposal: ApprovalProposal,
   context: AuthorizedOfficeContext,
   expectedVersion: string,
-) {
-  if (!isAuthorizedOfficeContext(context)) {
-    throw new DomainError(
-      DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
-      'Office context was not issued by server authorization',
-    );
-  }
+): Promise<AuthorizedOfficeContext> {
   if (proposal.status === 'REJECTED')
     approvalError(
       'APPROVAL_REJECTED',
@@ -111,31 +105,43 @@ function assertCanDecide(
     approvalError('APPROVAL_INVALIDATED', `Proposal is ${proposal.status}`);
   if (proposal.version !== expectedVersion)
     approvalError('APPROVAL_VERSION_MISMATCH', 'Proposal version mismatch');
+  const currentContext = await reauthorizeOfficeDecision(context, {
+    proposalId: proposal.id,
+    proposalVersion: proposal.version,
+    worldId: proposal.worldId,
+    countryId: proposal.countryId,
+    payloadFingerprint: proposal.payloadFingerprint,
+    policyVersion: proposal.policyVersion,
+    requiredOffices: proposal.requiredOffices,
+  });
   if (
-    context.capability !== OFFICE_APPROVAL_CAPABILITY ||
-    context.worldId !== proposal.worldId ||
-    context.countryId !== proposal.countryId ||
-    !proposal.requiredOffices.includes(context.officeId)
+    currentContext.capability !== OFFICE_APPROVAL_CAPABILITY ||
+    currentContext.worldId !== proposal.worldId ||
+    currentContext.countryId !== proposal.countryId ||
+    !proposal.requiredOffices.includes(currentContext.officeId)
   ) {
     throw new DomainError(
       DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
       'Office context cannot decide this proposal',
     );
   }
+  return currentContext;
 }
 
-export function signApprovalProposal(input: {
+export async function signApprovalProposal(input: {
   readonly proposal: ApprovalProposal;
   readonly context: AuthorizedOfficeContext;
   readonly actorId: ActorId;
   readonly expectedVersion: string;
   readonly signedAt: string;
-}): ApprovalProposal {
-  assertCanDecide(input.proposal, input.context, input.expectedVersion);
+}): Promise<ApprovalProposal> {
+  const context = await assertCanDecide(
+    input.proposal,
+    input.context,
+    input.expectedVersion,
+  );
   if (
-    input.proposal.signatures.some(
-      (item) => item.officeId === input.context.officeId,
-    )
+    input.proposal.signatures.some((item) => item.officeId === context.officeId)
   )
     throw new DomainError(
       DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
@@ -144,10 +150,10 @@ export function signApprovalProposal(input: {
   const signatures = Object.freeze([
     ...input.proposal.signatures,
     Object.freeze({
-      officeId: input.context.officeId,
+      officeId: context.officeId,
       actorId: input.actorId,
-      userId: input.context.userId,
-      authorizationVersion: input.context.authorizationVersion,
+      authSubject: context.authSubject,
+      authorizationVersion: context.authorizationVersion,
       signedAt: input.signedAt,
     }),
   ]);
@@ -161,16 +167,20 @@ export function signApprovalProposal(input: {
   });
 }
 
-export function rejectApprovalProposal(input: {
+export async function rejectApprovalProposal(input: {
   readonly proposal: ApprovalProposal;
   readonly context: AuthorizedOfficeContext;
   readonly expectedVersion: string;
-}): ApprovalProposal {
-  assertCanDecide(input.proposal, input.context, input.expectedVersion);
+}): Promise<ApprovalProposal> {
+  const context = await assertCanDecide(
+    input.proposal,
+    input.context,
+    input.expectedVersion,
+  );
   return Object.freeze({
     ...input.proposal,
     status: 'REJECTED',
-    rejectedByOfficeId: input.context.officeId,
+    rejectedByOfficeId: context.officeId,
   });
 }
 

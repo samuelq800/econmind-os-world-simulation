@@ -1,6 +1,6 @@
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
-import type { UserId } from '../ids.js';
-import { userId } from '../ids.js';
+import type { AuthSubject } from '../ids.js';
+import { authSubject } from '../ids.js';
 
 export const SHARED_IDENTITY_FIELDS = Object.freeze([
   'user_id',
@@ -27,7 +27,7 @@ export interface IdentityVerifier<Token> {
 }
 
 export interface AuthenticatedPrincipal {
-  readonly userId: UserId;
+  readonly authSubject: AuthSubject;
   readonly facts: SharedIdentityFacts;
   readonly token: VerifiedTokenEnvelope;
 }
@@ -55,8 +55,14 @@ export function validateSharedIdentityFacts(
     if (record[optional] !== null && typeof record[optional] !== 'string')
       invalidIdentity(`${optional} must be a string or null`);
   }
+  let subject: AuthSubject;
+  try {
+    subject = authSubject(record.user_id);
+  } catch {
+    invalidIdentity('user_id must be a canonical UUID');
+  }
   return Object.freeze({
-    user_id: record.user_id,
+    user_id: subject,
     display_name: record.display_name as string | null,
     school_id: record.school_id as string | null,
   });
@@ -69,10 +75,16 @@ export async function authenticateIdentity<Token>(input: {
 }): Promise<AuthenticatedPrincipal> {
   const verified = await input.verifier.verify(input.token);
   const facts = validateSharedIdentityFacts(input.profile);
-  if (verified.subject !== facts.user_id)
+  let verifiedSubject: AuthSubject;
+  try {
+    verifiedSubject = authSubject(verified.subject);
+  } catch {
+    invalidIdentity('Verified token subject must be a canonical UUID');
+  }
+  if (verifiedSubject !== facts.user_id)
     invalidIdentity('Verified token subject does not match user_id');
   return Object.freeze({
-    userId: userId(facts.user_id),
+    authSubject: verifiedSubject,
     facts,
     token: verified,
   });
