@@ -6,7 +6,8 @@ Implementation must not begin until all conditions are observed in the
 repository, not inferred from chat:
 
 1. Gate A has an independent `APPROVED` decision tied to the exact Foundation
-   candidate and evidence commit.
+   remediation code candidate and evidence commit; `READY_FOR_REVIEW` and green
+   candidate tests are insufficient.
 2. V02.1-V05.3 are governance-valid `VERIFIED` and Foundation integration into
    `main` is explicitly authorized and completed.
 3. `pnpm check`, governance validation, and `git diff --check` pass on the
@@ -47,9 +48,10 @@ publication, or V11 implementation is permitted.
 - **Dependencies:** V01.3, V03.3, passed Gate A, approved ADR-03 scope.
 - **Build:** Pure clock state/value objects, explicit advancement input, formal
   multiplier/calendar, injected scheduler adapter interface, invalid-transition
-  errors. No timers or database.
-- **Tests:** Exact conversions, monotonicity, formal multiplier lock, forbidden
-  ambient clock/timer architecture gates.
+  errors. Inherit exact-or-reject and the fail-closed public startup boundary.
+  No timers or database.
+- **Tests:** Exact conversions against shared oracle, monotonicity, formal
+  multiplier lock, forbidden ambient clock/timer and AST architecture gates.
 - **Evidence:** Source anchors MASTER-U0082-U0101, U0188-U0218 and Constitution
   U0166-U0187; seed/path for properties.
 - **Commit:** `feat(v06): implement deterministic simulation clock`.
@@ -76,12 +78,15 @@ publication, or V11 implementation is permitted.
 ### V07.1 — Command/Event schema and immutable ledger
 
 - **Dependencies:** V02.3, V03.3, V05.3, V06.3; ADR-11/17 and ADR-20 timing
-  approved; ADR-16 release authority confirmed.
-- **Build:** Canonical command/event types, schema registries, fingerprinting,
-  first World Core persistence migration for World head, command submissions,
-  immutable events and sequence constraints.
-- **Tests:** Schema/version/decimal attacks; ID/key conflicts; update/delete
-  denial; ordered sequence; migration clean/existing rehearsal.
+  approved. ADR-16 is not needed for branch-local candidate DDL but blocks any
+  merge/promotion of it.
+- **Build:** Canonical command/event types, external UUID `AuthSubject` plus
+  resolved World IDs, schema registries, inert-data/trusted-adapter
+  fingerprinting, first World Core persistence migration for World head,
+  command submissions, immutable events and sequence constraints.
+- **Tests:** Schema/version/exact-domain and behavioral-serialization attacks;
+  ID/key conflicts; update/delete denial; ordered sequence; verified migration
+  commit/path/byte hash plus clean/existing rehearsal.
 - **Commit:** `feat(v07): add command and append-only event contracts`.
 
 ### V07.2 — Receipts, outbox, and idempotency
@@ -89,6 +94,9 @@ publication, or V11 implementation is permitted.
 - **Dependencies:** V07.1.
 - **Build:** Acceptance acknowledgement, immutable final receipt, durable
   idempotency record, command queue/claim contract, outbox with consumer dedupe.
+- **Authorization:** Intake context is not authority; protected execution
+  re-resolves current identity, membership, country, Office, capability and
+  authorization revision.
 - **Tests:** Exact duplicate, same-key/different-intent conflict, dropped
   response, restart, outbox redelivery, rejected zero-mutation receipt.
 - **Commit:** `feat(v07): add durable receipts and idempotency`.
@@ -114,9 +122,11 @@ publication, or V11 implementation is permitted.
 
 ### V08.2 — Financial accounts and postings
 
-- **Dependencies:** V08.1; approved scoped ADR-08 GCU rule.
+- **Dependencies:** V08.1. Inherit Foundation exact-or-reject; ADR-08 stays open
+  unless implementation would add rounding, FX, minor units or formula policy.
 - **Build:** GCU account/position types, immutable balanced debit/credit batches,
-  exact Money-only transfer, causation and version fields. No Banking/FX.
+  exact-or-explicit-reject Money transfer, causation and version fields. No
+  Banking/FX or rounding.
 - **Tests:** Money conservation, missing/unequal/duplicate leg rollback,
   insufficient balance, cross-asset rejection, JS-number boundary.
 - **Commit:** `feat(v08): add balanced financial postings`.
@@ -135,7 +145,8 @@ publication, or V11 implementation is permitted.
 
 - **Dependencies:** V07.3, V08.3; ADR-17 final locking details approved.
 - **Build:** Worker-only lease repository, monotonic fencing token, WorldVersion
-  type/head, claim/renew/expire protocol. Real time only for operational lease.
+  type/head, claim/renew/expire protocol. Canonical environment validation must
+  finish before persistence or lease initialization. Real time only for lease.
 - **Tests:** Two-writer race, expired holder, renewal race, stale fence/version,
   process restart against isolated PostgreSQL.
 - **Commit:** `feat(v09): enforce single World writer`.
@@ -144,7 +155,8 @@ publication, or V11 implementation is permitted.
 
 - **Dependencies:** V09.1.
 - **Build:** Private candidate executor and one short database transaction for
-  rechecks, positions, postings, events, receipt, version, and outbox.
+  fence/version/idempotency rechecks, complete current authorization
+  re-resolution, positions, postings, events, receipt, version, and outbox.
 - **Tests:** Every precondition; all failure injection points; concurrent
   `N -> N+1`; committed retry.
 - **Commit:** `feat(v09): commit World transactions atomically`.
@@ -176,7 +188,8 @@ publication, or V11 implementation is permitted.
   non-strategic commodity, Seller Trade offer, Buyer Trade acceptance, Buyer
   Finance Treasury-GCU approval, inventory reservation.
 - **Tests:** No stock, wrong Office/country, revoked actor, stale version,
-  duplicate/conflict, mutated approval version. No E16 claim.
+  stale context/revision, duplicate/conflict, mutated payload/fingerprint/policy/
+  required-Office scope. No E16 claim.
 - **Commit:** `feat(v10): reserve approved bilateral transfer`.
 
 ### V10.3 — Dispatch, delivery, and atomic GCU payment
@@ -186,7 +199,8 @@ publication, or V11 implementation is permitted.
   delivery/payment transaction, events, receipt, WorldVersion and projection
   outbox.
 - **Tests:** Bilateral inventory/GCU conservation, failure at every leg,
-  insufficient funds, duplicate delivery, retry/crash.
+  exact-result overflow rejection, insufficient funds, duplicate delivery,
+  retry/crash; equality is canonical exact, never tolerance-based.
 - **Commit:** `feat(v10): settle first cross-country transaction`.
 
 ### V10.4 — Browser E2E and World Core hard evidence
@@ -195,7 +209,8 @@ publication, or V11 implementation is permitted.
 - **Build:** No new economic scope. Add real two-country/two-Office browser E2E,
   concurrency/retry/crash campaign, Gate B bundle and reconciliation.
 - **Tests:** Entire attack matrix, property/state-machine campaign, projection
-  rebuild, immutable replay, staging RLS/grants, full repository regression.
+  rebuild, immutable replay, staging RLS/grants, full repository regression and
+  all seven Gate-A-to-Gate-B inherited Foundation invariants.
 - **Commit:** `docs(v10): prepare Gate B World Core candidate` after the exact
   implementation candidate is committed and all actual evidence is recorded.
 
@@ -210,9 +225,11 @@ publication, or V11 implementation is permitted.
 4. **Projection migration:** derived read model and watermark; test fixture seed
    stays outside production migration artifacts.
 
-Each artifact must be ordered and hashed in the V02 manifest, rehearse against
-clean and existing schemas, include forward-fix/rollback notes, and remain
-unpublished to production.
+Each artifact must be ordered and hashed in the V02 manifest; its full source
+commit, path at that commit and exact bytes must be verified with replace refs
+disabled. It must rehearse against clean and existing schemas, include forward-
+fix/rollback notes, and remain unpublished to production. No separate World
+Core migration authority exists.
 
 ## Evidence and status progression
 

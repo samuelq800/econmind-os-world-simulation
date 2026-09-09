@@ -8,22 +8,26 @@ resolutions; it is not an approval record and does not change
 after Gate A and stop at the stated latest point if the responsible human has
 not recorded the necessary decision.
 
+The compressed A/B/C owner handoff is
+`docs/architecture/WORLD_CORE_OWNER_ADR_DECISION_PACK.md`. It controls the
+latest safe decision points for this sprint.
+
 ## Decision index
 
-| ADR    | Decision required now                                                      | Latest implementation point                    | Owner approval required |
-| ------ | -------------------------------------------------------------------------- | ---------------------------------------------- | ----------------------- |
-| ADR-01 | Settlement phase identity/order without renumbering E01-E18                | Before V06.3 ordering is frozen                | Yes                     |
-| ADR-03 | Tick unit, pause/resume, catch-up, cutoff, equal-time order                | Before V06.1 code                              | Yes                     |
-| ADR-11 | Command/idempotency/duplicate receipt semantics                            | Before V07.1 schema                            | Yes                     |
-| ADR-17 | Persistence, append-only ledger, transaction, lease/fence, replay boundary | Before V07.1 schema; final detail before V09.1 | Yes                     |
-| ADR-20 | Authorization at acceptance versus execution/recovery                      | Before V07.2 queues a command                  | Yes                     |
-| ADR-02 | Unique owners for inventory and financial positions/postings               | Before V08.1                                   | Yes                     |
-| ADR-08 | V10 GCU precision/rounding scope                                           | Before V08.2                                   | Yes                     |
-| ADR-05 | Reservation/transit/title/risk/recognition point                           | Before V08.1 model; no later than V10.1        | Yes                     |
-| ADR-12 | Country/Office/party projection visibility                                 | Before V10.1                                   | Yes                     |
-| ADR-09 | Required Offices for the V10 transaction version                           | Before V10.2                                   | Yes                     |
-| ADR-16 | `world_v2` namespace and sole publication chain for new DDL                | Before any V07-V09 migration is promoted       | Yes                     |
-| ADR-18 | Isolated database/runtime targets for persistence/concurrency evidence     | Before V09 staging evidence                    | Yes                     |
+| ADR    | Decision required now                                                      | Latest implementation point                       | Owner approval required  |
+| ------ | -------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------ |
+| ADR-01 | Settlement phase identity/order without renumbering E01-E18                | Before V06.1 starts                               | Yes                      |
+| ADR-03 | Tick unit, pause/resume, catch-up, cutoff, equal-time order                | Before V06.1 code                                 | Yes                      |
+| ADR-11 | Command/idempotency/duplicate receipt semantics                            | Before V07.1 schema                               | Yes                      |
+| ADR-17 | Persistence, append-only ledger, transaction, lease/fence, replay boundary | Before V07.1 schema; final detail before V09.1    | Yes                      |
+| ADR-20 | Authorization at acceptance versus execution/recovery                      | Before V07.2 queues a command                     | Yes                      |
+| ADR-02 | Unique owners for inventory and financial positions/postings               | Before V08.1                                      | Yes                      |
+| ADR-08 | Future economic rounding/formula policy; exact-or-reject is inherited      | Future operation that needs rounding/formula      | Yes, but not this sprint |
+| ADR-05 | Reservation/transit/title/risk/recognition point                           | Before V08.1 model; no later than V10.1           | Yes                      |
+| ADR-12 | Country/Office/party projection visibility                                 | Before V10.1                                      | Yes                      |
+| ADR-09 | Required Offices for the V10 transaction version                           | Before V10.2                                      | Yes                      |
+| ADR-16 | `world_v2` namespace and sole publication chain for new DDL                | Before any candidate migration is merged/promoted | Yes                      |
+| ADR-18 | Isolated database/runtime targets for persistence/concurrency evidence     | Before V09 staging evidence                       | Yes                      |
 
 ## ADR-01 — Engine and settlement-phase mapping
 
@@ -67,7 +71,8 @@ not recorded the necessary decision.
   without it.
 - **Recommended resolution:** Unique `(worldId, commandId)` and
   `(worldId, idempotencyKey)`. Fingerprint all authoritative intent fields using
-  V03 canonical serialization, excluding audit/transport metadata. Exact match
+  repaired inert V03 canonical serialization and trusted explicit domain
+  adapters only, excluding audit/transport metadata. Exact match
   returns the stored acknowledgement/final receipt and never executes again;
   same key or ID with a different fingerprint returns
   `IDEMPOTENCY_CONFLICT` with zero mutation. Consumer delivery receipts remain
@@ -101,9 +106,11 @@ not recorded the necessary decision.
 - **Decision required:** Which authority time controls accepted, queued,
   scheduled, and recovering commands.
 - **Why now:** V05 intentionally left queued execution without a default.
-- **Recommended resolution:** Verify identity/current membership at API
-  acceptance and re-resolve current authorization in the worker immediately
-  before a user-command commit. Revocation denies new or not-yet-committed user
+- **Recommended resolution:** Verify the external UUID `AuthSubject` and resolve
+  current membership at API acceptance; in the worker immediately before a
+  user-command commit re-resolve current identity, membership, country, Office,
+  capability, suspension and authorization revision. An authorization context
+  is not authority. Revocation denies new or not-yet-committed user
   actions. Already committed facts/contracts survive. Later automatic
   obligations execute from the accepted versioned contract authority unless
   their command type explicitly requires reauthorization or has been cancelled
@@ -129,15 +136,17 @@ not recorded the necessary decision.
 - **Consequence:** Cross-domain work uses typed posting interfaces/events and
   balanced batches.
 
-## ADR-08 — Exact GCU settlement scope
+## ADR-08 — Future economic rounding scope
 
-- **Decision required:** Precision/rounding policy needed by the V10 proof.
-- **Why now:** V08.2 financial postings require an exact settlement asset
-  contract, while full FX/currency rounding is future scope.
+- **Decision required:** No new decision for this sprint's exact mechanics.
+  ADR-08 is required only before an operation introduces economic rounding,
+  minor units, FX, CPI, tax, interest or formula policy.
+- **Why now:** The repaired Foundation already requires accepted operations to
+  return an exact canonical result or reject an out-of-domain result.
 - **Recommended resolution:** V10 uses the existing GCU international
   denomination. Inputs and postings are canonical decimal strings; transfer
   uses exact equal amounts and performs no FX or rounding. If a price-times-
-  quantity calculation cannot be represented under the approved exact rule,
+  quantity calculation cannot be represented under the inherited exact rule,
   validation fails rather than silently rounds. Full currency minor units and
   rounding postings remain future ADR-08 work.
 - **Alternatives:** Invent a test currency, use JS number, or prematurely define
@@ -201,8 +210,8 @@ DELIVERED/AVAILABLE`. Reservation changes no owner or total. Dispatch places
   is published only through the main-site release chain.
 - **Why now:** V07-V09 require the first authoritative persistence migration.
 - **Recommended resolution:** Preserve the V02 manifest, `world_v2` ownership,
-  exact artifact hashes, isolated rehearsal, and main-site-only production
-  publication. No dashboard/manual SQL authority.
+  replace-ref-safe commit/path/byte-hash provenance, isolated rehearsal, and
+  main-site-only production publication. No dashboard/manual SQL authority.
 - **Alternatives:** A second migration chain or reuse of Legacy tables. Both are
   prohibited.
 - **Consequence:** Planning and local/staging rehearsal can continue; production

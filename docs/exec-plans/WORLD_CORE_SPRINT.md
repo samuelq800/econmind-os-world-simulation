@@ -5,6 +5,9 @@
 - Observed on 2026-09-09 after fetching current remotes.
 - Foundation branch: `codex/foundation-v02-v05`.
 - Gate A: `PENDING`; independent approval is not present in the repository.
+- Targeted remediation: code candidate `47fe5c5d465748370d9a8ea046bc443978437203`,
+  evidence HEAD `b383904573b2959b3f22ea6d8ded4d02c3582b83`, status
+  `PENDING_RE_REVIEW`; passing candidate evidence is not approval.
 - V02.1-V05.3: `IMPLEMENTED_UNVERIFIED`.
 - V06.1-V10.4: all `PLANNED`; V06 `next_step_ready=false`.
 - Planning branch: `codex/world-core-planning`, created from Foundation evidence
@@ -41,6 +44,14 @@ initialization, NPC, orchestrators, gameplay UI, production mutation, and V11.
 
 - Architecture: `docs/architecture/WORLD_CORE_CONTRACT.md`
 - JIT decisions: `docs/architecture/WORLD_CORE_JIT_ADR_PACK.md`
+- Owner decision handoff: `docs/architecture/WORLD_CORE_OWNER_ADR_DECISION_PACK.md`
+- Remediation reconciliation:
+  `docs/planning/WORLD_CORE_REMEDIATION_RECONCILIATION.md`
+- Post-Gate sequence:
+  `docs/planning/WORLD_CORE_POST_GATE_RECONCILIATION_CHECKLIST.md`
+- V06 preflight: `docs/exec-plans/V06_EXECUTION_PREFLIGHT.md`
+- Batch policy draft:
+  `docs/governance/WORLD_CORE_BATCH_CANDIDATE_POLICY_DRAFT.json`
 - Step sequence: `docs/planning/V06_V10_IMPLEMENTATION_SEQUENCE.md`
 - Invariants: `docs/testing/WORLD_CORE_INVARIANT_MATRIX.md`
 - Attacks: `docs/testing/WORLD_CORE_ATTACK_MATRIX.md`
@@ -50,16 +61,16 @@ initialization, NPC, orchestrators, gameplay UI, production mutation, and V11.
 
 ## Authority and traceability
 
-| Concern                        | Primary anchors                                                                   | Planned steps |
-| ------------------------------ | --------------------------------------------------------------------------------- | ------------- |
-| One World/one clock/one ledger | MASTER-U0075-U0081, U0188-U0196; Constitution R016-R018                           | V06-V09       |
-| 10x time and 360-day calendar  | MASTER-U0082-U0113, U0214-U0219; Constitution R019-R024                           | V06           |
-| Determinism/idempotency        | MASTER-U0205-U0225; Constitution R025-R032                                        | V06-V07       |
-| Exact quantities/money         | Constitution R033-R036; V03 canonical types                                       | V08-V10       |
-| Transaction/concurrency        | Constitution U0404-U0424                                                          | V09-V10       |
-| Classified projection          | Constitution U0396-U0403; V05 classifications                                     | V10.1         |
-| Cross-border symmetry          | Constitution cross-border atomic-settlement rules; Trade GCU/payment requirements | V10.2-V10.4   |
-| R2 fixed target                | `REQ-E01` (`PLANNED_NOT_IMPLEMENTED`)                                             | V06           |
+| Concern                          | Primary anchors                                                                   | Planned steps |
+| -------------------------------- | --------------------------------------------------------------------------------- | ------------- |
+| One World/one clock/one ledger   | MASTER-U0075-U0081, U0188-U0196; Constitution R016-R018                           | V06-V09       |
+| 10x time and 360-day calendar    | MASTER-U0082-U0113, U0214-U0219; Constitution R019-R024                           | V06           |
+| Determinism/idempotency          | MASTER-U0205-U0225; Constitution R025-R032                                        | V06-V07       |
+| Exact-or-reject quantities/money | Constitution R033-R036; repaired V03 canonical types and exact oracle             | V06-V10       |
+| Transaction/concurrency          | Constitution U0404-U0424                                                          | V09-V10       |
+| Classified projection            | Constitution U0396-U0403; V05 classifications                                     | V10.1         |
+| Cross-border symmetry            | Constitution cross-border atomic-settlement rules; Trade GCU/payment requirements | V10.2-V10.4   |
+| R2 fixed target                  | `REQ-E01` (`PLANNED_NOT_IMPLEMENTED`)                                             | V06           |
 
 Requirement and source statuses are not modified by this planning task. During
 implementation, each report must name the exact requirement/source/ADR anchors
@@ -71,7 +82,8 @@ actually exercised; registration never implies implementation.
 2. Create `codex/world-core-v06-v10` from reconciled `main` only after Gate A
    approval/integration.
 3. Add the owner-approved narrow Gate B batch governance record; do not weaken
-   the general P0 policy.
+   the general P0 policy. The checked-in draft is inert until a separate
+   owner-approved activation after Gate A.
 4. Resolve JIT decisions at their latest implementation points, not as a bulk
    ADR approval.
 5. Implement steps continuously with meaningful code/evidence commits and
@@ -96,6 +108,12 @@ actually exercised; registration never implies implementation.
 
 No new package may become an independent state owner.
 
+Every new governed file/import remains under the repaired AST ownership and
+numeric-coercion scanners. Every authoritative Worker startup validates the
+canonical environment before persistence initialization. Every migration
+candidate extends the existing V02 chain with verified commit/path/byte-hash
+provenance.
+
 ## Gate B definition
 
 Gate B independently verifies all fourteen hard properties:
@@ -119,6 +137,14 @@ Gate B evidence must also prove full regression, production mutation `NONE`, no
 hidden E02-E18 scope, and V11 `NOT_STARTED`. BLOCKER/MAJOR findings stop before
 V11; MINOR findings may be backlogged only when they cannot threaten a hard
 property.
+
+The Gate B campaign also preserves seven inherited Foundation regression
+invariants without reopening Gate A from scratch: unsafe runtime environments
+cannot start an authoritative Worker; arithmetic remains exact-or-reject;
+canonical serialization executes no behavior; authorization is current rather
+than cached; `AuthSubject` remains UUID-safe and external to domain IDs;
+forbidden dependency/coercion forms remain AST-blocked; and migration provenance
+proves commit, path and exact bytes.
 
 ## Stop conditions
 

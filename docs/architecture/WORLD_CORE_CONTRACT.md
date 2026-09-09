@@ -6,14 +6,18 @@ This is a planning contract, not an implementation or approval. Gate A remains
 pending in `status/progress.json`; V06-V10.4 remain `PLANNED`. The contract may
 be implemented only after an independent Gate A approval is recorded and the
 JIT decisions identified below are approved at their latest implementation
-points.
+points. It is reconciled to remediation code candidate
+`47fe5c5d465748370d9a8ea046bc443978437203` and evidence HEAD
+`b383904573b2959b3f22ea6d8ded4d02c3582b83`, both still pending targeted
+independent re-review.
 
 ## One authoritative path
 
 ```text
-Actor
-  -> world-api: token verification, canonical parse/schema checks
-  -> current World membership and Office authorization
+External AuthSubject UUID
+  -> world-api: token/profile verification, canonical parse/schema checks
+  -> resolve current World membership to actor/team/country/Office domain IDs
+  -> current Office capability and authorization revision
   -> immutable command submission
   -> world-worker: only authoritative economic executor
   -> one database transaction under current lease/fencing token
@@ -29,6 +33,29 @@ but cannot change economic balances, ledger facts, or WorldVersion.
 `world-worker` is the only economic writer. `packages/core` contains pure,
 deterministic contracts and reducers and cannot read wall time, browser state,
 network state, or persistence implementations.
+
+## Inherited repaired Foundation boundaries
+
+- Public Web/API/Worker launchers run the canonical fail-closed environment
+  policy before spawning a child. A Worker must not initialize authoritative
+  persistence, acquire a lease, or begin recovery before that validation passes.
+- Authoritative decimal arithmetic is exact-or-reject: accepted operands and
+  successful results stay inside the canonical validated public domain,
+  intermediate arithmetic is exact, and an out-of-domain result is an explicit
+  deterministic error. Silent rounding is forbidden.
+- Canonical serialization accepts inert data and trusted explicit domain
+  adapters only. It rejects accessors, arbitrary methods/providers, behavioral
+  objects, Proxies, hidden/symbol state and unsupported containers/prototypes.
+- Authorization contexts are non-transferable snapshots, not credentials.
+  Protected decisions re-resolve current identity, membership, country, Office,
+  capability and authorization revision server-side.
+- `AuthSubject` is an external canonical UUID, distinct from `ActorId`,
+  `WorldId`, `CountryId`, `OfficeId` and other uppercase domain identifiers.
+- Existing AST ownership/coercion enforcement remains the architecture gate;
+  alternate import syntax, aliases and unresolved module references fail closed.
+- Migration provenance is true only when the full commit exists, the path
+  exists at that immutable commit and those bytes hash-match the manifest, with
+  Git replace refs disabled.
 
 ## Authoritative versus non-authoritative data
 
@@ -103,6 +130,7 @@ The proposed immutable envelope is:
 | `commandId`              | Canonical ID, unique within World; exact retry reuses it.                                    |
 | `idempotencyKey`         | Caller-scoped canonical string, unique within World.                                         |
 | `worldId`                | Target authoritative World.                                                                  |
+| `authSubject`            | Canonical external UUID from verified token/profile; never an uppercase domain ID.           |
 | `actorId`                | World actor identity, not browser profile metadata.                                          |
 | `countryId` / `officeId` | Claimed routing scope; always checked against current server membership.                     |
 | `commandType`            | Versioned registry value; unknown values fail closed.                                        |
@@ -113,22 +141,28 @@ The proposed immutable envelope is:
 | `correlationId`          | Trace grouping only; never affects ordering or outcome.                                      |
 
 The canonical command fingerprint includes commandId, idempotencyKey, World,
-actor/country/Office, command type/schema, payload, and expected WorldVersion.
-It excludes server audit time and transport metadata. Hash input uses the V03
-canonical serializer and its fixed SHA-256 preimage convention.
+AuthSubject, resolved actor/country/Office, command type/schema, payload, and
+expected WorldVersion. It excludes server audit time and transport metadata.
+Hash input uses the repaired V03 canonical serializer and its fixed SHA-256
+preimage convention. Fingerprint/Event/Receipt/replay bytes may contain only
+inert canonical primitives/plain records/arrays or trusted explicit domain
+adapters—never a getter, arbitrary method, duck-typed canonical provider,
+Proxy, hidden state or other behavioral object.
 
 ### Processing path
 
 ```text
-parse -> schema validate -> verify identity -> resolve current membership
--> authorize Office -> canonical fingerprint -> intake idempotency check
--> worker claims under lease -> recheck authorization policy and WorldVersion
+parse -> schema validate -> verify AuthSubject -> resolve current membership
+-> map to World actor/team/country/Office -> authorize current capability/revision
+-> canonical fingerprint -> intake idempotency check
+-> worker claims under lease -> re-resolve all current authority and WorldVersion
 -> domain validate -> execute candidate -> validate invariants
 -> atomic authoritative commit -> return stored receipt
 ```
 
 Every economic command uses this path. An engine cannot publish a direct
-mutation API.
+mutation API. The intake authorization context may be retained for audit but is
+not authority at approval or execution time.
 
 ### Idempotency outcomes
 
@@ -184,6 +218,22 @@ serialization/hash, not approximate numeric equality.
 Seeded randomness, when future rules require it, is passed explicitly and its
 seed/version is recorded. V06-V10 introduces no stochastic economic rule.
 
+## Exact numeric contract
+
+- Public Money, Quantity, Price, Rate and SimTime operands/results use the
+  Foundation canonical validated domain.
+- Add, subtract and multiply compute exactly. A successful result is canonical;
+  overflow or any out-of-domain exact result fails explicitly rather than
+  rounding, clamping or returning display precision.
+- Money/inventory conservation and live/replay equality are canonical exact
+  equality. JS-number conversions, epsilon and tolerance assertions are not
+  authoritative evidence.
+- Property tests extend the shared Foundation arbitraries and independent
+  BigInt coefficient/scale oracle; World Core does not create a second
+  arithmetic-testing framework.
+- This contract adds no FX, CPI, tax, interest, minor-unit, price-formation or
+  settlement-rounding semantics. Those remain in unresolved ADR-08.
+
 ## Inventory primitives
 
 The minimum World-owned model is:
@@ -216,8 +266,9 @@ Every committed batch balances in one settlement asset. V10 uses the
 authoritative GCU international denomination only; it performs no LC/GCU
 conversion, FX price discovery, central-bank reserve change, money creation, or
 banking operation. Exact GCU amounts use V03 Money/WorldDecimal and no JS
-number. ADR-08 must approve the scoped no-rounding transfer rule or a versioned
-GCU unit policy before V08.2.
+number. The repaired Foundation exact-or-reject rule is inherited without an
+ADR-08 approval; any operation that would require economic rounding, FX or
+minor-unit policy remains blocked on future ADR-08.
 
 ## WorldVersion, single writer, and transaction
 
@@ -237,7 +288,8 @@ BEGIN
   lock World head
   verify live fencing token and expected WorldVersion
   verify durable idempotency record
-  re-resolve required authorization policy
+  re-resolve current AuthSubject, membership, country, Office, capability,
+    authorization revision and immutable approval scope
   validate economic preconditions
   apply inventory postings
   apply financial postings
@@ -256,6 +308,10 @@ changes the economic result.
 
 The first World Core migration remains in the V02 manifest and main-site
 release chain. Names are provisional until migration implementation review.
+Every candidate artifact must name a full source commit and pass the existing
+replace-ref-safe proof: commit exists, path exists at that commit, and exact
+artifact bytes SHA-256-match the manifest. World Core creates no parallel
+manifest, caller-asserted provenance or publication authority.
 
 | Entity group         | Minimum constraints                                                                                |
 | -------------------- | -------------------------------------------------------------------------------------------------- |
