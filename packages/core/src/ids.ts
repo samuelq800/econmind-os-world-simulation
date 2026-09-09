@@ -16,6 +16,7 @@ export type EngineId = BrandedId<'EngineId'>;
 export type ProductionSectorId = BrandedId<'ProductionSectorId'>;
 export type InternationalActivityId = BrandedId<'InternationalActivityId'>;
 export type ProposalId = BrandedId<'ProposalId'>;
+export type ScheduledEventId = BrandedId<'ScheduledEventId'>;
 
 const CANONICAL_ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 const CANONICAL_UUID =
@@ -54,3 +55,5 @@ export const productionSectorId = (value: string) =>
 export const internationalActivityId = (value: string) =>
   parseId('InternationalActivityId', value);
 export const proposalId = (value: string) => parseId('ProposalId', value);
+export const scheduledEventId = (value: string) =>
+  parseId('ScheduledEventId', value);
