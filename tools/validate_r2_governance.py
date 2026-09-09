@@ -675,12 +675,11 @@ def validate(root: Path) -> dict[str, Any]:
         if continuation is not None:
             require(isinstance(continuation, dict), "invalid World Core continuation record")
             continuation_steps = continuation_policy["scope"]["allowed_steps"]
+            continuation_status = continuation.get("status")
             require(
-                continuation.get("status") == "ACTIVE"
+                continuation_status in {"ACTIVE", "COMPLETED"}
                 and continuation.get("method")
                 == "OWNER_AUTHORIZED_PACKAGE_CONTINUATION"
-                and continuation.get("decision")
-                == "ACCEPTED_FOR_MAINLINE_CONTINUATION"
                 and continuation.get("policy_file")
                 == "docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json"
                 and continuation.get("activation_record")
@@ -690,18 +689,42 @@ def validate(root: Path) -> dict[str, Any]:
                 and continuation.get("allowed_steps") == continuation_steps
                 and continuation.get("terminal_gate")
                 == continuation_policy["scope"]["terminal_gate"]
-                and continuation.get("independent_review_pending") is True
-                and continuation.get("merge_authorized") is False
                 and continuation.get("production_mutation") is False
                 and continuation.get("owner_approved") is True,
                 "World Core continuation status differs from owner policy",
             )
-            branch = git("branch", "--show-current")
-            require(
-                branch.returncode == 0
-                and branch.stdout.strip() == continuation.get("branch"),
-                "World Core continuation is used outside its exact branch",
-            )
+            if continuation_status == "ACTIVE":
+                require(
+                    continuation.get("decision")
+                    == "ACCEPTED_FOR_MAINLINE_CONTINUATION"
+                    and continuation.get("independent_review_pending") is True
+                    and continuation.get("merge_authorized") is False,
+                    "active World Core continuation has invalid gate state",
+                )
+                branch = git("branch", "--show-current")
+                require(
+                    branch.returncode == 0
+                    and branch.stdout.strip() == continuation.get("branch"),
+                    "active World Core continuation is used outside its exact branch",
+                )
+            else:
+                require(
+                    continuation.get("decision") == "V06_PACKAGE_APPROVED"
+                    and continuation.get("independent_review_pending") is False
+                    and continuation.get("merge_authorized") is True,
+                    "completed World Core continuation lacks package approval",
+                )
+                approved_target = commit_exists(
+                    continuation.get("approved_package_target"),
+                    "V06 approved package target",
+                )
+                is_ancestor(approved_target, "HEAD", "V06 approved package target")
+                acceptance_record = continuation.get("acceptance_record")
+                require(
+                    acceptance_record == "docs/reports/V06/FINAL_ACCEPTANCE.md",
+                    "completed World Core continuation lacks owner acceptance record",
+                )
+                file(acceptance_record)
             continuation_completed = continuation.get("completed_steps", {})
             require(
                 isinstance(continuation_completed, dict)
@@ -1094,36 +1117,67 @@ def validate(root: Path) -> dict[str, Any]:
                             step_id in continuation_completed,
                             f"{step_id} completed without continuation evidence",
                         )
-                require(
-                    required_gate == "V06_PACKAGE_REVIEW"
-                    and gate.get("gate_status") == "PENDING",
-                    "V06 continuation must remain at the package-review gate",
-                )
-                in_progress = [
-                    step_id
-                    for step_id in continuation_steps
-                    if states[step_id] == "IN_PROGRESS"
-                ]
-                if in_progress:
-                    active_step = in_progress[0]
-                    active_index = continuation_steps.index(active_step)
-                    expected_next = (
-                        continuation_steps[active_index + 1]
-                        if active_index + 1 < len(continuation_steps)
-                        else "V07.1"
-                    )
+                if continuation.get("status") == "ACTIVE":
                     require(
-                        gate.get("step_id") == active_step
-                        and gate.get("next_step") == expected_next
-                        and gate.get("next_step_ready") is False,
-                        "active V06 continuation step/gate differs from progress truth",
+                        required_gate == "V06_PACKAGE_REVIEW"
+                        and gate.get("gate_status") == "PENDING",
+                        "V06 continuation must remain at the package-review gate",
                     )
-                elif states["V06.3"] == "IMPLEMENTED_UNVERIFIED":
+                    in_progress = [
+                        step_id
+                        for step_id in continuation_steps
+                        if states[step_id] == "IN_PROGRESS"
+                    ]
+                    if in_progress:
+                        active_step = in_progress[0]
+                        active_index = continuation_steps.index(active_step)
+                        expected_next = (
+                            continuation_steps[active_index + 1]
+                            if active_index + 1 < len(continuation_steps)
+                            else "V07.1"
+                        )
+                        require(
+                            gate.get("step_id") == active_step
+                            and gate.get("next_step") == expected_next
+                            and gate.get("next_step_ready") is False,
+                            "active V06 continuation step/gate differs from progress truth",
+                        )
+                    elif states["V06.3"] == "IMPLEMENTED_UNVERIFIED":
+                        require(
+                            gate.get("step_id") == "V06.3"
+                            and gate.get("next_step") == "V07.1"
+                            and gate.get("next_step_ready") is False,
+                            "V06 package exit did not stop before V07",
+                        )
+                else:
+                    require(
+                        all(state == "VERIFIED" for state in v06_states)
+                        and progress_data.get("work_packages", {}).get("V06")
+                        == "VERIFIED",
+                        "completed V06 continuation is not fully promoted",
+                    )
+                    package_review = progress_data.get("v06_package_review")
+                    require(
+                        isinstance(package_review, dict)
+                        and package_review.get("decision")
+                        == "V06_PACKAGE_APPROVED"
+                        and package_review.get("reviewed_commit")
+                        == continuation.get("approved_package_target")
+                        and package_review.get("open_blockers") == 0
+                        and package_review.get("open_majors") == 0
+                        and package_review.get("package_verified") is True
+                        and package_review.get("merge_authorized") is True,
+                        "completed V06 package review record is invalid",
+                    )
                     require(
                         gate.get("step_id") == "V06.3"
+                        and gate.get("status") == "VERIFIED"
                         and gate.get("next_step") == "V07.1"
-                        and gate.get("next_step_ready") is False,
-                        "V06 package exit did not stop before V07",
+                        and gate.get("next_step_ready") is False
+                        and required_gate
+                        in {"V06_MAINLINE_INTEGRATION", "V07.1_OWNER_ADR_GATE"}
+                        and gate.get("gate_status") == "PENDING",
+                        "completed V06 handoff gate differs from progress truth",
                     )
             elif states["V06.1"] == "IMPLEMENTED_UNVERIFIED":
                 require(

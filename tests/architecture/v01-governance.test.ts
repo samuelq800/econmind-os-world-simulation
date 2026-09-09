@@ -149,7 +149,7 @@ describe('V01.2 ADR coordination graph', () => {
 });
 
 describe('V06 owner-authorized package continuation', () => {
-  it('limits unverified dependency continuation to adjacent V06 steps', () => {
+  it('preserves the approved continuation history and final package closure', () => {
     const central = readJson(
       'docs/governance/FAST_MAINLINE_REVIEW_POLICY.json',
     );
@@ -171,17 +171,21 @@ describe('V06 owner-authorized package continuation', () => {
       terminal_gate: 'V06_PACKAGE_REVIEW',
     });
     expect(progress.world_core_continuation).toMatchObject({
-      status: 'ACTIVE',
+      status: 'COMPLETED',
       method: 'OWNER_AUTHORIZED_PACKAGE_CONTINUATION',
-      decision: 'ACCEPTED_FOR_MAINLINE_CONTINUATION',
+      decision: 'V06_PACKAGE_APPROVED',
       allowed_steps: ['V06.1', 'V06.2', 'V06.3'],
       terminal_gate: 'V06_PACKAGE_REVIEW',
-      independent_review_pending: true,
-      merge_authorized: false,
+      independent_review_pending: false,
+      merge_authorized: true,
       production_mutation: false,
       owner_approved: true,
+      approved_package_target: '33fe26a7e014379b15d4f0f3ab10791b912b8885',
+      acceptance_record: 'docs/reports/V06/FINAL_ACCEPTANCE.md',
     });
-    expect(progress.steps['V06.1']).toBe('IMPLEMENTED_UNVERIFIED');
+    expect(progress.steps['V06.1']).toBe('VERIFIED');
+    expect(progress.steps['V06.2']).toBe('VERIFIED');
+    expect(progress.steps['V06.3']).toBe('VERIFIED');
     expect(
       progress.world_core_continuation.completed_steps['V06.2'],
     ).toMatchObject({
@@ -208,55 +212,59 @@ describe('V06 owner-authorized package continuation', () => {
     });
     expect(progress.current_gate).toMatchObject({
       step_id: 'V06.3',
-      status: 'IMPLEMENTED_UNVERIFIED',
+      status: 'VERIFIED',
       next_step: 'V07.1',
       next_step_ready: false,
     });
-    expect(progress.steps['V06.3']).toBe('IMPLEMENTED_UNVERIFIED');
     expect(
       progress.world_core_continuation.completed_steps['V06.3'],
     ).toMatchObject({
       implementation_commit: 'd9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1',
       automated_evidence_status: 'PASS',
       finding_ids: ['V06-PKG-BLK-01', 'V06-PKG-BLK-02'],
-      independent_closure: 'V06-PKG-BLK-02_PENDING',
-      package_review_pending: true,
-      package_verified: false,
+      independent_closure: 'CLOSED',
+      package_review_pending: false,
+      package_verified: true,
     });
     expect(progress.steps['V07.1']).toBe('PLANNED');
     expect(progress.v06_package_review).toMatchObject({
-      decision: 'CHANGES_REQUIRED',
-      reviewed_commit: '26cbb32004aa1888bac16529c4a957150035fa48',
-      bound_v06_3_code_candidate: 'c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453',
-      open_blockers: 1,
-      reviewer_severity_classification: 'NOT_PROVIDED',
-      package_verified: false,
-      merge_authorized: false,
+      decision: 'V06_PACKAGE_APPROVED',
+      reviewed_commit: '33fe26a7e014379b15d4f0f3ab10791b912b8885',
+      bound_v06_3_code_candidate: 'd9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1',
+      open_blockers: 0,
+      open_majors: 0,
+      closed_findings: ['V06-PKG-BLK-01', 'V06-PKG-BLK-02'],
+      package_verified: true,
+      merge_authorized: true,
+      owner_decision: 'ACCEPTED',
+      authority: 'PROJECT_OWNER_ACCEPTANCE',
       v07_authorized: false,
     });
     expect(
       progress.v06_package_re_review.restore_prefix_forward_fix,
     ).toMatchObject({
-      status: 'READY_FOR_FOCUSED_BLOCKER_CLOSURE_REVIEW',
+      status: 'CLOSED',
       finding: 'V06-PKG-BLK-02',
       code_candidate: 'd9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1',
       step_review_target: '12d81d4fca1d37240a4af39183f69f12d60415aa',
       implementation_result: 'PASS',
-      independent_closure_claimed: false,
+      independent_closure_claimed: true,
+      reviewed_package_target: '33fe26a7e014379b15d4f0f3ab10791b912b8885',
+      decision: 'V06_PACKAGE_APPROVED',
     });
     expect(progress.v06_package_re_review).toMatchObject({
-      status: 'V06_PACKAGE_CHANGES_REQUIRED',
+      status: 'V06_PACKAGE_APPROVED',
       finding_id: 'V06-PKG-BLK-01',
       forward_fix_code_candidate: '7a6ad76d7e43f96a143a4620afc33c8b107261e0',
       forward_fix_step_target: '3d21e94483ae923b60dc4a6a8a3e1cd1d64e80ec',
-      reviewed_package_target: '80ab3ecac0abbd622a7e2fc450101407db7f66f9',
+      reviewed_package_target: '33fe26a7e014379b15d4f0f3ab10791b912b8885',
       review_mode: 'LIGHTWEIGHT_TARGETED_RE_REVIEW',
       implementation_result: 'PASS',
       independent_closure_claimed: true,
-      closed_findings: ['V06-PKG-BLK-01'],
-      open_findings: ['V06-PKG-BLK-02'],
-      package_verified: false,
-      merge_authorized: false,
+      closed_findings: ['V06-PKG-BLK-01', 'V06-PKG-BLK-02'],
+      open_findings: [],
+      package_verified: true,
+      merge_authorized: true,
       v07_authorized: false,
     });
   });
