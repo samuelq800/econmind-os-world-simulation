@@ -15,6 +15,7 @@ export type ProjectId = BrandedId<'ProjectId'>;
 export type EngineId = BrandedId<'EngineId'>;
 export type ProductionSectorId = BrandedId<'ProductionSectorId'>;
 export type InternationalActivityId = BrandedId<'InternationalActivityId'>;
+export type ProposalId = BrandedId<'ProposalId'>;
 
 const CANONICAL_ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 
@@ -42,3 +43,4 @@ export const productionSectorId = (value: string) =>
   parseId('ProductionSectorId', value);
 export const internationalActivityId = (value: string) =>
   parseId('InternationalActivityId', value);
+export const proposalId = (value: string) => parseId('ProposalId', value);
