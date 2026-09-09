@@ -57,18 +57,22 @@
     "owner_approved": true
   },
   "current_gate": {
-    "step_id": "V01.3",
-    "status": "VERIFIED",
-    "review": "V01 package owner-fast-tracked after passing evidence and integrated into main; no independent approval claimed",
+    "step_id": "V02.1",
+    "status": "IN_PROGRESS",
+    "review": "Foundation Sprint feature-branch implementation started; P0 review remains reserved for Gate A",
     "next_step": "V02.1",
     "next_step_ready": true,
     "next_step_blockers": [],
-    "required_gate": "V01_PACKAGE_LEVEL_REVIEW",
-    "gate_status": "PASS"
+    "required_gate": null,
+    "gate_status": null
   },
   "work_packages": {
     "V00": "COMPLETE",
-    "V01": "IMPLEMENTED_MERGED"
+    "V01": "IMPLEMENTED_MERGED",
+    "V02": "IN_PROGRESS",
+    "V03": "PLANNED",
+    "V04": "PLANNED",
+    "V05": "PLANNED"
   },
   "step_evidence": {
     "V00.1": [
@@ -189,7 +193,7 @@
     "V01.1": "VERIFIED",
     "V01.2": "VERIFIED",
     "V01.3": "VERIFIED",
-    "V02.1": "PLANNED",
+    "V02.1": "IN_PROGRESS",
     "V02.2": "PLANNED",
     "V02.3": "PLANNED",
     "V03.1": "PLANNED",
