@@ -62,8 +62,8 @@ Codex 可提出 ADR proposal，但需要用户/负责人批准的架构或经济
 
 - V00.1：已 `VERIFIED`。
 - R2 治理同步：已 `VERIFIED` 并合并到 `main`；合并后 reconciliation 已通过。
-- 当前步骤：V00.2，状态为 `IMPLEMENTED_UNVERIFIED`。
-- 三应用运行入口与生命周期骨架等待独立审查；不得自动开始 V00.3。
+- V00.2：独立复审已 `APPROVED`，项目负责人已明确接受，状态为 `VERIFIED`。
+- 当前步骤：V00.3；仅可实施启动层集成验证与 Bootstrap 报告，不得开始 V01.1。
 
 ## 12. 导航
 
