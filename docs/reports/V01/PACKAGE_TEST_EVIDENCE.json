@@ -1,0 +1,58 @@
+{
+  "schema_version": "V01-PACKAGE-EVIDENCE-1",
+  "branch": "codex/v01-mainline",
+  "base_main_commit": "9a74545816209a05c06979659d03af643cedae58",
+  "implementation_commits": {
+    "V01.1": "2d66872278b1c8a586c751390fed94796f00c40a",
+    "V01.2": "e72f3b131e368c35dea25d1c5e98e7dbce9645dd",
+    "V01.3": "5ef35fc3dfe266187bf2f0b6ce557bc450eae2bf"
+  },
+  "risk_class": "P2",
+  "p0_boundary_changed": false,
+  "database_access": false,
+  "production_mutation": false,
+  "final_commands": [
+    {
+      "command": "pnpm check",
+      "environment": "Node 24.20.0; pnpm 12.3.4",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "lint, format, typecheck, 9 test files/102 tests, 29 boundary tests, environment, secrets, and builds passed"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "14/14 checks passed; V01 package review gate pending; V02 not ready"
+    },
+    {
+      "command": "pnpm test:boundaries",
+      "environment": "Node 24.20.0; pnpm 12.3.4",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "29 boundary tests and repository scanner passed"
+    },
+    {
+      "command": "pnpm env:check",
+      "environment": "Node 24.20.0; pnpm 12.3.4",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "local environment; production integration target; database mutation disabled"
+    },
+    {
+      "command": "pnpm secrets:check",
+      "environment": "Node 24.20.0; pnpm 12.3.4",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "273 repository files scanned"
+    }
+  ],
+  "historical_failures_preserved_in": [
+    "docs/reports/governance/FAST_MAINLINE_TEST_EVIDENCE.json",
+    "docs/reports/V00.3/TEST_EVIDENCE.json",
+    "docs/reports/V01.3/TEST_EVIDENCE.json"
+  ],
+  "overall_status": "PASS",
+  "next_action": "V01 PACKAGE-LEVEL REVIEW",
+  "v02_started": false
+}

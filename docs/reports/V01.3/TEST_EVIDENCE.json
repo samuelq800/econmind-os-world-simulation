@@ -1,0 +1,48 @@
+{
+  "schema_version": "V01.3-EVIDENCE-1",
+  "implementation_commit": "5ef35fc3dfe266187bf2f0b6ce557bc450eae2bf",
+  "effective_risk_class": "P2",
+  "p0_boundary_changed": false,
+  "database_access": false,
+  "production_mutation": false,
+  "attempts": [
+    {
+      "sequence": 1,
+      "command": "pnpm exec vitest run tests/architecture/v01-governance.test.ts",
+      "environment": "Node 24.20.0; pnpm 12.3.4",
+      "exit_code": 1,
+      "result": "FAIL",
+      "summary": "1 of 10 tests failed because assertion wording did not match the existing broader contract prohibition."
+    },
+    {
+      "sequence": 2,
+      "command": "pnpm exec vitest run tests/architecture/v01-governance.test.ts",
+      "environment": "Node 24.20.0; pnpm 12.3.4",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "1 file, 10 tests passed after correcting the assertion."
+    },
+    {
+      "sequence": 3,
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "14/14 governance checks passed including the integration contract boundary."
+    },
+    {
+      "sequence": 4,
+      "command": "pnpm check",
+      "environment": "Node 24.20.0; pnpm 12.3.4",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "lint, format, typecheck, 9 test files/102 tests, 29 boundary tests, environment, secrets, and builds passed"
+    }
+  ],
+  "mandatory_evidence_status": {
+    "tests": "PASS",
+    "invariants": "PASS",
+    "security_checks": "PASS",
+    "governance_checks": "PASS"
+  },
+  "overall_status": "PASS"
+}

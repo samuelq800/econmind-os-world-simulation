@@ -588,6 +588,22 @@ def validate(root: Path) -> dict[str, Any]:
             gate.get("next_step_ready") is next_ready,
             "current_gate next_step_ready differs from validated readiness",
         )
+        if states["V01.3"] == "VERIFIED":
+            require(states["V02.1"] == "PLANNED", "V02.1 started before V01 package review")
+            require(
+                required_gate == "V01_PACKAGE_LEVEL_REVIEW"
+                and gate.get("gate_status") == "PENDING",
+                "V01 completion must stop at pending package review",
+            )
+            require(
+                progress_data.get("work_packages", {}).get("V01")
+                == "IMPLEMENTATION_COMPLETE_PENDING_PACKAGE_REVIEW",
+                "V01 package status is not review-ready",
+            )
+            package_evidence = progress_data.get("package_evidence", {}).get("V01", [])
+            require(package_evidence, "V01 package review evidence is missing")
+            for evidence_path in package_evidence:
+                file(evidence_path)
         metrics["progress_states"] = dict(
             sorted({state: list(states.values()).count(state) for state in valid_states}.items())
         )
