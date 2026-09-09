@@ -24,6 +24,7 @@
     "env:check": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
     "migration:validate": "node scripts/validate-migrations.mjs",
     "migration:rehearse": "node scripts/rehearse-migrations.mjs",
+    "registry:generate": "python3 tools/build_core_registries.py && prettier --write packages/core/src/registries/fixed-catalog.ts",
     "secrets:check": "node scripts/check-repository-secrets.mjs",
     "supabase:safe": "node scripts/supabase-safe.mjs",
     "build": "pnpm -r --if-present build",
