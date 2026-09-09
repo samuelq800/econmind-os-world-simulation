@@ -12,6 +12,8 @@
 - Hard dependencies and their `VERIFIED` evidence:
 - Unresolved decisions:
 - Authorization source:
+- Effective risk class and highest affected boundary:
+- Review/continuation path from `docs/governance/FAST_MAINLINE_REVIEW_POLICY.json`:
 
 ## Change plan
 
@@ -33,5 +35,6 @@
 
 ## Exit condition
 
-Stop after this step. Implementation cannot set `VERIFIED`; independent review
-is required.
+Follow the centralized policy. P0 must stop for independent review. P1 may
+continue only under a recorded Work Package deferral. P2/P3 may use only an
+evidence-backed owner fast-track or non-behavioural path.

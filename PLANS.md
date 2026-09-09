@@ -12,19 +12,26 @@
 另有 `BLOCKED`、`DEFERRED_WITH_APPROVAL`。
 
 ## 3. 依赖门槛
-普通步骤只有在所有 `hard_dependencies` 已 `VERIFIED` 后才可开始。
+默认情况下 `hard_dependencies` 需已 `VERIFIED`。P1 若按
+`docs/governance/FAST_MAINLINE_REVIEW_POLICY.json` 明确记录为工作包审查延期，
+可在同一命名 Work Package 内继续；P0 永远不能用延期或 fast-track 解锁。
 标记 `PARALLEL_PREPARATION` 的步骤可以按清单提前准备，但不能据此跳过父工作包的正式前置门槛，也不能把父工作包标完成。
 
-## 4. 标准生命周期
-READ SPECS → PLAN → IMPLEMENT → RUN REAL TESTS → IMPLEMENTATION REPORT → INDEPENDENT REVIEW → FIX BLOCKERS → RE-REVIEW → VERIFIED → NEXT STEP。
-实施者不得自行把任务标为 VERIFIED。
+## 4. FAST_MAINLINE 生命周期
+唯一集中策略为 `docs/governance/FAST_MAINLINE_REVIEW_POLICY.json`。风险按实际
+变更触及的最高边界分类，不能因工作包标题、文件位置或进度目标降级。
 
-工作项只能在实施与必要测试完成、需要的独立审查结论为 `APPROVED`、
-项目负责人明确接受该审查，且所有硬依赖均为 `VERIFIED` 后才能成为
-`VERIFIED`。状态记录保存审查决定、被审查提交、仓库内审查文件及
-`owner_approved`。GitHub PR/审查与仓库状态检查是人的信任边界；验证器只检查
-工程一致性，不使用签名、私钥、trust root 或 reviewer registry 证明审查者身份。
-实施者不得默认或自行写入 `owner_approved: true`。
+- P0 / HIGH RISK：必要自动证据通过后仍须阻塞式独立审查；未批准前不得
+  `VERIFIED`、merge 或开始依赖实现。
+- P1：自动测试、invariant、security、governance 全部通过后可继续 mainline；
+  独立审查只能延期到明确命名的 Work Package gate。
+- P2：foundation/docs/tooling/non-authoritative integration 可在证据通过且确认
+  未改变 P0 边界后，由负责人明确 fast-track。
+- P3：非行为变更在必要证据通过后不要求独立审查。
+
+`VERIFIED` 可来自独立 `APPROVED`，或仅对 P2/P3 来自负责人明确的
+`OWNER_FAST_TRACK_ACCEPTED`。记录必须绑定不可变 implementation commit、证据
+文件和真实检查结果。实施者不得虚构 owner approval，也不得自行批准 P0。
 
 ## 5. 决策纪律
 Codex 可提出 ADR proposal，但需要用户/负责人批准的架构或经济规则不得自动变为 APPROVED。未批准冲突只阻塞依赖它的步骤。
@@ -60,10 +67,8 @@ Codex 可提出 ADR proposal，但需要用户/负责人批准的架构或经济
 
 ## 11. 当前执行门槛
 
-- V00.1：已 `VERIFIED`。
-- R2 治理同步：已 `VERIFIED` 并合并到 `main`；合并后 reconciliation 已通过。
-- V00.2：独立复审已 `APPROVED`，项目负责人已明确接受，状态为 `VERIFIED`。
-- 当前步骤：V00.3；仅可实施启动层集成验证与 Bootstrap 报告，不得开始 V01.1。
+当前状态、分支、证据和下一 gate 只以 `status/progress.json` 为准。本文件不复制
+易过期的 step 状态。V01 完成后必须停在 V01 PACKAGE-LEVEL REVIEW，不得开始 V02。
 
 ## 12. 导航
 

@@ -1,0 +1,48 @@
+{
+  "schema_version": "FAST_MAINLINE-1",
+  "implementation_commit": "f41af6fa8951ef1ad143e300312d9f648ef1cb21",
+  "effective_risk_class": "P2",
+  "p0_boundary_changed": false,
+  "database_access": false,
+  "production_mutation": false,
+  "attempts": [
+    {
+      "sequence": 1,
+      "command": "pnpm check",
+      "environment": "ambient Node/pnpm",
+      "exit_code": 1,
+      "result": "FAIL",
+      "reason": "Pinned engine enforcement rejected Node 24.19.0 and pnpm 11.19.0."
+    },
+    {
+      "sequence": 2,
+      "command": "PATH=<pinned-node-and-pnpm>:$PATH pnpm check",
+      "environment": "Node 24.20.0; pnpm 12.3.4",
+      "exit_code": 1,
+      "result": "FAIL",
+      "reason": "Prettier reported docs/governance/r2/README.md."
+    },
+    {
+      "sequence": 3,
+      "command": "PATH=<pinned-node-and-pnpm>:$PATH pnpm check",
+      "environment": "Node 24.20.0; pnpm 12.3.4",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "lint, format, typecheck, 92 tests, 29 boundary tests, environment, secrets, and builds passed"
+    },
+    {
+      "sequence": 4,
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "11/11 governance checks passed in FAST_MAINLINE mode"
+    }
+  ],
+  "mandatory_evidence_status": {
+    "tests": "PASS",
+    "invariants": "PASS",
+    "security_checks": "PASS",
+    "governance_checks": "PASS"
+  },
+  "overall_status": "PASS"
+}

@@ -2,7 +2,7 @@
 
 > 本文件与 `r2_steps.json` 共同构成 R2 详细步骤的权威定义。若二者冲突，以 JSON 的 step_id / dependencies 为机器校验源，并停止执行等待修正。
 
-状态规则：只有独立审查后才可 `VERIFIED`；普通步骤的 hard dependencies 必须全部 VERIFIED。`PARALLEL_PREPARATION` 只允许提前准备，不代表父工作包完成。
+状态与依赖规则统一来自 `docs/governance/FAST_MAINLINE_REVIEW_POLICY.json`。P0 只有阻塞式独立审查后才可 `VERIFIED`；P1 只可延期到命名工作包 gate；P2/P3 仅可使用策略定义的证据路径。`PARALLEL_PREPARATION` 只允许提前准备，不代表父工作包完成。
 
 ## V00｜新仓库边界、资料导入与可运行脚手架
 - Stage: S0

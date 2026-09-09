@@ -1,0 +1,169 @@
+{
+  "schema_version": "econmind.v00.3-test-evidence.v1",
+  "work_package": "V00.3",
+  "title": "Startup-Layer Integration Verification and Bootstrap Report",
+  "status": "PASS",
+  "implementation_status": "IMPLEMENTED_UNVERIFIED",
+  "implementation_commit": "6b934936d2eebb8c115afb869fbd48ebd7c611fa",
+  "recorded_at": "2026-09-09T01:41:58Z",
+  "branch": "feat/v00-3",
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "econmind_env": "local",
+    "supabase_target": "PRODUCTION_INTEGRATION_TARGET_ONLY",
+    "database_mutation_allowed": false
+  },
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "Lockfile passed supply-chain policies and required no resolution change"
+    },
+    {
+      "command": "pnpm lint",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm format:check",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm test",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "8 test files; 92 tests passed; 12 V00.3 unified-bootstrap cases"
+    },
+    {
+      "command": "pnpm test:boundaries",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "29 boundary tests passed; live scan passed over 14 governed files including both SERVER_TOOL launchers"
+    },
+    {
+      "command": "pnpm env:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "PRODUCTION_INTEGRATION_TARGET_ONLY; database mutation false"
+    },
+    {
+      "command": "pnpm secrets:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "249 candidate files scanned"
+    },
+    {
+      "command": "pnpm build",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "world-web, world-api, and world-worker built"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "All constituent gates completed successfully on the implementation tree"
+    },
+    {
+      "command": "manual real pnpm dev smoke on isolated loopback ports",
+      "exit_code": null,
+      "termination_signal": "SIGINT",
+      "result": "PASS",
+      "evidence": "Three LISTENING events, dependency HTTP 200, exactly one BOOTSTRAP_READY, signal cleanup, and ports released"
+    }
+  ],
+  "bootstrap_acceptance": {
+    "real_public_pnpm_dev": "PASS",
+    "three_real_runtime_processes": "PASS",
+    "web_readiness": "PASS",
+    "api_readiness": "PASS",
+    "worker_readiness": "PASS",
+    "web_to_api_health": "PASS",
+    "bootstrap_ready_exactly_once": "PASS",
+    "phase_outcome_separation": "PASS",
+    "failure_metadata_retained_after_cleanup": "PASS",
+    "ports_reusable": "PASS",
+    "no_orphan_descendants": "PASS",
+    "toctou_false_ready_rejected": "PASS"
+  },
+  "failure_attack_matrix": {
+    "web_launcher_failure": "PASS_EXPECTED_REJECTION",
+    "api_launcher_failure": "PASS_EXPECTED_REJECTION",
+    "worker_launcher_failure": "PASS_EXPECTED_REJECTION",
+    "occupied_port": "PASS_EXPECTED_REJECTION",
+    "invalid_environment": "PASS_EXPECTED_REJECTION",
+    "invalid_host_protocol_or_path": "PASS_EXPECTED_REJECTION",
+    "invalid_or_duplicate_port": "PASS_EXPECTED_REJECTION",
+    "shell_injection": "PASS_EXPECTED_REJECTION",
+    "child_exit_before_ready": "PASS_EXPECTED_REJECTION",
+    "readiness_timeout": "PASS_EXPECTED_REJECTION",
+    "sigint_during_startup": "PASS_CANCELLED_CLEAN",
+    "sigterm_during_startup": "PASS_CANCELLED_CLEAN",
+    "repeated_signal_during_cleanup": "PASS",
+    "unexpected_runtime_crash": "PASS_FAILED_CLEAN",
+    "cleanup_timeout": "PASS_FORCED_CLEAN_FAILURE_PRESERVED",
+    "api_ready_then_exit_toctou": "PASS_EXPECTED_REJECTION"
+  },
+  "security": {
+    "arbitrary_url_probe": "REJECTED_BY_ALLOWLISTED_HOST_AND_FIXED_PATH",
+    "redirect_target_escape": "PASS_EXPECTED_REJECTION_NO_TARGET_HIT",
+    "protocol_injection": "PASS_EXPECTED_REJECTION",
+    "path_injection": "PASS_EXPECTED_REJECTION",
+    "port_injection": "PASS_EXPECTED_REJECTION",
+    "shell_injection": "PASS_EXPECTED_REJECTION_NO_MARKER",
+    "unsafe_shell_true": false,
+    "secret_bearing_environment_exposure": false,
+    "service_role_leakage": false,
+    "health_error_detail_leakage": false,
+    "stale_or_cached_success": false,
+    "broad_cors_added": false,
+    "credentials_forwarded": false
+  },
+  "implementation_iterations": [
+    {
+      "command": "initial V00.3 public-boundary suite",
+      "exit_code": 1,
+      "result": "FAIL",
+      "observed": "4 of 12 new cases failed because the test preload treated an undefined target as a match and the Web process matcher was over-strict.",
+      "resolution": "Require an explicit fixture service target and match the actual Web command form; all 12 cases then passed."
+    },
+    {
+      "command": "first pnpm check",
+      "exit_code": 1,
+      "result": "FAIL",
+      "observed": "Prettier rejected the initial V00.3 plan and progress JSON; later gates did not run.",
+      "resolution": "Formatted both files and restarted the aggregate check from the beginning."
+    },
+    {
+      "command": "full concurrent pnpm test after boundary expansion",
+      "exit_code": 1,
+      "result": "FAIL",
+      "observed": "91 of 92 tests passed; the successful bootstrap path exceeded its 10-second test deadline while older process-heavy suites ran concurrently.",
+      "resolution": "Kept the deadline bounded, raised the operational default to 30 seconds and the loaded-suite test deadline to 25 seconds, while retaining the explicit 300ms timeout attack. Final full suite passed 92 of 92."
+    }
+  ],
+  "not_run": [
+    "Windows public-command signal and process-tree behavior",
+    "Production or staging deployment",
+    "Supabase or database access, mutation, migration, RLS, seed, backfill, or recovery",
+    "V01.1 or later work"
+  ],
+  "safety": {
+    "database_access": false,
+    "database_mutation": false,
+    "supabase_access": false,
+    "deployment": false,
+    "domain_events_or_commands": false,
+    "simulation_enabled": false,
+    "v01_1_started": false
+  }
+}

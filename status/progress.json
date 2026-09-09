@@ -1,8 +1,9 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-08T13:14:00Z",
-  "source_commit": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
-  "note": "Final foundation state uses independent APPROVED reviews plus explicit project-owner acceptance. GitHub review and repository checks are the human trust boundary.",
+  "derived_at": "2026-09-09T02:35:00Z",
+  "source_commit": "00e3320e2d3f6e28212f902bfa1f92d5d1561bf4",
+  "note": "FAST_MAINLINE is active. P0 still requires blocking independent review; P2/P3 may use explicit evidence-backed owner fast-track.",
+  "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
     "status": "VERIFIED",
@@ -26,12 +27,16 @@
     }
   },
   "current_gate": {
-    "step_id": "V00.2",
-    "status": "VERIFIED",
-    "review": "Independent APPROVED re-review accepted by the project owner",
-    "next_step": "V00.3",
+    "step_id": "V01.1",
+    "status": "PLANNED",
+    "review": "V00.3 accepted by explicit P2 owner fast-track; V01.1 is dependency-ready",
+    "next_step": "V01.1",
     "next_step_ready": true,
     "next_step_blockers": []
+  },
+  "work_packages": {
+    "V00": "COMPLETE",
+    "V01": "NOT_STARTED"
   },
   "step_evidence": {
     "V00.1": [
@@ -46,11 +51,19 @@
       "docs/reports/V00.2/TEST_EVIDENCE.json",
       "docs/reports/V00.2/SELF_AUDIT.md",
       "docs/reports/V00.2/REVIEW_FINAL.md"
+    ],
+    "V00.3": [
+      "docs/exec-plans/V00.3.md",
+      "docs/reports/V00.3/BOOTSTRAP_REPORT.md",
+      "docs/reports/V00.3/IMPLEMENTATION.md",
+      "docs/reports/V00.3/TEST_EVIDENCE.json",
+      "docs/reports/V00.3/OWNER_FAST_TRACK_ACCEPTANCE.md"
     ]
   },
   "implementation_commits": {
     "V00.1": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
-    "V00.2": "002066a52dc089441cda6b84fa83d226678da891"
+    "V00.2": "002066a52dc089441cda6b84fa83d226678da891",
+    "V00.3": "00e3320e2d3f6e28212f902bfa1f92d5d1561bf4"
   },
   "step_reviews": {
     "V00.1": {
@@ -64,12 +77,22 @@
       "reviewed_commit": "002066a52dc089441cda6b84fa83d226678da891",
       "review_file": "docs/reports/V00.2/REVIEW_FINAL.md",
       "owner_approved": true
+    },
+    "V00.3": {
+      "method": "OWNER_FAST_TRACK",
+      "decision": "OWNER_FAST_TRACK_ACCEPTED",
+      "risk_class": "P2",
+      "reviewed_commit": "00e3320e2d3f6e28212f902bfa1f92d5d1561bf4",
+      "evidence_file": "docs/reports/V00.3/OWNER_FAST_TRACK_ACCEPTANCE.md",
+      "automated_evidence_status": "PASS",
+      "p0_boundary_changed": false,
+      "owner_approved": true
     }
   },
   "steps": {
     "V00.1": "VERIFIED",
     "V00.2": "VERIFIED",
-    "V00.3": "PLANNED",
+    "V00.3": "VERIFIED",
     "V01.1": "PLANNED",
     "V01.2": "PLANNED",
     "V01.3": "PLANNED",

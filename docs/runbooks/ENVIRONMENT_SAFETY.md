@@ -32,6 +32,14 @@ When `ECONMIND_ENV` is `local` or `ci`, any `DATABASE_URL` must resolve to
 sanitized `*.env.example` templates. Future schema work requires an isolated
 local Supabase instance or separately approved ephemeral environment.
 
+V00.3's unified development command accepts only the exact local bind hosts
+`localhost`, `127.0.0.1`, `::1`, and `0.0.0.0`, integer ports from 1024 through
+65535, and distinct Web/API/Worker ports. It constructs health URLs internally;
+there is no arbitrary probe URL, protocol, path, redirect, or shell command
+input. The default ports are Web 4100, API 4101, and Worker health 4102. The
+bootstrap timing controls are bounded integer durations and never carry
+credentials or database targets.
+
 ## Browser environment enforcement
 
 The `world-web` Vite configuration validates the same effective browser

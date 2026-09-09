@@ -1,0 +1,83 @@
+{
+  "schema_version": "FAST_MAINLINE-1",
+  "authority": "Central review and mainline-continuation policy for EconMind World V2",
+  "active_mode": "FAST_MAINLINE",
+  "constitutional_precedence": "requirements.docx and the Constitution remain controlling. This policy may accelerate review timing only; it cannot weaken a P0/P1 invariant or authorize production mutation.",
+  "classification_order_low_to_high": ["P3", "P2", "P1", "P0"],
+  "classification_rule": "Classify the actual change by its highest affected boundary. Labels, work-package names, file locations, and an owner request cannot lower the effective risk. Uncertainty resolves upward and P0 is never fast-trackable.",
+  "classes": {
+    "P0": {
+      "label": "HIGH_RISK",
+      "blocking_independent_review": true,
+      "mainline_rule": "All mandatory automated evidence must pass, then an independent reviewer must approve the immutable candidate before VERIFIED, merge, or dependent implementation.",
+      "topics": [
+        "authoritative World State",
+        "database schema/migrations/RLS",
+        "identity and authorization",
+        "Command/Event/Receipt authority",
+        "append-only ledger",
+        "atomic settlement",
+        "financial/inventory conservation",
+        "single-writer semantics",
+        "production environment",
+        "determinism/idempotency",
+        "cross-country settlement"
+      ]
+    },
+    "P1": {
+      "label": "NORMAL_MAINLINE_IMPLEMENTATION",
+      "blocking_independent_review": false,
+      "mainline_rule": "May proceed after all mandatory automated tests, invariants, security checks, and governance checks pass. Independent review may be deferred only to the named Work Package gate."
+    },
+    "P2": {
+      "label": "FOUNDATION_DOCS_TOOLING_NON_AUTHORITATIVE_INTEGRATION",
+      "blocking_independent_review": false,
+      "mainline_rule": "May be owner-fast-tracked after required evidence passes and the record confirms that no P0 boundary changed."
+    },
+    "P3": {
+      "label": "NON_BEHAVIOURAL",
+      "blocking_independent_review": false,
+      "mainline_rule": "Does not require independent review after required evidence passes."
+    }
+  },
+  "verification_methods": {
+    "INDEPENDENT_REVIEW": {
+      "allowed_risk_classes": ["P0", "P1", "P2", "P3"],
+      "decision": "APPROVED"
+    },
+    "OWNER_FAST_TRACK": {
+      "allowed_risk_classes": ["P2", "P3"],
+      "decision": "OWNER_FAST_TRACK_ACCEPTED",
+      "requires_owner_approval": true,
+      "requires_passing_automated_evidence": true,
+      "requires_no_p0_boundary_change": true
+    },
+    "WORK_PACKAGE_DEFERRED_REVIEW": {
+      "allowed_risk_classes": ["P1"],
+      "decision": "ACCEPTED_FOR_MAINLINE_CONTINUATION",
+      "requires_named_work_package_gate": true,
+      "requires_passing_automated_evidence": true,
+      "cannot_mark_verified_before_review": true
+    }
+  },
+  "mandatory_evidence": [
+    "tests",
+    "invariants",
+    "security_checks",
+    "governance_checks"
+  ],
+  "prohibitions": [
+    "downgrade a risk classification to bypass review",
+    "approve its own P0 change",
+    "ignore failed tests",
+    "weaken Constitution requirements",
+    "create a second Source of Truth",
+    "permit UI authoritative mutation",
+    "introduce direct macro buffs",
+    "mutate production Supabase outside an authorized release"
+  ],
+  "status_semantics": {
+    "IMPLEMENTED_UNVERIFIED": "Implementation and required evidence are complete, but independent review remains pending or is explicitly deferred to a Work Package gate.",
+    "VERIFIED": "The immutable implementation commit is supported either by APPROVED independent review or, only for P2/P3, explicit owner fast-track acceptance with passing evidence."
+  }
+}

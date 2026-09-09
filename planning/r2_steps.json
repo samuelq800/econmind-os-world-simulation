@@ -17,8 +17,8 @@
     "DEFERRED_WITH_APPROVAL"
   ],
   "rules": {
-    "dependency": "A NORMAL step may start only when all hard_dependencies are VERIFIED. PARALLEL_PREPARATION may start when its listed hard dependencies are VERIFIED but does not unlock the parent package integration step.",
-    "verification": "Implementation agents cannot mark VERIFIED. Independent review is required.",
+    "dependency": "Dependency readiness follows docs/governance/FAST_MAINLINE_REVIEW_POLICY.json. P0 always requires VERIFIED independent review; an explicitly recorded P1 Work Package deferral may unlock only the named same-package continuation; P2/P3 may use policy-valid verification.",
+    "verification": "Review timing and verification methods are centralized in docs/governance/FAST_MAINLINE_REVIEW_POLICY.json. Risk cannot be downgraded; P0 cannot be self-approved or fast-tracked.",
     "decision": "Human-required architecture/economic decisions cannot be self-approved by Codex.",
     "scope": "Original specification scope cannot be silently reduced for schedule reasons."
   },
