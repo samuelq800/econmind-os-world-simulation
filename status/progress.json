@@ -1,6 +1,6 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-08T12:50:00Z",
+  "derived_at": "2026-09-08T13:14:00Z",
   "source_commit": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
   "note": "Final foundation state uses independent APPROVED reviews plus explicit project-owner acceptance. GitHub review and repository checks are the human trust boundary.",
   "governance_sync": {
@@ -26,10 +26,10 @@
     }
   },
   "current_gate": {
-    "step_id": "V00.1",
+    "step_id": "V00.2",
     "status": "VERIFIED",
-    "review": "Independent technical review APPROVED and explicitly accepted by the project owner",
-    "next_step": "V00.2",
+    "review": "Independent APPROVED re-review accepted by the project owner",
+    "next_step": "V00.3",
     "next_step_ready": true,
     "next_step_blockers": []
   },
@@ -39,10 +39,18 @@
       "docs/reports/V00.1/FINAL.md",
       "docs/reports/V00.1/TEST_EVIDENCE.json",
       "docs/reports/V00.1/REVIEW_FINAL.md"
+    ],
+    "V00.2": [
+      "docs/exec-plans/V00.2.md",
+      "docs/reports/V00.2/IMPLEMENTATION.md",
+      "docs/reports/V00.2/TEST_EVIDENCE.json",
+      "docs/reports/V00.2/SELF_AUDIT.md",
+      "docs/reports/V00.2/REVIEW_FINAL.md"
     ]
   },
   "implementation_commits": {
-    "V00.1": "c41ddd8fa7c4098e84efdbe8f1839e8690993627"
+    "V00.1": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
+    "V00.2": "002066a52dc089441cda6b84fa83d226678da891"
   },
   "step_reviews": {
     "V00.1": {
@@ -50,11 +58,17 @@
       "reviewed_commit": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
       "review_file": "docs/reports/V00.1/REVIEW_FINAL.md",
       "owner_approved": true
+    },
+    "V00.2": {
+      "decision": "APPROVED",
+      "reviewed_commit": "002066a52dc089441cda6b84fa83d226678da891",
+      "review_file": "docs/reports/V00.2/REVIEW_FINAL.md",
+      "owner_approved": true
     }
   },
   "steps": {
     "V00.1": "VERIFIED",
-    "V00.2": "BLOCKED",
+    "V00.2": "VERIFIED",
     "V00.3": "PLANNED",
     "V01.1": "PLANNED",
     "V01.2": "PLANNED",

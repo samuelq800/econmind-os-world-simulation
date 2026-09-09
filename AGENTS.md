@@ -14,12 +14,9 @@ reconstruct missing governance from chat history.
 
 ## Current gate
 
-V00.1 and the R2 governance sync have independent `APPROVED` reviews and explicit
-project-owner acceptance, so both are `VERIFIED`. The governance branch is
-merged into `main` and final reconciliation passed. V00.2 is the next
-dependency-ready step; it may transition from `BLOCKED` to `IN_PROGRESS` only
-on its dedicated branch after its execution plan is current. Implement only
-that step and never continue automatically into later work packages.
+V00.1, V00.2, and the R2 governance sync are `VERIFIED`; their approved history
+and final reconciliation are recorded in `status/progress.json`. V00.3 is the
+current implementation step. Do not begin V01.1 or later work.
 
 ## Architecture and data safety
 

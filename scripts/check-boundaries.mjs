@@ -59,13 +59,17 @@ async function listSourceFiles(directory) {
 
 export async function scanRepositoryBoundaries(repositoryRoot) {
   const context = createBoundaryContext(repositoryRoot);
-  const files = (
-    await Promise.all(
-      GOVERNED_ROOTS.map((root) =>
-        listSourceFiles(path.join(context.repositoryRoot, root)),
-      ),
-    )
-  ).flat();
+  const files = [
+    ...new Set(
+      (
+        await Promise.all(
+          GOVERNED_ROOTS.map((root) =>
+            listSourceFiles(path.join(context.repositoryRoot, root)),
+          ),
+        )
+      ).flat(),
+    ),
+  ];
   const violations = [];
 
   for (const filePath of files) {

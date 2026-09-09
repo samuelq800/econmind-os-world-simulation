@@ -449,11 +449,18 @@ def validate(root: Path) -> dict[str, Any]:
 
         require(states["V00.1"] == "VERIFIED", "V00.1 must remain VERIFIED")
         require(
-            states["V00.2"] in {"BLOCKED", "IN_PROGRESS", "IMPLEMENTED_UNVERIFIED"},
-            "V00.2 has an invalid finalization-session state",
+            states["V00.2"]
+            in {"BLOCKED", "IN_PROGRESS", "IMPLEMENTED_UNVERIFIED", "VERIFIED"},
+            "V00.2 has an invalid current lifecycle state",
         )
         for step_id, state in states.items():
-            if step_id not in {"V00.1", "V00.2"}:
+            if step_id == "V00.3" and states["V00.2"] == "VERIFIED":
+                require(
+                    state
+                    in {"PLANNED", "IN_PROGRESS", "IMPLEMENTED_UNVERIFIED", "BLOCKED"},
+                    f"V00.3 has an invalid implementation-session state: {state}",
+                )
+            elif step_id not in {"V00.1", "V00.2"}:
                 require(state == "PLANNED", f"later work has non-planning state: {step_id}")
 
         sync = progress_data["governance_sync"]

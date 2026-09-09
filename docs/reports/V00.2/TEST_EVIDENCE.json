@@ -1,0 +1,156 @@
+{
+  "schema_version": "econmind.v00.2-test-evidence.v2",
+  "work_package": "V00.2",
+  "title": "Three Application Runtime Entries and Lifecycle Skeleton",
+  "status": "PASS",
+  "implementation_status": "IMPLEMENTED_UNVERIFIED",
+  "original_implementation_commit": "98b2079b134d9926db960994aa5a2d04d89dd8be",
+  "implementation_commit": "52f44f962d9f28b27781c4ee74f7c25dea813470",
+  "corrected_implementation_commit": "52f44f962d9f28b27781c4ee74f7c25dea813470",
+  "correction_state": "IMMUTABLE_CANDIDATE_READY_FOR_INDEPENDENT_REREVIEW",
+  "recorded_at": "2026-09-08T15:46:33Z",
+  "branch": "feat/v00-2",
+  "candidate_finalization": {
+    "validation_reused_from_completed_correction_round": true,
+    "rerun_during_candidate_finalization": false
+  },
+  "environment": {
+    "platform": "darwin-arm64",
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "econmind_env": "local",
+    "supabase_target": "PRODUCTION_INTEGRATION_TARGET_ONLY",
+    "database_mutation_allowed": false
+  },
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm lint",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm format:check",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm test",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "7 test files; 79 tests passed; 26 V00.2 lifecycle tests"
+    },
+    {
+      "command": "pnpm test:boundaries",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "28 tests passed; live scan passed over 12 governed files"
+    },
+    {
+      "command": "pnpm env:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "PRODUCTION_INTEGRATION_TARGET_ONLY; mutation false"
+    },
+    {
+      "command": "pnpm secrets:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "241 candidate files scanned after lifecycle correction"
+    },
+    {
+      "command": "pnpm build",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "world-web, world-api, and world-worker built"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "all constituent gates reran successfully"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "evidence": "V00.2 dependency gate ready; governance merged; 20 ADRs remain unapproved"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "PASS"
+    }
+  ],
+  "runtime_acceptance": {
+    "independent_entries": "PASS",
+    "concurrent_three_process_start": "PASS",
+    "health_and_readiness": "PASS",
+    "invalid_environment": "PASS_EXPECTED_REJECTION",
+    "invalid_host_or_port": "PASS_EXPECTED_REJECTION",
+    "occupied_ports": "PASS_EXPECTED_REJECTION",
+    "sigint_shutdown": "PASS",
+    "sigterm_shutdown": "PASS",
+    "public_command_orphan_attacks": "PASS_6_OF_6",
+    "repeated_and_mixed_signal_attacks": "PASS_8_OF_8",
+    "startup_failure_cleanup_attacks": "PASS_12_OF_12",
+    "forced_timeout_attacks": "PASS_2_OF_2",
+    "cross_application_independence": "PASS",
+    "windows_lifecycle": "NOT_RUN",
+    "authority_or_simulation_enabled": false
+  },
+  "implementation_iterations": [
+    {
+      "command": "pnpm test -- tests/foundation/runtime-lifecycle.test.ts",
+      "exit_code": 1,
+      "result": "FAIL",
+      "observed": "Native TypeScript child entries could not resolve compiled-style .js imports; web signal assertion did not match Vite's conventional status.",
+      "resolution": "API and worker now build before executing dist entry points; the web process has an explicit wrapper and signal-specific assertions."
+    },
+    {
+      "command": "pnpm test -- tests/foundation/runtime-lifecycle.test.ts",
+      "exit_code": 1,
+      "result": "FAIL",
+      "observed": "An occupied-port Vite startup retained watcher handles, and SIGTERM returned Vite's conventional 143 status.",
+      "resolution": "Failed web startup now closes the Vite server; SIGINT wrapper and Vite-native SIGTERM are both tested explicitly."
+    },
+    {
+      "command": "pre-fix exact public-command attack matrix",
+      "exit_code": 1,
+      "result": "FAIL_EXPECTED_REPRODUCTION",
+      "observed": "All six outer-pnpm-only SIGINT/SIGTERM cases left re-parented descendants serving and prevented port rebind.",
+      "resolution": "All public runtime scripts now use one per-app parent-aware launcher and all six post-fix attacks pass."
+    },
+    {
+      "command": "independent candidate patch review",
+      "exit_code": 1,
+      "result": "CHANGES_REQUIRED",
+      "observed": "The first candidate had a pre-PPID-sample parent-loss race, retained its watch interval after compiler failure, and mapped unexpected signals to 143.",
+      "resolution": "Parent identity is checked before child launch, failed builds clear the interval and propagate exit status, conventional signal exit codes are preserved, and regression cases cover all three paths."
+    }
+  ],
+  "not_run": [
+    "Production or staging deployment",
+    "Supabase or database access/mutation/migration/RLS/recovery",
+    "Browser rendering E2E beyond the real Vite HTTP process",
+    "Windows public-command signal and process-tree behavior",
+    "V00.3 cross-application communication and unified development command"
+  ],
+  "safety": {
+    "database_access": false,
+    "database_mutation": false,
+    "supabase_access": false,
+    "deployment": false,
+    "domain_events_or_commands": false,
+    "v00_3_started": false
+  }
+}
