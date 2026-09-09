@@ -1,7 +1,7 @@
 {
   "schema_version": "R2-101.1",
   "derived_at": "2026-09-09T02:35:00Z",
-  "source_commit": "2d66872278b1c8a586c751390fed94796f00c40a",
+  "source_commit": "e72f3b131e368c35dea25d1c5e98e7dbce9645dd",
   "note": "FAST_MAINLINE is active. P0 still requires blocking independent review; P2/P3 may use explicit evidence-backed owner fast-track.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
@@ -41,10 +41,10 @@
     }
   },
   "current_gate": {
-    "step_id": "V01.2",
+    "step_id": "V01.3",
     "status": "PLANNED",
-    "review": "V01.1 accepted by explicit P2 owner fast-track; V01.2 is dependency-ready",
-    "next_step": "V01.2",
+    "review": "V01.2 accepted by explicit P2 owner fast-track; V01.3 is dependency-ready",
+    "next_step": "V01.3",
     "next_step_ready": true,
     "next_step_blockers": []
   },
@@ -80,13 +80,20 @@
       "docs/reports/V01.1/TEST_EVIDENCE.json",
       "requirements/requirement_registry.json",
       "requirements/source_unit_assignments.jsonl"
+    ],
+    "V01.2": [
+      "docs/exec-plans/V01.2.md",
+      "docs/reports/V01.2/IMPLEMENTATION.md",
+      "docs/reports/V01.2/TEST_EVIDENCE.json",
+      "requirements/adr_dependency_map.json"
     ]
   },
   "implementation_commits": {
     "V00.1": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
     "V00.2": "002066a52dc089441cda6b84fa83d226678da891",
     "V00.3": "00e3320e2d3f6e28212f902bfa1f92d5d1561bf4",
-    "V01.1": "2d66872278b1c8a586c751390fed94796f00c40a"
+    "V01.1": "2d66872278b1c8a586c751390fed94796f00c40a",
+    "V01.2": "e72f3b131e368c35dea25d1c5e98e7dbce9645dd"
   },
   "step_reviews": {
     "V00.1": {
@@ -120,6 +127,16 @@
       "automated_evidence_status": "PASS",
       "p0_boundary_changed": false,
       "owner_approved": true
+    },
+    "V01.2": {
+      "method": "OWNER_FAST_TRACK",
+      "decision": "OWNER_FAST_TRACK_ACCEPTED",
+      "risk_class": "P2",
+      "reviewed_commit": "e72f3b131e368c35dea25d1c5e98e7dbce9645dd",
+      "evidence_file": "docs/reports/V01.2/IMPLEMENTATION.md",
+      "automated_evidence_status": "PASS",
+      "p0_boundary_changed": false,
+      "owner_approved": true
     }
   },
   "steps": {
@@ -127,7 +144,7 @@
     "V00.2": "VERIFIED",
     "V00.3": "VERIFIED",
     "V01.1": "VERIFIED",
-    "V01.2": "PLANNED",
+    "V01.2": "VERIFIED",
     "V01.3": "PLANNED",
     "V02.1": "PLANNED",
     "V02.2": "PLANNED",
