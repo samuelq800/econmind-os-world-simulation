@@ -1,0 +1,61 @@
+{
+  "schema_version": "WORLD_CORE_BATCH_CANDIDATE_DRAFT-1",
+  "record_type": "INERT_GOVERNANCE_PROPOSAL",
+  "name": "WORLD_CORE_BATCH_CANDIDATE",
+  "status": "DRAFT_NOT_ACTIVE",
+  "authority": "RESPONSIBLE_HUMAN_OWNER_REQUIRED",
+  "activation_record": null,
+  "activation_preconditions": [
+    "Gate A has an independent APPROVED decision bound to the exact remediation candidate and evidence",
+    "approved Foundation remediation is integrated into main and V02.1-V05.3 are governance-valid VERIFIED",
+    "ADR-01 and ADR-03 have responsible-human approval records",
+    "reconciled main passes the mandatory Foundation and governance checks"
+  ],
+  "scope": {
+    "branch": "codex/world-core-v06-v10",
+    "first_step": "V06.1",
+    "last_step": "V10.4",
+    "allowed_steps": [
+      "V06.1",
+      "V06.2",
+      "V06.3",
+      "V07.1",
+      "V07.2",
+      "V07.3",
+      "V08.1",
+      "V08.2",
+      "V08.3",
+      "V09.1",
+      "V09.2",
+      "V09.3",
+      "V10.1",
+      "V10.2",
+      "V10.3",
+      "V10.4"
+    ],
+    "terminal_gate": "GATE_B_WORLD_CORE_HARD_GATE"
+  },
+  "continuation_rule": {
+    "condition": "current step implementation is committed and every mandatory targeted test, P0 invariant, architecture, environment, migration, security and governance check applicable to that step passes",
+    "effect": "the immediately following allowed step may start on the same scoped branch",
+    "status_after_step": "IMPLEMENTED_UNVERIFIED",
+    "dependency_exception": "an IMPLEMENTED_UNVERIFIED dependency is accepted only when both dependency and consumer are adjacent members of this exact allowed_steps sequence"
+  },
+  "preserved_controls": [
+    "P0 invariant tests remain mandatory and cannot be skipped or weakened",
+    "owner-required ADR approval remains mandatory at each latest safe decision point",
+    "every step remains IMPLEMENTED_UNVERIFIED until independent Gate B review",
+    "Gate B independent review remains mandatory",
+    "BLOCKER or MAJOR stops continuation",
+    "production restrictions and the sole migration publication chain remain unchanged"
+  ],
+  "prohibitions": [
+    "intermediate self-VERIFIED",
+    "merge to main before Gate B approval and separate merge authority",
+    "production deployment or migration publication",
+    "V11 or any step outside V06.1 through V10.4",
+    "use outside codex/world-core-v06-v10",
+    "activation by the existence of this draft"
+  ],
+  "integration_note": "This file is not referenced by status/progress.json, planning/r2_steps.json, the active FAST_MAINLINE policy, or the validator. Activation requires a separate owner-approved governance patch after Gate A approval."
+}
