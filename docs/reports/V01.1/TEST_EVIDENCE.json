@@ -1,0 +1,43 @@
+{
+  "schema_version": "V01.1-EVIDENCE-1",
+  "implementation_commit": "2d66872278b1c8a586c751390fed94796f00c40a",
+  "effective_risk_class": "P2",
+  "p0_boundary_changed": false,
+  "database_access": false,
+  "production_mutation": false,
+  "commands": [
+    {
+      "command": "python3 tools/build_v01_traceability.py",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "Generated 139 requirements and 8,743 source-unit assignments."
+    },
+    {
+      "command": "pnpm exec vitest run tests/architecture/v01-governance.test.ts",
+      "environment": "Node 24.20.0; pnpm 12.3.4",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "1 file, 3 tests passed."
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "12/12 governance checks passed including V01 traceability."
+    },
+    {
+      "command": "pnpm check",
+      "environment": "Node 24.20.0; pnpm 12.3.4",
+      "exit_code": 0,
+      "result": "PASS",
+      "summary": "lint, format, typecheck, 9 test files/95 tests, 29 boundary tests, environment, secrets, and builds passed"
+    }
+  ],
+  "mandatory_evidence_status": {
+    "tests": "PASS",
+    "invariants": "PASS",
+    "security_checks": "PASS",
+    "governance_checks": "PASS"
+  },
+  "overall_status": "PASS"
+}

@@ -150,6 +150,10 @@ def validate(root: Path) -> dict[str, Any]:
             "AGENTS.md",
             "PLANS.md",
             "requirements.docx",
+            "requirements/requirement_registry.json",
+            "requirements/source_unit_assignments.jsonl",
+            "requirements/adr_dependency_map.json",
+            "requirements/two_repository_integration_contract.json",
             "planning/01_新仓库架构与完整交付路线.md",
             "planning/02_架构裁决与数据库协议.md",
             "planning/03_33个工作包与依赖.md",
@@ -584,6 +588,22 @@ def validate(root: Path) -> dict[str, Any]:
             gate.get("next_step_ready") is next_ready,
             "current_gate next_step_ready differs from validated readiness",
         )
+        if states["V01.3"] == "VERIFIED":
+            require(states["V02.1"] == "PLANNED", "V02.1 started before V01 package review")
+            require(
+                required_gate == "V01_PACKAGE_LEVEL_REVIEW"
+                and gate.get("gate_status") == "PENDING",
+                "V01 completion must stop at pending package review",
+            )
+            require(
+                progress_data.get("work_packages", {}).get("V01")
+                == "IMPLEMENTATION_COMPLETE_PENDING_PACKAGE_REVIEW",
+                "V01 package status is not review-ready",
+            )
+            package_evidence = progress_data.get("package_evidence", {}).get("V01", [])
+            require(package_evidence, "V01 package review evidence is missing")
+            for evidence_path in package_evidence:
+                file(evidence_path)
         metrics["progress_states"] = dict(
             sorted({state: list(states.values()).count(state) for state in valid_states}.items())
         )
@@ -634,6 +654,166 @@ def validate(root: Path) -> dict[str, Any]:
         require(constitution_hash == constitution["sha256"], "requirements.docx differs from Constitution")
         metrics["source_documents"] = 8
 
+    def v01_traceability() -> None:
+        registry = load_json("requirements/requirement_registry.json")
+        require(
+            registry["schema_version"] == "V01.1-TRACEABILITY-1",
+            "wrong V01.1 traceability schema",
+        )
+        counts = registry["counts"]
+        require(counts["authoritative_sources"] == 8, "V01.1 must cover eight sources")
+        require(counts["source_units"] == 8743, "V01.1 source-unit count changed")
+        require(counts["fixed_targets"] == 131, "V01.1 fixed-target count changed")
+        require(
+            registry["claim_boundary"]["implemented"] is False
+            and registry["claim_boundary"]["verified_product_behavior"] is False,
+            "V01.1 registry falsely claims implementation",
+        )
+        source_units = {
+            json.loads(line)["source_id"]
+            for line in file("requirements/source_units.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if line.strip()
+        }
+        assignments = [
+            json.loads(line)
+            for line in file("requirements/source_unit_assignments.jsonl")
+            .read_text(encoding="utf-8")
+            .splitlines()
+            if line.strip()
+        ]
+        require(len(assignments) == 8743, "V01.1 assignment count changed")
+        require(
+            {row["source_unit_id"] for row in assignments} == source_units,
+            "V01.1 source-unit assignments are incomplete",
+        )
+        target_requirements = [
+            item for item in registry["requirements"] if item["kind"] != "source_scope"
+        ]
+        require(len(target_requirements) == 131, "V01.1 target requirements are incomplete")
+        for requirement in registry["requirements"]:
+            require(
+                requirement["implementation_status"] == "PLANNED_NOT_IMPLEMENTED",
+                f"V01.1 false implementation claim: {requirement['requirement_id']}",
+            )
+            require(
+                requirement["planned_work_packages"]
+                and requirement["planned_code_owners"],
+                f"V01.1 missing planned ownership: {requirement['requirement_id']}",
+            )
+        for requirement in target_requirements:
+            require(
+                requirement["source_unit_refs"]
+                and set(requirement["source_unit_refs"]) <= source_units,
+                f"V01.1 invalid source evidence: {requirement['requirement_id']}",
+            )
+        metrics.update(v01_requirements=len(registry["requirements"]), v01_source_units=len(assignments))
+
+    def v01_adr_graph() -> None:
+        decision_data = load_json("status/decisions.json")
+        graph = load_json("requirements/adr_dependency_map.json")
+        require(graph["schema_version"] == "V01.2-ADR-GRAPH-1", "wrong V01.2 graph schema")
+        require(graph["counts"]["adrs"] == 20, "V01.2 graph must contain 20 ADRs")
+        require(
+            graph["approval_summary"]
+            == {
+                "approved": 0,
+                "proposed_not_approved": 20,
+                "bulk_approval_permitted": False,
+            },
+            "V01.2 graph implies unsupported approval",
+        )
+        require(
+            graph["current_gate"]["unresolved_blockers"] == [],
+            "V01.2 coordination gate has an unresolved blocker",
+        )
+        records = {record["id"]: record for record in decision_data["decisions"]}
+        mapped = {record["id"]: record for record in graph["adrs"]}
+        require(set(mapped) == set(records), "V01.2 ADR set differs from decision register")
+        for adr_id, record in records.items():
+            require(
+                record["status"] == mapped[adr_id]["decision_status"] == "PROPOSED_NOT_APPROVED",
+                f"{adr_id} approval status drift",
+            )
+            require(
+                record["approval_record"] is None and mapped[adr_id]["approval_record"] is None,
+                f"{adr_id} carries unsupported approval",
+            )
+            require(
+                record["affected_work_packages"] == mapped[adr_id]["affected_work_packages"],
+                f"{adr_id} affected-package drift",
+            )
+            require(record["latest_gate"] == mapped[adr_id]["latest_gate"], f"{adr_id} gate drift")
+        for edge in graph["adr_relationships"]:
+            require(
+                edge["from"] in records and edge["to"] in records,
+                "V01.2 relationship refers to unknown ADR",
+            )
+        metrics.update(
+            v01_adrs=len(mapped),
+            v01_adr_relationships=len(graph["adr_relationships"]),
+            v01_adr_package_edges=len(graph["adr_to_package_edges"]),
+        )
+
+    def v01_integration_contract() -> None:
+        contract = load_json("requirements/two_repository_integration_contract.json")
+        require(
+            contract["schema_version"] == "V01.3-INTEGRATION-CONTRACT-1",
+            "wrong V01.3 contract schema",
+        )
+        require(contract["implementation_claim"] is False, "V01.3 falsely claims implementation")
+        require(
+            contract["shared_identity"]["profile_field_whitelist"]
+            == ["user_id", "display_name", "school_id"],
+            "V01.3 identity whitelist changed",
+        )
+        prohibited_identity = set(
+            contract["shared_identity"]["prohibited_shared_fields_or_assumptions"]
+        )
+        require(
+            {"role", "platform_role", "service_role key"} <= prohibited_identity,
+            "V01.3 permits portable authorization or credentials",
+        )
+        never_authority = set(contract["ownership"]["never_world_v2_authority"])
+        require(
+            {"main site", "V1 World", "League", "Legacy World", "browser or UI state"}
+            <= never_authority,
+            "V01.3 creates an alternate World V2 authority",
+        )
+        boundary = contract["world_v2_authoritative_boundary"]
+        require(boundary["source_of_truth_count"] == 1, "V01.3 source-of-truth count changed")
+        require(
+            boundary["authoritative_execution_host"] == "apps/world-worker"
+            and boundary["authentication_command_query_boundary"] == "apps/world-api"
+            and boundary["deterministic_domain_logic"] == "packages/core"
+            and boundary["non_authoritative_ui"] == "apps/world-web",
+            "V01.3 repository ownership boundary changed",
+        )
+        preserved_routes = {
+            item["route"] for item in contract["route_contract"]["main_site_preserved"]
+        }
+        require(
+            preserved_routes
+            == {
+                "/world",
+                "/simulation/world and descendants",
+                "/league/world and descendants",
+                "/simulation/legacy-world and descendants",
+                "/country, /lobby, /room, /results, /replay, /view",
+            },
+            "V01.3 route preservation set changed",
+        )
+        require(
+            contract["next_gate"] == "V01_PACKAGE_LEVEL_REVIEW",
+            "V01.3 must stop at package review",
+        )
+        metrics.update(
+            v01_identity_fields=len(contract["shared_identity"]["profile_field_whitelist"]),
+            v01_preserved_route_groups=len(preserved_routes),
+            v01_next_gate=contract["next_gate"],
+        )
+
     def templates() -> None:
         required_templates = [
             "templates/EXECUTION_PLAN.md",
@@ -662,6 +842,9 @@ def validate(root: Path) -> dict[str, Any]:
         ("progress_truth", progress),
         ("decision_register", decisions),
         ("source_material", source_material),
+        ("v01_traceability", v01_traceability),
+        ("v01_adr_graph", v01_adr_graph),
+        ("v01_integration_contract", v01_integration_contract),
         ("templates", templates),
     ):
         check(name, operation)

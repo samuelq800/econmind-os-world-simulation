@@ -1,7 +1,7 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T02:35:00Z",
-  "source_commit": "90f969544fb8745f6080b7dc4a514684bb4b319a",
+  "derived_at": "2026-09-09T02:55:00Z",
+  "source_commit": "5ef35fc3dfe266187bf2f0b6ce557bc450eae2bf",
   "note": "FAST_MAINLINE is active. P0 still requires blocking independent review; P2/P3 may use explicit evidence-backed owner fast-track.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
@@ -41,16 +41,18 @@
     }
   },
   "current_gate": {
-    "step_id": "V01.1",
-    "status": "PLANNED",
-    "review": "V00.3 accepted by explicit P2 owner fast-track; V01.1 is dependency-ready",
-    "next_step": "V01.1",
-    "next_step_ready": true,
-    "next_step_blockers": []
+    "step_id": "V01.3",
+    "status": "VERIFIED",
+    "review": "V01.1-V01.3 implementation complete; V01 package-level review is required before V02",
+    "next_step": "V02.1",
+    "next_step_ready": false,
+    "next_step_blockers": ["V01 PACKAGE-LEVEL REVIEW pending"],
+    "required_gate": "V01_PACKAGE_LEVEL_REVIEW",
+    "gate_status": "PENDING"
   },
   "work_packages": {
     "V00": "COMPLETE",
-    "V01": "NOT_STARTED"
+    "V01": "IMPLEMENTATION_COMPLETE_PENDING_PACKAGE_REVIEW"
   },
   "step_evidence": {
     "V00.1": [
@@ -73,12 +75,41 @@
       "docs/reports/V00.3/TEST_EVIDENCE.json",
       "docs/reports/V00.3/OWNER_FAST_TRACK_ACCEPTANCE.md",
       "docs/reports/V00.3/FINAL_RECONCILIATION.md"
+    ],
+    "V01.1": [
+      "docs/exec-plans/V01.1.md",
+      "docs/reports/V01.1/IMPLEMENTATION.md",
+      "docs/reports/V01.1/TEST_EVIDENCE.json",
+      "requirements/requirement_registry.json",
+      "requirements/source_unit_assignments.jsonl"
+    ],
+    "V01.2": [
+      "docs/exec-plans/V01.2.md",
+      "docs/reports/V01.2/IMPLEMENTATION.md",
+      "docs/reports/V01.2/TEST_EVIDENCE.json",
+      "requirements/adr_dependency_map.json"
+    ],
+    "V01.3": [
+      "docs/exec-plans/V01.3.md",
+      "docs/reports/V01.3/IMPLEMENTATION.md",
+      "docs/reports/V01.3/TEST_EVIDENCE.json",
+      "docs/architecture/V01_TWO_REPOSITORY_INTEGRATION_CONTRACT.md",
+      "requirements/two_repository_integration_contract.json"
+    ]
+  },
+  "package_evidence": {
+    "V01": [
+      "docs/reports/V01/PACKAGE_REVIEW_BUNDLE.md",
+      "docs/reports/V01/PACKAGE_TEST_EVIDENCE.json"
     ]
   },
   "implementation_commits": {
     "V00.1": "c41ddd8fa7c4098e84efdbe8f1839e8690993627",
     "V00.2": "002066a52dc089441cda6b84fa83d226678da891",
-    "V00.3": "00e3320e2d3f6e28212f902bfa1f92d5d1561bf4"
+    "V00.3": "00e3320e2d3f6e28212f902bfa1f92d5d1561bf4",
+    "V01.1": "2d66872278b1c8a586c751390fed94796f00c40a",
+    "V01.2": "e72f3b131e368c35dea25d1c5e98e7dbce9645dd",
+    "V01.3": "5ef35fc3dfe266187bf2f0b6ce557bc450eae2bf"
   },
   "step_reviews": {
     "V00.1": {
@@ -102,15 +133,45 @@
       "automated_evidence_status": "PASS",
       "p0_boundary_changed": false,
       "owner_approved": true
+    },
+    "V01.1": {
+      "method": "OWNER_FAST_TRACK",
+      "decision": "OWNER_FAST_TRACK_ACCEPTED",
+      "risk_class": "P2",
+      "reviewed_commit": "2d66872278b1c8a586c751390fed94796f00c40a",
+      "evidence_file": "docs/reports/V01.1/IMPLEMENTATION.md",
+      "automated_evidence_status": "PASS",
+      "p0_boundary_changed": false,
+      "owner_approved": true
+    },
+    "V01.2": {
+      "method": "OWNER_FAST_TRACK",
+      "decision": "OWNER_FAST_TRACK_ACCEPTED",
+      "risk_class": "P2",
+      "reviewed_commit": "e72f3b131e368c35dea25d1c5e98e7dbce9645dd",
+      "evidence_file": "docs/reports/V01.2/IMPLEMENTATION.md",
+      "automated_evidence_status": "PASS",
+      "p0_boundary_changed": false,
+      "owner_approved": true
+    },
+    "V01.3": {
+      "method": "OWNER_FAST_TRACK",
+      "decision": "OWNER_FAST_TRACK_ACCEPTED",
+      "risk_class": "P2",
+      "reviewed_commit": "5ef35fc3dfe266187bf2f0b6ce557bc450eae2bf",
+      "evidence_file": "docs/reports/V01.3/IMPLEMENTATION.md",
+      "automated_evidence_status": "PASS",
+      "p0_boundary_changed": false,
+      "owner_approved": true
     }
   },
   "steps": {
     "V00.1": "VERIFIED",
     "V00.2": "VERIFIED",
     "V00.3": "VERIFIED",
-    "V01.1": "PLANNED",
-    "V01.2": "PLANNED",
-    "V01.3": "PLANNED",
+    "V01.1": "VERIFIED",
+    "V01.2": "VERIFIED",
+    "V01.3": "VERIFIED",
     "V02.1": "PLANNED",
     "V02.2": "PLANNED",
     "V02.3": "PLANNED",
