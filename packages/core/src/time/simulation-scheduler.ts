@@ -1,6 +1,10 @@
 import { canonicalSerialize } from '../serialization/canonical.js';
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
-import { scheduledEventId, type ScheduledEventId } from '../ids.js';
+import {
+  scheduledEventId,
+  type ScheduledEventId,
+  type SchedulerPriorityId,
+} from '../ids.js';
 import { SimTime, isSimTime } from '../numeric/sim-time.js';
 import {
   SIMULATION_TICKS_PER_DAY,
@@ -10,8 +14,17 @@ import {
   type AdvanceClockInput,
   type SimulationClockState,
 } from './simulation-clock.js';
+import {
+  DEFAULT_SCHEDULER_PRIORITY_ID,
+  SCHEDULER_ORDER_VERSION,
+  compareCanonicalIdentifiers,
+  orderScheduledWork,
+  registeredSchedulerPriorityId,
+} from './deterministic-order.js';
 
-export const SIMULATION_SCHEDULER_VERSION = 'SIMULATION_SCHEDULER_V1' as const;
+export const LEGACY_SIMULATION_SCHEDULER_VERSION =
+  'SIMULATION_SCHEDULER_V1' as const;
+export const SIMULATION_SCHEDULER_VERSION = 'SIMULATION_SCHEDULER_V2' as const;
 
 export const SEASON_STATUSES = Object.freeze([
   'PREOPEN',
@@ -27,6 +40,7 @@ export interface ScheduleEventInput {
   readonly dueSimTime: SimTime;
   readonly eventType: string;
   readonly idempotencyKey: string;
+  readonly priorityId: SchedulerPriorityId;
   readonly scheduledEventId: ScheduledEventId;
 }
 
@@ -34,6 +48,7 @@ export interface ScheduledEventRecord {
   readonly dueSimTime: SimTime;
   readonly eventType: string;
   readonly idempotencyKey: string;
+  readonly priorityId: SchedulerPriorityId;
   readonly scheduledEventId: ScheduledEventId;
   readonly status: ScheduledEventStatus;
 }
@@ -56,6 +71,7 @@ export interface SimulationBoundaryCrossings {
 
 export interface SimulationSchedulerState {
   readonly clock: SimulationClockState;
+  readonly orderVersion: typeof SCHEDULER_ORDER_VERSION;
   readonly pauseIntervals: readonly PauseInterval[];
   readonly scheduledEvents: readonly ScheduledEventRecord[];
   readonly schedulerVersion: typeof SIMULATION_SCHEDULER_VERSION;
@@ -72,10 +88,19 @@ export interface ScheduledEventCompletion {
   readonly state: SimulationSchedulerState;
 }
 
+export const AUTHORITATIVE_TRANSACTION_CUTOFF_VERSION =
+  'AUTHORITATIVE_TRANSACTION_CUTOFF_V1' as const;
+
+export interface AuthoritativeTransactionCutoff {
+  readonly cutoffVersion: typeof AUTHORITATIVE_TRANSACTION_CUTOFF_VERSION;
+  readonly lockedSimTime: SimTime;
+}
+
 interface SerializedScheduledEvent {
   readonly dueSimTime: string;
   readonly eventType: string;
   readonly idempotencyKey: string;
+  readonly priorityId?: string;
   readonly scheduledEventId: string;
   readonly status: ScheduledEventStatus;
 }
@@ -91,6 +116,7 @@ interface SerializedSchedulerState {
     readonly simTime: string;
   };
   readonly pauseIntervals: readonly SerializedPauseInterval[];
+  readonly orderVersion?: string;
   readonly scheduledEvents: readonly SerializedScheduledEvent[];
   readonly schedulerVersion: string;
   readonly seasonStatus: string;
@@ -100,6 +126,7 @@ const CANONICAL_TOKEN = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 const CANONICAL_NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/u;
 const scheduleEventInputs = new WeakSet<object>();
 const schedulerStates = new WeakSet<object>();
+const transactionCutoffs = new WeakSet<object>();
 const TICKS_PER_DAY = BigInt(SIMULATION_TICKS_PER_DAY);
 const TICKS_PER_YEAR = BigInt(SIMULATION_TICKS_PER_YEAR);
 
@@ -148,10 +175,6 @@ function freezePause(interval: PauseInterval): PauseInterval {
   return Object.freeze({ ...interval });
 }
 
-function compareCanonicalIds(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
-}
-
 function createSchedulerState(input: {
   readonly clock: SimulationClockState;
   readonly pauseIntervals: readonly PauseInterval[];
@@ -160,11 +183,15 @@ function createSchedulerState(input: {
 }): SimulationSchedulerState {
   const state = Object.freeze({
     clock: input.clock,
+    orderVersion: SCHEDULER_ORDER_VERSION,
     pauseIntervals: Object.freeze(input.pauseIntervals.map(freezePause)),
     scheduledEvents: Object.freeze(
       [...input.scheduledEvents]
         .sort((left, right) =>
-          compareCanonicalIds(left.scheduledEventId, right.scheduledEventId),
+          compareCanonicalIdentifiers(
+            left.scheduledEventId,
+            right.scheduledEventId,
+          ),
         )
         .map(freezeEvent),
     ),
@@ -209,6 +236,7 @@ export function scheduleEventInput(
   eventType: string,
   dueSimTime: SimTime,
   idempotencyKey: string,
+  priorityId: SchedulerPriorityId = DEFAULT_SCHEDULER_PRIORITY_ID,
 ): ScheduleEventInput {
   if (!isSimTime(dueSimTime)) {
     invalidInput('Scheduled event due time must be canonical SimTime');
@@ -217,6 +245,7 @@ export function scheduleEventInput(
     dueSimTime,
     eventType: canonicalToken(eventType, 'Event type'),
     idempotencyKey: canonicalToken(idempotencyKey, 'Idempotency key'),
+    priorityId: registeredSchedulerPriorityId(priorityId),
     scheduledEventId: scheduledEventId(eventId),
   });
   scheduleEventInputs.add(result);
@@ -363,7 +392,8 @@ export function scheduleSimulationEvent(
     if (
       existingById.dueSimTime.ticks === input.dueSimTime.ticks &&
       existingById.eventType === input.eventType &&
-      existingById.idempotencyKey === input.idempotencyKey
+      existingById.idempotencyKey === input.idempotencyKey &&
+      existingById.priorityId === input.priorityId
     ) {
       return state;
     }
@@ -392,6 +422,40 @@ export function scheduleSimulationEvent(
       },
     ],
   });
+}
+
+export function pendingDueSimulationEventsInOrder(
+  state: SimulationSchedulerState,
+): readonly ScheduledEventRecord[] {
+  assertSchedulerState(state);
+  if (state.seasonStatus !== 'RUNNING') return Object.freeze([]);
+  return orderScheduledWork(
+    state.scheduledEvents.filter(
+      (event) =>
+        event.status === 'PENDING' &&
+        event.dueSimTime.ticks <= state.clock.simTime.ticks,
+    ),
+  );
+}
+
+export function beginAuthoritativeTransactionCutoff(
+  state: SimulationSchedulerState,
+): AuthoritativeTransactionCutoff {
+  transition(state, ['RUNNING'], 'RUNNING');
+  const cutoff = Object.freeze({
+    cutoffVersion: AUTHORITATIVE_TRANSACTION_CUTOFF_VERSION,
+    lockedSimTime: state.clock.simTime,
+  });
+  transactionCutoffs.add(cutoff);
+  return cutoff;
+}
+
+export function isAuthoritativeTransactionCutoff(
+  value: unknown,
+): value is AuthoritativeTransactionCutoff {
+  return (
+    typeof value === 'object' && value !== null && transactionCutoffs.has(value)
+  );
 }
 
 export function isSimulationEventDue(
@@ -462,15 +526,36 @@ function serializedState(
       pausedAtSimTime: interval.pausedAtSimTime.toCanonicalValue(),
       resumedAtSimTime: interval.resumedAtSimTime?.toCanonicalValue() ?? null,
     })),
+    orderVersion: state.orderVersion,
     scheduledEvents: state.scheduledEvents.map((event) => ({
       dueSimTime: event.dueSimTime.toCanonicalValue(),
       eventType: event.eventType,
       idempotencyKey: event.idempotencyKey,
+      priorityId: event.priorityId,
       scheduledEventId: event.scheduledEventId,
       status: event.status,
     })),
     schedulerVersion: state.schedulerVersion,
     seasonStatus: state.seasonStatus,
+  };
+}
+
+function legacySerializedState(
+  state: SimulationSchedulerState,
+): SerializedSchedulerState {
+  const current = serializedState(state);
+  return {
+    clock: current.clock,
+    pauseIntervals: current.pauseIntervals,
+    scheduledEvents: current.scheduledEvents.map((event) => ({
+      dueSimTime: event.dueSimTime,
+      eventType: event.eventType,
+      idempotencyKey: event.idempotencyKey,
+      scheduledEventId: event.scheduledEventId,
+      status: event.status,
+    })),
+    schedulerVersion: LEGACY_SIMULATION_SCHEDULER_VERSION,
+    seasonStatus: current.seasonStatus,
   };
 }
 
@@ -500,12 +585,17 @@ export function restoreSimulationSchedulerState(
     invalidState('Serialized scheduler state must be a record');
   }
   const snapshot = parsed as SerializedSchedulerState;
+  const isLegacy =
+    snapshot.schedulerVersion === LEGACY_SIMULATION_SCHEDULER_VERSION;
   if (
-    snapshot.schedulerVersion !== SIMULATION_SCHEDULER_VERSION ||
+    (!isLegacy && snapshot.schedulerVersion !== SIMULATION_SCHEDULER_VERSION) ||
     snapshot.clock?.clockVersion !== 'SIMULATION_CLOCK_V1' ||
     !SEASON_STATUSES.includes(snapshot.seasonStatus as SeasonStatus) ||
     !Array.isArray(snapshot.pauseIntervals) ||
-    !Array.isArray(snapshot.scheduledEvents)
+    !Array.isArray(snapshot.scheduledEvents) ||
+    (isLegacy
+      ? snapshot.orderVersion !== undefined
+      : snapshot.orderVersion !== SCHEDULER_ORDER_VERSION)
   ) {
     invalidState('Serialized scheduler state has an invalid schema or version');
   }
@@ -523,13 +613,25 @@ export function restoreSimulationSchedulerState(
         : canonicalTicks(interval.resumedAtSimTime, 'Pause end SimTime'),
   }));
   const events = snapshot.scheduledEvents.map((event) => {
+    if (typeof event !== 'object' || event === null) {
+      invalidState('Scheduled event must be a record');
+    }
     if (event.status !== 'PENDING' && event.status !== 'COMPLETED') {
       invalidState('Scheduled event status is invalid');
+    }
+    if (
+      (isLegacy && event.priorityId !== undefined) ||
+      (!isLegacy && typeof event.priorityId !== 'string')
+    ) {
+      invalidState('Scheduled event priority does not match scheduler version');
     }
     return {
       dueSimTime: canonicalTicks(event.dueSimTime, 'Event due SimTime'),
       eventType: canonicalToken(event.eventType, 'Event type'),
       idempotencyKey: canonicalToken(event.idempotencyKey, 'Idempotency key'),
+      priorityId: isLegacy
+        ? DEFAULT_SCHEDULER_PRIORITY_ID
+        : registeredSchedulerPriorityId(event.priorityId as string),
       scheduledEventId: scheduledEventId(event.scheduledEventId),
       status: event.status,
     };
@@ -596,7 +698,10 @@ export function restoreSimulationSchedulerState(
     scheduledEvents: events,
     seasonStatus: snapshot.seasonStatus as SeasonStatus,
   });
-  if (serializeSimulationSchedulerState(restored) !== serialized) {
+  const expectedSerialized = canonicalSerialize(
+    isLegacy ? legacySerializedState(restored) : serializedState(restored),
+  );
+  if (expectedSerialized !== serialized) {
     invalidState('Serialized scheduler state is not in canonical state order');
   }
   return restored;

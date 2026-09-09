@@ -17,6 +17,8 @@ export type ProductionSectorId = BrandedId<'ProductionSectorId'>;
 export type InternationalActivityId = BrandedId<'InternationalActivityId'>;
 export type ProposalId = BrandedId<'ProposalId'>;
 export type ScheduledEventId = BrandedId<'ScheduledEventId'>;
+export type SchedulerPriorityId = BrandedId<'SchedulerPriorityId'>;
+export type SettlementStageId = BrandedId<'SettlementStageId'>;
 
 const CANONICAL_ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 const CANONICAL_UUID =
@@ -57,3 +59,7 @@ export const internationalActivityId = (value: string) =>
 export const proposalId = (value: string) => parseId('ProposalId', value);
 export const scheduledEventId = (value: string) =>
   parseId('ScheduledEventId', value);
+export const schedulerPriorityId = (value: string) =>
+  parseId('SchedulerPriorityId', value);
+export const settlementStageId = (value: string) =>
+  parseId('SettlementStageId', value);
