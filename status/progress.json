@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T15:08:54Z",
+  "derived_at": "2026-09-09T15:24:55Z",
   "source_commit": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453",
-  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1, corrected V06.2 and V06.3 are IMPLEMENTED_UNVERIFIED. The owner continuation after Review B system errors remains recorded; a later independent re-review accepted the two V06.2 P0 fixes for continuation. V06 is ready only for package-level review, and V07 remains prohibited.",
+  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1, corrected V06.2 and V06.3 remain IMPLEMENTED_UNVERIFIED. Review B found one V06 package blocker at target 26cbb32004aa1888bac16529c4a957150035fa48: authoritative completion did not enforce the approved total order. A V06.3 forward fix is required; V07 remains prohibited.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -124,12 +124,26 @@
   "current_gate": {
     "step_id": "V06.3",
     "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "V06.3 evidence complete; V06 package-level review is required and no verification or merge is claimed",
+    "review": "CHANGES_REQUIRED: V06-PKG-BLK-01 permits caller-selected out-of-order due completion",
     "next_step": "V07.1",
     "next_step_ready": false,
-    "next_step_blockers": ["V06 package-level review is required before V07"],
+    "next_step_blockers": [
+      "V06-PKG-BLK-01 requires a V06.3 forward fix and independent package re-review",
+      "V06 package-level approval is required before V07"
+    ],
     "required_gate": "V06_PACKAGE_REVIEW",
     "gate_status": "PENDING"
+  },
+  "v06_package_review": {
+    "decision": "CHANGES_REQUIRED",
+    "reviewed_commit": "26cbb32004aa1888bac16529c4a957150035fa48",
+    "bound_v06_3_code_candidate": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453",
+    "review_file": "docs/reports/V06/PACKAGE_REVIEW_FINDINGS.md",
+    "open_blockers": 1,
+    "reviewer_severity_classification": "NOT_PROVIDED",
+    "package_verified": false,
+    "merge_authorized": false,
+    "v07_authorized": false
   },
   "world_core_continuation": {
     "status": "ACTIVE",
@@ -351,7 +365,8 @@
     "V06": [
       "docs/reports/V06/PACKAGE_REVIEW_BUNDLE.md",
       "docs/reports/V06/PACKAGE_TEST_EVIDENCE.json",
-      "docs/reports/V06/PACKAGE_REVIEW_TARGET.md"
+      "docs/reports/V06/PACKAGE_REVIEW_TARGET.md",
+      "docs/reports/V06/PACKAGE_REVIEW_FINDINGS.md"
     ]
   },
   "implementation_commits": {

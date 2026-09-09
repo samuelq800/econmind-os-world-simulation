@@ -2,7 +2,7 @@
   "schema_version": "R2-101.1",
   "package_id": "V06",
   "package_status": "IMPLEMENTED_UNVERIFIED",
-  "review_readiness": "READY_FOR_PACKAGE_REVIEW",
+  "review_readiness": "CHANGES_REQUIRED",
   "content_commit": "3c6f12b39820f878e7662b9ed7eca734c571a0d7",
   "steps": {
     "V06.1": {
@@ -41,13 +41,15 @@
     "workspace_build": "PASS"
   },
   "finding_state": {
-    "known_open_p0": 0,
-    "known_open_p1": 0,
+    "open_blockers": 1,
+    "reviewer_severity_classification": "NOT_PROVIDED",
+    "finding_id": "V06-PKG-BLK-01",
+    "reviewed_package_target": "26cbb32004aa1888bac16529c4a957150035fa48",
     "package_review_pending": true,
     "package_verified": false
   },
   "production_access": false,
   "database_mutation": false,
   "v07_started": false,
-  "next_action": "V06_PACKAGE_LEVEL_REVIEW"
+  "next_action": "V06_3_FORWARD_FIX_THEN_PACKAGE_REVIEW"
 }

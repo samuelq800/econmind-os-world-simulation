@@ -222,6 +222,16 @@ describe('V06 owner-authorized package continuation', () => {
       package_verified: false,
     });
     expect(progress.steps['V07.1']).toBe('PLANNED');
+    expect(progress.v06_package_review).toMatchObject({
+      decision: 'CHANGES_REQUIRED',
+      reviewed_commit: '26cbb32004aa1888bac16529c4a957150035fa48',
+      bound_v06_3_code_candidate: 'c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453',
+      open_blockers: 1,
+      reviewer_severity_classification: 'NOT_PROVIDED',
+      package_verified: false,
+      merge_authorized: false,
+      v07_authorized: false,
+    });
   });
 });
 
