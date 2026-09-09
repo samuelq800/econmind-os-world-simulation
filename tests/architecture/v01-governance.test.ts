@@ -187,14 +187,24 @@ describe('V06 owner-authorized package continuation', () => {
     ).toMatchObject({
       implementation_commit: '4e35c07758f4d39b05dac402eeb03b080275c3e0',
       automated_evidence_status: 'PASS',
-      independent_finding_status: 'OWNER_CONTINUATION_ACCEPTED_CLOSURE_PENDING',
+      independent_finding_status: 'CLEAR',
       review_findings_file: 'docs/reports/V06.2/REVIEW_FINDINGS.md',
       owner_continuation_record:
         'docs/reports/V06.2/OWNER_CONTINUATION_AFTER_REVIEW_UNAVAILABLE.md',
       owner_approved: true,
-      independent_review: 'UNAVAILABLE_SYSTEM_ERROR',
+      review_unavailability_history: 'UNAVAILABLE_SYSTEM_ERROR',
+      independent_review: 'APPROVED_FOR_CONTINUATION',
       owner_continuation_authorized: true,
       independent_closure_claimed: false,
+      continuation_review: {
+        decision: 'APPROVED_FOR_CONTINUATION',
+        reviewed_commit: '721993d871a72e0f12c9cfd115c5b04fc7abdcab',
+        bound_code_candidate: '4e35c07758f4d39b05dac402eeb03b080275c3e0',
+        evidence_file: 'docs/reports/V06.2/REVIEW_CONTINUATION_FINAL.md',
+        closed_p0_findings: 2,
+        remaining_p0_blockers: 0,
+        package_verified: false,
+      },
     });
     expect(progress.current_gate).toMatchObject({
       step_id: 'V06.3',

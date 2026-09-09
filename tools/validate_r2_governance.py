@@ -779,6 +779,32 @@ def validate(root: Path) -> dict[str, Any]:
                             and file(owner_record).is_file(),
                             f"{completed_step} owner continuation exception is incomplete",
                         )
+                    if independent_finding_status == "CLEAR":
+                        continuation_review = record.get("continuation_review")
+                        review_evidence_file = (
+                            continuation_review.get("evidence_file")
+                            if isinstance(continuation_review, dict)
+                            else None
+                        )
+                        require(
+                            isinstance(continuation_review, dict)
+                            and continuation_review.get("decision")
+                            == "APPROVED_FOR_CONTINUATION"
+                            and continuation_review.get("reviewed_commit")
+                            == "721993d871a72e0f12c9cfd115c5b04fc7abdcab"
+                            and continuation_review.get("bound_code_candidate")
+                            == implementation_commit
+                            and continuation_review.get("closed_p0_findings") == 2
+                            and continuation_review.get("remaining_p0_blockers") == 0
+                            and continuation_review.get("package_verified") is False
+                            and isinstance(review_evidence_file, str)
+                            and review_evidence_file
+                            in progress_data.get("step_evidence", {}).get(
+                                completed_step, []
+                            )
+                            and file(review_evidence_file).is_file(),
+                            f"{completed_step} independent finding closure is incomplete",
+                        )
                 evidence_commit = record.get("evidence_commit")
                 if evidence_commit is not None:
                     evidence_commit = commit_exists(
