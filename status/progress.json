@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T14:12:31Z",
-  "source_commit": "767b718d995210eafc4742c1a5a93e798329598e",
-  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1 is IMPLEMENTED_UNVERIFIED with independent APPROVED_FOR_CONTINUATION. V06.2 is IMPLEMENTED_UNVERIFIED under the active owner-authorized package-continuation policy; V07 remains prohibited until V06 package review.",
+  "derived_at": "2026-09-09T14:18:00Z",
+  "source_commit": "07636cc48b84602968ff75135c7a0b9c495a2487",
+  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1 is IMPLEMENTED_UNVERIFIED with independent APPROVED_FOR_CONTINUATION. V06.2 is IMPLEMENTED_UNVERIFIED with passing evidence. Owner-authorized adjacent continuation has opened V06.3; V07 remains prohibited until V06 package review.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -122,12 +122,15 @@
     "reconciliation_evidence_file": "docs/reports/GATE_A/FINAL_RECONCILIATION.md"
   },
   "current_gate": {
-    "step_id": "V06.2",
-    "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "V06.2 automated evidence passes under owner-authorized adjacent continuation; no independent verification is claimed",
-    "next_step": "V06.3",
-    "next_step_ready": true,
-    "next_step_blockers": [],
+    "step_id": "V06.3",
+    "status": "IN_PROGRESS",
+    "review": "Owner-authorized adjacent V06 continuation is active; no verification is claimed",
+    "next_step": "V07.1",
+    "next_step_ready": false,
+    "next_step_blockers": [
+      "V06.3 implementation and mandatory evidence are incomplete",
+      "V06 package-level independent review is required before V07"
+    ],
     "required_gate": "V06_PACKAGE_REVIEW",
     "gate_status": "PENDING"
   },
@@ -164,6 +167,7 @@
       },
       "V06.2": {
         "implementation_commit": "767b718d995210eafc4742c1a5a93e798329598e",
+        "evidence_commit": "07636cc48b84602968ff75135c7a0b9c495a2487",
         "evidence_file": "docs/reports/V06.2/TEST_EVIDENCE.json",
         "automated_evidence_status": "PASS"
       }
@@ -176,7 +180,7 @@
     "V03": "VERIFIED",
     "V04": "VERIFIED",
     "V05": "VERIFIED",
-    "V06": "IMPLEMENTED_UNVERIFIED"
+    "V06": "IN_PROGRESS"
   },
   "step_evidence": {
     "V00.1": [
@@ -561,7 +565,7 @@
     "V05.3": "VERIFIED",
     "V06.1": "IMPLEMENTED_UNVERIFIED",
     "V06.2": "IMPLEMENTED_UNVERIFIED",
-    "V06.3": "PLANNED",
+    "V06.3": "IN_PROGRESS",
     "V07.1": "PLANNED",
     "V07.2": "PLANNED",
     "V07.3": "PLANNED",
