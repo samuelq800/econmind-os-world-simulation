@@ -1,0 +1,1422 @@
+{
+  "schema_version": "V01.2-ADR-GRAPH-1",
+  "authority": "Coordination map only. It does not approve or implement any ADR proposal.",
+  "generated_from": [
+    "status/decisions.json",
+    "reference/02_规范冲突与裁决清单.md",
+    "planning/02_架构裁决与数据库协议.md",
+    "planning/r2_steps.json",
+    "planning/work_packages.json"
+  ],
+  "counts": {
+    "adrs": 20,
+    "adr_relationships": 32,
+    "adr_to_package_edges": 114
+  },
+  "current_gate": {
+    "step": "V01.2",
+    "unresolved_blockers": [],
+    "reason": "V01.2 records proposals and future gates; it does not select or implement an unapproved proposal."
+  },
+  "approval_summary": {
+    "approved": 0,
+    "proposed_not_approved": 20,
+    "bulk_approval_permitted": false
+  },
+  "adrs": [
+    {
+      "id": "ADR-01",
+      "conflict_subject": "Engine 与 Settlement Phase 映射及顺序差异",
+      "coordination_proposal": "保留 Master E01-E18，以 Master 18 阶段为协调基线建立 phase-to-engine operation 映射，并通过批准的附录协调 Constitution 硬约束。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V06/V09",
+      "affected_work_packages": [
+        "V01",
+        "V06"
+      ],
+      "first_affected_steps": [
+        "V01.1",
+        "V06.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-01",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-02",
+      "conflict_subject": "技能、库存、设施、存款和外债等逐字段唯一 owner",
+      "coordination_proposal": "为每个 canonical entity 固定唯一 owner 和 posting service；跨领域通过事件或命令交接，projection 不得回写。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V03/V08",
+      "affected_work_packages": [
+        "V01",
+        "V03",
+        "V05",
+        "V08",
+        "V11",
+        "V12",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V19",
+        "V20",
+        "V22",
+        "V23"
+      ],
+      "first_affected_steps": [
+        "V01.1",
+        "V03.1",
+        "V05.1",
+        "V08.1",
+        "V11.1",
+        "V12.1",
+        "V13.1",
+        "V14.1",
+        "V15.1",
+        "V16.1",
+        "V17.1",
+        "V19.1",
+        "V20.1",
+        "V22.1",
+        "V23.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-02",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-03",
+      "conflict_subject": "Simulation Clock、pause、cutoff 与同时间优先级",
+      "coordination_proposal": "使用相对 world 起点的 360 日历 sim ticks，暂停排除 elapsed，恢复按确定顺序补算，并冻结命令 cutoff 和同一 sim 时点优先序。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V06/V07",
+      "affected_work_packages": [
+        "V01",
+        "V06",
+        "V09"
+      ],
+      "first_affected_steps": [
+        "V01.1",
+        "V06.1",
+        "V09.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-03",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-04",
+      "conflict_subject": "期初、当期、滞后输入与资源能源劳动循环",
+      "coordination_proposal": "所有输入标注 opening、current_phase、prior_day 或 scheduled_event；禁止当日免费递归，并区分应计、已付和已到账现金。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V11-V17",
+      "affected_work_packages": [
+        "V01",
+        "V06",
+        "V09",
+        "V11",
+        "V12",
+        "V13",
+        "V15",
+        "V16",
+        "V17",
+        "V21"
+      ],
+      "first_affected_steps": [
+        "V01.1",
+        "V06.1",
+        "V09.1",
+        "V11.1",
+        "V12.1",
+        "V13.1",
+        "V15.1",
+        "V16.1",
+        "V17.1",
+        "V21.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-04",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-05",
+      "conflict_subject": "库存位置、在途、产权、风险及进出口确认时点",
+      "coordination_proposal": "分别记录 physical location、reservation、ownership、risk bearer 和 economic recognition；按批次守恒并冻结 title 与进出口确认时点。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V10",
+      "affected_work_packages": [
+        "V01",
+        "V08",
+        "V10",
+        "V12",
+        "V21",
+        "V22"
+      ],
+      "first_affected_steps": [
+        "V01.1",
+        "V08.1",
+        "V10.1",
+        "V12.1",
+        "V21.1",
+        "V22.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-05",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-06",
+      "conflict_subject": "粮食、服务、建设、医药供给与固定目录缺口",
+      "coordination_proposal": "提交 domestic sector、service 和 subledger 映射，补足农业、服务、建设及医药耗材来源；不得静默新增全球商品或无限 seed。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V13/V17",
+      "affected_work_packages": [
+        "V03",
+        "V13",
+        "V14",
+        "V15",
+        "V17",
+        "V23",
+        "V27"
+      ],
+      "first_affected_steps": [
+        "V03.1",
+        "V13.1",
+        "V14.1",
+        "V15.1",
+        "V17.1",
+        "V23.1",
+        "V27.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-06",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-07",
+      "conflict_subject": "建设增加值、在建资产、完工与 GDP",
+      "coordination_proposal": "批准、付款或 commission 本身不增加 GDP；真实施工按中间投入、劳动、产出和在建资产记录，后续运营产出另计。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V14",
+      "affected_work_packages": [
+        "V08",
+        "V14",
+        "V17",
+        "V18",
+        "V23"
+      ],
+      "first_affected_steps": [
+        "V08.1",
+        "V14.1",
+        "V17.1",
+        "V18.1",
+        "V23.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-07",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-08",
+      "conflict_subject": "价格、需求、FX、精度、舍入、CPI、率与流量周期",
+      "coordination_proposal": "统一单位、Money 精度与舍入分录；版本化价格、需求和 FX 函数及参数，并冻结 GDP 与债务比率的时间口径。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "FORMULA_IMPLEMENTATION",
+      "affected_work_packages": [
+        "V03",
+        "V08",
+        "V11",
+        "V13",
+        "V14",
+        "V15",
+        "V16",
+        "V17",
+        "V18",
+        "V19",
+        "V20",
+        "V21",
+        "V23",
+        "V27"
+      ],
+      "first_affected_steps": [
+        "V03.1",
+        "V08.1",
+        "V11.1",
+        "V13.1",
+        "V14.1",
+        "V15.1",
+        "V16.1",
+        "V17.1",
+        "V18.1",
+        "V19.1",
+        "V20.1",
+        "V21.1",
+        "V23.1",
+        "V27.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-08",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-09",
+      "conflict_subject": "required_offices、阈值、兼任签字与版本撤销",
+      "coordination_proposal": "建立版本化 required_offices resolver，记录 trigger、owner、role、threshold、country side 和 expiry；同人兼任仍需逐 Office 签字。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V05",
+      "affected_work_packages": [
+        "V01",
+        "V05",
+        "V10",
+        "V14",
+        "V16",
+        "V18",
+        "V19",
+        "V20",
+        "V22",
+        "V24",
+        "V25"
+      ],
+      "first_affected_steps": [
+        "V01.1",
+        "V05.1",
+        "V10.1",
+        "V14.1",
+        "V16.1",
+        "V18.1",
+        "V19.1",
+        "V20.1",
+        "V22.1",
+        "V24.1",
+        "V25.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-09",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-10",
+      "conflict_subject": "23 个国际 subtype 与 Trade 和 Industry 家族对照",
+      "coordination_proposal": "建立 type、subtype、family 映射，并逐种登记 economic adapter、审批、权利义务、结算与失败路径。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V21/V22",
+      "affected_work_packages": [
+        "V21",
+        "V22"
+      ],
+      "first_affected_steps": [
+        "V21.1",
+        "V22.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-10",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-11",
+      "conflict_subject": "幂等重复回执与不可变 event 消费状态",
+      "coordination_proposal": "使用 command_id 与 payload_hash 唯一性；返回明确的原回执且不重新执行，同 key 异 payload 拒绝，消费回执独立于 append-only event。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V07",
+      "affected_work_packages": [
+        "V07"
+      ],
+      "first_affected_steps": [
+        "V07.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-11",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-12",
+      "conflict_subject": "world、country、office、谈判和 admin 读取及 forecast 保密",
+      "coordination_proposal": "分别建立 public、cabinet、office-private、negotiation-party 和 admin 投影；RLS、grants、服务层、cache、Realtime 与 forecast 共用分类策略。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V05/V10",
+      "affected_work_packages": [
+        "V05",
+        "V10",
+        "V24",
+        "V25",
+        "V26"
+      ],
+      "first_affected_steps": [
+        "V05.1",
+        "V10.1",
+        "V24.1",
+        "V25.1",
+        "V26.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-12",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-13",
+      "conflict_subject": "无人国家 NPC、默认政策与权限",
+      "coordination_proposal": "使用可重复、版本化的 baseline 或 NPC controller，经同一命令管道并受资金、库存、权限和审批约束。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V27",
+      "affected_work_packages": [
+        "V27"
+      ],
+      "first_affected_steps": [
+        "V27.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-13",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-14",
+      "conflict_subject": "双 orchestrator、旧世界保留与 clean seed",
+      "coordination_proposal": "每个 world 固定 model_version；V2 Simulation 与 Season 共享 Core、使用不同 orchestrator，旧记录保留适配，新模型使用可追溯 clean seed。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V28",
+      "affected_work_packages": [
+        "V28",
+        "V31"
+      ],
+      "first_affected_steps": [
+        "V28.1",
+        "V31.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-14",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-15",
+      "conflict_subject": "评分版本、CPI 归因与季末未到期义务",
+      "coordination_proposal": "冻结评分版本和初始条件；区分 CPI 会计贡献与因果解释；季末停止新命令但保留未到期权利义务和最终快照。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V23/V31",
+      "affected_work_packages": [
+        "V23",
+        "V24",
+        "V26",
+        "V27",
+        "V31",
+        "V32"
+      ],
+      "first_affected_steps": [
+        "V23.1",
+        "V24.1",
+        "V26.1",
+        "V27.1",
+        "V31.1",
+        "V32.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-15",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-16",
+      "conflict_subject": "共享 Supabase namespace 与 migration 发布权",
+      "coordination_proposal": "V2 核心使用非公开 world_v2 schema；V2 交付带 ID 和 hash 的 SQL 制品，现有主站仓库保持共享生产 Supabase 的唯一 migration 发布源。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V02/V31",
+      "affected_work_packages": [
+        "V01",
+        "V02",
+        "V28",
+        "V30",
+        "V31"
+      ],
+      "first_affected_steps": [
+        "V01.1",
+        "V02.1",
+        "V28.1",
+        "V30.1",
+        "V31.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-16",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-17",
+      "conflict_subject": "持久化、提交、重放与故障边界",
+      "coordination_proposal": "canonical 实体、不可变事件和分录在同一权威事务提交；单 world writer 使用 lease 与 fencing，候选状态私有，outbox 可重投并由消费者去重。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V07/V09",
+      "affected_work_packages": [
+        "V07",
+        "V08",
+        "V09",
+        "V30"
+      ],
+      "first_affected_steps": [
+        "V07.1",
+        "V08.1",
+        "V09.1",
+        "V30.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-17",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-18",
+      "conflict_subject": "运行环境与资源隔离",
+      "coordination_proposal": "Local 和 CI 使用一次性环境，staging 使用隔离项目或分支，production 最后连接共享项目；Web、API、Worker 保持职责隔离。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V02/V30",
+      "affected_work_packages": [
+        "V01",
+        "V02",
+        "V30",
+        "V31"
+      ],
+      "first_affected_steps": [
+        "V01.1",
+        "V02.1",
+        "V30.1",
+        "V31.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-18",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-19",
+      "conflict_subject": "域名、登录、代理与缓存",
+      "coordination_proposal": "首期使用独立 World 域名并允许重新登录；同源代理或登录桥只在 Cookie、PKCE、redirect 和 cache 方案通过验收后启用。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V28",
+      "affected_work_packages": [
+        "V01",
+        "V05",
+        "V26",
+        "V28",
+        "V30",
+        "V31"
+      ],
+      "first_affected_steps": [
+        "V01.1",
+        "V05.1",
+        "V26.1",
+        "V28.1",
+        "V30.1",
+        "V31.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-19",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    },
+    {
+      "id": "ADR-20",
+      "conflict_subject": "身份生命周期与经济历史",
+      "coordination_proposal": "新命令按当前成员和 Office 权限验证；玩家离开不消除已生效国家义务，个人资料与不可变经济历史分层且不得级联删除。",
+      "decision_status": "PROPOSED_NOT_APPROVED",
+      "approval_record": null,
+      "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
+      "latest_gate": "V05/V28",
+      "affected_work_packages": [
+        "V01",
+        "V05",
+        "V28",
+        "V30",
+        "V32"
+      ],
+      "first_affected_steps": [
+        "V01.1",
+        "V05.1",
+        "V28.1",
+        "V30.1",
+        "V32.1"
+      ],
+      "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
+      "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
+      "source_locations": [
+        "reference/02_规范冲突与裁决清单.md#adr-20",
+        "planning/02_架构裁决与数据库协议.md",
+        "status/decisions.json"
+      ]
+    }
+  ],
+  "adr_relationships": [
+    {
+      "from": "ADR-01",
+      "to": "ADR-03",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Phase ordering requires the clock and cutoff contract."
+    },
+    {
+      "from": "ADR-01",
+      "to": "ADR-04",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Phase mapping must preserve opening/current/prior-day reads."
+    },
+    {
+      "from": "ADR-02",
+      "to": "ADR-05",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Inventory ownership fields constrain cross-border title transfer."
+    },
+    {
+      "from": "ADR-02",
+      "to": "ADR-07",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Facility and capital owners constrain construction recognition."
+    },
+    {
+      "from": "ADR-02",
+      "to": "ADR-11",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Command and receipt ownership constrain idempotent replay."
+    },
+    {
+      "from": "ADR-02",
+      "to": "ADR-12",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Canonical owners constrain authorized projections."
+    },
+    {
+      "from": "ADR-02",
+      "to": "ADR-20",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Historical actor references depend on canonical ownership."
+    },
+    {
+      "from": "ADR-03",
+      "to": "ADR-04",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Clock/cutoff rules determine which period values may be read."
+    },
+    {
+      "from": "ADR-03",
+      "to": "ADR-11",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Idempotency is evaluated against accepted simulation time."
+    },
+    {
+      "from": "ADR-03",
+      "to": "ADR-17",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Checkpoint and recovery semantics require a fixed clock."
+    },
+    {
+      "from": "ADR-04",
+      "to": "ADR-05",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Trade recognition timing depends on period read rules."
+    },
+    {
+      "from": "ADR-04",
+      "to": "ADR-06",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Domestic supply closure must avoid same-day recursive inputs."
+    },
+    {
+      "from": "ADR-04",
+      "to": "ADR-07",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Construction value added depends on current/prior-period rules."
+    },
+    {
+      "from": "ADR-04",
+      "to": "ADR-08",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Price and flow formula periods depend on read timing."
+    },
+    {
+      "from": "ADR-05",
+      "to": "ADR-10",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "International subtype adapters require title-transfer rules."
+    },
+    {
+      "from": "ADR-05",
+      "to": "ADR-17",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Transit and delivery facts require atomic persistence."
+    },
+    {
+      "from": "ADR-06",
+      "to": "ADR-07",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Construction inputs depend on the domestic supply catalogue."
+    },
+    {
+      "from": "ADR-06",
+      "to": "ADR-08",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "New domestic services require units and price functions."
+    },
+    {
+      "from": "ADR-08",
+      "to": "ADR-15",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Scoring and CPI attribution require fixed formula versions."
+    },
+    {
+      "from": "ADR-09",
+      "to": "ADR-12",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Required offices constrain private authorization projections."
+    },
+    {
+      "from": "ADR-09",
+      "to": "ADR-20",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Membership revocation constrains approval validity."
+    },
+    {
+      "from": "ADR-10",
+      "to": "ADR-16",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "International adapters constrain migration artefacts."
+    },
+    {
+      "from": "ADR-11",
+      "to": "ADR-17",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Replay receipts constrain persistence and recovery."
+    },
+    {
+      "from": "ADR-12",
+      "to": "ADR-19",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Projection classes constrain cross-origin caching and login."
+    },
+    {
+      "from": "ADR-12",
+      "to": "ADR-20",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Projection access must follow current identity lifecycle."
+    },
+    {
+      "from": "ADR-14",
+      "to": "ADR-16",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Legacy/V2 coexistence constrains schema publication."
+    },
+    {
+      "from": "ADR-14",
+      "to": "ADR-19",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Mode routing constrains login and proxy behavior."
+    },
+    {
+      "from": "ADR-14",
+      "to": "ADR-20",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Legacy history preservation constrains identity deletion."
+    },
+    {
+      "from": "ADR-16",
+      "to": "ADR-18",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Migration publication depends on environment isolation."
+    },
+    {
+      "from": "ADR-17",
+      "to": "ADR-16",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Persistence contracts constrain migration artefacts."
+    },
+    {
+      "from": "ADR-17",
+      "to": "ADR-18",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Recovery and fencing depend on runtime isolation."
+    },
+    {
+      "from": "ADR-19",
+      "to": "ADR-20",
+      "type": "CONSTRAINS_OR_PRECEDES",
+      "rationale": "Session lifecycle must enforce current authorization."
+    }
+  ],
+  "adr_to_package_edges": [
+    {
+      "from": "ADR-01",
+      "to": "V01",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-01",
+      "to": "V06",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V01",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V03",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V05",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V08",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V11",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V12",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V13",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V14",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V15",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V16",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V17",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V19",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V20",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V22",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-02",
+      "to": "V23",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-03",
+      "to": "V01",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-03",
+      "to": "V06",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-03",
+      "to": "V09",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-04",
+      "to": "V01",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-04",
+      "to": "V06",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-04",
+      "to": "V09",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-04",
+      "to": "V11",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-04",
+      "to": "V12",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-04",
+      "to": "V13",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-04",
+      "to": "V15",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-04",
+      "to": "V16",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-04",
+      "to": "V17",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-04",
+      "to": "V21",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-05",
+      "to": "V01",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-05",
+      "to": "V08",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-05",
+      "to": "V10",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-05",
+      "to": "V12",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-05",
+      "to": "V21",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-05",
+      "to": "V22",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-06",
+      "to": "V03",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-06",
+      "to": "V13",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-06",
+      "to": "V14",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-06",
+      "to": "V15",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-06",
+      "to": "V17",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-06",
+      "to": "V23",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-06",
+      "to": "V27",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-07",
+      "to": "V08",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-07",
+      "to": "V14",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-07",
+      "to": "V17",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-07",
+      "to": "V18",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-07",
+      "to": "V23",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V03",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V08",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V11",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V13",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V14",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V15",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V16",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V17",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V18",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V19",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V20",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V21",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V23",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-08",
+      "to": "V27",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-09",
+      "to": "V01",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-09",
+      "to": "V05",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-09",
+      "to": "V10",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-09",
+      "to": "V14",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-09",
+      "to": "V16",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-09",
+      "to": "V18",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-09",
+      "to": "V19",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-09",
+      "to": "V20",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-09",
+      "to": "V22",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-09",
+      "to": "V24",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-09",
+      "to": "V25",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-10",
+      "to": "V21",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-10",
+      "to": "V22",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-11",
+      "to": "V07",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-12",
+      "to": "V05",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-12",
+      "to": "V10",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-12",
+      "to": "V24",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-12",
+      "to": "V25",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-12",
+      "to": "V26",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-13",
+      "to": "V27",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-14",
+      "to": "V28",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-14",
+      "to": "V31",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-15",
+      "to": "V23",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-15",
+      "to": "V24",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-15",
+      "to": "V26",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-15",
+      "to": "V27",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-15",
+      "to": "V31",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-15",
+      "to": "V32",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-16",
+      "to": "V01",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-16",
+      "to": "V02",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-16",
+      "to": "V28",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-16",
+      "to": "V30",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-16",
+      "to": "V31",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-17",
+      "to": "V07",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-17",
+      "to": "V08",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-17",
+      "to": "V09",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-17",
+      "to": "V30",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-18",
+      "to": "V01",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-18",
+      "to": "V02",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-18",
+      "to": "V30",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-18",
+      "to": "V31",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-19",
+      "to": "V01",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-19",
+      "to": "V05",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-19",
+      "to": "V26",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-19",
+      "to": "V28",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-19",
+      "to": "V30",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-19",
+      "to": "V31",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-20",
+      "to": "V01",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-20",
+      "to": "V05",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-20",
+      "to": "V28",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-20",
+      "to": "V30",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    },
+    {
+      "from": "ADR-20",
+      "to": "V32",
+      "type": "BLOCKS_AFFECTED_IMPLEMENTATION_BY_LATEST_GATE"
+    }
+  ]
+}

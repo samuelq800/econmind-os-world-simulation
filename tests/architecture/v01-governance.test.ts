@@ -77,3 +77,65 @@ describe('V01.1 requirements traceability', () => {
     ).toBe(true);
   });
 });
+
+describe('V01.2 ADR coordination graph', () => {
+  it('preserves all 20 decisions as proposed and not approved', () => {
+    const decisions = readJson('status/decisions.json').decisions;
+    const graph = readJson('requirements/adr_dependency_map.json');
+    const expectedIds = Array.from(
+      { length: 20 },
+      (_, index) => `ADR-${String(index + 1).padStart(2, '0')}`,
+    );
+
+    expect(graph.counts.adrs).toBe(20);
+    expect(graph.approval_summary).toEqual({
+      approved: 0,
+      proposed_not_approved: 20,
+      bulk_approval_permitted: false,
+    });
+    expect(graph.adrs.map((adr) => adr.id)).toEqual(expectedIds);
+    expect(
+      decisions.every(
+        (decision) =>
+          decision.status === 'PROPOSED_NOT_APPROVED' &&
+          decision.approval_record === null,
+      ),
+    ).toBe(true);
+    expect(
+      graph.adrs.every(
+        (adr) =>
+          adr.decision_status === 'PROPOSED_NOT_APPROVED' &&
+          adr.approval_record === null,
+      ),
+    ).toBe(true);
+  });
+
+  it('matches affected packages and records future blocking gates', () => {
+    const decisions = readJson('status/decisions.json').decisions;
+    const graph = readJson('requirements/adr_dependency_map.json');
+    const graphById = new Map(graph.adrs.map((adr) => [adr.id, adr]));
+
+    for (const decision of decisions) {
+      const mapped = graphById.get(decision.id);
+      expect(mapped.affected_work_packages).toEqual(
+        decision.affected_work_packages,
+      );
+      expect(mapped.latest_gate).toBe(decision.latest_gate);
+      expect(mapped.future_implementation_effect).toBe(
+        'BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED',
+      );
+    }
+    expect(graph.adr_relationships.length).toBeGreaterThan(0);
+    expect(graph.adr_to_package_edges.length).toBeGreaterThan(20);
+  });
+
+  it('has no decision blocker for the coordination-only current gate', () => {
+    const graph = readJson('requirements/adr_dependency_map.json');
+    expect(graph.current_gate).toEqual({
+      step: 'V01.2',
+      unresolved_blockers: [],
+      reason:
+        'V01.2 records proposals and future gates; it does not select or implement an unapproved proposal.',
+    });
+  });
+});

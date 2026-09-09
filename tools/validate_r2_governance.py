@@ -152,6 +152,7 @@ def validate(root: Path) -> dict[str, Any]:
             "requirements.docx",
             "requirements/requirement_registry.json",
             "requirements/source_unit_assignments.jsonl",
+            "requirements/adr_dependency_map.json",
             "planning/01_新仓库架构与完整交付路线.md",
             "planning/02_架构裁决与数据库协议.md",
             "planning/03_33个工作包与依赖.md",
@@ -692,6 +693,52 @@ def validate(root: Path) -> dict[str, Any]:
             )
         metrics.update(v01_requirements=len(registry["requirements"]), v01_source_units=len(assignments))
 
+    def v01_adr_graph() -> None:
+        decision_data = load_json("status/decisions.json")
+        graph = load_json("requirements/adr_dependency_map.json")
+        require(graph["schema_version"] == "V01.2-ADR-GRAPH-1", "wrong V01.2 graph schema")
+        require(graph["counts"]["adrs"] == 20, "V01.2 graph must contain 20 ADRs")
+        require(
+            graph["approval_summary"]
+            == {
+                "approved": 0,
+                "proposed_not_approved": 20,
+                "bulk_approval_permitted": False,
+            },
+            "V01.2 graph implies unsupported approval",
+        )
+        require(
+            graph["current_gate"]["unresolved_blockers"] == [],
+            "V01.2 coordination gate has an unresolved blocker",
+        )
+        records = {record["id"]: record for record in decision_data["decisions"]}
+        mapped = {record["id"]: record for record in graph["adrs"]}
+        require(set(mapped) == set(records), "V01.2 ADR set differs from decision register")
+        for adr_id, record in records.items():
+            require(
+                record["status"] == mapped[adr_id]["decision_status"] == "PROPOSED_NOT_APPROVED",
+                f"{adr_id} approval status drift",
+            )
+            require(
+                record["approval_record"] is None and mapped[adr_id]["approval_record"] is None,
+                f"{adr_id} carries unsupported approval",
+            )
+            require(
+                record["affected_work_packages"] == mapped[adr_id]["affected_work_packages"],
+                f"{adr_id} affected-package drift",
+            )
+            require(record["latest_gate"] == mapped[adr_id]["latest_gate"], f"{adr_id} gate drift")
+        for edge in graph["adr_relationships"]:
+            require(
+                edge["from"] in records and edge["to"] in records,
+                "V01.2 relationship refers to unknown ADR",
+            )
+        metrics.update(
+            v01_adrs=len(mapped),
+            v01_adr_relationships=len(graph["adr_relationships"]),
+            v01_adr_package_edges=len(graph["adr_to_package_edges"]),
+        )
+
     def templates() -> None:
         required_templates = [
             "templates/EXECUTION_PLAN.md",
@@ -721,6 +768,7 @@ def validate(root: Path) -> dict[str, Any]:
         ("decision_register", decisions),
         ("source_material", source_material),
         ("v01_traceability", v01_traceability),
+        ("v01_adr_graph", v01_adr_graph),
         ("templates", templates),
     ):
         check(name, operation)
