@@ -282,6 +282,41 @@ def validate(root: Path) -> dict[str, Any]:
             and "not a Codex self-approval" in activation_text,
             "V06 owner continuation activation evidence is incomplete",
         )
+        review_exception = continuation_policy.get("review_unavailability_exception")
+        require(
+            isinstance(review_exception, dict)
+            and review_exception.get("status") == "ACTIVE"
+            and review_exception.get("authority") == "RESPONSIBLE_HUMAN_OWNER"
+            and review_exception.get("from_step") == "V06.2"
+            and review_exception.get("to_step") == "V06.3"
+            and review_exception.get("implementation_commit")
+            == "4e35c07758f4d39b05dac402eeb03b080275c3e0"
+            and review_exception.get("evidence_commit")
+            == "721993d871a72e0f12c9cfd115c5b04fc7abdcab"
+            and review_exception.get("independent_review")
+            == "UNAVAILABLE_SYSTEM_ERROR"
+            and review_exception.get("owner_continuation_authorized") is True
+            and review_exception.get("independent_closure_claimed") is False
+            and review_exception.get("verification_claimed") is False
+            and review_exception.get("merge_authorized") is False,
+            "V06 review-unavailability exception differs from owner authority",
+        )
+        review_exception_record = review_exception.get("record")
+        require(
+            isinstance(review_exception_record, str)
+            and review_exception_record.startswith("docs/reports/V06.2/"),
+            "V06 review-unavailability record path is invalid",
+        )
+        review_exception_text = file(review_exception_record).read_text(
+            encoding="utf-8"
+        )
+        require(
+            "Decision: OWNER_CONTINUATION_AFTER_REVIEW_UNAVAILABLE"
+            in review_exception_text
+            and "Authority: RESPONSIBLE_HUMAN_OWNER" in review_exception_text
+            and "not `VERIFIED`" in review_exception_text,
+            "V06 review-unavailability owner record is incomplete",
+        )
         owner_acceptance = review_policy["verification_methods"].get("PROJECT_OWNER_ACCEPTANCE")
         require(isinstance(owner_acceptance, dict), "missing Gate A project-owner acceptance policy")
         require(
@@ -711,7 +746,11 @@ def validate(root: Path) -> dict[str, Any]:
                 if independent_finding_status is not None:
                     require(
                         independent_finding_status
-                        in {"P0_CLOSURE_PENDING", "CLEAR"},
+                        in {
+                            "P0_CLOSURE_PENDING",
+                            "OWNER_CONTINUATION_ACCEPTED_CLOSURE_PENDING",
+                            "CLEAR",
+                        },
                         f"{completed_step} has invalid independent finding status",
                     )
                     findings_file = record.get("review_findings_file")
@@ -722,6 +761,24 @@ def validate(root: Path) -> dict[str, Any]:
                         and file(findings_file).is_file(),
                         f"{completed_step} independent finding evidence is not registered",
                     )
+                    if (
+                        independent_finding_status
+                        == "OWNER_CONTINUATION_ACCEPTED_CLOSURE_PENDING"
+                    ):
+                        owner_record = record.get("owner_continuation_record")
+                        require(
+                            record.get("owner_approved") is True
+                            and record.get("independent_review")
+                            == "UNAVAILABLE_SYSTEM_ERROR"
+                            and record.get("owner_continuation_authorized") is True
+                            and record.get("independent_closure_claimed") is False
+                            and owner_record
+                            == continuation_policy[
+                                "review_unavailability_exception"
+                            ]["record"]
+                            and file(owner_record).is_file(),
+                            f"{completed_step} owner continuation exception is incomplete",
+                        )
                 evidence_commit = record.get("evidence_commit")
                 if evidence_commit is not None:
                     evidence_commit = commit_exists(
@@ -849,6 +906,10 @@ def validate(root: Path) -> dict[str, Any]:
                             ]
                             and states[dependency] == "IMPLEMENTED_UNVERIFIED"
                             and dependency in continuation_completed
+                            and continuation_completed[dependency].get(
+                                "independent_finding_status"
+                            )
+                            != "P0_CLOSURE_PENDING"
                         )
                         for dependency in step_by_id[step_id]["hard_dependencies"]
                     )

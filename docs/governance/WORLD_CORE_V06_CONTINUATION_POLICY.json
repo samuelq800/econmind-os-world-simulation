@@ -13,15 +13,29 @@
     "terminal_gate": "V06_PACKAGE_REVIEW"
   },
   "continuation_rule": {
-    "condition": "The immediately preceding V06 step has an immutable implementation commit, complete evidence with applicable automated checks passing, no invalidating upstream finding, and status IMPLEMENTED_UNVERIFIED or VERIFIED.",
+    "condition": "The immediately preceding V06 step has an immutable implementation commit, complete evidence with applicable automated checks passing, no invalidating upstream finding or an exact owner continuation-after-review-unavailability record, and status IMPLEMENTED_UNVERIFIED or VERIFIED.",
     "effect": "The immediately following V06 step may start on codex/world-core-v06-v10 without claiming verification.",
     "status_after_step": "IMPLEMENTED_UNVERIFIED",
     "dependency_exception": "An IMPLEMENTED_UNVERIFIED dependency is accepted only between adjacent members of the exact allowed_steps sequence."
   },
+  "review_unavailability_exception": {
+    "status": "ACTIVE",
+    "authority": "RESPONSIBLE_HUMAN_OWNER",
+    "record": "docs/reports/V06.2/OWNER_CONTINUATION_AFTER_REVIEW_UNAVAILABLE.md",
+    "from_step": "V06.2",
+    "to_step": "V06.3",
+    "implementation_commit": "4e35c07758f4d39b05dac402eeb03b080275c3e0",
+    "evidence_commit": "721993d871a72e0f12c9cfd115c5b04fc7abdcab",
+    "independent_review": "UNAVAILABLE_SYSTEM_ERROR",
+    "owner_continuation_authorized": true,
+    "independent_closure_claimed": false,
+    "verification_claimed": false,
+    "merge_authorized": false
+  },
   "preserved_controls": [
     "V06.1, V06.2 and V06.3 remain IMPLEMENTED_UNVERIFIED unless independently promoted",
     "normal engineering acceptance, determinism, exactness, architecture, environment, security and governance checks remain mandatory",
-    "a blocking upstream review finding stops affected downstream work",
+    "a blocking upstream review finding stops affected downstream work unless the responsible human owner records an exact candidate-bound continuation-after-review-unavailability decision",
     "ADR-01 and ADR-03 remain the approved V06 decision authority",
     "ADR-04 remains PROPOSED_NOT_APPROVED",
     "no database or production mutation without separate exact-step authority",

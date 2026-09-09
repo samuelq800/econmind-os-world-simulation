@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T14:30:46Z",
-  "source_commit": "4e35c07758f4d39b05dac402eeb03b080275c3e0",
-  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1 is IMPLEMENTED_UNVERIFIED with independent APPROVED_FOR_CONTINUATION. Review B found two P0 blockers in the original V06.2 candidate; forward fixes and automated evidence pass, but independent closure is pending. V06.3 is stopped and V07 remains prohibited.",
+  "derived_at": "2026-09-09T14:40:56Z",
+  "source_commit": "721993d871a72e0f12c9cfd115c5b04fc7abdcab",
+  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1 is IMPLEMENTED_UNVERIFIED with independent APPROVED_FOR_CONTINUATION. The owner has explicitly authorized V06.3 continuation after repeated Review B system errors, bound to the repaired V06.2 code/evidence without claiming independent closure or verification. V07 remains prohibited.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -122,13 +122,14 @@
     "reconciliation_evidence_file": "docs/reports/GATE_A/FINAL_RECONCILIATION.md"
   },
   "current_gate": {
-    "step_id": "V06.2",
-    "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "Two Review B P0 findings have forward fixes; independent closure is pending and no verification is claimed",
-    "next_step": "V06.3",
+    "step_id": "V06.3",
+    "status": "IN_PROGRESS",
+    "review": "Exact owner continuation-after-review-unavailability authority is active; no independent closure or verification is claimed",
+    "next_step": "V07.1",
     "next_step_ready": false,
     "next_step_blockers": [
-      "Review B must close both V06.2 P0 findings against the new immutable evidence target"
+      "V06.3 implementation and mandatory evidence are incomplete",
+      "V06 package-level review is required before V07"
     ],
     "required_gate": "V06_PACKAGE_REVIEW",
     "gate_status": "PENDING"
@@ -168,8 +169,13 @@
         "implementation_commit": "4e35c07758f4d39b05dac402eeb03b080275c3e0",
         "evidence_file": "docs/reports/V06.2/TEST_EVIDENCE_RERUN.json",
         "automated_evidence_status": "PASS",
-        "independent_finding_status": "P0_CLOSURE_PENDING",
+        "independent_finding_status": "OWNER_CONTINUATION_ACCEPTED_CLOSURE_PENDING",
         "review_findings_file": "docs/reports/V06.2/REVIEW_FINDINGS.md",
+        "owner_continuation_record": "docs/reports/V06.2/OWNER_CONTINUATION_AFTER_REVIEW_UNAVAILABLE.md",
+        "owner_approved": true,
+        "independent_review": "UNAVAILABLE_SYSTEM_ERROR",
+        "owner_continuation_authorized": true,
+        "independent_closure_claimed": false,
         "superseded_candidates": [
           {
             "implementation_commit": "767b718d995210eafc4742c1a5a93e798329598e",
@@ -188,7 +194,7 @@
     "V03": "VERIFIED",
     "V04": "VERIFIED",
     "V05": "VERIFIED",
-    "V06": "IMPLEMENTED_UNVERIFIED"
+    "V06": "IN_PROGRESS"
   },
   "step_evidence": {
     "V00.1": [
@@ -303,7 +309,8 @@
       "docs/reports/V06.2/IMPLEMENTATION.md",
       "docs/reports/V06.2/TEST_EVIDENCE.json",
       "docs/reports/V06.2/REVIEW_FINDINGS.md",
-      "docs/reports/V06.2/TEST_EVIDENCE_RERUN.json"
+      "docs/reports/V06.2/TEST_EVIDENCE_RERUN.json",
+      "docs/reports/V06.2/OWNER_CONTINUATION_AFTER_REVIEW_UNAVAILABLE.md"
     ]
   },
   "package_evidence": {
@@ -575,7 +582,7 @@
     "V05.3": "VERIFIED",
     "V06.1": "IMPLEMENTED_UNVERIFIED",
     "V06.2": "IMPLEMENTED_UNVERIFIED",
-    "V06.3": "BLOCKED",
+    "V06.3": "IN_PROGRESS",
     "V07.1": "PLANNED",
     "V07.2": "PLANNED",
     "V07.3": "PLANNED",
