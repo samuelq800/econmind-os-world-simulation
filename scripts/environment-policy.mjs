@@ -1,12 +1,33 @@
 import { findForbiddenBrowserVariables } from './vite-environment-policy.mjs';
 
-const SAFE_LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 const SUPPORTED_ENVIRONMENTS = new Set([
   'local',
   'ci',
   'staging',
   'production',
 ]);
+
+function isLoopbackHost(hostname) {
+  const lower = hostname.toLowerCase().replace(/\.+$/u, '');
+  if (lower === 'localhost' || lower.endsWith('.localhost')) return true;
+
+  let canonical;
+  try {
+    // WHATWG's special-host parser deterministically normalizes every legacy
+    // IPv4 spelling (short, integer, hexadecimal, and octal) without DNS.
+    canonical = new URL(`http://${lower}`).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  if (canonical === '127.0.0.1' || canonical.startsWith('127.')) return true;
+
+  const ipv6 = canonical.replace(/^\[|\]$/gu, '');
+  return (
+    ipv6 === '::1' ||
+    /^::ffff:7f[0-9a-f]{2}:/u.test(ipv6) ||
+    /^::7f[0-9a-f]{2}:/u.test(ipv6)
+  );
+}
 
 export function assessEnvironment(environment) {
   const name = environment.ECONMIND_ENV;
@@ -41,14 +62,11 @@ export function assessEnvironment(environment) {
       }
       if (
         (name === 'local' || name === 'ci') &&
-        !SAFE_LOCAL_HOSTS.has(parsedDatabaseUrl.hostname)
+        !isLoopbackHost(parsedDatabaseUrl.hostname)
       ) {
         violations.push(`${name} DATABASE_URL must resolve to a loopback host`);
       }
-      if (
-        name === 'production' &&
-        SAFE_LOCAL_HOSTS.has(parsedDatabaseUrl.hostname)
-      ) {
+      if (name === 'production' && isLoopbackHost(parsedDatabaseUrl.hostname)) {
         violations.push(
           'production database URL must not resolve to a development host',
         );
@@ -82,16 +100,14 @@ export function assessEnvironment(environment) {
       'World database mutation is disabled during the Foundation Sprint',
     );
   }
-  if (name === 'ci') {
-    for (const key of Object.keys(environment)) {
-      if (
-        environment[key] &&
-        /(?:PRODUCTION|SERVICE_ROLE|SUPABASE_DB_PASSWORD)/iu.test(key)
-      ) {
-        violations.push(
-          `CI must not receive production credential variable: ${key}`,
-        );
-      }
+  for (const key of Object.keys(environment)) {
+    if (
+      environment[key] &&
+      /(?:PRODUCTION|SERVICE_ROLE|SUPABASE_DB_PASSWORD)/iu.test(key)
+    ) {
+      violations.push(
+        `Runtime must not receive forbidden production credential variable: ${key}`,
+      );
     }
   }
 
@@ -100,4 +116,14 @@ export function assessEnvironment(environment) {
     name: name ?? 'MISSING',
     violations,
   };
+}
+
+export function assertSafeEnvironment(environment = process.env) {
+  const assessment = assessEnvironment(environment);
+  if (assessment.violations.length > 0) {
+    throw new Error(
+      `Unsafe World V2 runtime environment (${assessment.name}): ${assessment.violations.join('; ')}`,
+    );
+  }
+  return assessment;
 }

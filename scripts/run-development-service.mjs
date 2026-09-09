@@ -4,6 +4,8 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
+import { assertSafeEnvironment } from './environment-policy.mjs';
+
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -33,6 +35,7 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
   console.error('Expected one service name: web, api, or worker');
   process.exitCode = 1;
 } else {
+  assertSafeEnvironment(process.env);
   const originalParentPid = process.ppid;
   let originalParentIsPnpm = process.platform === 'win32';
   let activeChild;

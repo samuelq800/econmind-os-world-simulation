@@ -316,7 +316,7 @@ describe.skipIf(process.platform === 'win32')(
         const ports = await freePorts();
         const secret = 'service-role-value-must-not-appear';
         const managed = startStack(ports, {
-          SUPABASE_SERVICE_ROLE_KEY: secret,
+          TEST_PRIVATE_VALUE: secret,
         });
         let captured: ProcessRow[] = [];
         try {

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 import { loadEnv } from 'vite';
 
-import { assessEnvironment } from './environment-policy.mjs';
+import { assertSafeEnvironment } from './environment-policy.mjs';
 import { findForbiddenBrowserVariables } from './vite-environment-policy.mjs';
 
 const repositoryRoot = path.resolve(
@@ -13,7 +13,18 @@ const repositoryRoot = path.resolve(
 );
 const linkMarker = path.join(repositoryRoot, 'supabase/.temp/project-ref');
 const worldWebRoot = path.join(repositoryRoot, 'apps/world-web');
-const assessment = assessEnvironment(process.env);
+let assessment;
+try {
+  assessment = assertSafeEnvironment(process.env);
+} catch (error) {
+  assessment = {
+    databaseConfigured: false,
+    name: process.env.ECONMIND_ENV ?? 'MISSING',
+    violations: [
+      error instanceof Error ? error.message : 'Unknown environment failure',
+    ],
+  };
+}
 const viteModes = ['development', 'production'];
 const viteViolations = viteModes.flatMap((mode) =>
   findForbiddenBrowserVariables(loadEnv(mode, worldWebRoot, 'VITE_')).map(
