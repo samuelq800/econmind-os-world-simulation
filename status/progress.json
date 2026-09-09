@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T14:40:56Z",
-  "source_commit": "721993d871a72e0f12c9cfd115c5b04fc7abdcab",
-  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1 is IMPLEMENTED_UNVERIFIED with independent APPROVED_FOR_CONTINUATION. The owner has explicitly authorized V06.3 continuation after repeated Review B system errors, bound to the repaired V06.2 code/evidence without claiming independent closure or verification. V07 remains prohibited.",
+  "derived_at": "2026-09-09T15:08:54Z",
+  "source_commit": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453",
+  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1, corrected V06.2 and V06.3 are IMPLEMENTED_UNVERIFIED. The owner continuation after Review B system errors remains recorded; a later independent re-review accepted the two V06.2 P0 fixes for continuation. V06 is ready only for package-level review, and V07 remains prohibited.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -123,14 +123,11 @@
   },
   "current_gate": {
     "step_id": "V06.3",
-    "status": "IN_PROGRESS",
-    "review": "Exact owner continuation-after-review-unavailability authority is active; no independent closure or verification is claimed",
+    "status": "IMPLEMENTED_UNVERIFIED",
+    "review": "V06.3 evidence complete; V06 package-level review is required and no verification or merge is claimed",
     "next_step": "V07.1",
     "next_step_ready": false,
-    "next_step_blockers": [
-      "V06.3 implementation and mandatory evidence are incomplete",
-      "V06 package-level review is required before V07"
-    ],
+    "next_step_blockers": ["V06 package-level review is required before V07"],
     "required_gate": "V06_PACKAGE_REVIEW",
     "gate_status": "PENDING"
   },
@@ -194,6 +191,13 @@
             "review_result": "P0_BLOCKER"
           }
         ]
+      },
+      "V06.3": {
+        "implementation_commit": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453",
+        "evidence_file": "docs/reports/V06.3/TEST_EVIDENCE.json",
+        "automated_evidence_status": "PASS",
+        "package_review_pending": true,
+        "package_verified": false
       }
     }
   },
@@ -204,7 +208,7 @@
     "V03": "VERIFIED",
     "V04": "VERIFIED",
     "V05": "VERIFIED",
-    "V06": "IN_PROGRESS"
+    "V06": "IMPLEMENTED_UNVERIFIED"
   },
   "step_evidence": {
     "V00.1": [
@@ -322,6 +326,11 @@
       "docs/reports/V06.2/TEST_EVIDENCE_RERUN.json",
       "docs/reports/V06.2/OWNER_CONTINUATION_AFTER_REVIEW_UNAVAILABLE.md",
       "docs/reports/V06.2/REVIEW_CONTINUATION_FINAL.md"
+    ],
+    "V06.3": [
+      "docs/exec-plans/V06.3.md",
+      "docs/reports/V06.3/IMPLEMENTATION.md",
+      "docs/reports/V06.3/TEST_EVIDENCE.json"
     ]
   },
   "package_evidence": {
@@ -360,7 +369,8 @@
     "V05.2": "47fe5c5d465748370d9a8ea046bc443978437203",
     "V05.3": "47fe5c5d465748370d9a8ea046bc443978437203",
     "V06.1": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7",
-    "V06.2": "4e35c07758f4d39b05dac402eeb03b080275c3e0"
+    "V06.2": "4e35c07758f4d39b05dac402eeb03b080275c3e0",
+    "V06.3": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453"
   },
   "step_reviews": {
     "V00.1": {
@@ -593,7 +603,7 @@
     "V05.3": "VERIFIED",
     "V06.1": "IMPLEMENTED_UNVERIFIED",
     "V06.2": "IMPLEMENTED_UNVERIFIED",
-    "V06.3": "IN_PROGRESS",
+    "V06.3": "IMPLEMENTED_UNVERIFIED",
     "V07.1": "PLANNED",
     "V07.2": "PLANNED",
     "V07.3": "PLANNED",

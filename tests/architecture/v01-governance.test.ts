@@ -208,10 +208,19 @@ describe('V06 owner-authorized package continuation', () => {
     });
     expect(progress.current_gate).toMatchObject({
       step_id: 'V06.3',
+      status: 'IMPLEMENTED_UNVERIFIED',
       next_step: 'V07.1',
       next_step_ready: false,
     });
-    expect(progress.steps['V06.3']).toBe('IN_PROGRESS');
+    expect(progress.steps['V06.3']).toBe('IMPLEMENTED_UNVERIFIED');
+    expect(
+      progress.world_core_continuation.completed_steps['V06.3'],
+    ).toMatchObject({
+      implementation_commit: 'c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453',
+      automated_evidence_status: 'PASS',
+      package_review_pending: true,
+      package_verified: false,
+    });
     expect(progress.steps['V07.1']).toBe('PLANNED');
   });
 });
