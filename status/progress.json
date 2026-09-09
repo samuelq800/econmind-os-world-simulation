@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T15:24:55Z",
-  "source_commit": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453",
-  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1, corrected V06.2 and V06.3 remain IMPLEMENTED_UNVERIFIED. Review B found one V06 package blocker at target 26cbb32004aa1888bac16529c4a957150035fa48: authoritative completion did not enforce the approved total order. A V06.3 forward fix is required; V07 remains prohibited.",
+  "derived_at": "2026-09-09T15:30:00Z",
+  "source_commit": "7a6ad76d7e43f96a143a4620afc33c8b107261e0",
+  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1, corrected V06.2 and V06.3 remain IMPLEMENTED_UNVERIFIED. V06-PKG-BLK-01 has a passing implementation-side forward fix at 7a6ad76d7e43f96a143a4620afc33c8b107261e0; independent lightweight package re-review is pending. V07 remains prohibited.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -124,11 +124,11 @@
   "current_gate": {
     "step_id": "V06.3",
     "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "CHANGES_REQUIRED: V06-PKG-BLK-01 permits caller-selected out-of-order due completion",
+    "review": "V06-PKG-BLK-01 forward fix complete with independent package re-review pending",
     "next_step": "V07.1",
     "next_step_ready": false,
     "next_step_blockers": [
-      "V06-PKG-BLK-01 requires a V06.3 forward fix and independent package re-review",
+      "V06-PKG-BLK-01 requires independent closure against the new package target",
       "V06 package-level approval is required before V07"
     ],
     "required_gate": "V06_PACKAGE_REVIEW",
@@ -141,6 +141,16 @@
     "review_file": "docs/reports/V06/PACKAGE_REVIEW_FINDINGS.md",
     "open_blockers": 1,
     "reviewer_severity_classification": "NOT_PROVIDED",
+    "package_verified": false,
+    "merge_authorized": false,
+    "v07_authorized": false
+  },
+  "v06_package_re_review": {
+    "status": "PENDING",
+    "finding_id": "V06-PKG-BLK-01",
+    "forward_fix_code_candidate": "7a6ad76d7e43f96a143a4620afc33c8b107261e0",
+    "implementation_result": "PASS",
+    "independent_closure_claimed": false,
     "package_verified": false,
     "merge_authorized": false,
     "v07_authorized": false
@@ -207,11 +217,22 @@
         ]
       },
       "V06.3": {
-        "implementation_commit": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453",
-        "evidence_file": "docs/reports/V06.3/TEST_EVIDENCE.json",
+        "implementation_commit": "7a6ad76d7e43f96a143a4620afc33c8b107261e0",
+        "evidence_file": "docs/reports/V06.3/TEST_EVIDENCE_FORWARD_FIX.json",
         "automated_evidence_status": "PASS",
+        "finding_id": "V06-PKG-BLK-01",
+        "independent_closure": "PENDING",
         "package_review_pending": true,
-        "package_verified": false
+        "package_verified": false,
+        "superseded_candidates": [
+          {
+            "implementation_commit": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453",
+            "evidence_commit": "3c6f12b39820f878e7662b9ed7eca734c571a0d7",
+            "package_review_target": "26cbb32004aa1888bac16529c4a957150035fa48",
+            "review_result": "CHANGES_REQUIRED",
+            "finding": "V06-PKG-BLK-01"
+          }
+        ]
       }
     }
   },
@@ -344,7 +365,9 @@
     "V06.3": [
       "docs/exec-plans/V06.3.md",
       "docs/reports/V06.3/IMPLEMENTATION.md",
-      "docs/reports/V06.3/TEST_EVIDENCE.json"
+      "docs/reports/V06.3/TEST_EVIDENCE.json",
+      "docs/reports/V06.3/IMPLEMENTATION_FORWARD_FIX.md",
+      "docs/reports/V06.3/TEST_EVIDENCE_FORWARD_FIX.json"
     ]
   },
   "package_evidence": {
@@ -390,7 +413,7 @@
     "V05.3": "47fe5c5d465748370d9a8ea046bc443978437203",
     "V06.1": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7",
     "V06.2": "4e35c07758f4d39b05dac402eeb03b080275c3e0",
-    "V06.3": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453"
+    "V06.3": "7a6ad76d7e43f96a143a4620afc33c8b107261e0"
   },
   "step_reviews": {
     "V00.1": {

@@ -216,8 +216,10 @@ describe('V06 owner-authorized package continuation', () => {
     expect(
       progress.world_core_continuation.completed_steps['V06.3'],
     ).toMatchObject({
-      implementation_commit: 'c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453',
+      implementation_commit: '7a6ad76d7e43f96a143a4620afc33c8b107261e0',
       automated_evidence_status: 'PASS',
+      finding_id: 'V06-PKG-BLK-01',
+      independent_closure: 'PENDING',
       package_review_pending: true,
       package_verified: false,
     });
@@ -228,6 +230,16 @@ describe('V06 owner-authorized package continuation', () => {
       bound_v06_3_code_candidate: 'c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453',
       open_blockers: 1,
       reviewer_severity_classification: 'NOT_PROVIDED',
+      package_verified: false,
+      merge_authorized: false,
+      v07_authorized: false,
+    });
+    expect(progress.v06_package_re_review).toMatchObject({
+      status: 'PENDING',
+      finding_id: 'V06-PKG-BLK-01',
+      forward_fix_code_candidate: '7a6ad76d7e43f96a143a4620afc33c8b107261e0',
+      implementation_result: 'PASS',
+      independent_closure_claimed: false,
       package_verified: false,
       merge_authorized: false,
       v07_authorized: false,

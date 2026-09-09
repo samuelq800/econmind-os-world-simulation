@@ -1,0 +1,74 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V06.3",
+  "finding_id": "V06-PKG-BLK-01",
+  "commit": "7a6ad76d7e43f96a143a4620afc33c8b107261e0",
+  "supersedes_for_review": {
+    "code_candidate": "c1bd5e073a6a8f7abdc49ca09aecf27c89b0c453",
+    "step_review_target": "3c6f12b39820f878e7662b9ed7eca734c571a0d7",
+    "package_review_target": "26cbb32004aa1888bac16529c4a957150035fa48"
+  },
+  "environment": {
+    "name": "local deterministic World Core",
+    "versions": {
+      "node": "24.20.0",
+      "pnpm": "12.3.4"
+    },
+    "production_access": false
+  },
+  "commands": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/deterministic-order.test.ts",
+      "exit_code": 1,
+      "result": "FAIL_EXPECTED_REPRODUCTION",
+      "stdout_stderr_summary": "Frozen package behavior reproduced: 10 tests passed and the new fail-closed regression failed because EVENT_LAST completion did not throw while EVENT_FIRST remained the authoritative head"
+    },
+    {
+      "command": "pnpm vitest run <four scheduler/order unit and property files>",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "4 files and 26 tests passed after the fix, including direct out-of-order rejection, generated ordered drain, restart after every completion and exact retry no-op"
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Full baseline passed lint, formatting, all typechecks, 23 files/326 tests, 3 files/34 protected architecture tests, authoritative scanner over 21 core and 33 total files, boundary scanner over 38 files, local environment safety, PGlite migration validation/rehearsal, Foundation policy, 420-file secret scan and all workspace builds"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "All 14 R2 governance groups passed after forward-fix evidence/status finalization"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No whitespace errors in the forward-fix code or evidence/status candidate"
+    }
+  ],
+  "finding_result": {
+    "implementation_side": "PASS",
+    "independent_closure": "PENDING",
+    "out_of_order_completion": "FAILS_CLOSED_WITHOUT_MUTATION",
+    "ordered_completion": "PASS",
+    "exact_retry": "PASS_NO_OP",
+    "restart_recovery": "PASS",
+    "property_permutation": "PASS"
+  },
+  "preserved_regressions": {
+    "V06_2_P0_1_locale_independent_order": "PASS",
+    "V06_2_P0_2_impossible_preopen_recovery": "PASS"
+  },
+  "database_rls_evidence": [
+    "NOT_RUN: the forward fix changes no database schema, RLS policy, connection or production state",
+    "PASS: local environment reported no configured database and production mutation disabled",
+    "PASS: migration validation and both PGlite rehearsal modes remained green"
+  ],
+  "unresolved_gaps": [
+    "Independent lightweight package re-review of the new immutable target is pending",
+    "V06.3 and V06 remain IMPLEMENTED_UNVERIFIED",
+    "V07 remains NOT_STARTED"
+  ]
+}
