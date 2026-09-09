@@ -9,7 +9,7 @@
       "release_order": 1,
       "path": "database/migrations/artifacts/0001_world_v2_namespace.sql",
       "sha256": "ad60fc9b95332c65301409f64d05e115816d3928fb3615e8232ddb1b94f536ad",
-      "created_from_commit": "980e89ac6a42fda924a9d95d369f7d702f06bda2",
+      "artifact_source_commit": "43739ceb38c167c44e806361930b7603360647c3",
       "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
       "affected_schemas": ["world_v2"],
       "rls_or_grants_changed": false,

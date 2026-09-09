@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
+import { execFile } from 'node:child_process';
 import path from 'node:path';
+import { promisify } from 'node:util';
 
 export const WORLD_V2_NAMESPACE = 'world_v2';
 export const WORLD_V2_MIGRATION_ROOT = 'database/migrations/artifacts';
@@ -7,6 +9,8 @@ export const PRODUCTION_PUBLISHER = 'main-site-release-chain';
 
 const MIGRATION_ID = /^\d{4}_[a-z][a-z0-9_]*$/u;
 const SHA256 = /^[0-9a-f]{64}$/u;
+const FULL_COMMIT = /^[0-9a-f]{40}$/u;
+const execFileAsync = promisify(execFile);
 const FORBIDDEN_SQL = [
   {
     category: 'SHARED_SCHEMA_REFERENCE',
@@ -21,6 +25,10 @@ const FORBIDDEN_SQL = [
     pattern: /\bdrop\s+(?:schema|database)\b/iu,
   },
 ];
+const NO_REPLACE_GIT_ENV = Object.freeze({
+  ...process.env,
+  GIT_NO_REPLACE_OBJECTS: '1',
+});
 
 export function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
@@ -40,7 +48,54 @@ export function inspectMigrationSql(sql) {
   return [...new Set(violations)];
 }
 
-export function validateMigrationManifest(manifest, artifacts) {
+function provenanceKey(commit, artifactPath) {
+  return `${commit}:${artifactPath}`;
+}
+
+export async function readMigrationGitProvenance(repositoryRoot, migrations) {
+  const provenance = new Map();
+  for (const migration of migrations) {
+    const commit = migration?.artifact_source_commit;
+    const artifactPath = path.posix.normalize(migration?.path ?? '');
+    const key = provenanceKey(commit, artifactPath);
+    if (!FULL_COMMIT.test(commit ?? '')) {
+      provenance.set(key, { commitExists: false, pathExists: false });
+      continue;
+    }
+    try {
+      await execFileAsync(
+        'git',
+        ['--no-replace-objects', 'cat-file', '-e', `${commit}^{commit}`],
+        { cwd: repositoryRoot, env: NO_REPLACE_GIT_ENV },
+      );
+    } catch {
+      provenance.set(key, { commitExists: false, pathExists: false });
+      continue;
+    }
+    try {
+      const { stdout } = await execFileAsync(
+        'git',
+        ['--no-replace-objects', 'show', `${commit}:${artifactPath}`],
+        {
+          cwd: repositoryRoot,
+          encoding: 'buffer',
+          env: NO_REPLACE_GIT_ENV,
+          maxBuffer: 16 * 1024 * 1024,
+        },
+      );
+      provenance.set(key, {
+        bytes: Buffer.from(stdout),
+        commitExists: true,
+        pathExists: true,
+      });
+    } catch {
+      provenance.set(key, { commitExists: true, pathExists: false });
+    }
+  }
+  return provenance;
+}
+
+export function validateMigrationManifest(manifest, artifacts, provenance) {
   const violations = [];
   const migrations = Array.isArray(manifest?.migrations)
     ? manifest.migrations
@@ -87,6 +142,15 @@ export function validateMigrationManifest(manifest, artifacts) {
 
     if (!SHA256.test(migration?.sha256 ?? ''))
       violations.push(`INVALID_SHA256:${migration?.migration_id}`);
+    const sourceCommit = migration?.artifact_source_commit;
+    if (!FULL_COMMIT.test(sourceCommit ?? '')) {
+      violations.push(
+        `INVALID_ARTIFACT_SOURCE_COMMIT:${migration?.migration_id}`,
+      );
+    }
+    if (migration?.created_from_commit !== undefined) {
+      violations.push(`LEGACY_PROVENANCE_FIELD:${migration?.migration_id}`);
+    }
     if (
       migration?.affected_schemas?.some(
         (schema) => schema !== WORLD_V2_NAMESPACE,
@@ -111,6 +175,18 @@ export function validateMigrationManifest(manifest, artifacts) {
       for (const category of inspectMigrationSql(bytes.toString('utf8'))) {
         violations.push(`${category}:${migration?.migration_id}`);
       }
+    }
+    const source = provenance?.get(provenanceKey(sourceCommit, normalized));
+    if (source === undefined) {
+      violations.push(`UNVERIFIED_GIT_PROVENANCE:${migration?.migration_id}`);
+    } else if (!source.commitExists) {
+      violations.push(`SOURCE_COMMIT_NOT_FOUND:${migration?.migration_id}`);
+    } else if (!source.pathExists || source.bytes === undefined) {
+      violations.push(`SOURCE_ARTIFACT_NOT_FOUND:${migration?.migration_id}`);
+    } else if (sha256(source.bytes) !== migration.sha256) {
+      violations.push(
+        `SOURCE_ARTIFACT_HASH_MISMATCH:${migration?.migration_id}`,
+      );
     }
   });
 

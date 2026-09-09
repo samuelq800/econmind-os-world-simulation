@@ -4,7 +4,10 @@ import { fileURLToPath } from 'node:url';
 
 import { PGlite } from '@electric-sql/pglite';
 
-import { validateMigrationManifest } from './migration-policy.mjs';
+import {
+  readMigrationGitProvenance,
+  validateMigrationManifest,
+} from './migration-policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(
@@ -17,7 +20,8 @@ for (const migration of manifest.migrations) {
     await readFile(path.join(root, migration.path)),
   );
 }
-const validation = validateMigrationManifest(manifest, artifacts);
+const provenance = await readMigrationGitProvenance(root, manifest.migrations);
+const validation = validateMigrationManifest(manifest, artifacts, provenance);
 if (validation.status !== 'PASS') {
   console.error(JSON.stringify(validation, null, 2));
   process.exit(1);
@@ -34,7 +38,7 @@ async function applyChain(database) {
       [
         migration.migration_id,
         migration.sha256,
-        migration.created_from_commit,
+        migration.artifact_source_commit,
         migration.release_order,
       ],
     );
@@ -51,13 +55,22 @@ async function rehearse(mode) {
     }
     await applyChain(database);
     const release = await database.query(
-      'select migration_id, artifact_sha256, release_order from world_v2.schema_release order by release_order',
+      'select migration_id, artifact_sha256, source_repo_commit, release_order from world_v2.schema_release order by release_order',
     );
     const shared = await database.query(
       "select schema_name from information_schema.schemata where schema_name in ('auth', 'public', 'storage') order by schema_name",
     );
     if (release.rows.length !== manifest.migrations.length)
       throw new Error(`${mode} release ledger mismatch`);
+    if (
+      release.rows.some(
+        (row, index) =>
+          row.source_repo_commit !==
+          manifest.migrations[index]?.artifact_source_commit,
+      )
+    ) {
+      throw new Error(`${mode} release provenance mismatch`);
+    }
     if (
       shared.rows.some(
         (row) => row.schema_name === 'auth' || row.schema_name === 'storage',

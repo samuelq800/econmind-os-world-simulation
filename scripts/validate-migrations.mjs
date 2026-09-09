@@ -2,7 +2,10 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { validateMigrationManifest } from './migration-policy.mjs';
+import {
+  readMigrationGitProvenance,
+  validateMigrationManifest,
+} from './migration-policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(
@@ -14,6 +17,7 @@ for (const migration of manifest.migrations) {
   if (!artifactPath.startsWith(`${root}${path.sep}`)) continue;
   artifacts.set(migration.path, await readFile(artifactPath));
 }
-const result = validateMigrationManifest(manifest, artifacts);
+const provenance = await readMigrationGitProvenance(root, manifest.migrations);
+const result = validateMigrationManifest(manifest, artifacts, provenance);
 console.log(JSON.stringify(result, null, 2));
 if (result.status !== 'PASS') process.exitCode = 1;
