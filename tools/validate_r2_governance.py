@@ -19,6 +19,7 @@ from typing import Any, Callable
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_EXECUTION_MODES = {"NORMAL", "PARALLEL_PREPARATION"}
+POLICY_PATH = "docs/governance/FAST_MAINLINE_REVIEW_POLICY.json"
 IMPLEMENTATION_AGENT_STATUSES = {
     "IN_PROGRESS",
     "IMPLEMENTED_UNVERIFIED",
@@ -72,7 +73,7 @@ def validate(root: Path) -> dict[str, Any]:
         result = git("merge-base", "--is-ancestor", ancestor, descendant)
         require(result.returncode == 0, f"{label}: {ancestor} is not an ancestor of {descendant}")
 
-    def approved_review(subject: str, target: Any, review: Any) -> None:
+    def independent_review(subject: str, target: Any, review: Any) -> None:
         require(isinstance(review, dict), f"{subject} requires review metadata")
         require(review.get("decision") == "APPROVED", f"{subject} review decision must be APPROVED")
         reviewed_commit = commit_exists(review.get("reviewed_commit"), f"{subject} reviewed_commit")
@@ -88,6 +89,46 @@ def validate(root: Path) -> dict[str, Any]:
         )
         file(review_file)
         require(review.get("owner_approved") is True, f"{subject} requires explicit owner approval")
+
+    review_policy: dict[str, Any] = {}
+
+    def verification_record(subject: str, target: Any, record: Any) -> None:
+        require(isinstance(record, dict), f"{subject} requires verification metadata")
+        method = record.get("method", "INDEPENDENT_REVIEW")
+        if method == "INDEPENDENT_REVIEW":
+            independent_review(subject, target, record)
+            return
+        require(method == "OWNER_FAST_TRACK", f"{subject} has invalid verification method")
+        require(
+            record.get("decision") == "OWNER_FAST_TRACK_ACCEPTED",
+            f"{subject} fast-track decision must be OWNER_FAST_TRACK_ACCEPTED",
+        )
+        risk_class = record.get("risk_class")
+        allowed = review_policy["verification_methods"]["OWNER_FAST_TRACK"][
+            "allowed_risk_classes"
+        ]
+        require(risk_class in allowed, f"{subject} {risk_class} cannot use owner fast-track")
+        implementation_commit = commit_exists(target, f"{subject} implementation_commit")
+        require(
+            commit_exists(record.get("reviewed_commit"), f"{subject} reviewed_commit")
+            == implementation_commit,
+            f"{subject} fast-track commit differs from implementation_commit",
+        )
+        evidence_file = record.get("evidence_file")
+        require(
+            isinstance(evidence_file, str) and evidence_file.startswith("docs/reports/"),
+            f"{subject} fast-track evidence_file must be a repository report path",
+        )
+        file(evidence_file)
+        require(
+            record.get("automated_evidence_status") == "PASS",
+            f"{subject} evidence did not pass",
+        )
+        require(
+            record.get("p0_boundary_changed") is False,
+            f"{subject} fast-track changed a P0 boundary",
+        )
+        require(record.get("owner_approved") is True, f"{subject} requires explicit owner fast-track")
 
     def check(name: str, operation: Callable[[], None]) -> None:
         try:
@@ -119,12 +160,60 @@ def validate(root: Path) -> dict[str, Any]:
             "planning/work_packages.json",
             "status/progress.json",
             "status/decisions.json",
+            POLICY_PATH,
             "docs/governance/r2/SOURCE_ATTRIBUTION.md",
             "docs/reports/governance/R2_GOVERNANCE_SYNC.md",
         ]
         for relative in required:
             require(file(relative).stat().st_size > 0, f"empty required file: {relative}")
         metrics["required_files"] = len(required)
+
+    def fast_mainline_policy() -> None:
+        nonlocal review_policy
+        review_policy = load_json(POLICY_PATH)
+        require(review_policy["schema_version"] == "FAST_MAINLINE-1", "wrong review policy schema")
+        require(review_policy["active_mode"] == "FAST_MAINLINE", "FAST_MAINLINE is not active")
+        require(
+            review_policy["classification_order_low_to_high"] == ["P3", "P2", "P1", "P0"],
+            "risk order must resolve upward to P0",
+        )
+        classes = review_policy["classes"]
+        require(set(classes) == {"P0", "P1", "P2", "P3"}, "review classes must be P0-P3")
+        require(classes["P0"]["blocking_independent_review"] is True, "P0 review must block")
+        require(
+            set(review_policy["verification_methods"]["OWNER_FAST_TRACK"]["allowed_risk_classes"])
+            == {"P2", "P3"},
+            "owner fast-track must be limited to P2/P3",
+        )
+        required_topics = {
+            "authoritative World State",
+            "database schema/migrations/RLS",
+            "identity and authorization",
+            "Command/Event/Receipt authority",
+            "append-only ledger",
+            "atomic settlement",
+            "financial/inventory conservation",
+            "single-writer semantics",
+            "production environment",
+            "determinism/idempotency",
+            "cross-country settlement",
+        }
+        require(set(classes["P0"]["topics"]) == required_topics, "P0 topic set changed")
+        required_prohibitions = {
+            "downgrade a risk classification to bypass review",
+            "approve its own P0 change",
+            "ignore failed tests",
+            "weaken Constitution requirements",
+            "create a second Source of Truth",
+            "permit UI authoritative mutation",
+            "introduce direct macro buffs",
+            "mutate production Supabase outside an authorized release",
+        }
+        require(
+            set(review_policy["prohibitions"]) == required_prohibitions,
+            "FAST_MAINLINE prohibitions changed",
+        )
+        metrics["review_mode"] = review_policy["active_mode"]
 
     def step_manifest() -> None:
         nonlocal steps_data, steps, step_by_id, valid_statuses
@@ -366,19 +455,10 @@ def validate(root: Path) -> dict[str, Any]:
                 == step["acceptance"],
                 f"prompt exit gate mismatch: {step_id}",
             )
-            status_declaration = prompt_match(
-                r"^7\. Final status must be one of: (.+)\. "
-                r"Implementation agent may not mark .+$",
-                "allowed status declaration",
-            ).group(1)
-            prompt_statuses = set(re.findall(r"`([^`]+)`", status_declaration))
+            require(POLICY_PATH in text, f"prompt lacks centralized policy reference: {step_id}")
             require(
-                prompt_statuses == IMPLEMENTATION_AGENT_STATUSES,
-                f"prompt allowed statuses differ from implementation vocabulary: {step_id}",
-            )
-            require(
-                prompt_statuses <= valid_statuses,
-                f"prompt authorizes a non-authoritative status: {step_id}",
+                "P0 always stops for independent review" in text,
+                f"prompt weakens P0 review: {step_id}",
             )
             require("PARTIAL" not in text, f"prompt authorizes PARTIAL: {step_id}")
         controls = [
@@ -439,7 +519,7 @@ def validate(root: Path) -> dict[str, Any]:
             if state in {"IN_PROGRESS", "IMPLEMENTED_UNVERIFIED", "CHANGES_REQUIRED", "VERIFIED"}:
                 require(dependencies_ready, f"impossible {state} dependency claim: {step_id}")
             if state == "VERIFIED":
-                approved_review(
+                verification_record(
                     step_id,
                     implementation_commits.get(step_id),
                     step_reviews.get(step_id),
@@ -453,19 +533,9 @@ def validate(root: Path) -> dict[str, Any]:
             in {"BLOCKED", "IN_PROGRESS", "IMPLEMENTED_UNVERIFIED", "VERIFIED"},
             "V00.2 has an invalid current lifecycle state",
         )
-        for step_id, state in states.items():
-            if step_id == "V00.3" and states["V00.2"] == "VERIFIED":
-                require(
-                    state
-                    in {"PLANNED", "IN_PROGRESS", "IMPLEMENTED_UNVERIFIED", "BLOCKED"},
-                    f"V00.3 has an invalid implementation-session state: {state}",
-                )
-            elif step_id not in {"V00.1", "V00.2"}:
-                require(state == "PLANNED", f"later work has non-planning state: {step_id}")
-
         sync = progress_data["governance_sync"]
         require(sync.get("status") == "VERIFIED", "governance sync must remain VERIFIED")
-        approved_review("Governance Sync", sync.get("implementation_commit"), sync.get("review"))
+        independent_review("Governance Sync", sync.get("implementation_commit"), sync.get("review"))
         require("merge_authorized" not in sync, "legacy separate merge authorization is unsupported")
 
         reconciliation = sync.get("final_reconciliation")
@@ -497,11 +567,19 @@ def validate(root: Path) -> dict[str, Any]:
         )
         next_step = gate.get("next_step")
         require(next_step in states, "current_gate names an unknown next step")
-        next_ready = (
+        dependency_ready = (
             v002_ready
             if next_step == "V00.2"
             else all(states[dependency] == "VERIFIED" for dependency in step_by_id[next_step]["hard_dependencies"])
         )
+        required_gate = gate.get("required_gate")
+        if required_gate is None:
+            gate_open = True
+        else:
+            require(isinstance(required_gate, str) and required_gate, "invalid required_gate")
+            require(gate.get("gate_status") in {"PENDING", "PASS"}, "invalid package gate status")
+            gate_open = gate["gate_status"] == "PASS"
+        next_ready = dependency_ready and gate_open
         require(
             gate.get("next_step_ready") is next_ready,
             "current_gate next_step_ready differs from validated readiness",
@@ -514,6 +592,7 @@ def validate(root: Path) -> dict[str, Any]:
             governance_integration=integration["status"],
             approved_reviews=1 + sum(state == "VERIFIED" for state in states.values()),
             v002_ready=v002_ready,
+            required_gate=required_gate,
         )
 
     def decisions() -> None:
@@ -574,6 +653,7 @@ def validate(root: Path) -> dict[str, Any]:
 
     for name, operation in (
         ("required_governance_files", required_files),
+        ("fast_mainline_policy", fast_mainline_policy),
         ("r2_step_manifest", step_manifest),
         ("step_dependencies", dependency_graph),
         ("human_navigation_matches_json", human_navigation_matches),

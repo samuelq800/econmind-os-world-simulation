@@ -1,5 +1,9 @@
 # Independent review for STEP_ID
 
+This template is mandatory for P0 and available for every class. P2/P3 owner
+fast-track is a different verification method and must not be represented as an
+independent review.
+
 ## Review identity and scope
 
 - Reviewed branch and commit:

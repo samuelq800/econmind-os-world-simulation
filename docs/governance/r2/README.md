@@ -5,6 +5,13 @@ The active entry point is `PLANS.md`; machine-readable current truth is under
 `status/`.
 
 - R2-101.1 step authority: `planning/r2_steps.json`.
+- Active review/continuation authority: `docs/governance/FAST_MAINLINE_REVIEW_POLICY.json`.
+- Step prompt renderer: `tools/render_step_prompts.py`.
+
+The files under `docs/governance/r2/source/` preserve the original R2-101.1
+delivery and hashes as historical evidence. They are not regenerated when the
+active review policy or rendered prompts change.
+
 - Human step navigation: `planning/R2_33_WORK_PACKAGES_101_STEPS.md`.
 - Work-package plan and 30-day windows: `planning/`.
 - Current progress and unresolved decisions: `status/`.

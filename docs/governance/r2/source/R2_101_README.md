@@ -11,7 +11,10 @@ This package repairs one specific governance defect: the previously supplied pac
 - `planning/r2_steps.json`: machine-readable authority for IDs/dependencies.
 - `planning/R2_33_WORK_PACKAGES_101_STEPS.md`: human-readable mirror.
 - `PLANS.md`: execution governance.
-- `prompts/steps/`: 101 step-level execution prompt shells.
+- `prompts/steps/`: 101 step-level execution prompt shells as delivered in the
+  original R2-101.1 package. Active prompts are now rendered from
+  `planning/r2_steps.json` under the centralized FAST_MAINLINE policy; this
+  historical manifest is intentionally not rewritten.
 - `status/*.template.json`: templates only; governance sync must derive current truth.
 - `prompts/control/RESUME_GOVERNANCE_SYNC.md`: resume prompt for the existing governance branch.
 

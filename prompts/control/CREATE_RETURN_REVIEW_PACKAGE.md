@@ -7,5 +7,5 @@ known gaps, and rollback or forward-fix notes. Use the repository templates.
 
 Distinguish `PASS`, `FAIL`, `NOT_RUN`, and `INSUFFICIENT_EVIDENCE`. Do not add
 credentials, generated build artifacts, unverified claims, or work from later
-steps. End with the requested independent-review action and leave the current
-step below `VERIFIED` until the reviewer decides.
+steps. End with the review action required by the centralized policy. Never
+represent owner fast-track as independent review, and never fast-track P0.

@@ -12,12 +12,16 @@ Use `PLANS.md`, `planning/r2_steps.json`, `status/progress.json`, and
 `status/decisions.json` as the repository-controlled R2 execution system. Do not
 reconstruct missing governance from chat history.
 
+`docs/governance/FAST_MAINLINE_REVIEW_POLICY.json` is the centralized review
+timing and continuation policy. Step prompts are rendered from
+`planning/r2_steps.json` by `tools/render_step_prompts.py`; duplicated prompt
+text is not an independent policy source. Constitution precedence always wins.
+
 ## Current gate
 
-V00.1, V00.2, and the R2 governance sync are `VERIFIED`; their approved history
-and final reconciliation are recorded in `status/progress.json`. V00.3 is
-`IMPLEMENTED_UNVERIFIED` and awaits independent review. Do not begin V01.1 or
-later work.
+The authoritative current gate is only `status/progress.json`. Do not infer the
+active step from this instruction file. Never begin V02 while the V01 package
+review gate is pending.
 
 ## Architecture and data safety
 
@@ -56,12 +60,21 @@ decisions remain unapproved until the responsible human records approval.
 Use the pinned toolchain and frozen lockfile. Run real lint, formatting,
 typecheck, test, boundary, environment, secret, and build checks appropriate to
 the step. A test file is not evidence, `NOT_RUN` is not `PASS`, and
-implementation is not verification. Implementation agents may report
-`IN_PROGRESS`, `IMPLEMENTED_UNVERIFIED`, or `BLOCKED`; they may not self-award
-the review-controlled `CHANGES_REQUIRED` or `VERIFIED` states.
+implementation is not verification. Without a policy-valid review or explicit
+owner fast-track record, implementation agents may report only `IN_PROGRESS`,
+`IMPLEMENTED_UNVERIFIED`, or `BLOCKED`. `CHANGES_REQUIRED` remains an
+independent-review decision; P0 `VERIFIED` can never be self-awarded.
 
 Use the templates under `templates/` and report actual commands, exit codes,
 environment, evidence gaps, affected owners, permissions, migrations, legacy
-impact, and unresolved decisions. An implementation agent must never set
-`owner_approved` on its own; only an explicit project-owner instruction may be
-recorded. Stop after the authorized step and request an independent review.
+impact, and unresolved decisions. An implementation agent must never invent
+`owner_approved`; it may record it only from an explicit project-owner
+instruction. Apply the centralized policy to review timing: P0 always blocks on
+independent review; P1 may defer review only to the named Work Package gate;
+P2/P3 may use only the policy-defined fast-track path after required evidence
+passes.
+
+Codex may never downgrade risk, approve its own P0 change, ignore a failed
+mandatory check, weaken Constitution requirements, create another Source of
+Truth, permit authoritative UI mutation, introduce direct macro buffs, or
+mutate production Supabase outside an authorized release.
