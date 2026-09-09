@@ -3,7 +3,10 @@ import { Decimal } from 'decimal.js';
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 
 export const WorldDecimal = Decimal.clone({
-  precision: 80,
+  // Two accepted operands contain at most 120 lexical digits each. A 240-digit
+  // context therefore covers exact coefficient multiplication and the widest
+  // scale-aligned addition/subtraction before result-domain validation.
+  precision: 240,
   rounding: Decimal.ROUND_HALF_EVEN,
   toExpNeg: -1_000_000,
   toExpPos: 1_000_000,
@@ -12,13 +15,18 @@ export const WorldDecimal = Decimal.clone({
 export type WorldDecimalValue = Decimal;
 
 const DECIMAL_STRING = /^-?(?:0|[1-9]\d*)(?:\.\d+)?$/u;
-const MAX_DIGITS = 120;
+export const WORLD_DECIMAL_OPERAND_MAX_DIGITS = 120;
+export const WORLD_DECIMAL_RESULT_MAX_DIGITS = 120;
+
+function lexicalDigitCount(value: string): number {
+  return value.replace(/[-.]/gu, '').length;
+}
 
 export function parseWorldDecimal(value: string): WorldDecimalValue {
   if (
     typeof value !== 'string' ||
     !DECIMAL_STRING.test(value) ||
-    value.replace(/[-.]/gu, '').length > MAX_DIGITS
+    lexicalDigitCount(value) > WORLD_DECIMAL_OPERAND_MAX_DIGITS
   ) {
     throw new DomainError(
       DOMAIN_ERROR_CODES.INVALID_DECIMAL,
@@ -33,6 +41,19 @@ export function parseWorldDecimal(value: string): WorldDecimalValue {
     );
   }
   return decimal;
+}
+
+export function assertWorldDecimalResult(
+  value: WorldDecimalValue,
+): WorldDecimalValue {
+  const rendered = canonicalDecimal(value);
+  if (lexicalDigitCount(rendered) > WORLD_DECIMAL_RESULT_MAX_DIGITS) {
+    throw new DomainError(
+      DOMAIN_ERROR_CODES.DECIMAL_RESULT_OUT_OF_RANGE,
+      `Exact authoritative decimal result exceeds ${WORLD_DECIMAL_RESULT_MAX_DIGITS} digits`,
+    );
+  }
+  return value;
 }
 
 export function canonicalDecimal(value: WorldDecimalValue): string {

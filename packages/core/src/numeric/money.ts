@@ -1,9 +1,12 @@
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 import {
+  assertWorldDecimalResult,
   canonicalDecimal,
   parseWorldDecimal,
   type WorldDecimalValue,
 } from './world-decimal.js';
+
+const moneyInstances = new WeakSet<object>();
 
 export class Money {
   readonly amount: WorldDecimalValue;
@@ -12,6 +15,7 @@ export class Money {
   private constructor(amount: WorldDecimalValue, currency: string) {
     this.amount = amount;
     this.currency = currency;
+    moneyInstances.add(this);
     Object.freeze(this);
   }
 
@@ -27,12 +31,18 @@ export class Money {
 
   add(other: Money): Money {
     this.assertCurrency(other);
-    return new Money(this.amount.plus(other.amount), this.currency);
+    return new Money(
+      assertWorldDecimalResult(this.amount.plus(other.amount)),
+      this.currency,
+    );
   }
 
   subtract(other: Money): Money {
     this.assertCurrency(other);
-    return new Money(this.amount.minus(other.amount), this.currency);
+    return new Money(
+      assertWorldDecimalResult(this.amount.minus(other.amount)),
+      this.currency,
+    );
   }
 
   toCanonicalValue() {
@@ -47,4 +57,10 @@ export class Money {
       );
     }
   }
+}
+
+export function isMoney(value: unknown): value is Money {
+  return (
+    typeof value === 'object' && value !== null && moneyInstances.has(value)
+  );
 }

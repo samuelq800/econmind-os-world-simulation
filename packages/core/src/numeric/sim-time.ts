@@ -1,10 +1,13 @@
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 
+const simTimeInstances = new WeakSet<object>();
+
 export class SimTime {
   readonly ticks: bigint;
 
   private constructor(ticks: bigint) {
     this.ticks = ticks;
+    simTimeInstances.add(this);
     Object.freeze(this);
   }
 
@@ -21,4 +24,10 @@ export class SimTime {
   toCanonicalValue() {
     return this.ticks.toString();
   }
+}
+
+export function isSimTime(value: unknown): value is SimTime {
+  return (
+    typeof value === 'object' && value !== null && simTimeInstances.has(value)
+  );
 }

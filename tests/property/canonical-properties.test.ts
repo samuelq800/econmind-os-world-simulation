@@ -2,8 +2,10 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
 import {
+  WORLD_DECIMAL_RESULT_MAX_DIGITS,
   CanonicalRegistry,
   Money,
+  Price,
   Quantity,
   canonicalDecimal,
   canonicalSerialize,
@@ -11,6 +13,7 @@ import {
   worldId,
 } from '../../packages/core/src/index.js';
 import {
+  acceptedDecimalBoundaryArbitrary,
   canonicalDecimalStringArbitrary,
   canonicalIdArbitrary,
   currencyArbitrary,
@@ -18,9 +21,64 @@ import {
   priceAndQuantityArbitrary,
   quantityUnitArbitrary,
 } from '../../packages/testkit/src/arbitraries.js';
+import {
+  exactDecimalAdd,
+  exactDecimalDigitCount,
+  exactDecimalMultiply,
+} from '../../packages/testkit/src/exact-decimal-oracle.js';
 import { FOUNDATION_PROPERTY_CONFIG } from './property-config.js';
 
 describe('V04 reproducible canonical properties', () => {
+  it('is exact-or-reject across the accepted addition boundary', () => {
+    fc.assert(
+      fc.property(
+        acceptedDecimalBoundaryArbitrary,
+        acceptedDecimalBoundaryArbitrary,
+        (left, right) => {
+          const expected = exactDecimalAdd(left, right);
+          if (
+            exactDecimalDigitCount(expected) > WORLD_DECIMAL_RESULT_MAX_DIGITS
+          ) {
+            expect(() =>
+              Money.from(left, 'GBP').add(Money.from(right, 'GBP')),
+            ).toThrow();
+          } else {
+            expect(
+              Money.from(left, 'GBP')
+                .add(Money.from(right, 'GBP'))
+                .toCanonicalValue().amount,
+            ).toBe(expected);
+          }
+        },
+      ),
+      FOUNDATION_PROPERTY_CONFIG,
+    );
+  });
+
+  it('is exact-or-reject across the accepted multiplication boundary', () => {
+    fc.assert(
+      fc.property(
+        acceptedDecimalBoundaryArbitrary,
+        acceptedDecimalBoundaryArbitrary,
+        (left, right) => {
+          const expected = exactDecimalMultiply(left, right);
+          const operation = () =>
+            Price.from(left, 'GBP', 'unit').multiply(
+              Quantity.from(right, 'unit'),
+            );
+          if (
+            exactDecimalDigitCount(expected) > WORLD_DECIMAL_RESULT_MAX_DIGITS
+          ) {
+            expect(operation).toThrow();
+          } else {
+            expect(operation().toCanonicalValue().amount).toBe(expected);
+          }
+        },
+      ),
+      FOUNDATION_PROPERTY_CONFIG,
+    );
+  });
+
   it('round-trips canonical decimal values', () => {
     fc.assert(
       fc.property(canonicalDecimalStringArbitrary, (input) => {

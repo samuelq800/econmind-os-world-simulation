@@ -5,11 +5,14 @@ import {
   type WorldDecimalValue,
 } from './world-decimal.js';
 
+const rateInstances = new WeakSet<object>();
+
 export class Rate {
   readonly value: WorldDecimalValue;
 
   private constructor(value: WorldDecimalValue) {
     this.value = value;
+    rateInstances.add(this);
     Object.freeze(this);
   }
 
@@ -27,4 +30,10 @@ export class Rate {
   toCanonicalValue() {
     return canonicalDecimal(this.value);
   }
+}
+
+export function isRate(value: unknown): value is Rate {
+  return (
+    typeof value === 'object' && value !== null && rateInstances.has(value)
+  );
 }

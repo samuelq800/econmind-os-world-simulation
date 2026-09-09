@@ -4,6 +4,27 @@ import { Money, Price, Quantity, Rate } from '../../core/src/index.js';
 
 const MAX_MAGNITUDE = 10n ** 30n;
 
+export const acceptedDecimalBoundaryArbitrary = fc
+  .tuple(
+    fc.boolean(),
+    fc.integer({ min: 1, max: 120 }),
+    fc.integer({ min: 0, max: 119 }),
+    fc.integer({ min: 1, max: 9 }),
+    fc.array(fc.integer({ min: 0, max: 9 }), {
+      maxLength: 119,
+      minLength: 119,
+    }),
+  )
+  .map(([negative, length, requestedScale, first, tail]) => {
+    const digits = `${first}${tail.slice(0, length - 1).join('')}`;
+    const scale = Math.min(requestedScale, length - 1);
+    const unsigned =
+      scale === 0
+        ? digits
+        : `${digits.slice(0, digits.length - scale)}.${digits.slice(-scale)}`;
+    return `${negative ? '-' : ''}${unsigned}`;
+  });
+
 export const canonicalDecimalStringArbitrary = fc
   .tuple(
     fc.boolean(),
