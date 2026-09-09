@@ -26,12 +26,12 @@
     }
   },
   "current_gate": {
-    "step_id": "V00.2",
-    "status": "VERIFIED",
-    "review": "Independent APPROVED re-review accepted by the project owner",
-    "next_step": "V00.3",
-    "next_step_ready": true,
-    "next_step_blockers": []
+    "step_id": "V00.3",
+    "status": "IN_PROGRESS",
+    "review": "V00.3 implementation and local evidence in progress",
+    "next_step": "V01.1",
+    "next_step_ready": false,
+    "next_step_blockers": ["V00.3 must be independently VERIFIED"]
   },
   "step_evidence": {
     "V00.1": [
@@ -46,6 +46,9 @@
       "docs/reports/V00.2/TEST_EVIDENCE.json",
       "docs/reports/V00.2/SELF_AUDIT.md",
       "docs/reports/V00.2/REVIEW_FINAL.md"
+    ],
+    "V00.3": [
+      "docs/exec-plans/V00.3.md"
     ]
   },
   "implementation_commits": {
@@ -69,7 +72,7 @@
   "steps": {
     "V00.1": "VERIFIED",
     "V00.2": "VERIFIED",
-    "V00.3": "PLANNED",
+    "V00.3": "IN_PROGRESS",
     "V01.1": "PLANNED",
     "V01.2": "PLANNED",
     "V01.3": "PLANNED",
