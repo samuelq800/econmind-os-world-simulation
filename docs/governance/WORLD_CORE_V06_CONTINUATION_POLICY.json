@@ -1,0 +1,38 @@
+{
+  "schema_version": "WORLD_CORE_PACKAGE_CONTINUATION-1",
+  "record_type": "OWNER_AUTHORIZED_PACKAGE_CONTINUATION",
+  "name": "WORLD_CORE_V06_PACKAGE_CONTINUATION",
+  "status": "ACTIVE",
+  "authority": "RESPONSIBLE_HUMAN_OWNER",
+  "activation_record": "docs/reports/V06/OWNER_CONTINUATION_ACTIVATION.md",
+  "scope": {
+    "branch": "codex/world-core-v06-v10",
+    "first_step": "V06.1",
+    "last_step": "V06.3",
+    "allowed_steps": ["V06.1", "V06.2", "V06.3"],
+    "terminal_gate": "V06_PACKAGE_REVIEW"
+  },
+  "continuation_rule": {
+    "condition": "The immediately preceding V06 step has an immutable implementation commit, complete evidence with applicable automated checks passing, no invalidating upstream finding, and status IMPLEMENTED_UNVERIFIED or VERIFIED.",
+    "effect": "The immediately following V06 step may start on codex/world-core-v06-v10 without claiming verification.",
+    "status_after_step": "IMPLEMENTED_UNVERIFIED",
+    "dependency_exception": "An IMPLEMENTED_UNVERIFIED dependency is accepted only between adjacent members of the exact allowed_steps sequence."
+  },
+  "preserved_controls": [
+    "V06.1, V06.2 and V06.3 remain IMPLEMENTED_UNVERIFIED unless independently promoted",
+    "normal engineering acceptance, determinism, exactness, architecture, environment, security and governance checks remain mandatory",
+    "a blocking upstream review finding stops affected downstream work",
+    "ADR-01 and ADR-03 remain the approved V06 decision authority",
+    "ADR-04 remains PROPOSED_NOT_APPROVED",
+    "no database or production mutation without separate exact-step authority",
+    "V06 package review and reconciliation remain mandatory before V07"
+  ],
+  "prohibitions": [
+    "self-VERIFIED or fabricated review",
+    "use for a non-adjacent dependency",
+    "use outside V06.1 through V06.3",
+    "merge to main before package review and merge authority",
+    "production deployment or migration publication",
+    "V07 or later implementation"
+  ]
+}

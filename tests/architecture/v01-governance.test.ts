@@ -148,6 +148,44 @@ describe('V01.2 ADR coordination graph', () => {
   });
 });
 
+describe('V06 owner-authorized package continuation', () => {
+  it('limits unverified dependency continuation to adjacent V06 steps', () => {
+    const central = readJson(
+      'docs/governance/FAST_MAINLINE_REVIEW_POLICY.json',
+    );
+    const scoped = readJson(
+      'docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json',
+    );
+    const progress = readJson('status/progress.json');
+
+    expect(central.scoped_continuation_records).toEqual([
+      'docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json',
+    ]);
+    expect(scoped.status).toBe('ACTIVE');
+    expect(scoped.authority).toBe('RESPONSIBLE_HUMAN_OWNER');
+    expect(scoped.scope).toEqual({
+      branch: 'codex/world-core-v06-v10',
+      first_step: 'V06.1',
+      last_step: 'V06.3',
+      allowed_steps: ['V06.1', 'V06.2', 'V06.3'],
+      terminal_gate: 'V06_PACKAGE_REVIEW',
+    });
+    expect(progress.world_core_continuation).toMatchObject({
+      status: 'ACTIVE',
+      method: 'OWNER_AUTHORIZED_PACKAGE_CONTINUATION',
+      decision: 'ACCEPTED_FOR_MAINLINE_CONTINUATION',
+      allowed_steps: ['V06.1', 'V06.2', 'V06.3'],
+      terminal_gate: 'V06_PACKAGE_REVIEW',
+      independent_review_pending: true,
+      merge_authorized: false,
+      production_mutation: false,
+      owner_approved: true,
+    });
+    expect(progress.steps['V06.1']).toBe('IMPLEMENTED_UNVERIFIED');
+    expect(progress.steps['V07.1']).toBe('PLANNED');
+  });
+});
+
 describe('V01.3 two-repository integration contract', () => {
   it('freezes a minimal identity whitelist without portable authorization', () => {
     const contract = readJson(

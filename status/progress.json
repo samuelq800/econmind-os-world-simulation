@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T13:29:59Z",
+  "derived_at": "2026-09-09T13:52:01Z",
   "source_commit": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7",
-  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 have responsible-human owner approval; ADR-04 remains PROPOSED_NOT_APPROVED with latest gate V11-V17. V06.1 is implemented with passing evidence and is stopped at required P0 independent review; V06.2 and later work have not started.",
+  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. The owner-authorized V06 package-continuation policy is active without changing V06.1 verification status. V06.2 is IN_PROGRESS; V07 remains prohibited until V06 package review.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -122,14 +122,38 @@
     "reconciliation_evidence_file": "docs/reports/GATE_A/FINAL_RECONCILIATION.md"
   },
   "current_gate": {
-    "step_id": "V06.1",
-    "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "P0 authoritative time and determinism candidate requires independent review",
-    "next_step": "V06.2",
+    "step_id": "V06.2",
+    "status": "IN_PROGRESS",
+    "review": "Owner-authorized adjacent V06 continuation is active; no verification is claimed",
+    "next_step": "V06.3",
     "next_step_ready": false,
-    "next_step_blockers": ["V06.1 required P0 independent review is pending"],
-    "required_gate": "V06.1_INDEPENDENT_REVIEW",
+    "next_step_blockers": [
+      "V06.2 implementation and mandatory evidence are incomplete"
+    ],
+    "required_gate": "V06_PACKAGE_REVIEW",
     "gate_status": "PENDING"
+  },
+  "world_core_continuation": {
+    "status": "ACTIVE",
+    "method": "OWNER_AUTHORIZED_PACKAGE_CONTINUATION",
+    "decision": "ACCEPTED_FOR_MAINLINE_CONTINUATION",
+    "policy_file": "docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json",
+    "activation_record": "docs/reports/V06/OWNER_CONTINUATION_ACTIVATION.md",
+    "branch": "codex/world-core-v06-v10",
+    "allowed_steps": ["V06.1", "V06.2", "V06.3"],
+    "terminal_gate": "V06_PACKAGE_REVIEW",
+    "independent_review_pending": true,
+    "merge_authorized": false,
+    "production_mutation": false,
+    "owner_approved": true,
+    "completed_steps": {
+      "V06.1": {
+        "implementation_commit": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7",
+        "evidence_commit": "390367442fca12cd511e5df7199d6c1dc49c345a",
+        "evidence_file": "docs/reports/V06.1/TEST_EVIDENCE.json",
+        "automated_evidence_status": "PASS"
+      }
+    }
   },
   "work_packages": {
     "V00": "COMPLETE",
@@ -138,7 +162,7 @@
     "V03": "VERIFIED",
     "V04": "VERIFIED",
     "V05": "VERIFIED",
-    "V06": "IMPLEMENTED_UNVERIFIED"
+    "V06": "IN_PROGRESS"
   },
   "step_evidence": {
     "V00.1": [
@@ -515,7 +539,7 @@
     "V05.2": "VERIFIED",
     "V05.3": "VERIFIED",
     "V06.1": "IMPLEMENTED_UNVERIFIED",
-    "V06.2": "PLANNED",
+    "V06.2": "IN_PROGRESS",
     "V06.3": "PLANNED",
     "V07.1": "PLANNED",
     "V07.2": "PLANNED",

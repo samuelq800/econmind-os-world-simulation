@@ -91,6 +91,7 @@ def validate(root: Path) -> dict[str, Any]:
         require(review.get("owner_approved") is True, f"{subject} requires explicit owner approval")
 
     review_policy: dict[str, Any] = {}
+    continuation_policy: dict[str, Any] = {}
 
     def verification_record(subject: str, target: Any, record: Any) -> None:
         require(isinstance(record, dict), f"{subject} requires verification metadata")
@@ -205,7 +206,7 @@ def validate(root: Path) -> dict[str, Any]:
         metrics["required_files"] = len(required)
 
     def fast_mainline_policy() -> None:
-        nonlocal review_policy
+        nonlocal review_policy, continuation_policy
         review_policy = load_json(POLICY_PATH)
         require(review_policy["schema_version"] == "FAST_MAINLINE-1", "wrong review policy schema")
         require(review_policy["active_mode"] == "FAST_MAINLINE", "FAST_MAINLINE is not active")
@@ -220,6 +221,66 @@ def validate(root: Path) -> dict[str, Any]:
             set(review_policy["verification_methods"]["OWNER_FAST_TRACK"]["allowed_risk_classes"])
             == {"P2", "P3"},
             "owner fast-track must be limited to P2/P3",
+        )
+        continuation_method = review_policy["verification_methods"].get(
+            "OWNER_AUTHORIZED_PACKAGE_CONTINUATION"
+        )
+        require(
+            isinstance(continuation_method, dict)
+            and set(continuation_method.get("allowed_risk_classes", []))
+            == {"P0", "P1"}
+            and continuation_method.get("decision")
+            == "ACCEPTED_FOR_MAINLINE_CONTINUATION"
+            and continuation_method.get("requires_explicit_owner_instruction")
+            is True
+            and continuation_method.get(
+                "requires_exact_branch_and_ordered_step_scope"
+            )
+            is True
+            and continuation_method.get(
+                "requires_immutable_candidate_and_passing_applicable_evidence"
+            )
+            is True
+            and continuation_method.get("requires_package_exit_review") is True
+            and continuation_method.get("cannot_mark_verified") is True
+            and continuation_method.get("cannot_authorize_merge") is True,
+            "owner-authorized package continuation policy is incomplete",
+        )
+        continuation_records = review_policy.get("scoped_continuation_records")
+        require(
+            continuation_records
+            == ["docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json"],
+            "unexpected scoped continuation records",
+        )
+        continuation_policy = load_json(continuation_records[0])
+        continuation_scope = continuation_policy.get("scope", {})
+        require(
+            continuation_policy.get("schema_version")
+            == "WORLD_CORE_PACKAGE_CONTINUATION-1"
+            and continuation_policy.get("record_type")
+            == "OWNER_AUTHORIZED_PACKAGE_CONTINUATION"
+            and continuation_policy.get("status") == "ACTIVE"
+            and continuation_policy.get("authority")
+            == "RESPONSIBLE_HUMAN_OWNER"
+            and continuation_scope.get("branch")
+            == "codex/world-core-v06-v10"
+            and continuation_scope.get("allowed_steps")
+            == ["V06.1", "V06.2", "V06.3"]
+            and continuation_scope.get("terminal_gate") == "V06_PACKAGE_REVIEW",
+            "V06 continuation scope or authority changed",
+        )
+        activation_record = continuation_policy.get("activation_record")
+        require(
+            isinstance(activation_record, str)
+            and activation_record.startswith("docs/reports/V06/"),
+            "V06 continuation activation record is invalid",
+        )
+        activation_text = file(activation_record).read_text(encoding="utf-8")
+        require(
+            "Decision: ACCEPTED_FOR_MAINLINE_CONTINUATION" in activation_text
+            and "Authority: RESPONSIBLE_HUMAN_OWNER" in activation_text
+            and "not a Codex self-approval" in activation_text,
+            "V06 owner continuation activation evidence is incomplete",
         )
         owner_acceptance = review_policy["verification_methods"].get("PROJECT_OWNER_ACCEPTANCE")
         require(isinstance(owner_acceptance, dict), "missing Gate A project-owner acceptance policy")
@@ -563,6 +624,9 @@ def validate(root: Path) -> dict[str, Any]:
         implementation_commits = progress_data.get("implementation_commits", {})
         step_reviews = progress_data.get("step_reviews", {})
         foundation_sprint = progress_data.get("foundation_sprint")
+        continuation = progress_data.get("world_core_continuation")
+        continuation_steps: list[str] = []
+        continuation_completed: dict[str, Any] = {}
         foundation_steps: set[str] = set()
         foundation_finalized = False
         require(
@@ -573,6 +637,92 @@ def validate(root: Path) -> dict[str, Any]:
             isinstance(step_reviews, dict) and set(step_reviews) <= set(states),
             "invalid step_reviews subjects",
         )
+        if continuation is not None:
+            require(isinstance(continuation, dict), "invalid World Core continuation record")
+            continuation_steps = continuation_policy["scope"]["allowed_steps"]
+            require(
+                continuation.get("status") == "ACTIVE"
+                and continuation.get("method")
+                == "OWNER_AUTHORIZED_PACKAGE_CONTINUATION"
+                and continuation.get("decision")
+                == "ACCEPTED_FOR_MAINLINE_CONTINUATION"
+                and continuation.get("policy_file")
+                == "docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json"
+                and continuation.get("activation_record")
+                == continuation_policy.get("activation_record")
+                and continuation.get("branch")
+                == continuation_policy["scope"]["branch"]
+                and continuation.get("allowed_steps") == continuation_steps
+                and continuation.get("terminal_gate")
+                == continuation_policy["scope"]["terminal_gate"]
+                and continuation.get("independent_review_pending") is True
+                and continuation.get("merge_authorized") is False
+                and continuation.get("production_mutation") is False
+                and continuation.get("owner_approved") is True,
+                "World Core continuation status differs from owner policy",
+            )
+            branch = git("branch", "--show-current")
+            require(
+                branch.returncode == 0
+                and branch.stdout.strip() == continuation.get("branch"),
+                "World Core continuation is used outside its exact branch",
+            )
+            continuation_completed = continuation.get("completed_steps", {})
+            require(
+                isinstance(continuation_completed, dict)
+                and set(continuation_completed) <= set(continuation_steps),
+                "World Core continuation completed-step set is invalid",
+            )
+            for completed_step, record in continuation_completed.items():
+                require(
+                    isinstance(record, dict)
+                    and record.get("automated_evidence_status") == "PASS",
+                    f"{completed_step} lacks passing continuation evidence",
+                )
+                implementation_commit = commit_exists(
+                    record.get("implementation_commit"),
+                    f"{completed_step} continuation implementation_commit",
+                )
+                require(
+                    implementation_commits.get(completed_step)
+                    == implementation_commit,
+                    f"{completed_step} continuation commit differs from progress truth",
+                )
+                evidence_file = record.get("evidence_file")
+                require(
+                    isinstance(evidence_file, str)
+                    and evidence_file
+                    in progress_data.get("step_evidence", {}).get(completed_step, []),
+                    f"{completed_step} continuation evidence is not registered",
+                )
+                evidence = load_json(evidence_file)
+                require(
+                    evidence.get("step_id") == completed_step
+                    and evidence.get("commit") == implementation_commit
+                    and any(
+                        command.get("command") == "pnpm check"
+                        and command.get("result") == "PASS"
+                        and command.get("exit_code") == 0
+                        for command in evidence.get("commands", [])
+                    ),
+                    f"{completed_step} continuation evidence lacks a passing full check",
+                )
+                evidence_commit = record.get("evidence_commit")
+                if evidence_commit is not None:
+                    evidence_commit = commit_exists(
+                        evidence_commit,
+                        f"{completed_step} continuation evidence_commit",
+                    )
+                    is_ancestor(
+                        implementation_commit,
+                        evidence_commit,
+                        f"{completed_step} implementation-to-evidence binding",
+                    )
+                    is_ancestor(
+                        evidence_commit,
+                        "HEAD",
+                        f"{completed_step} evidence is not in current history",
+                    )
         if foundation_sprint is not None:
             require(isinstance(foundation_sprint, dict), "invalid foundation_sprint")
             expected_foundation_steps = {
@@ -671,8 +821,27 @@ def validate(root: Path) -> dict[str, Any]:
                         for dependency in step_by_id[step_id]["hard_dependencies"]
                     )
                 )
+                continuation_dependencies_ready = (
+                    state in {"IN_PROGRESS", "IMPLEMENTED_UNVERIFIED"}
+                    and step_id in continuation_steps
+                    and all(
+                        states[dependency] == "VERIFIED"
+                        or (
+                            continuation_steps.index(step_id) > 0
+                            and dependency
+                            == continuation_steps[
+                                continuation_steps.index(step_id) - 1
+                            ]
+                            and states[dependency] == "IMPLEMENTED_UNVERIFIED"
+                            and dependency in continuation_completed
+                        )
+                        for dependency in step_by_id[step_id]["hard_dependencies"]
+                    )
+                )
                 require(
-                    dependencies_ready or batch_dependencies_ready,
+                    dependencies_ready
+                    or batch_dependencies_ready
+                    or continuation_dependencies_ready,
                     f"impossible {state} dependency claim: {step_id}",
                 )
             if state == "VERIFIED":
@@ -749,7 +918,20 @@ def validate(root: Path) -> dict[str, Any]:
             not foundation_finalized
             or foundation_sprint.get("integration", {}).get("status") == "MERGED"
         )
-        next_ready = dependency_ready and gate_open
+        continuation_next_ready = False
+        if next_step in continuation_steps:
+            next_index = continuation_steps.index(next_step)
+            if next_index > 0:
+                previous_step = continuation_steps[next_index - 1]
+                continuation_next_ready = (
+                    gate.get("step_id") == previous_step
+                    and states[previous_step]
+                    in {"IMPLEMENTED_UNVERIFIED", "VERIFIED"}
+                    and previous_step in continuation_completed
+                    and required_gate == continuation.get("terminal_gate")
+                    and gate.get("gate_status") == "PENDING"
+                )
+        next_ready = (dependency_ready and gate_open) or continuation_next_ready
         if next_step == "V06.1":
             next_ready = next_ready and foundation_integrated and group_a_ready
         require(
@@ -781,7 +963,63 @@ def validate(root: Path) -> dict[str, Any]:
                     == ("PASS" if foundation_finalized else "PENDING"),
                     "Foundation Gate A status differs from sprint state",
                 )
-            if states["V06.1"] == "IMPLEMENTED_UNVERIFIED":
+            if continuation_steps:
+                v06_states = [states[step_id] for step_id in continuation_steps]
+                require(
+                    states["V07.1"] == "PLANNED",
+                    "V07 started before V06 package review",
+                )
+                for index, state in enumerate(v06_states):
+                    if state != "PLANNED":
+                        require(
+                            all(
+                                prior in {"IMPLEMENTED_UNVERIFIED", "VERIFIED"}
+                                for prior in v06_states[:index]
+                            ),
+                            "V06 continuation contains a gap or overlapping step",
+                        )
+                require(
+                    sum(state == "IN_PROGRESS" for state in v06_states) <= 1,
+                    "multiple V06 steps are IN_PROGRESS",
+                )
+                for step_id in continuation_steps:
+                    if states[step_id] == "IMPLEMENTED_UNVERIFIED":
+                        require(
+                            step_id in continuation_completed,
+                            f"{step_id} completed without continuation evidence",
+                        )
+                require(
+                    required_gate == "V06_PACKAGE_REVIEW"
+                    and gate.get("gate_status") == "PENDING",
+                    "V06 continuation must remain at the package-review gate",
+                )
+                in_progress = [
+                    step_id
+                    for step_id in continuation_steps
+                    if states[step_id] == "IN_PROGRESS"
+                ]
+                if in_progress:
+                    active_step = in_progress[0]
+                    active_index = continuation_steps.index(active_step)
+                    expected_next = (
+                        continuation_steps[active_index + 1]
+                        if active_index + 1 < len(continuation_steps)
+                        else "V07.1"
+                    )
+                    require(
+                        gate.get("step_id") == active_step
+                        and gate.get("next_step") == expected_next
+                        and gate.get("next_step_ready") is False,
+                        "active V06 continuation step/gate differs from progress truth",
+                    )
+                elif states["V06.3"] == "IMPLEMENTED_UNVERIFIED":
+                    require(
+                        gate.get("step_id") == "V06.3"
+                        and gate.get("next_step") == "V07.1"
+                        and gate.get("next_step_ready") is False,
+                        "V06 package exit did not stop before V07",
+                    )
+            elif states["V06.1"] == "IMPLEMENTED_UNVERIFIED":
                 require(
                     gate.get("step_id") == "V06.1"
                     and next_step == "V06.2"
