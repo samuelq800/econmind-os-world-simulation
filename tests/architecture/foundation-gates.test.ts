@@ -42,7 +42,15 @@ describe('V04 authoritative architecture gates', () => {
         ),
         writeFile(
           path.join(fixture, 'apps/world-api/src/invalid.ts'),
-          "import fc from 'fast-check'; export const runtime = fc.boolean();",
+          "void import('fast-check');",
+        ),
+        writeFile(
+          path.join(fixture, 'packages/core/src/engine/dynamic.ts'),
+          "void import('decimal.js'); const canonicalValue = '1'; const Numeric = Number; export const leaked = +canonicalValue + Numeric(canonicalValue);",
+        ),
+        writeFile(
+          path.join(fixture, 'packages/core/src/engine/alias.ts'),
+          "const Numeric = Number; export const leaked = Numeric('1');",
         ),
       ]);
       const result = run(fixture);
@@ -51,6 +59,36 @@ describe('V04 authoritative architecture gates', () => {
       expect(result.stdout).toContain('FLOATING_POINT_LEAK');
       expect(result.stdout).toContain('BROWSER_API_LEAK');
       expect(result.stdout).toContain('FAST_CHECK_RUNTIME_LEAK');
+      expect(result.stdout).toContain('dynamic.ts');
+      expect(result.stdout).toContain('alias.ts');
+    } finally {
+      await rm(fixture, { recursive: true, force: true });
+    }
+  });
+
+  it('allows the designated decimal owner and testkit fast-check imports', async () => {
+    const fixture = await mkdtemp(
+      path.join(os.tmpdir(), 'econmind-v04-allowed-'),
+    );
+    try {
+      await Promise.all([
+        mkdir(path.join(fixture, 'packages/core/src/numeric'), {
+          recursive: true,
+        }),
+        mkdir(path.join(fixture, 'packages/testkit/src'), { recursive: true }),
+      ]);
+      await Promise.all([
+        writeFile(
+          path.join(fixture, 'packages/core/src/numeric/world-decimal.ts'),
+          "import Decimal from 'decimal.js'; export const exact = new Decimal('1');",
+        ),
+        writeFile(
+          path.join(fixture, 'packages/testkit/src/property.ts'),
+          "import fc from 'fast-check'; export const testOnly = fc.boolean();",
+        ),
+      ]);
+      const result = run(fixture);
+      expect(result.status, `${result.stdout}${result.stderr}`).toBe(0);
     } finally {
       await rm(fixture, { recursive: true, force: true });
     }
