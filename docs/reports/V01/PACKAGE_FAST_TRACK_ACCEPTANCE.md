@@ -5,7 +5,7 @@
 - Method: `OWNER_FAST_TRACK`
 - Decision: `OWNER_FAST_TRACK_ACCEPTED`
 - Effective risk: `P2`
-- Reviewed immutable package candidate: `4f90edaaedb0b081f5ddc56e774943954062e2af`
+- Reviewed immutable package candidate: `4f90eda1161f6f24b1a31630128e0e4d01257dbf`
 - Automated evidence: `PASS`
 - P0 boundary changed: no
 - Production database access or mutation: none
