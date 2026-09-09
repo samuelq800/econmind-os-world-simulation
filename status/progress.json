@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T14:18:00Z",
-  "source_commit": "07636cc48b84602968ff75135c7a0b9c495a2487",
-  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1 is IMPLEMENTED_UNVERIFIED with independent APPROVED_FOR_CONTINUATION. V06.2 is IMPLEMENTED_UNVERIFIED with passing evidence. Owner-authorized adjacent continuation has opened V06.3; V07 remains prohibited until V06 package review.",
+  "derived_at": "2026-09-09T14:30:46Z",
+  "source_commit": "4e35c07758f4d39b05dac402eeb03b080275c3e0",
+  "note": "Gate A is accepted and integrated. ADR-01 and ADR-03 are owner-approved; ADR-04 remains PROPOSED_NOT_APPROVED. V06.1 is IMPLEMENTED_UNVERIFIED with independent APPROVED_FOR_CONTINUATION. Review B found two P0 blockers in the original V06.2 candidate; forward fixes and automated evidence pass, but independent closure is pending. V06.3 is stopped and V07 remains prohibited.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -122,14 +122,13 @@
     "reconciliation_evidence_file": "docs/reports/GATE_A/FINAL_RECONCILIATION.md"
   },
   "current_gate": {
-    "step_id": "V06.3",
-    "status": "IN_PROGRESS",
-    "review": "Owner-authorized adjacent V06 continuation is active; no verification is claimed",
-    "next_step": "V07.1",
+    "step_id": "V06.2",
+    "status": "IMPLEMENTED_UNVERIFIED",
+    "review": "Two Review B P0 findings have forward fixes; independent closure is pending and no verification is claimed",
+    "next_step": "V06.3",
     "next_step_ready": false,
     "next_step_blockers": [
-      "V06.3 implementation and mandatory evidence are incomplete",
-      "V06 package-level independent review is required before V07"
+      "Review B must close both V06.2 P0 findings against the new immutable evidence target"
     ],
     "required_gate": "V06_PACKAGE_REVIEW",
     "gate_status": "PENDING"
@@ -166,10 +165,19 @@
         }
       },
       "V06.2": {
-        "implementation_commit": "767b718d995210eafc4742c1a5a93e798329598e",
-        "evidence_commit": "07636cc48b84602968ff75135c7a0b9c495a2487",
-        "evidence_file": "docs/reports/V06.2/TEST_EVIDENCE.json",
-        "automated_evidence_status": "PASS"
+        "implementation_commit": "4e35c07758f4d39b05dac402eeb03b080275c3e0",
+        "evidence_file": "docs/reports/V06.2/TEST_EVIDENCE_RERUN.json",
+        "automated_evidence_status": "PASS",
+        "independent_finding_status": "P0_CLOSURE_PENDING",
+        "review_findings_file": "docs/reports/V06.2/REVIEW_FINDINGS.md",
+        "superseded_candidates": [
+          {
+            "implementation_commit": "767b718d995210eafc4742c1a5a93e798329598e",
+            "evidence_commit": "07636cc48b84602968ff75135c7a0b9c495a2487",
+            "evidence_file": "docs/reports/V06.2/TEST_EVIDENCE.json",
+            "review_result": "P0_BLOCKER"
+          }
+        ]
       }
     }
   },
@@ -180,7 +188,7 @@
     "V03": "VERIFIED",
     "V04": "VERIFIED",
     "V05": "VERIFIED",
-    "V06": "IN_PROGRESS"
+    "V06": "IMPLEMENTED_UNVERIFIED"
   },
   "step_evidence": {
     "V00.1": [
@@ -293,7 +301,9 @@
     "V06.2": [
       "docs/exec-plans/V06.2.md",
       "docs/reports/V06.2/IMPLEMENTATION.md",
-      "docs/reports/V06.2/TEST_EVIDENCE.json"
+      "docs/reports/V06.2/TEST_EVIDENCE.json",
+      "docs/reports/V06.2/REVIEW_FINDINGS.md",
+      "docs/reports/V06.2/TEST_EVIDENCE_RERUN.json"
     ]
   },
   "package_evidence": {
@@ -332,7 +342,7 @@
     "V05.2": "47fe5c5d465748370d9a8ea046bc443978437203",
     "V05.3": "47fe5c5d465748370d9a8ea046bc443978437203",
     "V06.1": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7",
-    "V06.2": "767b718d995210eafc4742c1a5a93e798329598e"
+    "V06.2": "4e35c07758f4d39b05dac402eeb03b080275c3e0"
   },
   "step_reviews": {
     "V00.1": {
@@ -565,7 +575,7 @@
     "V05.3": "VERIFIED",
     "V06.1": "IMPLEMENTED_UNVERIFIED",
     "V06.2": "IMPLEMENTED_UNVERIFIED",
-    "V06.3": "IN_PROGRESS",
+    "V06.3": "BLOCKED",
     "V07.1": "PLANNED",
     "V07.2": "PLANNED",
     "V07.3": "PLANNED",

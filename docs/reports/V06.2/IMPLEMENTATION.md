@@ -2,12 +2,32 @@
 
 ## Status
 
-- Implementation commit:
+- Current implementation commit:
+  `4e35c07758f4d39b05dac402eeb03b080275c3e0`
+- Original implementation commit:
   `767b718d995210eafc4742c1a5a93e798329598e`
+- Original evidence target:
+  `07636cc48b84602968ff75135c7a0b9c495a2487`
 - Status: `IMPLEMENTED_UNVERIFIED`
 - Dependency: V06.1 remains `IMPLEMENTED_UNVERIFIED` and has independent
   `APPROVED_FOR_CONTINUATION` at evidence target
   `390367442fca12cd511e5df7199d6c1dc49c345a`.
+
+## Review B forward fixes
+
+Review B reproduced two P0 blockers against the original evidence target. The
+original commits remain immutable history.
+
+1. Canonical scheduled-event storage used `String.localeCompare`, allowing
+   locale/ICU-dependent ordering. The forward fix uses an explicit code-unit
+   comparator over the already ASCII-canonical event ID domain. A regression
+   test disables `localeCompare` and covers the `AA`/`Z` ordering divergence.
+2. Restore accepted a canonical lifecycle-impossible PREOPEN snapshot with a
+   COMPLETED event. The forward fix rejects PREOPEN snapshots with completed
+   work or pause history before reconstituting scheduler authority.
+
+The forward fix does not change V06.1 time semantics or expand V06.2 scope.
+V06.2 remains `IMPLEMENTED_UNVERIFIED` pending independent re-review.
 
 ## Implemented scope
 

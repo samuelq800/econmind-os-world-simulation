@@ -182,6 +182,20 @@ describe('V06 owner-authorized package continuation', () => {
       owner_approved: true,
     });
     expect(progress.steps['V06.1']).toBe('IMPLEMENTED_UNVERIFIED');
+    expect(
+      progress.world_core_continuation.completed_steps['V06.2'],
+    ).toMatchObject({
+      implementation_commit: '4e35c07758f4d39b05dac402eeb03b080275c3e0',
+      automated_evidence_status: 'PASS',
+      independent_finding_status: 'P0_CLOSURE_PENDING',
+      review_findings_file: 'docs/reports/V06.2/REVIEW_FINDINGS.md',
+    });
+    expect(progress.current_gate).toMatchObject({
+      step_id: 'V06.2',
+      next_step: 'V06.3',
+      next_step_ready: false,
+    });
+    expect(progress.steps['V06.3']).toBe('BLOCKED');
     expect(progress.steps['V07.1']).toBe('PLANNED');
   });
 });

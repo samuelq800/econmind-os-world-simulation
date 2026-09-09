@@ -707,6 +707,21 @@ def validate(root: Path) -> dict[str, Any]:
                     ),
                     f"{completed_step} continuation evidence lacks a passing full check",
                 )
+                independent_finding_status = record.get("independent_finding_status")
+                if independent_finding_status is not None:
+                    require(
+                        independent_finding_status
+                        in {"P0_CLOSURE_PENDING", "CLEAR"},
+                        f"{completed_step} has invalid independent finding status",
+                    )
+                    findings_file = record.get("review_findings_file")
+                    require(
+                        isinstance(findings_file, str)
+                        and findings_file
+                        in progress_data.get("step_evidence", {}).get(completed_step, [])
+                        and file(findings_file).is_file(),
+                        f"{completed_step} independent finding evidence is not registered",
+                    )
                 evidence_commit = record.get("evidence_commit")
                 if evidence_commit is not None:
                     evidence_commit = commit_exists(
@@ -928,6 +943,10 @@ def validate(root: Path) -> dict[str, Any]:
                     and states[previous_step]
                     in {"IMPLEMENTED_UNVERIFIED", "VERIFIED"}
                     and previous_step in continuation_completed
+                    and continuation_completed[previous_step].get(
+                        "independent_finding_status"
+                    )
+                    != "P0_CLOSURE_PENDING"
                     and required_gate == continuation.get("terminal_gate")
                     and gate.get("gate_status") == "PENDING"
                 )
