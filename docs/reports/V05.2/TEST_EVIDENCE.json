@@ -1,7 +1,7 @@
 {
   "schema_version": "R2-101.1",
   "step_id": "V05.2",
-  "commit": "c159cac3ee42309bbdf51b48b53a55e05d94b9ac",
+  "commit": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
   "environment": {
     "name": "local synthetic authorization adapter",
     "versions": { "node": "24.20.0", "pnpm": "12.3.4" },

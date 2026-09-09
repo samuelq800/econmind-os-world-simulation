@@ -1,7 +1,7 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-09T03:44:00Z",
-  "source_commit": "5d10233bb1b2e5c417f9ff44c306a30fbe0ed4de",
+  "derived_at": "2026-09-09T04:45:35Z",
+  "source_commit": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
   "note": "FAST_MAINLINE is active. P0 still requires blocking independent review; P2/P3 may use explicit evidence-backed owner fast-track.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
@@ -56,23 +56,49 @@
     "evidence_file": "docs/reports/V01/PACKAGE_FAST_TRACK_ACCEPTANCE.md",
     "owner_approved": true
   },
+  "foundation_sprint": {
+    "branch": "codex/foundation-v02-v05",
+    "status": "IMPLEMENTED_UNVERIFIED",
+    "candidate_commit": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
+    "review_gate": "GATE_A_FOUNDATION_REVIEW",
+    "allowed_steps": [
+      "V02.1",
+      "V02.2",
+      "V02.3",
+      "V03.1",
+      "V03.2",
+      "V03.3",
+      "V04.1",
+      "V04.2",
+      "V04.3",
+      "V05.1",
+      "V05.2",
+      "V05.3"
+    ],
+    "production_mutation": false,
+    "merge_allowed": false,
+    "independent_review_pending": true
+  },
   "current_gate": {
-    "step_id": "V02.1",
-    "status": "IN_PROGRESS",
-    "review": "Foundation Sprint feature-branch implementation started; P0 review remains reserved for Gate A",
-    "next_step": "V02.1",
-    "next_step_ready": true,
-    "next_step_blockers": [],
-    "required_gate": null,
-    "gate_status": null
+    "step_id": "V05.3",
+    "status": "IMPLEMENTED_UNVERIFIED",
+    "review": "V02-V05 implementation is complete on the feature branch; independent P0 Gate A review is pending",
+    "next_step": "V06.1",
+    "next_step_ready": false,
+    "next_step_blockers": [
+      "GATE A FOUNDATION REVIEW is pending",
+      "V04.3 and V05.3 are not independently VERIFIED"
+    ],
+    "required_gate": "GATE_A_FOUNDATION_REVIEW",
+    "gate_status": "PENDING"
   },
   "work_packages": {
     "V00": "COMPLETE",
     "V01": "IMPLEMENTED_MERGED",
-    "V02": "IN_PROGRESS",
-    "V03": "PLANNED",
-    "V04": "PLANNED",
-    "V05": "PLANNED"
+    "V02": "IMPLEMENTED_UNVERIFIED",
+    "V03": "IMPLEMENTED_UNVERIFIED",
+    "V04": "IMPLEMENTED_UNVERIFIED",
+    "V05": "IMPLEMENTED_UNVERIFIED"
   },
   "step_evidence": {
     "V00.1": [
@@ -115,6 +141,66 @@
       "docs/reports/V01.3/TEST_EVIDENCE.json",
       "docs/architecture/V01_TWO_REPOSITORY_INTEGRATION_CONTRACT.md",
       "requirements/two_repository_integration_contract.json"
+    ],
+    "V02.1": [
+      "docs/exec-plans/V02.1.md",
+      "docs/reports/V02.1/IMPLEMENTATION.md",
+      "docs/reports/V02.1/TEST_EVIDENCE.json"
+    ],
+    "V02.2": [
+      "docs/exec-plans/V02.2.md",
+      "docs/reports/V02.2/IMPLEMENTATION.md",
+      "docs/reports/V02.2/TEST_EVIDENCE.json"
+    ],
+    "V02.3": [
+      "docs/exec-plans/V02.3.md",
+      "docs/reports/V02.3/IMPLEMENTATION.md",
+      "docs/reports/V02.3/TEST_EVIDENCE.json"
+    ],
+    "V03.1": [
+      "docs/exec-plans/V03.1.md",
+      "docs/reports/V03.1/IMPLEMENTATION.md",
+      "docs/reports/V03.1/TEST_EVIDENCE.json"
+    ],
+    "V03.2": [
+      "docs/exec-plans/V03.2.md",
+      "docs/reports/V03.2/IMPLEMENTATION.md",
+      "docs/reports/V03.2/TEST_EVIDENCE.json"
+    ],
+    "V03.3": [
+      "docs/exec-plans/V03.3.md",
+      "docs/reports/V03.3/IMPLEMENTATION.md",
+      "docs/reports/V03.3/TEST_EVIDENCE.json"
+    ],
+    "V04.1": [
+      "docs/exec-plans/V04.1.md",
+      "docs/reports/V04.1/IMPLEMENTATION.md",
+      "docs/reports/V04.1/TEST_EVIDENCE.json"
+    ],
+    "V04.2": [
+      "docs/exec-plans/V04.2.md",
+      "docs/reports/V04.2/IMPLEMENTATION.md",
+      "docs/reports/V04.2/TEST_EVIDENCE.json"
+    ],
+    "V04.3": [
+      "docs/exec-plans/V04.3.md",
+      "docs/reports/V04.3/IMPLEMENTATION.md",
+      "docs/reports/V04.3/TEST_EVIDENCE.json"
+    ],
+    "V05.1": [
+      "docs/exec-plans/V05.1.md",
+      "docs/reports/V05.1/IMPLEMENTATION.md",
+      "docs/reports/V05.1/TEST_EVIDENCE.json"
+    ],
+    "V05.2": [
+      "docs/exec-plans/V05.2.md",
+      "docs/reports/V05.2/IMPLEMENTATION.md",
+      "docs/reports/V05.2/TEST_EVIDENCE.json"
+    ],
+    "V05.3": [
+      "docs/exec-plans/V05.3.md",
+      "docs/reports/V05.3/IMPLEMENTATION.md",
+      "docs/reports/V05.3/TEST_EVIDENCE.json"
     ]
   },
   "package_evidence": {
@@ -122,6 +208,10 @@
       "docs/reports/V01/PACKAGE_REVIEW_BUNDLE.md",
       "docs/reports/V01/PACKAGE_TEST_EVIDENCE.json",
       "docs/reports/V01/PACKAGE_FAST_TRACK_ACCEPTANCE.md"
+    ],
+    "FOUNDATION_V02_V05": [
+      "docs/reports/GATE_A_FOUNDATION_REVIEW_BUNDLE.md",
+      "docs/reports/GATE_A_FOUNDATION_TEST_EVIDENCE.json"
     ]
   },
   "implementation_commits": {
@@ -130,7 +220,19 @@
     "V00.3": "00e3320e2d3f6e28212f902bfa1f92d5d1561bf4",
     "V01.1": "2d66872278b1c8a586c751390fed94796f00c40a",
     "V01.2": "e72f3b131e368c35dea25d1c5e98e7dbce9645dd",
-    "V01.3": "5ef35fc3dfe266187bf2f0b6ce557bc450eae2bf"
+    "V01.3": "5ef35fc3dfe266187bf2f0b6ce557bc450eae2bf",
+    "V02.1": "43739ceb38c167c44e806361930b7603360647c3",
+    "V02.2": "43739ceb38c167c44e806361930b7603360647c3",
+    "V02.3": "43739ceb38c167c44e806361930b7603360647c3",
+    "V03.1": "52e62f1b988a3f0c650cf5f4032fada78c7fe43c",
+    "V03.2": "52e62f1b988a3f0c650cf5f4032fada78c7fe43c",
+    "V03.3": "52e62f1b988a3f0c650cf5f4032fada78c7fe43c",
+    "V04.1": "b91fb6ec92d9a19ff23eaeb7573b69e838dca0cc",
+    "V04.2": "b91fb6ec92d9a19ff23eaeb7573b69e838dca0cc",
+    "V04.3": "b91fb6ec92d9a19ff23eaeb7573b69e838dca0cc",
+    "V05.1": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
+    "V05.2": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c",
+    "V05.3": "2a5cff3b825c88e23dddc6dcb08186252d5f8b5c"
   },
   "step_reviews": {
     "V00.1": {
@@ -193,18 +295,18 @@
     "V01.1": "VERIFIED",
     "V01.2": "VERIFIED",
     "V01.3": "VERIFIED",
-    "V02.1": "IN_PROGRESS",
-    "V02.2": "PLANNED",
-    "V02.3": "PLANNED",
-    "V03.1": "PLANNED",
-    "V03.2": "PLANNED",
-    "V03.3": "PLANNED",
-    "V04.1": "PLANNED",
-    "V04.2": "PLANNED",
-    "V04.3": "PLANNED",
-    "V05.1": "PLANNED",
-    "V05.2": "PLANNED",
-    "V05.3": "PLANNED",
+    "V02.1": "IMPLEMENTED_UNVERIFIED",
+    "V02.2": "IMPLEMENTED_UNVERIFIED",
+    "V02.3": "IMPLEMENTED_UNVERIFIED",
+    "V03.1": "IMPLEMENTED_UNVERIFIED",
+    "V03.2": "IMPLEMENTED_UNVERIFIED",
+    "V03.3": "IMPLEMENTED_UNVERIFIED",
+    "V04.1": "IMPLEMENTED_UNVERIFIED",
+    "V04.2": "IMPLEMENTED_UNVERIFIED",
+    "V04.3": "IMPLEMENTED_UNVERIFIED",
+    "V05.1": "IMPLEMENTED_UNVERIFIED",
+    "V05.2": "IMPLEMENTED_UNVERIFIED",
+    "V05.3": "IMPLEMENTED_UNVERIFIED",
     "V06.1": "PLANNED",
     "V06.2": "PLANNED",
     "V06.3": "PLANNED",

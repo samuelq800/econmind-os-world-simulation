@@ -2,7 +2,7 @@
 
 ## Status
 
-- Implementation commit: `c159cac3ee42309bbdf51b48b53a55e05d94b9ac`
+- Implementation commit: `2a5cff3b825c88e23dddc6dcb08186252d5f8b5c`
 - Effective risk: P0 versioned Office approvals
 - Status: `IMPLEMENTED_UNVERIFIED`; Gate A independent review required
 
