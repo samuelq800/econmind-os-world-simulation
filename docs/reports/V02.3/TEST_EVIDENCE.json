@@ -1,0 +1,35 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V02.3",
+  "commit": "43739ceb38c167c44e806361930b7603360647c3",
+  "environment": {
+    "name": "ephemeral-pglite",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4", "pglite": "0.5.8" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm migration:rehearse",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "clean-baseline and existing-schema paths each recorded one exact release"
+    }
+  ],
+  "negative_cases": [
+    "shared/auth schema creation is rejected before execution"
+  ],
+  "database_rls_evidence": [
+    "PASS: ephemeral PostgreSQL-compatible clean and upgrade DDL",
+    "NOT_RUN: live Supabase RLS/grants/staging/backup restore"
+  ],
+  "invariant_evidence": [
+    "No production access",
+    "Exact artefact hash retained",
+    "Shared/auth ownership unchanged"
+  ],
+  "unresolved_gaps": [
+    "Live isolated Supabase staging rehearsal is NOT_RUN",
+    "ADR-16/18 remain unapproved"
+  ]
+}
