@@ -124,7 +124,7 @@
   "current_gate": {
     "step_id": "V06.3",
     "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "V06-PKG-BLK-01 forward fix complete with independent package re-review pending",
+    "review": "READY_FOR_LIGHTWEIGHT_PACKAGE_RE_REVIEW: V06-PKG-BLK-01 forward-fix target frozen",
     "next_step": "V07.1",
     "next_step_ready": false,
     "next_step_blockers": [
@@ -146,9 +146,11 @@
     "v07_authorized": false
   },
   "v06_package_re_review": {
-    "status": "PENDING",
+    "status": "READY",
     "finding_id": "V06-PKG-BLK-01",
     "forward_fix_code_candidate": "7a6ad76d7e43f96a143a4620afc33c8b107261e0",
+    "forward_fix_step_target": "3d21e94483ae923b60dc4a6a8a3e1cd1d64e80ec",
+    "review_mode": "LIGHTWEIGHT_TARGETED_RE_REVIEW",
     "implementation_result": "PASS",
     "independent_closure_claimed": false,
     "package_verified": false,
@@ -389,7 +391,10 @@
       "docs/reports/V06/PACKAGE_REVIEW_BUNDLE.md",
       "docs/reports/V06/PACKAGE_TEST_EVIDENCE.json",
       "docs/reports/V06/PACKAGE_REVIEW_TARGET.md",
-      "docs/reports/V06/PACKAGE_REVIEW_FINDINGS.md"
+      "docs/reports/V06/PACKAGE_REVIEW_FINDINGS.md",
+      "docs/reports/V06/PACKAGE_REVIEW_BUNDLE_FORWARD_FIX.md",
+      "docs/reports/V06/PACKAGE_TEST_EVIDENCE_FORWARD_FIX.json",
+      "docs/reports/V06/PACKAGE_REVIEW_TARGET_FORWARD_FIX.md"
     ]
   },
   "implementation_commits": {
