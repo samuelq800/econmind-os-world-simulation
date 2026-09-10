@@ -17,6 +17,20 @@
       "lock_or_downtime_risk": "Gate A candidate; local rehearsal only",
       "rollback_strategy": "reversible-before-economic-facts",
       "production_approval": null
+    },
+    {
+      "migration_id": "0002_world_v2_command_event_ledger",
+      "release_order": 2,
+      "path": "database/migrations/artifacts/0002_world_v2_command_event_ledger.sql",
+      "sha256": "92915905a159961ac0f8eb70f509501cf7697519471c1b84f832ef224cf87695",
+      "artifact_source_commit": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Branch-local candidate; creates new World V2 tables and immutability triggers only",
+      "rollback_strategy": "reversible-before-economic-facts",
+      "production_approval": null
     }
   ]
 }
