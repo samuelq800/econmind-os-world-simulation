@@ -2,9 +2,9 @@
 
 ## Status
 
-ADR-01, ADR-03, ADR-11 and ADR-17 are `APPROVED` in
+ADR-01, ADR-02, ADR-03, ADR-05, ADR-11, ADR-16, ADR-17 and ADR-20 are `APPROVED` in
 `status/decisions.json` and bound to responsible-human owner records under
-`docs/architecture/decisions/`. Every other entry below remains
+`docs/architecture/decisions/`. Every other unresolved entry below remains
 `PROPOSED_NOT_APPROVED`. This pack summarizes scoped resolutions; the
 individual decision records and register remain authoritative.
 
@@ -21,9 +21,9 @@ latest safe decision points for this sprint.
 | ADR-11 | Command/idempotency/duplicate receipt semantics                            | APPROVED before V07.1 schema                      | Approved                 |
 | ADR-17 | Persistence, append-only ledger, transaction, lease/fence, replay boundary | APPROVED; implementation staged V07/V08/V09       | Approved                 |
 | ADR-20 | Authorization at acceptance versus execution/recovery                      | Before V07.2 queues a command                     | Yes                      |
-| ADR-02 | Unique owners for inventory and financial positions/postings               | Before V08.1                                      | Yes                      |
+| ADR-02 | Unique owners for inventory and financial positions/postings               | APPROVED before V08.1                             | Approved                 |
 | ADR-08 | Future economic rounding/formula policy; exact-or-reject is inherited      | Future operation that needs rounding/formula      | Yes, but not this sprint |
-| ADR-05 | Reservation/transit/title/risk/recognition point                           | Before V08.1 model; no later than V10.1           | Yes                      |
+| ADR-05 | Reservation/transit/title/risk/recognition point                           | APPROVED before V08.1 model                       | Approved                 |
 | ADR-12 | Country/Office/party projection visibility                                 | Before V10.1                                      | Yes                      |
 | ADR-09 | Required Offices for the V10 transaction version                           | Before V10.2                                      | Yes                      |
 | ADR-16 | `world_v2` namespace and sole publication chain for new DDL                | Before any candidate migration is merged/promoted | Yes                      |
@@ -127,6 +127,7 @@ latest safe decision points for this sprint.
 
 ## ADR-02 — Unique entity owners
 
+- **Decision:** `APPROVED` by the responsible human owner.
 - **Decision required:** Which service alone owns physical inventory and GCU
   account balances.
 - **Why now:** V08 cannot permit Trade or another Engine to update balances
@@ -160,6 +161,7 @@ latest safe decision points for this sprint.
 
 ## ADR-05 — Inventory, transit, title, and recognition
 
+- **Decision:** `APPROVED` by the responsible human owner.
 - **Decision required:** Minimum V10 transfer lifecycle and ownership/risk
   point.
 - **Why now:** V08 account buckets and V10 delivery cannot be modeled without a

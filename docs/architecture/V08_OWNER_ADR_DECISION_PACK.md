@@ -2,9 +2,9 @@
 
 ## Decision request and authority
 
-V08.1 cannot start until the responsible human owner decides ADR-02 and
-ADR-05. Both remain `PROPOSED_NOT_APPROVED` in `status/decisions.json`; this
-pack proposes no status change and is not approval evidence.
+The responsible human owner approved ADR-02 and ADR-05. Both are now
+`APPROVED` in `status/decisions.json` and bound to their canonical records.
+This pack records the decision boundary; it is not Codex self-approval.
 
 The exact current sources are `status/decisions.json`,
 `requirements/adr_dependency_map.json`,
@@ -17,8 +17,8 @@ The exact current sources are `status/decisions.json`,
 ## ADR-02
 
 - **Subject:** 技能、库存、设施、存款和外债等逐字段唯一 owner.
-- **Current status:** `PROPOSED_NOT_APPROVED`; responsible human owner required;
-  no approval record.
+- **Current status:** `APPROVED`; record:
+  `docs/architecture/decisions/ADR-02.md`.
 - **Exact proposal:** 为每个 canonical entity 固定唯一 owner 和 posting
   service；跨领域通过事件或命令交接，projection 不得回写。
 - **Latest gate:** `V03/V08`; the V08 owner pack narrows the immediate safe
@@ -42,16 +42,17 @@ The exact current sources are `status/decisions.json`,
   high after consumers or tables persist duplicate balances, because migration
   would require choosing a surviving authority, reconciling history, changing
   writers and rebuilding projections.
-- **Approved now:** nothing in this pack. ADR-17's staged V08/V09 ownership is
-  already approved, but it does not substitute for ADR-02's per-entity owner.
+- **Approved now:** unique V08 Inventory Posting and Financial Posting owners,
+  typed cross-domain handoff and no projection write-back. ADR-17's staged
+  V08/V09 ownership remains separately binding.
 - **Later ownership left open:** post-sprint owners for skills, facilities,
   deposits and foreign debt; domain-specific Commands and projection shapes.
 
 ## ADR-05
 
 - **Subject:** 库存位置、在途、产权、风险及进出口确认时点.
-- **Current status:** `PROPOSED_NOT_APPROVED`; responsible human owner required;
-  no approval record.
+- **Current status:** `APPROVED`; record:
+  `docs/architecture/decisions/ADR-05.md`.
 - **Exact proposal:** 分别记录 physical location、reservation、ownership、risk
   bearer 和 economic recognition；按批次守恒并冻结 title 与进出口确认时点。
 - **Latest gate:** register says `V10`; the owner/JIT packs require the bucket
@@ -78,7 +79,9 @@ RESERVED -> IN_TRANSIT -> DELIVERED/AVAILABLE`; reservation and dispatch
   transition version can be replaced; high after title/risk/X/M facts exist,
   because changing the recognition point requires versioned migration and
   reconciliation rather than rewriting historical postings/Events.
-- **Approved now:** nothing in this pack.
+- **Approved now:** separated location/reservation/title/risk/X-M/settlement
+  facts, exactly conserved minimal bucket lifecycle, and delivery-time
+  title/risk/X-M semantics for the future minimal V10 transaction version.
 - **Later ownership left open:** full logistics, partial loss, configurable
   Incoterms, customs, insurance, macro recognition variants and contract-type
   policy beyond the minimal versioned proof.
@@ -96,9 +99,8 @@ RESERVED -> IN_TRANSIT -> DELIVERED/AVAILABLE`; reservation and dispatch
   economic rounding, minor units, FX, CPI, tax, interest, demand or other
   formula policy. V08.1 inherits exact-or-reject and adds none of those rules.
 
-## Owner action required later
+## Recorded owner action
 
-After V07 package approval, owner acceptance, closure and main integration,
-record explicit APPROVE/REJECT decisions for ADR-02 and ADR-05 through the
-existing authoritative decision mechanism. Do not infer approval from this
-recommendation or from ADR-17.
+ADR-02 and ADR-05 are approved through their canonical records. V08.1 may use
+them only after its full dependency/preflight recomputation passes. This does
+not start V08, approve ADR-07/08, or authorize production publication.

@@ -1516,6 +1516,41 @@ def validate(root: Path) -> dict[str, Any]:
                         file(v07_entry.get("preflight_file"))
                         file(v07_entry.get("continuation_policy"))
                         file(v07_entry.get("owner_activation"))
+                    elif isinstance(v07_entry, dict) and v07_entry.get("status") == "COMPLETED":
+                        package_review = progress_data.get("v07_package_review")
+                        v07_integration = progress_data.get("v07_integration")
+                        require(
+                            all(states[step_id] == "VERIFIED" for step_id in ("V07.1", "V07.2", "V07.3"))
+                            and progress_data.get("work_packages", {}).get("V07") == "VERIFIED"
+                            and gate.get("step_id") == "V08.1"
+                            and gate.get("status") == states["V08.1"] == "PLANNED"
+                            and gate.get("next_step") == "V08.1"
+                            and gate.get("next_step_ready") is False
+                            and required_gate == "V08.1_OWNER_ADR_GATE"
+                            and gate.get("gate_status") == "PENDING",
+                            "completed V07 handoff gate differs from progress truth",
+                        )
+                        require(
+                            isinstance(package_review, dict)
+                            and package_review.get("status") == "V07_PACKAGE_APPROVED"
+                            and package_review.get("package_status") == "VERIFIED"
+                            and package_review.get("package_verified") is True
+                            and package_review.get("owner_decision") == "ACCEPTED"
+                            and package_review.get("merge_authorized") is True
+                            and package_review.get("open_p0_blockers") == 0
+                            and package_review.get("open_p1_majors") == 0,
+                            "completed V07 package review record is invalid",
+                        )
+                        require(
+                            isinstance(v07_integration, dict)
+                            and v07_integration.get("status") == "MERGED"
+                            and v07_integration.get("history_preserved") is True
+                            and v07_integration.get("runtime_equivalence") == "PASS"
+                            and v07_integration.get("production_mutation") is False,
+                            "V07 mainline integration record is incomplete",
+                        )
+                        file(package_review.get("acceptance_record"))
+                        file(v07_integration.get("evidence_file"))
                     else:
                         require(
                             gate.get("step_id") == "V06.3"
