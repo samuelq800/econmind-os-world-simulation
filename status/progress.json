@@ -338,7 +338,7 @@
     "V04": "VERIFIED",
     "V05": "VERIFIED",
     "V06": "VERIFIED",
-    "V07": "IMPLEMENTED_UNVERIFIED"
+    "V07": "IN_PROGRESS"
   },
   "step_evidence": {
     "V00.1": [
