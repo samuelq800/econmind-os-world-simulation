@@ -334,6 +334,8 @@
         "status": "FIXED_PENDING_REVIEW",
         "finding": "correlationId trace metadata participated in authoritative Command fingerprint",
         "fixed_code_candidate": "67fd40b1597fb4057ef54481ba0b8b8be4ca18a8",
+        "fixed_review_target": "02b377614a7337b1d8d7442bae50c534ddbbe3c4",
+        "review_bundle": "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_TARGET.md",
         "automated_evidence": "PASS",
         "independent_closure": "PENDING",
         "production_mutation": false
@@ -487,7 +489,8 @@
       "docs/reports/V07.1/IMPLEMENTATION.md",
       "docs/reports/V07.1/TEST_EVIDENCE.json",
       "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX.md",
-      "docs/reports/V07.1/TEST_EVIDENCE_FINGERPRINT_FORWARD_FIX.json"
+      "docs/reports/V07.1/TEST_EVIDENCE_FINGERPRINT_FORWARD_FIX.json",
+      "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_TARGET.md"
     ]
   },
   "package_evidence": {
