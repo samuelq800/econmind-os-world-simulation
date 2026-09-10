@@ -1094,10 +1094,11 @@ def validate(root: Path) -> dict[str, Any]:
                 )
             if continuation_steps:
                 v06_states = [states[step_id] for step_id in continuation_steps]
-                require(
-                    states["V07.1"] == "PLANNED",
-                    "V07 started before V06 package review",
-                )
+                if continuation.get("status") == "ACTIVE":
+                    require(
+                        states["V07.1"] == "PLANNED",
+                        "V07 started before V06 package review",
+                    )
                 for index, state in enumerate(v06_states):
                     if state != "PLANNED":
                         require(
@@ -1169,17 +1170,47 @@ def validate(root: Path) -> dict[str, Any]:
                         and package_review.get("merge_authorized") is True,
                         "completed V06 package review record is invalid",
                     )
-                    require(
-                        gate.get("step_id") == "V06.3"
-                        and gate.get("status") == "VERIFIED"
-                        and gate.get("next_step") == "V07.1"
-                        and gate.get("next_step_ready") is False
-                        and required_gate
-                        in {"V06_MAINLINE_INTEGRATION", "V07.1_OWNER_ADR_GATE"}
-                        and gate.get("gate_status") == "PENDING",
-                        "completed V06 handoff gate differs from progress truth",
-                    )
-                    if required_gate == "V07.1_OWNER_ADR_GATE":
+                    v07_entry = progress_data.get("v07_entry")
+                    if isinstance(v07_entry, dict) and v07_entry.get("status") == "ACTIVE":
+                        require(
+                            gate.get("step_id") == "V07.1"
+                            and gate.get("status") == states["V07.1"]
+                            and states["V07.1"] == "IN_PROGRESS"
+                            and gate.get("next_step") == "V07.1"
+                            and gate.get("next_step_ready") is True
+                            and required_gate == "V07.1_IMPLEMENTATION"
+                            and gate.get("gate_status") == "PASS",
+                            "active V07.1 entry gate differs from progress truth",
+                        )
+                        require(
+                            v07_entry.get("branch") == "codex/world-core-v07"
+                            and v07_entry.get("preflight") == "GO"
+                            and v07_entry.get("approved_adrs") == ["ADR-11", "ADR-17"]
+                            and v07_entry.get("production_mutation") is False
+                            and v07_entry.get("owner_approved") is True,
+                            "V07.1 entry authority is incomplete",
+                        )
+                        for decision_id in ("ADR-11", "ADR-17"):
+                            require(
+                                owner_decisions[decision_id].get("status") == "APPROVED"
+                                and owner_decisions[decision_id].get("approval_record"),
+                                f"{decision_id} is not approved for V07.1 entry",
+                            )
+                        file(v07_entry.get("preflight_file"))
+                        file(v07_entry.get("continuation_policy"))
+                        file(v07_entry.get("owner_activation"))
+                    else:
+                        require(
+                            gate.get("step_id") == "V06.3"
+                            and gate.get("status") == "VERIFIED"
+                            and gate.get("next_step") == "V07.1"
+                            and gate.get("next_step_ready") is False
+                            and required_gate
+                            in {"V06_MAINLINE_INTEGRATION", "V07.1_OWNER_ADR_GATE"}
+                            and gate.get("gate_status") == "PENDING",
+                            "completed V06 handoff gate differs from progress truth",
+                        )
+                    if required_gate == "V07.1_OWNER_ADR_GATE" or isinstance(v07_entry, dict):
                         v06_integration = progress_data.get("v06_integration")
                         require(
                             isinstance(v06_integration, dict)

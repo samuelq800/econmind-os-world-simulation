@@ -79,7 +79,7 @@ describe('V01.1 requirements traceability', () => {
 });
 
 describe('V01.2 ADR coordination graph', () => {
-  it('preserves the two owner-approved decisions and all pending proposals', () => {
+  it('preserves the owner-approved decisions and all pending proposals', () => {
     const decisions = readJson('status/decisions.json').decisions;
     const graph = readJson('requirements/adr_dependency_map.json');
     const expectedIds = Array.from(
@@ -89,15 +89,15 @@ describe('V01.2 ADR coordination graph', () => {
 
     expect(graph.counts.adrs).toBe(20);
     expect(graph.approval_summary).toEqual({
-      approved: 2,
-      proposed_not_approved: 18,
+      approved: 4,
+      proposed_not_approved: 16,
       bulk_approval_permitted: false,
     });
     expect(graph.adrs.map((adr) => adr.id)).toEqual(expectedIds);
     const approvedIds = decisions
       .filter((decision) => decision.status === 'APPROVED')
       .map((decision) => decision.id);
-    expect(approvedIds).toEqual(['ADR-01', 'ADR-03']);
+    expect(approvedIds).toEqual(['ADR-01', 'ADR-03', 'ADR-11', 'ADR-17']);
     expect(
       decisions
         .filter((decision) => !approvedIds.includes(decision.id))
@@ -211,12 +211,12 @@ describe('V06 owner-authorized package continuation', () => {
       },
     });
     expect(progress.current_gate).toMatchObject({
-      step_id: 'V06.3',
-      status: 'VERIFIED',
+      step_id: 'V07.1',
+      status: 'IN_PROGRESS',
       next_step: 'V07.1',
-      next_step_ready: false,
-      required_gate: 'V07.1_OWNER_ADR_GATE',
-      gate_status: 'PENDING',
+      next_step_ready: true,
+      required_gate: 'V07.1_IMPLEMENTATION',
+      gate_status: 'PASS',
     });
     expect(progress.v06_integration).toEqual({
       branch: 'codex/world-core-v06-v10',
@@ -240,7 +240,19 @@ describe('V06 owner-authorized package continuation', () => {
       package_review_pending: false,
       package_verified: true,
     });
-    expect(progress.steps['V07.1']).toBe('PLANNED');
+    expect(progress.steps['V07.1']).toBe('IN_PROGRESS');
+    expect(progress.v07_entry).toMatchObject({
+      status: 'ACTIVE',
+      branch: 'codex/world-core-v07',
+      main_baseline: '026671eca6b85bc6e5f1c99878c6f8d740f2fb21',
+      decision_commit: 'e5e4a3291fd2e77ff16173d88f631ea131badf34',
+      preflight: 'GO',
+      approved_adrs: ['ADR-11', 'ADR-17'],
+      next_adr_gate: 'ADR-20_BEFORE_V07.2_COMMAND_QUEUE',
+      candidate_migration_merge_gate: 'ADR-16',
+      production_mutation: false,
+      owner_approved: true,
+    });
     expect(progress.v06_package_review).toMatchObject({
       decision: 'V06_PACKAGE_APPROVED',
       reviewed_commit: '33fe26a7e014379b15d4f0f3ab10791b912b8885',
@@ -252,7 +264,7 @@ describe('V06 owner-authorized package continuation', () => {
       merge_authorized: true,
       owner_decision: 'ACCEPTED',
       authority: 'PROJECT_OWNER_ACCEPTANCE',
-      v07_authorized: false,
+      v07_authorized: true,
     });
     expect(
       progress.v06_package_re_review.restore_prefix_forward_fix,
@@ -279,7 +291,7 @@ describe('V06 owner-authorized package continuation', () => {
       open_findings: [],
       package_verified: true,
       merge_authorized: true,
-      v07_authorized: false,
+      v07_authorized: true,
     });
   });
 });

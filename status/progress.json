@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-10T00:34:00Z",
-  "source_commit": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1",
-  "note": "Gate A and V06 are accepted, verified, and integrated into main. Independent Review B approved exact V06 package target 33fe26a7e014379b15d4f0f3ab10791b912b8885 with both historical blockers closed and no open blocker or major; the project owner accepted that review. V06.1-V06.3 and package V06 are VERIFIED. V07.1 hard dependencies are ready but V07.1 remains PLANNED at READY_PENDING_OWNER_ADR because ADR-11 and the V07 core boundary of ADR-17 remain PROPOSED_NOT_APPROVED.",
+  "derived_at": "2026-09-10T00:11:57Z",
+  "source_commit": "026671eca6b85bc6e5f1c99878c6f8d740f2fb21",
+  "note": "Gate A and V06 are accepted, verified, and integrated into main. The responsible human owner approved ADR-11 and ADR-17 in decision commit e5e4a3291fd2e77ff16173d88f631ea131badf34, reconciled to main at 026671eca6b85bc6e5f1c99878c6f8d740f2fb21. V07.1 hard dependencies are VERIFIED, repository-derived preflight is GO, and V07.1 is IN_PROGRESS. ADR-17 implementation remains staged by V07/V08/V09 ownership. ADR-20 still blocks V07.2 command queueing; ADR-16 still blocks candidate DDL merge/promotion.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -134,16 +134,14 @@
     "evidence_file": "docs/reports/V06/FINAL_RECONCILIATION.md"
   },
   "current_gate": {
-    "step_id": "V06.3",
-    "status": "VERIFIED",
-    "review": "V06_PACKAGE_APPROVED, owner accepted, promoted and integrated; READY_PENDING_OWNER_ADR",
+    "step_id": "V07.1",
+    "status": "IN_PROGRESS",
+    "review": "V07_1_PREFLIGHT=GO; owner-authorized package continuation active",
     "next_step": "V07.1",
-    "next_step_ready": false,
-    "next_step_blockers": [
-      "ADR-11 and the V07 core boundary of ADR-17 require responsible-human approval before V07.1 schema freeze"
-    ],
-    "required_gate": "V07.1_OWNER_ADR_GATE",
-    "gate_status": "PENDING"
+    "next_step_ready": true,
+    "next_step_blockers": [],
+    "required_gate": "V07.1_IMPLEMENTATION",
+    "gate_status": "PASS"
   },
   "v06_package_review": {
     "decision": "V06_PACKAGE_APPROVED",
@@ -157,7 +155,7 @@
     "merge_authorized": true,
     "owner_decision": "ACCEPTED",
     "authority": "PROJECT_OWNER_ACCEPTANCE",
-    "v07_authorized": false
+    "v07_authorized": true
   },
   "v06_package_re_review": {
     "status": "V06_PACKAGE_APPROVED",
@@ -204,7 +202,7 @@
     },
     "package_verified": true,
     "merge_authorized": true,
-    "v07_authorized": false
+    "v07_authorized": true
   },
   "world_core_continuation": {
     "status": "COMPLETED",
@@ -304,6 +302,21 @@
       }
     }
   },
+  "v07_entry": {
+    "status": "ACTIVE",
+    "branch": "codex/world-core-v07",
+    "main_baseline": "026671eca6b85bc6e5f1c99878c6f8d740f2fb21",
+    "decision_commit": "e5e4a3291fd2e77ff16173d88f631ea131badf34",
+    "preflight": "GO",
+    "preflight_file": "docs/reports/V07.1/PREFLIGHT.md",
+    "continuation_policy": "docs/governance/WORLD_CORE_V07_CONTINUATION_POLICY.json",
+    "owner_activation": "docs/reports/V07/OWNER_CONTINUATION_ACTIVATION.md",
+    "approved_adrs": ["ADR-11", "ADR-17"],
+    "next_adr_gate": "ADR-20_BEFORE_V07.2_COMMAND_QUEUE",
+    "candidate_migration_merge_gate": "ADR-16",
+    "production_mutation": false,
+    "owner_approved": true
+  },
   "work_packages": {
     "V00": "COMPLETE",
     "V01": "IMPLEMENTED_MERGED",
@@ -311,7 +324,8 @@
     "V03": "VERIFIED",
     "V04": "VERIFIED",
     "V05": "VERIFIED",
-    "V06": "VERIFIED"
+    "V06": "VERIFIED",
+    "V07": "IN_PROGRESS"
   },
   "step_evidence": {
     "V00.1": [
@@ -755,7 +769,7 @@
     "V06.1": "VERIFIED",
     "V06.2": "VERIFIED",
     "V06.3": "VERIFIED",
-    "V07.1": "PLANNED",
+    "V07.1": "IN_PROGRESS",
     "V07.2": "PLANNED",
     "V07.3": "PLANNED",
     "V08.1": "PLANNED",
