@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-10T16:20:14Z",
-  "source_commit": "b3a1f4949efa85d1c310819ebdf37505589f1b49",
-  "note": "Gate A, V06, V07 and V08 are verified and V08 is merged to main with runtime equivalence PASS. Independent Review B approved immutable V08 target b3a1f49, closing B01/B02 with zero open blockers or majors; direct project-owner confirmation recorded OWNER_POLICY_AUTO_ACCEPTANCE. V09 runtime remains NOT_STARTED pending the ADR-18 delegated-owner decision and V09 preflight. No production mutation is authorized.",
+  "derived_at": "2026-09-10T16:31:14Z",
+  "source_commit": "b7c39497c48f5e28305a2e01bf02d11b68e4fb99",
+  "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. V09.1 is IN_PROGRESS on a fresh V09 branch after dependency recomputation; no migration, production access or production mutation is authorized.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -165,17 +165,32 @@
     "production_mutation": false,
     "evidence_file": "docs/reports/V08/FINAL_RECONCILIATION.md"
   },
+  "v09_entry": {
+    "status": "ACTIVE",
+    "branch": "codex/world-core-v09",
+    "branch_base": "b7c39497c48f5e28305a2e01bf02d11b68e4fb99",
+    "authoritative_main": "b7c39497c48f5e28305a2e01bf02d11b68e4fb99",
+    "adr_18_decision_commit": "b7c39497c48f5e28305a2e01bf02d11b68e4fb99",
+    "preflight": "GO",
+    "preflight_file": "docs/reports/V09/PLANNING_PREFLIGHT.md",
+    "continuation_policy": "docs/governance/WORLD_CORE_V09_CONTINUATION_POLICY.json",
+    "owner_activation": "docs/reports/V09/OWNER_CONTINUATION_ACTIVATION.md",
+    "approved_adrs": ["ADR-03", "ADR-17", "ADR-18", "ADR-20"],
+    "deferred_adrs": ["ADR-04"],
+    "migration": "NOT_CREATED",
+    "production_mutation": false,
+    "owner_approved": true,
+    "authority": "CONTROL_TOWER_OWNER_DELEGATION"
+  },
   "current_gate": {
     "step_id": "V09.1",
-    "status": "PLANNED",
-    "review": "V08_MAINLINE_INTEGRATED_PENDING_ADR_18_DECISION",
+    "status": "IN_PROGRESS",
+    "review": "V09_ENTRY_PREFLIGHT_GO",
     "next_step": "V09.1",
-    "next_step_ready": false,
-    "next_step_blockers": [
-      "ADR-18 before V09.1 real persistence/concurrency evidence"
-    ],
-    "required_gate": "V09.1_ADR_18_DECISION",
-    "gate_status": "PENDING"
+    "next_step_ready": true,
+    "next_step_blockers": [],
+    "required_gate": "V09.1_IMPLEMENTATION",
+    "gate_status": "PASS"
   },
   "v07_package_review": {
     "status": "V07_PACKAGE_APPROVED",
@@ -599,6 +614,22 @@
       }
     }
   },
+  "v09_continuation": {
+    "status": "ACTIVE",
+    "method": "OWNER_AUTHORIZED_PACKAGE_CONTINUATION",
+    "decision": "ACCEPTED_FOR_MAINLINE_CONTINUATION",
+    "policy_file": "docs/governance/WORLD_CORE_V09_CONTINUATION_POLICY.json",
+    "activation_record": "docs/reports/V09/OWNER_CONTINUATION_ACTIVATION.md",
+    "branch": "codex/world-core-v09",
+    "allowed_steps": ["V09.1", "V09.2", "V09.3"],
+    "terminal_gate": "V09_PACKAGE_REVIEW",
+    "independent_review_pending": true,
+    "merge_authorized": false,
+    "production_mutation": false,
+    "owner_approved": true,
+    "authority": "CONTROL_TOWER_OWNER_DELEGATION",
+    "completed_steps": {}
+  },
   "v08_package_review": {
     "status": "V08_PACKAGE_APPROVED",
     "package_status": "VERIFIED",
@@ -644,7 +675,7 @@
     "final_closure_record": "docs/reports/V08/FINAL_CLOSURE.md",
     "production_access": false,
     "production_mutation": false,
-    "v09_started": false
+    "v09_started": true
   },
   "work_packages": {
     "V00": "COMPLETE",
@@ -655,7 +686,8 @@
     "V05": "VERIFIED",
     "V06": "VERIFIED",
     "V07": "VERIFIED",
-    "V08": "VERIFIED"
+    "V08": "VERIFIED",
+    "V09": "IN_PROGRESS"
   },
   "step_evidence": {
     "V00.1": [
@@ -1255,7 +1287,7 @@
     "V08.1": "VERIFIED",
     "V08.2": "VERIFIED",
     "V08.3": "VERIFIED",
-    "V09.1": "PLANNED",
+    "V09.1": "IN_PROGRESS",
     "V09.2": "PLANNED",
     "V09.3": "PLANNED",
     "V10.1": "PLANNED",

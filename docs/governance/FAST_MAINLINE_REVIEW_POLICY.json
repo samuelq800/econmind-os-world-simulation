@@ -85,7 +85,8 @@
   "scoped_continuation_records": [
     "docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json",
     "docs/governance/WORLD_CORE_V07_CONTINUATION_POLICY.json",
-    "docs/governance/WORLD_CORE_V08_CONTINUATION_POLICY.json"
+    "docs/governance/WORLD_CORE_V08_CONTINUATION_POLICY.json",
+    "docs/governance/WORLD_CORE_V09_CONTINUATION_POLICY.json"
   ],
   "mandatory_evidence": [
     "tests",

@@ -1,0 +1,41 @@
+{
+  "schema_version": "WORLD_CORE_PACKAGE_CONTINUATION-1",
+  "record_type": "OWNER_AUTHORIZED_PACKAGE_CONTINUATION",
+  "name": "WORLD_CORE_V09_PACKAGE_CONTINUATION",
+  "status": "ACTIVE",
+  "authority": "CONTROL_TOWER_OWNER_DELEGATION",
+  "activation_record": "docs/reports/V09/OWNER_CONTINUATION_ACTIVATION.md",
+  "scope": {
+    "branch": "codex/world-core-v09",
+    "first_step": "V09.1",
+    "last_step": "V09.3",
+    "allowed_steps": ["V09.1", "V09.2", "V09.3"],
+    "terminal_gate": "V09_PACKAGE_REVIEW"
+  },
+  "continuation_rule": {
+    "condition": "The immediately preceding V09 step has an immutable candidate and complete normal-engineering evidence with applicable automated checks passing and no recorded open P0 or MAJOR blocker, and every ADR required at the next step boundary is APPROVED or authoritatively not current for the exact implemented scope.",
+    "effect": "The immediately following dependency-ready V09 step may start on codex/world-core-v09 without claiming verification.",
+    "status_after_step": "IMPLEMENTED_UNVERIFIED",
+    "dependency_exception": "An IMPLEMENTED_UNVERIFIED dependency is accepted only between adjacent members of the exact allowed_steps sequence."
+  },
+  "preserved_controls": [
+    "V09 steps remain IMPLEMENTED_UNVERIFIED unless independently promoted",
+    "normal engineering acceptance, single-writer, determinism, idempotency, architecture, environment, security and governance checks remain mandatory",
+    "ADR-03, ADR-17, ADR-18 and ADR-20 are approved architecture for their exact V09 boundaries",
+    "ADR-04 remains deferred outside V09 because V09 does not implement its period-input-cycle semantics",
+    "real PostgreSQL concurrency and crash evidence uses the ADR-18 disposable local/CI and isolated non-production staging surfaces; PGlite is not the sole evidence surface",
+    "V07 Command, Event, Receipt, outbox and replay lineage remain controlling; V08 owns Posting and conservation semantics",
+    "candidate DDL remains branch-local until package review and normal promotion; production remains inaccessible",
+    "V09 package Review B and delegated-owner promotion remain mandatory before main merge or V10"
+  ],
+  "prohibitions": [
+    "self-VERIFIED or fabricated review",
+    "use for a non-adjacent dependency",
+    "use outside V09.1 through V09.3",
+    "continue across an unresolved applicable ADR, recorded P0 or MAJOR blocker",
+    "merge candidate DDL before V09 package review and delegated-owner promotion authority",
+    "merge V09 to main before package Review B and promotion authority",
+    "production deployment or migration publication",
+    "V10 or later implementation"
+  ]
+}

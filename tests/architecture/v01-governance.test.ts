@@ -166,12 +166,16 @@ describe('V06 owner-authorized package continuation', () => {
     const scoped = readJson(
       'docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json',
     );
+    const v09Scoped = readJson(
+      'docs/governance/WORLD_CORE_V09_CONTINUATION_POLICY.json',
+    );
     const progress = readJson('status/progress.json');
 
     expect(central.scoped_continuation_records).toEqual([
       'docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json',
       'docs/governance/WORLD_CORE_V07_CONTINUATION_POLICY.json',
       'docs/governance/WORLD_CORE_V08_CONTINUATION_POLICY.json',
+      'docs/governance/WORLD_CORE_V09_CONTINUATION_POLICY.json',
     ]);
     expect(scoped.status).toBe('ACTIVE');
     expect(scoped.authority).toBe('RESPONSIBLE_HUMAN_OWNER');
@@ -222,16 +226,53 @@ describe('V06 owner-authorized package continuation', () => {
         package_verified: false,
       },
     });
+    expect(v09Scoped).toMatchObject({
+      status: 'ACTIVE',
+      authority: 'CONTROL_TOWER_OWNER_DELEGATION',
+      scope: {
+        branch: 'codex/world-core-v09',
+        first_step: 'V09.1',
+        last_step: 'V09.3',
+        allowed_steps: ['V09.1', 'V09.2', 'V09.3'],
+        terminal_gate: 'V09_PACKAGE_REVIEW',
+      },
+    });
     expect(progress.current_gate).toMatchObject({
       step_id: 'V09.1',
-      status: 'PLANNED',
+      status: 'IN_PROGRESS',
       next_step: 'V09.1',
-      next_step_ready: false,
-      next_step_blockers: [
-        'ADR-18 before V09.1 real persistence/concurrency evidence',
-      ],
-      required_gate: 'V09.1_ADR_18_DECISION',
-      gate_status: 'PENDING',
+      next_step_ready: true,
+      next_step_blockers: [],
+      required_gate: 'V09.1_IMPLEMENTATION',
+      gate_status: 'PASS',
+    });
+    expect(progress.v09_entry).toMatchObject({
+      status: 'ACTIVE',
+      branch: 'codex/world-core-v09',
+      branch_base: 'b7c39497c48f5e28305a2e01bf02d11b68e4fb99',
+      authoritative_main: 'b7c39497c48f5e28305a2e01bf02d11b68e4fb99',
+      adr_18_decision_commit: 'b7c39497c48f5e28305a2e01bf02d11b68e4fb99',
+      preflight: 'GO',
+      approved_adrs: ['ADR-03', 'ADR-17', 'ADR-18', 'ADR-20'],
+      deferred_adrs: ['ADR-04'],
+      migration: 'NOT_CREATED',
+      production_mutation: false,
+      owner_approved: true,
+      authority: 'CONTROL_TOWER_OWNER_DELEGATION',
+    });
+    expect(progress.v09_continuation).toMatchObject({
+      status: 'ACTIVE',
+      method: 'OWNER_AUTHORIZED_PACKAGE_CONTINUATION',
+      decision: 'ACCEPTED_FOR_MAINLINE_CONTINUATION',
+      branch: 'codex/world-core-v09',
+      allowed_steps: ['V09.1', 'V09.2', 'V09.3'],
+      terminal_gate: 'V09_PACKAGE_REVIEW',
+      independent_review_pending: true,
+      merge_authorized: false,
+      production_mutation: false,
+      owner_approved: true,
+      authority: 'CONTROL_TOWER_OWNER_DELEGATION',
+      completed_steps: {},
     });
     expect(progress.v08_integration).toMatchObject({
       branch: 'codex/world-core-v08',
@@ -365,9 +406,10 @@ describe('V06 owner-authorized package continuation', () => {
       final_closure_record: 'docs/reports/V08/FINAL_CLOSURE.md',
       production_access: false,
       production_mutation: false,
-      v09_started: false,
+      v09_started: true,
     });
     expect(progress.work_packages.V08).toBe('VERIFIED');
+    expect(progress.work_packages.V09).toBe('IN_PROGRESS');
     expect(progress.v07_package_review).toMatchObject({
       status: 'V07_PACKAGE_APPROVED',
       package_status: 'VERIFIED',
