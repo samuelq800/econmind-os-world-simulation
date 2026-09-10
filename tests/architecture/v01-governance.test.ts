@@ -223,12 +223,12 @@ describe('V06 owner-authorized package continuation', () => {
     });
     expect(progress.current_gate).toMatchObject({
       step_id: 'V08.2',
-      status: 'PLANNED',
+      status: 'IN_PROGRESS',
       next_step: 'V08.2',
-      next_step_ready: false,
-      next_step_blockers: ['V08.2_PREFLIGHT_NOT_RUN'],
-      required_gate: 'V08.2_PREFLIGHT',
-      gate_status: 'PENDING',
+      next_step_ready: true,
+      next_step_blockers: [],
+      required_gate: 'V08.2_IMPLEMENTATION',
+      gate_status: 'PASS',
     });
     expect(progress.v08_entry).toMatchObject({
       status: 'ACTIVE',
@@ -244,6 +244,15 @@ describe('V06 owner-authorized package continuation', () => {
       not_current_gate_adrs: ['ADR-08'],
       production_mutation: false,
       owner_approved: true,
+      v08_2: {
+        status: 'ACTIVE',
+        preflight: 'GO',
+        dependency_method: 'OWNER_AUTHORIZED_PACKAGE_CONTINUATION',
+        approved_adrs: ['ADR-02', 'ADR-17'],
+        not_current_gate_adrs: ['ADR-07', 'ADR-08'],
+        migration: 'NOT_CREATED',
+        production_mutation: false,
+      },
     });
     expect(progress.v08_continuation).toMatchObject({
       status: 'ACTIVE',
