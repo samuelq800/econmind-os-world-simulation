@@ -17,11 +17,11 @@ import {
   financialAccountId,
   financialPostingBatchId,
   financialPostingLegId,
-  hydrateFinancialLedgerState,
   legalEntityId,
   worldId,
   type FinancialPostingLeg,
 } from '../../packages/core/src/index.js';
+import { openingLedgers } from '../helpers/v08-ledgers.js';
 import { FOUNDATION_PROPERTY_CONFIG } from './property-config.js';
 
 const sha256 = (preimage: string) =>
@@ -76,11 +76,10 @@ function batch(legs: readonly FinancialPostingLeg[]) {
 }
 
 const emptyState = () =>
-  hydrateFinancialLedgerState({
+  openingLedgers({
     worldId: WORLD,
-    worldVersion: '0',
-    positions: [],
-  });
+    sha256Hex: sha256,
+  }).financial;
 
 describe('V08.2 exact financial posting properties', () => {
   it('balances every generated multilateral batch exactly', () => {

@@ -19,12 +19,12 @@ import {
   financialClaimId,
   financialPostingBatchId,
   financialPostingLegId,
-  hydrateFinancialLedgerState,
   legalEntityId,
   worldId,
   type FinancialAccount,
   type FinancialPostingLeg,
 } from '../../packages/core/src/index.js';
+import { openingLedgers } from '../helpers/v08-ledgers.js';
 
 const sha256 = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
@@ -93,11 +93,10 @@ function batch(
 }
 
 const emptyState = () =>
-  hydrateFinancialLedgerState({
+  openingLedgers({
     worldId: WORLD,
-    worldVersion: '0',
-    positions: [],
-  });
+    sha256Hex: sha256,
+  }).financial;
 
 function balance(state: ReturnType<typeof emptyState>, accountId: string) {
   return (

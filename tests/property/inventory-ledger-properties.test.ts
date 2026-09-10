@@ -15,7 +15,6 @@ import {
   createInventoryAccount,
   createReservationPosting,
   eventId,
-  hydrateInventoryLedgerState,
   inventoryBatchId,
   inventoryLocationId,
   inventoryPostingId,
@@ -23,6 +22,7 @@ import {
   legalEntityId,
   worldId,
 } from '../../packages/core/src/index.js';
+import { openingLedgers } from '../helpers/v08-ledgers.js';
 import { FOUNDATION_PROPERTY_CONFIG } from './property-config.js';
 
 const sha256 = (preimage: string) =>
@@ -50,13 +50,14 @@ const reserved = createInventoryAccount({
 });
 
 function initial(total: bigint) {
-  return hydrateInventoryLedgerState({
+  return openingLedgers({
     worldId: WORLD,
-    worldVersion: '0',
-    balances: [
-      { account: available, quantity: Quantity.from(String(total), 'kg') },
-    ],
-  });
+    sha256Hex: sha256,
+    inventory: {
+      account: available,
+      quantity: Quantity.from(String(total), 'kg'),
+    },
+  }).inventory;
 }
 
 function reserve(total: bigint, requested: bigint) {

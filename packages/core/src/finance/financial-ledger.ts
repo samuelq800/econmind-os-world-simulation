@@ -27,6 +27,11 @@ import {
 import { isMoney, Money } from '../numeric/money.js';
 import { isSimTime, type SimTime } from '../numeric/sim-time.js';
 import {
+  authorizeFinancialLedgerState,
+  isAuthoritativeFinancialLedgerState,
+  type FinancialLedgerAuthority,
+} from '../opening/ledger-authority.js';
+import {
   canonicalHashInput,
   canonicalSerialize,
 } from '../serialization/canonical.js';
@@ -66,7 +71,6 @@ const DIRECTIONS: readonly FinancialPostingDirection[] = Object.freeze([
 const NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/u;
 const CANONICAL_SHA256 = /^sha256:[0-9a-f]{64}$/u;
 const financialBatchInstances = new WeakSet<object>();
-const financialLedgerInstances = new WeakSet<object>();
 
 export interface FinancialAccount {
   readonly worldId: WorldId;
@@ -111,7 +115,7 @@ export interface AppliedFinancialPostingBatch {
   readonly fingerprint: CanonicalSha256;
 }
 
-export interface FinancialLedgerState {
+export interface FinancialLedgerSnapshot {
   readonly schemaVersion: typeof FINANCIAL_LEDGER_SCHEMA_VERSION;
   readonly worldId: WorldId;
   readonly worldVersion: string;
@@ -119,6 +123,10 @@ export interface FinancialLedgerState {
   readonly positions: readonly Readonly<FinancialPosition>[];
   readonly appliedBatches: readonly Readonly<AppliedFinancialPostingBatch>[];
 }
+
+export type FinancialLedgerState = Readonly<
+  FinancialLedgerSnapshot & FinancialLedgerAuthority
+>;
 
 export interface FinancialPostingReceipt {
   readonly batchId: FinancialPostingBatchId;
@@ -359,17 +367,14 @@ export function createFinancialPostingBatch(
   return batch;
 }
 
-/**
- * Hydrates a position projection from authoritative posting history. V08.3
- * owns opening-source and reconciliation provenance.
- */
-export function hydrateFinancialLedgerState(input: {
+/** Parses untrusted checkpoint data. It never grants posting authority. */
+export function parseFinancialLedgerSnapshot(input: {
   readonly worldId: WorldId;
   readonly worldVersion: string;
   readonly accounts?: readonly FinancialAccount[];
   readonly positions: readonly FinancialPosition[];
   readonly appliedBatches?: readonly AppliedFinancialPostingBatch[];
-}): Readonly<FinancialLedgerState> {
+}): Readonly<FinancialLedgerSnapshot> {
   const canonicalWorldId = worldId(input.worldId);
   const accountsById = new Map<
     FinancialAccountId,
@@ -448,7 +453,6 @@ export function hydrateFinancialLedgerState(input: {
     positions: Object.freeze(positions),
     appliedBatches: Object.freeze(appliedBatches),
   });
-  financialLedgerInstances.add(state);
   return state;
 }
 
@@ -474,7 +478,7 @@ export function applyFinancialPostingBatch(
 ): Readonly<FinancialPostingResult> {
   if (
     state.schemaVersion !== FINANCIAL_LEDGER_SCHEMA_VERSION ||
-    !financialLedgerInstances.has(state)
+    !isAuthoritativeFinancialLedgerState(state)
   ) {
     throw new DomainError(
       DOMAIN_ERROR_CODES.VERSION_MISMATCH,
@@ -555,9 +559,9 @@ export function applyFinancialPostingBatch(
       Object.freeze({ batchId: batch.batchId, fingerprint: batch.fingerprint }),
     ]),
   });
-  financialLedgerInstances.add(nextState);
+  const authoritativeNextState = authorizeFinancialLedgerState(nextState);
   return Object.freeze({
-    state: nextState,
+    state: authoritativeNextState,
     receipt: receipt(batch, 'APPLIED'),
   });
 }

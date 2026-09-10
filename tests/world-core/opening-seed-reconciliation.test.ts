@@ -3,8 +3,10 @@ import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 
 import {
+  AUTHORITATIVE_TRANSITION_SCHEMA_VERSION,
   CURRENT_REPLAY_BINDING,
   DOMAIN_ERROR_CODES,
+  EVENT_SCHEMA_VERSION,
   FINANCIAL_POSTING_SCHEMA_VERSION,
   INVENTORY_POSTING_SCHEMA_VERSION,
   Money,
@@ -28,7 +30,6 @@ import {
   financialOpeningLegId,
   financialPostingBatchId,
   financialPostingLegId,
-  hydrateInventoryLedgerState,
   inventoryBatchId,
   inventoryLocationId,
   inventoryPostingId,
@@ -37,10 +38,13 @@ import {
   openingInventoryEntryId,
   openingSeedId,
   openingSourceId,
+  parseAuthoritativeEvent,
+  parseInventoryLedgerSnapshot,
   rebuildV08LedgersFromLineage,
   reconcileV08LedgerSnapshots,
   worldId,
   type FinancialOpeningBatch,
+  type AuthoritativeTransition,
   type OpeningInventoryEntry,
   type OpeningSource,
 } from '../../packages/core/src/index.js';
@@ -169,6 +173,44 @@ function seed(
     },
     sha256,
   );
+}
+
+function transition(input: {
+  readonly command: string;
+  readonly event: string;
+  readonly sequence: number;
+  readonly worldVersionBefore: number;
+  readonly worldVersionAfter: number;
+}): Readonly<AuthoritativeTransition> {
+  const command = commandId(input.command);
+  const authoritativeEvent = parseAuthoritativeEvent(
+    {
+      causationCommandId: command,
+      correlationId: `CORRELATION_${input.sequence}`,
+      correctsEventId: null,
+      eventId: input.event,
+      eventType: 'V08_LEDGER_TRANSITION',
+      payload: { transition: input.command },
+      recordedAtReal: `2026-09-10T00:00:0${input.sequence}.000Z`,
+      schemaVersion: EVENT_SCHEMA_VERSION,
+      sequence: String(input.sequence),
+      simTime: String(input.sequence * 10_000),
+      worldId: WORLD,
+      worldVersion: String(input.worldVersionAfter),
+    },
+    sha256,
+  );
+  return {
+    schemaVersion: AUTHORITATIVE_TRANSITION_SCHEMA_VERSION,
+    transitionId: command,
+    worldId: WORLD,
+    commandId: command,
+    commandFingerprint: `sha256:${'a'.repeat(64)}`,
+    worldVersionBefore: String(input.worldVersionBefore),
+    worldVersionAfter: String(input.worldVersionAfter),
+    eventIds: [authoritativeEvent.eventId],
+    events: [authoritativeEvent],
+  };
 }
 
 describe('V08.3 opening seed and reconciliation', () => {
@@ -384,9 +426,9 @@ describe('V08.3 opening seed and reconciliation', () => {
         worldId: WORLD,
         causationCommandId: commandId('COMMAND_PAYMENT'),
         causationEventIds: [eventId('EVENT_PAYMENT')],
-        worldVersionBefore: '0',
-        worldVersionAfter: '1',
-        simTime: SimTime.fromTicks('10000'),
+        worldVersionBefore: '1',
+        worldVersionAfter: '2',
+        simTime: SimTime.fromTicks('20000'),
         settlementCurrency: 'GCU',
         legs: [
           {
@@ -409,12 +451,35 @@ describe('V08.3 opening seed and reconciliation', () => {
     );
     const rebuilt = rebuildV08LedgersFromLineage({
       seed: opening,
-      inventoryPostings: [reservation],
-      financialPostingBatches: [payment],
+      transitions: [
+        {
+          transition: transition({
+            command: 'COMMAND_RESERVE',
+            event: 'EVENT_RESERVE',
+            sequence: 1,
+            worldVersionBefore: 0,
+            worldVersionAfter: 1,
+          }),
+          inventoryPostings: [reservation],
+          financialPostingBatches: [],
+        },
+        {
+          transition: transition({
+            command: 'COMMAND_PAYMENT',
+            event: 'EVENT_PAYMENT',
+            sequence: 2,
+            worldVersionBefore: 1,
+            worldVersionAfter: 2,
+          }),
+          inventoryPostings: [],
+          financialPostingBatches: [payment],
+        },
+      ],
     });
-    expect(rebuilt.inventory.worldVersion).toBe('1');
+    expect(rebuilt.worldVersion).toBe('2');
+    expect(rebuilt.inventory.worldVersion).toBe('2');
     expect(rebuilt.inventory.balances).toHaveLength(2);
-    expect(rebuilt.financial.worldVersion).toBe('1');
+    expect(rebuilt.financial.worldVersion).toBe('2');
     expect(
       rebuilt.financial.positions
         .find((position) => position.account.accountId === cash.accountId)
@@ -446,7 +511,7 @@ describe('V08.3 opening seed and reconciliation', () => {
 
   it('reports snapshot mismatch without mutating or repairing lineage', () => {
     const rebuilt = rebuildV08LedgersFromLineage({ seed: seed() });
-    const mismatching = hydrateInventoryLedgerState({
+    const mismatching = parseInventoryLedgerSnapshot({
       worldId: WORLD,
       worldVersion: '0',
       balances: [

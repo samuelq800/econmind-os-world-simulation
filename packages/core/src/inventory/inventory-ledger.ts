@@ -36,6 +36,11 @@ import {
   canonicalHashInput,
   canonicalSerialize,
 } from '../serialization/canonical.js';
+import {
+  authorizeInventoryLedgerState,
+  isAuthoritativeInventoryLedgerState,
+  type InventoryLedgerAuthority,
+} from '../opening/ledger-authority.js';
 
 export const INVENTORY_LEDGER_SCHEMA_VERSION = 'inventory-ledger-v1' as const;
 export const INVENTORY_POSTING_SCHEMA_VERSION = 'inventory-posting-v1' as const;
@@ -58,7 +63,6 @@ const OPERATIONS: readonly InventoryOperation[] = Object.freeze([
   'SHIP',
 ]);
 const inventoryPostingInstances = new WeakSet<object>();
-const inventoryLedgerInstances = new WeakSet<object>();
 const CANONICAL_SHA256 = /^sha256:[0-9a-f]{64}$/u;
 
 export interface InventoryAccount {
@@ -105,13 +109,17 @@ export interface AppliedInventoryPosting {
   readonly fingerprint: CanonicalSha256;
 }
 
-export interface InventoryLedgerState {
+export interface InventoryLedgerSnapshot {
   readonly schemaVersion: typeof INVENTORY_LEDGER_SCHEMA_VERSION;
   readonly worldId: WorldId;
   readonly worldVersion: string;
   readonly balances: readonly Readonly<InventoryBalance>[];
   readonly appliedPostings: readonly Readonly<AppliedInventoryPosting>[];
 }
+
+export type InventoryLedgerState = Readonly<
+  InventoryLedgerSnapshot & InventoryLedgerAuthority
+>;
 
 export interface InventoryPostingReceipt {
   readonly postingId: InventoryPostingId;
@@ -372,16 +380,13 @@ export function createInventoryPosting(
   return posting;
 }
 
-/**
- * Hydrates a ledger projection from already-authoritative posting history.
- * V08.3 owns the future opening-seed and reconciliation provenance contract.
- */
-export function hydrateInventoryLedgerState(input: {
+/** Parses untrusted checkpoint data. It never grants posting authority. */
+export function parseInventoryLedgerSnapshot(input: {
   readonly worldId: WorldId;
   readonly worldVersion: string;
   readonly balances: readonly InventoryBalance[];
   readonly appliedPostings?: readonly AppliedInventoryPosting[];
-}): Readonly<InventoryLedgerState> {
+}): Readonly<InventoryLedgerSnapshot> {
   const canonicalWorldId = worldId(input.worldId);
   const balances = input.balances.map((balance) => {
     const account = validateAccount(balance.account);
@@ -431,7 +436,6 @@ export function hydrateInventoryLedgerState(input: {
     balances: Object.freeze(balances),
     appliedPostings: Object.freeze(postings),
   });
-  inventoryLedgerInstances.add(state);
   return state;
 }
 
@@ -457,7 +461,7 @@ export function applyInventoryPosting(
 ): Readonly<InventoryPostingResult> {
   if (
     state.schemaVersion !== INVENTORY_LEDGER_SCHEMA_VERSION ||
-    !inventoryLedgerInstances.has(state)
+    !isAuthoritativeInventoryLedgerState(state)
   ) {
     throw new DomainError(
       DOMAIN_ERROR_CODES.VERSION_MISMATCH,
@@ -529,9 +533,9 @@ export function applyInventoryPosting(
       }),
     ]),
   });
-  inventoryLedgerInstances.add(nextState);
+  const authoritativeNextState = authorizeInventoryLedgerState(nextState);
   return Object.freeze({
-    state: nextState,
+    state: authoritativeNextState,
     receipt: receipt(posting, 'APPLIED'),
   });
 }

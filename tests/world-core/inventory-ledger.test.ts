@@ -20,7 +20,6 @@ import {
   createShipmentPosting,
   economicRecognitionId,
   eventId,
-  hydrateInventoryLedgerState,
   inventoryBatchId,
   inventoryLocationId,
   inventoryPostingId,
@@ -32,6 +31,7 @@ import {
   type InventoryLedgerState,
   type InventoryMovementInput,
 } from '../../packages/core/src/index.js';
+import { openingLedgers } from '../helpers/v08-ledgers.js';
 
 const sha256 = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
@@ -82,11 +82,11 @@ const delivered = account('AVAILABLE', {
 });
 
 function state(quantity = '100'): Readonly<InventoryLedgerState> {
-  return hydrateInventoryLedgerState({
+  return openingLedgers({
     worldId: WORLD,
-    worldVersion: '0',
-    balances: [{ account: available, quantity: Quantity.from(quantity, 'kg') }],
-  });
+    sha256Hex: sha256,
+    inventory: { account: available, quantity: Quantity.from(quantity, 'kg') },
+  }).inventory;
 }
 
 function movement(

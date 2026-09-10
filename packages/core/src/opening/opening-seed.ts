@@ -21,8 +21,9 @@ import {
 import {
   applyInventoryPosting,
   createInventoryAccount,
-  hydrateInventoryLedgerState,
+  parseInventoryLedgerSnapshot,
   type InventoryAccount,
+  type InventoryLedgerSnapshot,
   type InventoryLedgerState,
   type InventoryPosting,
 } from '../inventory/inventory-ledger.js';
@@ -33,18 +34,27 @@ import {
   type ReplayVersionBinding,
 } from '../replay/replay.js';
 import {
+  validateAuthoritativeTransition,
+  type AuthoritativeTransition,
+} from '../commands/receipt.js';
+import {
   canonicalHashInput,
   canonicalSerialize,
 } from '../serialization/canonical.js';
 import {
   applyFinancialPostingBatch,
   createFinancialAccount,
-  hydrateFinancialLedgerState,
+  parseFinancialLedgerSnapshot,
   type FinancialAccount,
+  type FinancialLedgerSnapshot,
   type FinancialLedgerState,
   type FinancialPostingBatch,
   type FinancialPostingDirection,
 } from '../finance/financial-ledger.js';
+import {
+  authorizeFinancialLedgerState,
+  authorizeInventoryLedgerState,
+} from './ledger-authority.js';
 
 export const OPENING_SOURCE_SCHEMA_VERSION = 'opening-source-v1' as const;
 export const OPENING_SEED_SCHEMA_VERSION = 'opening-seed-v1' as const;
@@ -112,8 +122,15 @@ export interface OpeningSeed {
 export interface RebuiltV08Ledgers {
   readonly seedId: OpeningSeedId;
   readonly seedFingerprint: CanonicalSha256;
+  readonly worldVersion: string;
   readonly inventory: Readonly<InventoryLedgerState>;
   readonly financial: Readonly<FinancialLedgerState>;
+}
+
+export interface V08AuthoritativeLedgerTransition {
+  readonly transition: AuthoritativeTransition;
+  readonly inventoryPostings: readonly InventoryPosting[];
+  readonly financialPostingBatches: readonly FinancialPostingBatch[];
 }
 
 export type LedgerReconciliationComparison = Readonly<{
@@ -431,46 +448,189 @@ function openingFinancialState(
       );
     }
   }
-  return hydrateFinancialLedgerState({
-    worldId: seed.worldId,
-    worldVersion: seed.openingWorldVersion,
-    accounts: [...accounts.values()],
-    positions: [...balances]
-      .filter(([, balance]) => !balance.amount.isZero())
-      .map(([accountId, netDebitBalance]) => {
-        const account = accounts.get(accountId);
-        if (account === undefined) invalid('Opening financial account missing');
-        return { account, netDebitBalance };
-      }),
-  });
+  return authorizeFinancialLedgerState(
+    parseFinancialLedgerSnapshot({
+      worldId: seed.worldId,
+      worldVersion: seed.openingWorldVersion,
+      accounts: [...accounts.values()],
+      positions: [...balances]
+        .filter(([, balance]) => !balance.amount.isZero())
+        .map(([accountId, netDebitBalance]) => {
+          const account = accounts.get(accountId);
+          if (account === undefined)
+            invalid('Opening financial account missing');
+          return { account, netDebitBalance };
+        }),
+    }),
+  );
+}
+
+function openingInventoryState(
+  seed: OpeningSeed,
+): Readonly<InventoryLedgerState> {
+  return authorizeInventoryLedgerState(
+    parseInventoryLedgerSnapshot({
+      worldId: seed.worldId,
+      worldVersion: seed.openingWorldVersion,
+      balances: seed.inventoryEntries.map((entry) => ({
+        account: entry.account,
+        quantity: entry.quantity,
+      })),
+    }),
+  );
+}
+
+function inventoryStateAtVersion(
+  state: InventoryLedgerState,
+  worldVersion: string,
+): Readonly<InventoryLedgerState> {
+  return authorizeInventoryLedgerState(
+    parseInventoryLedgerSnapshot({
+      worldId: state.worldId,
+      worldVersion,
+      balances: state.balances,
+      appliedPostings: state.appliedPostings,
+    }),
+  );
+}
+
+function financialStateAtVersion(
+  state: FinancialLedgerState,
+  worldVersion: string,
+): Readonly<FinancialLedgerState> {
+  return authorizeFinancialLedgerState(
+    parseFinancialLedgerSnapshot({
+      worldId: state.worldId,
+      worldVersion,
+      accounts: state.accounts,
+      positions: state.positions,
+      appliedBatches: state.appliedBatches,
+    }),
+  );
+}
+
+function assertInventoryPostingBinding(
+  posting: InventoryPosting,
+  transition: AuthoritativeTransition,
+): void {
+  const eventIds = new Set(transition.eventIds);
+  if (
+    posting.worldId !== transition.worldId ||
+    posting.causationCommandId !== transition.commandId ||
+    posting.worldVersionBefore !== transition.worldVersionBefore ||
+    posting.worldVersionAfter !== transition.worldVersionAfter ||
+    posting.causationEventIds.some((eventId) => !eventIds.has(eventId))
+  ) {
+    invalid(
+      'Inventory posting is not bound to its authoritative World transition',
+    );
+  }
+}
+
+function assertFinancialPostingBinding(
+  batch: FinancialPostingBatch,
+  transition: AuthoritativeTransition,
+): void {
+  const eventIds = new Set(transition.eventIds);
+  if (
+    batch.worldId !== transition.worldId ||
+    batch.causationCommandId !== transition.commandId ||
+    batch.worldVersionBefore !== transition.worldVersionBefore ||
+    batch.worldVersionAfter !== transition.worldVersionAfter ||
+    batch.causationEventIds.some((eventId) => !eventIds.has(eventId))
+  ) {
+    invalid(
+      'Financial posting is not bound to its authoritative World transition',
+    );
+  }
 }
 
 export function rebuildV08LedgersFromLineage(input: {
   readonly seed: OpeningSeed;
-  readonly inventoryPostings?: readonly InventoryPosting[];
-  readonly financialPostingBatches?: readonly FinancialPostingBatch[];
+  readonly transitions?: readonly V08AuthoritativeLedgerTransition[];
 }): Readonly<RebuiltV08Ledgers> {
   if (!openingSeedInstances.has(input.seed)) {
     invalid('Ledger reconstruction accepts a validated opening seed only');
   }
-  let inventory = hydrateInventoryLedgerState({
-    worldId: input.seed.worldId,
-    worldVersion: input.seed.openingWorldVersion,
-    balances: input.seed.inventoryEntries.map((entry) => ({
-      account: entry.account,
-      quantity: entry.quantity,
-    })),
-  });
+  let worldVersion: string = input.seed.openingWorldVersion;
+  let inventory = openingInventoryState(input.seed);
   let financial = openingFinancialState(input.seed);
-  for (const posting of input.inventoryPostings ?? []) {
-    inventory = applyInventoryPosting(inventory, posting).state;
-  }
-  for (const batch of input.financialPostingBatches ?? []) {
-    financial = applyFinancialPostingBatch(financial, batch).state;
+  const transitionIds = new Set<string>();
+  const inventoryPostingIds = new Set<string>();
+  const financialBatchIds = new Set<string>();
+
+  for (const value of input.transitions ?? []) {
+    const transition = validateAuthoritativeTransition(value.transition);
+    if (transitionIds.has(transition.transitionId)) {
+      invalid('Authoritative transition identity is duplicated');
+    }
+    if (
+      transition.worldId !== input.seed.worldId ||
+      transition.worldVersionBefore !== worldVersion
+    ) {
+      invalid(
+        'Authoritative transition sequence has a gap, conflict or foreign World',
+      );
+    }
+    transitionIds.add(transition.transitionId);
+
+    for (const posting of value.inventoryPostings) {
+      assertInventoryPostingBinding(posting, transition);
+      if (inventoryPostingIds.has(posting.postingId)) {
+        invalid('Inventory posting identity is duplicated across lineage');
+      }
+      inventoryPostingIds.add(posting.postingId);
+    }
+    for (const batch of value.financialPostingBatches) {
+      assertFinancialPostingBinding(batch, transition);
+      if (financialBatchIds.has(batch.batchId)) {
+        invalid('Financial posting identity is duplicated across lineage');
+      }
+      financialBatchIds.add(batch.batchId);
+    }
+
+    let candidateInventory = inventory;
+    for (const posting of value.inventoryPostings) {
+      candidateInventory = applyInventoryPosting(
+        inventoryStateAtVersion(
+          candidateInventory,
+          transition.worldVersionBefore,
+        ),
+        posting,
+      ).state;
+    }
+    if (value.inventoryPostings.length === 0) {
+      candidateInventory = inventoryStateAtVersion(
+        candidateInventory,
+        transition.worldVersionAfter,
+      );
+    }
+
+    let candidateFinancial = financial;
+    for (const batch of value.financialPostingBatches) {
+      candidateFinancial = applyFinancialPostingBatch(
+        financialStateAtVersion(
+          candidateFinancial,
+          transition.worldVersionBefore,
+        ),
+        batch,
+      ).state;
+    }
+    if (value.financialPostingBatches.length === 0) {
+      candidateFinancial = financialStateAtVersion(
+        candidateFinancial,
+        transition.worldVersionAfter,
+      );
+    }
+
+    inventory = candidateInventory;
+    financial = candidateFinancial;
+    worldVersion = transition.worldVersionAfter;
   }
   const rebuilt = Object.freeze({
     seedId: input.seed.seedId,
     seedFingerprint: input.seed.fingerprint,
+    worldVersion,
     inventory,
     financial,
   });
@@ -505,8 +665,8 @@ function comparison(
 
 export function reconcileV08LedgerSnapshots(input: {
   readonly reconstructed: RebuiltV08Ledgers;
-  readonly inventorySnapshot?: InventoryLedgerState;
-  readonly financialSnapshot?: FinancialLedgerState;
+  readonly inventorySnapshot?: InventoryLedgerSnapshot;
+  readonly financialSnapshot?: FinancialLedgerSnapshot;
   readonly sha256Hex: Sha256Hex;
 }): Readonly<V08LedgerReconciliation> {
   if (!rebuiltLedgerInstances.has(input.reconstructed)) {
@@ -515,7 +675,7 @@ export function reconcileV08LedgerSnapshots(input: {
   const inventorySnapshot =
     input.inventorySnapshot === undefined
       ? undefined
-      : hydrateInventoryLedgerState({
+      : parseInventoryLedgerSnapshot({
           worldId: input.inventorySnapshot.worldId,
           worldVersion: input.inventorySnapshot.worldVersion,
           balances: input.inventorySnapshot.balances,
@@ -524,7 +684,7 @@ export function reconcileV08LedgerSnapshots(input: {
   const financialSnapshot =
     input.financialSnapshot === undefined
       ? undefined
-      : hydrateFinancialLedgerState({
+      : parseFinancialLedgerSnapshot({
           worldId: input.financialSnapshot.worldId,
           worldVersion: input.financialSnapshot.worldVersion,
           accounts: input.financialSnapshot.accounts,
