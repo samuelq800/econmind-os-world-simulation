@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
   "derived_at": "2026-09-10T12:46:00Z",
-  "source_commit": "bdd5170fb571905f51629497cf786f8422a86958",
-  "note": "Gate A, V06 and V07 are accepted and verified. ADR-02 and ADR-05 are owner-approved on authoritative main ec3ceff. V08.1 code candidate bdd5170 has complete passing automated evidence and remains P0 IMPLEMENTED_UNVERIFIED. The responsible owner authorized only adjacent V08.1 through V08.3 package continuation without verification, merge, migration-publication or production authority. V08.2 remains PLANNED pending its exact preflight. ADR-07 remains deferred and ADR-08 is not applicable to V08.1 exact-or-reject mechanics.",
+  "source_commit": "a73c35d32d93f4067ab4e6228dbb65a4ab64734e",
+  "note": "Gate A, V06 and V07 are accepted and verified. ADR-02 and ADR-05 are owner-approved on authoritative main ec3ceff. V08.1 code candidate a73c35d has complete passing automated evidence and remains P0 IMPLEMENTED_UNVERIFIED. The responsible owner authorized only adjacent V08.1 through V08.3 package continuation without verification, merge, migration-publication or production authority. V08.2 remains PLANNED pending its exact preflight. ADR-07 remains deferred and ADR-08 is not applicable to V08.1 exact-or-reject mechanics.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -504,7 +504,7 @@
     "owner_approved": true,
     "completed_steps": {
       "V08.1": {
-        "implementation_commit": "bdd5170fb571905f51629497cf786f8422a86958",
+        "implementation_commit": "a73c35d32d93f4067ab4e6228dbb65a4ab64734e",
         "evidence_file": "docs/reports/V08.1/TEST_EVIDENCE.json",
         "automated_evidence_status": "PASS",
         "open_recorded_p0_blockers": 0,
@@ -771,7 +771,7 @@
     "V07.1": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
     "V07.2": "7e4b21e0cc70e878080a777874dad491a21501aa",
     "V07.3": "2b42e0d725da590a24e845a7046501af8f8d4c01",
-    "V08.1": "bdd5170fb571905f51629497cf786f8422a86958"
+    "V08.1": "a73c35d32d93f4067ab4e6228dbb65a4ab64734e"
   },
   "step_reviews": {
     "V00.1": {

@@ -4,7 +4,9 @@
   "title": "库存可用/预留/在途 Ledger",
   "state": "IMPLEMENTED_UNVERIFIED",
   "risk_class": "P0",
-  "code_candidate": "bdd5170fb571905f51629497cf786f8422a86958",
+  "code_candidate": "a73c35d32d93f4067ab4e6228dbb65a4ab64734e",
+  "superseded_code_candidate": "bdd5170fb571905f51629497cf786f8422a86958",
+  "superseded_reason": "WORLD_CORE_CONTRACT country dimension was added before downstream continuation",
   "toolchain": {
     "node": "24.20.0",
     "pnpm": "12.3.4",

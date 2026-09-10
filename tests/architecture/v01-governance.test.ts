@@ -258,7 +258,7 @@ describe('V06 owner-authorized package continuation', () => {
       owner_approved: true,
       completed_steps: {
         'V08.1': {
-          implementation_commit: 'bdd5170fb571905f51629497cf786f8422a86958',
+          implementation_commit: 'a73c35d32d93f4067ab4e6228dbb65a4ab64734e',
           automated_evidence_status: 'PASS',
           open_recorded_p0_blockers: 0,
           open_recorded_p1_majors: 0,

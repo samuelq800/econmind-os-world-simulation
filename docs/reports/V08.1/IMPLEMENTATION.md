@@ -5,7 +5,7 @@
 ```text
 Step: V08.1 — 库存可用/预留/在途 Ledger
 State: IMPLEMENTED_UNVERIFIED
-Code candidate: bdd5170fb571905f51629497cf786f8422a86958
+Code candidate: a73c35d32d93f4067ab4e6228dbb65a4ab64734e
 Automated evidence: PASS
 Independent verification: NOT_CLAIMED
 Migration: NOT_CREATED
@@ -17,7 +17,7 @@ Production mutation: NONE
 - Added a versioned, pure Core inventory Ledger/Posting contract whose only
   authoritative balance writer is `applyInventoryPosting` under the declared
   `WORLD_INVENTORY_POSTING` owner.
-- Added separate dimensions for World, commodity, batch, physical location,
+- Added separate dimensions for World, country, commodity, batch, physical location,
   AVAILABLE/RESERVED/IN_TRANSIT bucket, reservation, shipment, title holder,
   risk bearer and an opaque economic-recognition reference.
 - Added exact two-entry RESERVE, RELEASE, SHIP and DELIVER movements. Every
