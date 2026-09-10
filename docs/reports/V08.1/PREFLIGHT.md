@@ -4,12 +4,12 @@
 
 ```text
 V08_1_PREFLIGHT=NO_GO
-V08_1_PLANNING=READY_PENDING_DEPENDENCY_AND_OWNER_ADR
+V08_1_PLANNING=READY_PENDING_OWNER_ADR
 V08_1_RUNTIME=NOT_STARTED
 V08_1_MIGRATION=NOT_CREATED
-EVALUATED_V07_BRANCH=cbc0458ac083df0f85c9f7c9bf9c66c16189bb78
-AUTHORITATIVE_MAIN=8e4d9e125a89fc1457ed016c708537fd67e1c8b7
-V07_PACKAGE_REVIEW_TARGET=e802a5233ded3825c56d2897374fcd2de0c40da8
+EVALUATED_V08_BRANCH_BASE=403b97e6a2ae36cb7b250b1ce23fa128e9a5cbec
+AUTHORITATIVE_MAIN=403b97e6a2ae36cb7b250b1ce23fa128e9a5cbec
+V07_PACKAGE_REVIEW_TARGET=079fa9d230d5109488a1e5ea82e97f81845c49eb
 ```
 
 This is a planning-only dependency/ADR handoff. It does not change
@@ -18,17 +18,17 @@ or authorize production access.
 
 ## Dependency gates
 
-| Gate                           | Current result | Exact repository evidence                                               |
-| ------------------------------ | -------------- | ----------------------------------------------------------------------- |
-| V01.3                          | YES            | `status/progress.json`: `VERIFIED`                                      |
-| V02.3                          | YES            | `status/progress.json`: `VERIFIED`                                      |
-| V03.3                          | YES            | `status/progress.json`: `VERIFIED`                                      |
-| V07.3                          | NO             | `IMPLEMENTED_UNVERIFIED`; hard dependencies normally require `VERIFIED` |
-| V07 package independent review | NO             | `V07_PACKAGE_REVIEW` is `PENDING`; immutable target `e802a523...`       |
-| V07 owner acceptance           | NO             | No V07 package owner-acceptance record exists                           |
-| V07 verified/closed            | NO             | V07 remains `IMPLEMENTED_UNVERIFIED`                                    |
-| V07 merge/promotion to main    | NO             | main remains `8e4d9e1...`; V07 branch is not merged                     |
-| Dependency recomputation       | NO             | Must follow V07 closure and main integration                            |
+| Gate                           | Current result | Exact repository evidence                                             |
+| ------------------------------ | -------------- | --------------------------------------------------------------------- |
+| V01.3                          | YES            | `status/progress.json`: `VERIFIED`                                    |
+| V02.3                          | YES            | `status/progress.json`: `VERIFIED`                                    |
+| V03.3                          | YES            | `status/progress.json`: `VERIFIED`                                    |
+| V07.3                          | YES            | `status/progress.json`: `VERIFIED`                                    |
+| V07 package independent review | YES            | `V07_PACKAGE_APPROVED`; target `079fa9d...`                           |
+| V07 owner acceptance           | YES            | `e7cdaf0...`; `PROJECT_OWNER_ACCEPTANCE`                              |
+| V07 verified/closed            | YES            | V07.1-3 and package are `VERIFIED / CLOSED`                           |
+| V07 merge/promotion to main    | YES            | merge `5fb526c...`; reconciliation/main `403b97e...`                  |
+| Dependency recomputation       | YES            | exact V08 base equals synchronized `origin/main`; all hard steps pass |
 
 ## ADR gates
 
@@ -66,15 +66,10 @@ attempt to resolve that later gate.
 ## Required transition before rerun
 
 ```text
-V07_PACKAGE_APPROVED
--> OWNER_ACCEPTANCE
--> V07 VERIFIED/CLOSED
--> merge/promotion to main
--> dependency recomputation
--> ADR-02 APPROVED
+ADR-02 APPROVED
 -> ADR-05 APPROVED for the V08.1 model
 -> rerun V08.1 preflight
 ```
 
-Until every required gate is satisfied, V08 and V08.1 remain `NOT_STARTED /
-PLANNED`.
+All V07 and hard dependency gates are now satisfied. Until both remaining owner
+ADR gates are satisfied, V08 and V08.1 remain `NOT_STARTED / PLANNED`.

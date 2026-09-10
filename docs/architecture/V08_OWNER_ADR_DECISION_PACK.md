@@ -6,6 +6,11 @@ V08.1 cannot start until the responsible human owner decides ADR-02 and
 ADR-05. Both remain `PROPOSED_NOT_APPROVED` in `status/decisions.json`; this
 pack proposes no status change and is not approval evidence.
 
+V07 package approval, owner acceptance, `VERIFIED / CLOSED` promotion, main
+integration and dependency recomputation are satisfied on exact authoritative
+World main `403b97e6a2ae36cb7b250b1ce23fa128e9a5cbec`. These facts remove the V07
+dependency gate but do not approve either V08 decision.
+
 The exact current sources are `status/decisions.json`,
 `requirements/adr_dependency_map.json`,
 `reference/02_规范冲突与裁决清单.md`,
@@ -98,7 +103,7 @@ RESERVED -> IN_TRANSIT -> DELIVERED/AVAILABLE`; reservation and dispatch
 
 ## Owner action required later
 
-After V07 package approval, owner acceptance, closure and main integration,
-record explicit APPROVE/REJECT decisions for ADR-02 and ADR-05 through the
-existing authoritative decision mechanism. Do not infer approval from this
-recommendation or from ADR-17.
+Record explicit APPROVE/REJECT decisions for ADR-02 and ADR-05 through the
+existing authoritative decision mechanism, then recompute V08.1 preflight. Do
+not infer approval from this recommendation, the completed V07 lifecycle, or
+ADR-17.
