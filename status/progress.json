@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-10T00:11:57Z",
-  "source_commit": "026671eca6b85bc6e5f1c99878c6f8d740f2fb21",
-  "note": "Gate A and V06 are accepted, verified, and integrated into main. The responsible human owner approved ADR-11 and ADR-17 in decision commit e5e4a3291fd2e77ff16173d88f631ea131badf34, reconciled to main at 026671eca6b85bc6e5f1c99878c6f8d740f2fb21. V07.1 hard dependencies are VERIFIED, repository-derived preflight is GO, and V07.1 is IN_PROGRESS. ADR-17 implementation remains staged by V07/V08/V09 ownership. ADR-20 still blocks V07.2 command queueing; ADR-16 still blocks candidate DDL merge/promotion.",
+  "derived_at": "2026-09-10T00:55:27Z",
+  "source_commit": "4ed6f823eb7b8bc1a6e208184314153652aeb104",
+  "note": "Gate A and V06 are accepted, verified, and integrated into main. ADR-11 and ADR-17 are APPROVED. V07.1 preflight was GO and V07.1 is IMPLEMENTED_UNVERIFIED at code candidate b8c8555bac1f5e8d36d1f147732a691f248431f8 with migration provenance 039ffd3226a3cb780b94c624bd87b32bdc48ee67 and acceptance target e5840f76bb6a06c636f1f2575e3245b1f7734bd9. Automated evidence passes with no open P0/P1 blocker. ADR-20 blocks V07.2 command queueing; ADR-16 blocks candidate DDL merge/promotion. V08 is not started.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -135,13 +135,15 @@
   },
   "current_gate": {
     "step_id": "V07.1",
-    "status": "IN_PROGRESS",
-    "review": "V07_1_PREFLIGHT=GO; owner-authorized package continuation active",
-    "next_step": "V07.1",
-    "next_step_ready": true,
-    "next_step_blockers": [],
-    "required_gate": "V07.1_IMPLEMENTATION",
-    "gate_status": "PASS"
+    "status": "IMPLEMENTED_UNVERIFIED",
+    "review": "Automated evidence PASS; independent verification not claimed; READY_PENDING_OWNER_ADR",
+    "next_step": "V07.2",
+    "next_step_ready": false,
+    "next_step_blockers": [
+      "ADR-20 requires responsible-human approval before V07.2 queues a Command"
+    ],
+    "required_gate": "V07.2_OWNER_ADR_GATE",
+    "gate_status": "PENDING"
   },
   "v06_package_review": {
     "decision": "V06_PACKAGE_APPROVED",
@@ -314,6 +316,17 @@
     "approved_adrs": ["ADR-11", "ADR-17"],
     "next_adr_gate": "ADR-20_BEFORE_V07.2_COMMAND_QUEUE",
     "candidate_migration_merge_gate": "ADR-16",
+    "implementation_result": {
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "code_candidate": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
+      "migration_provenance_commit": "039ffd3226a3cb780b94c624bd87b32bdc48ee67",
+      "acceptance_target": "e5840f76bb6a06c636f1f2575e3245b1f7734bd9",
+      "evidence_commit": "4ed6f823eb7b8bc1a6e208184314153652aeb104",
+      "automated_evidence": "PASS",
+      "independent_review": "NOT_RUN",
+      "open_p0_blockers": 0,
+      "open_p1_majors": 0
+    },
     "production_mutation": false,
     "owner_approved": true
   },
@@ -325,7 +338,7 @@
     "V04": "VERIFIED",
     "V05": "VERIFIED",
     "V06": "VERIFIED",
-    "V07": "IN_PROGRESS"
+    "V07": "IMPLEMENTED_UNVERIFIED"
   },
   "step_evidence": {
     "V00.1": [
@@ -455,6 +468,12 @@
       "docs/reports/V06.3/IMPLEMENTATION_RESTORE_PREFIX_FIX.md",
       "docs/reports/V06.3/TEST_EVIDENCE_RESTORE_PREFIX_FIX.json",
       "docs/reports/V06/FINAL_ACCEPTANCE.md"
+    ],
+    "V07.1": [
+      "docs/exec-plans/V07.1.md",
+      "docs/reports/V07.1/PREFLIGHT.md",
+      "docs/reports/V07.1/IMPLEMENTATION.md",
+      "docs/reports/V07.1/TEST_EVIDENCE.json"
     ]
   },
   "package_evidence": {
@@ -511,7 +530,8 @@
     "V05.3": "47fe5c5d465748370d9a8ea046bc443978437203",
     "V06.1": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7",
     "V06.2": "4e35c07758f4d39b05dac402eeb03b080275c3e0",
-    "V06.3": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1"
+    "V06.3": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1",
+    "V07.1": "b8c8555bac1f5e8d36d1f147732a691f248431f8"
   },
   "step_reviews": {
     "V00.1": {
@@ -769,7 +789,7 @@
     "V06.1": "VERIFIED",
     "V06.2": "VERIFIED",
     "V06.3": "VERIFIED",
-    "V07.1": "IN_PROGRESS",
+    "V07.1": "IMPLEMENTED_UNVERIFIED",
     "V07.2": "PLANNED",
     "V07.3": "PLANNED",
     "V08.1": "PLANNED",

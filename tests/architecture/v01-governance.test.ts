@@ -212,11 +212,11 @@ describe('V06 owner-authorized package continuation', () => {
     });
     expect(progress.current_gate).toMatchObject({
       step_id: 'V07.1',
-      status: 'IN_PROGRESS',
-      next_step: 'V07.1',
-      next_step_ready: true,
-      required_gate: 'V07.1_IMPLEMENTATION',
-      gate_status: 'PASS',
+      status: 'IMPLEMENTED_UNVERIFIED',
+      next_step: 'V07.2',
+      next_step_ready: false,
+      required_gate: 'V07.2_OWNER_ADR_GATE',
+      gate_status: 'PENDING',
     });
     expect(progress.v06_integration).toEqual({
       branch: 'codex/world-core-v06-v10',
@@ -240,7 +240,7 @@ describe('V06 owner-authorized package continuation', () => {
       package_review_pending: false,
       package_verified: true,
     });
-    expect(progress.steps['V07.1']).toBe('IN_PROGRESS');
+    expect(progress.steps['V07.1']).toBe('IMPLEMENTED_UNVERIFIED');
     expect(progress.v07_entry).toMatchObject({
       status: 'ACTIVE',
       branch: 'codex/world-core-v07',
@@ -250,6 +250,17 @@ describe('V06 owner-authorized package continuation', () => {
       approved_adrs: ['ADR-11', 'ADR-17'],
       next_adr_gate: 'ADR-20_BEFORE_V07.2_COMMAND_QUEUE',
       candidate_migration_merge_gate: 'ADR-16',
+      implementation_result: {
+        status: 'IMPLEMENTED_UNVERIFIED',
+        code_candidate: 'b8c8555bac1f5e8d36d1f147732a691f248431f8',
+        migration_provenance_commit: '039ffd3226a3cb780b94c624bd87b32bdc48ee67',
+        acceptance_target: 'e5840f76bb6a06c636f1f2575e3245b1f7734bd9',
+        evidence_commit: '4ed6f823eb7b8bc1a6e208184314153652aeb104',
+        automated_evidence: 'PASS',
+        independent_review: 'NOT_RUN',
+        open_p0_blockers: 0,
+        open_p1_majors: 0,
+      },
       production_mutation: false,
       owner_approved: true,
     });

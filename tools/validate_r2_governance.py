@@ -1172,16 +1172,49 @@ def validate(root: Path) -> dict[str, Any]:
                     )
                     v07_entry = progress_data.get("v07_entry")
                     if isinstance(v07_entry, dict) and v07_entry.get("status") == "ACTIVE":
-                        require(
-                            gate.get("step_id") == "V07.1"
-                            and gate.get("status") == states["V07.1"]
-                            and states["V07.1"] == "IN_PROGRESS"
-                            and gate.get("next_step") == "V07.1"
-                            and gate.get("next_step_ready") is True
-                            and required_gate == "V07.1_IMPLEMENTATION"
-                            and gate.get("gate_status") == "PASS",
-                            "active V07.1 entry gate differs from progress truth",
-                        )
+                        if states["V07.1"] == "IN_PROGRESS":
+                            require(
+                                gate.get("step_id") == "V07.1"
+                                and gate.get("status") == states["V07.1"]
+                                and gate.get("next_step") == "V07.1"
+                                and gate.get("next_step_ready") is True
+                                and required_gate == "V07.1_IMPLEMENTATION"
+                                and gate.get("gate_status") == "PASS",
+                                "active V07.1 entry gate differs from progress truth",
+                            )
+                        else:
+                            require(
+                                states["V07.1"] == "IMPLEMENTED_UNVERIFIED"
+                                and gate.get("step_id") == "V07.1"
+                                and gate.get("status") == states["V07.1"]
+                                and gate.get("next_step") == "V07.2"
+                                and gate.get("next_step_ready") is False
+                                and required_gate == "V07.2_OWNER_ADR_GATE"
+                                and gate.get("gate_status") == "PENDING",
+                                "completed V07.1 ADR handoff differs from progress truth",
+                            )
+                            implementation = v07_entry.get("implementation_result")
+                            require(
+                                isinstance(implementation, dict)
+                                and implementation.get("status")
+                                == "IMPLEMENTED_UNVERIFIED"
+                                and implementation.get("automated_evidence") == "PASS"
+                                and implementation.get("independent_review") == "NOT_RUN"
+                                and implementation.get("open_p0_blockers") == 0
+                                and implementation.get("open_p1_majors") == 0,
+                                "V07.1 implementation evidence is incomplete",
+                            )
+                            code_candidate = commit_exists(
+                                implementation.get("code_candidate"),
+                                "V07.1 code candidate",
+                            )
+                            evidence_commit = commit_exists(
+                                implementation.get("evidence_commit"),
+                                "V07.1 evidence commit",
+                            )
+                            is_ancestor(code_candidate, evidence_commit, "V07.1 evidence lineage")
+                            file("docs/reports/V07.1/IMPLEMENTATION.md")
+                            file("docs/reports/V07.1/TEST_EVIDENCE.json")
                         require(
                             v07_entry.get("branch") == "codex/world-core-v07"
                             and v07_entry.get("preflight") == "GO"
