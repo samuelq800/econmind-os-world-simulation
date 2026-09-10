@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-10T17:07:46Z",
+  "derived_at": "2026-09-10T17:27:18Z",
   "source_commit": "b7c39497c48f5e28305a2e01bf02d11b68e4fb99",
-  "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. V09.1 is IN_PROGRESS on a fresh V09 branch with a branch-local, unpromoted 0005 lease/fencing candidate. Local rehearsal and disposable CI PostgreSQL evidence pass; dedicated non-production staging RLS/grant evidence remains NOT_RUN. No production access or production mutation is authorized.",
+  "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. V09.1 remains IN_PROGRESS after Review B found V09.1-BLK-01 at immutable target 0f09b17. Forward candidate e43dd66 adds branch-local, unpromoted 0006 to forbid lease-lineage DELETE/TRUNCATE reset; local and disposable PostgreSQL CI evidence pass, while a fresh independent review and dedicated non-production staging RLS/grant evidence remain pending. No production access or production mutation is authorized.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -187,6 +187,16 @@
     "code_candidate": "23b8b7d9101a7a8fab4bd272ff0a59b58fa684d7",
     "ci_support_commit": "beed9d389b3db6a65d1f10ed6330af5a1fb05da6",
     "evidence_file": "docs/reports/V09/V09.1_IMPLEMENTATION_CANDIDATE.md",
+    "failed_review": {
+      "status": "CHANGES_REQUIRED",
+      "reviewed_commit": "0f09b17adf3e56945fcc9e0888d2f14abe2467b1",
+      "code_review": "FAIL",
+      "open_blockers": ["V09.1-BLK-01"],
+      "open_majors": [],
+      "staging_evidence": "PENDING",
+      "finding": "0005 permitted DELETE of a writer-lease row, allowing fencing ABA reset.",
+      "evidence_file": "docs/reports/V09/V09.1_REVIEW_B_CHANGES_REQUIRED.md"
+    },
     "migration": {
       "status": "BRANCH_LOCAL_CANDIDATE_UNPROMOTED",
       "migration_id": "0005_world_v2_writer_lease_fencing",
@@ -195,22 +205,46 @@
       "manifest_path": "database/migrations/manifest.json",
       "production_mutation": false
     },
+    "forward_fix": {
+      "status": "EVIDENCE_READY_PENDING_INDEPENDENT_REVIEW",
+      "candidate_commit": "e43dd6629d8645740278156654bb224121666856",
+      "migration_id": "0006_world_v2_writer_lease_lineage_guard",
+      "artifact_source_commit": "8ef4390beaa877aa3e3d971a4bb0587a0c7592bd",
+      "artifact_sha256": "8ee4a6b01d2916665fc9793a24bbdb9675afc216a6aaa64ae84e67cb44fa66f8",
+      "evidence_file": "docs/reports/V09/V09.1_BLOCKER_FORWARD_FIX_EVIDENCE.md",
+      "fresh_review_target": "e43dd6629d8645740278156654bb224121666856"
+    },
     "automated_evidence": {
-      "local_full_check": "PASS",
-      "pglite_clean_and_existing_rehearsal": "PASS",
-      "disposable_postgresql_ci": {
-        "status": "PASS",
-        "workflow": "V09 PostgreSQL candidate",
-        "run": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34506068925",
-        "tested_commit": "beed9d389b3db6a65d1f10ed6330af5a1fb05da6",
-        "real_postgresql_tests": 2
+      "pre_review_candidate": {
+        "local_full_check": "PASS",
+        "pglite_clean_and_existing_rehearsal": "PASS",
+        "disposable_postgresql_ci": {
+          "status": "PASS",
+          "workflow": "V09 PostgreSQL candidate",
+          "run": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34506068925",
+          "tested_commit": "beed9d389b3db6a65d1f10ed6330af5a1fb05da6",
+          "real_postgresql_tests": 2
+        }
+      },
+      "forward_fix": {
+        "local_full_check": "PASS — 41 test files / 483 tests passed; 1 file / 3 tests skipped because no local real PostgreSQL target exists",
+        "migration_validation": "PASS — 6 migrations",
+        "pglite_clean_and_existing_rehearsal": "PASS — 6 manifest rows in each disposable rehearsal",
+        "focused_typescript_and_pglite": "PASS — lease core and migration suites; includes DELETE/TRUNCATE rejection and stale old-fence guard rejection",
+        "disposable_postgresql_ci": {
+          "status": "PASS",
+          "workflow": "V09 PostgreSQL candidate",
+          "run": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34508121499",
+          "tested_commit": "e43dd6629d8645740278156654bb224121666856",
+          "real_postgresql_tests": 3
+        }
       }
     },
     "remaining_required_evidence": {
       "dedicated_nonproduction_supabase_staging": "NOT_RUN",
       "staging_rls_and_grants": "NOT_RUN"
     },
-    "independent_review": "NOT_STARTED",
+    "independent_review": "FRESH_REVIEW_REQUIRED",
     "next_step": "V09.1",
     "v09_2_authorized": false,
     "production_access": false,
