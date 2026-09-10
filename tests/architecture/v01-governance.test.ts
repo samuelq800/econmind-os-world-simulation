@@ -170,6 +170,7 @@ describe('V06 owner-authorized package continuation', () => {
     expect(central.scoped_continuation_records).toEqual([
       'docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json',
       'docs/governance/WORLD_CORE_V07_CONTINUATION_POLICY.json',
+      'docs/governance/WORLD_CORE_V08_CONTINUATION_POLICY.json',
     ]);
     expect(scoped.status).toBe('ACTIVE');
     expect(scoped.authority).toBe('RESPONSIBLE_HUMAN_OWNER');
@@ -221,13 +222,13 @@ describe('V06 owner-authorized package continuation', () => {
       },
     });
     expect(progress.current_gate).toMatchObject({
-      step_id: 'V08.1',
-      status: 'IN_PROGRESS',
-      next_step: 'V08.1',
-      next_step_ready: true,
-      next_step_blockers: [],
-      required_gate: 'V08.1_IMPLEMENTATION',
-      gate_status: 'PASS',
+      step_id: 'V08.2',
+      status: 'PLANNED',
+      next_step: 'V08.2',
+      next_step_ready: false,
+      next_step_blockers: ['V08.2_PREFLIGHT_NOT_RUN'],
+      required_gate: 'V08.2_PREFLIGHT',
+      gate_status: 'PENDING',
     });
     expect(progress.v08_entry).toMatchObject({
       status: 'ACTIVE',
@@ -243,6 +244,28 @@ describe('V06 owner-authorized package continuation', () => {
       not_current_gate_adrs: ['ADR-08'],
       production_mutation: false,
       owner_approved: true,
+    });
+    expect(progress.v08_continuation).toMatchObject({
+      status: 'ACTIVE',
+      method: 'OWNER_AUTHORIZED_PACKAGE_CONTINUATION',
+      decision: 'ACCEPTED_FOR_MAINLINE_CONTINUATION',
+      branch: 'codex/world-core-v08',
+      allowed_steps: ['V08.1', 'V08.2', 'V08.3'],
+      terminal_gate: 'V08_PACKAGE_REVIEW',
+      independent_review_pending: true,
+      merge_authorized: false,
+      production_mutation: false,
+      owner_approved: true,
+      completed_steps: {
+        'V08.1': {
+          implementation_commit: 'bdd5170fb571905f51629497cf786f8422a86958',
+          automated_evidence_status: 'PASS',
+          open_recorded_p0_blockers: 0,
+          open_recorded_p1_majors: 0,
+          independent_review: 'NOT_RUN',
+          status: 'IMPLEMENTED_UNVERIFIED',
+        },
+      },
     });
     expect(progress.v07_package_review).toMatchObject({
       status: 'V07_PACKAGE_APPROVED',
