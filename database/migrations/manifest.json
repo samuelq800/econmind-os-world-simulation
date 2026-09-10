@@ -30,7 +30,7 @@
       "backfill": "NONE",
       "lock_or_downtime_risk": "Branch-local candidate; creates new World V2 tables and immutability triggers only",
       "rollback_strategy": "reversible-before-economic-facts",
-      "production_approval": null
+      "production_approval": "docs/reports/V07/FINAL_ACCEPTANCE.md"
     },
     {
       "migration_id": "0003_world_v2_command_receipts_outbox",
@@ -44,7 +44,7 @@
       "backfill": "NONE",
       "lock_or_downtime_risk": "Branch-local V07.2 candidate; creates queue, receipt, consumer-delivery and notification-outbox tables only",
       "rollback_strategy": "reversible-before-economic-facts",
-      "production_approval": null
+      "production_approval": "docs/reports/V07/FINAL_ACCEPTANCE.md"
     },
     {
       "migration_id": "0004_world_v2_receipt_event_set_integrity",
@@ -58,7 +58,7 @@
       "backfill": "NONE",
       "lock_or_downtime_risk": "Branch-local V07 forward fix; replaces receipt validation and guards final transition completeness",
       "rollback_strategy": "forward-fix",
-      "production_approval": null
+      "production_approval": "docs/reports/V07/FINAL_ACCEPTANCE.md"
     }
   ]
 }
