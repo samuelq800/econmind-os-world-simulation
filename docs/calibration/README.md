@@ -1,13 +1,15 @@
 # EconMind Calibration Foundation, C2 Live Pilot, and C3 Exploration
 
-Status: **IMPLEMENTED_UNVERIFIED / NON_AUTHORITATIVE / REVIEW TARGET PENDING**
+Status: **C2 APPROVED_FOR_CONTINUATION / C3 IMPLEMENTED_UNVERIFIED / NON_AUTHORITATIVE**
 Final Season 1 70-country package: **NOT CREATED**
 
 C2 historical review target `42adf110c1d8e8f01932b8b9b5f97a1e086d0343` is
-immutable reviewed evidence with required forward remediation. The focused
-C2-M01/C2-M02 forward-remediation lineage awaits independent re-review. C3 is
-**IMPLEMENTED_UNVERIFIED / EXPLORATORY_NON_AUTHORITATIVE**; its review target
-is pending.
+immutable reviewed evidence with required forward remediation. Independent
+Review B approved its forward closure target
+`56d9882cddd7244dca84a4dda3eed2dd10866ac1` for continuation under Class A:
+`C2-M01` and `C2-M02` are closed, with no open blocker or MAJOR finding. C3 is
+still **IMPLEMENTED_UNVERIFIED / EXPLORATORY_NON_AUTHORITATIVE**; no C3 review
+decision is implied by the C2 approval.
 
 This workstream converts provider-shaped bytes into traceable observations and, later, frozen World inputs. It does not implement World Core economics and it has no production/DB behavior.
 
@@ -63,8 +65,9 @@ Do not commit large provider downloads. Configure a local/object-store path outs
 
 ## Current stopping point
 
-C2 forward remediation and C3 descriptive exploration are implemented but
-unverified by an independent reviewer. C3 is bounded to the frozen partial
-pilot: it does not create or approve an archetype algorithm/count,
-fictional-country mapping, final trade matrix, IPF/RAS result, engine formula,
-runtime import, World State mutation, or production database operation.
+C2 forward remediation has independent Class A continuation approval. C3
+descriptive exploration remains unverified by an independent reviewer and is
+bounded to the frozen partial pilot: it does not create or approve an archetype
+algorithm/count, fictional-country mapping, final trade matrix, IPF/RAS result,
+engine formula, runtime import, World State mutation, or production database
+operation.

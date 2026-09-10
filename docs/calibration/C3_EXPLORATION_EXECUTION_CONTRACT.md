@@ -19,10 +19,12 @@ four inputs:
 - `data/calibration/pilot/snapshot_manifest.v1.json`
 - `data/calibration/pilot/pilot_report.v1.json`
 
-The historical C2 target remains immutable reviewed evidence. The later C2
-forward-remediation lineage changes no frozen C2 artifact and is itself
-awaiting independent re-review. C3 is therefore not review-ready until the
-relevant C2 forward target and C3 target are independently assessed.
+The historical C2 target remains immutable reviewed evidence. Its forward
+closure target `56d9882cddd7244dca84a4dda3eed2dd10866ac1` was independently
+approved for continuation under Class A: `C2-M01` and `C2-M02` are closed and
+there are no open blockers or MAJOR findings. That approval changes no frozen
+C2 artifact and is not a C3 review decision. C3 remains review-pending until
+its own immutable target is independently assessed.
 
 The generator reads only those fixed local artifacts. It rejects a changed
 input byte hash, an unexpected C2 input-path set, an altered C2 partial-pilot

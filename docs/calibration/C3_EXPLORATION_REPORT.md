@@ -10,6 +10,9 @@ read with its uncertainty register.
 ## Bound artifacts
 
 - C2 historical input target: `42adf110c1d8e8f01932b8b9b5f97a1e086d0343`
+- C2 independent closure target:
+  `56d9882cddd7244dca84a4dda3eed2dd10866ac1` (`APPROVED_FOR_CONTINUATION`;
+  `C2-M01`/`C2-M02` closed)
 - C3 contract canonical hash:
   `9c9b3fab9f7def56bbe66d2e1464d278dde345d24dc37fc3e49e6dd883eafd48`
 - Summary canonical content hash:
