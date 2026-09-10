@@ -219,11 +219,11 @@ describe('V06 owner-authorized package continuation', () => {
       },
     });
     expect(progress.current_gate).toMatchObject({
-      step_id: 'V07.2',
+      step_id: 'V07.3',
       status: 'PLANNED',
-      next_step: 'V07.2',
+      next_step: 'V07.3',
       next_step_ready: true,
-      required_gate: 'V07.2_IMPLEMENTATION_AND_EVIDENCE',
+      required_gate: 'V07.3_IMPLEMENTATION_AND_EVIDENCE',
       gate_status: 'PASS',
     });
     expect(progress.v06_integration).toEqual({
@@ -287,6 +287,17 @@ describe('V06 owner-authorized package continuation', () => {
       },
       production_mutation: false,
       owner_approved: true,
+      v07_2: {
+        status: 'IMPLEMENTED_UNVERIFIED',
+        code_candidate: '0f260ab1b582c524dc3005e0de62202d1c5d9a24',
+        migration_artifact_source_commit:
+          '2b3349555137196612bea6d55e22edf156f53cbd',
+        automated_evidence: 'PASS',
+        independent_review: 'DEFERRED_TO_V07_PACKAGE_GATE',
+        open_p0_blockers: 0,
+        open_p1_majors: 0,
+        production_mutation: false,
+      },
     });
     expect(progress.v06_package_review).toMatchObject({
       decision: 'V06_PACKAGE_APPROVED',

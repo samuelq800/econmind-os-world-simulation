@@ -1,0 +1,81 @@
+{
+  "schema_version": "V07.2-TEST-EVIDENCE-1",
+  "step_id": "V07.2",
+  "status": "PASS",
+  "risk_class": "P0",
+  "code_candidate": "0f260ab1b582c524dc3005e0de62202d1c5d9a24",
+  "migration_artifact_source_commit": "2b3349555137196612bea6d55e22edf156f53cbd",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile_changed": false
+  },
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/command-receipts.test.ts tests/world-core/command-receipt-ledger.test.ts tests/property/command-receipt-properties.test.ts tests/world-core/command-event-contracts.test.ts tests/property/command-event-properties.test.ts tests/world-core/command-event-ledger.test.ts",
+      "result": "PASS",
+      "test_files": 6,
+      "tests": 35,
+      "property_base_seed": 20260909,
+      "v07_2_property_seed": 20260981,
+      "property_num_runs": 250
+    },
+    {
+      "command": "pnpm check",
+      "result": "PASS",
+      "test_files": 29,
+      "tests": 370,
+      "boundary_test_files": 3,
+      "boundary_tests": 34,
+      "authoritative_scanned_core_files": 24,
+      "authoritative_scanned_files": 36,
+      "boundary_scanned_files": 41,
+      "migration_count": 3,
+      "migration_rehearsal_modes": ["clean-baseline", "existing-schema"],
+      "secret_scanned_files": 460,
+      "build": "PASS"
+    }
+  ],
+  "superseded_observations": [
+    {
+      "command": "pnpm check",
+      "result": "FAIL",
+      "passing_test_files": 28,
+      "failing_test_files": 1,
+      "passing_tests": 369,
+      "failing_tests": 1,
+      "cause": "the V02 negative test hard-coded release_order 4, which became the valid next order after migration 0003",
+      "resolution": "the negative fixture now derives an always-invalid order from the current manifest length; the production validation rule was not weakened"
+    },
+    {
+      "command": "focused V07.2 tests",
+      "result": "FAIL",
+      "failing_tests": 4,
+      "cause": "test fixtures used nonexistent SimTime.zero and passed query parameters to PGlite exec",
+      "resolution": "fixtures now use SimTime.fromTicks and parameterized query; the same focused suite passes"
+    }
+  ],
+  "assertions": {
+    "exact_duplicate_no_second_effect": "PASS",
+    "changed_intent_conflict_zero_effect": "PASS",
+    "correlation_only_duplicate": "PASS",
+    "commit_time_reauthorization": "PASS",
+    "authorization_revoked_zero_effect": "PASS",
+    "committed_fact_survives_revocation": "PASS",
+    "automatic_obligation_not_retroactively_revoked": "PASS",
+    "outbox_redelivery_independent": "PASS",
+    "consumer_receipt_separate_from_event": "PASS",
+    "unknown_version_fail_closed": "PASS",
+    "v06_sim_time_compatible": "PASS"
+  },
+  "database": {
+    "engine": "PGlite ephemeral PostgreSQL",
+    "production_access": false,
+    "production_mutation": false,
+    "migration_status": "BRANCH_LOCAL_CANDIDATE_UNPROMOTED",
+    "real_supabase_rls_or_multi_process_concurrency": "NOT_RUN_NOT_CLAIMED"
+  },
+  "open_p0_blockers": 0,
+  "open_p1_majors": 0,
+  "independent_review": "DEFERRED_TO_V07_PACKAGE_GATE_BY_OWNER_AUTHORIZED_CONTINUATION"
+}

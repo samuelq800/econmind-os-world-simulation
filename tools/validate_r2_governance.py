@@ -687,6 +687,7 @@ def validate(root: Path) -> dict[str, Any]:
         continuation = progress_data.get("world_core_continuation")
         continuation_steps: list[str] = []
         continuation_completed: dict[str, Any] = {}
+        v07_continuation_steps = v07_continuation_policy["scope"]["allowed_steps"]
         foundation_steps: set[str] = set()
         foundation_finalized = False
         require(
@@ -988,10 +989,27 @@ def validate(root: Path) -> dict[str, Any]:
                         for dependency in step_by_id[step_id]["hard_dependencies"]
                     )
                 )
+                v07_continuation_dependencies_ready = (
+                    state in {"IN_PROGRESS", "IMPLEMENTED_UNVERIFIED"}
+                    and step_id in v07_continuation_steps
+                    and all(
+                        states[dependency] == "VERIFIED"
+                        or (
+                            v07_continuation_steps.index(step_id) > 0
+                            and dependency
+                            == v07_continuation_steps[
+                                v07_continuation_steps.index(step_id) - 1
+                            ]
+                            and states[dependency] == "IMPLEMENTED_UNVERIFIED"
+                        )
+                        for dependency in step_by_id[step_id]["hard_dependencies"]
+                    )
+                )
                 require(
                     dependencies_ready
                     or batch_dependencies_ready
-                    or continuation_dependencies_ready,
+                    or continuation_dependencies_ready
+                    or v07_continuation_dependencies_ready,
                     f"impossible {state} dependency claim: {step_id}",
                 )
             if state == "VERIFIED":
@@ -1102,6 +1120,18 @@ def validate(root: Path) -> dict[str, Any]:
                 and v07_implementation.get("open_p0_blockers") == 0
                 and v07_implementation.get("open_p1_majors") == 0
                 and required_gate == "V07.2_IMPLEMENTATION_AND_EVIDENCE"
+                and gate.get("gate_status") == "PASS"
+            )
+        if next_step == "V07.3" and isinstance(v07_entry, dict):
+            v07_2 = v07_entry.get("v07_2", {})
+            next_ready = (
+                states["V07.2"] == "IMPLEMENTED_UNVERIFIED"
+                and states["V07.3"] == "PLANNED"
+                and v07_2.get("automated_evidence") == "PASS"
+                and v07_2.get("open_p0_blockers") == 0
+                and v07_2.get("open_p1_majors") == 0
+                and v07_2.get("production_mutation") is False
+                and required_gate == "V07.3_IMPLEMENTATION_AND_EVIDENCE"
                 and gate.get("gate_status") == "PASS"
             )
         require(
@@ -1293,6 +1323,56 @@ def validate(root: Path) -> dict[str, Any]:
                                 active_review_target
                                 == forward_fix.get("fixed_review_target"),
                                 "V07.1 Review B target differs from fixed review target",
+                            )
+                        elif (
+                            states["V07.2"] == "IMPLEMENTED_UNVERIFIED"
+                            and states["V07.3"] == "PLANNED"
+                        ):
+                            require(
+                                gate.get("step_id") == "V07.3"
+                                and gate.get("status") == states["V07.3"]
+                                and gate.get("next_step") == "V07.3"
+                                and gate.get("next_step_ready") is True
+                                and required_gate
+                                == "V07.3_IMPLEMENTATION_AND_EVIDENCE"
+                                and gate.get("gate_status") == "PASS",
+                                "V07.3 continuation entry differs from progress truth",
+                            )
+                            v07_2 = v07_entry.get("v07_2")
+                            require(
+                                isinstance(v07_2, dict)
+                                and v07_2.get("status")
+                                == "IMPLEMENTED_UNVERIFIED"
+                                and v07_2.get("automated_evidence") == "PASS"
+                                and v07_2.get("independent_review")
+                                == "DEFERRED_TO_V07_PACKAGE_GATE"
+                                and v07_2.get("open_p0_blockers") == 0
+                                and v07_2.get("open_p1_majors") == 0
+                                and v07_2.get("production_mutation") is False,
+                                "V07.2 continuation evidence is incomplete",
+                            )
+                            v07_2_candidate = commit_exists(
+                                v07_2.get("code_candidate"),
+                                "V07.2 code candidate",
+                            )
+                            migration_source = commit_exists(
+                                v07_2.get("migration_artifact_source_commit"),
+                                "V07.2 migration artifact source",
+                            )
+                            is_ancestor(
+                                migration_source,
+                                v07_2_candidate,
+                                "V07.2 migration/code lineage",
+                            )
+                            file(v07_2.get("implementation_file"))
+                            file(v07_2.get("evidence_file"))
+                            implementation = v07_entry.get("implementation_result", {})
+                            require(
+                                implementation.get("review_b_result")
+                                == "APPROVED_FOR_CONTINUATION"
+                                and implementation.get("open_p0_blockers") == 0
+                                and implementation.get("open_p1_majors") == 0,
+                                "V07.1 Review B continuation closure is missing",
                             )
                         else:
                             require(False, "unsupported active V07 lifecycle state")
