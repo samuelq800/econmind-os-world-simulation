@@ -268,6 +268,7 @@ describe('V06 owner-authorized package continuation', () => {
         acceptance_target: 'e5840f76bb6a06c636f1f2575e3245b1f7734bd9',
         evidence_commit: '4ed6f823eb7b8bc1a6e208184314153652aeb104',
         automated_evidence: 'PASS',
+        review_target: 'cea9554c5ad9c3ad69e0ec538c908901660ec761',
         review_target: 'b57b6aa9cd349776e1f5cd8ae10d20413523a69c',
         independent_review: 'CHANGES_REQUIRED_DOWNSTREAM_BLOCKING',
         open_p0_blockers: 0,

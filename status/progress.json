@@ -1,6 +1,6 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-10T03:16:30Z",
+  "derived_at": "2026-09-10T03:20:59Z",
   "source_commit": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
   "note": "Gate A and V06 are accepted, verified, and integrated into main. ADR-11, ADR-16, ADR-17 and ADR-20 are APPROVED. Review B closed the V07.1 correlation-fingerprint downstream blocker. V07.1 remains IMPLEMENTED_UNVERIFIED. V07.2 receipts/outbox/idempotency is IMPLEMENTED_UNVERIFIED at 0f260ab1b582c524dc3005e0de62202d1c5d9a24 with all applicable automated evidence passing and no open P0/P1 blocker. V07.3 is dependency-ready under the owner-authorized V07 package-continuation policy; V08 is not started.",
   "mainline_mode": "FAST_MAINLINE",
@@ -351,7 +351,8 @@
       "automated_evidence": "PASS",
       "evidence_file": "docs/reports/V07.2/TEST_EVIDENCE.json",
       "implementation_file": "docs/reports/V07.2/IMPLEMENTATION.md",
-      "review_target": null,
+      "review_target": "cea9554c5ad9c3ad69e0ec538c908901660ec761",
+      "review_bundle": "docs/reports/V07.2/REVIEW_TARGET.md",
       "independent_review": "DEFERRED_TO_V07_PACKAGE_GATE",
       "open_p0_blockers": 0,
       "open_p1_majors": 0,
@@ -513,7 +514,8 @@
     "V07.2": [
       "docs/exec-plans/V07.2.md",
       "docs/reports/V07.2/IMPLEMENTATION.md",
-      "docs/reports/V07.2/TEST_EVIDENCE.json"
+      "docs/reports/V07.2/TEST_EVIDENCE.json",
+      "docs/reports/V07.2/REVIEW_TARGET.md"
     ]
   },
   "package_evidence": {

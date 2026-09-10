@@ -1364,8 +1364,18 @@ def validate(root: Path) -> dict[str, Any]:
                                 v07_2_candidate,
                                 "V07.2 migration/code lineage",
                             )
+                            v07_2_review_target = commit_exists(
+                                v07_2.get("review_target"),
+                                "V07.2 review target",
+                            )
+                            is_ancestor(
+                                v07_2_candidate,
+                                v07_2_review_target,
+                                "V07.2 review lineage",
+                            )
                             file(v07_2.get("implementation_file"))
                             file(v07_2.get("evidence_file"))
+                            file(v07_2.get("review_bundle"))
                             implementation = v07_entry.get("implementation_result", {})
                             require(
                                 implementation.get("review_b_result")
