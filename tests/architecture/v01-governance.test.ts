@@ -223,12 +223,14 @@ describe('V06 owner-authorized package continuation', () => {
     });
     expect(progress.current_gate).toMatchObject({
       step_id: 'V08.3',
-      status: 'IN_PROGRESS',
-      next_step: 'V08.3',
-      next_step_ready: true,
-      next_step_blockers: [],
-      required_gate: 'V08.3_IMPLEMENTATION',
-      gate_status: 'PASS',
+      status: 'IMPLEMENTED_UNVERIFIED',
+      next_step: 'V09.1',
+      next_step_ready: false,
+      next_step_blockers: [
+        'V08 package independent review and owner acceptance/promotion',
+      ],
+      required_gate: 'V08_PACKAGE_REVIEW',
+      gate_status: 'PENDING',
     });
     expect(progress.v08_entry).toMatchObject({
       status: 'ACTIVE',
@@ -256,19 +258,21 @@ describe('V06 owner-authorized package continuation', () => {
         evidence_file: 'docs/reports/V08.2/TEST_EVIDENCE.json',
       },
       v08_3: {
-        status: 'ACTIVE',
+        status: 'IMPLEMENTED_UNVERIFIED',
         preflight: 'GO',
         dependency_method: 'OWNER_AUTHORIZED_PACKAGE_CONTINUATION',
         approved_adrs: ['ADR-02', 'ADR-05', 'ADR-17'],
         not_current_gate_adrs: ['ADR-07', 'ADR-08'],
         migration: 'NOT_CREATED',
         production_mutation: false,
+        implementation_commit: '4f0da4104b928f3504c50164147324c8af0deab5',
+        evidence_file: 'docs/reports/V08.3/TEST_EVIDENCE.json',
       },
     });
     expect(progress.v08_continuation).toMatchObject({
-      status: 'ACTIVE',
+      status: 'TERMINAL_GATE_REACHED',
       method: 'OWNER_AUTHORIZED_PACKAGE_CONTINUATION',
-      decision: 'ACCEPTED_FOR_MAINLINE_CONTINUATION',
+      decision: 'READY_FOR_PACKAGE_REVIEW',
       branch: 'codex/world-core-v08',
       allowed_steps: ['V08.1', 'V08.2', 'V08.3'],
       terminal_gate: 'V08_PACKAGE_REVIEW',
@@ -293,7 +297,28 @@ describe('V06 owner-authorized package continuation', () => {
           independent_review: 'NOT_RUN',
           status: 'IMPLEMENTED_UNVERIFIED',
         },
+        'V08.3': {
+          implementation_commit: '4f0da4104b928f3504c50164147324c8af0deab5',
+          automated_evidence_status: 'PASS',
+          open_recorded_p0_blockers: 0,
+          open_recorded_p1_majors: 0,
+          independent_review: 'NOT_RUN',
+          status: 'IMPLEMENTED_UNVERIFIED',
+        },
       },
+    });
+    expect(progress.v08_package_review).toMatchObject({
+      status: 'READY_FOR_PACKAGE_REVIEW',
+      package_status: 'IMPLEMENTED_UNVERIFIED',
+      review_target: null,
+      open_recorded_p0_blockers: 0,
+      open_recorded_p1_majors: 0,
+      independent_review: 'NOT_RUN',
+      package_verified: false,
+      merge_authorized: false,
+      production_access: false,
+      production_mutation: false,
+      v09_started: false,
     });
     expect(progress.v07_package_review).toMatchObject({
       status: 'V07_PACKAGE_APPROVED',

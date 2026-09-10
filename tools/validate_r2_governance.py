@@ -894,11 +894,15 @@ def validate(root: Path) -> dict[str, Any]:
         if v08_continuation is not None:
             require(
                 isinstance(v08_continuation, dict)
-                and v08_continuation.get("status") == "ACTIVE"
+                and v08_continuation.get("status")
+                in {"ACTIVE", "TERMINAL_GATE_REACHED"}
                 and v08_continuation.get("method")
                 == "OWNER_AUTHORIZED_PACKAGE_CONTINUATION"
                 and v08_continuation.get("decision")
-                == "ACCEPTED_FOR_MAINLINE_CONTINUATION"
+                in {
+                    "ACCEPTED_FOR_MAINLINE_CONTINUATION",
+                    "READY_FOR_PACKAGE_REVIEW",
+                }
                 and v08_continuation.get("policy_file")
                 == "docs/governance/WORLD_CORE_V08_CONTINUATION_POLICY.json"
                 and v08_continuation.get("activation_record")
@@ -1763,6 +1767,54 @@ def validate(root: Path) -> dict[str, Any]:
                                         "active V08.3 gate differs from progress truth",
                                     )
                                     file(v08_3.get("preflight_file"))
+                                elif states["V08.3"] == "IMPLEMENTED_UNVERIFIED":
+                                    v08_package_review = progress_data.get(
+                                        "v08_package_review", {}
+                                    )
+                                    require(
+                                        gate.get("step_id") == "V08.3"
+                                        and gate.get("status")
+                                        == "IMPLEMENTED_UNVERIFIED"
+                                        and gate.get("next_step") == "V09.1"
+                                        and gate.get("next_step_ready") is False
+                                        and required_gate == "V08_PACKAGE_REVIEW"
+                                        and gate.get("gate_status") == "PENDING"
+                                        and isinstance(v08_3, dict)
+                                        and v08_3.get("status")
+                                        == "IMPLEMENTED_UNVERIFIED"
+                                        and v08_3.get("implementation_commit")
+                                        and v08_3.get("evidence_file")
+                                        and isinstance(v08_package_review, dict)
+                                        and v08_package_review.get("status")
+                                        == "READY_FOR_PACKAGE_REVIEW"
+                                        and v08_package_review.get("package_status")
+                                        == "IMPLEMENTED_UNVERIFIED"
+                                        and v08_package_review.get("package_verified")
+                                        is False
+                                        and v08_package_review.get("merge_authorized")
+                                        is False
+                                        and v08_package_review.get("v09_started")
+                                        is False,
+                                        "V08 package review gate differs from progress truth",
+                                    )
+                                    require(
+                                        v08_continuation.get("status")
+                                        == "TERMINAL_GATE_REACHED"
+                                        and v08_continuation.get("decision")
+                                        == "READY_FOR_PACKAGE_REVIEW"
+                                        and "V08.3" in v08_completed
+                                        and v08_completed["V08.3"].get("status")
+                                        == "IMPLEMENTED_UNVERIFIED"
+                                        and v08_completed["V08.3"].get(
+                                            "automated_evidence_status"
+                                        )
+                                        == "PASS",
+                                        "V08.3 package continuation evidence is incomplete",
+                                    )
+                                    file(v08_3.get("preflight_file"))
+                                    file(v08_3.get("evidence_file"))
+                                    file(v08_package_review.get("bundle_file"))
+                                    file(v08_package_review.get("test_evidence_file"))
                                 else:
                                     require(False, "unsupported V08.3 lifecycle state")
                                 require(
@@ -1779,9 +1831,14 @@ def validate(root: Path) -> dict[str, Any]:
                                 file(v08_2.get("evidence_file"))
                             else:
                                 require(False, "unsupported V08.2 lifecycle state")
+                            expected_v08_package_state = (
+                                "IMPLEMENTED_UNVERIFIED"
+                                if states["V08.3"] == "IMPLEMENTED_UNVERIFIED"
+                                else "IN_PROGRESS"
+                            )
                             require(
                                 progress_data.get("work_packages", {}).get("V08")
-                                == "IN_PROGRESS",
+                                == expected_v08_package_state,
                                 "active V08 package state differs from progress truth",
                             )
                             require(
