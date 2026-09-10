@@ -8,8 +8,10 @@
     "observationId",
     "variableId",
     "geographyId",
+    "providerGeographyId",
     "period",
     "value",
+    "rawNumericToken",
     "canonicalUnit",
     "dataClass",
     "sourceSnapshotId",
@@ -17,17 +19,20 @@
     "transformationId",
     "transformationVersion",
     "qualityFlags",
-    "provenance"
+    "provenance",
+    "sourceAttributes"
   ],
   "properties": {
     "observationId": { "type": "string", "pattern": "^obs_[0-9a-f]{64}$" },
     "variableId": { "type": "string", "minLength": 1 },
     "geographyId": { "type": "string", "minLength": 1 },
+    "providerGeographyId": { "type": "string", "minLength": 1 },
     "period": { "type": "string", "minLength": 1 },
     "value": {
       "type": ["string", "null"],
       "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
     },
+    "rawNumericToken": { "type": ["string", "null"] },
     "canonicalUnit": { "type": "string", "minLength": 1 },
     "dataClass": {
       "enum": ["OBSERVED", "DERIVED", "SYNTHETIC_CALIBRATION", "PLACEHOLDER"]
@@ -46,6 +51,10 @@
       "items": { "type": "string" },
       "minItems": 1,
       "uniqueItems": true
+    },
+    "sourceAttributes": {
+      "type": "object",
+      "additionalProperties": { "type": ["string", "null"] }
     }
   },
   "allOf": [

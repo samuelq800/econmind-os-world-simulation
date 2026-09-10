@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "calibration-outlier-rules.v1",
+  "version": "1.0.0-pilot",
+  "status": "PILOT_NON_AUTHORITATIVE",
+  "rules": [
+    {
+      "ruleId": "NONNEGATIVE_GDP",
+      "version": "1.0.0",
+      "variableId": "gdp_current_usd",
+      "minimum": "0",
+      "maximum": null
+    },
+    {
+      "ruleId": "NONNEGATIVE_POPULATION",
+      "version": "1.0.0",
+      "variableId": "population_total",
+      "minimum": "0",
+      "maximum": null
+    },
+    {
+      "ruleId": "PERCENT_SHARE_RANGE",
+      "version": "1.0.0",
+      "variableId": "agriculture_value_added_pct_gdp",
+      "minimum": "0",
+      "maximum": "100"
+    },
+    {
+      "ruleId": "PERCENT_SHARE_RANGE",
+      "version": "1.0.0",
+      "variableId": "manufacturing_value_added_pct_gdp",
+      "minimum": "0",
+      "maximum": "100"
+    },
+    {
+      "ruleId": "PERCENT_SHARE_RANGE",
+      "version": "1.0.0",
+      "variableId": "services_value_added_pct_gdp",
+      "minimum": "0",
+      "maximum": "100"
+    },
+    {
+      "ruleId": "UNEMPLOYMENT_RANGE",
+      "version": "1.0.0",
+      "variableId": "unemployment_pct",
+      "minimum": "0",
+      "maximum": "100"
+    }
+  ]
+}

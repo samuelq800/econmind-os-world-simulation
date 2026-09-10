@@ -1,0 +1,135 @@
+{
+  "schemaVersion": "calibration-pilot-spec.v1",
+  "pilotId": "c2-live-pilot-2026-09-10",
+  "status": "PILOT_NON_AUTHORITATIVE",
+  "purpose": "Validate lossless snapshot, concordance, normalization, and quality paths; not final calibration.",
+  "periods": ["2021", "2022", "2023"],
+  "entities": [
+    "emp:AUS",
+    "emp:BRA",
+    "emp:CHN",
+    "emp:DEU",
+    "emp:IDN",
+    "emp:IND",
+    "emp:JPN",
+    "emp:MEX",
+    "emp:USA",
+    "emp:ZAF"
+  ],
+  "wdi": {
+    "economyCodes": [
+      "AU",
+      "BR",
+      "CN",
+      "DE",
+      "ID",
+      "IN",
+      "JP",
+      "MX",
+      "US",
+      "ZA"
+    ],
+    "variables": [
+      {
+        "variableId": "gdp_current_usd",
+        "indicatorCode": "NY.GDP.MKTP.CD",
+        "canonicalUnit": "USD"
+      },
+      {
+        "variableId": "real_gdp_growth_pct",
+        "indicatorCode": "NY.GDP.MKTP.KD.ZG",
+        "canonicalUnit": "PERCENT_PER_YEAR"
+      },
+      {
+        "variableId": "population_total",
+        "indicatorCode": "SP.POP.TOTL",
+        "canonicalUnit": "PERSON"
+      },
+      {
+        "variableId": "inflation_consumer_pct",
+        "indicatorCode": "FP.CPI.TOTL.ZG",
+        "canonicalUnit": "PERCENT_PER_YEAR"
+      },
+      {
+        "variableId": "unemployment_pct",
+        "indicatorCode": "SL.UEM.TOTL.ZS",
+        "canonicalUnit": "PERCENT_OF_LABOUR_FORCE"
+      },
+      {
+        "variableId": "agriculture_value_added_pct_gdp",
+        "indicatorCode": "NV.AGR.TOTL.ZS",
+        "canonicalUnit": "PERCENT_OF_GDP"
+      },
+      {
+        "variableId": "manufacturing_value_added_pct_gdp",
+        "indicatorCode": "NV.IND.MANF.ZS",
+        "canonicalUnit": "PERCENT_OF_GDP"
+      },
+      {
+        "variableId": "services_value_added_pct_gdp",
+        "indicatorCode": "NV.SRV.TOTL.ZS",
+        "canonicalUnit": "PERCENT_OF_GDP"
+      }
+    ]
+  },
+  "wto": {
+    "indicatorCode": "TP_A_0010",
+    "reporterCode": "USA",
+    "period": "2023",
+    "status": "REQUIRES_WTO_API_KEY"
+  },
+  "comtrade": {
+    "period": "2022",
+    "classificationSearchCode": "HS",
+    "candidateUniverse": {
+      "reporterCodes": ["842", "156", "276", "76", "699", "710"],
+      "partnerCodes": ["842", "156", "276", "76", "699", "710"],
+      "flowCodes": ["X", "M"],
+      "productCodes": ["10", "27", "84"]
+    },
+    "requests": [
+      {
+        "pairId": "usa-chn-machinery",
+        "reporterCode": "842",
+        "partnerCode": "156",
+        "flowCode": "X",
+        "productCode": "84"
+      },
+      {
+        "pairId": "usa-chn-machinery",
+        "reporterCode": "156",
+        "partnerCode": "842",
+        "flowCode": "M",
+        "productCode": "84"
+      },
+      {
+        "pairId": "deu-bra-energy",
+        "reporterCode": "276",
+        "partnerCode": "76",
+        "flowCode": "X",
+        "productCode": "27"
+      },
+      {
+        "pairId": "deu-bra-energy",
+        "reporterCode": "76",
+        "partnerCode": "276",
+        "flowCode": "M",
+        "productCode": "27"
+      },
+      {
+        "pairId": "ind-zaf-food",
+        "reporterCode": "699",
+        "partnerCode": "710",
+        "flowCode": "X",
+        "productCode": "10"
+      },
+      {
+        "pairId": "ind-zaf-food",
+        "reporterCode": "710",
+        "partnerCode": "699",
+        "flowCode": "M",
+        "productCode": "10"
+      }
+    ]
+  }
+}

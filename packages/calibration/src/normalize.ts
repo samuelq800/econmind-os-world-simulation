@@ -12,6 +12,7 @@ export interface NormalizationPlan {
   readonly acceptedSourceUnit: string;
   readonly transformationId: string;
   readonly transformationVersion: string;
+  readonly canonicalEntityId?: string;
 }
 
 export function normalizeRecord(
@@ -28,7 +29,7 @@ export function normalizeRecord(
     record.value === null ? null : assertCanonicalDecimal(record.value);
   const identity = {
     variableId: plan.variableId,
-    geographyId: record.geographyId,
+    geographyId: plan.canonicalEntityId ?? record.geographyId,
     period: record.period,
     sourceSnapshotId: snapshot.snapshotId,
     sourceObservationKey: record.sourceObservationKey,
@@ -37,9 +38,11 @@ export function normalizeRecord(
   return Object.freeze({
     observationId: `obs_${sha256Canonical(identity)}`,
     variableId: plan.variableId,
-    geographyId: record.geographyId,
+    geographyId: plan.canonicalEntityId ?? record.geographyId,
+    providerGeographyId: record.geographyId,
     period: record.period,
     value,
+    rawNumericToken: record.rawNumericToken,
     canonicalUnit: plan.canonicalUnit,
     dataClass: 'OBSERVED',
     sourceSnapshotId: snapshot.snapshotId,
@@ -51,5 +54,6 @@ export function normalizeRecord(
       snapshot.snapshotId,
       record.sourceObservationKey,
     ]),
+    sourceAttributes: Object.freeze({ ...record.attributes }),
   });
 }

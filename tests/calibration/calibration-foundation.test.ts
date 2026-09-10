@@ -7,13 +7,24 @@ import {
   addDecimal,
   buildCalibrationPackage,
   calibrationAdapters,
+  canonicalDecimalFromJsonNumber,
   canonicalJson,
   comtradeAdapter,
   createSnapshotMetadata,
+  diagnoseMirrorAsymmetry,
+  diagnoseOutliers,
+  diagnoseSnapshotRevision,
+  diagnoseSourceRecords,
+  diagnoseTemporalGaps,
   deterministicCandidateOrder,
   divideDecimalExactly,
   multiplyDecimal,
   normalizeRecord,
+  parseLosslessJson,
+  readWdiPagination,
+  requireResolvedEntity,
+  resolveEntity,
+  resolveTradeClassification,
   retrieveSnapshot,
   sha256Bytes,
   subtractDecimal,
@@ -78,13 +89,21 @@ describe('Calibration source adapters and snapshots', () => {
     expect(
       new Set(calibrationAdapters.map((adapter) => adapter.sourceId)).size,
     ).toBe(3);
-    expect(
+    const request = wdiAdapter.buildRequest({
+      indicator: 'SP.POP.TOTL',
+      economy: 'USA',
+      date: '2020:2023',
+    });
+    expect(request.url).toContain(
+      'date=2020%3A2023&format=json&page=1&per_page=20000&source=2',
+    );
+    expect(request).toEqual(
       wdiAdapter.buildRequest({
-        indicator: 'SP.POP.TOTL',
-        economy: 'USA',
         date: '2020:2023',
-      }).url,
-    ).toContain('date=2020%3A2023&format=json&per_page=20000');
+        economy: 'USA',
+        indicator: 'SP.POP.TOTL',
+      }),
+    );
   });
 
   it('parses a WDI fixture without converting decimal text to a float', async () => {
@@ -92,7 +111,17 @@ describe('Calibration source adapters and snapshots', () => {
     const records = wdiAdapter.parse(bytes);
     expect(records).toHaveLength(4);
     expect(records[0]?.value).toBe('27292170793297.5');
+    expect(records[0]?.rawNumericToken).toBe('27292170793297.5');
     expect(records[3]?.value).toBeNull();
+    expect(records[3]?.rawNumericToken).toBeNull();
+    expect(readWdiPagination(bytes)).toEqual({
+      page: 1,
+      pages: 1,
+      perPage: 20,
+      total: 4,
+      sourceId: '2',
+      lastUpdated: '2026-07-30',
+    });
   });
 
   it('parses WTO CSV including source flags', async () => {
@@ -110,10 +139,15 @@ describe('Calibration source adapters and snapshots', () => {
       await fixture('comtrade.bilateral.sample.json'),
     );
     expect(records[0]).toMatchObject({
-      geographyId: 'USA',
-      value: '147806742110',
+      geographyId: '842',
+      value: '153837022415',
+      rawNumericToken: '153837022415.0',
     });
     expect(records[0]?.qualityFlags).toEqual(['COMTRADE_AGGREGATE']);
+    expect(diagnoseMirrorAsymmetry(records[0]!, records[1]!)).toMatchObject({
+      code: 'REPORTING_ASYMMETRY',
+      details: { absoluteSignedDifference: '-14164212152.75' },
+    });
   });
 
   it('creates and verifies immutable content-addressed snapshot metadata', async () => {
@@ -130,13 +164,34 @@ describe('Calibration source adapters and snapshots', () => {
       providerVersion: 'fixture-v1',
       status: 'FIXTURE' as const,
     };
-    const metadata = createSnapshotMetadata(request, bytes, input);
+    const payload = {
+      bytes,
+      httpStatus: 200,
+      responseHeaders: { 'content-type': 'text/csv' },
+      finalUrl: request.url,
+    };
+    const metadata = createSnapshotMetadata(
+      request,
+      payload,
+      wtoAdapter,
+      input,
+    );
     expect(verifySnapshot(metadata, bytes)).toBe(true);
     expect(verifySnapshot(metadata, Buffer.from('changed'))).toBe(false);
     expect(Object.isFrozen(metadata)).toBe(true);
+    expect(Object.keys(metadata.requestParameters)).toEqual([
+      'i',
+      'indicator',
+      'pc',
+      'ps',
+      'r',
+      'reporter',
+      'year',
+    ]);
     const retrieved = await retrieveSnapshot(
       request,
       new FixtureTransport({ WTO_TIMESERIES_V1: bytes }),
+      wtoAdapter,
       input,
     );
     expect(retrieved.metadata.sha256).toBe(metadata.sha256);
@@ -165,13 +220,23 @@ describe('Calibration source adapters and snapshots', () => {
       reporter: 'USA',
       year: '2023',
     });
-    const snapshot = createSnapshotMetadata(request, bytes, {
-      snapshotId: 'snap-wto-fixture-001',
-      retrievedAt: '2026-09-10T00:00:00.000Z',
-      sourceAsOf: '2023',
-      providerVersion: 'fixture-v1',
-      status: 'FIXTURE',
-    });
+    const snapshot = createSnapshotMetadata(
+      request,
+      {
+        bytes,
+        httpStatus: 200,
+        responseHeaders: { 'content-type': 'text/csv' },
+        finalUrl: request.url,
+      },
+      wtoAdapter,
+      {
+        snapshotId: 'snap-wto-fixture-001',
+        retrievedAt: '2026-09-10T00:00:00.000Z',
+        sourceAsOf: '2023',
+        providerVersion: 'fixture-v1',
+        status: 'FIXTURE',
+      },
+    );
     const record = wtoAdapter.parse(bytes)[0];
     expect(record).toBeDefined();
     const plan = {
@@ -189,6 +254,180 @@ describe('Calibration source adapters and snapshots', () => {
       'snap-wto-fixture-001',
       record!.sourceObservationKey,
     ]);
+    expect(
+      diagnoseTemporalGaps([
+        { ...first, period: '2021' },
+        { ...first, observationId: 'obs_later', period: '2023' },
+      ]),
+    ).toMatchObject([
+      { code: 'TEMPORAL_GAP', details: { missingPeriod: '2022' } },
+    ]);
+    expect(
+      diagnoseOutliers(
+        [{ ...first, variableId: 'bounded_rate', value: '100.0001' }],
+        [
+          {
+            ruleId: 'BOUNDED_RATE',
+            version: '1.0.0',
+            variableId: 'bounded_rate',
+            minimum: '0',
+            maximum: '100',
+          },
+        ],
+      ),
+    ).toMatchObject([{ code: 'OUTLIER_RULE_VIOLATION' }]);
+  });
+
+  it('preserves long and exponent-form provider numbers without JS Number conversion', () => {
+    const parsed = parseLosslessJson(
+      Buffer.from('[12345678901234567890.1234500,1.25e-3,-4E+2,null]'),
+    );
+    expect(parsed).toEqual([
+      { kind: 'LOSSLESS_JSON_NUMBER', raw: '12345678901234567890.1234500' },
+      { kind: 'LOSSLESS_JSON_NUMBER', raw: '1.25e-3' },
+      { kind: 'LOSSLESS_JSON_NUMBER', raw: '-4E+2' },
+      null,
+    ]);
+    expect(canonicalDecimalFromJsonNumber('12345678901234567890.1234500')).toBe(
+      '12345678901234567890.12345',
+    );
+    expect(canonicalDecimalFromJsonNumber('1.25e-3')).toBe('0.00125');
+    expect(canonicalDecimalFromJsonNumber('-4E+2')).toBe('-400');
+    expect(() => canonicalDecimalFromJsonNumber('1e10001')).toThrow(
+      'LOSSLESS_NUMBER_EXPANSION_LIMIT',
+    );
+    expect(() => parseLosslessJson(Buffer.from('{"a":1,"a":2}'))).toThrow(
+      'duplicate-object-key:a',
+    );
+  });
+
+  it('resolves concordances and flags source quality failures deterministically', async () => {
+    const entityConcordance = JSON.parse(
+      await readFile(
+        path.join(
+          root,
+          'data/calibration/concordances/source_entity_concordance.v1.json',
+        ),
+        'utf8',
+      ),
+    );
+    const tradeConcordance = JSON.parse(
+      await readFile(
+        path.join(
+          root,
+          'data/calibration/concordances/trade_classification_concordance.v1.json',
+        ),
+        'utf8',
+      ),
+    );
+    expect(
+      resolveEntity(entityConcordance, 'WDI_ECONOMY_CODE', 'US'),
+    ).toMatchObject({ status: 'RESOLVED', canonicalEntityId: 'emp:USA' });
+    expect(
+      resolveEntity(entityConcordance, 'WDI_ECONOMY_CODE', 'XX').status,
+    ).toBe('UNRESOLVED');
+    expect(
+      resolveEntity(
+        {
+          ...entityConcordance,
+          entities: [
+            ...entityConcordance.entities,
+            {
+              canonicalEntityId: 'emp:DUPLICATE',
+              displayName: 'Duplicate test entity',
+              identifiers: [
+                {
+                  namespace: 'WDI_ECONOMY_CODE',
+                  value: 'US',
+                  status: 'PILOT',
+                },
+              ],
+            },
+          ],
+        },
+        'WDI_ECONOMY_CODE',
+        'US',
+      ).status,
+    ).toBe('AMBIGUOUS');
+    expect(() =>
+      requireResolvedEntity(entityConcordance, 'WDI_ECONOMY_CODE', 'XX'),
+    ).toThrow('UNRESOLVED_ENTITY_CONCORDANCE');
+    expect(
+      resolveTradeClassification(
+        tradeConcordance,
+        'UN_COMTRADE_HS',
+        'H6',
+        '84',
+      ),
+    ).toMatchObject({
+      calibrationSectorId: 'pilot_advanced_manufacturing',
+    });
+
+    const records = comtradeAdapter.parse(
+      await fixture('comtrade.bilateral.sample.json'),
+    );
+    const diagnostics = diagnoseSourceRecords(
+      [
+        records[0]!,
+        records[0]!,
+        { ...records[0]!, value: '1', rawNumericToken: '1' },
+        {
+          ...records[1]!,
+          sourceObservationKey: 'unresolved-test-key',
+          geographyId: '999',
+        },
+      ],
+      {
+        entityConcordance,
+        entityNamespace: 'COMTRADE_REPORTER_CODE',
+        expectedUnits: { PRIMARY_VALUE: 'EUR' },
+        tradeConcordance,
+      },
+    );
+    expect(diagnostics.map(({ code }) => code)).toEqual([
+      'UNIT_MISMATCH',
+      'UNIT_MISMATCH',
+      'UNIT_MISMATCH',
+      'UNRESOLVED_ENTITY_CONCORDANCE',
+      'UNIT_MISMATCH',
+      'SUSPICIOUS_DUPLICATE_PROVIDER_KEY',
+    ]);
+  });
+
+  it('detects provider revisions without changing source observations', async () => {
+    const bytes = await fixture('wto.tariff.sample.csv');
+    const request = wtoAdapter.buildRequest({
+      indicator: 'TP_A_0010',
+      reporter: 'USA',
+      year: '2023',
+    });
+    const basePayload = {
+      bytes,
+      httpStatus: 200,
+      responseHeaders: {},
+      finalUrl: request.url,
+    };
+    const earlier = createSnapshotMetadata(request, basePayload, wtoAdapter, {
+      retrievedAt: '2026-09-09T00:00:00.000Z',
+      sourceAsOf: '2026-09-09',
+      providerVersion: 'v1',
+      status: 'FIXTURE',
+    });
+    const later = createSnapshotMetadata(
+      request,
+      { ...basePayload, bytes: Buffer.from(`${bytes.toString()}\n`) },
+      wtoAdapter,
+      {
+        retrievedAt: '2026-09-10T00:00:00.000Z',
+        sourceAsOf: '2026-09-10',
+        providerVersion: 'v2',
+        status: 'FIXTURE',
+      },
+    );
+    expect(diagnoseSnapshotRevision(earlier, later)?.code).toBe(
+      'PROVIDER_REVISION_DIFFERENCE',
+    );
+    expect(earlier.snapshotId).not.toBe(later.snapshotId);
   });
 });
 

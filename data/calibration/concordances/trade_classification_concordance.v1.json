@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "trade-classification-concordance.v1",
+  "version": "1.0.0-pilot",
+  "status": "PILOT_NON_AUTHORITATIVE",
+  "calibrationSectorMappingVersion": "pilot-sectors.v1",
+  "notes": [
+    "This mapping exists only to test classification preservation and diagnostics.",
+    "It is not the final World Core sector taxonomy.",
+    "TOTAL and products outside the three pilot headings remain unsupported rather than silently remapped."
+  ],
+  "rules": [
+    {
+      "providerClassification": "UN_COMTRADE_HS",
+      "providerRevision": "H6",
+      "productCodePrefix": "10",
+      "calibrationSectorId": "pilot_food_agriculture",
+      "status": "PILOT_NON_AUTHORITATIVE"
+    },
+    {
+      "providerClassification": "UN_COMTRADE_HS",
+      "providerRevision": "H6",
+      "productCodePrefix": "27",
+      "calibrationSectorId": "pilot_energy",
+      "status": "PILOT_NON_AUTHORITATIVE"
+    },
+    {
+      "providerClassification": "UN_COMTRADE_HS",
+      "providerRevision": "H6",
+      "productCodePrefix": "84",
+      "calibrationSectorId": "pilot_advanced_manufacturing",
+      "status": "PILOT_NON_AUTHORITATIVE"
+    }
+  ]
+}

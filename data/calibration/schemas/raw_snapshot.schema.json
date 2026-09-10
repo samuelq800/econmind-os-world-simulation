@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://econmind.example/schemas/raw-snapshot.v1.json",
+  "$id": "https://econmind.example/schemas/raw-snapshot.v2.json",
   "title": "EconMind immutable raw snapshot metadata",
   "type": "object",
   "additionalProperties": false,
@@ -8,20 +8,31 @@
     "schemaVersion",
     "snapshotId",
     "sourceId",
+    "sourceFamily",
+    "provider",
+    "endpointIdentity",
     "retrievedAt",
     "sourceAsOf",
     "query",
     "requestParameters",
+    "requestedDimensions",
     "providerVersion",
     "fileFormat",
+    "httpStatus",
+    "responseHeaders",
+    "adapterVersion",
+    "licenseUrl",
     "sha256",
     "byteLength",
     "status"
   ],
   "properties": {
-    "schemaVersion": { "const": "raw-snapshot.v1" },
+    "schemaVersion": { "const": "raw-snapshot.v2" },
     "snapshotId": { "type": "string", "minLength": 1 },
     "sourceId": { "type": "string", "minLength": 1 },
+    "sourceFamily": { "type": "string", "minLength": 1 },
+    "provider": { "type": "string", "minLength": 1 },
+    "endpointIdentity": { "type": "string", "minLength": 1 },
     "retrievedAt": { "type": "string", "format": "date-time" },
     "sourceAsOf": { "type": ["string", "null"] },
     "query": { "type": "string", "minLength": 1 },
@@ -29,10 +40,32 @@
       "type": "object",
       "additionalProperties": { "type": "string" }
     },
+    "requestedDimensions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" },
+        "uniqueItems": true
+      }
+    },
     "providerVersion": { "type": ["string", "null"] },
     "fileFormat": { "enum": ["JSON", "CSV"] },
+    "httpStatus": { "type": "integer", "minimum": 100, "maximum": 599 },
+    "responseHeaders": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "adapterVersion": { "type": "string", "minLength": 1 },
+    "licenseUrl": { "type": "string", "format": "uri" },
     "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "byteLength": { "type": "integer", "minimum": 0 },
-    "status": { "enum": ["FIXTURE", "LIVE_FETCH_NOT_RUN", "FROZEN"] }
+    "status": {
+      "enum": [
+        "FIXTURE",
+        "LIVE_FETCH_NOT_RUN",
+        "DEVELOPMENT_NON_AUTHORITATIVE",
+        "FROZEN_REVIEW_CANDIDATE"
+      ]
+    }
   }
 }

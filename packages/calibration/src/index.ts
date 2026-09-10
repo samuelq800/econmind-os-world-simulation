@@ -1,9 +1,12 @@
 export * from './adapters.js';
 export * from './archetype.js';
 export * from './canonical.js';
+export * from './concordance.js';
 export * from './decimal.js';
+export * from './lossless-json.js';
 export * from './normalize.js';
 export * from './package.js';
+export * from './quality.js';
 export * from './snapshot.js';
 export * from './trade.js';
 export type * from './types.js';

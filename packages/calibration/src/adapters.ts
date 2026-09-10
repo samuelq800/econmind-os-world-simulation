@@ -1,3 +1,14 @@
+import {
+  canonicalDecimalValue,
+  isLosslessJsonNumber,
+  losslessArray,
+  losslessObject,
+  losslessScalarText,
+  losslessString,
+  parseLosslessJson,
+  rawNumberToken,
+  type LosslessJsonValue,
+} from './lossless-json.js';
 import type { SourceAdapter, SourceRecord, SourceRequest } from './types.js';
 
 function required(
@@ -20,20 +31,27 @@ function encodeQuery(parameters: Readonly<Record<string, string>>): string {
     .join('&');
 }
 
-function decimalText(value: unknown, context: string): string | null {
-  if (value === null) return null;
-  if (typeof value === 'string') return value;
-  if (typeof value === 'number' && Number.isSafeInteger(value))
-    return value.toString();
-  throw new TypeError(
-    `${context} must retain its source decimal as text or a safe integer`,
-  );
+function scalarOrNull(
+  value: LosslessJsonValue,
+  context: string,
+): string | null {
+  return value === null ? null : losslessScalarText(value, context);
 }
 
-function parseJson(bytes: Uint8Array): unknown {
-  return JSON.parse(
-    new TextDecoder('utf8', { fatal: true }).decode(bytes),
-  ) as unknown;
+function booleanValue(value: LosslessJsonValue, context: string): boolean {
+  if (typeof value !== 'boolean')
+    throw new TypeError(`${context} must be boolean`);
+  return value;
+}
+
+function integerMetadata(value: LosslessJsonValue, context: string): number {
+  if (!isLosslessJsonNumber(value) || !/^(?:0|[1-9]\d*)$/u.test(value.raw)) {
+    throw new TypeError(`${context} must be a non-negative integer token`);
+  }
+  const parsed = Number(value.raw);
+  if (!Number.isSafeInteger(parsed))
+    throw new RangeError(`${context} is out of range`);
+  return parsed;
 }
 
 function parseCsv(text: string): readonly Readonly<Record<string, string>>[] {
@@ -79,11 +97,23 @@ function parseCsv(text: string): readonly Readonly<Record<string, string>>[] {
 
 export const wdiAdapter: SourceAdapter = {
   sourceId: 'WB_WDI_V2',
+  sourceFamily: 'WORLD_BANK_WDI',
+  provider: 'World Bank',
+  endpointIdentity: 'WORLD_BANK_INDICATORS_API_V2',
+  adapterVersion: '2.0.0',
+  licenseUrl:
+    'https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets',
   buildRequest(parameters): SourceRequest {
     const economy = required(parameters, 'economy');
     const indicator = required(parameters, 'indicator');
     const date = required(parameters, 'date');
-    const query = { date, format: 'json', per_page: '20000' };
+    const query = {
+      date,
+      format: 'json',
+      page: parameters['page'] ?? '1',
+      per_page: parameters['per_page'] ?? '20000',
+      source: parameters['source'] ?? '2',
+    };
     return {
       sourceId: this.sourceId,
       method: 'GET',
@@ -93,43 +123,91 @@ export const wdiAdapter: SourceAdapter = {
     };
   },
   parse(bytes): readonly SourceRecord[] {
-    const payload = parseJson(bytes);
-    if (!Array.isArray(payload) || !Array.isArray(payload[1]))
-      throw new Error('Unexpected WDI payload');
-    return payload[1].map((item: unknown) => {
-      const row = item as Record<string, unknown>;
-      const country = row['country'] as Record<string, unknown>;
-      const indicator = row['indicator'] as Record<string, unknown>;
-      const geographyId = country?.['id'];
-      const indicatorId = indicator?.['id'];
-      const period = row['date'];
-      if (
-        typeof geographyId !== 'string' ||
-        typeof indicatorId !== 'string' ||
-        typeof period !== 'string'
-      ) {
-        throw new Error('WDI record is missing identity fields');
-      }
+    const payload = losslessArray(parseLosslessJson(bytes), 'WDI payload');
+    const records = losslessArray(payload[1] ?? null, 'WDI records');
+    return records.map((item, index) => {
+      const row = losslessObject(item, `WDI record ${index}`);
+      const country = losslessObject(row['country'] ?? null, 'WDI country');
+      const indicator = losslessObject(
+        row['indicator'] ?? null,
+        'WDI indicator',
+      );
+      const geographyId = losslessString(
+        country['id'] ?? null,
+        'WDI country.id',
+      );
+      const indicatorId = losslessString(
+        indicator['id'] ?? null,
+        'WDI indicator.id',
+      );
+      const period = losslessString(row['date'] ?? null, 'WDI date');
+      const valueNode = row['value'] ?? null;
+      const iso3 = scalarOrNull(
+        row['countryiso3code'] ?? null,
+        'WDI countryiso3code',
+      );
+      const unit = scalarOrNull(row['unit'] ?? null, 'WDI unit');
+      const status = scalarOrNull(row['obs_status'] ?? null, 'WDI obs_status');
       return {
         sourceObservationKey: `${geographyId}:${indicatorId}:${period}`,
+        variableCode: indicatorId,
         geographyId,
         period,
-        value: decimalText(row['value'], 'WDI value'),
-        sourceUnit:
-          typeof row['unit'] === 'string' && row['unit'].length > 0
-            ? row['unit']
-            : indicatorId,
-        qualityFlags:
-          row['obs_status'] === '' || row['obs_status'] === undefined
+        value: canonicalDecimalValue(valueNode, 'WDI value'),
+        rawNumericToken: rawNumberToken(valueNode, 'WDI value'),
+        sourceUnit: unit === null || unit.length === 0 ? indicatorId : unit,
+        qualityFlags: [
+          ...(status === null || status.length === 0
             ? []
-            : [`WDI_STATUS:${String(row['obs_status'])}`],
+            : [`WDI_STATUS:${status}`]),
+          ...(valueNode === null ? ['MISSING_OBSERVATION'] : []),
+        ],
+        attributes: {
+          countryIso3: iso3,
+          indicatorId,
+          providerUnit: unit,
+          providerDecimalField: scalarOrNull(
+            row['decimal'] ?? null,
+            'WDI decimal',
+          ),
+        },
       };
     });
   },
 };
 
+export interface WdiPagination {
+  readonly page: number;
+  readonly pages: number;
+  readonly perPage: number;
+  readonly total: number;
+  readonly sourceId: string | null;
+  readonly lastUpdated: string;
+}
+
+export function readWdiPagination(bytes: Uint8Array): WdiPagination {
+  const payload = losslessArray(parseLosslessJson(bytes), 'WDI payload');
+  const metadata = losslessObject(payload[0] ?? null, 'WDI metadata');
+  return {
+    page: integerMetadata(metadata['page'] ?? null, 'WDI page'),
+    pages: integerMetadata(metadata['pages'] ?? null, 'WDI pages'),
+    perPage: integerMetadata(metadata['per_page'] ?? null, 'WDI per_page'),
+    total: integerMetadata(metadata['total'] ?? null, 'WDI total'),
+    sourceId: scalarOrNull(metadata['sourceid'] ?? null, 'WDI sourceid'),
+    lastUpdated: losslessString(
+      metadata['lastupdated'] ?? null,
+      'WDI lastupdated',
+    ),
+  };
+}
+
 export const wtoAdapter: SourceAdapter = {
   sourceId: 'WTO_TIMESERIES_V1',
+  sourceFamily: 'WTO_TIMESERIES',
+  provider: 'World Trade Organization',
+  endpointIdentity: 'WTO_TIMESERIES_API_V1',
+  adapterVersion: '2.0.0',
+  licenseUrl: 'https://www.wto.org/english/info_e/copyright_e.htm',
   buildRequest(parameters): SourceRequest {
     const indicator = required(parameters, 'indicator');
     const reporter = required(parameters, 'reporter');
@@ -153,14 +231,22 @@ export const wtoAdapter: SourceAdapter = {
         const indicator = required(row, 'IndicatorCode');
         return {
           sourceObservationKey: `${reporter}:${partner}:${product}:${indicator}:${year}`,
+          variableCode: indicator,
           geographyId: reporter,
           period: year,
           value: row['Value'] === '' ? null : required(row, 'Value'),
+          rawNumericToken: row['Value'] === '' ? null : required(row, 'Value'),
           sourceUnit: required(row, 'Unit'),
           qualityFlags:
             row['Flag'] === undefined || row['Flag'] === ''
               ? []
               : [`WTO_FLAG:${row['Flag']}`],
+          attributes: {
+            reporterCode: reporter,
+            partnerCode: partner,
+            productCode: product,
+            indicatorCode: indicator,
+          },
         };
       },
     );
@@ -169,6 +255,11 @@ export const wtoAdapter: SourceAdapter = {
 
 export const comtradeAdapter: SourceAdapter = {
   sourceId: 'UN_COMTRADE_V1',
+  sourceFamily: 'UN_COMTRADE',
+  provider: 'United Nations Statistics Division',
+  endpointIdentity: 'UN_COMTRADE_PUBLIC_PREVIEW_V1',
+  adapterVersion: '2.0.0',
+  licenseUrl: 'https://comtrade.un.org/db/help/LicenseAgreement.aspx',
   buildRequest(parameters): SourceRequest {
     const reporterCode = required(parameters, 'reporterCode');
     const period = required(parameters, 'period');
@@ -179,8 +270,8 @@ export const comtradeAdapter: SourceAdapter = {
       flowCode,
       partnerCode: parameters['partnerCode'] ?? '0',
       cmdCode: parameters['cmdCode'] ?? 'TOTAL',
-      aggregateBy: '6',
-      breakdownMode: 'classic',
+      customsCode: parameters['customsCode'] ?? 'C00',
+      motCode: parameters['motCode'] ?? '0',
     };
     return {
       sourceId: this.sourceId,
@@ -191,35 +282,119 @@ export const comtradeAdapter: SourceAdapter = {
     };
   },
   parse(bytes): readonly SourceRecord[] {
-    const payload = parseJson(bytes) as Record<string, unknown>;
-    if (!Array.isArray(payload['data']))
-      throw new Error('Unexpected UN Comtrade payload');
-    return payload['data'].map((item: unknown) => {
-      const row = item as Record<string, unknown>;
-      const reporter = row['reporterISO'];
-      const partner = row['partnerISO'];
-      const period = row['period'];
-      const flow = row['flowCode'];
-      const commodity = row['cmdCode'];
-      if (
-        typeof reporter !== 'string' ||
-        typeof partner !== 'string' ||
-        (typeof period !== 'string' && typeof period !== 'number') ||
-        typeof flow !== 'string' ||
-        typeof commodity !== 'string'
-      ) {
-        throw new Error('UN Comtrade record is missing identity fields');
-      }
+    const payload = losslessObject(
+      parseLosslessJson(bytes),
+      'UN Comtrade payload',
+    );
+    const records = losslessArray(payload['data'] ?? null, 'UN Comtrade data');
+    return records.map((item, index) => {
+      const row = losslessObject(item, `UN Comtrade record ${index}`);
+      const reporter = losslessScalarText(
+        row['reporterCode'] ?? null,
+        'Comtrade reporterCode',
+      );
+      const partner = losslessScalarText(
+        row['partnerCode'] ?? null,
+        'Comtrade partnerCode',
+      );
+      const period = losslessScalarText(
+        row['period'] ?? null,
+        'Comtrade period',
+      );
+      const flow = losslessString(row['flowCode'] ?? null, 'Comtrade flowCode');
+      const commodity = losslessString(
+        row['cmdCode'] ?? null,
+        'Comtrade cmdCode',
+      );
+      const customsCode = losslessString(
+        row['customsCode'] ?? null,
+        'Comtrade customsCode',
+      );
+      const modeOfTransportCode = losslessScalarText(
+        row['motCode'] ?? null,
+        'Comtrade motCode',
+      );
+      const classification = losslessString(
+        row['classificationCode'] ?? row['classificationSearchCode'] ?? null,
+        'Comtrade classificationCode',
+      );
+      const primaryValue = row['primaryValue'] ?? null;
+      const isAggregate = booleanValue(
+        row['isAggregate'] ?? false,
+        'Comtrade isAggregate',
+      );
       return {
-        sourceObservationKey: `${reporter}:${partner}:${commodity}:${flow}:${String(period)}`,
+        sourceObservationKey: `${reporter}:${partner}:${classification}:${commodity}:${flow}:${period}:${customsCode}:${modeOfTransportCode}`,
+        variableCode: 'PRIMARY_VALUE',
         geographyId: reporter,
-        period: String(period),
-        value: decimalText(row['primaryValue'], 'UN Comtrade primaryValue'),
-        sourceUnit:
-          typeof row['primaryValueUnit'] === 'string'
-            ? row['primaryValueUnit']
-            : 'USD',
-        qualityFlags: row['isAggregate'] === true ? ['COMTRADE_AGGREGATE'] : [],
+        period,
+        value: canonicalDecimalValue(primaryValue, 'UN Comtrade primaryValue'),
+        rawNumericToken: rawNumberToken(
+          primaryValue,
+          'UN Comtrade primaryValue',
+        ),
+        sourceUnit: 'USD',
+        qualityFlags: [
+          ...(isAggregate ? ['COMTRADE_AGGREGATE'] : []),
+          ...(primaryValue === null ? ['MISSING_OBSERVATION'] : []),
+          ...(row['isReported'] === false
+            ? ['COMTRADE_NOT_DIRECTLY_REPORTED']
+            : []),
+        ],
+        attributes: {
+          reporterCode: reporter,
+          reporterIso: scalarOrNull(
+            row['reporterISO'] ?? null,
+            'Comtrade reporterISO',
+          ),
+          partnerCode: partner,
+          partnerIso: scalarOrNull(
+            row['partnerISO'] ?? null,
+            'Comtrade partnerISO',
+          ),
+          flowCode: flow,
+          productClassification: classification,
+          productCode: commodity,
+          customsCode,
+          modeOfTransportCode,
+          classificationSearchCode: scalarOrNull(
+            row['classificationSearchCode'] ?? null,
+            'Comtrade classificationSearchCode',
+          ),
+          isOriginalClassification:
+            typeof row['isOriginalClassification'] === 'boolean'
+              ? String(row['isOriginalClassification'])
+              : null,
+          quantityRawToken: rawNumberToken(row['qty'] ?? null, 'Comtrade qty'),
+          quantityCanonical: canonicalDecimalValue(
+            row['qty'] ?? null,
+            'Comtrade qty',
+          ),
+          quantityUnitCode: scalarOrNull(
+            row['qtyUnitCode'] ?? null,
+            'Comtrade qtyUnitCode',
+          ),
+          quantityUnitAbbreviation: scalarOrNull(
+            row['qtyUnitAbbr'] ?? null,
+            'Comtrade qtyUnitAbbr',
+          ),
+          netWeightRawToken: rawNumberToken(
+            row['netWgt'] ?? null,
+            'Comtrade netWgt',
+          ),
+          netWeightCanonical: canonicalDecimalValue(
+            row['netWgt'] ?? null,
+            'Comtrade netWgt',
+          ),
+          fobValueRawToken: rawNumberToken(
+            row['fobvalue'] ?? null,
+            'Comtrade fobvalue',
+          ),
+          cifValueRawToken: rawNumberToken(
+            row['cifvalue'] ?? null,
+            'Comtrade cifvalue',
+          ),
+        },
       };
     });
   },

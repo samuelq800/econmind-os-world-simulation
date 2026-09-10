@@ -1,0 +1,202 @@
+{
+  "schemaVersion": "source-entity-concordance.v1",
+  "version": "1.0.0-pilot",
+  "status": "PILOT_NON_AUTHORITATIVE",
+  "notes": [
+    "Canonical empirical entity IDs do not identify EconMind fictional countries.",
+    "UN M49 and UN Comtrade reporter codes are distinct namespaces even when values coincide.",
+    "WTO API reporter identifiers remain pilot/unverified until authenticated metadata retrieval succeeds."
+  ],
+  "entities": [
+    {
+      "canonicalEntityId": "emp:AUS",
+      "displayName": "Australia",
+      "identifiers": [
+        { "namespace": "ISO3", "value": "AUS", "status": "VERIFIED" },
+        { "namespace": "UN_M49", "value": "036", "status": "VERIFIED" },
+        {
+          "namespace": "WDI_ECONOMY_CODE",
+          "value": "AU",
+          "status": "VERIFIED"
+        },
+        {
+          "namespace": "COMTRADE_REPORTER_CODE",
+          "value": "36",
+          "status": "PILOT"
+        },
+        { "namespace": "WTO_MEMBER_ISO3", "value": "AUS", "status": "PILOT" }
+      ]
+    },
+    {
+      "canonicalEntityId": "emp:BRA",
+      "displayName": "Brazil",
+      "identifiers": [
+        { "namespace": "ISO3", "value": "BRA", "status": "VERIFIED" },
+        { "namespace": "UN_M49", "value": "076", "status": "VERIFIED" },
+        {
+          "namespace": "WDI_ECONOMY_CODE",
+          "value": "BR",
+          "status": "VERIFIED"
+        },
+        {
+          "namespace": "COMTRADE_REPORTER_CODE",
+          "value": "76",
+          "status": "PILOT"
+        },
+        { "namespace": "WTO_MEMBER_ISO3", "value": "BRA", "status": "PILOT" }
+      ]
+    },
+    {
+      "canonicalEntityId": "emp:CHN",
+      "displayName": "China",
+      "identifiers": [
+        { "namespace": "ISO3", "value": "CHN", "status": "VERIFIED" },
+        { "namespace": "UN_M49", "value": "156", "status": "VERIFIED" },
+        {
+          "namespace": "WDI_ECONOMY_CODE",
+          "value": "CN",
+          "status": "VERIFIED"
+        },
+        {
+          "namespace": "COMTRADE_REPORTER_CODE",
+          "value": "156",
+          "status": "PILOT"
+        },
+        { "namespace": "WTO_MEMBER_ISO3", "value": "CHN", "status": "PILOT" }
+      ]
+    },
+    {
+      "canonicalEntityId": "emp:DEU",
+      "displayName": "Germany",
+      "identifiers": [
+        { "namespace": "ISO3", "value": "DEU", "status": "VERIFIED" },
+        { "namespace": "UN_M49", "value": "276", "status": "VERIFIED" },
+        {
+          "namespace": "WDI_ECONOMY_CODE",
+          "value": "DE",
+          "status": "VERIFIED"
+        },
+        {
+          "namespace": "COMTRADE_REPORTER_CODE",
+          "value": "276",
+          "status": "PILOT"
+        },
+        { "namespace": "WTO_MEMBER_ISO3", "value": "DEU", "status": "PILOT" }
+      ]
+    },
+    {
+      "canonicalEntityId": "emp:IDN",
+      "displayName": "Indonesia",
+      "identifiers": [
+        { "namespace": "ISO3", "value": "IDN", "status": "VERIFIED" },
+        { "namespace": "UN_M49", "value": "360", "status": "VERIFIED" },
+        {
+          "namespace": "WDI_ECONOMY_CODE",
+          "value": "ID",
+          "status": "VERIFIED"
+        },
+        {
+          "namespace": "COMTRADE_REPORTER_CODE",
+          "value": "360",
+          "status": "PILOT"
+        },
+        { "namespace": "WTO_MEMBER_ISO3", "value": "IDN", "status": "PILOT" }
+      ]
+    },
+    {
+      "canonicalEntityId": "emp:IND",
+      "displayName": "India",
+      "identifiers": [
+        { "namespace": "ISO3", "value": "IND", "status": "VERIFIED" },
+        { "namespace": "UN_M49", "value": "356", "status": "VERIFIED" },
+        {
+          "namespace": "WDI_ECONOMY_CODE",
+          "value": "IN",
+          "status": "VERIFIED"
+        },
+        {
+          "namespace": "COMTRADE_REPORTER_CODE",
+          "value": "699",
+          "status": "PILOT"
+        },
+        { "namespace": "WTO_MEMBER_ISO3", "value": "IND", "status": "PILOT" }
+      ]
+    },
+    {
+      "canonicalEntityId": "emp:JPN",
+      "displayName": "Japan",
+      "identifiers": [
+        { "namespace": "ISO3", "value": "JPN", "status": "VERIFIED" },
+        { "namespace": "UN_M49", "value": "392", "status": "VERIFIED" },
+        {
+          "namespace": "WDI_ECONOMY_CODE",
+          "value": "JP",
+          "status": "VERIFIED"
+        },
+        {
+          "namespace": "COMTRADE_REPORTER_CODE",
+          "value": "392",
+          "status": "PILOT"
+        },
+        { "namespace": "WTO_MEMBER_ISO3", "value": "JPN", "status": "PILOT" }
+      ]
+    },
+    {
+      "canonicalEntityId": "emp:MEX",
+      "displayName": "Mexico",
+      "identifiers": [
+        { "namespace": "ISO3", "value": "MEX", "status": "VERIFIED" },
+        { "namespace": "UN_M49", "value": "484", "status": "VERIFIED" },
+        {
+          "namespace": "WDI_ECONOMY_CODE",
+          "value": "MX",
+          "status": "VERIFIED"
+        },
+        {
+          "namespace": "COMTRADE_REPORTER_CODE",
+          "value": "484",
+          "status": "PILOT"
+        },
+        { "namespace": "WTO_MEMBER_ISO3", "value": "MEX", "status": "PILOT" }
+      ]
+    },
+    {
+      "canonicalEntityId": "emp:USA",
+      "displayName": "United States",
+      "identifiers": [
+        { "namespace": "ISO3", "value": "USA", "status": "VERIFIED" },
+        { "namespace": "UN_M49", "value": "840", "status": "VERIFIED" },
+        {
+          "namespace": "WDI_ECONOMY_CODE",
+          "value": "US",
+          "status": "VERIFIED"
+        },
+        {
+          "namespace": "COMTRADE_REPORTER_CODE",
+          "value": "842",
+          "status": "PILOT"
+        },
+        { "namespace": "WTO_MEMBER_ISO3", "value": "USA", "status": "PILOT" }
+      ]
+    },
+    {
+      "canonicalEntityId": "emp:ZAF",
+      "displayName": "South Africa",
+      "identifiers": [
+        { "namespace": "ISO3", "value": "ZAF", "status": "VERIFIED" },
+        { "namespace": "UN_M49", "value": "710", "status": "VERIFIED" },
+        {
+          "namespace": "WDI_ECONOMY_CODE",
+          "value": "ZA",
+          "status": "VERIFIED"
+        },
+        {
+          "namespace": "COMTRADE_REPORTER_CODE",
+          "value": "710",
+          "status": "PILOT"
+        },
+        { "namespace": "WTO_MEMBER_ISO3", "value": "ZAF", "status": "PILOT" }
+      ]
+    }
+  ]
+}

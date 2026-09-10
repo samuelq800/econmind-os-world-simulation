@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/trade-classification-concordance.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "version",
+    "status",
+    "calibrationSectorMappingVersion",
+    "notes",
+    "rules"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "trade-classification-concordance.v1" },
+    "version": { "type": "string", "minLength": 1 },
+    "status": { "const": "PILOT_NON_AUTHORITATIVE" },
+    "calibrationSectorMappingVersion": { "type": "string", "minLength": 1 },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "providerClassification",
+          "providerRevision",
+          "productCodePrefix",
+          "calibrationSectorId",
+          "status"
+        ],
+        "properties": {
+          "providerClassification": { "type": "string" },
+          "providerRevision": { "type": "string" },
+          "productCodePrefix": { "type": "string", "pattern": "^[0-9]+$" },
+          "calibrationSectorId": { "type": "string" },
+          "status": { "const": "PILOT_NON_AUTHORITATIVE" }
+        }
+      }
+    }
+  }
+}

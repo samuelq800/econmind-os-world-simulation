@@ -59,6 +59,11 @@ export function subtractDecimal(left: string, right: string): string {
   return format(a - b, scale);
 }
 
+export function compareDecimal(left: string, right: string): -1 | 0 | 1 {
+  const [a, b] = align(parse(left), parse(right));
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 export function multiplyDecimal(left: string, right: string): string {
   const a = parse(left);
   const b = parse(right);

@@ -7,15 +7,15 @@
     {
       "path": "comtrade.bilateral.sample.json",
       "sourceId": "UN_COMTRADE_V1",
-      "sha256": "1686443dea00f8a129e9fdebab282057d46acbc1fa0f48fd20bb0ddc4faf56f9",
-      "byteLength": 539,
+      "sha256": "952305a34ae3be8204dac8e4b300c81e65e5e7f20cea27b76f6c10a52a2d3fdb",
+      "byteLength": 1276,
       "status": "FIXTURE"
     },
     {
       "path": "wdi.gdp.usa-chn.2022-2023.json",
       "sourceId": "WB_WDI_V2",
-      "sha256": "3de0f4c66ad0ad3696f12524ea6149ed2c30d02fd9f297c24dd06eb0e6b32d30",
-      "byteLength": 1362,
+      "sha256": "8047a7c3fdef50cde4effd24634c5b53b50b7727a10b91ced2f4183ba48f34c4",
+      "byteLength": 1356,
       "status": "FIXTURE"
     },
     {

@@ -13,7 +13,7 @@
       "country": { "id": "US", "value": "United States" },
       "countryiso3code": "USA",
       "date": "2023",
-      "value": "27292170793297.5",
+      "value": 27292170793297.5,
       "unit": "NY.GDP.MKTP.CD",
       "obs_status": "",
       "decimal": 0
@@ -23,7 +23,7 @@
       "country": { "id": "US", "value": "United States" },
       "countryiso3code": "USA",
       "date": "2022",
-      "value": "25604849183714.9",
+      "value": 25604849183714.9,
       "unit": "NY.GDP.MKTP.CD",
       "obs_status": "",
       "decimal": 0
@@ -33,7 +33,7 @@
       "country": { "id": "CN", "value": "China" },
       "countryiso3code": "CHN",
       "date": "2023",
-      "value": "17794782631206.8",
+      "value": 17794782631206.8,
       "unit": "NY.GDP.MKTP.CD",
       "obs_status": "",
       "decimal": 0
