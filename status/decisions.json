@@ -110,12 +110,12 @@
     {
       "id": "ADR-11",
       "subject": "幂等重复回执与不可变 event 消费状态",
-      "status": "PROPOSED_NOT_APPROVED",
-      "proposal": "使用 command_id 与 payload_hash 唯一性；返回明确的原回执且不重新执行，同 key 异 payload 拒绝，消费回执独立于 append-only event。",
+      "status": "APPROVED",
+      "proposal": "以 (worldId, commandId) 及适用时的 (worldId, idempotencyKey) 唯一绑定不可变 canonical command fingerprint；完全重复返回已存 acknowledgement/final receipt 且不重执行或追加重复 Event，身份相同但 fingerprint 不同则以 IDEMPOTENCY_CONFLICT 零效果拒绝；command receipt 与 consumer receipt 分离。",
       "latest_gate": "V07",
       "affected_work_packages": ["V07"],
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
-      "approval_record": null
+      "approval_record": "docs/architecture/decisions/ADR-11.md"
     },
     {
       "id": "ADR-12",
@@ -170,12 +170,12 @@
     {
       "id": "ADR-17",
       "subject": "持久化、提交、重放与故障边界",
-      "status": "PROPOSED_NOT_APPROVED",
-      "proposal": "canonical 实体、不可变事件和分录在同一权威事务提交；单 world writer 使用 lease 与 fencing，候选状态私有，outbox 可重投并由消费者去重。",
+      "status": "APPROVED",
+      "proposal": "以 opening seed 与 append-only authoritative Events 定义 replay lineage；current-head/materialization/index/snapshot 不是独立历史真相；权威转换最终采用 all-or-zero 提交、确定性且幂等的 retry/replay/recovery，并禁止同一 World 的竞争 committed writers。实现按 V07 Command/Event/Replay、V08 Ledger/Posting、V09 writer/lease/fencing/atomic-commit/recovery 的权威归属分阶段完成。",
       "latest_gate": "V07/V09",
       "affected_work_packages": ["V07", "V08", "V09", "V30"],
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
-      "approval_record": null
+      "approval_record": "docs/architecture/decisions/ADR-17.md"
     },
     {
       "id": "ADR-18",
