@@ -1724,21 +1724,47 @@ def validate(root: Path) -> dict[str, Any]:
                                 file(v08_2.get("preflight_file"))
                             elif states["V08.2"] == "IMPLEMENTED_UNVERIFIED":
                                 v08_2 = v08_entry.get("v08_2", {})
+                                v08_3 = v08_entry.get("v08_3", {})
                                 require(
-                                    states["V08.3"] == "PLANNED"
-                                    and gate.get("step_id") == "V08.3"
-                                    and gate.get("status") == states["V08.3"]
-                                    and gate.get("next_step") == "V08.3"
-                                    and gate.get("next_step_ready") is False
-                                    and required_gate == "V08.3_PREFLIGHT"
-                                    and gate.get("gate_status") == "PENDING"
-                                    and isinstance(v08_2, dict)
+                                    isinstance(v08_2, dict)
                                     and v08_2.get("status")
                                     == "IMPLEMENTED_UNVERIFIED"
                                     and v08_2.get("implementation_commit")
                                     and v08_2.get("evidence_file"),
                                     "completed V08.2 continuation gate differs from progress truth",
                                 )
+                                if states["V08.3"] == "PLANNED":
+                                    require(
+                                        gate.get("step_id") == "V08.3"
+                                        and gate.get("status") == states["V08.3"]
+                                        and gate.get("next_step") == "V08.3"
+                                        and gate.get("next_step_ready") is False
+                                        and required_gate == "V08.3_PREFLIGHT"
+                                        and gate.get("gate_status") == "PENDING",
+                                        "planned V08.3 gate differs from progress truth",
+                                    )
+                                elif states["V08.3"] == "IN_PROGRESS":
+                                    require(
+                                        gate.get("step_id") == "V08.3"
+                                        and gate.get("status") == states["V08.3"]
+                                        and gate.get("next_step") == "V08.3"
+                                        and gate.get("next_step_ready") is True
+                                        and required_gate == "V08.3_IMPLEMENTATION"
+                                        and gate.get("gate_status") == "PASS"
+                                        and isinstance(v08_3, dict)
+                                        and v08_3.get("status") == "ACTIVE"
+                                        and v08_3.get("preflight") == "GO"
+                                        and v08_3.get("dependency_method")
+                                        == "OWNER_AUTHORIZED_PACKAGE_CONTINUATION"
+                                        and v08_3.get("approved_adrs")
+                                        == ["ADR-02", "ADR-05", "ADR-17"]
+                                        and v08_3.get("migration") == "NOT_CREATED"
+                                        and v08_3.get("production_mutation") is False,
+                                        "active V08.3 gate differs from progress truth",
+                                    )
+                                    file(v08_3.get("preflight_file"))
+                                else:
+                                    require(False, "unsupported V08.3 lifecycle state")
                                 require(
                                     "V08.2" in v08_completed
                                     and v08_completed["V08.2"].get("status")

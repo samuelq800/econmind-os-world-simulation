@@ -2,7 +2,7 @@
   "schema_version": "R2-101.1",
   "derived_at": "2026-09-10T13:03:00Z",
   "source_commit": "1352163b0695112fafb510afe4c821773fb09bfe",
-  "note": "Gate A, V06 and V07 are accepted and verified. V08.1 candidate a73c35d and V08.2 candidate f5c022c have green evidence and remain P0 IMPLEMENTED_UNVERIFIED. Under the responsible-owner exact V08 package continuation scope, V08.3 is awaiting preflight. No migration or production mutation is authorized.",
+  "note": "Gate A, V06 and V07 are accepted and verified. V08.1 candidate a73c35d and V08.2 candidate f5c022c have green evidence and remain P0 IMPLEMENTED_UNVERIFIED. Under the responsible-owner exact V08 package continuation scope, V08.3 preflight is GO and implementation is IN_PROGRESS. No migration or production mutation is authorized.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -154,13 +154,13 @@
   },
   "current_gate": {
     "step_id": "V08.3",
-    "status": "PLANNED",
-    "review": "V08.2 completed with green automated evidence under the exact owner-authorized adjacent V08 package continuation scope",
+    "status": "IN_PROGRESS",
+    "review": "V08.3 preflight GO under the exact owner-authorized adjacent V08 package continuation scope",
     "next_step": "V08.3",
-    "next_step_ready": false,
-    "next_step_blockers": ["V08.3 preflight not yet recorded"],
-    "required_gate": "V08.3_PREFLIGHT",
-    "gate_status": "PENDING"
+    "next_step_ready": true,
+    "next_step_blockers": [],
+    "required_gate": "V08.3_IMPLEMENTATION",
+    "gate_status": "PASS"
   },
   "v07_package_review": {
     "status": "V07_PACKAGE_APPROVED",
@@ -497,6 +497,16 @@
       "implementation_commit": "f5c022c7957a1128660d25e36ea46df99964a850",
       "evidence_file": "docs/reports/V08.2/TEST_EVIDENCE.json"
     },
+    "v08_3": {
+      "status": "ACTIVE",
+      "preflight": "GO",
+      "preflight_file": "docs/reports/V08.3/PREFLIGHT.md",
+      "dependency_method": "OWNER_AUTHORIZED_PACKAGE_CONTINUATION",
+      "approved_adrs": ["ADR-02", "ADR-05", "ADR-17"],
+      "not_current_gate_adrs": ["ADR-07", "ADR-08"],
+      "migration": "NOT_CREATED",
+      "production_mutation": false
+    },
     "production_migration_track": "PARALLEL_BLOCKED_NO_PRODUCTION_MUTATION",
     "production_mutation": false,
     "owner_approved": true
@@ -728,7 +738,8 @@
       "docs/reports/V08.2/PREFLIGHT.md",
       "docs/reports/V08.2/IMPLEMENTATION.md",
       "docs/reports/V08.2/TEST_EVIDENCE.json"
-    ]
+    ],
+    "V08.3": ["docs/exec-plans/V08.3.md", "docs/reports/V08.3/PREFLIGHT.md"]
   },
   "package_evidence": {
     "V01": [
@@ -1086,7 +1097,7 @@
     "V07.3": "VERIFIED",
     "V08.1": "IMPLEMENTED_UNVERIFIED",
     "V08.2": "IMPLEMENTED_UNVERIFIED",
-    "V08.3": "PLANNED",
+    "V08.3": "IN_PROGRESS",
     "V09.1": "PLANNED",
     "V09.2": "PLANNED",
     "V09.3": "PLANNED",
