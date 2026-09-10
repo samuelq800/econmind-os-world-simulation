@@ -1,0 +1,108 @@
+{
+  "schema_version": "V07.1-FINGERPRINT-FORWARD-FIX-1",
+  "step_id": "V07.1",
+  "risk_class": "P1_DOWNSTREAM_BLOCKING_MAJOR",
+  "historical_review_target": "b57b6aa9cd349776e1f5cd8ae10d20413523a69c",
+  "historical_code_candidate": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
+  "fixed_code_candidate": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
+  "status": "FIXED_PENDING_REVIEW",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile": "FROZEN_UNCHANGED"
+  },
+  "finding": {
+    "severity": "MAJOR",
+    "result": "CHANGES_REQUIRED_DOWNSTREAM_BLOCKING",
+    "root_cause": "trace-only correlationId participated in the authoritative Command fingerprint",
+    "correction": "one explicit authoritative-intent allow-list projection excludes correlationId and submittedAtReal"
+  },
+  "field_classification": {
+    "AUTHORITATIVE_INTENT": [
+      "commandId",
+      "idempotencyKey",
+      "worldId",
+      "authSubject",
+      "actorId",
+      "countryId",
+      "officeId",
+      "commandType",
+      "schemaVersion",
+      "payload",
+      "expectedWorldVersion",
+      "simTime"
+    ],
+    "TRACE_TRANSPORT_AUDIT": ["correlationId", "submittedAtReal"]
+  },
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/command-event-contracts.test.ts tests/property/command-event-properties.test.ts tests/world-core/command-event-ledger.test.ts",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 3,
+      "tests": 20,
+      "property_base_seed": 20260909,
+      "property_num_runs": 250,
+      "correlation_invariance_seed": 20260979,
+      "payload_mutation_seed": 20260980
+    },
+    {
+      "command": "pnpm --filter @econmind/core typecheck",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm check",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 26,
+      "tests": 355,
+      "boundary_test_files": 3,
+      "boundary_tests": 34,
+      "authoritative_scanned_core_files": 23,
+      "authoritative_scanned_files": 35,
+      "boundary_scanned_files": 40,
+      "migration_count": 2,
+      "migration_rehearsal_modes": ["clean-baseline", "existing-schema"],
+      "secret_scanned_files": 453,
+      "build": "PASS"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "result": "PASS",
+      "exit_code": 0,
+      "groups": 14
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "superseded_observations": [
+    {
+      "candidate": "2a6b16f08967e23acd70dc519de1ecd57719f956",
+      "result": "FULL_BASELINE_STOPPED_AT_ONE_STALE_GOVERNANCE_EXPECTATION",
+      "resolution": "main and V07 were reconciled to the six approved ADR records before the replacement candidate"
+    },
+    {
+      "candidate": "67fd40b1597fb4057ef54481ba0b8b8be4ca18a8",
+      "evidence_target": "02b377614a7337b1d8d7442bae50c534ddbbe3c4",
+      "freeze_commit": "17eb43e21de1dc7e933cb7bfcdf7675b4cbf9a97",
+      "result": "SUPERSEDED_PROPERTY_CONFIGURATION_NOT_BOUND",
+      "resolution": "the property suite now imports FOUNDATION_PROPERTY_CONFIG and runs 250 cases at the fixed base seed 20260909"
+    }
+  ],
+  "migration": {
+    "artifact": "database/migrations/artifacts/0002_world_v2_command_event_ledger.sql",
+    "status": "BRANCH_LOCAL_CANDIDATE_UNPROMOTED",
+    "bytes_changed_by_fix": false,
+    "production_publication": false
+  },
+  "independent_closure": "PENDING",
+  "v07_2_runtime": "NOT_STARTED",
+  "v08": "NOT_STARTED",
+  "production_access": false,
+  "database_mutation": false,
+  "next_action": "FOCUSED_V07.1_INDEPENDENT_BLOCKER_CLOSURE_REVIEW"
+}

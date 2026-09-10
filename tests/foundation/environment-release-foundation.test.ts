@@ -109,7 +109,7 @@ describe('V02 environment isolation', () => {
 describe('V02 migration and release chain', () => {
   it('validates the canonical ordered and hashed manifest', () => {
     expect(validateMigrationManifest(manifest, artifacts, provenance)).toEqual({
-      migrations: 1,
+      migrations: manifest.migrations.length,
       status: 'PASS',
       violations: [],
     });
@@ -121,7 +121,7 @@ describe('V02 migration and release chain', () => {
     invalid.migrations.push({
       ...invalid.migrations[0],
       path: '../outside.sql',
-      release_order: 3,
+      release_order: invalid.migrations.length + 2,
     });
     const result = validateMigrationManifest(invalid, artifacts, provenance);
     expect(result.status).toBe('FAIL');

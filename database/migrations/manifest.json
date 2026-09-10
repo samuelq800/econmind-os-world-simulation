@@ -17,6 +17,48 @@
       "lock_or_downtime_risk": "Gate A candidate; local rehearsal only",
       "rollback_strategy": "reversible-before-economic-facts",
       "production_approval": null
+    },
+    {
+      "migration_id": "0002_world_v2_command_event_ledger",
+      "release_order": 2,
+      "path": "database/migrations/artifacts/0002_world_v2_command_event_ledger.sql",
+      "sha256": "92915905a159961ac0f8eb70f509501cf7697519471c1b84f832ef224cf87695",
+      "artifact_source_commit": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Branch-local candidate; creates new World V2 tables and immutability triggers only",
+      "rollback_strategy": "reversible-before-economic-facts",
+      "production_approval": "docs/reports/V07/FINAL_ACCEPTANCE.md"
+    },
+    {
+      "migration_id": "0003_world_v2_command_receipts_outbox",
+      "release_order": 3,
+      "path": "database/migrations/artifacts/0003_world_v2_command_receipts_outbox.sql",
+      "sha256": "fe8d6b6849b4ceb5a85789fff34bd2ed47cf7d07d662883dd0c345e88ad9255e",
+      "artifact_source_commit": "f589c8fba2e4e2a5686d8a1c4ded60a8688056fa",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Branch-local V07.2 candidate; creates queue, receipt, consumer-delivery and notification-outbox tables only",
+      "rollback_strategy": "reversible-before-economic-facts",
+      "production_approval": "docs/reports/V07/FINAL_ACCEPTANCE.md"
+    },
+    {
+      "migration_id": "0004_world_v2_receipt_event_set_integrity",
+      "release_order": 4,
+      "path": "database/migrations/artifacts/0004_world_v2_receipt_event_set_integrity.sql",
+      "sha256": "28bb8ff195d9c09b0cafcab79eb4a28868a1bf0170c7065fc4913a428bc17943",
+      "artifact_source_commit": "6f919d3a20835da39a042ee7863d849f140f4e0c",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Branch-local V07 forward fix; replaces receipt validation and guards final transition completeness",
+      "rollback_strategy": "forward-fix",
+      "production_approval": "docs/reports/V07/FINAL_ACCEPTANCE.md"
     }
   ]
 }

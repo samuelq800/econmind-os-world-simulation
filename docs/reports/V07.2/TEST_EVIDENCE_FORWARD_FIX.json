@@ -1,0 +1,61 @@
+{
+  "schema_version": "V07.2-FORWARD-FIX-TEST-EVIDENCE-1",
+  "step_id": "V07.2",
+  "status": "PASS",
+  "risk_class": "P0",
+  "review_result_being_remediated": "V07_PACKAGE_CHANGES_REQUIRED",
+  "superseded_package_review_target": "e802a5233ded3825c56d2897374fcd2de0c40da8",
+  "fixed_code_candidate": "2c32d0918bf7bbf97a851ad785b305de1f5688fa",
+  "migration_artifact_source_commit": "f589c8fba2e4e2a5686d8a1c4ded60a8688056fa",
+  "migration_sha256": "fe8d6b6849b4ceb5a85789fff34bd2ed47cf7d07d662883dd0c345e88ad9255e",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile_changed": false
+  },
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/command-receipts.test.ts tests/world-core/command-receipt-ledger.test.ts tests/property/command-receipt-properties.test.ts",
+      "result": "PASS",
+      "test_files": 3,
+      "tests": 26
+    },
+    {
+      "command": "pnpm migration:validate",
+      "result": "PASS",
+      "migrations": 3,
+      "violations": 0
+    },
+    {
+      "command": "pnpm migration:rehearse",
+      "result": "PASS",
+      "modes": ["clean-baseline", "existing-schema"],
+      "production_access": false
+    },
+    {
+      "command": "pnpm typecheck",
+      "result": "PASS"
+    }
+  ],
+  "assertions": {
+    "cross_world_authorization_rejected_before_commit": "PASS",
+    "cross_country_authorization_rejected_before_commit": "PASS",
+    "wrong_office_or_capability_rejected_before_commit": "PASS",
+    "revoked_authority_zero_effect": "PASS",
+    "stored_receipt_changed_fingerprint_conflicts": "PASS",
+    "receipt_command_fingerprint_binding": "PASS",
+    "receipt_event_existence_and_transition_binding": "PASS",
+    "receipt_before_after_version_binding": "PASS",
+    "multi_event_single_transition_receipt": "PASS",
+    "correlation_only_retry_regression": "PASS",
+    "append_only_event_regression": "PASS"
+  },
+  "finding_state": "IMPLEMENTED_PENDING_FOCUSED_INDEPENDENT_REVIEW",
+  "open_minor": ["V07-PKG-MIN-01"],
+  "database": {
+    "engine": "PGlite ephemeral PostgreSQL",
+    "migration_status": "BRANCH_LOCAL_CANDIDATE_UNPROMOTED",
+    "production_access": false,
+    "production_mutation": false
+  }
+}

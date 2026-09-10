@@ -1,0 +1,49 @@
+{
+  "schema_version": "WORLD_CORE_PACKAGE_CONTINUATION-1",
+  "record_type": "OWNER_AUTHORIZED_PACKAGE_CONTINUATION",
+  "name": "WORLD_CORE_V07_PACKAGE_CONTINUATION",
+  "status": "ACTIVE",
+  "authority": "RESPONSIBLE_HUMAN_OWNER",
+  "activation_record": "docs/reports/V07/OWNER_CONTINUATION_ACTIVATION.md",
+  "scope": {
+    "branch": "codex/world-core-v07",
+    "first_step": "V07.1",
+    "last_step": "V07.3",
+    "allowed_steps": ["V07.1", "V07.2", "V07.3"],
+    "terminal_gate": "V07_PACKAGE_REVIEW"
+  },
+  "continuation_rule": {
+    "condition": "The immediately preceding V07 step has an immutable candidate and complete normal-engineering evidence with applicable automated checks passing and no open P0 or MAJOR blocker, and every ADR required at the next step boundary is APPROVED.",
+    "effect": "The immediately following dependency-ready V07 step may start on codex/world-core-v07 without claiming verification.",
+    "status_after_step": "IMPLEMENTED_UNVERIFIED",
+    "dependency_exception": "An IMPLEMENTED_UNVERIFIED dependency is accepted only between adjacent members of the exact allowed_steps sequence."
+  },
+  "preserved_controls": [
+    "V07 steps remain IMPLEMENTED_UNVERIFIED unless independently promoted",
+    "normal engineering acceptance, determinism, idempotency, architecture, environment, security and governance checks remain mandatory",
+    "ADR-11 and ADR-17 are approved architecture",
+    "ADR-20 is approved; V07.2 must implement its current-authorization and durable-history boundary",
+    "ADR-16 is approved; candidate DDL promotion still follows V07 package review and owner authority",
+    "no database production mutation or migration publication",
+    "V07 package Review B and owner-controlled promotion remain mandatory before main merge or V08"
+  ],
+  "prohibitions": [
+    "self-VERIFIED or fabricated review",
+    "use for a non-adjacent dependency",
+    "use outside V07.1 through V07.3",
+    "continue across an unresolved ADR, P0 or MAJOR blocker",
+    "merge candidate DDL before V07 package review and owner promotion authority",
+    "merge V07 to main before package Review B and merge authority",
+    "production deployment or migration publication",
+    "V08 or later implementation"
+  ],
+  "review_b_closure": {
+    "record": "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_B.md",
+    "active_code_candidate": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
+    "active_review_target": "66da354755326fc00ece7fcdb78e35db27f0b15f",
+    "decision": "APPROVED_FOR_CONTINUATION",
+    "closed_finding": "correlationId trace metadata participated in authoritative Command fingerprint",
+    "open_downstream_blockers": 0,
+    "v07_1_status": "IMPLEMENTED_UNVERIFIED"
+  }
+}

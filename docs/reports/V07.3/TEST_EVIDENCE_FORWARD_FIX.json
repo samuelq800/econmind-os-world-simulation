@@ -1,0 +1,62 @@
+{
+  "schema_version": "V07.3-FORWARD-FIX-TEST-EVIDENCE-1",
+  "step_id": "V07.3",
+  "status": "PASS",
+  "risk_class": "P0",
+  "review_result_being_remediated": "V07_PACKAGE_CHANGES_REQUIRED",
+  "superseded_package_review_target": "e802a5233ded3825c56d2897374fcd2de0c40da8",
+  "fixed_code_candidate": "2b42e0d725da590a24e845a7046501af8f8d4c01",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile_changed": false
+  },
+  "focused_check": {
+    "command": "pnpm exec vitest run tests/world-core/replay.test.ts tests/property/replay-properties.test.ts",
+    "result": "PASS",
+    "test_files": 2,
+    "tests": 19,
+    "property_base_seed": 20260909,
+    "property_seeds": [20260982, 20260983, 20260984],
+    "property_num_runs": 250
+  },
+  "full_baseline": {
+    "command": "pnpm check",
+    "result": "PASS",
+    "test_files": 31,
+    "tests": 400,
+    "boundary_test_files": 3,
+    "boundary_tests": 34,
+    "authoritative_scanned_core_files": 25,
+    "authoritative_scanned_files": 37,
+    "boundary_scanned_files": 42,
+    "migration_count": 3,
+    "migration_rehearsal_modes": ["clean-baseline", "existing-schema"],
+    "secret_scanned_files": 474,
+    "build": "PASS"
+  },
+  "superseded_observation": {
+    "command": "pnpm check",
+    "result": "FAIL",
+    "passing_test_files": 26,
+    "failing_test_files": 5,
+    "passing_tests": 393,
+    "failing_tests": 7,
+    "cause": "concurrent process and PGlite startup resource saturation produced only timeout/signal-null failures",
+    "resolution": "the five affected files passed 41/41 with maxWorkers=2, followed by an unchanged normal pnpm check passing 400/400"
+  },
+  "assertions": {
+    "multi_event_single_transition_replay": "PASS",
+    "transition_world_version_advances_once": "PASS",
+    "transition_gap_or_conflict_rejected": "PASS",
+    "incomplete_or_ambiguous_group_rejected": "PASS",
+    "canonical_seed_hash_recomputed": "PASS",
+    "duplicate_event_identity_rejected": "PASS",
+    "deterministic_state_and_world_version_property": "PASS",
+    "v06_sim_time_regressions": "PASS"
+  },
+  "finding_state": "IMPLEMENTED_PENDING_FOCUSED_INDEPENDENT_REVIEW",
+  "migration_change": false,
+  "production_access": false,
+  "production_mutation": false
+}

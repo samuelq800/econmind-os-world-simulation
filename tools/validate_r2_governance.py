@@ -92,6 +92,7 @@ def validate(root: Path) -> dict[str, Any]:
 
     review_policy: dict[str, Any] = {}
     continuation_policy: dict[str, Any] = {}
+    v07_continuation_policy: dict[str, Any] = {}
 
     def verification_record(subject: str, target: Any, record: Any) -> None:
         require(isinstance(record, dict), f"{subject} requires verification metadata")
@@ -206,7 +207,7 @@ def validate(root: Path) -> dict[str, Any]:
         metrics["required_files"] = len(required)
 
     def fast_mainline_policy() -> None:
-        nonlocal review_policy, continuation_policy
+        nonlocal review_policy, continuation_policy, v07_continuation_policy
         review_policy = load_json(POLICY_PATH)
         require(review_policy["schema_version"] == "FAST_MAINLINE-1", "wrong review policy schema")
         require(review_policy["active_mode"] == "FAST_MAINLINE", "FAST_MAINLINE is not active")
@@ -249,7 +250,10 @@ def validate(root: Path) -> dict[str, Any]:
         continuation_records = review_policy.get("scoped_continuation_records")
         require(
             continuation_records
-            == ["docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json"],
+            == [
+                "docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json",
+                "docs/governance/WORLD_CORE_V07_CONTINUATION_POLICY.json",
+            ],
             "unexpected scoped continuation records",
         )
         continuation_policy = load_json(continuation_records[0])
@@ -282,6 +286,27 @@ def validate(root: Path) -> dict[str, Any]:
             and "not a Codex self-approval" in activation_text,
             "V06 owner continuation activation evidence is incomplete",
         )
+        v07_continuation_policy = load_json(continuation_records[1])
+        v07_scope = v07_continuation_policy.get("scope", {})
+        v07_closure = v07_continuation_policy.get("review_b_closure", {})
+        require(
+            v07_continuation_policy.get("schema_version")
+            == "WORLD_CORE_PACKAGE_CONTINUATION-1"
+            and v07_continuation_policy.get("record_type")
+            == "OWNER_AUTHORIZED_PACKAGE_CONTINUATION"
+            and v07_continuation_policy.get("status") == "ACTIVE"
+            and v07_continuation_policy.get("authority")
+            == "RESPONSIBLE_HUMAN_OWNER"
+            and v07_scope.get("branch") == "codex/world-core-v07"
+            and v07_scope.get("allowed_steps") == ["V07.1", "V07.2", "V07.3"]
+            and v07_scope.get("terminal_gate") == "V07_PACKAGE_REVIEW"
+            and v07_closure.get("decision") == "APPROVED_FOR_CONTINUATION"
+            and v07_closure.get("open_downstream_blockers") == 0
+            and v07_closure.get("v07_1_status") == "IMPLEMENTED_UNVERIFIED",
+            "V07 continuation scope or Review B closure is invalid",
+        )
+        file(v07_continuation_policy.get("activation_record"))
+        file(v07_closure.get("record"))
         review_exception = continuation_policy.get("review_unavailability_exception")
         require(
             isinstance(review_exception, dict)
@@ -662,6 +687,7 @@ def validate(root: Path) -> dict[str, Any]:
         continuation = progress_data.get("world_core_continuation")
         continuation_steps: list[str] = []
         continuation_completed: dict[str, Any] = {}
+        v07_continuation_steps = v07_continuation_policy["scope"]["allowed_steps"]
         foundation_steps: set[str] = set()
         foundation_finalized = False
         require(
@@ -963,10 +989,27 @@ def validate(root: Path) -> dict[str, Any]:
                         for dependency in step_by_id[step_id]["hard_dependencies"]
                     )
                 )
+                v07_continuation_dependencies_ready = (
+                    state in {"IN_PROGRESS", "IMPLEMENTED_UNVERIFIED"}
+                    and step_id in v07_continuation_steps
+                    and all(
+                        states[dependency] == "VERIFIED"
+                        or (
+                            v07_continuation_steps.index(step_id) > 0
+                            and dependency
+                            == v07_continuation_steps[
+                                v07_continuation_steps.index(step_id) - 1
+                            ]
+                            and states[dependency] == "IMPLEMENTED_UNVERIFIED"
+                        )
+                        for dependency in step_by_id[step_id]["hard_dependencies"]
+                    )
+                )
                 require(
                     dependencies_ready
                     or batch_dependencies_ready
-                    or continuation_dependencies_ready,
+                    or continuation_dependencies_ready
+                    or v07_continuation_dependencies_ready,
                     f"impossible {state} dependency claim: {step_id}",
                 )
             if state == "VERIFIED":
@@ -1063,6 +1106,34 @@ def validate(root: Path) -> dict[str, Any]:
         next_ready = (dependency_ready and gate_open) or continuation_next_ready
         if next_step == "V06.1":
             next_ready = next_ready and foundation_integrated and group_a_ready
+        v07_entry = progress_data.get("v07_entry")
+        if next_step == "V07.2" and isinstance(v07_entry, dict):
+            v07_implementation = v07_entry.get("implementation_result", {})
+            v07_forward_fix = v07_implementation.get("fingerprint_forward_fix", {})
+            next_ready = (
+                states["V07.1"] == "IMPLEMENTED_UNVERIFIED"
+                and states["V07.2"] == "PLANNED"
+                and v07_implementation.get("review_b_result")
+                == "APPROVED_FOR_CONTINUATION"
+                and v07_forward_fix.get("independent_closure")
+                == "APPROVED_FOR_CONTINUATION"
+                and v07_implementation.get("open_p0_blockers") == 0
+                and v07_implementation.get("open_p1_majors") == 0
+                and required_gate == "V07.2_IMPLEMENTATION_AND_EVIDENCE"
+                and gate.get("gate_status") == "PASS"
+            )
+        if next_step == "V07.3" and isinstance(v07_entry, dict):
+            v07_2 = v07_entry.get("v07_2", {})
+            next_ready = (
+                states["V07.2"] == "IMPLEMENTED_UNVERIFIED"
+                and states["V07.3"] == "PLANNED"
+                and v07_2.get("automated_evidence") == "PASS"
+                and v07_2.get("open_p0_blockers") == 0
+                and v07_2.get("open_p1_majors") == 0
+                and v07_2.get("production_mutation") is False
+                and required_gate == "V07.3_IMPLEMENTATION_AND_EVIDENCE"
+                and gate.get("gate_status") == "PASS"
+            )
         require(
             gate.get("next_step_ready") is next_ready,
             "current_gate next_step_ready differs from validated readiness",
@@ -1094,10 +1165,11 @@ def validate(root: Path) -> dict[str, Any]:
                 )
             if continuation_steps:
                 v06_states = [states[step_id] for step_id in continuation_steps]
-                require(
-                    states["V07.1"] == "PLANNED",
-                    "V07 started before V06 package review",
-                )
+                if continuation.get("status") == "ACTIVE":
+                    require(
+                        states["V07.1"] == "PLANNED",
+                        "V07 started before V06 package review",
+                    )
                 for index, state in enumerate(v06_states):
                     if state != "PLANNED":
                         require(
@@ -1169,17 +1241,293 @@ def validate(root: Path) -> dict[str, Any]:
                         and package_review.get("merge_authorized") is True,
                         "completed V06 package review record is invalid",
                     )
-                    require(
-                        gate.get("step_id") == "V06.3"
-                        and gate.get("status") == "VERIFIED"
-                        and gate.get("next_step") == "V07.1"
-                        and gate.get("next_step_ready") is False
-                        and required_gate
-                        in {"V06_MAINLINE_INTEGRATION", "V07.1_OWNER_ADR_GATE"}
-                        and gate.get("gate_status") == "PENDING",
-                        "completed V06 handoff gate differs from progress truth",
-                    )
-                    if required_gate == "V07.1_OWNER_ADR_GATE":
+                    v07_entry = progress_data.get("v07_entry")
+                    if isinstance(v07_entry, dict) and v07_entry.get("status") == "ACTIVE":
+                        if states["V07.1"] == "IN_PROGRESS":
+                            require(
+                                gate.get("step_id") == "V07.1"
+                                and gate.get("status") == states["V07.1"]
+                                and gate.get("next_step") == "V07.1"
+                                and gate.get("next_step_ready") is True
+                                and required_gate == "V07.1_IMPLEMENTATION"
+                                and gate.get("gate_status") == "PASS",
+                                "active V07.1 entry gate differs from progress truth",
+                            )
+                        elif states["V07.2"] == "PLANNED":
+                            require(
+                                states["V07.1"] == "IMPLEMENTED_UNVERIFIED"
+                                and gate.get("step_id") == "V07.2"
+                                and gate.get("status") == states["V07.2"]
+                                and gate.get("next_step") == "V07.2"
+                                and gate.get("next_step_ready") is True
+                                and required_gate
+                                == "V07.2_IMPLEMENTATION_AND_EVIDENCE"
+                                and gate.get("gate_status") == "PASS",
+                                "V07.2 continuation entry differs from progress truth",
+                            )
+                            implementation = v07_entry.get("implementation_result")
+                            require(
+                                isinstance(implementation, dict),
+                                "V07.1 implementation record is missing",
+                            )
+                            forward_fix = implementation.get("fingerprint_forward_fix")
+                            require(
+                                implementation.get("status")
+                                == "IMPLEMENTED_UNVERIFIED"
+                                and implementation.get("automated_evidence") == "PASS"
+                                and implementation.get("independent_review")
+                                == "CHANGES_REQUIRED_DOWNSTREAM_BLOCKING"
+                                and implementation.get("open_p0_blockers") == 0
+                                and implementation.get("open_p1_majors") == 0
+                                and implementation.get("review_b_result")
+                                == "APPROVED_FOR_CONTINUATION"
+                                and isinstance(forward_fix, dict)
+                                and forward_fix.get("status")
+                                == "CLOSED_FOR_CONTINUATION"
+                                and forward_fix.get("automated_evidence") == "PASS"
+                                and forward_fix.get("independent_closure")
+                                == "APPROVED_FOR_CONTINUATION"
+                                and forward_fix.get("production_mutation") is False,
+                                "V07.1 fingerprint forward-fix evidence is incomplete",
+                            )
+                            code_candidate = commit_exists(
+                                implementation.get("code_candidate"),
+                                "V07.1 code candidate",
+                            )
+                            evidence_commit = commit_exists(
+                                implementation.get("evidence_commit"),
+                                "V07.1 evidence commit",
+                            )
+                            is_ancestor(code_candidate, evidence_commit, "V07.1 evidence lineage")
+                            fixed_code_candidate = commit_exists(
+                                forward_fix.get("fixed_code_candidate"),
+                                "V07.1 fixed code candidate",
+                            )
+                            is_ancestor(
+                                evidence_commit,
+                                fixed_code_candidate,
+                                "V07.1 fingerprint forward-fix lineage",
+                            )
+                            file("docs/reports/V07.1/IMPLEMENTATION.md")
+                            file("docs/reports/V07.1/TEST_EVIDENCE.json")
+                            file("docs/reports/V07.1/FINGERPRINT_FORWARD_FIX.md")
+                            file(
+                                "docs/reports/V07.1/TEST_EVIDENCE_FINGERPRINT_FORWARD_FIX.json"
+                            )
+                            file(implementation.get("review_b_record"))
+                            active_review_target = commit_exists(
+                                implementation.get("active_review_target"),
+                                "V07.1 active review target",
+                            )
+                            require(
+                                active_review_target
+                                == forward_fix.get("fixed_review_target"),
+                                "V07.1 Review B target differs from fixed review target",
+                            )
+                        elif (
+                            states["V07.2"] == "IMPLEMENTED_UNVERIFIED"
+                            and states["V07.3"] == "PLANNED"
+                        ):
+                            require(
+                                gate.get("step_id") == "V07.3"
+                                and gate.get("status") == states["V07.3"]
+                                and gate.get("next_step") == "V07.3"
+                                and gate.get("next_step_ready") is True
+                                and required_gate
+                                == "V07.3_IMPLEMENTATION_AND_EVIDENCE"
+                                and gate.get("gate_status") == "PASS",
+                                "V07.3 continuation entry differs from progress truth",
+                            )
+                            v07_2 = v07_entry.get("v07_2")
+                            require(
+                                isinstance(v07_2, dict)
+                                and v07_2.get("status")
+                                == "IMPLEMENTED_UNVERIFIED"
+                                and v07_2.get("automated_evidence") == "PASS"
+                                and v07_2.get("independent_review")
+                                == "DEFERRED_TO_V07_PACKAGE_GATE"
+                                and v07_2.get("open_p0_blockers") == 0
+                                and v07_2.get("open_p1_majors") == 0
+                                and v07_2.get("production_mutation") is False,
+                                "V07.2 continuation evidence is incomplete",
+                            )
+                            v07_2_candidate = commit_exists(
+                                v07_2.get("code_candidate"),
+                                "V07.2 code candidate",
+                            )
+                            migration_source = commit_exists(
+                                v07_2.get("migration_artifact_source_commit"),
+                                "V07.2 migration artifact source",
+                            )
+                            is_ancestor(
+                                migration_source,
+                                v07_2_candidate,
+                                "V07.2 migration/code lineage",
+                            )
+                            v07_2_review_target = commit_exists(
+                                v07_2.get("review_target"),
+                                "V07.2 review target",
+                            )
+                            is_ancestor(
+                                v07_2_candidate,
+                                v07_2_review_target,
+                                "V07.2 review lineage",
+                            )
+                            file(v07_2.get("implementation_file"))
+                            file(v07_2.get("evidence_file"))
+                            file(v07_2.get("review_bundle"))
+                            implementation = v07_entry.get("implementation_result", {})
+                            require(
+                                implementation.get("review_b_result")
+                                == "APPROVED_FOR_CONTINUATION"
+                                and implementation.get("open_p0_blockers") == 0
+                                and implementation.get("open_p1_majors") == 0,
+                                "V07.1 Review B continuation closure is missing",
+                            )
+                        elif states["V07.3"] == "IMPLEMENTED_UNVERIFIED":
+                            require(
+                                states["V07.1"] == "IMPLEMENTED_UNVERIFIED"
+                                and states["V07.2"] == "IMPLEMENTED_UNVERIFIED"
+                                and gate.get("step_id") == "V07.3"
+                                and gate.get("status") == states["V07.3"]
+                                and gate.get("next_step") == "V08.1"
+                                and gate.get("next_step_ready") is False
+                                and required_gate == "V07_PACKAGE_REVIEW"
+                                and gate.get("gate_status") == "PENDING"
+                                and progress_data.get("work_packages", {}).get("V07")
+                                == "IMPLEMENTED_UNVERIFIED",
+                                "V07 package hard stop differs from progress truth",
+                            )
+                            for step_key in ("v07_2", "v07_3"):
+                                step_record = v07_entry.get(step_key)
+                                require(
+                                    isinstance(step_record, dict)
+                                    and step_record.get("status")
+                                    == "IMPLEMENTED_UNVERIFIED"
+                                    and step_record.get("automated_evidence") == "PASS"
+                                    and step_record.get("open_p0_blockers") == 0
+                                    and step_record.get("open_p1_majors") == 0
+                                    and step_record.get("production_mutation") is False,
+                                    f"{step_key} package evidence is incomplete",
+                                )
+                                step_candidate = commit_exists(
+                                    step_record.get("code_candidate"),
+                                    f"{step_key} code candidate",
+                                )
+                                is_ancestor(
+                                    step_candidate,
+                                    "HEAD",
+                                    f"{step_key} candidate lineage",
+                                )
+                                step_review_target = commit_exists(
+                                    step_record.get("review_target"),
+                                    f"{step_key} review target",
+                                )
+                                is_ancestor(
+                                    step_candidate,
+                                    step_review_target,
+                                    f"{step_key} review lineage",
+                                )
+                                file(step_record.get("implementation_file"))
+                                file(step_record.get("evidence_file"))
+                                file(step_record.get("review_bundle"))
+                            package_review = progress_data.get("v07_package_review")
+                            require(
+                                isinstance(package_review, dict)
+                                and package_review.get("status")
+                                == "READY_FOR_PACKAGE_REVIEW"
+                                and package_review.get("package_status")
+                                == "IMPLEMENTED_UNVERIFIED"
+                                and package_review.get("open_p0_blockers") == 0
+                                and package_review.get("open_p1_majors") == 0
+                                and package_review.get("package_verified") is False
+                                and package_review.get("merge_authorized") is False
+                                and package_review.get("production_access") is False
+                                and package_review.get("production_mutation") is False
+                                and package_review.get("v08_started") is False,
+                                "V07 package review state is incomplete",
+                            )
+                            require(
+                                package_review.get("latest_independent_decision")
+                                == "V07_PACKAGE_CHANGES_REQUIRED"
+                                and package_review.get("superseded_review_target")
+                                == "7cd856380e93020dabe8fb969472f9a18ce773cd"
+                                and package_review.get("reviewed_target")
+                                == "7cd856380e93020dabe8fb969472f9a18ce773cd"
+                                and package_review.get(
+                                    "pending_independent_closure", {}
+                                ).get("blockers")
+                                == ["V07-PKG-BLK-01"]
+                                and package_review.get(
+                                    "pending_independent_closure", {}
+                                ).get("majors")
+                                == ["V07-PKG-MAJ-02"]
+                                and len(package_review.get("review_history", [])) >= 2
+                                and package_review.get("review_history", [])[-1].get(
+                                    "closed_findings"
+                                )
+                                == [
+                                    "V07-PKG-BLK-02",
+                                    "V07-PKG-MAJ-01",
+                                    "V07-PKG-MAJ-03",
+                                    "V07-PKG-MAJ-04",
+                                ],
+                                "V07 package Review B history or focused closure scope is incomplete",
+                            )
+                            package_content = commit_exists(
+                                package_review.get("content_commit"),
+                                "V07 package content commit",
+                            )
+                            is_ancestor(
+                                step_review_target,
+                                package_content,
+                                "V07.3-to-package content lineage",
+                            )
+                            if package_review.get("review_target") is not None:
+                                package_target = commit_exists(
+                                    package_review.get("review_target"),
+                                    "V07 package review target",
+                                )
+                                is_ancestor(
+                                    package_content,
+                                    package_target,
+                                    "V07 package review lineage",
+                                )
+                            file(package_review.get("review_bundle"))
+                            file(package_review.get("evidence_file"))
+                            file("docs/reports/V07/PACKAGE_REVIEW_TARGET.md")
+                        else:
+                            require(False, "unsupported active V07 lifecycle state")
+                        require(
+                            v07_entry.get("branch") == "codex/world-core-v07"
+                            and v07_entry.get("preflight") == "GO"
+                            and v07_entry.get("approved_adrs")
+                            == ["ADR-11", "ADR-16", "ADR-17", "ADR-20"]
+                            and v07_entry.get("production_mutation") is False
+                            and v07_entry.get("owner_approved") is True,
+                            "V07.1 entry authority is incomplete",
+                        )
+                        for decision_id in ("ADR-11", "ADR-16", "ADR-17", "ADR-20"):
+                            require(
+                                owner_decisions[decision_id].get("status") == "APPROVED"
+                                and owner_decisions[decision_id].get("approval_record"),
+                                f"{decision_id} is not approved for V07.1 entry",
+                            )
+                        file(v07_entry.get("preflight_file"))
+                        file(v07_entry.get("continuation_policy"))
+                        file(v07_entry.get("owner_activation"))
+                    else:
+                        require(
+                            gate.get("step_id") == "V06.3"
+                            and gate.get("status") == "VERIFIED"
+                            and gate.get("next_step") == "V07.1"
+                            and gate.get("next_step_ready") is False
+                            and required_gate
+                            in {"V06_MAINLINE_INTEGRATION", "V07.1_OWNER_ADR_GATE"}
+                            and gate.get("gate_status") == "PENDING",
+                            "completed V06 handoff gate differs from progress truth",
+                        )
+                    if required_gate == "V07.1_OWNER_ADR_GATE" or isinstance(v07_entry, dict):
                         v06_integration = progress_data.get("v06_integration")
                         require(
                             isinstance(v06_integration, dict)

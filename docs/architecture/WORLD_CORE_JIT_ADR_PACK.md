@@ -2,10 +2,11 @@
 
 ## Status
 
-ADR-01 and ADR-03 are `APPROVED` in `status/decisions.json` and bound to
-responsible-human owner records under `docs/architecture/decisions/`. Every
-other entry below remains `PROPOSED_NOT_APPROVED`. This pack summarizes scoped
-resolutions; the individual decision records and register remain authoritative.
+ADR-01, ADR-03, ADR-11 and ADR-17 are `APPROVED` in
+`status/decisions.json` and bound to responsible-human owner records under
+`docs/architecture/decisions/`. Every other entry below remains
+`PROPOSED_NOT_APPROVED`. This pack summarizes scoped resolutions; the
+individual decision records and register remain authoritative.
 
 The compressed A/B/C owner handoff is
 `docs/architecture/WORLD_CORE_OWNER_ADR_DECISION_PACK.md`. It controls the
@@ -17,8 +18,8 @@ latest safe decision points for this sprint.
 | ------ | -------------------------------------------------------------------------- | ------------------------------------------------- | ------------------------ |
 | ADR-01 | Settlement phase identity/order without renumbering E01-E18                | Before V06.1 starts                               | Yes                      |
 | ADR-03 | Tick unit, pause/resume, catch-up, cutoff, equal-time order                | Before V06.1 code                                 | Yes                      |
-| ADR-11 | Command/idempotency/duplicate receipt semantics                            | Before V07.1 schema                               | Yes                      |
-| ADR-17 | Persistence, append-only ledger, transaction, lease/fence, replay boundary | Before V07.1 schema; final detail before V09.1    | Yes                      |
+| ADR-11 | Command/idempotency/duplicate receipt semantics                            | APPROVED before V07.1 schema                      | Approved                 |
+| ADR-17 | Persistence, append-only ledger, transaction, lease/fence, replay boundary | APPROVED; implementation staged V07/V08/V09       | Approved                 |
 | ADR-20 | Authorization at acceptance versus execution/recovery                      | Before V07.2 queues a command                     | Yes                      |
 | ADR-02 | Unique owners for inventory and financial positions/postings               | Before V08.1                                      | Yes                      |
 | ADR-08 | Future economic rounding/formula policy; exact-or-reject is inherited      | Future operation that needs rounding/formula      | Yes, but not this sprint |
@@ -62,13 +63,13 @@ latest safe decision points for this sprint.
 - **Consequence:** All economic deadlines use SimTime and reproduce exactly;
   real time remains audit/adapter metadata.
 
-## ADR-11 — Idempotency and receipts
+## ADR-11 — Idempotency and receipts (APPROVED)
 
 - **Decision required:** Exact duplicate versus conflict identity and what is
   returned after retry.
 - **Why now:** V07 tables and unique constraints cannot be defined safely
   without it.
-- **Recommended resolution:** Unique `(worldId, commandId)` and
+- **Approved resolution:** Unique `(worldId, commandId)` and
   `(worldId, idempotencyKey)`. Fingerprint all authoritative intent fields using
   repaired inert V03 canonical serialization and trusted explicit domain
   adapters only, excluding audit/transport metadata. Exact match
@@ -81,14 +82,14 @@ latest safe decision points for this sprint.
 - **Consequence:** Retried requests are stable and auditably distinguishable
   from conflicts.
 
-## ADR-17 — Persistence, commit, replay, and failure boundary
+## ADR-17 — Persistence, commit, replay, and failure boundary (APPROVED)
 
 - **Decision required:** Canonical facts, current head materialization,
   append-only ledger, snapshot/checkpoint role, single writer, and atomic
   transaction scope.
 - **Why now:** V07 starts durable command/event design; V09 enforces commit and
   recovery.
-- **Recommended resolution:** Opening seed plus append-only events is replay
+- **Approved resolution:** Opening seed plus append-only events is replay
   lineage; current World head/positions are transaction-bound canonical
   materializations in the same World State. Per-World worker lease plus
   monotonic fencing token; private candidates; short database transaction
@@ -97,6 +98,10 @@ latest safe decision points for this sprint.
 - **Alternatives:** Event-only reads, current-table-only history, distributed
   multiwriter, or projection-as-truth. These fail performance, audit, or
   single-authority constraints.
+- **Implementation ownership:** V07 owns Command/Event/Replay contracts and
+  foundations; V08 owns its Ledger/Posting facts; V09 owns writer, lease,
+  fencing, atomic-commit and recovery runtime. This staging is implementation
+  ownership, not partial approval.
 - **Consequence:** Full commit or zero commit, exact replay, and restart-safe
   dedupe; added schema/locking complexity is accepted as P0 necessity.
 

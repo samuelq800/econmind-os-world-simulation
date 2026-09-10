@@ -308,3 +308,45 @@ export async function reauthorizeOfficeDecision(
   }
   return metadata.context;
 }
+
+/**
+ * Re-resolves current Command authority from the server-held authorization
+ * metadata. The supplied context is intake audit evidence, not a capability
+ * token. A newly branded context is returned so callers cannot accidentally
+ * treat the stale authorization revision as commit authority.
+ */
+export async function reauthorizeOfficeCapability(
+  value: unknown,
+): Promise<AuthorizedOfficeContext> {
+  if (!isAuthorizedOfficeContext(value)) {
+    deny('Office context was not issued by server authorization');
+  }
+  const metadata = authorizedOfficeMetadata.get(value);
+  if (metadata === undefined) {
+    deny('Office context was not issued by server authorization');
+  }
+  const current = await resolveAuthorizedMembership({
+    principal: metadata.principal,
+    resolver: metadata.resolver,
+    worldId: metadata.context.worldId,
+    requestedCountryId: metadata.context.countryId,
+    requestedOfficeId: metadata.context.officeId,
+    capability: metadata.context.capability,
+  });
+  const context = Object.freeze({
+    authorizationVersion: current.authorizationVersion,
+    authSubject: current.authSubject,
+    worldId: current.worldId,
+    teamId: current.teamId,
+    countryId: current.countryId,
+    officeId: metadata.context.officeId,
+    capability: metadata.context.capability,
+  }) as AuthorizedOfficeContext;
+  authorizedOfficeMetadata.set(context, {
+    context,
+    principal: metadata.principal,
+    resolver: metadata.resolver,
+    decisionScope: metadata.decisionScope,
+  });
+  return context;
+}

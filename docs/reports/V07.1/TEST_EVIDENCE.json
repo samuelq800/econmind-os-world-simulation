@@ -1,0 +1,113 @@
+{
+  "schema_version": "V07.1-TEST-EVIDENCE-1",
+  "step_id": "V07.1",
+  "title": "Command/Event Schema 与不可变 Ledger",
+  "state": "IMPLEMENTED_UNVERIFIED",
+  "risk_class": "P0",
+  "code_candidate": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
+  "migration_provenance_commit": "039ffd3226a3cb780b94c624bd87b32bdc48ee67",
+  "acceptance_target": "e5840f76bb6a06c636f1f2575e3245b1f7734bd9",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile": "FROZEN_UNCHANGED"
+  },
+  "checks": [
+    {
+      "command": "pnpm --filter @econmind/core typecheck",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/command-event-contracts.test.ts tests/world-core/command-event-ledger.test.ts tests/property/command-event-properties.test.ts",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 3,
+      "tests": 15,
+      "property_seed": 20260908
+    },
+    {
+      "command": "pnpm test:boundaries",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 3,
+      "tests": 34,
+      "authoritative_scanned_files": 35,
+      "boundary_scanned_files": 40,
+      "violations": 0
+    },
+    {
+      "command": "pnpm migration:validate",
+      "result": "PASS",
+      "exit_code": 0,
+      "migrations": 2,
+      "violations": 0
+    },
+    {
+      "command": "pnpm migration:rehearse",
+      "result": "PASS",
+      "exit_code": 0,
+      "database": "PGlite ephemeral PostgreSQL",
+      "modes": ["clean-baseline", "existing-schema"],
+      "release_rows_each": 2,
+      "production_access": false
+    },
+    {
+      "command": "pnpm exec vitest run tests/foundation/bootstrap-lifecycle.test.ts",
+      "result": "PASS_AFTER_TIMEOUT_RERUN",
+      "exit_code": 0,
+      "test_files": 1,
+      "tests": 12
+    },
+    {
+      "command": "pnpm check",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 26,
+      "tests": 350,
+      "boundary_tests": 34,
+      "migration_count": 2,
+      "build": "PASS",
+      "environment": "local",
+      "database_configured": false,
+      "production_mutation_allowed": false
+    }
+  ],
+  "superseded_failures": [
+    {
+      "phase": "PRE_CANDIDATE",
+      "finding": "Core timestamp validation used Date and was rejected as AMBIENT_TIME_LEAK",
+      "resolution": "Removed Date and used lexical canonical RFC3339 validation before code candidate"
+    },
+    {
+      "phase": "POST_MANIFEST",
+      "finding": "V02 foundation test hard-coded migrations=1 and a now-valid release_order=3 mutation",
+      "resolution": "Made count manifest-derived and the invalid fixture unambiguously out of order in acceptance target e5840f76bb6a06c636f1f2575e3245b1f7734bd9"
+    },
+    {
+      "phase": "FULL_REGRESSION_RERUN",
+      "finding": "Existing V00.3 BOOTSTRAP_READY wait timed out once",
+      "resolution": "Isolated 12/12 rerun passed; subsequent complete pnpm check passed 350/350"
+    }
+  ],
+  "migration": {
+    "artifact": "database/migrations/artifacts/0002_world_v2_command_event_ledger.sql",
+    "sha256": "92915905a159961ac0f8eb70f509501cf7697519471c1b84f832ef224cf87695",
+    "artifact_source_commit": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
+    "manifest_chain": "EXISTING_V02_CHAIN",
+    "rls_or_grants_changed": false,
+    "backfill": "NONE",
+    "production_approval": null,
+    "promotion_blocker": "ADR-16"
+  },
+  "decisions": {
+    "ADR-11": "APPROVED",
+    "ADR-17": "APPROVED",
+    "ADR-16": "PROPOSED_NOT_APPROVED_PROMOTION_BLOCKER",
+    "ADR-20": "PROPOSED_NOT_APPROVED_V07.2_BLOCKER"
+  },
+  "open_p0_blockers": 0,
+  "open_p1_majors": 0,
+  "independent_review": "NOT_RUN",
+  "production_mutation": false
+}

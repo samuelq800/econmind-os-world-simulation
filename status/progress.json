@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-10T00:34:00Z",
-  "source_commit": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1",
-  "note": "Gate A and V06 are accepted, verified, and integrated into main. Independent Review B approved exact V06 package target 33fe26a7e014379b15d4f0f3ab10791b912b8885 with both historical blockers closed and no open blocker or major; the project owner accepted that review. V06.1-V06.3 and package V06 are VERIFIED. V07.1 hard dependencies are ready but V07.1 remains PLANNED at READY_PENDING_OWNER_ADR because ADR-11 and the V07 core boundary of ADR-17 remain PROPOSED_NOT_APPROVED.",
+  "derived_at": "2026-09-10T08:26:53Z",
+  "source_commit": "e7cdaf0aaeb83ebe63c62208c512fcb251158929",
+  "note": "Gate A, V06 and V07 are accepted and verified. Independent Review B approved exact V07 package target 079fa9d; the project owner accepted it and authorized canonical promotion, main merge and publication of migrations 0002-0004 only through the ADR-16 main-site release chain. All V07 BLOCKER/MAJOR findings are closed; V07-PKG-MIN-01 remains OPEN_DEFERRED. V08 is not started and remains blocked on owner decisions ADR-02 and ADR-05.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -134,16 +134,83 @@
     "evidence_file": "docs/reports/V06/FINAL_RECONCILIATION.md"
   },
   "current_gate": {
-    "step_id": "V06.3",
-    "status": "VERIFIED",
-    "review": "V06_PACKAGE_APPROVED, owner accepted, promoted and integrated; READY_PENDING_OWNER_ADR",
-    "next_step": "V07.1",
+    "step_id": "V08.1",
+    "status": "PLANNED",
+    "review": "V07_PACKAGE_APPROVED and owner accepted; V08.1 awaits its own owner ADR gate",
+    "next_step": "V08.1",
     "next_step_ready": false,
-    "next_step_blockers": [
-      "ADR-11 and the V07 core boundary of ADR-17 require responsible-human approval before V07.1 schema freeze"
+    "next_step_blockers": ["ADR-02", "ADR-05"],
+    "required_gate": "V08.1_OWNER_ADR_GATE",
+    "gate_status": "READY_PENDING_OWNER_ADR"
+  },
+  "v07_package_review": {
+    "status": "V07_PACKAGE_APPROVED",
+    "package_status": "VERIFIED",
+    "content_commit": "563a96490f207d94a3110dbf9c7a037f23b46923",
+    "review_target": "079fa9d230d5109488a1e5ea82e97f81845c49eb",
+    "superseded_review_target": "7cd856380e93020dabe8fb969472f9a18ce773cd",
+    "latest_independent_decision": "V07_PACKAGE_APPROVED",
+    "reviewed_target": "079fa9d230d5109488a1e5ea82e97f81845c49eb",
+    "review_history": [
+      {
+        "decision": "V07_PACKAGE_CHANGES_REQUIRED",
+        "reviewed_target": "e802a5233ded3825c56d2897374fcd2de0c40da8",
+        "open_blockers": ["V07-PKG-BLK-01", "V07-PKG-BLK-02"],
+        "open_majors": [
+          "V07-PKG-MAJ-01",
+          "V07-PKG-MAJ-02",
+          "V07-PKG-MAJ-03",
+          "V07-PKG-MAJ-04"
+        ]
+      },
+      {
+        "decision": "V07_PACKAGE_CHANGES_REQUIRED",
+        "reviewed_target": "7cd856380e93020dabe8fb969472f9a18ce773cd",
+        "open_blockers": ["V07-PKG-BLK-01"],
+        "open_majors": ["V07-PKG-MAJ-02"],
+        "closed_findings": [
+          "V07-PKG-BLK-02",
+          "V07-PKG-MAJ-01",
+          "V07-PKG-MAJ-03",
+          "V07-PKG-MAJ-04"
+        ]
+      },
+      {
+        "decision": "V07_PACKAGE_APPROVED",
+        "reviewed_target": "079fa9d230d5109488a1e5ea82e97f81845c49eb",
+        "open_blockers": [],
+        "open_majors": [],
+        "closed_findings": [
+          "V07-PKG-BLK-01",
+          "V07-PKG-BLK-02",
+          "V07-PKG-MAJ-01",
+          "V07-PKG-MAJ-02",
+          "V07-PKG-MAJ-03",
+          "V07-PKG-MAJ-04"
+        ],
+        "deferred_findings": ["V07-PKG-MIN-01"]
+      }
     ],
-    "required_gate": "V07.1_OWNER_ADR_GATE",
-    "gate_status": "PENDING"
+    "findings_record": "docs/reports/V07.2/BLK01_MAJ02_FORWARD_FIX.md",
+    "pending_independent_closure": {
+      "blockers": [],
+      "majors": [],
+      "minor_deferred": ["V07-PKG-MIN-01"]
+    },
+    "review_bundle": "docs/reports/V07/PACKAGE_REVIEW_BUNDLE.md",
+    "evidence_file": "docs/reports/V07/PACKAGE_TEST_EVIDENCE.json",
+    "open_p0_blockers": 0,
+    "open_p1_majors": 0,
+    "acceptance_record": "docs/reports/V07/FINAL_ACCEPTANCE.md",
+    "owner_acceptance_commit": "e7cdaf0aaeb83ebe63c62208c512fcb251158929",
+    "owner_decision": "ACCEPTED",
+    "authority": "PROJECT_OWNER_ACCEPTANCE",
+    "package_verified": true,
+    "merge_authorized": true,
+    "production_release_authorized": true,
+    "production_access": false,
+    "production_mutation": false,
+    "v08_started": false
   },
   "v06_package_review": {
     "decision": "V06_PACKAGE_APPROVED",
@@ -157,7 +224,7 @@
     "merge_authorized": true,
     "owner_decision": "ACCEPTED",
     "authority": "PROJECT_OWNER_ACCEPTANCE",
-    "v07_authorized": false
+    "v07_authorized": true
   },
   "v06_package_re_review": {
     "status": "V06_PACKAGE_APPROVED",
@@ -204,7 +271,7 @@
     },
     "package_verified": true,
     "merge_authorized": true,
-    "v07_authorized": false
+    "v07_authorized": true
   },
   "world_core_continuation": {
     "status": "COMPLETED",
@@ -304,6 +371,88 @@
       }
     }
   },
+  "v07_entry": {
+    "status": "COMPLETED",
+    "branch": "codex/world-core-v07",
+    "main_baseline": "026671eca6b85bc6e5f1c99878c6f8d740f2fb21",
+    "current_main": "8e4d9e125a89fc1457ed016c708537fd67e1c8b7",
+    "decision_commit": "e5e4a3291fd2e77ff16173d88f631ea131badf34",
+    "adr_16_20_decision_commit": "ec0f67d1e8e618bd0cf77089a0fd615cb10e0f5e",
+    "adr_16_20_main_merge": "24c05f8d907a5c100a6918bba662bdb0da90dfac",
+    "preflight": "GO",
+    "preflight_file": "docs/reports/V07.1/PREFLIGHT.md",
+    "continuation_policy": "docs/governance/WORLD_CORE_V07_CONTINUATION_POLICY.json",
+    "owner_activation": "docs/reports/V07/OWNER_CONTINUATION_ACTIVATION.md",
+    "approved_adrs": ["ADR-11", "ADR-16", "ADR-17", "ADR-20"],
+    "next_adr_gate": "SATISFIED_FOR_V07.2",
+    "candidate_migration_merge_gate": "SATISFIED_BY_V07_PACKAGE_REVIEW_AND_OWNER_PROMOTION",
+    "implementation_result": {
+      "status": "VERIFIED",
+      "code_candidate": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
+      "migration_provenance_commit": "039ffd3226a3cb780b94c624bd87b32bdc48ee67",
+      "acceptance_target": "e5840f76bb6a06c636f1f2575e3245b1f7734bd9",
+      "evidence_commit": "4ed6f823eb7b8bc1a6e208184314153652aeb104",
+      "automated_evidence": "PASS",
+      "review_target": "b57b6aa9cd349776e1f5cd8ae10d20413523a69c",
+      "independent_review": "V07_PACKAGE_APPROVED",
+      "open_p0_blockers": 0,
+      "open_p1_majors": 0,
+      "active_code_candidate": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
+      "active_review_target": "66da354755326fc00ece7fcdb78e35db27f0b15f",
+      "review_b_result": "APPROVED_FOR_CONTINUATION",
+      "review_b_record": "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_B.md",
+      "fingerprint_forward_fix": {
+        "status": "CLOSED_FOR_CONTINUATION",
+        "finding": "correlationId trace metadata participated in authoritative Command fingerprint",
+        "fixed_code_candidate": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
+        "fixed_review_target": "66da354755326fc00ece7fcdb78e35db27f0b15f",
+        "review_bundle": "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_TARGET_V2.md",
+        "superseded_review_target": "02b377614a7337b1d8d7442bae50c534ddbbe3c4",
+        "automated_evidence": "PASS",
+        "independent_closure": "APPROVED_FOR_CONTINUATION",
+        "production_mutation": false
+      }
+    },
+    "v07_2": {
+      "status": "VERIFIED",
+      "code_candidate": "7e4b21e0cc70e878080a777874dad491a21501aa",
+      "migration_artifact_source_commit": "6f919d3a20835da39a042ee7863d849f140f4e0c",
+      "automated_evidence": "PASS",
+      "evidence_file": "docs/reports/V07.2/TEST_EVIDENCE_BLK01_MAJ02.json",
+      "implementation_file": "docs/reports/V07.2/BLK01_MAJ02_FORWARD_FIX.md",
+      "review_target": "563a96490f207d94a3110dbf9c7a037f23b46923",
+      "review_bundle": "docs/reports/V07.2/BLK01_MAJ02_FORWARD_FIX.md",
+      "independent_review": "V07_PACKAGE_APPROVED",
+      "superseded_code_candidate": "2c32d0918bf7bbf97a851ad785b305de1f5688fa",
+      "superseded_review_target": "81d3e59de7b3dd51f9cc2eaf93dc086f1baaf5ba",
+      "open_p0_blockers": 0,
+      "open_p1_majors": 0,
+      "production_mutation": false
+    },
+    "v07_3": {
+      "status": "VERIFIED",
+      "code_candidate": "2b42e0d725da590a24e845a7046501af8f8d4c01",
+      "automated_evidence": "PASS",
+      "evidence_file": "docs/reports/V07.3/TEST_EVIDENCE_FORWARD_FIX.json",
+      "implementation_file": "docs/reports/V07.3/IMPLEMENTATION_FORWARD_FIX.md",
+      "review_target": "21299492a4acb47b5383056417bba22acbc214b2",
+      "review_bundle": "docs/reports/V07.3/REVIEW_TARGET_FORWARD_FIX.md",
+      "independent_review": "V07_PACKAGE_APPROVED",
+      "superseded_code_candidate": "956d011df95f383917b421ffc522eb896477970a",
+      "superseded_review_target": "2b645f963422ac7dcb39c599768003e93ddc22d3",
+      "open_p0_blockers": 0,
+      "open_p1_majors": 0,
+      "migration_change": false,
+      "production_mutation": false
+    },
+    "package_review": "V07_PACKAGE_APPROVED",
+    "owner_acceptance": "ACCEPTED",
+    "acceptance_record": "docs/reports/V07/FINAL_ACCEPTANCE.md",
+    "owner_acceptance_commit": "e7cdaf0aaeb83ebe63c62208c512fcb251158929",
+    "production_release_authorized": true,
+    "production_mutation": false,
+    "owner_approved": true
+  },
   "work_packages": {
     "V00": "COMPLETE",
     "V01": "IMPLEMENTED_MERGED",
@@ -311,7 +460,9 @@
     "V03": "VERIFIED",
     "V04": "VERIFIED",
     "V05": "VERIFIED",
-    "V06": "VERIFIED"
+    "V06": "VERIFIED",
+    "V07": "VERIFIED",
+    "V08": "NOT_STARTED"
   },
   "step_evidence": {
     "V00.1": [
@@ -441,6 +592,43 @@
       "docs/reports/V06.3/IMPLEMENTATION_RESTORE_PREFIX_FIX.md",
       "docs/reports/V06.3/TEST_EVIDENCE_RESTORE_PREFIX_FIX.json",
       "docs/reports/V06/FINAL_ACCEPTANCE.md"
+    ],
+    "V07.1": [
+      "docs/exec-plans/V07.1.md",
+      "docs/reports/V07.1/PREFLIGHT.md",
+      "docs/reports/V07.1/IMPLEMENTATION.md",
+      "docs/reports/V07.1/TEST_EVIDENCE.json",
+      "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX.md",
+      "docs/reports/V07.1/TEST_EVIDENCE_FINGERPRINT_FORWARD_FIX.json",
+      "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_TARGET.md",
+      "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_TARGET_V2.md",
+      "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_B.md",
+      "docs/reports/V07/FINAL_ACCEPTANCE.md",
+      "docs/reports/V07/FINAL_CLOSURE.md"
+    ],
+    "V07.2": [
+      "docs/exec-plans/V07.2.md",
+      "docs/reports/V07.2/IMPLEMENTATION.md",
+      "docs/reports/V07.2/TEST_EVIDENCE.json",
+      "docs/reports/V07.2/REVIEW_TARGET.md",
+      "docs/reports/V07.2/IMPLEMENTATION_FORWARD_FIX.md",
+      "docs/reports/V07.2/TEST_EVIDENCE_FORWARD_FIX.json",
+      "docs/reports/V07.2/REVIEW_TARGET_FORWARD_FIX.md",
+      "docs/reports/V07.2/BLK01_MAJ02_FORWARD_FIX.md",
+      "docs/reports/V07.2/TEST_EVIDENCE_BLK01_MAJ02.json",
+      "docs/reports/V07/FINAL_ACCEPTANCE.md",
+      "docs/reports/V07/FINAL_CLOSURE.md"
+    ],
+    "V07.3": [
+      "docs/exec-plans/V07.3.md",
+      "docs/reports/V07.3/IMPLEMENTATION.md",
+      "docs/reports/V07.3/TEST_EVIDENCE.json",
+      "docs/reports/V07.3/REVIEW_TARGET.md",
+      "docs/reports/V07.3/IMPLEMENTATION_FORWARD_FIX.md",
+      "docs/reports/V07.3/TEST_EVIDENCE_FORWARD_FIX.json",
+      "docs/reports/V07.3/REVIEW_TARGET_FORWARD_FIX.md",
+      "docs/reports/V07/FINAL_ACCEPTANCE.md",
+      "docs/reports/V07/FINAL_CLOSURE.md"
     ]
   },
   "package_evidence": {
@@ -474,6 +662,15 @@
       "docs/reports/V06/FINAL_ACCEPTANCE.md",
       "docs/reports/V06/FINAL_CLOSURE.md",
       "docs/reports/V06/FINAL_RECONCILIATION.md"
+    ],
+    "V07": [
+      "docs/reports/V07/PACKAGE_REVIEW_BUNDLE.md",
+      "docs/reports/V07/PACKAGE_TEST_EVIDENCE.json",
+      "docs/reports/V07/PACKAGE_REVIEW_TARGET.md",
+      "docs/reports/V07/PACKAGE_REVIEW_FINDINGS_FORWARD_FIX.md",
+      "docs/governance/LEGACY_REUSE_POLICY.md",
+      "docs/reports/V07/FINAL_ACCEPTANCE.md",
+      "docs/reports/V07/FINAL_CLOSURE.md"
     ]
   },
   "implementation_commits": {
@@ -497,7 +694,10 @@
     "V05.3": "47fe5c5d465748370d9a8ea046bc443978437203",
     "V06.1": "41fd476a221e7d14f5fc5fec76cafeb8d9263dc7",
     "V06.2": "4e35c07758f4d39b05dac402eeb03b080275c3e0",
-    "V06.3": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1"
+    "V06.3": "d9a84bd0198ecdcc2a9fe739c1eb900dc4e4cef1",
+    "V07.1": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
+    "V07.2": "7e4b21e0cc70e878080a777874dad491a21501aa",
+    "V07.3": "2b42e0d725da590a24e845a7046501af8f8d4c01"
   },
   "step_reviews": {
     "V00.1": {
@@ -731,6 +931,30 @@
       "package_reviewed_commit": "33fe26a7e014379b15d4f0f3ab10791b912b8885",
       "review_file": "docs/reports/V06/FINAL_ACCEPTANCE.md",
       "owner_approved": true
+    },
+    "V07.1": {
+      "method": "INDEPENDENT_REVIEW",
+      "decision": "APPROVED",
+      "reviewed_commit": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
+      "package_reviewed_commit": "079fa9d230d5109488a1e5ea82e97f81845c49eb",
+      "review_file": "docs/reports/V07/FINAL_ACCEPTANCE.md",
+      "owner_approved": true
+    },
+    "V07.2": {
+      "method": "INDEPENDENT_REVIEW",
+      "decision": "APPROVED",
+      "reviewed_commit": "7e4b21e0cc70e878080a777874dad491a21501aa",
+      "package_reviewed_commit": "079fa9d230d5109488a1e5ea82e97f81845c49eb",
+      "review_file": "docs/reports/V07/FINAL_ACCEPTANCE.md",
+      "owner_approved": true
+    },
+    "V07.3": {
+      "method": "INDEPENDENT_REVIEW",
+      "decision": "APPROVED",
+      "reviewed_commit": "2b42e0d725da590a24e845a7046501af8f8d4c01",
+      "package_reviewed_commit": "079fa9d230d5109488a1e5ea82e97f81845c49eb",
+      "review_file": "docs/reports/V07/FINAL_ACCEPTANCE.md",
+      "owner_approved": true
     }
   },
   "steps": {
@@ -755,9 +979,9 @@
     "V06.1": "VERIFIED",
     "V06.2": "VERIFIED",
     "V06.3": "VERIFIED",
-    "V07.1": "PLANNED",
-    "V07.2": "PLANNED",
-    "V07.3": "PLANNED",
+    "V07.1": "VERIFIED",
+    "V07.2": "VERIFIED",
+    "V07.3": "VERIFIED",
     "V08.1": "PLANNED",
     "V08.2": "PLANNED",
     "V08.3": "PLANNED",

@@ -167,6 +167,7 @@ describe('V06 owner-authorized package continuation', () => {
 
     expect(central.scoped_continuation_records).toEqual([
       'docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json',
+      'docs/governance/WORLD_CORE_V07_CONTINUATION_POLICY.json',
     ]);
     expect(scoped.status).toBe('ACTIVE');
     expect(scoped.authority).toBe('RESPONSIBLE_HUMAN_OWNER');
@@ -218,12 +219,38 @@ describe('V06 owner-authorized package continuation', () => {
       },
     });
     expect(progress.current_gate).toMatchObject({
-      step_id: 'V06.3',
-      status: 'VERIFIED',
-      next_step: 'V07.1',
+      step_id: 'V08.1',
+      status: 'PLANNED',
+      next_step: 'V08.1',
       next_step_ready: false,
-      required_gate: 'V07.1_OWNER_ADR_GATE',
-      gate_status: 'PENDING',
+      next_step_blockers: ['ADR-02', 'ADR-05'],
+      required_gate: 'V08.1_OWNER_ADR_GATE',
+      gate_status: 'READY_PENDING_OWNER_ADR',
+    });
+    expect(progress.v07_package_review).toMatchObject({
+      status: 'V07_PACKAGE_APPROVED',
+      package_status: 'VERIFIED',
+      content_commit: '563a96490f207d94a3110dbf9c7a037f23b46923',
+      review_target: '079fa9d230d5109488a1e5ea82e97f81845c49eb',
+      superseded_review_target: '7cd856380e93020dabe8fb969472f9a18ce773cd',
+      latest_independent_decision: 'V07_PACKAGE_APPROVED',
+      reviewed_target: '079fa9d230d5109488a1e5ea82e97f81845c49eb',
+      pending_independent_closure: {
+        blockers: [],
+        majors: [],
+        minor_deferred: ['V07-PKG-MIN-01'],
+      },
+      open_p0_blockers: 0,
+      open_p1_majors: 0,
+      owner_acceptance_commit: 'e7cdaf0aaeb83ebe63c62208c512fcb251158929',
+      owner_decision: 'ACCEPTED',
+      authority: 'PROJECT_OWNER_ACCEPTANCE',
+      package_verified: true,
+      merge_authorized: true,
+      production_release_authorized: true,
+      production_access: false,
+      production_mutation: false,
+      v08_started: false,
     });
     expect(progress.v06_integration).toEqual({
       branch: 'codex/world-core-v06-v10',
@@ -247,7 +274,77 @@ describe('V06 owner-authorized package continuation', () => {
       package_review_pending: false,
       package_verified: true,
     });
-    expect(progress.steps['V07.1']).toBe('PLANNED');
+    expect(progress.steps['V07.1']).toBe('VERIFIED');
+    expect(progress.steps['V07.2']).toBe('VERIFIED');
+    expect(progress.steps['V07.3']).toBe('VERIFIED');
+    expect(progress.v07_entry).toMatchObject({
+      status: 'COMPLETED',
+      branch: 'codex/world-core-v07',
+      main_baseline: '026671eca6b85bc6e5f1c99878c6f8d740f2fb21',
+      current_main: '8e4d9e125a89fc1457ed016c708537fd67e1c8b7',
+      decision_commit: 'e5e4a3291fd2e77ff16173d88f631ea131badf34',
+      adr_16_20_decision_commit: 'ec0f67d1e8e618bd0cf77089a0fd615cb10e0f5e',
+      adr_16_20_main_merge: '24c05f8d907a5c100a6918bba662bdb0da90dfac',
+      preflight: 'GO',
+      approved_adrs: ['ADR-11', 'ADR-16', 'ADR-17', 'ADR-20'],
+      next_adr_gate: 'SATISFIED_FOR_V07.2',
+      candidate_migration_merge_gate:
+        'SATISFIED_BY_V07_PACKAGE_REVIEW_AND_OWNER_PROMOTION',
+      implementation_result: {
+        status: 'VERIFIED',
+        code_candidate: 'b8c8555bac1f5e8d36d1f147732a691f248431f8',
+        migration_provenance_commit: '039ffd3226a3cb780b94c624bd87b32bdc48ee67',
+        acceptance_target: 'e5840f76bb6a06c636f1f2575e3245b1f7734bd9',
+        evidence_commit: '4ed6f823eb7b8bc1a6e208184314153652aeb104',
+        automated_evidence: 'PASS',
+        review_target: 'cea9554c5ad9c3ad69e0ec538c908901660ec761',
+        review_target: 'b57b6aa9cd349776e1f5cd8ae10d20413523a69c',
+        independent_review: 'V07_PACKAGE_APPROVED',
+        open_p0_blockers: 0,
+        open_p1_majors: 0,
+        active_code_candidate: '674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f',
+        active_review_target: '66da354755326fc00ece7fcdb78e35db27f0b15f',
+        review_b_result: 'APPROVED_FOR_CONTINUATION',
+        fingerprint_forward_fix: {
+          status: 'CLOSED_FOR_CONTINUATION',
+          finding:
+            'correlationId trace metadata participated in authoritative Command fingerprint',
+          fixed_code_candidate: '674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f',
+          automated_evidence: 'PASS',
+          independent_closure: 'APPROVED_FOR_CONTINUATION',
+          production_mutation: false,
+        },
+      },
+      production_mutation: false,
+      package_review: 'V07_PACKAGE_APPROVED',
+      owner_acceptance: 'ACCEPTED',
+      owner_acceptance_commit: 'e7cdaf0aaeb83ebe63c62208c512fcb251158929',
+      production_release_authorized: true,
+      owner_approved: true,
+      v07_2: {
+        status: 'VERIFIED',
+        code_candidate: '7e4b21e0cc70e878080a777874dad491a21501aa',
+        migration_artifact_source_commit:
+          '6f919d3a20835da39a042ee7863d849f140f4e0c',
+        review_target: '563a96490f207d94a3110dbf9c7a037f23b46923',
+        automated_evidence: 'PASS',
+        independent_review: 'V07_PACKAGE_APPROVED',
+        open_p0_blockers: 0,
+        open_p1_majors: 0,
+        production_mutation: false,
+      },
+      v07_3: {
+        status: 'VERIFIED',
+        code_candidate: '2b42e0d725da590a24e845a7046501af8f8d4c01',
+        review_target: '21299492a4acb47b5383056417bba22acbc214b2',
+        automated_evidence: 'PASS',
+        independent_review: 'V07_PACKAGE_APPROVED',
+        open_p0_blockers: 0,
+        open_p1_majors: 0,
+        migration_change: false,
+        production_mutation: false,
+      },
+    });
     expect(progress.v06_package_review).toMatchObject({
       decision: 'V06_PACKAGE_APPROVED',
       reviewed_commit: '33fe26a7e014379b15d4f0f3ab10791b912b8885',
@@ -259,7 +356,7 @@ describe('V06 owner-authorized package continuation', () => {
       merge_authorized: true,
       owner_decision: 'ACCEPTED',
       authority: 'PROJECT_OWNER_ACCEPTANCE',
-      v07_authorized: false,
+      v07_authorized: true,
     });
     expect(
       progress.v06_package_re_review.restore_prefix_forward_fix,
@@ -286,7 +383,7 @@ describe('V06 owner-authorized package continuation', () => {
       open_findings: [],
       package_verified: true,
       merge_authorized: true,
-      v07_authorized: false,
+      v07_authorized: true,
     });
   });
 });

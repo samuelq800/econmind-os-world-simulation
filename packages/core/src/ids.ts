@@ -19,6 +19,14 @@ export type ProposalId = BrandedId<'ProposalId'>;
 export type ScheduledEventId = BrandedId<'ScheduledEventId'>;
 export type SchedulerPriorityId = BrandedId<'SchedulerPriorityId'>;
 export type SettlementStageId = BrandedId<'SettlementStageId'>;
+export type CommandId = BrandedId<'CommandId'>;
+export type EventId = BrandedId<'EventId'>;
+export type IdempotencyKey = BrandedId<'IdempotencyKey'>;
+export type CorrelationId = BrandedId<'CorrelationId'>;
+export type CommandType = BrandedId<'CommandType'>;
+export type EventType = BrandedId<'EventType'>;
+export type OutboxMessageId = BrandedId<'OutboxMessageId'>;
+export type ConsumerId = BrandedId<'ConsumerId'>;
 
 const CANONICAL_ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 const CANONICAL_UUID =
@@ -63,3 +71,13 @@ export const schedulerPriorityId = (value: string) =>
   parseId('SchedulerPriorityId', value);
 export const settlementStageId = (value: string) =>
   parseId('SettlementStageId', value);
+export const commandId = (value: string) => parseId('CommandId', value);
+export const eventId = (value: string) => parseId('EventId', value);
+export const idempotencyKey = (value: string) =>
+  parseId('IdempotencyKey', value);
+export const correlationId = (value: string) => parseId('CorrelationId', value);
+export const commandType = (value: string) => parseId('CommandType', value);
+export const eventType = (value: string) => parseId('EventType', value);
+export const outboxMessageId = (value: string) =>
+  parseId('OutboxMessageId', value);
+export const consumerId = (value: string) => parseId('ConsumerId', value);

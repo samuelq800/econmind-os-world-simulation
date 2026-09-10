@@ -1,0 +1,77 @@
+{
+  "schema_version": "V07-BLK01-MAJ02-TEST-EVIDENCE-1",
+  "status": "PASS",
+  "risk_class": "P0",
+  "reviewed_package_target": "7cd856380e93020dabe8fb969472f9a18ce773cd",
+  "fixed_code_candidate": "7e4b21e0cc70e878080a777874dad491a21501aa",
+  "migration_provenance": "6f919d3a20835da39a042ee7863d849f140f4e0c",
+  "migration_id": "0004_world_v2_receipt_event_set_integrity",
+  "migration_sha256": "28bb8ff195d9c09b0cafcab79eb4a28868a1bf0170c7065fc4913a428bc17943",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile_changed": false
+  },
+  "focused": {
+    "v07_command_receipt_files": 2,
+    "v07_command_receipt_tests": 39,
+    "v07_all_files": 8,
+    "v07_all_tests": 80,
+    "result": "PASS"
+  },
+  "blk_01": {
+    "fresh_current_authorization_success": "PASS",
+    "membership_revoked_after_intake": "PASS",
+    "office_assignment_changed_after_intake": "PASS",
+    "country_changed_after_intake": "PASS",
+    "world_changed_after_intake": "PASS",
+    "capability_scope_changed_after_intake": "PASS",
+    "old_branded_context_cannot_bypass_resolution": "PASS",
+    "exact_final_retry_skips_resolution_and_execution": "PASS",
+    "alternate_exported_commit_proof_issuer": "ABSENT"
+  },
+  "maj_02": {
+    "complete_ordered_e1_e2": "ACCEPT",
+    "subset_e1": "REJECT",
+    "subset_e2": "REJECT",
+    "reverse_e2_e1": "REJECT",
+    "nonexistent_e3": "REJECT",
+    "duplicate_e1": "REJECT",
+    "foreign_transition": "REJECT",
+    "foreign_world": "REJECT",
+    "event_sequence_disagreement": "REJECT",
+    "committed_zero_event": "REJECT",
+    "zero_effect_empty_event_set": "ACCEPT",
+    "event_append_after_final_receipt": "REJECT",
+    "event_sequence_update_or_delete": "REJECT"
+  },
+  "closed_finding_regressions": {
+    "V07-PKG-BLK-02": "PASS",
+    "V07-PKG-MAJ-01": "PASS",
+    "V07-PKG-MAJ-03": "PASS",
+    "V07-PKG-MAJ-04": "PASS",
+    "V07-PKG-MIN-01": "OPEN_DEFERRED"
+  },
+  "full_baseline": {
+    "command": "pnpm check",
+    "result": "PASS",
+    "test_files": 31,
+    "tests": 415,
+    "boundary_test_files": 3,
+    "boundary_tests": 34,
+    "authoritative_scanned_core_files": 25,
+    "authoritative_scanned_files": 37,
+    "boundary_scanned_files": 42,
+    "migrations": 4,
+    "migration_rehearsal_modes": ["clean-baseline", "existing-schema"],
+    "secret_scanned_files": 483,
+    "build": "PASS"
+  },
+  "database": {
+    "engine": "PGlite ephemeral PostgreSQL",
+    "production_access": false,
+    "production_mutation": false,
+    "migration_state": "BRANCH_LOCAL_UNPROMOTED"
+  },
+  "finding_state": "IMPLEMENTED_PENDING_FOCUSED_INDEPENDENT_CLOSURE"
+}
