@@ -1,0 +1,74 @@
+{
+  "schema_version": "V07.3-TEST-EVIDENCE-1",
+  "step_id": "V07.3",
+  "status": "PASS",
+  "risk_class": "P0",
+  "code_candidate": "956d011df95f383917b421ffc522eb896477970a",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile_changed": false
+  },
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/replay.test.ts tests/property/replay-properties.test.ts tests/world-core/command-receipts.test.ts tests/world-core/command-receipt-ledger.test.ts tests/property/command-receipt-properties.test.ts tests/world-core/command-event-contracts.test.ts tests/property/command-event-properties.test.ts",
+      "result": "PASS",
+      "test_files": 7,
+      "tests": 44,
+      "property_base_seed": 20260909,
+      "v07_3_property_seed": 20260982,
+      "property_num_runs": 250
+    },
+    {
+      "command": "pnpm check",
+      "result": "PASS",
+      "test_files": 31,
+      "tests": 383,
+      "boundary_test_files": 3,
+      "boundary_tests": 34,
+      "authoritative_scanned_core_files": 25,
+      "authoritative_scanned_files": 37,
+      "boundary_scanned_files": 42,
+      "migration_count": 3,
+      "migration_rehearsal_modes": ["clean-baseline", "existing-schema"],
+      "secret_scanned_files": 466,
+      "build": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "superseded_observations": [
+    {
+      "command": "focused V07.3 tests",
+      "result": "FAIL",
+      "passing_tests": 43,
+      "failing_tests": 1,
+      "cause": "the corrupt-checkpoint assertion omitted the DomainError test import",
+      "resolution": "the assertion import was added and the unchanged focused semantic suite passed 44/44"
+    }
+  ],
+  "assertions": {
+    "same_inputs_byte_identical": "PASS",
+    "opening_seed_provenance": "PASS",
+    "binding_mismatch_fail_closed": "PASS",
+    "gap_duplicate_reorder_foreign_world_rejected": "PASS",
+    "payload_and_fingerprint_tamper_rejected": "PASS",
+    "unknown_event_reducer_rejected": "PASS",
+    "checkpoint_hash_seed_binding_corruption_rejected": "PASS",
+    "deterministic_rng": "PASS",
+    "real_audit_time_excluded_from_reducer": "PASS",
+    "exact_live_replay_hash_comparison": "PASS",
+    "v06_sim_time_consumed_as_recorded": "PASS"
+  },
+  "database": {
+    "production_access": false,
+    "production_mutation": false,
+    "migration_change": false,
+    "checkpoint_persistence_or_multi_process_recovery": "NOT_RUN_NOT_CLAIMED"
+  },
+  "open_p0_blockers": 0,
+  "open_p1_majors": 0,
+  "independent_review": "PENDING_V07_PACKAGE_GATE"
+}

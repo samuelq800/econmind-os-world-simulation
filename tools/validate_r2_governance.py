@@ -1384,6 +1384,43 @@ def validate(root: Path) -> dict[str, Any]:
                                 and implementation.get("open_p1_majors") == 0,
                                 "V07.1 Review B continuation closure is missing",
                             )
+                        elif states["V07.3"] == "IMPLEMENTED_UNVERIFIED":
+                            require(
+                                states["V07.1"] == "IMPLEMENTED_UNVERIFIED"
+                                and states["V07.2"] == "IMPLEMENTED_UNVERIFIED"
+                                and gate.get("step_id") == "V07.3"
+                                and gate.get("status") == states["V07.3"]
+                                and gate.get("next_step") == "V08.1"
+                                and gate.get("next_step_ready") is False
+                                and required_gate == "V07_PACKAGE_REVIEW"
+                                and gate.get("gate_status") == "PENDING"
+                                and progress_data.get("work_packages", {}).get("V07")
+                                == "IMPLEMENTED_UNVERIFIED",
+                                "V07 package hard stop differs from progress truth",
+                            )
+                            for step_key in ("v07_2", "v07_3"):
+                                step_record = v07_entry.get(step_key)
+                                require(
+                                    isinstance(step_record, dict)
+                                    and step_record.get("status")
+                                    == "IMPLEMENTED_UNVERIFIED"
+                                    and step_record.get("automated_evidence") == "PASS"
+                                    and step_record.get("open_p0_blockers") == 0
+                                    and step_record.get("open_p1_majors") == 0
+                                    and step_record.get("production_mutation") is False,
+                                    f"{step_key} package evidence is incomplete",
+                                )
+                                step_candidate = commit_exists(
+                                    step_record.get("code_candidate"),
+                                    f"{step_key} code candidate",
+                                )
+                                is_ancestor(
+                                    step_candidate,
+                                    "HEAD",
+                                    f"{step_key} candidate lineage",
+                                )
+                                file(step_record.get("implementation_file"))
+                                file(step_record.get("evidence_file"))
                         else:
                             require(False, "unsupported active V07 lifecycle state")
                         require(

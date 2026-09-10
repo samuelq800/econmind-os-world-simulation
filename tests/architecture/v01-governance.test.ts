@@ -220,11 +220,11 @@ describe('V06 owner-authorized package continuation', () => {
     });
     expect(progress.current_gate).toMatchObject({
       step_id: 'V07.3',
-      status: 'PLANNED',
-      next_step: 'V07.3',
-      next_step_ready: true,
-      required_gate: 'V07.3_IMPLEMENTATION_AND_EVIDENCE',
-      gate_status: 'PASS',
+      status: 'IMPLEMENTED_UNVERIFIED',
+      next_step: 'V08.1',
+      next_step_ready: false,
+      required_gate: 'V07_PACKAGE_REVIEW',
+      gate_status: 'PENDING',
     });
     expect(progress.v06_integration).toEqual({
       branch: 'codex/world-core-v06-v10',
@@ -297,6 +297,16 @@ describe('V06 owner-authorized package continuation', () => {
         independent_review: 'DEFERRED_TO_V07_PACKAGE_GATE',
         open_p0_blockers: 0,
         open_p1_majors: 0,
+        production_mutation: false,
+      },
+      v07_3: {
+        status: 'IMPLEMENTED_UNVERIFIED',
+        code_candidate: '956d011df95f383917b421ffc522eb896477970a',
+        automated_evidence: 'PASS',
+        independent_review: 'PENDING_V07_PACKAGE_GATE',
+        open_p0_blockers: 0,
+        open_p1_majors: 0,
+        migration_change: false,
         production_mutation: false,
       },
     });
