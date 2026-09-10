@@ -254,4 +254,52 @@ describePostgres('V09.1 real PostgreSQL lease/fencing evidence', () => {
       ),
     ).rejects.toThrow('WORLD_VERSION_MISMATCH');
   });
+
+  it('prevents DELETE/TRUNCATE reset from recreating a valid old fence', async () => {
+    await addWorld('WORLD_PG_DELETE_RESET');
+    await acquireLease(
+      currentDatabase(),
+      'WORLD_PG_DELETE_RESET',
+      'WORKER_1',
+      '2026-09-11T00:00:00.000Z',
+      '1000',
+    );
+    await expect(
+      currentDatabase().query(
+        `delete from world_v2.world_writer_lease
+         where world_id = 'WORLD_PG_DELETE_RESET'`,
+      ),
+    ).rejects.toThrow('World writer lease lineage is append-only; DELETE');
+    await expect(
+      currentDatabase().query('truncate world_v2.world_writer_lease'),
+    ).rejects.toThrow('World writer lease lineage is append-only; TRUNCATE');
+
+    await expect(
+      acquireLease(
+        currentDatabase(),
+        'WORLD_PG_DELETE_RESET',
+        'WORKER_2',
+        '2026-09-11T00:00:01.000Z',
+        '1000',
+      ),
+    ).resolves.toMatchObject({
+      rows: [
+        {
+          acquisition_kind: 'TAKEN_OVER',
+          fencing_token: '2',
+          holder_id: 'WORKER_2',
+        },
+      ],
+    });
+    await expect(
+      assertCommitGuard(
+        currentDatabase(),
+        'WORLD_PG_DELETE_RESET',
+        'WORKER_1',
+        '1',
+        '0',
+        '2026-09-11T00:00:01.000Z',
+      ),
+    ).rejects.toThrow('WORLD_WRITER_FENCE_STALE');
+  });
 });

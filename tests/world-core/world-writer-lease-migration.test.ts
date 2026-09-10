@@ -11,6 +11,7 @@ const migrationPaths = [
   'database/migrations/artifacts/0003_world_v2_command_receipts_outbox.sql',
   'database/migrations/artifacts/0004_world_v2_receipt_event_set_integrity.sql',
   'database/migrations/artifacts/0005_world_v2_writer_lease_fencing.sql',
+  'database/migrations/artifacts/0006_world_v2_writer_lease_lineage_guard.sql',
 ];
 
 let database: PGlite;
@@ -213,6 +214,44 @@ describe('V09.1 branch-local writer lease/fencing DDL candidate', () => {
     ).rejects.toThrow(
       'initial World writer lease must begin at fencing token 1',
     );
+  });
+
+  it('forbids deletion/reset and keeps the pre-takeover fence stale', async () => {
+    await acquireLease(
+      'WORLD_1',
+      'WORKER_1',
+      '2026-09-11T00:00:00.000Z',
+      '1000',
+    );
+    await expect(
+      database.exec(
+        `delete from world_v2.world_writer_lease where world_id = 'WORLD_1'`,
+      ),
+    ).rejects.toThrow('World writer lease lineage is append-only; DELETE');
+    await expect(
+      database.exec('truncate world_v2.world_writer_lease'),
+    ).rejects.toThrow('World writer lease lineage is append-only; TRUNCATE');
+
+    await expect(
+      acquireLease('WORLD_1', 'WORKER_2', '2026-09-11T00:00:01.000Z', '1000'),
+    ).resolves.toMatchObject({
+      rows: [
+        {
+          acquisition_kind: 'TAKEN_OVER',
+          fencing_token: '2',
+          holder_id: 'WORKER_2',
+        },
+      ],
+    });
+    await expect(
+      assertCommitGuard(
+        'WORLD_1',
+        'WORKER_1',
+        '1',
+        '0',
+        '2026-09-11T00:00:01.000Z',
+      ),
+    ).rejects.toThrow('WORLD_WRITER_FENCE_STALE');
   });
 
   it('keeps operational lease facts separate across Worlds and from economic facts', async () => {

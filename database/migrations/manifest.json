@@ -73,6 +73,20 @@
       "lock_or_downtime_risk": "Branch-local V09.1 candidate; adds a per-World operational lease record, guarded transition trigger and transaction-time fence/version guard without economic writes",
       "rollback_strategy": "forward-fix",
       "production_approval": null
+    },
+    {
+      "migration_id": "0006_world_v2_writer_lease_lineage_guard",
+      "release_order": 6,
+      "path": "database/migrations/artifacts/0006_world_v2_writer_lease_lineage_guard.sql",
+      "sha256": "8ee4a6b01d2916665fc9793a24bbdb9675afc216a6aaa64ae84e67cb44fa66f8",
+      "artifact_source_commit": "8ef4390beaa877aa3e3d971a4bb0587a0c7592bd",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Forward V09.1 blocker fix; adds DELETE/TRUNCATE lineage guards only and does not write economic facts",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }
