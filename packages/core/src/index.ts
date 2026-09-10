@@ -7,6 +7,7 @@ export * from './commands/command.js';
 export * from './commands/receipt.js';
 export * from './events/event.js';
 export * from './ids.js';
+export * from './inventory/inventory-ledger.js';
 export * from './numeric/index.js';
 export * from './registries/fixed-catalog.js';
 export * from './registries/registry.js';

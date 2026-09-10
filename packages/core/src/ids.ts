@@ -27,6 +27,13 @@ export type CommandType = BrandedId<'CommandType'>;
 export type EventType = BrandedId<'EventType'>;
 export type OutboxMessageId = BrandedId<'OutboxMessageId'>;
 export type ConsumerId = BrandedId<'ConsumerId'>;
+export type InventoryBatchId = BrandedId<'InventoryBatchId'>;
+export type InventoryLocationId = BrandedId<'InventoryLocationId'>;
+export type InventoryPostingId = BrandedId<'InventoryPostingId'>;
+export type InventoryReservationId = BrandedId<'InventoryReservationId'>;
+export type InventoryShipmentId = BrandedId<'InventoryShipmentId'>;
+export type LegalEntityId = BrandedId<'LegalEntityId'>;
+export type EconomicRecognitionId = BrandedId<'EconomicRecognitionId'>;
 
 const CANONICAL_ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 const CANONICAL_UUID =
@@ -81,3 +88,16 @@ export const eventType = (value: string) => parseId('EventType', value);
 export const outboxMessageId = (value: string) =>
   parseId('OutboxMessageId', value);
 export const consumerId = (value: string) => parseId('ConsumerId', value);
+export const inventoryBatchId = (value: string) =>
+  parseId('InventoryBatchId', value);
+export const inventoryLocationId = (value: string) =>
+  parseId('InventoryLocationId', value);
+export const inventoryPostingId = (value: string) =>
+  parseId('InventoryPostingId', value);
+export const inventoryReservationId = (value: string) =>
+  parseId('InventoryReservationId', value);
+export const inventoryShipmentId = (value: string) =>
+  parseId('InventoryShipmentId', value);
+export const legalEntityId = (value: string) => parseId('LegalEntityId', value);
+export const economicRecognitionId = (value: string) =>
+  parseId('EconomicRecognitionId', value);
