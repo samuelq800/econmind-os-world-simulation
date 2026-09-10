@@ -40,6 +40,8 @@ jobs:
       V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 12.3.4
