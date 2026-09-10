@@ -1,126 +1,95 @@
-# V07 package blocker/major closure review bundle
+# V07 BLK-01 and MAJ-02 focused closure bundle
 
-## Review target and hard stop
+## Review target and status
 
-Independent Review B returned `V07_PACKAGE_CHANGES_REQUIRED` against immutable
-target `e802a5233ded3825c56d2897374fcd2de0c40da8`. That target, every historical
-V07.1/2/3 candidate and prior evidence remain unchanged. This forward bundle
-binds only the requested two BLOCKER and four MAJOR corrections. Its exact new
-package target is frozen separately in `PACKAGE_REVIEW_TARGET.md`.
+The latest independent package review returned
+`V07_PACKAGE_CHANGES_REQUIRED` against immutable target
+`7cd856380e93020dabe8fb969472f9a18ce773cd` with only these findings open:
+
+- `V07-PKG-BLK-01`
+- `V07-PKG-MAJ-02`
+
+`V07-PKG-BLK-02`, `V07-PKG-MAJ-01`, `V07-PKG-MAJ-03`, and
+`V07-PKG-MAJ-04` are independently closed. `V07-PKG-MIN-01` remains
+`OPEN_DEFERRED`. All earlier candidates, targets, findings and evidence remain
+immutable.
 
 Package status remains `IMPLEMENTED_UNVERIFIED / READY_FOR_PACKAGE_REVIEW`.
-The listed findings are implemented but not independently closed. No DDL is
-promoted, main is unchanged, production was not accessed, and V08 remains
-`NOT_STARTED`.
+The exact new package target is frozen separately in
+`PACKAGE_REVIEW_TARGET.md`. No main merge, DDL promotion, production access or
+V08 implementation is authorized.
 
-## Fixed immutable step targets
-
-- V07.1 code was not changed. Active reviewed continuation target remains
-  `66da354755326fc00ece7fcdb78e35db27f0b15f`.
-- `V07_2_FIXED_CODE_CANDIDATE=2c32d0918bf7bbf97a851ad785b305de1f5688fa`
-- `V07_2_FIXED_REVIEW_TARGET=81d3e59de7b3dd51f9cc2eaf93dc086f1baaf5ba`
-- `V07_3_FIXED_CODE_CANDIDATE=2b42e0d725da590a24e845a7046501af8f8d4c01`
-- `V07_3_FIXED_REVIEW_TARGET=21299492a4acb47b5383056417bba22acbc214b2`
-
-## Finding corrections
-
-### V07-PKG-BLK-01 — authorization binding
-
-The old queued path accepted any valid current Office context. The fixed path
-requires an opaque, versioned commit proof issued from current server authority
-and bound to the exact Command ID/fingerprint, actor, AuthSubject, World,
-Country, Office, capability, team and authorization revision. Cross-context
-authority yields an immutable zero-effect revocation result before the commit
-port; the port is never invoked.
-
-### V07-PKG-BLK-02 — transition versus Event order
-
-The old replay advanced WorldVersion for every Event. V07 now defines one
-Command as one transition with an explicit before/after pair and one or more
-ordered Events. Every Event shares the transition causation identity and after
-version. Replay applies the complete ordered group, then advances WorldVersion
-once. Event `sequence` remains the independent global order.
-
-### V07-PKG-MAJ-01 — queued idempotency
-
-An existing receipt is returned only after durable identity/key and canonical
-authoritative fingerprint validation. Same identity with changed intent throws
-`IDEMPOTENCY_CONFLICT` with zero execution.
-
-### V07-PKG-MAJ-02 — receipt evidence
-
-Receipt schema v2 binds World, Command, idempotency key, canonical Command
-fingerprint, transition identity, WorldVersionBefore/After, ordered Event IDs
-and outcome. Runtime validates commit output against the transition. Branch-local
-DDL rejects mismatched Command evidence, nonexistent/duplicate Event IDs,
-Events from another transition/version and invalid version boundaries.
-
-### V07-PKG-MAJ-03 — seed lineage
-
-Replay recomputes SHA-256 from `canonicalSeed` and requires both the supplied
-seed and origin lineage to equal it. Corrupted seed bytes with a retained old
-hash fail closed.
-
-### V07-PKG-MAJ-04 — Event identity
-
-Replay rejects a duplicate Event ID before double application, including when
-sequence and transition versions are otherwise contiguous and regardless of
-whether payloads match.
-
-### V07-PKG-MIN-01 — outbox payload hash
-
-Recorded and left open as non-blocking. None of the required corrections
-needed to modify outbox hashing, so `payloadHash` recomputation was not added.
-
-## Cross-step authoritative story
+## Fixed lineage
 
 ```text
-canonical Command intent
--> durable identity/idempotency classification
--> current authorization bound to that Command
--> one logical authoritative transition
--> N >= 1 immutable ordered Events
--> one immutable final receipt
--> one WorldVersion increment
--> deterministic replay of the same transition
--> operational-only outbox/consumer delivery
+V07_FIXED_CODE_CANDIDATE=7e4b21e0cc70e878080a777874dad491a21501aa
+V07_FIXED_MIGRATION_PROVENANCE=6f919d3a20835da39a042ee7863d849f140f4e0c
+V07_FIXED_STEP_EVIDENCE_TARGET=563a96490f207d94a3110dbf9c7a037f23b46923
 ```
 
-This is compatible with V08 Ledger/Posting facts. V09 still owns the atomic
-all-facts-or-zero-facts commit, leases, fencing, checkpoint persistence and the
-single authoritative writer.
+## BLK-01 closure candidate
+
+The worker path no longer accepts a caller-provided commit-time authorization
+verdict/context. `processQueuedCommand()` receives intake evidence and itself
+calls the existing authorization subsystem, which re-reads current identity,
+membership, active/suspension state, World, Country, Office assignment, team
+and authorization revision through server-held resolver metadata.
+
+Only that newly resolved result can be bound to the exact Command and converted
+to an opaque commit proof. The proof issuer is private to the module. A stale
+branded context therefore cannot bypass revocation or scope changes. Exact
+retries still return the existing immutable receipt before any authorization
+or execution.
+
+The narrow authority-entry audit found no alternative exported implementation
+in packages/apps/scripts that can append authoritative Events, finalize a
+receipt or advance WorldVersion from a stale `AuthorizedOfficeContext`.
+
+## MAJ-02 closure candidate
+
+Frozen migration `0003` is unchanged. New ordered migration `0004` replaces
+the receipt validator within the sole V02 chain. For a committed receipt it
+derives every authoritative Event matching World, transition/causation Command
+and after-version, ordered by immutable `event_sequence`, and requires exact
+JSONB-array equality with `receipt.event_ids`.
+
+Subsets, supersets, permutations, duplicate IDs, foreign transition/world IDs,
+and sequence disagreement fail closed. A guard also prohibits extending a
+transition after its immutable final receipt exists.
+
+The runtime and DDL contract requires `N >= 1` Events for `COMMITTED`.
+Zero-effect `REJECTED` and `AUTHORIZATION_REVOKED` outcomes require `[]` and
+null transition/version evidence. Migration `0002` already makes Event history
+and `event_sequence` append-only and unique per World.
 
 ## Migration state
 
-- `0002` is unchanged, branch-local and unpromoted; SHA-256
+- `0002` unchanged: SHA-256
   `92915905a159961ac0f8eb70f509501cf7697519471c1b84f832ef224cf87695`.
-- Unpromoted `0003` was forward-replaced at source commit
-  `f589c8fba2e4e2a5686d8a1c4ded60a8688056fa`; SHA-256
+- `0003` unchanged: SHA-256
   `fe8d6b6849b4ceb5a85789fff34bd2ed47cf7d07d662883dd0c345e88ad9255e`.
-- The sole V02 manifest binds the exact bytes, hash, source commit and order.
-- Both clean-baseline and existing-schema PGlite rehearsals pass. No shared
-  schema, RLS/grant, backfill, real database or production change occurred.
+- `0004` source commit:
+  `6f919d3a20835da39a042ee7863d849f140f4e0c`.
+- `0004` SHA-256:
+  `28bb8ff195d9c09b0cafcab79eb4a28868a1bf0170c7065fc4913a428bc17943`.
+- Manifest validation and clean/existing-schema PGlite rehearsals: PASS, four
+  migrations.
+- All artifacts remain branch-local and unpromoted without production
+  approval.
 
 ## Verification
 
-- V07.2 focused: 3 files / 26 tests / PASS at its exact code target.
-- V07.3 focused: 2 files / 19 tests / PASS.
-- Full `pnpm check`: 31 files / 400 tests / PASS.
+- BLK-01/MAJ-02 focused: 2 files / 39 tests / PASS.
+- All V07 focused suites: 8 files / 80 tests / PASS.
+- Full `pnpm check`: 31 files / 415 tests / PASS.
 - Protected architecture: 3 files / 34 tests / PASS.
-- Authoritative scanner: 25 core / 37 total files / PASS.
-- Boundary scanner: 42 files / PASS.
-- Migrations: 3 / manifest validation and both rehearsals / PASS.
-- Environment, typecheck, lint, format, foundation policy, secrets and all
-  workspace builds: PASS.
+- Authoritative/boundary scanners: 25 core, 37 total, 42 boundary files / PASS.
+- Governance, environment, typecheck, lint, format, migration validation and
+  both rehearsals, foundation policy, secrets, and all builds: PASS.
 
-The first full run experienced only resource-saturation timeouts. All five
-affected files then passed 41/41 with bounded workers, followed by an unchanged
-normal `pnpm check` passing 400/400. Both observations are retained in the
-forward evidence.
+## Required decision
 
-## Independent decision required
-
-Review the new immutable package target, not the branch tip. Confirm or reject
-closure of `V07-PKG-BLK-01`, `V07-PKG-BLK-02`, and `V07-PKG-MAJ-01` through
-`04`. Until that independent decision and later owner acceptance, V07 is not
-verified, merge/promotion are not authorized, and V08 cannot start.
+Perform focused independent closure review only for `V07-PKG-BLK-01` and
+`V07-PKG-MAJ-02` against the newly frozen package target. This bundle does not
+self-close either finding or change the status of V07, main, migrations, or
+V08.

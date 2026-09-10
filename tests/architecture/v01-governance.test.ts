@@ -229,18 +229,13 @@ describe('V06 owner-authorized package continuation', () => {
     expect(progress.v07_package_review).toMatchObject({
       status: 'READY_FOR_PACKAGE_REVIEW',
       package_status: 'IMPLEMENTED_UNVERIFIED',
-      content_commit: '21299492a4acb47b5383056417bba22acbc214b2',
-      review_target: '7cd856380e93020dabe8fb969472f9a18ce773cd',
-      superseded_review_target: 'e802a5233ded3825c56d2897374fcd2de0c40da8',
+      content_commit: '563a96490f207d94a3110dbf9c7a037f23b46923',
+      review_target: null,
+      superseded_review_target: '7cd856380e93020dabe8fb969472f9a18ce773cd',
       latest_independent_decision: 'V07_PACKAGE_CHANGES_REQUIRED',
       pending_independent_closure: {
-        blockers: ['V07-PKG-BLK-01', 'V07-PKG-BLK-02'],
-        majors: [
-          'V07-PKG-MAJ-01',
-          'V07-PKG-MAJ-02',
-          'V07-PKG-MAJ-03',
-          'V07-PKG-MAJ-04',
-        ],
+        blockers: ['V07-PKG-BLK-01'],
+        majors: ['V07-PKG-MAJ-02'],
         minor_deferred: ['V07-PKG-MIN-01'],
       },
       open_p0_blockers: 0,
@@ -315,9 +310,10 @@ describe('V06 owner-authorized package continuation', () => {
       owner_approved: true,
       v07_2: {
         status: 'IMPLEMENTED_UNVERIFIED',
-        code_candidate: '2c32d0918bf7bbf97a851ad785b305de1f5688fa',
+        code_candidate: '7e4b21e0cc70e878080a777874dad491a21501aa',
         migration_artifact_source_commit:
-          'f589c8fba2e4e2a5686d8a1c4ded60a8688056fa',
+          '6f919d3a20835da39a042ee7863d849f140f4e0c',
+        review_target: '563a96490f207d94a3110dbf9c7a037f23b46923',
         automated_evidence: 'PASS',
         independent_review: 'IMPLEMENTED_PENDING_FOCUSED_PACKAGE_CLOSURE',
         open_p0_blockers: 0,

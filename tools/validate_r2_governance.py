@@ -1451,17 +1451,24 @@ def validate(root: Path) -> dict[str, Any]:
                                 package_review.get("latest_independent_decision")
                                 == "V07_PACKAGE_CHANGES_REQUIRED"
                                 and package_review.get("superseded_review_target")
-                                == "e802a5233ded3825c56d2897374fcd2de0c40da8"
+                                == "7cd856380e93020dabe8fb969472f9a18ce773cd"
+                                and package_review.get("reviewed_target")
+                                == "7cd856380e93020dabe8fb969472f9a18ce773cd"
                                 and package_review.get(
                                     "pending_independent_closure", {}
                                 ).get("blockers")
-                                == ["V07-PKG-BLK-01", "V07-PKG-BLK-02"]
+                                == ["V07-PKG-BLK-01"]
                                 and package_review.get(
                                     "pending_independent_closure", {}
                                 ).get("majors")
+                                == ["V07-PKG-MAJ-02"]
+                                and len(package_review.get("review_history", [])) >= 2
+                                and package_review.get("review_history", [])[-1].get(
+                                    "closed_findings"
+                                )
                                 == [
+                                    "V07-PKG-BLK-02",
                                     "V07-PKG-MAJ-01",
-                                    "V07-PKG-MAJ-02",
                                     "V07-PKG-MAJ-03",
                                     "V07-PKG-MAJ-04",
                                 ],

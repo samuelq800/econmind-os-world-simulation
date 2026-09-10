@@ -1,73 +1,54 @@
 {
-  "schema_version": "V07-PACKAGE-TEST-EVIDENCE-2",
+  "schema_version": "V07-PACKAGE-TEST-EVIDENCE-3",
   "package_id": "V07",
   "package_status": "IMPLEMENTED_UNVERIFIED",
   "review_readiness": "READY_FOR_PACKAGE_REVIEW",
-  "review_result_being_remediated": "V07_PACKAGE_CHANGES_REQUIRED",
-  "superseded_package_review_target": "e802a5233ded3825c56d2897374fcd2de0c40da8",
+  "latest_independent_decision": "V07_PACKAGE_CHANGES_REQUIRED",
+  "reviewed_package_target": "7cd856380e93020dabe8fb969472f9a18ce773cd",
   "authoritative_main": "8e4d9e125a89fc1457ed016c708537fd67e1c8b7",
   "branch": "codex/world-core-v07",
-  "approved_adrs": ["ADR-11", "ADR-16", "ADR-17", "ADR-20"],
-  "fixed_steps": {
-    "V07.1": {
-      "code_changed": false,
-      "active_review_target": "66da354755326fc00ece7fcdb78e35db27f0b15f",
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "review_b": "APPROVED_FOR_CONTINUATION"
-    },
-    "V07.2": {
-      "fixed_code_candidate": "2c32d0918bf7bbf97a851ad785b305de1f5688fa",
-      "fixed_review_target": "81d3e59de7b3dd51f9cc2eaf93dc086f1baaf5ba",
-      "migration_artifact_source_commit": "f589c8fba2e4e2a5686d8a1c4ded60a8688056fa",
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "automated_evidence": "PASS"
-    },
-    "V07.3": {
-      "fixed_code_candidate": "2b42e0d725da590a24e845a7046501af8f8d4c01",
-      "fixed_review_target": "21299492a4acb47b5383056417bba22acbc214b2",
-      "status": "IMPLEMENTED_UNVERIFIED",
-      "automated_evidence": "PASS"
-    }
+  "fixed_lineage": {
+    "code_candidate": "7e4b21e0cc70e878080a777874dad491a21501aa",
+    "migration_provenance": "6f919d3a20835da39a042ee7863d849f140f4e0c",
+    "step_evidence_target": "563a96490f207d94a3110dbf9c7a037f23b46923"
   },
   "finding_state": {
     "V07-PKG-BLK-01": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
-    "V07-PKG-BLK-02": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
-    "V07-PKG-MAJ-01": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
     "V07-PKG-MAJ-02": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
-    "V07-PKG-MAJ-03": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
-    "V07-PKG-MAJ-04": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
-    "V07-PKG-MIN-01": "OPEN_NON_BLOCKING_DEFERRED"
+    "V07-PKG-BLK-02": "CLOSED",
+    "V07-PKG-MAJ-01": "CLOSED",
+    "V07-PKG-MAJ-03": "CLOSED",
+    "V07-PKG-MAJ-04": "CLOSED",
+    "V07-PKG-MIN-01": "OPEN_DEFERRED"
   },
   "verification": {
-    "focused_v07_2": "3 files / 26 tests / PASS",
-    "focused_v07_3": "2 files / 19 tests / PASS",
-    "timeout_rechecks": "5 files / 41 tests / PASS with maxWorkers=2",
-    "full_repository_rerun": "31 files / 400 tests / PASS",
+    "blk01_maj02_focused": "2 files / 39 tests / PASS",
+    "all_v07_focused": "8 files / 80 tests / PASS",
+    "full_repository": "31 files / 415 tests / PASS",
     "protected_architecture": "3 files / 34 tests / PASS",
     "authoritative_scanner": "25 core files / 37 total files / PASS",
     "boundary_scanner": "42 files / PASS",
-    "migration_validation": "3 migrations / PASS",
+    "governance": "14 groups / PASS",
+    "migration_validation": "4 migrations / PASS",
     "migration_rehearsal": "clean-baseline and existing-schema / PGlite / PASS",
-    "environment": "PASS / local / database unconfigured / mutation denied",
-    "typecheck_lint_format": "PASS",
-    "foundation_policy": "PASS",
-    "secret_scanner": "474 files / PASS",
-    "workspace_build": "PASS",
+    "environment_typecheck_lint_format_build": "PASS",
+    "secret_scanner": "483 files / PASS",
     "git_diff_check": "PASS"
   },
   "migration_state": {
     "status": "BRANCH_LOCAL_CANDIDATES_UNPROMOTED",
-    "migration_count": 3,
+    "migration_count": 4,
     "world_v2_0002_sha256": "92915905a159961ac0f8eb70f509501cf7697519471c1b84f832ef224cf87695",
     "world_v2_0003_sha256": "fe8d6b6849b4ceb5a85789fff34bd2ed47cf7d07d662883dd0c345e88ad9255e",
+    "world_v2_0004_sha256": "28bb8ff195d9c09b0cafcab79eb4a28868a1bf0170c7065fc4913a428bc17943",
+    "world_v2_0004_source_commit": "6f919d3a20835da39a042ee7863d849f140f4e0c",
     "production_approval": null,
-    "real_supabase_rls_or_multi_process_concurrency": "NOT_RUN_NOT_CLAIMED"
+    "real_supabase_or_multi_process_concurrency": "NOT_RUN_NOT_CLAIMED"
   },
-  "independent_package_review_pending": true,
   "package_verified": false,
   "merge_authorized": false,
   "production_access": false,
   "database_mutation": false,
   "v08_started": false,
-  "next_action": "FOCUSED_V07_PACKAGE_BLOCKER_MAJOR_CLOSURE_REVIEW"
+  "next_action": "FOCUSED_INDEPENDENT_CLOSURE_REVIEW_FOR_BLK01_AND_MAJ02"
 }
