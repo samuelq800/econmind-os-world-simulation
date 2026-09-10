@@ -38,6 +38,11 @@ export type FinancialAccountId = BrandedId<'FinancialAccountId'>;
 export type FinancialClaimId = BrandedId<'FinancialClaimId'>;
 export type FinancialPostingBatchId = BrandedId<'FinancialPostingBatchId'>;
 export type FinancialPostingLegId = BrandedId<'FinancialPostingLegId'>;
+export type OpeningSeedId = BrandedId<'OpeningSeedId'>;
+export type OpeningSourceId = BrandedId<'OpeningSourceId'>;
+export type OpeningInventoryEntryId = BrandedId<'OpeningInventoryEntryId'>;
+export type FinancialOpeningBatchId = BrandedId<'FinancialOpeningBatchId'>;
+export type FinancialOpeningLegId = BrandedId<'FinancialOpeningLegId'>;
 
 const CANONICAL_ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 const CANONICAL_UUID =
@@ -113,3 +118,12 @@ export const financialPostingBatchId = (value: string) =>
   parseId('FinancialPostingBatchId', value);
 export const financialPostingLegId = (value: string) =>
   parseId('FinancialPostingLegId', value);
+export const openingSeedId = (value: string) => parseId('OpeningSeedId', value);
+export const openingSourceId = (value: string) =>
+  parseId('OpeningSourceId', value);
+export const openingInventoryEntryId = (value: string) =>
+  parseId('OpeningInventoryEntryId', value);
+export const financialOpeningBatchId = (value: string) =>
+  parseId('FinancialOpeningBatchId', value);
+export const financialOpeningLegId = (value: string) =>
+  parseId('FinancialOpeningLegId', value);

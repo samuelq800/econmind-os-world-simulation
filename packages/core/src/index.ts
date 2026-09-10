@@ -10,6 +10,7 @@ export * from './finance/financial-ledger.js';
 export * from './ids.js';
 export * from './inventory/inventory-ledger.js';
 export * from './numeric/index.js';
+export * from './opening/opening-seed.js';
 export * from './registries/fixed-catalog.js';
 export * from './registries/registry.js';
 export * from './replay/replay.js';
