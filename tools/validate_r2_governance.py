@@ -1456,8 +1456,18 @@ def validate(root: Path) -> dict[str, Any]:
                                 package_content,
                                 "V07.3-to-package content lineage",
                             )
+                            package_target = commit_exists(
+                                package_review.get("review_target"),
+                                "V07 package review target",
+                            )
+                            is_ancestor(
+                                package_content,
+                                package_target,
+                                "V07 package review lineage",
+                            )
                             file(package_review.get("review_bundle"))
                             file(package_review.get("evidence_file"))
+                            file("docs/reports/V07/PACKAGE_REVIEW_TARGET.md")
                         else:
                             require(False, "unsupported active V07 lifecycle state")
                         require(
