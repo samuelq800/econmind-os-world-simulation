@@ -8,7 +8,7 @@ import {
   classifyCommandIdentity,
   parseCanonicalCommand,
 } from '../../packages/core/src/index.js';
-import { PROPERTY_RUNS, PROPERTY_SEED } from './property-config.js';
+import { FOUNDATION_PROPERTY_CONFIG } from './property-config.js';
 
 const sha256 = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
@@ -60,7 +60,10 @@ describe('V07.1 deterministic Command properties', () => {
           );
         },
       ),
-      { numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED + 70 },
+      {
+        ...FOUNDATION_PROPERTY_CONFIG,
+        seed: FOUNDATION_PROPERTY_CONFIG.seed + 70,
+      },
     );
   });
 
@@ -83,7 +86,7 @@ describe('V07.1 deterministic Command properties', () => {
           expect(second.payloadHash).toBe(first.payloadHash);
         },
       ),
-      { numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED },
+      FOUNDATION_PROPERTY_CONFIG,
     );
   });
 
@@ -109,7 +112,10 @@ describe('V07.1 deterministic Command properties', () => {
           );
         }
       }),
-      { numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED + 71 },
+      {
+        ...FOUNDATION_PROPERTY_CONFIG,
+        seed: FOUNDATION_PROPERTY_CONFIG.seed + 71,
+      },
     );
   });
 });
