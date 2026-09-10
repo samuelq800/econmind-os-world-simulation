@@ -170,6 +170,7 @@ describe('V06 owner-authorized package continuation', () => {
     expect(central.scoped_continuation_records).toEqual([
       'docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json',
       'docs/governance/WORLD_CORE_V07_CONTINUATION_POLICY.json',
+      'docs/governance/WORLD_CORE_V08_CONTINUATION_POLICY.json',
     ]);
     expect(scoped.status).toBe('ACTIVE');
     expect(scoped.authority).toBe('RESPONSIBLE_HUMAN_OWNER');
@@ -221,14 +222,140 @@ describe('V06 owner-authorized package continuation', () => {
       },
     });
     expect(progress.current_gate).toMatchObject({
-      step_id: 'V08.1',
+      step_id: 'V09.1',
       status: 'PLANNED',
-      next_step: 'V08.1',
+      next_step: 'V09.1',
       next_step_ready: false,
-      next_step_blockers: ['ADR-02', 'ADR-05'],
-      required_gate: 'V08.1_OWNER_ADR_GATE',
+      next_step_blockers: [
+        'V08 final normal baseline and history-preserving main merge',
+        'ADR-18 before V09.1 real persistence/concurrency evidence',
+      ],
+      required_gate: 'V08_MAINLINE_INTEGRATION',
       gate_status: 'PENDING',
     });
+    expect(progress.v08_entry).toMatchObject({
+      status: 'COMPLETED',
+      branch: 'codex/world-core-v08',
+      branch_base: '403b97e6a2ae36cb7b250b1ce23fa128e9a5cbec',
+      authoritative_main: 'ec3ceff57b2657b374432b5ab3b4cbc1f78e003d',
+      decision_commit: '93087392ca28b2ccda70d6647f4f7af024b3f317',
+      decision_main_merge: 'ec3ceff57b2657b374432b5ab3b4cbc1f78e003d',
+      branch_reconciliation: 'd3c484a2a9fbeb08efbe9f1715018ac000ee53d6',
+      preflight: 'GO',
+      approved_adrs: ['ADR-02', 'ADR-05', 'ADR-17'],
+      deferred_adrs: ['ADR-07'],
+      not_current_gate_adrs: ['ADR-08'],
+      production_mutation: false,
+      owner_approved: true,
+      v08_2: {
+        status: 'VERIFIED',
+        preflight: 'GO',
+        dependency_method: 'OWNER_AUTHORIZED_PACKAGE_CONTINUATION',
+        approved_adrs: ['ADR-02', 'ADR-17'],
+        not_current_gate_adrs: ['ADR-07', 'ADR-08'],
+        migration: 'NOT_CREATED',
+        production_mutation: false,
+        implementation_commit: '08350cfa5081668c34e4104b40ae39384ec026a2',
+        historical_implementation_commit:
+          'f5c022c7957a1128660d25e36ea46df99964a850',
+        evidence_file:
+          'docs/reports/V08.2/TEST_EVIDENCE_BLOCKER_FORWARD_FIX.json',
+      },
+      v08_3: {
+        status: 'VERIFIED',
+        preflight: 'GO',
+        dependency_method: 'OWNER_AUTHORIZED_PACKAGE_CONTINUATION',
+        approved_adrs: ['ADR-02', 'ADR-05', 'ADR-17'],
+        not_current_gate_adrs: ['ADR-07', 'ADR-08'],
+        migration: 'NOT_CREATED',
+        production_mutation: false,
+        implementation_commit: '08350cfa5081668c34e4104b40ae39384ec026a2',
+        historical_implementation_commit:
+          '4f0da4104b928f3504c50164147324c8af0deab5',
+        evidence_file:
+          'docs/reports/V08.3/TEST_EVIDENCE_BLOCKER_FORWARD_FIX.json',
+      },
+    });
+    expect(progress.v08_continuation).toMatchObject({
+      status: 'COMPLETED',
+      method: 'OWNER_AUTHORIZED_PACKAGE_CONTINUATION',
+      decision: 'V08_PACKAGE_APPROVED',
+      branch: 'codex/world-core-v08',
+      allowed_steps: ['V08.1', 'V08.2', 'V08.3'],
+      terminal_gate: 'V08_PACKAGE_REVIEW',
+      independent_review_pending: false,
+      merge_authorized: true,
+      production_mutation: false,
+      owner_approved: true,
+      completed_steps: {
+        'V08.1': {
+          implementation_commit: '08350cfa5081668c34e4104b40ae39384ec026a2',
+          historical_implementation_commit:
+            'a73c35d32d93f4067ab4e6228dbb65a4ab64734e',
+          automated_evidence_status: 'PASS',
+          open_recorded_p0_blockers: 0,
+          historical_open_recorded_p0_blockers: 2,
+          open_recorded_p1_majors: 0,
+          historical_independent_review:
+            'CHANGES_REQUIRED_ON_HISTORICAL_TARGET',
+          independent_review: 'V08_PACKAGE_APPROVED',
+          finding_implementation_state: 'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
+          status: 'VERIFIED',
+        },
+        'V08.2': {
+          implementation_commit: '08350cfa5081668c34e4104b40ae39384ec026a2',
+          historical_implementation_commit:
+            'f5c022c7957a1128660d25e36ea46df99964a850',
+          automated_evidence_status: 'PASS',
+          open_recorded_p0_blockers: 0,
+          historical_open_recorded_p0_blockers: 2,
+          open_recorded_p1_majors: 0,
+          historical_independent_review:
+            'CHANGES_REQUIRED_ON_HISTORICAL_TARGET',
+          independent_review: 'V08_PACKAGE_APPROVED',
+          finding_implementation_state: 'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
+          status: 'VERIFIED',
+        },
+        'V08.3': {
+          implementation_commit: '08350cfa5081668c34e4104b40ae39384ec026a2',
+          historical_implementation_commit:
+            '4f0da4104b928f3504c50164147324c8af0deab5',
+          automated_evidence_status: 'PASS',
+          open_recorded_p0_blockers: 0,
+          historical_open_recorded_p0_blockers: 2,
+          open_recorded_p1_majors: 0,
+          historical_independent_review:
+            'CHANGES_REQUIRED_ON_HISTORICAL_TARGET',
+          independent_review: 'V08_PACKAGE_APPROVED',
+          finding_implementation_state: 'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
+          status: 'VERIFIED',
+        },
+      },
+    });
+    expect(progress.v08_package_review).toMatchObject({
+      status: 'V08_PACKAGE_APPROVED',
+      package_status: 'VERIFIED',
+      review_target: 'b3a1f4949efa85d1c310819ebdf37505589f1b49',
+      superseded_review_target: 'c44885fdf0c639d3cce6c1e337b21042ab647965',
+      target_file:
+        'docs/reports/V08/PACKAGE_REVIEW_TARGET_BLOCKER_FORWARD_FIX.md',
+      open_recorded_p0_blockers: 0,
+      historical_open_recorded_p0_blockers: 2,
+      open_recorded_p1_majors: 0,
+      independent_review: 'V08_PACKAGE_APPROVED',
+      latest_independent_decision: 'V08_PACKAGE_APPROVED',
+      finding_implementation_state: 'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
+      owner_decision: 'OWNER_POLICY_AUTO_ACCEPTANCE',
+      authority: 'PROJECT_OWNER_DIRECT_CONFIRMATION',
+      package_verified: true,
+      merge_authorized: true,
+      final_baseline_before_merge: 'PASS',
+      final_closure_record: 'docs/reports/V08/FINAL_CLOSURE.md',
+      production_access: false,
+      production_mutation: false,
+      v09_started: false,
+    });
+    expect(progress.work_packages.V08).toBe('VERIFIED');
     expect(progress.v07_package_review).toMatchObject({
       status: 'V07_PACKAGE_APPROVED',
       package_status: 'VERIFIED',

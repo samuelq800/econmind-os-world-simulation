@@ -1,0 +1,55 @@
+{
+  "schema_version": "V08-PACKAGE-BLOCKER-FORWARD-FIX-EVIDENCE-1",
+  "package_id": "V08",
+  "package_status": "IMPLEMENTED_UNVERIFIED",
+  "review_readiness": "READY_FOR_PACKAGE_REVIEW",
+  "branch": "codex/world-core-v08",
+  "historical_changes_required_target": "c44885fdf0c639d3cce6c1e337b21042ab647965",
+  "authoritative_main": "ec3ceff57b2657b374432b5ab3b4cbc1f78e003d",
+  "forward_fix_candidates": {
+    "B01": "08350cfa5081668c34e4104b40ae39384ec026a2",
+    "B02": "08350cfa5081668c34e4104b40ae39384ec026a2"
+  },
+  "verification": {
+    "focused_b01_b02": "2 files / 18 tests / PASS",
+    "v08_focused": "8 files / 58 tests / PASS",
+    "full_repository": "39 files / 473 tests / PASS",
+    "protected_architecture": "3 files / 34 tests / PASS",
+    "authoritative_scanner": "29 core files / 41 total files / PASS",
+    "boundary_scanner": "46 files / PASS",
+    "governance": "14 groups / PASS",
+    "public_export_audit": "PASS",
+    "migration_validation": "4 existing migrations / PASS",
+    "migration_rehearsal": "clean-baseline and existing-schema / PGlite / PASS",
+    "environment_typecheck_lint_format_build": "PASS",
+    "secret_scanner": "518 files / PASS",
+    "git_diff_check": "PASS"
+  },
+  "environment_observations": [
+    {
+      "result": "SANDBOX_PROCESS_INTROSPECTION_DENIED",
+      "cause": "initial full run could not execute ps and reported spawn EPERM/parent-not-owned in protected V00 lifecycle tests",
+      "resolution": "reran the unchanged candidate with process-table access; pnpm check passed"
+    }
+  ],
+  "decisions": {
+    "ADR-02": "APPROVED",
+    "ADR-05": "APPROVED",
+    "ADR-17": "APPROVED",
+    "ADR-08": "NOT_TRIGGERED"
+  },
+  "migration_state": {
+    "v08_migrations_created": 0,
+    "candidate_status": "NOT_CREATED",
+    "production_publication": false
+  },
+  "open_recorded_p0_blockers": 2,
+  "finding_implementation_state": "IMPLEMENTED_PENDING_FOCUSED_INDEPENDENT_REVIEW",
+  "independent_review": "NOT_RUN_ON_FORWARD_FIX_TARGET",
+  "package_verified": false,
+  "merge_authorized": false,
+  "production_access": false,
+  "database_mutation": false,
+  "v09_runtime_started": false,
+  "next_action": "FOCUSED_V08_PACKAGE_BLOCKER_CLOSURE_REVIEW"
+}

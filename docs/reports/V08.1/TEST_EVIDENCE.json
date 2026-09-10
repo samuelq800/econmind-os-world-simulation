@@ -1,0 +1,99 @@
+{
+  "schema_version": "V08.1-TEST-EVIDENCE-1",
+  "step_id": "V08.1",
+  "title": "库存可用/预留/在途 Ledger",
+  "state": "IMPLEMENTED_UNVERIFIED",
+  "risk_class": "P0",
+  "code_candidate": "a73c35d32d93f4067ab4e6228dbb65a4ab64734e",
+  "superseded_code_candidate": "bdd5170fb571905f51629497cf786f8422a86958",
+  "superseded_reason": "WORLD_CORE_CONTRACT country dimension was added before downstream continuation",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile": "FROZEN_UNCHANGED"
+  },
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/inventory-ledger.test.ts tests/property/inventory-ledger-properties.test.ts",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 2,
+      "tests": 14,
+      "property_base_seed": 20260909,
+      "property_runs": 250
+    },
+    {
+      "command": "pnpm check",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 33,
+      "tests": 429,
+      "boundary_test_files": 3,
+      "boundary_tests": 34,
+      "authoritative_scanned_core_files": 26,
+      "authoritative_scanned_files": 38,
+      "boundary_scanned_files": 43,
+      "migration_count": 4,
+      "migration_rehearsal_modes": ["clean-baseline", "existing-schema"],
+      "secret_scanned_files": 497,
+      "build": "PASS"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "result": "PASS",
+      "exit_code": 0,
+      "groups": 14
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "superseded_environment_observations": [
+    {
+      "result": "REJECTED_BEFORE_TEST_EXECUTION",
+      "cause": "ambient Node 24.19.0 and pnpm 11.19.0 did not satisfy the pinned toolchain",
+      "resolution": "reran with Node 24.20.0 and pnpm 12.3.4"
+    },
+    {
+      "result": "LIFECYCLE_TEST_HARNESS_PARENT_NOT_OWNED",
+      "cause": "the Corepack JavaScript shim hid the pnpm parent process identity required by protected V00 lifecycle tests",
+      "resolution": "reran the unchanged suite with a temporary process-owning pnpm 12.3.4 test entry; complete pnpm check passed"
+    }
+  ],
+  "acceptance": {
+    "available_to_reserved_conservation": "PASS",
+    "reserved_to_in_transit_conservation": "PASS",
+    "valid_delivery": "PASS",
+    "over_reservation_rejection": "PASS",
+    "over_shipment_rejection": "PASS",
+    "over_delivery_rejection": "PASS",
+    "non_negative_stock": "PASS",
+    "exact_batch_conservation": "PASS",
+    "retry_idempotency": "PASS",
+    "deterministic_canonical_posting": "PASS",
+    "duplicate_posting_protection": "PASS",
+    "v07_transition_compatibility": "PASS",
+    "projection_not_truth": "PASS",
+    "unsupported_or_forged_version": "PASS",
+    "architecture_ownership": "PASS"
+  },
+  "decisions": {
+    "ADR-02": "APPROVED",
+    "ADR-05": "APPROVED",
+    "ADR-17": "APPROVED",
+    "ADR-07": "DEFERRED_NOT_CURRENT_SCOPE",
+    "ADR-08": "NOT_APPLICABLE_EXACT_OR_REJECT_ONLY"
+  },
+  "migration": {
+    "created": false,
+    "status": "NOT_CREATED",
+    "production_publication": false
+  },
+  "open_recorded_p0_blockers": 0,
+  "open_recorded_p1_majors": 0,
+  "independent_review": "NOT_RUN",
+  "production_access": false,
+  "database_mutation": false
+}

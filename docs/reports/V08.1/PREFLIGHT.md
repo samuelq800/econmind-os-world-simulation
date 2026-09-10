@@ -3,13 +3,14 @@
 ## Result
 
 ```text
-V08_1_PREFLIGHT=NO_GO
-V08_1_PLANNING=READY_PENDING_DEPENDENCY_AND_OWNER_ADR
-V08_1_RUNTIME=NOT_STARTED
+V08_1_PREFLIGHT=GO
+V08_1_PLANNING=COMPLETE
+V08_1_RUNTIME=IN_PROGRESS
 V08_1_MIGRATION=NOT_CREATED
-EVALUATED_V07_BRANCH=cbc0458ac083df0f85c9f7c9bf9c66c16189bb78
-AUTHORITATIVE_MAIN=8e4d9e125a89fc1457ed016c708537fd67e1c8b7
-V07_PACKAGE_REVIEW_TARGET=e802a5233ded3825c56d2897374fcd2de0c40da8
+EVALUATED_V08_BRANCH_BASE=403b97e6a2ae36cb7b250b1ce23fa128e9a5cbec
+AUTHORITATIVE_MAIN=ec3ceff57b2657b374432b5ab3b4cbc1f78e003d
+V08_BRANCH_RECONCILIATION=d3c484a2a9fbeb08efbe9f1715018ac000ee53d6
+V07_PACKAGE_REVIEW_TARGET=079fa9d230d5109488a1e5ea82e97f81845c49eb
 ```
 
 This is a planning-only dependency/ADR handoff. It does not change
@@ -18,24 +19,24 @@ or authorize production access.
 
 ## Dependency gates
 
-| Gate                           | Current result | Exact repository evidence                                               |
-| ------------------------------ | -------------- | ----------------------------------------------------------------------- |
-| V01.3                          | YES            | `status/progress.json`: `VERIFIED`                                      |
-| V02.3                          | YES            | `status/progress.json`: `VERIFIED`                                      |
-| V03.3                          | YES            | `status/progress.json`: `VERIFIED`                                      |
-| V07.3                          | NO             | `IMPLEMENTED_UNVERIFIED`; hard dependencies normally require `VERIFIED` |
-| V07 package independent review | NO             | `V07_PACKAGE_REVIEW` is `PENDING`; immutable target `e802a523...`       |
-| V07 owner acceptance           | NO             | No V07 package owner-acceptance record exists                           |
-| V07 verified/closed            | NO             | V07 remains `IMPLEMENTED_UNVERIFIED`                                    |
-| V07 merge/promotion to main    | NO             | main remains `8e4d9e1...`; V07 branch is not merged                     |
-| Dependency recomputation       | NO             | Must follow V07 closure and main integration                            |
+| Gate                           | Current result | Exact repository evidence                                             |
+| ------------------------------ | -------------- | --------------------------------------------------------------------- |
+| V01.3                          | YES            | `status/progress.json`: `VERIFIED`                                    |
+| V02.3                          | YES            | `status/progress.json`: `VERIFIED`                                    |
+| V03.3                          | YES            | `status/progress.json`: `VERIFIED`                                    |
+| V07.3                          | YES            | `status/progress.json`: `VERIFIED`                                    |
+| V07 package independent review | YES            | `V07_PACKAGE_APPROVED`; target `079fa9d...`                           |
+| V07 owner acceptance           | YES            | `e7cdaf0...`; `PROJECT_OWNER_ACCEPTANCE`                              |
+| V07 verified/closed            | YES            | V07.1-3 and package are `VERIFIED / CLOSED`                           |
+| V07 merge/promotion to main    | YES            | merge `5fb526c...`; reconciliation/main `403b97e...`                  |
+| Dependency recomputation       | YES            | exact V08 base equals synchronized `origin/main`; all hard steps pass |
 
 ## ADR gates
 
 | Decision | Current result                | V08.1 effect                                                                                                      |
 | -------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| ADR-02   | NO                            | `PROPOSED_NOT_APPROVED`; blocks unique inventory/financial posting owner and V08.1 model/schema                   |
-| ADR-05   | NO                            | `PROPOSED_NOT_APPROVED`; blocks the initial bucket/title/risk/recognition separation model                        |
+| ADR-02   | YES                           | `APPROVED`; World Inventory/Financial Posting are the unique V08 authoritative owners                             |
+| ADR-05   | YES                           | `APPROVED`; location/reservation/title/risk/X-M/settlement are separate, with exact batch conservation            |
 | ADR-17   | YES                           | `APPROVED`; V08 owns Ledger/Posting while V09 owns writer/lease/fencing/atomic commit/recovery                    |
 | ADR-16   | YES FOR FUTURE CANDIDATE ONLY | `APPROVED`; future V08 DDL must use `world_v2` and the sole V02 chain; production remains separately unauthorized |
 | ADR-07   | NOT A CURRENT STEP GATE       | Remains unapproved; V08.1 implements no construction/WIP/GDP rule                                                 |
@@ -61,20 +62,20 @@ attempt to resolve that later gate.
 | P0/P1 risks and test architecture documented                     | YES    |
 | Scope exclusions documented                                      | YES    |
 | Owner ADR-02/ADR-05 decision pack prepared                       | YES    |
-| Runtime implementation authorized                                | NO     |
+| Runtime implementation authorized                                | YES    |
 
-## Required transition before rerun
+## Entry decision
 
 ```text
-V07_PACKAGE_APPROVED
--> OWNER_ACCEPTANCE
--> V07 VERIFIED/CLOSED
--> merge/promotion to main
--> dependency recomputation
--> ADR-02 APPROVED
--> ADR-05 APPROVED for the V08.1 model
--> rerun V08.1 preflight
+HARD_DEPENDENCIES=YES
+ADR-02=APPROVED
+ADR-05=APPROVED
+ADR-17=APPROVED
+ADR-07=DEFERRED_NOT_CURRENT_SCOPE
+ADR-08=NOT_CURRENT_GATE_EXACT_OR_REJECT_ONLY
+V08_1_PREFLIGHT=GO
 ```
 
-Until every required gate is satisfied, V08 and V08.1 remain `NOT_STARTED /
-PLANNED`.
+The production publisher migration-history issue is a parallel release track.
+V08 candidate DDL, if later needed, remains branch-local, unpromoted and
+production-unpublished. It does not block this non-production entry.

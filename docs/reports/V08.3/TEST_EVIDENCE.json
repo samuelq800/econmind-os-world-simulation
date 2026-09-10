@@ -1,0 +1,89 @@
+{
+  "schema_version": "V08.3-TEST-EVIDENCE-1",
+  "step_id": "V08.3",
+  "title": "期初 Seed/Reconciliation Contract",
+  "state": "IMPLEMENTED_UNVERIFIED",
+  "risk_class": "P0",
+  "code_candidate": "4f0da4104b928f3504c50164147324c8af0deab5",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile": "FROZEN_UNCHANGED"
+  },
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/opening-seed-reconciliation.test.ts tests/property/opening-reconciliation-properties.test.ts",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 2,
+      "tests": 12,
+      "property_base_seed": 20260909,
+      "property_runs": 250
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/inventory-ledger.test.ts tests/property/inventory-ledger-properties.test.ts tests/world-core/financial-posting-ledger.test.ts tests/property/financial-posting-properties.test.ts tests/world-core/opening-seed-reconciliation.test.ts tests/property/opening-reconciliation-properties.test.ts",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 6,
+      "tests": 40
+    },
+    {
+      "command": "pnpm check",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 37,
+      "tests": 455,
+      "boundary_test_files": 3,
+      "boundary_tests": 34,
+      "authoritative_scanned_core_files": 28,
+      "authoritative_scanned_files": 40,
+      "boundary_scanned_files": 45,
+      "migration_count": 4,
+      "migration_rehearsal_modes": ["clean-baseline", "existing-schema"],
+      "secret_scanned_files": 507,
+      "build": "PASS"
+    },
+    {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "result": "PASS",
+      "exit_code": 0,
+      "groups": 14
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS",
+      "exit_code": 0
+    }
+  ],
+  "acceptance": {
+    "explicit_source_provenance": "PASS",
+    "source_payload_hash": "PASS",
+    "current_replay_version_binding": "PASS",
+    "positive_inventory_opening": "PASS",
+    "financial_counterpart_items": "PASS",
+    "exact_opening_balance": "PASS",
+    "canonical_seed_fingerprint": "PASS",
+    "opening_plus_posting_reconstruction": "PASS",
+    "snapshot_free_reconstruction": "PASS",
+    "snapshot_match": "PASS",
+    "snapshot_mismatch_no_repair": "PASS",
+    "tamper_and_forgery_rejection": "PASS"
+  },
+  "decisions": {
+    "ADR-02": "APPROVED",
+    "ADR-05": "APPROVED",
+    "ADR-17": "APPROVED",
+    "ADR-07": "DEFERRED_NOT_CURRENT_SCOPE",
+    "ADR-08": "NOT_APPLICABLE_EXACT_OR_REJECT_ONLY"
+  },
+  "migration": {
+    "created": false,
+    "status": "NOT_CREATED",
+    "production_publication": false
+  },
+  "open_recorded_p0_blockers": 0,
+  "open_recorded_p1_majors": 0,
+  "independent_review": "NOT_RUN",
+  "production_access": false,
+  "database_mutation": false
+}

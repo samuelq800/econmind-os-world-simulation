@@ -1,0 +1,48 @@
+{
+  "schema_version": "V08-PACKAGE-TEST-EVIDENCE-1",
+  "package_id": "V08",
+  "package_status": "IMPLEMENTED_UNVERIFIED",
+  "review_readiness": "READY_FOR_PACKAGE_REVIEW",
+  "branch": "codex/world-core-v08",
+  "authoritative_main": "ec3ceff57b2657b374432b5ab3b4cbc1f78e003d",
+  "implementation_lineage": {
+    "V08.1": "a73c35d32d93f4067ab4e6228dbb65a4ab64734e",
+    "V08.2": "f5c022c7957a1128660d25e36ea46df99964a850",
+    "V08.3": "4f0da4104b928f3504c50164147324c8af0deab5"
+  },
+  "verification": {
+    "v08_focused": "6 files / 40 tests / PASS",
+    "full_repository": "37 files / 455 tests / PASS",
+    "protected_architecture": "3 files / 34 tests / PASS",
+    "authoritative_scanner": "28 core files / 40 total files / PASS",
+    "boundary_scanner": "45 files / PASS",
+    "governance": "14 groups / PASS",
+    "migration_validation": "4 existing migrations / PASS",
+    "migration_rehearsal": "clean-baseline and existing-schema / PGlite / PASS",
+    "environment_typecheck_lint_format_build": "PASS",
+    "secret_scanner": "511 files / PASS",
+    "git_diff_check": "PASS"
+  },
+  "decisions": {
+    "ADR-02": "APPROVED",
+    "ADR-05": "APPROVED",
+    "ADR-17": "APPROVED",
+    "ADR-07": "DEFERRED_NOT_CURRENT_SCOPE",
+    "ADR-08": "NOT_APPLICABLE_EXACT_OR_REJECT_ONLY"
+  },
+  "migration_state": {
+    "v08_migrations_created": 0,
+    "candidate_status": "NOT_CREATED",
+    "publisher_track": "PARALLEL_BLOCKED_REMOTE_MIGRATION_HISTORY_DIVERGENCE",
+    "production_publication": false
+  },
+  "open_recorded_p0_blockers": 0,
+  "open_recorded_p1_majors": 0,
+  "independent_review": "NOT_RUN",
+  "package_verified": false,
+  "merge_authorized": false,
+  "production_access": false,
+  "database_mutation": false,
+  "v09_started": false,
+  "next_action": "INDEPENDENT_V08_PACKAGE_REVIEW"
+}

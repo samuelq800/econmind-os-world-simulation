@@ -6,6 +6,12 @@ The responsible human owner approved ADR-02 and ADR-05. Both are now
 `APPROVED` in `status/decisions.json` and bound to their canonical records.
 This pack records the decision boundary; it is not Codex self-approval.
 
+V07 package approval, owner acceptance, `VERIFIED / CLOSED` promotion, main
+integration and dependency recomputation are satisfied on exact authoritative
+World main `ec3ceff57b2657b374432b5ab3b4cbc1f78e003d`. These facts remove the V07
+dependency gate; ADR-02 and ADR-05 authority comes separately from the owner
+records named above.
+
 The exact current sources are `status/decisions.json`,
 `requirements/adr_dependency_map.json`,
 `reference/02_规范冲突与裁决清单.md`,
