@@ -19,8 +19,8 @@
     "reason": "V01.2 records proposals and future gates; it does not select or implement an unapproved proposal."
   },
   "approval_summary": {
-    "approved": 2,
-    "proposed_not_approved": 18,
+    "approved": 6,
+    "proposed_not_approved": 14,
     "bulk_approval_permitted": false
   },
   "adrs": [
@@ -377,9 +377,9 @@
     {
       "id": "ADR-11",
       "conflict_subject": "幂等重复回执与不可变 event 消费状态",
-      "coordination_proposal": "使用 command_id 与 payload_hash 唯一性；返回明确的原回执且不重新执行，同 key 异 payload 拒绝，消费回执独立于 append-only event。",
-      "decision_status": "PROPOSED_NOT_APPROVED",
-      "approval_record": null,
+      "coordination_proposal": "以 (worldId, commandId) 及适用时的 (worldId, idempotencyKey) 唯一绑定不可变 canonical command fingerprint；完全重复返回已存 acknowledgement/final receipt 且不重执行或追加重复 Event，身份相同但 fingerprint 不同则以 IDEMPOTENCY_CONFLICT 零效果拒绝；command receipt 与 consumer receipt 分离。",
+      "decision_status": "APPROVED",
+      "approval_record": "docs/architecture/decisions/ADR-11.md",
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
       "latest_gate": "V07",
       "affected_work_packages": [
@@ -507,9 +507,9 @@
     {
       "id": "ADR-16",
       "conflict_subject": "共享 Supabase namespace 与 migration 发布权",
-      "coordination_proposal": "V2 核心使用非公开 world_v2 schema；V2 交付带 ID 和 hash 的 SQL 制品，现有主站仓库保持共享生产 Supabase 的唯一 migration 发布源。",
-      "decision_status": "PROPOSED_NOT_APPROVED",
-      "approval_record": null,
+      "coordination_proposal": "V2 核心使用非公开 world_v2 schema，并沿用唯一 V02 migration manifest/release provenance chain；候选制品绑定 migration ID、source commit、historical path 与 exact bytes/hash，现有主站仓库保持共享生产 Supabase 的唯一 production publisher。禁止第二发布链、dashboard/manual production SQL 和以 Legacy 表作为 V2 权威经济存储；实际生产发布仍需单独的人类授权。",
+      "decision_status": "APPROVED",
+      "approval_record": "docs/architecture/decisions/ADR-16.md",
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
       "latest_gate": "V02/V31",
       "affected_work_packages": [
@@ -529,17 +529,18 @@
       "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
       "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
       "source_locations": [
-        "reference/02_规范冲突与裁决清单.md#adr-16",
+        "docs/architecture/decisions/ADR-16.md",
         "planning/02_架构裁决与数据库协议.md",
+        "docs/architecture/WORLD_CORE_JIT_ADR_PACK.md",
         "status/decisions.json"
       ]
     },
     {
       "id": "ADR-17",
       "conflict_subject": "持久化、提交、重放与故障边界",
-      "coordination_proposal": "canonical 实体、不可变事件和分录在同一权威事务提交；单 world writer 使用 lease 与 fencing，候选状态私有，outbox 可重投并由消费者去重。",
-      "decision_status": "PROPOSED_NOT_APPROVED",
-      "approval_record": null,
+      "coordination_proposal": "以 opening seed 与 append-only authoritative Events 定义 replay lineage；current-head/materialization/index/snapshot 不是独立历史真相；权威转换最终采用 all-or-zero 提交、确定性且幂等的 retry/replay/recovery，并禁止同一 World 的竞争 committed writers。实现按 V07 Command/Event/Replay、V08 Ledger/Posting、V09 writer/lease/fencing/atomic-commit/recovery 的权威归属分阶段完成。",
+      "decision_status": "APPROVED",
+      "approval_record": "docs/architecture/decisions/ADR-17.md",
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
       "latest_gate": "V07/V09",
       "affected_work_packages": [
@@ -625,9 +626,9 @@
     {
       "id": "ADR-20",
       "conflict_subject": "身份生命周期与经济历史",
-      "coordination_proposal": "新命令按当前成员和 Office 权限验证；玩家离开不消除已生效国家义务，个人资料与不可变经济历史分层且不得级联删除。",
-      "decision_status": "PROPOSED_NOT_APPROVED",
-      "approval_record": null,
+      "coordination_proposal": "当前授权在 intake、适用的 approval 和权威 user-command commit 前重新解析；缓存上下文仅是审计证据。已撤销且未提交的 discretionary work 以 AUTHORIZATION_REVOKED 或版本化等价结果零效果失败；已提交事实与版本化自动义务保持有效，除非授权取消事件或显式版本化规则取消。pending recovery 重验当前授权，committed replay 不追溯重授权，身份/profile 生命周期不得级联删除不可变经济历史。",
+      "decision_status": "APPROVED",
+      "approval_record": "docs/architecture/decisions/ADR-20.md",
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
       "latest_gate": "V05/V28",
       "affected_work_packages": [
@@ -647,8 +648,9 @@
       "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
       "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
       "source_locations": [
-        "reference/02_规范冲突与裁决清单.md#adr-20",
+        "docs/architecture/decisions/ADR-20.md",
         "planning/02_架构裁决与数据库协议.md",
+        "docs/architecture/WORLD_CORE_JIT_ADR_PACK.md",
         "status/decisions.json"
       ]
     }
