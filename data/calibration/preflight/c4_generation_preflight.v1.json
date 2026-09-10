@@ -1,0 +1,101 @@
+{
+  "schemaVersion": "c4-generation-preflight.v1",
+  "preflightId": "c4-generation-preflight-c3-pilot-v1",
+  "status": "PREFLIGHT_ONLY_NON_AUTHORITATIVE",
+  "finalGeneratorReady": false,
+  "c3Review": {
+    "approvedTargetCommit": "77c4fb3083970573ed56cbd280e0e41a8d83e43a",
+    "historicalChangesRequiredTargetCommit": "21c571cd215b89bff20804bf2e38db687b44e55e",
+    "decision": "APPROVED_FOR_CONTINUATION",
+    "closedFindingIds": ["C3-MAJ-01"],
+    "openBlockerCount": 0,
+    "openMajorCount": 0,
+    "scope": "EXPLORATORY_NON_AUTHORITATIVE_ONLY"
+  },
+  "c3ExecutionContract": {
+    "path": "data/calibration/exploration/c3_execution_contract.v1.json",
+    "rawSha256": "bb7841b8925bd64ee5e07767098d5f12db3b1d55fdd142c78c24ba207f3725a5",
+    "canonicalHash": "9c9b3fab9f7def56bbe66d2e1464d278dde345d24dc37fc3e49e6dd883eafd48"
+  },
+  "c3GeneratedArtifacts": [
+    {
+      "path": "data/calibration/exploration/c3_exploration_manifest.v1.json",
+      "rawSha256": "e76a65aa274634ccebd54ff50f0e54c1d04a3bf65e12aa43601906fce4041846",
+      "schemaVersion": "c3-exploration-manifest.v1",
+      "canonicalContentHash": "b3ff2e350eb976af44d9fec17fb3d822071eb94d08f489b0f7800facc5f6419f"
+    },
+    {
+      "path": "data/calibration/exploration/c3_exploration_summary.v1.json",
+      "rawSha256": "9cc34aca524d6c9ec0ffb1c957f573e1145527cc4425b9bb379b15d87958036a",
+      "schemaVersion": "c3-exploration-summary.v1",
+      "canonicalContentHash": "054e7f43641127f7aa1b94aae34e8f5f41bc8ce074a2983a759b2ef69f1c27d5"
+    },
+    {
+      "path": "data/calibration/exploration/c3_uncertainty_register.v1.json",
+      "rawSha256": "341c9a3e08c582c82cf3e173660f7e4d822d34bbeee0ad2d36345df312773d2a",
+      "schemaVersion": "c3-uncertainty-register.v1",
+      "canonicalContentHash": "33547a374f86a6fa8670c8e5c5cf119903829239d4ec5cd07529d826b51c4bfd"
+    }
+  ],
+  "evidenceScope": {
+    "c2InputStatus": "PILOT_NON_AUTHORITATIVE_PARTIAL",
+    "empiricalEntityCount": 10,
+    "macroVariableCount": 8,
+    "macroPeriodCount": 3,
+    "sparseTradeVariableCount": 2,
+    "wtoProviderTruth": "NOT_FETCHED/WTO_API_KEY_MISSING"
+  },
+  "allowedPreparation": [
+    "C4_FEATURE_ADMISSION_GATE_DESIGN",
+    "C4_GENERATOR_CONTRACT_DESIGN",
+    "C4_DETERMINISM_AND_PROVENANCE_TEST_DESIGN",
+    "OWNER_DECISION_PACKET_PREPARATION"
+  ],
+  "prohibitedOutputs": [
+    "ARCHETYPE_ALGORITHM_OR_COUNT_SELECTION",
+    "FICTIONAL_COUNTRY_MAPPING",
+    "FINAL_70_COUNTRY_PACKAGE",
+    "IPF_RAS_OR_TRADE_RECONCILIATION",
+    "FINAL_CALIBRATION_OR_RUNTIME_PARAMETERIZATION",
+    "WORLD_CORE_RUNTIME_IMPORT_OR_MUTATION",
+    "PRODUCTION_DATABASE_OPERATION"
+  ],
+  "unmetPrerequisites": [
+    {
+      "prerequisiteId": "MISSING_VALUE_POLICY_FOR_ARCHETYPE_FEATURES_UNAPPROVED",
+      "evidenceId": "C2_EXPLICIT_MISSING_OBSERVATIONS",
+      "effect": "C3 blocks complete-case archetype selection and does not authorize imputation."
+    },
+    {
+      "prerequisiteId": "ARCHETYPE_METHOD_AND_COUNT_UNSELECTED",
+      "evidenceId": "C3_INFERENCE_SCOPE_LIMIT",
+      "effect": "C3 descriptive order statistics cannot select an archetype algorithm, count, or labels."
+    },
+    {
+      "prerequisiteId": "FICTIONAL_COUNTRY_MAPPING_NOT_AUTHORIZED",
+      "evidenceId": "C3_INFERENCE_SCOPE_LIMIT",
+      "effect": "No empirical entity may become a fictional-country identity or assignment."
+    },
+    {
+      "prerequisiteId": "WTO_TARIFF_EVIDENCE_ABSENT",
+      "evidenceId": "C2_WTO_PROVIDER_COVERAGE_GAP",
+      "effect": "No tariff backfill, policy-effect calibration, or tariff-informed synthetic output is allowed."
+    },
+    {
+      "prerequisiteId": "VINTAGE_STABILITY_NOT_ESTABLISHED",
+      "evidenceId": "C2_PROVIDER_VINTAGE_LIMIT",
+      "effect": "No revision-insensitive or stability claim may support a freeze."
+    },
+    {
+      "prerequisiteId": "SECTOR_TAXONOMY_AND_TRADE_RECONCILIATION_UNREVIEWED",
+      "evidenceId": "C2_REPORTING_ASYMMETRY",
+      "effect": "Reporter and mirror facts remain separate; no final trade matrix or IPF/RAS output is allowed."
+    },
+    {
+      "prerequisiteId": "FINAL_CALIBRATION_AND_RUNTIME_HANDOFF_BLOCKED",
+      "evidenceId": "C3_INFERENCE_SCOPE_LIMIT",
+      "effect": "The bounded pilot cannot parameterize a final package or World Core runtime."
+    }
+  ],
+  "contentHash": "323bf1d117d0511cb40891a02a161e052682e9aa8938f33ddbad6ce732fc5843"
+}

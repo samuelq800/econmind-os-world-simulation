@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/c4-generation-preflight.v1.json",
+  "title": "C4 generation preparation preflight",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "preflightId",
+    "status",
+    "finalGeneratorReady",
+    "c3Review",
+    "c3ExecutionContract",
+    "c3GeneratedArtifacts",
+    "evidenceScope",
+    "allowedPreparation",
+    "prohibitedOutputs",
+    "unmetPrerequisites",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "c4-generation-preflight.v1" },
+    "preflightId": { "type": "string", "minLength": 1 },
+    "status": { "const": "PREFLIGHT_ONLY_NON_AUTHORITATIVE" },
+    "finalGeneratorReady": { "const": false },
+    "c3Review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approvedTargetCommit",
+        "historicalChangesRequiredTargetCommit",
+        "decision",
+        "closedFindingIds",
+        "openBlockerCount",
+        "openMajorCount",
+        "scope"
+      ],
+      "properties": {
+        "approvedTargetCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "historicalChangesRequiredTargetCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "decision": { "const": "APPROVED_FOR_CONTINUATION" },
+        "closedFindingIds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "openBlockerCount": { "const": 0 },
+        "openMajorCount": { "const": 0 },
+        "scope": { "const": "EXPLORATORY_NON_AUTHORITATIVE_ONLY" }
+      }
+    },
+    "c3ExecutionContract": { "$ref": "#/$defs/contractBinding" },
+    "c3GeneratedArtifacts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/generatedArtifactBinding" },
+      "minItems": 3,
+      "uniqueItems": true
+    },
+    "evidenceScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "c2InputStatus",
+        "empiricalEntityCount",
+        "macroVariableCount",
+        "macroPeriodCount",
+        "sparseTradeVariableCount",
+        "wtoProviderTruth"
+      ],
+      "properties": {
+        "c2InputStatus": { "const": "PILOT_NON_AUTHORITATIVE_PARTIAL" },
+        "empiricalEntityCount": { "type": "integer", "minimum": 1 },
+        "macroVariableCount": { "type": "integer", "minimum": 1 },
+        "macroPeriodCount": { "type": "integer", "minimum": 1 },
+        "sparseTradeVariableCount": { "type": "integer", "minimum": 1 },
+        "wtoProviderTruth": { "type": "string", "minLength": 1 }
+      }
+    },
+    "allowedPreparation": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "prohibitedOutputs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "unmetPrerequisites": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/unmetPrerequisite" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "contentHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  },
+  "$defs": {
+    "contractBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "rawSha256", "canonicalHash"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "rawSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "canonicalHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "generatedArtifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "rawSha256",
+        "schemaVersion",
+        "canonicalContentHash"
+      ],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "rawSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "schemaVersion": { "type": "string", "minLength": 1 },
+        "canonicalContentHash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "unmetPrerequisite": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prerequisiteId", "evidenceId", "effect"],
+      "properties": {
+        "prerequisiteId": { "type": "string", "minLength": 1 },
+        "evidenceId": { "type": "string", "minLength": 1 },
+        "effect": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

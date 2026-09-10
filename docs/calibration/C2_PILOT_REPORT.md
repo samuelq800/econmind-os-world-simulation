@@ -4,7 +4,7 @@ Status: **IMPLEMENTED / NON_AUTHORITATIVE / READY_FOR_CALIBRATION_REVIEW**
 
 Pilot artifact status: **PILOT_NON_AUTHORITATIVE_PARTIAL**
 
-C3: **NOT STARTED**
+C3 at this historical C2 report target: **NOT STARTED**
 
 Final Season 1 70-country package: **NOT CREATED**
 

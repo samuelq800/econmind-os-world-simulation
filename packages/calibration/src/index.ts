@@ -7,6 +7,7 @@ export * from './exploration.js';
 export * from './lossless-json.js';
 export * from './normalize.js';
 export * from './package.js';
+export * from './preflight.js';
 export * from './quality.js';
 export * from './snapshot.js';
 export * from './trade.js';

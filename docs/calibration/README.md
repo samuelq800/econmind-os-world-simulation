@@ -1,6 +1,6 @@
-# EconMind Calibration Foundation, C2 Live Pilot, and C3 Exploration
+# EconMind Calibration Foundation, C2 Live Pilot, C3 Exploration, and C4 Preflight
 
-Status: **C2 APPROVED_FOR_CONTINUATION / C3 APPROVED_FOR_CONTINUATION / NON_AUTHORITATIVE**
+Status: **C2 APPROVED_FOR_CONTINUATION / C3 APPROVED_FOR_CONTINUATION / C4 PREFLIGHT_ONLY_NON_AUTHORITATIVE**
 Final Season 1 70-country package: **NOT CREATED**
 
 C2 historical review target `42adf110c1d8e8f01932b8b9b5f97a1e086d0343` is
@@ -28,6 +28,9 @@ This workstream converts provider-shaped bytes into traceable observations and, 
   uncertainty, and review-round contract for C3.
 - `C3_EXPLORATION_REPORT.md`: readable index of the generated C3 coverage,
   distributions, retained uncertainty, and hard boundaries.
+- `C4_GENERATION_PREFLIGHT.md`: exact-C3-bound, read-only readiness gate for
+  the next preparation phase; it explicitly remains not ready to generate a
+  final world.
 - `data/calibration/source_registry.v2.json`: eight official provider families.
 - `data/calibration/variable_registry.v2.json`: initial macro/fiscal/external/sector/trade variables.
 - `data/calibration/transformation_registry.v1.json`: approved deterministic Foundation transformations.
@@ -37,6 +40,8 @@ This workstream converts provider-shaped bytes into traceable observations and, 
 - `data/calibration/pilot/`: C2 specification, committed snapshot manifest, normalized observations, diagnostics, and report.
 - `data/calibration/exploration/`: C3 frozen-input contract and generated
   non-authoritative exploration artifacts.
+- `data/calibration/preflight/`: C4 exact-C3-bound, non-authoritative
+  generation-preparation gate.
 - `packages/calibration`: deterministic TypeScript implementation and adapters.
 - `tests/calibration`: calibration-specific verification and runtime-boundary checks.
 
@@ -58,6 +63,7 @@ pnpm vitest run tests/calibration
 pnpm --filter @econmind/calibration typecheck
 pnpm --filter @econmind/calibration build
 pnpm --filter @econmind/calibration exploration:generate
+pnpm --filter @econmind/calibration c4:preflight:verify
 pnpm test:boundaries
 pnpm secrets:check
 ```
@@ -70,8 +76,10 @@ Do not commit large provider downloads. Configure a local/object-store path outs
 
 ## Current stopping point
 
-C2 and C3 forward remediation have independent continuation approval. C3
-descriptive exploration remains bounded to the frozen partial pilot: it does
-not create or approve an archetype algorithm/count, fictional-country mapping,
-final trade matrix, IPF/RAS result, engine formula, runtime import, World State
-mutation, or production database operation.
+C2 and C3 forward remediation have independent continuation approval. The C4
+preflight binds the approved C3 evidence and explicitly reports that a final
+generator is not ready. C3 descriptive exploration remains bounded to the
+frozen partial pilot: it does not create or approve an archetype
+algorithm/count, fictional-country mapping, final trade matrix, IPF/RAS result,
+engine formula, runtime import, World State mutation, or production database
+operation.
