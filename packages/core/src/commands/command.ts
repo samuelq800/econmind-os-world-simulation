@@ -34,22 +34,26 @@ const CANONICAL_INTEGER = /^(?:0|[1-9]\d*)$/u;
 const SHA256_HEX = /^[0-9a-f]{64}$/u;
 const RFC3339_MILLISECONDS =
   /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d\.\d{3}Z$/u;
-const COMMAND_FIELDS = Object.freeze([
-  'actorId',
-  'authSubject',
-  'commandId',
-  'commandType',
-  'correlationId',
-  'countryId',
-  'expectedWorldVersion',
-  'idempotencyKey',
-  'officeId',
-  'payload',
-  'schemaVersion',
-  'simTime',
-  'submittedAtReal',
-  'worldId',
-]);
+export const COMMAND_FIELD_CLASSIFICATION = Object.freeze({
+  actorId: 'AUTHORITATIVE_INTENT',
+  authSubject: 'AUTHORITATIVE_INTENT',
+  commandId: 'AUTHORITATIVE_INTENT',
+  commandType: 'AUTHORITATIVE_INTENT',
+  correlationId: 'TRACE_TRANSPORT_AUDIT',
+  countryId: 'AUTHORITATIVE_INTENT',
+  expectedWorldVersion: 'AUTHORITATIVE_INTENT',
+  idempotencyKey: 'AUTHORITATIVE_INTENT',
+  officeId: 'AUTHORITATIVE_INTENT',
+  payload: 'AUTHORITATIVE_INTENT',
+  schemaVersion: 'AUTHORITATIVE_INTENT',
+  simTime: 'AUTHORITATIVE_INTENT',
+  submittedAtReal: 'TRACE_TRANSPORT_AUDIT',
+  worldId: 'AUTHORITATIVE_INTENT',
+} as const);
+
+const COMMAND_FIELDS = Object.freeze(
+  Object.keys(COMMAND_FIELD_CLASSIFICATION).sort(),
+);
 
 export interface CanonicalCommand {
   readonly actorId: ActorId;
@@ -68,6 +72,40 @@ export interface CanonicalCommand {
   readonly simTime: SimTime;
   readonly submittedAtReal: string;
   readonly worldId: WorldId;
+}
+
+export interface AuthoritativeCommandIntentProjection {
+  readonly actorId: ActorId;
+  readonly authSubject: AuthSubject;
+  readonly commandId: CommandId;
+  readonly commandType: CommandType;
+  readonly countryId: CountryId;
+  readonly expectedWorldVersion: string | null;
+  readonly idempotencyKey: IdempotencyKey | null;
+  readonly officeId: OfficeId | null;
+  readonly canonicalPayload: string;
+  readonly schemaVersion: CommandSchemaVersion;
+  readonly simTime: SimTime;
+  readonly worldId: WorldId;
+}
+
+export function projectAuthoritativeCommandIntent(
+  command: Omit<CanonicalCommand, 'fingerprint' | 'payloadHash'>,
+): Readonly<AuthoritativeCommandIntentProjection> {
+  return Object.freeze({
+    actorId: command.actorId,
+    authSubject: command.authSubject,
+    commandId: command.commandId,
+    commandType: command.commandType,
+    countryId: command.countryId,
+    expectedWorldVersion: command.expectedWorldVersion,
+    idempotencyKey: command.idempotencyKey,
+    officeId: command.officeId,
+    canonicalPayload: command.canonicalPayload,
+    schemaVersion: command.schemaVersion,
+    simTime: command.simTime,
+    worldId: command.worldId,
+  });
 }
 
 export interface DurableCommandIdentity {
@@ -166,7 +204,7 @@ export function parseCanonicalCommand(
   const canonicalSimTime = SimTime.fromTicks(
     requiredString(record.simTime, 'simTime'),
   );
-  const intent = Object.freeze({
+  const command = Object.freeze({
     actorId: actorId(requiredString(record.actorId, 'actorId')),
     authSubject: authSubject(requiredString(record.authSubject, 'authSubject')),
     commandId: canonicalCommandId,
@@ -187,13 +225,17 @@ export function parseCanonicalCommand(
     canonicalPayload,
     schemaVersion: COMMAND_SCHEMA_VERSION,
     simTime: canonicalSimTime,
+    submittedAtReal: canonicalRealTimestamp(record.submittedAtReal),
     worldId: worldId(requiredString(record.worldId, 'worldId')),
   });
+  const authoritativeIntent = projectAuthoritativeCommandIntent(command);
   return Object.freeze({
-    ...intent,
-    fingerprint: canonicalSha256(canonicalHashInput(intent), sha256Hex),
+    ...command,
+    fingerprint: canonicalSha256(
+      canonicalHashInput(authoritativeIntent),
+      sha256Hex,
+    ),
     payloadHash: canonicalSha256(canonicalHashInput(record.payload), sha256Hex),
-    submittedAtReal: canonicalRealTimestamp(record.submittedAtReal),
   });
 }
 

@@ -33,6 +33,37 @@ function commandInput(payload: Record<string, string>) {
 }
 
 describe('V07.1 deterministic Command properties', () => {
+  it('keeps fingerprints invariant across arbitrary correlation IDs', () => {
+    fc.assert(
+      fc.property(
+        fc.stringMatching(/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u),
+        fc.stringMatching(/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u),
+        (firstCorrelationId, secondCorrelationId) => {
+          const original = parseCanonicalCommand(
+            {
+              ...commandInput({ value: 'UNCHANGED' }),
+              correlationId: firstCorrelationId,
+            },
+            sha256,
+          );
+          const retry = parseCanonicalCommand(
+            {
+              ...commandInput({ value: 'UNCHANGED' }),
+              correlationId: secondCorrelationId,
+            },
+            sha256,
+          );
+
+          expect(retry.fingerprint).toBe(original.fingerprint);
+          expect(classifyCommandIdentity([original], retry).kind).toBe(
+            'EXACT_DUPLICATE',
+          );
+        },
+      ),
+      { numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED + 70 },
+    );
+  });
+
   it('canonicalizes property-order permutations to one fingerprint', () => {
     fc.assert(
       fc.property(

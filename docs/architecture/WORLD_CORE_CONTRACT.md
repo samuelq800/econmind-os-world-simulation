@@ -139,10 +139,18 @@ The proposed immutable envelope is:
 | `submittedAtReal`        | Server audit metadata only; excluded from economic calculations.                             |
 | `expectedWorldVersion`   | Canonical non-negative WorldVersion or explicit omission where the command contract permits. |
 | `correlationId`          | Trace grouping only; never affects ordering or outcome.                                      |
+| `simTime`                | Canonical V06 simulation tick associated with the accepted command intent.                   |
 
-The canonical command fingerprint includes commandId, idempotencyKey, World,
-AuthSubject, resolved actor/country/Office, command type/schema, payload, and
-expected WorldVersion. It excludes server audit time and transport metadata.
+The authoritative fingerprint projection is an explicit allow-list:
+
+| Classification          | Command input fields                                                                                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AUTHORITATIVE_INTENT`  | `commandId`, `idempotencyKey`, `worldId`, `authSubject`, `actorId`, `countryId`, `officeId`, `commandType`, `schemaVersion`, `payload`, `expectedWorldVersion`, `simTime` |
+| `TRACE_TRANSPORT_AUDIT` | `correlationId`, `submittedAtReal`                                                                                                                                        |
+
+Only `AUTHORITATIVE_INTENT` fields participate in the canonical command
+fingerprint. `correlationId` and server audit time remain stored envelope
+metadata but cannot change duplicate/conflict semantics, ordering, or outcome.
 Hash input uses the repaired V03 canonical serializer and its fixed SHA-256
 preimage convention. Fingerprint/Event/Receipt/replay bytes may contain only
 inert canonical primitives/plain records/arrays or trusted explicit domain
