@@ -364,7 +364,8 @@
       "automated_evidence": "PASS",
       "evidence_file": "docs/reports/V07.3/TEST_EVIDENCE.json",
       "implementation_file": "docs/reports/V07.3/IMPLEMENTATION.md",
-      "review_target": null,
+      "review_target": "2b645f963422ac7dcb39c599768003e93ddc22d3",
+      "review_bundle": "docs/reports/V07.3/REVIEW_TARGET.md",
       "independent_review": "PENDING_V07_PACKAGE_GATE",
       "open_p0_blockers": 0,
       "open_p1_majors": 0,
@@ -533,7 +534,8 @@
     "V07.3": [
       "docs/exec-plans/V07.3.md",
       "docs/reports/V07.3/IMPLEMENTATION.md",
-      "docs/reports/V07.3/TEST_EVIDENCE.json"
+      "docs/reports/V07.3/TEST_EVIDENCE.json",
+      "docs/reports/V07.3/REVIEW_TARGET.md"
     ]
   },
   "package_evidence": {

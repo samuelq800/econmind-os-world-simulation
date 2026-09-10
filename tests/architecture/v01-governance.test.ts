@@ -302,6 +302,7 @@ describe('V06 owner-authorized package continuation', () => {
       v07_3: {
         status: 'IMPLEMENTED_UNVERIFIED',
         code_candidate: '956d011df95f383917b421ffc522eb896477970a',
+        review_target: '2b645f963422ac7dcb39c599768003e93ddc22d3',
         automated_evidence: 'PASS',
         independent_review: 'PENDING_V07_PACKAGE_GATE',
         open_p0_blockers: 0,

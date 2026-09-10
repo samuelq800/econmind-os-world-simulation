@@ -1419,8 +1419,18 @@ def validate(root: Path) -> dict[str, Any]:
                                     "HEAD",
                                     f"{step_key} candidate lineage",
                                 )
+                                step_review_target = commit_exists(
+                                    step_record.get("review_target"),
+                                    f"{step_key} review target",
+                                )
+                                is_ancestor(
+                                    step_candidate,
+                                    step_review_target,
+                                    f"{step_key} review lineage",
+                                )
                                 file(step_record.get("implementation_file"))
                                 file(step_record.get("evidence_file"))
+                                file(step_record.get("review_bundle"))
                         else:
                             require(False, "unsupported active V07 lifecycle state")
                         require(
