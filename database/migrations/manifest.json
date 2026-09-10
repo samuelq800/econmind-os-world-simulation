@@ -31,6 +31,20 @@
       "lock_or_downtime_risk": "Branch-local candidate; creates new World V2 tables and immutability triggers only",
       "rollback_strategy": "reversible-before-economic-facts",
       "production_approval": null
+    },
+    {
+      "migration_id": "0003_world_v2_command_receipts_outbox",
+      "release_order": 3,
+      "path": "database/migrations/artifacts/0003_world_v2_command_receipts_outbox.sql",
+      "sha256": "bed513ccb1ae555d8c669597c61a46d6d56cdc8173a681a4da818934719502d0",
+      "artifact_source_commit": "2b3349555137196612bea6d55e22edf156f53cbd",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Branch-local V07.2 candidate; creates queue, receipt, consumer-delivery and notification-outbox tables only",
+      "rollback_strategy": "reversible-before-economic-facts",
+      "production_approval": null
     }
   ]
 }

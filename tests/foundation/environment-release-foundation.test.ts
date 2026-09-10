@@ -121,7 +121,7 @@ describe('V02 migration and release chain', () => {
     invalid.migrations.push({
       ...invalid.migrations[0],
       path: '../outside.sql',
-      release_order: 4,
+      release_order: invalid.migrations.length + 2,
     });
     const result = validateMigrationManifest(invalid, artifacts, provenance);
     expect(result.status).toBe('FAIL');
