@@ -24,39 +24,120 @@ create table world_v2.command_queue (
 comment on table world_v2.command_queue is
   'Operational V07.2 queue state; a claim is not commit authority or a V09 fencing token';
 
+alter table world_v2.command_submission
+  add constraint command_submission_receipt_evidence_key
+  unique (world_id, command_id, command_fingerprint);
+
+alter table world_v2.authoritative_event
+  add constraint authoritative_event_transition_evidence_key
+  unique (world_id, event_id, causation_command_id, world_version);
+
+comment on column world_v2.authoritative_event.world_version is
+  'WorldVersion after the logical transition; event_sequence independently orders one or more Events within that transition';
+
 create table world_v2.command_receipt (
   world_id text not null,
   command_id text not null,
-  schema_version text not null check (schema_version = 'command-receipt-v1'),
+  idempotency_key text,
+  schema_version text not null check (schema_version = 'command-receipt-v2'),
   command_fingerprint text not null check (command_fingerprint ~ '^sha256:[0-9a-f]{64}$'),
   outcome text not null
     check (outcome in ('COMMITTED', 'REJECTED', 'AUTHORIZATION_REVOKED')),
   reason_code text,
-  committed_world_version bigint check (committed_world_version > 0),
+  transition_id text,
+  world_version_before bigint check (world_version_before >= 0),
+  world_version_after bigint check (world_version_after > 0),
   sim_time bigint not null check (sim_time >= 0),
   event_ids jsonb not null default '[]'::jsonb check (jsonb_typeof(event_ids) = 'array'),
   recorded_at_real timestamptz not null,
   primary key (world_id, command_id),
-  foreign key (world_id, command_id)
-    references world_v2.command_submission (world_id, command_id),
+  foreign key (world_id, command_id, command_fingerprint)
+    references world_v2.command_submission (world_id, command_id, command_fingerprint),
   check (
     (
       outcome = 'COMMITTED'
       and reason_code is null
-      and committed_world_version is not null
+      and transition_id = command_id
+      and world_version_before is not null
+      and world_version_after = world_version_before + 1
       and jsonb_array_length(event_ids) > 0
     )
     or (
       outcome in ('REJECTED', 'AUTHORIZATION_REVOKED')
       and reason_code ~ '^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'
-      and committed_world_version is null
+      and transition_id is null
+      and world_version_before is null
+      and world_version_after is null
       and jsonb_array_length(event_ids) = 0
     )
   )
 );
 
 comment on table world_v2.command_receipt is
-  'Immutable final Command outcome; acceptance remains the immutable command_submission fact';
+  'Immutable final Command outcome bound to canonical intent and one complete authoritative transition';
+
+create function world_v2.validate_command_receipt_evidence()
+returns trigger
+language plpgsql
+as $$
+declare
+  submitted_idempotency_key text;
+  matching_event_count bigint;
+  distinct_event_count bigint;
+  non_string_event_count bigint;
+begin
+  select idempotency_key
+    into submitted_idempotency_key
+    from world_v2.command_submission
+    where world_id = new.world_id
+      and command_id = new.command_id
+      and command_fingerprint = new.command_fingerprint;
+
+  if not found or new.idempotency_key is distinct from submitted_idempotency_key then
+    raise exception 'receipt Command identity or fingerprint does not match submission'
+      using errcode = '23503';
+  end if;
+
+  if new.outcome = 'COMMITTED' then
+    select count(*)
+      into non_string_event_count
+      from jsonb_array_elements(new.event_ids) as items(item)
+      where jsonb_typeof(items.item) <> 'string';
+    if non_string_event_count <> 0 then
+      raise exception 'receipt Event IDs must be canonical strings'
+        using errcode = '23514';
+    end if;
+
+    select count(distinct ids.event_id)
+      into distinct_event_count
+      from jsonb_array_elements_text(new.event_ids) as ids(event_id);
+    if distinct_event_count <> jsonb_array_length(new.event_ids) then
+      raise exception 'receipt Event IDs must be unique'
+        using errcode = '23514';
+    end if;
+
+    select count(*)
+      into matching_event_count
+      from world_v2.authoritative_event event
+      where event.world_id = new.world_id
+        and event.causation_command_id = new.transition_id
+        and event.world_version = new.world_version_after
+        and event.event_id in (
+          select ids.event_id
+          from jsonb_array_elements_text(new.event_ids) as ids(event_id)
+        );
+    if matching_event_count <> jsonb_array_length(new.event_ids) then
+      raise exception 'receipt Events do not exist in the authoritative transition'
+        using errcode = '23503';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger command_receipt_evidence_is_bound
+before insert on world_v2.command_receipt
+for each row execute function world_v2.validate_command_receipt_evidence();
 
 create table world_v2.event_consumer_receipt (
   world_id text not null,

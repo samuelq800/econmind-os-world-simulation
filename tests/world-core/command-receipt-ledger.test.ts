@@ -43,7 +43,15 @@ async function insertCommand(
   );
 }
 
-async function insertEvent() {
+async function insertEvent(
+  input: {
+    commandId?: string;
+    correlationId?: string;
+    eventId?: string;
+    sequence?: number;
+    worldVersion?: number;
+  } = {},
+) {
   await database.query(
     `insert into world_v2.authoritative_event (
       world_id, event_id, event_sequence, world_version,
@@ -51,11 +59,19 @@ async function insertEvent() {
       canonical_payload, payload_sha256, event_fingerprint, sim_time,
       recorded_at_real, corrects_event_id
     ) values (
-      'WORLD_1', 'EVENT_1', 1, 1, 'COMMAND_1', 'CORRELATION_1',
+      'WORLD_1', $3, $4, $5, $6, $7,
       'TRANSFER_RECORDED', 'event-v1', '{"amount":"10","asset":"GCU"}',
       $1, $2, 10001, '2026-09-10T00:00:01.000Z', null
     )`,
-    [`sha256:${'c'.repeat(64)}`, `sha256:${'d'.repeat(64)}`],
+    [
+      `sha256:${'c'.repeat(64)}`,
+      `sha256:${'d'.repeat(64)}`,
+      input.eventId ?? 'EVENT_1',
+      input.sequence ?? 1,
+      input.worldVersion ?? 1,
+      input.commandId ?? 'COMMAND_1',
+      input.correlationId ?? 'CORRELATION_1',
+    ],
   );
 }
 
@@ -131,12 +147,14 @@ describe('V07.2 branch-local receipt/queue/outbox candidate', () => {
     await insertEvent();
     await database.query(
       `insert into world_v2.command_receipt (
-        world_id, command_id, schema_version, command_fingerprint, outcome,
-        reason_code, committed_world_version, sim_time, event_ids,
+        world_id, command_id, idempotency_key, schema_version,
+        command_fingerprint, outcome, reason_code, transition_id,
+        world_version_before, world_version_after, sim_time, event_ids,
         recorded_at_real
       ) values (
-        'WORLD_1', 'COMMAND_1', 'command-receipt-v1', $1, 'COMMITTED',
-        null, 1, 10001, '["EVENT_1"]'::jsonb,
+        'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v2', $1,
+        'COMMITTED', null, 'COMMAND_1', 0, 1, 10001,
+        '["EVENT_1"]'::jsonb,
         '2026-09-10T00:00:01.000Z'
       )`,
       [`sha256:${'b'.repeat(64)}`],
@@ -167,6 +185,153 @@ describe('V07.2 branch-local receipt/queue/outbox candidate', () => {
     expect(counts.rows).toEqual([{ commands: 1, events: 1, receipts: 1 }]);
   });
 
+  it('binds a committed receipt to the exact Command fingerprint and idempotency key', async () => {
+    await insertCommand();
+    await insertEvent();
+    await expect(
+      database.query(
+        `insert into world_v2.command_receipt (
+          world_id, command_id, idempotency_key, schema_version,
+          command_fingerprint, outcome, reason_code, transition_id,
+          world_version_before, world_version_after, sim_time, event_ids,
+          recorded_at_real
+        ) values (
+          'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v2', $1,
+          'COMMITTED', null, 'COMMAND_1', 0, 1, 10001,
+          '["EVENT_1"]'::jsonb, '2026-09-10T00:00:01.000Z'
+        )`,
+        [`sha256:${'e'.repeat(64)}`],
+      ),
+    ).rejects.toThrow();
+    await expect(
+      database.query(
+        `insert into world_v2.command_receipt (
+          world_id, command_id, idempotency_key, schema_version,
+          command_fingerprint, outcome, reason_code, transition_id,
+          world_version_before, world_version_after, sim_time, event_ids,
+          recorded_at_real
+        ) values (
+          'WORLD_1', 'COMMAND_1', 'DIFFERENT_KEY', 'command-receipt-v2', $1,
+          'COMMITTED', null, 'COMMAND_1', 0, 1, 10001,
+          '["EVENT_1"]'::jsonb, '2026-09-10T00:00:01.000Z'
+        )`,
+        [`sha256:${'b'.repeat(64)}`],
+      ),
+    ).rejects.toThrow('receipt Command identity or fingerprint');
+  });
+
+  it('requires complete receipt Event evidence from the same transition', async () => {
+    await insertCommand();
+    await insertEvent();
+    await expect(
+      database.query(
+        `insert into world_v2.command_receipt (
+          world_id, command_id, idempotency_key, schema_version,
+          command_fingerprint, outcome, reason_code, transition_id,
+          world_version_before, world_version_after, sim_time, event_ids,
+          recorded_at_real
+        ) values (
+          'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v2', $1,
+          'COMMITTED', null, 'COMMAND_1', 0, 1, 10001,
+          '["MISSING_EVENT"]'::jsonb, '2026-09-10T00:00:01.000Z'
+        )`,
+        [`sha256:${'b'.repeat(64)}`],
+      ),
+    ).rejects.toThrow('receipt Events do not exist');
+
+    await insertCommand({
+      commandId: 'COMMAND_2',
+      idempotencyKey: 'TRANSFER_2',
+      correlationId: 'CORRELATION_2',
+      fingerprintCharacter: 'e',
+    });
+    await insertEvent({
+      commandId: 'COMMAND_2',
+      correlationId: 'CORRELATION_2',
+      eventId: 'EVENT_2',
+      sequence: 2,
+    });
+    await expect(
+      database.query(
+        `insert into world_v2.command_receipt (
+          world_id, command_id, idempotency_key, schema_version,
+          command_fingerprint, outcome, reason_code, transition_id,
+          world_version_before, world_version_after, sim_time, event_ids,
+          recorded_at_real
+        ) values (
+          'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v2', $1,
+          'COMMITTED', null, 'COMMAND_1', 0, 1, 10001,
+          '["EVENT_2"]'::jsonb, '2026-09-10T00:00:01.000Z'
+        )`,
+        [`sha256:${'b'.repeat(64)}`],
+      ),
+    ).rejects.toThrow('receipt Events do not exist');
+  });
+
+  it('accepts multiple ordered Events in one transition and one WorldVersion increment', async () => {
+    await insertCommand();
+    await insertEvent();
+    await insertEvent({ eventId: 'EVENT_2', sequence: 2 });
+    await database.query(
+      `insert into world_v2.command_receipt (
+        world_id, command_id, idempotency_key, schema_version,
+        command_fingerprint, outcome, reason_code, transition_id,
+        world_version_before, world_version_after, sim_time, event_ids,
+        recorded_at_real
+      ) values (
+        'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v2', $1,
+        'COMMITTED', null, 'COMMAND_1', 0, 1, 10001,
+        '["EVENT_1","EVENT_2"]'::jsonb,
+        '2026-09-10T00:00:01.000Z'
+      )`,
+      [`sha256:${'b'.repeat(64)}`],
+    );
+    const evidence = await database.query(
+      `select world_version_before, world_version_after,
+              jsonb_array_length(event_ids)::int as event_count
+       from world_v2.command_receipt`,
+    );
+    expect(evidence.rows).toEqual([
+      { event_count: 2, world_version_after: 1, world_version_before: 0 },
+    ]);
+  });
+
+  it('rejects duplicate receipt Event IDs and invalid WorldVersion boundaries', async () => {
+    await insertCommand();
+    await insertEvent();
+    await expect(
+      database.query(
+        `insert into world_v2.command_receipt (
+          world_id, command_id, idempotency_key, schema_version,
+          command_fingerprint, outcome, reason_code, transition_id,
+          world_version_before, world_version_after, sim_time, event_ids,
+          recorded_at_real
+        ) values (
+          'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v2', $1,
+          'COMMITTED', null, 'COMMAND_1', 0, 1, 10001,
+          '["EVENT_1","EVENT_1"]'::jsonb,
+          '2026-09-10T00:00:01.000Z'
+        )`,
+        [`sha256:${'b'.repeat(64)}`],
+      ),
+    ).rejects.toThrow('receipt Event IDs must be unique');
+    await expect(
+      database.query(
+        `insert into world_v2.command_receipt (
+          world_id, command_id, idempotency_key, schema_version,
+          command_fingerprint, outcome, reason_code, transition_id,
+          world_version_before, world_version_after, sim_time, event_ids,
+          recorded_at_real
+        ) values (
+          'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v2', $1,
+          'COMMITTED', null, 'COMMAND_1', 0, 2, 10001,
+          '["EVENT_1"]'::jsonb, '2026-09-10T00:00:01.000Z'
+        )`,
+        [`sha256:${'b'.repeat(64)}`],
+      ),
+    ).rejects.toThrow();
+  });
+
   it('enforces AUTHORIZATION_REVOKED as a zero-effect final outcome', async () => {
     await insertCommand();
     await insertCommand({
@@ -175,12 +340,14 @@ describe('V07.2 branch-local receipt/queue/outbox candidate', () => {
     });
     await database.query(
       `insert into world_v2.command_receipt (
-        world_id, command_id, schema_version, command_fingerprint, outcome,
-        reason_code, committed_world_version, sim_time, event_ids,
+        world_id, command_id, idempotency_key, schema_version,
+        command_fingerprint, outcome, reason_code, transition_id,
+        world_version_before, world_version_after, sim_time, event_ids,
         recorded_at_real
       ) values (
-        'WORLD_1', 'COMMAND_1', 'command-receipt-v1', $1,
-        'AUTHORIZATION_REVOKED', 'AUTHORIZATION_REVOKED', null, 10001, '[]'::jsonb,
+        'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v2', $1,
+        'AUTHORIZATION_REVOKED', 'AUTHORIZATION_REVOKED', null, null, null,
+        10001, '[]'::jsonb,
         '2026-09-10T00:00:01.000Z'
       )`,
       [`sha256:${'b'.repeat(64)}`],
@@ -188,12 +355,13 @@ describe('V07.2 branch-local receipt/queue/outbox candidate', () => {
     await expect(
       database.query(
         `insert into world_v2.command_receipt (
-          world_id, command_id, schema_version, command_fingerprint, outcome,
-          reason_code, committed_world_version, sim_time, event_ids,
+          world_id, command_id, idempotency_key, schema_version,
+          command_fingerprint, outcome, reason_code, transition_id,
+          world_version_before, world_version_after, sim_time, event_ids,
           recorded_at_real
         ) values (
-          'WORLD_1', 'COMMAND_2', 'command-receipt-v1', $1,
-          'AUTHORIZATION_REVOKED', 'AUTHORIZATION_REVOKED', 2, 10001,
+          'WORLD_1', 'COMMAND_2', 'TRANSFER_2', 'command-receipt-v2', $1,
+          'AUTHORIZATION_REVOKED', 'AUTHORIZATION_REVOKED', 'COMMAND_2', 1, 2, 10001,
           '["EVENT_2"]'::jsonb, '2026-09-10T00:00:01.000Z'
         )`,
         [`sha256:${'e'.repeat(64)}`],
@@ -212,12 +380,14 @@ describe('V07.2 branch-local receipt/queue/outbox candidate', () => {
     await insertEvent();
     await database.query(
       `insert into world_v2.command_receipt (
-        world_id, command_id, schema_version, command_fingerprint, outcome,
-        reason_code, committed_world_version, sim_time, event_ids,
+        world_id, command_id, idempotency_key, schema_version,
+        command_fingerprint, outcome, reason_code, transition_id,
+        world_version_before, world_version_after, sim_time, event_ids,
         recorded_at_real
       ) values (
-        'WORLD_1', 'COMMAND_1', 'command-receipt-v1', $1, 'COMMITTED',
-        null, 1, 10001, '["EVENT_1"]'::jsonb,
+        'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v2', $1,
+        'COMMITTED', null, 'COMMAND_1', 0, 1, 10001,
+        '["EVENT_1"]'::jsonb,
         '2026-09-10T00:00:01.000Z'
       )`,
       [`sha256:${'b'.repeat(64)}`],
@@ -293,12 +463,13 @@ describe('V07.2 branch-local receipt/queue/outbox candidate', () => {
     await expect(
       database.query(
         `insert into world_v2.command_receipt (
-          world_id, command_id, schema_version, command_fingerprint, outcome,
-          reason_code, committed_world_version, sim_time, event_ids,
+          world_id, command_id, idempotency_key, schema_version,
+          command_fingerprint, outcome, reason_code, transition_id,
+          world_version_before, world_version_after, sim_time, event_ids,
           recorded_at_real
         ) values (
-          'WORLD_1', 'COMMAND_1', 'command-receipt-v2', $1, 'REJECTED',
-          'INVALID', null, 10001, '[]'::jsonb,
+          'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v3', $1,
+          'REJECTED', 'INVALID', null, null, null, 10001, '[]'::jsonb,
           '2026-09-10T00:00:01.000Z'
         )`,
         [`sha256:${'b'.repeat(64)}`],
