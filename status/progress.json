@@ -160,7 +160,7 @@
     "next_step_ready": false,
     "next_step_blockers": ["ADR-02", "ADR-05"],
     "required_gate": "V08.1_OWNER_ADR_GATE",
-    "gate_status": "READY_PENDING_OWNER_ADR"
+    "gate_status": "PENDING"
   },
   "v07_package_review": {
     "status": "V07_PACKAGE_APPROVED",

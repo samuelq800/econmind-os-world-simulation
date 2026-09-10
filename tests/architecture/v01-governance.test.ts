@@ -89,8 +89,8 @@ describe('V01.2 ADR coordination graph', () => {
 
     expect(graph.counts.adrs).toBe(20);
     expect(graph.approval_summary).toEqual({
-      approved: 6,
-      proposed_not_approved: 14,
+      approved: 8,
+      proposed_not_approved: 12,
       bulk_approval_permitted: false,
     });
     expect(graph.adrs.map((adr) => adr.id)).toEqual(expectedIds);
@@ -99,7 +99,9 @@ describe('V01.2 ADR coordination graph', () => {
       .map((decision) => decision.id);
     expect(approvedIds).toEqual([
       'ADR-01',
+      'ADR-02',
       'ADR-03',
+      'ADR-05',
       'ADR-11',
       'ADR-16',
       'ADR-17',
@@ -225,7 +227,7 @@ describe('V06 owner-authorized package continuation', () => {
       next_step_ready: false,
       next_step_blockers: ['ADR-02', 'ADR-05'],
       required_gate: 'V08.1_OWNER_ADR_GATE',
-      gate_status: 'READY_PENDING_OWNER_ADR',
+      gate_status: 'PENDING',
     });
     expect(progress.v07_package_review).toMatchObject({
       status: 'V07_PACKAGE_APPROVED',
@@ -355,8 +357,7 @@ describe('V06 owner-authorized package continuation', () => {
       history_preserved: true,
       runtime_equivalence: 'PASS',
       application_deployment: 'NOT_APPLICABLE',
-      migration_handoff_repository:
-        'https://github.com/samuelq800/econmind-os',
+      migration_handoff_repository: 'https://github.com/samuelq800/econmind-os',
       migration_handoff_branch: 'codex/world-v07-production-release',
       migration_handoff_commit: '169efc39d1ed7f47ba3430abd0e54b03e6f5fd02',
       production_migration_release: 'PRODUCTION_MIGRATION_RELEASE_READY',

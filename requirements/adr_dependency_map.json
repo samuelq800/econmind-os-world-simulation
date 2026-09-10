@@ -19,8 +19,8 @@
     "reason": "V01.2 records proposals and future gates; it does not select or implement an unapproved proposal."
   },
   "approval_summary": {
-    "approved": 6,
-    "proposed_not_approved": 14,
+    "approved": 8,
+    "proposed_not_approved": 12,
     "bulk_approval_permitted": false
   },
   "adrs": [
@@ -52,8 +52,8 @@
       "id": "ADR-02",
       "conflict_subject": "技能、库存、设施、存款和外债等逐字段唯一 owner",
       "coordination_proposal": "为每个 canonical entity 固定唯一 owner 和 posting service；跨领域通过事件或命令交接，projection 不得回写。",
-      "decision_status": "PROPOSED_NOT_APPROVED",
-      "approval_record": null,
+      "decision_status": "APPROVED",
+      "approval_record": "docs/architecture/decisions/ADR-02.md",
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
       "latest_gate": "V03/V08",
       "affected_work_packages": [
@@ -168,8 +168,8 @@
       "id": "ADR-05",
       "conflict_subject": "库存位置、在途、产权、风险及进出口确认时点",
       "coordination_proposal": "分别记录 physical location、reservation、ownership、risk bearer 和 economic recognition；按批次守恒并冻结 title 与进出口确认时点。",
-      "decision_status": "PROPOSED_NOT_APPROVED",
-      "approval_record": null,
+      "decision_status": "APPROVED",
+      "approval_record": "docs/architecture/decisions/ADR-05.md",
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
       "latest_gate": "V10",
       "affected_work_packages": [
