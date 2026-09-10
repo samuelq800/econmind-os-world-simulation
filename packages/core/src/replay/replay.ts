@@ -30,6 +30,10 @@ import {
   EVENT_SCHEMA_VERSION,
   type AuthoritativeEvent,
 } from '../events/event.js';
+import {
+  validateAuthoritativeTransition,
+  type AuthoritativeTransition,
+} from '../commands/receipt.js';
 
 export const REPLAY_SCHEMA_VERSION = 'replay-v1' as const;
 export const REDUCER_REGISTRY_VERSION = 'v07-reducer-registry-1' as const;
@@ -80,13 +84,15 @@ export interface ReplayOrigin {
 }
 
 export interface ReplayReducerEvent {
+  readonly transitionId: CommandId;
   readonly worldId: WorldId;
   readonly eventId: EventId;
   readonly causationCommandId: CommandId;
   readonly correctsEventId: EventId | null;
   readonly eventType: EventType;
   readonly sequence: string;
-  readonly worldVersion: string;
+  readonly worldVersionBefore: string;
+  readonly worldVersionAfter: string;
   readonly simTime: SimTime;
   readonly payload: unknown;
 }
@@ -170,6 +176,18 @@ function hashCanonicalJson(
   );
 }
 
+function hashReplaySeed(
+  seed: ReplaySeed,
+  sha256Hex: Sha256Hex,
+): CanonicalSha256 {
+  return canonicalSha256(
+    canonicalHashInput({
+      seed: parseCanonicalJson(seed.canonicalSeed, 'canonical seed'),
+    }),
+    sha256Hex,
+  );
+}
+
 function bindingHash(
   binding: ReplayVersionBinding,
   sha256Hex: Sha256Hex,
@@ -221,6 +239,12 @@ export function createReplayOrigin(input: {
   parseCanonicalInteger(input.lastSequence, 'lastSequence', false);
   parseCanonicalInteger(input.worldVersion, 'worldVersion', false);
   assertCurrentBinding(input.binding);
+  if (hashReplaySeed(input.seed, input.sha256Hex) !== input.seed.seedHash) {
+    replayError(
+      'REPLAY_INTEGRITY_INVALID',
+      'Declared seed hash does not match canonical seed bytes',
+    );
+  }
   const canonicalState = canonicalSerialize(input.state);
   return Object.freeze({
     worldId: worldId(input.worldId),
@@ -273,7 +297,11 @@ function verifyOrigin(input: {
   parseCanonicalInteger(input.origin.lastSequence, 'lastSequence', false);
   parseCanonicalInteger(input.origin.worldVersion, 'worldVersion', false);
   assertCurrentBinding(input.binding);
-  if (input.origin.seedHash !== input.seed.seedHash) {
+  const computedSeedHash = hashReplaySeed(input.seed, input.sha256Hex);
+  if (
+    input.seed.seedHash !== computedSeedHash ||
+    input.origin.seedHash !== computedSeedHash
+  ) {
     replayError('REPLAY_INTEGRITY_INVALID', 'Replay seed provenance mismatch');
   }
   if (
@@ -293,6 +321,7 @@ function verifyOrigin(input: {
 
 function verifyEvent(
   event: AuthoritativeEvent,
+  transition: AuthoritativeTransition,
   sha256Hex: Sha256Hex,
 ): Readonly<ReplayReducerEvent> {
   if (event.schemaVersion !== EVENT_SCHEMA_VERSION) {
@@ -334,13 +363,15 @@ function verifyEvent(
     replayError('REPLAY_INTEGRITY_INVALID', 'Event fingerprint mismatch');
   }
   return Object.freeze({
+    transitionId: transition.transitionId,
     worldId: intent.worldId,
     eventId: intent.eventId,
     causationCommandId: intent.causationCommandId,
     correctsEventId: intent.correctsEventId,
     eventType: intent.eventType,
     sequence: intent.sequence,
-    worldVersion: intent.worldVersion,
+    worldVersionBefore: transition.worldVersionBefore,
+    worldVersionAfter: transition.worldVersionAfter,
     simTime: intent.simTime,
     payload: canonicalPayload,
   });
@@ -381,7 +412,7 @@ export function replayAuthoritativeEvents(input: {
   readonly seed: ReplaySeed;
   readonly binding: ReplayVersionBinding;
   readonly registry: ReplayReducerRegistry;
-  readonly events: readonly AuthoritativeEvent[];
+  readonly transitions: readonly AuthoritativeTransition[];
   readonly sha256Hex: Sha256Hex;
 }): Readonly<ReplayResult> {
   if (
@@ -394,61 +425,98 @@ export function replayAuthoritativeEvents(input: {
   let expectedSequence =
     parseCanonicalInteger(input.origin.lastSequence, 'lastSequence', false) +
     1n;
-  let expectedWorldVersion =
-    parseCanonicalInteger(input.origin.worldVersion, 'worldVersion', false) +
-    1n;
+  let expectedWorldVersion = parseCanonicalInteger(
+    input.origin.worldVersion,
+    'worldVersion',
+    false,
+  );
   const appliedEventIds: EventId[] = [];
+  const seenEventIds = new Set<EventId>();
+  const seenTransitionIds = new Set<CommandId>();
   const currentBindingHash = bindingHash(input.binding, input.sha256Hex);
 
-  for (const authoritativeEvent of input.events) {
-    const event = verifyEvent(authoritativeEvent, input.sha256Hex);
-    if (event.worldId !== input.origin.worldId) {
+  for (const transitionInput of input.transitions) {
+    let transition: Readonly<AuthoritativeTransition>;
+    try {
+      transition = validateAuthoritativeTransition(transitionInput);
+    } catch (error) {
+      if (
+        error instanceof DomainError &&
+        error.code === DOMAIN_ERROR_CODES.TRANSITION_EVIDENCE_INVALID
+      ) {
+        replayError(
+          'REPLAY_SEQUENCE_INVALID',
+          `Replay transition evidence is invalid: ${error.message}`,
+        );
+      }
+      throw error;
+    }
+    if (
+      transition.worldId !== input.origin.worldId ||
+      BigInt(transition.worldVersionBefore) !== expectedWorldVersion ||
+      BigInt(transition.worldVersionAfter) !== expectedWorldVersion + 1n
+    ) {
       replayError(
         'REPLAY_SEQUENCE_INVALID',
-        'Replay Event belongs to another World',
+        'Replay transition has a gap, foreign World, or conflicting version boundary',
       );
     }
-    if (BigInt(event.sequence) !== expectedSequence) {
+    if (seenTransitionIds.has(transition.transitionId)) {
       replayError(
         'REPLAY_SEQUENCE_INVALID',
-        `Replay expected Event sequence ${expectedSequence.toString()}`,
+        'Replay transition identity is duplicated or ambiguously grouped',
       );
     }
-    if (BigInt(event.worldVersion) !== expectedWorldVersion) {
-      replayError(
-        'REPLAY_SEQUENCE_INVALID',
-        `Replay expected WorldVersion ${expectedWorldVersion.toString()}`,
+    seenTransitionIds.add(transition.transitionId);
+    for (const authoritativeEvent of transition.events) {
+      const event = verifyEvent(
+        authoritativeEvent,
+        transition,
+        input.sha256Hex,
       );
-    }
-    const reducer = input.registry.reducers[event.eventType];
-    if (reducer === undefined) {
-      replayError(
-        'VERSION_MISMATCH',
-        `No reducer for Event type ${event.eventType}`,
-      );
-    }
-    const next = reducer({
-      state,
-      event,
-      random: eventRandom({
-        seed: input.seed,
+      if (BigInt(event.sequence) !== expectedSequence) {
+        replayError(
+          'REPLAY_SEQUENCE_INVALID',
+          `Replay expected Event sequence ${expectedSequence.toString()}`,
+        );
+      }
+      if (seenEventIds.has(event.eventId)) {
+        replayError(
+          'REPLAY_SEQUENCE_INVALID',
+          'Replay Event identity is duplicated',
+        );
+      }
+      seenEventIds.add(event.eventId);
+      const reducer = input.registry.reducers[event.eventType];
+      if (reducer === undefined) {
+        replayError(
+          'VERSION_MISMATCH',
+          `No reducer for Event type ${event.eventType}`,
+        );
+      }
+      const next = reducer({
+        state,
         event,
-        bindingHash: currentBindingHash,
-        sha256Hex: input.sha256Hex,
-      }),
-    });
-    const canonicalState = canonicalSerialize(next);
-    state = parseCanonicalJson(canonicalState, 'reducer state');
-    appliedEventIds.push(event.eventId);
-    expectedSequence += 1n;
-    expectedWorldVersion += 1n;
+        random: eventRandom({
+          seed: input.seed,
+          event,
+          bindingHash: currentBindingHash,
+          sha256Hex: input.sha256Hex,
+        }),
+      });
+      const canonicalState = canonicalSerialize(next);
+      state = parseCanonicalJson(canonicalState, 'reducer state');
+      appliedEventIds.push(event.eventId);
+      expectedSequence += 1n;
+    }
+    expectedWorldVersion = BigInt(transition.worldVersionAfter);
   }
 
   const canonicalState = canonicalSerialize(state);
   return Object.freeze({
     worldId: input.origin.worldId,
     lastSequence: (expectedSequence - 1n).toString(),
-    worldVersion: (expectedWorldVersion - 1n).toString(),
+    worldVersion: expectedWorldVersion.toString(),
     canonicalState,
     stateHash: hashCanonicalJson(canonicalState, input.sha256Hex),
     seedHash: input.seed.seedHash,
