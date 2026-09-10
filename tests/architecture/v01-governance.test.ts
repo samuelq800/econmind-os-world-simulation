@@ -230,7 +230,7 @@ describe('V06 owner-authorized package continuation', () => {
       status: 'READY_FOR_PACKAGE_REVIEW',
       package_status: 'IMPLEMENTED_UNVERIFIED',
       content_commit: '563a96490f207d94a3110dbf9c7a037f23b46923',
-      review_target: null,
+      review_target: '079fa9d230d5109488a1e5ea82e97f81845c49eb',
       superseded_review_target: '7cd856380e93020dabe8fb969472f9a18ce773cd',
       latest_independent_decision: 'V07_PACKAGE_CHANGES_REQUIRED',
       pending_independent_closure: {
