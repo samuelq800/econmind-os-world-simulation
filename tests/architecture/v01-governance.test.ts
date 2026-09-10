@@ -281,7 +281,7 @@ describe('V06 owner-authorized package continuation', () => {
       status: 'COMPLETED',
       branch: 'codex/world-core-v07',
       main_baseline: '026671eca6b85bc6e5f1c99878c6f8d740f2fb21',
-      current_main: '8e4d9e125a89fc1457ed016c708537fd67e1c8b7',
+      current_main: '5fb526c40345a46db7e355e257057295ce0d670f',
       decision_commit: 'e5e4a3291fd2e77ff16173d88f631ea131badf34',
       adr_16_20_decision_commit: 'ec0f67d1e8e618bd0cf77089a0fd615cb10e0f5e',
       adr_16_20_main_merge: '24c05f8d907a5c100a6918bba662bdb0da90dfac',
@@ -344,6 +344,27 @@ describe('V06 owner-authorized package continuation', () => {
         migration_change: false,
         production_mutation: false,
       },
+    });
+    expect(progress.v07_integration).toEqual({
+      branch: 'codex/world-core-v07',
+      approved_package_target: '079fa9d230d5109488a1e5ea82e97f81845c49eb',
+      owner_acceptance_commit: 'e7cdaf0aaeb83ebe63c62208c512fcb251158929',
+      promotion_commit: '35ca483dc6e72bbcfc6d71202c3916f2a326dd76',
+      status: 'MERGED',
+      merged_commit: '5fb526c40345a46db7e355e257057295ce0d670f',
+      history_preserved: true,
+      runtime_equivalence: 'PASS',
+      application_deployment: 'NOT_APPLICABLE',
+      migration_handoff_repository:
+        'https://github.com/samuelq800/econmind-os',
+      migration_handoff_branch: 'codex/world-v07-production-release',
+      migration_handoff_commit: '169efc39d1ed7f47ba3430abd0e54b03e6f5fd02',
+      production_migration_release: 'PRODUCTION_MIGRATION_RELEASE_READY',
+      publisher_preflight: 'FAIL_REMOTE_MIGRATION_HISTORY_DIVERGENCE',
+      publisher_preflight_run:
+        'https://github.com/samuelq800/econmind-os/actions/runs/34457850502',
+      production_mutation: false,
+      evidence_file: 'docs/reports/V07/FINAL_RECONCILIATION.md',
     });
     expect(progress.v06_package_review).toMatchObject({
       decision: 'V06_PACKAGE_APPROVED',
