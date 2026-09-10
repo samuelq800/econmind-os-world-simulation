@@ -1,0 +1,21 @@
+{
+  "schema_version": "V08.1-BLOCKER-FORWARD-FIX-EVIDENCE-1",
+  "step_id": "V08.1",
+  "state": "IMPLEMENTED_UNVERIFIED",
+  "historical_package_target": "c44885fdf0c639d3cce6c1e337b21042ab647965",
+  "code_candidate": "08350cfa5081668c34e4104b40ae39384ec026a2",
+  "finding": "B01",
+  "checks": {
+    "raw_inventory_snapshot_not_authoritative": "PASS",
+    "arbitrary_world_version_not_authoritative": "PASS",
+    "arbitrary_applied_ids_not_authoritative": "PASS",
+    "opening_plus_posting_lineage_authoritative": "PASS",
+    "inventory_conservation_regression": "PASS",
+    "focused_b01_b02": "2 files / 18 tests / PASS",
+    "v08_regression": "8 files / 58 tests / PASS",
+    "full_repository": "39 files / 473 tests / PASS"
+  },
+  "migration_created": false,
+  "independent_review": "NOT_RUN",
+  "production_access": false
+}
