@@ -32,7 +32,10 @@ it('the actual pnpm test:boundaries command rejects the outside-src review bridg
       {
         cwd: repositoryRoot,
         encoding: 'utf8',
-        timeout: 30_000,
+        // The nested canonical suite can contend with the outer full-suite
+        // worker pool; keep the fail-closed assertion but give it a bounded
+        // budget that covers normal local/CI contention.
+        timeout: 60_000,
       },
     );
     expect(result.status, `${result.stdout}${result.stderr}`).toBe(1);
@@ -42,4 +45,4 @@ it('the actual pnpm test:boundaries command rejects the outside-src review bridg
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });
   }
-}, 40_000);
+}, 70_000);
