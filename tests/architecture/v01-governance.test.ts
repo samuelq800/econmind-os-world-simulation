@@ -349,10 +349,13 @@ describe('V06 owner-authorized package continuation', () => {
       authority: 'PROJECT_OWNER_DIRECT_CONFIRMATION',
       package_verified: true,
       merge_authorized: true,
+      final_baseline_before_merge: 'PASS',
+      final_closure_record: 'docs/reports/V08/FINAL_CLOSURE.md',
       production_access: false,
       production_mutation: false,
       v09_started: false,
     });
+    expect(progress.work_packages.V08).toBe('VERIFIED');
     expect(progress.v07_package_review).toMatchObject({
       status: 'V07_PACKAGE_APPROVED',
       package_status: 'VERIFIED',

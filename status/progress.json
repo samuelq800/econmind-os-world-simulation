@@ -628,7 +628,8 @@
     "authority": "PROJECT_OWNER_DIRECT_CONFIRMATION",
     "package_verified": true,
     "merge_authorized": true,
-    "final_baseline_before_merge": "PENDING",
+    "final_baseline_before_merge": "PASS",
+    "final_closure_record": "docs/reports/V08/FINAL_CLOSURE.md",
     "production_access": false,
     "production_mutation": false,
     "v09_started": false
@@ -822,7 +823,8 @@
       "docs/reports/V08.1/TEST_EVIDENCE_BLOCKER_FORWARD_FIX.json",
       "docs/governance/WORLD_CORE_V08_CONTINUATION_POLICY.json",
       "docs/reports/V08/OWNER_CONTINUATION_ACTIVATION.md",
-      "docs/reports/V08/FINAL_ACCEPTANCE.md"
+      "docs/reports/V08/FINAL_ACCEPTANCE.md",
+      "docs/reports/V08/FINAL_CLOSURE.md"
     ],
     "V08.2": [
       "docs/exec-plans/V08.2.md",
@@ -831,7 +833,8 @@
       "docs/reports/V08.2/TEST_EVIDENCE.json",
       "docs/reports/V08.2/IMPLEMENTATION_BLOCKER_FORWARD_FIX.md",
       "docs/reports/V08.2/TEST_EVIDENCE_BLOCKER_FORWARD_FIX.json",
-      "docs/reports/V08/FINAL_ACCEPTANCE.md"
+      "docs/reports/V08/FINAL_ACCEPTANCE.md",
+      "docs/reports/V08/FINAL_CLOSURE.md"
     ],
     "V08.3": [
       "docs/exec-plans/V08.3.md",
@@ -840,7 +843,8 @@
       "docs/reports/V08.3/TEST_EVIDENCE.json",
       "docs/reports/V08.3/IMPLEMENTATION_BLOCKER_FORWARD_FIX.md",
       "docs/reports/V08.3/TEST_EVIDENCE_BLOCKER_FORWARD_FIX.json",
-      "docs/reports/V08/FINAL_ACCEPTANCE.md"
+      "docs/reports/V08/FINAL_ACCEPTANCE.md",
+      "docs/reports/V08/FINAL_CLOSURE.md"
     ]
   },
   "package_evidence": {
@@ -892,7 +896,8 @@
       "docs/reports/V08/PACKAGE_REVIEW_BLOCKER_FORWARD_FIX.md",
       "docs/reports/V08/PACKAGE_TEST_EVIDENCE_BLOCKER_FORWARD_FIX.json",
       "docs/reports/V08/PACKAGE_REVIEW_TARGET_BLOCKER_FORWARD_FIX.md",
-      "docs/reports/V08/FINAL_ACCEPTANCE.md"
+      "docs/reports/V08/FINAL_ACCEPTANCE.md",
+      "docs/reports/V08/FINAL_CLOSURE.md"
     ]
   },
   "implementation_commits": {

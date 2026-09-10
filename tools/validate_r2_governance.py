@@ -2024,9 +2024,10 @@ def validate(root: Path) -> dict[str, Any]:
                                     and gate.get("gate_status") == "PENDING"
                                     and v08_package_review.get(
                                         "final_baseline_before_merge"
-                                    ) in {"PENDING", "PASS"},
+                                    ) == "PASS",
                                     "V08 promoted package must stop for mainline integration",
                                 )
+                                file(v08_package_review.get("final_closure_record"))
                             else:
                                 require(
                                     isinstance(v08_integration, dict)
