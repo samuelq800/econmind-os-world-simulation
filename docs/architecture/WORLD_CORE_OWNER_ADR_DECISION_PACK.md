@@ -2,9 +2,10 @@
 
 ## Status
 
-ADR-01, ADR-02, ADR-03, ADR-05, ADR-11, ADR-16, ADR-17 and ADR-20 are `APPROVED` by the responsible human owner
-and are bound to their records under `docs/architecture/decisions/`. The other
-four records in this pack remain `PROPOSED_NOT_APPROVED`. ADR-17 implementation
+ADR-01, ADR-02, ADR-03, ADR-05, ADR-11, ADR-16, ADR-17, ADR-18 and ADR-20 are `APPROVED` by the responsible human owner
+or the owner's Control Tower delegation and are bound to their records under
+`docs/architecture/decisions/`. The other three records in this pack remain
+`PROPOSED_NOT_APPROVED`. ADR-17 implementation
 is staged by authoritative work-package ownership; approval does not claim that
 V08/V09 mechanisms already exist.
 
@@ -24,7 +25,7 @@ V08/V09 mechanisms already exist.
 | ADR-20 | APPROVED       | Approved before V07.2 permits queued execution                | Re-resolve current identity/membership/country/Office/capability/revision at intake, applicable approval, recovery and immediately before authoritative user-command commit; accepted historical facts remain immutable. | Authorization context is not authority; revoked, uncommitted discretionary work fails closed with zero authoritative effect. | Policies for future irreversible obligations and user erasure beyond this slice. | V07.2, V09.2, V10.2-V10.3          |
 | ADR-02 | APPROVED       | Approved before V08.1 model/schema                            | World Core posting services uniquely own inventory and financial positions; other domains submit Commands/events only.                                                                                                   | One owner per canonical position and no projection write-back.                                                               | Owners for post-sprint skills, facilities, deposits and foreign debt.            | V08.1-V08.3, V09-V10               |
 | ADR-05 | APPROVED       | Approved before V08.1 bucket model                            | Separate physical location, reservation, title, risk and recognition; minimal fixture transfers title/risk at atomic delivery.                                                                                           | AVAILABLE/RESERVED/IN_TRANSIT conservation and no buyer availability/title before delivery.                                  | Full logistics, Incoterms, customs and macro recognition.                        | V08.1, V10.1-V10.3                 |
-| ADR-18 | NO             | Before V09.1 real persistence/concurrency evidence            | Disposable local/CI databases and isolated non-production staging; canonical fail-closed env check before persistence; no production target.                                                                             | Exact approved surfaces for PostgreSQL concurrency, crash and RLS/grant evidence.                                            | Production topology, capacity and cutover.                                       | V09.1-V09.3, V10.4                 |
+| ADR-18 | APPROVED       | Approved before V09.1 real persistence/concurrency evidence   | Disposable local/CI databases and isolated non-production staging; canonical fail-closed env check before persistence; no production target.                                                                             | Exact approved surfaces for PostgreSQL concurrency, crash and RLS/grant evidence.                                            | Production topology, capacity and cutover.                                       | V09.1-V09.3, V10.4                 |
 | ADR-12 | NO             | Before V10.1 projection/schema                                | Public, cabinet, Office-private, negotiation-party and admin projections share one classification policy across API/cache/Realtime.                                                                                      | Derived projections are watermark-bound, scoped and rebuildable; never authority.                                            | Forecast products and later UI disclosure details.                               | V10.1, V10.4                       |
 | ADR-09 | NO             | Before V10.2 proposal/approval schema                         | Versioned resolver requires Seller Trade, Buyer Trade and Buyer Finance for the Treasury-GCU fixture; each Office signs; changes supersede/invalidate scope.                                                             | Bind world/country/proposal/version/payload fingerprint/policy version/full Office set; re-resolve each current signer.      | Thresholds and Office sets for other commodities/instruments.                    | V10.2-V10.3                        |
 
@@ -38,6 +39,7 @@ V08/V09 mechanisms already exist.
 ## Owner friction rule
 
 Group A decisions are approved and V06 is closed. ADR-11/17/20 in Group B and
-ADR-02/05 are now approved for V08, and ADR-16 in Group C is approved. Each remaining Group B decision blocks only at
+ADR-02/05 are approved for V08; ADR-18 is approved for V09.1 evidence; and
+ADR-16 in Group C is approved. Each remaining Group B decision blocks only at
 its named boundary. Group C permits branch-local, candidate-only,
 non-production work; production publication remains separately authorized.

@@ -89,8 +89,8 @@ describe('V01.2 ADR coordination graph', () => {
 
     expect(graph.counts.adrs).toBe(20);
     expect(graph.approval_summary).toEqual({
-      approved: 8,
-      proposed_not_approved: 12,
+      approved: 9,
+      proposed_not_approved: 11,
       bulk_approval_permitted: false,
     });
     expect(graph.adrs.map((adr) => adr.id)).toEqual(expectedIds);
@@ -105,6 +105,7 @@ describe('V01.2 ADR coordination graph', () => {
       'ADR-11',
       'ADR-16',
       'ADR-17',
+      'ADR-18',
       'ADR-20',
     ]);
     expect(

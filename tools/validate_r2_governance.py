@@ -2258,10 +2258,18 @@ def validate(root: Path) -> dict[str, Any]:
                 approval_text = file(approval_record).read_text(encoding="utf-8")
                 require(
                     "Decision: APPROVED" in approval_text
-                    and "Authority: RESPONSIBLE_HUMAN_OWNER" in approval_text
+                    and (
+                        "Authority: RESPONSIBLE_HUMAN_OWNER" in approval_text
+                        or "Authority: CONTROL_TOWER_OWNER_DELEGATION" in approval_text
+                    )
                     and "Codex self-approval" in approval_text,
                     f"{record['id']} owner approval evidence is incomplete",
                 )
+                if "Authority: CONTROL_TOWER_OWNER_DELEGATION" in approval_text:
+                    require(
+                        "Delegation source:" in approval_text,
+                        f"{record['id']} delegated approval lacks its source",
+                    )
             else:
                 require(
                     record["approval_record"] is None,

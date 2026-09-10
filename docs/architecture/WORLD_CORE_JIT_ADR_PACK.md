@@ -2,8 +2,8 @@
 
 ## Status
 
-ADR-01, ADR-02, ADR-03, ADR-05, ADR-11, ADR-16, ADR-17 and ADR-20 are `APPROVED` in
-`status/decisions.json` and bound to responsible-human owner records under
+ADR-01, ADR-02, ADR-03, ADR-05, ADR-11, ADR-16, ADR-17, ADR-18 and ADR-20 are `APPROVED` in
+`status/decisions.json` and bound to owner or delegated-owner records under
 `docs/architecture/decisions/`. Every other unresolved entry below remains
 `PROPOSED_NOT_APPROVED`. This pack summarizes scoped resolutions; the
 individual decision records and register remain authoritative.
@@ -27,7 +27,7 @@ latest safe decision points for this sprint.
 | ADR-12 | Country/Office/party projection visibility                                 | Before V10.1                                      | Yes                      |
 | ADR-09 | Required Offices for the V10 transaction version                           | Before V10.2                                      | Yes                      |
 | ADR-16 | `world_v2` namespace and sole publication chain for new DDL                | Before any candidate migration is merged/promoted | Yes                      |
-| ADR-18 | Isolated database/runtime targets for persistence/concurrency evidence     | Before V09 staging evidence                       | Yes                      |
+| ADR-18 | Isolated database/runtime targets for persistence/concurrency evidence     | APPROVED before V09.1 evidence                    | Approved                 |
 
 ## ADR-01 — Engine and settlement-phase mapping
 
@@ -225,6 +225,8 @@ DELIVERED/AVAILABLE`. Reservation changes no owner or total. Dispatch places
 
 ## ADR-18 — Environment isolation
 
+- **Status:** APPROVED by `CONTROL_TOWER_OWNER_DELEGATION`; see
+  `docs/architecture/decisions/ADR-18.md`.
 - **Decision required:** Which isolated targets supply real transaction,
   concurrency, RLS/grant, and crash evidence.
 - **Why now:** PGlite is suitable for pure DDL rehearsal but cannot alone prove

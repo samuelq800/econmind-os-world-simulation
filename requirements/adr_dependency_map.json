@@ -19,8 +19,8 @@
     "reason": "V01.2 records proposals and future gates; it does not select or implement an unapproved proposal."
   },
   "approval_summary": {
-    "approved": 8,
-    "proposed_not_approved": 12,
+    "approved": 9,
+    "proposed_not_approved": 11,
     "bulk_approval_permitted": false
   },
   "adrs": [
@@ -567,8 +567,8 @@
       "id": "ADR-18",
       "conflict_subject": "运行环境与资源隔离",
       "coordination_proposal": "Local 和 CI 使用一次性环境，staging 使用隔离项目或分支，production 最后连接共享项目；Web、API、Worker 保持职责隔离。",
-      "decision_status": "PROPOSED_NOT_APPROVED",
-      "approval_record": null,
+      "decision_status": "APPROVED",
+      "approval_record": "docs/architecture/decisions/ADR-18.md",
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
       "latest_gate": "V02/V30",
       "affected_work_packages": [
