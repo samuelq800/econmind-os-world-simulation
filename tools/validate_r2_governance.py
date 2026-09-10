@@ -929,12 +929,25 @@ def validate(root: Path) -> dict[str, Any]:
                 "V08 continuation completed-step set is invalid",
             )
             for completed_step, record in v08_completed.items():
-                require(
+                historical_changes_required = (
                     isinstance(record, dict)
-                    and record.get("automated_evidence_status") == "PASS"
+                    and record.get("open_recorded_p0_blockers") > 0
+                    and record.get("open_recorded_p1_majors") == 0
+                    and record.get("independent_review")
+                    == "CHANGES_REQUIRED_ON_HISTORICAL_TARGET"
+                    and record.get("finding_implementation_state")
+                    == "IMPLEMENTED_PENDING_FOCUSED_INDEPENDENT_REVIEW"
+                )
+                initial_review_pending = (
+                    isinstance(record, dict)
                     and record.get("open_recorded_p0_blockers") == 0
                     and record.get("open_recorded_p1_majors") == 0
                     and record.get("independent_review") == "NOT_RUN"
+                )
+                require(
+                    isinstance(record, dict)
+                    and record.get("automated_evidence_status") == "PASS"
+                    and (initial_review_pending or historical_changes_required)
                     and record.get("status") == "IMPLEMENTED_UNVERIFIED",
                     f"{completed_step} lacks valid V08 continuation evidence",
                 )

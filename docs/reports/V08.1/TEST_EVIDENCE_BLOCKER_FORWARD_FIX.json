@@ -5,7 +5,23 @@
   "historical_package_target": "c44885fdf0c639d3cce6c1e337b21042ab647965",
   "code_candidate": "08350cfa5081668c34e4104b40ae39384ec026a2",
   "finding": "B01",
-  "checks": {
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/v08-ledger-authority-boundary.test.ts tests/world-core/v08-global-transition-reconstruction.test.ts",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 2,
+      "tests": 18
+    },
+    {
+      "command": "pnpm check",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": 39,
+      "tests": 473
+    }
+  ],
+  "acceptance": {
     "raw_inventory_snapshot_not_authoritative": "PASS",
     "arbitrary_world_version_not_authoritative": "PASS",
     "arbitrary_applied_ids_not_authoritative": "PASS",
@@ -16,6 +32,6 @@
     "full_repository": "39 files / 473 tests / PASS"
   },
   "migration_created": false,
-  "independent_review": "NOT_RUN",
+  "independent_review": "CHANGES_REQUIRED_ON_HISTORICAL_TARGET",
   "production_access": false
 }

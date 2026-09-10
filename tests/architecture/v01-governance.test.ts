@@ -254,8 +254,11 @@ describe('V06 owner-authorized package continuation', () => {
         not_current_gate_adrs: ['ADR-07', 'ADR-08'],
         migration: 'NOT_CREATED',
         production_mutation: false,
-        implementation_commit: 'f5c022c7957a1128660d25e36ea46df99964a850',
-        evidence_file: 'docs/reports/V08.2/TEST_EVIDENCE.json',
+        implementation_commit: '08350cfa5081668c34e4104b40ae39384ec026a2',
+        historical_implementation_commit:
+          'f5c022c7957a1128660d25e36ea46df99964a850',
+        evidence_file:
+          'docs/reports/V08.2/TEST_EVIDENCE_BLOCKER_FORWARD_FIX.json',
       },
       v08_3: {
         status: 'IMPLEMENTED_UNVERIFIED',
@@ -265,8 +268,11 @@ describe('V06 owner-authorized package continuation', () => {
         not_current_gate_adrs: ['ADR-07', 'ADR-08'],
         migration: 'NOT_CREATED',
         production_mutation: false,
-        implementation_commit: '4f0da4104b928f3504c50164147324c8af0deab5',
-        evidence_file: 'docs/reports/V08.3/TEST_EVIDENCE.json',
+        implementation_commit: '08350cfa5081668c34e4104b40ae39384ec026a2',
+        historical_implementation_commit:
+          '4f0da4104b928f3504c50164147324c8af0deab5',
+        evidence_file:
+          'docs/reports/V08.3/TEST_EVIDENCE_BLOCKER_FORWARD_FIX.json',
       },
     });
     expect(progress.v08_continuation).toMatchObject({
@@ -282,27 +288,39 @@ describe('V06 owner-authorized package continuation', () => {
       owner_approved: true,
       completed_steps: {
         'V08.1': {
-          implementation_commit: 'a73c35d32d93f4067ab4e6228dbb65a4ab64734e',
+          implementation_commit: '08350cfa5081668c34e4104b40ae39384ec026a2',
+          historical_implementation_commit:
+            'a73c35d32d93f4067ab4e6228dbb65a4ab64734e',
           automated_evidence_status: 'PASS',
-          open_recorded_p0_blockers: 0,
+          open_recorded_p0_blockers: 2,
           open_recorded_p1_majors: 0,
-          independent_review: 'NOT_RUN',
+          independent_review: 'CHANGES_REQUIRED_ON_HISTORICAL_TARGET',
+          finding_implementation_state:
+            'IMPLEMENTED_PENDING_FOCUSED_INDEPENDENT_REVIEW',
           status: 'IMPLEMENTED_UNVERIFIED',
         },
         'V08.2': {
-          implementation_commit: 'f5c022c7957a1128660d25e36ea46df99964a850',
+          implementation_commit: '08350cfa5081668c34e4104b40ae39384ec026a2',
+          historical_implementation_commit:
+            'f5c022c7957a1128660d25e36ea46df99964a850',
           automated_evidence_status: 'PASS',
-          open_recorded_p0_blockers: 0,
+          open_recorded_p0_blockers: 2,
           open_recorded_p1_majors: 0,
-          independent_review: 'NOT_RUN',
+          independent_review: 'CHANGES_REQUIRED_ON_HISTORICAL_TARGET',
+          finding_implementation_state:
+            'IMPLEMENTED_PENDING_FOCUSED_INDEPENDENT_REVIEW',
           status: 'IMPLEMENTED_UNVERIFIED',
         },
         'V08.3': {
-          implementation_commit: '4f0da4104b928f3504c50164147324c8af0deab5',
+          implementation_commit: '08350cfa5081668c34e4104b40ae39384ec026a2',
+          historical_implementation_commit:
+            '4f0da4104b928f3504c50164147324c8af0deab5',
           automated_evidence_status: 'PASS',
-          open_recorded_p0_blockers: 0,
+          open_recorded_p0_blockers: 2,
           open_recorded_p1_majors: 0,
-          independent_review: 'NOT_RUN',
+          independent_review: 'CHANGES_REQUIRED_ON_HISTORICAL_TARGET',
+          finding_implementation_state:
+            'IMPLEMENTED_PENDING_FOCUSED_INDEPENDENT_REVIEW',
           status: 'IMPLEMENTED_UNVERIFIED',
         },
       },
@@ -310,11 +328,16 @@ describe('V06 owner-authorized package continuation', () => {
     expect(progress.v08_package_review).toMatchObject({
       status: 'READY_FOR_PACKAGE_REVIEW',
       package_status: 'IMPLEMENTED_UNVERIFIED',
-      review_target: 'c44885fdf0c639d3cce6c1e337b21042ab647965',
-      target_file: 'docs/reports/V08/PACKAGE_REVIEW_TARGET.md',
-      open_recorded_p0_blockers: 0,
+      review_target: 'b3a1f4949efa85d1c310819ebdf37505589f1b49',
+      superseded_review_target: 'c44885fdf0c639d3cce6c1e337b21042ab647965',
+      target_file:
+        'docs/reports/V08/PACKAGE_REVIEW_TARGET_BLOCKER_FORWARD_FIX.md',
+      open_recorded_p0_blockers: 2,
       open_recorded_p1_majors: 0,
-      independent_review: 'NOT_RUN',
+      independent_review: 'CHANGES_REQUIRED_ON_SUPERSEDED_TARGET',
+      latest_independent_decision: 'V08_PACKAGE_CHANGES_REQUIRED',
+      finding_implementation_state:
+        'IMPLEMENTED_PENDING_FOCUSED_INDEPENDENT_REVIEW',
       package_verified: false,
       merge_authorized: false,
       production_access: false,
