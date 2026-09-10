@@ -275,7 +275,7 @@ describe('V06 owner-authorized package continuation', () => {
           status: 'FIXED_PENDING_REVIEW',
           finding:
             'correlationId trace metadata participated in authoritative Command fingerprint',
-          fixed_code_candidate: '67fd40b1597fb4057ef54481ba0b8b8be4ca18a8',
+          fixed_code_candidate: '674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f',
           automated_evidence: 'PASS',
           independent_closure: 'PENDING',
           production_mutation: false,

@@ -4,7 +4,7 @@
   "risk_class": "P1_DOWNSTREAM_BLOCKING_MAJOR",
   "historical_review_target": "b57b6aa9cd349776e1f5cd8ae10d20413523a69c",
   "historical_code_candidate": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
-  "fixed_code_candidate": "67fd40b1597fb4057ef54481ba0b8b8be4ca18a8",
+  "fixed_code_candidate": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
   "status": "FIXED_PENDING_REVIEW",
   "toolchain": {
     "node": "24.20.0",
@@ -41,7 +41,10 @@
       "exit_code": 0,
       "test_files": 3,
       "tests": 20,
-      "property_seed": 20260908
+      "property_base_seed": 20260909,
+      "property_num_runs": 250,
+      "correlation_invariance_seed": 20260979,
+      "payload_mutation_seed": 20260980
     },
     {
       "command": "pnpm --filter @econmind/core typecheck",
@@ -61,7 +64,7 @@
       "boundary_scanned_files": 40,
       "migration_count": 2,
       "migration_rehearsal_modes": ["clean-baseline", "existing-schema"],
-      "secret_scanned_files": 452,
+      "secret_scanned_files": 453,
       "build": "PASS"
     },
     {
@@ -80,7 +83,14 @@
     {
       "candidate": "2a6b16f08967e23acd70dc519de1ecd57719f956",
       "result": "FULL_BASELINE_STOPPED_AT_ONE_STALE_GOVERNANCE_EXPECTATION",
-      "resolution": "main and V07 were reconciled to the six approved ADR records before final candidate 67fd40b1597fb4057ef54481ba0b8b8be4ca18a8"
+      "resolution": "main and V07 were reconciled to the six approved ADR records before the replacement candidate"
+    },
+    {
+      "candidate": "67fd40b1597fb4057ef54481ba0b8b8be4ca18a8",
+      "evidence_target": "02b377614a7337b1d8d7442bae50c534ddbbe3c4",
+      "freeze_commit": "17eb43e21de1dc7e933cb7bfcdf7675b4cbf9a97",
+      "result": "SUPERSEDED_PROPERTY_CONFIGURATION_NOT_BOUND",
+      "resolution": "the property suite now imports FOUNDATION_PROPERTY_CONFIG and runs 250 cases at the fixed base seed 20260909"
     }
   ],
   "migration": {

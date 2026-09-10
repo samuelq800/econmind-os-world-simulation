@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-10T02:12:21Z",
-  "source_commit": "67fd40b1597fb4057ef54481ba0b8b8be4ca18a8",
-  "note": "Gate A and V06 are accepted, verified, and integrated into main. ADR-11, ADR-16, ADR-17 and ADR-20 are APPROVED. Independent review of V07.1 target b57b6aa9cd349776e1f5cd8ae10d20413523a69c found one downstream-blocking MAJOR: trace-only correlationId affected the authoritative Command fingerprint. The explicit projection fix is implemented at 67fd40b1597fb4057ef54481ba0b8b8be4ca18a8 with focused and full automated evidence passing. V07.1 remains IMPLEMENTED_UNVERIFIED / FIXED_PENDING_REVIEW; V07.2 and V08 are not started.",
+  "derived_at": "2026-09-10T02:25:25Z",
+  "source_commit": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
+  "note": "Gate A and V06 are accepted, verified, and integrated into main. ADR-11, ADR-16, ADR-17 and ADR-20 are APPROVED. Independent review of V07.1 target b57b6aa9cd349776e1f5cd8ae10d20413523a69c found one downstream-blocking MAJOR: trace-only correlationId affected the authoritative Command fingerprint. The explicit projection fix and pinned property evidence are implemented at 674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f with focused and full automated evidence passing. V07.1 remains IMPLEMENTED_UNVERIFIED / FIXED_PENDING_REVIEW; V07.2 and V08 are not started.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -333,9 +333,10 @@
       "fingerprint_forward_fix": {
         "status": "FIXED_PENDING_REVIEW",
         "finding": "correlationId trace metadata participated in authoritative Command fingerprint",
-        "fixed_code_candidate": "67fd40b1597fb4057ef54481ba0b8b8be4ca18a8",
+        "fixed_code_candidate": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
         "fixed_review_target": "02b377614a7337b1d8d7442bae50c534ddbbe3c4",
         "review_bundle": "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_TARGET.md",
+        "superseded_review_target": "02b377614a7337b1d8d7442bae50c534ddbbe3c4",
         "automated_evidence": "PASS",
         "independent_closure": "PENDING",
         "production_mutation": false

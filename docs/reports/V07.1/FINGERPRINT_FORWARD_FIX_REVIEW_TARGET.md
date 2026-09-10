@@ -1,4 +1,8 @@
-# V07.1 fingerprint blocker-closure review target
+# V07.1 fingerprint blocker-closure review target (superseded)
+
+This intermediate target is retained as immutable history but is superseded:
+its property test imported nonexistent configuration names and therefore did
+not bind the declared fixed seed/run count. Do not use it for blocker closure.
 
 Review this immutable content/evidence commit:
 

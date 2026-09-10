@@ -5,7 +5,7 @@
 ```text
 Independent review result: CHANGES_REQUIRED_DOWNSTREAM_BLOCKING
 Historical review target: b57b6aa9cd349776e1f5cd8ae10d20413523a69c
-Fixed code candidate: 67fd40b1597fb4057ef54481ba0b8b8be4ca18a8
+Fixed code candidate: 674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f
 Implementation status: IMPLEMENTED_UNVERIFIED / FIXED_PENDING_REVIEW
 V07.2 runtime: NOT_STARTED
 Production mutation: NONE
@@ -61,6 +61,12 @@ publication authority.
 ## Verification and next gate
 
 Focused Command/Event/idempotency/property tests passed 3 files and 20 tests.
+The property assertions are bound to the repository's fixed configuration of
+250 runs with base seed `20260909` (correlation invariance uses `+70`; payload
+mutation uses `+71`). The earlier `67fd40b` code candidate and `02b3776`
+evidence target are superseded because the property test imported nonexistent
+configuration names and therefore used fast-check defaults rather than the
+declared repository configuration.
 The pinned full baseline passed 26 files and 355 tests plus protected boundary
 tests, scanners, migration validation/rehearsal, environment/policy/secret
 checks and all builds. Governance validation passed all 14 groups. Exact
