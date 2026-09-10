@@ -92,6 +92,7 @@ def validate(root: Path) -> dict[str, Any]:
 
     review_policy: dict[str, Any] = {}
     continuation_policy: dict[str, Any] = {}
+    v07_continuation_policy: dict[str, Any] = {}
 
     def verification_record(subject: str, target: Any, record: Any) -> None:
         require(isinstance(record, dict), f"{subject} requires verification metadata")
@@ -206,7 +207,7 @@ def validate(root: Path) -> dict[str, Any]:
         metrics["required_files"] = len(required)
 
     def fast_mainline_policy() -> None:
-        nonlocal review_policy, continuation_policy
+        nonlocal review_policy, continuation_policy, v07_continuation_policy
         review_policy = load_json(POLICY_PATH)
         require(review_policy["schema_version"] == "FAST_MAINLINE-1", "wrong review policy schema")
         require(review_policy["active_mode"] == "FAST_MAINLINE", "FAST_MAINLINE is not active")
@@ -249,7 +250,10 @@ def validate(root: Path) -> dict[str, Any]:
         continuation_records = review_policy.get("scoped_continuation_records")
         require(
             continuation_records
-            == ["docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json"],
+            == [
+                "docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json",
+                "docs/governance/WORLD_CORE_V07_CONTINUATION_POLICY.json",
+            ],
             "unexpected scoped continuation records",
         )
         continuation_policy = load_json(continuation_records[0])
@@ -282,6 +286,27 @@ def validate(root: Path) -> dict[str, Any]:
             and "not a Codex self-approval" in activation_text,
             "V06 owner continuation activation evidence is incomplete",
         )
+        v07_continuation_policy = load_json(continuation_records[1])
+        v07_scope = v07_continuation_policy.get("scope", {})
+        v07_closure = v07_continuation_policy.get("review_b_closure", {})
+        require(
+            v07_continuation_policy.get("schema_version")
+            == "WORLD_CORE_PACKAGE_CONTINUATION-1"
+            and v07_continuation_policy.get("record_type")
+            == "OWNER_AUTHORIZED_PACKAGE_CONTINUATION"
+            and v07_continuation_policy.get("status") == "ACTIVE"
+            and v07_continuation_policy.get("authority")
+            == "RESPONSIBLE_HUMAN_OWNER"
+            and v07_scope.get("branch") == "codex/world-core-v07"
+            and v07_scope.get("allowed_steps") == ["V07.1", "V07.2", "V07.3"]
+            and v07_scope.get("terminal_gate") == "V07_PACKAGE_REVIEW"
+            and v07_closure.get("decision") == "APPROVED_FOR_CONTINUATION"
+            and v07_closure.get("open_downstream_blockers") == 0
+            and v07_closure.get("v07_1_status") == "IMPLEMENTED_UNVERIFIED",
+            "V07 continuation scope or Review B closure is invalid",
+        )
+        file(v07_continuation_policy.get("activation_record"))
+        file(v07_closure.get("record"))
         review_exception = continuation_policy.get("review_unavailability_exception")
         require(
             isinstance(review_exception, dict)
@@ -1063,6 +1088,22 @@ def validate(root: Path) -> dict[str, Any]:
         next_ready = (dependency_ready and gate_open) or continuation_next_ready
         if next_step == "V06.1":
             next_ready = next_ready and foundation_integrated and group_a_ready
+        v07_entry = progress_data.get("v07_entry")
+        if next_step == "V07.2" and isinstance(v07_entry, dict):
+            v07_implementation = v07_entry.get("implementation_result", {})
+            v07_forward_fix = v07_implementation.get("fingerprint_forward_fix", {})
+            next_ready = (
+                states["V07.1"] == "IMPLEMENTED_UNVERIFIED"
+                and states["V07.2"] == "PLANNED"
+                and v07_implementation.get("review_b_result")
+                == "APPROVED_FOR_CONTINUATION"
+                and v07_forward_fix.get("independent_closure")
+                == "APPROVED_FOR_CONTINUATION"
+                and v07_implementation.get("open_p0_blockers") == 0
+                and v07_implementation.get("open_p1_majors") == 0
+                and required_gate == "V07.2_IMPLEMENTATION_AND_EVIDENCE"
+                and gate.get("gate_status") == "PASS"
+            )
         require(
             gate.get("next_step_ready") is next_ready,
             "current_gate next_step_ready differs from validated readiness",
@@ -1182,17 +1223,17 @@ def validate(root: Path) -> dict[str, Any]:
                                 and gate.get("gate_status") == "PASS",
                                 "active V07.1 entry gate differs from progress truth",
                             )
-                        else:
+                        elif states["V07.2"] == "PLANNED":
                             require(
                                 states["V07.1"] == "IMPLEMENTED_UNVERIFIED"
-                                and gate.get("step_id") == "V07.1"
-                                and gate.get("status") == states["V07.1"]
+                                and gate.get("step_id") == "V07.2"
+                                and gate.get("status") == states["V07.2"]
                                 and gate.get("next_step") == "V07.2"
-                                and gate.get("next_step_ready") is False
+                                and gate.get("next_step_ready") is True
                                 and required_gate
-                                == "V07.1_FOCUSED_BLOCKER_CLOSURE_REVIEW"
-                                and gate.get("gate_status") == "PENDING",
-                                "V07.1 focused-review hold differs from progress truth",
+                                == "V07.2_IMPLEMENTATION_AND_EVIDENCE"
+                                and gate.get("gate_status") == "PASS",
+                                "V07.2 continuation entry differs from progress truth",
                             )
                             implementation = v07_entry.get("implementation_result")
                             require(
@@ -1207,11 +1248,15 @@ def validate(root: Path) -> dict[str, Any]:
                                 and implementation.get("independent_review")
                                 == "CHANGES_REQUIRED_DOWNSTREAM_BLOCKING"
                                 and implementation.get("open_p0_blockers") == 0
-                                and implementation.get("open_p1_majors") == 1
+                                and implementation.get("open_p1_majors") == 0
+                                and implementation.get("review_b_result")
+                                == "APPROVED_FOR_CONTINUATION"
                                 and isinstance(forward_fix, dict)
-                                and forward_fix.get("status") == "FIXED_PENDING_REVIEW"
+                                and forward_fix.get("status")
+                                == "CLOSED_FOR_CONTINUATION"
                                 and forward_fix.get("automated_evidence") == "PASS"
-                                and forward_fix.get("independent_closure") == "PENDING"
+                                and forward_fix.get("independent_closure")
+                                == "APPROVED_FOR_CONTINUATION"
                                 and forward_fix.get("production_mutation") is False,
                                 "V07.1 fingerprint forward-fix evidence is incomplete",
                             )
@@ -1239,6 +1284,18 @@ def validate(root: Path) -> dict[str, Any]:
                             file(
                                 "docs/reports/V07.1/TEST_EVIDENCE_FINGERPRINT_FORWARD_FIX.json"
                             )
+                            file(implementation.get("review_b_record"))
+                            active_review_target = commit_exists(
+                                implementation.get("active_review_target"),
+                                "V07.1 active review target",
+                            )
+                            require(
+                                active_review_target
+                                == forward_fix.get("fixed_review_target"),
+                                "V07.1 Review B target differs from fixed review target",
+                            )
+                        else:
+                            require(False, "unsupported active V07 lifecycle state")
                         require(
                             v07_entry.get("branch") == "codex/world-core-v07"
                             and v07_entry.get("preflight") == "GO"

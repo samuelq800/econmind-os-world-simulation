@@ -167,6 +167,7 @@ describe('V06 owner-authorized package continuation', () => {
 
     expect(central.scoped_continuation_records).toEqual([
       'docs/governance/WORLD_CORE_V06_CONTINUATION_POLICY.json',
+      'docs/governance/WORLD_CORE_V07_CONTINUATION_POLICY.json',
     ]);
     expect(scoped.status).toBe('ACTIVE');
     expect(scoped.authority).toBe('RESPONSIBLE_HUMAN_OWNER');
@@ -218,12 +219,12 @@ describe('V06 owner-authorized package continuation', () => {
       },
     });
     expect(progress.current_gate).toMatchObject({
-      step_id: 'V07.1',
-      status: 'IMPLEMENTED_UNVERIFIED',
+      step_id: 'V07.2',
+      status: 'PLANNED',
       next_step: 'V07.2',
-      next_step_ready: false,
-      required_gate: 'V07.1_FOCUSED_BLOCKER_CLOSURE_REVIEW',
-      gate_status: 'PENDING',
+      next_step_ready: true,
+      required_gate: 'V07.2_IMPLEMENTATION_AND_EVIDENCE',
+      gate_status: 'PASS',
     });
     expect(progress.v06_integration).toEqual({
       branch: 'codex/world-core-v06-v10',
@@ -270,14 +271,17 @@ describe('V06 owner-authorized package continuation', () => {
         review_target: 'b57b6aa9cd349776e1f5cd8ae10d20413523a69c',
         independent_review: 'CHANGES_REQUIRED_DOWNSTREAM_BLOCKING',
         open_p0_blockers: 0,
-        open_p1_majors: 1,
+        open_p1_majors: 0,
+        active_code_candidate: '674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f',
+        active_review_target: '66da354755326fc00ece7fcdb78e35db27f0b15f',
+        review_b_result: 'APPROVED_FOR_CONTINUATION',
         fingerprint_forward_fix: {
-          status: 'FIXED_PENDING_REVIEW',
+          status: 'CLOSED_FOR_CONTINUATION',
           finding:
             'correlationId trace metadata participated in authoritative Command fingerprint',
           fixed_code_candidate: '674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f',
           automated_evidence: 'PASS',
-          independent_closure: 'PENDING',
+          independent_closure: 'APPROVED_FOR_CONTINUATION',
           production_mutation: false,
         },
       },

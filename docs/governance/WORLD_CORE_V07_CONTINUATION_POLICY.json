@@ -37,10 +37,13 @@
     "production deployment or migration publication",
     "V08 or later implementation"
   ],
-  "current_hold": {
-    "step": "V07.1",
-    "status": "FIXED_PENDING_REVIEW",
-    "finding": "correlationId trace metadata participated in the authoritative Command fingerprint",
-    "effect": "V07.2 runtime remains NOT_STARTED until focused independent blocker closure"
+  "review_b_closure": {
+    "record": "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_B.md",
+    "active_code_candidate": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
+    "active_review_target": "66da354755326fc00ece7fcdb78e35db27f0b15f",
+    "decision": "APPROVED_FOR_CONTINUATION",
+    "closed_finding": "correlationId trace metadata participated in authoritative Command fingerprint",
+    "open_downstream_blockers": 0,
+    "v07_1_status": "IMPLEMENTED_UNVERIFIED"
   }
 }

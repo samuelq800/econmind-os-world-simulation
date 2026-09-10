@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-10T02:26:53Z",
+  "derived_at": "2026-09-10T02:53:22Z",
   "source_commit": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
-  "note": "Gate A and V06 are accepted, verified, and integrated into main. ADR-11, ADR-16, ADR-17 and ADR-20 are APPROVED. Independent review of V07.1 target b57b6aa9cd349776e1f5cd8ae10d20413523a69c found one downstream-blocking MAJOR: trace-only correlationId affected the authoritative Command fingerprint. The explicit projection fix and pinned property evidence are implemented at 674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f with focused and full automated evidence passing. V07.1 remains IMPLEMENTED_UNVERIFIED / FIXED_PENDING_REVIEW; V07.2 and V08 are not started.",
+  "note": "Gate A and V06 are accepted, verified, and integrated into main. ADR-11, ADR-16, ADR-17 and ADR-20 are APPROVED. Review B closed the V07.1 correlation-fingerprint downstream blocker against active candidate 674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f and review target 66da354755326fc00ece7fcdb78e35db27f0b15f. V07.1 remains IMPLEMENTED_UNVERIFIED; V07.2 is planned and ready under the owner-authorized V07 package-continuation policy; V08 is not started.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -134,16 +134,14 @@
     "evidence_file": "docs/reports/V06/FINAL_RECONCILIATION.md"
   },
   "current_gate": {
-    "step_id": "V07.1",
-    "status": "IMPLEMENTED_UNVERIFIED",
-    "review": "CHANGES_REQUIRED_DOWNSTREAM_BLOCKING corrected; FIXED_PENDING_FOCUSED_REVIEW",
+    "step_id": "V07.2",
+    "status": "PLANNED",
+    "review": "V07.1 Review B APPROVED_FOR_CONTINUATION; V07.1 remains IMPLEMENTED_UNVERIFIED",
     "next_step": "V07.2",
-    "next_step_ready": false,
-    "next_step_blockers": [
-      "V07.1 correlationId fingerprint MAJOR is fixed but requires focused independent blocker-closure review"
-    ],
-    "required_gate": "V07.1_FOCUSED_BLOCKER_CLOSURE_REVIEW",
-    "gate_status": "PENDING"
+    "next_step_ready": true,
+    "next_step_blockers": [],
+    "required_gate": "V07.2_IMPLEMENTATION_AND_EVIDENCE",
+    "gate_status": "PASS"
   },
   "v06_package_review": {
     "decision": "V06_PACKAGE_APPROVED",
@@ -329,16 +327,20 @@
       "review_target": "b57b6aa9cd349776e1f5cd8ae10d20413523a69c",
       "independent_review": "CHANGES_REQUIRED_DOWNSTREAM_BLOCKING",
       "open_p0_blockers": 0,
-      "open_p1_majors": 1,
+      "open_p1_majors": 0,
+      "active_code_candidate": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
+      "active_review_target": "66da354755326fc00ece7fcdb78e35db27f0b15f",
+      "review_b_result": "APPROVED_FOR_CONTINUATION",
+      "review_b_record": "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_B.md",
       "fingerprint_forward_fix": {
-        "status": "FIXED_PENDING_REVIEW",
+        "status": "CLOSED_FOR_CONTINUATION",
         "finding": "correlationId trace metadata participated in authoritative Command fingerprint",
         "fixed_code_candidate": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
         "fixed_review_target": "66da354755326fc00ece7fcdb78e35db27f0b15f",
         "review_bundle": "docs/reports/V07.1/FINGERPRINT_FORWARD_FIX_REVIEW_TARGET_V2.md",
         "superseded_review_target": "02b377614a7337b1d8d7442bae50c534ddbbe3c4",
         "automated_evidence": "PASS",
-        "independent_closure": "PENDING",
+        "independent_closure": "APPROVED_FOR_CONTINUATION",
         "production_mutation": false
       }
     },
