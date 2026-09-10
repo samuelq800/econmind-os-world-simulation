@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "calibration-pilot-report.v1",
+  "pilotId": "c2-live-pilot-2026-09-10",
+  "status": "PILOT_NON_AUTHORITATIVE_PARTIAL",
+  "generatedAt": "2026-09-10T15:50:59.632Z",
+  "sourcesActuallyFetched": ["WB_WDI_V2", "UN_COMTRADE_V1"],
+  "snapshotIdsAndHashes": [
+    {
+      "snapshotId": "snap_wb_wdi_v2_86bbb4db2a1ec6836a7d",
+      "sha256": "653051081b35c2b1a53e3eaa594fc17e41184ab6c07eec1e29637f64e849ad87",
+      "byteLength": 53878
+    },
+    {
+      "snapshotId": "snap_un_comtrade_v1_8ed04e71f69790d0669b",
+      "sha256": "ee354c8568f4a17599e09f85db6181e80efb904acc584f4fb507cea11090270f",
+      "byteLength": 952
+    },
+    {
+      "snapshotId": "snap_un_comtrade_v1_51c0cf64942e21d3eee4",
+      "sha256": "9471e8c7c50f12f3449bdf92e1e5a4a702855cfa8660920158feef42686a4cfc",
+      "byteLength": 951
+    },
+    {
+      "snapshotId": "snap_un_comtrade_v1_e543fdceee4321224096",
+      "sha256": "0320de3f536b3bb29e652c29ac94cc4d49e148637c0a9a27afea324cd7cfd015",
+      "byteLength": 1843
+    },
+    {
+      "snapshotId": "snap_un_comtrade_v1_35045c8e8ac401d11f6b",
+      "sha256": "b6f85ec31c56f70283452106a5aed4b50ba486cc3df9d1f2b6061cd950333f10",
+      "byteLength": 951
+    },
+    {
+      "snapshotId": "snap_un_comtrade_v1_9ce2516ce3b96f2bc036",
+      "sha256": "040bd33f563d194641f41df2faf08dd6dfb7425cb8904f6c2d9bac10cd31f41e",
+      "byteLength": 951
+    },
+    {
+      "snapshotId": "snap_un_comtrade_v1_037dca75a9030636c560",
+      "sha256": "8b489b70a35ea044580b77b77bc80224a9365bb8693a818f30e58bf3199481de",
+      "byteLength": 948
+    }
+  ],
+  "observationCount": 247,
+  "uniqueObservationIdCount": 246,
+  "entityCoverage": [
+    "emp:AUS",
+    "emp:BRA",
+    "emp:CHN",
+    "emp:DEU",
+    "emp:IDN",
+    "emp:IND",
+    "emp:JPN",
+    "emp:MEX",
+    "emp:USA",
+    "emp:ZAF"
+  ],
+  "variableCoverage": [
+    "agriculture_value_added_pct_gdp",
+    "bilateral_trade_exports_usd",
+    "bilateral_trade_imports_usd",
+    "gdp_current_usd",
+    "inflation_consumer_pct",
+    "manufacturing_value_added_pct_gdp",
+    "population_total",
+    "real_gdp_growth_pct",
+    "services_value_added_pct_gdp",
+    "unemployment_pct"
+  ],
+  "periodCoverage": ["2021", "2022", "2023"],
+  "missingnessCount": 6,
+  "dataQuality": {
+    "missingObservationCount": 6,
+    "duplicateObservationCount": 1,
+    "suspiciousDuplicateProviderKeyCount": 0,
+    "unresolvedConcordanceCount": 0,
+    "ambiguousConcordanceCount": 0,
+    "unitMismatchCount": 0,
+    "temporalGapCount": 0,
+    "revisionDifferenceCount": 0,
+    "reportingAsymmetryCount": 3,
+    "unsupportedClassificationCount": 0,
+    "outlierRuleViolationCount": 0
+  },
+  "diagnosticCounts": {
+    "DUPLICATE_OBSERVATION": 1,
+    "MISSING_OBSERVATION": 6,
+    "REPORTING_ASYMMETRY": 3
+  },
+  "exactnessFailures": [],
+  "providerRuns": [
+    {
+      "sourceId": "WB_WDI_V2",
+      "status": "FETCHED",
+      "requestCount": 1,
+      "snapshotCount": 1,
+      "observationCount": 240,
+      "issues": []
+    },
+    {
+      "sourceId": "WTO_TIMESERIES_V1",
+      "status": "NOT_FETCHED",
+      "requestCount": 0,
+      "snapshotCount": 0,
+      "observationCount": 0,
+      "issues": ["WTO_API_KEY_MISSING"]
+    },
+    {
+      "sourceId": "UN_COMTRADE_V1",
+      "status": "FETCHED",
+      "requestCount": 6,
+      "snapshotCount": 6,
+      "observationCount": 7,
+      "issues": []
+    }
+  ],
+  "revisionVintageObservations": [
+    "WDI source 2 last updated 2026-07-13.",
+    "UN Comtrade public-preview responses supplied no provider-vintage field; sourceAsOf is null.",
+    "No equivalent query was fetched at two vintages, so live revision comparison was not possible."
+  ],
+  "providerSpecificCaveats": {
+    "WB_WDI_V2": "The live record-level unit fields were empty; indicator codes were validated against the explicit pilot normalization plan.",
+    "WTO_TIMESERIES_V1": "Authenticated retrieval was not run because WTO_API_KEY was absent.",
+    "UN_COMTRADE_V1": "Public-preview results are limited; reporter exports and mirror imports are separate, and one identical duplicate provider row is retained and flagged."
+  },
+  "caveats": [
+    "This pilot is not final simulation calibration.",
+    "WTO remains absent unless an external WTO_API_KEY is supplied at retrieval time.",
+    "UN Comtrade public preview responses may be rate-limited or incomplete.",
+    "Reporter exports and mirror imports remain separate observed facts.",
+    "No IPF, RAS, archetype freeze, fictional-country mapping, or engine mutation was performed."
+  ]
+}

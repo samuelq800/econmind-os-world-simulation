@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "calibration-quality-diagnostics.v1",
+  "pilotId": "c2-live-pilot-2026-09-10",
+  "status": "PILOT_NON_AUTHORITATIVE_PARTIAL",
+  "generatedAt": "2026-09-10T15:50:59.632Z",
+  "diagnosticCounts": {
+    "DUPLICATE_OBSERVATION": 1,
+    "MISSING_OBSERVATION": 6,
+    "REPORTING_ASYMMETRY": 3
+  },
+  "exactnessFailures": [],
+  "diagnostics": [
+    {
+      "code": "DUPLICATE_OBSERVATION",
+      "severity": "WARNING",
+      "subjectKeys": ["276:76:H6:27:X:2022:C00:0"],
+      "message": "The same provider observation appears more than once.",
+      "transformationVersion": "QUALITY_DIAGNOSTICS@1.0.0",
+      "details": {
+        "count": "2"
+      }
+    },
+    {
+      "code": "MISSING_OBSERVATION",
+      "severity": "WARNING",
+      "subjectKeys": ["US:NV.AGR.TOTL.ZS:2022"],
+      "message": "Provider returned an explicit missing observation.",
+      "transformationVersion": "QUALITY_DIAGNOSTICS@1.0.0",
+      "details": {}
+    },
+    {
+      "code": "MISSING_OBSERVATION",
+      "severity": "WARNING",
+      "subjectKeys": ["US:NV.AGR.TOTL.ZS:2023"],
+      "message": "Provider returned an explicit missing observation.",
+      "transformationVersion": "QUALITY_DIAGNOSTICS@1.0.0",
+      "details": {}
+    },
+    {
+      "code": "MISSING_OBSERVATION",
+      "severity": "WARNING",
+      "subjectKeys": ["US:NV.IND.MANF.ZS:2022"],
+      "message": "Provider returned an explicit missing observation.",
+      "transformationVersion": "QUALITY_DIAGNOSTICS@1.0.0",
+      "details": {}
+    },
+    {
+      "code": "MISSING_OBSERVATION",
+      "severity": "WARNING",
+      "subjectKeys": ["US:NV.IND.MANF.ZS:2023"],
+      "message": "Provider returned an explicit missing observation.",
+      "transformationVersion": "QUALITY_DIAGNOSTICS@1.0.0",
+      "details": {}
+    },
+    {
+      "code": "MISSING_OBSERVATION",
+      "severity": "WARNING",
+      "subjectKeys": ["US:NV.SRV.TOTL.ZS:2022"],
+      "message": "Provider returned an explicit missing observation.",
+      "transformationVersion": "QUALITY_DIAGNOSTICS@1.0.0",
+      "details": {}
+    },
+    {
+      "code": "MISSING_OBSERVATION",
+      "severity": "WARNING",
+      "subjectKeys": ["US:NV.SRV.TOTL.ZS:2023"],
+      "message": "Provider returned an explicit missing observation.",
+      "transformationVersion": "QUALITY_DIAGNOSTICS@1.0.0",
+      "details": {}
+    },
+    {
+      "code": "REPORTING_ASYMMETRY",
+      "severity": "INFO",
+      "subjectKeys": ["276:76:H6:27:X:2022:C00:0", "76:276:H6:27:M:2022:C00:0"],
+      "message": "Reporter exports and partner-reported mirror imports remain separate observations.",
+      "transformationVersion": "COMTRADE_MIRROR_ASYMMETRY@1.0.0",
+      "details": {
+        "reporterExports": "37801402.939",
+        "mirrorImports": "85940348",
+        "absoluteSignedDifference": "-48138945.061"
+      }
+    },
+    {
+      "code": "REPORTING_ASYMMETRY",
+      "severity": "INFO",
+      "subjectKeys": [
+        "699:710:H6:10:X:2022:C00:0",
+        "710:699:H6:10:M:2022:C00:0"
+      ],
+      "message": "Reporter exports and partner-reported mirror imports remain separate observations.",
+      "transformationVersion": "COMTRADE_MIRROR_ASYMMETRY@1.0.0",
+      "details": {
+        "reporterExports": "78704554.777",
+        "mirrorImports": "93512889.72",
+        "absoluteSignedDifference": "-14808334.943"
+      }
+    },
+    {
+      "code": "REPORTING_ASYMMETRY",
+      "severity": "INFO",
+      "subjectKeys": [
+        "842:156:H6:84:X:2022:C00:0",
+        "156:842:H6:84:M:2022:C00:0"
+      ],
+      "message": "Reporter exports and partner-reported mirror imports remain separate observations.",
+      "transformationVersion": "COMTRADE_MIRROR_ASYMMETRY@1.0.0",
+      "details": {
+        "reporterExports": "14915568181",
+        "mirrorImports": "19655401690",
+        "absoluteSignedDifference": "-4739833509"
+      }
+    }
+  ]
+}

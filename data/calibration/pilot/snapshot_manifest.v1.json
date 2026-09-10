@@ -1,0 +1,329 @@
+{
+  "schemaVersion": "calibration-pilot-snapshot-manifest.v1",
+  "pilotId": "c2-live-pilot-2026-09-10",
+  "status": "PILOT_NON_AUTHORITATIVE_PARTIAL",
+  "generatedAt": "2026-09-10T15:50:59.632Z",
+  "rawBytesPolicy": "GIT_IGNORED_CONTENT_ADDRESSED_FILES",
+  "rawDirectory": "data/calibration/raw/",
+  "providerRuns": [
+    {
+      "sourceId": "WB_WDI_V2",
+      "status": "FETCHED",
+      "requestCount": 1,
+      "snapshotCount": 1,
+      "observationCount": 240,
+      "issues": []
+    },
+    {
+      "sourceId": "WTO_TIMESERIES_V1",
+      "status": "NOT_FETCHED",
+      "requestCount": 0,
+      "snapshotCount": 0,
+      "observationCount": 0,
+      "issues": ["WTO_API_KEY_MISSING"]
+    },
+    {
+      "sourceId": "UN_COMTRADE_V1",
+      "status": "FETCHED",
+      "requestCount": 6,
+      "snapshotCount": 6,
+      "observationCount": 7,
+      "issues": []
+    }
+  ],
+  "snapshots": [
+    {
+      "schemaVersion": "raw-snapshot.v2",
+      "snapshotId": "snap_wb_wdi_v2_86bbb4db2a1ec6836a7d",
+      "sourceId": "WB_WDI_V2",
+      "sourceFamily": "WORLD_BANK_WDI",
+      "provider": "World Bank",
+      "endpointIdentity": "WORLD_BANK_INDICATORS_API_V2",
+      "retrievedAt": "2026-09-10T15:50:50.668Z",
+      "sourceAsOf": "2026-07-13",
+      "query": "https://api.worldbank.org/v2/country/AU%3BBR%3BCN%3BDE%3BID%3BIN%3BJP%3BMX%3BUS%3BZA/indicator/NY.GDP.MKTP.CD%3BNY.GDP.MKTP.KD.ZG%3BSP.POP.TOTL%3BFP.CPI.TOTL.ZG%3BSL.UEM.TOTL.ZS%3BNV.AGR.TOTL.ZS%3BNV.IND.MANF.ZS%3BNV.SRV.TOTL.ZS?date=2021%3A2023&format=json&page=1&per_page=20000&source=2",
+      "requestParameters": {
+        "date": "2021:2023",
+        "economy": "AU;BR;CN;DE;ID;IN;JP;MX;US;ZA",
+        "format": "json",
+        "indicator": "NY.GDP.MKTP.CD;NY.GDP.MKTP.KD.ZG;SP.POP.TOTL;FP.CPI.TOTL.ZG;SL.UEM.TOTL.ZS;NV.AGR.TOTL.ZS;NV.IND.MANF.ZS;NV.SRV.TOTL.ZS",
+        "page": "1",
+        "per_page": "20000",
+        "source": "2"
+      },
+      "requestedDimensions": {
+        "economies": [
+          "AU",
+          "BR",
+          "CN",
+          "DE",
+          "ID",
+          "IN",
+          "JP",
+          "MX",
+          "US",
+          "ZA"
+        ],
+        "indicators": [
+          "NY.GDP.MKTP.CD",
+          "NY.GDP.MKTP.KD.ZG",
+          "SP.POP.TOTL",
+          "FP.CPI.TOTL.ZG",
+          "SL.UEM.TOTL.ZS",
+          "NV.AGR.TOTL.ZS",
+          "NV.IND.MANF.ZS",
+          "NV.SRV.TOTL.ZS"
+        ],
+        "periods": ["2021", "2022", "2023"]
+      },
+      "providerVersion": "WDI_SOURCE_2",
+      "fileFormat": "JSON",
+      "httpStatus": 200,
+      "responseHeaders": {
+        "cache-control": "public, max-age=86400",
+        "content-type": "application/json;charset=utf-8",
+        "date": "Thu, 10 Sep 2026 15:50:50 GMT",
+        "last-modified": "Thu, 10 Sep 2026 15:35:16 GMT"
+      },
+      "adapterVersion": "2.0.0",
+      "licenseUrl": "https://www.worldbank.org/en/about/legal/terms-of-use-for-datasets",
+      "sha256": "653051081b35c2b1a53e3eaa594fc17e41184ab6c07eec1e29637f64e849ad87",
+      "byteLength": 53878,
+      "status": "DEVELOPMENT_NON_AUTHORITATIVE"
+    },
+    {
+      "schemaVersion": "raw-snapshot.v2",
+      "snapshotId": "snap_un_comtrade_v1_8ed04e71f69790d0669b",
+      "sourceId": "UN_COMTRADE_V1",
+      "sourceFamily": "UN_COMTRADE",
+      "provider": "United Nations Statistics Division",
+      "endpointIdentity": "UN_COMTRADE_PUBLIC_PREVIEW_V1",
+      "retrievedAt": "2026-09-10T15:50:52.155Z",
+      "sourceAsOf": null,
+      "query": "https://comtradeapi.un.org/public/v1/preview/C/A/HS?cmdCode=84&customsCode=C00&flowCode=X&motCode=0&partnerCode=156&period=2022&reporterCode=842",
+      "requestParameters": {
+        "cmdCode": "84",
+        "customsCode": "C00",
+        "flowCode": "X",
+        "motCode": "0",
+        "partnerCode": "156",
+        "period": "2022",
+        "reporterCode": "842"
+      },
+      "requestedDimensions": {
+        "flows": ["X"],
+        "partners": ["156"],
+        "periods": ["2022"],
+        "products": ["84"],
+        "reporters": ["842"]
+      },
+      "providerVersion": "UN_COMTRADE_PUBLIC_PREVIEW_V1_HS",
+      "fileFormat": "JSON",
+      "httpStatus": 200,
+      "responseHeaders": {
+        "cache-control": "no-store, no-cache",
+        "date": "Thu, 10 Sep 2026 15:50:51 GMT"
+      },
+      "adapterVersion": "2.0.0",
+      "licenseUrl": "https://comtrade.un.org/db/help/LicenseAgreement.aspx",
+      "sha256": "ee354c8568f4a17599e09f85db6181e80efb904acc584f4fb507cea11090270f",
+      "byteLength": 952,
+      "status": "DEVELOPMENT_NON_AUTHORITATIVE"
+    },
+    {
+      "schemaVersion": "raw-snapshot.v2",
+      "snapshotId": "snap_un_comtrade_v1_51c0cf64942e21d3eee4",
+      "sourceId": "UN_COMTRADE_V1",
+      "sourceFamily": "UN_COMTRADE",
+      "provider": "United Nations Statistics Division",
+      "endpointIdentity": "UN_COMTRADE_PUBLIC_PREVIEW_V1",
+      "retrievedAt": "2026-09-10T15:50:53.956Z",
+      "sourceAsOf": null,
+      "query": "https://comtradeapi.un.org/public/v1/preview/C/A/HS?cmdCode=84&customsCode=C00&flowCode=M&motCode=0&partnerCode=842&period=2022&reporterCode=156",
+      "requestParameters": {
+        "cmdCode": "84",
+        "customsCode": "C00",
+        "flowCode": "M",
+        "motCode": "0",
+        "partnerCode": "842",
+        "period": "2022",
+        "reporterCode": "156"
+      },
+      "requestedDimensions": {
+        "flows": ["M"],
+        "partners": ["842"],
+        "periods": ["2022"],
+        "products": ["84"],
+        "reporters": ["156"]
+      },
+      "providerVersion": "UN_COMTRADE_PUBLIC_PREVIEW_V1_HS",
+      "fileFormat": "JSON",
+      "httpStatus": 200,
+      "responseHeaders": {
+        "cache-control": "no-store, no-cache",
+        "date": "Thu, 10 Sep 2026 15:50:53 GMT"
+      },
+      "adapterVersion": "2.0.0",
+      "licenseUrl": "https://comtrade.un.org/db/help/LicenseAgreement.aspx",
+      "sha256": "9471e8c7c50f12f3449bdf92e1e5a4a702855cfa8660920158feef42686a4cfc",
+      "byteLength": 951,
+      "status": "DEVELOPMENT_NON_AUTHORITATIVE"
+    },
+    {
+      "schemaVersion": "raw-snapshot.v2",
+      "snapshotId": "snap_un_comtrade_v1_e543fdceee4321224096",
+      "sourceId": "UN_COMTRADE_V1",
+      "sourceFamily": "UN_COMTRADE",
+      "provider": "United Nations Statistics Division",
+      "endpointIdentity": "UN_COMTRADE_PUBLIC_PREVIEW_V1",
+      "retrievedAt": "2026-09-10T15:50:55.344Z",
+      "sourceAsOf": null,
+      "query": "https://comtradeapi.un.org/public/v1/preview/C/A/HS?cmdCode=27&customsCode=C00&flowCode=X&motCode=0&partnerCode=76&period=2022&reporterCode=276",
+      "requestParameters": {
+        "cmdCode": "27",
+        "customsCode": "C00",
+        "flowCode": "X",
+        "motCode": "0",
+        "partnerCode": "76",
+        "period": "2022",
+        "reporterCode": "276"
+      },
+      "requestedDimensions": {
+        "flows": ["X"],
+        "partners": ["76"],
+        "periods": ["2022"],
+        "products": ["27"],
+        "reporters": ["276"]
+      },
+      "providerVersion": "UN_COMTRADE_PUBLIC_PREVIEW_V1_HS",
+      "fileFormat": "JSON",
+      "httpStatus": 200,
+      "responseHeaders": {
+        "cache-control": "no-store, no-cache",
+        "date": "Thu, 10 Sep 2026 15:50:54 GMT"
+      },
+      "adapterVersion": "2.0.0",
+      "licenseUrl": "https://comtrade.un.org/db/help/LicenseAgreement.aspx",
+      "sha256": "0320de3f536b3bb29e652c29ac94cc4d49e148637c0a9a27afea324cd7cfd015",
+      "byteLength": 1843,
+      "status": "DEVELOPMENT_NON_AUTHORITATIVE"
+    },
+    {
+      "schemaVersion": "raw-snapshot.v2",
+      "snapshotId": "snap_un_comtrade_v1_35045c8e8ac401d11f6b",
+      "sourceId": "UN_COMTRADE_V1",
+      "sourceFamily": "UN_COMTRADE",
+      "provider": "United Nations Statistics Division",
+      "endpointIdentity": "UN_COMTRADE_PUBLIC_PREVIEW_V1",
+      "retrievedAt": "2026-09-10T15:50:56.859Z",
+      "sourceAsOf": null,
+      "query": "https://comtradeapi.un.org/public/v1/preview/C/A/HS?cmdCode=27&customsCode=C00&flowCode=M&motCode=0&partnerCode=276&period=2022&reporterCode=76",
+      "requestParameters": {
+        "cmdCode": "27",
+        "customsCode": "C00",
+        "flowCode": "M",
+        "motCode": "0",
+        "partnerCode": "276",
+        "period": "2022",
+        "reporterCode": "76"
+      },
+      "requestedDimensions": {
+        "flows": ["M"],
+        "partners": ["276"],
+        "periods": ["2022"],
+        "products": ["27"],
+        "reporters": ["76"]
+      },
+      "providerVersion": "UN_COMTRADE_PUBLIC_PREVIEW_V1_HS",
+      "fileFormat": "JSON",
+      "httpStatus": 200,
+      "responseHeaders": {
+        "cache-control": "no-store, no-cache",
+        "date": "Thu, 10 Sep 2026 15:50:56 GMT"
+      },
+      "adapterVersion": "2.0.0",
+      "licenseUrl": "https://comtrade.un.org/db/help/LicenseAgreement.aspx",
+      "sha256": "b6f85ec31c56f70283452106a5aed4b50ba486cc3df9d1f2b6061cd950333f10",
+      "byteLength": 951,
+      "status": "DEVELOPMENT_NON_AUTHORITATIVE"
+    },
+    {
+      "schemaVersion": "raw-snapshot.v2",
+      "snapshotId": "snap_un_comtrade_v1_9ce2516ce3b96f2bc036",
+      "sourceId": "UN_COMTRADE_V1",
+      "sourceFamily": "UN_COMTRADE",
+      "provider": "United Nations Statistics Division",
+      "endpointIdentity": "UN_COMTRADE_PUBLIC_PREVIEW_V1",
+      "retrievedAt": "2026-09-10T15:50:58.247Z",
+      "sourceAsOf": null,
+      "query": "https://comtradeapi.un.org/public/v1/preview/C/A/HS?cmdCode=10&customsCode=C00&flowCode=X&motCode=0&partnerCode=710&period=2022&reporterCode=699",
+      "requestParameters": {
+        "cmdCode": "10",
+        "customsCode": "C00",
+        "flowCode": "X",
+        "motCode": "0",
+        "partnerCode": "710",
+        "period": "2022",
+        "reporterCode": "699"
+      },
+      "requestedDimensions": {
+        "flows": ["X"],
+        "partners": ["710"],
+        "periods": ["2022"],
+        "products": ["10"],
+        "reporters": ["699"]
+      },
+      "providerVersion": "UN_COMTRADE_PUBLIC_PREVIEW_V1_HS",
+      "fileFormat": "JSON",
+      "httpStatus": 200,
+      "responseHeaders": {
+        "cache-control": "no-store, no-cache",
+        "date": "Thu, 10 Sep 2026 15:50:57 GMT"
+      },
+      "adapterVersion": "2.0.0",
+      "licenseUrl": "https://comtrade.un.org/db/help/LicenseAgreement.aspx",
+      "sha256": "040bd33f563d194641f41df2faf08dd6dfb7425cb8904f6c2d9bac10cd31f41e",
+      "byteLength": 951,
+      "status": "DEVELOPMENT_NON_AUTHORITATIVE"
+    },
+    {
+      "schemaVersion": "raw-snapshot.v2",
+      "snapshotId": "snap_un_comtrade_v1_037dca75a9030636c560",
+      "sourceId": "UN_COMTRADE_V1",
+      "sourceFamily": "UN_COMTRADE",
+      "provider": "United Nations Statistics Division",
+      "endpointIdentity": "UN_COMTRADE_PUBLIC_PREVIEW_V1",
+      "retrievedAt": "2026-09-10T15:50:59.630Z",
+      "sourceAsOf": null,
+      "query": "https://comtradeapi.un.org/public/v1/preview/C/A/HS?cmdCode=10&customsCode=C00&flowCode=M&motCode=0&partnerCode=699&period=2022&reporterCode=710",
+      "requestParameters": {
+        "cmdCode": "10",
+        "customsCode": "C00",
+        "flowCode": "M",
+        "motCode": "0",
+        "partnerCode": "699",
+        "period": "2022",
+        "reporterCode": "710"
+      },
+      "requestedDimensions": {
+        "flows": ["M"],
+        "partners": ["699"],
+        "periods": ["2022"],
+        "products": ["10"],
+        "reporters": ["710"]
+      },
+      "providerVersion": "UN_COMTRADE_PUBLIC_PREVIEW_V1_HS",
+      "fileFormat": "JSON",
+      "httpStatus": 200,
+      "responseHeaders": {
+        "cache-control": "no-store, no-cache",
+        "date": "Thu, 10 Sep 2026 15:50:58 GMT"
+      },
+      "adapterVersion": "2.0.0",
+      "licenseUrl": "https://comtrade.un.org/db/help/LicenseAgreement.aspx",
+      "sha256": "8b489b70a35ea044580b77b77bc80224a9365bb8693a818f30e58bf3199481de",
+      "byteLength": 948,
+      "status": "DEVELOPMENT_NON_AUTHORITATIVE"
+    }
+  ]
+}

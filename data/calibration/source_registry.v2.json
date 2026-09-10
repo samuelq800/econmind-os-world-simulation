@@ -19,8 +19,8 @@
       "retrievalMethod": "Indicators API v2; unauthenticated GET",
       "revisionBehavior": "Provider may revise historical observations; every retrieval creates a new snapshot",
       "expectedFormat": "JSON",
-      "status": "FIXTURE_BACKED_LIVE_FETCH_NOT_RUN",
-      "notes": "Adapter preserves missing values and observation-status flags. Fractional JSON numbers require a future lossless-token parser before live freezing."
+      "status": "FIXTURE_AND_LIVE_PILOT_DEVELOPMENT_NON_AUTHORITATIVE",
+      "notes": "C2 live pilot fetched one paginated response covering 10 economies, 8 indicators, and 2021-2023. Exact JSON numeric tokens, explicit nulls, raw bytes, and provider last-updated metadata are preserved. Provider unit fields were empty in this response, so indicator identity is checked against the explicit pilot normalization plan."
     },
     {
       "sourceId": "WTO_TIMESERIES_V1",
@@ -37,8 +37,8 @@
       "retrievalMethod": "Timeseries API v1; API key supplied only at retrieval time",
       "revisionBehavior": "Continuously updated; freeze response bytes and retrieval metadata",
       "expectedFormat": "CSV",
-      "status": "FIXTURE_BACKED_LIVE_FETCH_NOT_RUN",
-      "notes": "Intended for tariffs, market-access indicators, and trade-policy baselines. No API key is stored."
+      "status": "FIXTURE_BACKED_LIVE_RETRIEVAL_BLOCKED_MISSING_API_KEY",
+      "notes": "C2 implements authenticated live transport with the API key supplied only at retrieval time. No key was available for the pilot, so no WTO live bytes or observations were created."
     },
     {
       "sourceId": "UN_COMTRADE_V1",
@@ -55,8 +55,8 @@
       "retrievalMethod": "Public preview API for fixtures/pilots; authenticated bulk access later if authorized",
       "revisionBehavior": "Reporter submissions and processing may revise data; snapshot each response",
       "expectedFormat": "JSON",
-      "status": "FIXTURE_BACKED_LIVE_FETCH_NOT_RUN",
-      "notes": "Primary future source for bilateral/product composition and concentration. Reporting asymmetry is explicit."
+      "status": "FIXTURE_AND_LIVE_PILOT_DEVELOPMENT_NON_AUTHORITATIVE",
+      "notes": "C2 fetched six public-preview requests for three explicit reporter/mirror pairs and three pilot HS headings. Reporter codes, partner codes, flows, H6 revision, product, customs, transport, quantities, weights, FOB/CIF values, exact tokens, and mirror asymmetry remain explicit."
     },
     {
       "sourceId": "IMF_WEO",
