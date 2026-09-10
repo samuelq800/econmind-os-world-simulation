@@ -23,22 +23,9 @@ export type LosslessJsonValue =
 
 const NUMBER_TOKEN = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/u;
 const NUMBER_PARTS = /^(-?)(0|[1-9]\d*)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/u;
-const MAX_EXPANDED_DIGITS = 10_000;
-const MAX_EXPANDED_DIGITS_BIGINT = BigInt(MAX_EXPANDED_DIGITS);
-const MAX_PROVIDER_EXPONENT_MAGNITUDE = MAX_EXPANDED_DIGITS_BIGINT + 1n;
+const MAX_EXPANDED_DIGITS = 10_000n;
+const MAX_PROVIDER_EXPONENT_MAGNITUDE = MAX_EXPANDED_DIGITS + 1n;
 const EXPONENT_PARTS = /^([+-]?)(\d+)$/u;
-const DECIMAL_DIGIT_VALUE: Readonly<Record<string, number>> = Object.freeze({
-  '0': 0,
-  '1': 1,
-  '2': 2,
-  '3': 3,
-  '4': 4,
-  '5': 5,
-  '6': 6,
-  '7': 7,
-  '8': 8,
-  '9': 9,
-});
 
 function maxBigInt(...values: readonly bigint[]): bigint {
   return values.reduce((maximum, value) => (value > maximum ? value : maximum));
@@ -61,22 +48,26 @@ function parseBoundedProviderExponent(raw: string | undefined): bigint {
   return sign * magnitude;
 }
 
-function boundedBigIntToIndex(value: bigint): number {
-  if (
-    value < -MAX_EXPANDED_DIGITS_BIGINT ||
-    value > MAX_EXPANDED_DIGITS_BIGINT
-  ) {
-    throw new RangeError('LOSSLESS_NUMBER_EXPANSION_LIMIT');
+function zeroes(count: bigint): string {
+  let output = '';
+  for (let position = 0n; position < count; position += 1n) {
+    output += '0';
   }
-  const negative = value < 0n;
-  const magnitude = (negative ? -value : value).toString();
-  let index = 0;
-  for (const character of magnitude) {
-    const digit = DECIMAL_DIGIT_VALUE[character];
-    if (digit === undefined) throw new TypeError('INVALID_BIGINT_DIGIT');
-    index = index * 10 + digit;
+  return output;
+}
+
+function insertDecimalAtBigIntPosition(
+  digits: string,
+  decimalPosition: bigint,
+): string {
+  let output = '';
+  let position = 0n;
+  for (const digit of digits) {
+    if (position === decimalPosition) output += '.';
+    output += digit;
+    position += 1n;
   }
-  return negative ? -index : index;
+  return output;
 }
 
 export function isLosslessJsonNumber(
@@ -105,18 +96,17 @@ export function canonicalDecimalFromJsonNumber(raw: string): string {
     decimalPosition,
     1n - decimalPosition,
   );
-  if (expandedLength > MAX_EXPANDED_DIGITS_BIGINT) {
+  if (expandedLength > MAX_EXPANDED_DIGITS) {
     throw new RangeError('LOSSLESS_NUMBER_EXPANSION_LIMIT');
   }
-  const decimalIndex = boundedBigIntToIndex(decimalPosition);
 
   let expanded: string;
-  if (decimalIndex <= 0) {
-    expanded = `0.${'0'.repeat(-decimalIndex)}${digits}`;
-  } else if (decimalIndex >= digits.length) {
-    expanded = `${digits}${'0'.repeat(decimalIndex - digits.length)}`;
+  if (decimalPosition <= 0n) {
+    expanded = `0.${zeroes(-decimalPosition)}${digits}`;
+  } else if (decimalPosition >= BigInt(digits.length)) {
+    expanded = `${digits}${zeroes(decimalPosition - BigInt(digits.length))}`;
   } else {
-    expanded = `${digits.slice(0, decimalIndex)}.${digits.slice(decimalIndex)}`;
+    expanded = insertDecimalAtBigIntPosition(digits, decimalPosition);
   }
 
   const [rawInteger = '0', rawFraction = ''] = expanded.split('.');

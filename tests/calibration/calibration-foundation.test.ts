@@ -347,13 +347,7 @@ describe('Calibration source adapters and snapshots', () => {
       path.join(root, 'packages/calibration/src/lossless-json.ts'),
       'utf8',
     );
-    const canonicalizer = losslessJsonSource.slice(
-      losslessJsonSource.indexOf(
-        'export function canonicalDecimalFromJsonNumber',
-      ),
-      losslessJsonSource.indexOf('export function parseLosslessJson'),
-    );
-    expect(canonicalizer).not.toMatch(/\bNumber(?:\s*\.|\s*\()/u);
+    expect(losslessJsonSource).not.toMatch(/\bNumber(?:\s*\.|\s*\()/u);
     expect(() => parseLosslessJson(Buffer.from('{"a":1,"a":2}'))).toThrow(
       'duplicate-object-key:a',
     );
