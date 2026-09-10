@@ -160,12 +160,12 @@
     {
       "id": "ADR-16",
       "subject": "共享 Supabase namespace 与 migration 发布权",
-      "status": "PROPOSED_NOT_APPROVED",
-      "proposal": "V2 核心使用非公开 world_v2 schema；V2 交付带 ID 和 hash 的 SQL 制品，现有主站仓库保持共享生产 Supabase 的唯一 migration 发布源。",
+      "status": "APPROVED",
+      "proposal": "V2 核心使用非公开 world_v2 schema，并沿用唯一 V02 migration manifest/release provenance chain；候选制品绑定 migration ID、source commit、historical path 与 exact bytes/hash，现有主站仓库保持共享生产 Supabase 的唯一 production publisher。禁止第二发布链、dashboard/manual production SQL 和以 Legacy 表作为 V2 权威经济存储；实际生产发布仍需单独的人类授权。",
       "latest_gate": "V02/V31",
       "affected_work_packages": ["V01", "V02", "V28", "V30", "V31"],
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
-      "approval_record": null
+      "approval_record": "docs/architecture/decisions/ADR-16.md"
     },
     {
       "id": "ADR-17",
@@ -200,12 +200,12 @@
     {
       "id": "ADR-20",
       "subject": "身份生命周期与经济历史",
-      "status": "PROPOSED_NOT_APPROVED",
-      "proposal": "新命令按当前成员和 Office 权限验证；玩家离开不消除已生效国家义务，个人资料与不可变经济历史分层且不得级联删除。",
+      "status": "APPROVED",
+      "proposal": "当前授权在 intake、适用的 approval 和权威 user-command commit 前重新解析；缓存上下文仅是审计证据。已撤销且未提交的 discretionary work 以 AUTHORIZATION_REVOKED 或版本化等价结果零效果失败；已提交事实与版本化自动义务保持有效，除非授权取消事件或显式版本化规则取消。pending recovery 重验当前授权，committed replay 不追溯重授权，身份/profile 生命周期不得级联删除不可变经济历史。",
       "latest_gate": "V05/V28",
       "affected_work_packages": ["V01", "V05", "V28", "V30", "V32"],
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
-      "approval_record": null
+      "approval_record": "docs/architecture/decisions/ADR-20.md"
     }
   ]
 }

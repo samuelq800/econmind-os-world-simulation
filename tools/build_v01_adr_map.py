@@ -45,6 +45,21 @@ ADR_RELATIONSHIPS = [
     ("ADR-19", "ADR-20", "Session lifecycle must enforce current authorization."),
 ]
 
+CURRENT_ADR_SOURCE_LOCATIONS = {
+    "ADR-16": [
+        "docs/architecture/decisions/ADR-16.md",
+        "planning/02_架构裁决与数据库协议.md",
+        "docs/architecture/WORLD_CORE_JIT_ADR_PACK.md",
+        "status/decisions.json",
+    ],
+    "ADR-20": [
+        "docs/architecture/decisions/ADR-20.md",
+        "planning/02_架构裁决与数据库协议.md",
+        "docs/architecture/WORLD_CORE_JIT_ADR_PACK.md",
+        "status/decisions.json",
+    ],
+}
+
 
 def load_json(relative: str) -> Any:
     return json.loads((ROOT / relative).read_text(encoding="utf-8"))
@@ -77,11 +92,14 @@ def main() -> None:
                 "first_affected_steps": [first_step_by_package[item] for item in affected],
                 "current_v01_coordination_effect": "DISCLOSURE_ONLY_NOT_BLOCKING",
                 "future_implementation_effect": "BLOCK_BEFORE_LATEST_GATE_UNLESS_APPROVED",
-                "source_locations": [
-                    f"reference/02_规范冲突与裁决清单.md#{record['id'].lower()}",
-                    "planning/02_架构裁决与数据库协议.md",
-                    "status/decisions.json",
-                ],
+                "source_locations": CURRENT_ADR_SOURCE_LOCATIONS.get(
+                    record["id"],
+                    [
+                        f"reference/02_规范冲突与裁决清单.md#{record['id'].lower()}",
+                        "planning/02_架构裁决与数据库协议.md",
+                        "status/decisions.json",
+                    ],
+                ),
             }
         )
 
