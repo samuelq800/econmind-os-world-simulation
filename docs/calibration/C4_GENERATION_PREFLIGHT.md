@@ -1,12 +1,22 @@
 # C4 Generation Preparation Preflight
 
-Status: **PREFLIGHT_ONLY_NON_AUTHORITATIVE / FINAL_GENERATOR_NOT_READY**
+Status: **APPROVED_FOR_CONTINUATION / NOT_READY_NON_AUTHORITATIVE / FINAL_GENERATOR_NOT_READY**
 
 C4 is not a 70-country generator implementation. This preflight records the
 next dependency-ready preparation boundary after the approved C3 descriptive
 exploration, and fails closed if its frozen C3 evidence differs. It creates no
 fictional country, archetype, trade matrix, calibration package, or World Core
 input.
+
+## C4 continuation review
+
+Review B approved immutable target
+`de663d7d6a5d5dc0873f9e49905af8c57ce645fc` for continuation:
+`C4_READINESS_GATE=PASS`, `OPEN_BLOCKER=0`, and `OPEN_MAJOR=0`. The decision
+confirms that the preflight correctly binds its C3 evidence and correctly
+remains not ready. It does not approve a final generator, change
+`finalGeneratorReady` from `false`, authorize new empirical coverage, or relax
+any C4 prohibition.
 
 ## Review lineage and frozen inputs
 

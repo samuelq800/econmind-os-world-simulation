@@ -1,6 +1,6 @@
 # EconMind Calibration Foundation, C2 Live Pilot, C3 Exploration, and C4 Preflight
 
-Status: **C2 APPROVED_FOR_CONTINUATION / C3 APPROVED_FOR_CONTINUATION / C4 PREFLIGHT_ONLY_NON_AUTHORITATIVE**
+Status: **C2 APPROVED_FOR_CONTINUATION / C3 APPROVED_FOR_CONTINUATION / C4 APPROVED_FOR_CONTINUATION + NOT_READY_NON_AUTHORITATIVE**
 Final Season 1 70-country package: **NOT CREATED**
 
 C2 historical review target `42adf110c1d8e8f01932b8b9b5f97a1e086d0343` is
@@ -15,6 +15,12 @@ historical target `21c571cd215b89bff20804bf2e38db687b44e55e` remains
 blocker/MAJOR findings. That approval preserves C3 as
 **EXPLORATORY_NON_AUTHORITATIVE** and grants no runtime or final-calibration
 authority.
+
+Review B also approved C4 immutable target
+`de663d7d6a5d5dc0873f9e49905af8c57ce645fc` for continuation:
+`C4_READINESS_GATE=PASS`, zero open blockers, and zero open MAJOR findings.
+The approved state is **NOT_READY_NON_AUTHORITATIVE**: C4 verifies the C3
+evidence boundary while `finalGeneratorReady` remains `false`.
 
 This workstream converts provider-shaped bytes into traceable observations and, later, frozen World inputs. It does not implement World Core economics and it has no production/DB behavior.
 
@@ -76,10 +82,10 @@ Do not commit large provider downloads. Configure a local/object-store path outs
 
 ## Current stopping point
 
-C2 and C3 forward remediation have independent continuation approval. The C4
-preflight binds the approved C3 evidence and explicitly reports that a final
-generator is not ready. C3 descriptive exploration remains bounded to the
-frozen partial pilot: it does not create or approve an archetype
+C2, C3, and the C4 readiness gate have independent continuation approval. C4
+remains explicitly **NOT_READY_NON_AUTHORITATIVE**: it binds the approved C3
+evidence but does not start final generation. C3 descriptive exploration
+remains bounded to the frozen partial pilot: it does not create or approve an archetype
 algorithm/count, fictional-country mapping, final trade matrix, IPF/RAS result,
 engine formula, runtime import, World State mutation, or production database
 operation.
