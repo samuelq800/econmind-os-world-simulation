@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/normalized-observation.v1.json",
+  "title": "EconMind normalized calibration observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "observationId",
+    "variableId",
+    "geographyId",
+    "period",
+    "value",
+    "canonicalUnit",
+    "dataClass",
+    "sourceSnapshotId",
+    "sourceObservationKey",
+    "transformationId",
+    "transformationVersion",
+    "qualityFlags",
+    "provenance"
+  ],
+  "properties": {
+    "observationId": { "type": "string", "pattern": "^obs_[0-9a-f]{64}$" },
+    "variableId": { "type": "string", "minLength": 1 },
+    "geographyId": { "type": "string", "minLength": 1 },
+    "period": { "type": "string", "minLength": 1 },
+    "value": {
+      "type": ["string", "null"],
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    },
+    "canonicalUnit": { "type": "string", "minLength": 1 },
+    "dataClass": {
+      "enum": ["OBSERVED", "DERIVED", "SYNTHETIC_CALIBRATION", "PLACEHOLDER"]
+    },
+    "sourceSnapshotId": { "type": ["string", "null"] },
+    "sourceObservationKey": { "type": ["string", "null"] },
+    "transformationId": { "type": "string", "minLength": 1 },
+    "transformationVersion": { "type": "string", "minLength": 1 },
+    "qualityFlags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "provenance": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "dataClass": { "const": "OBSERVED" } } },
+      "then": {
+        "properties": {
+          "sourceSnapshotId": { "type": "string" },
+          "sourceObservationKey": { "type": "string" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "dataClass": { "const": "PLACEHOLDER" } } },
+      "then": { "properties": { "value": { "type": "null" } } }
+    }
+  ]
+}

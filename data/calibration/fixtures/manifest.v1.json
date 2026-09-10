@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "calibration-fixture-manifest.v1",
+  "status": "DETERMINISTIC_TEST_FIXTURE_NON_AUTHORITATIVE",
+  "createdAt": "2026-09-10T00:00:00.000Z",
+  "notice": "Values are small provider-shaped test inputs. They are not a Season 1 empirical dataset or a calibration package.",
+  "fixtures": [
+    {
+      "path": "comtrade.bilateral.sample.json",
+      "sourceId": "UN_COMTRADE_V1",
+      "sha256": "1686443dea00f8a129e9fdebab282057d46acbc1fa0f48fd20bb0ddc4faf56f9",
+      "byteLength": 539,
+      "status": "FIXTURE"
+    },
+    {
+      "path": "wdi.gdp.usa-chn.2022-2023.json",
+      "sourceId": "WB_WDI_V2",
+      "sha256": "3de0f4c66ad0ad3696f12524ea6149ed2c30d02fd9f297c24dd06eb0e6b32d30",
+      "byteLength": 1362,
+      "status": "FIXTURE"
+    },
+    {
+      "path": "wto.tariff.sample.csv",
+      "sourceId": "WTO_TIMESERIES_V1",
+      "sha256": "9be05b633292886cc13a249bcdb9cf566d0e13ac1596e1c23cec2d843b0e68cb",
+      "byteLength": 151,
+      "status": "FIXTURE"
+    }
+  ]
+}

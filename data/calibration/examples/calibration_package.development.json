@@ -1,0 +1,14 @@
+{
+  "packageId": "calibration-foundation-v1-example",
+  "schemaVersion": "calibration-package.v1",
+  "calibrationVersion": "1.0.0-development",
+  "status": "DEVELOPMENT_NON_AUTHORITATIVE",
+  "asOfDate": "2026-09-10",
+  "sourceSnapshotSet": [],
+  "transformationVersions": ["IDENTITY_DECIMAL@1.0.0"],
+  "variableRegistryVersion": "2.0.0",
+  "countryArchetypeVersion": "1.0.0-design-only",
+  "tradeCalibrationVersion": "1.0.0-design-only",
+  "generatorVersion": "NOT_IMPLEMENTED",
+  "contentHash": "9c41137af644f4e809803fa1849e4225a86a38d09612487e8f946d4a64da9ec9"
+}

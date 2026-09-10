@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/transformation-registry.v1.json",
+  "title": "EconMind transformation registry",
+  "type": "object",
+  "required": [
+    "registryId",
+    "schemaVersion",
+    "version",
+    "status",
+    "transformations"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "transformation-registry.v1" },
+    "status": { "const": "DEVELOPMENT_NON_AUTHORITATIVE" },
+    "transformations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "transformId",
+          "version",
+          "inputVariables",
+          "formulaOrAlgorithm",
+          "unitTransformation",
+          "missingValueBehavior",
+          "validationRules"
+        ],
+        "properties": {
+          "transformId": { "type": "string", "minLength": 1 },
+          "version": { "type": "string", "minLength": 1 },
+          "inputVariables": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "formulaOrAlgorithm": { "type": "string", "minLength": 1 },
+          "unitTransformation": { "type": "string", "minLength": 1 },
+          "missingValueBehavior": { "type": "string", "minLength": 1 },
+          "validationRules": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/raw-snapshot.v1.json",
+  "title": "EconMind immutable raw snapshot metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "snapshotId",
+    "sourceId",
+    "retrievedAt",
+    "sourceAsOf",
+    "query",
+    "requestParameters",
+    "providerVersion",
+    "fileFormat",
+    "sha256",
+    "byteLength",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "raw-snapshot.v1" },
+    "snapshotId": { "type": "string", "minLength": 1 },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "retrievedAt": { "type": "string", "format": "date-time" },
+    "sourceAsOf": { "type": ["string", "null"] },
+    "query": { "type": "string", "minLength": 1 },
+    "requestParameters": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "providerVersion": { "type": ["string", "null"] },
+    "fileFormat": { "enum": ["JSON", "CSV"] },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "byteLength": { "type": "integer", "minimum": 0 },
+    "status": { "enum": ["FIXTURE", "LIVE_FETCH_NOT_RUN", "FROZEN"] }
+  }
+}

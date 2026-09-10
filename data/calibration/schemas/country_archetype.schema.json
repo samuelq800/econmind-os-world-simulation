@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/country-archetype.v1.json",
+  "title": "Evidence-backed country archetype candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "archetypeId",
+    "schemaVersion",
+    "status",
+    "methodId",
+    "featureSetVersion",
+    "dimensions",
+    "empiricalSupport",
+    "caveats"
+  ],
+  "properties": {
+    "archetypeId": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "country-archetype.v1" },
+    "status": { "enum": ["CANDIDATE", "APPROVED_FOR_PACKAGE"] },
+    "methodId": { "type": "string", "minLength": 1 },
+    "featureSetVersion": { "type": "string", "minLength": 1 },
+    "dimensions": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["variableId", "lowerQuantile", "upperQuantile", "weight"],
+        "properties": {
+          "variableId": { "type": "string" },
+          "lowerQuantile": {
+            "type": "string",
+            "pattern": "^(0|0\\.[0-9]+|1)$"
+          },
+          "upperQuantile": {
+            "type": "string",
+            "pattern": "^(0|0\\.[0-9]+|1)$"
+          },
+          "weight": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          }
+        }
+      }
+    },
+    "empiricalSupport": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "caveats": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+  }
+}

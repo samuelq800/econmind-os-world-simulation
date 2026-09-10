@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/calibration-package.v1.json",
+  "title": "Frozen calibration package handoff contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packageId",
+    "schemaVersion",
+    "calibrationVersion",
+    "status",
+    "asOfDate",
+    "sourceSnapshotSet",
+    "transformationVersions",
+    "variableRegistryVersion",
+    "countryArchetypeVersion",
+    "tradeCalibrationVersion",
+    "generatorVersion",
+    "contentHash"
+  ],
+  "properties": {
+    "packageId": { "type": "string", "minLength": 1 },
+    "schemaVersion": { "const": "calibration-package.v1" },
+    "calibrationVersion": { "type": "string", "minLength": 1 },
+    "status": {
+      "enum": ["DEVELOPMENT_NON_AUTHORITATIVE", "FROZEN_REVIEW_CANDIDATE"]
+    },
+    "asOfDate": { "type": "string", "format": "date" },
+    "sourceSnapshotSet": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "transformationVersions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "variableRegistryVersion": { "type": "string", "minLength": 1 },
+    "countryArchetypeVersion": { "type": "string", "minLength": 1 },
+    "tradeCalibrationVersion": { "type": "string", "minLength": 1 },
+    "generatorVersion": { "type": "string", "minLength": 1 },
+    "contentHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

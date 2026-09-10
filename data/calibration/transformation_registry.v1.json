@@ -1,0 +1,70 @@
+{
+  "registryId": "econmind-transformation-registry",
+  "schemaVersion": "transformation-registry.v1",
+  "version": "1.0.0",
+  "status": "DEVELOPMENT_NON_AUTHORITATIVE",
+  "transformations": [
+    {
+      "transformId": "IDENTITY_DECIMAL",
+      "version": "1.0.0",
+      "inputVariables": ["source observation"],
+      "formulaOrAlgorithm": "Validate canonical decimal text and copy without rounding.",
+      "unitTransformation": "Source unit must exactly equal the approved canonical unit mapping.",
+      "missingValueBehavior": "Preserve null.",
+      "validationRules": ["Canonical decimal string", "Explicit source unit"]
+    },
+    {
+      "transformId": "GDP_PER_CAPITA_EXACT",
+      "version": "1.0.0",
+      "inputVariables": ["gdp_current_usd", "population_total"],
+      "formulaOrAlgorithm": "gdp_current_usd / population_total using terminating exact decimal division only.",
+      "unitTransformation": "USD / PERSON = USD_PER_PERSON",
+      "missingValueBehavior": "Null if either input is null; reject zero population.",
+      "validationRules": [
+        "No implicit rounding",
+        "Non-terminating quotient raises CALIBRATION_ROUNDING_POLICY_REQUIRED"
+      ]
+    },
+    {
+      "transformId": "FISCAL_BALANCE_EXACT",
+      "version": "1.0.0",
+      "inputVariables": [
+        "government_revenue_pct_gdp",
+        "government_expenditure_pct_gdp"
+      ],
+      "formulaOrAlgorithm": "revenue - expenditure using exact decimal-string subtraction.",
+      "unitTransformation": "PERCENT_OF_GDP - PERCENT_OF_GDP",
+      "missingValueBehavior": "Null if either input is null.",
+      "validationRules": [
+        "Matched geography, period, vintage, and government coverage"
+      ]
+    },
+    {
+      "transformId": "TRADE_BALANCE_EXACT",
+      "version": "1.0.0",
+      "inputVariables": ["goods_exports_usd", "goods_imports_usd"],
+      "formulaOrAlgorithm": "exports - imports using exact decimal-string subtraction.",
+      "unitTransformation": "USD - USD",
+      "missingValueBehavior": "Null if either input is null.",
+      "validationRules": [
+        "Matched valuation, period, reporter, and classification"
+      ]
+    },
+    {
+      "transformId": "TRADE_OPENNESS_EXACT",
+      "version": "1.0.0",
+      "inputVariables": [
+        "exports_goods_services_usd",
+        "imports_goods_services_usd",
+        "gdp_current_usd"
+      ],
+      "formulaOrAlgorithm": "100 * (exports + imports) / GDP using exact decimal arithmetic.",
+      "unitTransformation": "USD / USD * 100 = PERCENT_OF_GDP",
+      "missingValueBehavior": "Null if any input is null; reject zero GDP.",
+      "validationRules": [
+        "No implicit rounding",
+        "Non-terminating quotient raises CALIBRATION_ROUNDING_POLICY_REQUIRED"
+      ]
+    }
+  ]
+}

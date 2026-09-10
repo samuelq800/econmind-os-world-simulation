@@ -1,0 +1,26 @@
+{
+  "elapsedTime": "0.02 secs",
+  "count": 2,
+  "data": [
+    {
+      "reporterISO": "USA",
+      "partnerISO": "CHN",
+      "period": "2023",
+      "flowCode": "X",
+      "cmdCode": "TOTAL",
+      "primaryValue": "147806742110",
+      "primaryValueUnit": "USD",
+      "isAggregate": true
+    },
+    {
+      "reporterISO": "CHN",
+      "partnerISO": "USA",
+      "period": "2023",
+      "flowCode": "X",
+      "cmdCode": "TOTAL",
+      "primaryValue": "500291442109",
+      "primaryValueUnit": "USD",
+      "isAggregate": true
+    }
+  ]
+}

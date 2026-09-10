@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/bilateral-trade-calibration.v1.json",
+  "title": "Bilateral trade calibration data",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "version",
+    "status",
+    "sectorTaxonomyRef",
+    "countryIds",
+    "flows",
+    "reconciliation"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "bilateral-trade-calibration.v1" },
+    "version": { "type": "string", "minLength": 1 },
+    "status": {
+      "enum": ["PILOT_NON_AUTHORITATIVE", "FROZEN_REVIEW_CANDIDATE"]
+    },
+    "sectorTaxonomyRef": { "type": "string", "minLength": 1 },
+    "countryIds": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 2,
+      "uniqueItems": true
+    },
+    "flows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exporterId",
+          "importerId",
+          "sectorId",
+          "period",
+          "value",
+          "unit",
+          "dataClass",
+          "sourceObservationIds"
+        ],
+        "properties": {
+          "exporterId": { "type": "string" },
+          "importerId": { "type": "string" },
+          "sectorId": { "type": "string" },
+          "period": { "type": "string" },
+          "value": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          },
+          "unit": { "const": "USD" },
+          "dataClass": {
+            "enum": ["OBSERVED", "DERIVED", "SYNTHETIC_CALIBRATION"]
+          },
+          "sourceObservationIds": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "reconciliation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "methodId",
+        "version",
+        "arithmetic",
+        "reportingAsymmetryPolicy",
+        "diagnosticsRequired"
+      ],
+      "properties": {
+        "methodId": { "type": "string" },
+        "version": { "type": "string" },
+        "arithmetic": { "const": "EXACT_DECIMAL_OR_RATIONAL" },
+        "reportingAsymmetryPolicy": { "type": "string", "minLength": 1 },
+        "diagnosticsRequired": { "const": true }
+      }
+    }
+  }
+}
