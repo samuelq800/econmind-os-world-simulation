@@ -7,6 +7,7 @@ import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 import {
   commandId,
   commodityId,
+  countryId,
   economicRecognitionId,
   eventId,
   inventoryBatchId,
@@ -18,6 +19,7 @@ import {
   worldId,
   type CommandId,
   type CommodityId,
+  type CountryId,
   type EconomicRecognitionId,
   type EventId,
   type InventoryBatchId,
@@ -61,6 +63,7 @@ const CANONICAL_SHA256 = /^sha256:[0-9a-f]{64}$/u;
 
 export interface InventoryAccount {
   readonly worldId: WorldId;
+  readonly countryId: CountryId;
   readonly commodityId: CommodityId;
   readonly batchId: InventoryBatchId;
   readonly unit: string;
@@ -164,6 +167,7 @@ function validateAccount(input: InventoryAccount): Readonly<InventoryAccount> {
   const canonicalUnit = Quantity.from('0', input.unit).unit;
   return Object.freeze({
     worldId: worldId(input.worldId),
+    countryId: countryId(input.countryId),
     commodityId: commodityId(input.commodityId),
     batchId: inventoryBatchId(input.batchId),
     unit: canonicalUnit,
@@ -285,6 +289,7 @@ function validateOperationEntries(
     }
   }
   const identityFields = [
+    'countryId',
     'titleHolderId',
     'riskBearerId',
     'economicRecognitionId',

@@ -11,6 +11,7 @@ import {
   canonicalSerialize,
   commandId,
   commodityId,
+  countryId,
   createInventoryAccount,
   createReservationPosting,
   eventId,
@@ -30,6 +31,7 @@ const sha256 = (preimage: string) =>
 const WORLD = worldId('WORLD_PROPERTY');
 const available = createInventoryAccount({
   worldId: WORLD,
+  countryId: countryId('COUNTRY_PROPERTY'),
   commodityId: commodityId('PROPERTY_GOOD'),
   batchId: inventoryBatchId('BATCH_PROPERTY'),
   unit: 'kg',

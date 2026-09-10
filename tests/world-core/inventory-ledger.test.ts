@@ -11,6 +11,7 @@ import {
   applyInventoryPosting,
   commandId,
   commodityId,
+  countryId,
   createDeliveryPosting,
   createInventoryAccount,
   createInventoryPosting,
@@ -36,6 +37,8 @@ const sha256 = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
 
 const WORLD = worldId('WORLD_1');
+const SELLER_COUNTRY = countryId('COUNTRY_SELLER');
+const BUYER_COUNTRY = countryId('COUNTRY_BUYER');
 const COMMODITY = commodityId('WHEAT');
 const BATCH = inventoryBatchId('BATCH_1');
 const OWNER = legalEntityId('ENTITY_SELLER');
@@ -52,6 +55,7 @@ function account(
 ) {
   return createInventoryAccount({
     worldId: WORLD,
+    countryId: SELLER_COUNTRY,
     commodityId: COMMODITY,
     batchId: BATCH,
     unit: 'kg',
@@ -70,6 +74,7 @@ const available = account('AVAILABLE');
 const reserved = account('RESERVED');
 const inTransit = account('IN_TRANSIT', { physicalLocationId: TRANSIT });
 const delivered = account('AVAILABLE', {
+  countryId: BUYER_COUNTRY,
   physicalLocationId: DESTINATION,
   titleHolderId: BUYER,
   riskBearerId: BUYER,
@@ -331,6 +336,7 @@ describe('V08.1 authoritative inventory posting ledger', () => {
     );
     expect(destinationEntry?.account).toMatchObject({
       physicalLocationId: DESTINATION,
+      countryId: BUYER_COUNTRY,
       titleHolderId: BUYER,
       riskBearerId: BUYER,
       economicRecognitionId: economicRecognitionId('TRADE_RECOGNITION_1'),
