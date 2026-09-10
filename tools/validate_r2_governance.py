@@ -895,14 +895,9 @@ def validate(root: Path) -> dict[str, Any]:
             require(
                 isinstance(v08_continuation, dict)
                 and v08_continuation.get("status")
-                in {"ACTIVE", "TERMINAL_GATE_REACHED"}
+                in {"ACTIVE", "TERMINAL_GATE_REACHED", "COMPLETED"}
                 and v08_continuation.get("method")
                 == "OWNER_AUTHORIZED_PACKAGE_CONTINUATION"
-                and v08_continuation.get("decision")
-                in {
-                    "ACCEPTED_FOR_MAINLINE_CONTINUATION",
-                    "READY_FOR_PACKAGE_REVIEW",
-                }
                 and v08_continuation.get("policy_file")
                 == "docs/governance/WORLD_CORE_V08_CONTINUATION_POLICY.json"
                 and v08_continuation.get("activation_record")
@@ -910,17 +905,9 @@ def validate(root: Path) -> dict[str, Any]:
                 and v08_continuation.get("branch") == "codex/world-core-v08"
                 and v08_continuation.get("allowed_steps") == v08_continuation_steps
                 and v08_continuation.get("terminal_gate") == "V08_PACKAGE_REVIEW"
-                and v08_continuation.get("independent_review_pending") is True
-                and v08_continuation.get("merge_authorized") is False
                 and v08_continuation.get("production_mutation") is False
                 and v08_continuation.get("owner_approved") is True,
                 "V08 continuation status differs from owner policy",
-            )
-            branch = git("branch", "--show-current")
-            require(
-                branch.returncode == 0
-                and branch.stdout.strip() == "codex/world-core-v08",
-                "active V08 continuation is used outside its exact branch",
             )
             v08_completed = v08_continuation.get("completed_steps", {})
             require(
@@ -928,6 +915,54 @@ def validate(root: Path) -> dict[str, Any]:
                 and set(v08_completed) <= set(v08_continuation_steps),
                 "V08 continuation completed-step set is invalid",
             )
+            v08_promoted = v08_continuation.get("status") == "COMPLETED"
+            if v08_promoted:
+                approved_target = commit_exists(
+                    v08_continuation.get("approved_package_target"),
+                    "V08 approved_package_target",
+                )
+                acceptance_commit = commit_exists(
+                    v08_continuation.get("owner_acceptance_commit"),
+                    "V08 owner_acceptance_commit",
+                )
+                require(
+                    v08_continuation.get("decision") == "V08_PACKAGE_APPROVED"
+                    and v08_continuation.get("independent_review_pending") is False
+                    and v08_continuation.get("merge_authorized") is True
+                    and v08_continuation.get("owner_decision")
+                    == "OWNER_POLICY_AUTO_ACCEPTANCE"
+                    and v08_continuation.get("authority")
+                    == "PROJECT_OWNER_DIRECT_CONFIRMATION",
+                    "V08 completed continuation lacks the approved policy closure",
+                )
+                is_ancestor(
+                    approved_target,
+                    acceptance_commit,
+                    "V08 approved target to policy acceptance",
+                )
+                is_ancestor(
+                    acceptance_commit,
+                    "HEAD",
+                    "V08 policy acceptance is not in current history",
+                )
+                file(v08_continuation.get("acceptance_record"))
+            else:
+                require(
+                    v08_continuation.get("decision")
+                    in {
+                        "ACCEPTED_FOR_MAINLINE_CONTINUATION",
+                        "READY_FOR_PACKAGE_REVIEW",
+                    }
+                    and v08_continuation.get("independent_review_pending") is True
+                    and v08_continuation.get("merge_authorized") is False,
+                    "V08 active continuation status is invalid",
+                )
+                branch = git("branch", "--show-current")
+                require(
+                    branch.returncode == 0
+                    and branch.stdout.strip() == "codex/world-core-v08",
+                    "active V08 continuation is used outside its exact branch",
+                )
             for completed_step, record in v08_completed.items():
                 historical_changes_required = (
                     isinstance(record, dict)
@@ -944,11 +979,35 @@ def validate(root: Path) -> dict[str, Any]:
                     and record.get("open_recorded_p1_majors") == 0
                     and record.get("independent_review") == "NOT_RUN"
                 )
+                approved_closure = (
+                    isinstance(record, dict)
+                    and record.get("open_recorded_p0_blockers") == 0
+                    and record.get("historical_open_recorded_p0_blockers") == 2
+                    and record.get("open_recorded_p1_majors") == 0
+                    and record.get("historical_independent_review")
+                    == "CHANGES_REQUIRED_ON_HISTORICAL_TARGET"
+                    and record.get("historical_review_target")
+                    == "c44885fdf0c639d3cce6c1e337b21042ab647965"
+                    and record.get("independent_review") == "V08_PACKAGE_APPROVED"
+                    and record.get("reviewed_target")
+                    == "b3a1f4949efa85d1c310819ebdf37505589f1b49"
+                    and record.get("finding_implementation_state")
+                    == "CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW"
+                    and record.get("status") == "VERIFIED"
+                )
                 require(
                     isinstance(record, dict)
                     and record.get("automated_evidence_status") == "PASS"
-                    and (initial_review_pending or historical_changes_required)
-                    and record.get("status") == "IMPLEMENTED_UNVERIFIED",
+                    and (
+                        approved_closure
+                        if v08_promoted
+                        else (initial_review_pending or historical_changes_required)
+                    )
+                    and (
+                        record.get("status") == "VERIFIED"
+                        if v08_promoted
+                        else record.get("status") == "IMPLEMENTED_UNVERIFIED"
+                    ),
                     f"{completed_step} lacks valid V08 continuation evidence",
                 )
                 implementation_commit = commit_exists(
@@ -1879,6 +1938,139 @@ def validate(root: Path) -> dict[str, Any]:
                                 "V08.1 lacks owner-authorized package continuation evidence",
                             )
                             file(v08_entry.get("preflight_file"))
+                        elif states["V08.2"] == "VERIFIED":
+                            v08_entry = progress_data.get("v08_entry")
+                            require(
+                                isinstance(v08_entry, dict),
+                                "completed V08 entry metadata is missing",
+                            )
+                            v08_2 = v08_entry.get("v08_2", {})
+                            v08_3 = v08_entry.get("v08_3", {})
+                            v08_package_review = progress_data.get(
+                                "v08_package_review", {}
+                            )
+                            require(
+                                states["V08.1"] == "VERIFIED"
+                                and states["V08.3"] == "VERIFIED"
+                                and progress_data.get("work_packages", {}).get("V08")
+                                == "VERIFIED"
+                                and isinstance(v08_entry, dict)
+                                and v08_entry.get("status") == "COMPLETED"
+                                and v08_entry.get("package_review")
+                                == "V08_PACKAGE_APPROVED"
+                                and v08_entry.get("owner_acceptance")
+                                == "OWNER_POLICY_AUTO_ACCEPTANCE"
+                                and isinstance(v08_2, dict)
+                                and v08_2.get("status") == "VERIFIED"
+                                and isinstance(v08_3, dict)
+                                and v08_3.get("status") == "VERIFIED"
+                                and isinstance(v08_package_review, dict)
+                                and v08_package_review.get("status")
+                                == "V08_PACKAGE_APPROVED"
+                                and v08_package_review.get("package_status")
+                                == "VERIFIED"
+                                and v08_package_review.get("latest_independent_decision")
+                                == "V08_PACKAGE_APPROVED"
+                                and v08_package_review.get("reviewed_target")
+                                == "b3a1f4949efa85d1c310819ebdf37505589f1b49"
+                                and v08_package_review.get("open_recorded_p0_blockers")
+                                == 0
+                                and v08_package_review.get("open_recorded_p1_majors")
+                                == 0
+                                and v08_package_review.get("package_verified") is True
+                                and v08_package_review.get("merge_authorized") is True
+                                and v08_package_review.get("owner_decision")
+                                == "OWNER_POLICY_AUTO_ACCEPTANCE"
+                                and v08_package_review.get("authority")
+                                == "PROJECT_OWNER_DIRECT_CONFIRMATION"
+                                and v08_package_review.get("v09_started") is False
+                                and isinstance(v08_continuation, dict)
+                                and v08_continuation.get("status") == "COMPLETED"
+                                and v08_continuation.get("decision")
+                                == "V08_PACKAGE_APPROVED"
+                                and all(
+                                    v08_completed.get(step_id, {}).get("status")
+                                    == "VERIFIED"
+                                    for step_id in v08_continuation_steps
+                                ),
+                                "completed V08 package review record is invalid",
+                            )
+                            v08_review_target = commit_exists(
+                                v08_package_review.get("reviewed_target"),
+                                "approved V08 package review target",
+                            )
+                            is_ancestor(
+                                v08_review_target,
+                                "HEAD",
+                                "approved V08 package target is not in current history",
+                            )
+                            file(v08_entry.get("preflight_file"))
+                            file(v08_2.get("preflight_file"))
+                            file(v08_2.get("evidence_file"))
+                            file(v08_3.get("preflight_file"))
+                            file(v08_3.get("evidence_file"))
+                            file(v08_package_review.get("bundle_file"))
+                            file(v08_package_review.get("test_evidence_file"))
+                            file(v08_package_review.get("target_file"))
+                            file(v08_package_review.get("acceptance_record"))
+                            v08_integration = progress_data.get("v08_integration")
+                            if v08_integration is None:
+                                require(
+                                    gate.get("step_id") == "V09.1"
+                                    and gate.get("status") == "PLANNED"
+                                    and gate.get("next_step") == "V09.1"
+                                    and gate.get("next_step_ready") is False
+                                    and required_gate == "V08_MAINLINE_INTEGRATION"
+                                    and gate.get("gate_status") == "PENDING"
+                                    and v08_package_review.get(
+                                        "final_baseline_before_merge"
+                                    ) in {"PENDING", "PASS"},
+                                    "V08 promoted package must stop for mainline integration",
+                                )
+                            else:
+                                require(
+                                    isinstance(v08_integration, dict)
+                                    and v08_integration.get("branch")
+                                    == "codex/world-core-v08"
+                                    and v08_integration.get("approved_package_target")
+                                    == v08_review_target
+                                    and v08_integration.get("status") == "MERGED"
+                                    and v08_integration.get("history_preserved") is True
+                                    and v08_integration.get("runtime_equivalence")
+                                    == "PASS"
+                                    and v08_integration.get("production_mutation") is False
+                                    and gate.get("step_id") == "V09.1"
+                                    and gate.get("status") == "PLANNED"
+                                    and gate.get("next_step") == "V09.1"
+                                    and gate.get("next_step_ready") is False
+                                    and required_gate == "V09.1_ADR_18_DECISION"
+                                    and gate.get("gate_status") == "PENDING",
+                                    "V08 integrated handoff is incomplete",
+                                )
+                                promotion_commit = commit_exists(
+                                    v08_integration.get("promotion_commit"),
+                                    "V08 promotion commit",
+                                )
+                                merged_commit = commit_exists(
+                                    v08_integration.get("merged_commit"),
+                                    "V08 merged commit",
+                                )
+                                is_ancestor(
+                                    v08_review_target,
+                                    promotion_commit,
+                                    "V08 approved target to promotion",
+                                )
+                                is_ancestor(
+                                    promotion_commit,
+                                    merged_commit,
+                                    "V08 promotion to merge",
+                                )
+                                is_ancestor(
+                                    merged_commit,
+                                    "HEAD",
+                                    "V08 mainline merge is not in current history",
+                                )
+                                file(v08_integration.get("evidence_file"))
                         else:
                             require(False, "unsupported V08 lifecycle state")
                         require(
