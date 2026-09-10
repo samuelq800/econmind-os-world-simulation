@@ -58,6 +58,13 @@ server-side, no-redirect, no-cache probe to the fixed API `/readyz` target. The
 response is sanitized to `ok` or `unavailable`. It is not an `/api/*` namespace,
 does not forward credentials or upstream content, and does not approve ADR-19.
 
+### `packages/calibration`
+
+- Non-authoritative, Node-side empirical data engineering and frozen-package preparation.
+- Owns provider request specifications, fixture/live retrieval adapters, raw snapshot metadata, normalization, provenance, and calibration-only exact arithmetic.
+- Has the dedicated `CALIBRATION_DATA` owner and may import only its own local modules and installed/Node dependencies.
+- No World runtime owner, shared-public package, build helper, policy helper, or server tool may import it. A future reviewed frozen-package handoff must use a separately approved public contract instead of exposing provider adapters.
+
 ## Reserved package names
 
 The architecture reserves `contracts`, `core`, `registries`, `persistence`,
@@ -77,9 +84,11 @@ database policy, or end-to-end authorization tests.
 registry. Paths under `apps/world-web`, `apps/world-api`, and `apps/world-worker`
 are WORLD_WEB, WORLD_API, and WORLD_WORKER respectively. Reserved contracts,
 core, registries, and UI paths are SHARED_PUBLIC; persistence, integration, and
-testkit paths are SERVER_ONLY. No product package is created by these reserved
-classifications. New/unclassified packages are UNKNOWN and require an explicit
-architecture decision before their source can pass the gate.
+testkit paths are SERVER_ONLY. `packages/calibration` is CALIBRATION_DATA and is
+isolated from every World runtime and shared-public owner. No product package is
+created by the reserved classifications. New/unclassified packages are UNKNOWN
+and require an explicit architecture decision before their source can pass the
+gate.
 
 The scanner enumerates all `.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`,
 and `.cjs` files throughout `apps/**` and `packages/**`, including declarations,

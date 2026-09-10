@@ -6,6 +6,7 @@ export const OWNERS = Object.freeze({
   WORLD_WORKER: 'WORLD_WORKER',
   SHARED_PUBLIC: 'SHARED_PUBLIC',
   SERVER_ONLY: 'SERVER_ONLY',
+  CALIBRATION_DATA: 'CALIBRATION_DATA',
   UNKNOWN: 'UNKNOWN',
 });
 
@@ -22,6 +23,7 @@ export const PACKAGE_OWNERS = new Map([
   ['packages/persistence', OWNERS.SERVER_ONLY],
   ['packages/integration', OWNERS.SERVER_ONLY],
   ['packages/testkit', OWNERS.SERVER_ONLY],
+  ['packages/calibration', OWNERS.CALIBRATION_DATA],
 ]);
 
 export const BUILD_HELPERS = ['apps/world-web/server.mjs'];
@@ -99,6 +101,17 @@ export function architecturalEdgeViolation(source, target) {
     )
       ? null
       : 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';
+  }
+  if (target.owner === OWNERS.CALIBRATION_DATA) {
+    return source.owner === OWNERS.CALIBRATION_DATA
+      ? null
+      : 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';
+  }
+  if (
+    source.owner === OWNERS.CALIBRATION_DATA &&
+    target.owner !== OWNERS.CALIBRATION_DATA
+  ) {
+    return 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';
   }
   if (source.context === 'TOOL_POLICY') {
     return 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';

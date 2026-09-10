@@ -15,3 +15,7 @@ coverage/
 *.tsbuildinfo
 supabase/.temp/
 .vite-env-test-*/
+
+# Large/retrieved calibration bytes stay local; commit manifests and fixtures.
+data/calibration/raw/
+data/calibration/artifacts/
