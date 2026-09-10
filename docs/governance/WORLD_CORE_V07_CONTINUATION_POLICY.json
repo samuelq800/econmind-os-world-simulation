@@ -22,8 +22,8 @@
     "V07 steps remain IMPLEMENTED_UNVERIFIED unless independently promoted",
     "normal engineering acceptance, determinism, idempotency, architecture, environment, security and governance checks remain mandatory",
     "ADR-11 and ADR-17 are approved architecture",
-    "ADR-20 remains required before V07.2 queues a command",
-    "ADR-16 remains required before candidate DDL is merged or promoted",
+    "ADR-20 is approved; V07.2 must implement its current-authorization and durable-history boundary",
+    "ADR-16 is approved; candidate DDL promotion still follows V07 package review and owner authority",
     "no database production mutation or migration publication",
     "V07 package Review B and owner-controlled promotion remain mandatory before main merge or V08"
   ],
@@ -32,9 +32,15 @@
     "use for a non-adjacent dependency",
     "use outside V07.1 through V07.3",
     "continue across an unresolved ADR, P0 or MAJOR blocker",
-    "merge candidate DDL before ADR-16",
+    "merge candidate DDL before V07 package review and owner promotion authority",
     "merge V07 to main before package Review B and merge authority",
     "production deployment or migration publication",
     "V08 or later implementation"
-  ]
+  ],
+  "current_hold": {
+    "step": "V07.1",
+    "status": "FIXED_PENDING_REVIEW",
+    "finding": "correlationId trace metadata participated in the authoritative Command fingerprint",
+    "effect": "V07.2 runtime remains NOT_STARTED until focused independent blocker closure"
+  }
 }

@@ -1189,20 +1189,31 @@ def validate(root: Path) -> dict[str, Any]:
                                 and gate.get("status") == states["V07.1"]
                                 and gate.get("next_step") == "V07.2"
                                 and gate.get("next_step_ready") is False
-                                and required_gate == "V07.2_OWNER_ADR_GATE"
+                                and required_gate
+                                == "V07.1_FOCUSED_BLOCKER_CLOSURE_REVIEW"
                                 and gate.get("gate_status") == "PENDING",
-                                "completed V07.1 ADR handoff differs from progress truth",
+                                "V07.1 focused-review hold differs from progress truth",
                             )
                             implementation = v07_entry.get("implementation_result")
                             require(
-                                isinstance(implementation, dict)
-                                and implementation.get("status")
+                                isinstance(implementation, dict),
+                                "V07.1 implementation record is missing",
+                            )
+                            forward_fix = implementation.get("fingerprint_forward_fix")
+                            require(
+                                implementation.get("status")
                                 == "IMPLEMENTED_UNVERIFIED"
                                 and implementation.get("automated_evidence") == "PASS"
-                                and implementation.get("independent_review") == "NOT_RUN"
+                                and implementation.get("independent_review")
+                                == "CHANGES_REQUIRED_DOWNSTREAM_BLOCKING"
                                 and implementation.get("open_p0_blockers") == 0
-                                and implementation.get("open_p1_majors") == 0,
-                                "V07.1 implementation evidence is incomplete",
+                                and implementation.get("open_p1_majors") == 1
+                                and isinstance(forward_fix, dict)
+                                and forward_fix.get("status") == "FIXED_PENDING_REVIEW"
+                                and forward_fix.get("automated_evidence") == "PASS"
+                                and forward_fix.get("independent_closure") == "PENDING"
+                                and forward_fix.get("production_mutation") is False,
+                                "V07.1 fingerprint forward-fix evidence is incomplete",
                             )
                             code_candidate = commit_exists(
                                 implementation.get("code_candidate"),
@@ -1213,17 +1224,31 @@ def validate(root: Path) -> dict[str, Any]:
                                 "V07.1 evidence commit",
                             )
                             is_ancestor(code_candidate, evidence_commit, "V07.1 evidence lineage")
+                            fixed_code_candidate = commit_exists(
+                                forward_fix.get("fixed_code_candidate"),
+                                "V07.1 fixed code candidate",
+                            )
+                            is_ancestor(
+                                evidence_commit,
+                                fixed_code_candidate,
+                                "V07.1 fingerprint forward-fix lineage",
+                            )
                             file("docs/reports/V07.1/IMPLEMENTATION.md")
                             file("docs/reports/V07.1/TEST_EVIDENCE.json")
+                            file("docs/reports/V07.1/FINGERPRINT_FORWARD_FIX.md")
+                            file(
+                                "docs/reports/V07.1/TEST_EVIDENCE_FINGERPRINT_FORWARD_FIX.json"
+                            )
                         require(
                             v07_entry.get("branch") == "codex/world-core-v07"
                             and v07_entry.get("preflight") == "GO"
-                            and v07_entry.get("approved_adrs") == ["ADR-11", "ADR-17"]
+                            and v07_entry.get("approved_adrs")
+                            == ["ADR-11", "ADR-16", "ADR-17", "ADR-20"]
                             and v07_entry.get("production_mutation") is False
                             and v07_entry.get("owner_approved") is True,
                             "V07.1 entry authority is incomplete",
                         )
-                        for decision_id in ("ADR-11", "ADR-17"):
+                        for decision_id in ("ADR-11", "ADR-16", "ADR-17", "ADR-20"):
                             require(
                                 owner_decisions[decision_id].get("status") == "APPROVED"
                                 and owner_decisions[decision_id].get("approval_record"),
