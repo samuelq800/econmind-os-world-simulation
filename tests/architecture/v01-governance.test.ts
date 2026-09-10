@@ -227,11 +227,22 @@ describe('V06 owner-authorized package continuation', () => {
       next_step: 'V09.1',
       next_step_ready: false,
       next_step_blockers: [
-        'V08 final normal baseline and history-preserving main merge',
         'ADR-18 before V09.1 real persistence/concurrency evidence',
       ],
-      required_gate: 'V08_MAINLINE_INTEGRATION',
+      required_gate: 'V09.1_ADR_18_DECISION',
       gate_status: 'PENDING',
+    });
+    expect(progress.v08_integration).toMatchObject({
+      branch: 'codex/world-core-v08',
+      approved_package_target: 'b3a1f4949efa85d1c310819ebdf37505589f1b49',
+      owner_acceptance_commit: '9cc753807d31a8ccfd963430d33ffa4863b65b28',
+      promotion_commit: '3dbcb67ad3c0816c091f2c4a64a08d4b9a6d66a3',
+      status: 'MERGED',
+      merged_commit: '7a4996339dcfcf54ece8f75e918e6b22fe165970',
+      history_preserved: true,
+      runtime_equivalence: 'PASS',
+      production_mutation: false,
+      evidence_file: 'docs/reports/V08/FINAL_RECONCILIATION.md',
     });
     expect(progress.v08_entry).toMatchObject({
       status: 'COMPLETED',
