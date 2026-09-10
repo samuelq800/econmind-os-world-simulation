@@ -43,6 +43,7 @@ export type OpeningSourceId = BrandedId<'OpeningSourceId'>;
 export type OpeningInventoryEntryId = BrandedId<'OpeningInventoryEntryId'>;
 export type FinancialOpeningBatchId = BrandedId<'FinancialOpeningBatchId'>;
 export type FinancialOpeningLegId = BrandedId<'FinancialOpeningLegId'>;
+export type WorkerId = BrandedId<'WorkerId'>;
 
 const CANONICAL_ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 const CANONICAL_UUID =
@@ -127,3 +128,4 @@ export const financialOpeningBatchId = (value: string) =>
   parseId('FinancialOpeningBatchId', value);
 export const financialOpeningLegId = (value: string) =>
   parseId('FinancialOpeningLegId', value);
+export const workerId = (value: string) => parseId('WorkerId', value);

@@ -1,0 +1,52 @@
+name: V09 PostgreSQL candidate
+
+on:
+  push:
+    branches:
+      - codex/world-core-v09
+  pull_request:
+    paths:
+      - .github/workflows/v09-postgres.yml
+      - database/migrations/**
+      - package.json
+      - pnpm-lock.yaml
+      - scripts/v09-postgres-test-environment.mjs
+      - tests/world-core/world-writer-lease-postgres.test.ts
+
+permissions:
+  contents: read
+
+jobs:
+  real-postgres-v09-1:
+    name: Disposable PostgreSQL V09.1 evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: pnpm test:v09:postgres

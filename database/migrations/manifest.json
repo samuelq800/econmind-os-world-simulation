@@ -59,6 +59,20 @@
       "lock_or_downtime_risk": "Branch-local V07 forward fix; replaces receipt validation and guards final transition completeness",
       "rollback_strategy": "forward-fix",
       "production_approval": "docs/reports/V07/FINAL_ACCEPTANCE.md"
+    },
+    {
+      "migration_id": "0005_world_v2_writer_lease_fencing",
+      "release_order": 5,
+      "path": "database/migrations/artifacts/0005_world_v2_writer_lease_fencing.sql",
+      "sha256": "1559a0a44c82f55005a0209b9b2a64095625c384e39ed0999e1a44e573ba3cb3",
+      "artifact_source_commit": "7102cd3c3ba80cd2468032c3d4776a871dec515d",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Branch-local V09.1 candidate; adds a per-World operational lease record, guarded transition trigger and transaction-time fence/version guard without economic writes",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }

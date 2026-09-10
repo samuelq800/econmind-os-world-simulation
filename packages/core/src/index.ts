@@ -19,3 +19,4 @@ export * from './time/simulation-clock.js';
 export * from './time/deterministic-order.js';
 export * from './time/simulation-scheduler.js';
 export * from './versions.js';
+export * from './writer/world-writer-lease.js';
