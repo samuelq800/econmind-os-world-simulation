@@ -1447,6 +1447,26 @@ def validate(root: Path) -> dict[str, Any]:
                                 and package_review.get("v08_started") is False,
                                 "V07 package review state is incomplete",
                             )
+                            require(
+                                package_review.get("latest_independent_decision")
+                                == "V07_PACKAGE_CHANGES_REQUIRED"
+                                and package_review.get("superseded_review_target")
+                                == "e802a5233ded3825c56d2897374fcd2de0c40da8"
+                                and package_review.get(
+                                    "pending_independent_closure", {}
+                                ).get("blockers")
+                                == ["V07-PKG-BLK-01", "V07-PKG-BLK-02"]
+                                and package_review.get(
+                                    "pending_independent_closure", {}
+                                ).get("majors")
+                                == [
+                                    "V07-PKG-MAJ-01",
+                                    "V07-PKG-MAJ-02",
+                                    "V07-PKG-MAJ-03",
+                                    "V07-PKG-MAJ-04",
+                                ],
+                                "V07 package Review B history or focused closure scope is incomplete",
+                            )
                             package_content = commit_exists(
                                 package_review.get("content_commit"),
                                 "V07 package content commit",
@@ -1456,15 +1476,16 @@ def validate(root: Path) -> dict[str, Any]:
                                 package_content,
                                 "V07.3-to-package content lineage",
                             )
-                            package_target = commit_exists(
-                                package_review.get("review_target"),
-                                "V07 package review target",
-                            )
-                            is_ancestor(
-                                package_content,
-                                package_target,
-                                "V07 package review lineage",
-                            )
+                            if package_review.get("review_target") is not None:
+                                package_target = commit_exists(
+                                    package_review.get("review_target"),
+                                    "V07 package review target",
+                                )
+                                is_ancestor(
+                                    package_content,
+                                    package_target,
+                                    "V07 package review lineage",
+                                )
                             file(package_review.get("review_bundle"))
                             file(package_review.get("evidence_file"))
                             file("docs/reports/V07/PACKAGE_REVIEW_TARGET.md")

@@ -1,69 +1,73 @@
 {
-  "schema_version": "V07-PACKAGE-TEST-EVIDENCE-1",
+  "schema_version": "V07-PACKAGE-TEST-EVIDENCE-2",
   "package_id": "V07",
   "package_status": "IMPLEMENTED_UNVERIFIED",
   "review_readiness": "READY_FOR_PACKAGE_REVIEW",
-  "content_commit": "190bd3b145f8e284c591446daaa1c6da355aa065",
+  "review_result_being_remediated": "V07_PACKAGE_CHANGES_REQUIRED",
+  "superseded_package_review_target": "e802a5233ded3825c56d2897374fcd2de0c40da8",
   "authoritative_main": "8e4d9e125a89fc1457ed016c708537fd67e1c8b7",
   "branch": "codex/world-core-v07",
   "approved_adrs": ["ADR-11", "ADR-16", "ADR-17", "ADR-20"],
-  "steps": {
+  "fixed_steps": {
     "V07.1": {
-      "historical_code_candidate": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
-      "historical_review_target": "b57b6aa9cd349776e1f5cd8ae10d20413523a69c",
-      "active_code_candidate": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
+      "code_changed": false,
       "active_review_target": "66da354755326fc00ece7fcdb78e35db27f0b15f",
       "status": "IMPLEMENTED_UNVERIFIED",
-      "review_b": "APPROVED_FOR_CONTINUATION",
-      "correlation_fingerprint_major": "CLOSED",
-      "open_downstream_blockers": 0,
-      "automated_evidence": "PASS"
+      "review_b": "APPROVED_FOR_CONTINUATION"
     },
     "V07.2": {
-      "migration_artifact_source_commit": "2b3349555137196612bea6d55e22edf156f53cbd",
-      "code_candidate": "0f260ab1b582c524dc3005e0de62202d1c5d9a24",
-      "review_target": "cea9554c5ad9c3ad69e0ec538c908901660ec761",
+      "fixed_code_candidate": "2c32d0918bf7bbf97a851ad785b305de1f5688fa",
+      "fixed_review_target": "81d3e59de7b3dd51f9cc2eaf93dc086f1baaf5ba",
+      "migration_artifact_source_commit": "f589c8fba2e4e2a5686d8a1c4ded60a8688056fa",
       "status": "IMPLEMENTED_UNVERIFIED",
-      "independent_review": "DEFERRED_TO_V07_PACKAGE_GATE",
       "automated_evidence": "PASS"
     },
     "V07.3": {
-      "code_candidate": "956d011df95f383917b421ffc522eb896477970a",
-      "review_target": "2b645f963422ac7dcb39c599768003e93ddc22d3",
+      "fixed_code_candidate": "2b42e0d725da590a24e845a7046501af8f8d4c01",
+      "fixed_review_target": "21299492a4acb47b5383056417bba22acbc214b2",
       "status": "IMPLEMENTED_UNVERIFIED",
-      "independent_review": "PENDING_V07_PACKAGE_GATE",
       "automated_evidence": "PASS"
     }
   },
+  "finding_state": {
+    "V07-PKG-BLK-01": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
+    "V07-PKG-BLK-02": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
+    "V07-PKG-MAJ-01": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
+    "V07-PKG-MAJ-02": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
+    "V07-PKG-MAJ-03": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
+    "V07-PKG-MAJ-04": "IMPLEMENTED_PENDING_INDEPENDENT_CLOSURE",
+    "V07-PKG-MIN-01": "OPEN_NON_BLOCKING_DEFERRED"
+  },
   "verification": {
-    "focused_v07_1": "PASS / active corrected target",
-    "focused_v07_2": "6 files / 35 tests / PASS",
-    "focused_v07_3_and_cross_step": "7 files / 44 tests / PASS",
-    "full_repository": "31 files / 383 tests / PASS",
+    "focused_v07_2": "3 files / 26 tests / PASS",
+    "focused_v07_3": "2 files / 19 tests / PASS",
+    "timeout_rechecks": "5 files / 41 tests / PASS with maxWorkers=2",
+    "full_repository_rerun": "31 files / 400 tests / PASS",
     "protected_architecture": "3 files / 34 tests / PASS",
     "authoritative_scanner": "25 core files / 37 total files / PASS",
     "boundary_scanner": "42 files / PASS",
-    "r2_governance": "14 groups / PASS",
-    "migration_rehearsal": "3 migrations / clean-baseline and existing-schema / PGlite / PASS",
-    "secret_scanner": "466 files / PASS",
-    "workspace_build": "PASS"
+    "migration_validation": "3 migrations / PASS",
+    "migration_rehearsal": "clean-baseline and existing-schema / PGlite / PASS",
+    "environment": "PASS / local / database unconfigured / mutation denied",
+    "typecheck_lint_format": "PASS",
+    "foundation_policy": "PASS",
+    "secret_scanner": "474 files / PASS",
+    "workspace_build": "PASS",
+    "git_diff_check": "PASS"
   },
   "migration_state": {
     "status": "BRANCH_LOCAL_CANDIDATES_UNPROMOTED",
     "migration_count": 3,
     "world_v2_0002_sha256": "92915905a159961ac0f8eb70f509501cf7697519471c1b84f832ef224cf87695",
-    "world_v2_0003_sha256": "bed513ccb1ae555d8c669597c61a46d6d56cdc8173a681a4da818934719502d0",
+    "world_v2_0003_sha256": "fe8d6b6849b4ceb5a85789fff34bd2ed47cf7d07d662883dd0c345e88ad9255e",
     "production_approval": null,
     "real_supabase_rls_or_multi_process_concurrency": "NOT_RUN_NOT_CLAIMED"
   },
-  "finding_state": {
-    "open_p0_blockers": 0,
-    "open_p1_majors": 0,
-    "independent_package_review_pending": true,
-    "package_verified": false
-  },
+  "independent_package_review_pending": true,
+  "package_verified": false,
+  "merge_authorized": false,
   "production_access": false,
   "database_mutation": false,
   "v08_started": false,
-  "next_action": "V07_PACKAGE_LEVEL_INDEPENDENT_REVIEW"
+  "next_action": "FOCUSED_V07_PACKAGE_BLOCKER_MAJOR_CLOSURE_REVIEW"
 }
