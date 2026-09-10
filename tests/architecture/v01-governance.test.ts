@@ -79,7 +79,7 @@ describe('V01.1 requirements traceability', () => {
 });
 
 describe('V01.2 ADR coordination graph', () => {
-  it('preserves the two owner-approved decisions and all pending proposals', () => {
+  it('preserves the owner-approved decisions and all pending proposals', () => {
     const decisions = readJson('status/decisions.json').decisions;
     const graph = readJson('requirements/adr_dependency_map.json');
     const expectedIds = Array.from(
@@ -89,15 +89,22 @@ describe('V01.2 ADR coordination graph', () => {
 
     expect(graph.counts.adrs).toBe(20);
     expect(graph.approval_summary).toEqual({
-      approved: 2,
-      proposed_not_approved: 18,
+      approved: 6,
+      proposed_not_approved: 14,
       bulk_approval_permitted: false,
     });
     expect(graph.adrs.map((adr) => adr.id)).toEqual(expectedIds);
     const approvedIds = decisions
       .filter((decision) => decision.status === 'APPROVED')
       .map((decision) => decision.id);
-    expect(approvedIds).toEqual(['ADR-01', 'ADR-03']);
+    expect(approvedIds).toEqual([
+      'ADR-01',
+      'ADR-03',
+      'ADR-11',
+      'ADR-16',
+      'ADR-17',
+      'ADR-20',
+    ]);
     expect(
       decisions
         .filter((decision) => !approvedIds.includes(decision.id))
