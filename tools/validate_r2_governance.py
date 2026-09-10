@@ -1794,8 +1794,18 @@ def validate(root: Path) -> dict[str, Any]:
                                         and v08_package_review.get("merge_authorized")
                                         is False
                                         and v08_package_review.get("v09_started")
-                                        is False,
+                                        is False
+                                        and v08_package_review.get("review_target"),
                                         "V08 package review gate differs from progress truth",
+                                    )
+                                    v08_review_target = commit_exists(
+                                        v08_package_review.get("review_target"),
+                                        "V08 package review_target",
+                                    )
+                                    is_ancestor(
+                                        v08_review_target,
+                                        "HEAD",
+                                        "V08 package review target is not in current history",
                                     )
                                     require(
                                         v08_continuation.get("status")
@@ -1815,6 +1825,7 @@ def validate(root: Path) -> dict[str, Any]:
                                     file(v08_3.get("evidence_file"))
                                     file(v08_package_review.get("bundle_file"))
                                     file(v08_package_review.get("test_evidence_file"))
+                                    file(v08_package_review.get("target_file"))
                                 else:
                                     require(False, "unsupported V08.3 lifecycle state")
                                 require(

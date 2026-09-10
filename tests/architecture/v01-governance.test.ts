@@ -310,7 +310,8 @@ describe('V06 owner-authorized package continuation', () => {
     expect(progress.v08_package_review).toMatchObject({
       status: 'READY_FOR_PACKAGE_REVIEW',
       package_status: 'IMPLEMENTED_UNVERIFIED',
-      review_target: null,
+      review_target: 'c44885fdf0c639d3cce6c1e337b21042ab647965',
+      target_file: 'docs/reports/V08/PACKAGE_REVIEW_TARGET.md',
       open_recorded_p0_blockers: 0,
       open_recorded_p1_majors: 0,
       independent_review: 'NOT_RUN',

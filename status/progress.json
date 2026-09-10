@@ -561,7 +561,8 @@
   "v08_package_review": {
     "status": "READY_FOR_PACKAGE_REVIEW",
     "package_status": "IMPLEMENTED_UNVERIFIED",
-    "review_target": null,
+    "review_target": "c44885fdf0c639d3cce6c1e337b21042ab647965",
+    "target_file": "docs/reports/V08/PACKAGE_REVIEW_TARGET.md",
     "bundle_file": "docs/reports/V08/PACKAGE_REVIEW_BUNDLE.md",
     "test_evidence_file": "docs/reports/V08/PACKAGE_TEST_EVIDENCE.json",
     "open_recorded_p0_blockers": 0,
@@ -818,7 +819,8 @@
     ],
     "V08": [
       "docs/reports/V08/PACKAGE_REVIEW_BUNDLE.md",
-      "docs/reports/V08/PACKAGE_TEST_EVIDENCE.json"
+      "docs/reports/V08/PACKAGE_TEST_EVIDENCE.json",
+      "docs/reports/V08/PACKAGE_REVIEW_TARGET.md"
     ]
   },
   "implementation_commits": {
