@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/c3-exploration-execution-contract.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "contractVersion",
+    "analysisId",
+    "status",
+    "c2ReviewTarget",
+    "coverageScopes",
+    "qualityTreatment",
+    "statisticalScope",
+    "transformation",
+    "hardBoundaries"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "c3-exploration-execution-contract.v1" },
+    "contractVersion": { "type": "string", "minLength": 1 },
+    "analysisId": { "type": "string", "minLength": 1 },
+    "status": { "const": "EXPLORATORY_NON_AUTHORITATIVE" },
+    "c2ReviewTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit",
+        "normalizedObservationStatus",
+        "inputArtifacts",
+        "requiredProviderTruth"
+      ],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "normalizedObservationStatus": {
+          "const": "PILOT_NON_AUTHORITATIVE_PARTIAL"
+        },
+        "inputArtifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "sha256"],
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^data/calibration/pilot/"
+              },
+              "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+            }
+          }
+        },
+        "requiredProviderTruth": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "coverageScopes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["scopeId", "variableIds", "coverageDenominatorPolicy"],
+        "properties": {
+          "scopeId": { "type": "string", "minLength": 1 },
+          "variableIds": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "expectedEntityIds": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^emp:" },
+            "uniqueItems": true
+          },
+          "expectedPeriods": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^[0-9]{4}$" },
+            "uniqueItems": true
+          },
+          "coverageDenominatorPolicy": {
+            "enum": [
+              "EXPLICIT_EXPECTED_GRID",
+              "NOT_DEFINED_FOR_SPARSE_REQUESTED_SLICE"
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "coverageDenominatorPolicy": {
+                  "const": "EXPLICIT_EXPECTED_GRID"
+                }
+              }
+            },
+            "then": { "required": ["expectedEntityIds", "expectedPeriods"] }
+          }
+        ]
+      }
+    },
+    "qualityTreatment": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "statisticalScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "prohibited", "reason"],
+      "properties": {
+        "mode": { "const": "DESCRIPTIVE_EXPLORATION_ONLY" },
+        "prohibited": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "transformation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "transformationId",
+        "transformationVersion",
+        "quantileMethod",
+        "arithmeticPolicy",
+        "ordering"
+      ],
+      "properties": {
+        "transformationId": { "type": "string", "minLength": 1 },
+        "transformationVersion": { "type": "string", "minLength": 1 },
+        "quantileMethod": { "const": "NEAREST_RANK_V1" },
+        "arithmeticPolicy": {
+          "const": "EXACT_DECIMAL_OR_EXACT_RATIONAL_NO_ROUNDING"
+        },
+        "ordering": { "type": "string", "minLength": 1 }
+      }
+    },
+    "hardBoundaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "uniqueItems": true
+    }
+  }
+}

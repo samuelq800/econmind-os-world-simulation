@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/c3-uncertainty-register.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "analysisId",
+    "status",
+    "input",
+    "entries",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "c3-uncertainty-register.v1" },
+    "analysisId": { "type": "string", "minLength": 1 },
+    "status": { "const": "EXPLORATORY_NON_AUTHORITATIVE" },
+    "input": { "type": "object" },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "uncertaintyId",
+          "category",
+          "evidenceCount",
+          "evidence",
+          "treatment",
+          "blocks"
+        ],
+        "properties": {
+          "uncertaintyId": { "type": "string", "minLength": 1 },
+          "category": {
+            "enum": [
+              "MISSINGNESS",
+              "DUPLICATION",
+              "MIRROR_ASYMMETRY",
+              "PROVIDER_COVERAGE",
+              "VINTAGE",
+              "UNIT_METADATA",
+              "INFERENCE_SCOPE"
+            ]
+          },
+          "evidenceCount": { "type": ["integer", "null"], "minimum": 0 },
+          "evidence": { "type": "array", "items": { "type": "string" } },
+          "treatment": { "type": "string", "minLength": 1 },
+          "blocks": {
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "contentHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

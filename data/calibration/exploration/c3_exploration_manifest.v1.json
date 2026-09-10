@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "c3-exploration-manifest.v1",
+  "analysisId": "c3-c2-pilot-exploration",
+  "status": "EXPLORATORY_NON_AUTHORITATIVE",
+  "input": {
+    "c2ReviewTargetCommit": "42adf110c1d8e8f01932b8b9b5f97a1e086d0343",
+    "contractCanonicalHash": "9c9b3fab9f7def56bbe66d2e1464d278dde345d24dc37fc3e49e6dd883eafd48",
+    "artifacts": [
+      {
+        "path": "data/calibration/pilot/normalized_observations.v1.json",
+        "sha256": "2ddf22030106f92b906510b926bf40855e8879e5faca67d43ed9ade31cb6078a"
+      },
+      {
+        "path": "data/calibration/pilot/pilot_report.v1.json",
+        "sha256": "3c8fe27f685b001ecfe73476fddf85ec32a71b1b239d70aad73ccf76d2c56a21"
+      },
+      {
+        "path": "data/calibration/pilot/quality_diagnostics.v1.json",
+        "sha256": "e4b4c07136f94992d63813ee34b6cf0111ee7953dab39fc964167e86f96e9b8a"
+      },
+      {
+        "path": "data/calibration/pilot/snapshot_manifest.v1.json",
+        "sha256": "bcdf0cefe0d6e6ac6b223198a5e076d4228fcaff354fe203c26f7343323bf8fa"
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "data/calibration/exploration/c3_exploration_summary.v1.json",
+      "schemaVersion": "c3-exploration-summary.v1",
+      "canonicalContentHash": "054e7f43641127f7aa1b94aae34e8f5f41bc8ce074a2983a759b2ef69f1c27d5"
+    },
+    {
+      "path": "data/calibration/exploration/c3_uncertainty_register.v1.json",
+      "schemaVersion": "c3-uncertainty-register.v1",
+      "canonicalContentHash": "33547a374f86a6fa8670c8e5c5cf119903829239d4ec5cd07529d826b51c4bfd"
+    }
+  ],
+  "contentHash": "b3ff2e350eb976af44d9fec17fb3d822071eb94d08f489b0f7800facc5f6419f"
+}

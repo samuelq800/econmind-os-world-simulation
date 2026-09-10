@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/c3-exploration-summary.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "analysisId",
+    "status",
+    "input",
+    "transformation",
+    "qualityTreatment",
+    "variableSummaries",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "c3-exploration-summary.v1" },
+    "analysisId": { "type": "string", "minLength": 1 },
+    "status": { "const": "EXPLORATORY_NON_AUTHORITATIVE" },
+    "input": { "$ref": "#/$defs/input" },
+    "transformation": { "type": "object" },
+    "qualityTreatment": { "type": "object" },
+    "variableSummaries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/variableSummary" }
+    },
+    "contentHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  },
+  "$defs": {
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "c2ReviewTargetCommit",
+        "contractCanonicalHash",
+        "artifacts"
+      ],
+      "properties": {
+        "c2ReviewTargetCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "contractCanonicalHash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "sha256"],
+            "properties": {
+              "path": { "type": "string" },
+              "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+            }
+          }
+        }
+      }
+    },
+    "variableSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "variableId",
+        "canonicalUnit",
+        "coverageScopeId",
+        "sourceFactCount",
+        "distinctObservationIdCount",
+        "exactDuplicateFactCount",
+        "reportedCellCount",
+        "explicitMissingValueCount",
+        "unreportedExpectedCellCount",
+        "nonMissingValueCount",
+        "reportedCellCoverage",
+        "nonMissingValueCoverage",
+        "entityIds",
+        "periods",
+        "sourceSnapshotIds",
+        "distribution"
+      ],
+      "properties": {
+        "variableId": { "type": "string", "minLength": 1 },
+        "canonicalUnit": { "type": "string", "minLength": 1 },
+        "coverageScopeId": { "type": "string", "minLength": 1 },
+        "sourceFactCount": { "type": "integer", "minimum": 0 },
+        "distinctObservationIdCount": { "type": "integer", "minimum": 0 },
+        "exactDuplicateFactCount": { "type": "integer", "minimum": 0 },
+        "reportedCellCount": { "type": "integer", "minimum": 0 },
+        "explicitMissingValueCount": { "type": "integer", "minimum": 0 },
+        "unreportedExpectedCellCount": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "nonMissingValueCount": { "type": "integer", "minimum": 0 },
+        "reportedCellCoverage": { "$ref": "#/$defs/coverage" },
+        "nonMissingValueCoverage": { "$ref": "#/$defs/coverage" },
+        "entityIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "periods": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "sourceSnapshotIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "distribution": { "$ref": "#/$defs/distribution" }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["numerator", "denominator", "denominatorPolicy"],
+      "properties": {
+        "numerator": { "type": "integer", "minimum": 0 },
+        "denominator": { "type": ["integer", "null"], "minimum": 0 },
+        "denominatorPolicy": {
+          "enum": [
+            "EXPLICIT_EXPECTED_GRID",
+            "NOT_DEFINED_FOR_SPARSE_REQUESTED_SLICE"
+          ]
+        }
+      }
+    },
+    "distribution": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": [
+        "quantileMethod",
+        "minimum",
+        "p25",
+        "p50",
+        "p75",
+        "maximum",
+        "exactSum",
+        "arithmeticMean"
+      ],
+      "properties": {
+        "quantileMethod": { "const": "NEAREST_RANK_V1" },
+        "minimum": { "$ref": "#/$defs/decimal" },
+        "p25": { "$ref": "#/$defs/decimal" },
+        "p50": { "$ref": "#/$defs/decimal" },
+        "p75": { "$ref": "#/$defs/decimal" },
+        "maximum": { "$ref": "#/$defs/decimal" },
+        "exactSum": { "$ref": "#/$defs/decimal" },
+        "arithmeticMean": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "numeratorDecimal",
+            "denominatorInteger",
+            "terminatingDecimal",
+            "roundingApplied"
+          ],
+          "properties": {
+            "numeratorDecimal": { "$ref": "#/$defs/decimal" },
+            "denominatorInteger": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*$"
+            },
+            "terminatingDecimal": {
+              "anyOf": [{ "$ref": "#/$defs/decimal" }, { "type": "null" }]
+            },
+            "roundingApplied": { "const": false }
+          }
+        }
+      }
+    },
+    "decimal": {
+      "type": "string",
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    }
+  }
+}

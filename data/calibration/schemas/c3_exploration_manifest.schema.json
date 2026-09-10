@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/c3-exploration-manifest.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "analysisId",
+    "status",
+    "input",
+    "artifacts",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "c3-exploration-manifest.v1" },
+    "analysisId": { "type": "string", "minLength": 1 },
+    "status": { "const": "EXPLORATORY_NON_AUTHORITATIVE" },
+    "input": { "type": "object" },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "schemaVersion", "canonicalContentHash"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^data/calibration/exploration/"
+          },
+          "schemaVersion": { "type": "string", "minLength": 1 },
+          "canonicalContentHash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "contentHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

@@ -1,0 +1,540 @@
+{
+  "schemaVersion": "c3-exploration-summary.v1",
+  "analysisId": "c3-c2-pilot-exploration",
+  "status": "EXPLORATORY_NON_AUTHORITATIVE",
+  "input": {
+    "c2ReviewTargetCommit": "42adf110c1d8e8f01932b8b9b5f97a1e086d0343",
+    "contractCanonicalHash": "9c9b3fab9f7def56bbe66d2e1464d278dde345d24dc37fc3e49e6dd883eafd48",
+    "artifacts": [
+      {
+        "path": "data/calibration/pilot/normalized_observations.v1.json",
+        "sha256": "2ddf22030106f92b906510b926bf40855e8879e5faca67d43ed9ade31cb6078a"
+      },
+      {
+        "path": "data/calibration/pilot/pilot_report.v1.json",
+        "sha256": "3c8fe27f685b001ecfe73476fddf85ec32a71b1b239d70aad73ccf76d2c56a21"
+      },
+      {
+        "path": "data/calibration/pilot/quality_diagnostics.v1.json",
+        "sha256": "e4b4c07136f94992d63813ee34b6cf0111ee7953dab39fc964167e86f96e9b8a"
+      },
+      {
+        "path": "data/calibration/pilot/snapshot_manifest.v1.json",
+        "sha256": "bcdf0cefe0d6e6ac6b223198a5e076d4228fcaff354fe203c26f7343323bf8fa"
+      }
+    ]
+  },
+  "transformation": {
+    "transformationId": "C3_EXPLORATION_DISTRIBUTION_COVERAGE",
+    "transformationVersion": "1.0.0",
+    "quantileMethod": "NEAREST_RANK_V1",
+    "arithmeticPolicy": "EXACT_DECIMAL_OR_EXACT_RATIONAL_NO_ROUNDING",
+    "ordering": "VARIABLE_ID_SUMMARIES; DISTRIBUTION_CANONICAL_DECIMAL_ASCENDING_THEN_OBSERVATION_ID; IDENTIFIER_LISTS_CODE_UNIT_ASCENDING"
+  },
+  "qualityTreatment": {
+    "missingness": "PRESERVE_EXPLICIT_NULLS_NO_IMPUTATION",
+    "duplicateObservationIds": "RETAIN_SOURCE_FACT_COUNT_EXCLUDE_EXACT_DUPLICATES_FROM_UNIVARIATE_DISTRIBUTION",
+    "reportingAsymmetry": "RETAIN_SEPARATE_REPORTER_AND_MIRROR_FACTS_NO_AVERAGING_NO_RECONCILIATION",
+    "unitCaveat": "NO_UNIT_RESCALING_WHEN_PROVIDER_UNIT_METADATA_IS_EMPTY",
+    "revisionCaveat": "DO_NOT_INFER_STABILITY_WITHOUT_A_SECOND_PROVIDER_VINTAGE"
+  },
+  "variableSummaries": [
+    {
+      "variableId": "agriculture_value_added_pct_gdp",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "coverageScopeId": "WDI_GRID_10_ENTITIES_3_PERIODS",
+      "sourceFactCount": 30,
+      "distinctObservationIdCount": 30,
+      "exactDuplicateFactCount": 0,
+      "reportedCellCount": 30,
+      "explicitMissingValueCount": 2,
+      "unreportedExpectedCellCount": 0,
+      "nonMissingValueCount": 28,
+      "reportedCellCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "nonMissingValueCoverage": {
+        "numerator": 28,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "entityIds": [
+        "emp:AUS",
+        "emp:BRA",
+        "emp:CHN",
+        "emp:DEU",
+        "emp:IDN",
+        "emp:IND",
+        "emp:JPN",
+        "emp:MEX",
+        "emp:USA",
+        "emp:ZAF"
+      ],
+      "periods": ["2021", "2022", "2023"],
+      "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+      "distribution": {
+        "quantileMethod": "NEAREST_RANK_V1",
+        "minimum": "0.753895620719434",
+        "p25": "0.994638278032481",
+        "p50": "3.78266528622109",
+        "p75": "7.08935251618004",
+        "maximum": "18.2106659929942",
+        "exactSum": "163.833140210298807",
+        "arithmeticMean": {
+          "numeratorDecimal": "163.833140210298807",
+          "denominatorInteger": "28",
+          "terminatingDecimal": null,
+          "roundingApplied": false
+        }
+      }
+    },
+    {
+      "variableId": "bilateral_trade_exports_usd",
+      "canonicalUnit": "USD",
+      "coverageScopeId": "COMTRADE_SPARSE_REQUESTED_SLICE",
+      "sourceFactCount": 4,
+      "distinctObservationIdCount": 3,
+      "exactDuplicateFactCount": 1,
+      "reportedCellCount": 3,
+      "explicitMissingValueCount": 0,
+      "unreportedExpectedCellCount": null,
+      "nonMissingValueCount": 3,
+      "reportedCellCoverage": {
+        "numerator": 3,
+        "denominator": null,
+        "denominatorPolicy": "NOT_DEFINED_FOR_SPARSE_REQUESTED_SLICE"
+      },
+      "nonMissingValueCoverage": {
+        "numerator": 3,
+        "denominator": null,
+        "denominatorPolicy": "NOT_DEFINED_FOR_SPARSE_REQUESTED_SLICE"
+      },
+      "entityIds": ["emp:DEU", "emp:IND", "emp:USA"],
+      "periods": ["2022"],
+      "sourceSnapshotIds": [
+        "snap_un_comtrade_v1_8ed04e71f69790d0669b",
+        "snap_un_comtrade_v1_9ce2516ce3b96f2bc036",
+        "snap_un_comtrade_v1_e543fdceee4321224096"
+      ],
+      "distribution": {
+        "quantileMethod": "NEAREST_RANK_V1",
+        "minimum": "37801402.939",
+        "p25": "37801402.939",
+        "p50": "78704554.777",
+        "p75": "14915568181",
+        "maximum": "14915568181",
+        "exactSum": "15032074138.716",
+        "arithmeticMean": {
+          "numeratorDecimal": "15032074138.716",
+          "denominatorInteger": "3",
+          "terminatingDecimal": "5010691379.572",
+          "roundingApplied": false
+        }
+      }
+    },
+    {
+      "variableId": "bilateral_trade_imports_usd",
+      "canonicalUnit": "USD",
+      "coverageScopeId": "COMTRADE_SPARSE_REQUESTED_SLICE",
+      "sourceFactCount": 3,
+      "distinctObservationIdCount": 3,
+      "exactDuplicateFactCount": 0,
+      "reportedCellCount": 3,
+      "explicitMissingValueCount": 0,
+      "unreportedExpectedCellCount": null,
+      "nonMissingValueCount": 3,
+      "reportedCellCoverage": {
+        "numerator": 3,
+        "denominator": null,
+        "denominatorPolicy": "NOT_DEFINED_FOR_SPARSE_REQUESTED_SLICE"
+      },
+      "nonMissingValueCoverage": {
+        "numerator": 3,
+        "denominator": null,
+        "denominatorPolicy": "NOT_DEFINED_FOR_SPARSE_REQUESTED_SLICE"
+      },
+      "entityIds": ["emp:BRA", "emp:CHN", "emp:ZAF"],
+      "periods": ["2022"],
+      "sourceSnapshotIds": [
+        "snap_un_comtrade_v1_037dca75a9030636c560",
+        "snap_un_comtrade_v1_35045c8e8ac401d11f6b",
+        "snap_un_comtrade_v1_51c0cf64942e21d3eee4"
+      ],
+      "distribution": {
+        "quantileMethod": "NEAREST_RANK_V1",
+        "minimum": "85940348",
+        "p25": "85940348",
+        "p50": "93512889.72",
+        "p75": "19655401690",
+        "maximum": "19655401690",
+        "exactSum": "19834854927.72",
+        "arithmeticMean": {
+          "numeratorDecimal": "19834854927.72",
+          "denominatorInteger": "3",
+          "terminatingDecimal": "6611618309.24",
+          "roundingApplied": false
+        }
+      }
+    },
+    {
+      "variableId": "gdp_current_usd",
+      "canonicalUnit": "USD",
+      "coverageScopeId": "WDI_GRID_10_ENTITIES_3_PERIODS",
+      "sourceFactCount": 30,
+      "distinctObservationIdCount": 30,
+      "exactDuplicateFactCount": 0,
+      "reportedCellCount": 30,
+      "explicitMissingValueCount": 0,
+      "unreportedExpectedCellCount": 0,
+      "nonMissingValueCount": 30,
+      "reportedCellCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "nonMissingValueCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "entityIds": [
+        "emp:AUS",
+        "emp:BRA",
+        "emp:CHN",
+        "emp:DEU",
+        "emp:IDN",
+        "emp:IND",
+        "emp:JPN",
+        "emp:MEX",
+        "emp:USA",
+        "emp:ZAF"
+      ],
+      "periods": ["2021", "2022", "2023"],
+      "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+      "distribution": {
+        "quantileMethod": "NEAREST_RANK_V1",
+        "minimum": "381440724491.232",
+        "p25": "1466934724243.38",
+        "p50": "2191131765684.63",
+        "p75": "4562207532490.28",
+        "maximum": "27811517000000",
+        "exactSum": "189944071523069.345",
+        "arithmeticMean": {
+          "numeratorDecimal": "189944071523069.345",
+          "denominatorInteger": "30",
+          "terminatingDecimal": null,
+          "roundingApplied": false
+        }
+      }
+    },
+    {
+      "variableId": "inflation_consumer_pct",
+      "canonicalUnit": "PERCENT_PER_YEAR",
+      "coverageScopeId": "WDI_GRID_10_ENTITIES_3_PERIODS",
+      "sourceFactCount": 30,
+      "distinctObservationIdCount": 30,
+      "exactDuplicateFactCount": 0,
+      "reportedCellCount": 30,
+      "explicitMissingValueCount": 0,
+      "unreportedExpectedCellCount": 0,
+      "nonMissingValueCount": 30,
+      "reportedCellCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "nonMissingValueCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "entityIds": [
+        "emp:AUS",
+        "emp:BRA",
+        "emp:CHN",
+        "emp:DEU",
+        "emp:IDN",
+        "emp:IND",
+        "emp:JPN",
+        "emp:MEX",
+        "emp:USA",
+        "emp:ZAF"
+      ],
+      "periods": ["2021", "2022", "2023"],
+      "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+      "distribution": {
+        "quantileMethod": "NEAREST_RANK_V1",
+        "minimum": "-0.233352779398264",
+        "p25": "3.06666666666673",
+        "p50": "4.69785886363742",
+        "p75": "6.59409658717841",
+        "maximum": "9.28010608956873",
+        "exactSum": "142.420764385339919",
+        "arithmeticMean": {
+          "numeratorDecimal": "142.420764385339919",
+          "denominatorInteger": "30",
+          "terminatingDecimal": null,
+          "roundingApplied": false
+        }
+      }
+    },
+    {
+      "variableId": "manufacturing_value_added_pct_gdp",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "coverageScopeId": "WDI_GRID_10_ENTITIES_3_PERIODS",
+      "sourceFactCount": 30,
+      "distinctObservationIdCount": 30,
+      "exactDuplicateFactCount": 0,
+      "reportedCellCount": 30,
+      "explicitMissingValueCount": 2,
+      "unreportedExpectedCellCount": 0,
+      "nonMissingValueCount": 28,
+      "reportedCellCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "nonMissingValueCoverage": {
+        "numerator": 28,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "entityIds": [
+        "emp:AUS",
+        "emp:BRA",
+        "emp:CHN",
+        "emp:DEU",
+        "emp:IDN",
+        "emp:IND",
+        "emp:JPN",
+        "emp:MEX",
+        "emp:USA",
+        "emp:ZAF"
+      ],
+      "periods": ["2021", "2022", "2023"],
+      "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+      "distribution": {
+        "quantileMethod": "NEAREST_RANK_V1",
+        "minimum": "5.26935642156248",
+        "p25": "12.4454055010392",
+        "p50": "18.3217735042199",
+        "p75": "19.4882904000273",
+        "maximum": "26.621932558827",
+        "exactSum": "453.74507742196628",
+        "arithmeticMean": {
+          "numeratorDecimal": "453.74507742196628",
+          "denominatorInteger": "28",
+          "terminatingDecimal": null,
+          "roundingApplied": false
+        }
+      }
+    },
+    {
+      "variableId": "population_total",
+      "canonicalUnit": "PERSON",
+      "coverageScopeId": "WDI_GRID_10_ENTITIES_3_PERIODS",
+      "sourceFactCount": 30,
+      "distinctObservationIdCount": 30,
+      "exactDuplicateFactCount": 0,
+      "reportedCellCount": 30,
+      "explicitMissingValueCount": 0,
+      "unreportedExpectedCellCount": 0,
+      "nonMissingValueCount": 30,
+      "reportedCellCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "nonMissingValueCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "entityIds": [
+        "emp:AUS",
+        "emp:BRA",
+        "emp:CHN",
+        "emp:DEU",
+        "emp:IDN",
+        "emp:IND",
+        "emp:JPN",
+        "emp:MEX",
+        "emp:USA",
+        "emp:ZAF"
+      ],
+      "periods": ["2021", "2022", "2023"],
+      "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+      "distribution": {
+        "quantileMethod": "NEAREST_RANK_V1",
+        "minimum": "25685412",
+        "p25": "83196078",
+        "p50": "129739759",
+        "p75": "333996304",
+        "maximum": "1438069596",
+        "exactSum": "12260012185",
+        "arithmeticMean": {
+          "numeratorDecimal": "12260012185",
+          "denominatorInteger": "30",
+          "terminatingDecimal": null,
+          "roundingApplied": false
+        }
+      }
+    },
+    {
+      "variableId": "real_gdp_growth_pct",
+      "canonicalUnit": "PERCENT_PER_YEAR",
+      "coverageScopeId": "WDI_GRID_10_ENTITIES_3_PERIODS",
+      "sourceFactCount": 30,
+      "distinctObservationIdCount": 30,
+      "exactDuplicateFactCount": 0,
+      "reportedCellCount": 30,
+      "explicitMissingValueCount": 0,
+      "unreportedExpectedCellCount": 0,
+      "nonMissingValueCount": 30,
+      "reportedCellCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "nonMissingValueCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "entityIds": [
+        "emp:AUS",
+        "emp:BRA",
+        "emp:CHN",
+        "emp:DEU",
+        "emp:IDN",
+        "emp:IND",
+        "emp:JPN",
+        "emp:MEX",
+        "emp:USA",
+        "emp:ZAF"
+      ],
+      "periods": ["2021", "2022", "2023"],
+      "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+      "distribution": {
+        "quantileMethod": "NEAREST_RANK_V1",
+        "minimum": "-0.869647578573321",
+        "p25": "2.52421385073222",
+        "p50": "3.58382100798981",
+        "p75": "5.30719722664799",
+        "maximum": "9.68959249191741",
+        "exactSum": "119.21787207099644",
+        "arithmeticMean": {
+          "numeratorDecimal": "119.21787207099644",
+          "denominatorInteger": "30",
+          "terminatingDecimal": null,
+          "roundingApplied": false
+        }
+      }
+    },
+    {
+      "variableId": "services_value_added_pct_gdp",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "coverageScopeId": "WDI_GRID_10_ENTITIES_3_PERIODS",
+      "sourceFactCount": 30,
+      "distinctObservationIdCount": 30,
+      "exactDuplicateFactCount": 0,
+      "reportedCellCount": 30,
+      "explicitMissingValueCount": 2,
+      "unreportedExpectedCellCount": 0,
+      "nonMissingValueCount": 28,
+      "reportedCellCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "nonMissingValueCoverage": {
+        "numerator": 28,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "entityIds": [
+        "emp:AUS",
+        "emp:BRA",
+        "emp:CHN",
+        "emp:DEU",
+        "emp:IDN",
+        "emp:IND",
+        "emp:JPN",
+        "emp:MEX",
+        "emp:USA",
+        "emp:ZAF"
+      ],
+      "periods": ["2021", "2022", "2023"],
+      "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+      "distribution": {
+        "quantileMethod": "NEAREST_RANK_V1",
+        "minimum": "41.7909255847112",
+        "p25": "54.8181795722183",
+        "p50": "58.3256995087389",
+        "p75": "63.5453543127468",
+        "maximum": "76.2563816410471",
+        "exactSum": "1643.8622188254249",
+        "arithmeticMean": {
+          "numeratorDecimal": "1643.8622188254249",
+          "denominatorInteger": "28",
+          "terminatingDecimal": null,
+          "roundingApplied": false
+        }
+      }
+    },
+    {
+      "variableId": "unemployment_pct",
+      "canonicalUnit": "PERCENT_OF_LABOUR_FORCE",
+      "coverageScopeId": "WDI_GRID_10_ENTITIES_3_PERIODS",
+      "sourceFactCount": 30,
+      "distinctObservationIdCount": 30,
+      "exactDuplicateFactCount": 0,
+      "reportedCellCount": 30,
+      "explicitMissingValueCount": 0,
+      "unreportedExpectedCellCount": 0,
+      "nonMissingValueCount": 30,
+      "reportedCellCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "nonMissingValueCoverage": {
+        "numerator": 30,
+        "denominator": 30,
+        "denominatorPolicy": "EXPLICIT_EXPECTED_GRID"
+      },
+      "entityIds": [
+        "emp:AUS",
+        "emp:BRA",
+        "emp:CHN",
+        "emp:DEU",
+        "emp:IDN",
+        "emp:IND",
+        "emp:JPN",
+        "emp:MEX",
+        "emp:USA",
+        "emp:ZAF"
+      ],
+      "periods": ["2021", "2022", "2023"],
+      "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+      "distribution": {
+        "quantileMethod": "NEAREST_RANK_V1",
+        "minimum": "2.6",
+        "p25": "3.308",
+        "p50": "3.827",
+        "p75": "5.349",
+        "maximum": "34.007",
+        "exactSum": "222.799",
+        "arithmeticMean": {
+          "numeratorDecimal": "222.799",
+          "denominatorInteger": "30",
+          "terminatingDecimal": null,
+          "roundingApplied": false
+        }
+      }
+    }
+  ],
+  "contentHash": "054e7f43641127f7aa1b94aae34e8f5f41bc8ce074a2983a759b2ef69f1c27d5"
+}

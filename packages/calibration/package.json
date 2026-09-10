@@ -11,6 +11,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "exploration:generate": "pnpm build && node dist/exploration-cli.js && pnpm exec prettier --write ../../data/calibration/exploration/*.json",
     "pilot:live": "pnpm build && node dist/pilot.js && pnpm exec prettier --write ../../data/calibration/pilot/*.json",
     "typecheck": "tsc -p tsconfig.json --pretty false"
   },
