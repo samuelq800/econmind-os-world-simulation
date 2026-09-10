@@ -3,6 +3,8 @@ export * from './authorization/approvals.js';
 export * from './authorization/identity.js';
 export * from './authorization/offices.js';
 export * from './authorization/projections.js';
+export * from './commands/command.js';
+export * from './events/event.js';
 export * from './ids.js';
 export * from './numeric/index.js';
 export * from './registries/fixed-catalog.js';
