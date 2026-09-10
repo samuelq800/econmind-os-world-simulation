@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-10T16:31:14Z",
+  "derived_at": "2026-09-10T17:07:46Z",
   "source_commit": "b7c39497c48f5e28305a2e01bf02d11b68e4fb99",
-  "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. V09.1 is IN_PROGRESS on a fresh V09 branch after dependency recomputation; no migration, production access or production mutation is authorized.",
+  "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. V09.1 is IN_PROGRESS on a fresh V09 branch with a branch-local, unpromoted 0005 lease/fencing candidate. Local rehearsal and disposable CI PostgreSQL evidence pass; dedicated non-production staging RLS/grant evidence remains NOT_RUN. No production access or production mutation is authorized.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -181,6 +181,40 @@
     "production_mutation": false,
     "owner_approved": true,
     "authority": "CONTROL_TOWER_OWNER_DELEGATION"
+  },
+  "v09_1": {
+    "status": "IN_PROGRESS",
+    "code_candidate": "23b8b7d9101a7a8fab4bd272ff0a59b58fa684d7",
+    "ci_support_commit": "beed9d389b3db6a65d1f10ed6330af5a1fb05da6",
+    "evidence_file": "docs/reports/V09/V09.1_IMPLEMENTATION_CANDIDATE.md",
+    "migration": {
+      "status": "BRANCH_LOCAL_CANDIDATE_UNPROMOTED",
+      "migration_id": "0005_world_v2_writer_lease_fencing",
+      "artifact_source_commit": "7102cd3c3ba80cd2468032c3d4776a871dec515d",
+      "artifact_sha256": "1559a0a44c82f55005a0209b9b2a64095625c384e39ed0999e1a44e573ba3cb3",
+      "manifest_path": "database/migrations/manifest.json",
+      "production_mutation": false
+    },
+    "automated_evidence": {
+      "local_full_check": "PASS",
+      "pglite_clean_and_existing_rehearsal": "PASS",
+      "disposable_postgresql_ci": {
+        "status": "PASS",
+        "workflow": "V09 PostgreSQL candidate",
+        "run": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34506068925",
+        "tested_commit": "beed9d389b3db6a65d1f10ed6330af5a1fb05da6",
+        "real_postgresql_tests": 2
+      }
+    },
+    "remaining_required_evidence": {
+      "dedicated_nonproduction_supabase_staging": "NOT_RUN",
+      "staging_rls_and_grants": "NOT_RUN"
+    },
+    "independent_review": "NOT_STARTED",
+    "next_step": "V09.1",
+    "v09_2_authorized": false,
+    "production_access": false,
+    "production_mutation": false
   },
   "current_gate": {
     "step_id": "V09.1",
