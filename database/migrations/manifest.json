@@ -45,6 +45,20 @@
       "lock_or_downtime_risk": "Branch-local V07.2 candidate; creates queue, receipt, consumer-delivery and notification-outbox tables only",
       "rollback_strategy": "reversible-before-economic-facts",
       "production_approval": null
+    },
+    {
+      "migration_id": "0004_world_v2_receipt_event_set_integrity",
+      "release_order": 4,
+      "path": "database/migrations/artifacts/0004_world_v2_receipt_event_set_integrity.sql",
+      "sha256": "28bb8ff195d9c09b0cafcab79eb4a28868a1bf0170c7065fc4913a428bc17943",
+      "artifact_source_commit": "6f919d3a20835da39a042ee7863d849f140f4e0c",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Branch-local V07 forward fix; replaces receipt validation and guards final transition completeness",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }
