@@ -1,6 +1,6 @@
 # C3 Exploratory Distribution and Coverage Contract
 
-Status: **IMPLEMENTED_UNVERIFIED / EXPLORATORY_NON_AUTHORITATIVE / FORWARD-REVIEW PENDING**
+Status: **APPROVED_FOR_CONTINUATION / EXPLORATORY_NON_AUTHORITATIVE / NO_RUNTIME_AUTHORITY**
 
 C3 is a deterministic descriptive exploration of the frozen C2 pilot. It is
 not a calibration package, statistical inference, archetype decision, trade
@@ -23,12 +23,16 @@ The historical C2 target remains immutable reviewed evidence. Its forward
 closure target `56d9882cddd7244dca84a4dda3eed2dd10866ac1` was independently
 approved for continuation under Class A: `C2-M01` and `C2-M02` are closed and
 there are no open blockers or MAJOR findings. That approval changes no frozen
-C2 artifact and is not a C3 review decision. C3 remains review-pending until
-its own immutable target is independently assessed.
+C2 artifact and was not itself a C3 review decision; the separate C3 decision
+is recorded below.
 
 C3 historical target `21c571cd215b89bff20804bf2e38db687b44e55e` remains
-immutable `CHANGES_REQUIRED` evidence for `C3-MAJ-01`. This forward-remediation
-lineage does not alter that target and does not claim a C3 review outcome.
+immutable `CHANGES_REQUIRED` evidence for `C3-MAJ-01`. Its forward-remediation
+target `77c4fb3083970573ed56cbd280e0e41a8d83e43a` was independently approved
+for continuation: `C3-MAJ-01` is closed, with zero open blockers and zero open
+MAJOR findings. This is a review decision for the frozen descriptive C3 line;
+it does not alter the historical target, authorize an archetype decision, or
+make C3 a runtime or final-calibration input.
 
 The generator reads only those fixed local artifacts. It rejects a changed
 input byte hash, an unexpected C2 input-path set, an altered C2 partial-pilot

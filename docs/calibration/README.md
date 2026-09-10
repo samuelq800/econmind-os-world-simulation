@@ -1,16 +1,20 @@
 # EconMind Calibration Foundation, C2 Live Pilot, and C3 Exploration
 
-Status: **C2 APPROVED_FOR_CONTINUATION / C3 IMPLEMENTED_UNVERIFIED / NON_AUTHORITATIVE**
+Status: **C2 APPROVED_FOR_CONTINUATION / C3 APPROVED_FOR_CONTINUATION / NON_AUTHORITATIVE**
 Final Season 1 70-country package: **NOT CREATED**
 
 C2 historical review target `42adf110c1d8e8f01932b8b9b5f97a1e086d0343` is
 immutable reviewed evidence with required forward remediation. Independent
 Review B approved its forward closure target
 `56d9882cddd7244dca84a4dda3eed2dd10866ac1` for continuation under Class A:
-`C2-M01` and `C2-M02` are closed, with no open blocker or MAJOR finding. C3 is
-still **IMPLEMENTED_UNVERIFIED / EXPLORATORY_NON_AUTHORITATIVE**. Its historical
-target `21c571cd215b89bff20804bf2e38db687b44e55e` remains `CHANGES_REQUIRED`
-evidence for C3-MAJ-01; no C3 approval is implied by the C2 decision.
+`C2-M01` and `C2-M02` are closed, with no open blocker or MAJOR finding. C3's
+historical target `21c571cd215b89bff20804bf2e38db687b44e55e` remains
+`CHANGES_REQUIRED` evidence for `C3-MAJ-01`; its forward-remediation target
+`77c4fb3083970573ed56cbd280e0e41a8d83e43a` is independently
+`APPROVED_FOR_CONTINUATION`, with `C3-MAJ-01` closed and zero open
+blocker/MAJOR findings. That approval preserves C3 as
+**EXPLORATORY_NON_AUTHORITATIVE** and grants no runtime or final-calibration
+authority.
 
 This workstream converts provider-shaped bytes into traceable observations and, later, frozen World inputs. It does not implement World Core economics and it has no production/DB behavior.
 
@@ -66,9 +70,8 @@ Do not commit large provider downloads. Configure a local/object-store path outs
 
 ## Current stopping point
 
-C2 forward remediation has independent Class A continuation approval. C3
-descriptive exploration remains unverified by an independent reviewer and is
-bounded to the frozen partial pilot: it does not create or approve an archetype
-algorithm/count, fictional-country mapping, final trade matrix, IPF/RAS result,
-engine formula, runtime import, World State mutation, or production database
-operation.
+C2 and C3 forward remediation have independent continuation approval. C3
+descriptive exploration remains bounded to the frozen partial pilot: it does
+not create or approve an archetype algorithm/count, fictional-country mapping,
+final trade matrix, IPF/RAS result, engine formula, runtime import, World State
+mutation, or production database operation.

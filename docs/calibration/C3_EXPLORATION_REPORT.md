@@ -1,6 +1,6 @@
 # C3 Exploratory Distribution and Coverage Report
 
-Status: **IMPLEMENTED_UNVERIFIED / EXPLORATORY_NON_AUTHORITATIVE**
+Status: **APPROVED_FOR_CONTINUATION / EXPLORATORY_NON_AUTHORITATIVE**
 
 This report is a readable index of the generated C3 artifacts, not a new data
 source or a calibration decision. It is bound to the frozen C2 inputs through
@@ -13,6 +13,11 @@ read with its uncertainty register.
 - C2 independent closure target:
   `56d9882cddd7244dca84a4dda3eed2dd10866ac1` (`APPROVED_FOR_CONTINUATION`;
   `C2-M01`/`C2-M02` closed)
+- C3 historical `CHANGES_REQUIRED` target:
+  `21c571cd215b89bff20804bf2e38db687b44e55e` (`C3-MAJ-01` evidence retained)
+- C3 independent continuation target:
+  `77c4fb3083970573ed56cbd280e0e41a8d83e43a`
+  (`APPROVED_FOR_CONTINUATION`; `C3-MAJ-01` closed; zero open blocker/MAJOR)
 - C3 contract canonical hash:
   `9c9b3fab9f7def56bbe66d2e1464d278dde345d24dc37fc3e49e6dd883eafd48`
 - Summary canonical content hash:
@@ -68,5 +73,6 @@ the data are a sparse requested slice, not an asserted full trade grid.
 C3 makes no p-value or confidence-interval claim and does not select an
 archetype method/count, assign fictional countries, run IPF/RAS, construct a
 final trade matrix, freeze a calibration package, import World Core/runtime,
-or access production data systems. Independent review remains required before
-any subsequent use of this exploratory work.
+or access production data systems. The continuation approval covers only this
+bounded exploratory evidence; any later preparation remains separately
+non-authoritative and evidence-bound.
