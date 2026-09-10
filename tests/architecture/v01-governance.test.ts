@@ -89,15 +89,22 @@ describe('V01.2 ADR coordination graph', () => {
 
     expect(graph.counts.adrs).toBe(20);
     expect(graph.approval_summary).toEqual({
-      approved: 4,
-      proposed_not_approved: 16,
+      approved: 6,
+      proposed_not_approved: 14,
       bulk_approval_permitted: false,
     });
     expect(graph.adrs.map((adr) => adr.id)).toEqual(expectedIds);
     const approvedIds = decisions
       .filter((decision) => decision.status === 'APPROVED')
       .map((decision) => decision.id);
-    expect(approvedIds).toEqual(['ADR-01', 'ADR-03', 'ADR-11', 'ADR-17']);
+    expect(approvedIds).toEqual([
+      'ADR-01',
+      'ADR-03',
+      'ADR-11',
+      'ADR-16',
+      'ADR-17',
+      'ADR-20',
+    ]);
     expect(
       decisions
         .filter((decision) => !approvedIds.includes(decision.id))
