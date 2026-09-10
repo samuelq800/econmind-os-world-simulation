@@ -25,6 +25,8 @@ export type IdempotencyKey = BrandedId<'IdempotencyKey'>;
 export type CorrelationId = BrandedId<'CorrelationId'>;
 export type CommandType = BrandedId<'CommandType'>;
 export type EventType = BrandedId<'EventType'>;
+export type OutboxMessageId = BrandedId<'OutboxMessageId'>;
+export type ConsumerId = BrandedId<'ConsumerId'>;
 
 const CANONICAL_ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 const CANONICAL_UUID =
@@ -76,3 +78,6 @@ export const idempotencyKey = (value: string) =>
 export const correlationId = (value: string) => parseId('CorrelationId', value);
 export const commandType = (value: string) => parseId('CommandType', value);
 export const eventType = (value: string) => parseId('EventType', value);
+export const outboxMessageId = (value: string) =>
+  parseId('OutboxMessageId', value);
+export const consumerId = (value: string) => parseId('ConsumerId', value);
