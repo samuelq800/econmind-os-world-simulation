@@ -226,6 +226,19 @@ describe('V06 owner-authorized package continuation', () => {
       required_gate: 'V07_PACKAGE_REVIEW',
       gate_status: 'PENDING',
     });
+    expect(progress.v07_package_review).toMatchObject({
+      status: 'READY_FOR_PACKAGE_REVIEW',
+      package_status: 'IMPLEMENTED_UNVERIFIED',
+      content_commit: '190bd3b145f8e284c591446daaa1c6da355aa065',
+      review_target: null,
+      open_p0_blockers: 0,
+      open_p1_majors: 0,
+      package_verified: false,
+      merge_authorized: false,
+      production_access: false,
+      production_mutation: false,
+      v08_started: false,
+    });
     expect(progress.v06_integration).toEqual({
       branch: 'codex/world-core-v06-v10',
       approved_package_target: '33fe26a7e014379b15d4f0f3ab10791b912b8885',

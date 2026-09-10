@@ -1,0 +1,69 @@
+{
+  "schema_version": "V07-PACKAGE-TEST-EVIDENCE-1",
+  "package_id": "V07",
+  "package_status": "IMPLEMENTED_UNVERIFIED",
+  "review_readiness": "READY_FOR_PACKAGE_REVIEW",
+  "content_commit": "190bd3b145f8e284c591446daaa1c6da355aa065",
+  "authoritative_main": "8e4d9e125a89fc1457ed016c708537fd67e1c8b7",
+  "branch": "codex/world-core-v07",
+  "approved_adrs": ["ADR-11", "ADR-16", "ADR-17", "ADR-20"],
+  "steps": {
+    "V07.1": {
+      "historical_code_candidate": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
+      "historical_review_target": "b57b6aa9cd349776e1f5cd8ae10d20413523a69c",
+      "active_code_candidate": "674e6cdf38bb2d52d3ec81d52616bb85a3cfd58f",
+      "active_review_target": "66da354755326fc00ece7fcdb78e35db27f0b15f",
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "review_b": "APPROVED_FOR_CONTINUATION",
+      "correlation_fingerprint_major": "CLOSED",
+      "open_downstream_blockers": 0,
+      "automated_evidence": "PASS"
+    },
+    "V07.2": {
+      "migration_artifact_source_commit": "2b3349555137196612bea6d55e22edf156f53cbd",
+      "code_candidate": "0f260ab1b582c524dc3005e0de62202d1c5d9a24",
+      "review_target": "cea9554c5ad9c3ad69e0ec538c908901660ec761",
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "independent_review": "DEFERRED_TO_V07_PACKAGE_GATE",
+      "automated_evidence": "PASS"
+    },
+    "V07.3": {
+      "code_candidate": "956d011df95f383917b421ffc522eb896477970a",
+      "review_target": "2b645f963422ac7dcb39c599768003e93ddc22d3",
+      "status": "IMPLEMENTED_UNVERIFIED",
+      "independent_review": "PENDING_V07_PACKAGE_GATE",
+      "automated_evidence": "PASS"
+    }
+  },
+  "verification": {
+    "focused_v07_1": "PASS / active corrected target",
+    "focused_v07_2": "6 files / 35 tests / PASS",
+    "focused_v07_3_and_cross_step": "7 files / 44 tests / PASS",
+    "full_repository": "31 files / 383 tests / PASS",
+    "protected_architecture": "3 files / 34 tests / PASS",
+    "authoritative_scanner": "25 core files / 37 total files / PASS",
+    "boundary_scanner": "42 files / PASS",
+    "r2_governance": "14 groups / PASS",
+    "migration_rehearsal": "3 migrations / clean-baseline and existing-schema / PGlite / PASS",
+    "secret_scanner": "466 files / PASS",
+    "workspace_build": "PASS"
+  },
+  "migration_state": {
+    "status": "BRANCH_LOCAL_CANDIDATES_UNPROMOTED",
+    "migration_count": 3,
+    "world_v2_0002_sha256": "92915905a159961ac0f8eb70f509501cf7697519471c1b84f832ef224cf87695",
+    "world_v2_0003_sha256": "bed513ccb1ae555d8c669597c61a46d6d56cdc8173a681a4da818934719502d0",
+    "production_approval": null,
+    "real_supabase_rls_or_multi_process_concurrency": "NOT_RUN_NOT_CLAIMED"
+  },
+  "finding_state": {
+    "open_p0_blockers": 0,
+    "open_p1_majors": 0,
+    "independent_package_review_pending": true,
+    "package_verified": false
+  },
+  "production_access": false,
+  "database_mutation": false,
+  "v08_started": false,
+  "next_action": "V07_PACKAGE_LEVEL_INDEPENDENT_REVIEW"
+}

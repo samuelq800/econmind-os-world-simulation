@@ -1431,6 +1431,33 @@ def validate(root: Path) -> dict[str, Any]:
                                 file(step_record.get("implementation_file"))
                                 file(step_record.get("evidence_file"))
                                 file(step_record.get("review_bundle"))
+                            package_review = progress_data.get("v07_package_review")
+                            require(
+                                isinstance(package_review, dict)
+                                and package_review.get("status")
+                                == "READY_FOR_PACKAGE_REVIEW"
+                                and package_review.get("package_status")
+                                == "IMPLEMENTED_UNVERIFIED"
+                                and package_review.get("open_p0_blockers") == 0
+                                and package_review.get("open_p1_majors") == 0
+                                and package_review.get("package_verified") is False
+                                and package_review.get("merge_authorized") is False
+                                and package_review.get("production_access") is False
+                                and package_review.get("production_mutation") is False
+                                and package_review.get("v08_started") is False,
+                                "V07 package review state is incomplete",
+                            )
+                            package_content = commit_exists(
+                                package_review.get("content_commit"),
+                                "V07 package content commit",
+                            )
+                            is_ancestor(
+                                step_review_target,
+                                package_content,
+                                "V07.3-to-package content lineage",
+                            )
+                            file(package_review.get("review_bundle"))
+                            file(package_review.get("evidence_file"))
                         else:
                             require(False, "unsupported active V07 lifecycle state")
                         require(
