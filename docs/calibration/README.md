@@ -8,8 +8,9 @@ immutable reviewed evidence with required forward remediation. Independent
 Review B approved its forward closure target
 `56d9882cddd7244dca84a4dda3eed2dd10866ac1` for continuation under Class A:
 `C2-M01` and `C2-M02` are closed, with no open blocker or MAJOR finding. C3 is
-still **IMPLEMENTED_UNVERIFIED / EXPLORATORY_NON_AUTHORITATIVE**; no C3 review
-decision is implied by the C2 approval.
+still **IMPLEMENTED_UNVERIFIED / EXPLORATORY_NON_AUTHORITATIVE**. Its historical
+target `21c571cd215b89bff20804bf2e38db687b44e55e` remains `CHANGES_REQUIRED`
+evidence for C3-MAJ-01; no C3 approval is implied by the C2 decision.
 
 This workstream converts provider-shaped bytes into traceable observations and, later, frozen World inputs. It does not implement World Core economics and it has no production/DB behavior.
 

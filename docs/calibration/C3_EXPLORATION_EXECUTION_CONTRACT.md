@@ -1,6 +1,6 @@
 # C3 Exploratory Distribution and Coverage Contract
 
-Status: **IMPLEMENTED_UNVERIFIED / EXPLORATORY_NON_AUTHORITATIVE / REVIEW TARGET PENDING**
+Status: **IMPLEMENTED_UNVERIFIED / EXPLORATORY_NON_AUTHORITATIVE / FORWARD-REVIEW PENDING**
 
 C3 is a deterministic descriptive exploration of the frozen C2 pilot. It is
 not a calibration package, statistical inference, archetype decision, trade
@@ -26,10 +26,21 @@ there are no open blockers or MAJOR findings. That approval changes no frozen
 C2 artifact and is not a C3 review decision. C3 remains review-pending until
 its own immutable target is independently assessed.
 
+C3 historical target `21c571cd215b89bff20804bf2e38db687b44e55e` remains
+immutable `CHANGES_REQUIRED` evidence for `C3-MAJ-01`. This forward-remediation
+lineage does not alter that target and does not claim a C3 review outcome.
+
 The generator reads only those fixed local artifacts. It rejects a changed
 input byte hash, an unexpected C2 input-path set, an altered C2 partial-pilot
 status, loss of the `WTO_API_KEY_MISSING` truth, or a Comtrade source that is
 not the recorded public-preview pilot. It performs no live provider retrieval.
+Before parsing C2 data, it verifies the fixed C3 contract canonical hash and
+all four raw C2 byte hashes. Each supplied byte array is copied once before
+hashing or parsing, so a getter or later mutation cannot swap the parsed value.
+Public summary and uncertainty constructors accept only the resulting
+module-attested bundle, rather than caller-supplied arrays or diagnostics;
+manifest construction likewise accepts only outputs attested to the same
+bundle. Structural clones and runtime-forged lookalikes fail closed.
 
 ## Descriptive methods
 
@@ -67,9 +78,10 @@ final calibration/runtime parameterization.
 - `data/calibration/exploration/c3_uncertainty_register.v1.json`
 - `data/calibration/exploration/c3_exploration_manifest.v1.json`
 
-Each output has a canonical content hash. The manifest refuses a summary or
-uncertainty register whose identity, normalized input binding, or content hash
-does not match the contract.
+Each output has a canonical content hash and is deeply frozen. The manifest
+refuses a summary or uncertainty register whose private bundle attestation,
+identity, normalized input binding, or content hash does not match the
+contract.
 
 ## Four review rounds
 
@@ -82,8 +94,10 @@ does not match the contract.
    diagnostics, pilot report, snapshot manifest, WTO gap, preview status, and
    revision/unit caveats.
 4. **Cross-artifact integrity and boundaries:** recompute the contract/input
-   hashes and manifest content hashes, then verify no output is used for a
-   prohibited decision or imports World Core/runtime code.
+   hashes and manifest content hashes; attempt altered raw bytes, erased
+   diagnostics, legacy caller-supplied arrays, and runtime-forged bundle/output
+   lookalikes; then verify no output is used for a prohibited decision or
+   imports World Core/runtime code.
 
 ## Local reproduction
 

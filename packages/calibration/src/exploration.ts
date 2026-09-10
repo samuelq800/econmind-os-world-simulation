@@ -1,4 +1,4 @@
-import { canonicalJson, sha256Canonical } from './canonical.js';
+import { canonicalJson, sha256Bytes, sha256Canonical } from './canonical.js';
 import { addDecimal, compareDecimal, divideDecimalExactly } from './decimal.js';
 import type { NormalizedObservation } from './types.js';
 
@@ -57,6 +57,21 @@ export interface C3InputBinding {
   readonly c2ReviewTargetCommit: string;
   readonly contractCanonicalHash: string;
   readonly artifacts: readonly ArtifactHashBinding[];
+}
+
+export const C3_EXPLORATION_CONTRACT_CANONICAL_HASH =
+  '9c9b3fab9f7def56bbe66d2e1464d278dde345d24dc37fc3e49e6dd883eafd48';
+
+export interface C3FrozenInputBytes {
+  readonly executionContract: Uint8Array;
+  readonly normalizedObservations: Uint8Array;
+  readonly qualityDiagnostics: Uint8Array;
+  readonly snapshotManifest: Uint8Array;
+  readonly pilotReport: Uint8Array;
+}
+
+export interface VerifiedC3FrozenInputBundle {
+  readonly kind: 'VERIFIED_C3_FROZEN_INPUT_BUNDLE';
 }
 
 export interface ExactFractionSummary {
@@ -370,12 +385,123 @@ function summarizeVariable(
   };
 }
 
+const C3_FROZEN_ARTIFACT_PATHS = Object.freeze({
+  normalizedObservations:
+    'data/calibration/pilot/normalized_observations.v1.json',
+  qualityDiagnostics: 'data/calibration/pilot/quality_diagnostics.v1.json',
+  snapshotManifest: 'data/calibration/pilot/snapshot_manifest.v1.json',
+  pilotReport: 'data/calibration/pilot/pilot_report.v1.json',
+});
+
+interface C2NormalizedArtifact {
+  readonly status: string;
+  readonly observations: readonly NormalizedObservation[];
+}
+
+interface C2QualityArtifact {
+  readonly status: string;
+  readonly diagnostics: readonly { readonly code: string }[];
+}
+
+interface C2SnapshotManifest {
+  readonly snapshots: readonly {
+    readonly sourceId: string;
+    readonly endpointIdentity: string;
+  }[];
+}
+
+interface C2PilotReport {
+  readonly status: string;
+  readonly providerRuns: readonly C3ProviderRun[];
+  readonly revisionVintageObservations: readonly string[];
+  readonly providerSpecificCaveats: Readonly<Record<string, string>>;
+}
+
+interface VerifiedC3BundleData {
+  readonly contract: C3ExplorationContract;
+  readonly input: C3InputBinding;
+  readonly observations: readonly NormalizedObservation[];
+  readonly evidence: C3UncertaintyEvidence;
+}
+
+const verifiedC3Bundles = new WeakMap<object, VerifiedC3BundleData>();
+const verifiedC3OutputBundles = new WeakMap<
+  object,
+  VerifiedC3FrozenInputBundle
+>();
+
+function deepFreeze<T>(value: T, seen = new Set<object>()): T {
+  if (typeof value !== 'object' || value === null) return value;
+  if (seen.has(value)) return value;
+  seen.add(value);
+  for (const key of Reflect.ownKeys(value)) {
+    deepFreeze(Reflect.get(value, key), seen);
+  }
+  return Object.freeze(value) as T;
+}
+
+function parseBoundJson<T>(bytes: Uint8Array, artifactPath: string): T {
+  try {
+    return JSON.parse(
+      new TextDecoder('utf8', { fatal: true }).decode(bytes),
+    ) as T;
+  } catch {
+    throw new Error(`C3_BOUND_INPUT_JSON_PARSE_FAILED:${artifactPath}`);
+  }
+}
+
+function diagnosticCounts(
+  diagnostics: readonly { readonly code: string }[],
+): readonly C3DiagnosticCount[] {
+  const counts = new Map<string, number>();
+  for (const diagnostic of diagnostics) {
+    counts.set(diagnostic.code, (counts.get(diagnostic.code) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort(([left], [right]) => compareText(left, right))
+    .map(([code, count]) => ({ code, count }));
+}
+
+function validateC2ProviderTruth(
+  contract: C3ExplorationContract,
+  report: C2PilotReport,
+  manifest: C2SnapshotManifest,
+): void {
+  if (report.status !== contract.c2ReviewTarget.normalizedObservationStatus) {
+    throw new Error('C3_C2_REPORT_STATUS_MISMATCH');
+  }
+  const wto = report.providerRuns.find(
+    ({ sourceId }) => sourceId === 'WTO_TIMESERIES_V1',
+  );
+  if (
+    wto?.status !== 'NOT_FETCHED' ||
+    !wto.issues.includes('WTO_API_KEY_MISSING')
+  ) {
+    throw new Error('C3_WTO_PARTIAL_PILOT_TRUTH_NOT_PRESERVED');
+  }
+  const comtradeSnapshots = manifest.snapshots.filter(
+    ({ sourceId }) => sourceId === 'UN_COMTRADE_V1',
+  );
+  if (
+    comtradeSnapshots.length === 0 ||
+    comtradeSnapshots.some(
+      ({ endpointIdentity }) =>
+        endpointIdentity !== 'UN_COMTRADE_PUBLIC_PREVIEW_V1',
+    )
+  ) {
+    throw new Error('C3_COMTRADE_PUBLIC_PREVIEW_TRUTH_NOT_PRESERVED');
+  }
+  if (!manifest.snapshots.some(({ sourceId }) => sourceId === 'WB_WDI_V2')) {
+    throw new Error('C3_WDI_PILOT_TRUTH_NOT_PRESERVED');
+  }
+}
+
 function finalize<T extends Record<string, unknown>>(
   value: T,
 ): T & {
   readonly contentHash: string;
 } {
-  return Object.freeze({
+  return deepFreeze({
     ...value,
     contentHash: sha256Canonical(value),
   });
@@ -418,41 +544,155 @@ export function validateC3InputBinding(
   }
 }
 
-function validateC3Input(
-  contract: C3ExplorationContract,
-  input: C3InputBinding,
-): void {
-  if (input.c2ReviewTargetCommit !== contract.c2ReviewTarget.commit) {
-    throw new Error('C3_INPUT_COMMIT_MISMATCH');
-  }
-  if (input.contractCanonicalHash !== contractCanonicalHash(contract)) {
-    throw new Error('C3_INPUT_CONTRACT_HASH_MISMATCH');
-  }
-  validateC3InputBinding(contract, input.artifacts);
+function frozenArtifactBindings(
+  bytes: C3FrozenInputBytes,
+): readonly ArtifactHashBinding[] {
+  return [
+    {
+      path: C3_FROZEN_ARTIFACT_PATHS.normalizedObservations,
+      sha256: sha256Bytes(bytes.normalizedObservations),
+    },
+    {
+      path: C3_FROZEN_ARTIFACT_PATHS.qualityDiagnostics,
+      sha256: sha256Bytes(bytes.qualityDiagnostics),
+    },
+    {
+      path: C3_FROZEN_ARTIFACT_PATHS.snapshotManifest,
+      sha256: sha256Bytes(bytes.snapshotManifest),
+    },
+    {
+      path: C3_FROZEN_ARTIFACT_PATHS.pilotReport,
+      sha256: sha256Bytes(bytes.pilotReport),
+    },
+  ];
 }
 
-function canonicalInput(
-  contract: C3ExplorationContract,
-  input: C3InputBinding,
-): C3InputBinding {
-  validateC3Input(contract, input);
-  return Object.freeze({
-    c2ReviewTargetCommit: input.c2ReviewTargetCommit,
-    contractCanonicalHash: input.contractCanonicalHash,
-    artifacts: Object.freeze(
-      [...input.artifacts].sort((left, right) =>
-        compareText(left.path, right.path),
-      ),
+function snapshotBoundBytes(
+  bytes: Uint8Array,
+  artifactPath: string,
+): Uint8Array {
+  if (!(bytes instanceof Uint8Array)) {
+    throw new TypeError(`C3_BOUND_INPUT_BYTES_REQUIRED:${artifactPath}`);
+  }
+  return new Uint8Array(bytes);
+}
+
+function snapshotFrozenInputs(bytes: C3FrozenInputBytes): C3FrozenInputBytes {
+  return {
+    executionContract: snapshotBoundBytes(
+      bytes.executionContract,
+      'data/calibration/exploration/c3_execution_contract.v1.json',
+    ),
+    normalizedObservations: snapshotBoundBytes(
+      bytes.normalizedObservations,
+      C3_FROZEN_ARTIFACT_PATHS.normalizedObservations,
+    ),
+    qualityDiagnostics: snapshotBoundBytes(
+      bytes.qualityDiagnostics,
+      C3_FROZEN_ARTIFACT_PATHS.qualityDiagnostics,
+    ),
+    snapshotManifest: snapshotBoundBytes(
+      bytes.snapshotManifest,
+      C3_FROZEN_ARTIFACT_PATHS.snapshotManifest,
+    ),
+    pilotReport: snapshotBoundBytes(
+      bytes.pilotReport,
+      C3_FROZEN_ARTIFACT_PATHS.pilotReport,
+    ),
+  };
+}
+
+export function createVerifiedC3FrozenInputBundle(
+  bytes: C3FrozenInputBytes,
+): VerifiedC3FrozenInputBundle {
+  const frozenBytes = snapshotFrozenInputs(bytes);
+  const contract = parseBoundJson<C3ExplorationContract>(
+    frozenBytes.executionContract,
+    'data/calibration/exploration/c3_execution_contract.v1.json',
+  );
+  const contractHash = contractCanonicalHash(contract);
+  if (contractHash !== C3_EXPLORATION_CONTRACT_CANONICAL_HASH) {
+    throw new Error('C3_EXECUTION_CONTRACT_HASH_MISMATCH');
+  }
+
+  const artifacts = frozenArtifactBindings(frozenBytes);
+  validateC3InputBinding(contract, artifacts);
+
+  const normalized = parseBoundJson<C2NormalizedArtifact>(
+    frozenBytes.normalizedObservations,
+    C3_FROZEN_ARTIFACT_PATHS.normalizedObservations,
+  );
+  const quality = parseBoundJson<C2QualityArtifact>(
+    frozenBytes.qualityDiagnostics,
+    C3_FROZEN_ARTIFACT_PATHS.qualityDiagnostics,
+  );
+  const manifest = parseBoundJson<C2SnapshotManifest>(
+    frozenBytes.snapshotManifest,
+    C3_FROZEN_ARTIFACT_PATHS.snapshotManifest,
+  );
+  const report = parseBoundJson<C2PilotReport>(
+    frozenBytes.pilotReport,
+    C3_FROZEN_ARTIFACT_PATHS.pilotReport,
+  );
+  if (
+    normalized.status !== contract.c2ReviewTarget.normalizedObservationStatus
+  ) {
+    throw new Error('C3_C2_NORMALIZED_STATUS_MISMATCH');
+  }
+  if (quality.status !== normalized.status) {
+    throw new Error('C3_C2_QUALITY_STATUS_MISMATCH');
+  }
+  validateC2ProviderTruth(contract, report, manifest);
+
+  const input = deepFreeze({
+    c2ReviewTargetCommit: contract.c2ReviewTarget.commit,
+    contractCanonicalHash: contractHash,
+    artifacts: [...artifacts].sort((left, right) =>
+      compareText(left.path, right.path),
     ),
   });
+  const data = deepFreeze({
+    contract,
+    input,
+    observations: normalized.observations,
+    evidence: {
+      diagnosticCounts: diagnosticCounts(quality.diagnostics),
+      providerRuns: report.providerRuns,
+      revisionVintageObservations: report.revisionVintageObservations,
+      providerSpecificCaveats: report.providerSpecificCaveats,
+    },
+  });
+  const bundle: VerifiedC3FrozenInputBundle = Object.freeze({
+    kind: 'VERIFIED_C3_FROZEN_INPUT_BUNDLE',
+  });
+  verifiedC3Bundles.set(bundle, data);
+  return bundle;
+}
+
+function resolveVerifiedC3Bundle(
+  bundle: VerifiedC3FrozenInputBundle,
+): VerifiedC3BundleData {
+  const candidate = bundle as unknown;
+  if (typeof candidate !== 'object' || candidate === null) {
+    throw new Error('C3_UNVERIFIED_INPUT_BUNDLE');
+  }
+  const data = verifiedC3Bundles.get(candidate);
+  if (data === undefined) throw new Error('C3_UNVERIFIED_INPUT_BUNDLE');
+  return data;
+}
+
+function bindVerifiedC3Output<T extends object>(
+  bundle: VerifiedC3FrozenInputBundle,
+  output: T,
+): T {
+  verifiedC3OutputBundles.set(output, bundle);
+  return output;
 }
 
 export function createC3ExplorationSummary(
-  contract: C3ExplorationContract,
-  input: C3InputBinding,
-  observations: readonly NormalizedObservation[],
+  bundle: VerifiedC3FrozenInputBundle,
 ): C3ExplorationSummary {
-  const normalizedInput = canonicalInput(contract, input);
+  const { contract, input, observations } = resolveVerifiedC3Bundle(bundle);
   const scopes = scopeIndex(contract);
   const byVariable = new Map<string, NormalizedObservation[]>();
   for (const observation of observations) {
@@ -475,15 +715,18 @@ export function createC3ExplorationSummary(
     );
     throw new Error(`C3_MISSING_SCOPED_VARIABLES:${missing.join(',')}`);
   }
-  return finalize({
-    schemaVersion: 'c3-exploration-summary.v1' as const,
-    analysisId: contract.analysisId,
-    status: contract.status,
-    input: normalizedInput,
-    transformation: contract.transformation,
-    qualityTreatment: contract.qualityTreatment,
-    variableSummaries: summaries,
-  });
+  return bindVerifiedC3Output(
+    bundle,
+    finalize({
+      schemaVersion: 'c3-exploration-summary.v1' as const,
+      analysisId: contract.analysisId,
+      status: contract.status,
+      input,
+      transformation: contract.transformation,
+      qualityTreatment: contract.qualityTreatment,
+      variableSummaries: summaries,
+    }),
+  );
 }
 
 function diagnosticCount(
@@ -503,11 +746,9 @@ function providerRun(
 }
 
 export function createC3UncertaintyRegister(
-  contract: C3ExplorationContract,
-  input: C3InputBinding,
-  evidence: C3UncertaintyEvidence,
+  bundle: VerifiedC3FrozenInputBundle,
 ): C3UncertaintyRegister {
-  const normalizedInput = canonicalInput(contract, input);
+  const { contract, input, evidence } = resolveVerifiedC3Bundle(bundle);
   const wto = providerRun(evidence, 'WTO_TIMESERIES_V1');
   if (
     wto?.status !== 'NOT_FETCHED' ||
@@ -580,13 +821,16 @@ export function createC3UncertaintyRegister(
       blocks: contract.statisticalScope.prohibited,
     },
   ];
-  return finalize({
-    schemaVersion: 'c3-uncertainty-register.v1' as const,
-    analysisId: contract.analysisId,
-    status: contract.status,
-    input: normalizedInput,
-    entries,
-  });
+  return bindVerifiedC3Output(
+    bundle,
+    finalize({
+      schemaVersion: 'c3-uncertainty-register.v1' as const,
+      analysisId: contract.analysisId,
+      status: contract.status,
+      input,
+      entries,
+    }),
+  );
 }
 
 type C3OutputArtifact = Readonly<{
@@ -598,11 +842,20 @@ type C3OutputArtifact = Readonly<{
 }>;
 
 function validateOutputArtifactForManifest(
+  bundle: VerifiedC3FrozenInputBundle,
   contract: C3ExplorationContract,
   input: C3InputBinding,
   artifact: C3OutputArtifact,
   schemaVersion: C3OutputArtifact['schemaVersion'],
 ): void {
+  const candidate = artifact as unknown;
+  if (
+    typeof candidate !== 'object' ||
+    candidate === null ||
+    verifiedC3OutputBundles.get(candidate) !== bundle
+  ) {
+    throw new Error(`C3_UNVERIFIED_OUTPUT_ARTIFACT:${schemaVersion}`);
+  }
   if (artifact.schemaVersion !== schemaVersion) {
     throw new Error(`C3_OUTPUT_SCHEMA_VERSION_MISMATCH:${schemaVersion}`);
   }
@@ -622,40 +875,44 @@ function validateOutputArtifactForManifest(
 }
 
 export function createC3ExplorationManifest(
-  contract: C3ExplorationContract,
-  input: C3InputBinding,
+  bundle: VerifiedC3FrozenInputBundle,
   summary: C3ExplorationSummary,
   uncertainty: C3UncertaintyRegister,
 ): C3ExplorationManifest {
-  const normalizedInput = canonicalInput(contract, input);
+  const { contract, input } = resolveVerifiedC3Bundle(bundle);
   validateOutputArtifactForManifest(
+    bundle,
     contract,
-    normalizedInput,
+    input,
     summary,
     'c3-exploration-summary.v1',
   );
   validateOutputArtifactForManifest(
+    bundle,
     contract,
-    normalizedInput,
+    input,
     uncertainty,
     'c3-uncertainty-register.v1',
   );
-  return finalize({
-    schemaVersion: 'c3-exploration-manifest.v1' as const,
-    analysisId: contract.analysisId,
-    status: contract.status,
-    input: normalizedInput,
-    artifacts: [
-      {
-        path: 'data/calibration/exploration/c3_exploration_summary.v1.json',
-        schemaVersion: summary.schemaVersion,
-        canonicalContentHash: summary.contentHash,
-      },
-      {
-        path: 'data/calibration/exploration/c3_uncertainty_register.v1.json',
-        schemaVersion: uncertainty.schemaVersion,
-        canonicalContentHash: uncertainty.contentHash,
-      },
-    ],
-  });
+  return bindVerifiedC3Output(
+    bundle,
+    finalize({
+      schemaVersion: 'c3-exploration-manifest.v1' as const,
+      analysisId: contract.analysisId,
+      status: contract.status,
+      input,
+      artifacts: [
+        {
+          path: 'data/calibration/exploration/c3_exploration_summary.v1.json',
+          schemaVersion: summary.schemaVersion,
+          canonicalContentHash: summary.contentHash,
+        },
+        {
+          path: 'data/calibration/exploration/c3_uncertainty_register.v1.json',
+          schemaVersion: uncertainty.schemaVersion,
+          canonicalContentHash: uncertainty.contentHash,
+        },
+      ],
+    }),
+  );
 }
