@@ -299,8 +299,7 @@ describe('V06 owner-authorized package continuation', () => {
           historical_independent_review:
             'CHANGES_REQUIRED_ON_HISTORICAL_TARGET',
           independent_review: 'V08_PACKAGE_APPROVED',
-          finding_implementation_state:
-            'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
+          finding_implementation_state: 'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
           status: 'VERIFIED',
         },
         'V08.2': {
@@ -314,8 +313,7 @@ describe('V06 owner-authorized package continuation', () => {
           historical_independent_review:
             'CHANGES_REQUIRED_ON_HISTORICAL_TARGET',
           independent_review: 'V08_PACKAGE_APPROVED',
-          finding_implementation_state:
-            'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
+          finding_implementation_state: 'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
           status: 'VERIFIED',
         },
         'V08.3': {
@@ -329,8 +327,7 @@ describe('V06 owner-authorized package continuation', () => {
           historical_independent_review:
             'CHANGES_REQUIRED_ON_HISTORICAL_TARGET',
           independent_review: 'V08_PACKAGE_APPROVED',
-          finding_implementation_state:
-            'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
+          finding_implementation_state: 'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
           status: 'VERIFIED',
         },
       },
@@ -347,8 +344,7 @@ describe('V06 owner-authorized package continuation', () => {
       open_recorded_p1_majors: 0,
       independent_review: 'V08_PACKAGE_APPROVED',
       latest_independent_decision: 'V08_PACKAGE_APPROVED',
-      finding_implementation_state:
-        'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
+      finding_implementation_state: 'CLOSED_BY_FOCUSED_INDEPENDENT_REVIEW',
       owner_decision: 'OWNER_POLICY_AUTO_ACCEPTANCE',
       authority: 'PROJECT_OWNER_DIRECT_CONFIRMATION',
       package_verified: true,
