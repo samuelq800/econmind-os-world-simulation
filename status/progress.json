@@ -2,7 +2,7 @@
   "schema_version": "R2-101.1",
   "derived_at": "2026-09-10T13:03:00Z",
   "source_commit": "1352163b0695112fafb510afe4c821773fb09bfe",
-  "note": "Gate A, V06 and V07 are accepted and verified. V08.1 candidate a73c35d has green evidence and remains P0 IMPLEMENTED_UNVERIFIED. Under the responsible-owner exact V08 package continuation scope, V08.2 preflight is GO and implementation is IN_PROGRESS. ADR-02/ADR-17 apply; ADR-07 is outside scope and ADR-08 is not current because only exact Money arithmetic is authorized. No migration or production mutation is authorized.",
+  "note": "Gate A, V06 and V07 are accepted and verified. V08.1 candidate a73c35d and V08.2 candidate f5c022c have green evidence and remain P0 IMPLEMENTED_UNVERIFIED. Under the responsible-owner exact V08 package continuation scope, V08.3 is awaiting preflight. No migration or production mutation is authorized.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -153,14 +153,14 @@
     "evidence_file": "docs/reports/V07/FINAL_RECONCILIATION.md"
   },
   "current_gate": {
-    "step_id": "V08.2",
-    "status": "IN_PROGRESS",
-    "review": "V08.2 preflight GO under the exact owner-authorized adjacent V08 package continuation scope",
-    "next_step": "V08.2",
-    "next_step_ready": true,
-    "next_step_blockers": [],
-    "required_gate": "V08.2_IMPLEMENTATION",
-    "gate_status": "PASS"
+    "step_id": "V08.3",
+    "status": "PLANNED",
+    "review": "V08.2 completed with green automated evidence under the exact owner-authorized adjacent V08 package continuation scope",
+    "next_step": "V08.3",
+    "next_step_ready": false,
+    "next_step_blockers": ["V08.3 preflight not yet recorded"],
+    "required_gate": "V08.3_PREFLIGHT",
+    "gate_status": "PENDING"
   },
   "v07_package_review": {
     "status": "V07_PACKAGE_APPROVED",
@@ -486,14 +486,16 @@
     "deferred_adrs": ["ADR-07"],
     "not_current_gate_adrs": ["ADR-08"],
     "v08_2": {
-      "status": "ACTIVE",
+      "status": "IMPLEMENTED_UNVERIFIED",
       "preflight": "GO",
       "preflight_file": "docs/reports/V08.2/PREFLIGHT.md",
       "dependency_method": "OWNER_AUTHORIZED_PACKAGE_CONTINUATION",
       "approved_adrs": ["ADR-02", "ADR-17"],
       "not_current_gate_adrs": ["ADR-07", "ADR-08"],
       "migration": "NOT_CREATED",
-      "production_mutation": false
+      "production_mutation": false,
+      "implementation_commit": "f5c022c7957a1128660d25e36ea46df99964a850",
+      "evidence_file": "docs/reports/V08.2/TEST_EVIDENCE.json"
     },
     "production_migration_track": "PARALLEL_BLOCKED_NO_PRODUCTION_MUTATION",
     "production_mutation": false,
@@ -516,6 +518,15 @@
       "V08.1": {
         "implementation_commit": "a73c35d32d93f4067ab4e6228dbb65a4ab64734e",
         "evidence_file": "docs/reports/V08.1/TEST_EVIDENCE.json",
+        "automated_evidence_status": "PASS",
+        "open_recorded_p0_blockers": 0,
+        "open_recorded_p1_majors": 0,
+        "independent_review": "NOT_RUN",
+        "status": "IMPLEMENTED_UNVERIFIED"
+      },
+      "V08.2": {
+        "implementation_commit": "f5c022c7957a1128660d25e36ea46df99964a850",
+        "evidence_file": "docs/reports/V08.2/TEST_EVIDENCE.json",
         "automated_evidence_status": "PASS",
         "open_recorded_p0_blockers": 0,
         "open_recorded_p1_majors": 0,
@@ -712,7 +723,12 @@
       "docs/governance/WORLD_CORE_V08_CONTINUATION_POLICY.json",
       "docs/reports/V08/OWNER_CONTINUATION_ACTIVATION.md"
     ],
-    "V08.2": ["docs/exec-plans/V08.2.md", "docs/reports/V08.2/PREFLIGHT.md"]
+    "V08.2": [
+      "docs/exec-plans/V08.2.md",
+      "docs/reports/V08.2/PREFLIGHT.md",
+      "docs/reports/V08.2/IMPLEMENTATION.md",
+      "docs/reports/V08.2/TEST_EVIDENCE.json"
+    ]
   },
   "package_evidence": {
     "V01": [
@@ -782,7 +798,8 @@
     "V07.1": "b8c8555bac1f5e8d36d1f147732a691f248431f8",
     "V07.2": "7e4b21e0cc70e878080a777874dad491a21501aa",
     "V07.3": "2b42e0d725da590a24e845a7046501af8f8d4c01",
-    "V08.1": "a73c35d32d93f4067ab4e6228dbb65a4ab64734e"
+    "V08.1": "a73c35d32d93f4067ab4e6228dbb65a4ab64734e",
+    "V08.2": "f5c022c7957a1128660d25e36ea46df99964a850"
   },
   "step_reviews": {
     "V00.1": {
@@ -1068,7 +1085,7 @@
     "V07.2": "VERIFIED",
     "V07.3": "VERIFIED",
     "V08.1": "IMPLEMENTED_UNVERIFIED",
-    "V08.2": "IN_PROGRESS",
+    "V08.2": "IMPLEMENTED_UNVERIFIED",
     "V08.3": "PLANNED",
     "V09.1": "PLANNED",
     "V09.2": "PLANNED",

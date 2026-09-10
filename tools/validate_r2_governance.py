@@ -1722,6 +1722,35 @@ def validate(root: Path) -> dict[str, Any]:
                                     "active V08.2 gate differs from progress truth",
                                 )
                                 file(v08_2.get("preflight_file"))
+                            elif states["V08.2"] == "IMPLEMENTED_UNVERIFIED":
+                                v08_2 = v08_entry.get("v08_2", {})
+                                require(
+                                    states["V08.3"] == "PLANNED"
+                                    and gate.get("step_id") == "V08.3"
+                                    and gate.get("status") == states["V08.3"]
+                                    and gate.get("next_step") == "V08.3"
+                                    and gate.get("next_step_ready") is False
+                                    and required_gate == "V08.3_PREFLIGHT"
+                                    and gate.get("gate_status") == "PENDING"
+                                    and isinstance(v08_2, dict)
+                                    and v08_2.get("status")
+                                    == "IMPLEMENTED_UNVERIFIED"
+                                    and v08_2.get("implementation_commit")
+                                    and v08_2.get("evidence_file"),
+                                    "completed V08.2 continuation gate differs from progress truth",
+                                )
+                                require(
+                                    "V08.2" in v08_completed
+                                    and v08_completed["V08.2"].get("status")
+                                    == "IMPLEMENTED_UNVERIFIED"
+                                    and v08_completed["V08.2"].get(
+                                        "automated_evidence_status"
+                                    )
+                                    == "PASS",
+                                    "V08.2 lacks owner-authorized package continuation evidence",
+                                )
+                                file(v08_2.get("preflight_file"))
+                                file(v08_2.get("evidence_file"))
                             else:
                                 require(False, "unsupported V08.2 lifecycle state")
                             require(
