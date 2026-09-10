@@ -1521,15 +1521,50 @@ def validate(root: Path) -> dict[str, Any]:
                         v07_integration = progress_data.get("v07_integration")
                         require(
                             all(states[step_id] == "VERIFIED" for step_id in ("V07.1", "V07.2", "V07.3"))
-                            and progress_data.get("work_packages", {}).get("V07") == "VERIFIED"
-                            and gate.get("step_id") == "V08.1"
-                            and gate.get("status") == states["V08.1"] == "PLANNED"
-                            and gate.get("next_step") == "V08.1"
-                            and gate.get("next_step_ready") is False
-                            and required_gate == "V08.1_OWNER_ADR_GATE"
-                            and gate.get("gate_status") == "PENDING",
-                            "completed V07 handoff gate differs from progress truth",
+                            and progress_data.get("work_packages", {}).get("V07") == "VERIFIED",
+                            "completed V07 state differs from progress truth",
                         )
+                        if states["V08.1"] == "PLANNED":
+                            require(
+                                gate.get("step_id") == "V08.1"
+                                and gate.get("status") == states["V08.1"]
+                                and gate.get("next_step") == "V08.1"
+                                and gate.get("next_step_ready") is False
+                                and required_gate == "V08.1_OWNER_ADR_GATE"
+                                and gate.get("gate_status") == "PENDING",
+                                "completed V07 handoff gate differs from progress truth",
+                            )
+                        elif states["V08.1"] == "IN_PROGRESS":
+                            v08_entry = progress_data.get("v08_entry")
+                            require(
+                                gate.get("step_id") == "V08.1"
+                                and gate.get("status") == states["V08.1"]
+                                and gate.get("next_step") == "V08.1"
+                                and gate.get("next_step_ready") is True
+                                and required_gate == "V08.1_IMPLEMENTATION"
+                                and gate.get("gate_status") == "PASS"
+                                and progress_data.get("work_packages", {}).get("V08") == "IN_PROGRESS",
+                                "active V08.1 entry gate differs from progress truth",
+                            )
+                            require(
+                                isinstance(v08_entry, dict)
+                                and v08_entry.get("status") == "ACTIVE"
+                                and v08_entry.get("branch") == "codex/world-core-v08"
+                                and v08_entry.get("preflight") == "GO"
+                                and v08_entry.get("approved_adrs") == ["ADR-02", "ADR-05", "ADR-17"]
+                                and v08_entry.get("production_mutation") is False
+                                and v08_entry.get("owner_approved") is True,
+                                "V08.1 entry authority is incomplete",
+                            )
+                            for decision_id in ("ADR-02", "ADR-05", "ADR-17"):
+                                require(
+                                    owner_decisions[decision_id].get("status") == "APPROVED"
+                                    and owner_decisions[decision_id].get("approval_record"),
+                                    f"{decision_id} is not approved for V08.1 entry",
+                                )
+                            file(v08_entry.get("preflight_file"))
+                        else:
+                            require(False, "unsupported V08 lifecycle state")
                         require(
                             isinstance(package_review, dict)
                             and package_review.get("status") == "V07_PACKAGE_APPROVED"

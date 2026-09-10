@@ -222,12 +222,27 @@ describe('V06 owner-authorized package continuation', () => {
     });
     expect(progress.current_gate).toMatchObject({
       step_id: 'V08.1',
-      status: 'PLANNED',
+      status: 'IN_PROGRESS',
       next_step: 'V08.1',
-      next_step_ready: false,
-      next_step_blockers: ['ADR-02', 'ADR-05'],
-      required_gate: 'V08.1_OWNER_ADR_GATE',
-      gate_status: 'PENDING',
+      next_step_ready: true,
+      next_step_blockers: [],
+      required_gate: 'V08.1_IMPLEMENTATION',
+      gate_status: 'PASS',
+    });
+    expect(progress.v08_entry).toMatchObject({
+      status: 'ACTIVE',
+      branch: 'codex/world-core-v08',
+      branch_base: '403b97e6a2ae36cb7b250b1ce23fa128e9a5cbec',
+      authoritative_main: 'ec3ceff57b2657b374432b5ab3b4cbc1f78e003d',
+      decision_commit: '93087392ca28b2ccda70d6647f4f7af024b3f317',
+      decision_main_merge: 'ec3ceff57b2657b374432b5ab3b4cbc1f78e003d',
+      branch_reconciliation: 'd3c484a2a9fbeb08efbe9f1715018ac000ee53d6',
+      preflight: 'GO',
+      approved_adrs: ['ADR-02', 'ADR-05', 'ADR-17'],
+      deferred_adrs: ['ADR-07'],
+      not_current_gate_adrs: ['ADR-08'],
+      production_mutation: false,
+      owner_approved: true,
     });
     expect(progress.v07_package_review).toMatchObject({
       status: 'V07_PACKAGE_APPROVED',

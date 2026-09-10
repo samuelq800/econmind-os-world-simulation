@@ -3,12 +3,13 @@
 ## Result
 
 ```text
-V08_1_PREFLIGHT=NO_GO
-V08_1_PLANNING=READY_PENDING_OWNER_ADR
-V08_1_RUNTIME=NOT_STARTED
+V08_1_PREFLIGHT=GO
+V08_1_PLANNING=COMPLETE
+V08_1_RUNTIME=IN_PROGRESS
 V08_1_MIGRATION=NOT_CREATED
 EVALUATED_V08_BRANCH_BASE=403b97e6a2ae36cb7b250b1ce23fa128e9a5cbec
-AUTHORITATIVE_MAIN=403b97e6a2ae36cb7b250b1ce23fa128e9a5cbec
+AUTHORITATIVE_MAIN=ec3ceff57b2657b374432b5ab3b4cbc1f78e003d
+V08_BRANCH_RECONCILIATION=d3c484a2a9fbeb08efbe9f1715018ac000ee53d6
 V07_PACKAGE_REVIEW_TARGET=079fa9d230d5109488a1e5ea82e97f81845c49eb
 ```
 
@@ -34,8 +35,8 @@ or authorize production access.
 
 | Decision | Current result                | V08.1 effect                                                                                                      |
 | -------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| ADR-02   | NO                            | `PROPOSED_NOT_APPROVED`; blocks unique inventory/financial posting owner and V08.1 model/schema                   |
-| ADR-05   | NO                            | `PROPOSED_NOT_APPROVED`; blocks the initial bucket/title/risk/recognition separation model                        |
+| ADR-02   | YES                           | `APPROVED`; World Inventory/Financial Posting are the unique V08 authoritative owners                             |
+| ADR-05   | YES                           | `APPROVED`; location/reservation/title/risk/X-M/settlement are separate, with exact batch conservation            |
 | ADR-17   | YES                           | `APPROVED`; V08 owns Ledger/Posting while V09 owns writer/lease/fencing/atomic commit/recovery                    |
 | ADR-16   | YES FOR FUTURE CANDIDATE ONLY | `APPROVED`; future V08 DDL must use `world_v2` and the sole V02 chain; production remains separately unauthorized |
 | ADR-07   | NOT A CURRENT STEP GATE       | Remains unapproved; V08.1 implements no construction/WIP/GDP rule                                                 |
@@ -61,15 +62,20 @@ attempt to resolve that later gate.
 | P0/P1 risks and test architecture documented                     | YES    |
 | Scope exclusions documented                                      | YES    |
 | Owner ADR-02/ADR-05 decision pack prepared                       | YES    |
-| Runtime implementation authorized                                | NO     |
+| Runtime implementation authorized                                | YES    |
 
-## Required transition before rerun
+## Entry decision
 
 ```text
-ADR-02 APPROVED
--> ADR-05 APPROVED for the V08.1 model
--> rerun V08.1 preflight
+HARD_DEPENDENCIES=YES
+ADR-02=APPROVED
+ADR-05=APPROVED
+ADR-17=APPROVED
+ADR-07=DEFERRED_NOT_CURRENT_SCOPE
+ADR-08=NOT_CURRENT_GATE_EXACT_OR_REJECT_ONLY
+V08_1_PREFLIGHT=GO
 ```
 
-All V07 and hard dependency gates are now satisfied. Until both remaining owner
-ADR gates are satisfied, V08 and V08.1 remain `NOT_STARTED / PLANNED`.
+The production publisher migration-history issue is a parallel release track.
+V08 candidate DDL, if later needed, remains branch-local, unpromoted and
+production-unpublished. It does not block this non-production entry.

@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-10T08:26:53Z",
-  "source_commit": "e7cdaf0aaeb83ebe63c62208c512fcb251158929",
-  "note": "Gate A, V06 and V07 are accepted and verified. Independent Review B approved exact V07 package target 079fa9d; the project owner accepted it and authorized canonical promotion, main merge and publication of migrations 0002-0004 only through the ADR-16 main-site release chain. All V07 BLOCKER/MAJOR findings are closed; V07-PKG-MIN-01 remains OPEN_DEFERRED. V08 is not started and remains blocked on owner decisions ADR-02 and ADR-05.",
+  "derived_at": "2026-09-10T12:07:23Z",
+  "source_commit": "d3c484a2a9fbeb08efbe9f1715018ac000ee53d6",
+  "note": "Gate A, V06 and V07 are accepted and verified. ADR-02 and ADR-05 are owner-approved on authoritative main ec3ceff. The V08 branch preserves its planning history and contains the decision merge. V08.1 hard dependencies and ADR gates recompute to GO; V08.1 is IN_PROGRESS. ADR-07 remains deferred and ADR-08 is not applicable to exact-or-reject mechanics. Production migration publication remains a parallel blocked release track with no production mutation.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -154,13 +154,13 @@
   },
   "current_gate": {
     "step_id": "V08.1",
-    "status": "PLANNED",
-    "review": "V07_PACKAGE_APPROVED and owner accepted; V08.1 awaits its own owner ADR gate",
+    "status": "IN_PROGRESS",
+    "review": "V08.1 implementation authorized by green dependency and owner ADR preflight",
     "next_step": "V08.1",
-    "next_step_ready": false,
-    "next_step_blockers": ["ADR-02", "ADR-05"],
-    "required_gate": "V08.1_OWNER_ADR_GATE",
-    "gate_status": "PENDING"
+    "next_step_ready": true,
+    "next_step_blockers": [],
+    "required_gate": "V08.1_IMPLEMENTATION",
+    "gate_status": "PASS"
   },
   "v07_package_review": {
     "status": "V07_PACKAGE_APPROVED",
@@ -472,6 +472,23 @@
     "production_mutation": false,
     "owner_approved": true
   },
+  "v08_entry": {
+    "status": "ACTIVE",
+    "branch": "codex/world-core-v08",
+    "branch_base": "403b97e6a2ae36cb7b250b1ce23fa128e9a5cbec",
+    "authoritative_main": "ec3ceff57b2657b374432b5ab3b4cbc1f78e003d",
+    "decision_commit": "93087392ca28b2ccda70d6647f4f7af024b3f317",
+    "decision_main_merge": "ec3ceff57b2657b374432b5ab3b4cbc1f78e003d",
+    "branch_reconciliation": "d3c484a2a9fbeb08efbe9f1715018ac000ee53d6",
+    "preflight": "GO",
+    "preflight_file": "docs/reports/V08.1/PREFLIGHT.md",
+    "approved_adrs": ["ADR-02", "ADR-05", "ADR-17"],
+    "deferred_adrs": ["ADR-07"],
+    "not_current_gate_adrs": ["ADR-08"],
+    "production_migration_track": "PARALLEL_BLOCKED_NO_PRODUCTION_MUTATION",
+    "production_mutation": false,
+    "owner_approved": true
+  },
   "work_packages": {
     "V00": "COMPLETE",
     "V01": "IMPLEMENTED_MERGED",
@@ -481,7 +498,7 @@
     "V05": "VERIFIED",
     "V06": "VERIFIED",
     "V07": "VERIFIED",
-    "V08": "NOT_STARTED"
+    "V08": "IN_PROGRESS"
   },
   "step_evidence": {
     "V00.1": [
@@ -1005,7 +1022,7 @@
     "V07.1": "VERIFIED",
     "V07.2": "VERIFIED",
     "V07.3": "VERIFIED",
-    "V08.1": "PLANNED",
+    "V08.1": "IN_PROGRESS",
     "V08.2": "PLANNED",
     "V08.3": "PLANNED",
     "V09.1": "PLANNED",
