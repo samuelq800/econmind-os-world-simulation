@@ -158,7 +158,6 @@ describe('Calibration source adapters and snapshots', () => {
       year: '2023',
     });
     const input = {
-      snapshotId: 'snap-wto-fixture-001',
       retrievedAt: '2026-09-10T00:00:00.000Z',
       sourceAsOf: '2023',
       providerVersion: 'fixture-v1',
@@ -179,6 +178,9 @@ describe('Calibration source adapters and snapshots', () => {
     expect(verifySnapshot(metadata, bytes)).toBe(true);
     expect(verifySnapshot(metadata, Buffer.from('changed'))).toBe(false);
     expect(Object.isFrozen(metadata)).toBe(true);
+    expect(metadata.snapshotId).toMatch(
+      /^snap_wto_timeseries_v1_[0-9a-f]{20}$/u,
+    );
     expect(Object.keys(metadata.requestParameters)).toEqual([
       'i',
       'indicator',
@@ -195,6 +197,47 @@ describe('Calibration source adapters and snapshots', () => {
       input,
     );
     expect(retrieved.metadata.sha256).toBe(metadata.sha256);
+  });
+
+  it('prevents caller-selected IDs from collapsing distinct snapshot bytes', () => {
+    const request = wtoAdapter.buildRequest({
+      indicator: 'TP_A_0010',
+      reporter: 'USA',
+      year: '2023',
+    });
+    const inputWithIgnoredOverride = {
+      snapshotId: 'snap_caller_selected_collision',
+      retrievedAt: '2026-09-10T00:00:00.000Z',
+      sourceAsOf: '2023',
+      providerVersion: 'fixture-v1',
+      status: 'FIXTURE' as const,
+    };
+    const first = createSnapshotMetadata(
+      request,
+      {
+        bytes: Uint8Array.of(1),
+        httpStatus: 200,
+        responseHeaders: {},
+        finalUrl: request.url,
+      },
+      wtoAdapter,
+      inputWithIgnoredOverride,
+    );
+    const second = createSnapshotMetadata(
+      request,
+      {
+        bytes: Uint8Array.of(2),
+        httpStatus: 200,
+        responseHeaders: {},
+        finalUrl: request.url,
+      },
+      wtoAdapter,
+      inputWithIgnoredOverride,
+    );
+    expect(first.sha256).not.toBe(second.sha256);
+    expect(first.snapshotId).not.toBe(second.snapshotId);
+    expect(first.snapshotId).not.toBe('snap_caller_selected_collision');
+    expect(second.snapshotId).not.toBe('snap_caller_selected_collision');
   });
 
   it('keeps every committed fixture bound to its manifest hash and byte length', async () => {
@@ -230,7 +273,6 @@ describe('Calibration source adapters and snapshots', () => {
       },
       wtoAdapter,
       {
-        snapshotId: 'snap-wto-fixture-001',
         retrievedAt: '2026-09-10T00:00:00.000Z',
         sourceAsOf: '2023',
         providerVersion: 'fixture-v1',
@@ -251,7 +293,7 @@ describe('Calibration source adapters and snapshots', () => {
     expect(first).toEqual(second);
     expect(first.dataClass).toBe('OBSERVED');
     expect(first.provenance).toEqual([
-      'snap-wto-fixture-001',
+      snapshot.snapshotId,
       record!.sourceObservationKey,
     ]);
     expect(
@@ -278,7 +320,7 @@ describe('Calibration source adapters and snapshots', () => {
     ).toMatchObject([{ code: 'OUTLIER_RULE_VIOLATION' }]);
   });
 
-  it('preserves long and exponent-form provider numbers without JS Number conversion', () => {
+  it('preserves long and exponent-form provider numbers without JS Number conversion', async () => {
     const parsed = parseLosslessJson(
       Buffer.from('[12345678901234567890.1234500,1.25e-3,-4E+2,null]'),
     );
@@ -293,9 +335,25 @@ describe('Calibration source adapters and snapshots', () => {
     );
     expect(canonicalDecimalFromJsonNumber('1.25e-3')).toBe('0.00125');
     expect(canonicalDecimalFromJsonNumber('-4E+2')).toBe('-400');
+    expect(canonicalDecimalFromJsonNumber('1.25e+0003')).toBe('1250');
+    expect(canonicalDecimalFromJsonNumber('-4E-0002')).toBe('-0.04');
     expect(() => canonicalDecimalFromJsonNumber('1e10001')).toThrow(
       'LOSSLESS_NUMBER_EXPANSION_LIMIT',
     );
+    expect(() =>
+      canonicalDecimalFromJsonNumber('1e+999999999999999999999999'),
+    ).toThrow('LOSSLESS_NUMBER_EXPONENT_OUT_OF_RANGE');
+    const losslessJsonSource = await readFile(
+      path.join(root, 'packages/calibration/src/lossless-json.ts'),
+      'utf8',
+    );
+    const canonicalizer = losslessJsonSource.slice(
+      losslessJsonSource.indexOf(
+        'export function canonicalDecimalFromJsonNumber',
+      ),
+      losslessJsonSource.indexOf('export function parseLosslessJson'),
+    );
+    expect(canonicalizer).not.toMatch(/\bNumber(?:\s*\.|\s*\()/u);
     expect(() => parseLosslessJson(Buffer.from('{"a":1,"a":2}'))).toThrow(
       'duplicate-object-key:a',
     );

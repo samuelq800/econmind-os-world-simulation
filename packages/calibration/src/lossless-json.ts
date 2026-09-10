@@ -24,6 +24,60 @@ export type LosslessJsonValue =
 const NUMBER_TOKEN = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/u;
 const NUMBER_PARTS = /^(-?)(0|[1-9]\d*)(?:\.(\d+))?(?:[eE]([+-]?\d+))?$/u;
 const MAX_EXPANDED_DIGITS = 10_000;
+const MAX_EXPANDED_DIGITS_BIGINT = BigInt(MAX_EXPANDED_DIGITS);
+const MAX_PROVIDER_EXPONENT_MAGNITUDE = MAX_EXPANDED_DIGITS_BIGINT + 1n;
+const EXPONENT_PARTS = /^([+-]?)(\d+)$/u;
+const DECIMAL_DIGIT_VALUE: Readonly<Record<string, number>> = Object.freeze({
+  '0': 0,
+  '1': 1,
+  '2': 2,
+  '3': 3,
+  '4': 4,
+  '5': 5,
+  '6': 6,
+  '7': 7,
+  '8': 8,
+  '9': 9,
+});
+
+function maxBigInt(...values: readonly bigint[]): bigint {
+  return values.reduce((maximum, value) => (value > maximum ? value : maximum));
+}
+
+function parseBoundedProviderExponent(raw: string | undefined): bigint {
+  if (raw === undefined) return 0n;
+  const match = raw.match(EXPONENT_PARTS);
+  if (match === null) throw new TypeError('INVALID_PROVIDER_NUMBER_EXPONENT');
+  const sign = match[1] === '-' ? -1n : 1n;
+  const magnitudeText = (match[2] ?? '0').replace(/^0+/u, '') || '0';
+  const maximumTextLength = MAX_PROVIDER_EXPONENT_MAGNITUDE.toString().length;
+  if (magnitudeText.length > maximumTextLength) {
+    throw new RangeError('LOSSLESS_NUMBER_EXPONENT_OUT_OF_RANGE');
+  }
+  const magnitude = BigInt(magnitudeText);
+  if (magnitude > MAX_PROVIDER_EXPONENT_MAGNITUDE) {
+    throw new RangeError('LOSSLESS_NUMBER_EXPONENT_OUT_OF_RANGE');
+  }
+  return sign * magnitude;
+}
+
+function boundedBigIntToIndex(value: bigint): number {
+  if (
+    value < -MAX_EXPANDED_DIGITS_BIGINT ||
+    value > MAX_EXPANDED_DIGITS_BIGINT
+  ) {
+    throw new RangeError('LOSSLESS_NUMBER_EXPANSION_LIMIT');
+  }
+  const negative = value < 0n;
+  const magnitude = (negative ? -value : value).toString();
+  let index = 0;
+  for (const character of magnitude) {
+    const digit = DECIMAL_DIGIT_VALUE[character];
+    if (digit === undefined) throw new TypeError('INVALID_BIGINT_DIGIT');
+    index = index * 10 + digit;
+  }
+  return negative ? -index : index;
+}
 
 export function isLosslessJsonNumber(
   value: unknown,
@@ -43,28 +97,26 @@ export function canonicalDecimalFromJsonNumber(raw: string): string {
   const negative = match[1] === '-';
   const integer = match[2] ?? '0';
   const fraction = match[3] ?? '';
-  const exponent = Number(match[4] ?? '0');
-  if (!Number.isSafeInteger(exponent)) {
-    throw new RangeError('LOSSLESS_NUMBER_EXPONENT_OUT_OF_RANGE');
-  }
+  const exponent = parseBoundedProviderExponent(match[4]);
   const digits = `${integer}${fraction}`;
-  const decimalPosition = integer.length + exponent;
-  const expandedLength = Math.max(
-    digits.length,
+  const decimalPosition = BigInt(integer.length) + exponent;
+  const expandedLength = maxBigInt(
+    BigInt(digits.length),
     decimalPosition,
-    1 - decimalPosition,
+    1n - decimalPosition,
   );
-  if (expandedLength > MAX_EXPANDED_DIGITS) {
+  if (expandedLength > MAX_EXPANDED_DIGITS_BIGINT) {
     throw new RangeError('LOSSLESS_NUMBER_EXPANSION_LIMIT');
   }
+  const decimalIndex = boundedBigIntToIndex(decimalPosition);
 
   let expanded: string;
-  if (decimalPosition <= 0) {
-    expanded = `0.${'0'.repeat(-decimalPosition)}${digits}`;
-  } else if (decimalPosition >= digits.length) {
-    expanded = `${digits}${'0'.repeat(decimalPosition - digits.length)}`;
+  if (decimalIndex <= 0) {
+    expanded = `0.${'0'.repeat(-decimalIndex)}${digits}`;
+  } else if (decimalIndex >= digits.length) {
+    expanded = `${digits}${'0'.repeat(decimalIndex - digits.length)}`;
   } else {
-    expanded = `${digits.slice(0, decimalPosition)}.${digits.slice(decimalPosition)}`;
+    expanded = `${digits.slice(0, decimalIndex)}.${digits.slice(decimalIndex)}`;
   }
 
   const [rawInteger = '0', rawFraction = ''] = expanded.split('.');

@@ -8,7 +8,6 @@ import type {
 } from './types.js';
 
 export interface SnapshotInput {
-  readonly snapshotId?: string;
   readonly retrievedAt: string;
   readonly sourceAsOf: string | null;
   readonly providerVersion: string | null;
@@ -59,9 +58,7 @@ export function createSnapshotMetadata(
   };
   return Object.freeze({
     schemaVersion: 'raw-snapshot.v2',
-    snapshotId:
-      input.snapshotId ??
-      `snap_${request.sourceId.toLowerCase()}_${sha256Canonical(snapshotIdentity).slice(0, 20)}`,
+    snapshotId: `snap_${request.sourceId.toLowerCase()}_${sha256Canonical(snapshotIdentity).slice(0, 20)}`,
     sourceId: request.sourceId,
     sourceFamily: adapter.sourceFamily,
     provider: adapter.provider,
