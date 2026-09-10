@@ -6,6 +6,7 @@ export * from './authorization/projections.js';
 export * from './commands/command.js';
 export * from './commands/receipt.js';
 export * from './events/event.js';
+export * from './finance/financial-ledger.js';
 export * from './ids.js';
 export * from './inventory/inventory-ledger.js';
 export * from './numeric/index.js';

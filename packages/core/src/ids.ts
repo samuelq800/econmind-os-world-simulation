@@ -34,6 +34,10 @@ export type InventoryReservationId = BrandedId<'InventoryReservationId'>;
 export type InventoryShipmentId = BrandedId<'InventoryShipmentId'>;
 export type LegalEntityId = BrandedId<'LegalEntityId'>;
 export type EconomicRecognitionId = BrandedId<'EconomicRecognitionId'>;
+export type FinancialAccountId = BrandedId<'FinancialAccountId'>;
+export type FinancialClaimId = BrandedId<'FinancialClaimId'>;
+export type FinancialPostingBatchId = BrandedId<'FinancialPostingBatchId'>;
+export type FinancialPostingLegId = BrandedId<'FinancialPostingLegId'>;
 
 const CANONICAL_ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 const CANONICAL_UUID =
@@ -101,3 +105,11 @@ export const inventoryShipmentId = (value: string) =>
 export const legalEntityId = (value: string) => parseId('LegalEntityId', value);
 export const economicRecognitionId = (value: string) =>
   parseId('EconomicRecognitionId', value);
+export const financialAccountId = (value: string) =>
+  parseId('FinancialAccountId', value);
+export const financialClaimId = (value: string) =>
+  parseId('FinancialClaimId', value);
+export const financialPostingBatchId = (value: string) =>
+  parseId('FinancialPostingBatchId', value);
+export const financialPostingLegId = (value: string) =>
+  parseId('FinancialPostingLegId', value);
