@@ -2,10 +2,10 @@ import { createHash } from 'node:crypto';
 
 import { describe, expect, it } from 'vitest';
 
+import * as worldCore from '../../packages/core/src/index.js';
 import {
   COMMAND_SCHEMA_VERSION,
   DOMAIN_ERROR_CODES,
-  DomainError,
   EVENT_SCHEMA_VERSION,
   SimTime,
   acceptCanonicalCommand,
@@ -22,7 +22,6 @@ import {
   parseAuthoritativeEvent,
   parseCanonicalCommand,
   processQueuedCommand,
-  reauthorizeOfficeCapability,
   recordConsumerDelivery,
   recordOutboxDeliveryAttempt,
   teamId,
@@ -185,11 +184,13 @@ function authorizationFixture(
     isWorldAdmin: false,
     negotiationPartyIds: Object.freeze([]),
   });
+  let onResolveMembership = () => {};
   const resolver = {
     async resolveCurrentIdentity() {
       return membership === null ? null : principal.authSubject;
     },
     async resolveCurrentMembership() {
+      onResolveMembership();
       return membership;
     },
   };
@@ -206,6 +207,38 @@ function authorizationFixture(
           authorizationVersion: '2',
         });
       }
+    },
+    changeOffice: (office: 'TRADE' | 'FINANCE') => {
+      if (membership !== null) {
+        membership = Object.freeze({
+          ...membership,
+          authorizationVersion: '2',
+          officeAssignments: Object.freeze([
+            command({ officeId: office }).officeId!,
+          ]),
+        });
+      }
+    },
+    changeCountry: (country: string) => {
+      if (membership !== null) {
+        membership = Object.freeze({
+          ...membership,
+          authorizationVersion: '2',
+          countryId: countryId(country),
+        });
+      }
+    },
+    changeWorld: (world: string) => {
+      if (membership !== null) {
+        membership = Object.freeze({
+          ...membership,
+          authorizationVersion: '2',
+          worldId: worldId(world),
+        });
+      }
+    },
+    observeResolution: (observer: () => void) => {
+      onResolveMembership = observer;
     },
   };
 }
@@ -249,6 +282,10 @@ describe('V07.2 accepted/executed and durable duplicate contract', () => {
 });
 
 describe('V07.2 commit-time authorization and recovery boundary', () => {
+  it('does not export an alternate commit-proof issuer', () => {
+    expect(worldCore).not.toHaveProperty('bindCommitAuthorizationToCommand');
+  });
+
   it('re-resolves current authority immediately before the commit port', async () => {
     const auth = authorizationFixture();
     const intakeContext = await authorizeOfficeCapability({
@@ -261,16 +298,14 @@ describe('V07.2 commit-time authorization and recovery boundary', () => {
     });
     auth.revise();
     const order: string[] = [];
+    auth.observeResolution(() => order.push('REAUTHORIZE'));
     const result = await processQueuedCommand({
       command: command(),
       authorityKind: 'DISCRETIONARY_USER',
       commitSimTime: SimTime.fromTicks('10001'),
       recordedAtReal: '2026-09-10T00:00:01.000Z',
       requiredCapability: 'TRADE_POLICY',
-      reauthorizeAtCommit: async () => {
-        order.push('REAUTHORIZE');
-        return reauthorizeOfficeCapability(intakeContext);
-      },
+      intakeAuthorization: intakeContext,
       persistence: {
         async readFinalReceipt() {
           order.push('READ_FINAL');
@@ -312,7 +347,7 @@ describe('V07.2 commit-time authorization and recovery boundary', () => {
       commitSimTime: SimTime.fromTicks('10001'),
       recordedAtReal: '2026-09-10T00:00:01.000Z',
       requiredCapability: 'TRADE_POLICY',
-      reauthorizeAtCommit: () => reauthorizeOfficeCapability(intakeContext),
+      intakeAuthorization: intakeContext,
       persistence: {
         async readFinalReceipt() {
           return null;
@@ -335,6 +370,132 @@ describe('V07.2 commit-time authorization and recovery boundary', () => {
       eventIds: [],
     });
     expect(recorded).toBe(result.receipt);
+    expect(commitCalls).toBe(0);
+  });
+
+  it.each([
+    [
+      'Office assignment',
+      (auth: ReturnType<typeof authorizationFixture>) =>
+        auth.changeOffice('FINANCE'),
+    ],
+    [
+      'Country relationship',
+      (auth: ReturnType<typeof authorizationFixture>) =>
+        auth.changeCountry('COUNTRY_2'),
+    ],
+    [
+      'World relationship',
+      (auth: ReturnType<typeof authorizationFixture>) =>
+        auth.changeWorld('WORLD_2'),
+    ],
+  ])(
+    're-resolves and rejects a changed %s after intake',
+    async (_label, changeAuthority) => {
+      const auth = authorizationFixture();
+      const intakeContext = await authorizeOfficeCapability({
+        principal: auth.principal,
+        resolver: auth.resolver,
+        worldId: worldId('WORLD_1'),
+        requestedCountryId: countryId('COUNTRY_1'),
+        requestedOfficeId: command().officeId!,
+        capability: 'TRADE_POLICY',
+      });
+      changeAuthority(auth);
+      let commitCalls = 0;
+      const result = await processQueuedCommand({
+        command: command(),
+        authorityKind: 'DISCRETIONARY_USER',
+        commitSimTime: SimTime.fromTicks('10001'),
+        recordedAtReal: '2026-09-10T00:00:01.000Z',
+        requiredCapability: 'TRADE_POLICY',
+        intakeAuthorization: intakeContext,
+        persistence: {
+          async readFinalReceipt() {
+            return null;
+          },
+          async recordZeroEffectReceipt(receipt) {
+            return receipt;
+          },
+          async commitAuthorizedCommand() {
+            commitCalls += 1;
+            throw new Error('changed authority reached commit');
+          },
+        },
+      });
+      expect(result.receipt.outcome).toBe('AUTHORIZATION_REVOKED');
+      expect(commitCalls).toBe(0);
+    },
+  );
+
+  it('cannot reuse an old branded context to bypass current resolution', async () => {
+    const auth = authorizationFixture();
+    const oldBrandedContext = await authorizeOfficeCapability({
+      principal: auth.principal,
+      resolver: auth.resolver,
+      worldId: worldId('WORLD_1'),
+      requestedCountryId: countryId('COUNTRY_1'),
+      requestedOfficeId: command().officeId!,
+      capability: 'TRADE_POLICY',
+    });
+    auth.revoke();
+    let commitCalls = 0;
+    const result = await processQueuedCommand({
+      command: command(),
+      authorityKind: 'DISCRETIONARY_USER',
+      commitSimTime: SimTime.fromTicks('10001'),
+      recordedAtReal: '2026-09-10T00:00:01.000Z',
+      requiredCapability: 'TRADE_POLICY',
+      intakeAuthorization: oldBrandedContext,
+      persistence: {
+        async readFinalReceipt() {
+          return null;
+        },
+        async recordZeroEffectReceipt(receipt) {
+          return receipt;
+        },
+        async commitAuthorizedCommand() {
+          commitCalls += 1;
+          throw new Error('stale branded context reached commit');
+        },
+      },
+    });
+    expect(result.receipt.outcome).toBe('AUTHORIZATION_REVOKED');
+    expect(commitCalls).toBe(0);
+  });
+
+  it('rejects a required capability that differs from current intake scope', async () => {
+    const auth = authorizationFixture();
+    const intakeContext = await authorizeOfficeCapability({
+      principal: auth.principal,
+      resolver: auth.resolver,
+      worldId: worldId('WORLD_1'),
+      requestedCountryId: countryId('COUNTRY_1'),
+      requestedOfficeId: command().officeId!,
+      capability: 'TRADE_POLICY',
+    });
+    let commitCalls = 0;
+    const result = await processQueuedCommand({
+      command: command(),
+      authorityKind: 'DISCRETIONARY_USER',
+      commitSimTime: SimTime.fromTicks('10001'),
+      recordedAtReal: '2026-09-10T00:00:01.000Z',
+      requiredCapability: 'TRADE_CONTRACTS',
+      intakeAuthorization: intakeContext,
+      persistence: {
+        async readFinalReceipt() {
+          return null;
+        },
+        async recordZeroEffectReceipt(receipt) {
+          return receipt;
+        },
+        async commitAuthorizedCommand() {
+          commitCalls += 1;
+          throw new Error('wrong capability reached commit');
+        },
+      },
+    });
+    expect(result.receipt.outcome).toBe('AUTHORIZATION_REVOKED');
     expect(commitCalls).toBe(0);
   });
 
@@ -385,7 +546,7 @@ describe('V07.2 commit-time authorization and recovery boundary', () => {
         commitSimTime: SimTime.fromTicks('10001'),
         recordedAtReal: '2026-09-10T00:00:01.000Z',
         requiredCapability,
-        reauthorizeAtCommit: () => reauthorizeOfficeCapability(issued),
+        intakeAuthorization: issued,
         persistence: {
           async readFinalReceipt() {
             return null;
@@ -409,21 +570,28 @@ describe('V07.2 commit-time authorization and recovery boundary', () => {
   );
 
   it('returns an already committed fact without retrospective reauthorization', async () => {
+    const auth = authorizationFixture();
+    const staleContext = await authorizeOfficeCapability({
+      principal: auth.principal,
+      resolver: auth.resolver,
+      worldId: worldId('WORLD_1'),
+      requestedCountryId: countryId('COUNTRY_1'),
+      requestedOfficeId: command().officeId!,
+      capability: 'TRADE_POLICY',
+    });
+    auth.revoke();
+    let resolutionCalls = 0;
+    auth.observeResolution(() => {
+      resolutionCalls += 1;
+    });
     const original = committedReceipt(command());
-    let reauthorizationCalls = 0;
     const result = await processQueuedCommand({
       command: command(),
       authorityKind: 'DISCRETIONARY_USER',
       commitSimTime: SimTime.fromTicks('10002'),
       recordedAtReal: '2026-09-10T00:00:02.000Z',
       requiredCapability: 'TRADE_POLICY',
-      reauthorizeAtCommit: async () => {
-        reauthorizationCalls += 1;
-        throw new DomainError(
-          DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
-          'revoked later',
-        );
-      },
+      intakeAuthorization: staleContext,
       persistence: {
         async readFinalReceipt() {
           return original;
@@ -437,7 +605,7 @@ describe('V07.2 commit-time authorization and recovery boundary', () => {
       },
     });
     expect(result).toEqual({ source: 'EXISTING_FINAL', receipt: original });
-    expect(reauthorizationCalls).toBe(0);
+    expect(resolutionCalls).toBe(0);
   });
 
   it('rejects a stored receipt whose fingerprint differs from the queued Command', async () => {
@@ -451,9 +619,6 @@ describe('V07.2 commit-time authorization and recovery boundary', () => {
         commitSimTime: SimTime.fromTicks('10002'),
         recordedAtReal: '2026-09-10T00:00:02.000Z',
         requiredCapability: 'TRADE_POLICY',
-        reauthorizeAtCommit: async () => {
-          throw new Error('fingerprint conflict must precede authorization');
-        },
         persistence: {
           async readFinalReceipt() {
             return existing;

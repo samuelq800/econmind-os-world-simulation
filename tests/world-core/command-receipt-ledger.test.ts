@@ -9,6 +9,7 @@ const migrationPaths = [
   'database/migrations/artifacts/0001_world_v2_namespace.sql',
   'database/migrations/artifacts/0002_world_v2_command_event_ledger.sql',
   'database/migrations/artifacts/0003_world_v2_command_receipts_outbox.sql',
+  'database/migrations/artifacts/0004_world_v2_receipt_event_set_integrity.sql',
 ];
 
 let database: PGlite;
@@ -19,6 +20,7 @@ async function insertCommand(
     idempotencyKey?: string;
     correlationId?: string;
     fingerprintCharacter?: string;
+    worldId?: string;
   } = {},
 ) {
   await database.query(
@@ -28,7 +30,7 @@ async function insertCommand(
       actor_id, country_id, office_id, expected_world_version, sim_time,
       correlation_id, submitted_at_real
     ) values (
-      'WORLD_1', $1, $2, 'TRANSFER_REQUESTED', 'command-v1',
+      $6, $1, $2, 'TRANSFER_REQUESTED', 'command-v1',
       '{"amount":"10","asset":"GCU"}', $3, $4,
       '11111111-1111-4111-8111-111111111111', 'ACTOR_1', 'COUNTRY_1',
       'TRADE', 0, 10000, $5, '2026-09-10T00:00:00.000Z'
@@ -39,6 +41,7 @@ async function insertCommand(
       `sha256:${'a'.repeat(64)}`,
       `sha256:${(input.fingerprintCharacter ?? 'b').repeat(64)}`,
       input.correlationId ?? 'CORRELATION_1',
+      input.worldId ?? 'WORLD_1',
     ],
   );
 }
@@ -50,6 +53,7 @@ async function insertEvent(
     eventId?: string;
     sequence?: number;
     worldVersion?: number;
+    worldId?: string;
   } = {},
 ) {
   await database.query(
@@ -59,7 +63,7 @@ async function insertEvent(
       canonical_payload, payload_sha256, event_fingerprint, sim_time,
       recorded_at_real, corrects_event_id
     ) values (
-      'WORLD_1', $3, $4, $5, $6, $7,
+      $8, $3, $4, $5, $6, $7,
       'TRANSFER_RECORDED', 'event-v1', '{"amount":"10","asset":"GCU"}',
       $1, $2, 10001, '2026-09-10T00:00:01.000Z', null
     )`,
@@ -71,6 +75,41 @@ async function insertEvent(
       input.worldVersion ?? 1,
       input.commandId ?? 'COMMAND_1',
       input.correlationId ?? 'CORRELATION_1',
+      input.worldId ?? 'WORLD_1',
+    ],
+  );
+}
+
+async function insertCommittedReceipt(
+  eventIds: readonly string[],
+  input: {
+    commandId?: string;
+    fingerprintCharacter?: string;
+    idempotencyKey?: string;
+    worldId?: string;
+    worldVersionBefore?: number;
+    worldVersionAfter?: number;
+  } = {},
+) {
+  await database.query(
+    `insert into world_v2.command_receipt (
+      world_id, command_id, idempotency_key, schema_version,
+      command_fingerprint, outcome, reason_code, transition_id,
+      world_version_before, world_version_after, sim_time, event_ids,
+      recorded_at_real
+    ) values (
+      $1, $2, $3, 'command-receipt-v2', $4,
+      'COMMITTED', null, $2, $5, $6, 10001,
+      $7::jsonb, '2026-09-10T00:00:01.000Z'
+    )`,
+    [
+      input.worldId ?? 'WORLD_1',
+      input.commandId ?? 'COMMAND_1',
+      input.idempotencyKey ?? 'TRANSFER_1',
+      `sha256:${(input.fingerprintCharacter ?? 'b').repeat(64)}`,
+      input.worldVersionBefore ?? 0,
+      input.worldVersionAfter ?? 1,
+      JSON.stringify(eventIds),
     ],
   );
 }
@@ -237,7 +276,7 @@ describe('V07.2 branch-local receipt/queue/outbox candidate', () => {
         )`,
         [`sha256:${'b'.repeat(64)}`],
       ),
-    ).rejects.toThrow('receipt Events do not exist');
+    ).rejects.toThrow('complete ordered authoritative transition Event set');
 
     await insertCommand({
       commandId: 'COMMAND_2',
@@ -265,27 +304,14 @@ describe('V07.2 branch-local receipt/queue/outbox candidate', () => {
         )`,
         [`sha256:${'b'.repeat(64)}`],
       ),
-    ).rejects.toThrow('receipt Events do not exist');
+    ).rejects.toThrow('complete ordered authoritative transition Event set');
   });
 
   it('accepts multiple ordered Events in one transition and one WorldVersion increment', async () => {
     await insertCommand();
     await insertEvent();
     await insertEvent({ eventId: 'EVENT_2', sequence: 2 });
-    await database.query(
-      `insert into world_v2.command_receipt (
-        world_id, command_id, idempotency_key, schema_version,
-        command_fingerprint, outcome, reason_code, transition_id,
-        world_version_before, world_version_after, sim_time, event_ids,
-        recorded_at_real
-      ) values (
-        'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v2', $1,
-        'COMMITTED', null, 'COMMAND_1', 0, 1, 10001,
-        '["EVENT_1","EVENT_2"]'::jsonb,
-        '2026-09-10T00:00:01.000Z'
-      )`,
-      [`sha256:${'b'.repeat(64)}`],
-    );
+    await insertCommittedReceipt(['EVENT_1', 'EVENT_2']);
     const evidence = await database.query(
       `select world_version_before, world_version_after,
               jsonb_array_length(event_ids)::int as event_count
@@ -294,6 +320,99 @@ describe('V07.2 branch-local receipt/queue/outbox candidate', () => {
     expect(evidence.rows).toEqual([
       { event_count: 2, world_version_after: 1, world_version_before: 0 },
     ]);
+  });
+
+  it.each([
+    ['omits the second Event', ['EVENT_1']],
+    ['omits the first Event', ['EVENT_2']],
+    ['reverses authoritative Event order', ['EVENT_2', 'EVENT_1']],
+    [
+      'claims a nonexistent additional Event',
+      ['EVENT_1', 'EVENT_2', 'EVENT_3'],
+    ],
+    ['duplicates an Event identity', ['EVENT_1', 'EVENT_1']],
+  ])('rejects a receipt that %s', async (_label, claimedEventIds) => {
+    await insertCommand();
+    await insertEvent();
+    await insertEvent({ eventId: 'EVENT_2', sequence: 2 });
+    await expect(insertCommittedReceipt(claimedEventIds)).rejects.toThrow(
+      'complete ordered authoritative transition Event set',
+    );
+  });
+
+  it('derives receipt order from immutable authoritative event_sequence', async () => {
+    await insertCommand();
+    await insertEvent({ eventId: 'EVENT_1', sequence: 2 });
+    await insertEvent({ eventId: 'EVENT_2', sequence: 1 });
+    await expect(
+      insertCommittedReceipt(['EVENT_1', 'EVENT_2']),
+    ).rejects.toThrow('complete ordered authoritative transition Event set');
+    await insertCommittedReceipt(['EVENT_2', 'EVENT_1']);
+    const receipt = await database.query(
+      'select event_ids from world_v2.command_receipt',
+    );
+    expect(receipt.rows).toEqual([{ event_ids: ['EVENT_2', 'EVENT_1'] }]);
+  });
+
+  it('rejects foreign-World Event evidence', async () => {
+    await database.exec(
+      "insert into world_v2.world_head (world_id) values ('WORLD_2')",
+    );
+    await insertCommand();
+    await insertCommand({
+      worldId: 'WORLD_2',
+      commandId: 'COMMAND_2',
+      idempotencyKey: 'TRANSFER_2',
+      correlationId: 'CORRELATION_2',
+      fingerprintCharacter: 'e',
+    });
+    await insertEvent({
+      worldId: 'WORLD_2',
+      commandId: 'COMMAND_2',
+      correlationId: 'CORRELATION_2',
+      eventId: 'EVENT_FOREIGN',
+    });
+    await expect(insertCommittedReceipt(['EVENT_FOREIGN'])).rejects.toThrow(
+      'complete ordered authoritative transition Event set',
+    );
+  });
+
+  it('prevents extending a transition after its immutable receipt is final', async () => {
+    await insertCommand();
+    await insertEvent();
+    await insertCommittedReceipt(['EVENT_1']);
+    await expect(
+      insertEvent({ eventId: 'EVENT_2', sequence: 2 }),
+    ).rejects.toThrow('cannot append an Event after');
+  });
+
+  it('permits empty Event evidence only for zero-effect final outcomes', async () => {
+    await insertCommand();
+    await database.query(
+      `insert into world_v2.command_receipt (
+        world_id, command_id, idempotency_key, schema_version,
+        command_fingerprint, outcome, reason_code, transition_id,
+        world_version_before, world_version_after, sim_time, event_ids,
+        recorded_at_real
+      ) values (
+        'WORLD_1', 'COMMAND_1', 'TRANSFER_1', 'command-receipt-v2', $1,
+        'REJECTED', 'POLICY_REJECTED', null, null, null, 10001, '[]'::jsonb,
+        '2026-09-10T00:00:01.000Z'
+      )`,
+      [`sha256:${'b'.repeat(64)}`],
+    );
+    await insertCommand({
+      commandId: 'COMMAND_2',
+      idempotencyKey: 'TRANSFER_2',
+      fingerprintCharacter: 'e',
+    });
+    await expect(
+      insertCommittedReceipt([], {
+        commandId: 'COMMAND_2',
+        idempotencyKey: 'TRANSFER_2',
+        fingerprintCharacter: 'e',
+      }),
+    ).rejects.toThrow();
   });
 
   it('rejects duplicate receipt Event IDs and invalid WorldVersion boundaries', async () => {
@@ -314,7 +433,7 @@ describe('V07.2 branch-local receipt/queue/outbox candidate', () => {
         )`,
         [`sha256:${'b'.repeat(64)}`],
       ),
-    ).rejects.toThrow('receipt Event IDs must be unique');
+    ).rejects.toThrow('complete ordered authoritative transition Event set');
     await expect(
       database.query(
         `insert into world_v2.command_receipt (

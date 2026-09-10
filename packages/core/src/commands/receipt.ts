@@ -1,5 +1,6 @@
 import {
   isAuthorizedOfficeContext,
+  reauthorizeOfficeCapability,
   type AuthorizationCapability,
   type AuthorizedOfficeContext,
 } from '../authorization/offices.js';
@@ -411,7 +412,7 @@ export function isCommitAuthorizationProof(
   );
 }
 
-export function bindCommitAuthorizationToCommand(input: {
+function bindCommitAuthorizationToCommand(input: {
   readonly command: CanonicalCommand;
   readonly currentAuthorization: AuthorizedOfficeContext;
   readonly requiredCapability: AuthorizationCapability;
@@ -469,7 +470,7 @@ export async function processQueuedCommand(input: {
   readonly commitSimTime: SimTime;
   readonly recordedAtReal: string;
   readonly requiredCapability?: AuthorizationCapability;
-  readonly reauthorizeAtCommit?: () => Promise<AuthorizedOfficeContext>;
+  readonly intakeAuthorization?: AuthorizedOfficeContext;
   readonly persistence: CommandLifecyclePersistencePort;
 }): Promise<QueuedCommandExecutionResult> {
   const existing = await input.persistence.readFinalReceipt(input.command);
@@ -486,13 +487,18 @@ export async function processQueuedCommand(input: {
   let commitAuthorization: CommitAuthorizationProof | null = null;
   if (input.authorityKind === 'DISCRETIONARY_USER') {
     if (
-      input.reauthorizeAtCommit === undefined ||
+      input.intakeAuthorization === undefined ||
       input.requiredCapability === undefined
     ) {
       invalid('Discretionary work requires commit-time reauthorization');
     }
     try {
-      const currentAuthorization = await input.reauthorizeAtCommit();
+      // Freshness comes from the authorization subsystem's server-held
+      // principal/resolver metadata. The caller can provide intake evidence,
+      // but cannot provide the commit-time verdict or bypass this resolution.
+      const currentAuthorization = await reauthorizeOfficeCapability(
+        input.intakeAuthorization,
+      );
       commitAuthorization = bindCommitAuthorizationToCommand({
         command: input.command,
         currentAuthorization,
