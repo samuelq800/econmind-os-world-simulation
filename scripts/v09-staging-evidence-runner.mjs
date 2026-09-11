@@ -1,5 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import {
+  lstat,
+  open,
+  readFile,
+  realpath,
+  rename,
+  unlink,
+} from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -21,10 +28,182 @@ const repositoryRoot = path.resolve(
 );
 const RUN_MARKER_TABLE = 'v09_staging_run_marker';
 const SQLSTATE_OBJECT_STATE = '55000';
+const ACK_SLEEP_SECONDS = 15;
+const ACK_SLEEP_MARKER = 'V09_ACKNOWLEDGEMENT_UNKNOWN';
+const CLEANUP_INCOMPLETE = 'CLEANUP_INCOMPLETE';
+const CRASH_PROTOCOL_UNAVAILABLE = 'CRASH_PROTOCOL_UNAVAILABLE';
+const DURABLE_EVIDENCE_WRITE_FAILED = 'DURABLE_EVIDENCE_WRITE_FAILED';
 const LINKED_PROJECT_PATH = path.join(
   repositoryRoot,
   'supabase/.temp/project-ref',
 );
+
+const RUN_MIGRATION_TEARDOWN = Object.freeze([
+  Object.freeze({
+    constraints: [],
+    functions: [
+      {
+        argumentCount: 0,
+        name: 'reject_world_writer_lease_lineage_reset',
+        sql: '()',
+      },
+    ],
+    migrationId: '0006_world_v2_writer_lease_lineage_guard',
+    tables: [],
+    triggers: [
+      {
+        name: 'world_writer_lease_truncate_is_forbidden',
+        table: 'world_writer_lease',
+      },
+      {
+        name: 'world_writer_lease_delete_is_forbidden',
+        table: 'world_writer_lease',
+      },
+    ],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [
+      {
+        argumentCount: 5,
+        name: 'assert_world_writer_commit_guard',
+        sql: '(text, text, bigint, bigint, timestamptz)',
+      },
+      {
+        argumentCount: 4,
+        name: 'acquire_world_writer_lease',
+        sql: '(text, text, timestamptz, bigint)',
+      },
+      {
+        argumentCount: 0,
+        name: 'validate_world_writer_lease_transition',
+        sql: '()',
+      },
+    ],
+    migrationId: '0005_world_v2_writer_lease_fencing',
+    tables: ['world_writer_lease'],
+    triggers: [
+      {
+        name: 'world_writer_lease_transition_is_guarded',
+        table: 'world_writer_lease',
+      },
+    ],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [
+      {
+        argumentCount: 0,
+        name: 'reject_event_after_final_receipt',
+        sql: '()',
+      },
+    ],
+    migrationId: '0004_world_v2_receipt_event_set_integrity',
+    tables: [],
+    triggers: [
+      {
+        name: 'authoritative_event_cannot_extend_final_transition',
+        table: 'authoritative_event',
+      },
+    ],
+  }),
+  Object.freeze({
+    constraints: [
+      {
+        name: 'authoritative_event_transition_evidence_key',
+        table: 'authoritative_event',
+      },
+      {
+        name: 'command_submission_receipt_evidence_key',
+        table: 'command_submission',
+      },
+    ],
+    functions: [
+      { argumentCount: 0, name: 'validate_outbox_update', sql: '()' },
+      {
+        argumentCount: 0,
+        name: 'validate_consumer_receipt_update',
+        sql: '()',
+      },
+      {
+        argumentCount: 0,
+        name: 'validate_command_queue_transition',
+        sql: '()',
+      },
+      {
+        argumentCount: 0,
+        name: 'validate_command_receipt_evidence',
+        sql: '()',
+      },
+    ],
+    migrationId: '0003_world_v2_command_receipts_outbox',
+    tables: [
+      'notification_outbox',
+      'event_consumer_receipt',
+      'command_receipt',
+      'command_queue',
+    ],
+    triggers: [
+      { name: 'outbox_update_is_guarded', table: 'notification_outbox' },
+      {
+        name: 'consumer_receipt_update_is_guarded',
+        table: 'event_consumer_receipt',
+      },
+      { name: 'command_queue_transition_is_guarded', table: 'command_queue' },
+      { name: 'command_receipt_is_immutable', table: 'command_receipt' },
+      {
+        name: 'command_receipt_evidence_is_bound',
+        table: 'command_receipt',
+      },
+    ],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [
+      {
+        argumentCount: 0,
+        name: 'reject_authoritative_history_mutation',
+        sql: '()',
+      },
+    ],
+    migrationId: '0002_world_v2_command_event_ledger',
+    tables: ['authoritative_event', 'command_submission', 'world_head'],
+    triggers: [
+      {
+        name: 'authoritative_event_is_immutable',
+        table: 'authoritative_event',
+      },
+      { name: 'command_submission_is_immutable', table: 'command_submission' },
+    ],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [],
+    migrationId: '0001_world_v2_namespace',
+    tables: ['schema_release'],
+    triggers: [],
+  }),
+]);
+const RUN_TABLES_REVERSE = Object.freeze([
+  ...RUN_MIGRATION_TEARDOWN.flatMap((migration) => migration.tables),
+  RUN_MARKER_TABLE,
+]);
+const RUN_FUNCTIONS_REVERSE = Object.freeze(
+  RUN_MIGRATION_TEARDOWN.flatMap((migration) => migration.functions),
+);
+const RUN_TRIGGERS_REVERSE = Object.freeze(
+  RUN_MIGRATION_TEARDOWN.flatMap((migration) => migration.triggers),
+);
+const RUN_POLICIES = Object.freeze([
+  { name: 'v09_staging_owner_world_head', table: 'world_head' },
+  { name: 'v09_staging_owner_lease', table: 'world_writer_lease' },
+  { name: 'v09_staging_worker_world_head', table: 'world_head' },
+  { name: 'v09_staging_worker_lease_select', table: 'world_writer_lease' },
+  { name: 'v09_staging_worker_lease_insert', table: 'world_writer_lease' },
+  { name: 'v09_staging_worker_lease_update', table: 'world_writer_lease' },
+  { name: 'v09_staging_reader_world_head', table: 'world_head' },
+  { name: 'v09_staging_reader_lease', table: 'world_writer_lease' },
+]);
 
 function identifier(value) {
   return `"${value.replaceAll('"', '""')}"`;
@@ -32,6 +211,24 @@ function identifier(value) {
 
 function failed(message) {
   throw new Error(`V09 dedicated staging runner failed closed: ${message}`);
+}
+
+function stagedFailure(stage) {
+  const error = new Error(
+    `V09 dedicated staging runner failed closed: ${stage}`,
+  );
+  error.stage = stage;
+  return error;
+}
+
+function failStage(stage) {
+  throw stagedFailure(stage);
+}
+
+function errorStage(error, fallback) {
+  return error && typeof error === 'object' && typeof error.stage === 'string'
+    ? error.stage
+    : fallback;
 }
 
 function rows(result) {
@@ -44,7 +241,9 @@ function asText(value) {
 
 function publicEvidence(approval, runId) {
   return {
+    commit_acknowledgement: { status: 'NOT_RUN' },
     cleanup: { markerBound: false, status: 'NOT_ATTEMPTED' },
+    durable_evidence: { status: 'NOT_ATTEMPTED' },
     marker: {
       namespace: approval.disposable_namespace,
       roles: { ...approval.roles },
@@ -61,7 +260,9 @@ function publicEvidence(approval, runId) {
 
 function publicFailure(stage) {
   return {
+    commit_acknowledgement: { status: 'NOT_RUN' },
     cleanup: { markerBound: false, status: 'NOT_ATTEMPTED' },
+    durable_evidence: { status: 'NOT_ATTEMPTED' },
     failure: { stage },
     migrations: [],
     secret_redacted: true,
@@ -69,6 +270,94 @@ function publicFailure(stage) {
     status: 'FAIL_CLOSED',
     steps: [],
   };
+}
+
+function redactDurableEvidence(value, key = '') {
+  if (
+    /(?:connection|credential|password|secret|database[_-]?url|service[_-]?key|anon[_-]?key|publishable[_-]?key)/iu.test(
+      key,
+    ) ||
+    (typeof value === 'string' && /postgres(?:ql)?:\/\//iu.test(value))
+  ) {
+    return '[REDACTED]';
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) => redactDurableEvidence(entry));
+  }
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([entryKey, entryValue]) => [
+        entryKey,
+        redactDurableEvidence(entryValue, entryKey),
+      ]),
+    );
+  }
+  return value;
+}
+
+async function safeRemove(pathname) {
+  await unlink(pathname).catch((error) => {
+    if (!(error && typeof error === 'object' && error.code === 'ENOENT')) {
+      throw error;
+    }
+  });
+}
+
+export async function writeV09StagingEvidence({ evidence, evidencePath }) {
+  if (
+    typeof evidencePath !== 'string' ||
+    !path.isAbsolute(evidencePath) ||
+    path.resolve(evidencePath) !== evidencePath ||
+    path.extname(evidencePath) !== '.json'
+  ) {
+    failStage(DURABLE_EVIDENCE_WRITE_FAILED);
+  }
+  const baseName = path.basename(evidencePath);
+  const parent = await realpath(path.dirname(evidencePath));
+  const destination = path.join(parent, baseName);
+  let existing;
+  try {
+    existing = await lstat(destination);
+  } catch (error) {
+    if (!(error && typeof error === 'object' && error.code === 'ENOENT')) {
+      throw error;
+    }
+  }
+  if (existing) failStage(DURABLE_EVIDENCE_WRITE_FAILED);
+
+  const temporary = path.join(parent, `.${baseName}.${randomUUID()}.tmp`);
+  let handle;
+  let parentHandle;
+  let destinationCreated = false;
+  try {
+    handle = await open(temporary, 'wx', 0o600);
+    const durable = redactDurableEvidence({
+      ...evidence,
+      durable_evidence: { status: 'PASS' },
+    });
+    await handle.writeFile(`${JSON.stringify(durable, null, 2)}\n`, 'utf8');
+    await handle.sync();
+    await handle.close();
+    handle = undefined;
+    await rename(temporary, destination);
+    destinationCreated = true;
+    parentHandle = await open(parent, 'r');
+    await parentHandle.sync();
+  } catch (error) {
+    if (destinationCreated) {
+      await safeRemove(destination).catch(() => undefined);
+    }
+    if (errorStage(error, '') === DURABLE_EVIDENCE_WRITE_FAILED) throw error;
+    failStage(DURABLE_EVIDENCE_WRITE_FAILED);
+  } finally {
+    if (handle) {
+      await handle.close().catch(() => undefined);
+    }
+    if (parentHandle) {
+      await parentHandle.close().catch(() => undefined);
+    }
+    await safeRemove(temporary).catch(() => undefined);
+  }
 }
 
 async function readLinkedProjectRef() {
@@ -152,7 +441,9 @@ export function createPgStagingClient({ connectionString }) {
       await client.end();
     },
     async execute({ text, values }) {
-      return client.query(text, values);
+      return values.length === 0
+        ? client.query(text)
+        : client.query(text, values);
     },
   });
 }
@@ -259,7 +550,9 @@ async function provisionMarker(client, approval, runId) {
        target_fingerprint text not null,
        migration_owner text not null,
        worker_role text not null,
-       reader_role text not null
+       reader_role text not null,
+       acknowledgement_state text not null default 'PENDING'
+         check (acknowledgement_state in ('PENDING', 'COMMITTED'))
      )`,
   );
   await command(
@@ -525,21 +818,53 @@ async function runLeaseEvidence(client, approval) {
   );
 }
 
-async function createCrashClient(clientFactory, connectionString) {
+async function createCrashClient(
+  clientFactory,
+  connectionString,
+  approval,
+  label,
+) {
   const client = await clientFactory({ connectionString });
-  await client.connect();
-  return client;
+  try {
+    await client.connect();
+    const identity = await command(
+      client,
+      `${label}_VERIFY_CONNECTED_ADMIN`,
+      'select current_user as current_user',
+    );
+    assertRows(
+      identity,
+      ([record]) => record?.current_user === approval.admin_database_role,
+      'crash protocol connection differs from the owner-approved admin role',
+    );
+    return client;
+  } catch (error) {
+    await client.end().catch(() => undefined);
+    throw error;
+  }
 }
 
-async function runCrashProtocol(
+function sleep(milliseconds) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
+}
+
+async function runCrashBeforeCommit(
   mainClient,
   clientFactory,
   connectionString,
   approval,
+  evidence,
 ) {
   const schema = identifier(approval.disposable_namespace);
   const worker = approval.roles.worker;
-  const beforeCommit = await createCrashClient(clientFactory, connectionString);
+  const beforeCommit = await createCrashClient(
+    clientFactory,
+    connectionString,
+    approval,
+    'CRASH_BEFORE',
+  );
   try {
     await withRole(beforeCommit, worker, 'CRASH_BEFORE', async () => {
       await command(beforeCommit, 'CRASH_BEFORE_BEGIN', 'begin');
@@ -562,9 +887,31 @@ async function runCrashProtocol(
       );
     });
   } finally {
-    // No commit: closing this client is the connection-loss / rollback protocol.
+    // No commit: closing this client is the rollback branch of recovery.
     await beforeCommit.end();
   }
+  const rolledBackMarker = await command(
+    mainClient,
+    'CRASH_BEFORE_RECOVER_EXACT_MARKER',
+    `select acknowledgement_state,
+            target_fingerprint,
+            migration_owner,
+            worker_role,
+            reader_role
+       from ${schema}.${identifier(RUN_MARKER_TABLE)}
+      where run_id = $1 for update`,
+    [evidence.marker.run_id],
+  );
+  assertRows(
+    rolledBackMarker,
+    ([record]) =>
+      record?.acknowledgement_state === 'PENDING' &&
+      record?.target_fingerprint === approval.target_fingerprint &&
+      record?.migration_owner === approval.roles.migration_owner &&
+      record?.worker_role === worker &&
+      record?.reader_role === approval.roles.reader,
+    'pre-commit recovery marker is not the exact rolled-back run',
+  );
   await withRole(mainClient, worker, 'CRASH_BEFORE_RECOVERY', async () => {
     assertLease(
       await command(
@@ -584,32 +931,208 @@ async function runCrashProtocol(
       'connection loss before commit did not roll back the lease',
     );
   });
+  evidence.commit_acknowledgement.rollback_before_commit = 'PASS';
+}
 
-  const afterCommit = await createCrashClient(clientFactory, connectionString);
-  try {
-    await withRole(afterCommit, worker, 'CRASH_AFTER', async () => {
-      assertLease(
-        await command(
-          afterCommit,
-          'CRASH_AFTER_ACQUIRE',
-          `select fencing_token::text as fencing_token, acquisition_kind
-             from ${schema}.acquire_world_writer_lease($1, $2, $3::timestamptz, $4::bigint)`,
-          [
-            'WORLD_STAGING_CRASH_AFTER',
-            'WORKER_1',
-            '2026-09-11T00:00:00.000Z',
-            '1000',
-          ],
-        ),
-        1,
-        'ACQUIRED',
-        'post-commit crash case did not acquire fence 1',
-      );
-    });
-  } finally {
-    // The acquisition committed in autocommit mode; only acknowledgement was lost.
-    await afterCommit.end();
+async function waitForPostCommitSleep(recoveryClient, backendPid) {
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const observation = await command(
+      recoveryClient,
+      'ACK_OBSERVE_POST_COMMIT_SLEEP',
+      `select pid::text as backend_pid,
+              state,
+              backend_type,
+              wait_event_type,
+              wait_event,
+              query like $2 as matching_ack_sleep
+         from pg_stat_activity
+        where pid = $1::integer`,
+      [backendPid, `%${ACK_SLEEP_MARKER}%`],
+    );
+    const record = rows(observation)[0];
+    if (
+      asText(record?.backend_pid) === asText(backendPid) &&
+      record?.backend_type === 'client backend' &&
+      record?.state === 'active' &&
+      record?.wait_event_type === 'Timeout' &&
+      record?.wait_event === 'PgSleep' &&
+      record?.matching_ack_sleep === true
+    ) {
+      return;
+    }
+    await sleep(25);
   }
+  failStage(CRASH_PROTOCOL_UNAVAILABLE);
+}
+
+async function runCommitAcknowledgementUnknown(
+  clientFactory,
+  connectionString,
+  approval,
+  evidence,
+) {
+  const schema = identifier(approval.disposable_namespace);
+  const { migration_owner: owner, worker } = approval.roles;
+  let acknowledgementClient;
+  let acknowledgementPromise;
+  let recoveryClient;
+  try {
+    acknowledgementClient = await createCrashClient(
+      clientFactory,
+      connectionString,
+      approval,
+      'ACK_PRIMARY',
+    );
+    const backend = await command(
+      acknowledgementClient,
+      'ACK_PRIMARY_BACKEND_PID',
+      'select pg_backend_pid()::text as backend_pid',
+    );
+    const backendPid = asText(rows(backend)[0]?.backend_pid);
+    if (!/^[1-9][0-9]*$/u.test(backendPid)) {
+      failStage(CRASH_PROTOCOL_UNAVAILABLE);
+    }
+    await command(acknowledgementClient, 'ACK_BEGIN', 'begin');
+    await command(
+      acknowledgementClient,
+      'ACK_SET_MIGRATION_OWNER',
+      `set local role ${identifier(owner)}`,
+    );
+    const marker = await command(
+      acknowledgementClient,
+      'ACK_MARK_COMMIT_INTENT',
+      `update ${schema}.${identifier(RUN_MARKER_TABLE)}
+          set acknowledgement_state = 'COMMITTED'
+        where run_id = $1
+          and target_fingerprint = $2
+          and migration_owner = $3
+        returning acknowledgement_state`,
+      [evidence.marker.run_id, approval.target_fingerprint, owner],
+    );
+    assertRows(
+      marker,
+      ([record]) => record?.acknowledgement_state === 'COMMITTED',
+      'acknowledgement marker did not bind the current disposable run',
+    );
+    await command(
+      acknowledgementClient,
+      'ACK_SET_WORKER',
+      `set local role ${identifier(worker)}`,
+    );
+    assertLease(
+      await command(
+        acknowledgementClient,
+        'ACK_ACQUIRE_LEASE',
+        `select fencing_token::text as fencing_token, acquisition_kind
+           from ${schema}.acquire_world_writer_lease($1, $2, $3::timestamptz, $4::bigint)`,
+        [
+          'WORLD_STAGING_CRASH_AFTER',
+          'WORKER_1',
+          '2026-09-11T00:00:00.000Z',
+          '1000',
+        ],
+      ),
+      1,
+      'ACQUIRED',
+      'acknowledgement transaction did not acquire fence 1',
+    );
+    acknowledgementPromise = command(
+      acknowledgementClient,
+      'ACK_UNKNOWN_COMMIT_AND_SLEEP',
+      `commit; /* ${ACK_SLEEP_MARKER} */ select pg_sleep(${ACK_SLEEP_SECONDS})`,
+    );
+    void acknowledgementPromise.catch(() => undefined);
+
+    recoveryClient = await createCrashClient(
+      clientFactory,
+      connectionString,
+      approval,
+      'ACK_RECOVERY',
+    );
+    await waitForPostCommitSleep(recoveryClient, backendPid);
+    const termination = await command(
+      recoveryClient,
+      'ACK_TERMINATE_EXACT_BACKEND',
+      'select pg_terminate_backend($1::integer) as terminated',
+      [backendPid],
+    );
+    assertRows(
+      termination,
+      ([record]) => record?.terminated === true,
+      'exact post-commit backend could not be terminated',
+    );
+    const acknowledgementLost = await acknowledgementPromise.then(
+      () => false,
+      () => true,
+    );
+    if (!acknowledgementLost) failStage(CRASH_PROTOCOL_UNAVAILABLE);
+
+    const recovered = await command(
+      recoveryClient,
+      'ACK_RECOVER_EXACT_MARKER',
+      `select acknowledgement_state,
+              target_fingerprint,
+              migration_owner,
+              worker_role,
+              reader_role
+         from ${schema}.${identifier(RUN_MARKER_TABLE)}
+        where run_id = $1 for update`,
+      [evidence.marker.run_id],
+    );
+    assertRows(
+      recovered,
+      ([record]) =>
+        record?.acknowledgement_state === 'COMMITTED' &&
+        record?.target_fingerprint === approval.target_fingerprint &&
+        record?.migration_owner === owner &&
+        record?.worker_role === worker &&
+        record?.reader_role === approval.roles.reader,
+      'post-commit recovery marker is not the exact committed run',
+    );
+    evidence.commit_acknowledgement = {
+      outcome: 'COMMITTED_ACKNOWLEDGEMENT_LOST',
+      rollback_before_commit:
+        evidence.commit_acknowledgement.rollback_before_commit,
+      status: 'PASS',
+    };
+  } catch (error) {
+    if (errorStage(error, '') === CRASH_PROTOCOL_UNAVAILABLE) throw error;
+    failStage(CRASH_PROTOCOL_UNAVAILABLE);
+  } finally {
+    if (recoveryClient) {
+      await recoveryClient.end().catch(() => undefined);
+    }
+    if (acknowledgementClient) {
+      await acknowledgementClient.end().catch(() => undefined);
+    }
+    if (acknowledgementPromise) {
+      await acknowledgementPromise.catch(() => undefined);
+    }
+  }
+}
+
+async function runCrashProtocol(
+  mainClient,
+  clientFactory,
+  connectionString,
+  approval,
+  evidence,
+) {
+  const schema = identifier(approval.disposable_namespace);
+  const worker = approval.roles.worker;
+  await runCrashBeforeCommit(
+    mainClient,
+    clientFactory,
+    connectionString,
+    approval,
+    evidence,
+  );
+  await runCommitAcknowledgementUnknown(
+    clientFactory,
+    connectionString,
+    approval,
+    evidence,
+  );
   await withRole(mainClient, worker, 'CRASH_AFTER_HELD', () =>
     expectRejected(
       mainClient,
@@ -660,11 +1183,212 @@ async function runCrashProtocol(
   );
 }
 
+function cleanupInventoryKey(record) {
+  if (typeof record?.inventory_key === 'string') {
+    return record.inventory_key;
+  }
+  return [record?.kind, record?.name, record?.detail, record?.owner]
+    .map((value) => asText(value))
+    .join('|');
+}
+
+export function expectedV09StagingCleanupInventory(approval) {
+  const owner = approval.roles.migration_owner;
+  return [
+    ...RUN_TABLES_REVERSE.map((name) => `RELATION|${name}|r|${owner}`),
+    ...RUN_FUNCTIONS_REVERSE.map(
+      ({ argumentCount, name }) => `FUNCTION|${name}|${argumentCount}|${owner}`,
+    ),
+    ...RUN_TRIGGERS_REVERSE.map(
+      ({ name, table }) => `TRIGGER|${name}|${table}|${owner}`,
+    ),
+    ...RUN_POLICIES.map(
+      ({ name, table }) => `POLICY|${name}|${table}|${owner}`,
+    ),
+  ].sort();
+}
+
+async function verifyExactRunInventory(client, approval) {
+  const inventory = await command(
+    client,
+    'CLEANUP_VERIFY_EXACT_ALLOWLIST',
+    `select 'RELATION' as kind,
+            c.relname as name,
+            c.relkind::text as detail,
+            pg_get_userbyid(c.relowner) as owner
+       from pg_class c
+       join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = $1
+        and c.relkind in ('r', 'p', 'v', 'm', 'S', 'f')
+     union all
+     select 'FUNCTION' as kind,
+            p.proname as name,
+            p.pronargs::text as detail,
+            pg_get_userbyid(p.proowner) as owner
+       from pg_proc p
+       join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = $1
+     union all
+     select 'TRIGGER' as kind,
+            t.tgname as name,
+            c.relname as detail,
+            pg_get_userbyid(c.relowner) as owner
+       from pg_trigger t
+       join pg_class c on c.oid = t.tgrelid
+       join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = $1 and not t.tgisinternal
+     union all
+     select 'POLICY' as kind,
+            p.polname as name,
+            c.relname as detail,
+            pg_get_userbyid(c.relowner) as owner
+       from pg_policy p
+       join pg_class c on c.oid = p.polrelid
+       join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = $1`,
+    [approval.disposable_namespace],
+  );
+  const actual = rows(inventory).map(cleanupInventoryKey).sort();
+  const expected = expectedV09StagingCleanupInventory(approval);
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    failStage(CLEANUP_INCOMPLETE);
+  }
+}
+
+async function verifyNoUnexpectedStandaloneObjects(client, approval) {
+  const standaloneTypes = await command(
+    client,
+    'CLEANUP_VERIFY_NO_STANDALONE_TYPES',
+    `select t.typname
+      from pg_type t
+       join pg_namespace n on n.oid = t.typnamespace
+      where n.nspname = $1
+        and t.typrelid = 0
+        and t.typelem = 0`,
+    [approval.disposable_namespace],
+  );
+  if (rows(standaloneTypes).length !== 0) failStage(CLEANUP_INCOMPLETE);
+  const operators = await command(
+    client,
+    'CLEANUP_VERIFY_NO_SCHEMA_OPERATORS',
+    `select o.oprname
+       from pg_operator o
+       join pg_namespace n on n.oid = o.oprnamespace
+      where n.nspname = $1`,
+    [approval.disposable_namespace],
+  );
+  if (rows(operators).length !== 0) failStage(CLEANUP_INCOMPLETE);
+}
+
+async function verifyExactCleanupRoleBoundary(client, approval) {
+  const roles = Object.values(approval.roles);
+  const attributes = await command(
+    client,
+    'CLEANUP_VERIFY_EXACT_ROLE_ATTRIBUTES',
+    `select rolname,
+            rolcanlogin,
+            rolsuper,
+            rolcreaterole,
+            rolcreatedb,
+            rolinherit,
+            rolreplication,
+            rolbypassrls
+       from pg_roles
+      where rolname = any($1::text[])
+      order by rolname`,
+    [roles],
+  );
+  if (
+    rows(attributes).length !== roles.length ||
+    rows(attributes).some(
+      (record) =>
+        !roles.includes(record?.rolname) ||
+        record?.rolcanlogin !== false ||
+        record?.rolsuper !== false ||
+        record?.rolcreaterole !== false ||
+        record?.rolcreatedb !== false ||
+        record?.rolinherit !== false ||
+        record?.rolreplication !== false ||
+        record?.rolbypassrls !== false,
+    )
+  ) {
+    failStage(CLEANUP_INCOMPLETE);
+  }
+  const memberships = await command(
+    client,
+    'CLEANUP_VERIFY_EXACT_ROLE_MEMBERSHIPS',
+    `select granted.rolname as role_name, member.rolname as member_name
+       from pg_auth_members membership
+       join pg_roles granted on granted.oid = membership.roleid
+       join pg_roles member on member.oid = membership.member
+      where granted.rolname = any($1::text[])
+         or member.rolname = any($1::text[])
+      order by granted.rolname, member.rolname`,
+    [roles],
+  );
+  if (
+    rows(memberships).length !== roles.length ||
+    new Set(rows(memberships).map((record) => record?.role_name)).size !==
+      roles.length ||
+    rows(memberships).some(
+      (record) =>
+        !roles.includes(record?.role_name) ||
+        record?.member_name !== approval.admin_database_role,
+    )
+  ) {
+    failStage(CLEANUP_INCOMPLETE);
+  }
+}
+
+async function verifyNoRoleResidue(client, approval) {
+  const residue = await command(
+    client,
+    'CLEANUP_VERIFY_NO_ROLE_RESIDUE',
+    `select role.rolname,
+            dependency.classid::regclass::text as class_name,
+            dependency.objid::text as object_id,
+            dependency.deptype
+       from pg_shdepend dependency
+       join pg_roles role on role.oid = dependency.refobjid
+      where role.rolname = any($1::text[])
+      order by role.rolname, class_name, object_id`,
+    [Object.values(approval.roles)],
+  );
+  if (rows(residue).length !== 0) failStage(CLEANUP_INCOMPLETE);
+}
+
+async function verifyNoRunResidue(client, approval) {
+  const namespace = await command(
+    client,
+    'CLEANUP_VERIFY_NAMESPACE_ABSENT',
+    'select nspname from pg_namespace where nspname = $1',
+    [approval.disposable_namespace],
+  );
+  if (rows(namespace).length !== 0) failStage(CLEANUP_INCOMPLETE);
+  const roles = await command(
+    client,
+    'CLEANUP_VERIFY_ROLES_ABSENT',
+    'select rolname from pg_roles where rolname = any($1::text[])',
+    [Object.values(approval.roles)],
+  );
+  if (rows(roles).length !== 0) failStage(CLEANUP_INCOMPLETE);
+}
+
 async function cleanupMarkedBoundary(client, approval, evidence) {
   const schema = identifier(approval.disposable_namespace);
   const { migration_owner: owner, reader, worker } = approval.roles;
   evidence.cleanup.status = 'RUNNING';
   try {
+    const identity = await command(
+      client,
+      'CLEANUP_VERIFY_CONNECTED_ADMIN',
+      'select current_user as current_user',
+    );
+    assertRows(
+      identity,
+      ([record]) => record?.current_user === approval.admin_database_role,
+      'cleanup connection differs from the owner-approved admin role',
+    );
     await command(client, 'CLEANUP_BEGIN', 'begin');
     await command(
       client,
@@ -674,7 +1398,12 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
     const marker = await command(
       client,
       'CLEANUP_VERIFY_MARKER',
-      `select run_id, target_fingerprint, migration_owner, worker_role, reader_role
+      `select run_id,
+              target_fingerprint,
+              migration_owner,
+              worker_role,
+              reader_role,
+              acknowledgement_state
          from ${schema}.${identifier(RUN_MARKER_TABLE)}
         where run_id = $1 for update`,
       [evidence.marker.run_id],
@@ -682,10 +1411,12 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
     assertRows(
       marker,
       ([record]) =>
+        record?.run_id === evidence.marker.run_id &&
         record?.target_fingerprint === approval.target_fingerprint &&
         record?.migration_owner === owner &&
         record?.worker_role === worker &&
-        record?.reader_role === reader,
+        record?.reader_role === reader &&
+        ['PENDING', 'COMMITTED'].includes(record?.acknowledgement_state),
       'cleanup marker does not bind this exact disposable run',
     );
     const ownership = await command(
@@ -721,6 +1452,9 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
         record?.schema_owner === owner && record?.all_objects_owned === true,
       'cleanup refuses a namespace that includes non-run-owned objects',
     );
+    await verifyExactRunInventory(client, approval);
+    await verifyNoUnexpectedStandaloneObjects(client, approval);
+    await verifyExactCleanupRoleBoundary(client, approval);
     const externalDependents = await command(
       client,
       'CLEANUP_VERIFY_NO_EXTERNAL_DEPENDENTS',
@@ -796,6 +1530,16 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
            from pg_depend d
            join run_objects r
              on r.class_id = d.refclassid and r.object_id = d.refobjid
+           join pg_operator op
+             on d.classid = 'pg_operator'::regclass and op.oid = d.objid
+           join pg_namespace n on n.oid = op.oprnamespace
+          where n.nspname <> $1 and n.nspname <> 'information_schema'
+            and n.nspname !~ '^pg_'
+         union
+         select distinct n.nspname as namespace
+           from pg_depend d
+           join run_objects r
+             on r.class_id = d.refclassid and r.object_id = d.refobjid
            join pg_constraint c
              on d.classid = 'pg_constraint'::regclass and c.oid = d.objid
            join pg_class relation on relation.oid = c.conrelid
@@ -834,12 +1578,60 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
       externalDependents,
       ([record]) =>
         Array.isArray(record?.namespaces) && record.namespaces.length === 0,
-      'cleanup refuses to cascade into an object outside this run namespace',
+      'cleanup refuses an external dependency outside this run namespace',
+    );
+    for (const policy of [...RUN_POLICIES].reverse()) {
+      await command(
+        client,
+        `CLEANUP_DROP_POLICY_${policy.name.toUpperCase()}`,
+        `drop policy ${identifier(policy.name)} on ${schema}.${identifier(policy.table)} restrict`,
+      );
+    }
+    const migrationTeardown = async (migration) => {
+      for (const trigger of migration.triggers) {
+        await command(
+          client,
+          `CLEANUP_${migration.migrationId.toUpperCase()}_DROP_TRIGGER_${trigger.name.toUpperCase()}`,
+          `drop trigger ${identifier(trigger.name)} on ${schema}.${identifier(trigger.table)} restrict`,
+        );
+      }
+      for (const routine of migration.functions) {
+        await command(
+          client,
+          `CLEANUP_${migration.migrationId.toUpperCase()}_DROP_FUNCTION_${routine.name.toUpperCase()}`,
+          `drop function ${schema}.${identifier(routine.name)}${routine.sql} restrict`,
+        );
+      }
+      for (const table of migration.tables) {
+        await command(
+          client,
+          `CLEANUP_${migration.migrationId.toUpperCase()}_DROP_TABLE_${table.toUpperCase()}`,
+          `drop table ${schema}.${identifier(table)} restrict`,
+        );
+      }
+      for (const constraint of migration.constraints) {
+        await command(
+          client,
+          `CLEANUP_${migration.migrationId.toUpperCase()}_DROP_CONSTRAINT_${constraint.name.toUpperCase()}`,
+          `alter table ${schema}.${identifier(constraint.table)} drop constraint ${identifier(constraint.name)} restrict`,
+        );
+      }
+    };
+    for (const migration of RUN_MIGRATION_TEARDOWN.slice(0, -1)) {
+      await migrationTeardown(migration);
+    }
+    await command(
+      client,
+      'CLEANUP_RUN_MARKER_DROP_TABLE_RESTRICT',
+      `drop table ${schema}.${identifier(RUN_MARKER_TABLE)} restrict`,
+    );
+    await migrationTeardown(
+      RUN_MIGRATION_TEARDOWN[RUN_MIGRATION_TEARDOWN.length - 1],
     );
     await command(
       client,
-      'CLEANUP_DROP_EXACT_SCHEMA',
-      `drop schema ${schema} cascade`,
+      'CLEANUP_DROP_EXACT_SCHEMA_RESTRICT',
+      `drop schema ${schema} restrict`,
     );
     await command(client, 'CLEANUP_RESET_ROLE', 'reset role');
     for (const role of [owner, worker, reader]) {
@@ -849,22 +1641,40 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
         `revoke ${identifier(role)} from current_user`,
       );
     }
+    await verifyNoRoleResidue(client, approval);
     for (const role of [owner, worker, reader]) {
+      // PostgreSQL DROP ROLE has no CASCADE form: outstanding dependencies fail.
       await command(
         client,
-        `CLEANUP_DROP_ROLE_${role.toUpperCase()}`,
+        `CLEANUP_DROP_ROLE_${role.toUpperCase()}_RESTRICT`,
         `drop role ${identifier(role)}`,
       );
     }
+    await verifyNoRunResidue(client, approval);
     await command(client, 'CLEANUP_COMMIT', 'commit');
     evidence.cleanup.status = 'PASS';
-  } catch (error) {
+  } catch {
     await command(client, 'CLEANUP_ROLLBACK', 'rollback').catch(
       () => undefined,
     );
-    evidence.cleanup.status = 'FAIL';
-    throw error;
+    evidence.cleanup.status = CLEANUP_INCOMPLETE;
+    failStage(CLEANUP_INCOMPLETE);
   }
+}
+
+async function persistDurableEvidence({ approval, evidence, writeEvidence }) {
+  try {
+    await writeEvidence({
+      evidence,
+      evidencePath: approval.evidence_output_path,
+    });
+    evidence.durable_evidence = { status: 'PASS' };
+  } catch {
+    evidence.durable_evidence = { status: 'FAIL' };
+    evidence.status = 'FAIL_CLOSED';
+    evidence.failure = { stage: DURABLE_EVIDENCE_WRITE_FAILED };
+  }
+  return evidence;
 }
 
 /**
@@ -879,6 +1689,7 @@ export async function runV09DedicatedStagingEvidence({
   loadLinkedProjectRef = readLinkedProjectRef,
   loadMigrationChain = loadV09StagingMigrationChain,
   runId = randomUUID(),
+  writeEvidence = writeV09StagingEvidence,
 }) {
   let authorized;
   try {
@@ -888,6 +1699,7 @@ export async function runV09DedicatedStagingEvidence({
   }
 
   const evidence = publicEvidence(authorized.approval, runId);
+  let canRun = true;
   try {
     await audited(evidence, 'LINKED_PROJECT_PRECHECK', async () => {
       assertNoLinkedSupabaseProject(await loadLinkedProjectRef());
@@ -895,16 +1707,22 @@ export async function runV09DedicatedStagingEvidence({
   } catch {
     evidence.status = 'FAIL_CLOSED';
     evidence.failure = { stage: 'LINKED_PROJECT_PRECHECK' };
-    return evidence;
+    canRun = false;
   }
 
   let migrations;
-  try {
-    migrations = await audited(evidence, 'LOCAL_MANIFEST', loadMigrationChain);
-  } catch {
-    evidence.status = 'FAIL_CLOSED';
-    evidence.failure = { stage: 'LOCAL_MANIFEST' };
-    return evidence;
+  if (canRun) {
+    try {
+      migrations = await audited(
+        evidence,
+        'LOCAL_MANIFEST',
+        loadMigrationChain,
+      );
+    } catch {
+      evidence.status = 'FAIL_CLOSED';
+      evidence.failure = { stage: 'LOCAL_MANIFEST' };
+      canRun = false;
+    }
   }
 
   let client;
@@ -913,134 +1731,143 @@ export async function runV09DedicatedStagingEvidence({
   let transactionCommitted = false;
   let transactionOpen = false;
   let markerWritten = false;
-  try {
-    client = await audited(evidence, 'CREATE_CLIENT', () =>
-      clientFactory({ connectionString: authorized.connectionString }),
-    );
-    await audited(evidence, 'CONNECT', () => client.connect());
-    await audited(evidence, 'VERIFY_CONNECTED_ADMIN', async () => {
-      const identity = await command(
-        client,
-        'VERIFY_CONNECTED_ADMIN_ROLE',
-        'select current_user as current_user',
+  if (canRun) {
+    try {
+      client = await audited(evidence, 'CREATE_CLIENT', () =>
+        clientFactory({ connectionString: authorized.connectionString }),
       );
-      assertRows(
-        identity,
-        ([record]) =>
-          record?.current_user === authorized.approval.admin_database_role,
-        'connected database role differs from the owner-approved admin role',
+      await audited(evidence, 'CONNECT', () => client.connect());
+      await audited(evidence, 'VERIFY_CONNECTED_ADMIN', async () => {
+        const identity = await command(
+          client,
+          'VERIFY_CONNECTED_ADMIN_ROLE',
+          'select current_user as current_user',
+        );
+        assertRows(
+          identity,
+          ([record]) =>
+            record?.current_user === authorized.approval.admin_database_role,
+          'connected database role differs from the owner-approved admin role',
+        );
+      });
+      await audited(evidence, 'PRISTINE_BOUNDARY', () =>
+        preflightPristine(client, authorized.approval),
       );
-    });
-    await audited(evidence, 'PRISTINE_BOUNDARY', () =>
-      preflightPristine(client, authorized.approval),
-    );
-    await audited(evidence, 'BEGIN_TRANSACTION', async () => {
-      await command(client, 'BEGIN_EVIDENCE_TRANSACTION', 'begin');
-      transactionOpen = true;
-      await command(
-        client,
-        'SET_LOCK_TIMEOUT',
-        "set local lock_timeout = '5s'",
+      await audited(evidence, 'BEGIN_TRANSACTION', async () => {
+        await command(client, 'BEGIN_EVIDENCE_TRANSACTION', 'begin');
+        transactionOpen = true;
+        await command(
+          client,
+          'SET_LOCK_TIMEOUT',
+          "set local lock_timeout = '5s'",
+        );
+        await command(
+          client,
+          'SET_STATEMENT_TIMEOUT',
+          "set local statement_timeout = '30s'",
+        );
+      });
+      await audited(evidence, 'PROVISION_MARKER', async () => {
+        await provisionMarker(client, authorized.approval, runId);
+        markerWritten = true;
+        evidence.cleanup.markerBound = true;
+      });
+      await audited(evidence, 'APPLY_MIGRATIONS', () =>
+        applyMigrations(client, authorized.approval, migrations, evidence),
       );
-      await command(
-        client,
-        'SET_STATEMENT_TIMEOUT',
-        "set local statement_timeout = '30s'",
+      await audited(evidence, 'LEASE_EVIDENCE', () =>
+        runLeaseEvidence(client, authorized.approval),
       );
-    });
-    await audited(evidence, 'PROVISION_MARKER', async () => {
-      await provisionMarker(client, authorized.approval, runId);
-      markerWritten = true;
-      evidence.cleanup.markerBound = true;
-    });
-    await audited(evidence, 'APPLY_MIGRATIONS', () =>
-      applyMigrations(client, authorized.approval, migrations, evidence),
-    );
-    await audited(evidence, 'LEASE_EVIDENCE', () =>
-      runLeaseEvidence(client, authorized.approval),
-    );
-    await audited(evidence, 'OWNERSHIP_GRANTS_RLS', () =>
-      configureOwnershipGrantsAndRls(client, authorized.approval),
-    );
-    await audited(evidence, 'COMMIT_TRANSACTION', async () => {
-      commitAttempted = true;
-      await command(client, 'COMMIT_EVIDENCE_TRANSACTION', 'commit');
-      transactionOpen = false;
-      transactionCommitted = true;
-      cleanupRequired = markerWritten;
-    });
-    await audited(evidence, 'ROLE_BOUNDARY_EVIDENCE', () =>
-      verifyRoleBoundaries(client, authorized.approval),
-    );
-    await audited(evidence, 'CRASH_CONNECTION_LOSS', () =>
-      runCrashProtocol(
-        client,
-        clientFactory,
-        authorized.connectionString,
-        authorized.approval,
-      ),
-    );
-    evidence.status = 'PASS';
-  } catch {
-    evidence.status = 'FAIL_CLOSED';
-    evidence.failure = {
-      stage: evidence.steps.at(-1)?.id ?? 'UNKNOWN',
-    };
-    if (client && transactionOpen) {
-      const rollbackConfirmed = await command(
-        client,
-        'ROLLBACK_AFTER_FAILURE',
-        'rollback',
-      ).then(
-        () => true,
-        () => false,
+      await audited(evidence, 'OWNERSHIP_GRANTS_RLS', () =>
+        configureOwnershipGrantsAndRls(client, authorized.approval),
       );
-      if (markerWritten && !commitAttempted && rollbackConfirmed) {
-        evidence.cleanup.status = 'TRANSACTION_ROLLED_BACK';
-      }
-      if (markerWritten && (!rollbackConfirmed || commitAttempted)) {
+      await audited(evidence, 'COMMIT_TRANSACTION', async () => {
+        commitAttempted = true;
+        await command(client, 'COMMIT_EVIDENCE_TRANSACTION', 'commit');
+        transactionOpen = false;
+        transactionCommitted = true;
+        cleanupRequired = markerWritten;
+      });
+      await audited(evidence, 'ROLE_BOUNDARY_EVIDENCE', () =>
+        verifyRoleBoundaries(client, authorized.approval),
+      );
+      await audited(evidence, 'CRASH_CONNECTION_LOSS', () =>
+        runCrashProtocol(
+          client,
+          clientFactory,
+          authorized.connectionString,
+          authorized.approval,
+          evidence,
+        ),
+      );
+      evidence.status = 'PASS';
+    } catch (error) {
+      evidence.status = 'FAIL_CLOSED';
+      evidence.failure = {
+        stage: errorStage(error, evidence.steps.at(-1)?.id ?? 'UNKNOWN'),
+      };
+      if (client && transactionOpen) {
+        const rollbackConfirmed = await command(
+          client,
+          'ROLLBACK_AFTER_FAILURE',
+          'rollback',
+        ).then(
+          () => true,
+          () => false,
+        );
+        if (markerWritten && !commitAttempted && rollbackConfirmed) {
+          evidence.cleanup.status = 'TRANSACTION_ROLLED_BACK';
+        }
+        if (markerWritten && (!rollbackConfirmed || commitAttempted)) {
+          cleanupRequired = true;
+        }
+      } else if (markerWritten && (transactionCommitted || commitAttempted)) {
         cleanupRequired = true;
       }
-    } else if (markerWritten && (transactionCommitted || commitAttempted)) {
-      cleanupRequired = true;
-    }
-  } finally {
-    if (client) {
-      try {
-        await audited(evidence, 'END_PRIMARY_CLIENT', () => client.end());
-      } catch {
-        evidence.status = 'FAIL_CLOSED';
-        evidence.failure = { stage: 'CLIENT_CLOSE' };
+    } finally {
+      if (client) {
+        try {
+          await audited(evidence, 'END_PRIMARY_CLIENT', () => client.end());
+        } catch {
+          evidence.status = 'FAIL_CLOSED';
+          evidence.failure = { stage: 'CLIENT_CLOSE' };
+        }
       }
-    }
-    if (cleanupRequired) {
-      let cleanupClient;
-      try {
-        cleanupClient = await audited(evidence, 'CREATE_CLEANUP_CLIENT', () =>
-          clientFactory({ connectionString: authorized.connectionString }),
-        );
-        await audited(evidence, 'CONNECT_CLEANUP_CLIENT', () =>
-          cleanupClient.connect(),
-        );
-        await audited(evidence, 'CLEANUP_MARKED_BOUNDARY', () =>
-          cleanupMarkedBoundary(cleanupClient, authorized.approval, evidence),
-        );
-      } catch {
-        evidence.status = 'FAIL_CLOSED';
-        evidence.failure = { stage: 'CLEANUP' };
-      } finally {
-        if (cleanupClient) {
-          try {
-            await audited(evidence, 'END_CLEANUP_CLIENT', () =>
-              cleanupClient.end(),
-            );
-          } catch {
-            evidence.status = 'FAIL_CLOSED';
-            evidence.failure = { stage: 'CLEANUP_CLIENT_CLOSE' };
+      if (cleanupRequired) {
+        let cleanupClient;
+        try {
+          cleanupClient = await audited(evidence, 'CREATE_CLEANUP_CLIENT', () =>
+            clientFactory({ connectionString: authorized.connectionString }),
+          );
+          await audited(evidence, 'CONNECT_CLEANUP_CLIENT', () =>
+            cleanupClient.connect(),
+          );
+          await audited(evidence, 'CLEANUP_MARKED_BOUNDARY', () =>
+            cleanupMarkedBoundary(cleanupClient, authorized.approval, evidence),
+          );
+        } catch (error) {
+          evidence.status = 'FAIL_CLOSED';
+          evidence.failure = {
+            stage: errorStage(error, CLEANUP_INCOMPLETE),
+          };
+        } finally {
+          if (cleanupClient) {
+            try {
+              await audited(evidence, 'END_CLEANUP_CLIENT', () =>
+                cleanupClient.end(),
+              );
+            } catch {
+              evidence.status = 'FAIL_CLOSED';
+              evidence.failure = { stage: 'CLEANUP_CLIENT_CLOSE' };
+            }
           }
         }
       }
     }
   }
-  return evidence;
+  return persistDurableEvidence({
+    approval: authorized.approval,
+    evidence,
+    writeEvidence,
+  });
 }

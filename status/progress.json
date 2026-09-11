@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-11T02:17:51Z",
+  "derived_at": "2026-09-11T03:04:30Z",
   "source_commit": "b7c39497c48f5e28305a2e01bf02d11b68e4fb99",
-  "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. Independent Review B approved the V09.1-BLK-01 forward remediation at immutable target d6819a3, then the URI-guard forward fix at 258e695 closed V09.1-STAGING-BLK-01. A one-shot dedicated-staging runner is now an IMPLEMENTED_UNVERIFIED fresh-review candidate; dedicated non-production RLS/grant/crash evidence remains NOT_RUN. V09.1 remains IN_PROGRESS, V09.2 remains NOT_STARTED, and no production access or production mutation is authorized.",
+  "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. The URI-guard forward fix at 258e695 closed V09.1-STAGING-BLK-01. Review B against runner target 23dd2da39783622ce175382bd19c51968182215a is preserved as CHANGES_REQUIRED with one blocker and one major; its strict-cleanup/acknowledgement/durable-evidence forward candidate requires fresh independent review. Dedicated non-production RLS/grant/crash evidence remains NOT_RUN. V09.1 remains IN_PROGRESS, V09.2 remains NOT_STARTED, and no production access or production mutation is authorized.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -265,14 +265,14 @@
       "plan_script": "scripts/v09-staging-evidence.mjs",
       "execution_runner": "IMPLEMENTED_UNVERIFIED_PENDING_FRESH_REVIEW",
       "execution_script": "scripts/v09-staging-evidence-runner.mjs",
-      "implementation_evidence": "docs/reports/V09/V09.1_STAGING_RUNNER_IMPLEMENTATION_CANDIDATE.md",
+      "implementation_evidence": "docs/reports/V09/V09.1_STAGING_RUNNER_FORWARD_FIX_CANDIDATE.md",
       "actual_evidence_run_eligibility": "PENDING_FRESH_REVIEW_AND_EXACT_OWNER_TARGET",
       "runner_candidate_checks": {
-        "focused_policy_and_runner_tests": "PASS — 11 tests with injected fake PostgreSQL client",
+        "focused_policy_and_runner_tests": "PASS — 16 tests with shared transaction-aware fake PostgreSQL state",
         "focused_lint_and_syntax": "PASS",
-        "secrets": "PASS — 554 files scanned",
+        "secrets": "PASS — 556 files scanned",
         "governance": "PASS — read-only / no database access",
-        "dry_run_without_target": "EXPECTED_FAIL_CLOSED"
+        "dry_run_without_target": "EXPECTED_FAIL_CLOSED — owner target contract absent; remoteMutation=false"
       },
       "remote_mutation_performed": false,
       "failed_review": {
@@ -282,6 +282,15 @@
         "open_majors": [],
         "actual_evidence_run_ready": false,
         "evidence_file": "docs/reports/V09/V09.1_STAGING_REVIEW_B_CHANGES_REQUIRED.md"
+      },
+      "runner_review_b": {
+        "reviewed_commit": "23dd2da39783622ce175382bd19c51968182215a",
+        "decision": "CHANGES_REQUIRED",
+        "open_blockers": ["UNRESTRICTED_CASCADE_CLEANUP"],
+        "open_majors": ["ACK_UNKNOWN_PROTOCOL_AND_DURABLE_EVIDENCE"],
+        "execution_runner_ready": false,
+        "actual_evidence_run_ready": false,
+        "evidence_file": "docs/reports/V09/V09.1_STAGING_RUNNER_REVIEW_B_CHANGES_REQUIRED.md"
       },
       "fresh_review": "REQUIRED"
     },

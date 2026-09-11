@@ -1,9 +1,12 @@
 import { createHash } from 'node:crypto';
+import path from 'node:path';
 
 import { Client } from 'pg';
 
 export const V09_STAGING_APPROVAL_RELATIVE_PATH =
   'config/v09-staging-target.json';
+export const V09_STAGING_TARGET_SCHEMA_VERSION =
+  'V09_DEDICATED_STAGING_TARGET-2';
 export const V09_STAGING_NAMESPACE = 'world_v2';
 export const V09_STAGING_OWNER_CONFIRMATION =
   'OWNER_APPROVED_DEDICATED_NONPRODUCTION_V09';
@@ -60,6 +63,7 @@ const FORBIDDEN_PG_CONNECTION_VARIABLES = Object.freeze([
   'PGUSER',
 ]);
 const REQUIRED_ADMIN_CONNECTION_QUERY = '?ssl=true';
+const EVIDENCE_OUTPUT_FILE = /^[A-Za-z0-9][A-Za-z0-9._-]*\.json$/u;
 
 function invalid(message) {
   throw new Error(
@@ -100,9 +104,32 @@ function normalizedPort(port) {
   return port;
 }
 
+function normalizeEvidenceOutputPath(value) {
+  if (
+    typeof value !== 'string' ||
+    value.length === 0 ||
+    value.trim() !== value
+  ) {
+    invalid('evidence_output_path must be a non-empty absolute local path');
+  }
+  if (!path.isAbsolute(value) || value.includes('\0')) {
+    invalid('evidence_output_path must be an absolute local path');
+  }
+  const normalized = path.resolve(value);
+  if (
+    normalized !== value ||
+    !EVIDENCE_OUTPUT_FILE.test(path.basename(value))
+  ) {
+    invalid(
+      'evidence_output_path must be normalized and name an owner-approved .json file',
+    );
+  }
+  return normalized;
+}
+
 function stableFingerprintInput(approval) {
   return [
-    'V09_DEDICATED_STAGING_TARGET-1',
+    approval.schema_version,
     approval.project_ref,
     approval.target_classification,
     String(approval.production_target),
@@ -116,6 +143,7 @@ function stableFingerprintInput(approval) {
     approval.roles.worker,
     approval.roles.reader,
     approval.owner_confirmation,
+    approval.evidence_output_path,
   ].join('\n');
 }
 
@@ -156,7 +184,7 @@ export function parseV09StagingApproval(value) {
     invalid('owner approval contract must be an object');
   }
   const approval = value;
-  if (approval.schema_version !== 'V09_DEDICATED_STAGING_TARGET-1') {
+  if (approval.schema_version !== V09_STAGING_TARGET_SCHEMA_VERSION) {
     invalid('owner approval contract has an unsupported schema_version');
   }
   if (approval.target_classification !== 'DEDICATED_NONPRODUCTION') {
@@ -188,6 +216,9 @@ export function parseV09StagingApproval(value) {
   if (!ADMIN_ROLE.test(approval.admin_database_role ?? '')) {
     invalid('admin_database_role is invalid');
   }
+  const evidenceOutputPath = normalizeEvidenceOutputPath(
+    approval.evidence_output_path,
+  );
   if (approval.disposable_namespace !== V09_STAGING_NAMESPACE) {
     invalid(
       `disposable_namespace must be the exact migration namespace ${V09_STAGING_NAMESPACE}`,
@@ -204,6 +235,7 @@ export function parseV09StagingApproval(value) {
     database_name: approval.database_name,
     database_port: databasePort,
     disposable_namespace: approval.disposable_namespace,
+    evidence_output_path: evidenceOutputPath,
     owner_confirmation: approval.owner_confirmation,
     production_target: approval.production_target,
     project_ref: approval.project_ref,
@@ -240,6 +272,10 @@ export function buildV09StagingDryRunPlan(approval) {
       databaseDropAllowed: false,
     }),
     credentialSource: 'V09_STAGING_ADMIN_DATABASE_URL_ONLY',
+    durableEvidence: Object.freeze({
+      ownerApprovedOutputPath: target.evidence_output_path,
+      overwriteAllowed: false,
+    }),
     execution: 'DRY_RUN_ONLY_UNTIL_EXPLICIT_CONFIRMATION',
     migrations: V09_STAGING_MIGRATION_IDS,
     roleChecks: Object.freeze([

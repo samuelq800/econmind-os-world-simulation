@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   V09_STAGING_EXECUTION_CONFIRMATION,
   V09_STAGING_MIGRATION_IDS,
+  V09_STAGING_TARGET_SCHEMA_VERSION,
   assertNoLinkedSupabaseProject,
   assertV09DedicatedStagingExecution,
   buildV09StagingDryRunPlan,
@@ -17,6 +18,7 @@ type Approval = {
   database_name: string;
   database_port: number;
   disposable_namespace: string;
+  evidence_output_path: string;
   owner_confirmation: string;
   production_target: boolean;
   project_ref: string;
@@ -43,6 +45,7 @@ function approvedTarget(
     database_name: 'postgres',
     database_port: 5432,
     disposable_namespace: 'world_v2',
+    evidence_output_path: '/private/tmp/v09-staging-policy-test/evidence.json',
     owner_confirmation: 'OWNER_APPROVED_DEDICATED_NONPRODUCTION_V09',
     production_target: false,
     project_ref: 'abcde12345fghij67890',
@@ -51,7 +54,7 @@ function approvedTarget(
       reader: 'v09_staging_reader',
       worker: 'v09_staging_worker',
     },
-    schema_version: 'V09_DEDICATED_STAGING_TARGET-1',
+    schema_version: V09_STAGING_TARGET_SCHEMA_VERSION,
     shared_target: false,
     target_classification: 'DEDICATED_NONPRODUCTION',
   };
@@ -95,6 +98,11 @@ describe('V09 dedicated staging evidence policy', () => {
       ],
       requiresRunMarker: true,
     });
+    expect(plan.durableEvidence).toEqual({
+      ownerApprovedOutputPath:
+        '/private/tmp/v09-staging-policy-test/evidence.json',
+      overwriteAllowed: false,
+    });
   });
 
   it('rejects missing owner confirmation, production/shared targets and ambiguous hosts', () => {
@@ -137,6 +145,26 @@ describe('V09 dedicated staging evidence policy', () => {
         }),
       ),
     ).toThrow('target_fingerprint does not bind');
+  });
+
+  it('requires an absolute, normalized owner-approved evidence output path', () => {
+    expect(() =>
+      parseV09StagingApproval(
+        approvedTarget({ evidence_output_path: 'evidence.json' }),
+      ),
+    ).toThrow('evidence_output_path');
+    expect(() =>
+      parseV09StagingApproval(
+        approvedTarget({
+          evidence_output_path: '/private/tmp/../evidence.json',
+        }),
+      ),
+    ).toThrow('evidence_output_path');
+    expect(() =>
+      parseV09StagingApproval(
+        approvedTarget({ evidence_output_path: '/private/tmp/evidence.txt' }),
+      ),
+    ).toThrow('evidence_output_path');
   });
 
   it('requires a separate approved fingerprint and explicit execution confirmation', () => {
