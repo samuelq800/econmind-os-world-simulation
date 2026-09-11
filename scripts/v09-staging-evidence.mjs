@@ -8,6 +8,7 @@ import {
   buildV09StagingDryRunPlan,
   parseV09StagingApproval,
 } from './v09-staging-evidence-policy.mjs';
+import { runV09DedicatedStagingEvidence } from './v09-staging-evidence-runner.mjs';
 
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -64,14 +65,35 @@ async function main() {
   const arguments_ = process.argv.slice(2);
   if (
     arguments_.length > 1 ||
-    (arguments_[0] !== undefined && arguments_[0] !== '--dry-run')
+    (arguments_[0] !== undefined &&
+      arguments_[0] !== '--dry-run' &&
+      arguments_[0] !== '--execute')
   ) {
-    fail(
-      'only --dry-run is implemented in this no-remote preparation candidate',
-    );
+    fail('only --dry-run or the explicit one-shot --execute mode is supported');
   }
   const approval = await readApproval();
-  assertNoLinkedSupabaseProject(await readLinkedProjectRef());
+  const linkedProjectRef = await readLinkedProjectRef();
+  assertNoLinkedSupabaseProject(linkedProjectRef);
+  if (arguments_[0] === '--execute') {
+    const evidence = await runV09DedicatedStagingEvidence({
+      approval,
+      environment: process.env,
+      loadLinkedProjectRef: async () => linkedProjectRef,
+    });
+    console.log(
+      JSON.stringify(
+        {
+          evidence,
+          mode: 'EXECUTE_ONE_SHOT',
+          remoteMutation: 'DEDICATED_NAMESPACE_ONLY',
+        },
+        null,
+        2,
+      ),
+    );
+    if (evidence.status !== 'PASS') process.exitCode = 1;
+    return;
+  }
   console.log(
     JSON.stringify(
       {

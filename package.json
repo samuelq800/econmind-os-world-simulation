@@ -29,6 +29,7 @@
     "migration:rehearse": "node scripts/rehearse-migrations.mjs",
     "test:v09:postgres": "node scripts/v09-postgres-test-environment.mjs && vitest run tests/world-core/world-writer-lease-postgres.test.ts",
     "v09:staging:plan": "node scripts/v09-staging-evidence.mjs --dry-run",
+    "v09:staging:execute": "node scripts/v09-staging-evidence.mjs --execute",
     "registry:generate": "python3 tools/build_core_registries.py && prettier --write packages/core/src/registries/fixed-catalog.ts",
     "secrets:check": "node scripts/check-repository-secrets.mjs",
     "supabase:safe": "node scripts/supabase-safe.mjs",
