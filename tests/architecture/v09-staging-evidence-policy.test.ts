@@ -7,6 +7,7 @@ import {
   assertV09DedicatedStagingExecution,
   buildV09StagingDryRunPlan,
   createV09StagingTargetFingerprint,
+  inspectV09StagingPgRuntime,
   parseV09StagingApproval,
 } from '../../scripts/v09-staging-evidence-policy.mjs';
 
@@ -70,7 +71,7 @@ function approvedTarget(
 function approvedExecution(target = approvedTarget()) {
   return {
     ECONMIND_ENV: 'staging',
-    V09_STAGING_ADMIN_DATABASE_URL: `postgresql://${target.admin_database_role}:local-test-only@${target.database_host}:${target.database_port}/${target.database_name}?sslmode=require`,
+    V09_STAGING_ADMIN_DATABASE_URL: `postgresql://${target.admin_database_role}:local-test-only@${target.database_host}:${target.database_port}/${target.database_name}?ssl=true`,
     V09_STAGING_EXECUTION_CONFIRMATION: V09_STAGING_EXECUTION_CONFIRMATION,
     V09_STAGING_TARGET_FINGERPRINT: target.target_fingerprint,
   };
@@ -157,8 +158,31 @@ describe('V09 dedicated staging evidence policy', () => {
     ).toThrow('V09_STAGING_TARGET_FINGERPRINT');
   });
 
-  it('rejects runtime URLs, client keys and a host that differs from the contract', () => {
+  it('uses pg runtime parameters and rejects authority override query strings', () => {
     const target = approvedTarget();
+    const authorityOverride =
+      'postgresql://v09_staging_admin:local-test-only@db.v09-stage.example.invalid:5432/postgres?ssl=true&host=other.example.invalid&port=6543&user=other';
+    expect(inspectV09StagingPgRuntime(authorityOverride)).toMatchObject({
+      host: 'other.example.invalid',
+      port: 6543,
+      ssl: true,
+      user: 'other',
+    });
+    expect(() =>
+      assertV09DedicatedStagingExecution(
+        {
+          ...approvedExecution(target),
+          V09_STAGING_ADMIN_DATABASE_URL: authorityOverride,
+        },
+        target,
+      ),
+    ).toThrow('canonical TLS query');
+  });
+
+  it('rejects runtime URLs, client keys, TLS overrides and nearby URI encodings', () => {
+    const target = approvedTarget();
+    const tlsOverride =
+      'postgresql://v09_staging_admin:local-test-only@db.v09-stage.example.invalid:5432/postgres?ssl=true&sslmode=disable';
     expect(() =>
       assertV09DedicatedStagingExecution(
         { ...approvedExecution(target), DATABASE_URL: 'postgresql://runtime' },
@@ -183,7 +207,7 @@ describe('V09 dedicated staging evidence policy', () => {
         {
           ...approvedExecution(target),
           V09_STAGING_ADMIN_DATABASE_URL:
-            'postgresql://v09_staging_admin:local-test-only@other.example.invalid:5432/postgres?sslmode=require',
+            'postgresql://v09_staging_admin:local-test-only@other.example.invalid:5432/postgres?ssl=true',
         },
         target,
       ),
@@ -192,12 +216,38 @@ describe('V09 dedicated staging evidence policy', () => {
       assertV09DedicatedStagingExecution(
         {
           ...approvedExecution(target),
-          V09_STAGING_ADMIN_DATABASE_URL:
-            'postgresql://v09_staging_admin:local-test-only@db.v09-stage.example.invalid:5432/postgres',
+          V09_STAGING_ADMIN_DATABASE_URL: tlsOverride,
         },
         target,
       ),
-    ).toThrow('explicitly require TLS');
+    ).toThrow('canonical TLS query');
+    expect(inspectV09StagingPgRuntime(tlsOverride).ssl).toBe(false);
+    for (const query of [
+      '?ssl=true&%68ost=other.example.invalid',
+      '?ssl=true&hostaddr=127.0.0.1',
+      '?ssl=true&port=6543',
+      '?ssl=true&user=other',
+      '?ssl=true&database=other',
+      '?ssl=true&sslmode=disable',
+      '?ssl=true&ssl=true',
+      '?ssl=%74rue',
+    ]) {
+      expect(() =>
+        assertV09DedicatedStagingExecution(
+          {
+            ...approvedExecution(target),
+            V09_STAGING_ADMIN_DATABASE_URL: `postgresql://v09_staging_admin:local-test-only@db.v09-stage.example.invalid:5432/postgres${query}`,
+          },
+          target,
+        ),
+      ).toThrow('canonical TLS query');
+    }
+    expect(() =>
+      assertV09DedicatedStagingExecution(
+        { ...approvedExecution(target), PGHOST: 'other.example.invalid' },
+        target,
+      ),
+    ).toThrow('PGHOST must be absent');
   });
 
   it('rejects any linked Supabase project rather than implicitly using it', () => {

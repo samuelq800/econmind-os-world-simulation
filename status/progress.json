@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-11T00:27:31Z",
+  "derived_at": "2026-09-11T01:16:35Z",
   "source_commit": "b7c39497c48f5e28305a2e01bf02d11b68e4fb99",
-  "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. Independent Review B approved the V09.1-BLK-01 forward remediation at immutable target d6819a3: 0006 preserves writer-lease fencing lineage without rewriting 0005. V09.1 remains IN_PROGRESS and V09.2 remains NOT_STARTED because dedicated non-production staging RLS/grant/crash evidence is still NOT_RUN. No production access or production mutation is authorized.",
+  "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. Independent Review B approved the V09.1-BLK-01 forward remediation at immutable target d6819a3, but found V09.1-STAGING-BLK-01 at immutable target 14692fb: URI authority validation did not match pg runtime override/TLS semantics. V09.1 remains IN_PROGRESS and V09.2 remains NOT_STARTED; dedicated non-production staging RLS/grant/crash evidence remains NOT_RUN. No production access or production mutation is authorized.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -259,12 +259,21 @@
       "staging_crash_recovery": "NOT_RUN"
     },
     "staging_evidence_harness": {
-      "status": "LOCAL_CANDIDATE_PENDING_FOCUSED_REVIEW",
+      "status": "FORWARD_FIX_CANDIDATE_PENDING_REVIEW",
       "approval_contract": "config/v09-staging-target.json",
       "default_mode": "DRY_RUN",
       "plan_script": "scripts/v09-staging-evidence.mjs",
       "execution_runner": "NOT_IMPLEMENTED_BY_PREPARATION_CANDIDATE",
-      "remote_mutation_performed": false
+      "remote_mutation_performed": false,
+      "failed_review": {
+        "reviewed_commit": "14692fb449f779ade6270dbee5c7c80178fb1ba8",
+        "decision": "CHANGES_REQUIRED",
+        "open_blockers": ["V09.1-STAGING-BLK-01"],
+        "open_majors": [],
+        "actual_evidence_run_ready": false,
+        "evidence_file": "docs/reports/V09/V09.1_STAGING_REVIEW_B_CHANGES_REQUIRED.md"
+      },
+      "fresh_review": "REQUIRED"
     },
     "independent_review": "APPROVED_FOR_CONTINUATION",
     "next_step": "V09.1",

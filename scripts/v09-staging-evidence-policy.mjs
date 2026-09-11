@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 
+import { Client } from 'pg';
+
 export const V09_STAGING_APPROVAL_RELATIVE_PATH =
   'config/v09-staging-target.json';
 export const V09_STAGING_NAMESPACE = 'world_v2';
@@ -38,6 +40,26 @@ const FORBIDDEN_RUNTIME_VARIABLES = Object.freeze([
   'VITE_SUPABASE_PUBLISHABLE_KEY',
   'VITE_SUPABASE_SERVICE_ROLE_KEY',
 ]);
+const FORBIDDEN_PG_CONNECTION_VARIABLES = Object.freeze([
+  'PGDATABASE',
+  'PGHOST',
+  'PGHOSTADDR',
+  'PGOPTIONS',
+  'PGPASSFILE',
+  'PGPASSWORD',
+  'PGPORT',
+  'PGSERVICE',
+  'PGSERVICEFILE',
+  'PGSSLCERT',
+  'PGSSLCRL',
+  'PGSSLKEY',
+  'PGSSLMODE',
+  'PGSSLNEGOTIATION',
+  'PGSSLROOTCERT',
+  'PGSSLSNI',
+  'PGUSER',
+]);
+const REQUIRED_ADMIN_CONNECTION_QUERY = '?ssl=true';
 
 function invalid(message) {
   throw new Error(
@@ -252,6 +274,59 @@ function hasPublishableOrAnonMaterial(value) {
   );
 }
 
+function parseCanonicalAdminUri(connectionString) {
+  let connection;
+  try {
+    connection = new URL(connectionString);
+  } catch {
+    invalid('V09_STAGING_ADMIN_DATABASE_URL is not a valid PostgreSQL URL');
+  }
+  if (!['postgres:', 'postgresql:'].includes(connection.protocol)) {
+    invalid('V09_STAGING_ADMIN_DATABASE_URL must use PostgreSQL');
+  }
+  if (
+    connection.hash !== '' ||
+    connection.search !== REQUIRED_ADMIN_CONNECTION_QUERY
+  ) {
+    invalid(
+      'admin PostgreSQL URL must have exactly one canonical TLS query ?ssl=true and no fragment or override parameters',
+    );
+  }
+  return connection;
+}
+
+function effectiveTlsEnabled(ssl) {
+  return (
+    ssl === true ||
+    (ssl !== null &&
+      typeof ssl === 'object' &&
+      ssl.rejectUnauthorized !== false)
+  );
+}
+
+/**
+ * Uses pg's actual ConnectionParameters construction without calling connect,
+ * so policy checks cover the exact parser/runtime semantics a later runner
+ * would use rather than only WHATWG URL authority fields.
+ */
+export function inspectV09StagingPgRuntime(connectionString) {
+  let parameters;
+  try {
+    parameters = new Client({ connectionString }).connectionParameters;
+  } catch (error) {
+    invalid(
+      `pg runtime could not parse the admin PostgreSQL URL: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  return Object.freeze({
+    database: parameters.database,
+    host: parameters.host,
+    port: parameters.port,
+    ssl: parameters.ssl,
+    user: parameters.user,
+  });
+}
+
 function parseAdminConnection(environment, approval) {
   const connectionString = environment.V09_STAGING_ADMIN_DATABASE_URL;
   if (!connectionString) {
@@ -263,29 +338,17 @@ function parseAdminConnection(environment, approval) {
     );
   }
 
-  let connection;
-  try {
-    connection = new URL(connectionString);
-  } catch {
-    invalid('V09_STAGING_ADMIN_DATABASE_URL is not a valid PostgreSQL URL');
-  }
-  if (!['postgres:', 'postgresql:'].includes(connection.protocol)) {
-    invalid('V09_STAGING_ADMIN_DATABASE_URL must use PostgreSQL');
-  }
+  const connection = parseCanonicalAdminUri(connectionString);
   if (normalizeApprovedHost(connection.hostname) !== approval.database_host) {
     invalid('admin PostgreSQL URL host does not match the owner-approved host');
   }
   if (connection.port !== String(approval.database_port)) {
     invalid('admin PostgreSQL URL port does not match the owner-approved port');
   }
-  if (
-    decodeURIComponent(connection.username) !== approval.admin_database_role
-  ) {
+  if (connection.username !== approval.admin_database_role) {
     invalid('admin PostgreSQL URL role does not match the owner-approved role');
   }
-  if (
-    decodeURIComponent(connection.pathname) !== `/${approval.database_name}`
-  ) {
+  if (connection.pathname !== `/${approval.database_name}`) {
     invalid(
       'admin PostgreSQL URL database does not match the owner-approved database',
     );
@@ -295,11 +358,23 @@ function parseAdminConnection(environment, approval) {
       'admin PostgreSQL URL must be securely provisioned with a password',
     );
   }
-  if (
-    connection.searchParams.get('sslmode') !== 'require' &&
-    connection.searchParams.get('ssl') !== 'true'
-  ) {
-    invalid('admin PostgreSQL URL must explicitly require TLS');
+  const runtime = inspectV09StagingPgRuntime(connectionString);
+  if (normalizeApprovedHost(runtime.host) !== approval.database_host) {
+    invalid('pg runtime host does not match the owner-approved host');
+  }
+  if (runtime.port !== approval.database_port) {
+    invalid('pg runtime port does not match the owner-approved port');
+  }
+  if (runtime.user !== approval.admin_database_role) {
+    invalid('pg runtime user does not match the owner-approved role');
+  }
+  if (runtime.database !== approval.database_name) {
+    invalid('pg runtime database does not match the owner-approved database');
+  }
+  if (!effectiveTlsEnabled(runtime.ssl)) {
+    invalid(
+      'pg runtime does not resolve the admin PostgreSQL URL to effective TLS',
+    );
   }
   return connectionString;
 }
@@ -328,6 +403,13 @@ export function assertV09DedicatedStagingExecution(environment, approval) {
     );
   }
   for (const name of FORBIDDEN_RUNTIME_VARIABLES) {
+    if (environment[name] !== undefined && environment[name] !== '') {
+      invalid(
+        `${name} must be absent from dedicated staging evidence execution`,
+      );
+    }
+  }
+  for (const name of FORBIDDEN_PG_CONNECTION_VARIABLES) {
     if (environment[name] !== undefined && environment[name] !== '') {
       invalid(
         `${name} must be absent from dedicated staging evidence execution`,
