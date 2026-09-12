@@ -54,4 +54,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm migration:validate
       - run: pnpm test:v09:postgres
+      - run: pnpm --filter @econmind/core build
+      - run: pnpm --filter @econmind/world-worker build
       - run: pnpm exec vitest run tests/world-core/v09-atomic-recovery-postgres.test.ts
