@@ -8,6 +8,11 @@ import {
   isAuthorizedOfficeContext,
 } from '../../packages/core/src/index.js';
 import {
+  transferCommand,
+  transferProposals,
+  transferTerms,
+} from '../preparation/v10-transfer-contract.js';
+import {
   V10_TWO_COUNTRY_TEST_FIXTURE_STATUS,
   createV10AtomicCommandFixture,
   createV10TwoCountryTestFixture,
@@ -24,11 +29,11 @@ describe('V10.1 two-country fixture preparation', () => {
       status: V10_TWO_COUNTRY_TEST_FIXTURE_STATUS,
       productionFallback: false,
       calibrationCountryValuesUsed: false,
-      worldId: 'WORLD_V10_TEST_ONLY',
+      worldId: 'WORLD_TRANSFER_TEST',
       openingWorldVersion: '0',
       countries: {
-        seller: 'COUNTRY_V10_ALPHA',
-        buyer: 'COUNTRY_V10_BETA',
+        seller: 'COUNTRY_SELLER_TEST',
+        buyer: 'COUNTRY_BUYER_TEST',
       },
       commodity: {
         id: 'GRAIN',
@@ -58,7 +63,7 @@ describe('V10.1 two-country fixture preparation', () => {
     expect(inventory[0]?.account).toEqual(
       fixture.inventoryAccounts.sellerAvailable,
     );
-    expect(inventory[0] && amount(inventory[0].quantity)).toBe('12');
+    expect(inventory[0] && amount(inventory[0].quantity)).toBe('4');
     const positions = new Map(
       fixture.rebuiltLedgers.financial.positions.map((position) => [
         position.account.accountId,
@@ -67,10 +72,10 @@ describe('V10.1 two-country fixture preparation', () => {
     );
     expect(positions).toEqual(
       new Map([
-        [fixture.financialAccounts.sellerSettlement.accountId, '20'],
-        [fixture.financialAccounts.sellerOpeningEquity.accountId, '-20'],
-        [fixture.financialAccounts.buyerTreasury.accountId, '100'],
-        [fixture.financialAccounts.buyerOpeningEquity.accountId, '-100'],
+        [fixture.financialAccounts.sellerSettlement.accountId, '2'],
+        [fixture.financialAccounts.sellerOpeningEquity.accountId, '-2'],
+        [fixture.financialAccounts.buyerTreasury.accountId, '8'],
+        [fixture.financialAccounts.buyerOpeningEquity.accountId, '-8'],
       ]),
     );
     expect(
@@ -91,18 +96,18 @@ describe('V10.1 two-country fixture preparation', () => {
       )
         .subtract(fixture.transferIntent.settlementAmount)
         .toCanonicalValue().amount,
-    ).toBe('92');
+    ).toBe('2');
     expect(
       inventory[0]!.quantity
         .subtract(fixture.transferIntent.quantity)
         .toCanonicalValue().amount,
-    ).toBe('8');
+    ).toBe('2');
   });
 
   it('publishes exact conserved movement and payment plans for later tests', () => {
     const fixture = createV10TwoCountryTestFixture();
     for (const movement of Object.values(fixture.movementPlan)) {
-      expect(movement.map(({ delta }) => amount(delta))).toEqual(['-4', '4']);
+      expect(movement.map(({ delta }) => amount(delta))).toEqual(['-2', '2']);
       expect(
         movement[0].delta.add(movement[1].delta).toCanonicalValue().amount,
       ).toBe('0');
@@ -136,8 +141,8 @@ describe('V10.1 two-country fixture preparation', () => {
         amount(value),
       ]),
     ).toEqual([
-      ['CREDIT', '8'],
-      ['DEBIT', '8'],
+      ['CREDIT', '6'],
+      ['DEBIT', '6'],
     ]);
     expect(
       fixture.paymentPlan[0].amount
@@ -151,10 +156,10 @@ describe('V10.1 two-country fixture preparation', () => {
     const second = createV10TwoCountryTestFixture();
     expect(second.openingSeed.fingerprint).toBe(first.openingSeed.fingerprint);
     expect(second.command.fingerprint).toBe(first.command.fingerprint);
-    expect(second.command.commandId).toBe('COMMAND_V10_TEST_TRANSFER');
+    expect(second.command.commandId).toBe('COMMAND_TRANSFER_TEST');
     expect(second.command.expectedWorldVersion).toBe('0');
     expect(second.command.canonicalPayload).toContain(
-      '"status":"TEST_ONLY_NON_AUTHORITATIVE"',
+      '"policyVersion":"TEST_ONLY_UNAPPROVED_V10_TREASURY_V1"',
     );
     expect(Object.isFrozen(first)).toBe(true);
     expect(Object.isFrozen(first.openingSeed)).toBe(true);
@@ -186,7 +191,7 @@ describe('V10.1 two-country fixture preparation', () => {
     }
   });
 
-  it('fails closed for wrong-country and wrong-Office negative cases', async () => {
+  it('fails closed for wrong-country and unassigned-Office negative cases', async () => {
     const fixture = createV10TwoCountryTestFixture();
     const denied = fixture.authorizationCases.filter(
       ({ expected }) => expected === 'DENY',
@@ -213,22 +218,59 @@ describe('V10.1 two-country fixture preparation', () => {
     const fixture = createV10TwoCountryTestFixture();
     const atomic = await createV10AtomicCommandFixture(fixture);
     expect(atomic).toMatchObject({
-      worldId: 'WORLD_V10_TEST_ONLY',
-      commandId: 'COMMAND_V10_TEST_TRANSFER',
-      idempotencyKey: 'IDEMPOTENCY_V10_TEST_TRANSFER',
+      worldId: 'WORLD_TRANSFER_TEST',
+      commandId: 'COMMAND_TRANSFER_TEST',
+      idempotencyKey: 'IDEMPOTENCY_TRANSFER_TEST',
       expectedWorldVersion: '0',
       holderId: 'WORKER_V10_TEST_ONLY',
       fencingToken: '1',
-      expectedAuthorizationRevision: 'AUTH_V10_ALPHA_TRADE_1',
-      requiredCountryId: 'COUNTRY_V10_ALPHA',
+      expectedAuthorizationRevision: 'AUTH_V10_SELLER_TRADE_1',
+      requiredCountryId: 'COUNTRY_SELLER_TEST',
       requiredOfficeId: 'TRADE',
       requiredCapability: 'TRADE_CONTRACTS',
-      inventoryAmount: '4',
-      financialAmount: '8',
+      inventoryAmount: '2',
+      financialAmount: '6',
     });
     expect(atomic.commandFingerprint).toMatch(/^sha256:[0-9a-f]{64}$/u);
     expect(isAuthorizedOfficeContext(atomic.authorizationContext)).toBe(true);
     expect(typeof atomic.inventoryAmount).toBe('string');
     expect(typeof atomic.financialAmount).toBe('string');
+  });
+
+  it('jointly reconciles the O transfer contract with C opening and Office facts', () => {
+    const fixture = createV10TwoCountryTestFixture();
+    const contractCommand = transferCommand();
+    const contractProposals = transferProposals();
+    expect(fixture.transferIntent.terms).toEqual(transferTerms());
+    expect(fixture.command.fingerprint).toBe(contractCommand.fingerprint);
+    expect(fixture.proposals).toEqual(contractProposals);
+    expect(fixture.decisionScopes.seller).toMatchObject({
+      worldId: fixture.worldId,
+      countryId: fixture.countries.seller,
+      payloadFingerprint: fixture.command.fingerprint,
+      requiredOffices: ['TRADE'],
+    });
+    expect(fixture.decisionScopes.buyer).toMatchObject({
+      worldId: fixture.worldId,
+      countryId: fixture.countries.buyer,
+      payloadFingerprint: fixture.command.fingerprint,
+      requiredOffices: ['TRADE', 'FINANCE'],
+    });
+    expect(
+      fixture.transferIntent.price.multiply(fixture.transferIntent.quantity),
+    ).toEqual(fixture.transferIntent.settlementAmount);
+    expect(fixture.transferIntent.settlementAmount.toCanonicalValue()).toEqual({
+      amount: '6',
+      currency: 'GCU',
+    });
+    expect(fixture.officeActors.buyerTrade.principal.authSubject).toBe(
+      fixture.officeActors.buyerFinance.principal.authSubject,
+    );
+    expect(
+      fixture.officeActors.buyerFinance.membership.officeAssignments,
+    ).toEqual(['TRADE', 'FINANCE']);
+    expect(fixture.openingSeed.sources[0]?.canonicalPayload).toContain(
+      fixture.command.fingerprint,
+    );
   });
 });

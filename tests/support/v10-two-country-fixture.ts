@@ -1,17 +1,16 @@
 import { createHash } from 'node:crypto';
 
 import {
-  COMMAND_SCHEMA_VERSION,
   COMMODITY_REGISTRY,
   CURRENT_REPLAY_BINDING,
   Money,
   OPENING_SEED_SCHEMA_VERSION,
   OPENING_SOURCE_SCHEMA_VERSION,
   Quantity,
+  Price,
   assertV08LedgerReconciled,
   authSubject,
   authorizeOfficeCapability,
-  commandId,
   commodityId,
   countryId,
   createFinancialAccount,
@@ -22,7 +21,6 @@ import {
   financialAccountId,
   financialOpeningBatchId,
   financialOpeningLegId,
-  idempotencyKey,
   inventoryBatchId,
   inventoryLocationId,
   inventoryReservationId,
@@ -32,7 +30,6 @@ import {
   openingInventoryEntryId,
   openingSeedId,
   openingSourceId,
-  parseCanonicalCommand,
   reconcileV08LedgerSnapshots,
   rebuildV08LedgersFromLineage,
   teamId,
@@ -54,6 +51,12 @@ import {
   type WorldId,
 } from '../../packages/core/src/index.js';
 import { actorId } from '../../packages/core/src/ids.js';
+import {
+  decisionScope,
+  transferCommand,
+  transferProposals,
+  transferTerms,
+} from '../preparation/v10-transfer-contract.js';
 
 export const V10_TWO_COUNTRY_TEST_FIXTURE_VERSION =
   'v10.1-two-country-test-fixture-preparation-v1' as const;
@@ -64,6 +67,19 @@ const sha256 = (preimage: string): string =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
 
 export type V10FixtureActorKey = 'sellerTrade' | 'buyerTrade' | 'buyerFinance';
+
+export type V10TransferTermsFixture = Readonly<{
+  commodityId: string;
+  sellerCountryId: string;
+  buyerCountryId: string;
+  quantity: Readonly<ReturnType<typeof transferTerms>['quantity']>;
+  price: Readonly<ReturnType<typeof transferTerms>['price']>;
+  paymentSource: string;
+  policyVersion: string;
+  requiredSignatures: readonly Readonly<
+    ReturnType<typeof transferTerms>['requiredSignatures'][number]
+  >[];
+}>;
 
 export interface V10OfficeActorFixture {
   readonly actorId: ActorId;
@@ -134,12 +150,10 @@ export interface V10TwoCountryTestFixture {
     buyerOpeningEquity: Readonly<FinancialAccount>;
   }>;
   readonly transferIntent: Readonly<{
+    terms: V10TransferTermsFixture;
     quantity: Quantity;
+    price: Price;
     settlementAmount: Money;
-    nonStrategic: true;
-    belowThreshold: true;
-    usesOfficialReserves: false;
-    titleAndRiskTransferAt: 'DELIVERY';
   }>;
   readonly movementPlan: Readonly<{
     reserve: readonly [
@@ -174,6 +188,11 @@ export interface V10TwoCountryTestFixture {
   >;
   readonly authorizationCases: readonly Readonly<V10AuthorizationCase>[];
   readonly command: Readonly<CanonicalCommand>;
+  readonly proposals: Readonly<ReturnType<typeof transferProposals>>;
+  readonly decisionScopes: Readonly<{
+    seller: Readonly<ReturnType<typeof decisionScope>>;
+    buyer: Readonly<ReturnType<typeof decisionScope>>;
+  }>;
   readonly openingSeed: Readonly<OpeningSeed>;
   readonly rebuiltLedgers: Readonly<RebuiltV08Ledgers>;
   readonly reconciliation: Readonly<V08LedgerReconciliation>;
@@ -209,6 +228,7 @@ function officeActor(input: {
   readonly country: CountryId;
   readonly team: string;
   readonly office: OfficeId;
+  readonly officeAssignments?: readonly OfficeId[];
   readonly capability: AuthorizationCapability;
   readonly authorizationVersion: string;
   readonly negotiationPartyIds: readonly string[];
@@ -220,7 +240,9 @@ function officeActor(input: {
     worldId: input.world,
     teamId: teamId(input.team),
     countryId: input.country,
-    officeAssignments: Object.freeze([input.office]),
+    officeAssignments: Object.freeze([
+      ...(input.officeAssignments ?? [input.office]),
+    ]),
     active: true,
     suspended: false,
     isWorldAdmin: false,
@@ -258,6 +280,7 @@ function financialAccount(input: {
   readonly ownerId: ReturnType<typeof legalEntityId>;
   readonly countryId: CountryId;
   readonly accountClass: 'CASH' | 'EQUITY';
+  readonly currency: string;
 }): Readonly<FinancialAccount> {
   return createFinancialAccount({
     worldId: input.worldId,
@@ -265,20 +288,58 @@ function financialAccount(input: {
     ownerId: input.ownerId,
     countryId: input.countryId,
     accountClass: input.accountClass,
-    currency: 'GCU',
+    currency: input.currency,
     claimId: null,
     counterpartyEntityId: null,
   });
 }
 
 export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixture> {
-  const world = worldId('WORLD_V10_TEST_ONLY');
-  const seller = countryId('COUNTRY_V10_ALPHA');
-  const buyer = countryId('COUNTRY_V10_BETA');
+  const rawTerms = transferTerms();
+  const terms = Object.freeze({
+    ...rawTerms,
+    quantity: Object.freeze({ ...rawTerms.quantity }),
+    price: Object.freeze({ ...rawTerms.price }),
+    requiredSignatures: Object.freeze(
+      rawTerms.requiredSignatures.map((signature) =>
+        Object.freeze({ ...signature }),
+      ),
+    ),
+  });
+  const command = transferCommand();
+  const proposals = transferProposals();
+  const world = worldId(command.worldId);
+  const seller = countryId(terms.sellerCountryId);
+  const buyer = countryId(terms.buyerCountryId);
+  const transferQuantity = Quantity.from(
+    terms.quantity.amount,
+    terms.quantity.unit,
+  );
+  const transferPrice = Price.from(
+    terms.price.amount,
+    terms.price.currency,
+    terms.price.perUnit,
+  );
+  const settlementAmount = transferPrice.multiply(transferQuantity);
+  if (
+    command.countryId !== seller ||
+    command.worldId !== world ||
+    proposals.seller.worldId !== world ||
+    proposals.buyer.worldId !== world ||
+    proposals.seller.countryId !== seller ||
+    proposals.buyer.countryId !== buyer ||
+    proposals.seller.payloadFingerprint !== command.fingerprint ||
+    proposals.buyer.payloadFingerprint !== command.fingerprint
+  ) {
+    throw new Error('V10_TEST_FIXTURE_TRANSFER_CONTRACT_MISMATCH');
+  }
   const sellerTreasury = legalEntityId('ENTITY_V10_ALPHA_TREASURY');
   const buyerTreasuryEntity = legalEntityId('ENTITY_V10_BETA_TREASURY');
-  const registeredCommodity = COMMODITY_REGISTRY.get('GRAIN');
+  const registeredCommodity = COMMODITY_REGISTRY.get(terms.commodityId);
   if (
+    registeredCommodity.id !== terms.commodityId ||
+    registeredCommodity.unit !== terms.quantity.unit ||
+    registeredCommodity.unit !== terms.price.perUnit ||
     registeredCommodity.unit !== 'tonne' ||
     registeredCommodity.sourceDocument !== 'MASTER'
   ) {
@@ -325,6 +386,7 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
     ownerId: sellerTreasury,
     countryId: seller,
     accountClass: 'CASH',
+    currency: terms.price.currency,
   });
   const sellerOpeningEquity = financialAccount({
     worldId: world,
@@ -332,6 +394,7 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
     ownerId: sellerTreasury,
     countryId: seller,
     accountClass: 'EQUITY',
+    currency: terms.price.currency,
   });
   const buyerTreasury = financialAccount({
     worldId: world,
@@ -339,6 +402,7 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
     ownerId: buyerTreasuryEntity,
     countryId: buyer,
     accountClass: 'CASH',
+    currency: terms.price.currency,
   });
   const buyerOpeningEquity = financialAccount({
     worldId: world,
@@ -346,6 +410,7 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
     ownerId: buyerTreasuryEntity,
     countryId: buyer,
     accountClass: 'EQUITY',
+    currency: terms.price.currency,
   });
   const source = createOpeningSource(
     {
@@ -362,6 +427,7 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
         openingWorldVersion: '0',
         countryIds: [seller, buyer],
         commodityId: grain,
+        transferCommandFingerprint: command.fingerprint,
       },
     },
     sha256,
@@ -379,20 +445,20 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
           entryId: openingInventoryEntryId('OPENING_V10_ALPHA_GRAIN'),
           sourceId: source.sourceId,
           account: sellerAvailable,
-          quantity: Quantity.from('12', 'tonne'),
+          quantity: Quantity.from('4', registeredCommodity.unit),
         },
       ],
       financialBatches: [
         {
           batchId: financialOpeningBatchId('OPENING_V10_ALPHA_FINANCE'),
           sourceId: source.sourceId,
-          settlementCurrency: 'GCU',
+          settlementCurrency: terms.price.currency,
           legs: [
             {
               legId: financialOpeningLegId('OPENING_V10_ALPHA_CASH'),
               account: sellerSettlement,
               direction: 'DEBIT',
-              amount: Money.from('20', 'GCU'),
+              amount: Money.from('2', terms.price.currency),
               counterpartLegId: financialOpeningLegId(
                 'OPENING_V10_ALPHA_EQUITY',
               ),
@@ -401,7 +467,7 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
               legId: financialOpeningLegId('OPENING_V10_ALPHA_EQUITY'),
               account: sellerOpeningEquity,
               direction: 'CREDIT',
-              amount: Money.from('20', 'GCU'),
+              amount: Money.from('2', terms.price.currency),
               counterpartLegId: financialOpeningLegId('OPENING_V10_ALPHA_CASH'),
             },
           ],
@@ -409,13 +475,13 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
         {
           batchId: financialOpeningBatchId('OPENING_V10_BETA_FINANCE'),
           sourceId: source.sourceId,
-          settlementCurrency: 'GCU',
+          settlementCurrency: terms.price.currency,
           legs: [
             {
               legId: financialOpeningLegId('OPENING_V10_BETA_TREASURY'),
               account: buyerTreasury,
               direction: 'DEBIT',
-              amount: Money.from('100', 'GCU'),
+              amount: Money.from('8', terms.price.currency),
               counterpartLegId: financialOpeningLegId(
                 'OPENING_V10_BETA_EQUITY',
               ),
@@ -424,7 +490,7 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
               legId: financialOpeningLegId('OPENING_V10_BETA_EQUITY'),
               account: buyerOpeningEquity,
               direction: 'CREDIT',
-              amount: Money.from('100', 'GCU'),
+              amount: Money.from('8', terms.price.currency),
               counterpartLegId: financialOpeningLegId(
                 'OPENING_V10_BETA_TREASURY',
               ),
@@ -446,74 +512,79 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
     sha256Hex: sha256,
   });
   assertV08LedgerReconciled(reconciliation);
-  const transferQuantity = Quantity.from('4', 'tonne');
-  const settlementAmount = Money.from('8', 'GCU');
+  const openingInventory = rebuiltLedgers.inventory.balances.find(
+    ({ account }) =>
+      account.countryId === seller && account.commodityId === grain,
+  );
+  const buyerTreasuryPosition = rebuiltLedgers.financial.positions.find(
+    ({ account }) => account.accountId === buyerTreasury.accountId,
+  );
+  if (
+    openingInventory === undefined ||
+    openingInventory.quantity.unit !== transferQuantity.unit ||
+    openingInventory.quantity.subtract(transferQuantity).amount.isNegative() ||
+    buyerTreasuryPosition === undefined ||
+    buyerTreasuryPosition.netDebitBalance.currency !==
+      settlementAmount.currency ||
+    buyerTreasuryPosition.netDebitBalance
+      .subtract(settlementAmount)
+      .amount.isNegative() ||
+    buyerTreasury.countryId !== buyer ||
+    buyerTreasury.ownerId !== buyerTreasuryEntity ||
+    sellerSettlement.countryId !== seller ||
+    sellerSettlement.ownerId !== sellerTreasury
+  ) {
+    throw new Error('V10_TEST_FIXTURE_OPENING_COVERAGE_MISMATCH');
+  }
   const sellerTrade = officeActor({
-    subject: '10000000-0000-4000-8000-000000000001',
+    subject: '11111111-1111-4111-8111-111111111111',
     displayName: 'V10 test seller Trade',
-    actor: 'ACTOR_V10_ALPHA_TRADE',
+    actor: 'ACTOR_SELLER_TEST',
     world,
     country: seller,
-    team: 'TEAM_V10_ALPHA',
+    team: 'TEAM_TRANSFER_SELLER_TEST',
     office: officeId('TRADE'),
     capability: 'TRADE_CONTRACTS',
-    authorizationVersion: 'AUTH_V10_ALPHA_TRADE_1',
+    authorizationVersion: 'AUTH_V10_SELLER_TRADE_1',
     negotiationPartyIds: ['PARTY_V10_ALPHA'],
   });
   const buyerTrade = officeActor({
-    subject: '20000000-0000-4000-8000-000000000002',
+    subject: '22222222-2222-4222-8222-222222222222',
     displayName: 'V10 test buyer Trade',
-    actor: 'ACTOR_V10_BETA_TRADE',
+    actor: 'ACTOR_BUYER_TEST',
     world,
     country: buyer,
-    team: 'TEAM_V10_BETA',
+    team: 'TEAM_TRANSFER_BUYER_TEST',
     office: officeId('TRADE'),
+    officeAssignments: [officeId('TRADE'), officeId('FINANCE')],
     capability: 'TRADE_CONTRACTS',
-    authorizationVersion: 'AUTH_V10_BETA_TRADE_1',
+    authorizationVersion: 'AUTH_V10_BUYER_1',
     negotiationPartyIds: ['PARTY_V10_BETA'],
   });
   const buyerFinance = officeActor({
-    subject: '30000000-0000-4000-8000-000000000003',
+    subject: '22222222-2222-4222-8222-222222222222',
     displayName: 'V10 test buyer Finance',
-    actor: 'ACTOR_V10_BETA_FINANCE',
+    actor: 'ACTOR_BUYER_TEST',
     world,
     country: buyer,
-    team: 'TEAM_V10_BETA',
+    team: 'TEAM_TRANSFER_BUYER_TEST',
     office: officeId('FINANCE'),
+    officeAssignments: [officeId('TRADE'), officeId('FINANCE')],
     capability: 'FINANCE_TREASURY',
-    authorizationVersion: 'AUTH_V10_BETA_FINANCE_1',
+    authorizationVersion: 'AUTH_V10_BUYER_1',
     negotiationPartyIds: [],
   });
-  const command = parseCanonicalCommand(
-    {
-      actorId: sellerTrade.actorId,
-      authSubject: sellerTrade.principal.authSubject,
-      commandId: commandId('COMMAND_V10_TEST_TRANSFER'),
-      commandType: 'V10_TEST_TRANSFER_PREPARATION',
-      correlationId: 'CORRELATION_V10_TEST_TRANSFER',
-      countryId: seller,
-      expectedWorldVersion: '0',
-      idempotencyKey: idempotencyKey('IDEMPOTENCY_V10_TEST_TRANSFER'),
-      officeId: sellerTrade.officeId,
-      payload: {
-        status: V10_TWO_COUNTRY_TEST_FIXTURE_STATUS,
-        sellerCountryId: seller,
-        buyerCountryId: buyer,
-        commodityId: grain,
-        quantity: transferQuantity.toCanonicalValue(),
-        settlementAmount: settlementAmount.toCanonicalValue(),
-        nonStrategic: true,
-        belowThreshold: true,
-        usesOfficialReserves: false,
-        titleAndRiskTransferAt: 'DELIVERY',
-      },
-      schemaVersion: COMMAND_SCHEMA_VERSION,
-      simTime: '0',
-      submittedAtReal: '2026-09-12T00:00:00.000Z',
-      worldId: world,
-    },
-    sha256,
-  );
+  if (
+    command.actorId !== sellerTrade.actorId ||
+    command.authSubject !== sellerTrade.principal.authSubject ||
+    command.officeId !== sellerTrade.officeId ||
+    command.expectedWorldVersion !== '0' ||
+    buyerTrade.principal.authSubject !== buyerFinance.principal.authSubject ||
+    !buyerFinance.membership.officeAssignments.includes(officeId('TRADE')) ||
+    !buyerFinance.membership.officeAssignments.includes(officeId('FINANCE'))
+  ) {
+    throw new Error('V10_TEST_FIXTURE_OFFICE_CONTRACT_MISMATCH');
+  }
   const movement = (
     sourceAccount: InventoryAccount,
     target: InventoryAccount,
@@ -521,11 +592,14 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
     Object.freeze([
       Object.freeze({
         account: sourceAccount,
-        delta: Quantity.from('-4', 'tonne'),
+        delta: Quantity.from(
+          `-${transferQuantity.toCanonicalValue().amount}`,
+          transferQuantity.unit,
+        ),
       }),
       Object.freeze({
         account: target,
-        delta: Quantity.from('4', 'tonne'),
+        delta: transferQuantity,
       }),
     ] as const);
   return Object.freeze({
@@ -558,12 +632,10 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
       buyerOpeningEquity,
     }),
     transferIntent: Object.freeze({
+      terms,
       quantity: transferQuantity,
+      price: transferPrice,
       settlementAmount,
-      nonStrategic: true,
-      belowThreshold: true,
-      usesOfficialReserves: false,
-      titleAndRiskTransferAt: 'DELIVERY',
     }),
     movementPlan: Object.freeze({
       reserve: movement(sellerAvailable, sellerReserved),
@@ -619,15 +691,20 @@ export function createV10TwoCountryTestFixture(): Readonly<V10TwoCountryTestFixt
         expected: 'DENY',
       }),
       Object.freeze({
-        caseId: 'DENY_BUYER_FINANCE_AS_TRADE',
+        caseId: 'DENY_BUYER_FINANCE_AS_CENTRAL_BANK',
         actorKey: 'buyerFinance',
         requestedCountryId: buyer,
-        requestedOfficeId: officeId('TRADE'),
-        capability: 'TRADE_CONTRACTS',
+        requestedOfficeId: officeId('CENTRAL_BANK'),
+        capability: 'CENTRAL_BANK_MONETARY_POLICY',
         expected: 'DENY',
       }),
     ] satisfies readonly V10AuthorizationCase[]),
     command,
+    proposals: Object.freeze(proposals),
+    decisionScopes: Object.freeze({
+      seller: Object.freeze(decisionScope(proposals.seller)),
+      buyer: Object.freeze(decisionScope(proposals.buyer)),
+    }),
     openingSeed,
     rebuiltLedgers,
     reconciliation,
@@ -646,15 +723,18 @@ export async function createV10AtomicCommandFixture(
     requestedOfficeId: actor.officeId,
     capability: actor.capability,
   });
-  if (fixture.command.idempotencyKey === null) {
-    throw new Error('V10_TEST_FIXTURE_IDEMPOTENCY_KEY_REQUIRED');
+  if (
+    fixture.command.idempotencyKey === null ||
+    fixture.command.expectedWorldVersion === null
+  ) {
+    throw new Error('V10_TEST_FIXTURE_COMMAND_IDENTITY_REQUIRED');
   }
   return Object.freeze({
     worldId: fixture.worldId,
     commandId: fixture.command.commandId,
     idempotencyKey: fixture.command.idempotencyKey,
     commandFingerprint: fixture.command.fingerprint,
-    expectedWorldVersion: fixture.openingWorldVersion,
+    expectedWorldVersion: fixture.command.expectedWorldVersion,
     holderId: 'WORKER_V10_TEST_ONLY',
     fencingToken: '1',
     observedAtReal: '2026-09-12T00:00:00.000Z',
