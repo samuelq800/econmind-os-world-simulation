@@ -1,7 +1,7 @@
 // PREPARATION_ONLY_NOT_V09_2_STARTED: test infrastructure only.
 
 import { PGlite } from '@electric-sql/pglite';
-import { Pool, type PoolClient } from 'pg';
+import { Pool, type PoolClient, type QueryResultRow } from 'pg';
 
 import { assertV09PostgresTestEnvironment } from '../../scripts/v09-postgres-test-environment.mjs';
 import {
@@ -14,20 +14,26 @@ import {
 } from './v09-atomic-contract.js';
 
 interface PGliteQueryable {
-  query<Row extends Record<string, unknown>>(
+  query<Row extends object = Record<string, unknown>>(
     text: string,
     values?: readonly unknown[],
-  ): Promise<{ readonly rows: readonly Row[] }>;
+  ): Promise<{
+    readonly affectedRows?: number;
+    readonly rows: readonly Row[];
+  }>;
 }
 
 function pgliteClient(database: PGliteQueryable): V09AtomicSqlClient {
   return {
-    async query<Row extends Record<string, unknown>>(
+    async query<Row extends object = Record<string, unknown>>(
       text: string,
       values: readonly unknown[] = [],
     ): Promise<SqlResult<Row>> {
       const result = await database.query<Row>(text, values);
-      return { rows: result.rows };
+      return {
+        rowCount: result.affectedRows ?? result.rows.length,
+        rows: result.rows,
+      };
     },
   };
 }
@@ -80,12 +86,14 @@ export function createPGliteV09AtomicTestDatabase(): V09AtomicTestDatabase {
 
 function postgresClient(client: Pool | PoolClient): V09AtomicSqlClient {
   return {
-    async query<Row extends Record<string, unknown>>(
+    async query<Row extends object = Record<string, unknown>>(
       text: string,
       values: readonly unknown[] = [],
     ): Promise<SqlResult<Row>> {
-      const result = await client.query<Row>(text, [...values]);
-      return { rows: result.rows };
+      const result = await client.query<Row & QueryResultRow>(text, [
+        ...values,
+      ]);
+      return { rowCount: result.rowCount, rows: result.rows };
     },
   };
 }
