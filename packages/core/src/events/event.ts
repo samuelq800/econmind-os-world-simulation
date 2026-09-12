@@ -16,7 +16,7 @@ import {
   type EventType,
   type WorldId,
 } from '../ids.js';
-import { SimTime } from '../numeric/sim-time.js';
+import { isSimTime, SimTime } from '../numeric/sim-time.js';
 import {
   canonicalHashInput,
   canonicalSerialize,
@@ -146,6 +146,44 @@ export function parseAuthoritativeEvent(
     payloadHash: canonicalSha256(canonicalHashInput(record.payload), sha256Hex),
     recordedAtReal: canonicalRealTimestamp(record.recordedAtReal),
   });
+}
+
+export function validateAuthoritativeEvent(
+  input: AuthoritativeEvent,
+  sha256Hex: Sha256Hex,
+): Readonly<AuthoritativeEvent> {
+  let payload: unknown;
+  try {
+    payload = JSON.parse(input.canonicalPayload);
+  } catch {
+    invalid('Event canonical payload must be valid JSON');
+  }
+  if (canonicalSerialize(payload) !== input.canonicalPayload) {
+    invalid('Event canonical payload is not canonical');
+  }
+  const parsed = parseAuthoritativeEvent(
+    {
+      causationCommandId: input.causationCommandId,
+      correlationId: input.correlationId,
+      correctsEventId: input.correctsEventId,
+      eventId: input.eventId,
+      eventType: input.eventType,
+      payload,
+      recordedAtReal: input.recordedAtReal,
+      schemaVersion: input.schemaVersion,
+      sequence: input.sequence,
+      simTime: isSimTime(input.simTime)
+        ? input.simTime.toCanonicalValue()
+        : input.simTime,
+      worldId: input.worldId,
+      worldVersion: input.worldVersion,
+    },
+    sha256Hex,
+  );
+  if (canonicalSerialize(parsed) !== canonicalSerialize(input)) {
+    invalid('Event evidence does not match its canonical fingerprints');
+  }
+  return parsed;
 }
 
 export function validateAppendOnlyEventBatch(

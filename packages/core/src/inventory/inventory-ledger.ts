@@ -1,8 +1,14 @@
 import {
   canonicalSha256,
+  type CanonicalCommand,
   type CanonicalSha256,
   type Sha256Hex,
 } from '../commands/command.js';
+import {
+  bindAuthoritativeTransition,
+  type AuthoritativeTransition,
+  type AuthoritativeTransitionBinding,
+} from '../commands/receipt.js';
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 import {
   commandId,
@@ -94,6 +100,7 @@ export interface InventoryPosting {
   readonly worldVersionBefore: string;
   readonly worldVersionAfter: string;
   readonly simTime: SimTime;
+  readonly transitionBinding: Readonly<AuthoritativeTransitionBinding>;
   readonly operation: InventoryOperation;
   readonly entries: readonly Readonly<InventoryPostingEntry>[];
   readonly fingerprint: CanonicalSha256;
@@ -145,6 +152,8 @@ export interface InventoryMovementInput {
   readonly worldVersionBefore: string;
   readonly worldVersionAfter: string;
   readonly simTime: SimTime;
+  readonly command: CanonicalCommand;
+  readonly transition: AuthoritativeTransition;
   readonly quantity: Quantity;
   readonly source: InventoryAccount;
   readonly destination: InventoryAccount;
@@ -333,7 +342,12 @@ export function createInventoryAccount(
 }
 
 export function createInventoryPosting(
-  input: Omit<InventoryPosting, 'entries' | 'fingerprint'> & {
+  input: Omit<
+    InventoryPosting,
+    'entries' | 'fingerprint' | 'transitionBinding'
+  > & {
+    readonly command: CanonicalCommand;
+    readonly transition: AuthoritativeTransition;
     readonly entries: readonly InventoryPostingEntry[];
   },
   sha256Hex: Sha256Hex,
@@ -358,6 +372,24 @@ export function createInventoryPosting(
   }
   if (!isSimTime(input.simTime)) invalid('Posting simTime must be a SimTime');
   const canonicalWorldId = worldId(input.worldId);
+  const transitionBinding = bindAuthoritativeTransition(
+    { command: input.command, transition: input.transition },
+    sha256Hex,
+  );
+  const causationEventIds = immutableEventIds(input.causationEventIds);
+  if (
+    canonicalWorldId !== transitionBinding.worldId ||
+    input.causationCommandId !== transitionBinding.commandId ||
+    input.worldVersionBefore !== transitionBinding.worldVersionBefore ||
+    input.worldVersionAfter !== transitionBinding.worldVersionAfter ||
+    input.simTime.ticks !== transitionBinding.simTime.ticks ||
+    causationEventIds.length !== transitionBinding.eventIds.length ||
+    causationEventIds.some(
+      (identity, index) => identity !== transitionBinding.eventIds[index],
+    )
+  ) {
+    invalid('Posting must bind the complete authoritative V07 transition');
+  }
   const entries = immutableEntries(input.entries, canonicalWorldId);
   validateOperationEntries(input.operation, entries);
   const intent = Object.freeze({
@@ -365,10 +397,11 @@ export function createInventoryPosting(
     postingId: inventoryPostingId(input.postingId),
     worldId: canonicalWorldId,
     causationCommandId: commandId(input.causationCommandId),
-    causationEventIds: immutableEventIds(input.causationEventIds),
+    causationEventIds,
     worldVersionBefore: input.worldVersionBefore,
     worldVersionAfter: input.worldVersionAfter,
     simTime: input.simTime,
+    transitionBinding,
     operation: input.operation,
     entries,
   });
@@ -454,7 +487,7 @@ function receipt(
   });
 }
 
-/** The sole authoritative V08.1 balance writer. */
+/** @internal Per-projection step used only by the joint V08 lineage writer. */
 export function applyInventoryPosting(
   state: InventoryLedgerState,
   posting: InventoryPosting,
@@ -564,6 +597,8 @@ function movementPosting(
       worldVersionBefore: input.worldVersionBefore,
       worldVersionAfter: input.worldVersionAfter,
       simTime: input.simTime,
+      command: input.command,
+      transition: input.transition,
       operation,
       entries: [
         {

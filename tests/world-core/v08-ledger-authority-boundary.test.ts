@@ -11,8 +11,6 @@ import {
   Money,
   Quantity,
   SimTime,
-  applyFinancialPostingBatch,
-  applyInventoryPosting,
   assertV08LedgerReconciled,
   commandId,
   commodityId,
@@ -37,8 +35,13 @@ import {
   type FinancialLedgerState,
   type InventoryLedgerState,
 } from '../../packages/core/src/index.js';
+import { applyFinancialPostingBatch } from '../../packages/core/src/finance/financial-ledger.js';
+import { applyInventoryPosting } from '../../packages/core/src/inventory/inventory-ledger.js';
 import { FOUNDATION_PROPERTY_CONFIG } from '../property/property-config.js';
-import { openingLedgers } from '../helpers/v08-ledgers.js';
+import {
+  openingLedgers,
+  testAuthoritativeTransition,
+} from '../helpers/v08-ledgers.js';
 
 const sha256 = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
@@ -81,16 +84,31 @@ const equity = createFinancialAccount({
 });
 
 function inventoryPosting(version: string) {
+  const causationCommandId = commandId(`AUTHORITY_COMMAND_I_${version}`);
+  const causationEventIds = [eventId(`AUTHORITY_EVENT_I_${version}`)];
+  const simTime = SimTime.fromTicks('10000');
+  const evidence = testAuthoritativeTransition({
+    worldId: WORLD,
+    commandId: causationCommandId,
+    eventIds: causationEventIds,
+    worldVersionBefore: version,
+    worldVersionAfter: (BigInt(version) + 1n).toString(),
+    simTime,
+    sha256Hex: sha256,
+    firstEventSequence: (BigInt(version) + 1n).toString(),
+  });
   return createReservationPosting(
     {
       schemaVersion: INVENTORY_POSTING_SCHEMA_VERSION,
       postingId: inventoryPostingId(`AUTHORITY_INVENTORY_${version}`),
       worldId: WORLD,
-      causationCommandId: commandId(`AUTHORITY_COMMAND_I_${version}`),
-      causationEventIds: [eventId(`AUTHORITY_EVENT_I_${version}`)],
+      causationCommandId,
+      causationEventIds,
       worldVersionBefore: version,
       worldVersionAfter: (BigInt(version) + 1n).toString(),
-      simTime: SimTime.fromTicks('10000'),
+      simTime,
+      command: evidence.command,
+      transition: evidence.transition,
       quantity: Quantity.from('1', 'tonne'),
       source: available,
       destination: reserved,
@@ -100,16 +118,31 @@ function inventoryPosting(version: string) {
 }
 
 function financialPosting(version: string) {
+  const causationCommandId = commandId(`AUTHORITY_COMMAND_F_${version}`);
+  const causationEventIds = [eventId(`AUTHORITY_EVENT_F_${version}`)];
+  const simTime = SimTime.fromTicks('10000');
+  const evidence = testAuthoritativeTransition({
+    worldId: WORLD,
+    commandId: causationCommandId,
+    eventIds: causationEventIds,
+    worldVersionBefore: version,
+    worldVersionAfter: (BigInt(version) + 1n).toString(),
+    simTime,
+    sha256Hex: sha256,
+    firstEventSequence: (BigInt(version) + 1n).toString(),
+  });
   return createFinancialPostingBatch(
     {
       schemaVersion: FINANCIAL_POSTING_SCHEMA_VERSION,
       batchId: financialPostingBatchId(`AUTHORITY_FINANCIAL_${version}`),
       worldId: WORLD,
-      causationCommandId: commandId(`AUTHORITY_COMMAND_F_${version}`),
-      causationEventIds: [eventId(`AUTHORITY_EVENT_F_${version}`)],
+      causationCommandId,
+      causationEventIds,
       worldVersionBefore: version,
       worldVersionAfter: (BigInt(version) + 1n).toString(),
-      simTime: SimTime.fromTicks('10000'),
+      simTime,
+      command: evidence.command,
+      transition: evidence.transition,
       settlementCurrency: 'GCU',
       legs: [
         {
@@ -180,13 +213,15 @@ describe('V08 authoritative ledger authority boundary', () => {
     );
   });
 
-  it('exports parsers but no raw-to-authoritative hydration bypass', () => {
+  it('exports parsers but no raw hydration or split-ledger authoritative writer bypass', () => {
     expect(core).toHaveProperty('parseInventoryLedgerSnapshot');
     expect(core).toHaveProperty('parseFinancialLedgerSnapshot');
     expect(core).not.toHaveProperty('hydrateInventoryLedgerState');
     expect(core).not.toHaveProperty('hydrateFinancialLedgerState');
     expect(core).not.toHaveProperty('authorizeInventoryLedgerState');
     expect(core).not.toHaveProperty('authorizeFinancialLedgerState');
+    expect(core).not.toHaveProperty('applyInventoryPosting');
+    expect(core).not.toHaveProperty('applyFinancialPostingBatch');
   });
 
   it('fails closed on a snapshot mismatch and preserves canonical lineage state', () => {

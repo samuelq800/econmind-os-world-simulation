@@ -8,7 +8,6 @@ import {
   INVENTORY_POSTING_SCHEMA_VERSION,
   Quantity,
   SimTime,
-  applyInventoryPosting,
   commandId,
   commodityId,
   countryId,
@@ -31,7 +30,11 @@ import {
   type InventoryLedgerState,
   type InventoryMovementInput,
 } from '../../packages/core/src/index.js';
-import { openingLedgers } from '../helpers/v08-ledgers.js';
+import { applyInventoryPosting } from '../../packages/core/src/inventory/inventory-ledger.js';
+import {
+  openingLedgers,
+  testAuthoritativeTransition,
+} from '../helpers/v08-ledgers.js';
 
 const sha256 = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
@@ -95,16 +98,33 @@ function movement(
   quantity: string,
   source: InventoryAccount,
   destination: InventoryAccount,
+  commandPayloadVariant = 'a',
 ): InventoryMovementInput {
+  const causationCommandId = commandId(`COMMAND_${postingNumber}`);
+  const causationEventIds = [eventId(`EVENT_${postingNumber}`)];
+  const simTime = SimTime.fromTicks(String(postingNumber * 10_000));
+  const evidence = testAuthoritativeTransition({
+    worldId: WORLD,
+    commandId: causationCommandId,
+    eventIds: causationEventIds,
+    worldVersionBefore: String(versionBefore),
+    worldVersionAfter: String(versionBefore + 1),
+    simTime,
+    sha256Hex: sha256,
+    firstEventSequence: String(postingNumber),
+    commandPayload: { commandPayloadVariant },
+  });
   return {
     schemaVersion: INVENTORY_POSTING_SCHEMA_VERSION,
     postingId: inventoryPostingId(`POSTING_${postingNumber}`),
     worldId: WORLD,
-    causationCommandId: commandId(`COMMAND_${postingNumber}`),
-    causationEventIds: [eventId(`EVENT_${postingNumber}`)],
+    causationCommandId,
+    causationEventIds,
     worldVersionBefore: String(versionBefore),
     worldVersionAfter: String(versionBefore + 1),
-    simTime: SimTime.fromTicks(String(postingNumber * 10_000)),
+    simTime,
+    command: evidence.command,
+    transition: evidence.transition,
     quantity: Quantity.from(quantity, 'kg'),
     source,
     destination,
@@ -225,17 +245,31 @@ describe('V08.1 authoritative inventory posting ledger', () => {
   );
 
   it('rejects non-conserving and unit-inconsistent posting intent', () => {
+    const badCommandId = commandId('COMMAND_BAD');
+    const badEventIds = [eventId('EVENT_BAD')];
+    const badSimTime = SimTime.fromTicks('0');
+    const badEvidence = testAuthoritativeTransition({
+      worldId: WORLD,
+      commandId: badCommandId,
+      eventIds: badEventIds,
+      worldVersionBefore: '0',
+      worldVersionAfter: '1',
+      simTime: badSimTime,
+      sha256Hex: sha256,
+    });
     expect(() =>
       createInventoryPosting(
         {
           schemaVersion: INVENTORY_POSTING_SCHEMA_VERSION,
           postingId: inventoryPostingId('POSTING_BAD'),
           worldId: WORLD,
-          causationCommandId: commandId('COMMAND_BAD'),
-          causationEventIds: [eventId('EVENT_BAD')],
+          causationCommandId: badCommandId,
+          causationEventIds: badEventIds,
           worldVersionBefore: '0',
           worldVersionAfter: '1',
-          simTime: SimTime.fromTicks('0'),
+          simTime: badSimTime,
+          command: badEvidence.command,
+          transition: badEvidence.transition,
           operation: 'RESERVE',
           entries: [
             { account: available, delta: Quantity.from('-10', 'kg') },
@@ -311,15 +345,30 @@ describe('V08.1 authoritative inventory posting ledger', () => {
         code: DOMAIN_ERROR_CODES.INVENTORY_POSTING_CONFLICT,
       }),
     );
+
+    const transitionConflict = createReservationPosting(
+      movement(1, 0, '25', available, reserved, 'b'),
+      sha256,
+    );
+    expect(() =>
+      applyInventoryPosting(first.state, transitionConflict),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.INVENTORY_POSTING_CONFLICT,
+      }),
+    );
   });
 
   it('canonicalizes entry order to one deterministic posting fingerprint', () => {
-    const base = createReservationPosting(
-      movement(1, 0, '12.345', available, reserved),
-      sha256,
-    );
+    const movementInput = movement(1, 0, '12.345', available, reserved);
+    const base = createReservationPosting(movementInput, sha256);
     const reversed = createInventoryPosting(
-      { ...base, entries: [...base.entries].reverse() },
+      {
+        ...base,
+        command: movementInput.command,
+        transition: movementInput.transition,
+        entries: [...base.entries].reverse(),
+      },
       sha256,
     );
     expect(reversed.fingerprint).toBe(base.fingerprint);
