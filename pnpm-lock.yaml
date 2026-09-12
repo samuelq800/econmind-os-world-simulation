@@ -190,7 +190,17 @@ importers:
         version: 8.2.2(@types/node@24.13.3)
 
   apps/world-worker:
+    dependencies:
+      '@econmind/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      pg:
+        specifier: 8.16.3
+        version: 8.16.3
     devDependencies:
+      '@types/pg':
+        specifier: 8.15.5
+        version: 8.15.5
       typescript:
         specifier: 6.0.3
         version: 6.0.3

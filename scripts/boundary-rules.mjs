@@ -317,9 +317,20 @@ export function analyzeBoundarySource({
     const specifier = cleanSpecifier(reference.specifier);
     const target = resolveTarget({ compilerOptions, filePath, specifier });
     const hintedTarget = workspaceTarget(specifier, workspacePackages);
+    const workspacePackageRoot = workspacePackages.get(
+      packageNameFromSpecifier(specifier),
+    );
+    // A bare workspace import can legitimately resolve through its generated
+    // `types` export. Attribute that edge to the declared package source root,
+    // whose governed source is scanned independently. Relative/direct imports
+    // into dist have no workspace package root hint and remain rejected.
+    const architectureTarget =
+      target && workspacePackageRoot && isWithin(workspacePackageRoot, target)
+        ? workspacePackageRoot
+        : (target ?? hintedTarget ?? repositoryRoot);
     const targetArchitecture = classifyArchitecturePath(
       repositoryRoot,
-      target ?? hintedTarget ?? repositoryRoot,
+      architectureTarget,
     );
     const externalReason = externalViolation(sourceArchitecture, specifier);
     const localSpecifier =
