@@ -9,3 +9,7 @@ export function getApiFoundationStatus(): ApiFoundationStatus {
     authoritativeMutationEnabled: false,
   };
 }
+
+export * from './integration/contracts.js';
+export * from './integration/identity.js';
+export * from './integration/transport.js';

@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "world-v2-read-model-types-v1",
+  "sourceMigration": "0007_world_v2_read_projection_boundary",
+  "tables": {
+    "projection_entitlement": {
+      "columns": {
+        "world_id": "text",
+        "auth_subject": "uuid",
+        "classification": "text",
+        "scope_key": "text",
+        "authorization_version": "text",
+        "active": "boolean",
+        "granted_at": "timestamptz",
+        "revoked_at": "timestamptz|null"
+      }
+    },
+    "read_projection": {
+      "columns": {
+        "world_id": "text",
+        "classification": "text",
+        "scope_key": "text",
+        "schema_version": "text",
+        "world_version": "bigint",
+        "event_sequence": "bigint",
+        "payload": "jsonb",
+        "generated_at": "timestamptz"
+      }
+    }
+  }
+}

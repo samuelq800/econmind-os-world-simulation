@@ -31,6 +31,8 @@
     "v09:staging:plan": "node scripts/v09-staging-evidence.mjs --dry-run",
     "v09:staging:execute": "node scripts/v09-staging-evidence.mjs --execute",
     "registry:generate": "python3 tools/build_core_registries.py && prettier --write packages/core/src/registries/fixed-catalog.ts",
+    "types:world-read:generate": "node scripts/generate-world-v2-read-types.mjs",
+    "types:world-read:check": "node scripts/generate-world-v2-read-types.mjs --check",
     "secrets:check": "node scripts/check-repository-secrets.mjs",
     "supabase:safe": "node scripts/supabase-safe.mjs",
     "build": "pnpm -r --if-present build",
