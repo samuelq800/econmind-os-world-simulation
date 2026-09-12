@@ -9,6 +9,8 @@
     "v10-two-country-fixture.ts",
     "v10-two-country-fixture.test.ts",
     "v10-commit-authorization-fixture.ts",
-    "v10-commit-authorization-fixture.test.ts"
+    "v10-commit-authorization-fixture.test.ts",
+    "v101-authorization-projection-fixture.ts",
+    "v101-authorization-projection-fixture.test.ts"
   ]
 }
