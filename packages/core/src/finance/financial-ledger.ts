@@ -1,8 +1,14 @@
 import {
   canonicalSha256,
+  type CanonicalCommand,
   type CanonicalSha256,
   type Sha256Hex,
 } from '../commands/command.js';
+import {
+  bindAuthoritativeTransition,
+  type AuthoritativeTransition,
+  type AuthoritativeTransitionBinding,
+} from '../commands/receipt.js';
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 import {
   commandId,
@@ -100,6 +106,7 @@ export interface FinancialPostingBatch {
   readonly worldVersionBefore: string;
   readonly worldVersionAfter: string;
   readonly simTime: SimTime;
+  readonly transitionBinding: Readonly<AuthoritativeTransitionBinding>;
   readonly settlementCurrency: string;
   readonly legs: readonly Readonly<FinancialPostingLeg>[];
   readonly fingerprint: CanonicalSha256;
@@ -324,7 +331,12 @@ export function createClaimAccountPair(input: {
 }
 
 export function createFinancialPostingBatch(
-  input: Omit<FinancialPostingBatch, 'legs' | 'fingerprint'> & {
+  input: Omit<
+    FinancialPostingBatch,
+    'legs' | 'fingerprint' | 'transitionBinding'
+  > & {
+    readonly command: CanonicalCommand;
+    readonly transition: AuthoritativeTransition;
     readonly legs: readonly FinancialPostingLeg[];
   },
   sha256Hex: Sha256Hex,
@@ -346,16 +358,37 @@ export function createFinancialPostingBatch(
   }
   if (!isSimTime(input.simTime)) invalid('Posting simTime must be a SimTime');
   const canonicalWorldId = worldId(input.worldId);
+  const transitionBinding = bindAuthoritativeTransition(
+    { command: input.command, transition: input.transition },
+    sha256Hex,
+  );
+  const causationEventIds = immutableEventIds(input.causationEventIds);
+  if (
+    canonicalWorldId !== transitionBinding.worldId ||
+    input.causationCommandId !== transitionBinding.commandId ||
+    input.worldVersionBefore !== transitionBinding.worldVersionBefore ||
+    input.worldVersionAfter !== transitionBinding.worldVersionAfter ||
+    input.simTime.ticks !== transitionBinding.simTime.ticks ||
+    causationEventIds.length !== transitionBinding.eventIds.length ||
+    causationEventIds.some(
+      (identity, index) => identity !== transitionBinding.eventIds[index],
+    )
+  ) {
+    invalid(
+      'Posting batch must bind the complete authoritative V07 transition',
+    );
+  }
   const settlementCurrency = Money.from('0', input.settlementCurrency).currency;
   const intent = Object.freeze({
     schemaVersion: FINANCIAL_POSTING_SCHEMA_VERSION,
     batchId: financialPostingBatchId(input.batchId),
     worldId: canonicalWorldId,
     causationCommandId: commandId(input.causationCommandId),
-    causationEventIds: immutableEventIds(input.causationEventIds),
+    causationEventIds,
     worldVersionBefore: input.worldVersionBefore,
     worldVersionAfter: input.worldVersionAfter,
     simTime: input.simTime,
+    transitionBinding,
     settlementCurrency,
     legs: immutableLegs(input.legs, canonicalWorldId, settlementCurrency),
   });
@@ -471,7 +504,7 @@ function receipt(
   });
 }
 
-/** The sole authoritative V08.2 financial-position writer. */
+/** @internal Per-projection step used only by the joint V08 lineage writer. */
 export function applyFinancialPostingBatch(
   state: FinancialLedgerState,
   batch: FinancialPostingBatch,

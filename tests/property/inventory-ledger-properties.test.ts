@@ -7,7 +7,6 @@ import {
   INVENTORY_POSTING_SCHEMA_VERSION,
   Quantity,
   SimTime,
-  applyInventoryPosting,
   canonicalSerialize,
   commandId,
   commodityId,
@@ -22,7 +21,11 @@ import {
   legalEntityId,
   worldId,
 } from '../../packages/core/src/index.js';
-import { openingLedgers } from '../helpers/v08-ledgers.js';
+import { applyInventoryPosting } from '../../packages/core/src/inventory/inventory-ledger.js';
+import {
+  openingLedgers,
+  testAuthoritativeTransition,
+} from '../helpers/v08-ledgers.js';
 import { FOUNDATION_PROPERTY_CONFIG } from './property-config.js';
 
 const sha256 = (preimage: string) =>
@@ -61,16 +64,30 @@ function initial(total: bigint) {
 }
 
 function reserve(total: bigint, requested: bigint) {
+  const causationCommandId = commandId('COMMAND_PROPERTY');
+  const causationEventIds = [eventId('EVENT_PROPERTY')];
+  const simTime = SimTime.fromTicks('10000');
+  const evidence = testAuthoritativeTransition({
+    worldId: WORLD,
+    commandId: causationCommandId,
+    eventIds: causationEventIds,
+    worldVersionBefore: '0',
+    worldVersionAfter: '1',
+    simTime,
+    sha256Hex: sha256,
+  });
   const posting = createReservationPosting(
     {
       schemaVersion: INVENTORY_POSTING_SCHEMA_VERSION,
       postingId: inventoryPostingId('POSTING_PROPERTY'),
       worldId: WORLD,
-      causationCommandId: commandId('COMMAND_PROPERTY'),
-      causationEventIds: [eventId('EVENT_PROPERTY')],
+      causationCommandId,
+      causationEventIds,
       worldVersionBefore: '0',
       worldVersionAfter: '1',
-      simTime: SimTime.fromTicks('10000'),
+      simTime,
+      command: evidence.command,
+      transition: evidence.transition,
       quantity: Quantity.from(String(requested), 'kg'),
       source: available,
       destination: reserved,

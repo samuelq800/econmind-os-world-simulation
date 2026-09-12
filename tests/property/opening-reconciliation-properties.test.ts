@@ -129,9 +129,11 @@ describe('V08.3 opening reconciliation properties', () => {
       fc.property(fc.bigInt({ min: 1n, max: 10n ** 30n }), (amount) => {
         const forward = rebuildV08LedgersFromLineage({
           seed: build(amount, false),
+          sha256Hex: sha256,
         });
         const reverse = rebuildV08LedgersFromLineage({
           seed: build(amount, true),
+          sha256Hex: sha256,
         });
         expect(canonicalSerialize(reverse)).toBe(canonicalSerialize(forward));
         const net = forward.financial.positions.reduce(
@@ -152,6 +154,7 @@ describe('V08.3 opening reconciliation properties', () => {
       fc.property(fc.bigInt({ min: 1n, max: 10n ** 24n }), (amount) => {
         const rebuilt = rebuildV08LedgersFromLineage({
           seed: build(amount, false),
+          sha256Hex: sha256,
         });
         const absent = reconcileV08LedgerSnapshots({
           reconstructed: rebuilt,

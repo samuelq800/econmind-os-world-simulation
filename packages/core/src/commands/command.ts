@@ -19,7 +19,7 @@ import {
   type OfficeId,
   type WorldId,
 } from '../ids.js';
-import { SimTime } from '../numeric/sim-time.js';
+import { isSimTime, SimTime } from '../numeric/sim-time.js';
 import {
   canonicalHashInput,
   canonicalSerialize,
@@ -237,6 +237,46 @@ export function parseCanonicalCommand(
     ),
     payloadHash: canonicalSha256(canonicalHashInput(record.payload), sha256Hex),
   });
+}
+
+export function validateCanonicalCommand(
+  input: CanonicalCommand,
+  sha256Hex: Sha256Hex,
+): Readonly<CanonicalCommand> {
+  let payload: unknown;
+  try {
+    payload = JSON.parse(input.canonicalPayload);
+  } catch {
+    invalid('Command canonical payload must be valid JSON');
+  }
+  if (canonicalSerialize(payload) !== input.canonicalPayload) {
+    invalid('Command canonical payload is not canonical');
+  }
+  const parsed = parseCanonicalCommand(
+    {
+      actorId: input.actorId,
+      authSubject: input.authSubject,
+      commandId: input.commandId,
+      commandType: input.commandType,
+      correlationId: input.correlationId,
+      countryId: input.countryId,
+      expectedWorldVersion: input.expectedWorldVersion,
+      idempotencyKey: input.idempotencyKey,
+      officeId: input.officeId,
+      payload,
+      schemaVersion: input.schemaVersion,
+      simTime: isSimTime(input.simTime)
+        ? input.simTime.toCanonicalValue()
+        : input.simTime,
+      submittedAtReal: input.submittedAtReal,
+      worldId: input.worldId,
+    },
+    sha256Hex,
+  );
+  if (canonicalSerialize(parsed) !== canonicalSerialize(input)) {
+    invalid('Command evidence does not match its canonical fingerprints');
+  }
+  return parsed;
 }
 
 export function classifyCommandIdentity(

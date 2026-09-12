@@ -1,5 +1,6 @@
 import {
   canonicalSha256,
+  type CanonicalCommand,
   type CanonicalSha256,
   type Sha256Hex,
 } from '../commands/command.js';
@@ -34,8 +35,10 @@ import {
   type ReplayVersionBinding,
 } from '../replay/replay.js';
 import {
+  bindAuthoritativeTransition,
   validateAuthoritativeTransition,
   type AuthoritativeTransition,
+  type AuthoritativeTransitionBinding,
 } from '../commands/receipt.js';
 import {
   canonicalHashInput,
@@ -128,6 +131,7 @@ export interface RebuiltV08Ledgers {
 }
 
 export interface V08AuthoritativeLedgerTransition {
+  readonly command: CanonicalCommand;
   readonly transition: AuthoritativeTransition;
   readonly inventoryPostings: readonly InventoryPosting[];
   readonly financialPostingBatches: readonly FinancialPostingBatch[];
@@ -511,15 +515,11 @@ function financialStateAtVersion(
 
 function assertInventoryPostingBinding(
   posting: InventoryPosting,
-  transition: AuthoritativeTransition,
+  binding: AuthoritativeTransitionBinding,
 ): void {
-  const eventIds = new Set(transition.eventIds);
   if (
-    posting.worldId !== transition.worldId ||
-    posting.causationCommandId !== transition.commandId ||
-    posting.worldVersionBefore !== transition.worldVersionBefore ||
-    posting.worldVersionAfter !== transition.worldVersionAfter ||
-    posting.causationEventIds.some((eventId) => !eventIds.has(eventId))
+    canonicalSerialize(posting.transitionBinding) !==
+    canonicalSerialize(binding)
   ) {
     invalid(
       'Inventory posting is not bound to its authoritative World transition',
@@ -529,15 +529,10 @@ function assertInventoryPostingBinding(
 
 function assertFinancialPostingBinding(
   batch: FinancialPostingBatch,
-  transition: AuthoritativeTransition,
+  binding: AuthoritativeTransitionBinding,
 ): void {
-  const eventIds = new Set(transition.eventIds);
   if (
-    batch.worldId !== transition.worldId ||
-    batch.causationCommandId !== transition.commandId ||
-    batch.worldVersionBefore !== transition.worldVersionBefore ||
-    batch.worldVersionAfter !== transition.worldVersionAfter ||
-    batch.causationEventIds.some((eventId) => !eventIds.has(eventId))
+    canonicalSerialize(batch.transitionBinding) !== canonicalSerialize(binding)
   ) {
     invalid(
       'Financial posting is not bound to its authoritative World transition',
@@ -548,6 +543,7 @@ function assertFinancialPostingBinding(
 export function rebuildV08LedgersFromLineage(input: {
   readonly seed: OpeningSeed;
   readonly transitions?: readonly V08AuthoritativeLedgerTransition[];
+  readonly sha256Hex: Sha256Hex;
 }): Readonly<RebuiltV08Ledgers> {
   if (!openingSeedInstances.has(input.seed)) {
     invalid('Ledger reconstruction accepts a validated opening seed only');
@@ -556,13 +552,35 @@ export function rebuildV08LedgersFromLineage(input: {
   let inventory = openingInventoryState(input.seed);
   let financial = openingFinancialState(input.seed);
   const transitionIds = new Set<string>();
+  const eventIds = new Set<string>();
+  const idempotencyCommands = new Map<string, string>();
   const inventoryPostingIds = new Set<string>();
   const financialBatchIds = new Set<string>();
+  let expectedEventSequence = 1n;
 
   for (const value of input.transitions ?? []) {
     const transition = validateAuthoritativeTransition(value.transition);
+    const transitionBinding = bindAuthoritativeTransition(
+      { command: value.command, transition },
+      input.sha256Hex,
+    );
     if (transitionIds.has(transition.transitionId)) {
       invalid('Authoritative transition identity is duplicated');
+    }
+    if (transitionBinding.idempotencyKey !== null) {
+      const priorCommand = idempotencyCommands.get(
+        transitionBinding.idempotencyKey,
+      );
+      if (
+        priorCommand !== undefined &&
+        priorCommand !== transitionBinding.commandId
+      ) {
+        invalid('Idempotency key is reused across distinct Commands');
+      }
+      idempotencyCommands.set(
+        transitionBinding.idempotencyKey,
+        transitionBinding.commandId,
+      );
     }
     if (
       transition.worldId !== input.seed.worldId ||
@@ -573,16 +591,26 @@ export function rebuildV08LedgersFromLineage(input: {
       );
     }
     transitionIds.add(transition.transitionId);
+    for (const event of transition.events) {
+      if (
+        BigInt(event.sequence) !== expectedEventSequence ||
+        eventIds.has(event.eventId)
+      ) {
+        invalid('Authoritative Event lineage is duplicated or out of order');
+      }
+      eventIds.add(event.eventId);
+      expectedEventSequence += 1n;
+    }
 
     for (const posting of value.inventoryPostings) {
-      assertInventoryPostingBinding(posting, transition);
+      assertInventoryPostingBinding(posting, transitionBinding);
       if (inventoryPostingIds.has(posting.postingId)) {
         invalid('Inventory posting identity is duplicated across lineage');
       }
       inventoryPostingIds.add(posting.postingId);
     }
     for (const batch of value.financialPostingBatches) {
-      assertFinancialPostingBinding(batch, transition);
+      assertFinancialPostingBinding(batch, transitionBinding);
       if (financialBatchIds.has(batch.batchId)) {
         invalid('Financial posting identity is duplicated across lineage');
       }
