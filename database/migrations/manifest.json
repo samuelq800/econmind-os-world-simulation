@@ -101,6 +101,20 @@
       "lock_or_downtime_risk": "Preparation-only V09.2 candidate; adds new append-only Posting/commit-authorization facts and replaceable current materialization rows without production publication",
       "rollback_strategy": "reversible-before-economic-facts",
       "production_approval": null
+    },
+    {
+      "migration_id": "0008_world_v2_materialization_recovery",
+      "release_order": 8,
+      "path": "database/migrations/artifacts/0008_world_v2_materialization_recovery.sql",
+      "sha256": "f35ccc9273e94766a942d9b50ed87cf2fa32387993be44ee562a4853d400a1bb",
+      "artifact_source_commit": "81a0022be738f8720dc5f9ca379d6556943adede",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Preparation-only V09.3 recovery candidate; permits atomic deletion and same-watermark repair of non-authoritative current materializations while preserving WorldVersion non-regression",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }
