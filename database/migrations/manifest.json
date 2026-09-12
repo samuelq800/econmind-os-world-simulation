@@ -143,6 +143,34 @@
       "lock_or_downtime_risk": "Forward V09.3 recovery-correctness candidate; adds an unvalidated-for-legacy claim-fencing constraint while requiring all new or updated claimed/finalized Command rows to retain a positive fence token",
       "rollback_strategy": "forward-fix",
       "production_approval": null
+    },
+    {
+      "migration_id": "0011_world_v2_current_commit_authorization",
+      "release_order": 11,
+      "path": "database/migrations/artifacts/0011_world_v2_current_commit_authorization.sql",
+      "sha256": "89d7c6c3ae977fa835af6f3aa8d5dea012dee4a77f0ee38a0e7cc434d7373722",
+      "artifact_source_commit": "f86167afad56d3f27537df8e88131aa02b4bb0a8",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Forward V09 review-closure candidate; adds an initially empty server-owned current-authorization projection that fails closed until a trusted authorization service writes current identity, membership, Office, capability and revision facts",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
+    },
+    {
+      "migration_id": "0012_world_v2_command_claim_active_lease_guard",
+      "release_order": 12,
+      "path": "database/migrations/artifacts/0012_world_v2_command_claim_active_lease_guard.sql",
+      "sha256": "01bef128971818338cbb9e54eca010ac24d5585e035b9d1bd17373ab1e0677f9",
+      "artifact_source_commit": "f86167afad56d3f27537df8e88131aa02b4bb0a8",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Forward V09 review-closure candidate; replaces only the Command queue transition guard so a new claim must lock and exactly match the active holder, unexpired lease and fencing token",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }
