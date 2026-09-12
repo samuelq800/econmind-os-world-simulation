@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import {
   createWorldReadRequest,
+  MAX_WORLD_READ_RESPONSE_BYTES,
   parseSupabaseAuthSubject,
   readEntitledWorldProjection,
   WORLD_V2_ENTITLED_PROJECTION_QUERY,
@@ -227,6 +228,32 @@ describe('forward-only parameterized PostgreSQL read adapter', () => {
       retryable: true,
     });
     expect(calls).toBe(1);
+  });
+
+  it('rejects a projection that exceeds the one MiB response boundary', async () => {
+    const oversizedExecutor: ParameterizedPgReadExecutor = {
+      query: async () => ({
+        rows: [
+          {
+            world_id: 'WORLD_1',
+            classification: 'COUNTRY',
+            scope_key: 'COUNTRY_A',
+            schema_version: 'world-projection-read-v1',
+            world_version: '9',
+            event_sequence: '14',
+            payload: 'x'.repeat(MAX_WORLD_READ_RESPONSE_BYTES),
+            generated_at: '2026-09-12T02:00:00.000Z',
+          },
+        ],
+      }),
+    };
+    await expect(
+      readEntitledWorldProjection({
+        executor: oversizedExecutor,
+        authSubject: countrySubject,
+        request: request('COUNTRY', 'COUNTRY_A'),
+      }),
+    ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
   });
 });
 

@@ -1,7 +1,6 @@
 import {
-  createWorldReadRequest,
+  parseWorldReadRequest,
   parseWorldProjectionDto,
-  WORLD_READ_API_SCHEMA_VERSION,
   type ProjectionClassification,
   type WorldProjectionDto,
   type WorldReadRequestEnvelope,
@@ -11,7 +10,10 @@ import {
   parseSupabaseAuthSubject,
   type SupabaseAuthSubject,
 } from './identity.js';
-import { WorldReadFailure } from './transport.js';
+import {
+  MAX_WORLD_READ_RESPONSE_BYTES,
+  WorldReadFailure,
+} from './transport.js';
 
 export type EntitledProjectionClassification = Extract<
   ProjectionClassification,
@@ -95,6 +97,33 @@ function isAborted(signal: AbortSignal | undefined): boolean {
   return signal?.aborted === true;
 }
 
+async function awaitQuery<T>(
+  operation: Promise<T>,
+  signal: AbortSignal | undefined,
+): Promise<T> {
+  if (signal === undefined) return operation;
+  if (signal.aborted) {
+    throw new WorldReadFailure('CANCELLED', 'World read cancelled', false);
+  }
+  return new Promise<T>((resolve, reject) => {
+    const cancel = () =>
+      reject(new WorldReadFailure('CANCELLED', 'World read cancelled', false));
+    signal.addEventListener('abort', cancel, { once: true });
+    void operation.then(
+      (value) => {
+        signal.removeEventListener('abort', cancel);
+        if (signal.aborted) cancel();
+        else resolve(value);
+      },
+      (error: unknown) => {
+        signal.removeEventListener('abort', cancel);
+        if (signal.aborted) cancel();
+        else reject(error);
+      },
+    );
+  });
+}
+
 function postgresInteger(value: unknown, label: string): string {
   if (typeof value !== 'string' || !NON_NEGATIVE_INTEGER.test(value)) {
     protocol(`${label} must be a canonical non-negative integer`);
@@ -141,28 +170,14 @@ function resultRows(value: unknown): readonly unknown[] {
   return (value as { readonly rows: readonly unknown[] }).rows;
 }
 
-function validateRequest(
-  request: WorldReadRequestEnvelope,
-): WorldReadRequestEnvelope & {
+function validateRequest(request: unknown): WorldReadRequestEnvelope & {
   readonly payload: {
     readonly classification: EntitledProjectionClassification;
   };
 } {
-  if (
-    request.schemaVersion !== WORLD_READ_API_SCHEMA_VERSION ||
-    request.operation !== 'READ_WORLD_PROJECTION'
-  ) {
-    protocol('World read request envelope is unsupported');
-  }
-
   let validated: WorldReadRequestEnvelope;
   try {
-    validated = createWorldReadRequest({
-      requestId: request.requestId,
-      worldId: request.payload.worldId,
-      classification: request.payload.classification,
-      scopeKey: request.payload.scopeKey,
-    });
+    validated = parseWorldReadRequest(request);
   } catch {
     protocol('World read request envelope is invalid');
   }
@@ -194,7 +209,7 @@ function mapProjectionRow(
   }
 
   try {
-    return parseWorldProjectionDto({
+    const projection = parseWorldProjectionDto({
       schemaVersion: row.schema_version,
       worldId: row.world_id,
       classification: row.classification,
@@ -208,6 +223,13 @@ function mapProjectionRow(
       receipts: [],
       events: [],
     });
+    if (
+      Buffer.byteLength(JSON.stringify(projection), 'utf8') >
+      MAX_WORLD_READ_RESPONSE_BYTES
+    ) {
+      protocol('PostgreSQL projection exceeds the one MiB response limit');
+    }
+    return projection;
   } catch (error) {
     if (error instanceof WorldReadFailure) throw error;
     protocol('PostgreSQL projection row failed DTO validation');
@@ -217,7 +239,7 @@ function mapProjectionRow(
 export async function readEntitledWorldProjection(input: {
   readonly executor: ParameterizedPgReadExecutor;
   readonly authSubject: SupabaseAuthSubject;
-  readonly request: WorldReadRequestEnvelope;
+  readonly request: unknown;
   readonly minimumWatermark?: MinimumProjectionWatermark;
   readonly signal?: AbortSignal;
 }): Promise<WorldProjectionDto | null> {
@@ -260,7 +282,7 @@ export async function readEntitledWorldProjection(input: {
 
   let result: ParameterizedPgReadResult;
   try {
-    result = await input.executor.query(queryRequest);
+    result = await awaitQuery(input.executor.query(queryRequest), input.signal);
   } catch {
     if (isAborted(input.signal)) {
       throw new WorldReadFailure('CANCELLED', 'World read cancelled', false);

@@ -1,6 +1,7 @@
 export const WORLD_READ_API_SCHEMA_VERSION = 'world-read-api-v1' as const;
 export const WORLD_PROJECTION_SCHEMA_VERSION =
   'world-projection-read-v1' as const;
+export const MAX_WORLD_READ_REQUEST_BYTES = 16 * 1024;
 
 export type JsonPrimitive = boolean | null | number | string;
 export type JsonValue =
@@ -125,6 +126,18 @@ function invalid(message: string): never {
   throw new Error(`WORLD_READ_PROTOCOL_INVALID: ${message}`);
 }
 
+function assertBoundedJson(value: unknown, limit: number, label: string): void {
+  let serialized: string;
+  try {
+    serialized = JSON.stringify(value);
+  } catch {
+    invalid(`${label} is not JSON`);
+  }
+  if (serialized === undefined || Buffer.byteLength(serialized) > limit) {
+    invalid(`${label} exceeds the byte limit`);
+  }
+}
+
 function record(value: unknown, label: string): Record<string, unknown> {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     invalid(`${label} must be an object`);
@@ -217,6 +230,37 @@ export function createWorldReadRequest(input: {
       classification: classification(input.classification),
       scopeKey: canonicalId(input.scopeKey, 'scopeKey'),
     }),
+  });
+}
+
+/** Parses untrusted server-request input before it reaches a read adapter. */
+export function parseWorldReadRequest(
+  value: unknown,
+): WorldReadRequestEnvelope {
+  assertBoundedJson(value, MAX_WORLD_READ_REQUEST_BYTES, 'request');
+  const input = record(value, 'request');
+  exactKeys(
+    input,
+    ['schemaVersion', 'requestId', 'operation', 'payload'],
+    'request',
+  );
+  if (
+    input.schemaVersion !== WORLD_READ_API_SCHEMA_VERSION ||
+    input.operation !== 'READ_WORLD_PROJECTION'
+  ) {
+    invalid('request operation is unsupported');
+  }
+  const payload = record(input.payload, 'request payload');
+  exactKeys(
+    payload,
+    ['worldId', 'classification', 'scopeKey'],
+    'request payload',
+  );
+  return createWorldReadRequest({
+    requestId: string(input.requestId, 'requestId'),
+    worldId: string(payload.worldId, 'worldId'),
+    classification: classification(payload.classification),
+    scopeKey: string(payload.scopeKey, 'scopeKey'),
   });
 }
 

@@ -5,6 +5,14 @@ import {
   type WorldReadRequestEnvelope,
 } from './contracts.js';
 
+export const MAX_WORLD_READ_RESPONSE_BYTES = 1_048_576;
+
+const RETRYABLE_UPSTREAM_CODES = new Set<WorldReadErrorCode>([
+  'RATE_LIMITED',
+  'TIMEOUT',
+  'UPSTREAM_UNAVAILABLE',
+]);
+
 export interface WorldReadTransport {
   send(
     request: WorldReadRequestEnvelope,
@@ -113,7 +121,12 @@ export class LocalMockHttpWorldReadTransport implements WorldReadTransport {
       signal,
     });
     const contentLength = response.headers.get('content-length');
-    if (contentLength !== null && Number(contentLength) > 1_048_576) {
+    if (
+      contentLength !== null &&
+      /^\d+$/u.test(contentLength) &&
+      BigInt(contentLength) > BigInt(MAX_WORLD_READ_RESPONSE_BYTES)
+    ) {
+      void response.body?.cancel().catch(() => undefined);
       throw new WorldReadFailure(
         'PROTOCOL_ERROR',
         'Mock response exceeds the one MiB contract limit',
@@ -121,20 +134,14 @@ export class LocalMockHttpWorldReadTransport implements WorldReadTransport {
       );
     }
     if (!response.ok) {
+      void response.body?.cancel().catch(() => undefined);
       throw new WorldReadFailure(
         response.status === 429 ? 'RATE_LIMITED' : 'UPSTREAM_UNAVAILABLE',
         `Mock transport returned HTTP ${response.status}`,
         response.status === 429 || response.status >= 500,
       );
     }
-    const text = await response.text();
-    if (Buffer.byteLength(text) > 1_048_576) {
-      throw new WorldReadFailure(
-        'PROTOCOL_ERROR',
-        'Mock response exceeds the one MiB contract limit',
-        false,
-      );
-    }
+    const text = await readResponseBodyWithinLimit(response);
     try {
       return JSON.parse(text) as unknown;
     } catch {
@@ -145,6 +152,38 @@ export class LocalMockHttpWorldReadTransport implements WorldReadTransport {
       );
     }
   }
+}
+
+async function readResponseBodyWithinLimit(
+  response: Response,
+): Promise<string> {
+  if (response.body === null) return '';
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const next = await reader.read();
+      if (next.done) break;
+      size += next.value.byteLength;
+      if (size > MAX_WORLD_READ_RESPONSE_BYTES) {
+        try {
+          await reader.cancel();
+        } catch {
+          // The bounded failure remains authoritative even if peer cleanup fails.
+        }
+        throw new WorldReadFailure(
+          'PROTOCOL_ERROR',
+          'Mock response exceeds the one MiB contract limit',
+          false,
+        );
+      }
+      chunks.push(next.value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  return Buffer.concat(chunks).toString('utf8');
 }
 
 function validatePolicy(policy: WorldReadRetryPolicy) {
@@ -182,7 +221,13 @@ function normalizeFailure(
   if (timedOut) {
     return new WorldReadFailure('TIMEOUT', 'World read timed out', true);
   }
-  if (error instanceof WorldReadFailure) return error;
+  if (error instanceof WorldReadFailure) {
+    return new WorldReadFailure(
+      error.code,
+      error.message,
+      error.retryable && RETRYABLE_UPSTREAM_CODES.has(error.code),
+    );
+  }
   if (error instanceof TypeError) {
     return new WorldReadFailure(
       'UPSTREAM_UNAVAILABLE',
@@ -191,6 +236,32 @@ function normalizeFailure(
     );
   }
   return new WorldReadFailure('UNKNOWN', 'World read failed', false);
+}
+
+async function awaitTransport<T>(
+  operation: Promise<T>,
+  signal: AbortSignal,
+): Promise<T> {
+  if (signal.aborted) {
+    throw new WorldReadFailure('CANCELLED', 'World read cancelled', false);
+  }
+  return new Promise<T>((resolve, reject) => {
+    const cancel = () =>
+      reject(new WorldReadFailure('CANCELLED', 'World read cancelled', false));
+    signal.addEventListener('abort', cancel, { once: true });
+    void operation.then(
+      (value) => {
+        signal.removeEventListener('abort', cancel);
+        if (signal.aborted) cancel();
+        else resolve(value);
+      },
+      (error: unknown) => {
+        signal.removeEventListener('abort', cancel);
+        if (signal.aborted) cancel();
+        else reject(error);
+      },
+    );
+  });
 }
 
 async function waitForRetry(milliseconds: number, signal?: AbortSignal) {
@@ -233,8 +304,8 @@ export async function executeWorldProjectionRead(input: {
       if (controller.signal.aborted) {
         throw new WorldReadFailure('CANCELLED', 'World read cancelled', false);
       }
-      const rawResponse = await input.transport.send(
-        input.request,
+      const rawResponse = await awaitTransport(
+        input.transport.send(input.request, controller.signal),
         controller.signal,
       );
       let response;
@@ -258,7 +329,8 @@ export async function executeWorldProjectionRead(input: {
       throw new WorldReadFailure(
         response.error.code,
         response.error.message,
-        response.error.retryable,
+        response.error.retryable &&
+          RETRYABLE_UPSTREAM_CODES.has(response.error.code),
       );
     } catch (error) {
       finalFailure = normalizeFailure(

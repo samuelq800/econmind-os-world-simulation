@@ -46,6 +46,34 @@ function integer(value: unknown, label: string): number {
   return value as number;
 }
 
+function abortFailure(): Error {
+  return new Error('JWT_VERIFICATION_CANCELLED');
+}
+
+async function awaitVerification<T>(
+  operation: Promise<T>,
+  signal: AbortSignal | undefined,
+): Promise<T> {
+  if (signal?.aborted) throw abortFailure();
+  if (signal === undefined) return operation;
+  return new Promise<T>((resolve, reject) => {
+    const cancel = () => reject(abortFailure());
+    signal.addEventListener('abort', cancel, { once: true });
+    void operation.then(
+      (value) => {
+        signal.removeEventListener('abort', cancel);
+        if (signal.aborted) reject(abortFailure());
+        else resolve(value);
+      },
+      (error: unknown) => {
+        signal.removeEventListener('abort', cancel);
+        if (signal.aborted) reject(abortFailure());
+        else reject(error);
+      },
+    );
+  });
+}
+
 export function parseSupabaseAuthSubject(value: unknown): SupabaseAuthSubject {
   if (typeof value !== 'string' || !CANONICAL_UUID.test(value)) {
     invalid('sub must be a canonical lowercase UUID');
@@ -99,6 +127,10 @@ export async function verifySupabaseJwtClaims(input: {
   readonly signal?: AbortSignal;
 }): Promise<ValidatedJwtClaims> {
   if (input.token.length === 0) invalid('token is empty');
-  const claims = await input.verifier.verify(input.token, input.signal);
+  if (input.signal?.aborted) throw abortFailure();
+  const claims = await awaitVerification(
+    input.verifier.verify(input.token, input.signal),
+    input.signal,
+  );
   return validateVerifiedJwtClaims(claims, input.policy);
 }
