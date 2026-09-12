@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/c4-feature-admission-execution-contract.v1.json",
+  "title": "C4 non-authoritative feature-admission evidence execution contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "contractVersion",
+    "evidenceId",
+    "status",
+    "baseline",
+    "inputArtifacts",
+    "registryPolicy",
+    "evidencePolicy",
+    "hardBoundaries"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "c4-feature-admission-execution-contract.v1"
+    },
+    "contractVersion": { "const": "1.0.0" },
+    "evidenceId": { "type": "string", "minLength": 1 },
+    "status": { "const": "EVIDENCE_ONLY_NON_AUTHORITATIVE" },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewedC4TargetCommit",
+        "continuationRecordCommit",
+        "c4ReadinessGate",
+        "approvedState",
+        "finalGeneratorReady"
+      ],
+      "properties": {
+        "reviewedC4TargetCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "continuationRecordCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "c4ReadinessGate": { "const": "PASS" },
+        "approvedState": { "const": "NOT_READY_NON_AUTHORITATIVE" },
+        "finalGeneratorReady": { "const": false }
+      }
+    },
+    "inputArtifacts": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "rawSha256"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "rawSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "canonicalHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+        }
+      }
+    },
+    "registryPolicy": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 },
+      "required": [
+        "requiredVersion",
+        "pilotVariableCoverage",
+        "candidateRole",
+        "candidateDisposition",
+        "transformationCompatibility"
+      ]
+    },
+    "evidencePolicy": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 },
+      "required": [
+        "observed",
+        "derived",
+        "placeholder",
+        "missingness",
+        "duplicates",
+        "reportingAsymmetry"
+      ]
+    },
+    "hardBoundaries": {
+      "type": "array",
+      "minItems": 9,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 {
   "registryId": "econmind-variable-registry",
   "schemaVersion": "variable-registry.v2",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "status": "DEVELOPMENT_NON_AUTHORITATIVE",
   "variables": [
     {
@@ -416,6 +416,54 @@
       "caveats": [
         "Reporter and mirror values may differ",
         "Classification revision must be retained"
+      ],
+      "engineConsumers": [],
+      "calibrationRole": "TRADE_CALIBRATION"
+    },
+    {
+      "variableId": "bilateral_trade_exports_usd",
+      "displayName": "Reported bilateral goods exports",
+      "definition": "Reported bilateral merchandise exports primary value by reporter, partner, product, and period.",
+      "economicDomain": "TRADE",
+      "canonicalUnit": "USD",
+      "frequency": "ANNUAL",
+      "dataClass": "OBSERVED",
+      "preferredSourceId": "UN_COMTRADE_V1",
+      "sourceIndicatorCode": "PRIMARY_VALUE",
+      "fallbackSourceIds": [],
+      "validityRules": ["value >= 0", "flowCode = X"],
+      "missingPolicy": "PRESERVE_NULL",
+      "transformationId": "IDENTITY_DECIMAL",
+      "transformationVersion": "1.0.0",
+      "confidence": "MEDIUM",
+      "caveats": [
+        "Reporter and mirror values may differ",
+        "Classification revision and partner identity must be retained",
+        "No averaging, reconciliation, IPF, or RAS is authorized"
+      ],
+      "engineConsumers": [],
+      "calibrationRole": "TRADE_CALIBRATION"
+    },
+    {
+      "variableId": "bilateral_trade_imports_usd",
+      "displayName": "Reported bilateral goods imports",
+      "definition": "Reported bilateral merchandise imports primary value by reporter, partner, product, and period.",
+      "economicDomain": "TRADE",
+      "canonicalUnit": "USD",
+      "frequency": "ANNUAL",
+      "dataClass": "OBSERVED",
+      "preferredSourceId": "UN_COMTRADE_V1",
+      "sourceIndicatorCode": "PRIMARY_VALUE",
+      "fallbackSourceIds": [],
+      "validityRules": ["value >= 0", "flowCode = M"],
+      "missingPolicy": "PRESERVE_NULL",
+      "transformationId": "IDENTITY_DECIMAL",
+      "transformationVersion": "1.0.0",
+      "confidence": "MEDIUM",
+      "caveats": [
+        "Reporter and mirror values may differ",
+        "Classification revision and partner identity must be retained",
+        "No averaging, reconciliation, IPF, or RAS is authorized"
       ],
       "engineConsumers": [],
       "calibrationRole": "TRADE_CALIBRATION"

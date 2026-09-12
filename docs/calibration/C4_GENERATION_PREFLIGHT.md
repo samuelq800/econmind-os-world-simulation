@@ -95,3 +95,11 @@ pnpm vitest run tests/calibration/calibration-c4-preflight.test.ts
 The verifier is local and read-only. It reports
 `C4_PREFLIGHT_VERIFIED_NOT_READY` on success; that result confirms binding and
 the preflight boundary, not authorization to generate a world.
+
+## Permitted continuation completed after this baseline
+
+`C4_FEATURE_ADMISSION_EVIDENCE.md` records the separately reproducible,
+non-authoritative feature-evidence inventory assembled from these frozen
+inputs. It closes the pilot-variable registry metadata gap and reports evidence
+for all current candidates, but admits zero features and carries forward all
+seven unmet gates above.

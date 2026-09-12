@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/c4-feature-admission-evidence.v1.json",
+  "title": "C4 non-authoritative feature-admission evidence register",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceId",
+    "status",
+    "featureSetSelected",
+    "finalGeneratorReady",
+    "input",
+    "baseline",
+    "registryCoverage",
+    "qualitySummary",
+    "candidateSummary",
+    "features",
+    "remainingPrerequisites",
+    "hardBoundaries",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "c4-feature-admission-evidence.v1" },
+    "evidenceId": { "type": "string", "minLength": 1 },
+    "status": { "const": "EVIDENCE_ONLY_NON_AUTHORITATIVE" },
+    "featureSetSelected": { "const": false },
+    "finalGeneratorReady": { "const": false },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contractCanonicalHash", "artifacts"],
+      "properties": {
+        "contractCanonicalHash": { "$ref": "#/$defs/hash" },
+        "artifacts": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "items": { "$ref": "#/$defs/artifactBinding" }
+        }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewedC4TargetCommit",
+        "continuationRecordCommit",
+        "c4ReadinessGate",
+        "approvedState",
+        "finalGeneratorReady",
+        "c4PreflightContentHash"
+      ],
+      "properties": {
+        "reviewedC4TargetCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "continuationRecordCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "c4ReadinessGate": { "const": "PASS" },
+        "approvedState": { "const": "NOT_READY_NON_AUTHORITATIVE" },
+        "finalGeneratorReady": { "const": false },
+        "c4PreflightContentHash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "registryCoverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registryVersion",
+        "frozenPilotVariableCount",
+        "registeredPilotVariableCount",
+        "missingVariableIds"
+      ],
+      "properties": {
+        "registryVersion": { "const": "2.1.0" },
+        "frozenPilotVariableCount": { "type": "integer", "minimum": 0 },
+        "registeredPilotVariableCount": { "type": "integer", "minimum": 0 },
+        "missingVariableIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "qualitySummary": { "$ref": "#/$defs/countSummary" },
+    "candidateSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "candidateCount",
+        "observedCount",
+        "derivedCount",
+        "placeholderCount",
+        "pilotEvidenceCandidateCount",
+        "noFrozenPilotObservationCount",
+        "admittedCount"
+      ],
+      "properties": {
+        "candidateCount": { "type": "integer", "minimum": 0 },
+        "observedCount": { "type": "integer", "minimum": 0 },
+        "derivedCount": { "type": "integer", "minimum": 0 },
+        "placeholderCount": { "type": "integer", "minimum": 0 },
+        "pilotEvidenceCandidateCount": { "type": "integer", "minimum": 0 },
+        "noFrozenPilotObservationCount": { "type": "integer", "minimum": 0 },
+        "admittedCount": { "const": 0 }
+      }
+    },
+    "features": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/feature" }
+    },
+    "remainingPrerequisites": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["prerequisiteId", "evidenceId", "effect"],
+        "properties": {
+          "prerequisiteId": { "type": "string", "minLength": 1 },
+          "evidenceId": { "type": "string", "minLength": 1 },
+          "effect": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "hardBoundaries": {
+      "type": "array",
+      "minItems": 9,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "contentHash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "artifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "rawSha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "rawSha256": { "$ref": "#/$defs/hash" },
+        "canonicalHash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "countSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceFactCount",
+        "distinctObservationIdCount",
+        "exactDuplicateFactCount",
+        "explicitMissingValueCount",
+        "reportingAsymmetryCount",
+        "exactnessFailureCount"
+      ],
+      "properties": {
+        "sourceFactCount": { "type": "integer", "minimum": 0 },
+        "distinctObservationIdCount": { "type": "integer", "minimum": 0 },
+        "exactDuplicateFactCount": { "type": "integer", "minimum": 0 },
+        "explicitMissingValueCount": { "type": "integer", "minimum": 0 },
+        "reportingAsymmetryCount": { "type": "integer", "minimum": 0 },
+        "exactnessFailureCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "feature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "variableId",
+        "dataClass",
+        "canonicalUnit",
+        "preferredSourceId",
+        "allowedSourceIds",
+        "registryTransformation",
+        "missingPolicy",
+        "evidenceStatus",
+        "admissionStatus",
+        "materializationStatus",
+        "pilotEvidence",
+        "caveatCodes"
+      ],
+      "properties": {
+        "variableId": { "type": "string", "minLength": 1 },
+        "dataClass": {
+          "enum": [
+            "OBSERVED",
+            "DERIVED",
+            "SYNTHETIC_CALIBRATION",
+            "PLACEHOLDER"
+          ]
+        },
+        "canonicalUnit": { "type": "string", "minLength": 1 },
+        "preferredSourceId": { "type": "string", "minLength": 1 },
+        "allowedSourceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "registryTransformation": { "type": "string", "minLength": 1 },
+        "missingPolicy": { "type": "string", "minLength": 1 },
+        "evidenceStatus": {
+          "enum": [
+            "PILOT_EVIDENCE_WITH_CAVEATS",
+            "NO_FROZEN_PILOT_OBSERVATIONS"
+          ]
+        },
+        "admissionStatus": { "const": "NOT_ADMITTED" },
+        "materializationStatus": {
+          "enum": [
+            "FROZEN_OBSERVATIONS_PRESENT",
+            "NO_FROZEN_PILOT_OBSERVATIONS",
+            "DERIVATION_NOT_RUN",
+            "PLACEHOLDER_VALUE_NOT_ASSIGNED"
+          ]
+        },
+        "pilotEvidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sourceFactCount",
+            "distinctObservationIdCount",
+            "exactDuplicateFactCount",
+            "explicitMissingValueCount",
+            "sourceIds",
+            "sourceSnapshotIds",
+            "adapterTransformations"
+          ],
+          "properties": {
+            "sourceFactCount": { "type": "integer", "minimum": 0 },
+            "distinctObservationIdCount": { "type": "integer", "minimum": 0 },
+            "exactDuplicateFactCount": { "type": "integer", "minimum": 0 },
+            "explicitMissingValueCount": { "type": "integer", "minimum": 0 },
+            "sourceIds": { "$ref": "#/$defs/stringSet" },
+            "sourceSnapshotIds": { "$ref": "#/$defs/stringSet" },
+            "adapterTransformations": { "$ref": "#/$defs/stringSet" }
+          }
+        },
+        "caveatCodes": { "$ref": "#/$defs/stringSet" }
+      }
+    },
+    "stringSet": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

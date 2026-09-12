@@ -1,0 +1,574 @@
+{
+  "schemaVersion": "c4-feature-admission-evidence.v1",
+  "evidenceId": "c4-feature-admission-evidence-from-frozen-c2-c3",
+  "status": "EVIDENCE_ONLY_NON_AUTHORITATIVE",
+  "featureSetSelected": false,
+  "finalGeneratorReady": false,
+  "input": {
+    "contractCanonicalHash": "c2b960b4465f6e8b0755d30ad721618b5454f957462aa236bde283365e59893a",
+    "artifacts": [
+      {
+        "path": "data/calibration/exploration/c3_execution_contract.v1.json",
+        "rawSha256": "bb7841b8925bd64ee5e07767098d5f12db3b1d55fdd142c78c24ba207f3725a5",
+        "canonicalHash": "9c9b3fab9f7def56bbe66d2e1464d278dde345d24dc37fc3e49e6dd883eafd48"
+      },
+      {
+        "path": "data/calibration/exploration/c3_exploration_manifest.v1.json",
+        "rawSha256": "e76a65aa274634ccebd54ff50f0e54c1d04a3bf65e12aa43601906fce4041846"
+      },
+      {
+        "path": "data/calibration/exploration/c3_exploration_summary.v1.json",
+        "rawSha256": "9cc34aca524d6c9ec0ffb1c957f573e1145527cc4425b9bb379b15d87958036a"
+      },
+      {
+        "path": "data/calibration/exploration/c3_uncertainty_register.v1.json",
+        "rawSha256": "341c9a3e08c582c82cf3e173660f7e4d822d34bbeee0ad2d36345df312773d2a"
+      },
+      {
+        "path": "data/calibration/pilot/normalized_observations.v1.json",
+        "rawSha256": "2ddf22030106f92b906510b926bf40855e8879e5faca67d43ed9ade31cb6078a"
+      },
+      {
+        "path": "data/calibration/pilot/pilot_report.v1.json",
+        "rawSha256": "3c8fe27f685b001ecfe73476fddf85ec32a71b1b239d70aad73ccf76d2c56a21"
+      },
+      {
+        "path": "data/calibration/pilot/quality_diagnostics.v1.json",
+        "rawSha256": "e4b4c07136f94992d63813ee34b6cf0111ee7953dab39fc964167e86f96e9b8a"
+      },
+      {
+        "path": "data/calibration/pilot/snapshot_manifest.v1.json",
+        "rawSha256": "bcdf0cefe0d6e6ac6b223198a5e076d4228fcaff354fe203c26f7343323bf8fa"
+      },
+      {
+        "path": "data/calibration/preflight/c4_generation_preflight.v1.json",
+        "rawSha256": "50187193d0a4cb1fec8b3d190431ff98806034cf36fae2aa980e1c932e3ab916",
+        "canonicalHash": "323bf1d117d0511cb40891a02a161e052682e9aa8938f33ddbad6ce732fc5843"
+      },
+      {
+        "path": "data/calibration/variable_registry.v2.json",
+        "rawSha256": "94b8b1a907410a0ed80b0378b3b040884d6f8fd974f096c0af29c7c01e286266"
+      }
+    ]
+  },
+  "baseline": {
+    "reviewedC4TargetCommit": "de663d7d6a5d5dc0873f9e49905af8c57ce645fc",
+    "continuationRecordCommit": "f8a248815db8c2474feea07f1f93d7e6aa9d5654",
+    "c4ReadinessGate": "PASS",
+    "approvedState": "NOT_READY_NON_AUTHORITATIVE",
+    "finalGeneratorReady": false,
+    "c4PreflightContentHash": "323bf1d117d0511cb40891a02a161e052682e9aa8938f33ddbad6ce732fc5843"
+  },
+  "registryCoverage": {
+    "registryVersion": "2.1.0",
+    "frozenPilotVariableCount": 10,
+    "registeredPilotVariableCount": 10,
+    "missingVariableIds": []
+  },
+  "qualitySummary": {
+    "sourceFactCount": 247,
+    "distinctObservationIdCount": 246,
+    "exactDuplicateFactCount": 1,
+    "explicitMissingValueCount": 6,
+    "reportingAsymmetryCount": 3,
+    "exactnessFailureCount": 0
+  },
+  "candidateSummary": {
+    "candidateCount": 19,
+    "observedCount": 10,
+    "derivedCount": 3,
+    "placeholderCount": 6,
+    "pilotEvidenceCandidateCount": 4,
+    "noFrozenPilotObservationCount": 15,
+    "admittedCount": 0
+  },
+  "features": [
+    {
+      "variableId": "agriculture_value_added_pct_gdp",
+      "dataClass": "OBSERVED",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "preferredSourceId": "WB_WDI_V2",
+      "allowedSourceIds": ["WB_WDI_V2"],
+      "registryTransformation": "IDENTITY_DECIMAL@1.0.0",
+      "missingPolicy": "PRESERVE_NULL",
+      "evidenceStatus": "PILOT_EVIDENCE_WITH_CAVEATS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "FROZEN_OBSERVATIONS_PRESENT",
+      "pilotEvidence": {
+        "sourceFactCount": 30,
+        "distinctObservationIdCount": 30,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 2,
+        "sourceIds": ["WB_WDI_V2"],
+        "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+        "adapterTransformations": ["WDI_IDENTITY_DECIMAL@2.0.0"]
+      },
+      "caveatCodes": [
+        "EXPLICIT_MISSING_VALUES_PRESENT",
+        "FROZEN_PILOT_ONLY",
+        "PROVIDER_UNIT_METADATA_EMPTY",
+        "REGISTRY_AND_ADAPTER_TRANSFORMATIONS_REPORTED_SEPARATELY"
+      ]
+    },
+    {
+      "variableId": "commodity_dependence_proxy",
+      "dataClass": "PLACEHOLDER",
+      "canonicalUnit": "UNSPECIFIED",
+      "preferredSourceId": "UN_COMTRADE_V1",
+      "allowedSourceIds": ["UN_COMTRADE_V1"],
+      "registryTransformation": "NOT_DEFINED@0.0.0",
+      "missingPolicy": "PLACEHOLDER",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "PLACEHOLDER_VALUE_NOT_ASSIGNED",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["PLACEHOLDER_DEFINITION_NOT_APPROVED"]
+    },
+    {
+      "variableId": "current_account_pct_gdp",
+      "dataClass": "OBSERVED",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "preferredSourceId": "IMF_WEO",
+      "allowedSourceIds": ["IMF_WEO"],
+      "registryTransformation": "IDENTITY_DECIMAL@1.0.0",
+      "missingPolicy": "PRESERVE_NULL",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["NO_FROZEN_PILOT_OBSERVATIONS"]
+    },
+    {
+      "variableId": "energy_dependence_proxy",
+      "dataClass": "PLACEHOLDER",
+      "canonicalUnit": "UNSPECIFIED",
+      "preferredSourceId": "WB_WDI_V2",
+      "allowedSourceIds": ["WB_WDI_V2"],
+      "registryTransformation": "NOT_DEFINED@0.0.0",
+      "missingPolicy": "PLACEHOLDER",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "PLACEHOLDER_VALUE_NOT_ASSIGNED",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["PLACEHOLDER_DEFINITION_NOT_APPROVED"]
+    },
+    {
+      "variableId": "export_concentration_hhi",
+      "dataClass": "PLACEHOLDER",
+      "canonicalUnit": "RATIO_0_1",
+      "preferredSourceId": "UN_COMTRADE_V1",
+      "allowedSourceIds": ["UN_COMTRADE_V1"],
+      "registryTransformation": "EXPORT_HHI_PENDING@0.0.0",
+      "missingPolicy": "PLACEHOLDER_UNTIL_PRODUCT_MAPPING_APPROVED",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "PLACEHOLDER_VALUE_NOT_ASSIGNED",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["PLACEHOLDER_DEFINITION_NOT_APPROVED"]
+    },
+    {
+      "variableId": "fiscal_balance_pct_gdp",
+      "dataClass": "DERIVED",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "preferredSourceId": "IMF_WEO",
+      "allowedSourceIds": ["IMF_WEO"],
+      "registryTransformation": "FISCAL_BALANCE_EXACT@1.0.0",
+      "missingPolicy": "NULL_IF_ANY_INPUT_NULL",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "DERIVATION_NOT_RUN",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["DERIVATION_NOT_RUN"]
+    },
+    {
+      "variableId": "food_dependence_proxy",
+      "dataClass": "PLACEHOLDER",
+      "canonicalUnit": "UNSPECIFIED",
+      "preferredSourceId": "FAOSTAT",
+      "allowedSourceIds": ["FAOSTAT"],
+      "registryTransformation": "NOT_DEFINED@0.0.0",
+      "missingPolicy": "PLACEHOLDER",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "PLACEHOLDER_VALUE_NOT_ASSIGNED",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["PLACEHOLDER_DEFINITION_NOT_APPROVED"]
+    },
+    {
+      "variableId": "gdp_per_capita_current_usd",
+      "dataClass": "DERIVED",
+      "canonicalUnit": "USD_PER_PERSON",
+      "preferredSourceId": "WB_WDI_V2",
+      "allowedSourceIds": ["WB_WDI_V2"],
+      "registryTransformation": "GDP_PER_CAPITA_EXACT@1.0.0",
+      "missingPolicy": "NULL_IF_ANY_INPUT_NULL",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "DERIVATION_NOT_RUN",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["DERIVATION_NOT_RUN"]
+    },
+    {
+      "variableId": "government_expenditure_pct_gdp",
+      "dataClass": "OBSERVED",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "preferredSourceId": "IMF_WEO",
+      "allowedSourceIds": ["IMF_WEO"],
+      "registryTransformation": "IDENTITY_DECIMAL@1.0.0",
+      "missingPolicy": "PRESERVE_NULL",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["NO_FROZEN_PILOT_OBSERVATIONS"]
+    },
+    {
+      "variableId": "government_revenue_pct_gdp",
+      "dataClass": "OBSERVED",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "preferredSourceId": "IMF_WEO",
+      "allowedSourceIds": ["IMF_WEO"],
+      "registryTransformation": "IDENTITY_DECIMAL@1.0.0",
+      "missingPolicy": "PRESERVE_NULL",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["NO_FROZEN_PILOT_OBSERVATIONS"]
+    },
+    {
+      "variableId": "import_dependency_hhi",
+      "dataClass": "PLACEHOLDER",
+      "canonicalUnit": "RATIO_0_1",
+      "preferredSourceId": "UN_COMTRADE_V1",
+      "allowedSourceIds": ["UN_COMTRADE_V1"],
+      "registryTransformation": "IMPORT_HHI_PENDING@0.0.0",
+      "missingPolicy": "PLACEHOLDER_UNTIL_MIRROR_POLICY_APPROVED",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "PLACEHOLDER_VALUE_NOT_ASSIGNED",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["PLACEHOLDER_DEFINITION_NOT_APPROVED"]
+    },
+    {
+      "variableId": "industry_value_added_pct_gdp",
+      "dataClass": "OBSERVED",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "preferredSourceId": "WB_WDI_V2",
+      "allowedSourceIds": ["WB_WDI_V2"],
+      "registryTransformation": "IDENTITY_DECIMAL@1.0.0",
+      "missingPolicy": "PRESERVE_NULL",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["NO_FROZEN_PILOT_OBSERVATIONS"]
+    },
+    {
+      "variableId": "labour_market_structure",
+      "dataClass": "PLACEHOLDER",
+      "canonicalUnit": "UNSPECIFIED",
+      "preferredSourceId": "ILOSTAT_BULK",
+      "allowedSourceIds": ["ILOSTAT_BULK"],
+      "registryTransformation": "NOT_DEFINED@0.0.0",
+      "missingPolicy": "PLACEHOLDER",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "PLACEHOLDER_VALUE_NOT_ASSIGNED",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["PLACEHOLDER_DEFINITION_NOT_APPROVED"]
+    },
+    {
+      "variableId": "manufacturing_value_added_pct_gdp",
+      "dataClass": "OBSERVED",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "preferredSourceId": "WB_WDI_V2",
+      "allowedSourceIds": ["WB_WDI_V2"],
+      "registryTransformation": "IDENTITY_DECIMAL@1.0.0",
+      "missingPolicy": "PRESERVE_NULL",
+      "evidenceStatus": "PILOT_EVIDENCE_WITH_CAVEATS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "FROZEN_OBSERVATIONS_PRESENT",
+      "pilotEvidence": {
+        "sourceFactCount": 30,
+        "distinctObservationIdCount": 30,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 2,
+        "sourceIds": ["WB_WDI_V2"],
+        "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+        "adapterTransformations": ["WDI_IDENTITY_DECIMAL@2.0.0"]
+      },
+      "caveatCodes": [
+        "EXPLICIT_MISSING_VALUES_PRESENT",
+        "FROZEN_PILOT_ONLY",
+        "PROVIDER_UNIT_METADATA_EMPTY",
+        "REGISTRY_AND_ADAPTER_TRANSFORMATIONS_REPORTED_SEPARATELY"
+      ]
+    },
+    {
+      "variableId": "public_debt_pct_gdp",
+      "dataClass": "OBSERVED",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "preferredSourceId": "IMF_WEO",
+      "allowedSourceIds": ["IMF_WEO"],
+      "registryTransformation": "IDENTITY_DECIMAL@1.0.0",
+      "missingPolicy": "PRESERVE_NULL",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["NO_FROZEN_PILOT_OBSERVATIONS"]
+    },
+    {
+      "variableId": "reserves_total_usd",
+      "dataClass": "OBSERVED",
+      "canonicalUnit": "USD",
+      "preferredSourceId": "WB_WDI_V2",
+      "allowedSourceIds": ["WB_WDI_V2"],
+      "registryTransformation": "IDENTITY_DECIMAL@1.0.0",
+      "missingPolicy": "PRESERVE_NULL",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["NO_FROZEN_PILOT_OBSERVATIONS"]
+    },
+    {
+      "variableId": "services_value_added_pct_gdp",
+      "dataClass": "OBSERVED",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "preferredSourceId": "WB_WDI_V2",
+      "allowedSourceIds": ["WB_WDI_V2"],
+      "registryTransformation": "IDENTITY_DECIMAL@1.0.0",
+      "missingPolicy": "PRESERVE_NULL",
+      "evidenceStatus": "PILOT_EVIDENCE_WITH_CAVEATS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "FROZEN_OBSERVATIONS_PRESENT",
+      "pilotEvidence": {
+        "sourceFactCount": 30,
+        "distinctObservationIdCount": 30,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 2,
+        "sourceIds": ["WB_WDI_V2"],
+        "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+        "adapterTransformations": ["WDI_IDENTITY_DECIMAL@2.0.0"]
+      },
+      "caveatCodes": [
+        "EXPLICIT_MISSING_VALUES_PRESENT",
+        "FROZEN_PILOT_ONLY",
+        "PROVIDER_UNIT_METADATA_EMPTY",
+        "REGISTRY_AND_ADAPTER_TRANSFORMATIONS_REPORTED_SEPARATELY"
+      ]
+    },
+    {
+      "variableId": "trade_openness_pct_gdp",
+      "dataClass": "DERIVED",
+      "canonicalUnit": "PERCENT_OF_GDP",
+      "preferredSourceId": "WB_WDI_V2",
+      "allowedSourceIds": ["WB_WDI_V2"],
+      "registryTransformation": "TRADE_OPENNESS_EXACT@1.0.0",
+      "missingPolicy": "NULL_IF_ANY_INPUT_NULL",
+      "evidenceStatus": "NO_FROZEN_PILOT_OBSERVATIONS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "DERIVATION_NOT_RUN",
+      "pilotEvidence": {
+        "sourceFactCount": 0,
+        "distinctObservationIdCount": 0,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": [],
+        "sourceSnapshotIds": [],
+        "adapterTransformations": []
+      },
+      "caveatCodes": ["DERIVATION_NOT_RUN"]
+    },
+    {
+      "variableId": "unemployment_pct",
+      "dataClass": "OBSERVED",
+      "canonicalUnit": "PERCENT_OF_LABOUR_FORCE",
+      "preferredSourceId": "ILOSTAT_BULK",
+      "allowedSourceIds": ["ILOSTAT_BULK", "WB_WDI_V2"],
+      "registryTransformation": "IDENTITY_DECIMAL@1.0.0",
+      "missingPolicy": "PRESERVE_NULL",
+      "evidenceStatus": "PILOT_EVIDENCE_WITH_CAVEATS",
+      "admissionStatus": "NOT_ADMITTED",
+      "materializationStatus": "FROZEN_OBSERVATIONS_PRESENT",
+      "pilotEvidence": {
+        "sourceFactCount": 30,
+        "distinctObservationIdCount": 30,
+        "exactDuplicateFactCount": 0,
+        "explicitMissingValueCount": 0,
+        "sourceIds": ["WB_WDI_V2"],
+        "sourceSnapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+        "adapterTransformations": ["WDI_IDENTITY_DECIMAL@2.0.0"]
+      },
+      "caveatCodes": [
+        "APPROVED_FALLBACK_SOURCE_USED",
+        "FROZEN_PILOT_ONLY",
+        "PROVIDER_UNIT_METADATA_EMPTY",
+        "REGISTRY_AND_ADAPTER_TRANSFORMATIONS_REPORTED_SEPARATELY"
+      ]
+    }
+  ],
+  "remainingPrerequisites": [
+    {
+      "prerequisiteId": "MISSING_VALUE_POLICY_FOR_ARCHETYPE_FEATURES_UNAPPROVED",
+      "evidenceId": "C2_EXPLICIT_MISSING_OBSERVATIONS",
+      "effect": "C3 blocks complete-case archetype selection and does not authorize imputation."
+    },
+    {
+      "prerequisiteId": "ARCHETYPE_METHOD_AND_COUNT_UNSELECTED",
+      "evidenceId": "C3_INFERENCE_SCOPE_LIMIT",
+      "effect": "C3 descriptive order statistics cannot select an archetype algorithm, count, or labels."
+    },
+    {
+      "prerequisiteId": "FICTIONAL_COUNTRY_MAPPING_NOT_AUTHORIZED",
+      "evidenceId": "C3_INFERENCE_SCOPE_LIMIT",
+      "effect": "No empirical entity may become a fictional-country identity or assignment."
+    },
+    {
+      "prerequisiteId": "WTO_TARIFF_EVIDENCE_ABSENT",
+      "evidenceId": "C2_WTO_PROVIDER_COVERAGE_GAP",
+      "effect": "No tariff backfill, policy-effect calibration, or tariff-informed synthetic output is allowed."
+    },
+    {
+      "prerequisiteId": "VINTAGE_STABILITY_NOT_ESTABLISHED",
+      "evidenceId": "C2_PROVIDER_VINTAGE_LIMIT",
+      "effect": "No revision-insensitive or stability claim may support a freeze."
+    },
+    {
+      "prerequisiteId": "SECTOR_TAXONOMY_AND_TRADE_RECONCILIATION_UNREVIEWED",
+      "evidenceId": "C2_REPORTING_ASYMMETRY",
+      "effect": "Reporter and mirror facts remain separate; no final trade matrix or IPF/RAS output is allowed."
+    },
+    {
+      "prerequisiteId": "FINAL_CALIBRATION_AND_RUNTIME_HANDOFF_BLOCKED",
+      "evidenceId": "C3_INFERENCE_SCOPE_LIMIT",
+      "effect": "The bounded pilot cannot parameterize a final package or World Core runtime."
+    }
+  ],
+  "hardBoundaries": [
+    "NO_FEATURE_ADMISSION_OR_FEATURE_SET_SELECTION",
+    "NO_ARCHETYPE_ALGORITHM_COUNT_OR_LABEL_SELECTION",
+    "NO_FICTIONAL_COUNTRY_MAPPING_OR_GENERATION",
+    "NO_DERIVED_OR_SYNTHETIC_VALUE_GENERATION",
+    "NO_IPF_RAS_OR_TRADE_RECONCILIATION",
+    "NO_WORLD_CORE_OR_RUNTIME_IMPORT_OR_MUTATION",
+    "NO_SUPABASE_OR_PRODUCTION_DATABASE_ACCESS",
+    "NO_LIVE_PROVIDER_NETWORK_RETRIEVAL",
+    "NO_FINAL_70_COUNTRY_PACKAGE"
+  ],
+  "contentHash": "cf3473c4343a88e3db7ac3e6526ef44ed2ce8a54bd1e3f93e13047de4b5a976c"
+}

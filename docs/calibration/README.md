@@ -37,6 +37,8 @@ This workstream converts provider-shaped bytes into traceable observations and, 
 - `C4_GENERATION_PREFLIGHT.md`: exact-C3-bound, read-only readiness gate for
   the next preparation phase; it explicitly remains not ready to generate a
   final world.
+- `C4_FEATURE_ADMISSION_EVIDENCE.md`: frozen C2/C3-backed feature evidence
+  inventory; it closes pilot registry coverage while admitting zero features.
 - `data/calibration/source_registry.v2.json`: eight official provider families.
 - `data/calibration/variable_registry.v2.json`: initial macro/fiscal/external/sector/trade variables.
 - `data/calibration/transformation_registry.v1.json`: approved deterministic Foundation transformations.
@@ -47,7 +49,7 @@ This workstream converts provider-shaped bytes into traceable observations and, 
 - `data/calibration/exploration/`: C3 frozen-input contract and generated
   non-authoritative exploration artifacts.
 - `data/calibration/preflight/`: C4 exact-C3-bound, non-authoritative
-  generation-preparation gate.
+  generation-preparation gate and feature-admission evidence register.
 - `packages/calibration`: deterministic TypeScript implementation and adapters.
 - `tests/calibration`: calibration-specific verification and runtime-boundary checks.
 
@@ -70,6 +72,7 @@ pnpm --filter @econmind/calibration typecheck
 pnpm --filter @econmind/calibration build
 pnpm --filter @econmind/calibration exploration:generate
 pnpm --filter @econmind/calibration c4:preflight:verify
+pnpm --filter @econmind/calibration c4:feature-evidence:generate
 pnpm test:boundaries
 pnpm secrets:check
 ```
@@ -84,7 +87,10 @@ Do not commit large provider downloads. Configure a local/object-store path outs
 
 C2, C3, and the C4 readiness gate have independent continuation approval. C4
 remains explicitly **NOT_READY_NON_AUTHORITATIVE**: it binds the approved C3
-evidence but does not start final generation. C3 descriptive exploration
+evidence and now packages a deterministic 19-candidate evidence register with
+10/10 frozen pilot variable IDs covered by registry metadata, while admitting
+zero features and leaving all seven final-generation prerequisites open. It
+does not start final generation. C3 descriptive exploration
 remains bounded to the frozen partial pilot: it does not create or approve an archetype
 algorithm/count, fictional-country mapping, final trade matrix, IPF/RAS result,
 engine formula, runtime import, World State mutation, or production database

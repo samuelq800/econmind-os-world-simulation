@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "c4-feature-admission-execution-contract.v1",
+  "contractVersion": "1.0.0",
+  "evidenceId": "c4-feature-admission-evidence-from-frozen-c2-c3",
+  "status": "EVIDENCE_ONLY_NON_AUTHORITATIVE",
+  "baseline": {
+    "reviewedC4TargetCommit": "de663d7d6a5d5dc0873f9e49905af8c57ce645fc",
+    "continuationRecordCommit": "f8a248815db8c2474feea07f1f93d7e6aa9d5654",
+    "c4ReadinessGate": "PASS",
+    "approvedState": "NOT_READY_NON_AUTHORITATIVE",
+    "finalGeneratorReady": false
+  },
+  "inputArtifacts": [
+    {
+      "path": "data/calibration/preflight/c4_generation_preflight.v1.json",
+      "rawSha256": "50187193d0a4cb1fec8b3d190431ff98806034cf36fae2aa980e1c932e3ab916",
+      "canonicalHash": "323bf1d117d0511cb40891a02a161e052682e9aa8938f33ddbad6ce732fc5843"
+    },
+    {
+      "path": "data/calibration/exploration/c3_execution_contract.v1.json",
+      "rawSha256": "bb7841b8925bd64ee5e07767098d5f12db3b1d55fdd142c78c24ba207f3725a5",
+      "canonicalHash": "9c9b3fab9f7def56bbe66d2e1464d278dde345d24dc37fc3e49e6dd883eafd48"
+    },
+    {
+      "path": "data/calibration/exploration/c3_exploration_summary.v1.json",
+      "rawSha256": "9cc34aca524d6c9ec0ffb1c957f573e1145527cc4425b9bb379b15d87958036a"
+    },
+    {
+      "path": "data/calibration/exploration/c3_uncertainty_register.v1.json",
+      "rawSha256": "341c9a3e08c582c82cf3e173660f7e4d822d34bbeee0ad2d36345df312773d2a"
+    },
+    {
+      "path": "data/calibration/exploration/c3_exploration_manifest.v1.json",
+      "rawSha256": "e76a65aa274634ccebd54ff50f0e54c1d04a3bf65e12aa43601906fce4041846"
+    },
+    {
+      "path": "data/calibration/pilot/normalized_observations.v1.json",
+      "rawSha256": "2ddf22030106f92b906510b926bf40855e8879e5faca67d43ed9ade31cb6078a"
+    },
+    {
+      "path": "data/calibration/pilot/quality_diagnostics.v1.json",
+      "rawSha256": "e4b4c07136f94992d63813ee34b6cf0111ee7953dab39fc964167e86f96e9b8a"
+    },
+    {
+      "path": "data/calibration/pilot/snapshot_manifest.v1.json",
+      "rawSha256": "bcdf0cefe0d6e6ac6b223198a5e076d4228fcaff354fe203c26f7343323bf8fa"
+    },
+    {
+      "path": "data/calibration/pilot/pilot_report.v1.json",
+      "rawSha256": "3c8fe27f685b001ecfe73476fddf85ec32a71b1b239d70aad73ccf76d2c56a21"
+    },
+    {
+      "path": "data/calibration/variable_registry.v2.json",
+      "rawSha256": "94b8b1a907410a0ed80b0378b3b040884d6f8fd974f096c0af29c7c01e286266"
+    }
+  ],
+  "registryPolicy": {
+    "requiredVersion": "2.1.0",
+    "pilotVariableCoverage": "EVERY_FROZEN_PILOT_VARIABLE_REQUIRES_EXACT_REGISTRY_ID_UNIT_CLASS_AND_ALLOWED_SOURCE",
+    "candidateRole": "ARCHETYPE_FEATURE",
+    "candidateDisposition": "NOT_ADMITTED",
+    "transformationCompatibility": "REGISTRY_SEMANTIC_TRANSFORMATION_AND_SOURCE_ADAPTER_TRANSFORMATION_ARE_REPORTED_SEPARATELY"
+  },
+  "evidencePolicy": {
+    "observed": "REPORT_ONLY_FROZEN_PILOT_COUNTS_SOURCES_MISSINGNESS_AND_TRANSFORMATIONS",
+    "derived": "DO_NOT_COMPUTE_OR_MATERIALIZE_DERIVED_CANDIDATES",
+    "placeholder": "PRESERVE_PLACEHOLDER_CLASS_AND_NEVER_ASSIGN_A_NUMERIC_VALUE",
+    "missingness": "PRESERVE_EXPLICIT_NULLS_NO_IMPUTATION",
+    "duplicates": "REPORT_SOURCE_FACT_AND_DISTINCT_OBSERVATION_COUNTS_SEPARATELY",
+    "reportingAsymmetry": "PRESERVE_REPORTER_AND_MIRROR_FACTS_NO_AVERAGING_OR_RECONCILIATION"
+  },
+  "hardBoundaries": [
+    "NO_FEATURE_ADMISSION_OR_FEATURE_SET_SELECTION",
+    "NO_ARCHETYPE_ALGORITHM_COUNT_OR_LABEL_SELECTION",
+    "NO_FICTIONAL_COUNTRY_MAPPING_OR_GENERATION",
+    "NO_DERIVED_OR_SYNTHETIC_VALUE_GENERATION",
+    "NO_IPF_RAS_OR_TRADE_RECONCILIATION",
+    "NO_WORLD_CORE_OR_RUNTIME_IMPORT_OR_MUTATION",
+    "NO_SUPABASE_OR_PRODUCTION_DATABASE_ACCESS",
+    "NO_LIVE_PROVIDER_NETWORK_RETRIEVAL",
+    "NO_FINAL_70_COUNTRY_PACKAGE"
+  ]
+}
