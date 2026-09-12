@@ -100,6 +100,7 @@ export interface V09AtomicTestDatabase extends V09AtomicSqlClient {
   readonly kind: 'PGLITE' | 'POSTGRESQL';
   readonly supportsParallelTransactions: boolean;
   close(): Promise<void>;
+  executeScript(script: string): Promise<void>;
   transaction<Result>(
     operation: (client: V09AtomicSqlClient) => Promise<Result>,
   ): Promise<Result>;

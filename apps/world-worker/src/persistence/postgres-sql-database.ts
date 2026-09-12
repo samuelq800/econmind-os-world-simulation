@@ -6,6 +6,30 @@ import type {
   SqlQueryResult,
 } from './sql-database.js';
 
+export type PostgresTransactionFailureOutcome =
+  | 'NOT_STARTED'
+  | 'ROLLED_BACK'
+  | 'ROLLBACK_UNCONFIRMED'
+  | 'COMMIT_OUTCOME_UNKNOWN';
+
+export class PostgresTransactionError extends Error {
+  readonly outcome: PostgresTransactionFailureOutcome;
+  readonly rollbackError: unknown;
+
+  constructor(input: {
+    readonly outcome: PostgresTransactionFailureOutcome;
+    readonly cause: unknown;
+    readonly rollbackError?: unknown;
+  }) {
+    super(`PostgreSQL transaction failed: ${input.outcome}`, {
+      cause: input.cause,
+    });
+    this.name = 'PostgresTransactionError';
+    this.outcome = input.outcome;
+    this.rollbackError = input.rollbackError;
+  }
+}
+
 function executor(client: PoolClient): SqlExecutor {
   return Object.freeze({
     query: async <Row extends object = Record<string, unknown>>(
@@ -53,24 +77,42 @@ export class PostgresSqlDatabase implements SqlDatabase {
     operation: (transaction: SqlExecutor) => Promise<Result>,
   ): Promise<Result> {
     const client = await this.#pool.connect();
-    let began = false;
+    let phase: 'NOT_STARTED' | 'ACTIVE' | 'COMMITTING' | 'COMMITTED' =
+      'NOT_STARTED';
     let discardConnection: Error | undefined;
     try {
       await client.query('begin');
-      began = true;
+      phase = 'ACTIVE';
       const result = await operation(executor(client));
+      phase = 'COMMITTING';
       await client.query('commit');
-      began = false;
+      phase = 'COMMITTED';
       return result;
     } catch (error) {
-      if (began) {
-        await client.query('rollback').catch(() => undefined);
+      let transactionError: PostgresTransactionError;
+      if (phase === 'ACTIVE') {
+        try {
+          await client.query('rollback');
+          transactionError = new PostgresTransactionError({
+            outcome: 'ROLLED_BACK',
+            cause: error,
+          });
+        } catch (rollbackError) {
+          transactionError = new PostgresTransactionError({
+            outcome: 'ROLLBACK_UNCONFIRMED',
+            cause: error,
+            rollbackError,
+          });
+        }
+      } else {
+        transactionError = new PostgresTransactionError({
+          outcome:
+            phase === 'COMMITTING' ? 'COMMIT_OUTCOME_UNKNOWN' : 'NOT_STARTED',
+          cause: error,
+        });
       }
-      discardConnection =
-        error instanceof Error
-          ? error
-          : new Error('PostgreSQL transaction failed with an unknown error');
-      throw error;
+      discardConnection = transactionError;
+      throw transactionError;
     } finally {
       client.release(discardConnection);
     }

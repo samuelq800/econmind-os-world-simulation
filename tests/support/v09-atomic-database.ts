@@ -47,6 +47,9 @@ export function createPGliteV09AtomicTestDatabase(): V09AtomicTestDatabase {
     kind: 'PGLITE',
     supportsParallelTransactions: false,
     close: () => database.close(),
+    executeScript: async (script) => {
+      await database.exec(script);
+    },
     query: client.query,
     async transaction<Result>(
       operation: (transactionClient: V09AtomicSqlClient) => Promise<Result>,
@@ -112,6 +115,9 @@ export function createLocalPostgresV09AtomicTestDatabase(
     kind: 'POSTGRESQL',
     supportsParallelTransactions: true,
     close: () => pool.end(),
+    executeScript: async (script) => {
+      await pool.query(script);
+    },
     query: queryClient.query,
     async transaction<Result>(
       operation: (client: V09AtomicSqlClient) => Promise<Result>,

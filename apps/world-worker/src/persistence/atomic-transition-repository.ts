@@ -358,13 +358,18 @@ export function prepareAtomicTransitionCandidate(input: {
 }
 
 export interface AtomicCommitAuthorizationGuard {
-  /** Must resolve current server-held authorization inside this transaction. */
+  /**
+   * Must resolve current server-held authorization inside this transaction.
+   * A null proof with `REVOKED` means the guard must prove the discretionary
+   * capability is still absent; it is not a no-op authorization bypass.
+   */
   assertCurrent(
     transaction: SqlExecutor,
     input: Readonly<{
       command: CanonicalCommand;
       authorityKind: QueueAuthorityKind;
       proof: CommitAuthorizationProof | null;
+      expected: 'AUTHORIZED' | 'REVOKED' | 'NOT_APPLICABLE';
     }>,
   ): Promise<void>;
 }
@@ -750,6 +755,14 @@ export class AtomicTransitionRepository {
       validateFinalReceiptForCommand({ command, receipt });
       const existing = await readReceipt(transaction, command);
       if (existing !== null) return existing;
+      if (receipt.outcome === 'AUTHORIZATION_REVOKED') {
+        await this.#authorizationGuard.assertCurrent(transaction, {
+          command,
+          authorityKind: 'DISCRETIONARY_USER',
+          proof: null,
+          expected: 'REVOKED',
+        });
+      }
       await this.#insertReceipt(transaction, receipt);
       await this.#finalizeQueue(transaction, command, receipt.recordedAtReal);
       return receipt;
@@ -794,6 +807,10 @@ export class AtomicTransitionRepository {
           command: candidate.command,
           authorityKind: candidate.authorityKind,
           proof: candidate.commitAuthorization,
+          expected:
+            candidate.authorityKind === 'DISCRETIONARY_USER'
+              ? 'AUTHORIZED'
+              : 'NOT_APPLICABLE',
         });
         await this.#faultInjector.hit('AUTHORIZATION_RECHECKED');
         await this.#faultInjector.hit('BEFORE_EVENTS');

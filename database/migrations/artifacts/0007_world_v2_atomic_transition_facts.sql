@@ -11,7 +11,7 @@ create table world_v2.inventory_posting (
   ),
   transition_binding text not null,
   operation text not null check (
-    operation in ('RESERVATION', 'RELEASE', 'SHIPMENT', 'DELIVERY')
+    operation in ('RESERVE', 'RELEASE', 'SHIP', 'DELIVER')
   ),
   canonical_payload text not null,
   posting_fingerprint text not null check (

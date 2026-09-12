@@ -13,6 +13,8 @@
     "support/v09-atomic-harness.ts",
     "support/v09-authorization-fixture.ts",
     "world-core/v09-atomic-preparation-infrastructure.test.ts",
-    "world-core/v09-atomic-preparation-postgres.test.ts"
+    "world-core/v09-atomic-repository-preparation.test.ts",
+    "world-core/v09-atomic-preparation-postgres.test.ts",
+    "world-core/v09-postgres-sql-database.test.ts"
   ]
 }
