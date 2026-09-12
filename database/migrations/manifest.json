@@ -129,6 +129,20 @@
       "lock_or_downtime_risk": "Forward V09 review-closure candidate; requires a preprovisioned native SHA-256 or pgcrypto digest function, and adds insert-time canonical intent, fingerprint, Inventory conservation and Financial balance validation to append-only Posting facts without production publication",
       "rollback_strategy": "forward-fix",
       "production_approval": null
+    },
+    {
+      "migration_id": "0010_world_v2_command_claim_fencing",
+      "release_order": 10,
+      "path": "database/migrations/artifacts/0010_world_v2_command_claim_fencing.sql",
+      "sha256": "7131f64afd486e26fe038839448dcb9f5df117a75d7265b453ca55b851fb1447",
+      "artifact_source_commit": "6276fbd8a53447be7e015e275b4d57725e41e98a",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Forward V09.3 recovery-correctness candidate; adds an unvalidated-for-legacy claim-fencing constraint while requiring all new or updated claimed/finalized Command rows to retain a positive fence token",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }
