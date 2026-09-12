@@ -91,7 +91,9 @@ class SqlServerHeldCommitAuthorizationSource {
       typeof row.team_id !== 'string' ||
       typeof row.authorization_version !== 'string'
     ) {
-      denied('Server-held authorization projection has malformed current evidence');
+      denied(
+        'Server-held authorization projection has malformed current evidence',
+      );
     }
     return Object.freeze({
       authSubject: row.auth_subject,

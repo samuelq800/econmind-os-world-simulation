@@ -8,22 +8,24 @@ import {
   COMMAND_SCHEMA_VERSION,
   SimTime,
   authSubject,
+  authorizeOfficeCapability,
   countryId,
   officeId,
   parseCanonicalCommand,
   processQueuedCommand,
+  teamId,
   worldId,
+  type AuthenticatedPrincipal,
+  type AuthorizationResolver,
   type CommandLifecyclePersistencePort,
   type CommitAuthorizationProof,
   type Sha256Hex,
-} from '../../packages/core/src/index.js';
-import {
-  createTransactionCutoffAuthorizationGuard,
-} from '../../apps/world-worker/src/authoritative-execution.js';
+  type WorldId,
+} from '@econmind/core';
+import { createTransactionCutoffAuthorizationGuard } from '../../apps/world-worker/src/authoritative-execution.js';
 import type { SqlExecutor } from '../../apps/world-worker/src/persistence/sql-database.js';
 import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
-import { MutableV09AuthorizationFixture } from '../support/v09-authorization-fixture.js';
 
 const sha256Hex: Sha256Hex = (preimage) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
@@ -63,9 +65,10 @@ async function database(): Promise<V09AtomicTestDatabase> {
       ),
     );
   }
-  await database.query('insert into world_v2.world_head (world_id) values ($1)', [
-    WORLD,
-  ]);
+  await database.query(
+    'insert into world_v2.world_head (world_id) values ($1)',
+    [WORLD],
+  );
   return database;
 }
 
@@ -91,9 +94,45 @@ function command() {
   );
 }
 
-async function issueProof(
-  fixture: MutableV09AuthorizationFixture,
-): Promise<CommitAuthorizationProof> {
+async function issueProof(): Promise<CommitAuthorizationProof> {
+  const principal = Object.freeze({
+    authSubject: SUBJECT,
+    facts: Object.freeze({
+      display_name: 'V09 package-Core cutoff proof test',
+      school_id: 'TEST_ONLY',
+      user_id: SUBJECT,
+    }),
+    token: Object.freeze({
+      audience: 'world-v2-test',
+      expiresAt: '2099-01-01T00:00:00.000Z',
+      issuedAt: '2026-09-12T00:00:00.000Z',
+      issuer: 'https://test.invalid',
+      subject: SUBJECT,
+    }),
+  }) satisfies AuthenticatedPrincipal;
+  const resolver: AuthorizationResolver = Object.freeze({
+    async resolveCurrentIdentity() {
+      return SUBJECT;
+    },
+    async resolveCurrentMembership(
+      _principal: AuthenticatedPrincipal,
+      requestedWorldId: WorldId,
+    ) {
+      if (requestedWorldId !== WORLD) return null;
+      return Object.freeze({
+        active: true,
+        authorizationVersion: 'AUTH_REVISION_1',
+        authSubject: SUBJECT,
+        countryId: COUNTRY,
+        isWorldAdmin: false,
+        negotiationPartyIds: Object.freeze([]),
+        officeAssignments: Object.freeze([FINANCE]),
+        suspended: false,
+        teamId: teamId('TEAM_AUTHORIZATION_CUTOFF'),
+        worldId: WORLD,
+      });
+    },
+  });
   const capturedSignal = new Error('COMMIT_PROOF_CAPTURED');
   let proof: CommitAuthorizationProof | null = null;
   const persistence: CommandLifecyclePersistencePort = {
@@ -115,10 +154,13 @@ async function issueProof(
       commitSimTime: SimTime.fromTicks('10000'),
       recordedAtReal: '2026-09-12T00:00:01.000Z',
       requiredCapability: 'FINANCE_TREASURY',
-      intakeAuthorization: await fixture.authorize({
+      intakeAuthorization: await authorizeOfficeCapability({
         capability: 'FINANCE_TREASURY',
-        countryId: COUNTRY,
-        officeId: FINANCE,
+        principal,
+        requestedCountryId: COUNTRY,
+        requestedOfficeId: FINANCE,
+        resolver,
+        worldId: WORLD,
       }),
       persistence,
     });
@@ -131,12 +173,7 @@ async function issueProof(
 
 describe('V09 real Core-issued authorization at transaction cutoff', () => {
   it('rejects a genuine Core-issued proof when the SQL-held revision changes or authority is revoked before commit', async () => {
-    const fixture = new MutableV09AuthorizationFixture({
-      authSubject: SUBJECT,
-      countryId: COUNTRY,
-      worldId: WORLD,
-    });
-    const proof = await issueProof(fixture);
+    const proof = await issueProof();
     const value = await database();
     await value.query(
       `insert into world_v2.current_commit_authorization
@@ -164,7 +201,7 @@ describe('V09 real Core-issued authorization at transaction cutoff', () => {
 
     await expect(
       value.transaction((transaction) =>
-        guard.assertCurrent(transaction as SqlExecutor, input as never),
+        guard.assertCurrent(transaction as SqlExecutor, input),
       ),
     ).resolves.toBe(undefined);
 
@@ -176,7 +213,7 @@ describe('V09 real Core-issued authorization at transaction cutoff', () => {
     );
     await expect(
       value.transaction((transaction) =>
-        guard.assertCurrent(transaction as SqlExecutor, input as never),
+        guard.assertCurrent(transaction as SqlExecutor, input),
       ),
     ).rejects.toMatchObject({
       cause: { code: 'AUTHORIZATION_DENIED' },
@@ -190,7 +227,7 @@ describe('V09 real Core-issued authorization at transaction cutoff', () => {
     );
     await expect(
       value.transaction((transaction) =>
-        guard.assertCurrent(transaction as SqlExecutor, input as never),
+        guard.assertCurrent(transaction as SqlExecutor, input),
       ),
     ).rejects.toMatchObject({
       cause: { code: 'AUTHORIZATION_DENIED' },

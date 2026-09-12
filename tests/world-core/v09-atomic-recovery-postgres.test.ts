@@ -361,12 +361,7 @@ postgresDescribe(
               set queue_state = 'CLAIMED', attempt_count = 1,
                   claimed_by = $3, claimed_at_real = $4, claim_fencing_token = 999
             where world_id = $1 and command_id = $2`,
-          [
-            claimWorld,
-            'COMMAND_POSTGRES_TOKEN',
-            'WORKER_POSTGRES_CLAIM',
-            AT_1,
-          ],
+          [claimWorld, 'COMMAND_POSTGRES_TOKEN', 'WORKER_POSTGRES_CLAIM', AT_1],
         ),
       ).rejects.toThrow(
         'Command claim must bind the exact active World writer lease holder and fencing token',

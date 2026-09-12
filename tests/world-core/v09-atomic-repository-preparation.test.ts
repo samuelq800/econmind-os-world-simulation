@@ -386,12 +386,7 @@ async function seed(
             claimed_at_real = $4,
             claim_fencing_token = 1
       where world_id = $1 and command_id = $2`,
-    [
-      command.worldId,
-      command.commandId,
-      WORKER,
-      '2026-09-12T00:00:00.500Z',
-    ],
+    [command.worldId, command.commandId, WORKER, '2026-09-12T00:00:00.500Z'],
   );
 }
 

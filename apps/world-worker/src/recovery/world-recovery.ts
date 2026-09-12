@@ -202,8 +202,10 @@ export class WorldRecoveryCoordinator {
           worldVersion ||
         integer(row.event_sequence_gap_count, 'Event sequence gap count') !==
           '0' ||
-        integer(row.event_orphan_receipt_count, 'orphan Event receipt count') !==
-          '0' ||
+        integer(
+          row.event_orphan_receipt_count,
+          'orphan Event receipt count',
+        ) !== '0' ||
         integer(
           row.event_unfinalized_causation_count,
           'unfinalized Event causation count',

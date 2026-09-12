@@ -92,12 +92,10 @@ describe('V09 authoritative Worker composition', () => {
         transactionFor({ authorizationVersion, observedTransactions }),
         input,
       ),
-    ).rejects.toMatchObject(
-      {
-        message:
-          'Office assignment, capability, team or authorization revision changed before commit',
-      },
-    );
+    ).rejects.toMatchObject({
+      message:
+        'Office assignment, capability, team or authorization revision changed before commit',
+    });
 
     authorizationVersion = null;
     await expect(
@@ -105,12 +103,10 @@ describe('V09 authoritative Worker composition', () => {
         transactionFor({ authorizationVersion, observedTransactions }),
         input,
       ),
-    ).rejects.toMatchObject(
-      {
-        message:
-          'Office assignment, capability, team or authorization revision changed before commit',
-      },
-    );
+    ).rejects.toMatchObject({
+      message:
+        'Office assignment, capability, team or authorization revision changed before commit',
+    });
   });
 
   it('has no caller-selectable authorization guard at the Worker composition root', () => {

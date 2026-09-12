@@ -102,11 +102,7 @@ async function insertCommand(
        (world_id, command_id, authority_kind, priority_rank,
         available_at_sim_time, attempt_count)
      values ($1, $2, 'VERSIONED_AUTOMATIC', 0, $3, 0)`,
-    [
-      WORLD,
-      commandId,
-      String(version * 10_000),
-    ],
+    [WORLD, commandId, String(version * 10_000)],
   );
   if (queueState === 'PENDING') return;
   const claimant = claimedBy ?? OLD_WORKER;
