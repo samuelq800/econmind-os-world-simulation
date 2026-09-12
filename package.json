@@ -37,6 +37,7 @@
     "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:boundaries && pnpm env:check && pnpm migration:validate && pnpm migration:rehearse && pnpm foundation:policy && pnpm secrets:check && pnpm build"
   },
   "devDependencies": {
+    "@econmind/core": "workspace:*",
     "@electric-sql/pglite": "0.5.8",
     "@eslint/js": "10.0.1",
     "@types/node": "24.13.3",

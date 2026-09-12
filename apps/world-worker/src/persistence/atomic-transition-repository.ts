@@ -207,6 +207,18 @@ function validateFinancialPosting(input: {
   return verified;
 }
 
+/**
+ * The Posting fingerprint binds the canonical intent, not an object which
+ * additionally contains that derived fingerprint. Persist that same intent so
+ * the database can independently recompute the fingerprint binding.
+ */
+function canonicalPostingIntent(
+  posting: InventoryPosting | FinancialPostingBatch,
+): string {
+  const { fingerprint: _fingerprint, ...intent } = posting;
+  return canonicalSerialize(intent);
+}
+
 function validateOutboxMessage(input: {
   readonly message: OutboxMessage;
   readonly command: CanonicalCommand;
@@ -1026,7 +1038,7 @@ export class AtomicTransitionRepository {
           canonicalSerialize(posting.causationEventIds),
           canonicalSerialize(posting.transitionBinding),
           posting.operation,
-          canonicalSerialize(posting),
+          canonicalPostingIntent(posting),
           posting.fingerprint,
         ],
       );
@@ -1055,7 +1067,7 @@ export class AtomicTransitionRepository {
           canonicalSerialize(batch.causationEventIds),
           canonicalSerialize(batch.transitionBinding),
           batch.settlementCurrency,
-          canonicalSerialize(batch),
+          canonicalPostingIntent(batch),
           batch.fingerprint,
         ],
       );

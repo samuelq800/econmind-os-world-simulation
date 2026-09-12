@@ -35,7 +35,7 @@ import {
   worldId,
   worldWriterLeaseRequest,
   type Sha256Hex,
-} from '../../apps/world-worker/node_modules/@econmind/core/dist/index.js';
+} from '@econmind/core';
 import {
   AtomicTransitionRepository,
   prepareAtomicTransitionCandidate,
@@ -56,6 +56,7 @@ const migrations = [
   '0006_world_v2_writer_lease_lineage_guard.sql',
   '0007_world_v2_atomic_transition_facts.sql',
   '0008_world_v2_materialization_recovery.sql',
+  '0009_world_v2_posting_payload_integrity.sql',
 ] as const;
 const sha256Hex: Sha256Hex = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');

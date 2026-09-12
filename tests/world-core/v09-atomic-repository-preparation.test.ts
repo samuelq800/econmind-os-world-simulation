@@ -17,6 +17,7 @@ import {
   acquireWorldWriterLease,
   canonicalHashInput,
   canonicalSha256,
+  canonicalSerialize,
   commandId,
   commodityId,
   countryId,
@@ -43,7 +44,7 @@ import {
   worldId,
   worldWriterLeaseRequest,
   type Sha256Hex,
-} from '../../apps/world-worker/node_modules/@econmind/core/dist/index.js';
+} from '@econmind/core';
 import {
   AtomicTransitionRepository,
   prepareAtomicTransitionCandidate,
@@ -68,6 +69,8 @@ const migrationPaths = [
   'database/migrations/artifacts/0005_world_v2_writer_lease_fencing.sql',
   'database/migrations/artifacts/0006_world_v2_writer_lease_lineage_guard.sql',
   'database/migrations/artifacts/0007_world_v2_atomic_transition_facts.sql',
+  'database/migrations/artifacts/0008_world_v2_materialization_recovery.sql',
+  'database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql',
 ] as const;
 
 const sha256Hex: Sha256Hex = (preimage: string) =>
@@ -443,6 +446,120 @@ describe('V09 private atomic repository preparation', () => {
       queue_state: 'FINALIZED',
       receipt_count: 1,
       world_version: '1',
+    });
+  });
+
+  it('rejects direct forged Inventory and Financial evidence despite valid V07 source binding', async () => {
+    const value = await database();
+    const prepared = candidate();
+    await seed(value, prepared);
+    await repository(value).commit(prepared);
+
+    const inventory = prepared.inventoryPostings[0]!;
+    const { fingerprint: _inventoryFingerprint, ...inventoryIntent } =
+      inventory;
+    const canonicalInventoryPayload = canonicalSerialize(inventoryIntent);
+    const changedInventoryId = canonicalInventoryPayload.replace(
+      'INVENTORY_ATOMIC_REPOSITORY',
+      'INVENTORY_FORGED_EVIDENCE',
+    );
+    const inventoryColumns = [
+      inventory.worldId,
+      'INVENTORY_FORGED_EVIDENCE',
+      inventory.causationCommandId,
+      inventory.worldVersionBefore,
+      inventory.worldVersionAfter,
+      inventory.simTime.toCanonicalValue(),
+      canonicalSerialize(inventory.causationEventIds),
+      canonicalSerialize(inventory.transitionBinding),
+      inventory.operation,
+    ] as const;
+    await expect(
+      value.query(
+        `insert into world_v2.inventory_posting
+           (world_id, posting_id, causation_command_id,
+            world_version_before, world_version_after, sim_time, event_ids,
+            transition_binding, operation, canonical_payload, posting_fingerprint)
+         values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11)`,
+        [...inventoryColumns, changedInventoryId, inventory.fingerprint],
+      ),
+    ).rejects.toThrow('fingerprint does not hash its canonical intent');
+    const unbalancedInventoryPayload = changedInventoryId.replace(
+      '"amount":"-2"',
+      '"amount":"-3"',
+    );
+    await expect(
+      value.query(
+        `insert into world_v2.inventory_posting
+           (world_id, posting_id, causation_command_id,
+            world_version_before, world_version_after, sim_time, event_ids,
+            transition_binding, operation, canonical_payload, posting_fingerprint)
+         values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11)`,
+        [
+          ...inventoryColumns,
+          unbalancedInventoryPayload,
+          canonicalSha256(
+            canonicalHashInput(JSON.parse(unbalancedInventoryPayload)),
+            sha256Hex,
+          ),
+        ],
+      ),
+    ).rejects.toThrow('conservation or account shape');
+
+    const batch = prepared.financialPostingBatches[0]!;
+    const { fingerprint: _batchFingerprint, ...batchIntent } = batch;
+    const canonicalBatchPayload = canonicalSerialize(batchIntent);
+    const changedBatchId = canonicalBatchPayload.replace(
+      'FINANCIAL_ATOMIC_REPOSITORY',
+      'FINANCIAL_FORGED_EVIDENCE',
+    );
+    const batchColumns = [
+      batch.worldId,
+      'FINANCIAL_FORGED_EVIDENCE',
+      batch.causationCommandId,
+      batch.worldVersionBefore,
+      batch.worldVersionAfter,
+      batch.simTime.toCanonicalValue(),
+      canonicalSerialize(batch.causationEventIds),
+      canonicalSerialize(batch.transitionBinding),
+      batch.settlementCurrency,
+    ] as const;
+    await expect(
+      value.query(
+        `insert into world_v2.financial_posting_batch
+           (world_id, batch_id, causation_command_id,
+            world_version_before, world_version_after, sim_time, event_ids,
+            transition_binding, settlement_currency, canonical_payload,
+            batch_fingerprint)
+         values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11)`,
+        [...batchColumns, changedBatchId, batch.fingerprint],
+      ),
+    ).rejects.toThrow('fingerprint does not hash its canonical intent');
+    const unbalancedBatchPayload = changedBatchId.replace(
+      '"amount":"25"',
+      '"amount":"26"',
+    );
+    await expect(
+      value.query(
+        `insert into world_v2.financial_posting_batch
+           (world_id, batch_id, causation_command_id,
+            world_version_before, world_version_after, sim_time, event_ids,
+            transition_binding, settlement_currency, canonical_payload,
+            batch_fingerprint)
+         values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11)`,
+        [
+          ...batchColumns,
+          unbalancedBatchPayload,
+          canonicalSha256(
+            canonicalHashInput(JSON.parse(unbalancedBatchPayload)),
+            sha256Hex,
+          ),
+        ],
+      ),
+    ).rejects.toThrow('Financial Posting legs violate exact V08 balance');
+    await expect(footprint(value)).resolves.toMatchObject({
+      financial_count: 1,
+      inventory_count: 1,
     });
   });
 

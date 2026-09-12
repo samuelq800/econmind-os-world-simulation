@@ -11,7 +11,7 @@ import {
   workerId,
   worldId,
   worldWriterLeaseRequest,
-} from '../../apps/world-worker/node_modules/@econmind/core/dist/index.js';
+} from '@econmind/core';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
 import { WorldRecoveryCoordinator } from '../../apps/world-worker/src/recovery/world-recovery.js';
 import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
@@ -27,6 +27,7 @@ const migrations = [
   '0006_world_v2_writer_lease_lineage_guard.sql',
   '0007_world_v2_atomic_transition_facts.sql',
   '0008_world_v2_materialization_recovery.sql',
+  '0009_world_v2_posting_payload_integrity.sql',
 ] as const;
 
 const WORLD = worldId('WORLD_RECOVERY_TEST');
