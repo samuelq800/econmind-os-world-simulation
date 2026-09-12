@@ -12,4 +12,5 @@ export function getApiFoundationStatus(): ApiFoundationStatus {
 
 export * from './integration/contracts.js';
 export * from './integration/identity.js';
+export * from './integration/postgres-read-adapter.js';
 export * from './integration/transport.js';
