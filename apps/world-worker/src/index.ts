@@ -14,6 +14,4 @@ export {
   createAuthoritativeWorkerExecution,
   createTransactionCutoffAuthorizationGuard,
   type AuthoritativeWorkerExecution,
-  type CurrentCommitAuthorization,
-  type ServerHeldCommitAuthorizationSource,
 } from './authoritative-execution.js';

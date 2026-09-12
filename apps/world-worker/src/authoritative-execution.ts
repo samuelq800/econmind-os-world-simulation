@@ -18,7 +18,7 @@ import {
 } from './persistence/atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './persistence/sql-database.js';
 
-export interface CurrentCommitAuthorization {
+interface CurrentCommitAuthorization {
   readonly authSubject: string;
   readonly worldId: string;
   readonly countryId: string;
@@ -28,30 +28,111 @@ export interface CurrentCommitAuthorization {
   readonly authorizationVersion: string;
 }
 
+function denied(message: string): never {
+  throw new DomainError(DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED, message);
+}
+
+interface CurrentCommitAuthorizationRow {
+  readonly auth_subject: unknown;
+  readonly authorization_version: unknown;
+  readonly capability: unknown;
+  readonly country_id: unknown;
+  readonly office_id: unknown;
+  readonly team_id: unknown;
+  readonly world_id: unknown;
+}
+
 /**
- * Adapter for the already-authoritative Office/assignment/revocation service.
- * Implementations must use the supplied transaction's connection (or its
- * transaction-bound authorization view), never client-held intake evidence.
+ * The only V09 production authorization reader. Its rows are a server-owned
+ * current-authorization projection; a missing row is denial, never a fallback
+ * to caller-provided resolver or intake evidence. Every read uses the
+ * repository's already-open authoritative transaction.
  */
-export interface ServerHeldCommitAuthorizationSource {
-  readCurrentAuthorization(
+class SqlServerHeldCommitAuthorizationSource {
+  async readCurrentAuthorization(
     transaction: SqlExecutor,
     input: Readonly<{
       command: CanonicalCommand;
       proof: CommitAuthorizationProof;
     }>,
-  ): Promise<Readonly<CurrentCommitAuthorization> | null>;
-  assertStillRevoked(
+  ): Promise<Readonly<CurrentCommitAuthorization> | null> {
+    const result = await transaction.query<CurrentCommitAuthorizationRow>(
+      `select auth_subject::text as auth_subject,
+              world_id,
+              country_id,
+              office_id,
+              capability,
+              team_id,
+              authorization_version
+         from world_v2.current_commit_authorization
+        where world_id = $1
+          and auth_subject = $2::uuid
+          and country_id = $3
+          and office_id = $4
+          and capability = $5
+          and active
+        for key share`,
+      [
+        input.command.worldId,
+        input.proof.authSubject,
+        input.command.countryId,
+        input.proof.officeId,
+        input.proof.capability,
+      ],
+    );
+    const row = result.rows[0];
+    if (row === undefined) return null;
+    if (
+      typeof row.auth_subject !== 'string' ||
+      typeof row.world_id !== 'string' ||
+      typeof row.country_id !== 'string' ||
+      typeof row.office_id !== 'string' ||
+      typeof row.capability !== 'string' ||
+      typeof row.team_id !== 'string' ||
+      typeof row.authorization_version !== 'string'
+    ) {
+      denied('Server-held authorization projection has malformed current evidence');
+    }
+    return Object.freeze({
+      authSubject: row.auth_subject,
+      worldId: row.world_id,
+      countryId: row.country_id,
+      officeId: row.office_id,
+      capability: row.capability,
+      teamId: row.team_id,
+      authorizationVersion: row.authorization_version,
+    });
+  }
+
+  async assertStillRevoked(
     transaction: SqlExecutor,
     input: Readonly<{
       command: CanonicalCommand;
       receipt: FinalCommandReceipt;
     }>,
-  ): Promise<void>;
-}
-
-function denied(message: string): never {
-  throw new DomainError(DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED, message);
+  ): Promise<void> {
+    const result = await transaction.query(
+      `select 1
+         from world_v2.current_commit_authorization
+        where world_id = $1
+          and auth_subject = $2::uuid
+          and country_id = $3
+          and office_id is not distinct from $4
+          and active
+        for key share`,
+      [
+        input.command.worldId,
+        input.command.authSubject,
+        input.command.countryId,
+        input.command.officeId,
+      ],
+    );
+    if (result.rowCount !== 0) {
+      denied(
+        'A current server-held authorization exists; revoked receipt cannot be finalized',
+      );
+    }
+  }
 }
 
 function matchesProof(
@@ -70,12 +151,11 @@ function matchesProof(
 }
 
 /**
- * ADR-20 transaction-cutoff guard. The source is required at composition time:
- * there is intentionally no process-local default or client-provided fallback.
+ * ADR-20 transaction-cutoff guard. It is permanently bound to the Worker SQL
+ * authority projection; callers cannot substitute an always-authorizing source.
  */
-export function createTransactionCutoffAuthorizationGuard(
-  source: ServerHeldCommitAuthorizationSource,
-): AtomicCommitAuthorizationGuard {
+export function createTransactionCutoffAuthorizationGuard(): AtomicCommitAuthorizationGuard {
+  const source = new SqlServerHeldCommitAuthorizationSource();
   const guard: AtomicCommitAuthorizationGuard = {
     async assertCurrent(
       transaction: SqlExecutor,
@@ -147,14 +227,11 @@ export function createAuthoritativeWorkerExecution(input: {
   readonly database: SqlDatabase;
   readonly workerId: string;
   readonly sha256Hex: Sha256Hex;
-  readonly authorizationSource: ServerHeldCommitAuthorizationSource;
   readonly candidateFactory: AtomicTransitionCandidateFactory;
 }): Readonly<AuthoritativeWorkerExecution> {
   const repository = new AtomicTransitionRepository({
     database: input.database,
-    authorizationGuard: createTransactionCutoffAuthorizationGuard(
-      input.authorizationSource,
-    ),
+    authorizationGuard: createTransactionCutoffAuthorizationGuard(),
     workerId: input.workerId,
     sha256Hex: input.sha256Hex,
   });

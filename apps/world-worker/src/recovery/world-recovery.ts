@@ -39,13 +39,16 @@ interface RecoveryInspectionRow {
   readonly committed_unfinalized_count: unknown;
   readonly event_max_sequence: unknown;
   readonly event_max_world_version: unknown;
+  readonly event_orphan_receipt_count: unknown;
   readonly event_sequence_gap_count: unknown;
+  readonly event_unfinalized_causation_count: unknown;
   readonly event_sequence: unknown;
   readonly finalized_without_receipt_count: unknown;
   readonly materialization_ahead_count: unknown;
   readonly pending_outbox_count: unknown;
   readonly posting_ahead_count: unknown;
   readonly receipt_max_world_version: unknown;
+  readonly receipt_event_set_mismatch_count: unknown;
   readonly stale_claim_count: unknown;
   readonly stale_materialization_count: unknown;
   readonly world_version: unknown;
@@ -134,7 +137,43 @@ export class WorldRecoveryCoordinator {
                from world_v2.authoritative_event
               where world_id = head.world_id
            ) ordered_event where ordered_event.event_sequence <> ordered_event.expected_sequence), 0) as event_sequence_gap_count,
+           coalesce((select count(*)
+              from world_v2.authoritative_event event
+              left join world_v2.command_receipt receipt
+                on receipt.world_id = event.world_id
+               and receipt.outcome = 'COMMITTED'
+               and receipt.transition_id = event.causation_command_id
+               and receipt.world_version_after = event.world_version
+             where event.world_id = head.world_id
+               and (receipt.command_id is null or not exists (
+                 select 1
+                   from jsonb_array_elements_text(receipt.event_ids) as listed(event_id)
+                  where listed.event_id = event.event_id
+               ))), 0) as event_orphan_receipt_count,
+           coalesce((select count(*)
+              from world_v2.authoritative_event event
+              left join world_v2.command_queue queue
+                on queue.world_id = event.world_id
+               and queue.command_id = event.causation_command_id
+              left join world_v2.command_receipt receipt
+                on receipt.world_id = event.world_id
+               and receipt.command_id = event.causation_command_id
+               and receipt.outcome = 'COMMITTED'
+             where event.world_id = head.world_id
+               and (queue.queue_state is distinct from 'FINALIZED'
+                    or receipt.command_id is null)), 0) as event_unfinalized_causation_count,
            coalesce((select max(world_version_after) from world_v2.command_receipt where world_id = head.world_id and outcome = 'COMMITTED'), 0) as receipt_max_world_version,
+           coalesce((select count(*)
+              from world_v2.command_receipt receipt
+             where receipt.world_id = head.world_id
+               and receipt.outcome = 'COMMITTED'
+               and receipt.event_ids is distinct from coalesce((
+                 select jsonb_agg(event.event_id order by event.event_sequence)
+                   from world_v2.authoritative_event event
+                  where event.world_id = receipt.world_id
+                    and event.causation_command_id = receipt.transition_id
+                    and event.world_version = receipt.world_version_after
+               ), '[]'::jsonb)), 0) as receipt_event_set_mismatch_count,
            (select count(*) from world_v2.command_receipt where world_id = head.world_id and outcome = 'COMMITTED') as committed_count,
            (select count(*) from world_v2.command_queue queue left join world_v2.command_receipt receipt using (world_id, command_id) where queue.world_id = head.world_id and queue.queue_state = 'FINALIZED' and receipt.command_id is null) as finalized_without_receipt_count,
            (select count(*) from world_v2.command_receipt receipt join world_v2.command_queue queue using (world_id, command_id) where receipt.world_id = head.world_id and receipt.outcome = 'COMMITTED' and queue.queue_state <> 'FINALIZED') as committed_unfinalized_count,
@@ -163,11 +202,21 @@ export class WorldRecoveryCoordinator {
           worldVersion ||
         integer(row.event_sequence_gap_count, 'Event sequence gap count') !==
           '0' ||
+        integer(row.event_orphan_receipt_count, 'orphan Event receipt count') !==
+          '0' ||
+        integer(
+          row.event_unfinalized_causation_count,
+          'unfinalized Event causation count',
+        ) !== '0' ||
         integer(
           row.receipt_max_world_version,
           'maximum receipt WorldVersion',
         ) !== worldVersion ||
         committedCount !== worldVersion ||
+        integer(
+          row.receipt_event_set_mismatch_count,
+          'receipt Event-set mismatch count',
+        ) !== '0' ||
         integer(
           row.finalized_without_receipt_count,
           'receiptless finalized queue count',
