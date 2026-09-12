@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2024", "DOM"],
+    "types": ["node"]
+  },
+  "include": [
+    "support/v10-gate-b-evidence.ts",
+    "world-core/v10-atomic-transfer-candidates.test.ts",
+    "world-core/v10-gate-b-evidence.test.ts"
+  ]
+}
