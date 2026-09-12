@@ -87,6 +87,20 @@
       "lock_or_downtime_risk": "Forward V09.1 blocker fix; adds DELETE/TRUNCATE lineage guards only and does not write economic facts",
       "rollback_strategy": "forward-fix",
       "production_approval": null
+    },
+    {
+      "migration_id": "0007_world_v2_read_projection_boundary",
+      "release_order": 7,
+      "path": "database/migrations/artifacts/0007_world_v2_read_projection_boundary.sql",
+      "sha256": "04152db462529835d32e44a4e9399721681f059effd288e25ea57bd69e58f8f9",
+      "artifact_source_commit": "8f8e7a3e88d2506556e188c65ed08481594d0db9",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": true,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Preparation-only additive derived read-model tables; all browser schema/table privileges remain explicitly revoked pending a reviewed query facade",
+      "rollback_strategy": "reversible-before-economic-facts",
+      "production_approval": null
     }
   ]
 }
