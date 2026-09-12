@@ -173,6 +173,11 @@ export function validateAuthoritativeTransition(
       'Transition identity must be the immutable causation Command identity',
     );
   }
+  if (!CANONICAL_SHA256.test(transition.commandFingerprint)) {
+    transitionInvalid(
+      'Transition Command fingerprint must be canonical SHA-256',
+    );
+  }
   const before = BigInt(
     canonicalWorldVersion(transition.worldVersionBefore, 'worldVersionBefore'),
   );
