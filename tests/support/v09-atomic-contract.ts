@@ -84,12 +84,13 @@ export class DeterministicV09FaultInjector {
   }
 }
 
-export interface SqlResult<Row extends Record<string, unknown>> {
+export interface SqlResult<Row extends object = Record<string, unknown>> {
+  readonly rowCount: number | null;
   readonly rows: readonly Row[];
 }
 
 export interface V09AtomicSqlClient {
-  query<Row extends Record<string, unknown>>(
+  query<Row extends object = Record<string, unknown>>(
     text: string,
     values?: readonly unknown[],
   ): Promise<SqlResult<Row>>;
