@@ -115,6 +115,20 @@
       "lock_or_downtime_risk": "Preparation-only V09.3 recovery candidate; permits atomic deletion and same-watermark repair of non-authoritative current materializations while preserving WorldVersion non-regression",
       "rollback_strategy": "forward-fix",
       "production_approval": null
+    },
+    {
+      "migration_id": "0009_world_v2_posting_payload_integrity",
+      "release_order": 9,
+      "path": "database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql",
+      "sha256": "189607be57cbce235685fc4ab7a8a1c69e1b2f8e3ea235cdec9ad7b61a831498",
+      "artifact_source_commit": "4bba830119b259104cd3c09f718cfdb66e4bdaa9",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Forward V09 review-closure candidate; requires a preprovisioned native SHA-256 or pgcrypto digest function, and adds insert-time canonical intent, fingerprint, Inventory conservation and Financial balance validation to append-only Posting facts without production publication",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }
