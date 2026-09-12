@@ -16,6 +16,7 @@
     "world-core/v09-atomic-recovery-postgres.test.ts",
     "world-core/v09-atomic-repository-preparation.test.ts",
     "world-core/v09-atomic-preparation-postgres.test.ts",
+    "world-core/v09-commit-authorization-cutoff.test.ts",
     "world-core/v09-postgres-sql-database.test.ts",
     "world-core/v09-world-recovery-preparation.test.ts",
     "world-core/v09-worker-authoritative-execution.test.ts"
