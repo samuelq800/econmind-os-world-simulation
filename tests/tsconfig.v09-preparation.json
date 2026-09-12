@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "types": ["node", "vitest"]
+  },
+  "include": [
+    "support/v09-atomic-contract.ts",
+    "support/v09-atomic-database.ts",
+    "support/v09-atomic-evidence.ts",
+    "support/v09-atomic-harness.ts",
+    "support/v09-authorization-fixture.ts",
+    "world-core/v09-atomic-preparation-infrastructure.test.ts",
+    "world-core/v09-atomic-preparation-postgres.test.ts"
+  ]
+}
