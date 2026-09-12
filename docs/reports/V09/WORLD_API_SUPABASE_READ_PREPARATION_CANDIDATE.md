@@ -49,9 +49,14 @@ promotion, V09.2/V09.3 completion claim, or production status change.
 ## Public capability probe
 
 The supplied project URL identifies the shared production project and is not an
-authorized staging runner surface. A publishable key was not available through
-the approved runtime environment in this worktree. Therefore no network request
-was made and no claim is made about live tables, RPCs, schemas, grants, or RLS.
+authorized staging runner surface. At this candidate's initial evidence point,
+a publishable key was not available through the approved runtime environment.
+A later, separately committed minimum-privilege probe used a user-supplied key
+once in process memory and established only an HTTP 200 zero-row SELECT for
+`public.profiles.account_status`. See
+`WORLD_API_SUPABASE_MINIMUM_PRIVILEGE_PROBE.md`. No user row or response body
+was read, and no claim is made about other live tables, RPCs, schemas, grants,
+or RLS behavior.
 
 The only permission result established here is local and candidate-specific:
 after applying the prepared SQL to disposable PGlite databases, the proposed
@@ -71,7 +76,7 @@ read tables exist with RLS enabled and forced, while PUBLIC, `anon`, and
 | Migration provenance validation              | PASS - 7 artifacts                                   |
 | Clean-baseline and existing-schema rehearsal | PASS - 7 release rows each; ephemeral PGlite only    |
 | Environment and foundation policy            | PASS                                                 |
-| Repository secret scan                       | PASS - 567 files                                     |
+| Repository secret scan                       | PASS - 568 files                                     |
 | Workspace build                              | PASS                                                 |
 
 The first default-parallel full-suite attempt is preserved as a failed execution
@@ -89,6 +94,6 @@ after the V09.2/V09.3 order is fixed, committed as new bytes, rebound in the
 manifest to a new source commit and SHA-256, revalidated, and independently
 reviewed. The current artifact must not be applied or promoted under `0007`.
 
-No Supabase project was linked, queried, or mutated while producing this
-candidate. No key, JWT, database URL, or service-role value is present in the
-candidate or this report.
+No Supabase project was linked or mutated. The only live reads are the exact
+minimum-privilege requests recorded in the separate probe report. No key, JWT,
+database URL, or service-role value is present in the candidate or this report.
