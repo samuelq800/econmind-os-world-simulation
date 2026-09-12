@@ -28,3 +28,18 @@ Its tokens are locally redeclared from the live-world shell at
 `econmind-os@5f420f7865a9c6884afc6583b3d3032dd0e52439` without importing or
 modifying that application. The implementation is scoped to this prototype;
 the runtime `App.tsx` and `main.tsx` remain isolated from it.
+
+## Gameplay UI V3 G01-A supplement
+
+The supplied Gameplay UI V3 specification (source SHA-256
+`2a1a28888d7196adafaa342d392a2a08206ba73f4cbfec96bcf547cc66ceb67e`) informs
+the desktop object-stage composition: compact status HUD, selectable economic
+objects, one contextual inspector, action dock, and visible progression tray.
+The primary G01 move opens the typed local grain-transfer draft in this
+directory. That draft stays `PREPARATION_ONLY_NOT_RUNTIME`: it has a reversible
+review, locally mockable receipt and recovery states, but it has no network,
+authoritative calculation, authorization, or World State write.
+
+No accompanying design-package archive is imported or used as an implementation
+dependency; the independently supplied local archive remains outside this
+candidate's file boundary.
