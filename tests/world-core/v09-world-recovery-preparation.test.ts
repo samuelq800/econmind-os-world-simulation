@@ -28,6 +28,7 @@ const migrations = [
   '0007_world_v2_atomic_transition_facts.sql',
   '0008_world_v2_materialization_recovery.sql',
   '0009_world_v2_posting_payload_integrity.sql',
+  '0010_world_v2_command_claim_fencing.sql',
 ] as const;
 
 const WORLD = worldId('WORLD_RECOVERY_TEST');
@@ -69,7 +70,7 @@ function hash(character: string): string {
 async function insertCommand(
   database: V09AtomicTestDatabase,
   version: number,
-  queueState: 'CLAIMED' | 'FINALIZED',
+  queueState: 'PENDING' | 'CLAIMED' | 'FINALIZED',
   claimedBy: string | null = null,
 ): Promise<void> {
   const commandId = `COMMAND_RECOVERY_${version}`;
@@ -98,8 +99,8 @@ async function insertCommand(
     `insert into world_v2.command_queue
        (world_id, command_id, authority_kind, queue_state, priority_rank,
         available_at_sim_time, attempt_count, claimed_by, claimed_at_real,
-        finalized_at_real)
-     values ($1, $2, 'VERSIONED_AUTOMATIC', $3, 0, $4, 1, $5, $6, $7)`,
+        finalized_at_real, claim_fencing_token)
+     values ($1, $2, 'VERSIONED_AUTOMATIC', $3, 0, $4, 1, $5, $6, $7, $8)`,
     [
       WORLD,
       commandId,
@@ -108,6 +109,7 @@ async function insertCommand(
       queueState === 'CLAIMED' ? claimedBy : null,
       queueState === 'CLAIMED' ? AT_0 : null,
       queueState === 'FINALIZED' ? AT_1 : null,
+      queueState === 'PENDING' ? null : '1',
     ],
   );
 }
@@ -250,7 +252,8 @@ describe('V09.3 World recovery preparation', () => {
     });
     await expect(
       database.query(
-        `select queue_state, claimed_by, attempt_count::text as attempt_count
+        `select queue_state, claimed_by, attempt_count::text as attempt_count,
+                claim_fencing_token::text as claim_fencing_token
            from world_v2.command_queue`,
       ),
     ).resolves.toMatchObject({
@@ -259,6 +262,49 @@ describe('V09.3 World recovery preparation', () => {
           queue_state: 'CLAIMED',
           claimed_by: NEW_WORKER,
           attempt_count: '2',
+          claim_fencing_token: '2',
+        },
+      ],
+    });
+  }, 20_000);
+
+  it('refuses to reclaim a claim held at the current fencing token', async () => {
+    const database = await testDatabase();
+    await insertCommand(database, 1, 'CLAIMED', NEW_WORKER);
+    await database.query(
+      'select * from world_v2.acquire_world_writer_lease($1, $2, $3, 60000)',
+      [WORLD, NEW_WORKER, AT_0],
+    );
+    const lease = acquireWorldWriterLease(
+      null,
+      worldWriterLeaseRequest(WORLD, NEW_WORKER, AT_0, AT_60),
+    );
+    const assertion = createWorldWriterCommitAssertion(lease.lease, '0');
+
+    await expect(
+      coordinator(database).reclaimAbandonedCommand({
+        assertion,
+        commandId: 'COMMAND_RECOVERY_1',
+        observedAtReal: AT_1,
+      }),
+    ).rejects.toEqual(
+      expect.objectContaining({
+        cause: expect.objectContaining({
+          message: 'Current higher-fence lease does not supersede this claim',
+        }),
+      }),
+    );
+    await expect(
+      database.query(
+        `select queue_state, claimed_by, claim_fencing_token::text as claim_fencing_token
+           from world_v2.command_queue`,
+      ),
+    ).resolves.toMatchObject({
+      rows: [
+        {
+          queue_state: 'CLAIMED',
+          claimed_by: NEW_WORKER,
+          claim_fencing_token: '1',
         },
       ],
     });
@@ -321,6 +367,36 @@ describe('V09.3 World recovery preparation', () => {
     const database = await testDatabase();
     await database.query(
       'update world_v2.world_head set world_version = 1, event_sequence = 1 where world_id = $1',
+      [WORLD],
+    );
+
+    await expect(coordinator(database).inspect(WORLD, AT_1)).rejects.toEqual(
+      expect.objectContaining({
+        cause: expect.objectContaining({
+          message:
+            'World head, Event, Posting, receipt, queue or materialization lineage is inconsistent',
+        }),
+      }),
+    );
+  }, 20_000);
+
+  it('rejects an Event sequence with a durable gap even when its maximum matches the head', async () => {
+    const database = await testDatabase();
+    await insertCommittedTransition(database, 1);
+    await insertCommand(database, 2, 'PENDING');
+    await database.query(
+      `insert into world_v2.authoritative_event
+         (world_id, event_id, event_sequence, world_version,
+          causation_command_id, correlation_id, event_type, schema_version,
+          canonical_payload, payload_sha256, event_fingerprint, sim_time,
+          recorded_at_real, corrects_event_id)
+       values ($1, 'EVENT_RECOVERY_GAP', 3, 1, 'COMMAND_RECOVERY_2',
+               'CORRELATION_RECOVERY_GAP', 'RECOVERY_GAP', 'event-v1', '{}',
+               $2, $3, 10000, $4, null)`,
+      [WORLD, hash('e'), hash('f'), AT_1],
+    );
+    await database.query(
+      'update world_v2.world_head set event_sequence = 3 where world_id = $1',
       [WORLD],
     );
 

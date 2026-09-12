@@ -39,8 +39,8 @@ import {
 import {
   AtomicTransitionRepository,
   prepareAtomicTransitionCandidate,
-  serverHeldAuthorizationGuard,
 } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
+import { createTransactionCutoffAuthorizationGuard } from '../../apps/world-worker/src/authoritative-execution.js';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
 import { WorldRecoveryCoordinator } from '../../apps/world-worker/src/recovery/world-recovery.js';
 import { createLocalPostgresV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
@@ -57,6 +57,7 @@ const migrations = [
   '0007_world_v2_atomic_transition_facts.sql',
   '0008_world_v2_materialization_recovery.sql',
   '0009_world_v2_posting_payload_integrity.sql',
+  '0010_world_v2_command_claim_fencing.sql',
 ] as const;
 const sha256Hex: Sha256Hex = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
@@ -260,14 +261,22 @@ postgresDescribe(
       await database.query(
         `insert into world_v2.command_queue
            (world_id, command_id, authority_kind, queue_state, priority_rank,
-            available_at_sim_time, attempt_count, claimed_by, claimed_at_real)
-         values ($1,$2,'VERSIONED_AUTOMATIC','CLAIMED',0,$3,1,$4,$5)`,
+            available_at_sim_time, attempt_count, claimed_by, claimed_at_real,
+            claim_fencing_token)
+         values ($1,$2,'VERSIONED_AUTOMATIC','CLAIMED',0,$3,1,$4,$5,1)`,
         [WORLD, command.commandId, simTime.toCanonicalValue(), WORKER, AT_0],
       );
 
       const repository = new AtomicTransitionRepository({
         database: database as SqlDatabase,
-        authorizationGuard: serverHeldAuthorizationGuard,
+        authorizationGuard: createTransactionCutoffAuthorizationGuard({
+          async readCurrentAuthorization() {
+            throw new Error('AUTOMATIC_COMMAND_SHOULD_NOT_READ_USER_AUTHORITY');
+          },
+          async assertStillRevoked() {
+            throw new Error('AUTOMATIC_COMMAND_SHOULD_NOT_CHECK_REVOCATION');
+          },
+        }),
         workerId: WORKER,
         sha256Hex,
       });

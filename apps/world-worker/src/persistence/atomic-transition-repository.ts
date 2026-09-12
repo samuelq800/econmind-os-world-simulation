@@ -2,7 +2,6 @@ import {
   DOMAIN_ERROR_CODES,
   DomainError,
   SimTime,
-  assertAuthorizationRevocationCurrent,
   bindAuthoritativeTransition,
   canonicalHashInput,
   canonicalSerialize,
@@ -14,7 +13,6 @@ import {
   idempotencyKey,
   isCommitAuthorizationProof,
   parseCanonicalCommand,
-  reauthorizeCommitAuthorizationProof,
   validateCanonicalCommand,
   validateFinalReceiptForCommand,
   worldId,
@@ -388,46 +386,6 @@ export interface AtomicCommitAuthorizationGuard {
     }>,
   ): Promise<void>;
 }
-
-/**
- * Concrete ADR-20 guard backed exclusively by the server-held authorization
- * resolver metadata captured when Core issued the proof/rejection. Callers
- * must invoke it from the authoritative SqlDatabase transaction callback.
- */
-export const serverHeldAuthorizationGuard: AtomicCommitAuthorizationGuard =
-  Object.freeze({
-    async assertCurrent(
-      _transaction: Parameters<
-        AtomicCommitAuthorizationGuard['assertCurrent']
-      >[0],
-      input: Parameters<AtomicCommitAuthorizationGuard['assertCurrent']>[1],
-    ): Promise<void> {
-      if (input.expected === 'NOT_APPLICABLE') {
-        if (
-          input.authorityKind !== 'VERSIONED_AUTOMATIC' ||
-          input.proof !== null ||
-          input.revokedReceipt !== undefined
-        ) {
-          throw new DomainError(
-            DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
-            'Automatic authority cannot carry discretionary authorization evidence',
-          );
-        }
-        return;
-      }
-      if (input.authorityKind !== 'DISCRETIONARY_USER') {
-        throw new DomainError(
-          DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
-          'Discretionary authorization is required at this transaction cutoff',
-        );
-      }
-      if (input.expected === 'AUTHORIZED') {
-        await reauthorizeCommitAuthorizationProof(input.proof);
-        return;
-      }
-      await assertAuthorizationRevocationCurrent(input.revokedReceipt);
-    },
-  });
 
 export type AtomicCommitCheckpoint =
   | 'SUBMISSION_LOCKED'
@@ -895,6 +853,7 @@ export class AtomicTransitionRepository {
           transaction,
           candidate.command,
           candidate.receipt.recordedAtReal,
+          candidate.commitAssertion.fencingToken,
         );
         await this.#faultInjector.hit('AFTER_QUEUE_FINALIZATION');
         await this.#faultInjector.hit('BEFORE_WORLD_HEAD');
@@ -1189,7 +1148,15 @@ export class AtomicTransitionRepository {
     transaction: SqlExecutor,
     command: CanonicalCommand,
     finalizedAtReal: string,
+    expectedFencingToken?: string,
   ): Promise<void> {
+    const fencingToken =
+      expectedFencingToken ??
+      (await this.#readCurrentClaimFencingToken(
+        transaction,
+        command,
+        finalizedAtReal,
+      ));
     const result = await transaction.query(
       `update world_v2.command_queue
           set queue_state = 'FINALIZED',
@@ -1197,10 +1164,41 @@ export class AtomicTransitionRepository {
         where world_id = $1
           and command_id = $2
           and queue_state = 'CLAIMED'
-          and claimed_by = $3`,
-      [command.worldId, command.commandId, this.#workerId, finalizedAtReal],
+          and claimed_by = $3
+          and claim_fencing_token = $5`,
+      [
+        command.worldId,
+        command.commandId,
+        this.#workerId,
+        finalizedAtReal,
+        fencingToken,
+      ],
     );
     requireOneRow(result, 'Command queue finalization');
+  }
+
+  async #readCurrentClaimFencingToken(
+    transaction: SqlExecutor,
+    command: CanonicalCommand,
+    observedAtReal: string,
+  ): Promise<string> {
+    const result = await transaction.query<{ readonly fencing_token: unknown }>(
+      `select fencing_token
+         from world_v2.world_writer_lease
+        where world_id = $1
+          and holder_id = $2
+          and lease_expires_at_real > $3
+        for share`,
+      [command.worldId, this.#workerId, observedAtReal],
+    );
+    const row = result.rows[0];
+    if (row === undefined) {
+      throw new DomainError(
+        DOMAIN_ERROR_CODES.WRITER_FENCE_STALE,
+        'Zero-effect receipt finalization requires the current writer lease',
+      );
+    }
+    return databaseInteger(row.fencing_token, 'writer fencing token', true);
   }
 
   async #advanceWorldHead(

@@ -71,6 +71,7 @@ const migrationPaths = [
   'database/migrations/artifacts/0007_world_v2_atomic_transition_facts.sql',
   'database/migrations/artifacts/0008_world_v2_materialization_recovery.sql',
   'database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql',
+  'database/migrations/artifacts/0010_world_v2_command_claim_fencing.sql',
 ] as const;
 
 const sha256Hex: Sha256Hex = (preimage: string) =>
@@ -367,8 +368,9 @@ async function seed(
   await value.query(
     `insert into world_v2.command_queue
        (world_id, command_id, authority_kind, queue_state, priority_rank,
-        available_at_sim_time, attempt_count, claimed_by, claimed_at_real)
-     values ($1, $2, 'VERSIONED_AUTOMATIC', 'CLAIMED', 0, $3, 1, $4, $5)`,
+        available_at_sim_time, attempt_count, claimed_by, claimed_at_real,
+        claim_fencing_token)
+     values ($1, $2, 'VERSIONED_AUTOMATIC', 'CLAIMED', 0, $3, 1, $4, $5, 1)`,
     [
       command.worldId,
       command.commandId,

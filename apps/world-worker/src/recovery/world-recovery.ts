@@ -39,6 +39,7 @@ interface RecoveryInspectionRow {
   readonly committed_unfinalized_count: unknown;
   readonly event_max_sequence: unknown;
   readonly event_max_world_version: unknown;
+  readonly event_sequence_gap_count: unknown;
   readonly event_sequence: unknown;
   readonly finalized_without_receipt_count: unknown;
   readonly materialization_ahead_count: unknown;
@@ -63,8 +64,10 @@ export interface WorldRecoveryInspection {
 interface LockedClaimRow {
   readonly acquired_at_real: unknown;
   readonly attempt_count: unknown;
+  readonly claim_fencing_token: unknown;
   readonly claimed_at_real: unknown;
   readonly claimed_by: unknown;
+  readonly fencing_token: unknown;
   readonly holder_id: unknown;
   readonly queue_state: unknown;
 }
@@ -125,6 +128,12 @@ export class WorldRecoveryCoordinator {
            head.event_sequence,
            coalesce((select max(event_sequence) from world_v2.authoritative_event where world_id = head.world_id), 0) as event_max_sequence,
            coalesce((select max(world_version) from world_v2.authoritative_event where world_id = head.world_id), 0) as event_max_world_version,
+           coalesce((select count(*) from (
+             select event_sequence,
+                    row_number() over (order by event_sequence) as expected_sequence
+               from world_v2.authoritative_event
+              where world_id = head.world_id
+           ) ordered_event where ordered_event.event_sequence <> ordered_event.expected_sequence), 0) as event_sequence_gap_count,
            coalesce((select max(world_version_after) from world_v2.command_receipt where world_id = head.world_id and outcome = 'COMMITTED'), 0) as receipt_max_world_version,
            (select count(*) from world_v2.command_receipt where world_id = head.world_id and outcome = 'COMMITTED') as committed_count,
            (select count(*) from world_v2.command_queue queue left join world_v2.command_receipt receipt using (world_id, command_id) where queue.world_id = head.world_id and queue.queue_state = 'FINALIZED' and receipt.command_id is null) as finalized_without_receipt_count,
@@ -152,6 +161,8 @@ export class WorldRecoveryCoordinator {
           eventSequence ||
         integer(row.event_max_world_version, 'maximum Event WorldVersion') !==
           worldVersion ||
+        integer(row.event_sequence_gap_count, 'Event sequence gap count') !==
+          '0' ||
         integer(
           row.receipt_max_world_version,
           'maximum receipt WorldVersion',
@@ -220,7 +231,9 @@ export class WorldRecoveryCoordinator {
                 queue.claimed_by,
                 queue.claimed_at_real,
                 queue.attempt_count,
+                queue.claim_fencing_token,
                 lease.holder_id,
+                lease.fencing_token,
                 lease.acquired_at_real
            from world_v2.command_queue queue
            join world_v2.world_writer_lease lease using (world_id)
@@ -250,8 +263,18 @@ export class WorldRecoveryCoordinator {
       }
       const claimedAt = new Date(row.claimed_at_real).getTime();
       const acquiredAt = new Date(row.acquired_at_real).getTime();
+      const claimFencingToken = integer(
+        row.claim_fencing_token,
+        'claimed fencing token',
+      );
+      const currentFencingToken = integer(
+        row.fencing_token,
+        'current fencing token',
+      );
       if (
         row.holder_id !== this.#workerId ||
+        currentFencingToken !== input.assertion.fencingToken ||
+        BigInt(claimFencingToken) >= BigInt(input.assertion.fencingToken) ||
         (row.claimed_by === this.#workerId && claimedAt >= acquiredAt)
       ) {
         recoveryInvalid(
@@ -264,6 +287,7 @@ export class WorldRecoveryCoordinator {
             set queue_state = 'PENDING',
                 claimed_by = null,
                 claimed_at_real = null,
+                claim_fencing_token = null,
                 finalized_at_real = null
           where world_id = $1 and command_id = $2 and queue_state = 'CLAIMED'`,
         [input.assertion.worldId, input.commandId],
@@ -273,9 +297,16 @@ export class WorldRecoveryCoordinator {
             set queue_state = 'CLAIMED',
                 attempt_count = attempt_count + 1,
                 claimed_by = $3,
-                claimed_at_real = $4
+                claimed_at_real = $4,
+                claim_fencing_token = $5
           where world_id = $1 and command_id = $2 and queue_state = 'PENDING'`,
-        [input.assertion.worldId, input.commandId, this.#workerId, observedAt],
+        [
+          input.assertion.worldId,
+          input.commandId,
+          this.#workerId,
+          observedAt,
+          input.assertion.fencingToken,
+        ],
       );
       if (reclaimed.rowCount !== 1)
         recoveryInvalid('Abandoned claim was not reclaimed');
