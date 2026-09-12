@@ -9,3 +9,5 @@ export function getWorkerFoundationStatus(): WorkerFoundationStatus {
     simulationEnabled: false,
   };
 }
+
+export * from './v10/transfer-vertical-slice.js';
