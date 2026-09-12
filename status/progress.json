@@ -1,7 +1,7 @@
 {
   "schema_version": "R2-101.1",
-  "derived_at": "2026-09-11T03:04:30Z",
-  "source_commit": "b7c39497c48f5e28305a2e01bf02d11b68e4fb99",
+  "derived_at": "2026-09-12T00:00:00Z",
+  "source_commit": "dadad8292f7b2e3f16430052d1e599d733c76031",
   "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. The URI-guard forward fix at 258e695 closed V09.1-STAGING-BLK-01. Review B against runner target 23dd2da39783622ce175382bd19c51968182215a is preserved as CHANGES_REQUIRED with one blocker and one major; its strict-cleanup/acknowledgement/durable-evidence forward candidate requires fresh independent review. Dedicated non-production RLS/grant/crash evidence remains NOT_RUN. V09.1 remains IN_PROGRESS, V09.2 remains NOT_STARTED, and no production access or production mutation is authorized.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
@@ -182,6 +182,29 @@
     "owner_approved": true,
     "authority": "CONTROL_TOWER_OWNER_DELEGATION"
   },
+  "v09_to_v10_entry": {
+    "status": "OWNER_AUTHORIZED_CONTINUATION_TO_V10",
+    "v09_recovery_candidate": "dadad8292f7b2e3f16430052d1e599d733c76031",
+    "independent_review": "APPROVED_FOR_CONTINUATION",
+    "recorded_open_blockers": 0,
+    "recorded_open_majors": 0,
+    "authorization_record": "docs/reports/V09/V09_TO_V10_ENTRY_AUTHORIZATION.md",
+    "v10_policy": "docs/governance/WORLD_CORE_V10_CONTINUATION_POLICY.json",
+    "merge_authorized": false,
+    "production_access": false,
+    "production_mutation": false
+  },
+  "v10_entry": {
+    "status": "ACTIVE",
+    "branch": "codex/world-core-v10-continuation",
+    "base_candidate": "dadad8292f7b2e3f16430052d1e599d733c76031",
+    "continuation_policy": "docs/governance/WORLD_CORE_V10_CONTINUATION_POLICY.json",
+    "owner_authorization": "docs/reports/V09/V09_TO_V10_ENTRY_AUTHORIZATION.md",
+    "current_step": "V10.1",
+    "terminal_gate": "GATE_B_WORLD_CORE_HARD_GATE",
+    "production_access": false,
+    "production_mutation": false
+  },
   "v09_1": {
     "status": "IN_PROGRESS",
     "code_candidate": "23b8b7d9101a7a8fab4bd272ff0a59b58fa684d7",
@@ -301,13 +324,13 @@
     "production_mutation": false
   },
   "current_gate": {
-    "step_id": "V09.1",
+    "step_id": "V10.1",
     "status": "IN_PROGRESS",
-    "review": "V09_ENTRY_PREFLIGHT_GO",
-    "next_step": "V09.1",
+    "review": "V09_TO_V10_OWNER_AUTHORIZED_ENTRY",
+    "next_step": "V10.1",
     "next_step_ready": true,
     "next_step_blockers": [],
-    "required_gate": "V09.1_IMPLEMENTATION",
+    "required_gate": "V10.1_IMPLEMENTATION",
     "gate_status": "PASS"
   },
   "v07_package_review": {
@@ -1405,10 +1428,10 @@
     "V08.1": "VERIFIED",
     "V08.2": "VERIFIED",
     "V08.3": "VERIFIED",
-    "V09.1": "IN_PROGRESS",
-    "V09.2": "PLANNED",
-    "V09.3": "PLANNED",
-    "V10.1": "PLANNED",
+    "V09.1": "IMPLEMENTED_UNVERIFIED",
+    "V09.2": "IMPLEMENTED_UNVERIFIED",
+    "V09.3": "IMPLEMENTED_UNVERIFIED",
+    "V10.1": "IN_PROGRESS",
     "V10.2": "PLANNED",
     "V10.3": "PLANNED",
     "V10.4": "PLANNED",
