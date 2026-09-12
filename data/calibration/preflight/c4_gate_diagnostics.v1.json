@@ -1,0 +1,1930 @@
+{
+  "schemaVersion": "c4-gate-diagnostics.v1",
+  "diagnosticsId": "c4-gate-diagnostics-from-frozen-c2-c3-feature-evidence",
+  "status": "DIAGNOSTICS_ONLY_NON_AUTHORITATIVE",
+  "finalGeneratorReady": false,
+  "input": {
+    "contractCanonicalHash": "c4172d3cc746be5f82b4eadc4494156918b73cc3b25112910ed90d17063eec40",
+    "artifacts": [
+      {
+        "path": "data/calibration/exploration/c3_execution_contract.v1.json",
+        "rawSha256": "bb7841b8925bd64ee5e07767098d5f12db3b1d55fdd142c78c24ba207f3725a5",
+        "canonicalHash": "9c9b3fab9f7def56bbe66d2e1464d278dde345d24dc37fc3e49e6dd883eafd48"
+      },
+      {
+        "path": "data/calibration/exploration/c3_exploration_manifest.v1.json",
+        "rawSha256": "e76a65aa274634ccebd54ff50f0e54c1d04a3bf65e12aa43601906fce4041846"
+      },
+      {
+        "path": "data/calibration/exploration/c3_exploration_summary.v1.json",
+        "rawSha256": "9cc34aca524d6c9ec0ffb1c957f573e1145527cc4425b9bb379b15d87958036a"
+      },
+      {
+        "path": "data/calibration/exploration/c3_uncertainty_register.v1.json",
+        "rawSha256": "341c9a3e08c582c82cf3e173660f7e4d822d34bbeee0ad2d36345df312773d2a"
+      },
+      {
+        "path": "data/calibration/pilot/normalized_observations.v1.json",
+        "rawSha256": "2ddf22030106f92b906510b926bf40855e8879e5faca67d43ed9ade31cb6078a"
+      },
+      {
+        "path": "data/calibration/pilot/pilot_report.v1.json",
+        "rawSha256": "3c8fe27f685b001ecfe73476fddf85ec32a71b1b239d70aad73ccf76d2c56a21"
+      },
+      {
+        "path": "data/calibration/pilot/quality_diagnostics.v1.json",
+        "rawSha256": "e4b4c07136f94992d63813ee34b6cf0111ee7953dab39fc964167e86f96e9b8a"
+      },
+      {
+        "path": "data/calibration/pilot/snapshot_manifest.v1.json",
+        "rawSha256": "bcdf0cefe0d6e6ac6b223198a5e076d4228fcaff354fe203c26f7343323bf8fa"
+      },
+      {
+        "path": "data/calibration/preflight/c4_feature_admission_evidence.v1.json",
+        "rawSha256": "ad1f7ff2030071528995b4de21da8777d87626289912628a5f3e9e2b55b977c7",
+        "canonicalHash": "cf3473c4343a88e3db7ac3e6526ef44ed2ce8a54bd1e3f93e13047de4b5a976c"
+      },
+      {
+        "path": "data/calibration/preflight/c4_feature_admission_execution_contract.v1.json",
+        "rawSha256": "77b81a75cadce7e24d2b8a8b6e90207694723b73a6bda2e335795fbf482fd14b",
+        "canonicalHash": "c2b960b4465f6e8b0755d30ad721618b5454f957462aa236bde283365e59893a"
+      },
+      {
+        "path": "data/calibration/preflight/c4_generation_preflight.v1.json",
+        "rawSha256": "50187193d0a4cb1fec8b3d190431ff98806034cf36fae2aa980e1c932e3ab916",
+        "canonicalHash": "323bf1d117d0511cb40891a02a161e052682e9aa8938f33ddbad6ce732fc5843"
+      },
+      {
+        "path": "data/calibration/variable_registry.v2.json",
+        "rawSha256": "94b8b1a907410a0ed80b0378b3b040884d6f8fd974f096c0af29c7c01e286266"
+      }
+    ]
+  },
+  "baseline": {
+    "featureEvidenceTargetCommit": "f564c0ca18387ab4a07144522ec8ce0c0df9ff62",
+    "featureEvidenceContentHash": "cf3473c4343a88e3db7ac3e6526ef44ed2ce8a54bd1e3f93e13047de4b5a976c",
+    "approvedState": "NOT_READY_NON_AUTHORITATIVE",
+    "finalGeneratorReady": false
+  },
+  "missingness": {
+    "strategySelected": false,
+    "valuesImputed": false,
+    "strategyCandidates": [
+      {
+        "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+        "fillsValuesWhenRun": false,
+        "executionStatus": "DIAGNOSTIC_CANDIDATE_NOT_SELECTED"
+      },
+      {
+        "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+        "fillsValuesWhenRun": false,
+        "executionStatus": "DIAGNOSTIC_CANDIDATE_NOT_SELECTED"
+      },
+      {
+        "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+        "fillsValuesWhenRun": false,
+        "executionStatus": "DIAGNOSTIC_CANDIDATE_NOT_SELECTED"
+      },
+      {
+        "strategyId": "OWNER_APPROVED_IMPUTATION",
+        "fillsValuesWhenRun": true,
+        "executionStatus": "NOT_RUN_OWNER_DECISION_REQUIRED"
+      }
+    ],
+    "variableApplicability": [
+      {
+        "variableId": "agriculture_value_added_pct_gdp",
+        "dataClass": "OBSERVED",
+        "pilotObservationCount": 30,
+        "explicitMissingValueCount": 2,
+        "nonMissingValueCount": 28,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "APPLICABLE_PRESERVES_EXPLICIT_NULLS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "APPLICABLE_NON_MISSING_VALUES_ONLY"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "APPLICABLE_WITH_COMMON_GRID_EXCLUSIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "OWNER_DECISION_REQUIRED_EXPLICIT_MISSING_VALUES"
+          }
+        ]
+      },
+      {
+        "variableId": "commodity_dependence_proxy",
+        "dataClass": "PLACEHOLDER",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          }
+        ]
+      },
+      {
+        "variableId": "current_account_pct_gdp",
+        "dataClass": "OBSERVED",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          }
+        ]
+      },
+      {
+        "variableId": "energy_dependence_proxy",
+        "dataClass": "PLACEHOLDER",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          }
+        ]
+      },
+      {
+        "variableId": "export_concentration_hhi",
+        "dataClass": "PLACEHOLDER",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          }
+        ]
+      },
+      {
+        "variableId": "fiscal_balance_pct_gdp",
+        "dataClass": "DERIVED",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          }
+        ]
+      },
+      {
+        "variableId": "food_dependence_proxy",
+        "dataClass": "PLACEHOLDER",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          }
+        ]
+      },
+      {
+        "variableId": "gdp_per_capita_current_usd",
+        "dataClass": "DERIVED",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          }
+        ]
+      },
+      {
+        "variableId": "government_expenditure_pct_gdp",
+        "dataClass": "OBSERVED",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          }
+        ]
+      },
+      {
+        "variableId": "government_revenue_pct_gdp",
+        "dataClass": "OBSERVED",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          }
+        ]
+      },
+      {
+        "variableId": "import_dependency_hhi",
+        "dataClass": "PLACEHOLDER",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          }
+        ]
+      },
+      {
+        "variableId": "industry_value_added_pct_gdp",
+        "dataClass": "OBSERVED",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          }
+        ]
+      },
+      {
+        "variableId": "labour_market_structure",
+        "dataClass": "PLACEHOLDER",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_APPLICABLE_PLACEHOLDER"
+          }
+        ]
+      },
+      {
+        "variableId": "manufacturing_value_added_pct_gdp",
+        "dataClass": "OBSERVED",
+        "pilotObservationCount": 30,
+        "explicitMissingValueCount": 2,
+        "nonMissingValueCount": 28,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "APPLICABLE_PRESERVES_EXPLICIT_NULLS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "APPLICABLE_NON_MISSING_VALUES_ONLY"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "APPLICABLE_WITH_COMMON_GRID_EXCLUSIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "OWNER_DECISION_REQUIRED_EXPLICIT_MISSING_VALUES"
+          }
+        ]
+      },
+      {
+        "variableId": "public_debt_pct_gdp",
+        "dataClass": "OBSERVED",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          }
+        ]
+      },
+      {
+        "variableId": "reserves_total_usd",
+        "dataClass": "OBSERVED",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          }
+        ]
+      },
+      {
+        "variableId": "services_value_added_pct_gdp",
+        "dataClass": "OBSERVED",
+        "pilotObservationCount": 30,
+        "explicitMissingValueCount": 2,
+        "nonMissingValueCount": 28,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "APPLICABLE_PRESERVES_EXPLICIT_NULLS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "APPLICABLE_NON_MISSING_VALUES_ONLY"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "APPLICABLE_WITH_COMMON_GRID_EXCLUSIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "OWNER_DECISION_REQUIRED_EXPLICIT_MISSING_VALUES"
+          }
+        ]
+      },
+      {
+        "variableId": "trade_openness_pct_gdp",
+        "dataClass": "DERIVED",
+        "pilotObservationCount": 0,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 0,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS"
+          }
+        ]
+      },
+      {
+        "variableId": "unemployment_pct",
+        "dataClass": "OBSERVED",
+        "pilotObservationCount": 30,
+        "explicitMissingValueCount": 0,
+        "nonMissingValueCount": 30,
+        "strategyApplicability": [
+          {
+            "strategyId": "PRESERVE_NULL_NO_IMPUTATION",
+            "status": "APPLICABLE_PRESERVES_EXPLICIT_NULLS"
+          },
+          {
+            "strategyId": "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "status": "APPLICABLE_NON_MISSING_VALUES_ONLY"
+          },
+          {
+            "strategyId": "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "status": "APPLICABLE_WITH_COMMON_GRID_EXCLUSIONS"
+          },
+          {
+            "strategyId": "OWNER_APPROVED_IMPUTATION",
+            "status": "NOT_NEEDED_NO_EXPLICIT_MISSING_VALUES"
+          }
+        ]
+      }
+    ],
+    "commonGridDiagnostic": {
+      "variableIds": [
+        "agriculture_value_added_pct_gdp",
+        "manufacturing_value_added_pct_gdp",
+        "services_value_added_pct_gdp",
+        "unemployment_pct"
+      ],
+      "expectedCellCount": 30,
+      "completeCellCount": 28,
+      "excludedCellCount": 2,
+      "incompleteCells": [
+        {
+          "geographyId": "emp:USA",
+          "period": "2022",
+          "missingVariableIds": [
+            "agriculture_value_added_pct_gdp",
+            "manufacturing_value_added_pct_gdp",
+            "services_value_added_pct_gdp"
+          ]
+        },
+        {
+          "geographyId": "emp:USA",
+          "period": "2023",
+          "missingVariableIds": [
+            "agriculture_value_added_pct_gdp",
+            "manufacturing_value_added_pct_gdp",
+            "services_value_added_pct_gdp"
+          ]
+        }
+      ]
+    }
+  },
+  "vintageStability": {
+    "comparisonPolicy": {
+      "comparablePairRule": "SAME_SOURCE_AND_CANONICAL_REQUEST_PARAMETERS_WITH_DISTINCT_RETRIEVALS",
+      "periodDifferenceIsVintageEvidence": false,
+      "differentQueryIsVintageEvidence": false,
+      "missingSourceAsOfSupportsStability": false
+    },
+    "providerDiagnostics": [
+      {
+        "sourceId": "UN_COMTRADE_V1",
+        "providerRunStatus": "FETCHED",
+        "snapshotCount": 6,
+        "distinctQueryIdentityCount": 6,
+        "comparableSnapshotPairCount": 0,
+        "snapshotIds": [
+          "snap_un_comtrade_v1_037dca75a9030636c560",
+          "snap_un_comtrade_v1_35045c8e8ac401d11f6b",
+          "snap_un_comtrade_v1_51c0cf64942e21d3eee4",
+          "snap_un_comtrade_v1_8ed04e71f69790d0669b",
+          "snap_un_comtrade_v1_9ce2516ce3b96f2bc036",
+          "snap_un_comtrade_v1_e543fdceee4321224096"
+        ],
+        "queryIdentityHashes": [
+          "0e8c57af5267da5cfb34901f0d35819d1b449acd12ca8f184f415ecf9861d2fb",
+          "1116d9a34b9c62eaaae2bee94db8f4816cc9004bbe9df37a80c687250c99e420",
+          "46393dead33a9d597a458ecdae930896d325e5181ced46f783c9a3f8d25750fa",
+          "73192010ded8458668e55c42d3a25f1570a1878d2a518334978841a9bd5e4b7a",
+          "c946ec5cc2d6dc6f4b364a95b46660527700601caee2c28503adfb4ff81af5e3",
+          "ecbe98618417040d2aca8c9cc3616dfa6d90c29c72c8cb9d963cc8745787298a"
+        ],
+        "observedPeriods": ["2022"],
+        "sourceAsOfValues": [],
+        "sourceAsOfMissingSnapshotCount": 6,
+        "retrievedAtRange": {
+          "minimum": "2026-09-10T15:50:52.155Z",
+          "maximum": "2026-09-10T15:50:59.630Z"
+        },
+        "comparisonStatus": "NOT_COMPARABLE_DIFFERENT_QUERY_IDENTITIES",
+        "stabilityClaimSupported": false
+      },
+      {
+        "sourceId": "WB_WDI_V2",
+        "providerRunStatus": "FETCHED",
+        "snapshotCount": 1,
+        "distinctQueryIdentityCount": 1,
+        "comparableSnapshotPairCount": 0,
+        "snapshotIds": ["snap_wb_wdi_v2_86bbb4db2a1ec6836a7d"],
+        "queryIdentityHashes": [
+          "0925a208facff380f49ee4f771afe23087c6b35b83f2f37fdc29f207e6f2bc4c"
+        ],
+        "observedPeriods": ["2021", "2022", "2023"],
+        "sourceAsOfValues": ["2026-07-13"],
+        "sourceAsOfMissingSnapshotCount": 0,
+        "retrievedAtRange": {
+          "minimum": "2026-09-10T15:50:50.668Z",
+          "maximum": "2026-09-10T15:50:50.668Z"
+        },
+        "comparisonStatus": "NOT_COMPARABLE_SINGLE_SNAPSHOT",
+        "stabilityClaimSupported": false
+      },
+      {
+        "sourceId": "WTO_TIMESERIES_V1",
+        "providerRunStatus": "NOT_FETCHED",
+        "snapshotCount": 0,
+        "distinctQueryIdentityCount": 0,
+        "comparableSnapshotPairCount": 0,
+        "snapshotIds": [],
+        "queryIdentityHashes": [],
+        "observedPeriods": [],
+        "sourceAsOfValues": [],
+        "sourceAsOfMissingSnapshotCount": 0,
+        "retrievedAtRange": null,
+        "comparisonStatus": "NOT_COMPARABLE_SOURCE_NOT_FETCHED",
+        "stabilityClaimSupported": false
+      }
+    ],
+    "comparableSnapshotPairCount": 0,
+    "stabilityClaimsSupported": false
+  },
+  "sectorDiagnostics": {
+    "observedComponentVariableIds": [
+      "agriculture_value_added_pct_gdp",
+      "manufacturing_value_added_pct_gdp",
+      "services_value_added_pct_gdp"
+    ],
+    "availableComponentSetIsExhaustive": false,
+    "totalReconciliationStatus": "NOT_RUN_NON_EXHAUSTIVE_COMPONENT_SET",
+    "evaluatedCellCount": 30,
+    "computedPartialSumCellCount": 28,
+    "explicitMissingComponentCellCount": 2,
+    "minimumResidualPctPoints": "8.894215082633489",
+    "maximumResidualPctPoints": "28.67604204198554",
+    "negativeResidualCellCount": 0,
+    "cells": [
+      {
+        "geographyId": "emp:AUS",
+        "period": "2021",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "2.30537875480088",
+            "observationId": "obs_850230cc9c5585de80d9f344e0c443ce8c82e12c913676ac4216beba481cf8ab"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "5.43021286709902",
+            "observationId": "obs_f1c12078e2e016e970cf0876a4ec1e39b3df29abed671a2f7e93a61d40e225b1"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "65.7262019595193",
+            "observationId": "obs_774bc083477e1fbea4e850aacf64694565fca53d6a4690e434c91a66ebe79485"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "73.4617935814192",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "26.5382064185808",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:AUS",
+        "period": "2022",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "2.67242699950618",
+            "observationId": "obs_de089d897c45718731735529508f7d0aae630601062ea7dd39fda81af4406136"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "5.28875408553718",
+            "observationId": "obs_9253a4886de02ea74fa1a3df24979b931ecf58e941c258ba0906f4fe08fd0b73"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "63.3627768729711",
+            "observationId": "obs_2457270e25eac126428ee654aab61d834eaef004256dcee6c20a5eabb37dd072"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "71.32395795801446",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "28.67604204198554",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:AUS",
+        "period": "2023",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "2.57169831894523",
+            "observationId": "obs_2a15e24c863522e224f351ad77431f7d0d1129924a74c8eec88596d366b9afc6"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "5.26935642156248",
+            "observationId": "obs_980d6eaaf93805fabc4b508da54bd51cf3869d7b314ef0b6bbae874d32930691"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "63.6365823532904",
+            "observationId": "obs_db6e540cc95c63216e83c403c1e2793dda1bbbe5344f6e91afd5b780590d61da"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "71.47763709379811",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "28.52236290620189",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:BRA",
+        "period": "2021",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "6.5587626121061",
+            "observationId": "obs_166b071351d78ab66fe81f81fc1384148eaae136988fa0a637cffbed0318965c"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "11.9043730112478",
+            "observationId": "obs_8b6aca28541a4c5ac92db610ac2a714e3914f095b3d99684fc13ed5428bf86f1"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "56.9133841887799",
+            "observationId": "obs_b8ac88ba3a168cd04a6ce861fa7be1fcfcb1dc20e9992fdd1fb7a0480b2413a0"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "75.3765198121338",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "24.6234801878662",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:BRA",
+        "period": "2022",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "5.76747490819457",
+            "observationId": "obs_ec847c0bd5e999867472daa3d3dd10ebe96919c4bf1b13b6a2a2edb58b3bfbf8"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "13.0740816282273",
+            "observationId": "obs_8300b456aa18ae6b31356b57cf75c52fd710c25bd5e0f00529d7cd8f5109a748"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "58.0872310744068",
+            "observationId": "obs_6322dd1c663b6cda195df2177a2c081467b509feae4a430cd84df4174524b811"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "76.92878761082867",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "23.07121238917133",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:BRA",
+        "period": "2023",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "6.02306023526246",
+            "observationId": "obs_f09d043fc64e91d2f4882645e8776245c23ad65e044df0aecd929f962be85873"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "13.2531636224002",
+            "observationId": "obs_7528c54bd947097f334ef87674f6b62eedfe2480da2502937fd3eacceffa9eb8"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "59.1789358567535",
+            "observationId": "obs_8306412912e6605ca51d9219aee327932da11e484333542d30feede2b5bb577f"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "78.45515971441616",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "21.54484028558384",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:CHN",
+        "period": "2021",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "7.08935251618004",
+            "observationId": "obs_ea97d43a1d61cbaa4d9e834bc8fd0fb49863ea87fab4fab01562e1338cbd0835"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "26.621932558827",
+            "observationId": "obs_76060063dee7a9d94a005897bfe81ead51791dfa6a8dd4c9b67d7814da4386d3"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "54.8181795722183",
+            "observationId": "obs_0b2a0a41e7559fabb0042f8a7a3e37466ada51cfd67a309addb09bff5204c577"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "88.52946464722534",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "11.47053535277466",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:CHN",
+        "period": "2022",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "7.14788692830171",
+            "observationId": "obs_c6afe952de30dff1c9bb3a17c9d04c25fc130850863e13c51408698788ce72e4"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "25.9806695043084",
+            "observationId": "obs_ec2ee51d7a254524690fcb32d23fbbd5ebc7390b9f5d50a2e38b3d1600199896"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "54.9575804271762",
+            "observationId": "obs_a184c2715a323dad28c4b9bc85db73d210c6918a82cff988192ffbff22bcbe99"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "88.08613685978631",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "11.91386314021369",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:CHN",
+        "period": "2023",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "6.88951941080068",
+            "observationId": "obs_18faa33889ba390489d6e9fa536694f574f6ec2e8ddb164ab1d642b113c06e89"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "25.0144267929987",
+            "observationId": "obs_21a5925acd3982322febfb22132bb0e8ed6742164081b7fa09c76eca5be26ef6"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "56.3379775668432",
+            "observationId": "obs_153784e77ebf36c2a2ba497d6938fdf16209ea74349f67b3161b8c977f6b21c2"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "88.24192377064258",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "11.75807622935742",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:DEU",
+        "period": "2021",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "0.753895620719434",
+            "observationId": "obs_a2490a218a4e3ae99921014d8059e6af2311101c588633ebba52a63350e76c8a"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "18.5726195842861",
+            "observationId": "obs_7274415eb8d7e60f5a9dc0bf34698aa6a5a4c0030f3720ac7c7c6d88696886a7"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "63.5453543127468",
+            "observationId": "obs_c6ee5f84e7b5ec8dc783f3cdd5ca35f11a41363f9d1353f4f9fca7712790a7fa"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "82.871869517752334",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "17.128130482247666",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:DEU",
+        "period": "2022",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "0.994638278032481",
+            "observationId": "obs_fab2a75d1f9e6f8c305b454b10aedb715e246e2df1ec4dd2f10978a5e344e7fc"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "18.3217735042199",
+            "observationId": "obs_e4d739e547d76f1177f47f924e031c4248c60a0608b13779184795804d7c4b1b"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "63.4806825103587",
+            "observationId": "obs_761c948b5f2ace08010d742cf9e421a36d15739e1609898069ba72611a9ee328"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "82.797094292611081",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "17.202905707388919",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:DEU",
+        "period": "2023",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "0.929156663056282",
+            "observationId": "obs_cfa4eb4afe1e0a3f22b61445fa3ee04092a6bf4c2e38173d659d8b69428b6d55"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "18.9402532641593",
+            "observationId": "obs_a0d6d6f75bbc9a8c4f263f421445c38b1286548e3e734f791bf6089cf5e83289"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "63.6154489715143",
+            "observationId": "obs_7e36be9bec3f5037a154de91c3475a84be80820ee7b9be078fe49230a15419ae"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "83.484858898729882",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "16.515141101270118",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:IDN",
+        "period": "2021",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "13.2801691376596",
+            "observationId": "obs_b02dc3b71da2225a231b6047cc4f102c7bd56e47e6b64aacfb993a74b011cf63"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "19.2434077817738",
+            "observationId": "obs_3e1298d7a03e16bd9572fecc5621f7fb733c241320a135d5c552e90050ac9263"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "42.8228206251521",
+            "observationId": "obs_3921c589afb5e0a91325e3e20ff2d7b0c2f510f3dca1b52c2e3bebf9d7141bd6"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "75.3463975445855",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "24.6536024554145",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:IDN",
+        "period": "2022",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "12.3996501634108",
+            "observationId": "obs_dfc570ebddb829ac1bf7ace1822808333e2e6175022b0b5d1b3c24e4b309dc38"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "18.3361771080329",
+            "observationId": "obs_13c0b51e68960a1eea186393d7212c38182f4e10b8f735eebc00437f7a73ae81"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "41.7909255847112",
+            "observationId": "obs_34936c20c3a76187f5e1b94d4795a7de0c03aa1ae9e4ddfabe7fb4b23fa802ff"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "72.5267528561549",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "27.4732471438451",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:IDN",
+        "period": "2023",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "12.5294431866213",
+            "observationId": "obs_5b11bea23932af9d122082a16524ba7f5191069b2b237febe0108b5ad911f221"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "18.6674487916783",
+            "observationId": "obs_88ac8dc86b30f4d8ebc865e9ffca16697c4059a0b1bbd2cf346b459da7b53b4d"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "42.8792527670573",
+            "observationId": "obs_b42641f89b0c5bfb605e21a94448e519b7df0abe4b003f1eed5e16ea097c40e2"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "74.0761447453569",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "25.9238552546431",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:IND",
+        "period": "2021",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "17.3725615260314",
+            "observationId": "obs_7779f938b4e7883f905273c80ce689f13ce8e52bd53c390f040567cad62cfa5f"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "14.3770288531286",
+            "observationId": "obs_70b22e63855b40a00a9581ba18717c0ee32c423afa31281533d7e6c5acc5e31c"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "47.8472234596709",
+            "observationId": "obs_01754e20047ee05b5ed3664f923cd2a32c1e8d4f83bad1af87031fde70e4c118"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "79.5968138388309",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "20.4031861611691",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:IND",
+        "period": "2022",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "18.2106659929942",
+            "observationId": "obs_b835f6c242c7e6648c72902c3f64f08106f8c4d228e1d6b38effbed291dae74f"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "13.3327202623974",
+            "observationId": "obs_b8f7f459797260c3a9d524c3d70bcee31b15fb47cfe95c57be54c005ed6b894b"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "47.1727519374304",
+            "observationId": "obs_04778243c99bb250c34a57e85d18c5d6d19e3b249a5b2c340d749a63f58e84ae"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "78.716138192822",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "21.283861807178",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:IND",
+        "period": "2023",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "17.6565389328245",
+            "observationId": "obs_0bb09032f4ccdb995cd6db90c555800dca5b1b924ff9c440109ca33352b28e40"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "13.312843875072",
+            "observationId": "obs_80079e437698b76afea71c081f3ce2afe206be1d08e94af68d9248eb649dc28a"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "47.5864648020094",
+            "observationId": "obs_0c64e3b333af04264ed97b2eea2d28641fcc4221417b3e29ca6f9cb3fa1c7912"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "78.5558476099059",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "21.4441523900941",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:JPN",
+        "period": "2021",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "0.938649382602401",
+            "observationId": "obs_64e5e62302f5f453d8c0c57f76390395f85ac560e218f4bd1f51a118c2033e66"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "19.6763666364",
+            "observationId": "obs_093b1dc5c6e689dcaa34d1abdaae12beb57d2a48c40ade2326da505749ca97ad"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "70.064497929455",
+            "observationId": "obs_0252172687ac1634327c1a127b9c66fcf11cfe23912f44bd3075cb74b2211516"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "90.679513948457401",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "9.320486051542599",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:JPN",
+        "period": "2022",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "0.848657019671377",
+            "observationId": "obs_716bc6053d797de0686e16e648216822af8cbd9d3be24e65c587b71605a9d3e6"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "18.8237454364041",
+            "observationId": "obs_7e64c3aa87dff3bc9f944db551fa155c6b5830d021c637ca81d3b67e93866800"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "71.1191098111371",
+            "observationId": "obs_dc54e610421296cd672e4febc6112fd18a0272c3619f30c01ca8b943047b077b"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "90.791512267212577",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "9.208487732787423",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:JPN",
+        "period": "2023",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "0.825345395457711",
+            "observationId": "obs_44c090385a289995b0a69673b67dc673a646c487583a5680f6c5eb04748eebcb"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "19.4882904000273",
+            "observationId": "obs_52917a7f6c5faf7a699ca67e1c9bdf6fd3a2e621e9154e0e19a86ddbb5616160"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "70.7921491218815",
+            "observationId": "obs_f41eda85209bafdc788349c410fd1743816ae90ccc06f28ef76a298952d38219"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "91.105784917366511",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "8.894215082633489",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:MEX",
+        "period": "2021",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "3.78266528622109",
+            "observationId": "obs_38dcc630c25a6aee7fc76e0169dd519c2d37cd492e36e9733e95b4cff22598f9"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "20.8358358617373",
+            "observationId": "obs_0fcf02584c4e412a7163c97111db8fc749747238251e5d719dc37b180b39ead0"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "58.3256995087389",
+            "observationId": "obs_54f85498380a62d6b110f9149b5dba27315709233cdec007953b0d1fdbc6e927"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "82.94420065669729",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "17.05579934330271",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:MEX",
+        "period": "2022",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "3.89806571238006",
+            "observationId": "obs_fc09eff2abf88825d6105f959bd90aa9b127b970392814635621583a0229eccb"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "21.48647019504",
+            "observationId": "obs_0df61928e5f49fc894d87d96ded926f4f5451ae91f52e7dd6b895de40c38aeca"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "58.1306222654239",
+            "observationId": "obs_247c703baeb7e448f8b25c169fd89991d2df565a813042e5d24c6cc9a7d2ef20"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "83.51515817284396",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "16.48484182715604",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:MEX",
+        "period": "2023",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "3.84569758598285",
+            "observationId": "obs_445ffc411fd65b2d8479ee56b17a609c11c1124c054202bed522211ad9ca5233"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "20.4651290537164",
+            "observationId": "obs_ba8c73dc7065e6dd908dea68be09d1fae15bd78955a6b3c6914a73c640da2c8b"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "57.6769252512863",
+            "observationId": "obs_42c53fd03876914292a5f0b697914d47b329d1df237b033f74e2ba49e06a1f9f"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "81.98775189098555",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "18.01224810901445",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:USA",
+        "period": "2021",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "0.942961672907101",
+            "observationId": "obs_d7f922089c6defc84e68e55d482f49bef3542fd396bfb6c921811dba59a92955"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "10.5250313827085",
+            "observationId": "obs_cbf94f8a04ad3626fae9a942a66dd27c013ae270b5001b1eb68589b4d9929902"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "76.2563816410471",
+            "observationId": "obs_c554c74fefa6d559c8dd5582bb8755e9aba1aeff3466da9e6b1d697e27b6f254"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "87.724374696662701",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "12.275625303337299",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:USA",
+        "period": "2022",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": null,
+            "observationId": "obs_aba9f39074681986d26910804bff06d767da325c352a5023e816a260235f1791"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": null,
+            "observationId": "obs_91325cc74bc17c4dbd65099f4f0878f120fdab3ea42766b285ab2666cea6d6ea"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": null,
+            "observationId": "obs_4ef218af8d76564238ea9cca6e8dac54a3de22bdb45e5b74c915815907b74a93"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": null,
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": null,
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "NOT_COMPUTED_EXPLICIT_MISSING_COMPONENT"
+      },
+      {
+        "geographyId": "emp:USA",
+        "period": "2023",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": null,
+            "observationId": "obs_47b47280ebe6b632d391d0f06e1f43c28d7df89cc3d7a98ce65c663981a61cda"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": null,
+            "observationId": "obs_c6c1d90cb78a7b4e37faf9e1e6a0ba071091db0f18bae12cb34dcb7e635c83e3"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": null,
+            "observationId": "obs_b0ab874349a090dcb494251ca29d3499230e0245e2271f2773e49d4b2e9b07fa"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": null,
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": null,
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "NOT_COMPUTED_EXPLICIT_MISSING_COMPONENT"
+      },
+      {
+        "geographyId": "emp:ZAF",
+        "period": "2021",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "2.45787199667371",
+            "observationId": "obs_62489d9e79550683b5da33017fef38f302de80af8232a7ab7e1b9abf246bb3ae"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "12.0775538850278",
+            "observationId": "obs_64a9e2bf76e9da1e0ca5bfaf9e65c376754925bfa717d001ade71edb828131c6"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "62.7445288151422",
+            "observationId": "obs_7cc823212ac9cc8c06a2ef060560f857157b0440a9158d47b24a10c296387f7f"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "77.27995469684371",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "22.72004530315629",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:ZAF",
+        "period": "2022",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "2.60577484985618",
+            "observationId": "obs_ec5fe30db59780efca18b4e96a415819081f3a2abcd00763314674ef789e9685"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "12.4454055010392",
+            "observationId": "obs_1c18a92be90422849557507ac49439c8fdcd4cd4c0886a1484b36b0d9cc118b8"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "62.2719610043357",
+            "observationId": "obs_78f4cbf44a35500d7944629e489e6ba0e62799705e1e3e33688a37d0cc7431d1"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "77.32314135523108",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "22.67685864476892",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      },
+      {
+        "geographyId": "emp:ZAF",
+        "period": "2023",
+        "observedComponents": [
+          {
+            "variableId": "agriculture_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "2.53517112309848",
+            "observationId": "obs_e70cd4d8bfbde5d0a2a3af6ac9776e7a21e2252556cd9b62d1eab0d2c9e85091"
+          },
+          {
+            "variableId": "manufacturing_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "12.9800055529093",
+            "observationId": "obs_c291e254564884308e8c513be8efae50d1a5984037d67fc663b75ed1330dda12"
+          },
+          {
+            "variableId": "services_value_added_pct_gdp",
+            "dataClass": "OBSERVED",
+            "value": "62.7205686343674",
+            "observationId": "obs_9bdad4036c74ed52058b5c37ae475dee4f563bfe7ccc752fac22b8381c7fa34f"
+          }
+        ],
+        "availableComponentSumPctGdp": {
+          "dataClass": "DERIVED",
+          "value": "78.23574531037518",
+          "transformation": "C4_SECTOR_AVAILABLE_COMPONENT_SUM_EXACT@1.0.0"
+        },
+        "residualToHundredPctPoints": {
+          "dataClass": "DERIVED",
+          "value": "21.76425468962482",
+          "transformation": "C4_SECTOR_RESIDUAL_TO_100_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION"
+      }
+    ]
+  },
+  "bilateralTradeDiagnostics": {
+    "reportedFlowDataClass": "OBSERVED",
+    "mirrorDifferenceDataClass": "DERIVED",
+    "exactDuplicateSourceFactCount": 1,
+    "distinctMirrorPairCount": 3,
+    "nonzeroDifferencePairCount": 3,
+    "unmatchedDistinctFlowCount": 0,
+    "reconciliationStatus": "NOT_RUN_NO_AVERAGING_NO_IPF_RAS",
+    "pairs": [
+      {
+        "pairId": "mirror_98cdbd07f00bab80e5d886f1ad362560131b69c4bb4417c4907d7c4d37e6b64a",
+        "exporterId": "emp:DEU",
+        "importerId": "emp:BRA",
+        "period": "2022",
+        "productClassification": "H6",
+        "productCode": "27",
+        "calibrationSectorId": "pilot_energy",
+        "reportedExport": {
+          "dataClass": "OBSERVED",
+          "valueUsd": "37801402.939",
+          "observationId": "obs_da844892390762c33af9608fe0af8d2151038217af0bce51acdc43f4b7b50c9c",
+          "sourceSnapshotId": "snap_un_comtrade_v1_e543fdceee4321224096",
+          "sourceFactMultiplicity": 2
+        },
+        "mirrorReportedImport": {
+          "dataClass": "OBSERVED",
+          "valueUsd": "85940348",
+          "observationId": "obs_0eaf254c277d62690b7f102547d8a49a7596e05fc19802d01da49b46c46bc31f",
+          "sourceSnapshotId": "snap_un_comtrade_v1_35045c8e8ac401d11f6b",
+          "sourceFactMultiplicity": 1
+        },
+        "signedDifferenceExportMinusMirrorUsd": {
+          "dataClass": "DERIVED",
+          "value": "-48138945.061",
+          "transformation": "C4_TRADE_MIRROR_SIGNED_DIFFERENCE_EXACT@1.0.0"
+        },
+        "absoluteDifferenceUsd": {
+          "dataClass": "DERIVED",
+          "value": "48138945.061",
+          "transformation": "C4_TRADE_MIRROR_ABSOLUTE_DIFFERENCE_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "MIRROR_DIFFERENCE_RETAINED_NO_RECONCILIATION",
+        "reconciliationStatus": "NOT_RUN_NO_AVERAGING_NO_IPF_RAS"
+      },
+      {
+        "pairId": "mirror_12b9dda24479ba00d88368c948e97221efb8674d1b7b5a54a10f7bb3788def4b",
+        "exporterId": "emp:IND",
+        "importerId": "emp:ZAF",
+        "period": "2022",
+        "productClassification": "H6",
+        "productCode": "10",
+        "calibrationSectorId": "pilot_food_agriculture",
+        "reportedExport": {
+          "dataClass": "OBSERVED",
+          "valueUsd": "78704554.777",
+          "observationId": "obs_dcbc354173e573ddf76cfc24b8753344cfc28e2751742b756c1e6aecf16dedee",
+          "sourceSnapshotId": "snap_un_comtrade_v1_9ce2516ce3b96f2bc036",
+          "sourceFactMultiplicity": 1
+        },
+        "mirrorReportedImport": {
+          "dataClass": "OBSERVED",
+          "valueUsd": "93512889.72",
+          "observationId": "obs_c2ec8b0db3cc934bc02de94a68a121068bedbaf2d61269aeb2f532eccad8cd46",
+          "sourceSnapshotId": "snap_un_comtrade_v1_037dca75a9030636c560",
+          "sourceFactMultiplicity": 1
+        },
+        "signedDifferenceExportMinusMirrorUsd": {
+          "dataClass": "DERIVED",
+          "value": "-14808334.943",
+          "transformation": "C4_TRADE_MIRROR_SIGNED_DIFFERENCE_EXACT@1.0.0"
+        },
+        "absoluteDifferenceUsd": {
+          "dataClass": "DERIVED",
+          "value": "14808334.943",
+          "transformation": "C4_TRADE_MIRROR_ABSOLUTE_DIFFERENCE_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "MIRROR_DIFFERENCE_RETAINED_NO_RECONCILIATION",
+        "reconciliationStatus": "NOT_RUN_NO_AVERAGING_NO_IPF_RAS"
+      },
+      {
+        "pairId": "mirror_1286e3ae9eb90c417c6becd850d730c4219a1b9e6b728b16e611d6a289ba7b84",
+        "exporterId": "emp:USA",
+        "importerId": "emp:CHN",
+        "period": "2022",
+        "productClassification": "H6",
+        "productCode": "84",
+        "calibrationSectorId": "pilot_advanced_manufacturing",
+        "reportedExport": {
+          "dataClass": "OBSERVED",
+          "valueUsd": "14915568181",
+          "observationId": "obs_9703c01cabbc720f8a68b68536bfbaa1402c8bcbab0132622f834afe02dda400",
+          "sourceSnapshotId": "snap_un_comtrade_v1_8ed04e71f69790d0669b",
+          "sourceFactMultiplicity": 1
+        },
+        "mirrorReportedImport": {
+          "dataClass": "OBSERVED",
+          "valueUsd": "19655401690",
+          "observationId": "obs_6bbf22cdc5322bad1d51dfc997e1d4fbf7a765b4f427770d9a4137787cad1029",
+          "sourceSnapshotId": "snap_un_comtrade_v1_51c0cf64942e21d3eee4",
+          "sourceFactMultiplicity": 1
+        },
+        "signedDifferenceExportMinusMirrorUsd": {
+          "dataClass": "DERIVED",
+          "value": "-4739833509",
+          "transformation": "C4_TRADE_MIRROR_SIGNED_DIFFERENCE_EXACT@1.0.0"
+        },
+        "absoluteDifferenceUsd": {
+          "dataClass": "DERIVED",
+          "value": "4739833509",
+          "transformation": "C4_TRADE_MIRROR_ABSOLUTE_DIFFERENCE_EXACT@1.0.0"
+        },
+        "diagnosticStatus": "MIRROR_DIFFERENCE_RETAINED_NO_RECONCILIATION",
+        "reconciliationStatus": "NOT_RUN_NO_AVERAGING_NO_IPF_RAS"
+      }
+    ]
+  },
+  "readinessGapDisposition": [
+    {
+      "prerequisiteId": "MISSING_VALUE_POLICY_FOR_ARCHETYPE_FEATURES_UNAPPROVED",
+      "gateStatus": "OPEN",
+      "evidenceWorkStatus": "COMPUTABLE_DIAGNOSTICS_COMPLETE",
+      "remainingRequirementType": "OWNER_DECISION",
+      "exactNextRequirement": "Approve one missingness policy and its variable-level applicability; no imputation values were generated."
+    },
+    {
+      "prerequisiteId": "ARCHETYPE_METHOD_AND_COUNT_UNSELECTED",
+      "gateStatus": "OPEN",
+      "evidenceWorkStatus": "NOT_ADDRESSED_BY_THIS_DIAGNOSTIC_SCOPE",
+      "remainingRequirementType": "OWNER_DECISION",
+      "exactNextRequirement": "Select and review an archetype method, count, labels, and feature set in a separately authorized decision."
+    },
+    {
+      "prerequisiteId": "FICTIONAL_COUNTRY_MAPPING_NOT_AUTHORIZED",
+      "gateStatus": "OPEN",
+      "evidenceWorkStatus": "NOT_ADDRESSED_BY_THIS_DIAGNOSTIC_SCOPE",
+      "remainingRequirementType": "GOVERNANCE_AUTHORIZATION",
+      "exactNextRequirement": "Obtain explicit governance authorization before any fictional-country mapping or generation."
+    },
+    {
+      "prerequisiteId": "WTO_TARIFF_EVIDENCE_ABSENT",
+      "gateStatus": "OPEN",
+      "evidenceWorkStatus": "EXTERNAL_EVIDENCE_REQUIRED",
+      "remainingRequirementType": "NEW_SOURCE_EVIDENCE",
+      "exactNextRequirement": "Provide an authenticated, frozen, reviewed WTO tariff snapshot; no substitute evidence is present."
+    },
+    {
+      "prerequisiteId": "VINTAGE_STABILITY_NOT_ESTABLISHED",
+      "gateStatus": "OPEN",
+      "evidenceWorkStatus": "DIAGNOSTIC_COMPLETE_NO_COMPARABLE_EVIDENCE",
+      "remainingRequirementType": "NEW_SOURCE_EVIDENCE",
+      "exactNextRequirement": "Provide at least two distinct retrievals of the same canonical provider query for a valid vintage comparison."
+    },
+    {
+      "prerequisiteId": "SECTOR_TAXONOMY_AND_TRADE_RECONCILIATION_UNREVIEWED",
+      "gateStatus": "OPEN",
+      "evidenceWorkStatus": "COMPUTABLE_DIAGNOSTICS_COMPLETE",
+      "remainingRequirementType": "OWNER_DECISION_AND_NEW_SOURCE_EVIDENCE",
+      "exactNextRequirement": "Approve an exhaustive sector component taxonomy and mirror policy, and provide missing sector-total evidence before any reconciliation run."
+    },
+    {
+      "prerequisiteId": "FINAL_CALIBRATION_AND_RUNTIME_HANDOFF_BLOCKED",
+      "gateStatus": "OPEN",
+      "evidenceWorkStatus": "BLOCKED_BY_UPSTREAM_GATES",
+      "remainingRequirementType": "GOVERNANCE_AUTHORIZATION",
+      "exactNextRequirement": "Close all upstream evidence and owner gates before a separately reviewed final calibration or runtime handoff."
+    }
+  ],
+  "hardBoundaries": [
+    "NO_VALUE_IMPUTATION",
+    "NO_MISSINGNESS_STRATEGY_SELECTION",
+    "NO_VINTAGE_STABILITY_CLAIM_WITHOUT_COMPARABLE_SNAPSHOTS",
+    "NO_SECTOR_TOTAL_CLAIM_FROM_PARTIAL_COMPONENTS",
+    "NO_TRADE_MIRROR_AVERAGING_OR_RECONCILIATION",
+    "NO_IPF_RAS",
+    "NO_ARCHETYPE_OR_FICTIONAL_COUNTRY_GENERATION",
+    "NO_WORLD_CORE_OR_RUNTIME_IMPORT_OR_MUTATION",
+    "NO_SUPABASE_OR_PRODUCTION_DATABASE_ACCESS",
+    "NO_LIVE_PROVIDER_NETWORK_RETRIEVAL",
+    "NO_FINAL_70_COUNTRY_PACKAGE"
+  ],
+  "contentHash": "fd0b7f00239b990b847bdca8e3629430a9f163ec49b997e546097b27b49882bc"
+}

@@ -1,0 +1,525 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/c4-gate-diagnostics.v1.json",
+  "title": "C4 deterministic non-authoritative gate diagnostics pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "diagnosticsId",
+    "status",
+    "finalGeneratorReady",
+    "input",
+    "baseline",
+    "missingness",
+    "vintageStability",
+    "sectorDiagnostics",
+    "bilateralTradeDiagnostics",
+    "readinessGapDisposition",
+    "hardBoundaries",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "c4-gate-diagnostics.v1" },
+    "diagnosticsId": { "type": "string", "minLength": 1 },
+    "status": { "const": "DIAGNOSTICS_ONLY_NON_AUTHORITATIVE" },
+    "finalGeneratorReady": { "const": false },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contractCanonicalHash", "artifacts"],
+      "properties": {
+        "contractCanonicalHash": { "$ref": "#/$defs/hash" },
+        "artifacts": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/artifactBinding" }
+        }
+      }
+    },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "featureEvidenceTargetCommit",
+        "featureEvidenceContentHash",
+        "approvedState",
+        "finalGeneratorReady"
+      ],
+      "properties": {
+        "featureEvidenceTargetCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "featureEvidenceContentHash": { "$ref": "#/$defs/hash" },
+        "approvedState": { "const": "NOT_READY_NON_AUTHORITATIVE" },
+        "finalGeneratorReady": { "const": false }
+      }
+    },
+    "missingness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strategySelected",
+        "valuesImputed",
+        "strategyCandidates",
+        "variableApplicability",
+        "commonGridDiagnostic"
+      ],
+      "properties": {
+        "strategySelected": { "const": false },
+        "valuesImputed": { "const": false },
+        "strategyCandidates": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/missingnessStrategy" }
+        },
+        "variableApplicability": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/variableApplicability" }
+        },
+        "commonGridDiagnostic": { "$ref": "#/$defs/commonGrid" }
+      }
+    },
+    "vintageStability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "comparisonPolicy",
+        "providerDiagnostics",
+        "comparableSnapshotPairCount",
+        "stabilityClaimsSupported"
+      ],
+      "properties": {
+        "comparisonPolicy": { "$ref": "#/$defs/vintagePolicy" },
+        "providerDiagnostics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/vintageProvider" }
+        },
+        "comparableSnapshotPairCount": { "$ref": "#/$defs/count" },
+        "stabilityClaimsSupported": { "const": false }
+      }
+    },
+    "sectorDiagnostics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observedComponentVariableIds",
+        "availableComponentSetIsExhaustive",
+        "totalReconciliationStatus",
+        "evaluatedCellCount",
+        "computedPartialSumCellCount",
+        "explicitMissingComponentCellCount",
+        "minimumResidualPctPoints",
+        "maximumResidualPctPoints",
+        "negativeResidualCellCount",
+        "cells"
+      ],
+      "properties": {
+        "observedComponentVariableIds": { "$ref": "#/$defs/stringSet" },
+        "availableComponentSetIsExhaustive": { "const": false },
+        "totalReconciliationStatus": {
+          "const": "NOT_RUN_NON_EXHAUSTIVE_COMPONENT_SET"
+        },
+        "evaluatedCellCount": { "$ref": "#/$defs/count" },
+        "computedPartialSumCellCount": { "$ref": "#/$defs/count" },
+        "explicitMissingComponentCellCount": { "$ref": "#/$defs/count" },
+        "minimumResidualPctPoints": { "$ref": "#/$defs/nullableDecimal" },
+        "maximumResidualPctPoints": { "$ref": "#/$defs/nullableDecimal" },
+        "negativeResidualCellCount": { "$ref": "#/$defs/count" },
+        "cells": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sectorCell" }
+        }
+      }
+    },
+    "bilateralTradeDiagnostics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reportedFlowDataClass",
+        "mirrorDifferenceDataClass",
+        "exactDuplicateSourceFactCount",
+        "distinctMirrorPairCount",
+        "nonzeroDifferencePairCount",
+        "unmatchedDistinctFlowCount",
+        "reconciliationStatus",
+        "pairs"
+      ],
+      "properties": {
+        "reportedFlowDataClass": { "const": "OBSERVED" },
+        "mirrorDifferenceDataClass": { "const": "DERIVED" },
+        "exactDuplicateSourceFactCount": { "$ref": "#/$defs/count" },
+        "distinctMirrorPairCount": { "$ref": "#/$defs/count" },
+        "nonzeroDifferencePairCount": { "$ref": "#/$defs/count" },
+        "unmatchedDistinctFlowCount": { "$ref": "#/$defs/count" },
+        "reconciliationStatus": {
+          "const": "NOT_RUN_NO_AVERAGING_NO_IPF_RAS"
+        },
+        "pairs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/tradePair" }
+        }
+      }
+    },
+    "readinessGapDisposition": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/readinessGap" }
+    },
+    "hardBoundaries": {
+      "type": "array",
+      "minItems": 11,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "contentHash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "count": { "type": "integer", "minimum": 0 },
+    "decimal": {
+      "type": "string",
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    },
+    "nullableDecimal": {
+      "type": ["string", "null"],
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+    },
+    "stringSet": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "artifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "rawSha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "rawSha256": { "$ref": "#/$defs/hash" },
+        "canonicalHash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "missingnessStrategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategyId", "fillsValuesWhenRun", "executionStatus"],
+      "properties": {
+        "strategyId": {
+          "enum": [
+            "PRESERVE_NULL_NO_IMPUTATION",
+            "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "OWNER_APPROVED_IMPUTATION"
+          ]
+        },
+        "fillsValuesWhenRun": { "type": "boolean" },
+        "executionStatus": {
+          "enum": [
+            "DIAGNOSTIC_CANDIDATE_NOT_SELECTED",
+            "NOT_RUN_OWNER_DECISION_REQUIRED"
+          ]
+        }
+      }
+    },
+    "dataClass": {
+      "enum": ["OBSERVED", "DERIVED", "SYNTHETIC_CALIBRATION", "PLACEHOLDER"]
+    },
+    "strategyApplicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategyId", "status"],
+      "properties": {
+        "strategyId": {
+          "$ref": "#/$defs/missingnessStrategy/properties/strategyId"
+        },
+        "status": {
+          "enum": [
+            "APPLICABLE_PRESERVES_EXPLICIT_NULLS",
+            "APPLICABLE_NON_MISSING_VALUES_ONLY",
+            "APPLICABLE_WITH_COMMON_GRID_EXCLUSIONS",
+            "OWNER_DECISION_REQUIRED_EXPLICIT_MISSING_VALUES",
+            "NOT_NEEDED_NO_EXPLICIT_MISSING_VALUES",
+            "NOT_ASSESSABLE_NO_FROZEN_PILOT_OBSERVATIONS",
+            "NOT_APPLICABLE_PLACEHOLDER"
+          ]
+        }
+      }
+    },
+    "variableApplicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "variableId",
+        "dataClass",
+        "pilotObservationCount",
+        "explicitMissingValueCount",
+        "nonMissingValueCount",
+        "strategyApplicability"
+      ],
+      "properties": {
+        "variableId": { "type": "string", "minLength": 1 },
+        "dataClass": { "$ref": "#/$defs/dataClass" },
+        "pilotObservationCount": { "$ref": "#/$defs/count" },
+        "explicitMissingValueCount": { "$ref": "#/$defs/count" },
+        "nonMissingValueCount": { "$ref": "#/$defs/count" },
+        "strategyApplicability": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/strategyApplicability" }
+        }
+      }
+    },
+    "commonGrid": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "variableIds",
+        "expectedCellCount",
+        "completeCellCount",
+        "excludedCellCount",
+        "incompleteCells"
+      ],
+      "properties": {
+        "variableIds": { "$ref": "#/$defs/stringSet" },
+        "expectedCellCount": { "$ref": "#/$defs/count" },
+        "completeCellCount": { "$ref": "#/$defs/count" },
+        "excludedCellCount": { "$ref": "#/$defs/count" },
+        "incompleteCells": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["geographyId", "period", "missingVariableIds"],
+            "properties": {
+              "geographyId": { "type": "string", "minLength": 1 },
+              "period": { "type": "string", "minLength": 1 },
+              "missingVariableIds": { "$ref": "#/$defs/stringSet" }
+            }
+          }
+        }
+      }
+    },
+    "vintagePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "comparablePairRule",
+        "periodDifferenceIsVintageEvidence",
+        "differentQueryIsVintageEvidence",
+        "missingSourceAsOfSupportsStability"
+      ],
+      "properties": {
+        "comparablePairRule": { "type": "string", "minLength": 1 },
+        "periodDifferenceIsVintageEvidence": { "const": false },
+        "differentQueryIsVintageEvidence": { "const": false },
+        "missingSourceAsOfSupportsStability": { "const": false }
+      }
+    },
+    "vintageProvider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceId",
+        "providerRunStatus",
+        "snapshotCount",
+        "distinctQueryIdentityCount",
+        "comparableSnapshotPairCount",
+        "snapshotIds",
+        "queryIdentityHashes",
+        "observedPeriods",
+        "sourceAsOfValues",
+        "sourceAsOfMissingSnapshotCount",
+        "retrievedAtRange",
+        "comparisonStatus",
+        "stabilityClaimSupported"
+      ],
+      "properties": {
+        "sourceId": { "type": "string", "minLength": 1 },
+        "providerRunStatus": { "type": "string", "minLength": 1 },
+        "snapshotCount": { "$ref": "#/$defs/count" },
+        "distinctQueryIdentityCount": { "$ref": "#/$defs/count" },
+        "comparableSnapshotPairCount": { "$ref": "#/$defs/count" },
+        "snapshotIds": { "$ref": "#/$defs/stringSet" },
+        "queryIdentityHashes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/hash" }
+        },
+        "observedPeriods": { "$ref": "#/$defs/stringSet" },
+        "sourceAsOfValues": { "$ref": "#/$defs/stringSet" },
+        "sourceAsOfMissingSnapshotCount": { "$ref": "#/$defs/count" },
+        "retrievedAtRange": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["minimum", "maximum"],
+              "properties": {
+                "minimum": { "type": "string", "format": "date-time" },
+                "maximum": { "type": "string", "format": "date-time" }
+              }
+            }
+          ]
+        },
+        "comparisonStatus": {
+          "enum": [
+            "NOT_COMPARABLE_SOURCE_NOT_FETCHED",
+            "NOT_COMPARABLE_SINGLE_SNAPSHOT",
+            "NOT_COMPARABLE_DIFFERENT_QUERY_IDENTITIES",
+            "COMPARABLE_SNAPSHOT_PAIRS_AVAILABLE"
+          ]
+        },
+        "stabilityClaimSupported": { "const": false }
+      }
+    },
+    "classifiedDecimal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataClass", "value", "transformation"],
+      "properties": {
+        "dataClass": { "enum": ["OBSERVED", "DERIVED"] },
+        "value": { "$ref": "#/$defs/nullableDecimal" },
+        "transformation": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sectorCell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "geographyId",
+        "period",
+        "observedComponents",
+        "availableComponentSumPctGdp",
+        "residualToHundredPctPoints",
+        "diagnosticStatus"
+      ],
+      "properties": {
+        "geographyId": { "type": "string", "minLength": 1 },
+        "period": { "type": "string", "minLength": 1 },
+        "observedComponents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["variableId", "dataClass", "value", "observationId"],
+            "properties": {
+              "variableId": { "type": "string", "minLength": 1 },
+              "dataClass": { "const": "OBSERVED" },
+              "value": { "$ref": "#/$defs/nullableDecimal" },
+              "observationId": {
+                "type": "string",
+                "pattern": "^obs_[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "availableComponentSumPctGdp": { "$ref": "#/$defs/classifiedDecimal" },
+        "residualToHundredPctPoints": { "$ref": "#/$defs/classifiedDecimal" },
+        "diagnosticStatus": {
+          "enum": [
+            "PARTIAL_COMPONENT_SUM_NOT_TOTAL_RECONCILIATION",
+            "NOT_COMPUTED_EXPLICIT_MISSING_COMPONENT"
+          ]
+        }
+      }
+    },
+    "observedTradeValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dataClass",
+        "valueUsd",
+        "observationId",
+        "sourceSnapshotId",
+        "sourceFactMultiplicity"
+      ],
+      "properties": {
+        "dataClass": { "const": "OBSERVED" },
+        "valueUsd": { "$ref": "#/$defs/decimal" },
+        "observationId": { "type": "string", "pattern": "^obs_[0-9a-f]{64}$" },
+        "sourceSnapshotId": { "type": "string", "minLength": 1 },
+        "sourceFactMultiplicity": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "tradePair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pairId",
+        "exporterId",
+        "importerId",
+        "period",
+        "productClassification",
+        "productCode",
+        "calibrationSectorId",
+        "reportedExport",
+        "mirrorReportedImport",
+        "signedDifferenceExportMinusMirrorUsd",
+        "absoluteDifferenceUsd",
+        "diagnosticStatus",
+        "reconciliationStatus"
+      ],
+      "properties": {
+        "pairId": { "type": "string", "pattern": "^mirror_[0-9a-f]{64}$" },
+        "exporterId": { "type": "string", "minLength": 1 },
+        "importerId": { "type": "string", "minLength": 1 },
+        "period": { "type": "string", "minLength": 1 },
+        "productClassification": { "type": "string", "minLength": 1 },
+        "productCode": { "type": "string", "minLength": 1 },
+        "calibrationSectorId": { "type": "string", "minLength": 1 },
+        "reportedExport": { "$ref": "#/$defs/observedTradeValue" },
+        "mirrorReportedImport": { "$ref": "#/$defs/observedTradeValue" },
+        "signedDifferenceExportMinusMirrorUsd": {
+          "$ref": "#/$defs/classifiedDecimal"
+        },
+        "absoluteDifferenceUsd": { "$ref": "#/$defs/classifiedDecimal" },
+        "diagnosticStatus": {
+          "const": "MIRROR_DIFFERENCE_RETAINED_NO_RECONCILIATION"
+        },
+        "reconciliationStatus": {
+          "const": "NOT_RUN_NO_AVERAGING_NO_IPF_RAS"
+        }
+      }
+    },
+    "readinessGap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prerequisiteId",
+        "gateStatus",
+        "evidenceWorkStatus",
+        "remainingRequirementType",
+        "exactNextRequirement"
+      ],
+      "properties": {
+        "prerequisiteId": { "type": "string", "minLength": 1 },
+        "gateStatus": { "const": "OPEN" },
+        "evidenceWorkStatus": {
+          "enum": [
+            "COMPUTABLE_DIAGNOSTICS_COMPLETE",
+            "DIAGNOSTIC_COMPLETE_NO_COMPARABLE_EVIDENCE",
+            "EXTERNAL_EVIDENCE_REQUIRED",
+            "NOT_ADDRESSED_BY_THIS_DIAGNOSTIC_SCOPE",
+            "BLOCKED_BY_UPSTREAM_GATES"
+          ]
+        },
+        "remainingRequirementType": {
+          "enum": [
+            "OWNER_DECISION",
+            "NEW_SOURCE_EVIDENCE",
+            "OWNER_DECISION_AND_NEW_SOURCE_EVIDENCE",
+            "GOVERNANCE_AUTHORIZATION"
+          ]
+        },
+        "exactNextRequirement": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

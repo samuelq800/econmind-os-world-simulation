@@ -5,6 +5,7 @@ export * from './concordance.js';
 export * from './decimal.js';
 export * from './exploration.js';
 export * from './feature-admission.js';
+export * from './gate-diagnostics.js';
 export * from './lossless-json.js';
 export * from './normalize.js';
 export * from './package.js';

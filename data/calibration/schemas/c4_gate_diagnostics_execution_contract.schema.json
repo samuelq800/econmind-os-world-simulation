@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/c4-gate-diagnostics-execution-contract.v1.json",
+  "title": "C4 deterministic non-authoritative gate diagnostics execution contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "contractVersion",
+    "diagnosticsId",
+    "status",
+    "baseline",
+    "inputArtifacts",
+    "missingnessStrategyCandidates",
+    "vintagePolicy",
+    "sectorDiagnosticPolicy",
+    "tradeDiagnosticPolicy",
+    "hardBoundaries"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "c4-gate-diagnostics-execution-contract.v1"
+    },
+    "contractVersion": { "const": "1.0.0" },
+    "diagnosticsId": { "type": "string", "minLength": 1 },
+    "status": { "const": "DIAGNOSTICS_ONLY_NON_AUTHORITATIVE" },
+    "baseline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "featureEvidenceTargetCommit",
+        "featureEvidenceContentHash",
+        "approvedState",
+        "finalGeneratorReady"
+      ],
+      "properties": {
+        "featureEvidenceTargetCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "featureEvidenceContentHash": { "$ref": "#/$defs/hash" },
+        "approvedState": { "const": "NOT_READY_NON_AUTHORITATIVE" },
+        "finalGeneratorReady": { "const": false }
+      }
+    },
+    "inputArtifacts": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/artifactBinding" }
+    },
+    "missingnessStrategyCandidates": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": { "$ref": "#/$defs/missingnessStrategy" }
+    },
+    "vintagePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "comparablePairRule",
+        "periodDifferenceIsVintageEvidence",
+        "differentQueryIsVintageEvidence",
+        "missingSourceAsOfSupportsStability"
+      ],
+      "properties": {
+        "comparablePairRule": { "type": "string", "minLength": 1 },
+        "periodDifferenceIsVintageEvidence": { "const": false },
+        "differentQueryIsVintageEvidence": { "const": false },
+        "missingSourceAsOfSupportsStability": { "const": false }
+      }
+    },
+    "sectorDiagnosticPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observedComponentVariableIds",
+        "availableComponentSumDataClass",
+        "totalReconciliationStatus",
+        "industryTotalMayBeAddedToManufacturing"
+      ],
+      "properties": {
+        "observedComponentVariableIds": { "$ref": "#/$defs/nonEmptyStringSet" },
+        "availableComponentSumDataClass": { "const": "DERIVED" },
+        "totalReconciliationStatus": {
+          "const": "NOT_RUN_NON_EXHAUSTIVE_COMPONENT_SET"
+        },
+        "industryTotalMayBeAddedToManufacturing": { "const": false }
+      }
+    },
+    "tradeDiagnosticPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reportedFlowDataClass",
+        "mirrorDifferenceDataClass",
+        "exactDuplicateWeighting",
+        "reconciliationStatus"
+      ],
+      "properties": {
+        "reportedFlowDataClass": { "const": "OBSERVED" },
+        "mirrorDifferenceDataClass": { "const": "DERIVED" },
+        "exactDuplicateWeighting": { "type": "string", "minLength": 1 },
+        "reconciliationStatus": {
+          "const": "NOT_RUN_NO_AVERAGING_NO_IPF_RAS"
+        }
+      }
+    },
+    "hardBoundaries": {
+      "type": "array",
+      "minItems": 11,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "artifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "rawSha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "rawSha256": { "$ref": "#/$defs/hash" },
+        "canonicalHash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "missingnessStrategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategyId", "fillsValuesWhenRun", "executionStatus"],
+      "properties": {
+        "strategyId": {
+          "enum": [
+            "PRESERVE_NULL_NO_IMPUTATION",
+            "VARIABLE_AVAILABLE_CASE_NO_IMPUTATION",
+            "COMMON_GRID_COMPLETE_CASE_NO_IMPUTATION",
+            "OWNER_APPROVED_IMPUTATION"
+          ]
+        },
+        "fillsValuesWhenRun": { "type": "boolean" },
+        "executionStatus": {
+          "enum": [
+            "DIAGNOSTIC_CANDIDATE_NOT_SELECTED",
+            "NOT_RUN_OWNER_DECISION_REQUIRED"
+          ]
+        }
+      }
+    },
+    "nonEmptyStringSet": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

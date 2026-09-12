@@ -12,6 +12,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "c4:feature-evidence:generate": "pnpm build && node dist/feature-admission-cli.js && pnpm exec prettier --write ../../data/calibration/preflight/c4_feature_admission_evidence.v1.json",
+    "c4:gate-diagnostics:generate": "pnpm build && node dist/gate-diagnostics-cli.js && pnpm exec prettier --write ../../data/calibration/preflight/c4_gate_diagnostics.v1.json",
     "c4:preflight:verify": "pnpm build && node dist/preflight-cli.js",
     "exploration:generate": "pnpm build && node dist/exploration-cli.js && pnpm exec prettier --write ../../data/calibration/exploration/*.json",
     "pilot:live": "pnpm build && node dist/pilot.js && pnpm exec prettier --write ../../data/calibration/pilot/*.json",

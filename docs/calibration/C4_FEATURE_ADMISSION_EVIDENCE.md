@@ -105,3 +105,10 @@ pnpm vitest run tests/calibration/calibration-c4-feature-admission.test.ts
 Successful generation reports
 `C4_FEATURE_EVIDENCE_VERIFIED_NOT_ADMITTED`. It confirms deterministic
 evidence packaging and zero admissions, not readiness to generate a world.
+
+## Permitted diagnostics continuation
+
+`C4_GATE_DIAGNOSTICS.md` binds this exact feature-evidence artifact and records
+the next permitted missingness, vintage-comparability, sector, and trade
+diagnostics. It does not change any admission status or close an owner,
+new-source, or governance gate.
