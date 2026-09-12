@@ -6,7 +6,7 @@ import {
   Quantity,
   authorizeOfficeCapability,
   isAuthorizedOfficeContext,
-} from '../../packages/core/src/index.js';
+} from '@econmind/core';
 import {
   transferCommand,
   transferProposals,

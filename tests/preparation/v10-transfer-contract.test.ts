@@ -13,7 +13,7 @@ import {
   teamId,
   type ApprovalProposal,
   type MembershipSnapshot,
-} from '../../packages/core/src/index.js';
+} from '@econmind/core';
 import {
   decisionScope,
   sha256,
