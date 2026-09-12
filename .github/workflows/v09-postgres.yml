@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - codex/world-core-v09
+      - codex/v09-recovery-preparation
   pull_request:
     paths:
       - .github/workflows/v09-postgres.yml
@@ -12,6 +13,7 @@ on:
       - pnpm-lock.yaml
       - scripts/v09-postgres-test-environment.mjs
       - tests/world-core/world-writer-lease-postgres.test.ts
+      - tests/world-core/v09-atomic-recovery-postgres.test.ts
 
 permissions:
   contents: read
@@ -52,3 +54,4 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm migration:validate
       - run: pnpm test:v09:postgres
+      - run: pnpm exec vitest run tests/world-core/v09-atomic-recovery-postgres.test.ts
