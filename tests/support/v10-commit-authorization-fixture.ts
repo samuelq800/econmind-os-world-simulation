@@ -1,10 +1,12 @@
 import {
   DOMAIN_ERROR_CODES,
   DomainError,
+  SimTime,
   authSubject,
   authorizeOfficeCapability,
   countryId,
   officeId,
+  processQueuedCommand,
   reauthorizeOfficeCapability,
   teamId,
   worldId,
@@ -13,6 +15,8 @@ import {
   type AuthorizationResolver,
   type AuthorizedOfficeContext,
   type CanonicalCommand,
+  type CommandLifecyclePersistencePort,
+  type CommitAuthorizationProof,
   type CountryId,
   type MembershipSnapshot,
   type OfficeId,
@@ -48,6 +52,7 @@ export interface V10CommitAuthorizationFixture {
   readonly restoredAuthorizationVersion: typeof RESTORED_AUTHORIZATION_VERSION;
   currentMembership(): MembershipSnapshot | null;
   issueAuthorization(): Promise<AuthorizedOfficeContext>;
+  issueCommitAuthorizationProof(): Promise<CommitAuthorizationProof>;
   assertIssuedAuthorizationCurrent(
     issued: AuthorizedOfficeContext,
   ): Promise<AuthorizedOfficeContext>;
@@ -164,6 +169,49 @@ export function createV10CommitAuthorizationFixture(): Readonly<V10CommitAuthori
     }
     return current;
   };
+  const issueCommitAuthorizationProof = async () => {
+    const intakeAuthorization = await issueAuthorization();
+    const capturedSignal = new Error(
+      'V10_COMMIT_AUTHORIZATION_FIXTURE_PROOF_CAPTURED',
+    );
+    let captured: CommitAuthorizationProof | null = null;
+    const persistence: CommandLifecyclePersistencePort = {
+      async readFinalReceipt() {
+        return null;
+      },
+      async recordZeroEffectReceipt() {
+        throw new Error(
+          'V10_COMMIT_AUTHORIZATION_FIXTURE_UNEXPECTED_ZERO_EFFECT',
+        );
+      },
+      async commitAuthorizedCommand(input) {
+        if (input.commitAuthorization === null) {
+          throw new Error(
+            'V10_COMMIT_AUTHORIZATION_FIXTURE_COMMIT_PROOF_MISSING',
+          );
+        }
+        captured = input.commitAuthorization;
+        throw capturedSignal;
+      },
+    };
+    try {
+      await processQueuedCommand({
+        command,
+        authorityKind: 'DISCRETIONARY_USER',
+        commitSimTime: SimTime.fromTicks('10000'),
+        recordedAtReal: '2026-09-12T00:00:01.000Z',
+        requiredCapability: capability,
+        intakeAuthorization,
+        persistence,
+      });
+    } catch (error) {
+      if (error !== capturedSignal) throw error;
+    }
+    if (captured === null) {
+      throw new Error('V10_COMMIT_AUTHORIZATION_FIXTURE_PROOF_CAPTURE_FAILED');
+    }
+    return captured;
+  };
   return Object.freeze({
     fixtureVersion: V10_COMMIT_AUTHORIZATION_FIXTURE_VERSION,
     command,
@@ -178,6 +226,7 @@ export function createV10CommitAuthorizationFixture(): Readonly<V10CommitAuthori
     restoredAuthorizationVersion: RESTORED_AUTHORIZATION_VERSION,
     currentMembership: () => membership,
     issueAuthorization,
+    issueCommitAuthorizationProof,
     assertIssuedAuthorizationCurrent,
     suspend: () => {
       membership = snapshot(

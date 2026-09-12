@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   DOMAIN_ERROR_CODES,
+  isCommitAuthorizationProof,
   isAuthorizedOfficeContext,
 } from '../../packages/core/src/index.js';
 import {
@@ -13,12 +14,20 @@ describe('V10.2 commit authorization fixture', () => {
   it('keeps an active seller Trade authorization current at the commit boundary', async () => {
     const fixture = createV10CommitAuthorizationFixture();
     const issued = await fixture.issueAuthorization();
+    const proof = await fixture.issueCommitAuthorizationProof();
     const current = await fixture.assertIssuedAuthorizationCurrent(issued);
 
     expect(fixture.fixtureVersion).toBe(
       V10_COMMIT_AUTHORIZATION_FIXTURE_VERSION,
     );
     expect(isAuthorizedOfficeContext(current)).toBe(true);
+    expect(isCommitAuthorizationProof(proof)).toBe(true);
+    expect(proof).toMatchObject({
+      commandId: fixture.command.commandId,
+      commandFingerprint: fixture.command.fingerprint,
+      authorizationVersion: fixture.initialAuthorizationVersion,
+      capability: fixture.capability,
+    });
     expect(current).toMatchObject({
       authorizationVersion: fixture.initialAuthorizationVersion,
       authSubject: fixture.command.authSubject,
