@@ -1,11 +1,3 @@
-do $$
-begin
-  if to_regprocedure('sha256(bytea)') is null then
-    execute 'create extension if not exists pgcrypto';
-  end if;
-end;
-$$;
-
 create or replace function world_v2.canonical_json(value jsonb)
 returns text
 language plpgsql

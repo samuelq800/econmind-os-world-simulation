@@ -75,6 +75,7 @@ let database: V09AtomicTestDatabase;
 beforeAll(async () => {
   if (!process.env.V09_TEST_DATABASE_URL) return;
   database = createLocalPostgresV09AtomicTestDatabase();
+  await database.executeScript('create extension if not exists pgcrypto');
   await database.executeScript('drop schema if exists world_v2 cascade');
   for (const migration of migrations) {
     await database.executeScript(
