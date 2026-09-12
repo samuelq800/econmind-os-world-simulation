@@ -58,6 +58,8 @@ const migrations = [
   '0008_world_v2_materialization_recovery.sql',
   '0009_world_v2_posting_payload_integrity.sql',
   '0010_world_v2_command_claim_fencing.sql',
+  '0011_world_v2_current_commit_authorization.sql',
+  '0012_world_v2_command_claim_active_lease_guard.sql',
 ] as const;
 const sha256Hex: Sha256Hex = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
@@ -260,23 +262,25 @@ postgresDescribe(
       );
       await database.query(
         `insert into world_v2.command_queue
-           (world_id, command_id, authority_kind, queue_state, priority_rank,
-            available_at_sim_time, attempt_count, claimed_by, claimed_at_real,
-            claim_fencing_token)
-         values ($1,$2,'VERSIONED_AUTOMATIC','CLAIMED',0,$3,1,$4,$5,1)`,
-        [WORLD, command.commandId, simTime.toCanonicalValue(), WORKER, AT_0],
+           (world_id, command_id, authority_kind, priority_rank,
+            available_at_sim_time, attempt_count)
+         values ($1,$2,'VERSIONED_AUTOMATIC',0,$3,0)`,
+        [WORLD, command.commandId, simTime.toCanonicalValue()],
+      );
+      await database.query(
+        `update world_v2.command_queue
+            set queue_state = 'CLAIMED',
+                attempt_count = 1,
+                claimed_by = $3,
+                claimed_at_real = $4,
+                claim_fencing_token = 1
+          where world_id = $1 and command_id = $2`,
+        [WORLD, command.commandId, WORKER, AT_0],
       );
 
       const repository = new AtomicTransitionRepository({
         database: database as SqlDatabase,
-        authorizationGuard: createTransactionCutoffAuthorizationGuard({
-          async readCurrentAuthorization() {
-            throw new Error('AUTOMATIC_COMMAND_SHOULD_NOT_READ_USER_AUTHORITY');
-          },
-          async assertStillRevoked() {
-            throw new Error('AUTOMATIC_COMMAND_SHOULD_NOT_CHECK_REVOCATION');
-          },
-        }),
+        authorizationGuard: createTransactionCutoffAuthorizationGuard(),
         workerId: WORKER,
         sha256Hex,
       });
@@ -302,6 +306,105 @@ postgresDescribe(
         status: 'READY',
         pendingOutboxCount: '0',
       });
+    }, 30_000);
+
+    it('rejects arbitrary fencing, wrong holder and expired leases in the real PostgreSQL claim transition', async () => {
+      const claimWorld = worldId('WORLD_POSTGRES_CLAIM_GUARD');
+      const expiredWorld = worldId('WORLD_POSTGRES_EXPIRED_CLAIM');
+      async function insertPendingCommand(
+        currentWorld: string,
+        commandId: string,
+      ): Promise<void> {
+        await database.query(
+          `insert into world_v2.command_submission
+             (world_id, command_id, idempotency_key, command_type,
+              schema_version, canonical_payload, payload_sha256,
+              command_fingerprint, auth_subject, actor_id, country_id,
+              office_id, expected_world_version, sim_time, correlation_id,
+              submitted_at_real)
+           values ($1, $2, $3, 'POSTGRES_CLAIM_GUARD', 'command-v1', '{}',
+                   'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+                   'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+                   '00000000-0000-4000-8000-000000000002', 'ACTOR_CLAIM_GUARD',
+                   'COUNTRY_CLAIM_GUARD', null, 0, 10000, $4, $5)`,
+          [
+            currentWorld,
+            commandId,
+            `IDEMPOTENCY_${commandId}`,
+            `CORRELATION_${commandId}`,
+            AT_0,
+          ],
+        );
+        await database.query(
+          `insert into world_v2.command_queue
+             (world_id, command_id, authority_kind, priority_rank,
+              available_at_sim_time, attempt_count)
+           values ($1, $2, 'VERSIONED_AUTOMATIC', 0, 10000, 0)`,
+          [currentWorld, commandId],
+        );
+      }
+
+      await database.query(
+        'insert into world_v2.world_head (world_id) values ($1), ($2)',
+        [claimWorld, expiredWorld],
+      );
+      await database.query(
+        'select * from world_v2.acquire_world_writer_lease($1, $2, $3, 60000)',
+        [claimWorld, 'WORKER_POSTGRES_CLAIM', AT_0],
+      );
+      await insertPendingCommand(claimWorld, 'COMMAND_POSTGRES_TOKEN');
+      await insertPendingCommand(claimWorld, 'COMMAND_POSTGRES_HOLDER');
+
+      await expect(
+        database.query(
+          `update world_v2.command_queue
+              set queue_state = 'CLAIMED', attempt_count = 1,
+                  claimed_by = $3, claimed_at_real = $4, claim_fencing_token = 999
+            where world_id = $1 and command_id = $2`,
+          [
+            claimWorld,
+            'COMMAND_POSTGRES_TOKEN',
+            'WORKER_POSTGRES_CLAIM',
+            AT_1,
+          ],
+        ),
+      ).rejects.toThrow(
+        'Command claim must bind the exact active World writer lease holder and fencing token',
+      );
+      await expect(
+        database.query(
+          `update world_v2.command_queue
+              set queue_state = 'CLAIMED', attempt_count = 1,
+                  claimed_by = 'WORKER_POSTGRES_WRONG', claimed_at_real = $3,
+                  claim_fencing_token = 1
+            where world_id = $1 and command_id = $2`,
+          [claimWorld, 'COMMAND_POSTGRES_HOLDER', AT_1],
+        ),
+      ).rejects.toThrow(
+        'Command claim must bind the exact active World writer lease holder and fencing token',
+      );
+
+      await database.query(
+        'select * from world_v2.acquire_world_writer_lease($1, $2, $3, 1000)',
+        [expiredWorld, 'WORKER_POSTGRES_EXPIRED', AT_0],
+      );
+      await insertPendingCommand(expiredWorld, 'COMMAND_POSTGRES_EXPIRED');
+      await expect(
+        database.query(
+          `update world_v2.command_queue
+              set queue_state = 'CLAIMED', attempt_count = 1,
+                  claimed_by = $3, claimed_at_real = $4, claim_fencing_token = 1
+            where world_id = $1 and command_id = $2`,
+          [
+            expiredWorld,
+            'COMMAND_POSTGRES_EXPIRED',
+            'WORKER_POSTGRES_EXPIRED',
+            AT_1,
+          ],
+        ),
+      ).rejects.toThrow(
+        'Command claim must bind the exact active World writer lease holder and fencing token',
+      );
     }, 30_000);
   },
 );

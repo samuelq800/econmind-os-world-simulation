@@ -72,6 +72,8 @@ const migrationPaths = [
   'database/migrations/artifacts/0008_world_v2_materialization_recovery.sql',
   'database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql',
   'database/migrations/artifacts/0010_world_v2_command_claim_fencing.sql',
+  'database/migrations/artifacts/0011_world_v2_current_commit_authorization.sql',
+  'database/migrations/artifacts/0012_world_v2_command_claim_active_lease_guard.sql',
 ] as const;
 
 const sha256Hex: Sha256Hex = (preimage: string) =>
@@ -366,22 +368,30 @@ async function seed(
     ],
   );
   await value.query(
+    `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
+    [command.worldId, WORKER, '2026-09-12T00:00:00.000Z', '300000'],
+  );
+  await value.query(
     `insert into world_v2.command_queue
-       (world_id, command_id, authority_kind, queue_state, priority_rank,
-        available_at_sim_time, attempt_count, claimed_by, claimed_at_real,
-        claim_fencing_token)
-     values ($1, $2, 'VERSIONED_AUTOMATIC', 'CLAIMED', 0, $3, 1, $4, $5, 1)`,
+       (world_id, command_id, authority_kind, priority_rank,
+        available_at_sim_time, attempt_count)
+     values ($1, $2, 'VERSIONED_AUTOMATIC', 0, $3, 0)`,
+    [command.worldId, command.commandId, command.simTime.toCanonicalValue()],
+  );
+  await value.query(
+    `update world_v2.command_queue
+        set queue_state = 'CLAIMED',
+            attempt_count = 1,
+            claimed_by = $3,
+            claimed_at_real = $4,
+            claim_fencing_token = 1
+      where world_id = $1 and command_id = $2`,
     [
       command.worldId,
       command.commandId,
-      command.simTime.toCanonicalValue(),
       WORKER,
       '2026-09-12T00:00:00.500Z',
     ],
-  );
-  await value.query(
-    `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
-    [command.worldId, WORKER, '2026-09-12T00:00:00.000Z', '300000'],
   );
 }
 

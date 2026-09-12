@@ -29,6 +29,8 @@ const migrations = [
   '0008_world_v2_materialization_recovery.sql',
   '0009_world_v2_posting_payload_integrity.sql',
   '0010_world_v2_command_claim_fencing.sql',
+  '0011_world_v2_current_commit_authorization.sql',
+  '0012_world_v2_command_claim_active_lease_guard.sql',
 ] as const;
 
 const WORLD = worldId('WORLD_RECOVERY_TEST');
@@ -97,21 +99,47 @@ async function insertCommand(
   );
   await database.query(
     `insert into world_v2.command_queue
-       (world_id, command_id, authority_kind, queue_state, priority_rank,
-        available_at_sim_time, attempt_count, claimed_by, claimed_at_real,
-        finalized_at_real, claim_fencing_token)
-     values ($1, $2, 'VERSIONED_AUTOMATIC', $3, 0, $4, 1, $5, $6, $7, $8)`,
+       (world_id, command_id, authority_kind, priority_rank,
+        available_at_sim_time, attempt_count)
+     values ($1, $2, 'VERSIONED_AUTOMATIC', 0, $3, 0)`,
     [
       WORLD,
       commandId,
-      queueState,
       String(version * 10_000),
-      queueState === 'CLAIMED' ? claimedBy : null,
-      queueState === 'CLAIMED' ? AT_0 : null,
-      queueState === 'FINALIZED' ? AT_1 : null,
-      queueState === 'PENDING' ? null : '1',
     ],
   );
+  if (queueState === 'PENDING') return;
+  const claimant = claimedBy ?? OLD_WORKER;
+  const existingLease = await database.query<{ readonly holder_id: string }>(
+    'select holder_id from world_v2.world_writer_lease where world_id = $1',
+    [WORLD],
+  );
+  if (existingLease.rows[0] === undefined) {
+    await database.query(
+      'select * from world_v2.acquire_world_writer_lease($1, $2, $3, 300000)',
+      [WORLD, claimant, AT_0],
+    );
+  } else if (existingLease.rows[0].holder_id !== claimant) {
+    throw new Error('RECOVERY_TEST_LEASE_HOLDER_MISMATCH');
+  }
+  await database.query(
+    `update world_v2.command_queue
+        set queue_state = 'CLAIMED',
+            attempt_count = 1,
+            claimed_by = $3,
+            claimed_at_real = $4,
+            claim_fencing_token = 1
+      where world_id = $1 and command_id = $2`,
+    [WORLD, commandId, claimant, AT_0],
+  );
+  if (queueState === 'FINALIZED') {
+    await database.query(
+      `update world_v2.command_queue
+          set queue_state = 'FINALIZED', finalized_at_real = $3
+        where world_id = $1 and command_id = $2`,
+      [WORLD, commandId, AT_1],
+    );
+  }
 }
 
 async function insertCommittedTransition(
@@ -224,13 +252,97 @@ describe('V09.3 World recovery preparation', () => {
     });
   }, 20_000);
 
+  it('fails closed on a continuous orphan Event whose causation Command is unfinalized', async () => {
+    const database = await testDatabase();
+    await insertCommittedTransition(database, 1);
+    await insertCommand(database, 2, 'PENDING');
+    await database.query(
+      `insert into world_v2.authoritative_event
+         (world_id, event_id, event_sequence, world_version,
+          causation_command_id, correlation_id, event_type, schema_version,
+          canonical_payload, payload_sha256, event_fingerprint, sim_time,
+          recorded_at_real, corrects_event_id)
+       values ($1, 'EVENT_RECOVERY_ORPHAN', 2, 1, 'COMMAND_RECOVERY_2',
+               'CORRELATION_RECOVERY_2', 'RECOVERY_ORPHAN', 'event-v1',
+               '{}', $2, $3, 20000, $4, null)`,
+      [WORLD, hash('c'), hash('d'), AT_1],
+    );
+    await database.query(
+      'update world_v2.world_head set event_sequence = 2 where world_id = $1',
+      [WORLD],
+    );
+
+    await expect(coordinator(database).inspect(WORLD, AT_1)).rejects.toEqual(
+      expect.objectContaining({
+        cause: expect.objectContaining({
+          message:
+            'World head, Event, Posting, receipt, queue or materialization lineage is inconsistent',
+        }),
+      }),
+    );
+  }, 20_000);
+
+  it('rejects wrong fencing token and wrong holder at the PENDING-to-CLAIMED database transition', async () => {
+    const database = await testDatabase();
+    await insertCommand(database, 1, 'PENDING');
+    await database.query(
+      'select * from world_v2.acquire_world_writer_lease($1, $2, $3, 60000)',
+      [WORLD, NEW_WORKER, AT_0],
+    );
+
+    await expect(
+      database.query(
+        `update world_v2.command_queue
+            set queue_state = 'CLAIMED', attempt_count = 1,
+                claimed_by = $3, claimed_at_real = $4, claim_fencing_token = 999
+          where world_id = $1 and command_id = $2`,
+        [WORLD, 'COMMAND_RECOVERY_1', NEW_WORKER, AT_1],
+      ),
+    ).rejects.toThrow(
+      'Command claim must bind the exact active World writer lease holder and fencing token',
+    );
+    await expect(
+      database.query(
+        `update world_v2.command_queue
+            set queue_state = 'CLAIMED', attempt_count = 1,
+                claimed_by = 'WORKER_WRONG', claimed_at_real = $3,
+                claim_fencing_token = 1
+          where world_id = $1 and command_id = $2`,
+        [WORLD, 'COMMAND_RECOVERY_1', AT_1],
+      ),
+    ).rejects.toThrow(
+      'Command claim must bind the exact active World writer lease holder and fencing token',
+    );
+  }, 20_000);
+
+  it('rejects a PENDING-to-CLAIMED transition against an expired lease', async () => {
+    const database = await testDatabase();
+    await insertCommand(database, 1, 'PENDING');
+    await database.query(
+      'select * from world_v2.acquire_world_writer_lease($1, $2, $3, 1000)',
+      [WORLD, NEW_WORKER, AT_0],
+    );
+
+    await expect(
+      database.query(
+        `update world_v2.command_queue
+            set queue_state = 'CLAIMED', attempt_count = 1,
+                claimed_by = $3, claimed_at_real = $4, claim_fencing_token = 1
+          where world_id = $1 and command_id = $2`,
+        [WORLD, 'COMMAND_RECOVERY_1', NEW_WORKER, AT_1],
+      ),
+    ).rejects.toThrow(
+      'Command claim must bind the exact active World writer lease holder and fencing token',
+    );
+  }, 20_000);
+
   it('reclaims an abandoned command only under the later lease generation', async () => {
     const database = await testDatabase();
-    await insertCommand(database, 1, 'CLAIMED', OLD_WORKER);
     await database.query(
       'select * from world_v2.acquire_world_writer_lease($1, $2, $3, 1000)',
       [WORLD, OLD_WORKER, AT_0],
     );
+    await insertCommand(database, 1, 'CLAIMED', OLD_WORKER);
     await database.query(
       'select * from world_v2.acquire_world_writer_lease($1, $2, $3, 60000)',
       [WORLD, NEW_WORKER, AT_1],
@@ -270,11 +382,11 @@ describe('V09.3 World recovery preparation', () => {
 
   it('refuses to reclaim a claim held at the current fencing token', async () => {
     const database = await testDatabase();
-    await insertCommand(database, 1, 'CLAIMED', NEW_WORKER);
     await database.query(
       'select * from world_v2.acquire_world_writer_lease($1, $2, $3, 60000)',
       [WORLD, NEW_WORKER, AT_0],
     );
+    await insertCommand(database, 1, 'CLAIMED', NEW_WORKER);
     const lease = acquireWorldWriterLease(
       null,
       worldWriterLeaseRequest(WORLD, NEW_WORKER, AT_0, AT_60),
@@ -321,18 +433,19 @@ describe('V09.3 World recovery preparation', () => {
        values ($1, 'RECOVERY_VIEW', 1, 'COMMAND_RECOVERY_1', '{"stale":true}', $2)`,
       [WORLD, hash('8')],
     );
-    await database.query(
-      'select * from world_v2.acquire_world_writer_lease($1, $2, $3, 60000)',
-      [WORLD, NEW_WORKER, AT_0],
-    );
     const lease = acquireWorldWriterLease(
       null,
-      worldWriterLeaseRequest(WORLD, NEW_WORKER, AT_0, AT_60),
+      worldWriterLeaseRequest(
+        WORLD,
+        OLD_WORKER,
+        AT_0,
+        '2026-09-12T00:05:00.000Z',
+      ),
     );
     const assertion = createWorldWriterCommitAssertion(lease.lease, '2');
 
     await expect(
-      coordinator(database).rebuildCurrentMaterializations({
+      coordinator(database, OLD_WORKER).rebuildCurrentMaterializations({
         assertion,
         observedAtReal: AT_1,
         rebuilder: {
