@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 
 import { PrototypeApp } from './App.js';
 import './prototype.css';
+import './six-offices.css';
 
 const rootElement = document.getElementById('prototype-root');
 

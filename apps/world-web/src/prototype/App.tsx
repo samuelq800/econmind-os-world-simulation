@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { WorldCommandBrief } from './WorldCommandBrief.js';
+import { SixOfficesG01 } from './SixOfficesG01.js';
 import {
   EMPTY_PROJECTION,
   READY_PROJECTION,
@@ -88,7 +88,7 @@ export function PrototypeApp() {
           ))}
         </div>
       </section>
-      <WorldCommandBrief state={state} onRetry={retry} />
+      <SixOfficesG01 state={state} onRetry={retry} />
     </div>
   );
 }
