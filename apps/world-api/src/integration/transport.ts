@@ -231,11 +231,7 @@ export async function executeWorldProjectionRead(input: {
     }, input.policy.timeoutMs);
     try {
       if (controller.signal.aborted) {
-        throw new WorldReadFailure(
-          'CANCELLED',
-          'World read cancelled',
-          false,
-        );
+        throw new WorldReadFailure('CANCELLED', 'World read cancelled', false);
       }
       const rawResponse = await input.transport.send(
         input.request,
