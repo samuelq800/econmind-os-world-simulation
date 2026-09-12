@@ -14,7 +14,7 @@
     "dev:web": "node scripts/run-development-service.mjs web",
     "dev:api": "node scripts/run-development-service.mjs api",
     "dev:worker": "node scripts/run-development-service.mjs worker",
-    "pretest": "pnpm --filter @econmind/world-api build && pnpm --filter @econmind/world-worker build",
+    "pretest": "pnpm --filter @econmind/core build && pnpm --filter @econmind/world-api build && pnpm --filter @econmind/world-worker build",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -37,6 +37,7 @@
     "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:boundaries && pnpm env:check && pnpm migration:validate && pnpm migration:rehearse && pnpm foundation:policy && pnpm secrets:check && pnpm build"
   },
   "devDependencies": {
+    "@econmind/core": "workspace:*",
     "@electric-sql/pglite": "0.5.8",
     "@eslint/js": "10.0.1",
     "@types/node": "24.13.3",

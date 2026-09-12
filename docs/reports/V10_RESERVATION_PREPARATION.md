@@ -47,3 +47,14 @@ receipt lookup is V09's responsibility; this constructor rejects duplicates
 instead of reserving again. No DB connection, deployed migration, RLS proof,
 server policy installation, UI entrypoint, or production release is claimed.
 ADR-09 is still unapproved. Formal dependency gates and main remain unchanged.
+
+## Integration correction
+
+F reproduced a real cross-module opaque-brand failure against A's atomic
+repository: A uses the workspace `@econmind/core` built package, while the
+initial O/C fixture path used Core source modules. The initial local tests
+proved only the all-source candidate, not this cross-window integration.
+The forward fix uses `@econmind/core` for the Worker and its test, declares
+the missing workspace dependency in this older preparation baseline, and
+builds Core before the Worker test lifecycle. C owns the corresponding fixture
+import-only correction. No serialization/brand checks are weakened.

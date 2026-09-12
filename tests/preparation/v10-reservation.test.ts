@@ -9,7 +9,7 @@ import {
   signApprovalProposal,
   type CanonicalCommand,
   type MembershipSnapshot,
-} from '../../packages/core/src/index.js';
+} from '@econmind/core';
 import {
   prepareGoodsReservation,
   type GoodsReservationApproval,

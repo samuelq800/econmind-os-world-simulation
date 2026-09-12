@@ -109,6 +109,9 @@ importers:
 
   .:
     devDependencies:
+      '@econmind/core':
+        specifier: workspace:*
+        version: link:packages/core
       '@electric-sql/pglite':
         specifier: 0.5.8
         version: 0.5.8
@@ -190,6 +193,10 @@ importers:
         version: 8.2.2(@types/node@24.13.3)
 
   apps/world-worker:
+    dependencies:
+      '@econmind/core':
+        specifier: workspace:*
+        version: link:../../packages/core
     devDependencies:
       typescript:
         specifier: 6.0.3
