@@ -21,7 +21,7 @@ import {
   type MembershipSnapshot,
   type OfficeId,
   type WorldId,
-} from '../../packages/core/src/index.js';
+} from '@econmind/core';
 import { transferCommand } from '../preparation/v10-transfer-contract.js';
 
 /**

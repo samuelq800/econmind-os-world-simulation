@@ -4,7 +4,7 @@ import {
   DOMAIN_ERROR_CODES,
   isCommitAuthorizationProof,
   isAuthorizedOfficeContext,
-} from '../../packages/core/src/index.js';
+} from '@econmind/core';
 import {
   V10_COMMIT_AUTHORIZATION_FIXTURE_VERSION,
   createV10CommitAuthorizationFixture,

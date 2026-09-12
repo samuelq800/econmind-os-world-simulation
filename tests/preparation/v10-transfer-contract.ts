@@ -11,7 +11,7 @@ import {
   parseCanonicalCommand,
   proposalId,
   type ApprovalProposal,
-} from '../../packages/core/src/index.js';
+} from '@econmind/core';
 
 // Test policy only: ADR-09 approval and the production resolver are still pending.
 export const V10_TEST_POLICY = 'TEST_ONLY_UNAPPROVED_V10_TREASURY_V1';

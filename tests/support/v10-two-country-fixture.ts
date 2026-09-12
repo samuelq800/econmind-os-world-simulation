@@ -49,8 +49,8 @@ import {
   type RebuiltV08Ledgers,
   type V08LedgerReconciliation,
   type WorldId,
-} from '../../packages/core/src/index.js';
-import { actorId } from '../../packages/core/src/ids.js';
+  actorId,
+} from '@econmind/core';
 import {
   decisionScope,
   transferCommand,
