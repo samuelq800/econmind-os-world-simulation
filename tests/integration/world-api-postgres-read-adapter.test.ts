@@ -16,7 +16,6 @@ const repositoryRoot = path.resolve(import.meta.dirname, '../..');
 const migrations = [
   '0001_world_v2_namespace.sql',
   '0002_world_v2_command_event_ledger.sql',
-  '0007_world_v2_read_projection_boundary.sql',
 ];
 const countrySubject = parseSupabaseAuthSubject(
   '123e4567-e89b-42d3-a456-426614174000',
@@ -40,7 +39,7 @@ function request(
   });
 }
 
-describe('forward-only parameterized PostgreSQL read adapter', () => {
+describe('undeployed parameterized PostgreSQL read adapter seam', () => {
   let database: PGlite;
   let executor: ParameterizedPgReadExecutor;
 
@@ -54,6 +53,28 @@ describe('forward-only parameterized PostgreSQL read adapter', () => {
         ),
       );
     }
+    await database.exec(`
+      create table world_v2.read_projection (
+        world_id text not null,
+        classification text not null,
+        scope_key text not null,
+        schema_version text not null,
+        world_version bigint not null,
+        event_sequence bigint not null,
+        payload jsonb not null,
+        generated_at timestamptz not null
+      );
+      create table world_v2.projection_entitlement (
+        world_id text not null,
+        auth_subject uuid not null,
+        classification text not null,
+        scope_key text not null,
+        authorization_version text not null,
+        active boolean not null default true,
+        granted_at timestamptz not null,
+        revoked_at timestamptz null
+      );
+    `);
     await database.query(
       `insert into world_v2.world_head (world_id, world_version, event_sequence)
        values ($1, $2, $3)`,
