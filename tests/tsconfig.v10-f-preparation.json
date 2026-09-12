@@ -5,8 +5,10 @@
     "types": ["node"]
   },
   "include": [
+    "support/v10-acceptance-runner.ts",
     "support/v10-gate-b-evidence.ts",
     "world-core/v10-atomic-transfer-candidates.test.ts",
+    "world-core/v10-acceptance-runner.test.ts",
     "world-core/v10-gate-b-evidence.test.ts"
   ]
 }
