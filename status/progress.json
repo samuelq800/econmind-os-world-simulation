@@ -795,15 +795,17 @@
     "production_mutation": false,
     "v09_started": true,
     "post_closure_authority_remediation": {
-      "status": "EVIDENCE_RECORDED_PENDING_TARGET_BINDING",
+      "status": "READY_FOR_FOCUSED_INDEPENDENT_REVIEW",
       "base_commit": "0e79faffce3cd44001374fa31b184a594ea51328",
       "branch": "codex/v08-authority-remediation",
       "code_candidate": "0e9d6f6dfe5fbb7cbf6e74463cc6e60fe0298095",
-      "review_target": null,
+      "review_target": "9d1c6d76e752b669597101ca2e4fd431c4b2b7b5",
+      "superseded_historical_package_target": "b3a1f4949efa85d1c310819ebdf37505589f1b49",
       "b01_raw_snapshot_hydration": "NO_CHANGE_ALREADY_CLOSED",
       "b02_transition_binding": "IMPLEMENTED_PENDING_FOCUSED_INDEPENDENT_REVIEW",
       "evidence_file": "docs/reports/V08/PACKAGE_AUTHORITY_REMEDIATION_EVIDENCE.md",
       "test_evidence_file": "docs/reports/V08/PACKAGE_AUTHORITY_REMEDIATION_TEST_EVIDENCE.json",
+      "target_file": "docs/reports/V08/PACKAGE_AUTHORITY_REMEDIATION_REVIEW_TARGET.md",
       "independent_review": "NOT_RUN_BY_REVIEW_B",
       "merge_authorized": false,
       "migration_change": false,
@@ -1005,7 +1007,8 @@
       "docs/reports/V08/FINAL_CLOSURE.md",
       "docs/reports/V08/FINAL_RECONCILIATION.md",
       "docs/reports/V08/PACKAGE_AUTHORITY_REMEDIATION_EVIDENCE.md",
-      "docs/reports/V08/PACKAGE_AUTHORITY_REMEDIATION_TEST_EVIDENCE.json"
+      "docs/reports/V08/PACKAGE_AUTHORITY_REMEDIATION_TEST_EVIDENCE.json",
+      "docs/reports/V08/PACKAGE_AUTHORITY_REMEDIATION_REVIEW_TARGET.md"
     ],
     "V08.2": [
       "docs/exec-plans/V08.2.md",
