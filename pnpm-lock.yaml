@@ -109,6 +109,9 @@ importers:
 
   .:
     devDependencies:
+      '@econmind/core':
+        specifier: workspace:*
+        version: link:packages/core
       '@electric-sql/pglite':
         specifier: 0.5.8
         version: 0.5.8

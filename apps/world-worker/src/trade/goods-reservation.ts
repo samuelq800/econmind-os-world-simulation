@@ -29,7 +29,7 @@ import {
   type OpeningSeed,
   type Sha256Hex,
   type V08AuthoritativeLedgerTransition,
-} from '../../../../packages/core/src/index.js';
+} from '@econmind/core';
 
 export interface GoodsReservationPolicy {
   readonly policyVersion: string;
