@@ -8,7 +8,6 @@ import {
   FINANCIAL_POSTING_SCHEMA_VERSION,
   Money,
   SimTime,
-  applyFinancialPostingBatch,
   commandId,
   countryId,
   createClaimAccountPair,
@@ -24,7 +23,11 @@ import {
   type FinancialAccount,
   type FinancialPostingLeg,
 } from '../../packages/core/src/index.js';
-import { openingLedgers } from '../helpers/v08-ledgers.js';
+import { applyFinancialPostingBatch } from '../../packages/core/src/finance/financial-ledger.js';
+import {
+  openingLedgers,
+  testAuthoritativeTransition,
+} from '../helpers/v08-ledgers.js';
 
 const sha256 = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
@@ -74,17 +77,34 @@ function batch(
   id: string,
   versionBefore: number,
   legs: readonly FinancialPostingLeg[],
+  commandPayloadVariant = 'a',
 ) {
+  const causationCommandId = commandId(`COMMAND_${id}`);
+  const causationEventIds = [eventId(`EVENT_${id}`)];
+  const simTime = SimTime.fromTicks(String((versionBefore + 1) * 10_000));
+  const evidence = testAuthoritativeTransition({
+    worldId: WORLD,
+    commandId: causationCommandId,
+    eventIds: causationEventIds,
+    worldVersionBefore: String(versionBefore),
+    worldVersionAfter: String(versionBefore + 1),
+    simTime,
+    sha256Hex: sha256,
+    firstEventSequence: String(versionBefore + 1),
+    commandPayload: { commandPayloadVariant },
+  });
   return createFinancialPostingBatch(
     {
       schemaVersion: FINANCIAL_POSTING_SCHEMA_VERSION,
       batchId: financialPostingBatchId(id),
       worldId: WORLD,
-      causationCommandId: commandId(`COMMAND_${id}`),
-      causationEventIds: [eventId(`EVENT_${id}`)],
+      causationCommandId,
+      causationEventIds,
       worldVersionBefore: String(versionBefore),
       worldVersionAfter: String(versionBefore + 1),
-      simTime: SimTime.fromTicks(String((versionBefore + 1) * 10_000)),
+      simTime,
+      command: evidence.command,
+      transition: evidence.transition,
       settlementCurrency: 'GCU',
       legs,
     },
@@ -193,7 +213,19 @@ describe('V08.2 authoritative financial posting ledger', () => {
     ]);
     expect(() =>
       createFinancialPostingBatch(
-        { ...valid, schemaVersion: 'financial-posting-v2' as never },
+        {
+          ...valid,
+          ...testAuthoritativeTransition({
+            worldId: WORLD,
+            commandId: valid.causationCommandId,
+            eventIds: valid.causationEventIds,
+            worldVersionBefore: valid.worldVersionBefore,
+            worldVersionAfter: valid.worldVersionAfter,
+            simTime: valid.simTime,
+            sha256Hex: sha256,
+          }),
+          schemaVersion: 'financial-posting-v2' as never,
+        },
         sha256,
       ),
     ).toThrowError(
@@ -203,6 +235,15 @@ describe('V08.2 authoritative financial posting ledger', () => {
       createFinancialPostingBatch(
         {
           ...valid,
+          ...testAuthoritativeTransition({
+            worldId: WORLD,
+            commandId: valid.causationCommandId,
+            eventIds: valid.causationEventIds,
+            worldVersionBefore: valid.worldVersionBefore,
+            worldVersionAfter: valid.worldVersionAfter,
+            simTime: valid.simTime,
+            sha256Hex: sha256,
+          }),
           legs: [
             { ...valid.legs[0]!, amount: 1 as unknown as Money },
             valid.legs[1]!,
@@ -293,6 +334,23 @@ describe('V08.2 authoritative financial posting ledger', () => {
     ]);
     expect(() =>
       applyFinancialPostingBatch(first.state, conflict),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.FINANCIAL_POSTING_CONFLICT,
+      }),
+    );
+
+    const transitionConflict = batch(
+      'BATCH_RETRY',
+      0,
+      [
+        leg('LEG_1', cash, 'DEBIT', '20'),
+        leg('LEG_2', revenue, 'CREDIT', '20'),
+      ],
+      'b',
+    );
+    expect(() =>
+      applyFinancialPostingBatch(first.state, transitionConflict),
     ).toThrowError(
       expect.objectContaining({
         code: DOMAIN_ERROR_CODES.FINANCIAL_POSTING_CONFLICT,

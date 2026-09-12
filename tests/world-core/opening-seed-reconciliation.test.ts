@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 
 import {
-  AUTHORITATIVE_TRANSITION_SCHEMA_VERSION,
+  COMMAND_SCHEMA_VERSION,
   CURRENT_REPLAY_BINDING,
   DOMAIN_ERROR_CODES,
   EVENT_SCHEMA_VERSION,
@@ -20,6 +20,7 @@ import {
   countryId,
   createFinancialAccount,
   createFinancialPostingBatch,
+  createAuthoritativeTransition,
   createInventoryAccount,
   createOpeningSeed,
   createOpeningSource,
@@ -39,18 +40,32 @@ import {
   openingSeedId,
   openingSourceId,
   parseAuthoritativeEvent,
+  parseCanonicalCommand,
   parseInventoryLedgerSnapshot,
-  rebuildV08LedgersFromLineage,
+  rebuildV08LedgersFromLineage as rebuildV08LedgersFromLineageWithEvidence,
   reconcileV08LedgerSnapshots,
   worldId,
   type FinancialOpeningBatch,
   type AuthoritativeTransition,
+  type CanonicalCommand,
   type OpeningInventoryEntry,
   type OpeningSource,
 } from '../../packages/core/src/index.js';
 
 const sha256 = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
+
+function rebuildV08LedgersFromLineage(
+  input: Omit<
+    Parameters<typeof rebuildV08LedgersFromLineageWithEvidence>[0],
+    'sha256Hex'
+  >,
+) {
+  return rebuildV08LedgersFromLineageWithEvidence({
+    ...input,
+    sha256Hex: sha256,
+  });
+}
 const WORLD = worldId('WORLD_OPENING');
 const OWNER = legalEntityId('ENTITY_OWNER');
 const COUNTRY = countryId('COUNTRY_A');
@@ -181,11 +196,33 @@ function transition(input: {
   readonly sequence: number;
   readonly worldVersionBefore: number;
   readonly worldVersionAfter: number;
-}): Readonly<AuthoritativeTransition> {
-  const command = commandId(input.command);
+}): Readonly<{
+  command: CanonicalCommand;
+  transition: AuthoritativeTransition;
+}> {
+  const commandIdentity = commandId(input.command);
+  const command = parseCanonicalCommand(
+    {
+      actorId: 'ACTOR_OPENING_TEST',
+      authSubject: '00000000-0000-4000-8000-000000000003',
+      commandId: commandIdentity,
+      commandType: 'V08_OPENING_COMMAND',
+      correlationId: `OPENING_COMMAND_CORRELATION_${input.sequence}`,
+      countryId: COUNTRY,
+      expectedWorldVersion: String(input.worldVersionBefore),
+      idempotencyKey: `OPENING_IDEMPOTENCY_${input.sequence}`,
+      officeId: null,
+      payload: { command: input.command },
+      schemaVersion: COMMAND_SCHEMA_VERSION,
+      simTime: String(input.sequence * 10_000),
+      submittedAtReal: '2026-09-10T00:00:00.000Z',
+      worldId: WORLD,
+    },
+    sha256,
+  );
   const authoritativeEvent = parseAuthoritativeEvent(
     {
-      causationCommandId: command,
+      causationCommandId: command.commandId,
       correlationId: `CORRELATION_${input.sequence}`,
       correctsEventId: null,
       eventId: input.event,
@@ -200,17 +237,15 @@ function transition(input: {
     },
     sha256,
   );
-  return {
-    schemaVersion: AUTHORITATIVE_TRANSITION_SCHEMA_VERSION,
-    transitionId: command,
-    worldId: WORLD,
-    commandId: command,
-    commandFingerprint: `sha256:${'a'.repeat(64)}`,
-    worldVersionBefore: String(input.worldVersionBefore),
-    worldVersionAfter: String(input.worldVersionAfter),
-    eventIds: [authoritativeEvent.eventId],
-    events: [authoritativeEvent],
-  };
+  return Object.freeze({
+    command,
+    transition: createAuthoritativeTransition({
+      command,
+      worldVersionBefore: String(input.worldVersionBefore),
+      worldVersionAfter: String(input.worldVersionAfter),
+      events: [authoritativeEvent],
+    }),
+  });
 }
 
 describe('V08.3 opening seed and reconciliation', () => {
@@ -398,6 +433,13 @@ describe('V08.3 opening seed and reconciliation', () => {
 
   it('reconstructs later inventory and financial posting lineage', () => {
     const opening = seed();
+    const reservationTransition = transition({
+      command: 'COMMAND_RESERVE',
+      event: 'EVENT_RESERVE',
+      sequence: 1,
+      worldVersionBefore: 0,
+      worldVersionAfter: 1,
+    });
     const reservation = createReservationPosting(
       {
         schemaVersion: INVENTORY_POSTING_SCHEMA_VERSION,
@@ -408,6 +450,8 @@ describe('V08.3 opening seed and reconciliation', () => {
         worldVersionBefore: '0',
         worldVersionAfter: '1',
         simTime: SimTime.fromTicks('10000'),
+        command: reservationTransition.command,
+        transition: reservationTransition.transition,
         quantity: Quantity.from('4', 'tonne'),
         source: inventoryAvailable,
         destination: inventoryReserved,
@@ -419,6 +463,13 @@ describe('V08.3 opening seed and reconciliation', () => {
       accountId: financialAccountId('ACCOUNT_EXPENSE'),
       accountClass: 'EXPENSE',
     });
+    const paymentTransition = transition({
+      command: 'COMMAND_PAYMENT',
+      event: 'EVENT_PAYMENT',
+      sequence: 2,
+      worldVersionBefore: 1,
+      worldVersionAfter: 2,
+    });
     const payment = createFinancialPostingBatch(
       {
         schemaVersion: FINANCIAL_POSTING_SCHEMA_VERSION,
@@ -429,6 +480,8 @@ describe('V08.3 opening seed and reconciliation', () => {
         worldVersionBefore: '1',
         worldVersionAfter: '2',
         simTime: SimTime.fromTicks('20000'),
+        command: paymentTransition.command,
+        transition: paymentTransition.transition,
         settlementCurrency: 'GCU',
         legs: [
           {
@@ -453,24 +506,14 @@ describe('V08.3 opening seed and reconciliation', () => {
       seed: opening,
       transitions: [
         {
-          transition: transition({
-            command: 'COMMAND_RESERVE',
-            event: 'EVENT_RESERVE',
-            sequence: 1,
-            worldVersionBefore: 0,
-            worldVersionAfter: 1,
-          }),
+          command: reservationTransition.command,
+          transition: reservationTransition.transition,
           inventoryPostings: [reservation],
           financialPostingBatches: [],
         },
         {
-          transition: transition({
-            command: 'COMMAND_PAYMENT',
-            event: 'EVENT_PAYMENT',
-            sequence: 2,
-            worldVersionBefore: 1,
-            worldVersionAfter: 2,
-          }),
+          command: paymentTransition.command,
+          transition: paymentTransition.transition,
           inventoryPostings: [],
           financialPostingBatches: [payment],
         },

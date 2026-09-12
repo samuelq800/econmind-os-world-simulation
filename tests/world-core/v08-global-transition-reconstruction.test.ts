@@ -4,7 +4,7 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
 import {
-  AUTHORITATIVE_TRANSITION_SCHEMA_VERSION,
+  COMMAND_SCHEMA_VERSION,
   DOMAIN_ERROR_CODES,
   EVENT_SCHEMA_VERSION,
   FINANCIAL_POSTING_SCHEMA_VERSION,
@@ -18,6 +18,7 @@ import {
   countryId,
   createFinancialAccount,
   createFinancialPostingBatch,
+  createAuthoritativeTransition,
   createInventoryAccount,
   createReservationPosting,
   financialAccountId,
@@ -29,9 +30,11 @@ import {
   inventoryReservationId,
   legalEntityId,
   parseAuthoritativeEvent,
-  rebuildV08LedgersFromLineage,
+  parseCanonicalCommand,
+  rebuildV08LedgersFromLineage as rebuildV08LedgersFromLineageWithEvidence,
   worldId,
   type AuthoritativeTransition,
+  type CanonicalCommand,
   type FinancialAccount,
   type V08AuthoritativeLedgerTransition,
 } from '../../packages/core/src/index.js';
@@ -77,6 +80,27 @@ const equity = createFinancialAccount({
   accountId: financialAccountId('GLOBAL_EQUITY'),
   accountClass: 'EQUITY',
 });
+const commandsByTransition = new WeakMap<object, Readonly<CanonicalCommand>>();
+
+function commandFor(
+  owner: AuthoritativeTransition,
+): Readonly<CanonicalCommand> {
+  const command = commandsByTransition.get(owner);
+  if (command === undefined) throw new Error('test transition command missing');
+  return command;
+}
+
+function rebuildV08LedgersFromLineage(
+  input: Omit<
+    Parameters<typeof rebuildV08LedgersFromLineageWithEvidence>[0],
+    'sha256Hex'
+  >,
+) {
+  return rebuildV08LedgersFromLineageWithEvidence({
+    ...input,
+    sha256Hex: sha256,
+  });
+}
 
 function seed() {
   return testOpeningSeed({
@@ -91,14 +115,46 @@ function transition(input: {
   readonly before?: number;
   readonly after?: number;
   readonly identity?: string;
+  readonly commandPayloadVariant?: string;
+  readonly expectedWorldVersion?: string | null;
+  readonly idempotencyKey?: string | null;
 }): Readonly<AuthoritativeTransition> {
   const before = input.before ?? input.number - 1;
   const after = input.after ?? input.number;
   const identity = input.identity ?? String(input.number);
-  const command = commandId(`GLOBAL_COMMAND_${identity}`);
+  const commandIdentity = commandId(`GLOBAL_COMMAND_${identity}`);
+  const simTime = String(input.number * 10_000);
+  const command = parseCanonicalCommand(
+    {
+      actorId: 'ACTOR_GLOBAL_TEST',
+      authSubject: '00000000-0000-4000-8000-000000000002',
+      commandId: commandIdentity,
+      commandType: 'V08_GLOBAL_COMMAND',
+      correlationId: `GLOBAL_COMMAND_CORRELATION_${identity}`,
+      countryId: COUNTRY,
+      expectedWorldVersion:
+        input.expectedWorldVersion === undefined
+          ? String(before)
+          : input.expectedWorldVersion,
+      idempotencyKey:
+        input.idempotencyKey === undefined
+          ? `GLOBAL_IDEMPOTENCY_${identity}`
+          : input.idempotencyKey,
+      officeId: null,
+      payload: {
+        identity,
+        variant: input.commandPayloadVariant ?? 'BASE',
+      },
+      schemaVersion: COMMAND_SCHEMA_VERSION,
+      simTime,
+      submittedAtReal: '2026-09-10T00:00:00.000Z',
+      worldId: WORLD,
+    },
+    sha256,
+  );
   const event = parseAuthoritativeEvent(
     {
-      causationCommandId: command,
+      causationCommandId: command.commandId,
       correlationId: `GLOBAL_CORRELATION_${identity}`,
       correctsEventId: null,
       eventId: `GLOBAL_EVENT_${identity}`,
@@ -109,30 +165,27 @@ function transition(input: {
       ).toISOString(),
       schemaVersion: EVENT_SCHEMA_VERSION,
       sequence: String(input.number),
-      simTime: String(input.number * 10_000),
+      simTime,
       worldId: WORLD,
       worldVersion: String(after),
     },
     sha256,
   );
-  return {
-    schemaVersion: AUTHORITATIVE_TRANSITION_SCHEMA_VERSION,
-    transitionId: command,
-    worldId: WORLD,
-    commandId: command,
-    commandFingerprint:
-      `sha256:${'a'.repeat(64)}` as AuthoritativeTransition['commandFingerprint'],
+  const owner = createAuthoritativeTransition({
+    command,
     worldVersionBefore: String(before),
     worldVersionAfter: String(after),
-    eventIds: [event.eventId],
     events: [event],
-  };
+  });
+  commandsByTransition.set(owner, command);
+  return owner;
 }
 
 function inventoryPosting(
   owner: AuthoritativeTransition,
   suffix = 'A',
   quantity = '1',
+  simTimeTicks = (BigInt(owner.worldVersionAfter) * 10_000n).toString(),
 ) {
   return createReservationPosting(
     {
@@ -145,9 +198,9 @@ function inventoryPosting(
       causationEventIds: [owner.eventIds[0]!],
       worldVersionBefore: owner.worldVersionBefore,
       worldVersionAfter: owner.worldVersionAfter,
-      simTime: SimTime.fromTicks(
-        (BigInt(owner.worldVersionAfter) * 10_000n).toString(),
-      ),
+      simTime: SimTime.fromTicks(simTimeTicks),
+      command: commandFor(owner),
+      transition: owner,
       quantity: Quantity.from(quantity, 'unit'),
       source: available,
       destination: reserved,
@@ -176,6 +229,8 @@ function financialPosting(
       simTime: SimTime.fromTicks(
         (BigInt(owner.worldVersionAfter) * 10_000n).toString(),
       ),
+      command: commandFor(owner),
+      transition: owner,
       settlementCurrency: 'GCU',
       legs: [
         {
@@ -208,6 +263,7 @@ function record(input: {
   readonly financial?: boolean;
 }): V08AuthoritativeLedgerTransition {
   return {
+    command: commandFor(input.owner),
     transition: input.owner,
     inventoryPostings: input.inventory ? [inventoryPosting(input.owner)] : [],
     financialPostingBatches: input.financial
@@ -253,6 +309,7 @@ describe('V08 one global WorldVersion reconstruction', () => {
       seed: seed(),
       transitions: [
         {
+          command: commandFor(owner),
           transition: owner,
           inventoryPostings: [
             inventoryPosting(owner, 'A'),
@@ -325,6 +382,7 @@ describe('V08 one global WorldVersion reconstruction', () => {
         seed: seed(),
         transitions: [
           {
+            command: commandFor(first),
             transition: first,
             inventoryPostings: [inventoryPosting(unrelated)],
             financialPostingBatches: [],
@@ -332,6 +390,171 @@ describe('V08 one global WorldVersion reconstruction', () => {
         ],
       }),
     ).toThrowError('not bound');
+  });
+
+  it('rejects generated Command-fingerprint divergence for both Posting owners', () => {
+    fc.assert(
+      fc.property(
+        fc.constantFrom('INVENTORY', 'FINANCIAL'),
+        fc.constantFrom('b', 'c', 'd', 'e', 'f'),
+        (ownerKind, fingerprintCharacter) => {
+          const owner = transition({ number: 1 });
+          const conflictingOwner = transition({
+            number: 1,
+            commandPayloadVariant: fingerprintCharacter,
+          });
+          expect(() =>
+            rebuildV08LedgersFromLineage({
+              seed: seed(),
+              transitions: [
+                {
+                  command: commandFor(owner),
+                  transition: owner,
+                  inventoryPostings:
+                    ownerKind === 'INVENTORY'
+                      ? [inventoryPosting(conflictingOwner)]
+                      : [],
+                  financialPostingBatches:
+                    ownerKind === 'FINANCIAL'
+                      ? [financialPosting(conflictingOwner)]
+                      : [],
+                },
+              ],
+            }),
+          ).toThrowError('not bound');
+        },
+      ),
+      {
+        ...FOUNDATION_PROPERTY_CONFIG,
+        seed: FOUNDATION_PROPERTY_CONFIG.seed + 112,
+      },
+    );
+  });
+
+  it('rejects incomplete Event-group and mismatched SimTime binding', () => {
+    const owner = transition({ number: 1 });
+    const secondEvent = parseAuthoritativeEvent(
+      {
+        causationCommandId: owner.commandId,
+        correlationId: 'GLOBAL_CORRELATION_SECOND',
+        correctsEventId: null,
+        eventId: 'GLOBAL_EVENT_SECOND',
+        eventType: 'V08_GLOBAL_TRANSITION',
+        payload: { identity: 'SECOND' },
+        recordedAtReal: '2026-09-10T00:00:02.000Z',
+        schemaVersion: EVENT_SCHEMA_VERSION,
+        sequence: '2',
+        simTime: '10000',
+        worldId: WORLD,
+        worldVersion: '1',
+      },
+      sha256,
+    );
+    const completeOwner: AuthoritativeTransition = {
+      ...owner,
+      eventIds: [owner.eventIds[0]!, secondEvent.eventId],
+      events: [owner.events[0]!, secondEvent],
+    };
+    expect(() =>
+      rebuildV08LedgersFromLineage({
+        seed: seed(),
+        transitions: [
+          {
+            command: commandFor(owner),
+            transition: completeOwner,
+            inventoryPostings: [
+              inventoryPosting(owner, 'PARTIAL_EVENT_GROUP', '1', '20000'),
+            ],
+            financialPostingBatches: [],
+          },
+        ],
+      }),
+    ).toThrowError('bind the complete');
+  });
+
+  it('rejects forged Event payload evidence before it can authorize a Posting', () => {
+    const owner = transition({ number: 1 });
+    const forgedOwner: AuthoritativeTransition = {
+      ...owner,
+      events: [
+        {
+          ...owner.events[0]!,
+          canonicalPayload: '{"identity":"FORGED"}',
+        },
+      ],
+    };
+    commandsByTransition.set(forgedOwner, commandFor(owner));
+    expect(() => inventoryPosting(forgedOwner)).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.EVENT_SCHEMA_INVALID,
+      }),
+    );
+  });
+
+  it('rejects forged Command payload evidence before it can authorize a Posting', () => {
+    const owner = transition({ number: 1 });
+    const command = commandFor(owner);
+    commandsByTransition.set(
+      owner,
+      Object.freeze({
+        ...command,
+        canonicalPayload: '{"forged":true}',
+      }),
+    );
+    expect(() => inventoryPosting(owner)).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.COMMAND_SCHEMA_INVALID,
+      }),
+    );
+  });
+
+  it('rejects a non-null Command expected WorldVersion that does not bind the transition', () => {
+    const owner = transition({ number: 1, expectedWorldVersion: '99' });
+    expect(() => inventoryPosting(owner)).toThrowError(
+      'expected WorldVersion does not match',
+    );
+  });
+
+  it('rejects reuse of a non-null idempotency key across distinct Commands', () => {
+    const first = transition({
+      number: 1,
+      identity: 'IDEMPOTENCY_FIRST',
+      idempotencyKey: 'GLOBAL_IDEMPOTENCY_REUSED',
+    });
+    const second = transition({
+      number: 2,
+      identity: 'IDEMPOTENCY_SECOND',
+      idempotencyKey: 'GLOBAL_IDEMPOTENCY_REUSED',
+    });
+    expect(() =>
+      rebuildV08LedgersFromLineage({
+        seed: seed(),
+        transitions: [record({ owner: first }), record({ owner: second })],
+      }),
+    ).toThrowError('Idempotency key is reused across distinct Commands');
+  });
+
+  it('rejects generated non-contiguous Event lineage from the opening origin', () => {
+    fc.assert(
+      fc.property(fc.integer({ min: 2, max: 1_000_000 }), (sequence) => {
+        const owner = transition({
+          number: sequence,
+          before: 0,
+          after: 1,
+          identity: `SEQUENCE_${sequence}`,
+        });
+        expect(() =>
+          rebuildV08LedgersFromLineage({
+            seed: seed(),
+            transitions: [record({ owner })],
+          }),
+        ).toThrowError('out of order');
+      }),
+      {
+        ...FOUNDATION_PROPERTY_CONFIG,
+        seed: FOUNDATION_PROPERTY_CONFIG.seed + 113,
+      },
+    );
   });
 
   it('returns no candidate state when Inventory fails inside a joint transition', () => {

@@ -4,7 +4,12 @@ import {
   type AuthorizationCapability,
   type AuthorizedOfficeContext,
 } from '../authorization/offices.js';
-import type { CanonicalCommand, CanonicalSha256 } from './command.js';
+import {
+  validateCanonicalCommand,
+  type CanonicalCommand,
+  type CanonicalSha256,
+  type Sha256Hex,
+} from './command.js';
 import { DOMAIN_ERROR_CODES, DomainError } from '../errors.js';
 import {
   consumerId,
@@ -22,15 +27,20 @@ import {
   type TeamId,
   type WorldId,
 } from '../ids.js';
-import { SimTime } from '../numeric/sim-time.js';
+import { isSimTime, SimTime } from '../numeric/sim-time.js';
 import { canonicalSerialize } from '../serialization/canonical.js';
-import type { AuthoritativeEvent } from '../events/event.js';
+import {
+  validateAuthoritativeEvent,
+  type AuthoritativeEvent,
+} from '../events/event.js';
 
 export const COMMAND_ACCEPTANCE_SCHEMA_VERSION =
   'command-acceptance-v1' as const;
 export const COMMAND_RECEIPT_SCHEMA_VERSION = 'command-receipt-v2' as const;
 export const AUTHORITATIVE_TRANSITION_SCHEMA_VERSION =
   'authoritative-transition-v1' as const;
+export const AUTHORITATIVE_TRANSITION_BINDING_SCHEMA_VERSION =
+  'authoritative-transition-binding-v1' as const;
 export const COMMIT_AUTHORIZATION_SCHEMA_VERSION =
   'commit-authorization-v1' as const;
 export const OUTBOX_SCHEMA_VERSION = 'outbox-v1' as const;
@@ -44,6 +54,7 @@ export type OutboxDeliveryState = 'PENDING' | 'DELIVERED';
 export type ConsumerDeliveryState = 'PROCESSING' | 'DELIVERED' | 'FAILED';
 
 const NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/u;
+const CANONICAL_SHA256 = /^sha256:[0-9a-f]{64}$/u;
 const CANONICAL_REASON = /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/u;
 const RFC3339_MILLISECONDS =
   /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d\.\d{3}Z$/u;
@@ -130,6 +141,27 @@ export interface AuthoritativeTransition {
   readonly events: readonly AuthoritativeEvent[];
 }
 
+/**
+ * Canonical V07 evidence projected for V08 Posting ownership. It intentionally
+ * excludes trace-only Event audit timestamps while retaining the immutable
+ * Command fingerprint, exact ordered Event identities/fingerprints, SimTime,
+ * and one WorldVersion boundary.
+ */
+export interface AuthoritativeTransitionBinding {
+  readonly schemaVersion: typeof AUTHORITATIVE_TRANSITION_BINDING_SCHEMA_VERSION;
+  readonly transitionId: CommandId;
+  readonly worldId: WorldId;
+  readonly commandId: CommandId;
+  readonly commandFingerprint: CanonicalSha256;
+  readonly idempotencyKey: IdempotencyKey | null;
+  readonly expectedWorldVersion: string | null;
+  readonly worldVersionBefore: string;
+  readonly worldVersionAfter: string;
+  readonly eventIds: readonly EventId[];
+  readonly eventFingerprints: readonly CanonicalSha256[];
+  readonly simTime: SimTime;
+}
+
 export function validateAuthoritativeTransition(
   transition: AuthoritativeTransition,
 ): Readonly<AuthoritativeTransition> {
@@ -180,6 +212,62 @@ export function validateAuthoritativeTransition(
     previousSequence = sequence;
   }
   return transition;
+}
+
+export function bindAuthoritativeTransition(
+  input: {
+    readonly command: CanonicalCommand;
+    readonly transition: AuthoritativeTransition;
+  },
+  sha256Hex: Sha256Hex,
+): Readonly<AuthoritativeTransitionBinding> {
+  const command = validateCanonicalCommand(input.command, sha256Hex);
+  const transition = validateAuthoritativeTransition(input.transition);
+  if (
+    !CANONICAL_SHA256.test(transition.commandFingerprint) ||
+    transition.commandId !== command.commandId ||
+    transition.worldId !== command.worldId ||
+    transition.commandFingerprint !== command.fingerprint ||
+    (command.expectedWorldVersion !== null &&
+      command.expectedWorldVersion !== transition.worldVersionBefore)
+  ) {
+    transitionInvalid(
+      command.expectedWorldVersion !== null &&
+        command.expectedWorldVersion !== transition.worldVersionBefore
+        ? 'Command expected WorldVersion does not match the transition boundary'
+        : 'Transition does not match canonical Command evidence',
+    );
+  }
+  const events = transition.events.map((event) =>
+    validateAuthoritativeEvent(event, sha256Hex),
+  );
+  const firstEvent = events[0]!;
+  const eventFingerprints = events.map((event) => {
+    if (
+      !isSimTime(event.simTime) ||
+      event.simTime.ticks !== command.simTime.ticks ||
+      !CANONICAL_SHA256.test(event.fingerprint)
+    ) {
+      transitionInvalid(
+        'Transition Events must share canonical SimTime and fingerprints',
+      );
+    }
+    return event.fingerprint;
+  });
+  return Object.freeze({
+    schemaVersion: AUTHORITATIVE_TRANSITION_BINDING_SCHEMA_VERSION,
+    transitionId: transition.transitionId,
+    worldId: transition.worldId,
+    commandId: transition.commandId,
+    commandFingerprint: transition.commandFingerprint,
+    idempotencyKey: command.idempotencyKey,
+    expectedWorldVersion: command.expectedWorldVersion,
+    worldVersionBefore: transition.worldVersionBefore,
+    worldVersionAfter: transition.worldVersionAfter,
+    eventIds: Object.freeze([...transition.eventIds]),
+    eventFingerprints: Object.freeze(eventFingerprints),
+    simTime: firstEvent.simTime,
+  });
 }
 
 export function createAuthoritativeTransition(input: {

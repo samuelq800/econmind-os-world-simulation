@@ -7,7 +7,6 @@ import {
   FINANCIAL_POSTING_SCHEMA_VERSION,
   Money,
   SimTime,
-  applyFinancialPostingBatch,
   canonicalSerialize,
   commandId,
   countryId,
@@ -21,7 +20,11 @@ import {
   worldId,
   type FinancialPostingLeg,
 } from '../../packages/core/src/index.js';
-import { openingLedgers } from '../helpers/v08-ledgers.js';
+import { applyFinancialPostingBatch } from '../../packages/core/src/finance/financial-ledger.js';
+import {
+  openingLedgers,
+  testAuthoritativeTransition,
+} from '../helpers/v08-ledgers.js';
 import { FOUNDATION_PROPERTY_CONFIG } from './property-config.js';
 
 const sha256 = (preimage: string) =>
@@ -58,16 +61,30 @@ function leg(
 }
 
 function batch(legs: readonly FinancialPostingLeg[]) {
+  const causationCommandId = commandId('COMMAND_PROPERTY');
+  const causationEventIds = [eventId('EVENT_PROPERTY')];
+  const simTime = SimTime.fromTicks('10000');
+  const evidence = testAuthoritativeTransition({
+    worldId: WORLD,
+    commandId: causationCommandId,
+    eventIds: causationEventIds,
+    worldVersionBefore: '0',
+    worldVersionAfter: '1',
+    simTime,
+    sha256Hex: sha256,
+  });
   return createFinancialPostingBatch(
     {
       schemaVersion: FINANCIAL_POSTING_SCHEMA_VERSION,
       batchId: financialPostingBatchId('BATCH_PROPERTY'),
       worldId: WORLD,
-      causationCommandId: commandId('COMMAND_PROPERTY'),
-      causationEventIds: [eventId('EVENT_PROPERTY')],
+      causationCommandId,
+      causationEventIds,
       worldVersionBefore: '0',
       worldVersionAfter: '1',
-      simTime: SimTime.fromTicks('10000'),
+      simTime,
+      command: evidence.command,
+      transition: evidence.transition,
       settlementCurrency: 'GCU',
       legs,
     },
