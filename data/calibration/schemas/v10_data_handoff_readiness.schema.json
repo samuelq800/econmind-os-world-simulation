@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/v10-data-handoff-readiness.v1.json",
+  "title": "V10 calibration data-handoff readiness assessment",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "readinessId",
+    "status",
+    "input",
+    "closureEvidenceBindings",
+    "gates",
+    "summary",
+    "v10_1Interface",
+    "hardBoundaries",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "v10-data-handoff-readiness.v1" },
+    "readinessId": { "type": "string", "minLength": 1 },
+    "status": { "const": "PREPARATION_ONLY_NON_AUTHORITATIVE" },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policyContractCanonicalHash", "artifacts"],
+      "properties": {
+        "policyContractCanonicalHash": { "$ref": "#/$defs/hash" },
+        "artifacts": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "$ref": "#/$defs/artifact" }
+        }
+      }
+    },
+    "closureEvidenceBindings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidenceBinding" }
+    },
+    "gates": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": { "$ref": "#/$defs/gate" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "closedGateCount",
+        "openGateCount",
+        "openGateIds",
+        "dataHandoffCandidateReady",
+        "runtimeCountrySeedExportAuthorized",
+        "v10Status"
+      ],
+      "properties": {
+        "closedGateCount": { "type": "integer", "minimum": 0, "maximum": 7 },
+        "openGateCount": { "type": "integer", "minimum": 0, "maximum": 7 },
+        "openGateIds": { "$ref": "#/$defs/stringSet" },
+        "dataHandoffCandidateReady": { "type": "boolean" },
+        "runtimeCountrySeedExportAuthorized": { "const": false },
+        "v10Status": { "const": "PLANNED" }
+      }
+    },
+    "v10_1Interface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "calibrationGateDependency",
+        "usesCalibrationCountryValues",
+        "twoCountryFixtureInstancePresent",
+        "countryValuesPresent",
+        "runtimeProjectionImplemented"
+      ],
+      "properties": {
+        "status": { "const": "INTERFACE_ONLY_NOT_EXECUTED" },
+        "calibrationGateDependency": { "const": false },
+        "usesCalibrationCountryValues": { "const": false },
+        "twoCountryFixtureInstancePresent": { "const": false },
+        "countryValuesPresent": { "const": false },
+        "runtimeProjectionImplemented": { "const": false }
+      }
+    },
+    "hardBoundaries": { "$ref": "#/$defs/stringSet" },
+    "contentHash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "stringSet": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "rawSha256", "canonicalHash"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "rawSha256": { "$ref": "#/$defs/hash" },
+        "canonicalHash": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "evidenceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidenceId", "rawSha256"],
+      "properties": {
+        "evidenceId": { "type": "string", "minLength": 1 },
+        "rawSha256": { "$ref": "#/$defs/hash" }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gateId",
+        "satisfiedComputableEvidenceIds",
+        "requiredEvidenceIds",
+        "satisfiedClosureEvidenceIds",
+        "pendingClosureEvidenceIds",
+        "dependsOnGateIds",
+        "computedStatus",
+        "allowedNextAction",
+        "prohibitedAuthorityInterpretation"
+      ],
+      "properties": {
+        "gateId": { "type": "string", "minLength": 1 },
+        "satisfiedComputableEvidenceIds": { "$ref": "#/$defs/stringSet" },
+        "requiredEvidenceIds": { "$ref": "#/$defs/stringSet" },
+        "satisfiedClosureEvidenceIds": { "$ref": "#/$defs/stringSet" },
+        "pendingClosureEvidenceIds": { "$ref": "#/$defs/stringSet" },
+        "dependsOnGateIds": { "$ref": "#/$defs/stringSet" },
+        "computedStatus": { "enum": ["OPEN", "CLOSED"] },
+        "allowedNextAction": { "type": "string", "minLength": 1 },
+        "prohibitedAuthorityInterpretation": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

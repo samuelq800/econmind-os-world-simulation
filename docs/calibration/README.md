@@ -41,6 +41,9 @@ This workstream converts provider-shaped bytes into traceable observations and, 
   inventory; it closes pilot registry coverage while admitting zero features.
 - `C4_GATE_DIAGNOSTICS.md`: deterministic missingness, vintage-comparability,
   sector-partial-sum, and bilateral-mirror diagnostics; all gates remain open.
+- `V10_DATA_HANDOFF_READINESS.md`: fail-closed machine contract for the seven
+  real-calibration gates plus a separate schema-only V10.1 test fixture
+  interface; no runtime seed or fixture instance is produced.
 - `data/calibration/source_registry.v2.json`: eight official provider families.
 - `data/calibration/variable_registry.v2.json`: initial macro/fiscal/external/sector/trade variables.
 - `data/calibration/transformation_registry.v1.json`: approved deterministic Foundation transformations.
@@ -76,6 +79,7 @@ pnpm --filter @econmind/calibration exploration:generate
 pnpm --filter @econmind/calibration c4:preflight:verify
 pnpm --filter @econmind/calibration c4:feature-evidence:generate
 pnpm --filter @econmind/calibration c4:gate-diagnostics:generate
+pnpm --filter @econmind/calibration v10:data-handoff:generate
 pnpm test:boundaries
 pnpm secrets:check
 ```
@@ -96,6 +100,11 @@ zero features. The follow-on deterministic diagnostics quantify missingness,
 show that no valid vintage-comparison pair exists, and preserve exact sector
 partial sums and trade mirror differences without reconciliation. All seven
 final-generation prerequisites remain open. It does not start final generation.
+The V10 data-handoff readiness assessment now represents those gates as eight
+unique owner/source/governance evidence requirements and rejects admission
+while any gate is open. Its separate V10.1 two-country placeholder interface
+does not depend on calibration readiness and includes no fixture instance or
+country value.
 C3 descriptive exploration
 remains bounded to the frozen partial pilot: it does not create or approve an archetype
 algorithm/count, fictional-country mapping, final trade matrix, IPF/RAS result,

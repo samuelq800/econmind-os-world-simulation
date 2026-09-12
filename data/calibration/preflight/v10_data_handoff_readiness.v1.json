@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "v10-data-handoff-readiness.v1",
+  "readinessId": "v10-data-handoff-readiness-from-c4-diagnostics",
+  "status": "PREPARATION_ONLY_NON_AUTHORITATIVE",
+  "input": {
+    "policyContractCanonicalHash": "95a1746400cf228186350c0ac8319d2cbef04d3ba4c22c6bab729db967d0ddf2",
+    "artifacts": [
+      {
+        "path": "data/calibration/preflight/c4_gate_diagnostics.v1.json",
+        "rawSha256": "a5d50b45e6b03f54c4632aba9810cc5446a8ec966c86adb93531bf47d04f28dc",
+        "canonicalHash": "fd0b7f00239b990b847bdca8e3629430a9f163ec49b997e546097b27b49882bc"
+      },
+      {
+        "path": "data/calibration/preflight/c4_gate_diagnostics_execution_contract.v1.json",
+        "rawSha256": "44719339abd7737e9330dc8424fdefb724f2629dc8ac12f1d9a1598e744a141c",
+        "canonicalHash": "c4172d3cc746be5f82b4eadc4494156918b73cc3b25112910ed90d17063eec40"
+      }
+    ]
+  },
+  "closureEvidenceBindings": [],
+  "gates": [
+    {
+      "gateId": "MISSING_VALUE_POLICY_FOR_ARCHETYPE_FEATURES_UNAPPROVED",
+      "satisfiedComputableEvidenceIds": [
+        "C4_MISSINGNESS_STRATEGY_CANDIDATES",
+        "C4_VARIABLE_LEVEL_APPLICABILITY",
+        "C4_COMMON_GRID_28_OF_30"
+      ],
+      "requiredEvidenceIds": ["OWNER_MISSINGNESS_POLICY"],
+      "satisfiedClosureEvidenceIds": [],
+      "pendingClosureEvidenceIds": ["OWNER_MISSINGNESS_POLICY"],
+      "dependsOnGateIds": [],
+      "computedStatus": "OPEN",
+      "allowedNextAction": "Attach one independently reviewed owner-decision envelope for OWNER_MISSINGNESS_POLICY.",
+      "prohibitedAuthorityInterpretation": "Diagnostic strategy enumeration does not select a missingness policy or authorize imputation."
+    },
+    {
+      "gateId": "ARCHETYPE_METHOD_AND_COUNT_UNSELECTED",
+      "satisfiedComputableEvidenceIds": [
+        "C4_FEATURE_EVIDENCE_19_CANDIDATES_ZERO_ADMITTED"
+      ],
+      "requiredEvidenceIds": [
+        "OWNER_ARCHETYPE_METHOD_COUNT_LABELS_FEATURE_SET"
+      ],
+      "satisfiedClosureEvidenceIds": [],
+      "pendingClosureEvidenceIds": [
+        "OWNER_ARCHETYPE_METHOD_COUNT_LABELS_FEATURE_SET"
+      ],
+      "dependsOnGateIds": [
+        "MISSING_VALUE_POLICY_FOR_ARCHETYPE_FEATURES_UNAPPROVED"
+      ],
+      "computedStatus": "OPEN",
+      "allowedNextAction": "Attach one independently reviewed owner-decision envelope for OWNER_ARCHETYPE_METHOD_COUNT_LABELS_FEATURE_SET after the missingness gate closes.",
+      "prohibitedAuthorityInterpretation": "The feature evidence register does not select features, archetypes, counts, or labels."
+    },
+    {
+      "gateId": "FICTIONAL_COUNTRY_MAPPING_NOT_AUTHORIZED",
+      "satisfiedComputableEvidenceIds": [
+        "C4_FEATURE_SET_NOT_SELECTED",
+        "C4_FINAL_GENERATOR_FALSE"
+      ],
+      "requiredEvidenceIds": ["GOVERNANCE_FICTIONAL_MAPPING_AUTHORIZATION"],
+      "satisfiedClosureEvidenceIds": [],
+      "pendingClosureEvidenceIds": [
+        "GOVERNANCE_FICTIONAL_MAPPING_AUTHORIZATION"
+      ],
+      "dependsOnGateIds": [
+        "MISSING_VALUE_POLICY_FOR_ARCHETYPE_FEATURES_UNAPPROVED",
+        "ARCHETYPE_METHOD_AND_COUNT_UNSELECTED"
+      ],
+      "computedStatus": "OPEN",
+      "allowedNextAction": "Prepare an independent governance decision envelope; do not create a mapping or country record.",
+      "prohibitedAuthorityInterpretation": "A data-readiness pass cannot itself authorize fictional-country identity or generation."
+    },
+    {
+      "gateId": "WTO_TARIFF_EVIDENCE_ABSENT",
+      "satisfiedComputableEvidenceIds": ["C4_WTO_NOT_FETCHED_GAP_CONFIRMED"],
+      "requiredEvidenceIds": ["SOURCE_WTO_TARIFF_FROZEN_REVIEWED"],
+      "satisfiedClosureEvidenceIds": [],
+      "pendingClosureEvidenceIds": ["SOURCE_WTO_TARIFF_FROZEN_REVIEWED"],
+      "dependsOnGateIds": [],
+      "computedStatus": "OPEN",
+      "allowedNextAction": "Attach one reviewed new-source evidence envelope only after a credential is supplied out of band; never store the credential.",
+      "prohibitedAuthorityInterpretation": "The confirmed WTO gap is not tariff evidence and cannot be backfilled from another provider or synthetic values."
+    },
+    {
+      "gateId": "VINTAGE_STABILITY_NOT_ESTABLISHED",
+      "satisfiedComputableEvidenceIds": [
+        "C4_VINTAGE_COMPARABLE_PAIRS_ZERO",
+        "C4_PERIODS_ARE_NOT_VINTAGES"
+      ],
+      "requiredEvidenceIds": ["SOURCE_REPEATED_EQUIVALENT_QUERY_SNAPSHOTS"],
+      "satisfiedClosureEvidenceIds": [],
+      "pendingClosureEvidenceIds": [
+        "SOURCE_REPEATED_EQUIVALENT_QUERY_SNAPSHOTS"
+      ],
+      "dependsOnGateIds": [],
+      "computedStatus": "OPEN",
+      "allowedNextAction": "Attach one reviewed repeated-snapshot evidence envelope when equivalent-query vintages exist.",
+      "prohibitedAuthorityInterpretation": "Multiple years, multiple different queries, or missing source-as-of metadata cannot support a vintage-stability claim."
+    },
+    {
+      "gateId": "SECTOR_TAXONOMY_AND_TRADE_RECONCILIATION_UNREVIEWED",
+      "satisfiedComputableEvidenceIds": [
+        "C4_SECTOR_PARTIAL_28_OF_30",
+        "C4_TRADE_MIRROR_3_PAIRS",
+        "C4_NO_RECONCILIATION_RUN"
+      ],
+      "requiredEvidenceIds": [
+        "OWNER_SECTOR_TAXONOMY_AND_MIRROR_POLICY",
+        "SOURCE_EXHAUSTIVE_SECTOR_TOTAL_EVIDENCE"
+      ],
+      "satisfiedClosureEvidenceIds": [],
+      "pendingClosureEvidenceIds": [
+        "OWNER_SECTOR_TAXONOMY_AND_MIRROR_POLICY",
+        "SOURCE_EXHAUSTIVE_SECTOR_TOTAL_EVIDENCE"
+      ],
+      "dependsOnGateIds": [],
+      "computedStatus": "OPEN",
+      "allowedNextAction": "Attach the owner-policy and reviewed sector-source envelopes; reconciliation remains a later separately authorized action.",
+      "prohibitedAuthorityInterpretation": "Partial sector sums and mirror differences are diagnostics, not totals, balanced trade, or IPF/RAS output."
+    },
+    {
+      "gateId": "FINAL_CALIBRATION_AND_RUNTIME_HANDOFF_BLOCKED",
+      "satisfiedComputableEvidenceIds": [
+        "C4_ALL_SEVEN_GATES_MACHINE_ENUMERATED",
+        "C4_RUNTIME_AND_FINAL_GENERATOR_FALSE"
+      ],
+      "requiredEvidenceIds": ["GOVERNANCE_FINAL_DATA_HANDOFF_AUTHORIZATION"],
+      "satisfiedClosureEvidenceIds": [],
+      "pendingClosureEvidenceIds": [
+        "GOVERNANCE_FINAL_DATA_HANDOFF_AUTHORIZATION"
+      ],
+      "dependsOnGateIds": [
+        "MISSING_VALUE_POLICY_FOR_ARCHETYPE_FEATURES_UNAPPROVED",
+        "ARCHETYPE_METHOD_AND_COUNT_UNSELECTED",
+        "FICTIONAL_COUNTRY_MAPPING_NOT_AUTHORIZED",
+        "WTO_TARIFF_EVIDENCE_ABSENT",
+        "VINTAGE_STABILITY_NOT_ESTABLISHED",
+        "SECTOR_TAXONOMY_AND_TRADE_RECONCILIATION_UNREVIEWED"
+      ],
+      "computedStatus": "OPEN",
+      "allowedNextAction": "After every dependency closes, attach one independent final-handoff authorization envelope and prepare a separate review candidate.",
+      "prohibitedAuthorityInterpretation": "Even a data-handoff readiness pass is not World Core import, runtime seed authority, V10.1 execution, or production approval."
+    }
+  ],
+  "summary": {
+    "closedGateCount": 0,
+    "openGateCount": 7,
+    "openGateIds": [
+      "MISSING_VALUE_POLICY_FOR_ARCHETYPE_FEATURES_UNAPPROVED",
+      "ARCHETYPE_METHOD_AND_COUNT_UNSELECTED",
+      "FICTIONAL_COUNTRY_MAPPING_NOT_AUTHORIZED",
+      "WTO_TARIFF_EVIDENCE_ABSENT",
+      "VINTAGE_STABILITY_NOT_ESTABLISHED",
+      "SECTOR_TAXONOMY_AND_TRADE_RECONCILIATION_UNREVIEWED",
+      "FINAL_CALIBRATION_AND_RUNTIME_HANDOFF_BLOCKED"
+    ],
+    "dataHandoffCandidateReady": false,
+    "runtimeCountrySeedExportAuthorized": false,
+    "v10Status": "PLANNED"
+  },
+  "v10_1Interface": {
+    "status": "INTERFACE_ONLY_NOT_EXECUTED",
+    "calibrationGateDependency": false,
+    "usesCalibrationCountryValues": false,
+    "twoCountryFixtureInstancePresent": false,
+    "countryValuesPresent": false,
+    "runtimeProjectionImplemented": false
+  },
+  "hardBoundaries": [
+    "NO_MISSINGNESS_POLICY_SELECTION_OR_VALUE_IMPUTATION",
+    "NO_NEW_PROVIDER_RETRIEVAL_OR_CREDENTIAL_STORAGE",
+    "NO_IPF_RAS_OR_TRADE_RECONCILIATION",
+    "NO_ARCHETYPE_OR_FINAL_COUNTRY_GENERATION",
+    "NO_RUNTIME_COUNTRY_SEED_EXPORT_WHILE_ANY_GATE_OPEN",
+    "NO_WORLD_CORE_IMPORT_OR_MUTATION",
+    "NO_V10_1_EXECUTION_OR_STATUS_CHANGE",
+    "CALIBRATION_GATES_DO_NOT_GATE_V10_1_TEST_ONLY_FIXTURE",
+    "NO_SUPABASE_OR_PRODUCTION_ACCESS",
+    "NO_SELF_CREATED_IMPLEMENTATION_REPORT_AS_APPROVAL"
+  ],
+  "contentHash": "2f4f5a21c7e1f298c0f71f974af441152e4d186bd8dbcfe6a364aa6fd5a80557"
+}

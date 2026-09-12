@@ -16,6 +16,7 @@
     "c4:preflight:verify": "pnpm build && node dist/preflight-cli.js",
     "exploration:generate": "pnpm build && node dist/exploration-cli.js && pnpm exec prettier --write ../../data/calibration/exploration/*.json",
     "pilot:live": "pnpm build && node dist/pilot.js && pnpm exec prettier --write ../../data/calibration/pilot/*.json",
+    "v10:data-handoff:generate": "pnpm build && node dist/v10-readiness-cli.js && pnpm exec prettier --write ../../data/calibration/preflight/v10_data_handoff_readiness.v1.json",
     "typecheck": "tsc -p tsconfig.json --pretty false"
   },
   "devDependencies": {

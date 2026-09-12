@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/v10.1-test-two-country-fixture.v1.json",
+  "title": "V10.1 test-only two-country fixture descriptor interface",
+  "description": "Interface only. No committed instance or country value is authorized by this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "fixtureId",
+    "status",
+    "countryCount",
+    "calibrationReadinessRequired",
+    "usesCalibrationCountryValues",
+    "runtimeAuthority",
+    "finalCountryData",
+    "projectionImplementationPresent",
+    "countries",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "v10.1-test-two-country-fixture.v1" },
+    "fixtureId": { "type": "string", "minLength": 1 },
+    "status": { "const": "TEST_ONLY_NON_AUTHORITATIVE" },
+    "countryCount": { "const": 2 },
+    "calibrationReadinessRequired": { "const": false },
+    "usesCalibrationCountryValues": { "const": false },
+    "runtimeAuthority": { "const": false },
+    "finalCountryData": { "const": false },
+    "projectionImplementationPresent": { "const": false },
+    "countries": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["testCountryId", "dataClass", "featureValues"],
+        "properties": {
+          "testCountryId": {
+            "type": "string",
+            "pattern": "^test:country:[a-z][a-z0-9-]*$"
+          },
+          "dataClass": { "const": "PLACEHOLDER" },
+          "featureValues": {
+            "type": "array",
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

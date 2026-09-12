@@ -13,4 +13,5 @@ export * from './preflight.js';
 export * from './quality.js';
 export * from './snapshot.js';
 export * from './trade.js';
+export * from './v10-readiness.js';
 export type * from './types.js';

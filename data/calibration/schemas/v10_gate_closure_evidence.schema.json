@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://econmind.example/schemas/v10-gate-closure-evidence.v1.json",
+  "title": "V10 data-handoff gate closure evidence envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "evidenceId",
+    "gateId",
+    "requirementId",
+    "evidenceKind",
+    "status",
+    "decision",
+    "authority",
+    "artifactBindings",
+    "sourceEvidence",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "v10-gate-closure-evidence.v1" },
+    "evidenceId": { "type": "string", "minLength": 1 },
+    "gateId": { "type": "string", "minLength": 1 },
+    "requirementId": { "type": "string", "minLength": 1 },
+    "evidenceKind": {
+      "enum": [
+        "OWNER_DECISION",
+        "NEW_SOURCE_OR_CREDENTIAL",
+        "GOVERNANCE_AUTHORIZATION"
+      ]
+    },
+    "status": { "const": "CLOSURE_EVIDENCE_CANDIDATE" },
+    "decision": { "const": "APPROVED" },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewerId",
+        "reviewerRole",
+        "independentReview",
+        "selfCreatedImplementationReport",
+        "reviewedTargetCommit",
+        "evidenceCommit"
+      ],
+      "properties": {
+        "reviewerId": { "type": "string", "minLength": 1 },
+        "reviewerRole": {
+          "enum": ["OWNER", "INDEPENDENT_REVIEWER", "GOVERNANCE_REVIEWER"]
+        },
+        "independentReview": { "const": true },
+        "selfCreatedImplementationReport": { "const": false },
+        "reviewedTargetCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "evidenceCommit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "artifactBindings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "rawSha256"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "rawSha256": { "$ref": "#/$defs/hash" }
+        }
+      }
+    },
+    "sourceEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["credentialStoredInRepository", "sourceSnapshotIds"],
+      "properties": {
+        "credentialStoredInRepository": { "const": false },
+        "sourceSnapshotIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "contentHash": { "$ref": "#/$defs/hash" }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}
