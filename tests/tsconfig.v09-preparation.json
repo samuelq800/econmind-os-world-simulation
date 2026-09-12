@@ -15,6 +15,7 @@
     "world-core/v09-atomic-preparation-infrastructure.test.ts",
     "world-core/v09-atomic-repository-preparation.test.ts",
     "world-core/v09-atomic-preparation-postgres.test.ts",
-    "world-core/v09-postgres-sql-database.test.ts"
+    "world-core/v09-postgres-sql-database.test.ts",
+    "world-core/v09-world-recovery-preparation.test.ts"
   ]
 }

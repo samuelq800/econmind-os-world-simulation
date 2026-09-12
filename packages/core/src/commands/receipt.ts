@@ -493,7 +493,26 @@ export interface CommitAuthorizationProof {
   readonly currentlyAuthorized: true;
 }
 
-const issuedCommitAuthorizationProofs = new WeakSet<object>();
+interface CommitAuthorizationMetadata {
+  readonly command: CanonicalCommand;
+  readonly currentAuthorization: AuthorizedOfficeContext;
+  readonly requiredCapability: AuthorizationCapability;
+}
+
+interface AuthorizationRevocationMetadata {
+  readonly command: CanonicalCommand;
+  readonly intakeAuthorization: AuthorizedOfficeContext;
+  readonly requiredCapability: AuthorizationCapability;
+}
+
+const issuedCommitAuthorizationProofs = new WeakMap<
+  object,
+  CommitAuthorizationMetadata
+>();
+const issuedAuthorizationRevocations = new WeakMap<
+  object,
+  AuthorizationRevocationMetadata
+>();
 
 export function isCommitAuthorizationProof(
   value: unknown,
@@ -543,8 +562,105 @@ function bindCommitAuthorizationToCommand(input: {
     authorizationVersion: input.currentAuthorization.authorizationVersion,
     currentlyAuthorized: true as const,
   }) as CommitAuthorizationProof;
-  issuedCommitAuthorizationProofs.add(proof);
+  issuedCommitAuthorizationProofs.set(proof, {
+    command: input.command,
+    currentAuthorization: input.currentAuthorization,
+    requiredCapability: input.requiredCapability,
+  });
   return proof;
+}
+
+/**
+ * Re-resolves the server-held Office assignment at the authoritative
+ * transaction cutoff. A revision or team change rejects the stale proof so a
+ * retry must issue and audit a fresh proof instead of committing old scope.
+ */
+export async function reauthorizeCommitAuthorizationProof(
+  value: unknown,
+): Promise<void> {
+  if (!isCommitAuthorizationProof(value)) {
+    throw new DomainError(
+      DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+      'Commit authorization proof was not issued by the server',
+    );
+  }
+  const metadata = issuedCommitAuthorizationProofs.get(value);
+  if (metadata === undefined) {
+    throw new DomainError(
+      DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+      'Commit authorization metadata is unavailable',
+    );
+  }
+  const current = await reauthorizeOfficeCapability(
+    metadata.currentAuthorization,
+  );
+  if (
+    current.authSubject !== value.authSubject ||
+    current.worldId !== value.worldId ||
+    current.countryId !== value.countryId ||
+    current.officeId !== value.officeId ||
+    current.capability !== metadata.requiredCapability ||
+    current.teamId !== value.teamId ||
+    current.authorizationVersion !== value.authorizationVersion ||
+    metadata.command.commandId !== value.commandId ||
+    metadata.command.fingerprint !== value.commandFingerprint
+  ) {
+    throw new DomainError(
+      DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+      'Commit authorization changed before the authoritative transaction cutoff',
+    );
+  }
+}
+
+/**
+ * Confirms that an authorization rejection is still current inside the
+ * authoritative transaction. If authority has been restored, the stale
+ * zero-effect receipt is rejected and the command must be retried.
+ */
+export async function assertAuthorizationRevocationCurrent(
+  value: unknown,
+): Promise<void> {
+  if (typeof value !== 'object' || value === null) {
+    throw new DomainError(
+      DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+      'Authorization revocation evidence is unavailable',
+    );
+  }
+  const metadata = issuedAuthorizationRevocations.get(value);
+  if (metadata === undefined) {
+    throw new DomainError(
+      DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+      'Authorization revocation was not issued by the server',
+    );
+  }
+  let current: AuthorizedOfficeContext;
+  try {
+    current = await reauthorizeOfficeCapability(metadata.intakeAuthorization);
+  } catch (error) {
+    if (
+      error instanceof DomainError &&
+      error.code === DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED
+    ) {
+      return;
+    }
+    throw error;
+  }
+  if (
+    current.authSubject === metadata.command.authSubject &&
+    current.worldId === metadata.command.worldId &&
+    current.countryId === metadata.command.countryId &&
+    current.officeId === metadata.command.officeId &&
+    current.capability === metadata.requiredCapability
+  ) {
+    throw new DomainError(
+      DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+      'Authorization was restored before the rejection transaction cutoff',
+    );
+  }
+  throw new DomainError(
+    DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+    'Current authorization does not match the rejected command scope',
+  );
 }
 
 export type QueuedCommandExecutionResult = Readonly<{
@@ -611,6 +727,11 @@ export async function processQueuedCommand(input: {
         transition: null,
         simTime: input.commitSimTime,
         recordedAtReal: input.recordedAtReal,
+      });
+      issuedAuthorizationRevocations.set(receipt, {
+        command: input.command,
+        intakeAuthorization: input.intakeAuthorization,
+        requiredCapability: input.requiredCapability,
       });
       return Object.freeze({
         source: 'NEW_FINAL',

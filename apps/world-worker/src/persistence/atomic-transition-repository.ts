@@ -2,6 +2,7 @@ import {
   DOMAIN_ERROR_CODES,
   DomainError,
   SimTime,
+  assertAuthorizationRevocationCurrent,
   bindAuthoritativeTransition,
   canonicalHashInput,
   canonicalSerialize,
@@ -13,6 +14,7 @@ import {
   idempotencyKey,
   isCommitAuthorizationProof,
   parseCanonicalCommand,
+  reauthorizeCommitAuthorizationProof,
   validateCanonicalCommand,
   validateFinalReceiptForCommand,
   worldId,
@@ -370,9 +372,50 @@ export interface AtomicCommitAuthorizationGuard {
       authorityKind: QueueAuthorityKind;
       proof: CommitAuthorizationProof | null;
       expected: 'AUTHORIZED' | 'REVOKED' | 'NOT_APPLICABLE';
+      revokedReceipt?: FinalCommandReceipt;
     }>,
   ): Promise<void>;
 }
+
+/**
+ * Concrete ADR-20 guard backed exclusively by the server-held authorization
+ * resolver metadata captured when Core issued the proof/rejection. Callers
+ * must invoke it from the authoritative SqlDatabase transaction callback.
+ */
+export const serverHeldAuthorizationGuard: AtomicCommitAuthorizationGuard =
+  Object.freeze({
+    async assertCurrent(
+      _transaction: Parameters<
+        AtomicCommitAuthorizationGuard['assertCurrent']
+      >[0],
+      input: Parameters<AtomicCommitAuthorizationGuard['assertCurrent']>[1],
+    ): Promise<void> {
+      if (input.expected === 'NOT_APPLICABLE') {
+        if (
+          input.authorityKind !== 'VERSIONED_AUTOMATIC' ||
+          input.proof !== null ||
+          input.revokedReceipt !== undefined
+        ) {
+          throw new DomainError(
+            DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+            'Automatic authority cannot carry discretionary authorization evidence',
+          );
+        }
+        return;
+      }
+      if (input.authorityKind !== 'DISCRETIONARY_USER') {
+        throw new DomainError(
+          DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+          'Discretionary authorization is required at this transaction cutoff',
+        );
+      }
+      if (input.expected === 'AUTHORIZED') {
+        await reauthorizeCommitAuthorizationProof(input.proof);
+        return;
+      }
+      await assertAuthorizationRevocationCurrent(input.revokedReceipt);
+    },
+  });
 
 export type AtomicCommitCheckpoint =
   | 'SUBMISSION_LOCKED'
@@ -761,6 +804,7 @@ export class AtomicTransitionRepository {
           authorityKind: 'DISCRETIONARY_USER',
           proof: null,
           expected: 'REVOKED',
+          revokedReceipt: receipt,
         });
       }
       await this.#insertReceipt(transaction, receipt);
