@@ -1,0 +1,58 @@
+{
+  "schema_version": "v08-auth-maj-01-forward-fix-evidence-v1",
+  "binding_base": "5c8fbece451e4d7f26b5e3e4ad50e7e553a46f71",
+  "preserved_review_b": {
+    "decision": "CHANGES_REQUIRED",
+    "code_candidate": "0e9d6f6dfe5fbb7cbf6e74463cc6e60fe0298095",
+    "evidence_target": "9d1c6d76e752b669597101ca2e4fd431c4b2b7b5",
+    "open_blockers": 0,
+    "open_majors": ["V08-AUTH-MAJ-01"]
+  },
+  "forward_fix_code_candidate": "c5ea104213b65763c4ce2959eafae96ddbb41f86",
+  "runtime": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4"
+  },
+  "checks": [
+    {
+      "scope": "transition/rebuild/root-export",
+      "command": "pnpm exec vitest run tests/world-core/v08-transition-fingerprint-validation.test.ts tests/world-core/v08-ledger-authority-boundary.test.ts tests/world-core/v08-global-transition-reconstruction.test.ts",
+      "result": "PASS",
+      "test_files": 3,
+      "tests": 29
+    },
+    {
+      "command": "pnpm --filter @econmind/core typecheck",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec eslint packages/core/src/commands/receipt.ts tests/world-core/v08-transition-fingerprint-validation.test.ts",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec prettier --check packages/core/src/commands/receipt.ts tests/world-core/v08-transition-fingerprint-validation.test.ts",
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "result": "PASS",
+      "scanned_core_files": 30,
+      "scanned_files": 42,
+      "violations": 0
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "result": "PASS",
+      "scanned_files": 47
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "not_run": ["full suite", "network", "stress", "high concurrency"],
+  "migration_change": false,
+  "production_access": false,
+  "production_mutation": false,
+  "review_b": "FRESH_REVIEW_REQUIRED"
+}
