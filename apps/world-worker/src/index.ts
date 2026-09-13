@@ -15,3 +15,4 @@ export {
   createTransactionCutoffAuthorizationGuard,
   type AuthoritativeWorkerExecution,
 } from './authoritative-execution.js';
+export * from './projections/world-read-projection-publisher.js';

@@ -265,6 +265,7 @@ describe('V06 owner-authorized package continuation', () => {
       production_access: false,
       production_mutation: false,
     });
+    expect(progress.steps['V10.1']).toBe('IN_PROGRESS');
     expect(progress.v09_entry).toMatchObject({
       status: 'ACTIVE',
       branch: 'codex/world-core-v09',
