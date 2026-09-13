@@ -15,6 +15,10 @@ const g01 = readFileSync(
   'apps/world-web/src/prototype/SixOfficesG01.tsx',
   'utf8',
 );
+const livingNationScene = readFileSync(
+  'apps/world-web/src/prototype/LivingNationScene.tsx',
+  'utf8',
+);
 const g01Styles = readFileSync(
   'apps/world-web/src/prototype/six-offices.css',
   'utf8',
@@ -24,7 +28,7 @@ const baseStyles = readFileSync(
   'utf8',
 );
 
-describe('Six Offices G01 object-stage preparation surface', () => {
+describe('Six Offices G01 Living Nation preparation surface', () => {
   it('keeps G01 as the only wired page while preserving the complete navigation map', () => {
     expect(prototypeApp).toContain(
       '<SixOfficesG01 state={state} onRetry={retry} />',
@@ -46,28 +50,51 @@ describe('Six Offices G01 object-stage preparation surface', () => {
     ]) {
       expect(g01).toContain(`pageId: '${leaf}'`);
     }
-    expect(g01).toContain('is mapped, not connected');
-    expect(g01).toContain('Move from signal to object.');
+    expect(g01).toContain('<LivingNationScene');
+    expect(g01).toContain('G01 is live. Its six office role chains');
     expect(g01).not.toMatch(/[\u3400-\u9fff]/u);
   });
 
-  it('puts selection, action, draft, comparison, and progression in one local loop', () => {
-    expect(g01).toContain('Supply network · actionable objects');
-    expect(g01).toContain('<ObjectInspector');
-    expect(g01).toContain('Draft transfer');
-    expect(g01).toContain('Compare paths');
+  it('gives every office a distinct national object loop without changing appointment', () => {
+    for (const office of [
+      'CAPTAIN',
+      'CENTRAL_BANK',
+      'FINANCE',
+      'TRADE',
+      'INDUSTRY',
+      'SOCIAL',
+    ]) {
+      expect(livingNationScene).toContain(`id: '${office}'`);
+    }
+    for (const page of ['C03', 'B03', 'F08', 'T03', 'I07', 'S07']) {
+      expect(livingNationScene).toContain(`nextPage: '${page}'`);
+    }
+    expect(livingNationScene).toContain(
+      'Actions follow the verified appointment',
+    );
+    expect(livingNationScene).toContain('toBoundOfficeId');
+    expect(livingNationScene).toContain('projection.viewer.actingOfficeId');
+    expect(livingNationScene).not.toContain('setActiveOfficeId');
+    expect(livingNationScene).toContain('Northstar national scene');
+    expect(livingNationScene).toContain('Action consequence');
     expect(g01).toContain('<GoodsTransferFlow');
-    expect(g01).toContain('<ProgressTray');
-    expect(g01).not.toContain('scrollIntoView');
+    expect(livingNationScene).not.toContain('scrollIntoView');
   });
 
-  it('preserves isolated browser-only preparation and explicit absence of World writes', () => {
-    expect(g01).toContain('Draft only · no World State write');
-    expect(g01).toContain('No object, balance, or right changed.');
-    expect(g01).not.toContain('fetch(');
-    expect(g01).not.toContain('submitCommand');
-    expect(g01).not.toContain('@econmind/core');
-    expect(g01).not.toContain('supabase');
+  it('makes replay and relations interactive while keeping the boundary local', () => {
+    expect(livingNationScene).toContain('National replay');
+    expect(livingNationScene).toContain('the world clock keeps running');
+    expect(livingNationScene).toContain(
+      'Relationship map · not to geographic scale',
+    );
+    expect(livingNationScene).toContain('Open trade relation');
+    expect(livingNationScene).toContain('Command contract not attached.');
+    for (const source of [g01, livingNationScene]) {
+      expect(source).not.toContain('fetch(');
+      expect(source).not.toContain('submitCommand');
+      expect(source).not.toContain('@econmind/core');
+      expect(source).not.toContain('supabase');
+    }
     expect(EMPTY_PROJECTION.events).toHaveLength(0);
     expect(READY_PROJECTION.events).toHaveLength(3);
   });
@@ -79,8 +106,8 @@ describe('Six Offices G01 object-stage preparation surface', () => {
     expect(baseStyles).toContain('Arial');
     expect(baseStyles).not.toContain('Georgia');
     expect(g01Styles).toContain('grid-template-columns: 154px minmax(0, 1fr)');
-    expect(g01Styles).toContain('grid-template-columns: minmax(0, 1fr) 320px');
-    expect(g01Styles).toContain('min-height: 92px');
+    expect(g01Styles).toContain('grid-template-columns: minmax(0, 1fr) 346px');
+    expect(g01Styles).toContain('min-height: 542px');
     expect(g01Styles).toContain('(prefers-reduced-motion: reduce)');
     expect(g01Styles).toContain('(forced-colors: active)');
   });
