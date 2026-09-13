@@ -15,7 +15,7 @@
     "The V09 recovery candidate dadad8292f7b2e3f16430052d1e599d733c76031 has an independent APPROVED_FOR_CONTINUATION decision with no recorded open blocker or major.",
     "The V10 pre-implementation integration candidate bacb8d6ac8623f0e527a63e969121a36740a78bc received an independent pre-implementation audit with zero recorded blocker or major.",
     "The project owner explicitly authorized use of reviewed candidates and start of V10.1 on 2026-09-13.",
-    "ADR-05 remains binding; ADR-12 is approved in docs/architecture/decisions/ADR-12.md for the exact V10.1 read-projection scope; ADR-09 remains unapproved and continues to bound V10.2."
+    "ADR-05 remains binding; ADR-12 is approved in docs/architecture/decisions/ADR-12.md for the exact V10.1 read-projection scope. ADR-09 is separately approved in docs/architecture/decisions/ADR-09.md, while V10.2 remains outside this policy and depends on complete V10.1 work plus its own implementation authorization."
   ],
   "preserved_controls": [
     "V10.1 remains IN_PROGRESS or IMPLEMENTED_UNVERIFIED until its immutable candidate receives the required independent review.",
