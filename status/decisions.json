@@ -120,12 +120,12 @@
     {
       "id": "ADR-12",
       "subject": "world、country、office、谈判和 admin 读取及 forecast 保密",
-      "status": "PROPOSED_NOT_APPROVED",
+      "status": "APPROVED",
       "proposal": "分别建立 public、cabinet、office-private、negotiation-party 和 admin 投影；RLS、grants、服务层、cache、Realtime 与 forecast 共用分类策略。",
       "latest_gate": "V05/V10",
       "affected_work_packages": ["V05", "V10", "V24", "V25", "V26"],
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
-      "approval_record": null
+      "approval_record": "docs/architecture/decisions/ADR-12.md"
     },
     {
       "id": "ADR-13",

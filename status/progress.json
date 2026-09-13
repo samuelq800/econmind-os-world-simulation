@@ -305,6 +305,8 @@
     "branch": "codex/v10-1-implementation",
     "base_candidate": "bacb8d6ac8623f0e527a63e969121a36740a78bc",
     "pre_implementation_audit": "INDEPENDENT_B_AUDIT_BLOCKER_0_MAJOR_0_MINOR_0",
+    "approved_adrs": ["ADR-05", "ADR-12"],
+    "adr_12_decision": "docs/architecture/decisions/ADR-12.md",
     "continuation_policy": "docs/governance/WORLD_CORE_V10_1_CONTINUATION_POLICY.json",
     "owner_authorization": "docs/reports/V10/V10.1_OWNER_IMPLEMENTATION_AUTHORIZATION.md",
     "implementation_status": "IN_PROGRESS",

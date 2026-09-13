@@ -89,8 +89,8 @@ describe('V01.2 ADR coordination graph', () => {
 
     expect(graph.counts.adrs).toBe(20);
     expect(graph.approval_summary).toEqual({
-      approved: 9,
-      proposed_not_approved: 11,
+      approved: 10,
+      proposed_not_approved: 10,
       bulk_approval_permitted: false,
     });
     expect(graph.adrs.map((adr) => adr.id)).toEqual(expectedIds);
@@ -103,6 +103,7 @@ describe('V01.2 ADR coordination graph', () => {
       'ADR-03',
       'ADR-05',
       'ADR-11',
+      'ADR-12',
       'ADR-16',
       'ADR-17',
       'ADR-18',
@@ -250,6 +251,8 @@ describe('V06 owner-authorized package continuation', () => {
       status: 'ACTIVE',
       branch: 'codex/v10-1-implementation',
       base_candidate: 'bacb8d6ac8623f0e527a63e969121a36740a78bc',
+      approved_adrs: ['ADR-05', 'ADR-12'],
+      adr_12_decision: 'docs/architecture/decisions/ADR-12.md',
       implementation_status: 'IN_PROGRESS',
       implemented_increments: {
         authenticated_read_query_boundary: {

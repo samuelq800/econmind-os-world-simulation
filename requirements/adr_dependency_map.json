@@ -19,8 +19,8 @@
     "reason": "V01.2 records proposals and future gates; it does not select or implement an unapproved proposal."
   },
   "approval_summary": {
-    "approved": 9,
-    "proposed_not_approved": 11,
+    "approved": 10,
+    "proposed_not_approved": 10,
     "bulk_approval_permitted": false
   },
   "adrs": [
@@ -400,8 +400,8 @@
       "id": "ADR-12",
       "conflict_subject": "world、country、office、谈判和 admin 读取及 forecast 保密",
       "coordination_proposal": "分别建立 public、cabinet、office-private、negotiation-party 和 admin 投影；RLS、grants、服务层、cache、Realtime 与 forecast 共用分类策略。",
-      "decision_status": "PROPOSED_NOT_APPROVED",
-      "approval_record": null,
+      "decision_status": "APPROVED",
+      "approval_record": "docs/architecture/decisions/ADR-12.md",
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
       "latest_gate": "V05/V10",
       "affected_work_packages": [
