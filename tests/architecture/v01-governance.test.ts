@@ -259,6 +259,13 @@ describe('V06 owner-authorized package continuation', () => {
           architecture_checks: 'PASS — 9 files / 84 tests',
           production_mutation: false,
         },
+        guarded_read_projection_publication: {
+          status: 'IMPLEMENTED_UNVERIFIED',
+          candidate_commit: '2709aec3974288fee290c7306d7eff5827a53d74',
+          focused_tests: 'PASS — 5 files / 27 tests',
+          architecture_checks: 'PASS — 9 files / 84 tests',
+          production_mutation: false,
+        },
       },
       required_exit: 'V10.1_INDEPENDENT_REVIEW',
       merge_authorized: false,
