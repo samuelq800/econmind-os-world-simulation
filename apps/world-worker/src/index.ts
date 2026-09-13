@@ -16,3 +16,4 @@ export {
   type AuthoritativeWorkerExecution,
 } from './authoritative-execution.js';
 export * from './projections/world-read-projection-publisher.js';
+export * from './projections/current-authorization-entitlement-publisher.js';
