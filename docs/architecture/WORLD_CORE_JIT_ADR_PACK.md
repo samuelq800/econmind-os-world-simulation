@@ -25,7 +25,7 @@ latest safe decision points for this sprint.
 | ADR-08 | Future economic rounding/formula policy; exact-or-reject is inherited      | Future operation that needs rounding/formula      | Yes, but not this sprint |
 | ADR-05 | Reservation/transit/title/risk/recognition point                           | APPROVED before V08.1 model                       | Approved                 |
 | ADR-12 | Country/Office/party projection visibility                                 | Before V10.1                                      | Yes                      |
-| ADR-09 | Required Offices for the V10 transaction version                           | Before V10.2                                      | Yes                      |
+| ADR-09 | Required Offices for the V10 transaction version                           | Before V10.2                                      | Approved                 |
 | ADR-16 | `world_v2` namespace and sole publication chain for new DDL                | Before any candidate migration is merged/promoted | Yes                      |
 | ADR-18 | Isolated database/runtime targets for persistence/concurrency evidence     | APPROVED before V09.1 evidence                    | Approved                 |
 
@@ -194,6 +194,8 @@ DELIVERED/AVAILABLE`. Reservation changes no owner or total. Dispatch places
 
 ## ADR-09 — V10 required Offices
 
+- **Status:** APPROVED by `RESPONSIBLE_HUMAN_OWNER`; see
+  `docs/architecture/decisions/ADR-09.md`.
 - **Decision required:** Required signatures for the exact V10 fixture command
   version.
 - **Why now:** V10.2 cannot claim an approved bilateral transaction without a

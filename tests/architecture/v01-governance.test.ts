@@ -89,8 +89,8 @@ describe('V01.2 ADR coordination graph', () => {
 
     expect(graph.counts.adrs).toBe(20);
     expect(graph.approval_summary).toEqual({
-      approved: 10,
-      proposed_not_approved: 10,
+      approved: 11,
+      proposed_not_approved: 9,
       bulk_approval_permitted: false,
     });
     expect(graph.adrs.map((adr) => adr.id)).toEqual(expectedIds);
@@ -102,6 +102,7 @@ describe('V01.2 ADR coordination graph', () => {
       'ADR-02',
       'ADR-03',
       'ADR-05',
+      'ADR-09',
       'ADR-11',
       'ADR-12',
       'ADR-16',
@@ -276,6 +277,23 @@ describe('V06 owner-authorized package continuation', () => {
       production_mutation: false,
     });
     expect(progress.steps['V10.1']).toBe('IN_PROGRESS');
+    expect(progress.v10_2_adr_entry).toEqual({
+      status: 'ADR_09_APPROVED_NOT_IMPLEMENTATION_AUTHORIZED',
+      adr_09_decision: 'docs/architecture/decisions/ADR-09.md',
+      v10_1_hard_dependency: 'NOT_YET_DECLARED_COMPLETE',
+      implementation_authorized: false,
+      merge_authorized: false,
+      production_access: false,
+      production_mutation: false,
+    });
+    expect(progress.owner_completed_work_approval).toEqual({
+      status: 'APPROVED_FOR_DEVELOPMENT_BASELINE',
+      approval_record:
+        'docs/governance/WORLD_CORE_HISTORICAL_COMPLETED_WORK_APPROVAL.md',
+      operational_evidence_reclassified: false,
+      production_access: false,
+      production_mutation: false,
+    });
     expect(progress.v09_entry).toMatchObject({
       status: 'ACTIVE',
       branch: 'codex/world-core-v09',

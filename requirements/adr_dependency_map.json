@@ -19,8 +19,8 @@
     "reason": "V01.2 records proposals and future gates; it does not select or implement an unapproved proposal."
   },
   "approval_summary": {
-    "approved": 10,
-    "proposed_not_approved": 10,
+    "approved": 11,
+    "proposed_not_approved": 9,
     "bulk_approval_permitted": false
   },
   "adrs": [
@@ -312,8 +312,8 @@
       "id": "ADR-09",
       "conflict_subject": "required_offices、阈值、兼任签字与版本撤销",
       "coordination_proposal": "建立版本化 required_offices resolver，记录 trigger、owner、role、threshold、country side 和 expiry；同人兼任仍需逐 Office 签字。",
-      "decision_status": "PROPOSED_NOT_APPROVED",
-      "approval_record": null,
+      "decision_status": "APPROVED",
+      "approval_record": "docs/architecture/decisions/ADR-09.md",
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
       "latest_gate": "V05",
       "affected_work_packages": [

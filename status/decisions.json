@@ -90,12 +90,12 @@
     {
       "id": "ADR-09",
       "subject": "required_offices、阈值、兼任签字与版本撤销",
-      "status": "PROPOSED_NOT_APPROVED",
+      "status": "APPROVED",
       "proposal": "建立版本化 required_offices resolver，记录 trigger、owner、role、threshold、country side 和 expiry；同人兼任仍需逐 Office 签字。",
       "latest_gate": "V05",
       "affected_work_packages": ["V01", "V05", "V10", "V14", "V16", "V18", "V19", "V20", "V22", "V24", "V25"],
       "approval_required_from": "RESPONSIBLE_HUMAN_OWNER",
-      "approval_record": null
+      "approval_record": "docs/architecture/decisions/ADR-09.md"
     },
     {
       "id": "ADR-10",
