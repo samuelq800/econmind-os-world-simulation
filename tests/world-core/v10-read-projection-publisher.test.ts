@@ -67,7 +67,7 @@ function assertion() {
 }
 
 describe('V10.1 worker read-projection publication', () => {
-  it('replaces only V10.1 derived scopes at the locked authoritative watermark', async () => {
+  it('replaces only negotiation-party projections at the locked authoritative watermark', async () => {
     const testDatabase = await database();
     const publisher = new WorldReadProjectionPublisher({
       database: testDatabase,
@@ -85,16 +85,6 @@ describe('V10.1 worker read-projection publication', () => {
         observedAtReal: AT,
         projections: [
           {
-            classification: 'COUNTRY',
-            scopeKey: 'COUNTRY_SELLER_TEST',
-            payload: { country: 'SELLER', markets: ['WHEAT'] },
-          },
-          {
-            classification: 'OFFICE_PRIVATE',
-            scopeKey: 'OFFICE_TRADE_SELLER_TEST',
-            payload: { office: 'TRADE', country: 'SELLER' },
-          },
-          {
             classification: 'NEGOTIATION_PARTY',
             scopeKey: 'PARTY_SELLER_BUYER_TEST',
             payload: { parties: ['SELLER', 'BUYER'] },
@@ -102,7 +92,7 @@ describe('V10.1 worker read-projection publication', () => {
         ],
       }),
     ).resolves.toEqual({
-      publishedCount: 3,
+      publishedCount: 1,
       worldVersion: '0',
       eventSequence: '0',
     });
@@ -110,7 +100,10 @@ describe('V10.1 worker read-projection publication', () => {
       `insert into world_v2.read_projection
          (world_id, classification, scope_key, schema_version, world_version,
           event_sequence, payload, generated_at)
-       values ($1, 'PUBLIC', 'PUBLIC', 'world-projection-read-v1', 0, 0, '{}', $2)`,
+       values
+         ($1, 'PUBLIC', 'PUBLIC', 'world-projection-read-v1', 0, 0, '{}', $2),
+         ($1, 'COUNTRY', 'COUNTRY_SELLER_TEST', 'world-projection-read-v1', 0, 0, '{"country":"SELLER"}', $2),
+         ($1, 'OFFICE_PRIVATE', 'OFFICE_TRADE_SELLER_TEST', 'world-projection-read-v1', 0, 0, '{"office":"TRADE"}', $2)`,
       [WORLD, AT],
     );
     await expect(
@@ -119,9 +112,9 @@ describe('V10.1 worker read-projection publication', () => {
         observedAtReal: AT,
         projections: [
           {
-            classification: 'COUNTRY',
-            scopeKey: 'COUNTRY_SELLER_TEST',
-            payload: { country: 'SELLER', markets: ['WHEAT', 'CORN'] },
+            classification: 'NEGOTIATION_PARTY',
+            scopeKey: 'PARTY_SELLER_BUYER_TEST',
+            payload: { parties: ['SELLER', 'BUYER', 'OBSERVER'] },
           },
         ],
       }),
@@ -148,6 +141,18 @@ describe('V10.1 worker read-projection publication', () => {
         event_sequence: '0',
       },
       {
+        classification: 'NEGOTIATION_PARTY',
+        scope_key: 'PARTY_SELLER_BUYER_TEST',
+        world_version: '0',
+        event_sequence: '0',
+      },
+      {
+        classification: 'OFFICE_PRIVATE',
+        scope_key: 'OFFICE_TRADE_SELLER_TEST',
+        world_version: '0',
+        event_sequence: '0',
+      },
+      {
         classification: 'PUBLIC',
         scope_key: 'PUBLIC',
         world_version: '0',
@@ -156,9 +161,14 @@ describe('V10.1 worker read-projection publication', () => {
     ]);
     expect(JSON.parse(published.rows[0]!.payload)).toEqual({
       country: 'SELLER',
-      markets: ['WHEAT', 'CORN'],
     });
-    expect(JSON.parse(published.rows[1]!.payload)).toEqual({});
+    expect(JSON.parse(published.rows[1]!.payload)).toEqual({
+      parties: ['SELLER', 'BUYER', 'OBSERVER'],
+    });
+    expect(JSON.parse(published.rows[2]!.payload)).toEqual({
+      office: 'TRADE',
+    });
+    expect(JSON.parse(published.rows[3]!.payload)).toEqual({});
   }, 30_000);
 
   it('fails closed before a transaction for a foreign worker or ambiguous projection set', async () => {
@@ -174,8 +184,8 @@ describe('V10.1 worker read-projection publication', () => {
         observedAtReal: AT,
         projections: [
           {
-            classification: 'COUNTRY',
-            scopeKey: 'COUNTRY_SELLER_TEST',
+            classification: 'NEGOTIATION_PARTY',
+            scopeKey: 'PARTY_SELLER_BUYER_TEST',
             payload: {},
           },
         ],
@@ -192,13 +202,13 @@ describe('V10.1 worker read-projection publication', () => {
         observedAtReal: AT,
         projections: [
           {
-            classification: 'COUNTRY',
-            scopeKey: 'COUNTRY_SELLER_TEST',
+            classification: 'NEGOTIATION_PARTY',
+            scopeKey: 'PARTY_SELLER_BUYER_TEST',
             payload: {},
           },
           {
-            classification: 'COUNTRY',
-            scopeKey: 'COUNTRY_SELLER_TEST',
+            classification: 'NEGOTIATION_PARTY',
+            scopeKey: 'PARTY_SELLER_BUYER_TEST',
             payload: {},
           },
         ],

@@ -18,12 +18,11 @@ export const WORLD_READ_PROJECTION_SCHEMA_VERSION =
   'world-projection-read-v1' as const;
 
 /**
- * These are the only V10.1 classifications owned by this publisher. PUBLIC
- * and ADMIN projections are intentionally preserved for their future owners.
+ * This generic publisher is now reserved for `NEGOTIATION_PARTY`. Country and
+ * Office-private projections have source-bound owners; PUBLIC and ADMIN
+ * remain preserved for their future owners.
  */
 export const V10_1_READ_PROJECTION_CLASSIFICATIONS = Object.freeze([
-  'COUNTRY',
-  'OFFICE_PRIVATE',
   'NEGOTIATION_PARTY',
 ] as const);
 
@@ -130,10 +129,10 @@ function prepareProjections(
 }
 
 /**
- * Worker-owned replacement boundary for V10.1's non-authoritative read model.
- * The caller must derive its input from locked authoritative facts. This class
- * only publishes a derived, watermark-bound copy after the current writer
- * lease and WorldVersion have been rechecked inside one transaction.
+ * Worker-owned replacement boundary for V10.1's non-authoritative
+ * negotiation-party read model. The caller must derive its input from locked
+ * authoritative facts. Country and Office-private projections deliberately
+ * cannot enter this generic boundary: their source-bound publishers own them.
  */
 export class WorldReadProjectionPublisher {
   readonly #database: SqlDatabase;
@@ -169,7 +168,7 @@ export class WorldReadProjectionPublisher {
       await transaction.query(
         `delete from world_v2.read_projection
           where world_id = $1
-            and classification in ('COUNTRY', 'OFFICE_PRIVATE', 'NEGOTIATION_PARTY')`,
+            and classification = 'NEGOTIATION_PARTY'`,
         [input.assertion.worldId],
       );
       for (const projection of projections) {
@@ -200,7 +199,7 @@ export class WorldReadProjectionPublisher {
         `select count(*) as count
            from world_v2.read_projection
           where world_id = $1
-            and classification in ('COUNTRY', 'OFFICE_PRIVATE', 'NEGOTIATION_PARTY')
+            and classification = 'NEGOTIATION_PARTY'
             and (world_version <> $2::bigint or event_sequence <> $3::bigint)`,
         [
           input.assertion.worldId,

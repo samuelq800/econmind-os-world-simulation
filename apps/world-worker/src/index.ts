@@ -17,3 +17,4 @@ export {
 } from './authoritative-execution.js';
 export * from './projections/world-read-projection-publisher.js';
 export * from './projections/current-authorization-entitlement-publisher.js';
+export * from './projections/authoritative-activity-read-projection-publisher.js';
