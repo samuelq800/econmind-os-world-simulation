@@ -251,6 +251,15 @@ describe('V06 owner-authorized package continuation', () => {
       branch: 'codex/v10-1-implementation',
       base_candidate: 'bacb8d6ac8623f0e527a63e969121a36740a78bc',
       implementation_status: 'IN_PROGRESS',
+      implemented_increments: {
+        authenticated_read_query_boundary: {
+          status: 'IMPLEMENTED_UNVERIFIED',
+          candidate_commit: 'fd1ee6a9fd63dc18feec50d39f3952b7500cb0f0',
+          focused_tests: 'PASS — 3 files / 21 tests',
+          architecture_checks: 'PASS — 9 files / 84 tests',
+          production_mutation: false,
+        },
+      },
       required_exit: 'V10.1_INDEPENDENT_REVIEW',
       merge_authorized: false,
       production_access: false,

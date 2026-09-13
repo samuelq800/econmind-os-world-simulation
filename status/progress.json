@@ -1,7 +1,7 @@
 {
   "schema_version": "R2-101.1",
   "derived_at": "2026-09-13T00:00:00Z",
-  "source_commit": "bacb8d6ac8623f0e527a63e969121a36740a78bc",
+  "source_commit": "fd1ee6a9fd63dc18feec50d39f3952b7500cb0f0",
   "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. The URI-guard forward fix at 258e695 closed V09.1-STAGING-BLK-01. Review B against runner target 23dd2da39783622ce175382bd19c51968182215a is preserved as CHANGES_REQUIRED with one blocker and one major; its strict-cleanup/acknowledgement/durable-evidence forward candidate requires fresh independent review. Dedicated non-production RLS/grant/crash evidence remains NOT_RUN. The project owner authorized reviewed candidate code and a narrowly scoped V10.1 implementation candidate from bacb8d6 on 2026-09-13; V10.1 remains unverified and no production access or production mutation is authorized.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
@@ -308,6 +308,16 @@
     "continuation_policy": "docs/governance/WORLD_CORE_V10_1_CONTINUATION_POLICY.json",
     "owner_authorization": "docs/reports/V10/V10.1_OWNER_IMPLEMENTATION_AUTHORIZATION.md",
     "implementation_status": "IN_PROGRESS",
+    "implemented_increments": {
+      "authenticated_read_query_boundary": {
+        "status": "IMPLEMENTED_UNVERIFIED",
+        "candidate_commit": "fd1ee6a9fd63dc18feec50d39f3952b7500cb0f0",
+        "evidence_file": "docs/reports/V10/V10.1_QUERY_BOUNDARY_INCREMENT.md",
+        "focused_tests": "PASS — 3 files / 21 tests",
+        "architecture_checks": "PASS — 9 files / 84 tests",
+        "production_mutation": false
+      }
+    },
     "required_exit": "V10.1_INDEPENDENT_REVIEW",
     "merge_authorized": false,
     "production_access": false,
