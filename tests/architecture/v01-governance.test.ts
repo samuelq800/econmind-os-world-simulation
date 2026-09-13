@@ -238,13 +238,23 @@ describe('V06 owner-authorized package continuation', () => {
       },
     });
     expect(progress.current_gate).toMatchObject({
-      step_id: 'V09.1',
+      step_id: 'V10.1',
       status: 'IN_PROGRESS',
-      next_step: 'V09.1',
+      next_step: 'V10.1',
       next_step_ready: true,
       next_step_blockers: [],
-      required_gate: 'V09.1_IMPLEMENTATION',
+      required_gate: 'V10.1_IMPLEMENTATION',
       gate_status: 'PASS',
+    });
+    expect(progress.v10_1_entry).toMatchObject({
+      status: 'ACTIVE',
+      branch: 'codex/v10-1-implementation',
+      base_candidate: 'bacb8d6ac8623f0e527a63e969121a36740a78bc',
+      implementation_status: 'IN_PROGRESS',
+      required_exit: 'V10.1_INDEPENDENT_REVIEW',
+      merge_authorized: false,
+      production_access: false,
+      production_mutation: false,
     });
     expect(progress.v09_entry).toMatchObject({
       status: 'ACTIVE',

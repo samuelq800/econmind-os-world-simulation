@@ -17,7 +17,7 @@ import {
 
 export type EntitledProjectionClassification = Extract<
   ProjectionClassification,
-  'COUNTRY' | 'OFFICE_PRIVATE'
+  'COUNTRY' | 'OFFICE_PRIVATE' | 'NEGOTIATION_PARTY'
 >;
 
 export interface ParameterizedPgReadRequest {
@@ -184,9 +184,12 @@ function validateRequest(request: unknown): WorldReadRequestEnvelope & {
 
   if (
     validated.payload.classification !== 'COUNTRY' &&
-    validated.payload.classification !== 'OFFICE_PRIVATE'
+    validated.payload.classification !== 'OFFICE_PRIVATE' &&
+    validated.payload.classification !== 'NEGOTIATION_PARTY'
   ) {
-    protocol('Only COUNTRY and OFFICE_PRIVATE projections are supported');
+    protocol(
+      'Only COUNTRY, OFFICE_PRIVATE, and NEGOTIATION_PARTY projections are supported',
+    );
   }
   return validated as WorldReadRequestEnvelope & {
     readonly payload: {

@@ -25,12 +25,15 @@ const countrySubject = parseSupabaseAuthSubject(
 const officeSubject = parseSupabaseAuthSubject(
   '123e4567-e89b-42d3-a456-426614174001',
 );
+const negotiationSubject = parseSupabaseAuthSubject(
+  '123e4567-e89b-42d3-a456-426614174003',
+);
 const unauthorizedSubject = parseSupabaseAuthSubject(
   '123e4567-e89b-42d3-a456-426614174002',
 );
 
 function request(
-  classification: 'COUNTRY' | 'OFFICE_PRIVATE',
+  classification: 'COUNTRY' | 'OFFICE_PRIVATE' | 'NEGOTIATION_PARTY',
   scopeKey: string,
 ) {
   return createWorldReadRequest({
@@ -65,21 +68,30 @@ describe('forward-only parameterized PostgreSQL read adapter', () => {
         (world_id, classification, scope_key, schema_version, world_version, event_sequence, payload, generated_at)
        values
         ($1, 'COUNTRY', 'COUNTRY_A', 'world-projection-read-v1', 9, 14, $2::jsonb, $3),
-        ($1, 'OFFICE_PRIVATE', 'OFFICE_A', 'world-projection-read-v1', 9, 14, $4::jsonb, $3)`,
+        ($1, 'OFFICE_PRIVATE', 'OFFICE_A', 'world-projection-read-v1', 9, 14, $4::jsonb, $3),
+        ($1, 'NEGOTIATION_PARTY', 'PARTY_A', 'world-projection-read-v1', 9, 14, $5::jsonb, $3)`,
       [
         'WORLD_1',
         JSON.stringify({ country: 'COUNTRY_A', status: 'READY' }),
         '2026-09-12T02:00:00.000Z',
         JSON.stringify({ office: 'OFFICE_A', status: 'READY' }),
+        JSON.stringify({ party: 'PARTY_A', status: 'READY' }),
       ],
     );
     await database.query(
       `insert into world_v2.projection_entitlement
         (world_id, auth_subject, classification, scope_key, authorization_version, granted_at)
        values
-        ($1, $2::uuid, 'COUNTRY', 'COUNTRY_A', 'AUTH_1', $4),
-        ($1, $3::uuid, 'OFFICE_PRIVATE', 'OFFICE_A', 'AUTH_1', $4)`,
-      ['WORLD_1', countrySubject, officeSubject, '2026-09-12T01:00:00.000Z'],
+        ($1, $2::uuid, 'COUNTRY', 'COUNTRY_A', 'AUTH_1', $5),
+        ($1, $3::uuid, 'OFFICE_PRIVATE', 'OFFICE_A', 'AUTH_1', $5),
+        ($1, $4::uuid, 'NEGOTIATION_PARTY', 'PARTY_A', 'AUTH_1', $5)`,
+      [
+        'WORLD_1',
+        countrySubject,
+        officeSubject,
+        negotiationSubject,
+        '2026-09-12T01:00:00.000Z',
+      ],
     );
     executor = {
       query: async ({ text, values }) => database.query(text, [...values]),
@@ -119,6 +131,20 @@ describe('forward-only parameterized PostgreSQL read adapter', () => {
       classification: 'OFFICE_PRIVATE',
       scopeKey: 'OFFICE_A',
       payload: { office: 'OFFICE_A', status: 'READY' },
+    });
+  });
+
+  it('returns an entitled negotiation-party projection without broadening scope', async () => {
+    await expect(
+      readEntitledWorldProjection({
+        executor,
+        authSubject: negotiationSubject,
+        request: request('NEGOTIATION_PARTY', 'PARTY_A'),
+      }),
+    ).resolves.toMatchObject({
+      classification: 'NEGOTIATION_PARTY',
+      scopeKey: 'PARTY_A',
+      payload: { party: 'PARTY_A', status: 'READY' },
     });
   });
 
