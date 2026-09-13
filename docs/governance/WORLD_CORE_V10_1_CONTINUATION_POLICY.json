@@ -1,0 +1,32 @@
+{
+  "schema_version": "WORLD_CORE_STEP_CONTINUATION-1",
+  "record_type": "OWNER_AUTHORIZED_STEP_IMPLEMENTATION",
+  "name": "WORLD_CORE_V10_1_IMPLEMENTATION",
+  "status": "ACTIVE",
+  "authority": "PROJECT_OWNER_CONFIRMATION",
+  "activation_record": "docs/reports/V10/V10.1_OWNER_IMPLEMENTATION_AUTHORIZATION.md",
+  "scope": {
+    "branch": "codex/v10-1-implementation",
+    "base_candidate": "bacb8d6ac8623f0e527a63e969121a36740a78bc",
+    "allowed_step": "V10.1",
+    "terminal_gate": "V10.1_INDEPENDENT_REVIEW"
+  },
+  "entry_preconditions": [
+    "The V09 recovery candidate dadad8292f7b2e3f16430052d1e599d733c76031 has an independent APPROVED_FOR_CONTINUATION decision with no recorded open blocker or major.",
+    "The V10 pre-implementation integration candidate bacb8d6ac8623f0e527a63e969121a36740a78bc received an independent pre-implementation audit with zero recorded blocker or major.",
+    "The project owner explicitly authorized use of reviewed candidates and start of V10.1 on 2026-09-13.",
+    "ADR-05, ADR-12, and the applicable ADR-09 boundary remain binding for the exact implementation scope."
+  ],
+  "preserved_controls": [
+    "V10.1 remains IN_PROGRESS or IMPLEMENTED_UNVERIFIED until its immutable candidate receives the required independent review.",
+    "Current server-side authorization, deterministic projection derivation, projection watermark integrity, and the single authoritative World State remain mandatory.",
+    "No browser, fixture, cache, or projection becomes authoritative World State or portable Office authority.",
+    "No main merge, production deployment, production migration publication, production/shared-Supabase access or mutation, or original EconMind website change is authorized.",
+    "V10.2 through V11 are outside this authorization."
+  ],
+  "stop_conditions": [
+    "A recorded P0 or MAJOR finding.",
+    "An unresolved applicable ADR or failed mandatory check.",
+    "Any need to exceed the declared V10.1 scope."
+  ]
+}
