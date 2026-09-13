@@ -277,6 +277,13 @@ describe('V06 owner-authorized package continuation', () => {
           worker_typecheck: 'PASS',
           production_mutation: false,
         },
+        source_bound_country_office_activity_publication: {
+          status: 'IMPLEMENTED_UNVERIFIED',
+          candidate_commit: '2ac1b67573336a751af2e27839372e872333417d',
+          focused_tests: 'PASS — 2 files / 5 tests',
+          worker_typecheck: 'PASS',
+          production_mutation: false,
+        },
       },
       required_exit: 'V10.1_INDEPENDENT_REVIEW',
       merge_authorized: false,

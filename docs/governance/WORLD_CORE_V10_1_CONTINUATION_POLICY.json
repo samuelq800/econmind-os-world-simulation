@@ -21,7 +21,7 @@
     "V10.1 remains IN_PROGRESS or IMPLEMENTED_UNVERIFIED until its immutable candidate receives the required independent review.",
     "Current server-side authorization, deterministic projection derivation, projection watermark integrity, and the single authoritative World State remain mandatory.",
     "No browser, fixture, cache, or projection becomes authoritative World State or portable Office authority.",
-    "ADR-12 approval does not authorize an entitlement writer, live verifier, public route, Realtime/cache behavior, forecast product, or any production/shared-Supabase connection.",
+    "ADR-12 approval alone does not authorize a live verifier, public route, Realtime/cache behavior, forecast product, or any production/shared-Supabase connection. The separately owner-authorized V10.1 Country/Office entitlement increment remains an IMPLEMENTED_UNVERIFIED candidate only.",
     "No main merge, production deployment, production migration publication, production/shared-Supabase access or mutation, or original EconMind website change is authorized.",
     "V10.2 through V11 are outside this authorization."
   ],
