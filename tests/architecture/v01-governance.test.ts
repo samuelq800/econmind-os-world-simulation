@@ -301,7 +301,7 @@ describe('V06 owner-authorized package continuation', () => {
     });
     expect(progress.steps['V10.1']).toBe('IN_PROGRESS');
     expect(progress.v10_2_adr_entry).toEqual({
-      status: 'OWNER_AUTHORIZED_IMPLEMENTATION_IN_PROGRESS',
+      status: 'V10_2_PACKAGE_APPROVED_NEXT_GOVERNANCE_ONLY',
       adr_09_decision: 'docs/architecture/decisions/ADR-09.md',
       continuation_policy:
         'docs/governance/WORLD_CORE_V10_2_CONTINUATION_POLICY.json',
@@ -341,7 +341,13 @@ describe('V06 owner-authorized package continuation', () => {
         'APPROVED_REPAIR_ONLY_V10_2_PACKAGE_REVIEW_REMAINS_REQUIRED',
       durable_persistence_independent_review_target:
         '64d2389d7cbec618684e5bcacde913e4d2c31b7d',
-      required_exit: 'V10.2_INDEPENDENT_REVIEW',
+      package_review_target: '64d2389d7cbec618684e5bcacde913e4d2c31b7d',
+      package_review_evidence_wrapper:
+        '07c9a5fd1bb8835c01c65d1b5687a737ce766b78',
+      package_review_result:
+        'V10_2_PACKAGE_APPROVED_FOR_NEXT_GOVERNANCE_ONLY — BLOCKER_0_MAJOR_0_MINOR_0',
+      package_review_evidence: 'docs/reports/V10/V10.2_PACKAGE_REVIEW.md',
+      required_exit: 'V10.1_INDEPENDENT_REVIEW_HARD_DEPENDENCY',
       merge_authorized: false,
       production_access: false,
       production_mutation: false,
