@@ -492,20 +492,20 @@
     "gate_b_evidence": false
   },
   "v10_6_entry": {
-    "status": "DURABLE_LEDGER_LINEAGE_REPLAY_REPAIR_CANDIDATE_AWAITING_FRESH_SCOPED_REVIEW",
+    "status": "DURABLE_LEDGER_LINEAGE_REPLAY_LOCAL_CANDIDATE_APPROVED_FOR_GATE_B_EVIDENCE_PREPARATION_ONLY",
     "implementation_target": "86d2bae363aca7a6e8c741eebfc239ece98e4d9f",
     "scope": "same-transaction rehydration of immutable opening seed plus durable Command/Event/Inventory Posting/Financial Posting lineage into V08 ledger state, with canonical hash and World-head checks",
     "evidence_file": "docs/reports/V10/V10.6_DURABLE_LINEAGE_REPLAY_INCREMENT.md",
-    "remaining_scope": "fresh scoped review of the null expectedWorldVersion repair; narrow delivery preparation composition, server-owned operational identity allocation and active writer lease assertion; real PostgreSQL/browser/staging Gate B evidence",
+    "remaining_scope": "full Gate B evidence matrix, including real PostgreSQL/browser/non-production staging evidence",
     "remote_or_production_execution": false,
     "gate_b_evidence": false
   },
   "v10_7_entry": {
-    "status": "NARROW_DURABLE_DELIVERY_PREPARATION_LOCAL_CANDIDATE_AWAITING_SCOPED_REVIEW",
+    "status": "NARROW_DURABLE_DELIVERY_PREPARATION_LOCAL_CANDIDATE_APPROVED_FOR_GATE_B_EVIDENCE_PREPARATION_ONLY",
     "implementation_target": "8b117a17a57cec2c305929d5dd61141c5cde2280",
     "scope": "Worker-only durable lineage reconstruction for the narrow treasury-GCU delivery preparation source, with deterministic derived identifiers and active writer-lease assertion",
     "local_verification": "worker typecheck/build and V10.4 plus durable-lineage reader focused tests PASS; 2 files / 11 tests",
-    "remaining_scope": "scoped independent review, full Gate B evidence matrix, real PostgreSQL/browser/non-production staging evidence",
+    "remaining_scope": "full Gate B evidence matrix, including real PostgreSQL/browser/non-production staging evidence",
     "remote_or_production_execution": false,
     "gate_b_evidence": false
   },
@@ -517,12 +517,12 @@
     "production_mutation": false
   },
   "current_gate": {
-    "step_id": "V10.6",
+    "step_id": "GATE_B_EVIDENCE_PREPARATION",
     "status": "IN_PROGRESS",
-    "review": "V10_4_AND_V10_5_LOCAL_CANDIDATES_APPROVED_FOR_CONTINUATION_ONLY; V10_6_REPAIR_CANDIDATE_AWAITING_FRESH_SCOPED_REVIEW; V10_7_LOCAL_CANDIDATE_AWAITING_SCOPED_REVIEW",
+    "review": "V10_4_AND_V10_5_LOCAL_CANDIDATES_APPROVED_FOR_CONTINUATION_ONLY; V10_6_AND_V10_7_SCOPED_REVIEW_00649D3_TO_6C1330B_APPROVED_FOR_GATE_B_EVIDENCE_PREPARATION_ONLY",
     "next_step": "GATE_B_WORLD_CORE_HARD_GATE",
     "next_step_ready": false,
-    "next_step_blockers": ["fresh scoped review of the V10.6 null expectedWorldVersion repair", "scoped review of the V10.7 narrow delivery preparation candidate", "real PostgreSQL/browser/staging Gate B evidence"],
+    "next_step_blockers": ["full immutable-candidate regression, property/state-machine, replay and projection-hash evidence", "real isolated PostgreSQL concurrency, transaction and controlled crash-recovery evidence", "browser E2E and RLS/grant negative evidence on an exact owner-approved non-production target"],
     "required_gate": "GATE_B_WORLD_CORE_HARD_GATE",
     "gate_status": "PENDING"
   },
@@ -1629,8 +1629,8 @@
     "V10.3": "DURABLE_DELIVERY_V10_4_REVIEWED_CONTINUATION_ONLY",
     "V10.4": "LOCAL_RECOVERY_AND_OUTBOX_CANDIDATE_APPROVED_FOR_CONTINUATION_ONLY",
     "V10.5": "IMMUTABLE_OPENING_SEED_CANDIDATE_APPROVED_FOR_CONTINUATION_ONLY",
-    "V10.6": "DURABLE_LEDGER_LINEAGE_REPLAY_REPAIR_CANDIDATE_AWAITING_FRESH_SCOPED_REVIEW",
-    "V10.7": "NARROW_DURABLE_DELIVERY_PREPARATION_LOCAL_CANDIDATE_AWAITING_SCOPED_REVIEW",
+    "V10.6": "DURABLE_LEDGER_LINEAGE_REPLAY_LOCAL_CANDIDATE_APPROVED_FOR_GATE_B_EVIDENCE_PREPARATION_ONLY",
+    "V10.7": "NARROW_DURABLE_DELIVERY_PREPARATION_LOCAL_CANDIDATE_APPROVED_FOR_GATE_B_EVIDENCE_PREPARATION_ONLY",
     "V11.1": "PLANNED",
     "V11.2": "PLANNED",
     "V11.3": "PLANNED",
