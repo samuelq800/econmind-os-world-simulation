@@ -35,11 +35,12 @@ second Event, posting, outbox message, or WorldVersion advance. This is a
 deterministic client-response-loss simulation, not an operating-system process
 kill.
 
-The next candidate adds a separate Vitest child process that terminates itself
-with `SIGKILL` at the V10 delivery repository's `AFTER_FINANCIAL_POSTINGS`
-checkpoint. The parent process then uses a new guarded PostgreSQL pool to
-prove rollback and commit the same durable Command once. Its result must be
-recorded from the exact CI run before it is counted as process-kill evidence.
+The current candidate starts a separate Vitest child process that terminates
+itself with `SIGKILL` at the V10 delivery repository's
+`AFTER_FINANCIAL_POSTINGS` checkpoint. The parent then uses a newly-created,
+guarded PostgreSQL pool to prove that the child left no Event, posting, outbox,
+receipt, or WorldVersion advance before committing the same durable Command
+once. This remains a narrow delivery-path crash-recovery check.
 
 ## Observed disposable CI evidence
 
@@ -70,7 +71,7 @@ unchanged 1,000-run property (10.136 seconds) and the two-command contention
 scenario. That run is scoped, partial V10 database evidence only; it predates
 the subsequently added reconnect scenario and does not close Gate B.
 
-The final candidate
+The preceding candidate
 `f2da0066d22cc6cc2ed17dd6fbd07c662a51c4d9` passed GitHub Actions run
 [`34846740076`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34846740076).
 Its disposable PostgreSQL V10.4 execution completed 12/12 tests, retaining the
@@ -78,6 +79,16 @@ Its disposable PostgreSQL V10.4 execution completed 12/12 tests, retaining the
 reconnect, and post-commit acknowledgement-loss receipt-recovery cases.
 Review B independently approved the final candidate for continuation with
 `BLOCKER=0`, `MAJOR=0`, and `MINOR=0`.
+
+The process-kill candidate
+`fed2177bef7b3029015bd3b91062e96ccd4cfe68` passed GitHub Actions run
+[`34848336309`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34848336309).
+Its disposable PostgreSQL V10.4 suite completed 13 passing tests with one
+environment-gated child test skipped in the parent process. The parent ran a
+separate child that was deliberately killed at `AFTER_FINANCIAL_POSTINGS`,
+verified rollback through a fresh guarded pool, and committed the same Command
+once. This CI evidence is limited to that narrow V10 delivery path and remains
+pending independent review of the new delta.
 
 The service was removed with the CI job. No Supabase, staging, or production
 target was contacted.
