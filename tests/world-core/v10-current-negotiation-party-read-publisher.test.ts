@@ -12,6 +12,7 @@ import {
 } from '@econmind/core';
 import {
   CurrentNegotiationPartyReadPublisher,
+  WorldReadProjectionPublisher,
   WORLD_NEGOTIATION_PARTY_PROJECTION_SCHEMA_VERSION,
 } from '../../apps/world-worker/src/index.js';
 import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
@@ -88,6 +89,7 @@ async function seedCurrentMembership(
     officeId: string;
     partyId: string;
     active?: boolean;
+    withCurrentAuthorization?: boolean;
   }>,
 ): Promise<void> {
   await database.query(
@@ -106,6 +108,23 @@ async function seedCurrentMembership(
       AT,
     ],
   );
+  if (input.withCurrentAuthorization ?? true) {
+    await database.query(
+      `insert into world_v2.current_commit_authorization
+         (world_id, auth_subject, country_id, office_id, capability, team_id,
+          authorization_version, active, refreshed_at_real)
+       values ($1, $2::uuid, $3, $4, 'TRADE_PROPOSE', 'TEAM_PARTY_TEST',
+               $5, true, $6::timestamptz)`,
+      [
+        WORLD,
+        input.authSubject,
+        input.countryId,
+        input.officeId,
+        input.authorizationVersion,
+        AT,
+      ],
+    );
+  }
 }
 
 describe('V10.1 current negotiation-party read publication', () => {
@@ -205,6 +224,45 @@ describe('V10.1 current negotiation-party read publication', () => {
       partyId: 'PARTY_CROSS_COUNTRY',
       schemaVersion: WORLD_NEGOTIATION_PARTY_PROJECTION_SCHEMA_VERSION,
     });
+
+    await expect(
+      new WorldReadProjectionPublisher({
+        database: testDatabase,
+        workerId: WORKER,
+      }).replace({
+        assertion: assertion(),
+        observedAtReal: AT,
+        projections: [
+          {
+            classification: 'NEGOTIATION_PARTY',
+            scopeKey: 'PARTY_CROSS_COUNTRY',
+            payload: { callerSuppliedOverride: true },
+          },
+        ],
+      }),
+    ).rejects.toMatchObject({ code: 'TRANSITION_EVIDENCE_INVALID' });
+    await expect(
+      testDatabase.query<{
+        readonly payload: string;
+        readonly scope_key: string;
+      }>(
+        `select scope_key, payload::text as payload
+           from world_v2.read_projection
+          where world_id = $1
+            and classification = 'NEGOTIATION_PARTY'
+          order by scope_key`,
+        [WORLD],
+      ),
+    ).resolves.toMatchObject({ rows: projections.rows });
+    await expect(
+      testDatabase.query(
+        `select count(*)::text as count
+           from world_v2.projection_entitlement
+          where world_id = $1
+            and classification = 'NEGOTIATION_PARTY'`,
+        [WORLD],
+      ),
+    ).resolves.toMatchObject({ rows: [{ count: '2' }] });
   }, 30_000);
 
   it('clears stale party rows when no active membership source remains while preserving other classifications', async () => {
@@ -269,6 +327,46 @@ describe('V10.1 current negotiation-party read publication', () => {
     ).resolves.toMatchObject({
       rows: [{ classification: 'ADMIN', scope_key: 'ADMIN_PRESERVED' }],
     });
+  }, 30_000);
+
+  it('clears party access when an active membership no longer has matching current Office authorization', async () => {
+    const testDatabase = await database();
+    await acquireLease(testDatabase);
+    await seedCurrentMembership(testDatabase, {
+      authSubject: SELLER_SUBJECT,
+      authorizationVersion: 'AUTH_MISSING_CURRENT',
+      countryId: 'COUNTRY_SELLER',
+      officeId: 'TRADE',
+      partyId: 'PARTY_UNCONFIRMED',
+      withCurrentAuthorization: false,
+    });
+    await testDatabase.query(
+      `insert into world_v2.projection_entitlement
+         (world_id, auth_subject, classification, scope_key,
+          authorization_version, granted_at)
+       values ($1, $2::uuid, 'NEGOTIATION_PARTY', 'PARTY_STALE', 'AUTH_OLD', $3)`,
+      [WORLD, SELLER_SUBJECT, AT],
+    );
+
+    const publisher = new CurrentNegotiationPartyReadPublisher({
+      database: testDatabase,
+      workerId: WORKER,
+    });
+    await expect(
+      publisher.replace({ assertion: assertion(), observedAtReal: AT }),
+    ).resolves.toMatchObject({
+      entitlementCount: 0,
+      partyProjections: 0,
+    });
+    await expect(
+      testDatabase.query(
+        `select count(*)::text as count
+           from world_v2.projection_entitlement
+          where world_id = $1
+            and classification = 'NEGOTIATION_PARTY'`,
+        [WORLD],
+      ),
+    ).resolves.toMatchObject({ rows: [{ count: '0' }] });
   }, 30_000);
 
   it('fails closed without replacing party rows when current membership evidence is malformed', async () => {

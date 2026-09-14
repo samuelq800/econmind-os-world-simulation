@@ -110,6 +110,16 @@ async function seedCurrentPartyMembership(
     [WORLD, SELLER_SUBJECT, BUYER_SUBJECT, AT],
   );
   await database.query(
+    `insert into world_v2.current_commit_authorization
+       (world_id, auth_subject, country_id, office_id, capability, team_id,
+        authorization_version, active, refreshed_at_real)
+     values ($1, $2::uuid, 'COUNTRY_SELLER', 'TRADE', 'TRADE_PROPOSE',
+             'TEAM_SELLER', 'AUTH_SELLER_1', true, $4::timestamptz),
+            ($1, $3::uuid, 'COUNTRY_BUYER', 'FINANCE', 'TREASURY_APPROVE',
+             'TEAM_BUYER', 'AUTH_BUYER_1', true, $4::timestamptz)`,
+    [WORLD, SELLER_SUBJECT, BUYER_SUBJECT, AT],
+  );
+  await database.query(
     `select * from world_v2.acquire_world_writer_lease($1, $2, $3, 300000)`,
     [WORLD, WORKER, AT],
   );

@@ -139,18 +139,17 @@ function entitlementKey(entitlement: NegotiationPartyEntitlement): string {
   return `${entitlement.authSubject}:${entitlement.partyId}`;
 }
 
-function deriveMaterialization(rows: readonly CurrentPartyMembershipRow[]): {
+function deriveMaterialization(rows: readonly CurrentPartyMembership[]): {
   readonly entitlements: readonly NegotiationPartyEntitlement[];
   readonly projections: readonly NegotiationPartyProjection[];
 } {
   const entitlements = new Map<string, NegotiationPartyEntitlement>();
   const membersByParty = new Map<string, Map<string, PartyMember>>();
   for (const row of rows) {
-    const source = parseCurrentPartyMembership(row);
     const entitlement = Object.freeze({
-      authSubject: source.authSubject,
-      authorizationVersion: source.authorizationVersion,
-      partyId: source.partyId,
+      authSubject: row.authSubject,
+      authorizationVersion: row.authorizationVersion,
+      partyId: row.partyId,
     });
     const key = entitlementKey(entitlement);
     const prior = entitlements.get(key);
@@ -164,12 +163,12 @@ function deriveMaterialization(rows: readonly CurrentPartyMembershipRow[]): {
     }
     entitlements.set(key, entitlement);
 
-    const members = membersByParty.get(source.partyId) ?? new Map();
+    const members = membersByParty.get(row.partyId) ?? new Map();
     members.set(
-      partyMemberKey(source),
-      Object.freeze({ countryId: source.countryId, officeId: source.officeId }),
+      partyMemberKey(row),
+      Object.freeze({ countryId: row.countryId, officeId: row.officeId }),
     );
-    membersByParty.set(source.partyId, members);
+    membersByParty.set(row.partyId, members);
   }
 
   const projections = [...membersByParty.entries()]
@@ -209,7 +208,9 @@ function deriveMaterialization(rows: readonly CurrentPartyMembershipRow[]): {
 
 /**
  * Worker-owned V10.1 named-party read boundary. It can materialize only the
- * current server-owned membership source introduced by migration 0014. The
+ * current server-owned membership source introduced by migration 0014, then
+ * requires an exact active match in the existing current authorization source
+ * for the member's subject, country, Office and authorization revision. The
  * source deliberately has no school field or school-isolation rule. Until a
  * separately authorized server workflow populates it, replacement clears any
  * stale party rows and leaves negotiation-party reads unavailable.
@@ -256,7 +257,20 @@ export class CurrentNegotiationPartyReadPublisher {
           for key share`,
         [input.assertion.worldId],
       );
-      const materialization = deriveMaterialization(source.rows);
+      const confirmedMemberships: CurrentPartyMembership[] = [];
+      for (const row of source.rows) {
+        const membership = parseCurrentPartyMembership(row);
+        if (
+          await this.#hasCurrentAuthorization(
+            transaction,
+            input.assertion.worldId,
+            membership,
+          )
+        ) {
+          confirmedMemberships.push(membership);
+        }
+      }
+      const materialization = deriveMaterialization(confirmedMemberships);
 
       await transaction.query(
         `delete from world_v2.projection_entitlement
@@ -355,6 +369,33 @@ export class CurrentNegotiationPartyReadPublisher {
     const result = await transaction.query<CountRow>(statement, parameters);
     const count = databaseInteger(result.rows[0]?.count, label);
     return Number(count);
+  }
+
+  async #hasCurrentAuthorization(
+    transaction: SqlExecutor,
+    worldId: string,
+    membership: CurrentPartyMembership,
+  ): Promise<boolean> {
+    const result = await transaction.query<CountRow>(
+      `select 1 as count
+         from world_v2.current_commit_authorization
+        where world_id = $1
+          and auth_subject = $2::uuid
+          and country_id = $3
+          and office_id = $4
+          and authorization_version = $5
+          and active
+        limit 1
+        for key share`,
+      [
+        worldId,
+        membership.authSubject,
+        membership.countryId,
+        membership.officeId,
+        membership.authorizationVersion,
+      ],
+    );
+    return result.rows.length === 1;
   }
 
   async #assertCommitGuard(
