@@ -7,7 +7,7 @@
   "activation_record": "docs/reports/V10/V10.2_OWNER_IMPLEMENTATION_AUTHORIZATION.md",
   "scope": {
     "branch": "codex/v10-1-implementation",
-    "implementation_candidate": "b6d3842b0cc8bd8f16756946415135fc3794355e",
+    "implementation_candidate": "a468d43be86617aebcb6cbde1a5114ee0414e849",
     "allowed_step": "V10.2",
     "terminal_gate": "V10.2_INDEPENDENT_REVIEW"
   },
@@ -17,7 +17,7 @@
     "V10.1 remains incomplete and unverified; this owner construction authorization is not a dependency-completion or Gate B declaration."
   ],
   "preserved_controls": [
-    "Each proposal binds the canonical Command fingerprint, both country scopes, policy version, complete Office set, signed asset source, and expiry.",
+    "Each proposal binds the canonical Command fingerprint, both country scopes, policy version, complete Office set, signed asset source, expiry, threshold policy version, and the fixed 6 GCU maximum settlement.",
     "Every required signer is re-resolved at reservation time. A stale, revoked, missing, duplicate, or mismatched signature denies before ledger effect.",
     "Reservation accepts only authoritative inventory lineage and emits only an exact AVAILABLE-to-RESERVED posting. No browser, fixture, cache, projection, or calibration input is authority.",
     "No main merge, production/shared-Supabase connection or mutation, migration publication, deployment, original EconMind website change, V10.3 delivery/payment, or V11 work is authorized."
