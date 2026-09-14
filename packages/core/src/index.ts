@@ -6,6 +6,7 @@ export * from './authorization/projections.js';
 export * from './commands/command.js';
 export * from './commands/receipt.js';
 export * from './events/event.js';
+export * from './transfers/narrow-treasury-gcu-transfer.js';
 export {
   FINANCIAL_AUTHORITATIVE_WRITER,
   FINANCIAL_LEDGER_SCHEMA_VERSION,
@@ -37,6 +38,7 @@ export {
   createReleasePosting,
   createReservationPosting,
   createShipmentPosting,
+  applyInventoryPosting,
   parseInventoryLedgerSnapshot,
   type AppliedInventoryPosting,
   type InventoryAccount,
