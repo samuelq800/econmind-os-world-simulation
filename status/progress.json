@@ -483,11 +483,20 @@
     "gate_b_evidence": false
   },
   "v10_5_entry": {
-    "status": "IMMUTABLE_OPENING_SEED_LOCAL_CANDIDATE_AWAITING_SCOPED_REVIEW",
-    "implementation_target": "2a3122febadfd15cc1f9dd830f0e18f5d296f497",
+    "status": "IMMUTABLE_OPENING_SEED_CANDIDATE_APPROVED_FOR_CONTINUATION_ONLY",
+    "implementation_target": "a6111d4a3b8a7aa1344557ebfa20d9ccb1554016",
     "scope": "canonical server-owned WorldVersion-zero opening seed bootstrap/read-back, TEST_FIXTURE rejection, immutable additive private schema, and local-only migration rehearsal",
     "evidence_file": "docs/reports/V10/V10.5_OPENING_SEED_INCREMENT.md",
     "remaining_scope": "delivery preparation source reconstructing persisted seed plus durable Command/Event/Posting lineage; real PostgreSQL/browser/staging Gate B evidence",
+    "remote_or_production_execution": false,
+    "gate_b_evidence": false
+  },
+  "v10_6_entry": {
+    "status": "DURABLE_LEDGER_LINEAGE_REPLAY_LOCAL_CANDIDATE_AWAITING_SCOPED_REVIEW",
+    "implementation_target": "0021fe0a5877739b09d8f672c8bb9dccfcb63071",
+    "scope": "same-transaction rehydration of immutable opening seed plus durable Command/Event/Inventory Posting/Financial Posting lineage into V08 ledger state, with canonical hash and World-head checks",
+    "evidence_file": "docs/reports/V10/V10.6_DURABLE_LINEAGE_REPLAY_INCREMENT.md",
+    "remaining_scope": "narrow delivery preparation composition, server-owned operational identity allocation and active writer lease assertion; real PostgreSQL/browser/staging Gate B evidence",
     "remote_or_production_execution": false,
     "gate_b_evidence": false
   },
@@ -499,12 +508,12 @@
     "production_mutation": false
   },
   "current_gate": {
-    "step_id": "V10.5",
+    "step_id": "V10.6",
     "status": "IN_PROGRESS",
-    "review": "V10_4_LOCAL_CANDIDATE_APPROVED_FOR_CONTINUATION_ONLY; V10_5_OPENING_SEED_INCREMENT_AWAITING_INDEPENDENT_REVIEW",
+    "review": "V10_4_AND_V10_5_LOCAL_CANDIDATES_APPROVED_FOR_CONTINUATION_ONLY; V10_6_DURABLE_LINEAGE_REPLAY_AWAITING_INDEPENDENT_REVIEW",
     "next_step": "GATE_B_WORLD_CORE_HARD_GATE",
     "next_step_ready": false,
-    "next_step_blockers": ["scoped review of V10.5 opening-seed candidate", "server-held delivery preparation source replaying persisted opening seed plus durable lineage", "real PostgreSQL/browser/staging Gate B evidence"],
+    "next_step_blockers": ["scoped review of V10.6 durable-lineage candidate", "narrow automatic delivery preparation composition with server-owned operational IDs and active writer lease assertion", "real PostgreSQL/browser/staging Gate B evidence"],
     "required_gate": "GATE_B_WORLD_CORE_HARD_GATE",
     "gate_status": "PENDING"
   },
@@ -1610,7 +1619,8 @@
     "V10.2": "PACKAGE_REVIEWED_NEXT_GOVERNANCE_ONLY",
     "V10.3": "DURABLE_DELIVERY_V10_4_REVIEWED_CONTINUATION_ONLY",
     "V10.4": "LOCAL_RECOVERY_AND_OUTBOX_CANDIDATE_APPROVED_FOR_CONTINUATION_ONLY",
-    "V10.5": "IMMUTABLE_OPENING_SEED_LOCAL_CANDIDATE_AWAITING_SCOPED_REVIEW",
+    "V10.5": "IMMUTABLE_OPENING_SEED_CANDIDATE_APPROVED_FOR_CONTINUATION_ONLY",
+    "V10.6": "DURABLE_LEDGER_LINEAGE_REPLAY_LOCAL_CANDIDATE_AWAITING_SCOPED_REVIEW",
     "V11.1": "PLANNED",
     "V11.2": "PLANNED",
     "V11.3": "PLANNED",
