@@ -301,10 +301,19 @@ describe('V06 owner-authorized package continuation', () => {
     });
     expect(progress.steps['V10.1']).toBe('IN_PROGRESS');
     expect(progress.v10_2_adr_entry).toEqual({
-      status: 'ADR_09_APPROVED_NOT_IMPLEMENTATION_AUTHORIZED',
+      status: 'OWNER_AUTHORIZED_IMPLEMENTATION_IN_PROGRESS',
       adr_09_decision: 'docs/architecture/decisions/ADR-09.md',
-      v10_1_hard_dependency: 'NOT_YET_DECLARED_COMPLETE',
-      implementation_authorized: false,
+      continuation_policy:
+        'docs/governance/WORLD_CORE_V10_2_CONTINUATION_POLICY.json',
+      owner_authorization:
+        'docs/reports/V10/V10.2_OWNER_IMPLEMENTATION_AUTHORIZATION.md',
+      v10_1_hard_dependency:
+        'NOT_YET_DECLARED_COMPLETE_OWNER_BUILD_AUTHORIZATION_DOES_NOT_CLOSE_DEPENDENCY',
+      implementation_authorized: true,
+      implementation_candidate: 'b6d3842b0cc8bd8f16756946415135fc3794355e',
+      implementation_status: 'IMPLEMENTED_UNVERIFIED',
+      focused_tests: 'PASS — 1 file / 4 tests',
+      required_exit: 'V10.2_INDEPENDENT_REVIEW',
       merge_authorized: false,
       production_access: false,
       production_mutation: false,

@@ -1,0 +1,30 @@
+{
+  "schema_version": "WORLD_CORE_STEP_CONTINUATION-1",
+  "record_type": "OWNER_AUTHORIZED_STEP_IMPLEMENTATION",
+  "name": "WORLD_CORE_V10_2_IMPLEMENTATION",
+  "status": "ACTIVE",
+  "authority": "PROJECT_OWNER_CONTINUATION_2026_09_14",
+  "activation_record": "docs/reports/V10/V10.2_OWNER_IMPLEMENTATION_AUTHORIZATION.md",
+  "scope": {
+    "branch": "codex/v10-1-implementation",
+    "implementation_candidate": "b6d3842b0cc8bd8f16756946415135fc3794355e",
+    "allowed_step": "V10.2",
+    "terminal_gate": "V10.2_INDEPENDENT_REVIEW"
+  },
+  "entry_preconditions": [
+    "ADR-09 remains APPROVED in docs/architecture/decisions/ADR-09.md for only the below-threshold registered GRAIN / Buyer Treasury GCU fixture.",
+    "The project owner explicitly authorized continuation on 2026-09-14.",
+    "V10.1 remains incomplete and unverified; this owner construction authorization is not a dependency-completion or Gate B declaration."
+  ],
+  "preserved_controls": [
+    "Each proposal binds the canonical Command fingerprint, both country scopes, policy version, complete Office set, signed asset source, and expiry.",
+    "Every required signer is re-resolved at reservation time. A stale, revoked, missing, duplicate, or mismatched signature denies before ledger effect.",
+    "Reservation accepts only authoritative inventory lineage and emits only an exact AVAILABLE-to-RESERVED posting. No browser, fixture, cache, projection, or calibration input is authority.",
+    "No main merge, production/shared-Supabase connection or mutation, migration publication, deployment, original EconMind website change, V10.3 delivery/payment, or V11 work is authorized."
+  ],
+  "stop_conditions": [
+    "A recorded P0 or MAJOR finding.",
+    "An unresolved applicable ADR or failed mandatory check.",
+    "Any need to exceed the exact V10.2 scope."
+  ]
+}
