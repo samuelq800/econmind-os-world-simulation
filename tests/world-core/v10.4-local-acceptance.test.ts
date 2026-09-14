@@ -104,7 +104,7 @@ const V10_PROCESS_KILL_CHECKPOINTS = [
   'BEFORE_RECEIPT',
   'BEFORE_TRANSACTION_COMMIT',
 ] as const satisfies readonly AtomicCommitCheckpoint[];
-type V10ProcessKillPhase = 'DELIVERY' | 'RESERVE';
+type V10ProcessKillPhase = 'DELIVERY' | 'RESERVE' | 'SHIP';
 const root = path.resolve(import.meta.dirname, '../..');
 const atomicMigrations = [
   '0001_world_v2_namespace.sql',
@@ -2849,23 +2849,36 @@ processKillChildDescribe(
       ) {
         throw new Error('V10_4_PROCESS_KILL_CHECKPOINT_REQUIRED');
       }
-      if (phase !== 'DELIVERY' && phase !== 'RESERVE') {
+      if (phase !== 'DELIVERY' && phase !== 'RESERVE' && phase !== 'SHIP') {
         throw new Error('V10_4_PROCESS_KILL_PHASE_REQUIRED');
       }
       const database = await atomicDatabase();
       const prepared = await preparedDelivery();
-      const candidate =
-        phase === 'RESERVE'
-          ? await atomicReserveCandidate({ prepared })
-          : atomicDeliveryCandidate({
-              delivery: prepared.delivery,
-              prepared,
-              suffix: `PROCESS_KILL_${checkpoint}`,
-            });
-      const narrowTransferApprovalGuard =
-        phase === 'RESERVE'
-          ? await seedAtomicReserve(database, { candidate, prepared })
-          : (await seedAtomicDelivery(database, candidate), undefined);
+      let candidate: PrivateAtomicTransitionCandidate;
+      let narrowTransferApprovalGuard: NarrowTransferApprovalStore | undefined;
+      if (phase === 'RESERVE') {
+        candidate = await atomicReserveCandidate({ prepared });
+        narrowTransferApprovalGuard = await seedAtomicReserve(database, {
+          candidate,
+          prepared,
+        });
+      } else if (phase === 'SHIP') {
+        candidate = atomicShipmentCandidate({
+          prepared,
+          suffix: `PROCESS_KILL_SHIP_${checkpoint}`,
+        });
+        await seedReservedAutomaticLifecycle(database, {
+          prepared,
+          shipment: candidate,
+        });
+      } else {
+        candidate = atomicDeliveryCandidate({
+          delivery: prepared.delivery,
+          prepared,
+          suffix: `PROCESS_KILL_${checkpoint}`,
+        });
+        await seedAtomicDelivery(database, candidate);
+      }
       const repository = new AtomicTransitionRepository({
         database: database as SqlDatabase,
         authorizationGuard:
@@ -3050,6 +3063,84 @@ processKillParentDescribe(
             outbox_count: '0',
             receipt_count: '1',
             world_version: '1',
+          });
+        } finally {
+          await database.close();
+        }
+      },
+      60_000,
+    );
+
+    it.each(V10_PROCESS_KILL_CHECKPOINTS)(
+      'rolls back a Worker killed at %s and commits the same Ship once after restart',
+      async (checkpoint) => {
+        const termination = await runV10ProcessKillChild(checkpoint, 'SHIP');
+        expect(termination).toEqual({ code: null, signal: 'SIGKILL' });
+        const prepared = await preparedDelivery();
+        const candidate = atomicShipmentCandidate({
+          prepared,
+          suffix: `PROCESS_KILL_SHIP_${checkpoint}`,
+        });
+        const database = createLocalPostgresV09AtomicTestDatabase();
+        try {
+          const rolledBack = await database.query<{
+            readonly event_count: string;
+            readonly inventory_count: string;
+            readonly queue_state: string;
+            readonly receipt_count: string;
+            readonly world_version: string;
+          }>(
+            `select
+           (select count(*)::text from world_v2.authoritative_event) as event_count,
+           (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+           (select count(*)::text from world_v2.command_receipt) as receipt_count,
+           (select queue_state from world_v2.command_queue where world_id = $1 and command_id = $2) as queue_state,
+           (select world_version::text from world_v2.world_head where world_id = $1) as world_version`,
+            [candidate.command.worldId, candidate.command.commandId],
+          );
+          expect(rolledBack.rows[0]).toEqual({
+            event_count: '1',
+            inventory_count: '1',
+            queue_state: 'CLAIMED',
+            receipt_count: '1',
+            world_version: '1',
+          });
+          const restartedRepository = new AtomicTransitionRepository({
+            database: database as SqlDatabase,
+            authorizationGuard: automaticCommitGuard,
+            workerId: 'WORKER_V10_4_CONCURRENT',
+            sha256Hex,
+          });
+          await expect(
+            restartedRepository.commit(candidate),
+          ).resolves.toMatchObject({
+            source: 'NEW_COMMIT',
+            receipt: { outcome: 'COMMITTED' },
+          });
+          const recovered = await database.query<{
+            readonly event_count: string;
+            readonly financial_count: string;
+            readonly inventory_count: string;
+            readonly outbox_count: string;
+            readonly receipt_count: string;
+            readonly world_version: string;
+          }>(
+            `select
+           (select count(*)::text from world_v2.authoritative_event) as event_count,
+           (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+           (select count(*)::text from world_v2.financial_posting_batch) as financial_count,
+           (select count(*)::text from world_v2.notification_outbox) as outbox_count,
+           (select count(*)::text from world_v2.command_receipt) as receipt_count,
+           (select world_version::text from world_v2.world_head where world_id = $1) as world_version`,
+            [candidate.command.worldId],
+          );
+          expect(recovered.rows[0]).toEqual({
+            event_count: '2',
+            financial_count: '0',
+            inventory_count: '2',
+            outbox_count: '0',
+            receipt_count: '2',
+            world_version: '2',
           });
         } finally {
           await database.close();
