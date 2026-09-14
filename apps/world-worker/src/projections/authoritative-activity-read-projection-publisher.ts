@@ -1,6 +1,8 @@
 import {
   DOMAIN_ERROR_CODES,
   DomainError,
+  Money,
+  Quantity,
   canonicalSerialize,
   countryId,
   officeId,
@@ -56,6 +58,11 @@ interface CountRow {
   readonly count: unknown;
 }
 
+interface CanonicalPostingRow {
+  readonly canonical_payload: unknown;
+  readonly world_version_after: unknown;
+}
+
 interface CountryOfficeScope {
   readonly countryId: CountryId;
   readonly officeId: OfficeId;
@@ -65,6 +72,44 @@ interface ActivitySummary {
   readonly authoritativeEventCount: string;
   readonly lastAuthoritativeEventSequence: string;
   readonly lastAuthoritativeEventWorldVersion: string;
+}
+
+interface FinancialPosition {
+  readonly accountClass: string;
+  readonly accountId: string;
+  readonly currency: string;
+  readonly netDebitBalance: string;
+}
+
+interface InventoryPosition {
+  readonly bucket: 'AVAILABLE' | 'RESERVED' | 'IN_TRANSIT';
+  readonly commodityId: string;
+  readonly quantity: string;
+  readonly unit: string;
+}
+
+interface LedgerEconomicSummary {
+  readonly financialPositions: readonly FinancialPosition[];
+  readonly inventoryPositions: readonly InventoryPosition[];
+}
+
+interface FinancialPositionAccumulator {
+  readonly accountClass: string;
+  readonly accountId: string;
+  readonly currency: string;
+  readonly value: Money;
+}
+
+interface InventoryPositionAccumulator {
+  readonly bucket: 'AVAILABLE' | 'RESERVED' | 'IN_TRANSIT';
+  readonly commodityId: string;
+  readonly unit: string;
+  readonly value: Quantity;
+}
+
+interface LedgerEconomicAccumulator {
+  readonly financial: Map<string, FinancialPositionAccumulator>;
+  readonly inventory: Map<string, InventoryPositionAccumulator>;
 }
 
 interface PreparedProjection {
@@ -105,6 +150,148 @@ function requiredString(value: unknown, label: string): string {
     invalid(`${label} must be a non-empty string`);
   }
   return value;
+}
+
+function object(
+  value: unknown,
+  label: string,
+): Readonly<Record<string, unknown>> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    invalid(`${label} must be an object`);
+  }
+  return value as Readonly<Record<string, unknown>>;
+}
+
+function array(value: unknown, label: string): readonly unknown[] {
+  if (!Array.isArray(value)) invalid(`${label} must be an array`);
+  return value;
+}
+
+function canonicalPostingPayload(
+  value: unknown,
+  label: string,
+): Readonly<Record<string, unknown>> {
+  const raw = requiredString(value, `${label} canonical payload`);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    invalid(`${label} canonical payload must be valid JSON`);
+  }
+  if (canonicalSerialize(parsed) !== raw) {
+    invalid(`${label} canonical payload is not canonical`);
+  }
+  return object(parsed, `${label} canonical payload`);
+}
+
+function canonicalWorldId(
+  payload: Readonly<Record<string, unknown>>,
+  expectedWorldId: string,
+  label: string,
+): void {
+  if (payload.worldId !== expectedWorldId) {
+    invalid(`${label} payload World ID does not match the publication World`);
+  }
+}
+
+function canonicalWorldVersion(
+  payload: Readonly<Record<string, unknown>>,
+  rowValue: unknown,
+  label: string,
+): string {
+  const rowVersion = databaseInteger(
+    rowValue,
+    `${label} database WorldVersion`,
+  );
+  const payloadVersion = databaseInteger(
+    payload.worldVersionAfter,
+    `${label} payload WorldVersion`,
+  );
+  if (payloadVersion !== rowVersion) {
+    invalid(`${label} payload WorldVersion does not match its durable row`);
+  }
+  return rowVersion;
+}
+
+function exactKey(parts: readonly string[]): string {
+  return canonicalSerialize(parts);
+}
+
+function emptyLedgerEconomicSummary(): LedgerEconomicSummary {
+  return Object.freeze({
+    financialPositions: Object.freeze([]),
+    inventoryPositions: Object.freeze([]),
+  });
+}
+
+function ledgerAccumulator(
+  values: Map<string, LedgerEconomicAccumulator>,
+  country: CountryId,
+): LedgerEconomicAccumulator {
+  const existing = values.get(country);
+  if (existing !== undefined) return existing;
+  const created: LedgerEconomicAccumulator = {
+    financial: new Map(),
+    inventory: new Map(),
+  };
+  values.set(country, created);
+  return created;
+}
+
+function inventoryBucket(
+  value: unknown,
+): 'AVAILABLE' | 'RESERVED' | 'IN_TRANSIT' {
+  if (value === 'AVAILABLE' || value === 'RESERVED' || value === 'IN_TRANSIT') {
+    return value;
+  }
+  invalid('Inventory posting account has an unsupported bucket');
+}
+
+function financialAccountClass(value: unknown): string {
+  const rendered = requiredString(value, 'Financial posting account class');
+  if (!/^[A-Z][A-Z0-9_]{0,63}$/u.test(rendered)) {
+    invalid('Financial posting account class is not canonical');
+  }
+  return rendered;
+}
+
+function finalizeLedgerEconomicSummary(
+  value: LedgerEconomicAccumulator,
+): LedgerEconomicSummary {
+  const financialPositions = [...value.financial.values()]
+    .filter((position) => !position.value.amount.isZero())
+    .map((position) =>
+      Object.freeze({
+        accountClass: position.accountClass,
+        accountId: position.accountId,
+        currency: position.currency,
+        netDebitBalance: position.value.toCanonicalValue().amount,
+      }),
+    )
+    .sort((left, right) =>
+      exactKey([left.accountId, left.currency]).localeCompare(
+        exactKey([right.accountId, right.currency]),
+      ),
+    );
+  const inventoryPositions = [...value.inventory.values()]
+    .filter((position) => !position.value.amount.isZero())
+    .map((position) =>
+      Object.freeze({
+        bucket: position.bucket,
+        commodityId: position.commodityId,
+        quantity: position.value.toCanonicalValue().amount,
+        unit: position.unit,
+      }),
+    )
+    .sort((left, right) =>
+      exactKey([left.commodityId, left.unit, left.bucket]).localeCompare(
+        exactKey([right.commodityId, right.unit, right.bucket]),
+      ),
+    );
+  return Object.freeze({
+    financialPositions: Object.freeze(financialPositions),
+    inventoryPositions: Object.freeze(inventoryPositions),
+  });
 }
 
 function nullableOfficeId(value: unknown): OfficeId | null {
@@ -184,8 +371,8 @@ function prepareProjection(input: {
 /**
  * Worker-owned V10.1 source-to-projection boundary. It derives compact,
  * labelled activity summaries from append-only authoritative Events joined to
- * their canonical Commands. It deliberately does not infer balances, prices,
- * inventory quantities, or any other economic value from event counts.
+ * their canonical Commands, plus exact financial and inventory positions from
+ * the immutable Posting facts. It never infers economic values from counts.
  */
 export class AuthoritativeActivityReadProjectionPublisher {
   readonly #database: SqlDatabase;
@@ -225,7 +412,12 @@ export class AuthoritativeActivityReadProjectionPublisher {
         input.assertion.worldId,
         watermark,
       );
-      const projections = this.#deriveProjections(scopes, activity);
+      const economics = await this.#readLedgerEconomics(
+        transaction,
+        input.assertion.worldId,
+        watermark,
+      );
+      const projections = this.#deriveProjections(scopes, activity, economics);
 
       await transaction.query(
         `delete from world_v2.read_projection
@@ -425,6 +617,212 @@ export class AuthoritativeActivityReadProjectionPublisher {
     return Object.freeze({ countries, offices });
   }
 
+  async #readLedgerEconomics(
+    transaction: SqlExecutor,
+    worldId: string,
+    watermark: Readonly<{ eventSequence: string; worldVersion: string }>,
+  ): Promise<ReadonlyMap<string, LedgerEconomicSummary>> {
+    const [inventory, financial] = await Promise.all([
+      transaction.query<CanonicalPostingRow>(
+        `select canonical_payload, world_version_after
+           from world_v2.inventory_posting
+          where world_id = $1
+            and world_version_after <= $2::bigint
+          order by world_version_after, posting_id`,
+        [worldId, watermark.worldVersion],
+      ),
+      transaction.query<CanonicalPostingRow>(
+        `select canonical_payload, world_version_after
+           from world_v2.financial_posting_batch
+          where world_id = $1
+            and world_version_after <= $2::bigint
+          order by world_version_after, batch_id`,
+        [worldId, watermark.worldVersion],
+      ),
+    ]);
+    const countries = new Map<string, LedgerEconomicAccumulator>();
+    for (const row of inventory.rows) {
+      this.#accumulateInventoryPosting(
+        countries,
+        row,
+        worldId,
+        watermark.worldVersion,
+      );
+    }
+    for (const row of financial.rows) {
+      this.#accumulateFinancialPosting(
+        countries,
+        row,
+        worldId,
+        watermark.worldVersion,
+      );
+    }
+    return new Map(
+      [...countries.entries()].map(([country, accumulator]) =>
+        Object.freeze([country, finalizeLedgerEconomicSummary(accumulator)]),
+      ),
+    );
+  }
+
+  #accumulateInventoryPosting(
+    countries: Map<string, LedgerEconomicAccumulator>,
+    row: CanonicalPostingRow,
+    worldId: string,
+    watermarkWorldVersion: string,
+  ): void {
+    const payload = canonicalPostingPayload(
+      row.canonical_payload,
+      'Inventory posting',
+    );
+    if (payload.schemaVersion !== 'inventory-posting-v1') {
+      invalid('Inventory posting payload has an unsupported schema version');
+    }
+    canonicalWorldId(payload, worldId, 'Inventory posting');
+    const version = canonicalWorldVersion(
+      payload,
+      row.world_version_after,
+      'Inventory posting',
+    );
+    if (BigInt(version) > BigInt(watermarkWorldVersion)) {
+      invalid(
+        'Inventory posting source is ahead of the guarded World watermark',
+      );
+    }
+    for (const entry of array(payload.entries, 'Inventory posting entries')) {
+      const entryValue = object(entry, 'Inventory posting entry');
+      const account = object(entryValue.account, 'Inventory posting account');
+      const delta = object(entryValue.delta, 'Inventory posting delta');
+      let country: CountryId;
+      try {
+        country = countryId(
+          requiredString(account.countryId, 'Inventory posting country ID'),
+        );
+      } catch {
+        invalid('Inventory posting account has a malformed country identifier');
+      }
+      const commodityId = requiredString(
+        account.commodityId,
+        'Inventory posting commodity ID',
+      );
+      if (account.worldId !== worldId) {
+        invalid('Inventory posting account belongs to a different World');
+      }
+      const unit = requiredString(
+        account.unit,
+        'Inventory posting account unit',
+      );
+      const bucket = inventoryBucket(account.bucket);
+      if (delta.unit !== unit) {
+        invalid('Inventory posting delta unit does not match its account');
+      }
+      let quantity: Quantity;
+      try {
+        quantity = Quantity.from(
+          requiredString(delta.amount, 'Inventory posting delta amount'),
+          unit,
+        );
+      } catch {
+        invalid('Inventory posting delta is not an exact canonical quantity');
+      }
+      const accumulator = ledgerAccumulator(countries, country);
+      const key = exactKey([commodityId, unit, bucket]);
+      const prior = accumulator.inventory.get(key);
+      accumulator.inventory.set(
+        key,
+        Object.freeze({
+          bucket,
+          commodityId,
+          unit,
+          value: prior === undefined ? quantity : prior.value.add(quantity),
+        }),
+      );
+    }
+  }
+
+  #accumulateFinancialPosting(
+    countries: Map<string, LedgerEconomicAccumulator>,
+    row: CanonicalPostingRow,
+    worldId: string,
+    watermarkWorldVersion: string,
+  ): void {
+    const payload = canonicalPostingPayload(
+      row.canonical_payload,
+      'Financial posting',
+    );
+    if (payload.schemaVersion !== 'financial-posting-v1') {
+      invalid('Financial posting payload has an unsupported schema version');
+    }
+    canonicalWorldId(payload, worldId, 'Financial posting');
+    const version = canonicalWorldVersion(
+      payload,
+      row.world_version_after,
+      'Financial posting',
+    );
+    if (BigInt(version) > BigInt(watermarkWorldVersion)) {
+      invalid(
+        'Financial posting source is ahead of the guarded World watermark',
+      );
+    }
+    for (const leg of array(payload.legs, 'Financial posting legs')) {
+      const legValue = object(leg, 'Financial posting leg');
+      const account = object(legValue.account, 'Financial posting account');
+      const amount = object(legValue.amount, 'Financial posting amount');
+      let country: CountryId;
+      try {
+        country = countryId(
+          requiredString(account.countryId, 'Financial posting country ID'),
+        );
+      } catch {
+        invalid('Financial posting account has a malformed country identifier');
+      }
+      const accountId = requiredString(
+        account.accountId,
+        'Financial posting account ID',
+      );
+      const accountClass = financialAccountClass(account.accountClass);
+      const currency = requiredString(
+        account.currency,
+        'Financial posting account currency',
+      );
+      if (account.worldId !== worldId) {
+        invalid('Financial posting account belongs to a different World');
+      }
+      if (amount.currency !== currency) {
+        invalid('Financial posting amount currency does not match its account');
+      }
+      let value: Money;
+      try {
+        value = Money.from(
+          requiredString(amount.amount, 'Financial posting amount'),
+          currency,
+        );
+      } catch {
+        invalid('Financial posting amount is not exact canonical money');
+      }
+      const direction = legValue.direction;
+      if (direction !== 'DEBIT' && direction !== 'CREDIT') {
+        invalid('Financial posting leg has an unsupported direction');
+      }
+      const accumulator = ledgerAccumulator(countries, country);
+      const key = exactKey([accountId, currency]);
+      const prior = accumulator.financial.get(key);
+      const balance =
+        prior === undefined ? Money.from('0', currency) : prior.value;
+      accumulator.financial.set(
+        key,
+        Object.freeze({
+          accountClass,
+          accountId,
+          currency,
+          value:
+            direction === 'DEBIT'
+              ? balance.add(value)
+              : balance.subtract(value),
+        }),
+      );
+    }
+  }
+
   #combineActivity(
     left: ActivitySummary,
     right: ActivitySummary,
@@ -456,6 +854,7 @@ export class AuthoritativeActivityReadProjectionPublisher {
       countries: ReadonlyMap<string, ActivitySummary>;
       offices: ReadonlyMap<string, ActivitySummary>;
     }>,
+    economics: ReadonlyMap<string, LedgerEconomicSummary>,
   ): readonly PreparedProjection[] {
     const countries = scopes.countries.map((country) =>
       prepareProjection({
@@ -465,6 +864,8 @@ export class AuthoritativeActivityReadProjectionPublisher {
           activity:
             activity.countries.get(countryKey(country)) ?? emptyActivity(),
           countryId: country,
+          ledger:
+            economics.get(countryKey(country)) ?? emptyLedgerEconomicSummary(),
           schemaVersion: WORLD_ACTIVITY_PROJECTION_SCHEMA_VERSION,
         },
       }),
@@ -476,6 +877,9 @@ export class AuthoritativeActivityReadProjectionPublisher {
         payload: {
           activity: activity.offices.get(officeKey(scope)) ?? emptyActivity(),
           countryId: scope.countryId,
+          ledger:
+            economics.get(countryKey(scope.countryId)) ??
+            emptyLedgerEconomicSummary(),
           officeId: scope.officeId,
           schemaVersion: WORLD_ACTIVITY_PROJECTION_SCHEMA_VERSION,
         },

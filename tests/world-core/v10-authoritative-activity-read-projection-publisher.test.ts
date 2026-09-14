@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -5,6 +6,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   acquireWorldWriterLease,
+  canonicalHashInput,
+  canonicalSha256,
+  canonicalSerialize,
   countryId,
   createWorldWriterCommitAssertion,
   officeId,
@@ -42,6 +46,13 @@ const EXPIRY = '2026-09-14T00:05:00.000Z';
 const SELLER_SUBJECT = '550e8400-e29b-41d4-a716-446655440011';
 const BUYER_SUBJECT = '550e8400-e29b-41d4-a716-446655440012';
 const HASH = `sha256:${'a'.repeat(64)}`;
+
+const sha256Hex = (preimage: string): string =>
+  createHash('sha256').update(preimage, 'utf8').digest('hex');
+
+function postingFingerprint(payload: unknown): string {
+  return canonicalSha256(canonicalHashInput(payload), sha256Hex);
+}
 
 const databases: V09AtomicTestDatabase[] = [];
 
@@ -156,6 +167,164 @@ async function seedAuthoritativeEvent(
   );
 }
 
+async function seedLedgerPostings(
+  database: V09AtomicTestDatabase,
+): Promise<void> {
+  const commandId = 'COMMAND_ACTIVITY_SELLER_TRADE';
+  const eventId = 'EVENT_ACTIVITY_SELLER_TRADE';
+  const transitionBinding = {
+    commandFingerprint: HASH,
+    commandId,
+    eventFingerprints: [HASH],
+    eventIds: [eventId],
+    expectedWorldVersion: '0',
+    idempotencyKey: null,
+    schemaVersion: 'authoritative-transition-binding-v1',
+    simTime: '0',
+    transitionId: commandId,
+    worldId: WORLD,
+    worldVersionAfter: '1',
+    worldVersionBefore: '0',
+  };
+  await database.query(
+    `insert into world_v2.command_receipt
+       (world_id, command_id, idempotency_key, schema_version,
+        command_fingerprint, outcome, reason_code, transition_id,
+        world_version_before, world_version_after, sim_time, event_ids,
+        recorded_at_real)
+     values ($1, $2, null, 'command-receipt-v2', $3, 'COMMITTED', null, $2,
+             0, 1, 0, $4::jsonb, $5::timestamptz)`,
+    [WORLD, commandId, HASH, canonicalSerialize([eventId]), AT],
+  );
+  const inventoryPayload = {
+    causationCommandId: commandId,
+    causationEventIds: [eventId],
+    entries: [
+      {
+        account: {
+          batchId: 'BATCH_ACTIVITY_GRAIN',
+          bucket: 'IN_TRANSIT',
+          commodityId: 'ACTIVITY_GRAIN',
+          countryId: 'COUNTRY_SELLER',
+          economicRecognitionId: null,
+          physicalLocationId: 'LOCATION_ACTIVITY_SELLER',
+          reservationId: null,
+          riskBearerId: 'ENTITY_ACTIVITY_SELLER',
+          shipmentId: 'SHIPMENT_ACTIVITY_DELIVERY',
+          titleHolderId: 'ENTITY_ACTIVITY_SELLER',
+          unit: 'tonne',
+          worldId: WORLD,
+        },
+        delta: { amount: '-5', unit: 'tonne' },
+      },
+      {
+        account: {
+          batchId: 'BATCH_ACTIVITY_GRAIN',
+          bucket: 'AVAILABLE',
+          commodityId: 'ACTIVITY_GRAIN',
+          countryId: 'COUNTRY_BUYER',
+          economicRecognitionId: 'RECOGNITION_ACTIVITY_IMPORT',
+          physicalLocationId: 'LOCATION_ACTIVITY_BUYER',
+          reservationId: null,
+          riskBearerId: 'ENTITY_ACTIVITY_BUYER',
+          shipmentId: null,
+          titleHolderId: 'ENTITY_ACTIVITY_BUYER',
+          unit: 'tonne',
+          worldId: WORLD,
+        },
+        delta: { amount: '5', unit: 'tonne' },
+      },
+    ],
+    operation: 'DELIVER',
+    postingId: 'INVENTORY_ACTIVITY_DELIVERY',
+    schemaVersion: 'inventory-posting-v1',
+    simTime: '0',
+    transitionBinding,
+    worldId: WORLD,
+    worldVersionAfter: '1',
+    worldVersionBefore: '0',
+  };
+  await database.query(
+    `insert into world_v2.inventory_posting
+       (world_id, posting_id, causation_command_id,
+        world_version_before, world_version_after, sim_time, event_ids,
+        transition_binding, operation, canonical_payload, posting_fingerprint)
+     values ($1, $2, $3, 0, 1, 0, $4::jsonb, $5, 'DELIVER', $6, $7)`,
+    [
+      WORLD,
+      inventoryPayload.postingId,
+      commandId,
+      canonicalSerialize([eventId]),
+      canonicalSerialize(transitionBinding),
+      canonicalSerialize(inventoryPayload),
+      postingFingerprint(inventoryPayload),
+    ],
+  );
+  const financialPayload = {
+    batchId: 'FINANCIAL_ACTIVITY_SETTLEMENT',
+    causationCommandId: commandId,
+    causationEventIds: [eventId],
+    legs: [
+      {
+        account: {
+          accountClass: 'CASH',
+          accountId: 'ACCOUNT_ACTIVITY_SELLER_CASH',
+          claimId: null,
+          counterpartyEntityId: null,
+          countryId: 'COUNTRY_SELLER',
+          currency: 'GCU',
+          ownerId: 'ENTITY_ACTIVITY_SELLER',
+          worldId: WORLD,
+        },
+        amount: { amount: '30', currency: 'GCU' },
+        counterpartyAccountId: 'ACCOUNT_ACTIVITY_BUYER_CASH',
+        direction: 'DEBIT',
+        legId: 'LEG_ACTIVITY_SELLER_DEBIT',
+      },
+      {
+        account: {
+          accountClass: 'CASH',
+          accountId: 'ACCOUNT_ACTIVITY_BUYER_CASH',
+          claimId: null,
+          counterpartyEntityId: null,
+          countryId: 'COUNTRY_BUYER',
+          currency: 'GCU',
+          ownerId: 'ENTITY_ACTIVITY_BUYER',
+          worldId: WORLD,
+        },
+        amount: { amount: '30', currency: 'GCU' },
+        counterpartyAccountId: 'ACCOUNT_ACTIVITY_SELLER_CASH',
+        direction: 'CREDIT',
+        legId: 'LEG_ACTIVITY_BUYER_CREDIT',
+      },
+    ],
+    schemaVersion: 'financial-posting-v1',
+    settlementCurrency: 'GCU',
+    simTime: '0',
+    transitionBinding,
+    worldId: WORLD,
+    worldVersionAfter: '1',
+    worldVersionBefore: '0',
+  };
+  await database.query(
+    `insert into world_v2.financial_posting_batch
+       (world_id, batch_id, causation_command_id,
+        world_version_before, world_version_after, sim_time, event_ids,
+        transition_binding, settlement_currency, canonical_payload,
+        batch_fingerprint)
+     values ($1, $2, $3, 0, 1, 0, $4::jsonb, $5, 'GCU', $6, $7)`,
+    [
+      WORLD,
+      financialPayload.batchId,
+      commandId,
+      canonicalSerialize([eventId]),
+      canonicalSerialize(transitionBinding),
+      canonicalSerialize(financialPayload),
+      postingFingerprint(financialPayload),
+    ],
+  );
+}
+
 function rowByScope(
   rows: readonly Readonly<{
     classification: string;
@@ -175,7 +344,7 @@ function rowByScope(
 }
 
 describe('V10.1 authoritative activity read-projection publication', () => {
-  it('rebuilds compact Country and Office activity payloads from authoritative Events without inventing balances', async () => {
+  it('rebuilds Country and Office activity plus exact ledger payloads from authoritative facts', async () => {
     const testDatabase = await database();
     await seedCurrentAuthorization(testDatabase, {
       authSubject: SELLER_SUBJECT,
@@ -211,6 +380,7 @@ describe('V10.1 authoritative activity read-projection publication', () => {
       officeId: 'FINANCE',
       sequence: '2',
     });
+    await seedLedgerPostings(testDatabase);
     await testDatabase.query(
       `update world_v2.world_head
           set world_version = 2, event_sequence = 2
@@ -261,6 +431,24 @@ describe('V10.1 authoritative activity read-projection publication', () => {
         lastAuthoritativeEventWorldVersion: '2',
       },
       countryId: 'COUNTRY_SELLER',
+      ledger: {
+        financialPositions: [
+          {
+            accountClass: 'CASH',
+            accountId: 'ACCOUNT_ACTIVITY_SELLER_CASH',
+            currency: 'GCU',
+            netDebitBalance: '30',
+          },
+        ],
+        inventoryPositions: [
+          {
+            bucket: 'IN_TRANSIT',
+            commodityId: 'ACTIVITY_GRAIN',
+            quantity: '-5',
+            unit: 'tonne',
+          },
+        ],
+      },
       schemaVersion: 'world-activity-projection-v1',
     });
     expect(rowByScope(result.rows, 'COUNTRY', 'COUNTRY_BUYER')).toEqual({
@@ -270,6 +458,24 @@ describe('V10.1 authoritative activity read-projection publication', () => {
         lastAuthoritativeEventWorldVersion: '0',
       },
       countryId: 'COUNTRY_BUYER',
+      ledger: {
+        financialPositions: [
+          {
+            accountClass: 'CASH',
+            accountId: 'ACCOUNT_ACTIVITY_BUYER_CASH',
+            currency: 'GCU',
+            netDebitBalance: '-30',
+          },
+        ],
+        inventoryPositions: [
+          {
+            bucket: 'AVAILABLE',
+            commodityId: 'ACTIVITY_GRAIN',
+            quantity: '5',
+            unit: 'tonne',
+          },
+        ],
+      },
       schemaVersion: 'world-activity-projection-v1',
     });
     expect(
@@ -284,6 +490,24 @@ describe('V10.1 authoritative activity read-projection publication', () => {
     ).toMatchObject({
       activity: { authoritativeEventCount: '1' },
       countryId: 'COUNTRY_SELLER',
+      ledger: {
+        financialPositions: [
+          {
+            accountClass: 'CASH',
+            accountId: 'ACCOUNT_ACTIVITY_SELLER_CASH',
+            currency: 'GCU',
+            netDebitBalance: '30',
+          },
+        ],
+        inventoryPositions: [
+          {
+            bucket: 'IN_TRANSIT',
+            commodityId: 'ACTIVITY_GRAIN',
+            quantity: '-5',
+            unit: 'tonne',
+          },
+        ],
+      },
       officeId: 'TRADE',
     });
     expect(
