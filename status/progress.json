@@ -528,7 +528,7 @@
       "full real PostgreSQL multi-process and process-kill recovery across the complete V10 lifecycle beyond the narrow V10.4 two-pool contention, transaction-failure reconnect, acknowledgement-loss, and five delivery atomic-boundary process-kill scenarios",
       "browser E2E and RLS/grant negative evidence on an exact owner-approved non-production target"
     ],
-    "local_preflight": "PASS — strict-SIGKILL thread-pool forward candidate; lint, format, typecheck, build, 74 passed / 2 skipped files and 690 passed / 17 skipped tests, boundaries 34/34, safe local environment, 16-migration validation/rehearsal, foundation policy and secrets check; one-worker runner preserves property budget and timeout while avoiding local PGlite contention; isolated PostgreSQL CI evidence pending",
+    "local_preflight": "PASS — five-boundary process-kill baseline: lint, format, typecheck, build, 74 passed / 2 skipped files and 690 passed / 17 skipped tests, boundaries 34/34, safe local environment, 16-migration validation/rehearsal, foundation policy and secrets check; focused local thread-pool harness checks passed, while exact strict-SIGKILL runtime evidence is the disposable PostgreSQL CI run 34850501755",
     "property_baseline": "PASS — 29 fixed-seed properties × 1,000 generated runs = 29,000 cases, one fixed-seed 250-sequence scheduler model, and one fixed-seed 100-sequence narrow V10 Reserve/Ship/Deliver model; no counterexample",
     "required_gate": "GATE_B_WORLD_CORE_HARD_GATE",
     "gate_status": "PENDING"
