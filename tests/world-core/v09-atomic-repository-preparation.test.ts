@@ -155,7 +155,9 @@ async function database(): Promise<V09AtomicTestDatabase> {
   return value;
 }
 
-function candidate(): PrivateAtomicTransitionCandidate {
+function candidate(
+  commandType: string = 'TEST_ATOMIC_COMMAND',
+): PrivateAtomicTransitionCandidate {
   const simTime = SimTime.fromTicks('10000');
   const commandIdentity = commandId('COMMAND_ATOMIC_REPOSITORY');
   const eventIdentity = eventId('EVENT_ATOMIC_REPOSITORY');
@@ -164,7 +166,7 @@ function candidate(): PrivateAtomicTransitionCandidate {
       actorId: 'ACTOR_ATOMIC_REPOSITORY',
       authSubject: '00000000-0000-4000-8000-000000000001',
       commandId: commandIdentity,
-      commandType: 'TEST_ATOMIC_COMMAND',
+      commandType,
       correlationId: 'CORRELATION_ATOMIC_REPOSITORY',
       countryId: COUNTRY,
       expectedWorldVersion: '0',
@@ -430,6 +432,30 @@ function repository(
 }
 
 describe('V09 private atomic repository preparation', () => {
+  it('fails closed before any effect when a V10 narrow transfer lacks the server-held approval guard', async () => {
+    const value = await database();
+    const prepared = candidate('CORE_GOODS_TRANSFER_V1');
+    await seed(value, prepared);
+
+    await expect(repository(value).commit(prepared)).rejects.toEqual(
+      expect.objectContaining({
+        name: V09TransactionRolledBackError.name,
+        cause: expect.objectContaining({ code: 'AUTHORIZATION_DENIED' }),
+      }),
+    );
+    await expect(footprint(value)).resolves.toEqual({
+      authorization_count: 0,
+      event_count: 0,
+      financial_count: 0,
+      inventory_count: 0,
+      materialization_count: 0,
+      outbox_count: 0,
+      queue_state: 'CLAIMED',
+      receipt_count: 0,
+      world_version: '0',
+    });
+  });
+
   it('commits every authoritative fact once and returns the durable receipt on retry', async () => {
     const value = await database();
     const prepared = candidate();
