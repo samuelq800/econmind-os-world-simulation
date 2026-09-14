@@ -310,6 +310,9 @@
     "continuation_policy": "docs/governance/WORLD_CORE_V10_1_CONTINUATION_POLICY.json",
     "owner_authorization": "docs/reports/V10/V10.1_OWNER_IMPLEMENTATION_AUTHORIZATION.md",
     "implementation_status": "IN_PROGRESS",
+    "package_audit_target": "ba46856fdcf6458156e044a4cbc6112e9e6502b5",
+    "package_audit_status": "AUDIT_REQUESTED",
+    "package_audit_request": "docs/reports/V10/V10.1_PACKAGE_AUDIT_REQUEST.md",
     "implemented_increments": {
       "authenticated_read_query_boundary": {
         "status": "IMPLEMENTED_UNVERIFIED",
