@@ -1448,3 +1448,81 @@ postgresDescribe('V10.4 disposable PostgreSQL contention evidence', () => {
     }
   }, 30_000);
 });
+
+postgresDescribe('V10.4 disposable PostgreSQL restart evidence', () => {
+  it('rolls back a faulted delivery before a reconnected Worker commits it', async () => {
+    const database = await atomicDatabase();
+    let initialDatabaseClosed = false;
+    try {
+      const prepared = await preparedDelivery();
+      const candidate = atomicDeliveryCandidate({
+        delivery: prepared.delivery,
+        prepared,
+        suffix: 'RESTART',
+      });
+      await seedAtomicDelivery(database, candidate);
+      const faultingRepository = new AtomicTransitionRepository({
+        database: database as SqlDatabase,
+        authorizationGuard: automaticCommitGuard,
+        faultInjector: {
+          hit(checkpoint) {
+            if (checkpoint === 'AFTER_FINANCIAL_POSTINGS') {
+              throw new Error('INJECTED_V10_4_RESTART_AFTER_FINANCIAL');
+            }
+          },
+        },
+        workerId: 'WORKER_V10_4_CONCURRENT',
+        sha256Hex,
+      });
+      await expect(faultingRepository.commit(candidate)).rejects.toThrow(
+        'transaction rolled back',
+      );
+      await database.close();
+      initialDatabaseClosed = true;
+
+      const restartedDatabase = createLocalPostgresV09AtomicTestDatabase();
+      try {
+        const restartedRepository = new AtomicTransitionRepository({
+          database: restartedDatabase as SqlDatabase,
+          authorizationGuard: automaticCommitGuard,
+          workerId: 'WORKER_V10_4_CONCURRENT',
+          sha256Hex,
+        });
+        await expect(
+          restartedRepository.commit(candidate),
+        ).resolves.toMatchObject({
+          source: 'NEW_COMMIT',
+          receipt: { outcome: 'COMMITTED' },
+        });
+        const persisted = await restartedDatabase.query<{
+          readonly event_count: string;
+          readonly financial_count: string;
+          readonly inventory_count: string;
+          readonly outbox_count: string;
+          readonly receipt_count: string;
+          readonly world_version: string;
+        }>(
+          `select
+             (select count(*)::text from world_v2.authoritative_event) as event_count,
+             (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+             (select count(*)::text from world_v2.financial_posting_batch) as financial_count,
+             (select count(*)::text from world_v2.notification_outbox) as outbox_count,
+             (select count(*)::text from world_v2.command_receipt) as receipt_count,
+             (select world_version::text from world_v2.world_head) as world_version`,
+        );
+        expect(persisted.rows[0]).toEqual({
+          event_count: '1',
+          financial_count: '1',
+          inventory_count: '1',
+          outbox_count: '1',
+          receipt_count: '1',
+          world_version: '3',
+        });
+      } finally {
+        await restartedDatabase.close();
+      }
+    } finally {
+      if (!initialDatabaseClosed) await database.close();
+    }
+  }, 30_000);
+});

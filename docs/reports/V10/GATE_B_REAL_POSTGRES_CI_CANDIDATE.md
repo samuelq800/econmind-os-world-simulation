@@ -22,6 +22,12 @@ claim to remain without an Event, posting, receipt, outbox, or WorldVersion
 effect. This is a scoped database-contention check, not a substitute for the
 full V10 lifecycle or controlled process-crash campaign.
 
+It also injects a fault after financial posting preparation, closes the initial
+Worker database connection, and reconnects through a new PostgreSQL pool. The
+same delivery can then commit once only if the failed transaction left no
+durable partial facts. This is controlled transaction-failure/reconnect
+evidence, not a process-kill or crash-at-commit-acknowledgement proof.
+
 ## Observed disposable CI evidence
 
 The preceding V09-only candidate was exercised by GitHub Actions run
