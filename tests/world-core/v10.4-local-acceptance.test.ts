@@ -33,6 +33,7 @@ import {
   shipNarrowTreasuryGcuTransfer,
   signApprovalProposal,
   authorizeOfficeCapability,
+  createFinalCommandReceipt,
   workerId,
   worldWriterLeaseRequest,
   type CanonicalCommand,
@@ -271,6 +272,70 @@ async function persistTransitionFact(
   );
 }
 
+async function persistFinalReceipt(
+  database: V09AtomicTestDatabase,
+  receipt: ReturnType<typeof createFinalCommandReceipt>,
+): Promise<void> {
+  await database.query(
+    `insert into world_v2.command_receipt
+       (world_id, command_id, idempotency_key, schema_version,
+        command_fingerprint, outcome, reason_code, transition_id,
+        world_version_before, world_version_after, sim_time, event_ids,
+        recorded_at_real)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12::jsonb, $13)`,
+    [
+      receipt.worldId,
+      receipt.commandId,
+      receipt.idempotencyKey,
+      receipt.schemaVersion,
+      receipt.commandFingerprint,
+      receipt.outcome,
+      receipt.reasonCode,
+      receipt.transitionId,
+      receipt.worldVersionBefore,
+      receipt.worldVersionAfter,
+      receipt.simTime.toCanonicalValue(),
+      canonicalSerialize(receipt.eventIds),
+      receipt.recordedAtReal,
+    ],
+  );
+}
+
+async function seedClaimedAtomicCandidate(
+  database: V09AtomicTestDatabase,
+  candidate: PrivateAtomicTransitionCandidate,
+): Promise<void> {
+  const command = candidate.command;
+  await persistCommand(database, command);
+  await database.query(
+    `insert into world_v2.command_queue
+       (world_id, command_id, authority_kind, priority_rank,
+        available_at_sim_time, attempt_count)
+     values ($1, $2, $3, 0, $4, 0)`,
+    [
+      command.worldId,
+      command.commandId,
+      candidate.authorityKind,
+      command.simTime.toCanonicalValue(),
+    ],
+  );
+  await database.query(
+    `update world_v2.command_queue
+        set queue_state = 'CLAIMED',
+            attempt_count = 1,
+            claimed_by = $3,
+            claimed_at_real = $4,
+            claim_fencing_token = 1
+      where world_id = $1 and command_id = $2`,
+    [
+      command.worldId,
+      command.commandId,
+      candidate.commitAssertion.holderId,
+      '2026-09-14T00:02:00.000Z',
+    ],
+  );
+}
+
 async function seedAtomicDelivery(
   database: V09AtomicTestDatabase,
   candidate: PrivateAtomicTransitionCandidate,
@@ -300,59 +365,7 @@ async function seedAtomicDeliveries(
     ],
   );
   for (const candidate of candidates) {
-    const queuedCommand = candidate.command;
-    await database.query(
-      `insert into world_v2.command_submission
-         (world_id, command_id, idempotency_key, command_type, schema_version,
-          canonical_payload, payload_sha256, command_fingerprint, auth_subject,
-          actor_id, country_id, office_id, expected_world_version, sim_time,
-          correlation_id, submitted_at_real)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
-      [
-        queuedCommand.worldId,
-        queuedCommand.commandId,
-        queuedCommand.idempotencyKey,
-        queuedCommand.commandType,
-        queuedCommand.schemaVersion,
-        queuedCommand.canonicalPayload,
-        queuedCommand.payloadHash,
-        queuedCommand.fingerprint,
-        queuedCommand.authSubject,
-        queuedCommand.actorId,
-        queuedCommand.countryId,
-        queuedCommand.officeId,
-        queuedCommand.expectedWorldVersion,
-        queuedCommand.simTime.toCanonicalValue(),
-        queuedCommand.correlationId,
-        queuedCommand.submittedAtReal,
-      ],
-    );
-    await database.query(
-      `insert into world_v2.command_queue
-         (world_id, command_id, authority_kind, priority_rank,
-          available_at_sim_time, attempt_count)
-       values ($1, $2, 'VERSIONED_AUTOMATIC', 0, $3, 0)`,
-      [
-        queuedCommand.worldId,
-        queuedCommand.commandId,
-        queuedCommand.simTime.toCanonicalValue(),
-      ],
-    );
-    await database.query(
-      `update world_v2.command_queue
-          set queue_state = 'CLAIMED',
-              attempt_count = 1,
-              claimed_by = $3,
-              claimed_at_real = $4,
-              claim_fencing_token = 1
-        where world_id = $1 and command_id = $2`,
-      [
-        queuedCommand.worldId,
-        queuedCommand.commandId,
-        candidate.commitAssertion.holderId,
-        '2026-09-14T00:02:00.000Z',
-      ],
-    );
+    await seedClaimedAtomicCandidate(database, candidate);
   }
 }
 
@@ -804,6 +817,119 @@ function atomicDeliveryCandidate(input: {
     draft,
     sha256Hex,
   });
+}
+
+function atomicShipmentCandidate(input: {
+  readonly prepared: Awaited<ReturnType<typeof preparedDelivery>>;
+  readonly suffix: string;
+}): PrivateAtomicTransitionCandidate {
+  const reserve = transition(input.prepared.transfer, '0', '1');
+  const reserved = rebuildV08LedgersFromLineage({
+    seed: input.prepared.fixture.openingSeed,
+    transitions: [
+      {
+        command: input.prepared.transfer,
+        transition: reserve.transition,
+        inventoryPostings: [input.prepared.reservationPosting],
+        financialPostingBatches: [],
+      },
+    ],
+    sha256Hex,
+  });
+  const source = reserved.inventory.balances.find(
+    (balance) => balance.account.bucket === 'RESERVED',
+  )?.account;
+  if (source === undefined) {
+    throw new Error('V10_4_EXPECTED_RESERVED_ATOMIC_SOURCE');
+  }
+  const shipment = input.prepared.shipment;
+  const ship = transition(shipment, '1', '2');
+  const result = shipNarrowTreasuryGcuTransfer({
+    causationEventIds: [ship.event.eventId],
+    inventoryState: reserved.inventory,
+    postingId: inventoryPostingId(`POSTING_V10_4_ATOMIC_SHIP_${input.suffix}`),
+    shipmentCommand: shipment,
+    source,
+    transferCommand: input.prepared.transfer,
+    transition: ship.transition,
+    sha256Hex,
+  });
+  if (result.inventory.receipt.outcome !== 'APPLIED') {
+    throw new Error('V10_4_EXPECTED_NEW_ATOMIC_SHIPMENT');
+  }
+  const lease = acquireWorldWriterLease(
+    null,
+    worldWriterLeaseRequest(
+      shipment.worldId,
+      workerId('WORKER_V10_4_CONCURRENT'),
+      '2026-09-14T00:02:00.000Z',
+      '2026-09-14T00:07:00.000Z',
+    ),
+  ).lease;
+  const receipt = createFinalCommandReceipt({
+    command: shipment,
+    outcome: 'COMMITTED',
+    reasonCode: null,
+    transition: ship.transition,
+    simTime: shipment.simTime,
+    recordedAtReal: '2026-09-14T00:02:00.000Z',
+  });
+  return prepareAtomicTransitionCandidate({
+    command: shipment,
+    commitAuthorization: null,
+    draft: {
+      transition: ship.transition,
+      inventoryPostings: [result.posting],
+      financialPostingBatches: [],
+      receipt,
+      outboxMessages: [],
+      currentMaterializations: [],
+      authorityKind: 'VERSIONED_AUTOMATIC',
+      commitAssertion: createWorldWriterCommitAssertion(lease, '1'),
+      observedAtReal: '2026-09-14T00:02:00.000Z',
+    },
+    sha256Hex,
+  });
+}
+
+async function seedReservedAutomaticLifecycle(
+  database: V09AtomicTestDatabase,
+  input: {
+    readonly prepared: Awaited<ReturnType<typeof preparedDelivery>>;
+    readonly shipment: PrivateAtomicTransitionCandidate;
+  },
+): Promise<void> {
+  const reserve = transition(input.prepared.transfer, '0', '1');
+  const receipt = createFinalCommandReceipt({
+    command: input.prepared.transfer,
+    outcome: 'COMMITTED',
+    reasonCode: null,
+    transition: reserve.transition,
+    simTime: input.prepared.transfer.simTime,
+    recordedAtReal: RESERVED_AT,
+  });
+  await database.query(
+    `insert into world_v2.world_head (world_id, world_version, event_sequence)
+     values ($1, 1, 1)`,
+    [input.prepared.transfer.worldId],
+  );
+  await persistCommand(database, input.prepared.transfer);
+  await persistTransitionFact(
+    database,
+    reserve.event,
+    input.prepared.reservationPosting,
+  );
+  await persistFinalReceipt(database, receipt);
+  await database.query(
+    `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
+    [
+      input.prepared.transfer.worldId,
+      input.shipment.commitAssertion.holderId,
+      '2026-09-14T00:02:00.000Z',
+      '300000',
+    ],
+  );
+  await seedClaimedAtomicCandidate(database, input.shipment);
 }
 
 type V10LifecyclePhase = 'AVAILABLE' | 'RESERVED' | 'IN_TRANSIT' | 'DELIVERED';
@@ -2053,6 +2179,92 @@ postgresDescribe('V10.4 disposable PostgreSQL restart evidence', () => {
           inventory_count: '1',
           outbox_count: '1',
           receipt_count: '1',
+          world_version: '3',
+        });
+      } finally {
+        await restartedDatabase.close();
+      }
+    } finally {
+      if (!initialDatabaseClosed) await database.close();
+    }
+  }, 30_000);
+
+  it('recovers the reserved-to-delivered automatic sequence after a Ship rollback', async () => {
+    const database = await atomicDatabase();
+    let initialDatabaseClosed = false;
+    try {
+      const prepared = await preparedDelivery();
+      const shipment = atomicShipmentCandidate({
+        prepared,
+        suffix: 'RESTART_LIFECYCLE_SHIP',
+      });
+      const delivery = atomicDeliveryCandidate({
+        delivery: prepared.delivery,
+        prepared,
+        suffix: 'RESTART_LIFECYCLE_DELIVERY',
+      });
+      await seedReservedAutomaticLifecycle(database, { prepared, shipment });
+      const faultingRepository = new AtomicTransitionRepository({
+        database: database as SqlDatabase,
+        authorizationGuard: automaticCommitGuard,
+        faultInjector: {
+          hit(checkpoint) {
+            if (checkpoint === 'AFTER_INVENTORY_POSTINGS') {
+              throw new Error('INJECTED_V10_4_SHIP_RESTART_AFTER_INVENTORY');
+            }
+          },
+        },
+        workerId: 'WORKER_V10_4_CONCURRENT',
+        sha256Hex,
+      });
+      await expect(faultingRepository.commit(shipment)).rejects.toThrow(
+        'transaction rolled back',
+      );
+      await database.close();
+      initialDatabaseClosed = true;
+
+      const restartedDatabase = createLocalPostgresV09AtomicTestDatabase();
+      try {
+        const repository = new AtomicTransitionRepository({
+          database: restartedDatabase as SqlDatabase,
+          authorizationGuard: automaticCommitGuard,
+          workerId: 'WORKER_V10_4_CONCURRENT',
+          sha256Hex,
+        });
+        await expect(repository.commit(shipment)).resolves.toMatchObject({
+          source: 'NEW_COMMIT',
+          receipt: { outcome: 'COMMITTED' },
+        });
+        await seedClaimedAtomicCandidate(restartedDatabase, delivery);
+        await expect(repository.commit(delivery)).resolves.toMatchObject({
+          source: 'NEW_COMMIT',
+          receipt: { outcome: 'COMMITTED' },
+        });
+        const persisted = await restartedDatabase.query<{
+          readonly event_count: string;
+          readonly financial_count: string;
+          readonly finalized_count: string;
+          readonly inventory_count: string;
+          readonly outbox_count: string;
+          readonly receipt_count: string;
+          readonly world_version: string;
+        }>(
+          `select
+             (select count(*)::text from world_v2.authoritative_event) as event_count,
+             (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+             (select count(*)::text from world_v2.financial_posting_batch) as financial_count,
+             (select count(*)::text from world_v2.notification_outbox) as outbox_count,
+             (select count(*)::text from world_v2.command_receipt) as receipt_count,
+             (select count(*)::text from world_v2.command_queue where queue_state = 'FINALIZED') as finalized_count,
+             (select world_version::text from world_v2.world_head) as world_version`,
+        );
+        expect(persisted.rows[0]).toEqual({
+          event_count: '3',
+          financial_count: '1',
+          finalized_count: '2',
+          inventory_count: '3',
+          outbox_count: '1',
+          receipt_count: '3',
           world_version: '3',
         });
       } finally {
