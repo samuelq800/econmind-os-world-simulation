@@ -199,6 +199,20 @@
       "lock_or_downtime_risk": "Preparation-only additive, initially empty server-owned named-party membership source; no school field, school-isolation rule, browser grant, production publication or shared-Supabase action",
       "rollback_strategy": "reversible-before-economic-facts",
       "production_approval": null
+    },
+    {
+      "migration_id": "0015_world_v2_narrow_transfer_approvals",
+      "release_order": 15,
+      "path": "database/migrations/artifacts/0015_world_v2_narrow_transfer_approvals.sql",
+      "sha256": "5c3ca3965ad6de94fb3f7164edb04f5209f37f1ab33a10cc9ff70c2146ecb3d0",
+      "artifact_source_commit": "3446ae63b74dc4429dfdead2a606ae766be8a464",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": true,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Candidate-only additive server-held approval tables; local rehearsal only, no browser grant, external DDL, production publication, or shared-Supabase action",
+      "rollback_strategy": "reversible-before-economic-facts",
+      "production_approval": null
     }
   ]
 }
