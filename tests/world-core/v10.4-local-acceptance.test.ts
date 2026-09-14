@@ -85,6 +85,12 @@ const V10_LIFECYCLE_STATE_MACHINE_CONFIG = Object.freeze({
   seed: 2_026_091_5,
 });
 const V10_LIFECYCLE_STATE_MACHINE_TIMEOUT_MS = 30_000;
+const V10_APPROVAL_AWARE_SEQUENCE_CONFIG = Object.freeze({
+  ...FOUNDATION_PROPERTY_CONFIG,
+  numRuns: 250,
+  seed: 2_026_091_6,
+});
+const V10_APPROVAL_AWARE_SEQUENCE_TIMEOUT_MS = 60_000;
 const V10_PROCESS_KILL_CHECKPOINTS = [
   'AFTER_EVENTS',
   'AFTER_INVENTORY_POSTINGS',
@@ -802,6 +808,14 @@ function atomicDeliveryCandidate(input: {
 
 type V10LifecyclePhase = 'AVAILABLE' | 'RESERVED' | 'IN_TRANSIT' | 'DELIVERED';
 type V10LifecycleOperation = 'RESERVE' | 'SHIP' | 'DELIVER';
+type V10ApprovalAwareOperation =
+  | 'SIGN_SELLER'
+  | 'SIGN_BUYER_TRADE'
+  | 'SIGN_BUYER_FINANCE'
+  | 'RESERVE'
+  | 'SHIP'
+  | 'DELIVER'
+  | 'RETRY';
 
 function lifecycleSource(
   prepared: Awaited<ReturnType<typeof preparedDelivery>>,
@@ -1152,6 +1166,292 @@ describe('V10.4 Treasury-GCU acceptance', () => {
       );
     },
     V10_LIFECYCLE_STATE_MACHINE_TIMEOUT_MS,
+  );
+
+  it(
+    'matches the approval-aware V10 command sequence across out-of-order commands and retries',
+    async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.array(
+            fc.constantFrom<V10ApprovalAwareOperation>(
+              'SIGN_SELLER',
+              'SIGN_BUYER_TRADE',
+              'SIGN_BUYER_FINANCE',
+              'RESERVE',
+              'SHIP',
+              'DELIVER',
+              'RETRY',
+            ),
+            { maxLength: 18 },
+          ),
+          async (noise) => {
+            const fixture = createV10TwoCountryTestFixture();
+            const transfer = transferCommand();
+            let approvals = createNarrowTransferApprovalBundle({
+              command: transfer,
+              sellerProposalId: proposalId('PROPOSAL_V10_4_SEQUENCE_SELLER'),
+              buyerProposalId: proposalId('PROPOSAL_V10_4_SEQUENCE_BUYER'),
+              proposalVersion: 'VERSION_1',
+            });
+            const sellerContext = await approvalContext(
+              fixture.officeActors.sellerTrade,
+              approvals.seller,
+            );
+            const buyerTradeContext = await approvalContext(
+              fixture.officeActors.buyerTrade,
+              approvals.buyer,
+            );
+            const buyerFinanceContext = await approvalContext(
+              fixture.officeActors.buyerFinance,
+              approvals.buyer,
+            );
+            const contexts = Object.freeze({
+              sellerTrade: Object.freeze({
+                actorId: fixture.officeActors.sellerTrade.actorId,
+                context: sellerContext,
+              }),
+              buyerTrade: Object.freeze({
+                actorId: fixture.officeActors.buyerTrade.actorId,
+                context: buyerTradeContext,
+              }),
+              buyerFinance: Object.freeze({
+                actorId: fixture.officeActors.buyerFinance.actorId,
+                context: buyerFinanceContext,
+              }),
+            });
+            const reserve = transition(transfer, '0', '1');
+            const shipment = shipmentCommand(transfer);
+            const ship = transition(shipment, '1', '2');
+            const delivery = deliveryCommand(transfer);
+            const deliver = transition(delivery, '2', '3');
+            let sellerSigned = false;
+            let buyerTradeSigned = false;
+            let buyerFinanceSigned = false;
+            let phase: V10LifecyclePhase = 'AVAILABLE';
+            let states: DeliveryStates = Object.freeze({
+              financial: fixture.rebuiltLedgers.financial,
+              inventory: fixture.rebuiltLedgers.inventory,
+            });
+            type LifecycleLineageTransition = Parameters<
+              typeof rebuildV08LedgersFromLineage
+            >[0]['transitions'][number];
+            const lineage: LifecycleLineageTransition[] = [];
+            const rebuildStates = () => {
+              const rebuilt = rebuildV08LedgersFromLineage({
+                seed: fixture.openingSeed,
+                transitions: lineage,
+                sha256Hex,
+              });
+              states = Object.freeze({
+                financial: rebuilt.financial,
+                inventory: rebuilt.inventory,
+              });
+            };
+
+            const reserveTransfer = async () => {
+              const result = await reserveNarrowTreasuryGcuTransfer({
+                approvals,
+                contexts,
+                atReal: RESERVED_AT,
+                inventoryState: states.inventory,
+                source: fixture.inventoryAccounts.sellerAvailable,
+                reservationId: inventoryReservationId(
+                  'RESERVATION_V10_4_SEQUENCE',
+                ),
+                postingId: inventoryPostingId('POSTING_V10_4_SEQUENCE_RESERVE'),
+                transition: reserve.transition,
+                simTime: SimTime.fromTicks('10000'),
+                causationEventIds: [reserve.event.eventId],
+                sha256Hex,
+              });
+              if (result.inventory.receipt.outcome === 'APPLIED') {
+                lineage.push({
+                  command: transfer,
+                  transition: reserve.transition,
+                  inventoryPostings: [result.posting],
+                  financialPostingBatches: [],
+                });
+              }
+              rebuildStates();
+            };
+            const shipTransfer = () => {
+              const source =
+                states.inventory.balances.find(
+                  (balance) => balance.account.bucket === 'RESERVED',
+                )?.account ?? fixture.inventoryAccounts.sellerReserved;
+              const result = shipNarrowTreasuryGcuTransfer({
+                causationEventIds: [ship.event.eventId],
+                inventoryState: states.inventory,
+                postingId: inventoryPostingId('POSTING_V10_4_SEQUENCE_SHIP'),
+                shipmentCommand: shipment,
+                source,
+                transferCommand: transfer,
+                transition: ship.transition,
+                sha256Hex,
+              });
+              if (result.inventory.receipt.outcome === 'APPLIED') {
+                lineage.push({
+                  command: shipment,
+                  transition: ship.transition,
+                  inventoryPostings: [result.posting],
+                  financialPostingBatches: [],
+                });
+              }
+              rebuildStates();
+            };
+            const deliverTransfer = () => {
+              const source =
+                states.inventory.balances.find(
+                  (balance) => balance.account.bucket === 'IN_TRANSIT',
+                )?.account ?? fixture.inventoryAccounts.sellerInTransit;
+              const result = deliverNarrowTreasuryGcuTransfer({
+                buyerTreasury: fixture.financialAccounts.buyerTreasury,
+                buyerTreasuryLegId: financialPostingLegId(
+                  'LEG_V10_4_SEQUENCE_BUYER',
+                ),
+                causationEventIds: [deliver.event.eventId],
+                deliveryCommand: delivery,
+                financialBatchId: financialPostingBatchId(
+                  'BATCH_V10_4_SEQUENCE_DELIVERY',
+                ),
+                financialState: states.financial,
+                inventoryPostingId: inventoryPostingId(
+                  'POSTING_V10_4_SEQUENCE_DELIVERY',
+                ),
+                inventoryState: states.inventory,
+                sellerSettlement: fixture.financialAccounts.sellerSettlement,
+                sellerSettlementLegId: financialPostingLegId(
+                  'LEG_V10_4_SEQUENCE_SELLER',
+                ),
+                source,
+                transferCommand: transfer,
+                transition: deliver.transition,
+                sha256Hex,
+              });
+              if (result.inventory.receipt.outcome === 'APPLIED') {
+                lineage.push({
+                  command: delivery,
+                  transition: deliver.transition,
+                  inventoryPostings: [result.posting],
+                  financialPostingBatches: [result.settlement],
+                });
+              }
+              rebuildStates();
+            };
+            const operations: readonly V10ApprovalAwareOperation[] = [
+              ...noise,
+              'SIGN_SELLER',
+              'SIGN_BUYER_TRADE',
+              'SIGN_BUYER_FINANCE',
+              'RESERVE',
+              'SHIP',
+              'DELIVER',
+              'RETRY',
+            ];
+
+            for (const operation of operations) {
+              const before = canonicalSerialize({ approvals, states });
+              const hasCompleteApproval =
+                sellerSigned && buyerTradeSigned && buyerFinanceSigned;
+              const advances =
+                (operation === 'SIGN_SELLER' && !sellerSigned) ||
+                (operation === 'SIGN_BUYER_TRADE' && !buyerTradeSigned) ||
+                (operation === 'SIGN_BUYER_FINANCE' && !buyerFinanceSigned) ||
+                (operation === 'RESERVE' &&
+                  hasCompleteApproval &&
+                  phase === 'AVAILABLE') ||
+                (operation === 'SHIP' && phase === 'RESERVED') ||
+                (operation === 'DELIVER' && phase === 'IN_TRANSIT');
+              let operationError: unknown = undefined;
+              try {
+                switch (operation) {
+                  case 'SIGN_SELLER':
+                    approvals = Object.freeze({
+                      ...approvals,
+                      seller: await signApprovalProposal({
+                        proposal: approvals.seller,
+                        context: sellerContext,
+                        actorId: fixture.officeActors.sellerTrade.actorId,
+                        expectedVersion: 'VERSION_1',
+                        signedAt: SUBMITTED_AT,
+                      }),
+                    });
+                    break;
+                  case 'SIGN_BUYER_TRADE':
+                    approvals = Object.freeze({
+                      ...approvals,
+                      buyer: await signApprovalProposal({
+                        proposal: approvals.buyer,
+                        context: buyerTradeContext,
+                        actorId: fixture.officeActors.buyerTrade.actorId,
+                        expectedVersion: 'VERSION_1',
+                        signedAt: SUBMITTED_AT,
+                      }),
+                    });
+                    break;
+                  case 'SIGN_BUYER_FINANCE':
+                    approvals = Object.freeze({
+                      ...approvals,
+                      buyer: await signApprovalProposal({
+                        proposal: approvals.buyer,
+                        context: buyerFinanceContext,
+                        actorId: fixture.officeActors.buyerFinance.actorId,
+                        expectedVersion: 'VERSION_1',
+                        signedAt: SUBMITTED_AT,
+                      }),
+                    });
+                    break;
+                  case 'RESERVE':
+                    await reserveTransfer();
+                    break;
+                  case 'SHIP':
+                    shipTransfer();
+                    break;
+                  case 'DELIVER':
+                    deliverTransfer();
+                    break;
+                  case 'RETRY':
+                    if (phase === 'RESERVED') await reserveTransfer();
+                    if (phase === 'IN_TRANSIT') shipTransfer();
+                    if (phase === 'DELIVERED') deliverTransfer();
+                    break;
+                }
+              } catch (error) {
+                operationError = error;
+              }
+              const after = canonicalSerialize({ approvals, states });
+              if (!advances) {
+                expect(after).toBe(before);
+              } else {
+                expect(operationError).toBeUndefined();
+                expect(after).not.toBe(before);
+                if (operation === 'SIGN_SELLER') sellerSigned = true;
+                if (operation === 'SIGN_BUYER_TRADE') buyerTradeSigned = true;
+                if (operation === 'SIGN_BUYER_FINANCE')
+                  buyerFinanceSigned = true;
+                if (operation === 'RESERVE') phase = 'RESERVED';
+                if (operation === 'SHIP') phase = 'IN_TRANSIT';
+                if (operation === 'DELIVER') phase = 'DELIVERED';
+              }
+            }
+
+            expect(phase).toBe('DELIVERED');
+            expect(states.inventory.appliedPostings).toHaveLength(
+              fixture.rebuiltLedgers.inventory.appliedPostings.length + 3,
+            );
+            expect(
+              accountBalance(
+                states.financial,
+                fixture.financialAccounts.buyerTreasury.accountId,
+              ).toCanonicalValue().amount,
+            ).toBe('2');
+          },
+        ),
+        V10_APPROVAL_AWARE_SEQUENCE_CONFIG,
+      );
+    },
+    V10_APPROVAL_AWARE_SEQUENCE_TIMEOUT_MS,
   );
 
   it('binds the applied delivery to one automatic atomic draft, receipt, and outbox fact', async () => {
