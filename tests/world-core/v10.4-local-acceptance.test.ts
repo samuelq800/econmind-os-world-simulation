@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import fc from 'fast-check';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   COMMAND_SCHEMA_VERSION,
@@ -40,6 +40,7 @@ import {
   createNarrowTreasuryGcuDeliveryCandidateFactory,
   prepareNarrowTreasuryGcuDeliveryAtomicDraft,
 } from '../../apps/world-worker/src/persistence/narrow-treasury-gcu-delivery-draft.js';
+import { NarrowTreasuryGcuDeliveryOutboxConsumer } from '../../apps/world-worker/src/outbox/narrow-treasury-gcu-delivery-outbox-consumer.js';
 import { NarrowTreasuryGcuDeliveryProjectionRebuilder } from '../../apps/world-worker/src/projections/narrow-treasury-gcu-delivery-projection.js';
 import { WorldRecoveryCoordinator } from '../../apps/world-worker/src/recovery/world-recovery.js';
 import { prepareAtomicTransitionCandidate } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
@@ -924,22 +925,57 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
         database: database as SqlDatabase,
         workerId: 'WORKER_V10_4_ATOMIC',
       });
+      const failedDelivery = new NarrowTreasuryGcuDeliveryOutboxConsumer({
+        consumerId: 'V10_4_LOCAL_DELIVERY',
+        database: database as SqlDatabase,
+        sha256Hex,
+        sink: {
+          async deliver() {
+            throw new Error('INJECTED_DELIVERY_SINK_FAILURE');
+          },
+        },
+      });
       await expect(
-        recovery.recordOutboxAttempt({
+        failedDelivery.dispatch({
           worldId: prepared.delivery.worldId,
           messageId: 'OUTBOX_V10_4_ATOMIC_DELIVERY',
           attemptedAtReal: '2026-09-14T00:03:00.000Z',
-          delivered: false,
+          retryProcessingBeforeReal: null,
         }),
       ).resolves.toEqual({ disposition: 'RETRY_PENDING', attemptCount: '1' });
+      const delivered = vi.fn(async () => undefined);
+      const successfulDelivery = new NarrowTreasuryGcuDeliveryOutboxConsumer({
+        consumerId: 'V10_4_LOCAL_DELIVERY',
+        database: database as SqlDatabase,
+        sha256Hex,
+        sink: { deliver: delivered },
+      });
       await expect(
-        recovery.recordOutboxAttempt({
+        successfulDelivery.dispatch({
           worldId: prepared.delivery.worldId,
           messageId: 'OUTBOX_V10_4_ATOMIC_DELIVERY',
           attemptedAtReal: '2026-09-14T00:04:00.000Z',
-          delivered: true,
+          retryProcessingBeforeReal: null,
         }),
       ).resolves.toEqual({ disposition: 'DELIVERED', attemptCount: '2' });
+      expect(delivered).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventId: 'EVENT_V10_4_ATOMIC_DELIVERY',
+          idempotencyKey: 'EVENT_V10_4_ATOMIC_DELIVERY',
+        }),
+      );
+      await expect(
+        successfulDelivery.dispatch({
+          worldId: prepared.delivery.worldId,
+          messageId: 'OUTBOX_V10_4_ATOMIC_DELIVERY',
+          attemptedAtReal: '2026-09-14T00:05:00.000Z',
+          retryProcessingBeforeReal: null,
+        }),
+      ).resolves.toEqual({
+        disposition: 'ALREADY_DELIVERED',
+        attemptCount: '2',
+      });
+      expect(delivered).toHaveBeenCalledTimes(1);
       const projectionBefore = await database.query<{
         readonly canonical_payload: string;
         readonly payload_sha256: string;
@@ -953,7 +989,7 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
       await expect(
         recovery.rebuildCurrentMaterializations({
           assertion: createWorldWriterCommitAssertion(lease, '3'),
-          observedAtReal: '2026-09-14T00:05:00.000Z',
+          observedAtReal: '2026-09-14T00:06:00.000Z',
           rebuilder: new NarrowTreasuryGcuDeliveryProjectionRebuilder({
             sha256Hex,
           }),
