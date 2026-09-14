@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -49,12 +50,17 @@ import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-da
 import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
 import { createV10TwoCountryTestFixture } from '../support/v10-two-country-fixture.js';
+import { FOUNDATION_PROPERTY_CONFIG } from '../property/property-config.js';
 
 const sha256Hex = (input: string): string =>
   createHash('sha256').update(input, 'utf8').digest('hex');
 
 const SUBMITTED_AT = '2026-09-14T00:00:00.000Z';
 const RESERVED_AT = '2026-09-14T00:01:00.000Z';
+const V10_4_PROPERTY_CONFIG = Object.freeze({
+  ...FOUNDATION_PROPERTY_CONFIG,
+  seed: 2_026_091_4,
+});
 const root = path.resolve(import.meta.dirname, '../..');
 const atomicMigrations = [
   '0001_world_v2_namespace.sql',
@@ -639,6 +645,63 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
     ).toBe(before);
   });
 
+  it('keeps generated exact Buyer Treasury balances symmetric or fully rejected', async () => {
+    await fc.assert(
+      fc.asyncProperty(fc.integer({ min: 1, max: 12 }), async (balance) => {
+        const fixture = createV10TwoCountryTestFixture();
+        const prepared = await preparedDelivery({
+          openingSeed: withBuyerTreasuryBalance(fixture, String(balance)),
+        });
+        const before = canonicalSerialize({
+          financial: prepared.preDelivery.financial,
+          inventory: prepared.preDelivery.inventory,
+        });
+        if (balance < 6) {
+          expect(() => settle(prepared)).toThrow(
+            /insufficient exact GCU funds/u,
+          );
+          expect(
+            canonicalSerialize({
+              financial: prepared.preDelivery.financial,
+              inventory: prepared.preDelivery.inventory,
+            }),
+          ).toBe(before);
+          return;
+        }
+        const settled = settle(prepared);
+        expect(settled.inventory.receipt.outcome).toBe('APPLIED');
+        expect(settled.financial.receipt.outcome).toBe('APPLIED');
+        expect(
+          settled.financial.state.positions
+            .find(
+              (position) =>
+                position.account.accountId ===
+                prepared.fixture.financialAccounts.buyerTreasury.accountId,
+            )
+            ?.netDebitBalance.toCanonicalValue().amount ?? '0',
+        ).toBe(String(balance - 6));
+        expect(
+          accountBalance(
+            settled.financial.state,
+            prepared.fixture.financialAccounts.sellerSettlement.accountId,
+          ).toCanonicalValue().amount,
+        ).toBe('8');
+        expect(
+          commodityQuantity(
+            settled.inventory.state,
+            prepared.fixture.commodity.id,
+          ).toCanonicalValue(),
+        ).toEqual(
+          commodityQuantity(
+            prepared.preDelivery.inventory,
+            prepared.fixture.commodity.id,
+          ).toCanonicalValue(),
+        );
+      }),
+      V10_4_PROPERTY_CONFIG,
+    );
+  });
+
   it('binds the applied delivery to one automatic atomic draft, receipt, and outbox fact', async () => {
     const prepared = await preparedDelivery();
     const lease = acquireWorldWriterLease(
@@ -855,5 +918,5 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
     } finally {
       await database.close();
     }
-  });
+  }, 30_000);
 });

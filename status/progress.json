@@ -464,7 +464,7 @@
     "implementation_target": "0b2d66eede98547270ce12119d946bcd4c946d32",
     "increment_evidence": "docs/reports/V10/V10.3_ATOMIC_DRAFT_INCREMENT.md",
     "scope": "ADR-05 RESERVED_TO_IN_TRANSIT_TO_BUYER_AVAILABLE plus exact Buyer Treasury GCU to Seller Settlement delivery posting, automatic atomic draft, receipt, and canonical outbox",
-    "local_checks": "PASS — worker and core typechecks; 3 focused files / 13 tests; targeted ESLint; isolated PGlite atomic commit/retry/rollback",
+    "local_checks": "PASS — worker and core typechecks; 3 focused files / 14 tests including fixed-seed 250-run property campaign; targeted ESLint; isolated PGlite atomic commit/retry/rollback",
     "remaining_v10_3_scope": [
       "server-held SQL preparation loader and opening-state bootstrap",
       "real outbox consumer",
