@@ -58,7 +58,7 @@ function canonicalIntent(value: { readonly fingerprint: unknown }): string {
   return canonicalSerialize(intent);
 }
 
-function fixture() {
+function fixture(input: { readonly expectedWorldVersion?: string | null } = {}) {
   const available = createInventoryAccount({
     worldId: WORLD,
     countryId: COUNTRY,
@@ -159,7 +159,10 @@ function fixture() {
       commandType: 'DURABLE_LEDGER_TEST',
       correlationId: 'CORRELATION_DURABLE',
       countryId: COUNTRY,
-      expectedWorldVersion: '0',
+      expectedWorldVersion:
+        input.expectedWorldVersion === undefined
+          ? '0'
+          : input.expectedWorldVersion,
       idempotencyKey: 'IDEMPOTENCY_DURABLE',
       officeId: null,
       payload: { purpose: 'durable-lineage-test' },
@@ -367,6 +370,18 @@ describe('V10.6 durable V08 ledger lineage reader', () => {
         )
         ?.netDebitBalance.toCanonicalValue().amount,
     ).toBe('95');
+  });
+
+  it('replays an unversioned durable Command from its Event version boundary', async () => {
+    const values = fixture({ expectedWorldVersion: null });
+    const reader = new DurableV08LedgerLineageReader({
+      database: database({ values }),
+      sha256Hex,
+    });
+
+    await expect(reader.rebuild(WORLD)).resolves.toMatchObject({
+      worldVersion: '1',
+    });
   });
 
   it('fails closed when durable Event evidence does not recompute', async () => {

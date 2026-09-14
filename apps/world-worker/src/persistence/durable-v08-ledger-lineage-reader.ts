@@ -625,13 +625,23 @@ export class DurableV08LedgerLineageReader {
         }
         return parseEvent(row, this.#sha256Hex);
       });
+      const worldVersionAfter = events[0]?.worldVersion;
+      if (worldVersionAfter === undefined || BigInt(worldVersionAfter) <= 0n) {
+        invalid('Durable Event transition WorldVersion after must be positive');
+      }
+      const worldVersionBefore = (BigInt(worldVersionAfter) - 1n).toString();
+      if (
+        command.expectedWorldVersion !== null &&
+        command.expectedWorldVersion !== worldVersionBefore
+      ) {
+        invalid(
+          'Durable Command expected WorldVersion does not match Event transition boundary',
+        );
+      }
       const transition = createAuthoritativeTransition({
         command,
-        worldVersionBefore: command.expectedWorldVersion ?? '',
-        worldVersionAfter: integer(
-          first.event_world_version,
-          'Transition WorldVersion after',
-        ),
+        worldVersionBefore,
+        worldVersionAfter,
         events,
       });
       rebuilt.push(
