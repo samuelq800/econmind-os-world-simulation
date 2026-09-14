@@ -1205,6 +1205,7 @@ type V10ApprovalAwareOperation =
   | 'SIGN_SELLER'
   | 'SIGN_BUYER_TRADE'
   | 'SIGN_BUYER_FINANCE'
+  | 'REVOKE_BUYER_FINANCE'
   | 'RESERVE'
   | 'SHIP'
   | 'DELIVER'
@@ -1571,6 +1572,7 @@ describe('V10.4 Treasury-GCU acceptance', () => {
               'SIGN_SELLER',
               'SIGN_BUYER_TRADE',
               'SIGN_BUYER_FINANCE',
+              'REVOKE_BUYER_FINANCE',
               'RESERVE',
               'SHIP',
               'DELIVER',
@@ -1595,10 +1597,11 @@ describe('V10.4 Treasury-GCU acceptance', () => {
               fixture.officeActors.buyerTrade,
               approvals.buyer,
             );
-            const buyerFinanceContext = await approvalContext(
+            const buyerFinanceAuthority = revocableApprovalContext(
               fixture.officeActors.buyerFinance,
               approvals.buyer,
             );
+            const buyerFinanceContext = await buyerFinanceAuthority.authorize();
             const contexts = Object.freeze({
               sellerTrade: Object.freeze({
                 actorId: fixture.officeActors.sellerTrade.actorId,
@@ -1621,6 +1624,7 @@ describe('V10.4 Treasury-GCU acceptance', () => {
             let sellerSigned = false;
             let buyerTradeSigned = false;
             let buyerFinanceSigned = false;
+            let buyerFinanceRevoked = false;
             let phase: V10LifecyclePhase = 'AVAILABLE';
             let states: DeliveryStates = Object.freeze({
               financial: fixture.rebuiltLedgers.financial,
@@ -1744,13 +1748,24 @@ describe('V10.4 Treasury-GCU acceptance', () => {
             ];
 
             for (const operation of operations) {
-              const before = canonicalSerialize({ approvals, states });
+              const before = canonicalSerialize({
+                approvals,
+                buyerFinanceRevoked,
+                states,
+              });
               const hasCompleteApproval =
-                sellerSigned && buyerTradeSigned && buyerFinanceSigned;
+                sellerSigned &&
+                buyerTradeSigned &&
+                buyerFinanceSigned &&
+                !buyerFinanceRevoked;
               const advances =
                 (operation === 'SIGN_SELLER' && !sellerSigned) ||
                 (operation === 'SIGN_BUYER_TRADE' && !buyerTradeSigned) ||
-                (operation === 'SIGN_BUYER_FINANCE' && !buyerFinanceSigned) ||
+                (operation === 'SIGN_BUYER_FINANCE' &&
+                  !buyerFinanceSigned &&
+                  !buyerFinanceRevoked) ||
+                (operation === 'REVOKE_BUYER_FINANCE' &&
+                  !buyerFinanceRevoked) ||
                 (operation === 'RESERVE' &&
                   hasCompleteApproval &&
                   phase === 'AVAILABLE') ||
@@ -1795,6 +1810,10 @@ describe('V10.4 Treasury-GCU acceptance', () => {
                       }),
                     });
                     break;
+                  case 'REVOKE_BUYER_FINANCE':
+                    buyerFinanceAuthority.revoke();
+                    buyerFinanceRevoked = true;
+                    break;
                   case 'RESERVE':
                     await reserveTransfer();
                     break;
@@ -1813,7 +1832,11 @@ describe('V10.4 Treasury-GCU acceptance', () => {
               } catch (error) {
                 operationError = error;
               }
-              const after = canonicalSerialize({ approvals, states });
+              const after = canonicalSerialize({
+                approvals,
+                buyerFinanceRevoked,
+                states,
+              });
               if (!advances) {
                 expect(after).toBe(before);
               } else {
@@ -1829,16 +1852,22 @@ describe('V10.4 Treasury-GCU acceptance', () => {
               }
             }
 
-            expect(phase).toBe('DELIVERED');
-            expect(states.inventory.appliedPostings).toHaveLength(
-              fixture.rebuiltLedgers.inventory.appliedPostings.length + 3,
-            );
-            expect(
-              accountBalance(
-                states.financial,
-                fixture.financialAccounts.buyerTreasury.accountId,
-              ).toCanonicalValue().amount,
-            ).toBe('2');
+            if (buyerFinanceRevoked && phase === 'AVAILABLE') {
+              expect(states.inventory).toEqual(
+                fixture.rebuiltLedgers.inventory,
+              );
+            } else {
+              expect(phase).toBe('DELIVERED');
+              expect(states.inventory.appliedPostings).toHaveLength(
+                fixture.rebuiltLedgers.inventory.appliedPostings.length + 3,
+              );
+              expect(
+                accountBalance(
+                  states.financial,
+                  fixture.financialAccounts.buyerTreasury.accountId,
+                ).toCanonicalValue().amount,
+              ).toBe('2');
+            }
           },
         ),
         V10_APPROVAL_AWARE_SEQUENCE_CONFIG,
