@@ -458,21 +458,30 @@
     "production_mutation": false
   },
   "v10_3_entry": {
-    "status": "CORE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
+    "status": "ATOMIC_DRAFT_AND_LOCAL_ACCEPTANCE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
     "hard_dependency": "V10.2_PACKAGE_APPROVED_NEXT_GOVERNANCE_ONLY",
     "owner_authorization": "docs/reports/V10/V10.3_OWNER_LOCAL_IMPLEMENTATION_AUTHORIZATION.md",
-    "implementation_target": "23c57d568726d33e4d3f61175055219107408fd2",
-    "scope": "ADR-05 RESERVED_TO_IN_TRANSIT_TO_BUYER_AVAILABLE plus exact Buyer Treasury GCU to Seller Settlement delivery posting",
-    "local_checks": "PASS — core typecheck; 2 focused files / 8 tests; targeted ESLint",
+    "implementation_target": "0b2d66eede98547270ce12119d946bcd4c946d32",
+    "increment_evidence": "docs/reports/V10/V10.3_ATOMIC_DRAFT_INCREMENT.md",
+    "scope": "ADR-05 RESERVED_TO_IN_TRANSIT_TO_BUYER_AVAILABLE plus exact Buyer Treasury GCU to Seller Settlement delivery posting, automatic atomic draft, receipt, and canonical outbox",
+    "local_checks": "PASS — worker and core typechecks; 3 focused files / 13 tests; targeted ESLint; isolated PGlite atomic commit/retry/rollback",
     "remaining_v10_3_scope": [
-      "atomic repository transaction",
-      "event and receipt persistence",
-      "projection outbox",
-      "retry and crash-recovery evidence"
+      "server-held SQL preparation loader and opening-state bootstrap",
+      "real outbox consumer",
+      "full crash-recovery campaign",
+      "projection rebuild"
     ],
     "merge_authorized": false,
     "production_access": false,
     "production_mutation": false
+  },
+  "v10_4_entry": {
+    "status": "LOCAL_ACCEPTANCE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
+    "implementation_target": "0b2d66eede98547270ce12119d946bcd4c946d32",
+    "scope": "deterministic local successful delivery, bilateral conservation, exact replay, insufficient-funds zero effect, and isolated atomic persistence evidence",
+    "evidence_file": "tests/world-core/v10.4-local-acceptance.test.ts",
+    "remote_or_production_execution": false,
+    "gate_b_evidence": false
   },
   "owner_completed_work_approval": {
     "status": "APPROVED_FOR_DEVELOPMENT_BASELINE",
@@ -484,11 +493,11 @@
   "current_gate": {
     "step_id": "V10.3",
     "status": "IN_PROGRESS",
-    "review": "SCOPED_CORE_CANDIDATE_AWAITING_INDEPENDENT_REVIEW",
+    "review": "SCOPED_V10_3_V10_4_CANDIDATE_AWAITING_INDEPENDENT_REVIEW",
     "next_step": "V10.3",
     "next_step_ready": true,
     "next_step_blockers": [],
-    "required_gate": "V10.3_CORE_INCREMENT_REVIEW",
+    "required_gate": "V10.3_V10.4_SCOPED_INCREMENT_REVIEW",
     "gate_status": "PASS"
   },
   "v07_package_review": {
@@ -1591,8 +1600,8 @@
     "V09.3": "PLANNED",
     "V10.1": "PACKAGE_REVIEWED_NEXT_GOVERNANCE_ONLY",
     "V10.2": "PACKAGE_REVIEWED_NEXT_GOVERNANCE_ONLY",
-    "V10.3": "CORE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
-    "V10.4": "PLANNED",
+    "V10.3": "ATOMIC_DRAFT_AND_LOCAL_ACCEPTANCE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
+    "V10.4": "LOCAL_ACCEPTANCE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
     "V11.1": "PLANNED",
     "V11.2": "PLANNED",
     "V11.3": "PLANNED",
