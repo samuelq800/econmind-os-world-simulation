@@ -5,6 +5,7 @@ on:
     branches:
       - codex/world-core-v09
       - codex/v09-recovery-preparation
+      - codex/v10-1-implementation
   pull_request:
     paths:
       - .github/workflows/v09-postgres.yml
