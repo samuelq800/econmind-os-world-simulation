@@ -29,7 +29,7 @@ import {
   type InventoryPosting,
 } from '../inventory/inventory-ledger.js';
 import { isMoney, Money } from '../numeric/money.js';
-import { isQuantity, type Quantity } from '../numeric/quantity.js';
+import { isQuantity, Quantity } from '../numeric/quantity.js';
 import {
   CURRENT_REPLAY_BINDING,
   type ReplayVersionBinding,
@@ -122,6 +122,8 @@ export interface OpeningSeed {
   readonly fingerprint: CanonicalSha256;
 }
 
+type UnknownRecord = Readonly<Record<string, unknown>>;
+
 export interface RebuiltV08Ledgers {
   readonly seedId: OpeningSeedId;
   readonly seedFingerprint: CanonicalSha256;
@@ -164,6 +166,182 @@ function nonEmpty(value: string, label: string): string {
     invalid(`${label} must be a non-empty canonical string`);
   }
   return value;
+}
+
+function record(value: unknown, label: string): UnknownRecord {
+  if (
+    typeof value !== 'object' ||
+    value === null ||
+    Array.isArray(value) ||
+    Object.getPrototypeOf(value) !== Object.prototype
+  ) {
+    invalid(`${label} must be a plain record`);
+  }
+  return value as UnknownRecord;
+}
+
+function text(value: unknown, label: string): string {
+  if (typeof value !== 'string') invalid(`${label} must be a string`);
+  return value;
+}
+
+function list(value: unknown, label: string): readonly unknown[] {
+  if (!Array.isArray(value)) invalid(`${label} must be an array`);
+  return value;
+}
+
+function parseQuantity(value: unknown): Quantity {
+  const quantity = record(value, 'Opening inventory quantity');
+  return Quantity.from(
+    text(quantity.amount, 'Opening inventory quantity amount'),
+    text(quantity.unit, 'Opening inventory quantity unit'),
+  );
+}
+
+function parseMoney(value: unknown): Money {
+  const money = record(value, 'Opening financial amount');
+  return Money.from(
+    text(money.amount, 'Opening financial amount value'),
+    text(money.currency, 'Opening financial amount currency'),
+  );
+}
+
+/**
+ * Rehydrates a canonical OpeningSeed record through the same constructors used
+ * for initial creation. It never trusts a deserialized object directly: every
+ * source payload hash, account, balance, replay binding, and the final seed
+ * fingerprint is recomputed before the returned seed receives authority.
+ */
+export function parseOpeningSeed(
+  value: unknown,
+  sha256Hex: Sha256Hex,
+): Readonly<OpeningSeed> {
+  const raw = record(value, 'Opening seed');
+  const rawSources = list(raw.sources, 'Opening seed sources');
+  const sources = rawSources.map((value) => {
+    const source = record(value, 'Opening source');
+    const canonicalPayload = text(
+      source.canonicalPayload,
+      'Opening source canonical payload',
+    );
+    let payload: unknown;
+    try {
+      payload = JSON.parse(canonicalPayload);
+    } catch {
+      invalid('Opening source canonical payload must be valid JSON');
+    }
+    if (canonicalSerialize(payload) !== canonicalPayload) {
+      invalid('Opening source payload is not canonical');
+    }
+    if (
+      text(source.schemaVersion, 'Opening source schema') !==
+      OPENING_SOURCE_SCHEMA_VERSION
+    ) {
+      invalid('Unsupported opening-source schema version');
+    }
+    const restored = createOpeningSource(
+      {
+        schemaVersion: OPENING_SOURCE_SCHEMA_VERSION,
+        sourceId: openingSourceId(text(source.sourceId, 'Opening source ID')),
+        sourceKind: text(
+          source.sourceKind,
+          'Opening source kind',
+        ) as OpeningSourceKind,
+        locator: text(source.locator, 'Opening source locator'),
+        sourceVersion: text(source.sourceVersion, 'Opening source version'),
+        payload,
+      },
+      sha256Hex,
+    );
+    if (canonicalSerialize(restored) !== canonicalSerialize(source)) {
+      invalid('Opening source hash or canonical evidence is invalid');
+    }
+    return restored;
+  });
+  const inventoryEntries = list(
+    raw.inventoryEntries,
+    'Opening inventory entries',
+  ).map((value) => {
+    const entry = record(value, 'Opening inventory entry');
+    return Object.freeze({
+      entryId: openingInventoryEntryId(text(entry.entryId, 'Opening entry ID')),
+      sourceId: openingSourceId(
+        text(entry.sourceId, 'Opening entry source ID'),
+      ),
+      account: record(
+        entry.account,
+        'Opening inventory account',
+      ) as unknown as InventoryAccount,
+      quantity: parseQuantity(entry.quantity),
+    });
+  });
+  const financialBatches = list(
+    raw.financialBatches,
+    'Opening financial batches',
+  ).map((value) => {
+    const batch = record(value, 'Opening financial batch');
+    return Object.freeze({
+      batchId: financialOpeningBatchId(
+        text(batch.batchId, 'Opening financial batch ID'),
+      ),
+      sourceId: openingSourceId(
+        text(batch.sourceId, 'Opening financial batch source ID'),
+      ),
+      settlementCurrency: text(
+        batch.settlementCurrency,
+        'Opening settlement currency',
+      ),
+      legs: list(batch.legs, 'Opening financial legs').map((value) => {
+        const leg = record(value, 'Opening financial leg');
+        return Object.freeze({
+          legId: financialOpeningLegId(
+            text(leg.legId, 'Opening financial leg ID'),
+          ),
+          account: record(
+            leg.account,
+            'Opening financial account',
+          ) as unknown as FinancialAccount,
+          direction: text(
+            leg.direction,
+            'Opening financial direction',
+          ) as FinancialPostingDirection,
+          amount: parseMoney(leg.amount),
+          counterpartLegId: financialOpeningLegId(
+            text(leg.counterpartLegId, 'Opening counterpart leg ID'),
+          ),
+        });
+      }),
+    });
+  });
+  if (
+    text(raw.schemaVersion, 'Opening seed schema') !==
+    OPENING_SEED_SCHEMA_VERSION
+  ) {
+    invalid('Unsupported opening-seed schema version');
+  }
+  const seed = createOpeningSeed(
+    {
+      schemaVersion: OPENING_SEED_SCHEMA_VERSION,
+      seedId: openingSeedId(text(raw.seedId, 'Opening seed ID')),
+      worldId: worldId(text(raw.worldId, 'Opening seed World ID')),
+      openingWorldVersion: text(
+        raw.openingWorldVersion,
+        'Opening WorldVersion',
+      ) as '0',
+      replayBinding: record(
+        raw.replayBinding,
+        'Opening replay binding',
+      ) as unknown as ReplayVersionBinding,
+      sources,
+      inventoryEntries,
+      financialBatches,
+    },
+    sha256Hex,
+  );
+  if (canonicalSerialize(seed) !== canonicalSerialize(raw)) {
+    invalid('Opening seed fingerprint or canonical evidence is invalid');
+  }
+  return seed;
 }
 
 export function createOpeningSource(

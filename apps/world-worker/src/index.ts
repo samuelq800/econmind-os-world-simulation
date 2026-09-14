@@ -44,3 +44,4 @@ export {
   prepareNarrowTreasuryGcuDeliveryAtomicDraft,
   type NarrowTreasuryGcuDeliveryPreparationSource,
 } from './persistence/narrow-treasury-gcu-delivery-draft.js';
+export { WorldOpeningSeedStore } from './persistence/opening-seed-store.js';
