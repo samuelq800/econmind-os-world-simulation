@@ -18,7 +18,10 @@ import {
 } from '@econmind/core';
 
 import { DurableV08LedgerLineageReader } from './durable-v08-ledger-lineage-reader.js';
-import type { NarrowTreasuryGcuDeliveryPreparationSource } from './narrow-treasury-gcu-delivery-draft.js';
+import {
+  createNarrowTreasuryGcuDeliveryCandidateFactory,
+  type NarrowTreasuryGcuDeliveryPreparationSource,
+} from './narrow-treasury-gcu-delivery-draft.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 
 const RFC3339_MILLISECONDS =
@@ -248,4 +251,16 @@ export class SqlNarrowTreasuryGcuDeliveryPreparationSource implements NarrowTrea
       expiresAtReal: timestamp(row.expires_at_real, 'Writer lease expiry time'),
     });
   }
+}
+
+/** Binds the narrow automatic delivery factory to its SQL-only source. */
+export function createSqlNarrowTreasuryGcuDeliveryCandidateFactory(input: {
+  readonly database: SqlDatabase;
+  readonly sha256Hex: Sha256Hex;
+  readonly workerId: string;
+}) {
+  return createNarrowTreasuryGcuDeliveryCandidateFactory({
+    sha256Hex: input.sha256Hex,
+    source: new SqlNarrowTreasuryGcuDeliveryPreparationSource(input),
+  });
 }

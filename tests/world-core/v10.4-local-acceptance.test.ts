@@ -45,7 +45,10 @@ import { NarrowTreasuryGcuDeliveryOutboxConsumer } from '../../apps/world-worker
 import { NarrowTreasuryGcuDeliveryProjectionRebuilder } from '../../apps/world-worker/src/projections/narrow-treasury-gcu-delivery-projection.js';
 import { WorldRecoveryCoordinator } from '../../apps/world-worker/src/recovery/world-recovery.js';
 import { prepareAtomicTransitionCandidate } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
-import { SqlNarrowTreasuryGcuDeliveryPreparationSource } from '../../apps/world-worker/src/persistence/sql-narrow-treasury-gcu-delivery-preparation-source.js';
+import {
+  createSqlNarrowTreasuryGcuDeliveryCandidateFactory,
+  SqlNarrowTreasuryGcuDeliveryPreparationSource,
+} from '../../apps/world-worker/src/persistence/sql-narrow-treasury-gcu-delivery-preparation-source.js';
 import {
   AtomicTransitionRepository,
   type AtomicCommitAuthorizationGuard,
@@ -1042,9 +1045,10 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
       expect(loaded.source).toEqual(prepared.source);
       expect(loaded.financialState).toEqual(prepared.preDelivery.financial);
       expect(loaded.inventoryState).toEqual(prepared.preDelivery.inventory);
-      const draft = await createNarrowTreasuryGcuDeliveryCandidateFactory({
+      const draft = await createSqlNarrowTreasuryGcuDeliveryCandidateFactory({
+        database,
         sha256Hex,
-        source,
+        workerId: 'WORKER_V10_4_SOURCE',
       }).prepare({
         command: prepared.delivery,
         commitAuthorization: null,
