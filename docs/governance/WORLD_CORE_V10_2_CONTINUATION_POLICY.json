@@ -18,7 +18,7 @@
   "entry_preconditions": [
     "ADR-09 remains APPROVED in docs/architecture/decisions/ADR-09.md for only the below-threshold registered GRAIN / Buyer Treasury GCU fixture.",
     "The project owner explicitly authorized continuation on 2026-09-14.",
-    "V10.1 remains incomplete and unverified; this owner construction authorization is not a dependency-completion or Gate B declaration."
+    "When V10.2 construction began, V10.1 was incomplete and unverified. V10.1 later received package approval for its next governance decision only; neither package has Gate B authority."
   ],
   "preserved_controls": [
     "Each proposal binds the canonical Command fingerprint, both country scopes, policy version, complete Office set, signed asset source, expiry, threshold policy version, and the fixed 6 GCU maximum settlement.",

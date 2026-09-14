@@ -249,12 +249,12 @@ describe('V06 owner-authorized package continuation', () => {
       gate_status: 'PASS',
     });
     expect(progress.v10_1_entry).toMatchObject({
-      status: 'ACTIVE',
+      status: 'V10_1_PACKAGE_APPROVED_NEXT_GOVERNANCE_ONLY',
       branch: 'codex/v10-1-implementation',
       base_candidate: 'bacb8d6ac8623f0e527a63e969121a36740a78bc',
       approved_adrs: ['ADR-05', 'ADR-12'],
       adr_12_decision: 'docs/architecture/decisions/ADR-12.md',
-      implementation_status: 'IN_PROGRESS',
+      implementation_status: 'PACKAGE_REVIEWED_NEXT_GOVERNANCE_ONLY',
       implemented_increments: {
         authenticated_read_query_boundary: {
           status: 'IMPLEMENTED_UNVERIFIED',
@@ -294,7 +294,16 @@ describe('V06 owner-authorized package continuation', () => {
           production_mutation: false,
         },
       },
-      required_exit: 'V10.1_INDEPENDENT_REVIEW',
+      package_audit_target: 'ba46856fdcf6458156e044a4cbc6112e9e6502b5',
+      package_audit_status: 'AUDIT_REQUESTED',
+      package_audit_request: 'docs/reports/V10/V10.1_PACKAGE_AUDIT_REQUEST.md',
+      package_review_target: 'ba46856fdcf6458156e044a4cbc6112e9e6502b5',
+      package_review_evidence_wrapper:
+        'b25ba34c560a0142ae017132490c01c74cce0d63',
+      package_review_result:
+        'V10_1_PACKAGE_APPROVED_FOR_NEXT_GOVERNANCE_ONLY — BLOCKER_0_MAJOR_0_MINOR_0',
+      package_review_evidence: 'docs/reports/V10/V10.1_PACKAGE_REVIEW.md',
+      required_exit: 'NEXT_GOVERNANCE_DECISION',
       merge_authorized: false,
       production_access: false,
       production_mutation: false,
@@ -347,7 +356,7 @@ describe('V06 owner-authorized package continuation', () => {
       package_review_result:
         'V10_2_PACKAGE_APPROVED_FOR_NEXT_GOVERNANCE_ONLY — BLOCKER_0_MAJOR_0_MINOR_0',
       package_review_evidence: 'docs/reports/V10/V10.2_PACKAGE_REVIEW.md',
-      required_exit: 'V10.1_INDEPENDENT_REVIEW_HARD_DEPENDENCY',
+      required_exit: 'NEXT_GOVERNANCE_DECISION',
       merge_authorized: false,
       production_access: false,
       production_mutation: false,

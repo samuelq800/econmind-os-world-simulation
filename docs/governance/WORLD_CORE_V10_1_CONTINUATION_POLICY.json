@@ -2,12 +2,15 @@
   "schema_version": "WORLD_CORE_STEP_CONTINUATION-1",
   "record_type": "OWNER_AUTHORIZED_STEP_IMPLEMENTATION",
   "name": "WORLD_CORE_V10_1_IMPLEMENTATION",
-  "status": "ACTIVE",
+  "status": "PACKAGE_REVIEWED_NEXT_GOVERNANCE_ONLY",
   "authority": "PROJECT_OWNER_CONFIRMATION",
   "activation_record": "docs/reports/V10/V10.1_OWNER_IMPLEMENTATION_AUTHORIZATION.md",
   "scope": {
     "branch": "codex/v10-1-implementation",
     "base_candidate": "bacb8d6ac8623f0e527a63e969121a36740a78bc",
+    "package_review_target": "ba46856fdcf6458156e044a4cbc6112e9e6502b5",
+    "package_review_evidence": "docs/reports/V10/V10.1_PACKAGE_REVIEW.md",
+    "package_review_result": "V10_1_PACKAGE_APPROVED_FOR_NEXT_GOVERNANCE_ONLY — BLOCKER_0_MAJOR_0_MINOR_0",
     "allowed_step": "V10.1",
     "terminal_gate": "V10.1_INDEPENDENT_REVIEW"
   },
@@ -18,7 +21,7 @@
     "ADR-05 remains binding; ADR-12 is approved in docs/architecture/decisions/ADR-12.md for the exact V10.1 read-projection scope. ADR-09 is separately approved in docs/architecture/decisions/ADR-09.md, while V10.2 remains outside this policy and depends on complete V10.1 work plus its own implementation authorization."
   ],
   "preserved_controls": [
-    "V10.1 remains IN_PROGRESS or IMPLEMENTED_UNVERIFIED until its immutable candidate receives the required independent review.",
+    "The V10.1 package received independent approval for its next governance decision only; it has not received Gate B, merge, staging, production, deployment, or migration-publication authority.",
     "Current server-side authorization, deterministic projection derivation, projection watermark integrity, and the single authoritative World State remain mandatory.",
     "No browser, fixture, cache, or projection becomes authoritative World State or portable Office authority.",
     "ADR-12 approval alone does not authorize a live verifier, public route, Realtime/cache behavior, forecast product, or any production/shared-Supabase connection. The separately owner-authorized V10.1 Country/Office entitlement increment remains an IMPLEMENTED_UNVERIFIED candidate only.",
