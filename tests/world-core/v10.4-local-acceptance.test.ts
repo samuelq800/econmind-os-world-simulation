@@ -59,7 +59,10 @@ import {
   createLocalPostgresV09AtomicTestDatabase,
   createPGliteV09AtomicTestDatabase,
 } from '../support/v09-atomic-database.js';
-import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
+import {
+  V09TransactionCommitUnknownError,
+  type V09AtomicTestDatabase,
+} from '../support/v09-atomic-contract.js';
 import { createV10TwoCountryTestFixture } from '../support/v10-two-country-fixture.js';
 import { FOUNDATION_PROPERTY_CONFIG } from '../property/property-config.js';
 
@@ -1523,6 +1526,66 @@ postgresDescribe('V10.4 disposable PostgreSQL restart evidence', () => {
       }
     } finally {
       if (!initialDatabaseClosed) await database.close();
+    }
+  }, 30_000);
+});
+
+postgresDescribe('V10.4 disposable PostgreSQL acknowledgement evidence', () => {
+  it('recovers the durable receipt when a committed response is lost', async () => {
+    const database = await atomicDatabase();
+    try {
+      const prepared = await preparedDelivery();
+      const candidate = atomicDeliveryCandidate({
+        delivery: prepared.delivery,
+        prepared,
+        suffix: 'ACK_LOST',
+      });
+      await seedAtomicDelivery(database, candidate);
+      const responseLostDatabase: SqlDatabase = {
+        query: database.query,
+        async transaction(operation) {
+          await database.transaction(operation);
+          throw new V09TransactionCommitUnknownError(
+            new Error('INJECTED_V10_4_POST_COMMIT_RESPONSE_LOST'),
+          );
+        },
+      };
+      const repository = new AtomicTransitionRepository({
+        database: responseLostDatabase,
+        authorizationGuard: automaticCommitGuard,
+        workerId: 'WORKER_V10_4_CONCURRENT',
+        sha256Hex,
+      });
+      await expect(repository.commit(candidate)).resolves.toMatchObject({
+        source: 'RECOVERED_AFTER_UNKNOWN_ACKNOWLEDGEMENT',
+        receipt: { outcome: 'COMMITTED' },
+      });
+      const persisted = await database.query<{
+        readonly event_count: string;
+        readonly financial_count: string;
+        readonly inventory_count: string;
+        readonly outbox_count: string;
+        readonly receipt_count: string;
+        readonly world_version: string;
+      }>(
+        `select
+           (select count(*)::text from world_v2.authoritative_event) as event_count,
+           (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+           (select count(*)::text from world_v2.financial_posting_batch) as financial_count,
+           (select count(*)::text from world_v2.notification_outbox) as outbox_count,
+           (select count(*)::text from world_v2.command_receipt) as receipt_count,
+           (select world_version::text from world_v2.world_head) as world_version`,
+      );
+      expect(persisted.rows[0]).toEqual({
+        event_count: '1',
+        financial_count: '1',
+        inventory_count: '1',
+        outbox_count: '1',
+        receipt_count: '1',
+        world_version: '3',
+      });
+    } finally {
+      await database.close();
     }
   }, 30_000);
 });

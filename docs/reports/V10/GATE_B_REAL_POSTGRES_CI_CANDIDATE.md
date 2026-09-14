@@ -28,6 +28,13 @@ same delivery can then commit once only if the failed transaction left no
 durable partial facts. This is controlled transaction-failure/reconnect
 evidence, not a process-kill or crash-at-commit-acknowledgement proof.
 
+Finally, the candidate injects a lost acknowledgement only after the underlying
+PostgreSQL transaction has committed. The repository must re-read the durable
+receipt and return `RECOVERED_AFTER_UNKNOWN_ACKNOWLEDGEMENT` without creating a
+second Event, posting, outbox message, or WorldVersion advance. This is a
+deterministic client-response-loss simulation, not an operating-system process
+kill.
+
 ## Observed disposable CI evidence
 
 The preceding V09-only candidate was exercised by GitHub Actions run
@@ -48,6 +55,14 @@ the candidate's 10-second limit. Forward commit
 `fd153dc20cdfaf9e7c8eeeee436e4ffcab3f8065` raises only that single-test limit
 to 20 seconds; it does not reduce generated cases, assertions, or the scoped
 database checks. The forward candidate requires a fresh review and CI result.
+
+The forward candidate through
+`05ca68b285c25efc9acea80c5d80c503b9993a14` passed GitHub Actions run
+[`34845721571`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34845721571).
+Its disposable PostgreSQL V10.4 execution completed 9/9 tests, including the
+unchanged 1,000-run property (10.136 seconds) and the two-command contention
+scenario. That run is scoped, partial V10 database evidence only; it predates
+the subsequently added reconnect scenario and does not close Gate B.
 
 The service was removed with the CI job. No Supabase, staging, or production
 target was contacted.
