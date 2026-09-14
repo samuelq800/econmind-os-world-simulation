@@ -9,6 +9,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   COMMAND_SCHEMA_VERSION,
+  DOMAIN_ERROR_CODES,
   EVENT_SCHEMA_VERSION,
   Money,
   OFFICE_APPROVAL_CAPABILITY,
@@ -27,6 +28,7 @@ import {
   inventoryReservationId,
   parseAuthoritativeEvent,
   parseCanonicalCommand,
+  processQueuedCommand,
   proposalId,
   rebuildV08LedgersFromLineage,
   reserveNarrowTreasuryGcuTransfer,
@@ -37,6 +39,7 @@ import {
   workerId,
   worldWriterLeaseRequest,
   type CanonicalCommand,
+  type CommitAuthorizationProof,
   type FinancialLedgerState,
   type InventoryLedgerState,
 } from '@econmind/core';
@@ -47,7 +50,9 @@ import {
 import { NarrowTreasuryGcuDeliveryOutboxConsumer } from '../../apps/world-worker/src/outbox/narrow-treasury-gcu-delivery-outbox-consumer.js';
 import { NarrowTreasuryGcuDeliveryProjectionRebuilder } from '../../apps/world-worker/src/projections/narrow-treasury-gcu-delivery-projection.js';
 import { WorldRecoveryCoordinator } from '../../apps/world-worker/src/recovery/world-recovery.js';
+import { createTransactionCutoffAuthorizationGuard } from '../../apps/world-worker/src/authoritative-execution.js';
 import { prepareAtomicTransitionCandidate } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
+import { NarrowTransferApprovalStore } from '../../apps/world-worker/src/persistence/narrow-transfer-approval-store.js';
 import {
   createSqlNarrowTreasuryGcuDeliveryCandidateFactory,
   SqlNarrowTreasuryGcuDeliveryPreparationSource,
@@ -113,6 +118,7 @@ const atomicMigrations = [
   '0010_world_v2_command_claim_fencing.sql',
   '0011_world_v2_current_commit_authorization.sql',
   '0012_world_v2_command_claim_active_lease_guard.sql',
+  '0015_world_v2_narrow_transfer_approvals.sql',
   '0016_world_v2_opening_seed.sql',
 ] as const;
 const postgresDescribe = process.env.V09_TEST_DATABASE_URL
@@ -304,9 +310,10 @@ async function persistFinalReceipt(
 async function seedClaimedAtomicCandidate(
   database: V09AtomicTestDatabase,
   candidate: PrivateAtomicTransitionCandidate,
+  input: Readonly<{ persistSubmission?: boolean }> = {},
 ): Promise<void> {
   const command = candidate.command;
-  await persistCommand(database, command);
+  if (input.persistSubmission ?? true) await persistCommand(database, command);
   await database.query(
     `insert into world_v2.command_queue
        (world_id, command_id, authority_kind, priority_rank,
@@ -501,6 +508,62 @@ async function approvalContext(
       payloadFingerprint: proposal.payloadFingerprint,
       policyVersion: proposal.policyVersion,
       requiredOffices: proposal.requiredOffices,
+    },
+  });
+}
+
+function revocableApprovalContext(
+  actor: ReturnType<
+    typeof createV10TwoCountryTestFixture
+  >['officeActors'][keyof ReturnType<
+    typeof createV10TwoCountryTestFixture
+  >['officeActors']],
+  proposal: ReturnType<typeof createNarrowTransferApprovalBundle>['seller'],
+) {
+  let revoked = false;
+  const resolver = Object.freeze({
+    async resolveCurrentIdentity(
+      candidate: typeof actor.principal,
+    ): Promise<typeof actor.principal.authSubject | null> {
+      return candidate.authSubject === actor.principal.authSubject
+        ? actor.principal.authSubject
+        : null;
+    },
+    async resolveCurrentMembership(
+      candidate: typeof actor.principal,
+      requestedWorldId: typeof proposal.worldId,
+    ) {
+      if (
+        revoked ||
+        candidate.authSubject !== actor.principal.authSubject ||
+        requestedWorldId !== proposal.worldId
+      ) {
+        return null;
+      }
+      return actor.membership;
+    },
+  });
+  return Object.freeze({
+    authorize: () =>
+      authorizeOfficeCapability({
+        principal: actor.principal,
+        resolver,
+        worldId: proposal.worldId,
+        requestedCountryId: proposal.countryId,
+        requestedOfficeId: actor.officeId,
+        capability: OFFICE_APPROVAL_CAPABILITY,
+        decisionScope: {
+          proposalId: proposal.id,
+          proposalVersion: proposal.version,
+          worldId: proposal.worldId,
+          countryId: proposal.countryId,
+          payloadFingerprint: proposal.payloadFingerprint,
+          policyVersion: proposal.policyVersion,
+          requiredOffices: proposal.requiredOffices,
+        },
+      }),
+    revoke: () => {
+      revoked = true;
     },
   });
 }
@@ -890,6 +953,210 @@ function atomicShipmentCandidate(input: {
     },
     sha256Hex,
   });
+}
+
+async function reserveCommitProof(
+  transfer: CanonicalCommand,
+): Promise<CommitAuthorizationProof> {
+  const fixture = createV10TwoCountryTestFixture();
+  const seller = fixture.officeActors.sellerTrade;
+  const context = await authorizeOfficeCapability({
+    principal: seller.principal,
+    resolver: seller.resolver,
+    worldId: transfer.worldId,
+    requestedCountryId: transfer.countryId,
+    requestedOfficeId: seller.officeId,
+    capability: 'TRADE_CONTRACTS',
+  });
+  const captured = new Error('V10_4_RESERVE_PROOF_CAPTURED');
+  let proof: CommitAuthorizationProof | null = null;
+  const persistence = {
+    async readFinalReceipt() {
+      return null;
+    },
+    async recordZeroEffectReceipt(receipt: unknown) {
+      return receipt;
+    },
+    async commitAuthorizedCommand(input: {
+      readonly commitAuthorization: CommitAuthorizationProof | null;
+    }) {
+      proof = input.commitAuthorization;
+      throw captured;
+    },
+  };
+  await expect(
+    processQueuedCommand({
+      command: transfer,
+      authorityKind: 'DISCRETIONARY_USER',
+      commitSimTime: transfer.simTime,
+      recordedAtReal: RESERVED_AT,
+      requiredCapability: 'TRADE_CONTRACTS',
+      intakeAuthorization: context,
+      persistence,
+    }),
+  ).rejects.toThrow(captured);
+  if (proof === null) throw new Error('V10_4_EXPECTED_RESERVE_COMMIT_PROOF');
+  return proof;
+}
+
+async function atomicReserveCandidate(input: {
+  readonly prepared: Awaited<ReturnType<typeof preparedDelivery>>;
+}): Promise<PrivateAtomicTransitionCandidate> {
+  const transfer = input.prepared.transfer;
+  const reserve = transition(transfer, '0', '1');
+  const result = await reserveNarrowTreasuryGcuTransfer({
+    approvals: input.prepared.approvals,
+    contexts: input.prepared.contexts,
+    atReal: RESERVED_AT,
+    inventoryState: input.prepared.fixture.rebuiltLedgers.inventory,
+    source: input.prepared.fixture.inventoryAccounts.sellerAvailable,
+    reservationId: inventoryReservationId('RESERVATION_V10_4_ATOMIC_RESERVE'),
+    postingId: inventoryPostingId('POSTING_V10_4_ATOMIC_RESERVE'),
+    transition: reserve.transition,
+    simTime: transfer.simTime,
+    causationEventIds: [reserve.event.eventId],
+    sha256Hex,
+  });
+  if (result.inventory.receipt.outcome !== 'APPLIED') {
+    throw new Error('V10_4_EXPECTED_NEW_ATOMIC_RESERVATION');
+  }
+  const lease = acquireWorldWriterLease(
+    null,
+    worldWriterLeaseRequest(
+      transfer.worldId,
+      workerId('WORKER_V10_4_CONCURRENT'),
+      '2026-09-14T00:02:00.000Z',
+      '2026-09-14T00:07:00.000Z',
+    ),
+  ).lease;
+  const receipt = createFinalCommandReceipt({
+    command: transfer,
+    outcome: 'COMMITTED',
+    reasonCode: null,
+    transition: reserve.transition,
+    simTime: transfer.simTime,
+    recordedAtReal: RESERVED_AT,
+  });
+  return prepareAtomicTransitionCandidate({
+    command: transfer,
+    commitAuthorization: await reserveCommitProof(transfer),
+    draft: {
+      transition: reserve.transition,
+      inventoryPostings: [result.posting],
+      financialPostingBatches: [],
+      receipt,
+      outboxMessages: [],
+      currentMaterializations: [],
+      authorityKind: 'DISCRETIONARY_USER',
+      commitAssertion: createWorldWriterCommitAssertion(lease, '0'),
+      observedAtReal: RESERVED_AT,
+    },
+    sha256Hex,
+  });
+}
+
+async function persistCurrentNarrowTransferAuthorizations(
+  database: V09AtomicTestDatabase,
+  prepared: Awaited<ReturnType<typeof preparedDelivery>>,
+): Promise<void> {
+  const fixture = prepared.fixture;
+  const authorizations = [
+    {
+      actor: fixture.officeActors.sellerTrade,
+      capability: 'TRADE_CONTRACTS',
+      countryId: fixture.countries.seller,
+      officeId: 'TRADE',
+    },
+    {
+      actor: fixture.officeActors.buyerTrade,
+      capability: 'TRADE_CONTRACTS',
+      countryId: fixture.countries.buyer,
+      officeId: 'TRADE',
+    },
+    {
+      actor: fixture.officeActors.buyerFinance,
+      capability: 'FINANCE_TREASURY',
+      countryId: fixture.countries.buyer,
+      officeId: 'FINANCE',
+    },
+  ] as const;
+  for (const authorization of authorizations) {
+    await database.query(
+      `insert into world_v2.current_commit_authorization
+         (world_id, auth_subject, country_id, office_id, capability, team_id,
+          authorization_version, active, refreshed_at_real)
+       values ($1, $2::uuid, $3, $4, $5, $6, $7, true, $8::timestamptz)`,
+      [
+        prepared.transfer.worldId,
+        authorization.actor.principal.authSubject,
+        authorization.countryId,
+        authorization.officeId,
+        authorization.capability,
+        authorization.actor.membership.teamId,
+        authorization.actor.membership.authorizationVersion,
+        SUBMITTED_AT,
+      ],
+    );
+  }
+}
+
+async function seedAtomicReserve(
+  database: V09AtomicTestDatabase,
+  input: {
+    readonly candidate: PrivateAtomicTransitionCandidate;
+    readonly prepared: Awaited<ReturnType<typeof preparedDelivery>>;
+  },
+): Promise<NarrowTransferApprovalStore> {
+  await database.query(
+    `insert into world_v2.world_head (world_id, world_version, event_sequence)
+     values ($1, 0, 0)`,
+    [input.prepared.transfer.worldId],
+  );
+  await persistCommand(database, input.prepared.transfer);
+  await persistCurrentNarrowTransferAuthorizations(database, input.prepared);
+  const approvals = new NarrowTransferApprovalStore({ database, sha256Hex });
+  await approvals.openSellerOffer({
+    command: input.prepared.transfer,
+    signer: {
+      actorId: input.prepared.fixture.officeActors.sellerTrade.actorId,
+      authSubject:
+        input.prepared.fixture.officeActors.sellerTrade.principal.authSubject,
+      signedAtReal: SUBMITTED_AT,
+    },
+  });
+  await approvals.signBuyerOffice({
+    command: input.prepared.transfer,
+    office: 'TRADE',
+    signer: {
+      actorId: input.prepared.fixture.officeActors.buyerTrade.actorId,
+      authSubject:
+        input.prepared.fixture.officeActors.buyerTrade.principal.authSubject,
+      signedAtReal: SUBMITTED_AT,
+    },
+  });
+  await approvals.signBuyerOffice({
+    command: input.prepared.transfer,
+    office: 'FINANCE',
+    signer: {
+      actorId: input.prepared.fixture.officeActors.buyerFinance.actorId,
+      authSubject:
+        input.prepared.fixture.officeActors.buyerFinance.principal.authSubject,
+      signedAtReal: SUBMITTED_AT,
+    },
+  });
+  await database.query(
+    `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
+    [
+      input.prepared.transfer.worldId,
+      input.candidate.commitAssertion.holderId,
+      '2026-09-14T00:02:00.000Z',
+      '300000',
+    ],
+  );
+  await seedClaimedAtomicCandidate(database, input.candidate, {
+    persistSubmission: false,
+  });
+  return approvals;
 }
 
 async function seedReservedAutomaticLifecycle(
@@ -1580,6 +1847,90 @@ describe('V10.4 Treasury-GCU acceptance', () => {
     V10_APPROVAL_AWARE_SEQUENCE_TIMEOUT_MS,
   );
 
+  it('rejects Reserve when a previously signed Office loses current authority', async () => {
+    const fixture = createV10TwoCountryTestFixture();
+    const transfer = transferCommand();
+    const initial = createNarrowTransferApprovalBundle({
+      command: transfer,
+      sellerProposalId: proposalId('PROPOSAL_V10_4_REVOKED_SELLER'),
+      buyerProposalId: proposalId('PROPOSAL_V10_4_REVOKED_BUYER'),
+      proposalVersion: 'VERSION_1',
+    });
+    const seller = revocableApprovalContext(
+      fixture.officeActors.sellerTrade,
+      initial.seller,
+    );
+    const buyerTrade = revocableApprovalContext(
+      fixture.officeActors.buyerTrade,
+      initial.buyer,
+    );
+    const buyerFinance = revocableApprovalContext(
+      fixture.officeActors.buyerFinance,
+      initial.buyer,
+    );
+    const sellerContext = await seller.authorize();
+    const buyerTradeContext = await buyerTrade.authorize();
+    const buyerFinanceContext = await buyerFinance.authorize();
+    const signedSeller = await signApprovalProposal({
+      proposal: initial.seller,
+      context: sellerContext,
+      actorId: fixture.officeActors.sellerTrade.actorId,
+      expectedVersion: 'VERSION_1',
+      signedAt: SUBMITTED_AT,
+    });
+    let signedBuyer = await signApprovalProposal({
+      proposal: initial.buyer,
+      context: buyerTradeContext,
+      actorId: fixture.officeActors.buyerTrade.actorId,
+      expectedVersion: 'VERSION_1',
+      signedAt: SUBMITTED_AT,
+    });
+    signedBuyer = await signApprovalProposal({
+      proposal: signedBuyer,
+      context: buyerFinanceContext,
+      actorId: fixture.officeActors.buyerFinance.actorId,
+      expectedVersion: 'VERSION_1',
+      signedAt: SUBMITTED_AT,
+    });
+    buyerFinance.revoke();
+    const reserve = transition(transfer, '0', '1');
+    const before = canonicalSerialize(fixture.rebuiltLedgers.inventory);
+
+    await expect(
+      reserveNarrowTreasuryGcuTransfer({
+        approvals: Object.freeze({
+          ...initial,
+          seller: signedSeller,
+          buyer: signedBuyer,
+        }),
+        contexts: Object.freeze({
+          sellerTrade: Object.freeze({
+            actorId: fixture.officeActors.sellerTrade.actorId,
+            context: sellerContext,
+          }),
+          buyerTrade: Object.freeze({
+            actorId: fixture.officeActors.buyerTrade.actorId,
+            context: buyerTradeContext,
+          }),
+          buyerFinance: Object.freeze({
+            actorId: fixture.officeActors.buyerFinance.actorId,
+            context: buyerFinanceContext,
+          }),
+        }),
+        atReal: RESERVED_AT,
+        inventoryState: fixture.rebuiltLedgers.inventory,
+        source: fixture.inventoryAccounts.sellerAvailable,
+        reservationId: inventoryReservationId('RESERVATION_V10_4_REVOKED'),
+        postingId: inventoryPostingId('POSTING_V10_4_REVOKED'),
+        transition: reserve.transition,
+        simTime: SimTime.fromTicks('10000'),
+        causationEventIds: [reserve.event.eventId],
+        sha256Hex,
+      }),
+    ).rejects.toMatchObject({ code: DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED });
+    expect(canonicalSerialize(fixture.rebuiltLedgers.inventory)).toBe(before);
+  });
+
   it('binds the applied delivery to one automatic atomic draft, receipt, and outbox fact', async () => {
     const prepared = await preparedDelivery();
     const lease = acquireWorldWriterLease(
@@ -2028,6 +2379,63 @@ describe('V10.4 Treasury-GCU acceptance', () => {
         [prepared.delivery.worldId],
       );
       expect(projectionAfter.rows).toEqual(projectionBefore.rows);
+    } finally {
+      await database.close();
+    }
+  }, 30_000);
+});
+
+describe('V10.4 durable Reserve authorization evidence', () => {
+  it('commits Reserve once only with current server-held approval and authorization', async () => {
+    const database = await atomicDatabase();
+    try {
+      const prepared = await preparedDelivery();
+      const candidate = await atomicReserveCandidate({ prepared });
+      const approvals = await seedAtomicReserve(database, {
+        candidate,
+        prepared,
+      });
+      const repository = new AtomicTransitionRepository({
+        database: database as SqlDatabase,
+        authorizationGuard: createTransactionCutoffAuthorizationGuard(),
+        narrowTransferApprovalGuard: approvals,
+        workerId: 'WORKER_V10_4_CONCURRENT',
+        sha256Hex,
+      });
+      await expect(repository.commit(candidate)).resolves.toMatchObject({
+        source: 'NEW_COMMIT',
+        receipt: { outcome: 'COMMITTED' },
+      });
+      const persisted = await database.query<{
+        readonly approval_signature_count: string;
+        readonly event_count: string;
+        readonly finalized_count: string;
+        readonly financial_count: string;
+        readonly inventory_count: string;
+        readonly proposal_count: string;
+        readonly receipt_count: string;
+        readonly world_version: string;
+      }>(
+        `select
+           (select count(*)::text from world_v2.authoritative_event) as event_count,
+           (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+           (select count(*)::text from world_v2.financial_posting_batch) as financial_count,
+           (select count(*)::text from world_v2.command_receipt) as receipt_count,
+           (select count(*)::text from world_v2.command_queue where queue_state = 'FINALIZED') as finalized_count,
+           (select count(*)::text from world_v2.narrow_transfer_proposal) as proposal_count,
+           (select count(*)::text from world_v2.narrow_transfer_approval_signature) as approval_signature_count,
+           (select world_version::text from world_v2.world_head) as world_version`,
+      );
+      expect(persisted.rows[0]).toEqual({
+        approval_signature_count: '3',
+        event_count: '1',
+        finalized_count: '1',
+        financial_count: '0',
+        inventory_count: '1',
+        proposal_count: '2',
+        receipt_count: '1',
+        world_version: '1',
+      });
     } finally {
       await database.close();
     }
