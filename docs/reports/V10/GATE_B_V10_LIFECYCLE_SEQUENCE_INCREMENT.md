@@ -18,9 +18,17 @@ the final inventory posting count must match the model phase. The property
 uses its own fixed seed and does not change the existing 29-property baseline
 or its 1,000-run budgets.
 
+The immutable candidate `f2da0066d22cc6cc2ed17dd6fbd07c662a51c4d9` also
+executed this property in GitHub Actions run
+[`34846740076`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34846740076),
+where the disposable PostgreSQL V10.4 suite passed 12/12. Review B approved
+this narrow increment for continuation with `BLOCKER=0`, `MAJOR=0`, and
+`MINOR=0`.
+
 ## Evidence boundary
 
-This is local pure-Core lifecycle evidence. It covers the narrow V10
+This is narrow pure-Core lifecycle evidence, additionally exercised in the
+disposable PostgreSQL suite. It covers the narrow V10
 Treasury-GCU path only; it does not cover authorization revocation, arbitrary
 Command types, durable worker restart across every lifecycle phase, full
 real-PostgreSQL contention, process kill, browser E2E, or RLS/grant negatives.

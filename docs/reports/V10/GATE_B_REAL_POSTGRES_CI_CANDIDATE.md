@@ -54,7 +54,7 @@ completed seven V10.4 tests but timed out the unchanged 1,000-run property at
 the candidate's 10-second limit. Forward commit
 `fd153dc20cdfaf9e7c8eeeee436e4ffcab3f8065` raises only that single-test limit
 to 20 seconds; it does not reduce generated cases, assertions, or the scoped
-database checks. The forward candidate requires a fresh review and CI result.
+database checks.
 
 The forward candidate through
 `05ca68b285c25efc9acea80c5d80c503b9993a14` passed GitHub Actions run
@@ -64,14 +64,21 @@ unchanged 1,000-run property (10.136 seconds) and the two-command contention
 scenario. That run is scoped, partial V10 database evidence only; it predates
 the subsequently added reconnect scenario and does not close Gate B.
 
+The final candidate
+`f2da0066d22cc6cc2ed17dd6fbd07c662a51c4d9` passed GitHub Actions run
+[`34846740076`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34846740076).
+Its disposable PostgreSQL V10.4 execution completed 12/12 tests, retaining the
+1,000-run property and adding the two-pool contention, transaction-failure
+reconnect, and post-commit acknowledgement-loss receipt-recovery cases.
+Review B independently approved the final candidate for continuation with
+`BLOCKER=0`, `MAJOR=0`, and `MINOR=0`.
+
 The service was removed with the CI job. No Supabase, staging, or production
 target was contacted.
 
 ## Boundary of this evidence
 
-This run is partial V09 real-PostgreSQL evidence only. The current candidate
-adds the V10.4 delivery suite, but its result is not yet recorded and must not
-be inferred from the prior run. Even after that scoped run, it would not
-demonstrate the remaining V10 delivery concurrency or controlled
-crash-recovery campaign, and it supplies no browser E2E or RLS/grant negative
-evidence. It does not authorize Gate B.
+This is scoped V09/V10 disposable PostgreSQL evidence only. It does not
+demonstrate multi-process contention or process-kill recovery across the full
+V10 lifecycle, and it supplies no browser E2E or RLS/grant negative evidence
+on an owner-approved non-production target. It does not authorize Gate B.
