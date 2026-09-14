@@ -319,7 +319,11 @@ describe('V06 owner-authorized package continuation', () => {
       focused_tests: 'PASS — 1 file / 4 tests',
       repair_checks:
         'PASS — core typecheck; architecture 9 files / 84 tests; boundary and authoritative-pattern scans PASS',
-      independent_review: 'REQUIRED_AFTER_THRESHOLD_REPAIR',
+      independent_review_target: '6d37b88d880af9515ccc3e2f450d65085b8cf903',
+      independent_review_result:
+        'APPROVED_FOR_V10_2_CONTINUATION_ONLY — BLOCKER_0_MAJOR_0_MINOR_0; closes threshold and focused-coverage findings for the core increment only',
+      independent_review:
+        'CORE_INCREMENT_CLOSED_NEXT_DURABLE_PERSISTENCE_CANDIDATE_REQUIRES_OWN_REVIEW',
       required_exit: 'V10.2_INDEPENDENT_REVIEW',
       merge_authorized: false,
       production_access: false,
