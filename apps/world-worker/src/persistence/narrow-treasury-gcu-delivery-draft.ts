@@ -22,7 +22,10 @@ import {
   type WorldWriterCommitAssertion,
 } from '@econmind/core';
 
-import type { AtomicTransitionDraft } from './atomic-transition-repository.js';
+import type {
+  AtomicTransitionCandidateFactory,
+  AtomicTransitionDraft,
+} from './atomic-transition-repository.js';
 
 export const NARROW_TREASURY_GCU_DELIVERY_EVENT_TYPE =
   'NARROW_TREASURY_GCU_DELIVERED_V1' as const;
@@ -30,6 +33,25 @@ export const NARROW_TREASURY_GCU_DELIVERY_EVENT_SCHEMA =
   'narrow-treasury-gcu-delivery-event-v1' as const;
 export const NARROW_TREASURY_GCU_DELIVERY_OUTBOX_SCHEMA =
   'narrow-treasury-gcu-delivery-outbox-v1' as const;
+
+type NarrowTreasuryGcuDeliveryDraftInput = Parameters<
+  typeof prepareNarrowTreasuryGcuDeliveryAtomicDraft
+>[0];
+
+/**
+ * Server-owned adapter boundary for loading the one authoritative delivery
+ * snapshot. The worker must implement it with one consistent read boundary;
+ * this port accepts no caller-provided balance or account facts.
+ */
+export interface NarrowTreasuryGcuDeliveryPreparationSource {
+  load(
+    input: Readonly<{
+      readonly deliveryCommand: CanonicalCommand;
+    }>,
+  ): Promise<
+    Omit<NarrowTreasuryGcuDeliveryDraftInput, 'deliveryCommand' | 'sha256Hex'>
+  >;
+}
 
 function invalid(message: string): never {
   throw new DomainError(
@@ -180,5 +202,37 @@ export function prepareNarrowTreasuryGcuDeliveryAtomicDraft(input: {
     }),
     inventoryState: delivery.inventory.state,
     financialState: delivery.financial.state,
+  });
+}
+
+/**
+ * Adapts the narrowly scoped, server-owned delivery snapshot to the existing
+ * authoritative worker composition root. It deliberately accepts only a
+ * versioned automatic delivery command and never discretionary authorization.
+ */
+export function createNarrowTreasuryGcuDeliveryCandidateFactory(input: {
+  readonly sha256Hex: Sha256Hex;
+  readonly source: NarrowTreasuryGcuDeliveryPreparationSource;
+}): AtomicTransitionCandidateFactory {
+  return Object.freeze({
+    async prepare(
+      candidateInput: Parameters<
+        AtomicTransitionCandidateFactory['prepare']
+      >[0],
+    ) {
+      if (candidateInput.commitAuthorization !== null) {
+        invalid(
+          'Automatic Treasury-GCU delivery cannot carry user authorization',
+        );
+      }
+      const preparation = await input.source.load({
+        deliveryCommand: candidateInput.command,
+      });
+      return prepareNarrowTreasuryGcuDeliveryAtomicDraft({
+        ...preparation,
+        deliveryCommand: candidateInput.command,
+        sha256Hex: input.sha256Hex,
+      }).draft;
+    },
   });
 }

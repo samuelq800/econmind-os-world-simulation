@@ -29,5 +29,7 @@ export {
   NARROW_TREASURY_GCU_DELIVERY_EVENT_SCHEMA,
   NARROW_TREASURY_GCU_DELIVERY_EVENT_TYPE,
   NARROW_TREASURY_GCU_DELIVERY_OUTBOX_SCHEMA,
+  createNarrowTreasuryGcuDeliveryCandidateFactory,
   prepareNarrowTreasuryGcuDeliveryAtomicDraft,
+  type NarrowTreasuryGcuDeliveryPreparationSource,
 } from './persistence/narrow-treasury-gcu-delivery-draft.js';

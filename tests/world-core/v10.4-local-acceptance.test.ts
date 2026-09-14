@@ -33,7 +33,10 @@ import {
   type FinancialLedgerState,
   type InventoryLedgerState,
 } from '@econmind/core';
-import { prepareNarrowTreasuryGcuDeliveryAtomicDraft } from '../../apps/world-worker/src/persistence/narrow-treasury-gcu-delivery-draft.js';
+import {
+  createNarrowTreasuryGcuDeliveryCandidateFactory,
+  prepareNarrowTreasuryGcuDeliveryAtomicDraft,
+} from '../../apps/world-worker/src/persistence/narrow-treasury-gcu-delivery-draft.js';
 import { prepareAtomicTransitionCandidate } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
 import { createV10TwoCountryTestFixture } from '../support/v10-two-country-fixture.js';
 
@@ -529,10 +532,11 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
         '2026-09-14T00:07:00.000Z',
       ),
     ).lease;
+    const commitAssertion = createWorldWriterCommitAssertion(lease, '2');
     const result = prepareNarrowTreasuryGcuDeliveryAtomicDraft({
       buyerTreasury: prepared.fixture.financialAccounts.buyerTreasury,
       buyerTreasuryLegId: financialPostingLegId('LEG_V10_4_DRAFT_BUYER'),
-      commitAssertion: createWorldWriterCommitAssertion(lease, '2'),
+      commitAssertion,
       deliveryCommand: prepared.delivery,
       eventId: 'EVENT_V10_4_DELIVERY_DRAFT',
       eventSequence: '3',
@@ -563,5 +567,44 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
     expect(candidate.outboxMessages[0]?.eventId).toBe(
       candidate.transition.eventIds[0],
     );
+
+    const factory = createNarrowTreasuryGcuDeliveryCandidateFactory({
+      sha256Hex,
+      source: {
+        async load({ deliveryCommand }) {
+          expect(deliveryCommand).toBe(prepared.delivery);
+          return {
+            buyerTreasury: prepared.fixture.financialAccounts.buyerTreasury,
+            buyerTreasuryLegId: financialPostingLegId('LEG_V10_4_DRAFT_BUYER'),
+            commitAssertion,
+            eventId: 'EVENT_V10_4_DELIVERY_DRAFT',
+            eventSequence: '3',
+            financialBatchId: financialPostingBatchId(
+              'BATCH_V10_4_DRAFT_DELIVERY',
+            ),
+            financialState: prepared.preDelivery.financial,
+            inventoryPostingId: inventoryPostingId(
+              'POSTING_V10_4_DRAFT_DELIVERY',
+            ),
+            inventoryState: prepared.preDelivery.inventory,
+            observedAtReal: '2026-09-14T00:02:00.000Z',
+            outboxMessageId: 'OUTBOX_V10_4_DELIVERY_DRAFT',
+            sellerSettlement:
+              prepared.fixture.financialAccounts.sellerSettlement,
+            sellerSettlementLegId: financialPostingLegId(
+              'LEG_V10_4_DRAFT_SELLER',
+            ),
+            source: prepared.source,
+            transferCommand: prepared.transfer,
+          };
+        },
+      },
+    });
+    await expect(
+      factory.prepare({
+        command: prepared.delivery,
+        commitAuthorization: null,
+      }),
+    ).resolves.toEqual(result.draft);
   });
 });
