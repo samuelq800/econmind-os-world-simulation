@@ -232,27 +232,6 @@ describe('V10.2 durable narrow transfer approval store', () => {
         },
       ],
     });
-    await expect(
-      testDatabase.query(
-        `select authorization_version
-           from world_v2.current_commit_authorization
-          where world_id = $1
-            and auth_subject = $2::uuid
-            and country_id = $3
-            and office_id = 'TRADE'
-            and capability = 'TRADE_CONTRACTS'
-            and active
-          for key share`,
-        [
-          value.worldId,
-          fixture.officeActors.sellerTrade.principal.authSubject,
-          fixture.countries.seller,
-        ],
-      ),
-    ).resolves.toMatchObject({
-      rows: [{ authorization_version: expect.any(String) }],
-    });
-
     await store.openSellerOffer({
       command: value,
       signer: {
@@ -280,14 +259,33 @@ describe('V10.2 durable narrow transfer approval store', () => {
       },
     });
 
+    const cutoffAuthorizationQueries: string[] = [];
     await expect(
-      testDatabase.transaction((transaction) =>
-        store.assertCurrent(transaction as SqlExecutor, {
+      testDatabase.transaction((transaction) => {
+        const observingTransaction: SqlExecutor = {
+          query<Row extends object = Record<string, unknown>>(
+            statement: string,
+            parameters?: readonly unknown[],
+          ) {
+            if (
+              statement.includes('from world_v2.current_commit_authorization')
+            ) {
+              cutoffAuthorizationQueries.push(statement);
+            }
+            return transaction.query<Row>(statement, parameters);
+          },
+        };
+        return store.assertCurrent(observingTransaction, {
           command: value,
           observedAtReal: '2026-09-14T00:00:04.000Z',
-        }),
-      ),
+        });
+      }),
     ).resolves.toBe(undefined);
+    expect(cutoffAuthorizationQueries).toHaveLength(3);
+    for (const statement of cutoffAuthorizationQueries) {
+      expect(statement).toMatch(/for update/u);
+      expect(statement).not.toMatch(/for key share/u);
+    }
     await expect(
       testDatabase.query<{
         readonly proposal_id: string;

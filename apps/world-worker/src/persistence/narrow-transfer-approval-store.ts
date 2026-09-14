@@ -218,7 +218,7 @@ async function readCurrentAuthorization(
         and office_id = $4
         and capability = $5
         and active
-      for key share`,
+      for update`,
     [
       input.command.worldId,
       input.authSubject,
