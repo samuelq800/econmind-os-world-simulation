@@ -93,6 +93,16 @@ Review B found that the parent accepted any non-zero child exit in addition to
 It recorded `CHANGES_REQUIRED`, `MAJOR=1`, and requires a forward candidate to
 accept exactly `{ code: null, signal: 'SIGKILL' }` plus a new exact CI result.
 
+The first strict-signal forward target
+`7d161dbfa54fef0dc131dc68ab53f35ea08bc6c6` failed GitHub Actions run
+[`34849578126`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34849578126):
+12 tests passed, one child fixture was parent-gated, and the recovery test
+failed because the outer Vitest launcher observed `{ code: 1, signal: null }`.
+That failure is correctly fail-closed, but does not close the Major. The next
+candidate runs the child fixture in Vitest's thread pool, so the parent directly
+observes the same Node process that receives the configured `SIGKILL`; it
+requires a new exact CI result before any process-kill claim is restored.
+
 The service was removed with the CI job. No Supabase, staging, or production
 target was contacted.
 

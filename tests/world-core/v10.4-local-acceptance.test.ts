@@ -910,6 +910,7 @@ async function runV10ProcessKillChild(
       'tests/world-core/v10.4-local-acceptance.test.ts',
       '--testNamePattern',
       'terminates the Worker at the configured atomic checkpoint',
+      '--pool=threads',
     ],
     {
       cwd: root,

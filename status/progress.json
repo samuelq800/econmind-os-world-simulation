@@ -520,7 +520,7 @@
   "current_gate": {
     "step_id": "GATE_B_EVIDENCE_PREPARATION",
     "status": "IN_PROGRESS",
-    "review": "V10_4_AND_V10_5_LOCAL_CANDIDATES_APPROVED_FOR_CONTINUATION_ONLY; V10_6_AND_V10_7_SCOPED_REVIEW_00649D3_TO_6C1330B_APPROVED_FOR_GATE_B_EVIDENCE_PREPARATION_ONLY; GATE_B_LOCAL_SCHEDULER_SEQUENCE_REVIEW_071DCF8_TO_F0AA252_APPROVED_FOR_CONTINUATION_ONLY_BLOCKER_0_MAJOR_0_MINOR_0; REAL_POSTGRES_CI_34844035170_PASS_PARTIAL_V09_EVIDENCE_ONLY; V10_4_POSTGRES_REVIEW_5A67_TO_417_CHANGES_REQUIRED_MAJOR_1_PROPERTY_TIMEOUT_CLOSED_BY_FD153DC; V10_4_REAL_POSTGRES_CI_34845721571_PASS_PARTIAL_CONTENTION_EVIDENCE_ONLY; V10_4_REAL_POSTGRES_CI_34846740076_PASS_12_OF_12_SCOPED_EVIDENCE_ONLY; REVIEW_B_F2DA006_APPROVED_FOR_CONTINUATION_BLOCKER_0_MAJOR_0_MINOR_0; V10_4_REAL_POSTGRES_CI_34848336309_GREEN_13_OF_14_NOT_COUNTED_B_REVIEW_MAJOR_1_STRICT_SIGKILL_REQUIRED; V10_4_PROCESS_KILL_REVIEW_850223_TO_FED_CHANGES_REQUIRED_MAJOR_1",
+    "review": "V10_4_AND_V10_5_LOCAL_CANDIDATES_APPROVED_FOR_CONTINUATION_ONLY; V10_6_AND_V10_7_SCOPED_REVIEW_00649D3_TO_6C1330B_APPROVED_FOR_GATE_B_EVIDENCE_PREPARATION_ONLY; GATE_B_LOCAL_SCHEDULER_SEQUENCE_REVIEW_071DCF8_TO_F0AA252_APPROVED_FOR_CONTINUATION_ONLY_BLOCKER_0_MAJOR_0_MINOR_0; REAL_POSTGRES_CI_34844035170_PASS_PARTIAL_V09_EVIDENCE_ONLY; V10_4_POSTGRES_REVIEW_5A67_TO_417_CHANGES_REQUIRED_MAJOR_1_PROPERTY_TIMEOUT_CLOSED_BY_FD153DC; V10_4_REAL_POSTGRES_CI_34845721571_PASS_PARTIAL_CONTENTION_EVIDENCE_ONLY; V10_4_REAL_POSTGRES_CI_34846740076_PASS_12_OF_12_SCOPED_EVIDENCE_ONLY; REVIEW_B_F2DA006_APPROVED_FOR_CONTINUATION_BLOCKER_0_MAJOR_0_MINOR_0; V10_4_REAL_POSTGRES_CI_34848336309_GREEN_13_OF_14_NOT_COUNTED_B_REVIEW_MAJOR_1_STRICT_SIGKILL_REQUIRED; V10_4_PROCESS_KILL_REVIEW_850223_TO_FED_CHANGES_REQUIRED_MAJOR_1; V10_4_REAL_POSTGRES_CI_34849578126_FAIL_12_OF_14_STRICT_SIGNAL_HARNESS; V10_4_PROCESS_KILL_THREAD_POOL_FORWARD_CANDIDATE_CI_PENDING",
     "next_step": "GATE_B_WORLD_CORE_HARD_GATE",
     "next_step_ready": false,
     "next_step_blockers": [
@@ -528,7 +528,7 @@
       "full real PostgreSQL multi-process and process-kill recovery across the complete V10 lifecycle beyond the narrow V10.4 two-pool contention, transaction-failure reconnect, acknowledgement-loss, and one delivery process-kill scenarios",
       "browser E2E and RLS/grant negative evidence on an exact owner-approved non-production target"
     ],
-    "local_preflight": "PASS — strict-SIGKILL forward candidate; lint, format, typecheck, build, 74 passed / 2 skipped files and 690 passed / 13 skipped tests, boundaries 34/34, safe local environment, 16-migration validation/rehearsal, foundation policy and secrets check; one-worker runner preserves property budget and timeout while avoiding local PGlite contention; isolated PostgreSQL CI evidence pending",
+    "local_preflight": "PASS — strict-SIGKILL thread-pool forward candidate; lint, format, typecheck, build, 74 passed / 2 skipped files and 690 passed / 17 skipped tests, boundaries 34/34, safe local environment, 16-migration validation/rehearsal, foundation policy and secrets check; one-worker runner preserves property budget and timeout while avoiding local PGlite contention; isolated PostgreSQL CI evidence pending",
     "property_baseline": "PASS — 29 fixed-seed properties × 1,000 generated runs = 29,000 cases, one fixed-seed 250-sequence scheduler model, and one fixed-seed 100-sequence narrow V10 Reserve/Ship/Deliver model; no counterexample",
     "required_gate": "GATE_B_WORLD_CORE_HARD_GATE",
     "gate_status": "PENDING"
