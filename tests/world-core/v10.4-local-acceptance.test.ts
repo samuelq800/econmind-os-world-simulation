@@ -1,4 +1,6 @@
 import { createHash } from 'node:crypto';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
@@ -38,6 +40,14 @@ import {
   prepareNarrowTreasuryGcuDeliveryAtomicDraft,
 } from '../../apps/world-worker/src/persistence/narrow-treasury-gcu-delivery-draft.js';
 import { prepareAtomicTransitionCandidate } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
+import {
+  AtomicTransitionRepository,
+  type AtomicCommitAuthorizationGuard,
+  type PrivateAtomicTransitionCandidate,
+} from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
+import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
+import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
+import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
 import { createV10TwoCountryTestFixture } from '../support/v10-two-country-fixture.js';
 
 const sha256Hex = (input: string): string =>
@@ -45,6 +55,114 @@ const sha256Hex = (input: string): string =>
 
 const SUBMITTED_AT = '2026-09-14T00:00:00.000Z';
 const RESERVED_AT = '2026-09-14T00:01:00.000Z';
+const root = path.resolve(import.meta.dirname, '../..');
+const atomicMigrations = [
+  '0001_world_v2_namespace.sql',
+  '0002_world_v2_command_event_ledger.sql',
+  '0003_world_v2_command_receipts_outbox.sql',
+  '0004_world_v2_receipt_event_set_integrity.sql',
+  '0005_world_v2_writer_lease_fencing.sql',
+  '0006_world_v2_writer_lease_lineage_guard.sql',
+  '0007_world_v2_atomic_transition_facts.sql',
+  '0008_world_v2_materialization_recovery.sql',
+  '0009_world_v2_posting_payload_integrity.sql',
+  '0010_world_v2_command_claim_fencing.sql',
+  '0011_world_v2_current_commit_authorization.sql',
+  '0012_world_v2_command_claim_active_lease_guard.sql',
+] as const;
+
+const automaticCommitGuard: AtomicCommitAuthorizationGuard = Object.freeze({
+  async assertCurrent(transaction, input) {
+    expect(input).toMatchObject({
+      authorityKind: 'VERSIONED_AUTOMATIC',
+      expected: 'NOT_APPLICABLE',
+      proof: null,
+    });
+    await transaction.query('select 1');
+  },
+});
+
+async function atomicDatabase(): Promise<V09AtomicTestDatabase> {
+  const database = createPGliteV09AtomicTestDatabase();
+  for (const migration of atomicMigrations) {
+    await database.executeScript(
+      await readFile(
+        path.join(root, 'database/migrations/artifacts', migration),
+        'utf8',
+      ),
+    );
+  }
+  return database;
+}
+
+async function seedAtomicDelivery(
+  database: V09AtomicTestDatabase,
+  candidate: PrivateAtomicTransitionCandidate,
+): Promise<void> {
+  const command = candidate.command;
+  await database.query(
+    `insert into world_v2.world_head (world_id, world_version, event_sequence)
+     values ($1, 2, 2)`,
+    [command.worldId],
+  );
+  await database.query(
+    `insert into world_v2.command_submission
+       (world_id, command_id, idempotency_key, command_type, schema_version,
+        canonical_payload, payload_sha256, command_fingerprint, auth_subject,
+        actor_id, country_id, office_id, expected_world_version, sim_time,
+        correlation_id, submitted_at_real)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+    [
+      command.worldId,
+      command.commandId,
+      command.idempotencyKey,
+      command.commandType,
+      command.schemaVersion,
+      command.canonicalPayload,
+      command.payloadHash,
+      command.fingerprint,
+      command.authSubject,
+      command.actorId,
+      command.countryId,
+      command.officeId,
+      command.expectedWorldVersion,
+      command.simTime.toCanonicalValue(),
+      command.correlationId,
+      command.submittedAtReal,
+    ],
+  );
+  await database.query(
+    `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
+    [
+      command.worldId,
+      candidate.commitAssertion.holderId,
+      '2026-09-14T00:02:00.000Z',
+      '300000',
+    ],
+  );
+  await database.query(
+    `insert into world_v2.command_queue
+       (world_id, command_id, authority_kind, priority_rank,
+        available_at_sim_time, attempt_count)
+     values ($1, $2, 'VERSIONED_AUTOMATIC', 0, $3, 0)`,
+    [command.worldId, command.commandId, command.simTime.toCanonicalValue()],
+  );
+  await database.query(
+    `update world_v2.command_queue
+        set queue_state = 'CLAIMED',
+            attempt_count = 1,
+            claimed_by = $3,
+            claimed_at_real = $4,
+            claim_fencing_token = 1
+      where world_id = $1 and command_id = $2`,
+    [
+      command.worldId,
+      command.commandId,
+      candidate.commitAssertion.holderId,
+      '2026-09-14T00:02:00.000Z',
+    ],
+  );
+}
 
 function transferCommand(): CanonicalCommand {
   const fixture = createV10TwoCountryTestFixture();
@@ -606,5 +724,136 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
         commitAuthorization: null,
       }),
     ).resolves.toEqual(result.draft);
+  });
+
+  it('commits the delivery draft atomically in isolated PGlite and returns the durable receipt on retry', async () => {
+    const prepared = await preparedDelivery();
+    const lease = acquireWorldWriterLease(
+      null,
+      worldWriterLeaseRequest(
+        prepared.delivery.worldId,
+        workerId('WORKER_V10_4_ATOMIC'),
+        '2026-09-14T00:02:00.000Z',
+        '2026-09-14T00:07:00.000Z',
+      ),
+    ).lease;
+    const draft = prepareNarrowTreasuryGcuDeliveryAtomicDraft({
+      buyerTreasury: prepared.fixture.financialAccounts.buyerTreasury,
+      buyerTreasuryLegId: financialPostingLegId('LEG_V10_4_ATOMIC_BUYER'),
+      commitAssertion: createWorldWriterCommitAssertion(lease, '2'),
+      deliveryCommand: prepared.delivery,
+      eventId: 'EVENT_V10_4_ATOMIC_DELIVERY',
+      eventSequence: '3',
+      financialBatchId: financialPostingBatchId('BATCH_V10_4_ATOMIC_DELIVERY'),
+      financialState: prepared.preDelivery.financial,
+      inventoryPostingId: inventoryPostingId('POSTING_V10_4_ATOMIC_DELIVERY'),
+      inventoryState: prepared.preDelivery.inventory,
+      observedAtReal: '2026-09-14T00:02:00.000Z',
+      outboxMessageId: 'OUTBOX_V10_4_ATOMIC_DELIVERY',
+      sellerSettlement: prepared.fixture.financialAccounts.sellerSettlement,
+      sellerSettlementLegId: financialPostingLegId('LEG_V10_4_ATOMIC_SELLER'),
+      source: prepared.source,
+      transferCommand: prepared.transfer,
+      sha256Hex,
+    }).draft;
+    const candidate = prepareAtomicTransitionCandidate({
+      command: prepared.delivery,
+      commitAuthorization: null,
+      draft,
+      sha256Hex,
+    });
+    const failingDatabase = await atomicDatabase();
+    try {
+      await seedAtomicDelivery(failingDatabase, candidate);
+      const failingRepository = new AtomicTransitionRepository({
+        database: failingDatabase as SqlDatabase,
+        authorizationGuard: automaticCommitGuard,
+        faultInjector: {
+          hit(checkpoint) {
+            if (checkpoint === 'AFTER_FINANCIAL_POSTINGS') {
+              throw new Error('INJECTED_V10_4_AFTER_FINANCIAL_POSTINGS');
+            }
+          },
+        },
+        workerId: 'WORKER_V10_4_ATOMIC',
+        sha256Hex,
+      });
+      await expect(failingRepository.commit(candidate)).rejects.toThrow(
+        'transaction rolled back',
+      );
+      const rolledBack = await failingDatabase.query<{
+        readonly event_count: string;
+        readonly financial_count: string;
+        readonly inventory_count: string;
+        readonly outbox_count: string;
+        readonly receipt_count: string;
+        readonly world_version: string;
+      }>(
+        `select
+           (select count(*)::text from world_v2.authoritative_event) as event_count,
+           (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+           (select count(*)::text from world_v2.financial_posting_batch) as financial_count,
+           (select count(*)::text from world_v2.notification_outbox) as outbox_count,
+           (select count(*)::text from world_v2.command_receipt) as receipt_count,
+           (select world_version::text from world_v2.world_head) as world_version`,
+      );
+      expect(rolledBack.rows[0]).toEqual({
+        event_count: '0',
+        financial_count: '0',
+        inventory_count: '0',
+        outbox_count: '0',
+        receipt_count: '0',
+        world_version: '2',
+      });
+    } finally {
+      await failingDatabase.close();
+    }
+    const database = await atomicDatabase();
+    try {
+      await seedAtomicDelivery(database, candidate);
+      const repository = new AtomicTransitionRepository({
+        database: database as SqlDatabase,
+        authorizationGuard: automaticCommitGuard,
+        workerId: 'WORKER_V10_4_ATOMIC',
+        sha256Hex,
+      });
+      await expect(repository.commit(candidate)).resolves.toMatchObject({
+        source: 'NEW_COMMIT',
+        receipt: { outcome: 'COMMITTED' },
+      });
+      await expect(repository.commit(candidate)).resolves.toMatchObject({
+        source: 'EXISTING_COMMIT',
+        receipt: { outcome: 'COMMITTED' },
+      });
+      const persisted = await database.query<{
+        readonly event_count: string;
+        readonly financial_count: string;
+        readonly inventory_count: string;
+        readonly outbox_count: string;
+        readonly queue_state: string;
+        readonly receipt_count: string;
+        readonly world_version: string;
+      }>(
+        `select
+           (select count(*)::text from world_v2.authoritative_event) as event_count,
+           (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+           (select count(*)::text from world_v2.financial_posting_batch) as financial_count,
+           (select count(*)::text from world_v2.notification_outbox) as outbox_count,
+           (select count(*)::text from world_v2.command_receipt) as receipt_count,
+           (select queue_state from world_v2.command_queue) as queue_state,
+           (select world_version::text from world_v2.world_head) as world_version`,
+      );
+      expect(persisted.rows[0]).toEqual({
+        event_count: '1',
+        financial_count: '1',
+        inventory_count: '1',
+        outbox_count: '1',
+        queue_state: 'FINALIZED',
+        receipt_count: '1',
+        world_version: '3',
+      });
+    } finally {
+      await database.close();
+    }
   });
 });
