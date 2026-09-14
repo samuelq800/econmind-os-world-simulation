@@ -38,7 +38,7 @@ import {
   type InventoryLedgerState,
   type InventoryPostingResult,
 } from '../inventory/inventory-ledger.js';
-import { Price, Quantity, type SimTime } from '../numeric/index.js';
+import { Money, Price, Quantity, type SimTime } from '../numeric/index.js';
 import { COMMODITY_REGISTRY } from '../registries/fixed-catalog.js';
 import type { AuthoritativeTransition } from '../commands/receipt.js';
 
@@ -53,8 +53,11 @@ export const NARROW_TREASURY_GCU_PAYLOAD_SCHEMA =
   'core-goods-transfer-v1' as const;
 export const NARROW_TREASURY_GCU_POLICY_VERSION =
   'V10_TREASURY_GCU_V1' as const;
+export const NARROW_TREASURY_GCU_THRESHOLD_POLICY_VERSION =
+  'V10_TREASURY_GCU_THRESHOLD_V1' as const;
 export const NARROW_TREASURY_GCU_PAYMENT_SOURCE = 'BUYER_TREASURY_GCU' as const;
 export const NARROW_TREASURY_GCU_COMMODITY = 'GRAIN' as const;
+export const NARROW_TREASURY_GCU_MAX_SETTLEMENT = '6' as const;
 
 const RFC3339_MILLISECONDS =
   /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d\.\d{3}Z$/u;
@@ -69,6 +72,10 @@ export interface NarrowTreasuryGcuTransferTerms {
   readonly buyerCountryId: ReturnType<typeof countryId>;
   readonly quantity: Quantity;
   readonly price: Price;
+  readonly threshold: Readonly<{
+    readonly policyVersion: typeof NARROW_TREASURY_GCU_THRESHOLD_POLICY_VERSION;
+    readonly maxSettlement: Money;
+  }>;
   readonly assetSource: Readonly<{
     readonly batchId: InventoryBatchId;
     readonly physicalLocationId: InventoryLocationId;
@@ -216,6 +223,35 @@ function parseAssetSource(
   });
 }
 
+function parseThreshold(
+  value: unknown,
+): NarrowTreasuryGcuTransferTerms['threshold'] {
+  const threshold = record(value, 'threshold');
+  exactKeys(threshold, ['maxSettlement', 'policyVersion'], 'threshold');
+  if (
+    threshold.policyVersion !== NARROW_TREASURY_GCU_THRESHOLD_POLICY_VERSION
+  ) {
+    invalid('Transfer threshold policy is outside the approved fixture');
+  }
+  const maximum = record(threshold.maxSettlement, 'threshold.maxSettlement');
+  exactKeys(maximum, ['amount', 'currency'], 'threshold.maxSettlement');
+  const maxSettlement = Money.from(
+    requiredString(maximum.amount, 'threshold.maxSettlement.amount'),
+    requiredString(maximum.currency, 'threshold.maxSettlement.currency'),
+  );
+  if (
+    maxSettlement.currency !== 'GCU' ||
+    maxSettlement.toCanonicalValue().amount !==
+      NARROW_TREASURY_GCU_MAX_SETTLEMENT
+  ) {
+    invalid('Transfer threshold does not match the approved fixture maximum');
+  }
+  return Object.freeze({
+    policyVersion: NARROW_TREASURY_GCU_THRESHOLD_POLICY_VERSION,
+    maxSettlement,
+  });
+}
+
 function parsePayload(command: CanonicalCommand): JsonRecord {
   try {
     return record(JSON.parse(command.canonicalPayload), 'Command payload');
@@ -347,6 +383,7 @@ export function parseNarrowTreasuryGcuTransferTerms(
       'quantity',
       'schemaVersion',
       'sellerCountryId',
+      'threshold',
     ],
     'Narrow transfer payload',
   );
@@ -372,6 +409,7 @@ export function parseNarrowTreasuryGcuTransferTerms(
   }
   const quantity = parseQuantity(payload.quantity);
   const price = parsePrice(payload.price);
+  const threshold = parseThreshold(payload.threshold);
   const assetSource = parseAssetSource(payload.assetSource);
   const registeredCommodity = COMMODITY_REGISTRY.get(
     commodityId(NARROW_TREASURY_GCU_COMMODITY),
@@ -383,6 +421,10 @@ export function parseNarrowTreasuryGcuTransferTerms(
     price.perUnit !== quantity.unit
   ) {
     invalid('Transfer does not use the approved registered GRAIN/GCU terms');
+  }
+  const settlement = price.multiply(quantity);
+  if (settlement.amount.greaterThan(threshold.maxSettlement.amount)) {
+    invalid('Transfer settlement exceeds the approved below-threshold maximum');
   }
   const expiresAtReal = requiredString(payload.expiresAtReal, 'expiresAtReal');
   if (
@@ -398,6 +440,7 @@ export function parseNarrowTreasuryGcuTransferTerms(
     buyerCountryId,
     quantity,
     price,
+    threshold,
     assetSource,
     paymentSource: NARROW_TREASURY_GCU_PAYMENT_SOURCE,
     policyVersion: NARROW_TREASURY_GCU_POLICY_VERSION,
@@ -469,6 +512,12 @@ export async function assertNarrowTransferApprovalsCurrent(input: {
       terms.price.toCanonicalValue().amount ||
     input.approvals.terms.price.currency !== terms.price.currency ||
     input.approvals.terms.price.perUnit !== terms.price.perUnit ||
+    input.approvals.terms.threshold.policyVersion !==
+      terms.threshold.policyVersion ||
+    input.approvals.terms.threshold.maxSettlement.currency !==
+      terms.threshold.maxSettlement.currency ||
+    input.approvals.terms.threshold.maxSettlement.toCanonicalValue().amount !==
+      terms.threshold.maxSettlement.toCanonicalValue().amount ||
     input.approvals.terms.assetSource.batchId !== terms.assetSource.batchId ||
     input.approvals.terms.assetSource.physicalLocationId !==
       terms.assetSource.physicalLocationId ||

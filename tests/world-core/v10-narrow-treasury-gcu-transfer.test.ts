@@ -74,6 +74,10 @@ function command(
         },
         paymentSource: 'BUYER_TREASURY_GCU',
         policyVersion: 'V10_TREASURY_GCU_V1',
+        threshold: {
+          policyVersion: 'V10_TREASURY_GCU_THRESHOLD_V1',
+          maxSettlement: { amount: '6', currency: 'GCU' },
+        },
         expiresAtReal: EXPIRES_AT,
       },
     },
@@ -206,6 +210,7 @@ function authoritativeInventoryState(
     typeof createV10TwoCountryTestFixture
   >['inventoryAccounts']['sellerAvailable'],
   transfer: CanonicalCommand,
+  quantity = '4',
 ) {
   const account = createInventoryAccount(source);
   return authorizeInventoryLedgerState({
@@ -213,7 +218,10 @@ function authoritativeInventoryState(
     worldId: transfer.worldId,
     worldVersion: '0',
     balances: Object.freeze([
-      Object.freeze({ account, quantity: Quantity.from('4', account.unit) }),
+      Object.freeze({
+        account,
+        quantity: Quantity.from(quantity, account.unit),
+      }),
     ]),
     appliedPostings: Object.freeze([]),
   });
@@ -241,6 +249,14 @@ describe('V10.2 narrow Treasury-GCU transfer', () => {
         proposalVersion: 'VERSION_1',
       }),
     ).toThrow(/approved registered GRAIN\/GCU terms/u);
+    expect(() =>
+      createNarrowTransferApprovalBundle({
+        command: command({ quantity: '3' }),
+        sellerProposalId: proposalId('PROPOSAL_V10_2_SELLER_THRESHOLD'),
+        buyerProposalId: proposalId('PROPOSAL_V10_2_BUYER_THRESHOLD'),
+        proposalVersion: 'VERSION_1',
+      }),
+    ).toThrow(/below-threshold maximum/u);
   });
 
   it('requires each current Seller Trade, Buyer Trade, and Buyer Finance signature', async () => {
@@ -253,21 +269,58 @@ describe('V10.2 narrow Treasury-GCU transfer', () => {
       }),
     ).resolves.toMatchObject({ commodityId: 'GRAIN' });
 
-    const staleBuyer = Object.freeze({
-      ...scenario.approvals.buyer,
-      signatures: Object.freeze(
-        scenario.approvals.buyer.signatures.map((signature) =>
-          signature.officeId === 'FINANCE'
-            ? Object.freeze({ ...signature, authorizationVersion: 'REVOKED_1' })
-            : signature,
+    for (const target of [
+      'SELLER_TRADE',
+      'BUYER_TRADE',
+      'BUYER_FINANCE',
+    ] as const) {
+      const staleSeller = Object.freeze({
+        ...scenario.approvals.seller,
+        signatures: Object.freeze(
+          scenario.approvals.seller.signatures.map((signature) =>
+            target === 'SELLER_TRADE'
+              ? Object.freeze({
+                  ...signature,
+                  authorizationVersion: 'REVOKED_1',
+                })
+              : signature,
+          ),
         ),
-      ),
-    });
+      });
+      const staleBuyer = Object.freeze({
+        ...scenario.approvals.buyer,
+        signatures: Object.freeze(
+          scenario.approvals.buyer.signatures.map((signature) =>
+            (target === 'BUYER_TRADE' && signature.officeId === 'TRADE') ||
+            (target === 'BUYER_FINANCE' && signature.officeId === 'FINANCE')
+              ? Object.freeze({
+                  ...signature,
+                  authorizationVersion: 'REVOKED_1',
+                })
+              : signature,
+          ),
+        ),
+      });
+      await expect(
+        assertNarrowTransferApprovalsCurrent({
+          approvals: Object.freeze({
+            ...scenario.approvals,
+            seller: staleSeller,
+            buyer: staleBuyer,
+          }),
+          contexts: scenario.contexts,
+          atReal: RESERVED_AT,
+        }),
+      ).rejects.toMatchObject({
+        code: DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+      });
+    }
+
     await expect(
       assertNarrowTransferApprovalsCurrent({
-        approvals: Object.freeze({ ...scenario.approvals, buyer: staleBuyer }),
+        approvals: scenario.approvals,
         contexts: scenario.contexts,
-        atReal: RESERVED_AT,
+        atReal: EXPIRES_AT,
       }),
     ).rejects.toMatchObject({ code: DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED });
   });
@@ -313,10 +366,29 @@ describe('V10.2 narrow Treasury-GCU transfer', () => {
     });
     expect(duplicate.inventory.receipt.outcome).toBe('EXACT_DUPLICATE');
     expect(duplicate.inventory.state).toBe(first.inventory.state);
+
+    const differentIntent = await approvedScenario(command({ quantity: '1' }));
+    await expect(
+      reserveNarrowTreasuryGcuTransfer({
+        approvals: differentIntent.approvals,
+        contexts: differentIntent.contexts,
+        atReal: RESERVED_AT,
+        inventoryState: first.inventory.state,
+        source: differentIntent.fixture.inventoryAccounts.sellerAvailable,
+        reservationId: inventoryReservationId('RESERVATION_V10_2'),
+        postingId: inventoryPostingId('POSTING_V10_2_RESERVE'),
+        transition: differentIntent.transition,
+        simTime: SimTime.fromTicks('10000'),
+        causationEventIds: [differentIntent.event.eventId],
+        sha256Hex: sha256,
+      }),
+    ).rejects.toMatchObject({
+      code: DOMAIN_ERROR_CODES.INVENTORY_POSTING_CONFLICT,
+    });
   });
 
   it('fails closed when the approved quantity exceeds authoritative stock', async () => {
-    const scenario = await approvedScenario(command({ quantity: '5' }));
+    const scenario = await approvedScenario();
     await expect(
       reserveNarrowTreasuryGcuTransfer({
         approvals: scenario.approvals,
@@ -325,6 +397,7 @@ describe('V10.2 narrow Treasury-GCU transfer', () => {
         inventoryState: authoritativeInventoryState(
           scenario.fixture.inventoryAccounts.sellerAvailable,
           scenario.approvals.command,
+          '1',
         ),
         source: scenario.fixture.inventoryAccounts.sellerAvailable,
         reservationId: inventoryReservationId('RESERVATION_V10_2_NO_STOCK'),
