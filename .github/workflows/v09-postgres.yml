@@ -15,13 +15,14 @@ on:
       - scripts/v09-postgres-test-environment.mjs
       - tests/world-core/world-writer-lease-postgres.test.ts
       - tests/world-core/v09-atomic-recovery-postgres.test.ts
+      - tests/world-core/v10.4-local-acceptance.test.ts
 
 permissions:
   contents: read
 
 jobs:
   real-postgres-v09-1:
-    name: Disposable PostgreSQL V09.1 evidence
+    name: Disposable PostgreSQL V09/V10 evidence
     runs-on: ubuntu-latest
     timeout-minutes: 10
     services:
@@ -59,3 +60,4 @@ jobs:
       - run: pnpm --filter @econmind/world-worker build
       - run: pnpm exec vitest run tests/world-core/v09-commit-authorization-cutoff.test.ts
       - run: pnpm exec vitest run tests/world-core/v09-atomic-recovery-postgres.test.ts
+      - run: pnpm test:v10.4:postgres

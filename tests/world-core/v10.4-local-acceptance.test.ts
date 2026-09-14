@@ -55,7 +55,10 @@ import {
   type PrivateAtomicTransitionCandidate,
 } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
-import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
+import {
+  createLocalPostgresV09AtomicTestDatabase,
+  createPGliteV09AtomicTestDatabase,
+} from '../support/v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
 import { createV10TwoCountryTestFixture } from '../support/v10-two-country-fixture.js';
 import { FOUNDATION_PROPERTY_CONFIG } from '../property/property-config.js';
@@ -98,7 +101,13 @@ const automaticCommitGuard: AtomicCommitAuthorizationGuard = Object.freeze({
 });
 
 async function atomicDatabase(): Promise<V09AtomicTestDatabase> {
-  const database = createPGliteV09AtomicTestDatabase();
+  const database = process.env.V09_TEST_DATABASE_URL
+    ? createLocalPostgresV09AtomicTestDatabase()
+    : createPGliteV09AtomicTestDatabase();
+  if (database.kind === 'POSTGRESQL') {
+    await database.executeScript('create extension if not exists pgcrypto');
+    await database.executeScript('drop schema if exists world_v2 cascade');
+  }
   for (const migration of atomicMigrations) {
     await database.executeScript(
       await readFile(
@@ -689,7 +698,7 @@ function settle(
   });
 }
 
-describe('V10.4 local Treasury-GCU acceptance', () => {
+describe('V10.4 Treasury-GCU acceptance', () => {
   it('delivers the full exact quantity and preserves bilateral GCU and goods conservation', async () => {
     const prepared = await preparedDelivery();
     const goodsBefore = commodityQuantity(
@@ -828,7 +837,7 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
       }),
       V10_4_PROPERTY_CONFIG,
     );
-  });
+  }, 10_000);
 
   it('binds the applied delivery to one automatic atomic draft, receipt, and outbox fact', async () => {
     const prepared = await preparedDelivery();
@@ -1064,7 +1073,7 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
     }
   });
 
-  it('commits the delivery draft atomically in isolated PGlite and returns the durable receipt on retry', async () => {
+  it('commits the delivery draft atomically in an isolated database and returns the durable receipt on retry', async () => {
     const prepared = await preparedDelivery();
     const lease = acquireWorldWriterLease(
       null,
