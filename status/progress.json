@@ -1,8 +1,8 @@
 {
   "schema_version": "R2-101.1",
   "derived_at": "2026-09-13T00:00:00Z",
-  "source_commit": "2ac1b67573336a751af2e27839372e872333417d",
-  "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. The URI-guard forward fix at 258e695 closed V09.1-STAGING-BLK-01. Review B against runner target 23dd2da39783622ce175382bd19c51968182215a is preserved as CHANGES_REQUIRED with one blocker and one major; its strict-cleanup/acknowledgement/durable-evidence forward candidate requires fresh independent review. Dedicated non-production RLS/grant/crash evidence remains NOT_RUN. The project owner has approved historical completed candidate work for use as a development baseline; this does not convert missing operational evidence into a pass. The project owner also approved the narrowly scoped ADR-09 V10 fixture rule. V10.1 remains incomplete and unverified; no production access or production mutation is authorized.",
+  "source_commit": "c50a2cdca9adc488d34701346e02326ce8c871dd",
+  "note": "Gate A, V06, V07 and V08 are verified; V08 is merged to synchronized main with runtime equivalence PASS. ADR-18 is approved by delegated owner record. The URI-guard forward fix at 258e695 closed V09.1-STAGING-BLK-01. Review B against runner target 23dd2da39783622ce175382bd19c51968182215a is preserved as CHANGES_REQUIRED with one blocker and one major; its strict-cleanup/acknowledgement/durable-evidence forward candidate requires fresh independent review. Dedicated non-production RLS/grant/crash evidence remains NOT_RUN. The project owner has approved historical completed candidate work for use as a development baseline; this does not convert missing operational evidence into a pass. The project owner also approved the narrowly scoped ADR-09 V10 fixture rule. V10.1's candidate-only named-party materializer uses an initially empty, cross-school-capable server source; it has no member-write workflow or operational evidence. V10.1 remains incomplete and unverified; no production access or production mutation is authorized.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -348,6 +348,17 @@
         "candidate_commit": "c5669dac74796e7e796661e8320a64b50ee8ec7c",
         "evidence_file": "docs/reports/V10/V10.1_QUERY_BOUNDARY_INCREMENT.md",
         "focused_tests": "PASS — 1 file / 2 tests",
+        "production_mutation": false
+      },
+      "current_negotiation_party_read_publication": {
+        "status": "IMPLEMENTED_UNVERIFIED",
+        "candidate_commit": "c50a2cdca9adc488d34701346e02326ce8c871dd",
+        "migration_artifact_commit": "89fac267f8b7b7185523a7b93035bf6df68a192e",
+        "migration_manifest_commit": "54eb0fe0f26f8ba3c32145c5467400e85d68dfac",
+        "evidence_file": "docs/reports/V10/V10.1_QUERY_BOUNDARY_INCREMENT.md",
+        "focused_tests": "PASS — 1 file / 4 tests",
+        "migration_validation": "PASS — 14 artifacts",
+        "local_rehearsal": "PASS — ephemeral PGlite only; no external database",
         "production_mutation": false
       }
     },
