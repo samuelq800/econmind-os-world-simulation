@@ -245,7 +245,7 @@ describe('V06 owner-authorized package continuation', () => {
       next_step: 'GATE_B_WORLD_CORE_HARD_GATE',
       next_step_ready: false,
       next_step_blockers: [
-        'full immutable-candidate regression, property/state-machine, replay and projection-hash evidence',
+        'Gate B command-sequence state-machine evidence; the local 29-property / 29,000-case baseline does not replace that campaign',
         'real isolated PostgreSQL concurrency, transaction and controlled crash-recovery evidence',
         'browser E2E and RLS/grant negative evidence on an exact owner-approved non-production target',
       ],
