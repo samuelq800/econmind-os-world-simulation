@@ -25,12 +25,29 @@ where the disposable PostgreSQL V10.4 suite passed 12/12. Review B approved
 this narrow increment for continuation with `BLOCKER=0`, `MAJOR=0`, and
 `MINOR=0`.
 
+## Approval-aware lifecycle increment
+
+Candidate `0391a662fbe3a51db962297689d7f36e40b4000c` adds a separate,
+fixed-seed 250-run model of the real V10 functions. Every generated sequence
+may interleave seller Trade, buyer Trade, and buyer Finance signatures with
+out-of-order Reserve, Ship, Deliver, and exact-retry attempts. The model
+only permits Reserve once all three signatures have been recorded, then
+enforces `AVAILABLE → RESERVED → IN_TRANSIT → DELIVERED`. Each successful
+transition is reconstructed from the actual command, event, inventory, and
+financial lineage; every rejected or duplicate attempt must preserve the
+canonical approval-and-ledger state.
+
+The same candidate passed the isolated disposable-PostgreSQL V09/V10 workflow
+in GitHub Actions run
+[`34852941751`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34852941751).
+That run also completed migration validation and the worker/Core build steps.
+It is automated evidence only and has not received a fresh independent review.
+
 ## Evidence boundary
 
-This is narrow pure-Core lifecycle evidence, additionally exercised in the
-disposable PostgreSQL suite. It covers the narrow V10
-Treasury-GCU path only; it does not cover authorization revocation, arbitrary
-Command types, durable worker restart across every lifecycle phase, full
-real-PostgreSQL contention, process kill, browser E2E, or RLS/grant negatives.
-It is not a Gate B approval, staging authorization, merge authorization, or
-Supabase action.
+This remains narrow V10 Treasury-GCU lifecycle evidence, additionally
+exercised in the disposable PostgreSQL suite. It does not cover authorization
+revocation within the generated model, arbitrary Command types, durable worker
+restart across every lifecycle phase, full real-PostgreSQL contention and
+process-kill recovery, browser E2E, or RLS/grant negatives. It is not a Gate B
+approval, staging authorization, merge authorization, or Supabase action.

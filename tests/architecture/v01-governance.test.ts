@@ -245,7 +245,7 @@ describe('V06 owner-authorized package continuation', () => {
       next_step: 'GATE_B_WORLD_CORE_HARD_GATE',
       next_step_ready: false,
       next_step_blockers: [
-        'full Gate B command-sequence state-machine evidence; the local 250-sequence scheduler model, 100-sequence narrow V10 lifecycle model, and 29-property / 29,000-case baseline do not replace the complete V10 lifecycle campaign',
+        'full Gate B command-sequence state-machine evidence; the local 250-sequence scheduler model, 100-sequence narrow V10 lifecycle model, approval-aware 250-sequence narrow V10 lifecycle model, and 29-property / 29,000-case baseline do not replace the complete V10 lifecycle campaign',
         'full real PostgreSQL multi-process and process-kill recovery across the complete V10 lifecycle beyond the narrow V10.4 two-pool contention, transaction-failure reconnect, acknowledgement-loss, and five delivery atomic-boundary process-kill scenarios',
         'browser E2E and RLS/grant negative evidence on an exact owner-approved non-production target',
       ],
