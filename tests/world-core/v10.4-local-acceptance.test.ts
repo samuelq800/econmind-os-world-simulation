@@ -16,6 +16,7 @@ import {
   createAuthoritativeTransition,
   createNarrowTransferApprovalBundle,
   createOpeningSeed,
+  createOpeningSource,
   createWorldWriterCommitAssertion,
   deliverNarrowTreasuryGcuTransfer,
   financialPostingBatchId,
@@ -44,6 +45,7 @@ import { NarrowTreasuryGcuDeliveryOutboxConsumer } from '../../apps/world-worker
 import { NarrowTreasuryGcuDeliveryProjectionRebuilder } from '../../apps/world-worker/src/projections/narrow-treasury-gcu-delivery-projection.js';
 import { WorldRecoveryCoordinator } from '../../apps/world-worker/src/recovery/world-recovery.js';
 import { prepareAtomicTransitionCandidate } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
+import { SqlNarrowTreasuryGcuDeliveryPreparationSource } from '../../apps/world-worker/src/persistence/sql-narrow-treasury-gcu-delivery-preparation-source.js';
 import {
   AtomicTransitionRepository,
   type AtomicCommitAuthorizationGuard,
@@ -78,6 +80,7 @@ const atomicMigrations = [
   '0010_world_v2_command_claim_fencing.sql',
   '0011_world_v2_current_commit_authorization.sql',
   '0012_world_v2_command_claim_active_lease_guard.sql',
+  '0016_world_v2_opening_seed.sql',
 ] as const;
 
 const automaticCommitGuard: AtomicCommitAuthorizationGuard = Object.freeze({
@@ -102,6 +105,122 @@ async function atomicDatabase(): Promise<V09AtomicTestDatabase> {
     );
   }
   return database;
+}
+
+function serverOpeningSeed(
+  seed: ReturnType<typeof createV10TwoCountryTestFixture>['openingSeed'],
+) {
+  const fixtureSource = seed.sources[0];
+  if (fixtureSource === undefined) throw new Error('V10_4_EXPECTED_SOURCE');
+  const source = createOpeningSource(
+    {
+      schemaVersion: fixtureSource.schemaVersion,
+      sourceId: fixtureSource.sourceId,
+      sourceKind: 'AUTHORITATIVE_DATASET',
+      locator: 'dataset://v10.4-preparation-source',
+      sourceVersion: '2026-09-14',
+      payload: JSON.parse(fixtureSource.canonicalPayload),
+    },
+    sha256Hex,
+  );
+  return createOpeningSeed(
+    {
+      ...seed,
+      sources: [source],
+    },
+    sha256Hex,
+  );
+}
+
+function canonicalPostingIntent(value: { readonly fingerprint: unknown }) {
+  const { fingerprint: _fingerprint, ...intent } = value;
+  void _fingerprint;
+  return canonicalSerialize(intent);
+}
+
+async function persistCommand(
+  database: V09AtomicTestDatabase,
+  command: CanonicalCommand,
+): Promise<void> {
+  await database.query(
+    `insert into world_v2.command_submission
+       (world_id, command_id, idempotency_key, command_type, schema_version,
+        canonical_payload, payload_sha256, command_fingerprint, auth_subject,
+        actor_id, country_id, office_id, expected_world_version, sim_time,
+        correlation_id, submitted_at_real)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+    [
+      command.worldId,
+      command.commandId,
+      command.idempotencyKey,
+      command.commandType,
+      command.schemaVersion,
+      command.canonicalPayload,
+      command.payloadHash,
+      command.fingerprint,
+      command.authSubject,
+      command.actorId,
+      command.countryId,
+      command.officeId,
+      command.expectedWorldVersion,
+      command.simTime.toCanonicalValue(),
+      command.correlationId,
+      command.submittedAtReal,
+    ],
+  );
+}
+
+async function persistTransitionFact(
+  database: V09AtomicTestDatabase,
+  event: ReturnType<typeof transition>['event'],
+  inventoryPosting: Awaited<
+    ReturnType<typeof preparedDelivery>
+  >['reservationPosting'],
+): Promise<void> {
+  await database.query(
+    `insert into world_v2.authoritative_event
+       (world_id, event_id, event_sequence, world_version,
+        causation_command_id, correlation_id, event_type, schema_version,
+        canonical_payload, payload_sha256, event_fingerprint, sim_time,
+        recorded_at_real, corrects_event_id)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+    [
+      event.worldId,
+      event.eventId,
+      event.sequence,
+      event.worldVersion,
+      event.causationCommandId,
+      event.correlationId,
+      event.eventType,
+      event.schemaVersion,
+      event.canonicalPayload,
+      event.payloadHash,
+      event.fingerprint,
+      event.simTime.toCanonicalValue(),
+      event.recordedAtReal,
+      event.correctsEventId,
+    ],
+  );
+  await database.query(
+    `insert into world_v2.inventory_posting
+       (world_id, posting_id, causation_command_id,
+        world_version_before, world_version_after, sim_time, event_ids,
+        transition_binding, operation, canonical_payload, posting_fingerprint)
+     values ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10, $11)`,
+    [
+      inventoryPosting.worldId,
+      inventoryPosting.postingId,
+      inventoryPosting.causationCommandId,
+      inventoryPosting.worldVersionBefore,
+      inventoryPosting.worldVersionAfter,
+      inventoryPosting.simTime.toCanonicalValue(),
+      canonicalSerialize(inventoryPosting.causationEventIds),
+      canonicalSerialize(inventoryPosting.transitionBinding),
+      inventoryPosting.operation,
+      canonicalPostingIntent(inventoryPosting),
+      inventoryPosting.fingerprint,
+    ],
+  );
 }
 
 async function seedAtomicDelivery(
@@ -529,6 +648,9 @@ async function preparedDelivery(
   const deliver = transition(delivery, '2', '3');
   return Object.freeze({
     fixture: approved.fixture,
+    reservationPosting: reservation.posting,
+    shipment,
+    shipmentPosting: shipmentResult.posting,
     transfer,
     preDelivery,
     source,
@@ -755,8 +877,9 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
     const factory = createNarrowTreasuryGcuDeliveryCandidateFactory({
       sha256Hex,
       source: {
-        async load({ deliveryCommand }) {
+        async load({ deliveryCommand, observedAtReal }) {
           expect(deliveryCommand).toBe(prepared.delivery);
+          expect(observedAtReal).toBe('2026-09-14T00:02:00.000Z');
           return {
             buyerTreasury: prepared.fixture.financialAccounts.buyerTreasury,
             buyerTreasuryLegId: financialPostingLegId('LEG_V10_4_DRAFT_BUYER'),
@@ -788,8 +911,153 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
       factory.prepare({
         command: prepared.delivery,
         commitAuthorization: null,
+        observedAtReal: '2026-09-14T00:02:00.000Z',
       }),
     ).resolves.toEqual(result.draft);
+  });
+
+  it('rejects a fixture-backed opening seed before SQL delivery preparation reads any caller state', async () => {
+    const prepared = await preparedDelivery();
+    const database = await atomicDatabase();
+    try {
+      const opening = prepared.fixture.openingSeed;
+      const { fingerprint: _fingerprint, ...openingIntent } = opening;
+      void _fingerprint;
+      await database.query(
+        `insert into world_v2.world_head (world_id, world_version, event_sequence)
+         values ($1, 0, 0)`,
+        [opening.worldId],
+      );
+      await database.query(
+        `insert into world_v2.opening_seed
+           (world_id, seed_id, opening_world_version, replay_binding,
+            canonical_payload, seed_fingerprint, bootstrapped_at_real)
+         values ($1, $2, 0, $3, $4, $5, $6)`,
+        [
+          opening.worldId,
+          opening.seedId,
+          canonicalSerialize(opening.replayBinding),
+          canonicalSerialize(openingIntent),
+          opening.fingerprint,
+          '2026-09-14T00:00:00.000Z',
+        ],
+      );
+      const source = new SqlNarrowTreasuryGcuDeliveryPreparationSource({
+        database,
+        sha256Hex,
+        workerId: 'WORKER_V10_4_SOURCE',
+      });
+      await expect(
+        source.load({
+          deliveryCommand: prepared.delivery,
+          observedAtReal: '2026-09-14T00:02:00.000Z',
+        }),
+      ).rejects.toMatchObject({
+        cause: expect.objectContaining({
+          message: expect.stringContaining('TEST_FIXTURE'),
+        }),
+      });
+    } finally {
+      await database.close();
+    }
+  });
+
+  it('prepares delivery solely from durable seed, lineage, lease, and deterministic IDs', async () => {
+    const fixture = createV10TwoCountryTestFixture();
+    const opening = serverOpeningSeed(fixture.openingSeed);
+    const prepared = await preparedDelivery({ openingSeed: opening });
+    const database = await atomicDatabase();
+    try {
+      const { fingerprint: _fingerprint, ...openingIntent } = opening;
+      void _fingerprint;
+      await database.query(
+        `insert into world_v2.world_head (world_id, world_version, event_sequence)
+         values ($1, 0, 0)`,
+        [opening.worldId],
+      );
+      await database.query(
+        `insert into world_v2.opening_seed
+           (world_id, seed_id, opening_world_version, replay_binding,
+            canonical_payload, seed_fingerprint, bootstrapped_at_real)
+         values ($1, $2, 0, $3, $4, $5, $6)`,
+        [
+          opening.worldId,
+          opening.seedId,
+          canonicalSerialize(opening.replayBinding),
+          canonicalSerialize(openingIntent),
+          opening.fingerprint,
+          '2026-09-14T00:00:00.000Z',
+        ],
+      );
+      for (const command of [
+        prepared.transfer,
+        prepared.shipment,
+        prepared.delivery,
+      ]) {
+        await persistCommand(database, command);
+      }
+      await persistTransitionFact(
+        database,
+        transition(prepared.transfer, '0', '1').event,
+        prepared.reservationPosting,
+      );
+      await persistTransitionFact(
+        database,
+        transition(prepared.shipment, '1', '2').event,
+        prepared.shipmentPosting,
+      );
+      await database.query(
+        `update world_v2.world_head
+            set world_version = 2, event_sequence = 2
+          where world_id = $1`,
+        [opening.worldId],
+      );
+      await database.query(
+        `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
+        [
+          opening.worldId,
+          'WORKER_V10_4_SOURCE',
+          '2026-09-14T00:02:00.000Z',
+          '300000',
+        ],
+      );
+      const source = new SqlNarrowTreasuryGcuDeliveryPreparationSource({
+        database,
+        sha256Hex,
+        workerId: 'WORKER_V10_4_SOURCE',
+      });
+      const loaded = await source.load({
+        deliveryCommand: prepared.delivery,
+        observedAtReal: '2026-09-14T00:02:00.000Z',
+      });
+      expect(loaded.commitAssertion).toMatchObject({
+        expectedWorldVersion: '2',
+        fencingToken: '1',
+        holderId: 'WORKER_V10_4_SOURCE',
+      });
+      expect(loaded.eventSequence).toBe('3');
+      expect(loaded.eventId).toBe(
+        `DELIVERY_EVENT_${prepared.delivery.commandId}`,
+      );
+      expect(loaded.source).toEqual(prepared.source);
+      expect(loaded.financialState).toEqual(prepared.preDelivery.financial);
+      expect(loaded.inventoryState).toEqual(prepared.preDelivery.inventory);
+      const draft = await createNarrowTreasuryGcuDeliveryCandidateFactory({
+        sha256Hex,
+        source,
+      }).prepare({
+        command: prepared.delivery,
+        commitAuthorization: null,
+        observedAtReal: '2026-09-14T00:02:00.000Z',
+      });
+      expect(draft.transition.worldVersionBefore).toBe('2');
+      expect(draft.transition.worldVersionAfter).toBe('3');
+      expect(draft.outboxMessages[0]?.eventId).toBe(
+        `DELIVERY_EVENT_${prepared.delivery.commandId}`,
+      );
+    } finally {
+      await database.close();
+    }
   });
 
   it('commits the delivery draft atomically in isolated PGlite and returns the durable receipt on retry', async () => {

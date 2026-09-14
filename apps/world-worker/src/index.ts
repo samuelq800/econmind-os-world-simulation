@@ -46,3 +46,4 @@ export {
 } from './persistence/narrow-treasury-gcu-delivery-draft.js';
 export { WorldOpeningSeedStore } from './persistence/opening-seed-store.js';
 export { DurableV08LedgerLineageReader } from './persistence/durable-v08-ledger-lineage-reader.js';
+export { SqlNarrowTreasuryGcuDeliveryPreparationSource } from './persistence/sql-narrow-treasury-gcu-delivery-preparation-source.js';

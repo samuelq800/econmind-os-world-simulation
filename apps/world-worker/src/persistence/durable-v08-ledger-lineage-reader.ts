@@ -43,7 +43,7 @@ interface HeadRow {
   readonly world_version: unknown;
 }
 
-interface DurableTransitionRow {
+interface DurableCommandRow {
   readonly command_actor_id: unknown;
   readonly command_auth_subject: unknown;
   readonly command_canonical_payload: unknown;
@@ -60,6 +60,9 @@ interface DurableTransitionRow {
   readonly command_type: unknown;
   readonly command_world_id: unknown;
   readonly correlation_id: unknown;
+}
+
+interface DurableTransitionRow extends DurableCommandRow {
   readonly event_canonical_payload: unknown;
   readonly event_causation_command_id: unknown;
   readonly event_corrects_event_id: unknown;
@@ -154,7 +157,7 @@ function canonicalIntent(value: object): string {
 }
 
 function parseCommand(
-  row: DurableTransitionRow,
+  row: DurableCommandRow,
   sha256Hex: Sha256Hex,
 ): CanonicalCommand {
   const payload = canonicalObject(row.command_canonical_payload, 'Command');
@@ -407,6 +410,12 @@ function parseFinancialPosting(input: {
   return batch;
 }
 
+export interface DurableV08LedgerLineageSnapshot {
+  readonly headEventSequence: string;
+  readonly headWorldVersion: string;
+  readonly ledgers: Readonly<RebuiltV08Ledgers>;
+}
+
 /**
  * Server-only read boundary for V08 ledger state. It replays the immutable
  * opening seed and durable Command/Event/Posting facts; it accepts neither a
@@ -431,32 +440,81 @@ export class DurableV08LedgerLineageReader {
   ): Promise<Readonly<RebuiltV08Ledgers>> {
     const canonicalWorldId = worldId(requestedWorldId);
     return this.#database.transaction(async (transaction) => {
-      const head = await this.#readHead(transaction, canonicalWorldId);
-      const seed = await this.#openingSeeds.loadFrom(
-        transaction,
-        canonicalWorldId,
-      );
-      const transitions = await this.#readTransitions(
-        transaction,
-        canonicalWorldId,
-      );
-      const rebuilt = rebuildV08LedgersFromLineage({
-        seed,
-        transitions,
-        sha256Hex: this.#sha256Hex,
-      });
-      const lastEventSequence =
-        transitions.at(-1)?.transition.events.at(-1)?.sequence ?? '0';
-      if (lastEventSequence !== head.eventSequence) {
-        invalid('Replayed Event sequence does not match durable World head');
-      }
-      if (rebuilt.worldVersion !== head.worldVersion) {
-        invalid(
-          'Replayed ledger WorldVersion does not match durable World head',
-        );
-      }
-      return rebuilt;
+      const snapshot = await this.rebuildFrom(transaction, canonicalWorldId);
+      return snapshot.ledgers;
     });
+  }
+
+  /**
+   * Shares an already-open Worker transaction with a later candidate builder,
+   * so its opening seed, lineage and writer-fence read have one snapshot.
+   */
+  async rebuildFrom(
+    transaction: SqlExecutor,
+    requestedWorldId: string,
+  ): Promise<Readonly<DurableV08LedgerLineageSnapshot>> {
+    const canonicalWorldId = worldId(requestedWorldId);
+    const head = await this.#readHead(transaction, canonicalWorldId);
+    const seed = await this.#openingSeeds.loadFrom(
+      transaction,
+      canonicalWorldId,
+    );
+    const transitions = await this.#readTransitions(
+      transaction,
+      canonicalWorldId,
+    );
+    const rebuilt = rebuildV08LedgersFromLineage({
+      seed,
+      transitions,
+      sha256Hex: this.#sha256Hex,
+    });
+    const lastEventSequence =
+      transitions.at(-1)?.transition.events.at(-1)?.sequence ?? '0';
+    if (lastEventSequence !== head.eventSequence) {
+      invalid('Replayed Event sequence does not match durable World head');
+    }
+    if (rebuilt.worldVersion !== head.worldVersion) {
+      invalid('Replayed ledger WorldVersion does not match durable World head');
+    }
+    return Object.freeze({
+      headEventSequence: head.eventSequence,
+      headWorldVersion: head.worldVersion,
+      ledgers: rebuilt,
+    });
+  }
+
+  async readCommandFrom(
+    transaction: SqlExecutor,
+    requestedWorldId: string,
+    requestedCommandId: string,
+  ): Promise<Readonly<CanonicalCommand>> {
+    const result = await transaction.query<DurableCommandRow>(
+      `select actor_id as command_actor_id,
+              auth_subject::text as command_auth_subject,
+              canonical_payload as command_canonical_payload,
+              country_id as command_country_id,
+              expected_world_version as command_expected_world_version,
+              command_fingerprint as command_fingerprint,
+              command_id as command_id,
+              idempotency_key as command_idempotency_key,
+              office_id as command_office_id,
+              payload_sha256 as command_payload_sha256,
+              schema_version as command_schema_version,
+              sim_time as command_sim_time,
+              submitted_at_real as command_submitted_at_real,
+              command_type as command_type,
+              world_id as command_world_id,
+              correlation_id
+         from world_v2.command_submission
+        where world_id = $1 and command_id = $2
+        for share`,
+      [worldId(requestedWorldId), requestedCommandId],
+    );
+    const row = result.rows[0];
+    if (row === undefined || result.rows.length !== 1) {
+      invalid('Durable Command is absent or duplicated');
+    }
+    return parseCommand(row, this.#sha256Hex);
   }
 
   async #readHead(

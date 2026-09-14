@@ -266,6 +266,7 @@ export function createAuthoritativeWorkerExecution(input: {
             const draft = await input.candidateFactory.prepare({
               command,
               commitAuthorization,
+              observedAtReal: commandInput.recordedAtReal,
             });
             const committed = await repository.commit(
               prepareAtomicTransitionCandidate({

@@ -52,6 +52,7 @@ export interface NarrowTreasuryGcuDeliveryPreparationSource {
   load(
     input: Readonly<{
       readonly deliveryCommand: CanonicalCommand;
+      readonly observedAtReal: string;
     }>,
   ): Promise<
     Omit<NarrowTreasuryGcuDeliveryDraftInput, 'deliveryCommand' | 'sha256Hex'>
@@ -282,6 +283,7 @@ export function createNarrowTreasuryGcuDeliveryCandidateFactory(input: {
       }
       const preparation = await input.source.load({
         deliveryCommand: candidateInput.command,
+        observedAtReal: candidateInput.observedAtReal,
       });
       return prepareNarrowTreasuryGcuDeliveryAtomicDraft({
         ...preparation,

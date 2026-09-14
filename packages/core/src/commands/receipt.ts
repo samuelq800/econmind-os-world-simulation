@@ -467,6 +467,8 @@ export interface CommandLifecyclePersistencePort {
   commitAuthorizedCommand(input: {
     readonly command: CanonicalCommand;
     readonly commitAuthorization: CommitAuthorizationProof | null;
+    /** Explicit operational timestamp; never an ambient clock read. */
+    readonly recordedAtReal: string;
   }): Promise<
     Readonly<{
       receipt: FinalCommandReceipt;
@@ -743,6 +745,7 @@ export async function processQueuedCommand(input: {
   const committed = await input.persistence.commitAuthorizedCommand({
     command: input.command,
     commitAuthorization,
+    recordedAtReal: input.recordedAtReal,
   });
   return Object.freeze({
     source: 'NEW_FINAL',

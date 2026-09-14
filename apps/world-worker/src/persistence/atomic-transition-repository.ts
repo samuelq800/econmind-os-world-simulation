@@ -1251,6 +1251,7 @@ export interface AtomicTransitionCandidateFactory {
   prepare(input: {
     readonly command: CanonicalCommand;
     readonly commitAuthorization: CommitAuthorizationProof | null;
+    readonly observedAtReal: string;
   }): Promise<AtomicTransitionDraft>;
 }
 
@@ -1263,6 +1264,8 @@ export function createAtomicCommandLifecyclePersistence(input: {
   readonly repository: AtomicTransitionRepository;
   readonly candidateFactory: AtomicTransitionCandidateFactory;
   readonly sha256Hex: Sha256Hex;
+  /** Caller supplies the explicit operation timestamp; no ambient clock. */
+  readonly observedAtReal: (command: CanonicalCommand) => string;
 }): CommandLifecyclePersistencePort {
   const persistence: CommandLifecyclePersistencePort = {
     readFinalReceipt: (command) => input.repository.readFinalReceipt(command),
@@ -1272,6 +1275,7 @@ export function createAtomicCommandLifecyclePersistence(input: {
       const draft = await input.candidateFactory.prepare({
         command,
         commitAuthorization,
+        observedAtReal: input.observedAtReal(command),
       });
       const candidate = prepareAtomicTransitionCandidate({
         command,
