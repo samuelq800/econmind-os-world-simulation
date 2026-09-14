@@ -2440,6 +2440,66 @@ describe('V10.4 durable Reserve authorization evidence', () => {
       await database.close();
     }
   }, 30_000);
+
+  it('leaves Reserve uncommitted when a signed Finance authority is revoked at the cutoff', async () => {
+    const database = await atomicDatabase();
+    try {
+      const prepared = await preparedDelivery();
+      const candidate = await atomicReserveCandidate({ prepared });
+      const approvals = await seedAtomicReserve(database, {
+        candidate,
+        prepared,
+      });
+      await database.query(
+        `update world_v2.current_commit_authorization
+            set active = false
+          where world_id = $1
+            and auth_subject = $2::uuid
+            and country_id = $3
+            and office_id = 'FINANCE'
+            and capability = 'FINANCE_TREASURY'`,
+        [
+          prepared.transfer.worldId,
+          prepared.fixture.officeActors.buyerFinance.principal.authSubject,
+          prepared.fixture.countries.buyer,
+        ],
+      );
+      const repository = new AtomicTransitionRepository({
+        database: database as SqlDatabase,
+        authorizationGuard: createTransactionCutoffAuthorizationGuard(),
+        narrowTransferApprovalGuard: approvals,
+        workerId: 'WORKER_V10_4_CONCURRENT',
+        sha256Hex,
+      });
+      await expect(repository.commit(candidate)).rejects.toMatchObject({
+        cause: { code: DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED },
+      });
+      const persisted = await database.query<{
+        readonly event_count: string;
+        readonly inventory_count: string;
+        readonly queue_state: string;
+        readonly receipt_count: string;
+        readonly world_version: string;
+      }>(
+        `select
+           (select count(*)::text from world_v2.authoritative_event) as event_count,
+           (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+           (select count(*)::text from world_v2.command_receipt) as receipt_count,
+           (select queue_state from world_v2.command_queue where world_id = $1 and command_id = $2) as queue_state,
+           (select world_version::text from world_v2.world_head where world_id = $1) as world_version`,
+        [candidate.command.worldId, candidate.command.commandId],
+      );
+      expect(persisted.rows[0]).toEqual({
+        event_count: '0',
+        inventory_count: '0',
+        queue_state: 'CLAIMED',
+        receipt_count: '0',
+        world_version: '0',
+      });
+    } finally {
+      await database.close();
+    }
+  }, 30_000);
 });
 
 postgresDescribe('V10.4 disposable PostgreSQL contention evidence', () => {
