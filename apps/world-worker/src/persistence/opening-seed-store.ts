@@ -174,6 +174,17 @@ export class WorldOpeningSeedStore {
     return this.#loadWith(this.#database, worldId);
   }
 
+  /**
+   * Lets another server-owned reader share its already-open read transaction.
+   * It does not expose a browser route or bypass canonical rehydration.
+   */
+  async loadFrom(
+    executor: SqlExecutor,
+    worldId: string,
+  ): Promise<Readonly<OpeningSeed>> {
+    return this.#loadWith(executor, worldId);
+  }
+
   async #loadWith(
     executor: SqlExecutor,
     worldId: string,
