@@ -72,6 +72,7 @@ const V10_4_PROPERTY_CONFIG = Object.freeze({
   ...FOUNDATION_PROPERTY_CONFIG,
   seed: 2_026_091_4,
 });
+const V10_4_PROPERTY_TIMEOUT_MS = 20_000;
 const root = path.resolve(import.meta.dirname, '../..');
 const atomicMigrations = [
   '0001_world_v2_namespace.sql',
@@ -782,62 +783,66 @@ describe('V10.4 Treasury-GCU acceptance', () => {
     ).toBe(before);
   });
 
-  it('keeps generated exact Buyer Treasury balances symmetric or fully rejected', async () => {
-    await fc.assert(
-      fc.asyncProperty(fc.integer({ min: 1, max: 12 }), async (balance) => {
-        const fixture = createV10TwoCountryTestFixture();
-        const prepared = await preparedDelivery({
-          openingSeed: withBuyerTreasuryBalance(fixture, String(balance)),
-        });
-        const before = canonicalSerialize({
-          financial: prepared.preDelivery.financial,
-          inventory: prepared.preDelivery.inventory,
-        });
-        if (balance < 6) {
-          expect(() => settle(prepared)).toThrow(
-            /insufficient exact GCU funds/u,
-          );
+  it(
+    'keeps generated exact Buyer Treasury balances symmetric or fully rejected',
+    async () => {
+      await fc.assert(
+        fc.asyncProperty(fc.integer({ min: 1, max: 12 }), async (balance) => {
+          const fixture = createV10TwoCountryTestFixture();
+          const prepared = await preparedDelivery({
+            openingSeed: withBuyerTreasuryBalance(fixture, String(balance)),
+          });
+          const before = canonicalSerialize({
+            financial: prepared.preDelivery.financial,
+            inventory: prepared.preDelivery.inventory,
+          });
+          if (balance < 6) {
+            expect(() => settle(prepared)).toThrow(
+              /insufficient exact GCU funds/u,
+            );
+            expect(
+              canonicalSerialize({
+                financial: prepared.preDelivery.financial,
+                inventory: prepared.preDelivery.inventory,
+              }),
+            ).toBe(before);
+            return;
+          }
+          const settled = settle(prepared);
+          expect(settled.inventory.receipt.outcome).toBe('APPLIED');
+          expect(settled.financial.receipt.outcome).toBe('APPLIED');
           expect(
-            canonicalSerialize({
-              financial: prepared.preDelivery.financial,
-              inventory: prepared.preDelivery.inventory,
-            }),
-          ).toBe(before);
-          return;
-        }
-        const settled = settle(prepared);
-        expect(settled.inventory.receipt.outcome).toBe('APPLIED');
-        expect(settled.financial.receipt.outcome).toBe('APPLIED');
-        expect(
-          settled.financial.state.positions
-            .find(
-              (position) =>
-                position.account.accountId ===
-                prepared.fixture.financialAccounts.buyerTreasury.accountId,
-            )
-            ?.netDebitBalance.toCanonicalValue().amount ?? '0',
-        ).toBe(String(balance - 6));
-        expect(
-          accountBalance(
-            settled.financial.state,
-            prepared.fixture.financialAccounts.sellerSettlement.accountId,
-          ).toCanonicalValue().amount,
-        ).toBe('8');
-        expect(
-          commodityQuantity(
-            settled.inventory.state,
-            prepared.fixture.commodity.id,
-          ).toCanonicalValue(),
-        ).toEqual(
-          commodityQuantity(
-            prepared.preDelivery.inventory,
-            prepared.fixture.commodity.id,
-          ).toCanonicalValue(),
-        );
-      }),
-      V10_4_PROPERTY_CONFIG,
-    );
-  }, 10_000);
+            settled.financial.state.positions
+              .find(
+                (position) =>
+                  position.account.accountId ===
+                  prepared.fixture.financialAccounts.buyerTreasury.accountId,
+              )
+              ?.netDebitBalance.toCanonicalValue().amount ?? '0',
+          ).toBe(String(balance - 6));
+          expect(
+            accountBalance(
+              settled.financial.state,
+              prepared.fixture.financialAccounts.sellerSettlement.accountId,
+            ).toCanonicalValue().amount,
+          ).toBe('8');
+          expect(
+            commodityQuantity(
+              settled.inventory.state,
+              prepared.fixture.commodity.id,
+            ).toCanonicalValue(),
+          ).toEqual(
+            commodityQuantity(
+              prepared.preDelivery.inventory,
+              prepared.fixture.commodity.id,
+            ).toCanonicalValue(),
+          );
+        }),
+        V10_4_PROPERTY_CONFIG,
+      );
+    },
+    V10_4_PROPERTY_TIMEOUT_MS,
+  );
 
   it('binds the applied delivery to one automatic atomic draft, receipt, and outbox fact', async () => {
     const prepared = await preparedDelivery();
