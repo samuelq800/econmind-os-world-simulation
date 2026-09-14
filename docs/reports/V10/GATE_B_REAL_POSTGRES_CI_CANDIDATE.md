@@ -15,6 +15,13 @@ acceptance suite against that same disposable target, and builds Core and
 Worker. Each result must be recorded from its exact GitHub Actions run before
 it can count as evidence.
 
+The current V10.4 candidate additionally starts two distinct automatic delivery
+commands concurrently from the same durable WorldVersion and claimant lease.
+The assertion accepts exactly one committed transition and requires the other
+claim to remain without an Event, posting, receipt, outbox, or WorldVersion
+effect. This is a scoped database-contention check, not a substitute for the
+full V10 lifecycle or controlled process-crash campaign.
+
 ## Observed disposable CI evidence
 
 The preceding V09-only candidate was exercised by GitHub Actions run
@@ -25,6 +32,16 @@ service completed migration validation, `pnpm test:v09:postgres`, Core and
 Worker builds, the V09 authorization-cutoff check, and the V09 atomic-recovery
 real-PostgreSQL suite. Expected fail-closed lease, fencing, version, and
 append-only violations were observed as rejected assertions.
+
+Review B recorded the first V10.4 PostgreSQL candidate
+`417a8bc7294784f35f62805cc5b0e78af4e04cb8` as `CHANGES_REQUIRED` with one
+Major. Its exact CI run
+[`34844794409`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34844794409)
+completed seven V10.4 tests but timed out the unchanged 1,000-run property at
+the candidate's 10-second limit. Forward commit
+`fd153dc20cdfaf9e7c8eeeee436e4ffcab3f8065` raises only that single-test limit
+to 20 seconds; it does not reduce generated cases, assertions, or the scoped
+database checks. The forward candidate requires a fresh review and CI result.
 
 The service was removed with the CI job. No Supabase, staging, or production
 target was contacted.

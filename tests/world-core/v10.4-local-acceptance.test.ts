@@ -89,6 +89,9 @@ const atomicMigrations = [
   '0012_world_v2_command_claim_active_lease_guard.sql',
   '0016_world_v2_opening_seed.sql',
 ] as const;
+const postgresDescribe = process.env.V09_TEST_DATABASE_URL
+  ? describe
+  : describe.skip;
 
 const automaticCommitGuard: AtomicCommitAuthorizationGuard = Object.freeze({
   async assertCurrent(transaction, input) {
@@ -240,69 +243,85 @@ async function seedAtomicDelivery(
   database: V09AtomicTestDatabase,
   candidate: PrivateAtomicTransitionCandidate,
 ): Promise<void> {
-  const command = candidate.command;
+  await seedAtomicDeliveries(database, [candidate]);
+}
+
+async function seedAtomicDeliveries(
+  database: V09AtomicTestDatabase,
+  candidates: readonly PrivateAtomicTransitionCandidate[],
+): Promise<void> {
+  const first = candidates[0];
+  if (first === undefined) throw new Error('V10_4_EXPECTED_CANDIDATE');
+  const command = first.command;
   await database.query(
     `insert into world_v2.world_head (world_id, world_version, event_sequence)
      values ($1, 2, 2)`,
     [command.worldId],
   );
   await database.query(
-    `insert into world_v2.command_submission
-       (world_id, command_id, idempotency_key, command_type, schema_version,
-        canonical_payload, payload_sha256, command_fingerprint, auth_subject,
-        actor_id, country_id, office_id, expected_world_version, sim_time,
-        correlation_id, submitted_at_real)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
-    [
-      command.worldId,
-      command.commandId,
-      command.idempotencyKey,
-      command.commandType,
-      command.schemaVersion,
-      command.canonicalPayload,
-      command.payloadHash,
-      command.fingerprint,
-      command.authSubject,
-      command.actorId,
-      command.countryId,
-      command.officeId,
-      command.expectedWorldVersion,
-      command.simTime.toCanonicalValue(),
-      command.correlationId,
-      command.submittedAtReal,
-    ],
-  );
-  await database.query(
     `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
     [
       command.worldId,
-      candidate.commitAssertion.holderId,
+      first.commitAssertion.holderId,
       '2026-09-14T00:02:00.000Z',
       '300000',
     ],
   );
-  await database.query(
-    `insert into world_v2.command_queue
-       (world_id, command_id, authority_kind, priority_rank,
-        available_at_sim_time, attempt_count)
-     values ($1, $2, 'VERSIONED_AUTOMATIC', 0, $3, 0)`,
-    [command.worldId, command.commandId, command.simTime.toCanonicalValue()],
-  );
-  await database.query(
-    `update world_v2.command_queue
-        set queue_state = 'CLAIMED',
-            attempt_count = 1,
-            claimed_by = $3,
-            claimed_at_real = $4,
-            claim_fencing_token = 1
-      where world_id = $1 and command_id = $2`,
-    [
-      command.worldId,
-      command.commandId,
-      candidate.commitAssertion.holderId,
-      '2026-09-14T00:02:00.000Z',
-    ],
-  );
+  for (const candidate of candidates) {
+    const queuedCommand = candidate.command;
+    await database.query(
+      `insert into world_v2.command_submission
+         (world_id, command_id, idempotency_key, command_type, schema_version,
+          canonical_payload, payload_sha256, command_fingerprint, auth_subject,
+          actor_id, country_id, office_id, expected_world_version, sim_time,
+          correlation_id, submitted_at_real)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+      [
+        queuedCommand.worldId,
+        queuedCommand.commandId,
+        queuedCommand.idempotencyKey,
+        queuedCommand.commandType,
+        queuedCommand.schemaVersion,
+        queuedCommand.canonicalPayload,
+        queuedCommand.payloadHash,
+        queuedCommand.fingerprint,
+        queuedCommand.authSubject,
+        queuedCommand.actorId,
+        queuedCommand.countryId,
+        queuedCommand.officeId,
+        queuedCommand.expectedWorldVersion,
+        queuedCommand.simTime.toCanonicalValue(),
+        queuedCommand.correlationId,
+        queuedCommand.submittedAtReal,
+      ],
+    );
+    await database.query(
+      `insert into world_v2.command_queue
+         (world_id, command_id, authority_kind, priority_rank,
+          available_at_sim_time, attempt_count)
+       values ($1, $2, 'VERSIONED_AUTOMATIC', 0, $3, 0)`,
+      [
+        queuedCommand.worldId,
+        queuedCommand.commandId,
+        queuedCommand.simTime.toCanonicalValue(),
+      ],
+    );
+    await database.query(
+      `update world_v2.command_queue
+          set queue_state = 'CLAIMED',
+              attempt_count = 1,
+              claimed_by = $3,
+              claimed_at_real = $4,
+              claim_fencing_token = 1
+        where world_id = $1 and command_id = $2`,
+      [
+        queuedCommand.worldId,
+        queuedCommand.commandId,
+        candidate.commitAssertion.holderId,
+        '2026-09-14T00:02:00.000Z',
+      ],
+    );
+  }
 }
 
 function transferCommand(): CanonicalCommand {
@@ -517,11 +536,16 @@ function shipmentCommand(transfer: CanonicalCommand): CanonicalCommand {
   });
 }
 
-function deliveryCommand(transfer: CanonicalCommand): CanonicalCommand {
+function deliveryCommand(
+  transfer: CanonicalCommand,
+  contenderSuffix = '',
+): CanonicalCommand {
   const fixture = createV10TwoCountryTestFixture();
   const destination = fixture.inventoryAccounts.buyerAvailable;
+  const contenderIdentity =
+    contenderSuffix.length === 0 ? '' : `_${contenderSuffix}`;
   return automaticCommand({
-    commandId: 'COMMAND_V10_4_DELIVERY',
+    commandId: `COMMAND_V10_4_DELIVERY${contenderIdentity}`,
     commandType: 'CORE_GOODS_DELIVERY_V1',
     expectedWorldVersion: '2',
     simTime: '10200',
@@ -695,6 +719,55 @@ function settle(
     source: input.source,
     transferCommand: input.transfer,
     transition: input.deliver.transition,
+    sha256Hex,
+  });
+}
+
+function atomicDeliveryCandidate(input: {
+  readonly delivery: CanonicalCommand;
+  readonly prepared: Awaited<ReturnType<typeof preparedDelivery>>;
+  readonly suffix: string;
+}): PrivateAtomicTransitionCandidate {
+  const lease = acquireWorldWriterLease(
+    null,
+    worldWriterLeaseRequest(
+      input.delivery.worldId,
+      workerId('WORKER_V10_4_CONCURRENT'),
+      '2026-09-14T00:02:00.000Z',
+      '2026-09-14T00:07:00.000Z',
+    ),
+  ).lease;
+  const draft = prepareNarrowTreasuryGcuDeliveryAtomicDraft({
+    buyerTreasury: input.prepared.fixture.financialAccounts.buyerTreasury,
+    buyerTreasuryLegId: financialPostingLegId(
+      `LEG_V10_4_CONCURRENT_BUYER_${input.suffix}`,
+    ),
+    commitAssertion: createWorldWriterCommitAssertion(lease, '2'),
+    deliveryCommand: input.delivery,
+    eventId: `EVENT_V10_4_CONCURRENT_${input.suffix}`,
+    eventSequence: '3',
+    financialBatchId: financialPostingBatchId(
+      `BATCH_V10_4_CONCURRENT_${input.suffix}`,
+    ),
+    financialState: input.prepared.preDelivery.financial,
+    inventoryPostingId: inventoryPostingId(
+      `POSTING_V10_4_CONCURRENT_${input.suffix}`,
+    ),
+    inventoryState: input.prepared.preDelivery.inventory,
+    observedAtReal: '2026-09-14T00:02:00.000Z',
+    outboxMessageId: `OUTBOX_V10_4_CONCURRENT_${input.suffix}`,
+    sellerSettlement: input.prepared.fixture.financialAccounts.sellerSettlement,
+    sellerSettlementLegId: financialPostingLegId(
+      `LEG_V10_4_CONCURRENT_SELLER_${input.suffix}`,
+    ),
+    source: input.prepared.source,
+    transferCommand: input.prepared.transfer,
+    sha256Hex,
+  }).draft;
+  return prepareAtomicTransitionCandidate({
+    command: input.delivery,
+    commitAuthorization: null,
+    draft,
     sha256Hex,
   });
 }
@@ -1292,6 +1365,84 @@ describe('V10.4 Treasury-GCU acceptance', () => {
         [prepared.delivery.worldId],
       );
       expect(projectionAfter.rows).toEqual(projectionBefore.rows);
+    } finally {
+      await database.close();
+    }
+  }, 30_000);
+});
+
+postgresDescribe('V10.4 disposable PostgreSQL contention evidence', () => {
+  it('commits exactly one competing delivery at the same WorldVersion', async () => {
+    const database = await atomicDatabase();
+    try {
+      const prepared = await preparedDelivery();
+      const primary = atomicDeliveryCandidate({
+        delivery: prepared.delivery,
+        prepared,
+        suffix: 'PRIMARY',
+      });
+      const contender = atomicDeliveryCandidate({
+        delivery: deliveryCommand(prepared.transfer, 'CONTENDER'),
+        prepared,
+        suffix: 'CONTENDER',
+      });
+      await seedAtomicDeliveries(database, [primary, contender]);
+      const repository = () =>
+        new AtomicTransitionRepository({
+          database: database as SqlDatabase,
+          authorizationGuard: automaticCommitGuard,
+          workerId: 'WORKER_V10_4_CONCURRENT',
+          sha256Hex,
+        });
+
+      const outcomes = await Promise.allSettled([
+        repository().commit(primary),
+        repository().commit(contender),
+      ]);
+      expect(
+        outcomes.filter((outcome) => outcome.status === 'fulfilled'),
+      ).toHaveLength(1);
+      expect(
+        outcomes.some(
+          (outcome) =>
+            outcome.status === 'fulfilled' &&
+            outcome.value.source === 'NEW_COMMIT',
+        ),
+      ).toBe(true);
+      expect(
+        outcomes.filter((outcome) => outcome.status === 'rejected'),
+      ).toHaveLength(1);
+
+      const persisted = await database.query<{
+        readonly event_count: string;
+        readonly financial_count: string;
+        readonly finalized_count: string;
+        readonly inventory_count: string;
+        readonly outbox_count: string;
+        readonly pending_claim_count: string;
+        readonly receipt_count: string;
+        readonly world_version: string;
+      }>(
+        `select
+           (select count(*)::text from world_v2.authoritative_event) as event_count,
+           (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+           (select count(*)::text from world_v2.financial_posting_batch) as financial_count,
+           (select count(*)::text from world_v2.notification_outbox) as outbox_count,
+           (select count(*)::text from world_v2.command_receipt) as receipt_count,
+           (select count(*)::text from world_v2.command_queue where queue_state = 'FINALIZED') as finalized_count,
+           (select count(*)::text from world_v2.command_queue where queue_state = 'CLAIMED') as pending_claim_count,
+           (select world_version::text from world_v2.world_head) as world_version`,
+      );
+      expect(persisted.rows[0]).toEqual({
+        event_count: '1',
+        financial_count: '1',
+        finalized_count: '1',
+        inventory_count: '1',
+        outbox_count: '1',
+        pending_claim_count: '1',
+        receipt_count: '1',
+        world_version: '3',
+      });
     } finally {
       await database.close();
     }
