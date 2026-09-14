@@ -25,3 +25,9 @@ export {
   type AtomicNarrowTransferApprovalGuard,
   type NarrowTransferApprovalSigner,
 } from './persistence/narrow-transfer-approval-store.js';
+export {
+  NARROW_TREASURY_GCU_DELIVERY_EVENT_SCHEMA,
+  NARROW_TREASURY_GCU_DELIVERY_EVENT_TYPE,
+  NARROW_TREASURY_GCU_DELIVERY_OUTBOX_SCHEMA,
+  prepareNarrowTreasuryGcuDeliveryAtomicDraft,
+} from './persistence/narrow-treasury-gcu-delivery-draft.js';

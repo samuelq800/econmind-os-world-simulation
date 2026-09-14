@@ -8,10 +8,12 @@ import {
   Money,
   OFFICE_APPROVAL_CAPABILITY,
   SimTime,
+  acquireWorldWriterLease,
   canonicalSerialize,
   createAuthoritativeTransition,
   createNarrowTransferApprovalBundle,
   createOpeningSeed,
+  createWorldWriterCommitAssertion,
   deliverNarrowTreasuryGcuTransfer,
   financialPostingBatchId,
   financialPostingLegId,
@@ -25,10 +27,14 @@ import {
   shipNarrowTreasuryGcuTransfer,
   signApprovalProposal,
   authorizeOfficeCapability,
+  workerId,
+  worldWriterLeaseRequest,
   type CanonicalCommand,
   type FinancialLedgerState,
   type InventoryLedgerState,
 } from '@econmind/core';
+import { prepareNarrowTreasuryGcuDeliveryAtomicDraft } from '../../apps/world-worker/src/persistence/narrow-treasury-gcu-delivery-draft.js';
+import { prepareAtomicTransitionCandidate } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
 import { createV10TwoCountryTestFixture } from '../support/v10-two-country-fixture.js';
 
 const sha256Hex = (input: string): string =>
@@ -510,5 +516,52 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
         inventory: prepared.preDelivery.inventory,
       }),
     ).toBe(before);
+  });
+
+  it('binds the applied delivery to one automatic atomic draft, receipt, and outbox fact', async () => {
+    const prepared = await preparedDelivery();
+    const lease = acquireWorldWriterLease(
+      null,
+      worldWriterLeaseRequest(
+        prepared.delivery.worldId,
+        workerId('WORKER_V10_4_LOCAL'),
+        '2026-09-14T00:02:00.000Z',
+        '2026-09-14T00:07:00.000Z',
+      ),
+    ).lease;
+    const result = prepareNarrowTreasuryGcuDeliveryAtomicDraft({
+      buyerTreasury: prepared.fixture.financialAccounts.buyerTreasury,
+      buyerTreasuryLegId: financialPostingLegId('LEG_V10_4_DRAFT_BUYER'),
+      commitAssertion: createWorldWriterCommitAssertion(lease, '2'),
+      deliveryCommand: prepared.delivery,
+      eventId: 'EVENT_V10_4_DELIVERY_DRAFT',
+      eventSequence: '3',
+      financialBatchId: financialPostingBatchId('BATCH_V10_4_DRAFT_DELIVERY'),
+      financialState: prepared.preDelivery.financial,
+      inventoryPostingId: inventoryPostingId('POSTING_V10_4_DRAFT_DELIVERY'),
+      inventoryState: prepared.preDelivery.inventory,
+      observedAtReal: '2026-09-14T00:02:00.000Z',
+      outboxMessageId: 'OUTBOX_V10_4_DELIVERY_DRAFT',
+      sellerSettlement: prepared.fixture.financialAccounts.sellerSettlement,
+      sellerSettlementLegId: financialPostingLegId('LEG_V10_4_DRAFT_SELLER'),
+      source: prepared.source,
+      transferCommand: prepared.transfer,
+      sha256Hex,
+    });
+    const candidate = prepareAtomicTransitionCandidate({
+      command: prepared.delivery,
+      commitAuthorization: null,
+      draft: result.draft,
+      sha256Hex,
+    });
+
+    expect(candidate.authorityKind).toBe('VERSIONED_AUTOMATIC');
+    expect(candidate.receipt.outcome).toBe('COMMITTED');
+    expect(candidate.inventoryPostings).toHaveLength(1);
+    expect(candidate.financialPostingBatches).toHaveLength(1);
+    expect(candidate.outboxMessages).toHaveLength(1);
+    expect(candidate.outboxMessages[0]?.eventId).toBe(
+      candidate.transition.eventIds[0],
+    );
   });
 });
