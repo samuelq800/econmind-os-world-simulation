@@ -1844,10 +1844,7 @@ processKillParentDescribe(
   () => {
     it('rolls back a killed Worker and commits the same delivery once after restart', async () => {
       const termination = await runV10ProcessKillChild();
-      expect(
-        termination.signal === 'SIGKILL' ||
-          (termination.code !== null && termination.code !== 0),
-      ).toBe(true);
+      expect(termination).toEqual({ code: null, signal: 'SIGKILL' });
       const prepared = await preparedDelivery();
       const candidate = atomicDeliveryCandidate({
         delivery: prepared.delivery,

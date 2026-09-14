@@ -87,8 +87,11 @@ Its disposable PostgreSQL V10.4 suite completed 13 passing tests with one
 environment-gated child test skipped in the parent process. The parent ran a
 separate child that was deliberately killed at `AFTER_FINANCIAL_POSTINGS`,
 verified rollback through a fresh guarded pool, and committed the same Command
-once. This CI evidence is limited to that narrow V10 delivery path and remains
-pending independent review of the new delta.
+once. This green run is not counted as process-kill evidence: independent
+Review B found that the parent accepted any non-zero child exit in addition to
+`SIGKILL`, which could admit an unrelated child failure before the checkpoint.
+It recorded `CHANGES_REQUIRED`, `MAJOR=1`, and requires a forward candidate to
+accept exactly `{ code: null, signal: 'SIGKILL' }` plus a new exact CI result.
 
 The service was removed with the CI job. No Supabase, staging, or production
 target was contacted.
