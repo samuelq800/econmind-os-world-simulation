@@ -320,10 +320,12 @@
         "production_mutation": false
       },
       "guarded_read_projection_publication": {
-        "status": "RETIRED_NO_WRITE_PATH_PENDING_REREVIEW",
+        "status": "RETIRED_NO_WRITE_PATH_INDEPENDENTLY_APPROVED_FOR_CONTINUATION",
         "historical_candidate_commit": "2709aec3974288fee290c7306d7eff5827a53d74",
         "candidate_commit": "d8282b734037ce1fa6fe1d434b8eaf04dd8de4ce",
         "governance_test_sync_commit": "8c30f679166896a9cf44be1d6c0b8c00aba4efd6",
+        "independent_review_target": "88fbfe2caed96ce4ad52e58c563755c725745437",
+        "independent_review_result": "APPROVED_FOR_V10_1_CONTINUATION_ONLY — BLOCKER_0_MAJOR_0_MINOR_0",
         "evidence_file": "docs/reports/V10/V10.1_QUERY_BOUNDARY_INCREMENT.md",
         "focused_tests": "PASS — 2 files / 6 tests",
         "architecture_checks": "PASS — 9 files / 84 tests",
@@ -370,6 +372,13 @@
         "local_rehearsal": "PASS — ephemeral PGlite only; no external database",
         "production_mutation": false
       },
+      "negotiation_party_rebuild_after_deletion_evidence": {
+        "status": "LOCAL_TEST_PASS_NOT_OPERATIONAL_EVIDENCE",
+        "candidate_commit": "9fd8a59a2fa87e3b4d65533144101511b63ec5f9",
+        "evidence_file": "docs/reports/V10/V10.1_QUERY_BOUNDARY_INCREMENT.md",
+        "focused_tests": "PASS — 1 file / 5 tests",
+        "production_mutation": false
+      },
       "negotiation_party_source_to_query_flow_evidence": {
         "status": "LOCAL_TEST_PASS_NOT_OPERATIONAL_EVIDENCE",
         "candidate_commit": "d8282b734037ce1fa6fe1d434b8eaf04dd8de4ce",
@@ -378,9 +387,11 @@
         "production_mutation": false
       },
       "negotiation_party_generic_write_path_repair": {
-        "status": "IMPLEMENTED_UNVERIFIED_PENDING_REREVIEW",
+        "status": "INDEPENDENTLY_APPROVED_FOR_V10_1_CONTINUATION_ONLY",
         "review_finding_target": "8b23d3fa9c296e3c943a174ced49bf19fa345f4c",
         "candidate_commit": "d8282b734037ce1fa6fe1d434b8eaf04dd8de4ce",
+        "independent_review_target": "88fbfe2caed96ce4ad52e58c563755c725745437",
+        "independent_review_result": "APPROVED_FOR_V10_1_CONTINUATION_ONLY — BLOCKER_0_MAJOR_0_MINOR_0",
         "finding": "MAJOR — legacy generic party publisher accepted caller-supplied payloads after source materialization",
         "repair": "Generic publisher rejects before database transaction; current party publisher additionally requires matching active current authorization",
         "governance_test_sync_commit": "8c30f679166896a9cf44be1d6c0b8c00aba4efd6",

@@ -264,7 +264,8 @@ describe('V06 owner-authorized package continuation', () => {
           production_mutation: false,
         },
         guarded_read_projection_publication: {
-          status: 'RETIRED_NO_WRITE_PATH_PENDING_REREVIEW',
+          status:
+            'RETIRED_NO_WRITE_PATH_INDEPENDENTLY_APPROVED_FOR_CONTINUATION',
           historical_candidate_commit:
             '2709aec3974288fee290c7306d7eff5827a53d74',
           candidate_commit: 'd8282b734037ce1fa6fe1d434b8eaf04dd8de4ce',
