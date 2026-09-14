@@ -344,6 +344,13 @@
         "worker_typecheck": "PASS",
         "production_mutation": false
       },
+      "country_office_rebuild_after_tamper_evidence": {
+        "status": "LOCAL_TEST_PASS_NOT_OPERATIONAL_EVIDENCE",
+        "candidate_commit": "2f955d4129d4391ddb41199edf49198d716bede4",
+        "evidence_file": "docs/reports/V10/V10.1_QUERY_BOUNDARY_INCREMENT.md",
+        "focused_tests": "PASS — 1 file / 3 tests",
+        "production_mutation": false
+      },
       "country_office_source_to_query_flow_evidence": {
         "status": "LOCAL_TEST_PASS_NOT_OPERATIONAL_EVIDENCE",
         "candidate_commit": "c5669dac74796e7e796661e8320a64b50ee8ec7c",
