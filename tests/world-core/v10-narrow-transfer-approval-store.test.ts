@@ -45,7 +45,7 @@ afterEach(async () => {
   await Promise.all(databases.splice(0).map((database) => database.close()));
 });
 
-function command(): CanonicalCommand {
+function command(quantity = '2'): CanonicalCommand {
   const fixture = createV10TwoCountryTestFixture();
   const source = fixture.inventoryAccounts.sellerAvailable;
   return parseCanonicalCommand(
@@ -68,7 +68,7 @@ function command(): CanonicalCommand {
         commodityId: 'GRAIN',
         sellerCountryId: fixture.countries.seller,
         buyerCountryId: fixture.countries.buyer,
-        quantity: { amount: '2', unit: source.unit },
+        quantity: { amount: quantity, unit: source.unit },
         price: { amount: '3', currency: 'GCU', perUnit: source.unit },
         assetSource: {
           batchId: source.batchId,
@@ -161,6 +161,37 @@ async function database(
 }
 
 describe('V10.2 durable narrow transfer approval store', () => {
+  it('rejects a different canonical intent with the same durable Command identity before creating a proposal', async () => {
+    const accepted = command();
+    const testDatabase = await database(accepted);
+    const fixture = createV10TwoCountryTestFixture();
+    const store = new NarrowTransferApprovalStore({
+      database: testDatabase,
+      sha256Hex,
+    });
+
+    await expect(
+      store.openSellerOffer({
+        command: command('1'),
+        signer: {
+          actorId: fixture.officeActors.sellerTrade.actorId,
+          authSubject: fixture.officeActors.sellerTrade.principal.authSubject,
+          signedAtReal: '2026-09-14T00:00:01.000Z',
+        },
+      }),
+    ).rejects.toMatchObject({
+      cause: { code: DOMAIN_ERROR_CODES.IDEMPOTENCY_CONFLICT },
+    });
+    await expect(
+      testDatabase.query<{ readonly count: string }>(
+        `select count(*)::text as count
+           from world_v2.narrow_transfer_proposal
+          where world_id = $1`,
+        [accepted.worldId],
+      ),
+    ).resolves.toMatchObject({ rows: [{ count: '0' }] });
+  });
+
   it('binds all three current Office signatures and rechecks their revision at the atomic cutoff', async () => {
     const value = command();
     const fixture = createV10TwoCountryTestFixture();

@@ -59,6 +59,12 @@ interface CurrentAuthorizationRow {
   readonly authorization_version: unknown;
 }
 
+interface DurableCommandRow {
+  readonly canonical_payload: unknown;
+  readonly command_fingerprint: unknown;
+  readonly payload_sha256: unknown;
+}
+
 function deny(message: string): never {
   throw new DomainError(DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED, message);
 }
@@ -228,6 +234,38 @@ async function readCurrentAuthorization(
   return text(row.authorization_version, 'Current authorization version');
 }
 
+/**
+ * An internally canonical object is not enough to open or sign an offer. The
+ * immutable Command ledger must already contain the same intent, locked before
+ * any proposal or signature is created.
+ */
+async function lockAndAssertDurableCommand(
+  transaction: SqlExecutor,
+  command: CanonicalCommand,
+): Promise<void> {
+  const result = await transaction.query<DurableCommandRow>(
+    `select canonical_payload, payload_sha256, command_fingerprint
+       from world_v2.command_submission
+      where world_id = $1 and command_id = $2
+      for update`,
+    [command.worldId, command.commandId],
+  );
+  const row = result.rows[0];
+  if (row === undefined || result.rows.length !== 1) {
+    deny('Approval requires an existing durable canonical Command');
+  }
+  if (
+    text(row.canonical_payload, 'Durable Command payload') !==
+      command.canonicalPayload ||
+    text(row.payload_sha256, 'Durable Command payload hash') !==
+      command.payloadHash ||
+    text(row.command_fingerprint, 'Durable Command fingerprint') !==
+      command.fingerprint
+  ) {
+    conflict('Durable Command identity is bound to different canonical intent');
+  }
+}
+
 async function readProposal(
   transaction: SqlExecutor,
   input: Readonly<{ command: CanonicalCommand; proposalId: string }>,
@@ -319,6 +357,7 @@ export class NarrowTransferApprovalStore implements AtomicNarrowTransferApproval
       signedAtReal: input.signer.signedAtReal,
     });
     await this.#database.transaction(async (transaction) => {
+      await lockAndAssertDurableCommand(transaction, command);
       const expected = expectedProposals(command);
       const authorizationVersion = await readCurrentAuthorization(transaction, {
         authSubject: input.signer.authSubject,
@@ -424,6 +463,7 @@ export class NarrowTransferApprovalStore implements AtomicNarrowTransferApproval
       signedAtReal: input.signer.signedAtReal,
     });
     await this.#database.transaction(async (transaction) => {
+      await lockAndAssertDurableCommand(transaction, command);
       const expected = expectedProposals(command);
       const seller = await readProposal(transaction, {
         command,
@@ -524,6 +564,7 @@ export class NarrowTransferApprovalStore implements AtomicNarrowTransferApproval
     ) {
       deny('Narrow transfer expired before authoritative commit');
     }
+    await lockAndAssertDurableCommand(transaction, command);
     const expected = expectedProposals(command);
     for (const proposal of [expected.seller, expected.buyer]) {
       const row = await readProposal(transaction, {
