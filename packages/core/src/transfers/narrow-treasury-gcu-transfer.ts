@@ -145,18 +145,11 @@ function requiredString(value: unknown, label: string): string {
   return value;
 }
 
-function canonicalTimestamp(value: string, label: string): number {
+function canonicalTimestamp(value: string, label: string): string {
   if (!RFC3339_MILLISECONDS.test(value)) {
     invalid(`${label} must be canonical RFC3339 UTC milliseconds`);
   }
-  const milliseconds = Date.parse(value);
-  if (
-    !Number.isFinite(milliseconds) ||
-    new Date(milliseconds).toISOString() !== value
-  ) {
-    invalid(`${label} must be a valid UTC timestamp`);
-  }
-  return milliseconds;
+  return value;
 }
 
 function parseQuantity(value: unknown): Quantity {
