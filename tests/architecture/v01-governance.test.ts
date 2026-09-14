@@ -284,6 +284,12 @@ describe('V06 owner-authorized package continuation', () => {
           worker_typecheck: 'PASS',
           production_mutation: false,
         },
+        country_office_source_to_query_flow_evidence: {
+          status: 'LOCAL_TEST_PASS_NOT_OPERATIONAL_EVIDENCE',
+          candidate_commit: 'c5669dac74796e7e796661e8320a64b50ee8ec7c',
+          focused_tests: 'PASS — 1 file / 2 tests',
+          production_mutation: false,
+        },
       },
       required_exit: 'V10.1_INDEPENDENT_REVIEW',
       merge_authorized: false,
