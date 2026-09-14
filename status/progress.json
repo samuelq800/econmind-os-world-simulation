@@ -360,6 +360,13 @@
         "migration_validation": "PASS — 14 artifacts",
         "local_rehearsal": "PASS — ephemeral PGlite only; no external database",
         "production_mutation": false
+      },
+      "negotiation_party_source_to_query_flow_evidence": {
+        "status": "LOCAL_TEST_PASS_NOT_OPERATIONAL_EVIDENCE",
+        "candidate_commit": "7f84ce5fd0ff8509c5ca3c010eb5bde08f73db04",
+        "evidence_file": "docs/reports/V10/V10.1_QUERY_BOUNDARY_INCREMENT.md",
+        "focused_tests": "PASS — 1 file / 2 tests",
+        "production_mutation": false
       }
     },
     "required_exit": "V10.1_INDEPENDENT_REVIEW",
