@@ -9,6 +9,7 @@
     "branch": "codex/v10-1-implementation",
     "implementation_candidate": "a468d43be86617aebcb6cbde1a5114ee0414e849",
     "durable_persistence_candidate": "64d2389d7cbec618684e5bcacde913e4d2c31b7d",
+    "durable_persistence_repair_review": "APPROVED_REPAIR_ONLY — BLOCKER_0_MAJOR_0_MINOR_0",
     "allowed_step": "V10.2",
     "terminal_gate": "V10.2_INDEPENDENT_REVIEW"
   },
