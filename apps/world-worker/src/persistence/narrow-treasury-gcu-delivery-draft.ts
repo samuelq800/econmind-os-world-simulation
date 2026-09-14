@@ -25,6 +25,7 @@ import {
 import type {
   AtomicTransitionCandidateFactory,
   AtomicTransitionDraft,
+  CurrentMaterializationInput,
 } from './atomic-transition-repository.js';
 
 export const NARROW_TREASURY_GCU_DELIVERY_EVENT_TYPE =
@@ -33,6 +34,10 @@ export const NARROW_TREASURY_GCU_DELIVERY_EVENT_SCHEMA =
   'narrow-treasury-gcu-delivery-event-v1' as const;
 export const NARROW_TREASURY_GCU_DELIVERY_OUTBOX_SCHEMA =
   'narrow-treasury-gcu-delivery-outbox-v1' as const;
+export const NARROW_TREASURY_GCU_DELIVERY_MATERIALIZATION_KEY =
+  'NARROW_TREASURY_GCU_DELIVERY' as const;
+export const NARROW_TREASURY_GCU_DELIVERY_MATERIALIZATION_SCHEMA =
+  'narrow-treasury-gcu-delivery-materialization-v1' as const;
 
 type NarrowTreasuryGcuDeliveryDraftInput = Parameters<
   typeof prepareNarrowTreasuryGcuDeliveryAtomicDraft
@@ -70,6 +75,43 @@ function automaticVersion(command: CanonicalCommand): Readonly<{
   return Object.freeze({
     before: command.expectedWorldVersion,
     after: (BigInt(command.expectedWorldVersion) + 1n).toString(),
+  });
+}
+
+/**
+ * This is a derived delivery index only. It is deliberately composed entirely
+ * from the immutable Command/Event/Posting identity that already commits in
+ * the same transaction; it carries no balance, stock, or authorization input.
+ */
+export function createNarrowTreasuryGcuDeliveryMaterialization(input: {
+  readonly deliveryCommandId: string;
+  readonly deliveryFingerprint: string;
+  readonly deliveryWorldVersion: string;
+  readonly eventId: string;
+  readonly financialPostingFingerprint: string;
+  readonly inventoryPostingFingerprint: string;
+  readonly shipmentId: string;
+  readonly transferCommandId: string;
+  readonly transferFingerprint: string;
+  readonly worldId: string;
+  readonly materializedWorldVersion: string;
+}): CurrentMaterializationInput {
+  return Object.freeze({
+    key: NARROW_TREASURY_GCU_DELIVERY_MATERIALIZATION_KEY,
+    payload: Object.freeze({
+      deliveryCommandId: input.deliveryCommandId,
+      deliveryFingerprint: input.deliveryFingerprint,
+      deliveryWorldVersion: input.deliveryWorldVersion,
+      eventId: input.eventId,
+      financialPostingFingerprint: input.financialPostingFingerprint,
+      inventoryPostingFingerprint: input.inventoryPostingFingerprint,
+      schemaVersion: NARROW_TREASURY_GCU_DELIVERY_MATERIALIZATION_SCHEMA,
+      shipmentId: input.shipmentId,
+      transferCommandId: input.transferCommandId,
+      transferFingerprint: input.transferFingerprint,
+      worldId: input.worldId,
+      materializedWorldVersion: input.materializedWorldVersion,
+    }),
   });
 }
 
@@ -188,6 +230,19 @@ export function prepareNarrowTreasuryGcuDeliveryAtomicDraft(input: {
     ),
     availableAtSimTime: input.deliveryCommand.simTime,
   });
+  const materialization = createNarrowTreasuryGcuDeliveryMaterialization({
+    deliveryCommandId: input.deliveryCommand.commandId,
+    deliveryFingerprint: input.deliveryCommand.fingerprint,
+    deliveryWorldVersion: versions.after,
+    eventId: event.eventId,
+    financialPostingFingerprint: delivery.settlement.fingerprint,
+    inventoryPostingFingerprint: delivery.posting.fingerprint,
+    shipmentId: terms.shipmentId,
+    transferCommandId: input.transferCommand.commandId,
+    transferFingerprint: input.transferCommand.fingerprint,
+    worldId: input.deliveryCommand.worldId,
+    materializedWorldVersion: versions.after,
+  });
   return Object.freeze({
     draft: Object.freeze({
       transition,
@@ -195,7 +250,7 @@ export function prepareNarrowTreasuryGcuDeliveryAtomicDraft(input: {
       financialPostingBatches: Object.freeze([delivery.settlement]),
       receipt,
       outboxMessages: Object.freeze([outbox]),
-      currentMaterializations: Object.freeze([]),
+      currentMaterializations: Object.freeze([materialization]),
       authorityKind: 'VERSIONED_AUTOMATIC',
       commitAssertion: input.commitAssertion,
       observedAtReal: input.observedAtReal,

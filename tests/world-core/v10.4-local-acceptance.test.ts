@@ -40,6 +40,8 @@ import {
   createNarrowTreasuryGcuDeliveryCandidateFactory,
   prepareNarrowTreasuryGcuDeliveryAtomicDraft,
 } from '../../apps/world-worker/src/persistence/narrow-treasury-gcu-delivery-draft.js';
+import { NarrowTreasuryGcuDeliveryProjectionRebuilder } from '../../apps/world-worker/src/projections/narrow-treasury-gcu-delivery-projection.js';
+import { WorldRecoveryCoordinator } from '../../apps/world-worker/src/recovery/world-recovery.js';
 import { prepareAtomicTransitionCandidate } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
 import {
   AtomicTransitionRepository,
@@ -848,6 +850,7 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
         readonly event_count: string;
         readonly financial_count: string;
         readonly inventory_count: string;
+        readonly materialization_count: string;
         readonly outbox_count: string;
         readonly receipt_count: string;
         readonly world_version: string;
@@ -903,6 +906,7 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
            (select count(*)::text from world_v2.financial_posting_batch) as financial_count,
            (select count(*)::text from world_v2.notification_outbox) as outbox_count,
            (select count(*)::text from world_v2.command_receipt) as receipt_count,
+           (select count(*)::text from world_v2.current_materialization) as materialization_count,
            (select queue_state from world_v2.command_queue) as queue_state,
            (select world_version::text from world_v2.world_head) as world_version`,
       );
@@ -910,11 +914,62 @@ describe('V10.4 local Treasury-GCU acceptance', () => {
         event_count: '1',
         financial_count: '1',
         inventory_count: '1',
+        materialization_count: '1',
         outbox_count: '1',
         queue_state: 'FINALIZED',
         receipt_count: '1',
         world_version: '3',
       });
+      const recovery = new WorldRecoveryCoordinator({
+        database: database as SqlDatabase,
+        workerId: 'WORKER_V10_4_ATOMIC',
+      });
+      await expect(
+        recovery.recordOutboxAttempt({
+          worldId: prepared.delivery.worldId,
+          messageId: 'OUTBOX_V10_4_ATOMIC_DELIVERY',
+          attemptedAtReal: '2026-09-14T00:03:00.000Z',
+          delivered: false,
+        }),
+      ).resolves.toEqual({ disposition: 'RETRY_PENDING', attemptCount: '1' });
+      await expect(
+        recovery.recordOutboxAttempt({
+          worldId: prepared.delivery.worldId,
+          messageId: 'OUTBOX_V10_4_ATOMIC_DELIVERY',
+          attemptedAtReal: '2026-09-14T00:04:00.000Z',
+          delivered: true,
+        }),
+      ).resolves.toEqual({ disposition: 'DELIVERED', attemptCount: '2' });
+      const projectionBefore = await database.query<{
+        readonly canonical_payload: string;
+        readonly payload_sha256: string;
+      }>(
+        `select canonical_payload, payload_sha256
+           from world_v2.current_materialization
+          where world_id = $1
+            and materialization_key = 'NARROW_TREASURY_GCU_DELIVERY'`,
+        [prepared.delivery.worldId],
+      );
+      await expect(
+        recovery.rebuildCurrentMaterializations({
+          assertion: createWorldWriterCommitAssertion(lease, '3'),
+          observedAtReal: '2026-09-14T00:05:00.000Z',
+          rebuilder: new NarrowTreasuryGcuDeliveryProjectionRebuilder({
+            sha256Hex,
+          }),
+        }),
+      ).resolves.toBe(1);
+      const projectionAfter = await database.query<{
+        readonly canonical_payload: string;
+        readonly payload_sha256: string;
+      }>(
+        `select canonical_payload, payload_sha256
+           from world_v2.current_materialization
+          where world_id = $1
+            and materialization_key = 'NARROW_TREASURY_GCU_DELIVERY'`,
+        [prepared.delivery.worldId],
+      );
+      expect(projectionAfter.rows).toEqual(projectionBefore.rows);
     } finally {
       await database.close();
     }
