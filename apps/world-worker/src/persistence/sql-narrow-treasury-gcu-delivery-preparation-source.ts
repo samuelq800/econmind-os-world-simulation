@@ -133,7 +133,7 @@ export class SqlNarrowTreasuryGcuDeliveryPreparationSource implements NarrowTrea
 
   async load(
     input: Parameters<NarrowTreasuryGcuDeliveryPreparationSource['load']>[0],
-  ) {
+  ): ReturnType<NarrowTreasuryGcuDeliveryPreparationSource['load']> {
     const observedAtReal = timestamp(
       input.observedAtReal,
       'Delivery preparation time',
