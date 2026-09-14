@@ -185,6 +185,20 @@
       "lock_or_downtime_risk": "Preparation-only additive derived read-model tables; all browser schema/table privileges remain explicitly revoked pending a reviewed query facade",
       "rollback_strategy": "reversible-before-economic-facts",
       "production_approval": null
+    },
+    {
+      "migration_id": "0014_world_v2_current_negotiation_party_membership",
+      "release_order": 14,
+      "path": "database/migrations/artifacts/0014_world_v2_current_negotiation_party_membership.sql",
+      "sha256": "0dd166235844de91f3503986e2bacdc8638706994da74a2ea1a190214eadfebc",
+      "artifact_source_commit": "89fac267f8b7b7185523a7b93035bf6df68a192e",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": true,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Preparation-only additive, initially empty server-owned named-party membership source; no school field, school-isolation rule, browser grant, production publication or shared-Supabase action",
+      "rollback_strategy": "reversible-before-economic-facts",
+      "production_approval": null
     }
   ]
 }
