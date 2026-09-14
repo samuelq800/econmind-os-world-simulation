@@ -35,6 +35,12 @@ second Event, posting, outbox message, or WorldVersion advance. This is a
 deterministic client-response-loss simulation, not an operating-system process
 kill.
 
+The next candidate adds a separate Vitest child process that terminates itself
+with `SIGKILL` at the V10 delivery repository's `AFTER_FINANCIAL_POSTINGS`
+checkpoint. The parent process then uses a new guarded PostgreSQL pool to
+prove rollback and commit the same durable Command once. Its result must be
+recorded from the exact CI run before it is counted as process-kill evidence.
+
 ## Observed disposable CI evidence
 
 The preceding V09-only candidate was exercised by GitHub Actions run
