@@ -98,10 +98,26 @@ The first strict-signal forward target
 [`34849578126`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34849578126):
 12 tests passed, one child fixture was parent-gated, and the recovery test
 failed because the outer Vitest launcher observed `{ code: 1, signal: null }`.
-That failure is correctly fail-closed, but does not close the Major. The next
-candidate runs the child fixture in Vitest's thread pool, so the parent directly
-observes the same Node process that receives the configured `SIGKILL`; it
-requires a new exact CI result before any process-kill claim is restored.
+The expanded five-checkpoint target
+`700acc4a7da3e5bcfdb9eb020f2e364764579383` failed the same way in run
+[`34850004437`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34850004437):
+12 passed, one skipped, and all five strict recovery checks failed. Both are
+preserved fail-closed failures and do not close the Major.
+
+The thread-pool forward candidate
+`3a15fac06af5bdb92906b8d6e6540cf75ed9353d` passed GitHub Actions run
+[`34850501755`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34850501755).
+Its disposable PostgreSQL V10.4 suite completed 17 passing tests with one
+parent-gated child fixture skipped. The strict signal assertion passed for a
+deliberate `SIGKILL` at each of `AFTER_EVENTS`, `AFTER_INVENTORY_POSTINGS`,
+`AFTER_FINANCIAL_POSTINGS`, `BEFORE_RECEIPT`, and
+`BEFORE_TRANSACTION_COMMIT`; after each kill, a new guarded pool verified no
+durable partial facts and committed the same Command once. Independent review
+of the exact range
+`7d161dbfa54fef0dc131dc68ab53f35ea08bc6c6..3a15fac06af5bdb92906b8d6e6540cf75ed9353d`
+recorded `APPROVED_FOR_CONTINUATION`, `BLOCKER=0`, `MAJOR=0`, and `MINOR=0`,
+closing the prior process-kill evidence Major. This remains narrow delivery-path
+evidence only, not Gate B approval.
 
 The service was removed with the CI job. No Supabase, staging, or production
 target was contacted.
