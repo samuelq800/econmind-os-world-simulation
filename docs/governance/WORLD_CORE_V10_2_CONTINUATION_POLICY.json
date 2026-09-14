@@ -8,7 +8,7 @@
   "scope": {
     "branch": "codex/v10-1-implementation",
     "implementation_candidate": "a468d43be86617aebcb6cbde1a5114ee0414e849",
-    "durable_persistence_candidate": "c77ac9c52a8d49de76269075c0adf1a2fe10018e",
+    "durable_persistence_candidate": "7eecbabc989bab5798790ed10256299273ff154b",
     "allowed_step": "V10.2",
     "terminal_gate": "V10.2_INDEPENDENT_REVIEW"
   },
@@ -20,7 +20,7 @@
   "preserved_controls": [
     "Each proposal binds the canonical Command fingerprint, both country scopes, policy version, complete Office set, signed asset source, expiry, threshold policy version, and the fixed 6 GCU maximum settlement.",
     "Every required signer is re-resolved at reservation time. A stale, revoked, missing, duplicate, or mismatched signature denies before ledger effect.",
-    "The Worker-owned durable approval store binds only the exact canonical Command, two country-scoped proposal records, immutable Office signatures, and their current authorization revisions. Its atomic cutoff guard fails closed when omitted, stale, expired, or incomplete.",
+    "The Worker-owned durable approval store locks and binds only the exact immutable Command ledger intent, two country-scoped proposal records, immutable Office signatures, and their current authorization revisions. Its atomic cutoff guard fails closed when omitted, stale, expired, or incomplete.",
     "Reservation accepts only authoritative inventory lineage and emits only an exact AVAILABLE-to-RESERVED posting. No browser, fixture, cache, projection, or calibration input is authority.",
     "No main merge, production/shared-Supabase connection or mutation, migration publication, deployment, original EconMind website change, V10.3 delivery/payment, or V11 work is authorized."
   ],

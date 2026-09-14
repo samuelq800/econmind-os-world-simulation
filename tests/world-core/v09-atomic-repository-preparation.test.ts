@@ -491,6 +491,7 @@ describe('V09 private atomic repository preparation', () => {
     const inventory = prepared.inventoryPostings[0]!;
     const { fingerprint: _inventoryFingerprint, ...inventoryIntent } =
       inventory;
+    void _inventoryFingerprint;
     const canonicalInventoryPayload = canonicalSerialize(inventoryIntent);
     const changedInventoryId = canonicalInventoryPayload.replace(
       'INVENTORY_ATOMIC_REPOSITORY',
@@ -541,6 +542,7 @@ describe('V09 private atomic repository preparation', () => {
 
     const batch = prepared.financialPostingBatches[0]!;
     const { fingerprint: _batchFingerprint, ...batchIntent } = batch;
+    void _batchFingerprint;
     const canonicalBatchPayload = canonicalSerialize(batchIntent);
     const changedBatchId = canonicalBatchPayload.replace(
       'FINANCIAL_ATOMIC_REPOSITORY',
