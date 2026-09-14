@@ -264,9 +264,11 @@ describe('V06 owner-authorized package continuation', () => {
           production_mutation: false,
         },
         guarded_read_projection_publication: {
-          status: 'IMPLEMENTED_UNVERIFIED',
-          candidate_commit: '2709aec3974288fee290c7306d7eff5827a53d74',
-          focused_tests: 'PASS — 5 files / 27 tests',
+          status: 'RETIRED_NO_WRITE_PATH_PENDING_REREVIEW',
+          historical_candidate_commit:
+            '2709aec3974288fee290c7306d7eff5827a53d74',
+          candidate_commit: 'd8282b734037ce1fa6fe1d434b8eaf04dd8de4ce',
+          focused_tests: 'PASS — 2 files / 6 tests',
           architecture_checks: 'PASS — 9 files / 84 tests',
           production_mutation: false,
         },
