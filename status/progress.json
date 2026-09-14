@@ -458,13 +458,13 @@
     "production_mutation": false
   },
   "v10_3_entry": {
-    "status": "ATOMIC_DRAFT_AND_LOCAL_ACCEPTANCE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
+    "status": "LOCAL_EVIDENCE_REBINDING_FIX_AWAITING_SCOPED_REVIEW",
     "hard_dependency": "V10.2_PACKAGE_APPROVED_NEXT_GOVERNANCE_ONLY",
     "owner_authorization": "docs/reports/V10/V10.3_OWNER_LOCAL_IMPLEMENTATION_AUTHORIZATION.md",
-    "implementation_target": "0b2d66eede98547270ce12119d946bcd4c946d32",
+    "implementation_target": "cd6faa84cd081c6857928c3c009ebb513721d41b",
     "increment_evidence": "docs/reports/V10/V10.3_ATOMIC_DRAFT_INCREMENT.md",
     "scope": "ADR-05 RESERVED_TO_IN_TRANSIT_TO_BUYER_AVAILABLE plus exact Buyer Treasury GCU to Seller Settlement delivery posting, automatic atomic draft, receipt, and canonical outbox",
-    "local_checks": "PASS — worker and core typechecks; 3 focused files / 14 tests including fixed-seed 250-run property campaign; targeted ESLint; isolated PGlite atomic commit/retry/rollback",
+    "local_checks": "PASS — worker and core typechecks; 3 focused files / 14 tests including fixed-seed 250-run property campaign at cd6faa84cd081c6857928c3c009ebb513721d41b; targeted ESLint; isolated PGlite atomic commit/retry/rollback",
     "remaining_v10_3_scope": [
       "server-held SQL preparation loader and opening-state bootstrap",
       "real outbox consumer",
@@ -476,8 +476,8 @@
     "production_mutation": false
   },
   "v10_4_entry": {
-    "status": "LOCAL_ACCEPTANCE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
-    "implementation_target": "0b2d66eede98547270ce12119d946bcd4c946d32",
+    "status": "LOCAL_EVIDENCE_REBINDING_FIX_AWAITING_SCOPED_REVIEW",
+    "implementation_target": "cd6faa84cd081c6857928c3c009ebb513721d41b",
     "scope": "deterministic local successful delivery, bilateral conservation, exact replay, insufficient-funds zero effect, and isolated atomic persistence evidence",
     "evidence_file": "tests/world-core/v10.4-local-acceptance.test.ts",
     "remote_or_production_execution": false,
@@ -493,10 +493,10 @@
   "current_gate": {
     "step_id": "V10.3",
     "status": "IN_PROGRESS",
-    "review": "SCOPED_V10_3_V10_4_CANDIDATE_AWAITING_INDEPENDENT_REVIEW",
+    "review": "SCOPED_V10_3_V10_4_LOCAL_REBINDING_FIX_AWAITING_INDEPENDENT_REVIEW",
     "next_step": "V10.3",
     "next_step_ready": true,
-    "next_step_blockers": [],
+    "next_step_blockers": ["V10.3_V10.4 evidence rebinding review on the successor commit"],
     "required_gate": "V10.3_V10.4_SCOPED_INCREMENT_REVIEW",
     "gate_status": "PASS"
   },
@@ -1600,8 +1600,8 @@
     "V09.3": "PLANNED",
     "V10.1": "PACKAGE_REVIEWED_NEXT_GOVERNANCE_ONLY",
     "V10.2": "PACKAGE_REVIEWED_NEXT_GOVERNANCE_ONLY",
-    "V10.3": "ATOMIC_DRAFT_AND_LOCAL_ACCEPTANCE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
-    "V10.4": "LOCAL_ACCEPTANCE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
+    "V10.3": "LOCAL_EVIDENCE_REBINDING_FIX_AWAITING_SCOPED_REVIEW",
+    "V10.4": "LOCAL_EVIDENCE_REBINDING_FIX_AWAITING_SCOPED_REVIEW",
     "V11.1": "PLANNED",
     "V11.2": "PLANNED",
     "V11.3": "PLANNED",
