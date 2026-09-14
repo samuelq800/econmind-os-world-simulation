@@ -16,29 +16,6 @@ const request = createWorldReadRequest({
   scopeKey: 'COUNTRY_A',
 });
 
-function response(overrides: Record<string, unknown> = {}) {
-  return {
-    schemaVersion: 'world-read-api-v1',
-    requestId: request.requestId,
-    ok: true,
-    data: {
-      schemaVersion: 'world-projection-read-v1',
-      worldId: 'WORLD_1',
-      classification: 'COUNTRY',
-      scopeKey: 'COUNTRY_A',
-      watermark: {
-        worldVersion: '1',
-        eventSequence: '1',
-        generatedAt: '2026-09-12T02:00:00.000Z',
-      },
-      payload: { status: 'READY' },
-      receipts: [],
-      events: [],
-    },
-    ...overrides,
-  };
-}
-
 const policy = { maxAttempts: 2, timeoutMs: 50, retryDelayMs: 0 } as const;
 
 describe('World read transport boundaries', () => {

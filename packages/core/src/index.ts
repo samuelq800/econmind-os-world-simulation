@@ -39,7 +39,6 @@ export {
   createReleasePosting,
   createReservationPosting,
   createShipmentPosting,
-  applyInventoryPosting,
   parseInventoryLedgerSnapshot,
   type AppliedInventoryPosting,
   type InventoryAccount,

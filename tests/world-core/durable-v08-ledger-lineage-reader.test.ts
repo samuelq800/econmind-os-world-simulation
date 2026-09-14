@@ -58,7 +58,9 @@ function canonicalIntent(value: { readonly fingerprint: unknown }): string {
   return canonicalSerialize(intent);
 }
 
-function fixture(input: { readonly expectedWorldVersion?: string | null } = {}) {
+function fixture(
+  input: { readonly expectedWorldVersion?: string | null } = {},
+) {
   const available = createInventoryAccount({
     worldId: WORLD,
     countryId: COUNTRY,

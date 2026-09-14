@@ -522,7 +522,11 @@
     "review": "V10_4_AND_V10_5_LOCAL_CANDIDATES_APPROVED_FOR_CONTINUATION_ONLY; V10_6_AND_V10_7_SCOPED_REVIEW_00649D3_TO_6C1330B_APPROVED_FOR_GATE_B_EVIDENCE_PREPARATION_ONLY",
     "next_step": "GATE_B_WORLD_CORE_HARD_GATE",
     "next_step_ready": false,
-    "next_step_blockers": ["full immutable-candidate regression, property/state-machine, replay and projection-hash evidence", "real isolated PostgreSQL concurrency, transaction and controlled crash-recovery evidence", "browser E2E and RLS/grant negative evidence on an exact owner-approved non-production target"],
+    "next_step_blockers": [
+      "full immutable-candidate regression, property/state-machine, replay and projection-hash evidence",
+      "real isolated PostgreSQL concurrency, transaction and controlled crash-recovery evidence",
+      "browser E2E and RLS/grant negative evidence on an exact owner-approved non-production target"
+    ],
     "required_gate": "GATE_B_WORLD_CORE_HARD_GATE",
     "gate_status": "PENDING"
   },

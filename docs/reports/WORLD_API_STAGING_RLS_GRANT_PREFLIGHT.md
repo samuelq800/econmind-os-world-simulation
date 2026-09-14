@@ -32,18 +32,18 @@ shared Supabase project.
 
 ## Negative test matrix
 
-| Case | Request identity/state | Expected outcome |
-| --- | --- | --- |
-| Missing bearer | No `Authorization` header | Authentication failure; no projection query |
-| Invalid bearer | Bad signature, issuer, audience, `exp`, or `iat` | Authentication failure; no projection query |
-| No entitlement | Valid subject without an entitlement row | No projection result; no scope disclosure |
-| Cross-country | Valid subject requests another country scope | No projection result |
-| Cross-office | Valid subject requests another office-private scope | No projection result |
-| Revoked entitlement | Matching entitlement has `revoked_at` | No projection result |
-| Inactive entitlement | Matching entitlement has `active = false` | No projection result |
-| Malformed/oversized input | Invalid envelope or request above 16 KiB | Protocol failure before database execution |
-| Oversized projection | Entitled row exceeds one MiB serialized response | Protocol failure; response is not emitted |
-| Upstream interruption | Query cancellation, deadline, or read failure | `CANCELLED`/`TIMEOUT`/redacted upstream failure; no server retry |
+| Case                      | Request identity/state                              | Expected outcome                                                 |
+| ------------------------- | --------------------------------------------------- | ---------------------------------------------------------------- |
+| Missing bearer            | No `Authorization` header                           | Authentication failure; no projection query                      |
+| Invalid bearer            | Bad signature, issuer, audience, `exp`, or `iat`    | Authentication failure; no projection query                      |
+| No entitlement            | Valid subject without an entitlement row            | No projection result; no scope disclosure                        |
+| Cross-country             | Valid subject requests another country scope        | No projection result                                             |
+| Cross-office              | Valid subject requests another office-private scope | No projection result                                             |
+| Revoked entitlement       | Matching entitlement has `revoked_at`               | No projection result                                             |
+| Inactive entitlement      | Matching entitlement has `active = false`           | No projection result                                             |
+| Malformed/oversized input | Invalid envelope or request above 16 KiB            | Protocol failure before database execution                       |
+| Oversized projection      | Entitled row exceeds one MiB serialized response    | Protocol failure; response is not emitted                        |
+| Upstream interruption     | Query cancellation, deadline, or read failure       | `CANCELLED`/`TIMEOUT`/redacted upstream failure; no server retry |
 
 ## Execution constraints
 

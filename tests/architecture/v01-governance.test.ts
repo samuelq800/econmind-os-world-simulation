@@ -240,13 +240,17 @@ describe('V06 owner-authorized package continuation', () => {
       },
     });
     expect(progress.current_gate).toMatchObject({
-      step_id: 'V10.1',
+      step_id: 'GATE_B_EVIDENCE_PREPARATION',
       status: 'IN_PROGRESS',
-      next_step: 'V10.1',
-      next_step_ready: true,
-      next_step_blockers: [],
-      required_gate: 'V10.1_IMPLEMENTATION',
-      gate_status: 'PASS',
+      next_step: 'GATE_B_WORLD_CORE_HARD_GATE',
+      next_step_ready: false,
+      next_step_blockers: [
+        'full immutable-candidate regression, property/state-machine, replay and projection-hash evidence',
+        'real isolated PostgreSQL concurrency, transaction and controlled crash-recovery evidence',
+        'browser E2E and RLS/grant negative evidence on an exact owner-approved non-production target',
+      ],
+      required_gate: 'GATE_B_WORLD_CORE_HARD_GATE',
+      gate_status: 'PENDING',
     });
     expect(progress.v10_1_entry).toMatchObject({
       status: 'V10_1_PACKAGE_APPROVED_NEXT_GOVERNANCE_ONLY',
@@ -308,7 +312,9 @@ describe('V06 owner-authorized package continuation', () => {
       production_access: false,
       production_mutation: false,
     });
-    expect(progress.steps['V10.1']).toBe('IN_PROGRESS');
+    expect(progress.steps['V10.1']).toBe(
+      'PACKAGE_REVIEWED_NEXT_GOVERNANCE_ONLY',
+    );
     expect(progress.v10_2_adr_entry).toEqual({
       status: 'V10_2_PACKAGE_APPROVED_NEXT_GOVERNANCE_ONLY',
       adr_09_decision: 'docs/architecture/decisions/ADR-09.md',

@@ -6,5 +6,6 @@ export default defineConfig({
       enabled: false,
     },
     include: ['tests/**/*.test.ts'],
+    maxWorkers: 2,
   },
 });
