@@ -457,6 +457,23 @@
     "production_access": false,
     "production_mutation": false
   },
+  "v10_3_entry": {
+    "status": "CORE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
+    "hard_dependency": "V10.2_PACKAGE_APPROVED_NEXT_GOVERNANCE_ONLY",
+    "owner_authorization": "docs/reports/V10/V10.3_OWNER_LOCAL_IMPLEMENTATION_AUTHORIZATION.md",
+    "implementation_target": "23c57d568726d33e4d3f61175055219107408fd2",
+    "scope": "ADR-05 RESERVED_TO_IN_TRANSIT_TO_BUYER_AVAILABLE plus exact Buyer Treasury GCU to Seller Settlement delivery posting",
+    "local_checks": "PASS — core typecheck; 2 focused files / 8 tests; targeted ESLint",
+    "remaining_v10_3_scope": [
+      "atomic repository transaction",
+      "event and receipt persistence",
+      "projection outbox",
+      "retry and crash-recovery evidence"
+    ],
+    "merge_authorized": false,
+    "production_access": false,
+    "production_mutation": false
+  },
   "owner_completed_work_approval": {
     "status": "APPROVED_FOR_DEVELOPMENT_BASELINE",
     "approval_record": "docs/governance/WORLD_CORE_HISTORICAL_COMPLETED_WORK_APPROVAL.md",
@@ -465,13 +482,13 @@
     "production_mutation": false
   },
   "current_gate": {
-    "step_id": "V10.1",
+    "step_id": "V10.3",
     "status": "IN_PROGRESS",
-    "review": "OWNER_AUTHORIZED_V10_1_IMPLEMENTATION",
-    "next_step": "V10.1",
+    "review": "SCOPED_CORE_CANDIDATE_AWAITING_INDEPENDENT_REVIEW",
+    "next_step": "V10.3",
     "next_step_ready": true,
     "next_step_blockers": [],
-    "required_gate": "V10.1_IMPLEMENTATION",
+    "required_gate": "V10.3_CORE_INCREMENT_REVIEW",
     "gate_status": "PASS"
   },
   "v07_package_review": {
@@ -1572,9 +1589,9 @@
     "V09.1": "IN_PROGRESS",
     "V09.2": "PLANNED",
     "V09.3": "PLANNED",
-    "V10.1": "IN_PROGRESS",
-    "V10.2": "IN_PROGRESS",
-    "V10.3": "PLANNED",
+    "V10.1": "PACKAGE_REVIEWED_NEXT_GOVERNANCE_ONLY",
+    "V10.2": "PACKAGE_REVIEWED_NEXT_GOVERNANCE_ONLY",
+    "V10.3": "CORE_CANDIDATE_AWAITING_SCOPED_INDEPENDENT_REVIEW",
     "V10.4": "PLANNED",
     "V11.1": "PLANNED",
     "V11.2": "PLANNED",
