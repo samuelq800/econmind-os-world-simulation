@@ -245,7 +245,7 @@ describe('V06 owner-authorized package continuation', () => {
       next_step: 'GATE_B_WORLD_CORE_HARD_GATE',
       next_step_ready: false,
       next_step_blockers: [
-        'full Gate B command-sequence state-machine evidence; the local 250-sequence scheduler model plus 29-property / 29,000-case baseline does not replace the V10 lifecycle campaign',
+        'full Gate B command-sequence state-machine evidence; the local 250-sequence scheduler model, 100-sequence narrow V10 lifecycle model, and 29-property / 29,000-case baseline do not replace the complete V10 lifecycle campaign',
         'real isolated PostgreSQL concurrency, transaction and controlled crash-recovery evidence',
         'browser E2E and RLS/grant negative evidence on an exact owner-approved non-production target',
       ],

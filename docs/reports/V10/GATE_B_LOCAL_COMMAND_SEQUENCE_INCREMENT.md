@@ -27,9 +27,11 @@ is included in `pnpm test:property`; that suite now contains 30 tests.
 
 ## Deliberate limits
 
-This increment is not the full Gate B command-sequence campaign. It does not
-exercise the V10 multi-step transfer/approval/delivery lifecycle, real
-PostgreSQL concurrency or crash recovery, browser E2E, or RLS/grant negatives.
-It does not authorize Gate B, staging, deployment, main merge, or any
-Supabase mutation. The three recorded Gate B blockers remain open until their
-separately required evidence is bound to an immutable candidate.
+This scheduler increment is not the full Gate B command-sequence campaign. A
+separate narrow V10 Reserve/Ship/Deliver model is recorded in
+`GATE_B_V10_LIFECYCLE_SEQUENCE_INCREMENT.md`; together they still do not cover
+the complete V10 lifecycle, real PostgreSQL concurrency or crash recovery,
+browser E2E, or RLS/grant negatives. They do not authorize Gate B, staging,
+deployment, main merge, or any Supabase mutation. The recorded Gate B blockers
+remain open until their separately required evidence is bound to an immutable
+candidate.

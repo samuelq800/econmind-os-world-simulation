@@ -76,6 +76,12 @@ const V10_4_PROPERTY_CONFIG = Object.freeze({
   seed: 2_026_091_4,
 });
 const V10_4_PROPERTY_TIMEOUT_MS = 20_000;
+const V10_LIFECYCLE_STATE_MACHINE_CONFIG = Object.freeze({
+  ...FOUNDATION_PROPERTY_CONFIG,
+  numRuns: 100,
+  seed: 2_026_091_5,
+});
+const V10_LIFECYCLE_STATE_MACHINE_TIMEOUT_MS = 30_000;
 const root = path.resolve(import.meta.dirname, '../..');
 const atomicMigrations = [
   '0001_world_v2_namespace.sql',
@@ -687,6 +693,8 @@ async function preparedDelivery(
   const delivery = deliveryCommand(transfer);
   const deliver = transition(delivery, '2', '3');
   return Object.freeze({
+    approvals: approved.approvals,
+    contexts: approved.contexts,
     fixture: approved.fixture,
     reservationPosting: reservation.posting,
     shipment,
@@ -773,6 +781,102 @@ function atomicDeliveryCandidate(input: {
     draft,
     sha256Hex,
   });
+}
+
+type V10LifecyclePhase = 'AVAILABLE' | 'RESERVED' | 'IN_TRANSIT' | 'DELIVERED';
+type V10LifecycleOperation = 'RESERVE' | 'SHIP' | 'DELIVER';
+
+function lifecycleSource(
+  prepared: Awaited<ReturnType<typeof preparedDelivery>>,
+  inventory: InventoryLedgerState,
+  bucket: 'RESERVED' | 'IN_TRANSIT',
+) {
+  return (
+    inventory.balances.find((balance) => balance.account.bucket === bucket)
+      ?.account ??
+    (bucket === 'RESERVED'
+      ? prepared.fixture.inventoryAccounts.sellerReserved
+      : prepared.source)
+  );
+}
+
+async function runV10LifecycleOperation(input: {
+  readonly operation: V10LifecycleOperation;
+  readonly prepared: Awaited<ReturnType<typeof preparedDelivery>>;
+  readonly states: DeliveryStates;
+}): Promise<DeliveryStates> {
+  const { operation, prepared } = input;
+  if (operation === 'RESERVE') {
+    const reserve = transition(prepared.transfer, '0', '1');
+    const result = await reserveNarrowTreasuryGcuTransfer({
+      approvals: prepared.approvals,
+      contexts: prepared.contexts,
+      atReal: RESERVED_AT,
+      inventoryState: input.states.inventory,
+      source: prepared.fixture.inventoryAccounts.sellerAvailable,
+      reservationId: inventoryReservationId('RESERVATION_V10_4_TREASURY_GCU'),
+      postingId: inventoryPostingId('POSTING_V10_4_RESERVE'),
+      transition: reserve.transition,
+      simTime: SimTime.fromTicks('10000'),
+      causationEventIds: [reserve.event.eventId],
+      sha256Hex,
+    });
+    return Object.freeze({
+      financial: input.states.financial,
+      inventory: result.inventory.state,
+    });
+  }
+  if (operation === 'SHIP') {
+    const ship = transition(prepared.shipment, '1', '2');
+    const result = shipNarrowTreasuryGcuTransfer({
+      causationEventIds: [ship.event.eventId],
+      inventoryState: input.states.inventory,
+      postingId: inventoryPostingId('POSTING_V10_4_SHIPMENT'),
+      shipmentCommand: prepared.shipment,
+      source: lifecycleSource(prepared, input.states.inventory, 'RESERVED'),
+      transferCommand: prepared.transfer,
+      transition: ship.transition,
+      sha256Hex,
+    });
+    return Object.freeze({
+      financial: input.states.financial,
+      inventory: result.inventory.state,
+    });
+  }
+  const deliver = transition(prepared.delivery, '2', '3');
+  const result = deliverNarrowTreasuryGcuTransfer({
+    buyerTreasury: prepared.fixture.financialAccounts.buyerTreasury,
+    buyerTreasuryLegId: financialPostingLegId('LEG_V10_4_LIFECYCLE_BUYER'),
+    causationEventIds: [deliver.event.eventId],
+    deliveryCommand: prepared.delivery,
+    financialBatchId: financialPostingBatchId('BATCH_V10_4_LIFECYCLE'),
+    financialState: input.states.financial,
+    inventoryPostingId: inventoryPostingId('POSTING_V10_4_LIFECYCLE'),
+    inventoryState: input.states.inventory,
+    sellerSettlement: prepared.fixture.financialAccounts.sellerSettlement,
+    sellerSettlementLegId: financialPostingLegId('LEG_V10_4_LIFECYCLE_SELLER'),
+    source: lifecycleSource(prepared, input.states.inventory, 'IN_TRANSIT'),
+    transferCommand: prepared.transfer,
+    transition: deliver.transition,
+    sha256Hex,
+  });
+  return Object.freeze({
+    financial: result.financial.state,
+    inventory: result.inventory.state,
+  });
+}
+
+function nextV10LifecyclePhase(
+  phase: V10LifecyclePhase,
+  operation: V10LifecycleOperation,
+  buyerBalance: number,
+): V10LifecyclePhase {
+  if (phase === 'AVAILABLE' && operation === 'RESERVE') return 'RESERVED';
+  if (phase === 'RESERVED' && operation === 'SHIP') return 'IN_TRANSIT';
+  if (phase === 'IN_TRANSIT' && operation === 'DELIVER' && buyerBalance >= 6) {
+    return 'DELIVERED';
+  }
+  return phase;
 }
 
 describe('V10.4 Treasury-GCU acceptance', () => {
@@ -918,6 +1022,86 @@ describe('V10.4 Treasury-GCU acceptance', () => {
       );
     },
     V10_4_PROPERTY_TIMEOUT_MS,
+  );
+
+  it(
+    'matches the V10 reserve-ship-deliver lifecycle model across repeated and out-of-order commands',
+    async () => {
+      await fc.assert(
+        fc.asyncProperty(
+          fc.integer({ min: 1, max: 12 }),
+          fc.array(
+            fc.constantFrom<V10LifecycleOperation>(
+              'RESERVE',
+              'SHIP',
+              'DELIVER',
+            ),
+            {
+              minLength: 1,
+              maxLength: 16,
+            },
+          ),
+          async (buyerBalance, operations) => {
+            const fixture = createV10TwoCountryTestFixture();
+            const prepared = await preparedDelivery({
+              openingSeed: withBuyerTreasuryBalance(
+                fixture,
+                String(buyerBalance),
+              ),
+            });
+            let phase: V10LifecyclePhase = 'AVAILABLE';
+            let states: DeliveryStates = Object.freeze({
+              financial: prepared.preDelivery.financial,
+              inventory: prepared.fixture.rebuiltLedgers.inventory,
+            });
+
+            for (const operation of operations) {
+              const before = canonicalSerialize(states);
+              const expectedPhase = nextV10LifecyclePhase(
+                phase,
+                operation,
+                buyerBalance,
+              );
+              let nextStates = states;
+              let operationError: unknown = undefined;
+              try {
+                nextStates = await runV10LifecycleOperation({
+                  operation,
+                  prepared,
+                  states,
+                });
+              } catch (error) {
+                operationError = error;
+              }
+              const after = canonicalSerialize(nextStates);
+              if (expectedPhase === phase) {
+                expect(after).toBe(before);
+              } else {
+                expect(operationError).toBeUndefined();
+                expect(after).not.toBe(before);
+                states = nextStates;
+                phase = expectedPhase;
+              }
+            }
+            expect(
+              states.inventory.appliedPostings.length -
+                prepared.fixture.rebuiltLedgers.inventory.appliedPostings
+                  .length,
+            ).toBe(
+              phase === 'AVAILABLE'
+                ? 0
+                : phase === 'RESERVED'
+                  ? 1
+                  : phase === 'IN_TRANSIT'
+                    ? 2
+                    : 3,
+            );
+          },
+        ),
+        V10_LIFECYCLE_STATE_MACHINE_CONFIG,
+      );
+    },
+    V10_LIFECYCLE_STATE_MACHINE_TIMEOUT_MS,
   );
 
   it('binds the applied delivery to one automatic atomic draft, receipt, and outbox fact', async () => {
