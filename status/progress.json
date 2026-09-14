@@ -323,6 +323,7 @@
         "status": "RETIRED_NO_WRITE_PATH_PENDING_REREVIEW",
         "historical_candidate_commit": "2709aec3974288fee290c7306d7eff5827a53d74",
         "candidate_commit": "d8282b734037ce1fa6fe1d434b8eaf04dd8de4ce",
+        "governance_test_sync_commit": "8c30f679166896a9cf44be1d6c0b8c00aba4efd6",
         "evidence_file": "docs/reports/V10/V10.1_QUERY_BOUNDARY_INCREMENT.md",
         "focused_tests": "PASS — 2 files / 6 tests",
         "architecture_checks": "PASS — 9 files / 84 tests",
@@ -382,6 +383,8 @@
         "candidate_commit": "d8282b734037ce1fa6fe1d434b8eaf04dd8de4ce",
         "finding": "MAJOR — legacy generic party publisher accepted caller-supplied payloads after source materialization",
         "repair": "Generic publisher rejects before database transaction; current party publisher additionally requires matching active current authorization",
+        "governance_test_sync_commit": "8c30f679166896a9cf44be1d6c0b8c00aba4efd6",
+        "post_sync_architecture_checks": "PASS — 9 files / 84 tests; boundary and authoritative-pattern scans PASS",
         "evidence_file": "docs/reports/V10/V10.1_QUERY_BOUNDARY_INCREMENT.md",
         "focused_tests": "PASS — 2 files / 6 tests",
         "production_mutation": false
