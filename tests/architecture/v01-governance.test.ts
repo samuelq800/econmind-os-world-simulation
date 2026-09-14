@@ -324,13 +324,17 @@ describe('V06 owner-authorized package continuation', () => {
         'APPROVED_FOR_V10_2_CONTINUATION_ONLY — BLOCKER_0_MAJOR_0_MINOR_0; closes threshold and focused-coverage findings for the core increment only',
       independent_review:
         'CORE_INCREMENT_CLOSED_NEXT_DURABLE_PERSISTENCE_CANDIDATE_REQUIRES_OWN_REVIEW',
-      durable_persistence_candidate: '7eecbabc989bab5798790ed10256299273ff154b',
+      durable_persistence_reviewed_target:
+        '7eecbabc989bab5798790ed10256299273ff154b',
+      durable_persistence_review_result:
+        'CHANGES_REQUIRED — BLOCKER_1_MAJOR_0_MINOR_0; authorization cutoff used FOR KEY SHARE and did not serialize revocation',
+      durable_persistence_candidate: '64d2389d7cbec618684e5bcacde913e4d2c31b7d',
       durable_persistence_status: 'IMPLEMENTED_UNVERIFIED',
       durable_persistence_checks:
-        'PASS — Worker typecheck; 4 files / 30 focused V09/V10 core/schema/cutoff tests; target lint; architecture 9 files / 84 tests; local migration validation and clean/existing-schema rehearsal',
+        'PASS — Worker typecheck; 4 files / 30 focused V09/V10 core/schema/cutoff tests including runtime FOR UPDATE cutoff-query contract; target lint; architecture 9 files / 84 tests; local migration validation and clean/existing-schema rehearsal',
       durable_persistence_independent_review: 'REQUIRED_EXACT_TARGET',
       durable_persistence_independent_review_target:
-        '7eecbabc989bab5798790ed10256299273ff154b',
+        '64d2389d7cbec618684e5bcacde913e4d2c31b7d',
       required_exit: 'V10.2_INDEPENDENT_REVIEW',
       merge_authorized: false,
       production_access: false,
