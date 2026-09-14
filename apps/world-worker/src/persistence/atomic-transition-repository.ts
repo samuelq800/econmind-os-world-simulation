@@ -1,6 +1,7 @@
 import {
   DOMAIN_ERROR_CODES,
   DomainError,
+  NARROW_TREASURY_GCU_COMMAND_TYPE,
   SimTime,
   bindAuthoritativeTransition,
   canonicalHashInput,
@@ -32,6 +33,7 @@ import {
 } from '@econmind/core';
 
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import type { AtomicNarrowTransferApprovalGuard } from './narrow-transfer-approval-store.js';
 
 const NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/u;
 const POSITIVE_INTEGER = /^[1-9]\d*$/u;
@@ -214,6 +216,7 @@ function canonicalPostingIntent(
   posting: InventoryPosting | FinancialPostingBatch,
 ): string {
   const { fingerprint: _fingerprint, ...intent } = posting;
+  void _fingerprint;
   return canonicalSerialize(intent);
 }
 
@@ -728,6 +731,7 @@ export class AtomicTransitionRepository {
   readonly #workerId: string;
   readonly #sha256Hex: Sha256Hex;
   readonly #faultInjector: AtomicCommitFaultInjector;
+  readonly #narrowTransferApprovalGuard: AtomicNarrowTransferApprovalGuard | null;
 
   constructor(input: {
     readonly database: SqlDatabase;
@@ -735,12 +739,15 @@ export class AtomicTransitionRepository {
     readonly workerId: string;
     readonly sha256Hex: Sha256Hex;
     readonly faultInjector?: AtomicCommitFaultInjector;
+    readonly narrowTransferApprovalGuard?: AtomicNarrowTransferApprovalGuard;
   }) {
     this.#database = input.database;
     this.#authorizationGuard = input.authorizationGuard;
     this.#workerId = workerId(input.workerId);
     this.#sha256Hex = input.sha256Hex;
     this.#faultInjector = input.faultInjector ?? noFaults;
+    this.#narrowTransferApprovalGuard =
+      input.narrowTransferApprovalGuard ?? null;
   }
 
   async readFinalReceipt(
@@ -826,6 +833,20 @@ export class AtomicTransitionRepository {
               ? 'AUTHORIZED'
               : 'NOT_APPLICABLE',
         });
+        if (
+          candidate.command.commandType === NARROW_TREASURY_GCU_COMMAND_TYPE
+        ) {
+          if (this.#narrowTransferApprovalGuard === null) {
+            throw new DomainError(
+              DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+              'Narrow Treasury-GCU transfer requires a server-held approval guard',
+            );
+          }
+          await this.#narrowTransferApprovalGuard.assertCurrent(transaction, {
+            command: candidate.command,
+            observedAtReal: candidate.observedAtReal,
+          });
+        }
         await this.#faultInjector.hit('AUTHORIZATION_RECHECKED');
         await this.#faultInjector.hit('BEFORE_EVENTS');
         await this.#insertEvents(transaction, candidate, head.eventSequence);

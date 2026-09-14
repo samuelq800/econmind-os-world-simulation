@@ -17,6 +17,7 @@ import {
   type AtomicTransitionCandidateFactory,
 } from './persistence/atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './persistence/sql-database.js';
+import type { AtomicNarrowTransferApprovalGuard } from './persistence/narrow-transfer-approval-store.js';
 
 interface CurrentCommitAuthorization {
   readonly authSubject: string;
@@ -230,12 +231,16 @@ export function createAuthoritativeWorkerExecution(input: {
   readonly workerId: string;
   readonly sha256Hex: Sha256Hex;
   readonly candidateFactory: AtomicTransitionCandidateFactory;
+  readonly narrowTransferApprovalGuard?: AtomicNarrowTransferApprovalGuard;
 }): Readonly<AuthoritativeWorkerExecution> {
   const repository = new AtomicTransitionRepository({
     database: input.database,
     authorizationGuard: createTransactionCutoffAuthorizationGuard(),
     workerId: input.workerId,
     sha256Hex: input.sha256Hex,
+    ...(input.narrowTransferApprovalGuard === undefined
+      ? {}
+      : { narrowTransferApprovalGuard: input.narrowTransferApprovalGuard }),
   });
   return Object.freeze({
     repository,
