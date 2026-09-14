@@ -291,6 +291,51 @@ describe('V10.1 authoritative activity read-projection publication', () => {
     ).toEqual({});
     expect(rowByScope(result.rows, 'ADMIN', 'ADMIN_FUTURE')).toEqual({});
     expect(result.rows.every((row) => row.world_version === '2')).toBe(true);
+
+    await testDatabase.query(
+      `update world_v2.read_projection
+          set payload = '{"tampered":true}'::jsonb
+        where world_id = $1
+          and classification = 'COUNTRY'
+          and scope_key = 'COUNTRY_SELLER'`,
+      [WORLD],
+    );
+    await testDatabase.query(
+      `delete from world_v2.read_projection
+        where world_id = $1
+          and classification = 'OFFICE_PRIVATE'
+          and scope_key = $2`,
+      [
+        WORLD,
+        officePrivateReadProjectionScopeKey({
+          countryId: countryId('COUNTRY_SELLER'),
+          officeId: officeId('TRADE'),
+        }),
+      ],
+    );
+    await expect(
+      publisher.replace({ assertion: assertion('2'), observedAtReal: AT }),
+    ).resolves.toEqual({
+      countryProjections: 2,
+      eventSequence: '2',
+      officePrivateProjections: 3,
+      worldVersion: '2',
+    });
+    await expect(
+      testDatabase.query<{
+        readonly classification: string;
+        readonly payload: string;
+        readonly scope_key: string;
+        readonly world_version: string;
+      }>(
+        `select classification, scope_key, payload::text as payload,
+                world_version::text as world_version
+           from world_v2.read_projection
+          where world_id = $1
+          order by classification, scope_key`,
+        [WORLD],
+      ),
+    ).resolves.toMatchObject({ rows: result.rows });
   }, 30_000);
 
   it('fails closed before replacement when active scope evidence is malformed', async () => {
