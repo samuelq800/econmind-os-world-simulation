@@ -263,6 +263,48 @@ describe('V10.1 current negotiation-party read publication', () => {
         [WORLD],
       ),
     ).resolves.toMatchObject({ rows: [{ count: '2' }] });
+
+    await testDatabase.query(
+      `delete from world_v2.read_projection
+        where world_id = $1
+          and classification = 'NEGOTIATION_PARTY'`,
+      [WORLD],
+    );
+    await testDatabase.query(
+      `delete from world_v2.projection_entitlement
+        where world_id = $1
+          and classification = 'NEGOTIATION_PARTY'`,
+      [WORLD],
+    );
+    await expect(
+      publisher.replace({ assertion: assertion(), observedAtReal: AT }),
+    ).resolves.toMatchObject({
+      entitlementCount: 2,
+      partyProjections: 1,
+      worldVersion: '0',
+    });
+    await expect(
+      testDatabase.query<{
+        readonly payload: string;
+        readonly scope_key: string;
+      }>(
+        `select scope_key, payload::text as payload
+           from world_v2.read_projection
+          where world_id = $1
+            and classification = 'NEGOTIATION_PARTY'
+          order by scope_key`,
+        [WORLD],
+      ),
+    ).resolves.toMatchObject({ rows: projections.rows });
+    await expect(
+      testDatabase.query(
+        `select count(*)::text as count
+           from world_v2.projection_entitlement
+          where world_id = $1
+            and classification = 'NEGOTIATION_PARTY'`,
+        [WORLD],
+      ),
+    ).resolves.toMatchObject({ rows: [{ count: '2' }] });
   }, 30_000);
 
   it('clears stale party rows when no active membership source remains while preserving other classifications', async () => {
