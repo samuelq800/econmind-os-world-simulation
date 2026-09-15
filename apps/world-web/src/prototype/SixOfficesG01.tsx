@@ -2,10 +2,13 @@ import { useState } from 'react';
 
 import { GoodsTransferFlow } from './GoodsTransferFlow.js';
 import { LivingNationScene } from './LivingNationScene.js';
+import { NationalOverview } from './NationalOverview.js';
+import type { PrototypeOfficeOption } from './contracts.js';
 import { readableProjection, type PrototypeViewState } from './state.js';
 
 type NavGroupId =
   'operations' | 'country' | 'policy' | 'crossOffice' | 'roleWork' | 'records';
+type WorkspacePageId = 'G01' | 'G02';
 
 interface NavLeaf {
   readonly pageId: string;
@@ -32,7 +35,7 @@ const NAV_GROUPS: readonly NavGroup[] = [
     id: 'country',
     label: 'Country & territory',
     leaves: [
-      { pageId: 'G02', label: 'Nation overview', implemented: false },
+      { pageId: 'G02', label: 'Nation overview', implemented: true },
       { pageId: 'T01', label: 'Markets & partners', implemented: false },
     ],
   },
@@ -107,12 +110,18 @@ function StateScreen({
 
 function OfficeSidebar({
   mobileOpen,
+  activePageId,
+  actingOffice,
   onNavigate,
   onClose,
+  onChangeFixtureRoute,
 }: {
   readonly mobileOpen: boolean;
+  readonly activePageId: WorkspacePageId;
+  readonly actingOffice: PrototypeOfficeOption;
   readonly onNavigate: (leaf: NavLeaf) => void;
   readonly onClose: () => void;
+  readonly onChangeFixtureRoute: () => void;
 }) {
   const [open, setOpen] = useState<Readonly<Record<NavGroupId, boolean>>>(
     Object.freeze({
@@ -141,16 +150,16 @@ function OfficeSidebar({
         </button>
       </div>
       <div className="six-sidebar__identity">
-        <span>Acting office</span>
-        <strong>Trade & Foreign Affairs</strong>
-        <small>TRADE · verified appointment</small>
+        <span>Fixture Office route</span>
+        <strong>{actingOffice.fullLabel}</strong>
+        <small>{actingOffice.officeId} · no appointment granted</small>
       </div>
       <div className="six-sidebar__counts" aria-label="work summary">
         <span>
-          <strong>2</strong> on desk
+          <strong>G01</strong> Office brief
         </span>
         <span>
-          <strong>1</strong> dependency
+          <strong>G02</strong> national view
         </span>
       </div>
       <nav>
@@ -179,10 +188,10 @@ function OfficeSidebar({
                       <button
                         type="button"
                         aria-current={
-                          leaf.pageId === 'G01' ? 'page' : undefined
+                          leaf.pageId === activePageId ? 'page' : undefined
                         }
                         className={
-                          leaf.pageId === 'G01' ? 'is-active' : undefined
+                          leaf.pageId === activePageId ? 'is-active' : undefined
                         }
                         onClick={() => {
                           onNavigate(leaf);
@@ -201,9 +210,16 @@ function OfficeSidebar({
         })}
       </nav>
       <p className="six-sidebar__note">
-        G01 is live. Its six office role chains remain traceable; formal leaves
-        remain mapped until their authorized handlers are attached.
+        G01 and G02 are local fixture routes. Other leaves stay visible until
+        their authorized handlers are attached.
       </p>
+      <button
+        className="six-sidebar__route"
+        type="button"
+        onClick={onChangeFixtureRoute}
+      >
+        Change fixture route
+      </button>
     </aside>
   );
 }
@@ -211,12 +227,15 @@ function OfficeSidebar({
 export function SixOfficesG01({
   state,
   onRetry,
+  onReturnToEntry,
 }: {
   readonly state: PrototypeViewState;
   readonly onRetry: () => void;
+  readonly onReturnToEntry: () => void;
 }) {
   const projection = readableProjection(state);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [currentPageId, setCurrentPageId] = useState<WorkspacePageId>('G01');
   const [unavailablePage, setUnavailablePage] = useState<string | null>(null);
   const [draftOpen, setDraftOpen] = useState(false);
   const [deskNotice, setDeskNotice] = useState<string | null>(null);
@@ -226,6 +245,15 @@ export function SixOfficesG01({
     state.status === 'loading' ||
     state.status === 'unauthorized'
   ) {
+    return <StateScreen state={state} onRetry={onRetry} />;
+  }
+
+  const actingOffice =
+    projection.viewer.offices.find(
+      (office) => office.officeId === projection.viewer.actingOfficeId,
+    ) ?? projection.viewer.offices[0];
+
+  if (!actingOffice) {
     return <StateScreen state={state} onRetry={onRetry} />;
   }
 
@@ -254,11 +282,12 @@ export function SixOfficesG01({
         <div className="six-topbar__game-status" aria-label="world status">
           <span>
             <i aria-hidden="true" />
-            {state.status === 'stale' ? 'INTEL BEHIND' : 'WORLD RUNNING'}
+            {state.status === 'stale'
+              ? 'FIXTURE SNAPSHOT BEHIND'
+              : 'LOCAL FIXTURE VIEW'}
           </span>
           <small>
-            {projection.simulationDateLabel} · 10× · World v
-            {projection.watermark.worldVersion}
+            Snapshot v{projection.watermark.worldVersion} · no live clock
           </small>
         </div>
       </header>
@@ -273,10 +302,21 @@ export function SixOfficesG01({
         ) : null}
         <OfficeSidebar
           mobileOpen={mobileNavOpen}
+          activePageId={currentPageId}
+          actingOffice={actingOffice}
           onClose={() => setMobileNavOpen(false)}
+          onChangeFixtureRoute={() => {
+            setMobileNavOpen(false);
+            onReturnToEntry();
+          }}
           onNavigate={(leaf) => {
-            setUnavailablePage(leaf.implemented ? null : leaf.pageId);
-            if (leaf.implemented) setDraftOpen(false);
+            if (leaf.implemented) {
+              setCurrentPageId(leaf.pageId as WorkspacePageId);
+              setUnavailablePage(null);
+              setDraftOpen(false);
+              return;
+            }
+            setUnavailablePage(leaf.pageId);
           }}
         />
         <main className="trade-main" id="six-offices-main">
@@ -301,7 +341,7 @@ export function SixOfficesG01({
                 runtime.
               </span>
               <button type="button" onClick={() => setUnavailablePage(null)}>
-                Return to G01
+                Return to current page
               </button>
             </section>
           ) : null}
@@ -313,7 +353,15 @@ export function SixOfficesG01({
               </button>
             </section>
           ) : null}
-          {draftOpen ? (
+          {currentPageId === 'G02' ? (
+            <NationalOverview
+              projection={projection}
+              onOpenBrief={() => {
+                setCurrentPageId('G01');
+                setDraftOpen(false);
+              }}
+            />
+          ) : draftOpen ? (
             <div className="trade-draft-area">
               <GoodsTransferFlow
                 onClose={() => setDraftOpen(false)}

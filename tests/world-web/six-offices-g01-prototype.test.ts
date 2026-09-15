@@ -28,11 +28,9 @@ const baseStyles = readFileSync(
   'utf8',
 );
 
-describe('Six Offices G01 Living Nation preparation surface', () => {
-  it('keeps G01 as the only wired page while preserving the complete navigation map', () => {
-    expect(prototypeApp).toContain(
-      '<SixOfficesG01 state={state} onRetry={retry} />',
-    );
+describe('Six Offices Living Nation preparation surface', () => {
+  it('wires G01 and G02 while preserving the complete navigation map', () => {
+    expect(prototypeApp).toContain('<SixOfficesG01');
     for (const leaf of [
       'G01',
       'G02',
@@ -51,7 +49,8 @@ describe('Six Offices G01 Living Nation preparation surface', () => {
       expect(g01).toContain(`pageId: '${leaf}'`);
     }
     expect(g01).toContain('<LivingNationScene');
-    expect(g01).toContain('G01 is live. Its six office role chains');
+    expect(g01).toContain('<NationalOverview');
+    expect(g01).toContain('G01 and G02 are local fixture routes');
     expect(g01).not.toMatch(/[\u3400-\u9fff]/u);
   });
 
@@ -70,7 +69,7 @@ describe('Six Offices G01 Living Nation preparation surface', () => {
       expect(livingNationScene).toContain(`nextPage: '${page}'`);
     }
     expect(livingNationScene).toContain(
-      'Actions follow the verified appointment',
+      'production requires appointment verification',
     );
     expect(livingNationScene).toContain('toBoundOfficeId');
     expect(livingNationScene).toContain('projection.viewer.actingOfficeId');

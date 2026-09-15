@@ -1,7 +1,84 @@
 import {
   PREPARATION_ONLY_MARKER,
+  type PrototypeOfficeOption,
   type PrototypeWorldBriefProjection,
 } from './contracts.js';
+
+export const FIXTURE_OFFICE_IDS = [
+  'CAPTAIN',
+  'CENTRAL_BANK',
+  'FINANCE',
+  'TRADE',
+  'INDUSTRY',
+  'SOCIAL',
+] as const;
+
+export type FixtureOfficeId = (typeof FIXTURE_OFFICE_IDS)[number];
+
+export interface FixtureOfficeChoice extends PrototypeOfficeOption {
+  readonly officeId: FixtureOfficeId;
+  readonly mission: string;
+  readonly firstLens: string;
+  readonly collaborators: string;
+}
+
+export const FIXTURE_OFFICES: readonly FixtureOfficeChoice[] = [
+  {
+    officeId: 'CAPTAIN',
+    shortLabel: 'Captain',
+    fullLabel: 'Country Captain / Head of Government',
+    mission: 'Turn competing national pressures into a deliberate agenda.',
+    firstLens: 'Cabinet agenda',
+    collaborators: 'All Offices',
+  },
+  {
+    officeId: 'CENTRAL_BANK',
+    shortLabel: 'Central Bank',
+    fullLabel: 'Central Bank Governor',
+    mission: 'Separate price pressure, liquidity, and legal instruments.',
+    firstLens: 'Reserve ledger',
+    collaborators: 'Finance',
+  },
+  {
+    officeId: 'FINANCE',
+    shortLabel: 'Finance',
+    fullLabel: 'Minister of Finance & Economy',
+    mission: 'Protect the cash window while funding commitments are reviewed.',
+    firstLens: 'Treasury queue',
+    collaborators: 'Central Bank · Industry',
+  },
+  {
+    officeId: 'TRADE',
+    shortLabel: 'Trade',
+    fullLabel: 'Minister of Trade & Foreign Affairs',
+    mission: 'Turn partner signals into terms without assuming capacity.',
+    firstLens: 'Harbour and partner route',
+    collaborators: 'Finance · Industry',
+  },
+  {
+    officeId: 'INDUSTRY',
+    shortLabel: 'Industry',
+    fullLabel: 'Minister of Industry, Technology & Resources',
+    mission: 'Shape physical capacity before a project claims an outcome.',
+    firstLens: 'Riverside capacity site',
+    collaborators: 'Finance · Trade · Social',
+  },
+  {
+    officeId: 'SOCIAL',
+    shortLabel: 'Social',
+    fullLabel: 'Minister of Labour, Education & Social Development',
+    mission: 'Read service strain as staffing and capacity, not a score.',
+    firstLens: 'Eastbank service path',
+    collaborators: 'Finance · Industry',
+  },
+];
+
+function fixtureOffice(officeId: FixtureOfficeId): FixtureOfficeChoice {
+  return (
+    FIXTURE_OFFICES.find((office) => office.officeId === officeId) ??
+    FIXTURE_OFFICES[3]!
+  );
+}
 
 const metrics: PrototypeWorldBriefProjection['metrics'] = [
   {
@@ -223,3 +300,23 @@ export const EMPTY_PROJECTION: PrototypeWorldBriefProjection = {
   routes: [],
   recentReceipt: null,
 };
+
+export function fixtureProjectionForOffice(
+  officeId: FixtureOfficeId,
+  source: PrototypeWorldBriefProjection = READY_PROJECTION,
+): PrototypeWorldBriefProjection {
+  const office = fixtureOffice(officeId);
+  return {
+    ...source,
+    viewer: {
+      actingOfficeId: office.officeId,
+      offices: [
+        {
+          officeId: office.officeId,
+          shortLabel: office.shortLabel,
+          fullLabel: office.fullLabel,
+        },
+      ],
+    },
+  };
+}

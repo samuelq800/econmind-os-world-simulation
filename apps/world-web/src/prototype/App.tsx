@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 
+import { OfficeEntryFlow } from './OfficeEntryFlow.js';
 import { SixOfficesG01 } from './SixOfficesG01.js';
 import {
   EMPTY_PROJECTION,
+  fixtureProjectionForOffice,
   READY_PROJECTION,
   STALE_PROJECTION,
+  type FixtureOfficeId,
 } from './fixtures.js';
 import type { PrototypeStateName, PrototypeViewState } from './state.js';
 
@@ -21,16 +24,28 @@ const stateLabels: ReadonlyArray<{
   { id: 'retrying', label: 'Retrying' },
 ];
 
-function viewState(name: PrototypeStateName): PrototypeViewState {
+function viewState(
+  name: PrototypeStateName,
+  officeId: FixtureOfficeId,
+): PrototypeViewState {
   switch (name) {
     case 'loading':
       return { status: 'loading' };
     case 'ready':
-      return { status: 'ready', projection: READY_PROJECTION };
+      return {
+        status: 'ready',
+        projection: fixtureProjectionForOffice(officeId, READY_PROJECTION),
+      };
     case 'empty':
-      return { status: 'empty', projection: EMPTY_PROJECTION };
+      return {
+        status: 'empty',
+        projection: fixtureProjectionForOffice(officeId, EMPTY_PROJECTION),
+      };
     case 'stale':
-      return { status: 'stale', projection: STALE_PROJECTION };
+      return {
+        status: 'stale',
+        projection: fixtureProjectionForOffice(officeId, STALE_PROJECTION),
+      };
     case 'unauthorized':
       return {
         status: 'unauthorized',
@@ -40,13 +55,13 @@ function viewState(name: PrototypeStateName): PrototypeViewState {
     case 'offline':
       return {
         status: 'offline',
-        projection: READY_PROJECTION,
+        projection: fixtureProjectionForOffice(officeId, READY_PROJECTION),
         reason: 'The prototype query connection is unavailable.',
       };
     case 'retrying':
       return {
         status: 'retrying',
-        projection: READY_PROJECTION,
+        projection: fixtureProjectionForOffice(officeId, READY_PROJECTION),
         reason: 'Refreshing the mock projection.',
       };
   }
@@ -54,11 +69,16 @@ function viewState(name: PrototypeStateName): PrototypeViewState {
 
 export function PrototypeApp() {
   const [stateName, setStateName] = useState<PrototypeStateName>('ready');
-  const [state, setState] = useState<PrototypeViewState>(viewState('ready'));
+  const [selectedOfficeId, setSelectedOfficeId] =
+    useState<FixtureOfficeId>('TRADE');
+  const [workspaceOpen, setWorkspaceOpen] = useState(false);
+  const [state, setState] = useState<PrototypeViewState>(
+    viewState('ready', 'TRADE'),
+  );
 
   useEffect(() => {
-    setState(viewState(stateName));
-  }, [stateName]);
+    setState(viewState(stateName, selectedOfficeId));
+  }, [selectedOfficeId, stateName]);
 
   const retry = () => {
     setStateName('retrying');
@@ -88,7 +108,22 @@ export function PrototypeApp() {
           ))}
         </div>
       </section>
-      <SixOfficesG01 state={state} onRetry={retry} />
+      {workspaceOpen ? (
+        <SixOfficesG01
+          state={state}
+          onRetry={retry}
+          onReturnToEntry={() => setWorkspaceOpen(false)}
+        />
+      ) : (
+        <OfficeEntryFlow
+          lastOfficeId={selectedOfficeId}
+          onEnterOffice={(officeId) => {
+            setSelectedOfficeId(officeId);
+            setState(viewState(stateName, officeId));
+            setWorkspaceOpen(true);
+          }}
+        />
+      )}
     </div>
   );
 }

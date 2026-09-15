@@ -509,7 +509,9 @@ function OfficeLensRail({
     >
       <div>
         <span>Assigned office</span>
-        <small>Actions follow the verified appointment</small>
+        <small>
+          Local Office lens; production requires appointment verification
+        </small>
       </div>
       <div aria-label="Office assignment index">
         {OFFICE_LENSES.map((office) => (
