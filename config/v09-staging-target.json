@@ -1,0 +1,20 @@
+{
+  "schema_version": "V09_DEDICATED_STAGING_TARGET-2",
+  "project_ref": "vzwrereseklnrjbtmsmc",
+  "target_classification": "DEDICATED_NONPRODUCTION",
+  "production_target": false,
+  "shared_target": false,
+  "database_host": "db.vzwrereseklnrjbtmsmc.supabase.co",
+  "database_port": 5432,
+  "database_name": "postgres",
+  "admin_database_role": "postgres",
+  "disposable_namespace": "world_v2",
+  "roles": {
+    "migration_owner": "v09_staging_migration_owner",
+    "worker": "v09_staging_worker",
+    "reader": "v09_staging_reader"
+  },
+  "owner_confirmation": "OWNER_APPROVED_DEDICATED_NONPRODUCTION_V09",
+  "evidence_output_path": "/Users/samuel/Documents/econclub/evidence/vzwrereseklnrjbtmsmc-gate-b-staging.json",
+  "target_fingerprint": "81239aa0d1272cfa6324c132bde33ab9b454e0d2b41776671fdb0cbf576566eb"
+}
