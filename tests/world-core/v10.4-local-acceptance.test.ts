@@ -377,15 +377,17 @@ async function seedAtomicDeliveries(
   }
 }
 
-function transferCommand(): CanonicalCommand {
+function transferCommand(contenderSuffix = ''): CanonicalCommand {
   const fixture = createV10TwoCountryTestFixture();
   const source = fixture.inventoryAccounts.sellerAvailable;
+  const contenderIdentity =
+    contenderSuffix.length === 0 ? '' : `_${contenderSuffix}`;
   return parseCanonicalCommand(
     {
       schemaVersion: COMMAND_SCHEMA_VERSION,
       commandType: 'CORE_GOODS_TRANSFER_V1',
-      commandId: 'COMMAND_V10_4_TREASURY_GCU_TRANSFER',
-      idempotencyKey: 'IDEMPOTENCY_V10_4_TREASURY_GCU_TRANSFER',
+      commandId: `COMMAND_V10_4_TREASURY_GCU_TRANSFER${contenderIdentity}`,
+      idempotencyKey: `IDEMPOTENCY_V10_4_TREASURY_GCU_TRANSFER${contenderIdentity}`,
       worldId: fixture.worldId,
       actorId: fixture.officeActors.sellerTrade.actorId,
       authSubject: fixture.officeActors.sellerTrade.principal.authSubject,
@@ -394,7 +396,7 @@ function transferCommand(): CanonicalCommand {
       expectedWorldVersion: '0',
       simTime: '10000',
       submittedAtReal: SUBMITTED_AT,
-      correlationId: 'CORRELATION_V10_4_TREASURY_GCU_TRANSFER',
+      correlationId: `CORRELATION_V10_4_TREASURY_GCU_TRANSFER${contenderIdentity}`,
       payload: {
         schemaVersion: 'core-goods-transfer-v1',
         commodityId: 'GRAIN',
@@ -630,9 +632,14 @@ async function approvedTransfer(transfer: CanonicalCommand) {
   });
 }
 
-function shipmentCommand(transfer: CanonicalCommand): CanonicalCommand {
+function shipmentCommand(
+  transfer: CanonicalCommand,
+  contenderSuffix = '',
+): CanonicalCommand {
+  const contenderIdentity =
+    contenderSuffix.length === 0 ? '' : `_${contenderSuffix}`;
   return automaticCommand({
-    commandId: 'COMMAND_V10_4_SHIPMENT',
+    commandId: `COMMAND_V10_4_SHIPMENT${contenderIdentity}`,
     commandType: 'CORE_GOODS_SHIPMENT_V1',
     expectedWorldVersion: '1',
     simTime: '10100',
@@ -732,9 +739,10 @@ async function preparedDelivery(
     readonly openingSeed?: ReturnType<
       typeof createV10TwoCountryTestFixture
     >['openingSeed'];
+    readonly transfer?: CanonicalCommand;
   } = {},
 ) {
-  const transfer = transferCommand();
+  const transfer = input.transfer ?? transferCommand();
   const approved = await approvedTransfer(transfer);
   const reserve = transition(transfer, '0', '1');
   const reservation = await reserveNarrowTreasuryGcuTransfer({
@@ -885,6 +893,7 @@ function atomicDeliveryCandidate(input: {
 
 function atomicShipmentCandidate(input: {
   readonly prepared: Awaited<ReturnType<typeof preparedDelivery>>;
+  readonly shipment?: CanonicalCommand;
   readonly suffix: string;
 }): PrivateAtomicTransitionCandidate {
   const reserve = transition(input.prepared.transfer, '0', '1');
@@ -906,7 +915,7 @@ function atomicShipmentCandidate(input: {
   if (source === undefined) {
     throw new Error('V10_4_EXPECTED_RESERVED_ATOMIC_SOURCE');
   }
-  const shipment = input.prepared.shipment;
+  const shipment = input.shipment ?? input.prepared.shipment;
   const ship = transition(shipment, '1', '2');
   const result = shipNarrowTreasuryGcuTransfer({
     causationEventIds: [ship.event.eventId],
@@ -1002,8 +1011,13 @@ async function reserveCommitProof(
 
 async function atomicReserveCandidate(input: {
   readonly prepared: Awaited<ReturnType<typeof preparedDelivery>>;
+  readonly suffix?: string;
 }): Promise<PrivateAtomicTransitionCandidate> {
   const transfer = input.prepared.transfer;
+  const contenderIdentity =
+    input.suffix === undefined || input.suffix.length === 0
+      ? ''
+      : `_${input.suffix}`;
   const reserve = transition(transfer, '0', '1');
   const result = await reserveNarrowTreasuryGcuTransfer({
     approvals: input.prepared.approvals,
@@ -1011,8 +1025,12 @@ async function atomicReserveCandidate(input: {
     atReal: RESERVED_AT,
     inventoryState: input.prepared.fixture.rebuiltLedgers.inventory,
     source: input.prepared.fixture.inventoryAccounts.sellerAvailable,
-    reservationId: inventoryReservationId('RESERVATION_V10_4_ATOMIC_RESERVE'),
-    postingId: inventoryPostingId('POSTING_V10_4_ATOMIC_RESERVE'),
+    reservationId: inventoryReservationId(
+      `RESERVATION_V10_4_ATOMIC_RESERVE${contenderIdentity}`,
+    ),
+    postingId: inventoryPostingId(
+      `POSTING_V10_4_ATOMIC_RESERVE${contenderIdentity}`,
+    ),
     transition: reserve.transition,
     simTime: transfer.simTime,
     causationEventIds: [reserve.event.eventId],
@@ -1108,55 +1126,72 @@ async function seedAtomicReserve(
     readonly prepared: Awaited<ReturnType<typeof preparedDelivery>>;
   },
 ): Promise<NarrowTransferApprovalStore> {
+  return seedAtomicReserves(database, [input]);
+}
+
+async function seedAtomicReserves(
+  database: V09AtomicTestDatabase,
+  inputs: readonly {
+    readonly candidate: PrivateAtomicTransitionCandidate;
+    readonly prepared: Awaited<ReturnType<typeof preparedDelivery>>;
+  }[],
+): Promise<NarrowTransferApprovalStore> {
+  const first = inputs[0];
+  if (first === undefined) throw new Error('V10_4_EXPECTED_RESERVE_CANDIDATE');
   await database.query(
     `insert into world_v2.world_head (world_id, world_version, event_sequence)
      values ($1, 0, 0)`,
-    [input.prepared.transfer.worldId],
+    [first.prepared.transfer.worldId],
   );
-  await persistCommand(database, input.prepared.transfer);
-  await persistCurrentNarrowTransferAuthorizations(database, input.prepared);
+  await persistCurrentNarrowTransferAuthorizations(database, first.prepared);
   const approvals = new NarrowTransferApprovalStore({ database, sha256Hex });
-  await approvals.openSellerOffer({
-    command: input.prepared.transfer,
-    signer: {
-      actorId: input.prepared.fixture.officeActors.sellerTrade.actorId,
-      authSubject:
-        input.prepared.fixture.officeActors.sellerTrade.principal.authSubject,
-      signedAtReal: SUBMITTED_AT,
-    },
-  });
-  await approvals.signBuyerOffice({
-    command: input.prepared.transfer,
-    office: 'TRADE',
-    signer: {
-      actorId: input.prepared.fixture.officeActors.buyerTrade.actorId,
-      authSubject:
-        input.prepared.fixture.officeActors.buyerTrade.principal.authSubject,
-      signedAtReal: SUBMITTED_AT,
-    },
-  });
-  await approvals.signBuyerOffice({
-    command: input.prepared.transfer,
-    office: 'FINANCE',
-    signer: {
-      actorId: input.prepared.fixture.officeActors.buyerFinance.actorId,
-      authSubject:
-        input.prepared.fixture.officeActors.buyerFinance.principal.authSubject,
-      signedAtReal: SUBMITTED_AT,
-    },
-  });
+  for (const input of inputs) {
+    await persistCommand(database, input.prepared.transfer);
+    await approvals.openSellerOffer({
+      command: input.prepared.transfer,
+      signer: {
+        actorId: input.prepared.fixture.officeActors.sellerTrade.actorId,
+        authSubject:
+          input.prepared.fixture.officeActors.sellerTrade.principal.authSubject,
+        signedAtReal: SUBMITTED_AT,
+      },
+    });
+    await approvals.signBuyerOffice({
+      command: input.prepared.transfer,
+      office: 'TRADE',
+      signer: {
+        actorId: input.prepared.fixture.officeActors.buyerTrade.actorId,
+        authSubject:
+          input.prepared.fixture.officeActors.buyerTrade.principal.authSubject,
+        signedAtReal: SUBMITTED_AT,
+      },
+    });
+    await approvals.signBuyerOffice({
+      command: input.prepared.transfer,
+      office: 'FINANCE',
+      signer: {
+        actorId: input.prepared.fixture.officeActors.buyerFinance.actorId,
+        authSubject:
+          input.prepared.fixture.officeActors.buyerFinance.principal
+            .authSubject,
+        signedAtReal: SUBMITTED_AT,
+      },
+    });
+  }
   await database.query(
     `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
     [
-      input.prepared.transfer.worldId,
-      input.candidate.commitAssertion.holderId,
+      first.prepared.transfer.worldId,
+      first.candidate.commitAssertion.holderId,
       '2026-09-14T00:02:00.000Z',
       '300000',
     ],
   );
-  await seedClaimedAtomicCandidate(database, input.candidate, {
-    persistSubmission: false,
-  });
+  for (const input of inputs) {
+    await seedClaimedAtomicCandidate(database, input.candidate, {
+      persistSubmission: false,
+    });
+  }
   return approvals;
 }
 
@@ -1164,9 +1199,16 @@ async function seedReservedAutomaticLifecycle(
   database: V09AtomicTestDatabase,
   input: {
     readonly prepared: Awaited<ReturnType<typeof preparedDelivery>>;
-    readonly shipment: PrivateAtomicTransitionCandidate;
+    readonly shipment?: PrivateAtomicTransitionCandidate;
+    readonly shipments?: readonly PrivateAtomicTransitionCandidate[];
   },
 ): Promise<void> {
+  const shipments =
+    input.shipments ?? (input.shipment === undefined ? [] : [input.shipment]);
+  const firstShipment = shipments[0];
+  if (firstShipment === undefined) {
+    throw new Error('V10_4_EXPECTED_ATOMIC_SHIPMENT');
+  }
   const reserve = transition(input.prepared.transfer, '0', '1');
   const receipt = createFinalCommandReceipt({
     command: input.prepared.transfer,
@@ -1192,12 +1234,14 @@ async function seedReservedAutomaticLifecycle(
     `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
     [
       input.prepared.transfer.worldId,
-      input.shipment.commitAssertion.holderId,
+      firstShipment.commitAssertion.holderId,
       '2026-09-14T00:02:00.000Z',
       '300000',
     ],
   );
-  await seedClaimedAtomicCandidate(database, input.shipment);
+  for (const shipment of shipments) {
+    await seedClaimedAtomicCandidate(database, shipment);
+  }
 }
 
 type V10LifecyclePhase = 'AVAILABLE' | 'RESERVED' | 'IN_TRANSIT' | 'DELIVERED';
@@ -2535,6 +2579,171 @@ describe('V10.4 durable Reserve authorization evidence', () => {
 });
 
 postgresDescribe('V10.4 disposable PostgreSQL contention evidence', () => {
+  it('commits exactly one competing reserve through independent PostgreSQL connection pools', async () => {
+    const database = await atomicDatabase();
+    const contenderDatabase = createLocalPostgresV09AtomicTestDatabase();
+    try {
+      const primaryPrepared = await preparedDelivery();
+      const contenderPrepared = await preparedDelivery({
+        transfer: transferCommand('RESERVE_CONTENDER'),
+      });
+      const primary = await atomicReserveCandidate({
+        prepared: primaryPrepared,
+        suffix: 'PRIMARY',
+      });
+      const contender = await atomicReserveCandidate({
+        prepared: contenderPrepared,
+        suffix: 'CONTENDER',
+      });
+      const approvals = await seedAtomicReserves(database, [
+        { candidate: primary, prepared: primaryPrepared },
+        { candidate: contender, prepared: contenderPrepared },
+      ]);
+      const primaryRepository = new AtomicTransitionRepository({
+        database: database as SqlDatabase,
+        authorizationGuard: createTransactionCutoffAuthorizationGuard(),
+        narrowTransferApprovalGuard: approvals,
+        workerId: 'WORKER_V10_4_CONCURRENT',
+        sha256Hex,
+      });
+      const contenderRepository = new AtomicTransitionRepository({
+        database: contenderDatabase as SqlDatabase,
+        authorizationGuard: createTransactionCutoffAuthorizationGuard(),
+        narrowTransferApprovalGuard: new NarrowTransferApprovalStore({
+          database: contenderDatabase as SqlDatabase,
+          sha256Hex,
+        }),
+        workerId: 'WORKER_V10_4_CONCURRENT',
+        sha256Hex,
+      });
+
+      const outcomes = await Promise.allSettled([
+        primaryRepository.commit(primary),
+        contenderRepository.commit(contender),
+      ]);
+      expect(
+        outcomes.filter((outcome) => outcome.status === 'fulfilled'),
+      ).toHaveLength(1);
+      expect(
+        outcomes.some(
+          (outcome) =>
+            outcome.status === 'fulfilled' &&
+            outcome.value.source === 'NEW_COMMIT',
+        ),
+      ).toBe(true);
+      expect(
+        outcomes.filter((outcome) => outcome.status === 'rejected'),
+      ).toHaveLength(1);
+
+      const persisted = await database.query<{
+        readonly event_count: string;
+        readonly finalized_count: string;
+        readonly inventory_count: string;
+        readonly pending_claim_count: string;
+        readonly receipt_count: string;
+        readonly world_version: string;
+      }>(
+        `select
+           (select count(*)::text from world_v2.authoritative_event) as event_count,
+           (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+           (select count(*)::text from world_v2.command_receipt) as receipt_count,
+           (select count(*)::text from world_v2.command_queue where queue_state = 'FINALIZED') as finalized_count,
+           (select count(*)::text from world_v2.command_queue where queue_state = 'CLAIMED') as pending_claim_count,
+           (select world_version::text from world_v2.world_head) as world_version`,
+      );
+      expect(persisted.rows[0]).toEqual({
+        event_count: '1',
+        finalized_count: '1',
+        inventory_count: '1',
+        pending_claim_count: '1',
+        receipt_count: '1',
+        world_version: '1',
+      });
+    } finally {
+      await contenderDatabase.close();
+      await database.close();
+    }
+  }, 30_000);
+
+  it('commits exactly one competing shipment through independent PostgreSQL connection pools', async () => {
+    const database = await atomicDatabase();
+    const contenderDatabase = createLocalPostgresV09AtomicTestDatabase();
+    try {
+      const prepared = await preparedDelivery();
+      const primary = atomicShipmentCandidate({
+        prepared,
+        suffix: 'PRIMARY',
+      });
+      const contender = atomicShipmentCandidate({
+        prepared,
+        shipment: shipmentCommand(prepared.transfer, 'SHIP_CONTENDER'),
+        suffix: 'CONTENDER',
+      });
+      await seedReservedAutomaticLifecycle(database, {
+        prepared,
+        shipments: [primary, contender],
+      });
+      const primaryRepository = new AtomicTransitionRepository({
+        database: database as SqlDatabase,
+        authorizationGuard: automaticCommitGuard,
+        workerId: 'WORKER_V10_4_CONCURRENT',
+        sha256Hex,
+      });
+      const contenderRepository = new AtomicTransitionRepository({
+        database: contenderDatabase as SqlDatabase,
+        authorizationGuard: automaticCommitGuard,
+        workerId: 'WORKER_V10_4_CONCURRENT',
+        sha256Hex,
+      });
+
+      const outcomes = await Promise.allSettled([
+        primaryRepository.commit(primary),
+        contenderRepository.commit(contender),
+      ]);
+      expect(
+        outcomes.filter((outcome) => outcome.status === 'fulfilled'),
+      ).toHaveLength(1);
+      expect(
+        outcomes.some(
+          (outcome) =>
+            outcome.status === 'fulfilled' &&
+            outcome.value.source === 'NEW_COMMIT',
+        ),
+      ).toBe(true);
+      expect(
+        outcomes.filter((outcome) => outcome.status === 'rejected'),
+      ).toHaveLength(1);
+
+      const persisted = await database.query<{
+        readonly event_count: string;
+        readonly finalized_count: string;
+        readonly inventory_count: string;
+        readonly pending_claim_count: string;
+        readonly receipt_count: string;
+        readonly world_version: string;
+      }>(
+        `select
+           (select count(*)::text from world_v2.authoritative_event) as event_count,
+           (select count(*)::text from world_v2.inventory_posting) as inventory_count,
+           (select count(*)::text from world_v2.command_receipt) as receipt_count,
+           (select count(*)::text from world_v2.command_queue where queue_state = 'FINALIZED') as finalized_count,
+           (select count(*)::text from world_v2.command_queue where queue_state = 'CLAIMED') as pending_claim_count,
+           (select world_version::text from world_v2.world_head) as world_version`,
+      );
+      expect(persisted.rows[0]).toEqual({
+        event_count: '2',
+        finalized_count: '1',
+        inventory_count: '2',
+        pending_claim_count: '1',
+        receipt_count: '2',
+        world_version: '2',
+      });
+    } finally {
+      await contenderDatabase.close();
+      await database.close();
+    }
+  }, 30_000);
+
   it('commits exactly one competing delivery at the same WorldVersion', async () => {
     const database = await atomicDatabase();
     try {
