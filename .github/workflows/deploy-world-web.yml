@@ -2,6 +2,14 @@ name: Deploy EconMind World preview
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex/d-v2-world-command-brief
+    paths:
+      - .github/workflows/deploy-world-web.yml
+      - apps/world-web/**
+      - package.json
+      - pnpm-lock.yaml
 
 permissions:
   contents: read

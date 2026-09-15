@@ -25,6 +25,7 @@ describe('public World preview deployment', () => {
     expect(viteConfig).toContain("resolve(worldWebRoot, 'command.html')");
     expect(viteConfig).toContain("'/econmind-os-world-simulation/'");
     expect(deploymentWorkflow).toContain('workflow_dispatch:');
+    expect(deploymentWorkflow).toContain('codex/d-v2-world-command-brief');
     expect(deploymentWorkflow).toContain(
       'pnpm --filter @econmind/world-web build',
     );
