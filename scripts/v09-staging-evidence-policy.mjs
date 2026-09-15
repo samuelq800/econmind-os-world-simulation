@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { Client } from 'pg';
@@ -148,6 +149,7 @@ function stableFingerprintInput(approval) {
     String(approval.database_port),
     approval.database_name,
     approval.admin_database_role,
+    approval.tls_root_ca_sha256 ?? '',
     approval.disposable_namespace,
     approval.roles.migration_owner,
     approval.roles.worker,
@@ -226,6 +228,13 @@ export function parseV09StagingApproval(value) {
   if (!ADMIN_ROLE.test(approval.admin_database_role ?? '')) {
     invalid('admin_database_role is invalid');
   }
+  if (
+    approval.tls_root_ca_sha256 !== undefined &&
+    approval.tls_root_ca_sha256 !== null &&
+    !SHA256.test(approval.tls_root_ca_sha256)
+  ) {
+    invalid('tls_root_ca_sha256 must be a SHA-256 value when provided');
+  }
   const evidenceOutputPath = normalizeEvidenceOutputPath(
     approval.evidence_output_path,
   );
@@ -254,6 +263,7 @@ export function parseV09StagingApproval(value) {
     shared_target: approval.shared_target,
     target_classification: approval.target_classification,
     target_fingerprint: approval.target_fingerprint,
+    tls_root_ca_sha256: approval.tls_root_ca_sha256 ?? null,
   });
   if (
     canonical.target_fingerprint !==
@@ -300,6 +310,7 @@ export function buildV09StagingDryRunPlan(approval) {
       database_port: target.database_port,
       project_ref: target.project_ref,
       target_fingerprint: target.target_fingerprint,
+      tls_root_ca_sha256: target.tls_root_ca_sha256,
     }),
     tests: Object.freeze([
       'TWO_WRITER_CONCURRENCY',
@@ -425,6 +436,44 @@ function parseAdminConnection(environment, approval) {
   return connectionString;
 }
 
+function assertTrustedRootCa(environment, approval) {
+  const configuredFingerprint = approval.tls_root_ca_sha256;
+  const caFile = environment.V09_STAGING_TLS_CA_FILE;
+  const nodeExtraCaFile = environment.NODE_EXTRA_CA_CERTS;
+
+  if (configuredFingerprint === null) {
+    if (caFile || nodeExtraCaFile) {
+      invalid(
+        'an additional TLS CA is forbidden unless its SHA-256 is bound in the owner approval contract',
+      );
+    }
+    return;
+  }
+
+  if (
+    typeof caFile !== 'string' ||
+    caFile.length === 0 ||
+    caFile !== nodeExtraCaFile
+  ) {
+    invalid(
+      'the approved TLS CA must be supplied through the exact V09_STAGING_TLS_CA_FILE and NODE_EXTRA_CA_CERTS path',
+    );
+  }
+
+  let contents;
+  try {
+    contents = readFileSync(caFile);
+  } catch {
+    invalid('the approved TLS CA file could not be read');
+  }
+  const actualFingerprint = createHash('sha256').update(contents).digest('hex');
+  if (actualFingerprint !== configuredFingerprint) {
+    invalid(
+      'the supplied TLS CA file does not match the owner-approved SHA-256',
+    );
+  }
+}
+
 /**
  * Verifies an explicit one-shot execution request without emitting or storing
  * credential values. It intentionally rejects runtime configuration and all
@@ -472,6 +521,7 @@ export function assertV09DedicatedStagingExecution(environment, approval) {
       );
     }
   }
+  assertTrustedRootCa(environment, target);
   return Object.freeze({
     approval: target,
     connectionString: parseAdminConnection(environment, target),

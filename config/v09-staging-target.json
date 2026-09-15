@@ -4,10 +4,11 @@
   "target_classification": "DEDICATED_NONPRODUCTION",
   "production_target": false,
   "shared_target": false,
-  "database_host": "db.vzwrereseklnrjbtmsmc.supabase.co",
+  "database_host": "aws-0-ap-northeast-1.pooler.supabase.com",
   "database_port": 5432,
   "database_name": "postgres",
-  "admin_database_role": "postgres",
+  "admin_database_role": "postgres.vzwrereseklnrjbtmsmc",
+  "tls_root_ca_sha256": "700723581420dd1ac98fd7e9ac529f0ef210eadcaf87fc868a3ad7d114c2f3b7",
   "disposable_namespace": "world_v2",
   "roles": {
     "migration_owner": "v09_staging_migration_owner",
@@ -15,6 +16,6 @@
     "reader": "v09_staging_reader"
   },
   "owner_confirmation": "OWNER_APPROVED_DEDICATED_NONPRODUCTION_V09",
-  "evidence_output_path": "/Users/samuel/Documents/econclub/evidence/vzwrereseklnrjbtmsmc-gate-b-staging-full-manifest.json",
-  "target_fingerprint": "8bade516653e3c42b7a1ae72dcc75931e1d5c41cab88671447cbed1d4432b660"
+  "evidence_output_path": "/Users/samuel/Documents/econclub/evidence/vzwrereseklnrjbtmsmc-gate-b-staging-pooler-ca.json",
+  "target_fingerprint": "c5f7b74785820b5781332a1737cbf8ad6c75b5656a6f56a9e805ec3940323acd"
 }
