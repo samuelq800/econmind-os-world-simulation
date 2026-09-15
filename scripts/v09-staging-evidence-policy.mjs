@@ -19,6 +19,16 @@ export const V09_STAGING_MIGRATION_IDS = Object.freeze([
   '0004_world_v2_receipt_event_set_integrity',
   '0005_world_v2_writer_lease_fencing',
   '0006_world_v2_writer_lease_lineage_guard',
+  '0007_world_v2_atomic_transition_facts',
+  '0008_world_v2_materialization_recovery',
+  '0009_world_v2_posting_payload_integrity',
+  '0010_world_v2_command_claim_fencing',
+  '0011_world_v2_current_commit_authorization',
+  '0012_world_v2_command_claim_active_lease_guard',
+  '0013_world_v2_read_projection_boundary',
+  '0014_world_v2_current_negotiation_party_membership',
+  '0015_world_v2_narrow_transfer_approvals',
+  '0016_world_v2_opening_seed',
 ]);
 
 const PROJECT_REF = /^[a-z0-9]{20}$/u;

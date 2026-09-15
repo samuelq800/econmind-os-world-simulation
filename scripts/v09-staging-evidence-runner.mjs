@@ -44,6 +44,159 @@ const RUN_MIGRATION_TEARDOWN = Object.freeze([
     functions: [
       {
         argumentCount: 0,
+        name: 'validate_opening_seed_insert',
+        sql: '()',
+      },
+    ],
+    migrationId: '0016_world_v2_opening_seed',
+    tables: ['opening_seed'],
+    triggers: [
+      { name: 'opening_seed_is_immutable', table: 'opening_seed' },
+      { name: 'opening_seed_insert_is_world_zero_only', table: 'opening_seed' },
+    ],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [
+      {
+        argumentCount: 0,
+        name: 'validate_narrow_transfer_proposal_update',
+        sql: '()',
+      },
+    ],
+    migrationId: '0015_world_v2_narrow_transfer_approvals',
+    tables: ['narrow_transfer_approval_signature', 'narrow_transfer_proposal'],
+    triggers: [
+      {
+        name: 'narrow_transfer_approval_signature_is_immutable',
+        table: 'narrow_transfer_approval_signature',
+      },
+      {
+        name: 'narrow_transfer_proposal_update_is_guarded',
+        table: 'narrow_transfer_proposal',
+      },
+    ],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [],
+    migrationId: '0014_world_v2_current_negotiation_party_membership',
+    tables: ['current_negotiation_party_membership'],
+    triggers: [],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [],
+    migrationId: '0013_world_v2_read_projection_boundary',
+    tables: ['read_projection', 'projection_entitlement'],
+    triggers: [],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [],
+    migrationId: '0011_world_v2_current_commit_authorization',
+    tables: ['current_commit_authorization'],
+    triggers: [],
+  }),
+  Object.freeze({
+    constraints: [
+      {
+        name: 'command_queue_claim_fencing_is_bound',
+        table: 'command_queue',
+      },
+    ],
+    functions: [],
+    migrationId: '0010_world_v2_command_claim_fencing',
+    tables: [],
+    triggers: [],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [
+      {
+        argumentCount: 0,
+        name: 'validate_authoritative_posting_payload',
+        sql: '()',
+      },
+      {
+        argumentCount: 2,
+        name: 'validate_financial_posting_payload',
+        sql: '(jsonb, world_v2.financial_posting_batch)',
+      },
+      {
+        argumentCount: 2,
+        name: 'validate_inventory_posting_payload',
+        sql: '(jsonb, world_v2.inventory_posting)',
+      },
+      { argumentCount: 1, name: 'authoritative_sha256', sql: '(text)' },
+      { argumentCount: 1, name: 'canonical_json', sql: '(jsonb)' },
+    ],
+    migrationId: '0009_world_v2_posting_payload_integrity',
+    tables: [],
+    triggers: [
+      {
+        name: 'financial_posting_payload_is_verified',
+        table: 'financial_posting_batch',
+      },
+      {
+        name: 'inventory_posting_payload_is_verified',
+        table: 'inventory_posting',
+      },
+    ],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [
+      {
+        argumentCount: 0,
+        name: 'validate_current_materialization_update',
+        sql: '()',
+      },
+      {
+        argumentCount: 0,
+        name: 'validate_authoritative_posting_evidence',
+        sql: '()',
+      },
+    ],
+    migrationId: '0007_world_v2_atomic_transition_facts',
+    tables: [
+      'current_materialization',
+      'authoritative_commit_authorization',
+      'financial_posting_batch',
+      'inventory_posting',
+    ],
+    triggers: [
+      {
+        name: 'current_materialization_update_is_guarded',
+        table: 'current_materialization',
+      },
+      {
+        name: 'authoritative_commit_authorization_is_immutable',
+        table: 'authoritative_commit_authorization',
+      },
+      {
+        name: 'financial_posting_batch_is_immutable',
+        table: 'financial_posting_batch',
+      },
+      {
+        name: 'inventory_posting_is_immutable',
+        table: 'inventory_posting',
+      },
+      {
+        name: 'financial_posting_evidence_is_bound',
+        table: 'financial_posting_batch',
+      },
+      {
+        name: 'inventory_posting_evidence_is_bound',
+        table: 'inventory_posting',
+      },
+    ],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [
+      {
+        argumentCount: 0,
         name: 'reject_world_writer_lease_lineage_reset',
         sql: '()',
       },
@@ -195,6 +348,14 @@ const RUN_TRIGGERS_REVERSE = Object.freeze(
   RUN_MIGRATION_TEARDOWN.flatMap((migration) => migration.triggers),
 );
 const RUN_POLICIES = Object.freeze([
+  {
+    name: 'read_projection_entitled_read',
+    table: 'read_projection',
+  },
+  {
+    name: 'projection_entitlement_self_read',
+    table: 'projection_entitlement',
+  },
   { name: 'v09_staging_owner_world_head', table: 'world_head' },
   { name: 'v09_staging_owner_lease', table: 'world_writer_lease' },
   { name: 'v09_staging_worker_world_head', table: 'world_head' },
@@ -465,7 +626,7 @@ export async function loadV09StagingMigrationChain() {
         migration.migration_id !== V09_STAGING_MIGRATION_IDS[index],
     )
   ) {
-    failed('the runner accepts only the exact branch-local 0001–0006 chain');
+    failed('the runner accepts only the exact branch-local 0001–0016 chain');
   }
   const artifacts = new Map();
   for (const migration of migrations) {

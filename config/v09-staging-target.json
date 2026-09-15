@@ -15,6 +15,6 @@
     "reader": "v09_staging_reader"
   },
   "owner_confirmation": "OWNER_APPROVED_DEDICATED_NONPRODUCTION_V09",
-  "evidence_output_path": "/Users/samuel/Documents/econclub/evidence/vzwrereseklnrjbtmsmc-gate-b-staging.json",
-  "target_fingerprint": "81239aa0d1272cfa6324c132bde33ab9b454e0d2b41776671fdb0cbf576566eb"
+  "evidence_output_path": "/Users/samuel/Documents/econclub/evidence/vzwrereseklnrjbtmsmc-gate-b-staging-full-manifest.json",
+  "target_fingerprint": "8bade516653e3c42b7a1ae72dcc75931e1d5c41cab88671447cbed1d4432b660"
 }
