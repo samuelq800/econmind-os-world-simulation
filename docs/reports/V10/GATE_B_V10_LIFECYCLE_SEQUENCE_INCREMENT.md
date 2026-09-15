@@ -43,11 +43,40 @@ in GitHub Actions run
 That run also completed migration validation and the worker/Core build steps.
 It is automated evidence only and has not received a fresh independent review.
 
+## Subsequent lifecycle evidence
+
+The approval-aware model was extended by immutable candidate
+`802ba25b37f25d2f097661d5ee20681938417e6e`, which interleaves a current
+Buyer Finance revocation with signatures, lifecycle commands, and retries. Its
+fixed-seed 250-run model requires a revoked, uncommitted Reserve to have zero
+ledger effect, while facts already committed before revocation remain replayable
+versioned obligations. Disposable PostgreSQL CI
+[`34855951453`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34855951453)
+passed. Candidate `1e04d72a78c75fdb82476f09509f1e0932143071` separately
+proved the actual transaction-cutoff denial for a revoked Finance approval in
+CI [`34855645977`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34855645977).
+
+The controlled strict process-kill recovery matrix now covers all three narrow
+lifecycle phases at `AFTER_EVENTS`, `AFTER_INVENTORY_POSTINGS`,
+`AFTER_FINANCIAL_POSTINGS`, `BEFORE_RECEIPT`, and
+`BEFORE_TRANSACTION_COMMIT`. Reserve was observed in CI
+[`34856225295`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34856225295)
+for `7541da72fd6b2ba8c59eee09961d59ec21650ada`; Ship was observed in CI
+[`34856697664`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34856697664)
+for `69b5e2297755525268d58e9dc3152add95df21d6`; Delivery remains bound to
+the earlier strict CI `34850501755`. Each parent requires exact
+`{ code: null, signal: 'SIGKILL' }`, verifies no durable partial footprint
+through a fresh pool, then commits the same candidate once.
+
+The current hard-property index is
+[`GATE_B_HARD_PROPERTY_EVIDENCE_LEDGER.md`](GATE_B_HARD_PROPERTY_EVIDENCE_LEDGER.md).
+
 ## Evidence boundary
 
 This remains narrow V10 Treasury-GCU lifecycle evidence, additionally
-exercised in the disposable PostgreSQL suite. It does not cover authorization
-revocation within the generated model, arbitrary Command types, durable worker
-restart across every lifecycle phase, full real-PostgreSQL contention and
-process-kill recovery, browser E2E, or RLS/grant negatives. It is not a Gate B
-approval, staging authorization, merge authorization, or Supabase action.
+exercised in the disposable PostgreSQL suite. It now covers Finance revocation
+within the generated model and controlled process-kill recovery for
+Reserve/Ship/Deliver, but it does not cover arbitrary Command types, browser
+E2E, or RLS/grant negatives. The newer evidence range has not received fresh
+independent review. It is not a Gate B approval, staging authorization, merge
+authorization, or Supabase action.

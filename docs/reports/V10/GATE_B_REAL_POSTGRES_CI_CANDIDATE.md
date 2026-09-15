@@ -122,9 +122,31 @@ evidence only, not Gate B approval.
 The service was removed with the CI job. No Supabase, staging, or production
 target was contacted.
 
+## Subsequent lifecycle increments awaiting fresh review
+
+The following immutable candidates extend the narrow V10 evidence after the
+last independent process-kill review. They are recorded as automated evidence
+only; none is a Gate B approval.
+
+| Candidate                                  | Disposable PostgreSQL evidence                                                                                 | Scope                                                                                                                |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `42cb6a6680b2c791c3af120f5bd5a65d7e612318` | CI [`34854082029`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34854082029) passed | Ship transaction rollback/reconnect, then one Deliver commit.                                                        |
+| `4bb27c5f359dce93eda5f984a022ce01da0065a7` | CI [`34855449298`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34855449298) passed | Reserve uses durable current authorization and durable narrow approvals.                                             |
+| `1e04d72a78c75fdb82476f09509f1e0932143071` | CI [`34855645977`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34855645977) passed | Revoked Finance approval is rejected at the Reserve transaction cutoff with zero durable effect.                     |
+| `802ba25b37f25d2f097661d5ee20681938417e6e` | CI [`34855951453`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34855951453) passed | Fixed-seed approval-revocation command-sequence model.                                                               |
+| `7541da72fd6b2ba8c59eee09961d59ec21650ada` | CI [`34856225295`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34856225295) passed | Reserve strict process kill at all five atomic boundaries.                                                           |
+| `69b5e2297755525268d58e9dc3152add95df21d6` | CI [`34856697664`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34856697664) passed | Ship strict process kill at all five atomic boundaries.                                                              |
+| `46476c9e7874ff31a45731f5aa424041bb4bc1c3` | CI [`34914425241`](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/34914425241) passed | Reserve and Ship distinct-command, same-WorldVersion contention through two independent PostgreSQL connection pools. |
+
+The strict process-kill cases require the parent to observe exactly
+`{ code: null, signal: 'SIGKILL' }`, query a newly-created guarded pool for a
+zero partial footprint, and then commit the same candidate exactly once. The
+Reserve and Ship additions therefore complement—not replace—the previously
+observed Delivery strict-kill evidence.
+
 ## Boundary of this evidence
 
 This is scoped V09/V10 disposable PostgreSQL evidence only. It does not
-demonstrate multi-process contention or process-kill recovery across the full
-V10 lifecycle, and it supplies no browser E2E or RLS/grant negative evidence
-on an owner-approved non-production target. It does not authorize Gate B.
+demonstrate arbitrary-command contention. It supplies no browser E2E or
+RLS/grant negative evidence on an owner-approved non-production target. It
+does not authorize Gate B.
