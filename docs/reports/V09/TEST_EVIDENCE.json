@@ -3,7 +3,7 @@
   "package": "V09.2 + V09.3",
   "state": "IMPLEMENTED_UNVERIFIED",
   "base": "8da085184bf063b61ba53c10537c6a797018072b",
-  "implementation_tip_before_evidence_docs": "dadad8292f7b2e3f16430052d1e599d733c76031",
+  "implementation_candidate_tip": "7318bfbfd1d6945d89d4ea77e7fd9a18d3787f08",
   "toolchain": {
     "node": "24.20.0",
     "pnpm": "12.3.4",
@@ -87,6 +87,11 @@
       "boundary_scanned_files": 52,
       "authoritative_core_files": 30,
       "authoritative_total_files": 47
+    },
+    {
+      "command": "git diff --check 8da085184bf063b61ba53c10537c6a797018072b..7318bfbfd1d6945d89d4ea77e7fd9a18d3787f08",
+      "result": "WARN_INHERITED_WHITESPACE",
+      "reason": "the hash-bound 0009 migration introduced before this integration tip has one trailing-space warning at line 119; changing historical migration bytes would invalidate manifest provenance, so it is preserved for reviewer disposition"
     },
     {
       "command": "ECONMIND_ENV=local V09_TEST_DATABASE_FINGERPRINT=world-v2-v09-test-local V09_TEST_DATABASE_URL=<approved-disposable-loopback-url> pnpm exec vitest run tests/world-core/v09-atomic-recovery-postgres.test.ts",
