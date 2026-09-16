@@ -10,5 +10,6 @@ export default defineConfig({
     // Their deterministic startup can exceed Vitest's five-second default
     // without indicating a stalled test or relaxing any assertion.
     testTimeout: 30_000,
+    hookTimeout: 30_000,
   },
 });
