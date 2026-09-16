@@ -1,9 +1,4 @@
-import {
-  kernelInvalid,
-  nonNegative,
-  render,
-  type ExactDecimal,
-} from './common.js';
+import { kernelInvalid } from './common.js';
 
 /**
  * This is a catalogue of requested causal pathways, not a policy or a state
@@ -20,7 +15,9 @@ export type CausalReadiness =
 export type CausalOwnerScope =
   | 'E02_TO_E07_HUMAN_SYSTEMS'
   | 'E08_TO_E14_REAL_ECONOMY'
-  | 'V19_TO_V21_FUTURE_MACRO_EXTERNAL';
+  | 'E13_TO_E14_DISTRIBUTION'
+  | 'V19_TO_V21_FUTURE_MACRO_EXTERNAL'
+  | 'V24_FUTURE_GOVERNANCE_CRISIS';
 
 export interface CausalEdge {
   readonly source: string;
@@ -62,12 +59,14 @@ function chain(
 
 const HUMAN: CausalOwnerScope = 'E02_TO_E07_HUMAN_SYSTEMS';
 const REAL_ECONOMY: CausalOwnerScope = 'E08_TO_E14_REAL_ECONOMY';
+const DISTRIBUTION: CausalOwnerScope = 'E13_TO_E14_DISTRIBUTION';
 const FUTURE_MACRO: CausalOwnerScope = 'V19_TO_V21_FUTURE_MACRO_EXTERNAL';
+const GOVERNANCE: CausalOwnerScope = 'V24_FUTURE_GOVERNANCE_CRISIS';
 const READY: CausalReadiness = 'PARAMETERIZED_KERNEL_READY';
 const FUTURE: CausalReadiness = 'FUTURE_INTERFACE_ONLY';
 
 /**
- * User-requested cross-engine pathways 1–50. The entries intentionally carry
+ * User-requested cross-engine pathways 1–100. The entries intentionally carry
  * signal topology only: neither a default elasticity nor a country parameter
  * can enter through this catalogue.
  */
@@ -869,22 +868,769 @@ export const CAUSAL_CHAINS: readonly CausalChainDefinition[] = Object.freeze([
       edge('ALTERNATIVE_SUPPLIER_SEARCH', 'LANDED_COST_FX_DEMAND', 'INCREASES'),
     ],
   ),
+  chain(
+    'C51',
+    'Essential inflation, living cost and political support',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('FOOD_ENERGY_INFLATION', 'ESSENTIAL_LIVING_COST', 'INCREASES'),
+      edge('ESSENTIAL_LIVING_COST', 'LOW_MIDDLE_REAL_MARGIN', 'DECREASES'),
+      edge('LOW_MIDDLE_REAL_MARGIN', 'COST_OF_LIVING_STRESS', 'DECREASES'),
+      edge('COST_OF_LIVING_STRESS', 'PUBLIC_SUPPORT', 'DECREASES'),
+      edge('PUBLIC_SUPPORT', 'POLITICAL_CAPITAL', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C52',
+    'Nominal wage lag against CPI and perceived welfare',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('CPI_EXCEEDING_NOMINAL_WAGE', 'REAL_WAGE', 'DECREASES'),
+      edge('REAL_WAGE', 'PERCEIVED_LIVING_STANDARD', 'INCREASES'),
+      edge('PERCEIVED_LIVING_STANDARD', 'CONSUMPTION_CONFIDENCE', 'INCREASES'),
+      edge('CONSUMPTION_CONFIDENCE', 'PUBLIC_SUPPORT', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C53',
+    'Unemployment duration, household stress and protest risk',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('UNEMPLOYMENT_DURATION', 'HOUSEHOLD_LIQUID_SAVINGS', 'DECREASES'),
+      edge('UNEMPLOYMENT_DURATION', 'HOUSEHOLD_DEBT_ARREARS', 'INCREASES'),
+      edge('HOUSEHOLD_LIQUID_SAVINGS', 'HOUSEHOLD_STRESS', 'DECREASES'),
+      edge('HOUSEHOLD_DEBT_ARREARS', 'HOUSEHOLD_STRESS', 'INCREASES'),
+      edge('HOUSEHOLD_STRESS', 'PROTEST_RISK', 'INCREASES'),
+      edge('PROTEST_RISK', 'PUBLIC_SUPPORT', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C54',
+    'Youth unemployment, emigration and future skills',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge(
+        'YOUTH_NEW_GRADUATE_UNEMPLOYMENT',
+        'PERCEIVED_EDUCATION_RETURN',
+        'DECREASES',
+      ),
+      edge(
+        'PERCEIVED_EDUCATION_RETURN',
+        'EMIGRATION_APPLICATIONS',
+        'DECREASES',
+      ),
+      edge(
+        'YOUTH_NEW_GRADUATE_UNEMPLOYMENT',
+        'PROTEST_SOCIAL_STRESS',
+        'INCREASES',
+      ),
+      edge('EMIGRATION_APPLICATIONS', 'FUTURE_SKILL_SUPPLY', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C55',
+    'Concentrated regional stress and local disruption',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge(
+        'REGIONAL_UNEMPLOYMENT_HOUSING_STRESS',
+        'LOCAL_PROTEST',
+        'INCREASES',
+      ),
+      edge('LOCAL_PROTEST', 'POLICE_DEPLOYMENT', 'INCREASES'),
+      edge(
+        'POLICE_DEPLOYMENT',
+        'REGIONAL_BUSINESS_TRANSPORT_DISRUPTION',
+        'INCREASES',
+      ),
+    ],
+  ),
+  chain(
+    'C56',
+    'Missed commitments, credibility and growth feedback',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('MISSED_GOVERNMENT_COMMITMENT', 'POLICY_CREDIBILITY', 'DECREASES'),
+      edge('POLICY_CREDIBILITY', 'PUBLIC_EXPECTATIONS', 'INCREASES'),
+      edge('PUBLIC_EXPECTATIONS', 'PRECAUTIONARY_SAVING', 'DECREASES'),
+      edge('PUBLIC_EXPECTATIONS', 'FIRM_INVESTMENT_DELAY', 'DECREASES'),
+      edge('PRECAUTIONARY_SAVING', 'GROWTH', 'DECREASES'),
+      edge('FIRM_INVESTMENT_DELAY', 'GROWTH', 'DECREASES'),
+      edge('GROWTH', 'PUBLIC_SUPPORT', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C57',
+    'Policy reversals, waiting value and investment delay',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('REPEATED_POLICY_REVERSALS', 'POLICY_CREDIBILITY', 'DECREASES'),
+      edge('POLICY_CREDIBILITY', 'BUSINESS_WAITING_VALUE', 'DECREASES'),
+      edge('BUSINESS_WAITING_VALUE', 'PROJECT_FDI_DELAY', 'INCREASES'),
+      edge('PROJECT_FDI_DELAY', 'EMPLOYMENT_INVESTMENT', 'DECREASES'),
+      edge('EMPLOYMENT_INVESTMENT', 'GOVERNMENT_PERFORMANCE', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C58',
+    'Successful crisis response and reform capacity',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('SUCCESSFUL_CRISIS_RESPONSE', 'PUBLIC_SUPPORT', 'INCREASES'),
+      edge('PUBLIC_SUPPORT', 'POLITICAL_CAPITAL', 'INCREASES'),
+      edge('POLITICAL_CAPITAL', 'DIFFICULT_REFORM_CAPACITY', 'INCREASES'),
+      edge('DIFFICULT_REFORM_CAPACITY', 'REFORM_SUCCESS', 'INCREASES'),
+      edge('REFORM_SUCCESS', 'POLICY_CREDIBILITY', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C59',
+    'Prolonged emergency powers and political cost',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('EMERGENCY_POWERS', 'ADMINISTRATIVE_RESPONSE', 'INCREASES'),
+      edge('PROLONGED_EMERGENCY_POWERS', 'POLITICAL_COST', 'INCREASES'),
+      edge('POLITICAL_COST', 'PUBLIC_SUPPORT', 'DECREASES'),
+      edge('POLITICAL_COST', 'POLITICAL_CAPITAL', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C60',
+    'Public-service backlog and reform pressure',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge(
+        'PUBLIC_SERVICE_BACKLOG',
+        'EXPERIENCED_SERVICE_QUALITY',
+        'DECREASES',
+      ),
+      edge('EXPERIENCED_SERVICE_QUALITY', 'PUBLIC_SUPPORT', 'INCREASES'),
+      edge('PUBLIC_SUPPORT', 'SOCIAL_REFORM_PRESSURE', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C61',
+    'Economic uncertainty and precautionary saving feedback',
+    DISTRIBUTION,
+    READY,
+    [
+      edge('ECONOMIC_UNCERTAINTY', 'PRECAUTIONARY_SAVING', 'INCREASES'),
+      edge('PRECAUTIONARY_SAVING', 'CONSUMPTION', 'DECREASES'),
+      edge('CONSUMPTION', 'FIRM_REVENUE', 'INCREASES'),
+      edge('FIRM_REVENUE', 'EMPLOYMENT_TAX_REVENUE', 'INCREASES'),
+      edge('EMPLOYMENT_TAX_REVENUE', 'ECONOMIC_UNCERTAINTY', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C62',
+    'Confidence recovery and pent-up demand pressure',
+    DISTRIBUTION,
+    READY,
+    [
+      edge('CONFIDENCE_RECOVERY', 'SAVING_RATE', 'DECREASES'),
+      edge('SAVING_RATE', 'PENT_UP_CONSUMPTION', 'DECREASES'),
+      edge('PENT_UP_CONSUMPTION', 'RETAIL_SERVICE_DEMAND', 'INCREASES'),
+      edge('RETAIL_SERVICE_DEMAND', 'IMPORTS', 'INCREASES'),
+      edge('IMPORTS', 'CPI_FX_PRESSURE', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C63',
+    'Consumer credit, leverage and future consumption risk',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('CONSUMER_CREDIT_EASING', 'HOUSEHOLD_BORROWING', 'INCREASES'),
+      edge('HOUSEHOLD_BORROWING', 'CONSUMPTION', 'INCREASES'),
+      edge('CONSUMPTION', 'VAT_GDP', 'INCREASES'),
+      edge('HOUSEHOLD_BORROWING', 'HOUSEHOLD_LEVERAGE', 'INCREASES'),
+      edge('INTEREST_RATE_RISE', 'DEBT_SERVICE', 'INCREASES'),
+      edge('DEBT_SERVICE', 'CONSUMPTION_COLLAPSE_RISK', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C64',
+    'Mortgage rate and retail demand feedback',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('MORTGAGE_RATE', 'DEBT_SERVICE', 'INCREASES'),
+      edge('DEBT_SERVICE', 'DISPOSABLE_RESOURCES', 'DECREASES'),
+      edge('DISPOSABLE_RESOURCES', 'NON_ESSENTIAL_CONSUMPTION', 'INCREASES'),
+      edge('NON_ESSENTIAL_CONSUMPTION', 'RETAIL_SERVICE_OUTPUT', 'INCREASES'),
+      edge('RETAIL_SERVICE_OUTPUT', 'VAT_REVENUE', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C65',
+    'Low-income transfers, consumption and poverty',
+    DISTRIBUTION,
+    READY,
+    [
+      edge('LOW_INCOME_TRANSFERS', 'LOW_INCOME_CONSUMPTION', 'INCREASES'),
+      edge('LOW_INCOME_CONSUMPTION', 'DOMESTIC_DEMAND', 'INCREASES'),
+      edge('DOMESTIC_DEMAND', 'POVERTY', 'DECREASES'),
+      edge('LOW_INCOME_TRANSFERS', 'FISCAL_SPENDING', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C66',
+    'High-income tax cut, deposits and weak consumption stimulus',
+    DISTRIBUTION,
+    READY,
+    [
+      edge('HIGH_INCOME_TAX_CUT', 'HIGH_INCOME_DISPOSABLE_INCOME', 'INCREASES'),
+      edge('HIGH_INCOME_DISPOSABLE_INCOME', 'SAVING_DEPOSITS', 'INCREASES'),
+      edge('HIGH_INCOME_SAVING_SHARE', 'CONSUMPTION_STIMULUS', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C67',
+    'VAT distribution and essential-consumption composition',
+    DISTRIBUTION,
+    READY,
+    [
+      edge('VAT_RATE', 'ESSENTIAL_BASKET_PRICE', 'INCREASES'),
+      edge('ESSENTIAL_BASKET_PRICE', 'LOW_INCOME_REAL_MARGIN', 'DECREASES'),
+      edge('LOW_INCOME_REAL_MARGIN', 'POVERTY_GINI', 'DECREASES'),
+      edge('POVERTY_GINI', 'ESSENTIAL_CONSUMPTION_SHARE', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C68',
+    'Profit-led productivity growth and income distribution',
+    DISTRIBUTION,
+    READY,
+    [
+      edge('PRODUCTIVITY', 'PROFIT_CAPITAL_INCOME', 'INCREASES'),
+      edge('PRODUCTIVITY', 'GDP', 'INCREASES'),
+      edge('PROFIT_CAPITAL_INCOME', 'MEDIAN_REAL_INCOME_SHARE', 'DECREASES'),
+      edge('MEDIAN_REAL_INCOME_SHARE', 'GINI', 'DECREASES'),
+      edge('GINI', 'CONSUMPTION_GROWTH', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C69',
+    'Wage-share consumption and investment trade-off',
+    DISTRIBUTION,
+    READY,
+    [
+      edge('LOW_MIDDLE_WAGE_SHARE', 'HOUSEHOLD_CONSUMPTION', 'INCREASES'),
+      edge('LOW_MIDDLE_WAGE_SHARE', 'FIRM_MARGIN', 'DECREASES'),
+      edge('FIRM_MARGIN', 'INVESTMENT_CAPACITY', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C70',
+    'Essential-cost crowding out of discretionary services',
+    DISTRIBUTION,
+    READY,
+    [
+      edge('FOOD_ENERGY_HOUSING_COST', 'ESSENTIAL_SPENDING_SHARE', 'INCREASES'),
+      edge(
+        'ESSENTIAL_SPENDING_SHARE',
+        'DISCRETIONARY_CONSUMPTION',
+        'DECREASES',
+      ),
+      edge(
+        'DISCRETIONARY_CONSUMPTION',
+        'SERVICES_GENERAL_GOODS_DEMAND',
+        'INCREASES',
+      ),
+      edge('SERVICES_GENERAL_GOODS_DEMAND', 'SECTOR_EMPLOYMENT', 'INCREASES'),
+    ],
+  ),
+  chain('C71', 'Inflation expectations feedback loop', FUTURE_MACRO, FUTURE, [
+    edge('EXPECTED_INFLATION', 'WAGE_DEMANDS_FIRM_PREPRICING', 'INCREASES'),
+    edge('WAGE_DEMANDS_FIRM_PREPRICING', 'ACTUAL_INFLATION', 'INCREASES'),
+    edge('ACTUAL_INFLATION', 'EXPECTED_INFLATION', 'INCREASES'),
+  ]),
+  chain(
+    'C72',
+    'Credible tightening and inflation moderation',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('CREDIBLE_CB_TIGHTENING', 'INFLATION_EXPECTATIONS', 'DECREASES'),
+      edge(
+        'INFLATION_EXPECTATIONS',
+        'WAGE_PRICE_SETTING_MODERATION',
+        'DECREASES',
+      ),
+      edge(
+        'WAGE_PRICE_SETTING_MODERATION',
+        'REQUIRED_RATE_TIGHTENING',
+        'DECREASES',
+      ),
+    ],
+  ),
+  chain(
+    'C73',
+    'Forward-guidance misses and market volatility',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('FORWARD_GUIDANCE_MISSES', 'MONETARY_CREDIBILITY', 'DECREASES'),
+      edge(
+        'MONETARY_CREDIBILITY',
+        'FUTURE_GUIDANCE_EFFECTIVENESS',
+        'INCREASES',
+      ),
+      edge(
+        'FUTURE_GUIDANCE_EFFECTIVENESS',
+        'INTEREST_FX_VOLATILITY',
+        'DECREASES',
+      ),
+    ],
+  ),
+  chain(
+    'C74',
+    'Expected depreciation and self-validating FX demand',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('EXPECTED_CURRENCY_DEPRECIATION', 'PREBUY_FX_IMPORTS', 'INCREASES'),
+      edge('PREBUY_FX_IMPORTS', 'FX_DEMAND', 'INCREASES'),
+      edge('FX_DEMAND', 'CURRENCY_DEPRECIATION', 'INCREASES'),
+      edge(
+        'CURRENCY_DEPRECIATION',
+        'EXPECTED_CURRENCY_DEPRECIATION',
+        'INCREASES',
+      ),
+    ],
+  ),
+  chain(
+    'C75',
+    'Expected tariff increase and import front-loading',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('EXPECTED_TARIFF_INCREASE', 'FRONT_LOADED_IMPORTS', 'INCREASES'),
+      edge('FRONT_LOADED_IMPORTS', 'CURRENT_FX_DEMAND', 'INCREASES'),
+      edge('FRONT_LOADED_IMPORTS', 'INVENTORY', 'INCREASES'),
+      edge('TARIFF_EFFECTIVE', 'IMPORTS', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C76',
+    'Shortage expectations and stockpiling feedback',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge(
+        'EXPECTED_COMMODITY_SHORTAGE',
+        'HOUSEHOLD_FIRM_STOCKPILING',
+        'INCREASES',
+      ),
+      edge('HOUSEHOLD_FIRM_STOCKPILING', 'USABLE_INVENTORY', 'DECREASES'),
+      edge('USABLE_INVENTORY', 'SPOT_PRICE', 'DECREASES'),
+      edge('SPOT_PRICE', 'SHORTAGE_PERCEPTION', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C77',
+    'Bank solvency warnings and liquidity feedback',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('BANK_SOLVENCY_WARNINGS', 'DEPOSITOR_WITHDRAWALS', 'INCREASES'),
+      edge('DEPOSITOR_WITHDRAWALS', 'BANK_LIQUIDITY', 'DECREASES'),
+      edge('BANK_LIQUIDITY', 'LENDING', 'INCREASES'),
+      edge('LENDING', 'ECONOMIC_OUTPUT', 'INCREASES'),
+      edge('ECONOMIC_OUTPUT', 'NPL', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C78',
+    'Deposit guarantee, run risk and fiscal liability',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('CREDIBLE_DEPOSIT_GUARANTEE', 'WITHDRAWAL_PROPENSITY', 'DECREASES'),
+      edge('WITHDRAWAL_PROPENSITY', 'BANK_RUN_RISK', 'INCREASES'),
+      edge(
+        'CREDIBLE_DEPOSIT_GUARANTEE',
+        'GOVERNMENT_CONTINGENT_LIABILITY',
+        'INCREASES',
+      ),
+    ],
+  ),
+  chain('C79', 'Repeated bailouts and moral hazard', FUTURE_MACRO, FUTURE, [
+    edge('REPEATED_BANK_BAILOUTS', 'EXPECTED_RESCUE', 'INCREASES'),
+    edge('EXPECTED_RESCUE', 'BANK_RISK_APPETITE', 'INCREASES'),
+    edge('BANK_RISK_APPETITE', 'RISKY_LENDING', 'INCREASES'),
+    edge('RISKY_LENDING', 'FUTURE_NPL_TAIL_RISK', 'INCREASES'),
+  ]),
+  chain(
+    'C80',
+    'Sovereign stress, saving, capital outflow and FX pressure',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('SOVEREIGN_STRESS', 'EXPECTED_TAX_INFLATION', 'INCREASES'),
+      edge('EXPECTED_TAX_INFLATION', 'SAVING_CAPITAL_OUTFLOW', 'INCREASES'),
+      edge('SAVING_CAPITAL_OUTFLOW', 'DOMESTIC_DEMAND', 'DECREASES'),
+      edge('SAVING_CAPITAL_OUTFLOW', 'FX_PRESSURE', 'INCREASES'),
+      edge('DOMESTIC_DEMAND', 'SOVEREIGN_STRESS', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C81',
+    'Buyer concentration and partner recession exposure',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge(
+        'TOP_BUYER_CONCENTRATION',
+        'PARTNER_RECESSION_EXPOSURE',
+        'INCREASES',
+      ),
+      edge('PARTNER_RECESSION_EXPOSURE', 'EXPORT_ORDERS', 'DECREASES'),
+      edge('EXPORT_ORDERS', 'SECTOR_EMPLOYMENT', 'INCREASES'),
+      edge('SECTOR_EMPLOYMENT', 'WAGE_INCOME', 'INCREASES'),
+      edge('WAGE_INCOME', 'PUBLIC_SUPPORT', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C82',
+    'Supplier concentration and precautionary importing',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge(
+        'SUPPLIER_CONCENTRATION_CONTRACT_RISK',
+        'PRECAUTIONARY_INVENTORY_TARGET',
+        'INCREASES',
+      ),
+      edge(
+        'PRECAUTIONARY_INVENTORY_TARGET',
+        'FRONT_LOADED_IMPORTS',
+        'INCREASES',
+      ),
+      edge('FRONT_LOADED_IMPORTS', 'WORKING_CAPITAL_FX_DEMAND', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C83',
+    'Contract default and trade credit risk premium',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge(
+        'REPEATED_CONTRACT_DEFAULT',
+        'DEPOSIT_ADVANCE_PAYMENT_RISK_PREMIUM',
+        'INCREASES',
+      ),
+      edge('DEPOSIT_ADVANCE_PAYMENT_RISK_PREMIUM', 'LANDED_COST', 'INCREASES'),
+      edge('LANDED_COST', 'TRADE_VOLUME', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C84',
+    'Reliable delivery and trade-finance terms',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge(
+        'RELIABLE_DELIVERY_HISTORY',
+        'PAYMENT_TERMS_COLLATERAL_RELIEF',
+        'INCREASES',
+      ),
+      edge(
+        'PAYMENT_TERMS_COLLATERAL_RELIEF',
+        'TRADE_FINANCE_COST',
+        'DECREASES',
+      ),
+      edge('TRADE_FINANCE_COST', 'EXPORT_COMPETITIVENESS', 'DECREASES'),
+    ],
+  ),
+  chain('C85', 'Sanctions and domestic political cost', FUTURE_MACRO, FUTURE, [
+    edge('GOVERNMENT_SANCTIONS', 'TARGET_TRADE', 'DECREASES'),
+    edge(
+      'GOVERNMENT_SANCTIONS',
+      'DOMESTIC_IMPORT_SUPPLY_EXPORT_MARKETS',
+      'DECREASES',
+    ),
+    edge('DOMESTIC_IMPORT_SUPPLY_EXPORT_MARKETS', 'DOMESTIC_COST', 'DECREASES'),
+    edge(
+      'DOMESTIC_IMPORT_SUPPLY_EXPORT_MARKETS',
+      'EXPORT_REVENUE',
+      'INCREASES',
+    ),
+    edge('DOMESTIC_COST', 'DOMESTIC_POLITICAL_COST', 'INCREASES'),
+    edge('EXPORT_REVENUE', 'DOMESTIC_POLITICAL_COST', 'DECREASES'),
+  ]),
+  chain(
+    'C86',
+    'Food export ban domestic relief and external cost',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('FOOD_EXPORT_BAN', 'DOMESTIC_AVAILABLE_FOOD_SUPPLY', 'INCREASES'),
+      edge('DOMESTIC_AVAILABLE_FOOD_SUPPLY', 'FOOD_PRICE', 'DECREASES'),
+      edge('FOOD_PRICE', 'COST_OF_LIVING_STRESS', 'INCREASES'),
+      edge(
+        'FOOD_EXPORT_BAN',
+        'FARMER_EXPORTER_INCOME_FX_EARNINGS',
+        'DECREASES',
+      ),
+      edge('FOOD_EXPORT_BAN', 'FOREIGN_DISPUTE_RISK', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C87',
+    'Commodity aid relief and local-supply substitution risk',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('COMMODITY_AID_INFLOW', 'ESSENTIAL_SUPPLY', 'INCREASES'),
+      edge('ESSENTIAL_SUPPLY', 'PRICE_STRESS', 'DECREASES'),
+      edge('ESSENTIAL_SUPPLY', 'IMPORT_BILL', 'DECREASES'),
+      edge('PROLONGED_COMMODITY_AID', 'LOCAL_PRODUCER_REVENUE', 'DECREASES'),
+      edge(
+        'LOCAL_PRODUCER_REVENUE',
+        'FUTURE_DOMESTIC_SUPPLY_CAPACITY',
+        'INCREASES',
+      ),
+    ],
+  ),
+  chain(
+    'C88',
+    'Grant and loan aid intertemporal trade-off',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('FOREIGN_AID_EMERGENCY_GRANT', 'FISCAL_FX_CONSTRAINT', 'DECREASES'),
+      edge('FISCAL_FX_CONSTRAINT', 'CRISIS_SERVICE_RECOVERY', 'DECREASES'),
+      edge('CRISIS_SERVICE_RECOVERY', 'SUPPORT_CREDIBILITY', 'INCREASES'),
+      edge('LOAN_AID', 'FUTURE_DEBT_SERVICE', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C89',
+    'Strategic resource agreement and current-account leakage',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge('STRATEGIC_RESOURCE_AGREEMENT', 'FOREIGN_INVESTMENT', 'INCREASES'),
+      edge('FOREIGN_INVESTMENT', 'EXTRACTION_JOBS_REVENUE', 'INCREASES'),
+      edge('STRATEGIC_RESOURCE_AGREEMENT', 'FOREIGN_OWNERSHIP', 'INCREASES'),
+      edge('FOREIGN_OWNERSHIP', 'PROFIT_REPATRIATION', 'INCREASES'),
+      edge('PROFIT_REPATRIATION', 'CURRENT_ACCOUNT_LEAKAGE', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C90',
+    'Foreign-funded project localisation and public perception',
+    FUTURE_MACRO,
+    FUTURE,
+    [
+      edge(
+        'FOREIGN_FUNDED_IMPORTED_CAPITAL_AND_LABOUR',
+        'FDI_HEADLINE',
+        'INCREASES',
+      ),
+      edge(
+        'FOREIGN_FUNDED_IMPORTED_CAPITAL_AND_LABOUR',
+        'DOMESTIC_EMPLOYMENT_MULTIPLIER',
+        'DECREASES',
+      ),
+      edge(
+        'FOREIGN_FUNDED_IMPORTED_CAPITAL_AND_LABOUR',
+        'HOUSING_DEMAND',
+        'INCREASES',
+      ),
+      edge('DOMESTIC_EMPLOYMENT_MULTIPLIER', 'PUBLIC_PERCEPTION', 'INCREASES'),
+    ],
+  ),
+  chain('C91', 'Welfare arrears, poverty and protest', GOVERNANCE, FUTURE, [
+    edge('WELFARE_PAYMENT_ARREARS', 'LOW_INCOME_CASH_FLOW', 'DECREASES'),
+    edge('LOW_INCOME_CASH_FLOW', 'CONSUMPTION', 'INCREASES'),
+    edge('LOW_INCOME_CASH_FLOW', 'DEBT_ARREARS', 'DECREASES'),
+    edge('DEBT_ARREARS', 'POVERTY', 'INCREASES'),
+    edge('POVERTY', 'PROTEST_RISK_PUBLIC_SUPPORT', 'INCREASES'),
+  ]),
+  chain(
+    'C92',
+    'Government wage arrears and service-capacity decline',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge(
+        'GOVERNMENT_WAGE_ARREARS',
+        'TEACHER_DOCTOR_POLICE_HOUSEHOLD_INCOME',
+        'DECREASES',
+      ),
+      edge(
+        'TEACHER_DOCTOR_POLICE_HOUSEHOLD_INCOME',
+        'ABSENTEEISM_STAFF_EXIT_RISK',
+        'DECREASES',
+      ),
+      edge(
+        'ABSENTEEISM_STAFF_EXIT_RISK',
+        'PUBLIC_SERVICE_CAPACITY',
+        'DECREASES',
+      ),
+      edge('PUBLIC_SERVICE_CAPACITY', 'PUBLIC_SUPPORT', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C93',
+    'Protest policing and residual public-safety capacity',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge(
+        'POLICE_CONCENTRATION_ON_PROTEST',
+        'AVAILABLE_POLICE_ELSEWHERE',
+        'DECREASES',
+      ),
+      edge(
+        'AVAILABLE_POLICE_ELSEWHERE',
+        'RESPONSE_TIME_CRIME_BACKLOG',
+        'DECREASES',
+      ),
+      edge('RESPONSE_TIME_CRIME_BACKLOG', 'LOCAL_SAFETY', 'DECREASES'),
+      edge('LOCAL_SAFETY', 'PUBLIC_SUPPORT', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C94',
+    'Protest disruption and unresolved feedback',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('PROTEST_EVENT', 'TRANSPORT_WORK_RETAIL_DISRUPTION', 'INCREASES'),
+      edge(
+        'TRANSPORT_WORK_RETAIL_DISRUPTION',
+        'PRODUCTION_CONSUMPTION',
+        'DECREASES',
+      ),
+      edge('PRODUCTION_CONSUMPTION', 'WAGE_TAX_REVENUE', 'INCREASES'),
+      edge('UNRESOLVED_PROTEST_DRIVERS', 'PROTEST_EVENT', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C95',
+    'Successful mediation and business recovery',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('SUCCESSFUL_MEDIATION', 'PROTEST_DURATION', 'DECREASES'),
+      edge('PROTEST_DURATION', 'POLICE_DEPLOYMENT', 'INCREASES'),
+      edge('POLICE_DEPLOYMENT', 'TRANSPORT_BUSINESS_RECOVERY', 'DECREASES'),
+      edge('TRANSPORT_BUSINESS_RECOVERY', 'POLITICAL_COST', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C96',
+    'Housing shortage, labour mobility and project delay',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('HOUSING_SHORTAGE', 'RENT', 'INCREASES'),
+      edge('RENT', 'REAL_MARGIN', 'DECREASES'),
+      edge('REAL_MARGIN', 'WORKER_MIGRATION_WILLINGNESS', 'INCREASES'),
+      edge('WORKER_MIGRATION_WILLINGNESS', 'VACANCY_FILLING', 'INCREASES'),
+      edge('VACANCY_FILLING', 'PROJECT_DELAY', 'DECREASES'),
+      edge('HOUSING_SHORTAGE', 'CONCENTRATED_HOUSING_DEMAND', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C97',
+    'Immigration labour contribution and service-capacity pressure',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('IMMIGRATION', 'LABOUR_SUPPLY', 'INCREASES'),
+      edge('LABOUR_SUPPLY', 'VACANCY', 'DECREASES'),
+      edge('LABOUR_SUPPLY', 'PRODUCTION', 'INCREASES'),
+      edge('IMMIGRATION', 'HOUSING_SCHOOL_HEALTHCARE_DEMAND', 'INCREASES'),
+      edge('HOUSING_SCHOOL_HEALTHCARE_DEMAND', 'RENT_BACKLOG', 'INCREASES'),
+      edge('RENT_BACKLOG', 'SOCIAL_STRESS', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C98',
+    'Emigration and misleading unemployment improvement',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('EMIGRATION', 'UNEMPLOYMENT_RATE', 'DECREASES'),
+      edge('EMIGRATION', 'POPULATION_TAX_BASE_CONSUMPTION', 'DECREASES'),
+      edge('EMIGRATION', 'SKILL_STOCK', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C99',
+    'Ageing, fiscal burden and working-age income',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('AGEING_POPULATION', 'LABOUR_FORCE_PARTICIPATION', 'DECREASES'),
+      edge('AGEING_POPULATION', 'PENSION_HEALTHCARE_DEMAND', 'INCREASES'),
+      edge('PENSION_HEALTHCARE_DEMAND', 'FISCAL_BURDEN', 'INCREASES'),
+      edge('FISCAL_BURDEN', 'TAX_CONTRIBUTION_PRESSURE', 'INCREASES'),
+      edge(
+        'TAX_CONTRIBUTION_PRESSURE',
+        'WORKING_AGE_DISPOSABLE_INCOME',
+        'DECREASES',
+      ),
+    ],
+  ),
+  chain(
+    'C100',
+    'Disaster displacement, essential demand and recovery',
+    GOVERNANCE,
+    FUTURE,
+    [
+      edge('DISASTER_CIVIL_EMERGENCY', 'DISPLACEMENT', 'INCREASES'),
+      edge('DISPLACEMENT', 'REDISTRIBUTED_HOUSING_DEMAND', 'INCREASES'),
+      edge(
+        'DISASTER_CIVIL_EMERGENCY',
+        'LABOUR_UNAVAILABLE_HEALTHCARE_DEMAND',
+        'INCREASES',
+      ),
+      edge(
+        'DISASTER_CIVIL_EMERGENCY',
+        'ESSENTIAL_CONSUMPTION_SHARE',
+        'INCREASES',
+      ),
+      edge(
+        'DISASTER_CIVIL_EMERGENCY',
+        'FISCAL_EMERGENCY_SPENDING',
+        'INCREASES',
+      ),
+      edge('RESPONSE_SPEED_AND_RECOVERY', 'PUBLIC_SUPPORT', 'INCREASES'),
+    ],
+  ),
 ]);
 
-export interface CausalTransmissionInput {
+/**
+ * Qualitative topology scheduling only. Concrete quantities and money must use
+ * `scheduleExactCausalTransmission` from causal-values.ts.
+ */
+export interface CausalSignalScheduleInput {
   readonly effectId: string;
   readonly chainId: CausalChainId;
   readonly edgeIndex: number;
   readonly sourcePeriod: number;
   /** Must be positive: a pure kernel cannot choose same-period settlement order. */
   readonly delayPeriods: number;
-  readonly sourceMagnitude: ExactDecimal;
-  /** Caller-owned, versioned conversion/response factor; there is no default. */
-  readonly responsePerSourceUnit: ExactDecimal;
   readonly parameterVersion: string;
 }
 
-export interface ScheduledCausalEffect {
+export interface ScheduledCausalSignal {
   readonly effectId: string;
   readonly chainId: CausalChainId;
   readonly edgeIndex: number;
@@ -894,7 +1640,6 @@ export interface ScheduledCausalEffect {
   readonly sourcePeriod: number;
   readonly duePeriod: number;
   readonly parameterVersion: string;
-  readonly delta: ExactDecimal;
 }
 
 function nonNegativePeriod(value: number, label: string): number {
@@ -925,12 +1670,12 @@ export function getCausalChain(chainId: CausalChainId): CausalChainDefinition {
 }
 
 /**
- * Schedules exactly one caller-parameterized signal. It neither reads nor
- * mutates World State, and a scheduled signal is never an event or posting.
+ * Schedules causal topology only. It cannot carry a number, quantity, or
+ * currency amount; concrete values must use the exact dimensional API.
  */
-export function scheduleCausalTransmission(
-  input: CausalTransmissionInput,
-): ScheduledCausalEffect {
+export function scheduleCausalSignal(
+  input: CausalSignalScheduleInput,
+): ScheduledCausalSignal {
   const definition = getCausalChain(input.chainId);
   if (!Number.isSafeInteger(input.edgeIndex) || input.edgeIndex < 0) {
     kernelInvalid('edgeIndex must be a non-negative safe integer');
@@ -946,16 +1691,6 @@ export function scheduleCausalTransmission(
   const duePeriod = sourcePeriod + delay;
   if (!Number.isSafeInteger(duePeriod))
     kernelInvalid('duePeriod exceeds safe range');
-  const amount = nonNegative(input.sourceMagnitude, 'sourceMagnitude');
-  const response = nonNegative(
-    input.responsePerSourceUnit,
-    'responsePerSourceUnit',
-  );
-  const absoluteDelta = amount.times(response);
-  const delta =
-    selected.direction === 'INCREASES'
-      ? absoluteDelta
-      : absoluteDelta.negated();
   return Object.freeze({
     effectId: stableIdentifier(input.effectId, 'effectId'),
     chainId: definition.id,
@@ -969,18 +1704,17 @@ export function scheduleCausalTransmission(
       input.parameterVersion,
       'parameterVersion',
     ),
-    delta: render(delta),
   });
 }
 
-export interface CausalEffectPartition {
-  readonly due: readonly ScheduledCausalEffect[];
-  readonly pending: readonly ScheduledCausalEffect[];
+export interface CausalSignalPartition {
+  readonly due: readonly ScheduledCausalSignal[];
+  readonly pending: readonly ScheduledCausalSignal[];
 }
 
-function compareScheduledEffects(
-  left: ScheduledCausalEffect,
-  right: ScheduledCausalEffect,
+function compareScheduledSignals(
+  left: ScheduledCausalSignal,
+  right: ScheduledCausalSignal,
 ): number {
   if (left.duePeriod !== right.duePeriod)
     return left.duePeriod - right.duePeriod;
@@ -992,27 +1726,27 @@ function compareScheduledEffects(
 }
 
 /** Returns an ordered, lossless partition; consumers still decide whether to apply it. */
-export function partitionCausalEffects(
+export function partitionCausalSignals(
   currentPeriod: number,
-  effects: readonly ScheduledCausalEffect[],
-): CausalEffectPartition {
+  signals: readonly ScheduledCausalSignal[],
+): CausalSignalPartition {
   const current = nonNegativePeriod(currentPeriod, 'currentPeriod');
   const seen = new Set<string>();
-  const ordered = [...effects].sort(compareScheduledEffects);
-  const due: ScheduledCausalEffect[] = [];
-  const pending: ScheduledCausalEffect[] = [];
-  for (const effect of ordered) {
-    stableIdentifier(effect.effectId, 'effectId');
-    nonNegativePeriod(effect.sourcePeriod, 'effect sourcePeriod');
-    nonNegativePeriod(effect.duePeriod, 'effect duePeriod');
-    if (effect.duePeriod <= effect.sourcePeriod) {
-      kernelInvalid('Scheduled effect must be due after its source period');
+  const ordered = [...signals].sort(compareScheduledSignals);
+  const due: ScheduledCausalSignal[] = [];
+  const pending: ScheduledCausalSignal[] = [];
+  for (const signal of ordered) {
+    stableIdentifier(signal.effectId, 'effectId');
+    nonNegativePeriod(signal.sourcePeriod, 'signal sourcePeriod');
+    nonNegativePeriod(signal.duePeriod, 'signal duePeriod');
+    if (signal.duePeriod <= signal.sourcePeriod) {
+      kernelInvalid('Scheduled signal must be due after its source period');
     }
-    if (seen.has(effect.effectId))
-      kernelInvalid('Causal effect IDs must be unique');
-    seen.add(effect.effectId);
-    if (effect.duePeriod <= current) due.push(effect);
-    else pending.push(effect);
+    if (seen.has(signal.effectId))
+      kernelInvalid('Causal signal IDs must be unique');
+    seen.add(signal.effectId);
+    if (signal.duePeriod <= current) due.push(signal);
+    else pending.push(signal);
   }
   return Object.freeze({
     due: Object.freeze(due),
