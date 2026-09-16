@@ -6,6 +6,13 @@
   "risk_class": "P0",
   "code_candidate": "6f2aa759548d6267dadcf4424e68927ae377d70e",
   "continuation_baseline": "2db39d01a22873162d1c841675855b60d4e5816e",
+  "candidate_ancestry": {
+    "branch": "codex/v11-2-labour-core",
+    "plan_commit": "a99de58543e2b7eb9cfd0f21e3f64d8fadabecfe",
+    "code_candidate": "6f2aa759548d6267dadcf4424e68927ae377d70e",
+    "evidence_predecessor": "5765cf1e8259cf1670c0055f3b4fa62ce01cdc1d",
+    "traceability_correction": "DOCS_ONLY"
+  },
   "continuation_policy": "docs/governance/WORLD_CORE_V11_2_CONDITIONAL_CONTINUATION_POLICY.json",
   "environment": {
     "node": "24.20.0",
