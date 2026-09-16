@@ -5,5 +5,6 @@ export * from './firm-ecology.js';
 export * from './international-settlement.js';
 export * from './quantified-systems.js';
 export * from './population-labour-services.js';
+export * from './quantified-node-registry.js';
 export * from './resources-energy-production.js';
 export * from './technology-project-household-fiscal.js';

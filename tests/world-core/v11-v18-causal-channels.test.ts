@@ -196,61 +196,75 @@ describe('V11–V18 causal-channel preparation', () => {
     expect(mortgage.targetDelta.amount).toBe('12.5');
     expect(mortgage.targetAfter).toMatchObject({ amount: '512.5' });
 
-    const supplyPrice = scheduleExactCausalTransmission({
-      effectId: 'firm-supply-price-v1',
-      chainId: 'C101',
-      edgeIndex: 9,
-      sourcePeriod: 10,
-      delayPeriods: 1,
-      source: {
-        node: 'MARKET_SUPPLY',
-        amount: '5',
-        unit: { kind: 'QUANTITY', unit: 'tonne_per_period' },
-        sign: 'NON_NEGATIVE',
-      },
-      targetBefore: {
-        node: 'UNIT_PRICE',
-        amount: '10',
-        unit: { kind: 'UNIT_PRICE', currency: 'GCU', perUnit: 'tonne' },
-        sign: 'NON_NEGATIVE',
-      },
-      response: {
-        sourceUnit: { kind: 'QUANTITY', unit: 'tonne_per_period' },
-        targetUnit: { kind: 'UNIT_PRICE', currency: 'GCU', perUnit: 'tonne' },
-        targetAmountPerSourceUnit: '0.2',
-        parameterVersion: 'sector-supply-price-v1',
-      },
+    const [supplyPrice] = calculateQuantifiedSystemTransmissions({
+      system: 'FIRM_ECOLOGY',
+      transmissions: [
+        {
+          effectId: 'firm-supply-price-v1',
+          chainId: 'C101',
+          edgeIndex: 9,
+          sourcePeriod: 10,
+          delayPeriods: 1,
+          source: {
+            node: 'MARKET_SUPPLY',
+            amount: '5',
+            unit: { kind: 'QUANTITY', unit: 'tonne_per_period' },
+            sign: 'NON_NEGATIVE',
+          },
+          targetBefore: {
+            node: 'UNIT_PRICE',
+            amount: '10',
+            unit: { kind: 'UNIT_PRICE', currency: 'GCU', perUnit: 'tonne' },
+            sign: 'NON_NEGATIVE',
+          },
+          response: {
+            sourceUnit: { kind: 'QUANTITY', unit: 'tonne_per_period' },
+            targetUnit: {
+              kind: 'UNIT_PRICE',
+              currency: 'GCU',
+              perUnit: 'tonne',
+            },
+            targetAmountPerSourceUnit: '0.2',
+            parameterVersion: 'sector-supply-price-v1',
+          },
+        },
+      ],
     });
-    expect(supplyPrice.targetDelta.amount).toBe('-1');
-    expect(supplyPrice.targetAfter).toMatchObject({ amount: '9' });
+    expect(supplyPrice?.targetDelta.amount).toBe('-1');
+    expect(supplyPrice?.targetAfter).toMatchObject({ amount: '9' });
 
-    const paymentOutage = scheduleExactCausalTransmission({
-      effectId: 'network-payment-outage-v1',
-      chainId: 'C150',
-      edgeIndex: 0,
-      sourcePeriod: 10,
-      delayPeriods: 1,
-      source: {
-        node: 'CYBERATTACK_NETWORK_FAILURE',
-        amount: '2',
-        unit: { kind: 'QUANTITY', unit: 'network_outage_hour' },
-        sign: 'NON_NEGATIVE',
-      },
-      targetBefore: {
-        node: 'ELECTRONIC_PAYMENTS',
-        amount: '100',
-        unit: { kind: 'QUANTITY', unit: 'transaction_per_hour' },
-        sign: 'NON_NEGATIVE',
-      },
-      response: {
-        sourceUnit: { kind: 'QUANTITY', unit: 'network_outage_hour' },
-        targetUnit: { kind: 'QUANTITY', unit: 'transaction_per_hour' },
-        targetAmountPerSourceUnit: '10',
-        parameterVersion: 'network-resilience-v1',
-      },
+    const [paymentOutage] = calculateQuantifiedSystemTransmissions({
+      system: 'ASSET_SPATIAL_DIGITAL',
+      transmissions: [
+        {
+          effectId: 'network-payment-outage-v1',
+          chainId: 'C150',
+          edgeIndex: 0,
+          sourcePeriod: 10,
+          delayPeriods: 1,
+          source: {
+            node: 'CYBERATTACK_NETWORK_FAILURE',
+            amount: '2',
+            unit: { kind: 'QUANTITY', unit: 'network_outage_hour' },
+            sign: 'NON_NEGATIVE',
+          },
+          targetBefore: {
+            node: 'ELECTRONIC_PAYMENTS',
+            amount: '100',
+            unit: { kind: 'QUANTITY', unit: 'transaction_per_hour' },
+            sign: 'NON_NEGATIVE',
+          },
+          response: {
+            sourceUnit: { kind: 'QUANTITY', unit: 'network_outage_hour' },
+            targetUnit: { kind: 'QUANTITY', unit: 'transaction_per_hour' },
+            targetAmountPerSourceUnit: '10',
+            parameterVersion: 'network-resilience-v1',
+          },
+        },
+      ],
     });
-    expect(paymentOutage.targetDelta.amount).toBe('-20');
-    expect(paymentOutage.targetAfter.amount).toBe('80');
+    expect(paymentOutage?.targetDelta.amount).toBe('-20');
+    expect(paymentOutage?.targetAfter.amount).toBe('80');
   });
 
   it('rejects wrong dimensions, impossible stock reductions, and undued application', () => {
@@ -369,18 +383,6 @@ describe('V11–V18 causal-channel preparation', () => {
     expect(
       calculateQuantifiedSystemTransmissions({
         system: 'LAND_WATER_FOOD',
-        nodeContracts: [
-          {
-            node: 'WATER_SUPPLY',
-            unit: { kind: 'QUANTITY', unit: 'cubic_metre_per_day' },
-            sign: 'NON_NEGATIVE',
-          },
-          {
-            node: 'AGRICULTURAL_OUTPUT',
-            unit: { kind: 'QUANTITY', unit: 'tonne_per_day' },
-            sign: 'NON_NEGATIVE',
-          },
-        ],
         transmissions: [
           {
             effectId: 'water-crop-capacity-v1',
@@ -418,18 +420,6 @@ describe('V11–V18 causal-channel preparation', () => {
     expect(() =>
       calculateQuantifiedSystemTransmissions({
         system: 'LAND_WATER_FOOD',
-        nodeContracts: [
-          {
-            node: 'CYBERATTACK_NETWORK_FAILURE',
-            unit: { kind: 'QUANTITY', unit: 'network_outage_hour' },
-            sign: 'NON_NEGATIVE',
-          },
-          {
-            node: 'ELECTRONIC_PAYMENTS',
-            unit: { kind: 'QUANTITY', unit: 'transaction_per_hour' },
-            sign: 'NON_NEGATIVE',
-          },
-        ],
         transmissions: [
           {
             effectId: 'wrong-system-v1',
@@ -467,22 +457,10 @@ describe('V11–V18 causal-channel preparation', () => {
     ).toThrow('LAND_WATER_FOOD cannot calculate C150');
   });
 
-  it('rejects a self-consistent response when its node units lack a contract', () => {
+  it('rejects wrong units and the generic caller-forged C101-C150 path', () => {
     expect(() =>
       calculateQuantifiedSystemTransmissions({
         system: 'LAND_WATER_FOOD',
-        nodeContracts: [
-          {
-            node: 'WATER_SUPPLY',
-            unit: { kind: 'QUANTITY', unit: 'cubic_metre_per_day' },
-            sign: 'NON_NEGATIVE',
-          },
-          {
-            node: 'AGRICULTURAL_OUTPUT',
-            unit: { kind: 'QUANTITY', unit: 'tonne_per_day' },
-            sign: 'NON_NEGATIVE',
-          },
-        ],
         transmissions: [
           {
             effectId: 'bad-water-dimension-v1',
@@ -511,6 +489,33 @@ describe('V11–V18 causal-channel preparation', () => {
           },
         ],
       }),
-    ).toThrow('source unit must match its quantified node contract');
+    ).toThrow('must match the fixed quantified node registry');
+    expect(() =>
+      scheduleExactCausalTransmission({
+        effectId: 'forged-direct-water-v1',
+        chainId: 'C123',
+        edgeIndex: 1,
+        sourcePeriod: 8,
+        delayPeriods: 1,
+        source: {
+          node: 'WATER_SUPPLY',
+          amount: '500',
+          unit: { kind: 'QUANTITY', unit: 'person' },
+          sign: 'NON_NEGATIVE',
+        },
+        targetBefore: {
+          node: 'AGRICULTURAL_OUTPUT',
+          amount: '100',
+          unit: { kind: 'MONEY', currency: 'GCU' },
+          sign: 'NON_NEGATIVE',
+        },
+        response: {
+          sourceUnit: { kind: 'QUANTITY', unit: 'person' },
+          targetUnit: { kind: 'MONEY', currency: 'GCU' },
+          targetAmountPerSourceUnit: '0.1',
+          parameterVersion: 'forged-direct-water-v1',
+        },
+      }),
+    ).toThrow('must use the fixed quantified registry path');
   });
 });

@@ -12,6 +12,10 @@ import {
   type CausalChainId,
   type ScheduledCausalSignal,
 } from './causal-channels.js';
+import {
+  getFixedQuantifiedNodeContract,
+  quantifiedSystemForChain,
+} from './quantified-node-registry.js';
 
 /** A monetary amount is never interchangeable with a physical quantity. */
 export type CausalUnit =
@@ -175,14 +179,16 @@ function withAmount(
   });
 }
 
-/**
- * Calculates one exact, dimensional causal result. It is deliberately unable
- * to infer a conversion from GCU to people, tonnes, or percentage points: the
- * caller must provide the approved conversion and its version.
- */
-export function scheduleExactCausalTransmission(
+function scheduleExactCausalTransmissionInternal(
   input: ExactCausalTransmissionInput,
+  route: 'GENERIC' | 'FIXED_QUANTIFIED',
 ): ExactScheduledCausalEffect {
+  const quantifiedSystem = quantifiedSystemForChain(input.chainId);
+  if (quantifiedSystem !== null && route !== 'FIXED_QUANTIFIED') {
+    kernelInvalid(
+      'C101-C150 exact transmissions must use the fixed quantified registry path',
+    );
+  }
   const definition = getCausalChain(input.chainId);
   const selected = definition.edges[input.edgeIndex];
   if (selected === undefined) {
@@ -201,6 +207,31 @@ export function scheduleExactCausalTransmission(
   const sourceParsed = parsedValue(source, 'source');
   const targetParsed = parsedValue(targetBefore, 'targetBefore');
   const response = exactResponse(input.response);
+  if (quantifiedSystem !== null) {
+    const sourceContract = getFixedQuantifiedNodeContract(
+      quantifiedSystem,
+      source.node,
+    );
+    const targetContract = getFixedQuantifiedNodeContract(
+      quantifiedSystem,
+      targetBefore.node,
+    );
+    if (sourceContract === undefined || targetContract === undefined) {
+      kernelInvalid('C101-C150 node is missing a fixed quantified contract');
+    }
+    if (
+      source.sign !== sourceContract.sign ||
+      targetBefore.sign !== targetContract.sign ||
+      !causalUnitsMatch(sourceParsed.unit, sourceContract.unit) ||
+      !causalUnitsMatch(targetParsed.unit, targetContract.unit) ||
+      !causalUnitsMatch(response.sourceUnit, sourceContract.unit) ||
+      !causalUnitsMatch(response.targetUnit, targetContract.unit)
+    ) {
+      kernelInvalid(
+        'C101-C150 transmission must match the fixed quantified node registry',
+      );
+    }
+  }
   if (!causalUnitsMatch(sourceParsed.unit, response.sourceUnit)) {
     kernelInvalid('Exact source unit does not match response sourceUnit');
   }
@@ -234,6 +265,29 @@ export function scheduleExactCausalTransmission(
     targetDelta,
     targetAfter,
   });
+}
+
+/**
+ * Calculates a non-C101–C150 exact transmission. Quantified systems cannot
+ * use this caller-configurable route because their node contracts are fixed.
+ */
+export function scheduleExactCausalTransmission(
+  input: ExactCausalTransmissionInput,
+): ExactScheduledCausalEffect {
+  return scheduleExactCausalTransmissionInternal(input, 'GENERIC');
+}
+
+/**
+ * Registry-only calculation route for C101–C150. It remains pure and inert;
+ * fixed unit/sign contracts are enforced before a result is returned.
+ */
+export function scheduleFixedQuantifiedCausalTransmission(
+  input: ExactCausalTransmissionInput,
+): ExactScheduledCausalEffect {
+  if (quantifiedSystemForChain(input.chainId) === null) {
+    kernelInvalid('Fixed quantified registry only covers C101-C150');
+  }
+  return scheduleExactCausalTransmissionInternal(input, 'FIXED_QUANTIFIED');
 }
 
 export interface ExactCausalStateCalculation {

@@ -8,6 +8,9 @@ import {
   type ExactMoney,
 } from './common.js';
 
+/** The sole common currency permitted for cross-country settlement. */
+export const INTERNATIONAL_SETTLEMENT_CURRENCY = 'ICU';
+
 /**
  * A deterministic binding from one domestic currency unit to the international
  * settlement currency. `internationalPerLocalUnit` is never inferred from a
@@ -62,6 +65,11 @@ export function canonicalizeInternationalCurrencyBinding(
     input.internationalCurrency,
     'internationalCurrency',
   );
+  if (internationalCurrency !== INTERNATIONAL_SETTLEMENT_CURRENCY) {
+    kernelInvalid(
+      `internationalCurrency must use ${INTERNATIONAL_SETTLEMENT_CURRENCY}`,
+    );
+  }
   const rate = nonNegative(
     input.internationalPerLocalUnit,
     'internationalPerLocalUnit',

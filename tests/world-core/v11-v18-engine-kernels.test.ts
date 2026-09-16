@@ -586,6 +586,11 @@ describe('E17 international settlement preparation', () => {
         { ...binding, localCurrency: 'LCB', version: 'fx-7.2' },
       ]),
     ).toThrow('must share a version');
+    expect(() =>
+      indexInternationalCurrencyBindings([
+        { ...binding, internationalCurrency: 'USD' },
+      ]),
+    ).toThrow('internationalCurrency must use ICU');
   });
 });
 
