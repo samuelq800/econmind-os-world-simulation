@@ -61,3 +61,48 @@
 - C101–C150 calculations do not authorize a firm lifecycle, liquidation,
   creditor waterfall, guarantee approval, parameter calibration, or World Core
   settlement.
+
+## Exact-unit hardening extension
+
+> `PREPARATION_ONLY_NOT_V11_STARTED`
+> Implementation state: `IMPLEMENTED_UNVERIFIED` — this is a report-only
+> statement, not a `status/progress.json` mutation.
+
+- **Extension baseline:** `3e2a6c4f3971810ab24ec98db884956ee270dca8`
+- **Immutable implementation candidate:** `3c455d13e14e20c438716c72b76f481f6635e3cf`
+- **Effective risk:** P0. The changes are pure and inert, but strengthen
+  financial/inventory conservation and cross-country-settlement preparation;
+  `FAST_MAINLINE` therefore requires independent review before merge,
+  `VERIFIED`, or dependent implementation.
+
+### Implemented preparation only
+
+- Replaced naked population, service-capacity, resource, energy, production,
+  R&D, project and fiscal factor inputs with exact money, named quantities,
+  bounded ratios, and explicit unit rates. Whole-person/case/bed/housing/firm
+  stocks fail closed on fractional values.
+- Added strict physical-unit checks for resource pools, inventory, fuel, energy
+  generation and production. A person cannot be fuel and a currency cannot be
+  a physical production capacity.
+- Added a pure international settlement binding: local currency, common
+  settlement currency, exact rate, effective period and version. A settlement
+  table must have one common currency, period and version, and every enabled
+  domestic currency must be bound. Cross-country payment output remains inert
+  and preserves the domestic debit plus exact international settlement amount.
+- Required C101–C150 quantified batches to carry unique node/unit/sign
+  contracts; source, target and response units must all match the contract.
+  The core intentionally does not invent an authoritative global node-unit or
+  country-currency registry.
+
+### Explicitly not implemented or authorized
+
+- No V11.1, V11.2, V11.3, V12–V18 step is started, completed, or marked in
+  repository status. In particular, no V11.2+ state implementation is
+  authorized by this preparation.
+- No World State, ledger, command, event, receipt, outbox, worker, API, UI,
+  authorization, Office, migration, database, Supabase, production, or legacy
+  EconMind path changed.
+- No FX source, economic calibration, default policy coefficient, country
+  initialization, settlement posting, or deterministic ordering policy was
+  added. Future integration must use the authoritative World Core transaction
+  path and approved country/parameter registries.
