@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { CaptainCommandCenter } from './CaptainCommandCenter.js';
 import { GoodsTransferFlow } from './GoodsTransferFlow.js';
 import { LivingNationScene } from './LivingNationScene.js';
 import { NationalOverview } from './NationalOverview.js';
@@ -74,6 +75,58 @@ const NAV_GROUPS: readonly NavGroup[] = [
   },
 ];
 
+const CAPTAIN_NAV_GROUPS: readonly NavGroup[] = [
+  {
+    id: 'operations',
+    label: 'Command room',
+    leaves: [
+      { pageId: 'G01', label: 'Captain command', implemented: true },
+      { pageId: 'C02', label: 'National intelligence', implemented: false },
+    ],
+  },
+  {
+    id: 'country',
+    label: 'National direction',
+    leaves: [
+      { pageId: 'G02', label: 'Nation overview', implemented: true },
+      { pageId: 'C03', label: 'Cabinet agenda', implemented: false },
+      { pageId: 'C04', label: 'Strategy & priorities', implemented: false },
+    ],
+  },
+  {
+    id: 'policy',
+    label: 'Decisions',
+    leaves: [
+      { pageId: 'C05', label: 'Approval inbox', implemented: false },
+      { pageId: 'C06', label: 'Political capital', implemented: false },
+    ],
+  },
+  {
+    id: 'crossOffice',
+    label: 'Cabinet',
+    leaves: [
+      { pageId: 'G03', label: 'Requests', implemented: false },
+      { pageId: 'G04', label: 'Joint plans', implemented: false },
+    ],
+  },
+  {
+    id: 'roleWork',
+    label: 'Statecraft',
+    leaves: [
+      { pageId: 'C07', label: 'International affairs', implemented: false },
+      { pageId: 'C08', label: 'Crisis command', implemented: false },
+    ],
+  },
+  {
+    id: 'records',
+    label: 'Accountability',
+    leaves: [
+      { pageId: 'G05', label: 'Execution alerts', implemented: false },
+      { pageId: 'G06', label: 'Decision record', implemented: false },
+    ],
+  },
+];
+
 function StateScreen({
   state,
   onRetry,
@@ -137,7 +190,7 @@ function OfficeSidebar({
     <aside
       id="six-workspace-navigation"
       className={`six-sidebar${mobileOpen ? ' is-open' : ''}`}
-      aria-label="Trade and Foreign Affairs workspace navigation"
+      aria-label={`${actingOffice.shortLabel} workspace navigation`}
     >
       <div className="six-sidebar__mobile-heading">
         <strong>Workspace navigation</strong>
@@ -163,7 +216,10 @@ function OfficeSidebar({
         </span>
       </div>
       <nav>
-        {NAV_GROUPS.map((group) => {
+        {(actingOffice.officeId === 'CAPTAIN'
+          ? CAPTAIN_NAV_GROUPS
+          : NAV_GROUPS
+        ).map((group) => {
           const isOpen = open[group.id];
           return (
             <section className="six-nav-group" key={group.id}>
@@ -210,8 +266,9 @@ function OfficeSidebar({
         })}
       </nav>
       <p className="six-sidebar__note">
-        G01 and G02 are local fixture routes. Other leaves stay visible until
-        their authorized handlers are attached.
+        G01 and G02 are local fixture routes. Captain command is a local
+        planning loop; other leaves stay visible until their authorized handlers
+        are attached.
       </p>
       <button
         className="six-sidebar__route"
@@ -371,6 +428,11 @@ export function SixOfficesG01({
                 }}
               />
             </div>
+          ) : actingOffice.officeId === 'CAPTAIN' ? (
+            <CaptainCommandCenter
+              projection={projection}
+              onNotice={setDeskNotice}
+            />
           ) : (
             <LivingNationScene
               projection={projection}
