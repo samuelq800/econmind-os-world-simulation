@@ -1,0 +1,46 @@
+{
+  "schema_version": "WORLD_CORE_STEP_CONTINUATION-1",
+  "record_type": "OWNER_AUTHORIZED_PACKAGE_CONTINUATION",
+  "name": "WORLD_CORE_V11_1_CONDITIONAL_CONTINUATION",
+  "status": "ACTIVE_IMPLEMENTATION_UNVERIFIED",
+  "authority": "PROJECT_OWNER_EXPLICIT_DIRECTION_2026_09_16",
+  "activation_record": "docs/reports/V10/GATE_B_OWNER_CONTINUATION_DECISION.md",
+  "scope": {
+    "baseline_branch": "codex/v10-1-implementation",
+    "baseline_candidate": "d739446467c3027e564d4d79c5826be3bdfba33f",
+    "allowed_step": "V11.1",
+    "allowed_domain": "E02 population stocks and flows",
+    "terminal_gate": "V11.1_INDEPENDENT_REVIEW",
+    "explicitly_excluded_steps": [
+      "V11.2",
+      "V11.3",
+      "V12",
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18"
+    ]
+  },
+  "dependency_exception": {
+    "gate_b_status": "PENDING",
+    "known_external_failure": "GB-RUNNER-1 CRASH_CONNECTION_LOSS is FAIL_CLOSED because the isolated staging pooler returned ERR_SSL_DECRYPTION_FAILED_OR_BAD_RECORD_MAC",
+    "owner_direction": "Continue into the next stage when the external blocker cannot be closed",
+    "effect": "Permits a non-production V11.1 implementation candidate only; it does not convert failed or missing Gate B evidence into PASS."
+  },
+  "preserved_controls": [
+    "V11.1 remains IMPLEMENTED_UNVERIFIED until an immutable candidate receives its required independent review.",
+    "The Constitution, P0/P1 invariants, one authoritative World State, determinism, and ownership boundaries remain mandatory.",
+    "No main merge, deployment, production/shared-Supabase access or mutation, migration publication, or original EconMind website change is authorized.",
+    "No V11.2 or later product implementation may use this record.",
+    "Any failed mandatory V11.1 test or newly discovered P0/MAJOR finding stops this continuation."
+  ],
+  "required_evidence": [
+    "V11.1 execution plan before product code",
+    "focused unit and invariant tests",
+    "applicable typecheck, lint, boundary, governance, secret, and build checks",
+    "implementation and test-evidence reports bound to the immutable candidate",
+    "independent V11.1 review before VERIFIED or any promotion"
+  ]
+}
