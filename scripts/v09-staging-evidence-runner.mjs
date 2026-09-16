@@ -558,7 +558,13 @@ async function audited(evidence, id, operation) {
 }
 
 async function command(client, step, text, values = []) {
-  return client.execute({ step, text, values });
+  try {
+    return await client.execute({ step, text, values });
+  } catch (error) {
+    const failure = stagedFailure(step);
+    failure.cause = error;
+    throw failure;
+  }
 }
 
 function assertRows(result, predicate, message) {
@@ -576,11 +582,13 @@ function assertLease(result, fencingToken, acquisitionKind, message) {
 }
 
 function expectedDatabaseFailure(error, expectedMessage) {
+  const databaseError =
+    error && typeof error === 'object' && error.cause ? error.cause : error;
   return (
-    error &&
-    typeof error === 'object' &&
-    error.code === SQLSTATE_OBJECT_STATE &&
-    asText(error.message).includes(expectedMessage)
+    databaseError &&
+    typeof databaseError === 'object' &&
+    databaseError.code === SQLSTATE_OBJECT_STATE &&
+    asText(databaseError.message).includes(expectedMessage)
   );
 }
 
@@ -1577,7 +1585,7 @@ async function verifyNoRunResidue(client, approval) {
   if (rows(roles).length !== 0) failStage(CLEANUP_INCOMPLETE);
 }
 
-async function cleanupMarkedBoundary(client, approval, evidence) {
+export async function cleanupMarkedBoundary(client, approval, evidence) {
   const schema = identifier(approval.disposable_namespace);
   const { migration_owner: owner, reader, worker } = approval.roles;
   evidence.cleanup.status = 'RUNNING';
@@ -1861,12 +1869,13 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
     await verifyNoRunResidue(client, approval);
     await command(client, 'CLEANUP_COMMIT', 'commit');
     evidence.cleanup.status = 'PASS';
-  } catch {
+  } catch (error) {
     await command(client, 'CLEANUP_ROLLBACK', 'rollback').catch(
       () => undefined,
     );
     evidence.cleanup.status = CLEANUP_INCOMPLETE;
-    failStage(CLEANUP_INCOMPLETE);
+    evidence.cleanup.failure = failureRecord(error, CLEANUP_INCOMPLETE);
+    throw stagedFailure(evidence.cleanup.failure.stage);
   }
 }
 

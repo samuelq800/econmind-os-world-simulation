@@ -642,7 +642,7 @@ describe('V09 dedicated staging evidence runner', () => {
 
     expect(evidence).toMatchObject({
       cleanup: { markerBound: false, status: 'NOT_ATTEMPTED' },
-      failure: { stage: 'PROVISION_MARKER' },
+      failure: { stage: 'WRITE_RUN_MARKER' },
       status: 'FAIL_CLOSED',
     });
     expect(fake.clients).toHaveLength(1);
@@ -752,7 +752,7 @@ describe('V09 dedicated staging evidence runner', () => {
 
     expect(evidence).toMatchObject({
       cleanup: { status: 'CLEANUP_INCOMPLETE' },
-      failure: { stage: 'CLEANUP_INCOMPLETE' },
+      failure: { stage: 'CLEANUP_DROP_EXACT_SCHEMA_RESTRICT' },
       status: 'FAIL_CLOSED',
     });
     expect(state.schemaExists).toBe(true);
