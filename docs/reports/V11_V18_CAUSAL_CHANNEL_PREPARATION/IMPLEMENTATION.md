@@ -11,16 +11,19 @@
 
 ## Delivered
 
-- `causal-channels.ts` records all 50 user-requested pathways as named,
-  signed directed edges. Chains 1–24 are parameterized-kernel-ready; 25–50
-  are explicitly marked future-interface-only for V19–V21.
-- `scheduleCausalTransmission` requires caller-owned source magnitude,
-  response factor, parameter version, and positive delay. It returns an inert
-  future effect and cannot read or mutate World State.
-- `partitionCausalEffects` is a deterministic, lossless due/pending partition;
-  it deliberately does not apply an effect, emit an event, or create a posting.
-- The focused test suite verifies catalogue completeness, directional signed
-  deltas, failure-closed input validation, and deterministic partitioning.
+- `causal-channels.ts` records all 100 user-requested pathways as named,
+  signed directed edges. Topology scheduling is deliberately value-free, so a
+  bare decimal cannot masquerade as money, people, tonnes, or a rate.
+- `causal-values.ts` adds the only concrete numerical path. Every input and
+  result is `MONEY(currency)` or `QUANTITY(unit)`, carries an explicit sign
+  rule, and returns exact canonical `before`, signed `delta`, and `after`.
+  Cross-dimensional response factors declare both source and target units.
+- Concrete stock updates fail closed on currency/unit mismatch, a negative
+  non-negative stock, an undued effect, or a duplicate effect ID. The pure
+  result remains inert and cannot mutate World State.
+- The focused suite verifies all 100 paths, exact population and GCU examples,
+  dimensional rejection, exact aggregation, topology scheduling, and
+  deterministic partitioning.
 
 ## Boundary declaration
 
