@@ -1,6 +1,7 @@
 // V09.2 candidate disposable-PostgreSQL integration coverage.
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { Pool } from 'pg';
 
 import { countryId, officeId, worldId } from '../../packages/core/src/index.js';
 import {
@@ -181,5 +182,69 @@ describePostgres('V09 atomic disposable PostgreSQL preparation harness', () => {
 
     expect(currentDatabase().supportsParallelTransactions).toBe(true);
     assertOnlyOneNToNPlusOneSucceeded(results);
+  });
+
+  it('rolls back an uncommitted native transaction after its backend is terminated', async () => {
+    const connectionString = process.env.V09_TEST_DATABASE_URL;
+    if (connectionString === undefined)
+      throw new Error('V09 PostgreSQL URL is missing');
+    const writerPool = new Pool({ connectionString, max: 1 });
+    const observerPool = new Pool({ connectionString, max: 1 });
+    const writer = await writerPool.connect();
+    try {
+      await writer.query('begin');
+      await writer.query(
+        `insert into v09_atomic_preparation.world_head
+           (world_id, world_version, event_sequence)
+         values ('WORLD_PG_TERMINATED', 0, 0)`,
+      );
+      const pid = await writer.query<{ readonly pid: number }>(
+        'select pg_backend_pid() as pid',
+      );
+      await observerPool.query('select pg_terminate_backend($1)', [
+        pid.rows[0]!.pid,
+      ]);
+      await expect(writer.query('commit')).rejects.toThrow();
+      await expect(
+        currentDatabase().query(
+          `select world_id from v09_atomic_preparation.world_head
+            where world_id = 'WORLD_PG_TERMINATED'`,
+        ),
+      ).resolves.toMatchObject({ rowCount: 0 });
+    } finally {
+      writer.release(true);
+      await observerPool.end();
+      await writerPool.end();
+    }
+  });
+
+  it('rejects an old WorldVersion after a prior native commit', async () => {
+    const first = await fixture('WORLD_PG_OLD_VERSION', 'COMMAND_PG_CURRENT');
+    await seed(first);
+    await expect(
+      runV09AtomicPreparationAttempt({
+        command: first,
+        database: currentDatabase(),
+      }),
+    ).resolves.toMatchObject({ classification: 'COMMITTED' });
+    const oldVersion = Object.freeze({
+      ...first,
+      commandFingerprint: `sha256:${'c'.repeat(64)}`,
+      commandId: 'COMMAND_PG_OLD_VERSION',
+      idempotencyKey: 'COMMAND_PG_OLD_VERSION_KEY',
+    });
+    await expect(
+      runV09AtomicPreparationAttempt({
+        command: oldVersion,
+        database: currentDatabase(),
+      }),
+    ).resolves.toMatchObject({
+      classification: 'ROLLED_BACK',
+      disposition: 'FAILED',
+    });
+    assertV09ZeroPersistence(
+      await inspectV09AtomicFootprint(currentDatabase(), oldVersion),
+      '1',
+    );
   });
 });

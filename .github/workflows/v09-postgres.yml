@@ -5,6 +5,7 @@ on:
     branches:
       - codex/world-core-v09
       - codex/v09-recovery-preparation
+      - codex/v09-package-integration
   pull_request:
     paths:
       - .github/workflows/v09-postgres.yml
@@ -13,6 +14,7 @@ on:
       - pnpm-lock.yaml
       - scripts/v09-postgres-test-environment.mjs
       - tests/world-core/world-writer-lease-postgres.test.ts
+      - tests/world-core/v09-atomic-preparation-postgres.test.ts
       - tests/world-core/v09-atomic-recovery-postgres.test.ts
 
 permissions:
@@ -56,5 +58,7 @@ jobs:
       - run: pnpm test:v09:postgres
       - run: pnpm --filter @econmind/core build
       - run: pnpm --filter @econmind/world-worker build
+      - run: pnpm exec vitest run tests/world-core/v09-atomic-preparation-postgres.test.ts
       - run: pnpm exec vitest run tests/world-core/v09-commit-authorization-cutoff.test.ts
       - run: pnpm exec vitest run tests/world-core/v09-atomic-recovery-postgres.test.ts
+      - run: pnpm exec vitest run tests/world-core/v09-world-recovery-preparation.test.ts

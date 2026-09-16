@@ -18,7 +18,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "pnpm -r --if-present typecheck",
+    "typecheck": "pnpm --filter @econmind/core build && pnpm -r --if-present typecheck",
     "test": "vitest run",
     "test:property": "vitest run tests/property",
     "test:architecture": "vitest run tests/architecture && node scripts/check-boundaries.mjs && node scripts/check-authoritative-patterns.mjs",
