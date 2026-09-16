@@ -18,7 +18,12 @@ export type CausalOwnerScope =
   | 'E13_TO_E14_DISTRIBUTION'
   | 'V19_TO_V21_FUTURE_MACRO_EXTERNAL'
   | 'V24_FUTURE_GOVERNANCE_CRISIS'
-  | 'V25_FUTURE_FIRM_ECOLOGY';
+  | 'V25_FUTURE_FIRM_ECOLOGY'
+  | 'V26_FUTURE_INSTITUTIONS_STATE_CAPACITY'
+  | 'V27_FUTURE_LAND_WATER_FOOD'
+  | 'V28_FUTURE_ENVIRONMENT_NATURAL_CAPITAL'
+  | 'V29_FUTURE_DEMOGRAPHY_HOUSEHOLD'
+  | 'V30_FUTURE_ASSET_SPATIAL_DIGITAL';
 
 export interface CausalEdge {
   readonly source: string;
@@ -64,11 +69,17 @@ const DISTRIBUTION: CausalOwnerScope = 'E13_TO_E14_DISTRIBUTION';
 const FUTURE_MACRO: CausalOwnerScope = 'V19_TO_V21_FUTURE_MACRO_EXTERNAL';
 const GOVERNANCE: CausalOwnerScope = 'V24_FUTURE_GOVERNANCE_CRISIS';
 const FIRM_ECOLOGY: CausalOwnerScope = 'V25_FUTURE_FIRM_ECOLOGY';
+const INSTITUTIONS: CausalOwnerScope = 'V26_FUTURE_INSTITUTIONS_STATE_CAPACITY';
+const LAND_WATER_FOOD: CausalOwnerScope = 'V27_FUTURE_LAND_WATER_FOOD';
+const ENVIRONMENT: CausalOwnerScope = 'V28_FUTURE_ENVIRONMENT_NATURAL_CAPITAL';
+const DEMOGRAPHY: CausalOwnerScope = 'V29_FUTURE_DEMOGRAPHY_HOUSEHOLD';
+const ASSET_SPATIAL_DIGITAL: CausalOwnerScope =
+  'V30_FUTURE_ASSET_SPATIAL_DIGITAL';
 const READY: CausalReadiness = 'PARAMETERIZED_KERNEL_READY';
 const FUTURE: CausalReadiness = 'FUTURE_INTERFACE_ONLY';
 
 /**
- * User-requested cross-engine pathways 1–105. The entries intentionally carry
+ * User-requested cross-engine pathways 1–150. The entries intentionally carry
  * signal topology only: neither a default elasticity nor a country parameter
  * can enter through this catalogue.
  */
@@ -1692,6 +1703,512 @@ export const CAUSAL_CHAINS: readonly CausalChainDefinition[] = Object.freeze([
       edge('SOE_SOFT_BUDGET_SUPPORT', 'CAPITAL_LABOUR_LOCK_IN', 'INCREASES'),
       edge('CAPITAL_LABOUR_LOCK_IN', 'PRODUCTIVITY', 'DECREASES'),
       edge('GOVERNMENT_GUARANTEE', 'FUTURE_FISCAL_LIABILITY', 'INCREASES'),
+    ],
+  ),
+  chain('C106', 'Market power, markup and blocked entry', FIRM_ECOLOGY, READY, [
+    edge('INDUSTRY_CONCENTRATION', 'MARKET_COMPETITION', 'DECREASES'),
+    edge('MARKET_COMPETITION', 'MARKUP', 'DECREASES'),
+    edge('MARKUP', 'CONSUMER_PRICE', 'INCREASES'),
+    edge('MARKUP', 'PROFITS', 'INCREASES'),
+    edge('MARKUP', 'WAGE_SHARE', 'DECREASES'),
+    edge('PROFITS', 'ENTRY_INCENTIVE', 'INCREASES'),
+    edge('ENTRY_BARRIERS', 'NEW_FIRM_ENTRY', 'DECREASES'),
+  ]),
+  chain(
+    'C107',
+    'Domestic production-network propagation',
+    FIRM_ECOLOGY,
+    READY,
+    [
+      edge('SUPPLIER_FAILURE', 'BUYER_INPUT_AVAILABILITY', 'DECREASES'),
+      edge('BUYER_INPUT_AVAILABILITY', 'BUYER_PRODUCTION', 'INCREASES'),
+      edge('BUYER_PRODUCTION', 'DOWNSTREAM_ORDERS', 'INCREASES'),
+      edge('DOWNSTREAM_ORDERS', 'LOGISTICS_ACTIVITY', 'INCREASES'),
+      edge('SUPPLIER_FAILURE', 'BANK_NPL', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C108',
+    'Trade-credit arrears and supplier default',
+    FIRM_ECOLOGY,
+    READY,
+    [
+      edge('BUYER_PAYMENT_DELAY', 'SUPPLIER_CASH', 'DECREASES'),
+      edge('SUPPLIER_CASH', 'SUPPLIER_WAGE_PAYMENT', 'INCREASES'),
+      edge('SUPPLIER_WAGE_PAYMENT', 'SUPPLIER_DEFAULT', 'DECREASES'),
+      edge('SUPPLIER_DEFAULT', 'TRADE_CREDIT_LOSSES', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C109',
+    'Inventory policy and bullwhip propagation',
+    FIRM_ECOLOGY,
+    READY,
+    [
+      edge(
+        'LEAD_TIME_UNCERTAINTY_EXPECTED_DEMAND',
+        'TARGET_INVENTORY',
+        'INCREASES',
+      ),
+      edge('TARGET_INVENTORY', 'SUPPLIER_ORDERS', 'INCREASES'),
+      edge('SUPPLIER_ORDERS', 'SUPPLIER_PRODUCTION', 'INCREASES'),
+      edge('EXCESS_INVENTORY', 'SUBSEQUENT_ORDERS', 'DECREASES'),
+    ],
+  ),
+  chain('C110', 'Technology diffusion across firms', FIRM_ECOLOGY, READY, [
+    edge('TECHNOLOGY_MASTERY', 'EARLY_ADOPTERS', 'INCREASES'),
+    edge('EARLY_ADOPTERS', 'TECHNOLOGY_DIFFUSION', 'INCREASES'),
+    edge('TECHNOLOGY_DIFFUSION', 'ADOPTION_COST', 'DECREASES'),
+    edge('ADOPTION_COST', 'MASS_ADOPTION', 'DECREASES'),
+    edge('FINANCE_SIZE_SKILLS_INFRASTRUCTURE', 'MASS_ADOPTION', 'INCREASES'),
+  ]),
+  chain('C111', 'Tax compliance and reported tax base', INSTITUTIONS, READY, [
+    edge('TAX_RATE', 'EVASION_INCENTIVE', 'INCREASES'),
+    edge('EVASION_INCENTIVE', 'INFORMAL_ACTIVITY', 'INCREASES'),
+    edge('INFORMAL_ACTIVITY', 'REPORTED_TAX_BASE', 'DECREASES'),
+    edge('TAX_COMPLIANCE', 'ACTUAL_TAX_REVENUE', 'INCREASES'),
+  ]),
+  chain(
+    'C112',
+    'Procurement leakage and effective construction',
+    INSTITUTIONS,
+    READY,
+    [
+      edge('PROCUREMENT_APPROPRIATION', 'CORRUPTION_LEAKAGE', 'INCREASES'),
+      edge('CORRUPTION_LEAKAGE', 'ACTUAL_PROCUREMENT', 'DECREASES'),
+      edge('CORRUPTION', 'INFRASTRUCTURE_UNIT_COST', 'INCREASES'),
+      edge('ACTUAL_PROCUREMENT', 'EFFECTIVE_CONSTRUCTION', 'INCREASES'),
+      edge('EFFECTIVE_CONSTRUCTION', 'SERVICE_QUALITY', 'INCREASES'),
+      edge('SERVICE_QUALITY', 'INSTITUTIONAL_TRUST', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C113',
+    'Court enforcement and trade-credit friction',
+    INSTITUTIONS,
+    READY,
+    [
+      edge('COURT_ENFORCEMENT_TIME', 'CONTRACT_RISK', 'INCREASES'),
+      edge('CONTRACT_RISK', 'PREPAYMENT_REQUIREMENT', 'INCREASES'),
+      edge('PREPAYMENT_REQUIREMENT', 'TRADE_CREDIT', 'DECREASES'),
+      edge('CONTRACT_RISK', 'LENDING_RISK_PREMIUM', 'INCREASES'),
+      edge('LENDING_RISK_PREMIUM', 'INVESTMENT', 'DECREASES'),
+    ],
+  ),
+  chain('C114', 'Property-right risk and capital flight', INSTITUTIONS, READY, [
+    edge('PROPERTY_RIGHT_UNCERTAINTY', 'REQUIRED_RETURN', 'INCREASES'),
+    edge('REQUIRED_RETURN', 'PRIVATE_INVESTMENT', 'DECREASES'),
+    edge('REQUIRED_RETURN', 'FDI', 'DECREASES'),
+    edge('PROPERTY_RIGHT_UNCERTAINTY', 'CAPITAL_FLIGHT', 'INCREASES'),
+  ]),
+  chain(
+    'C115',
+    'Regulatory compliance cost and concentration',
+    INSTITUTIONS,
+    READY,
+    [
+      edge('REGULATORY_COMPLEXITY', 'FIXED_COMPLIANCE_COST', 'INCREASES'),
+      edge('FIXED_COMPLIANCE_COST', 'SMALL_FIRM_ENTRY', 'DECREASES'),
+      edge('SMALL_FIRM_ENTRY', 'INDUSTRY_CONCENTRATION', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C116',
+    'Administrative capacity and programme delivery',
+    INSTITUTIONS,
+    READY,
+    [
+      edge('PROGRAMME_APPROVAL', 'CASE_PROCESSING_QUEUE', 'INCREASES'),
+      edge('STAFF_CAPACITY', 'CASE_PROCESSING_QUEUE', 'DECREASES'),
+      edge('CASE_PROCESSING_QUEUE', 'ACTUAL_IMPLEMENTATION', 'DECREASES'),
+    ],
+  ),
+  chain('C117', 'Statistical error and data revision', INSTITUTIONS, READY, [
+    edge('TRUE_ECONOMIC_ACTIVITY', 'OBSERVED_ECONOMIC_ACTIVITY', 'INCREASES'),
+    edge('STATISTICAL_ERROR', 'OBSERVED_ECONOMIC_ACTIVITY', 'INCREASES'),
+    edge('DATA_REVISION', 'POLICY_ERROR', 'DECREASES'),
+  ]),
+  chain(
+    'C118',
+    'Informal economy and official-account gap',
+    INSTITUTIONS,
+    READY,
+    [
+      edge(
+        'REGULATION_TAX_BURDEN_UNEMPLOYMENT',
+        'INFORMAL_EMPLOYMENT',
+        'INCREASES',
+      ),
+      edge('INFORMAL_EMPLOYMENT', 'ACTUAL_ECONOMIC_ACTIVITY', 'INCREASES'),
+      edge('INFORMAL_EMPLOYMENT', 'REPORTED_TAX_BASE', 'DECREASES'),
+      edge('INFORMAL_EMPLOYMENT', 'SOCIAL_INSURANCE_COVERAGE', 'DECREASES'),
+    ],
+  ),
+  chain('C119', 'Local government fiscal divergence', INSTITUTIONS, READY, [
+    edge('LOCAL_TAX_BASE', 'LOCAL_REVENUE', 'INCREASES'),
+    edge('LOCAL_DEBT_SERVICE', 'LOCAL_FISCAL_CAPACITY', 'DECREASES'),
+    edge('LOCAL_FISCAL_CAPACITY', 'LOCAL_INFRASTRUCTURE_SERVICES', 'INCREASES'),
+    edge('LOCAL_DEBT_CRISIS', 'NATIONAL_FISCAL_HEALTH', 'DECREASES'),
+  ]),
+  chain(
+    'C120',
+    'Regulatory capture and privileged concentration',
+    INSTITUTIONS,
+    READY,
+    [
+      edge(
+        'DOMINANT_INDUSTRY_SIZE',
+        'POLITICAL_ECONOMIC_INFLUENCE',
+        'INCREASES',
+      ),
+      edge(
+        'POLITICAL_ECONOMIC_INFLUENCE',
+        'PREFERENTIAL_REGULATION_SUBSIDY',
+        'INCREASES',
+      ),
+      edge('PREFERENTIAL_REGULATION_SUBSIDY', 'ENTRY_BARRIERS', 'INCREASES'),
+      edge('ENTRY_BARRIERS', 'MARKET_COMPETITION', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C121',
+    'Land competition and construction cost',
+    LAND_WATER_FOOD,
+    READY,
+    [
+      edge('INDUSTRIAL_EXPANSION', 'INDUSTRIAL_LAND_DEMAND', 'INCREASES'),
+      edge('INDUSTRIAL_LAND_DEMAND', 'LAND_PRICE', 'INCREASES'),
+      edge('LAND_PRICE', 'HOUSING_CONSTRUCTION_COST', 'INCREASES'),
+      edge('LAND_ALLOCATION', 'AGRICULTURAL_LAND', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C122',
+    'Zoning and housing supply elasticity',
+    LAND_WATER_FOOD,
+    READY,
+    [
+      edge('RESTRICTIVE_ZONING', 'HOUSING_SUPPLY_ELASTICITY', 'DECREASES'),
+      edge('POPULATION_INFLOW', 'HOUSING_DEMAND', 'INCREASES'),
+      edge('HOUSING_SUPPLY_ELASTICITY', 'RENT', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C123',
+    'Water allocation as an economic constraint',
+    LAND_WATER_FOOD,
+    READY,
+    [
+      edge('DROUGHT', 'WATER_SUPPLY', 'DECREASES'),
+      edge('WATER_SUPPLY', 'AGRICULTURAL_OUTPUT', 'INCREASES'),
+      edge('WATER_SUPPLY', 'SEMICONDUCTOR_CAPACITY', 'INCREASES'),
+      edge('WATER_SUPPLY', 'POWER_GENERATION', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C124',
+    'Seasonal agricultural yield formation',
+    LAND_WATER_FOOD,
+    READY,
+    [
+      edge(
+        'LAND_WATER_WEATHER_FERTILIZER_TECHNOLOGY_LABOUR',
+        'CROP_YIELD',
+        'INCREASES',
+      ),
+      edge('CROP_YIELD', 'HARVEST_OUTPUT', 'INCREASES'),
+      edge('PLANTING_HARVEST_SEASON', 'HARVEST_OUTPUT', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C125',
+    'Farm-input price shock and delayed food inflation',
+    LAND_WATER_FOOD,
+    READY,
+    [
+      edge('FERTILIZER_PRICE', 'FARM_INPUT_USE', 'DECREASES'),
+      edge('FARM_INPUT_USE', 'FUTURE_CROP_YIELD', 'INCREASES'),
+      edge('FUTURE_CROP_YIELD', 'FOOD_SUPPLY', 'INCREASES'),
+      edge('FOOD_SUPPLY', 'FOOD_INFLATION', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C126',
+    'Resource depletion and marginal extraction cost',
+    ENVIRONMENT,
+    READY,
+    [
+      edge('REMAINING_RESOURCE', 'ORE_GRADE', 'INCREASES'),
+      edge('ORE_GRADE', 'EXTRACTION_DIFFICULTY', 'DECREASES'),
+      edge('EXTRACTION_DIFFICULTY', 'UNIT_EXTRACTION_COST', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C127',
+    'Pollution, illness and labour productivity',
+    ENVIRONMENT,
+    READY,
+    [
+      edge('INDUSTRIAL_OUTPUT', 'POLLUTION', 'INCREASES'),
+      edge('POLLUTION', 'RESPIRATORY_ILLNESS', 'INCREASES'),
+      edge('RESPIRATORY_ILLNESS', 'HEALTHCARE_DEMAND', 'INCREASES'),
+      edge('RESPIRATORY_ILLNESS', 'ABSENTEEISM', 'INCREASES'),
+      edge('ABSENTEEISM', 'LABOUR_PRODUCTIVITY', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C128',
+    'Waste, recycling and secondary materials',
+    ENVIRONMENT,
+    READY,
+    [
+      edge('CONSUMPTION_PRODUCTION', 'WASTE', 'INCREASES'),
+      edge('RECYCLING_CAPACITY', 'SECONDARY_RAW_MATERIAL', 'INCREASES'),
+      edge('SECONDARY_RAW_MATERIAL', 'VIRGIN_RESOURCE_DEMAND', 'DECREASES'),
+    ],
+  ),
+  chain('C129', 'Chronic climate risk and insurance cost', ENVIRONMENT, READY, [
+    edge('AVERAGE_TEMPERATURE', 'COOLING_DEMAND', 'INCREASES'),
+    edge('AVERAGE_TEMPERATURE', 'WORKER_PRODUCTIVITY', 'DECREASES'),
+    edge('AVERAGE_TEMPERATURE', 'CROP_YIELD', 'DECREASES'),
+    edge('AVERAGE_TEMPERATURE', 'WATER_DEMAND', 'INCREASES'),
+    edge('SEA_LEVEL_RISK', 'COASTAL_INFRASTRUCTURE_RISK', 'INCREASES'),
+    edge('COASTAL_INFRASTRUCTURE_RISK', 'INSURANCE_COST', 'INCREASES'),
+  ]),
+  chain(
+    'C130',
+    'Transition policy and stranded carbon assets',
+    ENVIRONMENT,
+    READY,
+    [
+      edge('CARBON_POLICY', 'COAL_DEMAND', 'DECREASES'),
+      edge('COAL_DEMAND', 'COAL_PLANT_VALUE', 'INCREASES'),
+      edge('COAL_PLANT_VALUE', 'MINING_FIRM_LOSSES', 'DECREASES'),
+      edge('MINING_FIRM_LOSSES', 'BANK_LOAN_LOSSES', 'INCREASES'),
+      edge('MINING_FIRM_LOSSES', 'REGIONAL_EMPLOYMENT', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C131',
+    'Endogenous fertility and future labour supply',
+    DEMOGRAPHY,
+    READY,
+    [
+      edge('HOUSING_COST', 'FERTILITY', 'DECREASES'),
+      edge('CHILDCARE_EMPLOYMENT_SECURITY_INCOME', 'FERTILITY', 'INCREASES'),
+      edge('FERTILITY', 'FUTURE_SCHOOL_DEMAND', 'INCREASES'),
+      edge('FERTILITY', 'FUTURE_LABOUR_FORCE', 'INCREASES'),
+    ],
+  ),
+  chain('C132', 'Household formation and housing demand', DEMOGRAPHY, READY, [
+    edge('YOUNG_ADULT_INCOME', 'LEAVING_PARENTAL_HOME', 'INCREASES'),
+    edge('LEAVING_PARENTAL_HOME', 'HOUSEHOLD_COUNT', 'INCREASES'),
+    edge('HOUSEHOLD_COUNT', 'HOUSING_DEMAND', 'INCREASES'),
+  ]),
+  chain('C133', 'Education quality beyond seats', DEMOGRAPHY, READY, [
+    edge('TEACHER_QUALITY', 'LEARNING_OUTCOME', 'INCREASES'),
+    edge('CLASS_SIZE', 'LEARNING_OUTCOME', 'DECREASES'),
+    edge(
+      'EDUCATION_RESOURCES_ATTENDANCE_BACKGROUND',
+      'LEARNING_OUTCOME',
+      'INCREASES',
+    ),
+  ]),
+  chain('C134', 'Unpaid care and labour participation', DEMOGRAPHY, READY, [
+    edge('ELDERLY_DEPENDENCY', 'UNPAID_CARE_HOURS', 'INCREASES'),
+    edge('UNPAID_CARE_HOURS', 'LABOUR_PARTICIPATION', 'DECREASES'),
+  ]),
+  chain('C135', 'Migrant credential transferability', DEMOGRAPHY, READY, [
+    edge('IMMIGRATION', 'SKILL_TRANSFERABILITY', 'INCREASES'),
+    edge(
+      'CREDENTIAL_LANGUAGE_LICENSING_EXPERIENCE',
+      'SKILL_TRANSFERABILITY',
+      'INCREASES',
+    ),
+    edge('SKILL_TRANSFERABILITY', 'EFFECTIVE_SKILL_SUPPLY', 'INCREASES'),
+  ]),
+  chain(
+    'C136',
+    'Intergenerational mobility and persistent inequality',
+    DEMOGRAPHY,
+    READY,
+    [
+      edge('PARENTAL_INCOME', 'EDUCATION_ACCESS_QUALITY', 'INCREASES'),
+      edge('EDUCATION_ACCESS_QUALITY', 'CHILD_HUMAN_CAPITAL', 'INCREASES'),
+      edge('CHILD_HUMAN_CAPITAL', 'FUTURE_INCOME', 'INCREASES'),
+      edge('CURRENT_INEQUALITY', 'PERSISTENT_INEQUALITY', 'INCREASES'),
+    ],
+  ),
+  chain('C137', 'Social trust and transaction frictions', DEMOGRAPHY, READY, [
+    edge(
+      'CONTRACT_DEFAULT_CORRUPTION_BANK_FAILURE_POLICY_REVERSAL',
+      'SOCIAL_TRUST',
+      'DECREASES',
+    ),
+    edge('SOCIAL_TRUST', 'TAX_COMPLIANCE', 'INCREASES'),
+    edge('SOCIAL_TRUST', 'CASH_HOARDING', 'DECREASES'),
+    edge('SOCIAL_TRUST', 'CONTRACT_COLLATERAL_REQUIREMENT', 'DECREASES'),
+    edge('SOCIAL_TRUST', 'EMERGENCY_COOPERATION', 'INCREASES'),
+  ]),
+  chain('C138', 'Overtime, fatigue and human-capital cost', DEMOGRAPHY, READY, [
+    edge('WORKING_HOURS', 'SHORT_RUN_OUTPUT', 'INCREASES'),
+    edge('WORKING_HOURS', 'FATIGUE', 'INCREASES'),
+    edge('FATIGUE', 'LABOUR_PRODUCTIVITY', 'DECREASES'),
+    edge('FATIGUE', 'ACCIDENTS_HEALTHCARE_DEMAND_TURNOVER', 'INCREASES'),
+  ]),
+  chain('C139', 'Crime and urban economic space', DEMOGRAPHY, READY, [
+    edge('CRIME', 'SECURITY_SPENDING', 'INCREASES'),
+    edge('CRIME', 'INSURANCE_COST', 'INCREASES'),
+    edge('CRIME', 'RETAIL_FOOTFALL', 'DECREASES'),
+    edge('CRIME', 'PROPERTY_VALUE', 'DECREASES'),
+    edge('PROPERTY_VALUE', 'BUSINESS_ENTRY', 'INCREASES'),
+  ]),
+  chain('C140', 'Engel demand composition and ageing', DEMOGRAPHY, READY, [
+    edge('HOUSEHOLD_INCOME', 'FOOD_BUDGET_SHARE', 'DECREASES'),
+    edge('HOUSEHOLD_INCOME', 'SERVICES_DURABLES_BUDGET_SHARE', 'INCREASES'),
+    edge('AGEING', 'HEALTHCARE_DEMAND_SHARE', 'INCREASES'),
+    edge('DIGITALISATION', 'DIGITAL_SERVICE_DEMAND', 'INCREASES'),
+  ]),
+  chain(
+    'C141',
+    'Housing asset financial accelerator',
+    ASSET_SPATIAL_DIGITAL,
+    READY,
+    [
+      edge(
+        'RENT_INCOME_MORTGAGE_RATE_LAND_EXPECTATIONS',
+        'HOUSE_PRICE',
+        'INCREASES',
+      ),
+      edge('HOUSE_PRICE', 'COLLATERAL_VALUE', 'INCREASES'),
+      edge('COLLATERAL_VALUE', 'MORTGAGE_CREDIT', 'INCREASES'),
+      edge('MORTGAGE_CREDIT', 'HOUSING_DEMAND', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C142',
+    'Equity valuation and investment',
+    ASSET_SPATIAL_DIGITAL,
+    READY,
+    [
+      edge('PROFIT_EXPECTATIONS', 'EQUITY_VALUATION', 'INCREASES'),
+      edge('EQUITY_VALUATION', 'COST_OF_EQUITY', 'DECREASES'),
+      edge('COST_OF_EQUITY', 'INVESTMENT', 'DECREASES'),
+      edge('EQUITY_MARKET_CRASH', 'HOUSEHOLD_WEALTH', 'DECREASES'),
+      edge('HOUSEHOLD_WEALTH', 'CONSUMPTION', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C143',
+    'Corporate bond refinancing channel',
+    ASSET_SPATIAL_DIGITAL,
+    READY,
+    [
+      edge('FIRM_RISK', 'CORPORATE_BOND_YIELD', 'INCREASES'),
+      edge('CORPORATE_BOND_YIELD', 'REFINANCING_COST', 'INCREASES'),
+      edge('REFINANCING_COST', 'INVESTMENT', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C144',
+    'Insurance coverage and catastrophe balance sheets',
+    ASSET_SPATIAL_DIGITAL,
+    READY,
+    [
+      edge('FLOOD_CATASTROPHE_LOSS', 'INSURER_CLAIMS', 'INCREASES'),
+      edge('INSURANCE_COVERAGE', 'HOUSEHOLD_UNINSURED_LOSS', 'DECREASES'),
+      edge('HOUSEHOLD_UNINSURED_LOSS', 'HOUSEHOLD_WEALTH', 'DECREASES'),
+      edge('INSURER_CLAIMS', 'INSURER_SOLVENCY', 'DECREASES'),
+      edge('REINSURANCE', 'INSURER_SOLVENCY', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C145',
+    'Non-bank credit and liquidity mismatch',
+    ASSET_SPATIAL_DIGITAL,
+    READY,
+    [
+      edge('BANK_CREDIT_TIGHTENING', 'BANK_CREDIT', 'DECREASES'),
+      edge('NONBANK_CREDIT_CAPACITY', 'ECONOMY_WIDE_CREDIT', 'INCREASES'),
+      edge(
+        'NONBANK_LEVERAGE_LIQUIDITY_MISMATCH',
+        'FINANCIAL_CRISIS_RISK',
+        'INCREASES',
+      ),
+    ],
+  ),
+  chain('C146', 'Regional economic divergence', ASSET_SPATIAL_DIGITAL, READY, [
+    edge(
+      'REGIONAL_JOBS_HOUSING_WAGES_INFRASTRUCTURE',
+      'REGIONAL_MIGRATION',
+      'INCREASES',
+    ),
+    edge('MINING_REGION_COLLAPSE', 'REGIONAL_EMPLOYMENT', 'DECREASES'),
+    edge('REGIONAL_EMPLOYMENT', 'NATIONAL_GDP', 'INCREASES'),
+  ]),
+  chain(
+    'C147',
+    'Agglomeration benefits and congestion cost',
+    ASSET_SPATIAL_DIGITAL,
+    READY,
+    [
+      edge(
+        'FIRM_CLUSTERING',
+        'SUPPLIER_PROXIMITY_LABOUR_MATCHING_SPILLOVERS',
+        'INCREASES',
+      ),
+      edge(
+        'SUPPLIER_PROXIMITY_LABOUR_MATCHING_SPILLOVERS',
+        'PRODUCTIVITY',
+        'INCREASES',
+      ),
+      edge('FIRM_CLUSTERING', 'CONGESTION_RENT_POLLUTION', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C148',
+    'Tourism and international service trade',
+    ASSET_SPATIAL_DIGITAL,
+    READY,
+    [
+      edge(
+        'CURRENCY_DEPRECIATION',
+        'TOURISM_PRICE_COMPETITIVENESS',
+        'INCREASES',
+      ),
+      edge('TOURISM_PRICE_COMPETITIVENESS', 'TOURISM_ARRIVALS', 'INCREASES'),
+      edge('TOURISM_ARRIVALS', 'TOURISM_FX_REVENUE', 'INCREASES'),
+      edge('TOURISM_ARRIVALS', 'LOCAL_RENT_SERVICE_PRICE', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C149',
+    'Remittances and household FX income',
+    ASSET_SPATIAL_DIGITAL,
+    READY,
+    [
+      edge('MIGRANT_INCOME_ABROAD', 'REMITTANCE_HOME', 'INCREASES'),
+      edge('REMITTANCE_HOME', 'HOUSEHOLD_FX_INCOME', 'INCREASES'),
+      edge('HOUSEHOLD_FX_INCOME', 'CONSUMPTION_EDUCATION_HOUSING', 'INCREASES'),
+      edge('REMITTANCE_HOME', 'CURRENCY_APPRECIATION_PRESSURE', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C150',
+    'Digital infrastructure and network interruption',
+    ASSET_SPATIAL_DIGITAL,
+    READY,
+    [
+      edge('CYBERATTACK_NETWORK_FAILURE', 'ELECTRONIC_PAYMENTS', 'DECREASES'),
+      edge('ELECTRONIC_PAYMENTS', 'BANKING_TRANSACTION_DELAY', 'DECREASES'),
+      edge('BANKING_TRANSACTION_DELAY', 'RETAIL_SALES', 'DECREASES'),
+      edge('CYBERATTACK_NETWORK_FAILURE', 'LOGISTICS_INFORMATION', 'DECREASES'),
+      edge('LOGISTICS_INFORMATION', 'PRODUCTION_TRADE', 'INCREASES'),
+      edge(
+        'DIGITAL_INFRASTRUCTURE',
+        'REMOTE_SERVICES_DIGITAL_TRADE',
+        'INCREASES',
+      ),
     ],
   ),
 ]);

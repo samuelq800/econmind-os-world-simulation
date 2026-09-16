@@ -4,6 +4,7 @@ import {
   CAUSAL_CHAINS,
   assertCausalCatalogueIntegrity,
   calculateExactCausalStateAfterEffects,
+  calculateQuantifiedSystemTransmissions,
   getCausalChain,
   partitionCausalSignals,
   scheduleExactCausalTransmission,
@@ -13,15 +14,15 @@ import {
 describe('V11–V18 causal-channel preparation', () => {
   it('records every requested pathway with no implicit economic parameter', () => {
     expect(() => assertCausalCatalogueIntegrity()).not.toThrow();
-    expect(CAUSAL_CHAINS).toHaveLength(105);
+    expect(CAUSAL_CHAINS).toHaveLength(150);
     expect(new Set(CAUSAL_CHAINS.map((definition) => definition.id)).size).toBe(
-      105,
+      150,
     );
     expect(
       CAUSAL_CHAINS.filter(
         (definition) => definition.readiness === 'PARAMETERIZED_KERNEL_READY',
       ),
-    ).toHaveLength(37);
+    ).toHaveLength(82);
     expect(
       CAUSAL_CHAINS.filter(
         (definition) => definition.readiness === 'FUTURE_INTERFACE_ONLY',
@@ -41,6 +42,11 @@ describe('V11–V18 causal-channel preparation', () => {
       source: 'DISASTER_CIVIL_EMERGENCY',
       target: 'DISPLACEMENT',
       direction: 'INCREASES',
+    });
+    expect(getCausalChain('C150').edges).toContainEqual({
+      source: 'CYBERATTACK_NETWORK_FAILURE',
+      target: 'ELECTRONIC_PAYMENTS',
+      direction: 'DECREASES',
     });
     expect(getCausalChain('C105').edges).toContainEqual({
       source: 'GOVERNMENT_GUARANTEE',
@@ -217,6 +223,34 @@ describe('V11–V18 causal-channel preparation', () => {
     });
     expect(supplyPrice.targetDelta.amount).toBe('-1');
     expect(supplyPrice.targetAfter).toMatchObject({ amount: '9' });
+
+    const paymentOutage = scheduleExactCausalTransmission({
+      effectId: 'network-payment-outage-v1',
+      chainId: 'C150',
+      edgeIndex: 0,
+      sourcePeriod: 10,
+      delayPeriods: 1,
+      source: {
+        node: 'CYBERATTACK_NETWORK_FAILURE',
+        amount: '2',
+        unit: { kind: 'QUANTITY', unit: 'network_outage_hour' },
+        sign: 'NON_NEGATIVE',
+      },
+      targetBefore: {
+        node: 'ELECTRONIC_PAYMENTS',
+        amount: '100',
+        unit: { kind: 'QUANTITY', unit: 'transaction_per_hour' },
+        sign: 'NON_NEGATIVE',
+      },
+      response: {
+        sourceUnit: { kind: 'QUANTITY', unit: 'network_outage_hour' },
+        targetUnit: { kind: 'QUANTITY', unit: 'transaction_per_hour' },
+        targetAmountPerSourceUnit: '10',
+        parameterVersion: 'network-resilience-v1',
+      },
+    });
+    expect(paymentOutage.targetDelta.amount).toBe('-20');
+    expect(paymentOutage.targetAfter.amount).toBe('80');
   });
 
   it('rejects wrong dimensions, impossible stock reductions, and undued application', () => {
@@ -329,5 +363,83 @@ describe('V11–V18 causal-channel preparation', () => {
       delta: { amount: '8' },
       after: { amount: '108' },
     });
+  });
+
+  it('executes only the declared exact-unit transmissions for each C101–C150 system', () => {
+    expect(
+      calculateQuantifiedSystemTransmissions({
+        system: 'LAND_WATER_FOOD',
+        transmissions: [
+          {
+            effectId: 'water-crop-capacity-v1',
+            chainId: 'C123',
+            edgeIndex: 1,
+            sourcePeriod: 8,
+            delayPeriods: 1,
+            source: {
+              node: 'WATER_SUPPLY',
+              amount: '500',
+              unit: { kind: 'QUANTITY', unit: 'cubic_metre_per_day' },
+              sign: 'NON_NEGATIVE',
+            },
+            targetBefore: {
+              node: 'AGRICULTURAL_OUTPUT',
+              amount: '100',
+              unit: { kind: 'QUANTITY', unit: 'tonne_per_day' },
+              sign: 'NON_NEGATIVE',
+            },
+            response: {
+              sourceUnit: {
+                kind: 'QUANTITY',
+                unit: 'cubic_metre_per_day',
+              },
+              targetUnit: { kind: 'QUANTITY', unit: 'tonne_per_day' },
+              targetAmountPerSourceUnit: '0.1',
+              parameterVersion: 'irrigation-productivity-v1',
+            },
+          },
+        ],
+      }),
+    ).toMatchObject([
+      { targetDelta: { amount: '50' }, targetAfter: { amount: '150' } },
+    ]);
+    expect(() =>
+      calculateQuantifiedSystemTransmissions({
+        system: 'LAND_WATER_FOOD',
+        transmissions: [
+          {
+            effectId: 'wrong-system-v1',
+            chainId: 'C150',
+            edgeIndex: 0,
+            sourcePeriod: 1,
+            delayPeriods: 1,
+            source: {
+              node: 'CYBERATTACK_NETWORK_FAILURE',
+              amount: '1',
+              unit: { kind: 'QUANTITY', unit: 'network_outage_hour' },
+              sign: 'NON_NEGATIVE',
+            },
+            targetBefore: {
+              node: 'ELECTRONIC_PAYMENTS',
+              amount: '1',
+              unit: { kind: 'QUANTITY', unit: 'transaction_per_hour' },
+              sign: 'NON_NEGATIVE',
+            },
+            response: {
+              sourceUnit: {
+                kind: 'QUANTITY',
+                unit: 'network_outage_hour',
+              },
+              targetUnit: {
+                kind: 'QUANTITY',
+                unit: 'transaction_per_hour',
+              },
+              targetAmountPerSourceUnit: '1',
+              parameterVersion: 'wrong-system-v1',
+            },
+          },
+        ],
+      }),
+    ).toThrow('LAND_WATER_FOOD cannot calculate C150');
   });
 });
