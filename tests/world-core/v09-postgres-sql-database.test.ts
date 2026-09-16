@@ -1,4 +1,4 @@
-// PREPARATION_ONLY_NOT_V09_2_STARTED: adapter failure classification only.
+// V09 candidate PostgreSQL adapter failure classification.
 
 import type { Pool } from 'pg';
 import { describe, expect, it, vi } from 'vitest';

@@ -1,7 +1,7 @@
-// PREPARATION_ONLY_NOT_V09_2_STARTED: test infrastructure only.
+// V09.2 candidate test contract; independent package review remains required.
 
-export const V09_ATOMIC_PREPARATION_STATE =
-  'PREPARATION_ONLY_NOT_V09_2_STARTED' as const;
+export const V09_ATOMIC_CANDIDATE_STATE =
+  'V09_2_IMPLEMENTED_UNVERIFIED' as const;
 
 export const V09_ATOMIC_FAULT_POINTS = Object.freeze([
   'BEFORE_INVENTORY_WRITE',

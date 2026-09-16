@@ -6,5 +6,9 @@ export default defineConfig({
       enabled: false,
     },
     include: ['tests/**/*.test.ts'],
+    // The full suite runs several disposable PGlite schemas concurrently.
+    // Their deterministic startup can exceed Vitest's five-second default
+    // without indicating a stalled test or relaxing any assertion.
+    testTimeout: 30_000,
   },
 });

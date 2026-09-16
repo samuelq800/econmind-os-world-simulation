@@ -1,0 +1,115 @@
+{
+  "schema_version": "V09-TEST-EVIDENCE-1",
+  "package": "V09.2 + V09.3",
+  "state": "IMPLEMENTED_UNVERIFIED",
+  "base": "8da085184bf063b61ba53c10537c6a797018072b",
+  "implementation_tip_before_evidence_docs": "dadad8292f7b2e3f16430052d1e599d733c76031",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile": "restored unchanged after dependency bootstrap"
+  },
+  "checks": [
+    {
+      "command": "pnpm check",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": {
+        "passed": 51,
+        "skipped": 2,
+        "total": 53
+      },
+      "tests": {
+        "passed": 581,
+        "skipped": 8,
+        "total": 589
+      },
+      "additional_gates": [
+        "lint and format",
+        "workspace typecheck and build",
+        "architecture boundaries and authoritative-pattern scan",
+        "safe local environment policy",
+        "12-migration provenance validation",
+        "clean-baseline and existing-schema PGlite rehearsal",
+        "foundation policy and repository secret scan"
+      ]
+    },
+    {
+      "command": "pnpm --filter @econmind/core build && pnpm --filter @econmind/world-worker build",
+      "result": "PASS",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/v09-atomic-preparation-infrastructure.test.ts --testTimeout=30000",
+      "result": "PASS",
+      "exit_code": 0,
+      "tests": 31,
+      "coverage": "pre/post-write fault rollback, acknowledgement unknown, lost response, stale holder/fence/version/lease, authorization cutoff, idempotent retry and low-pressure contention"
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/v09-atomic-repository-preparation.test.ts --testTimeout=30000",
+      "result": "PASS",
+      "exit_code": 0,
+      "tests": 22,
+      "coverage": "single transaction facts, forged evidence rejection, checkpoints, rollback and receipt recovery"
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/v09-world-recovery-preparation.test.ts --testTimeout=30000",
+      "result": "PASS",
+      "exit_code": 0,
+      "tests": 9,
+      "coverage": "recovery scan, outbox retry, abandoned claim, current-fence refusal, locked projection rebuild, replay lineage and corrupt watermark rejection"
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/v09-commit-authorization-cutoff.test.ts --testTimeout=30000",
+      "result": "PASS",
+      "exit_code": 0,
+      "tests": 1,
+      "coverage": "server-held transaction-cutoff authorization revision and revocation"
+    },
+    {
+      "command": "pnpm migration:validate",
+      "result": "PASS",
+      "exit_code": 0,
+      "migrations": 12,
+      "violations": []
+    },
+    {
+      "command": "pnpm secrets:check",
+      "result": "PASS",
+      "exit_code": 0,
+      "scanned_files": 586
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs && node scripts/check-authoritative-patterns.mjs && git diff --check",
+      "result": "PASS",
+      "exit_code": 0,
+      "boundary_scanned_files": 52,
+      "authoritative_core_files": 30,
+      "authoritative_total_files": 47
+    },
+    {
+      "command": "ECONMIND_ENV=local V09_TEST_DATABASE_FINGERPRINT=world-v2-v09-test-local V09_TEST_DATABASE_URL=<approved-disposable-loopback-url> pnpm exec vitest run tests/world-core/v09-atomic-recovery-postgres.test.ts",
+      "result": "NOT_RUN",
+      "reason": "no approved disposable PostgreSQL URL/fingerprint or local PostgreSQL service was available; no remote target was attempted",
+      "required_cases": [
+        "lease expiry and stale holder/fence",
+        "old WorldVersion",
+        "connection or worker/API interruption before commit",
+        "post-commit acknowledgement/receipt loss",
+        "checkpoint restart and replay",
+        "outbox retry",
+        "corrupt watermark and projection rebuild"
+      ]
+    }
+  ],
+  "review_boundary": {
+    "implementation_self_assessed_open_p0": 0,
+    "implementation_self_assessed_open_major": 0,
+    "independent_p0_major_verdict": "NOT_RUN",
+    "gate_b": "NOT_RUN",
+    "production_access": false,
+    "production_mutation": false,
+    "main_merge_authorized": false
+  }
+}

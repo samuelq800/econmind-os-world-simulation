@@ -213,7 +213,8 @@ function validateFinancialPosting(input: {
 function canonicalPostingIntent(
   posting: InventoryPosting | FinancialPostingBatch,
 ): string {
-  const { fingerprint: _fingerprint, ...intent } = posting;
+  const intent: Record<string, unknown> = { ...posting };
+  Reflect.deleteProperty(intent, 'fingerprint');
   return canonicalSerialize(intent);
 }
 

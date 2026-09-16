@@ -1,4 +1,4 @@
-// PREPARATION_ONLY_NOT_V09_2_STARTED: test infrastructure only.
+// V09 candidate database adapters for disposable PGlite and PostgreSQL tests.
 
 import { PGlite } from '@electric-sql/pglite';
 import { Pool, type PoolClient, type QueryResultRow } from 'pg';

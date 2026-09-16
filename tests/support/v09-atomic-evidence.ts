@@ -1,9 +1,9 @@
-// PREPARATION_ONLY_NOT_V09_2_STARTED: test infrastructure only.
+// V09.2 candidate evidence helper; it is not independent review evidence.
 
 import { createHash } from 'node:crypto';
 
 import { writeV09StagingEvidence } from '../../scripts/v09-staging-evidence-runner.mjs';
-import { V09_ATOMIC_PREPARATION_STATE } from './v09-atomic-contract.js';
+import { V09_ATOMIC_CANDIDATE_STATE } from './v09-atomic-contract.js';
 
 export type EvidenceScalar = boolean | null | number | string;
 export type EvidenceValue =
@@ -14,7 +14,7 @@ export type EvidenceValue =
 export interface V09AtomicEvidenceEnvelope {
   readonly payload: EvidenceValue;
   readonly payloadSha256: string;
-  readonly preparationState: typeof V09_ATOMIC_PREPARATION_STATE;
+  readonly preparationState: typeof V09_ATOMIC_CANDIDATE_STATE;
   readonly schemaVersion: 'V09_ATOMIC_PREPARATION_EVIDENCE-1';
 }
 
@@ -73,7 +73,7 @@ export function prepareV09AtomicEvidence(
   return Object.freeze({
     payload,
     payloadSha256,
-    preparationState: V09_ATOMIC_PREPARATION_STATE,
+    preparationState: V09_ATOMIC_CANDIDATE_STATE,
     schemaVersion: 'V09_ATOMIC_PREPARATION_EVIDENCE-1',
   });
 }

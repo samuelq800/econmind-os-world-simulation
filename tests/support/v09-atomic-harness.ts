@@ -1,4 +1,4 @@
-// PREPARATION_ONLY_NOT_V09_2_STARTED: test infrastructure only.
+// V09.2 candidate harness; it does not provide independent approval.
 
 import {
   reauthorizeOfficeCapability,

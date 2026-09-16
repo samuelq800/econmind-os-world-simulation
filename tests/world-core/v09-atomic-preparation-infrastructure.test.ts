@@ -1,4 +1,4 @@
-// PREPARATION_ONLY_NOT_V09_2_STARTED: test infrastructure only.
+// V09.2 candidate deterministic-fault evidence; independent review remains required.
 
 import { mkdtemp, readFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -16,7 +16,7 @@ import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-databas
 import {
   DeterministicV09FaultInjector,
   V09_ATOMIC_FAULT_POINTS,
-  V09_ATOMIC_PREPARATION_STATE,
+  V09_ATOMIC_CANDIDATE_STATE,
   classifyTransactionResult,
   type V09AtomicFaultPoint,
   type V09AtomicTestDatabase,
@@ -487,7 +487,7 @@ describe('V09 atomic preparation evidence utilities', () => {
       });
 
       const durable = await readFile(firstPath, 'utf8');
-      expect(durable).toContain(V09_ATOMIC_PREPARATION_STATE);
+      expect(durable).toContain(V09_ATOMIC_CANDIDATE_STATE);
       expect(durable).toContain('[REDACTED]');
       expect(durable).not.toContain('do-not-write');
       expect((await stat(firstPath)).mode & 0o777).toBe(0o600);

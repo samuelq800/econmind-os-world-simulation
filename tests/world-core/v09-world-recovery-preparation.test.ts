@@ -1,4 +1,4 @@
-// PREPARATION_ONLY_NOT_V09_3_STARTED: local recovery behavior only.
+// V09.3 candidate local recovery behavior; real PostgreSQL is separately required.
 
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';

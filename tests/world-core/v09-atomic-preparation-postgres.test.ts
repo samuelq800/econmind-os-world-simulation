@@ -1,4 +1,4 @@
-// PREPARATION_ONLY_NOT_V09_2_STARTED: test infrastructure only.
+// V09.2 candidate disposable-PostgreSQL integration coverage.
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 

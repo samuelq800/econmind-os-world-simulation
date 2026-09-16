@@ -1,4 +1,4 @@
-// PREPARATION_ONLY_NOT_V09_2_STARTED: exercises the private candidate locally.
+// V09.2 candidate: exercises private candidates and the authoritative repository.
 
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
@@ -463,8 +463,8 @@ describe('V09 private atomic repository preparation', () => {
     await repository(value).commit(prepared);
 
     const inventory = prepared.inventoryPostings[0]!;
-    const { fingerprint: _inventoryFingerprint, ...inventoryIntent } =
-      inventory;
+    const inventoryIntent: Record<string, unknown> = { ...inventory };
+    Reflect.deleteProperty(inventoryIntent, 'fingerprint');
     const canonicalInventoryPayload = canonicalSerialize(inventoryIntent);
     const changedInventoryId = canonicalInventoryPayload.replace(
       'INVENTORY_ATOMIC_REPOSITORY',
@@ -514,7 +514,8 @@ describe('V09 private atomic repository preparation', () => {
     ).rejects.toThrow('conservation or account shape');
 
     const batch = prepared.financialPostingBatches[0]!;
-    const { fingerprint: _batchFingerprint, ...batchIntent } = batch;
+    const batchIntent: Record<string, unknown> = { ...batch };
+    Reflect.deleteProperty(batchIntent, 'fingerprint');
     const canonicalBatchPayload = canonicalSerialize(batchIntent);
     const changedBatchId = canonicalBatchPayload.replace(
       'FINANCIAL_ATOMIC_REPOSITORY',

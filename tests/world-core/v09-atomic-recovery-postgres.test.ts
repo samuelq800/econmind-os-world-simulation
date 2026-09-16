@@ -1,4 +1,4 @@
-// PREPARATION_ONLY_NOT_V09_3_STARTED: disposable PostgreSQL evidence only.
+// V09.3 candidate disposable-PostgreSQL recovery coverage.
 
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
