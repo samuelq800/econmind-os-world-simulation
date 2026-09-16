@@ -1,7 +1,7 @@
 # Gate B hard-property evidence ledger
 
-**Recorded:** 2026-09-15  
-**Candidate status:** `AUTOMATED_INCREMENT_OBSERVED_FINAL_CANDIDATE_NOT_FROZEN`  
+**Recorded:** 2026-09-16
+**Candidate status:** `STAGING_DATABASE_EVIDENCE_PARTIAL_FAIL_CLOSED`
 **Authority:** evidence index only; not an approval, promotion, merge, staging,
 or Supabase authorization
 
@@ -16,6 +16,27 @@ the owner-approved browser/RLS evidence called out below.
 All PostgreSQL evidence in this ledger uses the disposable GitHub Actions
 `postgres:16-alpine` service guarded by `V09_TEST_DATABASE_URL`; it does not
 contact Supabase, staging, or production.
+
+## Dedicated staging run — 2026-09-16
+
+The owner-authorized, dedicated non-production target was executed once from
+candidate `21cc41e`. The runner applied all 16 migrations and recorded PASS
+for lease, grants/RLS, commit, role-boundary, marker-bound cleanup, durable
+evidence, and independent residue inspection after cleanup. A new client then
+confirmed that the scoped schema and v09 roles were absent.
+
+The only failed stage is `CRASH_CONNECTION_LOSS`:
+`ERR_SSL_DECRYPTION_FAILED_OR_BAD_RECORD_MAC` from the managed PostgreSQL
+pooler/TLS path. The runner retained that first failure and still performed
+strict marker-bound cleanup; it is therefore a fail-closed record, not a
+passing crash-recovery claim. The durable local evidence artifact is
+`evidence/vzwrereseklnrjbtmsmc-gate-b-staging-ownership-matrix.json` outside
+this source checkout and contains no connection credential.
+
+This run closes neither a frozen whole-candidate regression nor independent
+review. Per the owner instruction, no repeated network retry is planned for
+this managed-service failure; Gate B remains `PENDING` until an approved
+alternative evidence route or an explicit waiver is recorded.
 
 ## Evidence map
 
