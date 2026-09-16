@@ -191,6 +191,29 @@ describe('V25.1 fictional atlas preparation', () => {
     );
   });
 
+  it('requires every mainland display boundary to name a local coastline mask', () => {
+    const mainlandBoundaries = FICTIONAL_ATLAS.visualTerritories.filter(
+      (territory) => territory.boundaryForm !== 'ISLAND_GROUP',
+    );
+    expect(
+      mainlandBoundaries.every(
+        (territory) => territory.landBoundaryRegion !== undefined,
+      ),
+    ).toBe(true);
+
+    const missingMask: FictionalAtlas = {
+      ...FICTIONAL_ATLAS,
+      visualTerritories: FICTIONAL_ATLAS.visualTerritories.map((territory) =>
+        territory.id === 'visual-territory-01'
+          ? { ...territory, landBoundaryRegion: undefined }
+          : territory,
+      ),
+    };
+    expect(() => validateFictionalAtlas(missingMask)).toThrow(
+      'needs a coastline boundary mask',
+    );
+  });
+
   it('keeps large display grainland inland rather than giving it a prepared port', () => {
     const invalid: FictionalAtlas = {
       ...FICTIONAL_ATLAS,

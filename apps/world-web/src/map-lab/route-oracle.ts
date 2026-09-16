@@ -349,12 +349,21 @@ export function validateFictionalAtlas(
           `Island-group visual territory ${territory.id} needs a one-or-two-island sea envelope`,
         );
       }
+      if (territory.landBoundaryRegion !== undefined) {
+        throw new Error(
+          `Island-group visual territory ${territory.id} cannot use a mainland boundary mask`,
+        );
+      }
     } else if (
       territory.maritimeEnvelope !== undefined ||
       territory.displayIslandCount !== undefined
     ) {
       throw new Error(
         `Non-island visual territory ${territory.id} cannot claim a display sea envelope`,
+      );
+    } else if (territory.landBoundaryRegion === undefined) {
+      throw new Error(
+        `Land visual territory ${territory.id} needs a coastline boundary mask`,
       );
     }
     if (territory.maritimeEnvelope) {

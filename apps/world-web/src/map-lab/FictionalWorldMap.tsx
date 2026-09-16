@@ -9,6 +9,7 @@ import type {
   AtlasFeature,
   AtlasInfrastructure,
   AtlasLandUseArea,
+  AtlasPoint,
   AtlasVisualTerritory,
 } from './types.js';
 
@@ -67,6 +68,63 @@ const initialMapLayerVisibility: Record<MapLayerId, boolean> = {
   infrastructure: false,
 };
 
+/**
+ * Local, hand-traced V8 display coast masks. They only constrain the visual
+ * country-boundary layer; they are not an alternative physical or legal map.
+ */
+const visualLandBoundaryMasks: Record<
+  NonNullable<AtlasVisualTerritory['landBoundaryRegion']>,
+  readonly AtlasPoint[]
+> = {
+  SOUTHERN_CORE: [
+    { xKm: 18_000, yKm: 8_500 },
+    { xKm: 20_500, yKm: 9_300 },
+    { xKm: 24_000, yKm: 9_000 },
+    { xKm: 27_500, yKm: 8_800 },
+    { xKm: 31_000, yKm: 8_000 },
+    { xKm: 33_000, yKm: 6_500 },
+    { xKm: 33_500, yKm: 4_000 },
+    { xKm: 32_000, yKm: 1_800 },
+    { xKm: 28_000, yKm: 1_200 },
+    { xKm: 24_000, yKm: 1_700 },
+    { xKm: 20_500, yKm: 3_200 },
+    { xKm: 18_500, yKm: 5_500 },
+  ],
+  RIFTED_FRAGMENT: [
+    { xKm: 26_500, yKm: 15_000 },
+    { xKm: 30_000, yKm: 15_500 },
+    { xKm: 33_500, yKm: 14_500 },
+    { xKm: 34_000, yKm: 12_000 },
+    { xKm: 32_500, yKm: 9_500 },
+    { xKm: 29_500, yKm: 9_000 },
+    { xKm: 27_000, yKm: 10_500 },
+    { xKm: 25_500, yKm: 12_500 },
+  ],
+  NORTHERN_CORE: [
+    { xKm: 2_000, yKm: 15_500 },
+    { xKm: 5_000, yKm: 16_200 },
+    { xKm: 9_500, yKm: 15_500 },
+    { xKm: 12_500, yKm: 14_800 },
+    { xKm: 15_000, yKm: 13_800 },
+    { xKm: 14_000, yKm: 11_800 },
+    { xKm: 11_500, yKm: 10_500 },
+    { xKm: 9_000, yKm: 8_200 },
+    { xKm: 5_500, yKm: 7_600 },
+    { xKm: 2_500, yKm: 8_500 },
+    { xKm: 1_500, yKm: 11_500 },
+  ],
+  CENTRAL_SHELF: [
+    { xKm: 12_000, yKm: 8_800 },
+    { xKm: 15_000, yKm: 9_000 },
+    { xKm: 18_000, yKm: 8_000 },
+    { xKm: 21_000, yKm: 7_000 },
+    { xKm: 22_500, yKm: 5_500 },
+    { xKm: 20_500, yKm: 4_500 },
+    { xKm: 17_500, yKm: 5_000 },
+    { xKm: 14_000, yKm: 6_000 },
+  ],
+};
+
 const areaFeatures = new Set([
   'BASIN',
   'DELTA',
@@ -117,6 +175,9 @@ function visualTerritoryElement(
     .map((tag) => tag.label)
     .join(', ');
   const nameY = territory.capital.yKm + 95;
+  const boundaryClip = territory.landBoundaryRegion
+    ? `url(#visual-land-${territory.landBoundaryRegion.toLowerCase()})`
+    : undefined;
   return (
     <g className="atlas-visual-territory" key={territory.id}>
       {territory.maritimeEnvelope ? (
@@ -125,17 +186,19 @@ function visualTerritoryElement(
           d={svgPath(territory.maritimeEnvelope, true)}
         />
       ) : null}
-      <path d={svgPath(territory.polygon, true)} fill={territory.color} />
-      <circle cx={territory.capital.xKm} cy={territory.capital.yKm} r={58} />
-      {showName ? (
-        <text
-          transform={`translate(0 ${nameY * 2}) scale(1 -1)`}
-          x={territory.capital.xKm + 95}
-          y={nameY}
-        >
-          {territory.name}
-        </text>
-      ) : null}
+      <g clipPath={boundaryClip}>
+        <path d={svgPath(territory.polygon, true)} fill={territory.color} />
+        <circle cx={territory.capital.xKm} cy={territory.capital.yKm} r={58} />
+        {showName ? (
+          <text
+            transform={`translate(0 ${nameY * 2}) scale(1 -1)`}
+            x={territory.capital.xKm + 95}
+            y={nameY}
+          >
+            {territory.name}
+          </text>
+        ) : null}
+      </g>
       <title>
         {territory.name} — capital marker
         {resources
@@ -407,6 +470,11 @@ export function FictionalWorldMap() {
                 strokeWidth="35"
               />
             </pattern>
+            {Object.entries(visualLandBoundaryMasks).map(([region, mask]) => (
+              <clipPath id={`visual-land-${region.toLowerCase()}`} key={region}>
+                <path d={svgPath(mask, true)} />
+              </clipPath>
+            ))}
             <marker
               id="warm-current-arrow"
               markerHeight="8"

@@ -202,10 +202,10 @@ body {
 }
 
 .atlas-visual-territory path {
-  fill-opacity: 0.16;
+  fill-opacity: 0.1;
   stroke: #fff4bd;
-  stroke-opacity: 0.72;
-  stroke-width: 22;
+  stroke-opacity: 0.92;
+  stroke-width: 32;
 }
 
 .atlas-visual-territory .atlas-visual-territory__maritime {

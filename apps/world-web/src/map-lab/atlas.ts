@@ -286,6 +286,14 @@ function visualTerritoryBoundaryForm(index: number) {
   return index % 4 === 0 ? ('COASTAL' as const) : ('INLAND' as const);
 }
 
+function visualTerritoryLandBoundaryRegion(index: number) {
+  if (index < 28) return 'SOUTHERN_CORE' as const;
+  if (index < 42) return 'RIFTED_FRAGMENT' as const;
+  if (index >= 42 && index < 56) return undefined;
+  if (index < 66) return 'NORTHERN_CORE' as const;
+  return 'CENTRAL_SHELF' as const;
+}
+
 function visualTerritoryMaritimeEnvelope(
   xKm: number,
   yKm: number,
@@ -307,6 +315,7 @@ function visualTerritoryMaritimeEnvelope(
 const visualTerritories = visualTerritoryNames.map((name, index) => {
   const [xKm, yKm] = visualTerritoryCentres[index]!;
   const boundaryForm = visualTerritoryBoundaryForm(index);
+  const landBoundaryRegion = visualTerritoryLandBoundaryRegion(index);
   return {
     id: `visual-territory-${String(index + 1).padStart(2, '0')}`,
     name,
@@ -314,6 +323,7 @@ const visualTerritories = visualTerritoryNames.map((name, index) => {
     capital: point(xKm, yKm),
     color: visualTerritoryPalette[index % visualTerritoryPalette.length]!,
     polygon: visualTerritoryPolygon(xKm, yKm, index),
+    ...(landBoundaryRegion ? { landBoundaryRegion } : {}),
     ...(boundaryForm === 'ISLAND_GROUP'
       ? {
           maritimeEnvelope: visualTerritoryMaritimeEnvelope(xKm, yKm, index),

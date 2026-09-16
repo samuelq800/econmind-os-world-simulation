@@ -62,6 +62,12 @@ export type AtlasVisualTerritory = Readonly<{
   name: string;
   /** A display boundary category, never a V27 sovereignty classification. */
   boundaryForm: 'COASTAL' | 'INLAND' | 'ISLAND_GROUP';
+  /**
+   * A local V8 visual land-mask name. It clips display boundaries to a
+   * hand-traced fictional coastline; it is not an authoritative land record.
+   */
+  landBoundaryRegion?:
+    'CENTRAL_SHELF' | 'NORTHERN_CORE' | 'RIFTED_FRAGMENT' | 'SOUTHERN_CORE';
   polygon: AtlasPolygon;
   capital: AtlasPoint;
   color: string;
