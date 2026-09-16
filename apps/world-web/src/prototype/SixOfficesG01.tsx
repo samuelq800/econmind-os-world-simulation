@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { CaptainCommandCenter } from './CaptainCommandCenter.js';
+import { FinanceMinisterCommand } from './FinanceMinisterCommand.js';
 import { GoodsTransferFlow } from './GoodsTransferFlow.js';
 import { LivingNationScene } from './LivingNationScene.js';
 import { NationalOverview } from './NationalOverview.js';
@@ -127,6 +128,59 @@ const CAPTAIN_NAV_GROUPS: readonly NavGroup[] = [
   },
 ];
 
+const FINANCE_NAV_GROUPS: readonly NavGroup[] = [
+  {
+    id: 'operations',
+    label: 'Treasury command',
+    leaves: [
+      { pageId: 'G01', label: 'Treasury survival turn', implemented: true },
+      { pageId: 'F01', label: 'Cash runway', implemented: false },
+    ],
+  },
+  {
+    id: 'country',
+    label: 'Budget & requests',
+    leaves: [
+      { pageId: 'G02', label: 'Nation overview', implemented: true },
+      { pageId: 'F02', label: 'Funding inbox', implemented: false },
+      { pageId: 'F03', label: 'National budget', implemented: false },
+    ],
+  },
+  {
+    id: 'policy',
+    label: 'Capital routes',
+    leaves: [
+      { pageId: 'F04', label: 'Project finance', implemented: false },
+      { pageId: 'F05', label: 'Debt market', implemented: false },
+      { pageId: 'F06', label: 'Tax studio', implemented: false },
+    ],
+  },
+  {
+    id: 'crossOffice',
+    label: 'Joint funding',
+    leaves: [
+      { pageId: 'G03', label: 'Joint committee', implemented: false },
+      { pageId: 'F07', label: 'Required approvals', implemented: false },
+    ],
+  },
+  {
+    id: 'roleWork',
+    label: 'Fiscal risk',
+    leaves: [
+      { pageId: 'F08', label: 'Outlook & risk', implemented: false },
+      { pageId: 'F09', label: 'Guarantees & SOEs', implemented: false },
+    ],
+  },
+  {
+    id: 'records',
+    label: 'Fiscal ledger',
+    leaves: [
+      { pageId: 'F10', label: 'Publish review', implemented: false },
+      { pageId: 'G06', label: 'Audit trail', implemented: false },
+    ],
+  },
+];
+
 function StateScreen({
   state,
   onRetry,
@@ -218,7 +272,9 @@ function OfficeSidebar({
       <nav>
         {(actingOffice.officeId === 'CAPTAIN'
           ? CAPTAIN_NAV_GROUPS
-          : NAV_GROUPS
+          : actingOffice.officeId === 'FINANCE'
+            ? FINANCE_NAV_GROUPS
+            : NAV_GROUPS
         ).map((group) => {
           const isOpen = open[group.id];
           return (
@@ -266,9 +322,10 @@ function OfficeSidebar({
         })}
       </nav>
       <p className="six-sidebar__note">
-        G01 and G02 are local fixture routes. Captain command is a local
-        planning loop; other leaves stay visible until their authorized handlers
-        are attached.
+        G01 and G02 are local fixture routes.{' '}
+        {actingOffice.officeId === 'FINANCE'
+          ? 'Funding routes are local rehearsals; Treasury, debt, and approval actions remain mapped until their authorized handlers are attached.'
+          : 'Captain command is a local planning loop; other leaves stay visible until their authorized handlers are attached.'}
       </p>
       <button
         className="six-sidebar__route"
@@ -430,6 +487,11 @@ export function SixOfficesG01({
             </div>
           ) : actingOffice.officeId === 'CAPTAIN' ? (
             <CaptainCommandCenter
+              projection={projection}
+              onNotice={setDeskNotice}
+            />
+          ) : actingOffice.officeId === 'FINANCE' ? (
+            <FinanceMinisterCommand
               projection={projection}
               onNotice={setDeskNotice}
             />
