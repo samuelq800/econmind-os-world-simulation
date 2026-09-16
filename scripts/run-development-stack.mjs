@@ -366,6 +366,24 @@ async function parentIsPnpm(parentPid) {
   }
 }
 
+async function processParentPid(pid) {
+  if (process.platform === 'win32') return pid;
+  try {
+    const { stdout } = await execFileAsync('ps', [
+      '-p',
+      String(pid),
+      '-o',
+      'ppid=',
+    ]);
+    const parentPid = Number(stdout.trim());
+    return Number.isSafeInteger(parentPid) && parentPid > 0
+      ? parentPid
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function spawnServices(environment, onExit) {
   const pnpmCommand = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
   return serviceDefinitions.map((definition) => {
@@ -419,6 +437,9 @@ async function run() {
   });
   const originalParentPid = process.ppid;
   const originalParentIsPnpm = await parentIsPnpm(originalParentPid);
+  const originalPnpmOwnerPid = originalParentIsPnpm
+    ? await processParentPid(originalParentPid)
+    : undefined;
 
   function emit(event, details = {}, error = false) {
     const payload = JSON.stringify({
@@ -448,6 +469,13 @@ async function run() {
     });
   }
 
+  async function parentStillOwnsBootstrap() {
+    if (!originalParentIsPnpm || process.ppid !== originalParentPid) {
+      return false;
+    }
+    return (await processParentPid(originalParentPid)) === originalPnpmOwnerPid;
+  }
+
   for (const signal of ['SIGINT', 'SIGTERM']) {
     process.on(signal, () => {
       requestTerminal({ signal, type: 'signal' });
@@ -456,7 +484,7 @@ async function run() {
 
   try {
     assertSafeEnvironment(process.env);
-    if (!originalParentIsPnpm || process.ppid !== originalParentPid) {
+    if (!(await parentStillOwnsBootstrap())) {
       throw new Error('bootstrap must remain owned by its pnpm parent');
     }
     const configuration = readConfiguration();
@@ -466,9 +494,11 @@ async function run() {
     emit('BOOTSTRAP_WAITING');
 
     parentWatch = setInterval(() => {
-      if (process.ppid !== originalParentPid) {
-        requestTerminal({ signal: 'SIGTERM', type: 'parent-exit' });
-      }
+      void parentStillOwnsBootstrap().then((stillOwned) => {
+        if (!stillOwned) {
+          requestTerminal({ signal: 'SIGTERM', type: 'parent-exit' });
+        }
+      });
     }, 25);
 
     const readiness = (async () => {

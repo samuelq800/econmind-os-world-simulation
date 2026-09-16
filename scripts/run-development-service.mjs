@@ -38,6 +38,7 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
   assertSafeEnvironment(process.env);
   const originalParentPid = process.ppid;
   let originalParentIsPnpm = process.platform === 'win32';
+  let originalPnpmOwnerPid;
   let activeChild;
   let stoppingPromise;
   let parentWatch;
@@ -58,9 +59,38 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
       originalParentIsPnpm = false;
     }
   }
+  if (originalParentIsPnpm && process.platform !== 'win32') {
+    try {
+      const { stdout } = await execFileAsync('ps', [
+        '-p',
+        String(originalParentPid),
+        '-o',
+        'ppid=',
+      ]);
+      const ownerPid = Number(stdout.trim());
+      originalPnpmOwnerPid =
+        Number.isSafeInteger(ownerPid) && ownerPid > 0 ? ownerPid : undefined;
+    } catch {
+      originalParentIsPnpm = false;
+    }
+  }
 
-  function parentStillOwnsLauncher() {
-    return originalParentIsPnpm && process.ppid === originalParentPid;
+  async function parentStillOwnsLauncher() {
+    if (!originalParentIsPnpm || process.ppid !== originalParentPid) {
+      return false;
+    }
+    if (process.platform === 'win32') return true;
+    try {
+      const { stdout } = await execFileAsync('ps', [
+        '-p',
+        String(originalParentPid),
+        '-o',
+        'ppid=',
+      ]);
+      return Number(stdout.trim()) === originalPnpmOwnerPid;
+    } catch {
+      return false;
+    }
   }
 
   function resultExitCode(result) {
@@ -148,25 +178,27 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
   }
 
   parentWatch = setInterval(() => {
-    if (!parentStillOwnsLauncher()) {
-      void beginShutdown('parent-exit', 'SIGTERM').catch((error) => {
-        console.error(
-          JSON.stringify({
-            event: 'PUBLIC_LAUNCHER_SHUTDOWN_FAILED',
-            service: `world-${serviceName}`,
-            error:
-              error instanceof Error
-                ? error.message
-                : 'Unknown launcher shutdown failure',
-          }),
-        );
-        process.exitCode = 1;
-      });
-    }
+    void parentStillOwnsLauncher().then((stillOwned) => {
+      if (!stillOwned) {
+        void beginShutdown('parent-exit', 'SIGTERM').catch((error) => {
+          console.error(
+            JSON.stringify({
+              event: 'PUBLIC_LAUNCHER_SHUTDOWN_FAILED',
+              service: `world-${serviceName}`,
+              error:
+                error instanceof Error
+                  ? error.message
+                  : 'Unknown launcher shutdown failure',
+            }),
+          );
+          process.exitCode = 1;
+        });
+      }
+    });
   }, 25);
 
   try {
-    if (!parentStillOwnsLauncher()) {
+    if (!(await parentStillOwnsLauncher())) {
       await beginShutdown('parent-exit', 'SIGTERM');
     } else if (mode === 'dev' && definition.buildConfig !== undefined) {
       const compiler = path.join(
