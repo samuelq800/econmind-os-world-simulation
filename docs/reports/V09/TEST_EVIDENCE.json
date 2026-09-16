@@ -3,7 +3,7 @@
   "package": "V09.2 + V09.3",
   "state": "IMPLEMENTED_UNVERIFIED",
   "base": "8da085184bf063b61ba53c10537c6a797018072b",
-  "implementation_candidate_tip": "82d9504b37fcbe2a839f9a8454cfacc6ef98dde3",
+  "implementation_candidate_tip": "d6793dd9439cc82e959d6d086ee4735dbdf62b57",
   "toolchain": {
     "node": "24.20.0",
     "pnpm": "12.3.4",
@@ -139,8 +139,15 @@
       "V09.3 recovery/outbox/lease-claim cases",
       "supplemental checkpoint, replay and corrupt-watermark recovery cases"
     ],
-    "execution_result_for_this_tip": "NOT_RUN_LOCALLY; await isolated CI result",
-    "local_probe": "docker, psql and pg_isready unavailable; loopback PostgreSQL unavailable"
+    "execution_result_for_this_tip": "PASS",
+    "run": {
+      "provider": "GitHub Actions disposable PostgreSQL 16 service",
+      "id": 35103754813,
+      "url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35103754813",
+      "commit": "d6793dd9439cc82e959d6d086ee4735dbdf62b57",
+      "result": "PASS"
+    },
+    "local_probe": "docker, psql and pg_isready unavailable; loopback PostgreSQL unavailable; no local remote target was attempted"
   },
   "review_boundary": {
     "implementation_self_assessed_open_p0": 0,

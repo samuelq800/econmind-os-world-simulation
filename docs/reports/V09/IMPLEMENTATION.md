@@ -61,7 +61,8 @@ The former root-check reproducibility defect is closed by building
 `@econmind/core` before recursive typechecking. A new no-output worktree at
 `82d9504b37fcbe2a839f9a8454cfacc6ef98dde3` completed the unmodified official
 `pnpm check` command successfully. The native PostgreSQL matrix remains a
-separate execution fact: its CI wiring now runs atomic rollback,
-acknowledgement-loss retry, two-connection race, backend termination and old
-WorldVersion cases as well as recovery tests, but no such CI run is claimed in
-this report until its result is observed.
+separate execution fact: isolated GitHub Actions PostgreSQL 16 run
+`35103754813` passed on `d6793dd9439cc82e959d6d086ee4735dbdf62b57`, covering
+atomic rollback, acknowledgement-loss retry, two-connection race, backend
+termination, old WorldVersion, writer lease and recovery cases. This execution
+evidence does not itself authorize a Gate B decision or a merge.

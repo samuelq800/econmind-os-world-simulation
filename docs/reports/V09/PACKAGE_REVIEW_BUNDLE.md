@@ -6,13 +6,13 @@
 PACKAGE = V09.2 + V09.3
 STATE = IMPLEMENTED_UNVERIFIED / READY_FOR_PACKAGE_REVIEW_CANDIDATE
 BASE = 8da085184bf063b61ba53c10537c6a797018072b
-IMPLEMENTATION_CODE_TIP = 82d9504b37fcbe2a839f9a8454cfacc6ef98dde3
+IMPLEMENTATION_CODE_TIP = d6793dd9439cc82e959d6d086ee4735dbdf62b57
 INDEPENDENT_REVIEW = REQUIRED
 GATE_B = NOT_RUN
 MAIN_MERGE = NO
 ```
 
-Review implementation code at the immutable `82d9504b37fcbe2a839f9a8454cfacc6ef98dde3`
+Review implementation code at the immutable `d6793dd9439cc82e959d6d086ee4735dbdf62b57`
 tip and this evidence bundle. Do not treat this implementation report, its
 local tests, an existing CI job, or a static database adapter as independent
 approval.
