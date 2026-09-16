@@ -12,7 +12,7 @@
 
 ## Delivered
 
-- `causal-channels.ts` records all 105 user-requested pathways as named,
+- `causal-channels.ts` records all 150 user-requested pathways as named,
   signed directed edges. Topology scheduling is deliberately value-free, so a
   bare decimal cannot masquerade as money, people, tonnes, or a rate.
 - `causal-values.ts` adds the only concrete numerical path. Every input and
@@ -28,9 +28,13 @@
   per-firm energy-cost selection, startup cohorts, and exact SOE
   guarantee/rollover accounting. Inputs/outputs are exact money, named-unit
   quantities, price per physical unit, or explicit dimensioned rates.
-- The focused suite verifies all 105 paths, exact population and GCU examples,
-  unit rejection, deterministic partitioning, and all five Firm Ecology
-  mechanisms.
+- `quantified-systems.ts` executes C101–C150 through their six declared
+  system boundaries. It accepts only exact-unit transmissions from its own
+  chain range, making each later mechanism calculable without inventing a
+  country-level coefficient or permitting cross-system leakage.
+- The focused suite verifies all 150 paths, exact population, price, money,
+  physical-unit and network-outage examples, unit/system rejection,
+  deterministic partitioning, and all five Firm Ecology mechanisms.
 
 ## Boundary declaration
 
@@ -43,6 +47,7 @@
 | UI, worker, API, map, cache, forecast                | None                                                                  |
 | Legacy or original EconMind site                     | None                                                                  |
 | Firm registry, bankruptcy, SOE guarantee application | None                                                                  |
+| C101–C150 state settlement                           | None                                                                  |
 
 ## Still gated
 
@@ -53,5 +58,6 @@
   accepted effect through the approved atomic World Core path.
 - V19–V21 implementation, and real banking/FX/trade/FDI/route behavior, remain
   outside this candidate.
-- C101–C105 calculations do not authorize a firm lifecycle, liquidation,
-  creditor waterfall, guarantee approval, or World Core settlement.
+- C101–C150 calculations do not authorize a firm lifecycle, liquidation,
+  creditor waterfall, guarantee approval, parameter calibration, or World Core
+  settlement.

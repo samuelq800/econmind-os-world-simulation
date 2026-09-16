@@ -7,9 +7,10 @@
 - **Immutable baseline:** `291034d1c4f4ca1f9a3fd8779cf129ec46793b4f`
 - **Candidate branch:** `codex/f-v11-v18-causal-channels`
 - **Requested additions:** three user-supplied catalogues of cross-engine causal
-  chains, numbered 1–50, 51–100 and 101–105, covering human systems,
+  chains, numbered 1–50, 51–100 and 101–150, covering human systems,
   industry/technology/energy, fiscal/monetary/banking, FX/trade/FDI,
-  expectations, political support, crisis resilience, and Firm Ecology.
+  expectations, political support, crisis resilience, Firm Ecology,
+  institutions, land/water/food, environment, household structure, and assets.
 
 This is a pure `packages/core` preparation only. It must not update
 `status/progress.json`, create a command/event/receipt, modify a migration,
@@ -54,10 +55,15 @@ Core transaction may decide to apply them.
    explicit exact-unit firm-count, capacity, employment, cash-flow,
    balance-sheet, energy-price, startup and SOE-support results. It cannot
    create/close a firm or resolve a bankruptcy.
+7. Bind C101–C150 to one of six quantified systems: Firm Ecology,
+   Institutions/State Capacity, Land/Water/Food, Environment/Natural Capital,
+   Demography/Household, or Asset/Spatial/Digital. A batch fails closed if it
+   contains a chain outside its own system and otherwise returns the exact,
+   unit-safe, inert effect for each supplied transmission.
 
 ## Invariants and evidence
 
-- All 105 IDs are unique and present; every chain has at least one directed
+- All 150 IDs are unique and present; every chain has at least one directed
   edge and an explicit owning scope.
 - A caller cannot schedule an unknown chain/edge, a zero/negative delay, or an
   empty parameter version.
@@ -71,6 +77,9 @@ Core transaction may decide to apply them.
 - Firm Ecology preserves whole `firm` and `person` stocks where required;
   prices are currency per named physical unit; no default entry coefficient,
   liquidation recovery, startup rate, guarantee, or SOE support is assumed.
+- All C101–C150 transmissions are executable only through their named
+  quantified-system boundary, with exact source/target dimensions and a
+  caller-supplied, versioned response. No system accepts a naked decimal.
 - Tests must demonstrate the human-system, industry/energy, and future
   monetary/trade paths without supplying implicit economic parameters.
 
@@ -81,5 +90,7 @@ Core transaction may decide to apply them.
 - Banking, FX, trade, FDI, route, tariff, or sanctions execution.
 - Firm registry mutation, contracts, equity/debt issuance, bankruptcy
   resolution, guarantee authorization, or any application of firm results.
+- Calibration of institutional, land/water, environmental, household, asset,
+  spatial, or digital response parameters, and all of their runtime settlement.
 - Any settlement-time ownership resolution, event/posting generation,
   authorization, atomic commit, production database operation, map, or UI.
