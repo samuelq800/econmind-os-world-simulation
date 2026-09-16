@@ -17,6 +17,6 @@
     "reader": "v09_staging_reader"
   },
   "owner_confirmation": "OWNER_APPROVED_DEDICATED_NONPRODUCTION_V09",
-  "evidence_output_path": "/Users/samuel/Documents/econclub/evidence/vzwrereseklnrjbtmsmc-gate-b-staging-database-create.json",
-  "target_fingerprint": "574e55707cd726587002f4cf46b038490962c6bca5f2fca691e40a3d4f09954d"
+  "evidence_output_path": "/Users/samuel/Documents/econclub/evidence/vzwrereseklnrjbtmsmc-gate-b-staging-ownership-matrix.json",
+  "target_fingerprint": "0875880639de0499bfe3ee5abb6eda1a963905615520684f26a0f30ece93b939"
 }

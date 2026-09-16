@@ -601,6 +601,9 @@ describe('V09 dedicated staging evidence runner', () => {
     expect(primary.map((call) => call.step)).toContain(
       'GRANT_MIGRATION_OWNER_DATABASE_CREATE',
     );
+    expect(
+      primary.find((call) => call.step === 'VERIFY_OWNERSHIP_GRANTS_RLS')?.text,
+    ).toContain('group by n.nspowner');
     const cleanup = cleanupCalls(fake);
     expect(
       callIndex(cleanup, 'CLEANUP_DROP_EXACT_SCHEMA_RESTRICT'),
