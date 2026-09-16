@@ -191,6 +191,10 @@ describePostgres('V09 atomic disposable PostgreSQL preparation harness', () => {
     const writerPool = new Pool({ connectionString, max: 1 });
     const observerPool = new Pool({ connectionString, max: 1 });
     const writer = await writerPool.connect();
+    // pg emits a terminal socket error after the controlled backend kill.
+    // The asserted query observes that failure; this listener prevents an
+    // expected transport event from becoming an unrelated unhandled error.
+    writer.on('error', () => undefined);
     try {
       await writer.query('begin');
       await writer.query(
