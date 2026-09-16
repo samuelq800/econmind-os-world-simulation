@@ -17,7 +17,8 @@ export type CausalOwnerScope =
   | 'E08_TO_E14_REAL_ECONOMY'
   | 'E13_TO_E14_DISTRIBUTION'
   | 'V19_TO_V21_FUTURE_MACRO_EXTERNAL'
-  | 'V24_FUTURE_GOVERNANCE_CRISIS';
+  | 'V24_FUTURE_GOVERNANCE_CRISIS'
+  | 'V25_FUTURE_FIRM_ECOLOGY';
 
 export interface CausalEdge {
   readonly source: string;
@@ -62,11 +63,12 @@ const REAL_ECONOMY: CausalOwnerScope = 'E08_TO_E14_REAL_ECONOMY';
 const DISTRIBUTION: CausalOwnerScope = 'E13_TO_E14_DISTRIBUTION';
 const FUTURE_MACRO: CausalOwnerScope = 'V19_TO_V21_FUTURE_MACRO_EXTERNAL';
 const GOVERNANCE: CausalOwnerScope = 'V24_FUTURE_GOVERNANCE_CRISIS';
+const FIRM_ECOLOGY: CausalOwnerScope = 'V25_FUTURE_FIRM_ECOLOGY';
 const READY: CausalReadiness = 'PARAMETERIZED_KERNEL_READY';
 const FUTURE: CausalReadiness = 'FUTURE_INTERFACE_ONLY';
 
 /**
- * User-requested cross-engine pathways 1–100. The entries intentionally carry
+ * User-requested cross-engine pathways 1–105. The entries intentionally carry
  * signal topology only: neither a default elasticity nor a country parameter
  * can enter through this catalogue.
  */
@@ -1612,6 +1614,84 @@ export const CAUSAL_CHAINS: readonly CausalChainDefinition[] = Object.freeze([
         'INCREASES',
       ),
       edge('RESPONSE_SPEED_AND_RECOVERY', 'PUBLIC_SUPPORT', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C101',
+    'Firm entry, exit, capacity and competitive margins',
+    FIRM_ECOLOGY,
+    READY,
+    [
+      edge('SECTOR_PROFITABILITY', 'NEW_FIRM_ENTRY', 'INCREASES'),
+      edge('NEW_FIRM_ENTRY', 'SECTOR_CAPACITY', 'INCREASES'),
+      edge('SECTOR_CAPACITY', 'LABOUR_DEMAND', 'INCREASES'),
+      edge('NEW_FIRM_ENTRY', 'MARKET_COMPETITION', 'INCREASES'),
+      edge('MARKET_COMPETITION', 'SECTOR_MARGIN', 'DECREASES'),
+      edge('SECTOR_PROFITABILITY', 'FIRM_EXIT', 'DECREASES'),
+      edge('FIRM_EXIT', 'SECTOR_CAPACITY', 'DECREASES'),
+      edge('FIRM_EXIT', 'SECTOR_EMPLOYMENT', 'DECREASES'),
+      edge('SECTOR_CAPACITY', 'MARKET_SUPPLY', 'INCREASES'),
+      edge('MARKET_SUPPLY', 'UNIT_PRICE', 'DECREASES'),
+    ],
+  ),
+  chain(
+    'C102',
+    'Firm distress, insolvency and creditor spillovers',
+    FIRM_ECOLOGY,
+    READY,
+    [
+      edge('OPERATING_CASH_FLOW', 'DEBT_SERVICE_FAILURE', 'DECREASES'),
+      edge('DEBT_SERVICE_FAILURE', 'TECHNICAL_DEFAULT', 'INCREASES'),
+      edge('TECHNICAL_DEFAULT', 'INSOLVENCY', 'INCREASES'),
+      edge('INSOLVENCY', 'LAYOFFS', 'INCREASES'),
+      edge('INSOLVENCY', 'ASSET_LIQUIDATION', 'INCREASES'),
+      edge('INSOLVENCY', 'SUPPLIER_LOSSES', 'INCREASES'),
+      edge('INSOLVENCY', 'BANK_NPL', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C103',
+    'Energy-shock firm selection and productivity composition',
+    FIRM_ECOLOGY,
+    READY,
+    [
+      edge('ENERGY_PRICE_SHOCK', 'LOW_EFFICIENCY_FIRM_EXIT', 'INCREASES'),
+      edge(
+        'LOW_EFFICIENCY_FIRM_EXIT',
+        'SURVIVING_FIRM_AVERAGE_PRODUCTIVITY',
+        'INCREASES',
+      ),
+    ],
+  ),
+  chain(
+    'C104',
+    'Startup formation, failure, scaling and innovation',
+    FIRM_ECOLOGY,
+    READY,
+    [
+      edge('EDUCATION', 'QUALIFIED_FOUNDERS', 'INCREASES'),
+      edge('FINANCE', 'STARTUP_FORMATION', 'INCREASES'),
+      edge('MARKET_OPPORTUNITY', 'STARTUP_FORMATION', 'INCREASES'),
+      edge('INSTITUTIONAL_CAPACITY', 'STARTUP_FORMATION', 'INCREASES'),
+      edge('STARTUP_FORMATION', 'STARTUP_EMPLOYMENT', 'INCREASES'),
+      edge('STARTUP_FORMATION', 'ENTREPRENEURIAL_INNOVATION', 'INCREASES'),
+      edge('STARTUP_COHORT', 'STARTUP_FAILURE', 'INCREASES'),
+      edge('STARTUP_SURVIVAL', 'SCALE_UP_FIRM_COUNT', 'INCREASES'),
+    ],
+  ),
+  chain(
+    'C105',
+    'SOE soft-budget support, factor lock-in and fiscal liability',
+    FIRM_ECOLOGY,
+    READY,
+    [
+      edge('SOE_LOSSES', 'GOVERNMENT_GUARANTEE', 'INCREASES'),
+      edge('SOE_LOSSES', 'BANK_ROLLOVER_CREDIT', 'INCREASES'),
+      edge('GOVERNMENT_GUARANTEE', 'SOE_EXIT', 'DECREASES'),
+      edge('BANK_ROLLOVER_CREDIT', 'SOE_EXIT', 'DECREASES'),
+      edge('SOE_SOFT_BUDGET_SUPPORT', 'CAPITAL_LABOUR_LOCK_IN', 'INCREASES'),
+      edge('CAPITAL_LABOUR_LOCK_IN', 'PRODUCTIVITY', 'DECREASES'),
+      edge('GOVERNMENT_GUARANTEE', 'FUTURE_FISCAL_LIABILITY', 'INCREASES'),
     ],
   ),
 ]);

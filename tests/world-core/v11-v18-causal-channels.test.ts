@@ -13,15 +13,15 @@ import {
 describe('V11–V18 causal-channel preparation', () => {
   it('records every requested pathway with no implicit economic parameter', () => {
     expect(() => assertCausalCatalogueIntegrity()).not.toThrow();
-    expect(CAUSAL_CHAINS).toHaveLength(100);
+    expect(CAUSAL_CHAINS).toHaveLength(105);
     expect(new Set(CAUSAL_CHAINS.map((definition) => definition.id)).size).toBe(
-      100,
+      105,
     );
     expect(
       CAUSAL_CHAINS.filter(
         (definition) => definition.readiness === 'PARAMETERIZED_KERNEL_READY',
       ),
-    ).toHaveLength(32);
+    ).toHaveLength(37);
     expect(
       CAUSAL_CHAINS.filter(
         (definition) => definition.readiness === 'FUTURE_INTERFACE_ONLY',
@@ -40,6 +40,11 @@ describe('V11–V18 causal-channel preparation', () => {
     expect(getCausalChain('C100').edges).toContainEqual({
       source: 'DISASTER_CIVIL_EMERGENCY',
       target: 'DISPLACEMENT',
+      direction: 'INCREASES',
+    });
+    expect(getCausalChain('C105').edges).toContainEqual({
+      source: 'GOVERNMENT_GUARANTEE',
+      target: 'FUTURE_FISCAL_LIABILITY',
       direction: 'INCREASES',
     });
   });
@@ -184,6 +189,34 @@ describe('V11–V18 causal-channel preparation', () => {
     });
     expect(mortgage.targetDelta.amount).toBe('12.5');
     expect(mortgage.targetAfter).toMatchObject({ amount: '512.5' });
+
+    const supplyPrice = scheduleExactCausalTransmission({
+      effectId: 'firm-supply-price-v1',
+      chainId: 'C101',
+      edgeIndex: 9,
+      sourcePeriod: 10,
+      delayPeriods: 1,
+      source: {
+        node: 'MARKET_SUPPLY',
+        amount: '5',
+        unit: { kind: 'QUANTITY', unit: 'tonne_per_period' },
+        sign: 'NON_NEGATIVE',
+      },
+      targetBefore: {
+        node: 'UNIT_PRICE',
+        amount: '10',
+        unit: { kind: 'UNIT_PRICE', currency: 'GCU', perUnit: 'tonne' },
+        sign: 'NON_NEGATIVE',
+      },
+      response: {
+        sourceUnit: { kind: 'QUANTITY', unit: 'tonne_per_period' },
+        targetUnit: { kind: 'UNIT_PRICE', currency: 'GCU', perUnit: 'tonne' },
+        targetAmountPerSourceUnit: '0.2',
+        parameterVersion: 'sector-supply-price-v1',
+      },
+    });
+    expect(supplyPrice.targetDelta.amount).toBe('-1');
+    expect(supplyPrice.targetAfter).toMatchObject({ amount: '9' });
   });
 
   it('rejects wrong dimensions, impossible stock reductions, and undued application', () => {
