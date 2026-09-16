@@ -68,6 +68,7 @@ function startPublicCommand(
 ): ManagedPublicCommand {
   const child = spawn('pnpm', [service.command], {
     cwd: repositoryRoot,
+    detached: process.platform !== 'win32',
     env: {
       ...process.env,
       ECONMIND_ENV: 'local',
@@ -92,6 +93,15 @@ function startPublicCommand(
     child.once('exit', (code, signal) => resolve({ code, signal }));
   });
   return { child, exited, output: () => output };
+}
+
+function signalOwnedGroup(
+  managed: ManagedPublicCommand,
+  signal: NodeJS.Signals,
+) {
+  const pid = managed.child.pid;
+  if (pid === undefined) throw new Error('owned pnpm fixture has no PID');
+  process.kill(process.platform === 'win32' ? pid : -pid, signal);
 }
 
 function preloadEnvironment(preload: string): NodeJS.ProcessEnv {
@@ -270,7 +280,7 @@ async function publicBoundaryAttack(
   try {
     await waitForHttp(port);
     captured = descendants(await readProcessTable(), managed.child.pid ?? -1);
-    managed.child.kill(signal);
+    signalOwnedGroup(managed, signal);
     const launcherExit = await Promise.race([
       managed.exited,
       new Promise<never>((_, reject) => {
@@ -404,7 +414,7 @@ async function startupWindowAttack(service: ServiceDefinition) {
       5_000,
       'delayed launcher creation',
     );
-    managed.child.kill('SIGTERM');
+    signalOwnedGroup(managed, 'SIGTERM');
     const launcherExit = await managed.exited;
     await waitUntil(
       async () => (await liveCapturedRows(captured)).length === 0,
