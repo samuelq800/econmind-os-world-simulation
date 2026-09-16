@@ -93,6 +93,10 @@ body {
   margin-top: 1.6rem;
 }
 
+.fictional-atlas__map-toolbar--layers {
+  margin-top: 0.65rem;
+}
+
 .fictional-atlas__map-toolbar > span {
   margin-right: 0.2rem;
   color: #a7c3bd;
@@ -202,6 +206,15 @@ body {
   stroke: #fff4bd;
   stroke-opacity: 0.72;
   stroke-width: 22;
+}
+
+.atlas-visual-territory .atlas-visual-territory__maritime {
+  fill: #4db9d5;
+  fill-opacity: 0.07;
+  stroke: #a7e7f5;
+  stroke-dasharray: 90 80;
+  stroke-opacity: 0.82;
+  stroke-width: 20;
 }
 
 .atlas-visual-territory circle {

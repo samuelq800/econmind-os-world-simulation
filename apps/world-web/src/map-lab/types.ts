@@ -60,9 +60,17 @@ export type FictionalPolity = Readonly<{
 export type AtlasVisualTerritory = Readonly<{
   id: string;
   name: string;
+  /** A display boundary category, never a V27 sovereignty classification. */
+  boundaryForm: 'COASTAL' | 'INLAND' | 'ISLAND_GROUP';
   polygon: AtlasPolygon;
   capital: AtlasPoint;
   color: string;
+  /**
+   * Optional visual sea envelope around one or two named display islands.
+   * It does not establish a legal maritime claim, EEZ or country record.
+   */
+  maritimeEnvelope?: AtlasPolygon;
+  displayIslandCount?: 1 | 2;
   /** Display-only geology/climate rationale with no quantity or capacity. */
   resourceProfile: readonly AtlasResourceTag[];
 }>;
@@ -188,6 +196,8 @@ export type FictionalAtlas = Readonly<{
   crs: typeof FICTIONAL_ATLAS_CRS;
   widthKm: number;
   heightKm: number;
+  /** The west and east borders meet at the same fictional meridian. */
+  wrapsHorizontally: true;
   landmasses: readonly AtlasLandmass[];
   tectonicGroups: readonly AtlasTectonicGroup[];
   polities: readonly FictionalPolity[];

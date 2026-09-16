@@ -282,7 +282,7 @@ export function measureRoute(
     mode: route.mode,
     fromNodeId: from.id,
     toNodeId: to.id,
-    distanceKm: polylineDistanceKm(route.path),
+    distanceKm: polylineDistanceKm(route.path, atlas.widthKm),
   };
 }
 
@@ -301,6 +301,9 @@ export function validateFictionalAtlas(
     atlas.heightKm <= 0
   ) {
     throw new Error('Fictional atlas extent must be positive and finite');
+  }
+  if (atlas.wrapsHorizontally !== true) {
+    throw new Error('Fictional atlas must wrap horizontally at its map edges');
   }
 
   indexById(atlas.landmasses);
@@ -335,6 +338,33 @@ export function validateFictionalAtlas(
       throw new Error(
         `Visual territory ${territory.id} capital must remain in territory`,
       );
+    }
+    if (territory.boundaryForm === 'ISLAND_GROUP') {
+      if (
+        !territory.maritimeEnvelope ||
+        (territory.displayIslandCount !== 1 &&
+          territory.displayIslandCount !== 2)
+      ) {
+        throw new Error(
+          `Island-group visual territory ${territory.id} needs a one-or-two-island sea envelope`,
+        );
+      }
+    } else if (
+      territory.maritimeEnvelope !== undefined ||
+      territory.displayIslandCount !== undefined
+    ) {
+      throw new Error(
+        `Non-island visual territory ${territory.id} cannot claim a display sea envelope`,
+      );
+    }
+    if (territory.maritimeEnvelope) {
+      for (const point of territory.maritimeEnvelope)
+        validatePointInExtent(atlas, point);
+      if (!pointInPolygon(territory.capital, territory.maritimeEnvelope)) {
+        throw new Error(
+          `Visual territory ${territory.id} sea envelope must contain its capital marker`,
+        );
+      }
     }
     for (const resource of territory.resourceProfile) {
       if (!hasPlausibleResourceOrigin(resource)) {

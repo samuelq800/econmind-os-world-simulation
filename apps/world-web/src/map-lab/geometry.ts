@@ -6,18 +6,42 @@ export function isFinitePoint(point: AtlasPoint): boolean {
   return Number.isFinite(point.xKm) && Number.isFinite(point.yKm);
 }
 
-export function distanceKm(from: AtlasPoint, to: AtlasPoint): number {
-  return Math.hypot(to.xKm - from.xKm, to.yKm - from.yKm);
+/**
+ * Measures a segment in the local fictional coordinate system. When a width is
+ * supplied, the atlas is a horizontal cylinder: x=0 and x=width are adjacent.
+ */
+export function distanceKm(
+  from: AtlasPoint,
+  to: AtlasPoint,
+  horizontalWrapWidthKm?: number,
+): number {
+  let horizontalDistanceKm = Math.abs(to.xKm - from.xKm);
+  if (horizontalWrapWidthKm !== undefined) {
+    if (!Number.isFinite(horizontalWrapWidthKm) || horizontalWrapWidthKm <= 0) {
+      throw new Error('Horizontal wrap width must be a positive finite value');
+    }
+    if (horizontalDistanceKm > horizontalWrapWidthKm) {
+      throw new Error('Wrapped points must be inside one atlas width');
+    }
+    horizontalDistanceKm = Math.min(
+      horizontalDistanceKm,
+      horizontalWrapWidthKm - horizontalDistanceKm,
+    );
+  }
+  return Math.hypot(horizontalDistanceKm, to.yKm - from.yKm);
 }
 
-export function polylineDistanceKm(points: readonly AtlasPoint[]): number {
+export function polylineDistanceKm(
+  points: readonly AtlasPoint[],
+  horizontalWrapWidthKm?: number,
+): number {
   if (points.length < 2) {
     throw new Error(
       'A measurable transport route requires at least two points',
     );
   }
   return points.slice(1).reduce((total, point, index) => {
-    return total + distanceKm(points[index]!, point);
+    return total + distanceKm(points[index]!, point, horizontalWrapWidthKm);
   }, 0);
 }
 

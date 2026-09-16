@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import satelliteTerrainUrl from '../assets/asterra-satellite-terrain-v2.png';
+import satelliteTerrainUrl from '../assets/asterra-satellite-terrain-v8.png';
 
 import { FICTIONAL_ATLAS } from './atlas.js';
 import { formatDistanceKm, validateFictionalAtlas } from './route-oracle.js';
@@ -23,15 +23,49 @@ const mapViews = [
     label: 'Full atlas',
     viewBox: `0 0 ${FICTIONAL_ATLAS.widthKm} ${FICTIONAL_ATLAS.heightKm}`,
   },
-  { id: 'western', label: 'Western Arc', viewBox: '0 1500 12000 6000' },
-  { id: 'interior', label: 'Uruq & Tessera', viewBox: '11000 1500 16000 8000' },
-  { id: 'eastern', label: 'Eastern Wedge', viewBox: '25000 2000 11000 5500' },
+  {
+    id: 'western',
+    label: 'Southern continental core',
+    viewBox: '18000 8500 14000 9000',
+  },
+  {
+    id: 'interior',
+    label: 'Central shelf & arc',
+    viewBox: '9000 6000 14000 8000',
+  },
+  {
+    id: 'eastern',
+    label: 'Rifted maritime fragment',
+    viewBox: '26500 3500 8500 7000',
+  },
   {
     id: 'southern',
-    label: 'Southern Crescent',
-    viewBox: '8000 9000 20000 8000',
+    label: 'Strait archipelago',
+    viewBox: '500 9500 14500 6500',
   },
 ] as const;
+
+const mapLayers = [
+  { id: 'physical', label: 'Physical annotations' },
+  { id: 'climate', label: 'Climate' },
+  { id: 'currents', label: 'Ocean currents' },
+  { id: 'trade', label: 'Trade routes' },
+  { id: 'resources', label: 'Resources' },
+  { id: 'political', label: 'Political' },
+  { id: 'infrastructure', label: 'Infrastructure' },
+] as const;
+
+type MapLayerId = (typeof mapLayers)[number]['id'];
+
+const initialMapLayerVisibility: Record<MapLayerId, boolean> = {
+  physical: false,
+  climate: false,
+  currents: false,
+  trade: false,
+  resources: false,
+  political: false,
+  infrastructure: false,
+};
 
 const areaFeatures = new Set([
   'BASIN',
@@ -82,12 +116,23 @@ function visualTerritoryElement(
   const resources = territory.resourceProfile
     .map((tag) => tag.label)
     .join(', ');
+  const nameY = territory.capital.yKm + 95;
   return (
     <g className="atlas-visual-territory" key={territory.id}>
+      {territory.maritimeEnvelope ? (
+        <path
+          className="atlas-visual-territory__maritime"
+          d={svgPath(territory.maritimeEnvelope, true)}
+        />
+      ) : null}
       <path d={svgPath(territory.polygon, true)} fill={territory.color} />
       <circle cx={territory.capital.xKm} cy={territory.capital.yKm} r={58} />
       {showName ? (
-        <text x={territory.capital.xKm + 95} y={territory.capital.yKm - 95}>
+        <text
+          transform={`translate(0 ${nameY * 2}) scale(1 -1)`}
+          x={territory.capital.xKm + 95}
+          y={nameY}
+        >
           {territory.name}
         </text>
       ) : null}
@@ -96,6 +141,9 @@ function visualTerritoryElement(
         {resources
           ? `; physical resource context: ${resources}`
           : '; trade-oriented / resource-light'}
+        {territory.displayIslandCount
+          ? `; ${territory.displayIslandCount}-island display group with a visual sea envelope`
+          : ''}
       </title>
     </g>
   );
@@ -198,7 +246,15 @@ function infrastructureElement(infrastructure: AtlasInfrastructure) {
 export function FictionalWorldMap() {
   const [activeMapViewId, setActiveMapViewId] =
     useState<(typeof mapViews)[number]['id']>('overview');
+  const [visibleLayers, setVisibleLayers] = useState(initialMapLayerVisibility);
   const activeMapView = mapViews.find((view) => view.id === activeMapViewId)!;
+
+  const toggleLayer = (layerId: MapLayerId) => {
+    setVisibleLayers((current) => ({
+      ...current,
+      [layerId]: !current[layerId],
+    }));
+  };
 
   return (
     <section aria-labelledby="atlas-title" className="fictional-atlas">
@@ -239,6 +295,25 @@ export function FictionalWorldMap() {
             type="button"
           >
             {view.label}
+          </button>
+        ))}
+      </div>
+
+      <div
+        aria-label="Map layers"
+        className="fictional-atlas__map-toolbar fictional-atlas__map-toolbar--layers"
+        role="group"
+      >
+        <span>Layers</span>
+        {mapLayers.map((layer) => (
+          <button
+            aria-pressed={visibleLayers[layer.id]}
+            className={visibleLayers[layer.id] ? 'is-active' : undefined}
+            key={layer.id}
+            onClick={() => toggleLayer(layer.id)}
+            type="button"
+          >
+            {layer.label}
           </button>
         ))}
       </div>
@@ -359,54 +434,76 @@ export function FictionalWorldMap() {
             width={FICTIONAL_ATLAS.widthKm}
           />
 
-          {FICTIONAL_ATLAS.latitudeBands.map((band) => (
-            <rect
-              className={`atlas-latitude atlas-latitude--${band.thermalClass.toLowerCase()}`}
-              height={band.southEdgeKm - band.northEdgeKm}
-              key={band.id}
-              width={FICTIONAL_ATLAS.widthKm}
-              y={band.northEdgeKm}
-            >
-              <title>{band.name}</title>
-            </rect>
-          ))}
+          <g
+            aria-label="Map annotations reflected with the vertically inverted terrain"
+            transform={`translate(0 ${FICTIONAL_ATLAS.heightKm}) scale(1 -1)`}
+          >
+            {visibleLayers.climate
+              ? FICTIONAL_ATLAS.latitudeBands.map((band) => (
+                  <rect
+                    className={`atlas-latitude atlas-latitude--${band.thermalClass.toLowerCase()}`}
+                    height={band.southEdgeKm - band.northEdgeKm}
+                    key={band.id}
+                    width={FICTIONAL_ATLAS.widthKm}
+                    y={band.northEdgeKm}
+                  >
+                    <title>{band.name}</title>
+                  </rect>
+                ))
+              : null}
 
-          {FICTIONAL_ATLAS.oceanCurrents.map((current) => (
-            <path
-              className="atlas-warm-current"
-              d={svgPath(current.geometry)}
-              key={current.id}
-              markerEnd="url(#warm-current-arrow)"
-            >
-              <title>{current.name} — warm subsurface current</title>
-            </path>
-          ))}
+            {visibleLayers.currents
+              ? FICTIONAL_ATLAS.oceanCurrents.map((current) => (
+                  <path
+                    className="atlas-warm-current"
+                    d={svgPath(current.geometry)}
+                    key={current.id}
+                    markerEnd="url(#warm-current-arrow)"
+                  >
+                    <title>{current.name} — warm subsurface current</title>
+                  </path>
+                ))
+              : null}
 
-          {FICTIONAL_ATLAS.visualTerritories.map((territory) =>
-            visualTerritoryElement(territory, activeMapView.id !== 'overview'),
-          )}
+            {visibleLayers.political
+              ? FICTIONAL_ATLAS.visualTerritories.map((territory) =>
+                  visualTerritoryElement(
+                    territory,
+                    activeMapView.id !== 'overview',
+                  ),
+                )
+              : null}
 
-          {FICTIONAL_ATLAS.landUseAreas.map(landUseElement)}
-          {FICTIONAL_ATLAS.features.map(featureElement)}
+            {visibleLayers.resources
+              ? FICTIONAL_ATLAS.landUseAreas.map(landUseElement)
+              : null}
+            {visibleLayers.physical
+              ? FICTIONAL_ATLAS.features.map(featureElement)
+              : null}
 
-          {FICTIONAL_ATLAS.routes.map((route) => (
-            <path
-              className={`atlas-route atlas-route--${route.mode.toLowerCase()}`}
-              d={svgPath(route.path)}
-              key={route.id}
-            >
-              <title>
-                {route.id} —{' '}
-                {formatDistanceKm(
-                  measuredRoutes.find(
-                    (measured) => measured.routeId === route.id,
-                  )!.distanceKm,
-                )}
-              </title>
-            </path>
-          ))}
+            {visibleLayers.trade
+              ? FICTIONAL_ATLAS.routes.map((route) => (
+                  <path
+                    className={`atlas-route atlas-route--${route.mode.toLowerCase()}`}
+                    d={svgPath(route.path)}
+                    key={route.id}
+                  >
+                    <title>
+                      {route.id} —{' '}
+                      {formatDistanceKm(
+                        measuredRoutes.find(
+                          (measured) => measured.routeId === route.id,
+                        )!.distanceKm,
+                      )}
+                    </title>
+                  </path>
+                ))
+              : null}
 
-          {FICTIONAL_ATLAS.infrastructure.map(infrastructureElement)}
+            {visibleLayers.infrastructure
+              ? FICTIONAL_ATLAS.infrastructure.map(infrastructureElement)
+              : null}
+          </g>
         </svg>
       </div>
 

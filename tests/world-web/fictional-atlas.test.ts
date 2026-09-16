@@ -5,9 +5,30 @@ import {
   formatDistanceKm,
   validateFictionalAtlas,
 } from '../../apps/world-web/src/map-lab/route-oracle.js';
+import { polylineDistanceKm } from '../../apps/world-web/src/map-lab/geometry.js';
 import type { FictionalAtlas } from '../../apps/world-web/src/map-lab/types.js';
 
 describe('V25.1 fictional atlas preparation', () => {
+  it('treats the east and west edges as one meridian for measured routes', () => {
+    expect(
+      polylineDistanceKm(
+        [
+          { xKm: 35_900, yKm: 9_000 },
+          { xKm: 100, yKm: 9_000 },
+        ],
+        FICTIONAL_ATLAS.widthKm,
+      ),
+    ).toBe(200);
+
+    const nonWrapping: FictionalAtlas = {
+      ...FICTIONAL_ATLAS,
+      wrapsHorizontally: false as true,
+    };
+    expect(() => validateFictionalAtlas(nonWrapping)).toThrow(
+      'must wrap horizontally',
+    );
+  });
+
   it('measures every prepared road and sea lane from the rendered local geometry', () => {
     const measurements = validateFictionalAtlas(FICTIONAL_ATLAS);
 
@@ -140,6 +161,33 @@ describe('V25.1 fictional atlas preparation', () => {
     };
     expect(() => validateFictionalAtlas(displacedCapital)).toThrow(
       'Visual territory visual-territory-01 capital must remain in territory',
+    );
+  });
+
+  it('limits visual sea envelopes to one-or-two-island display groups', () => {
+    const islandGroups = FICTIONAL_ATLAS.visualTerritories.filter(
+      (territory) => territory.boundaryForm === 'ISLAND_GROUP',
+    );
+    expect(islandGroups).toHaveLength(14);
+    expect(
+      islandGroups.every(
+        (territory) =>
+          territory.maritimeEnvelope !== undefined &&
+          (territory.displayIslandCount === 1 ||
+            territory.displayIslandCount === 2),
+      ),
+    ).toBe(true);
+
+    const missingEnvelope: FictionalAtlas = {
+      ...FICTIONAL_ATLAS,
+      visualTerritories: FICTIONAL_ATLAS.visualTerritories.map((territory) =>
+        territory.id === 'visual-territory-43'
+          ? { ...territory, maritimeEnvelope: undefined }
+          : territory,
+      ),
+    };
+    expect(() => validateFictionalAtlas(missingEnvelope)).toThrow(
+      'needs a one-or-two-island sea envelope',
     );
   });
 
