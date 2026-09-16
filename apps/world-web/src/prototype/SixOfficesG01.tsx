@@ -5,6 +5,7 @@ import { FinanceMinisterCommand } from './FinanceMinisterCommand.js';
 import { GoodsTransferFlow } from './GoodsTransferFlow.js';
 import { LivingNationScene } from './LivingNationScene.js';
 import { NationalOverview } from './NationalOverview.js';
+import { SocialCommandCenter } from './SocialCommandCenter.js';
 import { TradeForeignAffairsCommand } from './TradeForeignAffairsCommand.js';
 import type { PrototypeOfficeOption } from './contracts.js';
 import { readableProjection, type PrototypeViewState } from './state.js';
@@ -236,6 +237,59 @@ const TRADE_NAV_GROUPS: readonly NavGroup[] = [
   },
 ];
 
+const SOCIAL_NAV_GROUPS: readonly NavGroup[] = [
+  {
+    id: 'operations',
+    label: 'Service command',
+    leaves: [
+      { pageId: 'G01', label: 'Eastbank care line', implemented: true },
+      { pageId: 'S01', label: 'Social pressure', implemented: false },
+    ],
+  },
+  {
+    id: 'country',
+    label: 'People & work',
+    leaves: [
+      { pageId: 'G02', label: 'Nation overview', implemented: true },
+      { pageId: 'S02', label: 'Workforce & matching', implemented: false },
+      { pageId: 'S03', label: 'Training pipeline', implemented: false },
+    ],
+  },
+  {
+    id: 'policy',
+    label: 'Public services',
+    leaves: [
+      { pageId: 'S04', label: 'Education network', implemented: false },
+      { pageId: 'S05', label: 'Healthcare', implemented: false },
+      { pageId: 'S06', label: 'Capacity requests', implemented: false },
+    ],
+  },
+  {
+    id: 'crossOffice',
+    label: 'Households',
+    leaves: [
+      { pageId: 'S07', label: 'Household ledger', implemented: false },
+      { pageId: 'S08', label: 'Benefit delivery', implemented: false },
+    ],
+  },
+  {
+    id: 'roleWork',
+    label: 'Arrival & safety',
+    leaves: [
+      { pageId: 'S09', label: 'Migration & settlement', implemented: false },
+      { pageId: 'S10', label: 'Public safety response', implemented: false },
+    ],
+  },
+  {
+    id: 'records',
+    label: 'Coordination & record',
+    leaves: [
+      { pageId: 'G03', label: 'Joint requests', implemented: false },
+      { pageId: 'G06', label: 'Social audit', implemented: false },
+    ],
+  },
+];
+
 function StateScreen({
   state,
   onRetry,
@@ -331,7 +385,9 @@ function OfficeSidebar({
             ? FINANCE_NAV_GROUPS
             : actingOffice.officeId === 'TRADE'
               ? TRADE_NAV_GROUPS
-              : NAV_GROUPS
+              : actingOffice.officeId === 'SOCIAL'
+                ? SOCIAL_NAV_GROUPS
+                : NAV_GROUPS
         ).map((group) => {
           const isOpen = open[group.id];
           return (
@@ -384,7 +440,9 @@ function OfficeSidebar({
           ? 'Funding routes are local rehearsals; Treasury, debt, and approval actions remain mapped until their authorized handlers are attached.'
           : actingOffice.officeId === 'TRADE'
             ? 'Foreign routes are local rehearsals; orders, shipments, FX settlement, tariffs, and contracts remain mapped until their authorized handlers are attached.'
-            : 'Captain command is a local planning loop; other leaves stay visible until their authorized handlers are attached.'}
+            : actingOffice.officeId === 'SOCIAL'
+              ? 'Service plans are local rehearsals; staffing, funding, facilities, benefits, and deliveries remain mapped until their authorized handlers are attached.'
+              : 'Captain command is a local planning loop; other leaves stay visible until their authorized handlers are attached.'}
       </p>
       <button
         className="six-sidebar__route"
@@ -556,6 +614,11 @@ export function SixOfficesG01({
             />
           ) : actingOffice.officeId === 'TRADE' ? (
             <TradeForeignAffairsCommand
+              projection={projection}
+              onNotice={setDeskNotice}
+            />
+          ) : actingOffice.officeId === 'SOCIAL' ? (
+            <SocialCommandCenter
               projection={projection}
               onNotice={setDeskNotice}
             />
