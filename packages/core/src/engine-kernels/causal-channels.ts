@@ -7,6 +7,17 @@ import { kernelInvalid } from './common.js';
  */
 export type CausalChainId = `C${number}`;
 
+/**
+ * JSON-safe, exact ordinal values. Causal timing must never pass through a
+ * JavaScript floating-point number: each source/due period stays a canonical
+ * integer string throughout the auditable signal record.
+ */
+export type CausalPeriod = string;
+export type CausalEdgeIndex = string;
+
+const CANONICAL_NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/u;
+const CANONICAL_POSITIVE_INTEGER = /^[1-9]\d*$/u;
+
 export type CausalDirection = 'INCREASES' | 'DECREASES';
 
 export type CausalReadiness =
@@ -1623,37 +1634,75 @@ export const CAUSAL_CHAINS: readonly CausalChainDefinition[] = Object.freeze([
 export interface CausalSignalScheduleInput {
   readonly effectId: string;
   readonly chainId: CausalChainId;
-  readonly edgeIndex: number;
-  readonly sourcePeriod: number;
+  readonly edgeIndex: CausalEdgeIndex;
+  readonly sourcePeriod: CausalPeriod;
   /** Must be positive: a pure kernel cannot choose same-period settlement order. */
-  readonly delayPeriods: number;
+  readonly delayPeriods: CausalPeriod;
   readonly parameterVersion: string;
 }
 
 export interface ScheduledCausalSignal {
   readonly effectId: string;
   readonly chainId: CausalChainId;
-  readonly edgeIndex: number;
+  readonly edgeIndex: CausalEdgeIndex;
   readonly source: string;
   readonly target: string;
   readonly direction: CausalDirection;
-  readonly sourcePeriod: number;
-  readonly duePeriod: number;
+  readonly sourcePeriod: CausalPeriod;
+  readonly duePeriod: CausalPeriod;
   readonly parameterVersion: string;
 }
 
-function nonNegativePeriod(value: number, label: string): number {
-  if (!Number.isSafeInteger(value) || value < 0) {
-    kernelInvalid(`${label} must be a non-negative safe integer`);
+export function canonicalCausalPeriod(
+  value: string,
+  label: string,
+): CausalPeriod {
+  if (
+    typeof value !== 'string' ||
+    !CANONICAL_NON_NEGATIVE_INTEGER.test(value)
+  ) {
+    kernelInvalid(`${label} must be a canonical non-negative integer string`);
   }
   return value;
 }
 
-function positiveDelay(value: number): number {
-  if (!Number.isSafeInteger(value) || value <= 0) {
-    kernelInvalid('delayPeriods must be a positive safe integer');
+function canonicalPositiveCausalPeriod(
+  value: string,
+  label: string,
+): CausalPeriod {
+  if (typeof value !== 'string' || !CANONICAL_POSITIVE_INTEGER.test(value)) {
+    kernelInvalid(`${label} must be a canonical positive integer string`);
   }
   return value;
+}
+
+export function compareCausalPeriods(
+  left: CausalPeriod,
+  right: CausalPeriod,
+): number {
+  const canonicalLeft = canonicalCausalPeriod(left, 'left causal period');
+  const canonicalRight = canonicalCausalPeriod(right, 'right causal period');
+  if (canonicalLeft === canonicalRight) return 0;
+  return BigInt(canonicalLeft) < BigInt(canonicalRight) ? -1 : 1;
+}
+
+function addCausalPeriods(
+  left: CausalPeriod,
+  right: CausalPeriod,
+): CausalPeriod {
+  return (BigInt(left) + BigInt(right)).toString();
+}
+
+function selectedCausalEdge(
+  definition: CausalChainDefinition,
+  edgeIndex: CausalEdgeIndex,
+): CausalEdge | undefined {
+  let currentIndex: CausalEdgeIndex = '0';
+  for (const candidate of definition.edges) {
+    if (currentIndex === edgeIndex) return candidate;
+    currentIndex = addCausalPeriods(currentIndex, '1');
+  }
+  return undefined;
 }
 
 function stableIdentifier(value: string, label: string): string {
@@ -1677,24 +1726,24 @@ export function scheduleCausalSignal(
   input: CausalSignalScheduleInput,
 ): ScheduledCausalSignal {
   const definition = getCausalChain(input.chainId);
-  if (!Number.isSafeInteger(input.edgeIndex) || input.edgeIndex < 0) {
-    kernelInvalid('edgeIndex must be a non-negative safe integer');
-  }
-  const selected = definition.edges[input.edgeIndex];
+  const edgeIndex = canonicalCausalPeriod(input.edgeIndex, 'edgeIndex');
+  const selected = selectedCausalEdge(definition, edgeIndex);
   if (selected === undefined) {
-    kernelInvalid(
-      `Unknown causal edge ${input.edgeIndex} for ${input.chainId}`,
-    );
+    kernelInvalid(`Unknown causal edge ${edgeIndex} for ${input.chainId}`);
   }
-  const sourcePeriod = nonNegativePeriod(input.sourcePeriod, 'sourcePeriod');
-  const delay = positiveDelay(input.delayPeriods);
-  const duePeriod = sourcePeriod + delay;
-  if (!Number.isSafeInteger(duePeriod))
-    kernelInvalid('duePeriod exceeds safe range');
+  const sourcePeriod = canonicalCausalPeriod(
+    input.sourcePeriod,
+    'sourcePeriod',
+  );
+  const delay = canonicalPositiveCausalPeriod(
+    input.delayPeriods,
+    'delayPeriods',
+  );
+  const duePeriod = addCausalPeriods(sourcePeriod, delay);
   return Object.freeze({
     effectId: stableIdentifier(input.effectId, 'effectId'),
     chainId: definition.id,
-    edgeIndex: input.edgeIndex,
+    edgeIndex,
     source: selected.source,
     target: selected.target,
     direction: selected.direction,
@@ -1716,8 +1765,8 @@ function compareScheduledSignals(
   left: ScheduledCausalSignal,
   right: ScheduledCausalSignal,
 ): number {
-  if (left.duePeriod !== right.duePeriod)
-    return left.duePeriod - right.duePeriod;
+  const duePeriodOrder = compareCausalPeriods(left.duePeriod, right.duePeriod);
+  if (duePeriodOrder !== 0) return duePeriodOrder;
   return left.effectId < right.effectId
     ? -1
     : left.effectId > right.effectId
@@ -1727,25 +1776,25 @@ function compareScheduledSignals(
 
 /** Returns an ordered, lossless partition; consumers still decide whether to apply it. */
 export function partitionCausalSignals(
-  currentPeriod: number,
+  currentPeriod: CausalPeriod,
   signals: readonly ScheduledCausalSignal[],
 ): CausalSignalPartition {
-  const current = nonNegativePeriod(currentPeriod, 'currentPeriod');
+  const current = canonicalCausalPeriod(currentPeriod, 'currentPeriod');
   const seen = new Set<string>();
   const ordered = [...signals].sort(compareScheduledSignals);
   const due: ScheduledCausalSignal[] = [];
   const pending: ScheduledCausalSignal[] = [];
   for (const signal of ordered) {
     stableIdentifier(signal.effectId, 'effectId');
-    nonNegativePeriod(signal.sourcePeriod, 'signal sourcePeriod');
-    nonNegativePeriod(signal.duePeriod, 'signal duePeriod');
-    if (signal.duePeriod <= signal.sourcePeriod) {
+    canonicalCausalPeriod(signal.sourcePeriod, 'signal sourcePeriod');
+    canonicalCausalPeriod(signal.duePeriod, 'signal duePeriod');
+    if (compareCausalPeriods(signal.duePeriod, signal.sourcePeriod) <= 0) {
       kernelInvalid('Scheduled signal must be due after its source period');
     }
     if (seen.has(signal.effectId))
       kernelInvalid('Causal signal IDs must be unique');
     seen.add(signal.effectId);
-    if (signal.duePeriod <= current) due.push(signal);
+    if (compareCausalPeriods(signal.duePeriod, current) <= 0) due.push(signal);
     else pending.push(signal);
   }
   return Object.freeze({

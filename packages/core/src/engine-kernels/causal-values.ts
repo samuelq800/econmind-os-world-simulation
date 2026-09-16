@@ -7,9 +7,12 @@ import {
   type ExactDecimal,
 } from './common.js';
 import {
-  getCausalChain,
+  canonicalCausalPeriod,
+  compareCausalPeriods,
   scheduleCausalSignal,
   type CausalChainId,
+  type CausalEdgeIndex,
+  type CausalPeriod,
   type ScheduledCausalSignal,
 } from './causal-channels.js';
 
@@ -42,9 +45,9 @@ export interface ExactCausalResponse {
 export interface ExactCausalTransmissionInput {
   readonly effectId: string;
   readonly chainId: CausalChainId;
-  readonly edgeIndex: number;
-  readonly sourcePeriod: number;
-  readonly delayPeriods: number;
+  readonly edgeIndex: CausalEdgeIndex;
+  readonly sourcePeriod: CausalPeriod;
+  readonly delayPeriods: CausalPeriod;
   readonly source: ExactCausalValue;
   readonly targetBefore: ExactCausalValue;
   readonly response: ExactCausalResponse;
@@ -54,6 +57,11 @@ export interface ExactScheduledCausalEffect {
   readonly scheduled: ScheduledCausalSignal;
   readonly source: ExactCausalValue;
   readonly targetBefore: ExactCausalValue;
+  /**
+   * The exact, versioned conversion used for this effect. Keeping it with the
+   * before/delta/after values makes every concrete causal movement replayable.
+   */
+  readonly response: ExactCausalResponse;
   /** Always SIGNED, including a negative delta for a decreasing relationship. */
   readonly targetDelta: ExactCausalValue;
   readonly targetAfter: ExactCausalValue;
@@ -161,31 +169,7 @@ function withAmount(
 export function scheduleExactCausalTransmission(
   input: ExactCausalTransmissionInput,
 ): ExactScheduledCausalEffect {
-  const definition = getCausalChain(input.chainId);
-  const selected = definition.edges[input.edgeIndex];
-  if (selected === undefined) {
-    kernelInvalid(
-      `Unknown causal edge ${input.edgeIndex} for ${input.chainId}`,
-    );
-  }
-  const source = canonicalizeExactCausalValue(input.source);
-  const targetBefore = canonicalizeExactCausalValue(input.targetBefore);
-  if (source.node !== selected.source) {
-    kernelInvalid('Exact source node does not match the selected causal edge');
-  }
-  if (targetBefore.node !== selected.target) {
-    kernelInvalid('Exact target node does not match the selected causal edge');
-  }
-  const sourceParsed = parsedValue(source, 'source');
-  const targetParsed = parsedValue(targetBefore, 'targetBefore');
   const response = exactResponse(input.response);
-  if (!unitsMatch(sourceParsed.unit, response.sourceUnit)) {
-    kernelInvalid('Exact source unit does not match response sourceUnit');
-  }
-  if (!unitsMatch(targetParsed.unit, response.targetUnit)) {
-    kernelInvalid('Exact target unit does not match response targetUnit');
-  }
-  const exposure = nonNegative(source.amount, 'source amount');
   const scheduled = scheduleCausalSignal({
     effectId: input.effectId,
     chainId: input.chainId,
@@ -194,9 +178,26 @@ export function scheduleExactCausalTransmission(
     delayPeriods: input.delayPeriods,
     parameterVersion: response.parameterVersion,
   });
+  const source = canonicalizeExactCausalValue(input.source);
+  const targetBefore = canonicalizeExactCausalValue(input.targetBefore);
+  if (source.node !== scheduled.source) {
+    kernelInvalid('Exact source node does not match the selected causal edge');
+  }
+  if (targetBefore.node !== scheduled.target) {
+    kernelInvalid('Exact target node does not match the selected causal edge');
+  }
+  const sourceParsed = parsedValue(source, 'source');
+  const targetParsed = parsedValue(targetBefore, 'targetBefore');
+  if (!unitsMatch(sourceParsed.unit, response.sourceUnit)) {
+    kernelInvalid('Exact source unit does not match response sourceUnit');
+  }
+  if (!unitsMatch(targetParsed.unit, response.targetUnit)) {
+    kernelInvalid('Exact target unit does not match response targetUnit');
+  }
+  const exposure = nonNegative(source.amount, 'source amount');
   const absoluteDelta = exposure.times(response.factor);
   const delta =
-    selected.direction === 'INCREASES'
+    scheduled.direction === 'INCREASES'
       ? absoluteDelta
       : absoluteDelta.negated();
   const targetDelta = withAmount(targetBefore, delta, 'SIGNED');
@@ -205,10 +206,17 @@ export function scheduleExactCausalTransmission(
     targetParsed.amount.plus(delta),
     targetBefore.sign,
   );
+  const recordedResponse: ExactCausalResponse = Object.freeze({
+    sourceUnit: response.sourceUnit,
+    targetUnit: response.targetUnit,
+    targetAmountPerSourceUnit: render(response.factor),
+    parameterVersion: response.parameterVersion,
+  });
   return Object.freeze({
     scheduled,
     source,
     targetBefore,
+    response: recordedResponse,
     targetDelta,
     targetAfter,
   });
@@ -218,6 +226,8 @@ export interface ExactCausalStateCalculation {
   readonly before: ExactCausalValue;
   readonly delta: ExactCausalValue;
   readonly after: ExactCausalValue;
+  /** Exact effect identifiers included in this aggregate; no due effect is dropped. */
+  readonly appliedEffectIds: readonly string[];
 }
 
 /**
@@ -226,22 +236,24 @@ export interface ExactCausalStateCalculation {
  * must still validate fence, version, authorization and atomic settlement.
  */
 export function calculateExactCausalStateAfterEffects(input: {
-  readonly currentPeriod: number;
+  readonly currentPeriod: CausalPeriod;
   readonly current: ExactCausalValue;
   readonly effects: readonly ExactScheduledCausalEffect[];
 }): ExactCausalStateCalculation {
-  if (!Number.isSafeInteger(input.currentPeriod) || input.currentPeriod < 0) {
-    kernelInvalid('currentPeriod must be a non-negative safe integer');
-  }
+  const currentPeriod = canonicalCausalPeriod(
+    input.currentPeriod,
+    'currentPeriod',
+  );
   const before = canonicalizeExactCausalValue(input.current);
   const parsedBefore = parsedValue(before, 'current');
   const seen = new Set<string>();
+  const appliedEffectIds: string[] = [];
   let total = decimal('0', 'zero');
   for (const effect of input.effects) {
     const effectId = stableIdentifier(effect.scheduled.effectId, 'effectId');
     if (seen.has(effectId)) kernelInvalid('Causal effect IDs must be unique');
     seen.add(effectId);
-    if (effect.scheduled.duePeriod > input.currentPeriod) {
+    if (compareCausalPeriods(effect.scheduled.duePeriod, currentPeriod) > 0) {
       kernelInvalid('Causal effect is not due at currentPeriod');
     }
     if (effect.scheduled.target !== before.node) {
@@ -258,10 +270,13 @@ export function calculateExactCausalStateAfterEffects(input: {
       );
     }
     total = total.plus(parsedDelta.amount);
+    appliedEffectIds.push(effectId);
   }
+  appliedEffectIds.sort();
   return Object.freeze({
     before,
     delta: withAmount(before, total, 'SIGNED'),
     after: withAmount(before, parsedBefore.amount.plus(total), before.sign),
+    appliedEffectIds: Object.freeze(appliedEffectIds),
   });
 }

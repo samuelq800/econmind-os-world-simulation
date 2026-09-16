@@ -49,29 +49,29 @@ describe('V11–V18 causal-channel preparation', () => {
       scheduleCausalSignal({
         effectId: 'education-skill-v1',
         chainId: 'C1',
-        edgeIndex: 0,
-        sourcePeriod: 12,
-        delayPeriods: 3,
+        edgeIndex: '0',
+        sourcePeriod: '12',
+        delayPeriods: '3',
         parameterVersion: 'human-capital-2026.1',
       }),
     ).toEqual({
       effectId: 'education-skill-v1',
       chainId: 'C1',
-      edgeIndex: 0,
+      edgeIndex: '0',
       source: 'EDUCATION_INVESTMENT',
       target: 'HIGHER_VOCATIONAL_GRADUATES',
       direction: 'INCREASES',
-      sourcePeriod: 12,
-      duePeriod: 15,
+      sourcePeriod: '12',
+      duePeriod: '15',
       parameterVersion: 'human-capital-2026.1',
     });
     expect(
       scheduleCausalSignal({
         effectId: 'automation-displacement-v1',
         chainId: 'C1',
-        edgeIndex: 6,
-        sourcePeriod: 12,
-        delayPeriods: 1,
+        edgeIndex: '6',
+        sourcePeriod: '12',
+        delayPeriods: '1',
         parameterVersion: 'automation-2026.1',
       }).direction,
     ).toBe('DECREASES');
@@ -81,44 +81,63 @@ describe('V11–V18 causal-channel preparation', () => {
     const valid = {
       effectId: 'valid-effect',
       chainId: 'C15' as const,
-      edgeIndex: 0,
-      sourcePeriod: 0,
-      delayPeriods: 1,
+      edgeIndex: '0',
+      sourcePeriod: '0',
+      delayPeriods: '1',
       parameterVersion: 'test-v1',
     };
-    expect(() => scheduleCausalSignal({ ...valid, delayPeriods: 0 })).toThrow(
-      'delayPeriods must be a positive safe integer',
+    expect(() => scheduleCausalSignal({ ...valid, delayPeriods: '0' })).toThrow(
+      'delayPeriods must be a canonical positive integer string',
     );
     expect(() =>
       scheduleCausalSignal({ ...valid, parameterVersion: '' }),
     ).toThrow('parameterVersion must be a stable identifier');
-    expect(() => scheduleCausalSignal({ ...valid, edgeIndex: 99 })).toThrow(
+    expect(() => scheduleCausalSignal({ ...valid, edgeIndex: '99' })).toThrow(
       'Unknown causal edge',
     );
+    expect(() =>
+      scheduleCausalSignal({ ...valid, sourcePeriod: '01' }),
+    ).toThrow('sourcePeriod must be a canonical non-negative integer string');
+  });
+
+  it('preserves periods beyond JavaScript safe-integer range as exact strings', () => {
+    expect(
+      scheduleCausalSignal({
+        effectId: 'long-period-trace',
+        chainId: 'C1',
+        edgeIndex: '0',
+        sourcePeriod: '9007199254740993',
+        delayPeriods: '1',
+        parameterVersion: 'long-period-v1',
+      }),
+    ).toMatchObject({
+      sourcePeriod: '9007199254740993',
+      duePeriod: '9007199254740994',
+    });
   });
 
   it('partitions effects deterministically without applying or dropping one', () => {
     const pending = scheduleCausalSignal({
       effectId: 'future-route-delay',
       chainId: 'C50',
-      edgeIndex: 0,
-      sourcePeriod: 4,
-      delayPeriods: 2,
+      edgeIndex: '0',
+      sourcePeriod: '4',
+      delayPeriods: '2',
       parameterVersion: 'route-contract-v1',
     });
     const due = scheduleCausalSignal({
       effectId: 'due-health-availability',
       chainId: 'C6',
-      edgeIndex: 0,
-      sourcePeriod: 4,
-      delayPeriods: 1,
+      edgeIndex: '0',
+      sourcePeriod: '4',
+      delayPeriods: '1',
       parameterVersion: 'health-contract-v1',
     });
-    expect(partitionCausalSignals(5, [pending, due])).toEqual({
+    expect(partitionCausalSignals('5', [pending, due])).toEqual({
       due: [due],
       pending: [pending],
     });
-    expect(() => partitionCausalSignals(5, [due, due])).toThrow(
+    expect(() => partitionCausalSignals('5', [due, due])).toThrow(
       'Causal signal IDs must be unique',
     );
   });
@@ -127,9 +146,9 @@ describe('V11–V18 causal-channel preparation', () => {
     const immigration = scheduleExactCausalTransmission({
       effectId: 'immigration-labour-v1',
       chainId: 'C97',
-      edgeIndex: 0,
-      sourcePeriod: 10,
-      delayPeriods: 1,
+      edgeIndex: '0',
+      sourcePeriod: '10',
+      delayPeriods: '1',
       source: {
         node: 'IMMIGRATION',
         amount: '125',
@@ -156,13 +175,19 @@ describe('V11–V18 causal-channel preparation', () => {
       sign: 'SIGNED',
     });
     expect(immigration.targetAfter.amount).toBe('1100');
+    expect(immigration.response).toEqual({
+      sourceUnit: { kind: 'QUANTITY', unit: 'person' },
+      targetUnit: { kind: 'QUANTITY', unit: 'person' },
+      targetAmountPerSourceUnit: '0.8',
+      parameterVersion: 'demography-v1',
+    });
 
     const mortgage = scheduleExactCausalTransmission({
       effectId: 'mortgage-debt-service-v1',
       chainId: 'C64',
-      edgeIndex: 0,
-      sourcePeriod: 10,
-      delayPeriods: 1,
+      edgeIndex: '0',
+      sourcePeriod: '10',
+      delayPeriods: '1',
       source: {
         node: 'MORTGAGE_RATE',
         amount: '1',
@@ -186,13 +211,62 @@ describe('V11–V18 causal-channel preparation', () => {
     expect(mortgage.targetAfter).toMatchObject({ amount: '512.5' });
   });
 
+  it('makes every catalogue edge traceable with exact before, rate, delta, and after values', () => {
+    for (const definition of CAUSAL_CHAINS) {
+      for (const [index, edge] of definition.edges.entries()) {
+        const transmission = scheduleExactCausalTransmission({
+          effectId: `trace-${definition.id}-${index}`,
+          chainId: definition.id,
+          edgeIndex: `${index}`,
+          sourcePeriod: '0',
+          delayPeriods: '1',
+          source: {
+            node: edge.source,
+            amount: '1',
+            unit: { kind: 'QUANTITY', unit: 'causal_unit' },
+            sign: 'NON_NEGATIVE',
+          },
+          targetBefore: {
+            node: edge.target,
+            amount: '0',
+            unit: { kind: 'QUANTITY', unit: 'causal_unit' },
+            sign: 'SIGNED',
+          },
+          response: {
+            sourceUnit: { kind: 'QUANTITY', unit: 'causal_unit' },
+            targetUnit: { kind: 'QUANTITY', unit: 'causal_unit' },
+            targetAmountPerSourceUnit: '1',
+            parameterVersion: 'trace-contract-v1',
+          },
+        });
+        expect(transmission.scheduled).toMatchObject({
+          chainId: definition.id,
+          edgeIndex: `${index}`,
+          source: edge.source,
+          target: edge.target,
+          sourcePeriod: '0',
+          duePeriod: '1',
+        });
+        expect(transmission.source.amount).toBe('1');
+        expect(transmission.response.targetAmountPerSourceUnit).toBe('1');
+        expect(transmission.targetBefore.amount).toBe('0');
+        expect(transmission.targetDelta.amount).toBe(
+          edge.direction === 'INCREASES' ? '1' : '-1',
+        );
+        expect(transmission.targetAfter.amount).toBe(
+          edge.direction === 'INCREASES' ? '1' : '-1',
+        );
+      }
+    }
+  });
+
   it('rejects wrong dimensions, impossible stock reductions, and undued application', () => {
     const valid = {
       effectId: 'emigration-population-v1',
       chainId: 'C98' as const,
-      edgeIndex: 1,
-      sourcePeriod: 4,
-      delayPeriods: 1,
+      edgeIndex: '1',
+      sourcePeriod: '4',
+      delayPeriods: '1',
       source: {
         node: 'EMIGRATION',
         amount: '11',
@@ -232,7 +306,7 @@ describe('V11–V18 causal-channel preparation', () => {
     });
     expect(() =>
       calculateExactCausalStateAfterEffects({
-        currentPeriod: 4,
+        currentPeriod: '4',
         current: due.targetBefore,
         effects: [due],
       }),
@@ -243,9 +317,9 @@ describe('V11–V18 causal-channel preparation', () => {
     const first = scheduleExactCausalTransmission({
       effectId: 'immigration-labour-a',
       chainId: 'C97',
-      edgeIndex: 0,
-      sourcePeriod: 1,
-      delayPeriods: 1,
+      edgeIndex: '0',
+      sourcePeriod: '1',
+      delayPeriods: '1',
       source: {
         node: 'IMMIGRATION',
         amount: '10',
@@ -268,9 +342,9 @@ describe('V11–V18 causal-channel preparation', () => {
     const second = scheduleExactCausalTransmission({
       effectId: 'immigration-labour-b',
       chainId: 'C97',
-      edgeIndex: 0,
-      sourcePeriod: 1,
-      delayPeriods: 1,
+      edgeIndex: '0',
+      sourcePeriod: '1',
+      delayPeriods: '1',
       source: {
         node: 'IMMIGRATION',
         amount: '6',
@@ -287,7 +361,7 @@ describe('V11–V18 causal-channel preparation', () => {
     });
     expect(
       calculateExactCausalStateAfterEffects({
-        currentPeriod: 2,
+        currentPeriod: '2',
         current: first.targetBefore,
         effects: [second, first],
       }),
@@ -295,6 +369,7 @@ describe('V11–V18 causal-channel preparation', () => {
       before: { amount: '100' },
       delta: { amount: '8' },
       after: { amount: '108' },
+      appliedEffectIds: ['immigration-labour-a', 'immigration-labour-b'],
     });
   });
 });
