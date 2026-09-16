@@ -1,7 +1,7 @@
 {
   "schema_version": "R2-101.1",
   "step_id": "V25.1",
-  "commit": "2ebe4a3e68e339ce122c474a5f08f00dc29567e2",
+  "commit": "d02b1d6be63b2ff3871961d7f5dfdb684ed914b6",
   "preparation_marker": "PREPARATION_ONLY_NOT_V25_STARTED",
   "environment": {
     "name": "local browser fixture and pinned Node/pnpm toolchain",
@@ -17,13 +17,13 @@
       "command": "pnpm exec vitest run tests/world-web/fictional-atlas.test.ts",
       "exit_code": 0,
       "result": "PASS",
-      "stdout_stderr_summary": "8 focused fictional-atlas tests passed."
+      "stdout_stderr_summary": "10 focused fictional-atlas tests passed, including horizontal-wrap and island-group boundary-envelope constraints."
     },
     {
       "command": "pnpm --filter @econmind/world-web typecheck && pnpm --filter @econmind/world-web build",
       "exit_code": 0,
       "result": "PASS",
-      "stdout_stderr_summary": "TypeScript project check and Vite build passed; V2 terrain image was bundled locally."
+      "stdout_stderr_summary": "TypeScript project check and Vite build passed; V8 terrain image was bundled locally."
     },
     {
       "command": "pnpm exec eslint apps/world-web/src/App.tsx apps/world-web/src/map-lab tests/world-web/fictional-atlas.test.ts && pnpm exec prettier --check [targeted files]",
@@ -41,7 +41,7 @@
       "command": "local browser inspection at http://127.0.0.1:4173/",
       "exit_code": 0,
       "result": "PASS",
-      "stdout_stderr_summary": "Full atlas and Uruq/Tessera detail view rendered with 70 visual territory capital markers, local corridor lines and infrastructure glyphs."
+      "stdout_stderr_summary": "Clean terrain base rendered with all optional layers off; Political rendered 70 visual boundaries, including dashed display sea envelopes for island groups."
     },
     {
       "command": "MapLibre/deck.gl/PMTiles/MVT, authorised projection, production database, RLS and browser-matrix checks",
@@ -58,7 +58,9 @@
     "visual territory count other than 70",
     "capital point outside its visual territory",
     "large inland grainland given a prepared sea port",
-    "oversized local inland lake or invalid tectonic satellite"
+    "oversized local inland lake or invalid tectonic satellite",
+    "non-wrapping atlas geometry",
+    "island group without a one-or-two-island display sea envelope"
   ],
   "database_rls_evidence": [
     "NOT_RUN: no database, Supabase, RLS, credentials or service calls are in V25.1 preparation scope."
@@ -68,10 +70,12 @@
     "all current economic/demographic values remain UNASSIGNED_BY_V27",
     "exactly 70 visual territories are required",
     "each visual-territory capital is contained by its own polygon",
-    "resource labels are constrained to a physical origin rather than an economic quantity"
+    "resource labels are constrained to a physical origin rather than an economic quantity",
+    "island-group display envelopes remain non-authoritative visual geometry"
   ],
   "unresolved_gaps": [
     "satellite terrain raster is visual art, not a calibrated route-measurement surface",
+    "prepared legacy vector overlays are not yet calibrated to the V8 terrain candidate",
     "V25 and V27 remain unstarted; no status/progress record was changed",
     "no numerical population, national strength, reserve, production, capacity or port-throughput allocation has been authorised",
     "no authorised real/classified projection or map-stack dependency decision exists"
