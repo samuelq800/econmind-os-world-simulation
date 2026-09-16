@@ -174,6 +174,9 @@ describe('V06 owner-authorized package continuation', () => {
     const v11Continuation = readJson(
       'docs/governance/WORLD_CORE_V11_1_CONTINUATION_POLICY.json',
     );
+    const v11_2Continuation = readJson(
+      'docs/governance/WORLD_CORE_V11_2_CONDITIONAL_CONTINUATION_POLICY.json',
+    );
     const progress = readJson('status/progress.json');
 
     expect(central.scoped_continuation_records).toEqual([
@@ -243,9 +246,9 @@ describe('V06 owner-authorized package continuation', () => {
       },
     });
     expect(progress.current_gate).toMatchObject({
-      step_id: 'GATE_B_PENDING_V11_1_OWNER_AUTHORIZED_CONTINUATION',
-      status: 'PENDING_WITH_V11_1_IMPLEMENTATION_AUTHORIZED',
-      next_step: 'V11.1',
+      step_id: 'GATE_B_PENDING_V11_2_OWNER_AUTHORIZED_CONTINUATION',
+      status: 'PENDING_WITH_V11_2_IMPLEMENTATION_AUTHORIZED',
+      next_step: 'V11.2',
       next_step_ready: true,
       next_step_blockers: [
         'a frozen Gate B candidate must run the mapped command/lifecycle evidence as one complete campaign; the local 250-sequence scheduler model, 100-sequence narrow V10 lifecycle model, approval-aware 250-sequence revocation model, and 29-property / 29,000-case baseline do not establish arbitrary future Command families',
@@ -255,7 +258,8 @@ describe('V06 owner-authorized package continuation', () => {
       required_gate: 'GATE_B_WORLD_CORE_HARD_GATE',
       gate_status: 'PENDING',
     });
-    expect(progress.steps['V11.1']).toBe(
+    expect(progress.steps['V11.1']).toBe('OWNER_ACCEPTED_NONPRODUCTION');
+    expect(progress.steps['V11.2']).toBe(
       'OWNER_AUTHORIZED_IMPLEMENTATION_UNVERIFIED',
     );
     expect(v11Continuation).toMatchObject({
@@ -264,6 +268,16 @@ describe('V06 owner-authorized package continuation', () => {
         allowed_step: 'V11.1',
         allowed_domain: 'E02 population stocks and flows',
         terminal_gate: 'V11.1_INDEPENDENT_REVIEW',
+      },
+      dependency_exception: { gate_b_status: 'PENDING' },
+    });
+    expect(v11_2Continuation).toMatchObject({
+      status: 'ACTIVE_IMPLEMENTATION_UNVERIFIED',
+      scope: {
+        allowed_step: 'V11.2',
+        allowed_domain:
+          'E03 labour, skill, jobs, wages and public-service allocation',
+        terminal_gate: 'V11.2_INDEPENDENT_REVIEW',
       },
       dependency_exception: { gate_b_status: 'PENDING' },
     });
