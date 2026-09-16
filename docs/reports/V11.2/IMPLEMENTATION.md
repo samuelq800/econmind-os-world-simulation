@@ -8,6 +8,8 @@ State: IMPLEMENTED_UNVERIFIED
 Risk class: P0 authoritative-state change
 Code candidate: 6f2aa759548d6267dadcf4424e68927ae377d70e
 Baseline/continuation authority: 2db39d01a22873162d1c841675855b60d4e5816e
+Plan commit: a99de58543e2b7eb9cfd0f21e3f64d8fadabecfe
+Evidence predecessor: 5765cf1e8259cf1670c0055f3b4fa62ce01cdc1d
 Authority: WORLD_CORE_V11_2_CONDITIONAL_CONTINUATION_POLICY.json
 Independent review: NOT_RUN / REQUIRED BEFORE VERIFIED OR PROMOTION
 Migration: NOT_CREATED
@@ -19,6 +21,15 @@ This is a non-production candidate under
 not a Gate B pass, a V11.2 verification decision, authorization for V11.3, a
 main merge, deployment, database change, migration publication, or production
 access.
+
+## Traceability correction
+
+The V11.2 execution plan was committed at
+`a99de58543e2b7eb9cfd0f21e3f64d8fadabecfe`, the direct parent of code candidate
+`6f2aa759548d6267dadcf4424e68927ae377d70e`. The latter is the direct parent of
+evidence predecessor `5765cf1e8259cf1670c0055f3b4fa62ce01cdc1d`. This
+documentation-only correction records those resolvable references; it changes
+no runtime code, evidence outcome, status, or review authority.
 
 ## Implemented scope
 
