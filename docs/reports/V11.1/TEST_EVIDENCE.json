@@ -1,0 +1,152 @@
+{
+  "schema_version": "V11.1-TEST-EVIDENCE-1",
+  "step_id": "V11.1",
+  "title": "E02 Population Stocks/Flows",
+  "state": "IMPLEMENTED_UNVERIFIED",
+  "risk_class": "P0",
+  "code_candidate": "c5532ebe0c7afb54ca25f228c78a541e00714321",
+  "continuation_baseline": "626b2e8b25599abbd5b62cdf16a229cf8f6be307",
+  "environment": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile": "UNCHANGED",
+    "execution_surface": "LOCAL_ONLY",
+    "production_access": false,
+    "database_configured": false,
+    "linked_supabase_project": "NOT_LINKED"
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 --filter @econmind/core typecheck",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "tsc -p tsconfig.json --pretty false"
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 exec vitest run tests/world-core/v11-1-population-engine.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "test_files": 1,
+      "tests": 8,
+      "stdout_stderr_summary": "Focused E02 population invariant suite passed."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 --filter @econmind/core build",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "tsc -p tsconfig.build.json"
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 exec eslint packages/core/src/population/population-engine.ts packages/core/src/index.ts tests/world-core/v11-1-population-engine.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No targeted ESLint findings."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 exec prettier --check packages/core/src/population/population-engine.ts packages/core/src/index.ts tests/world-core/v11-1-population-engine.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "All three scoped files match Prettier."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 scripts/check-authoritative-patterns.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "authoritative_scanned_core_files": 33,
+      "authoritative_scanned_files": 68,
+      "stdout_stderr_summary": "No authoritative-pattern violations."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 scripts/check-boundaries.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "boundary_scanned_files": 73,
+      "stdout_stderr_summary": "No repository boundary violations."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 env:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Local only; databaseConfigured=false, linkedSupabaseProject=NOT_LINKED, databaseMutationAllowed=false."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 foundation:policy",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No policy violations."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 secrets:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "secret_scanned_files": 668,
+      "stdout_stderr_summary": "No repository secret findings."
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": null,
+      "result": "NOT_RUN",
+      "stdout_stderr_summary": "Deliberately not run: this scoped V11.1 evidence uses targeted checks and does not claim a full-repository campaign."
+    }
+  ],
+  "invariant_evidence": [
+    {
+      "name": "Per-country population identity and total/cohort closure",
+      "result": "PASS",
+      "source": "v11-1-population-engine.test.ts"
+    },
+    {
+      "name": "Paired, equal, cross-country migration; scheduled migration no-op",
+      "result": "PASS",
+      "source": "v11-1-population-engine.test.ts"
+    },
+    {
+      "name": "Exact retry, prior-identity conflict and migration-identity reuse rejection",
+      "result": "PASS",
+      "source": "v11-1-population-engine.test.ts"
+    },
+    {
+      "name": "No negative cohort; no unilateral/unequal migration",
+      "result": "PASS",
+      "source": "v11-1-population-engine.test.ts"
+    },
+    {
+      "name": "Household warning cannot change population; dependency ratio is derived exact rational",
+      "result": "PASS",
+      "source": "v11-1-population-engine.test.ts"
+    },
+    {
+      "name": "Canonical ordering cannot use locale comparison; fact identity cannot set intra-day timing",
+      "result": "PASS",
+      "source": "v11-1-population-engine.test.ts"
+    }
+  ],
+  "negative_cases": [
+    "Underflowing death/cohort transaction rejects before a result.",
+    "Unilateral, unequal or same-country migration rejects before a result.",
+    "Same fact identity with changed canonical payload rejects.",
+    "A scheduled approval does not mutate either population stock.",
+    "Migration handoff metadata does not create labour, skill or wage state."
+  ],
+  "database_rls_evidence": [
+    {
+      "result": "NOT_RUN",
+      "reason": "No database, API, worker, RLS, schema or migration surface is in V11.1 scope."
+    }
+  ],
+  "unresolved_gaps": [
+    "Independent V11.1 review is required before VERIFIED or any promotion.",
+    "No V07 command/event/receipt publication or V09 persistence/crash-recovery integration is implemented or evidenced here.",
+    "No E01 scheduler integration or full-repository test campaign is claimed.",
+    "ADR-04 and ADR-08 remain unapproved; no formula, period-input or price/rounding policy was selected."
+  ],
+  "migration": {
+    "created": false,
+    "status": "NOT_CREATED",
+    "production_publication": false
+  },
+  "independent_review": "NOT_RUN",
+  "production_mutation": false,
+  "database_mutation": false
+}
