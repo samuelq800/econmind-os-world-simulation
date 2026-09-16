@@ -1,4 +1,5 @@
 export * from './errors.js';
+export * from './engine-kernels/index.js';
 export * from './authorization/approvals.js';
 export * from './authorization/identity.js';
 export * from './authorization/offices.js';
