@@ -1,0 +1,53 @@
+{
+  "schema_version": "WORLD_CORE_STEP_CONTINUATION-1",
+  "record_type": "OWNER_AUTHORIZED_PACKAGE_CONTINUATION",
+  "name": "WORLD_CORE_V11_3_CONDITIONAL_CONTINUATION",
+  "status": "ACTIVE_IMPLEMENTATION_UNVERIFIED",
+  "authority": "PROJECT_OWNER_EXPLICIT_DIRECTION_2026_09_16",
+  "activation_record": "docs/reports/V11.2/OWNER_ACCEPTANCE_FOR_V11_3.md",
+  "predecessor": {
+    "step": "V11.2",
+    "candidate": "017be11af224424f26396abfaa602046fc90380a",
+    "independent_review": "B found no scoped P0/MAJOR and concluded the E03 candidate could enter V11.2 review",
+    "owner_acceptance": "Project owner accepted the candidate and directed automatic mainline continuation"
+  },
+  "scope": {
+    "baseline_branch": "codex/v11-2-labour-core",
+    "baseline_candidate": "017be11af224424f26396abfaa602046fc90380a",
+    "allowed_step": "V11.3",
+    "allowed_domain": "E02-E03 population and labour cross-engine invariant validation only",
+    "terminal_gate": "V11.3_INDEPENDENT_REVIEW",
+    "explicitly_excluded_steps": [
+      "V12",
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18"
+    ]
+  },
+  "dependency_exception": {
+    "gate_b_status": "PENDING",
+    "effect": "Permits a non-production V11.3 implementation candidate only. It does not change Gate B evidence, authorize a main merge, or convert a missing operational test into PASS."
+  },
+  "adr_cut_line": {
+    "ADR-04": "PROPOSED_NOT_APPROVED; V11.3 may require every cross-engine fact to carry an explicit caller-selected time/snapshot label but may not choose current, prior, opening, or phase ordering.",
+    "ADR-08": "PROPOSED_NOT_APPROVED; V11.3 may validate exact evidence links but may not introduce a labour, wage, participation, matching, price, or rounding formula/default.",
+    "permitted_without_new_adr": "Pure validation may prove that explicit E02/E03 facts conserve population and labour/skill stock, use compatible snapshot labels, and cannot create labour or skill without an approved source fact."
+  },
+  "preserved_controls": [
+    "V11.3 remains IMPLEMENTED_UNVERIFIED until an immutable candidate receives its required independent review.",
+    "V11.2 owner acceptance is a continuation decision, not a main merge, deployment, production or Gate B approval.",
+    "No main merge, deployment, production/shared-Supabase access or mutation, migration publication, or original EconMind website change is authorized.",
+    "No V12 or later product implementation may use this record.",
+    "Any failed mandatory V11.3 test or newly discovered P0/MAJOR finding stops this continuation."
+  ],
+  "required_evidence": [
+    "V11.3 execution plan before product code",
+    "focused cross-engine invariant tests",
+    "applicable typecheck, lint, boundary, governance, secret, and build checks",
+    "implementation and test-evidence reports bound to the immutable candidate",
+    "independent V11.3 review before VERIFIED or any promotion"
+  ]
+}
