@@ -594,17 +594,30 @@ async function expectRejected(client, step, text, values, expectedMessage) {
 export function createPgStagingClient({ connectionString }) {
   // This factory is intentionally called only after policy validation returns.
   const client = new Client({ connectionString });
+  let transportFailure;
+  client.on('error', (error) => {
+    transportFailure ??= error;
+  });
+  const assertTransportHealthy = () => {
+    if (transportFailure) throw transportFailure;
+  };
   return Object.freeze({
     async connect() {
       await client.connect();
+      assertTransportHealthy();
     },
     async end() {
       await client.end();
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      assertTransportHealthy();
     },
     async execute({ text, values }) {
-      return values.length === 0
-        ? client.query(text)
-        : client.query(text, values);
+      assertTransportHealthy();
+      const result =
+        values.length === 0 ? client.query(text) : client.query(text, values);
+      const resolved = await result;
+      assertTransportHealthy();
+      return resolved;
     },
   });
 }

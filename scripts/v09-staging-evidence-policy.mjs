@@ -149,6 +149,7 @@ function stableFingerprintInput(approval) {
     String(approval.database_port),
     approval.database_name,
     approval.admin_database_role,
+    approval.admin_database_login_role ?? approval.admin_database_role,
     approval.tls_root_ca_sha256 ?? '',
     approval.disposable_namespace,
     approval.roles.migration_owner,
@@ -228,6 +229,11 @@ export function parseV09StagingApproval(value) {
   if (!ADMIN_ROLE.test(approval.admin_database_role ?? '')) {
     invalid('admin_database_role is invalid');
   }
+  const adminDatabaseLoginRole =
+    approval.admin_database_login_role ?? approval.admin_database_role;
+  if (!ADMIN_ROLE.test(adminDatabaseLoginRole)) {
+    invalid('admin_database_login_role is invalid');
+  }
   if (
     approval.tls_root_ca_sha256 !== undefined &&
     approval.tls_root_ca_sha256 !== null &&
@@ -250,6 +256,7 @@ export function parseV09StagingApproval(value) {
 
   const canonical = Object.freeze({
     admin_database_role: approval.admin_database_role,
+    admin_database_login_role: adminDatabaseLoginRole,
     database_host: databaseHost,
     database_name: approval.database_name,
     database_port: databasePort,
@@ -402,8 +409,10 @@ function parseAdminConnection(environment, approval) {
   if (connection.port !== String(approval.database_port)) {
     invalid('admin PostgreSQL URL port does not match the owner-approved port');
   }
-  if (connection.username !== approval.admin_database_role) {
-    invalid('admin PostgreSQL URL role does not match the owner-approved role');
+  if (connection.username !== approval.admin_database_login_role) {
+    invalid(
+      'admin PostgreSQL URL login role does not match the owner-approved login role',
+    );
   }
   if (connection.pathname !== `/${approval.database_name}`) {
     invalid(
@@ -422,8 +431,8 @@ function parseAdminConnection(environment, approval) {
   if (runtime.port !== approval.database_port) {
     invalid('pg runtime port does not match the owner-approved port');
   }
-  if (runtime.user !== approval.admin_database_role) {
-    invalid('pg runtime user does not match the owner-approved role');
+  if (runtime.user !== approval.admin_database_login_role) {
+    invalid('pg runtime user does not match the owner-approved login role');
   }
   if (runtime.database !== approval.database_name) {
     invalid('pg runtime database does not match the owner-approved database');

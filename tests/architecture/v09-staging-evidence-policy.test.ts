@@ -13,6 +13,7 @@ import {
 } from '../../scripts/v09-staging-evidence-policy.mjs';
 
 type Approval = {
+  admin_database_login_role?: string;
   admin_database_role: string;
   database_host: string;
   database_name: string;
@@ -72,9 +73,11 @@ function approvedTarget(
 }
 
 function approvedExecution(target = approvedTarget()) {
+  const loginRole =
+    target.admin_database_login_role ?? target.admin_database_role;
   return {
     ECONMIND_ENV: 'staging',
-    V09_STAGING_ADMIN_DATABASE_URL: `postgresql://${target.admin_database_role}:local-test-only@${target.database_host}:${target.database_port}/${target.database_name}?ssl=true`,
+    V09_STAGING_ADMIN_DATABASE_URL: `postgresql://${loginRole}:local-test-only@${target.database_host}:${target.database_port}/${target.database_name}?ssl=true`,
     V09_STAGING_EXECUTION_CONFIRMATION: V09_STAGING_EXECUTION_CONFIRMATION,
     V09_STAGING_TARGET_FINGERPRINT: target.target_fingerprint,
   };
@@ -184,6 +187,22 @@ describe('V09 dedicated staging evidence policy', () => {
         target,
       ),
     ).toThrow('V09_STAGING_TARGET_FINGERPRINT');
+  });
+
+  it('binds a pooler login role independently from the effective database role', () => {
+    const target = approvedTarget({
+      admin_database_login_role: 'postgres.abcde12345fghij67890',
+      admin_database_role: 'postgres',
+    });
+    const execution = assertV09DedicatedStagingExecution(
+      approvedExecution(target),
+      target,
+    );
+
+    expect(execution.approval.admin_database_login_role).toBe(
+      'postgres.abcde12345fghij67890',
+    );
+    expect(execution.approval.admin_database_role).toBe('postgres');
   });
 
   it('uses pg runtime parameters and rejects authority override query strings', () => {
