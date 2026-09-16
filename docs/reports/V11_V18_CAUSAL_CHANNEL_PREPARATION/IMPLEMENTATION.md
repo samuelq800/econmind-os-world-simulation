@@ -29,9 +29,10 @@
   guarantee/rollover accounting. Inputs/outputs are exact money, named-unit
   quantities, price per physical unit, or explicit dimensioned rates.
 - `quantified-systems.ts` executes C101–C150 through their six declared
-  system boundaries. It accepts only exact-unit transmissions from its own
-  chain range, making each later mechanism calculable without inventing a
-  country-level coefficient or permitting cross-system leakage.
+  system boundaries. `quantified-node-registry.ts` owns a fixed, immutable
+  node/system/unit/sign registry for that range; callers cannot supply or
+  override a contract, and the generic exact-transmission route rejects
+  C101–C150 entirely.
 - The focused suite verifies all 150 paths, exact population, price, money,
   physical-unit and network-outage examples, unit/system rejection,
   deterministic partitioning, and all five Firm Ecology mechanisms.
@@ -84,15 +85,16 @@
 - Added strict physical-unit checks for resource pools, inventory, fuel, energy
   generation and production. A person cannot be fuel and a currency cannot be
   a physical production capacity.
-- Added a pure international settlement binding: local currency, common
-  settlement currency, exact rate, effective period and version. A settlement
-  table must have one common currency, period and version, and every enabled
-  domestic currency must be bound. Cross-country payment output remains inert
-  and preserves the domestic debit plus exact international settlement amount.
-- Required C101–C150 quantified batches to carry unique node/unit/sign
-  contracts; source, target and response units must all match the contract.
-  The core intentionally does not invent an authoritative global node-unit or
-  country-currency registry.
+- Added a pure international settlement binding: local currency, the fixed
+  literal `ICU` settlement currency, exact rate, effective period and version.
+  A settlement table must use `ICU` with one period and version, and every
+  enabled domestic currency must be bound. Cross-country payment output
+  remains inert and preserves the domestic debit plus exact international
+  settlement amount.
+- Required C101–C150 quantified transmissions to use a Core-owned immutable
+  node/system/unit/sign registry. Source, target and response units must all
+  match that fixed contract; `scheduleExactCausalTransmission()` rejects the
+  range so a caller cannot forge a self-consistent contract.
 
 ### Explicitly not implemented or authorized
 
@@ -106,3 +108,25 @@
   initialization, settlement posting, or deterministic ordering policy was
   added. Future integration must use the authoritative World Core transaction
   path and approved country/parameter registries.
+
+## Review-B MAJOR remediation
+
+> `PREPARATION_ONLY_NOT_V11_STARTED`
+> Implementation state: `IMPLEMENTED_UNVERIFIED` — this remediation remains
+> subject to independent review and does not change repository status.
+
+- **Reviewed candidate:** `4bb731532f49c16ecd306cb2a34a436a33f26fbb`
+- **Remediation implementation:** `d93712cf608bd85a7f458a5d6ab8967f9baa880c`
+- Replaced the C101–C150 caller-supplied node contract list with the immutable
+  Core registry. The generic route now rejects the range before any
+  caller-declared units can be used; the system route requires both endpoint
+  units and signs, and both response dimensions, to equal the registry.
+- Added focused C123 tests for a valid fixed-registry calculation, wrong
+  physical/monetary dimensions, and a direct generic forged path. The two
+  invalid variants reject.
+- Fixed `ICU` as the sole international settlement currency. `USD` and every
+  other canonical three-letter currency reject before conversion or cross-border
+  settlement calculation.
+- This is pure/inert Core preparation only: no ledger, state, command, event,
+  receipt, outbox, database, API, worker, UI, migration, or production path
+  was changed.
