@@ -1,17 +1,22 @@
 import {
   addMoney,
   decimal,
-  factor,
   kernelInvalid,
   maximum,
   minimum,
   money,
   nonNegative,
+  physicalQuantity,
+  ratio,
   render,
   renderMoney,
+  renderQuantity,
+  sameUnit,
   subtractMoney,
-  type ExactDecimal,
   type ExactMoney,
+  type ExactQuantity,
+  type ExactRatio,
+  type ExactUnitRate,
 } from './common.js';
 
 export type TechnologyState =
@@ -26,36 +31,70 @@ export type TechnologyState =
   | 'OBSOLETE';
 
 export interface ResearchProgressInput {
-  readonly accumulatedOutput: ExactDecimal;
-  readonly requiredOutput: ExactDecimal;
-  readonly fundingFactor: ExactDecimal;
-  readonly humanCapitalFactor: ExactDecimal;
-  readonly equipmentAvailability: ExactDecimal;
-  readonly existingTechnologyBase: ExactDecimal;
-  readonly researchEfficiency: ExactDecimal;
+  readonly accumulatedOutput: ExactQuantity;
+  readonly requiredOutput: ExactQuantity;
+  readonly researchLabourHours: ExactQuantity;
+  readonly fundingAvailability: ExactRatio;
+  readonly equipmentAvailability: ExactRatio;
+  /** Research points generated per one research-labour hour. */
+  readonly researchOutputPerLabourHour: ExactUnitRate;
+  readonly researchEfficiency: ExactRatio;
 }
 
 /** E11's R&D equation; it does not itself grant a technology right or capacity. */
 export function calculateResearchProgress(input: ResearchProgressInput) {
-  const accumulated = nonNegative(input.accumulatedOutput, 'accumulatedOutput');
-  const required = nonNegative(input.requiredOutput, 'requiredOutput');
-  if (required.isZero()) kernelInvalid('requiredOutput must be positive');
-  const periodOutput = nonNegative(input.fundingFactor, 'fundingFactor')
-    .times(nonNegative(input.humanCapitalFactor, 'humanCapitalFactor'))
-    .times(factor(input.equipmentAvailability, 'equipmentAvailability'))
-    .times(nonNegative(input.existingTechnologyBase, 'existingTechnologyBase'))
-    .times(nonNegative(input.researchEfficiency, 'researchEfficiency'));
-  const next = accumulated.plus(periodOutput);
-  return Object.freeze({
-    periodResearchOutput: render(periodOutput),
-    accumulatedResearchOutput: render(next),
-    progress: render(
-      minimum(
-        [next.dividedBy(required), decimal('1', 'one')],
-        'research progress',
+  const accumulated = physicalQuantity(
+    input.accumulatedOutput,
+    'accumulatedOutput',
+  );
+  const required = physicalQuantity(input.requiredOutput, 'requiredOutput');
+  if (
+    accumulated.unit !== 'research_point' ||
+    required.unit !== 'research_point'
+  ) {
+    kernelInvalid('Research output must use research_point');
+  }
+  if (required.amount.isZero())
+    kernelInvalid('requiredOutput must be positive');
+  const labour = physicalQuantity(
+    input.researchLabourHours,
+    'researchLabourHours',
+  );
+  if (labour.unit !== 'research_labour_hour') {
+    kernelInvalid('researchLabourHours must use research_labour_hour');
+  }
+  if (
+    input.researchOutputPerLabourHour.inputUnit !== labour.unit ||
+    input.researchOutputPerLabourHour.outputUnit !== accumulated.unit
+  ) {
+    kernelInvalid(
+      'researchOutputPerLabourHour must be research_point per research_labour_hour',
+    );
+  }
+  const periodOutput = labour.amount
+    .times(
+      nonNegative(
+        input.researchOutputPerLabourHour.amount,
+        'researchOutputPerLabourHour',
       ),
-    ),
-    complete: next.greaterThanOrEqualTo(required),
+    )
+    .times(ratio(input.fundingAvailability, 'fundingAvailability'))
+    .times(ratio(input.equipmentAvailability, 'equipmentAvailability'))
+    .times(ratio(input.researchEfficiency, 'researchEfficiency'));
+  const next = accumulated.amount.plus(periodOutput);
+  return Object.freeze({
+    periodResearchOutput: renderQuantity(periodOutput, accumulated.unit),
+    accumulatedResearchOutput: renderQuantity(next, accumulated.unit),
+    progress: Object.freeze({
+      amount: render(
+        minimum(
+          [next.dividedBy(required.amount), decimal('1', 'one')],
+          'research progress',
+        ),
+      ),
+      unit: 'ratio',
+    }),
+    complete: next.greaterThanOrEqualTo(required.amount),
   });
 }
 
@@ -116,29 +155,35 @@ export function canStartProject(input: ProjectStartCheck): boolean {
 }
 
 export interface ProjectProgressInput {
-  readonly plannedIncrement: ExactDecimal;
-  readonly fundingReleasedFactor: ExactDecimal;
-  readonly materialsDeliveredFactor: ExactDecimal;
-  readonly labourAvailableFactor: ExactDecimal;
-  readonly oversightCapacityFactor: ExactDecimal;
+  readonly plannedIncrement: ExactQuantity;
+  readonly fundingReleasedFactor: ExactRatio;
+  readonly materialsDeliveredFactor: ExactRatio;
+  readonly labourAvailableFactor: ExactRatio;
+  readonly oversightCapacityFactor: ExactRatio;
 }
 
 /** E12 progresses by its weakest explicit prerequisite; no capacity is commissioned here. */
 export function calculateProjectProgress(input: ProjectProgressInput) {
   const bottleneck = minimum(
     [
-      factor(input.fundingReleasedFactor, 'fundingReleasedFactor'),
-      factor(input.materialsDeliveredFactor, 'materialsDeliveredFactor'),
-      factor(input.labourAvailableFactor, 'labourAvailableFactor'),
-      factor(input.oversightCapacityFactor, 'oversightCapacityFactor'),
+      ratio(input.fundingReleasedFactor, 'fundingReleasedFactor'),
+      ratio(input.materialsDeliveredFactor, 'materialsDeliveredFactor'),
+      ratio(input.labourAvailableFactor, 'labourAvailableFactor'),
+      ratio(input.oversightCapacityFactor, 'oversightCapacityFactor'),
     ],
     'project bottleneck',
   );
   return Object.freeze({
-    progressIncrement: render(
-      nonNegative(input.plannedIncrement, 'plannedIncrement').times(bottleneck),
+    progressIncrement: renderQuantity(
+      physicalQuantity(input.plannedIncrement, 'plannedIncrement').amount.times(
+        bottleneck,
+      ),
+      physicalQuantity(input.plannedIncrement, 'plannedIncrement').unit,
     ),
-    bottleneckFactor: render(bottleneck),
+    bottleneckFactor: Object.freeze({
+      amount: render(bottleneck),
+      unit: 'ratio',
+    }),
   });
 }
 
@@ -150,6 +195,9 @@ export function calculateProjectFundingGap(
   const secured = money(securedFinancing, 'securedFinancing');
   if (total.currency !== secured.currency)
     kernelInvalid('Project funding currencies must match');
+  if (total.amount.isNegative() || secured.amount.isNegative()) {
+    kernelInvalid('Project cost and secured financing must be non-negative');
+  }
   return renderMoney(
     maximum(
       [total.amount.minus(secured.amount), decimal('0', 'zero')],
@@ -160,15 +208,21 @@ export function calculateProjectFundingGap(
 }
 
 export function calculateRemainingProjectInputs(
-  required: ExactDecimal,
-  delivered: ExactDecimal,
-  consumed: ExactDecimal,
-): ExactDecimal {
-  const remaining = nonNegative(required, 'required inputs')
-    .minus(nonNegative(delivered, 'delivered inputs'))
-    .minus(nonNegative(consumed, 'consumed inputs'));
-  return render(
+  required: ExactQuantity,
+  delivered: ExactQuantity,
+  consumed: ExactQuantity,
+): ExactQuantity {
+  const requiredInput = physicalQuantity(required, 'required inputs');
+  physicalQuantity(delivered, 'delivered inputs');
+  physicalQuantity(consumed, 'consumed inputs');
+  sameUnit(required, delivered, 'remaining project inputs');
+  sameUnit(required, consumed, 'remaining project inputs');
+  const remaining = requiredInput.amount
+    .minus(physicalQuantity(delivered, 'delivered inputs').amount)
+    .minus(physicalQuantity(consumed, 'consumed inputs').amount);
+  return renderQuantity(
     maximum([remaining, decimal('0', 'zero')], 'remaining project inputs'),
+    requiredInput.unit,
   );
 }
 
@@ -249,8 +303,8 @@ export function calculateHouseholdSaving(
 
 export interface PersonalIncomeTaxBand {
   /** Inclusive upper bound for the band; null is the terminal band. */
-  readonly upperBound: ExactDecimal | null;
-  readonly marginalRate: ExactDecimal;
+  readonly upperBound: ExactMoney | null;
+  readonly marginalRate: ExactRatio;
 }
 
 export function calculatePersonalIncomeTax(input: {
@@ -262,6 +316,9 @@ export function calculatePersonalIncomeTax(input: {
   const allowance = money(input.allowances, 'allowances');
   if (income.currency !== allowance.currency)
     kernelInvalid('PIT currencies must match');
+  if (income.amount.isNegative() || allowance.amount.isNegative()) {
+    kernelInvalid('PIT income and allowances must be non-negative');
+  }
   let remaining = maximum(
     [income.amount.minus(allowance.amount), decimal('0', 'zero')],
     'taxable income after allowances',
@@ -271,22 +328,25 @@ export function calculatePersonalIncomeTax(input: {
   if (input.bands.length === 0)
     kernelInvalid('PIT requires at least one tax band');
   for (const [index, band] of input.bands.entries()) {
-    const rate = factor(band.marginalRate, `PIT band ${index} rate`);
+    const rate = ratio(band.marginalRate, `PIT band ${index} rate`);
     const upper =
       band.upperBound === null
         ? null
-        : nonNegative(band.upperBound, `PIT band ${index} upper bound`);
-    if (upper !== null && upper.lessThanOrEqualTo(lower))
+        : money(band.upperBound, `PIT band ${index} upper bound`);
+    if (upper !== null && upper.currency !== income.currency) {
+      kernelInvalid('PIT band upper-bound currency must match taxable income');
+    }
+    if (upper !== null && upper.amount.lessThanOrEqualTo(lower))
       kernelInvalid('PIT band upper bounds must be strictly increasing');
     const width =
       upper === null
         ? remaining
-        : minimum([remaining, upper.minus(lower)], 'PIT band width');
+        : minimum([remaining, upper.amount.minus(lower)], 'PIT band width');
     total = total.plus(width.times(rate));
     remaining = remaining.minus(width);
     if (remaining.isZero()) break;
     if (upper === null) break;
-    lower = upper;
+    lower = upper.amount;
   }
   if (remaining.greaterThan(0))
     kernelInvalid('PIT terminal tax band is missing');
@@ -295,26 +355,29 @@ export function calculatePersonalIncomeTax(input: {
 
 export function calculateProportionalTax(
   taxableBase: ExactMoney,
-  rate: ExactDecimal,
-  compliance: ExactDecimal = '1',
+  rate: ExactRatio,
+  compliance: ExactRatio,
 ): ExactMoney {
   const base = money(taxableBase, 'taxableBase');
   if (base.amount.isNegative())
     kernelInvalid('Taxable base must be non-negative');
   return renderMoney(
     base.amount
-      .times(factor(rate, 'tax rate'))
-      .times(factor(compliance, 'tax compliance')),
+      .times(ratio(rate, 'tax rate'))
+      .times(ratio(compliance, 'tax compliance')),
     base.currency,
   );
 }
 
 export function calculatePayrollTax(
   payrollBase: ExactMoney,
-  rate: ExactDecimal,
+  rate: ExactRatio,
   credits: ExactMoney,
 ): ExactMoney {
-  const collected = calculateProportionalTax(payrollBase, rate);
+  const collected = calculateProportionalTax(payrollBase, rate, {
+    amount: '1',
+    unit: 'ratio',
+  });
   const beforeCredits = money(collected, 'payroll tax');
   const credit = money(credits, 'payroll credits');
   if (beforeCredits.currency !== credit.currency)

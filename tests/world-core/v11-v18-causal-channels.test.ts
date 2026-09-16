@@ -369,6 +369,18 @@ describe('V11–V18 causal-channel preparation', () => {
     expect(
       calculateQuantifiedSystemTransmissions({
         system: 'LAND_WATER_FOOD',
+        nodeContracts: [
+          {
+            node: 'WATER_SUPPLY',
+            unit: { kind: 'QUANTITY', unit: 'cubic_metre_per_day' },
+            sign: 'NON_NEGATIVE',
+          },
+          {
+            node: 'AGRICULTURAL_OUTPUT',
+            unit: { kind: 'QUANTITY', unit: 'tonne_per_day' },
+            sign: 'NON_NEGATIVE',
+          },
+        ],
         transmissions: [
           {
             effectId: 'water-crop-capacity-v1',
@@ -406,6 +418,18 @@ describe('V11–V18 causal-channel preparation', () => {
     expect(() =>
       calculateQuantifiedSystemTransmissions({
         system: 'LAND_WATER_FOOD',
+        nodeContracts: [
+          {
+            node: 'CYBERATTACK_NETWORK_FAILURE',
+            unit: { kind: 'QUANTITY', unit: 'network_outage_hour' },
+            sign: 'NON_NEGATIVE',
+          },
+          {
+            node: 'ELECTRONIC_PAYMENTS',
+            unit: { kind: 'QUANTITY', unit: 'transaction_per_hour' },
+            sign: 'NON_NEGATIVE',
+          },
+        ],
         transmissions: [
           {
             effectId: 'wrong-system-v1',
@@ -441,5 +465,52 @@ describe('V11–V18 causal-channel preparation', () => {
         ],
       }),
     ).toThrow('LAND_WATER_FOOD cannot calculate C150');
+  });
+
+  it('rejects a self-consistent response when its node units lack a contract', () => {
+    expect(() =>
+      calculateQuantifiedSystemTransmissions({
+        system: 'LAND_WATER_FOOD',
+        nodeContracts: [
+          {
+            node: 'WATER_SUPPLY',
+            unit: { kind: 'QUANTITY', unit: 'cubic_metre_per_day' },
+            sign: 'NON_NEGATIVE',
+          },
+          {
+            node: 'AGRICULTURAL_OUTPUT',
+            unit: { kind: 'QUANTITY', unit: 'tonne_per_day' },
+            sign: 'NON_NEGATIVE',
+          },
+        ],
+        transmissions: [
+          {
+            effectId: 'bad-water-dimension-v1',
+            chainId: 'C123',
+            edgeIndex: 1,
+            sourcePeriod: 8,
+            delayPeriods: 1,
+            source: {
+              node: 'WATER_SUPPLY',
+              amount: '500',
+              unit: { kind: 'QUANTITY', unit: 'person' },
+              sign: 'NON_NEGATIVE',
+            },
+            targetBefore: {
+              node: 'AGRICULTURAL_OUTPUT',
+              amount: '100',
+              unit: { kind: 'MONEY', currency: 'GCU' },
+              sign: 'NON_NEGATIVE',
+            },
+            response: {
+              sourceUnit: { kind: 'QUANTITY', unit: 'person' },
+              targetUnit: { kind: 'MONEY', currency: 'GCU' },
+              targetAmountPerSourceUnit: '0.1',
+              parameterVersion: 'bad-water-dimension-v1',
+            },
+          },
+        ],
+      }),
+    ).toThrow('source unit must match its quantified node contract');
   });
 });

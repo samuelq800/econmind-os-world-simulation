@@ -11,6 +11,7 @@ import {
 
 const MONEY = (amount: string) => ({ amount, currency: 'GCU' }) as const;
 const QUANTITY = (amount: string, unit: string) => ({ amount, unit }) as const;
+const RATIO = (amount: string) => ({ amount, unit: 'ratio' }) as const;
 
 describe('V11–V18 Firm Ecology preparation', () => {
   it('quantifies discrete entry/exit and its capacity, labour and margin transmission', () => {
@@ -83,10 +84,10 @@ describe('V11–V18 Firm Ecology preparation', () => {
         liquidatableAssetBookValue: MONEY('20'),
         supplierTradeCredit: MONEY('6'),
         bankDebt: MONEY('12'),
-        layoffFraction: '0.4',
-        assetRecoveryFraction: '0.5',
-        supplierNonpaymentFraction: '0.5',
-        bankNplFraction: '0.25',
+        layoffFraction: RATIO('0.4'),
+        assetRecoveryFraction: RATIO('0.5'),
+        supplierNonpaymentFraction: RATIO('0.5'),
+        bankNplFraction: RATIO('0.25'),
       }),
     ).toEqual({
       layoffs: QUANTITY('6', 'person'),
@@ -151,7 +152,7 @@ describe('V11–V18 Firm Ecology preparation', () => {
         minimumSeedFinancePerStartup: MONEY('200'),
         marketOpportunitySlots: QUANTITY('8', 'opportunity'),
         institutionalProcessingSlots: QUANTITY('5', 'permit'),
-        formationRate: '0.75',
+        formationRate: RATIO('0.75'),
         jobsPerStartup: {
           amount: '4',
           outputUnit: 'person',
@@ -162,8 +163,8 @@ describe('V11–V18 Firm Ecology preparation', () => {
           outputUnit: 'patent_per_period',
           inputUnit: 'firm',
         },
-        earlyFailureRate: '0.5',
-        scaleUpRate: '0.5',
+        earlyFailureRate: RATIO('0.5'),
+        scaleUpRate: RATIO('0.5'),
       }),
     ).toEqual({
       financeConstrainedStartupCapacity: QUANTITY('4', 'firm'),

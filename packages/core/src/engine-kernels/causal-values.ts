@@ -95,7 +95,7 @@ function canonicalUnit(value: CausalUnit, label: string): CausalUnit {
   });
 }
 
-function unitsMatch(left: CausalUnit, right: CausalUnit): boolean {
+export function causalUnitsMatch(left: CausalUnit, right: CausalUnit): boolean {
   if (left.kind === 'MONEY') {
     return right.kind === 'MONEY' && left.currency === right.currency;
   }
@@ -201,10 +201,10 @@ export function scheduleExactCausalTransmission(
   const sourceParsed = parsedValue(source, 'source');
   const targetParsed = parsedValue(targetBefore, 'targetBefore');
   const response = exactResponse(input.response);
-  if (!unitsMatch(sourceParsed.unit, response.sourceUnit)) {
+  if (!causalUnitsMatch(sourceParsed.unit, response.sourceUnit)) {
     kernelInvalid('Exact source unit does not match response sourceUnit');
   }
-  if (!unitsMatch(targetParsed.unit, response.targetUnit)) {
+  if (!causalUnitsMatch(targetParsed.unit, response.targetUnit)) {
     kernelInvalid('Exact target unit does not match response targetUnit');
   }
   const exposure = nonNegative(source.amount, 'source amount');
@@ -274,7 +274,7 @@ export function calculateExactCausalStateAfterEffects(input: {
       kernelInvalid('Causal effect delta must be signed');
     }
     const parsedDelta = parsedValue(delta, 'effect delta');
-    if (!unitsMatch(parsedBefore.unit, parsedDelta.unit)) {
+    if (!causalUnitsMatch(parsedBefore.unit, parsedDelta.unit)) {
       kernelInvalid(
         'Causal effect delta unit does not match current value unit',
       );
