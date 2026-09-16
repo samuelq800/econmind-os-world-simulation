@@ -6,9 +6,9 @@
 Step: V11.1 — E02 Population Stocks/Flows
 State: IMPLEMENTED_UNVERIFIED
 Risk class: P0 authoritative-state change
-Code candidate: c5532ebe0c7afb54ca25f228c78a541e00714321
+Code candidate: a955ede68fd17c2afd0c0e3cf3d0fe6cdece4988
 Baseline/continuation authority: 626b2e8b25599abbd5b62cdf16a229cf8f6be307
-Independent review: NOT_RUN / REQUIRED BEFORE VERIFIED OR PROMOTION
+Independent review: RE-REVIEW_REQUIRED BEFORE VERIFIED OR PROMOTION
 Migration: NOT_CREATED
 Production/shared-Supabase access or mutation: NONE
 ```
@@ -40,6 +40,10 @@ pure state transition described in `docs/exec-plans/V11.1.md`.
   duplicate input identity, and prior-identity payload conflict reject before a
   result is returned. Dependency ratio is a derived, reduced exact integer
   fraction rather than a rounded non-terminating decimal.
+- Restored durable bindings must contain a supported canonical population fact,
+  and that fact's embedded `factId` must equal the binding's outer `factId`.
+  A mismatched or underspecified restored binding rejects before the idempotency
+  or migration-replay indexes are built; valid exact retries remain no-ops.
 - Household updates may change only household count. A mismatched supplied
   reconciliation total emits a warning and never adjusts population.
 - A migration may carry `PENDING_V11_2_CLASSIFICATION` handoff metadata only;
@@ -72,7 +76,7 @@ All checks ran with Node `v24.20.0`, pnpm `12.3.4`, and the unchanged lockfile.
 The precise commands, exit codes and observed coverage are recorded in
 `TEST_EVIDENCE.json`.
 
-- Focused E02 unit/invariant tests: PASS, 8/8.
+- Focused E02 unit/invariant tests: PASS, 9/9.
 - Core TypeScript typecheck and build: PASS.
 - Targeted ESLint and Prettier checks: PASS.
 - Authoritative-pattern and repository-boundary scans: PASS.
@@ -90,9 +94,20 @@ The precise commands, exit codes and observed coverage are recorded in
 - Any need for a demographic formula, cross-engine same-day consumption or a
   period-input rule stops this path for the still-pending ADR-04 decision.
 
+## Remediation lineage
+
+Independent review B identified `V11-1-MAJ-001` against prior candidate
+`c5532ebe0c7afb54ca25f228c78a541e00714321`: a restored binding's outer key
+could differ from the canonical fact identity embedded in its payload. This
+candidate enforces the pair at state canonicalization and adds explicit
+regressions for alias-key restoration rejection, unsupported canonical JSON
+rejection, exact-retry no-op, and same-ID changed-payload rejection. The
+remediation is local to the E02 pure core and remains pending B re-review.
+
 ## Next action
 
-Freeze this candidate and request the required independent V11.1 review. A
-reviewer must inspect `c5532ebe0c7afb54ca25f228c78a541e00714321`, the source
-and test evidence, the E02 ownership boundary, and the declared V11.2/ADR-04
-cut line before any status change or promotion.
+Freeze this remediated candidate and return it to B for the required V11.1
+re-review. A reviewer must inspect
+`a955ede68fd17c2afd0c0e3cf3d0fe6cdece4988`, the source and test evidence, the
+E02 ownership boundary, and the declared V11.2/ADR-04 cut line before any
+status change or promotion.

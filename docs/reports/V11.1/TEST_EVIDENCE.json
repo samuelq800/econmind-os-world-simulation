@@ -4,7 +4,13 @@
   "title": "E02 Population Stocks/Flows",
   "state": "IMPLEMENTED_UNVERIFIED",
   "risk_class": "P0",
-  "code_candidate": "c5532ebe0c7afb54ca25f228c78a541e00714321",
+  "code_candidate": "a955ede68fd17c2afd0c0e3cf3d0fe6cdece4988",
+  "candidate_lineage": {
+    "pre_remediation_candidate": "c5532ebe0c7afb54ca25f228c78a541e00714321",
+    "remediation_commit": "a955ede68fd17c2afd0c0e3cf3d0fe6cdece4988",
+    "finding_id": "V11-1-MAJ-001",
+    "remediation_status": "FIXED_PENDING_B_REVIEW"
+  },
   "continuation_baseline": "626b2e8b25599abbd5b62cdf16a229cf8f6be307",
   "environment": {
     "node": "24.20.0",
@@ -28,8 +34,8 @@
       "exit_code": 0,
       "result": "PASS",
       "test_files": 1,
-      "tests": 8,
-      "stdout_stderr_summary": "Focused E02 population invariant suite passed."
+      "tests": 9,
+      "stdout_stderr_summary": "Focused E02 population invariant and restored-binding suite passed."
     },
     {
       "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 --filter @econmind/core build",
@@ -107,6 +113,11 @@
       "source": "v11-1-population-engine.test.ts"
     },
     {
+      "name": "Restored binding outer identity equals its supported canonical population-fact payload identity",
+      "result": "PASS",
+      "source": "v11-1-population-engine.test.ts"
+    },
+    {
       "name": "No negative cohort; no unilateral/unequal migration",
       "result": "PASS",
       "source": "v11-1-population-engine.test.ts"
@@ -126,6 +137,8 @@
     "Underflowing death/cohort transaction rejects before a result.",
     "Unilateral, unequal or same-country migration rejects before a result.",
     "Same fact identity with changed canonical payload rejects.",
+    "A restored binding with an outer factId that differs from its payload factId rejects before replay indexing.",
+    "Canonical JSON that is not a supported population fact rejects as restored binding state.",
     "A scheduled approval does not mutate either population stock.",
     "Migration handoff metadata does not create labour, skill or wage state."
   ],
@@ -146,7 +159,7 @@
     "status": "NOT_CREATED",
     "production_publication": false
   },
-  "independent_review": "NOT_RUN",
+  "independent_review": "RE_REVIEW_REQUIRED",
   "production_mutation": false,
   "database_mutation": false
 }
