@@ -705,6 +705,7 @@ async function preflightPristine(client, approval) {
 
 async function provisionMarker(client, approval, runId) {
   const schema = identifier(approval.disposable_namespace);
+  const database = identifier(approval.database_name);
   const { migration_owner: owner, reader, worker } = approval.roles;
   for (const role of [owner, worker, reader]) {
     await command(
@@ -722,6 +723,11 @@ async function provisionMarker(client, approval, runId) {
     client,
     'CREATE_DISPOSABLE_NAMESPACE',
     `create schema ${schema} authorization ${identifier(owner)}`,
+  );
+  await command(
+    client,
+    'GRANT_MIGRATION_OWNER_DATABASE_CREATE',
+    `grant create on database ${database} to ${identifier(owner)}`,
   );
   await command(
     client,
@@ -1830,6 +1836,11 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
       `drop schema ${schema} restrict`,
     );
     await command(client, 'CLEANUP_RESET_ROLE', 'reset role');
+    await command(
+      client,
+      'CLEANUP_REVOKE_MIGRATION_OWNER_DATABASE_CREATE',
+      `revoke create on database ${identifier(approval.database_name)} from ${identifier(owner)}`,
+    );
     for (const role of [owner, worker, reader]) {
       await command(
         client,

@@ -434,7 +434,9 @@ class FakeClient {
       return { rows: [] };
     }
     if (request.step.startsWith('CLEANUP_REVOKE_')) {
-      this.state.rolesRevoked += 1;
+      if (request.step.endsWith('_FROM_ADMIN')) {
+        this.state.rolesRevoked += 1;
+      }
       return { rows: [] };
     }
     if (request.step === 'CLEANUP_VERIFY_NO_ROLE_RESIDUE') {
@@ -596,6 +598,9 @@ describe('V09 dedicated staging evidence runner', () => {
     expect(primary.map((call) => call.step)).toContain(
       'CRASH_BEFORE_RECOVER_EXACT_MARKER',
     );
+    expect(primary.map((call) => call.step)).toContain(
+      'GRANT_MIGRATION_OWNER_DATABASE_CREATE',
+    );
     const cleanup = cleanupCalls(fake);
     expect(
       callIndex(cleanup, 'CLEANUP_DROP_EXACT_SCHEMA_RESTRICT'),
@@ -609,6 +614,9 @@ describe('V09 dedicated staging evidence runner', () => {
     expect(cleanupSql).not.toContain('drop database');
     expect(cleanupSql).not.toContain('drop owned');
     expect(cleanupSql).toContain('drop schema "world_v2" restrict');
+    expect(cleanupSql).toContain(
+      'revoke create on database "postgres" from "v09_staging_migration_owner"',
+    );
     expect(cleanupSql).toContain(
       'drop table "world_v2"."notification_outbox" restrict',
     );
