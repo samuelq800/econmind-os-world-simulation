@@ -186,6 +186,9 @@ export function CaptainCommandCenter({
     MAP_POINTS.find((point) => point.id === selectedPointId) ?? MAP_POINTS[0]!;
   const activeAgenda = agenda.filter((item) => item.status !== 'RESOLVED');
   const foodSignal = metricValue(projection, 'available-grain', '128k tonnes');
+  const cashSignal = metricValue(projection, 'treasury-cash', '1.84 bn GCU');
+  const priceSignal = metricValue(projection, 'inflation', '6.4%');
+  const employmentSignal = metricValue(projection, 'unemployment', '7.1%');
   const progress = [
     supportCommitted,
     decision !== 'PENDING',
@@ -529,13 +532,32 @@ export function CaptainCommandCenter({
           >
             <defs>
               <linearGradient id="captain-sea" x1="0" x2="1" y1="0" y2="1">
-                <stop stopColor="#173b56" />
-                <stop offset="1" stopColor="#0e2438" />
+                <stop stopColor="#071b18" />
+                <stop offset=".48" stopColor="#0d332d" />
+                <stop offset="1" stopColor="#071c28" />
               </linearGradient>
               <linearGradient id="captain-land" x1="0" x2=".85" y1="0" y2="1">
-                <stop stopColor="#d9c78b" />
-                <stop offset="1" stopColor="#9fb477" />
+                <stop stopColor="#285e4c" />
+                <stop offset=".5" stopColor="#1f4b40" />
+                <stop offset="1" stopColor="#15372f" />
               </linearGradient>
+              <linearGradient id="captain-relief" x1="0" x2="0" y1="0" y2="1">
+                <stop stopColor="#a9d59b" stopOpacity=".14" />
+                <stop offset="1" stopColor="#061c18" stopOpacity=".12" />
+              </linearGradient>
+              <filter
+                id="captain-glow"
+                x="-20%"
+                y="-20%"
+                width="140%"
+                height="140%"
+              >
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
               <pattern
                 id="captain-grid"
                 height="38"
@@ -545,8 +567,8 @@ export function CaptainCommandCenter({
                 <path
                   d="M 38 0 L 0 0 0 38"
                   fill="none"
-                  stroke="#ffffff"
-                  strokeOpacity=".11"
+                  stroke="#8cc9b0"
+                  strokeOpacity=".09"
                   strokeWidth="1"
                 />
               </pattern>
@@ -555,28 +577,33 @@ export function CaptainCommandCenter({
             <path
               d="M130 34 C265 17 335 67 434 43 C549 16 644 72 757 44 C852 21 907 88 915 158 L864 256 L920 346 L829 443 L830 571 L676 603 L538 555 L442 593 L326 536 L204 551 L104 453 L152 361 L82 260 Z"
               fill="url(#captain-land)"
-              stroke="#f6dda0"
-              strokeWidth="7"
+              stroke="#4a9878"
+              strokeWidth="4"
+            />
+            <path
+              d="M130 34 C265 17 335 67 434 43 C549 16 644 72 757 44 C852 21 907 88 915 158 L864 256 L920 346 L829 443 L830 571 L676 603 L538 555 L442 593 L326 536 L204 551 L104 453 L152 361 L82 260 Z"
+              fill="url(#captain-relief)"
             />
             <path
               d="M117 250 C279 243 354 339 445 330 C533 321 583 255 691 274 C785 291 815 365 920 349"
               fill="none"
-              stroke="#5a9ac2"
+              filter="url(#captain-glow)"
+              stroke="#4eacbb"
               strokeLinecap="round"
-              strokeWidth="19"
+              strokeWidth="12"
             />
             <path
               d="M117 250 C279 243 354 339 445 330 C533 321 583 255 691 274 C785 291 815 365 920 349"
               fill="none"
-              stroke="#c8e2e4"
+              stroke="#b5ddcf"
               strokeDasharray="4 18"
               strokeLinecap="round"
               strokeWidth="3"
             />
             <g
               fill="none"
-              opacity=".72"
-              stroke="#695b39"
+              opacity=".62"
+              stroke="#7ca974"
               strokeLinecap="round"
               strokeWidth="7"
             >
@@ -584,16 +611,30 @@ export function CaptainCommandCenter({
               <path d="M303 489 C409 413 614 449 753 362" />
               <path d="M460 89 C495 204 467 285 451 388" />
             </g>
-            <g fill="#7e935e" opacity=".54">
+            <g fill="#4b8c64" opacity=".34">
               <circle cx="350" cy="195" r="61" />
               <circle cx="655" cy="151" r="73" />
               <circle cx="740" cy="453" r="86" />
               <circle cx="270" cy="353" r="47" />
             </g>
+            <g fill="none" opacity=".42" stroke="#a8d49a" strokeWidth="1.4">
+              <path d="M185 176 C280 113 399 129 468 198 S696 285 835 185" />
+              <path d="M161 204 C292 141 391 164 452 226 S677 313 842 226" />
+              <path d="M170 452 C305 377 414 390 512 452 S697 510 802 425" />
+              <path d="M205 481 C340 416 450 430 543 488 S690 540 790 478" />
+            </g>
+            <g fill="#a8d49a" opacity=".65">
+              <circle cx="344" cy="269" r="3" />
+              <circle cx="367" cy="278" r="2" />
+              <circle cx="389" cy="263" r="2" />
+              <circle cx="607" cy="382" r="3" />
+              <circle cx="628" cy="393" r="2" />
+              <circle cx="650" cy="378" r="2" />
+            </g>
             <rect fill="url(#captain-grid)" height="620" width="1000" />
-            <path d="M194 85 L392 85" stroke="#f7e5ad" strokeWidth="2" />
+            <path d="M194 85 L392 85" stroke="#75c5a8" strokeWidth="2" />
             <text
-              fill="#f7e5ad"
+              fill="#b7d9ca"
               fontFamily="ui-monospace, monospace"
               fontSize="18"
               letterSpacing="4"
@@ -603,7 +644,7 @@ export function CaptainCommandCenter({
               NORTHSTAR OPERATIONS MAP
             </text>
             <text
-              fill="#f7e5ad"
+              fill="#7eb7a3"
               fontFamily="ui-monospace, monospace"
               fontSize="13"
               letterSpacing="3"
@@ -635,10 +676,35 @@ export function CaptainCommandCenter({
             ))}
           </div>
           <div className="captain-map-stage__caption">
-            <span>Live local scenario</span>
+            <span>National intent</span>
             <strong>
               {strategy} · {priority}
             </strong>
+          </div>
+          <div
+            className="captain-map-stage__telemetry"
+            aria-label="National telemetry"
+          >
+            <article className="is-alert">
+              <span>Food buffer</span>
+              <strong>{foodSignal}</strong>
+              <small>18k held</small>
+            </article>
+            <article className="is-watch">
+              <span>Price pressure</span>
+              <strong>{priceSignal}</strong>
+              <small>rising</small>
+            </article>
+            <article className="is-blocked">
+              <span>Cash window</span>
+              <strong>{cashSignal}</strong>
+              <small>1 queued</small>
+            </article>
+            <article>
+              <span>Employment</span>
+              <strong>{employmentSignal}</strong>
+              <small>watch line</small>
+            </article>
           </div>
         </section>
 

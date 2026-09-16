@@ -25,6 +25,7 @@ describe('Captain command preparation surface', () => {
       'Treasury Quarter',
       'Reserve Hill',
       'South Coast Port',
+      'National telemetry',
       'Three seats. One direction.',
       'Choose the line.',
       'Political Capital',
@@ -68,6 +69,8 @@ describe('Captain command preparation surface', () => {
     expect(styles).toContain('.captain-map-stage');
     expect(styles).toContain('.captain-map-marker');
     expect(styles).toContain('.captain-map-file');
+    expect(styles).toContain('.captain-map-stage__telemetry');
+    expect(styles).toContain('--captain-paper: var(--surface)');
     expect(styles).toContain('(prefers-reduced-motion: reduce)');
     expect(styles).toContain('(forced-colors: active)');
   });
