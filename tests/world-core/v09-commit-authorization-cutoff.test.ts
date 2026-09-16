@@ -24,7 +24,10 @@ import {
 } from '@econmind/core';
 import { createTransactionCutoffAuthorizationGuard } from '../../apps/world-worker/src/authoritative-execution.js';
 import type { SqlExecutor } from '../../apps/world-worker/src/persistence/sql-database.js';
-import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
+import {
+  createLocalPostgresV09AtomicTestDatabase,
+  createPGliteV09AtomicTestDatabase,
+} from '../support/v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
 
 const sha256Hex: Sha256Hex = (preimage) =>
@@ -49,14 +52,28 @@ const migrations = [
   '0012_world_v2_command_claim_active_lease_guard.sql',
 ] as const;
 const databases: V09AtomicTestDatabase[] = [];
+const nativePostgresConfigured = Boolean(process.env.V09_TEST_DATABASE_URL);
 
 afterEach(async () => {
-  await Promise.all(databases.splice(0).map((database) => database.close()));
+  await Promise.all(
+    databases.splice(0).map(async (database) => {
+      if (database.kind === 'POSTGRESQL') {
+        await database.executeScript('drop schema if exists world_v2 cascade');
+      }
+      await database.close();
+    }),
+  );
 });
 
 async function database(): Promise<V09AtomicTestDatabase> {
-  const database = createPGliteV09AtomicTestDatabase();
+  const database = nativePostgresConfigured
+    ? createLocalPostgresV09AtomicTestDatabase()
+    : createPGliteV09AtomicTestDatabase();
   databases.push(database);
+  if (database.kind === 'POSTGRESQL') {
+    await database.executeScript('create extension if not exists pgcrypto');
+    await database.executeScript('drop schema if exists world_v2 cascade');
+  }
   for (const migration of migrations) {
     await database.executeScript(
       await readFile(
@@ -175,6 +192,7 @@ describe('V09 real Core-issued authorization at transaction cutoff', () => {
   it('rejects a genuine Core-issued proof when the SQL-held revision changes or authority is revoked before commit', async () => {
     const proof = await issueProof();
     const value = await database();
+    expect(value.kind).toBe(nativePostgresConfigured ? 'POSTGRESQL' : 'PGLITE');
     await value.query(
       `insert into world_v2.current_commit_authorization
          (world_id, auth_subject, country_id, office_id, capability, team_id,

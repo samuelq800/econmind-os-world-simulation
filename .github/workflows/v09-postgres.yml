@@ -15,7 +15,9 @@ on:
       - scripts/v09-postgres-test-environment.mjs
       - tests/world-core/world-writer-lease-postgres.test.ts
       - tests/world-core/v09-atomic-preparation-postgres.test.ts
+      - tests/world-core/v09-commit-authorization-cutoff.test.ts
       - tests/world-core/v09-atomic-recovery-postgres.test.ts
+      - tests/world-core/v09-world-recovery-preparation.test.ts
 
 permissions:
   contents: read
@@ -62,3 +64,32 @@ jobs:
       - run: pnpm exec vitest run tests/world-core/v09-commit-authorization-cutoff.test.ts
       - run: pnpm exec vitest run tests/world-core/v09-atomic-recovery-postgres.test.ts
       - run: pnpm exec vitest run tests/world-core/v09-world-recovery-preparation.test.ts
+
+  official-pnpm-check:
+    name: Isolated official pnpm check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run unmodified official pnpm check
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm check 2>&1 | tee official-pnpm-check.log
+      - name: Upload raw official check output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-pnpm-check-${{ github.sha }}
+          path: official-pnpm-check.log
+          if-no-files-found: error

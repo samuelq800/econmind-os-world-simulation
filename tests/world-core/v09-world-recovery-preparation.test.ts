@@ -14,7 +14,10 @@ import {
 } from '@econmind/core';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
 import { WorldRecoveryCoordinator } from '../../apps/world-worker/src/recovery/world-recovery.js';
-import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
+import {
+  createLocalPostgresV09AtomicTestDatabase,
+  createPGliteV09AtomicTestDatabase,
+} from '../support/v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
 
 const root = path.resolve(import.meta.dirname, '../..');
@@ -42,14 +45,28 @@ const AT_1_5 = '2026-09-12T00:00:01.500Z';
 const AT_60 = '2026-09-12T00:01:00.000Z';
 
 const databases: V09AtomicTestDatabase[] = [];
+const nativePostgresConfigured = Boolean(process.env.V09_TEST_DATABASE_URL);
 
 afterEach(async () => {
-  await Promise.all(databases.splice(0).map((database) => database.close()));
+  await Promise.all(
+    databases.splice(0).map(async (database) => {
+      if (database.kind === 'POSTGRESQL') {
+        await database.executeScript('drop schema if exists world_v2 cascade');
+      }
+      await database.close();
+    }),
+  );
 });
 
 async function testDatabase(): Promise<V09AtomicTestDatabase> {
-  const database = createPGliteV09AtomicTestDatabase();
+  const database = nativePostgresConfigured
+    ? createLocalPostgresV09AtomicTestDatabase()
+    : createPGliteV09AtomicTestDatabase();
   databases.push(database);
+  if (database.kind === 'POSTGRESQL') {
+    await database.executeScript('create extension if not exists pgcrypto');
+    await database.executeScript('drop schema if exists world_v2 cascade');
+  }
   for (const migration of migrations) {
     await database.executeScript(
       await readFile(
@@ -217,6 +234,9 @@ function coordinator(database: V09AtomicTestDatabase, worker = NEW_WORKER) {
 describe('V09.3 World recovery preparation', () => {
   it('reconciles durable lineage and keeps outbox recovery independent', async () => {
     const database = await testDatabase();
+    expect(database.kind).toBe(
+      nativePostgresConfigured ? 'POSTGRESQL' : 'PGLITE',
+    );
     await insertCommittedTransition(database, 1);
     await insertOutbox(database);
     const recovery = coordinator(database);
