@@ -234,6 +234,82 @@ describe('V11.1 E02 Population Stocks/Flows', () => {
     }
   });
 
+  it('fails closed on malformed restored bindings while preserving valid exact retries', () => {
+    const fact: PopulationFact = {
+      kind: 'BIRTH',
+      factId: 'FACT_RESTORED_BIRTH_A',
+      countryId: 'COUNTRY_A',
+      dayIndex: '7',
+      count: '1',
+    };
+    const first = applyPopulationFacts({
+      boundary: DAY_7,
+      state: initialState(),
+      facts: [fact],
+    });
+
+    const validRetry = applyPopulationFacts({
+      boundary: DAY_7,
+      state: first.state,
+      facts: [fact],
+    });
+    expect(validRetry.state).toEqual(first.state);
+    expect(validRetry.newlyAppliedFacts).toEqual([]);
+    expect(validRetry.idempotentFactIds).toEqual(['FACT_RESTORED_BIRTH_A']);
+
+    const payload = first.state.appliedFactBindings[0]!.canonicalPayload;
+    expect(() =>
+      applyPopulationFacts({
+        boundary: DAY_7,
+        state: {
+          ...first.state,
+          appliedFactBindings: [
+            { factId: 'FACT_OUTER_ALIAS_A', canonicalPayload: payload },
+          ],
+        },
+        facts: [fact],
+      }),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.INVALID_IDENTITY_FACTS,
+      }),
+    );
+
+    expect(() =>
+      applyPopulationFacts({
+        boundary: DAY_7,
+        state: {
+          ...first.state,
+          appliedFactBindings: [
+            {
+              factId: 'FACT_RESTORED_BIRTH_A',
+              canonicalPayload: canonicalSerialize({
+                factId: 'FACT_RESTORED_BIRTH_A',
+              }),
+            },
+          ],
+        },
+        facts: [],
+      }),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.INVALID_IDENTITY_FACTS,
+      }),
+    );
+
+    expect(() =>
+      applyPopulationFacts({
+        boundary: DAY_7,
+        state: first.state,
+        facts: [{ ...fact, count: '2' }],
+      }),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.INVALID_IDENTITY_FACTS,
+      }),
+    );
+  });
+
   it('aggregates same-boundary cohort deltas so immutable fact IDs cannot select period timing', () => {
     const factsWithBirthFirst: readonly PopulationFact[] = [
       {
