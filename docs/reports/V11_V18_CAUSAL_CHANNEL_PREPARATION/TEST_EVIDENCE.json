@@ -1,0 +1,51 @@
+{
+  "status": "PREPARATION_ONLY_NOT_V11_STARTED",
+  "baseline": "291034d1c4f4ca1f9a3fd8779cf129ec46793b4f",
+  "candidate_branch": "codex/f-v11-v18-causal-channels",
+  "environment": {
+    "node": "v24.20.0",
+    "pnpm": "12.3.4"
+  },
+  "checks": [
+    {
+      "command": "pnpm --filter @econmind/core build",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/v11-v18-engine-kernels.test.ts tests/world-core/v11-v18-causal-channels.test.ts",
+      "exit_code": 0,
+      "result": "2 files, 10 tests passed"
+    },
+    {
+      "command": "pnpm exec tsc --noEmit -p packages/core/tsconfig.json",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm exec eslint packages/core/src/engine-kernels/causal-channels.ts packages/core/src/engine-kernels/index.ts tests/world-core/v11-v18-causal-channels.test.ts",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm exec prettier --check docs/exec-plans/V11_V18_CAUSAL_CHANNEL_PREPARATION.md packages/core/src/engine-kernels/causal-channels.ts packages/core/src/engine-kernels/index.ts tests/world-core/v11-v18-causal-channels.test.ts",
+      "exit_code": 0
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "exit_code": 0
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "exit_code": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "not_run": [
+    "Full test suite, which is unrelated to this focused pure-kernel change",
+    "Database, RLS, migration, replay, concurrency, recovery, or Supabase checks: no such code exists in scope",
+    "Economic calibration or policy validation: no parameter values or policy equations were introduced"
+  ],
+  "production_mutation": false,
+  "status_progress_mutation": false
+}
