@@ -1780,7 +1780,7 @@ export async function cleanupMarkedBoundary(client, approval, evidence) {
           where n.nspname <> $1 and n.nspname <> 'information_schema'
             and n.nspname !~ '^pg_'
        )
-       select coalesce(array_agg(namespace order by namespace), array[]::text[])
+       select coalesce(json_agg(namespace order by namespace), '[]'::json)
          as namespaces
          from external_user_dependents`,
       [approval.disposable_namespace],
