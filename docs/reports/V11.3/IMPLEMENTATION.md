@@ -6,7 +6,7 @@
 Step: V11.3 — E02/E03 population-labour cross-engine invariant
 State: IMPLEMENTED_UNVERIFIED
 Risk class: P0 authoritative-state validation
-Code candidate: d839c89591977376db75e30e3575d6c38caf2e51
+Code candidate: d839c8944601190d103082c64b9fe524ec01ec81
 Baseline continuation authority: 47526ea2219ece011da82e397cf5435b1d044ea8
 Plan commit: 7a54b116381c9cbf559053475bfd4d706a643d2e
 Authority: WORLD_CORE_V11_3_CONDITIONAL_CONTINUATION_POLICY.json
