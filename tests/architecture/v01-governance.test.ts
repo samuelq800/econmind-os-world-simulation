@@ -180,6 +180,9 @@ describe('V06 owner-authorized package continuation', () => {
     const v11_3Continuation = readJson(
       'docs/governance/WORLD_CORE_V11_3_CONDITIONAL_CONTINUATION_POLICY.json',
     );
+    const v11_3Acceptance = readJson(
+      'docs/governance/WORLD_CORE_V11_3_NONPRODUCTION_ACCEPTANCE_DOWNSTREAM_PLANNING_ONLY.json',
+    );
     const progress = readJson('status/progress.json');
 
     expect(central.scoped_continuation_records).toEqual([
@@ -249,23 +252,25 @@ describe('V06 owner-authorized package continuation', () => {
       },
     });
     expect(progress.current_gate).toMatchObject({
-      step_id: 'GATE_B_PENDING_V11_3_OWNER_AUTHORIZED_CONTINUATION',
-      status: 'PENDING_WITH_V11_3_IMPLEMENTATION_AUTHORIZED',
-      next_step: 'V11.3',
-      next_step_ready: true,
+      step_id: 'GATE_B_PENDING_V11_3_OWNER_ACCEPTED_NONPRODUCTION',
+      status: 'PENDING_WITH_V11_3_DOWNSTREAM_PLANNING_ONLY',
+      next_step: 'V12.1',
+      next_step_ready: false,
+      downstream_planning_only: true,
+      downstream_planning_ready: true,
       next_step_blockers: [
         'a frozen Gate B candidate must run the mapped command/lifecycle evidence as one complete campaign; the local 250-sequence scheduler model, 100-sequence narrow V10 lifecycle model, approval-aware 250-sequence revocation model, and 29-property / 29,000-case baseline do not establish arbitrary future Command families',
         'a frozen Gate B candidate must run the complete real PostgreSQL recovery/concurrency campaign and receive fresh independent review; narrow V10 Reserve/Ship/Deliver now have five-boundary strict process-kill evidence and same-WorldVersion dual-pool contention evidence, but this is not Gate B approval',
         'browser E2E and RLS/grant negative evidence on an exact owner-approved non-production target',
+        'V09.3 implementation and real recovery evidence remain required',
+        'ADR-04 authoritative time/read-order policy remains PROPOSED_NOT_APPROVED',
       ],
       required_gate: 'GATE_B_WORLD_CORE_HARD_GATE',
       gate_status: 'PENDING',
     });
     expect(progress.steps['V11.1']).toBe('OWNER_ACCEPTED_NONPRODUCTION');
     expect(progress.steps['V11.2']).toBe('OWNER_ACCEPTED_NONPRODUCTION');
-    expect(progress.steps['V11.3']).toBe(
-      'OWNER_AUTHORIZED_IMPLEMENTATION_UNVERIFIED',
-    );
+    expect(progress.steps['V11.3']).toBe('OWNER_ACCEPTED_NONPRODUCTION');
     expect(v11Continuation).toMatchObject({
       status: 'ACTIVE_IMPLEMENTATION_UNVERIFIED',
       scope: {
@@ -284,6 +289,40 @@ describe('V06 owner-authorized package continuation', () => {
         terminal_gate: 'V11.3_INDEPENDENT_REVIEW',
       },
       dependency_exception: { gate_b_status: 'PENDING' },
+    });
+    expect(v11_3Acceptance).toMatchObject({
+      status: 'ACTIVE_DOWNSTREAM_PLANNING_ONLY',
+      acceptance_state: 'OWNER_ACCEPTED_NONPRODUCTION',
+      candidate: {
+        independent_review_tip: 'd519e923034946c4691f06dda08ed6f29dce7457',
+      },
+      independent_review: {
+        reviewer: 'B',
+        open_p0: 0,
+        open_major: 0,
+      },
+      permitted_effect:
+        'Downstream planning only. No V12.1 or later product/runtime implementation is authorized by this record.',
+      remaining_blockers: {
+        'V09.3':
+          'V09.3 implementation and real recovery evidence remain required; its current planned state cannot establish the required operational recovery proof.',
+        'ADR-04':
+          'PROPOSED_NOT_APPROVED; the authoritative time/read-order policy remains unresolved. No downstream product code may choose current, prior, opening, or phase ordering.',
+      },
+      production_mutation: false,
+      main_merge_authorized: false,
+      verified: false,
+    });
+    expect(progress.v11_3_owner_acceptance).toMatchObject({
+      status: 'OWNER_ACCEPTED_NONPRODUCTION',
+      review_target: 'd519e923034946c4691f06dda08ed6f29dce7457',
+      review_result:
+        'OPEN_P0=0; OPEN_MAJOR=0; eligible for subsequent governance only',
+      gate_b_status: 'PENDING',
+      v12_1_product_implementation: 'NO_GO',
+      verified: false,
+      main_merge: false,
+      production_mutation: false,
     });
     expect(v11_2Continuation).toMatchObject({
       status: 'ACTIVE_IMPLEMENTATION_UNVERIFIED',

@@ -1,0 +1,50 @@
+{
+  "schema_version": "WORLD_CORE_V11_3_NONPRODUCTION_ACCEPTANCE-1",
+  "record_type": "OWNER_NONPRODUCTION_ACCEPTANCE",
+  "name": "WORLD_CORE_V11_3_NONPRODUCTION_ACCEPTANCE_DOWNSTREAM_PLANNING_ONLY",
+  "status": "ACTIVE_DOWNSTREAM_PLANNING_ONLY",
+  "acceptance_state": "OWNER_ACCEPTED_NONPRODUCTION",
+  "authority": "PROJECT_OWNER_EXPLICIT_DIRECTION_2026_09_16",
+  "predecessor_policy": "docs/governance/WORLD_CORE_V11_3_CONDITIONAL_CONTINUATION_POLICY.json",
+  "decision_record": "docs/reports/V11.3/OWNER_ACCEPTANCE_FOR_NEXT_STAGE.md",
+  "candidate": {
+    "continuation_baseline": "47526ea2219ece011da82e397cf5435b1d044ea8",
+    "plan_commit": "7a54b116381c9cbf559053475bfd4d706a643d2e",
+    "implementation_commit": "d839c8944601190d103082c64b9fe524ec01ec81",
+    "evidence_commit": "294f0aabf29cbe59d8d17d518b61583c156f4665",
+    "independent_review_tip": "d519e923034946c4691f06dda08ed6f29dce7457"
+  },
+  "independent_review": {
+    "reviewer": "B",
+    "scope": "Independent narrow review of the V11.3 E02-E03 population-labour cross-engine invariant candidate",
+    "target": "d519e923034946c4691f06dda08ed6f29dce7457",
+    "open_p0": 0,
+    "open_major": 0,
+    "conclusion": "Eligible for subsequent governance only; it is not a VERIFIED, Gate B, merge, deployment, or production decision."
+  },
+  "recorded_implementation_evidence": {
+    "focused_invariant_tests": "PASS — 1 file / 8 tests",
+    "attached_checks": [
+      "Core TypeScript typecheck and build: PASS",
+      "Scoped ESLint and Prettier: PASS",
+      "Authoritative-pattern, boundary, local-safe-environment, foundation-policy, and repository-secret scans: PASS"
+    ],
+    "evidence_record": "docs/reports/V11.3/TEST_EVIDENCE.json",
+    "full_repository_check": "NOT_RUN"
+  },
+  "permitted_effect": "Downstream planning only. No V12.1 or later product/runtime implementation is authorized by this record.",
+  "prohibitions": [
+    "This acceptance is not VERIFIED.",
+    "Gate B remains PENDING.",
+    "No main merge, deployment, production/shared-Supabase access or mutation, migration publication, API, worker, UI, Command, Event, or database/RLS work is authorized.",
+    "No V12.1 product implementation is authorized."
+  ],
+  "remaining_blockers": {
+    "V09.3": "V09.3 implementation and real recovery evidence remain required; its current planned state cannot establish the required operational recovery proof.",
+    "ADR-04": "PROPOSED_NOT_APPROVED; the authoritative time/read-order policy remains unresolved. No downstream product code may choose current, prior, opening, or phase ordering.",
+    "gate_b": "The complete Gate B evidence matrix remains required."
+  },
+  "production_mutation": false,
+  "main_merge_authorized": false,
+  "verified": false
+}
