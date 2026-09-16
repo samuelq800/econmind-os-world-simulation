@@ -43,3 +43,17 @@ authoritative calculation, authorization, or World State write.
 No accompanying design-package archive is imported or used as an implementation
 dependency; the independently supplied local archive remains outside this
 candidate's file boundary.
+
+## Central Bank and Industry gameplay preparation
+
+`CentralBankGovernor.tsx` and `IndustryCommandCenter.tsx` add local gameplay
+rehearsals for a policy meeting and a Riverside project work order. Each uses
+only fixture data and local component state. Their visible completion states
+say `No World State changed` because they do not create a policy decision,
+project, facility, request, inventory movement, funding release, delivery, or
+workforce assignment.
+
+These surfaces do not import World Core, the API, worker code, database or
+Supabase clients, and do not contain a production route. They are not Gate B,
+deployment, authorization, or runtime-integration evidence. Future wiring must
+use approved public browser contracts and retain the owning Office boundaries.

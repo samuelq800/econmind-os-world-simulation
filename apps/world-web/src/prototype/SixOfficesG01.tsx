@@ -1,8 +1,10 @@
 import { useState } from 'react';
 
 import { CaptainCommandCenter } from './CaptainCommandCenter.js';
+import { CentralBankGovernor } from './CentralBankGovernor.js';
 import { FinanceMinisterCommand } from './FinanceMinisterCommand.js';
 import { GoodsTransferFlow } from './GoodsTransferFlow.js';
+import { IndustryCommandCenter } from './IndustryCommandCenter.js';
 import { LivingNationScene } from './LivingNationScene.js';
 import { NationalOverview } from './NationalOverview.js';
 import { SocialCommandCenter } from './SocialCommandCenter.js';
@@ -130,6 +132,58 @@ const CAPTAIN_NAV_GROUPS: readonly NavGroup[] = [
   },
 ];
 
+const CENTRAL_BANK_NAV_GROUPS: readonly NavGroup[] = [
+  {
+    id: 'operations',
+    label: 'Monetary chamber',
+    leaves: [
+      { pageId: 'G01', label: 'Policy meeting', implemented: true },
+      { pageId: 'B01', label: 'Balance sheet', implemented: false },
+    ],
+  },
+  {
+    id: 'country',
+    label: 'Signals',
+    leaves: [
+      { pageId: 'G02', label: 'Nation overview', implemented: true },
+      { pageId: 'B02', label: 'Price & credit watch', implemented: false },
+    ],
+  },
+  {
+    id: 'policy',
+    label: 'Instruments',
+    leaves: [
+      { pageId: 'B03', label: 'Policy rate', implemented: false },
+      { pageId: 'B04', label: 'Market operations', implemented: false },
+      { pageId: 'B05', label: 'Reserve rule', implemented: false },
+    ],
+  },
+  {
+    id: 'crossOffice',
+    label: 'Banking system',
+    leaves: [
+      { pageId: 'B06', label: 'Facilities & credit', implemented: false },
+      { pageId: 'B07', label: 'FX & reserves', implemented: false },
+    ],
+  },
+  {
+    id: 'roleWork',
+    label: 'Shared decisions',
+    leaves: [
+      { pageId: 'G03', label: 'Joint requests', implemented: false },
+      { pageId: 'G04', label: 'Resolution table', implemented: false },
+    ],
+  },
+  {
+    id: 'records',
+    label: 'Accountability',
+    leaves: [
+      { pageId: 'B08', label: 'Policy statement', implemented: false },
+      { pageId: 'G06', label: 'Decision record', implemented: false },
+    ],
+  },
+];
+
 const FINANCE_NAV_GROUPS: readonly NavGroup[] = [
   {
     id: 'operations',
@@ -232,6 +286,60 @@ const TRADE_NAV_GROUPS: readonly NavGroup[] = [
     label: 'Trade ledger',
     leaves: [
       { pageId: 'T12', label: 'Route review', implemented: false },
+      { pageId: 'G06', label: 'Audit ledger', implemented: false },
+    ],
+  },
+];
+
+const INDUSTRY_NAV_GROUPS: readonly NavGroup[] = [
+  {
+    id: 'operations',
+    label: 'Build command',
+    leaves: [
+      { pageId: 'G01', label: 'Riverside work order', implemented: true },
+      { pageId: 'I01', label: 'National resources', implemented: false },
+    ],
+  },
+  {
+    id: 'country',
+    label: 'Capacity watch',
+    leaves: [
+      { pageId: 'G02', label: 'Nation overview', implemented: true },
+      { pageId: 'I02', label: 'Production floor', implemented: false },
+      { pageId: 'I03', label: 'Energy system', implemented: false },
+    ],
+  },
+  {
+    id: 'policy',
+    label: 'Technology route',
+    leaves: [
+      { pageId: 'I04', label: 'Technology & R&D', implemented: false },
+      { pageId: 'I05', label: 'Global exchange', implemented: false },
+      { pageId: 'I06', label: 'Project pipeline', implemented: false },
+    ],
+  },
+  {
+    id: 'crossOffice',
+    label: 'Project committee',
+    leaves: [
+      { pageId: 'G03', label: 'Dependency requests', implemented: false },
+      { pageId: 'G04', label: 'Joint projects', implemented: false },
+    ],
+  },
+  {
+    id: 'roleWork',
+    label: 'Industrial system',
+    leaves: [
+      { pageId: 'I07', label: 'Infrastructure network', implemented: false },
+      { pageId: 'I08', label: 'Sector support', implemented: false },
+      { pageId: 'I09', label: 'Strategic reserves', implemented: false },
+    ],
+  },
+  {
+    id: 'records',
+    label: 'Guardrails & record',
+    leaves: [
+      { pageId: 'I10', label: 'Emissions & security', implemented: false },
       { pageId: 'G06', label: 'Audit ledger', implemented: false },
     ],
   },
@@ -385,9 +493,13 @@ function OfficeSidebar({
             ? FINANCE_NAV_GROUPS
             : actingOffice.officeId === 'TRADE'
               ? TRADE_NAV_GROUPS
-              : actingOffice.officeId === 'SOCIAL'
-                ? SOCIAL_NAV_GROUPS
-                : NAV_GROUPS
+              : actingOffice.officeId === 'CENTRAL_BANK'
+                ? CENTRAL_BANK_NAV_GROUPS
+                : actingOffice.officeId === 'INDUSTRY'
+                  ? INDUSTRY_NAV_GROUPS
+                  : actingOffice.officeId === 'SOCIAL'
+                    ? SOCIAL_NAV_GROUPS
+                    : NAV_GROUPS
         ).map((group) => {
           const isOpen = open[group.id];
           return (
@@ -440,9 +552,15 @@ function OfficeSidebar({
           ? 'Funding routes are local rehearsals; Treasury, debt, and approval actions remain mapped until their authorized handlers are attached.'
           : actingOffice.officeId === 'TRADE'
             ? 'Foreign routes are local rehearsals; orders, shipments, FX settlement, tariffs, and contracts remain mapped until their authorized handlers are attached.'
-            : actingOffice.officeId === 'SOCIAL'
-              ? 'Service plans are local rehearsals; staffing, funding, facilities, benefits, and deliveries remain mapped until their authorized handlers are attached.'
-              : 'Captain command is a local planning loop; other leaves stay visible until their authorized handlers are attached.'}
+            : actingOffice.officeId === 'CENTRAL_BANK'
+              ? 'Policy meeting is a local rehearsal; other instruments remain mapped until their authorized handlers are attached.'
+              : actingOffice.officeId === 'INDUSTRY'
+                ? 'Build orders are local rehearsals; funding, external supply, workforce, and project approvals remain mapped to their owning offices.'
+                : actingOffice.officeId === 'SOCIAL'
+                  ? 'Service plans are local rehearsals; staffing, funding, facilities, benefits, and deliveries remain mapped until their authorized handlers are attached.'
+                : actingOffice.officeId === 'CAPTAIN'
+                  ? 'Captain command is a local planning loop; other leaves stay visible until their authorized handlers are attached.'
+                  : 'This office remains a local fixture route until its authorized handlers are attached.'}
       </p>
       <button
         className="six-sidebar__route"
@@ -614,6 +732,16 @@ export function SixOfficesG01({
             />
           ) : actingOffice.officeId === 'TRADE' ? (
             <TradeForeignAffairsCommand
+              projection={projection}
+              onNotice={setDeskNotice}
+            />
+          ) : actingOffice.officeId === 'CENTRAL_BANK' ? (
+            <CentralBankGovernor
+              projection={projection}
+              onNotice={setDeskNotice}
+            />
+          ) : actingOffice.officeId === 'INDUSTRY' ? (
+            <IndustryCommandCenter
               projection={projection}
               onNotice={setDeskNotice}
             />
