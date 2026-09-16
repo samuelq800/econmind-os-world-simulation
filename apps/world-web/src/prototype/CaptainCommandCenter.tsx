@@ -4,13 +4,11 @@ import type { PrototypeWorldBriefProjection } from './contracts.js';
 
 type AgendaStatus = 'ACTIVE' | 'UNDER_REVIEW' | 'RESOLVED';
 type ProposalDecision =
-  | 'PENDING'
-  | 'APPROVED'
-  | 'REVISION_REQUESTED'
-  | 'JOINT_PACKAGE_REQUESTED'
-  | 'REJECTED';
+  'PENDING' | 'APPROVED' | 'REVISION_REQUESTED' | 'REJECTED';
 type CoordinationMode = 'NORMAL' | 'ELEVATED' | 'EMERGENCY';
 type MapPointId = 'CABINET' | 'GRANARY' | 'TREASURY' | 'RESERVE' | 'HARBOUR';
+type MissionPhase =
+  'ASSESS' | 'CABINET' | 'SUPPORTED' | 'AUTHORISED' | 'CLOSED';
 
 interface AgendaIssue {
   readonly id: string;
@@ -133,10 +131,6 @@ const DECISION_COPY: Readonly<
     label: 'Request revision',
     log: 'Food buffer returned for a smaller resource call',
   },
-  JOINT_PACKAGE_REQUESTED: {
-    label: 'Call joint package',
-    log: 'Joint package called across Trade, Finance and Social',
-  },
   REJECTED: {
     label: 'Reject local draft',
     log: 'Food buffer draft rejected for this planning turn',
@@ -173,7 +167,10 @@ export function CaptainCommandCenter({
   const [priority, setPriority] =
     useState<(typeof PRIORITIES)[number]>('Food Security');
   const [agenda, setAgenda] = useState<readonly AgendaIssue[]>(INITIAL_AGENDA);
+  const [turn, setTurn] = useState(78);
   const [politicalCapital, setPoliticalCapital] = useState(28);
+  const [financeGuardrailRead, setFinanceGuardrailRead] = useState(false);
+  const [missionPhase, setMissionPhase] = useState<MissionPhase>('ASSESS');
   const [supportCommitted, setSupportCommitted] = useState(false);
   const [decision, setDecision] = useState<ProposalDecision>('PENDING');
   const [coordination, setCoordination] = useState<CoordinationMode>('NORMAL');
@@ -189,11 +186,16 @@ export function CaptainCommandCenter({
   const cashSignal = metricValue(projection, 'treasury-cash', '1.84 bn GCU');
   const priceSignal = metricValue(projection, 'inflation', '6.4%');
   const employmentSignal = metricValue(projection, 'unemployment', '7.1%');
-  const progress = [
-    supportCommitted,
-    decision !== 'PENDING',
-    coordination !== 'NORMAL',
-  ].filter(Boolean).length;
+  const progress =
+    missionPhase === 'AUTHORISED' || missionPhase === 'CLOSED'
+      ? 4
+      : missionPhase === 'SUPPORTED'
+        ? 3
+        : missionPhase === 'CABINET'
+          ? 2
+          : financeGuardrailRead
+            ? 1
+            : 0;
 
   const addLog = (entry: string) => {
     setLog((current) => [entry, ...current].slice(0, 4));
@@ -225,8 +227,28 @@ export function CaptainCommandCenter({
     onNotice(`Local agenda update: ${issue.title} marked resolved.`);
   };
 
+  const readFinanceGuardrail = () => {
+    if (financeGuardrailRead) return;
+    setFinanceGuardrailRead(true);
+    addLog('Treasury guardrail read · cash window must stay protected');
+    onNotice(
+      'Treasury constraint read. The Cabinet call is now available at Eastbank Granary.',
+    );
+  };
+
+  const callJointPackage = () => {
+    if (!financeGuardrailRead || missionPhase !== 'ASSESS') return;
+    setMissionPhase('CABINET');
+    addLog('Cabinet coalition assembled · Trade, Finance and Social called');
+    onNotice(
+      'Cabinet coalition assembled. Back the route at South Coast Port to continue.',
+    );
+  };
+
   const makeDecision = (next: Exclude<ProposalDecision, 'PENDING'>) => {
+    if (next === 'APPROVED' && missionPhase !== 'SUPPORTED') return;
     setDecision(next);
+    setMissionPhase(next === 'APPROVED' ? 'AUTHORISED' : 'CLOSED');
     addLog(DECISION_COPY[next].log);
     onNotice(
       `${DECISION_COPY[next].label} recorded locally. No command was submitted.`,
@@ -234,8 +256,15 @@ export function CaptainCommandCenter({
   };
 
   const commitSupport = () => {
-    if (supportCommitted || politicalCapital < 4) return;
+    if (
+      supportCommitted ||
+      politicalCapital < 4 ||
+      missionPhase !== 'CABINET'
+    ) {
+      return;
+    }
     setSupportCommitted(true);
+    setMissionPhase('SUPPORTED');
     setPoliticalCapital((current) => current - 4);
     addLog('Four Political Capital committed to food-buffer coordination');
     onNotice('4 Political Capital reserved in this local rehearsal.');
@@ -249,6 +278,23 @@ export function CaptainCommandCenter({
         ? 'Emergency posture is preview-only; the authority route remains required.'
         : `Local coordination posture staged: ${mode}.`,
     );
+  };
+
+  const startNextTurn = () => {
+    setTurn((current) => current + 1);
+    setFinanceGuardrailRead(false);
+    setMissionPhase('ASSESS');
+    setSupportCommitted(false);
+    setDecision('PENDING');
+    setSelectedPointId('GRANARY');
+    addLog(`Turn ${turn + 1} opened · food buffer mission reset for rehearsal`);
+    onNotice(`Local Turn ${turn + 1} opened. No world state changed.`);
+  };
+
+  const missionStepClass = (step: number) => {
+    if (progress >= step) return 'is-complete';
+    if (progress + 1 === step) return 'is-current';
+    return undefined;
   };
 
   const renderFieldFile = () => {
@@ -304,12 +350,35 @@ export function CaptainCommandCenter({
       case 'GRANARY':
         return (
           <>
-            <p className="captain-map-file__eyebrow">FOOD BUFFER · DECISION</p>
-            <h2>Make the call.</h2>
-            <p className="captain-map-file__brief">
-              Trade can release stock and open a targeted import route. Finance
-              and Social stay in the chain.
+            <p className="captain-map-file__eyebrow">
+              ACTIVE MISSION · FOOD BUFFER
             </p>
+            <h2>Protect Eastbank.</h2>
+            <p className="captain-map-file__brief">
+              A food release needs a protected cash window, a Cabinet coalition,
+              and political cover before the Captain gives the order.
+            </p>
+            <ol
+              className="captain-mission-route"
+              aria-label="Food buffer mission route"
+            >
+              <li className={missionStepClass(1)}>
+                <b>01</b>
+                <span>Read Treasury guardrail</span>
+              </li>
+              <li className={missionStepClass(2)}>
+                <b>02</b>
+                <span>Call the Cabinet package</span>
+              </li>
+              <li className={missionStepClass(3)}>
+                <b>03</b>
+                <span>Back the harbour route</span>
+              </li>
+              <li className={missionStepClass(4)}>
+                <b>04</b>
+                <span>Authorize the response</span>
+              </li>
+            </ol>
             <dl className="captain-map-file__facts">
               <div>
                 <dt>Buffer</dt>
@@ -320,34 +389,98 @@ export function CaptainCommandCenter({
                 <dd>0.32 bn GCU · port capacity</dd>
               </div>
               <div>
-                <dt>State</dt>
-                <dd>{decisionLabel(decision)}</dd>
+                <dt>Captain call</dt>
+                <dd>
+                  {decision === 'PENDING'
+                    ? `${progress} / 4 mission steps`
+                    : decisionLabel(decision)}
+                </dd>
               </div>
             </dl>
-            <div
-              className="captain-map-file__actions"
-              aria-label="Food buffer decision options"
-            >
-              {(
-                Object.keys(DECISION_COPY) as Exclude<
-                  ProposalDecision,
-                  'PENDING'
-                >[]
-              ).map((item) => (
+            {missionPhase === 'ASSESS' && !financeGuardrailRead ? (
+              <div className="captain-map-file__actions">
+                <span className="captain-mission-lock">
+                  Treasury guardrail is unread.
+                </span>
                 <button
-                  className={
-                    item === 'JOINT_PACKAGE_REQUESTED'
-                      ? 'captain-map-button captain-map-button--primary'
-                      : 'captain-map-button'
-                  }
-                  key={item}
+                  className="captain-map-button captain-map-button--primary"
                   type="button"
-                  onClick={() => makeDecision(item)}
+                  onClick={() => focusPoint('TREASURY')}
                 >
-                  {DECISION_COPY[item].label}
+                  Trace the Treasury constraint
                 </button>
-              ))}
-            </div>
+              </div>
+            ) : null}
+            {missionPhase === 'ASSESS' && financeGuardrailRead ? (
+              <div className="captain-map-file__actions">
+                <button
+                  className="captain-map-button captain-map-button--primary"
+                  type="button"
+                  onClick={callJointPackage}
+                >
+                  Call joint package
+                </button>
+                <small>Trade · Finance · Social will be needed.</small>
+              </div>
+            ) : null}
+            {missionPhase === 'CABINET' ? (
+              <div className="captain-map-file__actions">
+                <span className="captain-mission-lock">
+                  Cabinet is ready. Political cover is still missing.
+                </span>
+                <button
+                  className="captain-map-button captain-map-button--primary"
+                  type="button"
+                  onClick={() => focusPoint('HARBOUR')}
+                >
+                  Move to South Coast Port
+                </button>
+              </div>
+            ) : null}
+            {missionPhase === 'SUPPORTED' ? (
+              <div
+                className="captain-map-file__actions"
+                aria-label="Food buffer authorization options"
+              >
+                <button
+                  className="captain-map-button captain-map-button--primary"
+                  type="button"
+                  onClick={() => makeDecision('APPROVED')}
+                >
+                  Authorize food buffer package
+                </button>
+                <button
+                  className="captain-map-button"
+                  type="button"
+                  onClick={() => makeDecision('REVISION_REQUESTED')}
+                >
+                  {DECISION_COPY.REVISION_REQUESTED.label}
+                </button>
+                <button
+                  className="captain-map-button"
+                  type="button"
+                  onClick={() => makeDecision('REJECTED')}
+                >
+                  {DECISION_COPY.REJECTED.label}
+                </button>
+              </div>
+            ) : null}
+            {missionPhase === 'AUTHORISED' || missionPhase === 'CLOSED' ? (
+              <div className="captain-map-file__actions">
+                <span className="captain-mission-success">
+                  {missionPhase === 'AUTHORISED'
+                    ? 'Captain order staged for the local rehearsal.'
+                    : 'Mission returned without authorization.'}
+                </span>
+                <button
+                  className="captain-map-button captain-map-button--primary"
+                  type="button"
+                  onClick={startNextTurn}
+                >
+                  Open next turn
+                </button>
+              </div>
+            ) : null}
           </>
         );
       case 'TREASURY':
@@ -375,13 +508,13 @@ export function CaptainCommandCenter({
             </dl>
             <button
               className="captain-map-button captain-map-button--primary"
+              disabled={financeGuardrailRead}
               type="button"
-              onClick={() => {
-                addLog('Finance asked to redraw the payment-window package');
-                onNotice('Local request for Finance revision recorded.');
-              }}
+              onClick={readFinanceGuardrail}
             >
-              Request Finance revision
+              {financeGuardrailRead
+                ? 'Treasury guardrail confirmed'
+                : 'Read cash-window guardrail'}
             </button>
           </>
         );
@@ -428,7 +561,7 @@ export function CaptainCommandCenter({
         return (
           <>
             <p className="captain-map-file__eyebrow">
-              SOUTH COAST PORT · SUPPORT
+              MISSION SUPPORT · SOUTH COAST
             </p>
             <h2>Back the route.</h2>
             <p className="captain-map-file__brief">
@@ -447,13 +580,19 @@ export function CaptainCommandCenter({
             </dl>
             <button
               className="captain-map-button captain-map-button--primary"
-              disabled={supportCommitted || politicalCapital < 4}
+              disabled={
+                supportCommitted ||
+                politicalCapital < 4 ||
+                missionPhase !== 'CABINET'
+              }
               type="button"
               onClick={commitSupport}
             >
               {supportCommitted
-                ? 'Support committed this turn'
-                : 'Commit 4 PC to the route'}
+                ? 'Political cover secured'
+                : missionPhase !== 'CABINET'
+                  ? 'Cabinet call required first'
+                  : 'Commit 4 PC to the route'}
             </button>
           </>
         );
@@ -467,9 +606,11 @@ export function CaptainCommandCenter({
     >
       <header className="captain-map-command__header">
         <div>
-          <p>CAPTAIN · NORTHSTAR · TURN 78</p>
-          <h1 id="captain-map-title">National map command</h1>
-          <span>Read the pressure. Pick a place. Make one move.</span>
+          <p>CAPTAIN · NORTHSTAR · TURN {turn}</p>
+          <h1 id="captain-map-title">National command turn</h1>
+          <span>
+            Read the board. Commit one response. Live with the result.
+          </span>
         </div>
         <dl
           className="captain-map-hud"
@@ -494,18 +635,22 @@ export function CaptainCommandCenter({
         className="captain-map-command__playloop"
         aria-label="Command turn loop"
       >
-        <span>
-          <b>01</b> Scan the map
+        <span className={missionStepClass(1)}>
+          <b>01</b> Read the constraint
         </span>
         <i aria-hidden="true" />
-        <span>
-          <b>02</b> Commit support
+        <span className={missionStepClass(2)}>
+          <b>02</b> Call the Cabinet
         </span>
         <i aria-hidden="true" />
-        <span>
-          <b>03</b> Resolve a call
+        <span className={missionStepClass(3)}>
+          <b>03</b> Back the route
         </span>
-        <strong>{progress} / 3 moves locked</strong>
+        <i aria-hidden="true" />
+        <span className={missionStepClass(4)}>
+          <b>04</b> Authorize
+        </span>
+        <strong>{progress} / 4 mission steps</strong>
       </section>
 
       <div className="captain-map-command__board">
@@ -651,7 +796,7 @@ export function CaptainCommandCenter({
               x="803"
               y="556"
             >
-              TURN 78
+              TURN {turn}
             </text>
           </svg>
           <div
@@ -714,7 +859,7 @@ export function CaptainCommandCenter({
         >
           <header>
             <div>
-              <span>FIELD FILE</span>
+              <span>MISSION CARD · {progress}/4</span>
               <strong>{selectedPoint.label}</strong>
             </div>
             <button
@@ -746,8 +891,8 @@ export function CaptainCommandCenter({
       >
         <div className="captain-map-command__agenda">
           <div className="captain-map-section-heading">
-            <p>CABINET TABLE</p>
-            <h2>Three seats. One direction.</h2>
+            <p>CABINET QUEUE</p>
+            <h2>Three fronts. One turn.</h2>
           </div>
           <div
             className="captain-map-agenda-list"
@@ -783,8 +928,8 @@ export function CaptainCommandCenter({
           aria-labelledby="captain-ledger-title"
         >
           <div className="captain-map-section-heading">
-            <p>TURN RECORD</p>
-            <h2 id="captain-ledger-title">Your moves leave a trace.</h2>
+            <p>TURN REPLAY</p>
+            <h2 id="captain-ledger-title">What your move unlocked.</h2>
           </div>
           <ol>
             {log.map((entry) => (

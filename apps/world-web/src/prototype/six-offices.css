@@ -5724,6 +5724,104 @@
   }
 }
 
+/* Captain mission-state affordances: the map art may be replaced without changing this turn loop. */
+.captain-map-command__playloop span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 29px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  padding: 0 5px;
+}
+
+.captain-map-command__playloop span.is-complete {
+  color: var(--ink);
+}
+
+.captain-map-command__playloop span.is-complete b {
+  color: var(--accent-strong);
+}
+
+.captain-map-command__playloop span.is-current {
+  border-color: color-mix(in srgb, var(--amber) 60%, var(--line));
+  background: var(--amber-soft);
+  color: var(--ink);
+}
+
+.captain-mission-route {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.captain-mission-route li {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  border-radius: 5px;
+  padding: 6px 8px;
+  background: color-mix(in srgb, var(--surface-subtle) 88%, var(--canvas));
+  color: var(--ink-faint);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.025em;
+}
+
+.captain-mission-route b {
+  color: var(--ink-faint);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.captain-mission-route li.is-current {
+  border-color: color-mix(in srgb, var(--amber) 54%, var(--line));
+  border-left-color: var(--amber);
+  background: var(--amber-soft);
+  color: var(--ink);
+}
+
+.captain-mission-route li.is-current b {
+  color: var(--amber);
+}
+
+.captain-mission-route li.is-complete {
+  border-left-color: var(--accent-strong);
+  color: var(--ink-muted);
+}
+
+.captain-mission-route li.is-complete b {
+  color: var(--accent-strong);
+}
+
+.captain-mission-lock,
+.captain-mission-success {
+  border-left: 3px solid var(--amber);
+  padding: 5px 8px;
+  background: var(--amber-soft);
+  color: var(--ink-muted);
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.captain-mission-success {
+  border-left-color: var(--accent-strong);
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.captain-map-file__actions small {
+  color: var(--ink-faint);
+  font-size: 9px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .captain-map-marker,
   .captain-map-button {

@@ -16,9 +16,9 @@ const styles = readFileSync(
 );
 
 describe('Captain command preparation surface', () => {
-  it('makes a national map the Captain gameplay surface while retaining the strategic loop', () => {
+  it('makes a national map the Captain gameplay surface with a readable mission loop', () => {
     for (const label of [
-      'National map command',
+      'National command turn',
       'NORTHSTAR OPERATIONS MAP',
       'Capital District',
       'Eastbank Granary',
@@ -26,11 +26,15 @@ describe('Captain command preparation surface', () => {
       'Reserve Hill',
       'South Coast Port',
       'National telemetry',
-      'Three seats. One direction.',
+      'Read Treasury guardrail',
+      'Call the Cabinet package',
+      'Back the harbour route',
+      'Authorize the response',
+      'Three fronts. One turn.',
       'Choose the line.',
       'Political Capital',
       'Set the tempo.',
-      'Your moves leave a trace.',
+      'What your move unlocked.',
     ]) {
       expect(captainCommand).toContain(label);
     }
@@ -38,18 +42,23 @@ describe('Captain command preparation surface', () => {
     expect(captainCommand).toContain('Central Bank instrument.');
   });
 
-  it('keeps map decisions interactive and explicitly local', () => {
+  it('keeps the causal mission actions interactive and explicitly local', () => {
     for (const action of [
-      'Approve local draft',
+      'Read cash-window guardrail',
       'Request revision',
       'Call joint package',
       'Reject local draft',
       'Clear seat',
       'Commit 4 PC to the route',
+      'Authorize food buffer package',
+      'Open next turn',
       'Pin to the map',
     ]) {
       expect(captainCommand).toContain(action);
     }
+    expect(captainCommand).toContain("missionPhase !== 'CABINET'");
+    expect(captainCommand).toContain("missionPhase !== 'SUPPORTED'");
+    expect(captainCommand).toContain('financeGuardrailRead');
     expect(captainCommand).toContain('no proposal, approval, or command is');
     expect(captainCommand).toContain('submitted.');
     expect(captainCommand).not.toContain('fetch(');
@@ -70,6 +79,7 @@ describe('Captain command preparation surface', () => {
     expect(styles).toContain('.captain-map-marker');
     expect(styles).toContain('.captain-map-file');
     expect(styles).toContain('.captain-map-stage__telemetry');
+    expect(styles).toContain('.captain-mission-route');
     expect(styles).toContain('--captain-paper: var(--surface)');
     expect(styles).toContain('(prefers-reduced-motion: reduce)');
     expect(styles).toContain('(forced-colors: active)');
