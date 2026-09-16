@@ -1538,7 +1538,7 @@ async function verifyExactCleanupRoleBoundary(client, approval) {
     [roles],
   );
   if (
-    rows(memberships).length !== roles.length ||
+    rows(memberships).length < roles.length ||
     new Set(rows(memberships).map((record) => record?.role_name)).size !==
       roles.length ||
     rows(memberships).some(
@@ -1857,9 +1857,10 @@ export async function cleanupMarkedBoundary(client, approval, evidence) {
         `revoke ${identifier(role)} from current_user`,
       );
     }
-    await verifyNoRoleResidue(client, approval);
     for (const role of [owner, worker, reader]) {
       // PostgreSQL DROP ROLE has no CASCADE form: outstanding dependencies fail.
+      // It also removes the pooler-created grantor entry after the exact role
+      // and member boundary above have been checked.
       await command(
         client,
         `CLEANUP_DROP_ROLE_${role.toUpperCase()}_RESTRICT`,

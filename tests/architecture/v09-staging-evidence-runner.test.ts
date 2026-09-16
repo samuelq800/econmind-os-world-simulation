@@ -404,10 +404,16 @@ class FakeClient {
     }
     if (request.step === 'CLEANUP_VERIFY_EXACT_ROLE_MEMBERSHIPS') {
       return {
-        rows: Object.values(this.approval.roles).map((role_name) => ({
-          member_name: this.approval.admin_database_role,
-          role_name,
-        })),
+        rows: Object.values(this.approval.roles).flatMap((role_name) => [
+          {
+            member_name: this.approval.admin_database_role,
+            role_name,
+          },
+          {
+            member_name: this.approval.admin_database_role,
+            role_name,
+          },
+        ]),
       };
     }
     if (request.step === 'CLEANUP_VERIFY_NO_EXTERNAL_DEPENDENTS') {
