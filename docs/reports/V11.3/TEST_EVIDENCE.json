@@ -1,0 +1,155 @@
+{
+  "schema_version": "V11.3-TEST-EVIDENCE-1",
+  "step_id": "V11.3",
+  "title": "E02/E03 population-labour cross-engine invariant",
+  "state": "IMPLEMENTED_UNVERIFIED",
+  "risk_class": "P0",
+  "code_candidate": "d839c89591977376db75e30e3575d6c38caf2e51",
+  "continuation_baseline": "47526ea2219ece011da82e397cf5435b1d044ea8",
+  "plan_commit": "7a54b116381c9cbf559053475bfd4d706a643d2e",
+  "continuation_policy": "docs/governance/WORLD_CORE_V11_3_CONDITIONAL_CONTINUATION_POLICY.json",
+  "environment": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile": "UNCHANGED",
+    "execution_surface": "LOCAL_ONLY",
+    "production_access": false,
+    "database_configured": false,
+    "linked_supabase_project": "NOT_LINKED"
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 exec vitest run tests/world-core/v11-3-population-labour-invariants.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "test_files": 1,
+      "tests": 8,
+      "stdout_stderr_summary": "Focused E02/E03 cross-engine invariant suite passed."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 --filter @econmind/core typecheck",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "tsc -p tsconfig.json --pretty false"
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 --filter @econmind/core build",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "tsc -p tsconfig.build.json"
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 exec eslint packages/core/src/labour/population-labour-invariants.ts packages/core/src/index.ts tests/world-core/v11-3-population-labour-invariants.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No scoped ESLint findings."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 exec prettier --check packages/core/src/labour/population-labour-invariants.ts packages/core/src/index.ts tests/world-core/v11-3-population-labour-invariants.test.ts docs/exec-plans/V11.3.md",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "All scoped files matched Prettier."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 scripts/check-authoritative-patterns.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "authoritative_scanned_core_files": 35,
+      "authoritative_scanned_files": 70,
+      "stdout_stderr_summary": "No authoritative-pattern violations."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 scripts/check-boundaries.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "boundary_scanned_files": 75,
+      "stdout_stderr_summary": "No repository boundary violations."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 env:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Local only; databaseConfigured=false, linkedSupabaseProject=NOT_LINKED, databaseMutationAllowed=false."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 foundation:policy",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No policy violations."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 secrets:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "secret_scanned_files": 682,
+      "stdout_stderr_summary": "No repository secret findings."
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": null,
+      "result": "NOT_RUN",
+      "stdout_stderr_summary": "Deliberately not run: this P0 candidate records focused V11.3 evidence and makes no full-repository campaign claim."
+    }
+  ],
+  "invariant_evidence": [
+    {
+      "name": "Compatible opaque E02/E03 source and result labels plus exact replayed state/evidence",
+      "result": "PASS",
+      "source": "v11-3-population-labour-invariants.test.ts"
+    },
+    {
+      "name": "Direct labour or skill state creation not reproduced by explicit E03 evidence fails closed",
+      "result": "PASS",
+      "source": "v11-3-population-labour-invariants.test.ts"
+    },
+    {
+      "name": "Country total E03 availability cannot exceed E02 working-age stock",
+      "result": "PASS",
+      "source": "v11-3-population-labour-invariants.test.ts"
+    },
+    {
+      "name": "Migration labour entries require an exact working-age E02 arrival handoff and cannot exceed its count",
+      "result": "PASS",
+      "source": "v11-3-population-labour-invariants.test.ts"
+    },
+    {
+      "name": "Private/public employment reconciliation is revalidated through E03",
+      "result": "PASS",
+      "source": "v11-3-population-labour-invariants.test.ts"
+    },
+    {
+      "name": "Malformed evidence rejects and canonical evidence reordering yields the same receipt",
+      "result": "PASS",
+      "source": "v11-3-population-labour-invariants.test.ts"
+    }
+  ],
+  "negative_cases": [
+    "Mismatched caller-selected E02/E03 snapshot labels reject.",
+    "Direct labour/skill stock mutation without matching E03 replay rejects.",
+    "E03 availability greater than the E02 working-age cohort rejects.",
+    "Missing or overused migration arrival handoff rejects.",
+    "Private/public employed aggregate mismatch rejects through E03 validation.",
+    "Malformed canonical evidence rejects before any validation receipt."
+  ],
+  "database_rls_evidence": [
+    {
+      "result": "NOT_RUN",
+      "reason": "No database, API, worker, RLS, schema or migration surface is in V11.3 scope."
+    }
+  ],
+  "unresolved_gaps": [
+    "Independent V11.3 review is required before VERIFIED or any promotion.",
+    "ADR-04 and ADR-08 remain unapproved; no timing, participation, matching, wage, money, price, rate or rounding formula was selected.",
+    "No V07/V09 persistence, command/event/receipt publication, crash recovery or full-repository test campaign is implemented or evidenced here.",
+    "V12 through V18 remain NOT_STARTED."
+  ],
+  "migration": {
+    "created": false,
+    "status": "NOT_CREATED",
+    "production_publication": false
+  },
+  "independent_review": "NOT_RUN",
+  "production_mutation": false,
+  "database_mutation": false
+}
