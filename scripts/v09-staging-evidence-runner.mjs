@@ -392,6 +392,18 @@ function errorStage(error, fallback) {
     : fallback;
 }
 
+function failureRecord(error, fallback) {
+  const failure = { stage: errorStage(error, fallback) };
+  const code =
+    error && typeof error === 'object'
+      ? (error.cause?.code ?? error.code)
+      : undefined;
+  if (typeof code === 'string' && /^[A-Z0-9_]{1,80}$/u.test(code)) {
+    failure.code = code;
+  }
+  return failure;
+}
+
 function rows(result) {
   return Array.isArray(result?.rows) ? result.rows : [];
 }
@@ -1987,9 +1999,10 @@ export async function runV09DedicatedStagingEvidence({
       evidence.status = 'PASS';
     } catch (error) {
       evidence.status = 'FAIL_CLOSED';
-      evidence.failure = {
-        stage: errorStage(error, evidence.steps.at(-1)?.id ?? 'UNKNOWN'),
-      };
+      evidence.failure = failureRecord(
+        error,
+        evidence.steps.at(-1)?.id ?? 'UNKNOWN',
+      );
       if (client && transactionOpen) {
         const rollbackConfirmed = await command(
           client,
@@ -2012,9 +2025,9 @@ export async function runV09DedicatedStagingEvidence({
       if (client) {
         try {
           await audited(evidence, 'END_PRIMARY_CLIENT', () => client.end());
-        } catch {
+        } catch (error) {
           evidence.status = 'FAIL_CLOSED';
-          evidence.failure = { stage: 'CLIENT_CLOSE' };
+          evidence.failure ??= failureRecord(error, 'CLIENT_CLOSE');
         }
       }
       if (cleanupRequired) {
@@ -2031,18 +2044,16 @@ export async function runV09DedicatedStagingEvidence({
           );
         } catch (error) {
           evidence.status = 'FAIL_CLOSED';
-          evidence.failure = {
-            stage: errorStage(error, CLEANUP_INCOMPLETE),
-          };
+          evidence.failure = failureRecord(error, CLEANUP_INCOMPLETE);
         } finally {
           if (cleanupClient) {
             try {
               await audited(evidence, 'END_CLEANUP_CLIENT', () =>
                 cleanupClient.end(),
               );
-            } catch {
+            } catch (error) {
               evidence.status = 'FAIL_CLOSED';
-              evidence.failure = { stage: 'CLEANUP_CLIENT_CLOSE' };
+              evidence.failure ??= failureRecord(error, 'CLEANUP_CLIENT_CLOSE');
             }
           }
         }

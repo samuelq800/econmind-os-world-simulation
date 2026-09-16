@@ -17,6 +17,6 @@
     "reader": "v09_staging_reader"
   },
   "owner_confirmation": "OWNER_APPROVED_DEDICATED_NONPRODUCTION_V09",
-  "evidence_output_path": "/Users/samuel/Documents/econclub/evidence/vzwrereseklnrjbtmsmc-gate-b-staging-migration-detail.json",
-  "target_fingerprint": "a50bb6a581c34e316d1369ab0e1bcc9dee5ecaeff4ef0c16e470db14caa4fe8b"
+  "evidence_output_path": "/Users/samuel/Documents/econclub/evidence/vzwrereseklnrjbtmsmc-gate-b-staging-first-failure.json",
+  "target_fingerprint": "76fcc151b8abc3d3bbecce466fa8a0fc5f9cd1fdc717f01a02a60130e59e2dbc"
 }
