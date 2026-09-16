@@ -171,6 +171,9 @@ describe('V06 owner-authorized package continuation', () => {
     const v09Scoped = readJson(
       'docs/governance/WORLD_CORE_V09_CONTINUATION_POLICY.json',
     );
+    const v11Continuation = readJson(
+      'docs/governance/WORLD_CORE_V11_1_CONTINUATION_POLICY.json',
+    );
     const progress = readJson('status/progress.json');
 
     expect(central.scoped_continuation_records).toEqual([
@@ -240,10 +243,10 @@ describe('V06 owner-authorized package continuation', () => {
       },
     });
     expect(progress.current_gate).toMatchObject({
-      step_id: 'GATE_B_EVIDENCE_PREPARATION',
-      status: 'IN_PROGRESS',
-      next_step: 'GATE_B_WORLD_CORE_HARD_GATE',
-      next_step_ready: false,
+      step_id: 'GATE_B_PENDING_V11_1_OWNER_AUTHORIZED_CONTINUATION',
+      status: 'PENDING_WITH_V11_1_IMPLEMENTATION_AUTHORIZED',
+      next_step: 'V11.1',
+      next_step_ready: true,
       next_step_blockers: [
         'a frozen Gate B candidate must run the mapped command/lifecycle evidence as one complete campaign; the local 250-sequence scheduler model, 100-sequence narrow V10 lifecycle model, approval-aware 250-sequence revocation model, and 29-property / 29,000-case baseline do not establish arbitrary future Command families',
         'a frozen Gate B candidate must run the complete real PostgreSQL recovery/concurrency campaign and receive fresh independent review; narrow V10 Reserve/Ship/Deliver now have five-boundary strict process-kill evidence and same-WorldVersion dual-pool contention evidence, but this is not Gate B approval',
@@ -251,6 +254,18 @@ describe('V06 owner-authorized package continuation', () => {
       ],
       required_gate: 'GATE_B_WORLD_CORE_HARD_GATE',
       gate_status: 'PENDING',
+    });
+    expect(progress.steps['V11.1']).toBe(
+      'OWNER_AUTHORIZED_IMPLEMENTATION_UNVERIFIED',
+    );
+    expect(v11Continuation).toMatchObject({
+      status: 'ACTIVE_IMPLEMENTATION_UNVERIFIED',
+      scope: {
+        allowed_step: 'V11.1',
+        allowed_domain: 'E02 population stocks and flows',
+        terminal_gate: 'V11.1_INDEPENDENT_REVIEW',
+      },
+      dependency_exception: { gate_b_status: 'PENDING' },
     });
     expect(progress.v10_1_entry).toMatchObject({
       status: 'V10_1_PACKAGE_APPROVED_NEXT_GOVERNANCE_ONLY',
