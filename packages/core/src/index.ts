@@ -52,6 +52,7 @@ export {
   type InventoryPostingReceipt,
   type InventoryPostingResult,
 } from './inventory/inventory-ledger.js';
+export * from './labour/labour-engine.js';
 export * from './numeric/index.js';
 export * from './opening/opening-seed.js';
 export * from './population/population-engine.js';
