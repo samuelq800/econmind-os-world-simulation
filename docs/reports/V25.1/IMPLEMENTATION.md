@@ -3,7 +3,7 @@
 ## Status
 
 - **Preparation marker:** `PREPARATION_ONLY_NOT_V25_STARTED`.
-- **Implementation commit:** `d02b1d6be63b2ff3871961d7f5dfdb684ed914b6`.
+- **Implementation commit:** `dd2f8a08e95ab327d075426ace5a2bf2aa0ce1fb`.
 - **Immutable baseline:** `e43dd6629d8645740278156654bb224121666856`.
 - **Effective risk:** P2. This is a browser-only, source-controlled visual
   fixture and local test tooling. It owns no authoritative state, command,
@@ -32,20 +32,22 @@
 - Seventy `visualTerritories`, each with a fictional label, exact local capital
   point, display-only boundary and a non-quantitative physical resource
   profile. Fourteen are island groups with a visual envelope around one or two
-  display islands; that envelope is neither a legal maritime claim nor a
-  country record. They have no World IDs, population, government, strength,
-  inventory, reserve, capacity, throughput, price, GDP, market state or NPC
-  state. They are not a V27 country seed.
+  display islands; every non-island boundary is clipped by one of four local
+  V8 coast masks. Neither the envelope nor the coast mask is a legal maritime
+  claim, official border, land registry or country record. They have no World
+  IDs, population, government, strength, inventory, reserve, capacity,
+  throughput, price, GDP, market state or NPC state. They are not a V27 country
+  seed.
 - City-capital markers, ports, factory, refinery, mine, farm, energy,
   logistics, rail, bridge/tunnel, pipeline and mountain-pass rendering.
   All are position/type annotations only; none asserts construction, ownership,
   operation or capacity.
 - Deterministic checks for local extent, horizontal world wrap, route endpoints,
   land/sea sampling, named strait traversal, 70-territory count,
-  capital-in-territory, island-envelope form/count/containment, local-lake
-  scale, tectonic satellite placement, latitude continuity, warm subsurface
-  currents, resource origin compatibility and prohibited future economic seed
-  values.
+  capital-in-territory, island-envelope form/count/containment, mandatory
+  mainland coast-mask classification, local-lake scale, tectonic satellite
+  placement, latitude continuity, warm subsurface currents, resource origin
+  compatibility and prohibited future economic seed values.
 - The physical derivation contract is recorded in the execution plan:
   `plates → relief → drainage → latitude/wind/current → precipitation →
 climate → vegetation → agriculture/mineral potential → settlements →
@@ -77,7 +79,7 @@ All checks below used Node `24.20.0` and pnpm `12.3.4` through the repository’
 pinned local toolchain, on the code commit named above.
 
 - `pnpm exec vitest run tests/world-web/fictional-atlas.test.ts` — PASS,
-  10/10 focused invariants.
+  11/11 focused invariants.
 - `pnpm --filter @econmind/world-web typecheck` — PASS.
 - `pnpm --filter @econmind/world-web build` — PASS; bundled the V8 terrain
   asset locally.
@@ -88,8 +90,9 @@ pinned local toolchain, on the code commit named above.
   PASS.
 - Local browser inspection at `http://127.0.0.1:4173/` — PASS: the clean
   physical base rendered with all optional layers off; the Political switch
-  rendered 70 display boundaries and the island-group dashed sea envelopes.
-  This is visual local evidence only.
+  rendered 70 display boundaries. Mainland boundaries were clipped to local
+  V8 coast masks, while island groups rendered dashed sea envelopes. This is
+  visual local evidence only.
 
 ## Incomplete and deferred work
 

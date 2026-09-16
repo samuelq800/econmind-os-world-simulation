@@ -1,7 +1,7 @@
 {
   "schema_version": "R2-101.1",
   "step_id": "V25.1",
-  "commit": "d02b1d6be63b2ff3871961d7f5dfdb684ed914b6",
+  "commit": "dd2f8a08e95ab327d075426ace5a2bf2aa0ce1fb",
   "preparation_marker": "PREPARATION_ONLY_NOT_V25_STARTED",
   "environment": {
     "name": "local browser fixture and pinned Node/pnpm toolchain",
@@ -17,7 +17,7 @@
       "command": "pnpm exec vitest run tests/world-web/fictional-atlas.test.ts",
       "exit_code": 0,
       "result": "PASS",
-      "stdout_stderr_summary": "10 focused fictional-atlas tests passed, including horizontal-wrap and island-group boundary-envelope constraints."
+      "stdout_stderr_summary": "11 focused fictional-atlas tests passed, including horizontal-wrap, island-group envelope, and mainland coast-mask constraints."
     },
     {
       "command": "pnpm --filter @econmind/world-web typecheck && pnpm --filter @econmind/world-web build",
@@ -41,7 +41,7 @@
       "command": "local browser inspection at http://127.0.0.1:4173/",
       "exit_code": 0,
       "result": "PASS",
-      "stdout_stderr_summary": "Clean terrain base rendered with all optional layers off; Political rendered 70 visual boundaries, including dashed display sea envelopes for island groups."
+      "stdout_stderr_summary": "Clean terrain base rendered with all optional layers off; Political rendered 70 visual boundaries, clipped to V8 coast masks for mainland territories and dashed display sea envelopes for island groups."
     },
     {
       "command": "MapLibre/deck.gl/PMTiles/MVT, authorised projection, production database, RLS and browser-matrix checks",
@@ -60,7 +60,8 @@
     "large inland grainland given a prepared sea port",
     "oversized local inland lake or invalid tectonic satellite",
     "non-wrapping atlas geometry",
-    "island group without a one-or-two-island display sea envelope"
+    "island group without a one-or-two-island display sea envelope",
+    "mainland visual territory without a named local coastline mask"
   ],
   "database_rls_evidence": [
     "NOT_RUN: no database, Supabase, RLS, credentials or service calls are in V25.1 preparation scope."
@@ -71,7 +72,8 @@
     "exactly 70 visual territories are required",
     "each visual-territory capital is contained by its own polygon",
     "resource labels are constrained to a physical origin rather than an economic quantity",
-    "island-group display envelopes remain non-authoritative visual geometry"
+    "island-group display envelopes remain non-authoritative visual geometry",
+    "mainland visual boundaries are clipped to disposable V8 presentation coast masks"
   ],
   "unresolved_gaps": [
     "satellite terrain raster is visual art, not a calibrated route-measurement surface",
