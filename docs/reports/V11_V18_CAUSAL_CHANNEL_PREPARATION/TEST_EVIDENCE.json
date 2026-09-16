@@ -12,20 +12,20 @@
       "exit_code": 0
     },
     {
-      "command": "pnpm exec vitest run tests/world-core/v11-v18-engine-kernels.test.ts tests/world-core/v11-v18-causal-channels.test.ts",
+      "command": "pnpm exec vitest run tests/world-core/v11-v18-engine-kernels.test.ts tests/world-core/v11-v18-causal-channels.test.ts tests/world-core/v11-v18-firm-ecology.test.ts",
       "exit_code": 0,
-      "result": "2 files, 13 tests passed after the 51–100 and exact-unit extension"
+      "result": "3 files, 19 tests passed after the C101–C105 Firm Ecology exact-unit extension"
     },
     {
       "command": "pnpm exec tsc --noEmit -p packages/core/tsconfig.json",
       "exit_code": 0
     },
     {
-      "command": "pnpm exec eslint packages/core/src/engine-kernels/causal-channels.ts packages/core/src/engine-kernels/causal-values.ts packages/core/src/engine-kernels/index.ts tests/world-core/v11-v18-causal-channels.test.ts",
+      "command": "pnpm exec eslint packages/core/src/engine-kernels/causal-channels.ts packages/core/src/engine-kernels/causal-values.ts packages/core/src/engine-kernels/firm-ecology.ts packages/core/src/engine-kernels/index.ts tests/world-core/v11-v18-causal-channels.test.ts tests/world-core/v11-v18-firm-ecology.test.ts",
       "exit_code": 0
     },
     {
-      "command": "pnpm exec prettier --check docs/exec-plans/V11_V18_CAUSAL_CHANNEL_PREPARATION.md docs/reports/V11_V18_CAUSAL_CHANNEL_PREPARATION/IMPLEMENTATION.md docs/reports/V11_V18_CAUSAL_CHANNEL_PREPARATION/TEST_EVIDENCE.json packages/core/src/engine-kernels/causal-channels.ts packages/core/src/engine-kernels/causal-values.ts packages/core/src/engine-kernels/index.ts tests/world-core/v11-v18-causal-channels.test.ts",
+      "command": "pnpm exec prettier --check docs/exec-plans/V11_V18_CAUSAL_CHANNEL_PREPARATION.md docs/reports/V11_V18_CAUSAL_CHANNEL_PREPARATION/IMPLEMENTATION.md docs/reports/V11_V18_CAUSAL_CHANNEL_PREPARATION/TEST_EVIDENCE.json packages/core/src/engine-kernels/causal-channels.ts packages/core/src/engine-kernels/causal-values.ts packages/core/src/engine-kernels/firm-ecology.ts packages/core/src/engine-kernels/index.ts tests/world-core/v11-v18-causal-channels.test.ts tests/world-core/v11-v18-firm-ecology.test.ts",
       "exit_code": 0
     },
     {

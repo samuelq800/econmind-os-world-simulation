@@ -16,7 +16,12 @@ import {
 /** A monetary amount is never interchangeable with a physical quantity. */
 export type CausalUnit =
   | Readonly<{ readonly kind: 'MONEY'; readonly currency: string }>
-  | Readonly<{ readonly kind: 'QUANTITY'; readonly unit: string }>;
+  | Readonly<{ readonly kind: 'QUANTITY'; readonly unit: string }>
+  | Readonly<{
+      readonly kind: 'UNIT_PRICE';
+      readonly currency: string;
+      readonly perUnit: string;
+    }>;
 
 export type CausalValueSign = 'NON_NEGATIVE' | 'SIGNED';
 
@@ -73,10 +78,20 @@ function canonicalUnit(value: CausalUnit, label: string): CausalUnit {
     }
     return Object.freeze({ kind: 'MONEY' as const, currency: value.currency });
   }
-  if (value.kind !== 'QUANTITY') kernelInvalid(`${label} kind is invalid`);
+  if (value.kind === 'QUANTITY') {
+    return Object.freeze({
+      kind: 'QUANTITY' as const,
+      unit: quantity({ amount: '0', unit: value.unit }, label).unit,
+    });
+  }
+  if (value.kind !== 'UNIT_PRICE') kernelInvalid(`${label} kind is invalid`);
+  if (!/^[A-Z]{3}$/u.test(value.currency)) {
+    kernelInvalid(`${label} currency must be canonical`);
+  }
   return Object.freeze({
-    kind: 'QUANTITY' as const,
-    unit: quantity({ amount: '0', unit: value.unit }, label).unit,
+    kind: 'UNIT_PRICE' as const,
+    currency: value.currency,
+    perUnit: quantity({ amount: '0', unit: value.perUnit }, label).unit,
   });
 }
 
@@ -84,7 +99,14 @@ function unitsMatch(left: CausalUnit, right: CausalUnit): boolean {
   if (left.kind === 'MONEY') {
     return right.kind === 'MONEY' && left.currency === right.currency;
   }
-  return right.kind === 'QUANTITY' && left.unit === right.unit;
+  if (left.kind === 'QUANTITY') {
+    return right.kind === 'QUANTITY' && left.unit === right.unit;
+  }
+  return (
+    right.kind === 'UNIT_PRICE' &&
+    left.currency === right.currency &&
+    left.perUnit === right.perUnit
+  );
 }
 
 function parsedValue(
