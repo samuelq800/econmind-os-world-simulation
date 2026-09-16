@@ -54,6 +54,7 @@ export {
   type InventoryPostingResult,
 } from './inventory/inventory-ledger.js';
 export * from './labour/labour-engine.js';
+export * from './labour/population-labour-invariants.js';
 export * from './numeric/index.js';
 export * from './opening/opening-seed.js';
 export * from './population/population-engine.js';
