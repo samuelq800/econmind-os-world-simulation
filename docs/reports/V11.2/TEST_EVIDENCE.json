@@ -1,0 +1,156 @@
+{
+  "schema_version": "V11.2-TEST-EVIDENCE-1",
+  "step_id": "V11.2",
+  "title": "E03 Labour/Skill/Jobs/Wages",
+  "state": "IMPLEMENTED_UNVERIFIED",
+  "risk_class": "P0",
+  "code_candidate": "6f2aa759548d6267dadcf4424e68927ae377d70e",
+  "continuation_baseline": "2db39d01a22873162d1c841675855b60d4e5816e",
+  "continuation_policy": "docs/governance/WORLD_CORE_V11_2_CONDITIONAL_CONTINUATION_POLICY.json",
+  "environment": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "lockfile": "UNCHANGED",
+    "execution_surface": "LOCAL_ONLY",
+    "production_access": false,
+    "database_configured": false,
+    "linked_supabase_project": "NOT_LINKED"
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 exec vitest run tests/world-core/v11-2-labour-engine.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "test_files": 1,
+      "tests": 6,
+      "stdout_stderr_summary": "Focused E03 explicit labour-fact and invariant suite passed."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 --filter @econmind/core typecheck",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "tsc -p tsconfig.json --pretty false"
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 --filter @econmind/core build",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "tsc -p tsconfig.build.json"
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 exec eslint packages/core/src/labour/labour-engine.ts packages/core/src/index.ts tests/world-core/v11-2-labour-engine.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No targeted ESLint findings."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 exec prettier --check packages/core/src/labour/labour-engine.ts packages/core/src/index.ts tests/world-core/v11-2-labour-engine.test.ts docs/exec-plans/V11.2.md",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "All scoped files match Prettier."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 scripts/check-authoritative-patterns.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "authoritative_scanned_core_files": 34,
+      "authoritative_scanned_files": 69,
+      "stdout_stderr_summary": "No authoritative-pattern violations."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 scripts/check-boundaries.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "boundary_scanned_files": 74,
+      "stdout_stderr_summary": "No repository boundary violations."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 env:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Local only; databaseConfigured=false, linkedSupabaseProject=NOT_LINKED, databaseMutationAllowed=false."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 foundation:policy",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No policy violations."
+    },
+    {
+      "command": "PATH=<Node-v24.20.0-bin>:$PATH node-v24.20.0 pnpm-12.3.4 secrets:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "secret_scanned_files": 677,
+      "stdout_stderr_summary": "No repository secret findings."
+    },
+    {
+      "command": "pnpm check",
+      "exit_code": null,
+      "result": "NOT_RUN",
+      "stdout_stderr_summary": "Deliberately not run: this P0 candidate records focused E03 evidence and makes no full-repository campaign claim."
+    }
+  ],
+  "invariant_evidence": [
+    {
+      "name": "Read-only population availability cannot directly create labour; education and migration are the only implemented skill-entry paths",
+      "result": "PASS",
+      "source": "v11-2-labour-engine.test.ts"
+    },
+    {
+      "name": "Private and public occupations consume one unemployed pool and reconcile exactly to aggregate employed",
+      "result": "PASS",
+      "source": "v11-2-labour-engine.test.ts"
+    },
+    {
+      "name": "Skill/owner mismatch, vacancy overfill, separation underflow and same-boundary chaining reject before a result",
+      "result": "PASS",
+      "source": "v11-2-labour-engine.test.ts"
+    },
+    {
+      "name": "Wages require an existing position, canonical non-negative amount and explicit version; no wage calculation occurs",
+      "result": "PASS",
+      "source": "v11-2-labour-engine.test.ts"
+    },
+    {
+      "name": "Canonical ordering, exact retry and fact-payload conflict handling are deterministic",
+      "result": "PASS",
+      "source": "v11-2-labour-engine.test.ts"
+    },
+    {
+      "name": "Restored binding identity, aggregate/position reconciliation and population upper-bound violations fail closed",
+      "result": "PASS",
+      "source": "v11-2-labour-engine.test.ts"
+    }
+  ],
+  "negative_cases": [
+    "Population availability alone cannot create a labour status.",
+    "Education transition without an existing student source rejects.",
+    "Job/public occupation with wrong skill or owner, vacancy overfill and separation underflow reject.",
+    "A match cannot chain from a position demand in the same fact set.",
+    "Negative or non-canonical wage assertion and duplicate position/version assertion reject.",
+    "Same fact identity with changed canonical payload rejects.",
+    "Restored outer factId alias and aggregate/position mismatch reject.",
+    "Labour stock above the read-only population availability rejects."
+  ],
+  "database_rls_evidence": [
+    {
+      "result": "NOT_RUN",
+      "reason": "No database, API, worker, RLS, schema or migration surface is in V11.2 scope."
+    }
+  ],
+  "unresolved_gaps": [
+    "Independent V11.2 review is required before VERIFIED or any promotion.",
+    "V11.3 owns cross-engine population-labour temporal/provenance invariants; this candidate accepts only read-only explicit availability bounds.",
+    "ADR-04 and ADR-08 remain unapproved; no timing, participation, matching, wage, money, price, rate or rounding formula was selected.",
+    "No V07/V09 persistence, command/event/receipt publication, crash recovery or full-repository test campaign is implemented or evidenced here."
+  ],
+  "migration": {
+    "created": false,
+    "status": "NOT_CREATED",
+    "production_publication": false
+  },
+  "independent_review": "NOT_RUN",
+  "production_mutation": false,
+  "database_mutation": false
+}
