@@ -124,8 +124,8 @@ const DECISION_COPY: Readonly<
   Record<Exclude<ProposalDecision, 'PENDING'>, { label: string; log: string }>
 > = {
   APPROVED: {
-    label: 'Approve local draft',
-    log: 'Food buffer draft marked approved',
+    label: 'Food-buffer authorization',
+    log: 'Food-buffer authorization staged',
   },
   REVISION_REQUESTED: {
     label: 'Request revision',
@@ -147,9 +147,9 @@ function metricValue(
 }
 
 function decisionLabel(decision: ProposalDecision): string {
-  return decision === 'PENDING'
-    ? 'Awaiting your call'
-    : decision.replaceAll('_', ' ').toLowerCase();
+  if (decision === 'PENDING') return 'Awaiting your call';
+  if (decision === 'APPROVED') return 'authorized';
+  return decision.replaceAll('_', ' ').toLowerCase();
 }
 
 function agendaStatusLabel(status: AgendaStatus): string {
