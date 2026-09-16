@@ -5,6 +5,7 @@ import { FinanceMinisterCommand } from './FinanceMinisterCommand.js';
 import { GoodsTransferFlow } from './GoodsTransferFlow.js';
 import { LivingNationScene } from './LivingNationScene.js';
 import { NationalOverview } from './NationalOverview.js';
+import { TradeForeignAffairsCommand } from './TradeForeignAffairsCommand.js';
 import type { PrototypeOfficeOption } from './contracts.js';
 import { readableProjection, type PrototypeViewState } from './state.js';
 
@@ -181,6 +182,60 @@ const FINANCE_NAV_GROUPS: readonly NavGroup[] = [
   },
 ];
 
+const TRADE_NAV_GROUPS: readonly NavGroup[] = [
+  {
+    id: 'operations',
+    label: 'Foreign desk',
+    leaves: [
+      { pageId: 'G01', label: 'Corridor command', implemented: true },
+      { pageId: 'T01', label: 'Supply line watch', implemented: false },
+    ],
+  },
+  {
+    id: 'country',
+    label: 'Markets & routes',
+    leaves: [
+      { pageId: 'G02', label: 'Nation overview', implemented: true },
+      { pageId: 'T02', label: 'Global market', implemented: false },
+      { pageId: 'T03', label: 'Import desk', implemented: false },
+      { pageId: 'T04', label: 'Export desk', implemented: false },
+    ],
+  },
+  {
+    id: 'policy',
+    label: 'Terms & controls',
+    leaves: [
+      { pageId: 'T05', label: 'Negotiation room', implemented: false },
+      { pageId: 'T06', label: 'Contracts & logistics', implemented: false },
+      { pageId: 'T07', label: 'Tariffs & controls', implemented: false },
+    ],
+  },
+  {
+    id: 'crossOffice',
+    label: 'External partners',
+    leaves: [
+      { pageId: 'T08', label: 'Partner intelligence', implemented: false },
+      { pageId: 'T09', label: 'Treaties & diplomacy', implemented: false },
+    ],
+  },
+  {
+    id: 'roleWork',
+    label: 'Foreign activity',
+    leaves: [
+      { pageId: 'T10', label: 'Offers & deadlines', implemented: false },
+      { pageId: 'T11', label: 'Investment & technology', implemented: false },
+    ],
+  },
+  {
+    id: 'records',
+    label: 'Trade ledger',
+    leaves: [
+      { pageId: 'T12', label: 'Route review', implemented: false },
+      { pageId: 'G06', label: 'Audit ledger', implemented: false },
+    ],
+  },
+];
+
 function StateScreen({
   state,
   onRetry,
@@ -274,7 +329,9 @@ function OfficeSidebar({
           ? CAPTAIN_NAV_GROUPS
           : actingOffice.officeId === 'FINANCE'
             ? FINANCE_NAV_GROUPS
-            : NAV_GROUPS
+            : actingOffice.officeId === 'TRADE'
+              ? TRADE_NAV_GROUPS
+              : NAV_GROUPS
         ).map((group) => {
           const isOpen = open[group.id];
           return (
@@ -325,7 +382,9 @@ function OfficeSidebar({
         G01 and G02 are local fixture routes.{' '}
         {actingOffice.officeId === 'FINANCE'
           ? 'Funding routes are local rehearsals; Treasury, debt, and approval actions remain mapped until their authorized handlers are attached.'
-          : 'Captain command is a local planning loop; other leaves stay visible until their authorized handlers are attached.'}
+          : actingOffice.officeId === 'TRADE'
+            ? 'Foreign routes are local rehearsals; orders, shipments, FX settlement, tariffs, and contracts remain mapped until their authorized handlers are attached.'
+            : 'Captain command is a local planning loop; other leaves stay visible until their authorized handlers are attached.'}
       </p>
       <button
         className="six-sidebar__route"
@@ -492,6 +551,11 @@ export function SixOfficesG01({
             />
           ) : actingOffice.officeId === 'FINANCE' ? (
             <FinanceMinisterCommand
+              projection={projection}
+              onNotice={setDeskNotice}
+            />
+          ) : actingOffice.officeId === 'TRADE' ? (
+            <TradeForeignAffairsCommand
               projection={projection}
               onNotice={setDeskNotice}
             />
