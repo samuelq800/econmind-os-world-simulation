@@ -17,6 +17,6 @@
     "reader": "v09_staging_reader"
   },
   "owner_confirmation": "OWNER_APPROVED_DEDICATED_NONPRODUCTION_V09",
-  "evidence_output_path": "/Users/samuel/Documents/econclub/evidence/vzwrereseklnrjbtmsmc-gate-b-staging-pooler-ca-transport.json",
-  "target_fingerprint": "ac4d197dc4e6ebc43716e1e8730588c18202addef0c01a5287c63e0147488e66"
+  "evidence_output_path": "/Users/samuel/Documents/econclub/evidence/vzwrereseklnrjbtmsmc-gate-b-staging-migration-detail.json",
+  "target_fingerprint": "a50bb6a581c34e316d1369ab0e1bcc9dee5ecaeff4ef0c16e470db14caa4fe8b"
 }

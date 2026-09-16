@@ -644,6 +644,32 @@ describe('V09 dedicated staging evidence runner', () => {
     expect(state.durableWriteCalls).toBe(1);
   });
 
+  it('records the exact migration SQL step before rolling back a marked transaction', async () => {
+    const target = approvedTarget();
+    const state = createSharedState({
+      failAt: 'APPLY_MIGRATION_0001_WORLD_V2_NAMESPACE',
+    });
+    const fake = fakeFactory(target, state);
+
+    const evidence = await runV09DedicatedStagingEvidence({
+      approval: target,
+      clientFactory: fake.factory,
+      environment: approvedExecution(target),
+      loadLinkedProjectRef: async () => undefined,
+      loadMigrationChain: fakeMigrationChain,
+      runId: 'run-migration-sql-failure',
+      writeEvidence: noOpEvidenceWriter(state),
+    });
+
+    expect(evidence).toMatchObject({
+      cleanup: { markerBound: true, status: 'TRANSACTION_ROLLED_BACK' },
+      failure: { stage: 'APPLY_MIGRATION_0001_WORLD_V2_NAMESPACE' },
+      migrations: [],
+      status: 'FAIL_CLOSED',
+    });
+    expect(state.durableWriteCalls).toBe(1);
+  });
+
   it('refuses a synthetic public-operator dependency before deleting any dependent object', async () => {
     const target = approvedTarget();
     const state = createSharedState({ externalDependencyNamespace: 'public' });

@@ -742,24 +742,34 @@ async function provisionMarker(client, approval, runId) {
 async function applyMigrations(client, approval, migrations, evidence) {
   const schema = identifier(approval.disposable_namespace);
   for (const migration of migrations) {
-    await command(
-      client,
-      `APPLY_MIGRATION_${migration.migration_id.toUpperCase()}`,
-      migration.sql,
-    );
-    await command(
-      client,
-      `RECORD_MIGRATION_${migration.migration_id.toUpperCase()}`,
-      `insert into ${schema}.schema_release
-         (migration_id, artifact_sha256, source_repo_commit, release_order)
-       values ($1, $2, $3, $4)`,
-      [
-        migration.migration_id,
-        migration.artifact_sha256,
-        migration.source_repo_commit,
-        evidence.migrations.length + 1,
-      ],
-    );
+    const migrationStep = `APPLY_MIGRATION_${migration.migration_id.toUpperCase()}`;
+    try {
+      await command(client, migrationStep, migration.sql);
+    } catch (error) {
+      const failure = stagedFailure(migrationStep);
+      failure.cause = error;
+      throw failure;
+    }
+    const recordStep = `RECORD_MIGRATION_${migration.migration_id.toUpperCase()}`;
+    try {
+      await command(
+        client,
+        recordStep,
+        `insert into ${schema}.schema_release
+           (migration_id, artifact_sha256, source_repo_commit, release_order)
+         values ($1, $2, $3, $4)`,
+        [
+          migration.migration_id,
+          migration.artifact_sha256,
+          migration.source_repo_commit,
+          evidence.migrations.length + 1,
+        ],
+      );
+    } catch (error) {
+      const failure = stagedFailure(recordStep);
+      failure.cause = error;
+      throw failure;
+    }
     evidence.migrations.push(migration.migration_id);
   }
 }
