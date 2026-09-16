@@ -24,6 +24,9 @@ import {
   calculateProjectProgress,
   calculateRemainingProjectInputs,
   calculateResearchProgress,
+  assertCurrenciesBoundToInternational,
+  convertToInternationalSettlementMoney,
+  indexInternationalCurrencyBindings,
   calculateSafetyMetrics,
   calculateReserveMargin,
   calculateValueAdded,
@@ -33,6 +36,8 @@ import {
   reconcileElectricityBalance,
   reconcileInventory,
   reserveUsableInventory,
+  settleCrossBorderPayment,
+  settleCrossBorderPaymentFromBindings,
   transitionPopulation,
   transitionEnergyStorage,
   transitionResourceLayer,
@@ -40,83 +45,96 @@ import {
 
 const MONEY = (amount: string) => ({ amount, currency: 'GCU' }) as const;
 const TONNES = (amount: string) => ({ amount, unit: 'tonne' }) as const;
+const PERSON = (amount: string) => ({ amount, unit: 'person' }) as const;
+const CASE = (amount: string) => ({ amount, unit: 'case' }) as const;
+const BED = (amount: string) => ({ amount, unit: 'bed' }) as const;
+const HOUSING_UNIT = (amount: string) =>
+  ({ amount, unit: 'housing_unit' }) as const;
+const INCIDENT = (amount: string) => ({ amount, unit: 'incident' }) as const;
+const RATIO = (amount: string) => ({ amount, unit: 'ratio' }) as const;
+const HOUR = (amount: string) => ({ amount, unit: 'hour' }) as const;
+const PERIOD = (amount: string) => ({ amount, unit: 'period' }) as const;
 
 describe('E02 population and E03 labour kernels', () => {
   it('closes cohort identity and only matches compatible, actual workers', () => {
     expect(
       transitionPopulation(
-        { children0To15: '10', workingAge16To64: '20', retired65Plus: '5' },
         {
-          births: '2',
-          childDeaths: '1',
-          workingAgeDeaths: '0',
-          retiredDeaths: '0',
-          childImmigration: '0',
-          workingAgeImmigration: '2',
-          retiredImmigration: '0',
-          childEmigration: '0',
-          workingAgeEmigration: '1',
-          retiredEmigration: '0',
-          ageIntoWorkingAge: '1',
-          ageIntoRetirement: '0',
+          children0To15: PERSON('10'),
+          workingAge16To64: PERSON('20'),
+          retired65Plus: PERSON('5'),
+        },
+        {
+          births: PERSON('2'),
+          childDeaths: PERSON('1'),
+          workingAgeDeaths: PERSON('0'),
+          retiredDeaths: PERSON('0'),
+          childImmigration: PERSON('0'),
+          workingAgeImmigration: PERSON('2'),
+          retiredImmigration: PERSON('0'),
+          childEmigration: PERSON('0'),
+          workingAgeEmigration: PERSON('1'),
+          retiredEmigration: PERSON('0'),
+          ageIntoWorkingAge: PERSON('1'),
+          ageIntoRetirement: PERSON('0'),
         },
       ),
     ).toMatchObject({
       cohorts: {
-        children0To15: '10',
-        workingAge16To64: '22',
-        retired65Plus: '5',
+        children0To15: PERSON('10'),
+        workingAge16To64: PERSON('22'),
+        retired65Plus: PERSON('5'),
       },
-      previousTotal: '35',
-      nextTotal: '37',
-      netMigration: '1',
+      previousTotal: PERSON('35'),
+      nextTotal: PERSON('37'),
+      netMigration: PERSON('1'),
     });
     expect(
       calculateLabourMetrics({
-        employed: '8',
-        unemployedSearching: '2',
-        workingAgePopulation: '20',
-        requiredWorkers: '12',
-        availableWorkers: '9',
+        employed: PERSON('8'),
+        unemployedSearching: PERSON('2'),
+        workingAgePopulation: PERSON('20'),
+        requiredWorkers: PERSON('12'),
+        availableWorkers: PERSON('9'),
       }),
     ).toMatchObject({
-      labourForce: '10',
-      vacancy: '4',
-      skillGap: '3',
-      unemploymentRate: '0.2',
+      labourForce: PERSON('10'),
+      vacancy: PERSON('4'),
+      skillGap: PERSON('3'),
+      unemploymentRate: RATIO('0.2'),
     });
     expect(
       calculateLabourMatch({
-        unemployedSupply: '6',
-        vacancyDemand: '5',
-        matchingCapacity: '3',
+        unemployedSupply: PERSON('6'),
+        vacancyDemand: PERSON('5'),
+        matchingCapacity: PERSON('3'),
         skillMatches: true,
         locationMatches: true,
         offeredWageMeetsMinimum: true,
       }),
     ).toMatchObject({
-      matched: '3',
-      remainingUnemployed: '3',
-      remainingVacancies: '2',
+      matched: PERSON('3'),
+      remainingUnemployed: PERSON('3'),
+      remainingVacancies: PERSON('2'),
     });
     expect(
       calculateLabourMatch({
-        unemployedSupply: '6',
-        vacancyDemand: '5',
-        matchingCapacity: '3',
+        unemployedSupply: PERSON('6'),
+        vacancyDemand: PERSON('5'),
+        matchingCapacity: PERSON('3'),
         skillMatches: false,
         locationMatches: true,
         offeredWageMeetsMinimum: true,
       }),
     ).toMatchObject({
-      matched: '0',
+      matched: PERSON('0'),
       reason: 'INCOMPATIBLE_SKILL_LOCATION_OR_WAGE',
     });
     expect(() =>
       assertEmploymentAllocation({
-        aggregateEmployed: '10',
-        sectorEmployment: ['6'],
-        publicServiceEmployment: ['3'],
+        aggregateEmployed: PERSON('10'),
+        sectorEmployment: [PERSON('6')],
+        publicServiceEmployment: [PERSON('3')],
       }),
     ).toThrow('must equal aggregate employed');
   });
@@ -126,84 +144,94 @@ describe('E04-E07 public-service kernels', () => {
   it('enforces education, care, housing and police real capacity', () => {
     expect(
       calculateEducationOutcome({
-        applicants: '100',
-        seats: '80',
-        teacherSupportedSeats: '60',
-        budgetSupportedSeats: '70',
-        enrolled: '60',
-        dropoutRate: '0.1',
-        completionRate: '0.5',
+        applicants: PERSON('100'),
+        seats: PERSON('80'),
+        teacherSupportedSeats: PERSON('60'),
+        budgetSupportedSeats: PERSON('70'),
+        enrolled: PERSON('60'),
+        dropoutRate: RATIO('0.1'),
+        completionRate: RATIO('0.5'),
         durationReached: true,
       }),
     ).toMatchObject({
-      actualEnrollment: '60',
-      applicantsNotEnrolled: '40',
-      graduates: '27',
+      actualEnrollment: PERSON('60'),
+      applicantsNotEnrolled: PERSON('40'),
+      graduates: PERSON('27'),
     });
     expect(
-      deriveEducationSkillHandoff({ level: 'VOCATIONAL', graduates: '27' }),
-    ).toEqual({ skill: 'MEDIUM', count: '27' });
+      deriveEducationSkillHandoff({
+        level: 'VOCATIONAL',
+        graduates: PERSON('27'),
+      }),
+    ).toEqual({ skill: 'MEDIUM', count: PERSON('27') });
     expect(
       calculateHealthcareDelivery({
-        newDemand: '20',
-        priorBacklog: '10',
-        staffCapacity: '25',
-        facilityCapacity: '15',
-        supplyCapacity: '18',
-        budgetCapacity: '16',
+        newDemand: CASE('20'),
+        priorBacklog: CASE('10'),
+        staffCapacity: CASE('25'),
+        facilityCapacity: CASE('15'),
+        supplyCapacity: CASE('18'),
+        budgetCapacity: CASE('16'),
       }),
-    ).toEqual({ deliveredCare: '15', nextBacklog: '15' });
-    expect(calculateBedOccupancy('5', '10')).toBe('0.5');
+    ).toEqual({ deliveredCare: CASE('15'), nextBacklog: CASE('15') });
+    expect(calculateBedOccupancy(BED('5'), BED('10'))).toEqual(RATIO('0.5'));
     expect(
       calculateHousingMetrics({
-        householdDemand: '13',
-        habitableUnits: '10',
-        vacantHabitableUnits: '2',
-        housingCost: '30',
-        disposableIncome: '100',
+        householdDemand: HOUSING_UNIT('13'),
+        habitableUnits: HOUSING_UNIT('10'),
+        vacantHabitableUnits: HOUSING_UNIT('2'),
+        housingCost: MONEY('30'),
+        disposableIncome: MONEY('100'),
       }),
     ).toMatchObject({
-      netHousingGap: '3',
-      unmetHousingUnits: '3',
-      vacancyRate: '0.2',
-      housingBurden: '0.3',
+      netHousingGap: HOUSING_UNIT('3'),
+      unmetHousingUnits: HOUSING_UNIT('3'),
+      vacancyRate: RATIO('0.2'),
+      housingBurden: {
+        amount: '0.3',
+        outputUnit: 'GCU',
+        inputUnit: 'GCU',
+      },
     });
     expect(
       calculateSafetyMetrics({
-        employedStaff: '20',
-        deployedStaff: '8',
-        unavailableStaff: '2',
-        recordedIncidents: '50',
-        population: '10000',
-        priorBacklog: '9',
-        newCases: '4',
-        resolvedCases: '5',
-        casesHandled: '10',
+        employedStaff: PERSON('20'),
+        deployedStaff: PERSON('8'),
+        unavailableStaff: PERSON('2'),
+        recordedIncidents: INCIDENT('50'),
+        population: PERSON('10000'),
+        priorBacklog: CASE('9'),
+        newCases: CASE('4'),
+        resolvedCases: CASE('5'),
+        casesHandled: CASE('10'),
       }),
     ).toMatchObject({
-      availableStaff: '10',
-      crimeRatePer100k: '500',
-      caseClearanceRate: '0.5',
-      nextBacklog: '8',
+      availableStaff: PERSON('10'),
+      crimeRatePer100k: { amount: '500', unit: 'incident_per_100k_person' },
+      caseClearanceRate: RATIO('0.5'),
+      nextBacklog: CASE('8'),
     });
     expect(() =>
       calculateSafetyMetrics({
-        employedStaff: '5',
-        deployedStaff: '4',
-        unavailableStaff: '2',
-        recordedIncidents: '0',
-        population: '1',
-        priorBacklog: '0',
-        newCases: '0',
-        resolvedCases: '0',
-        casesHandled: '0',
+        employedStaff: PERSON('5'),
+        deployedStaff: PERSON('4'),
+        unavailableStaff: PERSON('2'),
+        recordedIncidents: INCIDENT('0'),
+        population: PERSON('1'),
+        priorBacklog: CASE('0'),
+        newCases: CASE('0'),
+        resolvedCases: CASE('0'),
+        casesHandled: CASE('0'),
       }),
     ).toThrow('deployment exceeds');
     expect(
-      allocateSafetyDeployment({ availableStaff: '4', requestedStaff: '3' }),
+      allocateSafetyDeployment({
+        availableStaff: PERSON('4'),
+        requestedStaff: PERSON('3'),
+      }),
     ).toEqual({
-      deployed: '3',
-      remainingAvailable: '1',
+      deployed: PERSON('3'),
+      remainingAvailable: PERSON('1'),
     });
   });
 });
@@ -211,21 +239,21 @@ describe('E04-E07 public-service kernels', () => {
 describe('E08 resource/inventory, E09 energy, and E10 production kernels', () => {
   it('conserves physical resource layers and inventory', () => {
     const initial = {
-      undiscovered: '50',
-      discovered: '20',
-      recoverable: '10',
-      developed: '10',
-      extractedCumulative: '10',
+      undiscovered: TONNES('50'),
+      discovered: TONNES('20'),
+      recoverable: TONNES('10'),
+      developed: TONNES('10'),
+      extractedCumulative: TONNES('10'),
     } as const;
     expect(
       transitionResourceLayer({
-        initialEndowment: '100',
+        initialEndowment: TONNES('100'),
         layers: initial,
         from: 'UNDISCOVERED',
         to: 'DISCOVERED',
-        amount: '5',
+        amount: TONNES('5'),
       }),
-    ).toMatchObject({ undiscovered: '45', discovered: '25' });
+    ).toMatchObject({ undiscovered: TONNES('45'), discovered: TONNES('25') });
     expect(
       reconcileInventory({
         opening: TONNES('10'),
@@ -249,11 +277,11 @@ describe('E08 resource/inventory, E09 energy, and E10 production kernels', () =>
     ).toMatchObject({ usable: TONNES('4'), reservedForContract: TONNES('4') });
     expect(() =>
       transitionResourceLayer({
-        initialEndowment: '100',
+        initialEndowment: TONNES('100'),
         layers: initial,
         from: 'UNDISCOVERED',
         to: 'RECOVERABLE',
-        amount: '1',
+        amount: TONNES('1'),
       }),
     ).toThrow('one documented lifecycle step');
   });
@@ -262,10 +290,14 @@ describe('E08 resource/inventory, E09 energy, and E10 production kernels', () =>
     expect(
       calculateEnergyGeneration({
         availableCapacity: { amount: '10', unit: 'MW' },
-        capacityFactor: '0.5',
-        hours: '2',
-        fuelEnergyPerMWh: { amount: '2', unit: 'MMBtu' },
-        technologyEfficiency: '0.5',
+        capacityFactor: RATIO('0.5'),
+        hours: HOUR('2'),
+        fuelEnergyPerMWh: {
+          amount: '2',
+          outputUnit: 'MMBtu',
+          inputUnit: 'MWh',
+        },
+        technologyEfficiency: RATIO('0.5'),
       }),
     ).toEqual({
       generated: { amount: '10', unit: 'MWh' },
@@ -286,15 +318,15 @@ describe('E08 resource/inventory, E09 energy, and E10 production kernels', () =>
         { amount: '120', unit: 'MW' },
         { amount: '100', unit: 'MW' },
       ),
-    ).toBe('0.2');
+    ).toEqual({ amount: '0.2', unit: 'MW_per_MW' });
     expect(
       transitionEnergyStorage({
         stateOfCharge: { amount: '5', unit: 'MWh' },
         energyCapacity: { amount: '10', unit: 'MWh' },
         requestedChargeFromGrid: { amount: '10', unit: 'MWh' },
         requestedDischargeToGrid: { amount: '0', unit: 'MWh' },
-        chargeEfficiency: '0.5',
-        dischargeEfficiency: '0.5',
+        chargeEfficiency: RATIO('0.5'),
+        dischargeEfficiency: RATIO('0.5'),
       }),
     ).toMatchObject({
       nextStateOfCharge: { amount: '10', unit: 'MWh' },
@@ -302,24 +334,39 @@ describe('E08 resource/inventory, E09 energy, and E10 production kernels', () =>
     });
     expect(
       calculateProductionOutcome({
-        operationalCapacity: TONNES('100'),
-        targetUtilisation: '0.8',
-        productivity: '1',
+        operationalCapacity: {
+          amount: '100',
+          outputUnit: 'tonne',
+          inputUnit: 'period',
+        },
+        operatingDuration: PERIOD('1'),
+        targetUtilisation: RATIO('0.8'),
+        productivity: {
+          amount: '1',
+          outputUnit: 'tonne',
+          inputUnit: 'tonne',
+        },
         inputAvailability: [
           { available: TONNES('10'), required: TONNES('20') },
         ],
-        energyAvailability: '0.75',
-        labourAvailability: '0.9',
-        logisticsAvailability: '1',
+        energyAvailability: RATIO('0.75'),
+        labourAvailability: RATIO('0.9'),
+        logisticsAvailability: RATIO('1'),
       }),
     ).toMatchObject({
       potentialOutput: TONNES('80'),
       actualOutput: TONNES('40'),
-      bottleneckFactor: '0.5',
+      bottleneckFactor: RATIO('0.5'),
     });
     expect(
       calculateProductionInputConsumption(TONNES('4'), [
-        { inputUnit: 'barrel', amountPerUnitOutput: '2' },
+        {
+          inputPerOutput: {
+            amount: '2',
+            outputUnit: 'barrel',
+            inputUnit: 'tonne',
+          },
+        },
       ]),
     ).toEqual([{ amount: '8', unit: 'barrel' }]);
     expect(calculateValueAdded(MONEY('100'), MONEY('60'))).toEqual(MONEY('40'));
@@ -330,18 +377,22 @@ describe('E11-E12 technology and project kernels', () => {
   it('keeps rights distinct from progress and requires all project prerequisites', () => {
     expect(
       calculateResearchProgress({
-        accumulatedOutput: '2',
-        requiredOutput: '10',
-        fundingFactor: '2',
-        humanCapitalFactor: '3',
-        equipmentAvailability: '0.5',
-        existingTechnologyBase: '1',
-        researchEfficiency: '1',
+        accumulatedOutput: { amount: '2', unit: 'research_point' },
+        requiredOutput: { amount: '10', unit: 'research_point' },
+        researchLabourHours: { amount: '6', unit: 'research_labour_hour' },
+        fundingAvailability: RATIO('1'),
+        equipmentAvailability: RATIO('0.5'),
+        researchOutputPerLabourHour: {
+          amount: '1',
+          outputUnit: 'research_point',
+          inputUnit: 'research_labour_hour',
+        },
+        researchEfficiency: RATIO('1'),
       }),
     ).toEqual({
-      periodResearchOutput: '3',
-      accumulatedResearchOutput: '5',
-      progress: '0.5',
+      periodResearchOutput: { amount: '3', unit: 'research_point' },
+      accumulatedResearchOutput: { amount: '5', unit: 'research_point' },
+      progress: RATIO('0.5'),
       complete: false,
     });
     expect(
@@ -371,17 +422,22 @@ describe('E11-E12 technology and project kernels', () => {
     ).toBe(true);
     expect(
       calculateProjectProgress({
-        plannedIncrement: '10',
-        fundingReleasedFactor: '0.8',
-        materialsDeliveredFactor: '0.5',
-        labourAvailableFactor: '0.9',
-        oversightCapacityFactor: '1',
+        plannedIncrement: { amount: '10', unit: 'project_progress_point' },
+        fundingReleasedFactor: RATIO('0.8'),
+        materialsDeliveredFactor: RATIO('0.5'),
+        labourAvailableFactor: RATIO('0.9'),
+        oversightCapacityFactor: RATIO('1'),
       }),
-    ).toEqual({ progressIncrement: '5', bottleneckFactor: '0.5' });
+    ).toEqual({
+      progressIncrement: { amount: '5', unit: 'project_progress_point' },
+      bottleneckFactor: RATIO('0.5'),
+    });
     expect(calculateProjectFundingGap(MONEY('100'), MONEY('60'))).toEqual(
       MONEY('40'),
     );
-    expect(calculateRemainingProjectInputs('10', '3', '4')).toBe('3');
+    expect(
+      calculateRemainingProjectInputs(TONNES('10'), TONNES('3'), TONNES('4')),
+    ).toEqual(TONNES('3'));
   });
 });
 
@@ -414,12 +470,12 @@ describe('E13 household and E14 fiscal kernels', () => {
         taxableIncome: MONEY('100'),
         allowances: MONEY('10'),
         bands: [
-          { upperBound: '50', marginalRate: '0.1' },
-          { upperBound: null, marginalRate: '0.2' },
+          { upperBound: MONEY('50'), marginalRate: RATIO('0.1') },
+          { upperBound: null, marginalRate: RATIO('0.2') },
         ],
       }),
     ).toEqual(MONEY('13'));
-    expect(calculatePayrollTax(MONEY('100'), '0.1', MONEY('4'))).toEqual(
+    expect(calculatePayrollTax(MONEY('100'), RATIO('0.1'), MONEY('4'))).toEqual(
       MONEY('6'),
     );
     expect(
@@ -445,5 +501,183 @@ describe('E13 household and E14 fiscal kernels', () => {
       canPayInFull: false,
       cashShortfall: MONEY('20'),
     });
+  });
+});
+
+describe('E17 international settlement preparation', () => {
+  it('converts every cross-border debit through a versioned common currency', () => {
+    const localBinding = {
+      localCurrency: 'LCA',
+      internationalCurrency: 'ICU',
+      internationalPerLocalUnit: '0.25',
+      effectivePeriod: 7,
+      version: 'fx-7.1',
+    } as const;
+    const foreignBinding = {
+      localCurrency: 'LCB',
+      internationalCurrency: 'ICU',
+      internationalPerLocalUnit: '2',
+      effectivePeriod: 7,
+      version: 'fx-7.1',
+    } as const;
+    expect(
+      indexInternationalCurrencyBindings([localBinding, foreignBinding]).size,
+    ).toBe(2);
+    expect(() =>
+      assertCurrenciesBoundToInternational(
+        ['LCA', 'LCB'],
+        [localBinding, foreignBinding],
+      ),
+    ).not.toThrow();
+    expect(
+      convertToInternationalSettlementMoney({
+        amount: { amount: '40', currency: 'LCA' },
+        binding: localBinding,
+      }),
+    ).toEqual({ amount: '10', currency: 'ICU' });
+    expect(
+      settleCrossBorderPaymentFromBindings({
+        payerCountry: 'country-a',
+        payeeCountry: 'country-b',
+        payerAmount: { amount: '40', currency: 'LCA' },
+        currencyBindings: [localBinding, foreignBinding],
+      }),
+    ).toEqual({
+      payerCountry: 'country-a',
+      payeeCountry: 'country-b',
+      payerDomesticDebit: { amount: '40', currency: 'LCA' },
+      internationalSettlement: { amount: '10', currency: 'ICU' },
+      bindingVersion: 'fx-7.1',
+      effectivePeriod: 7,
+    });
+  });
+
+  it('rejects missing bindings, currency mismatches, and domestic payments', () => {
+    const binding = {
+      localCurrency: 'LCA',
+      internationalCurrency: 'ICU',
+      internationalPerLocalUnit: '1',
+      effectivePeriod: 7,
+      version: 'fx-7.1',
+    } as const;
+    expect(() => indexInternationalCurrencyBindings([])).toThrow(
+      'binding is required',
+    );
+    expect(() =>
+      assertCurrenciesBoundToInternational(['LCA', 'LCB'], [binding]),
+    ).toThrow('LCB has no international currency binding');
+    expect(() =>
+      convertToInternationalSettlementMoney({
+        amount: { amount: '1', currency: 'LCB' },
+        binding,
+      }),
+    ).toThrow('must match its local binding');
+    expect(() =>
+      settleCrossBorderPayment({
+        payerCountry: 'country-a',
+        payeeCountry: 'country-a',
+        payerAmount: { amount: '1', currency: 'LCA' },
+        payerBinding: binding,
+      }),
+    ).toThrow('requires different countries');
+    expect(() =>
+      indexInternationalCurrencyBindings([
+        binding,
+        { ...binding, localCurrency: 'LCB', version: 'fx-7.2' },
+      ]),
+    ).toThrow('must share a version');
+  });
+});
+
+describe('unit and discrete-stock invariants', () => {
+  it('rejects the previously accepted fractional people and excess enrolment', () => {
+    expect(() =>
+      transitionPopulation(
+        {
+          children0To15: PERSON('1'),
+          workingAge16To64: PERSON('1'),
+          retired65Plus: PERSON('1'),
+        },
+        {
+          births: PERSON('0.5'),
+          childDeaths: PERSON('0'),
+          workingAgeDeaths: PERSON('0'),
+          retiredDeaths: PERSON('0'),
+          childImmigration: PERSON('0'),
+          workingAgeImmigration: PERSON('0'),
+          retiredImmigration: PERSON('0'),
+          childEmigration: PERSON('0'),
+          workingAgeEmigration: PERSON('0'),
+          retiredEmigration: PERSON('0'),
+          ageIntoWorkingAge: PERSON('0'),
+          ageIntoRetirement: PERSON('0'),
+        },
+      ),
+    ).toThrow('whole person count');
+    expect(() =>
+      calculateEducationOutcome({
+        applicants: PERSON('100'),
+        seats: PERSON('2'),
+        teacherSupportedSeats: PERSON('2'),
+        budgetSupportedSeats: PERSON('2'),
+        enrolled: PERSON('10'),
+        dropoutRate: RATIO('0'),
+        completionRate: RATIO('1'),
+        durationReached: true,
+      }),
+    ).toThrow('cannot exceed actual enrollment capacity');
+  });
+
+  it('rejects a person as fuel and currency as physical production capacity', () => {
+    expect(() =>
+      calculateEnergyGeneration({
+        availableCapacity: { amount: '10', unit: 'MW' },
+        capacityFactor: RATIO('0.5'),
+        hours: HOUR('2'),
+        fuelEnergyPerMWh: {
+          amount: '2',
+          outputUnit: 'person',
+          inputUnit: 'MWh',
+        },
+        technologyEfficiency: RATIO('0.5'),
+      }),
+    ).toThrow('physical commodity or energy unit');
+    expect(() =>
+      calculateProductionOutcome({
+        operationalCapacity: {
+          amount: '10',
+          outputUnit: 'GCU',
+          inputUnit: 'period',
+        },
+        operatingDuration: PERIOD('1'),
+        targetUtilisation: RATIO('1'),
+        productivity: { amount: '1', outputUnit: 'GCU', inputUnit: 'GCU' },
+        inputAvailability: [],
+        energyAvailability: RATIO('1'),
+        labourAvailability: RATIO('1'),
+        logisticsAvailability: RATIO('1'),
+      }),
+    ).toThrow('physical commodity or energy unit');
+  });
+
+  it('keeps unbounded burden and dependency measures out of bounded ratios', () => {
+    expect(
+      calculateHousingMetrics({
+        householdDemand: HOUSING_UNIT('1'),
+        habitableUnits: HOUSING_UNIT('1'),
+        vacantHabitableUnits: HOUSING_UNIT('0'),
+        housingCost: MONEY('150'),
+        disposableIncome: MONEY('100'),
+      }).housingBurden,
+    ).toEqual({ amount: '1.5', outputUnit: 'GCU', inputUnit: 'GCU' });
+    expect(() =>
+      calculateLabourMetrics({
+        employed: PERSON('6'),
+        unemployedSearching: PERSON('5'),
+        workingAgePopulation: PERSON('10'),
+        requiredWorkers: PERSON('10'),
+        availableWorkers: PERSON('10'),
+      }),
+    ).toThrow('Labour force cannot exceed working-age population');
   });
 });

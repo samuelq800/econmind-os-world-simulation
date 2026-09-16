@@ -1,15 +1,16 @@
 import {
   decimal,
-  factor,
   kernelInvalid,
   money,
   nonNegative,
   quantity,
+  ratio,
   render,
   renderMoney,
   type ExactDecimal,
   type ExactMoney,
   type ExactQuantity,
+  type ExactRatio,
 } from './common.js';
 
 /**
@@ -398,10 +399,10 @@ export interface FirmFailureEffectsInput {
   readonly liquidatableAssetBookValue: ExactMoney;
   readonly supplierTradeCredit: ExactMoney;
   readonly bankDebt: ExactMoney;
-  readonly layoffFraction: ExactDecimal;
-  readonly assetRecoveryFraction: ExactDecimal;
-  readonly supplierNonpaymentFraction: ExactDecimal;
-  readonly bankNplFraction: ExactDecimal;
+  readonly layoffFraction: ExactRatio;
+  readonly assetRecoveryFraction: ExactRatio;
+  readonly supplierNonpaymentFraction: ExactRatio;
+  readonly bankNplFraction: ExactRatio;
 }
 
 export interface FirmFailureEffects {
@@ -454,16 +455,16 @@ export function calculateFirmFailureEffects(
     );
   }
   const layoffs = wholeFloor(
-    workforce.amount.times(factor(input.layoffFraction, 'layoffFraction')),
+    workforce.amount.times(ratio(input.layoffFraction, 'layoffFraction')),
   );
   const liquidatedAssetRecovery = assets.times(
-    factor(input.assetRecoveryFraction, 'assetRecoveryFraction'),
+    ratio(input.assetRecoveryFraction, 'assetRecoveryFraction'),
   );
   const supplierLosses = supplierTradeCredit.times(
-    factor(input.supplierNonpaymentFraction, 'supplierNonpaymentFraction'),
+    ratio(input.supplierNonpaymentFraction, 'supplierNonpaymentFraction'),
   );
   const bankNpl = bankDebt.times(
-    factor(input.bankNplFraction, 'bankNplFraction'),
+    ratio(input.bankNplFraction, 'bankNplFraction'),
   );
   return Object.freeze({
     layoffs: quantityResult(layoffs, 'person'),
@@ -611,11 +612,11 @@ export interface StartupFormationInput {
   readonly minimumSeedFinancePerStartup: ExactMoney;
   readonly marketOpportunitySlots: ExactQuantity;
   readonly institutionalProcessingSlots: ExactQuantity;
-  readonly formationRate: ExactDecimal;
+  readonly formationRate: ExactRatio;
   readonly jobsPerStartup: ExactQuantityRate;
   readonly innovationPerStartup: ExactQuantityRate;
-  readonly earlyFailureRate: ExactDecimal;
-  readonly scaleUpRate: ExactDecimal;
+  readonly earlyFailureRate: ExactRatio;
+  readonly scaleUpRate: ExactRatio;
 }
 
 export interface StartupFormationResult {
@@ -693,14 +694,14 @@ export function calculateStartupFormation(
     'startup eligibility',
   );
   const startups = wholeFloor(
-    eligible.times(factor(input.formationRate, 'formationRate')),
+    eligible.times(ratio(input.formationRate, 'formationRate')),
   );
   const failures = wholeFloor(
-    startups.times(factor(input.earlyFailureRate, 'earlyFailureRate')),
+    startups.times(ratio(input.earlyFailureRate, 'earlyFailureRate')),
   );
   const survivors = startups.minus(failures);
   const scaleUps = wholeFloor(
-    survivors.times(factor(input.scaleUpRate, 'scaleUpRate')),
+    survivors.times(ratio(input.scaleUpRate, 'scaleUpRate')),
   );
   const committed = startups.times(minimumSeedFinance);
   return Object.freeze({

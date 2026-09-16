@@ -1,6 +1,10 @@
 import { kernelInvalid } from './common.js';
 import {
+  canonicalizeExactCausalValue,
+  causalUnitsMatch,
   scheduleExactCausalTransmission,
+  type CausalUnit,
+  type CausalValueSign,
   type ExactCausalTransmissionInput,
   type ExactScheduledCausalEffect,
 } from './causal-values.js';
@@ -19,7 +23,16 @@ export type QuantifiedSystemId =
 
 export interface QuantifiedSystemTransmissionBatch {
   readonly system: QuantifiedSystemId;
+  /** Immutable, caller-owned dimensional registry for this batch. */
+  readonly nodeContracts: readonly QuantifiedNodeContract[];
   readonly transmissions: readonly ExactCausalTransmissionInput[];
+}
+
+/** A node's stock/flow unit and sign rule; never inferred from the edge label. */
+export interface QuantifiedNodeContract {
+  readonly node: string;
+  readonly unit: CausalUnit;
+  readonly sign: CausalValueSign;
 }
 
 const SYSTEM_CHAIN_RANGES: Readonly<
@@ -39,6 +52,52 @@ function chainNumber(chainId: string): bigint {
   return BigInt(parsed[1]);
 }
 
+function indexNodeContracts(
+  contracts: readonly QuantifiedNodeContract[],
+): ReadonlyMap<string, QuantifiedNodeContract> {
+  if (contracts.length === 0) {
+    kernelInvalid('quantified system requires node contracts');
+  }
+  const indexed = new Map<string, QuantifiedNodeContract>();
+  for (const contract of contracts) {
+    const canonical = canonicalizeExactCausalValue({
+      node: contract.node,
+      amount: '0',
+      unit: contract.unit,
+      sign: contract.sign,
+    });
+    if (indexed.has(canonical.node)) {
+      kernelInvalid('quantified node contracts must be unique');
+    }
+    indexed.set(
+      canonical.node,
+      Object.freeze({
+        node: canonical.node,
+        unit: canonical.unit,
+        sign: canonical.sign,
+      }),
+    );
+  }
+  return indexed;
+}
+
+function assertMatchesNodeContract(
+  value: ExactCausalTransmissionInput['source'],
+  contract: QuantifiedNodeContract | undefined,
+  label: string,
+): void {
+  if (contract === undefined) {
+    kernelInvalid(`${label} node requires a quantified unit contract`);
+  }
+  const canonical = canonicalizeExactCausalValue(value);
+  if (canonical.sign !== contract.sign) {
+    kernelInvalid(`${label} sign must match its quantified node contract`);
+  }
+  if (!causalUnitsMatch(canonical.unit, contract.unit)) {
+    kernelInvalid(`${label} unit must match its quantified node contract`);
+  }
+}
+
 /**
  * Calculates a lossless batch of exact-unit transmissions for one of the six
  * systems introduced by C101–C150. Every response factor remains explicit;
@@ -52,6 +111,7 @@ export function calculateQuantifiedSystemTransmissions(
   if (input.transmissions.length === 0) {
     kernelInvalid('quantified system requires a transmission');
   }
+  const contracts = indexNodeContracts(input.nodeContracts);
   const [firstChain, lastChain] = range;
   const effectIds = new Set<string>();
   const results: ExactScheduledCausalEffect[] = [];
@@ -62,6 +122,31 @@ export function calculateQuantifiedSystemTransmissions(
     }
     if (effectIds.has(transmission.effectId)) {
       kernelInvalid('quantified system effect IDs must be unique');
+    }
+    assertMatchesNodeContract(
+      transmission.source,
+      contracts.get(transmission.source.node),
+      'source',
+    );
+    assertMatchesNodeContract(
+      transmission.targetBefore,
+      contracts.get(transmission.targetBefore.node),
+      'target',
+    );
+    const sourceContract = contracts.get(transmission.source.node);
+    const targetContract = contracts.get(transmission.targetBefore.node);
+    if (
+      sourceContract === undefined ||
+      targetContract === undefined ||
+      !causalUnitsMatch(
+        transmission.response.sourceUnit,
+        sourceContract.unit,
+      ) ||
+      !causalUnitsMatch(transmission.response.targetUnit, targetContract.unit)
+    ) {
+      kernelInvalid(
+        'causal response units must match quantified node contracts',
+      );
     }
     effectIds.add(transmission.effectId);
     results.push(scheduleExactCausalTransmission(transmission));

@@ -1,109 +1,128 @@
 import {
-  boundedRatioOrNull,
   decimal,
-  factor,
   kernelInvalid,
   maximum,
   minimum,
-  nonNegative,
-  ratioOrNull,
+  money,
+  ratio,
   render,
-  type ExactDecimal,
+  renderQuantity,
+  renderUnitRate,
+  type ExactMoney,
+  type ExactQuantity,
+  type ExactRatio,
+  type ExactUnitRate,
   type WorldDecimalValue,
+  wholeQuantity,
 } from './common.js';
 
 export interface PopulationCohorts {
-  readonly children0To15: ExactDecimal;
-  readonly workingAge16To64: ExactDecimal;
-  readonly retired65Plus: ExactDecimal;
+  readonly children0To15: ExactQuantity;
+  readonly workingAge16To64: ExactQuantity;
+  readonly retired65Plus: ExactQuantity;
 }
 
 export interface PopulationFlows {
-  readonly births: ExactDecimal;
-  readonly childDeaths: ExactDecimal;
-  readonly workingAgeDeaths: ExactDecimal;
-  readonly retiredDeaths: ExactDecimal;
-  readonly childImmigration: ExactDecimal;
-  readonly workingAgeImmigration: ExactDecimal;
-  readonly retiredImmigration: ExactDecimal;
-  readonly childEmigration: ExactDecimal;
-  readonly workingAgeEmigration: ExactDecimal;
-  readonly retiredEmigration: ExactDecimal;
-  readonly ageIntoWorkingAge: ExactDecimal;
-  readonly ageIntoRetirement: ExactDecimal;
+  readonly births: ExactQuantity;
+  readonly childDeaths: ExactQuantity;
+  readonly workingAgeDeaths: ExactQuantity;
+  readonly retiredDeaths: ExactQuantity;
+  readonly childImmigration: ExactQuantity;
+  readonly workingAgeImmigration: ExactQuantity;
+  readonly retiredImmigration: ExactQuantity;
+  readonly childEmigration: ExactQuantity;
+  readonly workingAgeEmigration: ExactQuantity;
+  readonly retiredEmigration: ExactQuantity;
+  readonly ageIntoWorkingAge: ExactQuantity;
+  readonly ageIntoRetirement: ExactQuantity;
 }
 
 export interface PopulationTransitionResult {
   readonly cohorts: PopulationCohorts;
-  readonly previousTotal: ExactDecimal;
-  readonly nextTotal: ExactDecimal;
-  readonly netMigration: ExactDecimal;
-  readonly dependencyRatio: ExactDecimal | null;
+  readonly previousTotal: ExactQuantity;
+  readonly nextTotal: ExactQuantity;
+  readonly netMigration: ExactQuantity;
+  readonly dependencyRatio: ExactUnitRate | null;
 }
 
-function cohortValues(
-  input: PopulationCohorts,
-  label: string,
-): readonly WorldDecimalValue[] {
-  return [
-    nonNegative(input.children0To15, `${label}.children0To15`),
-    nonNegative(input.workingAge16To64, `${label}.workingAge16To64`),
-    nonNegative(input.retired65Plus, `${label}.retired65Plus`),
-  ];
+function person(value: ExactQuantity, label: string): WorldDecimalValue {
+  return wholeQuantity(value, 'person', label).amount;
 }
 
-export function totalPopulation(input: PopulationCohorts): ExactDecimal {
-  return render(
-    cohortValues(input, 'cohorts').reduce((total, value) => total.plus(value)),
+function ratioResult(
+  numerator: WorldDecimalValue,
+  denominator: WorldDecimalValue,
+): ExactRatio | null {
+  return denominator.isZero()
+    ? null
+    : Object.freeze({
+        amount: render(numerator.dividedBy(denominator)),
+        unit: 'ratio',
+      });
+}
+
+function unitRateResult(
+  numerator: WorldDecimalValue,
+  denominator: WorldDecimalValue,
+  outputUnit: string,
+  inputUnit: string,
+): ExactUnitRate | null {
+  return denominator.isZero()
+    ? null
+    : renderUnitRate(numerator.dividedBy(denominator), outputUnit, inputUnit);
+}
+
+export function totalPopulation(input: PopulationCohorts): ExactQuantity {
+  return renderQuantity(
+    person(input.children0To15, 'children0To15')
+      .plus(person(input.workingAge16To64, 'workingAge16To64'))
+      .plus(person(input.retired65Plus, 'retired65Plus')),
+    'person',
   );
 }
 
-/** Implements the documented population identity and explicit cohort roll only. */
+/** Implements the cohort identity with whole, unit-labelled people only. */
 export function transitionPopulation(
   previous: PopulationCohorts,
   flows: PopulationFlows,
 ): PopulationTransitionResult {
-  const values = cohortValues(previous, 'previous');
-  const children = values[0]!;
-  const workingAge = values[1]!;
-  const retired = values[2]!;
-  const births = nonNegative(flows.births, 'births');
-  const childDeaths = nonNegative(flows.childDeaths, 'childDeaths');
-  const workingDeaths = nonNegative(flows.workingAgeDeaths, 'workingAgeDeaths');
-  const retiredDeaths = nonNegative(flows.retiredDeaths, 'retiredDeaths');
-  const childImmigration = nonNegative(
-    flows.childImmigration,
-    'childImmigration',
+  const children = person(previous.children0To15, 'previous.children0To15');
+  const working = person(
+    previous.workingAge16To64,
+    'previous.workingAge16To64',
   );
-  const workingImmigration = nonNegative(
+  const retired = person(previous.retired65Plus, 'previous.retired65Plus');
+  const births = person(flows.births, 'births');
+  const childDeaths = person(flows.childDeaths, 'childDeaths');
+  const workingDeaths = person(flows.workingAgeDeaths, 'workingAgeDeaths');
+  const retiredDeaths = person(flows.retiredDeaths, 'retiredDeaths');
+  const childImmigration = person(flows.childImmigration, 'childImmigration');
+  const workingImmigration = person(
     flows.workingAgeImmigration,
     'workingAgeImmigration',
   );
-  const retiredImmigration = nonNegative(
+  const retiredImmigration = person(
     flows.retiredImmigration,
     'retiredImmigration',
   );
-  const childEmigration = nonNegative(flows.childEmigration, 'childEmigration');
-  const workingEmigration = nonNegative(
+  const childEmigration = person(flows.childEmigration, 'childEmigration');
+  const workingEmigration = person(
     flows.workingAgeEmigration,
     'workingAgeEmigration',
   );
-  const retiredEmigration = nonNegative(
+  const retiredEmigration = person(
     flows.retiredEmigration,
     'retiredEmigration',
   );
-  const intoWorking = nonNegative(flows.ageIntoWorkingAge, 'ageIntoWorkingAge');
-  const intoRetirement = nonNegative(
-    flows.ageIntoRetirement,
-    'ageIntoRetirement',
-  );
+  const intoWorking = person(flows.ageIntoWorkingAge, 'ageIntoWorkingAge');
+  const intoRetirement = person(flows.ageIntoRetirement, 'ageIntoRetirement');
   const nextChildren = children
     .plus(births)
     .plus(childImmigration)
     .minus(childDeaths)
     .minus(childEmigration)
     .minus(intoWorking);
-  const nextWorking = workingAge
+  const nextWorking = working
     .plus(workingImmigration)
     .plus(intoWorking)
     .minus(workingDeaths)
@@ -121,7 +140,7 @@ export function transitionPopulation(
   ) {
     kernelInvalid('Population transition would create a negative cohort');
   }
-  const previousTotal = children.plus(workingAge).plus(retired);
+  const previousTotal = children.plus(working).plus(retired);
   const nextTotal = nextChildren.plus(nextWorking).plus(nextRetired);
   const expectedTotal = previousTotal
     .plus(births)
@@ -138,71 +157,87 @@ export function transitionPopulation(
     kernelInvalid('Population identity does not reconcile');
   return Object.freeze({
     cohorts: Object.freeze({
-      children0To15: render(nextChildren),
-      workingAge16To64: render(nextWorking),
-      retired65Plus: render(nextRetired),
+      children0To15: renderQuantity(nextChildren, 'person'),
+      workingAge16To64: renderQuantity(nextWorking, 'person'),
+      retired65Plus: renderQuantity(nextRetired, 'person'),
     }),
-    previousTotal: render(previousTotal),
-    nextTotal: render(nextTotal),
-    netMigration: render(
+    previousTotal: renderQuantity(previousTotal, 'person'),
+    nextTotal: renderQuantity(nextTotal, 'person'),
+    netMigration: renderQuantity(
       childImmigration
         .plus(workingImmigration)
         .plus(retiredImmigration)
         .minus(childEmigration)
         .minus(workingEmigration)
         .minus(retiredEmigration),
+      'person',
     ),
-    dependencyRatio: ratioOrNull(nextChildren.plus(nextRetired), nextWorking),
+    dependencyRatio: unitRateResult(
+      nextChildren.plus(nextRetired),
+      nextWorking,
+      'person',
+      'person',
+    ),
   });
 }
 
 export interface LabourMetricsInput {
-  readonly employed: ExactDecimal;
-  readonly unemployedSearching: ExactDecimal;
-  readonly workingAgePopulation: ExactDecimal;
-  readonly requiredWorkers: ExactDecimal;
-  readonly availableWorkers: ExactDecimal;
+  readonly employed: ExactQuantity;
+  readonly unemployedSearching: ExactQuantity;
+  readonly workingAgePopulation: ExactQuantity;
+  readonly requiredWorkers: ExactQuantity;
+  readonly availableWorkers: ExactQuantity;
 }
 
 export function calculateLabourMetrics(input: LabourMetricsInput) {
-  const employed = nonNegative(input.employed, 'employed');
-  const unemployed = nonNegative(
-    input.unemployedSearching,
-    'unemployedSearching',
-  );
-  const workingAge = nonNegative(
-    input.workingAgePopulation,
-    'workingAgePopulation',
-  );
-  const required = nonNegative(input.requiredWorkers, 'requiredWorkers');
-  const available = nonNegative(input.availableWorkers, 'availableWorkers');
+  const employed = person(input.employed, 'employed');
+  const unemployed = person(input.unemployedSearching, 'unemployedSearching');
+  const workingAge = person(input.workingAgePopulation, 'workingAgePopulation');
+  const required = person(input.requiredWorkers, 'requiredWorkers');
+  const available = person(input.availableWorkers, 'availableWorkers');
   const labourForce = employed.plus(unemployed);
+  if (labourForce.greaterThan(workingAge)) {
+    kernelInvalid('Labour force cannot exceed working-age population');
+  }
   return Object.freeze({
-    labourForce: render(labourForce),
-    labourForceParticipationRate: ratioOrNull(labourForce, workingAge),
-    unemploymentRate: ratioOrNull(unemployed, labourForce),
-    vacancy: render(
+    labourForce: renderQuantity(labourForce, 'person'),
+    labourForceParticipationRate: ratioResult(labourForce, workingAge),
+    unemploymentRate: ratioResult(unemployed, labourForce),
+    vacancy: renderQuantity(
       maximum([required.minus(employed), decimal('0', 'zero')], 'vacancy'),
+      'person',
     ),
-    skillGap: render(required.minus(available)),
-    labourAvailability: boundedRatioOrNull(available, required),
+    skillGap: renderQuantity(
+      maximum([required.minus(available), decimal('0', 'zero')], 'skill gap'),
+      'person',
+    ),
+    skillSurplus: renderQuantity(
+      maximum(
+        [available.minus(required), decimal('0', 'zero')],
+        'skill surplus',
+      ),
+      'person',
+    ),
+    labourAvailability: ratioResult(
+      minimum([available, required], 'available workers'),
+      required,
+    ),
   });
 }
 
 export interface LabourMatchInput {
-  readonly unemployedSupply: ExactDecimal;
-  readonly vacancyDemand: ExactDecimal;
-  readonly matchingCapacity: ExactDecimal;
+  readonly unemployedSupply: ExactQuantity;
+  readonly vacancyDemand: ExactQuantity;
+  readonly matchingCapacity: ExactQuantity;
   readonly skillMatches: boolean;
   readonly locationMatches: boolean;
   readonly offeredWageMeetsMinimum: boolean;
 }
 
-/** Matches only explicitly compatible workers; it never manufactures a worker. */
 export function calculateLabourMatch(input: LabourMatchInput) {
-  const supply = nonNegative(input.unemployedSupply, 'unemployedSupply');
-  const demand = nonNegative(input.vacancyDemand, 'vacancyDemand');
-  const capacity = nonNegative(input.matchingCapacity, 'matchingCapacity');
+  const supply = person(input.unemployedSupply, 'unemployedSupply');
+  const demand = person(input.vacancyDemand, 'vacancyDemand');
+  const capacity = person(input.matchingCapacity, 'matchingCapacity');
   const eligible =
     input.skillMatches &&
     input.locationMatches &&
@@ -211,69 +246,74 @@ export function calculateLabourMatch(input: LabourMatchInput) {
     ? minimum([supply, demand, capacity], 'labour match')
     : decimal('0', 'zero');
   return Object.freeze({
-    matched: render(matched),
-    remainingUnemployed: render(supply.minus(matched)),
-    remainingVacancies: render(demand.minus(matched)),
+    matched: renderQuantity(matched, 'person'),
+    remainingUnemployed: renderQuantity(supply.minus(matched), 'person'),
+    remainingVacancies: renderQuantity(demand.minus(matched), 'person'),
     reason: eligible ? null : 'INCOMPATIBLE_SKILL_LOCATION_OR_WAGE',
   });
 }
 
-/** Verifies that sector and public-service allocations consume one employment pool. */
 export function assertEmploymentAllocation(input: {
-  readonly aggregateEmployed: ExactDecimal;
-  readonly sectorEmployment: readonly ExactDecimal[];
-  readonly publicServiceEmployment: readonly ExactDecimal[];
+  readonly aggregateEmployed: ExactQuantity;
+  readonly sectorEmployment: readonly ExactQuantity[];
+  readonly publicServiceEmployment: readonly ExactQuantity[];
 }): void {
-  const aggregate = nonNegative(input.aggregateEmployed, 'aggregateEmployed');
+  const aggregate = person(input.aggregateEmployed, 'aggregateEmployed');
   const allocated = [
     ...input.sectorEmployment,
     ...input.publicServiceEmployment,
   ].reduce(
-    (sum, value) => sum.plus(nonNegative(value, 'employment allocation')),
+    (sum, value) => sum.plus(person(value, 'employment allocation')),
     decimal('0', 'zero'),
   );
-  if (!allocated.equals(aggregate))
+  if (!allocated.equals(aggregate)) {
     kernelInvalid(
       'Sector and public-service employment must equal aggregate employed',
     );
+  }
 }
 
 export interface EducationOutcomeInput {
-  readonly applicants: ExactDecimal;
-  readonly seats: ExactDecimal;
-  readonly teacherSupportedSeats: ExactDecimal;
-  readonly budgetSupportedSeats: ExactDecimal;
-  readonly enrolled: ExactDecimal;
-  readonly dropoutRate: ExactDecimal;
-  readonly completionRate: ExactDecimal;
+  readonly applicants: ExactQuantity;
+  readonly seats: ExactQuantity;
+  readonly teacherSupportedSeats: ExactQuantity;
+  readonly budgetSupportedSeats: ExactQuantity;
+  readonly enrolled: ExactQuantity;
+  readonly dropoutRate: ExactRatio;
+  readonly completionRate: ExactRatio;
   readonly durationReached: boolean;
 }
 
-/** E04: seats, teachers and budget all constrain enrolment; graduation uses SimTime eligibility supplied by caller. */
 export function calculateEducationOutcome(input: EducationOutcomeInput) {
-  const enrollment = minimum(
+  const applicants = person(input.applicants, 'applicants');
+  const enrollmentCapacity = minimum(
     [
-      nonNegative(input.applicants, 'applicants'),
-      nonNegative(input.seats, 'seats'),
-      nonNegative(input.teacherSupportedSeats, 'teacherSupportedSeats'),
-      nonNegative(input.budgetSupportedSeats, 'budgetSupportedSeats'),
+      applicants,
+      person(input.seats, 'seats'),
+      person(input.teacherSupportedSeats, 'teacherSupportedSeats'),
+      person(input.budgetSupportedSeats, 'budgetSupportedSeats'),
     ],
     'education enrollment',
   );
-  const enrolled = nonNegative(input.enrolled, 'enrolled');
+  const enrolled = person(input.enrolled, 'enrolled');
+  if (enrolled.greaterThan(enrollmentCapacity)) {
+    kernelInvalid('Enrolled students cannot exceed actual enrollment capacity');
+  }
   const graduates = input.durationReached
     ? enrolled
         .times(
-          decimal('1', 'one').minus(factor(input.dropoutRate, 'dropoutRate')),
+          decimal('1', 'one').minus(ratio(input.dropoutRate, 'dropoutRate')),
         )
-        .times(factor(input.completionRate, 'completionRate'))
+        .times(ratio(input.completionRate, 'completionRate'))
     : decimal('0', 'zero');
+  if (!graduates.isInteger()) {
+    kernelInvalid('Education outcome requires a whole graduate count');
+  }
   return Object.freeze({
-    actualEnrollment: render(enrollment),
-    applicantsNotEnrolled: render(
-      nonNegative(input.applicants, 'applicants').minus(enrollment),
-    ),
-    graduates: render(graduates),
+    actualEnrollment: renderQuantity(enrolled, 'person'),
+    enrollmentCapacity: renderQuantity(enrollmentCapacity, 'person'),
+    applicantsNotEnrolled: renderQuantity(applicants.minus(enrolled), 'person'),
+    graduates: renderQuantity(graduates, 'person'),
     skillTransition: graduates.isZero()
       ? null
       : 'CALLER_MUST_POST_VOCATIONAL_OR_HIGHER_TRANSITION',
@@ -282,12 +322,12 @@ export function calculateEducationOutcome(input: EducationOutcomeInput) {
 
 export function deriveEducationSkillHandoff(input: {
   readonly level: 'BASIC' | 'VOCATIONAL' | 'HIGHER';
-  readonly graduates: ExactDecimal;
+  readonly graduates: ExactQuantity;
 }): Readonly<{
   readonly skill: 'MEDIUM' | 'HIGH' | null;
-  readonly count: ExactDecimal;
+  readonly count: ExactQuantity;
 }> {
-  const count = nonNegative(input.graduates, 'graduates');
+  const count = person(input.graduates, 'graduates');
   return Object.freeze({
     skill:
       input.level === 'VOCATIONAL'
@@ -295,132 +335,188 @@ export function deriveEducationSkillHandoff(input: {
         : input.level === 'HIGHER'
           ? 'HIGH'
           : null,
-    count: render(count),
+    count: renderQuantity(count, 'person'),
   });
 }
 
 export interface HealthcareDeliveryInput {
-  readonly newDemand: ExactDecimal;
-  readonly priorBacklog: ExactDecimal;
-  readonly staffCapacity: ExactDecimal;
-  readonly facilityCapacity: ExactDecimal;
-  readonly supplyCapacity: ExactDecimal;
-  readonly budgetCapacity: ExactDecimal;
+  readonly newDemand: ExactQuantity;
+  readonly priorBacklog: ExactQuantity;
+  readonly staffCapacity: ExactQuantity;
+  readonly facilityCapacity: ExactQuantity;
+  readonly supplyCapacity: ExactQuantity;
+  readonly budgetCapacity: ExactQuantity;
 }
 
 export function calculateHealthcareDelivery(input: HealthcareDeliveryInput) {
-  const totalDemand = nonNegative(input.newDemand, 'newDemand').plus(
-    nonNegative(input.priorBacklog, 'priorBacklog'),
+  const totalDemand = wholeQuantity(
+    input.newDemand,
+    'case',
+    'newDemand',
+  ).amount.plus(
+    wholeQuantity(input.priorBacklog, 'case', 'priorBacklog').amount,
   );
   const delivered = minimum(
     [
       totalDemand,
-      nonNegative(input.staffCapacity, 'staffCapacity'),
-      nonNegative(input.facilityCapacity, 'facilityCapacity'),
-      nonNegative(input.supplyCapacity, 'supplyCapacity'),
-      nonNegative(input.budgetCapacity, 'budgetCapacity'),
+      wholeQuantity(input.staffCapacity, 'case', 'staffCapacity').amount,
+      wholeQuantity(input.facilityCapacity, 'case', 'facilityCapacity').amount,
+      wholeQuantity(input.supplyCapacity, 'case', 'supplyCapacity').amount,
+      wholeQuantity(input.budgetCapacity, 'case', 'budgetCapacity').amount,
     ],
     'healthcare delivery',
   );
   return Object.freeze({
-    deliveredCare: render(delivered),
-    nextBacklog: render(totalDemand.minus(delivered)),
+    deliveredCare: renderQuantity(delivered, 'case'),
+    nextBacklog: renderQuantity(totalDemand.minus(delivered), 'case'),
   });
 }
 
 export function calculateBedOccupancy(
-  occupiedBeds: ExactDecimal,
-  availableBeds: ExactDecimal,
-): ExactDecimal | null {
-  const occupied = nonNegative(occupiedBeds, 'occupiedBeds');
-  const available = nonNegative(availableBeds, 'availableBeds');
-  if (occupied.greaterThan(available))
+  occupiedBeds: ExactQuantity,
+  availableBeds: ExactQuantity,
+): ExactRatio | null {
+  const occupied = wholeQuantity(occupiedBeds, 'bed', 'occupiedBeds').amount;
+  const available = wholeQuantity(availableBeds, 'bed', 'availableBeds').amount;
+  if (occupied.greaterThan(available)) {
     kernelInvalid('Occupied beds cannot exceed available beds');
-  return ratioOrNull(occupied, available);
+  }
+  return ratioResult(occupied, available);
 }
 
 export interface HousingMetricsInput {
-  readonly householdDemand: ExactDecimal;
-  readonly habitableUnits: ExactDecimal;
-  readonly vacantHabitableUnits: ExactDecimal;
-  readonly housingCost: ExactDecimal;
-  readonly disposableIncome: ExactDecimal;
+  readonly householdDemand: ExactQuantity;
+  readonly habitableUnits: ExactQuantity;
+  readonly vacantHabitableUnits: ExactQuantity;
+  readonly housingCost: ExactMoney;
+  readonly disposableIncome: ExactMoney;
 }
 
 export function calculateHousingMetrics(input: HousingMetricsInput) {
-  const demand = nonNegative(input.householdDemand, 'householdDemand');
-  const habitable = nonNegative(input.habitableUnits, 'habitableUnits');
-  const vacant = nonNegative(
+  const demand = wholeQuantity(
+    input.householdDemand,
+    'housing_unit',
+    'householdDemand',
+  ).amount;
+  const habitable = wholeQuantity(
+    input.habitableUnits,
+    'housing_unit',
+    'habitableUnits',
+  ).amount;
+  const vacant = wholeQuantity(
     input.vacantHabitableUnits,
+    'housing_unit',
     'vacantHabitableUnits',
-  );
-  if (vacant.greaterThan(habitable))
+  ).amount;
+  if (vacant.greaterThan(habitable)) {
     kernelInvalid('Vacant units cannot exceed habitable units');
-  const cost = nonNegative(input.housingCost, 'housingCost');
-  const income = nonNegative(input.disposableIncome, 'disposableIncome');
+  }
+  const housingCost = money(input.housingCost, 'housingCost');
+  const disposableIncome = money(input.disposableIncome, 'disposableIncome');
+  if (housingCost.currency !== disposableIncome.currency) {
+    kernelInvalid('Housing cost and disposable income currencies must match');
+  }
+  if (housingCost.amount.isNegative() || disposableIncome.amount.isNegative()) {
+    kernelInvalid('Housing cost and disposable income must be non-negative');
+  }
+  const cost = housingCost.amount;
+  const income = disposableIncome.amount;
   const netGap = demand.minus(habitable);
   return Object.freeze({
-    netHousingGap: render(netGap),
-    unmetHousingUnits: render(
+    netHousingGap: Object.freeze({
+      amount: render(netGap),
+      unit: 'housing_unit',
+    }),
+    unmetHousingUnits: renderQuantity(
       maximum([netGap, decimal('0', 'zero')], 'unmet housing units'),
+      'housing_unit',
     ),
-    vacancyRate: ratioOrNull(vacant, habitable),
-    housingBurden: ratioOrNull(cost, income),
+    vacancyRate: ratioResult(vacant, habitable),
+    housingBurden: unitRateResult(
+      cost,
+      income,
+      housingCost.currency,
+      disposableIncome.currency,
+    ),
   });
 }
 
 export interface SafetyMetricsInput {
-  readonly employedStaff: ExactDecimal;
-  readonly deployedStaff: ExactDecimal;
-  readonly unavailableStaff: ExactDecimal;
-  readonly recordedIncidents: ExactDecimal;
-  readonly population: ExactDecimal;
-  readonly priorBacklog: ExactDecimal;
-  readonly newCases: ExactDecimal;
-  readonly resolvedCases: ExactDecimal;
-  readonly casesHandled: ExactDecimal;
+  readonly employedStaff: ExactQuantity;
+  readonly deployedStaff: ExactQuantity;
+  readonly unavailableStaff: ExactQuantity;
+  readonly recordedIncidents: ExactQuantity;
+  readonly population: ExactQuantity;
+  readonly priorBacklog: ExactQuantity;
+  readonly newCases: ExactQuantity;
+  readonly resolvedCases: ExactQuantity;
+  readonly casesHandled: ExactQuantity;
 }
 
 export function calculateSafetyMetrics(input: SafetyMetricsInput) {
-  const employed = nonNegative(input.employedStaff, 'employedStaff');
-  const deployed = nonNegative(input.deployedStaff, 'deployedStaff');
-  const unavailable = nonNegative(input.unavailableStaff, 'unavailableStaff');
+  const employed = person(input.employedStaff, 'employedStaff');
+  const deployed = person(input.deployedStaff, 'deployedStaff');
+  const unavailable = person(input.unavailableStaff, 'unavailableStaff');
   const available = employed.minus(deployed).minus(unavailable);
-  if (available.isNegative())
+  if (available.isNegative()) {
     kernelInvalid('Public-safety deployment exceeds employed staff');
-  const prior = nonNegative(input.priorBacklog, 'priorBacklog');
-  const newCases = nonNegative(input.newCases, 'newCases');
-  const resolved = nonNegative(input.resolvedCases, 'resolvedCases');
+  }
+  const prior = wholeQuantity(
+    input.priorBacklog,
+    'case',
+    'priorBacklog',
+  ).amount;
+  const newCases = wholeQuantity(input.newCases, 'case', 'newCases').amount;
+  const resolved = wholeQuantity(
+    input.resolvedCases,
+    'case',
+    'resolvedCases',
+  ).amount;
   const backlog = prior.plus(newCases).minus(resolved);
-  if (backlog.isNegative())
+  if (backlog.isNegative()) {
     kernelInvalid('Resolved cases cannot exceed available backlog');
+  }
+  const incidents = wholeQuantity(
+    input.recordedIncidents,
+    'incident',
+    'recordedIncidents',
+  ).amount;
+  const population = person(input.population, 'population');
+  const handled = wholeQuantity(
+    input.casesHandled,
+    'case',
+    'casesHandled',
+  ).amount;
+  if (resolved.greaterThan(handled)) {
+    kernelInvalid('Resolved cases cannot exceed cases handled');
+  }
   return Object.freeze({
-    availableStaff: render(available),
-    crimeRatePer100k: ratioOrNull(
-      nonNegative(input.recordedIncidents, 'recordedIncidents').times(100000),
-      nonNegative(input.population, 'population'),
-    ),
-    caseClearanceRate: ratioOrNull(
-      resolved,
-      nonNegative(input.casesHandled, 'casesHandled'),
-    ),
-    nextBacklog: render(backlog),
+    availableStaff: renderQuantity(available, 'person'),
+    crimeRatePer100k: population.isZero()
+      ? null
+      : Object.freeze({
+          amount: render(incidents.times(100000).dividedBy(population)),
+          unit: 'incident_per_100k_person',
+        }),
+    caseClearanceRate: ratioResult(resolved, handled),
+    nextBacklog: renderQuantity(backlog, 'case'),
   });
 }
 
 export function allocateSafetyDeployment(input: {
-  readonly availableStaff: ExactDecimal;
-  readonly requestedStaff: ExactDecimal;
+  readonly availableStaff: ExactQuantity;
+  readonly requestedStaff: ExactQuantity;
 }): Readonly<{
-  readonly deployed: ExactDecimal;
-  readonly remainingAvailable: ExactDecimal;
+  readonly deployed: ExactQuantity;
+  readonly remainingAvailable: ExactQuantity;
 }> {
-  const available = nonNegative(input.availableStaff, 'availableStaff');
-  const requested = nonNegative(input.requestedStaff, 'requestedStaff');
-  if (requested.greaterThan(available))
+  const available = person(input.availableStaff, 'availableStaff');
+  const requested = person(input.requestedStaff, 'requestedStaff');
+  if (requested.greaterThan(available)) {
     kernelInvalid('Safety deployment exceeds available staff');
+  }
   return Object.freeze({
-    deployed: render(requested),
-    remainingAvailable: render(available.minus(requested)),
+    deployed: renderQuantity(requested, 'person'),
+    remainingAvailable: renderQuantity(available.minus(requested), 'person'),
   });
 }

@@ -1,18 +1,19 @@
 import {
-  boundedRatioOrNull,
   decimal,
-  factor,
   kernelInvalid,
   minimum,
+  money,
   nonNegative,
-  positive,
-  quantity,
-  ratioOrNull,
+  physicalQuantity,
+  ratio,
   render,
+  renderMoney,
+  renderQuantity,
   sameUnit,
-  type ExactDecimal,
   type ExactMoney,
   type ExactQuantity,
+  type ExactRatio,
+  type ExactUnitRate,
   type WorldDecimalValue,
 } from './common.js';
 
@@ -20,11 +21,11 @@ export type ResourceLayer =
   'UNDISCOVERED' | 'DISCOVERED' | 'RECOVERABLE' | 'DEVELOPED' | 'EXTRACTED';
 
 export interface ResourceLayers {
-  readonly undiscovered: ExactDecimal;
-  readonly discovered: ExactDecimal;
-  readonly recoverable: ExactDecimal;
-  readonly developed: ExactDecimal;
-  readonly extractedCumulative: ExactDecimal;
+  readonly undiscovered: ExactQuantity;
+  readonly discovered: ExactQuantity;
+  readonly recoverable: ExactQuantity;
+  readonly developed: ExactQuantity;
+  readonly extractedCumulative: ExactQuantity;
 }
 
 const LAYER_KEY: Readonly<Record<ResourceLayer, keyof ResourceLayers>> =
@@ -45,39 +46,58 @@ const FORWARD_LAYER: Readonly<Record<ResourceLayer, ResourceLayer | null>> =
     EXTRACTED: null,
   });
 
-function resourceValues(
-  input: ResourceLayers,
-): Record<keyof ResourceLayers, WorldDecimalValue> {
-  return {
-    undiscovered: nonNegative(input.undiscovered, 'undiscovered'),
-    discovered: nonNegative(input.discovered, 'discovered'),
-    recoverable: nonNegative(input.recoverable, 'recoverable'),
-    developed: nonNegative(input.developed, 'developed'),
-    extractedCumulative: nonNegative(
-      input.extractedCumulative,
-      'extractedCumulative',
-    ),
-  };
+function resourceValues(input: ResourceLayers): {
+  readonly values: Record<keyof ResourceLayers, WorldDecimalValue>;
+  readonly unit: string;
+} {
+  const undiscovered = physicalQuantity(input.undiscovered, 'undiscovered');
+  const discovered = physicalQuantity(input.discovered, 'discovered');
+  const recoverable = physicalQuantity(input.recoverable, 'recoverable');
+  const developed = physicalQuantity(input.developed, 'developed');
+  const extracted = physicalQuantity(
+    input.extractedCumulative,
+    'extractedCumulative',
+  );
+  for (const value of [discovered, recoverable, developed, extracted]) {
+    if (value.unit !== undiscovered.unit) {
+      kernelInvalid('All resource layers must use one physical unit');
+    }
+  }
+  return Object.freeze({
+    values: {
+      undiscovered: undiscovered.amount,
+      discovered: discovered.amount,
+      recoverable: recoverable.amount,
+      developed: developed.amount,
+      extractedCumulative: extracted.amount,
+    },
+    unit: undiscovered.unit,
+  });
 }
 
 /** E08's five mutually exclusive pools must sum to the fixed geological endowment. */
 export function assertResourceConservation(
-  initialEndowment: ExactDecimal,
+  initialEndowment: ExactQuantity,
   layers: ResourceLayers,
 ): void {
-  const initial = nonNegative(initialEndowment, 'initialEndowment');
-  const values = resourceValues(layers);
-  const total = Object.values(values).reduce((sum, value) => sum.plus(value));
-  if (!total.equals(initial))
+  const initial = physicalQuantity(initialEndowment, 'initialEndowment');
+  const resource = resourceValues(layers);
+  if (initial.unit !== resource.unit) {
+    kernelInvalid('Initial endowment and resource layers must use one unit');
+  }
+  const total = Object.values(resource.values).reduce((sum, value) =>
+    sum.plus(value),
+  );
+  if (!total.equals(initial.amount))
     kernelInvalid('Resource layers must equal the fixed initial endowment');
 }
 
 export function transitionResourceLayer(input: {
-  readonly initialEndowment: ExactDecimal;
+  readonly initialEndowment: ExactQuantity;
   readonly layers: ResourceLayers;
   readonly from: ResourceLayer;
   readonly to: ResourceLayer;
-  readonly amount: ExactDecimal;
+  readonly amount: ExactQuantity;
 }): ResourceLayers {
   assertResourceConservation(input.initialEndowment, input.layers);
   if (FORWARD_LAYER[input.from] !== input.to) {
@@ -85,37 +105,46 @@ export function transitionResourceLayer(input: {
       'Resource layers may only advance one documented lifecycle step',
     );
   }
-  const amount = nonNegative(input.amount, 'resource transition amount');
-  const values = resourceValues(input.layers);
+  const resource = resourceValues(input.layers);
+  const amount = physicalQuantity(input.amount, 'resource transition amount');
+  if (amount.unit !== resource.unit) {
+    kernelInvalid('Resource transition amount must use the resource unit');
+  }
+  const values = resource.values;
   const fromKey = LAYER_KEY[input.from];
   const toKey = LAYER_KEY[input.to];
-  if (values[fromKey].lessThan(amount))
+  if (values[fromKey].lessThan(amount.amount))
     kernelInvalid('Resource transition exceeds source layer');
   return Object.freeze({
-    undiscovered: render(
+    undiscovered: renderQuantity(
       values.undiscovered
-        .minus(fromKey === 'undiscovered' ? amount : 0)
-        .plus(toKey === 'undiscovered' ? amount : 0),
+        .minus(fromKey === 'undiscovered' ? amount.amount : 0)
+        .plus(toKey === 'undiscovered' ? amount.amount : 0),
+      resource.unit,
     ),
-    discovered: render(
+    discovered: renderQuantity(
       values.discovered
-        .minus(fromKey === 'discovered' ? amount : 0)
-        .plus(toKey === 'discovered' ? amount : 0),
+        .minus(fromKey === 'discovered' ? amount.amount : 0)
+        .plus(toKey === 'discovered' ? amount.amount : 0),
+      resource.unit,
     ),
-    recoverable: render(
+    recoverable: renderQuantity(
       values.recoverable
-        .minus(fromKey === 'recoverable' ? amount : 0)
-        .plus(toKey === 'recoverable' ? amount : 0),
+        .minus(fromKey === 'recoverable' ? amount.amount : 0)
+        .plus(toKey === 'recoverable' ? amount.amount : 0),
+      resource.unit,
     ),
-    developed: render(
+    developed: renderQuantity(
       values.developed
-        .minus(fromKey === 'developed' ? amount : 0)
-        .plus(toKey === 'developed' ? amount : 0),
+        .minus(fromKey === 'developed' ? amount.amount : 0)
+        .plus(toKey === 'developed' ? amount.amount : 0),
+      resource.unit,
     ),
-    extractedCumulative: render(
+    extractedCumulative: renderQuantity(
       values.extractedCumulative
-        .minus(fromKey === 'extractedCumulative' ? amount : 0)
-        .plus(toKey === 'extractedCumulative' ? amount : 0),
+        .minus(fromKey === 'extractedCumulative' ? amount.amount : 0)
+        .plus(toKey === 'extractedCumulative' ? amount.amount : 0),
+      resource.unit,
     ),
   });
 }
@@ -141,20 +170,21 @@ export function reconcileInventory(
     input.deliveredExports,
     input.losses,
   ];
+  for (const value of quantities) physicalQuantity(value, 'inventory flow');
   for (const value of quantities.slice(1))
     sameUnit(input.opening, value, 'inventory reconciliation');
-  const opening = nonNegative(input.opening.amount, 'opening inventory');
-  const production = nonNegative(input.production.amount, 'production');
-  const imports = nonNegative(
-    input.deliveredImports.amount,
+  const opening = physicalQuantity(input.opening, 'opening inventory').amount;
+  const production = physicalQuantity(input.production, 'production').amount;
+  const imports = physicalQuantity(
+    input.deliveredImports,
     'deliveredImports',
-  );
-  const use = nonNegative(input.domesticUse.amount, 'domesticUse');
-  const exports = nonNegative(
-    input.deliveredExports.amount,
+  ).amount;
+  const use = physicalQuantity(input.domesticUse, 'domesticUse').amount;
+  const exports = physicalQuantity(
+    input.deliveredExports,
     'deliveredExports',
-  );
-  const losses = nonNegative(input.losses.amount, 'losses');
+  ).amount;
+  const losses = physicalQuantity(input.losses, 'losses').amount;
   const closing = opening
     .plus(production)
     .plus(imports)
@@ -165,7 +195,7 @@ export function reconcileInventory(
     kernelInvalid(
       'Inventory reconciliation would create negative physical stock',
     );
-  return Object.freeze({ amount: render(closing), unit: input.opening.unit });
+  return renderQuantity(closing, input.opening.unit);
 }
 
 export interface InventoryBuckets {
@@ -179,26 +209,29 @@ export function reserveUsableInventory(input: {
   readonly buckets: InventoryBuckets;
   readonly amount: ExactQuantity;
 }): InventoryBuckets {
-  for (const bucket of Object.values(input.buckets))
+  physicalQuantity(input.amount, 'reserved amount');
+  for (const bucket of Object.values(input.buckets)) {
+    physicalQuantity(bucket, 'inventory bucket');
     sameUnit(input.amount, bucket, 'inventory reservation');
-  const requested = nonNegative(input.amount.amount, 'reserved amount');
-  const usable = nonNegative(input.buckets.usable.amount, 'usable inventory');
+  }
+  const requested = physicalQuantity(input.amount, 'reserved amount').amount;
+  const usable = physicalQuantity(
+    input.buckets.usable,
+    'usable inventory',
+  ).amount;
   if (usable.lessThan(requested))
     kernelInvalid('Inventory reservation exceeds usable stock');
-  const reserved = nonNegative(
-    input.buckets.reservedForContract.amount,
+  const reserved = physicalQuantity(
+    input.buckets.reservedForContract,
     'reserved inventory',
-  );
+  ).amount;
   return Object.freeze({
-    usable: Object.freeze({
-      amount: render(usable.minus(requested)),
-      unit: input.amount.unit,
-    }),
+    usable: renderQuantity(usable.minus(requested), input.amount.unit),
     strategic: input.buckets.strategic,
-    reservedForContract: Object.freeze({
-      amount: render(reserved.plus(requested)),
-      unit: input.amount.unit,
-    }),
+    reservedForContract: renderQuantity(
+      reserved.plus(requested),
+      input.amount.unit,
+    ),
     inTransit: input.buckets.inTransit,
   });
 }
@@ -208,14 +241,23 @@ export function transferStrategicInventory(input: {
   readonly direction: 'ACCUMULATE' | 'RELEASE';
   readonly amount: ExactQuantity;
 }): InventoryBuckets {
-  for (const bucket of Object.values(input.buckets))
+  physicalQuantity(input.amount, 'strategic transfer amount');
+  for (const bucket of Object.values(input.buckets)) {
+    physicalQuantity(bucket, 'inventory bucket');
     sameUnit(input.amount, bucket, 'strategic inventory');
-  const amount = nonNegative(input.amount.amount, 'strategic transfer amount');
-  const usable = nonNegative(input.buckets.usable.amount, 'usable inventory');
-  const strategic = nonNegative(
-    input.buckets.strategic.amount,
+  }
+  const amount = physicalQuantity(
+    input.amount,
+    'strategic transfer amount',
+  ).amount;
+  const usable = physicalQuantity(
+    input.buckets.usable,
+    'usable inventory',
+  ).amount;
+  const strategic = physicalQuantity(
+    input.buckets.strategic,
     'strategic inventory',
-  );
+  ).amount;
   const from = input.direction === 'ACCUMULATE' ? usable : strategic;
   if (from.lessThan(amount))
     kernelInvalid('Strategic transfer exceeds source bucket');
@@ -228,14 +270,8 @@ export function transferStrategicInventory(input: {
       ? strategic.plus(amount)
       : strategic.minus(amount);
   return Object.freeze({
-    usable: Object.freeze({
-      amount: render(nextUsable),
-      unit: input.amount.unit,
-    }),
-    strategic: Object.freeze({
-      amount: render(nextStrategic),
-      unit: input.amount.unit,
-    }),
+    usable: renderQuantity(nextUsable, input.amount.unit),
+    strategic: renderQuantity(nextStrategic, input.amount.unit),
     reservedForContract: input.buckets.reservedForContract,
     inTransit: input.buckets.inTransit,
   });
@@ -243,36 +279,48 @@ export function transferStrategicInventory(input: {
 
 export interface EnergyGenerationInput {
   readonly availableCapacity: ExactQuantity;
-  readonly capacityFactor: ExactDecimal;
-  readonly hours: ExactDecimal;
-  readonly fuelEnergyPerMWh: ExactQuantity;
-  readonly technologyEfficiency: ExactDecimal;
+  readonly capacityFactor: ExactRatio;
+  readonly hours: ExactQuantity;
+  /** Physical fuel per generated MWh; input and output units are explicit. */
+  readonly fuelEnergyPerMWh: ExactUnitRate;
+  readonly technologyEfficiency: ExactRatio;
 }
 
 /** Computes MWh only from MW × time and never treats either as an untyped number. */
 export function calculateEnergyGeneration(input: EnergyGenerationInput) {
   if (input.availableCapacity.unit !== 'MW')
     kernelInvalid('Available generation capacity must use MW');
-  if (input.hours === '0') kernelInvalid('Generation hours must be positive');
   const capacity = nonNegative(
     input.availableCapacity.amount,
     'availableCapacity',
   );
-  const hours = positive(input.hours, 'hours');
+  const duration = physicalQuantity(input.hours, 'hours');
+  if (duration.unit !== 'hour' || duration.amount.isZero()) {
+    kernelInvalid('Generation hours must use positive hour');
+  }
   const generated = capacity
-    .times(factor(input.capacityFactor, 'capacityFactor'))
-    .times(hours);
-  const fuel = quantity(input.fuelEnergyPerMWh, 'fuelEnergyPerMWh');
-  const efficiency = positive(
-    input.technologyEfficiency,
-    'technologyEfficiency',
+    .times(ratio(input.capacityFactor, 'capacityFactor'))
+    .times(duration.amount);
+  if (input.fuelEnergyPerMWh.inputUnit !== 'MWh') {
+    kernelInvalid('fuelEnergyPerMWh inputUnit must use MWh');
+  }
+  const fuelUnit = physicalQuantity(
+    { amount: '0', unit: input.fuelEnergyPerMWh.outputUnit },
+    'fuelEnergyPerMWh outputUnit',
+  ).unit;
+  const fuelPerMWh = nonNegative(
+    input.fuelEnergyPerMWh.amount,
+    'fuelEnergyPerMWh amount',
   );
+  const efficiency = ratio(input.technologyEfficiency, 'technologyEfficiency');
+  if (efficiency.isZero())
+    kernelInvalid('technologyEfficiency must be positive');
   return Object.freeze({
-    generated: Object.freeze({ amount: render(generated), unit: 'MWh' }),
-    fuelBurn: Object.freeze({
-      amount: render(generated.times(fuel.amount).dividedBy(efficiency)),
-      unit: fuel.unit,
-    }),
+    generated: renderQuantity(generated, 'MWh'),
+    fuelBurn: renderQuantity(
+      generated.times(fuelPerMWh).dividedBy(efficiency),
+      fuelUnit,
+    ),
   });
 }
 
@@ -312,19 +360,28 @@ export function reconcileElectricityBalance(
 export function calculateEnergyAvailability(
   delivered: ExactQuantity,
   required: ExactQuantity,
-): ExactDecimal | null {
+): ExactRatio | null {
   if (delivered.unit !== 'MWh' || required.unit !== 'MWh')
     kernelInvalid('Energy availability requires MWh');
-  return boundedRatioOrNull(
-    nonNegative(delivered.amount, 'delivered MWh'),
-    nonNegative(required.amount, 'required MWh'),
-  );
+  const supplied = nonNegative(delivered.amount, 'delivered MWh');
+  const needed = nonNegative(required.amount, 'required MWh');
+  return needed.isZero()
+    ? null
+    : Object.freeze({
+        amount: render(
+          minimum(
+            [decimal('1', 'one'), supplied.dividedBy(needed)],
+            'energy availability',
+          ),
+        ),
+        unit: 'ratio',
+      });
 }
 
 export function calculateReserveMargin(
   availableGenerationCapacity: ExactQuantity,
   peakDemand: ExactQuantity,
-): ExactDecimal | null {
+): ExactQuantity | null {
   if (availableGenerationCapacity.unit !== 'MW' || peakDemand.unit !== 'MW') {
     kernelInvalid('Reserve margin requires MW');
   }
@@ -333,7 +390,12 @@ export function calculateReserveMargin(
     'availableGenerationCapacity',
   );
   const demand = nonNegative(peakDemand.amount, 'peakDemand');
-  return ratioOrNull(available.minus(demand), demand);
+  return demand.isZero()
+    ? null
+    : Object.freeze({
+        amount: render(available.minus(demand).dividedBy(demand)),
+        unit: 'MW_per_MW',
+      });
 }
 
 export interface StorageTransitionInput {
@@ -341,8 +403,8 @@ export interface StorageTransitionInput {
   readonly energyCapacity: ExactQuantity;
   readonly requestedChargeFromGrid: ExactQuantity;
   readonly requestedDischargeToGrid: ExactQuantity;
-  readonly chargeEfficiency: ExactDecimal;
-  readonly dischargeEfficiency: ExactDecimal;
+  readonly chargeEfficiency: ExactRatio;
+  readonly dischargeEfficiency: ExactRatio;
 }
 
 /** Storage is energy-conserving: charge and discharge cannot be requested in the same pure transition. */
@@ -369,8 +431,8 @@ export function transitionEnergyStorage(input: StorageTransitionInput) {
     kernelInvalid('State of charge cannot exceed storage capacity');
   if (!chargeRequested.isZero() && !dischargeRequested.isZero())
     kernelInvalid('Storage cannot charge and discharge in one transition');
-  const chargeEfficiency = factor(input.chargeEfficiency, 'chargeEfficiency');
-  const dischargeEfficiency = factor(
+  const chargeEfficiency = ratio(input.chargeEfficiency, 'chargeEfficiency');
+  const dischargeEfficiency = ratio(
     input.dischargeEfficiency,
     'dischargeEfficiency',
   );
@@ -388,15 +450,9 @@ export function transitionEnergyStorage(input: StorageTransitionInput) {
     .plus(actualChargeFromGrid.times(chargeEfficiency))
     .minus(deliveredDischarge.dividedBy(dischargeEfficiency));
   return Object.freeze({
-    nextStateOfCharge: Object.freeze({ amount: render(next), unit: 'MWh' }),
-    actualChargeFromGrid: Object.freeze({
-      amount: render(actualChargeFromGrid),
-      unit: 'MWh',
-    }),
-    deliveredDischarge: Object.freeze({
-      amount: render(deliveredDischarge),
-      unit: 'MWh',
-    }),
+    nextStateOfCharge: renderQuantity(next, 'MWh'),
+    actualChargeFromGrid: renderQuantity(actualChargeFromGrid, 'MWh'),
+    deliveredDischarge: renderQuantity(deliveredDischarge, 'MWh'),
   });
 }
 
@@ -406,66 +462,97 @@ export interface ProductionInputAvailability {
 }
 
 export interface ProductionOutcomeInput {
-  readonly operationalCapacity: ExactQuantity;
-  readonly targetUtilisation: ExactDecimal;
-  readonly productivity: ExactDecimal;
+  /** Physical output per one explicit operating-duration unit. */
+  readonly operationalCapacity: ExactUnitRate;
+  readonly operatingDuration: ExactQuantity;
+  readonly targetUtilisation: ExactRatio;
+  /** Output per unit of the capacity's output, preserving the output dimension. */
+  readonly productivity: ExactUnitRate;
   readonly inputAvailability: readonly ProductionInputAvailability[];
-  readonly energyAvailability: ExactDecimal;
-  readonly labourAvailability: ExactDecimal;
-  readonly logisticsAvailability: ExactDecimal;
+  readonly energyAvailability: ExactRatio;
+  readonly labourAvailability: ExactRatio;
+  readonly logisticsAvailability: ExactRatio;
 }
 
 export function calculateProductionOutcome(input: ProductionOutcomeInput) {
+  const duration = physicalQuantity(
+    input.operatingDuration,
+    'operatingDuration',
+  );
+  if (input.operationalCapacity.inputUnit !== duration.unit) {
+    kernelInvalid('operationalCapacity inputUnit must match operatingDuration');
+  }
+  const outputUnit = physicalQuantity(
+    { amount: '0', unit: input.operationalCapacity.outputUnit },
+    'operationalCapacity outputUnit',
+  ).unit;
   const capacity = nonNegative(
     input.operationalCapacity.amount,
     'operationalCapacity',
   );
+  if (
+    input.productivity.inputUnit !== outputUnit ||
+    input.productivity.outputUnit !== outputUnit
+  ) {
+    kernelInvalid('productivity must preserve the production output unit');
+  }
+  const productivity = nonNegative(input.productivity.amount, 'productivity');
   const potential = capacity
-    .times(factor(input.targetUtilisation, 'targetUtilisation'))
-    .times(nonNegative(input.productivity, 'productivity'));
+    .times(duration.amount)
+    .times(ratio(input.targetUtilisation, 'targetUtilisation'))
+    .times(productivity);
   const materialRatios = input.inputAvailability.map((entry) => {
+    physicalQuantity(entry.available, 'available input');
+    physicalQuantity(entry.required, 'required input');
     sameUnit(entry.available, entry.required, 'production input');
-    return boundedRatioOrNull(
-      nonNegative(entry.available.amount, 'available input'),
-      nonNegative(entry.required.amount, 'required input'),
-    );
+    const available = physicalQuantity(
+      entry.available,
+      'available input',
+    ).amount;
+    const required = physicalQuantity(entry.required, 'required input').amount;
+    return required.isZero()
+      ? null
+      : minimum(
+          [decimal('1', 'one'), available.dividedBy(required)],
+          'production input availability',
+        );
   });
   const material =
     materialRatios.length === 0
       ? decimal('1', 'one')
       : minimum(
-          materialRatios.map((value) =>
-            decimal(value ?? '1', 'input availability'),
-          ),
+          materialRatios.map((value) => value ?? decimal('1', 'one')),
           'input availability',
         );
   const bottleneck = minimum(
     [
       material,
-      factor(input.energyAvailability, 'energyAvailability'),
-      factor(input.labourAvailability, 'labourAvailability'),
-      factor(input.logisticsAvailability, 'logisticsAvailability'),
+      ratio(input.energyAvailability, 'energyAvailability'),
+      ratio(input.labourAvailability, 'labourAvailability'),
+      ratio(input.logisticsAvailability, 'logisticsAvailability'),
     ],
     'production bottleneck',
   );
   const actual = potential.times(bottleneck);
   return Object.freeze({
-    potentialOutput: Object.freeze({
-      amount: render(potential),
-      unit: input.operationalCapacity.unit,
+    potentialOutput: renderQuantity(potential, outputUnit),
+    actualOutput: renderQuantity(actual, outputUnit),
+    bottleneckFactor: Object.freeze({
+      amount: render(bottleneck),
+      unit: 'ratio',
     }),
-    actualOutput: Object.freeze({
-      amount: render(actual),
-      unit: input.operationalCapacity.unit,
-    }),
-    bottleneckFactor: render(bottleneck),
-    capacityUtilisation: ratioOrNull(actual, capacity),
+    capacityUtilisation: potential.isZero()
+      ? null
+      : Object.freeze({
+          amount: render(actual.dividedBy(potential)),
+          unit: 'ratio',
+        }),
   });
 }
 
 export interface ProductionInputCoefficient {
-  readonly inputUnit: string;
-  readonly amountPerUnitOutput: ExactDecimal;
+  /** Physical input amount per one physical unit of output. */
+  readonly inputPerOutput: ExactUnitRate;
 }
 
 /** Computes the inputs that a later atomic posting must consume before output can be posted. */
@@ -473,22 +560,23 @@ export function calculateProductionInputConsumption(
   actualOutput: ExactQuantity,
   coefficients: readonly ProductionInputCoefficient[],
 ): readonly ExactQuantity[] {
-  const output = quantity(actualOutput, 'actualOutput');
-  if (output.amount.isNegative())
-    kernelInvalid('Actual output must be non-negative');
+  const output = physicalQuantity(actualOutput, 'actualOutput');
   return Object.freeze(
     coefficients.map((coefficient) => {
+      if (coefficient.inputPerOutput.inputUnit !== output.unit) {
+        kernelInvalid(
+          'Production coefficient inputUnit must match actual output',
+        );
+      }
+      const inputUnit = physicalQuantity(
+        { amount: '0', unit: coefficient.inputPerOutput.outputUnit },
+        'Production coefficient outputUnit',
+      );
       const perUnit = nonNegative(
-        coefficient.amountPerUnitOutput,
+        coefficient.inputPerOutput.amount,
         'amountPerUnitOutput',
       );
-      if (!/^[A-Za-z][A-Za-z0-9 _/-]{0,63}$/u.test(coefficient.inputUnit)) {
-        kernelInvalid('Production input unit must be canonical');
-      }
-      return Object.freeze({
-        amount: render(output.amount.times(perUnit)),
-        unit: coefficient.inputUnit,
-      });
+      return renderQuantity(output.amount.times(perUnit), inputUnit.unit);
     }),
   );
 }
@@ -497,15 +585,12 @@ export function calculateValueAdded(
   grossOutputValue: ExactMoney,
   intermediateInputValue: ExactMoney,
 ): ExactMoney {
-  const gross = decimal(grossOutputValue.amount, 'grossOutputValue');
-  const intermediate = decimal(
-    intermediateInputValue.amount,
-    'intermediateInputValue',
-  );
-  if (grossOutputValue.currency !== intermediateInputValue.currency)
+  const gross = money(grossOutputValue, 'grossOutputValue');
+  const intermediate = money(intermediateInputValue, 'intermediateInputValue');
+  if (gross.currency !== intermediate.currency)
     kernelInvalid('Value-added currencies must match');
-  return Object.freeze({
-    amount: render(gross.minus(intermediate)),
-    currency: grossOutputValue.currency,
-  });
+  if (gross.amount.isNegative() || intermediate.amount.isNegative()) {
+    kernelInvalid('Value-added monetary inputs must be non-negative');
+  }
+  return renderMoney(gross.amount.minus(intermediate.amount), gross.currency);
 }
