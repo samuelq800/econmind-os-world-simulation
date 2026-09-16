@@ -358,7 +358,7 @@ async function parentIsPnpm(parentPid) {
       '-o',
       'command=',
     ]);
-    return /(?:^|[/\\])pnpm(?:\.(?:cjs|mjs))?(?:\s|$)|\(pnpm\)/u.test(
+    return /(?:^|[/\\])pnpm(?:-native)?(?:\.(?:cjs|mjs))?(?:\s|$)|\(pnpm\)/u.test(
       stdout.trim(),
     );
   } catch {
