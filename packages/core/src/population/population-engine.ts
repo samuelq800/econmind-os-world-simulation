@@ -480,6 +480,40 @@ function canonicalFact(
 
 type CanonicalPopulationFact = ReturnType<typeof canonicalFact>;
 
+function canonicalBoundPopulationFact(
+  canonicalPayload: string,
+): CanonicalPopulationFact {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(canonicalPayload);
+  } catch {
+    return invalid('Population fact binding payload must be canonical text');
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return invalid('Population fact binding payload must be a supported fact');
+  }
+
+  try {
+    const candidate = parsed as Record<string, unknown>;
+    if (typeof candidate.dayIndex !== 'string') {
+      invalid(
+        'Population fact binding payload must include a canonical dayIndex',
+      );
+    }
+    const fact = canonicalFact(parsed as PopulationFact, {
+      kind: 'E01_DAILY_BOUNDARY',
+      dayIndex: canonicalDayIndex(candidate.dayIndex, 'bound fact dayIndex'),
+    });
+    if (canonicalSerialize(fact) !== canonicalPayload) {
+      invalid('Population fact binding payload must be canonical text');
+    }
+    return fact;
+  } catch (error) {
+    if (error instanceof DomainError) throw error;
+    return invalid('Population fact binding payload must be a supported fact');
+  }
+}
+
 function canonicalState(input: PopulationEngineState): PopulationEngineState {
   const countryIds = new Set<string>();
   const countries = input.countries.map((country) => {
@@ -551,14 +585,11 @@ function canonicalState(input: PopulationEngineState): PopulationEngineState {
     if (typeof binding.canonicalPayload !== 'string') {
       invalid('Population fact binding payload must be canonical text');
     }
-    try {
-      const parsed: unknown = JSON.parse(binding.canonicalPayload);
-      if (canonicalSerialize(parsed) !== binding.canonicalPayload) {
-        invalid('Population fact binding payload must be canonical text');
-      }
-    } catch (error) {
-      if (error instanceof DomainError) throw error;
-      invalid('Population fact binding payload must be canonical text');
+    const fact = canonicalBoundPopulationFact(binding.canonicalPayload);
+    if (fact.factId !== factId) {
+      invalid(
+        'Population fact binding identity must match its canonical payload factId',
+      );
     }
     return Object.freeze({
       factId,
