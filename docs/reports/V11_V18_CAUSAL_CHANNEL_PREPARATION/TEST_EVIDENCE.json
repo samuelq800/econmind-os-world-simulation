@@ -100,5 +100,57 @@
       "commands/events/receipts/outbox/ledger",
       "database/migrations/Supabase/production"
     ]
+  },
+  "review_b_major_remediation": {
+    "status": "PREPARATION_ONLY_NOT_V11_STARTED",
+    "implementation_state": "IMPLEMENTED_UNVERIFIED",
+    "reviewed_candidate": "4bb731532f49c16ecd306cb2a34a436a33f26fbb",
+    "implementation_commit": "d93712cf608bd85a7f458a5d6ab8967f9baa880c",
+    "effective_risk": "P0",
+    "changes": [
+      "C101-C150 use a Core-owned immutable node-system-unit-sign registry; generic exact transmission rejects the range.",
+      "C123 valid registry calculation passes; wrong dimensions and a direct caller-forged generic path reject.",
+      "International settlement accepts only literal ICU; USD and every other currency reject."
+    ],
+    "checks": [
+      {
+        "command": "pnpm --filter @econmind/core build",
+        "exit_code": 0,
+        "result": "PASS"
+      },
+      {
+        "command": "pnpm --filter @econmind/core typecheck",
+        "exit_code": 0,
+        "result": "PASS"
+      },
+      {
+        "command": "pnpm exec vitest run tests/world-core/v11-v18-engine-kernels.test.ts tests/world-core/v11-v18-firm-ecology.test.ts tests/world-core/v11-v18-causal-channels.test.ts",
+        "exit_code": 0,
+        "result": "PASS: 3 files, 26 tests"
+      },
+      {
+        "command": "pnpm exec eslint [targeted Core and test files] && pnpm exec prettier --check [same files]",
+        "exit_code": 0,
+        "result": "PASS"
+      },
+      {
+        "command": "node scripts/check-boundaries.mjs && node scripts/check-authoritative-patterns.mjs && git diff --check",
+        "exit_code": 0,
+        "result": "PASS"
+      }
+    ],
+    "not_run": [
+      "Full suite: deliberately not rerun for this focused pure-Core remediation.",
+      "Database, RLS, migration, replay, concurrency, recovery, Supabase and production checks: no such code exists in scope and none was accessed.",
+      "Economic calibration, FX-rate sourcing, country currency-registry approval and World Core settlement integration: explicitly outside this preparation."
+    ],
+    "prohibited_paths_unchanged": [
+      "status/progress.json",
+      "apps/world-api",
+      "apps/world-web",
+      "apps/world-worker",
+      "commands/events/receipts/outbox/ledger",
+      "database/migrations/Supabase/production"
+    ]
   }
 }
