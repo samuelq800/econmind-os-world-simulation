@@ -3,13 +3,32 @@
   "package": "V09.2 + V09.3",
   "state": "IMPLEMENTED_UNVERIFIED",
   "base": "8da085184bf063b61ba53c10537c6a797018072b",
-  "implementation_candidate_tip": "7318bfbfd1d6945d89d4ea77e7fd9a18d3787f08",
+  "implementation_candidate_tip": "82d9504b37fcbe2a839f9a8454cfacc6ef98dde3",
   "toolchain": {
     "node": "24.20.0",
     "pnpm": "12.3.4",
     "lockfile": "restored unchanged after dependency bootstrap"
   },
   "checks": [
+    {
+      "command": "pnpm check",
+      "worktree": "/private/tmp/econmind-v09-cleancheck-04",
+      "source_commit": "82d9504b37fcbe2a839f9a8454cfacc6ef98dde3",
+      "source_status_before_command": "CLEAN",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": {
+        "passed": 51,
+        "skipped": 2,
+        "total": 53
+      },
+      "tests": {
+        "passed": 581,
+        "skipped": 10,
+        "total": 591
+      },
+      "note": "This closes the fresh-checkout Core-dist/typecheck reproducibility defect."
+    },
     {
       "command": "pnpm check",
       "result": "PASS",
@@ -108,9 +127,25 @@
       ]
     }
   ],
+  "native_postgresql_wiring": {
+    "workflow": ".github/workflows/v09-postgres.yml",
+    "disposable_target": "GitHub Actions PostgreSQL 16 service only",
+    "newly_wired_cases": [
+      "V09.2 native rollback after receipt write",
+      "unknown-acknowledgement retry",
+      "two-connection N-to-N+1 race",
+      "backend termination before commit with rollback verification",
+      "old WorldVersion rejection",
+      "V09.3 recovery/outbox/lease-claim cases",
+      "supplemental checkpoint, replay and corrupt-watermark recovery cases"
+    ],
+    "execution_result_for_this_tip": "NOT_RUN_LOCALLY; await isolated CI result",
+    "local_probe": "docker, psql and pg_isready unavailable; loopback PostgreSQL unavailable"
+  },
   "review_boundary": {
     "implementation_self_assessed_open_p0": 0,
     "implementation_self_assessed_open_major": 0,
+    "source_code_verdict": "PASS_BY_OWNER_DELEGATED_IMPLEMENTATION_ASSESSMENT",
     "independent_p0_major_verdict": "NOT_RUN",
     "gate_b": "NOT_RUN",
     "production_access": false,

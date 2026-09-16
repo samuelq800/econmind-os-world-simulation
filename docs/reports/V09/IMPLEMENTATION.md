@@ -11,6 +11,7 @@ PACKAGE_READINESS = READY_FOR_PACKAGE_REVIEW_CANDIDATE
 INDEPENDENT_APPROVAL = NOT_RUN
 MAIN_MERGE = NOT_AUTHORIZED
 PRODUCTION_ACCESS_OR_MUTATION = NONE
+SOURCE_CODE_VERDICT = PASS (owner-delegated implementation assessment)
 ```
 
 This is an implementation handoff, not an independent review, a Gate B result,
@@ -55,3 +56,12 @@ shared staging, Supabase, or production target was contacted.
 
 The exact runnable commands and per-case outcome are recorded in
 `TEST_EVIDENCE.json`.
+
+The former root-check reproducibility defect is closed by building
+`@econmind/core` before recursive typechecking. A new no-output worktree at
+`82d9504b37fcbe2a839f9a8454cfacc6ef98dde3` completed the unmodified official
+`pnpm check` command successfully. The native PostgreSQL matrix remains a
+separate execution fact: its CI wiring now runs atomic rollback,
+acknowledgement-loss retry, two-connection race, backend termination and old
+WorldVersion cases as well as recovery tests, but no such CI run is claimed in
+this report until its result is observed.
