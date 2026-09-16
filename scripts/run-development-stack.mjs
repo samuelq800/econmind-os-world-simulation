@@ -351,30 +351,16 @@ async function cleanupChildren(children, timeoutMs) {
 
 async function parentIsPnpm(parentPid) {
   if (process.platform === 'win32') return true;
-  async function processRow(pid) {
+  try {
     const { stdout } = await execFileAsync('ps', [
       '-p',
-      String(pid),
+      String(parentPid),
       '-o',
-      'ppid=,command=',
+      'command=',
     ]);
-    const match = stdout.trim().match(/^(\d+)\s+(.*)$/u);
-    if (match === null) return undefined;
-    return { command: match[2], ppid: Number(match[1]) };
-  }
-  function isPnpmCommand(command) {
-    return /(?:^|[/\\])pnpm(?:\.(?:cjs|mjs))?(?:\s|$)|\(pnpm\)/u.test(command);
-  }
-  function isPnpmOwnedShell(command) {
-    return /(?:^|[/\\])(?:sh|bash|dash)(?:\s|$)/u.test(command);
-  }
-  try {
-    const parent = await processRow(parentPid);
-    if (parent === undefined) return false;
-    if (isPnpmCommand(parent.command)) return true;
-    if (!isPnpmOwnedShell(parent.command)) return false;
-    const owner = await processRow(parent.ppid);
-    return owner !== undefined && isPnpmCommand(owner.command);
+    return /(?:^|[/\\])pnpm(?:\.(?:cjs|mjs))?(?:\s|$)|\(pnpm\)/u.test(
+      stdout.trim(),
+    );
   } catch {
     return false;
   }

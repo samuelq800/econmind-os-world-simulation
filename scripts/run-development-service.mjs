@@ -44,33 +44,16 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
 
   if (!originalParentIsPnpm) {
     try {
-      const readProcess = async (pid) => {
-        const { stdout } = await execFileAsync('ps', [
-          '-p',
-          String(pid),
-          '-o',
-          'ppid=,command=',
-        ]);
-        const match = stdout.trim().match(/^(\d+)\s+(.*)$/u);
-        if (match === null) return undefined;
-        return { command: match[2], ppid: Number(match[1]) };
-      };
-      const isPnpmCommand = (command) =>
-        /(?:^|[/\\])pnpm(?:\.(?:cjs|mjs))?(?:\s|$)|\(pnpm\)/u.test(command);
-      const isPnpmOwnedShell = (command) =>
-        /(?:^|[/\\])(?:sh|bash|dash)(?:\s|$)/u.test(command);
-      const parent = await readProcess(originalParentPid);
-      if (parent === undefined) {
-        originalParentIsPnpm = false;
-      } else if (isPnpmCommand(parent.command)) {
-        originalParentIsPnpm = true;
-      } else if (isPnpmOwnedShell(parent.command)) {
-        const owner = await readProcess(parent.ppid);
-        originalParentIsPnpm =
-          owner !== undefined && isPnpmCommand(owner.command);
-      } else {
-        originalParentIsPnpm = false;
-      }
+      const { stdout } = await execFileAsync('ps', [
+        '-p',
+        String(originalParentPid),
+        '-o',
+        'command=',
+      ]);
+      originalParentIsPnpm =
+        /(?:^|[/\\])pnpm(?:\.(?:cjs|mjs))?(?:\s|$)|\(pnpm\)/u.test(
+          stdout.trim(),
+        );
     } catch {
       originalParentIsPnpm = false;
     }

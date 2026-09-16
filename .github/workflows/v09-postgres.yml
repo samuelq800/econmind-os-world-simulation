@@ -67,8 +67,8 @@ jobs:
 
   official-pnpm-check:
     name: Isolated official pnpm check
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    runs-on: macos-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
         with:
