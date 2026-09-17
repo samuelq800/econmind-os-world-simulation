@@ -322,7 +322,7 @@ async function cleanupChildren(children, timeoutMs) {
   const roots = children.map((owned) => owned.child.pid).filter(Boolean);
   const captured = descendantRows(await readProcessTable(), roots);
   for (const owned of children) {
-    if (childAlive(owned)) owned.child.kill('SIGTERM');
+    stopOwnedService(owned, 'SIGTERM');
   }
   const deadline = Date.now() + timeoutMs;
   let live = await liveCapturedRows(captured);
@@ -389,6 +389,7 @@ function spawnServices(environment, onExit) {
   return serviceDefinitions.map((definition) => {
     const child = spawn(pnpmCommand, [definition.command], {
       cwd: repositoryRoot,
+      detached: process.platform !== 'win32',
       env: environment,
       shell: false,
       stdio: 'inherit',
@@ -407,6 +408,12 @@ function spawnServices(environment, onExit) {
     });
     return { child, definition, exit };
   });
+}
+
+function stopOwnedService(owned, signal) {
+  const pid = owned.child.pid;
+  if (!childAlive(owned) || pid === undefined) return;
+  process.kill(process.platform === 'win32' ? pid : -pid, signal);
 }
 
 function sanitizedReason(error) {
