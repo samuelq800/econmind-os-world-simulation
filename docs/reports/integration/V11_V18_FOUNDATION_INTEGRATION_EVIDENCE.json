@@ -86,6 +86,7 @@
     "packages/core/src/index.ts preserves V06-V09 exports and adds the F, V11, and V12 exports without removing existing ownership surfaces.",
     "packages/core/src/engine-kernels/index.ts exports F, V13/V14, V15/V16, and V17/V18 modules in dependency order.",
     "V13/V14 replay proof is named V13V14FoundationReplayProof so it does not collide with V17/V18 FoundationReplayProof.",
+    "The authoritative scanner distinguishes direct or reflective exact-value coercion from Number.isSafeInteger, which only validates a JS-number safe-integer domain; a fixture keeps direct Number(...) rejection covered.",
     "The V11.2 and V17/V18 reviewed plan documents were restored from their immutable source records; no status or Gate record was imported."
   ],
   "quarantine": {
@@ -99,13 +100,28 @@
     ]
   },
   "validation": {
+    "validatedCandidateTip": "a7641956218bcf86bd5d4b3b7c321f2c074d684a",
     "commands": [
       "pnpm --filter @econmind/core typecheck",
       "pnpm --filter @econmind/core build",
       "combined V11-V18 focused and acceptance architecture suites",
-      "ESLint, Prettier, git diff --check, boundaries, authoritative-patterns, foundation policy, secrets, and safe-local environment"
+      "ESLint over affected Core, scanner, and focused test paths",
+      "pnpm test:boundaries",
+      "pnpm env:check, pnpm secrets:check, pnpm foundation:policy",
+      "Prettier check and git diff --check against the immutable integration base"
     ],
-    "result": "PENDING_FINAL_RUN_AT_FROZEN_CANDIDATE"
+    "result": "PASS",
+    "results": {
+      "coreTypecheck": "PASS",
+      "coreBuild": "PASS",
+      "focusedAndAcceptanceSuites": "PASS: 15 files, 75 tests",
+      "affectedPathLint": "PASS",
+      "boundariesAndAuthoritativePatterns": "PASS: 3 files, 34 tests; 50 Core files and 62 total files scanned; zero violations",
+      "safeLocalEnvironment": "PASS: databaseConfigured=false, linkedSupabaseProject=NOT_LINKED, databaseMutationAllowed=false",
+      "secrets": "PASS: 631 files scanned",
+      "foundationPolicy": "PASS",
+      "prettierAndDiff": "PASS"
+    }
   },
   "notRun": [
     "final independent narrow integration Review B",

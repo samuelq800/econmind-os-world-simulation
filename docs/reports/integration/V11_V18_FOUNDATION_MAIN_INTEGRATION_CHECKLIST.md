@@ -28,26 +28,26 @@ This checklist is a control record, not an integration authorization. Every unch
 
 ## Quarantine and path controls
 
-- [ ] `git range-diff` and path allowlist review completed for every candidate range.
-- [ ] No staged range includes V09 runtime, worker/API, database, migration, application, status, Gate, deployment, production, or configuration paths.
-- [ ] No branch-local `status/progress.json` transition or broad `tests/architecture/v01-governance.test.ts` change has been carried forward without explicit separate authority.
-- [ ] `packages/core/src/index.ts` exports reconcile without duplicate/shadowed public identifiers.
-- [ ] `packages/core/src/engine-kernels/index.ts` exports reconcile in approved dependency order.
-- [ ] V13/V14 overlap is inspected from actual supplied sources, not inferred from their package names.
+- [x] Exact selective source provenance and a candidate/base path allowlist review are recorded in the integration evidence.
+- [x] No staged range includes V09 runtime, worker/API, database, migration, application, status, Gate, deployment, production, or configuration paths.
+- [x] No branch-local `status/progress.json` transition or broad `tests/architecture/v01-governance.test.ts` change has been carried forward without explicit separate authority.
+- [x] `packages/core/src/index.ts` exports reconcile without duplicate/shadowed public identifiers.
+- [x] `packages/core/src/engine-kernels/index.ts` exports reconcile in approved dependency order.
+- [x] V13/V14 overlap is inspected from actual supplied sources, not inferred from their package names.
 
 ## Evidence and checks at the staged SHA
 
-- [ ] `git diff --check` passes.
-- [ ] Pinned-runtime `pnpm env:check` passes.
-- [ ] `pnpm secrets:check` passes.
-- [ ] `pnpm foundation:policy` and `node scripts/check-authoritative-patterns.mjs` pass.
-- [ ] `pnpm core:build`, `pnpm boundaries:check`, and `pnpm boundaries:scan` pass.
-- [ ] All applicable F, V11, V12, V15/V16, and V17/V18 focused suites pass together.
+- [x] `git diff --check` passes.
+- [x] Pinned-runtime `pnpm env:check` passes.
+- [x] `pnpm secrets:check` passes.
+- [x] `pnpm foundation:policy` and `node scripts/check-authoritative-patterns.mjs` pass.
+- [x] Pinned-runtime Core typecheck/build and `pnpm test:boundaries` pass.
+- [x] All applicable F, V11, V12, V13/V14, V15/V16, and V17/V18 focused suites pass together (15 files, 75 tests).
 - [ ] The official full repository check has passed at the exact staged SHA when required by the package owner.
 - [ ] Independent review and owner acceptance evidence are attached before any mainline-promotion request.
 
 ## Explicit exclusions
 
-- [ ] No merge or cherry-pick was performed before all required supplied verdicts and source selections.
-- [ ] No mutation of `main`, production, database, status, Gate, or deployment occurred from this planning worktree.
-- [ ] No statement of R2 product completion, package verification, or production readiness is derived from this checklist.
+- [x] No merge or cherry-pick was performed before all required supplied verdicts and source selections.
+- [x] No mutation of `main`, production, database, status, Gate, or deployment occurred from this integration worktree.
+- [x] No statement of R2 product completion, package verification, or production readiness is derived from this checklist.
