@@ -11,8 +11,10 @@ import {
   lockHistoricalFxCashSettlement,
   revalueHistoricalFxCashSettlement,
   type CountryFxRate,
+  type ExternalDebtOperation,
   type FoundationTraceRequest,
   type FxFoundationFact,
+  type FxConversionRequest,
   type FxRoundingDecision,
   type LockedHistoricalFxCashSettlement,
 } from '../../packages/core/src/index.js';
@@ -164,6 +166,27 @@ describe('V20.1 LC/GCU FX foundation', () => {
         rateFacts: [rate, fact(TRACE, 'FACT.RATE.A.DUP', RATE)],
       }),
     ).toThrow('only one authoritative LC/GCU rate');
+
+    const unsafeDirection = fact<FxConversionRequest>(
+      TRACE,
+      'FACT.CONVERSION.UNSAFE.DIRECTION',
+      {
+        ...conversion.payload,
+        direction: 'UNSAFE_DIRECTION' as never,
+        amount: MONEY('not-a-decimal', 'ZZZ'),
+      },
+    );
+    let unsafeConversionOutput: unknown;
+    expect(() => {
+      unsafeConversionOutput = calculateFxConversion({
+        trace: TRACE,
+        rateFact: rate,
+        roundingFact: rounding,
+        conversionFact: unsafeDirection,
+        outputRef: 'OUT.FX.UNSAFE.DIRECTION',
+      });
+    }).toThrow('Conversion direction must be LC_TO_GCU or GCU_TO_LC');
+    expect(unsafeConversionOutput).toBeUndefined();
   });
 
   it('rejects forged or stale lineage, rounding-time and currency mismatches', () => {
@@ -367,6 +390,26 @@ describe('V20.2 private, external-finance and official facts', () => {
     });
     expect(debt.creditor.externalDebtAssets).toEqual(MONEY('60', 'GCU'));
     expect(debt.debtor.externalDebtLiabilities).toEqual(MONEY('60', 'GCU'));
+    const unsafeDirection = fact<ExternalDebtOperation>(
+      TRACE,
+      'FACT.DEBT.UNSAFE.DIRECTION',
+      {
+        ...operation.payload,
+        direction: 'UNSAFE_DIRECTION' as never,
+        amount: MONEY('not-a-decimal', 'ZZZ'),
+      },
+    );
+    let unsafeDebtOutput: unknown;
+    expect(() => {
+      unsafeDebtOutput = calculateExternalDebtOperation({
+        trace: TRACE,
+        creditorFact: creditor,
+        debtorFact: debtor,
+        operationFact: unsafeDirection,
+        outputRef: 'OUT.DEBT.UNSAFE.DIRECTION',
+      });
+    }).toThrow('External debt direction must be DRAW or REPAYMENT');
+    expect(unsafeDebtOutput).toBeUndefined();
     expect(() =>
       calculateExternalDebtOperation({
         trace: TRACE,

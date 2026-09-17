@@ -468,6 +468,18 @@ function normalizedRounding(
   });
 }
 
+function conversionDirection(value: unknown): FxConversionRequest['direction'] {
+  if (value === 'LC_TO_GCU' || value === 'GCU_TO_LC') return value;
+  return kernelInvalid('Conversion direction must be LC_TO_GCU or GCU_TO_LC');
+}
+
+function externalDebtDirection(
+  value: unknown,
+): ExternalDebtOperation['direction'] {
+  if (value === 'DRAW' || value === 'REPAYMENT') return value;
+  return kernelInvalid('External debt direction must be DRAW or REPAYMENT');
+}
+
 function rounded(
   value: WorldDecimalValue,
   decision: FxRoundingDecision,
@@ -592,6 +604,12 @@ function conversionContext(input: {
   readonly convertedAmount: ExactMoney;
   readonly unroundedAmount: string;
 } {
+  const request = foundationFactPayload(
+    input.trace,
+    input.conversionFact,
+    'conversion',
+  );
+  const direction = conversionDirection(request.direction);
   const rate = normalizedRate(
     foundationFactPayload(input.trace, input.rateFact, 'rate'),
     input.trace,
@@ -601,11 +619,6 @@ function conversionContext(input: {
     foundationFactPayload(input.trace, input.roundingFact, 'rounding'),
     input.trace,
     'rounding',
-  );
-  const request = foundationFactPayload(
-    input.trace,
-    input.conversionFact,
-    'conversion',
   );
   stableReference(request.conversionRef, 'conversion.conversionRef');
   stableReference(request.conversionVersion, 'conversion.conversionVersion');
@@ -636,9 +649,9 @@ function conversionContext(input: {
     'conversion.valuationAt',
   );
   const sourceCurrency =
-    request.direction === 'LC_TO_GCU' ? rate.localCurrency : FX_GLOBAL_CURRENCY;
+    direction === 'LC_TO_GCU' ? rate.localCurrency : FX_GLOBAL_CURRENCY;
   const targetCurrency =
-    request.direction === 'LC_TO_GCU' ? FX_GLOBAL_CURRENCY : rate.localCurrency;
+    direction === 'LC_TO_GCU' ? FX_GLOBAL_CURRENCY : rate.localCurrency;
   const sourceAmount = exactMoney(
     request.amount,
     sourceCurrency,
@@ -649,7 +662,7 @@ function conversionContext(input: {
     'rate.globalPerLocalUnit',
   );
   const raw =
-    request.direction === 'LC_TO_GCU'
+    direction === 'LC_TO_GCU'
       ? money(sourceAmount, 'conversion.amount').amount.times(rateValue)
       : money(sourceAmount, 'conversion.amount').amount.dividedBy(rateValue);
   const unroundedAmount = render(assertWorldDecimalResult(raw));
@@ -660,7 +673,7 @@ function conversionContext(input: {
   return Object.freeze({
     rate,
     rounding,
-    request: Object.freeze({ ...request, valuationAt }),
+    request: Object.freeze({ ...request, direction, valuationAt }),
     sourceAmount,
     convertedAmount,
     unroundedAmount,
@@ -1035,6 +1048,12 @@ export function calculateExternalDebtOperation(input: {
   readonly operationFact: FxFoundationFact<ExternalDebtOperation>;
   readonly outputRef: string;
 }): ExternalDebtResult {
+  const operation = foundationFactPayload(
+    input.trace,
+    input.operationFact,
+    'externalDebtOperation',
+  );
+  const direction = externalDebtDirection(operation.direction);
   const creditor = externalDebtPosition(
     foundationFactPayload(input.trace, input.creditorFact, 'creditor'),
     'creditor',
@@ -1042,11 +1061,6 @@ export function calculateExternalDebtOperation(input: {
   const debtor = externalDebtPosition(
     foundationFactPayload(input.trace, input.debtorFact, 'debtor'),
     'debtor',
-  );
-  const operation = foundationFactPayload(
-    input.trace,
-    input.operationFact,
-    'externalDebtOperation',
   );
   const debtRef = stableReference(
     operation.debtRef,
@@ -1109,7 +1123,7 @@ export function calculateExternalDebtOperation(input: {
     );
   }
   const delta =
-    operation.direction === 'DRAW'
+    direction === 'DRAW'
       ? money(amount, 'externalDebtOperation.amount').amount
       : money(amount, 'externalDebtOperation.amount').amount.negated();
   if (
