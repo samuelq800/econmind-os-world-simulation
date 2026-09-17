@@ -1,0 +1,73 @@
+{
+  "schema_version": "WORLD_CORE_V17_V18_FOUNDATION_REVIEWED_NONPRODUCTION-1",
+  "record_type": "FOUNDATION_REVIEW_OWNER_ACCEPTANCE",
+  "name": "WORLD_CORE_V17_V18_FOUNDATION_REVIEWED_NONPRODUCTION",
+  "status": "FOUNDATION_REVIEWED_NONPRODUCTION",
+  "authority": "PROJECT_OWNER_DIRECTION_RELAYED_BY_CONTROL_TOWER_2026_09_17",
+  "decision_record": "docs/reports/V17_V18_HOUSEHOLD_FISCAL_FOUNDATION/FOUNDATION_REVIEW_OWNER_ACCEPTANCE.md",
+  "candidate": {
+    "foundation_baseline": "5356fe93932eb285b3c21977a655e4c6e7bb6746",
+    "core_candidate": "ea3b5b818a485614ad7cb2d3cd6240a59f7da439",
+    "evidence_and_review_tip": "8038bc3f8d129f1d6bfa3877d7353ba96da15ac0",
+    "branch": "codex/c-v17-v18-household-fiscal-foundation"
+  },
+  "independent_review": {
+    "reviewer": "B",
+    "scope": "V17-V18 package-scoped pure Core household and fiscal foundation candidate only",
+    "target": "8038bc3f8d129f1d6bfa3877d7353ba96da15ac0",
+    "open_p0": 0,
+    "open_major": 0,
+    "verdict": "FOUNDATION_REVIEW_CANDIDATE_APPROVED",
+    "limit": "This is not approval of a V17 or V18 product, Gate, hard-dependency path, merge, deployment, or production action."
+  },
+  "recorded_evidence": {
+    "focused_tests": "PASS — tests/world-core/v17-v18-household-fiscal-foundation.test.ts and tests/world-core/v11-v18-engine-kernels.test.ts, 2 files / 17 tests",
+    "attached_checks": [
+      "@econmind/core build: PASS",
+      "@econmind/core typecheck: PASS",
+      "focused ESLint: PASS",
+      "Prettier: PASS",
+      "repository-boundary and authoritative-pattern scans: PASS",
+      "repository-secret and git show --check: PASS"
+    ],
+    "evidence_records": [
+      "docs/exec-plans/V17_V18_HOUSEHOLD_FISCAL_FOUNDATION.md",
+      "docs/reports/V17_V18_HOUSEHOLD_FISCAL_FOUNDATION/IMPLEMENTATION.md",
+      "docs/reports/V17_V18_HOUSEHOLD_FISCAL_FOUNDATION/TEST_EVIDENCE.json"
+    ],
+    "review_remediation": [
+      "Commitment lineage is immutable, predecessor-linked, and rejects caller-owned committed-before balances.",
+      "Settlement, payment, and commitment evidence binds source/version/snapshot/hash/predecessor lineage and a canonical replay preimage.",
+      "Household settlement kinds and Treasury insufficient-cash dispositions are runtime-validated."
+    ]
+  },
+  "final_foundation_integration": {
+    "accepted": true,
+    "scope": "Accepted only as a reviewed non-production input to the separately governed final V11-V18 pure-Core foundation integration.",
+    "conditions": [
+      "A later integration change must preserve the exact source provenance and re-run combined integration checks.",
+      "The V09 quarantine and all Core boundary restrictions remain in force.",
+      "This acceptance does not satisfy, bypass, or reclassify any R2 normal-mode dependency."
+    ]
+  },
+  "hard_dependencies": {
+    "V17.1": ["V11.3", "V13.3", "V15.3", "V16.3"],
+    "V17.2": ["V17.1"],
+    "V17.3": ["V17.2"],
+    "V18.1": ["V05.3", "V08.3", "V14.3", "V17.3"],
+    "V18.2": ["V18.1"],
+    "V18.3": ["V18.2"],
+    "effect": "Unchanged. This policy does not approve, satisfy, bypass, or reclassify any dependency."
+  },
+  "preserved_boundaries": [
+    "V17 and V18 remain FOUNDATION_REVIEWED_NONPRODUCTION, not VERIFIED.",
+    "No V17 or V18 product integration, Gate readiness, lifecycle-state transition, or dependency-path approval is claimed.",
+    "No status/progress or Gate record is changed.",
+    "No database, RLS, migration, API, worker, UI, Command, Event, authoritative state, transaction, production, merge, or deployment action is authorized.",
+    "No financial, treasury, household, price, priority, default, poverty, cost, or macro-policy formula is selected.",
+    "V09.3 remains the owner of durable atomic commit, idempotency, writer coordination, and recovery evidence."
+  ],
+  "main_merge_authorized": false,
+  "production_mutation": false,
+  "verified": false
+}
