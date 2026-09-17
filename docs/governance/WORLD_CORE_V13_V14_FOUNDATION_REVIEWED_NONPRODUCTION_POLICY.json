@@ -1,0 +1,71 @@
+{
+  "schema_version": "WORLD_CORE_V13_V14_FOUNDATION_REVIEWED_NONPRODUCTION-1",
+  "record_type": "FOUNDATION_REVIEW_OWNER_ACCEPTANCE",
+  "name": "WORLD_CORE_V13_V14_FOUNDATION_REVIEWED_NONPRODUCTION",
+  "status": "FOUNDATION_REVIEWED_NONPRODUCTION",
+  "authority": "PROJECT_OWNER_DIRECTION_RELAYED_BY_CONTROL_TOWER_2026_09_17",
+  "decision_record": "docs/reports/V13_V14_FOUNDATION/FOUNDATION_REVIEW_OWNER_ACCEPTANCE.md",
+  "candidate": {
+    "foundation_baseline": "5356fe93932eb285b3c21977a655e4c6e7bb6746",
+    "core_candidate": "653c1cba9681798260954a29e32dee3398054b70",
+    "branch": "codex/v13-v14-foundation-mode"
+  },
+  "independent_review": {
+    "reviewer": "B",
+    "scope": "V13-V14 package-scoped pure Core energy, production, technology, and project foundation candidate only",
+    "target": "653c1cba9681798260954a29e32dee3398054b70",
+    "open_p0": 0,
+    "open_major": 0,
+    "verdict": "FOUNDATION_CANDIDATE_APPROVED_FOR_CONTINUATION",
+    "limit": "This is not approval of a V13 or V14 product, Gate, hard-dependency path, deployment, or production action."
+  },
+  "recorded_evidence": {
+    "focused_tests": "PASS — tests/world-core/v13-v14-foundation.test.ts plus F regression suites, 4 files / 30 tests",
+    "attached_checks": [
+      "@econmind/core typecheck and build: PASS",
+      "focused ESLint: PASS",
+      "Prettier and git diff checks: PASS",
+      "repository-boundary and authoritative-pattern scans: PASS",
+      "foundation policy, safe-local environment, and repository-secret checks: PASS"
+    ],
+    "evidence_records": [
+      "docs/reports/V13_V14_FOUNDATION/IMPLEMENTATION.md",
+      "docs/reports/V13_V14_FOUNDATION/TEST_EVIDENCE.json",
+      "docs/exec-plans/V13.1.md",
+      "docs/exec-plans/V13.2.md",
+      "docs/exec-plans/V13.3.md",
+      "docs/exec-plans/V14.1.md",
+      "docs/exec-plans/V14.2.md",
+      "docs/exec-plans/V14.3.md"
+    ]
+  },
+  "final_foundation_integration": {
+    "accepted": true,
+    "scope": "Accepted only as a reviewed non-production input to the separately governed final V11-V18 pure-Core foundation integration.",
+    "conditions": [
+      "A later integration change must preserve the exact source provenance and re-run combined integration checks.",
+      "The V09 quarantine and all Core boundary restrictions remain in force.",
+      "This acceptance does not satisfy, bypass, or reclassify any R2 normal-mode dependency."
+    ]
+  },
+  "hard_dependencies": {
+    "V13.1": ["V03.3", "V11.3", "V12.3"],
+    "V13.2": ["V13.1"],
+    "V13.3": ["V13.2"],
+    "V14.1": ["V05.3", "V06.3", "V08.3", "V11.3", "V12.3", "V13.3"],
+    "V14.2": ["V14.1"],
+    "V14.3": ["V14.2"],
+    "effect": "Unchanged. This policy does not approve, satisfy, bypass, or reclassify any dependency."
+  },
+  "preserved_boundaries": [
+    "V13 and V14 remain FOUNDATION_REVIEWED_NONPRODUCTION, not VERIFIED.",
+    "No V13 or V14 product integration, Gate readiness, lifecycle-state transition, or dependency-path approval is claimed.",
+    "No status/progress or Gate record is changed.",
+    "No database, RLS, migration, API, worker, UI, Command, Event, authoritative state, transaction, production, merge, or deployment action is authorized.",
+    "No energy dispatch, price, policy rate, default, rounding, technology, project, facility, or macro-policy formula is selected.",
+    "V09.3 remains the owner of durable atomic commit, idempotency, writer coordination, and recovery evidence."
+  ],
+  "main_merge_authorized": false,
+  "production_mutation": false,
+  "verified": false
+}
