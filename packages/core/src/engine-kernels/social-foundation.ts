@@ -4,18 +4,15 @@ import {
   money,
   nonNegative,
   nonNegativeQuantity,
-  ratio,
   render,
   renderMoney,
   renderQuantity,
   unitPrice,
-  unitRate,
   wholeQuantity,
   type ExactMoney,
   type ExactQuantity,
   type ExactRatio,
   type ExactUnitPrice,
-  type ExactUnitRate,
   type WorldDecimalValue,
 } from './common.js';
 
@@ -30,6 +27,34 @@ export type SocialFoundationModule =
 export interface SocialFoundationTraceRequest {
   readonly traceId: string;
   readonly calculationVersion: string;
+  readonly lineageId: string;
+  readonly sourceVersion: string;
+  readonly snapshotId: string;
+  readonly snapshotAt: ExactQuantity;
+}
+
+/** A caller-owned source fact with its exact payload evidence. */
+export interface SocialFoundationFact<T> {
+  readonly factId: string;
+  readonly sourceId: string;
+  readonly predecessorFactIds: readonly string[];
+  readonly lineageId: string;
+  readonly sourceVersion: string;
+  readonly snapshotId: string;
+  readonly observedAt: ExactQuantity;
+  readonly payload: T;
+  readonly canonicalPayload: string;
+}
+
+export interface SocialFoundationFactBinding {
+  readonly factId: string;
+  readonly sourceId: string;
+  readonly predecessorFactIds: readonly string[];
+  readonly lineageId: string;
+  readonly sourceVersion: string;
+  readonly snapshotId: string;
+  readonly observedAt: ExactQuantity;
+  readonly canonicalPayload: string;
 }
 
 export interface SocialFoundationTransition {
@@ -42,9 +67,15 @@ export interface SocialFoundationTransition {
 export interface SocialFoundationReplayTrace {
   readonly traceId: string;
   readonly calculationVersion: string;
+  readonly lineageId: string;
+  readonly sourceVersion: string;
+  readonly snapshotId: string;
+  readonly snapshotAt: ExactQuantity;
   readonly module: SocialFoundationModule;
   readonly inputIds: readonly string[];
   readonly outputIds: readonly string[];
+  readonly inputFacts: readonly SocialFoundationFactBinding[];
+  readonly resultFacts: readonly SocialFoundationFactBinding[];
   readonly transitions: readonly SocialFoundationTransition[];
 }
 
@@ -74,25 +105,143 @@ function distinctIds(
   return Object.freeze(result);
 }
 
+function canonicalPayload(value: unknown): string {
+  if (
+    value === null ||
+    typeof value === 'string' ||
+    typeof value === 'boolean'
+  ) {
+    return JSON.stringify(value);
+  }
+  if (typeof value === 'number' || typeof value === 'undefined') {
+    kernelInvalid('Fact payload must not contain a non-canonical primitive');
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => canonicalPayload(item)).join(',')}]`;
+  }
+  if (typeof value === 'object') {
+    const object = value as Record<string, unknown>;
+    const keys = Object.keys(object).sort();
+    return `{${keys
+      .map((key) => `${JSON.stringify(key)}:${canonicalPayload(object[key])}`)
+      .join(',')}}`;
+  }
+  kernelInvalid('Fact payload must be canonical JSON data');
+}
+
+function traceContext(request: SocialFoundationTraceRequest): {
+  readonly traceId: string;
+  readonly calculationVersion: string;
+  readonly lineageId: string;
+  readonly sourceVersion: string;
+  readonly snapshotId: string;
+  readonly snapshotAt: WorldDecimalValue;
+} {
+  return Object.freeze({
+    traceId: foundationId(request.traceId, 'traceId'),
+    calculationVersion: foundationId(
+      request.calculationVersion,
+      'calculationVersion',
+    ),
+    lineageId: foundationId(request.lineageId, 'lineageId'),
+    sourceVersion: foundationId(request.sourceVersion, 'sourceVersion'),
+    snapshotId: foundationId(request.snapshotId, 'snapshotId'),
+    snapshotAt: time(request.snapshotAt, 'sim_millisecond', 'snapshotAt'),
+  });
+}
+
+function factBinding<T>(
+  request: SocialFoundationTraceRequest,
+  fact: SocialFoundationFact<T>,
+  label: string,
+): SocialFoundationFactBinding {
+  const context = traceContext(request);
+  const factId = foundationId(fact.factId, `${label}.factId`);
+  const sourceId = foundationId(fact.sourceId, `${label}.sourceId`);
+  const predecessors = distinctIds(
+    fact.predecessorFactIds,
+    `${label}.predecessorFactIds`,
+  );
+  if (predecessors.length === 0) {
+    kernelInvalid(`${label}.predecessorFactIds must be explicit`);
+  }
+  if (
+    fact.lineageId !== context.lineageId ||
+    fact.sourceVersion !== context.sourceVersion ||
+    fact.snapshotId !== context.snapshotId
+  ) {
+    kernelInvalid(
+      `${label} has stale or mixed lineage/version/snapshot evidence`,
+    );
+  }
+  const observedAt = time(
+    fact.observedAt,
+    'sim_millisecond',
+    `${label}.observedAt`,
+  );
+  if (!observedAt.equals(context.snapshotAt)) {
+    kernelInvalid(`${label} observedAt must equal the replay snapshot time`);
+  }
+  const payload = canonicalPayload(fact.payload);
+  if (payload !== fact.canonicalPayload) {
+    kernelInvalid(
+      `${label} canonical payload evidence does not match its fact`,
+    );
+  }
+  return Object.freeze({
+    factId,
+    sourceId,
+    predecessorFactIds: predecessors,
+    lineageId: context.lineageId,
+    sourceVersion: context.sourceVersion,
+    snapshotId: context.snapshotId,
+    observedAt: renderQuantity(observedAt, 'sim_millisecond'),
+    canonicalPayload: payload,
+  });
+}
+
+function payloadOf<T>(
+  request: SocialFoundationTraceRequest,
+  fact: SocialFoundationFact<T>,
+  label: string,
+): T {
+  factBinding(request, fact, label);
+  return fact.payload;
+}
+
+/** Creates immutable caller-supplied evidence; calculations verify it again. */
+export function createSocialFoundationFact<T>(input: {
+  readonly trace: SocialFoundationTraceRequest;
+  readonly factId: string;
+  readonly sourceId: string;
+  readonly predecessorFactIds: readonly string[];
+  readonly payload: T;
+}): SocialFoundationFact<T> {
+  const context = traceContext(input.trace);
+  const result: SocialFoundationFact<T> = {
+    factId: foundationId(input.factId, 'factId'),
+    sourceId: foundationId(input.sourceId, 'sourceId'),
+    predecessorFactIds: distinctIds(
+      input.predecessorFactIds,
+      'predecessorFactIds',
+    ),
+    lineageId: context.lineageId,
+    sourceVersion: context.sourceVersion,
+    snapshotId: context.snapshotId,
+    observedAt: renderQuantity(context.snapshotAt, 'sim_millisecond'),
+    payload: input.payload,
+    canonicalPayload: canonicalPayload(input.payload),
+  };
+  factBinding(input.trace, result, 'created fact');
+  return Object.freeze(result);
+}
+
 function whole(
   value: ExactQuantity,
   expectedUnit: string,
   label: string,
 ): WorldDecimalValue {
   return wholeQuantity(value, expectedUnit, label).amount;
-}
-
-function wholeResult(
-  value: WorldDecimalValue,
-  expectedUnit: string,
-  label: string,
-): WorldDecimalValue {
-  if (value.isNegative() || !value.isInteger()) {
-    kernelInvalid(
-      `${label} must resolve to a whole non-negative ${expectedUnit}`,
-    );
-  }
-  return value;
 }
 
 function time(
@@ -131,21 +280,76 @@ function transition(
 function replayTrace(
   module: SocialFoundationModule,
   request: SocialFoundationTraceRequest,
-  inputIds: readonly string[],
-  outputIds: readonly string[],
+  inputFacts: readonly SocialFoundationFact<unknown>[],
+  resultPayloads: readonly {
+    readonly factId: string;
+    readonly payload: unknown;
+  }[],
   transitions: readonly SocialFoundationTransition[],
 ): SocialFoundationReplayTrace {
+  const context = traceContext(request);
+  const inputBindings = inputFacts.map((fact, index) =>
+    factBinding(request, fact, `inputFacts[${index}]`),
+  );
+  const inputIds = distinctIds(
+    inputBindings.map((fact) => fact.factId),
+    'Trace inputIds',
+  );
+  const resultFacts = resultPayloads.map(({ factId, payload }) =>
+    Object.freeze({
+      factId: foundationId(factId, 'result factId'),
+      sourceId: context.traceId,
+      predecessorFactIds: inputIds,
+      lineageId: context.lineageId,
+      sourceVersion: context.sourceVersion,
+      snapshotId: context.snapshotId,
+      observedAt: renderQuantity(context.snapshotAt, 'sim_millisecond'),
+      canonicalPayload: canonicalPayload(payload),
+    }),
+  );
+  const outputIds = distinctIds(
+    resultFacts.map((fact) => fact.factId),
+    'Trace outputIds',
+  );
   return Object.freeze({
-    traceId: foundationId(request.traceId, 'traceId'),
-    calculationVersion: foundationId(
-      request.calculationVersion,
-      'calculationVersion',
-    ),
+    traceId: context.traceId,
+    calculationVersion: context.calculationVersion,
+    lineageId: context.lineageId,
+    sourceVersion: context.sourceVersion,
+    snapshotId: context.snapshotId,
+    snapshotAt: renderQuantity(context.snapshotAt, 'sim_millisecond'),
     module,
-    inputIds: distinctIds(inputIds, 'Trace inputIds'),
-    outputIds: distinctIds(outputIds, 'Trace outputIds'),
+    inputIds,
+    outputIds,
+    inputFacts: Object.freeze(inputBindings),
+    resultFacts: Object.freeze(resultFacts),
     transitions: Object.freeze([...transitions]),
   });
+}
+
+/** Rejects any forged, stale, mixed-lineage, or payload-divergent replay input. */
+export function assertSocialFoundationReplayEvidence(
+  trace: SocialFoundationReplayTrace,
+  inputFacts: readonly SocialFoundationFact<unknown>[],
+): void {
+  const request: SocialFoundationTraceRequest = {
+    traceId: trace.traceId,
+    calculationVersion: trace.calculationVersion,
+    lineageId: trace.lineageId,
+    sourceVersion: trace.sourceVersion,
+    snapshotId: trace.snapshotId,
+    snapshotAt: trace.snapshotAt,
+  };
+  const replayed = inputFacts.map((fact, index) =>
+    factBinding(request, fact, `replay inputFacts[${index}]`),
+  );
+  if (
+    canonicalPayload(replayed) !== canonicalPayload(trace.inputFacts) ||
+    canonicalPayload(trace.outputIds) !==
+      canonicalPayload(trace.resultFacts.map((fact) => fact.factId))
+  ) {
+    kernelInvalid('Replay evidence does not exactly equal the recorded trace');
+  }
 }
 
 export type EducationLevel = 'BASIC' | 'VOCATIONAL' | 'HIGHER';
@@ -155,21 +359,22 @@ export interface EducationFoundationInput {
   readonly trace: SocialFoundationTraceRequest;
   readonly outcomeId: string;
   readonly nextCohortId: string;
-  readonly enrollmentRequestId: string;
-  readonly applicantPool: {
+  readonly applicantPool: SocialFoundationFact<{
     readonly applicantPoolId: string;
     readonly applicants: ExactQuantity;
-  };
-  readonly capacity: {
+  }>;
+  readonly capacity: SocialFoundationFact<{
     readonly teacherWorkforceId: string;
     readonly teachers: ExactQuantity;
     readonly facilityId: string;
     readonly seats: ExactQuantity;
     readonly budgetCapacityId: string;
     readonly budgetSupportedSeats: ExactQuantity;
-    readonly studentsPerTeacher: ExactUnitRate;
-  };
-  readonly cohort: {
+    /** Caller-selected, policy-owned capacity fact; never derived in Core. */
+    readonly teacherSupportedSeats: ExactQuantity;
+    readonly availableEnrollmentCapacity: ExactQuantity;
+  }>;
+  readonly cohort: SocialFoundationFact<{
     readonly cohortId: string;
     readonly trainingProgrammeId: string;
     readonly level: EducationLevel;
@@ -178,18 +383,18 @@ export interface EducationFoundationInput {
     readonly cumulativeGraduates: ExactQuantity;
     readonly elapsedDuration: ExactQuantity;
     readonly requiredDuration: ExactQuantity;
-  };
-  readonly newEnrollment: ExactQuantity;
-  readonly graduation: {
-    readonly dropoutRate: ExactRatio;
-    readonly completionRate: ExactRatio;
-  };
-  readonly skillTarget: {
+  }>;
+  /** Caller-selected, policy-owned admissions/graduation outcome fact. */
+  readonly outcome: SocialFoundationFact<{
+    readonly admitted: ExactQuantity;
+    readonly graduates: ExactQuantity;
+  }>;
+  readonly skillTarget: SocialFoundationFact<{
     readonly handoffId: string;
     readonly labourSkillStockId: string;
     readonly skill: EducationSkill;
     readonly before: ExactQuantity;
-  } | null;
+  }> | null;
 }
 
 export interface EducationSkillHandoff {
@@ -228,27 +433,33 @@ export interface EducationFoundationResult {
  * formula or taking ownership of the labour ledger.
  */
 export function assertSocialFoundationPersonnelAllocation(input: {
-  readonly allocations: readonly {
+  readonly trace: SocialFoundationTraceRequest;
+  readonly allocations: readonly SocialFoundationFact<{
     readonly personPoolId: string;
     readonly availablePeople: ExactQuantity;
     readonly assignedPeople: ExactQuantity;
-  }[];
+  }>[];
 }): void {
   if (input.allocations.length === 0) {
     kernelInvalid('Personnel allocation requires at least one person pool');
   }
   const personPoolIds = distinctIds(
-    input.allocations.map((allocation) => allocation.personPoolId),
+    input.allocations.map(
+      (allocation, index) =>
+        payloadOf(input.trace, allocation, `allocations[${index}]`)
+          .personPoolId,
+    ),
     'Personnel allocation personPoolIds',
   );
   for (const [index, allocation] of input.allocations.entries()) {
+    const payload = payloadOf(input.trace, allocation, `allocations[${index}]`);
     const available = whole(
-      allocation.availablePeople,
+      payload.availablePeople,
       'person',
       `allocations[${index}].availablePeople`,
     );
     const assigned = whole(
-      allocation.assignedPeople,
+      payload.assignedPeople,
       'person',
       `allocations[${index}].assignedPeople`,
     );
@@ -263,43 +474,58 @@ export function assertSocialFoundationPersonnelAllocation(input: {
 export function calculateEducationFoundation(
   input: EducationFoundationInput,
 ): EducationFoundationResult {
-  const applicants = whole(
-    input.applicantPool.applicants,
-    'person',
-    'applicants',
+  const applicantPool = payloadOf(
+    input.trace,
+    input.applicantPool,
+    'applicantPool',
   );
-  const teachers = whole(input.capacity.teachers, 'person', 'teachers');
-  const seats = whole(input.capacity.seats, 'person', 'seats');
+  const capacity = payloadOf(input.trace, input.capacity, 'capacity');
+  const cohort = payloadOf(input.trace, input.cohort, 'cohort');
+  const outcome = payloadOf(input.trace, input.outcome, 'outcome');
+  const skillTarget =
+    input.skillTarget === null
+      ? null
+      : payloadOf(input.trace, input.skillTarget, 'skillTarget');
+  const applicants = whole(applicantPool.applicants, 'person', 'applicants');
+  const teachers = whole(capacity.teachers, 'person', 'teachers');
+  const seats = whole(capacity.seats, 'person', 'seats');
   const budgetSeats = whole(
-    input.capacity.budgetSupportedSeats,
+    capacity.budgetSupportedSeats,
     'person',
     'budgetSupportedSeats',
   );
-  const studentsPerTeacher = unitRate(
-    input.capacity.studentsPerTeacher,
-    'person',
-    'person',
-    'studentsPerTeacher',
-  );
-  const teacherSeats = wholeResult(
-    teachers.times(studentsPerTeacher),
+  const teacherSeats = whole(
+    capacity.teacherSupportedSeats,
     'person',
     'teacherSupportedSeats',
   );
-  const actualSeats = minimum(
-    [seats, teacherSeats, budgetSeats],
-    'education actual seats',
+  const actualSeats = whole(
+    capacity.availableEnrollmentCapacity,
+    'person',
+    'availableEnrollmentCapacity',
   );
-  const enrolled = whole(input.cohort.enrolled, 'person', 'cohort.enrolled');
+  if (
+    actualSeats.greaterThan(seats) ||
+    actualSeats.greaterThan(teacherSeats) ||
+    actualSeats.greaterThan(budgetSeats)
+  ) {
+    kernelInvalid(
+      'Enrollment capacity fact cannot exceed its stated real constraints',
+    );
+  }
+  if ((teachers.isZero() || seats.isZero()) && !actualSeats.isZero()) {
+    kernelInvalid('No teacher or seat cannot claim enrollment capacity');
+  }
+  const enrolled = whole(cohort.enrolled, 'person', 'cohort.enrolled');
   if (enrolled.greaterThan(actualSeats)) {
     kernelInvalid(
       'Cohort enrollment cannot exceed actual teacher and seat capacity',
     );
   }
   const requestedEnrollment = whole(
-    input.newEnrollment,
+    outcome.admitted,
     'person',
-    'newEnrollment',
+    'outcome.admitted',
   );
   const availableSlots = actualSeats.minus(enrolled);
   if (
@@ -311,129 +537,90 @@ export function calculateEducationFoundation(
     );
   }
   const elapsedDuration = time(
-    input.cohort.elapsedDuration,
+    cohort.elapsedDuration,
     'sim_day',
     'cohort.elapsedDuration',
   );
   const requiredDuration = time(
-    input.cohort.requiredDuration,
+    cohort.requiredDuration,
     'sim_day',
     'cohort.requiredDuration',
   );
   if (requiredDuration.isZero())
     kernelInvalid('cohort.requiredDuration must be positive');
-  const dropoutRate = ratio(input.graduation.dropoutRate, 'dropoutRate');
-  const completionRate = ratio(
-    input.graduation.completionRate,
-    'completionRate',
-  );
-  if (!['BASIC', 'VOCATIONAL', 'HIGHER'].includes(input.cohort.level)) {
+  if (!['BASIC', 'VOCATIONAL', 'HIGHER'].includes(cohort.level)) {
     kernelInvalid('cohort.level must be BASIC, VOCATIONAL, or HIGHER');
   }
-  const graduates = elapsedDuration.greaterThanOrEqualTo(requiredDuration)
-    ? wholeResult(
-        enrolled
-          .times(nonNegative('1', 'one').minus(dropoutRate))
-          .times(completionRate),
-        'person',
-        'graduates',
-      )
-    : nonNegative('0', 'zero graduates');
+  const graduates = whole(outcome.graduates, 'person', 'outcome.graduates');
+  if (graduates.greaterThan(enrolled)) {
+    kernelInvalid('Graduation outcome cannot exceed enrolled people');
+  }
+  if (elapsedDuration.lessThan(requiredDuration) && !graduates.isZero()) {
+    kernelInvalid(
+      'Graduation outcome requires the explicit programme duration',
+    );
+  }
   const cumulativeGraduates = whole(
-    input.cohort.cumulativeGraduates,
+    cohort.cumulativeGraduates,
     'person',
     'cohort.cumulativeGraduates',
   );
   const nextEnrolled = enrolled.minus(graduates).plus(requestedEnrollment);
   const nextCumulativeGraduates = cumulativeGraduates.plus(graduates);
 
-  if (input.cohort.level === 'BASIC') {
-    if (input.cohort.specialisationId !== null || input.skillTarget !== null) {
+  if (cohort.level === 'BASIC') {
+    if (cohort.specialisationId !== null || skillTarget !== null) {
       kernelInvalid(
         'Basic education cannot claim a vocational or higher skill handoff',
       );
     }
   } else {
-    if (input.cohort.specialisationId === null) {
+    if (cohort.specialisationId === null) {
       kernelInvalid(
         'Vocational and higher cohorts require an explicit specialisation',
       );
     }
-    foundationId(input.cohort.specialisationId, 'cohort.specialisationId');
+    foundationId(cohort.specialisationId, 'cohort.specialisationId');
   }
 
   let skillHandoff: EducationSkillHandoff | null = null;
   if (graduates.isZero()) {
-    if (input.skillTarget !== null) {
+    if (skillTarget !== null) {
       kernelInvalid('A skill handoff requires actual graduates');
     }
   } else {
-    if (input.skillTarget === null) {
+    if (skillTarget === null) {
       kernelInvalid(
         'Vocational and higher graduates require an explicit skill handoff',
       );
     }
-    const expectedSkill =
-      input.cohort.level === 'VOCATIONAL' ? 'MEDIUM' : 'HIGH';
-    if (input.skillTarget.skill !== expectedSkill) {
+    const expectedSkill = cohort.level === 'VOCATIONAL' ? 'MEDIUM' : 'HIGH';
+    if (skillTarget.skill !== expectedSkill) {
       kernelInvalid('Skill handoff must match the completed programme level');
     }
-    const before = whole(
-      input.skillTarget.before,
-      'person',
-      'skillTarget.before',
-    );
+    const before = whole(skillTarget.before, 'person', 'skillTarget.before');
     skillHandoff = Object.freeze({
-      handoffId: foundationId(
-        input.skillTarget.handoffId,
-        'skillTarget.handoffId',
-      ),
+      handoffId: foundationId(skillTarget.handoffId, 'skillTarget.handoffId'),
       trainingProgrammeId: foundationId(
-        input.cohort.trainingProgrammeId,
+        cohort.trainingProgrammeId,
         'cohort.trainingProgrammeId',
       ),
-      cohortId: foundationId(input.cohort.cohortId, 'cohort.cohortId'),
+      cohortId: foundationId(cohort.cohortId, 'cohort.cohortId'),
       targetSkillStockId: foundationId(
-        input.skillTarget.labourSkillStockId,
+        skillTarget.labourSkillStockId,
         'skillTarget.labourSkillStockId',
       ),
-      skill: input.skillTarget.skill,
+      skill: skillTarget.skill,
       graduatesTransferred: renderQuantity(graduates, 'person'),
       before: renderQuantity(before, 'person'),
       after: renderQuantity(before.plus(graduates), 'person'),
     });
   }
 
-  const inputIds = [
-    input.enrollmentRequestId,
-    input.applicantPool.applicantPoolId,
-    input.capacity.teacherWorkforceId,
-    input.capacity.facilityId,
-    input.capacity.budgetCapacityId,
-    input.cohort.cohortId,
-    input.cohort.trainingProgrammeId,
-    ...(input.cohort.specialisationId === null
-      ? []
-      : [input.cohort.specialisationId]),
-    ...(input.skillTarget === null
-      ? []
-      : [input.skillTarget.labourSkillStockId]),
-  ];
-  const outputIds = [
-    input.outcomeId,
-    input.nextCohortId,
-    ...(skillHandoff === null ? [] : [skillHandoff.handoffId]),
-  ];
   const transitions: SocialFoundationTransition[] = [
+    transition(cohort.cohortId, 'enrollment', enrolled, nextEnrolled, 'person'),
     transition(
-      input.cohort.cohortId,
-      'enrollment',
-      enrolled,
-      nextEnrolled,
-      'person',
-    ),
-    transition(
-      input.cohort.cohortId,
+      cohort.cohortId,
       'cumulative_graduates',
       cumulativeGraduates,
       nextCumulativeGraduates,
@@ -469,8 +656,35 @@ export function calculateEducationFoundation(
     trace: replayTrace(
       'E04_EDUCATION',
       input.trace,
-      inputIds,
-      outputIds,
+      [
+        input.applicantPool,
+        input.capacity,
+        input.cohort,
+        input.outcome,
+        ...(input.skillTarget === null ? [] : [input.skillTarget]),
+      ],
+      [
+        {
+          factId: input.outcomeId,
+          payload: {
+            admitted: renderQuantity(requestedEnrollment, 'person'),
+            graduates: renderQuantity(graduates, 'person'),
+          },
+        },
+        {
+          factId: input.nextCohortId,
+          payload: {
+            enrolled: renderQuantity(nextEnrolled, 'person'),
+            cumulativeGraduates: renderQuantity(
+              nextCumulativeGraduates,
+              'person',
+            ),
+          },
+        },
+        ...(skillHandoff === null
+          ? []
+          : [{ factId: skillHandoff.handoffId, payload: skillHandoff }]),
+      ],
       transitions,
     ),
   });
@@ -480,37 +694,36 @@ export interface HealthcareFoundationInput {
   readonly trace: SocialFoundationTraceRequest;
   readonly outcomeId: string;
   readonly deliveredCareId: string;
-  readonly serviceRequestId: string;
-  readonly backlog: {
+  readonly backlog: SocialFoundationFact<{
     readonly backlogStateId: string;
     readonly priorBacklog: ExactQuantity;
-  };
-  readonly demand: {
+  }>;
+  readonly demand: SocialFoundationFact<{
     readonly demandId: string;
     readonly newDemand: ExactQuantity;
-  };
-  readonly staff: {
+  }>;
+  readonly staff: SocialFoundationFact<{
     readonly workforceId: string;
     readonly staffedPeople: ExactQuantity;
     readonly careCapacity: ExactQuantity;
-  };
-  readonly facility: {
+  }>;
+  readonly facility: SocialFoundationFact<{
     readonly facilityId: string;
     readonly careCapacity: ExactQuantity;
     readonly bedStateId: string;
     readonly totalBeds: ExactQuantity;
     readonly occupiedBeds: ExactQuantity;
-  };
-  readonly medicalSupply: {
+  }>;
+  readonly medicalSupply: SocialFoundationFact<{
     readonly inventoryId: string;
     readonly availableMedicalDoses: ExactQuantity;
     readonly careCapacity: ExactQuantity;
-  };
-  readonly budget: {
+  }>;
+  readonly budget: SocialFoundationFact<{
     readonly budgetId: string;
     readonly observedOperatingBudget: ExactMoney;
     readonly careCapacity: ExactQuantity;
-  };
+  }>;
 }
 
 export interface HealthcareFoundationResult {
@@ -533,31 +746,41 @@ export interface HealthcareFoundationResult {
 export function calculateHealthcareFoundation(
   input: HealthcareFoundationInput,
 ): HealthcareFoundationResult {
-  const backlog = whole(input.backlog.priorBacklog, 'case', 'priorBacklog');
-  const newDemand = whole(input.demand.newDemand, 'case', 'newDemand');
-  const staff = whole(input.staff.staffedPeople, 'person', 'staffedPeople');
+  const backlogFact = payloadOf(input.trace, input.backlog, 'backlog');
+  const demand = payloadOf(input.trace, input.demand, 'demand');
+  const staffFact = payloadOf(input.trace, input.staff, 'staff');
+  const facility = payloadOf(input.trace, input.facility, 'facility');
+  const medicalSupply = payloadOf(
+    input.trace,
+    input.medicalSupply,
+    'medicalSupply',
+  );
+  const budget = payloadOf(input.trace, input.budget, 'budget');
+  const backlog = whole(backlogFact.priorBacklog, 'case', 'priorBacklog');
+  const newDemand = whole(demand.newDemand, 'case', 'newDemand');
+  const staff = whole(staffFact.staffedPeople, 'person', 'staffedPeople');
   const staffCapacity = whole(
-    input.staff.careCapacity,
+    staffFact.careCapacity,
     'case',
     'staff.careCapacity',
   );
   const facilityCapacity = whole(
-    input.facility.careCapacity,
+    facility.careCapacity,
     'case',
     'facility.careCapacity',
   );
   const doses = whole(
-    input.medicalSupply.availableMedicalDoses,
+    medicalSupply.availableMedicalDoses,
     'medical_dose',
     'availableMedicalDoses',
   );
   const supplyCapacity = whole(
-    input.medicalSupply.careCapacity,
+    medicalSupply.careCapacity,
     'case',
     'medicalSupply.careCapacity',
   );
   const budgetCapacity = whole(
-    input.budget.careCapacity,
+    budget.careCapacity,
     'case',
     'budget.careCapacity',
   );
@@ -567,12 +790,8 @@ export function calculateHealthcareFoundation(
   if (doses.isZero() && !supplyCapacity.isZero()) {
     kernelInvalid('No medical doses cannot claim care capacity');
   }
-  const totalBeds = whole(input.facility.totalBeds, 'bed', 'totalBeds');
-  const occupiedBeds = whole(
-    input.facility.occupiedBeds,
-    'bed',
-    'occupiedBeds',
-  );
+  const totalBeds = whole(facility.totalBeds, 'bed', 'totalBeds');
+  const occupiedBeds = whole(facility.occupiedBeds, 'bed', 'occupiedBeds');
   if (occupiedBeds.greaterThan(totalBeds)) {
     kernelInvalid('Occupied beds cannot exceed total beds');
   }
@@ -589,7 +808,7 @@ export function calculateHealthcareFoundation(
   );
   const nextBacklog = totalNeed.minus(delivered);
   const observedOperatingBudget = nonNegativeMoney(
-    input.budget.observedOperatingBudget,
+    budget.observedOperatingBudget,
     'observedOperatingBudget',
   );
   return Object.freeze({
@@ -604,8 +823,8 @@ export function calculateHealthcareFoundation(
           unit: 'ratio',
         }),
     facilityProcurementInterface: Object.freeze({
-      facilityId: foundationId(input.facility.facilityId, 'facilityId'),
-      inventoryId: foundationId(input.medicalSupply.inventoryId, 'inventoryId'),
+      facilityId: foundationId(facility.facilityId, 'facilityId'),
+      inventoryId: foundationId(medicalSupply.inventoryId, 'inventoryId'),
       unmetCare: renderQuantity(nextBacklog, 'case'),
     }),
     directHealthEffect: null,
@@ -614,19 +833,29 @@ export function calculateHealthcareFoundation(
       'E05_HEALTHCARE',
       input.trace,
       [
-        input.serviceRequestId,
-        input.backlog.backlogStateId,
-        input.demand.demandId,
-        input.staff.workforceId,
-        input.facility.facilityId,
-        input.facility.bedStateId,
-        input.medicalSupply.inventoryId,
-        input.budget.budgetId,
+        input.backlog,
+        input.demand,
+        input.staff,
+        input.facility,
+        input.medicalSupply,
+        input.budget,
       ],
-      [input.outcomeId, input.deliveredCareId],
+      [
+        {
+          factId: input.outcomeId,
+          payload: {
+            deliveredCare: renderQuantity(delivered, 'case'),
+            nextBacklog: renderQuantity(nextBacklog, 'case'),
+          },
+        },
+        {
+          factId: input.deliveredCareId,
+          payload: renderQuantity(delivered, 'case'),
+        },
+      ],
       [
         transition(
-          input.backlog.backlogStateId,
+          backlogFact.backlogStateId,
           'care_backlog',
           backlog,
           nextBacklog,
@@ -650,37 +879,37 @@ export interface HousingFoundationInput {
   readonly trace: SocialFoundationTraceRequest;
   readonly outcomeId: string;
   readonly nextHousingStockId: string;
-  readonly stock: {
+  readonly stock: SocialFoundationFact<{
     readonly housingStockId: string;
     readonly totalUnits: ExactQuantity;
     readonly habitableUnits: ExactQuantity;
     readonly occupiedUnits: ExactQuantity;
-  };
-  readonly demand: {
+  }>;
+  readonly demand: SocialFoundationFact<{
     readonly householdDemandId: string;
     readonly householdDemand: ExactQuantity;
     readonly temporaryProjectDemandId: string;
     readonly temporaryProjectDemand: ExactQuantity;
     readonly migrationDemandId: string;
     readonly migrationDemand: ExactQuantity;
-  };
-  readonly rent: {
+  }>;
+  readonly rent: SocialFoundationFact<{
     readonly rentStateId: string;
     readonly observedRent: ExactUnitPrice;
     readonly rentRuleVersion: string;
-  };
-  readonly subsidy: {
+  }>;
+  readonly subsidy: SocialFoundationFact<{
     readonly subsidyId: string;
     readonly programmeId: string;
     readonly amount: ExactMoney;
-  };
-  readonly commission: {
+  }>;
+  readonly commission: SocialFoundationFact<{
     readonly commissionId: string;
     readonly projectId: string;
     readonly status: HousingCommissionStatus;
     readonly commissionedAt: ExactQuantity;
     readonly newHabitableUnits: ExactQuantity;
-  };
+  }>;
 }
 
 export interface HousingFoundationResult {
@@ -704,18 +933,19 @@ export interface HousingFoundationResult {
 export function calculateHousingFoundation(
   input: HousingFoundationInput,
 ): HousingFoundationResult {
-  const totalUnits = whole(
-    input.stock.totalUnits,
-    'housing_unit',
-    'totalUnits',
-  );
+  const stock = payloadOf(input.trace, input.stock, 'stock');
+  const demand = payloadOf(input.trace, input.demand, 'demand');
+  const rentFact = payloadOf(input.trace, input.rent, 'rent');
+  const subsidy = payloadOf(input.trace, input.subsidy, 'subsidy');
+  const commission = payloadOf(input.trace, input.commission, 'commission');
+  const totalUnits = whole(stock.totalUnits, 'housing_unit', 'totalUnits');
   const habitableUnits = whole(
-    input.stock.habitableUnits,
+    stock.habitableUnits,
     'housing_unit',
     'habitableUnits',
   );
   const occupiedUnits = whole(
-    input.stock.occupiedUnits,
+    stock.occupiedUnits,
     'housing_unit',
     'occupiedUnits',
   );
@@ -726,42 +956,39 @@ export function calculateHousingFoundation(
     kernelInvalid('Housing stock must satisfy occupied <= habitable <= total');
   }
   const householdDemand = whole(
-    input.demand.householdDemand,
+    demand.householdDemand,
     'housing_unit',
     'householdDemand',
   );
   const projectDemand = whole(
-    input.demand.temporaryProjectDemand,
+    demand.temporaryProjectDemand,
     'housing_unit',
     'temporaryProjectDemand',
   );
   const migrationDemand = whole(
-    input.demand.migrationDemand,
+    demand.migrationDemand,
     'housing_unit',
     'migrationDemand',
   );
   const commissionedAt = time(
-    input.commission.commissionedAt,
+    commission.commissionedAt,
     'sim_day',
     'commissionedAt',
   );
   const commissionedUnits = whole(
-    input.commission.newHabitableUnits,
+    commission.newHabitableUnits,
     'housing_unit',
     'newHabitableUnits',
   );
-  if (!['NOT_COMMISSIONED', 'COMMISSIONED'].includes(input.commission.status)) {
+  if (!['NOT_COMMISSIONED', 'COMMISSIONED'].includes(commission.status)) {
     kernelInvalid('commission.status must be NOT_COMMISSIONED or COMMISSIONED');
   }
-  if (
-    input.commission.status === 'NOT_COMMISSIONED' &&
-    !commissionedUnits.isZero()
-  ) {
+  if (commission.status === 'NOT_COMMISSIONED' && !commissionedUnits.isZero()) {
     kernelInvalid(
       'Only an explicit completed commission can add housing units',
     );
   }
-  if (input.commission.status === 'COMMISSIONED' && commissionedAt.isZero()) {
+  if (commission.status === 'COMMISSIONED' && commissionedAt.isZero()) {
     kernelInvalid(
       'A completed commission requires an explicit positive completion time',
     );
@@ -773,20 +1000,13 @@ export function calculateHousingFoundation(
   const gap = totalDemand.greaterThan(nextHabitableUnits)
     ? totalDemand.minus(nextHabitableUnits)
     : nonNegative('0', 'zero housing gap');
-  const rent = unitPrice(
-    input.rent.observedRent,
-    'housing_unit',
-    'observedRent',
-  );
+  const rent = unitPrice(rentFact.observedRent, 'housing_unit', 'observedRent');
   const observedRent: ExactUnitPrice = Object.freeze({
     amount: render(rent.amount),
     currency: rent.currency,
     perUnit: rent.perUnit,
   });
-  const observedSubsidy = nonNegativeMoney(
-    input.subsidy.amount,
-    'subsidy.amount',
-  );
+  const observedSubsidy = nonNegativeMoney(subsidy.amount, 'subsidy.amount');
   return Object.freeze({
     outcomeId: foundationId(input.outcomeId, 'outcomeId'),
     nextHousingStockId: foundationId(
@@ -816,29 +1036,36 @@ export function calculateHousingFoundation(
     trace: replayTrace(
       'E06_HOUSING',
       input.trace,
+      [input.stock, input.demand, input.rent, input.subsidy, input.commission],
       [
-        input.stock.housingStockId,
-        input.demand.householdDemandId,
-        input.demand.temporaryProjectDemandId,
-        input.demand.migrationDemandId,
-        input.rent.rentStateId,
-        input.rent.rentRuleVersion,
-        input.subsidy.subsidyId,
-        input.subsidy.programmeId,
-        input.commission.commissionId,
-        input.commission.projectId,
+        {
+          factId: input.outcomeId,
+          payload: {
+            totalDemand: renderQuantity(totalDemand, 'housing_unit'),
+            housingGap: renderQuantity(gap, 'housing_unit'),
+            observedRent,
+            observedSubsidy,
+          },
+        },
+        {
+          factId: input.nextHousingStockId,
+          payload: {
+            totalUnits: renderQuantity(nextTotalUnits, 'housing_unit'),
+            habitableUnits: renderQuantity(nextHabitableUnits, 'housing_unit'),
+            occupiedUnits: renderQuantity(occupiedUnits, 'housing_unit'),
+          },
+        },
       ],
-      [input.outcomeId, input.nextHousingStockId],
       [
         transition(
-          input.stock.housingStockId,
+          stock.housingStockId,
           'total_units',
           totalUnits,
           nextTotalUnits,
           'housing_unit',
         ),
         transition(
-          input.stock.housingStockId,
+          stock.housingStockId,
           'habitable_units',
           habitableUnits,
           nextHabitableUnits,
@@ -853,43 +1080,45 @@ export interface SafetyFoundationInput {
   readonly trace: SocialFoundationTraceRequest;
   readonly outcomeId: string;
   readonly deploymentOutcomeId: string;
-  readonly population: {
+  readonly population: SocialFoundationFact<{
     readonly populationStateId: string;
     readonly population: ExactQuantity;
-  };
-  readonly workforce: {
+  }>;
+  readonly workforce: SocialFoundationFact<{
     readonly workforceId: string;
     readonly employedPeople: ExactQuantity;
     readonly alreadyDeployedPeople: ExactQuantity;
     readonly unavailablePeople: ExactQuantity;
-  };
-  readonly incidents: {
+  }>;
+  readonly incidents: SocialFoundationFact<{
     readonly incidentRegisterId: string;
     readonly recordedIncidents: ExactQuantity;
-  };
-  readonly backlog: {
+    /** Caller-observed rate; this Core module never selects a scaling formula. */
+    readonly observedIncidentRatePer100000People: ExactQuantity | null;
+  }>;
+  readonly backlog: SocialFoundationFact<{
     readonly backlogStateId: string;
     readonly priorBacklog: ExactQuantity;
-  };
-  readonly intake: {
+  }>;
+  readonly intake: SocialFoundationFact<{
     readonly intakeId: string;
     readonly newCases: ExactQuantity;
-  };
-  readonly deployment: {
+  }>;
+  readonly deployment: SocialFoundationFact<{
     readonly deploymentId: string;
     readonly requestedPeople: ExactQuantity;
     readonly handlingCapacity: ExactQuantity;
     readonly duration: ExactQuantity;
-  };
-  readonly funding: {
+  }>;
+  readonly funding: SocialFoundationFact<{
     readonly budgetId: string;
     readonly observedOperatingBudget: ExactMoney;
-  };
-  readonly simulationTime: {
+  }>;
+  readonly simulationTime: SocialFoundationFact<{
     readonly timeStateId: string;
     readonly now: ExactQuantity;
-  };
-  readonly emergency:
+  }>;
+  readonly emergency: SocialFoundationFact<
     | { readonly requested: false; readonly authority: null }
     | {
         readonly requested: true;
@@ -900,7 +1129,8 @@ export interface SafetyFoundationInput {
           readonly issuedAt: ExactQuantity;
           readonly expiresAt: ExactQuantity;
         };
-      };
+      }
+  >;
 }
 
 export interface SafetyFoundationResult {
@@ -921,19 +1151,28 @@ export interface SafetyFoundationResult {
 export function calculateSafetyFoundation(
   input: SafetyFoundationInput,
 ): SafetyFoundationResult {
-  const population = whole(input.population.population, 'person', 'population');
-  const employed = whole(
-    input.workforce.employedPeople,
-    'person',
-    'employedPeople',
+  const populationFact = payloadOf(input.trace, input.population, 'population');
+  const workforce = payloadOf(input.trace, input.workforce, 'workforce');
+  const incidentsFact = payloadOf(input.trace, input.incidents, 'incidents');
+  const backlogFact = payloadOf(input.trace, input.backlog, 'backlog');
+  const intake = payloadOf(input.trace, input.intake, 'intake');
+  const deployment = payloadOf(input.trace, input.deployment, 'deployment');
+  const funding = payloadOf(input.trace, input.funding, 'funding');
+  const simulationTime = payloadOf(
+    input.trace,
+    input.simulationTime,
+    'simulationTime',
   );
+  const emergency = payloadOf(input.trace, input.emergency, 'emergency');
+  whole(populationFact.population, 'person', 'population');
+  const employed = whole(workforce.employedPeople, 'person', 'employedPeople');
   const alreadyDeployed = whole(
-    input.workforce.alreadyDeployedPeople,
+    workforce.alreadyDeployedPeople,
     'person',
     'alreadyDeployedPeople',
   );
   const unavailable = whole(
-    input.workforce.unavailablePeople,
+    workforce.unavailablePeople,
     'person',
     'unavailablePeople',
   );
@@ -941,7 +1180,7 @@ export function calculateSafetyFoundation(
   if (available.isNegative())
     kernelInvalid('Safety workforce allocation exceeds employed people');
   const requested = whole(
-    input.deployment.requestedPeople,
+    deployment.requestedPeople,
     'person',
     'requestedPeople',
   );
@@ -949,48 +1188,31 @@ export function calculateSafetyFoundation(
     kernelInvalid('Safety deployment cannot exceed available personnel');
   }
   const handlingCapacity = whole(
-    input.deployment.handlingCapacity,
+    deployment.handlingCapacity,
     'case',
     'handlingCapacity',
   );
   if (requested.isZero() && !handlingCapacity.isZero()) {
     kernelInvalid('No deployed personnel cannot claim case handling capacity');
   }
-  const duration = time(
-    input.deployment.duration,
-    'sim_day',
-    'deployment.duration',
-  );
+  const duration = time(deployment.duration, 'sim_day', 'deployment.duration');
   if (duration.isZero() && !requested.isZero()) {
     kernelInvalid(
       'A personnel deployment requires an explicit positive duration',
     );
   }
-  const incidents = whole(
-    input.incidents.recordedIncidents,
-    'incident',
-    'recordedIncidents',
-  );
-  const priorBacklog = whole(
-    input.backlog.priorBacklog,
-    'case',
-    'priorBacklog',
-  );
-  const newCases = whole(input.intake.newCases, 'case', 'newCases');
+  whole(incidentsFact.recordedIncidents, 'incident', 'recordedIncidents');
+  const priorBacklog = whole(backlogFact.priorBacklog, 'case', 'priorBacklog');
+  const newCases = whole(intake.newCases, 'case', 'newCases');
   const totalCases = priorBacklog.plus(newCases);
   const resolved = minimum([totalCases, handlingCapacity], 'resolved cases');
   const nextBacklog = totalCases.minus(resolved);
   const availableAfter = available.minus(requested);
   const deployedAfter = alreadyDeployed.plus(requested);
-  const now = time(
-    input.simulationTime.now,
-    'sim_millisecond',
-    'simulationTime.now',
-  );
+  const now = time(simulationTime.now, 'sim_millisecond', 'simulationTime.now');
   let emergencyAuthorityAccepted = false;
-  let authorityIds: string[] = [];
-  if (input.emergency.requested) {
-    const authority = input.emergency.authority;
+  if (emergency.requested) {
+    const authority = emergency.authority;
     const issuedAt = time(
       authority.issuedAt,
       'sim_millisecond',
@@ -1011,16 +1233,17 @@ export function calculateSafetyFoundation(
       );
     }
     emergencyAuthorityAccepted = true;
-    authorityIds = [authority.authorityId, authority.captainApprovalId];
   }
-  const incidentRate = population.isZero()
-    ? null
-    : renderQuantity(
-        incidents.times(100000).dividedBy(population),
-        'incident_per_100000_person',
-      );
+  const incidentRate = incidentsFact.observedIncidentRatePer100000People;
+  if (incidentRate !== null) {
+    nonNegativeQuantity(
+      incidentRate,
+      'incident_per_100000_person',
+      'observedIncidentRatePer100000People',
+    );
+  }
   const observedOperatingBudget = nonNegativeMoney(
-    input.funding.observedOperatingBudget,
+    funding.observedOperatingBudget,
     'funding.observedOperatingBudget',
   );
   return Object.freeze({
@@ -1038,34 +1261,50 @@ export function calculateSafetyFoundation(
       'E07_PUBLIC_SAFETY',
       input.trace,
       [
-        input.population.populationStateId,
-        input.workforce.workforceId,
-        input.incidents.incidentRegisterId,
-        input.backlog.backlogStateId,
-        input.intake.intakeId,
-        input.deployment.deploymentId,
-        input.funding.budgetId,
-        input.simulationTime.timeStateId,
-        ...authorityIds,
+        input.population,
+        input.workforce,
+        input.incidents,
+        input.backlog,
+        input.intake,
+        input.deployment,
+        input.funding,
+        input.simulationTime,
+        input.emergency,
       ],
-      [input.outcomeId, input.deploymentOutcomeId],
+      [
+        {
+          factId: input.outcomeId,
+          payload: {
+            availableAfterDeployment: renderQuantity(availableAfter, 'person'),
+            nextBacklog: renderQuantity(nextBacklog, 'case'),
+            observedIncidentRatePer100000People: incidentRate,
+          },
+        },
+        {
+          factId: input.deploymentOutcomeId,
+          payload: {
+            deployedPeople: renderQuantity(deployedAfter, 'person'),
+            resolvedCases: renderQuantity(resolved, 'case'),
+          },
+        },
+      ],
       [
         transition(
-          input.workforce.workforceId,
+          workforce.workforceId,
           'available_personnel',
           available,
           availableAfter,
           'person',
         ),
         transition(
-          input.workforce.workforceId,
+          workforce.workforceId,
           'deployed_personnel',
           alreadyDeployed,
           deployedAfter,
           'person',
         ),
         transition(
-          input.backlog.backlogStateId,
+          backlogFact.backlogStateId,
           'case_backlog',
           priorBacklog,
           nextBacklog,

@@ -6,6 +6,9 @@
 programme, project completion, benefit payment, rent policy, database change or
 production outcome.
 
+Every source fact is canonical-payload bound to source/predecessor IDs and the
+same lineage/version/snapshot/time before the calculation can proceed.
+
 ## Implemented calculation boundary
 
 `calculateHousingFoundation` reads identified total/habitable/occupied stock,

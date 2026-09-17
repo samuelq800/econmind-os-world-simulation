@@ -10,11 +10,11 @@ safety event, authority decision, dispatch algorithm or stability-state update.
 `calculateSafetyFoundation` reads identified workforce, deployment, incidents,
 case backlog/intake, explicit case capacity, population, simulation time and
 observed funding. It returns available/deployed people, case resolution,
-backlog and a recorded incident rate using exact, unit-labelled arithmetic.
+backlog and a caller-observed incident rate using exact, unit-labelled facts.
 
 Funding never enters personnel, incident or case arithmetic, and the result has
-no direct stability effect. Response-time and dispatch formulas are deliberately
-not invented.
+no direct stability effect. Incident-rate scaling, response-time and dispatch
+formulas are deliberately not invented.
 
 ## Focused evidence
 

@@ -5,6 +5,9 @@
 `FOUNDATION_IMPLEMENTED_UNVERIFIED`. No staff are reserved or assigned by this
 candidate; it validates caller-supplied, inert values only.
 
+Those values must arrive as source/predecessor-bound canonical facts with a
+matching lineage, version, snapshot and simulation time.
+
 ## Implemented calculation boundary
 
 `assertSocialFoundationPersonnelAllocation` accepts whole person-unit pools once
