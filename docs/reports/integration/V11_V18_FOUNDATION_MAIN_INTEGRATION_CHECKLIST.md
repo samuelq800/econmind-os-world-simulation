@@ -13,8 +13,8 @@ This checklist is a control record, not an integration authorization. Every unch
 - [ ] Confirm the V12 foundation acceptance source remains `899bcb1a750d01be812fde9eee3fa0fd82357b42` and is being used only within its `FOUNDATION_REVIEWED_NONPRODUCTION` scope.
 - [ ] Control Tower supplies the exact V13 candidate SHA and B outcome.
 - [ ] Control Tower supplies the exact V14 candidate SHA and B outcome.
-- [ ] Control Tower supplies the B outcome for V15/V16 source `5eb535e0e50780a57f3a0d44125d806a48326be3`.
-- [ ] Control Tower supplies the B outcome for V17/V18 source `84e6c6b40a36448dd7c72e76f9df059308e5511f`.
+- [x] V15/V16 B result (`P0=0`, `MAJOR=0`, `FOUNDATION_REVIEW_CANDIDATE_APPROVED`) is bound to remediation `b84e790e163593a914ebff771b41c50279c1748f`, parent `5eb535e0e50780a57f3a0d44125d806a48326be3`, and non-production acceptance `1ccc680682faae18b150a33978ee1456b88cdc24`.
+- [x] V17/V18 B result (`P0=0`, `MAJOR=0`, `FOUNDATION_REVIEW_CANDIDATE_APPROVED`) is bound to review tip `8038bc3f8d129f1d6bfa3877d7353ba96da15ac0`, code `ea3b5b818a485614ad7cb2d3cd6240a59f7da439`, and non-production acceptance `74748ec4e607647af2bc5898233f6e17db1457f8`.
 
 ## Enforce dependency order
 
