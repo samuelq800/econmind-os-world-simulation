@@ -22,7 +22,7 @@ import {
   foundationReplayProof,
   type ExactQuantityTransition,
   type FoundationFact,
-  type FoundationReplayProof,
+  type V13V14FoundationReplayProof,
   type FoundationTraceRequest,
 } from './foundation-provenance.js';
 
@@ -184,7 +184,7 @@ export interface V13EnergyAllocationResult {
   readonly allocations: readonly V13EnergyAllocationResultLine[];
   readonly fuelTransition: ExactQuantityTransition;
   readonly gridTransition: ExactQuantityTransition;
-  readonly replayProof: FoundationReplayProof;
+  readonly replayProof: V13V14FoundationReplayProof;
 }
 
 /**
@@ -445,7 +445,7 @@ export interface V13ProductionResult {
   readonly labourConsumption: V13ProposedInputConsumption;
   readonly logisticsConsumption: V13ProposedInputConsumption;
   readonly outputTransition: ExactQuantityTransition;
-  readonly replayProof: FoundationReplayProof;
+  readonly replayProof: V13V14FoundationReplayProof;
 }
 
 function proposedConsumption(input: {

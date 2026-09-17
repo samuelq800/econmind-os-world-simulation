@@ -25,7 +25,7 @@ import {
   foundationReplayProof,
   type ExactQuantityTransition,
   type FoundationFact,
-  type FoundationReplayProof,
+  type V13V14FoundationReplayProof,
   type FoundationTraceRequest,
 } from './foundation-provenance.js';
 
@@ -146,7 +146,7 @@ export interface V14TechnologyRightsResult {
   readonly accumulatedResearchOutput: ExactQuantity;
   readonly researchComplete: boolean;
   readonly researchTransition: ExactQuantityTransition;
-  readonly replayProof: FoundationReplayProof;
+  readonly replayProof: V13V14FoundationReplayProof;
 }
 
 function validateTechnologyRight(
@@ -350,7 +350,7 @@ export interface V14ProjectLifecycleResult {
   readonly labourConsumption: V14ProposedProjectConsumption;
   /** Null unless construction is complete and explicit commissioning inputs pass. */
   readonly facilityHandoff: V14FacilityHandoffProposal | null;
-  readonly replayProof: FoundationReplayProof;
+  readonly replayProof: V13V14FoundationReplayProof;
 }
 
 function projectIdentity(

@@ -67,7 +67,7 @@ export interface ExactQuantityTransition {
   readonly after: ExactQuantity;
 }
 
-export interface FoundationReplayProof {
+export interface V13V14FoundationReplayProof {
   readonly module: V13V14FoundationModule;
   readonly traceRef: string;
   readonly calculationVersion: string;
@@ -312,7 +312,7 @@ export function foundationReplayProof(input: {
     readonly payload: unknown;
   }[];
   readonly transitions: readonly ExactQuantityTransition[];
-}): FoundationReplayProof {
+}): V13V14FoundationReplayProof {
   const context = traceContext(input.trace);
   const inputFacts = input.inputFacts.map((fact, index) =>
     foundationFactBinding(input.trace, fact, `inputFacts[${index}]`),
@@ -371,7 +371,7 @@ export function foundationReplayProof(input: {
 
 /** Rejects altered, stale, mixed-lineage, or duplicate fact evidence on replay. */
 export function assertFoundationReplayEvidence(
-  proof: FoundationReplayProof,
+  proof: V13V14FoundationReplayProof,
   inputFacts: readonly FoundationFact<unknown>[],
 ): void {
   const request: FoundationTraceRequest = {
