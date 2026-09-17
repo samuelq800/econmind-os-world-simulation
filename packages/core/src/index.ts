@@ -57,6 +57,7 @@ export * from './labour/population-labour-invariants.js';
 export * from './numeric/index.js';
 export * from './opening/opening-seed.js';
 export * from './population/population-engine.js';
+export * from './resource-inventory/index.js';
 export * from './registries/fixed-catalog.js';
 export * from './registries/registry.js';
 export * from './replay/replay.js';
