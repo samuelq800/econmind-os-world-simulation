@@ -1,0 +1,80 @@
+{
+  "schema_version": "V12-FOUNDATION-TEST-EVIDENCE-1",
+  "step_id": "V12.1",
+  "state": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
+  "code_candidate": "b0c04ab3e2bbb87edface2c652949d3c3cfcca21",
+  "baseline": "5356fe93932eb285b3c21977a655e4c6e7bb6746",
+  "execution_surface": "LOCAL_ONLY",
+  "product_integration": "NO_GO",
+  "commands": [
+    {
+      "command": "node-v24.20.0 pnpm-12.3.4 exec eslint packages/core/src/resource-inventory/foundation.ts packages/core/src/resource-inventory/index.ts packages/core/src/index.ts tests/world-core/v12-resource-inventory-foundation.test.ts",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node-v24.20.0 pnpm-12.3.4 --filter @econmind/core typecheck",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node-v24.20.0 pnpm-12.3.4 --filter @econmind/core build",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node-v24.20.0 pnpm-12.3.4 exec vitest run tests/world-core/v12-resource-inventory-foundation.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "test_files": 1,
+      "tests": 8
+    },
+    {
+      "command": "node-v24.20.0 scripts/check-authoritative-patterns.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "scanned_core_files": 31
+    },
+    {
+      "command": "node-v24.20.0 scripts/check-boundaries.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "scanned_files": 46
+    },
+    {
+      "command": "node-v24.20.0 pnpm-12.3.4 foundation:policy",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node-v24.20.0 pnpm-12.3.4 env:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "environment": "local",
+      "database_configured": false,
+      "linked_supabase_project": "NOT_LINKED"
+    },
+    {
+      "command": "node-v24.20.0 pnpm-12.3.4 secrets:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "scanned_files": 413
+    },
+    {
+      "command": "node-v24.20.0 pnpm-12.3.4 exec prettier --check <V12-changed-files>",
+      "exit_code": 0,
+      "result": "PASS"
+    }
+  ],
+  "covered_properties": [
+    "Five pools equal fixed geological endowment before and after every accepted transition.",
+    "EXPLORE is route-bound to UNDISCOVERED to DISCOVERED and records exact before/after quantities.",
+    "Forged or stale predecessor links and duplicate transition references reject.",
+    "Resource unit mismatch rejects without silent conversion."
+  ],
+  "not_run": [
+    "Full repository pnpm check.",
+    "Database, RLS, migration, API, worker, UI, Command, Event, durable transaction, recovery, and production evidence."
+  ],
+  "production_mutation": false
+}

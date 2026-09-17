@@ -1,0 +1,27 @@
+{
+  "schema_version": "V12-FOUNDATION-TEST-EVIDENCE-1",
+  "step_id": "V12.3",
+  "state": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
+  "code_candidate": "b0c04ab3e2bbb87edface2c652949d3c3cfcca21",
+  "baseline": "5356fe93932eb285b3c21977a655e4c6e7bb6746",
+  "execution_surface": "LOCAL_ONLY",
+  "product_integration": "NO_GO",
+  "focused_test": {
+    "command": "node-v24.20.0 pnpm-12.3.4 exec vitest run tests/world-core/v12-resource-inventory-foundation.test.ts",
+    "exit_code": 0,
+    "result": "PASS",
+    "test_files": 1,
+    "tests": 8
+  },
+  "covered_properties": [
+    "Same initial state and reference chain replay identically.",
+    "Duplicate, stale, and forged references reject before a result is produced.",
+    "Per-commodity inventory identity is exact and rejects a resource-unit mismatch.",
+    "Repeated exact-decimal extraction reaches exhaustion without a negative pool."
+  ],
+  "shared_checks": "See docs/reports/V12.1/TEST_EVIDENCE.json for the candidate's focused typecheck, build, boundary, authoritative-pattern, and secret checks.",
+  "not_run": [
+    "Real concurrent reservation, durable atomic commit, transaction retry, crash recovery, RLS, browser, and production evidence."
+  ],
+  "production_mutation": false
+}
