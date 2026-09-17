@@ -2,6 +2,7 @@ export * from './common.js';
 export * from './causal-channels.js';
 export * from './causal-values.js';
 export * from './firm-ecology.js';
+export * from './household-fiscal-closure.js';
 export * from './international-settlement.js';
 export * from './quantified-systems.js';
 export * from './population-labour-services.js';
