@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "recordType": "V20_FX_INTERNATIONAL_FOUNDATION_TEST_EVIDENCE",
+  "base": "ec5ceb2ef8434fc3f6c40c8c62b0311a3676a24d",
+  "branch": "codex/v20-fx-international-foundation",
+  "validatedCodeCandidate": "ff5becb57ac5f17da35ecd6cfc1940b6cc31949f",
+  "status": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
+  "risk": "P0",
+  "result": "PASS_AT_FROZEN_CODE_CANDIDATE",
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/v20-fx-international-foundation.test.ts",
+      "result": "PASS: 1 file, 5 tests"
+    },
+    {
+      "command": "pnpm --filter @econmind/core typecheck",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @econmind/core build",
+      "result": "PASS"
+    },
+    {
+      "command": "affected-path ESLint and Prettier",
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "result": "PASS: 52 Core files, 64 total files, zero violations"
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "result": "PASS: 69 files"
+    },
+    {
+      "command": "pnpm env:check",
+      "result": "PASS: local, databaseConfigured=false, linkedSupabaseProject=NOT_LINKED"
+    },
+    {
+      "command": "pnpm secrets:check",
+      "result": "PASS: 651 files"
+    },
+    {
+      "command": "pnpm foundation:policy",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check and git diff --cached --check",
+      "result": "PASS"
+    }
+  ],
+  "adverseVectors": [
+    "rate, explicit rounding-decision and simulation-time mismatch",
+    "missing rounding fact / no default conversion policy",
+    "forged canonical payload and stale snapshot lineage",
+    "cross-country and currency mismatch",
+    "duplicate private settlement witness",
+    "private-versus-official reserve field confusion",
+    "bilateral external-debt imbalance",
+    "historical locked-cash rewrite using current FX"
+  ],
+  "nonAuthoritativeBoundary": [
+    "Core consumes caller facts and selects no exchange rate, spread, capital control, intervention amount, rounding decision or macro formula.",
+    "No 70x69 authoritative FX pair matrix is created.",
+    "Private settlement has no official reserve input/output; official intervention and sterilization consume separate explicit facts.",
+    "Historical execution cash is locked; current-rate revaluation is a separate calculation trace."
+  ],
+  "notRun": [
+    "official full repository pnpm check",
+    "independent review",
+    "product V20 verification, status/Gate promotion, merge or deployment",
+    "database, RLS, migration, Supabase, API, worker, UI, Command, Event, receipt, durable ledger, transaction, recovery and production validation"
+  ],
+  "prohibitedPathsUnchanged": [
+    "status/progress.json",
+    "status/decisions.json",
+    "apps",
+    "supabase",
+    "packages/database",
+    "packages/api"
+  ],
+  "mainMergeAuthorized": false,
+  "productionMutation": false,
+  "verified": false
+}
