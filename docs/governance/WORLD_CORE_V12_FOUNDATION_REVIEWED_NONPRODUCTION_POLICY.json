@@ -1,0 +1,64 @@
+{
+  "schema_version": "WORLD_CORE_V12_FOUNDATION_REVIEWED_NONPRODUCTION-1",
+  "record_type": "FOUNDATION_REVIEW_OWNER_ACCEPTANCE",
+  "name": "WORLD_CORE_V12_FOUNDATION_REVIEWED_NONPRODUCTION",
+  "status": "FOUNDATION_REVIEWED_NONPRODUCTION",
+  "authority": "PROJECT_OWNER_DIRECTION_RELAYED_BY_CONTROL_TOWER_2026_09_17",
+  "decision_record": "docs/reports/V12/FOUNDATION_REVIEW_OWNER_ACCEPTANCE.md",
+  "candidate": {
+    "foundation_baseline": "5356fe93932eb285b3c21977a655e4c6e7bb6746",
+    "core_candidate": "b0c04ab3e2bbb87edface2c652949d3c3cfcca21",
+    "evidence_and_review_tip": "8bc779dcceb34adf731adc4c4868e4032093f8b0",
+    "branch": "codex/v12-foundation-mode"
+  },
+  "independent_review": {
+    "reviewer": "B",
+    "scope": "V12 package-scoped pure Core foundation candidate only",
+    "target": "8bc779dcceb34adf731adc4c4868e4032093f8b0",
+    "open_p0": 0,
+    "open_major": 0,
+    "verdict": "FOUNDATION_REVIEW_CANDIDATE_APPROVED",
+    "limit": "This is not approval of a V12 product, Gate, hard-dependency path, merge, deployment, or production action."
+  },
+  "recorded_evidence": {
+    "focused_test": "PASS — tests/world-core/v12-resource-inventory-foundation.test.ts, 1 file / 8 tests",
+    "attached_checks": [
+      "ESLint: PASS",
+      "@econmind/core typecheck and build: PASS",
+      "authoritative-pattern and repository-boundary scans: PASS",
+      "foundation policy, safe-local environment, repository-secret, Prettier, and git diff checks: PASS"
+    ],
+    "evidence_records": [
+      "docs/reports/V12.1/TEST_EVIDENCE.json",
+      "docs/reports/V12.2/TEST_EVIDENCE.json",
+      "docs/reports/V12.3/TEST_EVIDENCE.json",
+      "docs/reports/V12/FOUNDATION_HELPER_TRACEABILITY.md"
+    ]
+  },
+  "permitted_reuse": {
+    "future_work_packages": ["V13", "V14", "V15", "V16", "V17", "V18"],
+    "scope": "Future pure-Core foundation candidates may reuse the V12 typed helpers and the E08-to-downstream read-only boundary.",
+    "conditions": [
+      "Each future candidate must record its own helper traceability mapping and evidence.",
+      "Reuse must preserve exact decimal and unit checks, immutable causal references, and the E08 ownership boundary.",
+      "Reuse is not authorization to perform an authoritative write, durable application, or product integration."
+    ]
+  },
+  "hard_dependencies": {
+    "V12.1": ["V08.3", "V09.3", "V11.3"],
+    "V12.2": ["V12.1"],
+    "V12.3": ["V12.2"],
+    "effect": "Unchanged. This policy does not approve, satisfy, bypass, or reclassify any dependency."
+  },
+  "preserved_boundaries": [
+    "V12 remains FOUNDATION_REVIEWED_NONPRODUCTION, not VERIFIED.",
+    "No V12 product integration, Gate readiness, or dependency-path approval is claimed.",
+    "No status/progress or Gate record is changed.",
+    "No database, RLS, migration, API, worker, UI, Command, Event, transaction, production, merge, or deployment action is authorized.",
+    "ADR-04 remains PROPOSED_NOT_APPROVED; no time or read-order policy is selected.",
+    "V09.3 remains the owner of durable atomic commit, idempotency, writer coordination, and recovery evidence."
+  ],
+  "main_merge_authorized": false,
+  "production_mutation": false,
+  "verified": false
+}
