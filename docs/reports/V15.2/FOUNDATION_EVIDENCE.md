@@ -6,6 +6,9 @@
 candidate, not a healthcare service, procurement, payment, API, event or
 authoritative health-state implementation.
 
+All source facts are canonical-payload bound to source/predecessor IDs and one
+lineage/version/snapshot/time; calculation and replay reject divergence.
+
 ## Implemented calculation boundary
 
 `calculateHealthcareFoundation` receives identified demand/backlog, staffed

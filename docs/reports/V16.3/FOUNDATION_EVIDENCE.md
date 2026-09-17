@@ -11,7 +11,8 @@ An emergency calculation requires an `ACTIVE` Captain approval record whose
 issued and expiry simulation-millisecond values bracket the explicit current
 simulation time. Expired, future or non-active records are rejected. The replay
 trace retains all relevant input/output IDs and before/after workforce/backlog
-transitions.
+transitions, each bound to source/predecessor, lineage, version, snapshot, time
+and canonical payload evidence.
 
 This does not replace future authoritative authorization re-resolution, and it
 does not create a hidden subsidy, population or project shortcut.

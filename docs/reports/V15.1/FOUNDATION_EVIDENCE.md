@@ -10,12 +10,14 @@ or production disposition.
 
 `calculateEducationFoundation` in
 `packages/core/src/engine-kernels/social-foundation.ts` accepts explicitly
-identified applicants, teachers, facility seats, budget-supported seats,
-training duration and cohort states. It returns only exact person/simulation-day
-quantities, the next caller-owned cohort shape, and an ID-bound replay trace.
+identified applicants, teachers, facility seats, caller-selected capacity,
+training duration, cohort state and admissions/graduation outcome facts. It
+returns only exact person/simulation-day quantities, the next caller-owned
+cohort shape, and an ID-bound replay trace.
 
-The function rejects a cohort above actual capacity, rejects early or fractional
-graduates, and requires an actual vocational/higher graduate plus a matching
+The function does not derive capacity or graduates from a ratio/rate. It rejects
+a cohort above the supplied capacity, rejects early or fractional graduates, and
+requires an actual vocational/higher graduate plus a matching
 skill-stock handoff before labour-skill stock can change. It has no productivity
 output, command, event, persistence or default formula.
 

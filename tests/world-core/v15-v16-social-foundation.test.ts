@@ -1,430 +1,331 @@
 import { describe, expect, it } from 'vitest';
-
 import {
-  assertSocialFoundationPersonnelAllocation,
+  assertSocialFoundationReplayEvidence,
   calculateEducationFoundation,
   calculateHealthcareFoundation,
   calculateHousingFoundation,
   calculateSafetyFoundation,
+  createSocialFoundationFact,
 } from '../../packages/core/src/index.js';
 
-const MONEY = (amount: string) => ({ amount, currency: 'GCU' }) as const;
-const PERSON = (amount: string) => ({ amount, unit: 'person' }) as const;
-const CASE = (amount: string) => ({ amount, unit: 'case' }) as const;
-const BED = (amount: string) => ({ amount, unit: 'bed' }) as const;
-const DOSE = (amount: string) => ({ amount, unit: 'medical_dose' }) as const;
-const UNIT = (amount: string) => ({ amount, unit: 'housing_unit' }) as const;
-const INCIDENT = (amount: string) => ({ amount, unit: 'incident' }) as const;
-const DAY = (amount: string) => ({ amount, unit: 'sim_day' }) as const;
-const MILLIS = (amount: string) =>
-  ({ amount, unit: 'sim_millisecond' }) as const;
-const RATIO = (amount: string) => ({ amount, unit: 'ratio' }) as const;
-
-function educationInput() {
+const q = (amount: string, unit: string) => ({ amount, unit }) as const;
+const person = (amount: string) => q(amount, 'person');
+const caseCount = (amount: string) => q(amount, 'case');
+const unit = (amount: string) => q(amount, 'housing_unit');
+const day = (amount: string) => q(amount, 'sim_day');
+const ms = (amount: string) => q(amount, 'sim_millisecond');
+const money = (amount: string) => ({ amount, currency: 'GCU' }) as const;
+const TRACE = {
+  traceId: 'SOCIAL_TRACE_01',
+  calculationVersion: 'V15_V16_FOUNDATION_02',
+  lineageId: 'SOCIAL_LINEAGE_01',
+  sourceVersion: 'SOCIAL_SOURCE_VERSION_01',
+  snapshotId: 'SOCIAL_SNAPSHOT_01',
+  snapshotAt: ms('100'),
+} as const;
+function fact<T>(factId: string, payload: T) {
+  return createSocialFoundationFact({
+    trace: TRACE,
+    factId,
+    sourceId: `SOURCE_${factId}`,
+    predecessorFactIds: [`PREDECESSOR_${factId}`],
+    payload,
+  });
+}
+function education() {
   return {
-    trace: { traceId: 'TRACE_E04_01', calculationVersion: 'V15_1_FOUNDATION' },
+    trace: TRACE,
     outcomeId: 'EDUCATION_OUTCOME_01',
     nextCohortId: 'COHORT_NEXT_01',
-    enrollmentRequestId: 'ENROLLMENT_REQUEST_01',
-    applicantPool: {
+    applicantPool: fact('APPLICANT_FACT_01', {
       applicantPoolId: 'APPLICANT_POOL_01',
-      applicants: PERSON('100'),
-    },
-    capacity: {
+      applicants: person('100'),
+    }),
+    capacity: fact('EDUCATION_CAPACITY_FACT_01', {
       teacherWorkforceId: 'TEACHER_WORKFORCE_01',
-      teachers: PERSON('2'),
+      teachers: person('2'),
       facilityId: 'SCHOOL_01',
-      seats: PERSON('50'),
-      budgetCapacityId: 'EDUCATION_BUDGET_CAPACITY_01',
-      budgetSupportedSeats: PERSON('30'),
-      studentsPerTeacher: {
-        amount: '10',
-        outputUnit: 'person',
-        inputUnit: 'person',
-      },
-    },
-    cohort: {
+      seats: person('50'),
+      budgetCapacityId: 'EDUCATION_BUDGET_01',
+      budgetSupportedSeats: person('30'),
+      teacherSupportedSeats: person('20'),
+      availableEnrollmentCapacity: person('20'),
+    }),
+    cohort: fact('EDUCATION_COHORT_FACT_01', {
       cohortId: 'COHORT_01',
       trainingProgrammeId: 'TRAINING_PROGRAMME_01',
       level: 'VOCATIONAL' as const,
       specialisationId: 'MANUFACTURING_01',
-      enrolled: PERSON('10'),
-      cumulativeGraduates: PERSON('7'),
-      elapsedDuration: DAY('10'),
-      requiredDuration: DAY('10'),
-    },
-    newEnrollment: PERSON('5'),
-    graduation: { dropoutRate: RATIO('0.2'), completionRate: RATIO('0.5') },
-    skillTarget: {
+      enrolled: person('10'),
+      cumulativeGraduates: person('7'),
+      elapsedDuration: day('10'),
+      requiredDuration: day('10'),
+    }),
+    outcome: fact('EDUCATION_OUTCOME_FACT_01', {
+      admitted: person('5'),
+      graduates: person('4'),
+    }),
+    skillTarget: fact('EDUCATION_SKILL_FACT_01', {
       handoffId: 'SKILL_HANDOFF_01',
       labourSkillStockId: 'MEDIUM_SKILL_STOCK_01',
       skill: 'MEDIUM' as const,
-      before: PERSON('40'),
-    },
+      before: person('40'),
+    }),
   };
 }
 
-function healthcareInput() {
-  return {
-    trace: { traceId: 'TRACE_E05_01', calculationVersion: 'V15_2_FOUNDATION' },
-    outcomeId: 'HEALTH_OUTCOME_01',
-    deliveredCareId: 'DELIVERED_CARE_01',
-    serviceRequestId: 'HEALTH_SERVICE_REQUEST_01',
-    backlog: { backlogStateId: 'HEALTH_BACKLOG_01', priorBacklog: CASE('4') },
-    demand: { demandId: 'HEALTH_DEMAND_01', newDemand: CASE('6') },
-    staff: {
-      workforceId: 'HEALTH_WORKFORCE_01',
-      staffedPeople: PERSON('2'),
-      careCapacity: CASE('8'),
-    },
-    facility: {
-      facilityId: 'HOSPITAL_01',
-      careCapacity: CASE('9'),
-      bedStateId: 'HOSPITAL_BEDS_01',
-      totalBeds: BED('10'),
-      occupiedBeds: BED('4'),
-    },
-    medicalSupply: {
-      inventoryId: 'MEDICAL_INVENTORY_01',
-      availableMedicalDoses: DOSE('10'),
-      careCapacity: CASE('5'),
-    },
-    budget: {
-      budgetId: 'HEALTH_BUDGET_01',
-      observedOperatingBudget: MONEY('100'),
-      careCapacity: CASE('100'),
-    },
-  };
-}
-
-function housingInput() {
-  return {
-    trace: { traceId: 'TRACE_E06_01', calculationVersion: 'V16_1_FOUNDATION' },
-    outcomeId: 'HOUSING_OUTCOME_01',
-    nextHousingStockId: 'HOUSING_STOCK_NEXT_01',
-    stock: {
-      housingStockId: 'HOUSING_STOCK_01',
-      totalUnits: UNIT('10'),
-      habitableUnits: UNIT('8'),
-      occupiedUnits: UNIT('7'),
-    },
-    demand: {
-      householdDemandId: 'HOUSEHOLD_DEMAND_01',
-      householdDemand: UNIT('9'),
-      temporaryProjectDemandId: 'PROJECT_DEMAND_01',
-      temporaryProjectDemand: UNIT('1'),
-      migrationDemandId: 'MIGRATION_DEMAND_01',
-      migrationDemand: UNIT('2'),
-    },
-    rent: {
-      rentStateId: 'RENT_STATE_01',
-      observedRent: {
-        amount: '12.5',
-        currency: 'GCU',
-        perUnit: 'housing_unit',
-      },
-      rentRuleVersion: 'RENT_RULE_01',
-    },
-    subsidy: {
-      subsidyId: 'SUBSIDY_01',
-      programmeId: 'HOUSING_PROGRAMME_01',
-      amount: MONEY('100'),
-    },
-    commission: {
-      commissionId: 'HOUSING_COMMISSION_01',
-      projectId: 'HOUSING_PROJECT_01',
-      status: 'NOT_COMMISSIONED' as const,
-      commissionedAt: DAY('0'),
-      newHabitableUnits: UNIT('0'),
-    },
-  };
-}
-
-function safetyInput() {
-  return {
-    trace: { traceId: 'TRACE_E07_01', calculationVersion: 'V16_2_FOUNDATION' },
-    outcomeId: 'SAFETY_OUTCOME_01',
-    deploymentOutcomeId: 'SAFETY_DEPLOYMENT_OUTCOME_01',
-    population: {
-      populationStateId: 'POPULATION_01',
-      population: PERSON('1000'),
-    },
-    workforce: {
-      workforceId: 'SAFETY_WORKFORCE_01',
-      employedPeople: PERSON('10'),
-      alreadyDeployedPeople: PERSON('2'),
-      unavailablePeople: PERSON('1'),
-    },
-    incidents: {
-      incidentRegisterId: 'SAFETY_INCIDENTS_01',
-      recordedIncidents: INCIDENT('12'),
-    },
-    backlog: { backlogStateId: 'SAFETY_BACKLOG_01', priorBacklog: CASE('5') },
-    intake: { intakeId: 'SAFETY_INTAKE_01', newCases: CASE('6') },
-    deployment: {
-      deploymentId: 'SAFETY_DEPLOYMENT_01',
-      requestedPeople: PERSON('3'),
-      handlingCapacity: CASE('4'),
-      duration: DAY('1'),
-    },
-    funding: {
-      budgetId: 'SAFETY_BUDGET_01',
-      observedOperatingBudget: MONEY('100'),
-    },
-    simulationTime: { timeStateId: 'SIM_TIME_01', now: MILLIS('100') },
-    emergency: { requested: false as const, authority: null },
-  };
-}
-
-describe('V15 education foundation', () => {
-  it('requires real teachers, seats, duration, and graduates for a skill handoff', () => {
-    const result = calculateEducationFoundation(educationInput());
-
-    expect(result).toMatchObject({
-      capacity: {
-        teacherSupportedSeats: PERSON('20'),
-        actualSeats: PERSON('20'),
-      },
-      admitted: PERSON('5'),
-      graduates: PERSON('4'),
-      nextCohort: { enrolled: PERSON('11'), cumulativeGraduates: PERSON('11') },
-      skillHandoff: {
-        graduatesTransferred: PERSON('4'),
-        before: PERSON('40'),
-        after: PERSON('44'),
-      },
+describe('V15–V16 social foundation', () => {
+  it('uses explicit education capacity/outcome facts and never formula-selected rates', () => {
+    const input = education();
+    expect(calculateEducationFoundation(input)).toMatchObject({
+      capacity: { actualSeats: person('20') },
+      admitted: person('5'),
+      graduates: person('4'),
+      nextCohort: { enrolled: person('11'), cumulativeGraduates: person('11') },
+      skillHandoff: { before: person('40'), after: person('44') },
       directProductivityEffect: null,
     });
-    expect(result.trace).toMatchObject({
-      module: 'E04_EDUCATION',
-      inputIds: expect.arrayContaining([
-        'TEACHER_WORKFORCE_01',
-        'TRAINING_PROGRAMME_01',
-      ]),
-      outputIds: ['EDUCATION_OUTCOME_01', 'COHORT_NEXT_01', 'SKILL_HANDOFF_01'],
+    const early = education();
+    early.cohort = fact('EDUCATION_COHORT_FACT_02', {
+      ...early.cohort.payload,
+      elapsedDuration: day('9.5'),
     });
-
-    const withoutTeachers = educationInput();
-    withoutTeachers.capacity.teachers = PERSON('0');
-    withoutTeachers.cohort.enrolled = PERSON('0');
-    withoutTeachers.newEnrollment = PERSON('0');
-    withoutTeachers.skillTarget = null;
-    expect(calculateEducationFoundation(withoutTeachers)).toMatchObject({
-      capacity: { actualSeats: PERSON('0') },
-      graduates: PERSON('0'),
-      skillHandoff: null,
+    expect(() => calculateEducationFoundation(early)).toThrow(
+      'requires the explicit programme duration',
+    );
+    const noCapacity = education();
+    noCapacity.capacity = fact('EDUCATION_CAPACITY_FACT_02', {
+      ...noCapacity.capacity.payload,
+      teachers: person('0'),
+      seats: person('0'),
+      teacherSupportedSeats: person('0'),
+      availableEnrollmentCapacity: person('0'),
     });
+    noCapacity.cohort = fact('EDUCATION_COHORT_FACT_03', {
+      ...noCapacity.cohort.payload,
+      enrolled: person('0'),
+    });
+    noCapacity.outcome = fact('EDUCATION_OUTCOME_FACT_02', {
+      admitted: person('0'),
+      graduates: person('0'),
+    });
+    noCapacity.skillTarget = null;
+    expect(calculateEducationFoundation(noCapacity).graduates).toEqual(
+      person('0'),
+    );
   });
 
-  it('rejects early, unbacked, or non-integral person graduation claims', () => {
-    const early = educationInput();
-    early.cohort.elapsedDuration = DAY('9.5');
-    early.skillTarget = null;
-    expect(calculateEducationFoundation(early).graduates).toEqual(PERSON('0'));
-
-    const noSeatForExistingCohort = educationInput();
-    noSeatForExistingCohort.capacity.seats = PERSON('0');
-    expect(() => calculateEducationFoundation(noSeatForExistingCohort)).toThrow(
-      'cannot exceed actual teacher and seat capacity',
-    );
-
-    const fractionalGraduates = educationInput();
-    fractionalGraduates.graduation = {
-      dropoutRate: RATIO('0.1'),
-      completionRate: RATIO('0.5'),
+  it('keeps healthcare, housing, and safety physical boundaries intact', () => {
+    const health = calculateHealthcareFoundation({
+      trace: TRACE,
+      outcomeId: 'HEALTH_OUTCOME_01',
+      deliveredCareId: 'DELIVERED_CARE_01',
+      backlog: fact('HEALTH_BACKLOG_FACT_01', {
+        backlogStateId: 'HEALTH_BACKLOG_01',
+        priorBacklog: caseCount('4'),
+      }),
+      demand: fact('HEALTH_DEMAND_FACT_01', {
+        demandId: 'HEALTH_DEMAND_01',
+        newDemand: caseCount('6'),
+      }),
+      staff: fact('HEALTH_STAFF_FACT_01', {
+        workforceId: 'HEALTH_WORKFORCE_01',
+        staffedPeople: person('2'),
+        careCapacity: caseCount('8'),
+      }),
+      facility: fact('HEALTH_FACILITY_FACT_01', {
+        facilityId: 'HOSPITAL_01',
+        careCapacity: caseCount('9'),
+        bedStateId: 'BEDS_01',
+        totalBeds: q('10', 'bed'),
+        occupiedBeds: q('4', 'bed'),
+      }),
+      medicalSupply: fact('HEALTH_SUPPLY_FACT_01', {
+        inventoryId: 'MEDICINE_01',
+        availableMedicalDoses: q('10', 'medical_dose'),
+        careCapacity: caseCount('5'),
+      }),
+      budget: fact('HEALTH_BUDGET_FACT_01', {
+        budgetId: 'HEALTH_BUDGET_01',
+        observedOperatingBudget: money('1000000'),
+        careCapacity: caseCount('100'),
+      }),
+    });
+    expect(health).toMatchObject({
+      deliveredCare: caseCount('5'),
+      nextBacklog: caseCount('5'),
+      directHealthEffect: null,
+    });
+    const housingInput = {
+      trace: TRACE,
+      outcomeId: 'HOUSING_OUTCOME_01',
+      nextHousingStockId: 'HOUSING_STOCK_NEXT_01',
+      stock: fact('HOUSING_STOCK_FACT_01', {
+        housingStockId: 'HOUSING_STOCK_01',
+        totalUnits: unit('10'),
+        habitableUnits: unit('8'),
+        occupiedUnits: unit('7'),
+      }),
+      demand: fact('HOUSING_DEMAND_FACT_01', {
+        householdDemandId: 'HOUSEHOLD_DEMAND_01',
+        householdDemand: unit('9'),
+        temporaryProjectDemandId: 'PROJECT_DEMAND_01',
+        temporaryProjectDemand: unit('1'),
+        migrationDemandId: 'MIGRATION_DEMAND_01',
+        migrationDemand: unit('2'),
+      }),
+      rent: fact('RENT_FACT_01', {
+        rentStateId: 'RENT_01',
+        observedRent: {
+          amount: '12.5',
+          currency: 'GCU',
+          perUnit: 'housing_unit',
+        },
+        rentRuleVersion: 'RENT_RULE_01',
+      }),
+      subsidy: fact('SUBSIDY_FACT_01', {
+        subsidyId: 'SUBSIDY_01',
+        programmeId: 'HOUSING_PROGRAMME_01',
+        amount: money('1000000'),
+      }),
+      commission: fact('COMMISSION_FACT_01', {
+        commissionId: 'COMMISSION_01',
+        projectId: 'PROJECT_01',
+        status: 'NOT_COMMISSIONED' as const,
+        commissionedAt: day('0'),
+        newHabitableUnits: unit('0'),
+      }),
     };
-    expect(() => calculateEducationFoundation(fractionalGraduates)).toThrow(
-      'whole non-negative person',
-    );
-  });
-});
-
-describe('V15 healthcare foundation', () => {
-  it('delivers only the intersection of staff, facility, supply, and explicit budget capacity', () => {
-    const result = calculateHealthcareFoundation(healthcareInput());
-    expect(result).toMatchObject({
-      deliveredCare: CASE('5'),
-      unmetCare: CASE('5'),
-      nextBacklog: CASE('5'),
-      bedOccupancy: RATIO('0.4'),
-      directHealthEffect: null,
+    const housing = calculateHousingFoundation(housingInput);
+    expect(housing).toMatchObject({
+      stock: { totalUnits: unit('10') },
+      housingGap: unit('4'),
+      supplyAddedByCompletedCommission: unit('0'),
     });
-    expect(result.trace.transitions).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          metric: 'care_backlog',
-          before: CASE('4'),
-          after: CASE('5'),
+    expect(
+      calculateHousingFoundation({
+        ...housingInput,
+        commission: fact('COMMISSION_FACT_02', {
+          commissionId: 'COMMISSION_02',
+          projectId: 'PROJECT_02',
+          status: 'COMMISSIONED' as const,
+          commissionedAt: day('1'),
+          newHabitableUnits: unit('3'),
         }),
-      ]),
-    );
-
-    const noStaff = healthcareInput();
-    noStaff.staff.staffedPeople = PERSON('0');
-    noStaff.staff.careCapacity = CASE('0');
-    expect(calculateHealthcareFoundation(noStaff)).toMatchObject({
-      deliveredCare: CASE('0'),
-      nextBacklog: CASE('10'),
-      directHealthEffect: null,
+      }),
+    ).toMatchObject({
+      stock: { totalUnits: unit('13'), habitableUnits: unit('11') },
+      supplyAddedByCompletedCommission: unit('3'),
     });
-
-    const noMedicine = healthcareInput();
-    noMedicine.medicalSupply.availableMedicalDoses = DOSE('0');
-    noMedicine.medicalSupply.careCapacity = CASE('0');
-    expect(calculateHealthcareFoundation(noMedicine)).toMatchObject({
-      deliveredCare: CASE('0'),
-      nextBacklog: CASE('10'),
-    });
-  });
-
-  it('does not turn observed money into a health status result', () => {
-    const low = calculateHealthcareFoundation(healthcareInput());
-    const highInput = healthcareInput();
-    highInput.budget.observedOperatingBudget = MONEY('1000000');
-    const high = calculateHealthcareFoundation(highInput);
-    expect(high.deliveredCare).toEqual(low.deliveredCare);
-    expect(high.nextBacklog).toEqual(low.nextBacklog);
-    expect(high.directHealthEffect).toBeNull();
-  });
-});
-
-describe('V16 housing foundation', () => {
-  it('keeps subsidy and rent observation separate from physical housing supply', () => {
-    const result = calculateHousingFoundation(housingInput());
-    expect(result).toMatchObject({
-      stock: {
-        totalUnits: UNIT('10'),
-        habitableUnits: UNIT('8'),
-        occupiedUnits: UNIT('7'),
-        vacantUnits: UNIT('1'),
-      },
-      totalDemand: UNIT('12'),
-      housingGap: UNIT('4'),
-      occupancyRate: RATIO('0.875'),
-      observedRent: {
-        amount: '12.5',
-        currency: 'GCU',
-        perUnit: 'housing_unit',
-      },
-      observedSubsidy: MONEY('100'),
-      supplyAddedByCompletedCommission: UNIT('0'),
-    });
-
-    const largerSubsidy = housingInput();
-    largerSubsidy.subsidy.amount = MONEY('1000000');
-    expect(calculateHousingFoundation(largerSubsidy).stock).toEqual(
-      result.stock,
-    );
-
-    const commissioned = housingInput();
-    commissioned.commission.status = 'COMMISSIONED';
-    commissioned.commission.commissionedAt = DAY('1');
-    commissioned.commission.newHabitableUnits = UNIT('3');
-    expect(calculateHousingFoundation(commissioned)).toMatchObject({
-      stock: { totalUnits: UNIT('13'), habitableUnits: UNIT('11') },
-      housingGap: UNIT('1'),
-      supplyAddedByCompletedCommission: UNIT('3'),
-    });
-  });
-
-  it('rejects uncommissioned supply claims', () => {
-    const uncommissionedSupply = housingInput();
-    uncommissionedSupply.commission.newHabitableUnits = UNIT('1');
-    expect(() => calculateHousingFoundation(uncommissionedSupply)).toThrow(
-      'Only an explicit completed commission',
-    );
-  });
-});
-
-describe('V16 public safety foundation', () => {
-  it('conserves real personnel and uses capacity rather than money for case resolution', () => {
-    const result = calculateSafetyFoundation(safetyInput());
-    expect(result).toMatchObject({
-      availableBeforeDeployment: PERSON('7'),
-      availableAfterDeployment: PERSON('4'),
-      deployedPeople: PERSON('5'),
-      resolvedCases: CASE('4'),
-      nextBacklog: CASE('7'),
-      recordedIncidentRatePer100000People: {
-        amount: '1200',
-        unit: 'incident_per_100000_person',
-      },
+    const safetyInput = {
+      trace: TRACE,
+      outcomeId: 'SAFETY_OUTCOME_01',
+      deploymentOutcomeId: 'SAFETY_DEPLOYMENT_OUTCOME_01',
+      population: fact('POPULATION_FACT_01', {
+        populationStateId: 'POPULATION_01',
+        population: person('1000'),
+      }),
+      workforce: fact('WORKFORCE_FACT_01', {
+        workforceId: 'SAFETY_WORKFORCE_01',
+        employedPeople: person('10'),
+        alreadyDeployedPeople: person('2'),
+        unavailablePeople: person('1'),
+      }),
+      incidents: fact('INCIDENT_FACT_01', {
+        incidentRegisterId: 'INCIDENTS_01',
+        recordedIncidents: q('12', 'incident'),
+        observedIncidentRatePer100000People: q(
+          '1200',
+          'incident_per_100000_person',
+        ),
+      }),
+      backlog: fact('SAFETY_BACKLOG_FACT_01', {
+        backlogStateId: 'SAFETY_BACKLOG_01',
+        priorBacklog: caseCount('5'),
+      }),
+      intake: fact('INTAKE_FACT_01', {
+        intakeId: 'INTAKE_01',
+        newCases: caseCount('6'),
+      }),
+      deployment: fact('DEPLOYMENT_FACT_01', {
+        deploymentId: 'DEPLOYMENT_01',
+        requestedPeople: person('3'),
+        handlingCapacity: caseCount('4'),
+        duration: day('1'),
+      }),
+      funding: fact('FUNDING_FACT_01', {
+        budgetId: 'SAFETY_BUDGET_01',
+        observedOperatingBudget: money('1000000'),
+      }),
+      simulationTime: fact('TIME_FACT_01', {
+        timeStateId: 'TIME_01',
+        now: ms('100'),
+      }),
+      emergency: fact('EMERGENCY_FACT_01', {
+        requested: false as const,
+        authority: null,
+      }),
+    };
+    const safety = calculateSafetyFoundation(safetyInput);
+    expect(safety).toMatchObject({
+      resolvedCases: caseCount('4'),
+      nextBacklog: caseCount('7'),
+      recordedIncidentRatePer100000People: q(
+        '1200',
+        'incident_per_100000_person',
+      ),
       directStabilityEffect: null,
     });
-
-    const highFunding = safetyInput();
-    highFunding.funding.observedOperatingBudget = MONEY('1000000');
-    const highFundingResult = calculateSafetyFoundation(highFunding);
-    expect(highFundingResult.resolvedCases).toEqual(result.resolvedCases);
-    expect(highFundingResult.nextBacklog).toEqual(result.nextBacklog);
-
-    assertSocialFoundationPersonnelAllocation({
-      allocations: [
-        {
-          personPoolId: 'EDUCATION_STAFF_01',
-          availablePeople: PERSON('10'),
-          assignedPeople: PERSON('10'),
-        },
-        {
-          personPoolId: 'HEALTH_STAFF_01',
-          availablePeople: PERSON('8'),
-          assignedPeople: PERSON('7'),
-        },
-      ],
-    });
     expect(() =>
-      assertSocialFoundationPersonnelAllocation({
-        allocations: [
-          {
-            personPoolId: 'SAME_PERSON_POOL_01',
-            availablePeople: PERSON('2'),
-            assignedPeople: PERSON('1'),
+      calculateSafetyFoundation({
+        ...safetyInput,
+        emergency: fact('EMERGENCY_FACT_02', {
+          requested: true as const,
+          authority: {
+            authorityId: 'EMERGENCY_AUTHORITY_01',
+            captainApprovalId: 'CAPTAIN_APPROVAL_01',
+            status: 'EXPIRED' as const,
+            issuedAt: ms('1'),
+            expiresAt: ms('100'),
           },
-          {
-            personPoolId: 'SAME_PERSON_POOL_01',
-            availablePeople: PERSON('2'),
-            assignedPeople: PERSON('1'),
-          },
-        ],
+        }),
       }),
-    ).toThrow('must not repeat an identifier');
+    ).toThrow('active, unexpired Captain authority');
   });
 
-  it('rejects expired emergency authority and accepts only active Captain authority', () => {
-    const expired = safetyInput();
-    expired.emergency = {
-      requested: true,
-      authority: {
-        authorityId: 'EMERGENCY_AUTHORITY_01',
-        captainApprovalId: 'CAPTAIN_APPROVAL_01',
-        status: 'EXPIRED',
-        issuedAt: MILLIS('1'),
-        expiresAt: MILLIS('100'),
-      },
+  it('fails closed on forged, stale, and mixed replay evidence', () => {
+    const input = education();
+    const result = calculateEducationFoundation(input);
+    const facts = [
+      input.applicantPool,
+      input.capacity,
+      input.cohort,
+      input.outcome,
+      input.skillTarget!,
+    ];
+    expect(() =>
+      assertSocialFoundationReplayEvidence(result.trace, facts),
+    ).not.toThrow();
+    const forged = {
+      ...input.applicantPool,
+      payload: { ...input.applicantPool.payload, applicants: person('101') },
     };
-    expect(() => calculateSafetyFoundation(expired)).toThrow(
-      'active, unexpired Captain authority',
-    );
-
-    const active = safetyInput();
-    active.emergency = {
-      requested: true,
-      authority: {
-        authorityId: 'EMERGENCY_AUTHORITY_02',
-        captainApprovalId: 'CAPTAIN_APPROVAL_02',
-        status: 'ACTIVE',
-        issuedAt: MILLIS('1'),
-        expiresAt: MILLIS('101'),
-      },
-    };
-    expect(calculateSafetyFoundation(active)).toMatchObject({
-      emergencyAuthorityAccepted: true,
-      trace: {
-        inputIds: expect.arrayContaining([
-          'EMERGENCY_AUTHORITY_02',
-          'CAPTAIN_APPROVAL_02',
-        ]),
-      },
-    });
+    expect(() =>
+      calculateEducationFoundation({ ...input, applicantPool: forged }),
+    ).toThrow('canonical payload evidence');
+    const stale = { ...input.capacity, sourceVersion: 'STALE_VERSION_01' };
+    expect(() =>
+      calculateEducationFoundation({ ...input, capacity: stale }),
+    ).toThrow('stale or mixed lineage');
+    const mixed = { ...input.capacity, sourceId: 'MIXED_SOURCE_01' };
+    expect(() =>
+      assertSocialFoundationReplayEvidence(result.trace, [
+        input.applicantPool,
+        mixed,
+        input.cohort,
+        input.outcome,
+        input.skillTarget!,
+      ]),
+    ).toThrow('does not exactly equal');
   });
 });
