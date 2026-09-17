@@ -1,0 +1,74 @@
+{
+  "schema_version": "WORLD_CORE_V15_V16_FOUNDATION_REVIEWED_NONPRODUCTION-1",
+  "record_type": "FOUNDATION_REVIEW_OWNER_ACCEPTANCE",
+  "name": "WORLD_CORE_V15_V16_FOUNDATION_REVIEWED_NONPRODUCTION",
+  "status": "FOUNDATION_REVIEWED_NONPRODUCTION",
+  "authority": "PROJECT_OWNER_DIRECTION_RELAYED_BY_CONTROL_TOWER_2026_09_17",
+  "decision_record": "docs/reports/V15_V16_SOCIAL_FOUNDATION/FOUNDATION_REVIEW_OWNER_ACCEPTANCE.md",
+  "candidate": {
+    "foundation_baseline": "5356fe93932eb285b3c21977a655e4c6e7bb6746",
+    "foundation_candidate_parent": "5eb535e0e50780a57f3a0d44125d806a48326be3",
+    "remediation_and_review_tip": "b84e790e163593a914ebff771b41c50279c1748f",
+    "branch": "codex/e-v15-v16-social-foundation"
+  },
+  "independent_review": {
+    "reviewer": "B",
+    "scope": "V15-V16 package-scoped pure Core social foundation remediation candidate only",
+    "target": "b84e790e163593a914ebff771b41c50279c1748f",
+    "open_p0": 0,
+    "open_major": 0,
+    "verdict": "FOUNDATION_REVIEW_CANDIDATE_APPROVED",
+    "limit": "This is not approval of a V15 or V16 product, Gate, hard-dependency path, merge, deployment, or production action."
+  },
+  "recorded_evidence": {
+    "focused_test": "tests/world-core/v15-v16-social-foundation.test.ts",
+    "evidence_records": [
+      "docs/exec-plans/V15.1.md",
+      "docs/exec-plans/V15.2.md",
+      "docs/exec-plans/V15.3.md",
+      "docs/exec-plans/V16.1.md",
+      "docs/exec-plans/V16.2.md",
+      "docs/exec-plans/V16.3.md",
+      "docs/reports/V15.1/FOUNDATION_EVIDENCE.md",
+      "docs/reports/V15.2/FOUNDATION_EVIDENCE.md",
+      "docs/reports/V15.3/FOUNDATION_EVIDENCE.md",
+      "docs/reports/V16.1/FOUNDATION_EVIDENCE.md",
+      "docs/reports/V16.2/FOUNDATION_EVIDENCE.md",
+      "docs/reports/V16.3/FOUNDATION_EVIDENCE.md"
+    ],
+    "review_remediation": [
+      "Canonical source/predecessor, lineage, version, snapshot, time, and payload binding prevents mixed or stale social-foundation inputs.",
+      "Housing stock can increase only through an explicitly commissioned Project handoff; subsidies remain inert observed inputs.",
+      "Education, healthcare, safety, and emergency-authority calculations preserve their stated capacity, personnel, unit, and expiry boundaries."
+    ]
+  },
+  "final_foundation_integration": {
+    "accepted": true,
+    "scope": "Accepted only as a reviewed non-production input to the separately governed final V11-V18 pure-Core foundation integration.",
+    "conditions": [
+      "A later integration change must preserve the exact source provenance, including the 5eb535e parent and b84e790 remediation tip, and re-run combined integration checks.",
+      "The V09 quarantine and all Core boundary restrictions remain in force.",
+      "This acceptance does not satisfy, bypass, or reclassify any R2 normal-mode dependency."
+    ]
+  },
+  "hard_dependencies": {
+    "V15.1": ["V06.3", "V08.3", "V11.3", "V14.3"],
+    "V15.2": ["V15.1"],
+    "V15.3": ["V15.2"],
+    "V16.1": ["V06.3", "V08.3", "V11.3", "V14.3"],
+    "V16.2": ["V16.1"],
+    "V16.3": ["V16.2"],
+    "effect": "Unchanged. This policy does not approve, satisfy, bypass, or reclassify any dependency."
+  },
+  "preserved_boundaries": [
+    "V15 and V16 remain FOUNDATION_REVIEWED_NONPRODUCTION, not VERIFIED.",
+    "No V15 or V16 product integration, Gate readiness, lifecycle-state transition, or dependency-path approval is claimed.",
+    "No status/progress or Gate record is changed.",
+    "No database, RLS, migration, API, worker, UI, Command, Event, authoritative state, transaction, production, merge, or deployment action is authorized.",
+    "No education, healthcare, housing, safety, rent, subsidy, dispatch, authority, population, labour, or macro-policy formula is selected.",
+    "V09.3 remains the owner of durable atomic commit, idempotency, writer coordination, and recovery evidence."
+  ],
+  "main_merge_authorized": false,
+  "production_mutation": false,
+  "verified": false
+}
