@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "recordType": "V19_2_FOUNDATION_SCOPE_EVIDENCE",
+  "status": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
+  "sharedEvidence": "docs/reports/V19.1/TEST_EVIDENCE.json",
+  "acceptanceVectors": [
+    "balanced refinancing and OMO postings",
+    "M1/M2 derived only from ledger facts",
+    "collateral/capacity/security/reserve/currency/bank mismatch failure paths"
+  ],
+  "notRun": [
+    "policy-formula selection",
+    "authoritative posting",
+    "product integration"
+  ]
+}

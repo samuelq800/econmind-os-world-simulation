@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "recordType": "V19_3_FOUNDATION_SCOPE_EVIDENCE",
+  "status": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
+  "sharedEvidence": "docs/reports/V19.1/TEST_EVIDENCE.json",
+  "acceptanceVectors": [
+    "positive liquidity shortfall with collateral-bound ELA",
+    "negative equity/capital shortfall rejects ELA",
+    "forged/stale/mixed/duplicate replay evidence rejects"
+  ],
+  "notRun": [
+    "resolution",
+    "recapitalisation",
+    "authoritative recovery",
+    "production validation"
+  ]
+}
