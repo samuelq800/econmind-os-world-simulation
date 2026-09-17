@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "recordType": "V11_V18_FOUNDATION_INTEGRATION_CANDIDATE",
+  "status": "INTEGRATION_CANDIDATE_PENDING_FINAL_B_REVIEW",
+  "integrationBase": {
+    "ref": "origin/main",
+    "sha": "0720a57b56394a577d34534356aa784a8bef9d22"
+  },
+  "sourceTransplantTipBeforeEvidence": "051a57e0d726503b49753d2a3550a8eb155cd225",
+  "selectionOrder": ["F", "V11", "V12", "V13_V14", "V15_V16", "V17_V18"],
+  "sources": {
+    "F": {
+      "reviewedTip": "5356fe93932eb285b3c21977a655e4c6e7bb6746",
+      "selectedCommits": [
+        "291034d1c4f4ca1f9a3fd8779cf129ec46793b4f",
+        "84bfb6dcd736dbeff5ef554dc5a7f16bfbfdbeff",
+        "5a115cccefdd8f1a615d35eb393f54dc0dad0357",
+        "91ce489346e9690fa0bb1a8922b48aa424894b7f",
+        "3e2a6c4f3971810ab24ec98db884956ee270dca8",
+        "3c455d13e14e20c438716c72b76f481f6635e3cf",
+        "4bb731532f49c16ecd306cb2a34a436a33f26fbb",
+        "d93712cf608bd85a7f458a5d6ab8967f9baa880c",
+        "5356fe93932eb285b3c21977a655e4c6e7bb6746"
+      ]
+    },
+    "V11": {
+      "isolatedCode": [
+        "c5532ebe0c7afb54ca25f228c78a541e00714321",
+        "a955ede68fd17c2afd0c0e3cf3d0fe6cdece4988",
+        "6f2aa759548d6267dadcf4424e68927ae377d70e",
+        "d839c8944601190d103082c64b9fe524ec01ec81"
+      ],
+      "reviewedEvidence": [
+        "167ccc848f066db2030fcf4889917522f444ed14",
+        "017be11af224424f26396abfaa602046fc90380a",
+        "d519e923034946c4691f06dda08ed6f29dce7457"
+      ],
+      "governanceSourceRecords": [
+        {
+          "commit": "2db39d01a22873162d1c841675855b60d4e5816e",
+          "paths": [
+            "docs/governance/WORLD_CORE_V11_2_CONDITIONAL_CONTINUATION_POLICY.json",
+            "docs/reports/V11.1/OWNER_ACCEPTANCE_FOR_V11_2.md"
+          ]
+        },
+        {
+          "commit": "47526ea2219ece011da82e397cf5435b1d044ea8",
+          "paths": [
+            "docs/governance/WORLD_CORE_V11_3_CONDITIONAL_CONTINUATION_POLICY.json",
+            "docs/reports/V11.2/OWNER_ACCEPTANCE_FOR_V11_3.md"
+          ]
+        },
+        {
+          "commit": "7c92c588bf1682371cef0892ee35e27df9ba6e75",
+          "paths": [
+            "docs/governance/WORLD_CORE_V11_3_NONPRODUCTION_ACCEPTANCE_DOWNSTREAM_PLANNING_ONLY.json",
+            "docs/reports/V11.3/OWNER_ACCEPTANCE_FOR_NEXT_STAGE.md"
+          ]
+        }
+      ],
+      "governanceRecordHandling": "Used as immutable source records. Their status/progress.json and broad tests/architecture/v01-governance.test.ts changes were deliberately excluded."
+    },
+    "V12": {
+      "code": "b0c04ab3e2bbb87edface2c652949d3c3cfcca21",
+      "evidence": "8bc779dcceb34adf731adc4c4868e4032093f8b0",
+      "acceptance": "899bcb1a750d01be812fde9eee3fa0fd82357b42"
+    },
+    "V13_V14": {
+      "codeAndBTarget": "653c1cba9681798260954a29e32dee3398054b70",
+      "acceptance": "60fc5f8271bff8c86a14993e94cdf44c156472b6"
+    },
+    "V15_V16": {
+      "foundationParent": "5eb535e0e50780a57f3a0d44125d806a48326be3",
+      "remediation": "b84e790e163593a914ebff771b41c50279c1748f",
+      "acceptance": "1ccc680682faae18b150a33978ee1456b88cdc24"
+    },
+    "V17_V18": {
+      "foundationCode": "40c7476213f1b9d57533fbfd57286defe954202d",
+      "remediationCode": "ea3b5b818a485614ad7cb2d3cd6240a59f7da439",
+      "reviewEvidence": "8038bc3f8d129f1d6bfa3877d7353ba96da15ac0",
+      "acceptance": "74748ec4e607647af2bc5898233f6e17db1457f8"
+    }
+  },
+  "reconciliations": [
+    "packages/core/src/errors.ts preserves the pre-existing V06-V09 error surface and adds ENGINE_KERNEL_INVALID for the F kernels.",
+    "packages/core/src/index.ts preserves V06-V09 exports and adds the F, V11, and V12 exports without removing existing ownership surfaces.",
+    "packages/core/src/engine-kernels/index.ts exports F, V13/V14, V15/V16, and V17/V18 modules in dependency order.",
+    "V13/V14 replay proof is named V13V14FoundationReplayProof so it does not collide with V17/V18 FoundationReplayProof.",
+    "The V11.2 and V17/V18 reviewed plan documents were restored from their immutable source records; no status or Gate record was imported."
+  ],
+  "quarantine": {
+    "V09": "Preserved. No V09 runtime, worker/API, database, migration, status, Gate, deployment, or production artifact was selected.",
+    "excluded": [
+      "V00-V10 unrelated code and evidence",
+      "apps and UI",
+      "Supabase, database, RLS, migrations, API, worker, commands, events, receipts, and production artifacts",
+      "archived zip artifacts",
+      "status/progress.json and Gate records"
+    ]
+  },
+  "validation": {
+    "commands": [
+      "pnpm --filter @econmind/core typecheck",
+      "pnpm --filter @econmind/core build",
+      "combined V11-V18 focused and acceptance architecture suites",
+      "ESLint, Prettier, git diff --check, boundaries, authoritative-patterns, foundation policy, secrets, and safe-local environment"
+    ],
+    "result": "PENDING_FINAL_RUN_AT_FROZEN_CANDIDATE"
+  },
+  "notRun": [
+    "final independent narrow integration Review B",
+    "official full repository pnpm check",
+    "product runtime, Gate, status, database, RLS, migration, API, worker, UI, commands, events, receipts, transaction, deployment, and production validation"
+  ],
+  "mainMergeAuthorized": false,
+  "productionMutation": false,
+  "verified": false
+}

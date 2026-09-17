@@ -81,12 +81,19 @@ describe('V04 authoritative architecture gates', () => {
         mkdir(path.join(fixture, 'packages/core/src/numeric'), {
           recursive: true,
         }),
+        mkdir(path.join(fixture, 'packages/core/src/engine'), {
+          recursive: true,
+        }),
         mkdir(path.join(fixture, 'packages/testkit/src'), { recursive: true }),
       ]);
       await Promise.all([
         writeFile(
           path.join(fixture, 'packages/core/src/numeric/world-decimal.ts'),
           "import Decimal from 'decimal.js'; export const exact = new Decimal('1');",
+        ),
+        writeFile(
+          path.join(fixture, 'packages/core/src/engine/validation.ts'),
+          'export const valid = Number.isSafeInteger(1);',
         ),
         writeFile(
           path.join(fixture, 'packages/testkit/src/property.ts'),

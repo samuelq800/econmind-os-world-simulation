@@ -106,16 +106,6 @@ function packageName(specifier) {
     : specifier.split('/')[0];
 }
 
-function calleeContainsIdentifier(node, names) {
-  let found = false;
-  const visit = (candidate) => {
-    if (ts.isIdentifier(candidate) && names.has(candidate.text)) found = true;
-    if (!found) ts.forEachChild(candidate, visit);
-  };
-  visit(node);
-  return found;
-}
-
 function unwrapExpression(node) {
   let current = node;
   while (
@@ -146,6 +136,27 @@ function coercionReference(node, aliases) {
     current.expression.name.text === 'bind'
   ) {
     return coercionReference(current.expression.expression, aliases);
+  }
+  return false;
+}
+
+function coercionCallee(node, aliases) {
+  const current = unwrapExpression(node);
+  if (coercionReference(current, aliases)) return true;
+  if (
+    ts.isPropertyAccessExpression(current) &&
+    ['apply', 'bind', 'call'].includes(current.name.text)
+  ) {
+    return coercionReference(current.expression, aliases);
+  }
+  if (
+    ts.isElementAccessExpression(current) &&
+    current.argumentExpression !== undefined &&
+    ['apply', 'bind', 'call'].includes(
+      literalText(current.argumentExpression) ?? '',
+    )
+  ) {
+    return coercionReference(current.expression, aliases);
   }
   return false;
 }
@@ -337,9 +348,10 @@ function analyze(file) {
         );
       }
       if (ts.isCallExpression(node)) {
-        const directCoercion =
-          calleeContainsIdentifier(node.expression, forbiddenCoercionCallees) ||
-          coercionReference(node.expression, forbiddenCoercionCallees);
+        const directCoercion = coercionCallee(
+          node.expression,
+          forbiddenCoercionCallees,
+        );
         const reflectiveCoercion =
           ts.isPropertyAccessExpression(node.expression) &&
           ts.isIdentifier(node.expression.expression) &&
