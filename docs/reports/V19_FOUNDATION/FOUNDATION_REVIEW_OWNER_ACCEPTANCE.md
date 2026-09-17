@@ -1,7 +1,7 @@
 # V19 foundation review and owner acceptance
 
-**Status:** `FOUNDATION_REVIEWED_NONPRODUCTION`  
-**Date:** 2026-09-17  
+**Status:** `FOUNDATION_REVIEWED_NONPRODUCTION`
+**Date:** 2026-09-17
 **Authority:** `PROJECT_OWNER_DIRECTION_RELAYED_BY_CONTROL_TOWER_2026_09_17`
 
 ## Immutable review chain
