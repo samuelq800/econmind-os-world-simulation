@@ -57,12 +57,12 @@ shared staging, Supabase, or production target was contacted.
 The exact runnable commands and per-case outcome are recorded in
 `TEST_EVIDENCE.json`.
 
-The former root-check reproducibility defect is closed by building
-`@econmind/core` before recursive typechecking. A new no-output worktree at
-`82d9504b37fcbe2a839f9a8454cfacc6ef98dde3` completed the unmodified official
-`pnpm check` command successfully. The native PostgreSQL matrix remains a
-separate execution fact: isolated GitHub Actions PostgreSQL 16 run
-`35103754813` passed on `d6793dd9439cc82e959d6d086ee4735dbdf62b57`, covering
-atomic rollback, acknowledgement-loss retry, two-connection race, backend
+The exact current implementation candidate is
+`dc850f105a2f7cd8a6e5a3c05297293794cfed75`. GitHub Actions run
+`35185336585` passed both its disposable PostgreSQL 16 matrix and the
+unmodified official `pnpm check` on that exact SHA (581 passed, 10 skipped
+tests; 51 passed, 2 skipped test files). The PostgreSQL matrix covers atomic
+rollback, acknowledgement-loss retry, two-connection race, backend
 termination, old WorldVersion, writer lease and recovery cases. This execution
-evidence does not itself authorize a Gate B decision or a merge.
+evidence does not itself authorize an independent package decision, Gate B, or
+a merge.

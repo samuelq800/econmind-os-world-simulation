@@ -6,13 +6,13 @@
 PACKAGE = V09.2 + V09.3
 STATE = IMPLEMENTED_UNVERIFIED / READY_FOR_PACKAGE_REVIEW_CANDIDATE
 BASE = 8da085184bf063b61ba53c10537c6a797018072b
-IMPLEMENTATION_CODE_TIP = d6793dd9439cc82e959d6d086ee4735dbdf62b57
+IMPLEMENTATION_CODE_TIP = dc850f105a2f7cd8a6e5a3c05297293794cfed75
 INDEPENDENT_REVIEW = REQUIRED
-GATE_B = NOT_RUN
+GATE_B_WORLD_CORE_HARD_GATE = PENDING
 MAIN_MERGE = NO
 ```
 
-Review implementation code at the immutable `d6793dd9439cc82e959d6d086ee4735dbdf62b57`
+Review implementation code at the immutable `dc850f105a2f7cd8a6e5a3c05297293794cfed75`
 tip and this evidence bundle. Do not treat this implementation report, its
 local tests, an existing CI job, or a static database adapter as independent
 approval.
@@ -32,17 +32,19 @@ approval.
 6. Re-run manifest provenance, clean/existing migration rehearsal, secret and
    boundary scans after the final tip is frozen.
 
-## Real-PostgreSQL acceptance blocker
+## Current execution evidence and remaining gate boundary
 
-The exact V09 test command is present in `TEST_EVIDENCE.json`, but its
-dedicated disposable target is absent. This is a `NOT_RUN` evidence gap, not a
-passing local result. It must be resolved on an approved isolated PostgreSQL
-target before any reviewer can claim the process/connection recovery matrix is
-complete. Shared staging, Supabase and production are outside this request.
+GitHub Actions run `35185336585` passed the disposable PostgreSQL 16 matrix and
+the unmodified full `pnpm check` on this exact tip. The local host's
+PostgreSQL probe remains `NOT_RUN`; it was not substituted for CI evidence.
+
+This package is not a Gate B candidate by itself. Gate B remains pending V10.4
+evidence, including non-production Supabase RLS/grant negatives, browser E2E,
+the full property/state-machine and attack campaigns, and an independent Gate
+B review. Shared staging, Supabase and production are outside this request.
 
 ## Recorded risk state
 
-No implementation-side P0 or MAJOR defect was found by the focused local
-matrix. That is not an independent severity verdict: the independent P0/MAJOR
-verdict and Gate B remain `NOT_RUN` until package review and the real database
-matrix are completed.
+No implementation-side P0 or MAJOR defect was found by the focused local and
+CI matrices. That is not an independent severity verdict: independent V09
+package review is still required, and Gate B remains `PENDING`.

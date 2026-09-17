@@ -3,7 +3,7 @@
   "package": "V09.2 + V09.3",
   "state": "IMPLEMENTED_UNVERIFIED",
   "base": "8da085184bf063b61ba53c10537c6a797018072b",
-  "implementation_candidate_tip": "d6793dd9439cc82e959d6d086ee4735dbdf62b57",
+  "implementation_candidate_tip": "dc850f105a2f7cd8a6e5a3c05297293794cfed75",
   "toolchain": {
     "node": "24.20.0",
     "pnpm": "12.3.4",
@@ -52,6 +52,25 @@
         "clean-baseline and existing-schema PGlite rehearsal",
         "foundation policy and repository secret scan"
       ]
+    },
+    {
+      "command": "pnpm check",
+      "runner": "GitHub Actions macos-latest",
+      "source_commit": "dc850f105a2f7cd8a6e5a3c05297293794cfed75",
+      "run": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35185336585",
+      "result": "PASS",
+      "exit_code": 0,
+      "test_files": {
+        "passed": 51,
+        "skipped": 2,
+        "total": 53
+      },
+      "tests": {
+        "passed": 581,
+        "skipped": 10,
+        "total": 591
+      },
+      "note": "Unmodified official check on the exact implementation candidate."
     },
     {
       "command": "pnpm --filter @econmind/core build && pnpm --filter @econmind/world-worker build",
@@ -142,9 +161,9 @@
     "execution_result_for_this_tip": "PASS",
     "run": {
       "provider": "GitHub Actions disposable PostgreSQL 16 service",
-      "id": 35103754813,
-      "url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35103754813",
-      "commit": "d6793dd9439cc82e959d6d086ee4735dbdf62b57",
+      "id": 35185336585,
+      "url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35185336585",
+      "commit": "dc850f105a2f7cd8a6e5a3c05297293794cfed75",
       "result": "PASS"
     },
     "local_probe": "docker, psql and pg_isready unavailable; loopback PostgreSQL unavailable; no local remote target was attempted"
@@ -154,7 +173,7 @@
     "implementation_self_assessed_open_major": 0,
     "source_code_verdict": "PASS_BY_OWNER_DELEGATED_IMPLEMENTATION_ASSESSMENT",
     "independent_p0_major_verdict": "NOT_RUN",
-    "gate_b": "NOT_RUN",
+    "gate_b_world_core_hard_gate": "PENDING",
     "production_access": false,
     "production_mutation": false,
     "main_merge_authorized": false
