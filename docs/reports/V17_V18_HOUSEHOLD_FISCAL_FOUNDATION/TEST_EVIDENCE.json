@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "candidateCodeSha": "40c7476213f1b9d57533fbfd57286defe954202d",
+  "foundationSha": "5356fe93932eb285b3c21977a655e4c6e7bb6746",
+  "branch": "codex/c-v17-v18-household-fiscal-foundation",
+  "reportState": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
+  "effectiveRisk": "P0",
+  "toolchain": {
+    "node": "v24.20.0",
+    "pnpm": "12.3.4"
+  },
+  "passed": [
+    {
+      "command": "pnpm --filter @econmind/core build",
+      "result": "PASS",
+      "evidence": "tsc -p tsconfig.build.json exited 0"
+    },
+    {
+      "command": "pnpm --filter @econmind/core typecheck",
+      "result": "PASS",
+      "evidence": "tsc -p tsconfig.json --pretty false exited 0"
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/v17-v18-household-fiscal-foundation.test.ts tests/world-core/v11-v18-engine-kernels.test.ts",
+      "result": "PASS",
+      "evidence": "2 files and 15 tests passed"
+    },
+    {
+      "command": "pnpm exec eslint packages/core/src/engine-kernels/household-fiscal-closure.ts packages/core/src/engine-kernels/index.ts tests/world-core/v17-v18-household-fiscal-foundation.test.ts",
+      "result": "PASS",
+      "evidence": "exited 0"
+    },
+    {
+      "command": "pnpm exec prettier --check docs/exec-plans/V17_V18_HOUSEHOLD_FISCAL_FOUNDATION.md docs/reports/V17_V18_HOUSEHOLD_FISCAL_FOUNDATION/IMPLEMENTATION.md docs/reports/V17_V18_HOUSEHOLD_FISCAL_FOUNDATION/TEST_EVIDENCE.json packages/core/src/engine-kernels/household-fiscal-closure.ts packages/core/src/engine-kernels/index.ts tests/world-core/v17-v18-household-fiscal-foundation.test.ts",
+      "result": "PASS",
+      "evidence": "all matched files use Prettier code style"
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "result": "PASS",
+      "evidence": "45 files scanned; no boundary violation"
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "result": "PASS",
+      "evidence": "30 Core files scanned; no violation"
+    },
+    {
+      "command": "pnpm secrets:check",
+      "result": "PASS",
+      "evidence": "403 files scanned; no sensitive-pattern violation"
+    },
+    {
+      "command": "git show --check --format=fuller 40c7476213f1b9d57533fbfd57286defe954202d",
+      "result": "PASS",
+      "evidence": "no whitespace error"
+    }
+  ],
+  "notRun": [
+    {
+      "scope": "P0 independent review",
+      "reason": "must be performed by an independent reviewer; no self-approval"
+    },
+    {
+      "scope": "full repository pnpm check",
+      "reason": "not proportionate to this isolated pure-Core candidate; no full-suite claim"
+    },
+    {
+      "scope": "database, RLS, migration, API, worker, UI, authorization, persistence/recovery, concurrency, production, and calibration",
+      "reason": "no such code or authority is in scope"
+    },
+    {
+      "scope": "V17.3 poverty/cost views, V18.2 debt/guarantee/SOE, and V18.3 Finance integration",
+      "reason": "deliberately excluded from this foundation candidate"
+    }
+  ],
+  "conclusion": "FOUNDATION_IMPLEMENTED_UNVERIFIED; no lifecycle status, Gate, merge, deployment, or production claim."
+}
