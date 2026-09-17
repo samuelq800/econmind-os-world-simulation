@@ -3,7 +3,7 @@
   "recordType": "V20_FX_INTERNATIONAL_FOUNDATION_TEST_EVIDENCE",
   "base": "ec5ceb2ef8434fc3f6c40c8c62b0311a3676a24d",
   "branch": "codex/v20-fx-international-foundation",
-  "validatedCodeCandidate": "ff5becb57ac5f17da35ecd6cfc1940b6cc31949f",
+  "validatedCodeCandidate": "d9e6774c09f528a26c17cf289b741be13e830451",
   "status": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
   "risk": "P0",
   "result": "PASS_AT_FROZEN_CODE_CANDIDATE",
@@ -38,7 +38,7 @@
     },
     {
       "command": "pnpm secrets:check",
-      "result": "PASS: 651 files"
+      "result": "PASS: 652 files"
     },
     {
       "command": "pnpm foundation:policy",
@@ -57,8 +57,18 @@
     "duplicate private settlement witness",
     "private-versus-official reserve field confusion",
     "bilateral external-debt imbalance",
-    "historical locked-cash rewrite using current FX"
+    "historical locked-cash rewrite using current FX",
+    "unsafe-cast FX conversion direction rejects before amount/currency validation, arithmetic or trace output",
+    "unsafe-cast external-debt direction rejects before amount/currency validation, arithmetic or debt result"
   ],
+  "reviewRemediation": {
+    "reviewedTip": "ad8c4dc74d5b3b308b0415be4ce731425ad0f422",
+    "reviewedCode": "ff5becb57ac5f17da35ecd6cfc1940b6cc31949f",
+    "reviewResult": "P0=0, MAJOR=1",
+    "issue": "Runtime unsafe-cast discriminator strings were able to fall through the ternary defaults.",
+    "fix": "Validate FX direction as exactly LC_TO_GCU|GCU_TO_LC and debt direction as exactly DRAW|REPAYMENT immediately after immutable fact binding and before rate/balance arithmetic or direction branching.",
+    "closureReview": "PENDING_NARROW_REVIEW_B"
+  },
   "nonAuthoritativeBoundary": [
     "Core consumes caller facts and selects no exchange rate, spread, capital control, intervention amount, rounding decision or macro formula.",
     "No 70x69 authoritative FX pair matrix is created.",
@@ -67,7 +77,7 @@
   ],
   "notRun": [
     "official full repository pnpm check",
-    "independent review",
+    "narrow independent Review B closure review for d9e6774c09f528a26c17cf289b741be13e830451",
     "product V20 verification, status/Gate promotion, merge or deployment",
     "database, RLS, migration, Supabase, API, worker, UI, Command, Event, receipt, durable ledger, transaction, recovery and production validation"
   ],
