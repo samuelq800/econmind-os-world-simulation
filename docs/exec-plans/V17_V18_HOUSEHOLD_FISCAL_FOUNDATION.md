@@ -66,3 +66,19 @@ Freeze and push only an immutable pure-Core candidate. Report actual command
 outcomes and remaining gaps, keep this candidate
 `FOUNDATION_IMPLEMENTED_UNVERIFIED`, and stop for the required independent
 review before any dependent or authoritative work.
+
+## Review-remediation addendum
+
+- Any fiscal commitment candidate must reconcile a complete caller-supplied
+  immutable budget-line snapshot and its predecessor-linked submitted
+  commitment chain. A caller-owned `committedBefore` field is invalid; existing
+  and proposed commitments aggregate against the exact appropriation before a
+  candidate can return.
+- Settled household income, Treasury payment, and commitment evidence must all
+  bind to one immutable source/version/snapshot/hash/predecessor-hash lineage.
+  The kernel emits a canonical SHA-256 preimage for deterministic replay; the
+  future authoritative owner remains responsible for external source
+  attestation and durable replay/idempotency.
+- Runtime inputs must fail closed for unknown household settlement kinds and
+  insufficient-cash dispositions, including values introduced via an unsafe
+  TypeScript cast.

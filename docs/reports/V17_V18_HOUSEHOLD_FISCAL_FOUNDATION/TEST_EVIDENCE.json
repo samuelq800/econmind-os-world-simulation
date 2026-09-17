@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "candidateCodeSha": "40c7476213f1b9d57533fbfd57286defe954202d",
+  "candidateCodeSha": "ea3b5b818a485614ad7cb2d3cd6240a59f7da439",
   "foundationSha": "5356fe93932eb285b3c21977a655e4c6e7bb6746",
   "branch": "codex/c-v17-v18-household-fiscal-foundation",
   "reportState": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
@@ -9,6 +9,11 @@
     "node": "v24.20.0",
     "pnpm": "12.3.4"
   },
+  "reviewRemediation": [
+    "Reconciled immutable predecessor-linked commitment lineage per budget line; caller-owned committedBefore is rejected.",
+    "Bound settled-income, payment, and commitment evidence to one source/version/snapshot/hash/predecessor lineage and emitted a canonical replay preimage.",
+    "Runtime-validated household settlement kind and Treasury insufficient-cash disposition."
+  ],
   "passed": [
     {
       "command": "pnpm --filter @econmind/core build",
@@ -23,7 +28,7 @@
     {
       "command": "pnpm exec vitest run tests/world-core/v17-v18-household-fiscal-foundation.test.ts tests/world-core/v11-v18-engine-kernels.test.ts",
       "result": "PASS",
-      "evidence": "2 files and 15 tests passed"
+      "evidence": "2 files and 17 tests passed"
     },
     {
       "command": "pnpm exec eslint packages/core/src/engine-kernels/household-fiscal-closure.ts packages/core/src/engine-kernels/index.ts tests/world-core/v17-v18-household-fiscal-foundation.test.ts",
@@ -48,10 +53,10 @@
     {
       "command": "pnpm secrets:check",
       "result": "PASS",
-      "evidence": "403 files scanned; no sensitive-pattern violation"
+      "evidence": "405 files scanned; no sensitive-pattern violation"
     },
     {
-      "command": "git show --check --format=fuller 40c7476213f1b9d57533fbfd57286defe954202d",
+      "command": "git show --check --format=fuller ea3b5b818a485614ad7cb2d3cd6240a59f7da439",
       "result": "PASS",
       "evidence": "no whitespace error"
     }
