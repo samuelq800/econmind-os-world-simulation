@@ -3,9 +3,10 @@
   "recordType": "V19_FOUNDATION_TEST_EVIDENCE",
   "base": "72dcb20d83fbc7365fb22d5ac24c373e3ca55994",
   "branch": "codex/v19-bank-central-foundation",
+  "validatedCandidateTip": "f62e50fef6f21dc56df398f1228290679d207293",
   "status": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
   "risk": "P0",
-  "result": "PRE_COMMIT_WORKTREE_PASS_WITH_DOCUMENTED_BOUNDARY_RETRY",
+  "result": "PASS_AT_FROZEN_CANDIDATE_WITH_DOCUMENTED_BOUNDARY_RETRY",
   "checks": [
     { "command": "pnpm --filter @econmind/core typecheck", "result": "PASS" },
     { "command": "pnpm --filter @econmind/core build", "result": "PASS" },
@@ -18,8 +19,8 @@
       "result": "PASS: 16 files, 80 tests"
     },
     {
-      "command": "pnpm exec vitest run architecture boundary/foundation suites",
-      "result": "PASS on unmodified retry: 3 files, 34 tests"
+      "command": "pnpm exec vitest run architecture boundary/foundation suites --maxWorkers=1",
+      "result": "PASS: 3 files, 34 tests; suite assertions and timeouts unchanged"
     },
     {
       "command": "node scripts/check-authoritative-patterns.mjs",
@@ -38,9 +39,9 @@
     { "command": "affected-path ESLint and Prettier", "result": "PASS" }
   ],
   "preservedObservation": {
-    "command": "first architecture boundary-suite attempt",
-    "result": "FAIL: cold-cache fixture subprocesses exceeded their existing 5s/15s test timeouts",
-    "resolution": "No test, timeout, or boundary policy was modified. Direct pattern/boundary scans passed, then the identical architecture suite passed after cache warm-up."
+    "command": "default-concurrency architecture boundary-suite attempts",
+    "result": "FAIL: fixture subprocesses intermittently exceeded their existing 5s/15s test timeouts (first 3 failures, then 2 failures at the frozen candidate)",
+    "resolution": "No test, timeout, assertion, or boundary policy was modified. Direct pattern/boundary scans passed. The same architecture suite then passed serially with --maxWorkers=1, which changes scheduling only."
   },
   "notRun": [
     "official full repository pnpm check",
