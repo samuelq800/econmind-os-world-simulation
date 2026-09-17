@@ -13,6 +13,7 @@ import {
   type ExactQuantity,
   type ExactUnitPrice,
 } from './common.js';
+import { canonicalHashInput } from '../serialization/canonical.js';
 
 /**
  * E13/E14 foundation-only closure. Every balance supplied here is an inert
@@ -28,6 +29,33 @@ export interface ExternalBalanceSnapshot {
   /** Stable reference to the Banking- or CB-owned balance; never a local copy. */
   readonly balanceRef: string;
   readonly balance: ExactMoney;
+}
+
+/**
+ * Immutable source snapshot binding supplied by the future authoritative
+ * owner. This pure kernel verifies internal lineage consistency only; it does
+ * not attest, store, or fetch the external source.
+ */
+export interface ImmutableSourceSnapshotBinding {
+  readonly sourceRef: string;
+  readonly sourceVersion: string;
+  readonly snapshotRef: string;
+  readonly snapshotHash: string;
+  readonly predecessorSnapshotHash: string | null;
+}
+
+/** Externally produced evidence bound to the exact closure source snapshot. */
+export interface BoundFoundationEvidence {
+  readonly evidenceRef: string;
+  readonly lineage: ImmutableSourceSnapshotBinding;
+}
+
+/** Canonical SHA-256 preimage for an exact replay by a future owner. */
+export interface FoundationReplayProof {
+  readonly lineage: ImmutableSourceSnapshotBinding;
+  readonly evidenceRefs: readonly string[];
+  readonly traceRefs: readonly string[];
+  readonly hashInput: string;
 }
 
 export interface ExactMoneyTrace {
@@ -55,6 +83,7 @@ export interface SettledHouseholdReceipt {
   /** An externally issued settlement receipt reference, not a durable receipt here. */
   readonly receiptRef: string;
   readonly sourceRef: string;
+  readonly evidence: BoundFoundationEvidence;
   readonly kind: HouseholdSettlementKind;
   readonly settlementState: 'SETTLED';
   readonly amount: ExactMoney;
@@ -78,6 +107,7 @@ export interface HouseholdDomesticDemandLine {
 }
 
 export interface HouseholdDomesticClosureInput {
+  readonly lineage: ImmutableSourceSnapshotBinding;
   readonly bankDeposit: ExternalBalanceSnapshot;
   readonly settledReceipts: readonly SettledHouseholdReceipt[];
   readonly approvedUnpaidTransfers: readonly ApprovedUnpaidHouseholdTransfer[];
@@ -108,6 +138,7 @@ export interface HouseholdDomesticClosureResult {
   readonly excludedApprovedUnpaidTransfers: readonly ApprovedUnpaidHouseholdTransfer[];
   readonly receiptTraces: readonly ExactMoneyTrace[];
   readonly demandClosures: readonly HouseholdDemandClosureLine[];
+  readonly replayProof: FoundationReplayProof;
 }
 
 export type TreasuryInsufficientCashDisposition =
@@ -129,14 +160,31 @@ export interface FiscalTaxCollectionInput {
 export interface FiscalBudgetCommitmentInput {
   readonly budgetLineRef: string;
   readonly commitmentRef: string;
-  readonly appropriation: ExactMoney;
-  readonly committedBefore: ExactMoney;
+  readonly predecessorCommitmentRef: string | null;
   readonly newCommitment: ExactMoney;
+  readonly evidence: BoundFoundationEvidence;
+}
+
+/** Immutable budget-line snapshot with its complete submitted commitment chain. */
+export interface FiscalBudgetLineSnapshot {
+  readonly budgetLineRef: string;
+  readonly lineage: ImmutableSourceSnapshotBinding;
+  readonly appropriation: ExactMoney;
+  readonly commitmentHeadRef: string | null;
+  readonly committed: readonly FiscalSubmittedCommitment[];
+}
+
+export interface FiscalSubmittedCommitment {
+  readonly commitmentRef: string;
+  readonly predecessorCommitmentRef: string | null;
+  readonly amount: ExactMoney;
+  readonly evidence: BoundFoundationEvidence;
 }
 
 export interface TreasuryPaymentRequest {
   readonly paymentRef: string;
   readonly obligationRef: string;
+  readonly evidence: BoundFoundationEvidence;
   /** Strictly ascending and caller-declared. This foundation adds no policy. */
   readonly priority: number;
   readonly duePayment: ExactMoney;
@@ -144,8 +192,10 @@ export interface TreasuryPaymentRequest {
 }
 
 export interface FiscalTreasuryClosureInput {
+  readonly lineage: ImmutableSourceSnapshotBinding;
   readonly treasuryGeneralAccount: ExternalBalanceSnapshot;
   readonly taxes: readonly FiscalTaxCollectionInput[];
+  readonly budgetLineSnapshots: readonly FiscalBudgetLineSnapshot[];
   readonly commitments: readonly FiscalBudgetCommitmentInput[];
   readonly payments: readonly TreasuryPaymentRequest[];
 }
@@ -170,6 +220,7 @@ export interface FiscalTaxCollectionResult {
 export interface FiscalBudgetCommitmentResult {
   readonly budgetLineRef: string;
   readonly appropriation: ExactMoney;
+  readonly committedBefore: ExactMoney;
   readonly commitmentTrace: ExactMoneyTrace;
   readonly remainingAppropriation: ExactMoney;
 }
@@ -194,9 +245,11 @@ export interface FiscalTreasuryClosureResult {
   readonly taxCollections: readonly FiscalTaxCollectionResult[];
   readonly commitments: readonly FiscalBudgetCommitmentResult[];
   readonly paymentResults: readonly TreasuryPaymentResult[];
+  readonly replayProof: FoundationReplayProof;
 }
 
 const STABLE_REFERENCE = /^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u;
+const SHA256_HEX = /^[a-f0-9]{64}$/u;
 
 function stableReference(value: string, label: string): string {
   if (!STABLE_REFERENCE.test(value)) {
@@ -213,6 +266,96 @@ function stableReferences(values: readonly string[], label: string) {
       stableReference(value, `${label} input reference ${index}`),
     ),
   );
+}
+
+function snapshotHash(value: string, label: string): string {
+  if (!SHA256_HEX.test(value)) {
+    kernelInvalid(`${label} must be a lowercase SHA-256 hex digest`);
+  }
+  return value;
+}
+
+function immutableSourceSnapshotBinding(
+  value: ImmutableSourceSnapshotBinding,
+  label: string,
+): ImmutableSourceSnapshotBinding {
+  return Object.freeze({
+    sourceRef: stableReference(value.sourceRef, `${label} source`),
+    sourceVersion: stableReference(value.sourceVersion, `${label} version`),
+    snapshotRef: stableReference(value.snapshotRef, `${label} snapshot`),
+    snapshotHash: snapshotHash(value.snapshotHash, `${label} snapshot hash`),
+    predecessorSnapshotHash:
+      value.predecessorSnapshotHash === null
+        ? null
+        : snapshotHash(
+            value.predecessorSnapshotHash,
+            `${label} predecessor snapshot hash`,
+          ),
+  });
+}
+
+function sameLineage(
+  expected: ImmutableSourceSnapshotBinding,
+  actual: ImmutableSourceSnapshotBinding,
+  label: string,
+): void {
+  if (
+    expected.sourceRef !== actual.sourceRef ||
+    expected.sourceVersion !== actual.sourceVersion ||
+    expected.snapshotRef !== actual.snapshotRef ||
+    expected.snapshotHash !== actual.snapshotHash ||
+    expected.predecessorSnapshotHash !== actual.predecessorSnapshotHash
+  ) {
+    kernelInvalid(`${label} must bind to the closure source snapshot lineage`);
+  }
+}
+
+function boundEvidence(
+  value: BoundFoundationEvidence,
+  expectedLineage: ImmutableSourceSnapshotBinding,
+  label: string,
+): BoundFoundationEvidence {
+  const lineage = immutableSourceSnapshotBinding(
+    value.lineage,
+    `${label} lineage`,
+  );
+  sameLineage(expectedLineage, lineage, label);
+  return Object.freeze({
+    evidenceRef: stableReference(value.evidenceRef, `${label} reference`),
+    lineage,
+  });
+}
+
+function replayProof(input: {
+  readonly closure: 'HOUSEHOLD_DOMESTIC' | 'FISCAL_TREASURY';
+  readonly lineage: ImmutableSourceSnapshotBinding;
+  readonly evidenceRefs: readonly string[];
+  readonly traces: readonly (ExactMoneyTrace | ExactQuantityTrace)[];
+}): FoundationReplayProof {
+  const evidenceRefs = Object.freeze(
+    input.evidenceRefs.map((reference, index) =>
+      stableReference(reference, `replay proof evidence reference ${index}`),
+    ),
+  );
+  assertUniqueReferences(evidenceRefs, 'replay proof evidence reference');
+  const traceRefs = Object.freeze(
+    input.traces.map((trace) =>
+      stableReference(trace.traceRef, 'replay trace'),
+    ),
+  );
+  assertUniqueReferences(traceRefs, 'replay proof trace reference');
+  const lineage = immutableSourceSnapshotBinding(input.lineage, 'replay proof');
+  return Object.freeze({
+    lineage,
+    evidenceRefs,
+    traceRefs,
+    hashInput: canonicalHashInput({
+      closure: input.closure,
+      lineage,
+      evidenceRefs,
+      traces: input.traces,
+    }),
+  });
 }
 
 function nonNegativeMoney(value: ExactMoney, label: string) {
@@ -310,6 +453,20 @@ function settlementDelta(
   return kind === 'WAGE' || kind === 'TRANSFER' ? amount : amount.negated();
 }
 
+function householdSettlementKind(value: unknown): HouseholdSettlementKind {
+  if (
+    value === 'WAGE' ||
+    value === 'TRANSFER' ||
+    value === 'TAX' ||
+    value === 'DEBT_SERVICE'
+  ) {
+    return value;
+  }
+  return kernelInvalid(
+    'Household settlement kind must be WAGE, TRANSFER, TAX, or DEBT_SERVICE',
+  );
+}
+
 function assertStrictPriorities(
   payments: readonly TreasuryPaymentRequest[],
 ): void {
@@ -327,6 +484,133 @@ function assertStrictPriorities(
   }
 }
 
+function insufficientCashDisposition(
+  value: unknown,
+): TreasuryInsufficientCashDisposition {
+  if (value === 'ARREAR' || value === 'DELAYED' || value === 'DEFAULT') {
+    return value;
+  }
+  return kernelInvalid(
+    'Treasury insufficient cash disposition must be ARREAR, DELAYED, or DEFAULT',
+  );
+}
+
+interface BudgetLineClosureState {
+  readonly budgetLineRef: string;
+  readonly appropriation: ReturnType<typeof nonNegative>;
+  readonly currency: string;
+  committed: ReturnType<typeof nonNegative>;
+  commitmentHeadRef: string | null;
+}
+
+function fiscalBudgetLineStates(
+  snapshots: readonly FiscalBudgetLineSnapshot[],
+  lineage: ImmutableSourceSnapshotBinding,
+  currency: string,
+): {
+  readonly states: Map<string, BudgetLineClosureState>;
+  readonly commitmentRefs: ReadonlySet<string>;
+  readonly evidenceRefs: readonly string[];
+} {
+  assertUniqueReferences(
+    snapshots.map((snapshot) => snapshot.budgetLineRef),
+    'Fiscal budget-line snapshot reference',
+  );
+  const states = new Map<string, BudgetLineClosureState>();
+  const commitmentRefs = new Set<string>();
+  const evidenceRefs: string[] = [];
+  for (const snapshot of snapshots) {
+    const budgetLineRef = stableReference(
+      snapshot.budgetLineRef,
+      'fiscal budget line snapshot',
+    );
+    const snapshotLineage = immutableSourceSnapshotBinding(
+      snapshot.lineage,
+      'fiscal budget line snapshot',
+    );
+    sameLineage(lineage, snapshotLineage, 'fiscal budget line snapshot');
+    const appropriation = nonNegativeMoney(
+      snapshot.appropriation,
+      'budget appropriation',
+    );
+    sameCurrency(currency, appropriation.currency, 'budget appropriation');
+    let committed = decimal('0', 'submitted budget commitments');
+    let expectedPredecessor: string | null = null;
+    for (const submitted of snapshot.committed) {
+      const commitmentRef = stableReference(
+        submitted.commitmentRef,
+        'submitted budget commitment',
+      );
+      if (commitmentRefs.has(commitmentRef)) {
+        kernelInvalid('Submitted budget commitment reference must be unique');
+      }
+      const predecessor =
+        submitted.predecessorCommitmentRef === null
+          ? null
+          : stableReference(
+              submitted.predecessorCommitmentRef,
+              'submitted budget commitment predecessor',
+            );
+      if (predecessor !== expectedPredecessor) {
+        kernelInvalid(
+          'Submitted budget commitment predecessor does not match authoritative lineage',
+        );
+      }
+      const amount = nonNegativeMoney(
+        submitted.amount,
+        'submitted budget commitment amount',
+      );
+      sameCurrency(
+        appropriation.currency,
+        amount.currency,
+        'submitted budget commitment amount',
+      );
+      if (amount.amount.isZero()) {
+        kernelInvalid('Submitted budget commitment amount must be positive');
+      }
+      const evidence = boundEvidence(
+        submitted.evidence,
+        lineage,
+        'submitted budget commitment evidence',
+      );
+      commitmentRefs.add(commitmentRef);
+      evidenceRefs.push(evidence.evidenceRef);
+      committed = committed.plus(amount.amount);
+      if (committed.greaterThan(appropriation.amount)) {
+        kernelInvalid(
+          'Submitted budget commitments cannot exceed appropriation',
+        );
+      }
+      expectedPredecessor = commitmentRef;
+    }
+    const commitmentHeadRef =
+      snapshot.commitmentHeadRef === null
+        ? null
+        : stableReference(
+            snapshot.commitmentHeadRef,
+            'fiscal budget-line commitment head',
+          );
+    if (commitmentHeadRef !== expectedPredecessor) {
+      kernelInvalid(
+        'Fiscal budget-line commitment head does not match submitted lineage',
+      );
+    }
+    states.set(budgetLineRef, {
+      budgetLineRef,
+      appropriation: appropriation.amount,
+      currency: appropriation.currency,
+      committed,
+      commitmentHeadRef,
+    });
+  }
+  assertUniqueReferences(evidenceRefs, 'Submitted budget commitment evidence');
+  return Object.freeze({
+    states,
+    commitmentRefs,
+    evidenceRefs: Object.freeze(evidenceRefs),
+  });
+}
+
 /**
  * Closes only externally settled household cash and explicitly allocated final
  * demand. The returned cash values are an inert Banking-account trace, not a
@@ -335,6 +619,10 @@ function assertStrictPriorities(
 export function closeHouseholdDomesticClosure(
   input: HouseholdDomesticClosureInput,
 ): HouseholdDomesticClosureResult {
+  const lineage = immutableSourceSnapshotBinding(
+    input.lineage,
+    'household closure',
+  );
   const bankDepositRef = stableReference(
     input.bankDeposit.balanceRef,
     'bank deposit balance',
@@ -360,17 +648,25 @@ export function closeHouseholdDomesticClosure(
   let taxPaid = decimal('0', 'settled tax paid');
   let debtServicePaid = decimal('0', 'settled debt service paid');
   const receiptTraces: ExactMoneyTrace[] = [];
+  const receiptEvidenceRefs: string[] = [];
   for (const receipt of input.settledReceipts) {
     if (receipt.settlementState !== 'SETTLED') {
       kernelInvalid('Household cash path requires an explicit settled receipt');
     }
     const amount = nonNegativeMoney(receipt.amount, 'household receipt amount');
+    const kind = householdSettlementKind(receipt.kind);
+    const evidence = boundEvidence(
+      receipt.evidence,
+      lineage,
+      'household settlement evidence',
+    );
+    receiptEvidenceRefs.push(evidence.evidenceRef);
     sameCurrency(
       openingCash.currency,
       amount.currency,
       'Household receipt amount',
     );
-    const delta = settlementDelta(receipt.kind, amount.amount);
+    const delta = settlementDelta(kind, amount.amount);
     const after = cash.plus(delta);
     if (after.isNegative()) {
       kernelInvalid('A settled household debit cannot exceed available cash');
@@ -378,22 +674,30 @@ export function closeHouseholdDomesticClosure(
     receiptTraces.push(
       moneyTrace({
         traceRef: receipt.receiptRef,
-        inputRefs: [receipt.receiptRef, receipt.sourceRef],
+        inputRefs: [
+          receipt.receiptRef,
+          receipt.sourceRef,
+          evidence.evidenceRef,
+        ],
         outputRef: bankDepositRef,
         before: renderMoney(cash, openingCash.currency),
         delta: renderMoney(delta, openingCash.currency),
         after: renderMoney(after, openingCash.currency),
       }),
     );
-    if (receipt.kind === 'WAGE' || receipt.kind === 'TRANSFER') {
+    if (kind === 'WAGE' || kind === 'TRANSFER') {
       cashIncome = cashIncome.plus(amount.amount);
-    } else if (receipt.kind === 'TAX') {
+    } else if (kind === 'TAX') {
       taxPaid = taxPaid.plus(amount.amount);
     } else {
       debtServicePaid = debtServicePaid.plus(amount.amount);
     }
     cash = after;
   }
+  assertUniqueReferences(
+    receiptEvidenceRefs,
+    'Household settlement evidence reference',
+  );
   const excludedApprovedUnpaidTransfers = Object.freeze(
     input.approvedUnpaidTransfers.map((transfer) => {
       if (transfer.state !== 'APPROVED_UNPAID') {
@@ -521,6 +825,8 @@ export function closeHouseholdDomesticClosure(
     );
     cash = afterCash;
   }
+  const frozenReceiptTraces = Object.freeze(receiptTraces);
+  const frozenDemandClosures = Object.freeze(demandClosures);
   return Object.freeze({
     foundationStatus: HOUSEHOLD_FISCAL_FOUNDATION_STATUS,
     bankDepositRef,
@@ -530,8 +836,20 @@ export function closeHouseholdDomesticClosure(
     settledTaxPaid: renderMoney(taxPaid, openingCash.currency),
     settledDebtServicePaid: renderMoney(debtServicePaid, openingCash.currency),
     excludedApprovedUnpaidTransfers,
-    receiptTraces: Object.freeze(receiptTraces),
-    demandClosures: Object.freeze(demandClosures),
+    receiptTraces: frozenReceiptTraces,
+    demandClosures: frozenDemandClosures,
+    replayProof: replayProof({
+      closure: 'HOUSEHOLD_DOMESTIC',
+      lineage,
+      evidenceRefs: receiptEvidenceRefs,
+      traces: [
+        ...frozenReceiptTraces,
+        ...frozenDemandClosures.flatMap((closure) => [
+          closure.supplyTrace,
+          closure.cashTrace,
+        ]),
+      ],
+    }),
   });
 }
 
@@ -543,6 +861,10 @@ export function closeHouseholdDomesticClosure(
 export function closeFiscalTreasury(
   input: FiscalTreasuryClosureInput,
 ): FiscalTreasuryClosureResult {
+  const lineage = immutableSourceSnapshotBinding(
+    input.lineage,
+    'fiscal closure',
+  );
   const tgaRef = stableReference(
     input.treasuryGeneralAccount.balanceRef,
     'Treasury General Account',
@@ -564,6 +886,12 @@ export function closeFiscalTreasury(
     'Treasury payment reference',
   );
   assertStrictPriorities(input.payments);
+  const budgetLineState = fiscalBudgetLineStates(
+    input.budgetLineSnapshots,
+    lineage,
+    openingCash.currency,
+  );
+  const submittedEvidenceRefs = [...budgetLineState.evidenceRefs];
   let cash = openingCash.amount;
   const taxCollections: FiscalTaxCollectionResult[] = [];
   for (const tax of input.taxes) {
@@ -662,71 +990,102 @@ export function closeFiscalTreasury(
     cash = after;
   }
   const cashAfterTaxCollections = renderMoney(cash, openingCash.currency);
-  const commitments: FiscalBudgetCommitmentResult[] = input.commitments.map(
-    (commitment) => {
-      const appropriation = nonNegativeMoney(
-        commitment.appropriation,
-        'budget appropriation',
+  const commitments: FiscalBudgetCommitmentResult[] = [];
+  for (const commitment of input.commitments) {
+    if ('committedBefore' in commitment) {
+      kernelInvalid(
+        'Budget commitment cannot supply a caller-owned committed before amount',
       );
-      const committedBefore = nonNegativeMoney(
-        commitment.committedBefore,
-        'budget committed before',
+    }
+    const budgetLineRef = stableReference(
+      commitment.budgetLineRef,
+      'budget line',
+    );
+    const state = budgetLineState.states.get(budgetLineRef);
+    if (state === undefined) {
+      kernelInvalid(
+        'Budget commitment requires an authoritative budget-line snapshot',
       );
-      const newCommitment = nonNegativeMoney(
-        commitment.newCommitment,
-        'new budget commitment',
+    }
+    const commitmentRef = stableReference(
+      commitment.commitmentRef,
+      'budget commitment',
+    );
+    if (budgetLineState.commitmentRefs.has(commitmentRef)) {
+      kernelInvalid('Budget commitment reference replays submitted lineage');
+    }
+    const predecessor =
+      commitment.predecessorCommitmentRef === null
+        ? null
+        : stableReference(
+            commitment.predecessorCommitmentRef,
+            'budget commitment predecessor',
+          );
+    if (predecessor !== state.commitmentHeadRef) {
+      kernelInvalid(
+        'Budget commitment predecessor does not match submitted lineage',
       );
-      sameCurrency(
-        openingCash.currency,
-        appropriation.currency,
-        'budget appropriation',
-      );
-      sameCurrency(
-        appropriation.currency,
-        committedBefore.currency,
-        'budget committed before',
-      );
-      sameCurrency(
-        appropriation.currency,
-        newCommitment.currency,
-        'new budget commitment',
-      );
-      const committedAfter = committedBefore.amount.plus(newCommitment.amount);
-      if (committedAfter.greaterThan(appropriation.amount)) {
-        kernelInvalid('Budget commitment cannot exceed appropriation');
-      }
-      const budgetLineRef = stableReference(
-        commitment.budgetLineRef,
-        'budget line',
-      );
-      const commitmentRef = stableReference(
-        commitment.commitmentRef,
-        'budget commitment',
-      );
-      return Object.freeze({
+    }
+    const newCommitment = nonNegativeMoney(
+      commitment.newCommitment,
+      'new budget commitment',
+    );
+    sameCurrency(
+      state.currency,
+      newCommitment.currency,
+      'new budget commitment',
+    );
+    if (newCommitment.amount.isZero()) {
+      kernelInvalid('New budget commitment must be positive');
+    }
+    const evidence = boundEvidence(
+      commitment.evidence,
+      lineage,
+      'budget commitment evidence',
+    );
+    submittedEvidenceRefs.push(evidence.evidenceRef);
+    const committedBefore = state.committed;
+    const committedAfter = committedBefore.plus(newCommitment.amount);
+    if (committedAfter.greaterThan(state.appropriation)) {
+      kernelInvalid('Budget commitment cannot exceed appropriation');
+    }
+    commitments.push(
+      Object.freeze({
         budgetLineRef,
-        appropriation: renderMoney(
-          appropriation.amount,
-          appropriation.currency,
-        ),
+        appropriation: renderMoney(state.appropriation, state.currency),
+        committedBefore: renderMoney(committedBefore, state.currency),
         commitmentTrace: moneyTrace({
           traceRef: commitmentRef,
-          inputRefs: [budgetLineRef, commitmentRef],
+          inputRefs: [
+            budgetLineRef,
+            lineage.snapshotRef,
+            commitmentRef,
+            evidence.evidenceRef,
+          ],
           outputRef: `${budgetLineRef}:COMMITMENT`,
-          before: renderMoney(committedBefore.amount, appropriation.currency),
-          delta: renderMoney(newCommitment.amount, appropriation.currency),
-          after: renderMoney(committedAfter, appropriation.currency),
+          before: renderMoney(committedBefore, state.currency),
+          delta: renderMoney(newCommitment.amount, state.currency),
+          after: renderMoney(committedAfter, state.currency),
         }),
         remainingAppropriation: renderMoney(
-          appropriation.amount.minus(committedAfter),
-          appropriation.currency,
+          state.appropriation.minus(committedAfter),
+          state.currency,
         ),
-      });
-    },
+      }),
+    );
+    state.committed = committedAfter;
+    state.commitmentHeadRef = commitmentRef;
+  }
+  assertUniqueReferences(
+    submittedEvidenceRefs,
+    'Fiscal submitted evidence reference',
   );
   let unpaidHigherPriority: string | null = null;
   const paymentResults: TreasuryPaymentResult[] = [];
   for (const payment of input.payments) {
+    const disposition = insufficientCashDisposition(
+      payment.insufficientCashDisposition,
+    );
     const due = nonNegativeMoney(payment.duePayment, 'Treasury due payment');
     sameCurrency(openingCash.currency, due.currency, 'Treasury due payment');
     if (due.amount.isZero())
@@ -736,6 +1095,12 @@ export function closeFiscalTreasury(
       payment.obligationRef,
       'Treasury payment obligation',
     );
+    const evidence = boundEvidence(
+      payment.evidence,
+      lineage,
+      'Treasury payment evidence',
+    );
+    submittedEvidenceRefs.push(evidence.evidenceRef);
     const before = cash;
     let paid = decimal('0', 'Treasury paid amount');
     let status: TreasuryPaymentResult['status'];
@@ -746,7 +1111,7 @@ export function closeFiscalTreasury(
       paid = due.amount;
       status = 'PAID';
     } else {
-      status = payment.insufficientCashDisposition;
+      status = disposition;
       unpaidHigherPriority = paymentRef;
       blockedByHigherPriorityPaymentRef = null;
     }
@@ -762,7 +1127,7 @@ export function closeFiscalTreasury(
         blockedByHigherPriorityPaymentRef,
         tgaTrace: moneyTrace({
           traceRef: `${paymentRef}:SETTLEMENT`,
-          inputRefs: [paymentRef, obligationRef, tgaRef],
+          inputRefs: [paymentRef, obligationRef, evidence.evidenceRef, tgaRef],
           outputRef: tgaRef,
           before: renderMoney(before, openingCash.currency),
           delta: renderMoney(paid.negated(), openingCash.currency),
@@ -772,13 +1137,34 @@ export function closeFiscalTreasury(
     );
     cash = after;
   }
+  assertUniqueReferences(
+    submittedEvidenceRefs,
+    'Fiscal submitted evidence reference',
+  );
+  const frozenTaxCollections = Object.freeze(taxCollections);
+  const frozenCommitments = Object.freeze(commitments);
+  const frozenPaymentResults = Object.freeze(paymentResults);
   return Object.freeze({
     foundationStatus: HOUSEHOLD_FISCAL_FOUNDATION_STATUS,
     treasuryGeneralAccountRef: tgaRef,
     cashAfterTaxCollections,
     cashAfterPayments: renderMoney(cash, openingCash.currency),
-    taxCollections: Object.freeze(taxCollections),
-    commitments: Object.freeze(commitments),
-    paymentResults: Object.freeze(paymentResults),
+    taxCollections: frozenTaxCollections,
+    commitments: frozenCommitments,
+    paymentResults: frozenPaymentResults,
+    replayProof: replayProof({
+      closure: 'FISCAL_TREASURY',
+      lineage,
+      evidenceRefs: submittedEvidenceRefs,
+      traces: [
+        ...frozenTaxCollections.flatMap((tax) => [
+          tax.liabilityTrace,
+          tax.receivableTrace,
+          tax.tgaTrace,
+        ]),
+        ...frozenCommitments.map((commitment) => commitment.commitmentTrace),
+        ...frozenPaymentResults.map((payment) => payment.tgaTrace),
+      ],
+    }),
   });
 }
