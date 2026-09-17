@@ -55,7 +55,6 @@ function startCommand(
 ): ManagedCommand {
   const child = spawn('pnpm', [script], {
     cwd: repositoryRoot,
-    detached: process.platform !== 'win32',
     env: { ...process.env, ...environment },
     shell: false,
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -75,12 +74,6 @@ function startCommand(
     child.once('exit', (code, signal) => resolve({ code, signal }));
   });
   return { child, exited, output: () => output };
-}
-
-function signalOwnedGroup(managed: ManagedCommand, signal: NodeJS.Signals) {
-  const pid = managed.child.pid;
-  if (pid === undefined) throw new Error('owned pnpm fixture has no PID');
-  process.kill(process.platform === 'win32' ? pid : -pid, signal);
 }
 
 function stackEnvironment(
@@ -355,7 +348,7 @@ describe.skipIf(process.platform === 'win32')(
           expect(eventCount(managed.output(), 'BOOTSTRAP_READY')).toBe(1);
           expect(managed.output()).not.toContain(secret);
 
-          signalOwnedGroup(managed, 'SIGTERM');
+          managed.child.kill('SIGTERM');
           await waitForExit(managed);
           await waitForCapturedExit(captured);
           expect(await allPortsReusable(ports)).toBe(true);
@@ -463,7 +456,7 @@ describe.skipIf(process.platform === 'win32')(
           expect((await fetch(endpoint, { method: 'POST' })).status).toBe(405);
           expect((await fetch(endpoint, { method: 'HEAD' })).status).toBe(503);
         } finally {
-          signalOwnedGroup(web, 'SIGTERM');
+          web.child.kill('SIGTERM');
           await waitForExit(web).catch(() => undefined);
           await cleanupCaptured(captured);
           await Promise.all([closeServer(api), closeServer(redirectTarget)]);
@@ -592,7 +585,7 @@ describe.skipIf(process.platform === 'win32')(
             row.command.includes('scripts/run-development-stack.mjs'),
           );
           expect(coordinator).toBeDefined();
-          signalOwnedGroup(managed, signal);
+          managed.child.kill(signal);
           if (coordinator) {
             process.kill(coordinator.pid, signal);
             process.kill(coordinator.pid, signal);
