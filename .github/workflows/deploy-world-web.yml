@@ -1,0 +1,66 @@
+name: Deploy EconMind World preview
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/d-v2-world-command-brief
+    paths:
+      - .github/workflows/deploy-world-web.yml
+      - apps/world-web/**
+      - package.json
+      - pnpm-lock.yaml
+
+permissions:
+  contents: read
+  id-token: write
+  pages: write
+
+concurrency:
+  group: econmind-world-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ECONMIND_ENV: production
+    steps:
+      - name: Check out the selected immutable ref
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the non-authoritative World web preview
+        run: pnpm --filter @econmind/world-web build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload static World preview
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/world-web/dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy static World preview
+        id: deployment
+        uses: actions/deploy-pages@v4
