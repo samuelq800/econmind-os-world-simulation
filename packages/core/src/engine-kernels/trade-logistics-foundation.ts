@@ -143,6 +143,71 @@ export interface TradeEligibilityResult {
   readonly replayProof: V13V14FoundationReplayProof;
 }
 
+/** Structural subset of V21.1 BookFill; kept import-free to preserve ownership. */
+export interface OrderBookFillTradeContract {
+  readonly fillRef: string;
+  readonly buyerCountryRef: string;
+  readonly sellerCountryRef: string;
+  readonly commodityId: string;
+  readonly quantity: ExactQuantity;
+  readonly matchedAt: ExactQuantity;
+}
+
+export interface OrderBookEligibilityBridgeResult {
+  readonly foundationStatus: typeof TRADE_LOGISTICS_FOUNDATION_STATUS;
+  readonly request: TradeEligibilityRequest;
+  readonly replayProof: V13V14FoundationReplayProof;
+}
+
+/**
+ * Explicit V21.1-to-V21.2 bridge. An integration owner must wrap `request`
+ * into a fresh FoundationFact before it invokes `resolveTradeEligibility`.
+ */
+export function deriveTradeEligibilityRequestFromOrderBookFill(input: {
+  readonly trace: TradeLogisticsTraceRequest;
+  readonly orderBookFillFact: TradeLogisticsFact<OrderBookFillTradeContract>;
+  readonly requestRef: string;
+  readonly evaluatedAt: ExactQuantity;
+  readonly outputRef: string;
+}): OrderBookEligibilityBridgeResult {
+  const fill = foundationFactPayload(
+    input.trace,
+    input.orderBookFillFact,
+    'orderBookFillFact',
+  );
+  const matchedAt = tick(fill.matchedAt, 'fill.matchedAt');
+  const evaluatedAt = tick(input.evaluatedAt, 'evaluatedAt');
+  if (evaluatedAt.lessThan(matchedAt)) {
+    kernelInvalid('Eligibility evaluation cannot precede an order-book fill');
+  }
+  const quantity = physical(fill.quantity, 'fill.quantity');
+  const request: TradeEligibilityRequest = Object.freeze({
+    requestRef: ref(input.requestRef, 'requestRef'),
+    importerCountryRef: ref(fill.buyerCountryRef, 'fill.buyerCountryRef'),
+    exporterCountryRef: ref(fill.sellerCountryRef, 'fill.sellerCountryRef'),
+    commodityRef: ref(fill.commodityId, 'fill.commodityId'),
+    direction: 'IMPORT',
+    requestedQuantity: renderQuantity(quantity.amount, quantity.unit),
+    evaluatedAt: renderQuantity(evaluatedAt, 'sim_millisecond'),
+  });
+  if (request.importerCountryRef === request.exporterCountryRef) {
+    kernelInvalid(
+      'Order-book fill countries must be different for trade eligibility',
+    );
+  }
+  return Object.freeze({
+    foundationStatus: TRADE_LOGISTICS_FOUNDATION_STATUS,
+    request,
+    replayProof: foundationReplayProof({
+      module: 'V21_TARIFF_CUSTOMS_SHIPMENT',
+      trace: input.trace,
+      inputFacts: [input.orderBookFillFact],
+      outputs: [{ outputRef: input.outputRef, payload: request }],
+      transitions: [],
+    }),
+  });
+}
+
 function policyMatches(
   policy: TariffPolicy,
   request: TradeEligibilityRequest,
