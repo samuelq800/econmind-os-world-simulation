@@ -127,6 +127,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: 6.1.1
         version: 6.1.1(vite@8.2.2(@types/node@24.13.3))
+      comlink:
+        specifier: 4.4.2
+        version: 4.4.2
       eslint:
         specifier: 10.10.0
         version: 10.10.0
@@ -160,6 +163,9 @@ importers:
 
   apps/world-web:
     dependencies:
+      comlink:
+        specifier: 4.4.2
+        version: 4.4.2
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -545,6 +551,9 @@ packages:
   chai@6.2.2:
     resolution: {integrity: sha512-NUPRluOfOiTKBKvWPtSD4PhFvWCqOi0BGStNWs57X9js7XGTprSmFoz5F0tWhR4WPjNeR9jXqdC7/UpSJTnlRg==}
     engines: {node: '>=18'}
+
+  comlink@4.4.2:
+    resolution: {integrity: sha512-OxGdvBmJuNKSCMO4NTl1L47VRp6xn2wG4F/2hYzB6tiCb709otOxtEYCSvK80PtjODfXXZu8ds+Nw5kVCjqd2g==}
 
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
@@ -1352,6 +1361,8 @@ snapshots:
       qified: 0.10.1
 
   chai@6.2.2: {}
+
+  comlink@4.4.2: {}
 
   cross-spawn@7.0.6:
     dependencies:
