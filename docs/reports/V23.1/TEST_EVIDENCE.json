@@ -1,0 +1,49 @@
+{
+  "step": "V23.1",
+  "scope": "pure_core_preparation_only",
+  "status": "PREPARATION_ONLY",
+  "base_sha": "ebc5fcbe010559d5d6a94e86792a77ecc02502d2",
+  "code_commit_sha": "d98106e4f8c2a08db7680b56cf482d7c4e61d53a",
+  "branch": "codex/v23-1-national-accounts-core",
+  "authoritative_step_status": "PLANNED",
+  "hard_dependencies": {
+    "V13.3": "PLANNED",
+    "V14.3": "PLANNED",
+    "V15.3": "PLANNED",
+    "V16.3": "PLANNED",
+    "V17.3": "PLANNED",
+    "V18.3": "PLANNED",
+    "V19.3": "PLANNED",
+    "V20.3": "PLANNED",
+    "V21.3": "PLANNED",
+    "V22.3": "PLANNED"
+  },
+  "open_adrs": ["ADR-06", "ADR-07", "ADR-08"],
+  "checks": {
+    "focused_vitest": { "status": "PASS", "files": 1, "tests": 8 },
+    "core_typecheck": "PASS",
+    "core_build": "PASS",
+    "targeted_eslint": "PASS",
+    "targeted_prettier": "PASS",
+    "authoritative_pattern_scan": "PASS",
+    "boundary_scan_initial_parallel": "FAIL_UNRESOLVED_WORKSPACE_IMPORT_DURING_BUILD",
+    "boundary_scan_standalone_after_build": "PASS",
+    "local_environment_check": "PASS",
+    "repository_secret_scan": "PASS",
+    "foundation_gate_policy": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "not_run": [
+    "V23_product_integration",
+    "V09_authoritative_writer_integration",
+    "durable_receipt_authentication",
+    "global_period_source_completeness",
+    "cross_period_idempotency",
+    "end_to_end_accounts_reconciliation",
+    "independent_review",
+    "migration",
+    "production_database_access",
+    "gate_approval"
+  ],
+  "authoritative_writes": false
+}
