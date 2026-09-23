@@ -1071,11 +1071,15 @@ export function prepareResourceDevelopment(input: {
   });
 }
 
-/** Rebinds inputs and proof preimage; product writers must also enforce idempotency. */
+/** Recomputes the kind-specific economics from the same bound facts. */
 export function assertExecutorAReplayEvidence(
   proof: ExecutorAReplayProof,
   facts: readonly InternationalExecutorAFact<unknown>[],
 ): void {
+  if (facts.length !== 3)
+    kernelInvalid(
+      'Executor A replay requires exactly contract, terms and state facts',
+    );
   const trace: InternationalExecutorATrace = {
     traceRef: proof.traceRef,
     calculationVersion: proof.calculationVersion,
@@ -1085,11 +1089,63 @@ export function assertExecutorAReplayEvidence(
   const rebound = facts.map((fact, index) =>
     foundationFactBinding(trace, fact, `replay.fact[${index}]`),
   );
-  const { hashInput, ...proofBody } = proof;
-  if (
-    canonicalSerialize(rebound) !== canonicalSerialize(proof.inputFacts) ||
-    canonicalHashInput(proofBody) !== hashInput
-  ) {
+  if (canonicalSerialize(rebound) !== canonicalSerialize(proof.inputFacts)) {
     kernelInvalid('Executor A replay proof does not match supplied facts');
+  }
+  const contractFact =
+    facts[0] as InternationalExecutorAFact<InternationalContractFoundationSnapshot>;
+  const termsFact = facts[1]!;
+  const stateFact = facts[2]!;
+  const shared = { trace, contractFact, outputRef: proof.outputRef };
+  let recomputed: ExecutorAReplayProof;
+  switch (proof.kind) {
+    case 'COMMODITY_AGREEMENT':
+      recomputed = prepareCommodityAgreement({
+        ...shared,
+        termsFact:
+          termsFact as InternationalExecutorAFact<CommodityAgreementTerms>,
+        stateFact:
+          stateFact as InternationalExecutorAFact<CommodityAgreementState>,
+      }).replayProof;
+      break;
+    case 'FDI':
+      recomputed = prepareFdi({
+        ...shared,
+        termsFact: termsFact as InternationalExecutorAFact<FdiTerms>,
+        stateFact: stateFact as InternationalExecutorAFact<FdiState>,
+      }).replayProof;
+      break;
+    case 'SOVEREIGN_LOAN':
+      recomputed = prepareSovereignLoan({
+        ...shared,
+        termsFact: termsFact as InternationalExecutorAFact<SovereignLoanTerms>,
+        stateFact: stateFact as InternationalExecutorAFact<SovereignLoanState>,
+      }).replayProof;
+      break;
+    case 'INFRASTRUCTURE_FINANCE':
+      recomputed = prepareInfrastructureFinance({
+        ...shared,
+        termsFact:
+          termsFact as InternationalExecutorAFact<InfrastructureFinanceTerms>,
+        stateFact:
+          stateFact as InternationalExecutorAFact<InfrastructureFinanceState>,
+      }).replayProof;
+      break;
+    case 'RESOURCE_DEVELOPMENT':
+      recomputed = prepareResourceDevelopment({
+        ...shared,
+        termsFact:
+          termsFact as InternationalExecutorAFact<ResourceDevelopmentTerms>,
+        stateFact:
+          stateFact as InternationalExecutorAFact<ResourceDevelopmentState>,
+      }).replayProof;
+      break;
+    default:
+      kernelInvalid('Executor A replay kind is unsupported');
+  }
+  if (canonicalSerialize(recomputed) !== canonicalSerialize(proof)) {
+    kernelInvalid(
+      'Executor A replay output does not match deterministic recalculation',
+    );
   }
 }

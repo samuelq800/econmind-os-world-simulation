@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
+import {
+  canonicalHashInput,
+  canonicalSerialize,
+} from '../../packages/core/src/serialization/canonical.js';
 import { createFoundationFact } from '../../packages/core/src/engine-kernels/foundation-provenance.js';
 import {
   assertExecutorAReplayEvidence,
@@ -452,6 +456,70 @@ describe('V22.2 international executors A pure preparation', () => {
         input.stateFact,
         input.termsFact,
       ]),
+    ).toThrow();
+  });
+
+  it('recomputes all five kinds and rejects same-facts rewritten economics with a fresh public hash', () => {
+    const commodity = fixture(
+      'Commodity Supply Agreement',
+      commodityTerms,
+      commodityState,
+    );
+    const fdi = fixture('Foreign Direct Investment', fdiTerms, fdiState);
+    const loan = fixture('Sovereign Loan', loanTerms, loanState);
+    const infrastructure = fixture(
+      'Infrastructure Finance',
+      infraTerms,
+      infraState,
+    );
+    const resource = fixture(
+      'Resource Development Agreement',
+      resourceTerms,
+      resourceState,
+    );
+    const cases = [
+      { input: commodity, result: prepareCommodityAgreement(commodity) },
+      { input: fdi, result: prepareFdi(fdi) },
+      { input: loan, result: prepareSovereignLoan(loan) },
+      {
+        input: infrastructure,
+        result: prepareInfrastructureFinance(infrastructure),
+      },
+      { input: resource, result: prepareResourceDevelopment(resource) },
+    ];
+    for (const { input, result } of cases) {
+      const facts = [input.contractFact, input.termsFact, input.stateFact];
+      assertExecutorAReplayEvidence(result.replayProof, facts);
+      const { hashInput: oldHash, ...body } = result.replayProof;
+      expect(oldHash).toBe(canonicalHashInput(body));
+      const forgedBody = {
+        ...body,
+        canonicalOutput: canonicalSerialize({
+          after: { ...result.after, forgedEconomics: money('999999') },
+          transitions: result.transitions,
+        }),
+      };
+      const forgedProof = {
+        ...forgedBody,
+        hashInput: canonicalHashInput(forgedBody),
+      };
+      expect(() => assertExecutorAReplayEvidence(forgedProof, facts)).toThrow();
+    }
+    const result = prepareCommodityAgreement(commodity);
+    const { hashInput: oldHash, ...body } = result.replayProof;
+    expect(oldHash).toBe(canonicalHashInput(body));
+    const forgedBody = {
+      ...body,
+      canonicalOutput: canonicalSerialize({
+        after: { ...result.after, buyerCash: money('999999') },
+        transitions: result.transitions,
+      }),
+    };
+    expect(() =>
+      assertExecutorAReplayEvidence(
+        { ...forgedBody, hashInput: canonicalHashInput(forgedBody) },
+        [commodity.contractFact, commodity.termsFact, commodity.stateFact],
+      ),
     ).toThrow();
   });
 });
