@@ -617,6 +617,14 @@ export function assertV09DisposablePostgresEvidenceExecution(
     );
   }
   if (
+    !/^[1-9][0-9]{0,4}$/u.test(connection.port) ||
+    Number(connection.port) > 65535
+  ) {
+    disposableInvalid(
+      'V09_TEST_DATABASE_URL must include an explicit numeric PostgreSQL port',
+    );
+  }
+  if (
     !['127.0.0.1', '::1', '[::1]', 'localhost'].includes(connection.hostname)
   ) {
     disposableInvalid('V09_TEST_DATABASE_URL must use a loopback host');
@@ -642,7 +650,7 @@ export function assertV09DisposablePostgresEvidenceExecution(
         testTarget.environment,
         testTarget.fingerprint,
         connection.hostname,
-        connection.port || '5432',
+        connection.port,
         databaseName,
         connection.username,
       ].join('\n'),
@@ -665,7 +673,7 @@ export function assertV09DisposablePostgresEvidenceExecution(
     target: Object.freeze({
       database_name: databaseName,
       host: connection.hostname,
-      port: connection.port || '5432',
+      port: connection.port,
       role: connection.username,
       test_fingerprint: testTarget.fingerprint,
     }),

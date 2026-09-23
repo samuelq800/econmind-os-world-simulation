@@ -18,10 +18,12 @@ database variables and any `SUPABASE_*` or `VITE_SUPABASE_*` environment
 variable before creating a client. It does not connect to Supabase, production,
 or the original EconMind site.
 
-The URL must not carry a query string or fragment. This rejects PostgreSQL
-driver connection-parameter overrides (including `host` or `port`) before a
-`pg.Client` is constructed, so the reviewed loopback target is also the only
-possible driver target.
+The URL must include an explicit numeric PostgreSQL port, and it must not carry
+a query string or fragment. This rejects PostgreSQL driver connection-parameter
+overrides (including `host` or `port`) before a `pg.Client` is constructed and
+prevents an omitted port from inheriting `PGPORT`. Thus the reviewed loopback
+target and its fingerprint are also the only possible driver target for both
+the primary and cleanup clients.
 
 ## Immutable input and output contract
 

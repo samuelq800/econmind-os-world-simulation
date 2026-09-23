@@ -80,6 +80,32 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
     ).toThrow('must not contain query or fragment connection overrides');
   });
 
+  it('rejects an omitted port before a PGPORT environment value can redirect either client', async () => {
+    const withoutExplicitPort = environment({
+      PGPORT: '6432',
+      V09_TEST_DATABASE_URL: 'postgresql://postgres@127.0.0.1/econmind_v09',
+    });
+
+    expect(() =>
+      assertV09DisposablePostgresEvidenceExecution(withoutExplicitPort),
+    ).toThrow('must include an explicit numeric PostgreSQL port');
+
+    let clientFactoryCalls = 0;
+    const result = await runV09DisposablePostgresEvidence({
+      environment: withoutExplicitPort,
+      clientFactory: () => {
+        clientFactoryCalls += 1;
+        throw new Error('primary or cleanup client must not be constructed');
+      },
+    });
+
+    expect(clientFactoryCalls).toBe(0);
+    expect(result).toMatchObject({
+      failure: { stage: 'POLICY_REJECTED' },
+      status: 'FAIL_CLOSED',
+    });
+  });
+
   it('retains explicit IPv6 and non-default loopback port bindings without URL overrides', () => {
     const ipv6 = assertV09DisposablePostgresEvidenceExecution(
       environment({
