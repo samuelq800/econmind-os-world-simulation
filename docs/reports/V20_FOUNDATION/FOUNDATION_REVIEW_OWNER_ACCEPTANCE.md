@@ -2,8 +2,8 @@
 
 **Status:** `FOUNDATION_REVIEWED_NONPRODUCTION`
 **Date:** 2026-09-23
-**Authority:** project owner direction in the Control Tower task on 2026-09-23,
-authorizing verified changes to be accepted and published to `main`.
+**Authority:** project owner direction in the Control Tower task on
+2026-09-23, authorizing verified changes to be accepted and published to `main`.
 
 ## Immutable chain
 
