@@ -1,0 +1,104 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V26.1",
+  "state": "PREPARATION_ONLY_NOT_V26_1_STARTED",
+  "base": "c91744a6d02865829b82df2088025949de99d88d",
+  "implementation_commit": "e8fc88f97cfd4a099944602e2c16bdae59f0c4cb",
+  "environment": {
+    "name": "isolated local worktree, macOS",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm exec vitest run tests/world-web/forecast-worker-protocol.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "1 file, 7 tests passed; includes real Comlink MessageChannel RPC"
+    },
+    {
+      "command": "pnpm --filter @econmind/world-web typecheck",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "TypeScript build typecheck passed"
+    },
+    {
+      "command": "pnpm --filter @econmind/world-web build",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Vite app build passed; worker entry is not yet imported by the UI"
+    },
+    {
+      "command": "pnpm exec eslint apps/world-web/src/forecast tests/world-web/forecast-worker-protocol.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Scoped lint passed"
+    },
+    {
+      "command": "pnpm exec prettier --check apps/world-web/src/forecast tests/world-web/forecast-worker-protocol.test.ts docs/exec-plans/V26.1.md apps/world-web/package.json package.json pnpm-lock.yaml",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "All selected files formatted"
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "73 governed source files scanned; no forbidden import"
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "68 files scanned; no violations"
+    },
+    {
+      "command": "node scripts/check-repository-secrets.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "658 files scanned; no secret findings"
+    },
+    {
+      "command": "pnpm install --frozen-lockfile --lockfile-only",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "170 lockfile entries passed supply-chain policies"
+    },
+    {
+      "command": "git diff --cached --check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Implementation commit staged diff had no whitespace errors"
+    }
+  ],
+  "negative_cases": [
+    "malformed WorldVersion and non-decimal assumption rejected",
+    "duplicate active task id rejected",
+    "cancelled executor late completion cannot surface",
+    "authorization revision change discards old result",
+    "newer request supersedes older result",
+    "unexpected request and result fields are stripped",
+    "forecast output without supplied source reference rejected"
+  ],
+  "database_rls_evidence": [
+    { "result": "NOT_RUN", "reason": "browser-only preparation" }
+  ],
+  "invariant_evidence": [
+    "result identity must match current authorized snapshot identity",
+    "only latest task can become CURRENT",
+    "forecast result has no actual state write path"
+  ],
+  "corrected_initial_failures": [
+    "temporary pinned toolchain symlinks missing; restored from cached exact versions",
+    "root test runner lacked comlink resolution; pinned root dev dependency added",
+    "Markdown whitespace and one TypeScript callback annotation corrected"
+  ],
+  "unresolved_gaps": [
+    "V10.4 still PLANNED at immutable base",
+    "ADR-12 classification policy not approved",
+    "authorized read adapter and forecast model not connected",
+    "browser UI worker asset loading and product acceptance NOT_RUN",
+    "no V26 status or Gate claim"
+  ]
+}
