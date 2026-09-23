@@ -43,6 +43,7 @@ import {
   parseAuthoritativeEvent,
   parseCanonicalCommand,
   parseInventoryLedgerSnapshot,
+  parseOpeningSeed,
   rebuildV08LedgersFromLineage as rebuildV08LedgersFromLineageWithEvidence,
   reconcileV08LedgerSnapshots,
   worldId,
