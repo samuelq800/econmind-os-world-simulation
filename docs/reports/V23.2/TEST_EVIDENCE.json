@@ -1,0 +1,37 @@
+{
+  "step": "V23.2",
+  "scope": "pure_core_preparation_only",
+  "status": "PREPARATION_ONLY",
+  "base_sha": "2dc1de3fc4b4ea4c5f4792538d961420317912db",
+  "code_commit_sha": "61a35ffab2141fe8b4c74d4c8311f5c28813dd1e",
+  "branch": "codex/v23-2-reconciliation-core",
+  "authoritative_v23_1_status": "PLANNED",
+  "authoritative_v23_2_status": "PLANNED",
+  "open_adrs": ["ADR-08", "ADR-15"],
+  "checks": {
+    "focused_vitest": { "status": "PASS", "files": 1, "tests": 8 },
+    "core_typecheck": "PASS",
+    "core_build": "PASS",
+    "targeted_eslint": "PASS",
+    "targeted_prettier": "PASS",
+    "authoritative_pattern_scan": "PASS",
+    "repository_boundary_scan": "PASS",
+    "local_environment_check": "PASS",
+    "repository_secret_scan": "PASS",
+    "foundation_gate_policy": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "not_run": [
+    "V23_1_formal_product_closure",
+    "V23_2_product_integration",
+    "durable_receipt_authentication",
+    "global_period_source_completeness",
+    "V09_atomic_publication",
+    "capital_and_financial_account",
+    "independent_review",
+    "migration",
+    "production_access",
+    "gate_approval"
+  ],
+  "authoritative_writes": false
+}
