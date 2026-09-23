@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -121,6 +124,100 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
       role: 'postgres',
       test_fingerprint: 'world-v2-v09-test-ci',
     });
+  });
+
+  it('groups the schema owner in the ownership and RLS aggregate query', async () => {
+    const source = await readFile(
+      fileURLToPath(
+        new URL(
+          '../../scripts/v09-staging-evidence-runner.mjs',
+          import.meta.url,
+        ),
+      ),
+      'utf8',
+    );
+    const queryStart = source.indexOf("'VERIFY_OWNERSHIP_GRANTS_RLS'");
+    const queryEnd = source.indexOf('    [owner, worker, reader', queryStart);
+    const ownershipQuery = source.slice(queryStart, queryEnd);
+
+    expect(queryStart).toBeGreaterThanOrEqual(0);
+    expect(queryEnd).toBeGreaterThan(queryStart);
+    expect(ownershipQuery).toContain(
+      'n.nspowner::regrole::text as schema_owner',
+    );
+    expect(ownershipQuery).toMatch(
+      /where n\.nspname = \$4 and c\.relname = any\(array\['world_head', 'world_writer_lease'\]\)\n\s+group by n\.nspowner/u,
+    );
+  });
+
+  it('revokes the migration owner database CREATE grant before any later disposable migration', async () => {
+    const steps: string[] = [];
+    const firstMigration = {
+      artifact_sha256: '1'.repeat(64),
+      migration_id: '0001_world_v2_namespace',
+      source_repo_commit: 'a'.repeat(40),
+      sql: 'create schema if not exists world_v2',
+    };
+    const secondMigration = {
+      artifact_sha256: '2'.repeat(64),
+      migration_id: '0002_world_v2_command_event_ledger',
+      source_repo_commit: 'b'.repeat(40),
+      sql: 'create table world_v2.world_head (world_id text primary key)',
+    };
+    const result = await runV09DisposablePostgresEvidence({
+      environment: environment(),
+      clientFactory: () => ({
+        connect: async () => undefined,
+        end: async () => undefined,
+        execute: async ({ step }: { step: string }) => {
+          steps.push(step);
+          if (step === 'VERIFY_CONNECTED_ADMIN_ROLE') {
+            return { rows: [{ current_user: 'postgres' }] };
+          }
+          if (step === 'PRECHECK_NAMESPACE_ABSENT') {
+            return { rows: [{ exists: false }] };
+          }
+          if (step === 'PRECHECK_ROLES_ABSENT') return { rows: [] };
+          if (step === 'APPLY_MIGRATION_0002_WORLD_V2_COMMAND_EVENT_LEDGER') {
+            throw new Error('stop after bootstrap grant regression boundary');
+          }
+          return { rows: [] };
+        },
+      }),
+      loadLinkedProjectRef: async () => undefined,
+      loadMigrationChain: async () => [firstMigration, secondMigration],
+      writeEvidence: async () => undefined,
+    });
+
+    expect(result).toMatchObject({
+      cleanup: { status: 'TRANSACTION_ROLLED_BACK' },
+      failure: { stage: 'APPLY_MIGRATIONS' },
+      status: 'FAIL_CLOSED',
+    });
+    expect(steps).toEqual(
+      expect.arrayContaining([
+        'GRANT_MIGRATION_OWNER_TEMPORARY_DATABASE_CREATE',
+        'APPLY_MIGRATION_0001_WORLD_V2_NAMESPACE',
+        'RECORD_MIGRATION_0001_WORLD_V2_NAMESPACE',
+        'RESET_MIGRATION_OWNER_FOR_DATABASE_REVOKE',
+        'REVOKE_MIGRATION_OWNER_TEMPORARY_DATABASE_CREATE',
+        'REASSERT_MIGRATION_OWNER_AFTER_DATABASE_REVOKE',
+        'APPLY_MIGRATION_0002_WORLD_V2_COMMAND_EVENT_LEDGER',
+      ]),
+    );
+    expect(
+      steps.indexOf('GRANT_MIGRATION_OWNER_TEMPORARY_DATABASE_CREATE'),
+    ).toBeLessThan(steps.indexOf('APPLY_MIGRATION_0001_WORLD_V2_NAMESPACE'));
+    expect(
+      steps.indexOf('APPLY_MIGRATION_0001_WORLD_V2_NAMESPACE'),
+    ).toBeLessThan(
+      steps.indexOf('REVOKE_MIGRATION_OWNER_TEMPORARY_DATABASE_CREATE'),
+    );
+    expect(
+      steps.indexOf('REVOKE_MIGRATION_OWNER_TEMPORARY_DATABASE_CREATE'),
+    ).toBeLessThan(
+      steps.indexOf('APPLY_MIGRATION_0002_WORLD_V2_COMMAND_EVENT_LEDGER'),
+    );
   });
 
   it('rejects runtime or Supabase configuration before a client can be created', () => {
