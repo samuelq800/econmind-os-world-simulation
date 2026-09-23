@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 
 import { CaptainCommandCenter } from './CaptainCommandCenter.js';
 import { CentralBankGovernor } from './CentralBankGovernor.js';
+import {
+  CommandLifecycleStatus,
+  type CommandLifecycleState,
+} from './CommandLifecycleStatus.js';
 import { FinanceMinisterCommand } from './FinanceMinisterCommand.js';
 import { GoodsTransferFlow } from './GoodsTransferFlow.js';
 import { IndustryCommandCenter } from './IndustryCommandCenter.js';
@@ -650,6 +654,15 @@ export function SixOfficesG01({
     return <StateScreen state={state} onRetry={onRetry} />;
   }
 
+  const g01CommandState: CommandLifecycleState = {
+    source: 'LOCAL_FIXTURE',
+    kind: 'UNAVAILABLE',
+    reason:
+      state.status === 'ready'
+        ? 'This Office can rehearse locally; authorized submission is not connected.'
+        : 'This projection is not current; authorized submission is unavailable.',
+  };
+
   return (
     <div className="six-offices six-offices--gameplay">
       <a className="six-skip-link" href="#six-offices-main">
@@ -749,6 +762,13 @@ export function SixOfficesG01({
                 Refresh intel
               </button>
             </section>
+          ) : null}
+          {currentPageId === 'G01' ? (
+            <CommandLifecycleStatus
+              context={`${actingOffice.shortLabel} G01`}
+              state={g01CommandState}
+              compact
+            />
           ) : null}
           {unavailablePage ? (
             <section className="unavailable-page-notice" role="status">
