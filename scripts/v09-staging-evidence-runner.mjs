@@ -611,6 +611,11 @@ export function assertV09DisposablePostgresEvidenceExecution(
   if (!['postgres:', 'postgresql:'].includes(connection.protocol)) {
     disposableInvalid('V09_TEST_DATABASE_URL must use PostgreSQL');
   }
+  if (connection.search !== '' || connection.hash !== '') {
+    disposableInvalid(
+      'V09_TEST_DATABASE_URL must not contain query or fragment connection overrides',
+    );
+  }
   if (
     !['127.0.0.1', '::1', '[::1]', 'localhost'].includes(connection.hostname)
   ) {

@@ -62,6 +62,39 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
         }),
       ),
     ).toThrow('loopback host');
+    expect(() =>
+      assertV09DisposablePostgresEvidenceExecution(
+        environment({
+          V09_TEST_DATABASE_URL:
+            'postgresql://postgres@127.0.0.1:5432/econmind_v09?host=pg.example.com&port=6432',
+        }),
+      ),
+    ).toThrow('must not contain query or fragment connection overrides');
+    expect(() =>
+      assertV09DisposablePostgresEvidenceExecution(
+        environment({
+          V09_TEST_DATABASE_URL:
+            'postgresql://postgres@127.0.0.1:5432/econmind_v09#pg.example.com',
+        }),
+      ),
+    ).toThrow('must not contain query or fragment connection overrides');
+  });
+
+  it('retains explicit IPv6 and non-default loopback port bindings without URL overrides', () => {
+    const ipv6 = assertV09DisposablePostgresEvidenceExecution(
+      environment({
+        V09_TEST_DATABASE_URL:
+          'postgresql://postgres@[::1]:5544/econmind_v09_ipv6',
+      }),
+    );
+
+    expect(ipv6.target).toEqual({
+      database_name: 'econmind_v09_ipv6',
+      host: '[::1]',
+      port: '5544',
+      role: 'postgres',
+      test_fingerprint: 'world-v2-v09-test-ci',
+    });
   });
 
   it('rejects runtime or Supabase configuration before a client can be created', () => {
