@@ -276,6 +276,10 @@ describe('World Web local authorized client preparation', () => {
   it('does not retry a committed command with new IDs after a truncated 200 acknowledgement', async () => {
     let durableCommits = 0;
     let commandPosts = 0;
+    let releaseFirstAck!: (response: Response) => void;
+    const firstAck = new Promise<Response>((resolve) => {
+      releaseFirstAck = resolve;
+    });
     const fetcher = vi.fn(async (url: URL | RequestInfo) => {
       if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
         return Response.json({
@@ -288,9 +292,7 @@ describe('World Web local authorized client preparation', () => {
       commandPosts += 1;
       if (durableCommits === 0) {
         durableCommits += 1; // Server committed before its 200 body was truncated.
-        return new Response('{"schemaVersion":"world-command-api-v1",', {
-          status: 200,
-        });
+        return firstAck;
       }
       return Response.json({
         schemaVersion: 'world-command-api-v1',
@@ -301,20 +303,34 @@ describe('World Web local authorized client preparation', () => {
     }) as unknown as typeof fetch;
     const client = browser(fetcher);
     expect((await client.readProjection(requestId)).status).toBe('PROJECTION');
-    expect(await client.submitNarrowTransfer(requestId, draft)).toEqual({
-      status: 'UNKNOWN',
-    });
-    expect(client.cache.read(identity)).toMatchObject({
-      reconciliationRequired: true,
-    });
+    const firstSubmission = client.submitNarrowTransfer(requestId, draft);
+    await vi.waitFor(() => expect(commandPosts).toBe(1));
     const changedIds = {
       ...draft,
       commandId: 'COMMAND_2',
       idempotencyKey: 'IDEMPOTENCY_2',
     };
+    // B's race: the second command arrives before the first ack exists.
     expect(await client.submitNarrowTransfer(requestId, changedIds)).toEqual({
       status: 'UNKNOWN',
     });
+    expect(commandPosts).toBe(1);
+    releaseFirstAck(
+      new Response('{"schemaVersion":"world-command-api-v1",', { status: 200 }),
+    );
+    expect(await firstSubmission).toEqual({ status: 'UNKNOWN' });
+    expect(client.cache.read(identity)).toMatchObject({
+      reconciliationRequired: true,
+    });
+    expect(await client.submitNarrowTransfer(requestId, changedIds)).toEqual({
+      status: 'UNKNOWN',
+    });
+    expect(
+      await client.submitNarrowTransfer(
+        '550e8400-e29b-41d4-a716-446655440002',
+        draft,
+      ),
+    ).toEqual({ status: 'UNKNOWN' });
     expect(
       await client.submitNarrowTransfer(requestId, {
         ...draft,
@@ -333,6 +349,74 @@ describe('World Web local authorized client preparation', () => {
       receipt: { commandId: 'COMMAND_1', outcome: 'COMMITTED' },
     });
     expect(durableCommits).toBe(1);
+    expect(commandPosts).toBe(2);
+  });
+
+  it('releases the in-flight reservation after a verified definitive rejection', async () => {
+    let commandPosts = 0;
+    let releaseFirst!: (response: Response) => void;
+    const firstAck = new Promise<Response>((resolve) => {
+      releaseFirst = resolve;
+    });
+    const secondDraft = {
+      ...draft,
+      commandId: 'COMMAND_2',
+      idempotencyKey: 'IDEMPOTENCY_2',
+    };
+    const fetcher = vi.fn(async (url: URL | RequestInfo) => {
+      if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+        return Response.json({
+          schemaVersion: 'world-read-api-v1',
+          requestId,
+          ok: true,
+          data: projection(),
+        });
+      }
+      commandPosts += 1;
+      if (commandPosts === 1) return firstAck;
+      return Response.json({
+        schemaVersion: 'world-command-api-v1',
+        requestId,
+        ok: true,
+        receipt: {
+          ...receipt(),
+          commandId: secondDraft.commandId,
+          idempotencyKey: secondDraft.idempotencyKey,
+        },
+      });
+    }) as unknown as typeof fetch;
+    const client = browser(fetcher);
+    await client.readProjection(requestId);
+    const firstSubmission = client.submitNarrowTransfer(requestId, draft);
+    await vi.waitFor(() => expect(commandPosts).toBe(1));
+    expect(await client.submitNarrowTransfer(requestId, secondDraft)).toEqual({
+      status: 'UNKNOWN',
+    });
+    expect(commandPosts).toBe(1);
+    releaseFirst(
+      Response.json({
+        schemaVersion: 'world-command-api-v1',
+        requestId,
+        ok: true,
+        receipt: {
+          ...receipt(),
+          outcome: 'REJECTED',
+          reasonCode: 'NO_APPROVAL',
+          worldVersionAfter: null,
+          eventIds: [],
+        },
+      }),
+    );
+    expect(await firstSubmission).toMatchObject({
+      status: 'FINAL_RECEIPT',
+      receipt: { outcome: 'REJECTED' },
+    });
+    expect(
+      await client.submitNarrowTransfer(requestId, secondDraft),
+    ).toMatchObject({
+      status: 'FINAL_RECEIPT',
+      receipt: { commandId: 'COMMAND_2', outcome: 'COMMITTED' },
+    });
     expect(commandPosts).toBe(2);
   });
 

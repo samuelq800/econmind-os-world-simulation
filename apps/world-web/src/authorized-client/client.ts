@@ -266,6 +266,12 @@ export function createAuthorizedWorldBrowserClient(options: {
   const fetcher = options.bridge?.fetcher ?? fetch;
   let unresolvedDraft: NarrowTransferDraft | null = null;
   let unresolvedIdentity: AuthorizedBrowserIdentity | null = null;
+  let unresolvedRequestId: string | null = null;
+  let activeSubmission: {
+    readonly identity: AuthorizedBrowserIdentity;
+    readonly draft: NarrowTransferDraft;
+    readonly requestId: string;
+  } | null = null;
 
   function sameDraft(
     left: NarrowTransferDraft,
@@ -378,12 +384,14 @@ export function createAuthorizedWorldBrowserClient(options: {
   function unverifiedCommand(
     identity: AuthorizedBrowserIdentity,
     draft: NarrowTransferDraft,
+    requestId: string,
   ): BrowserCommandResult {
     // A fresh authoritative snapshot is required before another command.
     // The cache port exposes whole-cache reconnect invalidation, not a
     // one-scope invalidation method; broad invalidation is fail-closed.
     unresolvedDraft = { ...draft };
     unresolvedIdentity = { ...identity };
+    unresolvedRequestId = requestId;
     cache.onReconnect();
     return { status: 'UNKNOWN' };
   }
@@ -475,9 +483,11 @@ export function createAuthorizedWorldBrowserClient(options: {
       ) {
         return { status: 'UNAVAILABLE', reason: 'IDENTITY_NOT_READY' };
       }
+      if (activeSubmission) return { status: 'UNKNOWN' }; // Another POST is already in flight.
       if (
         unresolvedDraft &&
         (!unresolvedIdentity ||
+          unresolvedRequestId !== requestId ||
           !sameIdentity(unresolvedIdentity, identity) ||
           !sameDraft(unresolvedDraft, draft))
       ) {
@@ -497,49 +507,64 @@ export function createAuthorizedWorldBrowserClient(options: {
         cached.worldVersion !== draft.expectedWorldVersion
       )
         return { status: 'STALE' };
-      const result = await request(
-        LOCAL_WORLD_COMMAND_PATH,
+      // Reserve before the first await: no second command can pass while the
+      // first POST is pending. On ambiguity the reservation moves to the
+      // unresolved identity guard before this in-flight slot is released.
+      activeSubmission = {
+        identity: { ...identity },
+        draft: { ...draft },
         requestId,
-        identity,
-        {
-          schemaVersion: WORLD_COMMAND_SCHEMA,
+      };
+      try {
+        const result = await request(
+          LOCAL_WORLD_COMMAND_PATH,
           requestId,
-          operation: 'SUBMIT_NARROW_TREASURY_GCU_TRANSFER',
-          payload: {
-            worldId: identity.worldId,
-            countryId: identity.countryId,
-            officeId: identity.officeId,
-            commandId: draft.commandId,
-            idempotencyKey: draft.idempotencyKey,
-            proposalRef: draft.proposalRef,
-            buyerCountryId: draft.buyerCountryId,
-            buyerFinanceApprovalRef: draft.buyerFinanceApprovalRef,
+          identity,
+          {
+            schemaVersion: WORLD_COMMAND_SCHEMA,
+            requestId,
+            operation: 'SUBMIT_NARROW_TREASURY_GCU_TRANSFER',
+            payload: {
+              worldId: identity.worldId,
+              countryId: identity.countryId,
+              officeId: identity.officeId,
+              commandId: draft.commandId,
+              idempotencyKey: draft.idempotencyKey,
+              proposalRef: draft.proposalRef,
+              buyerCountryId: draft.buyerCountryId,
+              buyerFinanceApprovalRef: draft.buyerFinanceApprovalRef,
+            },
           },
-        },
-      );
-      if (result.status === 'UNVERIFIED_POST')
-        return unverifiedCommand(identity, draft);
-      if (result.status !== 'RESPONSE') {
-        return resolvingUnknown ? { status: 'UNKNOWN' } : result;
+        );
+        if (result.status === 'UNVERIFIED_POST')
+          return unverifiedCommand(identity, draft, requestId);
+        if (result.status !== 'RESPONSE') {
+          return resolvingUnknown ? { status: 'UNKNOWN' } : result;
+        }
+        const receipt = validReceipt(
+          result.body.receipt,
+          identity.worldId,
+          draft,
+        );
+        if (!receipt) return unverifiedCommand(identity, draft, requestId);
+        if (!sameIdentity(identity, options.currentIdentity()))
+          return unverifiedCommand(identity, draft, requestId);
+        unresolvedDraft = null;
+        unresolvedIdentity = null;
+        unresolvedRequestId = null;
+        if (receipt.outcome === 'COMMITTED' && receipt.worldVersionAfter) {
+          cache.observeNotice({
+            scope: identity,
+            worldVersion: receipt.worldVersionAfter,
+            noticeRef: `receipt:${receipt.commandId}`,
+          });
+        }
+        return { status: 'FINAL_RECEIPT', receipt };
+      } catch {
+        return unverifiedCommand(identity, draft, requestId);
+      } finally {
+        activeSubmission = null;
       }
-      const receipt = validReceipt(
-        result.body.receipt,
-        identity.worldId,
-        draft,
-      );
-      if (!receipt) return unverifiedCommand(identity, draft);
-      if (!sameIdentity(identity, options.currentIdentity()))
-        return unverifiedCommand(identity, draft);
-      unresolvedDraft = null;
-      unresolvedIdentity = null;
-      if (receipt.outcome === 'COMMITTED' && receipt.worldVersionAfter) {
-        cache.observeNotice({
-          scope: identity,
-          worldVersion: receipt.worldVersionAfter,
-          noticeRef: `receipt:${receipt.commandId}`,
-        });
-      }
-      return { status: 'FINAL_RECEIPT', receipt };
     },
     revoke(): void {
       cache.revokeAuthorization();

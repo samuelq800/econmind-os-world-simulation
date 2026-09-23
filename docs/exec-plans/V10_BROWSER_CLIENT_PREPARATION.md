@@ -45,6 +45,10 @@ imports Worker/Core settlement nor exposes server credentials.
   cache requires reconciliation, and this client instance blocks new command
   identities/payloads until an exact-ID retry obtains a verified final receipt.
   This in-memory guard is not restart persistence or a receipt lookup service.
+- The first command reserves its full identity, draft and request ID before
+  awaiting the transport. Concurrent second submissions cannot dispatch. A
+  verified final receipt or a definite pre-settlement denial releases the
+  in-flight slot; ambiguity transfers it to the unresolved exact-retry guard.
 - Browser transport is not yet integrated: E's current Node bridge responds
   only to POST and does not provide an OPTIONS/CORS preflight response. A page
   on a different localhost port therefore cannot call it directly in a real
