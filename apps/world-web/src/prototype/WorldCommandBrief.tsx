@@ -13,6 +13,10 @@ import type {
   PrototypeWorldBriefProjection,
 } from './contracts.js';
 import {
+  CommandLifecycleStatus,
+  fixtureLifecycleFromReceipt,
+} from './CommandLifecycleStatus.js';
+import {
   nextEventIndex,
   readableProjection,
   type PrototypeViewState,
@@ -260,22 +264,20 @@ function ReceiptPanel({
     <section className="panel receipt-panel" aria-labelledby="receipt-title">
       <div className="panel-heading">
         <div>
-          <p className="eyebrow">Last final receipt</p>
-          <h2 id="receipt-title">World change evidence</h2>
+          <p className="eyebrow">Fixture receipt example</p>
+          <h2 id="receipt-title">Local receipt replay</h2>
         </div>
-        {receipt ? (
-          <span
-            className={`receipt-outcome receipt-outcome--${receipt.outcome.toLowerCase()}`}
-          >
-            {receipt.outcome}
-          </span>
-        ) : null}
       </div>
       {receipt ? (
         <>
+          <CommandLifecycleStatus
+            context="Fixture receipt"
+            state={fixtureLifecycleFromReceipt(receipt)}
+            compact
+          />
           <p className="receipt-version">
-            World v{receipt.worldVersionBefore ?? '—'} → v
-            {receipt.worldVersionAfter ?? '—'}
+            Fixture version labels v{receipt.worldVersionBefore ?? '—'} → v
+            {receipt.worldVersionAfter ?? '—'} · not actual
           </p>
           <dl className="receipt-grid">
             <div>
@@ -291,10 +293,12 @@ function ReceiptPanel({
               <dd>{receipt.simTime}</dd>
             </div>
           </dl>
-          <p className="receipt-recorded">{receipt.recordedAtLabel}</p>
+          <p className="receipt-recorded">
+            Fixture timestamp · {receipt.recordedAtLabel}
+          </p>
         </>
       ) : (
-        <p>No final receipt is present in this authorized projection.</p>
+        <p>No fixture receipt example is present.</p>
       )}
     </section>
   );

@@ -10,6 +10,10 @@ import {
 
 import type { PrototypeWorldBriefProjection } from './contracts.js';
 import {
+  CommandLifecycleStatus,
+  type CommandLifecycleState,
+} from './CommandLifecycleStatus.js';
+import {
   preparationOfficeActionAdapter,
   type OfficeActionReadModel,
   type ReadableOfficeState,
@@ -65,7 +69,7 @@ function OfficeActionRoute({
   readonly model: OfficeActionReadModel;
   readonly onOpenBrief: () => void;
 }) {
-  const command = preparationOfficeActionAdapter.commandAvailability();
+  const commandStatus = fixtureLifecycleForOfficeAction(model);
   return (
     <section className="office-action-route" aria-label="Selected event route">
       <div className="office-action-route__heading">
@@ -73,7 +77,9 @@ function OfficeActionRoute({
         <strong>
           {model.kind === 'LOCAL_REHEARSAL_ROUTE'
             ? 'Your Office can rehearse this response'
-            : 'Action route unavailable'}
+            : model.code === 'APPROVAL_REQUIRED'
+              ? 'Approval gate before action'
+              : 'Action route unavailable'}
         </strong>
       </div>
       <dl>
@@ -85,12 +91,13 @@ function OfficeActionRoute({
           <dt>Route</dt>
           <dd>{model.routeLabel ?? 'Not supplied'}</dd>
         </div>
-        <div>
-          <dt>Live Command</dt>
-          <dd>{command.kind}</dd>
-        </div>
       </dl>
-      <p>{model.reason}</p>
+      {model.kind === 'LOCAL_REHEARSAL_ROUTE' ? <p>{model.reason}</p> : null}
+      <CommandLifecycleStatus
+        context="Selected event"
+        state={commandStatus}
+        compact
+      />
       {model.kind === 'LOCAL_REHEARSAL_ROUTE' ? (
         <button
           className="six-button six-button--primary"
@@ -110,6 +117,25 @@ function OfficeActionRoute({
       )}
     </section>
   );
+}
+
+export function fixtureLifecycleForOfficeAction(
+  model: OfficeActionReadModel,
+): CommandLifecycleState {
+  return model.kind === 'UNAVAILABLE' && model.code === 'APPROVAL_REQUIRED'
+    ? {
+        source: 'LOCAL_FIXTURE',
+        kind: 'APPROVAL_REQUIRED',
+        reason: 'This route needs an approval decision.',
+      }
+    : {
+        source: 'LOCAL_FIXTURE',
+        kind: 'UNAVAILABLE',
+        reason:
+          model.kind === 'LOCAL_REHEARSAL_ROUTE'
+            ? preparationOfficeActionAdapter.commandAvailability().reason
+            : model.reason,
+      };
 }
 
 export function nationalSignalSelection(

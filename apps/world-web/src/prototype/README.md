@@ -98,3 +98,15 @@ focus the main region. Loading, revoked, offline/retrying, and empty states
 have distinct recovery semantics; an empty G02 can retry without inventing
 national values. Values remain labeled as fixture data, not actuals or
 forecasts. No Gate B browser harness or production Command wire is included.
+
+## Command lifecycle display preparation
+
+`COMMAND_LIFECYCLE_PREPARATION.md` records the UI-only boundary. The shared
+`CommandLifecycleStatus` card appears in G01 and G02 event routes. It can
+distinguish unavailable, approval required or pending, submission awaiting a
+final receipt, final success or rejection, version conflict, and revoked
+authorization. Current pages supply only `LOCAL_FIXTURE` states; even a
+rehearsal success is labeled **not actual**. The legacy command brief now
+labels its sample receipt as a fixture replay rather than World change
+evidence. No authorized browser client, API, or receipt reconciliation is
+connected in this slice.
