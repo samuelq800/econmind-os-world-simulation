@@ -7,11 +7,11 @@ authorizing verified changes to be accepted and published to `main`.
 
 ## Immutable chain
 
-| Record | SHA |
-| --- | --- |
-| `main` baseline | `ec5ceb2ef8434fc3f6c40c8c62b0311a3676a24d` |
+| Record                                 | SHA                                        |
+| -------------------------------------- | ------------------------------------------ |
+| `main` baseline                        | `ec5ceb2ef8434fc3f6c40c8c62b0311a3676a24d` |
 | V20 code with runtime direction repair | `d9e6774c09f528a26c17cf289b741be13e830451` |
-| V20 evidence tip | `c91744a6d02865829b82df2088025949de99d88d` |
+| V20 evidence tip                       | `c91744a6d02865829b82df2088025949de99d88d` |
 
 B's focused review of the initial V20 candidate found one Major: unknown FX and
 external-debt directions could fall through to valid branches. The code tip

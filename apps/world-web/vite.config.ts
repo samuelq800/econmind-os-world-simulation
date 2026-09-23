@@ -1,5 +1,7 @@
 import react from '@vitejs/plugin-react';
+import { existsSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv, type Plugin, type PreviewServer } from 'vite';
 import type { ViteDevServer } from 'vite';
@@ -7,6 +9,15 @@ import type { ViteDevServer } from 'vite';
 import { assertSafeViteEnvironment } from '../../scripts/vite-environment-policy.mjs';
 
 const worldWebRoot = fileURLToPath(new URL('.', import.meta.url));
+const publicPageInputs = {
+  main: resolve(worldWebRoot, 'index.html'),
+  ...(existsSync(resolve(worldWebRoot, 'command.html'))
+    ? { command: resolve(worldWebRoot, 'command.html') }
+    : {}),
+  ...(existsSync(resolve(worldWebRoot, 'prototype.html'))
+    ? { prototype: resolve(worldWebRoot, 'prototype.html') }
+    : {}),
+};
 const supportedEnvironments = new Set(['local', 'ci', 'staging', 'production']);
 const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
 const apiHealthPath = '/readyz';
@@ -192,6 +203,15 @@ export default defineConfig(({ mode }) => {
   const apiOrigin = `http://${connectHost(apiHost)}:${apiPort}`;
 
   return {
+    base:
+      process.env.GITHUB_ACTIONS === 'true'
+        ? '/econmind-os-world-simulation/'
+        : '/',
+    build: {
+      rollupOptions: {
+        input: publicPageInputs,
+      },
+    },
     envDir: worldWebRoot,
     plugins: [react(), lifecyclePlugin(apiOrigin)],
     preview: {
