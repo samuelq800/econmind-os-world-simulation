@@ -2,7 +2,10 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
-import { nationalSignalSelection } from '../../apps/world-web/src/prototype/NationalOverview.js';
+import {
+  initialNationalView,
+  nationalSignalSelection,
+} from '../../apps/world-web/src/prototype/NationalOverview.js';
 import {
   EMPTY_PROJECTION,
   READY_PROJECTION,
@@ -41,11 +44,13 @@ describe('national atlas integration', () => {
       'CUSTOM-EVENT',
     ]);
     expect(selected.events[0]?.title).toBe('A new inflation report arrived');
-    expect(overviewSource).toContain(
-      'Atlas territories are not linked to country records',
+    expect(overviewSource).toMatch(
+      /Atlas territories are not linked to country\s+records/,
     );
     expect(overviewSource).toContain('Signal table');
     expect(overviewSource).toContain('onMapUnavailable');
+    expect(overviewSource).toContain('Fixture national signals');
+    expect(overviewSource).not.toContain('Observed national signals');
   });
 
   it('keeps empty and revoked projections from supplying map intel', () => {
@@ -59,5 +64,26 @@ describe('national atlas integration', () => {
         reason: 'Office access revoked.',
       }),
     ).toBeNull();
+    expect(overviewSource).toContain(
+      'No national values are inferred from an empty fixture',
+    );
+    expect(overviewSource).toContain('onClick={onRetry}');
+  });
+
+  it('starts on the usable table on a narrow screen and keeps map opt-in', () => {
+    expect(initialNationalView(390)).toBe('table');
+    expect(initialNationalView(700)).toBe('table');
+    expect(initialNationalView(701)).toBe('map');
+    expect(overviewSource).toContain('initialNationalView(');
+    expect(overviewSource).toContain("setView('map')");
+    expect(overviewSource).toContain("setView('table')");
+  });
+
+  it('keeps broken map recovery on the table and exposes focus target', () => {
+    expect(overviewSource).toContain('override componentDidCatch()');
+    expect(overviewSource).toContain('onMapUnavailable={fallbackToTable}');
+    expect(overviewSource).toContain('disabled={mapUnavailable}');
+    expect(overviewSource).toContain('tableViewButtonRef.current?.focus()');
+    expect(overviewSource).toContain('role="alert"');
   });
 });

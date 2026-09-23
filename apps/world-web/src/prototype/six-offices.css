@@ -21,6 +21,11 @@
   outline-offset: 3px;
 }
 
+.six-offices main:focus-visible {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: -3px;
+}
+
 .six-skip-link {
   position: fixed;
   z-index: 100;
@@ -2197,6 +2202,9 @@
 @media (max-width: 840px) {
   .six-offices--gameplay .six-topbar {
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .six-offices--gameplay .six-layout {
+    grid-template-columns: minmax(0, 1fr);
   }
   .six-offices--gameplay .six-topbar__game-status {
     display: none;
@@ -4691,6 +4699,11 @@
   color: var(--amber);
 }
 
+.national-overview__view-switch button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .national-overview__view-switch small {
   margin-left: auto;
   color: var(--ink-faint);
@@ -5178,6 +5191,24 @@
 
   .national-overview__header dl {
     justify-self: start;
+  }
+
+  .national-overview__view-switch {
+    flex-wrap: wrap;
+  }
+
+  .national-overview__view-switch small {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+
+  .national-atlas__board {
+    padding: 8px;
+  }
+
+  .national-atlas__board .fictional-atlas__map-frame {
+    min-height: 270px;
+    aspect-ratio: auto;
   }
 }
 

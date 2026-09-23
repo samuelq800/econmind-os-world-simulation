@@ -1,4 +1,12 @@
-import { Component, lazy, Suspense, useState, type ReactNode } from 'react';
+import {
+  Component,
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import type { PrototypeWorldBriefProjection } from './contracts.js';
 import {
@@ -24,10 +32,14 @@ class AtlasBoundary extends Component<
     return { failed: true };
   }
 
+  override componentDidCatch() {
+    this.props.onUseTable();
+  }
+
   override render() {
     if (this.state.failed) {
       return (
-        <div className="national-atlas__unavailable" role="status">
+        <div className="national-atlas__unavailable" role="alert">
           <strong>Map unavailable.</strong>
           <button type="button" onClick={this.props.onUseTable}>
             Open signal table
@@ -43,6 +55,7 @@ interface NationalOverviewProps {
   readonly projection: PrototypeWorldBriefProjection;
   readonly status: ReadableOfficeState;
   readonly onOpenBrief: () => void;
+  readonly onRetry: () => void;
 }
 
 function OfficeActionRoute({
@@ -115,16 +128,28 @@ export function nationalSignalSelection(
   return { metric, events };
 }
 
+export function initialNationalView(viewportWidth: number): 'map' | 'table' {
+  return viewportWidth <= 700 ? 'table' : 'map';
+}
+
 export function NationalOverview({
   projection,
   status,
   onOpenBrief,
+  onRetry,
 }: NationalOverviewProps) {
   const [selectedMetricId, setSelectedMetricId] = useState(
     projection.metrics[0]?.id ?? '',
   );
-  const [view, setView] = useState<'map' | 'table'>('map');
+  const [view, setView] = useState<'map' | 'table'>(() =>
+    initialNationalView(
+      typeof window === 'undefined'
+        ? Number.POSITIVE_INFINITY
+        : window.innerWidth,
+    ),
+  );
   const [mapUnavailable, setMapUnavailable] = useState(false);
+  const tableViewButtonRef = useRef<HTMLButtonElement>(null);
   const [selectedEventId, setSelectedEventId] = useState(
     projection.events[0]?.eventId ?? '',
   );
@@ -139,6 +164,13 @@ export function NationalOverview({
     event: selectedEvent,
     state: status,
   });
+  useEffect(() => {
+    if (mapUnavailable) tableViewButtonRef.current?.focus();
+  }, [mapUnavailable]);
+  const fallbackToTable = () => {
+    setMapUnavailable(true);
+    setView('table');
+  };
   const chooseMetric = (metricId: string) => {
     setSelectedMetricId(metricId);
     setSelectedEventId(
@@ -182,41 +214,53 @@ export function NationalOverview({
         </dl>
       </header>
 
-      <div
-        className="national-overview__view-switch"
-        role="group"
-        aria-label="National overview view"
-      >
-        <button
-          type="button"
-          aria-pressed={view === 'map'}
-          onClick={() => setView('map')}
-        >
-          World map
-        </button>
-        <button
-          type="button"
-          aria-pressed={view === 'table'}
-          onClick={() => setView('table')}
-        >
-          Signal table
-        </button>
-        <small>
-          LOCAL FIXTURE · Atlas territories are not linked to country records.
-        </small>
-      </div>
+      {selectedMetric ? (
+        <>
+          <div
+            className="national-overview__view-switch"
+            role="group"
+            aria-label="National overview view"
+          >
+            <button
+              type="button"
+              aria-pressed={view === 'map'}
+              disabled={mapUnavailable}
+              onClick={() => setView('map')}
+            >
+              World map
+            </button>
+            <button
+              ref={tableViewButtonRef}
+              type="button"
+              aria-pressed={view === 'table'}
+              onClick={() => setView('table')}
+            >
+              Signal table
+            </button>
+            <small>
+              LOCAL FIXTURE · Atlas territories are not linked to country
+              records.
+            </small>
+          </div>
 
-      {mapUnavailable ? (
-        <div className="national-overview__map-notice" role="status">
-          Map asset unavailable. Signal table is open.
-        </div>
+          {mapUnavailable ? (
+            <div
+              className="national-overview__map-notice"
+              role="status"
+              aria-live="polite"
+            >
+              Map unavailable. The signal table remains usable; map view is
+              paused.
+            </div>
+          ) : null}
+        </>
       ) : null}
 
       {selectedMetric ? (
         view === 'map' ? (
           <div className="national-atlas">
             <div className="national-atlas__board">
-              <AtlasBoundary onUseTable={() => setView('table')}>
+              <AtlasBoundary onUseTable={fallbackToTable}>
                 <Suspense
                   fallback={
                     <div className="national-atlas__loading" role="status">
@@ -226,10 +270,7 @@ export function NationalOverview({
                 >
                   <FictionalWorldMap
                     embedded
-                    onMapUnavailable={() => {
-                      setMapUnavailable(true);
-                      setView('table');
-                    }}
+                    onMapUnavailable={fallbackToTable}
                   />
                 </Suspense>
               </AtlasBoundary>
@@ -304,7 +345,7 @@ export function NationalOverview({
               aria-label="Read-only national signals"
             >
               <div className="national-overview__group-label">
-                <span>Observed national signals</span>
+                <span>Fixture national signals</span>
                 <small>
                   Unavailable national metrics are not rendered as zero or an
                   estimate.
@@ -401,11 +442,14 @@ export function NationalOverview({
         <section className="national-overview__empty" role="status">
           <p>NATIONAL OVERVIEW · G02</p>
           <h2>No common fixture signals are loaded.</h2>
-          <span>
-            This state does not invent GDP, inflation, employment, or reserves.
-            Refreshing an authorized snapshot would be the production recovery
-            path.
-          </span>
+          <span>No national values are inferred from an empty fixture.</span>
+          <button
+            className="six-button six-button--primary"
+            type="button"
+            onClick={onRetry}
+          >
+            Refresh intel
+          </button>
           <button
             className="six-button six-button--secondary"
             type="button"
