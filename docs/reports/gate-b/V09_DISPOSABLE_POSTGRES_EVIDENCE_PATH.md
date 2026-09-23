@@ -50,6 +50,26 @@ commit, and the non-secret loopback target fingerprint. It records:
   durable marker/fence recovery; and
 - marker-bound restrictive cleanup with role and namespace residue checks.
 
+## GitHub Actions disposable execution
+
+`V09 PostgreSQL candidate` exposes a manual-only `Frozen V09 disposable runner
+evidence` job. The dispatcher must supply an exact 40-character main SHA. The
+job checks out that SHA (not the workflow branch), verifies the checked-out
+identity before installation, uses only an Actions PostgreSQL 16 service bound
+to the runner loopback address, and uploads the redacted JSON and raw runner
+output as an artifact.
+
+For a frozen main commit, dispatch from a branch that contains the workflow:
+
+```text
+gh workflow run v09-postgres.yml --ref <workflow-branch> -f target_sha=<frozen-main-sha>
+```
+
+Then record the completed run URL, conclusion, uploaded JSON's
+`immutable_input.repository_commit`, `immutable_input.target`, and terminal
+status. A workflow or service success is disposable-loopback evidence only; it
+does not convert the result into dedicated staging or Gate B acceptance.
+
 Receipt/recovery remains a separate real-PostgreSQL focused assertion in
 `tests/world-core/v09-atomic-recovery-postgres.test.ts`; the disposable runner
 does not relabel that suite as executed. Run it against the same explicitly

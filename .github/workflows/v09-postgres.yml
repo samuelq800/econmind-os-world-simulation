@@ -1,6 +1,12 @@
 name: V09 PostgreSQL candidate
 
 on:
+  workflow_dispatch:
+    inputs:
+      target_sha:
+        description: Exact 40-character main SHA to execute against the disposable service
+        required: true
+        type: string
   push:
     branches:
       - codex/world-core-v09
@@ -22,7 +28,70 @@ permissions:
   contents: read
 
 jobs:
+  disposable-v09-gate-b-runner:
+    if: github.event_name == 'workflow_dispatch'
+    name: Frozen V09 disposable runner evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      TARGET_SHA: ${{ inputs.target_sha }}
+      V09_DISPOSABLE_EVIDENCE_CONFIRMATION: EXECUTE_DISPOSABLE_V09_POSTGRES_EVIDENCE
+      V09_DISPOSABLE_EVIDENCE_OUTPUT: ${{ runner.temp }}/v09-disposable-evidence.json
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.target_sha }}
+      - name: Verify frozen source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]
+          actual_sha="$(git rev-parse HEAD)"
+          test "$actual_sha" = "$TARGET_SHA"
+          printf 'frozen_main_sha=%s\n' "$actual_sha" >> "$GITHUB_STEP_SUMMARY"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - name: Run disposable PostgreSQL evidence
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm test:v09:disposable-evidence 2>&1 | tee "$RUNNER_TEMP/v09-disposable-evidence.log"
+      - name: Upload redacted disposable evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v09-disposable-evidence-${{ inputs.target_sha }}
+          path: |
+            ${{ runner.temp }}/v09-disposable-evidence.json
+            ${{ runner.temp }}/v09-disposable-evidence.log
+          if-no-files-found: error
+
   real-postgres-v09-1:
+    if: github.event_name != 'workflow_dispatch'
     name: Disposable PostgreSQL V09/V10 evidence
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -65,6 +134,7 @@ jobs:
       - run: pnpm exec vitest run tests/world-core/v09-world-recovery-preparation.test.ts
 
   official-pnpm-check:
+    if: github.event_name != 'workflow_dispatch'
     name: Isolated official pnpm check
     runs-on: macos-latest
     timeout-minutes: 20
