@@ -57,3 +57,19 @@ These surfaces do not import World Core, the API, worker code, database or
 Supabase clients, and do not contain a production route. They are not Gate B,
 deployment, authorization, or runtime-integration evidence. Future wiring must
 use approved public browser contracts and retain the owning Office boundaries.
+
+## V25.1 fictional atlas in G02
+
+The G02 Nation overview opens the source-controlled F atlas as a lazy-loaded
+map scene. The atlas files were copied from the F preparation candidate at
+`1635631` without its Core, database, status or report changes. A Signal table
+toggle remains available, and a failed map asset or component offers that
+table as the recovery path. The embedded atlas CSS is scoped so it does not
+replace the World Command Brief's font and color tokens.
+
+National values and event links beside the map come only from the scoped
+`PrototypeWorldBriefProjection` supplied by the current fixture route. The
+atlas has no World or country IDs, and its visual territories are not linked to
+Northstar or to any authorized economic values. Authorization-revoked views
+remove the projection and therefore the map intel. This integration stays
+`PREPARATION_ONLY_NOT_RUNTIME`; it has no query, command or persistence wire.
