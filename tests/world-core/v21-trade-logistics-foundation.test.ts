@@ -83,6 +83,15 @@ describe('V21.2 tariff, controls, and customs foundation', () => {
       requestedQuantity: q('5'),
     });
     assertFoundationReplayEvidence(bridge.replayProof, [fill]);
+    expect(() =>
+      deriveTradeEligibilityRequestFromOrderBookFill({
+        trace: TRACE,
+        orderBookFillFact: fill,
+        requestRef: 'REQUEST.FUTURE.EVALUATION',
+        evaluatedAt: q('21001', 'sim_millisecond'),
+        outputRef: 'OUTCOME.BRIDGE.FUTURE',
+      }),
+    ).toThrow('cannot occur after replay snapshot');
   });
 
   it('resolves treaty/bilateral/general priority and concrete quotas/bans without reserving state', () => {
@@ -161,6 +170,34 @@ describe('V21.2 tariff, controls, and customs foundation', () => {
       effectiveTariffRate: null,
       permittedQuantity: q('0'),
     });
+    const exportBlocked = resolveTradeEligibility({
+      trace: TRACE,
+      requestFact: req,
+      generalTariffFact: general(),
+      bilateralTariffFact: null,
+      treatyTariffFact: null,
+      controlsFact: fact('FACT.EXPORT.BAN.1', [
+        {
+          controlRef: 'EXPORT.BAN.1',
+          kind: 'BAN' as const,
+          direction: 'EXPORT' as const,
+          enforcingCountryRef: 'COUNTRY.B',
+          counterpartyCountryRef: 'COUNTRY.A',
+          commodityRef: 'COMMODITY.COPPER',
+          effectiveAt: q('1', 'sim_millisecond'),
+          expiryAt: null,
+          quantityLimit: null,
+          deliveredQuantity: null,
+          reservedQuantity: null,
+        },
+      ]),
+      outputRef: 'OUTCOME.EXPORT.BLOCKED',
+    });
+    expect(exportBlocked).toMatchObject({
+      decision: 'BLOCKED',
+      blockReason: 'BAN_OR_SANCTION',
+      permittedQuantity: q('0'),
+    });
   });
 
   it('rejects unknown runtime directions and control kinds before eligibility', () => {
@@ -214,6 +251,16 @@ describe('V21.2 tariff, controls, and customs foundation', () => {
         ]),
       }),
     ).toThrow('Invalid trade control direction');
+    expect(() =>
+      resolveTradeEligibility({
+        ...base,
+        requestFact: fact('FACT.REQUEST.FUTURE', {
+          ...request().payload,
+          evaluatedAt: q('21001', 'sim_millisecond'),
+        }),
+        controlsFact: fact('FACT.CONTROLS.EMPTY.FUTURE', []),
+      }),
+    ).toThrow('cannot occur after replay snapshot');
   });
 
   it('computes tariff once from the resolved rate and refuses a repeated assessment ref', () => {
@@ -381,6 +428,12 @@ describe('V21.3 logistics capacity and replay foundation', () => {
       destinationAvailableIncrease: q('5'),
       portConsumed: q('7'),
     });
+    expect(result.replayProof.outputFacts[0]?.canonicalPayload).toContain(
+      '"portConsumed"',
+    );
+    expect(result.replayProof.outputFacts[0]?.canonicalPayload).toContain(
+      '"storageConsumed"',
+    );
     assertFoundationReplayEvidence(result.replayProof, [
       shipment,
       capacity,
@@ -411,5 +464,17 @@ describe('V21.3 logistics capacity and replay foundation', () => {
         outputRef: 'OUTCOME.SHIPMENT.2',
       }),
     ).toThrow('cannot bypass port rail or storage capacity');
+    expect(() =>
+      applyShipmentLogisticsOutcome({
+        trace: TRACE,
+        shipmentFact: shipment,
+        capacityFact: capacity,
+        outcomeFact: fact('FACT.OUTCOME.FUTURE', {
+          ...outcome.payload,
+          reportedAt: q('21001', 'sim_millisecond'),
+        }),
+        outputRef: 'OUTCOME.SHIPMENT.FUTURE',
+      }),
+    ).toThrow('cannot occur after replay snapshot');
   });
 });

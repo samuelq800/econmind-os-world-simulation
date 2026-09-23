@@ -47,6 +47,15 @@ function tick(value: ExactQuantity, label: string): WorldDecimalValue {
   return parsed;
 }
 
+function withinSnapshot(
+  trace: TradeLogisticsTraceRequest,
+  at: WorldDecimalValue,
+  label: string,
+): void {
+  if (at.greaterThan(tick(trace.snapshotAt, 'trace.snapshotAt')))
+    kernelInvalid(`${label} cannot occur after replay snapshot`);
+}
+
 function physical(
   value: ExactQuantity,
   label: string,
@@ -177,6 +186,8 @@ export function deriveTradeEligibilityRequestFromOrderBookFill(input: {
   );
   const matchedAt = tick(fill.matchedAt, 'fill.matchedAt');
   const evaluatedAt = tick(input.evaluatedAt, 'evaluatedAt');
+  withinSnapshot(input.trace, matchedAt, 'fill.matchedAt');
+  withinSnapshot(input.trace, evaluatedAt, 'evaluatedAt');
   if (evaluatedAt.lessThan(matchedAt)) {
     kernelInvalid('Eligibility evaluation cannot precede an order-book fill');
   }
@@ -242,18 +253,15 @@ function controlMatches(
     kernelInvalid('Invalid trade control kind');
   if (control.direction !== 'IMPORT' && control.direction !== 'EXPORT')
     kernelInvalid('Invalid trade control direction');
-  if (
-    control.direction !== request.direction ||
-    control.commodityRef !== request.commodityRef
-  ) {
+  if (control.commodityRef !== request.commodityRef) {
     return false;
   }
   const subject =
-    request.direction === 'IMPORT'
+    control.direction === 'IMPORT'
       ? request.importerCountryRef
       : request.exporterCountryRef;
   const counterparty =
-    request.direction === 'IMPORT'
+    control.direction === 'IMPORT'
       ? request.exporterCountryRef
       : request.importerCountryRef;
   if (
@@ -353,6 +361,7 @@ export function resolveTradeEligibility(input: {
     'controlsFact',
   );
   const evaluatedAt = tick(request.evaluatedAt, 'request.evaluatedAt');
+  withinSnapshot(input.trace, evaluatedAt, 'request.evaluatedAt');
   ref(request.requestRef, 'requestRef');
   ref(request.importerCountryRef, 'importerCountryRef');
   ref(request.exporterCountryRef, 'exporterCountryRef');
@@ -558,7 +567,11 @@ export function assessCustomsTariff(input: {
   ) {
     kernelInvalid('Customs quantity exceeds trade eligibility');
   }
-  tick(declaration.declaredAt, 'declaration.declaredAt');
+  withinSnapshot(
+    input.trace,
+    tick(declaration.declaredAt, 'declaration.declaredAt'),
+    'declaration.declaredAt',
+  );
   const value = money(declaration.customsValue, 'customsValue');
   const transport = money(declaration.transportCost, 'transportCost');
   const insurance = money(declaration.insuranceCost, 'insuranceCost');
@@ -724,7 +737,11 @@ export function applyShipmentLogisticsOutcome(input: {
   const dispatchedAt = tick(shipment.dispatchedAt, 'shipment.dispatchedAt');
   const expiryAt = tick(shipment.expiryAt, 'shipment.expiryAt');
   const reportedAt = tick(outcome.reportedAt, 'outcome.reportedAt');
-  tick(capacity.measuredAt, 'capacity.measuredAt');
+  const measuredAt = tick(capacity.measuredAt, 'capacity.measuredAt');
+  withinSnapshot(input.trace, reportedAt, 'outcome.reportedAt');
+  withinSnapshot(input.trace, measuredAt, 'capacity.measuredAt');
+  if (measuredAt.greaterThan(reportedAt))
+    kernelInvalid('Capacity measurement cannot follow shipment outcome');
   if (reportedAt.lessThan(dispatchedAt))
     kernelInvalid('Outcome cannot precede shipment dispatch');
   if (!reportedAt.lessThan(expiryAt))
@@ -793,6 +810,9 @@ export function applyShipmentLogisticsOutcome(input: {
               delivered.amount,
               unit,
             ),
+            portConsumed: renderQuantity(consumed, unit),
+            railConsumed: renderQuantity(consumed, unit),
+            storageConsumed: renderQuantity(consumed, unit),
           },
         },
       ],

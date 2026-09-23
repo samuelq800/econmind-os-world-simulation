@@ -18,6 +18,14 @@ The original A/E candidate evidence remains attached to its own immutable
 SHAs. This composed branch still needs an independent narrow review before
 nonproduction owner acceptance or main merge.
 
+A read-only independent narrow review of the first composed tip found P0=0
+and three Major issues: exporter controls were bypassed by the import-side
+bridge, event times could exceed the replay snapshot, and capacity consumption
+was omitted from shipment replay output. This candidate now checks both import
+and export controls, bounds trade/customs/shipment times to the snapshot, and
+binds port/rail/storage consumption in the replay output. The added adverse
+vectors pass locally. Independent closure review remains pending.
+
 V10.4 product integration, authoritative inventory and financial posting,
 database/RLS, Command/Event/receipt, UI, Gate B, and production remain outside
 this candidate. Repository status files are unchanged.
