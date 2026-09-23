@@ -1,5 +1,23 @@
 # V24.2 — Crisis/Admin Cause-Layer Composer pure Core preparation
 
+## Review B same-target blocker forward fix
+
+- Forward-fix code/test commit: `fbfe6ec24cb1e73ba2b8706ffc558a75b2f73ccf`.
+- The original candidate `0aa4b290afd36c0095c8a782b20b0b282e707e79`
+  remains superseded for package review; this does not merge or approve V24.2.
+- Causes for the same `(targetOwnerRef, targetObjectRef, targetField)` now
+  execute in stable source fact-reference order. Every later cause must declare
+  a `before` exactly equal to that target's preceding `after`; each individual
+  transition still rejects a negative result. Conflicting independent
+  starting balances are rejected rather than silently coalesced.
+- Regression: two separate resource causes both claiming `10 - 7` for
+  `DEPOSIT.1` are rejected. A valid `10 - 7 = 3; 3 - 2 = 1` chain and replay
+  pass; a claimed `3 - 7` overdraft and a tampered replay fail.
+- Forward-fix focused Vitest: **PASS**, one file / nine tests. Core typecheck,
+  Core build, targeted ESLint/Prettier, authoritative-pattern scan,
+  repository-boundary scan, and diff check: **PASS**. Independent closure
+  review: **NOT_RUN** here; B must re-review the new immutable tip.
+
 ## Candidate identity and gate
 
 - Code/plan/test commit: `21536380aa9df376ce6a7abb0767d21e515e95fe`.
