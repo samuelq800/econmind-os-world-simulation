@@ -558,9 +558,9 @@ function OfficeSidebar({
                 ? 'Build orders are local rehearsals; funding, external supply, workforce, and project approvals remain mapped to their owning offices.'
                 : actingOffice.officeId === 'SOCIAL'
                   ? 'Service plans are local rehearsals; staffing, funding, facilities, benefits, and deliveries remain mapped until their authorized handlers are attached.'
-                : actingOffice.officeId === 'CAPTAIN'
-                  ? 'Captain command is a local planning loop; other leaves stay visible until their authorized handlers are attached.'
-                  : 'This office remains a local fixture route until its authorized handlers are attached.'}
+                  : actingOffice.officeId === 'CAPTAIN'
+                    ? 'Captain command is a local planning loop; other leaves stay visible until their authorized handlers are attached.'
+                    : 'This office remains a local fixture route until its authorized handlers are attached.'}
       </p>
       <button
         className="six-sidebar__route"
