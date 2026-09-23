@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs';
 
 import { describe, expect, it } from 'vitest';
 
+import { prototypeStateMessage } from '../../apps/world-web/src/prototype/SixOfficesG01.js';
+
 import {
   EMPTY_PROJECTION,
   READY_PROJECTION,
@@ -109,5 +111,38 @@ describe('Six Offices Living Nation preparation surface', () => {
     expect(g01Styles).toContain('min-height: 542px');
     expect(g01Styles).toContain('(prefers-reduced-motion: reduce)');
     expect(g01Styles).toContain('(forced-colors: active)');
+    expect(g01Styles).toMatch(
+      /@media \(max-width: 840px\) \{\s*\.six-offices--gameplay \.six-topbar \{[^}]+\}\s*\.six-offices--gameplay \.six-layout \{\s*grid-template-columns: minmax\(0, 1fr\)/,
+    );
+  });
+
+  it('announces loading, revoked access, and offline recovery distinctly', () => {
+    expect(prototypeStateMessage({ status: 'loading' })).toMatchObject({
+      liveRegion: 'status',
+      detail: 'Waiting for the scoped fixture projection.',
+    });
+    expect(
+      prototypeStateMessage({
+        status: 'unauthorized',
+        reason: 'Office access revoked.',
+      }),
+    ).toMatchObject({
+      liveRegion: 'alert',
+      detail: 'Office access revoked. No Office action is available.',
+    });
+    expect(
+      prototypeStateMessage({
+        status: 'offline',
+        projection: null,
+        reason: 'No cached projection.',
+      }),
+    ).toMatchObject({
+      title: 'Projection offline',
+      detail: 'No cached projection. No live action is available.',
+    });
+    expect(g01).toContain('mainRef.current?.focus()');
+    expect(g01).toContain(
+      'Supplied snapshot only. Live actions are unavailable',
+    );
   });
 });

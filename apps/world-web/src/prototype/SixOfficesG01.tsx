@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { CaptainCommandCenter } from './CaptainCommandCenter.js';
 import { CentralBankGovernor } from './CentralBankGovernor.js';
@@ -398,6 +398,43 @@ const SOCIAL_NAV_GROUPS: readonly NavGroup[] = [
   },
 ];
 
+export function prototypeStateMessage(state: PrototypeViewState): {
+  readonly title: string;
+  readonly detail: string;
+  readonly liveRegion: 'alert' | 'status';
+} {
+  const reason = 'reason' in state ? state.reason : 'No readable projection.';
+  if (state.status === 'loading') {
+    return {
+      title: 'Loading world desk',
+      detail: 'Waiting for the scoped fixture projection.',
+      liveRegion: 'status',
+    };
+  }
+  if (state.status === 'unauthorized') {
+    return {
+      title: 'Office access changed',
+      detail: `${state.reason} No Office action is available.`,
+      liveRegion: 'alert',
+    };
+  }
+  if (state.status === 'offline' || state.status === 'retrying') {
+    return {
+      title:
+        state.status === 'offline'
+          ? 'Projection offline'
+          : 'Reconnecting to projection',
+      detail: `${reason} No live action is available.`,
+      liveRegion: 'status',
+    };
+  }
+  return {
+    title: 'Projection unavailable',
+    detail: reason,
+    liveRegion: 'status',
+  };
+}
+
 function StateScreen({
   state,
   onRetry,
@@ -405,19 +442,17 @@ function StateScreen({
   readonly state: PrototypeViewState;
   readonly onRetry: () => void;
 }) {
-  const reason = 'reason' in state ? state.reason : 'No readable projection.';
-  const content =
-    state.status === 'loading'
-      ? ['Loading world desk', 'Waiting for the scoped projection.']
-      : state.status === 'unauthorized'
-        ? ['Office access changed', state.reason]
-        : ['Projection unavailable', reason];
+  const message = prototypeStateMessage(state);
   return (
     <main className="six-state-screen" id="six-offices-main">
-      <section className="six-state-card" role="status" aria-live="polite">
+      <section
+        className="six-state-card"
+        role={message.liveRegion}
+        aria-live={message.liveRegion === 'alert' ? 'assertive' : 'polite'}
+      >
         <p>WORLD SIMULATION · G01</p>
-        <h1>{content[0]}</h1>
-        <span>{content[1]}</span>
+        <h1>{message.title}</h1>
+        <span>{message.detail}</span>
         {state.status !== 'loading' ? (
           <button
             className="six-button six-button--primary"
@@ -588,6 +623,15 @@ export function SixOfficesG01({
   const [unavailablePage, setUnavailablePage] = useState<string | null>(null);
   const [draftOpen, setDraftOpen] = useState(false);
   const [deskNotice, setDeskNotice] = useState<string | null>(null);
+  const mainRef = useRef<HTMLElement>(null);
+  const previousPageRef = useRef<WorkspacePageId>(currentPageId);
+
+  useEffect(() => {
+    if (previousPageRef.current !== currentPageId) {
+      previousPageRef.current = currentPageId;
+      mainRef.current?.focus();
+    }
+  }, [currentPageId]);
 
   if (
     !projection ||
@@ -633,7 +677,11 @@ export function SixOfficesG01({
             <i aria-hidden="true" />
             {state.status === 'stale'
               ? 'FIXTURE SNAPSHOT BEHIND'
-              : 'LOCAL FIXTURE VIEW'}
+              : state.status === 'offline'
+                ? 'FIXTURE PROJECTION OFFLINE'
+                : state.status === 'retrying'
+                  ? 'FIXTURE RECONNECTING'
+                  : 'LOCAL FIXTURE VIEW'}
           </span>
           <small>
             Snapshot v{projection.watermark.worldVersion} · no live clock
@@ -668,11 +716,31 @@ export function SixOfficesG01({
             setUnavailablePage(leaf.pageId);
           }}
         />
-        <main className="trade-main" id="six-offices-main">
-          {state.status === 'stale' ? (
-            <section className="six-stale-banner" role="status">
-              <strong>Intel is behind authority.</strong>
-              <span>Refresh before leaving local preparation.</span>
+        <main
+          ref={mainRef}
+          className="trade-main"
+          id="six-offices-main"
+          tabIndex={-1}
+        >
+          {state.status === 'stale' ||
+          state.status === 'offline' ||
+          state.status === 'retrying' ? (
+            <section
+              className="six-stale-banner"
+              role="status"
+              aria-live="polite"
+            >
+              <strong>
+                {state.status === 'stale'
+                  ? 'Fixture intel is behind.'
+                  : state.status === 'offline'
+                    ? 'Projection connection is offline.'
+                    : 'Reconnecting to projection.'}
+              </strong>
+              <span>
+                Supplied snapshot only. Live actions are unavailable; refresh to
+                check for a current authorized view.
+              </span>
               <button
                 className="six-button six-button--secondary"
                 type="button"
@@ -706,6 +774,7 @@ export function SixOfficesG01({
             <NationalOverview
               projection={projection}
               status={state.status}
+              onRetry={onRetry}
               onOpenBrief={() => {
                 setCurrentPageId('G01');
                 setDraftOpen(false);

@@ -87,3 +87,14 @@ missing routes, and approval-required routes. Its Command port returns
 This is `PREPARATION_ONLY_NOT_V25_2_STARTED`. Formal V25.2 hard dependencies
 remain `PLANNED`, and no runtime query, Command, approval, posting or World
 State integration is claimed.
+
+## V25.3 accessibility and recovery preparation
+
+`V25_3_PREPARATION.md` bounds the G02 browser-only recovery slice. A narrow
+viewport starts on the signal table; the map remains opt-in. A failed atlas
+asset or lazy module switches to the table, disables the broken map control,
+announces the fallback, and focuses the table switch. G01/G02 page changes
+focus the main region. Loading, revoked, offline/retrying, and empty states
+have distinct recovery semantics; an empty G02 can retry without inventing
+national values. Values remain labeled as fixture data, not actuals or
+forecasts. No Gate B browser harness or production Command wire is included.
