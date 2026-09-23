@@ -3,7 +3,7 @@
   "recordType": "V22_3_INTERNATIONAL_EXECUTORS_B_PREPARATION_EVIDENCE",
   "base": "f4815cc3d24e4876e9f09858f5536aac560592ef",
   "branch": "codex/v22-3-international-executors-b",
-  "validatedCodeCandidate": "38a76f80d8bac6d45f1d17cb2b8051853dc1b786",
+  "validatedCodeCandidate": "8d85b1a7442ef007fc6b0dd73d1766b5fae7e216",
   "observedOriginMain": "751e06b896741fc69c438f5603fa770972d3d5de",
   "status": "PREPARATION_ONLY",
   "risk": "P0",
@@ -53,7 +53,7 @@
     },
     {
       "command": "pnpm secrets:check",
-      "result": "PASS: 735 files"
+      "result": "PASS: 737 files"
     },
     {
       "command": "git merge-base / changed-path intersection / git merge-tree against origin/main",
@@ -68,6 +68,14 @@
     "issue": "A public proof hash alone can be recomputed after rewriting economic output.",
     "fix": "Replay dispatches by module, reruns subtype economics from the same bound facts, and compares the full recomputed proof.",
     "regression": "PASS: forged outputCanonical plus a freshly recomputed hash is rejected."
+  },
+  "independentReviewRemediation": {
+    "reviewedTip": "4601b191533b344e28d719bb834653074575b761",
+    "reviewResult": "P0=0, MAJOR=1, CHANGES_REQUIRED",
+    "issue": "Joint-project receiving account could reuse a participant account and emit incompatible after-balances from one before-balance.",
+    "fix": "Reject any project receiving accountRef equal to a participant accountRef before transition construction.",
+    "regression": "PASS: shared ACCOUNT.PROJECT.SHARED participant/project account is rejected.",
+    "closureReview": "PENDING_B"
   },
   "adverseVectors": [
     "incomplete, reordered or misclassified 23-type coverage matrix",

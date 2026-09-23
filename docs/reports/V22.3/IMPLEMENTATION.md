@@ -4,7 +4,8 @@
 
 `PREPARATION_ONLY`.
 
-- Code candidate: `38a76f8` (full SHA recorded in `TEST_EVIDENCE.json`).
+- Fixed code candidate: `8d85b1a` (full SHA recorded in
+  `TEST_EVIDENCE.json`).
 - Base: reviewed V22.1 mainline
   `f4815cc3d24e4876e9f09858f5536aac560592ef`.
 - Branch: `codex/v22-3-international-executors-b`.
@@ -57,6 +58,16 @@ recomputing the public hash and confirms rejection.
 This remains a pure candidate calculation. It neither authenticates referenced
 rights/approvals nor creates an authoritative Contract, Command, Event,
 receipt, right, obligation, posting or durable idempotency record.
+
+## Independent-review forward fix
+
+Independent narrow review of the earlier remote tip `4601b19` found P0=0 and
+MAJOR=1: a project receiving account could reuse a participant account
+reference, allowing two incompatible after-balances to be calculated from the
+same before-balance. Fixed code `8d85b1a` now rejects a project account that
+matches any participant account before creating transitions. The regression
+uses the reported `ACCOUNT.PROJECT.SHARED` shape and confirms fail-closed
+behavior. The old tip remains superseded and is not mergeable.
 
 ## Ownership and exclusions
 
