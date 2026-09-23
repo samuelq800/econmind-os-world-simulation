@@ -21,7 +21,7 @@ const TRACE = {
     snapshotHash: 'a'.repeat(64),
     predecessorSnapshotHash: 'b'.repeat(64),
   },
-  snapshotAt: { amount: '1000', unit: 'sim_millisecond' },
+  snapshotAt: { amount: '100', unit: 'sim_millisecond' },
 } as const;
 
 const TICK = (amount: string) => ({ amount, unit: 'sim_millisecond' }) as const;
@@ -513,6 +513,33 @@ describe('V21.1 Global Order Book pure foundation', () => {
       ['RELEASE', '-0.2'],
     ]);
     expect(result.capacities[0]?.availableToReserve.amount).toBe('0.2');
+  });
+
+  it('expires an unmatched seller at the replay snapshot without a later action', () => {
+    const result = evaluate(
+      [capacity('ACCOUNT.SNAPSHOT', 'COUNTRY.A', '2')],
+      [
+        place(
+          '1',
+          '10',
+          order({
+            orderRef: 'SELL.SNAPSHOT',
+            countryRef: 'COUNTRY.A',
+            side: 'SELL',
+            quantity: '2',
+            price: '5',
+            accountRef: 'ACCOUNT.SNAPSHOT',
+            expiresAt: '50',
+          }),
+        ),
+      ],
+    ).result;
+    expect(result.orders[0]?.status).toBe('EXPIRED');
+    expect(result.reservationMovements.map((entry) => entry.kind)).toEqual([
+      'HOLD',
+      'RELEASE',
+    ]);
+    expect(result.capacities[0]?.availableToReserve.amount).toBe('2');
   });
 
   it('rejects mismatched price, unit, delivery window, and unsafe action discriminators', () => {

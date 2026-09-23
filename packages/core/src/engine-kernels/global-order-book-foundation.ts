@@ -689,6 +689,10 @@ export function calculateGlobalOrderBook(input: {
     }
   }
 
+  // The returned book is measured at the supplied snapshot, even when no
+  // later placement or cancellation action advances the replay clock.
+  expire(snapshotAt, `${input.outputRef}.snapshot`);
+
   const output = Object.freeze({
     orders: Object.freeze([...orders.values()].map(bookOrder)),
     fills: Object.freeze(fills),
