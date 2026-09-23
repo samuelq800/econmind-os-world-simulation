@@ -24,7 +24,10 @@ bridge, event times could exceed the replay snapshot, and capacity consumption
 was omitted from shipment replay output. This candidate now checks both import
 and export controls, bounds trade/customs/shipment times to the snapshot, and
 binds port/rail/storage consumption in the replay output. The added adverse
-vectors pass locally. Independent closure review remains pending.
+vectors pass locally. The independent narrow closure review at code tip
+`fb5926ac14f9623d6cdf1094adecfcaf6e36c871` reports `P0=0`, `MAJOR=0` for
+these three findings. The reviewer could not execute tests with its ambient
+Node/pnpm, so the executable test result is the Control Tower's pinned run.
 
 V10.4 product integration, authoritative inventory and financial posting,
 database/RLS, Command/Event/receipt, UI, Gate B, and production remain outside
