@@ -1,0 +1,36 @@
+{
+  "step": "V22.2",
+  "scope": "pure_core_preparation_only",
+  "status": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
+  "base_sha": "f4815cc3d24e4876e9f09858f5536aac560592ef",
+  "code_commit_sha": "2b3249bfde301959381a7a24bb3f165aca1a8cd0",
+  "branch": "codex/v22-2-international-executors-a",
+  "checks": {
+    "focused_vitest": { "status": "PASS", "files": 1, "tests": 8 },
+    "workspace_typecheck_pinned_direct": "PASS",
+    "core_build": "PASS",
+    "targeted_eslint": "PASS",
+    "targeted_prettier": "PASS",
+    "authoritative_pattern_scan": "PASS",
+    "boundary_scan": "PASS",
+    "local_environment_check": "PASS",
+    "repository_secret_scan": "PASS",
+    "foundation_gate_policy": "PASS",
+    "git_diff_check": "PASS",
+    "convenience_typecheck_script": "FAIL_TOOLCHAIN_WRAPPER_PINNED_DIRECT_RERUN_PASSED"
+  },
+  "not_run": [
+    "authoritative_V10_4_integration",
+    "V21_3_dependency_closure",
+    "V22_1_product_gate_closure",
+    "V09_atomic_writer_integration",
+    "posting_and_persistence",
+    "cross_border_end_to_end",
+    "independent_review",
+    "production_database_access",
+    "migration",
+    "gate_approval"
+  ],
+  "open_decisions": ["ADR-10"],
+  "authoritative_writes": false
+}
