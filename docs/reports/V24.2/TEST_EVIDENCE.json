@@ -18,6 +18,18 @@
     "git_diff_check": "PASS",
     "independent_closure_review": "NOT_RUN"
   },
+  "locale_determinism_forward_fix": {
+    "code_commit_sha": "e55ad9f4ca47fd22c595ae678405f7390b760201",
+    "supersedes_tip": "8dfc204d519ba07e3614bd17fbe4794301d27686",
+    "behavior": "locale-independent codepoint fact-reference order for same-target chain",
+    "focused_vitest_en_US_UTF_8": { "status": "PASS", "files": 1, "tests": 10 },
+    "focused_vitest_tr_TR_UTF_8": { "status": "PASS", "files": 1, "tests": 10 },
+    "core_typecheck": "PASS",
+    "core_build": "PASS",
+    "targeted_eslint": "PASS",
+    "git_diff_check": "PASS",
+    "independent_closure_review": "NOT_RUN"
+  },
   "branch": "codex/v24-2-crisis-cause-core",
   "authoritative_v24_1_status": "PLANNED",
   "authoritative_v24_2_status": "PLANNED",

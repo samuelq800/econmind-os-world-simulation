@@ -1,5 +1,17 @@
 # V24.2 — Crisis/Admin Cause-Layer Composer pure Core preparation
 
+## Review B locale-determinism blocker forward fix
+
+- Forward-fix code/test commit: `e55ad9f4ca47fd22c595ae678405f7390b760201`.
+- Same-target cause order now uses an explicit locale-independent codepoint
+  comparison of stable fact references, not `localeCompare`. The exact
+  before-to-after chain therefore has the same ordering across hosts.
+- Mixed-case `FACT.I` / `FACT.i` chain and replay passed with both
+  `LC_ALL=en_US.UTF-8` and `LC_ALL=tr_TR.UTF-8`: **10/10 tests each**.
+  Reversed input order produces the same result. Core typecheck/build,
+  targeted ESLint and diff check: **PASS**. Independent closure re-review
+  remains **NOT_RUN** here; this supersedes tip `8dfc204` for review.
+
 ## Review B same-target blocker forward fix
 
 - Forward-fix code/test commit: `fbfe6ec24cb1e73ba2b8706ffc558a75b2f73ccf`.
