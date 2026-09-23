@@ -237,8 +237,11 @@ describe('World Web local authorized client preparation', () => {
     expect((await client.readProjection(requestId)).status).toBe('PROJECTION');
     commandReceipt = { ...receipt(), source: 'FIXTURE' };
     expect(await client.submitNarrowTransfer(requestId, draft)).toEqual({
-      status: 'UNAVAILABLE',
-      reason: 'INVALID_RESPONSE',
+      status: 'UNKNOWN',
+    });
+    expect(client.cache.read(identity)).toMatchObject({
+      worldVersion: '8',
+      reconciliationRequired: true,
     });
     commandReceipt = receipt();
     expect(await client.submitNarrowTransfer(requestId, draft)).toMatchObject({
@@ -264,5 +267,130 @@ describe('World Web local authorized client preparation', () => {
     expect(await lostAck.submitNarrowTransfer(requestId, draft)).toEqual({
       status: 'UNKNOWN',
     });
+    expect(lostAck.cache.read(identity)).toMatchObject({
+      worldVersion: '8',
+      reconciliationRequired: true,
+    });
   });
+
+  it('does not retry a committed command with new IDs after a truncated 200 acknowledgement', async () => {
+    let durableCommits = 0;
+    let commandPosts = 0;
+    const fetcher = vi.fn(async (url: URL | RequestInfo) => {
+      if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+        return Response.json({
+          schemaVersion: 'world-read-api-v1',
+          requestId,
+          ok: true,
+          data: projection(),
+        });
+      }
+      commandPosts += 1;
+      if (durableCommits === 0) {
+        durableCommits += 1; // Server committed before its 200 body was truncated.
+        return new Response('{"schemaVersion":"world-command-api-v1",', {
+          status: 200,
+        });
+      }
+      return Response.json({
+        schemaVersion: 'world-command-api-v1',
+        requestId,
+        ok: true,
+        receipt: receipt(),
+      });
+    }) as unknown as typeof fetch;
+    const client = browser(fetcher);
+    expect((await client.readProjection(requestId)).status).toBe('PROJECTION');
+    expect(await client.submitNarrowTransfer(requestId, draft)).toEqual({
+      status: 'UNKNOWN',
+    });
+    expect(client.cache.read(identity)).toMatchObject({
+      reconciliationRequired: true,
+    });
+    const changedIds = {
+      ...draft,
+      commandId: 'COMMAND_2',
+      idempotencyKey: 'IDEMPOTENCY_2',
+    };
+    expect(await client.submitNarrowTransfer(requestId, changedIds)).toEqual({
+      status: 'UNKNOWN',
+    });
+    expect(
+      await client.submitNarrowTransfer(requestId, {
+        ...draft,
+        buyerFinanceApprovalRef: 'APPROVAL_2',
+      }),
+    ).toEqual({ status: 'UNKNOWN' });
+    expect(commandPosts).toBe(1);
+    // A same-version refresh alone must not unlock a new economic command.
+    expect((await client.readProjection(requestId)).status).toBe('PROJECTION');
+    expect(await client.submitNarrowTransfer(requestId, changedIds)).toEqual({
+      status: 'UNKNOWN',
+    });
+    expect(commandPosts).toBe(1);
+    expect(await client.submitNarrowTransfer(requestId, draft)).toMatchObject({
+      status: 'FINAL_RECEIPT',
+      receipt: { commandId: 'COMMAND_1', outcome: 'COMMITTED' },
+    });
+    expect(durableCommits).toBe(1);
+    expect(commandPosts).toBe(2);
+  });
+
+  it.each([
+    'wrong request ID',
+    'wrong schema',
+    'missing receipt',
+    'invalid receipt',
+    'service error',
+  ])(
+    'classifies post-dispatch %s as unknown and blocks a new command',
+    async (kind) => {
+      let commandPosts = 0;
+      const fetcher = vi.fn(async (url: URL | RequestInfo) => {
+        if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+          return Response.json({
+            schemaVersion: 'world-read-api-v1',
+            requestId,
+            ok: true,
+            data: projection(),
+          });
+        }
+        commandPosts += 1;
+        if (kind === 'service error') return Response.json({}, { status: 503 });
+        return Response.json({
+          schemaVersion:
+            kind === 'wrong schema' ? 'wrong-schema' : 'world-command-api-v1',
+          requestId:
+            kind === 'wrong request ID'
+              ? '550e8400-e29b-41d4-a716-446655440002'
+              : requestId,
+          ok: true,
+          ...(kind === 'missing receipt'
+            ? {}
+            : {
+                receipt:
+                  kind === 'invalid receipt'
+                    ? { ...receipt(), commandFingerprint: 'MOCK' }
+                    : receipt(),
+              }),
+        });
+      }) as unknown as typeof fetch;
+      const client = browser(fetcher);
+      await client.readProjection(requestId);
+      expect(await client.submitNarrowTransfer(requestId, draft)).toEqual({
+        status: 'UNKNOWN',
+      });
+      expect(client.cache.read(identity)).toMatchObject({
+        reconciliationRequired: true,
+      });
+      expect(
+        await client.submitNarrowTransfer(requestId, {
+          ...draft,
+          commandId: 'COMMAND_2',
+          idempotencyKey: 'IDEMPOTENCY_2',
+        }),
+      ).toEqual({ status: 'UNKNOWN' });
+      expect(commandPosts).toBe(1);
+    },
+  );
 });

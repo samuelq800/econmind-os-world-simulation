@@ -264,6 +264,22 @@ export function createAuthorizedWorldBrowserClient(options: {
   const cache = options.cache ?? createScopedProjectionCache();
   const origin = options.bridge ? validatedOrigin(options.bridge.origin) : null;
   const fetcher = options.bridge?.fetcher ?? fetch;
+  let unresolvedDraft: NarrowTransferDraft | null = null;
+  let unresolvedIdentity: AuthorizedBrowserIdentity | null = null;
+
+  function sameDraft(
+    left: NarrowTransferDraft,
+    right: NarrowTransferDraft,
+  ): boolean {
+    return (
+      left.commandId === right.commandId &&
+      left.idempotencyKey === right.idempotencyKey &&
+      left.expectedWorldVersion === right.expectedWorldVersion &&
+      left.proposalRef === right.proposalRef &&
+      left.buyerCountryId === right.buyerCountryId &&
+      left.buyerFinanceApprovalRef === right.buyerFinanceApprovalRef
+    );
+  }
 
   async function request(
     path: typeof LOCAL_WORLD_READ_PATH | typeof LOCAL_WORLD_COMMAND_PATH,
@@ -272,6 +288,11 @@ export function createAuthorizedWorldBrowserClient(options: {
     body: object,
   ): Promise<
     | ClientFailure
+    | {
+        readonly status: 'UNVERIFIED_POST';
+        readonly reason:
+          'NETWORK_UNAVAILABLE' | 'INVALID_RESPONSE' | 'STALE_IDENTITY';
+      }
     | { readonly status: 'RESPONSE'; readonly body: Record<string, unknown> }
   > {
     if (!origin)
@@ -305,21 +326,25 @@ export function createAuthorizedWorldBrowserClient(options: {
         body: serialized,
       });
     } catch {
-      return { status: 'UNAVAILABLE', reason: 'NETWORK_UNAVAILABLE' };
+      return { status: 'UNVERIFIED_POST', reason: 'NETWORK_UNAVAILABLE' };
     }
     if (!sameIdentity(identity, options.currentIdentity()))
-      return { status: 'STALE' };
+      return { status: 'UNVERIFIED_POST', reason: 'STALE_IDENTITY' };
     if (response.status === 401 || response.status === 403) {
       cache.revokeAuthorization();
       return { status: 'DENIED' };
     }
-    if (response.status === 409) return { status: 'STALE' };
+    if (response.status === 409) {
+      return path === LOCAL_WORLD_READ_PATH
+        ? { status: 'STALE' }
+        : { status: 'UNVERIFIED_POST', reason: 'INVALID_RESPONSE' };
+    }
     if (!response.ok)
-      return { status: 'UNAVAILABLE', reason: 'NETWORK_UNAVAILABLE' };
+      return { status: 'UNVERIFIED_POST', reason: 'NETWORK_UNAVAILABLE' };
     try {
       const parsed = record(await boundedJson(response));
       if (!sameIdentity(identity, options.currentIdentity()))
-        return { status: 'STALE' };
+        return { status: 'UNVERIFIED_POST', reason: 'STALE_IDENTITY' };
       if (
         !parsed ||
         parsed.requestId !== requestId ||
@@ -329,11 +354,11 @@ export function createAuthorizedWorldBrowserClient(options: {
             ? WORLD_READ_SCHEMA
             : WORLD_COMMAND_SCHEMA)
       ) {
-        return { status: 'UNAVAILABLE', reason: 'INVALID_RESPONSE' };
+        return { status: 'UNVERIFIED_POST', reason: 'INVALID_RESPONSE' };
       }
       return { status: 'RESPONSE', body: parsed };
     } catch {
-      return { status: 'UNAVAILABLE', reason: 'INVALID_RESPONSE' };
+      return { status: 'UNVERIFIED_POST', reason: 'INVALID_RESPONSE' };
     }
   }
 
@@ -348,6 +373,19 @@ export function createAuthorizedWorldBrowserClient(options: {
       identity.authorizationRevision,
     );
     return { ...identity };
+  }
+
+  function unverifiedCommand(
+    identity: AuthorizedBrowserIdentity,
+    draft: NarrowTransferDraft,
+  ): BrowserCommandResult {
+    // A fresh authoritative snapshot is required before another command.
+    // The cache port exposes whole-cache reconnect invalidation, not a
+    // one-scope invalidation method; broad invalidation is fail-closed.
+    unresolvedDraft = { ...draft };
+    unresolvedIdentity = { ...identity };
+    cache.onReconnect();
+    return { status: 'UNKNOWN' };
   }
 
   return {
@@ -367,6 +405,10 @@ export function createAuthorizedWorldBrowserClient(options: {
           scopeKey: identity.scopeKey,
         },
       });
+      if (result.status === 'UNVERIFIED_POST') {
+        if (result.reason === 'STALE_IDENTITY') return { status: 'STALE' };
+        return { status: 'UNAVAILABLE', reason: result.reason };
+      }
       if (result.status !== 'RESPONSE') return result;
       const data = record(result.body.data);
       const watermark = record(data?.watermark);
@@ -433,11 +475,27 @@ export function createAuthorizedWorldBrowserClient(options: {
       ) {
         return { status: 'UNAVAILABLE', reason: 'IDENTITY_NOT_READY' };
       }
+      if (
+        unresolvedDraft &&
+        (!unresolvedIdentity ||
+          !sameIdentity(unresolvedIdentity, identity) ||
+          !sameDraft(unresolvedDraft, draft))
+      ) {
+        return { status: 'UNKNOWN' }; // Never retry an unresolved command under new IDs or payload.
+      }
+      const resolvingUnknown = unresolvedDraft !== null;
       const cached = cache.read(identity);
-      if (cached.state !== 'DERIVED_CACHE' || cached.reconciliationRequired) {
+      if (
+        !resolvingUnknown &&
+        (cached.state !== 'DERIVED_CACHE' || cached.reconciliationRequired)
+      ) {
         return { status: 'UNAVAILABLE', reason: 'NO_CURRENT_PROJECTION' };
       }
-      if (cached.worldVersion !== draft.expectedWorldVersion)
+      if (
+        !resolvingUnknown &&
+        cached.state === 'DERIVED_CACHE' &&
+        cached.worldVersion !== draft.expectedWorldVersion
+      )
         return { status: 'STALE' };
       const result = await request(
         LOCAL_WORLD_COMMAND_PATH,
@@ -459,22 +517,21 @@ export function createAuthorizedWorldBrowserClient(options: {
           },
         },
       );
-      if (
-        result.status === 'UNAVAILABLE' &&
-        result.reason === 'NETWORK_UNAVAILABLE'
-      ) {
-        return { status: 'UNKNOWN' }; // Ack may have been lost; retry with identical IDs only.
+      if (result.status === 'UNVERIFIED_POST')
+        return unverifiedCommand(identity, draft);
+      if (result.status !== 'RESPONSE') {
+        return resolvingUnknown ? { status: 'UNKNOWN' } : result;
       }
-      if (result.status !== 'RESPONSE') return result;
       const receipt = validReceipt(
         result.body.receipt,
         identity.worldId,
         draft,
       );
-      if (!receipt)
-        return { status: 'UNAVAILABLE', reason: 'INVALID_RESPONSE' };
+      if (!receipt) return unverifiedCommand(identity, draft);
       if (!sameIdentity(identity, options.currentIdentity()))
-        return { status: 'STALE' };
+        return unverifiedCommand(identity, draft);
+      unresolvedDraft = null;
+      unresolvedIdentity = null;
       if (receipt.outcome === 'COMMITTED' && receipt.worldVersionAfter) {
         cache.observeNotice({
           scope: identity,

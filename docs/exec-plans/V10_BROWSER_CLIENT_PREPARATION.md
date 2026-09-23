@@ -39,6 +39,12 @@ imports Worker/Core settlement nor exposes server credentials.
   durable versus mock receipt parsing, lost acknowledgement, token handling
   and cache monotonicity. E's command wire has no expected WorldVersion field:
   the browser precondition does not constitute a server-side concurrency fence.
+- After a command POST, malformed/truncated 200 responses, wrong response
+  identity/schema, invalid final receipts, transport loss and non-definitive
+  HTTP failures are `UNKNOWN`, never negative commit evidence. The derived
+  cache requires reconciliation, and this client instance blocks new command
+  identities/payloads until an exact-ID retry obtains a verified final receipt.
+  This in-memory guard is not restart persistence or a receipt lookup service.
 - Browser transport is not yet integrated: E's current Node bridge responds
   only to POST and does not provide an OPTIONS/CORS preflight response. A page
   on a different localhost port therefore cannot call it directly in a real
