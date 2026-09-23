@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "recordType": "V21_1_GLOBAL_ORDER_BOOK_FOUNDATION_TEST_EVIDENCE",
+  "branch": "codex/v21-1-global-order-book-foundation",
+  "base": "c91744a6d02865829b82df2088025949de99d88d",
+  "validatedCodeCandidate": "14bc2c6856ff8242fd6f6d513930c7d22c441b43",
+  "status": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
+  "risk": "P0",
+  "result": "PASS_AT_FROZEN_CODE_CANDIDATE",
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/v21-1-global-order-book-foundation.test.ts",
+      "result": "PASS: 1 file, 7 tests"
+    },
+    {
+      "command": "pnpm --filter @econmind/core typecheck",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @econmind/core build",
+      "result": "PASS"
+    },
+    {
+      "command": "affected-path ESLint and Prettier",
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "result": "PASS: 53 Core files, 65 total files, zero violations"
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "result": "PASS: 70 files"
+    },
+    {
+      "command": "pnpm env:check",
+      "result": "PASS: local, databaseConfigured=false, linkedSupabaseProject=NOT_LINKED"
+    },
+    {
+      "command": "pnpm secrets:check",
+      "result": "PASS: 656 files"
+    },
+    {
+      "command": "pnpm foundation:policy",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --cached --check",
+      "result": "PASS"
+    }
+  ],
+  "vectors": [
+    "All 12 fixed commodity IDs with canonical physical units",
+    "Best price, earlier placement time and sequence, exact partial fills and remaining cancellation",
+    "Incoming non-partial order completes from multiple resting counterparties or remains unchanged",
+    "Seller hold, fill allocation, cancellation and expiry release with exact fractional quantities",
+    "Unique reservation reference and per-account available capacity prevent repeated holds",
+    "Uncrossed limit price, non-overlapping delivery windows, mismatched commodity units or settlement currency",
+    "Unsafe action and side discriminators, forged payload, stale snapshot and broken predecessor chain",
+    "Deterministic rerun and tampered replay proof rejection"
+  ],
+  "limits": [
+    "Calculation starts from an empty book and caller-attested net inventory availability within one supplied replay snapshot.",
+    "A resting non-partial order is not pooled across multiple later placement actions; product market policy remains later-owned.",
+    "The result has bid/ask limits but does not select an execution cash price, tariff, FX rate, payment or delivery posting.",
+    "The V08/V09 writer must enforce durable reservation uniqueness and atomic inventory/financial commitment."
+  ],
+  "notRun": [
+    "Independent review and P0 verification",
+    "Official full repository pnpm check",
+    "V10.4 dependency closure, full V21 package, Gate B, authoritative persistence and production validation"
+  ],
+  "prohibitedPathsUnchanged": [
+    "status/progress.json",
+    "status/decisions.json",
+    "packages/core/src/engine-kernels/index.ts",
+    "apps",
+    "supabase",
+    "packages/database",
+    "packages/api"
+  ],
+  "mainMergeAuthorized": false,
+  "productionMutation": false,
+  "verified": false
+}
