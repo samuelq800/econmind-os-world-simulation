@@ -22,7 +22,9 @@ export type V13V14FoundationModule =
   | 'V13_ENERGY_ALLOCATION'
   | 'V13_PRODUCTION'
   | 'V14_TECHNOLOGY_RIGHTS'
-  | 'V14_PROJECT_LIFECYCLE';
+  | 'V14_PROJECT_LIFECYCLE'
+  | 'V21_TARIFF_CUSTOMS_SHIPMENT'
+  | 'V21_LOGISTICS_REPLAY';
 
 export interface FoundationSnapshotBinding {
   readonly lineageRef: string;

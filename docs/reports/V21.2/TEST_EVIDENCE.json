@@ -1,0 +1,16 @@
+{
+  "status": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
+  "scope": "pure packages/core tariff-control-customs candidate",
+  "focused_test": "tests/world-core/v21-trade-logistics-foundation.test.ts",
+  "claims": [
+    "treaty/bilateral/general precedence uses explicit policy facts",
+    "sanction and ban block before tariff eligibility",
+    "quota/cap headroom uses delivered and reserved fact quantities",
+    "an assessment reference cannot be collected twice"
+  ],
+  "not_claimed": [
+    "V21.1 or V10.4 integration",
+    "authoritative tariff receivable or ledger posting",
+    "quota reservation or persistence"
+  ]
+}

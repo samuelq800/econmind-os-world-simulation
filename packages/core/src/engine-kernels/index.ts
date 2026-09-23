@@ -13,5 +13,6 @@ export * from './technology-project-household-fiscal.js';
 export * from './foundation-provenance.js';
 export * from './energy-production-foundation.js';
 export * from './technology-project-foundation.js';
+export * from './trade-logistics-foundation.js';
 export * from './bank-central-foundation.js';
 export * from './fx-international-foundation.js';

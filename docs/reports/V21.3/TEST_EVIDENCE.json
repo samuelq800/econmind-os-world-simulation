@@ -1,0 +1,16 @@
+{
+  "status": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
+  "scope": "pure packages/core logistics/replay candidate",
+  "focused_test": "tests/world-core/v21-trade-logistics-foundation.test.ts",
+  "claims": [
+    "partial delivery and loss reconcile exact commodity quantities",
+    "port, rail and storage bottlenecks reject bypass",
+    "only delivery increases destination availability",
+    "replay proof rejects divergent source evidence"
+  ],
+  "not_claimed": [
+    "shipment persistence or authoritative delivery event",
+    "in-transit or destination inventory posting",
+    "V21.2 independent review closure"
+  ]
+}
