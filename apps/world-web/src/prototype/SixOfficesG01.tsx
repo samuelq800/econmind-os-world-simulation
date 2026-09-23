@@ -705,6 +705,7 @@ export function SixOfficesG01({
           {currentPageId === 'G02' ? (
             <NationalOverview
               projection={projection}
+              status={state.status}
               onOpenBrief={() => {
                 setCurrentPageId('G01');
                 setDraftOpen(false);

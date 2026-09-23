@@ -73,3 +73,17 @@ atlas has no World or country IDs, and its visual territories are not linked to
 Northstar or to any authorized economic values. Authorization-revoked views
 remove the projection and therefore the map intel. This integration stays
 `PREPARATION_ONLY_NOT_RUNTIME`; it has no query, command or persistence wire.
+
+## V25.2 event-to-Office preparation
+
+`V25_2_PREPARATION.md` records the browser-only gap and six-Office ownership
+sources. G02 now lets a player choose a projected event and inspect its owning
+Office, event-specific route, and blocked or local-rehearsal state. The typed
+`office-action-adapter.ts` consumes only the supplied fixture read model and
+fails closed on stale/offline views, missing authorization, a different owner,
+missing routes, and approval-required routes. Its Command port returns
+`UNAVAILABLE`; G02 never invokes submission or produces a final receipt.
+
+This is `PREPARATION_ONLY_NOT_V25_2_STARTED`. Formal V25.2 hard dependencies
+remain `PLANNED`, and no runtime query, Command, approval, posting or World
+State integration is claimed.
