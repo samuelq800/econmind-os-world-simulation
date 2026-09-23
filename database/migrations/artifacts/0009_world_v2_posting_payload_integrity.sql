@@ -116,7 +116,7 @@ begin
          count(distinct entry.value->'account'->>'unit'),
          count(distinct entry.value->'account'->>'titleHolderId'),
          count(distinct entry.value->'account'->>'riskBearerId'),
-         count(distinct coalesce(entry.value->'account'->>'economicRecognitionId', '')),
+         count(distinct coalesce(entry.value->'account'->>'economicRecognitionId', '')), 
          count(*) filter (where
            jsonb_typeof(entry.value) <> 'object'
            or (select array_agg(key order by key) from jsonb_object_keys(entry.value) as key) is distinct from array['account', 'delta']
