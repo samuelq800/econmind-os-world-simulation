@@ -188,6 +188,13 @@ describe('V24.3 brief/conflict/expiry preparation', () => {
         ...input,
         viewerFact: fact('FACT.VIEWER.A', {
           ...viewer,
+          serverAuthorizationRef: null,
+        }),
+      }),
+      prepareCabinetBriefProjection({
+        ...input,
+        viewerFact: fact('FACT.VIEWER.A', {
+          ...viewer,
           officeRefs: ['OFFICE.OTHER'],
         }),
       }),
@@ -209,10 +216,26 @@ describe('V24.3 brief/conflict/expiry preparation', () => {
       }),
       prepareCabinetBriefProjection({
         ...input,
+        grantFact: fact(
+          'FACT.GRANT.SECRET',
+          { ...grant, allowed: false },
+          grantFact.predecessorFactRefs,
+        ),
+      }),
+      prepareCabinetBriefProjection({
+        ...input,
+        grantFact: fact('FACT.GRANT.SECRET', grant),
+      }),
+      prepareCabinetBriefProjection({
+        ...input,
         briefFact: fact('FACT.BRIEF.SECRET', {
           ...brief,
           countryRef: 'COUNTRY.B',
         }),
+      }),
+      prepareCabinetBriefProjection({
+        ...input,
+        briefFact: { ...briefFact, payload: { ...brief, body: 'FORGED' } },
       }),
     ];
     for (const result of denied) {
@@ -477,6 +500,13 @@ describe('V24.3 brief/conflict/expiry preparation', () => {
       evaluateTemporaryPower({
         trace,
         grantFact: fact('FACT.POWER', { ...grant, issuedAt: t('200') }),
+        crisisFact,
+      }),
+    ).toThrow();
+    expect(() =>
+      evaluateTemporaryPower({
+        trace,
+        grantFact: fact('FACT.POWER', { ...grant, issuedAt: t('20.5') }),
         crisisFact,
       }),
     ).toThrow();
