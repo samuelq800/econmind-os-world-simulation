@@ -70,6 +70,13 @@ Then record the completed run URL, conclusion, uploaded JSON's
 status. A workflow or service success is disposable-loopback evidence only; it
 does not convert the result into dedicated staging or Gate B acceptance.
 
+When the durable runner fails without an SQL-level detail, a dispatcher may run
+the same isolated service once with `-f mode=diagnose`. That path records only
+the first command step, a SHA-256 of its SQL text, SQLSTATE and a bounded
+redacted message; it never logs parameters or a connection string. It is a
+narrow failure diagnostic, not a successful evidence retry or a replacement
+for the durable runner artifact.
+
 Receipt/recovery remains a separate real-PostgreSQL focused assertion in
 `tests/world-core/v09-atomic-recovery-postgres.test.ts`; the disposable runner
 does not relabel that suite as executed. Run it against the same explicitly

@@ -7,6 +7,14 @@ on:
         description: Exact 40-character main SHA to execute against the disposable service
         required: true
         type: string
+      mode:
+        description: Run the durable evidence runner or one redacted migration diagnostic
+        required: true
+        default: evidence
+        type: choice
+        options:
+          - evidence
+          - diagnose
   push:
     branches:
       - codex/world-core-v09
@@ -75,12 +83,83 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm migration:validate
       - name: Run disposable PostgreSQL evidence
+        if: inputs.mode == 'evidence'
         shell: bash
         env:
           V09_DISPOSABLE_EVIDENCE_OUTPUT: ${{ runner.temp }}/v09-disposable-evidence.json
         run: |
           set -o pipefail
           pnpm test:v09:disposable-evidence 2>&1 | tee "$RUNNER_TEMP/v09-disposable-evidence.log"
+      - name: Diagnose first disposable migration failure
+        if: inputs.mode == 'diagnose'
+        shell: bash
+        env:
+          V09_DIAGNOSTIC_OUTPUT: ${{ runner.temp }}/v09-disposable-diagnostic.json
+          V09_DISPOSABLE_EVIDENCE_OUTPUT: ${{ runner.temp }}/v09-disposable-runner-contract.json
+        run: |
+          set -o pipefail
+          node --input-type=module <<'NODE' 2>&1 | tee "$RUNNER_TEMP/v09-disposable-diagnostic.log"
+          import { createHash } from 'node:crypto';
+          import { writeFile } from 'node:fs/promises';
+
+          import { Client } from 'pg';
+
+          import { runV09DisposablePostgresEvidence } from './scripts/v09-staging-evidence-runner.mjs';
+
+          function redact(value) {
+            return String(value ?? 'unknown')
+              .replaceAll(process.env.V09_TEST_DATABASE_URL, '[REDACTED_URL]')
+              .replace(/postgres(?:ql)?:\/\/\S+/giu, '[REDACTED_URL]')
+              .replace(/(password|token)\s*=\s*\S+/giu, '$1=[REDACTED]')
+              .slice(0, 500);
+          }
+
+          let firstQueryFailure;
+          const clientFactory = ({ connectionString }) => {
+            const client = new Client({ connectionString });
+            return Object.freeze({
+              connect: async () => client.connect(),
+              end: async () => client.end(),
+              execute: async ({ step, text, values }) => {
+                try {
+                  return values.length === 0
+                    ? await client.query(text)
+                    : await client.query(text, values);
+                } catch (error) {
+                  firstQueryFailure ??= {
+                    message: redact(error?.message),
+                    postgres_code: redact(error?.code),
+                    sql_bytes: Buffer.byteLength(text, 'utf8'),
+                    sql_sha256: createHash('sha256').update(text, 'utf8').digest('hex'),
+                    step,
+                  };
+                  throw error;
+                }
+              },
+            });
+          };
+
+          const evidence = await runV09DisposablePostgresEvidence({
+            clientFactory,
+            writeEvidence: async () => undefined,
+          });
+          const diagnostic = {
+            diagnosis_schema: 'V09_DISPOSABLE_DIAGNOSTIC-1',
+            first_query_failure: firstQueryFailure ?? null,
+            runner_failure: evidence.failure ?? null,
+            runner_status: evidence.status,
+          };
+          await writeFile(
+            process.env.V09_DIAGNOSTIC_OUTPUT,
+            `${JSON.stringify(diagnostic, null, 2)}\n`,
+            { encoding: 'utf8', flag: 'wx' },
+          );
+          console.log(JSON.stringify(diagnostic, null, 2));
+          if (firstQueryFailure === undefined) {
+            throw new Error('diagnostic expected a query failure but did not observe one');
+          }
+          process.exitCode = 1;
+          NODE
       - name: Upload redacted disposable evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -89,6 +168,8 @@ jobs:
           path: |
             ${{ runner.temp }}/v09-disposable-evidence.json
             ${{ runner.temp }}/v09-disposable-evidence.log
+            ${{ runner.temp }}/v09-disposable-diagnostic.json
+            ${{ runner.temp }}/v09-disposable-diagnostic.log
           if-no-files-found: error
 
   real-postgres-v09-1:
