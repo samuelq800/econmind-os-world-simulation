@@ -711,25 +711,149 @@ export function assertInternationalExecutorBReplayEvidence(
   const rebound = facts.map((fact, index) =>
     foundationFactBinding(trace, fact, `replay.inputFacts[${index}]`),
   );
-  const body = {
-    module: proof.module,
-    traceRef: proof.traceRef,
-    calculationVersion: proof.calculationVersion,
-    snapshot: proof.snapshot,
-    snapshotAt: proof.snapshotAt,
-    activityType: proof.activityType,
-    inputFactRefs: proof.inputFactRefs,
-    inputFacts: proof.inputFacts,
-    outputRef: proof.outputRef,
-    outputCanonical: proof.outputCanonical,
-    transitions: proof.transitions,
-  };
+  const recomputed = recomputeReplayProof(proof.module, trace, facts);
   if (
     canonicalPayload(rebound, 'replayed facts') !==
       canonicalPayload(proof.inputFacts, 'recorded facts') ||
-    canonicalHashInput(body) !== proof.hashInput
+    canonicalPayload(recomputed, 'recomputed proof') !==
+      canonicalPayload(proof, 'recorded proof')
   ) {
-    kernelInvalid('Replay evidence does not match the recorded preparation');
+    kernelInvalid(
+      'Replay evidence does not match recomputed subtype economics',
+    );
+  }
+}
+
+function recomputeReplayProof(
+  module: InternationalExecutorBPreparationModule,
+  trace: InternationalExecutorBTraceRequest,
+  facts: readonly InternationalExecutorBFact<unknown>[],
+): InternationalExecutorBReplayProof {
+  const count = (expected: number): void => {
+    if (facts.length !== expected) {
+      kernelInvalid(`${module} replay requires exactly ${expected} facts`);
+    }
+  };
+  const typed = <T>(index: number): InternationalExecutorBFact<T> => {
+    const fact = facts[index];
+    if (fact === undefined) {
+      return kernelInvalid(`${module} replay fact ${index} is missing`);
+    }
+    return fact as InternationalExecutorBFact<T>;
+  };
+  switch (module) {
+    case 'V22_3_TECHNOLOGY_LICENCE':
+      count(3);
+      return calculateTechnologyLicencePreparation({
+        trace,
+        licenseeCashFact: typed<CashAccountSnapshot>(0),
+        licensorCashFact: typed<CashAccountSnapshot>(1),
+        executionFact: typed<TechnologyLicenceExecution>(2),
+      }).replayProof;
+    case 'V22_3_JOINT_PROJECT': {
+      if (facts.length < 4) {
+        kernelInvalid(
+          'Joint-project replay requires participant, project and execution facts',
+        );
+      }
+      const projectIndex = facts.length - 2;
+      const executionIndex = facts.length - 1;
+      return calculateJointProjectPreparation({
+        trace,
+        participantCashFacts: facts.slice(
+          0,
+          projectIndex,
+        ) as readonly InternationalExecutorBFact<CashAccountSnapshot>[],
+        projectCashFact: typed<CashAccountSnapshot>(projectIndex),
+        executionFact: typed<JointProjectExecution>(executionIndex),
+      }).replayProof;
+    }
+    case 'V22_3_TREATY_VALIDATION':
+      count(1);
+      return validateTreatyPreparation({
+        trace,
+        requestFact: typed<TreatyValidationRequest>(0),
+      }).replayProof;
+    case 'V22_3_RESERVE_SWAP':
+      count(5);
+      return calculateReserveSwapPreparation({
+        trace,
+        partyACurrencyAFact: typed<CashAccountSnapshot>(0),
+        partyACurrencyBFact: typed<CashAccountSnapshot>(1),
+        partyBCurrencyAFact: typed<CashAccountSnapshot>(2),
+        partyBCurrencyBFact: typed<CashAccountSnapshot>(3),
+        executionFact: typed<ReserveSwapExecution>(4),
+      }).replayProof;
+    case 'V22_3_SANCTION_VALIDATION':
+      count(1);
+      return validateSanctionPackagePreparation({
+        trace,
+        requestFact: typed<SanctionPackageValidationRequest>(0),
+      }).replayProof;
+    case 'V22_3_GRANT_AID':
+      count(3);
+      return calculateGrantAidPreparation({
+        trace,
+        donorCashFact: typed<CashAccountSnapshot>(0),
+        recipientCashFact: typed<CashAccountSnapshot>(1),
+        executionFact: typed<GrantAidExecution>(2),
+      }).replayProof;
+    case 'V22_3_COMMODITY_AID':
+      count(3);
+      return calculateCommodityAidPreparation({
+        trace,
+        donorInventoryFact: typed<InventoryAccountSnapshot>(0),
+        recipientInventoryFact: typed<InventoryAccountSnapshot>(1),
+        executionFact: typed<CommodityAidExecution>(2),
+      }).replayProof;
+    case 'V22_3_CONCESSIONAL_LOAN':
+      count(5);
+      return calculateEmergencyConcessionalLoanPreparation({
+        trace,
+        lenderCashFact: typed<CashAccountSnapshot>(0),
+        borrowerCashFact: typed<CashAccountSnapshot>(1),
+        lenderReceivableFact: typed<DebtPositionSnapshot>(2),
+        borrowerPayableFact: typed<DebtPositionSnapshot>(3),
+        executionFact: typed<EmergencyConcessionalLoanExecution>(4),
+      }).replayProof;
+    case 'V22_3_TECHNICAL_ASSISTANCE':
+      count(3);
+      return calculateTechnicalAssistancePreparation({
+        trace,
+        providerCapacityFact: typed<ServiceCapacitySnapshot>(0),
+        recipientReceiptFact: typed<ServiceReceiptSnapshot>(1),
+        executionFact: typed<TechnicalAssistanceExecution>(2),
+      }).replayProof;
+    case 'V22_3_RECONSTRUCTION_AID':
+      count(3);
+      return calculateProjectReconstructionAidPreparation({
+        trace,
+        donorCashFact: typed<CashAccountSnapshot>(0),
+        recipientCashFact: typed<CashAccountSnapshot>(1),
+        executionFact: typed<ProjectReconstructionAidExecution>(2),
+      }).replayProof;
+    case 'V22_3_TENDER_VALIDATION':
+      count(1);
+      return validateInternationalTenderPreparation({
+        trace,
+        requestFact: typed<InternationalTenderValidationRequest>(0),
+      }).replayProof;
+    case 'V22_3_STRATEGIC_PARTNERSHIP_VALIDATION':
+      count(1);
+      return validateStrategicPartnershipPreparation({
+        trace,
+        requestFact: typed<StrategicPartnershipValidationRequest>(0),
+      }).replayProof;
+    case 'V22_3_DISPUTE_COMPENSATION':
+      count(3);
+      return calculateTradeDisputeCompensationPreparation({
+        trace,
+        payerCashFact: typed<CashAccountSnapshot>(0),
+        injuredPartyCashFact: typed<CashAccountSnapshot>(1),
+        executionFact: typed<TradeDisputeCompensationExecution>(2),
+      }).replayProof;
+    default:
+      return kernelInvalid('Unknown Executor B replay module');
   }
 }
 

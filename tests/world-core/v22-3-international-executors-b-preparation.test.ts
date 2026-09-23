@@ -14,6 +14,7 @@ import {
   calculateTechnicalAssistancePreparation,
   calculateTechnologyLicencePreparation,
   calculateTradeDisputeCompensationPreparation,
+  canonicalHashInput,
   createFoundationFact,
   validateInternationalTenderPreparation,
   validateSanctionPackagePreparation,
@@ -815,6 +816,23 @@ describe('V22.3 executor B parallel preparation', () => {
       recipientCashFact: recipient,
       executionFact: execution,
     });
+    const forgedBody: Record<string, unknown> = {
+      ...result.replayProof,
+      outputCanonical: '{"forged":true}',
+    };
+    delete forgedBody.hashInput;
+    const forgedProof = {
+      ...result.replayProof,
+      outputCanonical: '{"forged":true}',
+      hashInput: canonicalHashInput(forgedBody),
+    };
+    expect(() =>
+      assertInternationalExecutorBReplayEvidence(forgedProof, [
+        donor,
+        recipient,
+        execution,
+      ]),
+    ).toThrow('recomputed subtype economics');
     expect(() =>
       assertInternationalExecutorBReplayEvidence(result.replayProof, [
         donor,
