@@ -865,7 +865,7 @@ async function preflightPristine(client, approval) {
   );
 }
 
-async function provisionMarker(client, approval, runId) {
+async function provisionMarker(client, approval, databaseName, runId) {
   const schema = identifier(approval.disposable_namespace);
   const { migration_owner: owner, reader, worker } = approval.roles;
   for (const role of [owner, worker, reader]) {
@@ -884,6 +884,11 @@ async function provisionMarker(client, approval, runId) {
     client,
     'CREATE_DISPOSABLE_NAMESPACE',
     `create schema ${schema} authorization ${identifier(owner)}`,
+  );
+  await command(
+    client,
+    'GRANT_MIGRATION_OWNER_TEMPORARY_DATABASE_CREATE',
+    `grant create on database ${identifier(databaseName)} to ${identifier(owner)}`,
   );
   await command(
     client,
@@ -913,8 +918,15 @@ async function provisionMarker(client, approval, runId) {
   );
 }
 
-async function applyMigrations(client, approval, migrations, evidence) {
+async function applyMigrations(
+  client,
+  approval,
+  databaseName,
+  migrations,
+  evidence,
+) {
   const schema = identifier(approval.disposable_namespace);
+  const owner = approval.roles.migration_owner;
   for (const migration of migrations) {
     await command(
       client,
@@ -935,6 +947,23 @@ async function applyMigrations(client, approval, migrations, evidence) {
       ],
     );
     evidence.migrations.push(migration.migration_id);
+    if (migration.migration_id === V09_STAGING_MIGRATION_IDS[0]) {
+      await command(
+        client,
+        'RESET_MIGRATION_OWNER_FOR_DATABASE_REVOKE',
+        'reset role',
+      );
+      await command(
+        client,
+        'REVOKE_MIGRATION_OWNER_TEMPORARY_DATABASE_CREATE',
+        `revoke create on database ${identifier(databaseName)} from ${identifier(owner)}`,
+      );
+      await command(
+        client,
+        'REASSERT_MIGRATION_OWNER_AFTER_DATABASE_REVOKE',
+        `set local role ${identifier(owner)}`,
+      );
+    }
   }
 }
 
@@ -2109,12 +2138,23 @@ async function runV09AuthorizedPostgresEvidence({
         );
       });
       await audited(evidence, 'PROVISION_MARKER', async () => {
-        await provisionMarker(client, authorized.approval, runId);
+        await provisionMarker(
+          client,
+          authorized.approval,
+          authorized.target.database_name,
+          runId,
+        );
         markerWritten = true;
         evidence.cleanup.markerBound = true;
       });
       await audited(evidence, 'APPLY_MIGRATIONS', () =>
-        applyMigrations(client, authorized.approval, migrations, evidence),
+        applyMigrations(
+          client,
+          authorized.approval,
+          authorized.target.database_name,
+          migrations,
+          evidence,
+        ),
       );
       await audited(evidence, 'LEASE_EVIDENCE', () =>
         runLeaseEvidence(client, authorized.approval),

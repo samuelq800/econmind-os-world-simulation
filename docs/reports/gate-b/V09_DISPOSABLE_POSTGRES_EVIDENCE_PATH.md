@@ -25,6 +25,14 @@ prevents an omitted port from inheriting `PGPORT`. Thus the reviewed loopback
 target and its fingerprint are also the only possible driver target for both
 the primary and cleanup clients.
 
+The runner creates the disposable namespace with the approved admin and then
+executes the exact first migration as the migration owner. PostgreSQL requires
+database-level `CREATE` permission even when that migration's schema creation
+is an `IF NOT EXISTS` no-op. The runner grants that permission inside its still
+uncommitted transaction, records migration `0001`, resets role, revokes the
+permission, and reasserts the migration owner before migration `0002`. A
+failure before commit rolls the grant back; a later migration never sees it.
+
 ## Immutable input and output contract
 
 An actual local/CI run requires:
