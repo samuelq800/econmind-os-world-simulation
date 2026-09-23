@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "GATE_B_BROWSER_PREPARATION_EVIDENCE_V1",
+  "state": "PREPARATION_ONLY_NOT_GATE_B_BROWSER_E2E",
+  "base": "ebc5fcbe010559d5d6a94e86792a77ecc02502d2",
+  "implementationCommit": "1d3d6ad5ce3aec0bea72ffa04ec71ade7a3100a4",
+  "target": "EPHEMERAL_LOOPBACK_VITE_PREVIEW",
+  "environment": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "browser": "Google Chrome 154.0.8037.57",
+    "productionAccess": false
+  },
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @econmind/world-web build",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node tests/e2e/gate-b-browser-preflight.mjs",
+      "exitCode": 0,
+      "result": "PASS_PREVIEW_SMOKE_ONLY"
+    },
+    {
+      "command": "pnpm exec eslint tests/e2e/gate-b-browser-preflight.mjs",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec prettier --check tests/e2e docs/exec-plans/V10.4_BROWSER_E2E_PREPARATION.md",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node --check tests/e2e/gate-b-browser-preflight.mjs",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 0,
+      "result": "PASS"
+    }
+  ],
+  "browserObservations": {
+    "previewSmoke": "PASS",
+    "landingBoundary": true,
+    "commandBoundary": true,
+    "landingRenderedDomSha256": "678c7142ac9e1e45c1ebb4620288b48db2f717e18fa52248a2f27dd5c1900b57",
+    "commandRenderedDomSha256": "44bf3f2ccdbd82425634ad80196c2f48241478142777d82d0a720b64fe74f2a8"
+  },
+  "gateBBrowser": "NOT_RUN",
+  "requiredScenarios": [
+    { "id": "TWO_COUNTRY_TWO_OFFICE_AUTHORIZATION", "result": "NOT_RUN" },
+    { "id": "AUTHORIZED_READ_PROJECTION", "result": "NOT_RUN" },
+    { "id": "COMMAND_RECEIPT_SUCCESS_AND_FAILURE", "result": "NOT_RUN" },
+    { "id": "REFRESH_DISCONNECT_NO_REGRESSION", "result": "NOT_RUN" }
+  ],
+  "otherGateBEvidence": {
+    "postgresqlRlsStaging": "NOT_RUN",
+    "attackPropertyStateMachineCampaign": "NOT_RUN",
+    "independentReview": "NOT_RUN"
+  },
+  "missingSurfaces": [
+    "two real authenticated browser identities and current Office grants",
+    "authorized browser projection API",
+    "real bilateral command and final receipt lookup",
+    "private scoped channel and versioned snapshot reconciliation"
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "GATE_B_BROWSER_TARGET_V1",
+  "target": "LOCAL_NONPRODUCTION_AUTHENTICATED_WORLD_WEB",
+  "status": "NOT_RUN",
+  "scenarios": [
+    {
+      "id": "TWO_COUNTRY_TWO_OFFICE_AUTHORIZATION",
+      "status": "NOT_RUN",
+      "requires": "Two separate verified browser identities in two countries; at least Trade and Finance Office scopes, including Buyer Finance approval where required; server-side deny on wrong country, Office and revoked membership.",
+      "missing": "World Web has fixture Office selection, not authenticated server sessions or an authorized browser command route."
+    },
+    {
+      "id": "AUTHORIZED_READ_PROJECTION",
+      "status": "NOT_RUN",
+      "requires": "Browser calls a classified read API under each identity; Country/Office fields and WorldVersion originate from server projections; cross-scope reads are denied.",
+      "missing": "World Web renders local projection fixtures and does not call the read API."
+    },
+    {
+      "id": "COMMAND_RECEIPT_SUCCESS_AND_FAILURE",
+      "status": "NOT_RUN",
+      "requires": "Real bilateral command is submitted from authorized browser sessions; final success and failure receipts are retrieved by command ID and reconciled with WorldVersion and server state.",
+      "missing": "The command page uses a local mock transport/receipt; the browser has no actual command submission endpoint."
+    },
+    {
+      "id": "REFRESH_DISCONNECT_NO_REGRESSION",
+      "status": "NOT_RUN",
+      "requires": "After actual command and projection updates, browser refresh, lost connection, reauthentication and out-of-order delivery never display a lower accepted WorldVersion or wrong-scope cached data.",
+      "missing": "No live private channel, authorized UI cache adapter or real command/projection sequence is wired."
+    }
+  ]
+}
