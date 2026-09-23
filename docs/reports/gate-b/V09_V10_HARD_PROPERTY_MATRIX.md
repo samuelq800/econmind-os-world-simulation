@@ -1,7 +1,7 @@
 # Gate B V09/V10 hard-property matrix
 
-**Recorded:** 2026-09-23  
-**Code candidate:** `ebc5fcbe010559d5d6a94e86792a77ecc02502d2` (`origin/main`)  
+**Recorded:** 2026-09-23
+**Code candidate:** `ebc5fcbe010559d5d6a94e86792a77ecc02502d2` (`origin/main`)
 **Decision:** `GATE_B_WORLD_CORE_HARD_GATE = PENDING`
 
 This is a candidate-bound evidence index. It records source inspection and the
