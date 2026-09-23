@@ -15,6 +15,8 @@ export function getApiFoundationStatus(): ApiFoundationStatus {
 export * from './integration/contracts.js';
 export * from './integration/authenticated-read-boundary.js';
 export * from './integration/authenticated-read-query-handler.js';
+export * from './integration/authenticated-narrow-transfer-command-handler.js';
 export * from './integration/identity.js';
+export * from './integration/local-nonproduction-http-bridge.js';
 export * from './integration/postgres-read-adapter.js';
 export * from './integration/transport.js';
