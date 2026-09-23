@@ -241,6 +241,10 @@ function ref(value: string, label: string): string {
   return value;
 }
 
+function compareRef(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+
 function tick(value: ExactQuantity, label: string): WorldDecimalValue {
   const amount = nonNegativeQuantity(value, 'sim_millisecond', label).amount;
   if (!amount.isInteger())
@@ -453,7 +457,7 @@ export function prepareCrisisCauseAction(
     kernelInvalid('Each approval must have a distinct decision record');
   exactRefs(approved, required, 'approvals');
   const orderedCauses = [...input.causeFacts].sort((left, right) =>
-    left.factRef.localeCompare(right.factRef),
+    compareRef(left.factRef, right.factRef),
   );
   const causeRefs = orderedCauses.map((fact) =>
     ref(fact.factRef, 'cause fact'),

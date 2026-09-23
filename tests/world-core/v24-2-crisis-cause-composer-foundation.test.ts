@@ -376,6 +376,48 @@ describe('V24.2 crisis/Admin cause-layer pure preparation', () => {
     ).toThrow('Shock cannot create negative stock or capacity');
   });
 
+  it('orders mixed-case same-target fact references by codepoint, independent of locale', () => {
+    const request = input();
+    const upper = fact('FACT.I', {
+      ...resourceCause,
+      causeRef: 'CAUSE.UPPER',
+      before: qty('10'),
+      delta: qty('-7'),
+      sourceReceiptRef: 'RECEIPT.UPPER',
+    });
+    const lower = fact('FACT.i', {
+      ...resourceCause,
+      causeRef: 'CAUSE.LOWER',
+      before: qty('3'),
+      delta: qty('-2'),
+      sourceReceiptRef: 'RECEIPT.LOWER',
+    });
+    const causeFacts = [lower, request.causeFacts[1]!, upper];
+    const action = {
+      ...request.actionFact.payload,
+      causeFactRefs: causeFacts.map((item) => item.factRef),
+    };
+    const actionFact = fact('FACT.ACTION', action, [
+      request.stateFact.factRef,
+      request.authorizationFact.factRef,
+      ...action.causeFactRefs,
+    ]);
+    const mixed = { ...request, actionFact, causeFacts };
+    const result = prepareCrisisCauseAction(mixed);
+    expect(
+      result.causeTransitions
+        .filter((item) => item.targetObjectRef === 'DEPOSIT.1')
+        .map((item) => item.after),
+    ).toEqual([qty('3'), qty('1')]);
+    expect(
+      prepareCrisisCauseAction({
+        ...mixed,
+        causeFacts: [...causeFacts].reverse(),
+      }),
+    ).toEqual(result);
+    assertCrisisCauseReplay(mixed, result);
+  });
+
   it('requires explicit scenario evidence before proposing population displacement', () => {
     const request = input();
     const source = request.causeFacts[0]!;
