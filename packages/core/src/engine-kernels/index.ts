@@ -18,3 +18,4 @@ export * from './bank-central-foundation.js';
 export * from './fx-international-foundation.js';
 export * from './international-contract-foundation.js';
 export * from './international-executors-b-preparation.js';
+export * from './captain-strategy-governance-preparation.js';
