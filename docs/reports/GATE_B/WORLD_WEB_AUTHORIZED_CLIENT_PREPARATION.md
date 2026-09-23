@@ -4,6 +4,7 @@
 - Immutable base: `2dc1de3fc4b4ea4c5f4792538d961420317912db`
 - Implementation commit: `9662dd075c8de70c95643e3335dd913087268074`
 - B-blocker remediation commit: `550b0be70ea40ef7bbda297d8a73767dba1db3c0`
+- B concurrent-dispatch remediation commit: `bce00b7024d6d1719c88214b5cea7edae58f15c3`
 - E protocol candidate inspected: `dbcf7c52452d0e452ff19299d310ef69f0a89dd6`
 
 **Branch:** `codex/f-world-web-authorized-client-preparation`
@@ -30,7 +31,17 @@ durable across page restart; persistent pending-command recovery remains
 outside this preparatory, unmounted client.
 This remediation is submitted for B closure review, not self-approved.
 
-Focused Vitest: 2 files, 18 tests passed. World Web typecheck, Vite build,
+B's second narrow review found that a different command could POST while the
+first fetch Promise was still pending. The next forward fix reserves the full
+identity, draft and request ID synchronously before awaiting the transport.
+Concurrent callers receive `UNKNOWN` without dispatch. An ambiguous first
+response transfers the reservation to the unresolved exact-retry guard; a
+verified final receipt or definitive pre-settlement rejection releases it.
+The deferred-Promise regression confirms one POST before the first ack and
+also confirms that a verified rejection releases the slot without deadlock.
+This fix is again awaiting B's independent closure decision.
+
+Focused Vitest: 2 files, 19 tests passed. World Web typecheck, Vite build,
 scoped ESLint and Prettier, authoritative-pattern scan, secret scan and staged
 diff check passed. The boundary scan initially failed because the clean
 worktree had not built `@econmind/core`; after building that package it passed

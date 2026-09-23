@@ -4,6 +4,7 @@
   "base": "2dc1de3fc4b4ea4c5f4792538d961420317912db",
   "implementationCommit": "9662dd075c8de70c95643e3335dd913087268074",
   "bBlockerRemediationCommit": "550b0be70ea40ef7bbda297d8a73767dba1db3c0",
+  "bConcurrentDispatchRemediationCommit": "bce00b7024d6d1719c88214b5cea7edae58f15c3",
   "eProtocolCandidateInspected": "dbcf7c52452d0e452ff19299d310ef69f0a89dd6",
   "environment": {
     "node": "24.20.0",
@@ -14,7 +15,7 @@
     {
       "name": "focused Vitest, authorized browser client and scoped cache",
       "result": "PASS",
-      "detail": "2 files, 18 tests; committed-once truncated 200 body and invalid final receipt regression"
+      "detail": "2 files, 19 tests; committed-once truncated 200 body, invalid final receipt, and deferred concurrent POST regression"
     },
     { "name": "world-web typecheck", "result": "PASS" },
     { "name": "world-web build", "result": "PASS" },
@@ -53,8 +54,10 @@
   },
   "postDispatchAmbiguity": {
     "result": "UNKNOWN_AND_RECONCILIATION_REQUIRED",
+    "concurrentDifferentCommandBeforeFirstAck": "BLOCKED_WITHOUT_SECOND_POST",
     "newCommandIdentityWhileUnresolved": "BLOCKED_IN_CLIENT_INSTANCE",
-    "exactIdentityRetry": "ALLOWED_TO_RESOLVE_WITH_FINAL_RECEIPT",
+    "exactIdentityAndRequestIdRetry": "ALLOWED_TO_RESOLVE_WITH_FINAL_RECEIPT",
+    "definitiveRejectionReleasesInFlight": true,
     "restartPersistence": "NOT_RUN"
   },
   "gateBBrowserE2E": "NOT_RUN",
