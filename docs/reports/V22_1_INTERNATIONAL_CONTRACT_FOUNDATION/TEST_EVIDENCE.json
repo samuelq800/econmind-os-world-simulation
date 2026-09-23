@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "recordType": "V22_1_INTERNATIONAL_CONTRACT_FOUNDATION_TEST_EVIDENCE",
+  "base": "c91744a6d02865829b82df2088025949de99d88d",
+  "branch": "codex/c-v22-international-contract-foundation",
+  "validatedCodeCandidate": "744f942c9c1eb97cd5eef51f25fd6c5654cc9afa",
+  "observedOriginMain": "19e6082928c730782213e7d602f492bb3e961ca2",
+  "status": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
+  "risk": "P0",
+  "result": "PASS_AT_FROZEN_CODE_CANDIDATE",
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/v22-1-international-contract-foundation.test.ts --testTimeout=30000",
+      "result": "PASS: 1 file, 7 tests"
+    },
+    {
+      "command": "pnpm exec vitest run V22.1 plus V13/V14 provenance and V20 FX foundation tests --testTimeout=30000",
+      "result": "PASS: 3 files, 16 tests"
+    },
+    {
+      "command": "pnpm --filter @econmind/core typecheck",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @econmind/core build",
+      "result": "PASS"
+    },
+    {
+      "command": "affected-path ESLint and Prettier",
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "result": "PASS: 53 Core files, 65 total files, zero violations"
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "result": "PASS: 70 files"
+    },
+    {
+      "command": "pnpm env:check",
+      "result": "PASS: local, databaseConfigured=false, linkedSupabaseProject=NOT_LINKED"
+    },
+    {
+      "command": "pnpm foundation:policy",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm secrets:check",
+      "result": "PASS: 655 files"
+    },
+    {
+      "command": "git merge-base / changed-path intersection / git merge-tree against origin/main",
+      "result": "PASS: base is ancestor; zero overlapping paths; zero conflict markers"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "adverseVectors": [
+    "missing, duplicate, reordered, or unknown entries in the fixed 23-type matrix",
+    "non-reference prose supplied as a structured economic term value",
+    "skipped or non-integer contract version",
+    "stale contract/version/predecessor-state binding",
+    "approval from an unrequired or already-decided office",
+    "old-version approval reused after counteroffer",
+    "signing without the approved current version",
+    "illegal or unknown lifecycle edge",
+    "duplicate caller-owned lifecycle transition witness",
+    "tampered canonical fact payload",
+    "mixed source-version/snapshot lineage"
+  ],
+  "dependencyGaps": [
+    "V21.3 remains a formal unavailable dependency; no organization/office integration is claimed.",
+    "ADR-10 remains proposed and unapproved; the 23-entry matrix is type-only.",
+    "V22.2 and V22.3 subtype schemas and economic executors are not implemented."
+  ],
+  "notRun": [
+    "official full repository pnpm check",
+    "independent P0 review or product V22.1 verification",
+    "status/Gate promotion, merge, deployment, or production validation",
+    "database, RLS, migration, Supabase, API, worker, UI, authorization, Command, Event, receipt, posting, transaction, and recovery validation"
+  ],
+  "prohibitedPathsUnchanged": [
+    "status/progress.json",
+    "status/decisions.json",
+    "apps",
+    "supabase",
+    "packages/database",
+    "packages/api"
+  ],
+  "mainMergeAuthorized": false,
+  "productionMutation": false,
+  "verified": false
+}
