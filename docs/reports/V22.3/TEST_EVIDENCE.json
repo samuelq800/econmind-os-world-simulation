@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "recordType": "V22_3_INTERNATIONAL_EXECUTORS_B_PREPARATION_EVIDENCE",
+  "base": "f4815cc3d24e4876e9f09858f5536aac560592ef",
+  "branch": "codex/v22-3-international-executors-b",
+  "validatedCodeCandidate": "8d85b1a7442ef007fc6b0dd73d1766b5fae7e216",
+  "observedOriginMain": "751e06b896741fc69c438f5603fa770972d3d5de",
+  "status": "PREPARATION_ONLY",
+  "risk": "P0",
+  "result": "PASS_AT_FROZEN_CODE_CANDIDATE_WITH_UNSATISFIED_PRODUCT_DEPENDENCY",
+  "coverage": {
+    "exactTransferPreparation": 9,
+    "structuredValidationPreparation": 8,
+    "typeOnlyPendingV22_2": 6,
+    "total": 23
+  },
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/v22-3-international-executors-b-preparation.test.ts --testTimeout=30000",
+      "result": "PASS: 1 file, 12 tests"
+    },
+    {
+      "command": "pnpm exec vitest run V22.3, V22.1, V20 and V13/V14 focused suites --testTimeout=30000",
+      "result": "PASS: 4 files, 28 tests"
+    },
+    {
+      "command": "pnpm --filter @econmind/core typecheck",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @econmind/core build",
+      "result": "PASS"
+    },
+    {
+      "command": "affected-path ESLint and Prettier",
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "result": "PASS: 56 Core files, 97 total files, zero violations"
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "result": "PASS: 102 files"
+    },
+    {
+      "command": "pnpm env:check",
+      "result": "PASS: local, databaseConfigured=false, linkedSupabaseProject=NOT_LINKED"
+    },
+    {
+      "command": "pnpm foundation:policy",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm secrets:check",
+      "result": "PASS: 737 files"
+    },
+    {
+      "command": "git merge-base / changed-path intersection / git merge-tree against origin/main",
+      "result": "PASS: exact base; zero overlapping paths; merge tree produced with no conflict messages"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "replayRemediation": {
+    "issue": "A public proof hash alone can be recomputed after rewriting economic output.",
+    "fix": "Replay dispatches by module, reruns subtype economics from the same bound facts, and compares the full recomputed proof.",
+    "regression": "PASS: forged outputCanonical plus a freshly recomputed hash is rejected."
+  },
+  "independentReviewRemediation": {
+    "reviewedTip": "4601b191533b344e28d719bb834653074575b761",
+    "reviewResult": "P0=0, MAJOR=1, CHANGES_REQUIRED",
+    "issue": "Joint-project receiving account could reuse a participant account and emit incompatible after-balances from one before-balance.",
+    "fix": "Reject any project receiving accountRef equal to a participant accountRef before transition construction.",
+    "regression": "PASS: shared ACCOUNT.PROJECT.SHARED participant/project account is rejected.",
+    "closureReview": "PENDING_B"
+  },
+  "adverseVectors": [
+    "incomplete, reordered or misclassified 23-type coverage matrix",
+    "insufficient payer cash, inventory, reserves, project funding or service capacity",
+    "currency, unit, account, owner, counterparty or source-snapshot mismatch",
+    "joint-project contributions not equal to total cost or ownership shares not equal to one",
+    "single-currency reserve swap or unreconciled loan positions",
+    "missing subtype-specific treaty schedule/access references",
+    "sanction intensity or non-enumerated sanction measure",
+    "tender award exceeding bid/need or violating the partial-award rule",
+    "strategic-partnership abstract buff/direct effect",
+    "tampered canonical fact payload, mixed lineage or rewritten replay output with recomputed hash"
+  ],
+  "dependencyGaps": [
+    "V22.2 product status remains PLANNED/not VERIFIED despite reviewed foundation mainline acceptance.",
+    "V21.3 and authoritative V10.4 integration remain open.",
+    "ADR-10 remains unapproved.",
+    "Authoritative posting, rights, obligations, authorization, persistence and end-to-end settlement remain absent."
+  ],
+  "notRun": [
+    "official full repository pnpm check",
+    "independent P0 review of this immutable V22.3 candidate",
+    "live PostgreSQL or production validation",
+    "status/Gate promotion, merge or deployment",
+    "authoritative Command, Event, receipt, posting, transaction, recovery or durable idempotency integration"
+  ],
+  "prohibitedPathsUnchanged": [
+    "packages/core/src/engine-kernels/international-executors-a-foundation.ts",
+    "apps/world-web",
+    "apps/world-api",
+    "apps/world-worker",
+    "packages/database",
+    "supabase",
+    "status/progress.json",
+    "status/decisions.json"
+  ],
+  "mainMergeAuthorized": false,
+  "productionMutation": false,
+  "verified": false
+}
