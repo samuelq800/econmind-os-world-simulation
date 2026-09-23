@@ -1,0 +1,268 @@
+import { describe, expect, it, vi } from 'vitest';
+
+import {
+  LOCAL_WORLD_COMMAND_PATH,
+  LOCAL_WORLD_READ_PATH,
+  createAuthorizedWorldBrowserClient,
+  type AuthorizedBrowserIdentity,
+  type NarrowTransferDraft,
+} from '../../apps/world-web/src/authorized-client/client';
+
+const requestId = '550e8400-e29b-41d4-a716-446655440001';
+const identity: AuthorizedBrowserIdentity = {
+  worldId: 'WORLD_ONE',
+  authSubjectId: '550e8400-e29b-41d4-a716-446655440000',
+  authorizationRevision: 'AUTH_REVISION_1',
+  countryId: 'COUNTRY_A',
+  officeId: 'TRADE',
+  scopeKey: 'COUNTRY_A',
+  modelVersion: 'MODEL_1',
+  projectionVersion: 'PROJECTION_1',
+  classification: 'COUNTRY',
+};
+const draft: NarrowTransferDraft = {
+  commandId: 'COMMAND_1',
+  idempotencyKey: 'IDEMPOTENCY_1',
+  expectedWorldVersion: '8',
+  proposalRef: 'PROPOSAL_1',
+  buyerCountryId: 'COUNTRY_B',
+  buyerFinanceApprovalRef: 'APPROVAL_1',
+};
+
+function projection(worldVersion = '8') {
+  return {
+    schemaVersion: 'world-projection-read-v1',
+    worldId: identity.worldId,
+    classification: identity.classification,
+    scopeKey: identity.scopeKey,
+    watermark: {
+      worldVersion,
+      eventSequence: worldVersion,
+      generatedAt: '2026-09-23T00:00:00.000Z',
+    },
+    payload: { cash: '5.00' },
+    receipts: [],
+    events: [],
+  };
+}
+
+function receipt() {
+  return {
+    source: 'DURABLE_FINAL_COMMAND_RECEIPT',
+    worldId: identity.worldId,
+    commandId: draft.commandId,
+    idempotencyKey: draft.idempotencyKey,
+    commandFingerprint: `sha256:${'a'.repeat(64)}`,
+    outcome: 'COMMITTED',
+    reasonCode: null,
+    worldVersionAfter: '9',
+    eventIds: ['EVENT_1'],
+    recordedAtReal: '2026-09-23T00:00:00.000Z',
+  };
+}
+
+function browser(fetcher: typeof fetch, currentIdentity = () => identity) {
+  return createAuthorizedWorldBrowserClient({
+    currentIdentity,
+    getAccessToken: async () => 'local-jwt-token',
+    bridge: { origin: 'http://127.0.0.1:4179', fetcher },
+  });
+}
+
+describe('World Web local authorized client preparation', () => {
+  it('is unavailable by default and never requests a token', async () => {
+    const getAccessToken = vi.fn(async () => 'secret');
+    const client = createAuthorizedWorldBrowserClient({
+      currentIdentity: () => identity,
+      getAccessToken,
+    });
+    expect(await client.readProjection(requestId)).toEqual({
+      status: 'UNAVAILABLE',
+      reason: 'BRIDGE_NOT_CONFIGURED',
+    });
+    expect(await client.submitNarrowTransfer(requestId, draft)).toEqual({
+      status: 'UNAVAILABLE',
+      reason: 'NO_CURRENT_PROJECTION',
+    });
+    expect(getAccessToken).not.toHaveBeenCalled();
+  });
+
+  it('rejects non-loopback and credentialed origins', () => {
+    const create = (origin: string) =>
+      createAuthorizedWorldBrowserClient({
+        currentIdentity: () => identity,
+        getAccessToken: async () => 'token',
+        bridge: { origin },
+      });
+    expect(() => create('https://example.com')).toThrow(
+      'LOCAL_BRIDGE_ORIGIN_INVALID',
+    );
+    expect(() => create('http://user:pass@127.0.0.1:4179')).toThrow(
+      'LOCAL_BRIDGE_ORIGIN_INVALID',
+    );
+    expect(() => create('http://127.0.0.1:4179/path')).toThrow(
+      'LOCAL_BRIDGE_ORIGIN_INVALID',
+    );
+  });
+
+  it('uses E read wire shape, scopes response, and accepts only monotonic derived cache', async () => {
+    let worldVersion = '8';
+    const fetcher = vi.fn(
+      async (url: URL | RequestInfo, options?: RequestInit) => {
+        expect(String(url)).toBe(
+          `http://127.0.0.1:4179${LOCAL_WORLD_READ_PATH}`,
+        );
+        expect(options).toMatchObject({
+          method: 'POST',
+          redirect: 'error',
+          cache: 'no-store',
+          credentials: 'omit',
+        });
+        expect(new Headers(options?.headers).get('authorization')).toBe(
+          'Bearer local-jwt-token',
+        );
+        expect(JSON.parse(String(options?.body))).toEqual({
+          schemaVersion: 'world-read-api-v1',
+          requestId,
+          operation: 'READ_WORLD_PROJECTION',
+          payload: {
+            worldId: identity.worldId,
+            classification: identity.classification,
+            scopeKey: identity.scopeKey,
+          },
+        });
+        return Response.json({
+          schemaVersion: 'world-read-api-v1',
+          requestId,
+          ok: true,
+          data: projection(worldVersion),
+        });
+      },
+    ) as unknown as typeof fetch;
+    const client = browser(fetcher);
+    expect(await client.readProjection(requestId)).toMatchObject({
+      status: 'PROJECTION',
+      worldVersion: '8',
+      payload: { cash: '5.00' },
+    });
+    expect(JSON.stringify(client.cache.read(identity))).not.toContain(
+      'local-jwt-token',
+    );
+    worldVersion = '7';
+    expect(await client.readProjection(requestId)).toEqual({ status: 'STALE' });
+    expect(client.cache.read(identity)).toMatchObject({ worldVersion: '8' });
+  });
+
+  it('drops cross-scope and changed authorization responses, and clears cache on denial', async () => {
+    const wrongScope = browser(async () =>
+      Response.json({
+        schemaVersion: 'world-read-api-v1',
+        requestId,
+        ok: true,
+        data: { ...projection(), scopeKey: 'COUNTRY_B' },
+      }),
+    );
+    expect(await wrongScope.readProjection(requestId)).toEqual({
+      status: 'UNAVAILABLE',
+      reason: 'INVALID_RESPONSE',
+    });
+    let active = identity;
+    let release!: (response: Response) => void;
+    const pendingResponse = new Promise<Response>((done) => {
+      release = done;
+    });
+    const changing = browser(
+      async () => pendingResponse,
+      () => active,
+    );
+    const pending = changing.readProjection(requestId);
+    await Promise.resolve();
+    active = { ...identity, authorizationRevision: 'AUTH_REVISION_2' };
+    release(
+      Response.json({
+        schemaVersion: 'world-read-api-v1',
+        requestId,
+        ok: true,
+        data: projection(),
+      }),
+    );
+    expect(await pending).toEqual({ status: 'STALE' });
+    const denied = browser(async () => Response.json({}, { status: 403 }));
+    expect(await denied.readProjection(requestId)).toEqual({
+      status: 'DENIED',
+    });
+    expect(denied.cache.read(identity).state).toBe('UNAVAILABLE');
+  });
+
+  it('sends only E narrow command fields and handles durable, mock and unknown outcomes', async () => {
+    let commandReceipt: object = receipt();
+    const fetcher = vi.fn(
+      async (url: URL | RequestInfo, options?: RequestInit) => {
+        const body = JSON.parse(String(options?.body));
+        if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+          return Response.json({
+            schemaVersion: 'world-read-api-v1',
+            requestId,
+            ok: true,
+            data: projection(),
+          });
+        }
+        expect(String(url)).toBe(
+          `http://127.0.0.1:4179${LOCAL_WORLD_COMMAND_PATH}`,
+        );
+        expect(body).toEqual({
+          schemaVersion: 'world-command-api-v1',
+          requestId,
+          operation: 'SUBMIT_NARROW_TREASURY_GCU_TRANSFER',
+          payload: {
+            worldId: identity.worldId,
+            countryId: identity.countryId,
+            officeId: identity.officeId,
+            commandId: draft.commandId,
+            idempotencyKey: draft.idempotencyKey,
+            proposalRef: draft.proposalRef,
+            buyerCountryId: draft.buyerCountryId,
+            buyerFinanceApprovalRef: draft.buyerFinanceApprovalRef,
+          },
+        });
+        return Response.json({
+          schemaVersion: 'world-command-api-v1',
+          requestId,
+          ok: true,
+          receipt: commandReceipt,
+        });
+      },
+    ) as unknown as typeof fetch;
+    const client = browser(fetcher);
+    expect((await client.readProjection(requestId)).status).toBe('PROJECTION');
+    commandReceipt = { ...receipt(), source: 'FIXTURE' };
+    expect(await client.submitNarrowTransfer(requestId, draft)).toEqual({
+      status: 'UNAVAILABLE',
+      reason: 'INVALID_RESPONSE',
+    });
+    commandReceipt = receipt();
+    expect(await client.submitNarrowTransfer(requestId, draft)).toMatchObject({
+      status: 'FINAL_RECEIPT',
+      receipt: { outcome: 'COMMITTED', worldVersionAfter: '9' },
+    });
+    expect(client.cache.read(identity)).toMatchObject({
+      worldVersion: '8',
+      reconciliationRequired: true,
+    });
+    const lostAck = browser(async (url) => {
+      if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+        return Response.json({
+          schemaVersion: 'world-read-api-v1',
+          requestId,
+          ok: true,
+          data: projection(),
+        });
+      }
+      throw new Error('response dropped');
+    });
+    await lostAck.readProjection(requestId);
+    expect(await lostAck.submitNarrowTransfer(requestId, draft)).toEqual({
+      status: 'UNKNOWN',
+    });
+  });
+});
