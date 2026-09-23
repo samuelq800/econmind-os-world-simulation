@@ -110,3 +110,14 @@ rehearsal success is labeled **not actual**. The legacy command brief now
 labels its sample receipt as a fixture replay rather than World change
 evidence. No authorized browser client, API, or receipt reconciliation is
 connected in this slice.
+
+## G02 value trail preparation
+
+`VALUE_TRACE_PREPARATION.md` records the fixture-only boundary. The same
+collapsible `MetricValueTrail` appears beside the atlas and in the signal-table
+inspector. Available grain has one explicit fixture comparison (146k input,
+−18k recorded reservation, 128k displayed output), its source event/version,
+and visible gaps for the unproven input source and absent final receipt. Other
+metrics display missing evidence instead of an invented numeric or causal
+chain. No live projection, receipt attribution, or World calculation is
+connected.

@@ -13,6 +13,8 @@ import {
   CommandLifecycleStatus,
   type CommandLifecycleState,
 } from './CommandLifecycleStatus.js';
+import { MetricValueTrail } from './MetricValueTrail.js';
+import { fixtureValueTrail } from './metric-value-trace.js';
 import {
   preparationOfficeActionAdapter,
   type OfficeActionReadModel,
@@ -181,6 +183,11 @@ export function NationalOverview({
   );
   const { metric: selectedMetric, events: relevantEvents } =
     nationalSignalSelection(projection, selectedMetricId);
+  const valueTrail = fixtureValueTrail(
+    projection,
+    selectedMetric?.id ?? '',
+    status,
+  );
   const selectedEvent =
     projection.events.find((event) => event.eventId === selectedEventId) ??
     relevantEvents[0] ??
@@ -340,6 +347,11 @@ export function NationalOverview({
                 </strong>
                 <small>{selectedMetric.accessibleSummary}</small>
               </div>
+              <MetricValueTrail
+                key={selectedMetric.id}
+                metricLabel={selectedMetric.label}
+                state={valueTrail}
+              />
               <div
                 className="national-atlas__events"
                 aria-label="Choose a recorded event"
@@ -457,6 +469,11 @@ export function NationalOverview({
                   </dd>
                 </div>
               </dl>
+              <MetricValueTrail
+                key={selectedMetric.id}
+                metricLabel={selectedMetric.label}
+                state={valueTrail}
+              />
               <OfficeActionRoute
                 model={actionModel}
                 onOpenBrief={onOpenBrief}
