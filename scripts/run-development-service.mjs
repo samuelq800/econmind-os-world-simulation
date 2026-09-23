@@ -51,7 +51,7 @@ if (definition === undefined || !['dev', 'start'].includes(mode)) {
         'command=',
       ]);
       originalParentIsPnpm =
-        /(?:^|[/\\])pnpm(?:\.(?:cjs|mjs))?(?:\s|$)|\(pnpm\)/u.test(
+        /(?:^|[/\\])pnpm(?:-native)?(?:\.(?:cjs|mjs))?(?:\s|$)|\(pnpm\)/u.test(
           stdout.trim(),
         );
     } catch {

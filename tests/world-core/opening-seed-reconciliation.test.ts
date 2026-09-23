@@ -25,6 +25,7 @@ import {
   createOpeningSeed,
   createOpeningSource,
   createReservationPosting,
+  canonicalSerialize,
   eventId,
   financialAccountId,
   financialOpeningBatchId,
@@ -611,6 +612,34 @@ describe('V08.3 opening seed and reconciliation', () => {
         reconstructed: { ...rebuilt },
         sha256Hex: sha256,
       }),
+    ).toThrowError(
+      expect.objectContaining({
+        code: DOMAIN_ERROR_CODES.OPENING_SEED_INVALID,
+      }),
+    );
+  });
+
+  it('rehydrates a canonical opening seed but rejects a tampered source hash', () => {
+    const opening = seed();
+    const restored = parseOpeningSeed(
+      JSON.parse(canonicalSerialize(opening)),
+      sha256,
+    );
+    expect(canonicalSerialize(restored)).toBe(canonicalSerialize(opening));
+    expect(() =>
+      parseOpeningSeed(
+        {
+          ...JSON.parse(canonicalSerialize(opening)),
+          sources: [
+            {
+              ...JSON.parse(canonicalSerialize(opening)).sources[0],
+              payloadHash:
+                'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+            },
+          ],
+        },
+        sha256,
+      ),
     ).toThrowError(
       expect.objectContaining({
         code: DOMAIN_ERROR_CODES.OPENING_SEED_INVALID,
