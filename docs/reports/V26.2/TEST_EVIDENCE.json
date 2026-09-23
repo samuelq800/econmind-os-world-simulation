@@ -1,0 +1,102 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "V26.2",
+  "state": "PREPARATION_ONLY_NOT_V26_2_STARTED",
+  "base": "f4815cc3d24e4876e9f09858f5536aac560592ef",
+  "implementation_commit": "52ada0b78dc934c578ed04afb5eba4a80fd80f5e",
+  "environment": {
+    "name": "isolated local worktree, macOS",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4" },
+    "production_access": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Pinned toolchain verified; lockfile unchanged"
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-web/scoped-reconnect-cache.test.ts tests/world-web/forecast-worker-protocol.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "2 files, 13 tests passed: 6 new cache cases plus 7 V26.1 regressions"
+    },
+    {
+      "command": "pnpm --filter @econmind/world-web typecheck",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "TypeScript browser package typecheck passed"
+    },
+    {
+      "command": "pnpm --filter @econmind/world-web build",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Vite browser build passed; new cache module is not yet imported by UI"
+    },
+    {
+      "command": "pnpm exec eslint apps/world-web/src/reconnect tests/world-web/scoped-reconnect-cache.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Scoped lint passed"
+    },
+    {
+      "command": "pnpm exec prettier --check apps/world-web/src/reconnect tests/world-web/scoped-reconnect-cache.test.ts docs/exec-plans/V26.2.md",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Selected code, test and plan files formatted"
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "102 governed source files scanned"
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "97 source files scanned; no violations"
+    },
+    {
+      "command": "node scripts/check-repository-secrets.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "735 files scanned; no findings"
+    },
+    {
+      "command": "git diff --cached --check",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Implementation staged diff had no whitespace errors"
+    }
+  ],
+  "negative_cases": [
+    "cache key changes on each scope and version field and avoids delimiter collisions",
+    "versions above Number.MAX_SAFE_INTEGER remain monotonically ordered",
+    "stale and conflicting same-version snapshots do not overwrite cache",
+    "out-of-order and duplicate notices do not lower the watermark",
+    "snapshot below notice watermark cannot reconcile",
+    "reconnect requires a covering authoritative snapshot even at the same version",
+    "revocation and authorization revision switch remove old cache",
+    "cyclic, accessor, sparse-array and non-finite payloads fail closed"
+  ],
+  "database_rls_evidence": [
+    { "result": "NOT_RUN", "reason": "pure client preparation" }
+  ],
+  "invariant_evidence": [
+    "outbox notice changes only invalidation metadata, never cached economic payload",
+    "cache read always labels live channel unavailable",
+    "cache values are cloned on write and read",
+    "all cached scopes are removed on revocation"
+  ],
+  "unresolved_gaps": [
+    "formal V26.2 hard dependencies remain unclosed at immutable base",
+    "ADR-12 classification policy remains unapproved",
+    "private Realtime channel and outbox delivery NOT_RUN",
+    "authorized API snapshot and UI adapter NOT_RUN",
+    "IndexedDB persistence and restart recovery NOT_RUN",
+    "no V26.2 status or Gate claim"
+  ]
+}
