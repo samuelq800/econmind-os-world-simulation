@@ -284,6 +284,38 @@ describe('V22.3 executor B parallel preparation', () => {
         }),
       }),
     ).toThrow('sum exactly to one');
+
+    const sharedParticipant = cash(
+      'FACT.CASH.PROJECT.SHARED.PARTICIPANT',
+      'ACCOUNT.PROJECT.SHARED',
+      'COUNTRY.A',
+      '100',
+    );
+    const sharedProject = cash(
+      'FACT.CASH.PROJECT.SHARED.RECEIVER',
+      'ACCOUNT.PROJECT.SHARED',
+      'COUNTRY.A',
+      '100',
+    );
+    expect(() =>
+      calculateJointProjectPreparation({
+        trace: TRACE,
+        participantCashFacts: [sharedParticipant, participantB],
+        projectCashFact: sharedProject,
+        executionFact: fact('FACT.EXECUTION.PROJECT.SHARED', {
+          ...execution.payload,
+          executionRef: 'EXECUTION.PROJECT.SHARED',
+          projectAccountRef: 'ACCOUNT.PROJECT.SHARED',
+          contributions: [
+            {
+              ...execution.payload.contributions[0]!,
+              participantAccountRef: 'ACCOUNT.PROJECT.SHARED',
+            },
+            execution.payload.contributions[1]!,
+          ],
+        }),
+      }),
+    ).toThrow('must differ from every participant account');
   });
 
   it('validates distinct PTA, FTA, customs, sector and multilateral treaty schemas', () => {

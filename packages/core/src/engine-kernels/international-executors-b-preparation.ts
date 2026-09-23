@@ -1291,6 +1291,13 @@ export function calculateJointProjectPreparation(input: {
     normalized.map((entry) => entry.account.accountRef),
     'joint-project participant accounts',
   );
+  if (
+    normalized.some((entry) => entry.account.accountRef === project.accountRef)
+  ) {
+    kernelInvalid(
+      'Joint-project receiving account must differ from every participant account',
+    );
+  }
   const contributionTotal = addMoney(
     normalized.map((entry) => entry.amount),
     'joint-project contribution total',
