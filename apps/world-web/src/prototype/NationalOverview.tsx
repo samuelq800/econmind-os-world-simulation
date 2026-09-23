@@ -1,6 +1,13 @@
 import { Component, lazy, Suspense, useState, type ReactNode } from 'react';
 
 import type { PrototypeWorldBriefProjection } from './contracts.js';
+import {
+  preparationOfficeActionAdapter,
+  type OfficeActionReadModel,
+  type ReadableOfficeState,
+} from './office-action-adapter.js';
+
+import './office-action.css';
 
 const FictionalWorldMap = lazy(async () => {
   const map = await import('../map-lab/FictionalWorldMap.js');
@@ -34,7 +41,62 @@ class AtlasBoundary extends Component<
 
 interface NationalOverviewProps {
   readonly projection: PrototypeWorldBriefProjection;
+  readonly status: ReadableOfficeState;
   readonly onOpenBrief: () => void;
+}
+
+function OfficeActionRoute({
+  model,
+  onOpenBrief,
+}: {
+  readonly model: OfficeActionReadModel;
+  readonly onOpenBrief: () => void;
+}) {
+  const command = preparationOfficeActionAdapter.commandAvailability();
+  return (
+    <section className="office-action-route" aria-label="Selected event route">
+      <div className="office-action-route__heading">
+        <span>Event route · local fixture</span>
+        <strong>
+          {model.kind === 'LOCAL_REHEARSAL_ROUTE'
+            ? 'Your Office can rehearse this response'
+            : 'Action route unavailable'}
+        </strong>
+      </div>
+      <dl>
+        <div>
+          <dt>Owner</dt>
+          <dd>{model.ownerOfficeId ?? 'Not supplied'}</dd>
+        </div>
+        <div>
+          <dt>Route</dt>
+          <dd>{model.routeLabel ?? 'Not supplied'}</dd>
+        </div>
+        <div>
+          <dt>Live Command</dt>
+          <dd>{command.kind}</dd>
+        </div>
+      </dl>
+      <p>{model.reason}</p>
+      {model.kind === 'LOCAL_REHEARSAL_ROUTE' ? (
+        <button
+          className="six-button six-button--primary"
+          type="button"
+          onClick={onOpenBrief}
+        >
+          Open G01 Office brief
+        </button>
+      ) : (
+        <button
+          className="six-button six-button--secondary"
+          type="button"
+          onClick={onOpenBrief}
+        >
+          Return to my Office
+        </button>
+      )}
+    </section>
+  );
 }
 
 export function nationalSignalSelection(
@@ -55,6 +117,7 @@ export function nationalSignalSelection(
 
 export function NationalOverview({
   projection,
+  status,
   onOpenBrief,
 }: NationalOverviewProps) {
   const [selectedMetricId, setSelectedMetricId] = useState(
@@ -62,8 +125,37 @@ export function NationalOverview({
   );
   const [view, setView] = useState<'map' | 'table'>('map');
   const [mapUnavailable, setMapUnavailable] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState(
+    projection.events[0]?.eventId ?? '',
+  );
   const { metric: selectedMetric, events: relevantEvents } =
     nationalSignalSelection(projection, selectedMetricId);
+  const selectedEvent =
+    projection.events.find((event) => event.eventId === selectedEventId) ??
+    relevantEvents[0] ??
+    null;
+  const actionModel = preparationOfficeActionAdapter.readModel({
+    projection,
+    event: selectedEvent,
+    state: status,
+  });
+  const chooseMetric = (metricId: string) => {
+    setSelectedMetricId(metricId);
+    setSelectedEventId(
+      projection.events.find((event) =>
+        event.affectedMetricIds.includes(metricId),
+      )?.eventId ?? '',
+    );
+  };
+  const chooseEvent = (eventId: string) => {
+    const event = projection.events.find((item) => item.eventId === eventId);
+    if (!event) return;
+    setSelectedEventId(eventId);
+    const metricId = event.affectedMetricIds.find((id) =>
+      projection.metrics.some((metric) => metric.id === id),
+    );
+    if (metricId) setSelectedMetricId(metricId);
+  };
 
   return (
     <section
@@ -164,7 +256,7 @@ export function NationalOverview({
                     key={metric.id}
                     type="button"
                     aria-pressed={metric.id === selectedMetric.id}
-                    onClick={() => setSelectedMetricId(metric.id)}
+                    onClick={() => chooseMetric(metric.id)}
                   >
                     <span>{metric.label}</span>
                     <strong>
@@ -175,20 +267,34 @@ export function NationalOverview({
                 ))}
               </div>
               <div className="national-atlas__intel-event" aria-live="polite">
-                <span>Linked event</span>
+                <span>Selected event</span>
                 <strong>
-                  {relevantEvents[0]?.title ??
-                    'No linked event in this fixture'}
+                  {selectedEvent?.title ?? 'No linked event in this fixture'}
                 </strong>
                 <small>{selectedMetric.accessibleSummary}</small>
               </div>
-              <button
-                className="six-button six-button--primary"
-                type="button"
-                onClick={onOpenBrief}
+              <div
+                className="national-atlas__events"
+                aria-label="Choose a recorded event"
               >
-                Open G01 Office brief
-              </button>
+                {projection.events.map((event) => (
+                  <button
+                    key={event.eventId}
+                    type="button"
+                    aria-pressed={event.eventId === selectedEvent?.eventId}
+                    onClick={() => chooseEvent(event.eventId)}
+                  >
+                    <span>
+                      {event.priority} · {event.ownerOfficeId}
+                    </span>
+                    <strong>{event.title}</strong>
+                  </button>
+                ))}
+              </div>
+              <OfficeActionRoute
+                model={actionModel}
+                onOpenBrief={onOpenBrief}
+              />
             </aside>
           </div>
         ) : (
@@ -215,7 +321,7 @@ export function NationalOverview({
                         : 'national-signal'
                     }
                     aria-pressed={metric.id === selectedMetric.id}
-                    onClick={() => setSelectedMetricId(metric.id)}
+                    onClick={() => chooseMetric(metric.id)}
                   >
                     <span>{metric.label}</span>
                     <strong>
@@ -250,9 +356,7 @@ export function NationalOverview({
                           ? 'is-related'
                           : undefined
                       }
-                      onClick={() =>
-                        setSelectedMetricId(event.affectedMetricIds[0] ?? '')
-                      }
+                      onClick={() => chooseEvent(event.eventId)}
                     >
                       <span>{event.priority} signal</span>
                       <strong>{event.title}</strong>
@@ -282,26 +386,14 @@ export function NationalOverview({
                 <div>
                   <dt>Related event</dt>
                   <dd>
-                    {relevantEvents[0]?.title ??
-                      'No linked event in this fixture'}
+                    {selectedEvent?.title ?? 'No linked event in this fixture'}
                   </dd>
                 </div>
               </dl>
-              <section>
-                <span>Next route</span>
-                <strong>Return to your selected Office brief.</strong>
-                <small>
-                  The local transition retains only the selected fixture lens;
-                  it does not confer the event owner’s permission.
-                </small>
-                <button
-                  className="six-button six-button--primary"
-                  type="button"
-                  onClick={onOpenBrief}
-                >
-                  Open G01 Office brief
-                </button>
-              </section>
+              <OfficeActionRoute
+                model={actionModel}
+                onOpenBrief={onOpenBrief}
+              />
             </aside>
           </div>
         )

@@ -52,6 +52,7 @@ export interface PrototypeBriefEvent {
 
 export interface PrototypeResolvedRoute {
   readonly id: string;
+  readonly eventId: string;
   readonly officeId: string;
   readonly label: string;
   readonly availability: 'AVAILABLE' | 'APPROVAL_REQUIRED' | 'BLOCKED';

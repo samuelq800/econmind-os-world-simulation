@@ -214,7 +214,9 @@ function NextAction({
   readonly event: PrototypeBriefEvent;
 }) {
   const route = projection.routes.find(
-    (candidate) => candidate.officeId === event.ownerOfficeId,
+    (candidate) =>
+      candidate.eventId === event.eventId &&
+      candidate.officeId === event.ownerOfficeId,
   );
   return (
     <section className="panel action-panel" aria-labelledby="next-action-title">

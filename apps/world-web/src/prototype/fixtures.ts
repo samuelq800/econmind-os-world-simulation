@@ -256,6 +256,7 @@ export const READY_PROJECTION: PrototypeWorldBriefProjection = {
   routes: [
     {
       id: 'ROUTE-PROTOTYPE-TRADE',
+      eventId: 'EVENT-PROTOTYPE-001',
       officeId: 'TRADE',
       label: 'Review the reservation in Trade',
       availability: 'AVAILABLE',
@@ -263,6 +264,7 @@ export const READY_PROJECTION: PrototypeWorldBriefProjection = {
     },
     {
       id: 'ROUTE-PROTOTYPE-FINANCE',
+      eventId: 'EVENT-PROTOTYPE-002',
       officeId: 'FINANCE',
       label: 'Inspect the treasury commitment',
       availability: 'APPROVAL_REQUIRED',
