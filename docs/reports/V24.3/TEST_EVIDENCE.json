@@ -1,0 +1,45 @@
+{
+  "step": "V24.3",
+  "scope": "pure_core_preparation_only",
+  "status": "PREPARATION_ONLY",
+  "base_sha": "0c8178b5e2aac957faa57d92672e23ec6d87b36d",
+  "code_plan_commit_sha": "3c8c6d84d50ca69d217f75894e85ab1920b8d0ae",
+  "followup_test_plan_commit_sha": "4e3746ab5003f91f022868d07065622933c55cda",
+  "branch": "codex/v24-3-brief-conflict-expiry-core",
+  "authoritative_v24_2_status": "PLANNED",
+  "authoritative_v24_3_status": "PLANNED",
+  "open_admin_projection_adr": "ADR-12",
+  "checks": {
+    "focused_vitest_en_US_UTF_8": { "status": "PASS", "files": 1, "tests": 8 },
+    "focused_vitest_tr_TR_UTF_8": { "status": "PASS", "files": 1, "tests": 8 },
+    "v24_1_and_v24_3_focused_vitest": {
+      "status": "PASS",
+      "files": 2,
+      "tests": 16
+    },
+    "core_typecheck": "PASS",
+    "core_build": "PASS",
+    "targeted_eslint": "PASS",
+    "targeted_prettier": "PASS",
+    "authoritative_pattern_scan": "PASS",
+    "repository_boundary_scan": "PASS",
+    "local_environment_check": "PASS",
+    "repository_secret_scan": "PASS",
+    "foundation_gate_policy": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "not_run": [
+    "V24_2_formal_closure_and_dependency_recomputation",
+    "server_identity_office_approval_authorization",
+    "API_DB_brief_fetch_isolation_and_RLS",
+    "authoritative_brief_persistence",
+    "authoritative_audit_append",
+    "V09_atomic_writer",
+    "Event_Kernel_dispatch",
+    "migration",
+    "production_access",
+    "independent_review",
+    "gate_acceptance"
+  ],
+  "authoritative_writes": false
+}
