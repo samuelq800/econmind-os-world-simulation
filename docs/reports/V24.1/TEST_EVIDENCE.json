@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "recordType": "V24_1_CAPTAIN_GOVERNANCE_PREPARATION_EVIDENCE",
+  "base": "015de795dfd1780c14c580e743cd7d0fa721b0c6",
+  "branch": "codex/v24-1-captain-strategy-preparation",
+  "validatedCodeCandidate": "ed21614bb6b9de166eca1a5d9b6c6612c7066285",
+  "observedOriginMain": "fa281e2bdb7a6b2a1628f015aa721e859438fbb8",
+  "status": "PREPARATION_ONLY_DEPENDENCIES_OPEN",
+  "risk": "P0",
+  "result": "PASS_AT_FROZEN_CODE_CANDIDATE_WITH_OPEN_PRODUCT_DEPENDENCIES",
+  "checks": [
+    {
+      "command": "pnpm exec vitest run tests/world-core/v24-1-captain-governance-preparation.test.ts --testTimeout=30000",
+      "result": "PASS: 1 file, 8 tests"
+    },
+    {
+      "command": "pnpm exec vitest run V24.1, V23.2, V22.3 and V13/V14 focused suites --testTimeout=30000",
+      "result": "PASS: 4 files, 32 tests"
+    },
+    {
+      "command": "pnpm --filter @econmind/core typecheck",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @econmind/core build",
+      "result": "PASS"
+    },
+    {
+      "command": "affected-path ESLint and Prettier",
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "result": "PASS: 63 Core files, 130 total files, zero violations"
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "result": "PASS: 135 files"
+    },
+    {
+      "command": "pnpm env:check",
+      "result": "PASS: local, databaseConfigured=false, linkedSupabaseProject=NOT_LINKED"
+    },
+    {
+      "command": "pnpm foundation:policy",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm secrets:check",
+      "result": "PASS: 875 files"
+    },
+    {
+      "command": "git merge-base / changed-path intersection / git merge-tree against origin/main",
+      "result": "PASS: exact base; zero overlapping paths; merge tree produced without conflict messages"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "invariants": [
+    "Captain outputs cannot include direct fiscal, monetary, production, inventory or macro mutations.",
+    "Political Capital conserves opening plus generated, total, available, spent, closing and fixed bucket balances exactly.",
+    "Political Capital reallocation is zero-sum and action costs cannot exceed the selected bucket.",
+    "Primary/supporting strategies and primary/secondary priorities remain distinct.",
+    "Cabinet Agenda has at most three active or under-review issues and edit cannot bypass status actions.",
+    "Proposal decisions and approval bindings use the exact integer proposal version.",
+    "Cautious commitments cannot include targets; explicit commitments require metric, direction, value and future deadline.",
+    "Cabinet coordination has no office-policy mutation output.",
+    "Replay recomputes the module result and rejects rewritten output with a freshly recomputed public hash."
+  ],
+  "dependencyGaps": [
+    "V23.3 product status remains PLANNED/not formally closed despite reviewed preparation mainline acceptance.",
+    "Other V24.1 hard dependencies and authoritative authorization/persistence integration are not asserted closed.",
+    "Political-capital generation, credibility/public-support effects and proposal owner execution remain caller/system owned."
+  ],
+  "notRun": [
+    "official full repository pnpm check",
+    "independent P0 review of this immutable V24.1 candidate",
+    "authoritative role/approval, Command/Event/receipt, database or durable idempotency integration",
+    "live PostgreSQL, production validation, status/Gate promotion, merge or deployment"
+  ],
+  "prohibitedPathsUnchanged": [
+    "apps/world-web",
+    "apps/world-api",
+    "apps/world-worker",
+    "packages/database",
+    "supabase",
+    "status/progress.json",
+    "status/decisions.json"
+  ],
+  "mainMergeAuthorized": false,
+  "productionMutation": false,
+  "verified": false
+}
