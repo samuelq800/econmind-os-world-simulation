@@ -1,4 +1,5 @@
-import { randomUUID } from 'node:crypto';
+import { execFile } from 'node:child_process';
+import { createHash, randomUUID } from 'node:crypto';
 import {
   lstat,
   open,
@@ -8,6 +9,7 @@ import {
   unlink,
 } from 'node:fs/promises';
 import path from 'node:path';
+import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
 import { Client } from 'pg';
@@ -21,6 +23,7 @@ import {
   assertNoLinkedSupabaseProject,
   assertV09DedicatedStagingExecution,
 } from './v09-staging-evidence-policy.mjs';
+import { assertV09PostgresTestEnvironment } from './v09-postgres-test-environment.mjs';
 
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -37,6 +40,12 @@ const LINKED_PROJECT_PATH = path.join(
   repositoryRoot,
   'supabase/.temp/project-ref',
 );
+const DISPOSABLE_EXECUTION_CONFIRMATION =
+  'EXECUTE_DISPOSABLE_V09_POSTGRES_EVIDENCE';
+const DISPOSABLE_EVIDENCE_SCOPE = 'DISPOSABLE_LOOPBACK_POSTGRESQL';
+const DISPOSABLE_DATABASE = /^econmind_v09(?:_[a-z0-9_]+)?$/u;
+const DISPOSABLE_OUTPUT = /^[A-Za-z0-9][A-Za-z0-9._-]*\.json$/u;
+const executeFile = promisify(execFile);
 
 const RUN_MIGRATION_TEARDOWN = Object.freeze([
   Object.freeze({
@@ -530,6 +539,184 @@ async function readLinkedProjectRef() {
     }
     throw error;
   }
+}
+
+function localEvidenceFailure(stage) {
+  return {
+    commit_acknowledgement: { status: 'NOT_RUN' },
+    durable_evidence: { status: 'NOT_ATTEMPTED' },
+    evidence_scope: DISPOSABLE_EVIDENCE_SCOPE,
+    failure: { stage },
+    gate_b_dedicated_staging: 'NOT_RUN',
+    judgment: 'FAIL_CLOSED_LOCAL_EVIDENCE_NOT_CREATED',
+    migrations: [],
+    secret_redacted: true,
+    status: 'FAIL_CLOSED',
+    steps: [],
+  };
+}
+
+function disposableInvalid(message) {
+  throw new Error(`Unsafe V09 disposable PostgreSQL evidence: ${message}`);
+}
+
+function disposableOutputPath(value) {
+  if (
+    typeof value !== 'string' ||
+    value.length === 0 ||
+    !path.isAbsolute(value) ||
+    path.resolve(value) !== value ||
+    !DISPOSABLE_OUTPUT.test(path.basename(value))
+  ) {
+    disposableInvalid(
+      'V09_DISPOSABLE_EVIDENCE_OUTPUT must be a normalized absolute .json path',
+    );
+  }
+  return value;
+}
+
+function assertNoSupabaseCredentialEnvironment(environment) {
+  for (const [name, value] of Object.entries(environment)) {
+    if (/^(?:VITE_)?SUPABASE_/u.test(name) && value) {
+      disposableInvalid(`${name} must be absent from disposable evidence`);
+    }
+  }
+}
+
+/**
+ * Local/CI evidence policy. This is intentionally stricter than the generic
+ * V09 test environment: a loopback-only target prevents this runner from ever
+ * becoming a substitute path to a shared or Supabase PostgreSQL target.
+ */
+export function assertV09DisposablePostgresEvidenceExecution(
+  environment = process.env,
+) {
+  const testTarget = assertV09PostgresTestEnvironment(environment);
+  if (
+    environment.V09_DISPOSABLE_EVIDENCE_CONFIRMATION !==
+    DISPOSABLE_EXECUTION_CONFIRMATION
+  ) {
+    disposableInvalid('explicit disposable execution confirmation is required');
+  }
+  assertNoSupabaseCredentialEnvironment(environment);
+  const evidenceOutputPath = disposableOutputPath(
+    environment.V09_DISPOSABLE_EVIDENCE_OUTPUT,
+  );
+  let connection;
+  try {
+    connection = new URL(testTarget.connectionString);
+  } catch {
+    disposableInvalid('V09_TEST_DATABASE_URL must be a PostgreSQL URL');
+  }
+  if (!['postgres:', 'postgresql:'].includes(connection.protocol)) {
+    disposableInvalid('V09_TEST_DATABASE_URL must use PostgreSQL');
+  }
+  if (connection.search !== '' || connection.hash !== '') {
+    disposableInvalid(
+      'V09_TEST_DATABASE_URL must not contain query or fragment connection overrides',
+    );
+  }
+  if (
+    !/^[1-9][0-9]{0,4}$/u.test(connection.port) ||
+    Number(connection.port) > 65535
+  ) {
+    disposableInvalid(
+      'V09_TEST_DATABASE_URL must include an explicit numeric PostgreSQL port',
+    );
+  }
+  if (
+    !['127.0.0.1', '::1', '[::1]', 'localhost'].includes(connection.hostname)
+  ) {
+    disposableInvalid('V09_TEST_DATABASE_URL must use a loopback host');
+  }
+  const databaseName = decodeURIComponent(connection.pathname.slice(1));
+  if (!DISPOSABLE_DATABASE.test(databaseName)) {
+    disposableInvalid(
+      'V09_TEST_DATABASE_URL must name an econmind_v09 disposable database',
+    );
+  }
+  if (connection.username.length === 0) {
+    disposableInvalid(
+      'V09_TEST_DATABASE_URL must include the disposable admin role',
+    );
+  }
+  if (!/^[a-z_][a-z0-9_]{0,62}$/u.test(connection.username)) {
+    disposableInvalid('V09_TEST_DATABASE_URL must use a canonical role name');
+  }
+  const targetFingerprint = createHash('sha256')
+    .update(
+      [
+        DISPOSABLE_EVIDENCE_SCOPE,
+        testTarget.environment,
+        testTarget.fingerprint,
+        connection.hostname,
+        connection.port,
+        databaseName,
+        connection.username,
+      ].join('\n'),
+      'utf8',
+    )
+    .digest('hex');
+  return Object.freeze({
+    approval: Object.freeze({
+      admin_database_role: connection.username,
+      disposable_namespace: 'world_v2',
+      evidence_output_path: evidenceOutputPath,
+      roles: Object.freeze({
+        migration_owner: 'v09_staging_migration_owner',
+        reader: 'v09_staging_reader',
+        worker: 'v09_staging_worker',
+      }),
+      target_fingerprint: targetFingerprint,
+    }),
+    connectionString: testTarget.connectionString,
+    target: Object.freeze({
+      database_name: databaseName,
+      host: connection.hostname,
+      port: connection.port,
+      role: connection.username,
+      test_fingerprint: testTarget.fingerprint,
+    }),
+  });
+}
+
+async function immutableRunInput(target) {
+  const [{ stdout }, manifest] = await Promise.all([
+    executeFile('git', ['rev-parse', 'HEAD'], { cwd: repositoryRoot }),
+    readFile(path.join(repositoryRoot, 'database/migrations/manifest.json')),
+  ]);
+  return Object.freeze({
+    manifest_sha256: createHash('sha256').update(manifest).digest('hex'),
+    repository_commit: stdout.trim(),
+    target,
+  });
+}
+
+function annotateDisposableEvidence(evidence, immutableInput, migrations) {
+  const finalStatus = evidence.status === 'PASS' ? 'EVIDENCED' : 'FAIL';
+  return {
+    ...evidence,
+    evidence_scope: DISPOSABLE_EVIDENCE_SCOPE,
+    gate_b_dedicated_staging: 'NOT_RUN',
+    immutable_input: {
+      ...immutableInput,
+      migrations: migrations.map((migration) => ({
+        artifact_sha256: migration.artifact_sha256,
+        migration_id: migration.migration_id,
+        source_repo_commit: migration.source_repo_commit,
+      })),
+    },
+    judgment:
+      finalStatus === 'EVIDENCED'
+        ? 'EVIDENCED_DISPOSABLE_LOCAL_ONLY_NOT_DEDICATED_STAGING'
+        : 'FAIL_DISPOSABLE_LOCAL_ONLY_NOT_DEDICATED_STAGING',
+    receipt_recovery: {
+      required_focused_suite:
+        'tests/world-core/v09-atomic-recovery-postgres.test.ts',
+      status: 'NOT_RUN',
+    },
+    transport_tls_staging_equivalence: 'NOT_RUN',
+  };
 }
 
 async function audited(evidence, id, operation) {
@@ -1843,22 +2030,15 @@ async function persistDurableEvidence({ approval, evidence, writeEvidence }) {
  * the client factory so unit tests can inject a fake client; the default real
  * factory is invoked only after policy validation has completely passed.
  */
-export async function runV09DedicatedStagingEvidence({
-  approval,
+async function runV09AuthorizedPostgresEvidence({
+  authorized,
   clientFactory = createPgStagingClient,
-  environment = process.env,
   loadLinkedProjectRef = readLinkedProjectRef,
   loadMigrationChain = loadV09StagingMigrationChain,
   runId = randomUUID(),
   writeEvidence = writeV09StagingEvidence,
+  annotateEvidence = (evidence) => evidence,
 }) {
-  let authorized;
-  try {
-    authorized = assertV09DedicatedStagingExecution(environment, approval);
-  } catch {
-    return publicFailure('POLICY_REJECTED');
-  }
-
   const evidence = publicEvidence(authorized.approval, runId);
   let canRun = true;
   try {
@@ -2028,7 +2208,80 @@ export async function runV09DedicatedStagingEvidence({
   }
   return persistDurableEvidence({
     approval: authorized.approval,
-    evidence,
+    evidence: annotateEvidence(evidence),
     writeEvidence,
+  });
+}
+
+/**
+ * Dedicated staging wrapper. The reusable executor above receives an already
+ * policy-authorized target; this wrapper remains the only staging entry point.
+ */
+export async function runV09DedicatedStagingEvidence({
+  approval,
+  clientFactory = createPgStagingClient,
+  environment = process.env,
+  loadLinkedProjectRef = readLinkedProjectRef,
+  loadMigrationChain = loadV09StagingMigrationChain,
+  runId = randomUUID(),
+  writeEvidence = writeV09StagingEvidence,
+}) {
+  let authorized;
+  try {
+    authorized = assertV09DedicatedStagingExecution(environment, approval);
+  } catch {
+    return publicFailure('POLICY_REJECTED');
+  }
+  return runV09AuthorizedPostgresEvidence({
+    authorized,
+    clientFactory,
+    loadLinkedProjectRef,
+    loadMigrationChain,
+    runId,
+    writeEvidence,
+  });
+}
+
+/**
+ * Runs the same migration, RLS/grant, socket-loss/reconnect and cleanup body
+ * against an explicitly confirmed loopback PostgreSQL database. Its durable
+ * output is intentionally marked local-only and can never close the dedicated
+ * staging Gate B evidence gap.
+ */
+export async function runV09DisposablePostgresEvidence({
+  environment = process.env,
+  clientFactory = createPgStagingClient,
+  loadLinkedProjectRef = readLinkedProjectRef,
+  loadMigrationChain = loadV09StagingMigrationChain,
+  runId = randomUUID(),
+  writeEvidence = writeV09StagingEvidence,
+} = {}) {
+  let authorized;
+  try {
+    authorized = assertV09DisposablePostgresEvidenceExecution(environment);
+  } catch {
+    return localEvidenceFailure('POLICY_REJECTED');
+  }
+
+  let immutableInput;
+  try {
+    immutableInput = await immutableRunInput(authorized.target);
+  } catch {
+    return localEvidenceFailure('IMMUTABLE_INPUT_UNAVAILABLE');
+  }
+  let resolvedMigrations = [];
+  return runV09AuthorizedPostgresEvidence({
+    authorized,
+    clientFactory,
+    loadLinkedProjectRef,
+    loadMigrationChain: async () => {
+      const migrations = await loadMigrationChain();
+      resolvedMigrations = migrations;
+      return migrations;
+    },
+    runId,
+    writeEvidence,
+    annotateEvidence: (evidence) =>
+      annotateDisposableEvidence(evidence, immutableInput, resolvedMigrations),
   });
 }
