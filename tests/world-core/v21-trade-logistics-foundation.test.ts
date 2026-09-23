@@ -5,6 +5,7 @@ import {
   assessCustomsTariff,
   applyShipmentLogisticsOutcome,
   createFoundationFact,
+  deriveTradeEligibilityRequestFromOrderBookFill,
   resolveTradeEligibility,
   type FoundationTraceRequest,
 } from '../../packages/core/src/index.js';
@@ -58,6 +59,32 @@ function general() {
 }
 
 describe('V21.2 tariff, controls, and customs foundation', () => {
+  it('bridges the explicit V21.1 BookFill contract without importing its module', () => {
+    const fill = fact('FACT.ORDER_BOOK_FILL.1', {
+      fillRef: 'FILL.1',
+      buyerCountryRef: 'COUNTRY.A',
+      sellerCountryRef: 'COUNTRY.B',
+      commodityId: 'GRAIN',
+      quantity: q('5'),
+      matchedAt: q('20000', 'sim_millisecond'),
+    });
+    const bridge = deriveTradeEligibilityRequestFromOrderBookFill({
+      trace: TRACE,
+      orderBookFillFact: fill,
+      requestRef: 'REQUEST.FROM.FILL.1',
+      evaluatedAt: q('21000', 'sim_millisecond'),
+      outputRef: 'OUTCOME.BRIDGE.1',
+    });
+    expect(bridge.request).toMatchObject({
+      importerCountryRef: 'COUNTRY.A',
+      exporterCountryRef: 'COUNTRY.B',
+      commodityRef: 'GRAIN',
+      direction: 'IMPORT',
+      requestedQuantity: q('5'),
+    });
+    assertFoundationReplayEvidence(bridge.replayProof, [fill]);
+  });
+
   it('resolves treaty/bilateral/general priority and concrete quotas/bans without reserving state', () => {
     const req = request();
     const controls = fact('FACT.CONTROLS.1', [

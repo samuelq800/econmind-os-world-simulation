@@ -16,3 +16,8 @@ rejects a caller-scoped assessment reference already recorded as collected.
 
 No quota is reserved, tariff is posted, order/contract created, payment taken,
 shipment created, or inventory changed.
+
+`deriveTradeEligibilityRequestFromOrderBookFill` is the sole V21.1 bridge. It
+maps a provenance-bound structural `BookFill` subset from buyer/seller to an
+importer/exporter request and replay proof; it neither imports V21.1 nor makes
+an authoritative order or contract.
