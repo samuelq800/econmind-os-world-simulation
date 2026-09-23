@@ -300,6 +300,82 @@ describe('V24.2 crisis/Admin cause-layer pure preparation', () => {
     ).toThrow();
   });
 
+  it('requires an exact deterministic same-target chain and rejects double -7 from one balance', () => {
+    const request = input();
+    const first = refact(request.causeFacts[0]!, {
+      ...resourceCause,
+      before: qty('10'),
+      delta: qty('-7'),
+    });
+    const second = fact('FACT.CAUSE.RESOURCE.2', {
+      ...resourceCause,
+      causeRef: 'CAUSE.RESOURCE.2',
+      before: qty('10'),
+      delta: qty('-7'),
+      sourceReceiptRef: 'RECEIPT.CAUSE.RESOURCE.2',
+    });
+    const causeFacts = [first, second, request.causeFacts[1]!];
+    const action = {
+      ...request.actionFact.payload,
+      causeFactRefs: causeFacts.map((item) => item.factRef),
+    };
+    const actionFact = fact('FACT.ACTION', action, [
+      request.stateFact.factRef,
+      request.authorizationFact.factRef,
+      ...action.causeFactRefs,
+    ]);
+    const doubleDebit = { ...request, actionFact, causeFacts };
+    expect(() => prepareCrisisCauseAction(doubleDebit)).toThrow(
+      'Same-target crisis causes must form an exact before-to-after chain',
+    );
+    const sequencedSecond = refact(second, {
+      ...second.payload,
+      before: qty('3'),
+      delta: qty('-2'),
+    });
+    const sequenced = {
+      ...doubleDebit,
+      causeFacts: [first, sequencedSecond, request.causeFacts[1]!],
+    };
+    const result = prepareCrisisCauseAction(sequenced);
+    const resourceTransitions = result.causeTransitions.filter(
+      (item) => item.targetObjectRef === 'DEPOSIT.1',
+    );
+    expect(
+      resourceTransitions.map((item) => [item.before, item.delta, item.after]),
+    ).toEqual([
+      [qty('10'), qty('-7'), qty('3')],
+      [qty('3'), qty('-2'), qty('1')],
+    ]);
+    assertCrisisCauseReplay(sequenced, result);
+    expect(
+      prepareCrisisCauseAction({
+        ...sequenced,
+        causeFacts: [...sequenced.causeFacts].reverse(),
+      }),
+    ).toEqual(result);
+    expect(() =>
+      assertCrisisCauseReplay(sequenced, {
+        ...result,
+        causeTransitions: [
+          resourceTransitions[0]!,
+          { ...resourceTransitions[1]!, before: qty('10') },
+          result.causeTransitions[2]!,
+        ],
+      }),
+    ).toThrow();
+    const overdraftSecond = refact(second, {
+      ...second.payload,
+      before: qty('3'),
+    });
+    expect(() =>
+      prepareCrisisCauseAction({
+        ...doubleDebit,
+        causeFacts: [first, overdraftSecond, request.causeFacts[1]!],
+      }),
+    ).toThrow('Shock cannot create negative stock or capacity');
+  });
+
   it('requires explicit scenario evidence before proposing population displacement', () => {
     const request = input();
     const source = request.causeFacts[0]!;

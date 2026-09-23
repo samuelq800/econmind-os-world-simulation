@@ -495,15 +495,37 @@ export function prepareCrisisCauseAction(
         );
       lifecycleStatus = 'ACTIVE';
       eventKind = 'CRISIS_START_REQUESTED';
-      transitions = Object.freeze(
-        orderedCauses.map((fact) =>
-          causeTransition(actionRef, fact, input.trace, [
+      {
+        // One target has one evolving stock/capacity. Fact-ref order is the
+        // deterministic application order; a later source must witness the
+        // exact result of the preceding source, not reuse its old balance.
+        const lastByTarget = new Map<string, ExactMoney | ExactQuantity>();
+        const sequenced: CrisisCauseTransition[] = [];
+        for (const fact of orderedCauses) {
+          const transition = causeTransition(actionRef, fact, input.trace, [
             input.stateFact.factRef,
             input.authorizationFact.factRef,
             input.actionFact.factRef,
-          ]),
-        ),
-      );
+          ]);
+          const target = canonicalSerialize([
+            transition.targetOwnerRef,
+            transition.targetObjectRef,
+            transition.targetField,
+          ]);
+          const previous = lastByTarget.get(target);
+          if (
+            previous !== undefined &&
+            canonicalSerialize(transition.before) !==
+              canonicalSerialize(previous)
+          )
+            kernelInvalid(
+              'Same-target crisis causes must form an exact before-to-after chain',
+            );
+          lastByTarget.set(target, transition.after);
+          sequenced.push(transition);
+        }
+        transitions = Object.freeze(sequenced);
+      }
       if (
         new Set(transitions.map((item) => item.causeRef)).size !==
           transitions.length ||
