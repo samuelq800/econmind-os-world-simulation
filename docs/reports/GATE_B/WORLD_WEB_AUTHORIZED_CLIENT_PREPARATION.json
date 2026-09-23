@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "WORLD_WEB_AUTHORIZED_CLIENT_PREPARATION_V1",
+  "state": "PREPARATION_ONLY_NOT_BROWSER_INTEGRATED",
+  "base": "2dc1de3fc4b4ea4c5f4792538d961420317912db",
+  "implementationCommit": "9662dd075c8de70c95643e3335dd913087268074",
+  "eProtocolCandidateInspected": "dbcf7c52452d0e452ff19299d310ef69f0a89dd6",
+  "environment": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "productionAccess": false
+  },
+  "checks": [
+    {
+      "name": "focused Vitest, authorized browser client and scoped cache",
+      "result": "PASS",
+      "detail": "2 files, 12 tests"
+    },
+    { "name": "world-web typecheck", "result": "PASS" },
+    { "name": "world-web build", "result": "PASS" },
+    { "name": "scoped ESLint", "result": "PASS" },
+    { "name": "scoped Prettier", "result": "PASS" },
+    {
+      "name": "check-boundaries initial",
+      "result": "FAIL",
+      "detail": "clean worktree had not built @econmind/core; unresolved existing Worker imports"
+    },
+    {
+      "name": "core build then check-boundaries",
+      "result": "PASS",
+      "detail": "133 files scanned"
+    },
+    {
+      "name": "check-authoritative-patterns",
+      "result": "PASS",
+      "detail": "128 files scanned"
+    },
+    {
+      "name": "check-repository-secrets",
+      "result": "PASS",
+      "detail": "860 files scanned"
+    },
+    { "name": "git diff --cached --check", "result": "PASS" }
+  ],
+  "protocol": {
+    "readPath": "/local/v1/world-read",
+    "commandPath": "/local/v1/narrow-transfer-command",
+    "wireShapeComparedWithE": true,
+    "actualEBridgeRequest": "NOT_RUN",
+    "browserCorsPreflight": "NOT_AVAILABLE_IN_E_CANDIDATE",
+    "serverExpectedWorldVersionFence": "NOT_AVAILABLE_IN_E_CANDIDATE",
+    "separateReceiptLookup": "NOT_AVAILABLE_IN_E_CANDIDATE"
+  },
+  "gateBBrowserE2E": "NOT_RUN",
+  "databaseRlsStaging": "NOT_RUN",
+  "independentReview": "NOT_RUN"
+}
