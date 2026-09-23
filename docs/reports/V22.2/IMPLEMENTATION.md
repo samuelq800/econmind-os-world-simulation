@@ -27,8 +27,11 @@ and causal fact bindings for five contract activity families:
 5. Resource development: GCU foreign-to-host cash and bounded development
    right-share transfer, with geological endowment unchanged.
 
-All outputs have canonical replay preimages; the proof rebinds input facts and
-detects input/order/output-reference mutation. A caller's uniqueness witness
+All outputs have canonical replay preimages. After the B review forward fix,
+the replay assertion rebinds the three input facts, reruns the matching
+kind-specific calculator and compares the entire recomputed proof, including
+the economic output and transitions. A public hash is not treated as a proof
+of correct economics. A caller's uniqueness witness
 is checked locally, but only the V09 authoritative writer can establish and
 persist real idempotency, atomic effects, posting and receipt. Contract
 approval and delivery/payment evidence are caller-supplied refs, not
@@ -38,8 +41,9 @@ chosen here.
 
 ## Verification
 
-- Focused Vitest: **PASS**, 1 file / 8 tests (five positive families plus
-  invalid/stale/replay cases).
+- Focused Vitest: **PASS**, 1 file / 9 tests (five positive families plus
+  invalid/stale/replay cases and the independent-review same-facts rewritten
+  buyer-cash exploit with a freshly recomputed public hash).
 - Entire workspace typecheck via pinned Node 24.20.0 and pnpm 12.3.4:
   **PASS** (`pnpm -r --if-present typecheck`).
 - Core build, targeted ESLint, targeted Prettier: **PASS**.
@@ -60,3 +64,13 @@ gates remain open in repository status. No atomic writer integration,
 posting, persistence, Command/Event/receipt, end-to-end cross-border test,
 independent review, production access, migration or Gate approval was run.
 This branch must not be promoted as V22.2 product completion.
+
+## Independent-review forward fix
+
+The original frozen tip `f1d5813a1af26333b7a3401a74910ffc2eb0cdfc`
+received `CHANGES_REQUIRED_LOCAL` (P0=0, MAJOR=1): its replay assertion only
+checked fact bindings and a caller-recomputable hash. Code fix
+`dc16fcad4cd39e1a2dc6c021a9aa2da33cbadd2d` adds deterministic
+kind-specific recomputation for all five activities; tests show an unchanged
+fact set with `buyerCash=999999` and a newly computed hash now fails. This
+fix is local evidence only; B must re-review the new immutable tip.

@@ -4,9 +4,12 @@
   "status": "FOUNDATION_IMPLEMENTED_UNVERIFIED",
   "base_sha": "f4815cc3d24e4876e9f09858f5536aac560592ef",
   "code_commit_sha": "2b3249bfde301959381a7a24bb3f165aca1a8cd0",
+  "forward_fix_code_sha": "dc16fcad4cd39e1a2dc6c021a9aa2da33cbadd2d",
+  "independent_review_before_fix": "CHANGES_REQUIRED_LOCAL_P0_0_MAJOR_1",
+  "independent_re_review": "NOT_RUN",
   "branch": "codex/v22-2-international-executors-a",
   "checks": {
-    "focused_vitest": { "status": "PASS", "files": 1, "tests": 8 },
+    "focused_vitest": { "status": "PASS", "files": 1, "tests": 9 },
     "workspace_typecheck_pinned_direct": "PASS",
     "core_build": "PASS",
     "targeted_eslint": "PASS",
