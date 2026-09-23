@@ -136,6 +136,59 @@ describe('V21.2 tariff, controls, and customs foundation', () => {
     });
   });
 
+  it('rejects unknown runtime directions and control kinds before eligibility', () => {
+    const base = {
+      trace: TRACE,
+      generalTariffFact: general(),
+      bilateralTariffFact: null,
+      treatyTariffFact: null,
+      outputRef: 'OUTCOME.INVALID.INPUT',
+    } as const;
+    expect(() =>
+      resolveTradeEligibility({
+        ...base,
+        requestFact: fact('FACT.REQUEST.INVALID', {
+          ...request().payload,
+          direction: 'SIDEWAYS' as 'IMPORT',
+        }),
+        controlsFact: fact('FACT.CONTROLS.EMPTY.INVALID', []),
+      }),
+    ).toThrow('Invalid trade direction');
+    const control = {
+      controlRef: 'CONTROL.INVALID',
+      kind: 'UNKNOWN' as 'BAN',
+      direction: 'IMPORT' as const,
+      enforcingCountryRef: 'COUNTRY.A',
+      counterpartyCountryRef: null,
+      commodityRef: 'COMMODITY.COPPER',
+      effectiveAt: q('1', 'sim_millisecond'),
+      expiryAt: null,
+      quantityLimit: null,
+      deliveredQuantity: null,
+      reservedQuantity: null,
+    };
+    expect(() =>
+      resolveTradeEligibility({
+        ...base,
+        requestFact: request(),
+        controlsFact: fact('FACT.CONTROLS.INVALID.KIND', [control]),
+      }),
+    ).toThrow('Invalid trade control kind');
+    expect(() =>
+      resolveTradeEligibility({
+        ...base,
+        requestFact: request(),
+        controlsFact: fact('FACT.CONTROLS.INVALID.DIRECTION', [
+          {
+            ...control,
+            kind: 'BAN' as const,
+            direction: 'SIDEWAYS' as 'IMPORT',
+          },
+        ]),
+      }),
+    ).toThrow('Invalid trade control direction');
+  });
+
   it('computes tariff once from the resolved rate and refuses a repeated assessment ref', () => {
     const eligibility = resolveTradeEligibility({
       trace: TRACE,
@@ -155,11 +208,13 @@ describe('V21.2 tariff, controls, and customs foundation', () => {
       }),
       declarationFact: fact('FACT.DECLARATION.1', {
         declarationRef: 'DECLARATION.1',
+        eligibilityRequestRef: 'REQUEST.1',
         contractRef: 'CONTRACT.1',
         shipmentRef: 'SHIPMENT.1',
         importerCountryRef: 'COUNTRY.A',
         exporterCountryRef: 'COUNTRY.B',
         commodityRef: 'COMMODITY.COPPER',
+        declaredQuantity: q('5'),
         customsValue: money('100'),
         transportCost: money('5'),
         insuranceCost: money('1'),
@@ -183,11 +238,13 @@ describe('V21.2 tariff, controls, and customs foundation', () => {
         }),
         declarationFact: fact('FACT.DECLARATION.2', {
           declarationRef: 'DECLARATION.2',
+          eligibilityRequestRef: 'REQUEST.1',
           contractRef: 'CONTRACT.1',
           shipmentRef: 'SHIPMENT.1',
           importerCountryRef: 'COUNTRY.A',
           exporterCountryRef: 'COUNTRY.B',
           commodityRef: 'COMMODITY.COPPER',
+          declaredQuantity: q('5'),
           customsValue: money('100'),
           transportCost: money('0'),
           insuranceCost: money('0'),
@@ -197,6 +254,58 @@ describe('V21.2 tariff, controls, and customs foundation', () => {
         assessmentRef: 'ASSESSMENT.1',
       }),
     ).toThrow('already been collected');
+    expect(() =>
+      assessCustomsTariff({
+        trace: TRACE,
+        eligibilityFact: fact('FACT.ELIGIBILITY.OTHER.CARGO', eligibility),
+        collectionWitnessFact: fact('FACT.COLLECTION.OTHER.CARGO', {
+          witnessRef: 'WITNESS.OTHER.CARGO',
+          previouslyAssessedRefs: [],
+        }),
+        declarationFact: fact('FACT.DECLARATION.OTHER.CARGO', {
+          declarationRef: 'DECLARATION.OTHER.CARGO',
+          eligibilityRequestRef: 'REQUEST.1',
+          contractRef: 'CONTRACT.1',
+          shipmentRef: 'SHIPMENT.OTHER.CARGO',
+          importerCountryRef: 'COUNTRY.A',
+          exporterCountryRef: 'COUNTRY.B',
+          commodityRef: 'COMMODITY.IRON',
+          declaredQuantity: q('5'),
+          customsValue: money('100'),
+          transportCost: money('0'),
+          insuranceCost: money('0'),
+          borderFees: money('0'),
+          declaredAt: q('21000', 'sim_millisecond'),
+        }),
+        assessmentRef: 'ASSESSMENT.OTHER.CARGO',
+      }),
+    ).toThrow('Customs declaration must match its trade eligibility');
+    expect(() =>
+      assessCustomsTariff({
+        trace: TRACE,
+        eligibilityFact: fact('FACT.ELIGIBILITY.OVER.QUOTA', eligibility),
+        collectionWitnessFact: fact('FACT.COLLECTION.OVER.QUOTA', {
+          witnessRef: 'WITNESS.OVER.QUOTA',
+          previouslyAssessedRefs: [],
+        }),
+        declarationFact: fact('FACT.DECLARATION.OVER.QUOTA', {
+          declarationRef: 'DECLARATION.OVER.QUOTA',
+          eligibilityRequestRef: 'REQUEST.1',
+          contractRef: 'CONTRACT.1',
+          shipmentRef: 'SHIPMENT.OVER.QUOTA',
+          importerCountryRef: 'COUNTRY.A',
+          exporterCountryRef: 'COUNTRY.B',
+          commodityRef: 'COMMODITY.COPPER',
+          declaredQuantity: q('6'),
+          customsValue: money('100'),
+          transportCost: money('0'),
+          insuranceCost: money('0'),
+          borderFees: money('0'),
+          declaredAt: q('21000', 'sim_millisecond'),
+        }),
+        assessmentRef: 'ASSESSMENT.OVER.QUOTA',
+      }),
+    ).toThrow('Customs quantity exceeds trade eligibility');
   });
 });
 

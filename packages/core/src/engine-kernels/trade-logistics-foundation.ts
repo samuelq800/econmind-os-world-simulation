@@ -131,6 +131,9 @@ export interface TradeEligibilityRequest {
 export interface TradeEligibilityResult {
   readonly foundationStatus: typeof TRADE_LOGISTICS_FOUNDATION_STATUS;
   readonly requestRef: string;
+  readonly importerCountryRef: string;
+  readonly exporterCountryRef: string;
+  readonly commodityRef: string;
   readonly decision: 'ALLOWED' | 'BLOCKED';
   readonly blockReason: 'BAN_OR_SANCTION' | 'QUOTA_OR_CAP_EXHAUSTED' | null;
   readonly effectiveTariffRate: ExactRatio | null;
@@ -165,6 +168,15 @@ function controlMatches(
   evaluatedAt: WorldDecimalValue,
 ): boolean {
   ref(control.controlRef, 'controlRef');
+  if (
+    control.kind !== 'BAN' &&
+    control.kind !== 'SANCTION_BAN' &&
+    control.kind !== 'QUOTA' &&
+    control.kind !== 'EXPORT_CAP'
+  )
+    kernelInvalid('Invalid trade control kind');
+  if (control.direction !== 'IMPORT' && control.direction !== 'EXPORT')
+    kernelInvalid('Invalid trade control direction');
   if (
     control.direction !== request.direction ||
     control.commodityRef !== request.commodityRef
@@ -280,6 +292,8 @@ export function resolveTradeEligibility(input: {
   ref(request.importerCountryRef, 'importerCountryRef');
   ref(request.exporterCountryRef, 'exporterCountryRef');
   ref(request.commodityRef, 'commodityRef');
+  if (request.direction !== 'IMPORT' && request.direction !== 'EXPORT')
+    kernelInvalid('Invalid trade direction');
   if (request.importerCountryRef === request.exporterCountryRef)
     kernelInvalid('Trade eligibility requires different countries');
   const requested = physical(request.requestedQuantity, 'requestedQuantity');
@@ -341,6 +355,9 @@ export function resolveTradeEligibility(input: {
   const result = Object.freeze({
     foundationStatus: TRADE_LOGISTICS_FOUNDATION_STATUS,
     requestRef: request.requestRef,
+    importerCountryRef: request.importerCountryRef,
+    exporterCountryRef: request.exporterCountryRef,
+    commodityRef: request.commodityRef,
     decision,
     blockReason,
     effectiveTariffRate:
@@ -368,6 +385,10 @@ export function resolveTradeEligibility(input: {
         {
           outputRef: input.outputRef,
           payload: {
+            requestRef: request.requestRef,
+            importerCountryRef: request.importerCountryRef,
+            exporterCountryRef: request.exporterCountryRef,
+            commodityRef: request.commodityRef,
             decision,
             blockReason,
             effectiveTariffRate:
@@ -385,11 +406,13 @@ export function resolveTradeEligibility(input: {
 
 export interface CustomsDeclaration {
   readonly declarationRef: string;
+  readonly eligibilityRequestRef: string;
   readonly contractRef: string;
   readonly shipmentRef: string;
   readonly importerCountryRef: string;
   readonly exporterCountryRef: string;
   readonly commodityRef: string;
+  readonly declaredQuantity: ExactQuantity;
   readonly customsValue: ExactMoney;
   readonly transportCost: ExactMoney;
   readonly insuranceCost: ExactMoney;
@@ -449,6 +472,26 @@ export function assessCustomsTariff(input: {
     eligibility.effectiveTariffRate === null
   ) {
     kernelInvalid('Customs cannot assess a blocked trade eligibility result');
+  }
+  if (
+    declaration.eligibilityRequestRef !== eligibility.requestRef ||
+    declaration.importerCountryRef !== eligibility.importerCountryRef ||
+    declaration.exporterCountryRef !== eligibility.exporterCountryRef ||
+    declaration.commodityRef !== eligibility.commodityRef
+  ) {
+    kernelInvalid('Customs declaration must match its trade eligibility');
+  }
+  const declared = physical(declaration.declaredQuantity, 'declaredQuantity');
+  const permitted = physical(
+    eligibility.permittedQuantity,
+    'eligibility.permittedQuantity',
+  );
+  if (
+    declared.unit !== permitted.unit ||
+    declared.amount.isZero() ||
+    declared.amount.greaterThan(permitted.amount)
+  ) {
+    kernelInvalid('Customs quantity exceeds trade eligibility');
   }
   tick(declaration.declaredAt, 'declaration.declaredAt');
   const value = money(declaration.customsValue, 'customsValue');
