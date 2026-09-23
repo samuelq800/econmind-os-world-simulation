@@ -1047,7 +1047,8 @@ async function configureOwnershipGrantsAndRls(client, approval) {
        has_table_privilege($3, '${approval.disposable_namespace}.world_writer_lease', 'INSERT, UPDATE, DELETE') as reader_write
      from pg_namespace n
      join pg_class c on c.relnamespace = n.oid
-    where n.nspname = $4 and c.relname = any(array['world_head', 'world_writer_lease'])`,
+    where n.nspname = $4 and c.relname = any(array['world_head', 'world_writer_lease'])
+    group by n.nspowner`,
     [owner, worker, reader, approval.disposable_namespace],
   );
   assertRows(

@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -121,6 +124,30 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
       role: 'postgres',
       test_fingerprint: 'world-v2-v09-test-ci',
     });
+  });
+
+  it('groups the schema owner in the ownership and RLS aggregate query', async () => {
+    const source = await readFile(
+      fileURLToPath(
+        new URL(
+          '../../scripts/v09-staging-evidence-runner.mjs',
+          import.meta.url,
+        ),
+      ),
+      'utf8',
+    );
+    const queryStart = source.indexOf("'VERIFY_OWNERSHIP_GRANTS_RLS'");
+    const queryEnd = source.indexOf('    [owner, worker, reader', queryStart);
+    const ownershipQuery = source.slice(queryStart, queryEnd);
+
+    expect(queryStart).toBeGreaterThanOrEqual(0);
+    expect(queryEnd).toBeGreaterThan(queryStart);
+    expect(ownershipQuery).toContain(
+      'n.nspowner::regrole::text as schema_owner',
+    );
+    expect(ownershipQuery).toMatch(
+      /where n\.nspname = \$4 and c\.relname = any\(array\['world_head', 'world_writer_lease'\]\)\n\s+group by n\.nspowner/u,
+    );
   });
 
   it('revokes the migration owner database CREATE grant before any later disposable migration', async () => {
