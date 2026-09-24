@@ -131,6 +131,90 @@ async function post(
 }
 
 describe('local nonproduction authenticated World HTTP bridge', () => {
+  it('allows only an explicitly configured loopback page origin to preflight and call the bridge', async () => {
+    running = await startLocalNonproductionWorldHttpBridge({
+      bridge: createLocalNonproductionWorldHttpBridge({
+        allowedBrowserOrigin: 'http://127.0.0.1:4100',
+        environment: ENVIRONMENT,
+      }),
+    });
+
+    const preflight = await fetch(`${running.origin}/local/v1/world-read`, {
+      method: 'OPTIONS',
+      headers: {
+        origin: 'http://127.0.0.1:4100',
+        'access-control-request-method': 'POST',
+        'access-control-request-headers': 'authorization, content-type',
+      },
+    });
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get('access-control-allow-origin')).toBe(
+      'http://127.0.0.1:4100',
+    );
+    expect(preflight.headers.get('access-control-allow-methods')).toBe('POST');
+    expect(preflight.headers.get('access-control-allow-headers')).toBe(
+      'authorization, content-type',
+    );
+
+    const browserPost = await fetch(`${running.origin}/local/v1/world-read`, {
+      method: 'POST',
+      headers: {
+        origin: 'http://127.0.0.1:4100',
+        'content-type': 'application/json',
+      },
+      body: '{}',
+    });
+    expect(browserPost.status).toBe(503);
+    expect(browserPost.headers.get('access-control-allow-origin')).toBe(
+      'http://127.0.0.1:4100',
+    );
+    await expect(browserPost.json()).resolves.toMatchObject({
+      reason: 'SERVER_DEPENDENCIES_UNBOUND',
+    });
+  });
+
+  it('fails closed for unconfigured, different, or malformed browser origins', async () => {
+    running = await startLocalNonproductionWorldHttpBridge({
+      bridge: createLocalNonproductionWorldHttpBridge({
+        environment: ENVIRONMENT,
+      }),
+    });
+    const unconfigured = await fetch(`${running.origin}/local/v1/world-read`, {
+      method: 'POST',
+      headers: { origin: 'http://127.0.0.1:4100' },
+    });
+    expect(unconfigured.status).toBe(403);
+    expect(unconfigured.headers.get('access-control-allow-origin')).toBeNull();
+
+    await running.shutdown();
+    running = await startLocalNonproductionWorldHttpBridge({
+      bridge: createLocalNonproductionWorldHttpBridge({
+        allowedBrowserOrigin: 'http://127.0.0.1:4100',
+        environment: ENVIRONMENT,
+      }),
+    });
+    for (const origin of ['http://127.0.0.1:4101', 'http://evil.example']) {
+      const denied = await fetch(`${running.origin}/local/v1/world-read`, {
+        method: 'POST',
+        headers: { origin },
+      });
+      expect(denied.status).toBe(403);
+      expect(denied.headers.get('access-control-allow-origin')).toBeNull();
+      await expect(denied.json()).resolves.toMatchObject({
+        reason: 'BROWSER_ORIGIN_DENIED',
+      });
+    }
+    const deniedHeaders = await fetch(`${running.origin}/local/v1/world-read`, {
+      method: 'OPTIONS',
+      headers: {
+        origin: 'http://127.0.0.1:4100',
+        'access-control-request-method': 'POST',
+        'access-control-request-headers': 'authorization, x-unsafe-header',
+      },
+    });
+    expect(deniedHeaders.status).toBe(403);
+  });
+
   it('exposes no read or command behavior until server dependencies are bound', async () => {
     running = await startLocalNonproductionWorldHttpBridge({
       bridge: createLocalNonproductionWorldHttpBridge({
@@ -265,6 +349,20 @@ describe('local nonproduction authenticated World HTTP bridge', () => {
   });
 
   it('rejects production, Supabase-bearing and non-loopback bridge configuration', () => {
+    for (const allowedBrowserOrigin of [
+      'https://127.0.0.1:4100',
+      'http://evil.example:4100',
+      'http://127.0.0.1:4100/other',
+      'http://127.0.0.1:4100?x=1',
+      'http://127.0.0.1:80',
+    ]) {
+      expect(() =>
+        createLocalNonproductionWorldHttpBridge({
+          allowedBrowserOrigin,
+          environment: ENVIRONMENT,
+        }),
+      ).toThrow('allowedBrowserOrigin must be an exact loopback origin');
+    }
     expect(() =>
       createLocalNonproductionWorldHttpBridge({
         environment: { ECONMIND_ENV: 'production' },
