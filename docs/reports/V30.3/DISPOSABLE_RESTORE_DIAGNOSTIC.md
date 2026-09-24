@@ -22,6 +22,17 @@ not capacity targets or production/staging RPO/RTO evidence. Event/posting
 replay, Worker crash/fencing, real-world backup retention and shared-main-site
 impact were `NOT_RUN`.
 
+A second, single-purpose isolated workflow ran after adding a branch-push
+trigger: [Actions run 35968057913](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35968057913)
+at exact branch SHA `7c8a97fd34e1297540ca7ad6ba7ad99d2001039b` was
+`SUCCESS`. The disposable restore job again applied 16 migrations and matched
+the same pre-backup/restored snapshot hash while the later source hash
+differed. Its backup SHA was
+`07a80a009e9aca1c21f5e220570011ff93ed0aeb793820f6c8e338f1f4f630ab`;
+diagnostic RPO/RTO were 163/275 ms. This workflow did **not** run the
+repository-wide `pnpm check` and therefore does not change the separate
+failure below.
+
 The overall workflow run was **FAIL**, not PASS: its separate official
 `pnpm check` job failed one V29 Worker replay pinned-hash assertion
 (`tests/support/v29-worker-delivery-driver.test.ts:566`, expected local hash
