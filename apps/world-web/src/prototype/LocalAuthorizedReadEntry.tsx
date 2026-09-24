@@ -20,7 +20,7 @@ export function LocalAuthorizedReadEntry({
 }) {
   const controller = useMemo(
     () => createLocalAuthorizedReadController(config),
-    [config.bridgeOrigin, config.getAccessToken],
+    [config.bridgeOrigin, config.getAccessToken, config.lookupFinalReceipt],
   );
   const snapshot = useSyncExternalStore(
     controller.subscribe,
@@ -61,7 +61,8 @@ export function LocalAuthorizedReadEntry({
         : snapshot.phase === 'SUBMITTING'
           ? 'Sending once. No final result has returned yet.'
           : snapshot.phase === 'UNKNOWN'
-            ? 'Outcome unknown. Look up the original Command ID before another move.'
+            ? (snapshot.reason ??
+              'Outcome unknown. Look up the original Command ID before another move.')
             : read.kind === 'CURRENT'
               ? `Current derived projection · World v${read.worldVersion}`
               : (snapshot.reason ?? read.reason);
@@ -95,6 +96,17 @@ export function LocalAuthorizedReadEntry({
           {snapshot.connected ? (
             <button type="button" onClick={() => controller.disconnect()}>
               Disconnect
+            </button>
+          ) : null}
+          {controller.canLookupOriginalReceipt() ? (
+            <button
+              type="button"
+              disabled={snapshot.lookupPending === true}
+              onClick={() => void controller.lookupOriginalFinalReceipt()}
+            >
+              {snapshot.lookupPending
+                ? 'Checking receipt…'
+                : 'Check final receipt'}
             </button>
           ) : null}
         </div>

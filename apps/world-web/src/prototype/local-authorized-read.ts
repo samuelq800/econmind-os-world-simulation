@@ -10,6 +10,10 @@ import {
   sameAuthorizedIdentity,
   type AuthorizedUiInjection,
 } from './authorized-read-adapter.js';
+import {
+  parseFinalReceiptLookupResponse,
+  type FinalReceiptLookupRequest,
+} from './final-receipt-lookup.js';
 
 export interface LocalAuthorizedReadConfig {
   /** Supplied by a trusted host; never read from a URL or browser storage here. */
@@ -21,6 +25,10 @@ export interface LocalAuthorizedReadConfig {
   readonly narrowTransferDraft?: NarrowTransferDraft | null;
   /** Issued by the trusted host with the draft; never derived from fixture or browser inputs. */
   readonly narrowTransferReceiptBinding?: TrustedNarrowTransferReceiptBinding | null;
+  /** Host-owned E transport; this UI only prepares the exact read request. */
+  readonly lookupFinalReceipt?: (
+    request: FinalReceiptLookupRequest,
+  ) => Promise<unknown>;
   readonly command?: AuthorizedUiInjection['command'];
 }
 
@@ -62,6 +70,7 @@ export interface LocalReadSnapshot {
   readonly pendingCommandId: string | null;
   readonly lastSubmittedCommandId: string | null;
   readonly reason: string | null;
+  readonly lookupPending?: boolean;
 }
 
 type ReadPort = Pick<
@@ -84,7 +93,7 @@ type ClientFactory = (
 export function createLocalAuthorizedReadController(
   config: Pick<
     LocalAuthorizedReadConfig,
-    'currentIdentity' | 'getAccessToken' | 'bridgeOrigin'
+    'currentIdentity' | 'getAccessToken' | 'bridgeOrigin' | 'lookupFinalReceipt'
   >,
   clientFactory: ClientFactory = createAuthorizedWorldBrowserClient,
   requestId: () => string = () => crypto.randomUUID(),
@@ -94,6 +103,7 @@ export function createLocalAuthorizedReadController(
   let client: ReadPort | null = null;
   let lastSubmittedCommandId: string | null = null;
   let submittedBinding: TrustedNarrowTransferReceiptBinding | null = null;
+  let lookupPending = false;
   const submittedCommandIds = new Set<string>();
   let snapshot: LocalReadSnapshot = {
     phase: 'IDLE',
@@ -119,6 +129,7 @@ export function createLocalAuthorizedReadController(
 
   const invalidate = (reason: string) => {
     generation += 1;
+    lookupPending = false;
     submittedBinding = null;
     clearClient();
     publish({
@@ -133,8 +144,14 @@ export function createLocalAuthorizedReadController(
     });
   };
 
-  return {
+  const controller = {
     getSnapshot: () => snapshot,
+    canLookupOriginalReceipt: () =>
+      snapshot.phase === 'UNKNOWN' &&
+      snapshot.connected &&
+      !!identity &&
+      !!submittedBinding &&
+      !!config.lookupFinalReceipt,
     wasSubmitted: (commandId: string) => submittedCommandIds.has(commandId),
     subscribe: (listener: () => void) => {
       listeners.add(listener);
@@ -146,6 +163,7 @@ export function createLocalAuthorizedReadController(
       identity = next ? { ...next } : null;
       lastSubmittedCommandId = null;
       submittedBinding = null;
+      lookupPending = false;
       clearClient();
       generation += 1;
       publish({
@@ -164,6 +182,7 @@ export function createLocalAuthorizedReadController(
     disconnect() {
       generation += 1;
       submittedBinding = null;
+      lookupPending = false;
       clearClient();
       publish({
         phase: 'IDLE',
@@ -204,6 +223,8 @@ export function createLocalAuthorizedReadController(
         )
       )
         return false;
+      generation += 1;
+      lookupPending = false;
       publish({
         phase: 'FINAL_RECEIPT',
         connected: snapshot.connected,
@@ -215,6 +236,67 @@ export function createLocalAuthorizedReadController(
         reason: 'Final receipt supplied. Refresh the projection.',
       });
       return true;
+    },
+    async lookupOriginalFinalReceipt() {
+      if (
+        snapshot.phase !== 'UNKNOWN' ||
+        lookupPending ||
+        !snapshot.connected ||
+        !identity ||
+        !submittedBinding ||
+        !config.lookupFinalReceipt
+      )
+        return false;
+      const originalIdentity = { ...identity };
+      const originalBinding = { ...submittedBinding };
+      const activeGeneration = generation;
+      const id = requestId();
+      const request: FinalReceiptLookupRequest = {
+        schemaVersion: 'world-final-receipt-read-v1',
+        requestId: id,
+        operation: 'READ_FINAL_NARROW_TRANSFER_RECEIPT',
+        payload: {
+          worldId: originalIdentity.worldId,
+          commandId: originalBinding.commandId,
+          idempotencyKey: originalBinding.idempotencyKey,
+        },
+      };
+      lookupPending = true;
+      publish({
+        ...snapshot,
+        lookupPending: true,
+        reason: 'Checking the original final receipt…',
+      });
+      let response: unknown;
+      try {
+        response = await config.lookupFinalReceipt(request);
+      } catch {
+        response = null;
+      }
+      if (
+        activeGeneration !== generation ||
+        !snapshot.connected ||
+        !sameAuthorizedIdentity(identity, originalIdentity)
+      )
+        return false;
+      lookupPending = false;
+      const receipt = parseFinalReceiptLookupResponse(response, id);
+      if (
+        receipt &&
+        controller.reconcileFinalReceipt({
+          identity: originalIdentity,
+          commandId: originalBinding.commandId,
+          result: { status: 'FINAL_RECEIPT', receipt },
+        })
+      )
+        return true;
+      publish({
+        ...snapshot,
+        lookupPending: false,
+        reason:
+          'No matching final receipt. Keep the original Command ID; do not resend.',
+      });
+      return false;
     },
     recordUnknown(command: NonNullable<AuthorizedUiInjection['command']>) {
       if (
@@ -232,6 +314,7 @@ export function createLocalAuthorizedReadController(
       }
       submittedCommandIds.add(command.commandId);
       generation += 1;
+      lookupPending = false;
       clearClient();
       publish({
         phase: 'UNKNOWN',
@@ -417,4 +500,5 @@ export function createLocalAuthorizedReadController(
       });
     },
   };
+  return controller;
 }
