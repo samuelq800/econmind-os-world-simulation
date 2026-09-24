@@ -1,0 +1,113 @@
+{
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "preparationStatus": "PREPARATION_ONLY",
+  "riskClass": "P0",
+  "branch": "codex/v29-existing-data-closure",
+  "mainBaseSha": "0fa8da7e74488f4554185afb68c19b4933d72586",
+  "planSha": "fe3dd751a7eaed2018cc8f5f3bcdf0830aa237af",
+  "codeSha": "07a523246cc008a16ec7a0b6eb2b5c4b79ca632b",
+  "codeTree": "c983c84db332a19ee5e054b81bef6db37e0e6cad",
+  "existingDataSource": {
+    "branch": "codex/world-data-calibration",
+    "commitSha": "abbcdc5c86279227627d30d13952fdadda96737b",
+    "status": "PILOT_NON_AUTHORITATIVE_PARTIAL",
+    "artifactHashVerification": "PASS_7_OF_7"
+  },
+  "generationAuthorized": false,
+  "openingSeedAuthorized": false,
+  "observedCoverage": {
+    "targetCountryCount": "70",
+    "actualV27ProvenanceCountryCount": "UNAVAILABLE",
+    "actualV27CalibrationCountryCount": "UNAVAILABLE",
+    "empiricalEntityCount": "10",
+    "variableCount": "10",
+    "periodCount": "3",
+    "observationCount": "247",
+    "distinctObservationCount": "246",
+    "explicitMissingCount": "6",
+    "exactDuplicateCount": "1",
+    "featureCandidateCount": "19",
+    "admittedFeatureCount": "0",
+    "sourceSnapshotCount": "7",
+    "closureEvidenceBindingCount": "0"
+  },
+  "providerGaps": ["WTO_TIMESERIES_V1:WTO_API_KEY_MISSING"],
+  "openGateCount": 7,
+  "checks": [
+    {
+      "name": "immutable source artifact SHA-256 verification",
+      "status": "PASS",
+      "detail": "7 artifacts read from abbcdc5 Git objects; all hashes match inventory"
+    },
+    {
+      "name": "focused existing-data closure tests",
+      "status": "PASS",
+      "detail": "1 file, 7 tests"
+    },
+    {
+      "name": "combined V27 and existing-data closure tests",
+      "status": "PASS",
+      "detail": "4 files, 40 tests"
+    },
+    {
+      "name": "targeted ESLint",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted Prettier",
+      "status": "PASS"
+    },
+    {
+      "name": "Core typecheck",
+      "status": "PASS"
+    },
+    {
+      "name": "Core build",
+      "status": "PASS"
+    },
+    {
+      "name": "repository boundary scan",
+      "status": "PASS",
+      "detail": "155 files scanned"
+    },
+    {
+      "name": "authoritative-pattern scan",
+      "status": "PASS",
+      "detail": "72 Core files and 150 total files scanned"
+    },
+    {
+      "name": "safe-local environment",
+      "status": "PASS",
+      "detail": "databaseConfigured=false; linkedSupabaseProject=NOT_LINKED; databaseMutationAllowed=false"
+    },
+    {
+      "name": "foundation policy",
+      "status": "PASS"
+    },
+    {
+      "name": "repository secret scan",
+      "status": "PASS",
+      "detail": "975 files scanned"
+    },
+    {
+      "name": "git diff check",
+      "status": "PASS"
+    }
+  ],
+  "notRun": [
+    "actual 70-country V27.1 provenance input",
+    "actual 70-country V27.2 calibration input",
+    "new provider retrieval or WTO authentication",
+    "missingness or imputation policy selection",
+    "archetype method count labels or feature selection",
+    "fictional-country mapping",
+    "IPF RAS or final trade reconciliation",
+    "economic plausibility or source-owner approval",
+    "OpeningSeed generation or reconciliation",
+    "worker API UI database Supabase or production integration",
+    "V29 long-run replay",
+    "full repository test suite",
+    "independent P0 review",
+    "merge Gate migration release or production operation"
+  ]
+}
