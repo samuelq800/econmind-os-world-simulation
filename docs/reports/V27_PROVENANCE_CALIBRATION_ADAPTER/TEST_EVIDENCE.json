@@ -5,8 +5,9 @@
   "mainAncestorSha": "4d38a9f6ef4191edd84ded58a2c90b130267b69f",
   "compositionCommit": "18f622b",
   "planSha": "77cbb820a840a68fe05f6cca2c8a36b33c63e43e",
-  "codeSha": "652138d2179ec1102bb23efe8b3419de7af9b8de",
-  "codeTree": "1ec5c83673314c379ce6dfe642abbf501cf27507",
+  "supersededCodeSha": "652138d2179ec1102bb23efe8b3419de7af9b8de",
+  "codeSha": "fea7b979150aa5a8f7cb12b4c05fde879cbebc6f",
+  "codeTree": "94016c4ed3f7dc4c417ae7674c25a1a777294801",
   "generationAuthorized": false,
   "worldBinding": "UNAVAILABLE",
   "missingWorldBindingFields": [
@@ -17,7 +18,7 @@
     {
       "name": "adapter plus existing V27.1 and V27.2 tests",
       "status": "PASS",
-      "detail": "3 files, 31 tests"
+      "detail": "3 files, 33 tests; exact path identity, FACILITY_99 non-linkage, and duplicate-label regression included"
     },
     {
       "name": "targeted ESLint",
@@ -46,7 +47,7 @@
     {
       "name": "local safe-environment check",
       "status": "PASS",
-      "detail": "databaseConfigured=false; linkedSupabaseProject=NOT_LINKED; databaseMutationAllowed=false"
+      "detail": "Initial invocation without required ECONMIND_ENV returned MISSING; valid rerun used ECONMIND_ENV=local and passed with databaseConfigured=false, linkedSupabaseProject=NOT_LINKED, databaseMutationAllowed=false"
     },
     {
       "name": "foundation policy",
@@ -55,11 +56,12 @@
     {
       "name": "repository secret scan",
       "status": "PASS",
-      "detail": "955 files scanned"
+      "detail": "957 files scanned"
     },
     {
-      "name": "composition-to-code diff check",
-      "status": "PASS"
+      "name": "prior-candidate-to-remediated-code diff check",
+      "status": "PASS",
+      "detail": "Only adapter and focused adapter test changed from cf728cc2 to fea7b979"
     }
   ],
   "notRun": [
@@ -71,7 +73,7 @@
     "ledger or database writes",
     "runtime integration",
     "separate Season mechanics",
-    "independent P0 review",
+    "independent P0 rereview after remediation",
     "merge or Gate acceptance"
   ]
 }
