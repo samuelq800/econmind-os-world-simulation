@@ -14,6 +14,7 @@ import {
   CommandLifecycleStatus,
 } from '../../apps/world-web/src/prototype/CommandLifecycleStatus.js';
 import { createLocalAuthorizedReadController } from '../../apps/world-web/src/prototype/local-authorized-read.js';
+import type { FinalReceiptLookupRequest } from '../../apps/world-web/src/prototype/final-receipt-lookup.js';
 
 const identity: AuthorizedBrowserIdentity = {
   worldId: 'WORLD_TEST',
@@ -105,6 +106,7 @@ function deferred<T>() {
 function controllerWith(
   readProjection: () => Promise<BrowserReadResult>,
   submitNarrowTransfer: () => Promise<BrowserCommandResult>,
+  lookupFinalReceipt?: (request: FinalReceiptLookupRequest) => Promise<unknown>,
 ) {
   const submit = vi.fn(submitNarrowTransfer);
   const controller = createLocalAuthorizedReadController(
@@ -112,6 +114,7 @@ function controllerWith(
       currentIdentity: identity,
       getAccessToken: async () => 'token',
       bridgeOrigin: 'http://127.0.0.1:4102',
+      ...(lookupFinalReceipt ? { lookupFinalReceipt } : {}),
     },
     () => ({ readProjection, submitNarrowTransfer: submit }),
     () => '123e4567-e89b-42d3-a456-426614174000',
@@ -438,5 +441,102 @@ describe('authorized browser Command → receipt → projection preparation', ()
     await controller.submitNarrowTransfer(draft, receiptBinding);
     expect(controller.getSnapshot().phase).toBe('UNKNOWN');
     expect(controller.getSnapshot().read).toBeNull();
+  });
+
+  it('issues only the original E lookup triple and accepts only its matching durable receipt', async () => {
+    const lookup = vi.fn(async (request: FinalReceiptLookupRequest) => ({
+      schemaVersion: 'world-final-receipt-read-v1',
+      requestId: request.requestId,
+      ok: true,
+      receipt: finalReceipt.receipt,
+    }));
+    const { controller } = controllerWith(
+      async () => readResult('42'),
+      async () => ({ status: 'UNKNOWN' }),
+      lookup,
+    );
+    await controller.readProjection();
+    await controller.submitNarrowTransfer(draft, receiptBinding);
+    expect(controller.canLookupOriginalReceipt()).toBe(true);
+    expect(await controller.lookupOriginalFinalReceipt()).toBe(true);
+    expect(lookup).toHaveBeenCalledWith({
+      schemaVersion: 'world-final-receipt-read-v1',
+      requestId: '123e4567-e89b-42d3-a456-426614174000',
+      operation: 'READ_FINAL_NARROW_TRANSFER_RECEIPT',
+      payload: {
+        worldId: identity.worldId,
+        commandId: draft.commandId,
+        idempotencyKey: draft.idempotencyKey,
+      },
+    });
+    expect(controller.getSnapshot().phase).toBe('FINAL_RECEIPT');
+    expect(controller.getSnapshot().read).toBeNull();
+  });
+
+  it('keeps UNKNOWN on NOT_FOUND or a mismatched key/fingerprint from lookup', async () => {
+    let response: unknown = {
+      schemaVersion: 'world-final-receipt-read-v1',
+      requestId: '123e4567-e89b-42d3-a456-426614174000',
+      ok: false,
+      error: { code: 'NOT_FOUND', message: 'Not found', retryable: false },
+    };
+    const { controller } = controllerWith(
+      async () => readResult('42'),
+      async () => ({ status: 'UNKNOWN' }),
+      async () => response,
+    );
+    await controller.readProjection();
+    await controller.submitNarrowTransfer(draft, receiptBinding);
+    expect(await controller.lookupOriginalFinalReceipt()).toBe(false);
+    response = {
+      schemaVersion: 'world-final-receipt-read-v1',
+      requestId: '00000000-0000-4000-8000-000000000000',
+      ok: true,
+      receipt: finalReceipt.receipt,
+    };
+    expect(await controller.lookupOriginalFinalReceipt()).toBe(false);
+    response = {
+      schemaVersion: 'world-final-receipt-read-v1',
+      requestId: '123e4567-e89b-42d3-a456-426614174000',
+      ok: true,
+      receipt: { ...finalReceipt.receipt, idempotencyKey: 'OTHER_KEY' },
+    };
+    expect(await controller.lookupOriginalFinalReceipt()).toBe(false);
+    response = {
+      schemaVersion: 'world-final-receipt-read-v1',
+      requestId: '123e4567-e89b-42d3-a456-426614174000',
+      ok: true,
+      receipt: {
+        ...finalReceipt.receipt,
+        commandFingerprint: `sha256:${'b'.repeat(64)}`,
+      },
+    };
+    expect(await controller.lookupOriginalFinalReceipt()).toBe(false);
+    expect(controller.getSnapshot().phase).toBe('UNKNOWN');
+    expect(controller.getSnapshot().read).toBeNull();
+  });
+
+  it('ignores a late lookup after Office identity changes', async () => {
+    const pending = deferred<unknown>();
+    const { controller } = controllerWith(
+      async () => readResult('42'),
+      async () => ({ status: 'UNKNOWN' }),
+      () => pending.promise,
+    );
+    await controller.readProjection();
+    await controller.submitNarrowTransfer(draft, receiptBinding);
+    const lookup = controller.lookupOriginalFinalReceipt();
+    controller.setIdentity({
+      ...identity,
+      authorizationRevision: 'revision-2',
+    });
+    pending.resolve({
+      schemaVersion: 'world-final-receipt-read-v1',
+      requestId: '123e4567-e89b-42d3-a456-426614174000',
+      ok: true,
+      receipt: finalReceipt.receipt,
+    });
+    expect(await lookup).toBe(false);
+    expect(controller.getSnapshot().phase).toBe('UNAVAILABLE');
   });
 });
