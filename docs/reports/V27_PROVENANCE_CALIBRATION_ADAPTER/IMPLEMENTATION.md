@@ -9,8 +9,11 @@
   `4d38a9f6ef4191edd84ded58a2c90b130267b69f`.
 - Composition merge: `18f622b`.
 - Prior plan commit: `77cbb820a840a68fe05f6cca2c8a36b33c63e43e`.
-- Frozen code/test commit: `652138d2179ec1102bb23efe8b3419de7af9b8de`.
-- Frozen code/test tree: `1ec5c83673314c379ce6dfe642abbf501cf27507`.
+- Superseded code/test commit: `652138d2179ec1102bb23efe8b3419de7af9b8de`.
+- Remediated frozen code/test commit:
+  `fea7b979150aa5a8f7cb12b4c05fde879cbebc6f`.
+- Remediated frozen code/test tree:
+  `94016c4ed3f7dc4c417ae7674c25a1a777294801`.
 - Risk/status: P0 `PREPARATION_ONLY`; no verification, merge authority or
   Gate acceptance is claimed.
 
@@ -24,8 +27,12 @@ the existing strict closure validator, and rejects forged parser results.
 It compares exact country identity sets and shared source reference, locator,
 version, digest and evidence classification. V27.2 values are flattened to
 stable structural paths without synthesizing a `metricRef`. A V27.1 value is
-linked only when domain, country, source, unit, final amount and assumption
-semantics select exactly one V27.2 quantity. The link preserves V27.1
+linked only when its explicitly supported `metricRef` plus `subjectRef`
+determine the exact V27.2 structural path and country, source, unit, final
+amount and assumption semantics also match. Domain compatibility or an equal
+numeric tuple is never treated as metric identity. Unsupported or absent
+identity bindings report `CALIBRATION_METRIC_IDENTITY_MISSING`, and each
+verified V27.2 path may be claimed at most once. The link preserves V27.1
 domain/metric/subject/counterparty, source metadata, provenance amount,
 original calibration amount, final amount and every exact
 `before + delta = after` change. Every change must retain the same source and
@@ -53,9 +60,10 @@ created. The existing V27.1 parser and V27.2 validator were not modified.
 
 ## Verification against frozen code
 
-- Adapter plus existing V27.1 and V27.2 focused tests: **PASS**, 3 files / 31
+- Adapter plus existing V27.1 and V27.2 focused tests: **PASS**, 3 files / 33
   tests. Coverage includes one exact preserved causal chain, source digest
-  mismatch, missing metric identity ambiguity, missing derivation field,
+  mismatch, exact sibling-path discrimination, `FACILITY_99` non-linkage,
+  rejection of a second unverified provenance label, missing derivation field,
   country-set disagreement, incomplete calibration, forged parser output,
   deterministic order, one-World binding gap and no authorization.
 - Targeted ESLint and Prettier: **PASS**.
@@ -63,14 +71,17 @@ created. The existing V27.1 parser and V27.2 validator were not modified.
 - Repository boundary and authoritative-pattern scans: **PASS**.
 - Local safe-environment, foundation policy and repository secret scans:
   **PASS**. No database was configured, Supabase was not linked, mutation was
-  disabled and 955 files were scanned for secrets.
-- Composition-to-code diff check: **PASS**. Only the new adapter, focused test
-  and plan changed after the V27.1/V27.2 composition commit.
+  disabled and 957 files were scanned for secrets. An initial environment
+  invocation without the required `ECONMIND_ENV` returned `MISSING`; the valid
+  rerun explicitly used `ECONMIND_ENV=local` and passed.
+- Prior-candidate-to-remediated-code diff check: **PASS**. Only the adapter and
+  focused adapter test changed from evidence tip `cf728cc2` to frozen code
+  commit `fea7b979`.
 
 ## Explicitly not run
 
 Schema changes to add world/configuration/metric/derivation bindings, real
 source retrieval or digest verification, actual 70-country data linkage,
 economic plausibility review, OpeningSeed generation, ledger/database writes,
-runtime integration, separate Season mechanics, independent P0 review, merge
-approval and Gate acceptance are `NOT_RUN`.
+runtime integration, separate Season mechanics, independent P0 rereview after
+remediation, merge approval and Gate acceptance are `NOT_RUN`.
