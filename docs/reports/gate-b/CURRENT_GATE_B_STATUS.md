@@ -104,6 +104,12 @@ row equality before backup and after restore. It does not include real
 Event/Posting replay, Worker crash/fencing, dedicated staging, or Gate B
 approval. See `docs/reports/V30.3/P2_DISPOSABLE_RESTORE_ACCEPTANCE.md`.
 
+The V29 native-PG Worker two-delivery test is likewise preparation evidence:
+two Deliver commands persist distinct numeric postings and survive one lost
+acknowledgement/retry on disposable PG16. Its Reserve/Ship/opening state is
+still fixture-supplied, not a full live command lifecycle or long-run test.
+See `docs/reports/V29.3/P2_NATIVE_POSTGRES_WORKER_ACCEPTANCE.md`.
+
 ## Documentation and governance drift
 
 `status/progress.json` remains the formal R2 ledger at V09.1 `PLANNED` and
