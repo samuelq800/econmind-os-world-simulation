@@ -19,7 +19,13 @@ JWT, disposable PostgreSQL 16 and least-privilege synthetic API role. E's
 passed the native vertical test at the exact source SHA. On the integrated
 commit, focused local tests passed 2/2 with the native test correctly skipped
 without a disposable URL; world-api build, targeted ESLint and Prettier passed.
-A merged-main native CI run is separate evidence.
+The merged-main
+[run 35975404237](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35975404237)
+also passed the native PostgreSQL bridge job at exact code SHA
+`ffdfa02adc0de87edf92a61d6fa8e8119070eaa7`. The same SHA's separate
+[run 35975408470](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35975408470)
+passed the unmodified official `pnpm check` and disposable V09/V10 jobs.
+These are code/CI evidence only, not a live command or Gate B review.
 
 Buyer Finance approval reading and the Worker's durable command port remain
 fixtures. Production JWT verification/key management, deployed API role

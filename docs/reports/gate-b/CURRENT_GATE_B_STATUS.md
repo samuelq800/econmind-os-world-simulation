@@ -82,6 +82,13 @@ an independent review, or permission to use production Supabase.
   passed native PostgreSQL 16 synthetic-role/grant/RLS negatives. These
   checks follow the reviewed shared disposable-target guard fix; they remain
   code/CI evidence, not dedicated staging, deployed roles or Gate B approval.
+- On the still later merged-main code SHA
+  `ffdfa02adc0de87edf92a61d6fa8e8119070eaa7`,
+  [run 35975408470](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35975408470)
+  passed both official `pnpm check` and disposable V09/V10 PostgreSQL; the
+  separate [run 35975404237](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35975404237)
+  passed the local authenticated bridge's native PostgreSQL job. The later
+  documentation-only commits do not turn these runs into Gate B approval.
 
 ## Still required for Gate B
 
@@ -91,7 +98,7 @@ an independent review, or permission to use production Supabase.
 | Dedicated isolated staging connection-loss/TLS recovery                     | Historical `FAIL`, no valid replacement     | Use an approved dedicated non-production target or record an explicit owner decision on an alternative; disposable CI is not TLS equivalence.   |
 | Non-production RLS/grant negative vectors                                   | `PARTIAL`: disposable PG16 synthetic roles  | Preserve the fixed candidate run; verify real deployment roles and trusted JWT-to-GUC claims on approved non-production staging.                |
 | Two-country/two-Office browser command, receipt, projection and refresh E2E | `NOT_RUN`                                   | Finish the real authenticated API/worker/browser route; the default page is still fixture-backed.                                               |
-| Candidate-wide `pnpm check` and independent Gate B review                   | `PASS` at `21d43ae`; final review `NOT_RUN` | The code candidate is green; after external evidence, freeze a final tip and give its exact SHA, failures and boundaries to independent review. |
+| Candidate-wide `pnpm check` and independent Gate B review                   | `PASS` at `ffdfa02`; final review `NOT_RUN` | The code candidate is green; after external evidence, freeze a final tip and give its exact SHA, failures and boundaries to independent review. |
 
 Do not mark Gate B passed because a diagnostic becomes more precise, because
 a disposable-only run turns green, or because a preparation branch was
