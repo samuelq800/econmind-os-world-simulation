@@ -21,15 +21,19 @@ an independent review, or permission to use production Supabase.
   connection-loss and acknowledgement/durable-marker assertions passing,
   then `CLEANUP_MARKED_BOUNDARY=FAIL`, `cleanup.status=CLEANUP_INCOMPLETE`,
   overall `FAIL_CLOSED`; receipt recovery and dedicated staging/TLS were not
-  run in that attempt. The new redacted `cleanup.diagnostic` checkpoint code
-  was merged afterward and has not yet been exercised in a new PostgreSQL
-  evidence run at this snapshot.
+  run in that attempt. The redacted-checkpoint run
+  [35943102063](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35943102063)
+  at exact main SHA `9c74fb2ac055c3c9134267ea372aeeca6a932c8f` again ended
+  `FAIL_CLOSED`. Its durable JSON identifies the first cleanup failure as
+  `CLEANUP_ASSERT_NO_EXTERNAL_DEPENDENTS`, `error_kind=ASSERTION`, with no SQL
+  error code. A separate read-only disposable dependency-class summary is
+  being prepared; no cleanup invariant has been relaxed.
 
 ## Still required for Gate B
 
 | Evidence                                                                    | Current classification                  | Next action                                                                                                                                   |
 | --------------------------------------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Disposable cleanup and no-residue fault evidence on one frozen candidate    | `FAIL` on the last run                  | Use the short-lived PostgreSQL diagnostic workflow; inspect its redacted checkpoint, make one narrow fix, then rerun against a fixed SHA.     |
+| Disposable cleanup and no-residue fault evidence on one frozen candidate    | `FAIL` on the last run                  | Identify the external dependency class in disposable CI, make one narrow fix if justified, then rerun against a fixed SHA.                    |
 | Dedicated isolated staging connection-loss/TLS recovery                     | Historical `FAIL`, no valid replacement | Use an approved dedicated non-production target or record an explicit owner decision on an alternative; disposable CI is not TLS equivalence. |
 | Non-production RLS/grant negative vectors                                   | `NOT_RUN` as Gate B evidence            | Execute with real scoped roles and immutable evidence on a non-production target.                                                             |
 | Two-country/two-Office browser command, receipt, projection and refresh E2E | `NOT_RUN`                               | Finish the real authenticated API/worker/browser route; the default page is still fixture-backed.                                             |

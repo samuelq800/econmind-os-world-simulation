@@ -49,13 +49,22 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm migration:validate
       - name: Capture disposable fault evidence
+        id: evidence
         env:
           V09_DISPOSABLE_EVIDENCE_OUTPUT: ${{ runner.temp }}/v09-disposable-evidence.json
         run: pnpm test:v09:disposable-evidence
+      - name: Summarize external dependency classes after failure
+        if: ${{ always() && steps.evidence.outcome == 'failure' }}
+        env:
+          V09_DISPOSABLE_EVIDENCE_OUTPUT: ${{ runner.temp }}/v09-disposable-evidence.json
+          V09_DEPENDENCY_SUMMARY_OUTPUT: ${{ runner.temp }}/v09-dependency-summary.json
+        run: node scripts/v09-disposable-dependency-summary.mjs
       - name: Upload durable redacted JSON
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: v09-disposable-diagnostic-${{ github.sha }}
-          path: ${{ runner.temp }}/v09-disposable-evidence.json
+          path: |
+            ${{ runner.temp }}/v09-disposable-evidence.json
+            ${{ runner.temp }}/v09-dependency-summary.json
           if-no-files-found: error
