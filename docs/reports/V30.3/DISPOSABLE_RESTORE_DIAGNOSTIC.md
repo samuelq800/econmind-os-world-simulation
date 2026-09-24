@@ -33,7 +33,18 @@ diagnostic RPO/RTO were 163/275 ms. This workflow did **not** run the
 repository-wide `pnpm check` and therefore does not change the separate
 failure below.
 
-The overall workflow run was **FAIL**, not PASS: its separate official
+After strengthening the comparison from selected columns to complete sorted
+World-head and immutable Command-submission rows, the branch-push
+[Actions run 35968646448](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35968646448)
+was `SUCCESS` at exact SHA `9bc9c9cd32ca4a48515c97e5c14a86b9673d1be8`.
+The full-row pre-backup and restored snapshot SHA-256 both equalled
+`55097844361254b28957790e2c15a2254e5a4f6c0163bf1b1e06b4852af751af`;
+the later source hash was different. The custom-format backup SHA-256 was
+`fc3efa3475059ff1c7191c10d61649466915c01f7527d1a7f482af3672e3e5ec`.
+Diagnostic RPO/RTO were 142/249 ms. It still did not replay an Event or
+Posting or establish a production capacity target.
+
+The first combined workflow run `35965419504` was **FAIL**, not PASS: its separate official
 `pnpm check` job failed one V29 Worker replay pinned-hash assertion
 (`tests/support/v29-worker-delivery-driver.test.ts:566`, expected local hash
 `44214d63…`, received Linux hash `d43d7e1f…`). The V09/V10 disposable
@@ -42,3 +53,9 @@ waived or silently relabeled. This branch is not merged to main. The new
 standalone workflow is branch-only and cannot be manually dispatched until
 registered on the default branch; the existing registered V09 workflow was
 extended **on this isolated branch only** to obtain the diagnostic run.
+The cross-timezone V29 pinned-hash defect was subsequently fixed on main,
+and the unmodified official check plus disposable V09/V10 jobs both passed on
+main SHA `2b086a2` in
+[run 35968394633](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35968394633).
+That green run is a different SHA from these V30 restore probes and does not
+itself validate V30.3.
