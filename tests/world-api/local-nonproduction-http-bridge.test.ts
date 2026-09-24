@@ -39,6 +39,7 @@ function commandRequest(
       officeId: 'TRADE',
       commandId: 'COMMAND_NARROW_TRANSFER_1',
       idempotencyKey: 'IDEMPOTENCY_NARROW_TRANSFER_1',
+      expectedWorldVersion: '0',
       proposalRef: 'PROPOSAL_NARROW_TRANSFER_1',
       buyerCountryId: 'COUNTRY_BUYER',
       buyerFinanceApprovalRef:
@@ -51,6 +52,8 @@ function commandHandler(input: {
   readonly approval: 'APPROVED' | 'MISSING';
   readonly countryId?: string;
   readonly receiptCalls: { value: number };
+  readonly receivedWorldVersions?: string[];
+  readonly receiptWorldVersionAfter?: string;
 }) {
   return createAuthenticatedNarrowTransferCommandHandler({
     approvalReader: {
@@ -74,6 +77,9 @@ function commandHandler(input: {
     receiptPort: {
       async acceptOrRead(request) {
         input.receiptCalls.value += 1;
+        input.receivedWorldVersions?.push(
+          request.request.payload.expectedWorldVersion,
+        );
         return {
           source: 'DURABLE_FINAL_COMMAND_RECEIPT' as const,
           worldId: request.request.payload.worldId,
@@ -82,7 +88,7 @@ function commandHandler(input: {
           commandFingerprint: `sha256:${'a'.repeat(64)}`,
           outcome: 'COMMITTED' as const,
           reasonCode: null,
-          worldVersionAfter: '1',
+          worldVersionAfter: input.receiptWorldVersionAfter ?? '1',
           eventIds: ['EVENT_NARROW_TRANSFER_1'],
           recordedAtReal: '2026-09-23T00:00:00.000Z',
         };
@@ -319,6 +325,73 @@ describe('local nonproduction authenticated World HTTP bridge', () => {
     );
     expect(missingBuyerFinance.status).toBe(403);
     expect(receiptCalls.value).toBe(0);
+  });
+
+  it('requires a canonical WorldVersion fence in the v2 command wire and passes it to the durable port', async () => {
+    const receiptCalls = { value: 0 };
+    const receivedWorldVersions: string[] = [];
+    running = await startLocalNonproductionWorldHttpBridge({
+      bridge: createLocalNonproductionWorldHttpBridge({
+        commandHandler: commandHandler({
+          approval: 'APPROVED',
+          receiptCalls,
+          receivedWorldVersions,
+        }),
+        environment: ENVIRONMENT,
+      }),
+    });
+    const valid = await post(
+      '/local/v1/narrow-transfer-command',
+      commandRequest(),
+    );
+    expect(valid.status).toBe(200);
+    expect(receivedWorldVersions).toEqual(['0']);
+
+    const baseline = commandRequest();
+    for (const expectedWorldVersion of [
+      undefined,
+      '00',
+      '-1',
+      '1.0',
+      '9223372036854775808',
+    ]) {
+      const payload = { ...baseline.payload } as Record<string, unknown>;
+      if (expectedWorldVersion === undefined)
+        delete payload.expectedWorldVersion;
+      else payload.expectedWorldVersion = expectedWorldVersion;
+      const rejected = await post('/local/v1/narrow-transfer-command', {
+        ...baseline,
+        payload,
+      });
+      expect(rejected.status).toBe(400);
+      await expect(rejected.json()).resolves.toMatchObject({
+        error: { code: 'PROTOCOL_ERROR' },
+        ok: false,
+      });
+    }
+    expect(receiptCalls.value).toBe(1);
+  });
+
+  it('refuses to present a committed receipt whose version does not follow the requested fence', async () => {
+    running = await startLocalNonproductionWorldHttpBridge({
+      bridge: createLocalNonproductionWorldHttpBridge({
+        commandHandler: commandHandler({
+          approval: 'APPROVED',
+          receiptCalls: { value: 0 },
+          receiptWorldVersionAfter: '3',
+        }),
+        environment: ENVIRONMENT,
+      }),
+    });
+    const response = await post(
+      '/local/v1/narrow-transfer-command',
+      commandRequest(),
+    );
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: 'PROTOCOL_ERROR' },
+      ok: false,
+    });
   });
 
   it('does not cache command responses and exposes only a receipt returned by the durable port', async () => {

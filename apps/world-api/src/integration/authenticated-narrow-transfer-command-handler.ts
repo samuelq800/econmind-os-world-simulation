@@ -6,7 +6,7 @@ import {
 } from './identity.js';
 import { WorldReadFailure } from './transport.js';
 
-export const WORLD_COMMAND_API_SCHEMA_VERSION = 'world-command-api-v1' as const;
+export const WORLD_COMMAND_API_SCHEMA_VERSION = 'world-command-api-v2' as const;
 export const MAX_WORLD_COMMAND_REQUEST_BYTES = 16 * 1024;
 
 export type DurableCommandOutcome =
@@ -22,6 +22,8 @@ export interface NarrowTransferCommandRequest {
     readonly officeId: string;
     readonly commandId: string;
     readonly idempotencyKey: string;
+    /** Must be applied by the durable port under the atomic World head lock. */
+    readonly expectedWorldVersion: string;
     readonly proposalRef: string;
     readonly buyerCountryId: string;
     readonly buyerFinanceApprovalRef: string;
@@ -102,8 +104,10 @@ export interface BuyerFinanceApprovalReader {
 }
 
 /**
- * This port must atomically preserve command/idempotency identities and return
- * the stored final receipt for exact retries. It is intentionally server-only.
+ * This port must atomically preserve command/idempotency identities, enforce
+ * expectedWorldVersion under the World head lock for a first submission, and
+ * return the stored final receipt for exact retries. The transport's receipt
+ * check is defense in depth; it cannot replace the transaction-level fence.
  */
 export interface DurableNarrowTransferReceiptPort {
   acceptOrRead(input: {
@@ -132,7 +136,9 @@ export interface AuthenticatedNarrowTransferCommandHandler {
 const CANONICAL_UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
 const CANONICAL_ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
+const NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/u;
 const POSITIVE_INTEGER = /^[1-9]\d*$/u;
+const POSTGRES_BIGINT_MAX = 9_223_372_036_854_775_807n;
 const FINGERPRINT = /^sha256:[0-9a-f]{64}$/u;
 const REASON_CODE = /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/u;
 const RFC3339_MILLISECONDS =
@@ -183,6 +189,17 @@ function string(value: unknown, label: string): string {
 function canonicalId(value: unknown, label: string): string {
   const parsed = string(value, label);
   if (!CANONICAL_ID.test(parsed)) invalid(`${label} must be canonical`);
+  return parsed;
+}
+
+function canonicalWorldVersion(value: unknown): string {
+  const parsed = string(value, 'expectedWorldVersion');
+  if (
+    !NON_NEGATIVE_INTEGER.test(parsed) ||
+    BigInt(parsed) > POSTGRES_BIGINT_MAX
+  ) {
+    invalid('expectedWorldVersion must be a canonical PostgreSQL bigint');
+  }
   return parsed;
 }
 
@@ -243,6 +260,7 @@ function parseRequest(value: unknown): NarrowTransferCommandRequest {
       'officeId',
       'commandId',
       'idempotencyKey',
+      'expectedWorldVersion',
       'proposalRef',
       'buyerCountryId',
       'buyerFinanceApprovalRef',
@@ -259,6 +277,7 @@ function parseRequest(value: unknown): NarrowTransferCommandRequest {
       officeId: canonicalId(payload.officeId, 'officeId'),
       commandId: canonicalId(payload.commandId, 'commandId'),
       idempotencyKey: canonicalId(payload.idempotencyKey, 'idempotencyKey'),
+      expectedWorldVersion: canonicalWorldVersion(payload.expectedWorldVersion),
       proposalRef: canonicalId(payload.proposalRef, 'proposalRef'),
       buyerCountryId: canonicalId(payload.buyerCountryId, 'buyerCountryId'),
       buyerFinanceApprovalRef: canonicalId(
@@ -304,7 +323,9 @@ function validateReceipt(
   if (
     (committed &&
       (receipt.worldVersionAfter === null ||
-        !POSITIVE_INTEGER.test(receipt.worldVersionAfter))) ||
+        !POSITIVE_INTEGER.test(receipt.worldVersionAfter) ||
+        BigInt(receipt.worldVersionAfter) !==
+          BigInt(request.payload.expectedWorldVersion) + 1n)) ||
     (!committed && receipt.worldVersionAfter !== null)
   ) {
     invalid('durable receipt WorldVersion is internally inconsistent');
