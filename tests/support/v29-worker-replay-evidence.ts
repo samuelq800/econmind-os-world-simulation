@@ -155,7 +155,9 @@ export async function readV29DurableWorkerStep(input: {
         `select command_id, command_fingerprint, schema_version, outcome, reason_code,
                 transition_id, world_version_before::text,
                 world_version_after::text, sim_time::text,
-                event_ids::text, recorded_at_real::text
+                event_ids::text,
+                to_char(recorded_at_real AT TIME ZONE 'UTC',
+                        'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') as recorded_at_real_utc
            from world_v2.command_receipt
           where world_id = $1 and command_id = $2`,
         scope,
@@ -175,6 +177,9 @@ export async function readV29DurableWorkerStep(input: {
   );
   if (
     receipt.outcome !== 'COMMITTED' ||
+    !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/u.test(
+      receipt.recorded_at_real_utc ?? '',
+    ) ||
     receipt.world_version_after !== world.world_version ||
     event.world_version !== world.world_version ||
     inventory.world_version_after !== world.world_version ||
