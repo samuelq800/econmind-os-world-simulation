@@ -32,8 +32,11 @@ has a separately manual GitHub Actions candidate at
 disposable least-privilege test roles on the PG16 service, verifies real grants
 and RLS behavior for supplied claims, and cleans the schema and roles on exit.
 
-That workflow has not run from this local workspace, so its native result is
-currently `NOT_RUN`. It also does not prove production role provisioning or a
+The fixed isolated-branch native PG16 candidate passed 3/3 in
+[run 35969032516](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35969032516)
+at exact SHA `8b082e1b3347aa77408f3521bf9976b04283e00d`.
+This is non-production preparation evidence, not a merged-main or Gate B
+acceptance run. It also does not prove production role provisioning or a
 verified JWT-to-`request.jwt.claim.sub` propagation mechanism: migrations do
 not create deployment roles, and PostgreSQL custom settings must be populated
 by a trusted API gateway. Current receipt recovery requires any active current

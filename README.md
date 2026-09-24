@@ -53,7 +53,8 @@ The previous main-candidate check failed in a V00.2 shutdown-test timing
 race; a test-only fixture removed that race without dropping its repeated-
 signal assertions. This is code/CI evidence, not dedicated staging evidence.
 Dedicated non-production staging/TLS,
-non-production RLS/grant evidence, two-country/two-Office browser E2E, and
+deployment-role/JWT-backed RLS evidence beyond synthetic disposable PG16
+negatives, two-country/two-Office browser E2E, and
 final independent Gate B review remain open. See
 [`docs/reports/gate-b/CURRENT_GATE_B_STATUS.md`](docs/reports/gate-b/CURRENT_GATE_B_STATUS.md)
 for exact runs, scope, and the next evidence route. No green local test or
