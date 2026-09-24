@@ -21,7 +21,8 @@ an independent review, or permission to use production Supabase.
   injected runner. These P2 preparations are not a real 70-country World run,
   native-PostgreSQL Worker run, measured load or later-SHA Gate B check.
 - Subsequent mainline preparations add unactivated local-only final-receipt
-  API lookup and a web command/UNKNOWN-receipt loop. Review B closed the
+  API lookup, a web command/UNKNOWN-receipt loop, and a host-injected web
+  lookup port. Review B closed the
   browser receipt-intent binding MAJOR on exact isolated candidates; combined
   API/web targeted checks passed, but the default fixture page and production
   API are not live-wired. See

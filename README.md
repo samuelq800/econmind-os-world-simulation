@@ -15,11 +15,14 @@ deterministic economic, command, ledger, replay, and preparation modules;
 preparation. Recent V27 provenance, calibration-closure and NPC-intent modules
 are **non-production preparation**, not a generated 70-country World.
 V29 now has a source-to-evidence gap baseline and a strict candidate-bound
-evidence-claim helper (all 139 requirements default to `MISSING`); V30 has a deterministic,
+evidence-claim helper (all 139 requirements default to `MISSING`) plus an
+inert source-to-parameter-to-event traceability helper; V30 has a deterministic,
 non-network load-plan/latency-summary helper for 50/100/420 virtual sessions.
 V29 also has a test-only two-country 600/1000-day exact-ledger/replay harness
 and a disposable-PGlite driver for one real Worker goods-delivery commit/retry;
 V30's injected runner is bounded and has no built-in service target.
+V30 also has a caller-reported recovery measurement helper that cannot prove
+an actual backup restore.
 These preparations are not a real 70-country World long run, measured load
 test, security acceptance or V29/V30 gate pass; see [`docs/reports/V29.1/PREPARATION_GAP_AUDIT.md`](docs/reports/V29.1/PREPARATION_GAP_AUDIT.md)
 and [`docs/reports/V30.1/IMPLEMENTATION.md`](docs/reports/V30.1/IMPLEMENTATION.md).
@@ -28,8 +31,8 @@ The runnable API process currently exposes health/readiness endpoints only.
 The default web prototype is `LOCAL_FIXTURE`; an authorized local read requires
 an explicit trusted-host opt-in and is not mounted by the default entrypoint.
 An optional local-only final-receipt lookup and web command/UNKNOWN-receipt
-loop are now integrated as unactivated preparations; the web lookup-to-API
-adapter is still a separate review candidate.
+loop are now integrated as unactivated preparations; the web lookup port is
+also merged but still requires a real trusted-host transport and live E2E.
 There is no proven end-to-end authorized browser command/receipt flow, live
 forecast model, production database rollout, or product release.
 

@@ -23,6 +23,11 @@ browser E2E, full repository check on this later SHA, and Gate B final review
 remain `NOT_RUN`. The default page is still fixture-backed. The API route is
 optional/local-only and returns unavailable without injected dependencies.
 
-The new D lookup-to-UI branch `de3fee4` is not included in these merges; it
-requires separate delta review and integration. E's V30.2 permission tests
-and F/C's V29.3 preparation are also separate candidates.
+The later D lookup-to-UI delta `de3fee4` was independently reviewed by B
+with P0=0, MAJOR=0 and merged as unactivated preparation at `125079f`.
+Its request has only World, original Command ID and original idempotency key;
+UNKNOWN reconciliation still checks the original trusted fingerprint and
+identity. On the combined API/web candidate `125079f`, the same three focused
+files passed 40/40 and web TypeScript passed. This adds an injected host-owned
+lookup port, **not** a live Bearer transport or default-page activation.
+E's V30.2 permission tests and F's V29.3 replay remain separate candidates.
