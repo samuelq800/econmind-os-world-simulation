@@ -20,8 +20,13 @@ import {
 } from './authorized-read-adapter.js';
 import { SocialCommandCenter } from './SocialCommandCenter.js';
 import { TradeForeignAffairsCommand } from './TradeForeignAffairsCommand.js';
+import type { NarrowTransferDraft } from '../authorized-client/client.js';
 import type { PrototypeOfficeOption } from './contracts.js';
+import type { AuthorizedReadState } from './authorized-read-adapter.js';
+import type { LocalReadSnapshot } from './local-authorized-read.js';
 import { readableProjection, type PrototypeViewState } from './state.js';
+
+import './authorized-command-review.css';
 
 type NavGroupId =
   'operations' | 'country' | 'policy' | 'crossOffice' | 'roleWork' | 'records';
@@ -619,10 +624,162 @@ function OfficeSidebar({
   );
 }
 
+export interface AuthorizedCommandAction {
+  readonly draft: NarrowTransferDraft | null;
+  readonly receiptBindingReady: boolean;
+  readonly phase: LocalReadSnapshot['phase'];
+  readonly alreadySubmitted: boolean;
+  readonly onSubmit: () => void;
+  readonly onRefresh: () => void;
+}
+
+function AuthorizedCommandReview({
+  action,
+  read,
+}: {
+  readonly action: AuthorizedCommandAction | undefined;
+  readonly read: AuthorizedReadState;
+}) {
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const reviewButtonRef = useRef<HTMLButtonElement>(null);
+  const confirmButtonRef = useRef<HTMLButtonElement>(null);
+  const focusAfterToggleRef = useRef(false);
+  const draft = action?.draft;
+  const canReview =
+    !!draft &&
+    read.kind === 'CURRENT' &&
+    draft.expectedWorldVersion === read.worldVersion &&
+    action.receiptBindingReady &&
+    action.phase === 'READ_RETURNED' &&
+    !action.alreadySubmitted;
+  const notice = !action
+    ? 'No authorized Command route is attached.'
+    : !draft
+      ? 'No server-owned transfer draft was supplied.'
+      : action.phase === 'UNKNOWN'
+        ? 'Outcome unknown. Find the original receipt before another move.'
+        : action.phase === 'SUBMITTING'
+          ? 'Sending once. Wait for a final result.'
+          : action.phase === 'FINAL_RECEIPT'
+            ? 'Final receipt recorded. Refresh national intel.'
+            : !action.receiptBindingReady
+              ? 'Trusted receipt binding unavailable. Request a new transfer draft.'
+              : read.kind !== 'CURRENT'
+                ? 'Current national intel is required before review.'
+                : draft.expectedWorldVersion !== read.worldVersion
+                  ? `Draft targets v${draft.expectedWorldVersion}; current view is v${read.worldVersion}. Request a new draft.`
+                  : action.alreadySubmitted
+                    ? 'This Command ID has already been sent in this session.'
+                    : 'Review the trusted transfer reference before sending.';
+
+  useEffect(() => {
+    if (!focusAfterToggleRef.current || !canReview) return;
+    if (reviewOpen) confirmButtonRef.current?.focus();
+    else reviewButtonRef.current?.focus();
+    focusAfterToggleRef.current = false;
+  }, [reviewOpen, canReview]);
+
+  return (
+    <section
+      className="authorized-command-review"
+      aria-label="Narrow transfer Command"
+    >
+      <div className="authorized-command-review__heading">
+        <span>OFFICE MOVE · REQUEST REVIEW</span>
+        <h2>Narrow treasury transfer</h2>
+        <p>{notice}</p>
+      </div>
+      {canReview && draft ? (
+        reviewOpen ? (
+          <div className="authorized-command-review__confirm">
+            <dl>
+              <div>
+                <dt>Proposal</dt>
+                <dd>
+                  <code>{draft.proposalRef}</code>
+                </dd>
+              </div>
+              <div>
+                <dt>Buyer country</dt>
+                <dd>{draft.buyerCountryId}</dd>
+              </div>
+              <div>
+                <dt>Finance approval ref</dt>
+                <dd>
+                  <code>{draft.buyerFinanceApprovalRef}</code>
+                </dd>
+              </div>
+              <div>
+                <dt>Expected World</dt>
+                <dd>v{draft.expectedWorldVersion}</dd>
+              </div>
+              <div>
+                <dt>Command ID</dt>
+                <dd>
+                  <code>{draft.commandId}</code>
+                </dd>
+              </div>
+            </dl>
+            <p>
+              The server must validate all terms. This page cannot predict
+              settlement.
+            </p>
+            <div className="authorized-command-review__buttons">
+              <button
+                ref={confirmButtonRef}
+                className="six-button six-button--primary"
+                type="button"
+                onClick={action.onSubmit}
+              >
+                Confirm &amp; send once
+              </button>
+              <button
+                className="six-button six-button--secondary"
+                type="button"
+                onClick={() => {
+                  focusAfterToggleRef.current = true;
+                  setReviewOpen(false);
+                }}
+              >
+                Back
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            ref={reviewButtonRef}
+            className="six-button six-button--primary"
+            type="button"
+            onClick={() => {
+              focusAfterToggleRef.current = true;
+              setReviewOpen(true);
+            }}
+          >
+            Review transfer
+          </button>
+        )
+      ) : action &&
+        ['FINAL_RECEIPT', 'COMMAND_UNAVAILABLE', 'UNAVAILABLE'].includes(
+          action.phase,
+        ) ? (
+        <button
+          className="six-button six-button--secondary"
+          type="button"
+          onClick={action.onRefresh}
+        >
+          Refresh national intel
+        </button>
+      ) : null}
+    </section>
+  );
+}
+
 function AuthorizedOfficeView({
   authorized,
+  commandAction,
 }: {
   readonly authorized: AuthorizedUiInjection;
+  readonly commandAction?: AuthorizedCommandAction | undefined;
 }) {
   const [page, setPage] = useState<WorkspacePageId>('G02');
   const mainRef = useRef<HTMLElement>(null);
@@ -654,7 +811,9 @@ function AuthorizedOfficeView({
           <span>
             <i aria-hidden="true" />
             {ui.read.kind === 'CURRENT'
-              ? 'AUTHORIZED READ · DISPLAY ONLY'
+              ? commandAction?.draft
+                ? 'SCOPED VIEW · COMMAND REVIEW'
+                : 'AUTHORIZED READ · DISPLAY ONLY'
               : 'AUTHORIZED VIEW UNAVAILABLE'}
           </span>
           <small>
@@ -674,7 +833,7 @@ function AuthorizedOfficeView({
             <strong>
               {ui.read.kind === 'CURRENT' ? ui.read.officeId : 'Not available'}
             </strong>
-            <small>Read only · no action grant from this page</small>
+            <small>Actions require server authorization</small>
           </div>
           <nav aria-label="Office views">
             <div className="six-nav-group">
@@ -704,7 +863,8 @@ function AuthorizedOfficeView({
           </nav>
           <p className="six-sidebar__note">
             The existing Office games remain LOCAL_FIXTURE. Authorized mode
-            shows only supplied read results and Command status.
+            offers only supplied read results and a host-supplied narrow Command
+            request.
           </p>
         </aside>
         <main
@@ -727,7 +887,11 @@ function AuthorizedOfficeView({
               <header className="national-overview__header">
                 <div>
                   <p>OFFICE BRIEF · G01</p>
-                  <h1>Hold for a final outcome.</h1>
+                  <h1>
+                    {commandAction
+                      ? 'Make the next move.'
+                      : 'Hold for a final outcome.'}
+                  </h1>
                   <span>
                     Review the Command status before making another move.
                   </span>
@@ -737,6 +901,22 @@ function AuthorizedOfficeView({
                 context="Authorized Office"
                 state={ui.command}
               />
+              <AuthorizedCommandReview
+                key={JSON.stringify([
+                  commandAction?.draft?.commandId,
+                  commandAction?.draft?.idempotencyKey,
+                  commandAction?.draft?.expectedWorldVersion,
+                  commandAction?.draft?.proposalRef,
+                  commandAction?.draft?.buyerCountryId,
+                  commandAction?.draft?.buyerFinanceApprovalRef,
+                  commandAction?.receiptBindingReady,
+                  ui.read.kind === 'CURRENT'
+                    ? ui.read.worldVersion
+                    : 'unavailable',
+                ])}
+                action={commandAction}
+                read={ui.read}
+              />
               <section className="national-overview__empty" role="status">
                 <h2>
                   {ui.read.kind === 'CURRENT'
@@ -745,7 +925,7 @@ function AuthorizedOfficeView({
                 </h2>
                 <span>
                   {ui.read.kind === 'CURRENT'
-                    ? `Read snapshot v${ui.read.worldVersion} in G02. No Command action is attached here.`
+                    ? `Read snapshot v${ui.read.worldVersion} in G02.`
                     : ui.read.reason}
                 </span>
                 <button
@@ -769,14 +949,19 @@ export function SixOfficesG01({
   onRetry,
   onReturnToEntry,
   authorized,
+  commandAction,
 }: {
   readonly state: PrototypeViewState;
   readonly onRetry: () => void;
   readonly onReturnToEntry: () => void;
   readonly authorized?: AuthorizedUiInjection;
+  readonly commandAction?: AuthorizedCommandAction | undefined;
 }) {
   return authorized ? (
-    <AuthorizedOfficeView authorized={authorized} />
+    <AuthorizedOfficeView
+      authorized={authorized}
+      commandAction={commandAction}
+    />
   ) : (
     <FixtureSixOfficesG01
       state={state}

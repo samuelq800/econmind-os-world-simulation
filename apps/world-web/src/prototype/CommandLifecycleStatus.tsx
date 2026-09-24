@@ -20,6 +20,7 @@ export type CommandLifecycleState = LifecycleBase &
         readonly kind: 'SUBMITTED_AWAITING_FINAL_RECEIPT';
         readonly commandId: string;
       }
+    | { readonly kind: 'SENDING_UNCONFIRMED'; readonly commandId: string }
     | { readonly kind: 'UNKNOWN_OUTCOME'; readonly commandId: string }
     | {
         readonly kind: 'SUCCEEDED';
@@ -105,6 +106,16 @@ export function commandLifecycleCopy(
             : 'Submitted · awaiting final receipt',
         detail: 'Submission is not a final outcome.',
         nextStep: 'Look up this Command ID; do not resubmit automatically.',
+        tone: 'pending',
+        liveRegion: 'status',
+        referenceLabel: 'Command ID',
+        referenceValue: state.commandId,
+      };
+    case 'SENDING_UNCONFIRMED':
+      return {
+        title: 'Sending · not confirmed',
+        detail: 'The browser has not received a final response.',
+        nextStep: 'Keep this Command ID. Do not send another command.',
         tone: 'pending',
         liveRegion: 'status',
         referenceLabel: 'Command ID',
