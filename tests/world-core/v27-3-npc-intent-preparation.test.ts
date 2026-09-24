@@ -208,6 +208,40 @@ describe('V27.3 non-authoritative NPC intent preparation', () => {
     expect(first.intent).not.toHaveProperty('actorId');
   });
 
+  it('detaches and freezes nested caller inventory after return without changing replay bytes', async () => {
+    const input = await approvedInput();
+    const result = prepareNpcResourceAllocationIntent(input, sha256);
+    expect(result.status).toBe('CANDIDATE_ONLY');
+    if (result.status !== 'CANDIDATE_ONLY') return;
+    const returnedAccount = result.intent.inventoryAccount as Record<
+      string,
+      unknown
+    >;
+    expect(returnedAccount).not.toBe(input.inventory!.account);
+    expect(Object.isFrozen(result.intent)).toBe(true);
+    expect(Object.isFrozen(returnedAccount)).toBe(true);
+    expect(Object.isFrozen(result.intent.availableCash)).toBe(true);
+    const originalHashInput = result.hashInput;
+    const originalFingerprint = result.fingerprint;
+    const originalBatchId = returnedAccount.batchId;
+
+    Object.assign(input.inventory!.account, {
+      batchId: inventoryBatchId('BATCH_CHANGED_AFTER_RETURN'),
+    });
+    expect(input.inventory!.account.batchId).not.toBe(originalBatchId);
+    expect(returnedAccount.batchId).toBe(originalBatchId);
+    expect(() =>
+      Object.assign(returnedAccount, {
+        batchId: inventoryBatchId('BATCH_FORGED_RETURNED'),
+      }),
+    ).toThrow();
+    expect(canonicalSerialize(result.intent)).toBe(originalHashInput);
+    expect(result.fingerprint).toBe(originalFingerprint);
+    expect(result.fingerprint).toBe(
+      canonicalSha256(canonicalSerialize(result.intent), sha256),
+    );
+  });
+
   it('fails closed for missing model, authorization, approval, funding and stock', async () => {
     const input = await approvedInput();
     for (const [field, reason] of [
