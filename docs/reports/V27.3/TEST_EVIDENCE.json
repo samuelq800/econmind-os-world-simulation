@@ -1,0 +1,46 @@
+{
+  "step": "V27.3",
+  "scope": "pure_core_npc_candidate_intent_preparation_only",
+  "status": "PREPARATION_ONLY",
+  "branch": "codex/v27-3-npc-intent-preparation",
+  "base_main_sha": "4d38a9f6ef4191edd84ded58a2c90b130267b69f",
+  "authoritative_v27_2_status": "PLANNED",
+  "authoritative_v27_3_status": "PLANNED",
+  "open_adrs": ["ADR-13"],
+  "checks": {
+    "focused_and_regression_vitest": {
+      "status": "PASS",
+      "files": 4,
+      "tests": 51
+    },
+    "v27_3_focused_vitest": { "status": "PASS", "files": 1, "tests": 5 },
+    "architecture_boundary_vitest": {
+      "status": "PASS",
+      "files": 3,
+      "tests": 34
+    },
+    "core_build": "PASS",
+    "core_typecheck": "PASS",
+    "workspace_typechecks_pinned_direct": "PASS",
+    "targeted_eslint": "PASS",
+    "targeted_prettier": "PASS",
+    "authoritative_pattern_scan": "PASS",
+    "repository_boundary_scan": "PASS",
+    "repository_secret_scan": "PASS",
+    "local_safe_environment": "PASS",
+    "root_typecheck_wrapper": "FAIL_NESTED_SHELL_RESOLVED_UNPINNED_TOOLCHAIN"
+  },
+  "not_run": [
+    "full_repository_test_suite",
+    "V27_2_closure",
+    "ADR_13_owner_approval",
+    "real_NPC_principal_and_policy_integration",
+    "authoritative_ledger_reads_and_commit_rechecks",
+    "command_execution_and_atomic_writer_integration",
+    "independent_P0_review",
+    "migration",
+    "release",
+    "production_access"
+  ],
+  "authoritative_writes": false
+}
