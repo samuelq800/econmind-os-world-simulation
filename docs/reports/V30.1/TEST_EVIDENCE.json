@@ -1,0 +1,36 @@
+{
+  "scope": "V28.1_V29.1_V30.1_isolated_preparation_only",
+  "formal_status": "PLANNED",
+  "candidate_status": "PREPARATION_ONLY_NOT_V30_ACCEPTANCE",
+  "target": "NO_NETWORK_NO_DATABASE",
+  "checks": {
+    "focused_v28_v30_vitest": { "status": "PASS", "files": 2, "tests": 11 },
+    "targeted_eslint": "PASS",
+    "targeted_prettier": "PASS",
+    "v30_strict_typecheck": "PASS",
+    "core_build": "PASS",
+    "architecture_boundary_vitest": {
+      "status": "PASS",
+      "files": 3,
+      "tests": 34
+    },
+    "authoritative_pattern_and_boundary_scans": "PASS",
+    "repository_secret_scan": "PASS",
+    "local_safe_environment": "PASS"
+  },
+  "not_run": [
+    "full_repository_check",
+    "V29_1_full_requirement_code_test_mapping",
+    "V29_2_70_country_600_day_and_1000_day_run",
+    "V29_3_replay_and_minimal_reproduction",
+    "V30_1_real_50_100_420_session_load",
+    "V30_2_nonproduction_RLS_security",
+    "V30_3_database_backup_restore",
+    "V30_4_shared_database_SLO_capacity_signoff",
+    "V28_1_constitution_ADR14_reconciliation",
+    "independent_P0_review",
+    "production_access"
+  ],
+  "authoritative_writes": false,
+  "gate_b_decision": "PENDING"
+}
