@@ -1,0 +1,64 @@
+{
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "preparationStatus": "PREPARATION_ONLY",
+  "branch": "codex/v27-country-configuration-manifest-preparation",
+  "mainBaseSha": "e18a7073bc487f8948061b1e140726bfe191b4a9",
+  "planSha": "6e7e94824295a7c46bd34b61112a105763ab3ed9",
+  "codeSha": "53da7581606e343dd781fbad1d73a1c2e382bf13",
+  "codeTree": "163d367c1406a6495a1faf8530eefc2f1499a2a7",
+  "requiredCountryCount": 70,
+  "realCountryConfigurationSupplied": false,
+  "configurationHashVerified": false,
+  "sourceHashesVerified": false,
+  "generationAuthorized": false,
+  "formallyVerified": false,
+  "checks": [
+    {
+      "name": "focused country-configuration manifest tests",
+      "status": "PASS",
+      "detail": "1 file, 6 tests"
+    },
+    {
+      "name": "combined V27 and V29 preparation-tool tests",
+      "status": "PASS",
+      "detail": "3 files, 16 tests"
+    },
+    {
+      "name": "strict standalone TypeScript",
+      "status": "PASS",
+      "detail": "three tools and their focused tests"
+    },
+    {
+      "name": "targeted ESLint",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted Prettier",
+      "status": "PASS"
+    },
+    {
+      "name": "repository secret scan",
+      "status": "PASS",
+      "detail": "1023 files scanned"
+    },
+    {
+      "name": "git diff check",
+      "status": "PASS"
+    },
+    {
+      "name": "base-to-code changed-file audit",
+      "status": "PASS",
+      "detail": "plan, new tools/v27 validator and new focused test only"
+    }
+  ],
+  "notRun": [
+    "real 70-country configuration manifest",
+    "real country ID or policy data",
+    "real required-parameter catalog and coverage",
+    "configuration and source byte hash verification",
+    "A Worker or Core countryConfigurationRef integration",
+    "full repository tests",
+    "independent review",
+    "formal V27 or V29 Gate release or production"
+  ]
+}
