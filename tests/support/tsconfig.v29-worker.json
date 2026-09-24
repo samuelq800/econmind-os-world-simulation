@@ -10,6 +10,7 @@
   },
   "include": [
     "v29-worker-delivery-driver.ts",
+    "v29-worker-replay-evidence.ts",
     "v29-worker-delivery-driver.test.ts"
   ]
 }
