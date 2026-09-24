@@ -796,27 +796,8 @@ function recordCleanupDiagnostic(evidence, diagnostic, error) {
   };
 }
 
-export function summarizeCleanupExternalDependencyResult(result) {
-  const resultRows = rows(result);
-  const value = resultRows[0]?.namespaces;
-  const isArray = Array.isArray(value);
-  return {
-    result_row_count: resultRows.length,
-    value_kind: isArray
-      ? 'ARRAY'
-      : value === null
-        ? 'NULL'
-        : typeof value === 'string'
-          ? 'STRING'
-          : 'OTHER',
-    namespace_count: isArray ? value.length : null,
-    public_count: isArray
-      ? value.filter((namespace) => namespace === 'public').length
-      : null,
-    other_count: isArray
-      ? value.filter((namespace) => namespace !== 'public').length
-      : null,
-  };
+export function hasNoExternalDependents([record]) {
+  return record?.dependent_count === 0;
 }
 
 function assertRows(result, predicate, message) {
@@ -2098,21 +2079,15 @@ export async function cleanupMarkedBoundary(
           where n.nspname <> $1 and n.nspname <> 'information_schema'
             and n.nspname !~ '^pg_'
        )
-       select coalesce(array_agg(namespace order by namespace), array[]::text[])
-         as namespaces
+       select count(*)::integer as dependent_count
          from external_user_dependents`,
       [approval.disposable_namespace],
     );
-    if (diagnostic !== undefined) {
-      evidence.cleanup.external_dependency_summary =
-        summarizeCleanupExternalDependencyResult(externalDependents);
-    }
     cleanupAssertRows(
       diagnostic,
       'CLEANUP_ASSERT_NO_EXTERNAL_DEPENDENTS',
       externalDependents,
-      ([record]) =>
-        Array.isArray(record?.namespaces) && record.namespaces.length === 0,
+      hasNoExternalDependents,
       'cleanup refuses an external dependency outside this run namespace',
     );
     for (const policy of [...RUN_POLICIES].reverse()) {

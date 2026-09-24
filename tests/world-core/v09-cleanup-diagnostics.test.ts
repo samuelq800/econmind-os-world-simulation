@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   cleanupMarkedBoundary,
-  summarizeCleanupExternalDependencyResult,
+  hasNoExternalDependents,
 } from '../../scripts/v09-staging-evidence-runner.mjs';
 
 const approval = {
@@ -27,23 +27,11 @@ function evidence() {
 }
 
 describe('V09 disposable cleanup diagnostics', () => {
-  it('records only dependency result shape and counts, never schema names', () => {
-    expect(
-      summarizeCleanupExternalDependencyResult({
-        rows: [{ namespaces: ['public', 'private_other'] }],
-      }),
-    ).toEqual({
-      result_row_count: 1,
-      value_kind: 'ARRAY',
-      namespace_count: 2,
-      public_count: 1,
-      other_count: 1,
-    });
-    expect(
-      summarizeCleanupExternalDependencyResult({
-        rows: [{ namespaces: '{}' }],
-      }),
-    ).toMatchObject({ value_kind: 'STRING', namespace_count: null });
+  it('requires an exact zero integer count of external dependents', () => {
+    expect(hasNoExternalDependents([{ dependent_count: 0 }])).toBe(true);
+    expect(hasNoExternalDependents([{ dependent_count: 1 }])).toBe(false);
+    expect(hasNoExternalDependents([{ dependent_count: '0' }])).toBe(false);
+    expect(hasNoExternalDependents([])).toBe(false);
   });
 
   it('captures the first SQL checkpoint and SQLSTATE without storing an error message', async () => {
