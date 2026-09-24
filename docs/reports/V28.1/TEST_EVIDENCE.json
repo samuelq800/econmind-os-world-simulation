@@ -43,5 +43,15 @@
     "production_access",
     "release"
   ],
-  "authoritative_writes": false
+  "authoritative_writes": false,
+  "later_isolated_rebase": {
+    "branch": "codex/v28-v30-preparation",
+    "base_main_sha": "0fa8da7e74488f4554185afb68c19b4933d72586",
+    "code_commit": "cd7b7bd",
+    "governance_commit": "528c207",
+    "focused_v28_tests": { "status": "PASS", "tests": 5 },
+    "core_build": "PASS",
+    "architecture_boundaries": "PASS",
+    "classification": "PREPARATION_ONLY"
+  }
 }

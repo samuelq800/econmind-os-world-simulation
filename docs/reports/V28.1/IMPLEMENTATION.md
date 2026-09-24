@@ -20,3 +20,13 @@ One read-only binding verifies existing replay evidence belongs to the configure
 - Repository secrets and local safe-environment checks: PASS; Supabase unlinked, database mutation disallowed.
 - Governance alignment: additive proposal/plan only; active R2/ADR/Constitution records unchanged. Focused governance validator and diff checks are recorded in `TEST_EVIDENCE.json` after this addendum.
 - Full repository suite, authoritative integration, old-world compatibility, formal owner reconciliation, independent P0 review, migration, production and release: NOT_RUN. No Gate/status/ADR record changed.
+
+## Later isolated rebase (2026-09-24)
+
+The two preparation commits were cherry-picked onto the newer `0fa8da7`
+main base as `cd7b7bd` and `528c207` on
+`codex/v28-v30-preparation`. The focused V28.1 suite passed 5/5 and Core
+build plus architecture boundaries passed on that base. The earlier branch's
+21-test evidence is preserved as historical, not silently attributed to
+this new SHA. The status remains `PREPARATION_ONLY`; the R002/ADR-14 conflict
+and formal dependencies are unchanged.
