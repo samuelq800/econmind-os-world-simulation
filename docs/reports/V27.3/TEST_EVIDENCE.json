@@ -7,13 +7,20 @@
   "authoritative_v27_2_status": "PLANNED",
   "authoritative_v27_3_status": "PLANNED",
   "open_adrs": ["ADR-13"],
+  "initial_independent_review": {
+    "target_sha": "d674609414dd4825e69f3fc15e2eef2ba4229e99",
+    "p0": 0,
+    "major": 1,
+    "result": "NOT_MERGE_READY"
+  },
+  "forward_fix": "DETACHED_DEEP_FROZEN_CANONICAL_INTENT_PENDING_REVIEW",
   "checks": {
     "focused_and_regression_vitest": {
       "status": "PASS",
       "files": 4,
-      "tests": 51
+      "tests": 52
     },
-    "v27_3_focused_vitest": { "status": "PASS", "files": 1, "tests": 5 },
+    "v27_3_focused_vitest": { "status": "PASS", "files": 1, "tests": 6 },
     "architecture_boundary_vitest": {
       "status": "PASS",
       "files": 3,
@@ -37,7 +44,7 @@
     "real_NPC_principal_and_policy_integration",
     "authoritative_ledger_reads_and_commit_rechecks",
     "command_execution_and_atomic_writer_integration",
-    "independent_P0_review",
+    "independent_P0_re_review",
     "migration",
     "release",
     "production_access"

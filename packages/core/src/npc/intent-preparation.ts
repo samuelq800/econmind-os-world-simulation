@@ -95,6 +95,14 @@ function nonNegativeVersion(value: unknown): value is string {
   return typeof value === 'string' && WORLD_VERSION.test(value);
 }
 
+function freezeCanonicalValue(value: unknown): unknown {
+  if (value !== null && typeof value === 'object') {
+    for (const child of Object.values(value)) freezeCanonicalValue(child);
+    Object.freeze(value);
+  }
+  return value;
+}
+
 /**
  * Prepare one deterministic, non-authoritative allocation proposal. The
  * caller-provided facts are only screening inputs; the authoritative writer
@@ -203,6 +211,11 @@ export function prepareNpcResourceAllocationIntent(
     requestedInventory: inventory.requested.toCanonicalValue(),
   });
   const hashInput = canonicalSerialize(intent);
+  // The input account is caller-owned and may remain mutable. The returned
+  // candidate must instead own frozen bytes identical to its approval hash.
+  const detachedIntent = freezeCanonicalValue(
+    JSON.parse(hashInput),
+  ) as Readonly<Record<string, unknown>>;
   const fingerprint = canonicalSha256(hashInput, sha256Hex);
   const approval = input.approval;
   if (
@@ -240,7 +253,7 @@ export function prepareNpcResourceAllocationIntent(
   return Object.freeze({
     status: 'CANDIDATE_ONLY',
     candidateKind: 'RESOURCE_ALLOCATION_COMMAND_INTENT',
-    intent,
+    intent: detachedIntent,
     hashInput,
     fingerprint,
     requiredAuthoritativeChecks: Object.freeze([
