@@ -4,10 +4,11 @@
   "candidate_status": "PREPARATION_ONLY_NOT_V30_ACCEPTANCE",
   "target": "NO_NETWORK_NO_DATABASE",
   "checks": {
-    "focused_v30_vitest": { "status": "PASS", "files": 1, "tests": 6 },
+    "focused_v30_vitest": { "status": "PASS", "files": 2, "tests": 10 },
     "targeted_eslint": "PASS",
     "targeted_prettier": "PASS",
     "v30_strict_typecheck": "PASS",
+    "initial_standalone_typecheck": "FAILED_MISSING_TYPES_NODE_FLAG_CORRECTED",
     "core_build": "PASS",
     "architecture_boundary_vitest": {
       "status": "PASS",
