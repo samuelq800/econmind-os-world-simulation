@@ -20,12 +20,14 @@ export type CommandLifecycleState = LifecycleBase &
         readonly kind: 'SUBMITTED_AWAITING_FINAL_RECEIPT';
         readonly commandId: string;
       }
+    | { readonly kind: 'UNKNOWN_OUTCOME'; readonly commandId: string }
     | {
         readonly kind: 'SUCCEEDED';
         readonly receipt: {
           readonly outcome: 'COMMITTED';
           readonly commandId: string;
           readonly worldVersionAfter: string | null;
+          readonly eventIds?: readonly string[];
         };
       }
     | {
@@ -108,6 +110,18 @@ export function commandLifecycleCopy(
         referenceLabel: 'Command ID',
         referenceValue: state.commandId,
       };
+    case 'UNKNOWN_OUTCOME':
+      return {
+        title: 'Outcome unknown',
+        detail:
+          'The submission response was lost or cannot establish a final result.',
+        nextStep:
+          'Look up the original Command ID. Do not send a new Command automatically.',
+        tone: 'danger',
+        liveRegion: 'alert',
+        referenceLabel: 'Command ID',
+        referenceValue: state.commandId,
+      };
     case 'SUCCEEDED':
       return {
         title:
@@ -117,7 +131,7 @@ export function commandLifecycleCopy(
         detail:
           state.source === 'LOCAL_FIXTURE'
             ? 'Fixture result only. No World State changed.'
-            : 'A final receipt was supplied; inspect the authorized projection for actual effects.',
+            : `Final receipt at World v${state.receipt.worldVersionAfter ?? 'not supplied'}. Inspect the refreshed projection for effects.`,
         nextStep: 'Review the receipt before planning another action.',
         tone: 'success',
         liveRegion: 'status',

@@ -243,7 +243,7 @@ export function createGateBBrowserScenarioCases(
   });
   // E's narrow-transfer wire is not C's CORE_GOODS_TRANSFER_V1 command.
   const commandRequest: NarrowTransferCommandRequest = Object.freeze({
-    schemaVersion: 'world-command-api-v1',
+    schemaVersion: 'world-command-api-v2',
     requestId: requestIds.command,
     operation: 'SUBMIT_NARROW_TREASURY_GCU_TRANSFER',
     payload: Object.freeze({
@@ -252,6 +252,7 @@ export function createGateBBrowserScenarioCases(
       officeId: actors.sellerTrade.identity.officeId,
       commandId: draft.commandId,
       idempotencyKey: draft.idempotencyKey,
+      expectedWorldVersion: draft.expectedWorldVersion,
       proposalRef,
       buyerCountryId: fixture.countries.buyer,
       buyerFinanceApprovalRef,
