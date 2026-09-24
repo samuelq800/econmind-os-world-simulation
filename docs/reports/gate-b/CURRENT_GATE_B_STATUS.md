@@ -20,7 +20,10 @@ an independent review, or permission to use production Supabase.
   requirements default to `MISSING`), and a V30 virtual load plan plus bounded
   injected runner. These P2 preparations are not a real 70-country World run,
   native-PostgreSQL Worker run, measured load or later-SHA Gate B check.
-- Subsequent mainline preparations add unactivated local-only final-receipt
+- Subsequent mainline preparations add PGlite-only permission-negative tests
+  and a fixed-sequence Worker durable replay check. These do not replace real
+  PostgreSQL RLS/roles, browser E2E or a 70-country World run.
+- Other mainline preparations add unactivated local-only final-receipt
   API lookup, a web command/UNKNOWN-receipt loop, and a host-injected web
   lookup port. Review B closed the
   browser receipt-intent binding MAJOR on exact isolated candidates; combined

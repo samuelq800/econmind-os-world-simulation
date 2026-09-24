@@ -19,10 +19,12 @@ evidence-claim helper (all 139 requirements default to `MISSING`) plus an
 inert source-to-parameter-to-event traceability helper; V30 has a deterministic,
 non-network load-plan/latency-summary helper for 50/100/420 virtual sessions.
 V29 also has a test-only two-country 600/1000-day exact-ledger/replay harness
-and a disposable-PGlite driver for one real Worker goods-delivery commit/retry;
+and a disposable-PGlite driver for one real Worker goods-delivery commit/retry
+with a fixed-sequence durable replay check;
 V30's injected runner is bounded and has no built-in service target.
 V30 also has a caller-reported recovery measurement helper that cannot prove
-an actual backup restore.
+an actual backup restore, plus PGlite-only authorization negative tests that
+do not prove PostgreSQL RLS.
 These preparations are not a real 70-country World long run, measured load
 test, security acceptance or V29/V30 gate pass; see [`docs/reports/V29.1/PREPARATION_GAP_AUDIT.md`](docs/reports/V29.1/PREPARATION_GAP_AUDIT.md)
 and [`docs/reports/V30.1/IMPLEMENTATION.md`](docs/reports/V30.1/IMPLEMENTATION.md).
