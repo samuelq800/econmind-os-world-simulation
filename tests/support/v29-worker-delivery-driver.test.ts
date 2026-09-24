@@ -28,6 +28,12 @@ import { createV10TwoCountryTestFixture } from './v10-two-country-fixture.js';
 import { createPGliteV09AtomicTestDatabase } from './v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from './v09-atomic-contract.js';
 import { executeV29LocalWorkerDelivery } from './v29-worker-delivery-driver.js';
+import {
+  V29WorkerReplayMismatchError,
+  V29WorkerReplayStepError,
+  assertV29WorkerFixedSeedReplay,
+  readV29DurableWorkerStep,
+} from './v29-worker-replay-evidence.js';
 
 const sha256 = (value: string): string =>
   createHash('sha256').update(value, 'utf8').digest('hex');
@@ -127,15 +133,16 @@ function automaticCommand(input: {
   );
 }
 
-function preparedTwoCountryDelivery() {
+function preparedTwoCountryDelivery(seed = 'V29_DEFAULT') {
+  const suffix = sha256(seed).slice(0, 12).toUpperCase();
   const fixture = createV10TwoCountryTestFixture();
   const available = fixture.inventoryAccounts.sellerAvailable;
   const transfer = parseCanonicalCommand(
     {
       schemaVersion: COMMAND_SCHEMA_VERSION,
       commandType: 'CORE_GOODS_TRANSFER_V1',
-      commandId: 'COMMAND_V29_LOCAL_TRANSFER',
-      idempotencyKey: 'IDEMPOTENCY_V29_LOCAL_TRANSFER',
+      commandId: `COMMAND_V29_LOCAL_TRANSFER_${suffix}`,
+      idempotencyKey: `IDEMPOTENCY_V29_LOCAL_TRANSFER_${suffix}`,
       worldId: fixture.worldId,
       actorId: fixture.officeActors.sellerTrade.actorId,
       authSubject: fixture.officeActors.sellerTrade.principal.authSubject,
@@ -144,7 +151,7 @@ function preparedTwoCountryDelivery() {
       expectedWorldVersion: '0',
       simTime: '10000',
       submittedAtReal: AT,
-      correlationId: 'CORRELATION_V29_LOCAL_TRANSFER',
+      correlationId: `CORRELATION_V29_LOCAL_TRANSFER_${suffix}`,
       payload: {
         schemaVersion: 'core-goods-transfer-v1',
         commodityId: 'GRAIN',
@@ -175,7 +182,7 @@ function preparedTwoCountryDelivery() {
   const reservationPosting = createReservationPosting(
     {
       schemaVersion: INVENTORY_POSTING_SCHEMA_VERSION,
-      postingId: inventoryPostingId('POSTING_V29_LOCAL_RESERVE'),
+      postingId: inventoryPostingId(`POSTING_V29_LOCAL_RESERVE_${suffix}`),
       worldId: fixture.worldId,
       causationCommandId: transfer.commandId,
       causationEventIds: [reserve.event.eventId],
@@ -202,9 +209,9 @@ function preparedTwoCountryDelivery() {
     ],
     sha256Hex: sha256,
   });
-  const shipmentId = 'SHIPMENT_V29_LOCAL_TRANSFER';
+  const shipmentId = `SHIPMENT_V29_LOCAL_TRANSFER_${suffix}`;
   const shipment = automaticCommand({
-    id: 'COMMAND_V29_LOCAL_SHIPMENT',
+    id: `COMMAND_V29_LOCAL_SHIPMENT_${suffix}`,
     commandType: 'CORE_GOODS_SHIPMENT_V1',
     before: '1',
     simTime: '10100',
@@ -219,7 +226,7 @@ function preparedTwoCountryDelivery() {
   const shipmentResult = shipNarrowTreasuryGcuTransfer({
     causationEventIds: [ship.event.eventId],
     inventoryState: afterReservation.inventory,
-    postingId: inventoryPostingId('POSTING_V29_LOCAL_SHIPMENT'),
+    postingId: inventoryPostingId(`POSTING_V29_LOCAL_SHIPMENT_${suffix}`),
     shipmentCommand: shipment,
     source: reserved,
     transferCommand: transfer,
@@ -245,7 +252,7 @@ function preparedTwoCountryDelivery() {
     sha256Hex: sha256,
   });
   const delivery = automaticCommand({
-    id: 'COMMAND_V29_LOCAL_DELIVERY',
+    id: `COMMAND_V29_LOCAL_DELIVERY_${suffix}`,
     commandType: 'CORE_GOODS_DELIVERY_V1',
     before: '2',
     simTime: '10200',
@@ -285,18 +292,26 @@ function preparedTwoCountryDelivery() {
     async load() {
       return {
         buyerTreasury: fixture.financialAccounts.buyerTreasury,
-        buyerTreasuryLegId: financialPostingLegId('LEG_V29_LOCAL_BUYER'),
+        buyerTreasuryLegId: financialPostingLegId(
+          `LEG_V29_LOCAL_BUYER_${suffix}`,
+        ),
         commitAssertion: createWorldWriterCommitAssertion(lease, '2'),
-        eventId: 'EVENT_V29_LOCAL_DELIVERY',
+        eventId: `EVENT_V29_LOCAL_DELIVERY_${suffix}`,
         eventSequence: '3',
-        financialBatchId: financialPostingBatchId('BATCH_V29_LOCAL_DELIVERY'),
+        financialBatchId: financialPostingBatchId(
+          `BATCH_V29_LOCAL_DELIVERY_${suffix}`,
+        ),
         financialState: beforeDelivery.financial,
-        inventoryPostingId: inventoryPostingId('POSTING_V29_LOCAL_DELIVERY'),
+        inventoryPostingId: inventoryPostingId(
+          `POSTING_V29_LOCAL_DELIVERY_${suffix}`,
+        ),
         inventoryState: beforeDelivery.inventory,
         observedAtReal: AT,
-        outboxMessageId: 'OUTBOX_V29_LOCAL_DELIVERY',
+        outboxMessageId: `OUTBOX_V29_LOCAL_DELIVERY_${suffix}`,
         sellerSettlement: fixture.financialAccounts.sellerSettlement,
-        sellerSettlementLegId: financialPostingLegId('LEG_V29_LOCAL_SELLER'),
+        sellerSettlementLegId: financialPostingLegId(
+          `LEG_V29_LOCAL_SELLER_${suffix}`,
+        ),
         source: transit,
         transferCommand: transfer,
       };
@@ -358,6 +373,48 @@ async function seedClaimedDelivery(
       where world_id = $1 and command_id = $2`,
     [command.worldId, command.commandId, WORKER, AT],
   );
+}
+
+async function runFreshWorkerSequence(seed: string) {
+  const prepared = preparedTwoCountryDelivery(seed);
+  const local = await database();
+  try {
+    await seedClaimedDelivery(local, prepared.delivery);
+    const input = {
+      database: local,
+      productionTarget: false as const,
+      workerId: WORKER,
+      deliveryCommand: prepared.delivery,
+      observedAtReal: AT,
+      source: prepared.source,
+    };
+    const executeStep = async (commandIndex: number) => {
+      try {
+        const result = await executeV29LocalWorkerDelivery(input);
+        const durable = await readV29DurableWorkerStep({
+          database: local,
+          command: prepared.delivery,
+          commandIndex,
+        });
+        return { result, durable };
+      } catch {
+        throw new V29WorkerReplayStepError(commandIndex);
+      }
+    };
+    const first = await executeStep(0);
+    const retry = await executeStep(1);
+    if (
+      first.result.source !== 'NEW_FINAL' ||
+      retry.result.source !== 'EXISTING_FINAL'
+    ) {
+      throw new V29WorkerReplayStepError(
+        first.result.source !== 'NEW_FINAL' ? 0 : 1,
+      );
+    }
+    return [first.durable, retry.durable] as const;
+  } finally {
+    await local.close();
+  }
 }
 
 describe('V29 preparation-only real Worker narrow-delivery adapter', () => {
@@ -493,4 +550,108 @@ describe('V29 preparation-only real Worker narrow-delivery adapter', () => {
       await local.close();
     }
   }, 30_000);
+});
+
+describe('V29.3 preparation-only fresh-PGlite Worker replay evidence', () => {
+  it('matches every durable fact hash after two independent initializations with the same test seed and command sequence', async () => {
+    let initializations = 0;
+    const evidence = await assertV29WorkerFixedSeedReplay({
+      seed: 'V29_REPLAY_SEED_1',
+      async createAndRunFreshDatabase(seed) {
+        initializations += 1;
+        return runFreshWorkerSequence(seed);
+      },
+    });
+    expect(initializations).toBe(2);
+    expect(evidence.sequenceHash).toBe(
+      'sha256:44214d63aefc1e78987f817b80f767c3ac1e582ab1046076cb706ecf683d7e2b',
+    );
+    expect(evidence).toMatchObject({
+      status: 'LOCAL_PGLITE_FIXED_SEQUENCE_NOT_V29_3_ACCEPTANCE',
+      seed: 'V29_REPLAY_SEED_1',
+      commandCount: 2,
+    });
+    expect(evidence.steps[0]?.stepHash).toBe(evidence.steps[1]?.stepHash);
+    expect(evidence.steps.every((step) => step.worldVersion === '3')).toBe(
+      true,
+    );
+    const different = await assertV29WorkerFixedSeedReplay({
+      seed: 'V29_REPLAY_SEED_2',
+      createAndRunFreshDatabase: runFreshWorkerSequence,
+    });
+    expect(different.sequenceHash).not.toBe(evidence.sequenceHash);
+  }, 60_000);
+
+  it('reports a reproducible seed/index/minimal hash trace on mismatch, without payloads', async () => {
+    let run = 0;
+    let error: unknown;
+    try {
+      await assertV29WorkerFixedSeedReplay({
+        seed: 'V29_MISMATCH_SEED',
+        createAndRunFreshDatabase(seed) {
+          run += 1;
+          return runFreshWorkerSequence(
+            run === 1 ? seed : 'V29_DIFFERENT_SEED',
+          );
+        },
+      });
+    } catch (caught) {
+      error = caught;
+    }
+    expect(error).toBeInstanceOf(V29WorkerReplayMismatchError);
+    const mismatch = error as V29WorkerReplayMismatchError;
+    expect(mismatch.reproduction).toMatchObject({
+      seed: 'V29_MISMATCH_SEED',
+      commandIndex: 0,
+      first: { worldVersion: '3' },
+      second: { worldVersion: '3' },
+    });
+    expect(JSON.stringify(mismatch.reproduction)).not.toContain(
+      '00000000-0000-4000-8000-000000000001',
+    );
+    expect(JSON.stringify(mismatch.reproduction)).not.toContain(
+      'canonical_payload',
+    );
+    expect(mismatch.message).toContain('"eventHash"');
+    expect(mismatch.message).not.toContain('canonical_payload');
+  }, 60_000);
+
+  it('fails a missing sequence with the same redacted reproduction envelope', async () => {
+    await expect(
+      assertV29WorkerFixedSeedReplay({
+        seed: 'V29_EMPTY_SEED',
+        async createAndRunFreshDatabase() {
+          return [];
+        },
+      }),
+    ).rejects.toMatchObject({
+      reproduction: {
+        seed: 'V29_EMPTY_SEED',
+        commandIndex: 0,
+        first: null,
+        second: null,
+      },
+    });
+  });
+
+  it('redacts an execution error while retaining its seed and command index', async () => {
+    let error: unknown;
+    try {
+      await assertV29WorkerFixedSeedReplay({
+        seed: 'V29_STEP_FAILURE',
+        async createAndRunFreshDatabase() {
+          throw new V29WorkerReplayStepError(1);
+        },
+      });
+    } catch (caught) {
+      error = caught;
+    }
+    expect(error).toBeInstanceOf(V29WorkerReplayMismatchError);
+    expect((error as V29WorkerReplayMismatchError).reproduction).toMatchObject({
+      seed: 'V29_STEP_FAILURE',
+      commandIndex: 1,
+      first: null,
+      second: null,
+    });
+  });
 });
