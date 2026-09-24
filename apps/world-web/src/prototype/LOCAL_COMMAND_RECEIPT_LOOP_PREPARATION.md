@@ -12,6 +12,10 @@ configuration and remains `LOCAL_FIXTURE`. An external trusted host may supply
 loopback bridge origin, and an optional `narrowTransferDraft`. None of these
 are derived from URL parameters, fixture values, or the original EconMind site.
 Only the F browser client uses the token; this page does not persist or log it.
+Sending also requires a trusted-host `narrowTransferReceiptBinding` containing
+the original Command ID, idempotency key, and authoritative intent fingerprint.
+The UI cannot calculate or infer that fingerprint. A missing or mismatched
+binding disables review and dispatch.
 
 The playable authorized route is deliberately narrow:
 
@@ -30,9 +34,12 @@ The playable authorized route is deliberately narrow:
    World version before values appear. The same Command ID is not sent again
    in this session.
 5. `UNKNOWN` clears values and blocks reads and repeat submission until an
-   external trusted receipt lookup supplies the matching final receipt. F/E
-   currently do not expose that lookup in this page, so this remains a visible
-   stop, not an automatic retry or fabricated final receipt.
+   external trusted receipt lookup supplies a final receipt matching the
+   original captured Command ID, idempotency key, authoritative fingerprint,
+   and identity. An externally recorded UNKNOWN without a locally captured
+   binding cannot be promoted to final. F/E currently do not expose that lookup
+   in this page, so this remains a visible stop, not an automatic retry or
+   fabricated final receipt.
 
 Disconnect, identity changes and late responses clear/ignore old private
 content. The fictional atlas is still navigation art, not server geography.

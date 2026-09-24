@@ -7,6 +7,7 @@ import {
 } from './authorized-read-adapter.js';
 import {
   createLocalAuthorizedReadController,
+  trustedReceiptBindingMatchesDraft,
   type LocalAuthorizedReadConfig,
 } from './local-authorized-read.js';
 import { SixOfficesG01 } from './SixOfficesG01.js';
@@ -46,9 +47,7 @@ export function LocalAuthorizedReadEntry({
   const authorized: AuthorizedUiInjection = {
     currentIdentity: snapshot.connected ? config.currentIdentity : null,
     read: snapshot.connected && identityCurrent ? snapshot.read : null,
-    command: snapshot.connected
-      ? (snapshot.command ?? config.command ?? null)
-      : null,
+    command: snapshot.connected && identityCurrent ? snapshot.command : null,
     pendingCommandId:
       snapshot.connected && identityCurrent ? snapshot.pendingCommandId : null,
   };
@@ -110,6 +109,10 @@ export function LocalAuthorizedReadEntry({
           snapshot.connected && identityCurrent
             ? {
                 draft: config.narrowTransferDraft ?? null,
+                receiptBindingReady: trustedReceiptBindingMatchesDraft(
+                  config.narrowTransferDraft,
+                  config.narrowTransferReceiptBinding,
+                ),
                 phase: snapshot.phase,
                 alreadySubmitted: config.narrowTransferDraft
                   ? controller.wasSubmitted(
@@ -120,6 +123,7 @@ export function LocalAuthorizedReadEntry({
                   if (config.narrowTransferDraft) {
                     void controller.submitNarrowTransfer(
                       config.narrowTransferDraft,
+                      config.narrowTransferReceiptBinding,
                     );
                   }
                 },

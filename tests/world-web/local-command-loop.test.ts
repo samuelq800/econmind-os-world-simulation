@@ -88,6 +88,12 @@ const finalReceipt: BrowserCommandResult = {
   },
 };
 
+const receiptBinding = {
+  commandId: draft.commandId,
+  idempotencyKey: draft.idempotencyKey,
+  commandFingerprint: `sha256:${'a'.repeat(64)}`,
+};
+
 function deferred<T>() {
   let resolve!: (value: T) => void;
   const promise = new Promise<T>((settle) => {
@@ -119,13 +125,13 @@ describe('authorized browser Command → receipt → projection preparation', ()
       async () => readResult('42'),
       async () => finalReceipt,
     );
-    await controller.submitNarrowTransfer(draft);
+    await controller.submitNarrowTransfer(draft, receiptBinding);
     expect(submit).not.toHaveBeenCalled();
     await controller.readProjection();
-    await controller.submitNarrowTransfer({
-      ...draft,
-      expectedWorldVersion: '41',
-    });
+    await controller.submitNarrowTransfer(
+      { ...draft, expectedWorldVersion: '41' },
+      receiptBinding,
+    );
     expect(submit).not.toHaveBeenCalled();
     expect(controller.getSnapshot().read?.result.status).toBe('PROJECTION');
   });
@@ -140,7 +146,26 @@ describe('authorized browser Command → receipt → projection preparation', ()
       async () => finalReceipt,
     );
     await controller.readProjection();
-    await controller.submitNarrowTransfer(draft);
+    await controller.submitNarrowTransfer(draft, receiptBinding);
+    expect(submit).not.toHaveBeenCalled();
+    expect(controller.getSnapshot().phase).toBe('READ_RETURNED');
+  });
+
+  it('does not POST without the original trusted key and fingerprint binding', async () => {
+    const { controller, submit } = controllerWith(
+      async () => readResult('42'),
+      async () => finalReceipt,
+    );
+    await controller.readProjection();
+    await controller.submitNarrowTransfer(draft, null);
+    await controller.submitNarrowTransfer(draft, {
+      ...receiptBinding,
+      idempotencyKey: 'OTHER_KEY',
+    });
+    await controller.submitNarrowTransfer(draft, {
+      ...receiptBinding,
+      commandFingerprint: 'not-an-authoritative-fingerprint',
+    });
     expect(submit).not.toHaveBeenCalled();
     expect(controller.getSnapshot().phase).toBe('READ_RETURNED');
   });
@@ -153,7 +178,7 @@ describe('authorized browser Command → receipt → projection preparation', ()
       .mockResolvedValueOnce(readResult('43'));
     const { controller, submit } = controllerWith(reads, () => pending.promise);
     await controller.readProjection();
-    const send = controller.submitNarrowTransfer(draft);
+    const send = controller.submitNarrowTransfer(draft, receiptBinding);
     expect(controller.getSnapshot()).toMatchObject({
       phase: 'SUBMITTING',
       read: null,
@@ -186,7 +211,7 @@ describe('authorized browser Command → receipt → projection preparation', ()
     });
     expect(display.command.kind).toBe('SUCCEEDED');
     expect(display.read.kind).toBe('CURRENT');
-    await controller.submitNarrowTransfer(draft);
+    await controller.submitNarrowTransfer(draft, receiptBinding);
     expect(submit).toHaveBeenCalledOnce();
   });
 
@@ -196,14 +221,14 @@ describe('authorized browser Command → receipt → projection preparation', ()
       status: 'UNKNOWN',
     }));
     await controller.readProjection();
-    await controller.submitNarrowTransfer(draft);
+    await controller.submitNarrowTransfer(draft, receiptBinding);
     expect(controller.getSnapshot()).toMatchObject({
       phase: 'UNKNOWN',
       read: null,
       command: { result: { status: 'UNKNOWN' } },
     });
     await controller.readProjection();
-    await controller.submitNarrowTransfer(draft);
+    await controller.submitNarrowTransfer(draft, receiptBinding);
     expect(reads).toHaveBeenCalledOnce();
     expect(submit).toHaveBeenCalledOnce();
     expect(
@@ -217,10 +242,79 @@ describe('authorized browser Command → receipt → projection preparation', ()
       controller.reconcileFinalReceipt({
         identity,
         commandId: draft.commandId,
+        result: {
+          ...finalReceipt,
+          receipt: { ...finalReceipt.receipt, idempotencyKey: 'OTHER_KEY' },
+        },
+      }),
+    ).toBe(false);
+    expect(controller.getSnapshot().phase).toBe('UNKNOWN');
+    expect(
+      controller.reconcileFinalReceipt({
+        identity,
+        commandId: draft.commandId,
+        result: {
+          ...finalReceipt,
+          receipt: {
+            ...finalReceipt.receipt,
+            commandFingerprint: `sha256:${'b'.repeat(64)}`,
+          },
+        },
+      }),
+    ).toBe(false);
+    expect(controller.getSnapshot().phase).toBe('UNKNOWN');
+    expect(
+      controller.reconcileFinalReceipt({
+        identity,
+        commandId: draft.commandId,
         result: finalReceipt,
       }),
     ).toBe(true);
     expect(controller.getSnapshot().phase).toBe('FINAL_RECEIPT');
+  });
+
+  it('cannot reconcile externally recorded UNKNOWN without a locally captured trusted binding', () => {
+    const { controller } = controllerWith(
+      async () => readResult('42'),
+      async () => finalReceipt,
+    );
+    controller.recordUnknown({
+      identity,
+      commandId: draft.commandId,
+      result: { status: 'UNKNOWN' },
+    });
+    expect(controller.getSnapshot().phase).toBe('UNKNOWN');
+    expect(
+      controller.reconcileFinalReceipt({
+        identity,
+        commandId: draft.commandId,
+        result: finalReceipt,
+      }),
+    ).toBe(false);
+    expect(controller.getSnapshot().phase).toBe('UNKNOWN');
+  });
+
+  it('keeps the original command and fingerprint when host objects change after dispatch', async () => {
+    const pending = deferred<BrowserCommandResult>();
+    const { controller } = controllerWith(
+      async () => readResult('42'),
+      () => pending.promise,
+    );
+    const hostBinding = { ...receiptBinding };
+    const hostDraft = { ...draft };
+    await controller.readProjection();
+    const send = controller.submitNarrowTransfer(hostDraft, hostBinding);
+    hostBinding.commandFingerprint = `sha256:${'b'.repeat(64)}`;
+    hostDraft.commandId = 'MUTATED_COMMAND';
+    pending.resolve({ status: 'UNKNOWN' });
+    await send;
+    expect(
+      controller.reconcileFinalReceipt({
+        identity,
+        commandId: draft.commandId,
+        result: finalReceipt,
+      }),
+    ).toBe(true);
   });
 
   it('keeps a rejected durable receipt distinct from a committed World change', async () => {
@@ -239,7 +333,7 @@ describe('authorized browser Command → receipt → projection preparation', ()
       async () => rejected,
     );
     await controller.readProjection();
-    await controller.submitNarrowTransfer(draft);
+    await controller.submitNarrowTransfer(draft, receiptBinding);
     const state = controller.getSnapshot();
     expect(state.phase).toBe('FINAL_RECEIPT');
     const copy = commandLifecycleCopy(
@@ -266,11 +360,11 @@ describe('authorized browser Command → receipt → projection preparation', ()
       },
     );
     await controller.readProjection();
-    await controller.submitNarrowTransfer(draft);
+    await controller.submitNarrowTransfer(draft, receiptBinding);
     expect(controller.getSnapshot().phase).toBe('COMMAND_UNAVAILABLE');
     expect(controller.wasSubmitted(draft.commandId)).toBe(false);
     await controller.readProjection();
-    await controller.submitNarrowTransfer(draft);
+    await controller.submitNarrowTransfer(draft, receiptBinding);
     expect(submit).toHaveBeenCalledTimes(2);
     expect(controller.getSnapshot().phase).toBe('FINAL_RECEIPT');
   });
@@ -282,7 +376,7 @@ describe('authorized browser Command → receipt → projection preparation', ()
       () => pending.promise,
     );
     await controller.readProjection();
-    const send = controller.submitNarrowTransfer(draft);
+    const send = controller.submitNarrowTransfer(draft, receiptBinding);
     controller.setIdentity({
       ...identity,
       authorizationRevision: 'revision-2',
@@ -305,7 +399,7 @@ describe('authorized browser Command → receipt → projection preparation', ()
       }),
     );
     await controller.readProjection();
-    await controller.submitNarrowTransfer(draft);
+    await controller.submitNarrowTransfer(draft, receiptBinding);
     expect(controller.getSnapshot().phase).toBe('UNKNOWN');
     const copy = commandLifecycleCopy(
       resolveAuthorizedUi({
@@ -327,5 +421,22 @@ describe('authorized browser Command → receipt → projection preparation', ()
         }),
       ),
     ).toContain('Sending · not confirmed');
+  });
+
+  it('treats a direct final receipt with a different authoritative fingerprint as UNKNOWN', async () => {
+    const { controller } = controllerWith(
+      async () => readResult('42'),
+      async () => ({
+        ...finalReceipt,
+        receipt: {
+          ...finalReceipt.receipt,
+          commandFingerprint: `sha256:${'b'.repeat(64)}`,
+        },
+      }),
+    );
+    await controller.readProjection();
+    await controller.submitNarrowTransfer(draft, receiptBinding);
+    expect(controller.getSnapshot().phase).toBe('UNKNOWN');
+    expect(controller.getSnapshot().read).toBeNull();
   });
 });

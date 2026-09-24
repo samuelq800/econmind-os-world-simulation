@@ -626,6 +626,7 @@ function OfficeSidebar({
 
 export interface AuthorizedCommandAction {
   readonly draft: NarrowTransferDraft | null;
+  readonly receiptBindingReady: boolean;
   readonly phase: LocalReadSnapshot['phase'];
   readonly alreadySubmitted: boolean;
   readonly onSubmit: () => void;
@@ -648,6 +649,7 @@ function AuthorizedCommandReview({
     !!draft &&
     read.kind === 'CURRENT' &&
     draft.expectedWorldVersion === read.worldVersion &&
+    action.receiptBindingReady &&
     action.phase === 'READ_RETURNED' &&
     !action.alreadySubmitted;
   const notice = !action
@@ -660,13 +662,15 @@ function AuthorizedCommandReview({
           ? 'Sending once. Wait for a final result.'
           : action.phase === 'FINAL_RECEIPT'
             ? 'Final receipt recorded. Refresh national intel.'
-            : read.kind !== 'CURRENT'
-              ? 'Current national intel is required before review.'
-              : draft.expectedWorldVersion !== read.worldVersion
-                ? `Draft targets v${draft.expectedWorldVersion}; current view is v${read.worldVersion}. Request a new draft.`
-                : action.alreadySubmitted
-                  ? 'This Command ID has already been sent in this session.'
-                  : 'Review the trusted transfer reference before sending.';
+            : !action.receiptBindingReady
+              ? 'Trusted receipt binding unavailable. Request a new transfer draft.'
+              : read.kind !== 'CURRENT'
+                ? 'Current national intel is required before review.'
+                : draft.expectedWorldVersion !== read.worldVersion
+                  ? `Draft targets v${draft.expectedWorldVersion}; current view is v${read.worldVersion}. Request a new draft.`
+                  : action.alreadySubmitted
+                    ? 'This Command ID has already been sent in this session.'
+                    : 'Review the trusted transfer reference before sending.';
 
   useEffect(() => {
     if (!focusAfterToggleRef.current || !canReview) return;
@@ -905,6 +909,7 @@ function AuthorizedOfficeView({
                   commandAction?.draft?.proposalRef,
                   commandAction?.draft?.buyerCountryId,
                   commandAction?.draft?.buyerFinanceApprovalRef,
+                  commandAction?.receiptBindingReady,
                   ui.read.kind === 'CURRENT'
                     ? ui.read.worldVersion
                     : 'unavailable',

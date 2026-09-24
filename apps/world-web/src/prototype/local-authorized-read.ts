@@ -19,7 +19,30 @@ export interface LocalAuthorizedReadConfig {
   readonly bridgeOrigin: string;
   /** Trusted-host draft reference; the server must validate every term. */
   readonly narrowTransferDraft?: NarrowTransferDraft | null;
+  /** Issued by the trusted host with the draft; never derived from fixture or browser inputs. */
+  readonly narrowTransferReceiptBinding?: TrustedNarrowTransferReceiptBinding | null;
   readonly command?: AuthorizedUiInjection['command'];
+}
+
+export interface TrustedNarrowTransferReceiptBinding {
+  readonly commandId: string;
+  readonly idempotencyKey: string;
+  readonly commandFingerprint: string;
+}
+
+const fingerprintPattern = /^sha256:[0-9a-f]{64}$/u;
+
+export function trustedReceiptBindingMatchesDraft(
+  draft: NarrowTransferDraft | null | undefined,
+  binding: TrustedNarrowTransferReceiptBinding | null | undefined,
+): boolean {
+  return !!(
+    draft &&
+    binding &&
+    binding.commandId === draft.commandId &&
+    binding.idempotencyKey === draft.idempotencyKey &&
+    fingerprintPattern.test(binding.commandFingerprint)
+  );
 }
 
 export interface LocalReadSnapshot {
@@ -70,6 +93,7 @@ export function createLocalAuthorizedReadController(
   let generation = 0;
   let client: ReadPort | null = null;
   let lastSubmittedCommandId: string | null = null;
+  let submittedBinding: TrustedNarrowTransferReceiptBinding | null = null;
   const submittedCommandIds = new Set<string>();
   let snapshot: LocalReadSnapshot = {
     phase: 'IDLE',
@@ -95,6 +119,7 @@ export function createLocalAuthorizedReadController(
 
   const invalidate = (reason: string) => {
     generation += 1;
+    submittedBinding = null;
     clearClient();
     publish({
       phase: 'UNAVAILABLE',
@@ -120,6 +145,7 @@ export function createLocalAuthorizedReadController(
       if (next && sameAuthorizedIdentity(identity, next)) return;
       identity = next ? { ...next } : null;
       lastSubmittedCommandId = null;
+      submittedBinding = null;
       clearClient();
       generation += 1;
       publish({
@@ -137,6 +163,7 @@ export function createLocalAuthorizedReadController(
     },
     disconnect() {
       generation += 1;
+      submittedBinding = null;
       clearClient();
       publish({
         phase: 'IDLE',
@@ -157,6 +184,12 @@ export function createLocalAuthorizedReadController(
         snapshot.phase !== 'UNKNOWN' ||
         command.result.status !== 'FINAL_RECEIPT' ||
         command.commandId !== lastSubmittedCommandId ||
+        !submittedBinding ||
+        command.result.receipt.commandId !== submittedBinding.commandId ||
+        command.result.receipt.idempotencyKey !==
+          submittedBinding.idempotencyKey ||
+        command.result.receipt.commandFingerprint !==
+          submittedBinding.commandFingerprint ||
         !sameAuthorizedIdentity(identity, command.identity)
       )
         return false;
@@ -194,6 +227,9 @@ export function createLocalAuthorizedReadController(
       )
         return;
       lastSubmittedCommandId = command.commandId;
+      if (submittedBinding?.commandId !== command.commandId) {
+        submittedBinding = null;
+      }
       submittedCommandIds.add(command.commandId);
       generation += 1;
       clearClient();
@@ -263,9 +299,13 @@ export function createLocalAuthorizedReadController(
             : `Read ${result.status.toLowerCase()}.`,
       });
     },
-    async submitNarrowTransfer(draft: NarrowTransferDraft) {
+    async submitNarrowTransfer(
+      draft: NarrowTransferDraft,
+      receiptBinding: TrustedNarrowTransferReceiptBinding | null | undefined,
+    ) {
       if (
         !draft ||
+        !trustedReceiptBindingMatchesDraft(draft, receiptBinding) ||
         !identity ||
         !snapshot.connected ||
         snapshot.phase !== 'READ_RETURNED' ||
@@ -285,25 +325,29 @@ export function createLocalAuthorizedReadController(
       )
         return;
       const commandIdentity = { ...identity };
+      const submittedDraft = { ...draft };
+      // Freeze the host-issued lookup/intent binding before any asynchronous dispatch.
+      const originalBinding = { ...receiptBinding! };
       const activeClient = client;
       const submit = activeClient.submitNarrowTransfer;
       if (!submit) return;
       generation += 1;
       const activeGeneration = generation;
-      lastSubmittedCommandId = draft.commandId;
+      lastSubmittedCommandId = submittedDraft.commandId;
+      submittedBinding = originalBinding;
       publish({
         phase: 'SUBMITTING',
         connected: true,
         identity: commandIdentity,
         read: null,
         command: null,
-        pendingCommandId: draft.commandId,
+        pendingCommandId: submittedDraft.commandId,
         lastSubmittedCommandId,
         reason: null,
       });
       let result: BrowserCommandResult;
       try {
-        result = await submit(requestId(), draft);
+        result = await submit(requestId(), submittedDraft);
       } catch {
         // A thrown browser/transport error after dispatch is not proof of rejection.
         result = { status: 'UNKNOWN' };
@@ -318,7 +362,7 @@ export function createLocalAuthorizedReadController(
       }
       let command = {
         identity: commandIdentity,
-        commandId: draft.commandId,
+        commandId: submittedDraft.commandId,
         result,
       };
       if (result.status === 'FINAL_RECEIPT') {
@@ -328,6 +372,10 @@ export function createLocalAuthorizedReadController(
           command,
         });
         if (
+          result.receipt.commandId !== originalBinding.commandId ||
+          result.receipt.idempotencyKey !== originalBinding.idempotencyKey ||
+          result.receipt.commandFingerprint !==
+            originalBinding.commandFingerprint ||
           !['SUCCEEDED', 'REJECTED', 'AUTHORIZATION_REVOKED'].includes(
             verified.command.kind,
           )
@@ -335,7 +383,7 @@ export function createLocalAuthorizedReadController(
           result = { status: 'UNKNOWN' };
           command = {
             identity: commandIdentity,
-            commandId: draft.commandId,
+            commandId: submittedDraft.commandId,
             result,
           };
         }
@@ -347,7 +395,9 @@ export function createLocalAuthorizedReadController(
             ? 'UNKNOWN'
             : 'COMMAND_UNAVAILABLE';
       if (result.status === 'FINAL_RECEIPT' || result.status === 'UNKNOWN') {
-        submittedCommandIds.add(draft.commandId);
+        submittedCommandIds.add(submittedDraft.commandId);
+      } else {
+        submittedBinding = null;
       }
       if (result.status !== 'FINAL_RECEIPT') clearClient();
       publish({
