@@ -20,6 +20,12 @@ an independent review, or permission to use production Supabase.
   requirements default to `MISSING`), and a V30 virtual load plan plus bounded
   injected runner. These P2 preparations are not a real 70-country World run,
   native-PostgreSQL Worker run, measured load or later-SHA Gate B check.
+- Subsequent mainline preparations add unactivated local-only final-receipt
+  API lookup and a web command/UNKNOWN-receipt loop. Review B closed the
+  browser receipt-intent binding MAJOR on exact isolated candidates; combined
+  API/web targeted checks passed, but the default fixture page and production
+  API are not live-wired. See
+  [the integration record](LOCAL_RECEIPT_PREPARATION_INTEGRATION.md).
 - The [hard-property matrix](V09_V10_HARD_PROPERTY_MATRIX.md) maps all 14
   properties to test surfaces. Its frozen candidate and exact-SHA Actions
   run `35864766026` passed the official `pnpm check` and disposable

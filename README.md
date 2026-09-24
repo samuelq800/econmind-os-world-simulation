@@ -27,6 +27,9 @@ and [`docs/reports/V30.1/IMPLEMENTATION.md`](docs/reports/V30.1/IMPLEMENTATION.m
 The runnable API process currently exposes health/readiness endpoints only.
 The default web prototype is `LOCAL_FIXTURE`; an authorized local read requires
 an explicit trusted-host opt-in and is not mounted by the default entrypoint.
+An optional local-only final-receipt lookup and web command/UNKNOWN-receipt
+loop are now integrated as unactivated preparations; the web lookup-to-API
+adapter is still a separate review candidate.
 There is no proven end-to-end authorized browser command/receipt flow, live
 forecast model, production database rollout, or product release.
 
