@@ -61,3 +61,17 @@ main SHA `2b086a2` in
 [run 35968394633](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35968394633).
 That green run is a different SHA from these V30 restore probes and does not
 itself validate V30.3.
+
+After selective mainline integration, the manual standalone workflow
+[run 35969859719](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35969859719)
+was `SUCCESS` on exact main SHA
+`5def465b92fef733867b207e42ad9ed0cdd343b9`. It applied the 16
+checked-in migrations and restored one complete World-head row and one
+immutable Command-submission row. The backup-point and restored complete-row
+SHA-256 were both
+`4fd62beac8c3e218774e51e10783283cfa64950fc4a8fc643c2093ce6c2ad904`;
+the later source-only state differed. The custom backup SHA-256 was
+`7a130d7440a11f19ad639afd4dbd56073d3779972f65f1dbc457ac4e8d84b411`.
+Diagnostic RPO/RTO were 170/285 ms for this tiny CI fixture only. The run
+uploaded its redacted evidence artifact. It did not run the candidate-wide
+official check or the missing staging/Worker recovery scenarios.

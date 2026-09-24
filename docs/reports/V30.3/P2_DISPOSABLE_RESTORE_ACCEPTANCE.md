@@ -20,7 +20,10 @@ repository secret scanning passed. The first combined diagnostic run had a
 separate failed official check; that failure and its later cross-timezone fix
 remain recorded in `DISPOSABLE_RESTORE_DIAGNOSTIC.md`. A merged-main workflow
 run and candidate-wide check are separate evidence, not implied by this
-acceptance.
+acceptance. The subsequent manual merged-main workflow succeeded in
+[run 35969859719](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35969859719)
+at exact SHA `5def465b92fef733867b207e42ad9ed0cdd343b9`; its complete-row
+backup-point and restored hashes matched. This does not change formal status.
 
 Event/Posting replay, Worker crash/fencing, retention policy, real recovery
 capacity, dedicated staging and formal independent gate review are `NOT_RUN`.
