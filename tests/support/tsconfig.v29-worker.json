@@ -10,7 +10,10 @@
   },
   "include": [
     "v29-worker-delivery-driver.ts",
+    "v29-worker-native-postgres-harness.ts",
     "v29-worker-replay-evidence.ts",
-    "v29-worker-delivery-driver.test.ts"
+    "v29-worker-two-delivery-fixture.ts",
+    "v29-worker-delivery-driver.test.ts",
+    "../world-core/v09-atomic-recovery-postgres.test.ts"
   ]
 }

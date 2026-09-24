@@ -45,6 +45,7 @@ import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-da
 import { WorldRecoveryCoordinator } from '../../apps/world-worker/src/recovery/world-recovery.js';
 import { createLocalPostgresV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
+import { assertV29NativePostgresTwoDelivery } from '../support/v29-worker-native-postgres-harness.js';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const migrations = [
@@ -400,6 +401,11 @@ postgresDescribe(
       ).rejects.toThrow(
         'Command claim must bind the exact active World writer lease holder and fencing token',
       );
+    }, 30_000);
+
+    it('executes two V29 same-World Worker deliveries on disposable native PG16 with lost acknowledgement and restart/retry', async () => {
+      const evidence = await assertV29NativePostgresTwoDelivery(database);
+      console.info('V29_NATIVE_PG_DURABLE_HASHES', JSON.stringify(evidence));
     }, 30_000);
   },
 );
