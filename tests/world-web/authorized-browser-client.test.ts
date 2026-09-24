@@ -274,7 +274,7 @@ describe('World Web local authorized client preparation', () => {
           `http://127.0.0.1:4179${LOCAL_WORLD_COMMAND_PATH}`,
         );
         expect(body).toEqual({
-          schemaVersion: 'world-command-api-v1',
+          schemaVersion: 'world-command-api-v2',
           requestId,
           operation: 'SUBMIT_NARROW_TREASURY_GCU_TRANSFER',
           payload: {
@@ -290,7 +290,7 @@ describe('World Web local authorized client preparation', () => {
           },
         });
         return Response.json({
-          schemaVersion: 'world-command-api-v1',
+          schemaVersion: 'world-command-api-v2',
           requestId,
           ok: true,
           receipt: commandReceipt,
@@ -359,7 +359,7 @@ describe('World Web local authorized client preparation', () => {
         return firstAck;
       }
       return Response.json({
-        schemaVersion: 'world-command-api-v1',
+        schemaVersion: 'world-command-api-v2',
         requestId,
         ok: true,
         receipt: receipt(),
@@ -380,7 +380,7 @@ describe('World Web local authorized client preparation', () => {
     });
     expect(commandPosts).toBe(1);
     releaseFirstAck(
-      new Response('{"schemaVersion":"world-command-api-v1",', { status: 200 }),
+      new Response('{"schemaVersion":"world-command-api-v2",', { status: 200 }),
     );
     expect(await firstSubmission).toEqual({ status: 'UNKNOWN' });
     expect(client.cache.read(identity)).toMatchObject({
@@ -440,7 +440,7 @@ describe('World Web local authorized client preparation', () => {
       commandPosts += 1;
       if (commandPosts === 1) return firstAck;
       return Response.json({
-        schemaVersion: 'world-command-api-v1',
+        schemaVersion: 'world-command-api-v2',
         requestId,
         ok: true,
         receipt: {
@@ -460,7 +460,7 @@ describe('World Web local authorized client preparation', () => {
     expect(commandPosts).toBe(1);
     releaseFirst(
       Response.json({
-        schemaVersion: 'world-command-api-v1',
+        schemaVersion: 'world-command-api-v2',
         requestId,
         ok: true,
         receipt: {
@@ -499,7 +499,7 @@ describe('World Web local authorized client preparation', () => {
         });
       }
       commandPosts += 1;
-      return new Response('{"schemaVersion":"world-command-api-v1",', {
+      return new Response('{"schemaVersion":"world-command-api-v2",', {
         status: 200,
       });
     }) as unknown as typeof fetch;
@@ -610,7 +610,7 @@ describe('World Web local authorized client preparation', () => {
     expect(commandPosts).toBe(1);
     release(
       Response.json({
-        schemaVersion: 'world-command-api-v1',
+        schemaVersion: 'world-command-api-v2',
         requestId,
         ok: true,
         receipt: receipt(),
@@ -653,7 +653,7 @@ describe('World Web local authorized client preparation', () => {
     await vi.waitFor(() => expect(commandPosts).toBe(1));
     release(
       Response.json({
-        schemaVersion: 'world-command-api-v1',
+        schemaVersion: 'world-command-api-v2',
         requestId,
         ok: true,
         receipt: receipt(),
@@ -779,7 +779,9 @@ describe('World Web local authorized client preparation', () => {
         if (kind === 'service error') return Response.json({}, { status: 503 });
         return Response.json({
           schemaVersion:
-            kind === 'wrong schema' ? 'wrong-schema' : 'world-command-api-v1',
+            kind === 'wrong schema'
+              ? 'world-command-api-v1'
+              : 'world-command-api-v2',
           requestId:
             kind === 'wrong request ID'
               ? '550e8400-e29b-41d4-a716-446655440002'
