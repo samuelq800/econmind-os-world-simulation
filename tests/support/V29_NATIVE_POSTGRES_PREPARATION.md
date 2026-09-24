@@ -3,6 +3,7 @@
 Status: `PREPARATION_ONLY_NOT_V29_STARTED`.
 
 Frozen baseline: `1dbfacd69672ab527ac6628d27c6403e9c7c0006`.
+Tested implementation candidate: `fafcd4e07e87a8d409728699e84f79d0b7f53be5`.
 The existing two-delivery PGlite fixture entered main at code base `21d43ae`;
 this candidate extracts that fixture into shared test support without changing
 Core, Worker, API, migration, production data or the original main site.
@@ -34,3 +35,21 @@ kill, broad fault matrix or all recovery surfaces.
 Native PostgreSQL CI is a separate evidence source; PGlite and type/lint
 passes cannot substitute for it. This is not a 70-country, 600/1000-day run,
 economic calibration, formal V29 acceptance, independent review or Gate B.
+
+## Frozen evidence record
+
+The single disposable PG16 CI dispatch was [run 35973174009](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35973174009).
+Both its PostgreSQL job and its isolated official `pnpm check` job succeeded
+against the exact candidate above. The native-PG test file passed 3/3 tests.
+Its two delivery step hashes were:
+
+| Step    | WorldVersion | Goods        | Buyer payment | Durable step hash                                                         |
+| ------- | ------------ | ------------ | ------------- | ------------------------------------------------------------------------- |
+| A       | 5            | 2 tonne      | 6 GCU         | `sha256:4a4f9e9ace7aeba7b05897b8ffaa3a369c431d07e36624f6e84bd50b2825bb58` |
+| B       | 6            | 2 tonne      | 6 GCU         | `sha256:73831c70aff9bb0eb4cd7f605a0e237bf11441fab1a24e89d4d4b96dca869608` |
+| Retry B | 6            | 0 additional | 0 additional  | identical to B                                                            |
+
+The [machine-readable evidence](V29_NATIVE_POSTGRES_EVIDENCE.json) records
+the five fact hashes per step, exact CI provenance, local checks and explicit
+non-claims. This implementer evidence does not grant package approval or
+change `status/progress.json`.

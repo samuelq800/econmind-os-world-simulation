@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "V29_NATIVE_POSTGRES_EVIDENCE-1",
+  "status": "PREPARATION_ONLY_NOT_V29_STARTED",
+  "authority": "IMPLEMENTER_TEST_EVIDENCE_ONLY_NOT_INDEPENDENT_REVIEW",
+  "frozenBaselineSha": "1dbfacd69672ab527ac6628d27c6403e9c7c0006",
+  "testedImplementationSha": "fafcd4e07e87a8d409728699e84f79d0b7f53be5",
+  "branch": "codex/f-v29-native-worker-sequence",
+  "ci": {
+    "runId": 35973174009,
+    "url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35973174009",
+    "dispatchCount": 1,
+    "target": "DISPOSABLE_LOOPBACK_POSTGRESQL_16_ALPINE",
+    "targetGuard": "scripts/v09-postgres-test-environment.mjs",
+    "postgresJob": "SUCCESS",
+    "focusedNativePostgresTestFile": "tests/world-core/v09-atomic-recovery-postgres.test.ts",
+    "focusedNativePostgresTestCount": 3,
+    "focusedNativePostgresTestResult": "3_PASS_0_FAIL",
+    "officialPnpmCheckJob": "SUCCESS"
+  },
+  "fixtureBoundary": {
+    "openingBuyerTreasuryGcu": "14",
+    "reserveAndShip": "IN_MEMORY_TEST_PREPARATION_NOT_NATIVE_PG_WORKER_EXECUTION",
+    "claimedQueueRows": "TEST_SEEDED",
+    "realWorkerOperations": [
+      "DELIVERY_A",
+      "DELIVERY_B",
+      "RETRY_DELIVERY_B_ON_NEW_WORKER_INSTANCE"
+    ]
+  },
+  "observed": {
+    "worldVersionPath": ["4", "5", "6", "6"],
+    "eventSequenceAfter": "6",
+    "deliveryA": {
+      "tonne": "2",
+      "buyerPaymentGcu": "6",
+      "eventHash": "sha256:298585e8f5f96edb990b6736e5359e7b609d518d0e98bd0dd71c12c68cef8bf9",
+      "inventoryHash": "sha256:ac3300d08e32a3332e67cd2c3e09a0c3b6521f54ba45abcb01143a11ed62fbff",
+      "financialHash": "sha256:3927783bbfbe7339c0f82e3c36f0b7bf3e2789422561ae643e332138792a1cdc",
+      "receiptHash": "sha256:cf4051eed4881f81693266c534363d0367a9997d6c925c28b3ec7cae9e768116",
+      "worldVersionHash": "sha256:e9a65932e211af67c6678826645fbf39873c905de0705febe0d5bf207df32e76",
+      "stepHash": "sha256:4a4f9e9ace7aeba7b05897b8ffaa3a369c431d07e36624f6e84bd50b2825bb58"
+    },
+    "deliveryB": {
+      "tonne": "2",
+      "buyerPaymentGcu": "6",
+      "eventHash": "sha256:bdf28e8fbcf37c4c19a7d7c2ce9a8432b166ff58d01160d7a571f86c94ce4c12",
+      "inventoryHash": "sha256:3e97cd0e9970f1194ea863269f1595e76d48d5285f4d0ebdb7fc298808c4b56e",
+      "financialHash": "sha256:03ed3f9adac5b13830d4f2172db42f5bc364d28c258947b7f8ec9f60895dd50d",
+      "receiptHash": "sha256:0b7dbd45932251f5eecbdf77b57532dae7fddbe3c91453af480b1969e33727a9",
+      "worldVersionHash": "sha256:ba9c2df7030952b5a1c4de73ce00f0fa2adea37f71254aece4adbb0446709c06",
+      "stepHash": "sha256:73831c70aff9bb0eb4cd7f605a0e237bf11441fab1a24e89d4d4b96dca869608"
+    },
+    "totalDeliveredTonne": "4",
+    "totalBuyerPaymentGcu": "12",
+    "postCommitAcknowledgementLossInjections": 1,
+    "retrySource": "EXISTING_FINAL",
+    "durableRowCountsAfterRetry": {
+      "event": 2,
+      "inventoryPosting": 2,
+      "financialPosting": 2,
+      "receipt": 2,
+      "outbox": 2
+    },
+    "retryCreatedAdditionalEconomicRows": false
+  },
+  "localChecks": {
+    "pgliteFocused": "10_PASS_0_FAIL",
+    "nativePostgresLocal": "NOT_RUN_NO_LOCAL_PG16_SERVICE",
+    "focusedTypecheck": "PASS",
+    "focusedLint": "PASS",
+    "prettier": "PASS",
+    "coreBuild": "PASS",
+    "workerBuild": "PASS",
+    "boundaryCheck": "PASS",
+    "secretCheck": "PASS",
+    "gitDiffCheck": "PASS"
+  },
+  "notClaimed": [
+    "PRODUCTION_SUPABASE_EXECUTION",
+    "PRODUCTION_TRANSFER_RESERVE_SHIP_LIFECYCLE",
+    "PROCESS_CRASH_OR_CONNECTION_KILL_RECOVERY",
+    "SEVENTY_COUNTRY_LONG_RUN",
+    "SIX_HUNDRED_OR_ONE_THOUSAND_DAY_RUN",
+    "ECONOMIC_CALIBRATION",
+    "FORMAL_V29_ACCEPTANCE",
+    "INDEPENDENT_REVIEW",
+    "GATE_B"
+  ]
+}
