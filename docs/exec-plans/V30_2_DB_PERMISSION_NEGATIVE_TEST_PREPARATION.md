@@ -27,18 +27,23 @@ only an active current authorization at the receipt's durable scope.
 
 PGlite verifies the application/server query guards, not PostgreSQL role or
 row-level-security enforcement. Native PostgreSQL role/RLS negative validation
-has a separately manual GitHub Actions candidate at
+has an isolated GitHub Actions candidate at
 `.github/workflows/v30-2-postgres-permission-negatives.yml`. It creates only
 disposable least-privilege test roles on the PG16 service, verifies real grants
 and RLS behavior for supplied claims, and cleans the schema and roles on exit.
 
-That workflow has not run from this local workspace, so its native result is
-currently `NOT_RUN`. It also does not prove production role provisioning or a
-verified JWT-to-`request.jwt.claim.sub` propagation mechanism: migrations do
-not create deployment roles, and PostgreSQL custom settings must be populated
-by a trusted API gateway. Current receipt recovery requires any active current
-authorization at the durable scope; it has no separate capability-specific
-receipt-read grant. Those deployment/claim and capability semantics remain
-`MISSING` for Gate B until independently specified and verified. Do not
-promote this result to an RLS, remote Supabase, production, or Gate B
-acceptance claim.
+The native candidate passed at frozen SHA
+`8b082e1b3347aa77408f3521bf9976b04283e00d` in
+[Actions run 35969032516](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35969032516): migration validation, Core build, and all three
+native role/grant/RLS negatives passed. The prior run at `d4ed05a` is not
+evidence because its shared disposable-PostgreSQL URL guard allowed `pg` query
+parameter target overrides; the fixed SHA is the first valid native result.
+
+This isolated result does not prove production role provisioning or a verified
+JWT-to-`request.jwt.claim.sub` propagation mechanism: migrations do not create
+deployment roles, and PostgreSQL custom settings must be populated by a trusted
+API gateway. Current receipt recovery requires any active current authorization
+at the durable scope; it has no separate capability-specific receipt-read
+grant. Those deployment/claim and capability semantics remain `MISSING` for
+Gate B until independently specified and verified. Do not promote this result
+to a remote Supabase, production, or Gate B acceptance claim.
