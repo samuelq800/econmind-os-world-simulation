@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "v27-country-configuration-fingerprint-fix-evidence-v1",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "baseSha": "9ddfa46efee585fe2c373546faa9f87f2e168d72",
+  "planSha": "aca8a4adc6f119403c848a940a890fb3a01df6a6",
+  "implementationSha": "88dfc511ec494c53dc3c9f81b73e3df1ccb368ac",
+  "reviewedAContractReferenceSha": "ec72b19e120398c17bd4550c8673a16ca0fb5bb0",
+  "integratedOriginMainSha": "2b086a2f7fd768ef648992876ef5af2a1f8d19dd",
+  "postMergeTestedCandidateSha": "8fc95d04772ff0a698cdeae2001eb2fcdb49d849",
+  "branch": "codex/v27-country-config-fingerprint-contract-fix",
+  "goldenVector": {
+    "worldId": "WORLD_SHARED",
+    "countryIdRange": "COUNTRY_01..COUNTRY_70",
+    "bindingVersion": "v27.2-country-configuration-identity-v1",
+    "fingerprint": "sha256:6a3d1df55987668814bc6ff7427289e51c4e304d543b9f40b14da609b7ebfaf3"
+  },
+  "checks": [
+    {
+      "name": "focused-vitest",
+      "command": "pnpm exec vitest run tests/foundation/v27-country-configuration-manifest-preparation.test.ts",
+      "result": "PASS",
+      "detail": "1 file passed; 9 tests passed"
+    },
+    {
+      "name": "standalone-strict-typescript",
+      "command": "pnpm exec tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --types node,vitest/globals tools/v27/country-configuration-manifest-preparation.ts tests/foundation/v27-country-configuration-manifest-preparation.test.ts",
+      "result": "PASS"
+    },
+    {
+      "name": "targeted-eslint",
+      "command": "pnpm exec eslint tools/v27/country-configuration-manifest-preparation.ts tests/foundation/v27-country-configuration-manifest-preparation.test.ts",
+      "result": "PASS"
+    },
+    {
+      "name": "targeted-prettier",
+      "command": "pnpm exec prettier --write tools/v27/country-configuration-manifest-preparation.ts tests/foundation/v27-country-configuration-manifest-preparation.test.ts docs/exec-plans/V27_COUNTRY_CONFIGURATION_FINGERPRINT_CONTRACT_FIX.md",
+      "result": "PASS"
+    },
+    {
+      "name": "repository-secrets",
+      "command": "pnpm secrets:check",
+      "result": "PASS",
+      "detail": "1030 files scanned on post-merge candidate"
+    },
+    {
+      "name": "diff-check",
+      "command": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "notRun": [
+    "A P0 Core import or modification",
+    "external source-byte/hash verification",
+    "real configuration authority attestation",
+    "Worker or runtime integration",
+    "production database or deployment",
+    "independent approval or formal Gate"
+  ]
+}
