@@ -32,11 +32,11 @@ export function LocalAuthorizedReadEntry({
   });
   useEffect(() => {
     if (config.command?.result.status === 'UNKNOWN') {
-      controller.invalidate(
-        'Command outcome unknown. Read again after reconciliation.',
-      );
+      controller.recordUnknown(config.command);
+    } else if (config.command?.result.status === 'FINAL_RECEIPT') {
+      controller.reconcileFinalReceipt(config.command);
     }
-  }, [controller, config.command?.commandId, config.command?.result.status]);
+  }, [controller, config.command]);
   useEffect(() => () => controller.disconnect(), [controller]);
 
   const identityCurrent =
@@ -46,7 +46,11 @@ export function LocalAuthorizedReadEntry({
   const authorized: AuthorizedUiInjection = {
     currentIdentity: snapshot.connected ? config.currentIdentity : null,
     read: snapshot.connected && identityCurrent ? snapshot.read : null,
-    command: snapshot.connected ? (config.command ?? null) : null,
+    command: snapshot.connected
+      ? (snapshot.command ?? config.command ?? null)
+      : null,
+    pendingCommandId:
+      snapshot.connected && identityCurrent ? snapshot.pendingCommandId : null,
   };
   const read = resolveAuthorizedUi(authorized).read;
   const status = !snapshot.connected
@@ -55,17 +59,22 @@ export function LocalAuthorizedReadEntry({
       ? 'Office identity changed. Previous values were cleared.'
       : snapshot.phase === 'LOADING'
         ? 'Reading the scoped projection…'
-        : read.kind === 'CURRENT'
-          ? `Current derived projection · World v${read.worldVersion}`
-          : (snapshot.reason ?? read.reason);
+        : snapshot.phase === 'SUBMITTING'
+          ? 'Sending once. No final result has returned yet.'
+          : snapshot.phase === 'UNKNOWN'
+            ? 'Outcome unknown. Look up the original Command ID before another move.'
+            : read.kind === 'CURRENT'
+              ? `Current derived projection · World v${read.worldVersion}`
+              : (snapshot.reason ?? read.reason);
 
   return (
     <div className="prototype-app">
       <div className="prototype-warning" role="note">
         <strong>LOCAL AUTHORIZED READ · OPT-IN</strong>
         <span>
-          Only the supplied loopback bridge is contacted after you choose Read.
-          No Command is sent.
+          The supplied loopback bridge is contacted only after your action.
+          Commands require a reviewed, host-supplied draft and explicit
+          confirmation.
         </span>
       </div>
       <section
@@ -77,7 +86,8 @@ export function LocalAuthorizedReadEntry({
           <button
             type="button"
             disabled={
-              config.currentIdentity === null || snapshot.phase === 'LOADING'
+              config.currentIdentity === null ||
+              ['LOADING', 'SUBMITTING', 'UNKNOWN'].includes(snapshot.phase)
             }
             onClick={() => void controller.readProjection()}
           >
@@ -96,6 +106,27 @@ export function LocalAuthorizedReadEntry({
       <SixOfficesG01
         state={{ status: 'loading' }}
         authorized={authorized}
+        commandAction={
+          snapshot.connected && identityCurrent
+            ? {
+                draft: config.narrowTransferDraft ?? null,
+                phase: snapshot.phase,
+                alreadySubmitted: config.narrowTransferDraft
+                  ? controller.wasSubmitted(
+                      config.narrowTransferDraft.commandId,
+                    )
+                  : false,
+                onSubmit: () => {
+                  if (config.narrowTransferDraft) {
+                    void controller.submitNarrowTransfer(
+                      config.narrowTransferDraft,
+                    );
+                  }
+                },
+                onRefresh: () => void controller.readProjection(),
+              }
+            : undefined
+        }
         onRetry={() => void controller.readProjection()}
         onReturnToEntry={() => controller.disconnect()}
       />

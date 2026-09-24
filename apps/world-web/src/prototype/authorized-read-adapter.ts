@@ -7,6 +7,8 @@ import type { CommandLifecycleState } from './CommandLifecycleStatus.js';
 
 export interface AuthorizedUiInjection {
   readonly currentIdentity: AuthorizedBrowserIdentity | null;
+  /** Local in-flight state only; never means server acceptance. */
+  readonly pendingCommandId?: string | null;
   readonly read: {
     readonly identity: AuthorizedBrowserIdentity;
     readonly result: BrowserReadResult;
@@ -65,7 +67,12 @@ export interface AuthorizedUiState {
 
 const canonicalId = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 const version = /^(?:0|[1-9]\d*)$/u;
+const positiveVersion = /^[1-9]\d*$/u;
 const integer = /^(?:0|[1-9]\d*|-[1-9]\d*)$/u;
+const fingerprint = /^sha256:[0-9a-f]{64}$/u;
+const reasonCode = /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/u;
+const timestamp =
+  /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d\.\d{3}Z$/u;
 
 function record(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -246,6 +253,23 @@ function parseProjection(
 }
 
 function commandState(injection: AuthorizedUiInjection): CommandLifecycleState {
+  if (injection.pendingCommandId) {
+    if (
+      !injection.currentIdentity ||
+      !canonicalId.test(injection.pendingCommandId)
+    ) {
+      return {
+        source: 'AUTHORIZED_READ_MODEL',
+        kind: 'UNAVAILABLE',
+        reason: 'The in-flight Command reference is invalid.',
+      };
+    }
+    return {
+      source: 'AUTHORIZED_READ_MODEL',
+      kind: 'SENDING_UNCONFIRMED',
+      commandId: injection.pendingCommandId,
+    };
+  }
   const command = injection.command;
   if (
     !command ||
@@ -277,19 +301,26 @@ function commandState(injection: AuthorizedUiInjection): CommandLifecycleState {
         result.receipt.source !== 'DURABLE_FINAL_COMMAND_RECEIPT' ||
         result.receipt.commandId !== command.commandId ||
         result.receipt.worldId !== command.identity.worldId ||
+        !canonicalId.test(result.receipt.idempotencyKey) ||
+        !fingerprint.test(result.receipt.commandFingerprint) ||
+        !timestamp.test(result.receipt.recordedAtReal) ||
         !['COMMITTED', 'REJECTED', 'AUTHORIZATION_REVOKED'].includes(
           result.receipt.outcome,
         ) ||
         !Array.isArray(result.receipt.eventIds) ||
+        result.receipt.eventIds.length > 1000 ||
         !result.receipt.eventIds.every((id) => canonicalId.test(id)) ||
+        new Set(result.receipt.eventIds).size !==
+          result.receipt.eventIds.length ||
         (result.receipt.outcome === 'COMMITTED' &&
           (result.receipt.worldVersionAfter === null ||
-            !version.test(result.receipt.worldVersionAfter) ||
+            !positiveVersion.test(result.receipt.worldVersionAfter) ||
             result.receipt.reasonCode !== null ||
             result.receipt.eventIds.length === 0)) ||
         (result.receipt.outcome !== 'COMMITTED' &&
           (result.receipt.worldVersionAfter !== null ||
             !shortText(result.receipt.reasonCode, 80) ||
+            !reasonCode.test(result.receipt.reasonCode) ||
             result.receipt.eventIds.length !== 0))
       ) {
         return {
@@ -391,6 +422,7 @@ export function resolveAuthorizedUi(
     }
   }
   if (
+    command.kind === 'SENDING_UNCONFIRMED' ||
     command.kind === 'UNKNOWN_OUTCOME' ||
     command.kind === 'AUTHORIZATION_REVOKED' ||
     (command.kind === 'SUCCEEDED' &&

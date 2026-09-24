@@ -1,5 +1,10 @@
 # Opt-in local authorized read
 
+This records the read-only slice at `da5800a3545ea621fe191673c88f0bb756a8eee0`.
+The later opt-in Command/receipt extension is described in
+`LOCAL_COMMAND_RECEIPT_LOOP_PREPARATION.md`; the statements below refer to that
+earlier read-only candidate.
+
 `PREPARATION_ONLY_NOT_GATE_B`
 
 The default `prototype.html` still mounts `<PrototypeApp />` and remains
