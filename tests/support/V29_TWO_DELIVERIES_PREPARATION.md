@@ -19,10 +19,10 @@ step. The focused test checks each event's distinct transfer binding and each
 receipt's version edge, plus the durable posting amounts:
 
 | Worker step | WorldVersion | Goods delivered | Buyer Treasury payment | New Event/Inventory/Financial/Receipt/Outbox rows |
-| --- | --- | --- | --- | --- |
-| Delivery A | 4 → 5 | 2 tonne | 6 GCU | 1 each |
-| Delivery B | 5 → 6 | 2 tonne | 6 GCU | 1 each |
-| Retry B | 6 → 6 | 0 additional | 0 additional | 0 additional |
+| ----------- | ------------ | --------------- | ---------------------- | ------------------------------------------------- |
+| Delivery A  | 4 → 5        | 2 tonne         | 6 GCU                  | 1 each                                            |
+| Delivery B  | 5 → 6        | 2 tonne         | 6 GCU                  | 1 each                                            |
+| Retry B     | 6 → 6        | 0 additional    | 0 additional           | 0 additional                                      |
 
 Total persisted delivery postings: 4 tonne and 12 GCU; the buyer's
 14 GCU opening Treasury and the two pre-delivery transit sources are
