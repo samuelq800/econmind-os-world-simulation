@@ -1,0 +1,25 @@
+{
+  "scope": "V29_1_requirement_binding_preparation_only",
+  "formal_status": "PLANNED",
+  "candidate_status": "PREPARATION_ONLY_NOT_COVERAGE_APPROVAL",
+  "registry_requirements": 139,
+  "unbound_requirement_classification": "MISSING",
+  "checks": {
+    "focused_vitest": { "status": "PASS", "files": 1, "tests": 4 },
+    "initial_focused_vitest": "FAIL_TEST_EXPECTATION_ON_DEFAULT_MISSING_COUNT_CORRECTED",
+    "strict_typescript": "PASS",
+    "targeted_eslint": "PASS",
+    "targeted_prettier": "PASS",
+    "repository_secret_scan": "PASS"
+  },
+  "not_run": [
+    "full_requirement_to_code_test_mapping",
+    "artifact_existence_and_content_validation",
+    "independent_requirement_review",
+    "V29_2_real_70_country_long_run",
+    "V29_3_real_worker_replay",
+    "full_repository_check"
+  ],
+  "authoritative_writes": false,
+  "gate_b_decision": "PENDING"
+}

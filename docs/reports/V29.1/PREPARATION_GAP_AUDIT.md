@@ -21,3 +21,9 @@ V29.2's 70-country/600-day and 1,000-day non-idle run, V29.3's fixed-seed
 replay and minimal reproduction, and all V30 measurements are `NOT_RUN` on
 this candidate. No full feature audit, production rollout or Gate decision is
 claimed by this baseline.
+
+The additive V29.1 binding helper now produces 139 `MISSING` rows when given
+the current registry and no candidate-bound claims. It rejects unknown or
+duplicate IDs and refuses an `EVIDENCED` label without an exact SHA plus
+code/test/evidence references. This is schema validation, not an audit of the
+referenced artifact contents or approval of any requirement.
