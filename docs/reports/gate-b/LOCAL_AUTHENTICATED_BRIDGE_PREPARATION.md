@@ -29,3 +29,13 @@ final independent Gate B review remain `MISSING` or `NOT_RUN`. The new native
 vertical does not separately test multi-active-scope and unknown-SQL denial;
 the code rejects both, but those negative tests remain a focused follow-up.
 This merge is not production RLS, V30.3 recovery acceptance or Gate B approval.
+
+E's subsequent read-only schema check found a concrete blocker to replacing
+the Buyer Finance fixture: migration `0015` records proposal identity and
+Office signatures, but no durable `buyerFinanceApprovalRef`/`approval_ref`
+field. The current command handler requires that browser-supplied approval
+reference to match the server reader's exact approval reference. Neither the
+proposal ID nor actor, authorization version or timestamp can be substituted
+without inventing an authorization mapping. A separately reviewed V2 schema
+and approval-writing contract is needed before the reader can return real
+approval evidence; no migration or production database was changed.

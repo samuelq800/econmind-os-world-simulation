@@ -115,6 +115,9 @@ through server-only subject binding and real PostgreSQL RLS reads/receipts in
 disposable CI. Finance approval and durable Worker command dependencies remain
 fixtures, and no live browser command lifecycle was run. See
 `docs/reports/gate-b/LOCAL_AUTHENTICATED_BRIDGE_PREPARATION.md`.
+The Buyer Finance approval reader is specifically blocked by the absence of
+an exact durable approval reference in migration `0015`; an existing proposal
+ID or signature attribute must not be guessed into that authorization claim.
 
 ## Documentation and governance drift
 
