@@ -781,17 +781,37 @@ async function expectRejected(client, step, text, values, expectedMessage) {
 export function createPgStagingClient({ connectionString }) {
   // This factory is intentionally called only after policy validation returns.
   const client = new Client({ connectionString });
+  let terminalConnectionError;
+  client.on('error', (error) => {
+    terminalConnectionError ??= error;
+  });
+  function throwTerminalConnectionError() {
+    if (terminalConnectionError !== undefined) {
+      throw terminalConnectionError;
+    }
+  }
   return Object.freeze({
     async connect() {
       await client.connect();
+      throwTerminalConnectionError();
     },
     async end() {
-      await client.end();
+      let closeError;
+      try {
+        await client.end();
+      } catch (error) {
+        closeError = error;
+      }
+      throwTerminalConnectionError();
+      if (closeError !== undefined) throw closeError;
     },
     async execute({ text, values }) {
-      return values.length === 0
-        ? client.query(text)
-        : client.query(text, values);
+      throwTerminalConnectionError();
+      const result =
+        values.length === 0 ? client.query(text) : client.query(text, values);
+      const resolved = await result;
+      throwTerminalConnectionError();
+      return resolved;
     },
   });
 }
