@@ -18,6 +18,9 @@ const delayedLauncherPreload = pathToFileURL(
 const failedBuildPreload = pathToFileURL(
   path.join(repositoryRoot, 'tests/fixtures/fail-typescript-build.mjs'),
 ).href;
+const delayedClosePreload = pathToFileURL(
+  path.join(repositoryRoot, 'tests/fixtures/delay-http-close-callback.mjs'),
+).href;
 
 interface ServiceDefinition {
   readonly command: 'dev:web' | 'dev:api' | 'dev:worker';
@@ -347,7 +350,11 @@ async function repeatedSignalAttack(
   signals: readonly [NodeJS.Signals, NodeJS.Signals],
 ) {
   const port = await freePort();
-  const managed = startPublicCommand(service, port);
+  const managed = startPublicCommand(
+    service,
+    port,
+    preloadEnvironment(delayedClosePreload),
+  );
   let captured: ProcessRow[] = [];
   let socket: Socket | undefined;
   try {
