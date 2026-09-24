@@ -1,0 +1,43 @@
+{
+  "scope": "v27_v28_shared_core_opening_input_preparation_only",
+  "branch": "codex/v27-v28-single-world-core-composition",
+  "base_v27_sha": "ec72b19e120398c17bd4550c8673a16ca0fb5bb0",
+  "donor_v28_branch_sha": "875114cca52211cb752bfafaee923fc9dd63958d",
+  "donor_v28_code_sha": "cd7b7bd64dfab634d08bd426559b5c0c091cf574",
+  "common_ancestor_sha": "0fa8da7e74488f4554185afb68c19b4933d72586",
+  "risk": "P0",
+  "status": "PREPARATION_ONLY",
+  "initializationAuthorized": false,
+  "orchestratorSelected": false,
+  "checks": {
+    "focused_vitest_final": { "status": "PASS", "files": 7, "tests": 58 },
+    "architecture_boundary_vitest": {
+      "status": "PASS",
+      "files": 3,
+      "tests": 34
+    },
+    "core_build": "PASS",
+    "core_typecheck": "PASS",
+    "worker_build": "PASS",
+    "targeted_eslint": "PASS",
+    "targeted_prettier": "PASS",
+    "authoritative_pattern_scan": "PASS",
+    "repository_boundary_scan": "PASS",
+    "local_safe_environment": "PASS_DATABASE_NOT_CONFIGURED",
+    "repository_secret_scan": "PASS"
+  },
+  "intermediate_failure": "ONE_EXISTING_V27_ADAPTER_TEST_TIMED_OUT_IN_SEVEN_FILE_RUN; ISOLATED_RERUN_PASS; FINAL_SEVEN_FILE_RUN_58_OF_58_PASS; ROOT_CAUSE_NOT_ESTABLISHED",
+  "not_run": [
+    "independent_P0_review_of_new_sha",
+    "R002_ADR14_governance_reconciliation",
+    "formal_V27_V28_dependency_closure",
+    "external_configuration_authority",
+    "durable_opening_configuration_binding",
+    "calibration_to_opening_value_lineage",
+    "real_70_country_values",
+    "runtime_activation",
+    "full_repository_suite",
+    "database_migration_or_production"
+  ],
+  "authoritative_writes": false
+}

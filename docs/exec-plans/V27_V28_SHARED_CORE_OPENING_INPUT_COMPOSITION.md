@@ -1,0 +1,17 @@
+# V27 to V28 shared-Core opening input composition — preparation only
+
+## Exact inputs and authority
+
+New isolated branch `codex/v27-v28-single-world-core-composition` starts from V27 candidate `ec72b19e120398c17bd4550c8673a16ca0fb5bb0`. The separately reviewed V28.1 candidate is `origin/codex/v28-v30-preparation@875114cca52211cb752bfafaee923fc9dd63958d`; its reviewed Core code is from `cd7b7bd64dfab634d08bd426559b5c0c091cf574`. The branches have common ancestor `0fa8da7e74488f4554185afb68c19b4933d72586`. V28.1 adds a new configuration module/test, so there is no same-path code conflict with V27's calibration/preflight files. Do not merge the V28 branch wholesale: it also contains unrelated V29/V30 preparation and governance documents.
+
+Constitution R002 still requires separate World/Season orchestrators sharing Core. ADR-14 remains `PROPOSED_NOT_APPROVED`; active V28.1 contract and the owner's later single-World direction are unreconciled. This slice **does not** implement, remove, select or bypass either orchestrator. It prepares a neutral shared-Core input check for one World at a time, callable in principle by either future orchestrator only after formal contract/dependency closure. Neither `PREPARATION_ONLY` candidate is promoted to a formal step.
+
+## Minimal composition
+
+Bring in only the reviewed V28.1 pure configuration module and focused test, preserving their donor provenance. To make the composition's equality check possible, advance the **preparation-only** configuration schema to require a canonical `countryConfigurationRef`; this changes the reviewed file and therefore requires a fresh P0 review. Add a new pure Core preparation contract that compares: (1) a V27.2 closed candidate's explicit `worldId`, `countryConfigurationRef` and exact 70 country IDs; (2) the V28.1 immutable configuration's World/configuration ref/model/clock/count; and (3) a canonical WorldVersion-zero OpeningSeed identity/replay binding. Accept only direct, exact equality and fail closed on mismatch or forged evidence. This narrow check does not consume the V27.1 provenance adapter result, so it must explicitly report that link as unverified. A caller-provided canonical seed is not proof of durable persistence; the current OpeningSeed schema also has no country-configuration ref or verified linkage to V27.2 calibrated values. The result must therefore remain `OPENING_DURABILITY_UNVERIFIED` and `OPENING_CONFIGURATION_BINDING_UNAVAILABLE`, `initializationAuthorized=false`, with explicit missing authority. No candidate-to-seed coercion or fabricated binding is permitted.
+
+Optionally add a worker-only read wrapper over the existing `WorldOpeningSeedStore.load`, without calling `bootstrap` or runtime startup. Tests should show deterministic matching diagnostics, mismatch rejection, missing seed failure, and no writes during inspection. Reuse existing exact-decimal and OpeningSeed constructors; do not invent a second numeric, clock, replay or economic source of truth.
+
+## Scope and gate
+
+Own only Core preparation modules, focused tests and independent plan/evidence. The in-memory V28 preparation contract is versioned to v2; no database schema or migration is changed. No original main site, production, runtime wiring, status/ADR/governance edits, V27/V28 formal approval, or R002 reinterpretation. Run Core/worker build and typecheck, focused tests, targeted lint/format, architecture boundary and safety scans. This is P0 and needs independent review of the new SHA before any merge or activation.

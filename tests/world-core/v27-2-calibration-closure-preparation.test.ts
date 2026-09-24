@@ -10,6 +10,23 @@ import {
   v27_2CountryConfigurationRef,
 } from '../../packages/core/src/calibration/index.js';
 import { DOMAIN_ERROR_CODES } from '../../packages/core/src/errors.js';
+import {
+  openingSeedId,
+  openingSourceId,
+  worldId,
+} from '../../packages/core/src/ids.js';
+import { SimTime } from '../../packages/core/src/numeric/sim-time.js';
+import {
+  OPENING_SEED_SCHEMA_VERSION,
+  OPENING_SOURCE_SCHEMA_VERSION,
+  createOpeningSeed,
+  createOpeningSource,
+} from '../../packages/core/src/opening/opening-seed.js';
+import { SINGLE_WORLD_CONFIGURATION_VERSION } from '../../packages/core/src/orchestration/single-world-configuration.js';
+import { prepareSharedCoreOpeningInput } from '../../packages/core/src/orchestration/shared-core-opening-input.js';
+import { CURRENT_REPLAY_BINDING } from '../../packages/core/src/replay/replay.js';
+import { SIMULATION_CLOCK_VERSION } from '../../packages/core/src/time/simulation-clock.js';
+import { WORLD_MODEL_VERSION } from '../../packages/core/src/versions.js';
 
 const sha256 = (preimage: string) =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
@@ -137,6 +154,56 @@ function fixture() {
       },
     ],
     countries,
+  };
+}
+
+function openingSeed(
+  sourceKind:
+    'AUTHORITATIVE_DATASET' | 'TEST_FIXTURE' = 'AUTHORITATIVE_DATASET',
+  seedWorldId = 'WORLD_CALIBRATION_TEST',
+) {
+  const source = createOpeningSource(
+    {
+      schemaVersion: OPENING_SOURCE_SCHEMA_VERSION,
+      sourceId: openingSourceId('SOURCE_SHARED_CORE_OPENING'),
+      sourceKind,
+      locator: 'dataset://opening/shared-core-preparation',
+      sourceVersion: '2026-09-24',
+      payload: { dataset: 'shared-core-opening-preparation' },
+    },
+    sha256,
+  );
+  return createOpeningSeed(
+    {
+      schemaVersion: OPENING_SEED_SCHEMA_VERSION,
+      seedId: openingSeedId('SEED_SHARED_CORE_OPENING'),
+      worldId: worldId(seedWorldId),
+      openingWorldVersion: '0',
+      replayBinding: CURRENT_REPLAY_BINDING,
+      sources: [source],
+      inventoryEntries: [],
+      financialBatches: [],
+    },
+    sha256,
+  );
+}
+
+function sharedCoreInput() {
+  const calibration = fixture();
+  return {
+    calibration,
+    configuration: {
+      schemaVersion: SINGLE_WORLD_CONFIGURATION_VERSION,
+      worldId: calibration.worldId,
+      modelVersion: WORLD_MODEL_VERSION,
+      countryCount: '70',
+      countryConfigurationRef: calibration.countryConfigurationRef,
+      clockVersion: SIMULATION_CLOCK_VERSION,
+      economicExpiryClock: 'SIM_TIME',
+    },
+    openingSeed: openingSeed(),
+    initialSimTime: SimTime.fromTicks('0'),
+    sha256Hex: sha256,
   };
 }
 
@@ -391,5 +458,81 @@ describe('V27.2 deterministic calibration closure preparation', () => {
       perTurnBuff: { productionMultiplier: '1.15' },
     });
     expectInvalid(() => validateV27_2CalibrationPreparation(input, sha256));
+  });
+});
+
+describe('V27 to V28 neutral shared-Core opening input', () => {
+  it('binds matching World/config/count/opening identities but never authorizes initialization', () => {
+    const first = prepareSharedCoreOpeningInput(sharedCoreInput());
+    const replay = prepareSharedCoreOpeningInput(sharedCoreInput());
+    expect(first).toEqual(replay);
+    expect(first).toMatchObject({
+      status: 'PREPARATION_ONLY',
+      initializationAuthorized: false,
+      orchestratorSelected: false,
+      worldIdStatus: 'V27_V28_OPENING_MATCHED',
+      configurationRefStatus: 'V27_V28_ONLY',
+      worldId: 'WORLD_CALIBRATION_TEST',
+      countryCount: '70',
+      initialSimTime: '0',
+      blockers: [
+        'V27_1_PROVENANCE_LINK_UNVERIFIED',
+        'COUNTRY_CONFIGURATION_AUTHORITY_UNVERIFIED',
+        'OPENING_DURABILITY_UNVERIFIED',
+        'OPENING_CONFIGURATION_BINDING_UNAVAILABLE',
+        'CALIBRATION_OPENING_LINEAGE_UNVERIFIED',
+        'V27_V28_DEPENDENCY_AND_ADR_GATE_OPEN',
+      ],
+    });
+    expect(first.countryConfigurationRef).toBe(
+      sharedCoreInput().calibration.countryConfigurationRef,
+    );
+    expect(first.fingerprint).toMatch(/^sha256:[0-9a-f]{64}$/u);
+    expect(Object.isFrozen(first)).toBe(true);
+    expect(Object.isFrozen(first.blockers)).toBe(true);
+    expect(first).not.toHaveProperty('command');
+    expect(first).not.toHaveProperty('event');
+  });
+
+  it('rejects mismatched World, configuration ref, count and nonzero clock', () => {
+    const refMismatch = sharedCoreInput();
+    refMismatch.configuration.countryConfigurationRef = `sha256:${'b'.repeat(64)}`;
+    expectInvalid(() => prepareSharedCoreOpeningInput(refMismatch));
+
+    const worldMismatch = sharedCoreInput();
+    worldMismatch.configuration.worldId = 'WORLD_OTHER';
+    expectInvalid(() => prepareSharedCoreOpeningInput(worldMismatch));
+
+    const countMismatch = sharedCoreInput();
+    countMismatch.configuration.countryCount = '69';
+    expectInvalid(() => prepareSharedCoreOpeningInput(countMismatch));
+
+    const nonzero = sharedCoreInput();
+    nonzero.initialSimTime = SimTime.fromTicks('1');
+    expectInvalid(() => prepareSharedCoreOpeningInput(nonzero));
+
+    const openingWorldMismatch = sharedCoreInput();
+    openingWorldMismatch.openingSeed = openingSeed(
+      'AUTHORITATIVE_DATASET',
+      'WORLD_OTHER',
+    );
+    expectInvalid(() => prepareSharedCoreOpeningInput(openingWorldMismatch));
+  });
+
+  it('rejects incomplete calibration, forged opening and fixture provenance', () => {
+    const incomplete = sharedCoreInput();
+    incomplete.calibration.countries.pop();
+    expectInvalid(() => prepareSharedCoreOpeningInput(incomplete));
+
+    const forged = sharedCoreInput();
+    forged.openingSeed = {
+      ...forged.openingSeed,
+      fingerprint: `sha256:${'b'.repeat(64)}`,
+    } as typeof forged.openingSeed;
+    expect(() => prepareSharedCoreOpeningInput(forged)).toThrow();
+
+    const fixtureSource = sharedCoreInput();
+    fixtureSource.openingSeed = openingSeed('TEST_FIXTURE');
+    expectInvalid(() => prepareSharedCoreOpeningInput(fixtureSource));
   });
 });
