@@ -22,7 +22,7 @@ export interface AuthorizedBrowserIdentity extends CacheScope {
     'PUBLIC' | 'COUNTRY' | 'OFFICE_PRIVATE' | 'NEGOTIATION_PARTY' | 'ADMIN';
 }
 
-/** Freshness check is client-only: E's current command wire has no version fence. */
+/** Browser wire field; server enforcement awaits the coordinated API candidate. */
 export interface NarrowTransferDraft {
   readonly commandId: string;
   readonly idempotencyKey: string;
@@ -609,6 +609,7 @@ export function createAuthorizedWorldBrowserClient(options: {
               officeId: identity.officeId,
               commandId: draft.commandId,
               idempotencyKey: draft.idempotencyKey,
+              expectedWorldVersion: draft.expectedWorldVersion,
               proposalRef: draft.proposalRef,
               buyerCountryId: draft.buyerCountryId,
               buyerFinanceApprovalRef: draft.buyerFinanceApprovalRef,

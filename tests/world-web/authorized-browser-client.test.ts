@@ -189,6 +189,33 @@ describe('World Web local authorized client preparation', () => {
     expect(client.cache.read(identity)).toMatchObject({ worldVersion: '8' });
   });
 
+  it('rejects a noncanonical expected WorldVersion before persisting or posting', async () => {
+    const storage = new MemoryPendingStorage();
+    let commandPosts = 0;
+    const fetcher = vi.fn(async (url: URL | RequestInfo) => {
+      if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+        return Response.json({
+          schemaVersion: 'world-read-api-v1',
+          requestId,
+          ok: true,
+          data: projection(),
+        });
+      }
+      commandPosts += 1;
+      return Response.json({});
+    }) as unknown as typeof fetch;
+    const client = browser(fetcher, () => identity, storage);
+    await client.readProjection(requestId);
+    expect(
+      await client.submitNarrowTransfer(requestId, {
+        ...draft,
+        expectedWorldVersion: '08',
+      }),
+    ).toEqual({ status: 'UNAVAILABLE', reason: 'IDENTITY_NOT_READY' });
+    expect(storage.getItem(LOCAL_PENDING_MARKER_KEY)).toBeNull();
+    expect(commandPosts).toBe(0);
+  });
+
   it('drops cross-scope and changed authorization responses, and clears cache on denial', async () => {
     const wrongScope = browser(async () =>
       Response.json({
@@ -256,6 +283,7 @@ describe('World Web local authorized client preparation', () => {
             officeId: identity.officeId,
             commandId: draft.commandId,
             idempotencyKey: draft.idempotencyKey,
+            expectedWorldVersion: draft.expectedWorldVersion,
             proposalRef: draft.proposalRef,
             buyerCountryId: draft.buyerCountryId,
             buyerFinanceApprovalRef: draft.buyerFinanceApprovalRef,
