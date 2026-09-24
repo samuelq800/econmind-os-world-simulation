@@ -56,6 +56,12 @@ export * from './labour/labour-engine.js';
 export * from './labour/population-labour-invariants.js';
 export * from './numeric/index.js';
 export * from './opening/opening-seed.js';
+export {
+  SINGLE_WORLD_PREFLIGHT_VERSION,
+  prepareSingleWorldWorkerPreflight,
+  type SingleWorldPreflightInput,
+  type SingleWorldPreflightResult,
+} from './orchestration/single-world-preflight.js';
 export * from './population/population-engine.js';
 export * from './resource-inventory/index.js';
 export * from './registries/fixed-catalog.js';
