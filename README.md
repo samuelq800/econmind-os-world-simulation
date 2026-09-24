@@ -16,8 +16,10 @@ preparation. Recent V27 provenance, calibration-closure and NPC-intent modules
 are **non-production preparation**, not a generated 70-country World.
 V29 now has a source-to-evidence gap baseline, and V30 has a deterministic,
 non-network load-plan/latency-summary helper for 50/100/420 virtual sessions.
-Neither is a real long run, load test, security acceptance or V29/V30 gate
-pass; see [`docs/reports/V29.1/PREPARATION_GAP_AUDIT.md`](docs/reports/V29.1/PREPARATION_GAP_AUDIT.md)
+V29 also has a test-only two-country 600/1000-day exact-ledger/replay harness;
+V30's injected runner is bounded and has no built-in service target.
+These preparations are not a real 70-country World long run, measured load
+test, security acceptance or V29/V30 gate pass; see [`docs/reports/V29.1/PREPARATION_GAP_AUDIT.md`](docs/reports/V29.1/PREPARATION_GAP_AUDIT.md)
 and [`docs/reports/V30.1/IMPLEMENTATION.md`](docs/reports/V30.1/IMPLEMENTATION.md).
 
 The runnable API process currently exposes health/readiness endpoints only.
