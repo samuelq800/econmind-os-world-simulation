@@ -16,7 +16,10 @@ the mainline native-test callers that use the shared guard before creating a
 Pool. Its focused guard tests passed 3/3. E's exact fixed-branch
 [run 35969032516](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35969032516)
 passed native PG16 permission negatives 3/3, migration validation and Core
-build. A merged-main run remains a separate evidence point.
+build. The subsequent merged-main
+[run 35971451018](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35971451018)
+also passed the native PostgreSQL 16 job at exact code SHA
+`21d43ae0fdb3a341061314314fd898984abe729a`.
 
 The native test uses synthetic disposable roles and supplied claim settings.
 Real deployment role provisioning, trusted JWT-to-PostgreSQL GUC propagation,

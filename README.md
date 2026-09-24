@@ -52,6 +52,9 @@ on the same frozen code candidate (`ca5b056`, Actions run `35950584759`).
 The previous main-candidate check failed in a V00.2 shutdown-test timing
 race; a test-only fixture removed that race without dropping its repeated-
 signal assertions. This is code/CI evidence, not dedicated staging evidence.
+The later merged-main code SHA `21d43ae` passed official `pnpm check`,
+disposable V09/V10 PostgreSQL evidence, and a separate native PostgreSQL 16
+synthetic-role/RLS negative run; these do not close the remaining gate items.
 Dedicated non-production staging/TLS,
 deployment-role/JWT-backed RLS evidence beyond synthetic disposable PG16
 negatives, two-country/two-Office browser E2E, and
