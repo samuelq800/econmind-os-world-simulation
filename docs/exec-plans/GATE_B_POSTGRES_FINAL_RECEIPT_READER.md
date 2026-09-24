@@ -38,4 +38,3 @@ API typecheck/build, targeted ESLint and Prettier, repository boundary and
 authoritative-pattern checks, local-environment/policy/secret checks and a
 final diff review. Record live managed-PostgreSQL injection, E/F wiring,
 production rollout, independent review and Gate B approval as `NOT_RUN`.
-
