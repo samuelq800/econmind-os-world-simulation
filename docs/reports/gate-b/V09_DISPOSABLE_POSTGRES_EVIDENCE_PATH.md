@@ -98,5 +98,8 @@ The durable runner JSON says `status=PASS`, `cleanup.status=PASS`, and
 `receipt_recovery.status=NOT_RUN`; the receipt-recovery suite was a later,
 separate passing CI step on the same SHA. Its output classification remains
 `EVIDENCED_DISPOSABLE_LOCAL_ONLY_NOT_DEDICATED_STAGING`. Neither that run nor
-this note changes the historical managed-TLS `FAIL` or approves Gate B. See
+the later [run 35950584759](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35950584759),
+which passed both disposable PostgreSQL V09/V10 evidence and the official
+`pnpm check` at main code SHA `ca5b056ea818dc73e113a2bf4635318ae7c8bebf`,
+changes the historical managed-TLS `FAIL` or approves Gate B. See
 [`CURRENT_GATE_B_STATUS.md`](CURRENT_GATE_B_STATUS.md) for the remaining route.

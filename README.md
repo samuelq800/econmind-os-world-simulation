@@ -22,8 +22,11 @@ There is no proven end-to-end authorized browser command/receipt flow, live
 forecast model, production database rollout, or product release.
 
 **Gate B is PENDING.** A narrow cleanup-decoding fix now passes the disposable
-PostgreSQL fault runner and V09/V10 recovery suites on one frozen candidate;
-an earlier official `pnpm check` also passed on a different candidate.
+PostgreSQL fault runner, V09/V10 recovery suites and official `pnpm check`
+on the same frozen code candidate (`ca5b056`, Actions run `35950584759`).
+The previous main-candidate check failed in a V00.2 shutdown-test timing
+race; a test-only fixture removed that race without dropping its repeated-
+signal assertions. This is code/CI evidence, not dedicated staging evidence.
 Dedicated non-production staging/TLS,
 non-production RLS/grant evidence, two-country/two-Office browser E2E, and
 final independent Gate B review remain open. See

@@ -6,7 +6,7 @@ an independent review, or permission to use production Supabase.
 
 ## What is integrated
 
-- `origin/main` reached `d738362b275956f2a338a2c6cba4bde50b6e9f23`
+- `origin/main` reached `ca5b056ea818dc73e113a2bf4635318ae7c8bebf`
   before this status-note update. It includes the V09 cleanup fix and
   checkpoint diagnostic (`462286a`), V27.2 closure preparation,
   remediated V27.3 NPC-intent preparation, remediated V27.1-to-V27.2
@@ -38,16 +38,28 @@ an independent review, or permission to use production Supabase.
   `receipt_recovery.status=NOT_RUN` remains true for that JSON; the CI step is
   separate evidence. B independently reviewed the code diff with P0=0 and
   Major=0 for non-production merge, not Gate B approval.
+- On the later `ae39e3c` main candidate, combined
+  [run 35948171185](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35948171185)
+  passed the disposable PostgreSQL job but **failed** official `pnpm check`:
+  the existing V00.2 repeated-signal harness attempted its second signal
+  after the runtime had already exited (`ESRCH`). This is a CI failure, not
+  a green final-candidate check. A test-only close-callback fixture on branch
+  `codex/gate-b-code-integration` preserves the original one-start,
+  one-completion and 150 ms survival assertions; its focused eight cases
+  passed locally. The exact `ca5b056` candidate then passed both jobs in
+  [run 35950584759](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35950584759):
+  official unmodified `pnpm check` and disposable PostgreSQL V09/V10 evidence.
+  This does not replace dedicated staging or the final Gate B review.
 
 ## Still required for Gate B
 
-| Evidence                                                                    | Current classification                  | Next action                                                                                                                                   |
-| --------------------------------------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Disposable cleanup and no-residue fault evidence on one frozen candidate    | `EVIDENCED` on `d738362`                | Preserve the exact run/artifact; do not substitute it for staging TLS or the final candidate-wide check.                                      |
-| Dedicated isolated staging connection-loss/TLS recovery                     | Historical `FAIL`, no valid replacement | Use an approved dedicated non-production target or record an explicit owner decision on an alternative; disposable CI is not TLS equivalence. |
-| Non-production RLS/grant negative vectors                                   | `NOT_RUN` as Gate B evidence            | Execute with real scoped roles and immutable evidence on a non-production target.                                                             |
-| Two-country/two-Office browser command, receipt, projection and refresh E2E | `NOT_RUN`                               | Finish the real authenticated API/worker/browser route; the default page is still fixture-backed.                                             |
-| Final candidate-wide `pnpm check` and independent Gate B review             | `NOT_RUN` for the eventual final SHA    | Freeze one tip after remaining fixes, run checks once, provide all failures and boundaries to independent review.                             |
+| Evidence                                                                    | Current classification                      | Next action                                                                                                                                     |
+| --------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Disposable cleanup and no-residue fault evidence on one frozen candidate    | `EVIDENCED` on `ca5b056`                    | Preserve the exact run/artifact; do not substitute it for staging TLS.                                                                          |
+| Dedicated isolated staging connection-loss/TLS recovery                     | Historical `FAIL`, no valid replacement     | Use an approved dedicated non-production target or record an explicit owner decision on an alternative; disposable CI is not TLS equivalence.   |
+| Non-production RLS/grant negative vectors                                   | `NOT_RUN` as Gate B evidence                | Execute with real scoped roles and immutable evidence on a non-production target.                                                               |
+| Two-country/two-Office browser command, receipt, projection and refresh E2E | `NOT_RUN`                                   | Finish the real authenticated API/worker/browser route; the default page is still fixture-backed.                                               |
+| Candidate-wide `pnpm check` and independent Gate B review                   | `PASS` at `ca5b056`; final review `NOT_RUN` | The code candidate is green; after external evidence, freeze a final tip and give its exact SHA, failures and boundaries to independent review. |
 
 Do not mark Gate B passed because a diagnostic becomes more precise, because
 a disposable-only run turns green, or because a preparation branch was
