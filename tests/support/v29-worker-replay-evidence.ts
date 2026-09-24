@@ -103,11 +103,12 @@ export async function readV29DurableWorkerStep(input: {
   readonly commandIndex: number;
 }): Promise<V29DurableStepHash> {
   if (
-    input.database.kind !== 'PGLITE' ||
+    (input.database.kind !== 'PGLITE' &&
+      input.database.kind !== 'POSTGRESQL') ||
     !Number.isSafeInteger(input.commandIndex) ||
     input.commandIndex < 0
   ) {
-    invalid('read requires a disposable PGlite database and command index');
+    invalid('read requires a disposable test database and command index');
   }
   const scope = [input.command.worldId, input.command.commandId];
   const event = singleRow(
