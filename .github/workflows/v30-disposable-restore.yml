@@ -2,6 +2,13 @@ name: V30 disposable PostgreSQL restore diagnostic
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex/v30-disposable-restore-preparation
+    paths:
+      - .github/workflows/v30-disposable-restore.yml
+      - scripts/v30-disposable-restore-diagnostic.mjs
+      - tests/foundation/v30-disposable-restore-diagnostic.test.ts
 
 permissions:
   contents: read
