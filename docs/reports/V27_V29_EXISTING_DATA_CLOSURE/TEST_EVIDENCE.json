@@ -1,6 +1,8 @@
 {
-  "status": "IMPLEMENTED_UNVERIFIED",
+  "status": "PREPARATION_REVIEWED_DATA_UNAVAILABLE",
   "preparationStatus": "PREPARATION_ONLY",
+  "dataClosureStatus": "UNAVAILABLE",
+  "formalGateStatus": "NOT_CHANGED",
   "riskClass": "P0",
   "branch": "codex/v29-existing-data-closure",
   "mainBaseSha": "0fa8da7e74488f4554185afb68c19b4933d72586",
@@ -15,6 +17,25 @@
   },
   "generationAuthorized": false,
   "openingSeedAuthorized": false,
+  "independentReview": {
+    "lane": "B",
+    "reviewedCandidateSha": "94245838314900d309935cd436665745aea14fa1",
+    "scope": "PREPARATION_ONLY_CODE_AND_FROZEN_EXISTING_DATA_INVENTORY",
+    "blockerCount": 0,
+    "majorCount": 0,
+    "independentArtifactHashVerification": "PASS_7_OF_7",
+    "independentFocusedTestVerification": "PASS_40",
+    "conclusion": "CODE_PREPARATION_ACCEPTED_DATA_CLOSURE_UNAVAILABLE",
+    "doesNotApprove": [
+      "actual 70-country data",
+      "V27.2 input",
+      "fictional-country mapping",
+      "WTO evidence",
+      "seven open data gates",
+      "OpeningSeed",
+      "formal V29 completion"
+    ]
+  },
   "observedCoverage": {
     "targetCountryCount": "70",
     "actualV27ProvenanceCountryCount": "UNAVAILABLE",
@@ -107,7 +128,7 @@
     "worker API UI database Supabase or production integration",
     "V29 long-run replay",
     "full repository test suite",
-    "independent P0 review",
+    "independent approval of actual 70-country data and OpeningSeed",
     "merge Gate migration release or production operation"
   ]
 }
