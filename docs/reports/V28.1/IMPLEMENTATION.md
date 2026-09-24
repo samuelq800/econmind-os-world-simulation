@@ -30,3 +30,6 @@ build plus architecture boundaries passed on that base. The earlier branch's
 21-test evidence is preserved as historical, not silently attributed to
 this new SHA. The status remains `PREPARATION_ONLY`; the R002/ADR-14 conflict
 and formal dependencies are unchanged.
+Independent Review B then found no code blocker/major in the narrow V28.1
+preparation diff, but recorded one governance blocker to formal merge and
+promotion. See [`INDEPENDENT_REVIEW_B.md`](INDEPENDENT_REVIEW_B.md).

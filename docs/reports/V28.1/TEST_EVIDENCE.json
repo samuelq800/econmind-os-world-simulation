@@ -52,6 +52,12 @@
     "focused_v28_tests": { "status": "PASS", "tests": 5 },
     "core_build": "PASS",
     "architecture_boundaries": "PASS",
-    "classification": "PREPARATION_ONLY"
+    "classification": "PREPARATION_ONLY",
+    "independent_narrow_review": {
+      "code_blockers": 0,
+      "code_majors": 0,
+      "formal_merge_governance_blockers": 1,
+      "decision": "KEEP_ISOLATED_PREPARATION_ONLY"
+    }
   }
 }
