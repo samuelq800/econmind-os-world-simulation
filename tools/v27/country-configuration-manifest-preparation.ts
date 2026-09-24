@@ -2,6 +2,12 @@
 
 export type V27ConfigurationSourceStatus = 'AVAILABLE' | 'MISSING';
 export type V27ParameterCoverageStatus = 'COVERED' | 'MISSING';
+export type V27CountrySetFingerprintStatus =
+  'MATCH' | 'MISMATCH' | 'NOT_VERIFIED';
+export type Sha256Hex = (preimage: string) => string;
+
+export const V27_COUNTRY_SET_BINDING_VERSION =
+  'v27.2-country-configuration-identity-v1' as const;
 
 export interface V27ConfigurationSourceInput {
   readonly sourceId: string;
@@ -24,9 +30,11 @@ export interface V27CountryConfigurationInput {
 }
 
 export interface V27CountryConfigurationManifestInput {
-  readonly countryConfigurationRef: string;
-  readonly configurationVersion: string;
-  readonly configurationHash: string;
+  readonly worldId: string;
+  readonly sourceConfigurationRef: string;
+  readonly sourceConfigurationVersion: string;
+  readonly sourceConfigurationHash: string;
+  readonly expectedCountrySetFingerprint: string | null;
   readonly requiredParameterIds: readonly string[];
   readonly sources: readonly V27ConfigurationSourceInput[];
   readonly countries: readonly V27CountryConfigurationInput[];
@@ -69,11 +77,21 @@ export interface V27CountryParameterCoverage {
 }
 
 export interface V27CountryConfigurationManifestResult {
-  readonly status: 'PREPARATION_ONLY_TRACEABLE' | 'PREPARATION_ONLY_MISSING';
-  readonly countryConfigurationRef: string;
-  readonly configurationVersion: string;
-  readonly configurationHash: string;
-  readonly configurationHashVerified: false;
+  readonly status:
+    | 'PREPARATION_ONLY_TRACEABLE'
+    | 'PREPARATION_ONLY_MISSING'
+    | 'PREPARATION_ONLY_MISMATCH'
+    | 'PREPARATION_ONLY_NOT_VERIFIED';
+  readonly worldId: string;
+  readonly sourceConfigurationRef: string;
+  readonly sourceConfigurationVersion: string;
+  readonly sourceConfigurationHash: string;
+  readonly sourceConfigurationHashVerified: false;
+  readonly structuralBindingVersion: typeof V27_COUNTRY_SET_BINDING_VERSION;
+  readonly structuralCountrySetFingerprint: `sha256:${string}`;
+  readonly expectedCountrySetFingerprint: `sha256:${string}` | null;
+  readonly countrySetFingerprintStatus: V27CountrySetFingerprintStatus;
+  readonly configurationAuthorityVerified: false;
   readonly sourceHashesVerified: false;
   readonly generationAuthorized: false;
   readonly formallyVerified: false;
@@ -97,6 +115,7 @@ const REQUIRED_COUNTRY_COUNT = 70 as const;
 const ID = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u;
 const REF = /^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u;
 const SHA256 = /^[0-9a-f]{64}$/u;
+const PREFIXED_SHA256 = /^sha256:[0-9a-f]{64}$/u;
 
 function compare(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -167,6 +186,21 @@ function stableRef(value: unknown, label: string): string {
   const result = text(value, label);
   if (!REF.test(result)) fail(`${label} must be a stable reference`);
   return result;
+}
+
+function prefixedSha256(value: unknown, label: string): `sha256:${string}` {
+  const result = text(value, label);
+  if (!PREFIXED_SHA256.test(result)) {
+    fail(`${label} must be sha256:<64 lowercase hexadecimal characters>`);
+  }
+  return result as `sha256:${string}`;
+}
+
+function nullablePrefixedSha256(
+  value: unknown,
+  label: string,
+): `sha256:${string}` | null {
+  return value === null ? null : prefixedSha256(value, label);
 }
 
 function choice<T extends string>(
@@ -305,34 +339,73 @@ function coverageKey(value: V27CountryParameterCoverage): string {
   return `${value.countryId}\u0000${value.parameterId}`;
 }
 
+/**
+ * A-compatible structural identity only. It does not verify or confer external
+ * configuration authority.
+ */
+export function v27StructuralCountrySetFingerprint(
+  input: { readonly worldId: string; readonly countryIds: readonly string[] },
+  sha256Hex: Sha256Hex,
+): `sha256:${string}` {
+  const worldId = id(input.worldId, 'worldId');
+  const countryIds = sortedUnique(
+    list(input.countryIds, 'country configuration IDs').map((value) =>
+      id(value, 'country configuration ID'),
+    ),
+    (value) => value,
+    'country configuration',
+  );
+  const canonical = JSON.stringify({
+    bindingVersion: V27_COUNTRY_SET_BINDING_VERSION,
+    countryIds,
+    worldId,
+  });
+  const digest = sha256Hex(`SHA-256\n${canonical}`);
+  if (!SHA256.test(digest)) {
+    fail('SHA-256 adapter must return 64 lowercase hexadecimal characters');
+  }
+  return `sha256:${digest}`;
+}
+
 export function prepareV27CountryConfigurationManifest(
   value: unknown,
+  sha256Hex: Sha256Hex,
 ): V27CountryConfigurationManifestResult {
   const input = record(value, 'V27 country configuration manifest');
   exactKeys(
     input,
     [
-      'countryConfigurationRef',
-      'configurationVersion',
-      'configurationHash',
+      'worldId',
+      'sourceConfigurationRef',
+      'sourceConfigurationVersion',
+      'sourceConfigurationHash',
+      'expectedCountrySetFingerprint',
       'requiredParameterIds',
       'sources',
       'countries',
     ],
     'V27 country configuration manifest',
   );
-  const countryConfigurationRef = stableRef(
-    input.countryConfigurationRef,
-    'countryConfigurationRef',
+  const worldId = id(input.worldId, 'worldId');
+  const sourceConfigurationRef = stableRef(
+    input.sourceConfigurationRef,
+    'sourceConfigurationRef',
   );
-  const configurationVersion = stableRef(
-    input.configurationVersion,
-    'configurationVersion',
+  const sourceConfigurationVersion = stableRef(
+    input.sourceConfigurationVersion,
+    'sourceConfigurationVersion',
   );
-  const configurationHash = text(input.configurationHash, 'configurationHash');
-  if (!SHA256.test(configurationHash)) {
-    fail('configurationHash must be lowercase SHA-256');
+  const sourceConfigurationHash = text(
+    input.sourceConfigurationHash,
+    'sourceConfigurationHash',
+  );
+  if (!SHA256.test(sourceConfigurationHash)) {
+    fail('sourceConfigurationHash must be lowercase SHA-256');
   }
+  const expectedCountrySetFingerprint = nullablePrefixedSha256(
+    input.expectedCountrySetFingerprint,
+    'expectedCountrySetFingerprint',
+  );
   const requiredParameterIds = sortedUnique(
     list(input.requiredParameterIds, 'requiredParameterIds').map((item) =>
       id(item, 'requiredParameterId'),
@@ -360,6 +433,19 @@ export function prepareV27CountryConfigurationManifest(
   if (countries.length !== REQUIRED_COUNTRY_COUNT) {
     fail(`countries must contain exactly ${REQUIRED_COUNTRY_COUNT} unique IDs`);
   }
+  const countryIds = Object.freeze(
+    countries.map((country) => country.countryId),
+  );
+  const structuralCountrySetFingerprint = v27StructuralCountrySetFingerprint(
+    { worldId, countryIds },
+    sha256Hex,
+  );
+  const countrySetFingerprintStatus: V27CountrySetFingerprintStatus =
+    expectedCountrySetFingerprint === null
+      ? 'NOT_VERIFIED'
+      : expectedCountrySetFingerprint === structuralCountrySetFingerprint
+        ? 'MATCH'
+        : 'MISMATCH';
 
   const gaps: V27CountryConfigurationGap[] = [];
   for (const source of sources) {
@@ -562,19 +648,29 @@ export function prepareV27CountryConfigurationManifest(
   );
   return Object.freeze({
     status:
-      sortedGaps.length === 0
-        ? ('PREPARATION_ONLY_TRACEABLE' as const)
-        : ('PREPARATION_ONLY_MISSING' as const),
-    countryConfigurationRef,
-    configurationVersion,
-    configurationHash,
-    configurationHashVerified: false,
+      countrySetFingerprintStatus === 'MISMATCH'
+        ? ('PREPARATION_ONLY_MISMATCH' as const)
+        : sortedGaps.length > 0
+          ? ('PREPARATION_ONLY_MISSING' as const)
+          : countrySetFingerprintStatus === 'NOT_VERIFIED'
+            ? ('PREPARATION_ONLY_NOT_VERIFIED' as const)
+            : ('PREPARATION_ONLY_TRACEABLE' as const),
+    worldId,
+    sourceConfigurationRef,
+    sourceConfigurationVersion,
+    sourceConfigurationHash,
+    sourceConfigurationHashVerified: false,
+    structuralBindingVersion: V27_COUNTRY_SET_BINDING_VERSION,
+    structuralCountrySetFingerprint,
+    expectedCountrySetFingerprint,
+    countrySetFingerprintStatus,
+    configurationAuthorityVerified: false,
     sourceHashesVerified: false,
     generationAuthorized: false,
     formallyVerified: false,
     countryCount: REQUIRED_COUNTRY_COUNT,
     requiredParameterIds,
-    countryIds: Object.freeze(countries.map((country) => country.countryId)),
+    countryIds,
     countrySources: sortedCountrySources,
     parameterCoverage: sortedCoverage,
     gaps: sortedGaps,

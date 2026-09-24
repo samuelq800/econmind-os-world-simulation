@@ -1,6 +1,18 @@
+import { createHash } from 'node:crypto';
+
 import { describe, expect, it } from 'vitest';
 
-import { prepareV27CountryConfigurationManifest } from '../../tools/v27/country-configuration-manifest-preparation.js';
+import {
+  prepareV27CountryConfigurationManifest,
+  v27StructuralCountrySetFingerprint,
+} from '../../tools/v27/country-configuration-manifest-preparation.js';
+
+const GOLDEN_COUNTRY_SET_FINGERPRINT =
+  'sha256:6a3d1df55987668814bc6ff7427289e51c4e304d543b9f40b14da609b7ebfaf3';
+
+function sha256Hex(preimage: string): string {
+  return createHash('sha256').update(preimage).digest('hex');
+}
 
 interface MutableSource {
   sourceId: string;
@@ -24,9 +36,11 @@ interface MutableCountry {
 }
 
 interface MutableManifest {
-  countryConfigurationRef: string;
-  configurationVersion: string;
-  configurationHash: string;
+  worldId: string;
+  sourceConfigurationRef: string;
+  sourceConfigurationVersion: string;
+  sourceConfigurationHash: string;
+  expectedCountrySetFingerprint: string | null;
   requiredParameterIds: string[];
   sources: MutableSource[];
   countries: MutableCountry[];
@@ -34,9 +48,11 @@ interface MutableManifest {
 
 function manifest(): MutableManifest {
   return {
-    countryConfigurationRef: 'WORLD_COUNTRY_CONFIG_V1',
-    configurationVersion: 'VERSION_1',
-    configurationHash: 'c'.repeat(64),
+    worldId: 'WORLD_SHARED',
+    sourceConfigurationRef: 'WORLD_COUNTRY_CONFIG_V1',
+    sourceConfigurationVersion: 'VERSION_1',
+    sourceConfigurationHash: 'c'.repeat(64),
+    expectedCountrySetFingerprint: GOLDEN_COUNTRY_SET_FINGERPRINT,
     requiredParameterIds: ['POPULATION_BASE', 'TRADE_TARIFF_RATE'],
     sources: [
       {
@@ -73,15 +89,25 @@ function manifest(): MutableManifest {
   };
 }
 
+function prepare(value: unknown) {
+  return prepareV27CountryConfigurationManifest(value, sha256Hex);
+}
+
 describe('V27 exactly-70 country configuration manifest preparation', () => {
-  it('prepares one deterministic upstream countryConfigurationRef without values or authority', () => {
-    const result = prepareV27CountryConfigurationManifest(manifest());
+  it('separates source provenance from the A-compatible structural fingerprint', () => {
+    const result = prepare(manifest());
     expect(result).toMatchObject({
       status: 'PREPARATION_ONLY_TRACEABLE',
-      countryConfigurationRef: 'WORLD_COUNTRY_CONFIG_V1',
-      configurationVersion: 'VERSION_1',
-      configurationHash: 'c'.repeat(64),
-      configurationHashVerified: false,
+      worldId: 'WORLD_SHARED',
+      sourceConfigurationRef: 'WORLD_COUNTRY_CONFIG_V1',
+      sourceConfigurationVersion: 'VERSION_1',
+      sourceConfigurationHash: 'c'.repeat(64),
+      sourceConfigurationHashVerified: false,
+      structuralBindingVersion: 'v27.2-country-configuration-identity-v1',
+      structuralCountrySetFingerprint: GOLDEN_COUNTRY_SET_FINGERPRINT,
+      expectedCountrySetFingerprint: GOLDEN_COUNTRY_SET_FINGERPRINT,
+      countrySetFingerprintStatus: 'MATCH',
+      configurationAuthorityVerified: false,
       sourceHashesVerified: false,
       generationAuthorized: false,
       formallyVerified: false,
@@ -103,17 +129,53 @@ describe('V27 exactly-70 country configuration manifest preparation', () => {
       sourceHash: 'b'.repeat(64),
       sourceHashVerified: false,
     });
-    expect(JSON.stringify(result)).not.toMatch(/"value"|"policy"/u);
+    expect(JSON.stringify(result)).not.toMatch(
+      /"countryConfigurationRef"|"value"|"policy"/u,
+    );
+    expect(
+      v27StructuralCountrySetFingerprint(
+        {
+          worldId: 'WORLD_SHARED',
+          countryIds: result.countryIds,
+        },
+        sha256Hex,
+      ),
+    ).toBe(GOLDEN_COUNTRY_SET_FINGERPRINT);
   });
 
   it('is invariant to country, source, required-parameter and coverage order', () => {
-    const first = prepareV27CountryConfigurationManifest(manifest());
+    const first = prepare(manifest());
     const reversed = manifest();
     reversed.sources.reverse();
     reversed.requiredParameterIds.reverse();
     reversed.countries.reverse();
     for (const country of reversed.countries) country.parameters.reverse();
-    expect(prepareV27CountryConfigurationManifest(reversed)).toEqual(first);
+    expect(prepare(reversed)).toEqual(first);
+  });
+
+  it('reports NOT_VERIFIED when no expected structural fingerprint is supplied', () => {
+    const value = manifest();
+    value.expectedCountrySetFingerprint = null;
+    expect(prepare(value)).toMatchObject({
+      status: 'PREPARATION_ONLY_NOT_VERIFIED',
+      structuralCountrySetFingerprint: GOLDEN_COUNTRY_SET_FINGERPRINT,
+      expectedCountrySetFingerprint: null,
+      countrySetFingerprintStatus: 'NOT_VERIFIED',
+      configurationAuthorityVerified: false,
+    });
+  });
+
+  it('reports MISMATCH without converting either digest into authority', () => {
+    const value = manifest();
+    value.expectedCountrySetFingerprint = `sha256:${'d'.repeat(64)}`;
+    expect(prepare(value)).toMatchObject({
+      status: 'PREPARATION_ONLY_MISMATCH',
+      structuralCountrySetFingerprint: GOLDEN_COUNTRY_SET_FINGERPRINT,
+      expectedCountrySetFingerprint: `sha256:${'d'.repeat(64)}`,
+      countrySetFingerprintStatus: 'MISMATCH',
+      sourceConfigurationHashVerified: false,
+      configurationAuthorityVerified: false,
+    });
   });
 
   it('turns missing real sources into explicit MISSING coverage without defaults', () => {
@@ -123,7 +185,7 @@ describe('V27 exactly-70 country configuration manifest preparation', () => {
       sourceHash: null,
       missingReason: 'REAL_PARAMETER_SOURCE_NOT_AVAILABLE',
     });
-    const result = prepareV27CountryConfigurationManifest(value);
+    const result = prepare(value);
     expect(result.status).toBe('PREPARATION_ONLY_MISSING');
     expect(
       result.parameterCoverage.filter(
@@ -154,7 +216,7 @@ describe('V27 exactly-70 country configuration manifest preparation', () => {
     const value = manifest();
     value.countries[0]!.configurationSourceId = null;
     value.countries[1]!.parameters.pop();
-    const result = prepareV27CountryConfigurationManifest(value);
+    const result = prepare(value);
     expect(result.status).toBe('PREPARATION_ONLY_MISSING');
     expect(result.gaps).toEqual(
       expect.arrayContaining([
@@ -184,7 +246,7 @@ describe('V27 exactly-70 country configuration manifest preparation', () => {
   it('requires exactly 70 unique country IDs', () => {
     const tooFew = manifest();
     tooFew.countries.pop();
-    expect(() => prepareV27CountryConfigurationManifest(tooFew)).toThrow(
+    expect(() => prepare(tooFew)).toThrow(
       'countries must contain exactly 70 unique IDs',
     );
 
@@ -193,40 +255,57 @@ describe('V27 exactly-70 country configuration manifest preparation', () => {
       ...tooMany.countries[0]!,
       countryId: 'COUNTRY_71',
     });
-    expect(() => prepareV27CountryConfigurationManifest(tooMany)).toThrow(
+    expect(() => prepare(tooMany)).toThrow(
       'countries must contain exactly 70 unique IDs',
     );
 
     const duplicate = manifest();
     duplicate.countries[69]!.countryId = 'COUNTRY_01';
-    expect(() => prepareV27CountryConfigurationManifest(duplicate)).toThrow(
+    expect(() => prepare(duplicate)).toThrow(
       'country identities must be unique',
     );
   });
 
   it('rejects malformed hashes, unknown bindings and policy/value expansion', () => {
     const badConfigurationHash = manifest();
-    badConfigurationHash.configurationHash = 'short';
-    expect(() =>
-      prepareV27CountryConfigurationManifest(badConfigurationHash),
-    ).toThrow('configurationHash must be lowercase SHA-256');
+    badConfigurationHash.sourceConfigurationHash = 'short';
+    expect(() => prepare(badConfigurationHash)).toThrow(
+      'sourceConfigurationHash must be lowercase SHA-256',
+    );
 
     const missingAvailableHash = manifest();
     missingAvailableHash.sources[0]!.sourceHash = null;
-    expect(() =>
-      prepareV27CountryConfigurationManifest(missingAvailableHash),
-    ).toThrow('available source COUNTRY_ID_SOURCE requires SHA-256');
+    expect(() => prepare(missingAvailableHash)).toThrow(
+      'available source COUNTRY_ID_SOURCE requires SHA-256',
+    );
 
     const unknownSource = manifest();
     unknownSource.countries[0]!.parameters[0]!.sourceId = 'UNKNOWN_SOURCE';
-    expect(() => prepareV27CountryConfigurationManifest(unknownSource)).toThrow(
+    expect(() => prepare(unknownSource)).toThrow(
       'references unknown source UNKNOWN_SOURCE',
     );
 
     const expanded = manifest();
     expanded.countries[0]!.policy = 'INVENTED_POLICY';
-    expect(() => prepareV27CountryConfigurationManifest(expanded)).toThrow(
+    expect(() => prepare(expanded)).toThrow(
       'country configuration contains missing or unknown fields',
+    );
+  });
+
+  it('rejects the legacy ambiguous countryConfigurationRef shape', () => {
+    const legacy = manifest() as MutableManifest & {
+      countryConfigurationRef?: string;
+      configurationVersion?: string;
+      configurationHash?: string;
+    };
+    legacy.countryConfigurationRef = legacy.sourceConfigurationRef;
+    legacy.configurationVersion = legacy.sourceConfigurationVersion;
+    legacy.configurationHash = legacy.sourceConfigurationHash;
+    delete (legacy as Partial<MutableManifest>).sourceConfigurationRef;
+    delete (legacy as Partial<MutableManifest>).sourceConfigurationVersion;
+    delete (legacy as Partial<MutableManifest>).sourceConfigurationHash;
+    expect(() => prepare(legacy)).toThrow(
+      'V27 country configuration manifest contains missing or unknown fields',
     );
   });
 });
