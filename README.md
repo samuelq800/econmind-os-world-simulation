@@ -102,9 +102,9 @@ pnpm test:v10.4:postgres
 ```
 
 The PostgreSQL commands require an explicitly confirmed disposable local/CI
-database. The manual `Gate B disposable diagnostic` GitHub Actions workflow
-uses its own short-lived PostgreSQL service and records the exact checkout SHA;
-it cannot replace dedicated staging or authorize Gate B.
+database. The manual `Gate B disposable diagnostic` and V30 disposable restore
+GitHub Actions workflows use short-lived PostgreSQL services and record their
+exact checkout SHAs; neither replaces dedicated staging or authorizes Gate B.
 
 Use `pnpm supabase:safe -- status` for the repository-approved Supabase status
 check. Never run development migrations or resets against the shared

@@ -49,10 +49,12 @@ The first combined workflow run `35965419504` was **FAIL**, not PASS: its separa
 (`tests/support/v29-worker-delivery-driver.test.ts:566`, expected local hash
 `44214d63…`, received Linux hash `d43d7e1f…`). The V09/V10 disposable
 PostgreSQL job passed. F owns the targeted replay fix; no failed check is
-waived or silently relabeled. This branch is not merged to main. The new
-standalone workflow is branch-only and cannot be manually dispatched until
-registered on the default branch; the existing registered V09 workflow was
-extended **on this isolated branch only** to obtain the diagnostic run.
+waived or silently relabeled. At the time of that run, this branch was not
+merged to main and the new standalone workflow was branch-only; it could not
+be manually dispatched until registered on the default branch. The existing
+registered V09 workflow was extended **on this isolated branch only** to
+obtain the diagnostic run; that temporary V09 workflow change was excluded
+from the mainline integration.
 The cross-timezone V29 pinned-hash defect was subsequently fixed on main,
 and the unmodified official check plus disposable V09/V10 jobs both passed on
 main SHA `2b086a2` in

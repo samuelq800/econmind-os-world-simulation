@@ -88,6 +88,12 @@ a disposable-only run turns green, or because a preparation branch was
 cherry-picked to main. Preserve `FAIL` and `NOT_RUN` until their required
 evidence or an explicit authorized decision changes them.
 
+The V30.3 disposable backup/restore probe is separate preparation evidence:
+an isolated PostgreSQL 16 run verified complete durable World-head and Command
+row equality before backup and after restore. It does not include real
+Event/Posting replay, Worker crash/fencing, dedicated staging, or Gate B
+approval. See `docs/reports/V30.3/P2_DISPOSABLE_RESTORE_ACCEPTANCE.md`.
+
 ## Documentation and governance drift
 
 `status/progress.json` remains the formal R2 ledger at V09.1 `PLANNED` and
