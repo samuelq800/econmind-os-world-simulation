@@ -15,7 +15,7 @@ export const LOCAL_WORLD_READ_PATH = '/local/v1/world-read' as const;
 export const LOCAL_WORLD_COMMAND_PATH =
   '/local/v1/narrow-transfer-command' as const;
 export const WORLD_READ_SCHEMA = 'world-read-api-v1' as const;
-export const WORLD_COMMAND_SCHEMA = 'world-command-api-v1' as const;
+export const WORLD_COMMAND_SCHEMA = 'world-command-api-v2' as const;
 
 export interface AuthorizedBrowserIdentity extends CacheScope {
   readonly classification:
