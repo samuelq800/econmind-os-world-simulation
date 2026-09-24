@@ -7,6 +7,11 @@ import {
   type AuthorizedBrowserIdentity,
   type NarrowTransferDraft,
 } from '../../apps/world-web/src/authorized-client/client';
+import {
+  LOCAL_PENDING_MARKER_KEY,
+  localPendingStorage,
+  type PendingMarkerStorage,
+} from '../../apps/world-web/src/authorized-client/pending-marker';
 
 const requestId = '550e8400-e29b-41d4-a716-446655440001';
 const identity: AuthorizedBrowserIdentity = {
@@ -61,11 +66,29 @@ function receipt() {
   };
 }
 
-function browser(fetcher: typeof fetch, currentIdentity = () => identity) {
+class MemoryPendingStorage implements PendingMarkerStorage {
+  private readonly values = new Map<string, string>();
+  getItem(key: string): string | null {
+    return this.values.get(key) ?? null;
+  }
+  setItem(key: string, value: string): void {
+    this.values.set(key, value);
+  }
+  removeItem(key: string): void {
+    this.values.delete(key);
+  }
+}
+
+function browser(
+  fetcher: typeof fetch,
+  currentIdentity = () => identity,
+  pendingStorage: PendingMarkerStorage = new MemoryPendingStorage(),
+) {
   return createAuthorizedWorldBrowserClient({
     currentIdentity,
     getAccessToken: async () => 'local-jwt-token',
     bridge: { origin: 'http://127.0.0.1:4179', fetcher },
+    pendingStorage,
   });
 }
 
@@ -82,7 +105,7 @@ describe('World Web local authorized client preparation', () => {
     });
     expect(await client.submitNarrowTransfer(requestId, draft)).toEqual({
       status: 'UNAVAILABLE',
-      reason: 'NO_CURRENT_PROJECTION',
+      reason: 'BRIDGE_NOT_CONFIGURED',
     });
     expect(getAccessToken).not.toHaveBeenCalled();
   });
@@ -103,6 +126,19 @@ describe('World Web local authorized client preparation', () => {
     expect(() => create('http://127.0.0.1:4179/path')).toThrow(
       'LOCAL_BRIDGE_ORIGIN_INVALID',
     );
+  });
+
+  it('does not enable pending-marker storage for a remote browser page', () => {
+    const storage = new MemoryPendingStorage();
+    vi.stubGlobal('window', {
+      location: { hostname: 'remote.example' },
+      sessionStorage: storage,
+    });
+    try {
+      expect(localPendingStorage(storage)).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('uses E read wire shape, scopes response, and accepts only monotonic derived cache', async () => {
@@ -353,6 +389,7 @@ describe('World Web local authorized client preparation', () => {
   });
 
   it('releases the in-flight reservation after a verified definitive rejection', async () => {
+    const storage = new MemoryPendingStorage();
     let commandPosts = 0;
     let releaseFirst!: (response: Response) => void;
     const firstAck = new Promise<Response>((resolve) => {
@@ -385,7 +422,7 @@ describe('World Web local authorized client preparation', () => {
         },
       });
     }) as unknown as typeof fetch;
-    const client = browser(fetcher);
+    const client = browser(fetcher, () => identity, storage);
     await client.readProjection(requestId);
     const firstSubmission = client.submitNarrowTransfer(requestId, draft);
     await vi.waitFor(() => expect(commandPosts).toBe(1));
@@ -411,6 +448,7 @@ describe('World Web local authorized client preparation', () => {
       status: 'FINAL_RECEIPT',
       receipt: { outcome: 'REJECTED' },
     });
+    expect(storage.getItem(LOCAL_PENDING_MARKER_KEY)).toBeNull();
     expect(
       await client.submitNarrowTransfer(requestId, secondDraft),
     ).toMatchObject({
@@ -418,6 +456,276 @@ describe('World Web local authorized client preparation', () => {
       receipt: { commandId: 'COMMAND_2', outcome: 'COMMITTED' },
     });
     expect(commandPosts).toBe(2);
+  });
+
+  it('persists only a scope-bound pending marker and fails closed after browser-session reconstruction', async () => {
+    const storage = new MemoryPendingStorage();
+    let commandPosts = 0;
+    const fetcher = vi.fn(async (url: URL | RequestInfo) => {
+      if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+        return Response.json({
+          schemaVersion: 'world-read-api-v1',
+          requestId,
+          ok: true,
+          data: projection(),
+        });
+      }
+      commandPosts += 1;
+      return new Response('{"schemaVersion":"world-command-api-v1",', {
+        status: 200,
+      });
+    }) as unknown as typeof fetch;
+    const first = browser(fetcher, () => identity, storage);
+    await first.readProjection(requestId);
+    expect(await first.submitNarrowTransfer(requestId, draft)).toEqual({
+      status: 'UNKNOWN',
+    });
+    expect(commandPosts).toBe(1);
+    const raw = storage.getItem(LOCAL_PENDING_MARKER_KEY);
+    expect(raw).not.toBeNull();
+    expect(JSON.parse(String(raw))).toMatchObject({
+      schemaVersion: 'LOCAL_WORLD_PENDING_COMMAND_V1',
+      commandId: draft.commandId,
+      expectedWorldVersion: '8',
+    });
+    expect(JSON.parse(String(raw)).scopeDigest).toMatch(
+      /^sha256:[0-9a-f]{64}$/,
+    );
+    for (const forbidden of [
+      'local-jwt-token',
+      draft.idempotencyKey,
+      identity.authSubjectId,
+      draft.proposalRef,
+      draft.buyerFinanceApprovalRef,
+      draft.buyerCountryId,
+    ])
+      expect(raw).not.toContain(forbidden);
+
+    const rebuilt = browser(fetcher, () => identity, storage);
+    expect((await rebuilt.readProjection(requestId)).status).toBe('PROJECTION');
+    expect(rebuilt.cache.read(identity)).toMatchObject({
+      reconciliationRequired: true,
+    });
+    const newDraft = {
+      ...draft,
+      commandId: 'COMMAND_2',
+      idempotencyKey: 'IDEMPOTENCY_2',
+    };
+    expect(await rebuilt.submitNarrowTransfer(requestId, newDraft)).toEqual({
+      status: 'UNKNOWN',
+    });
+    expect(await rebuilt.submitNarrowTransfer(requestId, draft)).toEqual({
+      status: 'UNKNOWN',
+    });
+    expect(commandPosts).toBe(1); // No lookup port exists to verify either outcome.
+
+    const otherIdentity = {
+      ...identity,
+      authSubjectId: '550e8400-e29b-41d4-a716-446655440099',
+      countryId: 'COUNTRY_B',
+    };
+    const other = browser(fetcher, () => otherIdentity, storage);
+    expect(await other.submitNarrowTransfer(requestId, newDraft)).toEqual({
+      status: 'UNKNOWN',
+    });
+    const revised = browser(
+      fetcher,
+      () => ({
+        ...identity,
+        authorizationRevision: 'AUTH_REVISION_2',
+        projectionVersion: 'PROJECTION_2',
+      }),
+      storage,
+    );
+    expect(
+      await revised.submitNarrowTransfer(requestId, {
+        ...draft,
+        expectedWorldVersion: '9',
+      }),
+    ).toEqual({ status: 'UNKNOWN' });
+    expect(commandPosts).toBe(1);
+    expect(storage.getItem(LOCAL_PENDING_MARKER_KEY)).toBe(raw);
+  });
+
+  it('writes the marker before dispatch and removes it only for a verified final receipt', async () => {
+    const storage = new MemoryPendingStorage();
+    let release!: (response: Response) => void;
+    const acknowledgement = new Promise<Response>((resolve) => {
+      release = resolve;
+    });
+    let commandPosts = 0;
+    const fetcher = vi.fn(async (url: URL | RequestInfo) => {
+      if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+        return Response.json({
+          schemaVersion: 'world-read-api-v1',
+          requestId,
+          ok: true,
+          data: projection(),
+        });
+      }
+      expect(storage.getItem(LOCAL_PENDING_MARKER_KEY)).not.toBeNull();
+      commandPosts += 1;
+      return acknowledgement;
+    }) as unknown as typeof fetch;
+    const client = browser(fetcher, () => identity, storage);
+    await client.readProjection(requestId);
+    const pending = client.submitNarrowTransfer(requestId, draft);
+    await vi.waitFor(() => expect(commandPosts).toBe(1));
+    const rebuiltWhilePending = browser(fetcher, () => identity, storage);
+    expect(
+      await rebuiltWhilePending.submitNarrowTransfer(requestId, {
+        ...draft,
+        commandId: 'COMMAND_2',
+        idempotencyKey: 'IDEMPOTENCY_2',
+      }),
+    ).toEqual({ status: 'UNKNOWN' });
+    expect(commandPosts).toBe(1);
+    release(
+      Response.json({
+        schemaVersion: 'world-command-api-v1',
+        requestId,
+        ok: true,
+        receipt: receipt(),
+      }),
+    );
+    expect(await pending).toMatchObject({ status: 'FINAL_RECEIPT' });
+    expect(storage.getItem(LOCAL_PENDING_MARKER_KEY)).toBeNull();
+  });
+
+  it('reserves one session marker across two client instances before either can POST', async () => {
+    const storage = new MemoryPendingStorage();
+    let commandPosts = 0;
+    let release!: (response: Response) => void;
+    const acknowledgement = new Promise<Response>((resolve) => {
+      release = resolve;
+    });
+    const fetcher = vi.fn(async (url: URL | RequestInfo) => {
+      if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+        return Response.json({
+          schemaVersion: 'world-read-api-v1',
+          requestId,
+          ok: true,
+          data: projection(),
+        });
+      }
+      commandPosts += 1;
+      return acknowledgement;
+    }) as unknown as typeof fetch;
+    const first = browser(fetcher, () => identity, storage);
+    const second = browser(fetcher, () => identity, storage);
+    await first.readProjection(requestId);
+    await second.readProjection(requestId);
+    const firstSubmission = first.submitNarrowTransfer(requestId, draft);
+    const secondResult = await second.submitNarrowTransfer(requestId, {
+      ...draft,
+      commandId: 'COMMAND_2',
+      idempotencyKey: 'IDEMPOTENCY_2',
+    });
+    expect(secondResult).toEqual({ status: 'UNKNOWN' });
+    await vi.waitFor(() => expect(commandPosts).toBe(1));
+    release(
+      Response.json({
+        schemaVersion: 'world-command-api-v1',
+        requestId,
+        ok: true,
+        receipt: receipt(),
+      }),
+    );
+    expect(await firstSubmission).toMatchObject({ status: 'FINAL_RECEIPT' });
+    expect(commandPosts).toBe(1);
+  });
+
+  it('does not POST when session marker storage is unavailable or corrupt', async () => {
+    let commandPosts = 0;
+    const fetcher = vi.fn(async (url: URL | RequestInfo) => {
+      if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+        return Response.json({
+          schemaVersion: 'world-read-api-v1',
+          requestId,
+          ok: true,
+          data: projection(),
+        });
+      }
+      commandPosts += 1;
+      return Response.json({});
+    }) as unknown as typeof fetch;
+    const failingStorage: PendingMarkerStorage = {
+      getItem: () => null,
+      setItem: () => {
+        throw new Error('quota');
+      },
+      removeItem: () => {},
+    };
+    const unavailable = browser(fetcher, () => identity, failingStorage);
+    await unavailable.readProjection(requestId);
+    expect(await unavailable.submitNarrowTransfer(requestId, draft)).toEqual({
+      status: 'UNAVAILABLE',
+      reason: 'PENDING_STORAGE_UNAVAILABLE',
+    });
+    const corruptStorage = new MemoryPendingStorage();
+    corruptStorage.setItem(LOCAL_PENDING_MARKER_KEY, '{not-json');
+    const corrupt = browser(fetcher, () => identity, corruptStorage);
+    expect(await corrupt.submitNarrowTransfer(requestId, draft)).toEqual({
+      status: 'UNKNOWN',
+    });
+    expect(commandPosts).toBe(0);
+  });
+
+  it('keeps a posted command unknown after bare HTTP denial without a final receipt', async () => {
+    const storage = new MemoryPendingStorage();
+    let commandPosts = 0;
+    const fetcher = vi.fn(async (url: URL | RequestInfo) => {
+      if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+        return Response.json({
+          schemaVersion: 'world-read-api-v1',
+          requestId,
+          ok: true,
+          data: projection(),
+        });
+      }
+      commandPosts += 1;
+      return Response.json({}, { status: 403 });
+    }) as unknown as typeof fetch;
+    const client = browser(fetcher, () => identity, storage);
+    await client.readProjection(requestId);
+    expect(await client.submitNarrowTransfer(requestId, draft)).toEqual({
+      status: 'UNKNOWN',
+    });
+    expect(storage.getItem(LOCAL_PENDING_MARKER_KEY)).not.toBeNull();
+    expect(commandPosts).toBe(1);
+  });
+
+  it('clears a reservation when token loss proves no command POST occurred', async () => {
+    const storage = new MemoryPendingStorage();
+    let tokens = 0;
+    let commandPosts = 0;
+    const client = createAuthorizedWorldBrowserClient({
+      currentIdentity: () => identity,
+      getAccessToken: async () => (++tokens === 1 ? 'local-jwt-token' : null),
+      bridge: {
+        origin: 'http://127.0.0.1:4179',
+        fetcher: (async (url: URL | RequestInfo) => {
+          if (String(url).endsWith(LOCAL_WORLD_READ_PATH)) {
+            return Response.json({
+              schemaVersion: 'world-read-api-v1',
+              requestId,
+              ok: true,
+              data: projection(),
+            });
+          }
+          commandPosts += 1;
+          return Response.json({});
+        }) as unknown as typeof fetch,
+      },
+      pendingStorage: storage,
+    });
+    await client.readProjection(requestId);
+    expect(await client.submitNarrowTransfer(requestId, draft)).toEqual({
+      status: 'UNAVAILABLE',
+      reason: 'TOKEN_NOT_READY',
+    });
+    expect(commandPosts).toBe(0);
+    expect(storage.getItem(LOCAL_PENDING_MARKER_KEY)).toBeNull();
   });
 
   it.each([

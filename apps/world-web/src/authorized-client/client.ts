@@ -2,6 +2,13 @@ import {
   createScopedProjectionCache,
   type CacheScope,
 } from '../reconnect/scoped-cache';
+import {
+  clearPendingMarker,
+  localPendingStorage,
+  readPendingMarker,
+  reservePendingMarker,
+  type PendingMarkerStorage,
+} from './pending-marker';
 
 /** Browser-side mirror of E's local-only HTTP protocol; no server runtime import. */
 export const LOCAL_WORLD_READ_PATH = '/local/v1/world-read' as const;
@@ -43,6 +50,7 @@ export type BrowserUnavailableReason =
   | 'IDENTITY_NOT_READY'
   | 'TOKEN_NOT_READY'
   | 'NO_CURRENT_PROJECTION'
+  | 'PENDING_STORAGE_UNAVAILABLE'
   | 'NETWORK_UNAVAILABLE'
   | 'INVALID_RESPONSE';
 type ClientFailure =
@@ -260,10 +268,14 @@ export function createAuthorizedWorldBrowserClient(options: {
     readonly fetcher?: typeof fetch;
   } | null;
   readonly cache?: ReturnType<typeof createScopedProjectionCache>;
+  readonly pendingStorage?: PendingMarkerStorage | null;
 }) {
   const cache = options.cache ?? createScopedProjectionCache();
   const origin = options.bridge ? validatedOrigin(options.bridge.origin) : null;
   const fetcher = options.bridge?.fetcher ?? fetch;
+  const pendingStorage = localPendingStorage(options.pendingStorage);
+  let pendingRead = readPendingMarker(pendingStorage);
+  if (pendingRead.state !== 'EMPTY') cache.onReconnect();
   let unresolvedDraft: NarrowTransferDraft | null = null;
   let unresolvedIdentity: AuthorizedBrowserIdentity | null = null;
   let unresolvedRequestId: string | null = null;
@@ -272,6 +284,27 @@ export function createAuthorizedWorldBrowserClient(options: {
     readonly draft: NarrowTransferDraft;
     readonly requestId: string;
   } | null = null;
+
+  function scopeFields(identity: AuthorizedBrowserIdentity): readonly string[] {
+    return [
+      identity.worldId,
+      identity.authSubjectId,
+      identity.authorizationRevision,
+      identity.countryId,
+      identity.officeId,
+      identity.scopeKey,
+      identity.modelVersion,
+      identity.projectionVersion,
+      identity.classification,
+    ];
+  }
+
+  function observePending(): ReturnType<typeof readPendingMarker> {
+    const latest = readPendingMarker(pendingStorage);
+    // A missing or unreadable marker cannot silently undo a known pending POST.
+    if (latest.state !== 'EMPTY') pendingRead = latest;
+    return pendingRead;
+  }
 
   function sameDraft(
     left: NarrowTransferDraft,
@@ -453,6 +486,7 @@ export function createAuthorizedWorldBrowserClient(options: {
       if (!['ACCEPTED', 'RECONCILED', 'DUPLICATE'].includes(decision)) {
         return { status: 'UNAVAILABLE', reason: 'INVALID_RESPONSE' };
       }
+      if (observePending().state !== 'EMPTY') cache.onReconnect();
       const cached = cache.read(identity);
       if (cached.state !== 'DERIVED_CACHE') {
         return { status: 'UNAVAILABLE', reason: 'INVALID_RESPONSE' };
@@ -483,7 +517,21 @@ export function createAuthorizedWorldBrowserClient(options: {
       ) {
         return { status: 'UNAVAILABLE', reason: 'IDENTITY_NOT_READY' };
       }
+      if (!origin)
+        return { status: 'UNAVAILABLE', reason: 'BRIDGE_NOT_CONFIGURED' };
       if (activeSubmission) return { status: 'UNKNOWN' }; // Another POST is already in flight.
+      const persisted = observePending();
+      if (
+        persisted.state === 'CORRUPT' ||
+        (persisted.state === 'PENDING' && !unresolvedDraft)
+      ) {
+        return { status: 'UNKNOWN' }; // Restored marker has no safe lookup/retry payload.
+      }
+      if (persisted.state === 'UNAVAILABLE') {
+        return pendingStorage
+          ? { status: 'UNKNOWN' }
+          : { status: 'UNAVAILABLE', reason: 'PENDING_STORAGE_UNAVAILABLE' };
+      }
       if (
         unresolvedDraft &&
         (!unresolvedIdentity ||
@@ -494,6 +542,17 @@ export function createAuthorizedWorldBrowserClient(options: {
         return { status: 'UNKNOWN' }; // Never retry an unresolved command under new IDs or payload.
       }
       const resolvingUnknown = unresolvedDraft !== null;
+      if (resolvingUnknown) {
+        const latest = readPendingMarker(pendingStorage);
+        if (
+          latest.state !== 'PENDING' ||
+          latest.marker.requestId !== requestId ||
+          latest.marker.commandId !== draft.commandId ||
+          latest.marker.expectedWorldVersion !== draft.expectedWorldVersion
+        ) {
+          return { status: 'UNKNOWN' };
+        }
+      }
       const cached = cache.read(identity);
       if (
         !resolvingUnknown &&
@@ -516,6 +575,26 @@ export function createAuthorizedWorldBrowserClient(options: {
         requestId,
       };
       try {
+        if (!resolvingUnknown) {
+          const reserved = await reservePendingMarker({
+            storage: pendingStorage,
+            scopeFields: scopeFields(identity),
+            requestId,
+            commandId: draft.commandId,
+            expectedWorldVersion: draft.expectedWorldVersion,
+          });
+          if (reserved !== 'RESERVED') {
+            pendingRead = readPendingMarker(pendingStorage);
+            return reserved === 'EXISTING'
+              ? { status: 'UNKNOWN' }
+              : {
+                  status: 'UNAVAILABLE',
+                  reason: 'PENDING_STORAGE_UNAVAILABLE',
+                };
+          }
+          pendingRead = readPendingMarker(pendingStorage);
+          if (pendingRead.state !== 'PENDING') return { status: 'UNKNOWN' };
+        }
         const result = await request(
           LOCAL_WORLD_COMMAND_PATH,
           requestId,
@@ -539,7 +618,14 @@ export function createAuthorizedWorldBrowserClient(options: {
         if (result.status === 'UNVERIFIED_POST')
           return unverifiedCommand(identity, draft, requestId);
         if (result.status !== 'RESPONSE') {
-          return resolvingUnknown ? { status: 'UNKNOWN' } : result;
+          if (resolvingUnknown || result.status === 'DENIED') {
+            return unverifiedCommand(identity, draft, requestId);
+          }
+          if (!clearPendingMarker(pendingStorage)) {
+            return unverifiedCommand(identity, draft, requestId);
+          }
+          pendingRead = { state: 'EMPTY' };
+          return result;
         }
         const receipt = validReceipt(
           result.body.receipt,
@@ -549,6 +635,9 @@ export function createAuthorizedWorldBrowserClient(options: {
         if (!receipt) return unverifiedCommand(identity, draft, requestId);
         if (!sameIdentity(identity, options.currentIdentity()))
           return unverifiedCommand(identity, draft, requestId);
+        if (!clearPendingMarker(pendingStorage))
+          return unverifiedCommand(identity, draft, requestId);
+        pendingRead = { state: 'EMPTY' };
         unresolvedDraft = null;
         unresolvedIdentity = null;
         unresolvedRequestId = null;
