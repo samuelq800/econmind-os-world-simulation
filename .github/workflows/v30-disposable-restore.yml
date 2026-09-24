@@ -1,0 +1,61 @@
+name: V30 disposable PostgreSQL restore diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  disposable-restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V30_DISPOSABLE_POSTGRES_ADMIN_URL: postgresql://postgres@127.0.0.1:5432/postgres
+      V30_DISPOSABLE_RESTORE_CONFIRMATION: EXECUTE_DISPOSABLE_V30_PG_RESTORE
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - name: Ensure disposable PostgreSQL client utilities
+        run: |
+          if [ ! -x /usr/lib/postgresql/16/bin/pg_dump ] || [ ! -x /usr/lib/postgresql/16/bin/pg_restore ]; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client-16
+          fi
+          /usr/lib/postgresql/16/bin/pg_dump --version
+          /usr/lib/postgresql/16/bin/pg_restore --version
+      - name: Run real backup and restore on ephemeral service only
+        env:
+          V30_DISPOSABLE_RESTORE_OUTPUT: ${{ runner.temp }}/v30-disposable-restore-evidence.json
+        run: node scripts/v30-disposable-restore-diagnostic.mjs
+      - name: Upload redacted diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v30-disposable-restore-${{ github.sha }}
+          path: ${{ runner.temp }}/v30-disposable-restore-evidence.json
+          if-no-files-found: warn
