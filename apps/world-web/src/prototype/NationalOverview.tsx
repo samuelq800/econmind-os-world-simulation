@@ -14,6 +14,8 @@ import {
   type CommandLifecycleState,
 } from './CommandLifecycleStatus.js';
 import { MetricValueTrail } from './MetricValueTrail.js';
+import { AuthorizedMetricValueTrail } from './MetricValueTrail.js';
+import type { AuthorizedReadState } from './authorized-read-adapter.js';
 import { fixtureValueTrail } from './metric-value-trace.js';
 import {
   preparationOfficeActionAdapter,
@@ -55,6 +57,266 @@ class AtlasBoundary extends Component<
     }
     return this.props.children;
   }
+}
+
+export function AuthorizedNationalOverview({
+  read,
+  command,
+  onOpenBrief,
+}: {
+  readonly read: AuthorizedReadState;
+  readonly command: CommandLifecycleState;
+  readonly onOpenBrief: () => void;
+}) {
+  const [selectedMetricId, setSelectedMetricId] = useState('');
+  const [view, setView] = useState<'map' | 'table'>('map');
+  const [mapUnavailable, setMapUnavailable] = useState(false);
+  const tableViewButtonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (mapUnavailable) tableViewButtonRef.current?.focus();
+  }, [mapUnavailable]);
+  const metrics = read.kind === 'CURRENT' ? read.metrics : [];
+  const selectedMetric =
+    metrics.find((item) => item.id === selectedMetricId) ?? metrics[0] ?? null;
+  const trail =
+    read.kind === 'CURRENT'
+      ? (read.trails.find((item) => item.metricId === selectedMetric?.id) ??
+        null)
+      : null;
+  const fallbackToTable = () => {
+    setMapUnavailable(true);
+    setView('table');
+  };
+
+  return (
+    <section
+      className="national-overview"
+      aria-labelledby="authorized-national-title"
+      data-source="AUTHORIZED_READ_MODEL"
+    >
+      <header className="national-overview__header">
+        <div>
+          <p>NATIONAL OVERVIEW · G02</p>
+          <h1 id="authorized-national-title">
+            Read the country before acting.
+          </h1>
+          <span>Choose a signal. Trace its source. Return to your Office.</span>
+        </div>
+        <dl>
+          <div>
+            <dt>Snapshot</dt>
+            <dd>
+              {read.kind === 'CURRENT'
+                ? `Authorized v${read.worldVersion}`
+                : 'Not available'}
+            </dd>
+          </div>
+          <div>
+            <dt>Coverage</dt>
+            <dd>{metrics.length} verified signals</dd>
+          </div>
+        </dl>
+      </header>
+      {selectedMetric ? (
+        <>
+          <div
+            className="national-overview__view-switch"
+            role="group"
+            aria-label="National overview view"
+          >
+            <button
+              type="button"
+              aria-pressed={view === 'map'}
+              disabled={mapUnavailable}
+              onClick={() => setView('map')}
+            >
+              World map
+            </button>
+            <button
+              ref={tableViewButtonRef}
+              type="button"
+              aria-pressed={view === 'table'}
+              onClick={() => setView('table')}
+            >
+              Signal table
+            </button>
+            <small>
+              AUTHORIZED READ · Fictional atlas is navigation art, not territory
+              evidence.
+            </small>
+          </div>
+          {view === 'map' ? (
+            <div className="national-atlas">
+              <div className="national-atlas__board">
+                <AtlasBoundary onUseTable={fallbackToTable}>
+                  <Suspense
+                    fallback={
+                      <div className="national-atlas__loading" role="status">
+                        Loading atlas…
+                      </div>
+                    }
+                  >
+                    <FictionalWorldMap
+                      embedded
+                      onMapUnavailable={fallbackToTable}
+                    />
+                  </Suspense>
+                </AtlasBoundary>
+              </div>
+              <aside
+                className="national-atlas__intel"
+                aria-label="Authorized national signals"
+              >
+                <div className="national-atlas__intel-head">
+                  <span>
+                    {read.kind === 'CURRENT'
+                      ? read.countryId
+                      : 'Country unavailable'}
+                  </span>
+                  <strong>National intel</strong>
+                  <small>
+                    {read.kind === 'CURRENT'
+                      ? `Snapshot v${read.worldVersion}`
+                      : 'No snapshot'}
+                  </small>
+                </div>
+                <div
+                  className="national-atlas__signals"
+                  aria-label="Select an authorized signal"
+                >
+                  {metrics.map((metric) => (
+                    <button
+                      key={metric.id}
+                      type="button"
+                      aria-pressed={metric.id === selectedMetric.id}
+                      onClick={() => setSelectedMetricId(metric.id)}
+                    >
+                      <span>{metric.label}</span>
+                      <strong>
+                        {metric.displayValue} <small>{metric.unit}</small>
+                      </strong>
+                      <em>{metric.changeLabel ?? 'No comparison'}</em>
+                    </button>
+                  ))}
+                </div>
+                <div className="national-atlas__intel-event" aria-live="polite">
+                  <span>Selected signal</span>
+                  <strong>{selectedMetric.label}</strong>
+                  <small>{selectedMetric.accessibleSummary}</small>
+                </div>
+                <AuthorizedMetricValueTrail
+                  key={selectedMetric.id}
+                  metric={selectedMetric}
+                  trail={trail}
+                  command={command}
+                />
+                <CommandLifecycleStatus
+                  context="Selected signal"
+                  state={command}
+                  compact
+                />
+                <button
+                  className="six-button six-button--secondary"
+                  type="button"
+                  onClick={onOpenBrief}
+                >
+                  Return to my Office
+                </button>
+              </aside>
+            </div>
+          ) : (
+            <div className="national-overview__layout">
+              <section
+                className="national-overview__signals"
+                aria-label="Authorized read-only national signals"
+              >
+                <div className="national-overview__group-label">
+                  <span>Authorized national signals</span>
+                  <small>Only current verified values appear here.</small>
+                </div>
+                <div className="national-signal-grid">
+                  {metrics.map((metric) => (
+                    <button
+                      key={metric.id}
+                      type="button"
+                      className={
+                        metric.id === selectedMetric.id
+                          ? 'national-signal is-selected'
+                          : 'national-signal'
+                      }
+                      aria-pressed={metric.id === selectedMetric.id}
+                      onClick={() => setSelectedMetricId(metric.id)}
+                    >
+                      <span>{metric.label}</span>
+                      <strong>
+                        {metric.displayValue} <small>{metric.unit}</small>
+                      </strong>
+                      <em>{metric.changeLabel ?? 'No comparison'}</em>
+                    </button>
+                  ))}
+                </div>
+              </section>
+              <aside
+                className="national-overview__inspector"
+                aria-live="polite"
+              >
+                <p>Selected signal</p>
+                <h2>{selectedMetric.label}</h2>
+                <strong>
+                  {selectedMetric.displayValue} {selectedMetric.unit}
+                </strong>
+                <span>{selectedMetric.accessibleSummary}</span>
+                <AuthorizedMetricValueTrail
+                  key={selectedMetric.id}
+                  metric={selectedMetric}
+                  trail={trail}
+                  command={command}
+                />
+                <CommandLifecycleStatus
+                  context="Selected signal"
+                  state={command}
+                  compact
+                />
+                <button
+                  className="six-button six-button--secondary"
+                  type="button"
+                  onClick={onOpenBrief}
+                >
+                  Return to my Office
+                </button>
+              </aside>
+            </div>
+          )}
+        </>
+      ) : (
+        <section
+          className="national-overview__empty"
+          role="status"
+          aria-live="polite"
+        >
+          <p>NATIONAL OVERVIEW · G02</p>
+          <h2>Authorized signals unavailable.</h2>
+          <span>
+            {read.kind === 'UNAVAILABLE'
+              ? read.reason
+              : 'No verified signals were supplied.'}
+          </span>
+          <CommandLifecycleStatus
+            context="National overview"
+            state={command}
+            compact
+          />
+          <button
+            className="six-button six-button--secondary"
+            type="button"
+            onClick={onOpenBrief}
+          >
+            Return to G01
+          </button>
+        </section>
+      )}
+    </section>
+  );
 }
 
 interface NationalOverviewProps {
