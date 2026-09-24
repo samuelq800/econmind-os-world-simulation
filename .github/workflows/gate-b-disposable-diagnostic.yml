@@ -53,6 +53,15 @@ jobs:
         env:
           V09_DISPOSABLE_EVIDENCE_OUTPUT: ${{ runner.temp }}/v09-disposable-evidence.json
         run: pnpm test:v09:disposable-evidence
+      - name: Verify lease, receipt recovery, and V10.4 on the same candidate
+        run: |
+          pnpm test:v09:postgres
+          pnpm --filter @econmind/core build
+          pnpm --filter @econmind/world-worker build
+          pnpm exec vitest run tests/world-core/v09-commit-authorization-cutoff.test.ts
+          pnpm exec vitest run tests/world-core/v09-atomic-recovery-postgres.test.ts
+          pnpm test:v10.4:postgres
+          pnpm exec vitest run tests/world-core/v09-world-recovery-preparation.test.ts
       - name: Summarize external dependency classes after failure
         if: ${{ always() && steps.evidence.outcome == 'failure' }}
         env:
