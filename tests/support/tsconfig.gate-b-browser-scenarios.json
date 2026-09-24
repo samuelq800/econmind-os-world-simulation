@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2024", "DOM"],
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "gate-b-browser-scenario-cases.ts",
+    "../world-api/gate-b-browser-scenario-cases.test.ts"
+  ]
+}
