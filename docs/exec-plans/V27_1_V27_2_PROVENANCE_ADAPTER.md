@@ -22,6 +22,10 @@ owned by A/D/E/F.
   comparison; do not trust caller labels.
 - Require identical country identity sets. Compare shared source identity,
   locator, version, digest and compatible evidence classification exactly.
+- Enforce one World/Core semantic boundary. Because current V27.2 input has no
+  `worldId` or country-configuration provenance, report those bindings as
+  `UNAVAILABLE`; retain V27.1 `seasonRef` only as audit metadata and never use
+  it to select separate opening values, mechanisms, engines or buffs.
 - Flatten V27.2 values to stable structural paths without inventing a metric
   mapping. Link a V27.1 `VALUE` only when country, source, unit, amount and
   assumption semantics select exactly one V27.2 quantity.
@@ -52,4 +56,3 @@ format, boundary/authoritative-pattern checks, safe-environment/policy/secret
 checks and final diff review. Real source verification, schema evolution,
 OpeningSeed generation, persistence, independent review and Gate approval are
 `NOT_RUN`.
-
