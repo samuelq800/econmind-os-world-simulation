@@ -142,11 +142,13 @@ async function insertWorldAndCommand(url, suffix) {
 async function durableSnapshot(url) {
   return client(url, async (connection) => {
     const heads = await connection.query(
-      'select world_id, world_version::text, event_sequence::text from world_v2.world_head order by world_id',
+      `select row_to_json(head)::text as durable_row
+         from (select * from world_v2.world_head order by world_id) head`,
     );
     const commands = await connection.query(
-      `select world_id, command_id, idempotency_key, payload_sha256, command_fingerprint
-       from world_v2.command_submission order by world_id, command_id`,
+      `select row_to_json(command)::text as durable_row
+         from (select * from world_v2.command_submission
+               order by world_id, command_id) command`,
     );
     const rows = { heads: heads.rows, commands: commands.rows };
     return {
