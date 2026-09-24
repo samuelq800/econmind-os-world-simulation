@@ -1,0 +1,61 @@
+name: Gate B disposable diagnostic
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  disposable-v09-diagnostic:
+    name: Frozen V09 disposable cleanup diagnostic
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+      V09_DISPOSABLE_EVIDENCE_CONFIRMATION: EXECUTE_DISPOSABLE_V09_POSTGRES_EVIDENCE
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Record frozen source identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+          printf 'frozen_main_sha=%s\n' "${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - name: Capture disposable fault evidence
+        env:
+          V09_DISPOSABLE_EVIDENCE_OUTPUT: ${{ runner.temp }}/v09-disposable-evidence.json
+        run: pnpm test:v09:disposable-evidence
+      - name: Upload durable redacted JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v09-disposable-diagnostic-${{ github.sha }}
+          path: ${{ runner.temp }}/v09-disposable-evidence.json
+          if-no-files-found: error

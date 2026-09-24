@@ -1,13 +1,45 @@
-# EconMind OS World Simulation
+# EconMind World Simulation V2
 
-Repository foundation for the EconMind World simulation. V00.1 establishes the
-toolchain, workspace boundaries, and environment safety controls only. No
-economic engine, authoritative World State, database schema, or gameplay
-feature is implemented here yet.
+This is the dedicated World Simulation V2 repository. It does not modify or
+deploy the original EconMind main site. There is one authoritative World/Core
+path; the product must not create separate ordinary-World and Season-1 economic
+engines or hidden buffs.
+
+## Current state (2026-09-24)
+
+The repository has more than a foundation scaffold. `packages/core` contains
+deterministic economic, command, ledger, replay, and preparation modules;
+`apps/world-worker` contains authoritative-execution infrastructure;
+`apps/world-api` contains command/query integration modules; and
+`apps/world-web` contains a map, six-Office UI, authorized-client and forecast
+preparation. Recent V27 provenance, calibration-closure and NPC-intent modules
+are **non-production preparation**, not a generated 70-country World.
+
+The runnable API process currently exposes health/readiness endpoints only.
+The default web prototype is `LOCAL_FIXTURE`; an authorized local read requires
+an explicit trusted-host opt-in and is not mounted by the default entrypoint.
+There is no proven end-to-end authorized browser command/receipt flow, live
+forecast model, production database rollout, or product release.
+
+**Gate B is PENDING.** The disposable PostgreSQL V09/V10 suite and official
+check passed for an earlier frozen candidate, but the later fault-evidence run
+remained `FAIL_CLOSED` at cleanup. Dedicated non-production staging/TLS,
+non-production RLS/grant evidence, two-country/two-Office browser E2E, and
+final independent Gate B review remain open. See
+[`docs/reports/gate-b/CURRENT_GATE_B_STATUS.md`](docs/reports/gate-b/CURRENT_GATE_B_STATUS.md)
+for exact runs, scope, and the next evidence route. No green local test or
+merged preparation module is Gate B approval.
+
+`status/progress.json` is the formal governance ledger and still lists V09
+onward as `PLANNED`; it has not been silently promoted to match merged
+preparation code. Its old ADR-18 blocker wording is inconsistent with the
+approved ADR-18 record in `status/decisions.json` and needs a separate
+governance reconciliation. The V28 single-World candidate also remains outside
+main while the older two-orchestrator V28.1/ADR-14 contract is reconciled.
 
 ## Frozen toolchain
 
-- Node.js 24.20.0 (LTS)
+- Node.js 24.20.0
 - pnpm 12.3.4
 - TypeScript 6.0.3
 - Vite 8.2.2
@@ -21,31 +53,31 @@ active versions differ.
 
 ## Workspace responsibilities
 
-- `apps/world-web`: non-authoritative browser UI; submits commands and reads
-  query results only.
-- `apps/world-api`: future authentication, command, and query boundary.
-- `apps/world-worker`: future authoritative execution host.
-- `packages/core`: future deterministic domain logic; must remain independent
-  of React, browser APIs, and arbitrary persistence writes.
-- `packages/contracts`, `registries`, `persistence`, `integration`, `ui`, and
-  `testkit`: reserved workspace names, created only when an implementation
-  package is actually needed.
+- `apps/world-web`: non-authoritative browser UI and derived local state.
+- `apps/world-api`: authentication, command, and query boundary; its current
+  process entrypoint is not the complete integration route.
+- `apps/world-worker`: authoritative execution host, never imported by web.
+- `packages/core`: deterministic domain logic without React, browser APIs,
+  Supabase SDKs, or arbitrary persistence writes.
+- `packages/testkit`: shared test support. Other shared packages are added only
+  when a concrete implementation needs them; repository ownership boundaries
+  still apply.
 
 ## Commands
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm lint
-pnpm format:check
-pnpm typecheck
-pnpm test
-pnpm test:boundaries
-pnpm env:check
-pnpm secrets:check
-pnpm build
 pnpm check
+pnpm test:v09:postgres
+pnpm test:v10.4:postgres
 ```
 
-Use `pnpm supabase:safe -- status` for the only repository-approved Supabase
-status check. Direct production database mutation is prohibited. See
-`docs/runbooks/ENVIRONMENT_SAFETY.md` before any integration work.
+The PostgreSQL commands require an explicitly confirmed disposable local/CI
+database. The manual `Gate B disposable diagnostic` GitHub Actions workflow
+uses its own short-lived PostgreSQL service and records the exact checkout SHA;
+it cannot replace dedicated staging or authorize Gate B.
+
+Use `pnpm supabase:safe -- status` for the repository-approved Supabase status
+check. Never run development migrations or resets against the shared
+production Supabase project. See `docs/runbooks/ENVIRONMENT_SAFETY.md` and
+`AGENTS.md` before integration work.
