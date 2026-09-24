@@ -288,7 +288,7 @@ describe('V27.1 to V27.2 provenance/calibration adapter', () => {
     );
   });
 
-  it('reports ambiguous exact tuples because V27.2 has no metricRef', () => {
+  it('uses verified metric and subject identity instead of an equal-value sibling path', () => {
     const calibration = calibrationInput();
     calibration.countries[0]!.facilities[0]!.installedCapacity =
       calibratedQuantity('8', 'tonne_per_day');
@@ -296,14 +296,59 @@ describe('V27.1 to V27.2 provenance/calibration adapter', () => {
       parseCountrySeedProvenance(provenanceInput()),
       calibration,
     );
+    expect(result.links).toContainEqual(
+      expect.objectContaining({
+        metricRef: 'FACILITY_OPERATIONAL_CAPACITY',
+        calibrationPath: 'facilities.FACILITY_01.operationalCapacity',
+      }),
+    );
+    expect(result.links).toHaveLength(1);
+  });
+
+  it('does not link FACILITY_99 provenance to FACILITY_01 by matching value tuple', () => {
+    const raw = provenanceInput();
+    const field = raw.countries[0]!.fields.find(
+      (candidate) => candidate.domain === 'FACILITIES',
+    )!;
+    field.subjectRef = 'FACILITY_99';
+    const result = connect(parseCountrySeedProvenance(raw));
+
+    expect(result.links).toHaveLength(0);
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({
+        code: 'CALIBRATION_QUANTITY_UNAVAILABLE',
+        metricRef: 'FACILITY_OPERATIONAL_CAPACITY',
+        missingFields: ['calibration.metricRef', 'calibration.quantity'],
+      }),
+    );
+  });
+
+  it('does not let a second provenance label claim an already matched structural path', () => {
+    const raw = provenanceInput();
+    const original = raw.countries[0]!.fields.find(
+      (candidate) => candidate.domain === 'FACILITIES',
+    )!;
+    raw.countries[0]!.fields.push({
+      ...original,
+      metricRef: 'FACILITY_OUTPUT_CAPACITY',
+    });
+    const result = connect(parseCountrySeedProvenance(raw));
+
+    expect(result.links).toHaveLength(1);
+    expect(result.links[0]).toMatchObject({
+      metricRef: 'FACILITY_OPERATIONAL_CAPACITY',
+      calibrationPath: 'facilities.FACILITY_01.operationalCapacity',
+    });
     expect(result.issues).toContainEqual(
       expect.objectContaining({
         code: 'CALIBRATION_METRIC_IDENTITY_MISSING',
-        metricRef: 'FACILITY_OPERATIONAL_CAPACITY',
-        missingFields: ['calibration.metricRef'],
+        metricRef: 'FACILITY_OUTPUT_CAPACITY',
+        missingFields: [
+          'calibration.metricRef',
+          'calibration.structuralPathBinding',
+        ],
       }),
     );
-    expect(result.links).toHaveLength(0);
   });
 
   it('reports V27.1 derivationRef as unmappable rather than treating it as an assumption', () => {

@@ -271,18 +271,30 @@ function assumptionsMatch(
   return false;
 }
 
-function domainMatchesPath(
-  domain: CountrySeedExactValue['domain'],
-  path: string,
-): boolean {
-  return (
-    (domain === 'ACCOUNTS' && path.startsWith('financialBatches.')) ||
-    (domain === 'RESOURCES' &&
-      (path.startsWith('inventoryClosures.') ||
-        path.startsWith('geologicalClosures.'))) ||
-    (domain === 'FACILITIES' && path.startsWith('facilities.')) ||
-    (domain === 'TRADE_DEPENDENCY' && path.startsWith('supplyChains.'))
-  );
+const FACILITY_METRIC_PATH_SEGMENTS: Readonly<Record<string, string>> =
+  Object.freeze({
+    FACILITY_INSTALLED_CAPACITY: 'installedCapacity',
+    FACILITY_OPERATIONAL_CAPACITY: 'operationalCapacity',
+    FACILITY_STAFF_REQUIRED: 'staffRequired',
+    FACILITY_STAFF_ASSIGNED: 'staffAssigned',
+  });
+
+/**
+ * Returns a path only where V27.1 identity fields fully determine one V27.2
+ * structural quantity. A domain-compatible value tuple is not an identity.
+ */
+function verifiedCalibrationPath(field: CountrySeedExactValue): string | null {
+  if (
+    field.domain !== 'FACILITIES' ||
+    field.subjectRef === null ||
+    field.counterpartyCountryId !== null
+  ) {
+    return null;
+  }
+  const segment = FACILITY_METRIC_PATH_SEGMENTS[field.metricRef];
+  return segment === undefined
+    ? null
+    : `facilities.${field.subjectRef}.${segment}`;
 }
 
 function compatibleClassification(
@@ -522,10 +534,27 @@ export function connectCountrySeedProvenanceToCalibration(input: {
         );
         continue;
       }
+      const expectedPath = verifiedCalibrationPath(field);
+      if (expectedPath === null) {
+        issues.push(
+          unavailable({
+            code: 'CALIBRATION_METRIC_IDENTITY_MISSING',
+            countryId: country.countryId,
+            metricRef: field.metricRef,
+            missingFields: [
+              'calibration.metricRef',
+              'calibration.structuralPathBinding',
+            ],
+            message:
+              'V27.1 metricRef/subjectRef/counterparty cannot be verified against one V27.2 structural path',
+          }),
+        );
+        continue;
+      }
       const matches = quantities.filter(
         (candidate) =>
           candidate.countryId === country.countryId &&
-          domainMatchesPath(field.domain, candidate.path) &&
+          candidate.path === expectedPath &&
           candidate.quantity.sourceRef === field.sourceRef &&
           candidate.quantity.unit === field.unit &&
           candidate.quantity.amount === field.amount &&
@@ -557,6 +586,21 @@ export function connectCountrySeedProvenanceToCalibration(input: {
         continue;
       }
       const match = matches[0]!;
+      const claimedPath = `${match.countryId}\u0000${match.path}`;
+      if (usedPaths.has(claimedPath)) {
+        issues.push(
+          unavailable({
+            code: 'CALIBRATION_METRIC_IDENTITY_MISSING',
+            countryId: country.countryId,
+            metricRef: field.metricRef,
+            calibrationPath: match.path,
+            missingFields: ['provenance.uniqueCalibrationPathBinding'],
+            message:
+              'V27.2 structural path is already claimed by another V27.1 field',
+          }),
+        );
+        continue;
+      }
       const source = compareSource({
         field,
         provenance: provenanceSources.get(field.sourceRef),
@@ -568,7 +612,7 @@ export function connectCountrySeedProvenanceToCalibration(input: {
         issues.push(source);
         continue;
       }
-      usedPaths.add(`${match.countryId}\u0000${match.path}`);
+      usedPaths.add(claimedPath);
       links.push(
         Object.freeze({
           countryId: country.countryId,
