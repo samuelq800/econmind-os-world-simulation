@@ -1,0 +1,43 @@
+{
+  "scope": "single_world_core_configuration_preparation_only",
+  "related_step": "V28.1",
+  "status": "PREPARATION_ONLY",
+  "branch": "codex/v28-1-single-world-config-preparation",
+  "base_main_sha_at_entry": "4d38a9f6ef4191edd84ded58a2c90b130267b69f",
+  "rebased_main_sha": "b14d7becad757769ba6299f2c0d5674dca0482bd",
+  "authoritative_v28_1_status": "PLANNED",
+  "open_adrs": ["ADR-14"],
+  "owner_scope_correction": "ONE_WORLD_ONLY_NO_SEASON_MODE_OR_INSTANCE",
+  "checks": {
+    "focused_and_replay_vitest_final": {
+      "status": "PASS",
+      "files": 2,
+      "tests": 21
+    },
+    "initial_focused_vitest": "FAIL_TEST_ASSERTION_SUBSTRING_CORRECTED",
+    "architecture_boundary_vitest": {
+      "status": "PASS",
+      "files": 3,
+      "tests": 34
+    },
+    "core_build": "PASS",
+    "core_typecheck": "PASS",
+    "targeted_eslint": "PASS",
+    "targeted_prettier": "PASS",
+    "authoritative_pattern_scan": "PASS",
+    "repository_boundary_scan": "PASS",
+    "repository_secret_scan": "PASS",
+    "local_safe_environment": "PASS"
+  },
+  "not_run": [
+    "full_repository_test_suite",
+    "V28_1_dependency_closure",
+    "ADR_14_owner_reconciliation",
+    "runtime_orchestrator_integration",
+    "independent_P0_review",
+    "migration",
+    "production_access",
+    "release"
+  ],
+  "authoritative_writes": false
+}
