@@ -1531,54 +1531,59 @@ async function runCrashProtocol(
     approval,
     evidence,
   );
-  await withRole(mainClient, worker, 'CRASH_AFTER_HELD', () =>
-    expectRejected(
-      mainClient,
-      'CRASH_AFTER_HELD_REJECTED',
-      `select * from ${schema}.acquire_world_writer_lease($1, $2, $3::timestamptz, $4::bigint)`,
-      [
-        'WORLD_STAGING_CRASH_AFTER',
-        'WORKER_2',
-        '2026-09-11T00:00:00.500Z',
-        '1000',
-      ],
-      'WORLD_WRITER_LEASE_HELD',
-    ),
-  );
-  await withRole(mainClient, worker, 'CRASH_AFTER_TAKEOVER', async () => {
-    assertLease(
-      await command(
+  await command(mainClient, 'CRASH_AFTER_BEGIN', 'begin');
+  try {
+    await withRole(mainClient, worker, 'CRASH_AFTER_HELD', () =>
+      expectRejected(
         mainClient,
-        'CRASH_AFTER_TAKEOVER',
-        `select fencing_token::text as fencing_token, acquisition_kind
-           from ${schema}.acquire_world_writer_lease($1, $2, $3::timestamptz, $4::bigint)`,
+        'CRASH_AFTER_HELD_REJECTED',
+        `select * from ${schema}.acquire_world_writer_lease($1, $2, $3::timestamptz, $4::bigint)`,
         [
           'WORLD_STAGING_CRASH_AFTER',
           'WORKER_2',
-          '2026-09-11T00:00:01.000Z',
+          '2026-09-11T00:00:00.500Z',
           '1000',
         ],
+        'WORLD_WRITER_LEASE_HELD',
       ),
-      2,
-      'TAKEN_OVER',
-      'post-commit recovery did not preserve fencing lineage',
     );
-  });
-  await withRole(mainClient, worker, 'CRASH_AFTER_OLD_FENCE', () =>
-    expectRejected(
-      mainClient,
-      'CRASH_AFTER_OLD_FENCE_REJECTED',
-      `select * from ${schema}.assert_world_writer_commit_guard($1, $2, $3::bigint, $4::bigint, $5::timestamptz)`,
-      [
-        'WORLD_STAGING_CRASH_AFTER',
-        'WORKER_1',
-        '1',
-        '0',
-        '2026-09-11T00:00:01.000Z',
-      ],
-      'WORLD_WRITER_FENCE_STALE',
-    ),
-  );
+    await withRole(mainClient, worker, 'CRASH_AFTER_TAKEOVER', async () => {
+      assertLease(
+        await command(
+          mainClient,
+          'CRASH_AFTER_TAKEOVER',
+          `select fencing_token::text as fencing_token, acquisition_kind
+             from ${schema}.acquire_world_writer_lease($1, $2, $3::timestamptz, $4::bigint)`,
+          [
+            'WORLD_STAGING_CRASH_AFTER',
+            'WORKER_2',
+            '2026-09-11T00:00:01.000Z',
+            '1000',
+          ],
+        ),
+        2,
+        'TAKEN_OVER',
+        'post-commit recovery did not preserve fencing lineage',
+      );
+    });
+    await withRole(mainClient, worker, 'CRASH_AFTER_OLD_FENCE', () =>
+      expectRejected(
+        mainClient,
+        'CRASH_AFTER_OLD_FENCE_REJECTED',
+        `select * from ${schema}.assert_world_writer_commit_guard($1, $2, $3::bigint, $4::bigint, $5::timestamptz)`,
+        [
+          'WORLD_STAGING_CRASH_AFTER',
+          'WORKER_1',
+          '1',
+          '0',
+          '2026-09-11T00:00:01.000Z',
+        ],
+        'WORLD_WRITER_FENCE_STALE',
+      ),
+    );
+  } finally {
+    await command(mainClient, 'CRASH_AFTER_ROLLBACK', 'rollback');
+  }
 }
 
 function cleanupInventoryKey(record) {
