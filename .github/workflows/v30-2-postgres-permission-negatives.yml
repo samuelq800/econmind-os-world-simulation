@@ -2,6 +2,9 @@ name: V30.2 PostgreSQL permission negatives
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex/e-v302-native-pg-permission-negatives
 
 permissions:
   contents: read
