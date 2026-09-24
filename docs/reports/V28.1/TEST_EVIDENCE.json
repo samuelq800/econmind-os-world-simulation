@@ -8,6 +8,7 @@
   "authoritative_v28_1_status": "PLANNED",
   "open_adrs": ["ADR-14"],
   "owner_scope_correction": "ONE_WORLD_ONLY_NO_SEASON_MODE_OR_INSTANCE",
+  "governance_alignment": "ADR_14_SUPERSESSION_PROPOSAL_DECISION_REQUIRED",
   "checks": {
     "focused_and_replay_vitest_final": {
       "status": "PASS",
@@ -27,12 +28,15 @@
     "authoritative_pattern_scan": "PASS",
     "repository_boundary_scan": "PASS",
     "repository_secret_scan": "PASS",
-    "local_safe_environment": "PASS"
+    "local_safe_environment": "PASS",
+    "r2_governance_validator": "PASS",
+    "git_diff_check": "PASS"
   },
   "not_run": [
     "full_repository_test_suite",
     "V28_1_dependency_closure",
     "ADR_14_owner_reconciliation",
+    "Constitution_R002_governing_reconciliation",
     "runtime_orchestrator_integration",
     "independent_P0_review",
     "migration",

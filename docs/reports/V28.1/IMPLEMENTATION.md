@@ -4,7 +4,7 @@
 
 - Branch: `codex/v28-1-single-world-config-preparation`; initially prepared on `origin/main` `4d38a9f6ef4191edd84ded58a2c90b130267b69f`, then rebased onto `b14d7becad757769ba6299f2c0d5674dca0482bd`.
 - Status: `PREPARATION_ONLY`. `status/progress.json` still lists V28.1 and its outstanding dependencies as `PLANNED`; ADR-14 remains `PROPOSED_NOT_APPROVED`.
-- The owner explicitly corrected this slice to **one World only**, with no separate Season instance, label or World/Season mode. The repository's V28.1/ADR-14 text still anticipates two orchestrators. This candidate does not silently amend that authority or claim the V28.1 exit gate; later owner/governance reconciliation is required.
+- The owner explicitly corrected this slice to **one World only**, with no separate Season instance, label or World/Season mode. The repository's V28.1/ADR-14 text still anticipates two orchestrators, and Constitution R002 requires separate orchestrators. A new [ADR-14 single-World supersession proposal](../../architecture/ADR-14_SINGLE_WORLD_SUPERSESSION_PROPOSAL.md) records the exact conflict and proposed forward contract. It is `DECISION_REQUIRED / NOT_APPROVED`; no historical ADR, Constitution, step manifest, prompt or Gate has been silently rewritten. Formal V28.1 entry remains OPEN pending owner/governance reconciliation and hard dependencies.
 
 ## Delivered behavior
 
@@ -18,4 +18,5 @@ One read-only binding verifies existing replay evidence belongs to the configure
 - Core build/typecheck, targeted ESLint/Prettier: PASS.
 - Architecture boundary suite: PASS, 3 files / 34 tests; authoritative-pattern and boundary scans PASS.
 - Repository secrets and local safe-environment checks: PASS; Supabase unlinked, database mutation disallowed.
+- Governance alignment: additive proposal/plan only; active R2/ADR/Constitution records unchanged. Focused governance validator and diff checks are recorded in `TEST_EVIDENCE.json` after this addendum.
 - Full repository suite, authoritative integration, old-world compatibility, formal owner reconciliation, independent P0 review, migration, production and release: NOT_RUN. No Gate/status/ADR record changed.
