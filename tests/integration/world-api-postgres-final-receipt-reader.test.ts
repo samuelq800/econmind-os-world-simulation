@@ -6,7 +6,13 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { parseSupabaseAuthSubject } from '../../apps/world-api/src/integration/identity.js';
 import {
+  createAuthenticatedFinalReceiptQueryHandler,
+  WORLD_FINAL_RECEIPT_READ_API_SCHEMA_VERSION,
+} from '../../apps/world-api/src/integration/authenticated-final-receipt-query-handler.js';
+import {
+  readAuthenticatedPostgresFinalCommandReceipt,
   readPostgresFinalCommandReceipt,
+  WORLD_V2_AUTHENTICATED_FINAL_RECEIPT_QUERY,
   WORLD_V2_FINAL_RECEIPT_QUERY,
 } from '../../apps/world-api/src/integration/postgres-final-receipt-reader.js';
 import type { ParameterizedPgReadExecutor } from '../../apps/world-api/src/integration/postgres-read-adapter.js';
@@ -16,6 +22,7 @@ const migrations = [
   '0001_world_v2_namespace.sql',
   '0002_world_v2_command_event_ledger.sql',
   '0003_world_v2_command_receipts_outbox.sql',
+  '0011_world_v2_current_commit_authorization.sql',
 ];
 const authSubject = parseSupabaseAuthSubject(
   '123e4567-e89b-42d3-a456-426614174000',
@@ -152,6 +159,23 @@ describe('server-scoped PostgreSQL final receipt reader', () => {
         fingerprintB,
       ],
     );
+    await database.query(
+      `insert into world_v2.current_commit_authorization
+        (world_id, auth_subject, country_id, office_id, capability, team_id,
+         authorization_version, active, refreshed_at_real)
+       values
+        ($1, $2::uuid, $3, $4, 'TRADE_CONTRACTS', 'TEAM_A', 'AUTH_REVISION_1', true, $5),
+        ($1, $2::uuid, $3, $4, 'TRADE_READ', 'TEAM_A', 'AUTH_REVISION_1', true, $5),
+        ($1, $6::uuid, $3, $4, 'TRADE_READ', 'TEAM_A', 'AUTH_REVISION_1', false, $5)`,
+      [
+        committedIdentity.worldId,
+        authSubject,
+        serverScope.countryId,
+        serverScope.officeId,
+        '2026-09-24T01:00:00.000Z',
+        otherSubject,
+      ],
+    );
     executor = {
       query: async ({ text, values }) => database.query(text, [...values]),
     };
@@ -204,6 +228,30 @@ describe('server-scoped PostgreSQL final receipt reader', () => {
       worldVersionAfter: null,
       eventIds: [],
     });
+  });
+
+  it('recovers a receipt only through current active authorization derived from the durable submission', async () => {
+    await expect(
+      readAuthenticatedPostgresFinalCommandReceipt({
+        executor,
+        identity: committedIdentity,
+        authSubject,
+      }),
+    ).resolves.toMatchObject({
+      source: 'DURABLE_FINAL_COMMAND_RECEIPT',
+      worldId: committedIdentity.worldId,
+      commandId: committedIdentity.commandId,
+      idempotencyKey: committedIdentity.idempotencyKey,
+      outcome: 'COMMITTED',
+      worldVersionAfter: '1',
+    });
+    await expect(
+      readAuthenticatedPostgresFinalCommandReceipt({
+        executor,
+        identity: committedIdentity,
+        authSubject: otherSubject,
+      }),
+    ).resolves.toBeNull();
   });
 
   it.each([
@@ -294,6 +342,152 @@ describe('server-scoped PostgreSQL final receipt reader', () => {
     expect(WORLD_V2_FINAL_RECEIPT_QUERY).toContain(
       'and submission.office_id = $6',
     );
+  });
+
+  it('binds authenticated receipt recovery to no browser-supplied country or office', async () => {
+    const calls: Array<{ text: string; values: readonly string[] }> = [];
+    const recordingExecutor: ParameterizedPgReadExecutor = {
+      query: async ({ text, values }) => {
+        calls.push({ text, values });
+        return { rows: [] };
+      },
+    };
+
+    await readAuthenticatedPostgresFinalCommandReceipt({
+      executor: recordingExecutor,
+      identity: committedIdentity,
+      authSubject,
+    });
+
+    expect(calls).toEqual([
+      {
+        text: WORLD_V2_AUTHENTICATED_FINAL_RECEIPT_QUERY,
+        values: [
+          committedIdentity.worldId,
+          committedIdentity.commandId,
+          committedIdentity.idempotencyKey,
+          authSubject,
+        ],
+      },
+    ]);
+    expect(WORLD_V2_AUTHENTICATED_FINAL_RECEIPT_QUERY).toMatch(/^select\b/u);
+    expect(WORLD_V2_AUTHENTICATED_FINAL_RECEIPT_QUERY).not.toMatch(
+      /\b(?:insert|update|delete|merge|truncate|alter|drop|create|grant|revoke|call|do|for\s+update)\b/iu,
+    );
+    expect(WORLD_V2_AUTHENTICATED_FINAL_RECEIPT_QUERY).toContain(
+      'from world_v2.current_commit_authorization as current_authorization',
+    );
+    expect(WORLD_V2_AUTHENTICATED_FINAL_RECEIPT_QUERY).toContain(
+      'and current_authorization.active',
+    );
+  });
+
+  it('verifies JWT claims before running the authenticated durable recovery query', async () => {
+    const handler = createAuthenticatedFinalReceiptQueryHandler({
+      executor,
+      policy: {
+        expectedIssuer: 'https://issuer.example.test',
+        expectedAudience: 'authenticated',
+        nowEpochSeconds: 1_000,
+      },
+      verifier: {
+        async verify() {
+          return {
+            sub: authSubject,
+            iss: 'https://issuer.example.test',
+            aud: 'authenticated',
+            iat: 900,
+            exp: 1_100,
+          };
+        },
+      },
+    });
+    const request = {
+      schemaVersion: WORLD_FINAL_RECEIPT_READ_API_SCHEMA_VERSION,
+      requestId: '550e8400-e29b-41d4-a716-446655440001',
+      operation: 'READ_FINAL_NARROW_TRANSFER_RECEIPT',
+      payload: committedIdentity,
+    } as const;
+
+    await expect(
+      handler.handle({ authorization: 'Bearer test-token', request }),
+    ).resolves.toMatchObject({
+      ok: true,
+      receipt: {
+        source: 'DURABLE_FINAL_COMMAND_RECEIPT',
+        commandId: committedIdentity.commandId,
+      },
+    });
+
+    let queries = 0;
+    const invalidHandler = createAuthenticatedFinalReceiptQueryHandler({
+      executor: {
+        async query() {
+          queries += 1;
+          return { rows: [] };
+        },
+      },
+      policy: {
+        expectedIssuer: 'https://issuer.example.test',
+        expectedAudience: 'authenticated',
+        nowEpochSeconds: 1_000,
+      },
+      verifier: {
+        async verify() {
+          throw new Error('signature rejected');
+        },
+      },
+    });
+    await expect(
+      invalidHandler.handle({ authorization: 'Bearer test-token', request }),
+    ).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'AUTHENTICATION_INVALID' },
+    });
+    expect(queries).toBe(0);
+  });
+
+  it('rejects browser-supplied receipt scope fields before any query', async () => {
+    let queries = 0;
+    const handler = createAuthenticatedFinalReceiptQueryHandler({
+      executor: {
+        async query() {
+          queries += 1;
+          return { rows: [] };
+        },
+      },
+      policy: {
+        expectedIssuer: 'https://issuer.example.test',
+        expectedAudience: 'authenticated',
+        nowEpochSeconds: 1_000,
+      },
+      verifier: {
+        async verify() {
+          return {
+            sub: authSubject,
+            iss: 'https://issuer.example.test',
+            aud: 'authenticated',
+            iat: 900,
+            exp: 1_100,
+          };
+        },
+      },
+    });
+    await expect(
+      handler.handle({
+        authorization: 'Bearer test-token',
+        request: {
+          schemaVersion: WORLD_FINAL_RECEIPT_READ_API_SCHEMA_VERSION,
+          requestId: '550e8400-e29b-41d4-a716-446655440002',
+          operation: 'READ_FINAL_NARROW_TRANSFER_RECEIPT',
+          payload: { ...committedIdentity, countryId: 'COUNTRY_A' },
+        },
+      }),
+    ).resolves.toMatchObject({
+      ok: false,
+      error: { code: 'PROTOCOL_ERROR' },
+    });
+    expect(queries).toBe(0);
   });
 
   it('fails closed for duplicate, conflicting, or source-labelled rows', async () => {

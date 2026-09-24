@@ -76,6 +76,59 @@ where receipt.world_id = $1
 limit 2
 `.trim();
 
+/**
+ * Exact final-receipt recovery query for an already authenticated caller.
+ * Country and Office are derived from the durable submission, never request
+ * JSON. The existence predicate rechecks that the same caller has a current
+ * active authorization for that exact durable scope in the same statement.
+ */
+export const WORLD_V2_AUTHENTICATED_FINAL_RECEIPT_QUERY = `
+select
+  receipt.world_id as receipt_world_id,
+  receipt.command_id as receipt_command_id,
+  receipt.idempotency_key as receipt_idempotency_key,
+  receipt.schema_version as receipt_schema_version,
+  receipt.command_fingerprint as receipt_command_fingerprint,
+  receipt.outcome,
+  receipt.reason_code,
+  receipt.transition_id,
+  receipt.world_version_before::text as world_version_before,
+  receipt.world_version_after::text as world_version_after,
+  receipt.sim_time::text as sim_time,
+  receipt.event_ids,
+  receipt.recorded_at_real as recorded_at_real,
+  submission.world_id as submission_world_id,
+  submission.command_id as submission_command_id,
+  submission.idempotency_key as submission_idempotency_key,
+  submission.command_fingerprint as submission_command_fingerprint,
+  submission.auth_subject::text as submission_auth_subject,
+  submission.country_id as submission_country_id,
+  submission.office_id as submission_office_id
+from world_v2.command_receipt as receipt
+inner join world_v2.command_submission as submission
+  on submission.world_id = receipt.world_id
+  and submission.command_id = receipt.command_id
+  and submission.command_fingerprint = receipt.command_fingerprint
+  and submission.idempotency_key = receipt.idempotency_key
+where receipt.world_id = $1
+  and receipt.command_id = $2
+  and receipt.idempotency_key = $3
+  and submission.world_id = $1
+  and submission.command_id = $2
+  and submission.idempotency_key = $3
+  and submission.auth_subject = $4::uuid
+  and exists (
+    select 1
+    from world_v2.current_commit_authorization as current_authorization
+    where current_authorization.world_id = submission.world_id
+      and current_authorization.auth_subject = submission.auth_subject
+      and current_authorization.country_id = submission.country_id
+      and current_authorization.office_id = submission.office_id
+      and current_authorization.active
+  )
+limit 2
+`.trim();
+
 interface FinalReceiptRow {
   readonly receipt_world_id: unknown;
   readonly receipt_command_id: unknown;
@@ -442,4 +495,79 @@ export async function readPostgresFinalCommandReceipt(input: {
     protocol('PostgreSQL final receipt query returned conflicting rows');
   }
   return mapFinalReceipt(rows[0], identity, serverScope);
+}
+
+/**
+ * Reads a final receipt for a verified caller without accepting Country or
+ * Office from the browser. The durable submission supplies that scope and the
+ * same PostgreSQL statement requires a current active authorization match.
+ */
+export async function readAuthenticatedPostgresFinalCommandReceipt(input: {
+  readonly executor: ParameterizedPgReadExecutor;
+  readonly identity: FinalReceiptIdentity;
+  readonly authSubject: SupabaseAuthSubject;
+  readonly signal?: AbortSignal;
+}): Promise<PostgresFinalCommandReceipt | null> {
+  const identity = Object.freeze({
+    worldId: canonicalId(input.identity.worldId, 'worldId'),
+    commandId: canonicalId(input.identity.commandId, 'commandId'),
+    idempotencyKey: canonicalId(
+      input.identity.idempotencyKey,
+      'idempotencyKey',
+    ),
+  });
+  let authSubject: SupabaseAuthSubject;
+  try {
+    authSubject = parseSupabaseAuthSubject(input.authSubject);
+  } catch {
+    protocol('authenticated authSubject is invalid');
+  }
+  if (isAborted(input.signal)) {
+    throw new WorldReadFailure(
+      'CANCELLED',
+      'Final receipt read cancelled',
+      false,
+    );
+  }
+
+  const queryRequest: ParameterizedPgReadRequest = {
+    text: WORLD_V2_AUTHENTICATED_FINAL_RECEIPT_QUERY,
+    values: Object.freeze([
+      identity.worldId,
+      identity.commandId,
+      identity.idempotencyKey,
+      authSubject,
+    ]),
+    ...(input.signal === undefined ? {} : { signal: input.signal }),
+  };
+  let result: ParameterizedPgReadResult;
+  try {
+    result = await awaitQuery(input.executor.query(queryRequest), input.signal);
+  } catch {
+    if (isAborted(input.signal)) {
+      throw new WorldReadFailure(
+        'CANCELLED',
+        'Final receipt read cancelled',
+        false,
+      );
+    }
+    throw new WorldReadFailure(
+      'UPSTREAM_UNAVAILABLE',
+      'Final receipt database unavailable',
+      true,
+    );
+  }
+  const rows = resultRows(result);
+  if (rows.length === 0) return null;
+  if (rows.length !== 1) {
+    protocol(
+      'PostgreSQL authenticated final receipt query returned conflicting rows',
+    );
+  }
+  const row = receiptRow(rows[0]);
+  return mapFinalReceipt(rows[0], identity, {
+    authSubject,
+    countryId: canonicalId(row.submission_country_id, 'submission countryId'),
+    officeId: canonicalId(row.submission_office_id, 'submission officeId'),
+  });
 }
