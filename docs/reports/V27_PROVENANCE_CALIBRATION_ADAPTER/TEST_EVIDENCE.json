@@ -1,0 +1,77 @@
+{
+  "status": "PREPARATION_ONLY",
+  "riskClass": "P0",
+  "v27_2AncestorSha": "3b5766864dd15630b7beec7ddb358b2ec112aef6",
+  "mainAncestorSha": "4d38a9f6ef4191edd84ded58a2c90b130267b69f",
+  "compositionCommit": "18f622b",
+  "planSha": "77cbb820a840a68fe05f6cca2c8a36b33c63e43e",
+  "codeSha": "652138d2179ec1102bb23efe8b3419de7af9b8de",
+  "codeTree": "1ec5c83673314c379ce6dfe642abbf501cf27507",
+  "generationAuthorized": false,
+  "worldBinding": "UNAVAILABLE",
+  "missingWorldBindingFields": [
+    "calibration.worldId",
+    "calibration.countryConfigurationRef"
+  ],
+  "checks": [
+    {
+      "name": "adapter plus existing V27.1 and V27.2 tests",
+      "status": "PASS",
+      "detail": "3 files, 31 tests"
+    },
+    {
+      "name": "targeted ESLint",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted Prettier",
+      "status": "PASS"
+    },
+    {
+      "name": "Core typecheck",
+      "status": "PASS"
+    },
+    {
+      "name": "Core build",
+      "status": "PASS"
+    },
+    {
+      "name": "repository boundary scan",
+      "status": "PASS"
+    },
+    {
+      "name": "authoritative-pattern scan",
+      "status": "PASS"
+    },
+    {
+      "name": "local safe-environment check",
+      "status": "PASS",
+      "detail": "databaseConfigured=false; linkedSupabaseProject=NOT_LINKED; databaseMutationAllowed=false"
+    },
+    {
+      "name": "foundation policy",
+      "status": "PASS"
+    },
+    {
+      "name": "repository secret scan",
+      "status": "PASS",
+      "detail": "955 files scanned"
+    },
+    {
+      "name": "composition-to-code diff check",
+      "status": "PASS"
+    }
+  ],
+  "notRun": [
+    "schema evolution for world configuration metric or derivation binding",
+    "real source retrieval or digest verification",
+    "actual 70-country data linkage",
+    "economic plausibility review",
+    "OpeningSeed generation",
+    "ledger or database writes",
+    "runtime integration",
+    "separate Season mechanics",
+    "independent P0 review",
+    "merge or Gate acceptance"
+  ]
+}
