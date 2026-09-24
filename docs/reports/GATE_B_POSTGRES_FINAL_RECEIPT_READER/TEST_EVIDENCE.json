@@ -1,0 +1,68 @@
+{
+  "candidateStatus": "IMPLEMENTED_UNVERIFIED",
+  "baseSha": "45990429bb5405675d72cfde0299ca176084485c",
+  "planSha": "793534300b1637f5a3a43e09bf265c3d7e063cf2",
+  "codeSha": "d228cb65cd44d3ed0d3daf04ea5ba7b9ba363832",
+  "codeTree": "87c96505ca04759dcf41b40da1e548cf740310e2",
+  "checks": [
+    {
+      "name": "focused migration-backed and existing PostgreSQL adapter tests",
+      "status": "PASS",
+      "detail": "2 files, 20 tests"
+    },
+    {
+      "name": "targeted ESLint",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted Prettier",
+      "status": "PASS"
+    },
+    {
+      "name": "world-api typecheck",
+      "status": "PASS"
+    },
+    {
+      "name": "world-api build",
+      "status": "PASS"
+    },
+    {
+      "name": "repository boundary scan",
+      "status": "PASS"
+    },
+    {
+      "name": "authoritative-pattern scan",
+      "status": "PASS"
+    },
+    {
+      "name": "local safe-environment check",
+      "status": "PASS",
+      "detail": "databaseConfigured=false; linkedSupabaseProject=NOT_LINKED; databaseMutationAllowed=false"
+    },
+    {
+      "name": "foundation policy",
+      "status": "PASS"
+    },
+    {
+      "name": "repository secret scan",
+      "status": "PASS",
+      "detail": "931 files scanned"
+    },
+    {
+      "name": "base-to-code diff check",
+      "status": "PASS"
+    }
+  ],
+  "notRun": [
+    "live managed PostgreSQL injection",
+    "native PostgreSQL integration",
+    "E HTTP route wiring",
+    "F client wiring",
+    "database connection or role configuration",
+    "schema or migration changes",
+    "production Supabase access",
+    "production rollout",
+    "independent review",
+    "Gate B approval"
+  ]
+}
