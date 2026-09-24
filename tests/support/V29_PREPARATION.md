@@ -41,3 +41,12 @@ review are `NOT_RUN`. The harness accepts a 70-country roster but requires real
 daily postings for every declared country; a synthetic roster alone cannot
 pass it. Its fixed-seed comparison is fresh re-execution of the local Core
 financial trace, not a claim of complete authoritative World replay.
+
+## Later mainline integration
+
+The test-only commit was cherry-picked as `79ae441` on main base `c52ad30`.
+On that exact integration candidate, the new focused test file passed 6/6,
+its dedicated TypeScript project passed, and targeted ESLint, Prettier and
+repository secret checks passed. The earlier 33-test result remains evidence
+for F's original branch, not for this integration SHA. The classification
+remains `PREPARATION_ONLY_NOT_V29_STARTED`.
