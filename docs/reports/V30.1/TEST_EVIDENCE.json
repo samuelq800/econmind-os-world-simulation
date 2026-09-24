@@ -1,10 +1,10 @@
 {
-  "scope": "V28.1_V29.1_V30.1_isolated_preparation_only",
+  "scope": "V29.1_V30.1_non_authoritative_preparation_only",
   "formal_status": "PLANNED",
   "candidate_status": "PREPARATION_ONLY_NOT_V30_ACCEPTANCE",
   "target": "NO_NETWORK_NO_DATABASE",
   "checks": {
-    "focused_v28_v30_vitest": { "status": "PASS", "files": 2, "tests": 11 },
+    "focused_v30_vitest": { "status": "PASS", "files": 1, "tests": 6 },
     "targeted_eslint": "PASS",
     "targeted_prettier": "PASS",
     "v30_strict_typecheck": "PASS",
