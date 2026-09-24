@@ -73,7 +73,7 @@ function record(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
-function sameIdentity(
+export function sameAuthorizedIdentity(
   left: AuthorizedBrowserIdentity | null,
   right: AuthorizedBrowserIdentity,
 ): boolean {
@@ -247,7 +247,10 @@ function parseProjection(
 
 function commandState(injection: AuthorizedUiInjection): CommandLifecycleState {
   const command = injection.command;
-  if (!command || !sameIdentity(injection.currentIdentity, command.identity)) {
+  if (
+    !command ||
+    !sameAuthorizedIdentity(injection.currentIdentity, command.identity)
+  ) {
     return {
       source: 'AUTHORIZED_READ_MODEL',
       kind: 'UNAVAILABLE',
@@ -351,7 +354,7 @@ export function resolveAuthorizedUi(
   const read = injection.read;
   const accessDenied =
     read !== null &&
-    sameIdentity(injection.currentIdentity, read.identity) &&
+    sameAuthorizedIdentity(injection.currentIdentity, read.identity) &&
     read.result.status === 'DENIED';
   const command: CommandLifecycleState = accessDenied
     ? {
@@ -367,7 +370,7 @@ export function resolveAuthorizedUi(
   if (
     injection.currentIdentity &&
     read &&
-    sameIdentity(injection.currentIdentity, read.identity)
+    sameAuthorizedIdentity(injection.currentIdentity, read.identity)
   ) {
     const result = read.result;
     if (
