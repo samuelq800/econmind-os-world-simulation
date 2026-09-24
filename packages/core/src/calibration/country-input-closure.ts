@@ -15,7 +15,9 @@ import {
 } from '../serialization/canonical.js';
 
 export const V27_2_CALIBRATION_PREPARATION_SCHEMA_VERSION =
-  'v27.2-country-calibration-preparation-v1' as const;
+  'v27.2-country-calibration-preparation-v2' as const;
+export const V27_2_COUNTRY_CONFIGURATION_BINDING_VERSION =
+  'v27.2-country-configuration-identity-v1' as const;
 export const V27_2_REQUIRED_COUNTRY_COUNT = 70 as const;
 export const V27_2_REQUIRED_COUNTRY_COUNT_VALUE = '70' as const;
 
@@ -116,6 +118,9 @@ export interface CountryCalibrationInput {
 
 export interface V27_2CalibrationPreparationInput {
   readonly schemaVersion: typeof V27_2_CALIBRATION_PREPARATION_SCHEMA_VERSION;
+  readonly worldId: string;
+  /** Content-addressed World/country identity, not configuration authority. */
+  readonly countryConfigurationRef: CanonicalSha256;
   readonly expectedCountryCount: typeof V27_2_REQUIRED_COUNTRY_COUNT_VALUE;
   readonly sources: readonly CalibrationSourceEvidence[];
   readonly countries: readonly CountryCalibrationInput[];
@@ -261,6 +266,29 @@ function sortedUnique<T>(
     invalid(`${label} identities must be unique`);
   }
   return Object.freeze(sorted);
+}
+
+/** Structural identity only; an external owner must still attest the source. */
+export function v27_2CountryConfigurationRef(
+  input: { readonly worldId: string; readonly countryIds: readonly string[] },
+  sha256Hex: Sha256Hex,
+): CanonicalSha256 {
+  const requestedWorldId = canonicalId(input.worldId, 'worldId');
+  const countryIds = sortedUnique(
+    list(input.countryIds, 'country configuration IDs').map((value) =>
+      canonicalId(value, 'country configuration ID'),
+    ),
+    (value) => value,
+    'country configuration',
+  );
+  return canonicalSha256(
+    canonicalHashInput({
+      bindingVersion: V27_2_COUNTRY_CONFIGURATION_BINDING_VERSION,
+      worldId: requestedWorldId,
+      countryIds,
+    }),
+    sha256Hex,
+  );
 }
 
 function sourceEvidence(value: unknown): CalibrationSourceEvidence {
@@ -906,7 +934,14 @@ export function validateV27_2CalibrationPreparation(
   const input = record(value, 'V27.2 calibration input');
   exactKeys(
     input,
-    ['schemaVersion', 'expectedCountryCount', 'sources', 'countries'],
+    [
+      'schemaVersion',
+      'worldId',
+      'countryConfigurationRef',
+      'expectedCountryCount',
+      'sources',
+      'countries',
+    ],
     'V27.2 calibration input',
   );
   if (
@@ -914,6 +949,14 @@ export function validateV27_2CalibrationPreparation(
     input.expectedCountryCount !== V27_2_REQUIRED_COUNTRY_COUNT_VALUE
   ) {
     invalid('schema version and expected country count are fixed');
+  }
+  const requestedWorldId = canonicalId(input.worldId, 'worldId');
+  const countryConfigurationRef = string(
+    input.countryConfigurationRef,
+    'countryConfigurationRef',
+  );
+  if (!SHA256.test(countryConfigurationRef)) {
+    invalid('countryConfigurationRef must be canonical SHA-256');
   }
   const sources = sortedUnique(
     list(input.sources, 'sources').map(sourceEvidence),
@@ -939,6 +982,19 @@ export function validateV27_2CalibrationPreparation(
       `expected ${V27_2_REQUIRED_COUNTRY_COUNT} countries but received ${countries.length}`,
     );
   }
+  if (
+    countries.length === V27_2_REQUIRED_COUNTRY_COUNT &&
+    countryConfigurationRef !==
+      v27_2CountryConfigurationRef(
+        {
+          worldId: requestedWorldId,
+          countryIds: countries.map((country) => country.countryId),
+        },
+        sha256Hex,
+      )
+  ) {
+    invalid('countryConfigurationRef does not bind World and country IDs');
+  }
   const countryIds = new Set(countries.map((item) => item.countryId));
   for (const item of countries) {
     for (const chain of item.supplyChains) {
@@ -963,6 +1019,8 @@ export function validateV27_2CalibrationPreparation(
   }
   const candidate: Readonly<V27_2CalibrationPreparationInput> = Object.freeze({
     schemaVersion: V27_2_CALIBRATION_PREPARATION_SCHEMA_VERSION,
+    worldId: requestedWorldId,
+    countryConfigurationRef: countryConfigurationRef as CanonicalSha256,
     expectedCountryCount: V27_2_REQUIRED_COUNTRY_COUNT_VALUE,
     sources,
     countries,

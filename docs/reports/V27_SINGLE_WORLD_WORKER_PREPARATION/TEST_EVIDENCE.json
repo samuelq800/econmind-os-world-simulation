@@ -1,0 +1,48 @@
+{
+  "scope": "single_world_worker_diagnostic_preflight_only",
+  "status": "PREPARATION_ONLY",
+  "branch": "codex/v27-single-world-worker-preparation",
+  "base_main_sha": "0fa8da7e74488f4554185afb68c19b4933d72586",
+  "rebased_main_sha": "47a393a6f1abb3bb99467377c7d97a28e46456d1",
+  "authoritative_v27_steps": {
+    "V27.1": "PLANNED",
+    "V27.2": "PLANNED",
+    "V27.3": "PLANNED"
+  },
+  "open_adrs": ["ADR-13"],
+  "initializationAuthorized": false,
+  "workerDispatchAllowed": false,
+  "checks": {
+    "focused_vitest_final": { "status": "PASS", "files": 3, "tests": 20 },
+    "initial_focused_vitest": "FAIL_TEST_RUNTIME_IDENTITY_CORRECTED",
+    "core_build": "PASS",
+    "worker_build": "PASS",
+    "targeted_eslint": "PASS",
+    "targeted_prettier": "PASS",
+    "architecture_boundary_vitest": {
+      "status": "PASS",
+      "files": 3,
+      "tests": 34
+    },
+    "authoritative_pattern_scan": "PASS",
+    "repository_boundary_scan": "PASS",
+    "local_safe_environment": "PASS",
+    "repository_secret_scan": "PASS",
+    "git_staged_diff_check": "PASS"
+  },
+  "not_run": [
+    "complete_70_country_calibration",
+    "durable_world_configuration_binding",
+    "verified_source_content_retrieval",
+    "authoritative_opening_seed_bootstrap",
+    "worker_runtime_activation",
+    "ADR_13_owner_approval",
+    "current_funding_inventory_approval_at_commit",
+    "writer_lease_fencing_integration",
+    "independent_P0_review",
+    "full_repository_test_suite",
+    "migration_and_database_release",
+    "production_access"
+  ],
+  "authoritative_writes": false
+}

@@ -10,6 +10,7 @@ import {
   V27_2_CALIBRATION_PREPARATION_SCHEMA_VERSION,
   V27_2_REQUIRED_COUNTRY_COUNT,
   V27_2_REQUIRED_COUNTRY_COUNT_VALUE,
+  v27_2CountryConfigurationRef,
 } from '../../packages/core/src/calibration/country-input-closure.js';
 import {
   COUNTRY_SEED_PROVENANCE_SCHEMA,
@@ -137,8 +138,18 @@ function calibrationCountry(index: number) {
 }
 
 function calibrationInput() {
+  const countries = Array.from(
+    { length: V27_2_REQUIRED_COUNTRY_COUNT },
+    (_, index) => calibrationCountry(index + 1),
+  );
+  const worldId = 'WORLD_SHARED';
   return {
     schemaVersion: V27_2_CALIBRATION_PREPARATION_SCHEMA_VERSION,
+    worldId,
+    countryConfigurationRef: v27_2CountryConfigurationRef(
+      { worldId, countryIds: countries.map((country) => country.countryId) },
+      sha256,
+    ),
     expectedCountryCount: V27_2_REQUIRED_COUNTRY_COUNT_VALUE,
     sources: [
       {
@@ -149,10 +160,7 @@ function calibrationInput() {
         contentHash: `sha256:${SOURCE_HASH}`,
       },
     ],
-    countries: Array.from(
-      { length: V27_2_REQUIRED_COUNTRY_COUNT },
-      (_, index) => calibrationCountry(index + 1),
-    ),
+    countries,
   };
 }
 
@@ -243,6 +251,7 @@ describe('V27.1 to V27.2 provenance/calibration adapter', () => {
       status: 'UNAVAILABLE',
       generationAuthorized: false,
       worldId: 'WORLD_SHARED',
+      countryConfigurationRef: expect.stringMatching(/^sha256:[0-9a-f]{64}$/u),
       seasonRef: 'SEASON_1',
       countryCount: '70',
       hashInput: expect.stringMatching(/^SHA-256\n/u),
@@ -260,15 +269,22 @@ describe('V27.1 to V27.2 provenance/calibration adapter', () => {
         changes: [
           expect.objectContaining({ before: '0', delta: '8', after: '8' }),
         ],
+        numericDerivationTrace: {
+          sourceRef: SOURCE_REF,
+          assumptionRef: ASSUMPTION_REF,
+          unit: 'tonne_per_day',
+          originalAmount: '0',
+          finalAmount: '8',
+          changes: [
+            expect.objectContaining({ before: '0', delta: '8', after: '8' }),
+          ],
+        },
       }),
     );
     expect(result.issues).toContainEqual(
       expect.objectContaining({
-        code: 'WORLD_CONFIGURATION_BINDING_UNAVAILABLE',
-        missingFields: [
-          'calibration.countryConfigurationRef',
-          'calibration.worldId',
-        ],
+        code: 'COUNTRY_CONFIGURATION_AUTHORITY_UNVERIFIED',
+        missingFields: ['countryConfiguration.authoritativeSource'],
       }),
     );
     expect(JSON.stringify(result)).not.toMatch(/buff|multiplier|engineMode/iu);
@@ -383,6 +399,31 @@ describe('V27.1 to V27.2 provenance/calibration adapter', () => {
     expect(result.status).toBe('MISMATCH');
     expect(result.issues).toContainEqual(
       expect.objectContaining({ code: 'COUNTRY_SET_MISMATCH' }),
+    );
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({ code: 'WORLD_CONFIGURATION_BINDING_MISMATCH' }),
+    );
+    expect(result.links).toHaveLength(0);
+  });
+
+  it('rejects a different World even when its local country digest is self-consistent', () => {
+    const calibration = calibrationInput();
+    calibration.worldId = 'WORLD_OTHER';
+    calibration.countryConfigurationRef = v27_2CountryConfigurationRef(
+      {
+        worldId: calibration.worldId,
+        countryIds: calibration.countries.map((country) => country.countryId),
+      },
+      sha256,
+    );
+    const result = connect(
+      parseCountrySeedProvenance(provenanceInput()),
+      calibration,
+    );
+    expect(result.status).toBe('MISMATCH');
+    expect(result.links).toHaveLength(0);
+    expect(result.issues).toContainEqual(
+      expect.objectContaining({ code: 'WORLD_CONFIGURATION_BINDING_MISMATCH' }),
     );
   });
 
