@@ -17,7 +17,8 @@ are **non-production preparation**, not a generated 70-country World.
 V29 now has a source-to-evidence gap baseline and a strict candidate-bound
 evidence-claim helper (all 139 requirements default to `MISSING`); V30 has a deterministic,
 non-network load-plan/latency-summary helper for 50/100/420 virtual sessions.
-V29 also has a test-only two-country 600/1000-day exact-ledger/replay harness;
+V29 also has a test-only two-country 600/1000-day exact-ledger/replay harness
+and a disposable-PGlite driver for one real Worker goods-delivery commit/retry;
 V30's injected runner is bounded and has no built-in service target.
 These preparations are not a real 70-country World long run, measured load
 test, security acceptance or V29/V30 gate pass; see [`docs/reports/V29.1/PREPARATION_GAP_AUDIT.md`](docs/reports/V29.1/PREPARATION_GAP_AUDIT.md)
