@@ -375,10 +375,24 @@ async function seedClaimedDelivery(
   );
 }
 
-async function runFreshWorkerSequence(seed: string) {
+async function runFreshWorkerSequence(
+  seed: string,
+  sessionTimeZone?: 'UTC' | 'Asia/Shanghai',
+) {
   const prepared = preparedTwoCountryDelivery(seed);
   const local = await database();
   try {
+    if (sessionTimeZone !== undefined) {
+      await local.query(
+        sessionTimeZone === 'UTC'
+          ? `set time zone 'UTC'`
+          : `set time zone 'Asia/Shanghai'`,
+      );
+      const zone = await local.query<{ readonly zone: string }>(
+        `select current_setting('TimeZone') as zone`,
+      );
+      expect(zone.rows[0]?.zone).toBe(sessionTimeZone);
+    }
     await seedClaimedDelivery(local, prepared.delivery);
     const input = {
       database: local,
@@ -402,6 +416,16 @@ async function runFreshWorkerSequence(seed: string) {
       }
     };
     const first = await executeStep(0);
+    if (sessionTimeZone !== undefined) {
+      const offset = await local.query<{ readonly seconds: string }>(
+        `select extract(timezone from recorded_at_real)::text as seconds
+           from world_v2.command_receipt where command_id = $1`,
+        [prepared.delivery.commandId],
+      );
+      expect(offset.rows[0]?.seconds).toBe(
+        sessionTimeZone === 'UTC' ? '0' : '28800',
+      );
+    }
     const retry = await executeStep(1);
     if (
       first.result.source !== 'NEW_FINAL' ||
@@ -564,7 +588,8 @@ describe('V29.3 preparation-only fresh-PGlite Worker replay evidence', () => {
     });
     expect(initializations).toBe(2);
     expect(evidence.sequenceHash).toBe(
-      'sha256:44214d63aefc1e78987f817b80f767c3ac1e582ab1046076cb706ecf683d7e2b',
+      // The receipt instant is hashed in canonical UTC, not in the DB session zone.
+      'sha256:c814790513c1e8d4fea354111dabd12c39d2051b56a084af01bb4555033cd44c',
     );
     expect(evidence).toMatchObject({
       status: 'LOCAL_PGLITE_FIXED_SEQUENCE_NOT_V29_3_ACCEPTANCE',
@@ -580,6 +605,23 @@ describe('V29.3 preparation-only fresh-PGlite Worker replay evidence', () => {
       createAndRunFreshDatabase: runFreshWorkerSequence,
     });
     expect(different.sequenceHash).not.toBe(evidence.sequenceHash);
+  }, 60_000);
+
+  it('replays identical durable hashes across UTC and Asia/Shanghai database sessions', async () => {
+    let run = 0;
+    const evidence = await assertV29WorkerFixedSeedReplay({
+      seed: 'V29_CROSS_TZ_SEED',
+      createAndRunFreshDatabase(seed) {
+        run += 1;
+        return runFreshWorkerSequence(
+          seed,
+          run === 1 ? 'UTC' : 'Asia/Shanghai',
+        );
+      },
+    });
+    expect(run).toBe(2);
+    expect(evidence.commandCount).toBe(2);
+    expect(evidence.steps[0]?.stepHash).toBe(evidence.steps[1]?.stepHash);
   }, 60_000);
 
   it('reports a reproducible seed/index/minimal hash trace on mismatch, without payloads', async () => {
