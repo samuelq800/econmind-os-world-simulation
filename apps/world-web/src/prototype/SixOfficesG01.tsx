@@ -10,7 +10,14 @@ import { FinanceMinisterCommand } from './FinanceMinisterCommand.js';
 import { GoodsTransferFlow } from './GoodsTransferFlow.js';
 import { IndustryCommandCenter } from './IndustryCommandCenter.js';
 import { LivingNationScene } from './LivingNationScene.js';
-import { NationalOverview } from './NationalOverview.js';
+import {
+  AuthorizedNationalOverview,
+  NationalOverview,
+} from './NationalOverview.js';
+import {
+  resolveAuthorizedUi,
+  type AuthorizedUiInjection,
+} from './authorized-read-adapter.js';
 import { SocialCommandCenter } from './SocialCommandCenter.js';
 import { TradeForeignAffairsCommand } from './TradeForeignAffairsCommand.js';
 import type { PrototypeOfficeOption } from './contracts.js';
@@ -612,7 +619,174 @@ function OfficeSidebar({
   );
 }
 
+function AuthorizedOfficeView({
+  authorized,
+}: {
+  readonly authorized: AuthorizedUiInjection;
+}) {
+  const [page, setPage] = useState<WorkspacePageId>('G02');
+  const mainRef = useRef<HTMLElement>(null);
+  const ui = resolveAuthorizedUi(authorized);
+  useEffect(() => {
+    mainRef.current?.focus();
+  }, [page]);
+  return (
+    <div
+      className="six-offices six-offices--gameplay"
+      data-source="AUTHORIZED_READ_MODEL"
+    >
+      <a className="six-skip-link" href="#six-offices-main">
+        Skip to world desk
+      </a>
+      <header className="six-topbar">
+        <div className="six-brand">
+          <span aria-hidden="true">E</span>
+          <div>
+            <small>ECONMIND WORLD SIMULATION</small>
+            <strong>
+              {ui.read.kind === 'CURRENT'
+                ? ui.read.countryId
+                : 'Country unavailable'}
+            </strong>
+          </div>
+        </div>
+        <div className="six-topbar__game-status" aria-label="world status">
+          <span>
+            <i aria-hidden="true" />
+            {ui.read.kind === 'CURRENT'
+              ? 'AUTHORIZED READ · DISPLAY ONLY'
+              : 'AUTHORIZED VIEW UNAVAILABLE'}
+          </span>
+          <small>
+            {ui.read.kind === 'CURRENT'
+              ? `Snapshot v${ui.read.worldVersion}`
+              : 'No current snapshot'}
+          </small>
+        </div>
+      </header>
+      <div className="six-layout">
+        <aside
+          className="six-sidebar"
+          aria-label="Authorized Office navigation"
+        >
+          <div className="six-sidebar__identity">
+            <span>Office context</span>
+            <strong>
+              {ui.read.kind === 'CURRENT' ? ui.read.officeId : 'Not available'}
+            </strong>
+            <small>Read only · no action grant from this page</small>
+          </div>
+          <nav aria-label="Office views">
+            <div className="six-nav-group">
+              <ul>
+                <li>
+                  <button
+                    type="button"
+                    aria-current={page === 'G01' ? 'page' : undefined}
+                    onClick={() => setPage('G01')}
+                  >
+                    <span>Office brief</span>
+                    <small>G01</small>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    aria-current={page === 'G02' ? 'page' : undefined}
+                    onClick={() => setPage('G02')}
+                  >
+                    <span>Nation overview</span>
+                    <small>G02</small>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <p className="six-sidebar__note">
+            The existing Office games remain LOCAL_FIXTURE. Authorized mode
+            shows only supplied read results and Command status.
+          </p>
+        </aside>
+        <main
+          ref={mainRef}
+          className="trade-main"
+          id="six-offices-main"
+          tabIndex={-1}
+        >
+          {page === 'G02' ? (
+            <AuthorizedNationalOverview
+              read={ui.read}
+              command={ui.command}
+              onOpenBrief={() => setPage('G01')}
+            />
+          ) : (
+            <section
+              className="national-overview"
+              aria-label="Authorized Office brief"
+            >
+              <header className="national-overview__header">
+                <div>
+                  <p>OFFICE BRIEF · G01</p>
+                  <h1>Hold for a final outcome.</h1>
+                  <span>
+                    Review the Command status before making another move.
+                  </span>
+                </div>
+              </header>
+              <CommandLifecycleStatus
+                context="Authorized Office"
+                state={ui.command}
+              />
+              <section className="national-overview__empty" role="status">
+                <h2>
+                  {ui.read.kind === 'CURRENT'
+                    ? 'National intel is ready.'
+                    : 'National intel unavailable.'}
+                </h2>
+                <span>
+                  {ui.read.kind === 'CURRENT'
+                    ? `Read snapshot v${ui.read.worldVersion} in G02. No Command action is attached here.`
+                    : ui.read.reason}
+                </span>
+                <button
+                  className="six-button six-button--primary"
+                  type="button"
+                  onClick={() => setPage('G02')}
+                >
+                  Open national view
+                </button>
+              </section>
+            </section>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
 export function SixOfficesG01({
+  state,
+  onRetry,
+  onReturnToEntry,
+  authorized,
+}: {
+  readonly state: PrototypeViewState;
+  readonly onRetry: () => void;
+  readonly onReturnToEntry: () => void;
+  readonly authorized?: AuthorizedUiInjection;
+}) {
+  return authorized ? (
+    <AuthorizedOfficeView authorized={authorized} />
+  ) : (
+    <FixtureSixOfficesG01
+      state={state}
+      onRetry={onRetry}
+      onReturnToEntry={onReturnToEntry}
+    />
+  );
+}
+
+function FixtureSixOfficesG01({
   state,
   onRetry,
   onReturnToEntry,

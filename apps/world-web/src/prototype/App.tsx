@@ -10,6 +10,7 @@ import {
   type FixtureOfficeId,
 } from './fixtures.js';
 import type { PrototypeStateName, PrototypeViewState } from './state.js';
+import type { AuthorizedUiInjection } from './authorized-read-adapter.js';
 
 const stateLabels: ReadonlyArray<{
   readonly id: PrototypeStateName;
@@ -67,7 +68,9 @@ function viewState(
   }
 }
 
-export function PrototypeApp() {
+export function PrototypeApp({
+  authorized,
+}: { readonly authorized?: AuthorizedUiInjection } = {}) {
   const [stateName, setStateName] = useState<PrototypeStateName>('ready');
   const [selectedOfficeId, setSelectedOfficeId] =
     useState<FixtureOfficeId>('TRADE');
@@ -88,27 +91,45 @@ export function PrototypeApp() {
   return (
     <div className="prototype-app">
       <div className="prototype-warning" role="note">
-        <strong>PREPARATION ONLY · NOT RUNTIME</strong>
+        <strong>
+          {authorized
+            ? 'AUTHORIZED READ · PREPARATION ONLY'
+            : 'PREPARATION ONLY · NOT RUNTIME'}
+        </strong>
         <span>
-          Typed local mock projection · no API · no command submission
+          {authorized
+            ? 'Injected browser-client result · no automatic network or Command submission'
+            : 'Typed local mock projection · no API · no command submission'}
         </span>
       </div>
-      <section className="state-switcher" aria-label="Prototype state controls">
-        <span>Preview state</span>
-        <div>
-          {stateLabels.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              aria-pressed={stateName === item.id}
-              onClick={() => setStateName(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </section>
-      {workspaceOpen ? (
+      {!authorized ? (
+        <section
+          className="state-switcher"
+          aria-label="Prototype state controls"
+        >
+          <span>Preview state</span>
+          <div>
+            {stateLabels.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                aria-pressed={stateName === item.id}
+                onClick={() => setStateName(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+      {authorized ? (
+        <SixOfficesG01
+          state={state}
+          authorized={authorized}
+          onRetry={retry}
+          onReturnToEntry={() => setWorkspaceOpen(false)}
+        />
+      ) : workspaceOpen ? (
         <SixOfficesG01
           state={state}
           onRetry={retry}

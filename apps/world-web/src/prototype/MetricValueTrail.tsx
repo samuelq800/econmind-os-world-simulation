@@ -1,4 +1,9 @@
 import type { FixtureValueTrailState } from './metric-value-trace.js';
+import type {
+  AuthorizedMetric,
+  AuthorizedValueTrail,
+} from './authorized-read-adapter.js';
+import type { CommandLifecycleState } from './CommandLifecycleStatus.js';
 
 import './metric-value-trace.css';
 
@@ -76,6 +81,100 @@ export function MetricValueTrail({
               World change.
             </p>
           </>
+        )}
+      </div>
+    </details>
+  );
+}
+
+/** A server-supplied arithmetic trail, never an inferred effect from a chart delta. */
+export function AuthorizedMetricValueTrail({
+  metric,
+  trail,
+  command,
+}: {
+  readonly metric: AuthorizedMetric;
+  readonly trail: AuthorizedValueTrail | null;
+  readonly command: CommandLifecycleState;
+}) {
+  const linkedReceipt =
+    trail &&
+    command.kind === 'SUCCEEDED' &&
+    command.receipt.worldVersionAfter === trail.difference.eventVersion &&
+    command.receipt.eventIds?.includes(trail.difference.eventId)
+      ? command.receipt.commandId
+      : null;
+  return (
+    <details
+      className="metric-value-trace"
+      data-evidence={trail ? 'derived-server-projection' : 'missing'}
+    >
+      <summary>
+        <span>TRACE THIS SIGNAL</span>
+        <strong>{trail ? 'Value trail' : 'Evidence unavailable'}</strong>
+        <small>{metric.label} · authorized read only</small>
+      </summary>
+      <div className="metric-value-trace__body">
+        {trail ? (
+          <>
+            <ol
+              className="metric-value-trace__steps"
+              aria-label="Authorized value trail"
+            >
+              <li>
+                <span>01 · Recorded input</span>
+                <strong>
+                  {trail.input.canonicalValue} {metric.unit}
+                </strong>
+                <small>
+                  Source · <code>{trail.input.sourceRef}</code>
+                </small>
+              </li>
+              <li>
+                <span>02 · Recorded change</span>
+                <strong>
+                  {trail.difference.canonicalValue} {metric.unit}
+                </strong>
+                <small>{trail.difference.label}</small>
+              </li>
+              <li>
+                <span>03 · Current output</span>
+                <strong>
+                  {trail.output.canonicalValue} {metric.unit}
+                </strong>
+                <small>Snapshot v{trail.output.snapshotVersion}</small>
+              </li>
+            </ol>
+            <dl className="metric-value-trace__evidence">
+              <div>
+                <dt>Event / version</dt>
+                <dd>
+                  <code>{trail.difference.eventId}</code> · v
+                  {trail.difference.eventVersion}
+                </dd>
+              </div>
+              <div>
+                <dt>Final receipt</dt>
+                <dd>
+                  {linkedReceipt ? (
+                    <code>{linkedReceipt}</code>
+                  ) : (
+                    'No matching final receipt supplied.'
+                  )}
+                </dd>
+              </div>
+            </dl>
+            <p className="metric-value-trace__caveat">
+              Arithmetic and references come from the supplied derived
+              projection. This display does not determine World causality or
+              grant an action.
+            </p>
+          </>
+        ) : (
+          <p className="metric-value-trace__missing">
+            No source-backed arithmetic trail was supplied for this signal. The
+            displayed change is not a causal claim.
+          </p>
         )}
       </div>
     </details>
