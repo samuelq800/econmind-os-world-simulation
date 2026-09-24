@@ -21,9 +21,10 @@ an explicit trusted-host opt-in and is not mounted by the default entrypoint.
 There is no proven end-to-end authorized browser command/receipt flow, live
 forecast model, production database rollout, or product release.
 
-**Gate B is PENDING.** The disposable PostgreSQL V09/V10 suite and official
-check passed for an earlier frozen candidate, but the later fault-evidence run
-remained `FAIL_CLOSED` at cleanup. Dedicated non-production staging/TLS,
+**Gate B is PENDING.** A narrow cleanup-decoding fix now passes the disposable
+PostgreSQL fault runner and V09/V10 recovery suites on one frozen candidate;
+an earlier official `pnpm check` also passed on a different candidate.
+Dedicated non-production staging/TLS,
 non-production RLS/grant evidence, two-country/two-Office browser E2E, and
 final independent Gate B review remain open. See
 [`docs/reports/gate-b/CURRENT_GATE_B_STATUS.md`](docs/reports/gate-b/CURRENT_GATE_B_STATUS.md)

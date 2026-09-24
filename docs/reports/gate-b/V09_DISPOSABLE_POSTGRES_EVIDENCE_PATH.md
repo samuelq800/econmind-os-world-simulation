@@ -80,9 +80,23 @@ the final independent Gate B decision. The historical dedicated-staging
 `ERR_SSL_DECRYPTION_FAILED_OR_BAD_RECORD_MAC` remains `FAIL`; this preparation
 does not waive or downgrade it.
 
-## Current execution record
+## Original preparation execution record
 
 On this preparation branch, no loopback PostgreSQL service was available at
 `127.0.0.1:5432`. Therefore the new runner and the real receipt/recovery suite
 were **not executed**. This document records the required path and the actual
 `NOT_RUN` condition, not a database result.
+
+## Later isolated execution (2026-09-24)
+
+After a narrow, independently reviewed fix to the cleanup predicate's
+PostgreSQL-array decoding, the disposable runner and follow-on PostgreSQL
+lease, receipt-recovery and V10.4 suites passed at frozen SHA
+`d738362b275956f2a338a2c6cba4bde50b6e9f23` in
+[Actions run 35946009374](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35946009374).
+The durable runner JSON says `status=PASS`, `cleanup.status=PASS`, and
+`receipt_recovery.status=NOT_RUN`; the receipt-recovery suite was a later,
+separate passing CI step on the same SHA. Its output classification remains
+`EVIDENCED_DISPOSABLE_LOCAL_ONLY_NOT_DEDICATED_STAGING`. Neither that run nor
+this note changes the historical managed-TLS `FAIL` or approves Gate B. See
+[`CURRENT_GATE_B_STATUS.md`](CURRENT_GATE_B_STATUS.md) for the remaining route.

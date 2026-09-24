@@ -6,9 +6,9 @@ an independent review, or permission to use production Supabase.
 
 ## What is integrated
 
-- `origin/main` reached `a6d500e2181567000fdb4e12b445074980c66419`
-  before this documentation/diagnostic-workflow update. It includes the
-  V09 cleanup checkpoint diagnostic (`462286a`), V27.2 closure preparation,
+- `origin/main` reached `d738362b275956f2a338a2c6cba4bde50b6e9f23`
+  before this status-note update. It includes the V09 cleanup fix and
+  checkpoint diagnostic (`462286a`), V27.2 closure preparation,
   remediated V27.3 NPC-intent preparation, remediated V27.1-to-V27.2
   provenance adapter, and an opt-in local authorized-read UI. These are code
   slices, not formal completion of V09, V10, V25, V27, or Gate B.
@@ -17,27 +17,37 @@ an independent review, or permission to use production Supabase.
   run `35864766026` passed the official `pnpm check` and disposable
   PostgreSQL V09/V10 suites. This evidence is not automatically transferable
   to a later code SHA.
-- The later disposable fault-evidence run `35938884232` showed pre-commit
-  connection-loss and acknowledgement/durable-marker assertions passing,
-  then `CLEANUP_MARKED_BOUNDARY=FAIL`, `cleanup.status=CLEANUP_INCOMPLETE`,
-  overall `FAIL_CLOSED`; receipt recovery and dedicated staging/TLS were not
-  run in that attempt. The redacted-checkpoint run
+- The later disposable fault-evidence run `35938884232` ended `FAIL_CLOSED`
+  at cleanup. Run
   [35943102063](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35943102063)
-  at exact main SHA `9c74fb2ac055c3c9134267ea372aeeca6a932c8f` again ended
-  `FAIL_CLOSED`. Its durable JSON identifies the first cleanup failure as
-  `CLEANUP_ASSERT_NO_EXTERNAL_DEPENDENTS`, `error_kind=ASSERTION`, with no SQL
-  error code. A separate read-only disposable dependency-class summary is
-  being prepared; no cleanup invariant has been relaxed.
+  identified `CLEANUP_ASSERT_NO_EXTERNAL_DEPENDENTS`; a fixed-branch probe
+  [35944500181](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35944500181)
+  established that the aggregate returned one row but its PostgreSQL array
+  was delivered as a JavaScript string. Post-rollback catalog summaries found
+  no external user namespace. The reviewed forward fix keeps the identical
+  external-dependency CTE and accepts only an integer count of zero; positive,
+  missing or non-integer results still fail closed before any `DROP`.
+- The fixed candidate `d738362b275956f2a338a2c6cba4bde50b6e9f23`
+  passed [run 35946009374](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/35946009374)
+  on disposable PostgreSQL 16: durable runner `PASS`, cleanup `PASS`,
+  connection-loss and lost-acknowledgement `PASS`, and separate lease,
+  authorization-cutoff, PostgreSQL receipt-recovery, V10.4 and recovery
+  preparation test steps `PASS`. V10.4 reported 34 passing tests and one
+  intentionally skipped process-kill child branch. The durable JSON was
+  written before the separate receipt test step, so its
+  `receipt_recovery.status=NOT_RUN` remains true for that JSON; the CI step is
+  separate evidence. B independently reviewed the code diff with P0=0 and
+  Major=0 for non-production merge, not Gate B approval.
 
 ## Still required for Gate B
 
 | Evidence                                                                    | Current classification                  | Next action                                                                                                                                   |
 | --------------------------------------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Disposable cleanup and no-residue fault evidence on one frozen candidate    | `FAIL` on the last run                  | Identify the external dependency class in disposable CI, make one narrow fix if justified, then rerun against a fixed SHA.                    |
+| Disposable cleanup and no-residue fault evidence on one frozen candidate    | `EVIDENCED` on `d738362`                | Preserve the exact run/artifact; do not substitute it for staging TLS or the final candidate-wide check.                                      |
 | Dedicated isolated staging connection-loss/TLS recovery                     | Historical `FAIL`, no valid replacement | Use an approved dedicated non-production target or record an explicit owner decision on an alternative; disposable CI is not TLS equivalence. |
 | Non-production RLS/grant negative vectors                                   | `NOT_RUN` as Gate B evidence            | Execute with real scoped roles and immutable evidence on a non-production target.                                                             |
 | Two-country/two-Office browser command, receipt, projection and refresh E2E | `NOT_RUN`                               | Finish the real authenticated API/worker/browser route; the default page is still fixture-backed.                                             |
-| Final candidate-wide `pnpm check` and independent Gate B review             | `NOT_RUN` for the eventual final SHA    | Freeze one tip after fixes, run checks once, provide all failures and boundaries to independent review.                                       |
+| Final candidate-wide `pnpm check` and independent Gate B review             | `NOT_RUN` for the eventual final SHA    | Freeze one tip after remaining fixes, run checks once, provide all failures and boundaries to independent review.                             |
 
 Do not mark Gate B passed because a diagnostic becomes more precise, because
 a disposable-only run turns green, or because a preparation branch was
