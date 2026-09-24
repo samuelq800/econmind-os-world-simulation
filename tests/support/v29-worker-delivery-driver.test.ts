@@ -8,13 +8,17 @@ import {
   COMMAND_SCHEMA_VERSION,
   EVENT_SCHEMA_VERSION,
   INVENTORY_POSTING_SCHEMA_VERSION,
+  Money,
   acquireWorldWriterLease,
   createAuthoritativeTransition,
+  createInventoryAccount,
+  createOpeningSeed,
   createReservationPosting,
   createWorldWriterCommitAssertion,
   financialPostingBatchId,
   financialPostingLegId,
   inventoryPostingId,
+  inventoryReservationId,
   parseAuthoritativeEvent,
   parseCanonicalCommand,
   rebuildV08LedgersFromLineage,
@@ -23,7 +27,10 @@ import {
   worldWriterLeaseRequest,
   type CanonicalCommand,
 } from '@econmind/core';
-import type { NarrowTreasuryGcuDeliveryPreparationSource } from '../../apps/world-worker/src/persistence/narrow-treasury-gcu-delivery-draft.js';
+import {
+  prepareNarrowTreasuryGcuDeliveryAtomicDraft,
+  type NarrowTreasuryGcuDeliveryPreparationSource,
+} from '../../apps/world-worker/src/persistence/narrow-treasury-gcu-delivery-draft.js';
 import { createV10TwoCountryTestFixture } from './v10-two-country-fixture.js';
 import { createPGliteV09AtomicTestDatabase } from './v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from './v09-atomic-contract.js';
@@ -317,22 +324,279 @@ function preparedTwoCountryDelivery(seed = 'V29_DEFAULT') {
       };
     },
   };
-  return { fixture, delivery, source };
+  return {
+    fixture,
+    transfer,
+    reserve,
+    reservationPosting,
+    shipment,
+    ship,
+    shipmentPosting: shipmentResult.posting,
+    beforeDelivery,
+    delivery,
+    source,
+  };
+}
+
+async function preparedSequentialDeliveries(seed: string) {
+  const first = preparedTwoCountryDelivery(`${seed}_A`);
+  const suffix = sha256(`${seed}_B`).slice(0, 12).toUpperCase();
+  const available = first.fixture.inventoryAccounts.sellerAvailable;
+  const buyerTreasury = first.fixture.financialAccounts.buyerTreasury.accountId;
+  const buyerEquity =
+    first.fixture.financialAccounts.buyerOpeningEquity.accountId;
+  const fundedOpening = createOpeningSeed(
+    {
+      ...first.fixture.openingSeed,
+      financialBatches: first.fixture.openingSeed.financialBatches.map(
+        (batch) => ({
+          ...batch,
+          legs: batch.legs.map((leg) =>
+            leg.account.accountId === buyerTreasury ||
+            leg.account.accountId === buyerEquity
+              ? { ...leg, amount: Money.from('14', leg.amount.currency) }
+              : leg,
+          ),
+        }),
+      ),
+    },
+    sha256,
+  );
+  const firstLineage = [
+    {
+      command: first.transfer,
+      transition: first.reserve.transition,
+      inventoryPostings: [first.reservationPosting],
+      financialPostingBatches: [],
+    },
+    {
+      command: first.shipment,
+      transition: first.ship.transition,
+      inventoryPostings: [first.shipmentPosting],
+      financialPostingBatches: [],
+    },
+  ];
+  const transferB = parseCanonicalCommand(
+    {
+      schemaVersion: COMMAND_SCHEMA_VERSION,
+      commandType: 'CORE_GOODS_TRANSFER_V1',
+      commandId: `COMMAND_V29_SECOND_TRANSFER_${suffix}`,
+      idempotencyKey: `IDEMPOTENCY_V29_SECOND_TRANSFER_${suffix}`,
+      worldId: first.fixture.worldId,
+      actorId: first.fixture.officeActors.sellerTrade.actorId,
+      authSubject: first.fixture.officeActors.sellerTrade.principal.authSubject,
+      countryId: first.fixture.countries.seller,
+      officeId: 'TRADE',
+      expectedWorldVersion: '2',
+      simTime: '10200',
+      submittedAtReal: AT,
+      correlationId: `CORRELATION_V29_SECOND_TRANSFER_${suffix}`,
+      payload: JSON.parse(first.transfer.canonicalPayload),
+    },
+    sha256,
+  );
+  const reserveB = transition(transferB, '2', '3');
+  const reservedB = createInventoryAccount({
+    ...available,
+    bucket: 'RESERVED',
+    reservationId: inventoryReservationId(`RESERVATION_V29_SECOND_${suffix}`),
+    shipmentId: null,
+  });
+  const reservationPostingB = createReservationPosting(
+    {
+      schemaVersion: INVENTORY_POSTING_SCHEMA_VERSION,
+      postingId: inventoryPostingId(`POSTING_V29_SECOND_RESERVE_${suffix}`),
+      worldId: first.fixture.worldId,
+      causationCommandId: transferB.commandId,
+      causationEventIds: [reserveB.event.eventId],
+      worldVersionBefore: '2',
+      worldVersionAfter: '3',
+      simTime: transferB.simTime,
+      command: transferB,
+      transition: reserveB.transition,
+      quantity: first.fixture.transferIntent.quantity,
+      source: available,
+      destination: reservedB,
+    },
+    sha256,
+  );
+  const afterSecondReservation = rebuildV08LedgersFromLineage({
+    seed: fundedOpening,
+    transitions: [
+      ...firstLineage,
+      {
+        command: transferB,
+        transition: reserveB.transition,
+        inventoryPostings: [reservationPostingB],
+        financialPostingBatches: [],
+      },
+    ],
+    sha256Hex: sha256,
+  });
+  const shipmentIdB = `SHIPMENT_V29_SECOND_${suffix}`;
+  const shipmentB = automaticCommand({
+    id: `COMMAND_V29_SECOND_SHIPMENT_${suffix}`,
+    commandType: 'CORE_GOODS_SHIPMENT_V1',
+    before: '3',
+    simTime: '10300',
+    payload: {
+      schemaVersion: 'core-goods-shipment-v1',
+      shipmentId: shipmentIdB,
+      transferCommandId: transferB.commandId,
+      transferFingerprint: transferB.fingerprint,
+    },
+  });
+  const shipB = transition(shipmentB, '3', '4');
+  const shipmentResultB = shipNarrowTreasuryGcuTransfer({
+    causationEventIds: [shipB.event.eventId],
+    inventoryState: afterSecondReservation.inventory,
+    postingId: inventoryPostingId(`POSTING_V29_SECOND_SHIPMENT_${suffix}`),
+    shipmentCommand: shipmentB,
+    source: reservedB,
+    transferCommand: transferB,
+    transition: shipB.transition,
+    sha256Hex: sha256,
+  });
+  const beforeDeliveries = rebuildV08LedgersFromLineage({
+    seed: fundedOpening,
+    transitions: [
+      ...firstLineage,
+      {
+        command: transferB,
+        transition: reserveB.transition,
+        inventoryPostings: [reservationPostingB],
+        financialPostingBatches: [],
+      },
+      {
+        command: shipmentB,
+        transition: shipB.transition,
+        inventoryPostings: [shipmentResultB.posting],
+        financialPostingBatches: [],
+      },
+    ],
+    sha256Hex: sha256,
+  });
+  const deliveryA = automaticCommand({
+    id: `COMMAND_V29_FIRST_DELIVERY_${suffix}`,
+    commandType: 'CORE_GOODS_DELIVERY_V1',
+    before: '4',
+    simTime: '10400',
+    payload: JSON.parse(first.delivery.canonicalPayload),
+  });
+  const deliveryB = automaticCommand({
+    id: `COMMAND_V29_SECOND_DELIVERY_${suffix}`,
+    commandType: 'CORE_GOODS_DELIVERY_V1',
+    before: '5',
+    simTime: '10500',
+    payload: {
+      ...JSON.parse(first.delivery.canonicalPayload),
+      transferCommandId: transferB.commandId,
+      transferFingerprint: transferB.fingerprint,
+      shipmentId: shipmentIdB,
+    },
+  });
+  const shipmentIdA = first.beforeDelivery.inventory.balances.find(
+    ({ account }) => account.bucket === 'IN_TRANSIT',
+  )?.account.shipmentId;
+  const transitA = beforeDeliveries.inventory.balances.find(
+    ({ account }) =>
+      account.bucket === 'IN_TRANSIT' && account.shipmentId === shipmentIdA,
+  )?.account;
+  const transitB = beforeDeliveries.inventory.balances.find(
+    ({ account }) =>
+      account.bucket === 'IN_TRANSIT' && account.shipmentId === shipmentIdB,
+  )?.account;
+  if (transitA === undefined || transitB === undefined) {
+    throw new Error('V29_SEQUENTIAL_TRANSIT_SOURCES_MISSING');
+  }
+  const lease = acquireWorldWriterLease(
+    null,
+    worldWriterLeaseRequest(
+      first.fixture.worldId,
+      workerId(WORKER),
+      AT,
+      '2026-09-14T00:07:00.000Z',
+    ),
+  ).lease;
+  const sourceA: NarrowTreasuryGcuDeliveryPreparationSource = {
+    async load() {
+      return {
+        buyerTreasury: first.fixture.financialAccounts.buyerTreasury,
+        buyerTreasuryLegId: financialPostingLegId(
+          `LEG_V29_FIRST_BUYER_${suffix}`,
+        ),
+        commitAssertion: createWorldWriterCommitAssertion(lease, '4'),
+        eventId: `EVENT_V29_FIRST_DELIVERY_${suffix}`,
+        eventSequence: '5',
+        financialBatchId: financialPostingBatchId(`BATCH_V29_FIRST_${suffix}`),
+        financialState: beforeDeliveries.financial,
+        inventoryPostingId: inventoryPostingId(`POSTING_V29_FIRST_${suffix}`),
+        inventoryState: beforeDeliveries.inventory,
+        observedAtReal: AT,
+        outboxMessageId: `OUTBOX_V29_FIRST_${suffix}`,
+        sellerSettlement: first.fixture.financialAccounts.sellerSettlement,
+        sellerSettlementLegId: financialPostingLegId(
+          `LEG_V29_FIRST_SELLER_${suffix}`,
+        ),
+        source: transitA,
+        transferCommand: first.transfer,
+      };
+    },
+  };
+  const afterFirstDelivery = prepareNarrowTreasuryGcuDeliveryAtomicDraft({
+    ...(await sourceA.load({ deliveryCommand: deliveryA, observedAtReal: AT })),
+    deliveryCommand: deliveryA,
+    sha256Hex: sha256,
+  });
+  const sourceB: NarrowTreasuryGcuDeliveryPreparationSource = {
+    async load() {
+      return {
+        buyerTreasury: first.fixture.financialAccounts.buyerTreasury,
+        buyerTreasuryLegId: financialPostingLegId(
+          `LEG_V29_SECOND_BUYER_${suffix}`,
+        ),
+        commitAssertion: createWorldWriterCommitAssertion(lease, '5'),
+        eventId: `EVENT_V29_SECOND_DELIVERY_${suffix}`,
+        eventSequence: '6',
+        financialBatchId: financialPostingBatchId(`BATCH_V29_SECOND_${suffix}`),
+        financialState: afterFirstDelivery.financialState,
+        inventoryPostingId: inventoryPostingId(`POSTING_V29_SECOND_${suffix}`),
+        inventoryState: afterFirstDelivery.inventoryState,
+        observedAtReal: AT,
+        outboxMessageId: `OUTBOX_V29_SECOND_${suffix}`,
+        sellerSettlement: first.fixture.financialAccounts.sellerSettlement,
+        sellerSettlementLegId: financialPostingLegId(
+          `LEG_V29_SECOND_SELLER_${suffix}`,
+        ),
+        source: transitB,
+        transferCommand: transferB,
+      };
+    },
+  };
+  return { first, transferB, deliveryA, deliveryB, sourceA, sourceB };
 }
 
 async function seedClaimedDelivery(
   database: V09AtomicTestDatabase,
   command: CanonicalCommand,
+  worldVersion = '2',
 ) {
   await database.query(
     `insert into world_v2.world_head (world_id, world_version, event_sequence)
-     values ($1, 2, 2)`,
-    [command.worldId],
+     values ($1, $2, $2)`,
+    [command.worldId, worldVersion],
   );
   await database.query(
     `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
     [command.worldId, WORKER, AT, '300000'],
   );
+  await seedAdditionalClaimedCommand(database, command);
+}
+
+async function seedAdditionalClaimedCommand(
+  database: V09AtomicTestDatabase,
+  command: CanonicalCommand,
+) {
   await database.query(
     `insert into world_v2.command_submission
        (world_id, command_id, idempotency_key, command_type, schema_version,
@@ -436,6 +700,58 @@ async function runFreshWorkerSequence(
       );
     }
     return [first.durable, retry.durable] as const;
+  } finally {
+    await local.close();
+  }
+}
+
+async function runFreshSequentialWorkerSequence(seed: string) {
+  const prepared = await preparedSequentialDeliveries(seed);
+  const local = await database();
+  try {
+    await seedClaimedDelivery(local, prepared.deliveryA, '4');
+    await seedAdditionalClaimedCommand(local, prepared.deliveryB);
+    const execute = async (
+      command: CanonicalCommand,
+      source: NarrowTreasuryGcuDeliveryPreparationSource,
+      commandIndex: number,
+    ) => {
+      try {
+        const result = await executeV29LocalWorkerDelivery({
+          database: local,
+          productionTarget: false,
+          workerId: WORKER,
+          deliveryCommand: command,
+          observedAtReal: AT,
+          source,
+        });
+        const durable = await readV29DurableWorkerStep({
+          database: local,
+          command,
+          commandIndex,
+        });
+        return { result, durable };
+      } catch {
+        throw new V29WorkerReplayStepError(commandIndex);
+      }
+    };
+    const first = await execute(prepared.deliveryA, prepared.sourceA, 0);
+    const second = await execute(prepared.deliveryB, prepared.sourceB, 1);
+    const retry = await execute(prepared.deliveryB, prepared.sourceB, 2);
+    if (
+      first.result.source !== 'NEW_FINAL' ||
+      second.result.source !== 'NEW_FINAL' ||
+      retry.result.source !== 'EXISTING_FINAL'
+    ) {
+      throw new V29WorkerReplayStepError(
+        first.result.source !== 'NEW_FINAL'
+          ? 0
+          : second.result.source !== 'NEW_FINAL'
+            ? 1
+            : 2,
+      );
+    }
+    return [first.durable, second.durable, retry.durable] as const;
   } finally {
     await local.close();
   }
@@ -696,4 +1012,227 @@ describe('V29.3 preparation-only fresh-PGlite Worker replay evidence', () => {
       second: null,
     });
   });
+});
+
+describe('V29 preparation-only same-World sequential Worker deliveries', () => {
+  it('commits two distinct two-country deliveries through Worker with separate durable numeric trails', async () => {
+    const prepared = await preparedSequentialDeliveries('V29_TWO_DELIVERIES');
+    expect(prepared.first.fixture.transferIntent.quantity.unit).toBe('tonne');
+    const local = await database();
+    try {
+      await seedClaimedDelivery(local, prepared.deliveryA, '4');
+      await seedAdditionalClaimedCommand(local, prepared.deliveryB);
+      const first = await executeV29LocalWorkerDelivery({
+        database: local,
+        productionTarget: false,
+        workerId: WORKER,
+        deliveryCommand: prepared.deliveryA,
+        observedAtReal: AT,
+        source: prepared.sourceA,
+      });
+      const firstDurable = await readV29DurableWorkerStep({
+        database: local,
+        command: prepared.deliveryA,
+        commandIndex: 0,
+      });
+      const second = await executeV29LocalWorkerDelivery({
+        database: local,
+        productionTarget: false,
+        workerId: WORKER,
+        deliveryCommand: prepared.deliveryB,
+        observedAtReal: AT,
+        source: prepared.sourceB,
+      });
+      const secondDurable = await readV29DurableWorkerStep({
+        database: local,
+        command: prepared.deliveryB,
+        commandIndex: 1,
+      });
+      expect(first).toMatchObject({
+        source: 'NEW_FINAL',
+        worldVersion: '5',
+        eventCount: 1,
+        inventoryPostingCount: 1,
+        financialPostingCount: 1,
+        outboxCount: 1,
+      });
+      expect(second).toMatchObject({
+        source: 'NEW_FINAL',
+        worldVersion: '6',
+        eventCount: 1,
+        inventoryPostingCount: 1,
+        financialPostingCount: 1,
+        outboxCount: 1,
+      });
+      expect(first.receipt.commandId).not.toBe(second.receipt.commandId);
+      expect(firstDurable.worldVersion).toBe('5');
+      expect(secondDurable.worldVersion).toBe('6');
+      expect(firstDurable.stepHash).not.toBe(secondDurable.stepHash);
+      for (const key of [
+        'eventHash',
+        'inventoryHash',
+        'financialHash',
+        'receiptHash',
+        'worldVersionHash',
+      ] as const) {
+        expect(firstDurable[key]).toMatch(/^sha256:[0-9a-f]{64}$/u);
+        expect(secondDurable[key]).toMatch(/^sha256:[0-9a-f]{64}$/u);
+        expect(firstDurable[key]).not.toBe(secondDurable[key]);
+      }
+      const retry = await executeV29LocalWorkerDelivery({
+        database: local,
+        productionTarget: false,
+        workerId: WORKER,
+        deliveryCommand: prepared.deliveryB,
+        observedAtReal: AT,
+        source: prepared.sourceB,
+      });
+      expect(retry.source).toBe('EXISTING_FINAL');
+      expect(retry.durableTraceHash).toBe(second.durableTraceHash);
+      expect(
+        await readV29DurableWorkerStep({
+          database: local,
+          command: prepared.deliveryB,
+          commandIndex: 1,
+        }),
+      ).toEqual(secondDurable);
+      const postings = await local.query<{
+        readonly command_id: string;
+        readonly event: string;
+        readonly inventory: string;
+        readonly financial: string;
+        readonly world_version_before: string;
+        readonly world_version_after: string;
+      }>(
+        `select command_id,
+                (select canonical_payload from world_v2.authoritative_event
+                  where causation_command_id = command_id)::text as event,
+                (select canonical_payload from world_v2.inventory_posting
+                  where causation_command_id = command_id)::text as inventory,
+                (select canonical_payload from world_v2.financial_posting_batch
+                  where causation_command_id = command_id)::text as financial,
+                world_version_before::text, world_version_after::text
+           from world_v2.command_receipt
+          where command_id in ($1, $2)
+          order by world_version_after`,
+        [prepared.deliveryA.commandId, prepared.deliveryB.commandId],
+      );
+      expect(postings.rows).toHaveLength(2);
+      let deliveredTonnes = 0n;
+      let settledGcu = 0n;
+      for (const [index, row] of postings.rows.entries()) {
+        const transfer =
+          index === 0 ? prepared.first.transfer : prepared.transferB;
+        const event = JSON.parse(row.event) as {
+          readonly transferCommandId: string;
+          readonly transferFingerprint: string;
+        };
+        expect(event).toMatchObject({
+          transferCommandId: transfer.commandId,
+          transferFingerprint: transfer.fingerprint,
+        });
+        expect(row.world_version_before).toBe(index === 0 ? '4' : '5');
+        expect(row.world_version_after).toBe(index === 0 ? '5' : '6');
+        const inventory = JSON.parse(row.inventory) as {
+          readonly entries: readonly {
+            readonly delta: { readonly amount: string };
+            readonly account: {
+              readonly countryId: string;
+              readonly bucket: string;
+            };
+          }[];
+        };
+        const financial = JSON.parse(row.financial) as {
+          readonly legs: readonly {
+            readonly amount: { readonly amount: string };
+            readonly direction: string;
+            readonly account: { readonly countryId: string };
+          }[];
+        };
+        expect(
+          inventory.entries.map((entry) => entry.delta.amount).sort(),
+        ).toEqual(['-2', '2']);
+        expect(
+          inventory.entries.find((entry) => entry.delta.amount === '2')
+            ?.account,
+        ).toMatchObject({
+          countryId: prepared.first.fixture.countries.buyer,
+          bucket: 'AVAILABLE',
+        });
+        deliveredTonnes += BigInt(
+          inventory.entries.find((entry) => entry.delta.amount === '2')!.delta
+            .amount,
+        );
+        expect(financial.legs.map((leg) => leg.amount.amount)).toEqual([
+          '6',
+          '6',
+        ]);
+        const buyerPayment = financial.legs.find(
+          (leg) =>
+            leg.account.countryId === prepared.first.fixture.countries.buyer,
+        );
+        expect(buyerPayment?.direction).toBe('CREDIT');
+        settledGcu += BigInt(buyerPayment!.amount.amount);
+        expect(
+          financial.legs.map((leg) => leg.account.countryId).sort(),
+        ).toEqual(
+          [
+            prepared.first.fixture.countries.seller,
+            prepared.first.fixture.countries.buyer,
+          ].sort(),
+        );
+      }
+      expect(deliveredTonnes).toBe(4n);
+      expect(settledGcu).toBe(12n);
+      const counts = await local.query<{
+        readonly events: string;
+        readonly inventory: string;
+        readonly financial: string;
+        readonly receipts: string;
+        readonly outbox: string;
+        readonly world_version: string;
+      }>(
+        `select
+           (select count(*)::text from world_v2.authoritative_event) as events,
+           (select count(*)::text from world_v2.inventory_posting) as inventory,
+           (select count(*)::text from world_v2.financial_posting_batch) as financial,
+           (select count(*)::text from world_v2.command_receipt) as receipts,
+           (select count(*)::text from world_v2.notification_outbox) as outbox,
+           (select world_version::text from world_v2.world_head) as world_version`,
+      );
+      expect(counts.rows[0]).toEqual({
+        events: '2',
+        inventory: '2',
+        financial: '2',
+        receipts: '2',
+        outbox: '2',
+        world_version: '6',
+      });
+    } finally {
+      await local.close();
+    }
+  }, 30_000);
+
+  it('replays the same two-command Worker sequence and retry in two fresh PGlite worlds', async () => {
+    let initializations = 0;
+    const evidence = await assertV29WorkerFixedSeedReplay({
+      seed: 'V29_TWO_DELIVERIES_REPLAY',
+      async createAndRunFreshDatabase(seed) {
+        initializations += 1;
+        return runFreshSequentialWorkerSequence(seed);
+      },
+    });
+    expect(initializations).toBe(2);
+    expect(evidence.commandCount).toBe(3);
+    expect(evidence.sequenceHash).toBe(
+      'sha256:8638d34d83bc1dd44fa7f11a9404e7fd53077901dcaf4f1eb7db3105b0501ae2',
+    );
+    expect(evidence.steps.map((step) => step.worldVersion)).toEqual([
+      '5',
+      '6',
+      '6',
+    ]);
+    expect(evidence.steps[0]?.stepHash).not.toBe(evidence.steps[1]?.stepHash);
+    expect(evidence.steps[1]?.stepHash).toBe(evidence.steps[2]?.stepHash);
+  }, 60_000);
 });
