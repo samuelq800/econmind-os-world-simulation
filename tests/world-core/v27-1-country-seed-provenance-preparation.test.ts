@@ -425,5 +425,11 @@ describe('V27.1 country opening source/assumption preparation', () => {
       conversionProhibited: false,
     });
     expect(() => parseCountrySeedProvenance(index)).toThrow('quarantined');
+    index.countries[0]!.fields[3] = {
+      ...index.countries[0]!.fields[3]!,
+      conversionProhibited: true,
+      indexScore: '101',
+    };
+    expect(() => parseCountrySeedProvenance(index)).toThrow('within 0–100');
   });
 });
