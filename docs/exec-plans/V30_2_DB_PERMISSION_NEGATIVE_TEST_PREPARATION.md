@@ -27,6 +27,18 @@ only an active current authorization at the receipt's durable scope.
 
 PGlite verifies the application/server query guards, not PostgreSQL role or
 row-level-security enforcement. Native PostgreSQL role/RLS negative validation
-is `NOT_RUN` until a disposable, explicitly non-production database and least-
-privilege test roles are supplied. Do not promote this result to an RLS, remote
-Supabase, production, or Gate B acceptance claim.
+has a separately manual GitHub Actions candidate at
+`.github/workflows/v30-2-postgres-permission-negatives.yml`. It creates only
+disposable least-privilege test roles on the PG16 service, verifies real grants
+and RLS behavior for supplied claims, and cleans the schema and roles on exit.
+
+That workflow has not run from this local workspace, so its native result is
+currently `NOT_RUN`. It also does not prove production role provisioning or a
+verified JWT-to-`request.jwt.claim.sub` propagation mechanism: migrations do
+not create deployment roles, and PostgreSQL custom settings must be populated
+by a trusted API gateway. Current receipt recovery requires any active current
+authorization at the durable scope; it has no separate capability-specific
+receipt-read grant. Those deployment/claim and capability semantics remain
+`MISSING` for Gate B until independently specified and verified. Do not
+promote this result to an RLS, remote Supabase, production, or Gate B
+acceptance claim.
