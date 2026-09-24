@@ -6,7 +6,7 @@ an independent review, or permission to use production Supabase.
 
 ## What is integrated
 
-- `origin/main` reached `100524506b4fbf505b01b035b02ee6fbf0eb97cf` before
+- `origin/main` reached `884696c8213b2f946c8d153d37f547507d6af612` before
   this status-note update. The frozen
   Gate B code/CI candidate remains `ca5b056ea818dc73e113a2bf4635318ae7c8bebf`.
   Main includes the V09 cleanup fix and
@@ -14,8 +14,9 @@ an independent review, or permission to use production Supabase.
   remediated V27.3 NPC-intent preparation, remediated V27.1-to-V27.2
   provenance adapter, and an opt-in local authorized-read UI. These are code
   slices, not formal completion of V09, V10, V25, V27, or Gate B.
-- Later main commits add a V29 test-only two-country ledger/replay harness and
-  V30 virtual load plan plus bounded injected runner. These P2 preparations
+- Later main commits add a V29 test-only two-country ledger/replay harness,
+  a requirement-claim binding helper (all unbound requirements default to
+  `MISSING`), and a V30 virtual load plan plus bounded injected runner. These P2 preparations
   are not a real 70-country World run, measured load or later-SHA Gate B check.
 - The [hard-property matrix](V09_V10_HARD_PROPERTY_MATRIX.md) maps all 14
   properties to test surfaces. Its frozen candidate and exact-SHA Actions
