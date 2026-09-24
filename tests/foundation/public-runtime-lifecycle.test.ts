@@ -498,7 +498,16 @@ describe.skipIf(process.platform === 'win32')(
       async (service, signal) => {
         const observed = await publicBoundaryAttack(service, signal);
         expect(observed.captured.length).toBeGreaterThanOrEqual(3);
-        expect(observed.launcherExit).toEqual({ code: null, signal });
+        // pnpm can translate SIGINT to the conventional 128 + signal exit code.
+        // The descendant and listener assertions below still prove shutdown.
+        const acceptedExits =
+          signal === 'SIGINT'
+            ? [
+                { code: null, signal: 'SIGINT' },
+                { code: 130, signal: null },
+              ]
+            : [{ code: null, signal }];
+        expect(acceptedExits).toContainEqual(observed.launcherExit);
         expect(observed.survivors).toEqual([]);
         expect(observed.endpointClosed).toBe(true);
         expect(observed.rebound).toBe(true);
