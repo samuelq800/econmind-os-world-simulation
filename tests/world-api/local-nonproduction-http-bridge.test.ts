@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   WORLD_COMMAND_API_SCHEMA_VERSION,
+  WORLD_FINAL_RECEIPT_READ_API_SCHEMA_VERSION,
   WORLD_READ_API_SCHEMA_VERSION,
   createAuthenticatedNarrowTransferCommandHandler,
   createLocalNonproductionWorldHttpBridge,
@@ -44,6 +45,19 @@ function commandRequest(
       buyerCountryId: 'COUNTRY_BUYER',
       buyerFinanceApprovalRef:
         input.buyerFinanceApprovalRef ?? 'APPROVAL_BUYER_FINANCE_1',
+    },
+  } as const;
+}
+
+function receiptRequest() {
+  return {
+    schemaVersion: WORLD_FINAL_RECEIPT_READ_API_SCHEMA_VERSION,
+    requestId: REQUEST_ID,
+    operation: 'READ_FINAL_NARROW_TRANSFER_RECEIPT',
+    payload: {
+      worldId: 'WORLD_TWO_COUNTRY',
+      commandId: 'COMMAND_NARROW_TRANSFER_1',
+      idempotencyKey: 'IDEMPOTENCY_NARROW_TRANSFER_1',
     },
   } as const;
 }
@@ -221,7 +235,7 @@ describe('local nonproduction authenticated World HTTP bridge', () => {
     expect(deniedHeaders.status).toBe(403);
   });
 
-  it('exposes no read or command behavior until server dependencies are bound', async () => {
+  it('exposes no read, command, or receipt behavior until server dependencies are bound', async () => {
     running = await startLocalNonproductionWorldHttpBridge({
       bridge: createLocalNonproductionWorldHttpBridge({
         environment: ENVIRONMENT,
@@ -230,6 +244,7 @@ describe('local nonproduction authenticated World HTTP bridge', () => {
 
     const read = await post('/local/v1/world-read', {});
     const command = await post('/local/v1/narrow-transfer-command', {});
+    const receipt = await post('/local/v1/narrow-transfer-receipt', {});
 
     await expect(read.json()).resolves.toEqual({
       availability: 'NOT_AVAILABLE',
@@ -243,8 +258,15 @@ describe('local nonproduction authenticated World HTTP bridge', () => {
       reason: 'SERVER_DEPENDENCIES_UNBOUND',
       service: 'world-api',
     });
+    await expect(receipt.json()).resolves.toEqual({
+      availability: 'NOT_AVAILABLE',
+      operation: 'READ_FINAL_NARROW_TRANSFER_RECEIPT',
+      reason: 'SERVER_DEPENDENCIES_UNBOUND',
+      service: 'world-api',
+    });
     expect(read.status).toBe(503);
     expect(command.status).toBe(503);
+    expect(receipt.status).toBe(503);
   });
 
   it('keeps read access HTTP-wired only through the injected authenticated handler', async () => {
@@ -285,6 +307,45 @@ describe('local nonproduction authenticated World HTTP bridge', () => {
     expect(seenAuthorization).toBe('Bearer token');
     await expect(response.json()).resolves.toMatchObject({
       error: { code: 'AUTHORIZATION_DENIED' },
+      ok: false,
+    });
+  });
+
+  it('keeps final receipt recovery HTTP-wired only through the injected authenticated handler', async () => {
+    let seenAuthorization: unknown;
+    let seenRequest: unknown;
+    running = await startLocalNonproductionWorldHttpBridge({
+      bridge: createLocalNonproductionWorldHttpBridge({
+        environment: ENVIRONMENT,
+        receiptHandler: {
+          async handle(input) {
+            seenAuthorization = input.authorization;
+            seenRequest = input.request;
+            return {
+              schemaVersion: WORLD_FINAL_RECEIPT_READ_API_SCHEMA_VERSION,
+              requestId: REQUEST_ID,
+              ok: false,
+              error: {
+                code: 'NOT_FOUND',
+                message: 'receipt unavailable',
+                retryable: false,
+              },
+            } as const;
+          },
+        },
+      }),
+    });
+
+    const response = await post(
+      '/local/v1/narrow-transfer-receipt',
+      receiptRequest(),
+    );
+
+    expect(response.status).toBe(404);
+    expect(seenAuthorization).toBe('Bearer token');
+    expect(seenRequest).toEqual(receiptRequest());
+    await expect(response.json()).resolves.toMatchObject({
+      error: { code: 'NOT_FOUND' },
       ok: false,
     });
   });

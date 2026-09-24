@@ -8,6 +8,10 @@ import type {
   AuthenticatedNarrowTransferCommandHandler,
   WorldCommandResponseEnvelope,
 } from './authenticated-narrow-transfer-command-handler.js';
+import type {
+  AuthenticatedFinalReceiptQueryHandler,
+  WorldFinalReceiptReadResponseEnvelope,
+} from './authenticated-final-receipt-query-handler.js';
 import type { AuthenticatedWorldReadQueryHandler } from './authenticated-read-query-handler.js';
 import type { WorldReadResponseEnvelope } from './contracts.js';
 
@@ -16,6 +20,8 @@ export const LOCAL_WORLD_HTTP_BRIDGE_READ_PATH =
   '/local/v1/world-read' as const;
 export const LOCAL_WORLD_HTTP_BRIDGE_COMMAND_PATH =
   '/local/v1/narrow-transfer-command' as const;
+export const LOCAL_WORLD_HTTP_BRIDGE_RECEIPT_PATH =
+  '/local/v1/narrow-transfer-receipt' as const;
 export const MAX_LOCAL_WORLD_HTTP_BODY_BYTES = 16 * 1024;
 
 export interface LocalNonproductionWorldHttpBridge {
@@ -36,12 +42,14 @@ export interface LocalNonproductionWorldHttpBridgeInput {
   readonly commandHandler?: AuthenticatedNarrowTransferCommandHandler;
   readonly environment: NodeJS.ProcessEnv;
   readonly readHandler?: AuthenticatedWorldReadQueryHandler;
+  readonly receiptHandler?: AuthenticatedFinalReceiptQueryHandler;
 }
 
 const LOOPBACK_BIND_HOSTS = new Set(['127.0.0.1', 'localhost', '::1']);
 const BRIDGE_PATHS = new Set<string>([
   LOCAL_WORLD_HTTP_BRIDGE_READ_PATH,
   LOCAL_WORLD_HTTP_BRIDGE_COMMAND_PATH,
+  LOCAL_WORLD_HTTP_BRIDGE_RECEIPT_PATH,
 ]);
 
 function localOnlyFailure(message: string): never {
@@ -121,7 +129,10 @@ function sendJson(
 }
 
 function unavailable(
-  operation: 'READ_WORLD_PROJECTION' | 'SUBMIT_NARROW_TRANSFER',
+  operation:
+    | 'READ_WORLD_PROJECTION'
+    | 'SUBMIT_NARROW_TRANSFER'
+    | 'READ_FINAL_NARROW_TRANSFER_RECEIPT',
 ) {
   return Object.freeze({
     availability: LOCAL_WORLD_HTTP_BRIDGE_STATUS,
@@ -161,6 +172,23 @@ function httpStatusForCommand(response: WorldCommandResponseEnvelope): number {
       return 401;
     case 'AUTHORIZATION_DENIED':
       return 403;
+    case 'UPSTREAM_UNAVAILABLE':
+      return 503;
+    default:
+      return 400;
+  }
+}
+
+function httpStatusForReceipt(
+  response: WorldFinalReceiptReadResponseEnvelope,
+): number {
+  if (response.ok) return 200;
+  switch (response.error.code) {
+    case 'AUTHENTICATION_REQUIRED':
+    case 'AUTHENTICATION_INVALID':
+      return 401;
+    case 'NOT_FOUND':
+      return 404;
     case 'UPSTREAM_UNAVAILABLE':
       return 503;
     default:
@@ -325,6 +353,34 @@ export function createLocalNonproductionWorldHttpBridge(
           request: body,
         });
         sendJson(request, response, httpStatusForCommand(result), result);
+        return;
+      }
+      if (path === LOCAL_WORLD_HTTP_BRIDGE_RECEIPT_PATH) {
+        if (input.receiptHandler === undefined) {
+          sendJson(
+            request,
+            response,
+            503,
+            unavailable('READ_FINAL_NARROW_TRANSFER_RECEIPT'),
+          );
+          return;
+        }
+        let body: unknown;
+        try {
+          body = await readJsonBody(request);
+        } catch {
+          sendJson(request, response, 400, {
+            availability: 'NOT_AVAILABLE',
+            reason: 'REQUEST_BODY_INVALID',
+            service: 'world-api',
+          });
+          return;
+        }
+        const result = await input.receiptHandler.handle({
+          authorization: request.headers.authorization,
+          request: body,
+        });
+        sendJson(request, response, httpStatusForReceipt(result), result);
         return;
       }
       sendJson(request, response, 404, {
