@@ -1,3 +1,6 @@
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+
 import { describe, expect, it, vi } from 'vitest';
 
 const mockedPg = vi.hoisted(() => {
@@ -48,5 +51,37 @@ describe('V09 PostgreSQL staging client error latch', () => {
     expect(client.query).not.toHaveBeenCalled();
     await expect(stagingClient.end()).rejects.toBe(termination);
     expect(client.end).toHaveBeenCalledOnce();
+  });
+
+  it('bounds post-commit crash savepoints inside a rollback-only transaction', async () => {
+    const source = await readFile(
+      fileURLToPath(
+        new URL(
+          '../../scripts/v09-staging-evidence-runner.mjs',
+          import.meta.url,
+        ),
+      ),
+      'utf8',
+    );
+    const crashStart = source.indexOf('async function runCrashProtocol(');
+    const crashEnd = source.indexOf(
+      '\nfunction cleanupInventoryKey',
+      crashStart,
+    );
+    const crashProtocol = source.slice(crashStart, crashEnd);
+    const begin = crashProtocol.indexOf("'CRASH_AFTER_BEGIN', 'begin'");
+    const held = crashProtocol.indexOf("'CRASH_AFTER_HELD_REJECTED'");
+    const rollback = crashProtocol.indexOf(
+      "'CRASH_AFTER_ROLLBACK', 'rollback'",
+    );
+
+    expect(crashStart).toBeGreaterThanOrEqual(0);
+    expect(crashEnd).toBeGreaterThan(crashStart);
+    expect(begin).toBeGreaterThanOrEqual(0);
+    expect(held).toBeGreaterThan(begin);
+    expect(rollback).toBeGreaterThan(held);
+    expect(crashProtocol).toMatch(
+      /finally \{\n\s+await command\(mainClient, 'CRASH_AFTER_ROLLBACK', 'rollback'\);\n\s+\}/u,
+    );
   });
 });
