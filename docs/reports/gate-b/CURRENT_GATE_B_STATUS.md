@@ -30,6 +30,10 @@ an independent review, or permission to use production Supabase.
   API/web targeted checks passed, but the default fixture page and production
   API are not live-wired. See
   [the integration record](LOCAL_RECEIPT_PREPARATION_INTEGRATION.md).
+- A separately reviewed development-only browser audit host is now merged;
+  its unauthenticated view fails closed and it is excluded from production
+  inputs. No real JWT/PG two-country/two-Office E2E has run. See
+  [the host integration record](LOCAL_AUDIT_HOST_INTEGRATION.md).
 - The [hard-property matrix](V09_V10_HARD_PROPERTY_MATRIX.md) maps all 14
   properties to test surfaces. Its frozen candidate and exact-SHA Actions
   run `35864766026` passed the official `pnpm check` and disposable

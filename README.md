@@ -16,13 +16,17 @@ preparation. Recent V27 provenance, calibration-closure and NPC-intent modules
 are **non-production preparation**, not a generated 70-country World. A
 manifest checker now lists missing 70-country source and parameter coverage
 without inventing values or authorizing initialization.
+A reviewed, inert V27→V28 shared-Core input composition is integrated; it
+cannot initialize a World or select an Orchestrator.
 V29 now has a source-to-evidence gap baseline and a strict candidate-bound
 evidence-claim helper (all 139 requirements default to `MISSING`) plus an
 inert source-to-parameter-to-event traceability helper; V30 has a deterministic,
 non-network load-plan/latency-summary helper for 50/100/420 virtual sessions.
 V29 also has a test-only two-country 600/1000-day exact-ledger/replay harness
 and a disposable-PGlite driver for one real Worker goods-delivery commit/retry
-with a fixed-sequence durable replay check;
+with a fixed-sequence durable replay check. A second test now commits two
+different deliveries in sequence and checks each exact inventory/financial
+posting and idempotent retry;
 V30's injected runner is bounded and has no built-in service target.
 V30 also has a caller-reported recovery measurement helper that cannot prove
 an actual backup restore, plus PGlite-only authorization negative tests that
@@ -37,6 +41,8 @@ an explicit trusted-host opt-in and is not mounted by the default entrypoint.
 An optional local-only final-receipt lookup and web command/UNKNOWN-receipt
 loop are now integrated as unactivated preparations; the web lookup port is
 also merged but still requires a real trusted-host transport and live E2E.
+A separate development-only audit host renders `NOT CONNECTED` without a
+trusted injection and is excluded from the production web build.
 There is no proven end-to-end authorized browser command/receipt flow, live
 forecast model, production database rollout, or product release.
 
