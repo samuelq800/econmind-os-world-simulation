@@ -736,6 +736,66 @@ async function command(client, step, text, values = []) {
   return client.execute({ step, text, values });
 }
 
+function cleanupDiagnosticCheckpoint(diagnostic, checkpointId, errorKind) {
+  if (diagnostic !== undefined) {
+    diagnostic.current = { checkpointId, errorKind };
+  }
+}
+
+function cleanupDiagnosticClient(client, diagnostic) {
+  if (diagnostic === undefined) return client;
+  return Object.freeze({
+    execute({ step, text, values }) {
+      cleanupDiagnosticCheckpoint(diagnostic, step, 'SQL');
+      return client.execute({ step, text, values });
+    },
+  });
+}
+
+function cleanupAssertRows(
+  diagnostic,
+  checkpointId,
+  result,
+  predicate,
+  message,
+) {
+  cleanupDiagnosticCheckpoint(diagnostic, checkpointId, 'ASSERTION');
+  assertRows(result, predicate, message);
+}
+
+function cleanupFailClosedAssertion(diagnostic, checkpointId) {
+  cleanupDiagnosticCheckpoint(diagnostic, checkpointId, 'ASSERTION');
+  failStage(CLEANUP_INCOMPLETE);
+}
+
+function cleanupDiagnosticSqlState(error) {
+  const code =
+    error && typeof error === 'object' && typeof error.code === 'string'
+      ? error.code.toUpperCase()
+      : undefined;
+  return code !== undefined && /^[0-9A-Z]{5}$/u.test(code) ? code : null;
+}
+
+function recordCleanupDiagnostic(evidence, diagnostic, error) {
+  if (diagnostic === undefined) return;
+  const sqlstate = cleanupDiagnosticSqlState(error);
+  const checkpoint = diagnostic.current ?? {
+    checkpointId: 'CLEANUP_UNCLASSIFIED',
+    errorKind: 'RUNTIME',
+  };
+  evidence.cleanup.diagnostic = {
+    checkpoint_id: checkpoint.checkpointId,
+    error_kind:
+      checkpoint.errorKind === 'ASSERTION'
+        ? 'ASSERTION'
+        : sqlstate === null
+          ? 'RUNTIME'
+          : 'SQL',
+    sqlstate,
+    status: 'CAPTURED',
+  };
+}
+
 function assertRows(result, predicate, message) {
   if (!predicate(rows(result))) failed(message);
 }
@@ -1611,7 +1671,7 @@ export function expectedV09StagingCleanupInventory(approval) {
   ].sort();
 }
 
-async function verifyExactRunInventory(client, approval) {
+async function verifyExactRunInventory(client, approval, diagnostic) {
   const inventory = await command(
     client,
     'CLEANUP_VERIFY_EXACT_ALLOWLIST',
@@ -1654,11 +1714,15 @@ async function verifyExactRunInventory(client, approval) {
   const actual = rows(inventory).map(cleanupInventoryKey).sort();
   const expected = expectedV09StagingCleanupInventory(approval);
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
-    failStage(CLEANUP_INCOMPLETE);
+    cleanupFailClosedAssertion(diagnostic, 'CLEANUP_ASSERT_EXACT_ALLOWLIST');
   }
 }
 
-async function verifyNoUnexpectedStandaloneObjects(client, approval) {
+async function verifyNoUnexpectedStandaloneObjects(
+  client,
+  approval,
+  diagnostic,
+) {
   const standaloneTypes = await command(
     client,
     'CLEANUP_VERIFY_NO_STANDALONE_TYPES',
@@ -1670,7 +1734,12 @@ async function verifyNoUnexpectedStandaloneObjects(client, approval) {
         and t.typelem = 0`,
     [approval.disposable_namespace],
   );
-  if (rows(standaloneTypes).length !== 0) failStage(CLEANUP_INCOMPLETE);
+  if (rows(standaloneTypes).length !== 0) {
+    cleanupFailClosedAssertion(
+      diagnostic,
+      'CLEANUP_ASSERT_NO_STANDALONE_TYPES',
+    );
+  }
   const operators = await command(
     client,
     'CLEANUP_VERIFY_NO_SCHEMA_OPERATORS',
@@ -1680,10 +1749,15 @@ async function verifyNoUnexpectedStandaloneObjects(client, approval) {
       where n.nspname = $1`,
     [approval.disposable_namespace],
   );
-  if (rows(operators).length !== 0) failStage(CLEANUP_INCOMPLETE);
+  if (rows(operators).length !== 0) {
+    cleanupFailClosedAssertion(
+      diagnostic,
+      'CLEANUP_ASSERT_NO_SCHEMA_OPERATORS',
+    );
+  }
 }
 
-async function verifyExactCleanupRoleBoundary(client, approval) {
+async function verifyExactCleanupRoleBoundary(client, approval, diagnostic) {
   const roles = Object.values(approval.roles);
   const attributes = await command(
     client,
@@ -1715,7 +1789,10 @@ async function verifyExactCleanupRoleBoundary(client, approval) {
         record?.rolbypassrls !== false,
     )
   ) {
-    failStage(CLEANUP_INCOMPLETE);
+    cleanupFailClosedAssertion(
+      diagnostic,
+      'CLEANUP_ASSERT_EXACT_ROLE_ATTRIBUTES',
+    );
   }
   const memberships = await command(
     client,
@@ -1739,11 +1816,14 @@ async function verifyExactCleanupRoleBoundary(client, approval) {
         record?.member_name !== approval.admin_database_role,
     )
   ) {
-    failStage(CLEANUP_INCOMPLETE);
+    cleanupFailClosedAssertion(
+      diagnostic,
+      'CLEANUP_ASSERT_EXACT_ROLE_MEMBERSHIPS',
+    );
   }
 }
 
-async function verifyNoRoleResidue(client, approval) {
+async function verifyNoRoleResidue(client, approval, diagnostic) {
   const residue = await command(
     client,
     'CLEANUP_VERIFY_NO_ROLE_RESIDUE',
@@ -1757,49 +1837,64 @@ async function verifyNoRoleResidue(client, approval) {
       order by role.rolname, class_name, object_id`,
     [Object.values(approval.roles)],
   );
-  if (rows(residue).length !== 0) failStage(CLEANUP_INCOMPLETE);
+  if (rows(residue).length !== 0) {
+    cleanupFailClosedAssertion(diagnostic, 'CLEANUP_ASSERT_NO_ROLE_RESIDUE');
+  }
 }
 
-async function verifyNoRunResidue(client, approval) {
+async function verifyNoRunResidue(client, approval, diagnostic) {
   const namespace = await command(
     client,
     'CLEANUP_VERIFY_NAMESPACE_ABSENT',
     'select nspname from pg_namespace where nspname = $1',
     [approval.disposable_namespace],
   );
-  if (rows(namespace).length !== 0) failStage(CLEANUP_INCOMPLETE);
+  if (rows(namespace).length !== 0) {
+    cleanupFailClosedAssertion(diagnostic, 'CLEANUP_ASSERT_NAMESPACE_ABSENT');
+  }
   const roles = await command(
     client,
     'CLEANUP_VERIFY_ROLES_ABSENT',
     'select rolname from pg_roles where rolname = any($1::text[])',
     [Object.values(approval.roles)],
   );
-  if (rows(roles).length !== 0) failStage(CLEANUP_INCOMPLETE);
+  if (rows(roles).length !== 0) {
+    cleanupFailClosedAssertion(diagnostic, 'CLEANUP_ASSERT_ROLES_ABSENT');
+  }
 }
 
-async function cleanupMarkedBoundary(client, approval, evidence) {
+export async function cleanupMarkedBoundary(
+  client,
+  approval,
+  evidence,
+  { captureDiagnostic = false } = {},
+) {
   const schema = identifier(approval.disposable_namespace);
   const { migration_owner: owner, reader, worker } = approval.roles;
+  const diagnostic = captureDiagnostic ? { current: undefined } : undefined;
+  const cleanupClient = cleanupDiagnosticClient(client, diagnostic);
   evidence.cleanup.status = 'RUNNING';
   try {
     const identity = await command(
-      client,
+      cleanupClient,
       'CLEANUP_VERIFY_CONNECTED_ADMIN',
       'select current_user as current_user',
     );
-    assertRows(
+    cleanupAssertRows(
+      diagnostic,
+      'CLEANUP_ASSERT_CONNECTED_ADMIN',
       identity,
       ([record]) => record?.current_user === approval.admin_database_role,
       'cleanup connection differs from the owner-approved admin role',
     );
-    await command(client, 'CLEANUP_BEGIN', 'begin');
+    await command(cleanupClient, 'CLEANUP_BEGIN', 'begin');
     await command(
-      client,
+      cleanupClient,
       'CLEANUP_SET_MIGRATION_OWNER',
       `set local role ${identifier(owner)}`,
     );
     const marker = await command(
-      client,
+      cleanupClient,
       'CLEANUP_VERIFY_MARKER',
       `select run_id,
               target_fingerprint,
@@ -1811,7 +1906,9 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
         where run_id = $1 for update`,
       [evidence.marker.run_id],
     );
-    assertRows(
+    cleanupAssertRows(
+      diagnostic,
+      'CLEANUP_ASSERT_MARKER_BOUND',
       marker,
       ([record]) =>
         record?.run_id === evidence.marker.run_id &&
@@ -1823,7 +1920,7 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
       'cleanup marker does not bind this exact disposable run',
     );
     const ownership = await command(
-      client,
+      cleanupClient,
       'CLEANUP_VERIFY_SCHEMA_OWNERSHIP',
       `with namespace_objects as (
          select c.relowner as object_owner
@@ -1849,17 +1946,23 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
         group by n.nspowner`,
       [approval.disposable_namespace, owner],
     );
-    assertRows(
+    cleanupAssertRows(
+      diagnostic,
+      'CLEANUP_ASSERT_SCHEMA_OWNERSHIP',
       ownership,
       ([record]) =>
         record?.schema_owner === owner && record?.all_objects_owned === true,
       'cleanup refuses a namespace that includes non-run-owned objects',
     );
-    await verifyExactRunInventory(client, approval);
-    await verifyNoUnexpectedStandaloneObjects(client, approval);
-    await verifyExactCleanupRoleBoundary(client, approval);
+    await verifyExactRunInventory(cleanupClient, approval, diagnostic);
+    await verifyNoUnexpectedStandaloneObjects(
+      cleanupClient,
+      approval,
+      diagnostic,
+    );
+    await verifyExactCleanupRoleBoundary(cleanupClient, approval, diagnostic);
     const externalDependents = await command(
-      client,
+      cleanupClient,
       'CLEANUP_VERIFY_NO_EXTERNAL_DEPENDENTS',
       `with run_objects as (
          select 'pg_class'::regclass as class_id, c.oid as object_id
@@ -1977,7 +2080,9 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
          from external_user_dependents`,
       [approval.disposable_namespace],
     );
-    assertRows(
+    cleanupAssertRows(
+      diagnostic,
+      'CLEANUP_ASSERT_NO_EXTERNAL_DEPENDENTS',
       externalDependents,
       ([record]) =>
         Array.isArray(record?.namespaces) && record.namespaces.length === 0,
@@ -1985,7 +2090,7 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
     );
     for (const policy of [...RUN_POLICIES].reverse()) {
       await command(
-        client,
+        cleanupClient,
         `CLEANUP_DROP_POLICY_${policy.name.toUpperCase()}`,
         `drop policy ${identifier(policy.name)} on ${schema}.${identifier(policy.table)} restrict`,
       );
@@ -1993,28 +2098,28 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
     const migrationTeardown = async (migration) => {
       for (const trigger of migration.triggers) {
         await command(
-          client,
+          cleanupClient,
           `CLEANUP_${migration.migrationId.toUpperCase()}_DROP_TRIGGER_${trigger.name.toUpperCase()}`,
           `drop trigger ${identifier(trigger.name)} on ${schema}.${identifier(trigger.table)} restrict`,
         );
       }
       for (const routine of migration.functions) {
         await command(
-          client,
+          cleanupClient,
           `CLEANUP_${migration.migrationId.toUpperCase()}_DROP_FUNCTION_${routine.name.toUpperCase()}`,
           `drop function ${schema}.${identifier(routine.name)}${routine.sql} restrict`,
         );
       }
       for (const table of migration.tables) {
         await command(
-          client,
+          cleanupClient,
           `CLEANUP_${migration.migrationId.toUpperCase()}_DROP_TABLE_${table.toUpperCase()}`,
           `drop table ${schema}.${identifier(table)} restrict`,
         );
       }
       for (const constraint of migration.constraints) {
         await command(
-          client,
+          cleanupClient,
           `CLEANUP_${migration.migrationId.toUpperCase()}_DROP_CONSTRAINT_${constraint.name.toUpperCase()}`,
           `alter table ${schema}.${identifier(constraint.table)} drop constraint ${identifier(constraint.name)} restrict`,
         );
@@ -2024,7 +2129,7 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
       await migrationTeardown(migration);
     }
     await command(
-      client,
+      cleanupClient,
       'CLEANUP_RUN_MARKER_DROP_TABLE_RESTRICT',
       `drop table ${schema}.${identifier(RUN_MARKER_TABLE)} restrict`,
     );
@@ -2032,31 +2137,32 @@ async function cleanupMarkedBoundary(client, approval, evidence) {
       RUN_MIGRATION_TEARDOWN[RUN_MIGRATION_TEARDOWN.length - 1],
     );
     await command(
-      client,
+      cleanupClient,
       'CLEANUP_DROP_EXACT_SCHEMA_RESTRICT',
       `drop schema ${schema} restrict`,
     );
-    await command(client, 'CLEANUP_RESET_ROLE', 'reset role');
+    await command(cleanupClient, 'CLEANUP_RESET_ROLE', 'reset role');
     for (const role of [owner, worker, reader]) {
       await command(
-        client,
+        cleanupClient,
         `CLEANUP_REVOKE_${role.toUpperCase()}_FROM_ADMIN`,
         `revoke ${identifier(role)} from current_user`,
       );
     }
-    await verifyNoRoleResidue(client, approval);
+    await verifyNoRoleResidue(cleanupClient, approval, diagnostic);
     for (const role of [owner, worker, reader]) {
       // PostgreSQL DROP ROLE has no CASCADE form: outstanding dependencies fail.
       await command(
-        client,
+        cleanupClient,
         `CLEANUP_DROP_ROLE_${role.toUpperCase()}_RESTRICT`,
         `drop role ${identifier(role)}`,
       );
     }
-    await verifyNoRunResidue(client, approval);
-    await command(client, 'CLEANUP_COMMIT', 'commit');
+    await verifyNoRunResidue(cleanupClient, approval, diagnostic);
+    await command(cleanupClient, 'CLEANUP_COMMIT', 'commit');
     evidence.cleanup.status = 'PASS';
-  } catch {
+  } catch (error) {
+    recordCleanupDiagnostic(evidence, diagnostic, error);
     await command(client, 'CLEANUP_ROLLBACK', 'rollback').catch(
       () => undefined,
     );
@@ -2093,6 +2199,7 @@ async function runV09AuthorizedPostgresEvidence({
   runId = randomUUID(),
   writeEvidence = writeV09StagingEvidence,
   annotateEvidence = (evidence) => evidence,
+  captureCleanupDiagnostic = false,
 }) {
   const evidence = publicEvidence(authorized.approval, runId);
   let canRun = true;
@@ -2250,7 +2357,14 @@ async function runV09AuthorizedPostgresEvidence({
             cleanupClient.connect(),
           );
           await audited(evidence, 'CLEANUP_MARKED_BOUNDARY', () =>
-            cleanupMarkedBoundary(cleanupClient, authorized.approval, evidence),
+            cleanupMarkedBoundary(
+              cleanupClient,
+              authorized.approval,
+              evidence,
+              {
+                captureDiagnostic: captureCleanupDiagnostic,
+              },
+            ),
           );
         } catch (error) {
           evidence.status = 'FAIL_CLOSED';
@@ -2347,6 +2461,7 @@ export async function runV09DisposablePostgresEvidence({
     },
     runId,
     writeEvidence,
+    captureCleanupDiagnostic: true,
     annotateEvidence: (evidence) =>
       annotateDisposableEvidence(evidence, immutableInput, resolvedMigrations),
   });
