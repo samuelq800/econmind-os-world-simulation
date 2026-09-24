@@ -13,6 +13,7 @@ import {
 } from '../serialization/canonical.js';
 import {
   validateV27_2CalibrationPreparation,
+  v27_2CountryConfigurationRef,
   type CalibrationNumericChange,
   type CalibrationQuantity,
   type CalibrationSourceEvidence,
@@ -29,7 +30,8 @@ export type ProvenanceCalibrationLinkStatus =
 
 export type ProvenanceCalibrationIssueCode =
   | 'CALIBRATION_INPUT_INCOMPLETE'
-  | 'WORLD_CONFIGURATION_BINDING_UNAVAILABLE'
+  | 'WORLD_CONFIGURATION_BINDING_MISMATCH'
+  | 'COUNTRY_CONFIGURATION_AUTHORITY_UNVERIFIED'
   | 'COUNTRY_SET_MISMATCH'
   | 'PROVENANCE_VALUE_UNAVAILABLE'
   | 'LEGACY_INDEX_QUARANTINED'
@@ -76,6 +78,17 @@ export interface ProvenanceCalibrationValueLink {
   readonly assumptionRef: string | null;
   readonly derivationRef: string | null;
   readonly changes: readonly CalibrationNumericChange[];
+  /** Exact validated transformation chain, not an economic causal claim. */
+  readonly numericDerivationTrace: CalibrationNumericDerivationTrace;
+}
+
+export interface CalibrationNumericDerivationTrace {
+  readonly sourceRef: string;
+  readonly assumptionRef: string | null;
+  readonly unit: string;
+  readonly originalAmount: string;
+  readonly finalAmount: string;
+  readonly changes: readonly CalibrationNumericChange[];
 }
 
 export interface ProvenanceCalibrationAdapterResult {
@@ -83,6 +96,7 @@ export interface ProvenanceCalibrationAdapterResult {
   readonly status: ProvenanceCalibrationLinkStatus;
   readonly generationAuthorized: false;
   readonly worldId: string;
+  readonly countryConfigurationRef: string | null;
   readonly seasonRef: string;
   readonly countryCount: string;
   readonly links: readonly ProvenanceCalibrationValueLink[];
@@ -415,6 +429,7 @@ function linkKey(value: ProvenanceCalibrationValueLink): string {
 
 function result(input: {
   readonly provenance: CountrySeedProvenancePreparation;
+  readonly countryConfigurationRef: string | null;
   readonly links: readonly ProvenanceCalibrationValueLink[];
   readonly issues: readonly ProvenanceCalibrationIssue[];
 }): ProvenanceCalibrationAdapterResult {
@@ -436,6 +451,7 @@ function result(input: {
     status,
     generationAuthorized: false as const,
     worldId: input.provenance.worldId,
+    countryConfigurationRef: input.countryConfigurationRef,
     seasonRef: input.provenance.seasonRef,
     countryCount: String(input.provenance.configuredCountryIds.length),
     links,
@@ -461,6 +477,7 @@ export function connectCountrySeedProvenanceToCalibration(input: {
   if (calibration.status === 'PREPARATION_INCOMPLETE') {
     return result({
       provenance,
+      countryConfigurationRef: null,
       links: [],
       issues: [
         unavailable({
@@ -492,15 +509,37 @@ export function connectCountrySeedProvenanceToCalibration(input: {
       }),
     );
   }
+  const expectedConfigurationRef = v27_2CountryConfigurationRef(
+    {
+      worldId: provenance.worldId,
+      countryIds: provenance.configuredCountryIds,
+    },
+    input.sha256Hex,
+  );
+  if (
+    calibration.candidate.worldId !== provenance.worldId ||
+    calibration.candidate.countryConfigurationRef !== expectedConfigurationRef
+  ) {
+    issues.push(
+      mismatch({
+        code: 'WORLD_CONFIGURATION_BINDING_MISMATCH',
+        message:
+          'V27.2 World/country identity does not match reparsed V27.1 provenance',
+      }),
+    );
+    return result({
+      provenance,
+      countryConfigurationRef: calibration.candidate.countryConfigurationRef,
+      links: [],
+      issues,
+    });
+  }
   issues.push(
     unavailable({
-      code: 'WORLD_CONFIGURATION_BINDING_UNAVAILABLE',
-      missingFields: [
-        'calibration.worldId',
-        'calibration.countryConfigurationRef',
-      ],
+      code: 'COUNTRY_CONFIGURATION_AUTHORITY_UNVERIFIED',
+      missingFields: ['countryConfiguration.authoritativeSource'],
       message:
-        'V27.2 input has no World/configuration binding; seasonRef remains audit metadata and cannot select different economics',
+        'Matching structural identity does not prove external country-configuration authority',
     }),
   );
 
@@ -613,6 +652,16 @@ export function connectCountrySeedProvenanceToCalibration(input: {
         continue;
       }
       usedPaths.add(claimedPath);
+      const numericDerivationTrace: CalibrationNumericDerivationTrace =
+        Object.freeze({
+          sourceRef: match.quantity.sourceRef,
+          assumptionRef: match.quantity.assumptionRef,
+          unit: match.quantity.unit,
+          originalAmount:
+            match.quantity.changes[0]?.before ?? match.quantity.amount,
+          finalAmount: match.quantity.amount,
+          changes: Object.freeze([...match.quantity.changes]),
+        });
       links.push(
         Object.freeze({
           countryId: country.countryId,
@@ -624,13 +673,13 @@ export function connectCountrySeedProvenanceToCalibration(input: {
           source,
           unit: field.unit,
           provenanceAmount: field.amount,
-          originalCalibrationAmount:
-            match.quantity.changes[0]?.before ?? match.quantity.amount,
+          originalCalibrationAmount: numericDerivationTrace.originalAmount,
           finalCalibrationAmount: match.quantity.amount,
           valueOrigin: field.valueOrigin,
           assumptionRef: field.assumptionRef,
           derivationRef: field.derivationRef,
-          changes: Object.freeze([...match.quantity.changes]),
+          changes: numericDerivationTrace.changes,
+          numericDerivationTrace,
         }),
       );
     }
@@ -651,5 +700,10 @@ export function connectCountrySeedProvenanceToCalibration(input: {
       );
     }
   }
-  return result({ provenance, links, issues });
+  return result({
+    provenance,
+    countryConfigurationRef: calibration.candidate.countryConfigurationRef,
+    links,
+    issues,
+  });
 }

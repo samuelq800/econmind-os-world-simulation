@@ -29,7 +29,10 @@ import {
   COUNTRY_SEED_PROVENANCE_SCHEMA,
   parseCountrySeedProvenance,
 } from '../../packages/core/src/opening/country-seed-provenance-preparation.js';
-import { V27_2_CALIBRATION_PREPARATION_SCHEMA_VERSION } from '../../packages/core/src/calibration/country-input-closure.js';
+import {
+  V27_2_CALIBRATION_PREPARATION_SCHEMA_VERSION,
+  v27_2CountryConfigurationRef,
+} from '../../packages/core/src/calibration/country-input-closure.js';
 import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
 
@@ -128,6 +131,11 @@ function input(): WorkerSingleWorldPreflightInput {
     provenance: provenance(),
     calibration: {
       schemaVersion: V27_2_CALIBRATION_PREPARATION_SCHEMA_VERSION,
+      worldId: WORLD,
+      countryConfigurationRef: v27_2CountryConfigurationRef(
+        { worldId: WORLD, countryIds: COUNTRY_IDS },
+        sha256Hex,
+      ),
       expectedCountryCount: '70',
       sources: [],
       countries: [],

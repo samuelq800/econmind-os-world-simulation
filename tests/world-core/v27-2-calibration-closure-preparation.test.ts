@@ -7,6 +7,7 @@ import {
   V27_2_REQUIRED_COUNTRY_COUNT,
   V27_2_REQUIRED_COUNTRY_COUNT_VALUE,
   validateV27_2CalibrationPreparation,
+  v27_2CountryConfigurationRef,
 } from '../../packages/core/src/calibration/index.js';
 import { DOMAIN_ERROR_CODES } from '../../packages/core/src/errors.js';
 
@@ -113,8 +114,18 @@ function country(index: number) {
 }
 
 function fixture() {
+  const countries = Array.from(
+    { length: V27_2_REQUIRED_COUNTRY_COUNT },
+    (_, index) => country(index + 1),
+  );
+  const worldId = 'WORLD_CALIBRATION_TEST';
   return {
     schemaVersion: V27_2_CALIBRATION_PREPARATION_SCHEMA_VERSION,
+    worldId,
+    countryConfigurationRef: v27_2CountryConfigurationRef(
+      { worldId, countryIds: countries.map((item) => item.countryId) },
+      sha256,
+    ),
     expectedCountryCount: V27_2_REQUIRED_COUNTRY_COUNT_VALUE,
     sources: [
       {
@@ -125,10 +136,7 @@ function fixture() {
         contentHash: `sha256:${'a'.repeat(64)}`,
       },
     ],
-    countries: Array.from(
-      { length: V27_2_REQUIRED_COUNTRY_COUNT },
-      (_, index) => country(index + 1),
-    ),
+    countries,
   };
 }
 
@@ -164,6 +172,71 @@ describe('V27.2 deterministic calibration closure preparation', () => {
     const first = validateV27_2CalibrationPreparation(ordered, sha256);
     const second = validateV27_2CalibrationPreparation(reversed, sha256);
     expect(first.fingerprint).toBe(second.fingerprint);
+    expect(
+      v27_2CountryConfigurationRef(
+        {
+          worldId: ordered.worldId,
+          countryIds: ordered.countries.map((item) => item.countryId),
+        },
+        sha256,
+      ),
+    ).toBe(
+      v27_2CountryConfigurationRef(
+        {
+          worldId: reversed.worldId,
+          countryIds: reversed.countries.map((item) => item.countryId),
+        },
+        sha256,
+      ),
+    );
+  });
+
+  it('binds one World and exact country identity set while rejecting old or forged schemas', () => {
+    const original = fixture();
+    const closed = validateV27_2CalibrationPreparation(original, sha256);
+    expect(closed.status).toBe('PREPARATION_INPUT_CLOSED');
+    if (closed.status !== 'PREPARATION_INPUT_CLOSED') return;
+    expect(closed.candidate.worldId).toBe(original.worldId);
+    expect(closed.candidate.countryConfigurationRef).toBe(
+      original.countryConfigurationRef,
+    );
+    const differentWorld = fixture();
+    differentWorld.worldId = 'WORLD_OTHER';
+    differentWorld.countryConfigurationRef = v27_2CountryConfigurationRef(
+      {
+        worldId: differentWorld.worldId,
+        countryIds: differentWorld.countries.map((item) => item.countryId),
+      },
+      sha256,
+    );
+    expect(
+      validateV27_2CalibrationPreparation(differentWorld, sha256).fingerprint,
+    ).not.toBe(closed.fingerprint);
+
+    const oldSchema = {
+      ...fixture(),
+      schemaVersion: 'v27.2-country-calibration-preparation-v1',
+    };
+    expectInvalid(() => validateV27_2CalibrationPreparation(oldSchema, sha256));
+    const missingBinding = { ...fixture() } as Record<string, unknown>;
+    delete missingBinding.countryConfigurationRef;
+    expectInvalid(() =>
+      validateV27_2CalibrationPreparation(missingBinding, sha256),
+    );
+    const wrongWorld = { ...fixture(), worldId: 'WORLD_OTHER' };
+    expectInvalid(() =>
+      validateV27_2CalibrationPreparation(wrongWorld, sha256),
+    );
+    const wrongRef = {
+      ...fixture(),
+      countryConfigurationRef: `sha256:${'b'.repeat(64)}`,
+    };
+    expect(() => validateV27_2CalibrationPreparation(wrongRef, sha256)).toThrow(
+      'countryConfigurationRef does not bind World and country IDs',
+    );
+    const wrongSet = fixture();
+    wrongSet.countries[0]!.countryId = 'COUNTRY_99';
+    expectInvalid(() => validateV27_2CalibrationPreparation(wrongSet, sha256));
   });
 
   it('reports missing countries and domain inputs as incomplete', () => {

@@ -1,0 +1,51 @@
+{
+  "scope": "v27_2_world_country_configuration_structural_binding_only",
+  "base_sha": "e906764dde1603754ae7a5bea49b8b457ae47f07",
+  "status": "PREPARATION_ONLY",
+  "risk": "P0",
+  "authoritative_status_unchanged": {
+    "V27.1": "PLANNED",
+    "V27.2": "PLANNED",
+    "V27.3": "PLANNED",
+    "ADR-13": "PROPOSED_NOT_APPROVED",
+    "ADR-14": "PROPOSED_NOT_APPROVED"
+  },
+  "final_checks": {
+    "focused_vitest": {
+      "command": "pnpm exec vitest run tests/world-core/v27-1-country-seed-provenance-preparation.test.ts tests/world-core/v27-2-calibration-closure-preparation.test.ts tests/world-core/v27-3-npc-intent-preparation.test.ts tests/world-core/v27-provenance-calibration-adapter.test.ts tests/world-core/v27-single-world-worker-preflight.test.ts tests/world-core/opening-seed-store.test.ts",
+      "status": "PASS",
+      "files": 6,
+      "tests": 50
+    },
+    "architecture_vitest": {
+      "command": "pnpm exec vitest run tests/architecture/boundaries.test.ts tests/architecture/foundation-gates.test.ts tests/architecture/foundation-ci-gate.test.ts",
+      "status": "PASS",
+      "files": 3,
+      "tests": 34
+    },
+    "core_build": "PASS",
+    "core_typecheck": "PASS",
+    "worker_build": "PASS",
+    "targeted_eslint": "PASS",
+    "targeted_prettier": "PASS",
+    "authoritative_pattern_scan": "PASS",
+    "repository_boundary_scan": "PASS",
+    "local_safe_environment": "PASS_DATABASE_NOT_CONFIGURED",
+    "foundation_policy": "PASS",
+    "repository_secret_scan": "PASS"
+  },
+  "initial_parallel_test_run": "FAIL_7_WORKER_TESTS_LOADED_OLD_BUILT_CORE_SCHEMA_DURING_CONCURRENT_BUILD",
+  "resolution": "CORE_BUILD_COMPLETED_THEN_FOCUSED_SUITE_RERUN_SERIAL_AND_PASSED_50_OF_50",
+  "not_run": [
+    "independent_P0_review_of_new_commit",
+    "external_country_configuration_attestation",
+    "verified_70_country_sources_and_values",
+    "authoritative_opening_seed_bootstrap",
+    "ADR_13_and_ADR_14_owner_decisions",
+    "formal_V27_dependency_closure",
+    "runtime_activation",
+    "full_repository_test_suite",
+    "migration_or_production_access"
+  ],
+  "authoritative_writes": false
+}
