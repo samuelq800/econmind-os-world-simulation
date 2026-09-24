@@ -11,10 +11,25 @@
 - Frozen existing-data source commit:
   `abbcdc5c86279227627d30d13952fdadda96737b` on
   `codex/world-data-calibration`.
-- Classification: P0-sensitive `PREPARATION_ONLY` /
-  `IMPLEMENTED_UNVERIFIED`. `status/progress.json` still records V27.1,
+- Classification: P0-sensitive `PREPARATION_ONLY` with independent narrow code
+  review complete and actual data closure `UNAVAILABLE`.
+  `status/progress.json` still records V27.1,
   V27.2, V27.3 and V29.1–V29.3 as `PLANNED`; this branch does not change those
   entries or claim Gate completion.
+
+## Independent narrow review and handoff
+
+Independent lane B reviewed exact candidate
+`94245838314900d309935cd436665745aea14fa1`. Within the
+`PREPARATION_ONLY` code and frozen-inventory scope it reported **BLOCKER 0 /
+MAJOR 0**, independently recomputed all 7 artifact hashes with matching
+results, and confirmed the 40 focused tests pass.
+
+That conclusion does not approve actual 70-country data, V27.2 inputs,
+fictional-country mapping, WTO evidence, any of the seven open data gates,
+OpeningSeed generation or formal V29 completion. The handoff therefore stops
+at `PREPARATION_REVIEWED_DATA_UNAVAILABLE`. No synthetic input may be created
+to convert the review into a data-completion claim.
 
 ## Delivered boundary
 
@@ -94,5 +109,6 @@ remain unavailable.
 New data retrieval, WTO authentication, imputation/missingness selection,
 archetype selection, fictional-country mapping, IPF/RAS, trade reconciliation,
 economic plausibility approval, actual OpeningSeed generation/reconciliation,
-worker composition, long-run V29 replay, full repository tests, independent P0
-review, merge, migration, release and production operation are `NOT_RUN`.
+worker composition, long-run V29 replay, full repository tests, independent
+approval of actual 70-country data and OpeningSeed, merge, migration, release
+and production operation are `NOT_RUN`.
