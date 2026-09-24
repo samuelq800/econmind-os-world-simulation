@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { OfficeEntryFlow } from './OfficeEntryFlow.js';
+import { LocalAuthorizedReadEntry } from './LocalAuthorizedReadEntry.js';
 import { SixOfficesG01 } from './SixOfficesG01.js';
 import {
   EMPTY_PROJECTION,
@@ -11,6 +12,7 @@ import {
 } from './fixtures.js';
 import type { PrototypeStateName, PrototypeViewState } from './state.js';
 import type { AuthorizedUiInjection } from './authorized-read-adapter.js';
+import type { LocalAuthorizedReadConfig } from './local-authorized-read.js';
 
 const stateLabels: ReadonlyArray<{
   readonly id: PrototypeStateName;
@@ -70,7 +72,23 @@ function viewState(
 
 export function PrototypeApp({
   authorized,
-}: { readonly authorized?: AuthorizedUiInjection } = {}) {
+  localAuthorizedRead,
+}: {
+  readonly authorized?: AuthorizedUiInjection;
+  readonly localAuthorizedRead?: LocalAuthorizedReadConfig;
+} = {}) {
+  return localAuthorizedRead ? (
+    <LocalAuthorizedReadEntry config={localAuthorizedRead} />
+  ) : (
+    <FixturePrototypeApp authorized={authorized} />
+  );
+}
+
+function FixturePrototypeApp({
+  authorized,
+}: {
+  readonly authorized: AuthorizedUiInjection | undefined;
+}) {
   const [stateName, setStateName] = useState<PrototypeStateName>('ready');
   const [selectedOfficeId, setSelectedOfficeId] =
     useState<FixtureOfficeId>('TRADE');
