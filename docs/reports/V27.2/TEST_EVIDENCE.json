@@ -1,0 +1,73 @@
+{
+  "status": "PREPARATION_ONLY",
+  "riskClass": "P0",
+  "initialBaseSha": "45990429bb5405675d72cfde0299ca176084485c",
+  "integrationBaseSha": "7c216f6a37574d3372d2f59198aed34befa85eb0",
+  "planSha": "bf8bd301fe19f4901268b02f9747083602b5a927",
+  "codeSha": "3191181f9219a92e1306e183464274026a673e8d",
+  "codeTree": "2d5bc718aedfff314629acc4bffb0196730224e7",
+  "generationAuthorized": false,
+  "checks": [
+    {
+      "name": "focused calibration and existing opening ledger regressions",
+      "status": "PASS",
+      "detail": "4 files, 46 tests"
+    },
+    {
+      "name": "targeted ESLint",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted Prettier",
+      "status": "PASS"
+    },
+    {
+      "name": "Core typecheck",
+      "status": "PASS"
+    },
+    {
+      "name": "Core build",
+      "status": "PASS"
+    },
+    {
+      "name": "repository boundary scan",
+      "status": "PASS"
+    },
+    {
+      "name": "authoritative-pattern scan",
+      "status": "PASS"
+    },
+    {
+      "name": "local safe-environment check",
+      "status": "PASS",
+      "detail": "databaseConfigured=false; linkedSupabaseProject=NOT_LINKED; databaseMutationAllowed=false"
+    },
+    {
+      "name": "foundation policy",
+      "status": "PASS"
+    },
+    {
+      "name": "repository secret scan",
+      "status": "PASS",
+      "detail": "941 files scanned"
+    },
+    {
+      "name": "integration-base-to-code diff check",
+      "status": "PASS"
+    }
+  ],
+  "notRun": [
+    "actual 70-country empirical data",
+    "missing-provider retrieval",
+    "archetype selection or country generation",
+    "IPF or RAS",
+    "0-100 index conversion",
+    "V27.1 schema integration",
+    "authoritative OpeningSeed construction",
+    "runtime parameterization",
+    "commands or events",
+    "database or production work",
+    "independent review",
+    "merge or Gate acceptance"
+  ]
+}
