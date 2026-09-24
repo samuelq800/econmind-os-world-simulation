@@ -110,6 +110,12 @@ acknowledgement/retry on disposable PG16. Its Reserve/Ship/opening state is
 still fixture-supplied, not a full live command lifecycle or long-run test.
 See `docs/reports/V29.3/P2_NATIVE_POSTGRES_WORKER_ACCEPTANCE.md`.
 
+The local authenticated bridge preparation now exercises a signed **test** JWT
+through server-only subject binding and real PostgreSQL RLS reads/receipts in
+disposable CI. Finance approval and durable Worker command dependencies remain
+fixtures, and no live browser command lifecycle was run. See
+`docs/reports/gate-b/LOCAL_AUTHENTICATED_BRIDGE_PREPARATION.md`.
+
 ## Documentation and governance drift
 
 `status/progress.json` remains the formal R2 ledger at V09.1 `PLANNED` and
