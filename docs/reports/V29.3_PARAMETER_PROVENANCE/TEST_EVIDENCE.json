@@ -1,0 +1,64 @@
+{
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "preparationStatus": "PREPARATION_ONLY_NOT_V29_APPROVAL",
+  "branch": "codex/v29-3-parameter-provenance-preparation",
+  "mainBaseSha": "22369f8cdfee80c6a2b8fb7c67761350b516b738",
+  "planSha": "2a862775e61d4deca344712a66316615e5bf7a6d",
+  "codeSha": "e35d31afa34be2c8e90d1e76e57df9ab0b640716",
+  "codeTree": "c70cbae42eef53bf5fceb69d4b12c3fa36816171",
+  "formallyVerified": false,
+  "eventAuthorized": false,
+  "parameterApplicationAuthorized": false,
+  "realParameterDataAdded": false,
+  "checks": [
+    {
+      "name": "focused parameter-provenance test",
+      "status": "PASS",
+      "detail": "1 file, 6 tests"
+    },
+    {
+      "name": "combined V29 evidence and parameter-provenance tests",
+      "status": "PASS",
+      "detail": "2 files, 10 tests"
+    },
+    {
+      "name": "strict standalone TypeScript",
+      "status": "PASS",
+      "detail": "both V29 tools and focused test files"
+    },
+    {
+      "name": "targeted ESLint",
+      "status": "PASS"
+    },
+    {
+      "name": "targeted Prettier",
+      "status": "PASS"
+    },
+    {
+      "name": "repository secret scan",
+      "status": "PASS",
+      "detail": "999 files scanned"
+    },
+    {
+      "name": "git diff check",
+      "status": "PASS"
+    },
+    {
+      "name": "base-to-code changed-file audit",
+      "status": "PASS",
+      "detail": "plan, new tool and new focused test only"
+    }
+  ],
+  "notRun": [
+    "actual source artifact existence and byte hash verification",
+    "real numeric parameter ingestion",
+    "unit registry resolution or dimensional analysis",
+    "formula correctness or execution",
+    "empirical or causal validation",
+    "actual Core economic Event schema mapping",
+    "Worker replay or state application",
+    "full repository test suite",
+    "independent review",
+    "formal V29.3 Gate release or production"
+  ]
+}
