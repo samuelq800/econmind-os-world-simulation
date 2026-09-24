@@ -12,6 +12,8 @@ Worker, real data, databases, production, release status or Gate B.
 - execution plan: `aca8a4adc6f119403c848a940a890fb3a01df6a6`
 - implementation: `88dfc511ec494c53dc3c9f81b73e3df1ccb368ac`
 - reviewed A contract reference: `ec72b19e120398c17bd4550c8673a16ca0fb5bb0`
+- integrated `origin/main`: `2b086a2f7fd768ef648992876ef5af2a1f8d19dd`
+- post-merge tested candidate: `8fc95d04772ff0a698cdeae2001eb2fcdb49d849`
 - branch: `codex/v27-country-config-fingerprint-contract-fix`
 
 ## Contract correction
@@ -39,7 +41,7 @@ ambiguous `countryConfigurationRef` input shape is rejected.
 - standalone strict TypeScript: `PASS`
 - targeted ESLint: `PASS`
 - targeted Prettier: `PASS`
-- repository secrets check: `PASS` (1,027 files)
+- repository secrets check: `PASS` (1,030 files on the post-merge candidate)
 - `git diff --check`: `PASS`
 
 See `TEST_EVIDENCE.json` for exact commands and outcomes.
