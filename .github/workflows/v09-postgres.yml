@@ -1,6 +1,7 @@
 name: V09 PostgreSQL candidate
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - codex/world-core-v09
@@ -56,6 +57,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm migration:validate
+      - name: Run marked disposable fault evidence
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          V09_DISPOSABLE_EVIDENCE_CONFIRMATION: EXECUTE_DISPOSABLE_V09_POSTGRES_EVIDENCE
+          V09_DISPOSABLE_EVIDENCE_OUTPUT: ${{ runner.temp }}/v09-disposable-evidence.json
+        run: pnpm test:v09:disposable-evidence
       - run: pnpm test:v09:postgres
       - run: pnpm --filter @econmind/core build
       - run: pnpm --filter @econmind/world-worker build
@@ -63,6 +70,13 @@ jobs:
       - run: pnpm exec vitest run tests/world-core/v09-atomic-recovery-postgres.test.ts
       - run: pnpm test:v10.4:postgres
       - run: pnpm exec vitest run tests/world-core/v09-world-recovery-preparation.test.ts
+      - name: Upload marked disposable evidence
+        if: always() && github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: v09-disposable-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/v09-disposable-evidence.json
+          if-no-files-found: error
 
   official-pnpm-check:
     name: Isolated official pnpm check
