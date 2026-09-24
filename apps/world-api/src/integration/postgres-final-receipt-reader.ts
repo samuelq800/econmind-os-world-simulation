@@ -538,6 +538,7 @@ export async function readAuthenticatedPostgresFinalCommandReceipt(input: {
       identity.idempotencyKey,
       authSubject,
     ]),
+    verifiedAuthSubject: authSubject,
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   };
   let result: ParameterizedPgReadResult;

@@ -23,6 +23,12 @@ export type EntitledProjectionClassification = Extract<
 export interface ParameterizedPgReadRequest {
   readonly text: string;
   readonly values: readonly string[];
+  /**
+   * Set only by an authenticated server handler after signature validation.
+   * Concrete PostgreSQL executors may use this to establish a transaction-local
+   * RLS identity; it is never accepted from a browser request body.
+   */
+  readonly verifiedAuthSubject?: SupabaseAuthSubject;
   readonly signal?: AbortSignal;
 }
 
@@ -280,6 +286,7 @@ export async function readEntitledWorldProjection(input: {
       worldVersion,
       eventSequence,
     ]),
+    verifiedAuthSubject: authSubject,
     ...(input.signal === undefined ? {} : { signal: input.signal }),
   };
 

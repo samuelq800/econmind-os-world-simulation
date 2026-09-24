@@ -1,0 +1,50 @@
+name: V30.3 local authenticated bridge
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/e-gateb-auth-chain
+
+permissions:
+  contents: read
+
+jobs:
+  native-local-authenticated-bridge:
+    name: Disposable PostgreSQL local authenticated bridge
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: pnpm --filter @econmind/core build
+      - run: pnpm --filter @econmind/world-api build
+      - name: Run native local authenticated bridge vertical
+        run: pnpm exec vitest run tests/integration/v30-3-local-authenticated-bridge-postgres.test.ts

@@ -19,6 +19,8 @@ export * from './integration/authenticated-narrow-transfer-command-handler.js';
 export * from './integration/authenticated-final-receipt-query-handler.js';
 export * from './integration/identity.js';
 export * from './integration/local-nonproduction-http-bridge.js';
+export * from './integration/local-nonproduction-authenticated-binding.js';
+export * from './integration/local-trusted-postgres-binding.js';
 export * from './integration/postgres-read-adapter.js';
 export * from './integration/postgres-final-receipt-reader.js';
 export * from './integration/transport.js';
