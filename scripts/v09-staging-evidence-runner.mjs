@@ -796,6 +796,29 @@ function recordCleanupDiagnostic(evidence, diagnostic, error) {
   };
 }
 
+export function summarizeCleanupExternalDependencyResult(result) {
+  const resultRows = rows(result);
+  const value = resultRows[0]?.namespaces;
+  const isArray = Array.isArray(value);
+  return {
+    result_row_count: resultRows.length,
+    value_kind: isArray
+      ? 'ARRAY'
+      : value === null
+        ? 'NULL'
+        : typeof value === 'string'
+          ? 'STRING'
+          : 'OTHER',
+    namespace_count: isArray ? value.length : null,
+    public_count: isArray
+      ? value.filter((namespace) => namespace === 'public').length
+      : null,
+    other_count: isArray
+      ? value.filter((namespace) => namespace !== 'public').length
+      : null,
+  };
+}
+
 function assertRows(result, predicate, message) {
   if (!predicate(rows(result))) failed(message);
 }
@@ -2080,6 +2103,10 @@ export async function cleanupMarkedBoundary(
          from external_user_dependents`,
       [approval.disposable_namespace],
     );
+    if (diagnostic !== undefined) {
+      evidence.cleanup.external_dependency_summary =
+        summarizeCleanupExternalDependencyResult(externalDependents);
+    }
     cleanupAssertRows(
       diagnostic,
       'CLEANUP_ASSERT_NO_EXTERNAL_DEPENDENTS',

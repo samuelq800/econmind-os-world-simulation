@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { cleanupMarkedBoundary } from '../../scripts/v09-staging-evidence-runner.mjs';
+import {
+  cleanupMarkedBoundary,
+  summarizeCleanupExternalDependencyResult,
+} from '../../scripts/v09-staging-evidence-runner.mjs';
 
 const approval = {
   admin_database_role: 'postgres',
@@ -24,6 +27,25 @@ function evidence() {
 }
 
 describe('V09 disposable cleanup diagnostics', () => {
+  it('records only dependency result shape and counts, never schema names', () => {
+    expect(
+      summarizeCleanupExternalDependencyResult({
+        rows: [{ namespaces: ['public', 'private_other'] }],
+      }),
+    ).toEqual({
+      result_row_count: 1,
+      value_kind: 'ARRAY',
+      namespace_count: 2,
+      public_count: 1,
+      other_count: 1,
+    });
+    expect(
+      summarizeCleanupExternalDependencyResult({
+        rows: [{ namespaces: '{}' }],
+      }),
+    ).toMatchObject({ value_kind: 'STRING', namespace_count: null });
+  });
+
   it('captures the first SQL checkpoint and SQLSTATE without storing an error message', async () => {
     const output = evidence();
     const client = {
