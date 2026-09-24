@@ -13,7 +13,9 @@ deterministic economic, command, ledger, replay, and preparation modules;
 `apps/world-api` contains command/query integration modules; and
 `apps/world-web` contains a map, six-Office UI, authorized-client and forecast
 preparation. Recent V27 provenance, calibration-closure and NPC-intent modules
-are **non-production preparation**, not a generated 70-country World.
+are **non-production preparation**, not a generated 70-country World. A
+manifest checker now lists missing 70-country source and parameter coverage
+without inventing values or authorizing initialization.
 V29 now has a source-to-evidence gap baseline and a strict candidate-bound
 evidence-claim helper (all 139 requirements default to `MISSING`) plus an
 inert source-to-parameter-to-event traceability helper; V30 has a deterministic,
