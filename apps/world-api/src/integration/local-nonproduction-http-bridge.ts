@@ -30,6 +30,8 @@ export interface RunningLocalNonproductionWorldHttpBridge {
 }
 
 export interface LocalNonproductionWorldHttpBridgeInput {
+  /** One explicitly approved loopback page origin; omitted means no browser access. */
+  readonly allowedBrowserOrigin?: string;
   readonly bindHost?: '127.0.0.1' | 'localhost' | '::1';
   readonly commandHandler?: AuthenticatedNarrowTransferCommandHandler;
   readonly environment: NodeJS.ProcessEnv;
@@ -37,6 +39,10 @@ export interface LocalNonproductionWorldHttpBridgeInput {
 }
 
 const LOOPBACK_BIND_HOSTS = new Set(['127.0.0.1', 'localhost', '::1']);
+const BRIDGE_PATHS = new Set<string>([
+  LOCAL_WORLD_HTTP_BRIDGE_READ_PATH,
+  LOCAL_WORLD_HTTP_BRIDGE_COMMAND_PATH,
+]);
 
 function localOnlyFailure(message: string): never {
   throw new Error(`LOCAL_WORLD_HTTP_BRIDGE_INVALID: ${message}`);
@@ -59,6 +65,43 @@ function assertNonproductionEnvironment(environment: NodeJS.ProcessEnv): void {
 function loopbackPeer(value: string | undefined): boolean {
   return (
     value === '127.0.0.1' || value === '::1' || value === '::ffff:127.0.0.1'
+  );
+}
+
+function browserOrigin(value: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    return localOnlyFailure('allowedBrowserOrigin must be a loopback origin');
+  }
+  const port = Number(parsed.port);
+  if (
+    parsed.protocol !== 'http:' ||
+    !LOOPBACK_BIND_HOSTS.has(parsed.hostname.replace(/^\[|\]$/g, '')) ||
+    !Number.isInteger(port) ||
+    port < 1024 ||
+    port > 65535 ||
+    parsed.username !== '' ||
+    parsed.password !== '' ||
+    parsed.pathname !== '/' ||
+    parsed.search !== '' ||
+    parsed.hash !== '' ||
+    value !== parsed.origin
+  ) {
+    localOnlyFailure('allowedBrowserOrigin must be an exact loopback origin');
+  }
+  return parsed.origin;
+}
+
+function allowedPreflightHeaders(
+  value: string | string[] | undefined,
+): boolean {
+  if (value === undefined) return true;
+  if (typeof value !== 'string') return false;
+  const headers = value.split(',').map((header) => header.trim().toLowerCase());
+  return headers.every(
+    (header) => header === 'authorization' || header === 'content-type',
   );
 }
 
@@ -163,6 +206,10 @@ export function createLocalNonproductionWorldHttpBridge(
   if (!LOOPBACK_BIND_HOSTS.has(bindHost)) {
     localOnlyFailure('bindHost must be a loopback host');
   }
+  const allowedOrigin =
+    input.allowedBrowserOrigin === undefined
+      ? undefined
+      : browserOrigin(input.allowedBrowserOrigin);
   return Object.freeze({
     bindHost,
     async handle(request: IncomingMessage, response: ServerResponse) {
@@ -175,6 +222,50 @@ export function createLocalNonproductionWorldHttpBridge(
         return;
       }
       const path = request.url?.split('?', 1)[0];
+      const origin = request.headers.origin;
+      if (
+        origin !== undefined &&
+        (allowedOrigin === undefined || origin !== allowedOrigin)
+      ) {
+        sendJson(request, response, 403, {
+          availability: 'NOT_AVAILABLE',
+          reason: 'BROWSER_ORIGIN_DENIED',
+          service: 'world-api',
+        });
+        return;
+      }
+      if (origin === allowedOrigin && allowedOrigin !== undefined) {
+        response.setHeader('access-control-allow-origin', allowedOrigin);
+        response.setHeader(
+          'vary',
+          'Origin, Access-Control-Request-Method, Access-Control-Request-Headers',
+        );
+      }
+      if (request.method === 'OPTIONS') {
+        if (
+          origin !== allowedOrigin ||
+          allowedOrigin === undefined ||
+          !BRIDGE_PATHS.has(path ?? '') ||
+          request.headers['access-control-request-method'] !== 'POST' ||
+          !allowedPreflightHeaders(
+            request.headers['access-control-request-headers'],
+          )
+        ) {
+          sendJson(request, response, 403, {
+            availability: 'NOT_AVAILABLE',
+            reason: 'BROWSER_PREFLIGHT_DENIED',
+            service: 'world-api',
+          });
+          return;
+        }
+        response.writeHead(204, {
+          'access-control-allow-headers': 'authorization, content-type',
+          'access-control-allow-methods': 'POST',
+          'cache-control': 'no-store',
+        });
+        response.end();
+        return;
+      }
       if (request.method !== 'POST') {
         response.writeHead(405, { allow: 'POST' });
         response.end();
