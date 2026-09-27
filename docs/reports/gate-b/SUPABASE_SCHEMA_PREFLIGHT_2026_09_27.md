@@ -63,3 +63,37 @@ The final publisher must recheck the target and absence guard immediately
 before applying. Only then record actual created objects and read-back
 results. Do not relabel this preflight as completed database creation,
 production readiness, World initialization or Gate B acceptance.
+
+## Continuation and observed connection checks (09:11 UTC)
+
+After being asked whether a minimal main-site-owned release entrypoint may be
+added without altering legacy pages, logic or data, the owner instructed:
+"你继续推进直至数据库全部连接完成". This authorizes the scoped connection
+work and necessary release entrypoint; it does not waive verification or
+authorize changes to existing user data.
+
+- Reviewed handoff: `02f59be5026cdf2131eaf6e7fd907d5b87e987b3`.
+  B confirmed code-only merge approval, zero open MAJOR findings; the copied
+  capability defect in earlier candidates remains recorded and is closed by
+  the module-private identity registry. Remote execution is a separate gate.
+- Integrated and pushed to main at
+  `9faf33b69641109fede404c1f78cc87c54430953`.
+- Disposable PostgreSQL 17 evidence: run `36308233484`, 5/5 passing;
+  17 migration ledger entries, 21 tables, rollback and legacy sentinel checks.
+- Real HTTPS public-key connectivity: `/auth/v1/settings` returned HTTP 200.
+  No-session POST `{}` to the fixed My Team RPC returned HTTP 401 / `42501`,
+  consistent with rejecting unauthenticated access. No member data was read;
+  this is not a successful authenticated roster read.
+- Read-only catalog snapshot using
+  `docs/examples/world-v2-schema-preflight.sql`: 6,069 protected catalog
+  objects across `public`, `auth`, `storage`; fingerprint
+  `dfd1fd1c50460291a7a68e608fa7c372`; 114 public tables; no `world_v2`.
+  The fingerprint is a structure/permissions change detector, not a user-data
+  checksum or proof that concurrent unrelated changes cannot occur. Re-read
+  immediately before and after publication.
+
+E owns the isolated main-site publication entrypoint; A owns the optional
+same-user API route. Both new candidates require their own narrow review.
+DDL remains NOT_EXECUTED. Signed-in roster verification, deployed API/session
+configuration and authoritative Worker activation are not implied by the
+successful administrative/public-key connection probes.
