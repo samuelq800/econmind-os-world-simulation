@@ -227,6 +227,20 @@
       "lock_or_downtime_risk": "Candidate-only additive immutable WorldVersion-zero opening lineage; local rehearsal only, no browser grant, external DDL, production publication, or shared-Supabase action",
       "rollback_strategy": "reversible-before-economic-facts",
       "production_approval": null
+    },
+    {
+      "migration_id": "0017_world_v2_narrow_transfer_approval_reference",
+      "release_order": 17,
+      "path": "database/migrations/artifacts/0017_world_v2_narrow_transfer_approval_reference.sql",
+      "sha256": "9949281bcccc0d4d2d422a3579a93f39074882607678c6db92e2326814417781",
+      "artifact_source_commit": "9e951cc90d871404ac4a23ca7d51c9c90cda6eec",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": true,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Candidate-only additive immutable narrow approval reference; no legacy backfill, browser grants, production publication or shared-Supabase action",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }
