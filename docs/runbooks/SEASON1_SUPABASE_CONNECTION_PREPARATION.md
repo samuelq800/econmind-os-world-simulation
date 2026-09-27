@@ -1,6 +1,7 @@
 # Season 1 team connection preparation — 2026-09-27
 
-Status: source/configuration confirmed; live authenticated team read NOT_RUN.
+Status: source/configuration confirmed; read adapter independently approved and
+integrated but NOT_ACTIVE; live authenticated team read NOT_RUN.
 The user is preparing the UI and requested Supabase connection preparation
 using the **recent Season 1-specific lobby**, not previous team systems.
 This handoff does not deploy a route, approve new World permissions, modify
@@ -96,11 +97,14 @@ applications or a directory of other teams.
 
 ## Remaining activation checklist
 
-1. E implements and tests the server-only read adapter and exact configuration
-   validation in an isolated V2 branch. It is not installed into the default
-   API/web entrypoint by this document.
-2. Review the frozen code candidate and ordinary negative/compatibility tests;
-   reject wrong project/redirects/elevated credentials/legacy-RPC fallback.
+1. Completed: server-only read adapter and exact configuration validation.
+   Candidate `36ae8887dbc91b30ba0c5c7557dccd68c85349a1` received B's independent
+   APPROVED, P0=0, MAJOR=0. Integration:
+   `bc6a5150a821891688cddd2b3d3afa77cd2077fe`. The adapter is not installed
+   into the default API/web entrypoint.
+2. Completed: focused reader and legacy HTTP tests 15/15 and API build on the
+   integrated code. B also ran architecture 34/34 plus scanners. These local
+   tests are not a signed-in live roster read.
 3. Select the new UI origin and deploy-time session/configuration mechanism;
    mount the reviewed adapter through a same-user read route, not a generic RPC
    proxy. Keep connection keys server configured and user sessions per request.
@@ -113,3 +117,11 @@ applications or a directory of other teams.
 No database migration is needed merely to prepare this existing-RPC reader.
 If the expected RPC is missing remotely, report the version mismatch; do not
 execute SQL, repair migration history or switch to an older team system.
+
+Subsequent owner instruction explicitly authorizes creating needed V2 database
+structures and requests Homebrew. CLI metadata inspection on 2026-09-27
+confirmed the target project and existence of the latest Season 1 RPC, without
+reading user rows. `world_v2` is absent. See
+[`SUPABASE_SCHEMA_PREFLIGHT_2026_09_27.md`](../reports/gate-b/SUPABASE_SCHEMA_PREFLIGHT_2026_09_27.md)
+for the separate publication-preparation status. This does not activate the
+reader or grant simulation authority from team membership.
