@@ -47,6 +47,15 @@ into this document. No remote team records were fetched during this inspection.
 Successful old-site deployment is source/configuration evidence, not a new
 authenticated end-to-end V2 connection test.
 
+Server configuration template:
+[`season1-lobby.env.example`](../examples/season1-lobby.env.example). All values
+are intentionally empty. The candidate reader expects
+`WORLD_LOBBY_SUPABASE_PROJECT_REF`, `WORLD_LOBBY_SUPABASE_URL` and
+`WORLD_LOBBY_SUPABASE_PUBLISHABLE_KEY`. The URL must match the project's exact
+HTTPS origin. The public key is not a user session and does not grant roster
+access by itself. Service-role/secret credentials are not accepted. Do not
+copy these variables into `VITE_*` or the existing local bridge environment.
+
 ## Connection and identity boundary
 
 The new UI should consume a reviewed World API read response. Only the
