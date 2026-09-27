@@ -37,5 +37,29 @@ source commit, and release order.
 5. Record the post-commit `schema_release` ledger and the 21-table count using
    the approved release evidence process.
 
+## Current execution gap and minimum owner-side addition
+
+The existing `main-site-release-chain` is an ownership and approval contract in
+this repository; it is not a checked-in persistent-connection publisher. The
+available Homebrew Supabase CLI `db query` management API must not execute this
+handoff one artifact at a time: separate invocations do not establish one
+transactional session and would defeat the all-or-nothing guarantee.
+
+Before a remote publication can be considered executable, the main-site owner
+must add and independently review a release runner that:
+
+1. receives the verified capability object from this handoff at an immutable
+   reviewed commit;
+2. acquires one approved, server-held PostgreSQL connection outside this
+   repository and passes it to `applyWorldV2ReleaseHandoff` exactly once;
+3. records commit, manifest validation, transaction outcome, exact ledger, and
+   table-count evidence without recording credentials; and
+4. rejects per-artifact CLI queries, dashboard SQL, `db push`, repair, seed,
+   reset, or a second history.
+
+No such owner-side runner is present here, and this candidate intentionally
+does not create one. This is a concrete `REMOTE_EXECUTION_ENTRYPOINT_MISSING`
+blocker, not an invitation to reconstruct a transaction with ad hoc CLI SQL.
+
 No remote DDL was executed for this handoff. A live project inspection is not a
 release approval, and this preparation does not advance Gate B.
