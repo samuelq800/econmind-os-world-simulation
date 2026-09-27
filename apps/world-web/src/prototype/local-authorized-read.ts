@@ -100,6 +100,7 @@ export function createLocalAuthorizedReadController(
 ) {
   let identity = config.currentIdentity ? { ...config.currentIdentity } : null;
   let generation = 0;
+  let clientEpoch = 0;
   let client: ReadPort | null = null;
   let lastSubmittedCommandId: string | null = null;
   let submittedBinding: TrustedNarrowTransferReceiptBinding | null = null;
@@ -118,6 +119,9 @@ export function createLocalAuthorizedReadController(
   const listeners = new Set<() => void>();
 
   const clearClient = () => {
+    // Retire this client permanently, including disconnect/reconnect to the
+    // same identity. UI response generations alone cannot prevent a POST.
+    clientEpoch += 1;
     client?.cache?.revokeAuthorization();
     client = null;
   };
@@ -349,11 +353,16 @@ export function createLocalAuthorizedReadController(
       let result: BrowserReadResult;
       let activeClient: ReadPort | null = null;
       try {
-        client ??= clientFactory({
-          currentIdentity: () => identity,
-          getAccessToken: config.getAccessToken,
-          bridge: { origin: config.bridgeOrigin },
-        });
+        if (!client) {
+          const issuedEpoch = clientEpoch;
+          client = clientFactory({
+            currentIdentity: () => identity,
+            getAccessToken: config.getAccessToken,
+            canDispatchCommand: () =>
+              issuedEpoch === clientEpoch && snapshot.connected,
+            bridge: { origin: config.bridgeOrigin },
+          });
+        }
         activeClient = client;
         result = await client.readProjection(requestId());
       } catch {

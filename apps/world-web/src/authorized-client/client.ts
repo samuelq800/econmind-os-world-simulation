@@ -96,6 +96,11 @@ const classifications = new Set([
   'ADMIN',
 ]);
 
+// Ephemeral proof shared by clients in this browser session, not a receipt.
+// Only a confirmed pre-dispatch cancellation may release another client's
+// cached reservation. Missing storage alone never proves a POST was cancelled.
+const cancelledReservations = new WeakMap<PendingMarkerStorage, string>();
+
 function record(value: unknown): Record<string, unknown> | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -263,6 +268,8 @@ async function boundedJson(response: Response): Promise<unknown> {
 export function createAuthorizedWorldBrowserClient(options: {
   readonly currentIdentity: () => AuthorizedBrowserIdentity | null;
   readonly getAccessToken: () => Promise<string | null>;
+  /** Host session lifetime; checked only before dispatch, never to cancel a sent POST. */
+  readonly canDispatchCommand?: () => boolean;
   readonly bridge?: {
     readonly origin: string;
     readonly fetcher?: typeof fetch;
@@ -302,7 +309,15 @@ export function createAuthorizedWorldBrowserClient(options: {
   function observePending(): ReturnType<typeof readPendingMarker> {
     const latest = readPendingMarker(pendingStorage);
     // A missing or unreadable marker cannot silently undo a known pending POST.
-    if (latest.state !== 'EMPTY') pendingRead = latest;
+    if (
+      latest.state !== 'EMPTY' ||
+      (pendingStorage &&
+        !unresolvedDraft &&
+        pendingRead.state === 'PENDING' &&
+        cancelledReservations.get(pendingStorage) ===
+          JSON.stringify(pendingRead.marker))
+    )
+      pendingRead = latest;
     return pendingRead;
   }
 
@@ -350,6 +365,16 @@ export function createAuthorizedWorldBrowserClient(options: {
     const serialized = JSON.stringify(body);
     if (new TextEncoder().encode(serialized).byteLength > maxRequestBytes) {
       return { status: 'UNAVAILABLE', reason: 'INVALID_RESPONSE' };
+    }
+    // Both marker reservation and token retrieval may outlive the host seat.
+    // No await may separate this check from fetch. A sent request still uses
+    // the normal receipt/UNKNOWN path, even if the host retires afterwards.
+    if (path === LOCAL_WORLD_COMMAND_PATH && options.canDispatchCommand) {
+      try {
+        if (options.canDispatchCommand() !== true) return { status: 'STALE' };
+      } catch {
+        return { status: 'STALE' };
+      }
     }
     let response: Response;
     try {
@@ -592,6 +617,8 @@ export function createAuthorizedWorldBrowserClient(options: {
                   reason: 'PENDING_STORAGE_UNAVAILABLE',
                 };
           }
+          // A newer reservation ends the previous cancellation proof's lifetime.
+          if (pendingStorage) cancelledReservations.delete(pendingStorage);
           pendingRead = readPendingMarker(pendingStorage);
           if (pendingRead.state !== 'PENDING') return { status: 'UNKNOWN' };
         }
@@ -624,6 +651,12 @@ export function createAuthorizedWorldBrowserClient(options: {
           }
           if (!clearPendingMarker(pendingStorage)) {
             return unverifiedCommand(identity, draft, requestId);
+          }
+          if (pendingStorage && pendingRead.state === 'PENDING') {
+            cancelledReservations.set(
+              pendingStorage,
+              JSON.stringify(pendingRead.marker),
+            );
           }
           pendingRead = { state: 'EMPTY' };
           return result;
