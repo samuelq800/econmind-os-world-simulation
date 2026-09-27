@@ -44,3 +44,12 @@ durable final lookup via existing Worker receipt writer. No stress campaign.
 Run affected typecheck/build, lint/format, boundary/environment/secrets gates
 and `git diff --check`; no unrelated full suite. Record exact code SHA and
 native run before handoff. HTTP staging/browser/production remain NOT_RUN.
+
+## Frozen handoff
+
+Implementation candidate: `3223f3a45b12948aa400034bdc5df9d559a3440b`.
+Focused local checks and native PG16 run `36302385602` passed. Exact counts,
+states and remaining wiring gaps are recorded in
+`docs/reports/gate-b/F_DURABLE_COMMAND_INTAKE.md` and its sibling
+`F_DURABLE_COMMAND_INTAKE_EVIDENCE.json`. B review remains independent; this
+record does not authorize merge, formal promotion or the next code slice.
