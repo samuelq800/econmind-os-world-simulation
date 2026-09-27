@@ -1,0 +1,114 @@
+{
+  "release_run": "https://github.com/samuelq800/econmind-os/actions/runs/36310359277",
+  "publisher_commit": "fda91732ccc12dc6004c1e281f2e850d2414274d",
+  "project_ref": "vimksjrhaxdpnkvgsavz",
+  "completed_at_utc": "2026-09-27T09:45:21Z",
+  "table_count": 21,
+  "schema_release": [
+    {
+      "migration_id": "0001_world_v2_namespace",
+      "release_order": 1,
+      "artifact_sha256": "ad60fc9b95332c65301409f64d05e115816d3928fb3615e8232ddb1b94f536ad",
+      "source_repo_commit": "43739ceb38c167c44e806361930b7603360647c3"
+    },
+    {
+      "migration_id": "0002_world_v2_command_event_ledger",
+      "release_order": 2,
+      "artifact_sha256": "92915905a159961ac0f8eb70f509501cf7697519471c1b84f832ef224cf87695",
+      "source_repo_commit": "b8c8555bac1f5e8d36d1f147732a691f248431f8"
+    },
+    {
+      "migration_id": "0003_world_v2_command_receipts_outbox",
+      "release_order": 3,
+      "artifact_sha256": "fe8d6b6849b4ceb5a85789fff34bd2ed47cf7d07d662883dd0c345e88ad9255e",
+      "source_repo_commit": "f589c8fba2e4e2a5686d8a1c4ded60a8688056fa"
+    },
+    {
+      "migration_id": "0004_world_v2_receipt_event_set_integrity",
+      "release_order": 4,
+      "artifact_sha256": "28bb8ff195d9c09b0cafcab79eb4a28868a1bf0170c7065fc4913a428bc17943",
+      "source_repo_commit": "6f919d3a20835da39a042ee7863d849f140f4e0c"
+    },
+    {
+      "migration_id": "0005_world_v2_writer_lease_fencing",
+      "release_order": 5,
+      "artifact_sha256": "1559a0a44c82f55005a0209b9b2a64095625c384e39ed0999e1a44e573ba3cb3",
+      "source_repo_commit": "7102cd3c3ba80cd2468032c3d4776a871dec515d"
+    },
+    {
+      "migration_id": "0006_world_v2_writer_lease_lineage_guard",
+      "release_order": 6,
+      "artifact_sha256": "8ee4a6b01d2916665fc9793a24bbdb9675afc216a6aaa64ae84e67cb44fa66f8",
+      "source_repo_commit": "8ef4390beaa877aa3e3d971a4bb0587a0c7592bd"
+    },
+    {
+      "migration_id": "0007_world_v2_atomic_transition_facts",
+      "release_order": 7,
+      "artifact_sha256": "4f91759a05092b3d9432b3743ad2a4abddb20e5730eb02450ffa96c15d982a61",
+      "source_repo_commit": "080502fdc5615a05910120c9170adaf113ad0ce0"
+    },
+    {
+      "migration_id": "0008_world_v2_materialization_recovery",
+      "release_order": 8,
+      "artifact_sha256": "f35ccc9273e94766a942d9b50ed87cf2fa32387993be44ee562a4853d400a1bb",
+      "source_repo_commit": "81a0022be738f8720dc5f9ca379d6556943adede"
+    },
+    {
+      "migration_id": "0009_world_v2_posting_payload_integrity",
+      "release_order": 9,
+      "artifact_sha256": "88d54a0abccc91e23a1384c5cff4fe2918671169db6e2c67fc9a6440a6cdfa11",
+      "source_repo_commit": "49c31cb0cac61e6b77fb41a915cc33f0fee10c4a"
+    },
+    {
+      "migration_id": "0010_world_v2_command_claim_fencing",
+      "release_order": 10,
+      "artifact_sha256": "7131f64afd486e26fe038839448dcb9f5df117a75d7265b453ca55b851fb1447",
+      "source_repo_commit": "6276fbd8a53447be7e015e275b4d57725e41e98a"
+    },
+    {
+      "migration_id": "0011_world_v2_current_commit_authorization",
+      "release_order": 11,
+      "artifact_sha256": "89d7c6c3ae977fa835af6f3aa8d5dea012dee4a77f0ee38a0e7cc434d7373722",
+      "source_repo_commit": "f86167afad56d3f27537df8e88131aa02b4bb0a8"
+    },
+    {
+      "migration_id": "0012_world_v2_command_claim_active_lease_guard",
+      "release_order": 12,
+      "artifact_sha256": "01bef128971818338cbb9e54eca010ac24d5585e035b9d1bd17373ab1e0677f9",
+      "source_repo_commit": "f86167afad56d3f27537df8e88131aa02b4bb0a8"
+    },
+    {
+      "migration_id": "0013_world_v2_read_projection_boundary",
+      "release_order": 13,
+      "artifact_sha256": "04152db462529835d32e44a4e9399721681f059effd288e25ea57bd69e58f8f9",
+      "source_repo_commit": "7ea1458026ee659312c65499bad49cfd544390b4"
+    },
+    {
+      "migration_id": "0014_world_v2_current_negotiation_party_membership",
+      "release_order": 14,
+      "artifact_sha256": "0dd166235844de91f3503986e2bacdc8638706994da74a2ea1a190214eadfebc",
+      "source_repo_commit": "89fac267f8b7b7185523a7b93035bf6df68a192e"
+    },
+    {
+      "migration_id": "0015_world_v2_narrow_transfer_approvals",
+      "release_order": 15,
+      "artifact_sha256": "5c3ca3965ad6de94fb3f7164edb04f5209f37f1ab33a10cc9ff70c2146ecb3d0",
+      "source_repo_commit": "3446ae63b74dc4429dfdead2a606ae766be8a464"
+    },
+    {
+      "migration_id": "0016_world_v2_opening_seed",
+      "release_order": 16,
+      "artifact_sha256": "8a7cde2fa70fdb5f3519d4b1f72732c40f943ecf3b595f995766f4a779546116",
+      "source_repo_commit": "2a3122febadfd15cc1f9dd830f0e18f5d296f497"
+    },
+    {
+      "migration_id": "0017_world_v2_narrow_transfer_approval_reference",
+      "release_order": 17,
+      "artifact_sha256": "9949281bcccc0d4d2d422a3579a93f39074882607678c6db92e2326814417781",
+      "source_repo_commit": "9e951cc90d871404ac4a23ca7d51c9c90cda6eec"
+    }
+  ],
+  "migration_count": 17,
+  "handoff_source_commit": "02f59be5026cdf2131eaf6e7fd907d5b87e987b3",
+  "status": "WORLD_V2_RELEASE_EVIDENCE_VERIFIED"
+}

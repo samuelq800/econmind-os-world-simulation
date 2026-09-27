@@ -7,6 +7,17 @@ engines or hidden buffs.
 
 ## Latest code integration (2026-09-27)
 
+The reviewed main-site release chain has now published the isolated `world_v2`
+schema to the shared Supabase project: 17 exact migration records and 21 tables,
+verified by release run `36310359277` and live read-back. The existing 114 public
+tables and protected legacy catalog fingerprint are unchanged; browser roles
+have no World schema usage or table write grants. No World data was seeded.
+The optional `/v1/season1/my-team` API is also integrated, default-off, using
+the existing Season 1 RPC. Real upstream rejection checks passed; a valid
+signed-in roster read and UI/session/TLS deployment remain unverified. See
+[database release and connection evidence](docs/reports/gate-b/SUPABASE_SCHEMA_PREFLIGHT_2026_09_27.md).
+This does not activate economic execution or approve Gate B.
+
 Independently reviewed and integrated: browser session-liveness fix, immutable
 Buyer Finance approval references, native approval reader, durable staged
 command intake with the Worker lock-order fix, and local staged HTTP

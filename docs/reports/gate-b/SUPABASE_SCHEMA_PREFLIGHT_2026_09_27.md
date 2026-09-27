@@ -1,6 +1,41 @@
 # Supabase World V2 schema preflight — 2026-09-27
 
-Status: live administrative metadata READ completed; V2 DDL NOT_EXECUTED.
+Current status: V2 schema PUBLISHED and read back at 09:45 UTC. The earlier
+preflight and NOT_EXECUTED records below are retained chronologically.
+
+## Completed publication and postflight
+
+- Owner-authorized main-site publisher: reviewed candidate
+  `8ada30550a01ee6402b7d25eb3ab1ce443629b49`, integrated onto real main
+  `210afd804d9116efe4e68e160edc2aab68d9d90a` as
+  `fda91732ccc12dc6004c1e281f2e850d2414274d`.
+- Integration changed exactly the reviewed 11 files; the nine standalone
+  files match the candidate byte-for-byte. The two merged package/docs files
+  preserve the latest main-site changes. No page, style, existing application
+  code or user dirty-worktree change was included. The merge intentionally
+  used `[skip ci]` to avoid redeploying the old website; this is not a claim
+  that merge CI passed. The exact candidate's PG17 run `36310009927` passed.
+- One manual production publication, run
+  [36310359277](https://github.com/samuelq800/econmind-os/actions/runs/36310359277),
+  job `108594977674`, completed SUCCESS at `2026-09-27T09:45:21Z`.
+- Its verified, downloaded artifact matches the current World manifest:
+  17 exact IDs, SHA-256s, historical source commits and release orders;
+  21 `world_v2` tables. See the committed
+  [release evidence](WORLD_V2_DATABASE_RELEASE_2026_09_27.json).
+- Independent Homebrew CLI postflight confirms `world_v2` exists, with 21
+  ordinary/partitioned tables. `public` still has 114 tables. Protected
+  `public`/`auth`/`storage` catalog count remains 6,069 and fingerprint remains
+  `dfd1fd1c50460291a7a68e608fa7c372`, identical immediately before/after.
+  This is structure/permissions evidence, not a checksum of all user rows.
+- `anon` and `authenticated` both have no `world_v2` schema USAGE and zero
+  World tables with INSERT/UPDATE/DELETE/TRUNCATE grants. No browser write
+  permission was added. The latest Season 1 My Team RPC still exists.
+
+No seed, World activation, duplicate roster, password reset, migration repair,
+or publication retry was performed. Successful schema publication is not
+Gate B approval or a live authoritative Worker deployment. The same-user API
+is integrated and its real upstream rejection path works; a valid signed-in
+roster read and final UI-origin/session/TLS deployment remain NOT_RUN.
 
 ## Owner request and target
 
