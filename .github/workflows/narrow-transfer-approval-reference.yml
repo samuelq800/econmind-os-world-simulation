@@ -1,0 +1,51 @@
+name: Narrow transfer approval reference
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/narrow-transfer-approval-reference
+
+permissions:
+  contents: read
+
+jobs:
+  native-approval-reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+      APPROVAL_REFERENCE_NATIVE: '1'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: node scripts/v09-postgres-test-environment.mjs
+      - run: pnpm --filter @econmind/core build
+      - run: pnpm --filter @econmind/world-worker typecheck
+      - name: Native PostgreSQL reference binding and retry regressions
+        run: pnpm exec vitest run tests/world-core/v10-narrow-transfer-approval-store.test.ts
