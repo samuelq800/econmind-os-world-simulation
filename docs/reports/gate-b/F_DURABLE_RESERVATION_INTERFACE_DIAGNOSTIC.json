@@ -1,0 +1,39 @@
+{
+  "schema_version": "f-durable-reservation-interface-diagnostic-v1",
+  "date": "2026-09-27",
+  "disposition": "DIAGNOSTIC_ONLY",
+  "runtime_implementation": "NOT_STARTED",
+  "baseline_sha": "809d1db528a09dbca681e5dc2d6fb7afa260a38d",
+  "runtime_candidate_sha": null,
+  "branch": "codex/f-durable-reservation-worker",
+  "worktree": "/Users/samuel/Documents/econclub/.econmind-worktrees/f-durable-reservation-worker",
+  "report": "docs/reports/gate-b/F_DURABLE_RESERVATION_INTERFACE_DIAGNOSTIC.md",
+  "changed_scope": "two diagnostic record files only",
+  "available_sources": [
+    "WorldOpeningSeedStore.loadFrom",
+    "DurableV08LedgerLineageReader.rebuildFrom",
+    "reserveNarrowTreasuryGcuTransfer",
+    "createAuthoritativeWorkerExecution",
+    "NarrowTransferApprovalStore.assertCurrent"
+  ],
+  "unresolved_contracts": [
+    "server-only durable identity and current authority rehydration into branded Core contexts",
+    "explicit immutable SQL proposal to Core proposal-version mapping"
+  ],
+  "checks": {
+    "focused_format": "PASS_EXIT_0",
+    "json_baseline_and_source_paths": "PASS_EXIT_0_EIGHT_SOURCE_PATHS",
+    "git_diff_check": "PASS_EXIT_0",
+    "runtime_tests": "NOT_RUN_NO_RUNTIME_CHANGE",
+    "native_postgresql": "NOT_RUN_NO_RESERVE_IMPLEMENTATION",
+    "runtime_typecheck": "NOT_RUN_DOCUMENTATION_ONLY",
+    "runtime_lint": "NOT_RUN_DOCUMENTATION_ONLY",
+    "full_suite": "NOT_RUN_UNRELATED"
+  },
+  "production_connected": false,
+  "migrations_changed_or_executed": false,
+  "formal_status_progress_updated": false,
+  "independent_approval_claimed": false,
+  "gate_b_pass_claimed": false,
+  "stop_after_handoff": true
+}
