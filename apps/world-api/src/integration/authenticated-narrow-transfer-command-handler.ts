@@ -90,6 +90,12 @@ export interface BuyerFinanceApprovalReader {
   readCurrent(input: {
     readonly worldId: string;
     readonly buyerCountryId: string;
+    /**
+     * The immutable approval-reference binding is Command-specific.  Passing
+     * this request identity prevents a valid approval for one durable Command
+     * from being reused for another Command.
+     */
+    readonly commandId: string;
     readonly proposalRef: string;
     readonly buyerFinanceApprovalRef: string;
     readonly signal?: AbortSignal;
@@ -436,6 +442,7 @@ export function createAuthenticatedNarrowTransferCommandHandler(input: {
           .readCurrent({
             worldId: request.payload.worldId,
             buyerCountryId: request.payload.buyerCountryId,
+            commandId: request.payload.commandId,
             proposalRef: request.payload.proposalRef,
             buyerFinanceApprovalRef: request.payload.buyerFinanceApprovalRef,
             ...(handlerInput.signal === undefined

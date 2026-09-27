@@ -9,6 +9,7 @@ import {
   createLocalNonproductionAuthenticatedWorldHttpBridge,
   createLocalPostgresCurrentCommandScopeReader,
   createLocalTrustedPostgresReadExecutor,
+  createPostgresBuyerFinanceApprovalReader,
   parseSupabaseAuthSubject,
   startLocalNonproductionWorldHttpBridge,
   WORLD_COMMAND_API_SCHEMA_VERSION,
@@ -27,8 +28,11 @@ const migrations = [
   '0003_world_v2_command_receipts_outbox.sql',
   '0011_world_v2_current_commit_authorization.sql',
   '0013_world_v2_read_projection_boundary.sql',
+  '0015_world_v2_narrow_transfer_approvals.sql',
+  '0017_world_v2_narrow_transfer_approval_reference.sql',
 ] as const;
 const API_ROLE = 'v30_3_local_api';
+const APPROVAL_READER_ROLE = 'v30_3_approval_reader';
 const WORLD = 'WORLD_V30_3_AUTH_CHAIN';
 const COUNTRY_ALPHA = 'COUNTRY_ALPHA';
 const COUNTRY_BRAVO = 'COUNTRY_BRAVO';
@@ -42,8 +46,14 @@ const SUBJECT_BRAVO = parseSupabaseAuthSubject(
 );
 const REQUEST_ID = '550e8400-e29b-41d4-a716-446655440363';
 const COMMAND_ID = 'COMMAND_V30_3_ALPHA';
+const BUYER_COMMAND_ID = 'COMMAND_V30_3_BUYER';
+const EXPIRED_BUYER_COMMAND_ID = 'COMMAND_V30_3_EXPIRED';
+const BUYER_APPROVAL_REF = 'APPROVAL_V30_3_BRAVO';
+const EXPIRED_BUYER_APPROVAL_REF = 'APPROVAL_V30_3_EXPIRED';
 const IDEMPOTENCY_KEY = 'IDEMPOTENCY_V30_3_ALPHA';
 const FINGERPRINT = `sha256:${'7'.repeat(64)}`;
+const BUYER_COMMAND_FINGERPRINT = `sha256:${'9'.repeat(64)}`;
+const EXPIRED_BUYER_COMMAND_FINGERPRINT = `sha256:${'c'.repeat(64)}`;
 const PAYLOAD_HASH = `sha256:${'8'.repeat(64)}`;
 const AT = '2026-09-24T00:00:00.000Z';
 const JWT_SIGNING_KEY = randomBytes(32);
@@ -53,6 +63,7 @@ const postgresDescribe = process.env.V09_TEST_DATABASE_URL
 
 let admin: Pool | undefined;
 let api: Pool | undefined;
+let approvalReaderApi: Pool | undefined;
 let running: RunningLocalNonproductionWorldHttpBridge | undefined;
 let durableReceiptFixtureCalls = 0;
 
@@ -64,6 +75,13 @@ function currentAdmin(): Pool {
 function currentApi(): Pool {
   if (api === undefined) throw new Error('V30_3_API_POOL_UNAVAILABLE');
   return api;
+}
+
+function currentApprovalReaderApi(): Pool {
+  if (approvalReaderApi === undefined) {
+    throw new Error('V30_3_APPROVAL_READER_POOL_UNAVAILABLE');
+  }
+  return approvalReaderApi;
 }
 
 function roleConnectionString(connectionString: string, role: string): string {
@@ -157,21 +175,29 @@ function receiptRequest() {
   } as const;
 }
 
-function commandRequest(countryId = COUNTRY_ALPHA) {
+function commandRequest(
+  input: {
+    readonly buyerFinanceApprovalRef?: string;
+    readonly commandId?: string;
+    readonly countryId?: string;
+  } = {},
+) {
+  const commandId = input.commandId ?? BUYER_COMMAND_ID;
   return {
     schemaVersion: WORLD_COMMAND_API_SCHEMA_VERSION,
     requestId: REQUEST_ID,
     operation: 'SUBMIT_NARROW_TREASURY_GCU_TRANSFER',
     payload: {
       worldId: WORLD,
-      countryId,
+      countryId: input.countryId ?? COUNTRY_ALPHA,
       officeId: 'TRADE',
-      commandId: 'COMMAND_V30_3_NEW',
+      commandId,
       idempotencyKey: 'IDEMPOTENCY_V30_3_NEW',
       expectedWorldVersion: '0',
-      proposalRef: 'PROPOSAL_V30_3_ALPHA',
+      proposalRef: `BUYER_APPROVAL_${commandId}`,
       buyerCountryId: COUNTRY_BRAVO,
-      buyerFinanceApprovalRef: 'APPROVAL_V30_3_BRAVO',
+      buyerFinanceApprovalRef:
+        input.buyerFinanceApprovalRef ?? BUYER_APPROVAL_REF,
     },
   } as const;
 }
@@ -188,14 +214,14 @@ async function post(pathname: string, body: unknown, token: string) {
   });
 }
 
-async function dropTestRole(): Promise<void> {
+async function dropTestRole(role: string): Promise<void> {
   await currentAdmin().query(
     `select pg_terminate_backend(pid)
        from pg_stat_activity
       where usename = $1 and pid <> pg_backend_pid()`,
-    [API_ROLE],
+    [role],
   );
-  await currentAdmin().query(`drop role if exists ${API_ROLE}`);
+  await currentAdmin().query(`drop role if exists ${role}`);
 }
 
 async function resetAndSeed(): Promise<void> {
@@ -216,6 +242,23 @@ async function resetAndSeed(): Promise<void> {
                      world_v2.command_receipt,
                      world_v2.current_commit_authorization
        to ${API_ROLE}`,
+  );
+  await currentAdmin().query(
+    `grant select on world_v2.narrow_transfer_approval_reference,
+                     world_v2.narrow_transfer_proposal,
+                     world_v2.narrow_transfer_approval_signature
+       to ${API_ROLE}`,
+  );
+  await currentAdmin().query(
+    `grant usage on schema world_v2 to ${APPROVAL_READER_ROLE}`,
+  );
+  await currentAdmin().query(
+    `grant select on world_v2.narrow_transfer_approval_reference,
+                     world_v2.narrow_transfer_proposal,
+                     world_v2.narrow_transfer_approval_signature,
+                     world_v2.command_submission,
+                     world_v2.current_commit_authorization
+       to ${APPROVAL_READER_ROLE}`,
   );
   await currentAdmin().query(
     `insert into world_v2.world_head (world_id)
@@ -305,6 +348,104 @@ async function resetAndSeed(): Promise<void> {
              'POLICY_REJECTED', null, null, null, 0, '[]'::jsonb, $5)`,
     [WORLD, COMMAND_ID, IDEMPOTENCY_KEY, FINGERPRINT, AT],
   );
+  await seedBuyerApproval({
+    approvalRef: BUYER_APPROVAL_REF,
+    commandFingerprint: BUYER_COMMAND_FINGERPRINT,
+    commandId: BUYER_COMMAND_ID,
+    expiresAtReal: '2999-01-01T00:00:00.000Z',
+    historyAt: AT,
+  });
+  await seedBuyerApproval({
+    approvalRef: EXPIRED_BUYER_APPROVAL_REF,
+    commandFingerprint: EXPIRED_BUYER_COMMAND_FINGERPRINT,
+    commandId: EXPIRED_BUYER_COMMAND_ID,
+    expiresAtReal: '2025-01-01T00:00:00.000Z',
+    historyAt: '2024-01-01T00:00:00.000Z',
+  });
+}
+
+async function seedBuyerApproval(input: {
+  readonly approvalRef: string;
+  readonly commandFingerprint: string;
+  readonly commandId: string;
+  readonly expiresAtReal: string;
+  readonly historyAt: string;
+}): Promise<void> {
+  const proposalId = `BUYER_APPROVAL_${input.commandId}`;
+  await currentAdmin().query(
+    `insert into world_v2.command_submission
+       (world_id, command_id, idempotency_key, command_type, schema_version,
+        canonical_payload, payload_sha256, command_fingerprint, auth_subject,
+        actor_id, country_id, office_id, expected_world_version, sim_time,
+        correlation_id, submitted_at_real)
+     values ($1, $2, $3, 'CORE_GOODS_TRANSFER_V1', 'command-v1', $4,
+             $5, $6, $7::uuid, 'ACTOR_ALPHA', $8, 'TRADE', 0, 0, $9, $10)`,
+    [
+      WORLD,
+      input.commandId,
+      `IDEMPOTENCY_${input.commandId}`,
+      JSON.stringify({
+        buyerCountryId: COUNTRY_BRAVO,
+        expiresAtReal: input.expiresAtReal,
+        paymentSource: 'BUYER_TREASURY_GCU',
+      }),
+      PAYLOAD_HASH,
+      input.commandFingerprint,
+      SUBJECT_ALPHA,
+      COUNTRY_ALPHA,
+      `CORRELATION_${input.commandId}`,
+      input.historyAt,
+    ],
+  );
+  await currentAdmin().query(
+    `insert into world_v2.narrow_transfer_proposal
+       (world_id, proposal_id, command_id, country_id, command_fingerprint,
+        policy_version, threshold_policy_version, required_offices, status,
+        opened_at_real, approved_at_real)
+     values ($1, $2, $3, $4, $5, 'V10_TREASURY_GCU_V1',
+             'V10_TREASURY_GCU_THRESHOLD_V1', '["TRADE","FINANCE"]'::jsonb,
+             'PENDING', $6, null)`,
+    [
+      WORLD,
+      proposalId,
+      input.commandId,
+      COUNTRY_BRAVO,
+      input.commandFingerprint,
+      input.historyAt,
+    ],
+  );
+  await currentAdmin().query(
+    `insert into world_v2.narrow_transfer_approval_signature
+       (world_id, proposal_id, country_id, office_id, actor_id, auth_subject,
+        authorization_version, signed_at_real)
+     values ($1, $2, $3, 'FINANCE', 'ACTOR_BRAVO', $4::uuid,
+             'AUTH_V30_3_1', $5)`,
+    [WORLD, proposalId, COUNTRY_BRAVO, SUBJECT_BRAVO, input.historyAt],
+  );
+  await currentAdmin().query(
+    `update world_v2.narrow_transfer_proposal
+        set status = 'APPROVED', approved_at_real = $1
+      where world_id = $2 and proposal_id = $3`,
+    [input.historyAt, WORLD, proposalId],
+  );
+  await currentAdmin().query(
+    `insert into world_v2.narrow_transfer_approval_reference
+       (world_id, approval_ref, proposal_id, buyer_country_id, command_id,
+        command_fingerprint, finance_actor_id, finance_auth_subject,
+        finance_authorization_version, finance_signed_at_real, bound_at_real)
+     values ($1, $2, $3, $4, $5, $6, 'ACTOR_BRAVO', $7::uuid,
+             'AUTH_V30_3_1', $8, $8)`,
+    [
+      WORLD,
+      input.approvalRef,
+      proposalId,
+      COUNTRY_BRAVO,
+      input.commandId,
+      input.commandFingerprint,
+      SUBJECT_BRAVO,
+      input.historyAt,
+    ],
+  );
 }
 
 postgresDescribe(
@@ -316,7 +457,8 @@ postgresDescribe(
         connectionString: environment.connectionString,
         max: 2,
       });
-      await dropTestRole();
+      await dropTestRole(API_ROLE);
+      await dropTestRole(APPROVAL_READER_ROLE);
       await currentAdmin().query(
         `create role ${API_ROLE}
        login nosuperuser nocreatedb nocreaterole noinherit noreplication`,
@@ -328,32 +470,25 @@ postgresDescribe(
         ),
         max: 4,
       });
+      await currentAdmin().query(
+        `create role ${APPROVAL_READER_ROLE}
+       login nosuperuser nocreatedb nocreaterole noinherit noreplication bypassrls`,
+      );
+      approvalReaderApi = new Pool({
+        connectionString: roleConnectionString(
+          environment.connectionString,
+          APPROVAL_READER_ROLE,
+        ),
+        max: 2,
+      });
       await resetAndSeed();
       durableReceiptFixtureCalls = 0;
       running = await startLocalNonproductionWorldHttpBridge({
         bridge: createLocalNonproductionAuthenticatedWorldHttpBridge({
           command: {
-            // Fixture only: migration 0015 has no API approval-reader adapter.
-            approvalReader: {
-              async readCurrent(request) {
-                if (
-                  request.worldId !== WORLD ||
-                  request.buyerCountryId !== COUNTRY_BRAVO ||
-                  request.proposalRef !== 'PROPOSAL_V30_3_ALPHA' ||
-                  request.buyerFinanceApprovalRef !== 'APPROVAL_V30_3_BRAVO'
-                ) {
-                  return null;
-                }
-                return {
-                  worldId: WORLD,
-                  buyerCountryId: COUNTRY_BRAVO,
-                  officeId: 'FINANCE' as const,
-                  proposalRef: 'PROPOSAL_V30_3_ALPHA',
-                  approvalRef: 'APPROVAL_V30_3_BRAVO',
-                  status: 'APPROVED' as const,
-                };
-              },
-            },
+            approvalReader: createPostgresBuyerFinanceApprovalReader({
+              pool: currentApprovalReaderApi(),
+            }),
             // Fixture only: no Worker-owned durable command port is bound here.
             receiptPort: {
               async acceptOrRead(request) {
@@ -398,15 +533,18 @@ postgresDescribe(
       running = undefined;
       await api?.end();
       api = undefined;
+      await approvalReaderApi?.end();
+      approvalReaderApi = undefined;
       if (admin !== undefined) {
         await currentAdmin().query('drop schema if exists world_v2 cascade');
-        await dropTestRole();
+        await dropTestRole(API_ROLE);
+        await dropTestRole(APPROVAL_READER_ROLE);
         await admin.end();
         admin = undefined;
       }
     });
 
-    it('binds a verified local JWT to native RLS while keeping command durability explicitly fixture-only', async () => {
+    it('uses a server-held exact approval reader while keeping command durability explicitly fixture-only', async () => {
       const alphaToken = signedJwt(SUBJECT_ALPHA);
       const bravoToken = signedJwt(SUBJECT_BRAVO);
 
@@ -421,6 +559,13 @@ postgresDescribe(
           '0',
           '0',
         ]),
+      ).resolves.toMatchObject({ rowCount: 0 });
+      // Even with SELECT granted, the ordinary API role cannot read immutable
+      // approval history: forced RLS has no browser/API policy for it.
+      await expect(
+        currentApi().query(
+          'select approval_ref from world_v2.narrow_transfer_approval_reference',
+        ),
       ).resolves.toMatchObject({ rowCount: 0 });
 
       const ownCountry = await post(
@@ -477,10 +622,57 @@ postgresDescribe(
       expect(durableReceiptFixtureCalls).toBe(1);
       const crossCountryCommand = await post(
         '/local/v1/narrow-transfer-command',
-        commandRequest(COUNTRY_ALPHA),
+        commandRequest({ countryId: COUNTRY_ALPHA }),
         bravoToken,
       );
       expect(crossCountryCommand.status).toBe(403);
+      expect(durableReceiptFixtureCalls).toBe(1);
+      const crossCommandApproval = await post(
+        '/local/v1/narrow-transfer-command',
+        commandRequest({ commandId: 'COMMAND_V30_3_CROSS' }),
+        alphaToken,
+      );
+      expect(crossCommandApproval.status).toBe(403);
+      expect(durableReceiptFixtureCalls).toBe(1);
+      const expiredApproval = await post(
+        '/local/v1/narrow-transfer-command',
+        commandRequest({
+          buyerFinanceApprovalRef: EXPIRED_BUYER_APPROVAL_REF,
+          commandId: EXPIRED_BUYER_COMMAND_ID,
+        }),
+        alphaToken,
+      );
+      expect(expiredApproval.status).toBe(403);
+      expect(durableReceiptFixtureCalls).toBe(1);
+      await currentAdmin().query(
+        `update world_v2.current_commit_authorization
+            set authorization_version = 'AUTH_V30_3_REVOKED'
+          where world_id = $1 and auth_subject = $2::uuid
+            and country_id = $3 and office_id = 'FINANCE'
+            and capability = 'FINANCE_TREASURY'`,
+        [WORLD, SUBJECT_BRAVO, COUNTRY_BRAVO],
+      );
+      const staleFinanceRevision = await post(
+        '/local/v1/narrow-transfer-command',
+        commandRequest(),
+        alphaToken,
+      );
+      expect(staleFinanceRevision.status).toBe(403);
+      expect(durableReceiptFixtureCalls).toBe(1);
+      await currentAdmin().query(
+        `update world_v2.current_commit_authorization
+            set authorization_version = 'AUTH_V30_3_1', active = false
+          where world_id = $1 and auth_subject = $2::uuid
+            and country_id = $3 and office_id = 'FINANCE'
+            and capability = 'FINANCE_TREASURY'`,
+        [WORLD, SUBJECT_BRAVO, COUNTRY_BRAVO],
+      );
+      const inactiveFinance = await post(
+        '/local/v1/narrow-transfer-command',
+        commandRequest(),
+        alphaToken,
+      );
+      expect(inactiveFinance.status).toBe(403);
       expect(durableReceiptFixtureCalls).toBe(1);
 
       const invalidSignature = `${alphaToken.slice(0, -1)}${
