@@ -24,4 +24,5 @@ export * from './integration/local-trusted-postgres-binding.js';
 export * from './integration/postgres-read-adapter.js';
 export * from './integration/postgres-final-receipt-reader.js';
 export * from './integration/postgres-buyer-finance-approval-reader.js';
+export * from './integration/season1-lobby-supabase-reader.js';
 export * from './integration/transport.js';
