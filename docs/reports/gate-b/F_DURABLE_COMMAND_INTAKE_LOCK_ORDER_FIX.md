@@ -85,3 +85,29 @@ Focused typecheck and lint pass. Native fixed-candidate result and exact SHA
 will be added after the single focused rerun. No full repository rerun or
 actual-user feedback is needed for this correction. Independent review and
 all previously recorded HTTP/deployment/production gaps remain separate.
+
+## Independent closure — 2026-09-27
+
+B approved exact fixed candidate `9009528bbd48af77de80547f647dffbb14d05909`:
+`F-INTAKE-LOCK-ORDER-001=CLOSED`, P0=0, MAJOR=0. Review task:
+`01a086cd-8c3b-7182-b14f-4d3b77f3b67d`. The original `3223f3a` candidate
+remains historically CHANGES_REQUIRED; its finding was not waived.
+
+The unchanged-runtime negative control `3039353` had 26 PASS / 3 FAIL with
+native SQLSTATE `40P01` in
+[run 36303083307](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36303083307).
+The exact fixed SHA passed PostgreSQL 16.15 with **31/31, no skips** in
+[run 36303327228](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36303327228).
+B independently confirmed the three actual Worker interleavings, two first-row
+registration races, preserved assertions and correct lock order. The original
+26 regressions remain intact. Existing Worker, Core and database files were
+not modified by the fix.
+
+Control Tower's conflict-free integration commit is
+`d1017e6586b8ef1bd203f41ca163c27ba0518e71`, based on main
+`6f3483a5c9fc4f36540920bc57a611bbd6a404b2`, retaining original source ancestry.
+On that composition, Worker build, focused local intake (25 PASS, six explicitly
+native-only SKIP) and `git diff --check` passed. Native coverage is the separate
+31/31 fixed-candidate CI above, not the local skipped cases.
+This closure permits integration of the staged transaction module, not a claim
+that the synchronous HTTP fixture has been replaced or Gate B has passed.

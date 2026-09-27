@@ -26,9 +26,12 @@ Progress update: D's harness/session-liveness fix, A's immutable approval
 reference and E's native approval reader are independently approved and merged.
 The reviewed E candidate is `6a73e05c2f5c7006c87e6ebcc87233cab1f731c1`;
 integration is `16ed0c59c5cfedaac396917c8da97058bb160215`. F's first candidate
-`3223f3a45b12948aa400034bdc5df9d559a3440b` is **not merged**:
-`F-INTAKE-LOCK-ORDER-001` requires aligning intake/Worker locks and native
-interleaving regressions. This blocks only that candidate and its consumers.
+`3223f3a45b12948aa400034bdc5df9d559a3440b` was rejected for
+`F-INTAKE-LOCK-ORDER-001`. Fixed candidate
+`9009528bbd48af77de80547f647dffbb14d05909` is independently approved with that
+finding CLOSED and native PostgreSQL 31/31 PASS, integrated at
+`d1017e6586b8ef1bd203f41ca163c27ba0518e71`. The staged module is now available;
+actual HTTP registration/approval/enqueue/receipt composition remains next.
 
 1. Completed: replace the API Finance approval fixture in the native bridge
    composition with a server-owned reader of A's approved contract. This is
