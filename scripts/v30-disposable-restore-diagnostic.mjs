@@ -1,12 +1,18 @@
 import { execFile } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
-import { mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
+import { lstat, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
 import { Client } from 'pg';
+
+import {
+  WORLD_V2_MIGRATION_ROOT,
+  readMigrationGitProvenance,
+  validateMigrationManifest,
+} from './migration-policy.mjs';
 
 const exec = promisify(execFile);
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -84,30 +90,63 @@ async function createDatabase(adminUrl, database) {
   );
 }
 
-async function applyCheckedInMigrations(url) {
-  const directory = path.join(root, 'database/migrations/artifacts');
-  const files = (await readdir(directory))
-    .filter((file) => /^\d{4}_world_v2_[a-z0-9_]+\.sql$/.test(file))
-    .sort();
-  if (
-    files.length !== 16 ||
-    files[0]?.slice(0, 4) !== '0001' ||
-    files.at(-1)?.slice(0, 4) !== '0016'
-  ) {
-    invalid('expected checked-in migration set 0001-0016 is not present');
+/** Validate before any database I/O; copy bytes so later file edits cannot apply. */
+export function prepareV30RestoreMigrations(manifest, artifacts, provenance) {
+  const result = validateMigrationManifest(manifest, artifacts, provenance);
+  if (result.status !== 'PASS') {
+    invalid(
+      `migration manifest validation failed: ${result.violations.join(', ')}`,
+    );
   }
-  const migrationHashes = [];
+  return Object.freeze(
+    manifest.migrations.map((migration) =>
+      Object.freeze({
+        file: path.posix.basename(migration.path),
+        sha256: migration.sha256,
+        sql: artifacts.get(migration.path).toString('utf8'),
+      }),
+    ),
+  );
+}
+
+export async function loadV30RestoreMigrations() {
+  const manifest = JSON.parse(
+    await readFile(
+      path.join(root, 'database/migrations/manifest.json'),
+      'utf8',
+    ),
+  );
+  if (!Array.isArray(manifest?.migrations))
+    invalid('migration list is missing');
+  const artifacts = new Map();
+  for (const migration of manifest.migrations) {
+    const artifactPath = migration?.path;
+    if (
+      typeof artifactPath !== 'string' ||
+      path.posix.dirname(artifactPath) !== WORLD_V2_MIGRATION_ROOT ||
+      path.posix.normalize(artifactPath) !== artifactPath ||
+      !artifactPath.endsWith('.sql')
+    ) {
+      invalid('migration path is outside the canonical artifact directory');
+    }
+    const absolutePath = path.join(root, artifactPath);
+    if (!(await lstat(absolutePath)).isFile())
+      invalid('migration is not a regular file');
+    artifacts.set(artifactPath, await readFile(absolutePath));
+  }
+  const provenance = await readMigrationGitProvenance(
+    root,
+    manifest.migrations,
+  );
+  return prepareV30RestoreMigrations(manifest, artifacts, provenance);
+}
+
+async function applyCheckedInMigrations(url, migrations) {
   await client(url, async (connection) => {
-    for (const file of files) {
-      const sql = await readFile(path.join(directory, file), 'utf8');
-      await connection.query(sql);
-      migrationHashes.push({
-        file,
-        sha256: createHash('sha256').update(sql).digest('hex'),
-      });
+    for (const migration of migrations) {
+      await connection.query(migration.sql);
     }
   });
-  return migrationHashes;
 }
 
 async function insertWorldAndCommand(url, suffix) {
@@ -178,6 +217,7 @@ export async function runV30DisposableRestore(environment = process.env) {
   const { stdout } = await exec('git', ['rev-parse', 'HEAD'], { cwd: root });
   if (stdout.trim() !== target.codeSha)
     invalid('checkout does not match GitHub SHA');
+  const preparedMigrations = await loadV30RestoreMigrations();
   const suffix = randomBytes(4).toString('hex');
   const sourceName = `econmind_v30_source_${suffix}`;
   const restoredName = `econmind_v30_restored_${suffix}`;
@@ -189,7 +229,11 @@ export async function runV30DisposableRestore(environment = process.env) {
   const backupPath = path.join(tempDirectory, 'world-v2.dump');
   await createDatabase(target.adminUrl, sourceName);
   await createDatabase(target.adminUrl, restoredName);
-  const migrations = await applyCheckedInMigrations(sourceUrl);
+  await applyCheckedInMigrations(sourceUrl, preparedMigrations);
+  const migrations = preparedMigrations.map(({ file, sha256 }) => ({
+    file,
+    sha256,
+  }));
   await insertWorldAndCommand(sourceUrl, 'BEFORE_BACKUP');
   const recoveryPointAt = new Date().toISOString();
   const expected = await durableSnapshot(sourceUrl);
