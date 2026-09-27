@@ -80,3 +80,25 @@ without duplicate writes. No fake FINAL; no Event/Posting/receipt in this slice.
 Also scoped lint/typecheck/build, legacy bridge regressions, boundary scanner
 and manifest checks. Freeze source SHA, push branch and provide CI run to B;
 only Control Tower merges after independent review. Actual UX deferred.
+
+## Independent approval and integration — 2026-09-27
+
+B approved base `809d1db528a09dbca681e5dc2d6fb7afa260a38d` to candidate
+`19dbc3ac5c2909da3f3590549bb32b5eb01847a5`, P0=0, MAJOR=0, covering all
+12 changed files. Reviewer task: `01a086cd-8c3b-7182-b14f-4d3b77f3b67d`.
+Control Tower integrated without conflict at
+`34c9b7ff4c93a7dcc3d475d4bf4451f2702de545`.
+On that composition, Control Tower ran pinned `pnpm pretest` (Core → Worker
+→ API), the new and legacy HTTP tests (19/19), and `git diff --check`, all PASS.
+
+Exact-candidate PostgreSQL 16.15
+[run 36304466552](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36304466552),
+job `108578228956`, passed new HTTP 9 + legacy HTTP 10 = 19/19, no skips.
+Fresh-checkout Core → Worker → API build, focused TypeScript, migration
+provenance and environment checks passed. B independently ran local 19/19 and
+architecture 34/34 plus boundary/authority scanners.
+
+The native HTTP suite uses a guarded PostgreSQL Pool and a **test SQL adapter**,
+not the production `PostgresSqlDatabase` adapter. This proves the scoped HTTP
+registration/signature/reference/enqueue/read path to QUEUED, not a production
+composition, provider JWT rollout, Reserve execution, settlement or Gate B.

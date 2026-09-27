@@ -5,7 +5,7 @@ feedback. This is an execution order, not a claim that V00–V32 or Gate B is
 complete. Preserve existing UI/maps/engines and implement missing connections.
 No production Supabase mutation or original EconMind website change is allowed.
 
-## Active independent slices
+## Round delivery ownership
 
 | Owner         | Concrete code delivery                                               | Boundary                                                                                                                                                   |
 | ------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -30,8 +30,16 @@ integration is `16ed0c59c5cfedaac396917c8da97058bb160215`. F's first candidate
 `F-INTAKE-LOCK-ORDER-001`. Fixed candidate
 `9009528bbd48af77de80547f647dffbb14d05909` is independently approved with that
 finding CLOSED and native PostgreSQL 31/31 PASS, integrated at
-`d1017e6586b8ef1bd203f41ca163c27ba0518e71`. The staged module is now available;
-actual HTTP registration/approval/enqueue/receipt composition remains next.
+`d1017e6586b8ef1bd203f41ca163c27ba0518e71`. The staged module is now available
+to the HTTP composition described below.
+
+A's staged HTTP candidate `19dbc3ac5c2909da3f3590549bb32b5eb01847a5` is now
+independently approved and integrated at
+`34c9b7ff4c93a7dcc3d475d4bf4451f2702de545`. Native PostgreSQL + real HTTP
+19/19 passed, using a test SQL adapter. Empty Command/approval tables progress
+through registration, three signatures, reference binding and enqueue to
+QUEUED/read; actual Worker economic execution and production composition are
+not provided by this slice.
 
 Reserve follow-on diagnostic `f46d06f134c227e8b46426337a1a8ea907e8189e`
 records a separate missing server-side authority reconstruction contract.

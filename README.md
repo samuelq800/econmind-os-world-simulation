@@ -5,7 +5,27 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current state (2026-09-24)
+## Latest code integration (2026-09-27)
+
+Independently reviewed and integrated: browser session-liveness fix, immutable
+Buyer Finance approval references, native approval reader, durable staged
+command intake with the Worker lock-order fix, and local staged HTTP
+registration/signature/reference/enqueue/read. The staged HTTP candidate
+`19dbc3a` passed native PostgreSQL plus HTTP 19/19; its test composition uses a
+test SQL adapter and reaches QUEUED, not economic execution or FINAL.
+
+The current functional gap is a reviewed server-side bridge from durable
+approval/Command authority to branded Core contexts, followed by real Reserve
+candidate/queue execution. Existing UI/maps, engines and opening/lineage
+modules are reusable, but default fixture UI, full World initialization/NPC,
+forecast-model wiring and deployment remain separate work. No original-site
+or production database change, product release or Gate B approval is implied.
+See [the live code-completion record](docs/exec-plans/CODE_COMPLETION_2026_09_27.md).
+
+## Earlier capability baseline (2026-09-24)
+
+The following dated baseline is retained for context; later slice evidence
+above supersedes its older local-integration and test-coverage statements.
 
 The repository has more than a foundation scaffold. `packages/core` contains
 deterministic economic, command, ledger, replay, and preparation modules;
