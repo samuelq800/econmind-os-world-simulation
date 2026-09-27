@@ -33,6 +33,16 @@ finding CLOSED and native PostgreSQL 31/31 PASS, integrated at
 `d1017e6586b8ef1bd203f41ca163c27ba0518e71`. The staged module is now available;
 actual HTTP registration/approval/enqueue/receipt composition remains next.
 
+Reserve follow-on diagnostic `f46d06f134c227e8b46426337a1a8ea907e8189e`
+records a separate missing server-side authority reconstruction contract.
+Durable opening/lineage sources and Core reservation calculation exist, but
+durable approval signatures do not yet provide the branded Core approval
+contexts, explicit proposal-version mapping or restarted discretionary-command
+authority. No Reserve factory/runner was implemented in that diagnostic.
+See `docs/reports/gate-b/F_DURABLE_RESERVATION_INTERFACE_DIAGNOSTIC.md`.
+F stopped that round as requested. A's HTTP registration/signing/queue/read
+work may proceed, but QUEUED is not evidence of Reserve execution or FINAL.
+
 1. Completed: replace the API Finance approval fixture in the native bridge
    composition with a server-owned reader of A's approved contract. This is
    not removal of the remaining receipt-port fixture or production wiring.
