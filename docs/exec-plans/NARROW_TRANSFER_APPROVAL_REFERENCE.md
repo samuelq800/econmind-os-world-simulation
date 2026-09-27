@@ -79,3 +79,29 @@ databases behind the existing local/CI environment guard. The tests close
 connections and delete only databases/roles they created. No local server or
 production connection is needed. F separately owns intake/receipt lifecycle
 separation; actual usage/UX testing remains outside this code-only slice.
+
+## Scoped integration acceptance — 2026-09-27
+
+B independently approved exact candidate
+`0a61951e7d6b94f6f68b54d4cad46d0a460c13bc` against base
+`2f83974a4aa2bb01a6bae63bf73beaaa2a22402e`: P0=0, MAJOR=0.
+Reviewer task: `01a086cd-8c3b-7182-b14f-4d3b77f3b67d`.
+B verified all six files, immutable migration source/hash, current-authority
+checks, exact reference/signature binding, retries and conflicts. The reference
+is linkage, not a standing credential or replacement for commit-time checks.
+
+Exact-candidate native PostgreSQL 16 evidence:
+[run 36301986278](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36301986278),
+job `108571196630`, SUCCESS; 13 store tests including 11 reference-contract
+tests. B also independently reported PGlite store/schema 14/14 and architecture
+34/34 plus both scanners PASS. These are separate evidence types.
+
+Control Tower integrated without conflict at
+`b953d29fb0bae08a147e9720e7e40fb544b1a3ae` on prior main
+`597566d61df8d3142615f58075757911aa375f37`. Composition checks:
+`pnpm migration:validate` PASS (17 entries), targeted store/schema PGlite tests
+14/14 PASS, `git diff --check` PASS. No duplicate full-suite run.
+
+This unblocks E's server-only reader against the reviewed contract. Initial
+registration, signing API, F's intake/queue integration, actual usage,
+production migration publication and Gate B remain separate and incomplete.
