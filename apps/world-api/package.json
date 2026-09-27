@@ -9,6 +9,10 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --pretty false"
   },
+  "dependencies": {
+    "@econmind/core": "workspace:*",
+    "@econmind/world-worker": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "6.0.3"
   }

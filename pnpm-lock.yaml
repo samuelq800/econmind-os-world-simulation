@@ -165,6 +165,13 @@ importers:
         version: 5.0.0(@types/node@24.13.3)(vite@8.2.2(@types/node@24.13.3))
 
   apps/world-api:
+    dependencies:
+      '@econmind/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@econmind/world-worker':
+        specifier: workspace:*
+        version: link:../world-worker
     devDependencies:
       typescript:
         specifier: 6.0.3
