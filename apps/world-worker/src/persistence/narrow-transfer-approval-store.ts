@@ -24,6 +24,34 @@ export interface NarrowTransferApprovalSigner {
   readonly signedAtReal: string;
 }
 
+export interface NarrowTransferApprovalReference {
+  readonly worldId: string;
+  readonly approvalRef: string;
+  readonly proposalRef: string;
+  readonly buyerCountryId: string;
+  readonly commandId: string;
+  readonly commandFingerprint: string;
+  readonly officeId: 'FINANCE';
+  readonly financeActorId: string;
+  readonly financeAuthSubject: string;
+  readonly financeAuthorizationVersion: string;
+  readonly financeSignedAtReal: string;
+  readonly boundAtReal: string;
+}
+
+interface ApprovalReferenceRow {
+  readonly approval_ref: string;
+  readonly proposal_id: string;
+  readonly command_id: string;
+  readonly command_fingerprint: string;
+  readonly buyer_country_id: string;
+  readonly finance_actor_id: string;
+  readonly finance_auth_subject: string;
+  readonly finance_authorization_version: string;
+  readonly finance_signed_at_real: string;
+  readonly bound_at_real: string;
+}
+
 export interface AtomicNarrowTransferApprovalGuard {
   assertCurrent(
     transaction: SqlExecutor,
@@ -335,6 +363,95 @@ export class NarrowTransferApprovalStore implements AtomicNarrowTransferApproval
   ) {
     this.#database = input.database;
     this.#sha256Hex = input.sha256Hex;
+  }
+
+  /**
+   * Bind, never manufacture, an already durable Finance signature. Trusted
+   * server callers must first persist the Command and obtain all approvals.
+   * This is not initial Command intake or a substitute for assertCurrent at
+   * commit. Even an exact retry rechecks current authority and expiry.
+   */
+  async bindBuyerFinanceApprovalReference(
+    input: Readonly<{
+      command: CanonicalCommand;
+      approvalRef: string;
+      observedAtReal: string;
+    }>,
+  ): Promise<NarrowTransferApprovalReference> {
+    const command = validateCanonicalCommand(input.command, this.#sha256Hex);
+    const approvalRef = proposalId(input.approvalRef);
+    const observedAtReal = canonicalTimestamp(
+      input.observedAtReal,
+      'Reference binding observation time',
+    );
+    const buyer = expectedProposals(command).buyer;
+    return this.#database.transaction(async (transaction) => {
+      await this.assertCurrent(transaction, { command, observedAtReal });
+      // Read timestamps as UTC text so native pg and PGlite return the same
+      // immutable representation. Never derive signer identity from the caller.
+      await transaction.query(
+        `insert into world_v2.narrow_transfer_approval_reference
+           (world_id, approval_ref, proposal_id, buyer_country_id, command_id,
+            command_fingerprint, finance_actor_id, finance_auth_subject,
+            finance_authorization_version, finance_signed_at_real, bound_at_real)
+         select s.world_id, $3, s.proposal_id, s.country_id, $4, $5,
+                s.actor_id, s.auth_subject, s.authorization_version,
+                s.signed_at_real, $6::timestamptz
+           from world_v2.narrow_transfer_approval_signature s
+          where s.world_id = $1 and s.proposal_id = $2 and s.office_id = 'FINANCE'
+         on conflict do nothing`,
+        [
+          command.worldId,
+          buyer.proposalId,
+          approvalRef,
+          command.commandId,
+          command.fingerprint,
+          observedAtReal,
+        ],
+      );
+      const result = await transaction.query<ApprovalReferenceRow>(
+        `select approval_ref, proposal_id, buyer_country_id, command_id,
+                command_fingerprint, finance_actor_id,
+                finance_auth_subject::text as finance_auth_subject,
+                finance_authorization_version,
+                to_char(finance_signed_at_real at time zone 'UTC',
+                        'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as finance_signed_at_real,
+                to_char(bound_at_real at time zone 'UTC',
+                        'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"') as bound_at_real
+           from world_v2.narrow_transfer_approval_reference
+          where world_id = $1 and (approval_ref = $2 or proposal_id = $3)
+          for update`,
+        [command.worldId, approvalRef, buyer.proposalId],
+      );
+      const row = result.rows[0];
+      if (
+        result.rows.length !== 1 ||
+        row === undefined ||
+        row.approval_ref !== approvalRef ||
+        row.proposal_id !== buyer.proposalId ||
+        row.buyer_country_id !== buyer.countryId ||
+        row.command_id !== command.commandId ||
+        row.command_fingerprint !== command.fingerprint
+      ) {
+        conflict(
+          'Approval reference or buyer proposal already has another immutable binding',
+        );
+      }
+      return Object.freeze({
+        worldId: command.worldId,
+        approvalRef: row.approval_ref,
+        proposalRef: row.proposal_id,
+        buyerCountryId: row.buyer_country_id,
+        commandId: row.command_id,
+        commandFingerprint: row.command_fingerprint,
+        officeId: 'FINANCE',
+        financeActorId: row.finance_actor_id,
+        financeAuthSubject: row.finance_auth_subject,
+        financeAuthorizationVersion: row.finance_authorization_version,
+        financeSignedAtReal: row.finance_signed_at_real,
+        boundAtReal: row.bound_at_real,
+      });
+    });
   }
 
   async openSellerOffer(
