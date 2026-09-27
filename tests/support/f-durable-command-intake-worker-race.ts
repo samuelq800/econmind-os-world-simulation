@@ -45,7 +45,9 @@ function barrier() {
   return { ready, release };
 }
 
-async function bounded<T>(operation: Promise<T>): Promise<T> {
+export async function withinIntakeRaceDeadline<T>(
+  operation: Promise<T>,
+): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     return await Promise.race([
@@ -210,7 +212,7 @@ export async function assertIntakeWorkerLockRace(input: {
                 if (role === 'WORKER' && submissionLock && !pausedWorker) {
                   pausedWorker = true;
                   workerLocked.release();
-                  await bounded(resumeWorker.ready);
+                  await withinIntakeRaceDeadline(resumeWorker.ready);
                 }
                 return result;
               } catch (error) {
@@ -257,15 +259,17 @@ export async function assertIntakeWorkerLockRace(input: {
   );
   let inspected: ReturnType<PostgresNarrowTransferIntake['read']> | undefined;
   try {
-    await bounded(workerLocked.ready);
+    await withinIntakeRaceDeadline(workerLocked.ready);
     const adapter = new PostgresNarrowTransferIntake({
       database: observedDatabase('INTAKE'),
       sha256Hex,
     });
     inspected = adapter[input.method](intakeInput);
-    await bounded(intakeSubmissionRequested.ready);
+    await withinIntakeRaceDeadline(intakeSubmissionRequested.ready);
     resumeWorker.release();
-    const [commit, state] = await bounded(Promise.all([committed, inspected]));
+    const [commit, state] = await withinIntakeRaceDeadline(
+      Promise.all([committed, inspected]),
+    );
     expect(
       errors,
       'no deadlock, lock timeout or other SQL error may be swallowed',

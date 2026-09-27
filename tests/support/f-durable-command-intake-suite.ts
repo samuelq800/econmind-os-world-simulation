@@ -18,7 +18,10 @@ import {
 import { NarrowTransferApprovalStore } from '../../apps/world-worker/src/persistence/narrow-transfer-approval-store.js';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
 import { createV10TwoCountryTestFixture } from './v10-two-country-fixture.js';
-import { assertIntakeWorkerLockRace } from './f-durable-command-intake-worker-race.js';
+import {
+  assertIntakeWorkerLockRace,
+  withinIntakeRaceDeadline,
+} from './f-durable-command-intake-worker-race.js';
 
 export interface IntakeTestDatabase extends SqlDatabase {
   readonly native: boolean;
@@ -649,6 +652,78 @@ export function defineDurableIntakeSuite(
           method,
           source: fixture.inventoryAccounts.sellerAvailable,
         });
+      },
+    );
+
+    it.skipIf(!native).each([false, true])(
+      'rechecks an initially missing registration without reversing locks (conflict=%s, native PG only)',
+      async (conflicting) => {
+        const missing = Promise.withResolvers<void>();
+        const resume = Promise.withResolvers<void>();
+        const lookupStatements: string[] = [];
+        const lateDatabase: SqlDatabase = {
+          query: (sql, parameters) => database.query(sql, parameters),
+          transaction: (operation) =>
+            database.transaction((transaction) =>
+              operation({
+                async query<Row extends object>(
+                  sql: string,
+                  parameters?: readonly unknown[],
+                ) {
+                  const result = await transaction.query<Row>(sql, parameters);
+                  if (sql.includes('from world_v2.command_submission')) {
+                    lookupStatements.push(sql);
+                    if (lookupStatements.length === 1) {
+                      expect(result.rows).toHaveLength(0);
+                      missing.resolve();
+                      await withinIntakeRaceDeadline(resume.promise);
+                    }
+                  }
+                  return result;
+                },
+              }),
+            ),
+        };
+        const late = new PostgresNarrowTransferIntake({
+          database: lateDatabase,
+          sha256Hex,
+        })
+          .submitPending(input)
+          .then(
+            (state) => ({ state, error: null }),
+            (error: unknown) => ({ state: null, error }),
+          );
+        try {
+          await withinIntakeRaceDeadline(missing.promise);
+          const registered = await intake.submitPending({
+            ...input,
+            command: conflicting
+              ? altered({ commandId: 'OTHER_REGISTRANT' })
+              : input.command,
+          });
+          resume.resolve();
+          const result = await withinIntakeRaceDeadline(late);
+          if (conflicting) {
+            expect(result.error).toMatchObject({
+              code: 'IDEMPOTENCY_CONFLICT',
+            });
+          } else {
+            expect(result.error).toBeNull();
+            expect(result.state).toEqual(registered);
+          }
+          expect(lookupStatements).toHaveLength(2);
+          expect(lookupStatements[0]).toMatch(/for update/iu);
+          expect(lookupStatements[1]).not.toMatch(/for update/iu);
+          expect(await counts()).toMatchObject({
+            commands: '1',
+            queues: '0',
+            events: '0',
+            receipts: '0',
+          });
+        } finally {
+          resume.resolve();
+          await late;
+        }
       },
     );
   });

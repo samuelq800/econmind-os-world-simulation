@@ -8,7 +8,7 @@ on:
     paths:
       - apps/world-worker/src/intake/**
       - tests/integration/f-durable-command-intake*.test.ts
-      - tests/support/f-durable-command-intake-suite.ts
+      - tests/support/f-durable-command-intake*.ts
       - tests/support/tsconfig.f-durable-intake.json
       - .github/workflows/f-durable-command-intake.yml
 

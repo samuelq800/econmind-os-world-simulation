@@ -181,14 +181,25 @@ export class PostgresNarrowTransferIntake {
     let semanticFailure: DomainError | undefined;
     const inspect = async (transaction: SqlExecutor, write: boolean) => {
       try {
+        // Existing Commands must be locked before the head, like Worker commit
+        // (submission -> lease -> head). Intake does not need a writer lease.
+        let stored = await this.#load(transaction, command, true);
         const head = await transaction.query<{ world_version: string }>(
           `select world_version::text as world_version from world_v2.world_head
             where world_id = $1 for update`,
           [command.worldId],
         );
         if (head.rows.length !== 1) invalid('World head does not exist');
-        // Match lock order used by the Worker and existing approval store.
-        const stored = await this.#load(transaction, command);
+        // A missing row cannot be locked. First registration is serialized by
+        // the head and SQL unique constraints; a concurrent registrant may
+        // have committed while we waited for that head. Recheck immutably,
+        // WITHOUT a submission lock under the head. SUBMIT/read-only recovery
+        // may return that stored state but must never enqueue on this path.
+        // A first ENQUEUE lookup that found no intent remains NOT_FOUND; a
+        // subsequent explicit call can lock the now-existing intent first.
+        if (stored === null && (operation === 'SUBMIT' || !write)) {
+          stored = await this.#load(transaction, command, false);
+        }
         await this.#authorize(transaction, command, auth);
         if (stored !== null) {
           const state = await this.#state(transaction, stored);
@@ -306,6 +317,7 @@ export class PostgresNarrowTransferIntake {
   async #load(
     transaction: SqlExecutor,
     command: CanonicalCommand,
+    lockSubmission: boolean,
   ): Promise<CanonicalCommand | null> {
     const result = await transaction.query<SubmissionRow>(
       `select world_id as "worldId", command_id as "commandId", idempotency_key as "idempotencyKey",
@@ -317,7 +329,8 @@ export class PostgresNarrowTransferIntake {
               correlation_id as "correlationId", submitted_at_real as "submittedAtReal"
          from world_v2.command_submission
         where world_id = $1 and (command_id = $2 or idempotency_key = $3)
-        for update`,
+        order by command_id
+        ${lockSubmission ? 'for update' : ''}`,
       [command.worldId, command.commandId, command.idempotencyKey],
     );
     if (result.rows.length === 0) return null;
