@@ -1,0 +1,48 @@
+name: E World V2 release handoff rehearsal
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/e-world-v2-release-handoff
+
+permissions:
+  contents: read
+
+jobs:
+  native-pg17-release-handoff:
+    name: Disposable PostgreSQL 17 release handoff
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - name: Rehearse the release handoff on disposable PostgreSQL 17
+        run: pnpm test:world-v2-release-handoff:postgres
