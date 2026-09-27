@@ -4,11 +4,18 @@ import {
   type Server,
   type ServerResponse,
 } from 'node:http';
+import {
+  createSeason1MyTeamRoute,
+  readSeason1MyTeamRouteConfiguration,
+  SEASON1_MY_TEAM_PATH,
+} from './integration/season1-my-team-route.js';
+import type { Season1LobbySupabaseConfiguration } from './integration/season1-lobby-supabase-reader.js';
 
 const supportedEnvironments = new Set(['local', 'ci', 'staging', 'production']);
 const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
 
 export interface ApiRuntimeConfig {
+  readonly season1MyTeam?: Season1LobbySupabaseConfiguration;
   readonly environment: string;
   readonly host: string;
   readonly port: number;
@@ -49,7 +56,9 @@ export function readApiRuntimeConfig(
   if (!supportedEnvironments.has(environmentName)) {
     throw new Error(`Unsupported ECONMIND_ENV: ${environmentName}`);
   }
+  const season1MyTeam = readSeason1MyTeamRouteConfiguration(environment);
   return {
+    ...(season1MyTeam === undefined ? {} : { season1MyTeam }),
     environment: environmentName,
     host: parseHost(environment.WORLD_API_HOST),
     port: parsePort(environment.WORLD_API_PORT, 4101),
@@ -72,10 +81,31 @@ function sendJson(
   response.end(request.method === 'HEAD' ? undefined : payload);
 }
 
-function createApiServer() {
+function createApiServer(
+  config: ApiRuntimeConfig,
+  requestFetch?: typeof fetch,
+) {
   let ready = false;
+  const season1MyTeam =
+    config.season1MyTeam === undefined
+      ? undefined
+      : createSeason1MyTeamRoute({
+          configuration: config.season1MyTeam,
+          ...(requestFetch === undefined ? {} : { fetch: requestFetch }),
+        });
   const server = createServer((request, response) => {
     const path = request.url?.split('?', 1)[0];
+    if (path === SEASON1_MY_TEAM_PATH && season1MyTeam !== undefined) {
+      void season1MyTeam(request, response).catch(() => {
+        if (!response.headersSent && !response.destroyed) {
+          sendJson(request, response, 503, {
+            ok: false,
+            error: { code: 'UPSTREAM_UNAVAILABLE' },
+          });
+        }
+      });
+      return;
+    }
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       response.writeHead(405, { allow: 'GET, HEAD' });
       response.end();
@@ -138,8 +168,9 @@ function closeServer(server: Server, graceMs: number): Promise<void> {
 
 export async function startApiRuntime(
   config: ApiRuntimeConfig = readApiRuntimeConfig(),
+  dependencies: { readonly season1Fetch?: typeof fetch } = {},
 ): Promise<RunningApiRuntime> {
-  const lifecycle = createApiServer();
+  const lifecycle = createApiServer(config, dependencies.season1Fetch);
   await new Promise<void>((resolve, reject) => {
     const startupError = (error: Error) => {
       lifecycle.server.off('listening', resolve);
