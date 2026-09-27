@@ -8,7 +8,7 @@ import {
 } from './migration-policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const HANDOFF_CAPABILITY = Symbol('world-v2-release-handoff');
+const verifiedHandoffs = new WeakSet();
 
 export const WORLD_V2_RELEASE_HANDOFF_VERSION =
   'WORLD_V2_MAIN_SITE_RELEASE_HANDOFF-1';
@@ -71,14 +71,15 @@ export async function loadWorldV2ReleaseHandoff(repositoryRoot = root) {
     }),
   );
   if (migrations.length !== 17) failure('WORLD_V2_HANDOFF_MIGRATION_COUNT');
-  return Object.freeze({
-    [HANDOFF_CAPABILITY]: true,
+  const handoff = Object.freeze({
     version: WORLD_V2_RELEASE_HANDOFF_VERSION,
     namespace: manifest.namespace,
     productionPublisher: manifest.production_publisher,
     expectedTableCount: WORLD_V2_EXPECTED_TABLE_COUNT,
     migrations: Object.freeze(migrations),
   });
+  verifiedHandoffs.add(handoff);
+  return handoff;
 }
 
 function rows(result) {
@@ -148,7 +149,7 @@ async function verifyReleaseLedger(client, handoff) {
  */
 export async function applyWorldV2ReleaseHandoff(client, handoff) {
   if (
-    handoff?.[HANDOFF_CAPABILITY] !== true ||
+    !verifiedHandoffs.has(handoff) ||
     handoff?.version !== WORLD_V2_RELEASE_HANDOFF_VERSION ||
     handoff?.namespace !== 'world_v2' ||
     handoff?.productionPublisher !== WORLD_V2_RELEASE_OWNER ||

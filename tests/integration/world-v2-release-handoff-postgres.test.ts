@@ -147,6 +147,32 @@ postgresDescribe(
       ).resolves.toMatchObject({ rows: [{ namespace: null }] });
     });
 
+    it('refuses a spread copy whose SQL was replaced before it can issue DDL', async () => {
+      const valid = currentHandoff();
+      const forged = {
+        ...valid,
+        migrations: valid.migrations.map((migration, index) =>
+          index === 0 ? { ...migration, sql: 'select 1' } : migration,
+        ),
+      };
+      let queryCalls = 0;
+      const recordingClient = {
+        query: async () => {
+          queryCalls += 1;
+          throw new Error('FORGED_HANDOFF_REACHED_DATABASE');
+        },
+      };
+      await expect(
+        applyWorldV2ReleaseHandoff(recordingClient, forged),
+      ).rejects.toThrow('WORLD_V2_HANDOFF_INVALID');
+      expect(queryCalls).toBe(0);
+      await expect(
+        currentPool().query(
+          "select to_regnamespace('world_v2')::text as namespace",
+        ),
+      ).resolves.toMatchObject({ rows: [{ namespace: null }] });
+    });
+
     it('rolls back every prior artifact when an execution failure occurs', async () => {
       const before = await legacySentinelFingerprint();
       const failureSql = currentHandoff().migrations[4]?.sql;

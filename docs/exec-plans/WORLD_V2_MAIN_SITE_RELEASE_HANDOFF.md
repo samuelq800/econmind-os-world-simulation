@@ -49,7 +49,10 @@ Before a remote publication can be considered executable, the main-site owner
 must add and independently review a release runner that:
 
 1. receives the verified capability object from this handoff at an immutable
-   reviewed commit;
+   reviewed commit by calling `loadWorldV2ReleaseHandoff` and
+   `applyWorldV2ReleaseHandoff` in the same module instance. The capability is
+   held in a module-private identity registry and cannot be reconstructed by
+   serializing, spreading, or editing a plan object;
 2. acquires one approved, server-held PostgreSQL connection outside this
    repository and passes it to `applyWorldV2ReleaseHandoff` exactly once;
 3. records commit, manifest validation, transaction outcome, exact ledger, and
