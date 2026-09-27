@@ -97,3 +97,26 @@ same-user API route. Both new candidates require their own narrow review.
 DDL remains NOT_EXECUTED. Signed-in roster verification, deployed API/session
 configuration and authoritative Worker activation are not implied by the
 successful administrative/public-key connection probes.
+
+## Reviewed API route and live rejection checks
+
+The optional same-user route candidate
+`dbeed3303b6d849f8e6db999d6ef8a033ef2656c` received B's code-only approval,
+zero open MAJOR findings, and independent 25/25 focused tests plus 34/34
+architecture tests. It was merged and pushed as
+`1e24ef2` without changing the already reviewed reader. Integrated API build
+passed. The default API remains disconnected until explicitly configured.
+
+Root then started the integrated API on an ephemeral loopback port with the
+real project URL and public key, using a counting wrapper that delegates to
+real network fetch (no injected fixture response):
+
+- no bearer session: HTTP 401 `UNAUTHENTICATED`, zero upstream calls;
+- invalid non-user probe session: HTTP 401 `UNAUTHENTICATED`, one real upstream
+  call to the configured Supabase RPC;
+- both responses: `Cache-Control: private, no-store`;
+- the temporary API server was shut down after the checks.
+
+These prove configuration, route wiring, and rejection-path connectivity only.
+No valid session, personal roster, browser integration, TLS-hosted API
+deployment, or authoritative Worker connection was tested.
