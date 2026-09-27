@@ -81,7 +81,30 @@ production, original website and formal status/progress are untouched.
 
 Local focused intake + existing approval-store regression: **27 PASS, 6 SKIP**;
 the six skips are native-only cases, including the five added race cases.
-Focused typecheck and lint pass. Native fixed-candidate result and exact SHA
-will be added after the single focused rerun. No full repository rerun or
-actual-user feedback is needed for this correction. Independent review and
-all previously recorded HTTP/deployment/production gaps remain separate.
+Focused typecheck, lint, format, Worker build, architecture scanner and
+`git diff --check` pass. No full repository rerun or actual-user feedback was
+performed for this correction. All previously recorded
+HTTP/deployment/production gaps remain separate.
+
+## Fixed candidate and independent closure
+
+Exact fix: **`9009528bbd48af77de80547f647dffbb14d05909`**.
+[Native PG16 fixed run 36303327228](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36303327228)
+completed SUCCESS at that exact head SHA, job `108575011314`, PostgreSQL 16.15:
+**31/31 PASS, no skips** (original 26 + three actual Worker interleavings + two
+first-registration races). Raw output reports one file / 31 tests passed.
+
+Independent reviewer B explicitly returned **APPROVED** for the exact fix,
+**F-INTAKE-LOCK-ORDER-001=CLOSED**, P0 findings 0, MAJOR findings 0, through
+review task `01a086cd-8c3b-7182-b14f-4d3b77f3b67d`. B independently checked both
+negative and positive native runs, immutable ancestry, unchanged original
+regression assertions, and local intake tests (25 PASS, six native-only skips)
+plus focused typecheck. The broader original audit was reused rather than
+repeated. The implementer did not award this approval.
+
+Only this transaction slice and finding closure are approved. No HTTP
+composition, complete economy, production, formal status ledger or Gate B is
+promoted. Main integration is left to the control tower; F does not merge.
+Machine-readable provenance is in
+`F_DURABLE_COMMAND_INTAKE_LOCK_ORDER_EVIDENCE.json`. Original evidence files
+remain historical and unchanged.

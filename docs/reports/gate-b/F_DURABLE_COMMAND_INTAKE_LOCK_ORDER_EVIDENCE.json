@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "f-intake-lock-order-evidence-v1",
+  "finding": "F-INTAKE-LOCK-ORDER-001",
+  "risk": "P0",
+  "originalCandidate": "3223f3a45b12948aa400034bdc5df9d559a3440b",
+  "originalReview": "CHANGES_REQUIRED_MAJOR_1",
+  "negativeControl": {
+    "headSha": "3039353b673b3f56212a3ae0b1f05dc17aa5868b",
+    "runtimeUnchangedFromOriginalCandidate": true,
+    "runId": 36303083307,
+    "url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36303083307",
+    "status": "FAIL_EXPECTED_REGRESSION_REPRODUCED",
+    "originalTestsPassed": 26,
+    "newTestsFailed": 3,
+    "observedSqlStateForEachFailure": "40P01",
+    "entrypoints": ["read", "submitPending", "enqueueApproved"]
+  },
+  "fixedCandidate": "9009528bbd48af77de80547f647dffbb14d05909",
+  "nativeFixedRun": {
+    "headSha": "9009528bbd48af77de80547f647dffbb14d05909",
+    "runId": 36303327228,
+    "url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36303327228",
+    "status": "PASS",
+    "jobId": 108575011314,
+    "postgresVersion": "16.15",
+    "originalTestsPassed": 26,
+    "addedWorkerInterleavingTestsPassed": 3,
+    "addedInitialMissingRegistrationTestsPassed": 2,
+    "totalPassed": 31,
+    "skipped": 0
+  },
+  "independentReview": {
+    "reviewer": "B",
+    "sourceThreadId": "01a086cd-8c3b-7182-b14f-4d3b77f3b67d",
+    "targetSha": "9009528bbd48af77de80547f647dffbb14d05909",
+    "decision": "APPROVED",
+    "findingState": "CLOSED",
+    "p0Findings": 0,
+    "majorFindings": 0,
+    "scope": "STAGED_INTAKE_TRANSACTION_SLICE_AND_LOCK_ORDER_CORRECTION_ONLY"
+  },
+  "local": {
+    "focusedTestsPassed": 27,
+    "nativeOnlyCasesSkipped": 6,
+    "focusedTypecheck": "PASS",
+    "focusedLint": "PASS",
+    "focusedFormat": "PASS",
+    "workerBuild": "PASS",
+    "architectureScanner": "PASS",
+    "diffCheck": "PASS"
+  },
+  "preservedChecks": [
+    "EXPECTED_WORLD_VERSION_UNDER_HEAD_LOCK_FOR_FIRST_WRITE",
+    "SQL_COMMAND_ID_AND_IDEMPOTENCY_UNIQUENESS",
+    "FULL_CANONICAL_FINGERPRINT_AND_IDENTITY_CHECK_ON_NONLOCKING_REREAD",
+    "CURRENT_SCOPE_TEAM_AND_AUTHORIZATION_REVISION",
+    "THREE_CURRENT_APPROVAL_SIGNATURES",
+    "UNKNOWN_AND_EXACT_RETRY_SEMANTICS",
+    "WORKER_EXCLUSIVE_ECONOMIC_WRITES"
+  ],
+  "limits": [
+    "SYNTHETIC_RESERVATION_CANDIDATE_NOT_FULL_ECONOMIC_ACCEPTANCE",
+    "NO_EXISTING_WORKER_OR_SCHEMA_MODIFICATION",
+    "NO_STRESS_OR_ACTUAL_USER_TESTING",
+    "NO_PRODUCTION_ACCESS",
+    "SCOPED_INDEPENDENT_REVIEW_NOT_HTTP_OR_GATE_B_ACCEPTANCE",
+    "NO_SELF_MERGE_OR_GATE_PROMOTION"
+  ]
+}
