@@ -18,6 +18,7 @@ import {
 import { NarrowTransferApprovalStore } from '../../apps/world-worker/src/persistence/narrow-transfer-approval-store.js';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
 import { createV10TwoCountryTestFixture } from './v10-two-country-fixture.js';
+import { assertIntakeWorkerLockRace } from './f-durable-command-intake-worker-race.js';
 
 export interface IntakeTestDatabase extends SqlDatabase {
   readonly native: boolean;
@@ -630,6 +631,24 @@ export function defineDurableIntakeSuite(
           code: 'VERSION_MISMATCH',
         });
         expect((await counts())?.commands).toBe('0');
+      },
+    );
+
+    it
+      .skipIf(!native)
+      .each(['read', 'submitPending', 'enqueueApproved'] as const)(
+      'keeps %s and actual same-Command Worker commit deadlock-free (native PG only)',
+      async (method) => {
+        await intake.submitPending(input);
+        await approve();
+        await intake.enqueueApproved(input);
+        await assertIntakeWorkerLockRace({
+          database,
+          intakeInput: input,
+          sha256Hex,
+          method,
+          source: fixture.inventoryAccounts.sellerAvailable,
+        });
       },
     );
   });
