@@ -14,6 +14,10 @@ import type {
 } from './authenticated-final-receipt-query-handler.js';
 import type { AuthenticatedWorldReadQueryHandler } from './authenticated-read-query-handler.js';
 import type { WorldReadResponseEnvelope } from './contracts.js';
+import type { StagedTransferHandler } from './staged-narrow-transfer-handler.js';
+
+export const LOCAL_WORLD_HTTP_BRIDGE_STAGED_PATH =
+  '/local/v1/staged-narrow-transfer' as const;
 
 export const LOCAL_WORLD_HTTP_BRIDGE_STATUS = 'NOT_AVAILABLE' as const;
 export const LOCAL_WORLD_HTTP_BRIDGE_READ_PATH =
@@ -36,6 +40,7 @@ export interface RunningLocalNonproductionWorldHttpBridge {
 }
 
 export interface LocalNonproductionWorldHttpBridgeInput {
+  readonly stagedHandler?: StagedTransferHandler;
   /** One explicitly approved loopback page origin; omitted means no browser access. */
   readonly allowedBrowserOrigin?: string;
   readonly bindHost?: '127.0.0.1' | 'localhost' | '::1';
@@ -47,6 +52,7 @@ export interface LocalNonproductionWorldHttpBridgeInput {
 
 const LOOPBACK_BIND_HOSTS = new Set(['127.0.0.1', 'localhost', '::1']);
 const BRIDGE_PATHS = new Set<string>([
+  LOCAL_WORLD_HTTP_BRIDGE_STAGED_PATH,
   LOCAL_WORLD_HTTP_BRIDGE_READ_PATH,
   LOCAL_WORLD_HTTP_BRIDGE_COMMAND_PATH,
   LOCAL_WORLD_HTTP_BRIDGE_RECEIPT_PATH,
@@ -297,6 +303,31 @@ export function createLocalNonproductionWorldHttpBridge(
       if (request.method !== 'POST') {
         response.writeHead(405, { allow: 'POST' });
         response.end();
+        return;
+      }
+      if (path === LOCAL_WORLD_HTTP_BRIDGE_STAGED_PATH) {
+        if (input.stagedHandler === undefined) {
+          sendJson(request, response, 503, {
+            availability: 'NOT_AVAILABLE',
+            reason: 'SERVER_DEPENDENCIES_UNBOUND',
+          });
+          return;
+        }
+        let body: unknown;
+        try {
+          body = await readJsonBody(request);
+        } catch {
+          sendJson(request, response, 400, {
+            availability: 'NOT_AVAILABLE',
+            reason: 'REQUEST_BODY_INVALID',
+          });
+          return;
+        }
+        const result = await input.stagedHandler.handle({
+          authorization: request.headers.authorization,
+          request: body,
+        });
+        sendJson(request, response, result.httpStatus, result.body);
         return;
       }
       if (path === LOCAL_WORLD_HTTP_BRIDGE_READ_PATH) {

@@ -3,6 +3,16 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "exports": {
+    "./intake": {
+      "types": "./dist/intake/postgres-narrow-transfer-intake.d.ts",
+      "default": "./dist/intake/postgres-narrow-transfer-intake.js"
+    },
+    "./approval-store": {
+      "types": "./dist/persistence/narrow-transfer-approval-store.d.ts",
+      "default": "./dist/persistence/narrow-transfer-approval-store.js"
+    }
+  },
   "scripts": {
     "dev": "node ../../scripts/run-development-service.mjs worker",
     "start": "node ../../scripts/run-development-service.mjs worker start",

@@ -1,0 +1,52 @@
+name: Staged narrow transfer HTTP
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/staged-narrow-transfer-http
+
+permissions:
+  contents: read
+
+jobs:
+  native-staged-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+      STAGED_HTTP_NATIVE: '1'
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: node scripts/v09-postgres-test-environment.mjs
+      - run: pnpm pretest
+      - run: pnpm exec tsc -p tests/support/tsconfig.staged-http.json
+      - run: node scripts/check-boundaries.mjs
+      - name: Native PostgreSQL through actual staged HTTP
+        run: pnpm exec vitest run tests/integration/staged-narrow-transfer-http.test.ts tests/world-api/local-nonproduction-http-bridge.test.ts
