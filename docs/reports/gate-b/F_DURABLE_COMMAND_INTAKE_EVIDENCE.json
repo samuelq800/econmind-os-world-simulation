@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "f-durable-command-intake-evidence-v1",
+  "state": "IMPLEMENTED_UNVERIFIED",
+  "risk": "P0",
+  "baselineSha": "e8c4337aa6db3922eb13159264485cf5177703f4",
+  "testedImplementationSha": "3223f3a45b12948aa400034bdc5df9d559a3440b",
+  "branch": "codex/f-durable-command-receipt",
+  "nativePostgres": {
+    "status": "PASS",
+    "runId": 36302385602,
+    "jobId": 108572328721,
+    "headSha": "3223f3a45b12948aa400034bdc5df9d559a3440b",
+    "url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36302385602",
+    "versionFromContainerLog": "16.15",
+    "driver": "EXISTING_POSTGRES_SQL_DATABASE",
+    "poolMaximum": 4,
+    "suite": "tests/integration/f-durable-command-intake-postgres.test.ts",
+    "passed": 26,
+    "skipped": 0,
+    "productionTarget": false,
+    "rolesAndRlsAcceptanceClaimed": false
+  },
+  "local": {
+    "toolchain": {
+      "node": "24.20.0",
+      "pnpm": "12.3.4",
+      "frozenLockfile": true
+    },
+    "focusedTests": {
+      "status": "PASS",
+      "passed": 52,
+      "skipped": 1,
+      "skipReason": "NATIVE_ONLY_MULTI_SESSION_TEST_EXPLICITLY_SKIPPED_IN_PGLITE",
+      "files": [
+        "tests/integration/f-durable-command-intake.test.ts",
+        "tests/world-core/v10-narrow-transfer-approval-store.test.ts",
+        "tests/integration/world-api-postgres-final-receipt-reader.test.ts",
+        "tests/world-api/local-nonproduction-http-bridge.test.ts"
+      ]
+    },
+    "boundaryTestsPassed": 34,
+    "coreBuild": "PASS",
+    "workerBuild": "PASS",
+    "focusedTypecheck": "PASS",
+    "focusedLint": "PASS",
+    "focusedFormat": "PASS",
+    "architectureScanners": "PASS",
+    "environmentCheck": "PASS_NO_DATABASE_CONFIGURED_NO_SUPABASE_LINK",
+    "secretsCheck": "PASS",
+    "migrationManifestValidation": "PASS_16_EXISTING_ARTIFACTS_UNCHANGED",
+    "diffCheck": "PASS",
+    "nativePostgres": "NOT_RUN_NO_LOCAL_PG16_SERVICE"
+  },
+  "faultEvidence": [
+    "SUBMISSION_PRECOMMIT_EXCEPTION_ZERO_NEW_DURABLE_ROWS",
+    "ENQUEUE_PRECOMMIT_EXCEPTION_ZERO_NEW_QUEUE_ROWS",
+    "SUBMISSION_COMMIT_ACK_LOST_RECOVERED_WITH_FRESH_READ",
+    "ENQUEUE_COMMIT_ACK_LOST_RECOVERED_WITH_FRESH_READ",
+    "COMMIT_ACK_AND_RECOVERY_READ_UNAVAILABLE_UNKNOWN_THEN_EXACT_RETRY"
+  ],
+  "stateContract": [
+    "PENDING_APPROVAL_OR_ENQUEUE",
+    "QUEUED",
+    "EXECUTING",
+    "FINAL",
+    "NOT_FOUND",
+    "UNKNOWN"
+  ],
+  "failureHistory": [
+    {
+      "finding": "TEST_LEASE_HELPER_USED_EXPIRY_INSTEAD_OF_MILLISECOND_DURATION",
+      "resolution": "FIXED_BEFORE_CANDIDATE_FREEZE"
+    },
+    {
+      "finding": "TWO_UNUSED_TEST_DESTRUCTURING_VARIABLES",
+      "resolution": "FIXED_BEFORE_CANDIDATE_FREEZE"
+    }
+  ],
+  "nonClaims": [
+    "INDEPENDENT_APPROVAL_PENDING",
+    "GATE_B_PENDING",
+    "NO_FORMAL_STATUS_PROGRESS_CHANGE",
+    "NO_A_0017_DEPENDENCY",
+    "NO_HTTP_FINAL_ONLY_PORT_REPLACEMENT",
+    "NO_ACTUAL_USER_OR_BROWSER_E2E",
+    "NO_FULL_ECONOMIC_RESERVATION_DELIVERY_LIFECYCLE",
+    "NO_DEPLOYED_ROLE_RLS_JWT_GATEWAY_ACCEPTANCE",
+    "NO_STAGING_TLS_OR_PRODUCTION_ACCESS",
+    "NO_PROCESS_KILL_NETWORK_KILL_OR_STRESS_CAMPAIGN",
+    "NO_FULL_PNPM_CHECK_RERUN",
+    "NO_SELF_MERGE"
+  ]
+}
