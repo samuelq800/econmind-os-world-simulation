@@ -14,6 +14,7 @@ export const WORLD_V2_RELEASE_HANDOFF_VERSION =
   'WORLD_V2_MAIN_SITE_RELEASE_HANDOFF-1';
 export const WORLD_V2_EXPECTED_TABLE_COUNT = 21;
 export const WORLD_V2_RELEASE_OWNER = 'main-site-release-chain';
+const INITIAL_RELEASE_MIGRATION_COUNT = 17;
 
 export class WorldV2ReleaseHandoffError extends Error {
   constructor(code) {
@@ -63,14 +64,28 @@ export async function loadWorldV2ReleaseHandoff(repositoryRoot = root) {
   if (validation.status !== 'PASS') {
     failure('WORLD_V2_HANDOFF_MANIFEST_INVALID');
   }
-  const migrations = manifest.migrations.map((migration) =>
+  // This handoff is the immutable initial publication, not a rolling latest
+  // release. Later migrations have separate, additive publication contracts.
+  const initialMigrations = manifest.migrations.slice(
+    0,
+    INITIAL_RELEASE_MIGRATION_COUNT,
+  );
+  if (
+    initialMigrations.length !== INITIAL_RELEASE_MIGRATION_COUNT ||
+    initialMigrations.at(-1)?.migration_id !==
+      '0017_world_v2_narrow_transfer_approval_reference'
+  ) {
+    failure('WORLD_V2_HANDOFF_MIGRATION_COUNT');
+  }
+  const migrations = initialMigrations.map((migration) =>
     Object.freeze({
       ...expectedReleaseRow(migration),
       artifactPath: migration.path,
       sql: artifacts.get(migration.path).toString('utf8'),
     }),
   );
-  if (migrations.length !== 17) failure('WORLD_V2_HANDOFF_MIGRATION_COUNT');
+  if (migrations.length !== INITIAL_RELEASE_MIGRATION_COUNT)
+    failure('WORLD_V2_HANDOFF_MIGRATION_COUNT');
   const handoff = Object.freeze({
     version: WORLD_V2_RELEASE_HANDOFF_VERSION,
     namespace: manifest.namespace,
@@ -154,7 +169,7 @@ export async function applyWorldV2ReleaseHandoff(client, handoff) {
     handoff?.namespace !== 'world_v2' ||
     handoff?.productionPublisher !== WORLD_V2_RELEASE_OWNER ||
     !Array.isArray(handoff?.migrations) ||
-    handoff.migrations.length !== 17
+    handoff.migrations.length !== INITIAL_RELEASE_MIGRATION_COUNT
   ) {
     failure('WORLD_V2_HANDOFF_INVALID');
   }

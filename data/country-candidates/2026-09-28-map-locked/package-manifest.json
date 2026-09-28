@@ -1,0 +1,94 @@
+{
+  "status": "ILLUSTRATIVE_PLANNING_ONLY",
+  "authority": "NOT_CORE_OR_PRODUCTION",
+  "sourcePdfSha256": "befe98dbe34531a40019104712c3b185ab14be33b944553a85a53268e8b8cb40",
+  "infrastructureSha256": "0a4d495ec30d286df1a4f0b5babcd59ea2188c743346940b09be298b6a110162",
+  "mapNodeSha256": "0fc6e46be29dd5ab49d98ba50546e0e658fec2b277cbd10a2ab42f48fa3ebde9",
+  "depositSha256": "5685425b2dc0b5926bd5ca37000f570cd16983de2ec22000fd7e9c4cfdf2478f",
+  "sourceJson": {
+    "world-space.json": "63f6843e96dc64a197d979b8093bd22326c5ec4a48c8a9d15ca122a3232c1fd2",
+    "natural-endowment.json": "d51d044bf93c530a41be1424989e021b4ac18a0100e519e1ed940f1a9b2d9b1b",
+    "opening-society.json": "4f8b18a362035dac0e5f0987ba77e59bd54f055cd4c34350200b7e3c27911085",
+    "connections-rights.json": "d852aacb6800dd530751af86a83bb59590378660d0c2fba01167cf8358fdc5fb",
+    "initialization-validation.json": "e04cd56444a3519a2c862a1e11ea799ebae8c940b28992887eff8dfbc4e255a2",
+    "reconciliation-ledger.json": "6a0f4fcc09460b0e2b7ffbf80dbd759983acdae35061a592cdb448c98046b647"
+  },
+  "tables": {
+    "country_summary": {
+      "rows": 70,
+      "columns": 80,
+      "sha256": "f15ed2383336c47b29e25b73ade8a3cf8e9297a94bb743fa2c447ab594ef8edb"
+    },
+    "fairness_audit": {
+      "rows": 70,
+      "columns": 22,
+      "sha256": "841a3acc5f47c6044350c13f7745fb617e6fd1cff653bf3fb4861b57bda9714e"
+    },
+    "regions": {
+      "rows": 122,
+      "columns": 54,
+      "sha256": "072fcbee122112ad38a4606592bb68630fe2f2fbec7c1f1216f55eb0d95d433c"
+    },
+    "deposits": {
+      "rows": 240,
+      "columns": 21,
+      "sha256": "36813aa695bdeb2c97b189d08e921f3d1764a5645377b86e0a34637e24c75781"
+    },
+    "facilities": {
+      "rows": 350,
+      "columns": 24,
+      "sha256": "9d861eba161df901c4bcea7cd08e4a0373a32b83dd74723ac9d49cf663d293cf"
+    },
+    "freight": {
+      "rows": 349,
+      "columns": 14,
+      "sha256": "be961f29f6165cef3a1f2c505b781e1a08b448bd402f58bc1c347833f27e214e"
+    },
+    "power": {
+      "rows": 70,
+      "columns": 10,
+      "sha256": "edefab2a41dd843612bcf51ce10068fe34fe4cb673db2f3ea2fbcd8cd7d5c8c6"
+    },
+    "rights": {
+      "rows": 70,
+      "columns": 9,
+      "sha256": "c68720b5154515583826f29dbe59c1944833f6a91d3ec7b9b7cb3cf2ef398754"
+    },
+    "basins": {
+      "rows": 71,
+      "columns": 13,
+      "sha256": "f855710012b40f934e39d0cdf79a085e5af7e930895da43a7517790ddd2674e6"
+    },
+    "climate_templates": {
+      "rows": 15,
+      "columns": 5,
+      "sha256": "baa8592f204388c265d3f274e2ae6cb970916dacbb6710ac9f7a297b69b118b3"
+    },
+    "balance_checks": {
+      "rows": 122,
+      "columns": 5,
+      "sha256": "f198d46a3d86339c6decf755db56b2ffa0d529a31d32fab05acde11176489dc4"
+    },
+    "scenarios": {
+      "rows": 3,
+      "columns": 6,
+      "sha256": "d5b6a7aa28d700df007fa04d702ca1d2672d1030727c90c2c6d4b7ce564776c9"
+    },
+    "country_opening_raw": {
+      "rows": 70,
+      "columns": 25,
+      "sha256": "036041c01ffd758f10428a8ef3f3e132d9c61234fceceb9c8463b8e0241d3168"
+    },
+    "model_parameters": {
+      "rows": 40,
+      "columns": 3,
+      "sha256": "1de04a6368849aadd9e471c8a5047840b23dc4d70f9bf6ec745a0aed8b61341a"
+    }
+  },
+  "limitations": [
+    "600_SIM_DAY_VALIDATION_NOT_RUN",
+    "CORE_RECIPES_AND_RIGHTS_NOT_ACTIVATED",
+    "HUMAN_GEOGRAPHY_COEFFICIENTS_ARE_SCENARIO_ASSUMPTIONS"
+  ],
+  "allTablesJsonSha256": "4d2ec807f38c06411b3ef799794137a1ba509b832520919bb97e13fea63a3fea"
+}

@@ -241,6 +241,20 @@
       "lock_or_downtime_risk": "Candidate-only additive immutable narrow approval reference; no legacy backfill, browser grants, production publication or shared-Supabase action",
       "rollback_strategy": "forward-fix",
       "production_approval": null
+    },
+    {
+      "migration_id": "0018_world_v2_country_candidate_intake",
+      "release_order": 18,
+      "path": "database/migrations/artifacts/0018_world_v2_country_candidate_intake.sql",
+      "sha256": "77c08b7adee042b26e2ef4938613b19a9ab7cf35f39f0f0085694556314c3643",
+      "artifact_source_commit": "129aa1d9b5df139a3b4bf4f4ff9bb2e5a82835c8",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": true,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Additive, initially empty and immutable candidate intake only; no World opening, legacy schema write, browser grant, or economic fact mutation",
+      "rollback_strategy": "reversible-before-economic-facts",
+      "production_approval": null
     }
   ]
 }

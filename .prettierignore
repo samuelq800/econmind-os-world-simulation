@@ -14,3 +14,5 @@ reference/
 requirements/
 status/decisions.json
 PLANS.md
+# Preserve the exact hash-verified bytes of the delivered country data package.
+data/country-candidates/2026-09-28-map-locked/
