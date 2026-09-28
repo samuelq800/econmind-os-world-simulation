@@ -1,0 +1,41 @@
+group,parameter,value
+scale,status,AUTHORED_FICTIONAL_ASSUMPTIONS_NOT_HANDBOOK_PARAMETERS
+scale,worldWidthKm,36000
+scale,horizontalWrap,True
+scale,travelWrap,seam crossings require explicit edges; none inferred
+scale,simDaysYear,360
+scale,seasonSimDays,600
+scale,cropWaterM3HaYear,5000
+scale,grainTonnesPersonYear,0.24
+scale,environmentalRunoffShare,0.65
+scale,populationSettlementShare,"Initial carrying-capacity total redistributed by transport gravity, river access, arable share and mineral frontier; see humanGeography"
+scale,minSettlementPersons,1000
+scale,droughtRecoveryStorageDays,90
+scale,illustrativeUsableLakeDepthM,10
+scale,annualGeologicalDensity,"{""oil"": {""unitPerKm2"": 80000, ""unit"": ""barrel""}, ""gas"": {""unitPerKm2"": 160000, ""unit"": ""MMBtu""}, ""uranium"": {""unitPerKm2"": 0.7, ""unit"": ""tonne U""}, ""iron"": {""unitPerKm2"": 50000, ""unit"": ""tonne""}, ""copper"": {""unitPerKm2"": 1800, ""unit"": ""tonne""}, ""lithium"": {""unitPerKm2"": 100, ""unit"": ""tonne LCE""}}"
+scale,uncertainty,"Mineral volume 0.25x–4x; all scenario coefficients are configurable, not measured."
+coefficients,status,AUTHORED_FICTIONAL_ASSUMPTIONS_NOT_HANDBOOK_PARAMETERS
+coefficients,worldWidthKm,36000
+coefficients,horizontalWrap,True
+coefficients,travelWrap,seam crossings require explicit edges; none inferred
+coefficients,simDaysYear,360
+coefficients,seasonSimDays,600
+coefficients,cropWaterM3HaYear,5000
+coefficients,grainTonnesPersonYear,0.24
+coefficients,environmentalRunoffShare,0.65
+coefficients,populationSettlementShare,"Initial carrying-capacity total redistributed by transport gravity, river access, arable share and mineral frontier; see humanGeography"
+coefficients,minSettlementPersons,1000
+coefficients,droughtRecoveryStorageDays,90
+coefficients,illustrativeUsableLakeDepthM,10
+coefficients,annualGeologicalDensity,"{""oil"": {""unitPerKm2"": 80000, ""unit"": ""barrel""}, ""gas"": {""unitPerKm2"": 160000, ""unit"": ""MMBtu""}, ""uranium"": {""unitPerKm2"": 0.7, ""unit"": ""tonne U""}, ""iron"": {""unitPerKm2"": 50000, ""unit"": ""tonne""}, ""copper"": {""unitPerKm2"": 1800, ""unit"": ""tonne""}, ""lithium"": {""unitPerKm2"": 100, ""unit"": ""tonne LCE""}}"
+coefficients,uncertainty,"Mineral volume 0.25x–4x; all scenario coefficients are configurable, not measured."
+coefficients,forestSettlementRevision,"{""status"": ""AUTHORED_FICTIONAL_SCENARIO_NOT_OBSERVED_HISTORY"", ""affectedCountries"": [""visual-territory-51"", ""visual-territory-52""], ""populationDensityPersonsKm2"": ""0.35 + 0.25 * transportGravity"", ""forestReclassificationFraction"": 0.006, ""croplandShareOfClearing"": 0.6666666666666666, ""worldPopulationChangeReason"": ""correction of two map-inconsistent near-empty countries; no donor reallocation""}"
+source,handbook,EconMind Season1 Official Handbook CN v1.1
+source,pages,"[22, 23, 90, 93, 94, 95, 96, 98]"
+source,pdfSha256,befe98dbe34531a40019104712c3b185ab14be33b944553a85a53268e8b8cb40
+source,partitionSha256,394a43ffc94df7c27c8fe8610378d348f07c1680675c89ecad26300aa9c7b101
+activationBlocker,blocker1,AGRICULTURE_CORE_OWNER_AND_RECIPE_UNRESOLVED
+activationBlocker,blocker2,RECIPE_COEFFICIENTS_AND_SEASON_CALIBRATION_REQUIRED
+activationBlocker,blocker3,STATE_IDENTITY_AND_PRIVATE_DATA_GATE_REQUIRED
+activationBlocker,blocker4,MULTIMODAL_CORRIDORS_REQUIRE_ROUTING_AND_TRANSIT_REGISTRATION
+activationBlocker,blocker5,FULL_NORMAL_DISRUPTION_RECOVERY_SIMULATION_NOT_RUN

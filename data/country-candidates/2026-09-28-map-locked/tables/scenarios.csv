@@ -1,0 +1,4 @@
+id,status,supply,demand,scope,requires
+normal-food-capacity,PASS,11686128.49,9809341.88,"geographic potential, not actual operating supply",
+climate-derived-dry-season,SHORTFALL,8354330.04,9809341.88,,
+cooperative-irrigation-recovery,CAPACITY_SCENARIO_ONLY,11686128.49,9809341.88,,"[""construction"",""water allocation"",""labour"",""equipment"",""financing""]"
