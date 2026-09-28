@@ -255,6 +255,20 @@
       "lock_or_downtime_risk": "Additive, initially empty and immutable candidate intake only; no World opening, legacy schema write, browser grant, or economic fact mutation",
       "rollback_strategy": "reversible-before-economic-facts",
       "production_approval": null
+    },
+    {
+      "migration_id": "0019_world_v2_balanced_candidate_status",
+      "release_order": 19,
+      "path": "database/migrations/artifacts/0019_world_v2_balanced_candidate_status.sql",
+      "sha256": "82f7471ddc42cf0a7c0e884cf806f3e20f8424e0f848667cd633a1f7b0f03ccb",
+      "artifact_source_commit": "a0843ef3a5d4ad5ae6c7ea0893775b482b5d3b50",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "Brief check-constraint replacement on the inert candidate bundle table; existing rows unchanged, no World, OpeningSeed, legacy schema or browser grants",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }
