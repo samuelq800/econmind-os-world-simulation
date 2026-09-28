@@ -1,0 +1,734 @@
+国家队长|Country Captain
+财政部长|Finance Minister
+央行行长|Central Bank Governor
+产业部长|Industry Minister
+贸易部长|Trade Minister
+社会部长|Labour & Social Minister
+每位部长独立操作|Each minister is a separate operator
+当前操作席位|Current office
+独立操作者|Separate operator
+当前页面不切换操作者身份。|This page keeps the current operator's office.
+该操作属于其他部长席位。|This action belongs to another minister.
+该签署需由对应部长独立完成。|The responsible minister must sign independently.
+产业部长与国家队长须在各自席位确认。|Industry and the Captain must confirm from their own offices.
+已有样例确认|Existing sample confirmation
+待签署|Awaiting signature
+本职签署|Sign in own office
+70 国图鉴|70-Country Atlas
+七十个国家，各有来路。|Seventy countries. Seventy starting points.
+搜索国家名称或编号|Search by country name or number
+搜索国家|Search countries
+国家筛选|Filter countries
+全部国土|All countries
+沿海国家|Coastal countries
+内陆国家|Landlocked countries
+沿海国土|Coastal territory
+内陆国土|Landlocked territory
+关闭国家图鉴|Close atlas
+从这片国土开始|A country to explore
+国土概览|Country overview
+基础设施|Infrastructure
+资源禀赋|Natural resources
+进入内阁|Enter the cabinet
+国土面积|Land area
+人口|Population
+劳动力|Labour force
+接壤国家|Neighbouring countries
+无陆地接壤记录|No recorded land neighbours
+国情数值沿用地图配套情景资料。|Country figures come from the map's scenario dataset.
+选择地图上的一处设施，查看它需要的资源与承担的功能。|Select a site to explore its function and resource requirements.
+查看本国设施|Explore local sites
+沿海区位提供出海条件；港口能力以设施记录为准。|Coastal geography provides sea access; port capacity depends on recorded facilities.
+货运依托国内集散与邻国通道。|Freight depends on domestic hubs and routes through neighbouring countries.
+国土实景插画 · 地标可选|Country illustration · Select a landmark
+国土场景 · 选择地标|Country scene · Select a landmark
+资源地理图 · 原始地图坐标|Resource map · Original geographic coordinates
+国土场景图|Country illustration
+资源地理定位图|Resource location map
+互动地图|Interactive map
+隐藏地标|Hide labels
+显示地标|Show labels
+缩小地图|Zoom out
+放大地图|Zoom in
+国家页面|Country navigation
+地图与资料沿用现有国家文件 · 设施状态按来源展示|Existing country maps and records · Facility status follows the source
+设施与生产网络|Sites and production networks
+从地图地标进入；容量、投入和建设周期分别显示。|Explore each landmark's capacity, required inputs and construction time.
+规划设施 · 未标记投运|Planned site · Not marked operational
+规划设施|Planned site
+已投运|Operational
+本国设施|Country sites
+规划容量|Planned capacity
+所需工作人员|Workers required
+所需电力|Power required
+所需用水|Water required
+维护费用|Maintenance cost
+建设周期|Construction time
+容量与产出|Capacity and output
+规划容量是上限。正式产出还取决于投运状态、投入与配方。|Planned capacity is a ceiling. Output also depends on commissioning, inputs and the production recipe.
+进入本职操作|Open own-office actions
+查看协作分工|View office responsibilities
+项目与来源状态|Project and source status
+地下与地表的禀赋|Below ground. Above ground.
+资源位置按原始地理坐标呈现。储量与可交易库存分开。|Resource sites use the original geographic coordinates. Reserves are separate from tradable stock.
+有储量记录|Reserves recorded
+地表资源分布|Surface distribution
+该国没有已记录的资源点。|No resource sites are recorded for this country.
+本国资源|Country resources
+地质资源记录|Geological record
+地表分布记录|Surface record
+剩余地质储量|Remaining geological reserves
+已发现剩余|Discovered reserves
+可采剩余|Recoverable reserves
+已开发剩余|Developed reserves
+情景开采能力|Scenario extraction capacity
+埋深|Depth
+来源只记录分布，没有可用储量数字。|The source records distribution only; no reserve quantity is available.
+储量不等于库存|Reserves are not inventory
+地下资源需要开发与运输，不能直接计入仓库或用于交易。|Underground resources require development and transport before they become inventory or tradable goods.
+进入资源开发职能|Open resource-development actions
+查看开发分工|View development responsibilities
+国土、邻国与跨部门事项|Territory, neighbours and cross-office matters
+建设投入、维护与财政条款|Capital funding, maintenance and fiscal terms
+货币、银行与双币资产|Money, banks and assets in two currencies
+资源、能源与生产设施|Resources, energy and production sites
+货源、通道与跨境履约|Suppliers, routes and cross-border delivery
+劳动力、住房与公共服务|Labour, housing and public services
+内阁分工 · 其他席位|Cabinet responsibilities · Other offices
+本国职能|Country actions
+本页为所选席位的本地预览。正式身份授权与协作回执由世界服务核验。|Local preview of the selected office. The world service must verify identity, permissions and collaboration receipts.
+本事项由|Responsible office:
+负责|responsible
+只能处理本职条款。跨部门协作需由对方独立确认，当前页面不代签。|may edit only their own terms. Other ministers must confirm independently; this page cannot sign for them.
+没有匹配的国家。|No matching countries.
+暂时无法进入国家|Country temporarily unavailable
+未找到该国家，请从70国图鉴进入。|Country not found. Choose a country from the atlas.
+国家资料加载失败|Country data could not be loaded
+国家索引暂不可用|Country index is unavailable
+返回国家入口|Return to countries
+重试|Retry
+正在进入|Entering
+现实 10×|Real time ×10
+1 模拟日 · 现实 2 小时 24 分钟|1 simulated day · 2h 24m in real time
+1 模拟日 = 现实 2 小时 24 分|1 simulated day = 2h 24m real time
+世界时间 · 现实 10×|World time · Real time ×10
+本地时钟 · 未接服务器|Local clock · Server not connected
+持续运行|Running
+测试暂停|Paused for testing
+国家资料暂不可用，请从国家图鉴重新进入。|Country data is unavailable. Re-enter from the atlas.
+本国条款|Country terms
+本国参数草稿 · 未提交正式世界|Country draft · Not submitted to the world
+当前席位为|Current office:
+，其他部长独立操作。|. Other ministers operate independently.
+热带季风|Tropical monsoon
+温带海洋性|Temperate oceanic
+热带高地|Tropical highland
+温带湿润|Humid temperate
+热带常湿|Tropical rainforest
+亚热带湿润|Humid subtropical
+地中海型|Mediterranean
+热带草原|Tropical savanna
+半干旱|Semi-arid
+干旱荒漠|Arid desert
+温带大陆性|Temperate continental
+亚寒带|Subarctic
+极地苔原|Polar tundra
+高山寒冷|Alpine
+地中海气候|Mediterranean
+荒漠|Desert
+大陆性|Continental
+冻原|Tundra
+矿山|Mine
+能源|Energy
+海港|Seaport
+物流枢纽|Logistics hub
+工厂|Factory
+农业|Agriculture
+教育|Education
+医疗|Healthcare
+住房|Housing
+学位|Student seats
+套住房|Dwellings
+人次 / 模拟日|visits / simulated day
+设备单位 / 模拟日|equipment units / simulated day
+模拟日|simulated day
+EconMind 徽标|EconMind badge
+EconMind 游戏首页|EconMind game home
+游戏动线|game journey
+当前事项动线|Current decision journey
+职位专业入口|Office actions
+当前事项|Current objective
+让北港等到第一批人才|Bring skilled workers to North Harbour
+北港人才议题|North Harbour workforce
+选议题|Identify issue
+比较方案|Compare options
+协调席位|Coordinate offices
+跟踪兑现|Track delivery
+在到岗速度、人数与政治支持之间作出取舍。|Balance arrival time, workforce size and political support.
+让建设资金有着落|Fund the next stage of construction
+北港一期融资|North Harbour phase-one funding
+看资金缺口|Review funding gap
+比较来源|Compare sources
+决定参与|Set participation
+跟踪付款|Track payments
+建设需要资金，国库也要履行工资和偿债义务。|Construction needs funding; the treasury must also meet wages and debt payments.
+恢复银行的支付能力|Restore banks' payment capacity
+银行流动性缺口|Bank liquidity gap
+辨认风险|Identify risk
+比较工具|Compare tools
+核对约束|Check constraints
+观察结果|Watch outcomes
+先区分支付资金和资本问题，再决定如何介入。|Distinguish a cash shortfall from a capital problem before choosing an intervention.
+让生产线接续运转|Keep production moving
+北港机械生产|North Harbour manufacturing
+找瓶颈|Find bottleneck
+比较办法|Compare approaches
+安排生产|Schedule production
+验收产出|Review output
+电力、矿石、工人与资金共同决定实际产出。|Power, ore, labour and cash jointly constrain output.
+把钢材送到北港|Deliver steel to North Harbour
+北港钢材采购|North Harbour steel purchase
+看交付缺口|Review delivery gap
+比较货源|Compare suppliers
+签约发运|Contract and ship
+验收到货|Confirm arrival
+买得到、付得起和赶得上，是三个不同的条件。|Availability, affordability and timely arrival are separate conditions.
+让技能人才走进岗位|Bring skilled people into jobs
+北港技术岗位|North Harbour skilled jobs
+看岗位缺口|Review vacancies
+安排人才|Assign talent
+跟踪到岗|Track job starts
+现有人才可以先补员，长期缺口需要培养。|Existing talent can fill immediate vacancies; longer-term gaps need training.
+实际到岗|Workers arrived
+首批目标|First intake target
+政治资本|Political capital
+国库现金|Treasury cash
+尚需承诺|Funding still required
+实际建设付款|Construction paid
+支付缺口|Payment shortfall
+央行资金|Central bank funds
+政策利率|Policy rate
+可用矿石|Available ore
+工业供电|Industrial power
+约束下机械日产|Constrained daily machinery output
+已到港|Goods received
+仍在途|In transit
+可用库存缺口|Available-stock gap
+空缺岗位|Vacancies
+已有技能|Skilled people available
+正式到岗|Workers in post
+医疗预算|Healthcare budget
+等候接诊|Awaiting care
+累计接诊|People treated
+外币资产|Foreign-currency assets
+本币资金|Domestic-currency funds
+样例汇率|Sample exchange rate
+最近变化|Recent changes
+最近记录|Recent records
+尚无执行记录，当前局势可以直接查看。|No execution records yet. Review the current situation.
+查看当前进展|View current progress
+比较可行办法|Compare options
+继续比较其他办法|Compare other approaches
+保持现状，查看后续|Maintain current policy and observe
+已有事项运行中，等待不需要重复操作。|An action is running. No repeated input is needed while waiting.
+当前没有提交新方案。比较不会扣款或执行政策。|No new proposal has been submitted. Comparing options does not spend funds or enact policy.
+可行方案|Available options
+比较成本、期限和未解决的部分，再选择一条路径。|Compare cost, timing and the remaining gap before choosing an approach.
+查看条款|Review terms
+暂不改变，继续观察|Make no change; keep observing
+当前约束|Current constraints
+本次决定|This decision
+本地样例 · 当前资源与条款|Local sample · Current resources and terms
+当前席位只处理本职决定，其他部长独立签署。|This office handles its own decisions. Other ministers sign independently.
+完整参数|Full parameters
+返回比较，保留当前参数|Back to options; keep current settings
+后续进展|Follow-up
+决定之后，世界继续运行|Actions and scheduled outcomes
+当前阶段没有待到期事项|No scheduled events at this stage
+本次观察没有新增经济承诺。|Observation creates no new economic commitment.
+已承诺、已支付与已交付分开记录。|Commitments, payments and deliveries are recorded separately.
+等待按期执行|Awaiting scheduled execution
+没有已排程事件。可以比较其他办法，也可以结束本次查看。|No events are scheduled. Review other approaches or finish this visit.
+回到当前局势|Return to current situation
+结束本次查看|Finish this visit
+继续安排项目资金|Continue project funding
+本地独立样例 · 插画不代表工程或交易已完成|Independent local sample · Artwork does not indicate completed construction or trades
+专业入口|Office actions
+从具体职能进入；原有参数、来源与结果入口保持可用。|Open an action with its full parameters, source and result fields.
+项参数|parameters
+已保存版本|Saved version
+查看条款|Review terms
+回到当前事项|Return to current objective
+执行记录|Execution records
+已保存文书|Saved documents
+国库与税收|Treasury and taxation
+预算与项目|Budgets and projects
+债务与资产|Debt and assets
+风险与应急|Risk and emergencies
+方向与议程|Direction and agenda
+局势与协作|Situation and coordination
+承诺与行动|Commitments and action
+记录与反馈|Records and feedback
+今日指挥|Current situation
+货币与银行|Money and banking
+外汇与储备|FX and reserves
+协作与复盘|Coordination and review
+生产与资源|Production and resources
+能源与设施|Energy and facilities
+技术与人才|Technology and talent
+项目与协作|Projects and coordination
+贸易总览|Trade overview
+市场与规则|Markets and rules
+谈判与合作|Negotiation and cooperation
+合同与履约|Contracts and delivery
+就业与人才|Employment and talent
+教育与医疗|Education and healthcare
+生活与保障|Living standards and support
+治安与应急|Public safety and emergencies
+本地参数配置 · 尚未进入正式结算|Local configuration · Not submitted for settlement
+操作|Configure
+核对|Review
+结果|Results
+规则来源|Source specification
+查看规格原文|View source specification
+核对完整行动|Review all terms
+保存行动版本|Save action version
+完整参数按同一版本保存。|All parameters are saved under the same version.
+该项为跨职位协作请求。|This item requests collaboration with another office.
+调整数量后，单位与数值一同记录。|Values and units are recorded together.
+可同时选择多个对象。|Multiple objects may be selected.
+选择参与本次行动的对象或规则。|Select the objects or rules involved in this action.
+条目保留具体对象、数量和单位。|Entries preserve the object, quantity and unit.
+当前记录|Current record
+尚未保存|Not saved
+待结算|Awaiting settlement
+结果尚未连接正式结算引擎。|Results are not yet connected to the official settlement engine.
+该行动没有独立结果字段。|This action has no separate result fields.
+每次处理一个对象。核对后保存完整版本，联合事项另需会签。|Configure one object at a time, then review and save. Joint matters require separate signatures.
+进阶行动|Office actions
+返回进阶行动|Return to office actions
+方案|Proposal
+投入与规模|Inputs and scale
+条件与条款|Conditions and terms
+期限与节奏|Timing
+行动参数|Action parameters
+添加条目|Add entry
+尚无条目。添加资源对象及对应数量。|No entries yet. Add a resource and its quantity.
+执行条件|Execution condition
+资源条目|Resource entry
+北港|North Harbour
+模拟时间|Simulated time
+世界持续运行 · 到期自动结算|World time continues · Events settle when due
+按期自动结算|Automatic settlement at the due date
+场景插画|Scene illustration
+当前决定|Current decision
+返回当前决定|Return to current decision
+场地施工|Site preparation
+主体开工|Main construction
+工资与税款|Wages and taxes
+既有债务本息|Existing debt service
+既有采购|Existing procurement
+债券交割|Bond settlement
+债券到期|Bond maturity
+生产批次完成|Production batch completed
+扩建投产|Expansion commissioned
+货船到港|Cargo arrived
+本期毕业|Graduation
+人才齐备|Workforce ready
+到岗周期|Time to start work
+计划人数|Planned headcount
+已分配|Allocated
+已支付|Paid
+还款|Repayment
+本科|Undergraduate
+
+温带湿润|Humid temperate
+热带常湿|Tropical wet
+温带海洋性|Temperate oceanic
+暖温带半干旱草原|Warm semi-arid steppe
+内陆荒漠|Interior desert
+冷凉大陆性|Cool continental
+温带高山|Temperate alpine
+热带季风|Tropical monsoon
+热带稀树草原|Tropical savanna
+地中海式沿岸|Mediterranean coast
+冷凉半干旱草原|Cool semi-arid steppe
+温带湿润大陆性|Humid continental
+热带高地|Tropical highland
+高山寒带|Alpine tundra
+人|people
+日|days
+台|units
+模拟日|simulation days
+滑块| slider
+
+气|Gas
+油|Oil
+麦|Grain
+林|Forest
+煤|Coal
+粮食产区|Grain-growing area
+磷矿|Phosphate
+林业产区|Forestry area
+煤炭|Coal
+北港人才议程|North Harbour workforce agenda
+本地培养|Local training
+当前支持：|Current support: 
+三个席位各需至少|Each office needs at least
+执行成本为方案成本与已分配支持的较大值。|Execution costs the greater of the proposal cost and allocated support.
+分配基础支持，查看席位|Allocate initial support
+北港建设款|North Harbour construction funding
+点击筹码拨款；再次点击可以收回。|Select a funding chip to allocate it. Select again to withdraw it.
+承诺建设资金|Commit construction funding
+清算网络|Clearing network
+北港银行|North Harbour Bank
+市民银行|Citizens Bank
+缺口|Shortfall
+国债|Government bonds
+信贷资产|Credit assets
+选中抵押品后开放额度。折扣|Select collateral to establish a credit limit. Haircut
+确认抵押放款|Issue secured loan
+工业电网|Industrial power grid
+当前预计日产|Estimated daily output: 
+点击产线转入电力。|Select a production line to allocate power.
+进入生产线|Enter production line
+北港航线|North Harbour shipping route
+阿斯特近港|Aster near port
+索拉远港|Sola far port
+含税总额|Total including tax
+价格、运费、保险与关税一并计入；现金和货源都有限。|The total includes freight, insurance and tariffs. Cash and available stock are limited.
+前往装船码头|Proceed to loading dock
+技术学院|Technical college
+支出|Expenditure
+预计毕业|Expected graduates
+点击安排一组|Assign a group of
+最多|Maximum
+入学不等于毕业，毕业不等于到岗。|Enrolment, graduation and starting work are separate stages.
+缴费并开班|Fund training intake
+内阁|Cabinet
+财政会议室|Treasury chamber
+选择对象，调整投入与条款，核对当前版本。|Select an object, adjust its inputs and terms, then review.
+← 上一项|← Previous
+下一项 →|Next →
+返回支付日|Return to payment schedule
+税制与国库文件|Tax and treasury instruments
+件物件|objects
+到期|maturity
+/年|/year
+钢材、|steel and
+周期较长，财政成本较低。|Longer lead time, lower fiscal cost.
+海外引才|Overseas recruitment
+到岗较快，资金与政治成本较高。|Faster arrival, higher funding and political costs.
+双线培养|Combined recruitment and training
+在人数与时间之间折中。|Balances workforce size and lead time.
+内阁表决|Cabinet vote
+议程|Agenda
+三个席位分别确认|Each office confirms independently
+批准只对应当前版本，方案变化须重新表决。|Approval applies to this version. Changes require a new vote.
+执行已批准议程|Execute approved agenda
+国家承诺|National commitment
+启动加强协调|Intensify coordination
+公开目标为|Public target:
+执行仍受人才计划与入职时间约束。|Delivery depends on workforce plans and start dates.
+发布到岗承诺|Publish workforce commitment
+安排国库资金|Allocate treasury funds
+财政参与|Treasury contribution
+分期付款 · 不新增此笔债务|Staged payments · No new debt for this commitment
+承诺不等于付款，仍需保留未来现金。|A commitment is not a payment. Cash must remain available for future obligations.
+先比较债券融资|Explore bond financing
+查看已发行债券|View issued bonds
+样例买盘最多|Sample demand limit:
+发行价|issue price
+年票息|annual coupon
+次日交割，新增到期偿还义务；资金不足部分仍在。|Settles next day and creates a repayment obligation. Any remaining funding gap still needs financing.
+面值|face value
+银行申购|Bank bids
+其他申购|Other bids
+净到账|Net proceeds
+折价|Issue price
+发行费|issuance fee
+开启申购簿|Open order book
+国库支付日|Treasury payment schedule
+等待资金|Awaiting funding
+下一事件按模拟日结算，建设款与既有义务分别扣除。|Events settle on their scheduled simulation day. Construction and existing obligations are paid separately.
+提供抵押贷款|Provide a secured loan
+覆盖支付资金缺口|Cover payment funding shortfalls
+折扣|Haircut
+须有合格抵押品，不替代资本补充。|Requires eligible collateral. Does not replace a capital injection.
+调整新贷款报价|Adjust new loan pricing
+政策利率每档|Policy-rate step:
+不修改既有固定利率合同|Existing fixed-rate contracts keep their terms
+影响新报价，不直接向银行支付现金。|Changes new quotes without transferring cash to banks.
+检查外汇交易|Review FX trading
+同时处理 GCU 与 LNY|Both GCU and LNY settle together
+样例即期价|Sample spot rate
+属于外币资产管理，不等同本币救助。|Manages foreign-currency assets. Does not provide domestic-currency emergency support.
+利率公告|Rate announcement
+已公布|Published
+新贷款|New loans
+每档 25 bp。旧固定利率合同保持原价。|25 bp per step. Existing fixed-rate contracts keep their original pricing.
+公布政策利率|Publish policy rate
+外汇交易|FX trading
+卖出|Sold
+回收|Received
+同一笔成交同时减少 GCU、增加 LNY。|The same trade reduces GCU and increases LNY.
+确认双边成交|Confirm currency exchange
+重排工业供电|Reallocate industrial power
+共同分配|shared allocation
+一条产线增加，另一条减少|More power for one line leaves less for the other
+适合检查当前生产瓶颈。|Reveals the current production bottleneck.
+运行生产批次|Run a production batch
+可选|Options:
+逐日消耗矿石、钢材与现金|Consumes ore, steel and cash each day
+批次结束停机，每日重新核对资源约束。|Stops after the batch. Resource constraints are checked daily.
+扩建钢厂|Expand steelworks
+产能|capacity
+不会同时增加工人、电力和原料。|Workers, power and raw materials do not increase automatically.
+北港联合钢厂|North Harbour Steelworks
+批次|batch
+首日生产|First-day production
+启动后逐日生产；批次结束自动停机。原料与现金决定实际产量。|Production runs daily and stops at batch end. Raw materials and cash constrain actual output.
+启动|Start
+钢厂二期|Steelworks phase II
+扩大的产能仍受工人、电力和原料约束。|Expanded capacity still requires workers, power and raw materials.
+支付并开工|Fund and start construction
+航程|transit
+库存|stock
+运费|freight
+更快到港；保险与关税另计。|Faster arrival. Insurance and tariffs are additional.
+单价较低，但占用更多运输时间。|Lower unit price, longer transit.
+装船泊位|Loading berth
+货物待配装|Cargo awaiting allocation
+本单支出|Order expenditure
+锁定配货清单|Confirm cargo manifest
+海关锚地|Customs anchorage
+港口等待新航次|Awaiting the next shipment
+北港可用库存|North Harbour available stock
+货船到港后，库存才增加。|Stock increases only after the shipment arrives.
+寻找下一批货源|Find the next supplier
+先匹配现有人才|Assign existing skilled workers
+具备技能|skilled workers available
+入职|until start date
+匹配时预留人选，到岗前不计入就业。|Assignment reserves workers. Employment starts when they arrive.
+开办技能培养|Start skills training
+师资最多支持|Teaching capacity:
+样例毕业率 90%；毕业后仍需安排到岗。|Sample graduation rate: 90%. Graduates still need a job assignment.
+转去处理医疗服务|Review healthcare services
+正在等候|awaiting service
+独立医疗预算|Separate healthcare budget
+另一条服务事项，不作为就业线的必做步骤。|A separate service. Not a required step in the employment journey.
+到岗|until workforce arrival
+到港|until arrival
+/人|/person
+就业驿站|Employment centre
+人匹配|workers assigned
+有技能|Skilled workforce
+在途|In transit
+已到岗|Started work
+岗位匹配后 7 日入职，期间不计入正式在岗人数。|Workers start seven days after assignment. They are not counted as employed during this period.
+安排岗位匹配|Assign workers to jobs
+社区医疗服务|Community healthcare
+社区诊所|Community clinic
+本批支出|Batch expenditure
+等候|Waiting
+独立于培训资金。|separate from training funds.
+完成接诊|Provide consultations
+风能设施|Wind farm
+基础教育设施|Basic education facility
+基层医疗设施|Primary healthcare facility
+棉|Cotton
+棉花产区|Cotton-growing area
+暖热河谷与灌溉平原。|Warm river valleys and irrigated plains. 
+东北枢纽|Northeast hub
+咖|Coffee
+咖啡产区|Coffee-growing area
+热带丘陵与高地。|Tropical hills and highlands. 
+东北湾港|Northeast Bay Port
+河谷与平原。|River valleys and plains. 
+湿润森林与山麓。|Humid forests and foothills. 
+内陆枢纽|Inland hub
+盐|Salt
+盐类矿产|Salt deposits
+干旱盆地与蒸发环境。|Arid basins and evaporitic environments. 
+西湾港|West Bay Port
+沉积盆地与古浅海区。|Sedimentary basins and former shallow seas. 
+稀|Rare earths
+稀土|Rare earths
+古老岩体与风化带。|Ancient rock formations and weathering zones. 
+东原枢纽|East Plain hub
+东岸港|East Coast Port
+南原枢纽|South Plain hub
+南湾港|South Bay Port
+北原枢纽|North Plain hub
+西北西岸港|Northwest Coast Port
+铝土矿|Bauxite
+暖湿地带的风化高原。|Weathered plateaus in warm humid regions. 
+雪脊南枢纽|South Snowridge hub
+北原东港|North Plain East Port
+镍矿|Nickel ore
+岛弧与基性岩带。|Island arcs and mafic rock belts. 
+公共住房|Public housing
+中陆东港|Central East Port
+中陆西港|Central West Port
+中陆枢纽|Central hub
+西南枢纽|Southwest hub
+西南海峡港|Southwest Strait Port
+双岛港|Twin Islands Port
+弧岛港|Arc Island Port
+南岛港|South Island Port
+沉积盆地与山前煤系。|Sedimentary basins and foothill coal formations. 
+共和国|Republic
+内阁议事厅|Cabinet chamber
+场景物件|Scene objects
+返回召集表决|Return to cabinet vote
+独立角色样例 · 本地自动结算|Independent office sample · Automatic local settlement
+国家议程文件|National agenda documents
+条件与权利|Conditions and rights
+第N模拟日|Simulation day N
+核对行动 →|Review action →
+返回组合议程|Return to agenda
+议事桌文件|Council documents
+时间与交付|Timing and delivery
+外交会议厅|Diplomatic chamber
+返回承诺与危机|Return to commitments and crises
+外交文书|Diplomatic instruments
+证券交易大厅|Securities exchange
+返回债券发行|Return to bond issuance
+债务与资产凭证|Debt and asset instruments
+每单位面值|per unit of face value
+返回项目拨款|Return to project funding
+项目与预算文件|Project and budget documents
+返回外汇干预|Return to FX intervention
+外汇与跨境合约|FX and cross-border contracts
+央行清算厅|Central clearing hall
+返回利率走廊|Return to policy rates
+货币政策文件|Monetary policy documents
+返回调配流动性|Return to liquidity allocation
+银行与抵押档案|Bank and collateral records
+工业厂区|Industrial works
+返回扩建工程|Return to expansion
+建设与技术图纸|Construction and technology plans
+能力单位|capacity units
+电网调度中心|Grid dispatch centre
+返回电力调度|Return to power dispatch
+电网与能源方案|Power and energy plans
+单位产出|unit of output
+勘探与施工现场|Exploration and construction site
+待指定商品单位|commodity unit required
+结算单位|Settlement unit
+返回生产链|Return to production chain
+生产与设施图纸|Production and facility plans
+公顷|hectares
+港口调度室|Port dispatch room
+返回航线追踪|Return to shipment tracking
+航路与贸易规则|Shipping and trade rules
+返回签约发船|Return to contracts and shipping
+技术与融资合约|Technology and financing contracts
+返回选择货源|Return to supplier selection
+订单与采购合约|Orders and procurement contracts
+倍|times
+公共服务中心|Public services centre
+返回岗位匹配|Return to job matching
+岗位与民生方案|Employment and welfare plans
+/户|/household
+套|housing units
+返回医疗分流|Return to healthcare allocation
+医疗与服务方案|Healthcare and service plans
+次/模拟日|visits/simulation day
+床|beds
+返回分配学位|Return to education allocation
+培养与教育方案|Training and education plans
+/小时|/hour
+互换对手|Swap counterparty
+A腿币种|Leg A currency
+A腿本金|Leg A principal
+B腿币种|Leg B currency
+B腿本金|Leg B principal
+起始交换汇率|Initial exchange rate
+互换期限|Swap term
+A腿年利率|Leg A annual interest rate
+B腿年利率|Leg B annual interest rate
+归还汇率规则|Repayment exchange-rate rule
+合同固定汇率|Contractual fixed exchange rate
+提前终止条件|Early termination conditions
+公开市场方向|Open-market operation direction
+交易面值|Transaction face value
+证券批次|Security tranche
+准备金率|Reserve requirement ratio
+外汇成交金额|FX transaction amount
+冲销安排|Sterilisation arrangement
+冲销金额|Sterilisation amount
+官方外汇批准金额|Approved official FX amount
+工具名称|Facility name
+合格行业|Eligible sectors
+再融资额度|Refinancing limit
+再融资年利率|Refinancing annual rate
+最长借款期限|Maximum loan term
+终端利率上限|End-borrower rate cap
+银行新贷利率上限|New bank loan rate cap
+合格抵押|Eligible collateral
+开放日期|Opening date
+停止新增提款日期|Last date for new drawings
+政策年利率|Annual policy rate
+内部说明|Internal note
+关联政策决定|Related policy decision
+政策评估|Policy assessment
+声明立场|Statement stance
+补充理由|Additional rationale
+通胀判断|Inflation assessment
+增长判断|Growth assessment
+金融判断|Financial conditions assessment
+ELA年利率|ELA annual rate
+ELA期限|ELA term
+ELA抵押类型|ELA collateral type
+容忍下限|Lower tolerance bound
+容忍上限|Upper tolerance bound
+框架调整原因|Reason for framework adjustment
+技能|Skills
+模拟席位批准议程| sample office approved agenda
+危机协调状态：|Coordination status: 
+加强协调|Intensified coordination
+常态|Normal
+暂无到期事件|No events due
+债券配售|Bond allocation
+等待交割|Awaiting settlement
+配售完成，次日交割入账|Allocation complete. Proceeds settle next day.
+工资|Wages
+税款|Tax receipts
+本金 + 利息|principal + interest
+贷款到账 · 清算缺口已更新|Loan disbursed · Payment shortfall updated
+本币资产|Domestic-currency assets
+外汇与本币资产已同步结算|Both currency legs have settled
+外汇储备|Foreign reserves
+贷款归还|Loan repaid
+利息|Interest
+剩余|remaining
+生产批次启动|Production batch started
+钢厂扩建开工，支出|Steelworks expansion started · Cost
+钢厂扩建开工 · 5 日后完工|Steelworks expansion started · Completes in 5 days
+现金|Cash
+钢厂扩建完工，新增 40 tonne/日产能|Steelworks expansion completed · Capacity increased by 40 tonne/day
+批次完成 · 矿石消耗|Batch completed · Ore consumed
+机械增加|Machinery added
+现金支出|Cash spent
+生产|Produced
+装船，支出|loaded · Cost
+货船已离港 · 库存将在到港后增加|Shipment departed · Stock increases on arrival
+企业资金|Corporate funds
+技术培训开班|Training intake opened
+培训开始 · 毕业前不会增加技能人才|Training started · Skilled workforce increases at graduation
+培训预算|Training budget
+岗位匹配完成 · 人员正在入职途中|Jobs assigned · Workers are on their way
+接诊完成 · 等候队列已缩短|Consultations completed · Waiting list reduced
+毕业，进入就业匹配|graduated and available for job matching
+完整参数已保存；新版本需重新校验与会签|Parameters saved. The new version requires validation and signatures.
+待规则校验|Awaiting rule validation
+保存行动：|Action saved: 
+需要结构化条目|requires structured entries
+条目需要对象、数值和单位|entries require an object, value and unit
+世界时间固定为现实 10×|World time runs at 10× real time
+当前批次仍在运行|The current batch is still running
+生产线已启动。每个模拟日核对投入并结算产出，完成后自动停机。|Production started. Inputs and outputs settle each simulation day; the line stops at batch end.
+货源或报价已变化，请重新配货|Supply or pricing changed. Update the cargo manifest.
+该抵押品仍担保未偿贷款|This collateral secures an outstanding loan
+本次查看已结束。世界继续运行，进度已保留。|Progress saved. World time continues.

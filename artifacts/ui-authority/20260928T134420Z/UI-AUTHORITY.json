@@ -1,0 +1,28 @@
+{
+  "selectionId": "ECONMIND_S1_AUTHORITATIVE_UI_20260928T134420Z",
+  "selectedAt": "2026-09-28T13:44:20.844029+00:00",
+  "authority": "OWNER_SELECTED_SOLE_PAGE_UI_BASELINE",
+  "userAuthorization": "把这里所有网页代码上传codex://threads/01a08bf9-fe19-7440-88fa-159677b611bd，我授权你这个是唯一权威页面UI",
+  "targetThreadId": "01a08bf9-fe19-7440-88fa-159677b611bd",
+  "targetThreadTitle": "Coordinate EconMind control tower",
+  "authoritativeRoot": "role-prototypes/season1-immersive/",
+  "primaryEntry": "role-prototypes/season1-immersive/index.html",
+  "countries": 70,
+  "offices": [
+    "captain",
+    "finance",
+    "central_bank",
+    "industry",
+    "trade",
+    "social"
+  ],
+  "dependencies": [
+    "role-prototypes/shared/",
+    "role-prototypes/specs-markdown-2026-09-27/",
+    "role-prototypes/indicator-audit/"
+  ],
+  "legacyStatus": "Other prototype versions are included for preservation and reference only. They are not alternative authoritative page UI.",
+  "scope": "Page composition, visuals, assets, interaction routes, office boundaries, EN/ZH switching and automatic 10x preview clock.",
+  "executionBoundary": "Does not promote local fixtures, local stored plans, pending readouts or typed parameter saves into authoritative world state. Does not authorize production database changes, deployment or world activation.",
+  "dataReconciliation": "Receiving thread has selected a newer official 70-country data baseline. Bind that data into this UI without treating the snapshot geography/scenario values as an override of the official data selection."
+}

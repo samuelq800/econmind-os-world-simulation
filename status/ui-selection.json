@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "selectionId": "ECONMIND_S1_AUTHORITATIVE_UI_20260928T134420Z",
+  "decision": "OWNER_SELECTED_SOLE_PAGE_UI_BASELINE",
+  "ownerInstruction": "把这里所有网页代码上传codex://threads/01a08bf9-fe19-7440-88fa-159677b611bd，我授权你这个是唯一权威页面UI",
+  "sourceThreadId": "01a0e08d-6667-7c81-9dae-39e5a1263982",
+  "archiveSha256": "d436904dc061b6f909c8b5c180104f82299e987f6e89732f9b82dc9a40e3db71",
+  "sourcePayloadFiles": 860,
+  "publishedRoot": "apps/world-web/public/season1-immersive",
+  "siteEntry": "apps/world-web/index.html",
+  "legacyEntry": "apps/world-web/legacy.html",
+  "offices": [
+    "captain",
+    "finance",
+    "central_bank",
+    "industry",
+    "trade",
+    "social"
+  ],
+  "countryCount": 70,
+  "mapAssetReuse": {
+    "sceneSource": "apps/world-web/src/assets/country-scenes",
+    "detailSource": "apps/world-web/src/assets/country-detail",
+    "rule": "Reuse byte-identical 70-country map assets via build-time copies and a local dev route; do not commit duplicate binaries"
+  },
+  "authorityBoundary": {
+    "pageUI": "OFFICIAL_SELECTED",
+    "economicData": "status/world-data-selection.json",
+    "bundledCountryPreviewPopulation": 14714012813,
+    "selectedOfficialDataPopulation": 14712146434,
+    "localScenarioValues": "PREVIEW_ONLY_NOT_WORLD_STATE",
+    "worldCommandsAndSettlement": "NOT_CONNECTED",
+    "supabaseMutation": false,
+    "originalEconMindMainSiteChanged": false
+  }
+}

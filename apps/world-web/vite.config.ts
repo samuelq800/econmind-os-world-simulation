@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react';
-import { existsSync } from 'node:fs';
+import { createReadStream, existsSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +11,9 @@ import { assertSafeViteEnvironment } from '../../scripts/vite-environment-policy
 const worldWebRoot = fileURLToPath(new URL('.', import.meta.url));
 const publicPageInputs = {
   main: resolve(worldWebRoot, 'index.html'),
+  ...(existsSync(resolve(worldWebRoot, 'legacy.html'))
+    ? { legacy: resolve(worldWebRoot, 'legacy.html') }
+    : {}),
   ...(existsSync(resolve(worldWebRoot, 'command.html'))
     ? { command: resolve(worldWebRoot, 'command.html') }
     : {}),
@@ -18,6 +21,48 @@ const publicPageInputs = {
     ? { prototype: resolve(worldWebRoot, 'prototype.html') }
     : {}),
 };
+const selectedMapAssetPath =
+  /^\/season1-immersive\/countries\/assets\/(scenes|details)\/([0-9]{2}(?:-[a-z]+)?\.(?:png|svg))$/u;
+
+function selectedUiMapAssetPlugin(): Plugin {
+  return {
+    name: 'selected-ui-map-asset-dev-bridge',
+    configureServer(server) {
+      server.middlewares.use((request, response, next) => {
+        const match = selectedMapAssetPath.exec(
+          request.url?.split('?')[0] ?? '',
+        );
+        if (!match) return next();
+        const [, kind, filename] = match;
+        if (!kind || !filename) return next();
+        if (
+          (kind === 'scenes' && !/^[0-9]{2}\.png$/u.test(filename)) ||
+          (kind === 'details' && !/^[0-9]{2}-[a-z]+\.svg$/u.test(filename))
+        ) {
+          return next();
+        }
+        const source = resolve(
+          worldWebRoot,
+          'src/assets',
+          kind === 'scenes' ? 'country-scenes' : 'country-detail',
+          filename,
+        );
+        if (!existsSync(source)) {
+          response.statusCode = 404;
+          response.end('Map asset not found');
+          return;
+        }
+        response.setHeader(
+          'Content-Type',
+          kind === 'scenes' ? 'image/png' : 'image/svg+xml',
+        );
+        createReadStream(source)
+          .on('error', () => response.destroy())
+          .pipe(response);
+      });
+    },
+  };
+}
 const supportedEnvironments = new Set(['local', 'ci', 'staging', 'production']);
 const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
 const apiHealthPath = '/readyz';
@@ -213,7 +258,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     envDir: worldWebRoot,
-    plugins: [react(), lifecyclePlugin(apiOrigin)],
+    plugins: [react(), lifecyclePlugin(apiOrigin), selectedUiMapAssetPlugin()],
     preview: {
       host: runtimeHost(process.env.WORLD_WEB_HOST, 'WORLD_WEB_HOST'),
       port: runtimePort(process.env.WORLD_WEB_PORT, 4100, 'WORLD_WEB_PORT'),
