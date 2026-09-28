@@ -257,6 +257,8 @@ describe('V27 to V29 existing-data seed closure preparation', () => {
       provenance: null,
       calibration: {
         schemaVersion: V27_2_CALIBRATION_PREPARATION_SCHEMA_VERSION,
+        worldId: 'WORLD_SHARED',
+        countryConfigurationRef: `sha256:${'a'.repeat(64)}`,
         expectedCountryCount: V27_2_REQUIRED_COUNTRY_COUNT_VALUE,
         sources: [],
         countries: [],
