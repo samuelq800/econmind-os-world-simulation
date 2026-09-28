@@ -1,0 +1,172 @@
+{
+  "schemaVersion": "v27-v29-existing-data-inventory-v1",
+  "dataStatus": "PILOT_NON_AUTHORITATIVE_PARTIAL",
+  "sourceRepository": {
+    "branch": "codex/world-data-calibration",
+    "commitSha": "abbcdc5c86279227627d30d13952fdadda96737b"
+  },
+  "targetCountryCount": "70",
+  "artifacts": [
+    {
+      "artifactRef": "NORMALIZED_OBSERVATIONS",
+      "kind": "NORMALIZED_DATA",
+      "locator": "data/calibration/pilot/normalized_observations.v1.json",
+      "contentSha256": "2ddf22030106f92b906510b926bf40855e8879e5faca67d43ed9ade31cb6078a"
+    },
+    {
+      "artifactRef": "PILOT_REPORT",
+      "kind": "DATA_QUALITY_EVIDENCE",
+      "locator": "data/calibration/pilot/pilot_report.v1.json",
+      "contentSha256": "3c8fe27f685b001ecfe73476fddf85ec32a71b1b239d70aad73ccf76d2c56a21"
+    },
+    {
+      "artifactRef": "SNAPSHOT_MANIFEST",
+      "kind": "DATA_QUALITY_EVIDENCE",
+      "locator": "data/calibration/pilot/snapshot_manifest.v1.json",
+      "contentSha256": "bcdf0cefe0d6e6ac6b223198a5e076d4228fcaff354fe203c26f7343323bf8fa"
+    },
+    {
+      "artifactRef": "C4_GENERATION_PREFLIGHT",
+      "kind": "READINESS_EVIDENCE",
+      "locator": "data/calibration/preflight/c4_generation_preflight.v1.json",
+      "contentSha256": "50187193d0a4cb1fec8b3d190431ff98806034cf36fae2aa980e1c932e3ab916"
+    },
+    {
+      "artifactRef": "C4_FEATURE_ADMISSION",
+      "kind": "READINESS_EVIDENCE",
+      "locator": "data/calibration/preflight/c4_feature_admission_evidence.v1.json",
+      "contentSha256": "ad1f7ff2030071528995b4de21da8777d87626289912628a5f3e9e2b55b977c7"
+    },
+    {
+      "artifactRef": "V10_HANDOFF_READINESS",
+      "kind": "READINESS_EVIDENCE",
+      "locator": "data/calibration/preflight/v10_data_handoff_readiness.v1.json",
+      "contentSha256": "76c807fca4bf70e3f0886334b118953a1a128eb4aff3de993bf0837fd25cf53c"
+    },
+    {
+      "artifactRef": "V10_HANDOFF_CONTRACT",
+      "kind": "READINESS_EVIDENCE",
+      "locator": "data/calibration/preflight/v10_data_handoff_readiness_contract.v1.json",
+      "contentSha256": "680e0fb21838d225f4273b818fd0988547df67f0dec725ad6b4e1e6df2b95b9b"
+    }
+  ],
+  "metrics": [
+    {
+      "metricRef": "EMPIRICAL_ENTITY_COUNT",
+      "value": "10",
+      "unit": "count",
+      "evidenceArtifactRef": "PILOT_REPORT"
+    },
+    {
+      "metricRef": "VARIABLE_COUNT",
+      "value": "10",
+      "unit": "count",
+      "evidenceArtifactRef": "PILOT_REPORT"
+    },
+    {
+      "metricRef": "PERIOD_COUNT",
+      "value": "3",
+      "unit": "count",
+      "evidenceArtifactRef": "PILOT_REPORT"
+    },
+    {
+      "metricRef": "OBSERVATION_COUNT",
+      "value": "247",
+      "unit": "count",
+      "evidenceArtifactRef": "PILOT_REPORT"
+    },
+    {
+      "metricRef": "DISTINCT_OBSERVATION_COUNT",
+      "value": "246",
+      "unit": "count",
+      "evidenceArtifactRef": "C4_FEATURE_ADMISSION"
+    },
+    {
+      "metricRef": "EXPLICIT_MISSING_COUNT",
+      "value": "6",
+      "unit": "count",
+      "evidenceArtifactRef": "C4_FEATURE_ADMISSION"
+    },
+    {
+      "metricRef": "EXACT_DUPLICATE_COUNT",
+      "value": "1",
+      "unit": "count",
+      "evidenceArtifactRef": "C4_FEATURE_ADMISSION"
+    },
+    {
+      "metricRef": "FEATURE_CANDIDATE_COUNT",
+      "value": "19",
+      "unit": "count",
+      "evidenceArtifactRef": "C4_FEATURE_ADMISSION"
+    },
+    {
+      "metricRef": "ADMITTED_FEATURE_COUNT",
+      "value": "0",
+      "unit": "count",
+      "evidenceArtifactRef": "C4_FEATURE_ADMISSION"
+    },
+    {
+      "metricRef": "SOURCE_SNAPSHOT_COUNT",
+      "value": "7",
+      "unit": "count",
+      "evidenceArtifactRef": "SNAPSHOT_MANIFEST"
+    },
+    {
+      "metricRef": "CLOSURE_EVIDENCE_BINDING_COUNT",
+      "value": "0",
+      "unit": "count",
+      "evidenceArtifactRef": "V10_HANDOFF_READINESS"
+    }
+  ],
+  "providerGaps": [
+    {
+      "sourceRef": "WTO_TIMESERIES_V1",
+      "issueRef": "WTO_API_KEY_MISSING",
+      "evidenceArtifactRef": "PILOT_REPORT"
+    }
+  ],
+  "openGates": [
+    {
+      "gateId": "MISSING_VALUE_POLICY_FOR_ARCHETYPE_FEATURES_UNAPPROVED",
+      "requiredEvidenceRefs": ["OWNER_MISSINGNESS_POLICY"],
+      "evidenceArtifactRef": "V10_HANDOFF_READINESS"
+    },
+    {
+      "gateId": "ARCHETYPE_METHOD_AND_COUNT_UNSELECTED",
+      "requiredEvidenceRefs": [
+        "OWNER_ARCHETYPE_METHOD_COUNT_LABELS_FEATURE_SET"
+      ],
+      "evidenceArtifactRef": "V10_HANDOFF_READINESS"
+    },
+    {
+      "gateId": "FICTIONAL_COUNTRY_MAPPING_NOT_AUTHORIZED",
+      "requiredEvidenceRefs": ["GOVERNANCE_FICTIONAL_MAPPING_AUTHORIZATION"],
+      "evidenceArtifactRef": "V10_HANDOFF_READINESS"
+    },
+    {
+      "gateId": "WTO_TARIFF_EVIDENCE_ABSENT",
+      "requiredEvidenceRefs": ["SOURCE_WTO_TARIFF_FROZEN_REVIEWED"],
+      "evidenceArtifactRef": "V10_HANDOFF_READINESS"
+    },
+    {
+      "gateId": "VINTAGE_STABILITY_NOT_ESTABLISHED",
+      "requiredEvidenceRefs": ["SOURCE_REPEATED_EQUIVALENT_QUERY_SNAPSHOTS"],
+      "evidenceArtifactRef": "V10_HANDOFF_READINESS"
+    },
+    {
+      "gateId": "SECTOR_TAXONOMY_AND_TRADE_RECONCILIATION_UNREVIEWED",
+      "requiredEvidenceRefs": [
+        "OWNER_SECTOR_TAXONOMY_AND_MIRROR_POLICY",
+        "SOURCE_EXHAUSTIVE_SECTOR_TOTAL_EVIDENCE"
+      ],
+      "evidenceArtifactRef": "V10_HANDOFF_READINESS"
+    },
+    {
+      "gateId": "FINAL_CALIBRATION_AND_RUNTIME_HANDOFF_BLOCKED",
+      "requiredEvidenceRefs": ["GOVERNANCE_FINAL_DATA_HANDOFF_AUTHORIZATION"],
+      "evidenceArtifactRef": "V10_HANDOFF_READINESS"
+    }
+  ],
+  "fictionalCountryMappingAuthorized": false,
+  "finalGeneratorReady": false
+}
