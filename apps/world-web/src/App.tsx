@@ -11,6 +11,8 @@ const FictionalWorldMap = lazy(async () => ({
 const WorldExplorer = lazy(async () => ({
   default: (await import('./map-explorer/WorldExplorer.js')).WorldExplorer,
 }));
+const previewBoundary =
+  'This public preview uses illustrative planning data only and does not connect to World State or establish Gate B evidence.';
 
 export function App() {
   const atlas = new URLSearchParams(window.location.search).get('atlas');
@@ -53,10 +55,7 @@ export function App() {
           <a href="?atlas=continents">Explore four continents</a>
           <a href="?atlas=map">Open layered world map</a>
         </nav>
-        <p className="world-landing__boundary">
-          Public previews and illustrative planning data only. They do not
-          connect to World State or establish Gate B evidence.
-        </p>
+        <p className="world-landing__boundary">{previewBoundary}</p>
       </section>
     </main>
   );
