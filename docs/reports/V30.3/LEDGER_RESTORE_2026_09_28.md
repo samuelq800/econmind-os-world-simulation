@@ -23,3 +23,20 @@ synthetic durable rows survived one PostgreSQL backup/restore at the fixed
 candidate. Worker crash/fencing, Event/Posting replay through Core, a real
 70-country World, backup retention, shared-database impact, and the formal
 V30.3/Gate B acceptance remain `NOT_RUN` or `PENDING`.
+
+## Mainline scope and checks
+
+The owner's 2026-09-28 instruction to continue toward V30 permits this
+non-authoritative P2 diagnostic to proceed under the repository fast-mainline
+policy. The change is confined to the disposable restore script and this
+report. It does not alter Core, Worker, API, browser, migration, RLS, runtime
+authority, production target, or the original main site; it does not mark a
+formal step verified. The target guard still requires the fixed GitHub Actions
+loopback PostgreSQL service and exact checkout SHA.
+
+At code SHA `46b9d16`, focused local tests passed 6/6; targeted ESLint,
+Prettier and migration validation passed. On the documented PR branch,
+architecture tests passed 34/34, both boundary scanners, safe-local environment,
+foundation policy, repository secret scan and full formatting check passed.
+The exact-code native PostgreSQL run is linked above. This is scoped tooling
+evidence, not an independent P0 review or full V30.3 acceptance.
