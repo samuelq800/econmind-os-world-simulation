@@ -1,0 +1,74 @@
+{
+  "version": "2026-09-28-v2-map-grounded",
+  "status": "ILLUSTRATIVE_PLANNING_ONLY",
+  "recipientThread": "01a08bf9-fe19-7440-88fa-159677b611bd",
+  "worktree": "/Users/samuel/Documents/econclub/.econmind-worktrees/f-v25-fictional-map-preparation",
+  "baseCommit": "16356316144d27412183a13e4e568cd6a79151f5",
+  "changesCommitted": false,
+  "balanceVariables": [
+    "FINANCIAL_ASSETS",
+    "TECHNOLOGY"
+  ],
+  "sourceLockedToMap": [
+    "FACILITY_IDENTITY_AND_LOCATION",
+    "GEOLOGICAL_RESOURCES",
+    "POPULATION_AND_SETTLEMENTS",
+    "GEOGRAPHIC_ENDOWMENTS"
+  ],
+  "files": {
+    "workbook": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/f-v25-fictional-map-preparation/outputs/01a0e1b0-603c-7e13-81de-2cddb9c5d4c1/World_V2_70_Country_Presets_2026-09-28.xlsx",
+      "sha256": "6794d573505ddf08770c92d5ed8c3bb1759da1bb0ce3687dc64b4ec84264cd19",
+      "bytes": 276575
+    },
+    "shareableArchive": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/f-v25-fictional-map-preparation/outputs/01a0e1b0-603c-7e13-81de-2cddb9c5d4c1/World_V2_Atlas_2026-09-28.zip",
+      "sha256": "37314a68086720989bc82ea4e55119ab22c8ffd982ffa3e4c1e196cc9a759401",
+      "bytes": 277391595
+    },
+    "dataManifest": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/f-v25-fictional-map-preparation/artifacts/world-geography/reconciled-v2/package-manifest.json",
+      "sha256": "ea8567accc519baf05a5c48dc74f2102e16e11c88a9b4ba2e2e5b5a14c7ea1a2",
+      "bytes": 3434
+    },
+    "dataValidation": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/f-v25-fictional-map-preparation/artifacts/world-geography/reconciled-v2/package-validation.json",
+      "sha256": "a99aca4685d48404cd442c8d46d950826ad0daf7e32d858d8aafa5a63686f718",
+      "bytes": 474
+    },
+    "reconciliationLedger": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/f-v25-fictional-map-preparation/artifacts/world-geography/reconciled-v2/reconciliation-ledger.json",
+      "sha256": "6a0f4fcc09460b0e2b7ffbf80dbd759983acdae35061a592cdb448c98046b647",
+      "bytes": 4435
+    },
+    "qualityReport": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/f-v25-fictional-map-preparation/docs/reports/V25.1/COUNTRY_ATLAS_AND_PRESETS_2026-09-28.md",
+      "sha256": "32d661b2fa84c861cb77aa6a2683c52d45910d16b3661b219811c24cbc05e372",
+      "bytes": 4733
+    },
+    "countryVisualReviews": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/f-v25-fictional-map-preparation/apps/world-web/src/assets/country-scenes/reviews.json",
+      "sha256": "9c44ba550d4c1d96e4646da8b3be53e6c55c78019bfd74a15b57cacfe894c599",
+      "bytes": 35064
+    },
+    "continentVisualReviews": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/f-v25-fictional-map-preparation/apps/world-web/src/assets/continent-scenes/reviews.json",
+      "sha256": "635ad6126cca322c069bcd743687dc112c3a4e2ef0b5148656a7a32a4269fcf1",
+      "bytes": 897
+    }
+  },
+  "verification": {
+    "countryScenes": 70,
+    "continentScenes": 4,
+    "facilityAnchors": 350,
+    "dataTables": 14,
+    "xlsxSheetsIncludingReadme": 15,
+    "typecheckBuild": "PASS",
+    "targetedESLint": "PASS",
+    "labelLayoutTests": 2,
+    "mapGeographyAccounting": "PASS",
+    "exportedStaticSiteBrowser": "PASS",
+    "economicFairness600Days": "NOT_RUN",
+    "activationAllowed": false
+  }
+}

@@ -1,0 +1,7 @@
+﻿commodityId,unit,cumulativeExtraction,openingStockRawEquivalent,historicalConsumed,basis
+CRUDE_OIL,barrel,3104112184.872,2456940832.390078,647171352.4819221,Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction
+NATURAL_GAS,MMBtu,7124591150.799,1058152779.2663422,6066438371.532658,Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction
+URANIUM,tonne U,4855.07,1117.6336840000001,3737.4363159999994,Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction
+IRON_ORE,tonne,1557645161.753,564348148.9420633,993297012.8109367,Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction
+COPPER,tonne,43638014.666999996,395207.3556057045,43242807.31139429,Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction
+LITHIUM,tonne LCE,3245058.291,106065.712509,3138992.578491,Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction

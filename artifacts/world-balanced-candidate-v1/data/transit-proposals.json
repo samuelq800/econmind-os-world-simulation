@@ -1,0 +1,1290 @@
+[
+  {
+    "id": "TRANSIT-FLOW-0008",
+    "flowId": "FLOW-0008",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0012",
+    "flowId": "FLOW-0012",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0016",
+    "flowId": "FLOW-0016",
+    "countryIds": [
+      "visual-territory-11"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0021",
+    "flowId": "FLOW-0021",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0022",
+    "flowId": "FLOW-0022",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0023",
+    "flowId": "FLOW-0023",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0024",
+    "flowId": "FLOW-0024",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0043",
+    "flowId": "FLOW-0043",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0050",
+    "flowId": "FLOW-0050",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0052",
+    "flowId": "FLOW-0052",
+    "countryIds": [
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0059",
+    "flowId": "FLOW-0059",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0060",
+    "flowId": "FLOW-0060",
+    "countryIds": [
+      "visual-territory-11"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0062",
+    "flowId": "FLOW-0062",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0067",
+    "flowId": "FLOW-0067",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0072",
+    "flowId": "FLOW-0072",
+    "countryIds": [
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0083",
+    "flowId": "FLOW-0083",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0085",
+    "flowId": "FLOW-0085",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-29",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0086",
+    "flowId": "FLOW-0086",
+    "countryIds": [
+      "visual-territory-29"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0087",
+    "flowId": "FLOW-0087",
+    "countryIds": [
+      "visual-territory-29"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0098",
+    "flowId": "FLOW-0098",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0099",
+    "flowId": "FLOW-0099",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0122",
+    "flowId": "FLOW-0122",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0123",
+    "flowId": "FLOW-0123",
+    "countryIds": [
+      "visual-territory-11"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0124",
+    "flowId": "FLOW-0124",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0149",
+    "flowId": "FLOW-0149",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0150",
+    "flowId": "FLOW-0150",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0160",
+    "flowId": "FLOW-0160",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0166",
+    "flowId": "FLOW-0166",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0169",
+    "flowId": "FLOW-0169",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0173",
+    "flowId": "FLOW-0173",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0176",
+    "flowId": "FLOW-0176",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0181",
+    "flowId": "FLOW-0181",
+    "countryIds": [
+      "visual-territory-11"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0182",
+    "flowId": "FLOW-0182",
+    "countryIds": [
+      "visual-territory-11"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0183",
+    "flowId": "FLOW-0183",
+    "countryIds": [
+      "visual-territory-29"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0190",
+    "flowId": "FLOW-0190",
+    "countryIds": [
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0207",
+    "flowId": "FLOW-0207",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0210",
+    "flowId": "FLOW-0210",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0211",
+    "flowId": "FLOW-0211",
+    "countryIds": [
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0214",
+    "flowId": "FLOW-0214",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0215",
+    "flowId": "FLOW-0215",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0216",
+    "flowId": "FLOW-0216",
+    "countryIds": [
+      "visual-territory-29"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0217",
+    "flowId": "FLOW-0217",
+    "countryIds": [
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0219",
+    "flowId": "FLOW-0219",
+    "countryIds": [
+      "visual-territory-11",
+      "visual-territory-29"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0220",
+    "flowId": "FLOW-0220",
+    "countryIds": [
+      "visual-territory-11",
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0221",
+    "flowId": "FLOW-0221",
+    "countryIds": [
+      "visual-territory-11"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0227",
+    "flowId": "FLOW-0227",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0229",
+    "flowId": "FLOW-0229",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0232",
+    "flowId": "FLOW-0232",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19",
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0233",
+    "flowId": "FLOW-0233",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0234",
+    "flowId": "FLOW-0234",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0235",
+    "flowId": "FLOW-0235",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0236",
+    "flowId": "FLOW-0236",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0237",
+    "flowId": "FLOW-0237",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0238",
+    "flowId": "FLOW-0238",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0240",
+    "flowId": "FLOW-0240",
+    "countryIds": [
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0270",
+    "flowId": "FLOW-0270",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0271",
+    "flowId": "FLOW-0271",
+    "countryIds": [
+      "visual-territory-12",
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0272",
+    "flowId": "FLOW-0272",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0273",
+    "flowId": "FLOW-0273",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0274",
+    "flowId": "FLOW-0274",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0275",
+    "flowId": "FLOW-0275",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0277",
+    "flowId": "FLOW-0277",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0290",
+    "flowId": "FLOW-0290",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0291",
+    "flowId": "FLOW-0291",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0292",
+    "flowId": "FLOW-0292",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19",
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0293",
+    "flowId": "FLOW-0293",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0296",
+    "flowId": "FLOW-0296",
+    "countryIds": [
+      "visual-territory-24"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0301",
+    "flowId": "FLOW-0301",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0302",
+    "flowId": "FLOW-0302",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0303",
+    "flowId": "FLOW-0303",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0304",
+    "flowId": "FLOW-0304",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0305",
+    "flowId": "FLOW-0305",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0306",
+    "flowId": "FLOW-0306",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0307",
+    "flowId": "FLOW-0307",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0308",
+    "flowId": "FLOW-0308",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0309",
+    "flowId": "FLOW-0309",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0310",
+    "flowId": "FLOW-0310",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0311",
+    "flowId": "FLOW-0311",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0312",
+    "flowId": "FLOW-0312",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-29",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0315",
+    "flowId": "FLOW-0315",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0316",
+    "flowId": "FLOW-0316",
+    "countryIds": [
+      "visual-territory-11"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0339",
+    "flowId": "FLOW-0339",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0345",
+    "flowId": "FLOW-0345",
+    "countryIds": [
+      "visual-territory-46",
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0346",
+    "flowId": "FLOW-0346",
+    "countryIds": [
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0347",
+    "flowId": "FLOW-0347",
+    "countryIds": [
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0348",
+    "flowId": "FLOW-0348",
+    "countryIds": [
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0372",
+    "flowId": "FLOW-0372",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0374",
+    "flowId": "FLOW-0374",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0375",
+    "flowId": "FLOW-0375",
+    "countryIds": [
+      "visual-territory-11"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0379",
+    "flowId": "FLOW-0379",
+    "countryIds": [
+      "visual-territory-29"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0380",
+    "flowId": "FLOW-0380",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0396",
+    "flowId": "FLOW-0396",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0397",
+    "flowId": "FLOW-0397",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0399",
+    "flowId": "FLOW-0399",
+    "countryIds": [
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0400",
+    "flowId": "FLOW-0400",
+    "countryIds": [
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0436",
+    "flowId": "FLOW-0436",
+    "countryIds": [
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0444",
+    "flowId": "FLOW-0444",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0448",
+    "flowId": "FLOW-0448",
+    "countryIds": [
+      "visual-territory-29"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0449",
+    "flowId": "FLOW-0449",
+    "countryIds": [
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0452",
+    "flowId": "FLOW-0452",
+    "countryIds": [
+      "visual-territory-24"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0455",
+    "flowId": "FLOW-0455",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0462",
+    "flowId": "FLOW-0462",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0463",
+    "flowId": "FLOW-0463",
+    "countryIds": [
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0487",
+    "flowId": "FLOW-0487",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0488",
+    "flowId": "FLOW-0488",
+    "countryIds": [
+      "visual-territory-11"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0489",
+    "flowId": "FLOW-0489",
+    "countryIds": [
+      "visual-territory-11"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0498",
+    "flowId": "FLOW-0498",
+    "countryIds": [
+      "visual-territory-11"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0518",
+    "flowId": "FLOW-0518",
+    "countryIds": [
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0521",
+    "flowId": "FLOW-0521",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0522",
+    "flowId": "FLOW-0522",
+    "countryIds": [
+      "visual-territory-11",
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0523",
+    "flowId": "FLOW-0523",
+    "countryIds": [
+      "visual-territory-12",
+      "visual-territory-29"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0524",
+    "flowId": "FLOW-0524",
+    "countryIds": [
+      "visual-territory-12",
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0525",
+    "flowId": "FLOW-0525",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0526",
+    "flowId": "FLOW-0526",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0527",
+    "flowId": "FLOW-0527",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0533",
+    "flowId": "FLOW-0533",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0534",
+    "flowId": "FLOW-0534",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0535",
+    "flowId": "FLOW-0535",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0536",
+    "flowId": "FLOW-0536",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0537",
+    "flowId": "FLOW-0537",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0538",
+    "flowId": "FLOW-0538",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0539",
+    "flowId": "FLOW-0539",
+    "countryIds": [
+      "visual-territory-34",
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0540",
+    "flowId": "FLOW-0540",
+    "countryIds": [
+      "visual-territory-46",
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0541",
+    "flowId": "FLOW-0541",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0542",
+    "flowId": "FLOW-0542",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0543",
+    "flowId": "FLOW-0543",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0544",
+    "flowId": "FLOW-0544",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0580",
+    "flowId": "FLOW-0580",
+    "countryIds": [
+      "visual-territory-49"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0597",
+    "flowId": "FLOW-0597",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0598",
+    "flowId": "FLOW-0598",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0599",
+    "flowId": "FLOW-0599",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0600",
+    "flowId": "FLOW-0600",
+    "countryIds": [
+      "visual-territory-12",
+      "visual-territory-17",
+      "visual-territory-19"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0601",
+    "flowId": "FLOW-0601",
+    "countryIds": [
+      "visual-territory-11",
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0602",
+    "flowId": "FLOW-0602",
+    "countryIds": [
+      "visual-territory-12",
+      "visual-territory-29"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0603",
+    "flowId": "FLOW-0603",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0604",
+    "flowId": "FLOW-0604",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0605",
+    "flowId": "FLOW-0605",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0606",
+    "flowId": "FLOW-0606",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0607",
+    "flowId": "FLOW-0607",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0608",
+    "flowId": "FLOW-0608",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0609",
+    "flowId": "FLOW-0609",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0610",
+    "flowId": "FLOW-0610",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0611",
+    "flowId": "FLOW-0611",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0612",
+    "flowId": "FLOW-0612",
+    "countryIds": [
+      "visual-territory-12"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0623",
+    "flowId": "FLOW-0623",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-29",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0624",
+    "flowId": "FLOW-0624",
+    "countryIds": [
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0625",
+    "flowId": "FLOW-0625",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0626",
+    "flowId": "FLOW-0626",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0627",
+    "flowId": "FLOW-0627",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0628",
+    "flowId": "FLOW-0628",
+    "countryIds": [
+      "visual-territory-24"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0629",
+    "flowId": "FLOW-0629",
+    "countryIds": [
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0639",
+    "flowId": "FLOW-0639",
+    "countryIds": [
+      "visual-territory-46"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  },
+  {
+    "id": "TRANSIT-FLOW-0640",
+    "flowId": "FLOW-0640",
+    "countryIds": [
+      "visual-territory-34"
+    ],
+    "consentStatus": "PROPOSED_NOT_GRANTED"
+  }
+]

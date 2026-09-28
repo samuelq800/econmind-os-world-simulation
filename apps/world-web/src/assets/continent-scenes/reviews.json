@@ -1,0 +1,26 @@
+{
+  "northwest": {
+    "visualDetail": "PASS",
+    "revision": 1,
+    "notes": "西部山脊、北寒海岸、中部盆地、东南平原及近海岛群方向与底图一致。",
+    "browser": "PASS_PAGE_RENDER_AND_DIRECTORY_LINK"
+  },
+  "southwest": {
+    "visualDetail": "PASS",
+    "revision": 2,
+    "notes": "重画后呈纵向山脊、海峡、农业河谷和群岛，修正初稿错位。",
+    "browser": "PASS_PAGE_RENDER_AND_DIRECTORY_LINK"
+  },
+  "central": {
+    "visualDetail": "PASS",
+    "revision": 2,
+    "notes": "重画后中央山地、东侧河谷与北部弧岛正确，修正初稿错位。",
+    "browser": "PASS_PAGE_RENDER_AND_DIRECTORY_LINK"
+  },
+  "east": {
+    "visualDetail": "PASS",
+    "revision": 1,
+    "notes": "东北山地半岛、中西部荒漠、西南山脊及东南湿润三角洲均可辨。",
+    "browser": "PASS_PAGE_RENDER_AND_DIRECTORY_LINK"
+  }
+}

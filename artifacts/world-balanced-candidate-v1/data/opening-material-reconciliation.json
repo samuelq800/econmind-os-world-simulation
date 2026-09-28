@@ -1,0 +1,50 @@
+[
+  {
+    "commodityId": "CRUDE_OIL",
+    "unit": "barrel",
+    "cumulativeExtraction": 3104112184.872,
+    "openingStockRawEquivalent": 2456940832.390078,
+    "historicalConsumed": 647171352.4819221,
+    "basis": "Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction"
+  },
+  {
+    "commodityId": "NATURAL_GAS",
+    "unit": "MMBtu",
+    "cumulativeExtraction": 7124591150.799,
+    "openingStockRawEquivalent": 1058152779.2663422,
+    "historicalConsumed": 6066438371.532658,
+    "basis": "Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction"
+  },
+  {
+    "commodityId": "URANIUM",
+    "unit": "tonne U",
+    "cumulativeExtraction": 4855.07,
+    "openingStockRawEquivalent": 1117.6336840000001,
+    "historicalConsumed": 3737.4363159999994,
+    "basis": "Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction"
+  },
+  {
+    "commodityId": "IRON_ORE",
+    "unit": "tonne",
+    "cumulativeExtraction": 1557645161.753,
+    "openingStockRawEquivalent": 564348148.9420633,
+    "historicalConsumed": 993297012.8109367,
+    "basis": "Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction"
+  },
+  {
+    "commodityId": "COPPER",
+    "unit": "tonne",
+    "cumulativeExtraction": 43638014.666999996,
+    "openingStockRawEquivalent": 395207.3556057045,
+    "historicalConsumed": 43242807.31139429,
+    "basis": "Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction"
+  },
+  {
+    "commodityId": "LITHIUM",
+    "unit": "tonne LCE",
+    "cumulativeExtraction": 3245058.291,
+    "openingStockRawEquivalent": 106065.712509,
+    "historicalConsumed": 3138992.578491,
+    "basis": "Raw-equivalent decomposition includes mineral content in processed opening stocks; no increase in geological endowment or extraction"
+  }
+]

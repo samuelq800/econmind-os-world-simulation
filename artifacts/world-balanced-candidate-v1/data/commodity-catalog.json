@@ -1,0 +1,86 @@
+[
+  {
+    "id": "CRUDE_OIL",
+    "unit": "barrel",
+    "referencePriceGcu": 75.0,
+    "finalDemandPerPersonDay": 0.0,
+    "freightTonnesPerUnit": 0.136
+  },
+  {
+    "id": "NATURAL_GAS",
+    "unit": "MMBtu",
+    "referencePriceGcu": 4.0,
+    "finalDemandPerPersonDay": 0.0,
+    "freightTonnesPerUnit": 0.0192
+  },
+  {
+    "id": "URANIUM",
+    "unit": "tonne U",
+    "referencePriceGcu": 100000.0,
+    "finalDemandPerPersonDay": 1e-09,
+    "freightTonnesPerUnit": 1.0
+  },
+  {
+    "id": "GRAIN",
+    "unit": "tonne",
+    "referencePriceGcu": 250.0,
+    "finalDemandPerPersonDay": 0.0006666666666666666,
+    "freightTonnesPerUnit": 1.0
+  },
+  {
+    "id": "IRON_ORE",
+    "unit": "tonne",
+    "referencePriceGcu": 110.0,
+    "finalDemandPerPersonDay": 0.0,
+    "freightTonnesPerUnit": 1.0
+  },
+  {
+    "id": "COPPER",
+    "unit": "tonne",
+    "referencePriceGcu": 8000.0,
+    "finalDemandPerPersonDay": 0.0,
+    "freightTonnesPerUnit": 1.0
+  },
+  {
+    "id": "LITHIUM",
+    "unit": "tonne LCE",
+    "referencePriceGcu": 15000.0,
+    "finalDemandPerPersonDay": 0.0,
+    "freightTonnesPerUnit": 1.0
+  },
+  {
+    "id": "STEEL",
+    "unit": "tonne",
+    "referencePriceGcu": 700.0,
+    "finalDemandPerPersonDay": 0.00015,
+    "freightTonnesPerUnit": 1.0
+  },
+  {
+    "id": "REFINED_FUEL",
+    "unit": "barrel equivalent",
+    "referencePriceGcu": 95.0,
+    "finalDemandPerPersonDay": 0.001,
+    "freightTonnesPerUnit": 0.125
+  },
+  {
+    "id": "MACHINERY",
+    "unit": "equipment unit",
+    "referencePriceGcu": 25000.0,
+    "finalDemandPerPersonDay": 8e-07,
+    "freightTonnesPerUnit": 5.0
+  },
+  {
+    "id": "SEMICONDUCTORS",
+    "unit": "standardised chip unit",
+    "referencePriceGcu": 20.0,
+    "finalDemandPerPersonDay": 0.001,
+    "freightTonnesPerUnit": 1e-06
+  },
+  {
+    "id": "BATTERIES",
+    "unit": "MWh-equivalent",
+    "referencePriceGcu": 90000.0,
+    "finalDemandPerPersonDay": 8e-08,
+    "freightTonnesPerUnit": 6.0
+  }
+]

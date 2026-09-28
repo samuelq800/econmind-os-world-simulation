@@ -1,0 +1,70 @@
+{
+  "version": "WORLD_BALANCED_CANDIDATE_V1",
+  "status": "IMPLEMENTED_UNVERIFIED_CANDIDATE",
+  "activationAllowed": false,
+  "sourceSnapshots": [
+    {
+      "sourcePath": "apps/world-web/src/map-lab/geographic-scenario.json",
+      "snapshot": "apps__world-web__src__map-lab__geographic-scenario.json",
+      "sha256": "3712151194e9745f028f838e42f67b55a4c4a4cb61dd56afcf6c0edd106b7a7f",
+      "bytes": 1500353
+    },
+    {
+      "sourcePath": "apps/world-web/src/map-lab/atlas-layers.json",
+      "snapshot": "apps__world-web__src__map-lab__atlas-layers.json",
+      "sha256": "49989ef13dfe2812835a8cdcba7110d5cb9dca13203c4288a5b35871726e0465",
+      "bytes": 912223
+    },
+    {
+      "sourcePath": "apps/world-web/src/map-lab/land-partition.json",
+      "snapshot": "apps__world-web__src__map-lab__land-partition.json",
+      "sha256": "394a43ffc94df7c27c8fe8610378d348f07c1680675c89ecad26300aa9c7b101",
+      "bytes": 662704
+    },
+    {
+      "sourcePath": "apps/world-web/src/map-lab/maritime-zones.json",
+      "snapshot": "apps__world-web__src__map-lab__maritime-zones.json",
+      "sha256": "3fbaa0e9a957b73c36ce1e8e688b014531b144e5965e0eee39760063aaf93c75",
+      "bytes": 7156549
+    },
+    {
+      "sourcePath": "apps/world-web/src/assets/country-scenes/index.json",
+      "snapshot": "apps__world-web__src__assets__country-scenes__index.json",
+      "sha256": "20e47feeb029edb551a528e9e29e1a546251ba2c26cdb376cd981324aff488a6",
+      "bytes": 37857
+    },
+    {
+      "sourcePath": "apps/world-web/src/assets/country-scenes/reviews.json",
+      "snapshot": "apps__world-web__src__assets__country-scenes__reviews.json",
+      "sha256": "aa62eb0fc4bb74f7e17cd056bec30ef35654aa1405fb37f3a3d62d6ebea7edfb",
+      "bytes": 27425
+    },
+    {
+      "sourcePath": "apps/world-web/src/assets/continent-scenes/index.json",
+      "snapshot": "apps__world-web__src__assets__continent-scenes__index.json",
+      "sha256": "4c3c45463e47e18a7326ee75a6da933aa5a1e14fbfd97bfe1ee28b5ea5cea8ea",
+      "bytes": 783
+    },
+    {
+      "sourcePath": "packages/core/src/registries/fixed-catalog.ts",
+      "snapshot": "packages__core__src__registries__fixed-catalog.ts",
+      "sha256": "303b6ed82539fa9b19846e86f216087b5a0f38d8d15531cdbd9cde3aa14e53b2",
+      "bytes": 16664
+    }
+  ],
+  "sourcePriority": [
+    "V8 land partition for geometry",
+    "14-climate/320-resource atlas for location and classification",
+    "geographic scenario for immutable minerals and human/environment inputs",
+    "country/continent illustrations for display identity only, never quantities"
+  ],
+  "simDaysYear": 360,
+  "seasonSimDays": 600,
+  "populationTotalPreserved": 14712146434,
+  "balanceDefinition": "At reference prices, each country physical net trade is within ±8% of the same per-person final demand basket. Basic services and buffers have explicit assets. This does not promise equal GDP, geography, skill, or win probability.",
+  "pricePolicy": "Authored calibration references; sensitivity and runtime pricing are separate.",
+  "newNumbersAuthority": "AUTHORED_GEOGRAPHY_CONSTRAINED_CANDIDATE_NOT_HANDBOOK_FIXED_RULES",
+  "solver": "scipy.optimize.linprog highs; country-neutral IO constraints and geographic feasible capacities",
+  "worldIdentity": "CANDIDATE_ONLY_NO_PRODUCTION_WORLD_ID",
+  "noProductionMutation": true
+}

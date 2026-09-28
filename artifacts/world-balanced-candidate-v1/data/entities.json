@@ -1,0 +1,2802 @@
+[
+  {
+    "id": "GOV-01",
+    "countryId": "visual-territory-01",
+    "economyId": "SCENARIO-ECONOMY-01",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-01",
+    "countryId": "visual-territory-01",
+    "economyId": "SCENARIO-ECONOMY-01",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-01",
+    "countryId": "visual-territory-01",
+    "economyId": "SCENARIO-ECONOMY-01",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-01",
+    "countryId": "visual-territory-01",
+    "economyId": "SCENARIO-ECONOMY-01",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-01",
+    "countryId": "visual-territory-01",
+    "economyId": "SCENARIO-ECONOMY-01",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-02",
+    "countryId": "visual-territory-02",
+    "economyId": "SCENARIO-ECONOMY-02",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-02",
+    "countryId": "visual-territory-02",
+    "economyId": "SCENARIO-ECONOMY-02",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-02",
+    "countryId": "visual-territory-02",
+    "economyId": "SCENARIO-ECONOMY-02",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-02",
+    "countryId": "visual-territory-02",
+    "economyId": "SCENARIO-ECONOMY-02",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-02",
+    "countryId": "visual-territory-02",
+    "economyId": "SCENARIO-ECONOMY-02",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-03",
+    "countryId": "visual-territory-03",
+    "economyId": "SCENARIO-ECONOMY-03",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-03",
+    "countryId": "visual-territory-03",
+    "economyId": "SCENARIO-ECONOMY-03",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-03",
+    "countryId": "visual-territory-03",
+    "economyId": "SCENARIO-ECONOMY-03",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-03",
+    "countryId": "visual-territory-03",
+    "economyId": "SCENARIO-ECONOMY-03",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-03",
+    "countryId": "visual-territory-03",
+    "economyId": "SCENARIO-ECONOMY-03",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-04",
+    "countryId": "visual-territory-04",
+    "economyId": "SCENARIO-ECONOMY-04",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-04",
+    "countryId": "visual-territory-04",
+    "economyId": "SCENARIO-ECONOMY-04",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-04",
+    "countryId": "visual-territory-04",
+    "economyId": "SCENARIO-ECONOMY-04",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-04",
+    "countryId": "visual-territory-04",
+    "economyId": "SCENARIO-ECONOMY-04",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-04",
+    "countryId": "visual-territory-04",
+    "economyId": "SCENARIO-ECONOMY-04",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-05",
+    "countryId": "visual-territory-05",
+    "economyId": "SCENARIO-ECONOMY-05",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-05",
+    "countryId": "visual-territory-05",
+    "economyId": "SCENARIO-ECONOMY-05",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-05",
+    "countryId": "visual-territory-05",
+    "economyId": "SCENARIO-ECONOMY-05",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-05",
+    "countryId": "visual-territory-05",
+    "economyId": "SCENARIO-ECONOMY-05",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-05",
+    "countryId": "visual-territory-05",
+    "economyId": "SCENARIO-ECONOMY-05",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-06",
+    "countryId": "visual-territory-06",
+    "economyId": "SCENARIO-ECONOMY-06",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-06",
+    "countryId": "visual-territory-06",
+    "economyId": "SCENARIO-ECONOMY-06",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-06",
+    "countryId": "visual-territory-06",
+    "economyId": "SCENARIO-ECONOMY-06",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-06",
+    "countryId": "visual-territory-06",
+    "economyId": "SCENARIO-ECONOMY-06",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-06",
+    "countryId": "visual-territory-06",
+    "economyId": "SCENARIO-ECONOMY-06",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-07",
+    "countryId": "visual-territory-07",
+    "economyId": "SCENARIO-ECONOMY-07",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-07",
+    "countryId": "visual-territory-07",
+    "economyId": "SCENARIO-ECONOMY-07",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-07",
+    "countryId": "visual-territory-07",
+    "economyId": "SCENARIO-ECONOMY-07",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-07",
+    "countryId": "visual-territory-07",
+    "economyId": "SCENARIO-ECONOMY-07",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-07",
+    "countryId": "visual-territory-07",
+    "economyId": "SCENARIO-ECONOMY-07",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-08",
+    "countryId": "visual-territory-08",
+    "economyId": "SCENARIO-ECONOMY-08",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-08",
+    "countryId": "visual-territory-08",
+    "economyId": "SCENARIO-ECONOMY-08",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-08",
+    "countryId": "visual-territory-08",
+    "economyId": "SCENARIO-ECONOMY-08",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-08",
+    "countryId": "visual-territory-08",
+    "economyId": "SCENARIO-ECONOMY-08",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-08",
+    "countryId": "visual-territory-08",
+    "economyId": "SCENARIO-ECONOMY-08",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-09",
+    "countryId": "visual-territory-09",
+    "economyId": "SCENARIO-ECONOMY-09",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-09",
+    "countryId": "visual-territory-09",
+    "economyId": "SCENARIO-ECONOMY-09",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-09",
+    "countryId": "visual-territory-09",
+    "economyId": "SCENARIO-ECONOMY-09",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-09",
+    "countryId": "visual-territory-09",
+    "economyId": "SCENARIO-ECONOMY-09",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-09",
+    "countryId": "visual-territory-09",
+    "economyId": "SCENARIO-ECONOMY-09",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-10",
+    "countryId": "visual-territory-10",
+    "economyId": "SCENARIO-ECONOMY-10",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-10",
+    "countryId": "visual-territory-10",
+    "economyId": "SCENARIO-ECONOMY-10",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-10",
+    "countryId": "visual-territory-10",
+    "economyId": "SCENARIO-ECONOMY-10",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-10",
+    "countryId": "visual-territory-10",
+    "economyId": "SCENARIO-ECONOMY-10",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-10",
+    "countryId": "visual-territory-10",
+    "economyId": "SCENARIO-ECONOMY-10",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-11",
+    "countryId": "visual-territory-11",
+    "economyId": "SCENARIO-ECONOMY-11",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-11",
+    "countryId": "visual-territory-11",
+    "economyId": "SCENARIO-ECONOMY-11",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-11",
+    "countryId": "visual-territory-11",
+    "economyId": "SCENARIO-ECONOMY-11",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-11",
+    "countryId": "visual-territory-11",
+    "economyId": "SCENARIO-ECONOMY-11",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-11",
+    "countryId": "visual-territory-11",
+    "economyId": "SCENARIO-ECONOMY-11",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-12",
+    "countryId": "visual-territory-12",
+    "economyId": "SCENARIO-ECONOMY-12",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-12",
+    "countryId": "visual-territory-12",
+    "economyId": "SCENARIO-ECONOMY-12",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-12",
+    "countryId": "visual-territory-12",
+    "economyId": "SCENARIO-ECONOMY-12",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-12",
+    "countryId": "visual-territory-12",
+    "economyId": "SCENARIO-ECONOMY-12",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-12",
+    "countryId": "visual-territory-12",
+    "economyId": "SCENARIO-ECONOMY-12",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-13",
+    "countryId": "visual-territory-13",
+    "economyId": "SCENARIO-ECONOMY-13",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-13",
+    "countryId": "visual-territory-13",
+    "economyId": "SCENARIO-ECONOMY-13",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-13",
+    "countryId": "visual-territory-13",
+    "economyId": "SCENARIO-ECONOMY-13",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-13",
+    "countryId": "visual-territory-13",
+    "economyId": "SCENARIO-ECONOMY-13",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-13",
+    "countryId": "visual-territory-13",
+    "economyId": "SCENARIO-ECONOMY-13",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-14",
+    "countryId": "visual-territory-14",
+    "economyId": "SCENARIO-ECONOMY-14",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-14",
+    "countryId": "visual-territory-14",
+    "economyId": "SCENARIO-ECONOMY-14",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-14",
+    "countryId": "visual-territory-14",
+    "economyId": "SCENARIO-ECONOMY-14",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-14",
+    "countryId": "visual-territory-14",
+    "economyId": "SCENARIO-ECONOMY-14",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-14",
+    "countryId": "visual-territory-14",
+    "economyId": "SCENARIO-ECONOMY-14",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-15",
+    "countryId": "visual-territory-15",
+    "economyId": "SCENARIO-ECONOMY-15",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-15",
+    "countryId": "visual-territory-15",
+    "economyId": "SCENARIO-ECONOMY-15",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-15",
+    "countryId": "visual-territory-15",
+    "economyId": "SCENARIO-ECONOMY-15",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-15",
+    "countryId": "visual-territory-15",
+    "economyId": "SCENARIO-ECONOMY-15",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-15",
+    "countryId": "visual-territory-15",
+    "economyId": "SCENARIO-ECONOMY-15",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-16",
+    "countryId": "visual-territory-16",
+    "economyId": "SCENARIO-ECONOMY-16",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-16",
+    "countryId": "visual-territory-16",
+    "economyId": "SCENARIO-ECONOMY-16",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-16",
+    "countryId": "visual-territory-16",
+    "economyId": "SCENARIO-ECONOMY-16",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-16",
+    "countryId": "visual-territory-16",
+    "economyId": "SCENARIO-ECONOMY-16",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-16",
+    "countryId": "visual-territory-16",
+    "economyId": "SCENARIO-ECONOMY-16",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-17",
+    "countryId": "visual-territory-17",
+    "economyId": "SCENARIO-ECONOMY-17",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-17",
+    "countryId": "visual-territory-17",
+    "economyId": "SCENARIO-ECONOMY-17",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-17",
+    "countryId": "visual-territory-17",
+    "economyId": "SCENARIO-ECONOMY-17",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-17",
+    "countryId": "visual-territory-17",
+    "economyId": "SCENARIO-ECONOMY-17",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-17",
+    "countryId": "visual-territory-17",
+    "economyId": "SCENARIO-ECONOMY-17",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-18",
+    "countryId": "visual-territory-18",
+    "economyId": "SCENARIO-ECONOMY-18",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-18",
+    "countryId": "visual-territory-18",
+    "economyId": "SCENARIO-ECONOMY-18",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-18",
+    "countryId": "visual-territory-18",
+    "economyId": "SCENARIO-ECONOMY-18",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-18",
+    "countryId": "visual-territory-18",
+    "economyId": "SCENARIO-ECONOMY-18",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-18",
+    "countryId": "visual-territory-18",
+    "economyId": "SCENARIO-ECONOMY-18",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-19",
+    "countryId": "visual-territory-19",
+    "economyId": "SCENARIO-ECONOMY-19",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-19",
+    "countryId": "visual-territory-19",
+    "economyId": "SCENARIO-ECONOMY-19",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-19",
+    "countryId": "visual-territory-19",
+    "economyId": "SCENARIO-ECONOMY-19",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-19",
+    "countryId": "visual-territory-19",
+    "economyId": "SCENARIO-ECONOMY-19",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-19",
+    "countryId": "visual-territory-19",
+    "economyId": "SCENARIO-ECONOMY-19",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-20",
+    "countryId": "visual-territory-20",
+    "economyId": "SCENARIO-ECONOMY-20",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-20",
+    "countryId": "visual-territory-20",
+    "economyId": "SCENARIO-ECONOMY-20",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-20",
+    "countryId": "visual-territory-20",
+    "economyId": "SCENARIO-ECONOMY-20",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-20",
+    "countryId": "visual-territory-20",
+    "economyId": "SCENARIO-ECONOMY-20",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-20",
+    "countryId": "visual-territory-20",
+    "economyId": "SCENARIO-ECONOMY-20",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-21",
+    "countryId": "visual-territory-21",
+    "economyId": "SCENARIO-ECONOMY-21",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-21",
+    "countryId": "visual-territory-21",
+    "economyId": "SCENARIO-ECONOMY-21",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-21",
+    "countryId": "visual-territory-21",
+    "economyId": "SCENARIO-ECONOMY-21",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-21",
+    "countryId": "visual-territory-21",
+    "economyId": "SCENARIO-ECONOMY-21",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-21",
+    "countryId": "visual-territory-21",
+    "economyId": "SCENARIO-ECONOMY-21",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-22",
+    "countryId": "visual-territory-22",
+    "economyId": "SCENARIO-ECONOMY-22",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-22",
+    "countryId": "visual-territory-22",
+    "economyId": "SCENARIO-ECONOMY-22",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-22",
+    "countryId": "visual-territory-22",
+    "economyId": "SCENARIO-ECONOMY-22",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-22",
+    "countryId": "visual-territory-22",
+    "economyId": "SCENARIO-ECONOMY-22",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-22",
+    "countryId": "visual-territory-22",
+    "economyId": "SCENARIO-ECONOMY-22",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-23",
+    "countryId": "visual-territory-23",
+    "economyId": "SCENARIO-ECONOMY-23",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-23",
+    "countryId": "visual-territory-23",
+    "economyId": "SCENARIO-ECONOMY-23",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-23",
+    "countryId": "visual-territory-23",
+    "economyId": "SCENARIO-ECONOMY-23",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-23",
+    "countryId": "visual-territory-23",
+    "economyId": "SCENARIO-ECONOMY-23",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-23",
+    "countryId": "visual-territory-23",
+    "economyId": "SCENARIO-ECONOMY-23",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-24",
+    "countryId": "visual-territory-24",
+    "economyId": "SCENARIO-ECONOMY-24",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-24",
+    "countryId": "visual-territory-24",
+    "economyId": "SCENARIO-ECONOMY-24",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-24",
+    "countryId": "visual-territory-24",
+    "economyId": "SCENARIO-ECONOMY-24",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-24",
+    "countryId": "visual-territory-24",
+    "economyId": "SCENARIO-ECONOMY-24",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-24",
+    "countryId": "visual-territory-24",
+    "economyId": "SCENARIO-ECONOMY-24",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-25",
+    "countryId": "visual-territory-25",
+    "economyId": "SCENARIO-ECONOMY-25",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-25",
+    "countryId": "visual-territory-25",
+    "economyId": "SCENARIO-ECONOMY-25",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-25",
+    "countryId": "visual-territory-25",
+    "economyId": "SCENARIO-ECONOMY-25",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-25",
+    "countryId": "visual-territory-25",
+    "economyId": "SCENARIO-ECONOMY-25",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-25",
+    "countryId": "visual-territory-25",
+    "economyId": "SCENARIO-ECONOMY-25",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-26",
+    "countryId": "visual-territory-26",
+    "economyId": "SCENARIO-ECONOMY-26",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-26",
+    "countryId": "visual-territory-26",
+    "economyId": "SCENARIO-ECONOMY-26",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-26",
+    "countryId": "visual-territory-26",
+    "economyId": "SCENARIO-ECONOMY-26",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-26",
+    "countryId": "visual-territory-26",
+    "economyId": "SCENARIO-ECONOMY-26",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-26",
+    "countryId": "visual-territory-26",
+    "economyId": "SCENARIO-ECONOMY-26",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-27",
+    "countryId": "visual-territory-27",
+    "economyId": "SCENARIO-ECONOMY-27",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-27",
+    "countryId": "visual-territory-27",
+    "economyId": "SCENARIO-ECONOMY-27",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-27",
+    "countryId": "visual-territory-27",
+    "economyId": "SCENARIO-ECONOMY-27",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-27",
+    "countryId": "visual-territory-27",
+    "economyId": "SCENARIO-ECONOMY-27",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-27",
+    "countryId": "visual-territory-27",
+    "economyId": "SCENARIO-ECONOMY-27",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-28",
+    "countryId": "visual-territory-28",
+    "economyId": "SCENARIO-ECONOMY-28",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-28",
+    "countryId": "visual-territory-28",
+    "economyId": "SCENARIO-ECONOMY-28",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-28",
+    "countryId": "visual-territory-28",
+    "economyId": "SCENARIO-ECONOMY-28",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-28",
+    "countryId": "visual-territory-28",
+    "economyId": "SCENARIO-ECONOMY-28",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-28",
+    "countryId": "visual-territory-28",
+    "economyId": "SCENARIO-ECONOMY-28",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-29",
+    "countryId": "visual-territory-29",
+    "economyId": "SCENARIO-ECONOMY-29",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-29",
+    "countryId": "visual-territory-29",
+    "economyId": "SCENARIO-ECONOMY-29",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-29",
+    "countryId": "visual-territory-29",
+    "economyId": "SCENARIO-ECONOMY-29",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-29",
+    "countryId": "visual-territory-29",
+    "economyId": "SCENARIO-ECONOMY-29",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-29",
+    "countryId": "visual-territory-29",
+    "economyId": "SCENARIO-ECONOMY-29",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-30",
+    "countryId": "visual-territory-30",
+    "economyId": "SCENARIO-ECONOMY-30",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-30",
+    "countryId": "visual-territory-30",
+    "economyId": "SCENARIO-ECONOMY-30",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-30",
+    "countryId": "visual-territory-30",
+    "economyId": "SCENARIO-ECONOMY-30",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-30",
+    "countryId": "visual-territory-30",
+    "economyId": "SCENARIO-ECONOMY-30",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-30",
+    "countryId": "visual-territory-30",
+    "economyId": "SCENARIO-ECONOMY-30",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-31",
+    "countryId": "visual-territory-31",
+    "economyId": "SCENARIO-ECONOMY-31",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-31",
+    "countryId": "visual-territory-31",
+    "economyId": "SCENARIO-ECONOMY-31",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-31",
+    "countryId": "visual-territory-31",
+    "economyId": "SCENARIO-ECONOMY-31",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-31",
+    "countryId": "visual-territory-31",
+    "economyId": "SCENARIO-ECONOMY-31",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-31",
+    "countryId": "visual-territory-31",
+    "economyId": "SCENARIO-ECONOMY-31",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-32",
+    "countryId": "visual-territory-32",
+    "economyId": "SCENARIO-ECONOMY-32",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-32",
+    "countryId": "visual-territory-32",
+    "economyId": "SCENARIO-ECONOMY-32",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-32",
+    "countryId": "visual-territory-32",
+    "economyId": "SCENARIO-ECONOMY-32",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-32",
+    "countryId": "visual-territory-32",
+    "economyId": "SCENARIO-ECONOMY-32",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-32",
+    "countryId": "visual-territory-32",
+    "economyId": "SCENARIO-ECONOMY-32",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-33",
+    "countryId": "visual-territory-33",
+    "economyId": "SCENARIO-ECONOMY-33",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-33",
+    "countryId": "visual-territory-33",
+    "economyId": "SCENARIO-ECONOMY-33",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-33",
+    "countryId": "visual-territory-33",
+    "economyId": "SCENARIO-ECONOMY-33",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-33",
+    "countryId": "visual-territory-33",
+    "economyId": "SCENARIO-ECONOMY-33",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-33",
+    "countryId": "visual-territory-33",
+    "economyId": "SCENARIO-ECONOMY-33",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-34",
+    "countryId": "visual-territory-34",
+    "economyId": "SCENARIO-ECONOMY-34",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-34",
+    "countryId": "visual-territory-34",
+    "economyId": "SCENARIO-ECONOMY-34",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-34",
+    "countryId": "visual-territory-34",
+    "economyId": "SCENARIO-ECONOMY-34",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-34",
+    "countryId": "visual-territory-34",
+    "economyId": "SCENARIO-ECONOMY-34",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-34",
+    "countryId": "visual-territory-34",
+    "economyId": "SCENARIO-ECONOMY-34",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-35",
+    "countryId": "visual-territory-35",
+    "economyId": "SCENARIO-ECONOMY-35",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-35",
+    "countryId": "visual-territory-35",
+    "economyId": "SCENARIO-ECONOMY-35",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-35",
+    "countryId": "visual-territory-35",
+    "economyId": "SCENARIO-ECONOMY-35",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-35",
+    "countryId": "visual-territory-35",
+    "economyId": "SCENARIO-ECONOMY-35",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-35",
+    "countryId": "visual-territory-35",
+    "economyId": "SCENARIO-ECONOMY-35",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-36",
+    "countryId": "visual-territory-36",
+    "economyId": "SCENARIO-ECONOMY-36",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-36",
+    "countryId": "visual-territory-36",
+    "economyId": "SCENARIO-ECONOMY-36",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-36",
+    "countryId": "visual-territory-36",
+    "economyId": "SCENARIO-ECONOMY-36",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-36",
+    "countryId": "visual-territory-36",
+    "economyId": "SCENARIO-ECONOMY-36",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-36",
+    "countryId": "visual-territory-36",
+    "economyId": "SCENARIO-ECONOMY-36",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-37",
+    "countryId": "visual-territory-37",
+    "economyId": "SCENARIO-ECONOMY-37",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-37",
+    "countryId": "visual-territory-37",
+    "economyId": "SCENARIO-ECONOMY-37",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-37",
+    "countryId": "visual-territory-37",
+    "economyId": "SCENARIO-ECONOMY-37",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-37",
+    "countryId": "visual-territory-37",
+    "economyId": "SCENARIO-ECONOMY-37",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-37",
+    "countryId": "visual-territory-37",
+    "economyId": "SCENARIO-ECONOMY-37",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-38",
+    "countryId": "visual-territory-38",
+    "economyId": "SCENARIO-ECONOMY-38",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-38",
+    "countryId": "visual-territory-38",
+    "economyId": "SCENARIO-ECONOMY-38",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-38",
+    "countryId": "visual-territory-38",
+    "economyId": "SCENARIO-ECONOMY-38",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-38",
+    "countryId": "visual-territory-38",
+    "economyId": "SCENARIO-ECONOMY-38",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-38",
+    "countryId": "visual-territory-38",
+    "economyId": "SCENARIO-ECONOMY-38",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-39",
+    "countryId": "visual-territory-39",
+    "economyId": "SCENARIO-ECONOMY-39",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-39",
+    "countryId": "visual-territory-39",
+    "economyId": "SCENARIO-ECONOMY-39",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-39",
+    "countryId": "visual-territory-39",
+    "economyId": "SCENARIO-ECONOMY-39",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-39",
+    "countryId": "visual-territory-39",
+    "economyId": "SCENARIO-ECONOMY-39",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-39",
+    "countryId": "visual-territory-39",
+    "economyId": "SCENARIO-ECONOMY-39",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-40",
+    "countryId": "visual-territory-40",
+    "economyId": "SCENARIO-ECONOMY-40",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-40",
+    "countryId": "visual-territory-40",
+    "economyId": "SCENARIO-ECONOMY-40",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-40",
+    "countryId": "visual-territory-40",
+    "economyId": "SCENARIO-ECONOMY-40",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-40",
+    "countryId": "visual-territory-40",
+    "economyId": "SCENARIO-ECONOMY-40",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-40",
+    "countryId": "visual-territory-40",
+    "economyId": "SCENARIO-ECONOMY-40",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-41",
+    "countryId": "visual-territory-41",
+    "economyId": "SCENARIO-ECONOMY-41",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-41",
+    "countryId": "visual-territory-41",
+    "economyId": "SCENARIO-ECONOMY-41",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-41",
+    "countryId": "visual-territory-41",
+    "economyId": "SCENARIO-ECONOMY-41",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-41",
+    "countryId": "visual-territory-41",
+    "economyId": "SCENARIO-ECONOMY-41",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-41",
+    "countryId": "visual-territory-41",
+    "economyId": "SCENARIO-ECONOMY-41",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-42",
+    "countryId": "visual-territory-42",
+    "economyId": "SCENARIO-ECONOMY-42",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-42",
+    "countryId": "visual-territory-42",
+    "economyId": "SCENARIO-ECONOMY-42",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-42",
+    "countryId": "visual-territory-42",
+    "economyId": "SCENARIO-ECONOMY-42",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-42",
+    "countryId": "visual-territory-42",
+    "economyId": "SCENARIO-ECONOMY-42",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-42",
+    "countryId": "visual-territory-42",
+    "economyId": "SCENARIO-ECONOMY-42",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-43",
+    "countryId": "visual-territory-43",
+    "economyId": "SCENARIO-ECONOMY-43",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-43",
+    "countryId": "visual-territory-43",
+    "economyId": "SCENARIO-ECONOMY-43",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-43",
+    "countryId": "visual-territory-43",
+    "economyId": "SCENARIO-ECONOMY-43",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-43",
+    "countryId": "visual-territory-43",
+    "economyId": "SCENARIO-ECONOMY-43",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-43",
+    "countryId": "visual-territory-43",
+    "economyId": "SCENARIO-ECONOMY-43",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-44",
+    "countryId": "visual-territory-44",
+    "economyId": "SCENARIO-ECONOMY-44",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-44",
+    "countryId": "visual-territory-44",
+    "economyId": "SCENARIO-ECONOMY-44",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-44",
+    "countryId": "visual-territory-44",
+    "economyId": "SCENARIO-ECONOMY-44",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-44",
+    "countryId": "visual-territory-44",
+    "economyId": "SCENARIO-ECONOMY-44",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-44",
+    "countryId": "visual-territory-44",
+    "economyId": "SCENARIO-ECONOMY-44",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-45",
+    "countryId": "visual-territory-45",
+    "economyId": "SCENARIO-ECONOMY-45",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-45",
+    "countryId": "visual-territory-45",
+    "economyId": "SCENARIO-ECONOMY-45",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-45",
+    "countryId": "visual-territory-45",
+    "economyId": "SCENARIO-ECONOMY-45",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-45",
+    "countryId": "visual-territory-45",
+    "economyId": "SCENARIO-ECONOMY-45",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-45",
+    "countryId": "visual-territory-45",
+    "economyId": "SCENARIO-ECONOMY-45",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-46",
+    "countryId": "visual-territory-46",
+    "economyId": "SCENARIO-ECONOMY-46",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-46",
+    "countryId": "visual-territory-46",
+    "economyId": "SCENARIO-ECONOMY-46",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-46",
+    "countryId": "visual-territory-46",
+    "economyId": "SCENARIO-ECONOMY-46",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-46",
+    "countryId": "visual-territory-46",
+    "economyId": "SCENARIO-ECONOMY-46",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-46",
+    "countryId": "visual-territory-46",
+    "economyId": "SCENARIO-ECONOMY-46",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-47",
+    "countryId": "visual-territory-47",
+    "economyId": "SCENARIO-ECONOMY-47",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-47",
+    "countryId": "visual-territory-47",
+    "economyId": "SCENARIO-ECONOMY-47",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-47",
+    "countryId": "visual-territory-47",
+    "economyId": "SCENARIO-ECONOMY-47",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-47",
+    "countryId": "visual-territory-47",
+    "economyId": "SCENARIO-ECONOMY-47",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-47",
+    "countryId": "visual-territory-47",
+    "economyId": "SCENARIO-ECONOMY-47",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-48",
+    "countryId": "visual-territory-48",
+    "economyId": "SCENARIO-ECONOMY-48",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-48",
+    "countryId": "visual-territory-48",
+    "economyId": "SCENARIO-ECONOMY-48",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-48",
+    "countryId": "visual-territory-48",
+    "economyId": "SCENARIO-ECONOMY-48",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-48",
+    "countryId": "visual-territory-48",
+    "economyId": "SCENARIO-ECONOMY-48",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-48",
+    "countryId": "visual-territory-48",
+    "economyId": "SCENARIO-ECONOMY-48",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-49",
+    "countryId": "visual-territory-49",
+    "economyId": "SCENARIO-ECONOMY-49",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-49",
+    "countryId": "visual-territory-49",
+    "economyId": "SCENARIO-ECONOMY-49",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-49",
+    "countryId": "visual-territory-49",
+    "economyId": "SCENARIO-ECONOMY-49",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-49",
+    "countryId": "visual-territory-49",
+    "economyId": "SCENARIO-ECONOMY-49",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-49",
+    "countryId": "visual-territory-49",
+    "economyId": "SCENARIO-ECONOMY-49",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-50",
+    "countryId": "visual-territory-50",
+    "economyId": "SCENARIO-ECONOMY-50",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-50",
+    "countryId": "visual-territory-50",
+    "economyId": "SCENARIO-ECONOMY-50",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-50",
+    "countryId": "visual-territory-50",
+    "economyId": "SCENARIO-ECONOMY-50",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-50",
+    "countryId": "visual-territory-50",
+    "economyId": "SCENARIO-ECONOMY-50",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-50",
+    "countryId": "visual-territory-50",
+    "economyId": "SCENARIO-ECONOMY-50",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-51",
+    "countryId": "visual-territory-51",
+    "economyId": "SCENARIO-ECONOMY-51",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-51",
+    "countryId": "visual-territory-51",
+    "economyId": "SCENARIO-ECONOMY-51",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-51",
+    "countryId": "visual-territory-51",
+    "economyId": "SCENARIO-ECONOMY-51",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-51",
+    "countryId": "visual-territory-51",
+    "economyId": "SCENARIO-ECONOMY-51",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-51",
+    "countryId": "visual-territory-51",
+    "economyId": "SCENARIO-ECONOMY-51",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-52",
+    "countryId": "visual-territory-52",
+    "economyId": "SCENARIO-ECONOMY-52",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-52",
+    "countryId": "visual-territory-52",
+    "economyId": "SCENARIO-ECONOMY-52",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-52",
+    "countryId": "visual-territory-52",
+    "economyId": "SCENARIO-ECONOMY-52",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-52",
+    "countryId": "visual-territory-52",
+    "economyId": "SCENARIO-ECONOMY-52",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-52",
+    "countryId": "visual-territory-52",
+    "economyId": "SCENARIO-ECONOMY-52",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-53",
+    "countryId": "visual-territory-53",
+    "economyId": "SCENARIO-ECONOMY-53",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-53",
+    "countryId": "visual-territory-53",
+    "economyId": "SCENARIO-ECONOMY-53",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-53",
+    "countryId": "visual-territory-53",
+    "economyId": "SCENARIO-ECONOMY-53",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-53",
+    "countryId": "visual-territory-53",
+    "economyId": "SCENARIO-ECONOMY-53",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-53",
+    "countryId": "visual-territory-53",
+    "economyId": "SCENARIO-ECONOMY-53",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-54",
+    "countryId": "visual-territory-54",
+    "economyId": "SCENARIO-ECONOMY-54",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-54",
+    "countryId": "visual-territory-54",
+    "economyId": "SCENARIO-ECONOMY-54",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-54",
+    "countryId": "visual-territory-54",
+    "economyId": "SCENARIO-ECONOMY-54",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-54",
+    "countryId": "visual-territory-54",
+    "economyId": "SCENARIO-ECONOMY-54",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-54",
+    "countryId": "visual-territory-54",
+    "economyId": "SCENARIO-ECONOMY-54",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-55",
+    "countryId": "visual-territory-55",
+    "economyId": "SCENARIO-ECONOMY-55",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-55",
+    "countryId": "visual-territory-55",
+    "economyId": "SCENARIO-ECONOMY-55",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-55",
+    "countryId": "visual-territory-55",
+    "economyId": "SCENARIO-ECONOMY-55",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-55",
+    "countryId": "visual-territory-55",
+    "economyId": "SCENARIO-ECONOMY-55",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-55",
+    "countryId": "visual-territory-55",
+    "economyId": "SCENARIO-ECONOMY-55",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-56",
+    "countryId": "visual-territory-56",
+    "economyId": "SCENARIO-ECONOMY-56",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-56",
+    "countryId": "visual-territory-56",
+    "economyId": "SCENARIO-ECONOMY-56",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-56",
+    "countryId": "visual-territory-56",
+    "economyId": "SCENARIO-ECONOMY-56",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-56",
+    "countryId": "visual-territory-56",
+    "economyId": "SCENARIO-ECONOMY-56",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-56",
+    "countryId": "visual-territory-56",
+    "economyId": "SCENARIO-ECONOMY-56",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-57",
+    "countryId": "visual-territory-57",
+    "economyId": "SCENARIO-ECONOMY-57",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-57",
+    "countryId": "visual-territory-57",
+    "economyId": "SCENARIO-ECONOMY-57",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-57",
+    "countryId": "visual-territory-57",
+    "economyId": "SCENARIO-ECONOMY-57",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-57",
+    "countryId": "visual-territory-57",
+    "economyId": "SCENARIO-ECONOMY-57",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-57",
+    "countryId": "visual-territory-57",
+    "economyId": "SCENARIO-ECONOMY-57",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-58",
+    "countryId": "visual-territory-58",
+    "economyId": "SCENARIO-ECONOMY-58",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-58",
+    "countryId": "visual-territory-58",
+    "economyId": "SCENARIO-ECONOMY-58",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-58",
+    "countryId": "visual-territory-58",
+    "economyId": "SCENARIO-ECONOMY-58",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-58",
+    "countryId": "visual-territory-58",
+    "economyId": "SCENARIO-ECONOMY-58",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-58",
+    "countryId": "visual-territory-58",
+    "economyId": "SCENARIO-ECONOMY-58",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-59",
+    "countryId": "visual-territory-59",
+    "economyId": "SCENARIO-ECONOMY-59",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-59",
+    "countryId": "visual-territory-59",
+    "economyId": "SCENARIO-ECONOMY-59",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-59",
+    "countryId": "visual-territory-59",
+    "economyId": "SCENARIO-ECONOMY-59",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-59",
+    "countryId": "visual-territory-59",
+    "economyId": "SCENARIO-ECONOMY-59",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-59",
+    "countryId": "visual-territory-59",
+    "economyId": "SCENARIO-ECONOMY-59",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-60",
+    "countryId": "visual-territory-60",
+    "economyId": "SCENARIO-ECONOMY-60",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-60",
+    "countryId": "visual-territory-60",
+    "economyId": "SCENARIO-ECONOMY-60",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-60",
+    "countryId": "visual-territory-60",
+    "economyId": "SCENARIO-ECONOMY-60",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-60",
+    "countryId": "visual-territory-60",
+    "economyId": "SCENARIO-ECONOMY-60",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-60",
+    "countryId": "visual-territory-60",
+    "economyId": "SCENARIO-ECONOMY-60",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-61",
+    "countryId": "visual-territory-61",
+    "economyId": "SCENARIO-ECONOMY-61",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-61",
+    "countryId": "visual-territory-61",
+    "economyId": "SCENARIO-ECONOMY-61",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-61",
+    "countryId": "visual-territory-61",
+    "economyId": "SCENARIO-ECONOMY-61",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-61",
+    "countryId": "visual-territory-61",
+    "economyId": "SCENARIO-ECONOMY-61",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-61",
+    "countryId": "visual-territory-61",
+    "economyId": "SCENARIO-ECONOMY-61",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-62",
+    "countryId": "visual-territory-62",
+    "economyId": "SCENARIO-ECONOMY-62",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-62",
+    "countryId": "visual-territory-62",
+    "economyId": "SCENARIO-ECONOMY-62",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-62",
+    "countryId": "visual-territory-62",
+    "economyId": "SCENARIO-ECONOMY-62",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-62",
+    "countryId": "visual-territory-62",
+    "economyId": "SCENARIO-ECONOMY-62",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-62",
+    "countryId": "visual-territory-62",
+    "economyId": "SCENARIO-ECONOMY-62",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-63",
+    "countryId": "visual-territory-63",
+    "economyId": "SCENARIO-ECONOMY-63",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-63",
+    "countryId": "visual-territory-63",
+    "economyId": "SCENARIO-ECONOMY-63",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-63",
+    "countryId": "visual-territory-63",
+    "economyId": "SCENARIO-ECONOMY-63",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-63",
+    "countryId": "visual-territory-63",
+    "economyId": "SCENARIO-ECONOMY-63",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-63",
+    "countryId": "visual-territory-63",
+    "economyId": "SCENARIO-ECONOMY-63",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-64",
+    "countryId": "visual-territory-64",
+    "economyId": "SCENARIO-ECONOMY-64",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-64",
+    "countryId": "visual-territory-64",
+    "economyId": "SCENARIO-ECONOMY-64",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-64",
+    "countryId": "visual-territory-64",
+    "economyId": "SCENARIO-ECONOMY-64",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-64",
+    "countryId": "visual-territory-64",
+    "economyId": "SCENARIO-ECONOMY-64",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-64",
+    "countryId": "visual-territory-64",
+    "economyId": "SCENARIO-ECONOMY-64",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-65",
+    "countryId": "visual-territory-65",
+    "economyId": "SCENARIO-ECONOMY-65",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-65",
+    "countryId": "visual-territory-65",
+    "economyId": "SCENARIO-ECONOMY-65",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-65",
+    "countryId": "visual-territory-65",
+    "economyId": "SCENARIO-ECONOMY-65",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-65",
+    "countryId": "visual-territory-65",
+    "economyId": "SCENARIO-ECONOMY-65",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-65",
+    "countryId": "visual-territory-65",
+    "economyId": "SCENARIO-ECONOMY-65",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-66",
+    "countryId": "visual-territory-66",
+    "economyId": "SCENARIO-ECONOMY-66",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-66",
+    "countryId": "visual-territory-66",
+    "economyId": "SCENARIO-ECONOMY-66",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-66",
+    "countryId": "visual-territory-66",
+    "economyId": "SCENARIO-ECONOMY-66",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-66",
+    "countryId": "visual-territory-66",
+    "economyId": "SCENARIO-ECONOMY-66",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-66",
+    "countryId": "visual-territory-66",
+    "economyId": "SCENARIO-ECONOMY-66",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-67",
+    "countryId": "visual-territory-67",
+    "economyId": "SCENARIO-ECONOMY-67",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-67",
+    "countryId": "visual-territory-67",
+    "economyId": "SCENARIO-ECONOMY-67",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-67",
+    "countryId": "visual-territory-67",
+    "economyId": "SCENARIO-ECONOMY-67",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-67",
+    "countryId": "visual-territory-67",
+    "economyId": "SCENARIO-ECONOMY-67",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-67",
+    "countryId": "visual-territory-67",
+    "economyId": "SCENARIO-ECONOMY-67",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-68",
+    "countryId": "visual-territory-68",
+    "economyId": "SCENARIO-ECONOMY-68",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-68",
+    "countryId": "visual-territory-68",
+    "economyId": "SCENARIO-ECONOMY-68",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-68",
+    "countryId": "visual-territory-68",
+    "economyId": "SCENARIO-ECONOMY-68",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-68",
+    "countryId": "visual-territory-68",
+    "economyId": "SCENARIO-ECONOMY-68",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-68",
+    "countryId": "visual-territory-68",
+    "economyId": "SCENARIO-ECONOMY-68",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-69",
+    "countryId": "visual-territory-69",
+    "economyId": "SCENARIO-ECONOMY-69",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-69",
+    "countryId": "visual-territory-69",
+    "economyId": "SCENARIO-ECONOMY-69",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-69",
+    "countryId": "visual-territory-69",
+    "economyId": "SCENARIO-ECONOMY-69",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-69",
+    "countryId": "visual-territory-69",
+    "economyId": "SCENARIO-ECONOMY-69",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-69",
+    "countryId": "visual-territory-69",
+    "economyId": "SCENARIO-ECONOMY-69",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "GOV-70",
+    "countryId": "visual-territory-70",
+    "economyId": "SCENARIO-ECONOMY-70",
+    "role": "GOV",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "OP-70",
+    "countryId": "visual-territory-70",
+    "economyId": "SCENARIO-ECONOMY-70",
+    "role": "OP",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "HOUSEHOLDS-70",
+    "countryId": "visual-territory-70",
+    "economyId": "SCENARIO-ECONOMY-70",
+    "role": "HOUSEHOLDS",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "BANK-70",
+    "countryId": "visual-territory-70",
+    "economyId": "SCENARIO-ECONOMY-70",
+    "role": "BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  },
+  {
+    "id": "CENTRAL-BANK-70",
+    "countryId": "visual-territory-70",
+    "economyId": "SCENARIO-ECONOMY-70",
+    "role": "CENTRAL-BANK",
+    "realTeamBinding": null,
+    "bindingMode": "UNASSIGNED_TEAM_WITH_CANDIDATE_NPC_ADMINISTRATION"
+  }
+]

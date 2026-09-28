@@ -1,6 +1,37 @@
 import './landing.css';
+import { lazy, Suspense } from 'react';
+
+const ContinentExplorer = lazy(async () => ({
+  default: (await import('./map-explorer/ContinentExplorer.js'))
+    .ContinentExplorer,
+}));
+const FictionalWorldMap = lazy(async () => ({
+  default: (await import('./map-lab/FictionalWorldMap.js')).FictionalWorldMap,
+}));
+const WorldExplorer = lazy(async () => ({
+  default: (await import('./map-explorer/WorldExplorer.js')).WorldExplorer,
+}));
 
 export function App() {
+  const atlas = new URLSearchParams(window.location.search).get('atlas');
+  if (atlas === 'continents' || atlas === 'explorer' || atlas === 'map') {
+    const view =
+      atlas === 'continents' ? (
+        <ContinentExplorer />
+      ) : atlas === 'explorer' ? (
+        <WorldExplorer />
+      ) : (
+        <FictionalWorldMap />
+      );
+    return (
+      <Suspense
+        fallback={<main className="world-landing">Loading atlas…</main>}
+      >
+        {view}
+      </Suspense>
+    );
+  }
+
   return (
     <main className="world-landing">
       <section className="world-landing__panel" aria-labelledby="world-title">
@@ -14,9 +45,17 @@ export function App() {
         <a className="world-landing__action" href="./command.html">
           Open national command
         </a>
+        <nav
+          className="world-landing__atlas-links"
+          aria-label="World atlas previews"
+        >
+          <a href="?atlas=explorer">Explore 70 country maps</a>
+          <a href="?atlas=continents">Explore four continents</a>
+          <a href="?atlas=map">Open layered world map</a>
+        </nav>
         <p className="world-landing__boundary">
-          Public preview only. It does not connect to World State or establish
-          Gate B evidence.
+          Public previews and illustrative planning data only. They do not
+          connect to World State or establish Gate B evidence.
         </p>
       </section>
     </main>

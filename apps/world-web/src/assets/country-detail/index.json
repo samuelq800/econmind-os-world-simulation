@@ -1,0 +1,1752 @@
+[
+  {
+    "id": "visual-territory-01",
+    "number": "01",
+    "name": "Avenor",
+    "file": "01-avenor.svg",
+    "viewBox": [
+      1528.9,
+      206.9,
+      107.2,
+      137.2
+    ],
+    "trees": 261,
+    "fields": 85,
+    "mountainSymbols": 12,
+    "buildings": 55,
+    "facilityIds": [
+      "SF001",
+      "SF002",
+      "SF003",
+      "SF004",
+      "SF005"
+    ],
+    "sha256": "8454c3efb17d879452ee18963b994e85197bf3889ee5317e812916894857aab0",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-02",
+    "number": "02",
+    "name": "Brelis",
+    "file": "02-brelis.svg",
+    "viewBox": [
+      1576.7,
+      225.7,
+      125.6,
+      131.6
+    ],
+    "trees": 259,
+    "fields": 170,
+    "mountainSymbols": 21,
+    "buildings": 55,
+    "facilityIds": [
+      "SF006",
+      "SF007",
+      "SF008",
+      "SF009",
+      "SF010",
+      "SF011"
+    ],
+    "sha256": "5fa49236fdb033cb8efdb8eb97eb7a2bcd107478bda25ab85d398ead63bb8cc8",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-03",
+    "number": "03",
+    "name": "Caedon",
+    "file": "03-caedon.svg",
+    "viewBox": [
+      1371.1,
+      281.1,
+      156.8,
+      177.8
+    ],
+    "trees": 550,
+    "fields": 50,
+    "mountainSymbols": 53,
+    "buildings": 104,
+    "facilityIds": [
+      "SF012",
+      "SF013",
+      "SF014",
+      "SF015",
+      "SF016",
+      "SF017",
+      "SF018",
+      "SF019",
+      "SF020"
+    ],
+    "sha256": "ba585c685fede27679cd775205f7a67da86c0be4efcfd932e8e69568d2317990",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-04",
+    "number": "04",
+    "name": "Darsin",
+    "file": "04-darsin.svg",
+    "viewBox": [
+      1429.9,
+      192.9,
+      170.2,
+      214.2
+    ],
+    "trees": 614,
+    "fields": 89,
+    "mountainSymbols": 65,
+    "buildings": 94,
+    "facilityIds": [
+      "H05",
+      "SF021",
+      "SF022",
+      "SF023",
+      "SF024",
+      "SF025",
+      "SF026",
+      "SF027"
+    ],
+    "sha256": "df1ceb3f2a782b3de15fac0937a9445ca765dc3f682576a6e59594756f246550",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-05",
+    "number": "05",
+    "name": "Ellovar",
+    "file": "05-ellovar.svg",
+    "viewBox": [
+      1533.3,
+      290.3,
+      134.4,
+      155.4
+    ],
+    "trees": 438,
+    "fields": 92,
+    "mountainSymbols": 8,
+    "buildings": 110,
+    "facilityIds": [
+      "SF028",
+      "SF029",
+      "SF030",
+      "SF031",
+      "SF032",
+      "SF033",
+      "SF034"
+    ],
+    "sha256": "da2b03d3bb61b27ebf7bf87ee8868a6def69cf560ae8b601f24c7be84972762c",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-06",
+    "number": "06",
+    "name": "Faren",
+    "file": "06-faren.svg",
+    "viewBox": [
+      1257.9,
+      342.9,
+      207.2,
+      195.2
+    ],
+    "trees": 650,
+    "fields": 170,
+    "mountainSymbols": 54,
+    "buildings": 99,
+    "facilityIds": [
+      "SF035",
+      "SF036",
+      "SF037",
+      "SF038",
+      "SF039",
+      "SF040",
+      "SF041"
+    ],
+    "sha256": "17e4413c071b067c2dec8ab05438f8a0585151ea1d00eb4ab864e9b37231d08c",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-07",
+    "number": "07",
+    "name": "Galdra",
+    "file": "07-galdra.svg",
+    "viewBox": [
+      1406.5,
+      368.5,
+      140.0,
+      138.0
+    ],
+    "trees": 249,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "P09",
+      "SF042",
+      "SF043",
+      "SF044",
+      "SF045",
+      "SF046",
+      "SF047"
+    ],
+    "sha256": "6c9ad06bd7f14642100213384059f8a7cdabfd773c96bec51dd7140c9887d093",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-08",
+    "number": "08",
+    "name": "Hethen",
+    "file": "08-hethen.svg",
+    "viewBox": [
+      1469.1,
+      330.1,
+      148.8,
+      177.8
+    ],
+    "trees": 474,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 97,
+    "facilityIds": [
+      "SF048",
+      "SF049",
+      "SF050",
+      "SF051",
+      "SF052",
+      "SF053",
+      "SF054"
+    ],
+    "sha256": "b5c2424d087f3942610c2ed38d09b871797c595ce48d0db64ec5fd6b417c40d3",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-09",
+    "number": "09",
+    "name": "Istrel",
+    "file": "09-istrel.svg",
+    "viewBox": [
+      1020.5,
+      475.5,
+      168.0,
+      152.0
+    ],
+    "trees": 272,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 106,
+    "facilityIds": [
+      "SF055",
+      "SF056",
+      "SF057",
+      "SF058"
+    ],
+    "sha256": "95d53a86fcf16d2c7c75eb7c2363a9f9bfa4c0d28dce2cc248c37ac5b363e9bb",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-10",
+    "number": "10",
+    "name": "Jorun",
+    "file": "10-jorun.svg",
+    "viewBox": [
+      1065.1,
+      387.1,
+      193.8,
+      226.8
+    ],
+    "trees": 351,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 109,
+    "facilityIds": [
+      "SF059",
+      "SF060",
+      "SF061"
+    ],
+    "sha256": "86958c79726df6b8a84dc8bfa87fbb518c8ea553e9d300d36430a2f9b8cdec85",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-11",
+    "number": "11",
+    "name": "Keldan",
+    "file": "11-keldan.svg",
+    "viewBox": [
+      1139.1,
+      520.1,
+      149.8,
+      120.80000000000001
+    ],
+    "trees": 4,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 55,
+    "facilityIds": [
+      "SF062",
+      "SF063",
+      "SF064"
+    ],
+    "sha256": "bd46814df8291d93b8ba8390610c77ee30eabc3da9a6e60f93b608d6754111f5",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-12",
+    "number": "12",
+    "name": "Lumer",
+    "file": "12-lumer.svg",
+    "viewBox": [
+      1187.1,
+      430.1,
+      191.8,
+      161.8
+    ],
+    "trees": 222,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 109,
+    "facilityIds": [
+      "H06",
+      "SF065",
+      "SF066",
+      "SF067"
+    ],
+    "sha256": "3189e011c2072c07e8c2a26dddc9f2ac03debcd1f3f06d118180f63e6f3f753a",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-13",
+    "number": "13",
+    "name": "Meros",
+    "file": "13-meros.svg",
+    "viewBox": [
+      1239.5,
+      522.5,
+      161.0,
+      146.0
+    ],
+    "trees": 5,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "SF068",
+      "SF069"
+    ],
+    "sha256": "a4aa035f617d0a5b213da5e4074d6037ccdbccd6cfda8fd55166ada9dd5b5a55",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-14",
+    "number": "14",
+    "name": "Nadrin",
+    "file": "14-nadrin.svg",
+    "viewBox": [
+      1314.1,
+      448.1,
+      156.8,
+      136.8
+    ],
+    "trees": 287,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "SF070",
+      "SF071",
+      "SF072",
+      "SF073",
+      "SF074"
+    ],
+    "sha256": "9f106cfb4646270ba5895c58acb6b7b3489be3829cf139147454c857e0bbfefc",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-15",
+    "number": "15",
+    "name": "Orelis",
+    "file": "15-orelis.svg",
+    "viewBox": [
+      1340.5,
+      488.5,
+      165.0,
+      168.0
+    ],
+    "trees": 588,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 98,
+    "facilityIds": [
+      "SF075",
+      "SF076",
+      "SF077",
+      "SF078",
+      "SF079",
+      "SF080",
+      "SF081"
+    ],
+    "sha256": "a61c483239e17092fcb5de933ca41f7c4b76d134265534482242f3d77e67b32d",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-16",
+    "number": "16",
+    "name": "Paryn",
+    "file": "16-paryn.svg",
+    "viewBox": [
+      1424.9,
+      463.9,
+      231.2,
+      242.2
+    ],
+    "trees": 650,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 99,
+    "facilityIds": [
+      "SF082",
+      "SF083",
+      "SF084",
+      "SF085",
+      "SF086",
+      "SF087",
+      "SF088",
+      "SF089"
+    ],
+    "sha256": "3d99b5b8102f43e7c5c2215dcb486b92495dd01f5d55b329200304da57faab01",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-17",
+    "number": "17",
+    "name": "Quoran",
+    "file": "17-quoran.svg",
+    "viewBox": [
+      908.9,
+      544.9,
+      137.2,
+      125.2
+    ],
+    "trees": 68,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 55,
+    "facilityIds": [
+      "P12",
+      "SF090",
+      "SF091",
+      "SF092"
+    ],
+    "sha256": "36e0b74c2687d177c327e4d19bc1e172fe8e33df75640e0959d202b57a94284e",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-18",
+    "number": "18",
+    "name": "Rassel",
+    "file": "18-rassel.svg",
+    "viewBox": [
+      983.9,
+      633.9,
+      123.2,
+      102.2
+    ],
+    "trees": 121,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 55,
+    "facilityIds": [
+      "SF093",
+      "SF094"
+    ],
+    "sha256": "dd4eb00e34335695dc77ee62f8d839a458dbaa8b0554762e71383874ddbe4f9d",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-19",
+    "number": "19",
+    "name": "Siven",
+    "file": "19-siven.svg",
+    "viewBox": [
+      995.7,
+      555.7,
+      124.6,
+      117.6
+    ],
+    "trees": 105,
+    "fields": 170,
+    "mountainSymbols": 26,
+    "buildings": 55,
+    "facilityIds": [
+      "SF095",
+      "SF096",
+      "SF097",
+      "SF098"
+    ],
+    "sha256": "b680c5a50fcca6ab63243865ee294df7a19a8d4007be7bcfcb320c013bd1f8f1",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-20",
+    "number": "20",
+    "name": "Talan",
+    "file": "20-talan.svg",
+    "viewBox": [
+      1056.7,
+      565.7,
+      149.6,
+      159.6
+    ],
+    "trees": 41,
+    "fields": 170,
+    "mountainSymbols": 40,
+    "buildings": 110,
+    "facilityIds": [
+      "SF099",
+      "SF100"
+    ],
+    "sha256": "a31522809e72097055422d93150f1c404f1ca13edf09f8d423695381eecbde8c",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-21",
+    "number": "21",
+    "name": "Uvren",
+    "file": "21-uvren.svg",
+    "viewBox": [
+      1137.5,
+      575.5,
+      163.0,
+      175.0
+    ],
+    "trees": 366,
+    "fields": 170,
+    "mountainSymbols": 79,
+    "buildings": 94,
+    "facilityIds": [
+      "SF101",
+      "SF102",
+      "SF103",
+      "SF104",
+      "SF105"
+    ],
+    "sha256": "b8528a7579fe03fff0598e9389048d9e530bfb63c05a4f1240734ba104293b80",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-22",
+    "number": "22",
+    "name": "Vardis",
+    "file": "22-vardis.svg",
+    "viewBox": [
+      1249.5,
+      588.5,
+      152.0,
+      168.0
+    ],
+    "trees": 310,
+    "fields": 99,
+    "mountainSymbols": 49,
+    "buildings": 55,
+    "facilityIds": [
+      "SF106",
+      "SF107",
+      "SF108",
+      "SF109"
+    ],
+    "sha256": "108525927c2fa78a54456656388e6fa126c6c5346b02dace76b090d10aeb2d87",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-23",
+    "number": "23",
+    "name": "Wexar",
+    "file": "23-wexar.svg",
+    "viewBox": [
+      1255.5,
+      583.5,
+      252.0,
+      181.0
+    ],
+    "trees": 650,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "H07",
+      "SF110",
+      "SF111",
+      "SF112",
+      "SF113",
+      "SF114",
+      "SF115"
+    ],
+    "sha256": "6909675ee6c0a2a6f71c1ecc0295fe8a27c315d8fa6709c59f82379d53c54621",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-24",
+    "number": "24",
+    "name": "Xandor",
+    "file": "24-xandor.svg",
+    "viewBox": [
+      1431.3,
+      574.3,
+      204.4,
+      160.4
+    ],
+    "trees": 457,
+    "fields": 67,
+    "mountainSymbols": 0,
+    "buildings": 95,
+    "facilityIds": [
+      "P10",
+      "SF116",
+      "SF117",
+      "SF118",
+      "SF119",
+      "SF120"
+    ],
+    "sha256": "19b544c53e6bccfeb3ec81300a1b8b391eb31bea23796ab7d5aecd6194800b77",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-25",
+    "number": "25",
+    "name": "Ysol",
+    "file": "25-ysol.svg",
+    "viewBox": [
+      838.7,
+      627.7,
+      194.6,
+      183.6
+    ],
+    "trees": 199,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 42,
+    "facilityIds": [
+      "SF121",
+      "SF122",
+      "SF123"
+    ],
+    "sha256": "21be74cb3e924c0d20f68c5218f6d738112ce6a2b8e90c32b1b8fd8a2dc02d07",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-26",
+    "number": "26",
+    "name": "Zarev",
+    "file": "26-zarev.svg",
+    "viewBox": [
+      974.3,
+      690.3,
+      141.4,
+      127.4
+    ],
+    "trees": 373,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "SF124",
+      "SF125"
+    ],
+    "sha256": "0d0b98ac724f5b28e34e93a79b1ab1b669e4b830a8a2001e271319e9ebc8a36a",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-27",
+    "number": "27",
+    "name": "Adara",
+    "file": "27-adara.svg",
+    "viewBox": [
+      1054.7,
+      651.7,
+      159.6,
+      187.6
+    ],
+    "trees": 516,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "SF126",
+      "SF127",
+      "SF128",
+      "SF129"
+    ],
+    "sha256": "87343fc28cafc6db88968f84723ad81bb5c889379a66484c6eb73ef18d4e7aa7",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-28",
+    "number": "28",
+    "name": "Belm",
+    "file": "28-belm.svg",
+    "viewBox": [
+      1117.3,
+      689.3,
+      158.4,
+      169.4
+    ],
+    "trees": 521,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 101,
+    "facilityIds": [
+      "H08",
+      "SF130",
+      "SF131"
+    ],
+    "sha256": "6a8471b1de5891b929ec2684eb1692eb489a09c8f42c0c99f88f814f82cbd497",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-29",
+    "number": "29",
+    "name": "Corven",
+    "file": "29-corven.svg",
+    "viewBox": [
+      1221.1,
+      686.1,
+      151.8,
+      163.8
+    ],
+    "trees": 565,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 107,
+    "facilityIds": [
+      "P11",
+      "SF132",
+      "SF133",
+      "SF134"
+    ],
+    "sha256": "40f41d26f5dfebd20944d274a223b9129f9cef90e1a33f470f3656e933b02ff3",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-30",
+    "number": "30",
+    "name": "Delyra",
+    "file": "30-delyra.svg",
+    "viewBox": [
+      1326.3,
+      684.3,
+      148.4,
+      148.4
+    ],
+    "trees": 575,
+    "fields": 84,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "SF135",
+      "SF136",
+      "SF137",
+      "SF138"
+    ],
+    "sha256": "37c3f9b8abf38b44e61c8259268f308f428bcba56811d292a0f81e0f54d4f54e",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-31",
+    "number": "31",
+    "name": "Erdan",
+    "file": "31-erdan.svg",
+    "viewBox": [
+      1416.1,
+      669.1,
+      177.8,
+      150.8
+    ],
+    "trees": 521,
+    "fields": 100,
+    "mountainSymbols": 0,
+    "buildings": 108,
+    "facilityIds": [
+      "SF139",
+      "SF140",
+      "SF141",
+      "SF142"
+    ],
+    "sha256": "3f01eb12faf136c9ce5346c2aea92faa0c617e162cd38f06263c9163586ca6e5",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-32",
+    "number": "32",
+    "name": "Falcor",
+    "file": "32-falcor.svg",
+    "viewBox": [
+      1403.9,
+      633.9,
+      431.2,
+      261.2
+    ],
+    "trees": 423,
+    "fields": 163,
+    "mountainSymbols": 0,
+    "buildings": 56,
+    "facilityIds": [
+      "SF143",
+      "SF144"
+    ],
+    "sha256": "0db19e95b5e7461a1d7b6e091ca9f75ac5e611d800b6b5dd371f6a732061214c",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-33",
+    "number": "33",
+    "name": "Gysel",
+    "file": "33-gysel.svg",
+    "viewBox": [
+      88.1,
+      97.1,
+      177.8,
+      148.8
+    ],
+    "trees": 215,
+    "fields": 170,
+    "mountainSymbols": 55,
+    "buildings": 110,
+    "facilityIds": [
+      "SF145",
+      "SF146",
+      "SF147",
+      "SF148"
+    ],
+    "sha256": "0f9a14aeec4a7396e837db6be38ca955fd751acef0bcb68daed828a9ea8c1eff",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-34",
+    "number": "34",
+    "name": "Harin",
+    "file": "34-harin.svg",
+    "viewBox": [
+      290.5,
+      122.5,
+      151.0,
+      161.0
+    ],
+    "trees": 540,
+    "fields": 170,
+    "mountainSymbols": 65,
+    "buildings": 110,
+    "facilityIds": [
+      "SF149",
+      "SF150",
+      "SF151",
+      "SF152",
+      "SF153"
+    ],
+    "sha256": "f751e4f39700038d3ed579fb6fdb2433487cc2535702463bcd92fbc3482ae5a2",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-35",
+    "number": "35",
+    "name": "Inovar",
+    "file": "35-inovar.svg",
+    "viewBox": [
+      375.1,
+      89.1,
+      153.8,
+      163.8
+    ],
+    "trees": 354,
+    "fields": 170,
+    "mountainSymbols": 55,
+    "buildings": 110,
+    "facilityIds": [
+      "SF154",
+      "SF155",
+      "SF156",
+      "SF157",
+      "SF158"
+    ],
+    "sha256": "c7f22ca276ab3633d6411aa9983a4017fee1fb701de4b7415836bf743e727e4c",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-36",
+    "number": "36",
+    "name": "Jessa",
+    "file": "36-jessa.svg",
+    "viewBox": [
+      483.3,
+      92.3,
+      128.4,
+      141.4
+    ],
+    "trees": 133,
+    "fields": 170,
+    "mountainSymbols": 38,
+    "buildings": 55,
+    "facilityIds": [
+      "SF159",
+      "SF160",
+      "SF161",
+      "SF162"
+    ],
+    "sha256": "d2473c3a78093bb2b6d42211cb30768606189a6e1268d34fc6a644570f604676",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-37",
+    "number": "37",
+    "name": "Koryn",
+    "file": "37-koryn.svg",
+    "viewBox": [
+      556.3,
+      119.3,
+      127.4,
+      115.4
+    ],
+    "trees": 191,
+    "fields": 169,
+    "mountainSymbols": 0,
+    "buildings": 55,
+    "facilityIds": [
+      "SF163",
+      "SF164",
+      "SF165",
+      "SF166"
+    ],
+    "sha256": "a8a18df8871b99ada26c0c1862d7fee650368ba21deda49da7fb758a1601878a",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-38",
+    "number": "38",
+    "name": "Lydan",
+    "file": "38-lydan.svg",
+    "viewBox": [
+      -3.1000000000000014,
+      172.9,
+      298.2,
+      191.2
+    ],
+    "trees": 604,
+    "fields": 170,
+    "mountainSymbols": 75,
+    "buildings": 110,
+    "facilityIds": [
+      "SF167",
+      "SF168",
+      "SF169",
+      "SF170",
+      "SF171",
+      "SF172",
+      "SF173"
+    ],
+    "sha256": "b0faa49758b09aeb28878c6cf58778b15de4f858b7958e47a9aef65b1c2c2b05",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-39",
+    "number": "39",
+    "name": "Mirea",
+    "file": "39-mirea.svg",
+    "viewBox": [
+      193.9,
+      110.9,
+      155.2,
+      193.2
+    ],
+    "trees": 372,
+    "fields": 170,
+    "mountainSymbols": 35,
+    "buildings": 110,
+    "facilityIds": [
+      "SF174",
+      "SF175",
+      "SF176",
+      "SF177",
+      "SF178"
+    ],
+    "sha256": "fee587da566bb6f04b1fc4478d799ffcde623e1707b69f70aea84feaf8e66f1f",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-40",
+    "number": "40",
+    "name": "Norvak",
+    "file": "40-norvak.svg",
+    "viewBox": [
+      270.5,
+      226.5,
+      121.0,
+      140.0
+    ],
+    "trees": 164,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "H01",
+      "SF179",
+      "SF180"
+    ],
+    "sha256": "9cf5952cd520507581a90d4c16b52363db47f31f28945d07b643dfab533f004c",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-41",
+    "number": "41",
+    "name": "Ostra",
+    "file": "41-ostra.svg",
+    "viewBox": [
+      338.3,
+      188.3,
+      162.4,
+      144.4
+    ],
+    "trees": 493,
+    "fields": 101,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "SF181",
+      "SF182",
+      "SF183",
+      "SF184",
+      "SF185"
+    ],
+    "sha256": "76b97318ac27297f03cb08cf75499717c19d961964f3c73c2adf2f9a7c1b53aa",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-42",
+    "number": "42",
+    "name": "Pavan",
+    "file": "42-pavan.svg",
+    "viewBox": [
+      438.7,
+      194.7,
+      122.6,
+      131.6
+    ],
+    "trees": 387,
+    "fields": 23,
+    "mountainSymbols": 0,
+    "buildings": 55,
+    "facilityIds": [
+      "SF186",
+      "SF187",
+      "SF188",
+      "SF189",
+      "SF190"
+    ],
+    "sha256": "cc05423f7e7b49c318ce4249d1b08ca430e8403649c65f6317511e45cbe5aedb",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-43",
+    "number": "43",
+    "name": "Qemra",
+    "file": "43-qemra.svg",
+    "viewBox": [
+      493.9,
+      176.9,
+      127.2,
+      130.2
+    ],
+    "trees": 477,
+    "fields": 8,
+    "mountainSymbols": 0,
+    "buildings": 55,
+    "facilityIds": [
+      "SF191",
+      "SF192",
+      "SF193",
+      "SF194",
+      "SF195"
+    ],
+    "sha256": "463748aaaecf469d4d7b88f3093c6f49788cad912235d072025df39ef1607dfc",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-44",
+    "number": "44",
+    "name": "Ruvan",
+    "file": "44-ruvan.svg",
+    "viewBox": [
+      49.099999999999994,
+      270.1,
+      205.8,
+      156.8
+    ],
+    "trees": 567,
+    "fields": 107,
+    "mountainSymbols": 25,
+    "buildings": 110,
+    "facilityIds": [
+      "P01",
+      "SF196",
+      "SF197",
+      "SF198"
+    ],
+    "sha256": "fd462f2af7d3450a10ae48c3add74f7b3f37d0e2979cf19fc484a67b70d65513",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-45",
+    "number": "45",
+    "name": "Selka",
+    "file": "45-selka.svg",
+    "viewBox": [
+      194.5,
+      241.5,
+      148.0,
+      161.0
+    ],
+    "trees": 28,
+    "fields": 170,
+    "mountainSymbols": 33,
+    "buildings": 107,
+    "facilityIds": [
+      "SF199",
+      "SF200",
+      "SF201",
+      "SF202"
+    ],
+    "sha256": "e3f6f2e074e23ff821c9a0f1cd60e1dc40b2035e2209e2449111acb9920a3337",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-46",
+    "number": "46",
+    "name": "Tirren",
+    "file": "46-tirren.svg",
+    "viewBox": [
+      292.9,
+      274.9,
+      200.2,
+      228.2
+    ],
+    "trees": 355,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 105,
+    "facilityIds": [
+      "SF203",
+      "SF204",
+      "SF205",
+      "SF206",
+      "SF207"
+    ],
+    "sha256": "984968f3604f1344721266fa4767057b5628b3b9b9995a1cab99f457ad5680a6",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-47",
+    "number": "47",
+    "name": "Ulyss",
+    "file": "47-ulyss.svg",
+    "viewBox": [
+      380.1,
+      242.1,
+      163.8,
+      177.8
+    ],
+    "trees": 650,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "SF208",
+      "SF209",
+      "SF210",
+      "SF211",
+      "SF212",
+      "SF213",
+      "SF214"
+    ],
+    "sha256": "1a4aaf0fd6e2cf67a7ad2910f3d91b9472f7a4eac6383ee2dfd84a751af771d1",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-48",
+    "number": "48",
+    "name": "Varos",
+    "file": "48-varos.svg",
+    "viewBox": [
+      54.5,
+      346.5,
+      161.0,
+      128.0
+    ],
+    "trees": 338,
+    "fields": 46,
+    "mountainSymbols": 8,
+    "buildings": 55,
+    "facilityIds": [
+      "SF215",
+      "SF216"
+    ],
+    "sha256": "ebe1138645295c98eb11d9afa69ff9c3cc1adfa33b4d4223b88e9a2743360293",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-49",
+    "number": "49",
+    "name": "Wrenna",
+    "file": "49-wrenna.svg",
+    "viewBox": [
+      171.1,
+      337.1,
+      142.8,
+      120.80000000000001
+    ],
+    "trees": 108,
+    "fields": 170,
+    "mountainSymbols": 11,
+    "buildings": 110,
+    "facilityIds": [
+      "SF217",
+      "SF218",
+      "SF219",
+      "SF220"
+    ],
+    "sha256": "a09fbdc60a4125e773a3da3c90e054ad4723498d09c5878b1f2a4de84a54bc7e",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-50",
+    "number": "50",
+    "name": "Xyren",
+    "file": "50-xyren.svg",
+    "viewBox": [
+      195.5,
+      400.5,
+      175.0,
+      150.0
+    ],
+    "trees": 397,
+    "fields": 116,
+    "mountainSymbols": 0,
+    "buildings": 104,
+    "facilityIds": [
+      "SF221",
+      "SF222"
+    ],
+    "sha256": "bdcf20c81b96e092106cf2b629fc165eb51a260d9ed47d85c78cd747983ef97a",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-51",
+    "number": "51",
+    "name": "Yara",
+    "file": "51-yara.svg",
+    "viewBox": [
+      243.9,
+      368.9,
+      207.2,
+      156.2
+    ],
+    "trees": 438,
+    "fields": 68,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "H02",
+      "SF223"
+    ],
+    "sha256": "7af5d94d2dd0a9acbf16e8476d1b43eef83734348b1b87f085ddd7be85c490a8",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-52",
+    "number": "52",
+    "name": "Zorin",
+    "file": "52-zorin.svg",
+    "viewBox": [
+      452.1,
+      338.1,
+      135.8,
+      128.8
+    ],
+    "trees": 187,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 55,
+    "facilityIds": [
+      "P02",
+      "SF224"
+    ],
+    "sha256": "3c2e849db971c0d2ab1c00b71184368c399f666a90fa9b91b7c6e396ae2d203a",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-53",
+    "number": "53",
+    "name": "Alera",
+    "file": "53-alera.svg",
+    "viewBox": [
+      664.3,
+      343.3,
+      197.4,
+      163.4
+    ],
+    "trees": 650,
+    "fields": 107,
+    "mountainSymbols": 14,
+    "buildings": 87,
+    "facilityIds": [
+      "SF225",
+      "SF226",
+      "SF227",
+      "SF228",
+      "SF229",
+      "SF230",
+      "SF231",
+      "SF232"
+    ],
+    "sha256": "2348ea593cbe9f7a7878aa6ba19a5e8611b29d54235975b5492bf48792c319d7",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-54",
+    "number": "54",
+    "name": "Brin",
+    "file": "54-brin.svg",
+    "viewBox": [
+      767.5,
+      368.5,
+      192.0,
+      196.0
+    ],
+    "trees": 650,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 110,
+    "facilityIds": [
+      "SF233",
+      "SF234",
+      "SF235",
+      "SF236",
+      "SF237",
+      "SF238",
+      "SF239",
+      "SF240",
+      "SF241"
+    ],
+    "sha256": "f9d360aca0c8b2ee7a6852bd6735930e4404356d11e21975f7cb28b3af0e5edb",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-55",
+    "number": "55",
+    "name": "Cassa",
+    "file": "55-cassa.svg",
+    "viewBox": [
+      895.3,
+      337.3,
+      197.4,
+      178.4
+    ],
+    "trees": 320,
+    "fields": 59,
+    "mountainSymbols": 0,
+    "buildings": 55,
+    "facilityIds": [
+      "P05",
+      "SF242",
+      "SF243",
+      "SF244",
+      "SF245",
+      "SF246"
+    ],
+    "sha256": "1365dcaf4de6d8dff5cae20047ce540dd25f27624a32abe93e8d6cffda9c062e",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-56",
+    "number": "56",
+    "name": "Doren",
+    "file": "56-doren.svg",
+    "viewBox": [
+      538.3,
+      400.3,
+      232.4,
+      225.4
+    ],
+    "trees": 650,
+    "fields": 170,
+    "mountainSymbols": 17,
+    "buildings": 110,
+    "facilityIds": [
+      "P04",
+      "SF247",
+      "SF248",
+      "SF249"
+    ],
+    "sha256": "854e24c601ac86144d12358a299e644415f00c53c2ee2f52790a4ea3a9101492",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-57",
+    "number": "57",
+    "name": "Everen",
+    "file": "57-everen.svg",
+    "viewBox": [
+      597.7,
+      530.7,
+      166.6,
+      156.6
+    ],
+    "trees": 423,
+    "fields": 155,
+    "mountainSymbols": 0,
+    "buildings": 109,
+    "facilityIds": [
+      "SF250",
+      "SF251",
+      "SF252",
+      "SF253",
+      "SF254"
+    ],
+    "sha256": "69f32046e544f99437dee66044fdfcd4b747bbddf5ec3e5f2d4df4790ae22695",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-58",
+    "number": "58",
+    "name": "Fenna",
+    "file": "58-fenna.svg",
+    "viewBox": [
+      690.7,
+      440.7,
+      201.6,
+      182.6
+    ],
+    "trees": 397,
+    "fields": 170,
+    "mountainSymbols": 79,
+    "buildings": 110,
+    "facilityIds": [
+      "H03",
+      "SF255",
+      "SF256",
+      "SF257",
+      "SF258",
+      "SF259",
+      "SF260",
+      "SF261",
+      "SF262"
+    ],
+    "sha256": "0503cb795453213b17bea61eed27a0cd4c483c5a52ba90ebdded1817acd28dc0",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-59",
+    "number": "59",
+    "name": "Garan",
+    "file": "59-garan.svg",
+    "viewBox": [
+      584.7,
+      595.7,
+      103.6,
+      101.6
+    ],
+    "trees": 343,
+    "fields": 17,
+    "mountainSymbols": 0,
+    "buildings": 55,
+    "facilityIds": [
+      "SF263",
+      "SF264",
+      "SF265"
+    ],
+    "sha256": "300dbd52f896c6b4aa16331ab335a99921528b1ba3cde5ab8b47a26d4537c786",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-60",
+    "number": "60",
+    "name": "Hylos",
+    "file": "60-hylos.svg",
+    "viewBox": [
+      132.9,
+      444.9,
+      184.2,
+      221.2
+    ],
+    "trees": 650,
+    "fields": 82,
+    "mountainSymbols": 59,
+    "buildings": 107,
+    "facilityIds": [
+      "SF266",
+      "SF267",
+      "SF268",
+      "SF269",
+      "SF270",
+      "SF271",
+      "SF272",
+      "SF273"
+    ],
+    "sha256": "4571653162c28aa3ab6faf9c8542861cc78cf4495c3c328f270e22dcd33a91c9",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-61",
+    "number": "61",
+    "name": "Ivara",
+    "file": "61-ivara.svg",
+    "viewBox": [
+      197.7,
+      490.7,
+      173.6,
+      201.6
+    ],
+    "trees": 616,
+    "fields": 137,
+    "mountainSymbols": 52,
+    "buildings": 104,
+    "facilityIds": [
+      "H04",
+      "SF274",
+      "SF275",
+      "SF276",
+      "SF277",
+      "SF278",
+      "SF279",
+      "SF280"
+    ],
+    "sha256": "0a60d23d259f6d26e180504fe5fe01a1179a074b649455db0f1e2fbbd3cda605",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-62",
+    "number": "62",
+    "name": "Jalen",
+    "file": "62-jalen.svg",
+    "viewBox": [
+      240.3,
+      591.3,
+      211.4,
+      207.4
+    ],
+    "trees": 613,
+    "fields": 28,
+    "mountainSymbols": 67,
+    "buildings": 103,
+    "facilityIds": [
+      "SF281",
+      "SF282",
+      "SF283",
+      "SF284",
+      "SF285",
+      "SF286"
+    ],
+    "sha256": "010e070e559d7ec69bc00ffcbc8c4f0f854327306d0e58f67b95fb5d9cc8b154",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-63",
+    "number": "63",
+    "name": "Korra",
+    "file": "63-korra.svg",
+    "viewBox": [
+      286.9,
+      514.9,
+      200.2,
+      192.2
+    ],
+    "trees": 650,
+    "fields": 66,
+    "mountainSymbols": 6,
+    "buildings": 101,
+    "facilityIds": [
+      "P06",
+      "SF287",
+      "SF288",
+      "SF289",
+      "SF290",
+      "SF291",
+      "SF292"
+    ],
+    "sha256": "ed1554153905c02a2cb0b36f821c34069570776e9156656f772c19d003eca4ba",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-64",
+    "number": "64",
+    "name": "Lethis",
+    "file": "64-lethis.svg",
+    "viewBox": [
+      596.5,
+      139.5,
+      273.0,
+      250.0
+    ],
+    "trees": 650,
+    "fields": 129,
+    "mountainSymbols": 61,
+    "buildings": 110,
+    "facilityIds": [
+      "P03",
+      "SF293",
+      "SF294",
+      "SF295",
+      "SF296",
+      "SF297",
+      "SF298",
+      "SF299",
+      "SF300"
+    ],
+    "sha256": "27bcd6bd2ae0db7fd79d203c7179331bd555cf820c14945d0561d6925dbee423",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-65",
+    "number": "65",
+    "name": "Marn",
+    "file": "65-marn.svg",
+    "viewBox": [
+      507.9,
+      229.9,
+      193.2,
+      184.2
+    ],
+    "trees": 650,
+    "fields": 113,
+    "mountainSymbols": 56,
+    "buildings": 110,
+    "facilityIds": [
+      "SF301",
+      "SF302",
+      "SF303",
+      "SF304",
+      "SF305",
+      "SF306"
+    ],
+    "sha256": "83f3518181f55f19155e4fc5d71632c570e29cfdcdae22fb26d4226d4c745360",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-66",
+    "number": "66",
+    "name": "Nivor",
+    "file": "66-nivor.svg",
+    "viewBox": [
+      827.5,
+      103.5,
+      316.0,
+      357.0
+    ],
+    "trees": 570,
+    "fields": 170,
+    "mountainSymbols": 0,
+    "buildings": 91,
+    "facilityIds": [
+      "P08",
+      "SF307",
+      "SF308",
+      "SF309",
+      "SF310",
+      "SF311",
+      "SF312",
+      "SF313"
+    ],
+    "sha256": "a8ff29832ea4ac4fb308e62b830432e382be170a56c5b9bc4528cb893bf4937a",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-67",
+    "number": "67",
+    "name": "Orsa",
+    "file": "67-orsa.svg",
+    "viewBox": [
+      363.7,
+      614.7,
+      236.60000000000002,
+      210.60000000000002
+    ],
+    "trees": 558,
+    "fields": 57,
+    "mountainSymbols": 0,
+    "buildings": 109,
+    "facilityIds": [
+      "P07",
+      "SF314",
+      "SF315",
+      "SF316",
+      "SF317",
+      "SF318"
+    ],
+    "sha256": "6ecbab15a3f73ed7a389f9973485f4fe3b825c88f0c48ed39961d8019708f6c5",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-68",
+    "number": "68",
+    "name": "Pella",
+    "file": "68-pella.svg",
+    "viewBox": [
+      386.9,
+      479.9,
+      221.2,
+      183.2
+    ],
+    "trees": 536,
+    "fields": 32,
+    "mountainSymbols": 0,
+    "buildings": 103,
+    "facilityIds": [
+      "SF319",
+      "SF320",
+      "SF321",
+      "SF322",
+      "SF323"
+    ],
+    "sha256": "be3ab6b3a65ca6c94618b4a069d8f257ae9a11322743fa3f7f67a200575d70b4",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-69",
+    "number": "69",
+    "name": "Quillan",
+    "file": "69-quillan.svg",
+    "viewBox": [
+      79.1,
+      602.1,
+      205.8,
+      183.8
+    ],
+    "trees": 458,
+    "fields": 34,
+    "mountainSymbols": 0,
+    "buildings": 55,
+    "facilityIds": [
+      "SF324",
+      "SF325",
+      "SF326",
+      "SF327"
+    ],
+    "sha256": "31b6aab43b53b9b735df28d6964c5e1b9bdd6532ad83a94007333028eea3af0b",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  },
+  {
+    "id": "visual-territory-70",
+    "number": "70",
+    "name": "Rhea",
+    "file": "70-rhea.svg",
+    "viewBox": [
+      1062.7,
+      116.69999999999999,
+      264.6,
+      237.60000000000002
+    ],
+    "trees": 293,
+    "fields": 67,
+    "mountainSymbols": 0,
+    "buildings": 55,
+    "facilityIds": [
+      "SF328",
+      "SF329",
+      "SF330"
+    ],
+    "sha256": "de2aee1275514c5646291208f00e02f2ed63c8c105a51d1a7371aec99f73ef30",
+    "basis": "BOUNDARIES_WATER_AND_FACILITY_POSITIONS_FROM_ATLAS; MICRODETAIL_SCENARIO_CARTOGRAPHY"
+  }
+]

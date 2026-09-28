@@ -1,0 +1,6722 @@
+[
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.105507,
+    "netPerDay": -0.105507,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "GRAIN",
+    "outputPerDay": 176207.739724,
+    "usePerDay": 70337.899333,
+    "netPerDay": 105869.84039,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "COPPER",
+    "outputPerDay": 389.811143,
+    "usePerDay": 0.0,
+    "netPerDay": 389.811143,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 15826.02735,
+    "netPerDay": -15826.02735,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 105506.849,
+    "netPerDay": -105506.849,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 84.405479,
+    "netPerDay": -84.405479,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 105506.849,
+    "netPerDay": -105506.849,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-01",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 8.440548,
+    "netPerDay": -8.440548,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 45593.176193,
+    "netPerDay": -45593.176193,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.137302,
+    "netPerDay": -0.137302,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "GRAIN",
+    "outputPerDay": 243177.391149,
+    "usePerDay": 91534.432667,
+    "netPerDay": 151642.958482,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 20595.24735,
+    "netPerDay": -20595.24735,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 42215.903883,
+    "usePerDay": 137301.649,
+    "netPerDay": -95085.745117,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 109.841319,
+    "netPerDay": -109.841319,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 137301.649,
+    "netPerDay": -137301.649,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 10.984132,
+    "netPerDay": -10.984132,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.392046,
+    "usePerDay": 0.260037,
+    "netPerDay": 0.132009,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "GRAIN",
+    "outputPerDay": 435616.121161,
+    "usePerDay": 173358.294,
+    "netPerDay": 262257.827161,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 25.489005,
+    "netPerDay": -25.489005,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 39642.841267,
+    "netPerDay": -39642.841267,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 260037.441,
+    "netPerDay": -260037.441,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 318.612558,
+    "usePerDay": 208.029953,
+    "netPerDay": 110.582605,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 260037.441,
+    "netPerDay": -260037.441,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 20.802995,
+    "netPerDay": -20.802995,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 35822.541649,
+    "netPerDay": -35822.541649,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.275749,
+    "netPerDay": -0.275749,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "GRAIN",
+    "outputPerDay": 468677.064003,
+    "usePerDay": 183832.687333,
+    "netPerDay": 284844.37667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 19105.355546,
+    "netPerDay": -19105.355546,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "STEEL",
+    "outputPerDay": 11940.847216,
+    "usePerDay": 41362.35465,
+    "netPerDay": -29421.507434,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 275749.031,
+    "netPerDay": -275749.031,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 220.599225,
+    "netPerDay": -220.599225,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 275749.031,
+    "netPerDay": -275749.031,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 22.059922,
+    "netPerDay": -22.059922,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 78929.304104,
+    "usePerDay": 0.0,
+    "netPerDay": 78929.304104,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.198818,
+    "netPerDay": -0.198818,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "GRAIN",
+    "outputPerDay": 331874.438243,
+    "usePerDay": 132545.274667,
+    "netPerDay": 199329.163577,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 29822.6868,
+    "netPerDay": -29822.6868,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 198817.912,
+    "netPerDay": -198817.912,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 159.05433,
+    "netPerDay": -159.05433,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 198817.912,
+    "netPerDay": -198817.912,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 15.905433,
+    "netPerDay": -15.905433,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 679260.5305,
+    "usePerDay": 0.0,
+    "netPerDay": 679260.5305,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.30106,
+    "netPerDay": -0.30106,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "GRAIN",
+    "outputPerDay": 334619.024534,
+    "usePerDay": 200706.945333,
+    "netPerDay": 133912.079201,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 45159.0627,
+    "netPerDay": -45159.0627,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 301060.418,
+    "netPerDay": -301060.418,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 240.848334,
+    "netPerDay": -240.848334,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 301060.418,
+    "netPerDay": -301060.418,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 24.084833,
+    "netPerDay": -24.084833,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 492478.8321,
+    "usePerDay": 0.0,
+    "netPerDay": 492478.8321,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.21693,
+    "netPerDay": -0.21693,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "GRAIN",
+    "outputPerDay": 214070.148881,
+    "usePerDay": 144620.127333,
+    "netPerDay": 69450.021548,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 16.685997,
+    "netPerDay": -16.685997,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 32539.52865,
+    "netPerDay": -32539.52865,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 216930.191,
+    "netPerDay": -216930.191,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 173.877873,
+    "netPerDay": -173.877873,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 333719.943055,
+    "usePerDay": 216930.191,
+    "netPerDay": 116789.752055,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 17.354415,
+    "netPerDay": -17.354415,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.23459,
+    "netPerDay": -0.23459,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "GRAIN",
+    "outputPerDay": 391956.401878,
+    "usePerDay": 156393.544,
+    "netPerDay": 235562.857878,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 17.605304,
+    "netPerDay": -17.605304,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 35188.5474,
+    "netPerDay": -35188.5474,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 234590.316,
+    "netPerDay": -234590.316,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 188.024359,
+    "netPerDay": -188.024359,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 352106.072496,
+    "usePerDay": 234590.316,
+    "netPerDay": 117515.756496,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 18.767225,
+    "netPerDay": -18.767225,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 48599.071779,
+    "netPerDay": -48599.071779,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.6716,
+    "usePerDay": 0.203914,
+    "netPerDay": 0.467686,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "GRAIN",
+    "outputPerDay": 252444.447736,
+    "usePerDay": 135942.678667,
+    "netPerDay": 116501.769069,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 56254.5845,
+    "usePerDay": 25919.504949,
+    "netPerDay": 30335.079551,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "STEEL",
+    "outputPerDay": 16199.690593,
+    "usePerDay": 30587.1027,
+    "netPerDay": -14387.412107,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 203914.018,
+    "netPerDay": -203914.018,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 163.131214,
+    "netPerDay": -163.131214,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 203914.018,
+    "netPerDay": -203914.018,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 16.313121,
+    "netPerDay": -16.313121,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 475703.6894,
+    "usePerDay": 72788.756074,
+    "netPerDay": 402914.933326,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 985412.409,
+    "usePerDay": 0.0,
+    "netPerDay": 985412.409,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.217859,
+    "netPerDay": -0.217859,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "GRAIN",
+    "outputPerDay": 131890.516401,
+    "usePerDay": 145239.572,
+    "netPerDay": -13349.055599,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "COPPER",
+    "outputPerDay": 524.006639,
+    "usePerDay": 56.25397,
+    "netPerDay": 467.752669,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 42.190477,
+    "netPerDay": -42.190477,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 32678.9037,
+    "netPerDay": -32678.9037,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 67396.996365,
+    "usePerDay": 217859.358,
+    "netPerDay": -150462.361635,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 174.357804,
+    "netPerDay": -174.357804,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 217859.358,
+    "netPerDay": -217859.358,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 70.317462,
+    "usePerDay": 17.428749,
+    "netPerDay": 52.888714,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 95910.182,
+    "usePerDay": 0.0,
+    "netPerDay": 95910.182,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.139077,
+    "netPerDay": -0.139077,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "GRAIN",
+    "outputPerDay": 87635.989878,
+    "usePerDay": 92718.024,
+    "netPerDay": -5082.034122,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "COPPER",
+    "outputPerDay": 524.006639,
+    "usePerDay": 188.315474,
+    "netPerDay": 335.691165,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 141.236606,
+    "usePerDay": 141.236606,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 20861.5554,
+    "netPerDay": -20861.5554,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 139077.036,
+    "netPerDay": -139077.036,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 111.497023,
+    "netPerDay": -111.497023,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 139077.036,
+    "netPerDay": -139077.036,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 235.394343,
+    "usePerDay": 11.126163,
+    "netPerDay": 224.26818,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 594288.8959,
+    "usePerDay": 0.0,
+    "netPerDay": 594288.8959,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.282894,
+    "netPerDay": -0.282894,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 188595.934,
+    "netPerDay": -188595.934,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 219.974055,
+    "netPerDay": -219.974055,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 57.709517,
+    "netPerDay": -57.709517,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 42434.08515,
+    "netPerDay": -42434.08515,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 282893.901,
+    "netPerDay": -282893.901,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 229.271864,
+    "netPerDay": -229.271864,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 2860560.629329,
+    "usePerDay": 282893.901,
+    "netPerDay": 2577666.728329,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 96.182529,
+    "usePerDay": 22.631512,
+    "netPerDay": 73.551017,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 46809.2515,
+    "usePerDay": 0.0,
+    "netPerDay": 46809.2515,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 27181.756629,
+    "netPerDay": -27181.756629,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.21227,
+    "netPerDay": -0.21227,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "GRAIN",
+    "outputPerDay": 67822.098593,
+    "usePerDay": 141513.008667,
+    "netPerDay": -73690.910074,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 14496.936869,
+    "netPerDay": -14496.936869,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "COPPER",
+    "outputPerDay": 524.006639,
+    "usePerDay": 269.726276,
+    "netPerDay": 254.280363,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 141.236606,
+    "usePerDay": 141.236606,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "STEEL",
+    "outputPerDay": 9060.585543,
+    "usePerDay": 31840.42695,
+    "netPerDay": -22779.841407,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 212269.513,
+    "netPerDay": -212269.513,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 171.679221,
+    "netPerDay": -171.679221,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 1628216.034805,
+    "usePerDay": 212269.513,
+    "netPerDay": 1415946.521805,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 235.394343,
+    "usePerDay": 16.981561,
+    "netPerDay": 218.412782,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 25718.439045,
+    "netPerDay": -25718.439045,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.4792,
+    "usePerDay": 0.203975,
+    "netPerDay": 0.275225,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "GRAIN",
+    "outputPerDay": 292986.637695,
+    "usePerDay": 135983.538,
+    "netPerDay": 157003.099695,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 13716.500824,
+    "netPerDay": -13716.500824,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "STEEL",
+    "outputPerDay": 8572.813015,
+    "usePerDay": 30596.29605,
+    "netPerDay": -22023.483035,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 203975.307,
+    "netPerDay": -203975.307,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 163.180246,
+    "netPerDay": -163.180246,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 203975.307,
+    "netPerDay": -203975.307,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 16.318025,
+    "netPerDay": -16.318025,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 630831.0069,
+    "usePerDay": 0.0,
+    "netPerDay": 630831.0069,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.270336,
+    "netPerDay": -0.270336,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "GRAIN",
+    "outputPerDay": 267900.373479,
+    "usePerDay": 180224.091333,
+    "netPerDay": 87676.282145,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 70.538841,
+    "netPerDay": -70.538841,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 52.904131,
+    "netPerDay": -52.904131,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 40550.42055,
+    "netPerDay": -40550.42055,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 270336.137,
+    "netPerDay": -270336.137,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 216.357083,
+    "netPerDay": -216.357083,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 270336.137,
+    "netPerDay": -270336.137,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 88.173551,
+    "usePerDay": 21.626891,
+    "netPerDay": 66.54666,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.270585,
+    "netPerDay": -0.270585,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "GRAIN",
+    "outputPerDay": 457116.344543,
+    "usePerDay": 180389.916667,
+    "netPerDay": 276726.427876,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 71.821196,
+    "netPerDay": -71.821196,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 53.865897,
+    "netPerDay": -53.865897,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 40587.73125,
+    "netPerDay": -40587.73125,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 270584.875,
+    "netPerDay": -270584.875,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 216.557676,
+    "netPerDay": -216.557676,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 270584.875,
+    "netPerDay": -270584.875,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 89.776495,
+    "usePerDay": 21.64679,
+    "netPerDay": 68.129705,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 255415.810084,
+    "netPerDay": -255415.810084,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.142121,
+    "netPerDay": -0.142121,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 94747.592,
+    "netPerDay": -94747.592,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 144693.0256,
+    "usePerDay": 136221.765378,
+    "netPerDay": 8471.260222,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 14.052268,
+    "netPerDay": -14.052268,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "STEEL",
+    "outputPerDay": 85138.603361,
+    "usePerDay": 21669.514898,
+    "netPerDay": 63469.088463,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 142121.388,
+    "netPerDay": -142121.388,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 175.653349,
+    "usePerDay": 113.69711,
+    "netPerDay": 61.956239,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 142121.388,
+    "netPerDay": -142121.388,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 11.369711,
+    "netPerDay": -11.369711,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 400953.4334,
+    "usePerDay": 39260.129909,
+    "netPerDay": 361693.303491,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 44276.716769,
+    "netPerDay": -44276.716769,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.114529,
+    "netPerDay": -0.114529,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 76352.808,
+    "netPerDay": -76352.808,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 30571.1834,
+    "usePerDay": 23614.248944,
+    "netPerDay": 6956.934456,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 141.236606,
+    "usePerDay": 0.0,
+    "netPerDay": 141.236606,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "STEEL",
+    "outputPerDay": 14758.90559,
+    "usePerDay": 17179.3818,
+    "netPerDay": -2420.47621,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 36351.972138,
+    "usePerDay": 114529.212,
+    "netPerDay": -78177.239862,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 91.62337,
+    "netPerDay": -91.62337,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 114529.212,
+    "netPerDay": -114529.212,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 9.162337,
+    "netPerDay": -9.162337,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 831625.0282,
+    "usePerDay": 0.0,
+    "netPerDay": 831625.0282,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.4158,
+    "usePerDay": 0.122802,
+    "netPerDay": 0.292998,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "GRAIN",
+    "outputPerDay": 159155.254382,
+    "usePerDay": 81868.181333,
+    "netPerDay": 77287.073048,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 9.226743,
+    "netPerDay": -9.226743,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 18420.3408,
+    "netPerDay": -18420.3408,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 122802.272,
+    "netPerDay": -122802.272,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 98.426352,
+    "netPerDay": -98.426352,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 184534.851332,
+    "usePerDay": 122802.272,
+    "netPerDay": 61732.579332,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 9.824182,
+    "netPerDay": -9.824182,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 61920.918878,
+    "netPerDay": -61920.918878,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 376868.279659,
+    "netPerDay": -376868.279659,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.187895,
+    "netPerDay": -0.187895,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 125263.396667,
+    "netPerDay": -125263.396667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 39269.4631,
+    "usePerDay": 200996.415818,
+    "netPerDay": -161726.952718,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 141.236606,
+    "usePerDay": 0.0,
+    "netPerDay": 141.236606,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "STEEL",
+    "outputPerDay": 125622.759886,
+    "usePerDay": 28184.26425,
+    "netPerDay": 97438.495636,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 57334.184147,
+    "usePerDay": 187895.095,
+    "netPerDay": -130560.910853,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 150.316076,
+    "netPerDay": -150.316076,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 187895.095,
+    "netPerDay": -187895.095,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 15.031608,
+    "netPerDay": -15.031608,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 30342.0349,
+    "usePerDay": 0.0,
+    "netPerDay": 30342.0349,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 33037.40854,
+    "netPerDay": -33037.40854,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.262573,
+    "netPerDay": -0.262573,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "GRAIN",
+    "outputPerDay": 339190.919612,
+    "usePerDay": 175048.902,
+    "netPerDay": 164142.017612,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 66264.723,
+    "usePerDay": 17619.951221,
+    "netPerDay": 48644.771779,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "STEEL",
+    "outputPerDay": 11012.469513,
+    "usePerDay": 39386.00295,
+    "netPerDay": -28373.533437,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 262573.353,
+    "netPerDay": -262573.353,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 210.058682,
+    "netPerDay": -210.058682,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 262573.353,
+    "netPerDay": -262573.353,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 21.005868,
+    "netPerDay": -21.005868,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 14117.836315,
+    "netPerDay": -14117.836315,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.6868,
+    "usePerDay": 0.112205,
+    "netPerDay": 0.574595,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "GRAIN",
+    "outputPerDay": 190747.106186,
+    "usePerDay": 74803.095333,
+    "netPerDay": 115944.010853,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 7529.512701,
+    "netPerDay": -7529.512701,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "STEEL",
+    "outputPerDay": 4705.945438,
+    "usePerDay": 16830.69645,
+    "netPerDay": -12124.751012,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 112204.643,
+    "netPerDay": -112204.643,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 89.763714,
+    "netPerDay": -89.763714,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 112204.643,
+    "netPerDay": -112204.643,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 8.976371,
+    "netPerDay": -8.976371,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 652034.660291,
+    "netPerDay": -652034.660291,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.350234,
+    "netPerDay": -0.350234,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 233489.644667,
+    "netPerDay": -233489.644667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 330393.1816,
+    "usePerDay": 347751.818822,
+    "netPerDay": -17358.637222,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 96.122233,
+    "netPerDay": -96.122233,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 72.091675,
+    "netPerDay": -72.091675,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "STEEL",
+    "outputPerDay": 217344.886764,
+    "usePerDay": 52535.17005,
+    "netPerDay": 164809.716714,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 350234.467,
+    "netPerDay": -350234.467,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 280.307726,
+    "netPerDay": -280.307726,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 350234.467,
+    "netPerDay": -350234.467,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 120.152792,
+    "usePerDay": 28.018757,
+    "netPerDay": 92.134034,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 275827.7684,
+    "usePerDay": 0.0,
+    "netPerDay": 275827.7684,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 171489.286743,
+    "usePerDay": 0.0,
+    "netPerDay": 171489.286743,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.217554,
+    "netPerDay": -0.217554,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 145036.324,
+    "netPerDay": -145036.324,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 207.376692,
+    "netPerDay": -207.376692,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 37347.415406,
+    "netPerDay": -37347.415406,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 217554.486,
+    "netPerDay": -217554.486,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 2357.121253,
+    "usePerDay": 174.419729,
+    "netPerDay": 2182.701524,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 376139.831894,
+    "usePerDay": 217554.486,
+    "netPerDay": 158585.345894,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 17.404359,
+    "netPerDay": -17.404359,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 453443.5652,
+    "usePerDay": 992130.114173,
+    "netPerDay": -538686.548973,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 25113.532316,
+    "netPerDay": -25113.532316,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.121895,
+    "netPerDay": -0.121895,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 81263.314,
+    "netPerDay": -81263.314,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 13393.883902,
+    "netPerDay": -13393.883902,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "STEEL",
+    "outputPerDay": 8371.177439,
+    "usePerDay": 18284.24565,
+    "netPerDay": -9913.068211,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 918638.994605,
+    "usePerDay": 121894.971,
+    "netPerDay": 796744.023605,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 97.515977,
+    "netPerDay": -97.515977,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 121894.971,
+    "netPerDay": -121894.971,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 9.751598,
+    "netPerDay": -9.751598,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 573830.8846,
+    "usePerDay": 990261.16384,
+    "netPerDay": -416430.27924,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 66810.676848,
+    "netPerDay": -66810.676848,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.150478,
+    "netPerDay": -0.150478,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 100318.792667,
+    "netPerDay": -100318.792667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 35632.360985,
+    "netPerDay": -35632.360985,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "STEEL",
+    "outputPerDay": 22270.225616,
+    "usePerDay": 22571.72835,
+    "netPerDay": -301.502734,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 916908.485037,
+    "usePerDay": 150478.189,
+    "netPerDay": 766430.296037,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 120.382551,
+    "netPerDay": -120.382551,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 150478.189,
+    "netPerDay": -150478.189,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 12.038255,
+    "netPerDay": -12.038255,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 509595.826397,
+    "netPerDay": -509595.826397,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.208513,
+    "netPerDay": -0.208513,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 139008.672667,
+    "netPerDay": -139008.672667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 56834.627976,
+    "usePerDay": 271784.440745,
+    "netPerDay": -214949.812769,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "STEEL",
+    "outputPerDay": 169865.275466,
+    "usePerDay": 31276.95135,
+    "netPerDay": 138588.324116,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 208513.009,
+    "netPerDay": -208513.009,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 166.810407,
+    "netPerDay": -166.810407,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 208513.009,
+    "netPerDay": -208513.009,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 16.681041,
+    "netPerDay": -16.681041,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 758738.5155,
+    "usePerDay": 1281261.188116,
+    "netPerDay": -522522.672616,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 819781.96488,
+    "usePerDay": 0.0,
+    "netPerDay": 819781.96488,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.218123,
+    "netPerDay": -0.218123,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 145415.374667,
+    "netPerDay": -145415.374667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 21.876533,
+    "netPerDay": -21.876533,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 33265.372619,
+    "netPerDay": -33265.372619,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 1186352.95196,
+    "usePerDay": 218123.062,
+    "netPerDay": 968229.88996,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 273.456659,
+    "usePerDay": 174.49845,
+    "netPerDay": 98.95821,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 218123.062,
+    "netPerDay": -218123.062,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 17.449845,
+    "netPerDay": -17.449845,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 577690.5259,
+    "usePerDay": 0.0,
+    "netPerDay": 577690.5259,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 1196121.1015,
+    "usePerDay": 111745.786846,
+    "netPerDay": 1084375.314654,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.202596,
+    "netPerDay": -0.202596,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 135063.71,
+    "netPerDay": -135063.71,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 90689.3733,
+    "usePerDay": 59597.752984,
+    "netPerDay": 31091.620316,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "STEEL",
+    "outputPerDay": 37248.595615,
+    "usePerDay": 30389.33475,
+    "netPerDay": 6859.260865,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 202595.565,
+    "netPerDay": -202595.565,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 162.076452,
+    "netPerDay": -162.076452,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 202595.565,
+    "netPerDay": -202595.565,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 16.207645,
+    "netPerDay": -16.207645,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 144359.829316,
+    "usePerDay": 0.0,
+    "netPerDay": 144359.829316,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 276709.049316,
+    "netPerDay": -276709.049316,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.181478,
+    "netPerDay": -0.181478,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 120985.325333,
+    "netPerDay": -120985.325333,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 209853.6955,
+    "usePerDay": 147578.159635,
+    "netPerDay": 62275.535865,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "STEEL",
+    "outputPerDay": 92236.349772,
+    "usePerDay": 27221.6982,
+    "netPerDay": 65014.651572,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 181477.988,
+    "netPerDay": -181477.988,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 145.18239,
+    "netPerDay": -145.18239,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 181477.988,
+    "netPerDay": -181477.988,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 14.518239,
+    "netPerDay": -14.518239,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 584438.6651,
+    "usePerDay": 1613312.380145,
+    "netPerDay": -1028873.715045,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.198215,
+    "netPerDay": -0.198215,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 132143.061333,
+    "netPerDay": -132143.061333,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 51.304821,
+    "netPerDay": -51.304821,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 141.236606,
+    "usePerDay": 0.0,
+    "netPerDay": 141.236606,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 30633.274413,
+    "netPerDay": -30633.274413,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 1493807.759394,
+    "usePerDay": 198214.592,
+    "netPerDay": 1295593.167394,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 450.542807,
+    "usePerDay": 158.876902,
+    "netPerDay": 291.665905,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 305227.926798,
+    "usePerDay": 198214.592,
+    "netPerDay": 107013.334798,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 15.857167,
+    "netPerDay": -15.857167,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 981649.694665,
+    "usePerDay": 298607.614701,
+    "netPerDay": 683042.079965,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.131554,
+    "netPerDay": -0.131554,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 87702.480667,
+    "netPerDay": -87702.480667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 35696.352533,
+    "usePerDay": 159257.394507,
+    "netPerDay": -123561.041974,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "STEEL",
+    "outputPerDay": 99535.871567,
+    "usePerDay": 19733.05815,
+    "netPerDay": 79802.813417,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 131553.721,
+    "netPerDay": -131553.721,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 105.242977,
+    "netPerDay": -105.242977,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 131553.721,
+    "netPerDay": -131553.721,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 10.524298,
+    "netPerDay": -10.524298,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.6767,
+    "usePerDay": 0.172579,
+    "netPerDay": 0.504121,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "GRAIN",
+    "outputPerDay": 242509.321633,
+    "usePerDay": 115052.474,
+    "netPerDay": 127456.847633,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 45740.787488,
+    "usePerDay": 0.0,
+    "netPerDay": 45740.787488,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 25886.80665,
+    "netPerDay": -25886.80665,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 172578.711,
+    "netPerDay": -172578.711,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 138.062969,
+    "netPerDay": -138.062969,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 172578.711,
+    "netPerDay": -172578.711,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 13.806297,
+    "netPerDay": -13.806297,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.9038,
+    "usePerDay": 0.205341,
+    "netPerDay": 0.698459,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "GRAIN",
+    "outputPerDay": 288278.667503,
+    "usePerDay": 136893.756667,
+    "netPerDay": 151384.910837,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 54943.609729,
+    "usePerDay": 0.0,
+    "netPerDay": 54943.609729,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 30801.09525,
+    "netPerDay": -30801.09525,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 205340.635,
+    "netPerDay": -205340.635,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 164.272508,
+    "netPerDay": -164.272508,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 205340.635,
+    "netPerDay": -205340.635,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 16.427251,
+    "netPerDay": -16.427251,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 338578.458835,
+    "netPerDay": -338578.458835,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.4303,
+    "usePerDay": 0.185985,
+    "netPerDay": 0.244315,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 123989.83,
+    "netPerDay": -123989.83,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 230215.6069,
+    "usePerDay": 180575.178046,
+    "netPerDay": 49640.428854,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "STEEL",
+    "outputPerDay": 112859.486278,
+    "usePerDay": 27897.71175,
+    "netPerDay": 84961.774528,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 185984.745,
+    "netPerDay": -185984.745,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 148.787796,
+    "netPerDay": -148.787796,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 185984.745,
+    "netPerDay": -185984.745,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 14.87878,
+    "netPerDay": -14.87878,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 679136.941403,
+    "usePerDay": 0.0,
+    "netPerDay": 679136.941403,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.093559,
+    "netPerDay": -0.093559,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "GRAIN",
+    "outputPerDay": 147445.136902,
+    "usePerDay": 62372.758667,
+    "netPerDay": 85072.378235,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 24.147091,
+    "netPerDay": -24.147091,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 18.110318,
+    "netPerDay": -18.110318,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 14033.8707,
+    "netPerDay": -14033.8707,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 93559.138,
+    "netPerDay": -93559.138,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 74.877494,
+    "netPerDay": -74.877494,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 93559.138,
+    "netPerDay": -93559.138,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 30.183864,
+    "usePerDay": 7.484731,
+    "netPerDay": 22.699133,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 317788.031,
+    "usePerDay": 778844.382204,
+    "netPerDay": -461056.351204,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 11994.125847,
+    "netPerDay": -11994.125847,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.09569,
+    "netPerDay": -0.09569,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 63793.523333,
+    "netPerDay": -63793.523333,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 38007.202318,
+    "usePerDay": 6396.867119,
+    "netPerDay": 31610.335199,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "STEEL",
+    "outputPerDay": 3998.041949,
+    "usePerDay": 14353.54275,
+    "netPerDay": -10355.500801,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 721152.205745,
+    "usePerDay": 95690.285,
+    "netPerDay": 625461.920745,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 76.552228,
+    "netPerDay": -76.552228,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 95690.285,
+    "netPerDay": -95690.285,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 7.655223,
+    "netPerDay": -7.655223,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 1014465.9469,
+    "usePerDay": 1896713.095985,
+    "netPerDay": -882247.149085,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.287466,
+    "netPerDay": -0.287466,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "GRAIN",
+    "outputPerDay": 13504.121877,
+    "usePerDay": 191644.25,
+    "netPerDay": -178140.128123,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 79980.434546,
+    "usePerDay": 0.0,
+    "netPerDay": 79980.434546,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 43119.95625,
+    "netPerDay": -43119.95625,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 1756215.829616,
+    "usePerDay": 287466.375,
+    "netPerDay": 1468749.454616,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 229.9731,
+    "netPerDay": -229.9731,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 287466.375,
+    "netPerDay": -287466.375,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 22.99731,
+    "netPerDay": -22.99731,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 539203.835622,
+    "netPerDay": -539203.835622,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.8704,
+    "usePerDay": 0.220477,
+    "netPerDay": 0.649923,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 146984.412667,
+    "netPerDay": -146984.412667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 58730.976814,
+    "usePerDay": 287575.378998,
+    "netPerDay": -228844.402184,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "STEEL",
+    "outputPerDay": 179734.611874,
+    "usePerDay": 33071.49285,
+    "netPerDay": 146663.119024,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 220476.619,
+    "netPerDay": -220476.619,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 176.381295,
+    "netPerDay": -176.381295,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 220476.619,
+    "netPerDay": -220476.619,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 17.63813,
+    "netPerDay": -17.63813,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 328661.7993,
+    "usePerDay": 0.0,
+    "netPerDay": 328661.7993,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.19407,
+    "netPerDay": -0.19407,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 129379.925333,
+    "netPerDay": -129379.925333,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 131.004935,
+    "netPerDay": -131.004935,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 29595.334786,
+    "netPerDay": -29595.334786,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 194069.888,
+    "netPerDay": -194069.888,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 242.425793,
+    "usePerDay": 157.488128,
+    "netPerDay": 84.937665,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 2232217.436,
+    "usePerDay": 194069.888,
+    "netPerDay": 2038147.548,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 15.525591,
+    "netPerDay": -15.525591,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 547320.4839,
+    "usePerDay": 0.0,
+    "netPerDay": 547320.4839,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 155222.740671,
+    "netPerDay": -155222.740671,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.209318,
+    "netPerDay": -0.209318,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 139545.132667,
+    "netPerDay": -139545.132667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 236747.3646,
+    "usePerDay": 82785.461691,
+    "netPerDay": 153961.902909,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "STEEL",
+    "outputPerDay": 51740.913557,
+    "usePerDay": 31397.65485,
+    "netPerDay": 20343.258707,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 209317.699,
+    "netPerDay": -209317.699,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 167.454159,
+    "netPerDay": -167.454159,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 209317.699,
+    "netPerDay": -209317.699,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 16.745416,
+    "netPerDay": -16.745416,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 193952.393972,
+    "netPerDay": -193952.393972,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.129656,
+    "netPerDay": -0.129656,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 86437.448667,
+    "netPerDay": -86437.448667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 116149.4715,
+    "usePerDay": 103441.276785,
+    "netPerDay": 12708.194715,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 12.201452,
+    "netPerDay": -12.201452,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "STEEL",
+    "outputPerDay": 64650.797991,
+    "usePerDay": 19753.46224,
+    "netPerDay": 44897.33575,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 129656.173,
+    "netPerDay": -129656.173,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 152.518145,
+    "usePerDay": 103.724938,
+    "netPerDay": 48.793207,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 129656.173,
+    "netPerDay": -129656.173,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 10.372494,
+    "netPerDay": -10.372494,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 202558.696221,
+    "netPerDay": -202558.696221,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.133083,
+    "netPerDay": -0.133083,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 88722.11,
+    "netPerDay": -88722.11,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 111037.309,
+    "usePerDay": 108031.304651,
+    "netPerDay": 3006.004349,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "COPPER",
+    "outputPerDay": 487.564149,
+    "usePerDay": 0.0,
+    "netPerDay": 487.564149,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "STEEL",
+    "outputPerDay": 67519.565407,
+    "usePerDay": 19962.47475,
+    "netPerDay": 47557.090657,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 133083.165,
+    "netPerDay": -133083.165,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 106.466532,
+    "netPerDay": -106.466532,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 133083.165,
+    "netPerDay": -133083.165,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 10.646653,
+    "netPerDay": -10.646653,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 512189.8122,
+    "usePerDay": 0.0,
+    "netPerDay": 512189.8122,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 157934.906178,
+    "netPerDay": -157934.906178,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.27114,
+    "netPerDay": -0.27114,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 180759.882,
+    "netPerDay": -180759.882,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 198690.7885,
+    "usePerDay": 84231.949962,
+    "netPerDay": 114458.838538,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 48.189206,
+    "netPerDay": -48.189206,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "STEEL",
+    "outputPerDay": 52644.968726,
+    "usePerDay": 41347.313189,
+    "netPerDay": 11297.655537,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 271139.823,
+    "netPerDay": -271139.823,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 338.169869,
+    "usePerDay": 217.334571,
+    "netPerDay": 120.835299,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 422712.336715,
+    "usePerDay": 271139.823,
+    "netPerDay": 151572.513715,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 21.691186,
+    "netPerDay": -21.691186,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 396113.160829,
+    "netPerDay": -396113.160829,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.230359,
+    "netPerDay": -0.230359,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 153572.382667,
+    "netPerDay": -153572.382667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 182987.2414,
+    "usePerDay": 211260.352442,
+    "netPerDay": -28273.111042,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "STEEL",
+    "outputPerDay": 132037.720276,
+    "usePerDay": 34553.7861,
+    "netPerDay": 97483.934176,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 230358.574,
+    "netPerDay": -230358.574,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 184.286859,
+    "netPerDay": -184.286859,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 230358.574,
+    "netPerDay": -230358.574,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 18.428686,
+    "netPerDay": -18.428686,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 119279.5808,
+    "usePerDay": 0.0,
+    "netPerDay": 119279.5808,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.259832,
+    "netPerDay": -0.259832,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "GRAIN",
+    "outputPerDay": 329572.087626,
+    "usePerDay": 173221.160667,
+    "netPerDay": 156350.92696,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 19.457867,
+    "netPerDay": -19.457867,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 38974.76115,
+    "netPerDay": -38974.76115,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 259831.741,
+    "netPerDay": -259831.741,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 208.25455,
+    "netPerDay": -208.25455,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 389157.337017,
+    "usePerDay": 259831.741,
+    "netPerDay": 129325.596017,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 20.786539,
+    "netPerDay": -20.786539,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 671315.4223,
+    "usePerDay": 0.0,
+    "netPerDay": 671315.4223,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.314358,
+    "netPerDay": -0.314358,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "GRAIN",
+    "outputPerDay": 277497.847369,
+    "usePerDay": 209572.146667,
+    "netPerDay": 67925.700703,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 47153.733,
+    "netPerDay": -47153.733,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 314358.22,
+    "netPerDay": -314358.22,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 251.486576,
+    "netPerDay": -251.486576,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 314358.22,
+    "netPerDay": -314358.22,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 25.148658,
+    "netPerDay": -25.148658,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 289073.1661,
+    "usePerDay": 43704.353639,
+    "netPerDay": 245368.812461,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 82098.612658,
+    "netPerDay": -82098.612658,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.127599,
+    "netPerDay": -0.127599,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 85065.972,
+    "netPerDay": -85065.972,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 112158.6923,
+    "usePerDay": 43785.926751,
+    "netPerDay": 68372.765549,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "STEEL",
+    "outputPerDay": 27366.204219,
+    "usePerDay": 19139.8437,
+    "netPerDay": 8226.360519,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 40466.994111,
+    "usePerDay": 127598.958,
+    "netPerDay": -87131.963889,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 102.079166,
+    "netPerDay": -102.079166,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 127598.958,
+    "netPerDay": -127598.958,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 10.207917,
+    "netPerDay": -10.207917,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 373850.0408,
+    "usePerDay": 0.0,
+    "netPerDay": 373850.0408,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 120895.915459,
+    "netPerDay": -120895.915459,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.9428,
+    "usePerDay": 0.190381,
+    "netPerDay": 0.752419,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 126920.595333,
+    "netPerDay": -126920.595333,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 164534.4427,
+    "usePerDay": 64477.821578,
+    "netPerDay": 100056.621122,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 14.410502,
+    "netPerDay": -14.410502,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "STEEL",
+    "outputPerDay": 40298.638486,
+    "usePerDay": 28557.13395,
+    "netPerDay": 11741.504536,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 190380.893,
+    "netPerDay": -190380.893,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 152.592924,
+    "netPerDay": -152.592924,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 288210.039153,
+    "usePerDay": 190380.893,
+    "netPerDay": 97829.146153,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 15.230471,
+    "netPerDay": -15.230471,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 267220.4082,
+    "usePerDay": 69704.563887,
+    "netPerDay": 197515.844313,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 1025963.1065,
+    "usePerDay": 0.0,
+    "netPerDay": 1025963.1065,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.199941,
+    "netPerDay": -0.199941,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 133293.834,
+    "netPerDay": -133293.834,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "COPPER",
+    "outputPerDay": 170.637986,
+    "usePerDay": 173.28654,
+    "netPerDay": -2.648555,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 34323.276162,
+    "netPerDay": -34323.276162,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 64541.262859,
+    "usePerDay": 199940.751,
+    "netPerDay": -135399.488141,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 2166.081756,
+    "usePerDay": 159.952601,
+    "netPerDay": 2006.129155,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 199940.751,
+    "netPerDay": -199940.751,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 15.99526,
+    "netPerDay": -15.99526,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 368237.4826,
+    "usePerDay": 0.0,
+    "netPerDay": 368237.4826,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 188737.51027,
+    "netPerDay": -188737.51027,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.217385,
+    "netPerDay": -0.217385,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 144923.449333,
+    "netPerDay": -144923.449333,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 151211.8201,
+    "usePerDay": 100660.005477,
+    "netPerDay": 50551.814623,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 22.051169,
+    "netPerDay": -22.051169,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "STEEL",
+    "outputPerDay": 62912.503423,
+    "usePerDay": 33159.055319,
+    "netPerDay": 29753.448104,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 217385.174,
+    "netPerDay": -217385.174,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 275.63961,
+    "usePerDay": 173.908139,
+    "netPerDay": 101.73147,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 217385.174,
+    "netPerDay": -217385.174,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 17.390814,
+    "netPerDay": -17.390814,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 284053.4424,
+    "usePerDay": 60300.654982,
+    "netPerDay": 223752.787418,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.161966,
+    "netPerDay": -0.161966,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 107977.648,
+    "netPerDay": -107977.648,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 110626.8729,
+    "usePerDay": 0.0,
+    "netPerDay": 110626.8729,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 82.505006,
+    "netPerDay": -82.505006,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 25460.168476,
+    "netPerDay": -25460.168476,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 55833.939798,
+    "usePerDay": 161966.472,
+    "netPerDay": -106132.532202,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 582.598838,
+    "usePerDay": 130.29112,
+    "netPerDay": 452.307718,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 717941.977426,
+    "usePerDay": 161966.472,
+    "netPerDay": 555975.505426,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 12.957318,
+    "netPerDay": -12.957318,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 752109.7761,
+    "usePerDay": 96088.590615,
+    "netPerDay": 656021.185485,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.277523,
+    "netPerDay": -0.277523,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "GRAIN",
+    "outputPerDay": 265688.341468,
+    "usePerDay": 185015.062667,
+    "netPerDay": 80673.278802,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 41628.3891,
+    "netPerDay": -41628.3891,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 88970.917236,
+    "usePerDay": 277522.594,
+    "netPerDay": -188551.676764,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 222.018075,
+    "netPerDay": -222.018075,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 277522.594,
+    "netPerDay": -277522.594,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 22.201808,
+    "netPerDay": -22.201808,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "URANIUM",
+    "outputPerDay": 1.6369,
+    "usePerDay": 0.337594,
+    "netPerDay": 1.299306,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "GRAIN",
+    "outputPerDay": 562955.458392,
+    "usePerDay": 225062.414667,
+    "netPerDay": 337893.043725,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 25.619802,
+    "netPerDay": -25.619802,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 50639.0433,
+    "netPerDay": -50639.0433,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 337593.622,
+    "netPerDay": -337593.622,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 270.587294,
+    "netPerDay": -270.587294,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 512396.03067,
+    "usePerDay": 337593.622,
+    "netPerDay": 174802.40867,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 27.00749,
+    "netPerDay": -27.00749,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 275977.9733,
+    "usePerDay": 58748.780006,
+    "netPerDay": 217229.193294,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.158399,
+    "netPerDay": -0.158399,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "GRAIN",
+    "outputPerDay": 135233.137364,
+    "usePerDay": 105599.228,
+    "netPerDay": 29633.909364,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 12.919292,
+    "netPerDay": -12.919292,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 23759.8263,
+    "netPerDay": -23759.8263,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 54397.018524,
+    "usePerDay": 158398.842,
+    "netPerDay": -104001.823476,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 126.977459,
+    "netPerDay": -126.977459,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 258385.837989,
+    "usePerDay": 158398.842,
+    "netPerDay": 99986.995989,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 12.671907,
+    "netPerDay": -12.671907,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 201498.5237,
+    "usePerDay": 0.0,
+    "netPerDay": 201498.5237,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.3269,
+    "netPerDay": -0.3269,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 217933.248,
+    "netPerDay": -217933.248,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 388.214139,
+    "netPerDay": -388.214139,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 67.361168,
+    "netPerDay": -67.361168,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 52816.925394,
+    "netPerDay": -52816.925394,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 326899.872,
+    "netPerDay": -326899.872,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 1890.972297,
+    "usePerDay": 264.574595,
+    "netPerDay": 1626.397701,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 2942429.2868,
+    "usePerDay": 326899.872,
+    "netPerDay": 2615529.4148,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 112.268613,
+    "usePerDay": 26.15199,
+    "netPerDay": 86.116623,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 349700.501495,
+    "netPerDay": -349700.501495,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.221099,
+    "netPerDay": -0.221099,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 147399.011333,
+    "netPerDay": -147399.011333,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 167202.7521,
+    "usePerDay": 186506.934131,
+    "netPerDay": -19304.182031,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 21.361328,
+    "netPerDay": -21.361328,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "STEEL",
+    "outputPerDay": 116566.833832,
+    "usePerDay": 33698.810751,
+    "netPerDay": 82868.023081,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 221098.517,
+    "netPerDay": -221098.517,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 267.016601,
+    "usePerDay": 176.878814,
+    "netPerDay": 90.137787,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 221098.517,
+    "netPerDay": -221098.517,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 17.687881,
+    "netPerDay": -17.687881,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "URANIUM",
+    "outputPerDay": 3.5847,
+    "usePerDay": 0.30386,
+    "netPerDay": 3.28084,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "GRAIN",
+    "outputPerDay": 505163.30085,
+    "usePerDay": 202573.616667,
+    "netPerDay": 302589.684183,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 83653.082165,
+    "usePerDay": 0.0,
+    "netPerDay": 83653.082165,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 45579.06375,
+    "netPerDay": -45579.06375,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 303860.425,
+    "netPerDay": -303860.425,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 243.08834,
+    "netPerDay": -243.08834,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 303860.425,
+    "netPerDay": -303860.425,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 24.308834,
+    "netPerDay": -24.308834,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 128201.285504,
+    "netPerDay": -128201.285504,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.073362,
+    "netPerDay": -0.073362,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 48908.082667,
+    "netPerDay": -48908.082667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 80866.1122,
+    "usePerDay": 68374.018936,
+    "netPerDay": 12492.093264,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 7.052521,
+    "netPerDay": -7.052521,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "STEEL",
+    "outputPerDay": 42733.761835,
+    "usePerDay": 11180.631618,
+    "netPerDay": 31553.130217,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 73362.124,
+    "netPerDay": -73362.124,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 88.156509,
+    "usePerDay": 58.689699,
+    "netPerDay": 29.46681,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 73362.124,
+    "netPerDay": -73362.124,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 5.86897,
+    "netPerDay": -5.86897,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 96562.580611,
+    "netPerDay": -96562.580611,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "URANIUM",
+    "outputPerDay": 1.2007,
+    "usePerDay": 0.281991,
+    "netPerDay": 0.918709,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "GRAIN",
+    "outputPerDay": 498807.30138,
+    "usePerDay": 187993.952667,
+    "netPerDay": 310813.348713,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 42298.63935,
+    "netPerDay": -42298.63935,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 89409.796862,
+    "usePerDay": 281990.929,
+    "netPerDay": -192581.132138,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 225.592743,
+    "netPerDay": -225.592743,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 281990.929,
+    "netPerDay": -281990.929,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 22.559274,
+    "netPerDay": -22.559274,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.7794,
+    "usePerDay": 0.340449,
+    "netPerDay": 0.438951,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "GRAIN",
+    "outputPerDay": 435817.048755,
+    "usePerDay": 226966.253333,
+    "netPerDay": 208850.795421,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 61.976116,
+    "netPerDay": -61.976116,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 51937.247222,
+    "netPerDay": -51937.247222,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 340449.38,
+    "netPerDay": -340449.38,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 434.920111,
+    "usePerDay": 272.903154,
+    "netPerDay": 162.016957,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 543650.138841,
+    "usePerDay": 340449.38,
+    "netPerDay": 203200.758841,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 27.23595,
+    "netPerDay": -27.23595,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 676348.0136,
+    "usePerDay": 1665571.925593,
+    "netPerDay": -989223.911993,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.204635,
+    "netPerDay": -0.204635,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 136423.532,
+    "netPerDay": -136423.532,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 123288.774458,
+    "usePerDay": 0.0,
+    "netPerDay": 123288.774458,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 30695.2947,
+    "netPerDay": -30695.2947,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 1542196.227401,
+    "usePerDay": 204635.298,
+    "netPerDay": 1337560.929401,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 163.708238,
+    "netPerDay": -163.708238,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 204635.298,
+    "netPerDay": -204635.298,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 16.370824,
+    "netPerDay": -16.370824,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 705026.506,
+    "usePerDay": 1769114.608003,
+    "netPerDay": -1064088.102003,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 213745.352491,
+    "netPerDay": -213745.352491,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.268831,
+    "netPerDay": -0.268831,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 179220.844,
+    "netPerDay": -179220.844,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 71827.234658,
+    "usePerDay": 113997.521329,
+    "netPerDay": -42170.286671,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "STEEL",
+    "outputPerDay": 71248.45083,
+    "usePerDay": 40324.6899,
+    "netPerDay": 30923.76093,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 1638069.081484,
+    "usePerDay": 268831.266,
+    "netPerDay": 1369237.815484,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 215.065013,
+    "netPerDay": -215.065013,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 268831.266,
+    "netPerDay": -268831.266,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 21.506501,
+    "netPerDay": -21.506501,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "URANIUM",
+    "outputPerDay": 1.041,
+    "usePerDay": 0.330089,
+    "netPerDay": 0.710911,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "GRAIN",
+    "outputPerDay": 552570.109197,
+    "usePerDay": 220059.511333,
+    "netPerDay": 332510.597864,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 32.512204,
+    "netPerDay": -32.512204,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 50326.19515,
+    "netPerDay": -50326.19515,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 330089.267,
+    "netPerDay": -330089.267,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 406.40255,
+    "usePerDay": 264.071414,
+    "netPerDay": 142.331136,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 330089.267,
+    "netPerDay": -330089.267,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 26.407141,
+    "netPerDay": -26.407141,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.293343,
+    "netPerDay": -0.293343,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "GRAIN",
+    "outputPerDay": 463863.264745,
+    "usePerDay": 195561.854667,
+    "netPerDay": 268301.410078,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 79.302178,
+    "netPerDay": -79.302178,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 59.476633,
+    "netPerDay": -59.476633,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 44001.4173,
+    "netPerDay": -44001.4173,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 293342.782,
+    "netPerDay": -293342.782,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 234.773353,
+    "netPerDay": -234.773353,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 293342.782,
+    "netPerDay": -293342.782,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 99.127722,
+    "usePerDay": 23.467423,
+    "netPerDay": 75.6603,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 729802.487,
+    "usePerDay": 2353290.988838,
+    "netPerDay": -1623488.501838,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.28913,
+    "netPerDay": -0.28913,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "GRAIN",
+    "outputPerDay": 111521.580393,
+    "usePerDay": 192753.17,
+    "netPerDay": -81231.589607,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 28.630366,
+    "netPerDay": -28.630366,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 44085.222393,
+    "netPerDay": -44085.222393,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 2178973.137813,
+    "usePerDay": 289129.755,
+    "netPerDay": 1889843.382813,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 357.879572,
+    "usePerDay": 231.303804,
+    "netPerDay": 126.575768,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 289129.755,
+    "netPerDay": -289129.755,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 23.13038,
+    "netPerDay": -23.13038,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 561062.3378,
+    "usePerDay": 1874351.003422,
+    "netPerDay": -1313288.665622,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.230286,
+    "netPerDay": -0.230286,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 153524.192,
+    "netPerDay": -153524.192,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 98.822075,
+    "netPerDay": -98.822075,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 36557.819178,
+    "netPerDay": -36557.819178,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 1735510.188354,
+    "usePerDay": 230286.288,
+    "netPerDay": 1505223.900354,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 1007.437989,
+    "usePerDay": 184.593571,
+    "netPerDay": 822.844418,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 364540.723681,
+    "usePerDay": 230286.288,
+    "netPerDay": 134254.435681,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 18.422903,
+    "netPerDay": -18.422903,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 483940.703264,
+    "netPerDay": -483940.703264,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.197939,
+    "netPerDay": -0.197939,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 131959.644,
+    "netPerDay": -131959.644,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 53663.832061,
+    "usePerDay": 258101.708408,
+    "netPerDay": -204437.876347,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "STEEL",
+    "outputPerDay": 161313.567755,
+    "usePerDay": 29690.9199,
+    "netPerDay": 131622.647855,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 197939.466,
+    "netPerDay": -197939.466,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 158.351573,
+    "netPerDay": -158.351573,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 197939.466,
+    "netPerDay": -197939.466,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 15.835157,
+    "netPerDay": -15.835157,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 326646.326391,
+    "netPerDay": -326646.326391,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.133511,
+    "netPerDay": -0.133511,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "GRAIN",
+    "outputPerDay": 0.0,
+    "usePerDay": 89007.182667,
+    "netPerDay": -89007.182667,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 35844.465263,
+    "usePerDay": 174211.374075,
+    "netPerDay": -138366.908813,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "STEEL",
+    "outputPerDay": 108882.108797,
+    "usePerDay": 20026.6161,
+    "netPerDay": 88855.492697,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 133510.774,
+    "netPerDay": -133510.774,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 106.808619,
+    "netPerDay": -106.808619,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 133510.774,
+    "netPerDay": -133510.774,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 10.680862,
+    "netPerDay": -10.680862,
+    "unit": "MWh-equivalent"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "CRUDE_OIL",
+    "outputPerDay": 0.0,
+    "usePerDay": 29594.793605,
+    "netPerDay": -29594.793605,
+    "unit": "barrel"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "NATURAL_GAS",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "MMBtu"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "URANIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.089351,
+    "netPerDay": -0.089351,
+    "unit": "tonne U"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "GRAIN",
+    "outputPerDay": 134582.879135,
+    "usePerDay": 59567.486,
+    "netPerDay": 75015.393135,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "IRON_ORE",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "COPPER",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "LITHIUM",
+    "outputPerDay": 0.0,
+    "usePerDay": 0.0,
+    "netPerDay": 0.0,
+    "unit": "tonne LCE"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "STEEL",
+    "outputPerDay": 0.0,
+    "usePerDay": 13402.68435,
+    "netPerDay": -13402.68435,
+    "unit": "tonne"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "REFINED_FUEL",
+    "outputPerDay": 27402.586671,
+    "usePerDay": 89351.229,
+    "netPerDay": -61948.642329,
+    "unit": "barrel equivalent"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "MACHINERY",
+    "outputPerDay": 0.0,
+    "usePerDay": 71.480983,
+    "netPerDay": -71.480983,
+    "unit": "equipment unit"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "SEMICONDUCTORS",
+    "outputPerDay": 0.0,
+    "usePerDay": 89351.229,
+    "netPerDay": -89351.229,
+    "unit": "standardised chip unit"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "commodityId": "BATTERIES",
+    "outputPerDay": 0.0,
+    "usePerDay": 7.148098,
+    "netPerDay": -7.148098,
+    "unit": "MWh-equivalent"
+  }
+]

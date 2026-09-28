@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "countries": 70,
+  "regions": 122,
+  "deposits": 240,
+  "mapFacilities": 350,
+  "sceneAnchors": 350,
+  "csvTables": 14,
+  "mapIdentityAndNodeCoordinatesUnchanged": true,
+  "geologicalResourceRecordsUnchanged": true,
+  "untouchedCountryAndRegionRecords": 68,
+  "mapConsistencyCorrections": [
+    "visual-territory-51",
+    "visual-territory-52"
+  ],
+  "financialAndTechnologyProposalsActivated": false,
+  "fullEconomicFairnessSimulation": "NOT_RUN"
+}

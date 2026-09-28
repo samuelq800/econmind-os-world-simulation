@@ -1,0 +1,3174 @@
+[
+  {
+    "id": "visual-territory-01-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-01",
+    "regionId": "visual-territory-01-E1",
+    "name": "Avenor E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 40092603,
+    "representativePoint": [
+      1583.0,
+      275.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-01-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-01",
+    "regionId": "visual-territory-01-E1",
+    "name": "Avenor E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 65414246,
+    "representativePoint": [
+      1583.0,
+      275.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-02-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-02",
+    "regionId": "visual-territory-02-E1",
+    "name": "Brelis E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 48330180,
+    "representativePoint": [
+      1639.0,
+      292.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-02-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-02",
+    "regionId": "visual-territory-02-E1",
+    "name": "Brelis E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 88971469,
+    "representativePoint": [
+      1639.0,
+      292.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-03-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-03",
+    "regionId": "visual-territory-03-E1",
+    "name": "Caedon E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 51787252,
+    "representativePoint": [
+      1436.75,
+      370.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-03-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-03",
+    "regionId": "visual-territory-03-E1",
+    "name": "Caedon E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 68090647,
+    "representativePoint": [
+      1436.75,
+      370.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-03-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-03",
+    "regionId": "visual-territory-03-E2",
+    "name": "Caedon E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 69519133,
+    "representativePoint": [
+      1473.25,
+      375.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-03-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-03",
+    "regionId": "visual-territory-03-E2",
+    "name": "Caedon E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 70640409,
+    "representativePoint": [
+      1473.25,
+      375.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-04-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-04",
+    "regionId": "visual-territory-04-E1",
+    "name": "Darsin E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 67969402,
+    "representativePoint": [
+      1509.75,
+      319.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-04-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-04",
+    "regionId": "visual-territory-04-E1",
+    "name": "Darsin E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 74823459,
+    "representativePoint": [
+      1509.75,
+      319.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-04-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-04",
+    "regionId": "visual-territory-04-E2",
+    "name": "Darsin E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 53581337,
+    "representativePoint": [
+      1535.75,
+      295.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-04-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-04",
+    "regionId": "visual-territory-04-E2",
+    "name": "Darsin E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 79374833,
+    "representativePoint": [
+      1535.75,
+      295.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-05-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-05",
+    "regionId": "visual-territory-05-E1",
+    "name": "Ellovar E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 39541865,
+    "representativePoint": [
+      1579.25,
+      366.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-05-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-05",
+    "regionId": "visual-territory-05-E1",
+    "name": "Ellovar E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 60311330,
+    "representativePoint": [
+      1579.25,
+      366.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-05-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-05",
+    "regionId": "visual-territory-05-E2",
+    "name": "Ellovar E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 39486922,
+    "representativePoint": [
+      1607.75,
+      367.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-05-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-05",
+    "regionId": "visual-territory-05-E2",
+    "name": "Ellovar E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 59477795,
+    "representativePoint": [
+      1607.75,
+      367.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-06-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-06",
+    "regionId": "visual-territory-06-E1",
+    "name": "Faren E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 53001340,
+    "representativePoint": [
+      1347.75,
+      441.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-06-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-06",
+    "regionId": "visual-territory-06-E1",
+    "name": "Faren E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 93411202,
+    "representativePoint": [
+      1347.75,
+      441.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-06-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-06",
+    "regionId": "visual-territory-06-E2",
+    "name": "Faren E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 59230137,
+    "representativePoint": [
+      1399.25,
+      435.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-06-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-06",
+    "regionId": "visual-territory-06-E2",
+    "name": "Faren E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 95417739,
+    "representativePoint": [
+      1399.25,
+      435.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-07-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-07",
+    "regionId": "visual-territory-07-E1",
+    "name": "Galdra E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 52426329,
+    "representativePoint": [
+      1450.25,
+      444.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-07-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-07",
+    "regionId": "visual-territory-07-E1",
+    "name": "Galdra E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 55446775,
+    "representativePoint": [
+      1450.25,
+      444.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-07-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-07",
+    "regionId": "visual-territory-07-E2",
+    "name": "Galdra E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 51147774,
+    "representativePoint": [
+      1491.25,
+      427.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-07-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-07",
+    "regionId": "visual-territory-07-E2",
+    "name": "Galdra E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 57909313,
+    "representativePoint": [
+      1491.25,
+      427.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-08-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-08",
+    "regionId": "visual-territory-08-E1",
+    "name": "Hethen E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 51160205,
+    "representativePoint": [
+      1523.25,
+      419.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-08-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-08",
+    "regionId": "visual-territory-08-E1",
+    "name": "Hethen E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 67540967,
+    "representativePoint": [
+      1523.25,
+      419.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-08-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-08",
+    "regionId": "visual-territory-08-E2",
+    "name": "Hethen E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 46703325,
+    "representativePoint": [
+      1566.25,
+      419.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-08-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-08",
+    "regionId": "visual-territory-08-E2",
+    "name": "Hethen E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 69185819,
+    "representativePoint": [
+      1566.25,
+      419.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-09-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-09",
+    "regionId": "visual-territory-09-E1",
+    "name": "Istrel E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 40618250,
+    "representativePoint": [
+      1079.75,
+      550.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-09-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-09",
+    "regionId": "visual-territory-09-E1",
+    "name": "Istrel E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 67409010,
+    "representativePoint": [
+      1079.75,
+      550.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-09-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-09",
+    "regionId": "visual-territory-09-E2",
+    "name": "Istrel E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 30971423,
+    "representativePoint": [
+      1121.75,
+      557.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-09-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-09",
+    "regionId": "visual-territory-09-E2",
+    "name": "Istrel E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 64915335,
+    "representativePoint": [
+      1121.75,
+      557.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-10-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-10",
+    "regionId": "visual-territory-10-E1",
+    "name": "Jorun E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 38533008,
+    "representativePoint": [
+      1132.75,
+      517.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-10-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-10",
+    "regionId": "visual-territory-10-E1",
+    "name": "Jorun E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 70625655,
+    "representativePoint": [
+      1132.75,
+      517.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-10-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-10",
+    "regionId": "visual-territory-10-E2",
+    "name": "Jorun E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 41306264,
+    "representativePoint": [
+      1202.5,
+      445.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-10-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-10",
+    "regionId": "visual-territory-10-E2",
+    "name": "Jorun E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 67394431,
+    "representativePoint": [
+      1202.5,
+      445.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-11-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-11",
+    "regionId": "visual-territory-11-E1",
+    "name": "Keldan E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 57021585,
+    "representativePoint": [
+      1198.0,
+      581.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-11-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-11",
+    "regionId": "visual-territory-11-E1",
+    "name": "Keldan E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 82055451,
+    "representativePoint": [
+      1198.0,
+      581.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-12-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-12",
+    "regionId": "visual-territory-12-E1",
+    "name": "Lumer E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 79554547,
+    "representativePoint": [
+      1269.25,
+      522.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-12-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-12",
+    "regionId": "visual-territory-12-E1",
+    "name": "Lumer E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 73141321,
+    "representativePoint": [
+      1269.25,
+      522.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-12-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-12",
+    "regionId": "visual-territory-12-E2",
+    "name": "Lumer E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 51688619,
+    "representativePoint": [
+      1321.75,
+      511.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-12-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-12",
+    "regionId": "visual-territory-12-E2",
+    "name": "Lumer E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 78509414,
+    "representativePoint": [
+      1321.75,
+      511.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-13-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-13",
+    "regionId": "visual-territory-13-E1",
+    "name": "Meros E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 52510048,
+    "representativePoint": [
+      1294.25,
+      598.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-13-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-13",
+    "regionId": "visual-territory-13-E1",
+    "name": "Meros E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 64962095,
+    "representativePoint": [
+      1294.25,
+      598.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-13-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-13",
+    "regionId": "visual-territory-13-E2",
+    "name": "Meros E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 33653066,
+    "representativePoint": [
+      1350.25,
+      592.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-13-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-13",
+    "regionId": "visual-territory-13-E2",
+    "name": "Meros E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 61144304,
+    "representativePoint": [
+      1350.25,
+      592.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-14-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-14",
+    "regionId": "visual-territory-14-E1",
+    "name": "Nadrin E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 30293414,
+    "representativePoint": [
+      1369.75,
+      521.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-14-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-14",
+    "regionId": "visual-territory-14-E1",
+    "name": "Nadrin E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 60134688,
+    "representativePoint": [
+      1369.75,
+      521.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-14-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-14",
+    "regionId": "visual-territory-14-E2",
+    "name": "Nadrin E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 44964693,
+    "representativePoint": [
+      1419.75,
+      515.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-14-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-14",
+    "regionId": "visual-territory-14-E2",
+    "name": "Nadrin E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 68582512,
+    "representativePoint": [
+      1419.75,
+      515.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-15-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-15",
+    "regionId": "visual-territory-15-E1",
+    "name": "Orelis E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 44651321,
+    "representativePoint": [
+      1401.75,
+      578.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-15-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-15",
+    "regionId": "visual-territory-15-E1",
+    "name": "Orelis E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 86290970,
+    "representativePoint": [
+      1401.75,
+      578.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-15-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-15",
+    "regionId": "visual-territory-15-E2",
+    "name": "Orelis E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 53666631,
+    "representativePoint": [
+      1445.75,
+      573.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-15-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-15",
+    "regionId": "visual-territory-15-E2",
+    "name": "Orelis E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 85727215,
+    "representativePoint": [
+      1445.75,
+      573.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-16-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-16",
+    "regionId": "visual-territory-16-E1",
+    "name": "Paryn E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 52812418,
+    "representativePoint": [
+      1495.25,
+      571.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-16-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-16",
+    "regionId": "visual-territory-16-E1",
+    "name": "Paryn E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 82952153,
+    "representativePoint": [
+      1495.25,
+      571.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-16-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-16",
+    "regionId": "visual-territory-16-E2",
+    "name": "Paryn E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 56624528,
+    "representativePoint": [
+      1547.25,
+      533.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-16-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-16",
+    "regionId": "visual-territory-16-E2",
+    "name": "Paryn E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 78195776,
+    "representativePoint": [
+      1547.25,
+      533.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-17-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-17",
+    "regionId": "visual-territory-17-E1",
+    "name": "Quoran E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 69355237,
+    "representativePoint": [
+      984.0,
+      608.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-17-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-17",
+    "regionId": "visual-territory-17-E1",
+    "name": "Quoran E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 72766151,
+    "representativePoint": [
+      984.0,
+      608.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-18-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-18",
+    "regionId": "visual-territory-18-E1",
+    "name": "Rassel E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 49018503,
+    "representativePoint": [
+      1053.0,
+      685.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-18-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-18",
+    "regionId": "visual-territory-18-E1",
+    "name": "Rassel E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 65510709,
+    "representativePoint": [
+      1053.0,
+      685.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-19-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-19",
+    "regionId": "visual-territory-19-E1",
+    "name": "Siven E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 51576954,
+    "representativePoint": [
+      1062.5,
+      616.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-19-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-19",
+    "regionId": "visual-territory-19-E1",
+    "name": "Siven E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 71225318,
+    "representativePoint": [
+      1062.5,
+      616.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-20-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-20",
+    "regionId": "visual-territory-20-E1",
+    "name": "Talan E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 32914072,
+    "representativePoint": [
+      1105.25,
+      650.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-20-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-20",
+    "regionId": "visual-territory-20-E1",
+    "name": "Talan E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 62766371,
+    "representativePoint": [
+      1105.25,
+      650.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-20-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-20",
+    "regionId": "visual-territory-20-E2",
+    "name": "Talan E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 29877547,
+    "representativePoint": [
+      1151.75,
+      642.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-20-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-20",
+    "regionId": "visual-territory-20-E2",
+    "name": "Talan E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 62337105,
+    "representativePoint": [
+      1151.75,
+      642.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-21-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-21",
+    "regionId": "visual-territory-21-E1",
+    "name": "Uvren E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 48008221,
+    "representativePoint": [
+      1195.25,
+      671.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-21-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-21",
+    "regionId": "visual-territory-21-E1",
+    "name": "Uvren E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 82804370,
+    "representativePoint": [
+      1195.25,
+      671.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-21-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-21",
+    "regionId": "visual-territory-21-E2",
+    "name": "Uvren E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 47565635,
+    "representativePoint": [
+      1251.25,
+      667.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-21-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-21",
+    "regionId": "visual-territory-21-E2",
+    "name": "Uvren E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 84195127,
+    "representativePoint": [
+      1251.25,
+      667.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-22-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-22",
+    "regionId": "visual-territory-22-E1",
+    "name": "Vardis E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 40842490,
+    "representativePoint": [
+      1298.0,
+      673.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-22-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-22",
+    "regionId": "visual-territory-22-E1",
+    "name": "Vardis E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 71362153,
+    "representativePoint": [
+      1298.0,
+      673.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-23-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-23",
+    "regionId": "visual-territory-23-E1",
+    "name": "Wexar E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 58333576,
+    "representativePoint": [
+      1355.75,
+      664.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-23-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-23",
+    "regionId": "visual-territory-23-E1",
+    "name": "Wexar E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 97222626,
+    "representativePoint": [
+      1355.75,
+      664.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-23-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-23",
+    "regionId": "visual-territory-23-E2",
+    "name": "Wexar E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 111940002,
+    "representativePoint": [
+      1434.25,
+      679.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-23-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-23",
+    "regionId": "visual-territory-23-E2",
+    "name": "Wexar E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 82738263,
+    "representativePoint": [
+      1434.25,
+      679.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-24-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-24",
+    "regionId": "visual-territory-24-E1",
+    "name": "Xandor E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 57270834,
+    "representativePoint": [
+      1473.5,
+      651.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-24-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-24",
+    "regionId": "visual-territory-24-E1",
+    "name": "Xandor E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 54151022,
+    "representativePoint": [
+      1473.5,
+      651.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-24-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-24",
+    "regionId": "visual-territory-24-E2",
+    "name": "Xandor E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 47229020,
+    "representativePoint": [
+      1516.75,
+      625.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-24-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-24",
+    "regionId": "visual-territory-24-E2",
+    "name": "Xandor E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 58903610,
+    "representativePoint": [
+      1516.75,
+      625.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-25-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-25",
+    "regionId": "visual-territory-25-E1",
+    "name": "Ysol E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 51683468,
+    "representativePoint": [
+      927.0,
+      677.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-25-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-25",
+    "regionId": "visual-territory-25-E1",
+    "name": "Ysol E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 70211503,
+    "representativePoint": [
+      927.0,
+      677.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-26-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-26",
+    "regionId": "visual-territory-26-E1",
+    "name": "Zarev E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 28570817,
+    "representativePoint": [
+      1020.25,
+      756.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-26-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-26",
+    "regionId": "visual-territory-26-E1",
+    "name": "Zarev E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 46221898,
+    "representativePoint": [
+      1020.25,
+      756.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-26-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-26",
+    "regionId": "visual-territory-26-E2",
+    "name": "Zarev E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 27322456,
+    "representativePoint": [
+      1066.25,
+      751.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-26-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-26",
+    "regionId": "visual-territory-26-E2",
+    "name": "Zarev E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 48363018,
+    "representativePoint": [
+      1066.25,
+      751.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-27-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-27",
+    "regionId": "visual-territory-27-E1",
+    "name": "Adara E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 34325918,
+    "representativePoint": [
+      1108.75,
+      743.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-27-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-27",
+    "regionId": "visual-territory-27-E1",
+    "name": "Adara E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 57209864,
+    "representativePoint": [
+      1108.75,
+      743.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-27-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-27",
+    "regionId": "visual-territory-27-E2",
+    "name": "Adara E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 52054866,
+    "representativePoint": [
+      1153.25,
+      733.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-27-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-27",
+    "regionId": "visual-territory-27-E2",
+    "name": "Adara E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 64922361,
+    "representativePoint": [
+      1153.25,
+      733.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-28-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-28",
+    "regionId": "visual-territory-28-E1",
+    "name": "Belm E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 59326204,
+    "representativePoint": [
+      1184.25,
+      773.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-28-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-28",
+    "regionId": "visual-territory-28-E1",
+    "name": "Belm E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 48539622,
+    "representativePoint": [
+      1184.25,
+      773.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-28-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-28",
+    "regionId": "visual-territory-28-E2",
+    "name": "Belm E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 54908104,
+    "representativePoint": [
+      1223.75,
+      765.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-28-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-28",
+    "regionId": "visual-territory-28-E2",
+    "name": "Belm E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 55349132,
+    "representativePoint": [
+      1223.75,
+      765.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-29-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-29",
+    "regionId": "visual-territory-29-E1",
+    "name": "Corven E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 39678682,
+    "representativePoint": [
+      1274.25,
+      749.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-29-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-29",
+    "regionId": "visual-territory-29-E1",
+    "name": "Corven E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 57811937,
+    "representativePoint": [
+      1274.25,
+      749.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-29-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-29",
+    "regionId": "visual-territory-29-E2",
+    "name": "Corven E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 49819744,
+    "representativePoint": [
+      1325.75,
+      768.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-29-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-29",
+    "regionId": "visual-territory-29-E2",
+    "name": "Corven E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 55285202,
+    "representativePoint": [
+      1325.75,
+      768.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-30-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-30",
+    "regionId": "visual-territory-30-E1",
+    "name": "Delyra E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 37759682,
+    "representativePoint": [
+      1373.75,
+      743.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-30-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-30",
+    "regionId": "visual-territory-30-E1",
+    "name": "Delyra E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 57834450,
+    "representativePoint": [
+      1373.75,
+      743.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-30-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-30",
+    "regionId": "visual-territory-30-E2",
+    "name": "Delyra E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 35555916,
+    "representativePoint": [
+      1422.75,
+      759.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-30-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-30",
+    "regionId": "visual-territory-30-E2",
+    "name": "Delyra E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 50327940,
+    "representativePoint": [
+      1422.75,
+      759.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-31-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-31",
+    "regionId": "visual-territory-31-E1",
+    "name": "Erdan E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 46987343,
+    "representativePoint": [
+      1469.75,
+      720.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-31-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-31",
+    "regionId": "visual-territory-31-E1",
+    "name": "Erdan E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 49893777,
+    "representativePoint": [
+      1469.75,
+      720.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-31-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-31",
+    "regionId": "visual-territory-31-E2",
+    "name": "Erdan E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 48133399,
+    "representativePoint": [
+      1523.25,
+      740.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-31-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-31",
+    "regionId": "visual-territory-31-E2",
+    "name": "Erdan E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 53200073,
+    "representativePoint": [
+      1523.25,
+      740.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-32-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-32",
+    "regionId": "visual-territory-32-E1",
+    "name": "Falcor E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 26263903,
+    "representativePoint": [
+      1515.75,
+      784.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-32-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-32",
+    "regionId": "visual-territory-32-E1",
+    "name": "Falcor E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 38108409,
+    "representativePoint": [
+      1515.75,
+      784.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-32-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-32",
+    "regionId": "visual-territory-32-E2",
+    "name": "Falcor E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 26805382,
+    "representativePoint": [
+      1643.0,
+      778.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-32-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-32",
+    "regionId": "visual-territory-32-E2",
+    "name": "Falcor E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 40376027,
+    "representativePoint": [
+      1643.0,
+      778.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-33-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-33",
+    "regionId": "visual-territory-33-E1",
+    "name": "Gysel E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 35353174,
+    "representativePoint": [
+      154.25,
+      175.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-33-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-33",
+    "regionId": "visual-territory-33-E1",
+    "name": "Gysel E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 62578055,
+    "representativePoint": [
+      154.25,
+      175.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-33-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-33",
+    "regionId": "visual-territory-33-E2",
+    "name": "Gysel E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 24633669,
+    "representativePoint": [
+      205.25,
+      174.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-33-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-33",
+    "regionId": "visual-territory-33-E2",
+    "name": "Gysel E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 50013813,
+    "representativePoint": [
+      205.25,
+      174.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-34-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-34",
+    "regionId": "visual-territory-34-E1",
+    "name": "Harin E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 38638006,
+    "representativePoint": [
+      339.75,
+      205.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-34-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-34",
+    "regionId": "visual-territory-34-E1",
+    "name": "Harin E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 65789036,
+    "representativePoint": [
+      339.75,
+      205.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-34-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-34",
+    "regionId": "visual-territory-34-E2",
+    "name": "Harin E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 37338029,
+    "representativePoint": [
+      390.25,
+      207.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-34-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-34",
+    "regionId": "visual-territory-34-E2",
+    "name": "Harin E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 63575564,
+    "representativePoint": [
+      390.25,
+      207.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-35-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-35",
+    "regionId": "visual-territory-35-E1",
+    "name": "Inovar E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 34549623,
+    "representativePoint": [
+      435.75,
+      179.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-35-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-35",
+    "regionId": "visual-territory-35-E1",
+    "name": "Inovar E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 65017014,
+    "representativePoint": [
+      435.75,
+      179.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-35-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-35",
+    "regionId": "visual-territory-35-E2",
+    "name": "Inovar E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 30246338,
+    "representativePoint": [
+      478.75,
+      171.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-35-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-35",
+    "regionId": "visual-territory-35-E2",
+    "name": "Inovar E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 56171770,
+    "representativePoint": [
+      478.75,
+      171.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-36-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-36",
+    "regionId": "visual-territory-36-E1",
+    "name": "Jessa E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 31622989,
+    "representativePoint": [
+      549.0,
+      163.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-36-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-36",
+    "regionId": "visual-territory-36-E1",
+    "name": "Jessa E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 61936149,
+    "representativePoint": [
+      549.0,
+      163.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-37-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-37",
+    "regionId": "visual-territory-37-E1",
+    "name": "Koryn E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 33970051,
+    "representativePoint": [
+      608.5,
+      178.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-37-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-37",
+    "regionId": "visual-territory-37-E1",
+    "name": "Koryn E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 61720234,
+    "representativePoint": [
+      608.5,
+      178.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-38-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-38",
+    "regionId": "visual-territory-38-E1",
+    "name": "Lydan E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 69823953,
+    "representativePoint": [
+      157.75,
+      266.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-38-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-38",
+    "regionId": "visual-territory-38-E1",
+    "name": "Lydan E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 86033084,
+    "representativePoint": [
+      157.75,
+      266.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-38-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-38",
+    "regionId": "visual-territory-38-E2",
+    "name": "Lydan E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 47905799,
+    "representativePoint": [
+      216.75,
+      269.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-38-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-38",
+    "regionId": "visual-territory-38-E2",
+    "name": "Lydan E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 83703539,
+    "representativePoint": [
+      216.75,
+      269.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-39-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-39",
+    "regionId": "visual-territory-39-E1",
+    "name": "Mirea E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 38406314,
+    "representativePoint": [
+      248.75,
+      204.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-39-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-39",
+    "regionId": "visual-territory-39-E1",
+    "name": "Mirea E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 72274707,
+    "representativePoint": [
+      248.75,
+      204.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-39-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-39",
+    "regionId": "visual-territory-39-E2",
+    "name": "Mirea E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 40843962,
+    "representativePoint": [
+      296.25,
+      220.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-39-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-39",
+    "regionId": "visual-territory-39-E2",
+    "name": "Mirea E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 68951636,
+    "representativePoint": [
+      296.25,
+      220.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-40-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-40",
+    "regionId": "visual-territory-40-E1",
+    "name": "Norvak E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 39820592,
+    "representativePoint": [
+      316.75,
+      297.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-40-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-40",
+    "regionId": "visual-territory-40-E1",
+    "name": "Norvak E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 50886906,
+    "representativePoint": [
+      316.75,
+      297.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-40-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-40",
+    "regionId": "visual-territory-40-E2",
+    "name": "Norvak E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 60053549,
+    "representativePoint": [
+      350.75,
+      296.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-40-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-40",
+    "regionId": "visual-territory-40-E2",
+    "name": "Norvak E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 43308841,
+    "representativePoint": [
+      350.75,
+      296.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-41-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-41",
+    "regionId": "visual-territory-41-E1",
+    "name": "Ostra E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 51869714,
+    "representativePoint": [
+      385.75,
+      263.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-41-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-41",
+    "regionId": "visual-territory-41-E1",
+    "name": "Ostra E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 55743800,
+    "representativePoint": [
+      385.75,
+      263.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-41-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-41",
+    "regionId": "visual-territory-41-E2",
+    "name": "Ostra E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 40986787,
+    "representativePoint": [
+      432.75,
+      249.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-41-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-41",
+    "regionId": "visual-territory-41-E2",
+    "name": "Ostra E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 60717398,
+    "representativePoint": [
+      432.75,
+      249.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-42-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-42",
+    "regionId": "visual-territory-42-E1",
+    "name": "Pavan E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 47713472,
+    "representativePoint": [
+      499.5,
+      260.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-42-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-42",
+    "regionId": "visual-territory-42-E1",
+    "name": "Pavan E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 81942701,
+    "representativePoint": [
+      499.5,
+      260.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-43-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-43",
+    "regionId": "visual-territory-43-E1",
+    "name": "Qemra E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 47909939,
+    "representativePoint": [
+      558.0,
+      242.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-43-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-43",
+    "regionId": "visual-territory-43-E1",
+    "name": "Qemra E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 85173226,
+    "representativePoint": [
+      558.0,
+      242.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-44-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-44",
+    "regionId": "visual-territory-44-E1",
+    "name": "Ruvan E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 85710421,
+    "representativePoint": [
+      149.75,
+      340.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-44-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-44",
+    "regionId": "visual-territory-44-E1",
+    "name": "Ruvan E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 59808121,
+    "representativePoint": [
+      149.75,
+      340.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-44-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-44",
+    "regionId": "visual-territory-44-E2",
+    "name": "Ruvan E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 52760938,
+    "representativePoint": [
+      197.25,
+      354.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-44-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-44",
+    "regionId": "visual-territory-44-E2",
+    "name": "Ruvan E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 72860343,
+    "representativePoint": [
+      197.25,
+      354.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-45-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-45",
+    "regionId": "visual-territory-45-E1",
+    "name": "Selka E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 38618504,
+    "representativePoint": [
+      242.75,
+      322.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-45-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-45",
+    "regionId": "visual-territory-45-E1",
+    "name": "Selka E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 70782357,
+    "representativePoint": [
+      242.75,
+      322.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-45-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-45",
+    "regionId": "visual-territory-45-E2",
+    "name": "Selka E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 47415423,
+    "representativePoint": [
+      290.75,
+      331.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-45-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-45",
+    "regionId": "visual-territory-45-E2",
+    "name": "Selka E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 73542290,
+    "representativePoint": [
+      290.75,
+      331.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-46-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-46",
+    "regionId": "visual-territory-46-E1",
+    "name": "Tirren E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 54529993,
+    "representativePoint": [
+      377.5,
+      366.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-46-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-46",
+    "regionId": "visual-territory-46-E1",
+    "name": "Tirren E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 75303323,
+    "representativePoint": [
+      377.5,
+      366.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-46-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-46",
+    "regionId": "visual-territory-46-E2",
+    "name": "Tirren E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 52519364,
+    "representativePoint": [
+      411.5,
+      364.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-46-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-46",
+    "regionId": "visual-territory-46-E2",
+    "name": "Tirren E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 77479061,
+    "representativePoint": [
+      411.5,
+      364.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-47-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-47",
+    "regionId": "visual-territory-47-E1",
+    "name": "Ulyss E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 61915584,
+    "representativePoint": [
+      445.75,
+      326.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-47-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-47",
+    "regionId": "visual-territory-47-E1",
+    "name": "Ulyss E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 96436294,
+    "representativePoint": [
+      445.75,
+      326.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-47-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-47",
+    "regionId": "visual-territory-47-E2",
+    "name": "Ulyss E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 65522664,
+    "representativePoint": [
+      492.75,
+      331.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-47-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-47",
+    "regionId": "visual-territory-47-E2",
+    "name": "Ulyss E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 90483678,
+    "representativePoint": [
+      492.75,
+      331.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-48-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-48",
+    "regionId": "visual-territory-48-E1",
+    "name": "Varos E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 54357156,
+    "representativePoint": [
+      125.0,
+      411.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-48-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-48",
+    "regionId": "visual-territory-48-E1",
+    "name": "Varos E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 73241802,
+    "representativePoint": [
+      125.0,
+      411.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-49-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-49",
+    "regionId": "visual-territory-49-E1",
+    "name": "Wrenna E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 37912522,
+    "representativePoint": [
+      218.5,
+      398.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-49-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-49",
+    "regionId": "visual-territory-49-E1",
+    "name": "Wrenna E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 55930354,
+    "representativePoint": [
+      218.5,
+      398.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-49-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-49",
+    "regionId": "visual-territory-49-E2",
+    "name": "Wrenna E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 45469406,
+    "representativePoint": [
+      267.0,
+      400.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-49-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-49",
+    "regionId": "visual-territory-49-E2",
+    "name": "Wrenna E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 51068611,
+    "representativePoint": [
+      267.0,
+      400.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-50-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-50",
+    "regionId": "visual-territory-50-E1",
+    "name": "Xyren E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 49608535,
+    "representativePoint": [
+      279.75,
+      466.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-50-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-50",
+    "regionId": "visual-territory-50-E1",
+    "name": "Xyren E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 51840411,
+    "representativePoint": [
+      279.75,
+      466.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-50-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-50",
+    "regionId": "visual-territory-50-E2",
+    "name": "Xyren E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 44222820,
+    "representativePoint": [
+      314.25,
+      482.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-50-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-50",
+    "regionId": "visual-territory-50-E2",
+    "name": "Xyren E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 54268985,
+    "representativePoint": [
+      314.25,
+      482.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-51-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-51",
+    "regionId": "visual-territory-51-E1",
+    "name": "Yara E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 71602534,
+    "representativePoint": [
+      308.75,
+      438.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-51-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-51",
+    "regionId": "visual-territory-51-E1",
+    "name": "Yara E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 45778670,
+    "representativePoint": [
+      308.75,
+      438.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-51-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-51",
+    "regionId": "visual-territory-51-E2",
+    "name": "Yara E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 48501925,
+    "representativePoint": [
+      347.25,
+      448.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-51-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-51",
+    "regionId": "visual-territory-51-E2",
+    "name": "Yara E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 51502045,
+    "representativePoint": [
+      347.25,
+      448.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-52-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-52",
+    "regionId": "visual-territory-52-E1",
+    "name": "Zorin E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 103172643,
+    "representativePoint": [
+      534.0,
+      401.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-52-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-52",
+    "regionId": "visual-territory-52-E1",
+    "name": "Zorin E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 58793829,
+    "representativePoint": [
+      534.0,
+      401.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-53-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-53",
+    "regionId": "visual-territory-53-E1",
+    "name": "Alera E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 59085808,
+    "representativePoint": [
+      762.25,
+      421.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-53-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-53",
+    "regionId": "visual-territory-53-E1",
+    "name": "Alera E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 76432100,
+    "representativePoint": [
+      762.25,
+      421.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-53-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-53",
+    "regionId": "visual-territory-53-E2",
+    "name": "Alera E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 66458193,
+    "representativePoint": [
+      803.75,
+      429.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-53-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-53",
+    "regionId": "visual-territory-53-E2",
+    "name": "Alera E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 75546493,
+    "representativePoint": [
+      803.75,
+      429.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-54-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-54",
+    "regionId": "visual-territory-54-E1",
+    "name": "Brin E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 84558478,
+    "representativePoint": [
+      836.75,
+      465.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-54-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-54",
+    "regionId": "visual-territory-54-E1",
+    "name": "Brin E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 94212088,
+    "representativePoint": [
+      836.75,
+      465.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-54-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-54",
+    "regionId": "visual-territory-54-E2",
+    "name": "Brin E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 65435099,
+    "representativePoint": [
+      896.75,
+      472.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-54-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-54",
+    "regionId": "visual-territory-54-E2",
+    "name": "Brin E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 93387957,
+    "representativePoint": [
+      896.75,
+      472.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-55-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-55",
+    "regionId": "visual-territory-55-E1",
+    "name": "Cassa E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 99316074,
+    "representativePoint": [
+      965.5,
+      442.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-55-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-55",
+    "regionId": "visual-territory-55-E1",
+    "name": "Cassa E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 59082768,
+    "representativePoint": [
+      965.5,
+      442.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-56-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-56",
+    "regionId": "visual-territory-56-E1",
+    "name": "Doren E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 96124963,
+    "representativePoint": [
+      656.75,
+      534.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-56-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-56",
+    "regionId": "visual-territory-56-E1",
+    "name": "Doren E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 74309368,
+    "representativePoint": [
+      656.75,
+      534.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-56-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-56",
+    "regionId": "visual-territory-56-E2",
+    "name": "Doren E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 63681475,
+    "representativePoint": [
+      699.75,
+      503.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-56-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-56",
+    "regionId": "visual-territory-56-E2",
+    "name": "Doren E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 92784066,
+    "representativePoint": [
+      699.75,
+      503.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-57-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-57",
+    "regionId": "visual-territory-57-E1",
+    "name": "Everen E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 51291378,
+    "representativePoint": [
+      665.75,
+      594.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-57-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-57",
+    "regionId": "visual-territory-57-E1",
+    "name": "Everen E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 62943316,
+    "representativePoint": [
+      665.75,
+      594.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-57-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-57",
+    "regionId": "visual-territory-57-E2",
+    "name": "Everen E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 44027895,
+    "representativePoint": [
+      708.25,
+      609.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-57-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-57",
+    "regionId": "visual-territory-57-E2",
+    "name": "Everen E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 62835928,
+    "representativePoint": [
+      708.25,
+      609.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-58-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-58",
+    "regionId": "visual-territory-58-E1",
+    "name": "Fenna E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 67032799,
+    "representativePoint": [
+      748.0,
+      518.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-58-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-58",
+    "regionId": "visual-territory-58-E1",
+    "name": "Fenna E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 87065589,
+    "representativePoint": [
+      748.0,
+      518.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-58-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-58",
+    "regionId": "visual-territory-58-E2",
+    "name": "Fenna E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 66194820,
+    "representativePoint": [
+      809.75,
+      544.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-58-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-58",
+    "regionId": "visual-territory-58-E2",
+    "name": "Fenna E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 83567217,
+    "representativePoint": [
+      809.75,
+      544.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-59-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-59",
+    "regionId": "visual-territory-59-E1",
+    "name": "Garan E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 30738730,
+    "representativePoint": [
+      635.5,
+      648.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-59-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-59",
+    "regionId": "visual-territory-59-E1",
+    "name": "Garan E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 42623394,
+    "representativePoint": [
+      635.5,
+      648.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-60-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-60",
+    "regionId": "visual-territory-60-E1",
+    "name": "Hylos E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 52835560,
+    "representativePoint": [
+      198.25,
+      555.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-60-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-60",
+    "regionId": "visual-territory-60-E1",
+    "name": "Hylos E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 77622612,
+    "representativePoint": [
+      198.25,
+      555.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-60-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-60",
+    "regionId": "visual-territory-60-E2",
+    "name": "Hylos E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 67129011,
+    "representativePoint": [
+      245.25,
+      568.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-60-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-60",
+    "regionId": "visual-territory-60-E2",
+    "name": "Hylos E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 84403746,
+    "representativePoint": [
+      245.25,
+      568.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-61-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-61",
+    "regionId": "visual-territory-61-E1",
+    "name": "Ivara E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 79800899,
+    "representativePoint": [
+      267.75,
+      594.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-61-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-61",
+    "regionId": "visual-territory-61-E1",
+    "name": "Ivara E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 76060232,
+    "representativePoint": [
+      267.75,
+      594.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-61-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-61",
+    "regionId": "visual-territory-61-E2",
+    "name": "Ivara E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 114813891,
+    "representativePoint": [
+      308.25,
+      585.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-61-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-61",
+    "regionId": "visual-territory-61-E2",
+    "name": "Ivara E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 69774358,
+    "representativePoint": [
+      308.25,
+      585.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-62-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-62",
+    "regionId": "visual-territory-62-E1",
+    "name": "Jalen E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 46552939,
+    "representativePoint": [
+      317.25,
+      687.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-62-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-62",
+    "regionId": "visual-territory-62-E1",
+    "name": "Jalen E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 60219857,
+    "representativePoint": [
+      317.25,
+      687.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-62-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-62",
+    "regionId": "visual-territory-62-E2",
+    "name": "Jalen E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 41983013,
+    "representativePoint": [
+      389.5,
+      746.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-62-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-62",
+    "regionId": "visual-territory-62-E2",
+    "name": "Jalen E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 55879489,
+    "representativePoint": [
+      389.5,
+      746.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-63-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-63",
+    "regionId": "visual-territory-63-E1",
+    "name": "Korra E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 62857316,
+    "representativePoint": [
+      347.75,
+      606.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-63-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-63",
+    "regionId": "visual-territory-63-E1",
+    "name": "Korra E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 72029629,
+    "representativePoint": [
+      347.75,
+      606.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-63-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-63",
+    "regionId": "visual-territory-63-E2",
+    "name": "Korra E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 67507938,
+    "representativePoint": [
+      397.25,
+      620.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-63-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-63",
+    "regionId": "visual-territory-63-E2",
+    "name": "Korra E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 66436383,
+    "representativePoint": [
+      397.25,
+      620.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-64-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-64",
+    "regionId": "visual-territory-64-E1",
+    "name": "Lethis E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 82397962,
+    "representativePoint": [
+      675.75,
+      291.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-64-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-64",
+    "regionId": "visual-territory-64-E1",
+    "name": "Lethis E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 92916850,
+    "representativePoint": [
+      675.75,
+      291.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-64-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-64",
+    "regionId": "visual-territory-64-E2",
+    "name": "Lethis E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 75529934,
+    "representativePoint": [
+      724.25,
+      297.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-64-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-64",
+    "regionId": "visual-territory-64-E2",
+    "name": "Lethis E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 79244521,
+    "representativePoint": [
+      724.25,
+      297.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-65-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-65",
+    "regionId": "visual-territory-65-E1",
+    "name": "Marn E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 59946654,
+    "representativePoint": [
+      577.25,
+      330.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-65-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-65",
+    "regionId": "visual-territory-65-E1",
+    "name": "Marn E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 75373106,
+    "representativePoint": [
+      577.25,
+      330.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-65-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-65",
+    "regionId": "visual-territory-65-E2",
+    "name": "Marn E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 71742452,
+    "representativePoint": [
+      641.75,
+      315.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-65-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-65",
+    "regionId": "visual-territory-65-E2",
+    "name": "Marn E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 86280570,
+    "representativePoint": [
+      641.75,
+      315.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-66-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-66",
+    "regionId": "visual-territory-66-E1",
+    "name": "Nivor E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 43426247,
+    "representativePoint": [
+      929.75,
+      180.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-66-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-66",
+    "regionId": "visual-territory-66-E1",
+    "name": "Nivor E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 77202218,
+    "representativePoint": [
+      929.75,
+      180.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-66-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-66",
+    "regionId": "visual-territory-66-E2",
+    "name": "Nivor E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 98741756,
+    "representativePoint": [
+      972.75,
+      341.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-66-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-66",
+    "regionId": "visual-territory-66-E2",
+    "name": "Nivor E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 69759534,
+    "representativePoint": [
+      972.75,
+      341.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-67-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-67",
+    "regionId": "visual-territory-67-E1",
+    "name": "Orsa E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 43034072,
+    "representativePoint": [
+      461.75,
+      703.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-67-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-67",
+    "regionId": "visual-territory-67-E1",
+    "name": "Orsa E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 57045166,
+    "representativePoint": [
+      461.75,
+      703.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-67-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-67",
+    "regionId": "visual-territory-67-E2",
+    "name": "Orsa E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 83462719,
+    "representativePoint": [
+      526.25,
+      696.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-67-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-67",
+    "regionId": "visual-territory-67-E2",
+    "name": "Orsa E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 46744331,
+    "representativePoint": [
+      526.25,
+      696.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-68-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-68",
+    "regionId": "visual-territory-68-E1",
+    "name": "Pella E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 39777351,
+    "representativePoint": [
+      476.75,
+      587.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-68-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-68",
+    "regionId": "visual-territory-68-E1",
+    "name": "Pella E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 61180392,
+    "representativePoint": [
+      476.75,
+      587.5
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-68-E2-URBAN_CLUSTER",
+    "countryId": "visual-territory-68",
+    "regionId": "visual-territory-68-E2",
+    "name": "Pella E2城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 39665525,
+    "representativePoint": [
+      523.25,
+      596.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-68-E2-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-68",
+    "regionId": "visual-territory-68-E2",
+    "name": "Pella E2乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 57316198,
+    "representativePoint": [
+      523.25,
+      596.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-69-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-69",
+    "regionId": "visual-territory-69-E1",
+    "name": "Quillan E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 50467073,
+    "representativePoint": [
+      211.0,
+      702.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-69-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-69",
+    "regionId": "visual-territory-69-E1",
+    "name": "Quillan E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 83043701,
+    "representativePoint": [
+      211.0,
+      702.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-70-E1-URBAN_CLUSTER",
+    "countryId": "visual-territory-70",
+    "regionId": "visual-territory-70-E1",
+    "name": "Rhea E1城镇群",
+    "kind": "URBAN_CLUSTER",
+    "population": 30915525,
+    "representativePoint": [
+      1211.0,
+      255.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  },
+  {
+    "id": "visual-territory-70-E1-RURAL_SETTLEMENT_NETWORK",
+    "countryId": "visual-territory-70",
+    "regionId": "visual-territory-70-E1",
+    "name": "Rhea E1乡村聚落群",
+    "kind": "RURAL_SETTLEMENT_NETWORK",
+    "population": 58435704,
+    "representativePoint": [
+      1211.0,
+      255.0
+    ],
+    "coordinatePrecision": "REGIONAL_REPRESENTATIVE_NOT_INDIVIDUAL_BUILDINGS"
+  }
+]

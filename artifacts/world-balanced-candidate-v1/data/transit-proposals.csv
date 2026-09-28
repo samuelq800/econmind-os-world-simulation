@@ -1,0 +1,154 @@
+﻿id,flowId,countryIds,consentStatus
+TRANSIT-FLOW-0008,FLOW-0008,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0012,FLOW-0012,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0016,FLOW-0016,"[""visual-territory-11""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0021,FLOW-0021,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0022,FLOW-0022,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0023,FLOW-0023,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0024,FLOW-0024,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0043,FLOW-0043,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0050,FLOW-0050,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0052,FLOW-0052,"[""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0059,FLOW-0059,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0060,FLOW-0060,"[""visual-territory-11""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0062,FLOW-0062,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0067,FLOW-0067,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0072,FLOW-0072,"[""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0083,FLOW-0083,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0085,FLOW-0085,"[""visual-territory-24"", ""visual-territory-29"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0086,FLOW-0086,"[""visual-territory-29""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0087,FLOW-0087,"[""visual-territory-29""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0098,FLOW-0098,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0099,FLOW-0099,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0122,FLOW-0122,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0123,FLOW-0123,"[""visual-territory-11""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0124,FLOW-0124,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0149,FLOW-0149,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0150,FLOW-0150,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0160,FLOW-0160,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0166,FLOW-0166,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0169,FLOW-0169,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0173,FLOW-0173,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0176,FLOW-0176,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0181,FLOW-0181,"[""visual-territory-11""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0182,FLOW-0182,"[""visual-territory-11""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0183,FLOW-0183,"[""visual-territory-29""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0190,FLOW-0190,"[""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0207,FLOW-0207,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0210,FLOW-0210,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0211,FLOW-0211,"[""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0214,FLOW-0214,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0215,FLOW-0215,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0216,FLOW-0216,"[""visual-territory-29""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0217,FLOW-0217,"[""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0219,FLOW-0219,"[""visual-territory-11"", ""visual-territory-29""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0220,FLOW-0220,"[""visual-territory-11"", ""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0221,FLOW-0221,"[""visual-territory-11""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0227,FLOW-0227,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0229,FLOW-0229,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0232,FLOW-0232,"[""visual-territory-17"", ""visual-territory-19"", ""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0233,FLOW-0233,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0234,FLOW-0234,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0235,FLOW-0235,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0236,FLOW-0236,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0237,FLOW-0237,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0238,FLOW-0238,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0240,FLOW-0240,"[""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0270,FLOW-0270,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0271,FLOW-0271,"[""visual-territory-12"", ""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0272,FLOW-0272,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0273,FLOW-0273,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0274,FLOW-0274,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0275,FLOW-0275,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0277,FLOW-0277,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0290,FLOW-0290,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0291,FLOW-0291,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0292,FLOW-0292,"[""visual-territory-17"", ""visual-territory-19"", ""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0293,FLOW-0293,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0296,FLOW-0296,"[""visual-territory-24""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0301,FLOW-0301,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0302,FLOW-0302,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0303,FLOW-0303,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0304,FLOW-0304,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0305,FLOW-0305,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0306,FLOW-0306,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0307,FLOW-0307,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0308,FLOW-0308,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0309,FLOW-0309,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0310,FLOW-0310,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0311,FLOW-0311,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0312,FLOW-0312,"[""visual-territory-24"", ""visual-territory-29"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0315,FLOW-0315,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0316,FLOW-0316,"[""visual-territory-11""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0339,FLOW-0339,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0345,FLOW-0345,"[""visual-territory-46"", ""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0346,FLOW-0346,"[""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0347,FLOW-0347,"[""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0348,FLOW-0348,"[""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0372,FLOW-0372,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0374,FLOW-0374,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0375,FLOW-0375,"[""visual-territory-11""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0379,FLOW-0379,"[""visual-territory-29""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0380,FLOW-0380,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0396,FLOW-0396,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0397,FLOW-0397,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0399,FLOW-0399,"[""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0400,FLOW-0400,"[""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0436,FLOW-0436,"[""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0444,FLOW-0444,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0448,FLOW-0448,"[""visual-territory-29""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0449,FLOW-0449,"[""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0452,FLOW-0452,"[""visual-territory-24""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0455,FLOW-0455,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0462,FLOW-0462,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0463,FLOW-0463,"[""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0487,FLOW-0487,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0488,FLOW-0488,"[""visual-territory-11""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0489,FLOW-0489,"[""visual-territory-11""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0498,FLOW-0498,"[""visual-territory-11""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0518,FLOW-0518,"[""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0521,FLOW-0521,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0522,FLOW-0522,"[""visual-territory-11"", ""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0523,FLOW-0523,"[""visual-territory-12"", ""visual-territory-29""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0524,FLOW-0524,"[""visual-territory-12"", ""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0525,FLOW-0525,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0526,FLOW-0526,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0527,FLOW-0527,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0533,FLOW-0533,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0534,FLOW-0534,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0535,FLOW-0535,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0536,FLOW-0536,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0537,FLOW-0537,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0538,FLOW-0538,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0539,FLOW-0539,"[""visual-territory-34"", ""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0540,FLOW-0540,"[""visual-territory-46"", ""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0541,FLOW-0541,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0542,FLOW-0542,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0543,FLOW-0543,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0544,FLOW-0544,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0580,FLOW-0580,"[""visual-territory-49""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0597,FLOW-0597,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0598,FLOW-0598,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0599,FLOW-0599,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0600,FLOW-0600,"[""visual-territory-12"", ""visual-territory-17"", ""visual-territory-19""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0601,FLOW-0601,"[""visual-territory-11"", ""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0602,FLOW-0602,"[""visual-territory-12"", ""visual-territory-29""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0603,FLOW-0603,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0604,FLOW-0604,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0605,FLOW-0605,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0606,FLOW-0606,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0607,FLOW-0607,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0608,FLOW-0608,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0609,FLOW-0609,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0610,FLOW-0610,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0611,FLOW-0611,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0612,FLOW-0612,"[""visual-territory-12""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0623,FLOW-0623,"[""visual-territory-24"", ""visual-territory-29"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0624,FLOW-0624,"[""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0625,FLOW-0625,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0626,FLOW-0626,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0627,FLOW-0627,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0628,FLOW-0628,"[""visual-territory-24""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0629,FLOW-0629,"[""visual-territory-24"", ""visual-territory-31""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0639,FLOW-0639,"[""visual-territory-46""]",PROPOSED_NOT_GRANTED
+TRANSIT-FLOW-0640,FLOW-0640,"[""visual-territory-34""]",PROPOSED_NOT_GRANTED

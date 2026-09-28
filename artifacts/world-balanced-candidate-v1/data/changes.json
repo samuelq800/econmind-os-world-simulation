@@ -1,0 +1,920 @@
+[
+  {
+    "objectId": "visual-territory-44-E1",
+    "field": "landUseKm2",
+    "reason": "湿润热带农业不再被2200毫米硬阈值归零；12%森林转为候选农业用地，上限明确且面积守恒。",
+    "transferredKm2": 150360.37256,
+    "from": "forest",
+    "to": "croplandPotential"
+  },
+  {
+    "objectId": "visual-territory-48-E1",
+    "field": "landUseKm2",
+    "reason": "湿润热带农业不再被2200毫米硬阈值归零；12%森林转为候选农业用地，上限明确且面积守恒。",
+    "transferredKm2": 179088.29651999997,
+    "from": "forest",
+    "to": "croplandPotential"
+  },
+  {
+    "objectId": "visual-territory-50-E1",
+    "field": "landUseKm2",
+    "reason": "湿润热带农业不再被2200毫米硬阈值归零；12%森林转为候选农业用地，上限明确且面积守恒。",
+    "transferredKm2": 64934.33320000001,
+    "from": "forest",
+    "to": "croplandPotential"
+  },
+  {
+    "objectId": "visual-territory-50-E2",
+    "field": "landUseKm2",
+    "reason": "湿润热带农业不再被2200毫米硬阈值归零；12%森林转为候选农业用地，上限明确且面积守恒。",
+    "transferredKm2": 127150.71383999998,
+    "from": "forest",
+    "to": "croplandPotential"
+  },
+  {
+    "objectId": "visual-territory-51-E1",
+    "field": "landUseKm2",
+    "reason": "湿润热带农业不再被2200毫米硬阈值归零；12%森林转为候选农业用地，上限明确且面积守恒。",
+    "transferredKm2": 123938.58936,
+    "from": "forest",
+    "to": "croplandPotential"
+  },
+  {
+    "objectId": "visual-territory-51-E2",
+    "field": "landUseKm2",
+    "reason": "湿润热带农业不再被2200毫米硬阈值归零；12%森林转为候选农业用地，上限明确且面积守恒。",
+    "transferredKm2": 126162.36792,
+    "from": "forest",
+    "to": "croplandPotential"
+  },
+  {
+    "objectId": "visual-territory-52-E1",
+    "field": "landUseKm2",
+    "reason": "湿润热带农业不再被2200毫米硬阈值归零；12%森林转为候选农业用地，上限明确且面积守恒。",
+    "transferredKm2": 192925.14072,
+    "from": "forest",
+    "to": "croplandPotential"
+  },
+  {
+    "objectId": "visual-territory-56-E1",
+    "field": "landUseKm2",
+    "reason": "湿润热带农业不再被2200毫米硬阈值归零；12%森林转为候选农业用地，上限明确且面积守恒。",
+    "transferredKm2": 167228.1444,
+    "from": "forest",
+    "to": "croplandPotential"
+  },
+  {
+    "objectId": "visual-territory-01-E1",
+    "field": "population",
+    "before": 176666984,
+    "after": 105506849,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-02-E1",
+    "field": "population",
+    "before": 276124585,
+    "after": 137301649,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-03-E1",
+    "field": "population",
+    "before": 234670145,
+    "after": 119877899,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-03-E2",
+    "field": "population",
+    "before": 275733174,
+    "after": 140159542,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-04-E1",
+    "field": "population",
+    "before": 276319021,
+    "after": 142792861,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-04-E2",
+    "field": "population",
+    "before": 220042721,
+    "after": 132956170,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-05-E1",
+    "field": "population",
+    "before": 163135753,
+    "after": 99853195,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-05-E2",
+    "field": "population",
+    "before": 159455285,
+    "after": 98964717,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-06-E1",
+    "field": "population",
+    "before": 26250367,
+    "after": 146412542,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-06-E2",
+    "field": "population",
+    "before": 298296159,
+    "after": 154647876,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-07-E1",
+    "field": "population",
+    "before": 170218980,
+    "after": 107873104,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-07-E2",
+    "field": "population",
+    "before": 163757844,
+    "after": 109057087,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-08-E1",
+    "field": "population",
+    "before": 173777247,
+    "after": 118701172,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-08-E2",
+    "field": "population",
+    "before": 180232712,
+    "after": 115889144,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-09-E1",
+    "field": "population",
+    "before": 85754496,
+    "after": 108027260,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-09-E2",
+    "field": "population",
+    "before": 32192135,
+    "after": 95886758,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-10-E1",
+    "field": "population",
+    "before": 31506781,
+    "after": 109158663,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-10-E2",
+    "field": "population",
+    "before": 32419344,
+    "after": 108700695,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-11-E1",
+    "field": "population",
+    "before": 58955987,
+    "after": 139077036,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-12-E1",
+    "field": "population",
+    "before": 61848785,
+    "after": 152695868,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-12-E2",
+    "field": "population",
+    "before": 44072926,
+    "after": 130198033,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-13-E1",
+    "field": "population",
+    "before": 35430889,
+    "after": 117472143,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-13-E2",
+    "field": "population",
+    "before": 709,
+    "after": 94797370,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-14-E1",
+    "field": "population",
+    "before": 31186330,
+    "after": 90428102,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-14-E2",
+    "field": "population",
+    "before": 161872496,
+    "after": 113547205,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-15-E1",
+    "field": "population",
+    "before": 111688662,
+    "after": 130942291,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-15-E2",
+    "field": "population",
+    "before": 227434923,
+    "after": 139393846,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-16-E1",
+    "field": "population",
+    "before": 227801460,
+    "after": 135764571,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-16-E2",
+    "field": "population",
+    "before": 231462573,
+    "after": 134820304,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-17-E1",
+    "field": "population",
+    "before": 132916537,
+    "after": 142121388,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-18-E1",
+    "field": "population",
+    "before": 47662589,
+    "after": 114529212,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-19-E1",
+    "field": "population",
+    "before": 106134098,
+    "after": 122802272,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-20-E1",
+    "field": "population",
+    "before": 381996,
+    "after": 95680443,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-20-E2",
+    "field": "population",
+    "before": 1764147,
+    "after": 92214652,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-21-E1",
+    "field": "population",
+    "before": 68331499,
+    "after": 130812591,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-21-E2",
+    "field": "population",
+    "before": 100775263,
+    "after": 131760762,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-22-E1",
+    "field": "population",
+    "before": 132438465,
+    "after": 112204643,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-23-E1",
+    "field": "population",
+    "before": 148269816,
+    "after": 155556202,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-23-E2",
+    "field": "population",
+    "before": 206121337,
+    "after": 194678265,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-24-E1",
+    "field": "population",
+    "before": 114237166,
+    "after": 111421856,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-24-E2",
+    "field": "population",
+    "before": 121293267,
+    "after": 106132630,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-25-E1",
+    "field": "population",
+    "before": 97452872,
+    "after": 121894971,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-26-E1",
+    "field": "population",
+    "before": 27044362,
+    "after": 74792715,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-26-E2",
+    "field": "population",
+    "before": 26797795,
+    "after": 75685474,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-27-E1",
+    "field": "population",
+    "before": 37482602,
+    "after": 91535782,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-27-E2",
+    "field": "population",
+    "before": 78069157,
+    "after": 116977227,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-28-E1",
+    "field": "population",
+    "before": 43203604,
+    "after": 107865826,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-28-E2",
+    "field": "population",
+    "before": 47914677,
+    "after": 110257236,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-29-E1",
+    "field": "population",
+    "before": 46209585,
+    "after": 97490619,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-29-E2",
+    "field": "population",
+    "before": 53067553,
+    "after": 105104946,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-30-E1",
+    "field": "population",
+    "before": 68709690,
+    "after": 95594132,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-30-E2",
+    "field": "population",
+    "before": 40318198,
+    "after": 85883856,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-31-E1",
+    "field": "population",
+    "before": 64329620,
+    "after": 96881120,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-31-E2",
+    "field": "population",
+    "before": 77266897,
+    "after": 101333472,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-32-E1",
+    "field": "population",
+    "before": 2353384,
+    "after": 64372312,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-32-E2",
+    "field": "population",
+    "before": 20125562,
+    "after": 67181409,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-33-E1",
+    "field": "population",
+    "before": 106254418,
+    "after": 97931229,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-33-E2",
+    "field": "population",
+    "before": 46335645,
+    "after": 74647482,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-34-E1",
+    "field": "population",
+    "before": 115148859,
+    "after": 104427042,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-34-E2",
+    "field": "population",
+    "before": 102095657,
+    "after": 100913593,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-35-E1",
+    "field": "population",
+    "before": 117408467,
+    "after": 99566637,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-35-E2",
+    "field": "population",
+    "before": 76586113,
+    "after": 86418108,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-36-E1",
+    "field": "population",
+    "before": 99086318,
+    "after": 93559138,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-37-E1",
+    "field": "population",
+    "before": 113207534,
+    "after": 95690285,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-38-E1",
+    "field": "population",
+    "before": 192686613,
+    "after": 155857037,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-38-E2",
+    "field": "population",
+    "before": 131407898,
+    "after": 131609338,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-39-E1",
+    "field": "population",
+    "before": 89657054,
+    "after": 110681021,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-39-E2",
+    "field": "population",
+    "before": 109131569,
+    "after": 109795598,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-40-E1",
+    "field": "population",
+    "before": 45236073,
+    "after": 90707498,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-40-E2",
+    "field": "population",
+    "before": 30621784,
+    "after": 103362390,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-41-E1",
+    "field": "population",
+    "before": 87059284,
+    "after": 107613514,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-41-E2",
+    "field": "population",
+    "before": 99385919,
+    "after": 101704185,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-42-E1",
+    "field": "population",
+    "before": 153671207,
+    "after": 129656173,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-43-E1",
+    "field": "population",
+    "before": 157559906,
+    "after": 133083165,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-44-E1",
+    "field": "population",
+    "before": 12149294,
+    "after": 145518542,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-44-E2",
+    "field": "population",
+    "before": 107963252,
+    "after": 125621281,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-45-E1",
+    "field": "population",
+    "before": 74114972,
+    "after": 109400861,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-45-E2",
+    "field": "population",
+    "before": 54860004,
+    "after": 120957713,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-46-E1",
+    "field": "population",
+    "before": 75235355,
+    "after": 129833316,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-46-E2",
+    "field": "population",
+    "before": 96579233,
+    "after": 129998425,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-47-E1",
+    "field": "population",
+    "before": 145038719,
+    "after": 158351878,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-47-E2",
+    "field": "population",
+    "before": 166409695,
+    "after": 156006342,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-48-E1",
+    "field": "population",
+    "before": 6373142,
+    "after": 127598958,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-49-E1",
+    "field": "population",
+    "before": 91183568,
+    "after": 93842876,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-49-E2",
+    "field": "population",
+    "before": 47836708,
+    "after": 96538017,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-50-E1",
+    "field": "population",
+    "before": 27192127,
+    "after": 101448946,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-50-E2",
+    "field": "population",
+    "before": 614,
+    "after": 98491805,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-51-E1",
+    "field": "population",
+    "before": 894,
+    "after": 117381204,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-51-E2",
+    "field": "population",
+    "before": 655,
+    "after": 100003970,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-52-E1",
+    "field": "population",
+    "before": 900,
+    "after": 161966472,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-53-E1",
+    "field": "population",
+    "before": 260218838,
+    "after": 135517908,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-53-E2",
+    "field": "population",
+    "before": 233333531,
+    "after": 142004686,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-54-E1",
+    "field": "population",
+    "before": 305638125,
+    "after": 178770566,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-54-E2",
+    "field": "population",
+    "before": 270616728,
+    "after": 158823056,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-55-E1",
+    "field": "population",
+    "before": 262394337,
+    "after": 158398842,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-56-E1",
+    "field": "population",
+    "before": 28839567,
+    "after": 170434331,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-56-E2",
+    "field": "population",
+    "before": 110774240,
+    "after": 156465541,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-57-E1",
+    "field": "population",
+    "before": 106779070,
+    "after": 114234694,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-57-E2",
+    "field": "population",
+    "before": 113650376,
+    "after": 106863823,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-58-E1",
+    "field": "population",
+    "before": 277168197,
+    "after": 154098388,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-58-E2",
+    "field": "population",
+    "before": 336263799,
+    "after": 149762037,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-59-E1",
+    "field": "population",
+    "before": 71566237,
+    "after": 73362124,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-60-E1",
+    "field": "population",
+    "before": 191671351,
+    "after": 130458172,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-60-E2",
+    "field": "population",
+    "before": 261166772,
+    "after": 151532757,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-61-E1",
+    "field": "population",
+    "before": 216047227,
+    "after": 155861131,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-61-E2",
+    "field": "population",
+    "before": 245529126,
+    "after": 184588249,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-62-E1",
+    "field": "population",
+    "before": 143661321,
+    "after": 106772796,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-62-E2",
+    "field": "population",
+    "before": 102983284,
+    "after": 97862502,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-63-E1",
+    "field": "population",
+    "before": 179658235,
+    "after": 134886945,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-63-E2",
+    "field": "population",
+    "before": 161399450,
+    "after": 133944321,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-64-E1",
+    "field": "population",
+    "before": 316535880,
+    "after": 175314812,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-64-E2",
+    "field": "population",
+    "before": 253993192,
+    "after": 154774455,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-65-E1",
+    "field": "population",
+    "before": 93120107,
+    "after": 135319760,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-65-E2",
+    "field": "population",
+    "before": 205851341,
+    "after": 158023022,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-66-E1",
+    "field": "population",
+    "before": 177198306,
+    "after": 120628465,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-66-E2",
+    "field": "population",
+    "before": 279333907,
+    "after": 168501290,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-67-E1",
+    "field": "population",
+    "before": 95049742,
+    "after": 100079238,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-67-E2",
+    "field": "population",
+    "before": 135077556,
+    "after": 130207050,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-68-E1",
+    "field": "population",
+    "before": 88056397,
+    "after": 100957743,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-68-E2",
+    "field": "population",
+    "before": 92791462,
+    "after": 96981723,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-69-E1",
+    "field": "population",
+    "before": 151539363,
+    "after": 133510774,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  },
+  {
+    "objectId": "visual-territory-70-E1",
+    "field": "population",
+    "before": 87778709,
+    "after": 89351229,
+    "reason": "连续人文地理权重重分配；世界总人口守恒"
+  }
+]

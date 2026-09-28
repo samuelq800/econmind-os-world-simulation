@@ -26,7 +26,7 @@ import {
 import './office-action.css';
 
 const FictionalWorldMap = lazy(async () => {
-  const map = await import('../map-lab/FictionalWorldMap.js');
+  const map = await import('../map-lab/LegacyFictionalWorldMap.js');
   return { default: map.FictionalWorldMap };
 });
 
