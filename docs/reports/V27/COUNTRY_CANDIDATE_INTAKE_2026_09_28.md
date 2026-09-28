@@ -2,6 +2,51 @@
 
 Status: `RECEIVED_AND_HASH_VERIFIED / NOT_IMPORTED / NOT_ACTIVATED`.
 
+## Named-source handoff received later
+
+The exact task named by the owner, `01a0e1b0-603c-7e13-81de-2cddb9c5d4c1`,
+subsequently delivered a separate map-locked 70-country candidate. Its
+handoff manifest is at
+`/Users/samuel/Documents/econclub/.econmind-worktrees/f-v25-fictional-map-preparation/outputs/01a0e1b0-603c-7e13-81de-2cddb9c5d4c1/handoff-manifest.json`.
+This is now the **named-source candidate for reconciliation**, not an activated
+opening. Source baseline `16356316144d27412183a13e4e568cd6a79151f5` has
+uncommitted data outputs; immutable identity is therefore the file hashes, not
+that Git commit alone.
+
+- Workbook SHA-256 `6794d573505ddf08770c92d5ed8c3bb1759da1bb0ce3687dc64b4ec84264cd19`.
+- Shareable atlas ZIP SHA-256
+  `37314a68086720989bc82ea4e55119ab22c8ffd982ffa3e4c1e196cc9a759401`.
+- Both full-file hashes matched the handoff manifest. Six listed source JSON
+  files and all 14 named CSV tables matched the package manifest's SHA-256.
+  The producing task reported 70 country scenes, 70 countries, 122 regions,
+  240 deposits, 350 map-locked facility candidates and 349 survey-stage freight
+  paths; this intake has not independently repeated its browser or geometric
+  tests.
+- The new reconciliation ledger changes country 51 population from 1,549 to
+  1,019,797 and country 52 from 900 to 849,031. Its world population rises
+  from 14,712,146,434 to 14,714,012,813; the other 68 countries' population
+  is declared unchanged. `package-validation.json` reports structural PASS,
+  but complete Core economic fairness validation is NOT_RUN.
+- Its balancing suggestions affect only proposed financial credit/technology
+  direction, not actual cash, loan, licences or operational facilities. The
+  handoff says `activationAllowed=false`,
+  `ILLUSTRATIVE_PLANNING_ONLY`, no real World/Season/team binding, and no
+  production mutation.
+
+The earlier alternate package described below is **not interchangeable**:
+it preserves total population 14,712,146,434 by broader redistribution and
+adds 1,024 opening facility groups plus wider trade/route plans. The named
+handoff instead locks existing map facilities and corrects only two countries.
+Do not merge their rows, take the larger facility count as commissioned, or
+promote the earlier package merely because its offline stock rehearsal passed.
+
+No country rows were written to the production database. The existing
+`world_v2` schema still lacks a candidate-input store; `opening_seed` cannot
+hold this inactive/illustrative candidate. The next authorized route is an
+independently reviewed non-authoritative staging contract, or later a separately
+approved canonical opening after Core mappings and activation criteria are
+settled. Until one exists, the immutable source package is the intake record.
+
 ## Delivery and provenance
 
 - Delivery message came from Codex task `01a0e302-4577-7471-a357-c81779b0a4fc`.
