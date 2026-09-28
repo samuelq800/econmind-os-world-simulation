@@ -28,8 +28,12 @@ async function readVerified(root, relativePath, expectedHash) {
 
 export async function loadCountryCandidate(repositoryRoot) {
   const root = path.join(repositoryRoot, COUNTRY_CANDIDATE_ROOT);
-  const handoff = JSON.parse(await readFile(path.join(root, 'handoff-manifest.json'), 'utf8'));
-  const manifestBytes = await readFile(path.join(root, 'package-manifest.json'));
+  const handoff = JSON.parse(
+    await readFile(path.join(root, 'handoff-manifest.json'), 'utf8'),
+  );
+  const manifestBytes = await readFile(
+    path.join(root, 'package-manifest.json'),
+  );
   const manifestHash = sha256(manifestBytes);
   if (
     handoff.recipientThread !== '01a08bf9-fe19-7440-88fa-159677b611bd' ||
@@ -50,7 +54,11 @@ export async function loadCountryCandidate(repositoryRoot) {
     artifacts.push(await readVerified(root, name, hash));
   }
   for (const [name, metadata] of Object.entries(manifest.tables)) {
-    const artifact = await readVerified(root, `tables/${name}.csv`, metadata.sha256);
+    const artifact = await readVerified(
+      root,
+      `tables/${name}.csv`,
+      metadata.sha256,
+    );
     const rows = artifact.content.trimEnd().split(/\r?\n/u);
     if (rows.length !== metadata.rows + 1) {
       throw new Error(`COUNTRY_CANDIDATE_ROW_COUNT_MISMATCH:${name}`);
@@ -70,7 +78,9 @@ export async function loadCountryCandidate(repositoryRoot) {
       content: manifestBytes.toString('utf8'),
     }),
   );
-  const validationBytes = await readFile(path.join(root, 'package-validation.json'));
+  const validationBytes = await readFile(
+    path.join(root, 'package-validation.json'),
+  );
   artifacts.push(
     Object.freeze({
       path: 'package-validation.json',
@@ -78,7 +88,8 @@ export async function loadCountryCandidate(repositoryRoot) {
       content: validationBytes.toString('utf8'),
     }),
   );
-  if (artifacts.length !== 23) throw new Error('COUNTRY_CANDIDATE_ARTIFACT_COUNT');
+  if (artifacts.length !== 23)
+    throw new Error('COUNTRY_CANDIDATE_ARTIFACT_COUNT');
 
   const tables = JSON.parse(allTables.content);
   for (const [name, metadata] of Object.entries(manifest.tables)) {
@@ -91,12 +102,15 @@ export async function loadCountryCandidate(repositoryRoot) {
   if (
     countries.length !== EXPECTED_COUNTRY_COUNT ||
     ids.size !== EXPECTED_COUNTRY_COUNT ||
-    countries.some((row) =>
-      !/^visual-territory-(?:0[1-9]|[1-6][0-9]|70)$/u.test(row.countryId) ||
-      row.activationAllowed !== false ||
-      row.bindingStatus !== 'UNBOUND' ||
-      row.facilityLifecycle !== 'CANDIDATE_NOT_OPERATIONAL') ||
-    countries.reduce((sum, row) => sum + row.population, 0) !== EXPECTED_POPULATION
+    countries.some(
+      (row) =>
+        !/^visual-territory-(?:0[1-9]|[1-6][0-9]|70)$/u.test(row.countryId) ||
+        row.activationAllowed !== false ||
+        row.bindingStatus !== 'UNBOUND' ||
+        row.facilityLifecycle !== 'CANDIDATE_NOT_OPERATIONAL',
+    ) ||
+    countries.reduce((sum, row) => sum + row.population, 0) !==
+      EXPECTED_POPULATION
   ) {
     throw new Error('COUNTRY_CANDIDATE_COUNTRY_INVARIANT_FAILED');
   }
@@ -112,24 +126,38 @@ export async function loadCountryCandidate(repositoryRoot) {
     activationAllowed: false,
     artifacts: Object.freeze(artifacts),
     countries: Object.freeze(countries),
-    tableCounts: Object.freeze(Object.fromEntries(
-      Object.entries(manifest.tables).map(([name, meta]) => [name, meta.rows]),
-    )),
+    tableCounts: Object.freeze(
+      Object.fromEntries(
+        Object.entries(manifest.tables).map(([name, meta]) => [
+          name,
+          meta.rows,
+        ]),
+      ),
+    ),
   });
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
+) {
   const repositoryRoot = path.resolve(process.argv[2] ?? '.');
   const bundle = await loadCountryCandidate(repositoryRoot);
-  process.stdout.write(JSON.stringify({
-    status: 'PASS',
-    candidateId: bundle.candidateId,
-    sourceThread: bundle.sourceThread,
-    manifestSha256: bundle.manifestSha256,
-    artifactCount: bundle.artifacts.length,
-    countryCount: bundle.countries.length,
-    population: EXPECTED_POPULATION,
-    activationAllowed: bundle.activationAllowed,
-    tableCounts: bundle.tableCounts,
-  }, null, 2) + '\n');
+  process.stdout.write(
+    JSON.stringify(
+      {
+        status: 'PASS',
+        candidateId: bundle.candidateId,
+        sourceThread: bundle.sourceThread,
+        manifestSha256: bundle.manifestSha256,
+        artifactCount: bundle.artifacts.length,
+        countryCount: bundle.countries.length,
+        population: EXPECTED_POPULATION,
+        activationAllowed: bundle.activationAllowed,
+        tableCounts: bundle.tableCounts,
+      },
+      null,
+      2,
+    ) + '\n',
+  );
 }

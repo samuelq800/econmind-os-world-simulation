@@ -7,7 +7,9 @@ import { PGlite } from '@electric-sql/pglite';
 import { renderCountryCandidateRelease } from './render-country-candidate-release.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const manifest = JSON.parse(await readFile(path.join(root, 'database/migrations/manifest.json'), 'utf8'));
+const manifest = JSON.parse(
+  await readFile(path.join(root, 'database/migrations/manifest.json'), 'utf8'),
+);
 const db = new PGlite();
 try {
   for (const migration of manifest.migrations.slice(0, 17)) {
@@ -16,7 +18,12 @@ try {
       `insert into world_v2.schema_release
        (migration_id, artifact_sha256, source_repo_commit, release_order)
        values ($1, $2, $3, $4)`,
-      [migration.migration_id, migration.sha256, migration.artifact_source_commit, migration.release_order],
+      [
+        migration.migration_id,
+        migration.sha256,
+        migration.artifact_source_commit,
+        migration.release_order,
+      ],
     );
   }
   const release = await renderCountryCandidateRelease(root);
@@ -32,12 +39,21 @@ try {
     (select count(*)::int from world_v2.schema_release) as releases`);
   const row = result.rows[0];
   if (
-    row.bundles !== 1 || row.artifacts !== 23 || row.countries !== 70 ||
-    row.opening_seeds !== 0 || row.world_heads !== 0 || row.releases !== 18
+    row.bundles !== 1 ||
+    row.artifacts !== 23 ||
+    row.countries !== 70 ||
+    row.opening_seeds !== 0 ||
+    row.world_heads !== 0 ||
+    row.releases !== 18
   ) {
-    throw new Error(`COUNTRY_CANDIDATE_REHEARSAL_MISMATCH:${JSON.stringify(row)}`);
+    throw new Error(
+      `COUNTRY_CANDIDATE_REHEARSAL_MISMATCH:${JSON.stringify(row)}`,
+    );
   }
-  process.stdout.write(JSON.stringify({ status: 'PASS', database: 'PGlite disposable', ...row }) + '\n');
+  process.stdout.write(
+    JSON.stringify({ status: 'PASS', database: 'PGlite disposable', ...row }) +
+      '\n',
+  );
 } finally {
   await db.close();
 }

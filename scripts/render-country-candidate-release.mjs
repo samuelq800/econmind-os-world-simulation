@@ -21,35 +21,55 @@ const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
 async function verifiedMigration(repositoryRoot) {
   const manifest = JSON.parse(
-    await readFile(path.join(repositoryRoot, 'database/migrations/manifest.json'), 'utf8'),
+    await readFile(
+      path.join(repositoryRoot, 'database/migrations/manifest.json'),
+      'utf8',
+    ),
   );
   const artifacts = new Map();
   for (const entry of manifest.migrations) {
-    artifacts.set(entry.path, await readFile(path.join(repositoryRoot, entry.path)));
+    artifacts.set(
+      entry.path,
+      await readFile(path.join(repositoryRoot, entry.path)),
+    );
   }
-  const provenance = await readMigrationGitProvenance(repositoryRoot, manifest.migrations);
+  const provenance = await readMigrationGitProvenance(
+    repositoryRoot,
+    manifest.migrations,
+  );
   const result = validateMigrationManifest(manifest, artifacts, provenance);
   if (result.status !== 'PASS' || manifest.migrations.length !== 18) {
     throw new Error('COUNTRY_CANDIDATE_MIGRATION_CHAIN_INVALID');
   }
   const migration = manifest.migrations.at(-1);
-  if (migration.migration_id !== MIGRATION_ID || migration.release_order !== 18) {
+  if (
+    migration.migration_id !== MIGRATION_ID ||
+    migration.release_order !== 18
+  ) {
     throw new Error('COUNTRY_CANDIDATE_MIGRATION_ID_INVALID');
   }
-  return { manifest, migration, sql: artifacts.get(migration.path).toString('utf8') };
+  return {
+    manifest,
+    migration,
+    sql: artifacts.get(migration.path).toString('utf8'),
+  };
 }
 
 function releaseLedgerJson(migrations) {
-  return JSON.stringify(migrations.map((entry) => ({
-    migration_id: entry.migration_id,
-    artifact_sha256: entry.sha256,
-    source_repo_commit: entry.artifact_source_commit,
-    release_order: entry.release_order,
-  })));
+  return JSON.stringify(
+    migrations.map((entry) => ({
+      migration_id: entry.migration_id,
+      artifact_sha256: entry.sha256,
+      source_repo_commit: entry.artifact_source_commit,
+      release_order: entry.release_order,
+    })),
+  );
 }
 
 function schemaSql({ manifest, migration, sql }) {
-  const previous = releaseLedgerJson(manifest.migrations.slice(0, 17));
+  const previous = releaseLedgerJson(
+    manifest.migrations.slice(0, EXPECTED_PREVIOUS_MIGRATIONS),
+  );
   return `begin;
 do $country_candidate_preflight$
 begin
@@ -85,15 +105,24 @@ select jsonb_build_object(
 }
 
 function importSql(bundle, migration) {
-  const artifactValues = bundle.artifacts.map((artifact) =>
-    `(${sqlLiteral(bundle.candidateId)}, ${sqlLiteral(artifact.path)}, ${sqlLiteral(artifact.sha256)}, ${sqlLiteral(artifact.content)})`
-  ).join(',\n');
-  const profileValues = bundle.countries.map((country) =>
-    `(${sqlLiteral(bundle.candidateId)}, ${sqlLiteral(country.countryId)}, ${sqlLiteral(JSON.stringify(country))}::jsonb)`
-  ).join(',\n');
-  const expectedHashes = bundle.artifacts.map((artifact) =>
-    `(${sqlLiteral(artifact.path)}, ${sqlLiteral(artifact.sha256)})`
-  ).join(',\n');
+  const artifactValues = bundle.artifacts
+    .map(
+      (artifact) =>
+        `(${sqlLiteral(bundle.candidateId)}, ${sqlLiteral(artifact.path)}, ${sqlLiteral(artifact.sha256)}, ${sqlLiteral(artifact.content)})`,
+    )
+    .join(',\n');
+  const profileValues = bundle.countries
+    .map(
+      (country) =>
+        `(${sqlLiteral(bundle.candidateId)}, ${sqlLiteral(country.countryId)}, ${sqlLiteral(JSON.stringify(country))}::jsonb)`,
+    )
+    .join(',\n');
+  const expectedHashes = bundle.artifacts
+    .map(
+      (artifact) =>
+        `(${sqlLiteral(artifact.path)}, ${sqlLiteral(artifact.sha256)})`,
+    )
+    .join(',\n');
   return `begin;
 do $country_candidate_schema_guard$
 begin
@@ -172,7 +201,10 @@ where bundle_id = ${sqlLiteral(bundle.candidateId)};
 export async function renderCountryCandidateRelease(repositoryRoot) {
   const { manifest, migration, sql } = await verifiedMigration(repositoryRoot);
   const bundle = await loadCountryCandidate(repositoryRoot);
-  if (bundle.artifacts.length !== EXPECTED_ARTIFACTS || bundle.countries.length !== EXPECTED_COUNTRIES) {
+  if (
+    bundle.artifacts.length !== EXPECTED_ARTIFACTS ||
+    bundle.countries.length !== EXPECTED_COUNTRIES
+  ) {
     throw new Error('COUNTRY_CANDIDATE_INPUT_COUNT_INVALID');
   }
   return Object.freeze({
@@ -180,30 +212,50 @@ export async function renderCountryCandidateRelease(repositoryRoot) {
     bundle,
     schema: schemaSql({ manifest, migration, sql }),
     import: importSql(bundle, migration),
-    inputSha256: sha256(Buffer.from(bundle.artifacts.map((entry) => `${entry.path}:${entry.sha256}`).join('\n'))),
+    inputSha256: sha256(
+      Buffer.from(
+        bundle.artifacts
+          .map((entry) => `${entry.path}:${entry.sha256}`)
+          .join('\n'),
+      ),
+    ),
   });
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+if (
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1])
+) {
   const [repositoryRoot, phase, outputPath] = process.argv.slice(2);
   if (!repositoryRoot || !['schema', 'import'].includes(phase) || !outputPath) {
-    throw new Error('usage: node render-country-candidate-release.mjs SOURCE_ROOT schema|import OUTPUT');
+    throw new Error(
+      'usage: node render-country-candidate-release.mjs SOURCE_ROOT schema|import OUTPUT',
+    );
   }
-  const { stdout } = await execFileAsync('git', ['status', '--porcelain=v1', '--untracked-files=all'], {
-    cwd: repositoryRoot,
-  });
-  if (stdout.trim() !== '') throw new Error('COUNTRY_CANDIDATE_SOURCE_NOT_CLEAN');
-  const release = await renderCountryCandidateRelease(path.resolve(repositoryRoot));
+  const { stdout } = await execFileAsync(
+    'git',
+    ['status', '--porcelain=v1', '--untracked-files=all'],
+    {
+      cwd: repositoryRoot,
+    },
+  );
+  if (stdout.trim() !== '')
+    throw new Error('COUNTRY_CANDIDATE_SOURCE_NOT_CLEAN');
+  const release = await renderCountryCandidateRelease(
+    path.resolve(repositoryRoot),
+  );
   await writeFile(outputPath, JSON.stringify({ query: release[phase] }));
-  process.stdout.write(JSON.stringify({
-    phase,
-    migrationId: release.migration.migration_id,
-    migrationSha256: release.migration.sha256,
-    sourceCommit: release.migration.artifact_source_commit,
-    bundleId: release.bundle.candidateId,
-    manifestSha256: release.bundle.manifestSha256,
-    inputSha256: release.inputSha256,
-    artifactCount: release.bundle.artifacts.length,
-    countryCount: release.bundle.countries.length,
-  }) + '\n');
+  process.stdout.write(
+    JSON.stringify({
+      phase,
+      migrationId: release.migration.migration_id,
+      migrationSha256: release.migration.sha256,
+      sourceCommit: release.migration.artifact_source_commit,
+      bundleId: release.bundle.candidateId,
+      manifestSha256: release.bundle.manifestSha256,
+      inputSha256: release.inputSha256,
+      artifactCount: release.bundle.artifacts.length,
+      countryCount: release.bundle.countries.length,
+    }) + '\n',
+  );
 }
