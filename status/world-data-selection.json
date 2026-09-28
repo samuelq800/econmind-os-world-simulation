@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "decision": "OWNER_SELECTED_OFFICIAL_WORLD_V2_DATA_BASELINE",
+  "recordedDate": "2026-09-28",
+  "ownerInstruction": "直接把这个70个国家对应所有数据认为是官方world",
+  "scope": "World V2 only; no change to the original EconMind website",
+  "balancedData": {
+    "packageId": "BALANCED_2026_09_28_V1",
+    "path": "artifacts/world-balanced-candidate-v1",
+    "sourceCommit": "d55eab3bb66b185e3b7458359590f9d1e1b2340b",
+    "checksumsSha256": "88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315",
+    "checksumEntries": 86,
+    "countriesPath": "data/countries.json",
+    "countriesSha256": "5d493e93dfab1425731191ba7491cce47949d176e4769b33fdca48d2d31dba89",
+    "countryCount": 70,
+    "populationTotal": 14712146434,
+    "countryIdRule": "visual-territory-01 through visual-territory-70 in source order"
+  },
+  "mapFiles": {
+    "packageId": "WORLD_MAP_FILES_V1_2026_09_28",
+    "manifestPath": "artifacts/world-map-files-v1/manifest.json",
+    "manifestSha256": "9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f",
+    "fileCount": 203,
+    "role": "OFFICIAL_VERSIONED_MAP_AND_PRESENTATION_ASSETS"
+  },
+  "interpretation": {
+    "authority": "OFFICIAL_SELECTED_SOURCE_DATASET",
+    "numericalGeography": "Use the balanced package's frozen source snapshots and documented source priority; current map asset drift is not silently reconciled into quantities",
+    "proposalFields": "Remain official source records of proposals, not executed permits, contracts, team appointments, or built facilities",
+    "openingValues": "Selected numerical inputs; require explicit audited Core OpeningSeed mapping before becoming authoritative World State",
+    "originalPackageLabels": "Historical source-package status and activationAllowed=false remain unchanged for provenance"
+  },
+  "runtime": {
+    "worldId": null,
+    "openingSeedCommitted": false,
+    "workerStarted": false,
+    "productionDatabaseMutatedByThisDecision": false,
+    "gateStatusChangedByThisDecision": false
+  }
+}

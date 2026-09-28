@@ -5,6 +5,25 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
+## Official 70-country data selection (2026-09-28)
+
+The project owner selected the complete, immutable 70-country balanced package
+as the official World V2 **source-data baseline**. The single machine-readable
+selection record is [`status/world-data-selection.json`](status/world-data-selection.json):
+it pins all 87 source artifacts (including their checksum manifest), 70 country
+records, total population 14,712,146,434, and the separate 203-file map asset
+manifest by SHA-256. Run `node scripts/verify-world-data-selection.mjs` to
+verify the selection against the bytes on this checkout. Earlier map-locked
+country numbers are not the selected economic baseline.
+
+The selected data retains its field meanings. Proposed contracts, permits,
+team assignments and 350 legacy development options are not executed facts or
+operating facilities. Three current atlas snapshots differ from the frozen
+balanced inputs; display assets do not silently replace the selected numerical
+geography. The source package's historical candidate labels remain unchanged
+for provenance. This selection does not itself create a World ID, commit an
+OpeningSeed, start a Worker, write to Supabase, or change Gate status.
+
 ## Latest code integration (2026-09-27)
 
 The reviewed main-site release chain has now published the isolated `world_v2`
