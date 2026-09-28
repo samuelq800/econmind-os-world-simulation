@@ -29,6 +29,9 @@ export const V09_STAGING_MIGRATION_IDS = Object.freeze([
   '0014_world_v2_current_negotiation_party_membership',
   '0015_world_v2_narrow_transfer_approvals',
   '0016_world_v2_opening_seed',
+  '0017_world_v2_narrow_transfer_approval_reference',
+  '0018_world_v2_country_candidate_intake',
+  '0019_world_v2_balanced_candidate_status',
 ]);
 
 const PROJECT_REF = /^[a-z0-9]{20}$/u;

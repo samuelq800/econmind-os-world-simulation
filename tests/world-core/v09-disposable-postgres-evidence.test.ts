@@ -5,9 +5,12 @@ import { describe, expect, it } from 'vitest';
 
 import {
   assertV09DisposablePostgresEvidenceExecution,
+  expectedV09StagingCleanupInventory,
+  loadV09StagingMigrationChain,
   runV09DedicatedStagingEvidence,
   runV09DisposablePostgresEvidence,
 } from '../../scripts/v09-staging-evidence-runner.mjs';
+import { V09_STAGING_MIGRATION_IDS } from '../../scripts/v09-staging-evidence-policy.mjs';
 
 const OUTPUT = '/private/tmp/v09-disposable-evidence-test.json';
 
@@ -26,6 +29,28 @@ function environment(
 }
 
 describe('V09 disposable PostgreSQL evidence boundary', () => {
+  it('binds the current 19-artifact chain and exact new cleanup objects', async () => {
+    const migrations = await loadV09StagingMigrationChain();
+    expect(migrations.map((migration) => migration.migration_id)).toEqual(
+      V09_STAGING_MIGRATION_IDS,
+    );
+    expect(migrations).toHaveLength(19);
+
+    const inventory = expectedV09StagingCleanupInventory({
+      roles: { migration_owner: 'v09_staging_migration_owner' },
+    });
+    expect(inventory).toEqual(
+      expect.arrayContaining([
+        'RELATION|narrow_transfer_approval_reference|r|v09_staging_migration_owner',
+        'RELATION|country_candidate_artifact|r|v09_staging_migration_owner',
+        'RELATION|country_candidate_bundle|r|v09_staging_migration_owner',
+        'RELATION|country_candidate_profile|r|v09_staging_migration_owner',
+        'FUNCTION|validate_narrow_transfer_approval_reference|0|v09_staging_migration_owner',
+        'TRIGGER|narrow_transfer_approval_reference_cannot_truncate|narrow_transfer_approval_reference|v09_staging_migration_owner',
+      ]),
+    );
+  });
+
   it('keeps the dedicated staging entry point policy-gated before client creation', async () => {
     const result = await runV09DedicatedStagingEvidence({
       approval: {},

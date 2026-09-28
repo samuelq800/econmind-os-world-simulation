@@ -49,6 +49,65 @@ const executeFile = promisify(execFile);
 
 const RUN_MIGRATION_TEARDOWN = Object.freeze([
   Object.freeze({
+    // 0019 replaces a check constraint on the 0018 bundle table; dropping
+    // that table removes it without a separate cross-version operation.
+    constraints: [],
+    functions: [],
+    migrationId: '0019_world_v2_balanced_candidate_status',
+    tables: [],
+    triggers: [],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [],
+    migrationId: '0018_world_v2_country_candidate_intake',
+    tables: [
+      'country_candidate_profile',
+      'country_candidate_artifact',
+      'country_candidate_bundle',
+    ],
+    triggers: [
+      {
+        name: 'country_candidate_profile_immutable',
+        table: 'country_candidate_profile',
+      },
+      {
+        name: 'country_candidate_artifact_immutable',
+        table: 'country_candidate_artifact',
+      },
+      {
+        name: 'country_candidate_bundle_immutable',
+        table: 'country_candidate_bundle',
+      },
+    ],
+  }),
+  Object.freeze({
+    constraints: [],
+    functions: [
+      {
+        argumentCount: 0,
+        name: 'validate_narrow_transfer_approval_reference',
+        sql: '()',
+      },
+    ],
+    migrationId: '0017_world_v2_narrow_transfer_approval_reference',
+    tables: ['narrow_transfer_approval_reference'],
+    triggers: [
+      {
+        name: 'narrow_transfer_approval_reference_scope_is_verified',
+        table: 'narrow_transfer_approval_reference',
+      },
+      {
+        name: 'narrow_transfer_approval_reference_is_immutable',
+        table: 'narrow_transfer_approval_reference',
+      },
+      {
+        name: 'narrow_transfer_approval_reference_cannot_truncate',
+        table: 'narrow_transfer_approval_reference',
+      },
+    ],
+  }),
+  Object.freeze({
     constraints: [],
     functions: [
       {
@@ -897,7 +956,7 @@ export async function loadV09StagingMigrationChain() {
         migration.migration_id !== V09_STAGING_MIGRATION_IDS[index],
     )
   ) {
-    failed('the runner accepts only the exact branch-local 0001–0016 chain');
+    failed('the runner accepts only the exact branch-local 0001–0019 chain');
   }
   const artifacts = new Map();
   for (const migration of migrations) {
