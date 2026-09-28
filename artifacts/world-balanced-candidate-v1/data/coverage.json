@@ -1,0 +1,50 @@
+[
+  {
+    "domain": "国家/团队",
+    "candidateData": "COMPLETE",
+    "runtimeActivation": "NOT_AUTHORIZED",
+    "remainingAdapterWork": "团队成员由赛事实际分配，候选NPC管理记录已完整"
+  },
+  {
+    "domain": "资源/人口/气候",
+    "candidateData": "COMPLETE",
+    "runtimeActivation": "NOT_AUTHORIZED",
+    "remainingAdapterWork": "候选数值完整；采用时锁定版本"
+  },
+  {
+    "domain": "生产配方/农业",
+    "candidateData": "COMPLETE",
+    "runtimeActivation": "NOT_AUTHORIZED",
+    "remainingAdapterWork": "完整候选系数已提供，需Core责任方审定并映射"
+  },
+  {
+    "domain": "道路/港口/航运",
+    "candidateData": "COMPLETE",
+    "runtimeActivation": "NOT_AUTHORIZED",
+    "remainingAdapterWork": "端点、货量和容量完整；实际地形路由、第三国过境及航道测绘未完成"
+  },
+  {
+    "domain": "电网",
+    "candidateData": "COMPLETE",
+    "runtimeActivation": "NOT_AUTHORIZED",
+    "remainingAdapterWork": "平均供需与储能完整；逐小时调度未运行"
+  },
+  {
+    "domain": "权利/合同",
+    "candidateData": "COMPLETE",
+    "runtimeActivation": "NOT_AUTHORIZED",
+    "remainingAdapterWork": "条款候选完整；未替用户或国家签约授权"
+  },
+  {
+    "domain": "金融/库存",
+    "candidateData": "COMPLETE",
+    "runtimeActivation": "NOT_AUTHORIZED",
+    "remainingAdapterWork": "开局账户与库存完整；需通过官方初始化命令入库"
+  },
+  {
+    "domain": "世界运行",
+    "candidateData": "COMPLETE",
+    "runtimeActivation": "NOT_AUTHORIZED",
+    "remainingAdapterWork": "离线质量与稳态校验不等于Core 600日完整运行"
+  }
+]

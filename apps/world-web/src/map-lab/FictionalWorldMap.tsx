@@ -1,700 +1,494 @@
-import { useState } from 'react';
-
-import satelliteTerrainUrl from '../assets/asterra-satellite-terrain-v8.png';
-
-import { FICTIONAL_ATLAS } from './atlas.js';
-import { formatDistanceKm, validateFictionalAtlas } from './route-oracle.js';
-import { svgPath } from './geometry.js';
-import type {
-  AtlasFeature,
-  AtlasInfrastructure,
-  AtlasLandUseArea,
-  AtlasPoint,
-  AtlasVisualTerritory,
-} from './types.js';
-
+import { ScenarioPanel } from './ScenarioPanel.js';
+import { useRef, useState } from 'react';
+import {
+  artwork,
+  partition,
+  maritime,
+  layerDefinitions,
+  mapViews,
+  visibilityFor,
+  resourceTypeById,
+  type LayerId,
+} from './display-layers.js';
+import { LayerArtwork } from './LayerArtwork.js';
 import './fictional-world-map.css';
 
-const measuredRoutes = validateFictionalAtlas(FICTIONAL_ATLAS);
-const nodesById = new Map(FICTIONAL_ATLAS.nodes.map((node) => [node.id, node]));
-
-const mapViews = [
-  {
-    id: 'overview',
-    label: 'Full atlas',
-    viewBox: `0 0 ${FICTIONAL_ATLAS.widthKm} ${FICTIONAL_ATLAS.heightKm}`,
-  },
-  {
-    id: 'western',
-    label: 'Southern continental core',
-    viewBox: '18000 8500 14000 9000',
-  },
-  {
-    id: 'interior',
-    label: 'Central shelf & arc',
-    viewBox: '9000 6000 14000 8000',
-  },
-  {
-    id: 'eastern',
-    label: 'Rifted maritime fragment',
-    viewBox: '26500 3500 8500 7000',
-  },
-  {
-    id: 'southern',
-    label: 'Strait archipelago',
-    viewBox: '500 9500 14500 6500',
-  },
-] as const;
-
-const mapLayers = [
-  { id: 'physical', label: 'Physical annotations' },
-  { id: 'climate', label: 'Climate' },
-  { id: 'currents', label: 'Ocean currents' },
-  { id: 'trade', label: 'Trade routes' },
-  { id: 'resources', label: 'Resources' },
-  { id: 'political', label: 'Political' },
-  { id: 'infrastructure', label: 'Infrastructure' },
-] as const;
-
-type MapLayerId = (typeof mapLayers)[number]['id'];
-
-const initialMapLayerVisibility: Record<MapLayerId, boolean> = {
-  physical: false,
-  climate: false,
-  currents: false,
-  trade: false,
-  resources: false,
-  political: false,
-  infrastructure: false,
-};
-
-/**
- * Local, hand-traced V8 display coast masks. They only constrain the visual
- * country-boundary layer; they are not an alternative physical or legal map.
- */
-const visualLandBoundaryMasks: Record<
-  NonNullable<AtlasVisualTerritory['landBoundaryRegion']>,
-  readonly AtlasPoint[]
-> = {
-  SOUTHERN_CORE: [
-    { xKm: 18_000, yKm: 8_500 },
-    { xKm: 20_500, yKm: 9_300 },
-    { xKm: 24_000, yKm: 9_000 },
-    { xKm: 27_500, yKm: 8_800 },
-    { xKm: 31_000, yKm: 8_000 },
-    { xKm: 33_000, yKm: 6_500 },
-    { xKm: 33_500, yKm: 4_000 },
-    { xKm: 32_000, yKm: 1_800 },
-    { xKm: 28_000, yKm: 1_200 },
-    { xKm: 24_000, yKm: 1_700 },
-    { xKm: 20_500, yKm: 3_200 },
-    { xKm: 18_500, yKm: 5_500 },
-  ],
-  RIFTED_FRAGMENT: [
-    { xKm: 26_500, yKm: 15_000 },
-    { xKm: 30_000, yKm: 15_500 },
-    { xKm: 33_500, yKm: 14_500 },
-    { xKm: 34_000, yKm: 12_000 },
-    { xKm: 32_500, yKm: 9_500 },
-    { xKm: 29_500, yKm: 9_000 },
-    { xKm: 27_000, yKm: 10_500 },
-    { xKm: 25_500, yKm: 12_500 },
-  ],
-  NORTHERN_CORE: [
-    { xKm: 2_000, yKm: 15_500 },
-    { xKm: 5_000, yKm: 16_200 },
-    { xKm: 9_500, yKm: 15_500 },
-    { xKm: 12_500, yKm: 14_800 },
-    { xKm: 15_000, yKm: 13_800 },
-    { xKm: 14_000, yKm: 11_800 },
-    { xKm: 11_500, yKm: 10_500 },
-    { xKm: 9_000, yKm: 8_200 },
-    { xKm: 5_500, yKm: 7_600 },
-    { xKm: 2_500, yKm: 8_500 },
-    { xKm: 1_500, yKm: 11_500 },
-  ],
-  CENTRAL_SHELF: [
-    { xKm: 12_000, yKm: 8_800 },
-    { xKm: 15_000, yKm: 9_000 },
-    { xKm: 18_000, yKm: 8_000 },
-    { xKm: 21_000, yKm: 7_000 },
-    { xKm: 22_500, yKm: 5_500 },
-    { xKm: 20_500, yKm: 4_500 },
-    { xKm: 17_500, yKm: 5_000 },
-    { xKm: 14_000, yKm: 6_000 },
-  ],
-};
-
-const areaFeatures = new Set([
-  'BASIN',
-  'DELTA',
-  'HILL_COUNTRY',
-  'INLAND_LAKE',
-  'PLAIN',
-  'STEPPE',
-]);
-
-function featureClass(feature: AtlasFeature): string {
-  return `atlas-feature atlas-feature--${feature.kind.toLowerCase()}`;
-}
-
-function featureElement(feature: AtlasFeature) {
-  const path = svgPath(feature.geometry, areaFeatures.has(feature.kind));
-  return (
-    <path className={featureClass(feature)} d={path} key={feature.id}>
-      <title>
-        {feature.name}
-        {feature.resourceTags.length > 0
-          ? ` — ${feature.resourceTags.map((tag) => tag.label).join(', ')}`
-          : ''}
-      </title>
-    </path>
+const presets: { name: string; layers: LayerId[] }[] = [
+  { name: '国家分配', layers: ['political'] },
+  { name: '海域划分', layers: ['political', 'maritime'] },
+  { name: '人文地理', layers: ['political', 'population'] },
+  { name: '自然地理', layers: ['physical', 'climate', 'currents'] },
+  { name: '贸易与资源', layers: ['trade', 'resources', 'infrastructure'] },
+  { name: '全部图层', layers: layerDefinitions.map((layer) => layer.id) },
+];
+export function FictionalWorldMap() {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(visibilityFor('political'));
+  const [viewId, setViewId] = useState<string>('overview');
+  const [box, setBox] = useState<readonly number[]>(mapViews[0].box);
+  const [selected, setSelected] = useState(() => {
+    const code = new URLSearchParams(window.location.search).get('country');
+    return partition.territories.find((c) => c.number === code)?.id ?? '';
+  });
+  const [showLabels, setShowLabels] = useState(true);
+  const [resourceGroup, setResourceGroup] = useState('首季地质资源');
+  const [showRouteTable, setShowRouteTable] = useState(false);
+  const activeLayers = layerDefinitions.filter((layer) => visible[layer.id]);
+  const selectedIndex = artwork.political.countries.findIndex(
+    (country) => country.id === selected,
   );
-}
-
-function landUseElement(area: AtlasLandUseArea) {
-  return (
-    <path
-      className={`atlas-land-use atlas-land-use--${area.kind.toLowerCase()}`}
-      d={svgPath(area.geometry, true)}
-      key={area.id}
-    >
-      <title>
-        {area.name} — {area.resourceTags.map((tag) => tag.label).join(', ')};
-        value {area.economicValue}
-      </title>
-    </path>
+  const country = artwork.political.countries[selectedIndex];
+  const localResources = artwork.resources.filter(
+    (resource) => resource.countryId === selected,
   );
-}
-
-function visualTerritoryElement(
-  territory: AtlasVisualTerritory,
-  showName: boolean,
-) {
-  const resources = territory.resourceProfile
-    .map((tag) => tag.label)
-    .join(', ');
-  const nameY = territory.capital.yKm + 95;
-  const boundaryClip = territory.landBoundaryRegion
-    ? `url(#visual-land-${territory.landBoundaryRegion.toLowerCase()})`
-    : undefined;
-  return (
-    <g className="atlas-visual-territory" key={territory.id}>
-      {territory.maritimeEnvelope ? (
-        <path
-          className="atlas-visual-territory__maritime"
-          d={svgPath(territory.maritimeEnvelope, true)}
-        />
-      ) : null}
-      <g clipPath={boundaryClip}>
-        <path d={svgPath(territory.polygon, true)} fill={territory.color} />
-        <circle cx={territory.capital.xKm} cy={territory.capital.yKm} r={58} />
-        {showName ? (
-          <text
-            transform={`translate(0 ${nameY * 2}) scale(1 -1)`}
-            x={territory.capital.xKm + 95}
-            y={nameY}
-          >
-            {territory.name}
-          </text>
-        ) : null}
-      </g>
-      <title>
-        {territory.name} — capital marker
-        {resources
-          ? `; physical resource context: ${resources}`
-          : '; trade-oriented / resource-light'}
-        {territory.displayIslandCount
-          ? `; ${territory.displayIslandCount}-island display group with a visual sea envelope`
-          : ''}
-      </title>
-    </g>
+  const localFacilities = [...artwork.nodes, ...artwork.facilities].filter(
+    (item) => item.countryId === selected,
   );
-}
-
-function infrastructureGlyph(kind: AtlasInfrastructure['kind']) {
-  switch (kind) {
-    case 'PORT':
-      return (
-        <path
-          className="atlas-infrastructure__glyph"
-          d="M 0 -125 L 0 135 M -135 55 L 0 135 L 135 55 M -95 55 L -95 135 M 95 55 L 95 135"
-        />
-      );
-    case 'FACTORY':
-      return (
-        <path
-          className="atlas-infrastructure__glyph"
-          d="M -125 120 L -125 -35 L -55 5 L -55 -115 L 10 -55 L 10 -145 L 80 -90 L 80 120 Z M -160 120 H 145"
-        />
-      );
-    case 'FARM_COMPLEX':
-      return (
-        <path
-          className="atlas-infrastructure__glyph"
-          d="M -130 -90 H 130 M -130 -5 H 130 M -130 85 H 130 M -95 -135 V 135 M 0 -135 V 135 M 95 -135 V 135"
-        />
-      );
-    case 'MINING_COMPLEX':
-      return (
-        <path
-          className="atlas-infrastructure__glyph"
-          d="M 0 -145 L 135 0 L 0 145 L -135 0 Z M -75 0 H 75 M 0 -75 V 75"
-        />
-      );
-    case 'REFINERY':
-      return (
-        <path
-          className="atlas-infrastructure__glyph"
-          d="M -110 125 H 110 M -95 125 V -100 H -35 V 125 M 5 125 V -145 H 65 V 125 M -120 -100 H -10 M -20 -145 H 105"
-        />
-      );
-    case 'ENERGY_COMPLEX':
-      return (
-        <path
-          className="atlas-infrastructure__glyph"
-          d="M 15 -150 L -95 5 H -20 L -45 150 L 105 -35 H 25 Z"
-        />
-      );
-    case 'LOGISTICS_HUB':
-      return (
-        <path
-          className="atlas-infrastructure__glyph"
-          d="M 0 -140 V 140 M -140 0 H 140 M 0 -140 L 48 -82 M 0 -140 L -48 -82 M 140 0 L 82 48 M 140 0 L 82 -48 M 0 140 L 48 82 M 0 140 L -48 82 M -140 0 L -82 48 M -140 0 L -82 -48"
-        />
-      );
-    case 'MOUNTAIN_PASS':
-      return (
-        <path
-          className="atlas-infrastructure__glyph"
-          d="M -140 110 L -35 -120 L 35 110 L 92 -35 L 145 110 M -140 110 H 145"
-        />
-      );
-    default:
-      return (
-        <path
-          className="atlas-infrastructure__glyph"
-          d="M -125 0 H 125 M 0 -125 V 125"
-        />
-      );
+  const countryRoutes = artwork.routes.filter((route) =>
+    localFacilities.some((f) => f.id === route.fromId || f.id === route.toId),
+  );
+  function zoom(factor: number) {
+    const [x = 0, y = 0, width = 1774, height = 887] = box;
+    const nextWidth = Math.min(1774, Math.max(220, width * factor));
+    const nextHeight = Math.min(887, Math.max(110, height * factor));
+    setBox([
+      Math.max(0, Math.min(1774 - nextWidth, x + (width - nextWidth) / 2)),
+      Math.max(0, Math.min(887 - nextHeight, y + (height - nextHeight) / 2)),
+      nextWidth,
+      nextHeight,
+    ]);
+    setViewId('custom');
   }
-}
-
-function infrastructureElement(infrastructure: AtlasInfrastructure) {
-  const point = infrastructure.geometry[0]!;
-  if (infrastructure.geometry.length === 1) {
-    return (
-      <g
-        className={`atlas-infrastructure atlas-infrastructure--${infrastructure.kind.toLowerCase()}`}
-        key={infrastructure.id}
-        transform={`translate(${point.xKm} ${point.yKm})`}
-      >
-        <circle r={205} />
-        {infrastructureGlyph(infrastructure.kind)}
-        <title>{infrastructure.name}</title>
-      </g>
-    );
+  function focusCountry() {
+    if (selectedIndex < 0) return;
+    const [x = 0, y = 0] = partition.territories[selectedIndex]!.label;
+    setBox([
+      Math.max(0, Math.min(1374, x - 200)),
+      Math.max(0, Math.min(637, y - 125)),
+      400,
+      250,
+    ]);
+    setViewId('custom');
+    mapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   return (
-    <path
-      className={`atlas-infrastructure atlas-infrastructure--${infrastructure.kind.toLowerCase()}`}
-      d={svgPath(infrastructure.geometry)}
-      key={infrastructure.id}
-    >
-      <title>{infrastructure.name}</title>
-    </path>
-  );
-}
-
-export function FictionalWorldMap({
-  embedded = false,
-  onMapUnavailable,
-}: {
-  readonly embedded?: boolean;
-  readonly onMapUnavailable?: () => void;
-}) {
-  const [activeMapViewId, setActiveMapViewId] =
-    useState<(typeof mapViews)[number]['id']>('overview');
-  const [visibleLayers, setVisibleLayers] = useState(initialMapLayerVisibility);
-  const activeMapView = mapViews.find((view) => view.id === activeMapViewId)!;
-
-  const toggleLayer = (layerId: MapLayerId) => {
-    setVisibleLayers((current) => ({
-      ...current,
-      [layerId]: !current[layerId],
-    }));
-  };
-
-  return (
-    <section
-      aria-label={embedded ? 'Fictional world atlas' : undefined}
-      aria-labelledby={embedded ? undefined : 'atlas-title'}
-      className={`fictional-atlas${embedded ? ' fictional-atlas--embedded' : ''}`}
-    >
-      {!embedded ? (
-        <header className="fictional-atlas__header">
-          <div>
-            <p className="fictional-atlas__eyebrow">
-              V25.1 parallel preparation
-            </p>
-            <h1 id="atlas-title">Asterra — fictional transport atlas</h1>
-            <p>
-              Local planar geometry only: every displayed route distance is
-              measured from the same line shown on the map. This map is not
-              Earth, a World State, or a V27 country seed.
-            </p>
-          </div>
-          <dl className="fictional-atlas__status">
-            <div>
-              <dt>CRS</dt>
-              <dd>{FICTIONAL_ATLAS.crs}</dd>
-            </div>
-            <div>
-              <dt>Economic values</dt>
-              <dd>UNASSIGNED_BY_V27</dd>
-            </div>
-          </dl>
-        </header>
-      ) : null}
-
-      <div
-        aria-label="Map detail view"
-        className="fictional-atlas__map-toolbar"
-        role="group"
-      >
-        <span>Detail view</span>
-        {mapViews.map((view) => (
-          <button
-            aria-pressed={view.id === activeMapView.id}
-            className={view.id === activeMapView.id ? 'is-active' : undefined}
-            key={view.id}
-            onClick={() => setActiveMapViewId(view.id)}
-            type="button"
+    <main className="atlas-workbench">
+      <header className="atlas-header">
+        <div>
+          <p className="atlas-eyebrow">ASTERRA / WORLD V2</p>
+          <h1>世界地图 · 地理与开局情景</h1>
+          <a
+            className="explorer-entry"
+            href={`?atlas=explorer${selected ? `&country=${selected.slice(-2)}` : ''}`}
           >
-            {view.label}
-          </button>
-        ))}
-      </div>
-
-      <div
-        aria-label="Map layers"
-        className="fictional-atlas__map-toolbar fictional-atlas__map-toolbar--layers"
-        role="group"
-      >
-        <span>Layers</span>
-        {mapLayers.map((layer) => (
-          <button
-            aria-pressed={visibleLayers[layer.id]}
-            className={visibleLayers[layer.id] ? 'is-active' : undefined}
-            key={layer.id}
-            onClick={() => toggleLayer(layer.id)}
-            type="button"
-          >
-            {layer.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="fictional-atlas__map-frame">
-        <svg
-          aria-label={`Fictional physical map, ${activeMapView.label} view`}
-          className="fictional-atlas__map"
-          role="img"
-          viewBox={activeMapView.viewBox}
-        >
-          <defs>
-            <radialGradient cx="45%" cy="35%" id="ocean-surface" r="85%">
-              <stop offset="0%" stopColor="#1d617a" />
-              <stop offset="52%" stopColor="#0b3e56" />
-              <stop offset="100%" stopColor="#061f31" />
-            </radialGradient>
-            <linearGradient id="land-surface" x1="0" x2="0.8" y1="0" y2="1">
-              <stop offset="0%" stopColor="#a2ae75" />
-              <stop offset="42%" stopColor="#5e875a" />
-              <stop offset="76%" stopColor="#2f6549" />
-              <stop offset="100%" stopColor="#1d493a" />
-            </linearGradient>
-            <filter
-              id="terrain-relief"
-              x="-12%"
-              y="-12%"
-              width="124%"
-              height="130%"
-            >
-              <feTurbulence
-                baseFrequency="0.006 0.032"
-                numOctaves="4"
-                result="terrain"
-                seed="27"
-                type="fractalNoise"
-              />
-              <feColorMatrix
-                in="terrain"
-                result="terrain-colour"
-                type="matrix"
-                values="0.6 0 0 0 0.16 0 0.55 0 0 0.25 0 0 0.45 0 0.12 0 0 0 0.82 0"
-              />
-              <feComposite
-                in="terrain-colour"
-                in2="SourceAlpha"
-                operator="in"
-                result="terrain-masked"
-              />
-              <feBlend
-                in="SourceGraphic"
-                in2="terrain-masked"
-                mode="soft-light"
-                result="relief"
-              />
-              <feDropShadow
-                dx="0"
-                dy="75"
-                floodColor="#001516"
-                floodOpacity="0.68"
-                stdDeviation="46"
-              />
-            </filter>
-            <pattern
-              height="330"
-              id="cultivation-grid"
-              patternUnits="userSpaceOnUse"
-              width="330"
-            >
-              <rect fill="#e9c96d" height="330" opacity="0.5" width="330" />
-              <path
-                d="M 0 82 H 330 M 0 170 H 330 M 0 254 H 330 M 82 0 V 330 M 194 0 V 330 M 280 0 V 330"
-                fill="none"
-                stroke="#fff0a1"
-                strokeOpacity="0.65"
-                strokeWidth="16"
-              />
-            </pattern>
-            <pattern
-              height="360"
-              id="mineral-veins"
-              patternUnits="userSpaceOnUse"
-              width="360"
-            >
-              <rect fill="#5f5576" height="360" opacity="0.54" width="360" />
-              <path
-                d="M -40 60 L 100 -30 M 40 240 L 290 80 M 170 420 L 400 260"
-                fill="none"
-                stroke="#d9a5e9"
-                strokeOpacity="0.76"
-                strokeWidth="35"
-              />
-            </pattern>
-            {Object.entries(visualLandBoundaryMasks).map(([region, mask]) => (
-              <clipPath id={`visual-land-${region.toLowerCase()}`} key={region}>
-                <path d={svgPath(mask, true)} />
-              </clipPath>
-            ))}
-            <marker
-              id="warm-current-arrow"
-              markerHeight="8"
-              markerWidth="8"
-              orient="auto"
-              refX="7"
-              refY="4"
-              viewBox="0 0 8 8"
-            >
-              <path d="M 0 0 L 8 4 L 0 8 z" fill="#f3cb70" />
-            </marker>
-          </defs>
-
-          <rect
-            className="atlas-ocean"
-            height={FICTIONAL_ATLAS.heightKm}
-            width={FICTIONAL_ATLAS.widthKm}
-          />
-          <image
-            aria-hidden="true"
-            className="atlas-satellite-base"
-            height={FICTIONAL_ATLAS.heightKm}
-            href={satelliteTerrainUrl}
-            onError={onMapUnavailable}
-            preserveAspectRatio="none"
-            width={FICTIONAL_ATLAS.widthKm}
-          />
-
-          <g
-            aria-label="Map annotations reflected with the vertically inverted terrain"
-            transform={`translate(0 ${FICTIONAL_ATLAS.heightKm}) scale(1 -1)`}
-          >
-            {visibleLayers.climate
-              ? FICTIONAL_ATLAS.latitudeBands.map((band) => (
-                  <rect
-                    className={`atlas-latitude atlas-latitude--${band.thermalClass.toLowerCase()}`}
-                    height={band.southEdgeKm - band.northEdgeKm}
-                    key={band.id}
-                    width={FICTIONAL_ATLAS.widthKm}
-                    y={band.northEdgeKm}
-                  >
-                    <title>{band.name}</title>
-                  </rect>
-                ))
-              : null}
-
-            {visibleLayers.currents
-              ? FICTIONAL_ATLAS.oceanCurrents.map((current) => (
-                  <path
-                    className="atlas-warm-current"
-                    d={svgPath(current.geometry)}
-                    key={current.id}
-                    markerEnd="url(#warm-current-arrow)"
-                  >
-                    <title>{current.name} — warm subsurface current</title>
-                  </path>
-                ))
-              : null}
-
-            {visibleLayers.political
-              ? FICTIONAL_ATLAS.visualTerritories.map((territory) =>
-                  visualTerritoryElement(
-                    territory,
-                    activeMapView.id !== 'overview',
-                  ),
-                )
-              : null}
-
-            {visibleLayers.resources
-              ? FICTIONAL_ATLAS.landUseAreas.map(landUseElement)
-              : null}
-            {visibleLayers.physical
-              ? FICTIONAL_ATLAS.features.map(featureElement)
-              : null}
-
-            {visibleLayers.trade
-              ? FICTIONAL_ATLAS.routes.map((route) => (
-                  <path
-                    className={`atlas-route atlas-route--${route.mode.toLowerCase()}`}
-                    d={svgPath(route.path)}
-                    key={route.id}
-                  >
-                    <title>
-                      {route.id} —{' '}
-                      {formatDistanceKm(
-                        measuredRoutes.find(
-                          (measured) => measured.routeId === route.id,
-                        )!.distanceKm,
-                      )}
-                    </title>
-                  </path>
-                ))
-              : null}
-
-            {visibleLayers.infrastructure
-              ? FICTIONAL_ATLAS.infrastructure.map(infrastructureElement)
-              : null}
-          </g>
-        </svg>
-      </div>
-
-      {!embedded ? (
-        <div className="fictional-atlas__panels">
-          <section aria-labelledby="corridors-title" className="atlas-panel">
-            <h2 id="corridors-title">Measured corridors</h2>
-            <p>
-              Land roads are solid; maritime corridors are dashed. Strait-bound
-              sea lanes are rejected unless their actual geometry passes through
-              the named strait.
-            </p>
-            <ul className="atlas-route-list">
-              {measuredRoutes.map((route) => {
-                const from = nodesById.get(route.fromNodeId)!;
-                const to = nodesById.get(route.toNodeId)!;
-                return (
-                  <li key={route.routeId}>
-                    <span
-                      className={`atlas-route-chip atlas-route-chip--${route.mode.toLowerCase()}`}
-                    >
-                      {route.mode}
-                    </span>
-                    <span>
-                      {from.name} → {to.name}
-                    </span>
-                    <strong>{formatDistanceKm(route.distanceKm)}</strong>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-
-          <section aria-labelledby="layers-title" className="atlas-panel">
-            <h2 id="layers-title">Physical & infrastructure layers</h2>
-            <ul className="atlas-layer-list">
-              <li>
-                <span className="atlas-key atlas-key--mountain" /> collision
-                mountain ranges
-              </li>
-              <li>
-                <span className="atlas-key atlas-key--river" /> rivers and a
-                small delta
-              </li>
-              <li>
-                <span className="atlas-key atlas-key--current" /> warm
-                subsurface currents
-              </li>
-              <li>
-                <span className="atlas-key atlas-key--seismic" /> seismic belts
-              </li>
-              <li>
-                <span className="atlas-key atlas-key--port" /> ports and major
-                infrastructure
-              </li>
-              <li>
-                <span className="atlas-key atlas-key--capital" /> 70
-                display-territory capital markers
-              </li>
-            </ul>
-            <p className="atlas-panel__note">
-              Resource labels identify geography only. Population, crop output,
-              reserves, capacity and port throughput are intentionally
-              unavailable until an approved V27 seed and authorised projection
-              exist.
-            </p>
-          </section>
-
-          <section
-            aria-labelledby="portfolio-title"
-            className="atlas-panel atlas-panel--portfolio"
-          >
-            <h2 id="portfolio-title">Physical resource portfolio</h2>
-            <ul className="atlas-resource-list">
-              <li>
-                <strong>North-west continental basin</strong>
-                <span>
-                  collision metals upstream; grain on convergent river plains
-                </span>
-              </li>
-              <li>
-                <strong>Central endorheic interior</strong>
-                <span>
-                  sedimentary gas, salt-basin lithium and shield uranium; low
-                  coast access
-                </span>
-              </li>
-              <li>
-                <strong>Eastern margin</strong>
-                <span>
-                  margin copper, fractured harbour coast and shelf trade access
-                </span>
-              </li>
-              <li>
-                <strong>Equatorial strait arc</strong>
-                <span>
-                  route service and limited island-arc minerals; intentionally
-                  resource-light
-                </span>
-              </li>
-              <li>
-                <strong>Southern fragments</strong>
-                <span>temperate grain lowlands and exposed shield iron</span>
-              </li>
-            </ul>
-          </section>
+            打开沉浸式地图 ↗
+          </a>
+          <p className="atlas-intro">
+            从自然地理到国家分配，在同一张地图上查看。
+          </p>
         </div>
-      ) : null}
-    </section>
+        <div className="atlas-summary">
+          <strong>
+            70<span>国家区域</span>
+          </strong>
+          <strong>
+            {layerDefinitions.length}
+            <span>地图图层</span>
+          </strong>
+          <span className="draft-badge">规划草案</span>
+        </div>
+      </header>
+
+      <section className="atlas-controls" aria-label="地图控制">
+        <div className="preset-row">
+          <span className="control-label">视图组合</span>
+          {presets.map((preset) => (
+            <button
+              key={preset.name}
+              type="button"
+              className={
+                activeLayers.length === preset.layers.length &&
+                preset.layers.every((id) => visible[id])
+                  ? 'preset active'
+                  : 'preset'
+              }
+              onClick={() => setVisible(visibilityFor(...preset.layers))}
+            >
+              {preset.name}
+            </button>
+          ))}
+          <button
+            className="quiet-button"
+            onClick={() => setVisible(visibilityFor())}
+            type="button"
+          >
+            仅看底图
+          </button>
+        </div>
+        <div className="layer-grid" role="group" aria-label="地图图层">
+          {layerDefinitions.map((layer, index) => (
+            <button
+              type="button"
+              key={layer.id}
+              aria-pressed={visible[layer.id]}
+              className={`layer-button${visible[layer.id] ? ' active' : ''}`}
+              onClick={() =>
+                setVisible((current) => ({
+                  ...current,
+                  [layer.id]: !current[layer.id],
+                }))
+              }
+              title={layer.summary}
+            >
+              <span className="layer-index" style={{ color: layer.color }}>
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span>{layer.name}</span>
+              <span className="layer-check" aria-hidden="true">
+                {visible[layer.id] ? '✓' : '+'}
+              </span>
+            </button>
+          ))}
+        </div>
+        <div className="region-toolbar" role="group" aria-label="地图区域">
+          <span className="control-label">查看区域</span>
+          {mapViews.map((view) => (
+            <button
+              type="button"
+              key={view.id}
+              aria-pressed={viewId === view.id}
+              className={
+                viewId === view.id ? 'view-button active' : 'view-button'
+              }
+              onClick={() => {
+                setViewId(view.id);
+                setBox(view.box);
+              }}
+            >
+              {view.name}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {(visible.resources || visible.climate) && (
+        <div className="ecology-toolbar">
+          <span>
+            {artwork.climates.length} 种气候 · 6 类首季地质资源 ·{' '}
+            {artwork.seasonAlignment.geologicalSites} 个矿床候选点
+          </span>
+          {visible.resources && (
+            <label>
+              资源筛选{' '}
+              <select
+                aria-label="资源类别"
+                value={resourceGroup}
+                onChange={(event) => setResourceGroup(event.target.value)}
+              >
+                {['全部', '首季地质资源', '农业用地', '未启用背景'].map(
+                  (group) => (
+                    <option key={group}>{group}</option>
+                  ),
+                )}
+              </select>
+            </label>
+          )}
+          {visible.resources && (
+            <small>
+              {box[2]! >= 1200
+                ? '全图数字为各国资源点数量，点击或放大查看具体资源。'
+                : '局部显示具体资源；数量不代表储量。'}
+            </small>
+          )}
+        </div>
+      )}
+      {visible.maritime && (
+        <section className="maritime-notice">
+          <strong>12 海里领海 · 200 海里专属经济区 · 公海</strong>
+          <p>
+            按最大宽度绘制。专属经济区不是领海；黄色斜纹为重叠待议范围。领海在全图中很窄，放大近岸可查看。
+          </p>
+          <details>
+            <summary>基线假设与法律依据</summary>
+            <ul>
+              {maritime.assumptions.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+            <div>
+              {maritime.sources.map((source) => (
+                <a
+                  key={source.url}
+                  href={source.url}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {source.label}
+                </a>
+              ))}
+            </div>
+          </details>
+        </section>
+      )}
+      {visible.physical && (
+        <p className="area-note">
+          新增河湖为水系规划示意；内陆湖保留所属国家管辖，不作为海洋基线。
+        </p>
+      )}
+      {visible.infrastructure && (
+        <p className="area-note">
+          350 个候选设施点 ·
+          依聚居与接入条件分布。全图“设”后数字为设施数量，放大查看位置；局部选中国家后仅显示该国的资源与设施。
+        </p>
+      )}
+      <div className="map-topline">
+        <span>
+          {activeLayers.length
+            ? activeLayers.map((layer) => layer.name).join(' / ')
+            : '原始地形底图'}
+        </span>
+        <div className="map-tools">
+          <label>
+            <input
+              type="checkbox"
+              checked={showLabels}
+              onChange={(event) => setShowLabels(event.target.checked)}
+            />
+            文字标注
+          </label>
+          <button type="button" aria-label="放大地图" onClick={() => zoom(0.7)}>
+            ＋
+          </button>
+          <button
+            type="button"
+            aria-label="缩小地图"
+            onClick={() => zoom(1 / 0.7)}
+          >
+            −
+          </button>
+        </div>
+      </div>
+      <div className="atlas-map-frame" ref={mapRef}>
+        <LayerArtwork
+          visible={visible}
+          box={box}
+          selected={selected}
+          onSelect={setSelected}
+          showLabels={showLabels}
+          detail={box[2]! < 1200}
+          resourceGroup={resourceGroup}
+        />
+      </div>
+      <div className="map-caption">
+        <span>海岸贴合底图 · 各图层统一坐标</span>
+        <span>国界线 / 沿岸岛屿 / 01–70 编号</span>
+      </div>
+
+      <div className="atlas-bottom-grid">
+        <section
+          className="atlas-card layer-legends"
+          aria-labelledby="legend-title"
+        >
+          <div className="card-heading">
+            <h2 id="legend-title">当前图例</h2>
+            <span>{activeLayers.length} 层已开启</span>
+          </div>
+          {activeLayers.length === 0 ? (
+            <p className="muted-copy">点击上方图层，查看对应信息。</p>
+          ) : (
+            activeLayers.map((layer) => (
+              <div key={layer.id} className="legend-group">
+                <h3>
+                  {layer.name}
+                  <span>{layer.summary}</span>
+                </h3>
+                <div className="legend-items">
+                  {layer.legend.map(([color, name]) => (
+                    <span key={name}>
+                      <i style={{ background: color }} />
+                      {name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
+        </section>
+        <section
+          className="atlas-card country-card"
+          aria-labelledby="country-title"
+        >
+          <div className="card-heading">
+            <h2 id="country-title">国家分配工作区</h2>
+            <span>待分配</span>
+          </div>
+          <label className="select-label" htmlFor="territory-select">
+            选择国家区域
+          </label>
+          <div className="country-select-row">
+            <select
+              id="territory-select"
+              value={selected}
+              onChange={(event) => setSelected(event.target.value)}
+            >
+              <option value="">选择编号或名称</option>
+              {artwork.political.countries.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.number} · {item.name}
+                </option>
+              ))}
+            </select>
+            <button type="button" disabled={!selected} onClick={focusCountry}>
+              定位
+            </button>
+          </div>
+          <ScenarioPanel selected={selected} />
+          <div aria-live="polite">
+            {country ? (
+              <>
+                <h3 className="selected-name">
+                  <span>{country.number}</span>
+                  {country.name}
+                </h3>
+                <dl className="country-facts">
+                  <div>
+                    <dt>主要气候</dt>
+                    <dd>
+                      {
+                        artwork.climates.find((c) => c.id === country.climateId)
+                          ?.name
+                      }
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>区内气候</dt>
+                    <dd>
+                      {country.climateMix
+                        .filter((mix) => mix.sharePercent >= 3)
+                        .map(
+                          (mix) =>
+                            `${artwork.climates.find((c) => c.id === mix.id)?.name} ${mix.sharePercent}%`,
+                        )
+                        .join('、')}
+                      <small className="area-note">图上陆地面积占比</small>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>海域条件</dt>
+                    <dd>
+                      {maritime.countries.find((c) => c.id === selected)
+                        ?.coastal
+                        ? '沿海国家：可查看领海与专属经济区候选范围，重叠部分待划界。'
+                        : '内陆国家：无本国海岸产生的领海或专属经济区。'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>资源分布</dt>
+                    <dd>
+                      <strong>
+                        {localResources.length} 个点 ·{' '}
+                        {new Set(localResources.map((r) => r.kind)).size} 类
+                      </strong>
+                      <br />
+                      {[...new Set(localResources.map((r) => r.kind))]
+                        .map(
+                          (kind) =>
+                            `${resourceTypeById.get(kind)?.name}${resourceTypeById.get(kind)?.group === '未启用背景' ? '（未启用背景）' : ''} ×${localResources.filter((r) => r.kind === kind).length}`,
+                        )
+                        .join('、')}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>设施规划</dt>
+                    <dd>
+                      {localFacilities.length} 个设施：
+                      {localFacilities
+                        .map((f) => f.name.replace('（规划）', ''))
+                        .join('、') || '尚未设置设施点'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>陆上邻区</dt>
+                    <dd>
+                      {country.neighbours
+                        .map((id) => id.slice(-2))
+                        .join(' / ') || '无陆上接壤区域'}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>接入通道</dt>
+                    <dd>
+                      {countryRoutes.length
+                        ? `${countryRoutes.length} 条规划通道`
+                        : '尚未设置通道节点'}
+                    </dd>
+                  </div>
+                </dl>
+                <button
+                  className="quiet-button"
+                  type="button"
+                  onClick={() => setSelected('')}
+                >
+                  取消选中
+                </button>
+              </>
+            ) : (
+              <p className="empty-country">
+                点击国家区域，或按编号选择。
+                <br />
+                这里会显示该区域的气候、资源、设施和邻区，方便下一步分配。
+              </p>
+            )}
+          </div>
+        </section>
+      </div>
+
+      <section className="atlas-card route-card">
+        <button
+          className="route-disclosure"
+          aria-expanded={showRouteTable}
+          onClick={() => setShowRouteTable(!showRouteTable)}
+          type="button"
+        >
+          <span>
+            规划交通网络{' '}
+            <small>
+              {artwork.routes.filter((r) => r.mode === 'land').length} 条陆路 ·{' '}
+              {artwork.routes.filter((r) => r.mode === 'sea').length} 条海运 ·{' '}
+              {artwork.nodes.filter((n) => n.kind === 'port').length} 个港口
+            </small>
+          </span>
+          <span>{showRouteTable ? '收起 −' : '展开 ＋'}</span>
+        </button>
+        {showRouteTable && (
+          <div className="route-table-wrap">
+            <table>
+              <caption>距离为虚构地图比例下沿所绘路径的测量值。</caption>
+              <thead>
+                <tr>
+                  <th>编号</th>
+                  <th>类型</th>
+                  <th>节点连接</th>
+                  <th>图上距离</th>
+                </tr>
+              </thead>
+              <tbody>
+                {artwork.routes.map((route) => (
+                  <tr key={route.id}>
+                    <td>{route.id}</td>
+                    <td>{route.mode === 'sea' ? '海运' : '陆路'}</td>
+                    <td>{route.name}</td>
+                    <td>{route.distanceKm.toLocaleString()} km</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+      <footer className="atlas-footer">
+        气候、洋流、资源、路线与设施均为虚构世界的规划示意。已补充可复现的地理与人文情景估值；正式经济体、配方与运行状态尚未启用。
+      </footer>
+    </main>
   );
 }

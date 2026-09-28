@@ -1,0 +1,13 @@
+﻿commodityId,maxCountryOutputShare,basis
+CRUDE_OIL,0.2,20% diversity cap; feasibility relaxation only when geology requires it
+NATURAL_GAS,0.2,20% diversity cap; feasibility relaxation only when geology requires it
+URANIUM,0.25,20% diversity cap; feasibility relaxation only when geology requires it
+GRAIN,0.2,20% diversity cap; feasibility relaxation only when geology requires it
+IRON_ORE,0.2,20% diversity cap; feasibility relaxation only when geology requires it
+COPPER,0.2,20% diversity cap; feasibility relaxation only when geology requires it
+LITHIUM,0.2,20% diversity cap; feasibility relaxation only when geology requires it
+STEEL,0.2,20% diversity cap; feasibility relaxation only when geology requires it
+REFINED_FUEL,0.2,20% diversity cap; feasibility relaxation only when geology requires it
+MACHINERY,0.2,20% diversity cap; feasibility relaxation only when geology requires it
+SEMICONDUCTORS,0.2,20% diversity cap; feasibility relaxation only when geology requires it
+BATTERIES,0.2,20% diversity cap; feasibility relaxation only when geology requires it

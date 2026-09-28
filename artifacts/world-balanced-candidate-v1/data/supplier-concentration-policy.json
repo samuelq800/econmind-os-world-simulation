@@ -1,0 +1,62 @@
+[
+  {
+    "commodityId": "CRUDE_OIL",
+    "maxCountryOutputShare": 0.2,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  },
+  {
+    "commodityId": "NATURAL_GAS",
+    "maxCountryOutputShare": 0.2,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  },
+  {
+    "commodityId": "URANIUM",
+    "maxCountryOutputShare": 0.25,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  },
+  {
+    "commodityId": "GRAIN",
+    "maxCountryOutputShare": 0.2,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  },
+  {
+    "commodityId": "IRON_ORE",
+    "maxCountryOutputShare": 0.2,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  },
+  {
+    "commodityId": "COPPER",
+    "maxCountryOutputShare": 0.2,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  },
+  {
+    "commodityId": "LITHIUM",
+    "maxCountryOutputShare": 0.2,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  },
+  {
+    "commodityId": "STEEL",
+    "maxCountryOutputShare": 0.2,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  },
+  {
+    "commodityId": "REFINED_FUEL",
+    "maxCountryOutputShare": 0.2,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  },
+  {
+    "commodityId": "MACHINERY",
+    "maxCountryOutputShare": 0.2,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  },
+  {
+    "commodityId": "SEMICONDUCTORS",
+    "maxCountryOutputShare": 0.2,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  },
+  {
+    "commodityId": "BATTERIES",
+    "maxCountryOutputShare": 0.2,
+    "basis": "20% diversity cap; feasibility relaxation only when geology requires it"
+  }
+]

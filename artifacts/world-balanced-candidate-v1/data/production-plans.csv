@@ -1,0 +1,841 @@
+﻿countryId,commodityId,outputPerDay,usePerDay,netPerDay,unit
+visual-territory-01,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-01,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-01,URANIUM,0.0,0.105507,-0.105507,tonne U
+visual-territory-01,GRAIN,176207.739724,70337.899333,105869.84039,tonne
+visual-territory-01,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-01,COPPER,389.811143,0.0,389.811143,tonne
+visual-territory-01,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-01,STEEL,0.0,15826.02735,-15826.02735,tonne
+visual-territory-01,REFINED_FUEL,0.0,105506.849,-105506.849,barrel equivalent
+visual-territory-01,MACHINERY,0.0,84.405479,-84.405479,equipment unit
+visual-territory-01,SEMICONDUCTORS,0.0,105506.849,-105506.849,standardised chip unit
+visual-territory-01,BATTERIES,0.0,8.440548,-8.440548,MWh-equivalent
+visual-territory-02,CRUDE_OIL,0.0,45593.176193,-45593.176193,barrel
+visual-territory-02,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-02,URANIUM,0.0,0.137302,-0.137302,tonne U
+visual-territory-02,GRAIN,243177.391149,91534.432667,151642.958482,tonne
+visual-territory-02,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-02,COPPER,0.0,0.0,0.0,tonne
+visual-territory-02,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-02,STEEL,0.0,20595.24735,-20595.24735,tonne
+visual-territory-02,REFINED_FUEL,42215.903883,137301.649,-95085.745117,barrel equivalent
+visual-territory-02,MACHINERY,0.0,109.841319,-109.841319,equipment unit
+visual-territory-02,SEMICONDUCTORS,0.0,137301.649,-137301.649,standardised chip unit
+visual-territory-02,BATTERIES,0.0,10.984132,-10.984132,MWh-equivalent
+visual-territory-03,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-03,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-03,URANIUM,0.392046,0.260037,0.132009,tonne U
+visual-territory-03,GRAIN,435616.121161,173358.294,262257.827161,tonne
+visual-territory-03,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-03,COPPER,0.0,25.489005,-25.489005,tonne
+visual-territory-03,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-03,STEEL,0.0,39642.841267,-39642.841267,tonne
+visual-territory-03,REFINED_FUEL,0.0,260037.441,-260037.441,barrel equivalent
+visual-territory-03,MACHINERY,318.612558,208.029953,110.582605,equipment unit
+visual-territory-03,SEMICONDUCTORS,0.0,260037.441,-260037.441,standardised chip unit
+visual-territory-03,BATTERIES,0.0,20.802995,-20.802995,MWh-equivalent
+visual-territory-04,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-04,NATURAL_GAS,0.0,35822.541649,-35822.541649,MMBtu
+visual-territory-04,URANIUM,0.0,0.275749,-0.275749,tonne U
+visual-territory-04,GRAIN,468677.064003,183832.687333,284844.37667,tonne
+visual-territory-04,IRON_ORE,0.0,19105.355546,-19105.355546,tonne
+visual-territory-04,COPPER,0.0,0.0,0.0,tonne
+visual-territory-04,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-04,STEEL,11940.847216,41362.35465,-29421.507434,tonne
+visual-territory-04,REFINED_FUEL,0.0,275749.031,-275749.031,barrel equivalent
+visual-territory-04,MACHINERY,0.0,220.599225,-220.599225,equipment unit
+visual-territory-04,SEMICONDUCTORS,0.0,275749.031,-275749.031,standardised chip unit
+visual-territory-04,BATTERIES,0.0,22.059922,-22.059922,MWh-equivalent
+visual-territory-05,CRUDE_OIL,78929.304104,0.0,78929.304104,barrel
+visual-territory-05,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-05,URANIUM,0.0,0.198818,-0.198818,tonne U
+visual-territory-05,GRAIN,331874.438243,132545.274667,199329.163577,tonne
+visual-territory-05,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-05,COPPER,0.0,0.0,0.0,tonne
+visual-territory-05,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-05,STEEL,0.0,29822.6868,-29822.6868,tonne
+visual-territory-05,REFINED_FUEL,0.0,198817.912,-198817.912,barrel equivalent
+visual-territory-05,MACHINERY,0.0,159.05433,-159.05433,equipment unit
+visual-territory-05,SEMICONDUCTORS,0.0,198817.912,-198817.912,standardised chip unit
+visual-territory-05,BATTERIES,0.0,15.905433,-15.905433,MWh-equivalent
+visual-territory-06,CRUDE_OIL,679260.5305,0.0,679260.5305,barrel
+visual-territory-06,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-06,URANIUM,0.0,0.30106,-0.30106,tonne U
+visual-territory-06,GRAIN,334619.024534,200706.945333,133912.079201,tonne
+visual-territory-06,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-06,COPPER,0.0,0.0,0.0,tonne
+visual-territory-06,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-06,STEEL,0.0,45159.0627,-45159.0627,tonne
+visual-territory-06,REFINED_FUEL,0.0,301060.418,-301060.418,barrel equivalent
+visual-territory-06,MACHINERY,0.0,240.848334,-240.848334,equipment unit
+visual-territory-06,SEMICONDUCTORS,0.0,301060.418,-301060.418,standardised chip unit
+visual-territory-06,BATTERIES,0.0,24.084833,-24.084833,MWh-equivalent
+visual-territory-07,CRUDE_OIL,492478.8321,0.0,492478.8321,barrel
+visual-territory-07,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-07,URANIUM,0.0,0.21693,-0.21693,tonne U
+visual-territory-07,GRAIN,214070.148881,144620.127333,69450.021548,tonne
+visual-territory-07,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-07,COPPER,0.0,16.685997,-16.685997,tonne
+visual-territory-07,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-07,STEEL,0.0,32539.52865,-32539.52865,tonne
+visual-territory-07,REFINED_FUEL,0.0,216930.191,-216930.191,barrel equivalent
+visual-territory-07,MACHINERY,0.0,173.877873,-173.877873,equipment unit
+visual-territory-07,SEMICONDUCTORS,333719.943055,216930.191,116789.752055,standardised chip unit
+visual-territory-07,BATTERIES,0.0,17.354415,-17.354415,MWh-equivalent
+visual-territory-08,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-08,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-08,URANIUM,0.0,0.23459,-0.23459,tonne U
+visual-territory-08,GRAIN,391956.401878,156393.544,235562.857878,tonne
+visual-territory-08,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-08,COPPER,0.0,17.605304,-17.605304,tonne
+visual-territory-08,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-08,STEEL,0.0,35188.5474,-35188.5474,tonne
+visual-territory-08,REFINED_FUEL,0.0,234590.316,-234590.316,barrel equivalent
+visual-territory-08,MACHINERY,0.0,188.024359,-188.024359,equipment unit
+visual-territory-08,SEMICONDUCTORS,352106.072496,234590.316,117515.756496,standardised chip unit
+visual-territory-08,BATTERIES,0.0,18.767225,-18.767225,MWh-equivalent
+visual-territory-09,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-09,NATURAL_GAS,0.0,48599.071779,-48599.071779,MMBtu
+visual-territory-09,URANIUM,0.6716,0.203914,0.467686,tonne U
+visual-territory-09,GRAIN,252444.447736,135942.678667,116501.769069,tonne
+visual-territory-09,IRON_ORE,56254.5845,25919.504949,30335.079551,tonne
+visual-territory-09,COPPER,0.0,0.0,0.0,tonne
+visual-territory-09,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-09,STEEL,16199.690593,30587.1027,-14387.412107,tonne
+visual-territory-09,REFINED_FUEL,0.0,203914.018,-203914.018,barrel equivalent
+visual-territory-09,MACHINERY,0.0,163.131214,-163.131214,equipment unit
+visual-territory-09,SEMICONDUCTORS,0.0,203914.018,-203914.018,standardised chip unit
+visual-territory-09,BATTERIES,0.0,16.313121,-16.313121,MWh-equivalent
+visual-territory-10,CRUDE_OIL,475703.6894,72788.756074,402914.933326,barrel
+visual-territory-10,NATURAL_GAS,985412.409,0.0,985412.409,MMBtu
+visual-territory-10,URANIUM,0.0,0.217859,-0.217859,tonne U
+visual-territory-10,GRAIN,131890.516401,145239.572,-13349.055599,tonne
+visual-territory-10,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-10,COPPER,524.006639,56.25397,467.752669,tonne
+visual-territory-10,LITHIUM,0.0,42.190477,-42.190477,tonne LCE
+visual-territory-10,STEEL,0.0,32678.9037,-32678.9037,tonne
+visual-territory-10,REFINED_FUEL,67396.996365,217859.358,-150462.361635,barrel equivalent
+visual-territory-10,MACHINERY,0.0,174.357804,-174.357804,equipment unit
+visual-territory-10,SEMICONDUCTORS,0.0,217859.358,-217859.358,standardised chip unit
+visual-territory-10,BATTERIES,70.317462,17.428749,52.888714,MWh-equivalent
+visual-territory-11,CRUDE_OIL,95910.182,0.0,95910.182,barrel
+visual-territory-11,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-11,URANIUM,0.0,0.139077,-0.139077,tonne U
+visual-territory-11,GRAIN,87635.989878,92718.024,-5082.034122,tonne
+visual-territory-11,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-11,COPPER,524.006639,188.315474,335.691165,tonne
+visual-territory-11,LITHIUM,141.236606,141.236606,0.0,tonne LCE
+visual-territory-11,STEEL,0.0,20861.5554,-20861.5554,tonne
+visual-territory-11,REFINED_FUEL,0.0,139077.036,-139077.036,barrel equivalent
+visual-territory-11,MACHINERY,0.0,111.497023,-111.497023,equipment unit
+visual-territory-11,SEMICONDUCTORS,0.0,139077.036,-139077.036,standardised chip unit
+visual-territory-11,BATTERIES,235.394343,11.126163,224.26818,MWh-equivalent
+visual-territory-12,CRUDE_OIL,594288.8959,0.0,594288.8959,barrel
+visual-territory-12,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-12,URANIUM,0.0,0.282894,-0.282894,tonne U
+visual-territory-12,GRAIN,0.0,188595.934,-188595.934,tonne
+visual-territory-12,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-12,COPPER,0.0,219.974055,-219.974055,tonne
+visual-territory-12,LITHIUM,0.0,57.709517,-57.709517,tonne LCE
+visual-territory-12,STEEL,0.0,42434.08515,-42434.08515,tonne
+visual-territory-12,REFINED_FUEL,0.0,282893.901,-282893.901,barrel equivalent
+visual-territory-12,MACHINERY,0.0,229.271864,-229.271864,equipment unit
+visual-territory-12,SEMICONDUCTORS,2860560.629329,282893.901,2577666.728329,standardised chip unit
+visual-territory-12,BATTERIES,96.182529,22.631512,73.551017,MWh-equivalent
+visual-territory-13,CRUDE_OIL,46809.2515,0.0,46809.2515,barrel
+visual-territory-13,NATURAL_GAS,0.0,27181.756629,-27181.756629,MMBtu
+visual-territory-13,URANIUM,0.0,0.21227,-0.21227,tonne U
+visual-territory-13,GRAIN,67822.098593,141513.008667,-73690.910074,tonne
+visual-territory-13,IRON_ORE,0.0,14496.936869,-14496.936869,tonne
+visual-territory-13,COPPER,524.006639,269.726276,254.280363,tonne
+visual-territory-13,LITHIUM,141.236606,141.236606,0.0,tonne LCE
+visual-territory-13,STEEL,9060.585543,31840.42695,-22779.841407,tonne
+visual-territory-13,REFINED_FUEL,0.0,212269.513,-212269.513,barrel equivalent
+visual-territory-13,MACHINERY,0.0,171.679221,-171.679221,equipment unit
+visual-territory-13,SEMICONDUCTORS,1628216.034805,212269.513,1415946.521805,standardised chip unit
+visual-territory-13,BATTERIES,235.394343,16.981561,218.412782,MWh-equivalent
+visual-territory-14,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-14,NATURAL_GAS,0.0,25718.439045,-25718.439045,MMBtu
+visual-territory-14,URANIUM,0.4792,0.203975,0.275225,tonne U
+visual-territory-14,GRAIN,292986.637695,135983.538,157003.099695,tonne
+visual-territory-14,IRON_ORE,0.0,13716.500824,-13716.500824,tonne
+visual-territory-14,COPPER,0.0,0.0,0.0,tonne
+visual-territory-14,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-14,STEEL,8572.813015,30596.29605,-22023.483035,tonne
+visual-territory-14,REFINED_FUEL,0.0,203975.307,-203975.307,barrel equivalent
+visual-territory-14,MACHINERY,0.0,163.180246,-163.180246,equipment unit
+visual-territory-14,SEMICONDUCTORS,0.0,203975.307,-203975.307,standardised chip unit
+visual-territory-14,BATTERIES,0.0,16.318025,-16.318025,MWh-equivalent
+visual-territory-15,CRUDE_OIL,630831.0069,0.0,630831.0069,barrel
+visual-territory-15,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-15,URANIUM,0.0,0.270336,-0.270336,tonne U
+visual-territory-15,GRAIN,267900.373479,180224.091333,87676.282145,tonne
+visual-territory-15,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-15,COPPER,0.0,70.538841,-70.538841,tonne
+visual-territory-15,LITHIUM,0.0,52.904131,-52.904131,tonne LCE
+visual-territory-15,STEEL,0.0,40550.42055,-40550.42055,tonne
+visual-territory-15,REFINED_FUEL,0.0,270336.137,-270336.137,barrel equivalent
+visual-territory-15,MACHINERY,0.0,216.357083,-216.357083,equipment unit
+visual-territory-15,SEMICONDUCTORS,0.0,270336.137,-270336.137,standardised chip unit
+visual-territory-15,BATTERIES,88.173551,21.626891,66.54666,MWh-equivalent
+visual-territory-16,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-16,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-16,URANIUM,0.0,0.270585,-0.270585,tonne U
+visual-territory-16,GRAIN,457116.344543,180389.916667,276726.427876,tonne
+visual-territory-16,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-16,COPPER,0.0,71.821196,-71.821196,tonne
+visual-territory-16,LITHIUM,0.0,53.865897,-53.865897,tonne LCE
+visual-territory-16,STEEL,0.0,40587.73125,-40587.73125,tonne
+visual-territory-16,REFINED_FUEL,0.0,270584.875,-270584.875,barrel equivalent
+visual-territory-16,MACHINERY,0.0,216.557676,-216.557676,equipment unit
+visual-territory-16,SEMICONDUCTORS,0.0,270584.875,-270584.875,standardised chip unit
+visual-territory-16,BATTERIES,89.776495,21.64679,68.129705,MWh-equivalent
+visual-territory-17,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-17,NATURAL_GAS,0.0,255415.810084,-255415.810084,MMBtu
+visual-territory-17,URANIUM,0.0,0.142121,-0.142121,tonne U
+visual-territory-17,GRAIN,0.0,94747.592,-94747.592,tonne
+visual-territory-17,IRON_ORE,144693.0256,136221.765378,8471.260222,tonne
+visual-territory-17,COPPER,0.0,14.052268,-14.052268,tonne
+visual-territory-17,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-17,STEEL,85138.603361,21669.514898,63469.088463,tonne
+visual-territory-17,REFINED_FUEL,0.0,142121.388,-142121.388,barrel equivalent
+visual-territory-17,MACHINERY,175.653349,113.69711,61.956239,equipment unit
+visual-territory-17,SEMICONDUCTORS,0.0,142121.388,-142121.388,standardised chip unit
+visual-territory-17,BATTERIES,0.0,11.369711,-11.369711,MWh-equivalent
+visual-territory-18,CRUDE_OIL,400953.4334,39260.129909,361693.303491,barrel
+visual-territory-18,NATURAL_GAS,0.0,44276.716769,-44276.716769,MMBtu
+visual-territory-18,URANIUM,0.0,0.114529,-0.114529,tonne U
+visual-territory-18,GRAIN,0.0,76352.808,-76352.808,tonne
+visual-territory-18,IRON_ORE,30571.1834,23614.248944,6956.934456,tonne
+visual-territory-18,COPPER,0.0,0.0,0.0,tonne
+visual-territory-18,LITHIUM,141.236606,0.0,141.236606,tonne LCE
+visual-territory-18,STEEL,14758.90559,17179.3818,-2420.47621,tonne
+visual-territory-18,REFINED_FUEL,36351.972138,114529.212,-78177.239862,barrel equivalent
+visual-territory-18,MACHINERY,0.0,91.62337,-91.62337,equipment unit
+visual-territory-18,SEMICONDUCTORS,0.0,114529.212,-114529.212,standardised chip unit
+visual-territory-18,BATTERIES,0.0,9.162337,-9.162337,MWh-equivalent
+visual-territory-19,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-19,NATURAL_GAS,831625.0282,0.0,831625.0282,MMBtu
+visual-territory-19,URANIUM,0.4158,0.122802,0.292998,tonne U
+visual-territory-19,GRAIN,159155.254382,81868.181333,77287.073048,tonne
+visual-territory-19,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-19,COPPER,0.0,9.226743,-9.226743,tonne
+visual-territory-19,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-19,STEEL,0.0,18420.3408,-18420.3408,tonne
+visual-territory-19,REFINED_FUEL,0.0,122802.272,-122802.272,barrel equivalent
+visual-territory-19,MACHINERY,0.0,98.426352,-98.426352,equipment unit
+visual-territory-19,SEMICONDUCTORS,184534.851332,122802.272,61732.579332,standardised chip unit
+visual-territory-19,BATTERIES,0.0,9.824182,-9.824182,MWh-equivalent
+visual-territory-20,CRUDE_OIL,0.0,61920.918878,-61920.918878,barrel
+visual-territory-20,NATURAL_GAS,0.0,376868.279659,-376868.279659,MMBtu
+visual-territory-20,URANIUM,0.0,0.187895,-0.187895,tonne U
+visual-territory-20,GRAIN,0.0,125263.396667,-125263.396667,tonne
+visual-territory-20,IRON_ORE,39269.4631,200996.415818,-161726.952718,tonne
+visual-territory-20,COPPER,0.0,0.0,0.0,tonne
+visual-territory-20,LITHIUM,141.236606,0.0,141.236606,tonne LCE
+visual-territory-20,STEEL,125622.759886,28184.26425,97438.495636,tonne
+visual-territory-20,REFINED_FUEL,57334.184147,187895.095,-130560.910853,barrel equivalent
+visual-territory-20,MACHINERY,0.0,150.316076,-150.316076,equipment unit
+visual-territory-20,SEMICONDUCTORS,0.0,187895.095,-187895.095,standardised chip unit
+visual-territory-20,BATTERIES,0.0,15.031608,-15.031608,MWh-equivalent
+visual-territory-21,CRUDE_OIL,30342.0349,0.0,30342.0349,barrel
+visual-territory-21,NATURAL_GAS,0.0,33037.40854,-33037.40854,MMBtu
+visual-territory-21,URANIUM,0.0,0.262573,-0.262573,tonne U
+visual-territory-21,GRAIN,339190.919612,175048.902,164142.017612,tonne
+visual-territory-21,IRON_ORE,66264.723,17619.951221,48644.771779,tonne
+visual-territory-21,COPPER,0.0,0.0,0.0,tonne
+visual-territory-21,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-21,STEEL,11012.469513,39386.00295,-28373.533437,tonne
+visual-territory-21,REFINED_FUEL,0.0,262573.353,-262573.353,barrel equivalent
+visual-territory-21,MACHINERY,0.0,210.058682,-210.058682,equipment unit
+visual-territory-21,SEMICONDUCTORS,0.0,262573.353,-262573.353,standardised chip unit
+visual-territory-21,BATTERIES,0.0,21.005868,-21.005868,MWh-equivalent
+visual-territory-22,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-22,NATURAL_GAS,0.0,14117.836315,-14117.836315,MMBtu
+visual-territory-22,URANIUM,0.6868,0.112205,0.574595,tonne U
+visual-territory-22,GRAIN,190747.106186,74803.095333,115944.010853,tonne
+visual-territory-22,IRON_ORE,0.0,7529.512701,-7529.512701,tonne
+visual-territory-22,COPPER,0.0,0.0,0.0,tonne
+visual-territory-22,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-22,STEEL,4705.945438,16830.69645,-12124.751012,tonne
+visual-territory-22,REFINED_FUEL,0.0,112204.643,-112204.643,barrel equivalent
+visual-territory-22,MACHINERY,0.0,89.763714,-89.763714,equipment unit
+visual-territory-22,SEMICONDUCTORS,0.0,112204.643,-112204.643,standardised chip unit
+visual-territory-22,BATTERIES,0.0,8.976371,-8.976371,MWh-equivalent
+visual-territory-23,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-23,NATURAL_GAS,0.0,652034.660291,-652034.660291,MMBtu
+visual-territory-23,URANIUM,0.0,0.350234,-0.350234,tonne U
+visual-territory-23,GRAIN,0.0,233489.644667,-233489.644667,tonne
+visual-territory-23,IRON_ORE,330393.1816,347751.818822,-17358.637222,tonne
+visual-territory-23,COPPER,0.0,96.122233,-96.122233,tonne
+visual-territory-23,LITHIUM,0.0,72.091675,-72.091675,tonne LCE
+visual-territory-23,STEEL,217344.886764,52535.17005,164809.716714,tonne
+visual-territory-23,REFINED_FUEL,0.0,350234.467,-350234.467,barrel equivalent
+visual-territory-23,MACHINERY,0.0,280.307726,-280.307726,equipment unit
+visual-territory-23,SEMICONDUCTORS,0.0,350234.467,-350234.467,standardised chip unit
+visual-territory-23,BATTERIES,120.152792,28.018757,92.134034,MWh-equivalent
+visual-territory-24,CRUDE_OIL,275827.7684,0.0,275827.7684,barrel
+visual-territory-24,NATURAL_GAS,171489.286743,0.0,171489.286743,MMBtu
+visual-territory-24,URANIUM,0.0,0.217554,-0.217554,tonne U
+visual-territory-24,GRAIN,0.0,145036.324,-145036.324,tonne
+visual-territory-24,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-24,COPPER,0.0,207.376692,-207.376692,tonne
+visual-territory-24,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-24,STEEL,0.0,37347.415406,-37347.415406,tonne
+visual-territory-24,REFINED_FUEL,0.0,217554.486,-217554.486,barrel equivalent
+visual-territory-24,MACHINERY,2357.121253,174.419729,2182.701524,equipment unit
+visual-territory-24,SEMICONDUCTORS,376139.831894,217554.486,158585.345894,standardised chip unit
+visual-territory-24,BATTERIES,0.0,17.404359,-17.404359,MWh-equivalent
+visual-territory-25,CRUDE_OIL,453443.5652,992130.114173,-538686.548973,barrel
+visual-territory-25,NATURAL_GAS,0.0,25113.532316,-25113.532316,MMBtu
+visual-territory-25,URANIUM,0.0,0.121895,-0.121895,tonne U
+visual-territory-25,GRAIN,0.0,81263.314,-81263.314,tonne
+visual-territory-25,IRON_ORE,0.0,13393.883902,-13393.883902,tonne
+visual-territory-25,COPPER,0.0,0.0,0.0,tonne
+visual-territory-25,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-25,STEEL,8371.177439,18284.24565,-9913.068211,tonne
+visual-territory-25,REFINED_FUEL,918638.994605,121894.971,796744.023605,barrel equivalent
+visual-territory-25,MACHINERY,0.0,97.515977,-97.515977,equipment unit
+visual-territory-25,SEMICONDUCTORS,0.0,121894.971,-121894.971,standardised chip unit
+visual-territory-25,BATTERIES,0.0,9.751598,-9.751598,MWh-equivalent
+visual-territory-26,CRUDE_OIL,573830.8846,990261.16384,-416430.27924,barrel
+visual-territory-26,NATURAL_GAS,0.0,66810.676848,-66810.676848,MMBtu
+visual-territory-26,URANIUM,0.0,0.150478,-0.150478,tonne U
+visual-territory-26,GRAIN,0.0,100318.792667,-100318.792667,tonne
+visual-territory-26,IRON_ORE,0.0,35632.360985,-35632.360985,tonne
+visual-territory-26,COPPER,0.0,0.0,0.0,tonne
+visual-territory-26,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-26,STEEL,22270.225616,22571.72835,-301.502734,tonne
+visual-territory-26,REFINED_FUEL,916908.485037,150478.189,766430.296037,barrel equivalent
+visual-territory-26,MACHINERY,0.0,120.382551,-120.382551,equipment unit
+visual-territory-26,SEMICONDUCTORS,0.0,150478.189,-150478.189,standardised chip unit
+visual-territory-26,BATTERIES,0.0,12.038255,-12.038255,MWh-equivalent
+visual-territory-27,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-27,NATURAL_GAS,0.0,509595.826397,-509595.826397,MMBtu
+visual-territory-27,URANIUM,0.0,0.208513,-0.208513,tonne U
+visual-territory-27,GRAIN,0.0,139008.672667,-139008.672667,tonne
+visual-territory-27,IRON_ORE,56834.627976,271784.440745,-214949.812769,tonne
+visual-territory-27,COPPER,0.0,0.0,0.0,tonne
+visual-territory-27,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-27,STEEL,169865.275466,31276.95135,138588.324116,tonne
+visual-territory-27,REFINED_FUEL,0.0,208513.009,-208513.009,barrel equivalent
+visual-territory-27,MACHINERY,0.0,166.810407,-166.810407,equipment unit
+visual-territory-27,SEMICONDUCTORS,0.0,208513.009,-208513.009,standardised chip unit
+visual-territory-27,BATTERIES,0.0,16.681041,-16.681041,MWh-equivalent
+visual-territory-28,CRUDE_OIL,758738.5155,1281261.188116,-522522.672616,barrel
+visual-territory-28,NATURAL_GAS,819781.96488,0.0,819781.96488,MMBtu
+visual-territory-28,URANIUM,0.0,0.218123,-0.218123,tonne U
+visual-territory-28,GRAIN,0.0,145415.374667,-145415.374667,tonne
+visual-territory-28,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-28,COPPER,0.0,21.876533,-21.876533,tonne
+visual-territory-28,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-28,STEEL,0.0,33265.372619,-33265.372619,tonne
+visual-territory-28,REFINED_FUEL,1186352.95196,218123.062,968229.88996,barrel equivalent
+visual-territory-28,MACHINERY,273.456659,174.49845,98.95821,equipment unit
+visual-territory-28,SEMICONDUCTORS,0.0,218123.062,-218123.062,standardised chip unit
+visual-territory-28,BATTERIES,0.0,17.449845,-17.449845,MWh-equivalent
+visual-territory-29,CRUDE_OIL,577690.5259,0.0,577690.5259,barrel
+visual-territory-29,NATURAL_GAS,1196121.1015,111745.786846,1084375.314654,MMBtu
+visual-territory-29,URANIUM,0.0,0.202596,-0.202596,tonne U
+visual-territory-29,GRAIN,0.0,135063.71,-135063.71,tonne
+visual-territory-29,IRON_ORE,90689.3733,59597.752984,31091.620316,tonne
+visual-territory-29,COPPER,0.0,0.0,0.0,tonne
+visual-territory-29,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-29,STEEL,37248.595615,30389.33475,6859.260865,tonne
+visual-territory-29,REFINED_FUEL,0.0,202595.565,-202595.565,barrel equivalent
+visual-territory-29,MACHINERY,0.0,162.076452,-162.076452,equipment unit
+visual-territory-29,SEMICONDUCTORS,0.0,202595.565,-202595.565,standardised chip unit
+visual-territory-29,BATTERIES,0.0,16.207645,-16.207645,MWh-equivalent
+visual-territory-30,CRUDE_OIL,144359.829316,0.0,144359.829316,barrel
+visual-territory-30,NATURAL_GAS,0.0,276709.049316,-276709.049316,MMBtu
+visual-territory-30,URANIUM,0.0,0.181478,-0.181478,tonne U
+visual-territory-30,GRAIN,0.0,120985.325333,-120985.325333,tonne
+visual-territory-30,IRON_ORE,209853.6955,147578.159635,62275.535865,tonne
+visual-territory-30,COPPER,0.0,0.0,0.0,tonne
+visual-territory-30,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-30,STEEL,92236.349772,27221.6982,65014.651572,tonne
+visual-territory-30,REFINED_FUEL,0.0,181477.988,-181477.988,barrel equivalent
+visual-territory-30,MACHINERY,0.0,145.18239,-145.18239,equipment unit
+visual-territory-30,SEMICONDUCTORS,0.0,181477.988,-181477.988,standardised chip unit
+visual-territory-30,BATTERIES,0.0,14.518239,-14.518239,MWh-equivalent
+visual-territory-31,CRUDE_OIL,584438.6651,1613312.380145,-1028873.715045,barrel
+visual-territory-31,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-31,URANIUM,0.0,0.198215,-0.198215,tonne U
+visual-territory-31,GRAIN,0.0,132143.061333,-132143.061333,tonne
+visual-territory-31,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-31,COPPER,0.0,51.304821,-51.304821,tonne
+visual-territory-31,LITHIUM,141.236606,0.0,141.236606,tonne LCE
+visual-territory-31,STEEL,0.0,30633.274413,-30633.274413,tonne
+visual-territory-31,REFINED_FUEL,1493807.759394,198214.592,1295593.167394,barrel equivalent
+visual-territory-31,MACHINERY,450.542807,158.876902,291.665905,equipment unit
+visual-territory-31,SEMICONDUCTORS,305227.926798,198214.592,107013.334798,standardised chip unit
+visual-territory-31,BATTERIES,0.0,15.857167,-15.857167,MWh-equivalent
+visual-territory-32,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-32,NATURAL_GAS,981649.694665,298607.614701,683042.079965,MMBtu
+visual-territory-32,URANIUM,0.0,0.131554,-0.131554,tonne U
+visual-territory-32,GRAIN,0.0,87702.480667,-87702.480667,tonne
+visual-territory-32,IRON_ORE,35696.352533,159257.394507,-123561.041974,tonne
+visual-territory-32,COPPER,0.0,0.0,0.0,tonne
+visual-territory-32,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-32,STEEL,99535.871567,19733.05815,79802.813417,tonne
+visual-territory-32,REFINED_FUEL,0.0,131553.721,-131553.721,barrel equivalent
+visual-territory-32,MACHINERY,0.0,105.242977,-105.242977,equipment unit
+visual-territory-32,SEMICONDUCTORS,0.0,131553.721,-131553.721,standardised chip unit
+visual-territory-32,BATTERIES,0.0,10.524298,-10.524298,MWh-equivalent
+visual-territory-33,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-33,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-33,URANIUM,0.6767,0.172579,0.504121,tonne U
+visual-territory-33,GRAIN,242509.321633,115052.474,127456.847633,tonne
+visual-territory-33,IRON_ORE,45740.787488,0.0,45740.787488,tonne
+visual-territory-33,COPPER,0.0,0.0,0.0,tonne
+visual-territory-33,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-33,STEEL,0.0,25886.80665,-25886.80665,tonne
+visual-territory-33,REFINED_FUEL,0.0,172578.711,-172578.711,barrel equivalent
+visual-territory-33,MACHINERY,0.0,138.062969,-138.062969,equipment unit
+visual-territory-33,SEMICONDUCTORS,0.0,172578.711,-172578.711,standardised chip unit
+visual-territory-33,BATTERIES,0.0,13.806297,-13.806297,MWh-equivalent
+visual-territory-34,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-34,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-34,URANIUM,0.9038,0.205341,0.698459,tonne U
+visual-territory-34,GRAIN,288278.667503,136893.756667,151384.910837,tonne
+visual-territory-34,IRON_ORE,54943.609729,0.0,54943.609729,tonne
+visual-territory-34,COPPER,0.0,0.0,0.0,tonne
+visual-territory-34,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-34,STEEL,0.0,30801.09525,-30801.09525,tonne
+visual-territory-34,REFINED_FUEL,0.0,205340.635,-205340.635,barrel equivalent
+visual-territory-34,MACHINERY,0.0,164.272508,-164.272508,equipment unit
+visual-territory-34,SEMICONDUCTORS,0.0,205340.635,-205340.635,standardised chip unit
+visual-territory-34,BATTERIES,0.0,16.427251,-16.427251,MWh-equivalent
+visual-territory-35,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-35,NATURAL_GAS,0.0,338578.458835,-338578.458835,MMBtu
+visual-territory-35,URANIUM,0.4303,0.185985,0.244315,tonne U
+visual-territory-35,GRAIN,0.0,123989.83,-123989.83,tonne
+visual-territory-35,IRON_ORE,230215.6069,180575.178046,49640.428854,tonne
+visual-territory-35,COPPER,0.0,0.0,0.0,tonne
+visual-territory-35,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-35,STEEL,112859.486278,27897.71175,84961.774528,tonne
+visual-territory-35,REFINED_FUEL,0.0,185984.745,-185984.745,barrel equivalent
+visual-territory-35,MACHINERY,0.0,148.787796,-148.787796,equipment unit
+visual-territory-35,SEMICONDUCTORS,0.0,185984.745,-185984.745,standardised chip unit
+visual-territory-35,BATTERIES,0.0,14.87878,-14.87878,MWh-equivalent
+visual-territory-36,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-36,NATURAL_GAS,679136.941403,0.0,679136.941403,MMBtu
+visual-territory-36,URANIUM,0.0,0.093559,-0.093559,tonne U
+visual-territory-36,GRAIN,147445.136902,62372.758667,85072.378235,tonne
+visual-territory-36,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-36,COPPER,0.0,24.147091,-24.147091,tonne
+visual-territory-36,LITHIUM,0.0,18.110318,-18.110318,tonne LCE
+visual-territory-36,STEEL,0.0,14033.8707,-14033.8707,tonne
+visual-territory-36,REFINED_FUEL,0.0,93559.138,-93559.138,barrel equivalent
+visual-territory-36,MACHINERY,0.0,74.877494,-74.877494,equipment unit
+visual-territory-36,SEMICONDUCTORS,0.0,93559.138,-93559.138,standardised chip unit
+visual-territory-36,BATTERIES,30.183864,7.484731,22.699133,MWh-equivalent
+visual-territory-37,CRUDE_OIL,317788.031,778844.382204,-461056.351204,barrel
+visual-territory-37,NATURAL_GAS,0.0,11994.125847,-11994.125847,MMBtu
+visual-territory-37,URANIUM,0.0,0.09569,-0.09569,tonne U
+visual-territory-37,GRAIN,0.0,63793.523333,-63793.523333,tonne
+visual-territory-37,IRON_ORE,38007.202318,6396.867119,31610.335199,tonne
+visual-territory-37,COPPER,0.0,0.0,0.0,tonne
+visual-territory-37,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-37,STEEL,3998.041949,14353.54275,-10355.500801,tonne
+visual-territory-37,REFINED_FUEL,721152.205745,95690.285,625461.920745,barrel equivalent
+visual-territory-37,MACHINERY,0.0,76.552228,-76.552228,equipment unit
+visual-territory-37,SEMICONDUCTORS,0.0,95690.285,-95690.285,standardised chip unit
+visual-territory-37,BATTERIES,0.0,7.655223,-7.655223,MWh-equivalent
+visual-territory-38,CRUDE_OIL,1014465.9469,1896713.095985,-882247.149085,barrel
+visual-territory-38,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-38,URANIUM,0.0,0.287466,-0.287466,tonne U
+visual-territory-38,GRAIN,13504.121877,191644.25,-178140.128123,tonne
+visual-territory-38,IRON_ORE,79980.434546,0.0,79980.434546,tonne
+visual-territory-38,COPPER,0.0,0.0,0.0,tonne
+visual-territory-38,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-38,STEEL,0.0,43119.95625,-43119.95625,tonne
+visual-territory-38,REFINED_FUEL,1756215.829616,287466.375,1468749.454616,barrel equivalent
+visual-territory-38,MACHINERY,0.0,229.9731,-229.9731,equipment unit
+visual-territory-38,SEMICONDUCTORS,0.0,287466.375,-287466.375,standardised chip unit
+visual-territory-38,BATTERIES,0.0,22.99731,-22.99731,MWh-equivalent
+visual-territory-39,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-39,NATURAL_GAS,0.0,539203.835622,-539203.835622,MMBtu
+visual-territory-39,URANIUM,0.8704,0.220477,0.649923,tonne U
+visual-territory-39,GRAIN,0.0,146984.412667,-146984.412667,tonne
+visual-territory-39,IRON_ORE,58730.976814,287575.378998,-228844.402184,tonne
+visual-territory-39,COPPER,0.0,0.0,0.0,tonne
+visual-territory-39,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-39,STEEL,179734.611874,33071.49285,146663.119024,tonne
+visual-territory-39,REFINED_FUEL,0.0,220476.619,-220476.619,barrel equivalent
+visual-territory-39,MACHINERY,0.0,176.381295,-176.381295,equipment unit
+visual-territory-39,SEMICONDUCTORS,0.0,220476.619,-220476.619,standardised chip unit
+visual-territory-39,BATTERIES,0.0,17.63813,-17.63813,MWh-equivalent
+visual-territory-40,CRUDE_OIL,328661.7993,0.0,328661.7993,barrel
+visual-territory-40,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-40,URANIUM,0.0,0.19407,-0.19407,tonne U
+visual-territory-40,GRAIN,0.0,129379.925333,-129379.925333,tonne
+visual-territory-40,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-40,COPPER,0.0,131.004935,-131.004935,tonne
+visual-territory-40,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-40,STEEL,0.0,29595.334786,-29595.334786,tonne
+visual-territory-40,REFINED_FUEL,0.0,194069.888,-194069.888,barrel equivalent
+visual-territory-40,MACHINERY,242.425793,157.488128,84.937665,equipment unit
+visual-territory-40,SEMICONDUCTORS,2232217.436,194069.888,2038147.548,standardised chip unit
+visual-territory-40,BATTERIES,0.0,15.525591,-15.525591,MWh-equivalent
+visual-territory-41,CRUDE_OIL,547320.4839,0.0,547320.4839,barrel
+visual-territory-41,NATURAL_GAS,0.0,155222.740671,-155222.740671,MMBtu
+visual-territory-41,URANIUM,0.0,0.209318,-0.209318,tonne U
+visual-territory-41,GRAIN,0.0,139545.132667,-139545.132667,tonne
+visual-territory-41,IRON_ORE,236747.3646,82785.461691,153961.902909,tonne
+visual-territory-41,COPPER,0.0,0.0,0.0,tonne
+visual-territory-41,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-41,STEEL,51740.913557,31397.65485,20343.258707,tonne
+visual-territory-41,REFINED_FUEL,0.0,209317.699,-209317.699,barrel equivalent
+visual-territory-41,MACHINERY,0.0,167.454159,-167.454159,equipment unit
+visual-territory-41,SEMICONDUCTORS,0.0,209317.699,-209317.699,standardised chip unit
+visual-territory-41,BATTERIES,0.0,16.745416,-16.745416,MWh-equivalent
+visual-territory-42,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-42,NATURAL_GAS,0.0,193952.393972,-193952.393972,MMBtu
+visual-territory-42,URANIUM,0.0,0.129656,-0.129656,tonne U
+visual-territory-42,GRAIN,0.0,86437.448667,-86437.448667,tonne
+visual-territory-42,IRON_ORE,116149.4715,103441.276785,12708.194715,tonne
+visual-territory-42,COPPER,0.0,12.201452,-12.201452,tonne
+visual-territory-42,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-42,STEEL,64650.797991,19753.46224,44897.33575,tonne
+visual-territory-42,REFINED_FUEL,0.0,129656.173,-129656.173,barrel equivalent
+visual-territory-42,MACHINERY,152.518145,103.724938,48.793207,equipment unit
+visual-territory-42,SEMICONDUCTORS,0.0,129656.173,-129656.173,standardised chip unit
+visual-territory-42,BATTERIES,0.0,10.372494,-10.372494,MWh-equivalent
+visual-territory-43,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-43,NATURAL_GAS,0.0,202558.696221,-202558.696221,MMBtu
+visual-territory-43,URANIUM,0.0,0.133083,-0.133083,tonne U
+visual-territory-43,GRAIN,0.0,88722.11,-88722.11,tonne
+visual-territory-43,IRON_ORE,111037.309,108031.304651,3006.004349,tonne
+visual-territory-43,COPPER,487.564149,0.0,487.564149,tonne
+visual-territory-43,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-43,STEEL,67519.565407,19962.47475,47557.090657,tonne
+visual-territory-43,REFINED_FUEL,0.0,133083.165,-133083.165,barrel equivalent
+visual-territory-43,MACHINERY,0.0,106.466532,-106.466532,equipment unit
+visual-territory-43,SEMICONDUCTORS,0.0,133083.165,-133083.165,standardised chip unit
+visual-territory-43,BATTERIES,0.0,10.646653,-10.646653,MWh-equivalent
+visual-territory-44,CRUDE_OIL,512189.8122,0.0,512189.8122,barrel
+visual-territory-44,NATURAL_GAS,0.0,157934.906178,-157934.906178,MMBtu
+visual-territory-44,URANIUM,0.0,0.27114,-0.27114,tonne U
+visual-territory-44,GRAIN,0.0,180759.882,-180759.882,tonne
+visual-territory-44,IRON_ORE,198690.7885,84231.949962,114458.838538,tonne
+visual-territory-44,COPPER,0.0,48.189206,-48.189206,tonne
+visual-territory-44,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-44,STEEL,52644.968726,41347.313189,11297.655537,tonne
+visual-territory-44,REFINED_FUEL,0.0,271139.823,-271139.823,barrel equivalent
+visual-territory-44,MACHINERY,338.169869,217.334571,120.835299,equipment unit
+visual-territory-44,SEMICONDUCTORS,422712.336715,271139.823,151572.513715,standardised chip unit
+visual-territory-44,BATTERIES,0.0,21.691186,-21.691186,MWh-equivalent
+visual-territory-45,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-45,NATURAL_GAS,0.0,396113.160829,-396113.160829,MMBtu
+visual-territory-45,URANIUM,0.0,0.230359,-0.230359,tonne U
+visual-territory-45,GRAIN,0.0,153572.382667,-153572.382667,tonne
+visual-territory-45,IRON_ORE,182987.2414,211260.352442,-28273.111042,tonne
+visual-territory-45,COPPER,0.0,0.0,0.0,tonne
+visual-territory-45,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-45,STEEL,132037.720276,34553.7861,97483.934176,tonne
+visual-territory-45,REFINED_FUEL,0.0,230358.574,-230358.574,barrel equivalent
+visual-territory-45,MACHINERY,0.0,184.286859,-184.286859,equipment unit
+visual-territory-45,SEMICONDUCTORS,0.0,230358.574,-230358.574,standardised chip unit
+visual-territory-45,BATTERIES,0.0,18.428686,-18.428686,MWh-equivalent
+visual-territory-46,CRUDE_OIL,119279.5808,0.0,119279.5808,barrel
+visual-territory-46,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-46,URANIUM,0.0,0.259832,-0.259832,tonne U
+visual-territory-46,GRAIN,329572.087626,173221.160667,156350.92696,tonne
+visual-territory-46,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-46,COPPER,0.0,19.457867,-19.457867,tonne
+visual-territory-46,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-46,STEEL,0.0,38974.76115,-38974.76115,tonne
+visual-territory-46,REFINED_FUEL,0.0,259831.741,-259831.741,barrel equivalent
+visual-territory-46,MACHINERY,0.0,208.25455,-208.25455,equipment unit
+visual-territory-46,SEMICONDUCTORS,389157.337017,259831.741,129325.596017,standardised chip unit
+visual-territory-46,BATTERIES,0.0,20.786539,-20.786539,MWh-equivalent
+visual-territory-47,CRUDE_OIL,671315.4223,0.0,671315.4223,barrel
+visual-territory-47,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-47,URANIUM,0.0,0.314358,-0.314358,tonne U
+visual-territory-47,GRAIN,277497.847369,209572.146667,67925.700703,tonne
+visual-territory-47,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-47,COPPER,0.0,0.0,0.0,tonne
+visual-territory-47,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-47,STEEL,0.0,47153.733,-47153.733,tonne
+visual-territory-47,REFINED_FUEL,0.0,314358.22,-314358.22,barrel equivalent
+visual-territory-47,MACHINERY,0.0,251.486576,-251.486576,equipment unit
+visual-territory-47,SEMICONDUCTORS,0.0,314358.22,-314358.22,standardised chip unit
+visual-territory-47,BATTERIES,0.0,25.148658,-25.148658,MWh-equivalent
+visual-territory-48,CRUDE_OIL,289073.1661,43704.353639,245368.812461,barrel
+visual-territory-48,NATURAL_GAS,0.0,82098.612658,-82098.612658,MMBtu
+visual-territory-48,URANIUM,0.0,0.127599,-0.127599,tonne U
+visual-territory-48,GRAIN,0.0,85065.972,-85065.972,tonne
+visual-territory-48,IRON_ORE,112158.6923,43785.926751,68372.765549,tonne
+visual-territory-48,COPPER,0.0,0.0,0.0,tonne
+visual-territory-48,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-48,STEEL,27366.204219,19139.8437,8226.360519,tonne
+visual-territory-48,REFINED_FUEL,40466.994111,127598.958,-87131.963889,barrel equivalent
+visual-territory-48,MACHINERY,0.0,102.079166,-102.079166,equipment unit
+visual-territory-48,SEMICONDUCTORS,0.0,127598.958,-127598.958,standardised chip unit
+visual-territory-48,BATTERIES,0.0,10.207917,-10.207917,MWh-equivalent
+visual-territory-49,CRUDE_OIL,373850.0408,0.0,373850.0408,barrel
+visual-territory-49,NATURAL_GAS,0.0,120895.915459,-120895.915459,MMBtu
+visual-territory-49,URANIUM,0.9428,0.190381,0.752419,tonne U
+visual-territory-49,GRAIN,0.0,126920.595333,-126920.595333,tonne
+visual-territory-49,IRON_ORE,164534.4427,64477.821578,100056.621122,tonne
+visual-territory-49,COPPER,0.0,14.410502,-14.410502,tonne
+visual-territory-49,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-49,STEEL,40298.638486,28557.13395,11741.504536,tonne
+visual-territory-49,REFINED_FUEL,0.0,190380.893,-190380.893,barrel equivalent
+visual-territory-49,MACHINERY,0.0,152.592924,-152.592924,equipment unit
+visual-territory-49,SEMICONDUCTORS,288210.039153,190380.893,97829.146153,standardised chip unit
+visual-territory-49,BATTERIES,0.0,15.230471,-15.230471,MWh-equivalent
+visual-territory-50,CRUDE_OIL,267220.4082,69704.563887,197515.844313,barrel
+visual-territory-50,NATURAL_GAS,1025963.1065,0.0,1025963.1065,MMBtu
+visual-territory-50,URANIUM,0.0,0.199941,-0.199941,tonne U
+visual-territory-50,GRAIN,0.0,133293.834,-133293.834,tonne
+visual-territory-50,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-50,COPPER,170.637986,173.28654,-2.648555,tonne
+visual-territory-50,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-50,STEEL,0.0,34323.276162,-34323.276162,tonne
+visual-territory-50,REFINED_FUEL,64541.262859,199940.751,-135399.488141,barrel equivalent
+visual-territory-50,MACHINERY,2166.081756,159.952601,2006.129155,equipment unit
+visual-territory-50,SEMICONDUCTORS,0.0,199940.751,-199940.751,standardised chip unit
+visual-territory-50,BATTERIES,0.0,15.99526,-15.99526,MWh-equivalent
+visual-territory-51,CRUDE_OIL,368237.4826,0.0,368237.4826,barrel
+visual-territory-51,NATURAL_GAS,0.0,188737.51027,-188737.51027,MMBtu
+visual-territory-51,URANIUM,0.0,0.217385,-0.217385,tonne U
+visual-territory-51,GRAIN,0.0,144923.449333,-144923.449333,tonne
+visual-territory-51,IRON_ORE,151211.8201,100660.005477,50551.814623,tonne
+visual-territory-51,COPPER,0.0,22.051169,-22.051169,tonne
+visual-territory-51,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-51,STEEL,62912.503423,33159.055319,29753.448104,tonne
+visual-territory-51,REFINED_FUEL,0.0,217385.174,-217385.174,barrel equivalent
+visual-territory-51,MACHINERY,275.63961,173.908139,101.73147,equipment unit
+visual-territory-51,SEMICONDUCTORS,0.0,217385.174,-217385.174,standardised chip unit
+visual-territory-51,BATTERIES,0.0,17.390814,-17.390814,MWh-equivalent
+visual-territory-52,CRUDE_OIL,284053.4424,60300.654982,223752.787418,barrel
+visual-territory-52,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-52,URANIUM,0.0,0.161966,-0.161966,tonne U
+visual-territory-52,GRAIN,0.0,107977.648,-107977.648,tonne
+visual-territory-52,IRON_ORE,110626.8729,0.0,110626.8729,tonne
+visual-territory-52,COPPER,0.0,82.505006,-82.505006,tonne
+visual-territory-52,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-52,STEEL,0.0,25460.168476,-25460.168476,tonne
+visual-territory-52,REFINED_FUEL,55833.939798,161966.472,-106132.532202,barrel equivalent
+visual-territory-52,MACHINERY,582.598838,130.29112,452.307718,equipment unit
+visual-territory-52,SEMICONDUCTORS,717941.977426,161966.472,555975.505426,standardised chip unit
+visual-territory-52,BATTERIES,0.0,12.957318,-12.957318,MWh-equivalent
+visual-territory-53,CRUDE_OIL,752109.7761,96088.590615,656021.185485,barrel
+visual-territory-53,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-53,URANIUM,0.0,0.277523,-0.277523,tonne U
+visual-territory-53,GRAIN,265688.341468,185015.062667,80673.278802,tonne
+visual-territory-53,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-53,COPPER,0.0,0.0,0.0,tonne
+visual-territory-53,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-53,STEEL,0.0,41628.3891,-41628.3891,tonne
+visual-territory-53,REFINED_FUEL,88970.917236,277522.594,-188551.676764,barrel equivalent
+visual-territory-53,MACHINERY,0.0,222.018075,-222.018075,equipment unit
+visual-territory-53,SEMICONDUCTORS,0.0,277522.594,-277522.594,standardised chip unit
+visual-territory-53,BATTERIES,0.0,22.201808,-22.201808,MWh-equivalent
+visual-territory-54,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-54,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-54,URANIUM,1.6369,0.337594,1.299306,tonne U
+visual-territory-54,GRAIN,562955.458392,225062.414667,337893.043725,tonne
+visual-territory-54,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-54,COPPER,0.0,25.619802,-25.619802,tonne
+visual-territory-54,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-54,STEEL,0.0,50639.0433,-50639.0433,tonne
+visual-territory-54,REFINED_FUEL,0.0,337593.622,-337593.622,barrel equivalent
+visual-territory-54,MACHINERY,0.0,270.587294,-270.587294,equipment unit
+visual-territory-54,SEMICONDUCTORS,512396.03067,337593.622,174802.40867,standardised chip unit
+visual-territory-54,BATTERIES,0.0,27.00749,-27.00749,MWh-equivalent
+visual-territory-55,CRUDE_OIL,275977.9733,58748.780006,217229.193294,barrel
+visual-territory-55,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-55,URANIUM,0.0,0.158399,-0.158399,tonne U
+visual-territory-55,GRAIN,135233.137364,105599.228,29633.909364,tonne
+visual-territory-55,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-55,COPPER,0.0,12.919292,-12.919292,tonne
+visual-territory-55,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-55,STEEL,0.0,23759.8263,-23759.8263,tonne
+visual-territory-55,REFINED_FUEL,54397.018524,158398.842,-104001.823476,barrel equivalent
+visual-territory-55,MACHINERY,0.0,126.977459,-126.977459,equipment unit
+visual-territory-55,SEMICONDUCTORS,258385.837989,158398.842,99986.995989,standardised chip unit
+visual-territory-55,BATTERIES,0.0,12.671907,-12.671907,MWh-equivalent
+visual-territory-56,CRUDE_OIL,201498.5237,0.0,201498.5237,barrel
+visual-territory-56,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-56,URANIUM,0.0,0.3269,-0.3269,tonne U
+visual-territory-56,GRAIN,0.0,217933.248,-217933.248,tonne
+visual-territory-56,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-56,COPPER,0.0,388.214139,-388.214139,tonne
+visual-territory-56,LITHIUM,0.0,67.361168,-67.361168,tonne LCE
+visual-territory-56,STEEL,0.0,52816.925394,-52816.925394,tonne
+visual-territory-56,REFINED_FUEL,0.0,326899.872,-326899.872,barrel equivalent
+visual-territory-56,MACHINERY,1890.972297,264.574595,1626.397701,equipment unit
+visual-territory-56,SEMICONDUCTORS,2942429.2868,326899.872,2615529.4148,standardised chip unit
+visual-territory-56,BATTERIES,112.268613,26.15199,86.116623,MWh-equivalent
+visual-territory-57,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-57,NATURAL_GAS,0.0,349700.501495,-349700.501495,MMBtu
+visual-territory-57,URANIUM,0.0,0.221099,-0.221099,tonne U
+visual-territory-57,GRAIN,0.0,147399.011333,-147399.011333,tonne
+visual-territory-57,IRON_ORE,167202.7521,186506.934131,-19304.182031,tonne
+visual-territory-57,COPPER,0.0,21.361328,-21.361328,tonne
+visual-territory-57,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-57,STEEL,116566.833832,33698.810751,82868.023081,tonne
+visual-territory-57,REFINED_FUEL,0.0,221098.517,-221098.517,barrel equivalent
+visual-territory-57,MACHINERY,267.016601,176.878814,90.137787,equipment unit
+visual-territory-57,SEMICONDUCTORS,0.0,221098.517,-221098.517,standardised chip unit
+visual-territory-57,BATTERIES,0.0,17.687881,-17.687881,MWh-equivalent
+visual-territory-58,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-58,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-58,URANIUM,3.5847,0.30386,3.28084,tonne U
+visual-territory-58,GRAIN,505163.30085,202573.616667,302589.684183,tonne
+visual-territory-58,IRON_ORE,83653.082165,0.0,83653.082165,tonne
+visual-territory-58,COPPER,0.0,0.0,0.0,tonne
+visual-territory-58,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-58,STEEL,0.0,45579.06375,-45579.06375,tonne
+visual-territory-58,REFINED_FUEL,0.0,303860.425,-303860.425,barrel equivalent
+visual-territory-58,MACHINERY,0.0,243.08834,-243.08834,equipment unit
+visual-territory-58,SEMICONDUCTORS,0.0,303860.425,-303860.425,standardised chip unit
+visual-territory-58,BATTERIES,0.0,24.308834,-24.308834,MWh-equivalent
+visual-territory-59,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-59,NATURAL_GAS,0.0,128201.285504,-128201.285504,MMBtu
+visual-territory-59,URANIUM,0.0,0.073362,-0.073362,tonne U
+visual-territory-59,GRAIN,0.0,48908.082667,-48908.082667,tonne
+visual-territory-59,IRON_ORE,80866.1122,68374.018936,12492.093264,tonne
+visual-territory-59,COPPER,0.0,7.052521,-7.052521,tonne
+visual-territory-59,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-59,STEEL,42733.761835,11180.631618,31553.130217,tonne
+visual-territory-59,REFINED_FUEL,0.0,73362.124,-73362.124,barrel equivalent
+visual-territory-59,MACHINERY,88.156509,58.689699,29.46681,equipment unit
+visual-territory-59,SEMICONDUCTORS,0.0,73362.124,-73362.124,standardised chip unit
+visual-territory-59,BATTERIES,0.0,5.86897,-5.86897,MWh-equivalent
+visual-territory-60,CRUDE_OIL,0.0,96562.580611,-96562.580611,barrel
+visual-territory-60,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-60,URANIUM,1.2007,0.281991,0.918709,tonne U
+visual-territory-60,GRAIN,498807.30138,187993.952667,310813.348713,tonne
+visual-territory-60,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-60,COPPER,0.0,0.0,0.0,tonne
+visual-territory-60,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-60,STEEL,0.0,42298.63935,-42298.63935,tonne
+visual-territory-60,REFINED_FUEL,89409.796862,281990.929,-192581.132138,barrel equivalent
+visual-territory-60,MACHINERY,0.0,225.592743,-225.592743,equipment unit
+visual-territory-60,SEMICONDUCTORS,0.0,281990.929,-281990.929,standardised chip unit
+visual-territory-60,BATTERIES,0.0,22.559274,-22.559274,MWh-equivalent
+visual-territory-61,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-61,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-61,URANIUM,0.7794,0.340449,0.438951,tonne U
+visual-territory-61,GRAIN,435817.048755,226966.253333,208850.795421,tonne
+visual-territory-61,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-61,COPPER,0.0,61.976116,-61.976116,tonne
+visual-territory-61,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-61,STEEL,0.0,51937.247222,-51937.247222,tonne
+visual-territory-61,REFINED_FUEL,0.0,340449.38,-340449.38,barrel equivalent
+visual-territory-61,MACHINERY,434.920111,272.903154,162.016957,equipment unit
+visual-territory-61,SEMICONDUCTORS,543650.138841,340449.38,203200.758841,standardised chip unit
+visual-territory-61,BATTERIES,0.0,27.23595,-27.23595,MWh-equivalent
+visual-territory-62,CRUDE_OIL,676348.0136,1665571.925593,-989223.911993,barrel
+visual-territory-62,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-62,URANIUM,0.0,0.204635,-0.204635,tonne U
+visual-territory-62,GRAIN,0.0,136423.532,-136423.532,tonne
+visual-territory-62,IRON_ORE,123288.774458,0.0,123288.774458,tonne
+visual-territory-62,COPPER,0.0,0.0,0.0,tonne
+visual-territory-62,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-62,STEEL,0.0,30695.2947,-30695.2947,tonne
+visual-territory-62,REFINED_FUEL,1542196.227401,204635.298,1337560.929401,barrel equivalent
+visual-territory-62,MACHINERY,0.0,163.708238,-163.708238,equipment unit
+visual-territory-62,SEMICONDUCTORS,0.0,204635.298,-204635.298,standardised chip unit
+visual-territory-62,BATTERIES,0.0,16.370824,-16.370824,MWh-equivalent
+visual-territory-63,CRUDE_OIL,705026.506,1769114.608003,-1064088.102003,barrel
+visual-territory-63,NATURAL_GAS,0.0,213745.352491,-213745.352491,MMBtu
+visual-territory-63,URANIUM,0.0,0.268831,-0.268831,tonne U
+visual-territory-63,GRAIN,0.0,179220.844,-179220.844,tonne
+visual-territory-63,IRON_ORE,71827.234658,113997.521329,-42170.286671,tonne
+visual-territory-63,COPPER,0.0,0.0,0.0,tonne
+visual-territory-63,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-63,STEEL,71248.45083,40324.6899,30923.76093,tonne
+visual-territory-63,REFINED_FUEL,1638069.081484,268831.266,1369237.815484,barrel equivalent
+visual-territory-63,MACHINERY,0.0,215.065013,-215.065013,equipment unit
+visual-territory-63,SEMICONDUCTORS,0.0,268831.266,-268831.266,standardised chip unit
+visual-territory-63,BATTERIES,0.0,21.506501,-21.506501,MWh-equivalent
+visual-territory-64,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-64,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-64,URANIUM,1.041,0.330089,0.710911,tonne U
+visual-territory-64,GRAIN,552570.109197,220059.511333,332510.597864,tonne
+visual-territory-64,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-64,COPPER,0.0,32.512204,-32.512204,tonne
+visual-territory-64,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-64,STEEL,0.0,50326.19515,-50326.19515,tonne
+visual-territory-64,REFINED_FUEL,0.0,330089.267,-330089.267,barrel equivalent
+visual-territory-64,MACHINERY,406.40255,264.071414,142.331136,equipment unit
+visual-territory-64,SEMICONDUCTORS,0.0,330089.267,-330089.267,standardised chip unit
+visual-territory-64,BATTERIES,0.0,26.407141,-26.407141,MWh-equivalent
+visual-territory-65,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-65,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-65,URANIUM,0.0,0.293343,-0.293343,tonne U
+visual-territory-65,GRAIN,463863.264745,195561.854667,268301.410078,tonne
+visual-territory-65,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-65,COPPER,0.0,79.302178,-79.302178,tonne
+visual-territory-65,LITHIUM,0.0,59.476633,-59.476633,tonne LCE
+visual-territory-65,STEEL,0.0,44001.4173,-44001.4173,tonne
+visual-territory-65,REFINED_FUEL,0.0,293342.782,-293342.782,barrel equivalent
+visual-territory-65,MACHINERY,0.0,234.773353,-234.773353,equipment unit
+visual-territory-65,SEMICONDUCTORS,0.0,293342.782,-293342.782,standardised chip unit
+visual-territory-65,BATTERIES,99.127722,23.467423,75.6603,MWh-equivalent
+visual-territory-66,CRUDE_OIL,729802.487,2353290.988838,-1623488.501838,barrel
+visual-territory-66,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-66,URANIUM,0.0,0.28913,-0.28913,tonne U
+visual-territory-66,GRAIN,111521.580393,192753.17,-81231.589607,tonne
+visual-territory-66,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-66,COPPER,0.0,28.630366,-28.630366,tonne
+visual-territory-66,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-66,STEEL,0.0,44085.222393,-44085.222393,tonne
+visual-territory-66,REFINED_FUEL,2178973.137813,289129.755,1889843.382813,barrel equivalent
+visual-territory-66,MACHINERY,357.879572,231.303804,126.575768,equipment unit
+visual-territory-66,SEMICONDUCTORS,0.0,289129.755,-289129.755,standardised chip unit
+visual-territory-66,BATTERIES,0.0,23.13038,-23.13038,MWh-equivalent
+visual-territory-67,CRUDE_OIL,561062.3378,1874351.003422,-1313288.665622,barrel
+visual-territory-67,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-67,URANIUM,0.0,0.230286,-0.230286,tonne U
+visual-territory-67,GRAIN,0.0,153524.192,-153524.192,tonne
+visual-territory-67,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-67,COPPER,0.0,98.822075,-98.822075,tonne
+visual-territory-67,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-67,STEEL,0.0,36557.819178,-36557.819178,tonne
+visual-territory-67,REFINED_FUEL,1735510.188354,230286.288,1505223.900354,barrel equivalent
+visual-territory-67,MACHINERY,1007.437989,184.593571,822.844418,equipment unit
+visual-territory-67,SEMICONDUCTORS,364540.723681,230286.288,134254.435681,standardised chip unit
+visual-territory-67,BATTERIES,0.0,18.422903,-18.422903,MWh-equivalent
+visual-territory-68,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-68,NATURAL_GAS,0.0,483940.703264,-483940.703264,MMBtu
+visual-territory-68,URANIUM,0.0,0.197939,-0.197939,tonne U
+visual-territory-68,GRAIN,0.0,131959.644,-131959.644,tonne
+visual-territory-68,IRON_ORE,53663.832061,258101.708408,-204437.876347,tonne
+visual-territory-68,COPPER,0.0,0.0,0.0,tonne
+visual-territory-68,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-68,STEEL,161313.567755,29690.9199,131622.647855,tonne
+visual-territory-68,REFINED_FUEL,0.0,197939.466,-197939.466,barrel equivalent
+visual-territory-68,MACHINERY,0.0,158.351573,-158.351573,equipment unit
+visual-territory-68,SEMICONDUCTORS,0.0,197939.466,-197939.466,standardised chip unit
+visual-territory-68,BATTERIES,0.0,15.835157,-15.835157,MWh-equivalent
+visual-territory-69,CRUDE_OIL,0.0,0.0,0.0,barrel
+visual-territory-69,NATURAL_GAS,0.0,326646.326391,-326646.326391,MMBtu
+visual-territory-69,URANIUM,0.0,0.133511,-0.133511,tonne U
+visual-territory-69,GRAIN,0.0,89007.182667,-89007.182667,tonne
+visual-territory-69,IRON_ORE,35844.465263,174211.374075,-138366.908813,tonne
+visual-territory-69,COPPER,0.0,0.0,0.0,tonne
+visual-territory-69,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-69,STEEL,108882.108797,20026.6161,88855.492697,tonne
+visual-territory-69,REFINED_FUEL,0.0,133510.774,-133510.774,barrel equivalent
+visual-territory-69,MACHINERY,0.0,106.808619,-106.808619,equipment unit
+visual-territory-69,SEMICONDUCTORS,0.0,133510.774,-133510.774,standardised chip unit
+visual-territory-69,BATTERIES,0.0,10.680862,-10.680862,MWh-equivalent
+visual-territory-70,CRUDE_OIL,0.0,29594.793605,-29594.793605,barrel
+visual-territory-70,NATURAL_GAS,0.0,0.0,0.0,MMBtu
+visual-territory-70,URANIUM,0.0,0.089351,-0.089351,tonne U
+visual-territory-70,GRAIN,134582.879135,59567.486,75015.393135,tonne
+visual-territory-70,IRON_ORE,0.0,0.0,0.0,tonne
+visual-territory-70,COPPER,0.0,0.0,0.0,tonne
+visual-territory-70,LITHIUM,0.0,0.0,0.0,tonne LCE
+visual-territory-70,STEEL,0.0,13402.68435,-13402.68435,tonne
+visual-territory-70,REFINED_FUEL,27402.586671,89351.229,-61948.642329,barrel equivalent
+visual-territory-70,MACHINERY,0.0,71.480983,-71.480983,equipment unit
+visual-territory-70,SEMICONDUCTORS,0.0,89351.229,-89351.229,standardised chip unit
+visual-territory-70,BATTERIES,0.0,7.148098,-7.148098,MWh-equivalent

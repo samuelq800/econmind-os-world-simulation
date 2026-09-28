@@ -1,0 +1,6 @@
+[
+  {"id":"northwest","name":"西北大陆与近海群岛","frame":[20,85,840,450],"file":"northwest.png","description":"西部纵向高山、北部寒冷海岸、中部干旱盆地、东南湿润平原和岛群"},
+  {"id":"southwest","name":"西南大陆与群岛","frame":[90,465,510,330],"file":"southwest.png","description":"纵向山脊、海峡群岛、温润河谷、农业聚落和海港"},
+  {"id":"central","name":"中央大陆与弧岛","frame":[550,260,520,440],"file":"central.png","description":"中央西部山地、东部河谷、北侧弧形岛链和深湾海岸"},
+  {"id":"east","name":"东部大陆","frame":[870,150,850,680],"file":"east.png","description":"东北长条山脉半岛、中西部沙漠盆地、西南高山脊、东南湿润三角洲和平原"}
+]

@@ -1,0 +1,9 @@
+﻿domain,candidateData,runtimeActivation,remainingAdapterWork
+国家/团队,COMPLETE,NOT_AUTHORIZED,团队成员由赛事实际分配，候选NPC管理记录已完整
+资源/人口/气候,COMPLETE,NOT_AUTHORIZED,候选数值完整；采用时锁定版本
+生产配方/农业,COMPLETE,NOT_AUTHORIZED,完整候选系数已提供，需Core责任方审定并映射
+道路/港口/航运,COMPLETE,NOT_AUTHORIZED,端点、货量和容量完整；实际地形路由、第三国过境及航道测绘未完成
+电网,COMPLETE,NOT_AUTHORIZED,平均供需与储能完整；逐小时调度未运行
+权利/合同,COMPLETE,NOT_AUTHORIZED,条款候选完整；未替用户或国家签约授权
+金融/库存,COMPLETE,NOT_AUTHORIZED,开局账户与库存完整；需通过官方初始化命令入库
+世界运行,COMPLETE,NOT_AUTHORIZED,离线质量与稳态校验不等于Core 600日完整运行

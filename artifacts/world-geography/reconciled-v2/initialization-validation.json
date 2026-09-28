@@ -1,0 +1,962 @@
+{
+  "source": {
+    "handbook": "EconMind Season1 Official Handbook CN v1.1",
+    "pages": [
+      22,
+      23,
+      90,
+      93,
+      94,
+      95,
+      96,
+      98
+    ],
+    "pdfSha256": "befe98dbe34531a40019104712c3b185ab14be33b944553a85a53268e8b8cb40",
+    "partitionSha256": "394a43ffc94df7c27c8fe8610378d348f07c1680675c89ecad26300aa9c7b101"
+  },
+  "coefficients": {
+    "status": "AUTHORED_FICTIONAL_ASSUMPTIONS_NOT_HANDBOOK_PARAMETERS",
+    "worldWidthKm": 36000,
+    "horizontalWrap": true,
+    "travelWrap": "seam crossings require explicit edges; none inferred",
+    "simDaysYear": 360,
+    "seasonSimDays": 600,
+    "cropWaterM3HaYear": 5000,
+    "grainTonnesPersonYear": 0.24,
+    "environmentalRunoffShare": 0.65,
+    "populationSettlementShare": "Initial carrying-capacity total redistributed by transport gravity, river access, arable share and mineral frontier; see humanGeography",
+    "minSettlementPersons": 1000,
+    "droughtRecoveryStorageDays": 90,
+    "illustrativeUsableLakeDepthM": 10,
+    "annualGeologicalDensity": {
+      "oil": {
+        "unitPerKm2": 80000,
+        "unit": "barrel"
+      },
+      "gas": {
+        "unitPerKm2": 160000,
+        "unit": "MMBtu"
+      },
+      "uranium": {
+        "unitPerKm2": 0.7,
+        "unit": "tonne U"
+      },
+      "iron": {
+        "unitPerKm2": 50000,
+        "unit": "tonne"
+      },
+      "copper": {
+        "unitPerKm2": 1800,
+        "unit": "tonne"
+      },
+      "lithium": {
+        "unitPerKm2": 100,
+        "unit": "tonne LCE"
+      }
+    },
+    "uncertainty": "Mineral volume 0.25x–4x; all scenario coefficients are configurable, not measured.",
+    "forestSettlementRevision": {
+      "status": "AUTHORED_FICTIONAL_SCENARIO_NOT_OBSERVED_HISTORY",
+      "affectedCountries": [
+        "visual-territory-51",
+        "visual-territory-52"
+      ],
+      "populationDensityPersonsKm2": "0.35 + 0.25 * transportGravity",
+      "forestReclassificationFraction": 0.006,
+      "croplandShareOfClearing": 0.6666666666666666,
+      "worldPopulationChangeReason": "correction of two map-inconsistent near-empty countries; no donor reallocation"
+    }
+  },
+  "balanceChecks": [
+    {
+      "regionId": "visual-territory-01-E1",
+      "foodNetTonnesDay": 27461.07,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 182193062,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-02-E1",
+      "foodNetTonnesDay": 90252.558,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 348812381,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-03-E1",
+      "foodNetTonnesDay": -919.089,
+      "housingGapUnits": 453578,
+      "waterAfterHouseholdsAndFarmsM3Day": 202287078,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-03-E2",
+      "foodNetTonnesDay": -476.427,
+      "housingGapUnits": 1627144,
+      "waterAfterHouseholdsAndFarmsM3Day": 289027072,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-04-E1",
+      "foodNetTonnesDay": -16599.835,
+      "housingGapUnits": 1283791,
+      "waterAfterHouseholdsAndFarmsM3Day": 230715264,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-04-E2",
+      "foodNetTonnesDay": 43552.034,
+      "housingGapUnits": 39561,
+      "waterAfterHouseholdsAndFarmsM3Day": 261210100,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-05-E1",
+      "foodNetTonnesDay": 32767.875,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 181318790,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-05-E2",
+      "foodNetTonnesDay": 8296.669,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 135988009,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-06-E1",
+      "foodNetTonnesDay": 17555.935,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 704533604,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-06-E2",
+      "foodNetTonnesDay": 100889.05,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 405549802,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-07-E1",
+      "foodNetTonnesDay": -2351.369,
+      "housingGapUnits": 897372,
+      "waterAfterHouseholdsAndFarmsM3Day": 150135214,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-07-E2",
+      "foodNetTonnesDay": 1352.914,
+      "housingGapUnits": 689423,
+      "waterAfterHouseholdsAndFarmsM3Day": 145545598,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-08-E1",
+      "foodNetTonnesDay": 20425.927,
+      "housingGapUnits": 325298,
+      "waterAfterHouseholdsAndFarmsM3Day": 179535583,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-08-E2",
+      "foodNetTonnesDay": 17302.706,
+      "housingGapUnits": 32403,
+      "waterAfterHouseholdsAndFarmsM3Day": 165503506,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-09-E1",
+      "foodNetTonnesDay": 34613.121,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 137212339,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-09-E2",
+      "foodNetTonnesDay": 27065.304,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 95970605,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-10-E1",
+      "foodNetTonnesDay": 20917.526,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 289991005,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-10-E2",
+      "foodNetTonnesDay": 24052.293,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 248211293,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-11-E1",
+      "foodNetTonnesDay": 28950.164,
+      "housingGapUnits": 35398,
+      "waterAfterHouseholdsAndFarmsM3Day": 143813321,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-12-E1",
+      "foodNetTonnesDay": 12298.513,
+      "housingGapUnits": 463229,
+      "waterAfterHouseholdsAndFarmsM3Day": 224352000,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-12-E2",
+      "foodNetTonnesDay": 21911.645,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 142591810,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-13-E1",
+      "foodNetTonnesDay": 11439.193,
+      "housingGapUnits": 100995,
+      "waterAfterHouseholdsAndFarmsM3Day": 83443445,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-13-E2",
+      "foodNetTonnesDay": -0.473,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 39149763,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-14-E1",
+      "foodNetTonnesDay": 21650.915,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 82970937,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-14-E2",
+      "foodNetTonnesDay": 21879.265,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 156359147,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-15-E1",
+      "foodNetTonnesDay": 51744.271,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 176213952,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-15-E2",
+      "foodNetTonnesDay": 17450.92,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 196718665,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-16-E1",
+      "foodNetTonnesDay": 5264.852,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 180783812,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-16-E2",
+      "foodNetTonnesDay": -2759.863,
+      "housingGapUnits": 278703,
+      "waterAfterHouseholdsAndFarmsM3Day": 182516101,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-17-E1",
+      "foodNetTonnesDay": -7210.682,
+      "housingGapUnits": 717410,
+      "waterAfterHouseholdsAndFarmsM3Day": 125474499,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-18-E1",
+      "foodNetTonnesDay": 10922.999,
+      "housingGapUnits": 80521,
+      "waterAfterHouseholdsAndFarmsM3Day": 80283208,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-19-E1",
+      "foodNetTonnesDay": 29426.545,
+      "housingGapUnits": 127795,
+      "waterAfterHouseholdsAndFarmsM3Day": 189662864,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-20-E1",
+      "foodNetTonnesDay": 317.244,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 179759882,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-20-E2",
+      "foodNetTonnesDay": 2313.478,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 149157801,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-21-E1",
+      "foodNetTonnesDay": 33694.684,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 171773554,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-21-E2",
+      "foodNetTonnesDay": 45934.691,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 198905035,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-22-E1",
+      "foodNetTonnesDay": 52683.119,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 245742921,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-23-E1",
+      "foodNetTonnesDay": 21175.187,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 162494436,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-23-E2",
+      "foodNetTonnesDay": -28702.382,
+      "housingGapUnits": 2266849,
+      "waterAfterHouseholdsAndFarmsM3Day": 177135105,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-24-E1",
+      "foodNetTonnesDay": -13938.855,
+      "housingGapUnits": 804537,
+      "waterAfterHouseholdsAndFarmsM3Day": 91598581,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-24-E2",
+      "foodNetTonnesDay": -12807.149,
+      "housingGapUnits": 330850,
+      "waterAfterHouseholdsAndFarmsM3Day": 89891060,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-25-E1",
+      "foodNetTonnesDay": 14865.051,
+      "housingGapUnits": 140964,
+      "waterAfterHouseholdsAndFarmsM3Day": 131215589,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-26-E1",
+      "foodNetTonnesDay": 14590.906,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 62766575,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-26-E2",
+      "foodNetTonnesDay": 15886.403,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 61606544,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-27-E1",
+      "foodNetTonnesDay": 18477.206,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 77095512,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-27-E2",
+      "foodNetTonnesDay": 8427.732,
+      "housingGapUnits": 212948,
+      "waterAfterHouseholdsAndFarmsM3Day": 97477873,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-28-E1",
+      "foodNetTonnesDay": 1994.702,
+      "housingGapUnits": 404402,
+      "waterAfterHouseholdsAndFarmsM3Day": 79040372,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-28-E2",
+      "foodNetTonnesDay": 7511.323,
+      "housingGapUnits": 288802,
+      "waterAfterHouseholdsAndFarmsM3Day": 87416218,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-29-E1",
+      "foodNetTonnesDay": 18557.973,
+      "housingGapUnits": 19406,
+      "waterAfterHouseholdsAndFarmsM3Day": 95578501,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-29-E2",
+      "foodNetTonnesDay": 11170.642,
+      "housingGapUnits": 239934,
+      "waterAfterHouseholdsAndFarmsM3Day": 103840039,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-30-E1",
+      "foodNetTonnesDay": 11552.588,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 95812846,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-30-E2",
+      "foodNetTonnesDay": 12456.827,
+      "housingGapUnits": 33928,
+      "waterAfterHouseholdsAndFarmsM3Day": 77240527,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-31-E1",
+      "foodNetTonnesDay": 3034.645,
+      "housingGapUnits": 335101,
+      "waterAfterHouseholdsAndFarmsM3Day": 84247120,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-31-E2",
+      "foodNetTonnesDay": 2868.615,
+      "housingGapUnits": 354165,
+      "waterAfterHouseholdsAndFarmsM3Day": 93497694,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-32-E1",
+      "foodNetTonnesDay": 1790.376,
+      "housingGapUnits": 1130,
+      "waterAfterHouseholdsAndFarmsM3Day": 84614831,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-32-E2",
+      "foodNetTonnesDay": 12376.602,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 57422706,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-33-E1",
+      "foodNetTonnesDay": 23205.303,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 139409685,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-33-E2",
+      "foodNetTonnesDay": 33024.159,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 147425007,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-34-E1",
+      "foodNetTonnesDay": 27616.397,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 172250771,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-34-E2",
+      "foodNetTonnesDay": 32553.51,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 167482260,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-35-E1",
+      "foodNetTonnesDay": 28238.538,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 171480859,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-35-E2",
+      "foodNetTonnesDay": 29203.825,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 147194829,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-36-E1",
+      "foodNetTonnesDay": 54713.58,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 233738470,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-37-E1",
+      "foodNetTonnesDay": 19951.768,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 123100132,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-38-E1",
+      "foodNetTonnesDay": -4435.128,
+      "housingGapUnits": 561087,
+      "waterAfterHouseholdsAndFarmsM3Day": 172419856,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-38-E2",
+      "foodNetTonnesDay": 48614.246,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 223822836,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-39-E1",
+      "foodNetTonnesDay": 16998.932,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 128791734,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-39-E2",
+      "foodNetTonnesDay": 26620.179,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 159840960,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-40-E1",
+      "foodNetTonnesDay": 7390.05,
+      "housingGapUnits": 106763,
+      "waterAfterHouseholdsAndFarmsM3Day": 62559254,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-40-E2",
+      "foodNetTonnesDay": 404.799,
+      "housingGapUnits": 348906,
+      "waterAfterHouseholdsAndFarmsM3Day": 53043101,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-41-E1",
+      "foodNetTonnesDay": 910.189,
+      "housingGapUnits": 437136,
+      "waterAfterHouseholdsAndFarmsM3Day": 89079763,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-41-E2",
+      "foodNetTonnesDay": 7319.245,
+      "housingGapUnits": 17868,
+      "waterAfterHouseholdsAndFarmsM3Day": 96110417,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-42-E1",
+      "foodNetTonnesDay": 1162.834,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 126023666,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-43-E1",
+      "foodNetTonnesDay": 21765.131,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 157796033,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-44-E1",
+      "foodNetTonnesDay": 1178.526,
+      "housingGapUnits": 144876,
+      "waterAfterHouseholdsAndFarmsM3Day": 414351139,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-44-E2",
+      "foodNetTonnesDay": 45436.947,
+      "housingGapUnits": 129998,
+      "waterAfterHouseholdsAndFarmsM3Day": 397974308,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-45-E1",
+      "foodNetTonnesDay": 36375.468,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 152192123,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-45-E2",
+      "foodNetTonnesDay": 16001.169,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 99844296,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-46-E1",
+      "foodNetTonnesDay": 26172.569,
+      "housingGapUnits": 90590,
+      "waterAfterHouseholdsAndFarmsM3Day": 146155716,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-46-E2",
+      "foodNetTonnesDay": 42576.486,
+      "housingGapUnits": 23158,
+      "waterAfterHouseholdsAndFarmsM3Day": 181366863,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-47-E1",
+      "foodNetTonnesDay": 35949.827,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 194377741,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-47-E2",
+      "foodNetTonnesDay": 65479.749,
+      "housingGapUnits": 200373,
+      "waterAfterHouseholdsAndFarmsM3Day": 263928810,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-48-E1",
+      "foodNetTonnesDay": 3874.405,
+      "housingGapUnits": 9992,
+      "waterAfterHouseholdsAndFarmsM3Day": 547081809,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-49-E1",
+      "foodNetTonnesDay": 34875.862,
+      "housingGapUnits": 21864,
+      "waterAfterHouseholdsAndFarmsM3Day": 162311643,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-49-E2",
+      "foodNetTonnesDay": 7539.03,
+      "housingGapUnits": 207344,
+      "waterAfterHouseholdsAndFarmsM3Day": 80154576,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-50-E1",
+      "foodNetTonnesDay": 9363.384,
+      "housingGapUnits": 148477,
+      "waterAfterHouseholdsAndFarmsM3Day": 258881608,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-50-E2",
+      "foodNetTonnesDay": -0.409,
+      "housingGapUnits": 2,
+      "waterAfterHouseholdsAndFarmsM3Day": 315700323,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-51-E1",
+      "foodNetTonnesDay": 1228.707,
+      "housingGapUnits": 8561,
+      "waterAfterHouseholdsAndFarmsM3Day": 309855171,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-51-E2",
+      "foodNetTonnesDay": 1641.95,
+      "housingGapUnits": 1966,
+      "waterAfterHouseholdsAndFarmsM3Day": 301748004,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-52-E1",
+      "foodNetTonnesDay": 1944.779,
+      "housingGapUnits": 12871,
+      "waterAfterHouseholdsAndFarmsM3Day": 463019762,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-53-E1",
+      "foodNetTonnesDay": 15039.614,
+      "housingGapUnits": 566446,
+      "waterAfterHouseholdsAndFarmsM3Day": 250272562,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-53-E2",
+      "foodNetTonnesDay": -12100.735,
+      "housingGapUnits": 967835,
+      "waterAfterHouseholdsAndFarmsM3Day": 184827474,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-54-E1",
+      "foodNetTonnesDay": -24707.226,
+      "housingGapUnits": 1362831,
+      "waterAfterHouseholdsAndFarmsM3Day": 237242364,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-54-E2",
+      "foodNetTonnesDay": 10408.17,
+      "housingGapUnits": 195086,
+      "waterAfterHouseholdsAndFarmsM3Day": 230595374,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-55-E1",
+      "foodNetTonnesDay": -58754.34,
+      "housingGapUnits": 3799057,
+      "waterAfterHouseholdsAndFarmsM3Day": 189247247,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-56-E1",
+      "foodNetTonnesDay": 3069.198,
+      "housingGapUnits": 296309,
+      "waterAfterHouseholdsAndFarmsM3Day": 508163596,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-56-E2",
+      "foodNetTonnesDay": 35294.172,
+      "housingGapUnits": 46520,
+      "waterAfterHouseholdsAndFarmsM3Day": 532398191,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-57-E1",
+      "foodNetTonnesDay": 12558.61,
+      "housingGapUnits": 317496,
+      "waterAfterHouseholdsAndFarmsM3Day": 122304590,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-57-E2",
+      "foodNetTonnesDay": 13289.213,
+      "housingGapUnits": 81930,
+      "waterAfterHouseholdsAndFarmsM3Day": 120170997,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-58-E1",
+      "foodNetTonnesDay": 49983.254,
+      "housingGapUnits": 586422,
+      "waterAfterHouseholdsAndFarmsM3Day": 340976006,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-58-E2",
+      "foodNetTonnesDay": 30593.39,
+      "housingGapUnits": 855374,
+      "waterAfterHouseholdsAndFarmsM3Day": 360183498,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-59-E1",
+      "foodNetTonnesDay": 752.172,
+      "housingGapUnits": 81842,
+      "waterAfterHouseholdsAndFarmsM3Day": 64922678,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-60-E1",
+      "foodNetTonnesDay": 72879.809,
+      "housingGapUnits": 57464,
+      "waterAfterHouseholdsAndFarmsM3Day": 314277458,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-60-E2",
+      "foodNetTonnesDay": 41058.771,
+      "housingGapUnits": 680348,
+      "waterAfterHouseholdsAndFarmsM3Day": 337544782,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-61-E1",
+      "foodNetTonnesDay": -12145.087,
+      "housingGapUnits": 1494029,
+      "waterAfterHouseholdsAndFarmsM3Day": 210920468,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-61-E2",
+      "foodNetTonnesDay": -14413.415,
+      "housingGapUnits": 3471592,
+      "waterAfterHouseholdsAndFarmsM3Day": 352688385,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-62-E1",
+      "foodNetTonnesDay": 10138.826,
+      "housingGapUnits": 312723,
+      "waterAfterHouseholdsAndFarmsM3Day": 173995781,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-62-E2",
+      "foodNetTonnesDay": 20103.524,
+      "housingGapUnits": 180242,
+      "waterAfterHouseholdsAndFarmsM3Day": 163591655,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-63-E1",
+      "foodNetTonnesDay": -6292.989,
+      "housingGapUnits": 722883,
+      "waterAfterHouseholdsAndFarmsM3Day": 179080824,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-63-E2",
+      "foodNetTonnesDay": -21326.004,
+      "housingGapUnits": 1034102,
+      "waterAfterHouseholdsAndFarmsM3Day": 127711750,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-64-E1",
+      "foodNetTonnesDay": -31828.985,
+      "housingGapUnits": 1352305,
+      "waterAfterHouseholdsAndFarmsM3Day": 272313610,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-64-E2",
+      "foodNetTonnesDay": -9156.934,
+      "housingGapUnits": 1370915,
+      "waterAfterHouseholdsAndFarmsM3Day": 251158669,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-65-E1",
+      "foodNetTonnesDay": 46281.208,
+      "housingGapUnits": 242581,
+      "waterAfterHouseholdsAndFarmsM3Day": 538052566,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-65-E2",
+      "foodNetTonnesDay": 45075.136,
+      "housingGapUnits": 675456,
+      "waterAfterHouseholdsAndFarmsM3Day": 410891133,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-66-E1",
+      "foodNetTonnesDay": 19830.598,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 159032210,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-66-E2",
+      "foodNetTonnesDay": -57300.661,
+      "housingGapUnits": 3275301,
+      "waterAfterHouseholdsAndFarmsM3Day": 196794391,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-67-E1",
+      "foodNetTonnesDay": 5335.261,
+      "housingGapUnits": 172140,
+      "waterAfterHouseholdsAndFarmsM3Day": 98157041,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-67-E2",
+      "foodNetTonnesDay": -30135.608,
+      "housingGapUnits": 2084704,
+      "waterAfterHouseholdsAndFarmsM3Day": 110643329,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-68-E1",
+      "foodNetTonnesDay": 38716.936,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 138998882,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-68-E2",
+      "foodNetTonnesDay": 11655.927,
+      "housingGapUnits": 50129,
+      "waterAfterHouseholdsAndFarmsM3Day": 100040037,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-69-E1",
+      "foodNetTonnesDay": 21650.94,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 158838725,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    },
+    {
+      "regionId": "visual-territory-70-E1",
+      "foodNetTonnesDay": 20979.734,
+      "housingGapUnits": 0,
+      "waterAfterHouseholdsAndFarmsM3Day": 99488094,
+      "action": "TRADE_HOUSING_POWER_AND_EMPLOYMENT_CALIBRATION_REQUIRED"
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "normal-food-capacity",
+      "status": "PASS",
+      "supply": 11686128.49,
+      "demand": 9809341.88,
+      "scope": "geographic potential, not actual operating supply"
+    },
+    {
+      "id": "climate-derived-dry-season",
+      "supply": 8354330.04,
+      "demand": 9809341.88,
+      "status": "SHORTFALL"
+    },
+    {
+      "id": "cooperative-irrigation-recovery",
+      "supply": 11686128.49,
+      "demand": 9809341.88,
+      "status": "CAPACITY_SCENARIO_ONLY",
+      "requires": [
+        "construction",
+        "water allocation",
+        "labour",
+        "equipment",
+        "financing"
+      ]
+    }
+  ],
+  "blockers": [
+    "AGRICULTURE_CORE_OWNER_AND_RECIPE_UNRESOLVED",
+    "RECIPE_COEFFICIENTS_AND_SEASON_CALIBRATION_REQUIRED",
+    "STATE_IDENTITY_AND_PRIVATE_DATA_GATE_REQUIRED",
+    "MULTIMODAL_CORRIDORS_REQUIRE_ROUTING_AND_TRANSIT_REGISTRATION",
+    "FULL_NORMAL_DISRUPTION_RECOVERY_SIMULATION_NOT_RUN"
+  ],
+  "activationAllowed": false
+}

@@ -1,0 +1,2333 @@
+[
+  {
+    "id": "visual-territory-01",
+    "number": "01",
+    "name": "Avenor",
+    "file": "01.png",
+    "frame": [
+      1513.9,
+      206.9,
+      137.2,
+      137.2
+    ],
+    "anchors": {
+      "SF001": [
+        0.665,
+        0.6
+      ],
+      "SF002": [
+        0.356,
+        0.325
+      ],
+      "SF003": [
+        0.74,
+        0.224
+      ],
+      "SF004": [
+        0.332,
+        0.619
+      ],
+      "SF005": [
+        0.638,
+        0.392
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-02",
+    "number": "02",
+    "name": "Brelis",
+    "file": "02.png",
+    "frame": [
+      1573.7,
+      225.7,
+      131.6,
+      131.6
+    ],
+    "anchors": {
+      "SF006": [
+        0.216,
+        0.453
+      ],
+      "SF007": [
+        0.841,
+        0.372
+      ],
+      "SF008": [
+        0.588,
+        0.737
+      ],
+      "SF009": [
+        0.41,
+        0.12
+      ],
+      "SF010": [
+        0.533,
+        0.379
+      ],
+      "SF011": [
+        0.31,
+        0.612
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-03",
+    "number": "03",
+    "name": "Caedon",
+    "file": "03.png",
+    "frame": [
+      1360.6,
+      281.1,
+      177.8,
+      177.8
+    ],
+    "anchors": {
+      "SF012": [
+        0.748,
+        0.505
+      ],
+      "SF013": [
+        0.265,
+        0.12
+      ],
+      "SF014": [
+        0.236,
+        0.515
+      ],
+      "SF015": [
+        0.632,
+        0.215
+      ],
+      "SF016": [
+        0.378,
+        0.747
+      ],
+      "SF017": [
+        0.468,
+        0.444
+      ],
+      "SF018": [
+        0.752,
+        0.336
+      ],
+      "SF019": [
+        0.447,
+        0.267
+      ],
+      "SF020": [
+        0.405,
+        0.615
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-04",
+    "number": "04",
+    "name": "Darsin",
+    "file": "04.png",
+    "frame": [
+      1407.9,
+      192.9,
+      214.2,
+      214.2
+    ],
+    "anchors": {
+      "H05": [
+        0.427,
+        0.773
+      ],
+      "SF021": [
+        0.483,
+        0.812
+      ],
+      "SF022": [
+        0.552,
+        0.366
+      ],
+      "SF023": [
+        0.61,
+        0.225
+      ],
+      "SF024": [
+        0.192,
+        0.283
+      ],
+      "SF025": [
+        0.815,
+        0.576
+      ],
+      "SF026": [
+        0.782,
+        0.04
+      ],
+      "SF027": [
+        0.363,
+        0.594
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-05",
+    "number": "05",
+    "name": "Ellovar",
+    "file": "05.png",
+    "frame": [
+      1522.8,
+      290.3,
+      155.4,
+      155.4
+    ],
+    "anchors": {
+      "SF028": [
+        0.242,
+        0.292
+      ],
+      "SF029": [
+        0.783,
+        0.477
+      ],
+      "SF030": [
+        0.45,
+        0.725
+      ],
+      "SF031": [
+        0.618,
+        0.13
+      ],
+      "SF032": [
+        0.5,
+        0.43
+      ],
+      "SF033": [
+        0.301,
+        0.081
+      ],
+      "SF034": [
+        0.658,
+        0.594
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-06",
+    "number": "06",
+    "name": "Faren",
+    "file": "06.png",
+    "frame": [
+      1257.9,
+      336.9,
+      207.2,
+      207.2
+    ],
+    "anchors": {
+      "SF035": [
+        0.594,
+        0.431
+      ],
+      "SF036": [
+        0.14,
+        0.513
+      ],
+      "SF037": [
+        0.326,
+        0.15
+      ],
+      "SF038": [
+        0.465,
+        0.661
+      ],
+      "SF039": [
+        0.863,
+        0.554
+      ],
+      "SF040": [
+        0.747,
+        0.18
+      ],
+      "SF041": [
+        0.387,
+        0.484
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-07",
+    "number": "07",
+    "name": "Galdra",
+    "file": "07.png",
+    "frame": [
+      1406.5,
+      367.5,
+      140,
+      140
+    ],
+    "anchors": {
+      "P09": [
+        0.535,
+        0.63
+      ],
+      "SF042": [
+        0.324,
+        0.313
+      ],
+      "SF043": [
+        0.85,
+        0.58
+      ],
+      "SF044": [
+        0.22,
+        0.708
+      ],
+      "SF045": [
+        0.646,
+        0.115
+      ],
+      "SF046": [
+        0.746,
+        0.347
+      ],
+      "SF047": [
+        0.198,
+        0.496
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-08",
+    "number": "08",
+    "name": "Hethen",
+    "file": "08.png",
+    "frame": [
+      1454.6,
+      330.1,
+      177.8,
+      177.8
+    ],
+    "anchors": {
+      "SF048": [
+        0.57,
+        0.263
+      ],
+      "SF049": [
+        0.551,
+        0.751
+      ],
+      "SF050": [
+        0.27,
+        0.237
+      ],
+      "SF051": [
+        0.324,
+        0.55
+      ],
+      "SF052": [
+        0.58,
+        0.105
+      ],
+      "SF053": [
+        0.651,
+        0.51
+      ],
+      "SF054": [
+        0.743,
+        0.38
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-09",
+    "number": "09",
+    "name": "Istrel",
+    "file": "09.png",
+    "frame": [
+      1020.5,
+      467.5,
+      168,
+      168
+    ],
+    "anchors": {
+      "SF055": [
+        0.54,
+        0.28
+      ],
+      "SF056": [
+        0.76,
+        0.634
+      ],
+      "SF057": [
+        0.273,
+        0.633
+      ],
+      "SF058": [
+        0.45,
+        0.728
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-10",
+    "number": "10",
+    "name": "Jorun",
+    "file": "10.png",
+    "frame": [
+      1048.6,
+      387.1,
+      226.8,
+      226.8
+    ],
+    "anchors": {
+      "SF059": [
+        0.359,
+        0.616
+      ],
+      "SF060": [
+        0.809,
+        0.09
+      ],
+      "SF061": [
+        0.489,
+        0.226
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-11",
+    "number": "11",
+    "name": "Keldan",
+    "file": "11.png",
+    "frame": [
+      1139.1,
+      505.6,
+      149.8,
+      149.8
+    ],
+    "anchors": {
+      "SF062": [
+        0.327,
+        0.392
+      ],
+      "SF063": [
+        0.495,
+        0.539
+      ],
+      "SF064": [
+        0.839,
+        0.292
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-12",
+    "number": "12",
+    "name": "Lumer",
+    "file": "12.png",
+    "frame": [
+      1187.1,
+      415.1,
+      191.8,
+      191.8
+    ],
+    "anchors": {
+      "H06": [
+        0.49,
+        0.605
+      ],
+      "SF065": [
+        0.84,
+        0.557
+      ],
+      "SF066": [
+        0.15,
+        0.44
+      ],
+      "SF067": [
+        0.611,
+        0.154
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-13",
+    "number": "13",
+    "name": "Meros",
+    "file": "13.png",
+    "frame": [
+      1239.5,
+      515,
+      161,
+      161
+    ],
+    "anchors": {
+      "SF068": [
+        0.329,
+        0.51
+      ],
+      "SF069": [
+        0.68,
+        0.198
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-14",
+    "number": "14",
+    "name": "Nadrin",
+    "file": "14.png",
+    "frame": [
+      1314.1,
+      438.1,
+      156.8,
+      156.8
+    ],
+    "anchors": {
+      "SF070": [
+        0.304,
+        0.35
+      ],
+      "SF071": [
+        0.453,
+        0.72
+      ],
+      "SF072": [
+        0.896,
+        0.438
+      ],
+      "SF073": [
+        0.612,
+        0.125
+      ],
+      "SF074": [
+        0.173,
+        0.607
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-15",
+    "number": "15",
+    "name": "Orelis",
+    "file": "15.png",
+    "frame": [
+      1339,
+      488.5,
+      168,
+      168
+    ],
+    "anchors": {
+      "SF075": [
+        0.554,
+        0.468
+      ],
+      "SF076": [
+        0.857,
+        0.086
+      ],
+      "SF077": [
+        0.837,
+        0.71
+      ],
+      "SF078": [
+        0.227,
+        0.66
+      ],
+      "SF079": [
+        0.165,
+        0.36
+      ],
+      "SF080": [
+        0.552,
+        0.126
+      ],
+      "SF081": [
+        0.52,
+        0.755
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-16",
+    "number": "16",
+    "name": "Paryn",
+    "file": "16.png",
+    "frame": [
+      1419.4,
+      463.9,
+      242.2,
+      242.2
+    ],
+    "anchors": {
+      "SF082": [
+        0.439,
+        0.54
+      ],
+      "SF083": [
+        0.87,
+        0.268
+      ],
+      "SF084": [
+        0.433,
+        0.133
+      ],
+      "SF085": [
+        0.884,
+        0.867
+      ],
+      "SF086": [
+        0.166,
+        0.34
+      ],
+      "SF087": [
+        0.559,
+        0.272
+      ],
+      "SF088": [
+        0.6,
+        0.098
+      ],
+      "SF089": [
+        0.379,
+        0.37
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-17",
+    "number": "17",
+    "name": "Quoran",
+    "file": "17.png",
+    "frame": [
+      908.9,
+      538.9,
+      137.2,
+      137.2
+    ],
+    "anchors": {
+      "P12": [
+        0.77,
+        0.699
+      ],
+      "SF090": [
+        0.729,
+        0.535
+      ],
+      "SF091": [
+        0.646,
+        0.148
+      ],
+      "SF092": [
+        0.437,
+        0.412
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-18",
+    "number": "18",
+    "name": "Rassel",
+    "file": "18.png",
+    "frame": [
+      983.9,
+      623.4,
+      123.2,
+      123.2
+    ],
+    "anchors": {
+      "SF093": [
+        0.55,
+        0.62
+      ],
+      "SF094": [
+        0.275,
+        0.235
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-19",
+    "number": "19",
+    "name": "Siven",
+    "file": "19.png",
+    "frame": [
+      995.7,
+      552.2,
+      124.6,
+      124.6
+    ],
+    "anchors": {
+      "SF095": [
+        0.79,
+        0.35
+      ],
+      "SF096": [
+        0.176,
+        0.667
+      ],
+      "SF097": [
+        0.69,
+        0.716
+      ],
+      "SF098": [
+        0.267,
+        0.128
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-20",
+    "number": "20",
+    "name": "Talan",
+    "file": "20.png",
+    "frame": [
+      1051.7,
+      565.7,
+      159.6,
+      159.6
+    ],
+    "anchors": {
+      "SF099": [
+        0.48,
+        0.4
+      ],
+      "SF100": [
+        0.708,
+        0.124
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-21",
+    "number": "21",
+    "name": "Uvren",
+    "file": "21.png",
+    "frame": [
+      1131.5,
+      575.5,
+      175,
+      175
+    ],
+    "anchors": {
+      "SF101": [
+        0.79,
+        0.618
+      ],
+      "SF102": [
+        0.839,
+        0.19
+      ],
+      "SF103": [
+        0.29,
+        0.664
+      ],
+      "SF104": [
+        0.255,
+        0.224
+      ],
+      "SF105": [
+        0.485,
+        0.4
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-22",
+    "number": "22",
+    "name": "Vardis",
+    "file": "22.png",
+    "frame": [
+      1241.5,
+      588.5,
+      168,
+      168
+    ],
+    "anchors": {
+      "SF106": [
+        0.238,
+        0.45
+      ],
+      "SF107": [
+        0.218,
+        0.145
+      ],
+      "SF108": [
+        0.456,
+        0.71
+      ],
+      "SF109": [
+        0.765,
+        0.672
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-23",
+    "number": "23",
+    "name": "Wexar",
+    "file": "23.png",
+    "frame": [
+      1255.5,
+      548,
+      252,
+      252
+    ],
+    "anchors": {
+      "H07": [
+        0.87,
+        0.419
+      ],
+      "SF110": [
+        0.71,
+        0.291
+      ],
+      "SF111": [
+        0.148,
+        0.301
+      ],
+      "SF112": [
+        0.761,
+        0.616
+      ],
+      "SF113": [
+        0.371,
+        0.407
+      ],
+      "SF114": [
+        0.412,
+        0.156
+      ],
+      "SF115": [
+        0.601,
+        0.49
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-24",
+    "number": "24",
+    "name": "Xandor",
+    "file": "24.png",
+    "frame": [
+      1431.3,
+      552.3,
+      204.4,
+      204.4
+    ],
+    "anchors": {
+      "P10": [
+        0.61,
+        0.558
+      ],
+      "SF116": [
+        0.54,
+        0.51
+      ],
+      "SF117": [
+        0.16,
+        0.52
+      ],
+      "SF118": [
+        0.28,
+        0.14
+      ],
+      "SF119": [
+        0.87,
+        0.646
+      ],
+      "SF120": [
+        0.73,
+        0.19
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-25",
+    "number": "25",
+    "name": "Ysol",
+    "file": "25.png",
+    "frame": [
+      838.7,
+      622.2,
+      194.6,
+      194.6
+    ],
+    "anchors": {
+      "SF121": [
+        0.84,
+        0.56
+      ],
+      "SF122": [
+        0.58,
+        0.18
+      ],
+      "SF123": [
+        0.44,
+        0.57
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-26",
+    "number": "26",
+    "name": "Zarev",
+    "file": "26.png",
+    "frame": [
+      974.3,
+      683.3,
+      141.4,
+      141.4
+    ],
+    "anchors": {
+      "SF124": [
+        0.8,
+        0.2
+      ],
+      "SF125": [
+        0.85,
+        0.555
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-27",
+    "number": "27",
+    "name": "Adara",
+    "file": "27.png",
+    "frame": [
+      1040.7,
+      651.7,
+      187.6,
+      187.6
+    ],
+    "anchors": {
+      "SF126": [
+        0.71,
+        0.12
+      ],
+      "SF127": [
+        0.7,
+        0.485
+      ],
+      "SF128": [
+        0.31,
+        0.615
+      ],
+      "SF129": [
+        0.235,
+        0.227
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-28",
+    "number": "28",
+    "name": "Belm",
+    "file": "28.png",
+    "frame": [
+      1111.8,
+      689.3,
+      169.4,
+      169.4
+    ],
+    "anchors": {
+      "H08": [
+        0.45,
+        0.33
+      ],
+      "SF130": [
+        0.77,
+        0.165
+      ],
+      "SF131": [
+        0.223,
+        0.747
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-29",
+    "number": "29",
+    "name": "Corven",
+    "file": "29.png",
+    "frame": [
+      1215.1,
+      686.1,
+      163.8,
+      163.8
+    ],
+    "anchors": {
+      "P11": [
+        0.595,
+        0.63
+      ],
+      "SF132": [
+        0.5,
+        0.105
+      ],
+      "SF133": [
+        0.234,
+        0.83
+      ],
+      "SF134": [
+        0.804,
+        0.756
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-30",
+    "number": "30",
+    "name": "Delyra",
+    "file": "30.png",
+    "frame": [
+      1326.3,
+      684.3,
+      148.4,
+      148.4
+    ],
+    "anchors": {
+      "SF135": [
+        0.6,
+        0.401
+      ],
+      "SF136": [
+        0.703,
+        0.748
+      ],
+      "SF137": [
+        0.237,
+        0.558
+      ],
+      "SF138": [
+        0.415,
+        0.115
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-31",
+    "number": "31",
+    "name": "Erdan",
+    "file": "31.png",
+    "frame": [
+      1416.1,
+      655.6,
+      177.8,
+      177.8
+    ],
+    "anchors": {
+      "SF139": [
+        0.53,
+        0.225
+      ],
+      "SF140": [
+        0.61,
+        0.56
+      ],
+      "SF141": [
+        0.86,
+        0.324
+      ],
+      "SF142": [
+        0.21,
+        0.525
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-32",
+    "number": "32",
+    "name": "Falcor",
+    "file": "32.png",
+    "frame": [
+      1403.9,
+      548.9,
+      431.2,
+      431.2
+    ],
+    "anchors": {
+      "SF143": [
+        0.23,
+        0.47
+      ],
+      "SF144": [
+        0.87,
+        0.47
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-33",
+    "number": "33",
+    "name": "Gysel",
+    "file": "33.png",
+    "frame": [
+      88.1,
+      82.6,
+      177.8,
+      177.8
+    ],
+    "anchors": {
+      "SF145": [
+        0.596,
+        0.467
+      ],
+      "SF146": [
+        0.178,
+        0.412
+      ],
+      "SF147": [
+        0.413,
+        0.224
+      ],
+      "SF148": [
+        0.776,
+        0.682
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-34",
+    "number": "34",
+    "name": "Harin",
+    "file": "34.png",
+    "frame": [
+      285.5,
+      122.5,
+      161,
+      161
+    ],
+    "anchors": {
+      "SF149": [
+        0.81,
+        0.28
+      ],
+      "SF150": [
+        0.245,
+        0.66
+      ],
+      "SF151": [
+        0.755,
+        0.666
+      ],
+      "SF152": [
+        0.493,
+        0.443
+      ],
+      "SF153": [
+        0.179,
+        0.242
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-35",
+    "number": "35",
+    "name": "Inovar",
+    "file": "35.png",
+    "frame": [
+      370.1,
+      89.1,
+      163.8,
+      163.8
+    ],
+    "anchors": {
+      "SF154": [
+        0.66,
+        0.486
+      ],
+      "SF155": [
+        0.82,
+        0.13
+      ],
+      "SF156": [
+        0.281,
+        0.634
+      ],
+      "SF157": [
+        0.772,
+        0.717
+      ],
+      "SF158": [
+        0.364,
+        0.253
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-36",
+    "number": "36",
+    "name": "Jessa",
+    "file": "36.png",
+    "frame": [
+      476.8,
+      92.3,
+      141.4,
+      141.4
+    ],
+    "anchors": {
+      "SF159": [
+        0.778,
+        0.479
+      ],
+      "SF160": [
+        0.853,
+        0.096
+      ],
+      "SF161": [
+        0.232,
+        0.747
+      ],
+      "SF162": [
+        0.329,
+        0.28
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-37",
+    "number": "37",
+    "name": "Koryn",
+    "file": "37.png",
+    "frame": [
+      556.3,
+      113.3,
+      127.4,
+      127.4
+    ],
+    "anchors": {
+      "SF163": [
+        0.284,
+        0.447
+      ],
+      "SF164": [
+        0.842,
+        0.499
+      ],
+      "SF165": [
+        0.553,
+        0.684
+      ],
+      "SF166": [
+        0.619,
+        0.221
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-38",
+    "number": "38",
+    "name": "Lydan",
+    "file": "38.png",
+    "frame": [
+      -3.1000000000000014,
+      119.4,
+      298.2,
+      298.2
+    ],
+    "anchors": {
+      "SF167": [
+        0.844,
+        0.302
+      ],
+      "SF168": [
+        0.15,
+        0.515
+      ],
+      "SF169": [
+        0.544,
+        0.527
+      ],
+      "SF170": [
+        0.487,
+        0.251
+      ],
+      "SF171": [
+        0.82,
+        0.611
+      ],
+      "SF172": [
+        0.253,
+        0.446
+      ],
+      "SF173": [
+        0.615,
+        0.385
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-39",
+    "number": "39",
+    "name": "Mirea",
+    "file": "39.png",
+    "frame": [
+      174.9,
+      110.9,
+      193.2,
+      193.2
+    ],
+    "anchors": {
+      "SF174": [
+        0.672,
+        0.576
+      ],
+      "SF175": [
+        0.23,
+        0.445
+      ],
+      "SF176": [
+        0.645,
+        0.286
+      ],
+      "SF177": [
+        0.303,
+        0.208
+      ],
+      "SF178": [
+        0.347,
+        0.653
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-40",
+    "number": "40",
+    "name": "Norvak",
+    "file": "40.png",
+    "frame": [
+      261,
+      226.5,
+      140,
+      140
+    ],
+    "anchors": {
+      "H01": [
+        0.75,
+        0.394
+      ],
+      "SF179": [
+        0.375,
+        0.686
+      ],
+      "SF180": [
+        0.24,
+        0.239
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-41",
+    "number": "41",
+    "name": "Ostra",
+    "file": "41.png",
+    "frame": [
+      338.3,
+      179.3,
+      162.4,
+      162.4
+    ],
+    "anchors": {
+      "SF181": [
+        0.42,
+        0.254
+      ],
+      "SF182": [
+        0.832,
+        0.226
+      ],
+      "SF183": [
+        0.697,
+        0.495
+      ],
+      "SF184": [
+        0.192,
+        0.714
+      ],
+      "SF185": [
+        0.162,
+        0.423
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-42",
+    "number": "42",
+    "name": "Pavan",
+    "file": "42.png",
+    "frame": [
+      434.2,
+      194.7,
+      131.6,
+      131.6
+    ],
+    "anchors": {
+      "SF186": [
+        0.716,
+        0.28
+      ],
+      "SF187": [
+        0.6,
+        0.698
+      ],
+      "SF188": [
+        0.438,
+        0.51
+      ],
+      "SF189": [
+        0.392,
+        0.169
+      ],
+      "SF190": [
+        0.813,
+        0.52
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-43",
+    "number": "43",
+    "name": "Qemra",
+    "file": "43.png",
+    "frame": [
+      492.4,
+      176.9,
+      130.2,
+      130.2
+    ],
+    "anchors": {
+      "SF191": [
+        0.18,
+        0.223
+      ],
+      "SF192": [
+        0.667,
+        0.157
+      ],
+      "SF193": [
+        0.331,
+        0.608
+      ],
+      "SF194": [
+        0.797,
+        0.694
+      ],
+      "SF195": [
+        0.469,
+        0.322
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-44",
+    "number": "44",
+    "name": "Ruvan",
+    "file": "44.png",
+    "frame": [
+      49.099999999999994,
+      245.60000000000002,
+      205.8,
+      205.8
+    ],
+    "anchors": {
+      "P01": [
+        0.396,
+        0.343
+      ],
+      "SF196": [
+        0.811,
+        0.267
+      ],
+      "SF197": [
+        0.229,
+        0.508
+      ],
+      "SF198": [
+        0.734,
+        0.635
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-45",
+    "number": "45",
+    "name": "Selka",
+    "file": "45.png",
+    "frame": [
+      188,
+      241.5,
+      161,
+      161
+    ],
+    "anchors": {
+      "SF199": [
+        0.277,
+        0.432
+      ],
+      "SF200": [
+        0.793,
+        0.388
+      ],
+      "SF201": [
+        0.461,
+        0.131
+      ],
+      "SF202": [
+        0.523,
+        0.768
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-46",
+    "number": "46",
+    "name": "Tirren",
+    "file": "46.png",
+    "frame": [
+      278.9,
+      274.9,
+      228.2,
+      228.2
+    ],
+    "anchors": {
+      "SF203": [
+        0.234,
+        0.244
+      ],
+      "SF204": [
+        0.449,
+        0.23
+      ],
+      "SF205": [
+        0.632,
+        0.125
+      ],
+      "SF206": [
+        0.333,
+        0.184
+      ],
+      "SF207": [
+        0.453,
+        0.137
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-47",
+    "number": "47",
+    "name": "Ulyss",
+    "file": "47.png",
+    "frame": [
+      373.1,
+      242.1,
+      177.8,
+      177.8
+    ],
+    "anchors": {
+      "SF208": [
+        0.735,
+        0.452
+      ],
+      "SF209": [
+        0.612,
+        0.601
+      ],
+      "SF210": [
+        0.164,
+        0.179
+      ],
+      "SF211": [
+        0.582,
+        0.085
+      ],
+      "SF212": [
+        0.274,
+        0.448
+      ],
+      "SF213": [
+        0.519,
+        0.281
+      ],
+      "SF214": [
+        0.772,
+        0.256
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-48",
+    "number": "48",
+    "name": "Varos",
+    "file": "48.png",
+    "frame": [
+      54.5,
+      330,
+      161,
+      161
+    ],
+    "anchors": {
+      "SF215": [
+        0.593167701863354,
+        0.2919254658385093
+      ],
+      "SF216": [
+        0.5496894409937888,
+        0.7515527950310559
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "PENDING_VISUAL_REVIEW"
+  },
+  {
+    "id": "visual-territory-49",
+    "number": "49",
+    "name": "Wrenna",
+    "file": "49.png",
+    "frame": [
+      171.1,
+      326.1,
+      142.8,
+      142.8
+    ],
+    "anchors": {
+      "SF217": [
+        0.6085434173669467,
+        0.5175070028011203
+      ],
+      "SF218": [
+        0.1673669467787115,
+        0.7345938375350138
+      ],
+      "SF219": [
+        0.25840336134453784,
+        0.3424369747899158
+      ],
+      "SF220": [
+        0.8466386554621849,
+        0.3564425770308121
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "PENDING_VISUAL_REVIEW"
+  },
+  {
+    "id": "visual-territory-50",
+    "number": "50",
+    "name": "Xyren",
+    "file": "50.png",
+    "frame": [
+      195.5,
+      388,
+      175,
+      175
+    ],
+    "anchors": {
+      "SF221": [
+        0.4257142857142857,
+        0.38285714285714284
+      ],
+      "SF222": [
+        0.78,
+        0.7828571428571428
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "PENDING_VISUAL_REVIEW"
+  },
+  {
+    "id": "visual-territory-51",
+    "number": "51",
+    "name": "Yara",
+    "file": "51.png",
+    "frame": [
+      243.9,
+      343.4,
+      207.2,
+      207.2
+    ],
+    "anchors": {
+      "H02": [
+        0.28523166023166024,
+        0.393822393822394
+      ],
+      "SF223": [
+        0.3093629343629343,
+        0.5434362934362936
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "PENDING_VISUAL_REVIEW"
+  },
+  {
+    "id": "visual-territory-52",
+    "number": "52",
+    "name": "Zorin",
+    "file": "52.png",
+    "frame": [
+      452.1,
+      334.6,
+      135.8,
+      135.8
+    ],
+    "anchors": {
+      "P02": [
+        0.6399116347569953,
+        0.3932253313696611
+      ],
+      "SF224": [
+        0.4926362297496316,
+        0.3858615611192929
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "PENDING_VISUAL_REVIEW"
+  },
+  {
+    "id": "visual-territory-53",
+    "number": "53",
+    "name": "Alera",
+    "file": "53.png",
+    "frame": [
+      664.3,
+      326.3,
+      197.4,
+      197.4
+    ],
+    "anchors": {
+      "SF225": [
+        0.5202634245187439,
+        0.5202634245187436
+      ],
+      "SF226": [
+        0.38855116514691007,
+        0.6519756838905775
+      ],
+      "SF227": [
+        0.7684903748733538,
+        0.25177304964539
+      ],
+      "SF228": [
+        0.8444782168186425,
+        0.5658561296859168
+      ],
+      "SF229": [
+        0.14539007092198605,
+        0.5253292806484295
+      ],
+      "SF230": [
+        0.4949341438703143,
+        0.24670719351570408
+      ],
+      "SF231": [
+        0.6519756838905777,
+        0.7532928064842958
+      ],
+      "SF232": [
+        0.697568389057751,
+        0.434143870314083
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "PENDING_VISUAL_REVIEW"
+  },
+  {
+    "id": "visual-territory-54",
+    "number": "54",
+    "name": "Brin",
+    "file": "54.png",
+    "frame": [
+      765.5,
+      368.5,
+      196,
+      196
+    ],
+    "anchors": {
+      "SF233": [
+        0.6045918367346939,
+        0.5229591836734694
+      ],
+      "SF234": [
+        0.28316326530612246,
+        0.6556122448979592
+      ],
+      "SF235": [
+        0.4923469387755102,
+        0.45153061224489793
+      ],
+      "SF236": [
+        0.7576530612244898,
+        0.8545918367346939
+      ],
+      "SF237": [
+        0.6505102040816326,
+        0.16071428571428573
+      ],
+      "SF238": [
+        0.8086734693877551,
+        0.3647959183673469
+      ],
+      "SF239": [
+        0.39540816326530615,
+        0.22704081632653061
+      ],
+      "SF240": [
+        0.2627551020408163,
+        0.43112244897959184
+      ],
+      "SF241": [
+        0.8035714285714286,
+        0.6454081632653061
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "PENDING_VISUAL_REVIEW"
+  },
+  {
+    "id": "visual-territory-55",
+    "number": "55",
+    "name": "Cassa",
+    "file": "55.png",
+    "frame": [
+      895.3,
+      327.8,
+      197.4,
+      197.4
+    ],
+    "anchors": {
+      "P05": [
+        0.4138804457953396,
+        0.6342451874366767
+      ],
+      "SF242": [
+        0.15045592705167196,
+        0.6849037487335359
+      ],
+      "SF243": [
+        0.8546099290780144,
+        0.21884498480243156
+      ],
+      "SF244": [
+        0.5557244174265453,
+        0.5329280648429584
+      ],
+      "SF245": [
+        0.30749746707193537,
+        0.4518743667679837
+      ],
+      "SF246": [
+        0.6418439716312059,
+        0.2644376899696048
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "PENDING_VISUAL_REVIEW"
+  },
+  {
+    "id": "visual-territory-63",
+    "number": "63",
+    "name": "Korra",
+    "file": "63.png",
+    "frame": [
+      286.9,
+      514.9,
+      200.2,
+      192.2
+    ],
+    "anchors": {
+      "P06": [
+        0.56,
+        0.64
+      ],
+      "SF287": [
+        0.83,
+        0.51
+      ],
+      "SF288": [
+        0.59,
+        0.27
+      ],
+      "SF289": [
+        0.44,
+        0.75
+      ],
+      "SF290": [
+        0.2,
+        0.39
+      ],
+      "SF291": [
+        0.43,
+        0.075
+      ],
+      "SF292": [
+        0.4,
+        0.46
+      ]
+    },
+    "environment": [
+      {
+        "temperatureC": 12.5,
+        "rainMm": 1366,
+        "elevationM": 921,
+        "land": {
+          "croplandPotential": 973520.817,
+          "forest": 227731.393,
+          "urbanIndustrialPotential": 11530.703,
+          "mountain": 191080.228,
+          "inlandWater": 35827.543,
+          "convertible": 28826.759
+        },
+        "settlement": "农业河谷"
+      },
+      {
+        "temperatureC": 11.2,
+        "rainMm": 1315,
+        "elevationM": 180,
+        "land": {
+          "croplandPotential": 1504344.986,
+          "forest": 23473.218,
+          "urbanIndustrialPotential": 0,
+          "mountain": 0,
+          "inlandWater": 1235.433,
+          "convertible": 0
+        },
+        "settlement": "农业河谷"
+      }
+    ],
+    "landmarks": [
+      {
+        "id": "P06",
+        "name": "西南海峡港",
+        "kind": "port",
+        "at": [
+          0.48001998001998014,
+          0.74975024975025
+        ]
+      },
+      {
+        "id": "SF287",
+        "name": "气田开发（情景候选）",
+        "kind": "energy",
+        "at": [
+          0.8546453546453548,
+          0.67982017982018
+        ]
+      },
+      {
+        "id": "SF288",
+        "name": "油田开发（情景候选）",
+        "kind": "energy",
+        "at": [
+          0.584915084915085,
+          0.3501498501498503
+        ]
+      },
+      {
+        "id": "SF289",
+        "name": "铁矿（情景候选）",
+        "kind": "mine",
+        "at": [
+          0.46503496503496516,
+          0.7997002997002999
+        ]
+      },
+      {
+        "id": "SF290",
+        "name": "太阳能设施（情景候选）",
+        "kind": "energy",
+        "at": [
+          0.19530469530469544,
+          0.46503496503496516
+        ]
+      },
+      {
+        "id": "SF291",
+        "name": "风能设施（情景候选）",
+        "kind": "energy",
+        "at": [
+          0.3251748251748253,
+          0.17032967032967045
+        ]
+      },
+      {
+        "id": "SF292",
+        "name": "物流枢纽（情景候选）",
+        "kind": "hub",
+        "at": [
+          0.4250749250749252,
+          0.5199800199800201
+        ]
+      }
+    ],
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-64",
+    "number": "64",
+    "name": "Lethis",
+    "file": "64.png",
+    "frame": [
+      596.5,
+      128,
+      273,
+      273
+    ],
+    "anchors": {
+      "P03": [
+        0.34,
+        0.71
+      ],
+      "SF293": [
+        0.18,
+        0.5
+      ],
+      "SF294": [
+        0.35,
+        0.545
+      ],
+      "SF295": [
+        0.32,
+        0.62
+      ],
+      "SF296": [
+        0.89,
+        0.34
+      ],
+      "SF297": [
+        0.4,
+        0.2
+      ],
+      "SF298": [
+        0.73,
+        0.52
+      ],
+      "SF299": [
+        0.6,
+        0.285
+      ],
+      "SF300": [
+        0.23,
+        0.395
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-65",
+    "number": "65",
+    "name": "Marn",
+    "file": "65.png",
+    "frame": [
+      507.9,
+      225.4,
+      193.2,
+      193.2
+    ],
+    "anchors": {
+      "SF301": [
+        0.145,
+        0.414
+      ],
+      "SF302": [
+        0.87,
+        0.54
+      ],
+      "SF303": [
+        0.655,
+        0.06
+      ],
+      "SF304": [
+        0.515,
+        0.69
+      ],
+      "SF305": [
+        0.49,
+        0.435
+      ],
+      "SF306": [
+        0.77,
+        0.317
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-66",
+    "number": "66",
+    "name": "Nivor",
+    "file": "66.png",
+    "frame": [
+      807,
+      103.5,
+      357,
+      357
+    ],
+    "anchors": {
+      "P08": [
+        0.475,
+        0.632
+      ],
+      "SF307": [
+        0.31,
+        0.449
+      ],
+      "SF308": [
+        0.51,
+        0.446
+      ],
+      "SF309": [
+        0.37,
+        0.112
+      ],
+      "SF310": [
+        0.474,
+        0.428
+      ],
+      "SF311": [
+        0.51,
+        0.412
+      ],
+      "SF312": [
+        0.859,
+        0.43
+      ],
+      "SF313": [
+        0.18,
+        0.7
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-67",
+    "number": "67",
+    "name": "Orsa",
+    "file": "67.png",
+    "frame": [
+      363.7,
+      601.7,
+      236.60000000000002,
+      236.60000000000002
+    ],
+    "anchors": {
+      "P07": [
+        0.79,
+        0.346
+      ],
+      "SF314": [
+        0.56,
+        0.265
+      ],
+      "SF315": [
+        0.635,
+        0.472
+      ],
+      "SF316": [
+        0.135,
+        0.415
+      ],
+      "SF317": [
+        0.343,
+        0.806
+      ],
+      "SF318": [
+        0.878,
+        0.624
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-68",
+    "number": "68",
+    "name": "Pella",
+    "file": "68.png",
+    "frame": [
+      386.9,
+      460.9,
+      221.2,
+      221.2
+    ],
+    "anchors": {
+      "SF319": [
+        0.182,
+        0.455
+      ],
+      "SF320": [
+        0.814,
+        0.637
+      ],
+      "SF321": [
+        0.466,
+        0.6
+      ],
+      "SF322": [
+        0.476,
+        0.425
+      ],
+      "SF323": [
+        0.277,
+        0.28
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-69",
+    "number": "69",
+    "name": "Quillan",
+    "file": "69.png",
+    "frame": [
+      79.1,
+      591.1,
+      205.8,
+      205.8
+    ],
+    "anchors": {
+      "SF324": [
+        0.62,
+        0.325
+      ],
+      "SF325": [
+        0.146,
+        0.651
+      ],
+      "SF326": [
+        0.84,
+        0.632
+      ],
+      "SF327": [
+        0.368,
+        0.216
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  },
+  {
+    "id": "visual-territory-70",
+    "number": "70",
+    "name": "Rhea",
+    "file": "70.png",
+    "frame": [
+      1062.7,
+      103.19999999999999,
+      264.6,
+      264.6
+    ],
+    "anchors": {
+      "SF328": [
+        0.6,
+        0.5
+      ],
+      "SF329": [
+        0.15,
+        0.738
+      ],
+      "SF330": [
+        0.85,
+        0.219
+      ]
+    },
+    "status": "ILLUSTRATED_PLANNING_SCENE",
+    "landmarkReview": "VISUALLY_ALIGNED"
+  }
+]

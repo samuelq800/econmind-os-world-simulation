@@ -16,3 +16,14 @@ status/decisions.json
 PLANS.md
 # Preserve the exact hash-verified bytes of the delivered country data package.
 data/country-candidates/2026-09-28-map-locked/
+# Preserve byte-for-byte atlas source, reviews, manifests, and separate candidate packages.
+apps/world-web/src/assets/continent-scenes/
+apps/world-web/src/assets/country-detail/
+apps/world-web/src/assets/country-scenes/
+apps/world-web/src/map-lab/atlas-layers.json
+apps/world-web/src/map-lab/geographic-scenario.json
+apps/world-web/src/map-lab/land-partition.json
+apps/world-web/src/map-lab/maritime-zones.json
+artifacts/world-geography/
+artifacts/world-balanced-candidate-v1/
+docs/reports/V25.1/

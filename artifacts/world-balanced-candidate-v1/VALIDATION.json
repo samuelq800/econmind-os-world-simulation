@@ -1,0 +1,220 @@
+{
+  "candidateChecks": [
+    {
+      "check": "Population, land, labour, housing and education conservation",
+      "status": "PASS"
+    },
+    {
+      "check": "Unique IDs, references and country-point containment",
+      "status": "PASS"
+    },
+    {
+      "check": "Geology unchanged, reserve conservation and opening stock provenance",
+      "status": "PASS"
+    },
+    {
+      "check": "Staffing, skill sufficiency, water, average power and financial coverage",
+      "status": "PASS"
+    },
+    {
+      "check": "Input-output, bilateral trade conservation and two-route balance",
+      "status": "PASS"
+    },
+    {
+      "check": "Reference price shocks +/-20% within 30% trade exposure",
+      "status": "PASS"
+    },
+    {
+      "check": "Terrain-constrained trade paths and settlement reconciliation",
+      "status": "PASS"
+    }
+  ],
+  "candidateStatus": "PASS",
+  "countries": 70,
+  "regions": 122,
+  "deposits": 240,
+  "facilities": 1374,
+  "openingPortfolioFacilities": 1024,
+  "legacyDevelopmentOptions": 350,
+  "tradePlans": 641,
+  "uniqueOutputMixesRounded5Decimals": 70,
+  "scenarios": [
+    {
+      "scenario": "normal600",
+      "status": "PASS",
+      "daysExecuted": 600,
+      "violations": [],
+      "minimumStockAcrossUnits": -0.0005999999984567239,
+      "scope": "OFFLINE_FIXED_PLAN_STOCK_REHEARSAL_WITH_SHIPPING_DELAY; not Core, not hour-by-hour power, not legal route activation"
+    },
+    {
+      "scenario": "trade_pause30",
+      "status": "PASS",
+      "daysExecuted": 600,
+      "violations": [],
+      "minimumStockAcrossUnits": -0.00017999999951712198,
+      "scope": "OFFLINE_FIXED_PLAN_STOCK_REHEARSAL_WITH_SHIPPING_DELAY; not Core, not hour-by-hour power, not legal route activation"
+    },
+    {
+      "scenario": "drought90",
+      "status": "PASS",
+      "daysExecuted": 600,
+      "violations": [],
+      "minimumStockAcrossUnits": -0.0005999999984567239,
+      "scope": "OFFLINE_FIXED_PLAN_STOCK_REHEARSAL_WITH_SHIPPING_DELAY; not Core, not hour-by-hour power, not legal route activation"
+    }
+  ],
+  "priceSensitivity": [
+    {
+      "commodityId": "CRUDE_OIL",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.22342461669417815,
+      "countriesOutsideBaseline8PercentBand": 29
+    },
+    {
+      "commodityId": "CRUDE_OIL",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.19287249277256147,
+      "countriesOutsideBaseline8PercentBand": 17
+    },
+    {
+      "commodityId": "NATURAL_GAS",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.09308717033706132,
+      "countriesOutsideBaseline8PercentBand": 20
+    },
+    {
+      "commodityId": "NATURAL_GAS",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.09402800069290079,
+      "countriesOutsideBaseline8PercentBand": 16
+    },
+    {
+      "commodityId": "URANIUM",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.08019481576032957,
+      "countriesOutsideBaseline8PercentBand": 29
+    },
+    {
+      "commodityId": "URANIUM",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.08051775585900275,
+      "countriesOutsideBaseline8PercentBand": 33
+    },
+    {
+      "commodityId": "GRAIN",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.19729000177614842,
+      "countriesOutsideBaseline8PercentBand": 31
+    },
+    {
+      "commodityId": "GRAIN",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.19749583837139284,
+      "countriesOutsideBaseline8PercentBand": 39
+    },
+    {
+      "commodityId": "IRON_ORE",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.13516137141358545,
+      "countriesOutsideBaseline8PercentBand": 23
+    },
+    {
+      "commodityId": "IRON_ORE",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.12574296081819905,
+      "countriesOutsideBaseline8PercentBand": 11
+    },
+    {
+      "commodityId": "COPPER",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.0941599993410709,
+      "countriesOutsideBaseline8PercentBand": 15
+    },
+    {
+      "commodityId": "COPPER",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.09427999951432221,
+      "countriesOutsideBaseline8PercentBand": 17
+    },
+    {
+      "commodityId": "LITHIUM",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.088936899433642,
+      "countriesOutsideBaseline8PercentBand": 6
+    },
+    {
+      "commodityId": "LITHIUM",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.08149331283563684,
+      "countriesOutsideBaseline8PercentBand": 3
+    },
+    {
+      "commodityId": "STEEL",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.2690264495123516,
+      "countriesOutsideBaseline8PercentBand": 34
+    },
+    {
+      "commodityId": "STEEL",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.290347774604241,
+      "countriesOutsideBaseline8PercentBand": 36
+    },
+    {
+      "commodityId": "REFINED_FUEL",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.3000000007558296,
+      "countriesOutsideBaseline8PercentBand": 38
+    },
+    {
+      "commodityId": "REFINED_FUEL",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.30000000053284587,
+      "countriesOutsideBaseline8PercentBand": 41
+    },
+    {
+      "commodityId": "MACHINERY",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.20315169770826746,
+      "countriesOutsideBaseline8PercentBand": 37
+    },
+    {
+      "commodityId": "MACHINERY",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.088929560963961,
+      "countriesOutsideBaseline8PercentBand": 25
+    },
+    {
+      "commodityId": "SEMICONDUCTORS",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.1832487048665892,
+      "countriesOutsideBaseline8PercentBand": 39
+    },
+    {
+      "commodityId": "SEMICONDUCTORS",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.08880453050341705,
+      "countriesOutsideBaseline8PercentBand": 23
+    },
+    {
+      "commodityId": "BATTERIES",
+      "priceMultiplier": 0.8,
+      "worstAbsoluteTradeRatio": 0.15064036905470735,
+      "countriesOutsideBaseline8PercentBand": 31
+    },
+    {
+      "commodityId": "BATTERIES",
+      "priceMultiplier": 1.2,
+      "worstAbsoluteTradeRatio": 0.09112151150966592,
+      "countriesOutsideBaseline8PercentBand": 31
+    }
+  ],
+  "worstPriceShockTradeRatio": 0.3000000007558296,
+  "quantityRoundingTolerancePerUnit": 0.001,
+  "coreSimulation": "NOT_RUN",
+  "hourlyPowerDispatch": "NOT_RUN",
+  "physicalRouteSurvey": "NOT_RUN",
+  "independentReview": "NOT_CLAIMED",
+  "activationAllowed": false
+}

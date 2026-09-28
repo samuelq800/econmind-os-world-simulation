@@ -1,0 +1,173 @@
+[
+  {
+    "id": "SCENARIO-RECIPE-CRUDE_OIL",
+    "commodityId": "CRUDE_OIL",
+    "outputUnit": "barrel",
+    "outputQuantity": 1,
+    "inputsPerUnit": {},
+    "electricityMWhPerUnit": 0.012,
+    "waterM3PerUnit": 0.2,
+    "workersPerDailyOutputUnit": 0.015,
+    "projectId": "PROJECT-01",
+    "agricultureOwnerProposal": null,
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  },
+  {
+    "id": "SCENARIO-RECIPE-NATURAL_GAS",
+    "commodityId": "NATURAL_GAS",
+    "outputUnit": "MMBtu",
+    "outputQuantity": 1,
+    "inputsPerUnit": {},
+    "electricityMWhPerUnit": 0.001,
+    "waterM3PerUnit": 0.01,
+    "workersPerDailyOutputUnit": 0.002,
+    "projectId": "PROJECT-02",
+    "agricultureOwnerProposal": null,
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  },
+  {
+    "id": "SCENARIO-RECIPE-URANIUM",
+    "commodityId": "URANIUM",
+    "outputUnit": "tonne U",
+    "outputQuantity": 1,
+    "inputsPerUnit": {},
+    "electricityMWhPerUnit": 35.0,
+    "waterM3PerUnit": 20.0,
+    "workersPerDailyOutputUnit": 20.0,
+    "projectId": "PROJECT-03",
+    "agricultureOwnerProposal": null,
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  },
+  {
+    "id": "SCENARIO-RECIPE-GRAIN",
+    "commodityId": "GRAIN",
+    "outputUnit": "tonne",
+    "outputQuantity": 1,
+    "inputsPerUnit": {},
+    "electricityMWhPerUnit": 0.02,
+    "waterM3PerUnit": 1428.5714285714287,
+    "workersPerDailyOutputUnit": 0.5,
+    "projectId": null,
+    "agricultureOwnerProposal": "INDUSTRY_WITH_SOCIAL_WATER_COORDINATION",
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  },
+  {
+    "id": "SCENARIO-RECIPE-IRON_ORE",
+    "commodityId": "IRON_ORE",
+    "outputUnit": "tonne",
+    "outputQuantity": 1,
+    "inputsPerUnit": {},
+    "electricityMWhPerUnit": 0.06,
+    "waterM3PerUnit": 0.1,
+    "workersPerDailyOutputUnit": 0.08,
+    "projectId": "PROJECT-04",
+    "agricultureOwnerProposal": null,
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  },
+  {
+    "id": "SCENARIO-RECIPE-COPPER",
+    "commodityId": "COPPER",
+    "outputUnit": "tonne",
+    "outputQuantity": 1,
+    "inputsPerUnit": {},
+    "electricityMWhPerUnit": 0.8,
+    "waterM3PerUnit": 2.0,
+    "workersPerDailyOutputUnit": 0.5,
+    "projectId": "PROJECT-05",
+    "agricultureOwnerProposal": null,
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  },
+  {
+    "id": "SCENARIO-RECIPE-LITHIUM",
+    "commodityId": "LITHIUM",
+    "outputUnit": "tonne LCE",
+    "outputQuantity": 1,
+    "inputsPerUnit": {},
+    "electricityMWhPerUnit": 1.2,
+    "waterM3PerUnit": 3.0,
+    "workersPerDailyOutputUnit": 0.5,
+    "projectId": "PROJECT-06",
+    "agricultureOwnerProposal": null,
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  },
+  {
+    "id": "SCENARIO-RECIPE-STEEL",
+    "commodityId": "STEEL",
+    "outputUnit": "tonne",
+    "outputQuantity": 1,
+    "inputsPerUnit": {
+      "IRON_ORE": 1.6,
+      "NATURAL_GAS": 3
+    },
+    "electricityMWhPerUnit": 0.65,
+    "waterM3PerUnit": 2.0,
+    "workersPerDailyOutputUnit": 0.12,
+    "projectId": "PROJECT-14",
+    "agricultureOwnerProposal": null,
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  },
+  {
+    "id": "SCENARIO-RECIPE-REFINED_FUEL",
+    "commodityId": "REFINED_FUEL",
+    "outputUnit": "barrel equivalent",
+    "outputQuantity": 1,
+    "inputsPerUnit": {
+      "CRUDE_OIL": 1.08
+    },
+    "electricityMWhPerUnit": 0.008,
+    "waterM3PerUnit": 0.1,
+    "workersPerDailyOutputUnit": 0.008,
+    "projectId": "PROJECT-15",
+    "agricultureOwnerProposal": null,
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  },
+  {
+    "id": "SCENARIO-RECIPE-MACHINERY",
+    "commodityId": "MACHINERY",
+    "outputUnit": "equipment unit",
+    "outputQuantity": 1,
+    "inputsPerUnit": {
+      "STEEL": 2,
+      "COPPER": 0.08
+    },
+    "electricityMWhPerUnit": 2.0,
+    "waterM3PerUnit": 1.0,
+    "workersPerDailyOutputUnit": 0.2,
+    "projectId": "PROJECT-16",
+    "agricultureOwnerProposal": null,
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  },
+  {
+    "id": "SCENARIO-RECIPE-SEMICONDUCTORS",
+    "commodityId": "SEMICONDUCTORS",
+    "outputUnit": "standardised chip unit",
+    "outputQuantity": 1,
+    "inputsPerUnit": {
+      "COPPER": 5e-05,
+      "MACHINERY": 1e-06
+    },
+    "electricityMWhPerUnit": 0.0001,
+    "waterM3PerUnit": 0.0001,
+    "workersPerDailyOutputUnit": 0.001,
+    "projectId": "PROJECT-17",
+    "agricultureOwnerProposal": null,
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  },
+  {
+    "id": "SCENARIO-RECIPE-BATTERIES",
+    "commodityId": "BATTERIES",
+    "outputUnit": "MWh-equivalent",
+    "outputQuantity": 1,
+    "inputsPerUnit": {
+      "LITHIUM": 0.6,
+      "COPPER": 0.8,
+      "MACHINERY": 0.001
+    },
+    "electricityMWhPerUnit": 0.6,
+    "waterM3PerUnit": 2.0,
+    "workersPerDailyOutputUnit": 0.3,
+    "projectId": "PROJECT-18",
+    "agricultureOwnerProposal": null,
+    "authority": "AUTHORED_CANDIDATE_NOT_CORE_APPROVED"
+  }
+]

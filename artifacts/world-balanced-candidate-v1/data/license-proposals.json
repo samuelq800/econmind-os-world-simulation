@@ -1,0 +1,3746 @@
+[
+  {
+    "id": "LIC-01-GRAIN",
+    "countryId": "visual-territory-01",
+    "grantorId": "GOV-01",
+    "holderId": "OP-01",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-01-COPPER",
+    "countryId": "visual-territory-01",
+    "grantorId": "GOV-01",
+    "holderId": "OP-01",
+    "activity": "COPPER",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-02-GRAIN",
+    "countryId": "visual-territory-02",
+    "grantorId": "GOV-02",
+    "holderId": "OP-02",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-02-REFINED_FUEL",
+    "countryId": "visual-territory-02",
+    "grantorId": "GOV-02",
+    "holderId": "OP-02",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-03-GRAIN",
+    "countryId": "visual-territory-03",
+    "grantorId": "GOV-03",
+    "holderId": "OP-03",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-03-MACHINERY",
+    "countryId": "visual-territory-03",
+    "grantorId": "GOV-03",
+    "holderId": "OP-03",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-03-URANIUM",
+    "countryId": "visual-territory-03",
+    "grantorId": "GOV-03",
+    "holderId": "OP-03",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-04-GRAIN",
+    "countryId": "visual-territory-04",
+    "grantorId": "GOV-04",
+    "holderId": "OP-04",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-04-STEEL",
+    "countryId": "visual-territory-04",
+    "grantorId": "GOV-04",
+    "holderId": "OP-04",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-05-GRAIN",
+    "countryId": "visual-territory-05",
+    "grantorId": "GOV-05",
+    "holderId": "OP-05",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-05-CRUDE_OIL",
+    "countryId": "visual-territory-05",
+    "grantorId": "GOV-05",
+    "holderId": "OP-05",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-06-GRAIN",
+    "countryId": "visual-territory-06",
+    "grantorId": "GOV-06",
+    "holderId": "OP-06",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-06-CRUDE_OIL",
+    "countryId": "visual-territory-06",
+    "grantorId": "GOV-06",
+    "holderId": "OP-06",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-07-GRAIN",
+    "countryId": "visual-territory-07",
+    "grantorId": "GOV-07",
+    "holderId": "OP-07",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-07-CRUDE_OIL",
+    "countryId": "visual-territory-07",
+    "grantorId": "GOV-07",
+    "holderId": "OP-07",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-07-SEMICONDUCTORS",
+    "countryId": "visual-territory-07",
+    "grantorId": "GOV-07",
+    "holderId": "OP-07",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-08-GRAIN",
+    "countryId": "visual-territory-08",
+    "grantorId": "GOV-08",
+    "holderId": "OP-08",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-08-SEMICONDUCTORS",
+    "countryId": "visual-territory-08",
+    "grantorId": "GOV-08",
+    "holderId": "OP-08",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-09-GRAIN",
+    "countryId": "visual-territory-09",
+    "grantorId": "GOV-09",
+    "holderId": "OP-09",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-09-STEEL",
+    "countryId": "visual-territory-09",
+    "grantorId": "GOV-09",
+    "holderId": "OP-09",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-09-IRON_ORE",
+    "countryId": "visual-territory-09",
+    "grantorId": "GOV-09",
+    "holderId": "OP-09",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-09-URANIUM",
+    "countryId": "visual-territory-09",
+    "grantorId": "GOV-09",
+    "holderId": "OP-09",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-10-CRUDE_OIL",
+    "countryId": "visual-territory-10",
+    "grantorId": "GOV-10",
+    "holderId": "OP-10",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-10-GRAIN",
+    "countryId": "visual-territory-10",
+    "grantorId": "GOV-10",
+    "holderId": "OP-10",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-10-REFINED_FUEL",
+    "countryId": "visual-territory-10",
+    "grantorId": "GOV-10",
+    "holderId": "OP-10",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-10-BATTERIES",
+    "countryId": "visual-territory-10",
+    "grantorId": "GOV-10",
+    "holderId": "OP-10",
+    "activity": "BATTERIES",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-10-COPPER",
+    "countryId": "visual-territory-10",
+    "grantorId": "GOV-10",
+    "holderId": "OP-10",
+    "activity": "COPPER",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-10-NATURAL_GAS",
+    "countryId": "visual-territory-10",
+    "grantorId": "GOV-10",
+    "holderId": "OP-10",
+    "activity": "NATURAL_GAS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-11-GRAIN",
+    "countryId": "visual-territory-11",
+    "grantorId": "GOV-11",
+    "holderId": "OP-11",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-11-BATTERIES",
+    "countryId": "visual-territory-11",
+    "grantorId": "GOV-11",
+    "holderId": "OP-11",
+    "activity": "BATTERIES",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-11-CRUDE_OIL",
+    "countryId": "visual-territory-11",
+    "grantorId": "GOV-11",
+    "holderId": "OP-11",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-11-COPPER",
+    "countryId": "visual-territory-11",
+    "grantorId": "GOV-11",
+    "holderId": "OP-11",
+    "activity": "COPPER",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-11-LITHIUM",
+    "countryId": "visual-territory-11",
+    "grantorId": "GOV-11",
+    "holderId": "OP-11",
+    "activity": "LITHIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-12-SEMICONDUCTORS",
+    "countryId": "visual-territory-12",
+    "grantorId": "GOV-12",
+    "holderId": "OP-12",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-12-CRUDE_OIL",
+    "countryId": "visual-territory-12",
+    "grantorId": "GOV-12",
+    "holderId": "OP-12",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-12-BATTERIES",
+    "countryId": "visual-territory-12",
+    "grantorId": "GOV-12",
+    "holderId": "OP-12",
+    "activity": "BATTERIES",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-13-SEMICONDUCTORS",
+    "countryId": "visual-territory-13",
+    "grantorId": "GOV-13",
+    "holderId": "OP-13",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-13-BATTERIES",
+    "countryId": "visual-territory-13",
+    "grantorId": "GOV-13",
+    "holderId": "OP-13",
+    "activity": "BATTERIES",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-13-GRAIN",
+    "countryId": "visual-territory-13",
+    "grantorId": "GOV-13",
+    "holderId": "OP-13",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-13-STEEL",
+    "countryId": "visual-territory-13",
+    "grantorId": "GOV-13",
+    "holderId": "OP-13",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-13-COPPER",
+    "countryId": "visual-territory-13",
+    "grantorId": "GOV-13",
+    "holderId": "OP-13",
+    "activity": "COPPER",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-13-CRUDE_OIL",
+    "countryId": "visual-territory-13",
+    "grantorId": "GOV-13",
+    "holderId": "OP-13",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-13-LITHIUM",
+    "countryId": "visual-territory-13",
+    "grantorId": "GOV-13",
+    "holderId": "OP-13",
+    "activity": "LITHIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-14-GRAIN",
+    "countryId": "visual-territory-14",
+    "grantorId": "GOV-14",
+    "holderId": "OP-14",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-14-STEEL",
+    "countryId": "visual-territory-14",
+    "grantorId": "GOV-14",
+    "holderId": "OP-14",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-14-URANIUM",
+    "countryId": "visual-territory-14",
+    "grantorId": "GOV-14",
+    "holderId": "OP-14",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-15-GRAIN",
+    "countryId": "visual-territory-15",
+    "grantorId": "GOV-15",
+    "holderId": "OP-15",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-15-CRUDE_OIL",
+    "countryId": "visual-territory-15",
+    "grantorId": "GOV-15",
+    "holderId": "OP-15",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-15-BATTERIES",
+    "countryId": "visual-territory-15",
+    "grantorId": "GOV-15",
+    "holderId": "OP-15",
+    "activity": "BATTERIES",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-16-GRAIN",
+    "countryId": "visual-territory-16",
+    "grantorId": "GOV-16",
+    "holderId": "OP-16",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-16-BATTERIES",
+    "countryId": "visual-territory-16",
+    "grantorId": "GOV-16",
+    "holderId": "OP-16",
+    "activity": "BATTERIES",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-17-STEEL",
+    "countryId": "visual-territory-17",
+    "grantorId": "GOV-17",
+    "holderId": "OP-17",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-17-IRON_ORE",
+    "countryId": "visual-territory-17",
+    "grantorId": "GOV-17",
+    "holderId": "OP-17",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-17-MACHINERY",
+    "countryId": "visual-territory-17",
+    "grantorId": "GOV-17",
+    "holderId": "OP-17",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-18-CRUDE_OIL",
+    "countryId": "visual-territory-18",
+    "grantorId": "GOV-18",
+    "holderId": "OP-18",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-18-STEEL",
+    "countryId": "visual-territory-18",
+    "grantorId": "GOV-18",
+    "holderId": "OP-18",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-18-REFINED_FUEL",
+    "countryId": "visual-territory-18",
+    "grantorId": "GOV-18",
+    "holderId": "OP-18",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-18-IRON_ORE",
+    "countryId": "visual-territory-18",
+    "grantorId": "GOV-18",
+    "holderId": "OP-18",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-18-LITHIUM",
+    "countryId": "visual-territory-18",
+    "grantorId": "GOV-18",
+    "holderId": "OP-18",
+    "activity": "LITHIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-19-GRAIN",
+    "countryId": "visual-territory-19",
+    "grantorId": "GOV-19",
+    "holderId": "OP-19",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-19-SEMICONDUCTORS",
+    "countryId": "visual-territory-19",
+    "grantorId": "GOV-19",
+    "holderId": "OP-19",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-19-NATURAL_GAS",
+    "countryId": "visual-territory-19",
+    "grantorId": "GOV-19",
+    "holderId": "OP-19",
+    "activity": "NATURAL_GAS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-19-URANIUM",
+    "countryId": "visual-territory-19",
+    "grantorId": "GOV-19",
+    "holderId": "OP-19",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-20-STEEL",
+    "countryId": "visual-territory-20",
+    "grantorId": "GOV-20",
+    "holderId": "OP-20",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-20-REFINED_FUEL",
+    "countryId": "visual-territory-20",
+    "grantorId": "GOV-20",
+    "holderId": "OP-20",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-20-IRON_ORE",
+    "countryId": "visual-territory-20",
+    "grantorId": "GOV-20",
+    "holderId": "OP-20",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-20-LITHIUM",
+    "countryId": "visual-territory-20",
+    "grantorId": "GOV-20",
+    "holderId": "OP-20",
+    "activity": "LITHIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-21-GRAIN",
+    "countryId": "visual-territory-21",
+    "grantorId": "GOV-21",
+    "holderId": "OP-21",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-21-STEEL",
+    "countryId": "visual-territory-21",
+    "grantorId": "GOV-21",
+    "holderId": "OP-21",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-21-IRON_ORE",
+    "countryId": "visual-territory-21",
+    "grantorId": "GOV-21",
+    "holderId": "OP-21",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-21-CRUDE_OIL",
+    "countryId": "visual-territory-21",
+    "grantorId": "GOV-21",
+    "holderId": "OP-21",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-22-GRAIN",
+    "countryId": "visual-territory-22",
+    "grantorId": "GOV-22",
+    "holderId": "OP-22",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-22-STEEL",
+    "countryId": "visual-territory-22",
+    "grantorId": "GOV-22",
+    "holderId": "OP-22",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-22-URANIUM",
+    "countryId": "visual-territory-22",
+    "grantorId": "GOV-22",
+    "holderId": "OP-22",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-23-STEEL",
+    "countryId": "visual-territory-23",
+    "grantorId": "GOV-23",
+    "holderId": "OP-23",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-23-IRON_ORE",
+    "countryId": "visual-territory-23",
+    "grantorId": "GOV-23",
+    "holderId": "OP-23",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-23-BATTERIES",
+    "countryId": "visual-territory-23",
+    "grantorId": "GOV-23",
+    "holderId": "OP-23",
+    "activity": "BATTERIES",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-24-MACHINERY",
+    "countryId": "visual-territory-24",
+    "grantorId": "GOV-24",
+    "holderId": "OP-24",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-24-CRUDE_OIL",
+    "countryId": "visual-territory-24",
+    "grantorId": "GOV-24",
+    "holderId": "OP-24",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-24-SEMICONDUCTORS",
+    "countryId": "visual-territory-24",
+    "grantorId": "GOV-24",
+    "holderId": "OP-24",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-24-NATURAL_GAS",
+    "countryId": "visual-territory-24",
+    "grantorId": "GOV-24",
+    "holderId": "OP-24",
+    "activity": "NATURAL_GAS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-25-REFINED_FUEL",
+    "countryId": "visual-territory-25",
+    "grantorId": "GOV-25",
+    "holderId": "OP-25",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-25-CRUDE_OIL",
+    "countryId": "visual-territory-25",
+    "grantorId": "GOV-25",
+    "holderId": "OP-25",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-25-STEEL",
+    "countryId": "visual-territory-25",
+    "grantorId": "GOV-25",
+    "holderId": "OP-25",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-26-REFINED_FUEL",
+    "countryId": "visual-territory-26",
+    "grantorId": "GOV-26",
+    "holderId": "OP-26",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-26-CRUDE_OIL",
+    "countryId": "visual-territory-26",
+    "grantorId": "GOV-26",
+    "holderId": "OP-26",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-26-STEEL",
+    "countryId": "visual-territory-26",
+    "grantorId": "GOV-26",
+    "holderId": "OP-26",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-27-STEEL",
+    "countryId": "visual-territory-27",
+    "grantorId": "GOV-27",
+    "holderId": "OP-27",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-27-IRON_ORE",
+    "countryId": "visual-territory-27",
+    "grantorId": "GOV-27",
+    "holderId": "OP-27",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-28-REFINED_FUEL",
+    "countryId": "visual-territory-28",
+    "grantorId": "GOV-28",
+    "holderId": "OP-28",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-28-CRUDE_OIL",
+    "countryId": "visual-territory-28",
+    "grantorId": "GOV-28",
+    "holderId": "OP-28",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-28-MACHINERY",
+    "countryId": "visual-territory-28",
+    "grantorId": "GOV-28",
+    "holderId": "OP-28",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-28-NATURAL_GAS",
+    "countryId": "visual-territory-28",
+    "grantorId": "GOV-28",
+    "holderId": "OP-28",
+    "activity": "NATURAL_GAS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-29-CRUDE_OIL",
+    "countryId": "visual-territory-29",
+    "grantorId": "GOV-29",
+    "holderId": "OP-29",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-29-STEEL",
+    "countryId": "visual-territory-29",
+    "grantorId": "GOV-29",
+    "holderId": "OP-29",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-29-IRON_ORE",
+    "countryId": "visual-territory-29",
+    "grantorId": "GOV-29",
+    "holderId": "OP-29",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-29-NATURAL_GAS",
+    "countryId": "visual-territory-29",
+    "grantorId": "GOV-29",
+    "holderId": "OP-29",
+    "activity": "NATURAL_GAS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-30-STEEL",
+    "countryId": "visual-territory-30",
+    "grantorId": "GOV-30",
+    "holderId": "OP-30",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-30-IRON_ORE",
+    "countryId": "visual-territory-30",
+    "grantorId": "GOV-30",
+    "holderId": "OP-30",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-30-CRUDE_OIL",
+    "countryId": "visual-territory-30",
+    "grantorId": "GOV-30",
+    "holderId": "OP-30",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-31-REFINED_FUEL",
+    "countryId": "visual-territory-31",
+    "grantorId": "GOV-31",
+    "holderId": "OP-31",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-31-CRUDE_OIL",
+    "countryId": "visual-territory-31",
+    "grantorId": "GOV-31",
+    "holderId": "OP-31",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-31-MACHINERY",
+    "countryId": "visual-territory-31",
+    "grantorId": "GOV-31",
+    "holderId": "OP-31",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-31-SEMICONDUCTORS",
+    "countryId": "visual-territory-31",
+    "grantorId": "GOV-31",
+    "holderId": "OP-31",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-31-LITHIUM",
+    "countryId": "visual-territory-31",
+    "grantorId": "GOV-31",
+    "holderId": "OP-31",
+    "activity": "LITHIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-32-STEEL",
+    "countryId": "visual-territory-32",
+    "grantorId": "GOV-32",
+    "holderId": "OP-32",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-32-IRON_ORE",
+    "countryId": "visual-territory-32",
+    "grantorId": "GOV-32",
+    "holderId": "OP-32",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-32-NATURAL_GAS",
+    "countryId": "visual-territory-32",
+    "grantorId": "GOV-32",
+    "holderId": "OP-32",
+    "activity": "NATURAL_GAS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-33-GRAIN",
+    "countryId": "visual-territory-33",
+    "grantorId": "GOV-33",
+    "holderId": "OP-33",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-33-IRON_ORE",
+    "countryId": "visual-territory-33",
+    "grantorId": "GOV-33",
+    "holderId": "OP-33",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-33-URANIUM",
+    "countryId": "visual-territory-33",
+    "grantorId": "GOV-33",
+    "holderId": "OP-33",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-34-GRAIN",
+    "countryId": "visual-territory-34",
+    "grantorId": "GOV-34",
+    "holderId": "OP-34",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-34-IRON_ORE",
+    "countryId": "visual-territory-34",
+    "grantorId": "GOV-34",
+    "holderId": "OP-34",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-34-URANIUM",
+    "countryId": "visual-territory-34",
+    "grantorId": "GOV-34",
+    "holderId": "OP-34",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-35-STEEL",
+    "countryId": "visual-territory-35",
+    "grantorId": "GOV-35",
+    "holderId": "OP-35",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-35-IRON_ORE",
+    "countryId": "visual-territory-35",
+    "grantorId": "GOV-35",
+    "holderId": "OP-35",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-35-URANIUM",
+    "countryId": "visual-territory-35",
+    "grantorId": "GOV-35",
+    "holderId": "OP-35",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-36-GRAIN",
+    "countryId": "visual-territory-36",
+    "grantorId": "GOV-36",
+    "holderId": "OP-36",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-36-NATURAL_GAS",
+    "countryId": "visual-territory-36",
+    "grantorId": "GOV-36",
+    "holderId": "OP-36",
+    "activity": "NATURAL_GAS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-36-BATTERIES",
+    "countryId": "visual-territory-36",
+    "grantorId": "GOV-36",
+    "holderId": "OP-36",
+    "activity": "BATTERIES",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-37-REFINED_FUEL",
+    "countryId": "visual-territory-37",
+    "grantorId": "GOV-37",
+    "holderId": "OP-37",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-37-CRUDE_OIL",
+    "countryId": "visual-territory-37",
+    "grantorId": "GOV-37",
+    "holderId": "OP-37",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-37-IRON_ORE",
+    "countryId": "visual-territory-37",
+    "grantorId": "GOV-37",
+    "holderId": "OP-37",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-37-STEEL",
+    "countryId": "visual-territory-37",
+    "grantorId": "GOV-37",
+    "holderId": "OP-37",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-38-REFINED_FUEL",
+    "countryId": "visual-territory-38",
+    "grantorId": "GOV-38",
+    "holderId": "OP-38",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-38-CRUDE_OIL",
+    "countryId": "visual-territory-38",
+    "grantorId": "GOV-38",
+    "holderId": "OP-38",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-38-IRON_ORE",
+    "countryId": "visual-territory-38",
+    "grantorId": "GOV-38",
+    "holderId": "OP-38",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-38-GRAIN",
+    "countryId": "visual-territory-38",
+    "grantorId": "GOV-38",
+    "holderId": "OP-38",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-39-STEEL",
+    "countryId": "visual-territory-39",
+    "grantorId": "GOV-39",
+    "holderId": "OP-39",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-39-IRON_ORE",
+    "countryId": "visual-territory-39",
+    "grantorId": "GOV-39",
+    "holderId": "OP-39",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-39-URANIUM",
+    "countryId": "visual-territory-39",
+    "grantorId": "GOV-39",
+    "holderId": "OP-39",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-40-SEMICONDUCTORS",
+    "countryId": "visual-territory-40",
+    "grantorId": "GOV-40",
+    "holderId": "OP-40",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-40-CRUDE_OIL",
+    "countryId": "visual-territory-40",
+    "grantorId": "GOV-40",
+    "holderId": "OP-40",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-40-MACHINERY",
+    "countryId": "visual-territory-40",
+    "grantorId": "GOV-40",
+    "holderId": "OP-40",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-41-CRUDE_OIL",
+    "countryId": "visual-territory-41",
+    "grantorId": "GOV-41",
+    "holderId": "OP-41",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-41-STEEL",
+    "countryId": "visual-territory-41",
+    "grantorId": "GOV-41",
+    "holderId": "OP-41",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-41-IRON_ORE",
+    "countryId": "visual-territory-41",
+    "grantorId": "GOV-41",
+    "holderId": "OP-41",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-42-STEEL",
+    "countryId": "visual-territory-42",
+    "grantorId": "GOV-42",
+    "holderId": "OP-42",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-42-IRON_ORE",
+    "countryId": "visual-territory-42",
+    "grantorId": "GOV-42",
+    "holderId": "OP-42",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-42-MACHINERY",
+    "countryId": "visual-territory-42",
+    "grantorId": "GOV-42",
+    "holderId": "OP-42",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-43-STEEL",
+    "countryId": "visual-territory-43",
+    "grantorId": "GOV-43",
+    "holderId": "OP-43",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-43-IRON_ORE",
+    "countryId": "visual-territory-43",
+    "grantorId": "GOV-43",
+    "holderId": "OP-43",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-43-COPPER",
+    "countryId": "visual-territory-43",
+    "grantorId": "GOV-43",
+    "holderId": "OP-43",
+    "activity": "COPPER",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-44-CRUDE_OIL",
+    "countryId": "visual-territory-44",
+    "grantorId": "GOV-44",
+    "holderId": "OP-44",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-44-STEEL",
+    "countryId": "visual-territory-44",
+    "grantorId": "GOV-44",
+    "holderId": "OP-44",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-44-IRON_ORE",
+    "countryId": "visual-territory-44",
+    "grantorId": "GOV-44",
+    "holderId": "OP-44",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-44-MACHINERY",
+    "countryId": "visual-territory-44",
+    "grantorId": "GOV-44",
+    "holderId": "OP-44",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-44-SEMICONDUCTORS",
+    "countryId": "visual-territory-44",
+    "grantorId": "GOV-44",
+    "holderId": "OP-44",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-45-STEEL",
+    "countryId": "visual-territory-45",
+    "grantorId": "GOV-45",
+    "holderId": "OP-45",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-45-IRON_ORE",
+    "countryId": "visual-territory-45",
+    "grantorId": "GOV-45",
+    "holderId": "OP-45",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-46-GRAIN",
+    "countryId": "visual-territory-46",
+    "grantorId": "GOV-46",
+    "holderId": "OP-46",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-46-CRUDE_OIL",
+    "countryId": "visual-territory-46",
+    "grantorId": "GOV-46",
+    "holderId": "OP-46",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-46-SEMICONDUCTORS",
+    "countryId": "visual-territory-46",
+    "grantorId": "GOV-46",
+    "holderId": "OP-46",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-47-GRAIN",
+    "countryId": "visual-territory-47",
+    "grantorId": "GOV-47",
+    "holderId": "OP-47",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-47-CRUDE_OIL",
+    "countryId": "visual-territory-47",
+    "grantorId": "GOV-47",
+    "holderId": "OP-47",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-48-CRUDE_OIL",
+    "countryId": "visual-territory-48",
+    "grantorId": "GOV-48",
+    "holderId": "OP-48",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-48-STEEL",
+    "countryId": "visual-territory-48",
+    "grantorId": "GOV-48",
+    "holderId": "OP-48",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-48-IRON_ORE",
+    "countryId": "visual-territory-48",
+    "grantorId": "GOV-48",
+    "holderId": "OP-48",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-48-REFINED_FUEL",
+    "countryId": "visual-territory-48",
+    "grantorId": "GOV-48",
+    "holderId": "OP-48",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-49-STEEL",
+    "countryId": "visual-territory-49",
+    "grantorId": "GOV-49",
+    "holderId": "OP-49",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-49-CRUDE_OIL",
+    "countryId": "visual-territory-49",
+    "grantorId": "GOV-49",
+    "holderId": "OP-49",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-49-IRON_ORE",
+    "countryId": "visual-territory-49",
+    "grantorId": "GOV-49",
+    "holderId": "OP-49",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-49-SEMICONDUCTORS",
+    "countryId": "visual-territory-49",
+    "grantorId": "GOV-49",
+    "holderId": "OP-49",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-49-URANIUM",
+    "countryId": "visual-territory-49",
+    "grantorId": "GOV-49",
+    "holderId": "OP-49",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-50-MACHINERY",
+    "countryId": "visual-territory-50",
+    "grantorId": "GOV-50",
+    "holderId": "OP-50",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-50-CRUDE_OIL",
+    "countryId": "visual-territory-50",
+    "grantorId": "GOV-50",
+    "holderId": "OP-50",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-50-REFINED_FUEL",
+    "countryId": "visual-territory-50",
+    "grantorId": "GOV-50",
+    "holderId": "OP-50",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-50-NATURAL_GAS",
+    "countryId": "visual-territory-50",
+    "grantorId": "GOV-50",
+    "holderId": "OP-50",
+    "activity": "NATURAL_GAS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-50-COPPER",
+    "countryId": "visual-territory-50",
+    "grantorId": "GOV-50",
+    "holderId": "OP-50",
+    "activity": "COPPER",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-51-STEEL",
+    "countryId": "visual-territory-51",
+    "grantorId": "GOV-51",
+    "holderId": "OP-51",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-51-CRUDE_OIL",
+    "countryId": "visual-territory-51",
+    "grantorId": "GOV-51",
+    "holderId": "OP-51",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-51-IRON_ORE",
+    "countryId": "visual-territory-51",
+    "grantorId": "GOV-51",
+    "holderId": "OP-51",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-51-MACHINERY",
+    "countryId": "visual-territory-51",
+    "grantorId": "GOV-51",
+    "holderId": "OP-51",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-52-CRUDE_OIL",
+    "countryId": "visual-territory-52",
+    "grantorId": "GOV-52",
+    "holderId": "OP-52",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-52-MACHINERY",
+    "countryId": "visual-territory-52",
+    "grantorId": "GOV-52",
+    "holderId": "OP-52",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-52-SEMICONDUCTORS",
+    "countryId": "visual-territory-52",
+    "grantorId": "GOV-52",
+    "holderId": "OP-52",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-52-IRON_ORE",
+    "countryId": "visual-territory-52",
+    "grantorId": "GOV-52",
+    "holderId": "OP-52",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-52-REFINED_FUEL",
+    "countryId": "visual-territory-52",
+    "grantorId": "GOV-52",
+    "holderId": "OP-52",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-53-GRAIN",
+    "countryId": "visual-territory-53",
+    "grantorId": "GOV-53",
+    "holderId": "OP-53",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-53-CRUDE_OIL",
+    "countryId": "visual-territory-53",
+    "grantorId": "GOV-53",
+    "holderId": "OP-53",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-53-REFINED_FUEL",
+    "countryId": "visual-territory-53",
+    "grantorId": "GOV-53",
+    "holderId": "OP-53",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-54-GRAIN",
+    "countryId": "visual-territory-54",
+    "grantorId": "GOV-54",
+    "holderId": "OP-54",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-54-SEMICONDUCTORS",
+    "countryId": "visual-territory-54",
+    "grantorId": "GOV-54",
+    "holderId": "OP-54",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-54-URANIUM",
+    "countryId": "visual-territory-54",
+    "grantorId": "GOV-54",
+    "holderId": "OP-54",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-55-GRAIN",
+    "countryId": "visual-territory-55",
+    "grantorId": "GOV-55",
+    "holderId": "OP-55",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-55-CRUDE_OIL",
+    "countryId": "visual-territory-55",
+    "grantorId": "GOV-55",
+    "holderId": "OP-55",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-55-REFINED_FUEL",
+    "countryId": "visual-territory-55",
+    "grantorId": "GOV-55",
+    "holderId": "OP-55",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-55-SEMICONDUCTORS",
+    "countryId": "visual-territory-55",
+    "grantorId": "GOV-55",
+    "holderId": "OP-55",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-56-SEMICONDUCTORS",
+    "countryId": "visual-territory-56",
+    "grantorId": "GOV-56",
+    "holderId": "OP-56",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-56-MACHINERY",
+    "countryId": "visual-territory-56",
+    "grantorId": "GOV-56",
+    "holderId": "OP-56",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-56-CRUDE_OIL",
+    "countryId": "visual-territory-56",
+    "grantorId": "GOV-56",
+    "holderId": "OP-56",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-56-BATTERIES",
+    "countryId": "visual-territory-56",
+    "grantorId": "GOV-56",
+    "holderId": "OP-56",
+    "activity": "BATTERIES",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-57-STEEL",
+    "countryId": "visual-territory-57",
+    "grantorId": "GOV-57",
+    "holderId": "OP-57",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-57-IRON_ORE",
+    "countryId": "visual-territory-57",
+    "grantorId": "GOV-57",
+    "holderId": "OP-57",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-57-MACHINERY",
+    "countryId": "visual-territory-57",
+    "grantorId": "GOV-57",
+    "holderId": "OP-57",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-58-GRAIN",
+    "countryId": "visual-territory-58",
+    "grantorId": "GOV-58",
+    "holderId": "OP-58",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-58-IRON_ORE",
+    "countryId": "visual-territory-58",
+    "grantorId": "GOV-58",
+    "holderId": "OP-58",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-58-URANIUM",
+    "countryId": "visual-territory-58",
+    "grantorId": "GOV-58",
+    "holderId": "OP-58",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-59-STEEL",
+    "countryId": "visual-territory-59",
+    "grantorId": "GOV-59",
+    "holderId": "OP-59",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-59-IRON_ORE",
+    "countryId": "visual-territory-59",
+    "grantorId": "GOV-59",
+    "holderId": "OP-59",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-59-MACHINERY",
+    "countryId": "visual-territory-59",
+    "grantorId": "GOV-59",
+    "holderId": "OP-59",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-60-GRAIN",
+    "countryId": "visual-territory-60",
+    "grantorId": "GOV-60",
+    "holderId": "OP-60",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-60-REFINED_FUEL",
+    "countryId": "visual-territory-60",
+    "grantorId": "GOV-60",
+    "holderId": "OP-60",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-60-URANIUM",
+    "countryId": "visual-territory-60",
+    "grantorId": "GOV-60",
+    "holderId": "OP-60",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-61-GRAIN",
+    "countryId": "visual-territory-61",
+    "grantorId": "GOV-61",
+    "holderId": "OP-61",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-61-MACHINERY",
+    "countryId": "visual-territory-61",
+    "grantorId": "GOV-61",
+    "holderId": "OP-61",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-61-SEMICONDUCTORS",
+    "countryId": "visual-territory-61",
+    "grantorId": "GOV-61",
+    "holderId": "OP-61",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-61-URANIUM",
+    "countryId": "visual-territory-61",
+    "grantorId": "GOV-61",
+    "holderId": "OP-61",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-62-REFINED_FUEL",
+    "countryId": "visual-territory-62",
+    "grantorId": "GOV-62",
+    "holderId": "OP-62",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-62-CRUDE_OIL",
+    "countryId": "visual-territory-62",
+    "grantorId": "GOV-62",
+    "holderId": "OP-62",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-62-IRON_ORE",
+    "countryId": "visual-territory-62",
+    "grantorId": "GOV-62",
+    "holderId": "OP-62",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-63-REFINED_FUEL",
+    "countryId": "visual-territory-63",
+    "grantorId": "GOV-63",
+    "holderId": "OP-63",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-63-CRUDE_OIL",
+    "countryId": "visual-territory-63",
+    "grantorId": "GOV-63",
+    "holderId": "OP-63",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-63-STEEL",
+    "countryId": "visual-territory-63",
+    "grantorId": "GOV-63",
+    "holderId": "OP-63",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-63-IRON_ORE",
+    "countryId": "visual-territory-63",
+    "grantorId": "GOV-63",
+    "holderId": "OP-63",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-64-GRAIN",
+    "countryId": "visual-territory-64",
+    "grantorId": "GOV-64",
+    "holderId": "OP-64",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-64-MACHINERY",
+    "countryId": "visual-territory-64",
+    "grantorId": "GOV-64",
+    "holderId": "OP-64",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-64-URANIUM",
+    "countryId": "visual-territory-64",
+    "grantorId": "GOV-64",
+    "holderId": "OP-64",
+    "activity": "URANIUM",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-65-GRAIN",
+    "countryId": "visual-territory-65",
+    "grantorId": "GOV-65",
+    "holderId": "OP-65",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-65-BATTERIES",
+    "countryId": "visual-territory-65",
+    "grantorId": "GOV-65",
+    "holderId": "OP-65",
+    "activity": "BATTERIES",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-66-REFINED_FUEL",
+    "countryId": "visual-territory-66",
+    "grantorId": "GOV-66",
+    "holderId": "OP-66",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-66-CRUDE_OIL",
+    "countryId": "visual-territory-66",
+    "grantorId": "GOV-66",
+    "holderId": "OP-66",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-66-GRAIN",
+    "countryId": "visual-territory-66",
+    "grantorId": "GOV-66",
+    "holderId": "OP-66",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-66-MACHINERY",
+    "countryId": "visual-territory-66",
+    "grantorId": "GOV-66",
+    "holderId": "OP-66",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-67-REFINED_FUEL",
+    "countryId": "visual-territory-67",
+    "grantorId": "GOV-67",
+    "holderId": "OP-67",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-67-CRUDE_OIL",
+    "countryId": "visual-territory-67",
+    "grantorId": "GOV-67",
+    "holderId": "OP-67",
+    "activity": "CRUDE_OIL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-67-MACHINERY",
+    "countryId": "visual-territory-67",
+    "grantorId": "GOV-67",
+    "holderId": "OP-67",
+    "activity": "MACHINERY",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-67-SEMICONDUCTORS",
+    "countryId": "visual-territory-67",
+    "grantorId": "GOV-67",
+    "holderId": "OP-67",
+    "activity": "SEMICONDUCTORS",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-68-STEEL",
+    "countryId": "visual-territory-68",
+    "grantorId": "GOV-68",
+    "holderId": "OP-68",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-68-IRON_ORE",
+    "countryId": "visual-territory-68",
+    "grantorId": "GOV-68",
+    "holderId": "OP-68",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-69-STEEL",
+    "countryId": "visual-territory-69",
+    "grantorId": "GOV-69",
+    "holderId": "OP-69",
+    "activity": "STEEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-69-IRON_ORE",
+    "countryId": "visual-territory-69",
+    "grantorId": "GOV-69",
+    "holderId": "OP-69",
+    "activity": "IRON_ORE",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-70-GRAIN",
+    "countryId": "visual-territory-70",
+    "grantorId": "GOV-70",
+    "holderId": "OP-70",
+    "activity": "GRAIN",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  },
+  {
+    "id": "LIC-70-REFINED_FUEL",
+    "countryId": "visual-territory-70",
+    "grantorId": "GOV-70",
+    "holderId": "OP-70",
+    "activity": "REFINED_FUEL",
+    "validFromSimDay": 0,
+    "validUntilSimDay": 600,
+    "status": "PROPOSED_NOT_GRANTED",
+    "feeGcuProposal": 0,
+    "conditions": [
+      "season adoption",
+      "resource and environmental limits",
+      "operator registration"
+    ]
+  }
+]

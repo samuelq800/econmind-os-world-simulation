@@ -1,0 +1,610 @@
+[
+  {
+    "countryId": "visual-territory-01",
+    "regionId": "visual-territory-01-E1",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 13189.256710153333,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-02",
+    "regionId": "visual-territory-02-E1",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 16853.806682356666,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "regionId": "visual-territory-03-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 32280.340207229998,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "regionId": "visual-territory-04-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 34612.01847649334,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-05",
+    "regionId": "visual-territory-05-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 25949.36880258667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-06",
+    "regionId": "visual-territory-06-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 39094.55010876334,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "regionId": "visual-territory-07-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 29212.263184953335,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "regionId": "visual-territory-08-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 31516.26796438,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "regionId": "visual-territory-09-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 26550.52299117667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "regionId": "visual-territory-10-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 29311.57917146,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "regionId": "visual-territory-11-E1",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 17743.682024700003,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "regionId": "visual-territory-12-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 36645.43448836,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "regionId": "visual-territory-13-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 26265.84079109667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "regionId": "visual-territory-14-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 9059.838,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "regionId": "visual-territory-14-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 18019.278003330004,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "regionId": "visual-territory-15-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 36232.86748104334,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "regionId": "visual-territory-16-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 35373.63017265667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "regionId": "visual-territory-17-E1",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 5765.352,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "regionId": "visual-territory-17-E1",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 12019.83257459,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "regionId": "visual-territory-18-E1",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 14324.610002730002,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "regionId": "visual-territory-19-E1",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 14494.264274873334,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "regionId": "visual-territory-20-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 22879.54367197667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "regionId": "visual-territory-21-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 31837.79614896,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "regionId": "visual-territory-22-E1",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 13251.315830013335,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "regionId": "visual-territory-23-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 46049.19946324667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "regionId": "visual-territory-24-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 27643.59060205,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "regionId": "visual-territory-25-E1",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 15050.038921090001,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "regionId": "visual-territory-26-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 18800.760539176666,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "regionId": "visual-territory-27-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 27118.09514454667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "regionId": "visual-territory-28-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 27137.683654756667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "regionId": "visual-territory-29-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 25025.41166921,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "regionId": "visual-territory-30-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 22671.908903423337,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "regionId": "visual-territory-31-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 24628.428076353335,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "regionId": "visual-territory-32-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 16055.021228106669,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-33",
+    "regionId": "visual-territory-33-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 20510.05422026,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-34",
+    "regionId": "visual-territory-34-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 24862.19929416667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "regionId": "visual-territory-35-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 22460.162611509997,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "regionId": "visual-territory-36-E1",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 10705.575272956667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "regionId": "visual-territory-37-E1",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 9883.46,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "regionId": "visual-territory-37-E1",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 2057.275367793334,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "regionId": "visual-territory-38-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 35473.86493172,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "regionId": "visual-territory-39-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 26950.826472786666,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "regionId": "visual-territory-40-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 24584.874391823334,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "regionId": "visual-territory-41-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 27169.714950396665,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "regionId": "visual-territory-42-E1",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 16764.587131106666,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "regionId": "visual-territory-43-E1",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 17178.45079328,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "regionId": "visual-territory-44-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 36244.35535425,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "regionId": "visual-territory-45-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 28801.870286796668,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "regionId": "visual-territory-46-E1",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 34016.23464932667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-47",
+    "regionId": "visual-territory-47-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 42408.92652219667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "regionId": "visual-territory-48-E1",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 16918.30064091,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "regionId": "visual-territory-49-E1",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 23639.72524311333,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "regionId": "visual-territory-50-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 27446.61177873,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "regionId": "visual-territory-51-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 30327.848499823336,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "regionId": "visual-territory-52-E1",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 21982.50568813,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "regionId": "visual-territory-53-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 36177.42625243667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "regionId": "visual-territory-54-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 13589.758,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "regionId": "visual-territory-54-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 31073.69181523667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "regionId": "visual-territory-55-E1",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 20587.430642240004,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "regionId": "visual-territory-56-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 44079.06530571,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "regionId": "visual-territory-57-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 29254.28859038333,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-58",
+    "regionId": "visual-territory-58-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 37336.66115486667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "regionId": "visual-territory-59-E1",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 9236.858116146666,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "regionId": "visual-territory-60-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 34782.50307116667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "regionId": "visual-territory-61-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 42977.705855123335,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "regionId": "visual-territory-62-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 24147.77818991,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "regionId": "visual-territory-63-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 33733.049863119995,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "regionId": "visual-territory-64-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 23061.407,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "regionId": "visual-territory-64-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 17214.241266263336,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "regionId": "visual-territory-65-E2",
+    "from": "convertible",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 3294.487,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "regionId": "visual-territory-65-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 33109.95339790667,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "regionId": "visual-territory-66-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 37477.34322976999,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "regionId": "visual-territory-67-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 28989.58692257,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "regionId": "visual-territory-68-E2",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 25982.998268490002,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "regionId": "visual-territory-69-E1",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 17134.754047886665,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "regionId": "visual-territory-70-E1",
+    "from": "croplandPotential",
+    "to": "urbanIndustrialPotential",
+    "areaKm2": 11112.34196999,
+    "reason": "Explicit settlement and renewable facility footprint allocation"
+  }
+]

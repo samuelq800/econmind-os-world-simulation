@@ -1,0 +1,13 @@
+﻿id,unit,referencePriceGcu,finalDemandPerPersonDay,freightTonnesPerUnit
+CRUDE_OIL,barrel,75.0,0.0,0.136
+NATURAL_GAS,MMBtu,4.0,0.0,0.0192
+URANIUM,tonne U,100000.0,1e-09,1.0
+GRAIN,tonne,250.0,0.0006666666666666666,1.0
+IRON_ORE,tonne,110.0,0.0,1.0
+COPPER,tonne,8000.0,0.0,1.0
+LITHIUM,tonne LCE,15000.0,0.0,1.0
+STEEL,tonne,700.0,0.00015,1.0
+REFINED_FUEL,barrel equivalent,95.0,0.001,0.125
+MACHINERY,equipment unit,25000.0,8e-07,5.0
+SEMICONDUCTORS,standardised chip unit,20.0,0.001,1e-06
+BATTERIES,MWh-equivalent,90000.0,8e-08,6.0

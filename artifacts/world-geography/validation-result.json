@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "regions": 122,
+  "countries": 70,
+  "facilities": 350,
+  "candidateGraphConnected": true,
+  "actualOperatingNetwork": "NOT_ACTIVATED",
+  "mineralConservation": true,
+  "landConservation": true,
+  "populationAndSkillsConserved": true,
+  "bankBalance": true,
+  "finalBalance": {
+    "foodDeficitRegions": 23,
+    "housingGapRegions": 74,
+    "waterDeficitRegions": 0
+  },
+  "fullSimulation": "NOT_RUN"
+}

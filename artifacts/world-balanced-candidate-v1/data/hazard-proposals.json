@@ -1,0 +1,3662 @@
+[
+  {
+    "regionId": "visual-territory-01-E1",
+    "countryId": "visual-territory-01",
+    "kind": "DROUGHT",
+    "exposure": 0.367,
+    "annualEventProbabilityProposal": 0.0594,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-01-E1",
+    "countryId": "visual-territory-01",
+    "kind": "FLOOD",
+    "exposure": 0.43,
+    "annualEventProbabilityProposal": 0.0544,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-01-E1",
+    "countryId": "visual-territory-01",
+    "kind": "STORM",
+    "exposure": 0.587,
+    "annualEventProbabilityProposal": 0.067,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-02-E1",
+    "countryId": "visual-territory-02",
+    "kind": "DROUGHT",
+    "exposure": 0.361,
+    "annualEventProbabilityProposal": 0.0589,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-02-E1",
+    "countryId": "visual-territory-02",
+    "kind": "FLOOD",
+    "exposure": 0.394,
+    "annualEventProbabilityProposal": 0.0515,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-02-E1",
+    "countryId": "visual-territory-02",
+    "kind": "STORM",
+    "exposure": 0.545,
+    "annualEventProbabilityProposal": 0.0636,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-03-E1",
+    "countryId": "visual-territory-03",
+    "kind": "DROUGHT",
+    "exposure": 0.333,
+    "annualEventProbabilityProposal": 0.0566,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-03-E1",
+    "countryId": "visual-territory-03",
+    "kind": "FLOOD",
+    "exposure": 0.447,
+    "annualEventProbabilityProposal": 0.0558,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-03-E1",
+    "countryId": "visual-territory-03",
+    "kind": "STORM",
+    "exposure": 0.644,
+    "annualEventProbabilityProposal": 0.0715,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-03-E2",
+    "countryId": "visual-territory-03",
+    "kind": "DROUGHT",
+    "exposure": 0.368,
+    "annualEventProbabilityProposal": 0.0594,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-03-E2",
+    "countryId": "visual-territory-03",
+    "kind": "FLOOD",
+    "exposure": 0.316,
+    "annualEventProbabilityProposal": 0.0453,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-03-E2",
+    "countryId": "visual-territory-03",
+    "kind": "STORM",
+    "exposure": 0.426,
+    "annualEventProbabilityProposal": 0.0541,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-04-E1",
+    "countryId": "visual-territory-04",
+    "kind": "DROUGHT",
+    "exposure": 0.342,
+    "annualEventProbabilityProposal": 0.0574,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-04-E1",
+    "countryId": "visual-territory-04",
+    "kind": "FLOOD",
+    "exposure": 0.467,
+    "annualEventProbabilityProposal": 0.0574,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-04-E1",
+    "countryId": "visual-territory-04",
+    "kind": "STORM",
+    "exposure": 0.664,
+    "annualEventProbabilityProposal": 0.0731,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-04-E2",
+    "countryId": "visual-territory-04",
+    "kind": "DROUGHT",
+    "exposure": 0.39,
+    "annualEventProbabilityProposal": 0.0612,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-04-E2",
+    "countryId": "visual-territory-04",
+    "kind": "FLOOD",
+    "exposure": 0.336,
+    "annualEventProbabilityProposal": 0.0469,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-04-E2",
+    "countryId": "visual-territory-04",
+    "kind": "STORM",
+    "exposure": 0.436,
+    "annualEventProbabilityProposal": 0.0549,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-05-E1",
+    "countryId": "visual-territory-05",
+    "kind": "DROUGHT",
+    "exposure": 0.331,
+    "annualEventProbabilityProposal": 0.0565,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-05-E1",
+    "countryId": "visual-territory-05",
+    "kind": "FLOOD",
+    "exposure": 0.279,
+    "annualEventProbabilityProposal": 0.0423,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-05-E1",
+    "countryId": "visual-territory-05",
+    "kind": "STORM",
+    "exposure": 0.403,
+    "annualEventProbabilityProposal": 0.0522,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-05-E2",
+    "countryId": "visual-territory-05",
+    "kind": "DROUGHT",
+    "exposure": 0.31,
+    "annualEventProbabilityProposal": 0.0548,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-05-E2",
+    "countryId": "visual-territory-05",
+    "kind": "FLOOD",
+    "exposure": 0.488,
+    "annualEventProbabilityProposal": 0.059,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-05-E2",
+    "countryId": "visual-territory-05",
+    "kind": "STORM",
+    "exposure": 0.683,
+    "annualEventProbabilityProposal": 0.0746,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-06-E1",
+    "countryId": "visual-territory-06",
+    "kind": "DROUGHT",
+    "exposure": 0.16,
+    "annualEventProbabilityProposal": 0.0428,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-06-E1",
+    "countryId": "visual-territory-06",
+    "kind": "FLOOD",
+    "exposure": 0.515,
+    "annualEventProbabilityProposal": 0.0612,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-06-E1",
+    "countryId": "visual-territory-06",
+    "kind": "STORM",
+    "exposure": 0.595,
+    "annualEventProbabilityProposal": 0.0676,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-06-E2",
+    "countryId": "visual-territory-06",
+    "kind": "DROUGHT",
+    "exposure": 0.326,
+    "annualEventProbabilityProposal": 0.0561,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-06-E2",
+    "countryId": "visual-territory-06",
+    "kind": "FLOOD",
+    "exposure": 0.309,
+    "annualEventProbabilityProposal": 0.0447,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-06-E2",
+    "countryId": "visual-territory-06",
+    "kind": "STORM",
+    "exposure": 0.421,
+    "annualEventProbabilityProposal": 0.0537,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-07-E1",
+    "countryId": "visual-territory-07",
+    "kind": "DROUGHT",
+    "exposure": 0.309,
+    "annualEventProbabilityProposal": 0.0547,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-07-E1",
+    "countryId": "visual-territory-07",
+    "kind": "FLOOD",
+    "exposure": 0.337,
+    "annualEventProbabilityProposal": 0.047,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-07-E1",
+    "countryId": "visual-territory-07",
+    "kind": "STORM",
+    "exposure": 0.47,
+    "annualEventProbabilityProposal": 0.0576,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-07-E2",
+    "countryId": "visual-territory-07",
+    "kind": "DROUGHT",
+    "exposure": 0.308,
+    "annualEventProbabilityProposal": 0.0546,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-07-E2",
+    "countryId": "visual-territory-07",
+    "kind": "FLOOD",
+    "exposure": 0.33,
+    "annualEventProbabilityProposal": 0.0464,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-07-E2",
+    "countryId": "visual-territory-07",
+    "kind": "STORM",
+    "exposure": 0.458,
+    "annualEventProbabilityProposal": 0.0566,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-08-E1",
+    "countryId": "visual-territory-08",
+    "kind": "DROUGHT",
+    "exposure": 0.349,
+    "annualEventProbabilityProposal": 0.0579,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-08-E1",
+    "countryId": "visual-territory-08",
+    "kind": "FLOOD",
+    "exposure": 0.269,
+    "annualEventProbabilityProposal": 0.0415,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-08-E1",
+    "countryId": "visual-territory-08",
+    "kind": "STORM",
+    "exposure": 0.408,
+    "annualEventProbabilityProposal": 0.0526,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-08-E2",
+    "countryId": "visual-territory-08",
+    "kind": "DROUGHT",
+    "exposure": 0.308,
+    "annualEventProbabilityProposal": 0.0546,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-08-E2",
+    "countryId": "visual-territory-08",
+    "kind": "FLOOD",
+    "exposure": 0.37,
+    "annualEventProbabilityProposal": 0.0496,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-08-E2",
+    "countryId": "visual-territory-08",
+    "kind": "STORM",
+    "exposure": 0.512,
+    "annualEventProbabilityProposal": 0.061,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-09-E1",
+    "countryId": "visual-territory-09",
+    "kind": "DROUGHT",
+    "exposure": 0.403,
+    "annualEventProbabilityProposal": 0.0622,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-09-E1",
+    "countryId": "visual-territory-09",
+    "kind": "FLOOD",
+    "exposure": 0.378,
+    "annualEventProbabilityProposal": 0.0502,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-09-E1",
+    "countryId": "visual-territory-09",
+    "kind": "STORM",
+    "exposure": 0.619,
+    "annualEventProbabilityProposal": 0.0695,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-09-E2",
+    "countryId": "visual-territory-09",
+    "kind": "DROUGHT",
+    "exposure": 0.636,
+    "annualEventProbabilityProposal": 0.0809,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-09-E2",
+    "countryId": "visual-territory-09",
+    "kind": "FLOOD",
+    "exposure": 0.128,
+    "annualEventProbabilityProposal": 0.0302,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-09-E2",
+    "countryId": "visual-territory-09",
+    "kind": "STORM",
+    "exposure": 0.341,
+    "annualEventProbabilityProposal": 0.0473,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-10-E1",
+    "countryId": "visual-territory-10",
+    "kind": "DROUGHT",
+    "exposure": 0.223,
+    "annualEventProbabilityProposal": 0.0478,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-10-E1",
+    "countryId": "visual-territory-10",
+    "kind": "FLOOD",
+    "exposure": 0.437,
+    "annualEventProbabilityProposal": 0.055,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-10-E1",
+    "countryId": "visual-territory-10",
+    "kind": "STORM",
+    "exposure": 0.526,
+    "annualEventProbabilityProposal": 0.0621,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-10-E2",
+    "countryId": "visual-territory-10",
+    "kind": "DROUGHT",
+    "exposure": 0.307,
+    "annualEventProbabilityProposal": 0.0546,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-10-E2",
+    "countryId": "visual-territory-10",
+    "kind": "FLOOD",
+    "exposure": 0.49,
+    "annualEventProbabilityProposal": 0.0592,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-10-E2",
+    "countryId": "visual-territory-10",
+    "kind": "STORM",
+    "exposure": 0.676,
+    "annualEventProbabilityProposal": 0.0741,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-11-E1",
+    "countryId": "visual-territory-11",
+    "kind": "DROUGHT",
+    "exposure": 0.605,
+    "annualEventProbabilityProposal": 0.0784,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-11-E1",
+    "countryId": "visual-territory-11",
+    "kind": "FLOOD",
+    "exposure": 0.207,
+    "annualEventProbabilityProposal": 0.0366,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-11-E1",
+    "countryId": "visual-territory-11",
+    "kind": "STORM",
+    "exposure": 0.471,
+    "annualEventProbabilityProposal": 0.0577,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-12-E1",
+    "countryId": "visual-territory-12",
+    "kind": "DROUGHT",
+    "exposure": 0.432,
+    "annualEventProbabilityProposal": 0.0646,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-12-E1",
+    "countryId": "visual-territory-12",
+    "kind": "FLOOD",
+    "exposure": 0.359,
+    "annualEventProbabilityProposal": 0.0487,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-12-E1",
+    "countryId": "visual-territory-12",
+    "kind": "STORM",
+    "exposure": 0.627,
+    "annualEventProbabilityProposal": 0.0702,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-12-E2",
+    "countryId": "visual-territory-12",
+    "kind": "DROUGHT",
+    "exposure": 0.611,
+    "annualEventProbabilityProposal": 0.0789,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-12-E2",
+    "countryId": "visual-territory-12",
+    "kind": "FLOOD",
+    "exposure": 0.161,
+    "annualEventProbabilityProposal": 0.0329,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-12-E2",
+    "countryId": "visual-territory-12",
+    "kind": "STORM",
+    "exposure": 0.413,
+    "annualEventProbabilityProposal": 0.053,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-13-E1",
+    "countryId": "visual-territory-13",
+    "kind": "DROUGHT",
+    "exposure": 0.726,
+    "annualEventProbabilityProposal": 0.0881,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-13-E1",
+    "countryId": "visual-territory-13",
+    "kind": "FLOOD",
+    "exposure": 0.146,
+    "annualEventProbabilityProposal": 0.0317,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-13-E1",
+    "countryId": "visual-territory-13",
+    "kind": "STORM",
+    "exposure": 0.444,
+    "annualEventProbabilityProposal": 0.0555,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-13-E2",
+    "countryId": "visual-territory-13",
+    "kind": "DROUGHT",
+    "exposure": 0.941,
+    "annualEventProbabilityProposal": 0.1053,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-13-E2",
+    "countryId": "visual-territory-13",
+    "kind": "FLOOD",
+    "exposure": 0.018,
+    "annualEventProbabilityProposal": 0.0214,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-13-E2",
+    "countryId": "visual-territory-13",
+    "kind": "STORM",
+    "exposure": 0.294,
+    "annualEventProbabilityProposal": 0.0435,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-14-E1",
+    "countryId": "visual-territory-14",
+    "kind": "DROUGHT",
+    "exposure": 0.689,
+    "annualEventProbabilityProposal": 0.0851,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-14-E1",
+    "countryId": "visual-territory-14",
+    "kind": "FLOOD",
+    "exposure": 0.085,
+    "annualEventProbabilityProposal": 0.0268,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-14-E1",
+    "countryId": "visual-territory-14",
+    "kind": "STORM",
+    "exposure": 0.266,
+    "annualEventProbabilityProposal": 0.0413,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-14-E2",
+    "countryId": "visual-territory-14",
+    "kind": "DROUGHT",
+    "exposure": 0.311,
+    "annualEventProbabilityProposal": 0.0549,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-14-E2",
+    "countryId": "visual-territory-14",
+    "kind": "FLOOD",
+    "exposure": 0.32,
+    "annualEventProbabilityProposal": 0.0456,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-14-E2",
+    "countryId": "visual-territory-14",
+    "kind": "STORM",
+    "exposure": 0.447,
+    "annualEventProbabilityProposal": 0.0558,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-15-E1",
+    "countryId": "visual-territory-15",
+    "kind": "DROUGHT",
+    "exposure": 0.483,
+    "annualEventProbabilityProposal": 0.0686,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-15-E1",
+    "countryId": "visual-territory-15",
+    "kind": "FLOOD",
+    "exposure": 0.161,
+    "annualEventProbabilityProposal": 0.0329,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-15-E1",
+    "countryId": "visual-territory-15",
+    "kind": "STORM",
+    "exposure": 0.309,
+    "annualEventProbabilityProposal": 0.0447,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-15-E2",
+    "countryId": "visual-territory-15",
+    "kind": "DROUGHT",
+    "exposure": 0.315,
+    "annualEventProbabilityProposal": 0.0552,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-15-E2",
+    "countryId": "visual-territory-15",
+    "kind": "FLOOD",
+    "exposure": 0.422,
+    "annualEventProbabilityProposal": 0.0538,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-15-E2",
+    "countryId": "visual-territory-15",
+    "kind": "STORM",
+    "exposure": 0.6,
+    "annualEventProbabilityProposal": 0.068,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-16-E1",
+    "countryId": "visual-territory-16",
+    "kind": "DROUGHT",
+    "exposure": 0.308,
+    "annualEventProbabilityProposal": 0.0546,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-16-E1",
+    "countryId": "visual-territory-16",
+    "kind": "FLOOD",
+    "exposure": 0.456,
+    "annualEventProbabilityProposal": 0.0565,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-16-E1",
+    "countryId": "visual-territory-16",
+    "kind": "STORM",
+    "exposure": 0.632,
+    "annualEventProbabilityProposal": 0.0706,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-16-E2",
+    "countryId": "visual-territory-16",
+    "kind": "DROUGHT",
+    "exposure": 0.314,
+    "annualEventProbabilityProposal": 0.0551,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-16-E2",
+    "countryId": "visual-territory-16",
+    "kind": "FLOOD",
+    "exposure": 0.564,
+    "annualEventProbabilityProposal": 0.0651,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-16-E2",
+    "countryId": "visual-territory-16",
+    "kind": "STORM",
+    "exposure": 0.803,
+    "annualEventProbabilityProposal": 0.0842,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-17-E1",
+    "countryId": "visual-territory-17",
+    "kind": "DROUGHT",
+    "exposure": 0.635,
+    "annualEventProbabilityProposal": 0.0808,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-17-E1",
+    "countryId": "visual-territory-17",
+    "kind": "FLOOD",
+    "exposure": 0.255,
+    "annualEventProbabilityProposal": 0.0404,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-17-E1",
+    "countryId": "visual-territory-17",
+    "kind": "STORM",
+    "exposure": 0.524,
+    "annualEventProbabilityProposal": 0.0619,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-18-E1",
+    "countryId": "visual-territory-18",
+    "kind": "DROUGHT",
+    "exposure": 0.759,
+    "annualEventProbabilityProposal": 0.0907,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-18-E1",
+    "countryId": "visual-territory-18",
+    "kind": "FLOOD",
+    "exposure": 0.117,
+    "annualEventProbabilityProposal": 0.0294,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-18-E1",
+    "countryId": "visual-territory-18",
+    "kind": "STORM",
+    "exposure": 0.242,
+    "annualEventProbabilityProposal": 0.0394,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-19-E1",
+    "countryId": "visual-territory-19",
+    "kind": "DROUGHT",
+    "exposure": 0.704,
+    "annualEventProbabilityProposal": 0.0863,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-19-E1",
+    "countryId": "visual-territory-19",
+    "kind": "FLOOD",
+    "exposure": 0.131,
+    "annualEventProbabilityProposal": 0.0305,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-19-E1",
+    "countryId": "visual-territory-19",
+    "kind": "STORM",
+    "exposure": 0.235,
+    "annualEventProbabilityProposal": 0.0388,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-20-E1",
+    "countryId": "visual-territory-20",
+    "kind": "DROUGHT",
+    "exposure": 0.82,
+    "annualEventProbabilityProposal": 0.0956,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-20-E1",
+    "countryId": "visual-territory-20",
+    "kind": "FLOOD",
+    "exposure": 0.044,
+    "annualEventProbabilityProposal": 0.0235,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-20-E1",
+    "countryId": "visual-territory-20",
+    "kind": "STORM",
+    "exposure": 0.111,
+    "annualEventProbabilityProposal": 0.0289,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-20-E2",
+    "countryId": "visual-territory-20",
+    "kind": "DROUGHT",
+    "exposure": 0.848,
+    "annualEventProbabilityProposal": 0.0978,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-20-E2",
+    "countryId": "visual-territory-20",
+    "kind": "FLOOD",
+    "exposure": 0.034,
+    "annualEventProbabilityProposal": 0.0227,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-20-E2",
+    "countryId": "visual-territory-20",
+    "kind": "STORM",
+    "exposure": 0.134,
+    "annualEventProbabilityProposal": 0.0307,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-21-E1",
+    "countryId": "visual-territory-21",
+    "kind": "DROUGHT",
+    "exposure": 0.762,
+    "annualEventProbabilityProposal": 0.091,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-21-E1",
+    "countryId": "visual-territory-21",
+    "kind": "FLOOD",
+    "exposure": 0.065,
+    "annualEventProbabilityProposal": 0.0252,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-21-E1",
+    "countryId": "visual-territory-21",
+    "kind": "STORM",
+    "exposure": 0.142,
+    "annualEventProbabilityProposal": 0.0314,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-21-E2",
+    "countryId": "visual-territory-21",
+    "kind": "DROUGHT",
+    "exposure": 0.677,
+    "annualEventProbabilityProposal": 0.0842,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-21-E2",
+    "countryId": "visual-territory-21",
+    "kind": "FLOOD",
+    "exposure": 0.132,
+    "annualEventProbabilityProposal": 0.0306,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-21-E2",
+    "countryId": "visual-territory-21",
+    "kind": "STORM",
+    "exposure": 0.209,
+    "annualEventProbabilityProposal": 0.0367,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-22-E1",
+    "countryId": "visual-territory-22",
+    "kind": "DROUGHT",
+    "exposure": 0.586,
+    "annualEventProbabilityProposal": 0.0769,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-22-E1",
+    "countryId": "visual-territory-22",
+    "kind": "FLOOD",
+    "exposure": 0.237,
+    "annualEventProbabilityProposal": 0.039,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-22-E1",
+    "countryId": "visual-territory-22",
+    "kind": "STORM",
+    "exposure": 0.213,
+    "annualEventProbabilityProposal": 0.037,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-23-E1",
+    "countryId": "visual-territory-23",
+    "kind": "DROUGHT",
+    "exposure": 0.594,
+    "annualEventProbabilityProposal": 0.0775,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-23-E1",
+    "countryId": "visual-territory-23",
+    "kind": "FLOOD",
+    "exposure": 0.193,
+    "annualEventProbabilityProposal": 0.0354,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-23-E1",
+    "countryId": "visual-territory-23",
+    "kind": "STORM",
+    "exposure": 0.265,
+    "annualEventProbabilityProposal": 0.0412,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-23-E2",
+    "countryId": "visual-territory-23",
+    "kind": "DROUGHT",
+    "exposure": 0.594,
+    "annualEventProbabilityProposal": 0.0775,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-23-E2",
+    "countryId": "visual-territory-23",
+    "kind": "FLOOD",
+    "exposure": 0.168,
+    "annualEventProbabilityProposal": 0.0334,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-23-E2",
+    "countryId": "visual-territory-23",
+    "kind": "STORM",
+    "exposure": 0.215,
+    "annualEventProbabilityProposal": 0.0372,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-24-E1",
+    "countryId": "visual-territory-24",
+    "kind": "DROUGHT",
+    "exposure": 0.485,
+    "annualEventProbabilityProposal": 0.0688,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-24-E1",
+    "countryId": "visual-territory-24",
+    "kind": "FLOOD",
+    "exposure": 0.324,
+    "annualEventProbabilityProposal": 0.0459,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-24-E1",
+    "countryId": "visual-territory-24",
+    "kind": "STORM",
+    "exposure": 0.37,
+    "annualEventProbabilityProposal": 0.0496,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-24-E2",
+    "countryId": "visual-territory-24",
+    "kind": "DROUGHT",
+    "exposure": 0.468,
+    "annualEventProbabilityProposal": 0.0674,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-24-E2",
+    "countryId": "visual-territory-24",
+    "kind": "FLOOD",
+    "exposure": 0.427,
+    "annualEventProbabilityProposal": 0.0542,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-24-E2",
+    "countryId": "visual-territory-24",
+    "kind": "STORM",
+    "exposure": 0.461,
+    "annualEventProbabilityProposal": 0.0569,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-25-E1",
+    "countryId": "visual-territory-25",
+    "kind": "DROUGHT",
+    "exposure": 0.589,
+    "annualEventProbabilityProposal": 0.0771,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-25-E1",
+    "countryId": "visual-territory-25",
+    "kind": "FLOOD",
+    "exposure": 0.331,
+    "annualEventProbabilityProposal": 0.0465,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-25-E1",
+    "countryId": "visual-territory-25",
+    "kind": "STORM",
+    "exposure": 0.307,
+    "annualEventProbabilityProposal": 0.0446,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-26-E1",
+    "countryId": "visual-territory-26",
+    "kind": "DROUGHT",
+    "exposure": 0.702,
+    "annualEventProbabilityProposal": 0.0862,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-26-E1",
+    "countryId": "visual-territory-26",
+    "kind": "FLOOD",
+    "exposure": 0.193,
+    "annualEventProbabilityProposal": 0.0354,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-26-E1",
+    "countryId": "visual-territory-26",
+    "kind": "STORM",
+    "exposure": 0.207,
+    "annualEventProbabilityProposal": 0.0366,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-26-E2",
+    "countryId": "visual-territory-26",
+    "kind": "DROUGHT",
+    "exposure": 0.722,
+    "annualEventProbabilityProposal": 0.0878,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-26-E2",
+    "countryId": "visual-territory-26",
+    "kind": "FLOOD",
+    "exposure": 0.149,
+    "annualEventProbabilityProposal": 0.0319,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-26-E2",
+    "countryId": "visual-territory-26",
+    "kind": "STORM",
+    "exposure": 0.179,
+    "annualEventProbabilityProposal": 0.0343,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-27-E1",
+    "countryId": "visual-territory-27",
+    "kind": "DROUGHT",
+    "exposure": 0.729,
+    "annualEventProbabilityProposal": 0.0883,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-27-E1",
+    "countryId": "visual-territory-27",
+    "kind": "FLOOD",
+    "exposure": 0.108,
+    "annualEventProbabilityProposal": 0.0286,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-27-E1",
+    "countryId": "visual-territory-27",
+    "kind": "STORM",
+    "exposure": 0.132,
+    "annualEventProbabilityProposal": 0.0306,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-27-E2",
+    "countryId": "visual-territory-27",
+    "kind": "DROUGHT",
+    "exposure": 0.682,
+    "annualEventProbabilityProposal": 0.0846,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-27-E2",
+    "countryId": "visual-territory-27",
+    "kind": "FLOOD",
+    "exposure": 0.118,
+    "annualEventProbabilityProposal": 0.0294,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-27-E2",
+    "countryId": "visual-territory-27",
+    "kind": "STORM",
+    "exposure": 0.147,
+    "annualEventProbabilityProposal": 0.0318,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-28-E1",
+    "countryId": "visual-territory-28",
+    "kind": "DROUGHT",
+    "exposure": 0.738,
+    "annualEventProbabilityProposal": 0.089,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-28-E1",
+    "countryId": "visual-territory-28",
+    "kind": "FLOOD",
+    "exposure": 0.169,
+    "annualEventProbabilityProposal": 0.0335,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-28-E1",
+    "countryId": "visual-territory-28",
+    "kind": "STORM",
+    "exposure": 0.153,
+    "annualEventProbabilityProposal": 0.0322,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-28-E2",
+    "countryId": "visual-territory-28",
+    "kind": "DROUGHT",
+    "exposure": 0.73,
+    "annualEventProbabilityProposal": 0.0884,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-28-E2",
+    "countryId": "visual-territory-28",
+    "kind": "FLOOD",
+    "exposure": 0.126,
+    "annualEventProbabilityProposal": 0.0301,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-28-E2",
+    "countryId": "visual-territory-28",
+    "kind": "STORM",
+    "exposure": 0.126,
+    "annualEventProbabilityProposal": 0.0301,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-29-E1",
+    "countryId": "visual-territory-29",
+    "kind": "DROUGHT",
+    "exposure": 0.714,
+    "annualEventProbabilityProposal": 0.0871,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-29-E1",
+    "countryId": "visual-territory-29",
+    "kind": "FLOOD",
+    "exposure": 0.149,
+    "annualEventProbabilityProposal": 0.0319,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-29-E1",
+    "countryId": "visual-territory-29",
+    "kind": "STORM",
+    "exposure": 0.159,
+    "annualEventProbabilityProposal": 0.0327,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-29-E2",
+    "countryId": "visual-territory-29",
+    "kind": "DROUGHT",
+    "exposure": 0.715,
+    "annualEventProbabilityProposal": 0.0872,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-29-E2",
+    "countryId": "visual-territory-29",
+    "kind": "FLOOD",
+    "exposure": 0.174,
+    "annualEventProbabilityProposal": 0.0339,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-29-E2",
+    "countryId": "visual-territory-29",
+    "kind": "STORM",
+    "exposure": 0.164,
+    "annualEventProbabilityProposal": 0.0331,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-30-E1",
+    "countryId": "visual-territory-30",
+    "kind": "DROUGHT",
+    "exposure": 0.649,
+    "annualEventProbabilityProposal": 0.0819,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-30-E1",
+    "countryId": "visual-territory-30",
+    "kind": "FLOOD",
+    "exposure": 0.211,
+    "annualEventProbabilityProposal": 0.0369,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-30-E1",
+    "countryId": "visual-territory-30",
+    "kind": "STORM",
+    "exposure": 0.213,
+    "annualEventProbabilityProposal": 0.037,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-30-E2",
+    "countryId": "visual-territory-30",
+    "kind": "DROUGHT",
+    "exposure": 0.675,
+    "annualEventProbabilityProposal": 0.084,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-30-E2",
+    "countryId": "visual-territory-30",
+    "kind": "FLOOD",
+    "exposure": 0.232,
+    "annualEventProbabilityProposal": 0.0386,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-30-E2",
+    "countryId": "visual-territory-30",
+    "kind": "STORM",
+    "exposure": 0.197,
+    "annualEventProbabilityProposal": 0.0358,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-31-E1",
+    "countryId": "visual-territory-31",
+    "kind": "DROUGHT",
+    "exposure": 0.614,
+    "annualEventProbabilityProposal": 0.0791,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-31-E1",
+    "countryId": "visual-territory-31",
+    "kind": "FLOOD",
+    "exposure": 0.285,
+    "annualEventProbabilityProposal": 0.0428,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-31-E1",
+    "countryId": "visual-territory-31",
+    "kind": "STORM",
+    "exposure": 0.267,
+    "annualEventProbabilityProposal": 0.0414,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-31-E2",
+    "countryId": "visual-territory-31",
+    "kind": "DROUGHT",
+    "exposure": 0.579,
+    "annualEventProbabilityProposal": 0.0763,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-31-E2",
+    "countryId": "visual-territory-31",
+    "kind": "FLOOD",
+    "exposure": 0.313,
+    "annualEventProbabilityProposal": 0.045,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-31-E2",
+    "countryId": "visual-territory-31",
+    "kind": "STORM",
+    "exposure": 0.287,
+    "annualEventProbabilityProposal": 0.043,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-32-E1",
+    "countryId": "visual-territory-32",
+    "kind": "DROUGHT",
+    "exposure": 0.767,
+    "annualEventProbabilityProposal": 0.0914,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-32-E1",
+    "countryId": "visual-territory-32",
+    "kind": "FLOOD",
+    "exposure": 0.173,
+    "annualEventProbabilityProposal": 0.0338,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-32-E1",
+    "countryId": "visual-territory-32",
+    "kind": "STORM",
+    "exposure": 0.121,
+    "annualEventProbabilityProposal": 0.0297,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-32-E2",
+    "countryId": "visual-territory-32",
+    "kind": "DROUGHT",
+    "exposure": 0.727,
+    "annualEventProbabilityProposal": 0.0882,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-32-E2",
+    "countryId": "visual-territory-32",
+    "kind": "FLOOD",
+    "exposure": 0.239,
+    "annualEventProbabilityProposal": 0.0391,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-32-E2",
+    "countryId": "visual-territory-32",
+    "kind": "STORM",
+    "exposure": 0.184,
+    "annualEventProbabilityProposal": 0.0347,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-33-E1",
+    "countryId": "visual-territory-33",
+    "kind": "DROUGHT",
+    "exposure": 0.576,
+    "annualEventProbabilityProposal": 0.0761,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-33-E1",
+    "countryId": "visual-territory-33",
+    "kind": "FLOOD",
+    "exposure": 0.293,
+    "annualEventProbabilityProposal": 0.0434,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-33-E1",
+    "countryId": "visual-territory-33",
+    "kind": "STORM",
+    "exposure": 0.278,
+    "annualEventProbabilityProposal": 0.0422,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-33-E2",
+    "countryId": "visual-territory-33",
+    "kind": "DROUGHT",
+    "exposure": 0.712,
+    "annualEventProbabilityProposal": 0.087,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-33-E2",
+    "countryId": "visual-territory-33",
+    "kind": "FLOOD",
+    "exposure": 0.146,
+    "annualEventProbabilityProposal": 0.0317,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-33-E2",
+    "countryId": "visual-territory-33",
+    "kind": "STORM",
+    "exposure": 0.093,
+    "annualEventProbabilityProposal": 0.0274,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-34-E1",
+    "countryId": "visual-territory-34",
+    "kind": "DROUGHT",
+    "exposure": 0.642,
+    "annualEventProbabilityProposal": 0.0814,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-34-E1",
+    "countryId": "visual-territory-34",
+    "kind": "FLOOD",
+    "exposure": 0.153,
+    "annualEventProbabilityProposal": 0.0322,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-34-E1",
+    "countryId": "visual-territory-34",
+    "kind": "STORM",
+    "exposure": 0.139,
+    "annualEventProbabilityProposal": 0.0311,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-34-E2",
+    "countryId": "visual-territory-34",
+    "kind": "DROUGHT",
+    "exposure": 0.662,
+    "annualEventProbabilityProposal": 0.083,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-34-E2",
+    "countryId": "visual-territory-34",
+    "kind": "FLOOD",
+    "exposure": 0.137,
+    "annualEventProbabilityProposal": 0.031,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-34-E2",
+    "countryId": "visual-territory-34",
+    "kind": "STORM",
+    "exposure": 0.133,
+    "annualEventProbabilityProposal": 0.0306,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-35-E1",
+    "countryId": "visual-territory-35",
+    "kind": "DROUGHT",
+    "exposure": 0.621,
+    "annualEventProbabilityProposal": 0.0797,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-35-E1",
+    "countryId": "visual-territory-35",
+    "kind": "FLOOD",
+    "exposure": 0.19,
+    "annualEventProbabilityProposal": 0.0352,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-35-E1",
+    "countryId": "visual-territory-35",
+    "kind": "STORM",
+    "exposure": 0.179,
+    "annualEventProbabilityProposal": 0.0343,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-35-E2",
+    "countryId": "visual-territory-35",
+    "kind": "DROUGHT",
+    "exposure": 0.641,
+    "annualEventProbabilityProposal": 0.0813,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-35-E2",
+    "countryId": "visual-territory-35",
+    "kind": "FLOOD",
+    "exposure": 0.236,
+    "annualEventProbabilityProposal": 0.0389,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-35-E2",
+    "countryId": "visual-territory-35",
+    "kind": "STORM",
+    "exposure": 0.174,
+    "annualEventProbabilityProposal": 0.0339,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-36-E1",
+    "countryId": "visual-territory-36",
+    "kind": "DROUGHT",
+    "exposure": 0.623,
+    "annualEventProbabilityProposal": 0.0798,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-36-E1",
+    "countryId": "visual-territory-36",
+    "kind": "FLOOD",
+    "exposure": 0.263,
+    "annualEventProbabilityProposal": 0.041,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-36-E1",
+    "countryId": "visual-territory-36",
+    "kind": "STORM",
+    "exposure": 0.161,
+    "annualEventProbabilityProposal": 0.0329,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-37-E1",
+    "countryId": "visual-territory-37",
+    "kind": "DROUGHT",
+    "exposure": 0.511,
+    "annualEventProbabilityProposal": 0.0709,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-37-E1",
+    "countryId": "visual-territory-37",
+    "kind": "FLOOD",
+    "exposure": 0.349,
+    "annualEventProbabilityProposal": 0.0479,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-37-E1",
+    "countryId": "visual-territory-37",
+    "kind": "STORM",
+    "exposure": 0.328,
+    "annualEventProbabilityProposal": 0.0462,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-38-E1",
+    "countryId": "visual-territory-38",
+    "kind": "DROUGHT",
+    "exposure": 0.505,
+    "annualEventProbabilityProposal": 0.0704,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-38-E1",
+    "countryId": "visual-territory-38",
+    "kind": "FLOOD",
+    "exposure": 0.365,
+    "annualEventProbabilityProposal": 0.0492,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-38-E1",
+    "countryId": "visual-territory-38",
+    "kind": "STORM",
+    "exposure": 0.359,
+    "annualEventProbabilityProposal": 0.0487,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-38-E2",
+    "countryId": "visual-territory-38",
+    "kind": "DROUGHT",
+    "exposure": 0.653,
+    "annualEventProbabilityProposal": 0.0822,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-38-E2",
+    "countryId": "visual-territory-38",
+    "kind": "FLOOD",
+    "exposure": 0.15,
+    "annualEventProbabilityProposal": 0.032,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-38-E2",
+    "countryId": "visual-territory-38",
+    "kind": "STORM",
+    "exposure": 0.234,
+    "annualEventProbabilityProposal": 0.0387,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-39-E1",
+    "countryId": "visual-territory-39",
+    "kind": "DROUGHT",
+    "exposure": 0.716,
+    "annualEventProbabilityProposal": 0.0873,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-39-E1",
+    "countryId": "visual-territory-39",
+    "kind": "FLOOD",
+    "exposure": 0.158,
+    "annualEventProbabilityProposal": 0.0326,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-39-E1",
+    "countryId": "visual-territory-39",
+    "kind": "STORM",
+    "exposure": 0.25,
+    "annualEventProbabilityProposal": 0.04,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-39-E2",
+    "countryId": "visual-territory-39",
+    "kind": "DROUGHT",
+    "exposure": 0.659,
+    "annualEventProbabilityProposal": 0.0827,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-39-E2",
+    "countryId": "visual-territory-39",
+    "kind": "FLOOD",
+    "exposure": 0.171,
+    "annualEventProbabilityProposal": 0.0337,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-39-E2",
+    "countryId": "visual-territory-39",
+    "kind": "STORM",
+    "exposure": 0.205,
+    "annualEventProbabilityProposal": 0.0364,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-40-E1",
+    "countryId": "visual-territory-40",
+    "kind": "DROUGHT",
+    "exposure": 0.679,
+    "annualEventProbabilityProposal": 0.0843,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-40-E1",
+    "countryId": "visual-territory-40",
+    "kind": "FLOOD",
+    "exposure": 0.125,
+    "annualEventProbabilityProposal": 0.03,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-40-E1",
+    "countryId": "visual-territory-40",
+    "kind": "STORM",
+    "exposure": 0.294,
+    "annualEventProbabilityProposal": 0.0435,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-40-E2",
+    "countryId": "visual-territory-40",
+    "kind": "DROUGHT",
+    "exposure": 0.775,
+    "annualEventProbabilityProposal": 0.092,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-40-E2",
+    "countryId": "visual-territory-40",
+    "kind": "FLOOD",
+    "exposure": 0.083,
+    "annualEventProbabilityProposal": 0.0266,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-40-E2",
+    "countryId": "visual-territory-40",
+    "kind": "STORM",
+    "exposure": 0.287,
+    "annualEventProbabilityProposal": 0.043,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-41-E1",
+    "countryId": "visual-territory-41",
+    "kind": "DROUGHT",
+    "exposure": 0.588,
+    "annualEventProbabilityProposal": 0.077,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-41-E1",
+    "countryId": "visual-territory-41",
+    "kind": "FLOOD",
+    "exposure": 0.201,
+    "annualEventProbabilityProposal": 0.0361,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-41-E1",
+    "countryId": "visual-territory-41",
+    "kind": "STORM",
+    "exposure": 0.262,
+    "annualEventProbabilityProposal": 0.041,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-41-E2",
+    "countryId": "visual-territory-41",
+    "kind": "DROUGHT",
+    "exposure": 0.537,
+    "annualEventProbabilityProposal": 0.073,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-41-E2",
+    "countryId": "visual-territory-41",
+    "kind": "FLOOD",
+    "exposure": 0.265,
+    "annualEventProbabilityProposal": 0.0412,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-41-E2",
+    "countryId": "visual-territory-41",
+    "kind": "STORM",
+    "exposure": 0.288,
+    "annualEventProbabilityProposal": 0.043,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-42-E1",
+    "countryId": "visual-territory-42",
+    "kind": "DROUGHT",
+    "exposure": 0.516,
+    "annualEventProbabilityProposal": 0.0713,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-42-E1",
+    "countryId": "visual-territory-42",
+    "kind": "FLOOD",
+    "exposure": 0.316,
+    "annualEventProbabilityProposal": 0.0453,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-42-E1",
+    "countryId": "visual-territory-42",
+    "kind": "STORM",
+    "exposure": 0.321,
+    "annualEventProbabilityProposal": 0.0457,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-43-E1",
+    "countryId": "visual-territory-43",
+    "kind": "DROUGHT",
+    "exposure": 0.514,
+    "annualEventProbabilityProposal": 0.0711,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-43-E1",
+    "countryId": "visual-territory-43",
+    "kind": "FLOOD",
+    "exposure": 0.318,
+    "annualEventProbabilityProposal": 0.0454,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-43-E1",
+    "countryId": "visual-territory-43",
+    "kind": "STORM",
+    "exposure": 0.32,
+    "annualEventProbabilityProposal": 0.0456,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-44-E1",
+    "countryId": "visual-territory-44",
+    "kind": "DROUGHT",
+    "exposure": 0.121,
+    "annualEventProbabilityProposal": 0.0397,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-44-E1",
+    "countryId": "visual-territory-44",
+    "kind": "FLOOD",
+    "exposure": 0.583,
+    "annualEventProbabilityProposal": 0.0666,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-44-E1",
+    "countryId": "visual-territory-44",
+    "kind": "STORM",
+    "exposure": 0.617,
+    "annualEventProbabilityProposal": 0.0694,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-44-E2",
+    "countryId": "visual-territory-44",
+    "kind": "DROUGHT",
+    "exposure": 0.273,
+    "annualEventProbabilityProposal": 0.0518,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-44-E2",
+    "countryId": "visual-territory-44",
+    "kind": "FLOOD",
+    "exposure": 0.401,
+    "annualEventProbabilityProposal": 0.0521,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-44-E2",
+    "countryId": "visual-territory-44",
+    "kind": "STORM",
+    "exposure": 0.531,
+    "annualEventProbabilityProposal": 0.0625,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-45-E1",
+    "countryId": "visual-territory-45",
+    "kind": "DROUGHT",
+    "exposure": 0.687,
+    "annualEventProbabilityProposal": 0.085,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-45-E1",
+    "countryId": "visual-territory-45",
+    "kind": "FLOOD",
+    "exposure": 0.126,
+    "annualEventProbabilityProposal": 0.0301,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-45-E1",
+    "countryId": "visual-territory-45",
+    "kind": "STORM",
+    "exposure": 0.3,
+    "annualEventProbabilityProposal": 0.044,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-45-E2",
+    "countryId": "visual-territory-45",
+    "kind": "DROUGHT",
+    "exposure": 0.669,
+    "annualEventProbabilityProposal": 0.0835,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-45-E2",
+    "countryId": "visual-territory-45",
+    "kind": "FLOOD",
+    "exposure": 0.165,
+    "annualEventProbabilityProposal": 0.0332,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-45-E2",
+    "countryId": "visual-territory-45",
+    "kind": "STORM",
+    "exposure": 0.448,
+    "annualEventProbabilityProposal": 0.0558,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-46-E1",
+    "countryId": "visual-territory-46",
+    "kind": "DROUGHT",
+    "exposure": 0.485,
+    "annualEventProbabilityProposal": 0.0688,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-46-E1",
+    "countryId": "visual-territory-46",
+    "kind": "FLOOD",
+    "exposure": 0.312,
+    "annualEventProbabilityProposal": 0.045,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-46-E1",
+    "countryId": "visual-territory-46",
+    "kind": "STORM",
+    "exposure": 0.6,
+    "annualEventProbabilityProposal": 0.068,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-46-E2",
+    "countryId": "visual-territory-46",
+    "kind": "DROUGHT",
+    "exposure": 0.355,
+    "annualEventProbabilityProposal": 0.0584,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-46-E2",
+    "countryId": "visual-territory-46",
+    "kind": "FLOOD",
+    "exposure": 0.389,
+    "annualEventProbabilityProposal": 0.0511,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-46-E2",
+    "countryId": "visual-territory-46",
+    "kind": "STORM",
+    "exposure": 0.581,
+    "annualEventProbabilityProposal": 0.0665,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-47-E1",
+    "countryId": "visual-territory-47",
+    "kind": "DROUGHT",
+    "exposure": 0.41,
+    "annualEventProbabilityProposal": 0.0628,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-47-E1",
+    "countryId": "visual-territory-47",
+    "kind": "FLOOD",
+    "exposure": 0.309,
+    "annualEventProbabilityProposal": 0.0447,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-47-E1",
+    "countryId": "visual-territory-47",
+    "kind": "STORM",
+    "exposure": 0.448,
+    "annualEventProbabilityProposal": 0.0558,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-47-E2",
+    "countryId": "visual-territory-47",
+    "kind": "DROUGHT",
+    "exposure": 0.206,
+    "annualEventProbabilityProposal": 0.0465,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-47-E2",
+    "countryId": "visual-territory-47",
+    "kind": "FLOOD",
+    "exposure": 0.487,
+    "annualEventProbabilityProposal": 0.059,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-47-E2",
+    "countryId": "visual-territory-47",
+    "kind": "STORM",
+    "exposure": 0.579,
+    "annualEventProbabilityProposal": 0.0663,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-48-E1",
+    "countryId": "visual-territory-48",
+    "kind": "DROUGHT",
+    "exposure": 0.142,
+    "annualEventProbabilityProposal": 0.0414,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-48-E1",
+    "countryId": "visual-territory-48",
+    "kind": "FLOOD",
+    "exposure": 0.66,
+    "annualEventProbabilityProposal": 0.0728,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-48-E1",
+    "countryId": "visual-territory-48",
+    "kind": "STORM",
+    "exposure": 0.735,
+    "annualEventProbabilityProposal": 0.0788,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-49-E1",
+    "countryId": "visual-territory-49",
+    "kind": "DROUGHT",
+    "exposure": 0.491,
+    "annualEventProbabilityProposal": 0.0693,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-49-E1",
+    "countryId": "visual-territory-49",
+    "kind": "FLOOD",
+    "exposure": 0.331,
+    "annualEventProbabilityProposal": 0.0465,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-49-E1",
+    "countryId": "visual-territory-49",
+    "kind": "STORM",
+    "exposure": 0.565,
+    "annualEventProbabilityProposal": 0.0652,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-49-E2",
+    "countryId": "visual-territory-49",
+    "kind": "DROUGHT",
+    "exposure": 0.607,
+    "annualEventProbabilityProposal": 0.0786,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-49-E2",
+    "countryId": "visual-territory-49",
+    "kind": "FLOOD",
+    "exposure": 0.215,
+    "annualEventProbabilityProposal": 0.0372,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-49-E2",
+    "countryId": "visual-territory-49",
+    "kind": "STORM",
+    "exposure": 0.537,
+    "annualEventProbabilityProposal": 0.063,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-50-E1",
+    "countryId": "visual-territory-50",
+    "kind": "DROUGHT",
+    "exposure": 0.147,
+    "annualEventProbabilityProposal": 0.0418,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-50-E1",
+    "countryId": "visual-territory-50",
+    "kind": "FLOOD",
+    "exposure": 0.642,
+    "annualEventProbabilityProposal": 0.0714,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-50-E1",
+    "countryId": "visual-territory-50",
+    "kind": "STORM",
+    "exposure": 0.694,
+    "annualEventProbabilityProposal": 0.0755,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-50-E2",
+    "countryId": "visual-territory-50",
+    "kind": "DROUGHT",
+    "exposure": 0.115,
+    "annualEventProbabilityProposal": 0.0392,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-50-E2",
+    "countryId": "visual-territory-50",
+    "kind": "FLOOD",
+    "exposure": 0.565,
+    "annualEventProbabilityProposal": 0.0652,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-50-E2",
+    "countryId": "visual-territory-50",
+    "kind": "STORM",
+    "exposure": 0.588,
+    "annualEventProbabilityProposal": 0.067,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-51-E1",
+    "countryId": "visual-territory-51",
+    "kind": "DROUGHT",
+    "exposure": 0.115,
+    "annualEventProbabilityProposal": 0.0392,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-51-E1",
+    "countryId": "visual-territory-51",
+    "kind": "FLOOD",
+    "exposure": 0.519,
+    "annualEventProbabilityProposal": 0.0615,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-51-E1",
+    "countryId": "visual-territory-51",
+    "kind": "STORM",
+    "exposure": 0.539,
+    "annualEventProbabilityProposal": 0.0631,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-51-E2",
+    "countryId": "visual-territory-51",
+    "kind": "DROUGHT",
+    "exposure": 0.115,
+    "annualEventProbabilityProposal": 0.0392,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-51-E2",
+    "countryId": "visual-territory-51",
+    "kind": "FLOOD",
+    "exposure": 0.687,
+    "annualEventProbabilityProposal": 0.075,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-51-E2",
+    "countryId": "visual-territory-51",
+    "kind": "STORM",
+    "exposure": 0.715,
+    "annualEventProbabilityProposal": 0.0772,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-52-E1",
+    "countryId": "visual-territory-52",
+    "kind": "DROUGHT",
+    "exposure": 0.115,
+    "annualEventProbabilityProposal": 0.0392,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-52-E1",
+    "countryId": "visual-territory-52",
+    "kind": "FLOOD",
+    "exposure": 0.685,
+    "annualEventProbabilityProposal": 0.0748,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-52-E1",
+    "countryId": "visual-territory-52",
+    "kind": "STORM",
+    "exposure": 0.713,
+    "annualEventProbabilityProposal": 0.077,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-53-E1",
+    "countryId": "visual-territory-53",
+    "kind": "DROUGHT",
+    "exposure": 0.313,
+    "annualEventProbabilityProposal": 0.055,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-53-E1",
+    "countryId": "visual-territory-53",
+    "kind": "FLOOD",
+    "exposure": 0.426,
+    "annualEventProbabilityProposal": 0.0541,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-53-E1",
+    "countryId": "visual-territory-53",
+    "kind": "STORM",
+    "exposure": 0.61,
+    "annualEventProbabilityProposal": 0.0688,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-53-E2",
+    "countryId": "visual-territory-53",
+    "kind": "DROUGHT",
+    "exposure": 0.308,
+    "annualEventProbabilityProposal": 0.0546,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-53-E2",
+    "countryId": "visual-territory-53",
+    "kind": "FLOOD",
+    "exposure": 0.456,
+    "annualEventProbabilityProposal": 0.0565,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-53-E2",
+    "countryId": "visual-territory-53",
+    "kind": "STORM",
+    "exposure": 0.632,
+    "annualEventProbabilityProposal": 0.0706,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-54-E1",
+    "countryId": "visual-territory-54",
+    "kind": "DROUGHT",
+    "exposure": 0.335,
+    "annualEventProbabilityProposal": 0.0568,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-54-E1",
+    "countryId": "visual-territory-54",
+    "kind": "FLOOD",
+    "exposure": 0.425,
+    "annualEventProbabilityProposal": 0.054,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-54-E1",
+    "countryId": "visual-territory-54",
+    "kind": "STORM",
+    "exposure": 0.623,
+    "annualEventProbabilityProposal": 0.0698,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-54-E2",
+    "countryId": "visual-territory-54",
+    "kind": "DROUGHT",
+    "exposure": 0.309,
+    "annualEventProbabilityProposal": 0.0547,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-54-E2",
+    "countryId": "visual-territory-54",
+    "kind": "FLOOD",
+    "exposure": 0.452,
+    "annualEventProbabilityProposal": 0.0562,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-54-E2",
+    "countryId": "visual-territory-54",
+    "kind": "STORM",
+    "exposure": 0.629,
+    "annualEventProbabilityProposal": 0.0703,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-55-E1",
+    "countryId": "visual-territory-55",
+    "kind": "DROUGHT",
+    "exposure": 0.284,
+    "annualEventProbabilityProposal": 0.0527,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-55-E1",
+    "countryId": "visual-territory-55",
+    "kind": "FLOOD",
+    "exposure": 0.576,
+    "annualEventProbabilityProposal": 0.0661,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-55-E1",
+    "countryId": "visual-territory-55",
+    "kind": "STORM",
+    "exposure": 0.767,
+    "annualEventProbabilityProposal": 0.0814,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-56-E1",
+    "countryId": "visual-territory-56",
+    "kind": "DROUGHT",
+    "exposure": 0.127,
+    "annualEventProbabilityProposal": 0.0402,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-56-E1",
+    "countryId": "visual-territory-56",
+    "kind": "FLOOD",
+    "exposure": 0.608,
+    "annualEventProbabilityProposal": 0.0686,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-56-E1",
+    "countryId": "visual-territory-56",
+    "kind": "STORM",
+    "exposure": 0.652,
+    "annualEventProbabilityProposal": 0.0722,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-56-E2",
+    "countryId": "visual-territory-56",
+    "kind": "DROUGHT",
+    "exposure": 0.204,
+    "annualEventProbabilityProposal": 0.0463,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-56-E2",
+    "countryId": "visual-territory-56",
+    "kind": "FLOOD",
+    "exposure": 0.443,
+    "annualEventProbabilityProposal": 0.0554,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-56-E2",
+    "countryId": "visual-territory-56",
+    "kind": "STORM",
+    "exposure": 0.554,
+    "annualEventProbabilityProposal": 0.0643,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-57-E1",
+    "countryId": "visual-territory-57",
+    "kind": "DROUGHT",
+    "exposure": 0.406,
+    "annualEventProbabilityProposal": 0.0625,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-57-E1",
+    "countryId": "visual-territory-57",
+    "kind": "FLOOD",
+    "exposure": 0.345,
+    "annualEventProbabilityProposal": 0.0476,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-57-E1",
+    "countryId": "visual-territory-57",
+    "kind": "STORM",
+    "exposure": 0.379,
+    "annualEventProbabilityProposal": 0.0503,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-57-E2",
+    "countryId": "visual-territory-57",
+    "kind": "DROUGHT",
+    "exposure": 0.376,
+    "annualEventProbabilityProposal": 0.0601,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-57-E2",
+    "countryId": "visual-territory-57",
+    "kind": "FLOOD",
+    "exposure": 0.471,
+    "annualEventProbabilityProposal": 0.0577,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-57-E2",
+    "countryId": "visual-territory-57",
+    "kind": "STORM",
+    "exposure": 0.549,
+    "annualEventProbabilityProposal": 0.0639,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-58-E1",
+    "countryId": "visual-territory-58",
+    "kind": "DROUGHT",
+    "exposure": 0.344,
+    "annualEventProbabilityProposal": 0.0575,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-58-E1",
+    "countryId": "visual-territory-58",
+    "kind": "FLOOD",
+    "exposure": 0.351,
+    "annualEventProbabilityProposal": 0.0481,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-58-E1",
+    "countryId": "visual-territory-58",
+    "kind": "STORM",
+    "exposure": 0.492,
+    "annualEventProbabilityProposal": 0.0594,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-58-E2",
+    "countryId": "visual-territory-58",
+    "kind": "DROUGHT",
+    "exposure": 0.351,
+    "annualEventProbabilityProposal": 0.0581,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-58-E2",
+    "countryId": "visual-territory-58",
+    "kind": "FLOOD",
+    "exposure": 0.475,
+    "annualEventProbabilityProposal": 0.058,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-58-E2",
+    "countryId": "visual-territory-58",
+    "kind": "STORM",
+    "exposure": 0.661,
+    "annualEventProbabilityProposal": 0.0729,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-59-E1",
+    "countryId": "visual-territory-59",
+    "kind": "DROUGHT",
+    "exposure": 0.5,
+    "annualEventProbabilityProposal": 0.07,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-59-E1",
+    "countryId": "visual-territory-59",
+    "kind": "FLOOD",
+    "exposure": 0.428,
+    "annualEventProbabilityProposal": 0.0542,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-59-E1",
+    "countryId": "visual-territory-59",
+    "kind": "STORM",
+    "exposure": 0.41,
+    "annualEventProbabilityProposal": 0.0528,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-60-E1",
+    "countryId": "visual-territory-60",
+    "kind": "DROUGHT",
+    "exposure": 0.268,
+    "annualEventProbabilityProposal": 0.0514,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-60-E1",
+    "countryId": "visual-territory-60",
+    "kind": "FLOOD",
+    "exposure": 0.572,
+    "annualEventProbabilityProposal": 0.0658,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-60-E1",
+    "countryId": "visual-territory-60",
+    "kind": "STORM",
+    "exposure": 0.672,
+    "annualEventProbabilityProposal": 0.0738,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-60-E2",
+    "countryId": "visual-territory-60",
+    "kind": "DROUGHT",
+    "exposure": 0.343,
+    "annualEventProbabilityProposal": 0.0574,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-60-E2",
+    "countryId": "visual-territory-60",
+    "kind": "FLOOD",
+    "exposure": 0.381,
+    "annualEventProbabilityProposal": 0.0505,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-60-E2",
+    "countryId": "visual-territory-60",
+    "kind": "STORM",
+    "exposure": 0.451,
+    "annualEventProbabilityProposal": 0.0561,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-61-E1",
+    "countryId": "visual-territory-61",
+    "kind": "DROUGHT",
+    "exposure": 0.492,
+    "annualEventProbabilityProposal": 0.0694,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-61-E1",
+    "countryId": "visual-territory-61",
+    "kind": "FLOOD",
+    "exposure": 0.259,
+    "annualEventProbabilityProposal": 0.0407,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-61-E1",
+    "countryId": "visual-territory-61",
+    "kind": "STORM",
+    "exposure": 0.306,
+    "annualEventProbabilityProposal": 0.0445,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-61-E2",
+    "countryId": "visual-territory-61",
+    "kind": "DROUGHT",
+    "exposure": 0.353,
+    "annualEventProbabilityProposal": 0.0582,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-61-E2",
+    "countryId": "visual-territory-61",
+    "kind": "FLOOD",
+    "exposure": 0.33,
+    "annualEventProbabilityProposal": 0.0464,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-61-E2",
+    "countryId": "visual-territory-61",
+    "kind": "STORM",
+    "exposure": 0.39,
+    "annualEventProbabilityProposal": 0.0512,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-62-E1",
+    "countryId": "visual-territory-62",
+    "kind": "DROUGHT",
+    "exposure": 0.548,
+    "annualEventProbabilityProposal": 0.0738,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-62-E1",
+    "countryId": "visual-territory-62",
+    "kind": "FLOOD",
+    "exposure": 0.321,
+    "annualEventProbabilityProposal": 0.0457,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-62-E1",
+    "countryId": "visual-territory-62",
+    "kind": "STORM",
+    "exposure": 0.294,
+    "annualEventProbabilityProposal": 0.0435,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-62-E2",
+    "countryId": "visual-territory-62",
+    "kind": "DROUGHT",
+    "exposure": 0.591,
+    "annualEventProbabilityProposal": 0.0773,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-62-E2",
+    "countryId": "visual-territory-62",
+    "kind": "FLOOD",
+    "exposure": 0.329,
+    "annualEventProbabilityProposal": 0.0463,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-62-E2",
+    "countryId": "visual-territory-62",
+    "kind": "STORM",
+    "exposure": 0.288,
+    "annualEventProbabilityProposal": 0.043,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-63-E1",
+    "countryId": "visual-territory-63",
+    "kind": "DROUGHT",
+    "exposure": 0.474,
+    "annualEventProbabilityProposal": 0.0679,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-63-E1",
+    "countryId": "visual-territory-63",
+    "kind": "FLOOD",
+    "exposure": 0.352,
+    "annualEventProbabilityProposal": 0.0482,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-63-E1",
+    "countryId": "visual-territory-63",
+    "kind": "STORM",
+    "exposure": 0.362,
+    "annualEventProbabilityProposal": 0.049,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-63-E2",
+    "countryId": "visual-territory-63",
+    "kind": "DROUGHT",
+    "exposure": 0.494,
+    "annualEventProbabilityProposal": 0.0695,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-63-E2",
+    "countryId": "visual-territory-63",
+    "kind": "FLOOD",
+    "exposure": 0.398,
+    "annualEventProbabilityProposal": 0.0518,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-63-E2",
+    "countryId": "visual-territory-63",
+    "kind": "STORM",
+    "exposure": 0.385,
+    "annualEventProbabilityProposal": 0.0508,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-64-E1",
+    "countryId": "visual-territory-64",
+    "kind": "DROUGHT",
+    "exposure": 0.42,
+    "annualEventProbabilityProposal": 0.0636,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-64-E1",
+    "countryId": "visual-territory-64",
+    "kind": "FLOOD",
+    "exposure": 0.333,
+    "annualEventProbabilityProposal": 0.0466,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-64-E1",
+    "countryId": "visual-territory-64",
+    "kind": "STORM",
+    "exposure": 0.368,
+    "annualEventProbabilityProposal": 0.0494,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-64-E2",
+    "countryId": "visual-territory-64",
+    "kind": "DROUGHT",
+    "exposure": 0.417,
+    "annualEventProbabilityProposal": 0.0634,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-64-E2",
+    "countryId": "visual-territory-64",
+    "kind": "FLOOD",
+    "exposure": 0.462,
+    "annualEventProbabilityProposal": 0.057,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-64-E2",
+    "countryId": "visual-territory-64",
+    "kind": "STORM",
+    "exposure": 0.542,
+    "annualEventProbabilityProposal": 0.0634,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-65-E1",
+    "countryId": "visual-territory-65",
+    "kind": "DROUGHT",
+    "exposure": 0.258,
+    "annualEventProbabilityProposal": 0.0506,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-65-E1",
+    "countryId": "visual-territory-65",
+    "kind": "FLOOD",
+    "exposure": 0.549,
+    "annualEventProbabilityProposal": 0.0639,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-65-E1",
+    "countryId": "visual-territory-65",
+    "kind": "STORM",
+    "exposure": 0.655,
+    "annualEventProbabilityProposal": 0.0724,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-65-E2",
+    "countryId": "visual-territory-65",
+    "kind": "DROUGHT",
+    "exposure": 0.283,
+    "annualEventProbabilityProposal": 0.0526,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-65-E2",
+    "countryId": "visual-territory-65",
+    "kind": "FLOOD",
+    "exposure": 0.42,
+    "annualEventProbabilityProposal": 0.0536,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-65-E2",
+    "countryId": "visual-territory-65",
+    "kind": "STORM",
+    "exposure": 0.493,
+    "annualEventProbabilityProposal": 0.0594,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-66-E1",
+    "countryId": "visual-territory-66",
+    "kind": "DROUGHT",
+    "exposure": 0.357,
+    "annualEventProbabilityProposal": 0.0586,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-66-E1",
+    "countryId": "visual-territory-66",
+    "kind": "FLOOD",
+    "exposure": 0.504,
+    "annualEventProbabilityProposal": 0.0603,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-66-E1",
+    "countryId": "visual-territory-66",
+    "kind": "STORM",
+    "exposure": 0.702,
+    "annualEventProbabilityProposal": 0.0762,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-66-E2",
+    "countryId": "visual-territory-66",
+    "kind": "DROUGHT",
+    "exposure": 0.308,
+    "annualEventProbabilityProposal": 0.0546,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-66-E2",
+    "countryId": "visual-territory-66",
+    "kind": "FLOOD",
+    "exposure": 0.543,
+    "annualEventProbabilityProposal": 0.0634,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-66-E2",
+    "countryId": "visual-territory-66",
+    "kind": "STORM",
+    "exposure": 0.781,
+    "annualEventProbabilityProposal": 0.0825,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-67-E1",
+    "countryId": "visual-territory-67",
+    "kind": "DROUGHT",
+    "exposure": 0.52,
+    "annualEventProbabilityProposal": 0.0716,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-67-E1",
+    "countryId": "visual-territory-67",
+    "kind": "FLOOD",
+    "exposure": 0.358,
+    "annualEventProbabilityProposal": 0.0486,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-67-E1",
+    "countryId": "visual-territory-67",
+    "kind": "STORM",
+    "exposure": 0.342,
+    "annualEventProbabilityProposal": 0.0474,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-67-E2",
+    "countryId": "visual-territory-67",
+    "kind": "DROUGHT",
+    "exposure": 0.507,
+    "annualEventProbabilityProposal": 0.0706,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-67-E2",
+    "countryId": "visual-territory-67",
+    "kind": "FLOOD",
+    "exposure": 0.376,
+    "annualEventProbabilityProposal": 0.0501,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-67-E2",
+    "countryId": "visual-territory-67",
+    "kind": "STORM",
+    "exposure": 0.36,
+    "annualEventProbabilityProposal": 0.0488,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-68-E1",
+    "countryId": "visual-territory-68",
+    "kind": "DROUGHT",
+    "exposure": 0.284,
+    "annualEventProbabilityProposal": 0.0527,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-68-E1",
+    "countryId": "visual-territory-68",
+    "kind": "FLOOD",
+    "exposure": 0.559,
+    "annualEventProbabilityProposal": 0.0647,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-68-E1",
+    "countryId": "visual-territory-68",
+    "kind": "STORM",
+    "exposure": 0.638,
+    "annualEventProbabilityProposal": 0.071,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-68-E2",
+    "countryId": "visual-territory-68",
+    "kind": "DROUGHT",
+    "exposure": 0.471,
+    "annualEventProbabilityProposal": 0.0677,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-68-E2",
+    "countryId": "visual-territory-68",
+    "kind": "FLOOD",
+    "exposure": 0.401,
+    "annualEventProbabilityProposal": 0.0521,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-68-E2",
+    "countryId": "visual-territory-68",
+    "kind": "STORM",
+    "exposure": 0.398,
+    "annualEventProbabilityProposal": 0.0518,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-69-E1",
+    "countryId": "visual-territory-69",
+    "kind": "DROUGHT",
+    "exposure": 0.501,
+    "annualEventProbabilityProposal": 0.0701,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-69-E1",
+    "countryId": "visual-territory-69",
+    "kind": "FLOOD",
+    "exposure": 0.383,
+    "annualEventProbabilityProposal": 0.0506,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-69-E1",
+    "countryId": "visual-territory-69",
+    "kind": "STORM",
+    "exposure": 0.367,
+    "annualEventProbabilityProposal": 0.0494,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-70-E1",
+    "countryId": "visual-territory-70",
+    "kind": "DROUGHT",
+    "exposure": 0.481,
+    "annualEventProbabilityProposal": 0.0685,
+    "productionLossFractionProposal": 0.25,
+    "durationSimDaysProposal": 90,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-70-E1",
+    "countryId": "visual-territory-70",
+    "kind": "FLOOD",
+    "exposure": 0.437,
+    "annualEventProbabilityProposal": 0.055,
+    "productionLossFractionProposal": 0.12,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  },
+  {
+    "regionId": "visual-territory-70-E1",
+    "countryId": "visual-territory-70",
+    "kind": "STORM",
+    "exposure": 0.429,
+    "annualEventProbabilityProposal": 0.0543,
+    "productionLossFractionProposal": 0.1,
+    "durationSimDaysProposal": 10,
+    "ruleAuthority": "AUTHORED_EVENT_RULE_NOT_OBSERVED_FREQUENCY"
+  }
+]

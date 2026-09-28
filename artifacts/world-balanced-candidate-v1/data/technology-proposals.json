@@ -1,0 +1,884 @@
+[
+  {
+    "countryId": "visual-territory-02",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-02",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-03",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-03",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-04",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-04",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-07",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-07",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-08",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-08",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-09",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-09",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-10",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-10",
+    "technologyId": "RESOURCE_BATTERY_CHEM",
+    "holderId": "OP-10",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "BATTERIES"
+  },
+  {
+    "countryId": "visual-territory-11",
+    "technologyId": "RESOURCE_BATTERY_CHEM",
+    "holderId": "OP-11",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "BATTERIES"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-12",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-12",
+    "technologyId": "RESOURCE_BATTERY_CHEM",
+    "holderId": "OP-12",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "BATTERIES"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-13",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-13",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-13",
+    "technologyId": "RESOURCE_BATTERY_CHEM",
+    "holderId": "OP-13",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "BATTERIES"
+  },
+  {
+    "countryId": "visual-territory-14",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-14",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-15",
+    "technologyId": "RESOURCE_BATTERY_CHEM",
+    "holderId": "OP-15",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "BATTERIES"
+  },
+  {
+    "countryId": "visual-territory-16",
+    "technologyId": "RESOURCE_BATTERY_CHEM",
+    "holderId": "OP-16",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "BATTERIES"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-17",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-17",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-17",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-18",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-18",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-18",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-19",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-19",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-20",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-20",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-20",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-21",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-21",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-22",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-22",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-23",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-23",
+    "technologyId": "RESOURCE_BATTERY_CHEM",
+    "holderId": "OP-23",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "BATTERIES"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-24",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-24",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-24",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-25",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-25",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-25",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-26",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-26",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-26",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-27",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-27",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-28",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-28",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-28",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-29",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-29",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-30",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-30",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-31",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-31",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-31",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-31",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-32",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-32",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-35",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-35",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-36",
+    "technologyId": "RESOURCE_BATTERY_CHEM",
+    "holderId": "OP-36",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "BATTERIES"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-37",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-37",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-37",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-38",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-38",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-39",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-39",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-40",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-40",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-40",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-41",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-41",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-42",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-42",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-42",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-43",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-43",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-44",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-44",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-44",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-44",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-45",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-45",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-46",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-46",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-48",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-48",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-48",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-49",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-49",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-49",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-50",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-50",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-50",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-51",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-51",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-51",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-52",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-52",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-52",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-52",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-53",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-53",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-54",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-54",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-55",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-55",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-55",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-56",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-56",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-56",
+    "technologyId": "RESOURCE_BATTERY_CHEM",
+    "holderId": "OP-56",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "BATTERIES"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-57",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-57",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-57",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-59",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-59",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-59",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-60",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-60",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-61",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-61",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-61",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-62",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-62",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-63",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-63",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-63",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-64",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-64",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-65",
+    "technologyId": "RESOURCE_BATTERY_CHEM",
+    "holderId": "OP-65",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "BATTERIES"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-66",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-66",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-66",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-67",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "technologyId": "MFG_PRECISION",
+    "holderId": "OP-67",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "MACHINERY"
+  },
+  {
+    "countryId": "visual-territory-67",
+    "technologyId": "SEMI_BASIC",
+    "holderId": "OP-67",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "SEMICONDUCTORS"
+  },
+  {
+    "countryId": "visual-territory-68",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-68",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-69",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-69",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "STEEL"
+  },
+  {
+    "countryId": "visual-territory-70",
+    "technologyId": "RESOURCE_EFFICIENT_REFINING",
+    "holderId": "OP-70",
+    "levelProposal": 1,
+    "status": "OPENING_LICENSE_PROPOSAL_NOT_GRANTED",
+    "royaltyGcuPerDayProposal": 0,
+    "scope": "REFINED_FUEL"
+  }
+]

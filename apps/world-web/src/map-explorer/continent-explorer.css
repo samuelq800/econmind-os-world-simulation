@@ -1,0 +1,303 @@
+.continent-explorer {
+  height: 100dvh;
+  min-height: 550px;
+  background: #0b252e;
+  color: #ebe9d7;
+  font-family: Inter, 'PingFang SC', sans-serif;
+  overflow: hidden;
+}
+.continent-explorer * {
+  box-sizing: border-box;
+}
+.continent-explorer button,
+.continent-explorer input {
+  font: inherit;
+}
+.continent-explorer button,
+.continent-explorer a {
+  cursor: pointer;
+}
+.continent-explorer a {
+  color: inherit;
+  text-decoration: none;
+}
+.continent-explorer button:focus-visible,
+.continent-explorer a:focus-visible {
+  outline: 2px solid #e8cb8d;
+  outline-offset: 3px;
+}
+.continent-explorer header {
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 0 26px;
+  border-bottom: 1px solid #6d90873b;
+}
+.continent-explorer header > a:first-child {
+  font: 32px Georgia;
+  color: #e1ce9e;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.continent-explorer header > a span {
+  font: 10px sans-serif;
+  letter-spacing: 2px;
+}
+.continent-explorer header > a:last-child {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.continent-explorer nav {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  overflow: auto;
+}
+.continent-explorer nav button {
+  white-space: nowrap;
+  border: 0;
+  background: transparent;
+  color: #9bbab8;
+  font-size: 12px;
+  padding: 10px 12px;
+  border-bottom: 2px solid transparent;
+}
+.continent-explorer nav button.active {
+  color: #eddaa4;
+  border-bottom-color: #dfc280;
+}
+.continent-layout {
+  display: flex;
+  height: calc(100% - 68px);
+}
+.continent-viewport {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  background: #102b35;
+}
+.continent-viewport > img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+.continent-title {
+  position: absolute;
+  top: 35px;
+  left: 36px;
+  max-width: 70%;
+  pointer-events: none;
+  text-shadow: 0 3px 18px #072029;
+  background: linear-gradient(90deg, #0d2b30b8, transparent);
+  padding: 16px 24px 18px 0;
+}
+.continent-title > span {
+  color: #dec99e;
+  font-size: 10px;
+  letter-spacing: 3px;
+}
+.continent-title h1 {
+  font:
+    clamp(26px, 3vw, 48px) Georgia,
+    'Songti SC',
+    serif;
+  margin: 15px 0;
+}
+.continent-title p {
+  font-size: 12px;
+  line-height: 1.9;
+  letter-spacing: 1px;
+  max-width: 410px;
+}
+.continent-tools {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  display: flex;
+  flex-direction: column;
+  background: #15353cdd;
+  border: 1px solid #718e8666;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.continent-tools button {
+  color: #f1e7c8;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #54757966;
+  width: 39px;
+  height: 40px;
+  font-size: 20px;
+}
+.continent-tools small {
+  text-align: center;
+  padding: 7px;
+  font-size: 10px;
+  color: #adcbc5;
+}
+.continent-caption {
+  position: absolute;
+  bottom: 0;
+  padding: 28px 25px 16px;
+  background: linear-gradient(transparent, #09262e);
+  width: 100%;
+  font-size: 10px;
+  color: #d2d9c5;
+  pointer-events: none;
+}
+.continent-caption span {
+  display: block;
+  margin-top: 7px;
+  color: #8dafaf;
+  font-size: 9px;
+}
+.continent-layout aside {
+  width: 290px;
+  display: flex;
+  flex-direction: column;
+  padding: 30px 24px;
+  background: #102c35;
+  border-left: 1px solid #607f7940;
+  min-height: 0;
+}
+.continent-layout aside > span {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #92b4b0;
+}
+.continent-layout h2 {
+  font:
+    24px Georgia,
+    'Songti SC',
+    serif;
+  margin: 14px 0;
+}
+.continent-layout aside p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #9fb9b5;
+}
+.continent-layout input {
+  width: 100%;
+  padding: 12px;
+  background: #17363e;
+  border: 1px solid #547770;
+  color: #eee6cf;
+  border-radius: 3px;
+  margin: 10px 0 18px;
+}
+.continent-countries {
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+.continent-countries a {
+  display: flex;
+  gap: 14px;
+  padding: 14px 4px;
+  border-bottom: 1px solid #47716b4d;
+  font-size: 13px;
+}
+.continent-countries b {
+  color: #d7c18d;
+  font-size: 11px;
+}
+.continent-countries i {
+  margin-left: auto;
+  font-style: normal;
+  color: #8eb7b0;
+}
+.continent-countries a:hover {
+  background: #21434a;
+}
+.all-countries {
+  font-size: 12px;
+  padding: 20px 0 0;
+  color: #d7c18d !important;
+}
+.continent-pending {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #d7c18d;
+}
+@media (max-width: 900px) {
+  .continent-explorer header {
+    height: 94px;
+    gap: 12px;
+    padding: 10px 16px;
+    flex-wrap: wrap;
+  }
+  .continent-explorer header > a:first-child {
+    font-size: 23px;
+  }
+  .continent-explorer header > a span {
+    display: none;
+  }
+  .continent-explorer header nav {
+    order: 3;
+    flex-basis: 100%;
+    gap: 0;
+  }
+  .continent-explorer header nav button {
+    padding: 7px 10px;
+  }
+  .continent-explorer header > a:last-child {
+    margin-left: auto;
+  }
+  .continent-layout {
+    height: calc(100% - 94px);
+    flex-direction: column;
+  }
+  .continent-layout aside {
+    width: 100%;
+    height: 200px;
+    padding: 14px 20px;
+    border-top: 1px solid #607f7940;
+  }
+  .continent-layout aside > span,
+  .continent-layout aside > p,
+  .continent-layout aside > input,
+  .all-countries {
+    display: none;
+  }
+  .continent-layout h2 {
+    font-size: 20px;
+    margin: 0 0 12px;
+  }
+  .continent-countries {
+    display: flex;
+    gap: 10px;
+    overflow: auto;
+  }
+  .continent-countries a {
+    min-width: 140px;
+    height: 60px;
+    padding: 20px 12px;
+    border: 1px solid #47716b4d;
+  }
+  .continent-title {
+    top: 20px;
+    left: 20px;
+  }
+  .continent-title p {
+    display: none;
+  }
+  .continent-title > span {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+  }
+  .continent-title h1 {
+    font-size: 29px;
+  }
+}
