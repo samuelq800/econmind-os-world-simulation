@@ -1,0 +1,10 @@
+{
+  "selectionId": "ECONMIND_S1_AUTHORITATIVE_UI_20260928T134420Z",
+  "archive": "/Users/samuel/Documents/econclub/artifacts/ui-authority/20260928T134420Z/EconMind-Authoritative-UI.zip",
+  "archiveBytes": 639321078,
+  "sha256": "d436904dc061b6f909c8b5c180104f82299e987f6e89732f9b82dc9a40e3db71",
+  "payloadFiles": 860,
+  "payloadBytes": 678539703,
+  "verifiedAllArchiveFileHashes": true,
+  "targetThreadId": "01a08bf9-fe19-7440-88fa-159677b611bd"
+}

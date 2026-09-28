@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node ../../scripts/run-development-service.mjs web",
     "start": "node ../../scripts/run-development-service.mjs web start",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node ../../scripts/publish-authoritative-ui-map-assets.mjs",
     "typecheck": "tsc -b --pretty false"
   },
   "dependencies": {

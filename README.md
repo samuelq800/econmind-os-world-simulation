@@ -24,6 +24,23 @@ geography. The source package's historical candidate labels remain unchanged
 for provenance. This selection does not itself create a World ID, commit an
 OpeningSeed, start a Worker, write to Supabase, or change Gate status.
 
+## Owner-selected page UI
+
+The sole selected page UI is the Season 1 immersive experience at
+`apps/world-web/public/season1-immersive/`. The World V2 Pages home route
+opens its country-map entry. The exact owner handoff and source-archive hash
+are pinned in [`status/ui-selection.json`](status/ui-selection.json); the
+published runtime files are checked against the delivered manifest by
+`pnpm test:authoritative-ui`. The older React page remains at `legacy.html`
+for reference. No original EconMind main-site files are changed.
+
+This is a static, local-planning UI release. Its bundled country preview
+population totals 14,714,012,813, whereas the official selected World data
+totals 14,712,146,434. The UI's preview numbers therefore must **not** be
+treated as official economic state until a reviewed data adapter replaces
+them. Login, authoritative commands, settlement and live receipts are not
+connected by this publication.
+
 ## Latest code integration (2026-09-27)
 
 The reviewed main-site release chain has now published the isolated `world_v2`

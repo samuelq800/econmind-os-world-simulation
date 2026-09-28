@@ -1,0 +1,38 @@
+[
+  {
+    "role": "captain",
+    "file": "captain.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: stylized-concept. Asset type: production-quality landscape illustration for EconMind Season 1 web strategy game. A close cinematic establishing image of a grand fictional republic cabinet meeting in an early-industrial alternate-world economic strategy game. Three ministers in sober tailored suits seen mostly from behind around a mahogany conference table, several competing paper proposals, understated wax seals, through tall windows a working coastal city with cranes. Emphasize the human tension of a real policy choice. No flags of real nations. Style: high-end painterly realism, rich fine-grained materials, restrained cinematic color grading, believable scale, mature visual complexity. Composition: wide horizontal landscape, scene fills the frame, dominant subject center-left, layered foreground and atmospheric depth, clear natural focal point, suitable for a large in-game object illustration. No typography, no text, no UI, no frames, no logos, no graphs, no wireframes, no isometric miniatures, no icons, no bright childish cartoon styling."
+  },
+  {
+    "role": "finance",
+    "file": "finance.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: stylized-concept. Asset type: production-quality landscape illustration for EconMind Season 1 web strategy game. A detailed cinematic view from the waterfront of an early industrial fictional republic's port expansion construction site at dusk. A half-completed stone quay, realistic large steel cranes, workers, stacks of steel girders, survey lamps, freight ships in the distant working harbor. Construction capital becomes a tangible place. Not a tabletop model, show the actual life-size place, sophisticated game environment. Style: high-end painterly realism, rich fine-grained materials, restrained cinematic color grading, believable scale, mature visual complexity. Composition: wide horizontal landscape, scene fills the frame, dominant subject center-left, layered foreground and atmospheric depth, clear natural focal point, suitable for a large in-game object illustration. No typography, no text, no UI, no frames, no logos, no graphs, no wireframes, no isometric miniatures, no icons, no bright childish cartoon styling."
+  },
+  {
+    "role": "central_bank",
+    "file": "central_bank.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: stylized-concept. Asset type: production-quality landscape illustration for EconMind Season 1 web strategy game. A cinematic close perspective inside a fictional early-modern central bank settlement hall. Bank couriers bringing sealed document folios to two separate brass-framed teller windows, disciplined adult clerks, deep polished stone, huge mechanical settlement clock and secure vault architecture. Sophisticated financial strategy game. No floating holographic networks or diagrams. Style: high-end painterly realism, rich fine-grained materials, restrained cinematic color grading, believable scale, mature visual complexity. Composition: wide horizontal landscape, scene fills the frame, dominant subject center-left, layered foreground and atmospheric depth, clear natural focal point, suitable for a large in-game object illustration. No typography, no text, no UI, no frames, no logos, no graphs, no wireframes, no isometric miniatures, no icons, no bright childish cartoon styling."
+  },
+  {
+    "role": "industry",
+    "file": "industry.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: stylized-concept. Asset type: production-quality landscape illustration for EconMind Season 1 web strategy game. A cinematic interior of a large realistically built steel and machine factory in an alternate early industrial republic. Molten steel in the foreground, heavy rolling mill, gear assemblies and machining stations further back, workers visibly operating safely, skylight beams and luminous orange furnace lighting, intricate authentic-looking machinery. Adult serious economic strategy game. Style: high-end painterly realism, rich fine-grained materials, restrained cinematic color grading, believable scale, mature visual complexity. Composition: wide horizontal landscape, scene fills the frame, dominant subject center-left, layered foreground and atmospheric depth, clear natural focal point, suitable for a large in-game object illustration. No typography, no text, no UI, no frames, no logos, no graphs, no wireframes, no isometric miniatures, no icons, no bright childish cartoon styling."
+  },
+  {
+    "role": "trade",
+    "file": "trade.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: stylized-concept. Asset type: production-quality landscape illustration for EconMind Season 1 web strategy game. A cinematic realistic cargo steamship departing a detailed fictional industrial port carrying lashed steel girders on its deck, seen from the harbor master's waterside balcony at blue hour. Tugboat, dockworkers, warm harbor lamps and distant cliffs, coherent ship engineering and refined maritime atmosphere. A tangible shipment in an adult economic strategy game. No sailing toy, no diagrams. Style: high-end painterly realism, rich fine-grained materials, restrained cinematic color grading, believable scale, mature visual complexity. Composition: wide horizontal landscape, scene fills the frame, dominant subject center-left, layered foreground and atmospheric depth, clear natural focal point, suitable for a large in-game object illustration. No typography, no text, no UI, no frames, no logos, no graphs, no wireframes, no isometric miniatures, no icons, no bright childish cartoon styling."
+  },
+  {
+    "role": "social",
+    "file": "social.png",
+    "mode": "built-in image_gen",
+    "prompt": "Use case: stylized-concept. Asset type: production-quality landscape illustration for EconMind Season 1 web strategy game. A cinematic fictional republic technical academy courtyard connected visually to an operating industrial district in the background, adult apprentices in modest workshop clothing leaving a practical engineering classroom carrying tool cases, instructor speaking to a small group, warm late afternoon light, stone campus, fine architectural detail, dignified and human. Adult economic strategy game. No children, no toy classroom. Style: high-end painterly realism, rich fine-grained materials, restrained cinematic color grading, believable scale, mature visual complexity. Composition: wide horizontal landscape, scene fills the frame, dominant subject center-left, layered foreground and atmospheric depth, clear natural focal point, suitable for a large in-game object illustration. No typography, no text, no UI, no frames, no logos, no graphs, no wireframes, no isometric miniatures, no icons, no bright childish cartoon styling."
+  }
+]

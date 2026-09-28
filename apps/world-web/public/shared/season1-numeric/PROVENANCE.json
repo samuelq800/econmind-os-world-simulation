@@ -1,0 +1,19 @@
+{
+  "sourceRoot": "/Users/samuel/Documents/econclub/econmind-os-world-simulation/.econmind-worktrees/gate-b-code-integration/packages/core/src",
+  "sha": "b38420d845fa921d3c6e64a9ce72b00a578c3db1",
+  "scope": "Pure public numeric value types only. No worker, authoritative settlement or database code.",
+  "sourceFiles": {
+    "errors.ts": "4e68c9ce9131b6013e636c79f00dfd9815492418f1eb7317de12cd395991738e",
+    "numeric/world-decimal.ts": "66090413e58239c9cd421ce4229300c818091956c675b797b520b569ce3d7959",
+    "numeric/money.ts": "f54fca28535ab746341712f135dd7ec6b9a6db69188f84e01ea164117d882124",
+    "numeric/quantity.ts": "622cb4edb9f756fda4838c0e7d7875345605166f03c6a57833413ecd2f614549",
+    "numeric/price.ts": "94a60ec75e53a997f45bbab5bf24debc15248cdc7a1f84c935f66a68c72250d8",
+    "numeric/rate.ts": "aefbe69ec50c26cc6a1d3d3b528a0d9a8dc83141fc42d9bf5985a33b06a9ee31",
+    "numeric/sim-time.ts": "cc5ba1a89cf21f2b606baa2f9e30f03b454b7e00c6b5fa7808896f81e66611d7"
+  },
+  "transform": "TypeScript transpile to ES2022; decimal import changed to local dependency",
+  "decimal": "10.6.0",
+  "simulationDaysPerYear": 360,
+  "ticksPerDay": "86400000",
+  "verifiedMatchingLocalOriginMain": "72e0e1b3b5d3272301dd6ea40f5faed4919949ba"
+}

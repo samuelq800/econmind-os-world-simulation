@@ -1,0 +1,4305 @@
+{
+  "files": [
+    {
+      "path": "role-prototypes/INTERFACE-INVENTORY.json",
+      "bytes": 228403,
+      "sha256": "30863ee2fe45b964e8a98ec72cbe01fea8dca6f47bfa6064d2bfb367edfd9252"
+    },
+    {
+      "path": "role-prototypes/NEXT-ROLES-COVERAGE-AUDIT.json",
+      "bytes": 18319,
+      "sha256": "84fe72ebc4bd56047cb635660f6110c6cb6d5569e8ddba4e883b74888bd00c53"
+    },
+    {
+      "path": "role-prototypes/README.md",
+      "bytes": 2941,
+      "sha256": "82cc6295b07e329dd9b9301c41eb170cf405f36123684cb96305be061d358f1a"
+    },
+    {
+      "path": "role-prototypes/Season1_代码与单位对照.md",
+      "bytes": 4320,
+      "sha256": "005cce919155eb473c623ffbe1c7566d6924f11c3c8b99a21ccf0b355969762c"
+    },
+    {
+      "path": "role-prototypes/VERIFICATION-CENTRAL-BANK.json",
+      "bytes": 4544,
+      "sha256": "a8f715ee56fc663f003bf50707d0cf9860d7564a3fad5d8c35202f563e8118ec"
+    },
+    {
+      "path": "role-prototypes/VERIFICATION-NEXT-ROLES.json",
+      "bytes": 30826,
+      "sha256": "e8cf8a01c6041da70dd8af8de03331adf04666f7312a98a2faa9f53dd9a3a20f"
+    },
+    {
+      "path": "role-prototypes/VERIFICATION-PLAYABLE-V2.json",
+      "bytes": 6434,
+      "sha256": "2f270f7981b6a65f7e846713dc363545a60d76239a75b893dbe43d80633fc581"
+    },
+    {
+      "path": "role-prototypes/VERIFICATION.json",
+      "bytes": 1193,
+      "sha256": "a44e43eab542f222f8b1d1ef2731f669617d8cf4e3d4b3f188bf4810ce301e8a"
+    },
+    {
+      "path": "role-prototypes/archive-comparison.json",
+      "bytes": 1497,
+      "sha256": "b7b217a8af2d6200aa9d4c0c6397ce6ce1a5d9075f127e918dd099715d128883"
+    },
+    {
+      "path": "role-prototypes/captain-complete/Captain_完整游戏页面设计_V3.md",
+      "bytes": 19471,
+      "sha256": "3557a94f65633847efba2db0cb126404b802e6df7a4fee91e6ce22d4ed80923f"
+    },
+    {
+      "path": "role-prototypes/captain-complete/README.md",
+      "bytes": 1396,
+      "sha256": "62ded1de47013102b6b9923d5d35bb2017561d7b92ee811d1c5bf1589e1503ad"
+    },
+    {
+      "path": "role-prototypes/captain-complete/app.js",
+      "bytes": 45968,
+      "sha256": "0e81dab488bbcc80db630d4d7bc0ccdc085fc0d7eb0de6600637669f2e4fa675"
+    },
+    {
+      "path": "role-prototypes/captain-complete/blueprint.png",
+      "bytes": 1170508,
+      "sha256": "37c417dac31bd047b7e1ea6dbdd0853ec8a189975ed03ab135c6fc9d1ea89b95"
+    },
+    {
+      "path": "role-prototypes/captain-complete/capabilities-data.js",
+      "bytes": 58955,
+      "sha256": "f2e08854001dfa1c9578f3dbd254d39312ac78368e8bea0d426a09b43d8c3dad"
+    },
+    {
+      "path": "role-prototypes/captain-complete/capabilities.css",
+      "bytes": 2832,
+      "sha256": "69f2d4e6e0c8fcc184e6d694a4a8fb057d70de14764b0a18abdb576f87c75c41"
+    },
+    {
+      "path": "role-prototypes/captain-complete/capabilities.js",
+      "bytes": 11766,
+      "sha256": "1cf80d70956f42e3b2b2300536622bcd5af7363a51efa6d81fdb9f93dddbf01e"
+    },
+    {
+      "path": "role-prototypes/captain-complete/complete-home.png",
+      "bytes": 2259699,
+      "sha256": "b04ac5a212a4a47a2b5b5ff7158eb3cebdb50b4c3d9f0c580b5e31b6036d7138"
+    },
+    {
+      "path": "role-prototypes/captain-complete/complete-map.png",
+      "bytes": 622550,
+      "sha256": "7edecc0368244622834a4e96e400506c4af0d4066804b286bc70aab973a68365"
+    },
+    {
+      "path": "role-prototypes/captain-complete/coverage.json",
+      "bytes": 9624,
+      "sha256": "5a62dd3ec8b492af9635318ecfb5f4cbb4436d5c7e4a27e004925eef31ac3338"
+    },
+    {
+      "path": "role-prototypes/captain-complete/desktop.png",
+      "bytes": 2264753,
+      "sha256": "ff2081ce18cd51bb4a6650b9b7abae2008901892598719f2bae9a23649808769"
+    },
+    {
+      "path": "role-prototypes/captain-complete/event-opening.png",
+      "bytes": 957447,
+      "sha256": "aded775ee7393d4aa83f369b415f03e64057f8574256f2d9378e20f06edee431"
+    },
+    {
+      "path": "role-prototypes/captain-complete/game-v2.css",
+      "bytes": 18342,
+      "sha256": "ad5b7c32c85c987ca8689f1d04eb260d9e9c99088e11dff91bb45f8c1c7f90a6"
+    },
+    {
+      "path": "role-prototypes/captain-complete/history.png",
+      "bytes": 1185682,
+      "sha256": "c7894ba648c20dbe8151b10bc09367dd25a9dc3ed330d054cc66f00a792ac97d"
+    },
+    {
+      "path": "role-prototypes/captain-complete/index-legacy.html",
+      "bytes": 819,
+      "sha256": "6244af10cf4e13833b20946618d0cb67b857202919ac0d4ca3cb8288ee7367d9"
+    },
+    {
+      "path": "role-prototypes/captain-complete/index.html",
+      "bytes": 332,
+      "sha256": "64b1120b71b66342fcc4c55e990d75b6abecef14fc3dc230c57486ea822ce63d"
+    },
+    {
+      "path": "role-prototypes/captain-complete/issue.png",
+      "bytes": 1308357,
+      "sha256": "f7efa2fcff3d195461990b1118ae944f06a764f28d5ded6ef4590f0da5fa0b45"
+    },
+    {
+      "path": "role-prototypes/captain-complete/layout-qa.cjs",
+      "bytes": 1233,
+      "sha256": "de40c9236e2ad6e6af6da5ddac2ab1256a72d049db9e7a48a20b17d44240acb9"
+    },
+    {
+      "path": "role-prototypes/captain-complete/meeting.png",
+      "bytes": 929365,
+      "sha256": "e459903ed6b82674430040df509f4fdace3e34fe978f5d044133644b9582f135"
+    },
+    {
+      "path": "role-prototypes/captain-complete/mobile-coverage.png",
+      "bytes": 181518,
+      "sha256": "8543d68ff04c2173e207f9fbc2c1354cac99ec11592894a6cb0cd7be9bb28b9d"
+    },
+    {
+      "path": "role-prototypes/captain-complete/mobile.png",
+      "bytes": 619436,
+      "sha256": "7443e4a10ece3e794d94e177ba525a64649d9544fa897f36a418c4d2a02bfcf8"
+    },
+    {
+      "path": "role-prototypes/captain-complete/numeric-capital.png",
+      "bytes": 673243,
+      "sha256": "1b7103c739a525962e1a7e2a3fb493930d5c58a323d5df3a7b2b330a9522c90c"
+    },
+    {
+      "path": "role-prototypes/captain-complete/playable.js",
+      "bytes": 13131,
+      "sha256": "65030717ea2af3a975142efed0208dfb0868e68e2d2bdd929a98f3d936adb08c"
+    },
+    {
+      "path": "role-prototypes/captain-complete/qa.cjs",
+      "bytes": 3677,
+      "sha256": "13028773a29c712275c56722dca18f1301a4ec3922238f3519f052bc0b26d395"
+    },
+    {
+      "path": "role-prototypes/captain-complete/source-extract.txt",
+      "bytes": 31644,
+      "sha256": "2e45f4b322dccc9bb2d4ec320a6593d679e281f0552dfc9cac9f85f7b6594898"
+    },
+    {
+      "path": "role-prototypes/captain-complete/style.css",
+      "bytes": 16587,
+      "sha256": "9c1a7a7e41abf65aef0c39f80e5754cde593b099c851740c6b684493575bddd3"
+    },
+    {
+      "path": "role-prototypes/captain-complete/world-art-v2.png",
+      "bytes": 3623648,
+      "sha256": "2a873ccd0f9ab415af6174047fbaa977ea5df55853803d4be582fc34c49dd1e0"
+    },
+    {
+      "path": "role-prototypes/captain-complete/world.png",
+      "bytes": 1221816,
+      "sha256": "1e8e25c03c16e861129764a3230d2582b8932b19ce78ce45959ac0b2309ae250"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/Captain_完整游戏页面设计_V3.md",
+      "bytes": 19471,
+      "sha256": "3557a94f65633847efba2db0cb126404b802e6df7a4fee91e6ce22d4ed80923f"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/PRESERVATION.json",
+      "bytes": 2128,
+      "sha256": "0c26c323f5c885779a5ce3f78796ee431784fd960c462a11eda2ca0cbfc0d80c"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/README.md",
+      "bytes": 1396,
+      "sha256": "62ded1de47013102b6b9923d5d35bb2017561d7b92ee811d1c5bf1589e1503ad"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/app.js",
+      "bytes": 46896,
+      "sha256": "c30d9699a5c2f8f1430cb2cf7bd611e912a3d59c87a8373e9657c8dbc1851d62"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/blueprint.png",
+      "bytes": 1170508,
+      "sha256": "37c417dac31bd047b7e1ea6dbdd0853ec8a189975ed03ab135c6fc9d1ea89b95"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/capabilities-data.js",
+      "bytes": 58955,
+      "sha256": "9fbcd113437d8a4a1376479e1de763e76cb4da260c4b61655c3a348c51c68e94"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/capabilities.css",
+      "bytes": 2439,
+      "sha256": "bdab37304fc78bcdec32ff4a6ba5af209ed39d05e2000edfca0157a9bc135692"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/capabilities.js",
+      "bytes": 11835,
+      "sha256": "8e080cb0b5589be2aef0579398c5145f1237993b8bee5328170d5a5b32e66ea3"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/complete-home.png",
+      "bytes": 2259699,
+      "sha256": "b04ac5a212a4a47a2b5b5ff7158eb3cebdb50b4c3d9f0c580b5e31b6036d7138"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/complete-map.png",
+      "bytes": 622550,
+      "sha256": "7edecc0368244622834a4e96e400506c4af0d4066804b286bc70aab973a68365"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/coverage.json",
+      "bytes": 9624,
+      "sha256": "5a62dd3ec8b492af9635318ecfb5f4cbb4436d5c7e4a27e004925eef31ac3338"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/desktop.png",
+      "bytes": 2264753,
+      "sha256": "ff2081ce18cd51bb4a6650b9b7abae2008901892598719f2bae9a23649808769"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/game-v2.css",
+      "bytes": 18342,
+      "sha256": "ad5b7c32c85c987ca8689f1d04eb260d9e9c99088e11dff91bb45f8c1c7f90a6"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/history.png",
+      "bytes": 1185682,
+      "sha256": "c7894ba648c20dbe8151b10bc09367dd25a9dc3ed330d054cc66f00a792ac97d"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/index.html",
+      "bytes": 552,
+      "sha256": "b47ba4a2dda711766e180f116dec1beb0ad5ce0cc4148b483082262f063c5bc4"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/issue.png",
+      "bytes": 1308357,
+      "sha256": "f7efa2fcff3d195461990b1118ae944f06a764f28d5ded6ef4590f0da5fa0b45"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/layout-qa.cjs",
+      "bytes": 1233,
+      "sha256": "de40c9236e2ad6e6af6da5ddac2ab1256a72d049db9e7a48a20b17d44240acb9"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/meeting.png",
+      "bytes": 929365,
+      "sha256": "e459903ed6b82674430040df509f4fdace3e34fe978f5d044133644b9582f135"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/mobile-coverage.png",
+      "bytes": 181518,
+      "sha256": "8543d68ff04c2173e207f9fbc2c1354cac99ec11592894a6cb0cd7be9bb28b9d"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/mobile.png",
+      "bytes": 619436,
+      "sha256": "7443e4a10ece3e794d94e177ba525a64649d9544fa897f36a418c4d2a02bfcf8"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/qa.cjs",
+      "bytes": 3677,
+      "sha256": "13028773a29c712275c56722dca18f1301a4ec3922238f3519f052bc0b26d395"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/source-extract.txt",
+      "bytes": 31644,
+      "sha256": "2e45f4b322dccc9bb2d4ec320a6593d679e281f0552dfc9cac9f85f7b6594898"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/style.css",
+      "bytes": 16587,
+      "sha256": "9c1a7a7e41abf65aef0c39f80e5754cde593b099c851740c6b684493575bddd3"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/world-art-v2.png",
+      "bytes": 3623648,
+      "sha256": "2a873ccd0f9ab415af6174047fbaa977ea5df55853803d4be582fc34c49dd1e0"
+    },
+    {
+      "path": "role-prototypes/captain-design-v3-preserved/world.png",
+      "bytes": 1221816,
+      "sha256": "1e8e25c03c16e861129764a3230d2582b8932b19ce78ce45959ac0b2309ae250"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/PRESERVATION.json",
+      "bytes": 1412,
+      "sha256": "c779a6810830d6c39d1176fd672a6a803dfc5cf0097e9c141382ec262cc0f421"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/README.md",
+      "bytes": 1396,
+      "sha256": "62ded1de47013102b6b9923d5d35bb2017561d7b92ee811d1c5bf1589e1503ad"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/app.js",
+      "bytes": 46896,
+      "sha256": "c30d9699a5c2f8f1430cb2cf7bd611e912a3d59c87a8373e9657c8dbc1851d62"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/blueprint.png",
+      "bytes": 1170508,
+      "sha256": "37c417dac31bd047b7e1ea6dbdd0853ec8a189975ed03ab135c6fc9d1ea89b95"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/desktop.png",
+      "bytes": 2264753,
+      "sha256": "ff2081ce18cd51bb4a6650b9b7abae2008901892598719f2bae9a23649808769"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/game-v2.css",
+      "bytes": 18342,
+      "sha256": "ad5b7c32c85c987ca8689f1d04eb260d9e9c99088e11dff91bb45f8c1c7f90a6"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/history.png",
+      "bytes": 1185682,
+      "sha256": "c7894ba648c20dbe8151b10bc09367dd25a9dc3ed330d054cc66f00a792ac97d"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/index.html",
+      "bytes": 422,
+      "sha256": "156eae4add2d6b0e5e50cfbcd1874541189dcf410f0a869bf64064ecd85aa336"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/issue.png",
+      "bytes": 1308357,
+      "sha256": "f7efa2fcff3d195461990b1118ae944f06a764f28d5ded6ef4590f0da5fa0b45"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/layout-qa.cjs",
+      "bytes": 1233,
+      "sha256": "de40c9236e2ad6e6af6da5ddac2ab1256a72d049db9e7a48a20b17d44240acb9"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/meeting.png",
+      "bytes": 929365,
+      "sha256": "e459903ed6b82674430040df509f4fdace3e34fe978f5d044133644b9582f135"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/mobile.png",
+      "bytes": 619436,
+      "sha256": "7443e4a10ece3e794d94e177ba525a64649d9544fa897f36a418c4d2a02bfcf8"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/qa.cjs",
+      "bytes": 3677,
+      "sha256": "13028773a29c712275c56722dca18f1301a4ec3922238f3519f052bc0b26d395"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/style.css",
+      "bytes": 16587,
+      "sha256": "9c1a7a7e41abf65aef0c39f80e5754cde593b099c851740c6b684493575bddd3"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/world-art-v2.png",
+      "bytes": 3623648,
+      "sha256": "2a873ccd0f9ab415af6174047fbaa977ea5df55853803d4be582fc34c49dd1e0"
+    },
+    {
+      "path": "role-prototypes/captain-v2-preserved/world.png",
+      "bytes": 1221816,
+      "sha256": "1e8e25c03c16e861129764a3230d2582b8932b19ce78ce45959ac0b2309ae250"
+    },
+    {
+      "path": "role-prototypes/captain-v4/build_coverage.py",
+      "bytes": 9925,
+      "sha256": "e36acd68117a39245ac4e578e6c43825cd79c40e621321a931d174ff71352e59"
+    },
+    {
+      "path": "role-prototypes/captain-v4/captain.css",
+      "bytes": 20564,
+      "sha256": "4cca3759977d5e99242786df211b8c47db7d71fa1e69e5b8c2192ebe1c085834"
+    },
+    {
+      "path": "role-prototypes/captain-v4/captain.js",
+      "bytes": 89877,
+      "sha256": "692c9c79df097b5dd2d8b5cb7eb92ee9a53412382e3f10d1e6ef3cb79c7cae01"
+    },
+    {
+      "path": "role-prototypes/captain-v4/control-verification.json",
+      "bytes": 21342,
+      "sha256": "b4d788ec2d4a4229184cb1a165e4778c836dd1a2e9b7d80349af21a282ae2fe9"
+    },
+    {
+      "path": "role-prototypes/captain-v4/coverage.html",
+      "bytes": 22895,
+      "sha256": "5350deb3d21d3b913391080ee24262737b9634dd40a316d1254a0688b2e77740"
+    },
+    {
+      "path": "role-prototypes/captain-v4/coverage.json",
+      "bytes": 41451,
+      "sha256": "bf72a896c8e1abf5e73c4d5916a73055d7313c8fdc025c33a3641ae37e359e7e"
+    },
+    {
+      "path": "role-prototypes/captain-v4/home-desktop.png",
+      "bytes": 1758923,
+      "sha256": "3416233586bae9c9c25d817dc356fbdfae60b8956cf754282993958bfb78297f"
+    },
+    {
+      "path": "role-prototypes/captain-v4/home-mobile.png",
+      "bytes": 439061,
+      "sha256": "c53365ae971d2f60536a55a6fb142efc0bc24199036d546b67102f14e2fcbb16"
+    },
+    {
+      "path": "role-prototypes/captain-v4/index.html",
+      "bytes": 523,
+      "sha256": "3cba26dab7c0355dab7f184697ab8ec9efee1898e2c8809171f1b7a5f1259e6f"
+    },
+    {
+      "path": "role-prototypes/captain-v4/outcome-desktop.png",
+      "bytes": 1758272,
+      "sha256": "497cdc187b108fb3de0923cac80f30741d2f026d9eb3770633ccd814385422e6"
+    },
+    {
+      "path": "role-prototypes/captain-v4/plans-desktop.png",
+      "bytes": 308611,
+      "sha256": "40e94df260c744b5bcf5d8f11d33773be6e37ee442fa5cca99659db029c236ef"
+    },
+    {
+      "path": "role-prototypes/captain-v4/plans-mobile.png",
+      "bytes": 164866,
+      "sha256": "27a2d7ffa41c7fc301b757253915949913372462074918243eb2ee49ec4dc375"
+    },
+    {
+      "path": "role-prototypes/captain-v4/preservation-verification.json",
+      "bytes": 184,
+      "sha256": "00bba07fdefc0b4258cb5e9a358f11c41c75b6e15c2a1b2d12ae4fca96104102"
+    },
+    {
+      "path": "role-prototypes/captain-v4/source.js",
+      "bytes": 45700,
+      "sha256": "fb6d41ef71ff681dbd2f0ddcfc9c15fcd5b503f7b3588c6090bd5f3f1d7ec354"
+    },
+    {
+      "path": "role-prototypes/captain-v4/verification.json",
+      "bytes": 1922,
+      "sha256": "4918e6efc8c663dd9539d89063ebc2581f35ff6182a5f0c4e2d76acedb2df987"
+    },
+    {
+      "path": "role-prototypes/captain-v4/verify-coverage.cjs",
+      "bytes": 2827,
+      "sha256": "8e13480062f088b8c7c8dc8171a57d419c6a887e6791f310b5741a21c47320d9"
+    },
+    {
+      "path": "role-prototypes/captain-v4/verify.cjs",
+      "bytes": 13033,
+      "sha256": "81a1de076981cf75ded7ff6362e288166eaea599907bc250155c2c09dbd6b562"
+    },
+    {
+      "path": "role-prototypes/captain-v4/页面逻辑与玩家复审.md",
+      "bytes": 4304,
+      "sha256": "4da2f5ee2d6183812d50f9bedf20700c8e80fafe5d9499f0aca37705700385f4"
+    },
+    {
+      "path": "role-prototypes/central-bank/CentralBank_游戏页面设计_V1.md",
+      "bytes": 16612,
+      "sha256": "37460b51c87995ea219245ed23912ae4208d43082a5ff83aeeba479ab7c4b362"
+    },
+    {
+      "path": "role-prototypes/central-bank/bank-funded.png",
+      "bytes": 1264480,
+      "sha256": "fca62f592764f779cb88156ffe5a63b694164b64117f1aa8c5e1be840277b141"
+    },
+    {
+      "path": "role-prototypes/central-bank/capital-gap.png",
+      "bytes": 1388782,
+      "sha256": "65d1f0c3afa7333f2b97a6ec9ea3cca8e2ad5af701af626719e765ed2529a528"
+    },
+    {
+      "path": "role-prototypes/central-bank/central-bank.css",
+      "bytes": 13913,
+      "sha256": "4b8ebb7daac8778f635b4f7e9b6bd9b3279adb4047a40d762963bce09d55c109"
+    },
+    {
+      "path": "role-prototypes/central-bank/central-bank.js",
+      "bytes": 38471,
+      "sha256": "2b7ad04bb6d1f8b479bf1f6c91350658008139a903bcf9d310b38f66c081ddcd"
+    },
+    {
+      "path": "role-prototypes/central-bank/coverage.json",
+      "bytes": 3420,
+      "sha256": "a3b74d0bbb5609dfca107bebf0a5bc9c612d04c0f88c5fa1aca6d6aedd550737"
+    },
+    {
+      "path": "role-prototypes/central-bank/event-opening.png",
+      "bytes": 703310,
+      "sha256": "3e6491cd077953f75c18c4b526bf2e373ce90eb4d14b07113e9979fc7e3f471e"
+    },
+    {
+      "path": "role-prototypes/central-bank/feature-data.js",
+      "bytes": 62503,
+      "sha256": "25dfc33facc0ba0e6f2556048f55149c65b259bec69c4fc9199283c874576b0c"
+    },
+    {
+      "path": "role-prototypes/central-bank/fx-paid.png",
+      "bytes": 1131009,
+      "sha256": "485ca46f9469df7387e5c7be444c180af48dcf44b924ea9e14c11115e7285fc0"
+    },
+    {
+      "path": "role-prototypes/central-bank/home.png",
+      "bytes": 1748850,
+      "sha256": "6cf317584d69bf8cd720c2a84327f2d51b5174639888ba035176cf1cb7f1ce26"
+    },
+    {
+      "path": "role-prototypes/central-bank/index.html",
+      "bytes": 736,
+      "sha256": "902c2821dbb3ae5d801e7e062d4a6025d6def524c679cd91dcc93b8da4ca6b33"
+    },
+    {
+      "path": "role-prototypes/central-bank/mobile.png",
+      "bytes": 519952,
+      "sha256": "8eec4e846d8507a18f6370a8def79bdf418c4c729343f584594384d125be8122"
+    },
+    {
+      "path": "role-prototypes/central-bank/numeric-ela.png",
+      "bytes": 263860,
+      "sha256": "d0b2bcc2cb465d6dbc8165ad3e5094643f4f1abbf6b0185bea9e119724d4e5c6"
+    },
+    {
+      "path": "role-prototypes/central-bank/original-specification.txt",
+      "bytes": 52822,
+      "sha256": "e2f4118c8ac6eb8c8f666513964df1c85e2021d085a30962321428ae3e53ee6b"
+    },
+    {
+      "path": "role-prototypes/central-bank/playable.js",
+      "bytes": 21533,
+      "sha256": "d4c58455e731edf4e0ea0b606fdba224561baaebb7832246679397f000186697"
+    },
+    {
+      "path": "role-prototypes/central-bank/policy.png",
+      "bytes": 1227336,
+      "sha256": "c95a161cced33773a02b5f6ef1a8b153c7888127dce6d7bb1a92ccaa2b088e10"
+    },
+    {
+      "path": "role-prototypes/central-bank/world-art-v2.png",
+      "bytes": 3623648,
+      "sha256": "2a873ccd0f9ab415af6174047fbaa977ea5df55853803d4be582fc34c49dd1e0"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/CentralBank_游戏页面设计_V1.md",
+      "bytes": 16612,
+      "sha256": "37460b51c87995ea219245ed23912ae4208d43082a5ff83aeeba479ab7c4b362"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/PRESERVATION.json",
+      "bytes": 1272,
+      "sha256": "df213954101f656c6581eca6e740796fb0bb27738718feddfee6d35b0954fe2f"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/bank-funded.png",
+      "bytes": 1264480,
+      "sha256": "fca62f592764f779cb88156ffe5a63b694164b64117f1aa8c5e1be840277b141"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/capital-gap.png",
+      "bytes": 1388782,
+      "sha256": "65d1f0c3afa7333f2b97a6ec9ea3cca8e2ad5af701af626719e765ed2529a528"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/central-bank.css",
+      "bytes": 13913,
+      "sha256": "4b8ebb7daac8778f635b4f7e9b6bd9b3279adb4047a40d762963bce09d55c109"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/central-bank.js",
+      "bytes": 38945,
+      "sha256": "0cc05f3e337dad51801e04e888f3185a6cdc83b7bd94853efb6b18b17e507211"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/coverage.json",
+      "bytes": 3420,
+      "sha256": "a3b74d0bbb5609dfca107bebf0a5bc9c612d04c0f88c5fa1aca6d6aedd550737"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/feature-data.js",
+      "bytes": 62512,
+      "sha256": "e6d8c18ecd4f09e1df48a7bdd45507885b29f043cd4c789925d80269760ab930"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/fx-paid.png",
+      "bytes": 1131009,
+      "sha256": "485ca46f9469df7387e5c7be444c180af48dcf44b924ea9e14c11115e7285fc0"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/home.png",
+      "bytes": 1748850,
+      "sha256": "6cf317584d69bf8cd720c2a84327f2d51b5174639888ba035176cf1cb7f1ce26"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/index.html",
+      "bytes": 528,
+      "sha256": "3ac0b2690243d736a96d721868dae573729381a56fdf788e1e72597e7f04537c"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/mobile.png",
+      "bytes": 519952,
+      "sha256": "8eec4e846d8507a18f6370a8def79bdf418c4c729343f584594384d125be8122"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/original-specification.txt",
+      "bytes": 52822,
+      "sha256": "e2f4118c8ac6eb8c8f666513964df1c85e2021d085a30962321428ae3e53ee6b"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/policy.png",
+      "bytes": 1227336,
+      "sha256": "c95a161cced33773a02b5f6ef1a8b153c7888127dce6d7bb1a92ccaa2b088e10"
+    },
+    {
+      "path": "role-prototypes/central-bank-v1-preserved/world-art-v2.png",
+      "bytes": 3623648,
+      "sha256": "2a873ccd0f9ab415af6174047fbaa977ea5df55853803d4be582fc34c49dd1e0"
+    },
+    {
+      "path": "role-prototypes/finance/Finance_游戏页面设计_V1.md",
+      "bytes": 4193,
+      "sha256": "42724ed53a572beb47c1bb5bab3cc2bccb5185d852516a1545122f2d96dc919b"
+    },
+    {
+      "path": "role-prototypes/finance/debt.png",
+      "bytes": 775584,
+      "sha256": "da58715c526b7cf4adf4f8ac23b589ef2fe61f52d54984c51c1768ea74b378ea"
+    },
+    {
+      "path": "role-prototypes/finance/finance.css",
+      "bytes": 17017,
+      "sha256": "170c1dd79c5b32bdeb6dd1a47545ecb028cd053f89f8396e70808bfadc51002e"
+    },
+    {
+      "path": "role-prototypes/finance/finance.js",
+      "bytes": 38307,
+      "sha256": "e877c8e47d4d67afae11f43f48e2eea917952bc36f5c1e99c62233d02cfdd35d"
+    },
+    {
+      "path": "role-prototypes/finance/funding.png",
+      "bytes": 879408,
+      "sha256": "2df7a7c4dfa62053d7e7eb6cfedbea8624f11e8214f1f02188f85066f2e09004"
+    },
+    {
+      "path": "role-prototypes/finance/home.png",
+      "bytes": 1879944,
+      "sha256": "c5cb1a8ce9c9963b45fe8c1edfbebb395d151728efe8c80bf9706f0e100ba4d4"
+    },
+    {
+      "path": "role-prototypes/finance/index-legacy.html",
+      "bytes": 369,
+      "sha256": "5bc9d3143fdefd26af1087f9796525c409e003b57af3983992193acefa6f104f"
+    },
+    {
+      "path": "role-prototypes/finance/index.html",
+      "bytes": 336,
+      "sha256": "930da162a5c7f0de8bbb2b70000d0b9e97991d5fb7befcc2cbf50d10032ac7e4"
+    },
+    {
+      "path": "role-prototypes/finance/mobile.png",
+      "bytes": 528013,
+      "sha256": "ebbfcf8879829eacf5aff9859e58184ea1b28731bfe1551e942ac14d9bdc2f37"
+    },
+    {
+      "path": "role-prototypes/finance/source-extract.txt",
+      "bytes": 87130,
+      "sha256": "3d882b123aa5cbd0cb338adefe0eb5579d77f91c4fd554d76d5d47aa72e0dd9a"
+    },
+    {
+      "path": "role-prototypes/finance/world-art-v2.png",
+      "bytes": 3623648,
+      "sha256": "2a873ccd0f9ab415af6174047fbaa977ea5df55853803d4be582fc34c49dd1e0"
+    },
+    {
+      "path": "role-prototypes/finance-complete/Finance_完整游戏页面设计_V2.md",
+      "bytes": 20726,
+      "sha256": "72d5b9644f5810ed4d3d9e37ac63bb435c95b44bc692f31a2c657c600b171f09"
+    },
+    {
+      "path": "role-prototypes/finance-complete/Finance_游戏页面设计_V1.md",
+      "bytes": 4193,
+      "sha256": "42724ed53a572beb47c1bb5bab3cc2bccb5185d852516a1545122f2d96dc919b"
+    },
+    {
+      "path": "role-prototypes/finance-complete/complete.js",
+      "bytes": 308,
+      "sha256": "46e4c1ff9008a36e531787a4890cefd57827ed2e1c5cccb09623243cdc12bbc0"
+    },
+    {
+      "path": "role-prototypes/finance-complete/coverage.json",
+      "bytes": 3341,
+      "sha256": "84c9e290e50f2f5b8ace421e531b5fe387a1b7c0eb76b982550fccb72dd13174"
+    },
+    {
+      "path": "role-prototypes/finance-complete/coverage.png",
+      "bytes": 530375,
+      "sha256": "7356fb648c59e35c7b85ab2db64b84d47766c8f15ff0f401f59dcd68c68a11d8"
+    },
+    {
+      "path": "role-prototypes/finance-complete/debt.png",
+      "bytes": 775584,
+      "sha256": "da58715c526b7cf4adf4f8ac23b589ef2fe61f52d54984c51c1768ea74b378ea"
+    },
+    {
+      "path": "role-prototypes/finance-complete/event-opening.png",
+      "bytes": 826712,
+      "sha256": "52f5825f40329f1f09aa1ae639da39e8bca85fcd3c4158329dcfffa5a9c4f275"
+    },
+    {
+      "path": "role-prototypes/finance-complete/feature-data.js",
+      "bytes": 66624,
+      "sha256": "07b475e2c261ab6f1690fe87e66dcbe447de8c12a86ba2a37f193027c33a097f"
+    },
+    {
+      "path": "role-prototypes/finance-complete/finance.css",
+      "bytes": 17017,
+      "sha256": "170c1dd79c5b32bdeb6dd1a47545ecb028cd053f89f8396e70808bfadc51002e"
+    },
+    {
+      "path": "role-prototypes/finance-complete/finance.js",
+      "bytes": 37836,
+      "sha256": "5258f66e022992c4b42ec9b9f53789f3ed18b8d2b466d742bdd719b48c8d3e83"
+    },
+    {
+      "path": "role-prototypes/finance-complete/funding.png",
+      "bytes": 879408,
+      "sha256": "2df7a7c4dfa62053d7e7eb6cfedbea8624f11e8214f1f02188f85066f2e09004"
+    },
+    {
+      "path": "role-prototypes/finance-complete/home.png",
+      "bytes": 1879944,
+      "sha256": "c5cb1a8ce9c9963b45fe8c1edfbebb395d151728efe8c80bf9706f0e100ba4d4"
+    },
+    {
+      "path": "role-prototypes/finance-complete/index-legacy.html",
+      "bytes": 761,
+      "sha256": "66a3a5fc8cecdaa715e153c3d7ddbf776d2c1d93eb4a3e5e86db5c9640474aee"
+    },
+    {
+      "path": "role-prototypes/finance-complete/index.html",
+      "bytes": 336,
+      "sha256": "930da162a5c7f0de8bbb2b70000d0b9e97991d5fb7befcc2cbf50d10032ac7e4"
+    },
+    {
+      "path": "role-prototypes/finance-complete/mobile.png",
+      "bytes": 528013,
+      "sha256": "ebbfcf8879829eacf5aff9859e58184ea1b28731bfe1551e942ac14d9bdc2f37"
+    },
+    {
+      "path": "role-prototypes/finance-complete/numeric-budget.png",
+      "bytes": 526485,
+      "sha256": "c05e2e4c4841bef98a2cc2df0810553a011d6640f075e5e5e4ff351c8a226bee"
+    },
+    {
+      "path": "role-prototypes/finance-complete/original-specification.txt",
+      "bytes": 51154,
+      "sha256": "884382efefca5463643417db50a10864f52dc42836bdebd0060f375d3ce6a177"
+    },
+    {
+      "path": "role-prototypes/finance-complete/playable.js",
+      "bytes": 14123,
+      "sha256": "e27237de215b7cf8977c51ef7cb06f631b82eb1c441ad0cde855128af8fbdc49"
+    },
+    {
+      "path": "role-prototypes/finance-complete/source-extract.txt",
+      "bytes": 87130,
+      "sha256": "3d882b123aa5cbd0cb338adefe0eb5579d77f91c4fd554d76d5d47aa72e0dd9a"
+    },
+    {
+      "path": "role-prototypes/finance-complete/world-art-v2.png",
+      "bytes": 3623648,
+      "sha256": "2a873ccd0f9ab415af6174047fbaa977ea5df55853803d4be582fc34c49dd1e0"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/Finance_完整游戏页面设计_V2.md",
+      "bytes": 20726,
+      "sha256": "72d5b9644f5810ed4d3d9e37ac63bb435c95b44bc692f31a2c657c600b171f09"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/Finance_游戏页面设计_V1.md",
+      "bytes": 4193,
+      "sha256": "42724ed53a572beb47c1bb5bab3cc2bccb5185d852516a1545122f2d96dc919b"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/PRESERVATION.json",
+      "bytes": 1477,
+      "sha256": "23e2a38a1840cef3321c438459437067892cb3d93555511733ae8cb579ea903f"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/complete.js",
+      "bytes": 308,
+      "sha256": "46e4c1ff9008a36e531787a4890cefd57827ed2e1c5cccb09623243cdc12bbc0"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/coverage.json",
+      "bytes": 3341,
+      "sha256": "84c9e290e50f2f5b8ace421e531b5fe387a1b7c0eb76b982550fccb72dd13174"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/coverage.png",
+      "bytes": 530375,
+      "sha256": "7356fb648c59e35c7b85ab2db64b84d47766c8f15ff0f401f59dcd68c68a11d8"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/debt.png",
+      "bytes": 775584,
+      "sha256": "da58715c526b7cf4adf4f8ac23b589ef2fe61f52d54984c51c1768ea74b378ea"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/feature-data.js",
+      "bytes": 66624,
+      "sha256": "07b475e2c261ab6f1690fe87e66dcbe447de8c12a86ba2a37f193027c33a097f"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/finance.css",
+      "bytes": 17017,
+      "sha256": "170c1dd79c5b32bdeb6dd1a47545ecb028cd053f89f8396e70808bfadc51002e"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/finance.js",
+      "bytes": 38316,
+      "sha256": "b8347a1adc104feb72a47d055cf7d7fcfc6a9062a2ea20dbfbb3e840888b92d4"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/funding.png",
+      "bytes": 879408,
+      "sha256": "2df7a7c4dfa62053d7e7eb6cfedbea8624f11e8214f1f02188f85066f2e09004"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/home.png",
+      "bytes": 1879944,
+      "sha256": "c5cb1a8ce9c9963b45fe8c1edfbebb395d151728efe8c80bf9706f0e100ba4d4"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/index.html",
+      "bytes": 553,
+      "sha256": "964b9918344ae15002c7f2d5b7b8447855479a09aed113be6cb1d4a497781beb"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/mobile.png",
+      "bytes": 528013,
+      "sha256": "ebbfcf8879829eacf5aff9859e58184ea1b28731bfe1551e942ac14d9bdc2f37"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/original-specification.txt",
+      "bytes": 51154,
+      "sha256": "884382efefca5463643417db50a10864f52dc42836bdebd0060f375d3ce6a177"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/source-extract.txt",
+      "bytes": 87130,
+      "sha256": "3d882b123aa5cbd0cb338adefe0eb5579d77f91c4fd554d76d5d47aa72e0dd9a"
+    },
+    {
+      "path": "role-prototypes/finance-design-v2-preserved/world-art-v2.png",
+      "bytes": 3623648,
+      "sha256": "2a873ccd0f9ab415af6174047fbaa977ea5df55853803d4be582fc34c49dd1e0"
+    },
+    {
+      "path": "role-prototypes/finance-v1-preserved/Finance_游戏页面设计_V1.md",
+      "bytes": 4193,
+      "sha256": "42724ed53a572beb47c1bb5bab3cc2bccb5185d852516a1545122f2d96dc919b"
+    },
+    {
+      "path": "role-prototypes/finance-v1-preserved/PRESERVATION.json",
+      "bytes": 894,
+      "sha256": "3c0c05ed439257877165030051cb449aada2c45192d959d06b4de47a65f93f6d"
+    },
+    {
+      "path": "role-prototypes/finance-v1-preserved/debt.png",
+      "bytes": 775584,
+      "sha256": "da58715c526b7cf4adf4f8ac23b589ef2fe61f52d54984c51c1768ea74b378ea"
+    },
+    {
+      "path": "role-prototypes/finance-v1-preserved/finance.css",
+      "bytes": 17017,
+      "sha256": "170c1dd79c5b32bdeb6dd1a47545ecb028cd053f89f8396e70808bfadc51002e"
+    },
+    {
+      "path": "role-prototypes/finance-v1-preserved/finance.js",
+      "bytes": 38307,
+      "sha256": "e877c8e47d4d67afae11f43f48e2eea917952bc36f5c1e99c62233d02cfdd35d"
+    },
+    {
+      "path": "role-prototypes/finance-v1-preserved/funding.png",
+      "bytes": 879408,
+      "sha256": "2df7a7c4dfa62053d7e7eb6cfedbea8624f11e8214f1f02188f85066f2e09004"
+    },
+    {
+      "path": "role-prototypes/finance-v1-preserved/home.png",
+      "bytes": 1879944,
+      "sha256": "c5cb1a8ce9c9963b45fe8c1edfbebb395d151728efe8c80bf9706f0e100ba4d4"
+    },
+    {
+      "path": "role-prototypes/finance-v1-preserved/index.html",
+      "bytes": 369,
+      "sha256": "5bc9d3143fdefd26af1087f9796525c409e003b57af3983992193acefa6f104f"
+    },
+    {
+      "path": "role-prototypes/finance-v1-preserved/mobile.png",
+      "bytes": 528013,
+      "sha256": "ebbfcf8879829eacf5aff9859e58184ea1b28731bfe1551e942ac14d9bdc2f37"
+    },
+    {
+      "path": "role-prototypes/finance-v1-preserved/source-extract.txt",
+      "bytes": 87130,
+      "sha256": "3d882b123aa5cbd0cb338adefe0eb5579d77f91c4fd554d76d5d47aa72e0dd9a"
+    },
+    {
+      "path": "role-prototypes/finance-v1-preserved/world-art-v2.png",
+      "bytes": 3623648,
+      "sha256": "2a873ccd0f9ab415af6174047fbaa977ea5df55853803d4be582fc34c49dd1e0"
+    },
+    {
+      "path": "role-prototypes/finance-v3/README.md",
+      "bytes": 1111,
+      "sha256": "b9acfad918e2eebfbc6edb98806834fee9356ece4bf4d51510779ead36cca618"
+    },
+    {
+      "path": "role-prototypes/finance-v3/build_coverage.py",
+      "bytes": 3912,
+      "sha256": "c12aa7298623954afdc42d7af85c4493c3c059fcee00f5fe46f2b330bdd36107"
+    },
+    {
+      "path": "role-prototypes/finance-v3/build_schema.py",
+      "bytes": 15536,
+      "sha256": "9462321560199906ef91974c83ac97e2efbb29cfe35539b9ea65cdd08ad514f5"
+    },
+    {
+      "path": "role-prototypes/finance-v3/control-verification.json",
+      "bytes": 44611,
+      "sha256": "258b27bb8b9caa8ff98a6d03d0c673ec80eb09776bfcfbc8b01c21e94b426ad7"
+    },
+    {
+      "path": "role-prototypes/finance-v3/coverage.html",
+      "bytes": 47512,
+      "sha256": "ff22ace72c5cf313a47c46236f190c1a4714491d168e7124c0fa8394e54aca7b"
+    },
+    {
+      "path": "role-prototypes/finance-v3/coverage.js",
+      "bytes": 68053,
+      "sha256": "ed082acf55aff7f21fe0a5fa0d0fe5aa9e8089cae03921afad51b8b998b976a7"
+    },
+    {
+      "path": "role-prototypes/finance-v3/coverage.json",
+      "bytes": 82916,
+      "sha256": "17bfac2d89ce8ffc63d92feee88c20448ddd8f0a6e980f45930e3d2a5108f4c0"
+    },
+    {
+      "path": "role-prototypes/finance-v3/finance.css",
+      "bytes": 8391,
+      "sha256": "7fe158a2ec523047acdd46bbd46ac936698e5f5ff4567a1f13b585a67328c6b6"
+    },
+    {
+      "path": "role-prototypes/finance-v3/finance.js",
+      "bytes": 86233,
+      "sha256": "2f49203e38a2ff517a7715d1c7408990e05eae6e7d903f2e101987c58ef0be9b"
+    },
+    {
+      "path": "role-prototypes/finance-v3/home-desktop.png",
+      "bytes": 1304670,
+      "sha256": "41a7fa0b30b9620aa7c47d9e4f8441cceef23b78a02cc01b311e8e69a496fe54"
+    },
+    {
+      "path": "role-prototypes/finance-v3/home-mobile.png",
+      "bytes": 316126,
+      "sha256": "a106b5c548f1d72bd8f5ca478fab6b36309db0ed52e178aafc6104801d36b465"
+    },
+    {
+      "path": "role-prototypes/finance-v3/index.html",
+      "bytes": 595,
+      "sha256": "198a842e68e9cdc0e1e6aa8950bba69f7fbf00534e0e1eae50c53e4deb7530ab"
+    },
+    {
+      "path": "role-prototypes/finance-v3/outcome-desktop.png",
+      "bytes": 1303514,
+      "sha256": "1bc29e561ad02db0ce27166de13bd0853e7e04b418a80d757c06882336958836"
+    },
+    {
+      "path": "role-prototypes/finance-v3/plans-desktop.png",
+      "bytes": 234300,
+      "sha256": "fbfcdc926d9da5b1fa0c30deed59f6396679ea6ef241aa3ae37f8f9126c27c18"
+    },
+    {
+      "path": "role-prototypes/finance-v3/preservation-verification.json",
+      "bytes": 2201,
+      "sha256": "c0988978cabafe94696747d56621bc6c25baae18f98536793e910095d0d8c6e7"
+    },
+    {
+      "path": "role-prototypes/finance-v3/previous-finance.zip",
+      "bytes": 17216695,
+      "sha256": "6f3450477eb1a9598e33d01a7d5e98de337037c4e087c49989cd176b0a429037"
+    },
+    {
+      "path": "role-prototypes/finance-v3/project-mobile.png",
+      "bytes": 173913,
+      "sha256": "769dc122701787391d2368b88399809b362e51bd3fadaa07d8ddc9f757e52840"
+    },
+    {
+      "path": "role-prototypes/finance-v3/schema.js",
+      "bytes": 35476,
+      "sha256": "29456a4746cc9971805ea11cf55d93925b0c1ce498cb8a4decd905abcb8e1bf7"
+    },
+    {
+      "path": "role-prototypes/finance-v3/schema.json",
+      "bytes": 57105,
+      "sha256": "ba8386dc42f01e9b87edaef1b7ccfca4ded48e7981bb66b6ae102a4003a36e8b"
+    },
+    {
+      "path": "role-prototypes/finance-v3/verification.json",
+      "bytes": 2591,
+      "sha256": "327958fb32bd0a48672e2bd8396a6eff055b253edd92945f822ac8caf0c845b6"
+    },
+    {
+      "path": "role-prototypes/finance-v3/verify-coverage.cjs",
+      "bytes": 2126,
+      "sha256": "e9f1801d7522be69fadb71bb393876c2339b917c4332dc05dd206a03e29f2192"
+    },
+    {
+      "path": "role-prototypes/finance-v3/verify.cjs",
+      "bytes": 14553,
+      "sha256": "381a0702a0cf6a9b1b7fad93fe4ce6827526dfb5cf84feb7af32059801c43957"
+    },
+    {
+      "path": "role-prototypes/finance-v3/workbench-desktop.png",
+      "bytes": 350363,
+      "sha256": "7952812d6d0ba95dc84884a5a3ade14e5e392ae110e8f1cba45b58d2fe7d9f34"
+    },
+    {
+      "path": "role-prototypes/finance-v3/workbench-mobile.png",
+      "bytes": 101613,
+      "sha256": "b8bf5c860668dc54cb7a036f6c12fbc96874bad1a9b7a1a011a05a79469e6c3b"
+    },
+    {
+      "path": "role-prototypes/finance-v3/页面逻辑与玩家复审.md",
+      "bytes": 5165,
+      "sha256": "442a4060cbdced4bbe703dae0b6612fd1f0e50d5f671d1c4ae634e6ff20e6482"
+    },
+    {
+      "path": "role-prototypes/index.html",
+      "bytes": 3745,
+      "sha256": "ee9e4b5b1d4e5757b79bdb5fa46dea5b220617b3c14dc9543f715d6efb3ca2c2"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/audit-preview.png",
+      "bytes": 205230,
+      "sha256": "ed200fd52c3c521ff27d58ab51a6eef95e451799c6afbf7c03ca2dc3032684ef"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/audit.json",
+      "bytes": 565727,
+      "sha256": "76e656f190180f817619e82c106ef0bcd6305603c1e4c2bad789fd0287f2c220"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/build_audit.py",
+      "bytes": 36238,
+      "sha256": "07655dcf01b812d031cd4624300c0449df237ebf465816e4c42ed02084ba43fe"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/control-verification.json",
+      "bytes": 85201,
+      "sha256": "d046e19e0812eee1775d734cf6b63338af4edb57d5d84f7232a6446acd1f6529"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/index.html",
+      "bytes": 462432,
+      "sha256": "42970679d4f36bb10c1117eb7be4472e4243df433c7a8812bd68fb8c8ded9aff"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/report-verification.json",
+      "bytes": 197,
+      "sha256": "7ada13a74cb43227ac7d467913dcbbd68cb896c652dd616f7acf0b9148dc7d2c"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/source-verification.json",
+      "bytes": 771,
+      "sha256": "1fa252af259a4dcf13658679b4f916b4cda5c0842c7faf2278f03ae5d40b7fd7"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/special-verification.json",
+      "bytes": 15852,
+      "sha256": "817c75b335b57aeee10a634c7b3cbd798078c2e88e861f2015d73cdbb3876e09"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/template.html",
+      "bytes": 10519,
+      "sha256": "50cd360db3beb7a515eae837bdf7e9f81d315c5b59759afbae7fa1d28a0b9f3a"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/verify-controls.cjs",
+      "bytes": 2374,
+      "sha256": "0a03e5d337ebff478a262a3472dcff027236fd0d198be8ee6ecb026335f4146b"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/verify-report.cjs",
+      "bytes": 1677,
+      "sha256": "95e83c3b002146df3e21336f1ca1b9f127c3c60967be3fe0fa391ded7a2cb55e"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/verify-special-controls.cjs",
+      "bytes": 3456,
+      "sha256": "0f5e8e779df2c4a2ab2ba8626329351dfe4a2d5d4604c92057ccac7082dd7361"
+    },
+    {
+      "path": "role-prototypes/indicator-audit/核对结论.md",
+      "bytes": 5013,
+      "sha256": "e27be45c9c8916056325b541b024e6f942b423e6e79f50e6cbcaf77a7e70258b"
+    },
+    {
+      "path": "role-prototypes/industry/action-coverage.js",
+      "bytes": 10566,
+      "sha256": "942617b276c68cf134c8f06143b442d2f4bb7d2f1a3188c81fee21d18fc4e926"
+    },
+    {
+      "path": "role-prototypes/industry/action-coverage.json",
+      "bytes": 11837,
+      "sha256": "cb0f5b5ff7738ba1d9813e1ed56d4411b30c27ece769fc2b23b1aa738a3c1d34"
+    },
+    {
+      "path": "role-prototypes/industry/cases.js",
+      "bytes": 8183,
+      "sha256": "87be97910fe23725cee969c32dc85214406f74ae4fe270bc0537af295fb7f278"
+    },
+    {
+      "path": "role-prototypes/industry/functions.png",
+      "bytes": 115644,
+      "sha256": "0ba11743eb630cbd1a7ad651ff6771d79925b57e1e5fcc658fe955c71008d54a"
+    },
+    {
+      "path": "role-prototypes/industry/home.png",
+      "bytes": 1191343,
+      "sha256": "ad7580ba2530f4536c942b78fcdd45272239a5649e1754a2f61c9fc87517bcc1"
+    },
+    {
+      "path": "role-prototypes/industry/index.html",
+      "bytes": 768,
+      "sha256": "0161c18568add4384833685866bfdf4ab542f795fa4c2b80eba07bad5ee32e7a"
+    },
+    {
+      "path": "role-prototypes/industry/industry.js",
+      "bytes": 17760,
+      "sha256": "038afcab84bffecee82ac64d68077bb6750f509d172a0914c306c38ab28e21d9"
+    },
+    {
+      "path": "role-prototypes/industry/mobile.png",
+      "bytes": 393175,
+      "sha256": "59f7d0aa1b8bd25415aa95bbd4fe37943f690224b807dc5bff6278e773e4595b"
+    },
+    {
+      "path": "role-prototypes/industry/opening.png",
+      "bytes": 737381,
+      "sha256": "77d62a166c29c9c85828587b587730c89cfb857b9a98ede14919292bc37a306b"
+    },
+    {
+      "path": "role-prototypes/industry/source-extract.txt",
+      "bytes": 67787,
+      "sha256": "7e65f6e7eb7b2a9676cc4cb57c1d49a99f1a7f72deb0354a4226c93073b6424c"
+    },
+    {
+      "path": "role-prototypes/industry/source-provenance.json",
+      "bytes": 247,
+      "sha256": "116ec196df14773e9130469b9bc0fbe5653a27ac06282e465b5c73b72d875eb0"
+    },
+    {
+      "path": "role-prototypes/industry/spec-data.js",
+      "bytes": 70085,
+      "sha256": "39cfbd85b0a7813475e296ea315bd86bd9e8f3c0e27fbbc68d6c6abb70da06f6"
+    },
+    {
+      "path": "role-prototypes/industry/spec-sections.json",
+      "bytes": 71342,
+      "sha256": "cf1deb0e4bde1f60bfbfb4cd6705dd2f1f28555a1c4789e4befb02011e4b0826"
+    },
+    {
+      "path": "role-prototypes/industry/页面交互与玩家复审.md",
+      "bytes": 2468,
+      "sha256": "b2e53c06614b0bc2c1223ab925a4488555ded5d92123af8450606c9054e8cb0d"
+    },
+    {
+      "path": "role-prototypes/season1-game/README.md",
+      "bytes": 2700,
+      "sha256": "46b17ef3f8c928f9913fa1268c7befc1bcbdddc819bdbb08d866f8b233ba26a1"
+    },
+    {
+      "path": "role-prototypes/season1-game/assets/republic.png",
+      "bytes": 3409194,
+      "sha256": "6f26ef62b7484c55c9cb9d0d5d7fa91646baa127950500fe57efa49d56d43203"
+    },
+    {
+      "path": "role-prototypes/season1-game/build-coverage.py",
+      "bytes": 4260,
+      "sha256": "abe5635f8b4607c0ab1f3bd74560c603a6ad832914f9fdf5d59027eb439b08cf"
+    },
+    {
+      "path": "role-prototypes/season1-game/captain-desktop.png",
+      "bytes": 2532430,
+      "sha256": "e5346a8571763fd8a9d72f663b34f8d21585300c31b3a5cde582bc970ca1be12"
+    },
+    {
+      "path": "role-prototypes/season1-game/captain-mobile.png",
+      "bytes": 593527,
+      "sha256": "059cf20937011eb6e2277832c45b84ec1a869ba321b95ac8f4c2eea6c2d81f23"
+    },
+    {
+      "path": "role-prototypes/season1-game/captain-play.png",
+      "bytes": 657446,
+      "sha256": "43e6aebcc431e7874c95c7d8f9fb736aa08fdd8f348f19bd5b948c5c5adbd1a9"
+    },
+    {
+      "path": "role-prototypes/season1-game/catalog.json",
+      "bytes": 871638,
+      "sha256": "66da624db58faac33cedc807e141dd75dbcd9ef4d8ab41e1ad2b5398d90dbbb1"
+    },
+    {
+      "path": "role-prototypes/season1-game/central_bank-desktop.png",
+      "bytes": 2515296,
+      "sha256": "75ada4f970965f0707a48aa02f241c4e4304ed7f5f65fd1f4516ef6217166f03"
+    },
+    {
+      "path": "role-prototypes/season1-game/central_bank-mobile.png",
+      "bytes": 582864,
+      "sha256": "887849eabb7ea8e6e40f4a1d0792f594db609ff19e02aaeb9baadf97f4d3c73f"
+    },
+    {
+      "path": "role-prototypes/season1-game/central_bank-play.png",
+      "bytes": 650596,
+      "sha256": "f98015bc3972138db009661903b414a5247ce67f48a307a6073f7bc2bb18f603"
+    },
+    {
+      "path": "role-prototypes/season1-game/coverage.html",
+      "bytes": 198414,
+      "sha256": "c9a724e9214f3a56a40538e9da9894cfc8ed31f236fbf1d4be558e5039aed7fa"
+    },
+    {
+      "path": "role-prototypes/season1-game/coverage.json",
+      "bytes": 460650,
+      "sha256": "9263d1d1d4ac58f8285a796405a4ff66d7eaf388e4c00daac5d689407f9767ff"
+    },
+    {
+      "path": "role-prototypes/season1-game/final-verification.json",
+      "bytes": 166,
+      "sha256": "3bd097cdf7e8a40c468cc8efdafe7a8acfdfbd04af35738d4aa73d23985cf01e"
+    },
+    {
+      "path": "role-prototypes/season1-game/finance-desktop.png",
+      "bytes": 2542954,
+      "sha256": "96744924b2c1e91183e665bc7681eee79e4ef2d67b87676c73565d770e80b597"
+    },
+    {
+      "path": "role-prototypes/season1-game/finance-final.png",
+      "bytes": 2522127,
+      "sha256": "d676813dc3eef96e524c2c4207940a83b25d18a0bf963b137f97ff100add0d3d"
+    },
+    {
+      "path": "role-prototypes/season1-game/finance-first.png",
+      "bytes": 2586312,
+      "sha256": "41a006a532a093a66b016b2696f7cd5b937c976462b46dad1b09d1b63bf101ac"
+    },
+    {
+      "path": "role-prototypes/season1-game/finance-mobile.png",
+      "bytes": 597935,
+      "sha256": "0b99d6427a4ee7e07cf01253a40f8934f0f30ea62bad72b2976620024f02b2e1"
+    },
+    {
+      "path": "role-prototypes/season1-game/finance-play.png",
+      "bytes": 744026,
+      "sha256": "3f23b07739d502d07e8d4a98bb6e1092df7ac889d567ef25d1362327ab3c1d82"
+    },
+    {
+      "path": "role-prototypes/season1-game/game.css",
+      "bytes": 22527,
+      "sha256": "a153207aebc5994fe459f81243e8efa68f0df0690bf70a628956c0ac5cfd798f"
+    },
+    {
+      "path": "role-prototypes/season1-game/game.js",
+      "bytes": 65823,
+      "sha256": "b89a0749f9dfaf8fbeb3462a6eac29d309a37229e98842008d8442caf0a083ca"
+    },
+    {
+      "path": "role-prototypes/season1-game/index.html",
+      "bytes": 412,
+      "sha256": "1ca6af8b06e4c47b6ad073f32bc17f14f31123d84c16105fbbe9f28179b18687"
+    },
+    {
+      "path": "role-prototypes/season1-game/industry-desktop.png",
+      "bytes": 2529309,
+      "sha256": "e6d7d6567c0a9492639b30ac2cb464c957b7428ecc2a5e98914a67d79cf17415"
+    },
+    {
+      "path": "role-prototypes/season1-game/industry-mobile.png",
+      "bytes": 589693,
+      "sha256": "fafe32212507904586c41b39d1dfac55f5efa10d2f04242afe2c3f35fa938558"
+    },
+    {
+      "path": "role-prototypes/season1-game/industry-play.png",
+      "bytes": 656042,
+      "sha256": "e5d18c9ecc011bab24dfa7d5503068684aa9b2f6ff747bcbc0629f56b4d923b0"
+    },
+    {
+      "path": "role-prototypes/season1-game/interaction-verification.json",
+      "bytes": 2531,
+      "sha256": "10d1d5d95b75be7dfe0ccde66ab289bf9695f86d5c991eb11ccf34a26074c3dd"
+    },
+    {
+      "path": "role-prototypes/season1-game/interface-corrections.json",
+      "bytes": 6531,
+      "sha256": "1f486edff15dbff5a4b177d47dfb414e5a4ca67c5d135b7e55eccfc6d674e487"
+    },
+    {
+      "path": "role-prototypes/season1-game/preservation-verification.json",
+      "bytes": 1398,
+      "sha256": "70adcc83e6810d268288f07ea07054dfc6d1b633f7aab73d533c6b33a7bc4153"
+    },
+    {
+      "path": "role-prototypes/season1-game/smoke.cjs",
+      "bytes": 704,
+      "sha256": "790e851a03faa05a7b1853defe8c4e1084bf142dd48b831cd193bc5abaf8b7c9"
+    },
+    {
+      "path": "role-prototypes/season1-game/social-desktop.png",
+      "bytes": 2502647,
+      "sha256": "2c0914595ceefedbdf60d53b766b86de174dccd0b0b06e4727dc50290784697c"
+    },
+    {
+      "path": "role-prototypes/season1-game/social-mobile.png",
+      "bytes": 576975,
+      "sha256": "14a03b6b4c49e0e2f235e2732ba40263648b8cb798aedaf2ece4caffe70f1d71"
+    },
+    {
+      "path": "role-prototypes/season1-game/social-play.png",
+      "bytes": 643194,
+      "sha256": "7459162962e932448475849b375c2f98f00dcee4ec4030c7294530bb4b55dd4e"
+    },
+    {
+      "path": "role-prototypes/season1-game/structured-verification.json",
+      "bytes": 122,
+      "sha256": "6dd2d87a77b12b00796bcf1d9ea5d72d76bb81f47bac3b9f6c435f6168ead3a0"
+    },
+    {
+      "path": "role-prototypes/season1-game/trade-desktop.png",
+      "bytes": 2519480,
+      "sha256": "d374d3b34e1014cf3547463d05502e2d2e60ad104ac16708f80a0b1cae320b9c"
+    },
+    {
+      "path": "role-prototypes/season1-game/trade-mobile.png",
+      "bytes": 583853,
+      "sha256": "5508cafd81e62b77ac7cc1a8e0ec892217efa76bf8912d40a91c69d86bdc4caa"
+    },
+    {
+      "path": "role-prototypes/season1-game/trade-play.png",
+      "bytes": 591841,
+      "sha256": "843eb2c95cfd240442c8a06efe53b8b8b645365c43b309070bfed80c09f65153"
+    },
+    {
+      "path": "role-prototypes/season1-game/verification.json",
+      "bytes": 3069,
+      "sha256": "e2ea7d7acda2a98934d4dde21b3442b06c6b4a52572990547cd506d3fc6c89af"
+    },
+    {
+      "path": "role-prototypes/season1-game/verify-final.cjs",
+      "bytes": 2113,
+      "sha256": "8ef7f89b86d9efa9d82fca6df4095e40fc0e999f4d05d93204f001620e59f3fe"
+    },
+    {
+      "path": "role-prototypes/season1-game/verify-interactions-latest.log",
+      "bytes": 43,
+      "sha256": "7fd2095dcb8414e2043bc20f16abfc30cc6a148fadf0bfe4ff71ba6cbd2d3f5c"
+    },
+    {
+      "path": "role-prototypes/season1-game/verify-interactions.cjs",
+      "bytes": 4885,
+      "sha256": "1f2431d547333066665533c97015afa1f3dd917572e5aa429162bf5ded6451b3"
+    },
+    {
+      "path": "role-prototypes/season1-game/verify-latest.log",
+      "bytes": 2982,
+      "sha256": "18aae94096b1f1c0a2b2f6d6aeffd159fead299adb2525274ab95fdac1a00c04"
+    },
+    {
+      "path": "role-prototypes/season1-game/verify-structured.cjs",
+      "bytes": 2502,
+      "sha256": "12b0b2b0a026e8f770da12a05bb1d38325e6f2dc0818ba27c3c0a4a2d9adbe3b"
+    },
+    {
+      "path": "role-prototypes/season1-game/verify.cjs",
+      "bytes": 6889,
+      "sha256": "d7cccc6585a76b1457bd187508afcc174b216c380ae72b823ebc6f2c660f8cd5"
+    },
+    {
+      "path": "role-prototypes/season1-game/页面逻辑与玩家复审.md",
+      "bytes": 8837,
+      "sha256": "55796918c95e15bfd66871cacf757109b1e73df41232e791914a33629c7f4466"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/70国接入准备.md",
+      "bytes": 2071,
+      "sha256": "c32dfed766d70c134c00879628b8dbdb4a749daf0d3bbf60c6c6ea979f2b6459"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/FINAL-FUNCTION-REVIEW.md",
+      "bytes": 3007,
+      "sha256": "265a6ff1899a60c31205e63b6f7320428c263bea970648fd1061b28a690c733e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/README.md",
+      "bytes": 5909,
+      "sha256": "efb47c58a0811e5cb17482f92a644032a753d519ac4ea931e14c17586aec9814"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/academy.png",
+      "bytes": 2536272,
+      "sha256": "b2463e6cf988a366c905251363fac4c23c45d252fd50e11615018ee9bda69c5b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/cabinet.png",
+      "bytes": 2312621,
+      "sha256": "7b5b1db92811cca61a71b05b4ad99215786259e7299e1583afc255add8f3b478"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/clinic.png",
+      "bytes": 2247626,
+      "sha256": "52945d37550a4fb480cffe0ca4c6ba9a55ca718995faa7cafa56294d1637c7b9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/commons.png",
+      "bytes": 2539524,
+      "sha256": "a5b72372178c3860887f10e0426243d35343a8c581ce0e6c948c8b7242f8318e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/construction.png",
+      "bytes": 2676082,
+      "sha256": "285a99eea75b4d331471f3eba04fdf6b2cf59f059bc9001440e2688bbd8c5013"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/diplomacy.png",
+      "bytes": 2341320,
+      "sha256": "c187182474e87b64868442b526ee79a8070193e41c64835f3298f945dd00a571"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/exchange.png",
+      "bytes": 2169733,
+      "sha256": "e296734843c03e9366123a3ccd5743e2257837df0511522225bec704e64e5b26"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/factory.png",
+      "bytes": 2775586,
+      "sha256": "1202de580bcb2d2602296799e237700672af4785405d9c62db8c1bfc27379acf"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/harbor.png",
+      "bytes": 2487439,
+      "sha256": "e8da9e014a621fd3295b9f6ff5a87eb9a1745aef95358e45c62c32491c51374f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/journeys/captain.png",
+      "bytes": 2175692,
+      "sha256": "a8c3697005e1480c66c300866abd193066bed048804d941d0b34d0295c20f2ff"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/journeys/central_bank.png",
+      "bytes": 2317903,
+      "sha256": "2d6ab008d5c866345ad17adc3e597c3435fb99dfed066be1d9a8044d66487f26"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/journeys/finance.png",
+      "bytes": 2655542,
+      "sha256": "a9c44c2acf4ddbdf8d240d3ec18b119cda8a721115bde1d43d4dc19123cdf47a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/journeys/industry.png",
+      "bytes": 2789535,
+      "sha256": "164839a268dde06bf58f3996019961b35d915ca60276eac26c20973584bde057"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/journeys/manifest.json",
+      "bytes": 6882,
+      "sha256": "ab9dffffdb1da46e7d49f4b0b62686452deedb5d0776abfc5e626120725c24c1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/journeys/social.png",
+      "bytes": 2523700,
+      "sha256": "c643a1fa16237efe357e4043d9ede5f392b87639a86f7e7304913be2779c6397"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/journeys/trade.png",
+      "bytes": 2440592,
+      "sha256": "5b1fc8c15592836d6f4227b8c2928a4d16e4bab947d45bfac30253e0244cbb4d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/lobby/brand-reference.css",
+      "bytes": 1225,
+      "sha256": "60142949659c0c9278d99d8c1dfe8b7b5ca96a935d96ab17c8ae9c156427e43e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/lobby/econmind-badge-192.png",
+      "bytes": 48562,
+      "sha256": "114ecb729a80fc3a2232f7a7048d042519f56cb2ff6a0495383c9f16ee0e33e9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/lobby/econmind-badge-48.png",
+      "bytes": 4648,
+      "sha256": "b8bd6080ea88f2a8584d9ffc7a865d4227ff0b94cf3217228a5b153b07c03e1e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/lobby/econmind-badge-96.png",
+      "bytes": 15412,
+      "sha256": "c5a802f204f42f795d09ef2de22a1ea66eabc602edc1f8b2187293f91f7bb75f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/lobby/season1-connected-world-globe.png",
+      "bytes": 2240760,
+      "sha256": "a47e733049bdf03064be0c251208206f5ce58ba9a8470f0417730904bdb78a39"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/lobby/season1-game-lobby.css",
+      "bytes": 20395,
+      "sha256": "df5a7f51f2e7c4304c6d953b6c3bef8559bcb548113f9819d0184770fbf91efc"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/power.png",
+      "bytes": 2399356,
+      "sha256": "193b38f6d69b735acb2a7c7afb0f62cbe00cff8d218d662adca79a5d14b09c26"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/republic.png",
+      "bytes": 3409194,
+      "sha256": "6f26ef62b7484c55c9cb9d0d5d7fa91646baa127950500fe57efa49d56d43203"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/reserve.png",
+      "bytes": 2303573,
+      "sha256": "592ea2ad20d7d5dfeebe61d431fece5da8ab6bb13c367c1821a571ea2398e499"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/assets/treasury.png",
+      "bytes": 2243551,
+      "sha256": "4543bd8804256607781b43d2edc9b5ada4d33d2d4104ef18a3409fc5f97c75e1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/build-coverage.py",
+      "bytes": 4707,
+      "sha256": "5794c5041aadb3c44fc3bcc49f96203424afa10a198e3e20376f12e5403215e7"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/catalog.json",
+      "bytes": 871638,
+      "sha256": "66da624db58faac33cedc807e141dd75dbcd9ef4d8ab41e1ad2b5398d90dbbb1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/01/index.html",
+      "bytes": 625,
+      "sha256": "265ec46ca6887e56c66f4e8b03e6db0a2c419718a214497bd664e36643feb281"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/02/index.html",
+      "bytes": 625,
+      "sha256": "228621037c028885372e1528180634a301c1c5787df8ce36c454d6e4a459e125"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/03/index.html",
+      "bytes": 625,
+      "sha256": "985ad80f178c203621c1f49494fbbe4c754170604afa31e01bc8e3c01541df26"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/04/index.html",
+      "bytes": 625,
+      "sha256": "61bf4fbf5fa77a03ed2f3a858efdaf3e0d8fae97414e308ad741638f3d45a2fb"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/05/index.html",
+      "bytes": 627,
+      "sha256": "9fcad5bc4ff78ce9ddd93e18f8b7e3a2e5224021470ac02e049fafbecfc49ca7"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/06/index.html",
+      "bytes": 623,
+      "sha256": "4dd80407125fbb3bffe49eece9fb6f6a15bf593af2cb18405d43261483edfb24"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/07/index.html",
+      "bytes": 625,
+      "sha256": "588c4e65d55e66c826b6e4383c2daad5369252f6740c1f037df547bbffd11c41"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/08/index.html",
+      "bytes": 625,
+      "sha256": "56fc9e2d876e6cdc65a2e3f3ddee2c9724fcc1e877992a22786c3685f7fdb162"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/09/index.html",
+      "bytes": 625,
+      "sha256": "6490daa64c6d95ae08eb5a51c6506b28d42e96ba0924aa93e3d69da88f2a70ea"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/10/index.html",
+      "bytes": 623,
+      "sha256": "05f33d9dd742b878168c9bcd3f4b7fd86bb863dd19de2b17b1a528b72317f789"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/11/index.html",
+      "bytes": 625,
+      "sha256": "8115bfe35e7e707b8739f0dc761a2fbd18db386413af7393e940324fb825bb2e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/12/index.html",
+      "bytes": 623,
+      "sha256": "6869275426bb069e49a0b362af36426ab012c3a71fcdcce926d45bf4b340ee3d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/13/index.html",
+      "bytes": 623,
+      "sha256": "b3f7abcde72c76070a55112d405302993ecb72c80466903472a658badacc34e6"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/14/index.html",
+      "bytes": 625,
+      "sha256": "43c1ac93c29045d14ddb7561c0f0e445026f319e945d839bdd35a5b4d985435d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/15/index.html",
+      "bytes": 625,
+      "sha256": "4032f99e79f2717745870833643a3356fe669b0b916683d042883e6d98b64af6"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/16/index.html",
+      "bytes": 623,
+      "sha256": "598a1ca3e5170e1262a6c3e695e2477e1fd2fe7e9dcf85ef31c39aa216767fb4"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/17/index.html",
+      "bytes": 625,
+      "sha256": "3fc79c2073b400bb99cada4ccf3b0246703309e71617d69471594d7dda8f6984"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/18/index.html",
+      "bytes": 625,
+      "sha256": "25490d4b2691e8505c3d6aa047bb5a583c4f06f74b0e106cb7f563fe77168885"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/19/index.html",
+      "bytes": 623,
+      "sha256": "1144b41dfd3e2e1b2bff71d4eb31e8a6b705d66c34b803e2acbc2eeac83f1d1d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/20/index.html",
+      "bytes": 623,
+      "sha256": "a3c6bbe76af542bc6315e12cff86c7b9adc905627d39cf33044a3420f0e94659"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/21/index.html",
+      "bytes": 623,
+      "sha256": "69f1e5150657bc47d15f0f349e585e81b8703b1cd796aaae85a3ce09a639a96b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/22/index.html",
+      "bytes": 625,
+      "sha256": "26583f71c9d1a302f54271057853fa4ac943962f558d8cdaade5cc31c16ddc22"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/23/index.html",
+      "bytes": 623,
+      "sha256": "49ecc64bd757f7584df2371e3ce5ed7a55ab8ba1f030725142294e55a6e19444"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/24/index.html",
+      "bytes": 625,
+      "sha256": "3da34e1a910c98402752bc2b34e6135b48a3e2b0bcfc3e3ff3daedf1a921c0e1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/25/index.html",
+      "bytes": 621,
+      "sha256": "fcd5daac7536a128a8413cd47190d283e14c20b8dfbb8f5b1c95678742fc2373"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/26/index.html",
+      "bytes": 623,
+      "sha256": "2f92f1340d95c35eb66e3f04883c72588b529d8c877a407925a6806ed737b848"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/27/index.html",
+      "bytes": 623,
+      "sha256": "2b0979dd24f500c89e1995efb6016a5d1f115a88b043139d7625b27bc054338b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/28/index.html",
+      "bytes": 621,
+      "sha256": "007c1af18a8755d7e04425ae19543f5dde5d7c33264fc91bcff7b38ec0ec409d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/29/index.html",
+      "bytes": 625,
+      "sha256": "83574a1a8cba535795dff21c23a96a984f8ee9c85b8ef62aa1a1ee033fad4417"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/30/index.html",
+      "bytes": 625,
+      "sha256": "f7c60a09130523b32afabd3da0302ca72835abe157c66ea4854800701614229d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/31/index.html",
+      "bytes": 623,
+      "sha256": "c84d4897c87e823c7118704b0a5663909ab1009e149b86fed2e387d9d8f6d924"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/32/index.html",
+      "bytes": 625,
+      "sha256": "474712ccf6a32ac56706cd67def55c3050e6b3afd7e5f1eca0b68e7b1044ac12"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/33/index.html",
+      "bytes": 623,
+      "sha256": "0e96592d7ac28b58d96f79effaa316275a0e3f1cc4d9f6385cafe6b234260c06"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/34/index.html",
+      "bytes": 623,
+      "sha256": "185ff36e190722f303d610b4c9abc9b3ebc165b56fce133e2e0167fbadadadd5"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/35/index.html",
+      "bytes": 625,
+      "sha256": "08eac8ed6ad458d04752c564059a43b5093eb015f4d4d0ac13f553f9a0511f05"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/36/index.html",
+      "bytes": 623,
+      "sha256": "9b8d20d9d7a1442004b515d66f82d23246ad87250db07da058dde28a95fa4996"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/37/index.html",
+      "bytes": 623,
+      "sha256": "66a11f2251805b77f34a95bdb6da9bcbd86343d170bc903f620581a1b6fa8088"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/38/index.html",
+      "bytes": 623,
+      "sha256": "25cf87a195f8e0b96d31d7ac9e54a47c95d8cc7fab15573e4162ffd2c2c5af59"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/39/index.html",
+      "bytes": 623,
+      "sha256": "6b0ce61bf8380bdc0bb5c1ec7804d7644aafd97daa98c984a9d38b3774e1f92c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/40/index.html",
+      "bytes": 625,
+      "sha256": "52db01fd364f1515465da116367888f9827f683c3bcd906678e788a631297b38"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/41/index.html",
+      "bytes": 623,
+      "sha256": "1bfb7788541d79fc48db7891201e7de006c4a0750458436a868f5f977b6fd98a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/42/index.html",
+      "bytes": 623,
+      "sha256": "97a0d9976721ae6b42d84b020e629780413453de6fbd52013ecd5cb605267722"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/43/index.html",
+      "bytes": 623,
+      "sha256": "2a5c5f0f30cf64f83b4fc2f26cebae5b2d512ce8ab8ad7810ea2ee47d11af094"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/44/index.html",
+      "bytes": 623,
+      "sha256": "1ed8e5ee4b5d635c5687587fd554a185d3b9d90eb2e1e76b3cd04845338c1334"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/45/index.html",
+      "bytes": 623,
+      "sha256": "0134ca4d53d7c56eee174f143e24ee98be24856063987023d59f79cbcbd0e2b9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/46/index.html",
+      "bytes": 625,
+      "sha256": "6e45825e8b370da9bbe4f674c4ffdb8a3f544e96399684595efb9636b3d26dfa"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/47/index.html",
+      "bytes": 623,
+      "sha256": "7b803dc18a835caf11c83658e4d1a41d0e30b60d9154896bc29d74d27b9673ab"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/48/index.html",
+      "bytes": 623,
+      "sha256": "69044d040ff2e20ffcfc17bd52ad9de7630f166cda0a4c43919c72efc6f8e165"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/49/index.html",
+      "bytes": 625,
+      "sha256": "ac60b4b9c985d05c06fe0119a0a79604d6a01ad6ec87c2eabeea1f71a2f8d400"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/50/index.html",
+      "bytes": 623,
+      "sha256": "cf772f3432cbd4bf09ebe35025c7965ab14b8505e059d89b595ba85071fa0e28"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/51/index.html",
+      "bytes": 621,
+      "sha256": "da7ff069f618a1684bf9f7c159ad1343ef238ee43e697c0420d38e05c931bfb1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/52/index.html",
+      "bytes": 623,
+      "sha256": "06e0e943952e2d4f0c1902de3a6b2d5705dd107aca099308a4c9b369282e466c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/53/index.html",
+      "bytes": 623,
+      "sha256": "9d07ef3a54b51db72ea3fc764c0b064f3002055b61b4856d05157347c140ca8d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/54/index.html",
+      "bytes": 621,
+      "sha256": "0c27c2ba255e9c7323689f9867d9985f551a58377a709095addce0e4509c4a54"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/55/index.html",
+      "bytes": 623,
+      "sha256": "e6e814808133490bc78765f16574f7566db86496ad3a090de986b0f6eb8d0624"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/56/index.html",
+      "bytes": 623,
+      "sha256": "dac4068c330acdff3035f4f049f9d34747e30d1e0d4d0a997c530cb80140a26b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/57/index.html",
+      "bytes": 625,
+      "sha256": "6b604256536a42915e71d313c8fea8af8f4abd795b6b7640f16d84db88580942"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/58/index.html",
+      "bytes": 623,
+      "sha256": "7971cb5dc7a2308118fb5b985fc1d07dea7595d899459df5c92f1926502aa93e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/59/index.html",
+      "bytes": 623,
+      "sha256": "2751030c3d43cbdfb9eb51e2852d18d29aa41e1084e554e6e5f60835757e88ca"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/60/index.html",
+      "bytes": 623,
+      "sha256": "a96878d9e8df992087ed4b64e1cbbf85362930c5530817f44ea7925560f93092"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/61/index.html",
+      "bytes": 623,
+      "sha256": "5a4b17c2cef7ae31e173a6125c652014c72b10b4de6bd917343c67ee0aac2006"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/62/index.html",
+      "bytes": 623,
+      "sha256": "d39f3198c192e3fa491d689ec3cee5b0c8dc373ca47b131724eb0fb6e08f8f0b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/63/index.html",
+      "bytes": 623,
+      "sha256": "72868cfaa78d1ba90cf40dacdac7cfbf4ae6d47ca5f3121977419d868c22f465"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/64/index.html",
+      "bytes": 625,
+      "sha256": "6dd092a0b960309b18bef3d129df0564c472cda360164aebf2a9b1dc6a3173ef"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/65/index.html",
+      "bytes": 621,
+      "sha256": "2261aa7c0da3a75cf1f4f9728dc6a685b9e79903e9dbf262b37e0757f6eaa950"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/66/index.html",
+      "bytes": 623,
+      "sha256": "43a386216bb8439a36689db3faa8f6fd7d7381b747c171654f717c4591a4dacf"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/67/index.html",
+      "bytes": 621,
+      "sha256": "4cc85e04aafa1c0c15208e20a3714c72df88b8095379061d43e948c8c45e30a3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/68/index.html",
+      "bytes": 623,
+      "sha256": "edeef0e6f68b0a11ead213710f58ded53e65b3d72c8d465464d89609f8ec7def"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/69/index.html",
+      "bytes": 627,
+      "sha256": "00f58403a4db241a15f0245f8bb47bc43f9983ed38dc4549bae94d6ed715d1e4"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/70/index.html",
+      "bytes": 621,
+      "sha256": "5fba89664a244af4f727fbbb8523fb954877b6bc56e55e1581b0d18a043c8250"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/GAME-ENTRY.md",
+      "bytes": 5604,
+      "sha256": "5441c830134352f2a42f35129d4bde2c53684a5718cfd0df398b291f366c9176"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/README.md",
+      "bytes": 4096,
+      "sha256": "7e5060ec78343cdc371881e157b7714e885428a6ff2fba8cf6baf135b3bf1cea"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/01-avenor.svg",
+      "bytes": 346487,
+      "sha256": "8454c3efb17d879452ee18963b994e85197bf3889ee5317e812916894857aab0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/02-brelis.svg",
+      "bytes": 414067,
+      "sha256": "5fa49236fdb033cb8efdb8eb97eb7a2bcd107478bda25ab85d398ead63bb8cc8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/03-caedon.svg",
+      "bytes": 573177,
+      "sha256": "ba585c685fede27679cd775205f7a67da86c0be4efcfd932e8e69568d2317990"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/04-darsin.svg",
+      "bytes": 700107,
+      "sha256": "df1ceb3f2a782b3de15fac0937a9445ca765dc3f682576a6e59594756f246550"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/05-ellovar.svg",
+      "bytes": 473121,
+      "sha256": "da2b03d3bb61b27ebf7bf87ee8868a6def69cf560ae8b601f24c7be84972762c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/06-faren.svg",
+      "bytes": 742714,
+      "sha256": "17e4413c071b067c2dec8ab05438f8a0585151ea1d00eb4ab864e9b37231d08c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/07-galdra.svg",
+      "bytes": 396207,
+      "sha256": "6c9ad06bd7f14642100213384059f8a7cdabfd773c96bec51dd7140c9887d093"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/08-hethen.svg",
+      "bytes": 541954,
+      "sha256": "b5c2424d087f3942610c2ed38d09b871797c595ce48d0db64ec5fd6b417c40d3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/09-istrel.svg",
+      "bytes": 433466,
+      "sha256": "95d53a86fcf16d2c7c75eb7c2363a9f9bfa4c0d28dce2cc248c37ac5b363e9bb"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/10-jorun.svg",
+      "bytes": 541010,
+      "sha256": "86958c79726df6b8a84dc8bfa87fbb518c8ea553e9d300d36430a2f9b8cdec85"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/11-keldan.svg",
+      "bytes": 219630,
+      "sha256": "bd46814df8291d93b8ba8390610c77ee30eabc3da9a6e60f93b608d6754111f5"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/12-lumer.svg",
+      "bytes": 411011,
+      "sha256": "3189e011c2072c07e8c2a26dddc9f2ac03debcd1f3f06d118180f63e6f3f753a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/13-meros.svg",
+      "bytes": 233175,
+      "sha256": "a4aa035f617d0a5b213da5e4074d6037ccdbccd6cfda8fd55166ada9dd5b5a55"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/14-nadrin.svg",
+      "bytes": 396475,
+      "sha256": "9f106cfb4646270ba5895c58acb6b7b3489be3829cf139147454c857e0bbfefc"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/15-orelis.svg",
+      "bytes": 611102,
+      "sha256": "a61c483239e17092fcb5de933ca41f7c4b76d134265534482242f3d77e67b32d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/16-paryn.svg",
+      "bytes": 788423,
+      "sha256": "3d99b5b8102f43e7c5c2215dcb486b92495dd01f5d55b329200304da57faab01"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/17-quoran.svg",
+      "bytes": 318410,
+      "sha256": "36e0b74c2687d177c327e4d19bc1e172fe8e33df75640e0959d202b57a94284e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/18-rassel.svg",
+      "bytes": 296698,
+      "sha256": "dd4eb00e34335695dc77ee62f8d839a458dbaa8b0554762e71383874ddbe4f9d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/19-siven.svg",
+      "bytes": 275822,
+      "sha256": "b680c5a50fcca6ab63243865ee294df7a19a8d4007be7bcfcb320c013bd1f8f1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/20-talan.svg",
+      "bytes": 245293,
+      "sha256": "a31522809e72097055422d93150f1c404f1ca13edf09f8d423695381eecbde8c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/21-uvren.svg",
+      "bytes": 479560,
+      "sha256": "b8528a7579fe03fff0598e9389048d9e530bfb63c05a4f1240734ba104293b80"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/22-vardis.svg",
+      "bytes": 372643,
+      "sha256": "108525927c2fa78a54456656388e6fa126c6c5346b02dace76b090d10aeb2d87"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/23-wexar.svg",
+      "bytes": 633164,
+      "sha256": "6909675ee6c0a2a6f71c1ecc0295fe8a27c315d8fa6709c59f82379d53c54621"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/24-xandor.svg",
+      "bytes": 531340,
+      "sha256": "19b544c53e6bccfeb3ec81300a1b8b391eb31bea23796ab7d5aecd6194800b77"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/25-ysol.svg",
+      "bytes": 450646,
+      "sha256": "21be74cb3e924c0d20f68c5218f6d738112ce6a2b8e90c32b1b8fd8a2dc02d07"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/26-zarev.svg",
+      "bytes": 498714,
+      "sha256": "0d0b98ac724f5b28e34e93a79b1ab1b669e4b830a8a2001e271319e9ebc8a36a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/27-adara.svg",
+      "bytes": 564242,
+      "sha256": "87343fc28cafc6db88968f84723ad81bb5c889379a66484c6eb73ef18d4e7aa7"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/28-belm.svg",
+      "bytes": 609258,
+      "sha256": "6a8471b1de5891b929ec2684eb1692eb489a09c8f42c0c99f88f814f82cbd497"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/29-corven.svg",
+      "bytes": 659739,
+      "sha256": "40f41d26f5dfebd20944d274a223b9129f9cef90e1a33f470f3656e933b02ff3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/30-delyra.svg",
+      "bytes": 597753,
+      "sha256": "37c3f9b8abf38b44e61c8259268f308f428bcba56811d292a0f81e0f54d4f54e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/31-erdan.svg",
+      "bytes": 604054,
+      "sha256": "3f01eb12faf136c9ce5346c2aea92faa0c617e162cd38f06263c9163586ca6e5"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/32-falcor.svg",
+      "bytes": 603035,
+      "sha256": "0db19e95b5e7461a1d7b6e091ca9f75ac5e611d800b6b5dd371f6a732061214c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/33-gysel.svg",
+      "bytes": 468189,
+      "sha256": "0f9a14aeec4a7396e837db6be38ca955fd751acef0bcb68daed828a9ea8c1eff"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/34-harin.svg",
+      "bytes": 628642,
+      "sha256": "f751e4f39700038d3ed579fb6fdb2433487cc2535702463bcd92fbc3482ae5a2"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/35-inovar.svg",
+      "bytes": 542533,
+      "sha256": "c7f22ca276ab3633d6411aa9983a4017fee1fb701de4b7415836bf743e727e4c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/36-jessa.svg",
+      "bytes": 374801,
+      "sha256": "d2473c3a78093bb2b6d42211cb30768606189a6e1268d34fc6a644570f604676"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/37-koryn.svg",
+      "bytes": 368775,
+      "sha256": "a8a18df8871b99ada26c0c1862d7fee650368ba21deda49da7fb758a1601878a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/38-lydan.svg",
+      "bytes": 743834,
+      "sha256": "b0faa49758b09aeb28878c6cf58778b15de4f858b7958e47a9aef65b1c2c2b05"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/39-mirea.svg",
+      "bytes": 513779,
+      "sha256": "fee587da566bb6f04b1fc4478d799ffcde623e1707b69f70aea84feaf8e66f1f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/40-norvak.svg",
+      "bytes": 308291,
+      "sha256": "9cf5952cd520507581a90d4c16b52363db47f31f28945d07b643dfab533f004c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/41-ostra.svg",
+      "bytes": 485126,
+      "sha256": "76b97318ac27297f03cb08cf75499717c19d961964f3c73c2adf2f9a7c1b53aa"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/42-pavan.svg",
+      "bytes": 351774,
+      "sha256": "cc05423f7e7b49c318ce4249d1b08ca430e8403649c65f6317511e45cbe5aedb"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/43-qemra.svg",
+      "bytes": 415818,
+      "sha256": "463748aaaecf469d4d7b88f3093c6f49788cad912235d072025df39ef1607dfc"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/44-ruvan.svg",
+      "bytes": 600736,
+      "sha256": "fd462f2af7d3450a10ae48c3add74f7b3f37d0e2979cf19fc484a67b70d65513"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/45-selka.svg",
+      "bytes": 277009,
+      "sha256": "e3f6f2e074e23ff821c9a0f1cd60e1dc40b2035e2209e2449111acb9920a3337"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/46-tirren.svg",
+      "bytes": 572019,
+      "sha256": "984968f3604f1344721266fa4767057b5628b3b9b9995a1cab99f457ad5680a6"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/47-ulyss.svg",
+      "bytes": 674069,
+      "sha256": "1a4aaf0fd6e2cf67a7ad2910f3d91b9472f7a4eac6383ee2dfd84a751af771d1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/48-varos.svg",
+      "bytes": 417496,
+      "sha256": "ebe1138645295c98eb11d9afa69ff9c3cc1adfa33b4d4223b88e9a2743360293"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/49-wrenna.svg",
+      "bytes": 339935,
+      "sha256": "a09fbdc60a4125e773a3da3c90e054ad4723498d09c5878b1f2a4de84a54bc7e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/50-xyren.svg",
+      "bytes": 537233,
+      "sha256": "bdcf20c81b96e092106cf2b629fc165eb51a260d9ed47d85c78cd747983ef97a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/51-yara.svg",
+      "bytes": 496316,
+      "sha256": "7af5d94d2dd0a9acbf16e8476d1b43eef83734348b1b87f085ddd7be85c490a8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/52-zorin.svg",
+      "bytes": 405947,
+      "sha256": "3c2e849db971c0d2ab1c00b71184368c399f666a90fa9b91b7c6e396ae2d203a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/53-alera.svg",
+      "bytes": 645744,
+      "sha256": "2348ea593cbe9f7a7878aa6ba19a5e8611b29d54235975b5492bf48792c319d7"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/54-brin.svg",
+      "bytes": 738302,
+      "sha256": "f9d360aca0c8b2ee7a6852bd6735930e4404356d11e21975f7cb28b3af0e5edb"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/55-cassa.svg",
+      "bytes": 414217,
+      "sha256": "1365dcaf4de6d8dff5cae20047ce540dd25f27624a32abe93e8d6cffda9c062e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/56-doren.svg",
+      "bytes": 749123,
+      "sha256": "854e24c601ac86144d12358a299e644415f00c53c2ee2f52790a4ea3a9101492"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/57-everen.svg",
+      "bytes": 545979,
+      "sha256": "69f32046e544f99437dee66044fdfcd4b747bbddf5ec3e5f2d4df4790ae22695"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/58-fenna.svg",
+      "bytes": 611354,
+      "sha256": "0503cb795453213b17bea61eed27a0cd4c483c5a52ba90ebdded1817acd28dc0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/59-garan.svg",
+      "bytes": 355733,
+      "sha256": "300dbd52f896c6b4aa16331ab335a99921528b1ba3cde5ab8b47a26d4537c786"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/60-hylos.svg",
+      "bytes": 731606,
+      "sha256": "4571653162c28aa3ab6faf9c8542861cc78cf4495c3c328f270e22dcd33a91c9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/61-ivara.svg",
+      "bytes": 662865,
+      "sha256": "0a60d23d259f6d26e180504fe5fe01a1179a074b649455db0f1e2fbbd3cda605"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/62-jalen.svg",
+      "bytes": 749449,
+      "sha256": "010e070e559d7ec69bc00ffcbc8c4f0f854327306d0e58f67b95fb5d9cc8b154"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/63-korra.svg",
+      "bytes": 702815,
+      "sha256": "ed1554153905c02a2cb0b36f821c34069570776e9156656f772c19d003eca4ba"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/64-lethis.svg",
+      "bytes": 806067,
+      "sha256": "27bcd6bd2ae0db7fd79d203c7179331bd555cf820c14945d0561d6925dbee423"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/65-marn.svg",
+      "bytes": 705778,
+      "sha256": "83f3518181f55f19155e4fc5d71632c570e29cfdcdae22fb26d4226d4c745360"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/66-nivor.svg",
+      "bytes": 700190,
+      "sha256": "a8ff29832ea4ac4fb308e62b830432e382be170a56c5b9bc4528cb893bf4937a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/67-orsa.svg",
+      "bytes": 631045,
+      "sha256": "6ecbab15a3f73ed7a389f9973485f4fe3b825c88f0c48ed39961d8019708f6c5"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/68-pella.svg",
+      "bytes": 576494,
+      "sha256": "be3ab6b3a65ca6c94618b4a069d8f257ae9a11322743fa3f7f67a200575d70b4"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/69-quillan.svg",
+      "bytes": 498250,
+      "sha256": "31b6aab43b53b9b735df28d6964c5e1b9bdd6532ad83a94007333028eea3af0b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/details/70-rhea.svg",
+      "bytes": 411274,
+      "sha256": "de2aee1275514c5646291208f00e02f2ed63c8c105a51d1a7371aec99f73ef30"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/01.png",
+      "bytes": 3114230,
+      "sha256": "f613553b76fa708ab01972e44325574d92fa8ebd67b4e3afa662d6e941cafd00"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/02.png",
+      "bytes": 3306774,
+      "sha256": "d1ae294e910ab4317d8edf3daf085007a870d8bbe3ea67b3c5815be0e28bd84d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/03.png",
+      "bytes": 3345670,
+      "sha256": "43eaf54b764c8d16b9267ccad6dd087441528e7af3d2380af2e169baa05208a5"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/04.png",
+      "bytes": 3502535,
+      "sha256": "078a6b21fcc835d971c4e856630a54092f161fdc983b3d9a441dbb3d6a5ef8d9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/05.png",
+      "bytes": 3468078,
+      "sha256": "f658fc32f57e733062b1abf829d81aaa3fbacdca1a551a3df3331c014c90cedc"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/06.png",
+      "bytes": 3395066,
+      "sha256": "157b73c6a6862338b3a56f19a1c28ab543dbe88f0266a0b538a0efb8ada56e56"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/07.png",
+      "bytes": 3361371,
+      "sha256": "c4f9cd41a1dda970802dbf45d81710d6d486bb1f6085db1e43ffd8bdb1c722e6"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/08.png",
+      "bytes": 3391715,
+      "sha256": "d2a80bdcc8d5ba5735469e453ed2ec2337a82f04e6d0b6b631ab758813cd94f0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/09.png",
+      "bytes": 3449556,
+      "sha256": "411280534ce44755842803d8c07a7dddc9f45772e760316b999c9aa4e5d25854"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/10.png",
+      "bytes": 3189536,
+      "sha256": "b56645be09b8c535d38bb4dea0e23ce1168cc2a39edbf0c874908922316bb5c9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/11.png",
+      "bytes": 3466570,
+      "sha256": "db4c6e14fac6747423ff2d6a21c2fb2ebbd90926e0a97e798c551eeb85f2cc13"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/12.png",
+      "bytes": 3315175,
+      "sha256": "98a89d3f56d993eedd847350f4e565cf8df447b07f6b6122b8ca74a03d23d65c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/13.png",
+      "bytes": 3345853,
+      "sha256": "4fdae8a72e85ac0a96a69b1ff9108c26aaee55e3ea8598cc7b92d620d523da6b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/14.png",
+      "bytes": 3396254,
+      "sha256": "c98d1f6285d561d3f0732b97c210e0ae990343259f3d2e65a992d96656c31e48"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/15.png",
+      "bytes": 3484949,
+      "sha256": "cb0448cdc1d6d2b75458828b87281f2401c0f6877d56be619f0c1bb17e3c56fb"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/16.png",
+      "bytes": 3325854,
+      "sha256": "1e95e3c45271f5859f3083b7790cc63da0912e465e8eb95a8860721b8b20f880"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/17.png",
+      "bytes": 3222585,
+      "sha256": "628910503e94e8d9dc604143965144efba45578731ec81d06f6b19ac1af8ec6a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/18.png",
+      "bytes": 3329749,
+      "sha256": "4bfd24224584ac1fb579b5c24f54af604d493921334b6d51b26a020dc24149d7"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/19.png",
+      "bytes": 3439049,
+      "sha256": "59304afcb1be94bb193482c7c817ddba67731c8417b120844f70ae45e12121cf"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/20.png",
+      "bytes": 3351466,
+      "sha256": "1c214ab893b8d7821044947cec9294df61d93baf71c800fcb1c77809700b5bce"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/21.png",
+      "bytes": 3572157,
+      "sha256": "bdd7253d460ae74f87305c7087897f31e656791448965f9bfa751b9c7a6e1485"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/22.png",
+      "bytes": 3213619,
+      "sha256": "bb90441f1cec6aa52ad272f16dbfaf3d8e87bd4053a41239896015953f0332ea"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/23.png",
+      "bytes": 3163653,
+      "sha256": "50a4991006c5dae9d12be1c9d8736140f323c2896b919e4a4a0a919820fce79e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/24.png",
+      "bytes": 3387276,
+      "sha256": "dfd6ad7830748457873b144b690f63ef3eab85131076f2c8cc991001e83adfdf"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/25.png",
+      "bytes": 3246085,
+      "sha256": "b9aa0bc05a6eb7ea002dea07f3675fe4406b3cb70126af3572cbdaa0747557f9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/26.png",
+      "bytes": 3369811,
+      "sha256": "25b69b5a6bdb9b26e79620fcff9d78eacc6193218ebac4b1e80c5953f9ed3a09"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/27.png",
+      "bytes": 3420203,
+      "sha256": "52148678701120d405fcff79faca75babdebc16f6e39a1cd4e79e6a9525c1ee7"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/28.png",
+      "bytes": 3480284,
+      "sha256": "92b71ad8ce2c7052bace214902b0a5d34d7ced71d5c4732ae60171b95ae4f369"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/29.png",
+      "bytes": 3372669,
+      "sha256": "0049bac05fd1309a9ea7ca76da5c104da7c39911ea518b0d4b05a8478f35323c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/30.png",
+      "bytes": 3518214,
+      "sha256": "ba4194dd4328060013fd624536e15551b37e076bc6523a33082ae736ff201c7a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/31.png",
+      "bytes": 3501044,
+      "sha256": "8f3ea777d4a31c2adde4beec36ac381c4f03f2422f21cdb8f9ed687b6fd50bec"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/32.png",
+      "bytes": 3128586,
+      "sha256": "1f82cecb20e5a7a603d2a304521be325f139c54ff2127c435c2f859bb73922e9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/33.png",
+      "bytes": 3348095,
+      "sha256": "02d71abe3e80af6219a1f734747fb41531e3356a83450de9f02c35876cab8801"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/34.png",
+      "bytes": 3522926,
+      "sha256": "945fe8839cbf6aeb3311987f4f38ff252cc4c9b7f439723718457dc7fdb0d244"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/35.png",
+      "bytes": 3399727,
+      "sha256": "58cfc78f6d6a3e9b314606479db9c4ea10845cb313778786dffc167bb85d4c88"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/36.png",
+      "bytes": 3105979,
+      "sha256": "1de34000554d35e248fab4c789b1a1150bb3a0943bb1169b3b7e4a8873eae537"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/37.png",
+      "bytes": 3369326,
+      "sha256": "d85f8ddd2c316e5e659221d37e0b88b01c2fa41e4b9a98a82ddcfce12726be7d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/38.png",
+      "bytes": 3345526,
+      "sha256": "f14b69c6585fdd3765bbd51ec6e10e3dab5b96b6b3a097ac28b189927bae2d62"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/39.png",
+      "bytes": 3138378,
+      "sha256": "d1244ea55705e27a993068fa09d6c49cad6a937578690978b63de3dce1e6cd17"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/40.png",
+      "bytes": 3314281,
+      "sha256": "392c3b2b7809eb0bce51a2fa747c7d17e05c61b15b3d6359663ff92eba8489a9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/41.png",
+      "bytes": 3564529,
+      "sha256": "fbb10b5161e57249b8be7bb981a163fca85f92df11eb7e2ee49d91f268725635"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/42.png",
+      "bytes": 3359464,
+      "sha256": "bf93f437aaf48a38ffc8034c7618f6f34f0a982eed52ff33ecd974f5d5df7ea4"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/43.png",
+      "bytes": 3476865,
+      "sha256": "6c7454875a1054d95cdc95091d7d13401b126cf122abf25e418f67676c5be341"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/44.png",
+      "bytes": 3070136,
+      "sha256": "010a41a1edf597e029f33718087fe1dd24b048864bf95bbe54ed722a76924176"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/45.png",
+      "bytes": 3558300,
+      "sha256": "30c4fbefec671f19e7cfac687f3d9ffd09dc935350df32d5c63aaaad88522f2f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/46.png",
+      "bytes": 3230148,
+      "sha256": "cf602712f84027f0a3831f6527f93a87f3fbf02e73aa66b6ce54a9bcd5d9e6f4"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/47.png",
+      "bytes": 3604548,
+      "sha256": "ba1fc2b90961dd667799108857f6e9489059b97be9fd2489b9f5de1a8b995d90"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/48.png",
+      "bytes": 3324838,
+      "sha256": "88ac6b671c1a8ccbc4f27c3444633df7fc48eac53aedaffd51012429348de781"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/49.png",
+      "bytes": 3380647,
+      "sha256": "89b7fee83687f5825bf48e51cb50131bbc324c83bb1ebf20842add4787cd6e9e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/50.png",
+      "bytes": 3181079,
+      "sha256": "0fec45760eec4ef392aec83d4b2653cfd53293c83ba8b0ca0e1f2795086610df"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/51.png",
+      "bytes": 3208236,
+      "sha256": "0fcd2ccb7e645103917ce1d7b4b0fe91230fcd807e70b8cbef46377abaf12950"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/52.png",
+      "bytes": 3257753,
+      "sha256": "3ffecb95148b66e4d787d9baba186d2037ec42b678df7d4279105a5081f939fe"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/53.png",
+      "bytes": 2950534,
+      "sha256": "f58f82cda189ddc64dbaf599d9cfe145e6f19edf5433bc68ad9e2500b6e550d8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/54.png",
+      "bytes": 3109117,
+      "sha256": "b2a40d0ebca8eb3af347c033235a4101d375a85c1f1e4bbe744fa1ee7cc87741"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/55.png",
+      "bytes": 3183097,
+      "sha256": "1064b3383c5375b789a83b7f7f165ff624fcd77bb4dcdc55c7a7e4860c8e4b74"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/56.png",
+      "bytes": 3217367,
+      "sha256": "12a589dfb03405b99bbf91ee9893f0abc2afebb88b1953bc7268925803ddd532"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/57.png",
+      "bytes": 3427911,
+      "sha256": "a88ec2572c0e51742c2b5d5e47622408120ec4ebea83890cda42cfd305d283fd"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/58.png",
+      "bytes": 3415498,
+      "sha256": "1f2d97fa5e268f9da2f0742ce5191b4c4c42b767a20eaf5aaeb928623c585292"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/59.png",
+      "bytes": 3078610,
+      "sha256": "bb2d9c58021905615092bbdcabcbf01be253aa8d6871a573b2b5ea2a4e70c5f8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/60.png",
+      "bytes": 3166384,
+      "sha256": "fac672b56f5079e243fbad6824d840e7c8f80163455226042db15056363926c6"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/61.png",
+      "bytes": 3093878,
+      "sha256": "21de44f472b875584a4ace5a84d2054fd49556a8c8913b74d9e11a78795511f1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/62.png",
+      "bytes": 3370722,
+      "sha256": "6d4f42c28dba498ecc40eef7b6b7f356ba909b022e5d4eeb00ae669c18b2552d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/63.png",
+      "bytes": 3423667,
+      "sha256": "b7bd6894ee13c31999dfbed5704288ce953438a90acd6e0ca62e98c3e81f25a5"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/64.png",
+      "bytes": 3463848,
+      "sha256": "f62a389b6a386a48637d5d58b7213feb96957f71a3b9ff0f8be570ff8aafe9a4"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/65.png",
+      "bytes": 3327371,
+      "sha256": "310736d93322621530e65d1b1ac28d873482f06cec429c7736462428c79a5a61"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/66.png",
+      "bytes": 3192286,
+      "sha256": "70c207394291accfe8a0907d720e00f5f845178675703db972f0245e1fd55642"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/67.png",
+      "bytes": 3330111,
+      "sha256": "9bc94163a3fec6bbc7a97bbfcf010dfb168cc0c6077c23d64646e1fc0eeb5a87"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/68.png",
+      "bytes": 3179577,
+      "sha256": "ef2f808bbba6402cc9ca4db92ab1885d829b65b4d157286e1d85667704c6bac2"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/69.png",
+      "bytes": 3300460,
+      "sha256": "2905e43b304f5b055eb45836f1a846fc025f28c6dc72855ba7fe7bd35ea05b10"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/assets/scenes/70.png",
+      "bytes": 3062744,
+      "sha256": "c58399d51f4c2a848bd500b60b0692f27d11231f31c0621ecb61b2245ee3fac9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/build.py",
+      "bytes": 6133,
+      "sha256": "ab378ab46df69f93b0363f8df18e731b35abe38e5c18b6d9b63069799d35863d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/countries.css",
+      "bytes": 16498,
+      "sha256": "bc1dceb1926d5ee2b809c1af481a6ac6c23a4f6cf1548efc99e8f320e4b10326"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/countries.js",
+      "bytes": 17821,
+      "sha256": "cdac2b126ac5ba7f8ea037f2886ff420d471b29fa320fd300afecd6e7ae08dbe"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/country-entry.js",
+      "bytes": 539,
+      "sha256": "c178a898d1d9f23ad8c36ffd6912de2dacfdcc5d8b5ccd1054fe7dd55e53cee1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/01.json",
+      "bytes": 11504,
+      "sha256": "2a5bdb538e5ee44fe97bc7338d5e9690910f645404202fa6e6663ced637885b6"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/02.json",
+      "bytes": 12386,
+      "sha256": "22a165dbe5fd5e3b5a497c42f8236929678fb5265ac7a557b041bdb6542b7510"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/03.json",
+      "bytes": 16478,
+      "sha256": "c095e8a72896a0a951f823322b398970e4fd0becc6cfb21b23c97b49a243aae8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/04.json",
+      "bytes": 15774,
+      "sha256": "1dd9012ffec8ba909de0faabd00cea5f86782f3fbfd8ec6943c39b8f4188fcb6"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/05.json",
+      "bytes": 14443,
+      "sha256": "c319717aabfba4bb1152f3304c66d830c70915de18f2cfd518962b73c4c6147b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/06.json",
+      "bytes": 15233,
+      "sha256": "0729b85293567fb0b5950048f5ca6861dbcfe89bb829b2901fcabde4adbd3dd6"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/07.json",
+      "bytes": 13757,
+      "sha256": "a299b4f3053fe1c81931ecbc781f4b912ad05528f5c9d25e19844ec43906dbba"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/08.json",
+      "bytes": 14933,
+      "sha256": "ee9854256b73667daafa8df5091157b29f3fa392d77a76ec2138189e825491d1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/09.json",
+      "bytes": 12807,
+      "sha256": "d3d4699367e03f338bc7d2e0b9d6d2514b3b618f99403c3a4bd2cecda951b807"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/10.json",
+      "bytes": 11907,
+      "sha256": "644473cc10775b084a472a7f21a2b41cc73b171814ff0f436761dda820644591"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/11.json",
+      "bytes": 10272,
+      "sha256": "c346f1ff6651e8f3047a65919a034ffdfb5f119476c0bdca252dcec7075d1c36"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/12.json",
+      "bytes": 12590,
+      "sha256": "c2f8fc44548612af7d774c44d223b5c5a6c6b24ae71f0624f2e5447c564141f3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/13.json",
+      "bytes": 11006,
+      "sha256": "e4ea0b817b1f4a9f865c719e31fb480e2487fabaf7f7ce2e387b8b667300c7a8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/14.json",
+      "bytes": 13529,
+      "sha256": "7647a820b1d9101113103b22ea398900490fff9f16e1263fe3ac8bfd391d530a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/15.json",
+      "bytes": 15158,
+      "sha256": "fa9f8c301d1d0995a41420e924924896ac840c06f2e58ea956756bbbde8e5edf"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/16.json",
+      "bytes": 15579,
+      "sha256": "eb030e05aa48d9193c37c8986f566667c4fe87b984a6f3b14bfc2b514789baed"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/17.json",
+      "bytes": 10085,
+      "sha256": "6351bd6d58005a166477621a9f71cebb09e77f84cb85c52f55adc40a3f6c4526"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/18.json",
+      "bytes": 8574,
+      "sha256": "ba393931e1b4d93f7f926808ac7688f1dc5ff75d88822feb2e9df4124cd46223"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/19.json",
+      "bytes": 10510,
+      "sha256": "ad76d135f1f5c5fde376ae7d06ce985bcb6ee0349cd51135a6db2164562688f1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/20.json",
+      "bytes": 11273,
+      "sha256": "65d1e4a8d8814610a340dc5e7d5bb988f7ab185fc15383c907901cfe0a07a3a3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/21.json",
+      "bytes": 13949,
+      "sha256": "33cc962f07fd61ad67d97cd018ad5b2a39df9fe579cfa3f864e50fb5f9549e50"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/22.json",
+      "bytes": 10223,
+      "sha256": "de74e34cc5ca50b54cde356240a6cf3ed4e4b0f81d0aedb432796ea91a110c13"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/23.json",
+      "bytes": 15641,
+      "sha256": "a29b96bc3e9cbbd51183dbdd8497981e5910877ccddaefea9ed7099cbf96dbbd"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/24.json",
+      "bytes": 13062,
+      "sha256": "37d2df06c8e3659cc341f6c45f34b8087612744225111429981ef2fbfb05fe5a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/25.json",
+      "bytes": 9206,
+      "sha256": "247baf1f5c4015c976e0cba86053300658ec248c33e5f93f1cb8bcbd648f2137"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/26.json",
+      "bytes": 10317,
+      "sha256": "0da7fc15f5eefa2f2c0fe43b42b69249e2ea2813ffa99a7027ea5e37c5fb378b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/27.json",
+      "bytes": 12175,
+      "sha256": "1332c97a3f10fbe16b0ca6f1f7b233470b29e4317419decad1af899356d2d6ce"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/28.json",
+      "bytes": 11267,
+      "sha256": "7906d85ab2706372c55d28f22538ff13cdd43ab83a086e5cf61cc1d0999df8d1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/29.json",
+      "bytes": 12836,
+      "sha256": "35f7ab9c8824e39d6934478d9c7a7892a4f897a842091d6e7c1d60368471f462"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/30.json",
+      "bytes": 12601,
+      "sha256": "2e4bb03fc9e958d48193df97ec0f690b3d04d37c11d9d50b1d0581c47aabdd1e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/31.json",
+      "bytes": 11507,
+      "sha256": "ee3c1d627718a13f0f5b14720de7c7da4db7aba2c83d1a23706fe7f1a03862dc"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/32.json",
+      "bytes": 9657,
+      "sha256": "24811e4006004742f45ef9c79beea9f54f986465e4f066150d0e541b3739ae0a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/33.json",
+      "bytes": 12938,
+      "sha256": "8e741e486da4334442d163d146f4500239c8cbc4b701ed3ae50862a067721543"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/34.json",
+      "bytes": 13495,
+      "sha256": "0c6e9982acf0a3a130bd76e606f3cd03eee47e21c0ae9f35822b12403114ba3b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/35.json",
+      "bytes": 13824,
+      "sha256": "73a4b6b9fe03f2c53fc1b9e6e1efb54bbeca6a503e0542cbf4a9b71d4e75513b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/36.json",
+      "bytes": 10150,
+      "sha256": "e5bfb758e8a36bc6aad60b9cd24d7f635249f77e78c9a5d3768d0ef5ae154c16"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/37.json",
+      "bytes": 10175,
+      "sha256": "99edc5d37aa0ae49d207a2e28bfbdeeb98d0dcc9377b0354d61ce8102fcf649b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/38.json",
+      "bytes": 15113,
+      "sha256": "946959c039ec1d7f45d813fe2977662e137b116f36a3bd5b2c4bd1f4ae6f7827"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/39.json",
+      "bytes": 13285,
+      "sha256": "3379ee74198cee6a4840d88d5bd83a6bc6e2b4a1f79e26d47663a4be03dcfe32"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/40.json",
+      "bytes": 11117,
+      "sha256": "4144c30f86d6cd16ecb0aa3c9ae9d51469e1d4d657c16014b68f46fd0a7f3944"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/41.json",
+      "bytes": 12669,
+      "sha256": "318067520a9fda9deda71ffcd052055f3c8778eaaedc0f99b7a84e7403dc9450"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/42.json",
+      "bytes": 10700,
+      "sha256": "5ccc43f13cd51addfd777c34f02e4ae56a807529ecb2179e1e0c6d40a404fee3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/43.json",
+      "bytes": 10722,
+      "sha256": "7951b72121e07ec65c6b121650db3c351479c228159cb6fa87dcd7e9bb106b14"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/44.json",
+      "bytes": 12618,
+      "sha256": "787c3106a1633e6383ab01bb56faf47a1d1e06f83187874d3cdbb99750bd7e8a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/45.json",
+      "bytes": 13592,
+      "sha256": "6ba7ae57c3134f7a403e4d9d02314fd51bc959bd00368bfe6632eba9b0b83d74"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/46.json",
+      "bytes": 15123,
+      "sha256": "a18be1e861e481d521838261813a9cd8b8b157f4ad05c67f58eba41b7361bfa8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/47.json",
+      "bytes": 14121,
+      "sha256": "12a1da961ba68450148cc104da0d1717e31d89e4565d5f162867461b40ea1752"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/48.json",
+      "bytes": 8858,
+      "sha256": "3742cf27c70cbfb98c7f734c82b1a9a26cf3de2a298a050ea36d25d04aab3c7b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/49.json",
+      "bytes": 12374,
+      "sha256": "b53a93c07f23e2559f5a08c93be7fdf926d4e1f1b559e872b62ad8aacf4d3ab2"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/50.json",
+      "bytes": 9628,
+      "sha256": "b18337ab85db68948c7fa02f943e89c71b19bbf0b59d73459d22da7623bcfada"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/51.json",
+      "bytes": 10148,
+      "sha256": "e4d5f7f5af91a6a1fcdc3a72b8da147a420e98868f0088794fdff678ffc362bf"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/52.json",
+      "bytes": 8661,
+      "sha256": "3895649ff34dad46bee907ec2e10aa1c57fdf7c4eff3e84a5211bb89962a5d0d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/53.json",
+      "bytes": 15058,
+      "sha256": "d348e0e14b1183e0c1b7533c481c0ee488030c85e74737b63348f602afd4d6fa"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/54.json",
+      "bytes": 15863,
+      "sha256": "d1ecfa98d257e1652e16d924c5ddaa1056b61f3ab1eeaac620066d49629c56c0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/55.json",
+      "bytes": 12084,
+      "sha256": "b31360ecd54de50951bf65bb126ad19dc5b3e89bc0c65695b27e53f93e84bd9c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/56.json",
+      "bytes": 12661,
+      "sha256": "f818e07db43c1cafa2d30dd00f43fa844143ddb3f5ef4a22b0869b33ea53de31"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/57.json",
+      "bytes": 12533,
+      "sha256": "d24ff4e136c77274e9d5cf9f2b7b04dee77608fbefb9b1c125931c01172c047d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/58.json",
+      "bytes": 15989,
+      "sha256": "2712204de36451df9c13749cf6ff2f2affb0e1ee3f0b1a1367a76fa6864d1335"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/59.json",
+      "bytes": 8961,
+      "sha256": "0b2aec7088a19c9ba53d6e61dfbed5f81ab4992b7d4cf227f99904846a475438"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/60.json",
+      "bytes": 16018,
+      "sha256": "0a52617d98bbee97c6cff13e50a03e0c8d2539893940bc95d4b004bee660807f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/61.json",
+      "bytes": 16069,
+      "sha256": "c54f75fb8732d73b4a3a983f7be0f99511f3bc900c19b6a45efe14eb20234350"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/62.json",
+      "bytes": 13578,
+      "sha256": "4e26a0fdace6a438c71a5951d147e8a59ad769e6b19552366c244a6cd31f8d1e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/63.json",
+      "bytes": 14370,
+      "sha256": "a1a1e8a01b99ad8e5c9cc2b8898173be68468faa0e8c6979f46903b8f13b572e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/64.json",
+      "bytes": 16771,
+      "sha256": "779744cfe469bbe3b11676fe59456422ec5833ce42bf9148febaf93507e15b26"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/65.json",
+      "bytes": 12337,
+      "sha256": "525e1c22260d161931a8182d79cdc371ceb28bd6328f588606412f25daa80bbb"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/66.json",
+      "bytes": 16213,
+      "sha256": "fed686b6a0390b345c48b9f88fd47f547e14a5495831051d655de130e1d44058"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/67.json",
+      "bytes": 12375,
+      "sha256": "0241ace7170b5413be3719bea2095ef1dcb3cff1982f06f80784ced6888b097a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/68.json",
+      "bytes": 10867,
+      "sha256": "9b69d53c28018971c9c73561a0d80f78b88f1b1e99e4dc54332b062c9aa0153c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/69.json",
+      "bytes": 8611,
+      "sha256": "852ef985d2adb872303e7874255348470313e7f980a866683541d846151a11b9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/70.json",
+      "bytes": 7829,
+      "sha256": "9dd979fcf156218e813a99b162754dc4f83197d96135353536b47b88cdc508c0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/data/index.json",
+      "bytes": 20159,
+      "sha256": "2584d5ec97dfdbb1f51b5c8fe51205f28eb8fa0e2a0e0ca86f26a7c490545d92"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/index.html",
+      "bytes": 592,
+      "sha256": "002b787d289990e4670350ca58e68480fb56db3623cbc260e6c0bac4ef276473"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/provenance.json",
+      "bytes": 3415,
+      "sha256": "83821d587b873fcccb0769ca664a2c694aa8468b7311cf10af6b6d1b338e2dbf"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/bilingual-verification.json",
+      "bytes": 657,
+      "sha256": "3e11bdf423e865476976e7204cb032b1c48b26c99b09f4020092f48e7e93d053"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/bilingual.cjs",
+      "bytes": 5681,
+      "sha256": "3b3abaf31349a9223d69cd2b5b308b46d79c4ee314a9beb7262d34854dcda3bb"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/country-01-1440.png",
+      "bytes": 1585933,
+      "sha256": "136779beee9d99167a91c10b54edc0d852ab5fbc54b30f82220438ac26844adb"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/country-01-390.png",
+      "bytes": 564999,
+      "sha256": "d60ce31e1b52116aa73e0b066f2046a97ac4361d3da650fa7d0a44f259f5859f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/country-01.png",
+      "bytes": 1581825,
+      "sha256": "1eb12c9f205fe1747fb994a50a0b318404048789ae2f1a68ff094d12c8c97888"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/country-38-1440.png",
+      "bytes": 1643099,
+      "sha256": "78d653ca86cb144335246676cc5b9184c70eaa5712491db0d0817a15b72ede2b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/country-38-390.png",
+      "bytes": 589169,
+      "sha256": "74a510f1b7d9da7045e9c7392cb7a16107114dfc3697d8c872d9f9a65acb645c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/country-70-1440.png",
+      "bytes": 1561047,
+      "sha256": "db67ac5159820e3cdbd786237a151f69c541f6e0d019ba0616c97af6fa0aa969"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/country-70-390.png",
+      "bytes": 555873,
+      "sha256": "7bd93e675ae1008d676bf5e107dec5febc6f039f867287b0b3b440e1d0008705"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/desktop-layout-verification.json",
+      "bytes": 420,
+      "sha256": "2f45f12992c30a2eaf188c2027b43265562a2c764a60fa74f0e8669b0d827049"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/english-country-1440.png",
+      "bytes": 1589810,
+      "sha256": "bc1b1d3e764fa703f4d0237d8ee5ab970893228d782e3bd977fe42143cec91a0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/english-country-390.png",
+      "bytes": 569083,
+      "sha256": "8e4dc5546fdf6591f9131b8b7e3b89d4cb2d294ae15088edc28f27a1dd675efb"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/english-role-1440.png",
+      "bytes": 1579438,
+      "sha256": "a7015885807e2831e47c6a6557935ce86efb9e5891e866ff9a82322cf14057cc"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/english-role-390.png",
+      "bytes": 398069,
+      "sha256": "86980852838c3711267cea7a6080dbe10afa2ed50798e74ab05fe688fd640171"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/facility.png",
+      "bytes": 1574148,
+      "sha256": "43fedb611150e7ce2373bd3525767bfdc6389edc7fe1d7831df9b704c75cb4c9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/feedback-verification.json",
+      "bytes": 129,
+      "sha256": "57d505a5b85a5ec58d1351327165c3e6a8a0ad70e076b83b158e67f5a5217e65"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/feedback.cjs",
+      "bytes": 1711,
+      "sha256": "23fc465707874cd257369810b56e044a14b35e419462d1cdd9a27f58c780722e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/game-entry-navigation.json",
+      "bytes": 238,
+      "sha256": "76053f0241adec831ff3da8bee673ffb47fd8b6f765c1178e174077014cf2fca"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/game-entry-verification.json",
+      "bytes": 12452,
+      "sha256": "9d5e1043b6cbbd81e8f60c9bd43c73e3414845ac38f29b21d572aa65af2498f1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/game-entry.cjs",
+      "bytes": 6782,
+      "sha256": "90e48deeacadeb385bc186ab0660936ceba751c3f342b7eefb3c415ba268445f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-final-finance.png",
+      "bytes": 2023559,
+      "sha256": "f4466b14d5b28a60ba74b59c51cdb4882599f51b487f04146eed0e68d7d8d028"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-final-mobile.png",
+      "bytes": 639540,
+      "sha256": "54cebb3bd4e5b969dfe95141359a03b28c3dd52964f2be7f6faba22f602abcad"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-finance-1440.png",
+      "bytes": 2373475,
+      "sha256": "522faf05f1cecca2f046330444a29766716153e765b92d715b69f149622b1b9b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-finance-390.png",
+      "bytes": 637134,
+      "sha256": "57243257c44bb256c284e2491bc350307e20805713e7cf0b61c9ad725936a0c8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-finance-768.png",
+      "bytes": 1229467,
+      "sha256": "5188c42daa47842e651f730cd7e29029d2da393cc4fe033b08e3ca7a72f819ab"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-social-1440.png",
+      "bytes": 2474873,
+      "sha256": "8f7d1ee6b4e9063b0df60eb92d88a37b67bcc70a975963f0a20af57f121b0e28"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-social-390.png",
+      "bytes": 635581,
+      "sha256": "76850cfa15993959f2032850894773f7be4eca0a625bdba6ab42831e4143bfa8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-social-768.png",
+      "bytes": 1299068,
+      "sha256": "a19e02d9b8f6aed0ecc48dacd5217823819dbee6032662e1665c47931048df73"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-trade-1440.png",
+      "bytes": 2670346,
+      "sha256": "9b2096afeb4adb25e1aa57358dbb7330c54d2f5d770ccb57804cf0ddaf3c9609"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-trade-390.png",
+      "bytes": 623705,
+      "sha256": "60c37988d5e38e43481ddf02f606b09296ce2a25fd3a8ff21e558871a828a027"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-trade-768.png",
+      "bytes": 1392474,
+      "sha256": "099e3f8245293bf01af3b54a67490f87f01c6234b0156fb0d458c1f897d37018"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/map-entry-zh-390.png",
+      "bytes": 625502,
+      "sha256": "b5abf95924587687ea067ee09b8c657f63fc0cd2b577d86f3bd5245097f525c7"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/mobile.png",
+      "bytes": 419593,
+      "sha256": "d998b9281eb6ebaff4f19cf3b0de374af33371ca71303b930459283e22ea7dd5"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/resources.png",
+      "bytes": 879301,
+      "sha256": "08298cf5868c58efb3214c5e803fe3061903abb603449318db42b053029ff093"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/scroll-bottom-1440.png",
+      "bytes": 934388,
+      "sha256": "f17cb568427ed37107ddd14bfa12053c2c2acd35c1fbba319cd62833b124df85"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/scroll-bottom-320.png",
+      "bytes": 153685,
+      "sha256": "76a48d9b3f414b75a688dce94136052e83fd8f06fb2f4a0587f0ac073cb0dffa"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/scroll-bottom-390.png",
+      "bytes": 315459,
+      "sha256": "1a44fb32b566a82a8769f525497869c82bbd917545c6fdea5b759483d0f49e84"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/scroll-bottom-618.png",
+      "bytes": 499468,
+      "sha256": "e0d65ad9a10178067646fca213e9e18a7d276ea81574fdf0f4691f303c34987b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/scroll-verification.json",
+      "bytes": 2955,
+      "sha256": "a657affe3e38515f193619c67213c0fd60e14df763b238d352dfadab2785fa4e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/scroll.cjs",
+      "bytes": 3220,
+      "sha256": "98da0998daf7108d2b1083475d323fc5014c1a2992a1f3c3db3b9e7129426072"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/smoke.cjs",
+      "bytes": 1012,
+      "sha256": "3d65972ff7490e889c4c55e77c6d053063f0aea349915ed3da1029dd5cc8ffa5"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/updated-role.png",
+      "bytes": 1653857,
+      "sha256": "bc48087198601549db2173a06e87c01e6ca3a06a6c4845564a144c20b28537e4"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/verification.json",
+      "bytes": 8200,
+      "sha256": "421b7b7e49e6c8ebb92482a32f21d17b3757d049aa863d94ea3caa5e337f9008"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/countries/qa/verify.cjs",
+      "bytes": 7940,
+      "sha256": "90f00103161b964f5320d3dd04c99b2d916873d4e61f834aaa1c9e548ca65178"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/country-context.js",
+      "bytes": 2243,
+      "sha256": "161a8df1b1a65b0db81f88fd123b51fcc74c5d644885d00ac1d35d7542dd9da0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/country-game.css",
+      "bytes": 21537,
+      "sha256": "2b56adbede42203b9b940ece3d34f50871f6d8b2eff13d42f7162004f03f6a7a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/country-game.js",
+      "bytes": 17800,
+      "sha256": "ff9ab561860417f93f7305c79a3be018e090dc76c3e767c1ee37516069339b45"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/country-integration-manifest.json",
+      "bytes": 535697,
+      "sha256": "9e4eda6e27832e3d3a4cbd5d364e94592534dd5836c6eec7f2b307e8c9f309fb"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/coverage.html",
+      "bytes": 211804,
+      "sha256": "d834b1b08561479acfc93ef0b08e6a620b21362c84390e659ac0ee812f844ea6"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/coverage.json",
+      "bytes": 474040,
+      "sha256": "450e2c58b1a7680fdf2c4ec4106e00160f0efa1b4b1f814c0ff23a040c4c88e7"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/game.css",
+      "bytes": 22527,
+      "sha256": "a153207aebc5994fe459f81243e8efa68f0df0690bf70a628956c0ac5cfd798f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/game.js",
+      "bytes": 66442,
+      "sha256": "a4d81fcd33e2623b1041ea10d89a6bf631d48311d78688740904b0958f933ec4"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/i18n.css",
+      "bytes": 2517,
+      "sha256": "92155a28a45622c5b2d525908236fc11bee85f1c38ec26441632a58ac84b3aa4"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/i18n.js",
+      "bytes": 5378,
+      "sha256": "b5891fd64d632086cee094c1638b109a6257d63755f82f5246e9de63638cc35f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/immersive.css",
+      "bytes": 82009,
+      "sha256": "7f46ad6509c1590eb656ec99a0a5ffde8d3cba2e6a1f721e1be44bcc505ea338"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/immersive.js",
+      "bytes": 90883,
+      "sha256": "5a83606ee7d018019672b19c5bdf75e4241758fe2878f05bf701de2612d7b171"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/index.html",
+      "bytes": 1123,
+      "sha256": "696c7cd288375b1ae68ef68938d5a5e8a2135312f37aea31f5553983e39c13a0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/interface-corrections.json",
+      "bytes": 6531,
+      "sha256": "1f486edff15dbff5a4b177d47dfb414e5a4ca67c5d135b7e55eccfc6d674e487"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/journey.css",
+      "bytes": 17024,
+      "sha256": "df5abe7532c826ac9058ec9bfcf4928e869f1b517e4eb4cdc152b9eca2a67e42"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/journey.js",
+      "bytes": 20820,
+      "sha256": "e76476784e38f014e792d277bcce598105563893c0af2fda1b26b595c3355b25"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/living-world.css",
+      "bytes": 29134,
+      "sha256": "654cd31ea071836cc2a47cd5cf1c5f46beefdaf92af8eb028cf840b1ee677441"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/living-world.js",
+      "bytes": 16713,
+      "sha256": "b803317b0532f4bf5f3986cab07e775407bede208150790704489e2f306405f3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/lobby-theme.css",
+      "bytes": 5310,
+      "sha256": "fd8d8cf3153899fe5549e15e4340d307e99f1b6164a01d4f177fffd23025c81e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/locales/README.md",
+      "bytes": 2103,
+      "sha256": "3077efe1608fcc5086b990021ac653848a51a80fafe10c9812dc16a6cdf66349"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/locales/build.py",
+      "bytes": 3412,
+      "sha256": "e99e819faf374e6742fc081b1b16dee3c4c1ebad61dc1d3a74a56983eb5df178"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/locales/country-game.tsv",
+      "bytes": 5495,
+      "sha256": "173d9f6e34da4abcd2877cd1ae90ccbf0c1159405d8d911370bce92717c5152c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/locales/coverage.json",
+      "bytes": 200,
+      "sha256": "b20f06f361f9c72515b0ec45d4ddf724e9de6d92ed4dcefb0e4395d4eeaa72a3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/locales/dictionary.json",
+      "bytes": 97813,
+      "sha256": "2627ad2c5968377763f8f8d48704ff0bdcb7f283e139f0f45dfdd07e350ebfb1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/locales/english-source.json",
+      "bytes": 5958,
+      "sha256": "1a897394836967cbfd398e7652dcf07b4418598a289851880fd681e44f213b56"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/locales/modules.tsv",
+      "bytes": 4444,
+      "sha256": "72e27cfae9a119ffe9504e06b10dd7f7f68f9d79f9eab1a764315f724530656e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/locales/phrases.json",
+      "bytes": 66716,
+      "sha256": "94c651cd0c80f437937cc8285584183b40eed7f96a9f3a57f495e2c191d50c58"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/locales/terms.tsv",
+      "bytes": 17532,
+      "sha256": "de581a10d49b1cc7c2d3dc5497489ee4a9542c4dfc2277f23b6a7930362b3bd0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/locales/ui.tsv",
+      "bytes": 33895,
+      "sha256": "781d6bfcfa65942d2fdbdbc5f75f3204d3bbdd277327270c6f39ce6fbb4a6d59"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/prepare-country-integration.py",
+      "bytes": 3545,
+      "sha256": "39aff20ea013958e929d7c03ae18fbe84934997a9a74477a5810f7551560bec6"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/auto-world-verification.json",
+      "bytes": 3857,
+      "sha256": "dc1076e7664af5feeca68add5b737c2c6efd64d741cff094ac1e4f4fe99db85f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/auto-world.cjs",
+      "bytes": 6526,
+      "sha256": "9e4baeab33075af572e1edcb88da481a4cd8bad0603c541b519079d14ff244bd"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/captain-0.png",
+      "bytes": 1361972,
+      "sha256": "3d4f594903f528779b9a5366d4f125791056e216e19e82d8c44504f1d6c7daf1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/captain-1.png",
+      "bytes": 1546260,
+      "sha256": "7213e33c0f4267d8c77a6242bdeaded6b35b5571a664845c29bd5a2a9c728f49"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/captain-2.png",
+      "bytes": 1413532,
+      "sha256": "073db30b95c8afcde45e31d5a2d604e1878aa70a4bd5e913cf62aa82ab31a25f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/captain-mobile.png",
+      "bytes": 340293,
+      "sha256": "3b75bce2cefc2f9be85e2918ac1779dc236bfecbde391537517996ec7f1883a1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/central_bank-0.png",
+      "bytes": 1395370,
+      "sha256": "b63287dbf8c8997bef91de3f01be2ebc9f857ad1c1a6b8955679f7b8d7c839a8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/central_bank-1.png",
+      "bytes": 1528990,
+      "sha256": "da5f3a3b80c5c3126eb5bd9c176b798375087181438e2add554f2358e6594894"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/central_bank-2.png",
+      "bytes": 1529939,
+      "sha256": "cb5dcf66c51aa968651022f4151fa2a36d9d9e5fa6040881509d7a04b13c12d8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/central_bank-mobile.png",
+      "bytes": 382518,
+      "sha256": "e3f7817ef8f77b5031c18bc12cbe8ffc59c9c7840836edb68554281d75a48aa0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/clock-countdown.cjs",
+      "bytes": 1479,
+      "sha256": "523a0201a474e92c8b5e913fb643c8d073603ce814062d3933c6887999899e93"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/clock-countdown.json",
+      "bytes": 163,
+      "sha256": "6f8b87c55ad68e96eaeb0f3afd9ef20b713de84cdcd670fe0edb7a9da0ea097d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/compact-layout.cjs",
+      "bytes": 1298,
+      "sha256": "6a459b740f7862506b12e3c3ca97cf5190b715b26ce6626df3ce37fca8345eac"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/contextual-coverage.cjs",
+      "bytes": 1647,
+      "sha256": "3e38ee6e75ece285422c3008559fd52f0c07ed7f46f931ca868b0e7e9a226098"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/contextual-coverage.json",
+      "bytes": 4842,
+      "sha256": "5b6d944ccbcebcc5f5cd31ef3aef2a294fda7e929e8618965b80ac5c075b35ce"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/current-look.cjs",
+      "bytes": 699,
+      "sha256": "4c53292ac61c4893c0fcd0aec7d227dc5c53f70f0a60825604af958169bab022"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/debug-live.cjs",
+      "bytes": 761,
+      "sha256": "b8f81147530621dd3bb511ee1f34e72a44f66e69b16b898babc06ea951afd777"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/debug-mobile.png",
+      "bytes": 379287,
+      "sha256": "f5fa85615517beeb32b5cabfe94e59d4d8edfacec4bf6bb08b2b5adec10e53e4"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-desktop-captain.png",
+      "bytes": 1216013,
+      "sha256": "882fe925faae3b168fa456fb05d2c573bfc60c4dff2dac9e53380322d340916e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-desktop-central_bank.png",
+      "bytes": 1231986,
+      "sha256": "c6d0f69752cd4609d242d7afbfdc0fe82b6b265421cdecf3f3bb3cb71efb3d0a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-desktop-finance.png",
+      "bytes": 1218779,
+      "sha256": "707b422e55de181d1761dc775dba3929776f43ff9f4a1d2ccc1c08f62c5a2e99"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-desktop-industry.png",
+      "bytes": 1216795,
+      "sha256": "e2f8099c31d6df3cc9407b9eaf385fc11397c76b73805b06862c454b4f527cac"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-desktop-social.png",
+      "bytes": 1223816,
+      "sha256": "8a18599e86f4027aac00aeeef07a765bfb8ac47ef2556822ef6b7d808d9cc926"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-desktop-trade.png",
+      "bytes": 1220777,
+      "sha256": "a3fdc29f1f3a7740b1eb6967c12d9c83d65e05005e0436956ae9d2de930bc95b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-finance-cabinet.png",
+      "bytes": 1453214,
+      "sha256": "4785c0d1bb8ee0f52f9cc672fb6fae201aa3db9212a542ad11a363cf6c4f7894"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-finance-world.png",
+      "bytes": 1599041,
+      "sha256": "3760b180d7bd570689dcd2bd97681808d43d7201dc64ece938c28a76661aec98"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-home-regression.cjs",
+      "bytes": 3609,
+      "sha256": "e6ac57ca770cd390fb9bb4026ac7494bdbd4589ae57ede6f6b3192212e1d39ef"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-home-regression.json",
+      "bytes": 8946,
+      "sha256": "20d85f436851e14ebd6ed7c61b83e849d12999daa17c6b2e3b39baf104e29d5b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-role-audit.cjs",
+      "bytes": 7615,
+      "sha256": "0050d049912000a1e57f333241deb939f4cd0e6cd3fd079f7c4f4b83dad4e833"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-role-audit.json",
+      "bytes": 38368,
+      "sha256": "12141ffa910b6d83b60875a4a3170491f3bd3339c87b19eeb4dd34c21cf7f9d9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/final-source-audit.json",
+      "bytes": 1315,
+      "sha256": "598cc0a44e03154d0f40ccd457d126bf38515fc0eb945a139f36d99b9567e705"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/finance-0.png",
+      "bytes": 1402701,
+      "sha256": "bd8cb8f807c8598481ef8856482e8c6d0821212f0f129d707c7aa14bfdf62864"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/finance-1.png",
+      "bytes": 1303398,
+      "sha256": "87c190d3d9aeb8bb344599ce31f839702c5384c70e54a56122315e5bc9439985"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/finance-2.png",
+      "bytes": 1465411,
+      "sha256": "fd5d9570cfe3b6f78c085a61b28e3fe698ae1eac36bd5b3313097a35fdc188ea"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/finance-mobile.png",
+      "bytes": 366241,
+      "sha256": "30a0fb7b2fc0635596b011539197d5a1c47735a84fa31b429e28db31e3f2c845"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/handbook-extracted.txt",
+      "bytes": 173817,
+      "sha256": "b5142f7de8ed9118ccddd93b446ad93c9bfde84bdfcbc515ff3c70553f2060a7"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/industry-0.png",
+      "bytes": 1436290,
+      "sha256": "859ce9db4cb8a4b0a1300a67276c09d436ca70dd1ccb9b4c9605e9723deebd18"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/industry-1.png",
+      "bytes": 1542673,
+      "sha256": "c0bbd8bde19c40b130e0bda97189ee888e85138a5b3f5a971348c85219b3026d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/industry-2.png",
+      "bytes": 1583134,
+      "sha256": "187b01bf8caf05463f83b83cb2d21278dd5bdbbf7fd8173e90c334a59d7bc4cd"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/industry-mobile.png",
+      "bytes": 360810,
+      "sha256": "e6569a45d4595e01002f3fc9210f20fb8c7ed7a0c221ae40042dadfb3dab0abb"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-captain-act.png",
+      "bytes": 1273633,
+      "sha256": "12ae65b04f1928d4a246218a5284df733a5a2dba9df9e26bd674194e1bb968d8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-captain-brief.png",
+      "bytes": 1539042,
+      "sha256": "67a137b636323259c30f2ced2b26ddf98291f74c1fbf3437cac33956b9e21729"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-central_bank-act.png",
+      "bytes": 1236269,
+      "sha256": "f57d8b9f2304a48eee05d6f81b3124a6351f3f25206471b46018e112bf25d95b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-central_bank-brief.png",
+      "bytes": 1559097,
+      "sha256": "cc5cefa6c1b4ee725da667c2e08c7147e621428972193bdbc8277c574ba9b3ab"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-final.png",
+      "bytes": 944893,
+      "sha256": "a23306e92384b4bfdb8034614493e55aad2ea96812998bd2812eb495e5c4293d"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-finance-1366.png",
+      "bytes": 990735,
+      "sha256": "829d4f5ddfc3dd6b2a205e21b39b37e16708cc939f482f186746c18ba4f91b2c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-finance-390.png",
+      "bytes": 294206,
+      "sha256": "ee3a9f9f4ce9c433235be70147daf4e9d8709d7332d029d36f04bf920967cec8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-finance-act.png",
+      "bytes": 1211740,
+      "sha256": "720e69854191367451907668b83fecc8e4ab0e672e87c8fe8d253c10b94c9fdf"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-finance-brief.png",
+      "bytes": 1687812,
+      "sha256": "e6f81ccf9ae95b98769fabd760f98be420829d78c5fd989852097e427e08c935"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-flow.cjs",
+      "bytes": 8506,
+      "sha256": "6453880bf7a8d7d177bc2f99cf93c68bdd70de80da6da2513dffac6dfa20218a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-industry-act.png",
+      "bytes": 496568,
+      "sha256": "15e7c841a1d07c6c1f92e99a8f3525247c0d464fd0214ded94cd16f79de940ef"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-industry-brief.png",
+      "bytes": 1765159,
+      "sha256": "bb7c69c97cc40022f9546f8cf63f18cd813a0b97251d4653bf135df761f74da1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-social-act.png",
+      "bytes": 1254668,
+      "sha256": "a8fb926dab5afe7cdf3c34c7e692db2cc3e07be5502ad896752783461463ff42"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-social-brief.png",
+      "bytes": 1673884,
+      "sha256": "3e4581f190b853ee14af292cfa0345f81dc8bc75e4b03ea7687bca4718c7bfb7"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-trade-act.png",
+      "bytes": 1313591,
+      "sha256": "11d06c0c5e71f9a0232cac874509ae298bdd5f595f15edfc86ffcf139fd6c52c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-trade-brief.png",
+      "bytes": 1606705,
+      "sha256": "0a2e869a135dd33621e0200e37e48281545590ca8b6733d8ae07b7035b470146"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/journey-verification.json",
+      "bytes": 10487,
+      "sha256": "087471ca86f6221d54c0fd89728f79e3e084de9bd96e2244c7983a95cd8d9e64"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/live-update-verification.json",
+      "bytes": 3160,
+      "sha256": "8306038bbbcc58fbd7ffb140b95fe0c7a0f6ec2980e4318c2246942dd734e43b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/live-updates.cjs",
+      "bytes": 4723,
+      "sha256": "f695b0f883366cef5a0791dd0242e945c20dc3cd32076e4444c7c2dd6fcf2d16"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-captain-0.png",
+      "bytes": 1679454,
+      "sha256": "a2f5923e1d272d8b9bafe0c96c5887f8110fa6a204354bee220ec59302380c7e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-captain-1.png",
+      "bytes": 1660121,
+      "sha256": "193eebe2bd6b6897a549cebb94df8d8a04818d631a80fbb44f3d919d1f37398c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-captain-2.png",
+      "bytes": 1641584,
+      "sha256": "1d5640a320f013c5f9366b269d3ec9c69ec098eb3f0681380fe17dd930fe8d45"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-central_bank-0.png",
+      "bytes": 1578447,
+      "sha256": "03bc10f6a8eebc7f95d795205ec124fc7e76416d3ee947ecc6d77bd69fddc6e6"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-central_bank-1.png",
+      "bytes": 1617929,
+      "sha256": "ab02b9c49b262b9de0c8e6d36f4dcc90f9e0edb8fdf9f4eec61e369599ea97b7"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-central_bank-2.png",
+      "bytes": 1556127,
+      "sha256": "bc452027a52c448716929d65b2ac8eb9aa8aa69058b51d4fda284b84e13a52ec"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-finance-0.png",
+      "bytes": 1596065,
+      "sha256": "b64b307ba4372d7749c9a043b1d8bb0cff41eefa502a5679c1dba285c035dc1e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-finance-1.png",
+      "bytes": 1523178,
+      "sha256": "849a1b6ae764a19793a98037f61cf87cc369bb12f22cf11f778df58e0ddf88b3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-finance-2.png",
+      "bytes": 1597066,
+      "sha256": "c9e2bac8c5a73dd27a4c4abed08d9e5b7c001f951c03da4848facde71d881ebd"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-finance-mobile.png",
+      "bytes": 309198,
+      "sha256": "fd9c51b0123a6db4fb09802db9bdb189cae6eb13daaee0c4d51878f1d0b494c9"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-finance.png",
+      "bytes": 1707322,
+      "sha256": "7af59fb95da08a5d7e7db036730116b34f445bee465d1070f9cf9fd06aeaae7e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-industry-0.png",
+      "bytes": 1637780,
+      "sha256": "ea8054871201424746ab75986f196edbce50a70aadb1eaf1a3582dd384d69a27"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-industry-1.png",
+      "bytes": 1766997,
+      "sha256": "01820eb269a669acda2415ab3f16e550e9312e9710f04e623030618ad0479497"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-industry-2.png",
+      "bytes": 1741851,
+      "sha256": "a7645850d47376288e186e5edb8a1348ae76638965b98ed4daad5592f5f2170a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-social-0.png",
+      "bytes": 1712651,
+      "sha256": "61ad65fb9d937dd4a28d37f4a8817c253c6ab80abecea809cf072ff210aa882b"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-social-1.png",
+      "bytes": 1769659,
+      "sha256": "bc73f030850b942b079a0b5d67c0476fd37f0d6dcd6f38a9590b99c96753d2d2"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-social-2.png",
+      "bytes": 1588021,
+      "sha256": "2607b22864b4b74e4d99ab24c4a143c7d7465eb565a4c481543b59b2a51eed99"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-trade-0.png",
+      "bytes": 1675203,
+      "sha256": "e3df10c2ef17791936e664be4347d9d664e133cd26f14d13e08a2d34b8ea9977"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-trade-1.png",
+      "bytes": 1673550,
+      "sha256": "54ba1f96a244f70d61dceef53ab6473d0b0c5db654f05ccd12ea974108eada0f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/living-trade-2.png",
+      "bytes": 1661281,
+      "sha256": "b1d0d1af7a46ddd85ac7c55b5273964d1647ca61937a656453a713cc7d7789b1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/module.png",
+      "bytes": 1106414,
+      "sha256": "40b328f4c302913e74f9207d07ba778d921831c626deb84436b492b0aef2033e"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/numeric-source-verification.json",
+      "bytes": 2794,
+      "sha256": "4e3bf47fe420e5425e86ea3a02bc873c0cc98a4fd81b2799e3ef9db3c97026de"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/smoke.cjs",
+      "bytes": 1064,
+      "sha256": "b0fa9817d6cd46dfb8be0f87015e8c9077e646a0fb50f86f22be6fb1836b9eaa"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/social-0.png",
+      "bytes": 1489536,
+      "sha256": "8a7591dc91fd33dbf9c8fc016c7aca808cadc89ab412c755245ef02e6651a05c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/social-1.png",
+      "bytes": 1576455,
+      "sha256": "b15cc9e20bd65258c36e1e3ae404240ff2f4818154255920a9eaf2ea6100ddc0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/social-2.png",
+      "bytes": 1298395,
+      "sha256": "013ec5491d035c0cedcd4cf40fa68d24dc9b03886da5ec337f43c7765cd1b90f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/social-mobile.png",
+      "bytes": 355072,
+      "sha256": "db78b45a576e17c48e52d3099ceff421499c596db4b7670c6a5e3b01a9ab43f8"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/trade-0.png",
+      "bytes": 1468584,
+      "sha256": "1277eed16a2a8f20a55e3ef75ee135bebc20589a802b0f07e86e5a5387edfbb0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/trade-1.png",
+      "bytes": 1331155,
+      "sha256": "1bd95e832a4e374f5e8fc337ec25da627a8dc69dd2dba778f7a9786e6f4382d1"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/trade-2.png",
+      "bytes": 1558608,
+      "sha256": "6ed44a6d43b5fccb4c52e3da25a25696f3c1d4ae5a119d20de72d1df1e4fa6b3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/trade-mobile.png",
+      "bytes": 375872,
+      "sha256": "533b3175edac9ec3b6be210ec864581c847f80457c4ff1172d8b742bef0503ef"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/verification.json",
+      "bytes": 2915,
+      "sha256": "25d2a98631e89fad617bddcf1be391ca294e97d586ddb7f2ab4c5573964e07c2"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/verify.cjs",
+      "bytes": 9954,
+      "sha256": "4f4757608bcab4ece9181745754f4f3db60743cfbf6adeef4cec66672bd2e243"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-captain-mobile.png",
+      "bytes": 378847,
+      "sha256": "a873725534c2375ae3f2c86692a20e4d5fcab3ad0e03f65c3a470512e6ab1cf3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-captain.png",
+      "bytes": 1676203,
+      "sha256": "1bdb8c9596333a906a959d16ee7144ea1247e1ce512b2653502c9c011cb343d3"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-central_bank-mobile.png",
+      "bytes": 370406,
+      "sha256": "2e458c013e164b0b9e8eebfe3295a3ca073a07a0f01f694009571f576c9505c0"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-central_bank.png",
+      "bytes": 1613632,
+      "sha256": "64856c0c396a0534ca43f69a1d0cc855c151db2d240bd670f9d12677d907d983"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-finance-mobile.png",
+      "bytes": 354188,
+      "sha256": "b79b29928aaf79bb2ad162c8ea752e4a3cde75b7a28cdb2bc2453253e7dbbe95"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-finance.png",
+      "bytes": 1600417,
+      "sha256": "d0e28b9c64c3a165ec7a65a004bfd9bcfe2f83a0ccb39b876e389c856de4c17f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-industry-mobile.png",
+      "bytes": 354799,
+      "sha256": "36c8236cb55c27d26a905a8a4e4991cb392d8f1d6a71772e6af01fa1f8a448b4"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-industry.png",
+      "bytes": 1637978,
+      "sha256": "bdfd5ad72584cc8d10e8c5995c681974d90065cfc0feebdd4381bef0db1d6648"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-social-mobile.png",
+      "bytes": 379551,
+      "sha256": "216d18b7c4e3e8a33a49496823a21a164e80489473898eae473858c45b15161c"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-social.png",
+      "bytes": 1714432,
+      "sha256": "1699696af24b1b5cba2167bd2caab1fa6917cec05fcf4eb95f3e54b4027eca73"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-trade-mobile.png",
+      "bytes": 374932,
+      "sha256": "62f0506ca1dabc45221e5041dde03b6d62102700c3616b6cebf3cbca40cdfb64"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/qa/world-trade.png",
+      "bytes": 1674293,
+      "sha256": "50a7bd35400f6a57b7926344ba0935ca2b5fd39053cc3e5c47aeed57fb7d158f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/seat-boundaries.js",
+      "bytes": 1892,
+      "sha256": "015e0631aea47373a28f930d00689f50f8eb867e4da7ab99d47c82744ccc8284"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/source-review/EconMind_Season1_Captain_操作台完整设计_高可玩性与每日路径.txt",
+      "bytes": 76627,
+      "sha256": "f266023f01435900baa5244419262704ccfa749b4c32ebf6f87a6b291b40e13f"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/source-review/EconMind_Season1_Central_Bank_Gameplay_Console_Specification_CN (1).txt",
+      "bytes": 92976,
+      "sha256": "d22ed8c0b4e8396ddd5516581f0ccd9fc52d5db8391780ef28b27018d57595cd"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/source-review/EconMind_Season1_Central_Bank_Gameplay_Console_Specification_CN.txt",
+      "bytes": 92976,
+      "sha256": "d22ed8c0b4e8396ddd5516581f0ccd9fc52d5db8391780ef28b27018d57595cd"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/source-review/EconMind_Season1_Finance_Console_Gameplay_Design_v2.txt",
+      "bytes": 87017,
+      "sha256": "65ada83b1e3592deb2c85bcbbc4f23b36db8cc534694fabf1cc14b9210f2b2c5"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/source-review/EconMind_Season1_Labour_Console_Gameplay_Design_CN_v1.txt",
+      "bytes": 95135,
+      "sha256": "5f0ff520d559352d7afa9105d1a1a0c43197f0defc0f5fad2426deda0539a623"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/source-review/EconMind_Season1_Trade_Gameplay_Console_Specification_CN.txt",
+      "bytes": 119174,
+      "sha256": "02663b9b3e12b5df302ca456eb3c9419c3b3ddbaafb143ea2be58204e2aa0503"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/source-review/sources.json",
+      "bytes": 2212,
+      "sha256": "9cb6b77fe938ffa9ad51a03a3377b364e3d4dd930f42e34d63db58d6853b6d36"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/validation-summary.json",
+      "bytes": 4102,
+      "sha256": "03cef525612edba71d009ced5c3ad3800df2cb7b7538d99c55f9874a074bc3ec"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/world-clock.js",
+      "bytes": 5770,
+      "sha256": "eb61b7889868048a45c5d2f37581ebb6386ce2d5710280526cf2c96ff0bdf646"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/交互场景设计与复审.md",
+      "bytes": 9014,
+      "sha256": "75cb9c2b8cda6fd54de8c3ebe00a7cfbcf2f871124e3ffc28f21b5fc99187c67"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/六职游戏动线重设计.md",
+      "bytes": 8711,
+      "sha256": "0b63241ed9c45cb01acfa5b2800d89fbbd6e248b3ec92bc572284d406f8a109a"
+    },
+    {
+      "path": "role-prototypes/season1-immersive/规则核对与接入边界.md",
+      "bytes": 2953,
+      "sha256": "98fcd7df23ee70a8c55e845e794b20fd567e377439ec922c60a216c647914096"
+    },
+    {
+      "path": "role-prototypes/shared/design-library.css",
+      "bytes": 1162,
+      "sha256": "f186ef7d28b66ad8d9065310f01cf84332ffe55bbceb608e6d54a7e5368fa6e0"
+    },
+    {
+      "path": "role-prototypes/shared/design-library.js",
+      "bytes": 5298,
+      "sha256": "f769e68023e82a8ba293f3f85a9e94b2ab570955c3d95cf7c6bc82f241795034"
+    },
+    {
+      "path": "role-prototypes/shared/next-roles.css",
+      "bytes": 9995,
+      "sha256": "a715f9a3dc489f7e50e364c71a5b17ddc1e1cbc4cb076d9d6c2e87430d4f1ca1"
+    },
+    {
+      "path": "role-prototypes/shared/next-roles.js",
+      "bytes": 11199,
+      "sha256": "274bba9a43e87ef00f0cfd92cb39b9abba9d854a9be8cbe372cdb0db15ce12f4"
+    },
+    {
+      "path": "role-prototypes/shared/play-controls.css",
+      "bytes": 5343,
+      "sha256": "e385b6c6d318e054b98a09661da3e0f2f85f4d45788da64931abb551596c5baf"
+    },
+    {
+      "path": "role-prototypes/shared/play-controls.js",
+      "bytes": 8677,
+      "sha256": "4616e7dad6c160472e97ec79a11854bf0dc70aa9d977a50987f46626d85f1171"
+    },
+    {
+      "path": "role-prototypes/shared/season1-bridge.js",
+      "bytes": 1338,
+      "sha256": "33573dea3d6fd5a78dc52224b8b7d3a41d51f172692205956a02f6ec4b0c13f3"
+    },
+    {
+      "path": "role-prototypes/shared/season1-numeric/DECIMAL-LICENCE.md",
+      "bytes": 1104,
+      "sha256": "3108b546bcff5d346923a82f48b2d252ca722f9088076db6d145f6b67757ad6c"
+    },
+    {
+      "path": "role-prototypes/shared/season1-numeric/PROVENANCE.json",
+      "bytes": 1235,
+      "sha256": "c1fa54c5cb5f8d3fc5cb76abb98bc02df5aa1be0716a4635206ed31e3cd0b427"
+    },
+    {
+      "path": "role-prototypes/shared/season1-numeric/decimal.mjs",
+      "bytes": 127787,
+      "sha256": "45e6ecc0a500fee6439acdf67ee2e9322aab57e6ea0409ef52993dedbba8cf19"
+    },
+    {
+      "path": "role-prototypes/shared/season1-numeric/errors.js",
+      "bytes": 3199,
+      "sha256": "2e6615748548b869dc42d800d8a862f09b19c5e11342f1b8bf2ae98e96517d0c"
+    },
+    {
+      "path": "role-prototypes/shared/season1-numeric/numeric/money.js",
+      "bytes": 1455,
+      "sha256": "6ec5260f522b3becf43dc0d2b0749151b6c9043b3353ebdbac36ab3f81cdecbd"
+    },
+    {
+      "path": "role-prototypes/shared/season1-numeric/numeric/price.js",
+      "bytes": 1369,
+      "sha256": "a3075a62652054b0e14f6fb7e9dd71359f3d5f735b8bc53bc9b45da5418462b2"
+    },
+    {
+      "path": "role-prototypes/shared/season1-numeric/numeric/quantity.js",
+      "bytes": 1421,
+      "sha256": "f4f0b1aadf6f52f6eac60b09ad91ef3dabdbb7d60bd87ebb02ac431df3619e12"
+    },
+    {
+      "path": "role-prototypes/shared/season1-numeric/numeric/rate.js",
+      "bytes": 823,
+      "sha256": "970c60338a5f0cc502249719981c7c74f08caab420c53dc2b97f37f9bb2ad1fe"
+    },
+    {
+      "path": "role-prototypes/shared/season1-numeric/numeric/sim-time.js",
+      "bytes": 735,
+      "sha256": "698fad3d1e4766b125de9636c3ea0f9d767749d817812711778d947b3f33b9c3"
+    },
+    {
+      "path": "role-prototypes/shared/season1-numeric/numeric/world-decimal.js",
+      "bytes": 2129,
+      "sha256": "11bd9ffbeb35e1694968927a53867159d5a06aaf8139ba3a79a52ac7e311aea7"
+    },
+    {
+      "path": "role-prototypes/shared/specialist-cases.js",
+      "bytes": 9847,
+      "sha256": "e41396133b3cd71a3b2da759167d8e2b666da9ec44b9aa8b71635002ab50dcd8"
+    },
+    {
+      "path": "role-prototypes/social/action-coverage.js",
+      "bytes": 9753,
+      "sha256": "82effef4a71dcb819a10ff3f7af1264fa9c366af6a23cc41a74f08e80073fe98"
+    },
+    {
+      "path": "role-prototypes/social/action-coverage.json",
+      "bytes": 10910,
+      "sha256": "43df34580d784fc7fa4143b9ef3988b5d8dfea2285f5f99e29dd1e653ca18b02"
+    },
+    {
+      "path": "role-prototypes/social/cases.js",
+      "bytes": 8400,
+      "sha256": "dc55a34618fed036fc10f97139ce0c18b1d7ccab063426f070f791e31c159114"
+    },
+    {
+      "path": "role-prototypes/social/functions.png",
+      "bytes": 106697,
+      "sha256": "4996851418bf928afce901cba8f4bd533e1f807a74308be5042f77313a7fded6"
+    },
+    {
+      "path": "role-prototypes/social/home.png",
+      "bytes": 1186066,
+      "sha256": "e22e1d5c7e642c3dd2a0b3c10393741e9be710f7cbc595aabc603e1c0d130e4b"
+    },
+    {
+      "path": "role-prototypes/social/index.html",
+      "bytes": 775,
+      "sha256": "5fbc79fa4108f1a0bbd8a209d6a354d060f5600cc553408b6e01860d473d4934"
+    },
+    {
+      "path": "role-prototypes/social/mobile.png",
+      "bytes": 394873,
+      "sha256": "a1b9753e98875cd2b72e9b4cfada7157aa15b31b879c6cde322269f9c11bd52f"
+    },
+    {
+      "path": "role-prototypes/social/original-gameplay-extract.txt",
+      "bytes": 96842,
+      "sha256": "2b3ad77de87b6b53447bfaaeeb86d8703480a4ce5b524dec36e92cf302008a3a"
+    },
+    {
+      "path": "role-prototypes/social/social.js",
+      "bytes": 19608,
+      "sha256": "5fda22a5b8590e8b3c40307f4717d65cb1263c2a403b08f0efec7c96baf466ff"
+    },
+    {
+      "path": "role-prototypes/social/source-extract.txt",
+      "bytes": 51076,
+      "sha256": "7e4b46fa91cfb76c888aa401892b557c3280c36c4d1dc5ac947772fe03412189"
+    },
+    {
+      "path": "role-prototypes/social/source-provenance.json",
+      "bytes": 254,
+      "sha256": "6dfa5f0263e1907ed897e4bbc5523d8416de540010bd8c00c2e881ba16aaba0a"
+    },
+    {
+      "path": "role-prototypes/social/spec-data.js",
+      "bytes": 53490,
+      "sha256": "163faaac8b29e2fc0ac90b294bb6ae921e43c634f36bd5f5240d96a7334bcc70"
+    },
+    {
+      "path": "role-prototypes/social/spec-sections.json",
+      "bytes": 54681,
+      "sha256": "72b776c2f62ec4c77b035e080ccf62055bdc95fe0ae461ef492789d50ccc486c"
+    },
+    {
+      "path": "role-prototypes/social/页面交互与玩家复审.md",
+      "bytes": 2516,
+      "sha256": "296a7cbabcbc8f003e5097c42e27876551884135247e742f1d0cef117952cf11"
+    },
+    {
+      "path": "role-prototypes/specs-markdown-2026-09-27/CAPTAIN.md",
+      "bytes": 45294,
+      "sha256": "b7b1b62a30000797f20390aa809898847e580918cbef04b929e6ee2824fde3eb"
+    },
+    {
+      "path": "role-prototypes/specs-markdown-2026-09-27/CENTRAL_BANK.md",
+      "bytes": 73133,
+      "sha256": "36019b179fa6d159bae2eb7f8652d2571ffe9c49aa1547f619da20ddb56cc353"
+    },
+    {
+      "path": "role-prototypes/specs-markdown-2026-09-27/FINANCE.md",
+      "bytes": 71798,
+      "sha256": "6152e2c87a5545e1c354c8a6dbe8b948bbfcb3d396ef54624d9326d0bc1b8385"
+    },
+    {
+      "path": "role-prototypes/specs-markdown-2026-09-27/INDUSTRY.md",
+      "bytes": 90680,
+      "sha256": "ccfcfa93a0cc281bb9a25d6f75a97897bb4612338a530e3292fc03782c310dee"
+    },
+    {
+      "path": "role-prototypes/specs-markdown-2026-09-27/SHA256.json",
+      "bytes": 509,
+      "sha256": "d7f7dfa79d106261bb51c6363048d909f1a2fdef493a516f9936417ab4772e96"
+    },
+    {
+      "path": "role-prototypes/specs-markdown-2026-09-27/SOCIAL.md",
+      "bytes": 70104,
+      "sha256": "1a2b1b5d7c9d665fdd3f5f533fc24e948993395cab006e12a962f45b06954a11"
+    },
+    {
+      "path": "role-prototypes/specs-markdown-2026-09-27/TRADE.md",
+      "bytes": 78010,
+      "sha256": "2fd32bb9c644289e58790f3d999275e250287bad5b50c50abe4de937f2d119b9"
+    },
+    {
+      "path": "role-prototypes/trade/action-coverage.js",
+      "bytes": 11995,
+      "sha256": "425aea1ab6bce41349f458163ea4fc2287ba7ce3da586562b7dd1e83ac6520d4"
+    },
+    {
+      "path": "role-prototypes/trade/action-coverage.json",
+      "bytes": 13456,
+      "sha256": "ba75b2c63c12de28a20492f0a34f97cd0ade6f0ec4fd36ba90576ef7fdcc3836"
+    },
+    {
+      "path": "role-prototypes/trade/cases.js",
+      "bytes": 11541,
+      "sha256": "d4627d6b9d20ffbd9c7993eae06d121f4b3db16800181cb26b1fdda97d46753a"
+    },
+    {
+      "path": "role-prototypes/trade/functions.png",
+      "bytes": 108024,
+      "sha256": "197814cbf4ffb26f5c75fb02fd5ba2968ff88aa7da891797342301bf3dccf9aa"
+    },
+    {
+      "path": "role-prototypes/trade/home.png",
+      "bytes": 1176185,
+      "sha256": "1c67cf6b7f5e50ed4cd58b7dcc2d4dbf82e6e88ef4ed84301eae5b4f95f9b159"
+    },
+    {
+      "path": "role-prototypes/trade/index.html",
+      "bytes": 768,
+      "sha256": "c90ea5800505f897e8c6bcd5e9373ffa85fd9130edc02f943207fadc62a91ea9"
+    },
+    {
+      "path": "role-prototypes/trade/mobile.png",
+      "bytes": 391547,
+      "sha256": "3798ea658b23b07eda75742adbd15735cf968058902e1c2a8f4d7faa7051787b"
+    },
+    {
+      "path": "role-prototypes/trade/original-gameplay-extract.txt",
+      "bytes": 120667,
+      "sha256": "aedea8503e0664730311932689e4c971ee50f1261d9f989a1fbc9c53ff70313f"
+    },
+    {
+      "path": "role-prototypes/trade/source-extract.txt",
+      "bytes": 59405,
+      "sha256": "000ad42ca2a88c0e7e31a876f7858547d16ea8e92f646d72d4bba2fdd7e24054"
+    },
+    {
+      "path": "role-prototypes/trade/source-provenance.json",
+      "bytes": 239,
+      "sha256": "fe8263ca5991dd9423246a50b214da1af1146cc047969a4629b4311263061ad4"
+    },
+    {
+      "path": "role-prototypes/trade/spec-data.js",
+      "bytes": 61286,
+      "sha256": "44daa97058c445ef0cb12836fd03c76f6d527b25606fca2a78a865c6539c8a80"
+    },
+    {
+      "path": "role-prototypes/trade/spec-sections.json",
+      "bytes": 62213,
+      "sha256": "69e84362a212e17bf8b761abc3a18e99600e07a65d480071e1f15f008b5f5f3d"
+    },
+    {
+      "path": "role-prototypes/trade/trade.js",
+      "bytes": 16880,
+      "sha256": "4cdc0f0a9ecc2a5a9976cb446e4c56a7baa14cf8777ea4ed2cad509836eec9d5"
+    },
+    {
+      "path": "role-prototypes/trade/页面交互与玩家复审.md",
+      "bytes": 2491,
+      "sha256": "44799512fe5b5dcb4efc1f1c29b482309f3be67be1216db66ef8543be0261e74"
+    },
+    {
+      "path": "role-prototypes/v3/build_schema.py",
+      "bytes": 55514,
+      "sha256": "7f4ae60a7b28446807e49a184e477e0901ffd06e89bbee4ef939c62f72df8693"
+    },
+    {
+      "path": "role-prototypes/v3/catalog.js",
+      "bytes": 598861,
+      "sha256": "7fae7dc4d7bdac9eca4c7cdce30b040a17da59a4d76fe06e2d29ce8f1a65c63f"
+    },
+    {
+      "path": "role-prototypes/v3/catalog.json",
+      "bytes": 867751,
+      "sha256": "b575ada13b1adc5fc368067ad577b2f1df78f3a2f4b205ca8e81b3c14ba51bf5"
+    },
+    {
+      "path": "role-prototypes/v3/preserved.json",
+      "bytes": 225,
+      "sha256": "e9d2123c7fe0a8c0b9c843ac8174410e6b5cf32203d4641efff79c5f1a165b11"
+    },
+    {
+      "path": "role-prototypes/v3/previous-version.zip",
+      "bytes": 44862734,
+      "sha256": "cf34f88573ce703e7dab726fbdea213027d3b56d2c0a4c2b78eaf11f7d650880"
+    },
+    {
+      "path": "role-prototypes/v3/页面交互与玩家复审.md",
+      "bytes": 4208,
+      "sha256": "e91818f9e88e61e8ce3050401a6652a47bda99ffc3e728708eec6453a99242b0"
+    },
+    {
+      "path": "role-prototypes/verify-central-bank.cjs",
+      "bytes": 10494,
+      "sha256": "7427467aea01fddb07b99c93d37f5439b0e9d4743b33da0e966fdae8f39685e6"
+    },
+    {
+      "path": "role-prototypes/verify-next-roles.cjs",
+      "bytes": 9538,
+      "sha256": "8da16841afc9c9c413bb5a8cd1254bdd2f249b4f7f757a5d738d38f491e4a26f"
+    },
+    {
+      "path": "role-prototypes/verify-playable-v2.cjs",
+      "bytes": 11403,
+      "sha256": "6416366b37993ef87719fcb64c37281d3de0be2a7cff4a3ea61c2d13efb4ef26"
+    },
+    {
+      "path": "role-prototypes/verify.cjs",
+      "bytes": 6400,
+      "sha256": "a85245bcd6cf31dbd601b98e866451fdaefaceaed2efa56f77c0ac0d36e5b4ec"
+    },
+    {
+      "path": "role-prototypes/后三职位_功能核对与实现边界.md",
+      "bytes": 10979,
+      "sha256": "d1f1eb858cc10e82b13b14cbe6e87e80deda96ed43482670e11f18035c63ad4b"
+    },
+    {
+      "path": "role-prototypes/游戏体验复审_V2.md",
+      "bytes": 3442,
+      "sha256": "6ae04f6e50b467c1a194790f443bfe69158aae3a55267a6d07e24e4085782499"
+    },
+    {
+      "path": "role-prototypes/职位游戏设计工作流.md",
+      "bytes": 1523,
+      "sha256": "c923256d74c1c2228461b6cfcee94bfe9583c680ad774b34a98bd61cf38673b6"
+    }
+  ],
+  "fileCount": 860
+}

@@ -27,3 +27,6 @@ apps/world-web/src/map-lab/maritime-zones.json
 artifacts/world-geography/
 artifacts/world-balanced-candidate-v1/
 docs/reports/V25.1/
+# Preserve the hash-verified owner-selected UI runtime files without rewriting them.
+apps/world-web/public/
+artifacts/ui-authority/

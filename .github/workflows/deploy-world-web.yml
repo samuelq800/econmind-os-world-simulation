@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - codex/d-v2-world-command-brief
+      - main
     paths:
       - .github/workflows/deploy-world-web.yml
       - apps/world-web/**

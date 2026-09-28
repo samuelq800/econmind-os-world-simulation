@@ -9,6 +9,7 @@ const deploymentWorkflow = readFileSync(
   '.github/workflows/deploy-world-web.yml',
   'utf8',
 );
+const landingPage = readFileSync('apps/world-web/index.html', 'utf8');
 
 describe('public World preview deployment', () => {
   it('keeps the runtime landing page isolated while linking to the command preview', () => {
@@ -25,7 +26,10 @@ describe('public World preview deployment', () => {
     expect(viteConfig).toContain("resolve(worldWebRoot, 'command.html')");
     expect(viteConfig).toContain("'/econmind-os-world-simulation/'");
     expect(deploymentWorkflow).toContain('workflow_dispatch:');
-    expect(deploymentWorkflow).toContain('codex/d-v2-world-command-brief');
+    expect(deploymentWorkflow).toContain('      - main');
+    expect(landingPage).toContain(
+      'season1-immersive/?role=finance&amp;country=01#country',
+    );
     expect(deploymentWorkflow).toContain(
       'pnpm --filter @econmind/world-web build',
     );

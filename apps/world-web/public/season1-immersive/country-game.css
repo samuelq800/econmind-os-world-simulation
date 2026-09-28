@@ -1,0 +1,126 @@
+/* Country entrances reuse the illustrated map, parchment HUD and physical controls of the reference. */
+body.country-map-home{background:#143e3e;font-family:Georgia,'Songti SC','STSong',serif}.country-map-home #game{display:block!important}.country-map-home #overlay{display:none}.country-map-home #world-clock{display:none!important}.country-game{position:relative;isolation:isolate;min-height:max(930px,100dvh);overflow:hidden;color:#243f3b;padding:28px 32px 245px}.national-world,.national-light{position:absolute;inset:0;z-index:-2}.national-world{background-image:var(--national-art);background-size:cover;background-position:center;filter:saturate(.95) brightness(.97)}.national-light{z-index:-1;background:linear-gradient(90deg,#0c343d9c,transparent 64%),linear-gradient(0deg,#123c438c,transparent 50%);pointer-events:none}.national-hud{position:relative;z-index:2;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:start}.national-identity{display:flex;align-items:center;gap:15px;padding:15px 24px 15px 17px;border-radius:15px 55px 55px 15px;background:#fff8df;box-shadow:0 5px 18px #12382f35}.national-identity .brand-badge-mini{width:45px;height:45px}.national-identity small{font-size:9px;letter-spacing:1.5px;display:block;margin-bottom:7px}.national-identity strong{font-size:20px;font-weight:400}.national-atlas{justify-self:end;text-decoration:none;padding:13px 17px;background:#fff8dfed;border:1px solid #fbefbf;border-radius:8px;font-size:12px;color:#244842;margin-top:12px}.national-time{min-width:235px;background:#204e50ef;border:1px solid #f3e1ac55;color:#fff9df;text-align:right;padding:12px 18px;border-radius:14px}.national-time small{display:block;letter-spacing:1px;font-size:9px}.national-time strong{font-size:25px;display:block;margin:5px 0;font-weight:400}.national-time span{font-size:9px;color:#d1dec7}.national-resources{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);padding:14px 6px;background:#fff7dded;border-radius:14px;box-shadow:0 8px 35px #0b333839;backdrop-filter:blur(5px)}.national-resources>div{padding:0 22px;border-right:1px solid #b3b39a80}.national-resources>div:last-child{border:0}.national-resources small{font-size:11px;letter-spacing:1.2px;display:block;color:#627268;margin-bottom:8px}.national-resources strong{font-size:24px;font-weight:400}.national-resources em{font-style:normal;font-size:12px}.national-mission{margin-top:33px;padding-left:20px;border-left:4px solid #f8d78c;max-width:470px;color:#fffbe4;text-shadow:0 2px 14px #062e35}.national-mission>small{letter-spacing:2.4px;font-size:12px}.national-mission h1{font-size:39px;line-height:1.14;font-weight:400;margin:14px 0 17px;letter-spacing:-.5px}.national-mission p{font-size:14px;line-height:1.8;max-width:405px;margin:0 0 16px}.national-progress{height:6px;max-width:370px;background:#fff7d749;border-radius:8px;margin:10px 0 12px;overflow:hidden}.national-progress i{display:block;height:100%;background:#ffd57d;transition:width .15s}.national-mission>span{font-size:12px}.national-tools{position:absolute;right:32px;top:240px;display:flex;flex-direction:column;gap:13px}.national-tools button{width:48px;height:48px;border-radius:50%;background:#fff8dd;border:1px solid #e2c88e;color:#254846;font-size:24px;box-shadow:0 4px 0 #cbb67566}.national-play{position:relative;z-index:2;margin-top:30px;background:linear-gradient(135deg,#285a50ed,#24524ae6);border:1px solid #d9dfab8c;border-radius:18px;padding:20px;color:#fff5ce;width:330px;box-shadow:0 12px 30px #062f3b44;backdrop-filter:blur(5px)}.national-play-heading{display:flex;align-items:center;justify-content:space-between;color:#ffdf91;gap:8px}.national-play-heading small{font-size:11px;letter-spacing:1px}.national-play-heading button{border:1px solid #e3d7a270;border-radius:5px;background:#214940;color:#fff8d1;padding:6px 9px;font-size:10px}.national-play h2{font-size:18px;font-weight:400;margin:10px 0 17px}.national-tokens{display:flex;gap:8px;flex-wrap:wrap;min-height:43px}.national-tokens button{width:42px;height:42px;border:3px solid #f9d78d;border-radius:50%;background:radial-gradient(circle at 35% 25%,#ffedb0,#e8b55e 75%);color:#604920;box-shadow:0 4px 0 #b58234,inset 0 0 0 2px #f6df9d;transition:transform .14s,opacity .14s;padding:0;font-size:12px;touch-action:manipulation}.national-tokens button:hover{transform:translateY(-3px)}.national-tokens button.allocated{opacity:.42;transform:translateY(3px);box-shadow:none}.national-slider{display:flex;align-items:center;gap:12px;margin:18px 0 12px}.national-slider button{background:#fff7db;color:#305049;border:1px solid #cab274;border-radius:5px;width:28px;height:28px;flex-shrink:0}.national-slider input{width:100%;accent-color:#edcc7a;min-width:0}.national-reading strong{font-size:24px;font-weight:400;display:block}.national-reading small{display:block;font-size:10px;color:#d8e7ca;margin-top:6px}.national-lesson{font-size:11px;line-height:1.6;color:#d4e5ca;margin:13px 0}.national-confirm{display:flex;justify-content:space-between;gap:15px;width:100%;border:2px solid #d4c99d;border-radius:9px;padding:13px 15px;background:#fff6d6;color:#2b4d45;box-shadow:0 3px 0 #b5aa7b;font-size:13px}.national-confirm:disabled{opacity:.5}.national-confirm.sealed{animation:allocation-seal .24s ease-out}.national-save-status{display:block;font-size:9px;color:#c5d8bb;margin-top:11px}.national-destination{position:absolute;left:53%;top:58%;padding:12px 17px;border:1px solid #f4d58c;background:#254e47ed;border-radius:10px;box-shadow:0 0 0 5px #edce7540;color:#fff5d5;max-width:210px}.national-destination:before{content:'';position:absolute;width:10px;height:10px;border:2px solid #ffe9aa;background:#295148;left:50%;top:-20px;rotate:45deg;box-shadow:0 0 0 6px #ffe8a738}.national-destination>span{font-size:9px;color:#f8d58b;display:block;letter-spacing:1px}.national-destination strong{display:block;font-size:14px;font-weight:400;margin:5px 0}.national-destination small{font-size:9px;opacity:.8}.national-buildings{position:absolute;right:18%;top:38%;display:flex;flex-direction:column;align-items:center;gap:27px}.national-building{display:flex;flex-direction:column;align-items:center;background:none;border:0;color:#254a41;padding:0;max-width:155px}.national-building>span{width:65px;height:65px;display:grid;place-items:center;background:#fff8d9;border:1px solid #faf0c1;border-radius:25px 25px 25px 5px;transform:rotate(-5deg);box-shadow:0 5px 0 #c1b08288;font-size:34px;transition:transform .15s}.national-building:hover>span{transform:rotate(2deg) translateY(-5px)}.national-building strong{background:#fff6dce8;padding:8px 10px;font-size:12px;font-weight:400;text-align:center;margin-top:9px;border-radius:4px}.national-bottom{position:absolute;bottom:46px;left:32px;right:32px;display:flex;gap:22px;align-items:end}.national-hand{display:flex;gap:15px;flex:1;max-width:1020px}.national-card{width:33.333%;height:178px;position:relative;padding:18px 22px;text-align:left;background:#fff6d9;border:1px solid #fff6d2;border-radius:16px;color:#244a41;box-shadow:0 9px 0 #c0ad70,0 18px 25px #06353855;transform:rotate(-2deg);transition:transform .16s}.national-card:nth-child(2){transform:translateY(-9px) rotate(1deg);background:#ffedb7}.national-card:nth-child(3){transform:rotate(2deg)}.national-card:hover{transform:translateY(-15px)}.national-card>small{position:absolute;right:16px;top:12px;color:#80927c;font-size:10px}.national-card>span{font-size:34px;display:block;margin:5px 0 14px}.national-card h3{font-size:21px;font-weight:400;margin:0 0 8px}.national-card p{font-size:11px;line-height:1.5;color:#71816f;margin:0}.national-world-status{margin-left:auto;width:138px;flex-shrink:0;min-height:123px;border:3px solid #edca76;background:#27594df2;border-radius:21px;color:#fff3ce;padding:14px 10px}.national-world-status>span{font-size:33px;display:block}.national-world-status strong{display:block;font-weight:400;font-size:14px;margin:7px 0}.national-world-status small{font-size:10px}.national-edition{position:absolute;bottom:13px;left:34px;font-size:9px;color:#d5ece1;letter-spacing:.2px;max-width:calc(100% - 150px)}.national-drawer{position:absolute;z-index:8;top:185px;right:28px;width:min(570px,calc(100% - 56px));max-height:calc(100% - 245px);overflow:auto;border:1px solid #e2c78e;border-radius:15px;padding:20px;background:#f9f1dbeF;box-shadow:0 15px 60px #0c323da6;backdrop-filter:blur(15px)}.national-drawer[hidden]{display:none}.national-drawer-head{display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid #7c967766;padding-bottom:12px;margin-bottom:16px}.national-drawer-head h2{font-size:24px;font-weight:400;margin:0}.national-drawer-head button{background:#244d46;color:#fff1c4;border:0;border-radius:50%;width:32px;height:32px;font-size:21px}.national-site-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}.national-site-list button{background:#fff9e8;border:1px solid #bbaa72;border-radius:7px;text-align:left;color:#294a42;padding:13px}.national-site-list h3{font-size:17px;font-weight:400;margin:9px 0}.national-site-list :is(small,p,span){font-size:10px;line-height:1.6}.national-record{display:grid;gap:8px;padding:14px 0;border-bottom:1px solid #8d9b7844}.national-record strong{font-size:21px;font-weight:400}.national-record :is(small,span),.national-drawer-note{font-size:11px}.country-game button:focus-visible,.country-game a:focus-visible,.country-game input:focus-visible{outline:3px solid #ffd26f;outline-offset:4px}@keyframes allocation-seal{50%{transform:scale(.96);filter:brightness(1.2)}}
+@media(min-width:1600px){.national-world{background-position:center 57%}.country-game{padding-left:48px;padding-right:48px}.national-mission{max-width:540px}.national-mission h1{font-size:48px}.national-play{width:350px}.national-buildings{right:23%}.national-destination{left:51%}.national-bottom{left:48px;right:48px}}
+@media(max-width:1000px){.country-game{min-height:max(1090px,100dvh);padding:22px 23px 235px}.national-hud{gap:14px;grid-template-columns:1fr auto}.national-identity{max-width:330px;padding:13px 19px 13px 13px}.national-identity strong{font-size:19px}.national-atlas{position:absolute;right:0;top:85px;z-index:3;font-size:10px;padding:7px 10px}.national-time{min-width:185px}.national-time strong{font-size:22px}.national-resources{margin-top:26px}.national-resources strong{font-size:20px}.national-resources small{font-size:10px}.national-mission{margin-top:28px;max-width:420px}.national-mission h1{font-size:38px}.national-play{width:300px;margin-top:24px}.national-buildings{right:16%;top:44%;gap:27px}.national-tools{top:280px;right:23px}.national-destination{left:54%;top:73%}.national-bottom{left:23px;right:23px;gap:15px}.national-hand{gap:10px}.national-card{height:165px;padding:17px 15px}.national-card h3{font-size:18px}.national-world-status{width:105px;min-height:112px}.national-world-status strong{font-size:12px}}
+@media(max-width:600px){.country-game{min-height:1220px;padding:14px 14px 215px}.national-hud{gap:11px;grid-template-columns:1fr auto}.national-identity{padding:10px 12px 10px 9px;gap:8px;border-radius:12px 30px 30px 12px}.national-identity .brand-badge-mini{width:30px;height:30px}.national-identity strong{font-size:13px;line-height:1.3;display:block;max-width:133px}.national-identity small{font-size:7px;letter-spacing:.5px;margin-bottom:5px}.national-time{min-width:130px;padding:10px 9px;border-radius:10px}.national-time small{font-size:7px;letter-spacing:0}.national-time strong{font-size:15px}.national-time span{font-size:7px}.national-atlas{top:77px;padding:5px 7px;font-size:9px}.national-resources{margin-top:26px;padding:13px 0;border-radius:10px}.national-resources>div{padding:0 9px;min-width:0}.national-resources small{font-size:9px;letter-spacing:0;min-height:23px;line-height:1.3}.national-resources strong{font-size:15px;overflow-wrap:anywhere}.national-resources em{font-size:9px;display:block;margin-top:4px}.national-mission{padding-left:12px;max-width:calc(100% - 48px);margin-top:25px}.national-mission>small{font-size:9px;letter-spacing:1px}.national-mission h1{font-size:30px;max-width:300px;margin:12px 0}.national-mission p{font-size:12px;line-height:1.6}.national-mission>span{font-size:10px}.national-tools{right:14px;top:240px;gap:10px}.national-tools button{width:35px;height:35px;font-size:20px}.national-play{width:calc(100% - 118px);max-width:300px;padding:13px;margin-top:25px;border-radius:12px;min-height:350px}.national-play h2{font-size:16px}.national-play-heading small{font-size:9px}.national-play-heading button{font-size:8px;padding:5px}.national-tokens{gap:7px;max-width:200px}.national-tokens button{width:32px;height:32px;font-size:9px;border-width:2px}.national-slider{gap:7px}.national-slider button{width:24px;height:24px}.national-reading strong{font-size:20px}.national-reading small{font-size:9px;line-height:1.4}.national-lesson{font-size:10px}.national-confirm{font-size:11px;padding:10px}.national-save-status{font-size:8px}.national-buildings{right:15px;top:46%;gap:26px;max-width:100px}.national-building{max-width:95px}.national-building>span{width:53px;height:53px;font-size:27px;border-radius:20px 20px 20px 4px}.national-building strong{font-size:10px;padding:7px;line-height:1.3}.national-destination{left:auto;right:16px;top:77%;max-width:180px;padding:9px 12px}.national-destination strong{font-size:12px}.national-destination small{font-size:8px}.national-bottom{bottom:46px;left:13px;right:13px;gap:7px}.national-hand{gap:7px}.national-card{height:140px;padding:13px 9px;border-radius:10px;box-shadow:0 6px 0 #c0ad70,0 10px 18px #123c3d44}.national-card>span{font-size:25px;margin:8px 0 13px}.national-card h3{font-size:13px;line-height:1.2;min-height:31px;margin-bottom:5px}.national-card p{font-size:8px}.national-card>small{font-size:8px;right:8px;top:7px}.national-world-status{display:none}.national-edition{left:15px;bottom:9px;max-width:calc(100% - 105px);font-size:7px;line-height:1.5}.national-drawer{top:180px;right:12px;width:calc(100% - 24px);padding:16px;max-height:770px}.national-drawer-head h2{font-size:21px}.national-site-list h3{font-size:15px}}
+@media(prefers-reduced-motion:reduce){.country-game *{animation:none!important;transition:none!important}}
+
+.national-site-pins{position:absolute;inset:0;pointer-events:none}.national-site-pins button{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;width:31px;height:31px;border-radius:50%;border:1px solid #fff0b1;background:#234e49e8;color:#fff6cf;font:11px Georgia,serif;box-shadow:0 0 0 4px #f1d98133}.national-site-pins button.selected{background:#ffdc87;color:#29493d}.national-site-pins button[hidden],.national-destination[hidden]{display:none}.national-destination{transform:translate(-50%,25px);right:auto!important;pointer-events:auto}.national-destination:before{display:none}.national-buildings{z-index:1}.national-play{z-index:2}
+.country-map-home #language-switch{position:absolute;left:32px;right:auto;top:112px;bottom:auto;z-index:5}.national-mission{position:relative;z-index:1}
+@media(max-width:1000px){.country-map-home #language-switch{left:23px;top:112px}}
+@media(max-width:600px){.country-map-home #language-switch{left:15px;top:110px}}
+
+/* The lobby's clipped decorative container must not lock the document when used on body. */
+html:has(body.country-map-home){height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:auto}
+body.country-map-home{width:100%;height:auto;min-height:100dvh;max-height:none;margin:0;padding:0;overflow:visible}
+.country-map-home #game{height:auto;max-height:none;overflow:visible}
+.country-map-home .national-drawer{overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
+@media(max-width:600px){.national-hud{grid-template-columns:minmax(0,1fr) auto}.national-identity,.national-identity>div{min-width:0}.national-identity strong{overflow-wrap:anywhere}}
+@media(max-width:360px){.national-time{min-width:118px}.national-identity{padding-right:9px;gap:6px}.national-identity strong{font-size:12px}.national-identity small{font-size:6px}.national-identity .brand-badge-mini{width:27px;height:27px}}
+
+/* Desktop game composition: one landscape viewport, with the map between two side panels. */
+@media(min-width:1001px){
+ .country-game{height:100dvh;min-height:680px;padding:18px 26px 170px;box-sizing:border-box}
+ .national-hud{gap:12px;grid-template-columns:auto 1fr auto}
+ .national-identity{padding:10px 20px 10px 12px;gap:12px}
+ .national-identity .brand-badge-mini{width:36px;height:36px}
+ .national-identity strong{font-size:18px}
+ .national-identity small{margin-bottom:4px}
+ .national-time{padding:8px 15px;min-width:210px}
+ .national-time strong{font-size:21px;margin:3px 0}
+ .national-atlas{margin:6px 0 0;padding:10px 14px}
+ .national-resources{padding:10px 6px}
+ .national-resources small{margin-bottom:5px;font-size:10px}
+ .national-resources strong{font-size:21px}
+ .country-map-home #language-switch{left:auto;right:270px;top:64px}
+ .national-mission{position:absolute;left:28px;top:183px;margin:0;width:31%;max-width:430px;padding-left:17px;box-sizing:border-box}
+ .national-mission h1{font-size:clamp(29px,2.7vw,44px);margin:12px 0}
+ .national-mission p{font-size:13px;line-height:1.65;margin-bottom:12px}
+ .national-mission>small{font-size:10px;letter-spacing:1.6px}
+ .national-play{position:absolute;top:183px;right:90px;width:350px;margin:0;padding:14px;box-sizing:border-box}
+ .national-play h2{font-size:17px;margin:8px 0 12px}
+ .national-play-heading small{font-size:10px}
+ .national-tokens{gap:5px;min-height:30px;flex-wrap:nowrap}
+ .national-tokens button{width:26px;height:26px;flex-shrink:0;border-width:2px;font-size:9px}
+ .national-slider{margin:14px 0 10px;gap:10px}
+ .national-reading strong{font-size:22px}
+ .national-reading small{margin-top:4px;line-height:1.4}
+ .national-lesson{font-size:10px;line-height:1.5;margin:10px 0}
+ .national-confirm{padding:10px 12px;font-size:12px}
+ .national-save-status{margin-top:8px}
+ .national-tools{top:183px;right:26px;gap:12px}
+ .national-tools button{width:43px;height:43px;font-size:22px}
+ .national-buildings{left:34px;right:auto;top:auto;bottom:177px;flex-direction:row;align-items:start;gap:28px}
+ .national-building{width:105px;max-width:105px}
+ .national-building>span{width:49px;height:49px;font-size:27px;border-radius:19px 19px 19px 5px}
+ .national-building strong{font-size:11px;padding:6px 8px;margin-top:8px}
+ .national-bottom{left:28px;right:28px;bottom:35px;gap:24px}
+ .national-hand{max-width:none;gap:18px}
+ .national-card{height:112px;padding:18px 18px 12px 66px;box-sizing:border-box;transform:rotate(-1deg)}
+ .national-card:nth-child(2){transform:translateY(-4px) rotate(.5deg)}
+ .national-card:nth-child(3){transform:rotate(1deg)}
+ .national-card>span{position:absolute;left:19px;top:25px;font-size:29px;margin:0}
+ .national-card h3{font-size:19px;margin:6px 0 8px}
+ .national-card p{font-size:11px;line-height:1.4}
+ .national-card:hover{transform:translateY(-8px)}
+ .national-world-status{width:132px;min-height:105px;padding:9px 10px;box-sizing:border-box}
+ .national-world-status>span{font-size:24px}
+ .national-world-status strong{font-size:13px;margin:4px 0}
+ .national-edition{left:28px;bottom:10px}
+ .national-drawer{position:fixed;top:164px;bottom:25px;max-height:none;right:26px}
+}
+@media(min-width:1001px) and (min-height:850px){
+ .national-mission{top:205px}
+ .national-play{top:205px;padding:20px;width:370px}
+ .national-play h2{margin:12px 0 18px;font-size:20px}
+ .national-tokens button{width:28px;height:28px}
+ .national-lesson{font-size:11px;margin:16px 0}
+ .national-buildings{bottom:206px;gap:42px}
+ .national-building>span{width:62px;height:62px;font-size:32px}
+ .national-card{height:136px;padding-top:24px}
+ .national-card>span{top:36px}
+ .national-card h3{font-size:23px}
+}
+@media(min-width:1001px){
+ .national-identity,.national-time,.national-resources{line-height:1.3}
+ .country-game{min-height:620px}
+}
+@media(min-width:1001px) and (max-height:760px){
+ .national-mission,.national-play{top:160px}
+ .national-mission h1{font-size:30px}
+ .national-play{padding:12px;line-height:1.35}
+ .national-play h2{margin:7px 0 10px}
+ .national-slider{margin:11px 0 8px}
+ .national-reading strong{font-size:21px}
+ .national-lesson{margin:8px 0}
+ .national-confirm{padding:9px 12px}
+ .national-save-status{margin-top:6px}
+ .national-buildings{bottom:159px}
+ .national-bottom{bottom:32px}
+ .national-card{height:100px;padding-top:13px}
+ .national-card h3{font-size:18px}
+ .national-world-status{min-height:95px}
+ .national-tools{top:160px}
+}
+@media(min-width:1001px){
+ .national-time small,.national-time span{line-height:1.3}
+ .national-time strong{line-height:1.2}
+ .national-resources small,.national-resources strong,.national-resources em{line-height:1.3}
+}
+@media(min-width:1001px){
+ .national-tokens{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;justify-items:start}
+ .country-game{min-height:660px}
+}
+@media(min-width:1001px) and (max-height:760px){
+ .national-mission,.national-play,.national-tools{top:190px}
+ .national-mission h1{font-size:28px;margin:9px 0}
+ .national-mission p{font-size:12px;line-height:1.5}
+ .national-play{padding:10px;line-height:1.2}
+ .national-play h2{margin:6px 0 8px}
+ .national-tokens{gap:3px;min-height:24px}
+ .national-tokens button{width:24px;height:24px}
+ .national-slider{margin:8px 0 6px}
+ .national-reading strong{font-size:20px}
+ .national-lesson{margin:6px 0}
+ .national-confirm{padding:8px 12px}
+}
