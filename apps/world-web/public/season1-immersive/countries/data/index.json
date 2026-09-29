@@ -1,1 +1,1259 @@
-[{"id":"visual-territory-01","number":"01","name":"Avenor","scene":"assets/scenes/01.png","areaKm2":1267965.565,"population":176666984,"facilities":5,"resources":4,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-02","visual-territory-04","visual-territory-05"]},{"id":"visual-territory-02","number":"02","name":"Brelis","scene":"assets/scenes/02.png","areaKm2":1969691.231,"population":276124585,"facilities":6,"resources":4,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-01","visual-territory-05"]},{"id":"visual-territory-03","number":"03","name":"Caedon","scene":"assets/scenes/03.png","areaKm2":2699008.222,"population":510403319,"facilities":9,"resources":5,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-04","visual-territory-06","visual-territory-07","visual-territory-08"]},{"id":"visual-territory-04","number":"04","name":"Darsin","scene":"assets/scenes/04.png","areaKm2":3187415.875,"population":496361742,"facilities":8,"resources":5,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-01","visual-territory-03","visual-territory-05","visual-territory-08"]},{"id":"visual-territory-05","number":"05","name":"Ellovar","scene":"assets/scenes/05.png","areaKm2":2227484.8140000002,"population":322591038,"facilities":7,"resources":4,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-01","visual-territory-02","visual-territory-04","visual-territory-08"]},{"id":"visual-territory-06","number":"06","name":"Faren","scene":"assets/scenes/06.png","areaKm2":4043570.603,"population":324546526,"facilities":7,"resources":5,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-03","visual-territory-07","visual-territory-12","visual-territory-14"]},{"id":"visual-territory-07","number":"07","name":"Galdra","scene":"assets/scenes/07.png","areaKm2":2138121.863,"population":333976824,"facilities":7,"resources":4,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-03","visual-territory-06","visual-territory-08","visual-territory-14"]},{"id":"visual-territory-08","number":"08","name":"Hethen","scene":"assets/scenes/08.png","areaKm2":2654944.4620000003,"population":354009959,"facilities":7,"resources":5,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-03","visual-territory-04","visual-territory-05","visual-territory-07"]},{"id":"visual-territory-09","number":"09","name":"Istrel","scene":"assets/scenes/09.png","areaKm2":2638472.029,"population":117946631,"facilities":4,"resources":5,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-10","visual-territory-11","visual-territory-19","visual-territory-20"]},{"id":"visual-territory-10","number":"10","name":"Jorun","scene":"assets/scenes/10.png","areaKm2":2692419.249,"population":63926125,"facilities":3,"resources":5,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-09","visual-territory-11"]},{"id":"visual-territory-11","number":"11","name":"Keldan","scene":"assets/scenes/11.png","areaKm2":1944982.581,"population":58955987,"facilities":3,"resources":4,"coastal":true,"climate":"内陆荒漠","neighbours":["visual-territory-09","visual-territory-10","visual-territory-12","visual-territory-13","visual-territory-20","visual-territory-21"]},{"id":"visual-territory-12","number":"12","name":"Lumer","scene":"assets/scenes/12.png","areaKm2":3363670.912,"population":105921711,"facilities":4,"resources":5,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-06","visual-territory-11","visual-territory-13","visual-territory-14"]},{"id":"visual-territory-13","number":"13","name":"Meros","scene":"assets/scenes/13.png","areaKm2":3276778.8260000004,"population":35431598,"facilities":2,"resources":5,"coastal":false,"climate":"内陆荒漠","neighbours":["visual-territory-11","visual-territory-12","visual-territory-14","visual-territory-15","visual-territory-21","visual-territory-22","visual-territory-23"]},{"id":"visual-territory-14","number":"14","name":"Nadrin","scene":"assets/scenes/14.png","areaKm2":2593172.837,"population":193058826,"facilities":5,"resources":5,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-06","visual-territory-07","visual-territory-12","visual-territory-13","visual-territory-15"]},{"id":"visual-territory-15","number":"15","name":"Orelis","scene":"assets/scenes/15.png","areaKm2":3570811.7630000003,"population":339123585,"facilities":7,"resources":5,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-13","visual-territory-14","visual-territory-23","visual-territory-24"]},{"id":"visual-territory-16","number":"16","name":"Paryn","scene":"assets/scenes/16.png","areaKm2":3434914.187,"population":459264033,"facilities":8,"resources":5,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-24"]},{"id":"visual-territory-17","number":"17","name":"Quoran","scene":"assets/scenes/17.png","areaKm2":1892682.604,"population":132916537,"facilities":4,"resources":4,"coastal":true,"climate":"地中海式沿岸","neighbours":["visual-territory-19"]},{"id":"visual-territory-18","number":"18","name":"Rassel","scene":"assets/scenes/18.png","areaKm2":1752255.109,"population":47662589,"facilities":2,"resources":4,"coastal":true,"climate":"地中海式沿岸","neighbours":["visual-territory-19","visual-territory-20","visual-territory-26","visual-territory-27"]},{"id":"visual-territory-19","number":"19","name":"Siven","scene":"assets/scenes/19.png","areaKm2":1944158.959,"population":106134098,"facilities":4,"resources":4,"coastal":true,"climate":"地中海式沿岸","neighbours":["visual-territory-09","visual-territory-17","visual-territory-18","visual-territory-20"]},{"id":"visual-territory-20","number":"20","name":"Talan","scene":"assets/scenes/20.png","areaKm2":3266895.3660000004,"population":2146143,"facilities":2,"resources":5,"coastal":false,"climate":"内陆荒漠","neighbours":["visual-territory-09","visual-territory-11","visual-territory-18","visual-territory-19","visual-territory-21","visual-territory-27"]},{"id":"visual-territory-21","number":"21","name":"Uvren","scene":"assets/scenes/21.png","areaKm2":4411317.68,"population":169106762,"facilities":5,"resources":5,"coastal":false,"climate":"温带高山","neighbours":["visual-territory-11","visual-territory-13","visual-territory-20","visual-territory-22","visual-territory-27","visual-territory-28","visual-territory-29"]},{"id":"visual-territory-22","number":"22","name":"Vardis","scene":"assets/scenes/22.png","areaKm2":1903801.497,"population":132438465,"facilities":4,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-13","visual-territory-21","visual-territory-23","visual-territory-29","visual-territory-30"]},{"id":"visual-territory-23","number":"23","name":"Wexar","scene":"assets/scenes/23.png","areaKm2":4548862.5,"population":354391153,"facilities":7,"resources":6,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-13","visual-territory-15","visual-territory-22","visual-territory-24","visual-territory-31"]},{"id":"visual-territory-24","number":"24","name":"Xandor","scene":"assets/scenes/24.png","areaKm2":2161183.27,"population":235530433,"facilities":6,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-15","visual-territory-16","visual-territory-23","visual-territory-31"]},{"id":"visual-territory-25","number":"25","name":"Ysol","scene":"assets/scenes/25.png","areaKm2":1925627.471,"population":97452872,"facilities":3,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-26"]},{"id":"visual-territory-26","number":"26","name":"Zarev","scene":"assets/scenes/26.png","areaKm2":2435861.097,"population":53842157,"facilities":2,"resources":4,"coastal":true,"climate":"冷凉大陆性","neighbours":["visual-territory-18","visual-territory-25","visual-territory-27"]},{"id":"visual-territory-27","number":"27","name":"Adara","scene":"assets/scenes/27.png","areaKm2":3060578.137,"population":115551759,"facilities":4,"resources":5,"coastal":true,"climate":"温带湿润大陆性","neighbours":["visual-territory-18","visual-territory-20","visual-territory-21","visual-territory-26","visual-territory-28"]},{"id":"visual-territory-28","number":"28","name":"Belm","scene":"assets/scenes/28.png","areaKm2":3220772.553,"population":91118281,"facilities":3,"resources":5,"coastal":true,"climate":"冷凉大陆性","neighbours":["visual-territory-21","visual-territory-27","visual-territory-29"]},{"id":"visual-territory-29","number":"29","name":"Corven","scene":"assets/scenes/29.png","areaKm2":3269778.041,"population":99277138,"facilities":4,"resources":5,"coastal":true,"climate":"冷凉大陆性","neighbours":["visual-territory-21","visual-territory-22","visual-territory-28","visual-territory-30"]},{"id":"visual-territory-30","number":"30","name":"Delyra","scene":"assets/scenes/30.png","areaKm2":2714245.223,"population":109027888,"facilities":4,"resources":5,"coastal":true,"climate":"冷凉大陆性","neighbours":["visual-territory-22","visual-territory-29"]},{"id":"visual-territory-31","number":"31","name":"Erdan","scene":"assets/scenes/31.png","areaKm2":2559404.349,"population":141596517,"facilities":4,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-23","visual-territory-24","visual-territory-32"]},{"id":"visual-territory-32","number":"32","name":"Falcor","scene":"assets/scenes/32.png","areaKm2":2414858.745,"population":22478946,"facilities":2,"resources":4,"coastal":true,"climate":"冷凉大陆性","neighbours":["visual-territory-31"]},{"id":"visual-territory-33","number":"33","name":"Gysel","scene":"assets/scenes/33.png","areaKm2":3060166.3260000004,"population":152590063,"facilities":4,"resources":5,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-38","visual-territory-39"]},{"id":"visual-territory-34","number":"34","name":"Harin","scene":"assets/scenes/34.png","areaKm2":3332785.1,"population":217244516,"facilities":5,"resources":5,"coastal":true,"climate":"温带湿润大陆性","neighbours":["visual-territory-35","visual-territory-39","visual-territory-40","visual-territory-41"]},{"id":"visual-territory-35","number":"35","name":"Inovar","scene":"assets/scenes/35.png","areaKm2":3066343.488,"population":193994580,"facilities":5,"resources":5,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-34","visual-territory-36","visual-territory-41"]},{"id":"visual-territory-36","number":"36","name":"Jessa","scene":"assets/scenes/36.png","areaKm2":1941688.094,"population":99086318,"facilities":4,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-35","visual-territory-37","visual-territory-43"]},{"id":"visual-territory-37","number":"37","name":"Koryn","scene":"assets/scenes/37.png","areaKm2":1351974.976,"population":113207534,"facilities":4,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-36","visual-territory-43"]},{"id":"visual-territory-38","number":"38","name":"Lydan","scene":"assets/scenes/38.png","areaKm2":4306305.916999999,"population":324094511,"facilities":7,"resources":5,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-33","visual-territory-39","visual-territory-44","visual-territory-45"]},{"id":"visual-territory-39","number":"39","name":"Mirea","scene":"assets/scenes/39.png","areaKm2":3497921.245,"population":198788623,"facilities":5,"resources":5,"coastal":true,"climate":"地中海式沿岸","neighbours":["visual-territory-33","visual-territory-34","visual-territory-38","visual-territory-40","visual-territory-45"]},{"id":"visual-territory-40","number":"40","name":"Norvak","scene":"assets/scenes/40.png","areaKm2":2104353.374,"population":75857857,"facilities":3,"resources":4,"coastal":true,"climate":"地中海式沿岸","neighbours":["visual-territory-34","visual-territory-39","visual-territory-41","visual-territory-45","visual-territory-46"]},{"id":"visual-territory-41","number":"41","name":"Ostra","scene":"assets/scenes/41.png","areaKm2":2446156.368,"population":186445203,"facilities":5,"resources":4,"coastal":false,"climate":"温带海洋性","neighbours":["visual-territory-34","visual-territory-35","visual-territory-40","visual-territory-46","visual-territory-47"]},{"id":"visual-territory-42","number":"42","name":"Pavan","scene":"assets/scenes/42.png","areaKm2":1688836.24,"population":153671207,"facilities":5,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-43","visual-territory-47"]},{"id":"visual-territory-43","number":"43","name":"Qemra","scene":"assets/scenes/43.png","areaKm2":2000577.044,"population":157559906,"facilities":5,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-36","visual-territory-37","visual-territory-42"]},{"id":"visual-territory-44","number":"44","name":"Ruvan","scene":"assets/scenes/44.png","areaKm2":2899148.2879999997,"population":120112546,"facilities":4,"resources":5,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-38","visual-territory-45","visual-territory-48","visual-territory-49"]},{"id":"visual-territory-45","number":"45","name":"Selka","scene":"assets/scenes/45.png","areaKm2":3178767.847,"population":128974976,"facilities":4,"resources":5,"coastal":true,"climate":"暖温带半干旱草原","neighbours":["visual-territory-38","visual-territory-39","visual-territory-40","visual-territory-44","visual-territory-49"]},{"id":"visual-territory-46","number":"46","name":"Tirren","scene":"assets/scenes/46.png","areaKm2":3165178.09,"population":171814588,"facilities":5,"resources":6,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-40","visual-territory-41","visual-territory-47"]},{"id":"visual-territory-47","number":"47","name":"Ulyss","scene":"assets/scenes/47.png","areaKm2":3784541.5870000003,"population":311448414,"facilities":7,"resources":5,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-41","visual-territory-42","visual-territory-46","visual-territory-52"]},{"id":"visual-territory-48","number":"48","name":"Varos","scene":"assets/scenes/48.png","areaKm2":1636536.264,"population":6373142,"facilities":2,"resources":4,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-44","visual-territory-49"]},{"id":"visual-territory-49","number":"49","name":"Wrenna","scene":"assets/scenes/49.png","areaKm2":2134827.376,"population":139020276,"facilities":4,"resources":4,"coastal":true,"climate":"热带稀树草原","neighbours":["visual-territory-44","visual-territory-45","visual-territory-48","visual-territory-50","visual-territory-51"]},{"id":"visual-territory-50","number":"50","name":"Xyren","scene":"assets/scenes/50.png","areaKm2":2115472.267,"population":27192741,"facilities":2,"resources":4,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-49","visual-territory-51"]},{"id":"visual-territory-51","number":"51","name":"Yara","scene":"assets/scenes/51.png","areaKm2":2084174.644,"population":1019797,"facilities":2,"resources":4,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-49","visual-territory-50"]},{"id":"visual-territory-52","number":"52","name":"Zorin","scene":"assets/scenes/52.png","areaKm2":1607709.506,"population":849031,"facilities":2,"resources":4,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-47"]},{"id":"visual-territory-53","number":"53","name":"Alera","scene":"assets/scenes/53.png","areaKm2":3192769.415,"population":493552369,"facilities":8,"resources":5,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-56","visual-territory-58"]},{"id":"visual-territory-54","number":"54","name":"Brin","scene":"assets/scenes/54.png","areaKm2":4171231.9629999995,"population":576254853,"facilities":9,"resources":5,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-55","visual-territory-58"]},{"id":"visual-territory-55","number":"55","name":"Cassa","scene":"assets/scenes/55.png","areaKm2":1561998.503,"population":262394337,"facilities":6,"resources":4,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-54"]},{"id":"visual-territory-56","number":"56","name":"Doren","scene":"assets/scenes/56.png","areaKm2":3703003.0420000004,"population":139613807,"facilities":4,"resources":5,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-53","visual-territory-57","visual-territory-58"]},{"id":"visual-territory-57","number":"57","name":"Everen","scene":"assets/scenes/57.png","areaKm2":2381502.068,"population":220429446,"facilities":5,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-56","visual-territory-58","visual-territory-59"]},{"id":"visual-territory-58","number":"58","name":"Fenna","scene":"assets/scenes/58.png","areaKm2":3765598.289,"population":613431996,"facilities":9,"resources":5,"coastal":true,"climate":"热带季风","neighbours":["visual-territory-53","visual-territory-54","visual-territory-56","visual-territory-57"]},{"id":"visual-territory-59","number":"59","name":"Garan","scene":"assets/scenes/59.png","areaKm2":835975.998,"population":71566237,"facilities":3,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-57"]},{"id":"visual-territory-60","number":"60","name":"Hylos","scene":"assets/scenes/60.png","areaKm2":3330726.046,"population":452838123,"facilities":8,"resources":5,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-61"]},{"id":"visual-territory-61","number":"61","name":"Ivara","scene":"assets/scenes/61.png","areaKm2":3361200.0470000003,"population":461576353,"facilities":8,"resources":5,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-60","visual-territory-62","visual-territory-63"]},{"id":"visual-territory-62","number":"62","name":"Jalen","scene":"assets/scenes/62.png","areaKm2":2931269.534,"population":246644605,"facilities":6,"resources":5,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-61","visual-territory-63"]},{"id":"visual-territory-63","number":"63","name":"Korra","scene":"assets/scenes/63.png","areaKm2":2997571.079,"population":341057685,"facilities":7,"resources":5,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-61","visual-territory-62"]},{"id":"visual-territory-64","number":"64","name":"Lethis","scene":"assets/scenes/64.png","areaKm2":3481448.812,"population":570529072,"facilities":9,"resources":5,"coastal":true,"climate":"温带海洋性","neighbours":["visual-territory-65"]},{"id":"visual-territory-65","number":"65","name":"Marn","scene":"assets/scenes/65.png","areaKm2":3375613.427,"population":298971448,"facilities":6,"resources":5,"coastal":true,"climate":"热带常湿","neighbours":["visual-territory-64"]},{"id":"visual-territory-66","number":"66","name":"Nivor","scene":"assets/scenes/66.png","areaKm2":3359140.993,"population":456532213,"facilities":8,"resources":5,"coastal":true,"climate":"热带季风","neighbours":[]},{"id":"visual-territory-67","number":"67","name":"Orsa","scene":"assets/scenes/67.png","areaKm2":2535107.5089999996,"population":230127298,"facilities":6,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":[]},{"id":"visual-territory-68","number":"68","name":"Pella","scene":"assets/scenes/68.png","areaKm2":2340732.795,"population":180847859,"facilities":5,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":[]},{"id":"visual-territory-69","number":"69","name":"Quillan","scene":"assets/scenes/69.png","areaKm2":2026932.937,"population":151539363,"facilities":4,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":[]},{"id":"visual-territory-70","number":"70","name":"Rhea","scene":"assets/scenes/70.png","areaKm2":1246551.402,"population":87778709,"facilities":3,"resources":4,"coastal":true,"climate":"温带海洋性","neighbours":[]}]
+[
+  {
+    "id": "visual-territory-01",
+    "number": "01",
+    "name": "Avenor",
+    "scene": "assets/scenes/01.png",
+    "areaKm2": 1267965.565,
+    "population": 105506849,
+    "facilities": 16,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-02",
+      "visual-territory-04",
+      "visual-territory-05"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-02",
+    "number": "02",
+    "name": "Brelis",
+    "scene": "assets/scenes/02.png",
+    "areaKm2": 1969691.231,
+    "population": 137301649,
+    "facilities": 17,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-01",
+      "visual-territory-05"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-03",
+    "number": "03",
+    "name": "Caedon",
+    "scene": "assets/scenes/03.png",
+    "areaKm2": 2699008.222,
+    "population": 260037441,
+    "facilities": 24,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-04",
+      "visual-territory-06",
+      "visual-territory-07",
+      "visual-territory-08"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-04",
+    "number": "04",
+    "name": "Darsin",
+    "scene": "assets/scenes/04.png",
+    "areaKm2": 3187415.875,
+    "population": 275749031,
+    "facilities": 22,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-01",
+      "visual-territory-03",
+      "visual-territory-05",
+      "visual-territory-08"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-05",
+    "number": "05",
+    "name": "Ellovar",
+    "scene": "assets/scenes/05.png",
+    "areaKm2": 2227484.8140000002,
+    "population": 198817912,
+    "facilities": 21,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-01",
+      "visual-territory-02",
+      "visual-territory-04",
+      "visual-territory-08"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-06",
+    "number": "06",
+    "name": "Faren",
+    "scene": "assets/scenes/06.png",
+    "areaKm2": 4043570.603,
+    "population": 301060418,
+    "facilities": 21,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-03",
+      "visual-territory-07",
+      "visual-territory-12",
+      "visual-territory-14"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-07",
+    "number": "07",
+    "name": "Galdra",
+    "scene": "assets/scenes/07.png",
+    "areaKm2": 2138121.863,
+    "population": 216930191,
+    "facilities": 22,
+    "resources": 3,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-03",
+      "visual-territory-06",
+      "visual-territory-08",
+      "visual-territory-14"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-08",
+    "number": "08",
+    "name": "Hethen",
+    "scene": "assets/scenes/08.png",
+    "areaKm2": 2654944.4620000003,
+    "population": 234590316,
+    "facilities": 21,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-03",
+      "visual-territory-04",
+      "visual-territory-05",
+      "visual-territory-07"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-09",
+    "number": "09",
+    "name": "Istrel",
+    "scene": "assets/scenes/09.png",
+    "areaKm2": 2638472.029,
+    "population": 203914018,
+    "facilities": 20,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-10",
+      "visual-territory-11",
+      "visual-territory-19",
+      "visual-territory-20"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-10",
+    "number": "10",
+    "name": "Jorun",
+    "scene": "assets/scenes/10.png",
+    "areaKm2": 2692419.249,
+    "population": 217859358,
+    "facilities": 21,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-09",
+      "visual-territory-11"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-11",
+    "number": "11",
+    "name": "Keldan",
+    "scene": "assets/scenes/11.png",
+    "areaKm2": 1944982.581,
+    "population": 139077036,
+    "facilities": 17,
+    "resources": 4,
+    "coastal": true,
+    "climate": "内陆荒漠",
+    "neighbours": [
+      "visual-territory-09",
+      "visual-territory-10",
+      "visual-territory-12",
+      "visual-territory-13",
+      "visual-territory-20",
+      "visual-territory-21"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-12",
+    "number": "12",
+    "name": "Lumer",
+    "scene": "assets/scenes/12.png",
+    "areaKm2": 3363670.912,
+    "population": 282893901,
+    "facilities": 19,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-06",
+      "visual-territory-11",
+      "visual-territory-13",
+      "visual-territory-14"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-13",
+    "number": "13",
+    "name": "Meros",
+    "scene": "assets/scenes/13.png",
+    "areaKm2": 3276778.8260000004,
+    "population": 212269513,
+    "facilities": 22,
+    "resources": 4,
+    "coastal": false,
+    "climate": "内陆荒漠",
+    "neighbours": [
+      "visual-territory-11",
+      "visual-territory-12",
+      "visual-territory-14",
+      "visual-territory-15",
+      "visual-territory-21",
+      "visual-territory-22",
+      "visual-territory-23"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-14",
+    "number": "14",
+    "name": "Nadrin",
+    "scene": "assets/scenes/14.png",
+    "areaKm2": 2593172.837,
+    "population": 203975307,
+    "facilities": 20,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-06",
+      "visual-territory-07",
+      "visual-territory-12",
+      "visual-territory-13",
+      "visual-territory-15"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-15",
+    "number": "15",
+    "name": "Orelis",
+    "scene": "assets/scenes/15.png",
+    "areaKm2": 3570811.7630000003,
+    "population": 270336137,
+    "facilities": 22,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-13",
+      "visual-territory-14",
+      "visual-territory-23",
+      "visual-territory-24"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-16",
+    "number": "16",
+    "name": "Paryn",
+    "scene": "assets/scenes/16.png",
+    "areaKm2": 3434914.187,
+    "population": 270584875,
+    "facilities": 22,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-24"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-17",
+    "number": "17",
+    "name": "Quoran",
+    "scene": "assets/scenes/17.png",
+    "areaKm2": 1892682.604,
+    "population": 142121388,
+    "facilities": 16,
+    "resources": 3,
+    "coastal": true,
+    "climate": "地中海式沿岸",
+    "neighbours": [
+      "visual-territory-19"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-18",
+    "number": "18",
+    "name": "Rassel",
+    "scene": "assets/scenes/18.png",
+    "areaKm2": 1752255.109,
+    "population": 114529212,
+    "facilities": 16,
+    "resources": 3,
+    "coastal": true,
+    "climate": "地中海式沿岸",
+    "neighbours": [
+      "visual-territory-19",
+      "visual-territory-20",
+      "visual-territory-26",
+      "visual-territory-27"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-19",
+    "number": "19",
+    "name": "Siven",
+    "scene": "assets/scenes/19.png",
+    "areaKm2": 1944158.959,
+    "population": 122802272,
+    "facilities": 17,
+    "resources": 3,
+    "coastal": true,
+    "climate": "地中海式沿岸",
+    "neighbours": [
+      "visual-territory-09",
+      "visual-territory-17",
+      "visual-territory-18",
+      "visual-territory-20"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-20",
+    "number": "20",
+    "name": "Talan",
+    "scene": "assets/scenes/20.png",
+    "areaKm2": 3266895.3660000004,
+    "population": 187895095,
+    "facilities": 19,
+    "resources": 4,
+    "coastal": false,
+    "climate": "内陆荒漠",
+    "neighbours": [
+      "visual-territory-09",
+      "visual-territory-11",
+      "visual-territory-18",
+      "visual-territory-19",
+      "visual-territory-21",
+      "visual-territory-27"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-21",
+    "number": "21",
+    "name": "Uvren",
+    "scene": "assets/scenes/21.png",
+    "areaKm2": 4411317.68,
+    "population": 262573353,
+    "facilities": 21,
+    "resources": 4,
+    "coastal": false,
+    "climate": "温带高山",
+    "neighbours": [
+      "visual-territory-11",
+      "visual-territory-13",
+      "visual-territory-20",
+      "visual-territory-22",
+      "visual-territory-27",
+      "visual-territory-28",
+      "visual-territory-29"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-22",
+    "number": "22",
+    "name": "Vardis",
+    "scene": "assets/scenes/22.png",
+    "areaKm2": 1903801.497,
+    "population": 112204643,
+    "facilities": 16,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-13",
+      "visual-territory-21",
+      "visual-territory-23",
+      "visual-territory-29",
+      "visual-territory-30"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-23",
+    "number": "23",
+    "name": "Wexar",
+    "scene": "assets/scenes/23.png",
+    "areaKm2": 4548862.5,
+    "population": 350234467,
+    "facilities": 22,
+    "resources": 4,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-13",
+      "visual-territory-15",
+      "visual-territory-22",
+      "visual-territory-24",
+      "visual-territory-31"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-24",
+    "number": "24",
+    "name": "Xandor",
+    "scene": "assets/scenes/24.png",
+    "areaKm2": 2161183.27,
+    "population": 217554486,
+    "facilities": 22,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-15",
+      "visual-territory-16",
+      "visual-territory-23",
+      "visual-territory-31"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-25",
+    "number": "25",
+    "name": "Ysol",
+    "scene": "assets/scenes/25.png",
+    "areaKm2": 1925627.471,
+    "population": 121894971,
+    "facilities": 15,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-26"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-26",
+    "number": "26",
+    "name": "Zarev",
+    "scene": "assets/scenes/26.png",
+    "areaKm2": 2435861.097,
+    "population": 150478189,
+    "facilities": 17,
+    "resources": 3,
+    "coastal": true,
+    "climate": "冷凉大陆性",
+    "neighbours": [
+      "visual-territory-18",
+      "visual-territory-25",
+      "visual-territory-27"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-27",
+    "number": "27",
+    "name": "Adara",
+    "scene": "assets/scenes/27.png",
+    "areaKm2": 3060578.137,
+    "population": 208513009,
+    "facilities": 18,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带湿润大陆性",
+    "neighbours": [
+      "visual-territory-18",
+      "visual-territory-20",
+      "visual-territory-21",
+      "visual-territory-26",
+      "visual-territory-28"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-28",
+    "number": "28",
+    "name": "Belm",
+    "scene": "assets/scenes/28.png",
+    "areaKm2": 3220772.553,
+    "population": 218123062,
+    "facilities": 19,
+    "resources": 3,
+    "coastal": true,
+    "climate": "冷凉大陆性",
+    "neighbours": [
+      "visual-territory-21",
+      "visual-territory-27",
+      "visual-territory-29"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-29",
+    "number": "29",
+    "name": "Corven",
+    "scene": "assets/scenes/29.png",
+    "areaKm2": 3269778.041,
+    "population": 202595565,
+    "facilities": 20,
+    "resources": 4,
+    "coastal": true,
+    "climate": "冷凉大陆性",
+    "neighbours": [
+      "visual-territory-21",
+      "visual-territory-22",
+      "visual-territory-28",
+      "visual-territory-30"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-30",
+    "number": "30",
+    "name": "Delyra",
+    "scene": "assets/scenes/30.png",
+    "areaKm2": 2714245.223,
+    "population": 181477988,
+    "facilities": 19,
+    "resources": 4,
+    "coastal": true,
+    "climate": "冷凉大陆性",
+    "neighbours": [
+      "visual-territory-22",
+      "visual-territory-29"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-31",
+    "number": "31",
+    "name": "Erdan",
+    "scene": "assets/scenes/31.png",
+    "areaKm2": 2559404.349,
+    "population": 198214592,
+    "facilities": 21,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-23",
+      "visual-territory-24",
+      "visual-territory-32"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-32",
+    "number": "32",
+    "name": "Falcor",
+    "scene": "assets/scenes/32.png",
+    "areaKm2": 2414858.745,
+    "population": 131553721,
+    "facilities": 17,
+    "resources": 3,
+    "coastal": true,
+    "climate": "冷凉大陆性",
+    "neighbours": [
+      "visual-territory-31"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-33",
+    "number": "33",
+    "name": "Gysel",
+    "scene": "assets/scenes/33.png",
+    "areaKm2": 3060166.3260000004,
+    "population": 172578711,
+    "facilities": 19,
+    "resources": 4,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-38",
+      "visual-territory-39"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-34",
+    "number": "34",
+    "name": "Harin",
+    "scene": "assets/scenes/34.png",
+    "areaKm2": 3332785.1,
+    "population": 205340635,
+    "facilities": 20,
+    "resources": 4,
+    "coastal": true,
+    "climate": "温带湿润大陆性",
+    "neighbours": [
+      "visual-territory-35",
+      "visual-territory-39",
+      "visual-territory-40",
+      "visual-territory-41"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-35",
+    "number": "35",
+    "name": "Inovar",
+    "scene": "assets/scenes/35.png",
+    "areaKm2": 3066343.488,
+    "population": 185984745,
+    "facilities": 20,
+    "resources": 4,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-34",
+      "visual-territory-36",
+      "visual-territory-41"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-36",
+    "number": "36",
+    "name": "Jessa",
+    "scene": "assets/scenes/36.png",
+    "areaKm2": 1941688.094,
+    "population": 93559138,
+    "facilities": 16,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-35",
+      "visual-territory-37",
+      "visual-territory-43"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-37",
+    "number": "37",
+    "name": "Koryn",
+    "scene": "assets/scenes/37.png",
+    "areaKm2": 1351974.976,
+    "population": 95690285,
+    "facilities": 17,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-36",
+      "visual-territory-43"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-38",
+    "number": "38",
+    "name": "Lydan",
+    "scene": "assets/scenes/38.png",
+    "areaKm2": 4306305.916999999,
+    "population": 287466375,
+    "facilities": 23,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-33",
+      "visual-territory-39",
+      "visual-territory-44",
+      "visual-territory-45"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-39",
+    "number": "39",
+    "name": "Mirea",
+    "scene": "assets/scenes/39.png",
+    "areaKm2": 3497921.245,
+    "population": 220476619,
+    "facilities": 20,
+    "resources": 3,
+    "coastal": true,
+    "climate": "地中海式沿岸",
+    "neighbours": [
+      "visual-territory-33",
+      "visual-territory-34",
+      "visual-territory-38",
+      "visual-territory-40",
+      "visual-territory-45"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-40",
+    "number": "40",
+    "name": "Norvak",
+    "scene": "assets/scenes/40.png",
+    "areaKm2": 2104353.374,
+    "population": 194069888,
+    "facilities": 18,
+    "resources": 3,
+    "coastal": true,
+    "climate": "地中海式沿岸",
+    "neighbours": [
+      "visual-territory-34",
+      "visual-territory-39",
+      "visual-territory-41",
+      "visual-territory-45",
+      "visual-territory-46"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-41",
+    "number": "41",
+    "name": "Ostra",
+    "scene": "assets/scenes/41.png",
+    "areaKm2": 2446156.368,
+    "population": 209317699,
+    "facilities": 20,
+    "resources": 3,
+    "coastal": false,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-34",
+      "visual-territory-35",
+      "visual-territory-40",
+      "visual-territory-46",
+      "visual-territory-47"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-42",
+    "number": "42",
+    "name": "Pavan",
+    "scene": "assets/scenes/42.png",
+    "areaKm2": 1688836.24,
+    "population": 129656173,
+    "facilities": 17,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-43",
+      "visual-territory-47"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-43",
+    "number": "43",
+    "name": "Qemra",
+    "scene": "assets/scenes/43.png",
+    "areaKm2": 2000577.044,
+    "population": 133083165,
+    "facilities": 17,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-36",
+      "visual-territory-37",
+      "visual-territory-42"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-44",
+    "number": "44",
+    "name": "Ruvan",
+    "scene": "assets/scenes/44.png",
+    "areaKm2": 2899148.2879999997,
+    "population": 271139823,
+    "facilities": 21,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-38",
+      "visual-territory-45",
+      "visual-territory-48",
+      "visual-territory-49"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-45",
+    "number": "45",
+    "name": "Selka",
+    "scene": "assets/scenes/45.png",
+    "areaKm2": 3178767.847,
+    "population": 230358574,
+    "facilities": 18,
+    "resources": 5,
+    "coastal": true,
+    "climate": "暖温带半干旱草原",
+    "neighbours": [
+      "visual-territory-38",
+      "visual-territory-39",
+      "visual-territory-40",
+      "visual-territory-44",
+      "visual-territory-49"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-46",
+    "number": "46",
+    "name": "Tirren",
+    "scene": "assets/scenes/46.png",
+    "areaKm2": 3165178.09,
+    "population": 259831741,
+    "facilities": 20,
+    "resources": 6,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-40",
+      "visual-territory-41",
+      "visual-territory-47"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-47",
+    "number": "47",
+    "name": "Ulyss",
+    "scene": "assets/scenes/47.png",
+    "areaKm2": 3784541.5870000003,
+    "population": 314358220,
+    "facilities": 21,
+    "resources": 2,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-41",
+      "visual-territory-42",
+      "visual-territory-46",
+      "visual-territory-52"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-48",
+    "number": "48",
+    "name": "Varos",
+    "scene": "assets/scenes/48.png",
+    "areaKm2": 1636536.264,
+    "population": 127598958,
+    "facilities": 15,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-44",
+      "visual-territory-49"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-49",
+    "number": "49",
+    "name": "Wrenna",
+    "scene": "assets/scenes/49.png",
+    "areaKm2": 2134827.376,
+    "population": 190380893,
+    "facilities": 21,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带稀树草原",
+    "neighbours": [
+      "visual-territory-44",
+      "visual-territory-45",
+      "visual-territory-48",
+      "visual-territory-50",
+      "visual-territory-51"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-50",
+    "number": "50",
+    "name": "Xyren",
+    "scene": "assets/scenes/50.png",
+    "areaKm2": 2115472.267,
+    "population": 199940751,
+    "facilities": 19,
+    "resources": 3,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-49",
+      "visual-territory-51"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-51",
+    "number": "51",
+    "name": "Yara",
+    "scene": "assets/scenes/51.png",
+    "areaKm2": 2084174.644,
+    "population": 217385174,
+    "facilities": 18,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-49",
+      "visual-territory-50"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-52",
+    "number": "52",
+    "name": "Zorin",
+    "scene": "assets/scenes/52.png",
+    "areaKm2": 1607709.506,
+    "population": 161966472,
+    "facilities": 16,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-47"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-53",
+    "number": "53",
+    "name": "Alera",
+    "scene": "assets/scenes/53.png",
+    "areaKm2": 3192769.415,
+    "population": 277522594,
+    "facilities": 23,
+    "resources": 3,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-56",
+      "visual-territory-58"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-54",
+    "number": "54",
+    "name": "Brin",
+    "scene": "assets/scenes/54.png",
+    "areaKm2": 4171231.9629999995,
+    "population": 337593622,
+    "facilities": 24,
+    "resources": 3,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-55",
+      "visual-territory-58"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-55",
+    "number": "55",
+    "name": "Cassa",
+    "scene": "assets/scenes/55.png",
+    "areaKm2": 1561998.503,
+    "population": 158398842,
+    "facilities": 19,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-54"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-56",
+    "number": "56",
+    "name": "Doren",
+    "scene": "assets/scenes/56.png",
+    "areaKm2": 3703003.0420000004,
+    "population": 326899872,
+    "facilities": 20,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-53",
+      "visual-territory-57",
+      "visual-territory-58"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-57",
+    "number": "57",
+    "name": "Everen",
+    "scene": "assets/scenes/57.png",
+    "areaKm2": 2381502.068,
+    "population": 221098517,
+    "facilities": 20,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-56",
+      "visual-territory-58",
+      "visual-territory-59"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-58",
+    "number": "58",
+    "name": "Fenna",
+    "scene": "assets/scenes/58.png",
+    "areaKm2": 3765598.289,
+    "population": 303860425,
+    "facilities": 25,
+    "resources": 3,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [
+      "visual-territory-53",
+      "visual-territory-54",
+      "visual-territory-56",
+      "visual-territory-57"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-59",
+    "number": "59",
+    "name": "Garan",
+    "scene": "assets/scenes/59.png",
+    "areaKm2": 835975.998,
+    "population": 73362124,
+    "facilities": 15,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-57"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-60",
+    "number": "60",
+    "name": "Hylos",
+    "scene": "assets/scenes/60.png",
+    "areaKm2": 3330726.046,
+    "population": 281990929,
+    "facilities": 23,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-61"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-61",
+    "number": "61",
+    "name": "Ivara",
+    "scene": "assets/scenes/61.png",
+    "areaKm2": 3361200.0470000003,
+    "population": 340449380,
+    "facilities": 24,
+    "resources": 4,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-60",
+      "visual-territory-62",
+      "visual-territory-63"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-62",
+    "number": "62",
+    "name": "Jalen",
+    "scene": "assets/scenes/62.png",
+    "areaKm2": 2931269.534,
+    "population": 204635298,
+    "facilities": 21,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-61",
+      "visual-territory-63"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-63",
+    "number": "63",
+    "name": "Korra",
+    "scene": "assets/scenes/63.png",
+    "areaKm2": 2997571.079,
+    "population": 268831266,
+    "facilities": 23,
+    "resources": 3,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-61",
+      "visual-territory-62"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-64",
+    "number": "64",
+    "name": "Lethis",
+    "scene": "assets/scenes/64.png",
+    "areaKm2": 3481448.812,
+    "population": 330089267,
+    "facilities": 24,
+    "resources": 4,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [
+      "visual-territory-65"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-65",
+    "number": "65",
+    "name": "Marn",
+    "scene": "assets/scenes/65.png",
+    "areaKm2": 3375613.427,
+    "population": 293342782,
+    "facilities": 20,
+    "resources": 1,
+    "coastal": true,
+    "climate": "热带常湿",
+    "neighbours": [
+      "visual-territory-64"
+    ],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-66",
+    "number": "66",
+    "name": "Nivor",
+    "scene": "assets/scenes/66.png",
+    "areaKm2": 3359140.993,
+    "population": 289129755,
+    "facilities": 25,
+    "resources": 5,
+    "coastal": true,
+    "climate": "热带季风",
+    "neighbours": [],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-67",
+    "number": "67",
+    "name": "Orsa",
+    "scene": "assets/scenes/67.png",
+    "areaKm2": 2535107.5089999996,
+    "population": 230286288,
+    "facilities": 22,
+    "resources": 2,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-68",
+    "number": "68",
+    "name": "Pella",
+    "scene": "assets/scenes/68.png",
+    "areaKm2": 2340732.795,
+    "population": 197939466,
+    "facilities": 19,
+    "resources": 1,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-69",
+    "number": "69",
+    "name": "Quillan",
+    "scene": "assets/scenes/69.png",
+    "areaKm2": 2026932.937,
+    "population": 133510774,
+    "facilities": 15,
+    "resources": 1,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  },
+  {
+    "id": "visual-territory-70",
+    "number": "70",
+    "name": "Rhea",
+    "scene": "assets/scenes/70.png",
+    "areaKm2": 1246551.402,
+    "population": 89351229,
+    "facilities": 14,
+    "resources": 1,
+    "coastal": true,
+    "climate": "温带海洋性",
+    "neighbours": [],
+    "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE"
+  }
+]

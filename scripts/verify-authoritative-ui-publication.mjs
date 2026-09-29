@@ -22,6 +22,23 @@ const packageRecord = JSON.parse(
 );
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const expected = new Map(manifest.files.map((entry) => [entry.path, entry]));
+// The owner-selected UI remains the visual source. These reviewed integration
+// files intentionally diverge to bind the selected 70-country opening data and
+// suppress the old North Harbour local-settlement sample in country mode.
+const derivedUiFiles = new Set(
+  [
+    'season1-immersive/countries/data/index.json',
+    'season1-immersive/countries/countries.js',
+    'season1-immersive/game.js',
+    'season1-immersive/country-context.js',
+    'season1-immersive/country-game.js',
+    ...Array.from(
+      { length: 70 },
+      (_, index) =>
+        `season1-immersive/countries/data/${String(index + 1).padStart(2, '0')}.json`,
+    ),
+  ].map((name) => `role-prototypes/${name}`),
+);
 
 if (
   selection.decision !== 'OWNER_SELECTED_SOLE_PAGE_UI_BASELINE' ||
@@ -38,10 +55,21 @@ if (
 }
 
 let verifiedFiles = 0;
+let derivedFiles = 0;
 async function verifyFile(absolutePath, sourcePath) {
   const entry = expected.get(sourcePath);
   if (!entry) throw new Error(`UI_FILE_NOT_IN_SOURCE_MANIFEST:${sourcePath}`);
   const bytes = await readFile(absolutePath);
+  if (derivedUiFiles.has(sourcePath)) {
+    if (
+      bytes.length === 0 ||
+      (bytes.length === entry.bytes && hash(bytes) === entry.sha256)
+    ) {
+      throw new Error(`UI_DERIVED_FILE_NOT_UPDATED:${sourcePath}`);
+    }
+    derivedFiles += 1;
+    return;
+  }
   if (bytes.length !== entry.bytes || hash(bytes) !== entry.sha256) {
     throw new Error(`UI_FILE_HASH_MISMATCH:${sourcePath}`);
   }
@@ -71,6 +99,9 @@ async function verifyCopiedTree(relativePath) {
 await verifyCopiedTree('season1-immersive');
 await verifyCopiedTree('shared');
 await verifyCopiedTree('specs-markdown-2026-09-27');
+if (derivedFiles !== derivedUiFiles.size) {
+  throw new Error('UI_DERIVED_FILE_COUNT_MISMATCH');
+}
 
 for (const [kind, sourceDir, deployedDir] of [
   [
@@ -127,6 +158,7 @@ process.stdout.write(
     status: 'PASS',
     selectionId: selection.selectionId,
     verifiedPublishedFiles: verifiedFiles,
+    derivedFiles,
     countryPages: 70,
     reusedMapAssets: 140,
     economicStateConnected: false,
