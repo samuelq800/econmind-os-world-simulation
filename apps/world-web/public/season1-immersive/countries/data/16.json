@@ -1,1 +1,1607 @@
-{"id":"visual-territory-16","number":"16","name":"Paryn","color":"#72bcb0","climateId":8,"neighbours":["visual-territory-24"],"climateMix":[{"id":8,"landPixels":8209,"sharePercent":98.4},{"id":3,"landPixels":132,"sharePercent":1.6}],"coastal":true,"scene":"assets/scenes/16.png","detail":"assets/details/16-paryn.svg","viewBox":[1424.9,463.9,231.2,242.2],"frame":[1419.4,463.9,242.2,242.2],"facilities":[{"id":"SF082","countryId":"visual-territory-16","point":[1522,613],"kind":"energy","name":"油田开发（情景候选）","resourceId":"RES71","projectId":"PROJECT-01","projectNumber":1,"anchor":[0.439,0.54],"record":{"id":"SF082","countryId":"visual-territory-16","projectId":"PROJECT-01","projectNumber":1,"name":"油田开发","lifecycle":"CANDIDATE","operational":false,"estimatedCapacity":241821.2851,"capacityUnit":"barrel/sim-day","requiredWorkers":5358,"requiredPowerMW":96.444,"requiredWaterM3Day":9644,"maintenanceGcuDay":47700.43,"equipmentUnits":268,"constructionSimDays":434,"recipeStatus":"CORE_COEFFICIENT_BINDING_REQUIRED","inputCategories":["LABOUR","MACHINERY","ELECTRICITY","CRUDE_OIL_DEVELOPED_RESERVE"],"gridNodeId":"GRID-visual-territory-16","accessNodeId":"SF082","capacityBasis":"GEOGRAPHIC_SCENARIO_ESTIMATE"}},{"id":"SF083","countryId":"visual-territory-16","point":[1620,533],"kind":"energy","name":"气田开发（情景候选）","resourceId":"RES135","projectId":"PROJECT-02","projectNumber":2,"anchor":[0.87,0.268],"record":{"id":"SF083","countryId":"visual-territory-16","projectId":"PROJECT-02","projectNumber":2,"name":"气田开发","lifecycle":"CANDIDATE","operational":false,"estimatedCapacity":1257199.2595,"capacityUnit":"MMBtu/sim-day","requiredWorkers":5358,"requiredPowerMW":96.444,"requiredWaterM3Day":9644,"maintenanceGcuDay":68007.99,"equipmentUnits":268,"constructionSimDays":445,"recipeStatus":"CORE_COEFFICIENT_BINDING_REQUIRED","inputCategories":["LABOUR","MACHINERY","ELECTRICITY","NATURAL_GAS_DEVELOPED_RESERVE"],"gridNodeId":"GRID-visual-territory-16","accessNodeId":"SF083","capacityBasis":"GEOGRAPHIC_SCENARIO_ESTIMATE"}},{"id":"SF084","countryId":"visual-territory-16","point":[1520,510],"kind":"mine","name":"铜矿（情景候选）","resourceId":"RES136","projectId":"PROJECT-05","projectNumber":5,"anchor":[0.433,0.133],"record":{"id":"SF084","countryId":"visual-territory-16","projectId":"PROJECT-05","projectNumber":5,"name":"铜矿","lifecycle":"CANDIDATE","operational":false,"estimatedCapacity":11639.6777,"capacityUnit":"tonne/sim-day","requiredWorkers":8572,"requiredPowerMW":154.296,"requiredWaterM3Day":15430,"maintenanceGcuDay":68808.79,"equipmentUnits":429,"constructionSimDays":615,"recipeStatus":"CORE_COEFFICIENT_BINDING_REQUIRED","inputCategories":["LABOUR","MACHINERY","ELECTRICITY","COPPER_DEVELOPED_RESERVE"],"gridNodeId":"GRID-visual-territory-16","accessNodeId":"SF084","capacityBasis":"GEOGRAPHIC_SCENARIO_ESTIMATE"}},{"id":"SF085","countryId":"visual-territory-16","point":[1611,670],"kind":"mine","name":"锂矿（情景候选）","resourceId":"RES137","projectId":"PROJECT-06","projectNumber":6,"anchor":[0.884,0.867],"record":{"id":"SF085","countryId":"visual-territory-16","projectId":"PROJECT-06","projectNumber":6,"name":"锂矿","lifecycle":"CANDIDATE","operational":false,"estimatedCapacity":637.2343,"capacityUnit":"tonne LCE/sim-day","requiredWorkers":8572,"requiredPowerMW":154.296,"requiredWaterM3Day":15430,"maintenanceGcuDay":68588.74,"equipmentUnits":429,"constructionSimDays":609,"recipeStatus":"CORE_COEFFICIENT_BINDING_REQUIRED","inputCategories":["LABOUR","MACHINERY","ELECTRICITY","LITHIUM_DEVELOPED_RESERVE"],"gridNodeId":"GRID-visual-territory-16","accessNodeId":"SF085","capacityBasis":"GEOGRAPHIC_SCENARIO_ESTIMATE"}},{"id":"SF086","countryId":"visual-territory-16","point":[1466,568],"kind":"energy","name":"太阳能设施（情景候选）","resourceId":null,"projectId":"PROJECT-10","projectNumber":10,"anchor":[0.166,0.34],"record":{"id":"SF086","countryId":"visual-territory-16","projectId":"PROJECT-10","projectNumber":10,"name":"太阳能设施","lifecycle":"CANDIDATE","operational":false,"estimatedCapacity":114816.01,"capacityUnit":"MW","requiredWorkers":5358,"requiredPowerMW":96.444,"requiredWaterM3Day":9644,"maintenanceGcuDay":45160.32,"equipmentUnits":268,"constructionSimDays":430,"recipeStatus":"CORE_COEFFICIENT_BINDING_REQUIRED","inputCategories":["LABOUR","MACHINERY","ELECTRICITY"],"gridNodeId":"GRID-visual-territory-16","accessNodeId":"SF086","capacityBasis":"GEOGRAPHIC_SCENARIO_ESTIMATE"}},{"id":"SF087","countryId":"visual-territory-16","point":[1560,551],"kind":"energy","name":"风能设施（情景候选）","resourceId":null,"projectId":"PROJECT-11","projectNumber":11,"anchor":[0.559,0.272],"record":{"id":"SF087","countryId":"visual-territory-16","projectId":"PROJECT-11","projectNumber":11,"name":"风能设施","lifecycle":"CANDIDATE","operational":false,"estimatedCapacity":114816.01,"capacityUnit":"MW","requiredWorkers":5358,"requiredPowerMW":96.444,"requiredWaterM3Day":9644,"maintenanceGcuDay":45160.32,"equipmentUnits":268,"constructionSimDays":430,"recipeStatus":"CORE_COEFFICIENT_BINDING_REQUIRED","inputCategories":["LABOUR","MACHINERY","ELECTRICITY"],"gridNodeId":"GRID-visual-territory-16","accessNodeId":"SF087","capacityBasis":"GEOGRAPHIC_SCENARIO_ESTIMATE"}},{"id":"SF088","countryId":"visual-territory-16","point":[1572,500],"kind":"hub","name":"物流枢纽（情景候选）","resourceId":null,"projectId":"PROJECT-25","projectNumber":25,"anchor":[0.6,0.098],"record":{"id":"SF088","countryId":"visual-territory-16","projectId":"PROJECT-25","projectNumber":25,"name":"物流枢纽","lifecycle":"CANDIDATE","operational":false,"estimatedCapacity":114816.01,"capacityUnit":"tonne/sim-day","requiredWorkers":5358,"requiredPowerMW":96.444,"requiredWaterM3Day":9644,"maintenanceGcuDay":45160.32,"equipmentUnits":268,"constructionSimDays":430,"recipeStatus":"CORE_COEFFICIENT_BINDING_REQUIRED","inputCategories":["LABOUR","MACHINERY","ELECTRICITY"],"gridNodeId":"GRID-visual-territory-16","accessNodeId":"SF088","capacityBasis":"GEOGRAPHIC_SCENARIO_ESTIMATE"}},{"id":"SF089","countryId":"visual-territory-16","point":[1514,565],"kind":"factory","name":"基础教育设施（情景候选）","resourceId":null,"projectId":"PROJECT-31","projectNumber":31,"anchor":[0.379,0.37],"record":{"id":"SF089","countryId":"visual-territory-16","projectId":"PROJECT-31","projectNumber":31,"name":"基础教育设施","lifecycle":"CANDIDATE","operational":false,"estimatedCapacity":114816.01,"capacityUnit":"student-seat","requiredWorkers":5358,"requiredPowerMW":96.444,"requiredWaterM3Day":9644,"maintenanceGcuDay":45160.32,"equipmentUnits":268,"constructionSimDays":430,"recipeStatus":"CORE_COEFFICIENT_BINDING_REQUIRED","inputCategories":["LABOUR","MACHINERY","ELECTRICITY"],"gridNodeId":"GRID-visual-territory-16","accessNodeId":"SF089","capacityBasis":"GEOGRAPHIC_SCENARIO_ESTIMATE"}}],"resources":[{"id":"RES71","kind":"oil","point":[1522,613],"countryId":"visual-territory-16","climateId":8,"classification":"geological","commodityId":"CRUDE_OIL","visibility":"PUBLIC_SCENARIO_CANDIDATE","tradable":false,"type":{"id":"oil","name":"原油","symbol":"油","color":"#909cbe","context":"沉积盆地","group":"首季地质资源","seasonEnabled":true},"deposit":{"id":"RES71","countryId":"visual-territory-16","commodityId":"CRUDE_OIL","unit":"barrel","provinceId":"PROVINCE-5-2","provinceType":"basin","initialGeological":49070201656.153,"historicalConsumed":49784957.079,"cumulativeExtracted":49784957.079,"remainingGeological":49020416699.074,"discoveredRemaining":34314291689.352,"recoverableRemaining":20865382961.937,"developedRemaining":3269212181.545,"qualityProxy":0.714,"depthM":150,"developmentDifficulty":1.525,"extractionCapacityPerDay":241821.2851,"requiredRoad":true,"requiredGrid":true,"visibility":"PUBLIC_SCENARIO_CANDIDATE","uncertaintyFactor":[0.25,4]}},{"id":"RES135","kind":"gas","point":[1620,533],"countryId":"visual-territory-16","climateId":8,"classification":"geological","commodityId":"NATURAL_GAS","visibility":"PUBLIC_SCENARIO_CANDIDATE","tradable":false,"type":{"id":"gas","name":"天然气","symbol":"气","color":"#ba9fda","context":"内陆沉积盆地","group":"首季地质资源","seasonEnabled":true},"deposit":{"id":"RES135","countryId":"visual-territory-16","commodityId":"NATURAL_GAS","unit":"MMBtu","provinceId":"PROVINCE-5-2","provinceType":"basin","initialGeological":121013234892.875,"historicalConsumed":192804078.431,"cumulativeExtracted":192804078.431,"remainingGeological":120820430814.444,"discoveredRemaining":84574301570.111,"recoverableRemaining":69048923633.162,"developedRemaining":12660801150.285,"qualityProxy":0.881,"depthM":111,"developmentDifficulty":1.136,"extractionCapacityPerDay":1257199.2595,"requiredRoad":true,"requiredGrid":true,"visibility":"PUBLIC_SCENARIO_CANDIDATE","uncertaintyFactor":[0.25,4]}},{"id":"RES136","kind":"copper","point":[1520,510],"countryId":"visual-territory-16","climateId":8,"classification":"geological","commodityId":"COPPER","visibility":"PUBLIC_SCENARIO_CANDIDATE","tradable":false,"type":{"id":"copper","name":"铜","symbol":"Cu","color":"#eda26c","context":"褶皱矿带","group":"首季地质资源","seasonEnabled":true},"deposit":{"id":"RES136","countryId":"visual-territory-16","commodityId":"COPPER","unit":"tonne","provinceId":"PROVINCE-5-2","provinceType":"mineral-belt","initialGeological":1120391254.12,"historicalConsumed":1785060.976,"cumulativeExtracted":1785060.976,"remainingGeological":1118606193.144,"discoveredRemaining":783024335.201,"recoverableRemaining":639283878.441,"developedRemaining":117219004.115,"qualityProxy":0.725,"depthM":111,"developmentDifficulty":1.136,"extractionCapacityPerDay":11639.6777,"requiredRoad":true,"requiredGrid":true,"visibility":"PUBLIC_SCENARIO_CANDIDATE","uncertaintyFactor":[0.25,4]}},{"id":"RES137","kind":"lithium","point":[1611,670],"countryId":"visual-territory-16","climateId":3,"classification":"geological","commodityId":"LITHIUM","visibility":"PUBLIC_SCENARIO_CANDIDATE","tradable":false,"type":{"id":"lithium","name":"锂","symbol":"Li","color":"#dfafd8","context":"干旱盆地","group":"首季地质资源","seasonEnabled":true},"deposit":{"id":"RES137","countryId":"visual-territory-16","commodityId":"LITHIUM","unit":"tonne LCE","provinceId":"PROVINCE-5-3","provinceType":"mineral-belt","initialGeological":61337753.339,"historicalConsumed":97726.245,"cumulativeExtracted":97726.245,"remainingGeological":61240027.094,"discoveredRemaining":42868018.966,"recoverableRemaining":34998699.521,"developedRemaining":6417356.736,"qualityProxy":0.714,"depthM":111,"developmentDifficulty":1.136,"extractionCapacityPerDay":637.2343,"requiredRoad":true,"requiredGrid":true,"visibility":"PUBLIC_SCENARIO_CANDIDATE","uncertaintyFactor":[0.25,4]}},{"id":"RES295","kind":"cotton","point":[1466,568],"countryId":"visual-territory-16","climateId":8,"classification":"background","commodityId":"","visibility":"PUBLIC_SCENARIO_CANDIDATE","tradable":false,"type":{"id":"cotton","name":"棉花产区","symbol":"棉","color":"#ebc9a7","context":"暖热河谷与灌溉平原","group":"未启用背景","seasonEnabled":false},"deposit":null}],"regions":[{"id":"visual-territory-16-E1","countryId":"visual-territory-16","label":[1495.25,571.5],"areaKm2":1690071.673,"landUseKm2":{"croplandPotential":1651773.265,"forest":0.0,"urbanIndustrialPotential":0.0,"mountain":0.0,"inlandWater":38298.408,"convertible":0.0},"natural":{"meanElevationM":184,"temperatureC":25.0,"annualRainMm":1800,"monthlyRainMm":[52.5,65.56,101.25,150.0,198.75,234.44,247.5,234.44,198.75,150.0,101.25,65.56],"runoffM3Year":403170623614,"environmentalFlowM3Year":262060905349,"allocatableWaterM3Day":391971440,"drySeasonWaterM3Day":213624435,"grainPotentialTonnesYear":130385380,"grainYieldTonnesHa":4.62,"solarKwhM2Day":3.8,"windMps":5.42,"droughtExposure":0.308,"floodExposure":0.456,"stormExposure":0.632},"initial":{"population":227801460,"workingAge":140100176,"labourForce":85736684,"skills":{"low":52771786,"medium":24294347,"high":8670551},"households":68002466,"housingUnits":68152071,"croplandHa":12244090.27,"grainTonnesDay":157132.492,"grainDemandTonnesDay":151867.64,"foodStockTonnes":7618288.293,"teachers":815074,"medicalWorkers":559435,"schoolSeats":43282277,"hospitalBeds":405031},"basis":"GEOGRAPHIC_SCENARIO_ESTIMATE","settlementAccess":0.6584,"humanGeography":{"transportDistanceKm":2146,"riverDistanceKm":581,"transportGravity":0.2459,"riverGravity":0.3009,"settlementType":"农业河谷","scenarioUrbanShare":0.389,"basis":"HUMAN_GEOGRAPHY_SCENARIO_NOT_OBSERVED_HISTORY"},"basinId":"BASIN-HL11"},{"id":"visual-territory-16-E2","countryId":"visual-territory-16","label":[1547.25,533.0],"areaKm2":1744842.514,"landUseKm2":{"croplandPotential":1744842.514,"forest":0.0,"urbanIndustrialPotential":0.0,"mountain":0.0,"inlandWater":0.0,"convertible":0.0},"natural":{"meanElevationM":124,"temperatureC":24.6,"annualRainMm":1784,"monthlyRainMm":[54.13,66.8,101.42,148.7,195.99,230.6,243.27,230.6,195.99,148.7,101.42,66.8],"runoffM3Year":399855725665,"environmentalFlowM3Year":259906221682,"allocatableWaterM3Day":388748622,"drySeasonWaterM3Day":215683002,"grainPotentialTonnesYear":128981981,"grainYieldTonnesHa":4.608,"solarKwhM2Day":3.82,"windMps":5.71,"droughtExposure":0.314,"floodExposure":0.564,"stormExposure":0.803},"initial":{"population":231462573,"workingAge":142997578,"labourForce":87892746,"skills":{"low":52981747,"medium":25559211,"high":9351788},"households":69675669,"housingUnits":69396966,"croplandHa":11839728.03,"grainTonnesDay":151548.519,"grainDemandTonnesDay":154308.382,"foodStockTonnes":7613575.568,"teachers":842524,"medicalWorkers":584212,"schoolSeats":43977889,"hospitalBeds":425891},"basis":"GEOGRAPHIC_SCENARIO_ESTIMATE","settlementAccess":0.8211,"humanGeography":{"transportDistanceKm":1927,"riverDistanceKm":1755,"transportGravity":0.2665,"riverGravity":0.1247,"settlementType":"农业河谷","scenarioUrbanShare":0.42,"basis":"HUMAN_GEOGRAPHY_SCENARIO_NOT_OBSERVED_HISTORY"},"basinId":"BASIN-HL11"}],"profile":{"countryId":"visual-territory-16","economyIdProposal":"S1-16","bindingStatus":"UNBOUND","population":459264033,"labourForce":173629430,"scenarioEmployed":149321310,"scenarioUnemployed":24308120,"foodProductionTonnesDay":308681.011,"foodDemandTonnesDay":306176.022,"foodAvailableStockTonnes":15231863.861,"foodReservedTonnes":0,"foodInTransitTonnes":0,"dailyIncomeGcu":4014470862.69,"treasuryCashGcu":120434125880.7,"bankDepositsGcu":120434125880.7,"bankReservesGcu":24086825176.14,"bankLoansGcu":108390713292.63,"bankEquityGcu":12043412588.07,"historicalDebtGcu":0,"existingContracts":[],"techLicenses":[],"historicalPolicy":"CLEAN_START_SCENARIO_NO_INFERRED_HISTORY","strengths":["可用耕地与淡水承载","具名资源与网络候选"],"bottlenecks":["设施尚未完成配方与投运核验","历史技术和权利不由地理推定"],"developmentPaths":["农业与国内集散建设","资源开发与跨境技术合作"]},"power":{"id":"GRID-visual-territory-16","countryId":"visual-territory-16","scenarioDemandMW":206668.815,"solarCapacityFactor":0.1588,"windCapacityFactor":0.0999,"suggestedGenerationMW":1562155.58,"transferCapacityMW":237669.137,"lossFraction":0.06,"crossBorderConnections":[],"status":"CANDIDATE_NOT_ENERGIZED"},"sourceStatus":"ILLUSTRATIVE_PLANNING_ONLY","areaKm2":3434914.187,"climates":[{"id":8,"landPixels":8209,"sharePercent":98.4,"name":"热带季风"},{"id":3,"landPixels":132,"sharePercent":1.6,"name":"温带海洋性"}]}
+{
+  "id": "visual-territory-16",
+  "number": "16",
+  "name": "Paryn",
+  "color": "#72bcb0",
+  "climateId": 8,
+  "neighbours": [
+    "visual-territory-24"
+  ],
+  "climateMix": [
+    {
+      "id": 8,
+      "landPixels": 8209,
+      "sharePercent": 98.4
+    },
+    {
+      "id": 3,
+      "landPixels": 132,
+      "sharePercent": 1.6
+    }
+  ],
+  "coastal": true,
+  "scene": "assets/scenes/16.png",
+  "detail": "assets/details/16-paryn.svg",
+  "viewBox": [
+    1424.9,
+    463.9,
+    231.2,
+    242.2
+  ],
+  "frame": [
+    1419.4,
+    463.9,
+    242.2,
+    242.2
+  ],
+  "facilities": [
+    {
+      "id": "SF082",
+      "countryId": "visual-territory-16",
+      "point": [
+        1522,
+        613
+      ],
+      "kind": "energy",
+      "name": "油田开发",
+      "resourceId": "RES71",
+      "projectId": "PROJECT-01",
+      "projectNumber": 1,
+      "anchor": [
+        0.439,
+        0.54
+      ],
+      "record": {
+        "id": "SF082",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-01",
+        "name": "油田开发",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 241821.2851,
+        "capacityUnit": "barrel/sim-day",
+        "requiredWorkers": 5358,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 21432,
+        "equipmentUnits": 268,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "DEVELOPMENT_OPTION",
+        "openingAvailabilityProposal": false,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SF083",
+      "countryId": "visual-territory-16",
+      "point": [
+        1620,
+        533
+      ],
+      "kind": "energy",
+      "name": "气田开发",
+      "resourceId": "RES135",
+      "projectId": "PROJECT-02",
+      "projectNumber": 2,
+      "anchor": [
+        0.87,
+        0.268
+      ],
+      "record": {
+        "id": "SF083",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-02",
+        "name": "气田开发",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 1257199.2595,
+        "capacityUnit": "MMBtu/sim-day",
+        "requiredWorkers": 5358,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 21432,
+        "equipmentUnits": 268,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "DEVELOPMENT_OPTION",
+        "openingAvailabilityProposal": false,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SF084",
+      "countryId": "visual-territory-16",
+      "point": [
+        1520,
+        510
+      ],
+      "kind": "mine",
+      "name": "铜矿",
+      "resourceId": "RES136",
+      "projectId": "PROJECT-05",
+      "projectNumber": 5,
+      "anchor": [
+        0.433,
+        0.133
+      ],
+      "record": {
+        "id": "SF084",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-05",
+        "name": "铜矿",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 11639.6777,
+        "capacityUnit": "tonne/sim-day",
+        "requiredWorkers": 8572,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 34288,
+        "equipmentUnits": 429,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "DEVELOPMENT_OPTION",
+        "openingAvailabilityProposal": false,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SF085",
+      "countryId": "visual-territory-16",
+      "point": [
+        1611,
+        670
+      ],
+      "kind": "mine",
+      "name": "锂矿",
+      "resourceId": "RES137",
+      "projectId": "PROJECT-06",
+      "projectNumber": 6,
+      "anchor": [
+        0.884,
+        0.867
+      ],
+      "record": {
+        "id": "SF085",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-06",
+        "name": "锂矿",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 637.2343,
+        "capacityUnit": "tonne LCE/sim-day",
+        "requiredWorkers": 8572,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 34288,
+        "equipmentUnits": 429,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "DEVELOPMENT_OPTION",
+        "openingAvailabilityProposal": false,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SF086",
+      "countryId": "visual-territory-16",
+      "point": [
+        1466,
+        568
+      ],
+      "kind": "energy",
+      "name": "太阳能设施",
+      "resourceId": null,
+      "projectId": "PROJECT-10",
+      "projectNumber": 10,
+      "anchor": [
+        0.166,
+        0.34
+      ],
+      "record": {
+        "id": "SF086",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-10",
+        "name": "太阳能设施",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 114816.01,
+        "capacityUnit": "MW",
+        "requiredWorkers": 5358,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 21432,
+        "equipmentUnits": 268,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "DEVELOPMENT_OPTION",
+        "openingAvailabilityProposal": false,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SF087",
+      "countryId": "visual-territory-16",
+      "point": [
+        1560,
+        551
+      ],
+      "kind": "energy",
+      "name": "风能设施",
+      "resourceId": null,
+      "projectId": "PROJECT-11",
+      "projectNumber": 11,
+      "anchor": [
+        0.559,
+        0.272
+      ],
+      "record": {
+        "id": "SF087",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-11",
+        "name": "风能设施",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 114816.01,
+        "capacityUnit": "MW",
+        "requiredWorkers": 5358,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 21432,
+        "equipmentUnits": 268,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "DEVELOPMENT_OPTION",
+        "openingAvailabilityProposal": false,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SF088",
+      "countryId": "visual-territory-16",
+      "point": [
+        1572,
+        500
+      ],
+      "kind": "hub",
+      "name": "物流枢纽",
+      "resourceId": null,
+      "projectId": "PROJECT-25",
+      "projectNumber": 25,
+      "anchor": [
+        0.6,
+        0.098
+      ],
+      "record": {
+        "id": "SF088",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-25",
+        "name": "物流枢纽",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 114816.01,
+        "capacityUnit": "tonne/sim-day",
+        "requiredWorkers": 5358,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 21432,
+        "equipmentUnits": 268,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "DEVELOPMENT_OPTION",
+        "openingAvailabilityProposal": false,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SF089",
+      "countryId": "visual-territory-16",
+      "point": [
+        1514,
+        565
+      ],
+      "kind": "factory",
+      "name": "基础教育设施",
+      "resourceId": null,
+      "projectId": "PROJECT-31",
+      "projectNumber": 31,
+      "anchor": [
+        0.379,
+        0.37
+      ],
+      "record": {
+        "id": "SF089",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-31",
+        "name": "基础教育设施",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 114816.01,
+        "capacityUnit": "student-seat",
+        "requiredWorkers": 5358,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 21432,
+        "equipmentUnits": 268,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "DEVELOPMENT_OPTION",
+        "openingAvailabilityProposal": false,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "OPEN-16-GRAIN",
+      "countryId": "visual-territory-16",
+      "point": [
+        1495.25,
+        571.5
+      ],
+      "kind": "farm",
+      "name": "GRAIN区域生产群",
+      "projectId": null,
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "OPEN-16-GRAIN",
+        "countryId": "visual-territory-16",
+        "projectId": null,
+        "name": "GRAIN区域生产群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 525683.796224,
+        "capacityUnit": "tonne/sim-day",
+        "requiredWorkers": 228559,
+        "requiredPowerMW": 380.930287,
+        "requiredWaterM3Day": 653023349.347143,
+        "maintenanceGcuDay": 914236,
+        "equipmentUnits": 11428,
+        "constructionSimDays": 180,
+        "recipeStatus": "SCENARIO-RECIPE-GRAIN",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "OPEN-16-BATTERIES",
+      "countryId": "visual-territory-16",
+      "point": [
+        1495.25,
+        571.5
+      ],
+      "kind": "factory",
+      "name": "BATTERIES区域生产群",
+      "projectId": "PROJECT-18",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "OPEN-16-BATTERIES",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-18",
+        "name": "BATTERIES区域生产群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 103.242969,
+        "capacityUnit": "MWh-equivalent/sim-day",
+        "requiredWorkers": 27,
+        "requiredPowerMW": 2.244412,
+        "requiredWaterM3Day": 179.55299,
+        "maintenanceGcuDay": 108,
+        "equipmentUnits": 2,
+        "constructionSimDays": 180,
+        "recipeStatus": "SCENARIO-RECIPE-BATTERIES",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SERVICE-visual-territory-16-E1-36",
+      "countryId": "visual-territory-16",
+      "point": [
+        1495.25,
+        571.5
+      ],
+      "kind": "housing",
+      "name": "住房区域服务群",
+      "projectId": "PROJECT-36",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "SERVICE-visual-territory-16-E1-36",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-36",
+        "name": "住房区域服务群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 42734290,
+        "capacityUnit": "dwelling-unit",
+        "requiredWorkers": 0,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 1,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SERVICE-visual-territory-16-E1-31",
+      "countryId": "visual-territory-16",
+      "point": [
+        1495.25,
+        571.5
+      ],
+      "kind": "education",
+      "name": "基础教育区域服务群",
+      "projectId": "PROJECT-31",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "SERVICE-visual-territory-16-E1-31",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-31",
+        "name": "基础教育区域服务群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 27085032,
+        "capacityUnit": "student-seat",
+        "requiredWorkers": 992126,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 49607,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SERVICE-visual-territory-16-E1-35",
+      "countryId": "visual-territory-16",
+      "point": [
+        1495.25,
+        571.5
+      ],
+      "kind": "health",
+      "name": "医院区域服务群",
+      "projectId": "PROJECT-35",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "SERVICE-visual-territory-16-E1-35",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-35",
+        "name": "医院区域服务群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 407294,
+        "capacityUnit": "bed",
+        "requiredWorkers": 475176,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 23759,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SERVICE-visual-territory-16-E2-36",
+      "countryId": "visual-territory-16",
+      "point": [
+        1547.25,
+        533
+      ],
+      "kind": "housing",
+      "name": "住房区域服务群",
+      "projectId": "PROJECT-36",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "SERVICE-visual-territory-16-E2-36",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-36",
+        "name": "住房区域服务群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 42743151,
+        "capacityUnit": "dwelling-unit",
+        "requiredWorkers": 0,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 1,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SERVICE-visual-territory-16-E2-31",
+      "countryId": "visual-territory-16",
+      "point": [
+        1547.25,
+        533
+      ],
+      "kind": "education",
+      "name": "基础教育区域服务群",
+      "projectId": "PROJECT-31",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "SERVICE-visual-territory-16-E2-31",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-31",
+        "name": "基础教育区域服务群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 26896651,
+        "capacityUnit": "student-seat",
+        "requiredWorkers": 985226,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 49262,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "SERVICE-visual-territory-16-E2-35",
+      "countryId": "visual-territory-16",
+      "point": [
+        1547.25,
+        533
+      ],
+      "kind": "health",
+      "name": "医院区域服务群",
+      "projectId": "PROJECT-35",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "SERVICE-visual-territory-16-E2-35",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-35",
+        "name": "医院区域服务群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 404461,
+        "capacityUnit": "bed",
+        "requiredWorkers": 471872,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 23594,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "POWER-16-10",
+      "countryId": "visual-territory-16",
+      "point": [
+        1495.25,
+        571.5
+      ],
+      "kind": "energy",
+      "name": "太阳能区域设施群",
+      "projectId": "PROJECT-10",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "POWER-16-10",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-10",
+        "name": "太阳能区域设施群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 577821.283533,
+        "capacityUnit": "MW",
+        "requiredWorkers": 34671,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 1734,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "POWER-16-11",
+      "countryId": "visual-territory-16",
+      "point": [
+        1495.25,
+        571.5
+      ],
+      "kind": "energy",
+      "name": "风能区域设施群",
+      "projectId": "PROJECT-11",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "POWER-16-11",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-11",
+        "name": "风能区域设施群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 577821.283533,
+        "capacityUnit": "MW",
+        "requiredWorkers": 34669,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 1734,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "POWER-16-23",
+      "countryId": "visual-territory-16",
+      "point": [
+        1495.25,
+        571.5
+      ],
+      "kind": "energy",
+      "name": "国家电网区域设施群",
+      "projectId": "PROJECT-23",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "POWER-16-23",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-23",
+        "name": "国家电网区域设施群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 152682.960562,
+        "capacityUnit": "MW",
+        "requiredWorkers": 34669,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 1734,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "POWER-16-13",
+      "countryId": "visual-territory-16",
+      "point": [
+        1495.25,
+        571.5
+      ],
+      "kind": "energy",
+      "name": "储能区域设施群",
+      "projectId": "PROJECT-13",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "POWER-16-13",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-13",
+        "name": "储能区域设施群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 6514472.983973,
+        "capacityUnit": "MWh",
+        "requiredWorkers": 34669,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 1734,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "GATE-16",
+      "countryId": "visual-territory-16",
+      "point": [
+        1575.5,
+        506
+      ],
+      "kind": "port",
+      "name": "国家海港集群",
+      "projectId": "PROJECT-21",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "GATE-16",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-21",
+        "name": "国家海港集群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 458681.582389,
+        "capacityUnit": "tonne/sim-day",
+        "requiredWorkers": 405878,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 20294,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    },
+    {
+      "id": "WAREHOUSE-16",
+      "countryId": "visual-territory-16",
+      "point": [
+        1495.25,
+        571.5
+      ],
+      "kind": "hub",
+      "name": "国家战略与生产库存库群",
+      "projectId": "PROJECT-26",
+      "projectNumber": null,
+      "anchor": null,
+      "record": {
+        "id": "WAREHOUSE-16",
+        "countryId": "visual-territory-16",
+        "projectId": "PROJECT-26",
+        "name": "国家战略与生产库存库群",
+        "lifecycle": "UNAPPROVED_SCENARIO_ASSET",
+        "operational": false,
+        "estimatedCapacity": 20324781.598451,
+        "capacityUnit": "tonne",
+        "requiredWorkers": 405877,
+        "requiredPowerMW": 0,
+        "requiredWaterM3Day": 0,
+        "maintenanceGcuDay": 108236,
+        "equipmentUnits": 20294,
+        "constructionSimDays": 90,
+        "recipeStatus": "NO_APPROVED_RECIPE",
+        "scenarioRole": "OPENING_PORTFOLIO",
+        "openingAvailabilityProposal": true,
+        "sourceStatus": "UNAPPROVED_SCENARIO_ASSET"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "id": "RES71",
+      "kind": "oil",
+      "point": [
+        1522,
+        613
+      ],
+      "countryId": "visual-territory-16",
+      "climateId": 8,
+      "classification": "geological",
+      "commodityId": "CRUDE_OIL",
+      "visibility": "PUBLIC_SCENARIO_CANDIDATE",
+      "tradable": false,
+      "type": {
+        "id": "oil",
+        "name": "原油",
+        "symbol": "油",
+        "color": "#909cbe",
+        "context": "沉积盆地",
+        "group": "首季地质资源",
+        "seasonEnabled": true
+      },
+      "deposit": {
+        "id": "RES71",
+        "countryId": "visual-territory-16",
+        "commodityId": "CRUDE_OIL",
+        "unit": "barrel",
+        "provinceId": "PROVINCE-5-2",
+        "provinceType": "basin",
+        "initialGeological": 49070201656.153,
+        "historicalConsumed": 10379585.558503084,
+        "cumulativeExtracted": 49784957.079,
+        "remainingGeological": 49020416699.074,
+        "discoveredRemaining": 34314291689.352,
+        "recoverableRemaining": 20865382961.937,
+        "developedRemaining": 3269212181.545,
+        "qualityProxy": 0.714,
+        "depthM": 150,
+        "developmentDifficulty": 1.525,
+        "extractionCapacityPerDay": 241821.2851,
+        "requiredRoad": true,
+        "requiredGrid": true,
+        "visibility": "PUBLIC_SCENARIO_CANDIDATE",
+        "uncertaintyFactor": [
+          0.25,
+          4
+        ],
+        "point": [
+          1522,
+          613
+        ],
+        "regionId": "visual-territory-16-E1",
+        "runtimeExtractionPerDay": 0,
+        "developedReserveInterpretation": "CONDITIONAL_ON_OPENING_FACILITY_AND_LICENSE_ADOPTION",
+        "openingStockRawEquivalentAllocated": 39405371.52049692
+      }
+    },
+    {
+      "id": "RES135",
+      "kind": "gas",
+      "point": [
+        1620,
+        533
+      ],
+      "countryId": "visual-territory-16",
+      "climateId": 8,
+      "classification": "geological",
+      "commodityId": "NATURAL_GAS",
+      "visibility": "PUBLIC_SCENARIO_CANDIDATE",
+      "tradable": false,
+      "type": {
+        "id": "gas",
+        "name": "天然气",
+        "symbol": "气",
+        "color": "#ba9fda",
+        "context": "内陆沉积盆地",
+        "group": "首季地质资源",
+        "seasonEnabled": true
+      },
+      "deposit": {
+        "id": "RES135",
+        "countryId": "visual-territory-16",
+        "commodityId": "NATURAL_GAS",
+        "unit": "MMBtu",
+        "provinceId": "PROVINCE-5-2",
+        "provinceType": "basin",
+        "initialGeological": 121013234892.875,
+        "historicalConsumed": 164168586.63540852,
+        "cumulativeExtracted": 192804078.431,
+        "remainingGeological": 120820430814.444,
+        "discoveredRemaining": 84574301570.111,
+        "recoverableRemaining": 69048923633.162,
+        "developedRemaining": 12660801150.285,
+        "qualityProxy": 0.881,
+        "depthM": 111,
+        "developmentDifficulty": 1.136,
+        "extractionCapacityPerDay": 1257199.2595,
+        "requiredRoad": true,
+        "requiredGrid": true,
+        "visibility": "PUBLIC_SCENARIO_CANDIDATE",
+        "uncertaintyFactor": [
+          0.25,
+          4
+        ],
+        "point": [
+          1620,
+          533
+        ],
+        "regionId": "visual-territory-16-E2",
+        "runtimeExtractionPerDay": 0,
+        "developedReserveInterpretation": "CONDITIONAL_ON_OPENING_FACILITY_AND_LICENSE_ADOPTION",
+        "openingStockRawEquivalentAllocated": 28635491.795591485
+      }
+    },
+    {
+      "id": "RES136",
+      "kind": "copper",
+      "point": [
+        1520,
+        510
+      ],
+      "countryId": "visual-territory-16",
+      "climateId": 8,
+      "classification": "geological",
+      "commodityId": "COPPER",
+      "visibility": "PUBLIC_SCENARIO_CANDIDATE",
+      "tradable": false,
+      "type": {
+        "id": "copper",
+        "name": "铜",
+        "symbol": "Cu",
+        "color": "#eda26c",
+        "context": "褶皱矿带",
+        "group": "首季地质资源",
+        "seasonEnabled": true
+      },
+      "deposit": {
+        "id": "RES136",
+        "countryId": "visual-territory-16",
+        "commodityId": "COPPER",
+        "unit": "tonne",
+        "provinceId": "PROVINCE-5-2",
+        "provinceType": "mineral-belt",
+        "initialGeological": 1120391254.12,
+        "historicalConsumed": 1768894.5845336763,
+        "cumulativeExtracted": 1785060.976,
+        "remainingGeological": 1118606193.144,
+        "discoveredRemaining": 783024335.201,
+        "recoverableRemaining": 639283878.441,
+        "developedRemaining": 117219004.115,
+        "qualityProxy": 0.725,
+        "depthM": 111,
+        "developmentDifficulty": 1.136,
+        "extractionCapacityPerDay": 11639.6777,
+        "requiredRoad": true,
+        "requiredGrid": true,
+        "visibility": "PUBLIC_SCENARIO_CANDIDATE",
+        "uncertaintyFactor": [
+          0.25,
+          4
+        ],
+        "point": [
+          1520,
+          510
+        ],
+        "regionId": "visual-territory-16-E1",
+        "runtimeExtractionPerDay": 0,
+        "developedReserveInterpretation": "CONDITIONAL_ON_OPENING_FACILITY_AND_LICENSE_ADOPTION",
+        "openingStockRawEquivalentAllocated": 16166.391466323717
+      }
+    },
+    {
+      "id": "RES137",
+      "kind": "lithium",
+      "point": [
+        1611,
+        670
+      ],
+      "countryId": "visual-territory-16",
+      "climateId": 3,
+      "classification": "geological",
+      "commodityId": "LITHIUM",
+      "visibility": "PUBLIC_SCENARIO_CANDIDATE",
+      "tradable": false,
+      "type": {
+        "id": "lithium",
+        "name": "锂",
+        "symbol": "Li",
+        "color": "#dfafd8",
+        "context": "干旱盆地",
+        "group": "首季地质资源",
+        "seasonEnabled": true
+      },
+      "deposit": {
+        "id": "RES137",
+        "countryId": "visual-territory-16",
+        "commodityId": "LITHIUM",
+        "unit": "tonne LCE",
+        "provinceId": "PROVINCE-5-3",
+        "provinceType": "mineral-belt",
+        "initialGeological": 61337753.339,
+        "historicalConsumed": 94532.03310078634,
+        "cumulativeExtracted": 97726.245,
+        "remainingGeological": 61240027.094,
+        "discoveredRemaining": 42868018.966,
+        "recoverableRemaining": 34998699.521,
+        "developedRemaining": 6417356.736,
+        "qualityProxy": 0.714,
+        "depthM": 111,
+        "developmentDifficulty": 1.136,
+        "extractionCapacityPerDay": 637.2343,
+        "requiredRoad": true,
+        "requiredGrid": true,
+        "visibility": "PUBLIC_SCENARIO_CANDIDATE",
+        "uncertaintyFactor": [
+          0.25,
+          4
+        ],
+        "point": [
+          1611,
+          670
+        ],
+        "regionId": "visual-territory-16-E2",
+        "runtimeExtractionPerDay": 0,
+        "developedReserveInterpretation": "CONDITIONAL_ON_OPENING_FACILITY_AND_LICENSE_ADOPTION",
+        "openingStockRawEquivalentAllocated": 3194.211899213646
+      }
+    }
+  ],
+  "regions": [
+    {
+      "id": "visual-territory-16-E1",
+      "countryId": "visual-territory-16",
+      "label": [
+        1495.25,
+        571.5
+      ],
+      "areaKm2": 1690071.673,
+      "landUseKm2": {
+        "croplandPotential": 1651773.265,
+        "forest": 0,
+        "urbanIndustrialPotential": 0,
+        "mountain": 0,
+        "inlandWater": 38298.408,
+        "convertible": 0
+      },
+      "natural": {
+        "meanElevationM": 184,
+        "temperatureC": 25,
+        "annualRainMm": 1800,
+        "monthlyRainMm": [
+          52.5,
+          65.56,
+          101.25,
+          150,
+          198.75,
+          234.44,
+          247.5,
+          234.44,
+          198.75,
+          150,
+          101.25,
+          65.56
+        ],
+        "runoffM3Year": 403170623614,
+        "environmentalFlowM3Year": 262060905349,
+        "allocatableWaterM3Day": 391971440,
+        "drySeasonWaterM3Day": 213624435,
+        "grainPotentialTonnesYear": 130385379.8016,
+        "grainYieldTonnesHa": 4.62,
+        "solarKwhM2Day": 3.8,
+        "windMps": 5.42,
+        "droughtExposure": 0.308,
+        "floodExposure": 0.456,
+        "stormExposure": 0.632
+      },
+      "initial": {
+        "population": 135764571,
+        "workingAge": 83496569,
+        "labourForce": 51097145,
+        "skills": {
+          "low": 31450804,
+          "medium": 14478887,
+          "high": 5167454
+        },
+        "households": 40527948,
+        "housingUnits": 42734290,
+        "croplandHa": 17906405.467748,
+        "grainTonnesDay": 229798.870169,
+        "grainDemandTonnesDay": 90509.71399999999,
+        "foodStockTonnes": 0,
+        "teachers": 992126,
+        "medicalWorkers": 475176,
+        "schoolSeats": 27085032,
+        "hospitalBeds": 407294
+      },
+      "basis": "GEOGRAPHIC_SCENARIO_ESTIMATE",
+      "settlementAccess": 0.6584,
+      "humanGeography": {
+        "transportDistanceKm": 2146,
+        "riverDistanceKm": 581,
+        "transportGravity": 0.2459,
+        "riverGravity": 0.3009,
+        "settlementType": "农业河谷",
+        "scenarioUrbanShare": 0.389,
+        "basis": "HUMAN_GEOGRAPHY_SCENARIO_NOT_OBSERVED_HISTORY"
+      },
+      "basinId": "BASIN-HL11",
+      "populationBasis": "area^0.72 × continuous temperature/rain/mountain suitability × transport/river settlement access"
+    },
+    {
+      "id": "visual-territory-16-E2",
+      "countryId": "visual-territory-16",
+      "label": [
+        1547.25,
+        533
+      ],
+      "areaKm2": 1744842.514,
+      "landUseKm2": {
+        "croplandPotential": 1709468.8838273434,
+        "forest": 0,
+        "urbanIndustrialPotential": 35373.63017265667,
+        "mountain": 0,
+        "inlandWater": 0,
+        "convertible": 0
+      },
+      "natural": {
+        "meanElevationM": 124,
+        "temperatureC": 24.6,
+        "annualRainMm": 1784,
+        "monthlyRainMm": [
+          54.13,
+          66.8,
+          101.42,
+          148.7,
+          195.99,
+          230.6,
+          243.27,
+          230.6,
+          195.99,
+          148.7,
+          101.42,
+          66.8
+        ],
+        "runoffM3Year": 399855725665,
+        "environmentalFlowM3Year": 259906221682,
+        "allocatableWaterM3Day": 388748622,
+        "drySeasonWaterM3Day": 215683002,
+        "grainPotentialTonnesYear": 128977462.812672,
+        "grainYieldTonnesHa": 4.608,
+        "solarKwhM2Day": 3.82,
+        "windMps": 5.71,
+        "droughtExposure": 0.314,
+        "floodExposure": 0.564,
+        "stormExposure": 0.803
+      },
+      "initial": {
+        "population": 134820304,
+        "workingAge": 83291984,
+        "labourForce": 51195002,
+        "skills": {
+          "low": 30860347,
+          "medium": 14887507,
+          "high": 5447148
+        },
+        "households": 40584078,
+        "housingUnits": 42743151,
+        "croplandHa": 17759177.685396,
+        "grainTonnesDay": 227317.474373,
+        "grainDemandTonnesDay": 89880.20266666666,
+        "foodStockTonnes": 0,
+        "teachers": 985226,
+        "medicalWorkers": 471872,
+        "schoolSeats": 26896651,
+        "hospitalBeds": 404461
+      },
+      "basis": "GEOGRAPHIC_SCENARIO_ESTIMATE",
+      "settlementAccess": 0.8211,
+      "humanGeography": {
+        "transportDistanceKm": 1927,
+        "riverDistanceKm": 1755,
+        "transportGravity": 0.2665,
+        "riverGravity": 0.1247,
+        "settlementType": "农业河谷",
+        "scenarioUrbanShare": 0.42,
+        "basis": "HUMAN_GEOGRAPHY_SCENARIO_NOT_OBSERVED_HISTORY"
+      },
+      "basinId": "BASIN-HL11",
+      "populationBasis": "area^0.72 × continuous temperature/rain/mountain suitability × transport/river settlement access"
+    }
+  ],
+  "profile": {
+    "countryId": "visual-territory-16",
+    "economyIdProposal": "SCENARIO-ECONOMY-16",
+    "bindingStatus": "OPENING_SEED_NOT_COMMITTED",
+    "population": 270584875,
+    "labourForce": 102292147,
+    "scenarioEmployed": 89668775,
+    "scenarioUnemployed": 12623372,
+    "foodProductionTonnesDay": 457116.344543,
+    "foodDemandTonnesDay": 180389.916667,
+    "foodAvailableStockTonnes": 12446904.250023,
+    "foodReservedTonnes": 0,
+    "foodInTransitTonnes": 0,
+    "dailyIncomeGcu": 2049231980.835806,
+    "treasuryCentralBankBalanceGcu": 122953918850.15,
+    "bankDepositsGcu": 61476959425.07417,
+    "bankReservesGcu": 67624655367.58159,
+    "bankLoansGcu": 0,
+    "bankEquityGcu": 6147695942.507418,
+    "historicalDebtGcu": 0,
+    "existingContracts": [],
+    "techLicenses": [],
+    "historicalPolicy": "EXPLICIT_GENESIS_ALLOCATION; no invented historical debt",
+    "strengths": [
+      "可用耕地与淡水承载",
+      "具名资源与网络候选"
+    ],
+    "bottlenecks": [
+      "设施尚未完成配方与投运核验",
+      "历史技术和权利不由地理推定"
+    ],
+    "developmentPaths": [
+      "农业与国内集散建设",
+      "资源开发与跨境技术合作"
+    ]
+  },
+  "power": {
+    "id": "GRID-16",
+    "countryId": "visual-territory-16",
+    "solarMW": 577821.283533,
+    "windMW": 577821.283533,
+    "solarCapacityFactor": 0.158757,
+    "windCapacityFactor": 0.09986,
+    "averageDemandMW": 122146.368449,
+    "averageDeliveredMW": 140468.323717,
+    "lossFraction": 0.06,
+    "storageMWh": 6514472.983973,
+    "storageDischargeMW": 122146.368449,
+    "storageEfficiency": 0.9,
+    "openingStateOfChargeFraction": 1,
+    "crossBorderConnections": [],
+    "hourlyDispatchValidated": false,
+    "status": "CANDIDATE_NOT_ENERGIZED"
+  },
+  "sourceStatus": "OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE",
+  "areaKm2": 3434914.187,
+  "climates": [
+    {
+      "id": 8,
+      "landPixels": 8209,
+      "sharePercent": 98.4,
+      "name": "热带季风"
+    },
+    {
+      "id": 3,
+      "landPixels": 132,
+      "sharePercent": 1.6,
+      "name": "温带海洋性"
+    }
+  ],
+  "officialOpening": {
+    "sourcePackageId": "BALANCED_2026_09_28_V1",
+    "countriesSha256": "5d493e93dfab1425731191ba7491cce47949d176e4769b33fdca48d2d31dba89",
+    "worldId": null,
+    "openingSeedCommitted": false,
+    "finance": {
+      "countryId": "visual-territory-16",
+      "currency": "GCU_SCENARIO_ACCOUNTING_UNIT",
+      "dailyLabourIncomeReference": 2049231980.835806,
+      "treasuryCentralBankBalance": 122953918850.15,
+      "householdBankDeposits": 46107719568.80563,
+      "businessBankDeposits": 15369239856.268543,
+      "bankReserveAssets": 67624655367.58159,
+      "bankLoanAssets": 0,
+      "bankEquity": 6147695942.507418,
+      "bankDepositLiabilities": 61476959425.07417,
+      "publicDebt": 0,
+      "existingContracts": [],
+      "historicalClaims": [],
+      "dailyReferenceTradeNet": 8961049.500333,
+      "openingMoneyOrigin": "EXPLICIT_GENESIS_ALLOCATION; no invented historical debt",
+      "taxRateProposal": 0.18,
+      "taxBase": "daily labour-income reference",
+      "priceAuthority": "BALANCE_REFERENCE_ONLY",
+      "openingPhysicalAssetBookValueGcu": 8160951934118.39,
+      "assetFunding": "GENESIS_PUBLIC_CAPITAL_EQUITY_NOT_NEW_CASH",
+      "dailyMaintenanceBudgetGcu": 453386218.56,
+      "dailyInboundFreightBudgetGcu": 12803408.16,
+      "dailyTaxRevenueReferenceGcu": 368861756.55,
+      "dailyNetCashDrainGcu": 88366820.67,
+      "reserveBasis": "max(60 days baseline labour income, 660 days maintenance+freight+trade shortfall net of tax)",
+      "cashRunwayDays": 1391.4,
+      "cashRunwayStatus": "FINITE"
+    },
+    "employment": {
+      "countryId": "visual-territory-16",
+      "labourForce": 102292147,
+      "employed": 89668775,
+      "unemployed": 12623372,
+      "sectors": {
+        "CRUDE_OIL": 0,
+        "NATURAL_GAS": 0,
+        "URANIUM": 0,
+        "GRAIN": 228559,
+        "IRON_ORE": 0,
+        "COPPER": 0,
+        "LITHIUM": 0,
+        "STEEL": 0,
+        "REFINED_FUEL": 0,
+        "MACHINERY": 0,
+        "SEMICONDUCTORS": 0,
+        "BATTERIES": 27
+      },
+      "educationAndHealth": 2924400,
+      "power": 138678,
+      "logistics": 811755,
+      "otherDomesticServices": 85565356,
+      "interpretation": "Candidate allocated posts; not runtime jobs"
+    },
+    "stocks": [
+      {
+        "id": "STOCK-16-CRUDE_OIL",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "CRUDE_OIL",
+        "unit": "barrel",
+        "available": 0,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      },
+      {
+        "id": "STOCK-16-NATURAL_GAS",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "NATURAL_GAS",
+        "unit": "MMBtu",
+        "available": 0,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      },
+      {
+        "id": "STOCK-16-URANIUM",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "URANIUM",
+        "unit": "tonne U",
+        "available": 18.670365,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      },
+      {
+        "id": "STOCK-16-GRAIN",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "GRAIN",
+        "unit": "tonne",
+        "available": 12446904.250023,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      },
+      {
+        "id": "STOCK-16-IRON_ORE",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "IRON_ORE",
+        "unit": "tonne",
+        "available": 0,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      },
+      {
+        "id": "STOCK-16-COPPER",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "COPPER",
+        "unit": "tonne",
+        "available": 4955.662524,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      },
+      {
+        "id": "STOCK-16-LITHIUM",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "LITHIUM",
+        "unit": "tonne LCE",
+        "available": 3716.746893,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      },
+      {
+        "id": "STOCK-16-STEEL",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "STEEL",
+        "unit": "tonne",
+        "available": 2800553.45625,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      },
+      {
+        "id": "STOCK-16-REFINED_FUEL",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "REFINED_FUEL",
+        "unit": "barrel equivalent",
+        "available": 18670356.375,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      },
+      {
+        "id": "STOCK-16-MACHINERY",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "MACHINERY",
+        "unit": "equipment unit",
+        "available": 14942.479644,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      },
+      {
+        "id": "STOCK-16-SEMICONDUCTORS",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "SEMICONDUCTORS",
+        "unit": "standardised chip unit",
+        "available": 18670356.375,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      },
+      {
+        "id": "STOCK-16-BATTERIES",
+        "countryId": "visual-territory-16",
+        "ownerId": "OP-16",
+        "warehouseId": "WAREHOUSE-16",
+        "commodityId": "BATTERIES",
+        "unit": "MWh-equivalent",
+        "available": 1493.62851,
+        "reserved": 0,
+        "inTransit": 0,
+        "bufferDays": 69,
+        "origin": "AUTHORED_OPENING_STOCK_ENDOWMENT_NOT_HISTORICAL_EXTRACTION"
+      }
+    ],
+    "productionPlans": [
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "CRUDE_OIL",
+        "outputPerDay": 0,
+        "usePerDay": 0,
+        "netPerDay": 0,
+        "unit": "barrel"
+      },
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "NATURAL_GAS",
+        "outputPerDay": 0,
+        "usePerDay": 0,
+        "netPerDay": 0,
+        "unit": "MMBtu"
+      },
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "URANIUM",
+        "outputPerDay": 0,
+        "usePerDay": 0.270585,
+        "netPerDay": -0.270585,
+        "unit": "tonne U"
+      },
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "GRAIN",
+        "outputPerDay": 457116.344543,
+        "usePerDay": 180389.916667,
+        "netPerDay": 276726.427876,
+        "unit": "tonne"
+      },
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "IRON_ORE",
+        "outputPerDay": 0,
+        "usePerDay": 0,
+        "netPerDay": 0,
+        "unit": "tonne"
+      },
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "COPPER",
+        "outputPerDay": 0,
+        "usePerDay": 71.821196,
+        "netPerDay": -71.821196,
+        "unit": "tonne"
+      },
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "LITHIUM",
+        "outputPerDay": 0,
+        "usePerDay": 53.865897,
+        "netPerDay": -53.865897,
+        "unit": "tonne LCE"
+      },
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "STEEL",
+        "outputPerDay": 0,
+        "usePerDay": 40587.73125,
+        "netPerDay": -40587.73125,
+        "unit": "tonne"
+      },
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "REFINED_FUEL",
+        "outputPerDay": 0,
+        "usePerDay": 270584.875,
+        "netPerDay": -270584.875,
+        "unit": "barrel equivalent"
+      },
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "MACHINERY",
+        "outputPerDay": 0,
+        "usePerDay": 216.557676,
+        "netPerDay": -216.557676,
+        "unit": "equipment unit"
+      },
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "SEMICONDUCTORS",
+        "outputPerDay": 0,
+        "usePerDay": 270584.875,
+        "netPerDay": -270584.875,
+        "unit": "standardised chip unit"
+      },
+      {
+        "countryId": "visual-territory-16",
+        "commodityId": "BATTERIES",
+        "outputPerDay": 89.776495,
+        "usePerDay": 21.64679,
+        "netPerDay": 68.129705,
+        "unit": "MWh-equivalent"
+      }
+    ],
+    "populationServices": [
+      {
+        "id": "SERVICE-visual-territory-16-E1",
+        "countryId": "visual-territory-16",
+        "regionId": "visual-territory-16-E1",
+        "population": 135764571,
+        "households": 40527948,
+        "housingUnits": 42734290,
+        "schoolSeats": 27085032,
+        "teachers": 992126,
+        "medicalWorkers": 475176,
+        "hospitalBeds": 407294,
+        "dailyMedicalVisits": 1629175,
+        "waterDomesticM3Day": 24513047.541667,
+        "sourceStatus": "OPENING_SOCIAL_ASSET_PROPOSAL"
+      },
+      {
+        "id": "SERVICE-visual-territory-16-E2",
+        "countryId": "visual-territory-16",
+        "regionId": "visual-territory-16-E2",
+        "population": 134820304,
+        "households": 40584078,
+        "housingUnits": 42743151,
+        "schoolSeats": 26896651,
+        "teachers": 985226,
+        "medicalWorkers": 471872,
+        "hospitalBeds": 404461,
+        "dailyMedicalVisits": 1617844,
+        "waterDomesticM3Day": 24342554.888889,
+        "sourceStatus": "OPENING_SOCIAL_ASSET_PROPOSAL"
+      }
+    ]
+  }
+}

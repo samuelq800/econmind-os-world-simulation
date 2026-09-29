@@ -35,7 +35,7 @@
     "test:v10.4:postgres": "node scripts/v09-postgres-test-environment.mjs && vitest run tests/world-core/v10.4-local-acceptance.test.ts",
     "test:world-v2-release-handoff:postgres": "node scripts/v09-postgres-test-environment.mjs && vitest run tests/integration/world-v2-release-handoff-postgres.test.ts",
     "test:balanced-candidate": "node scripts/test-balanced-country-candidate-release.mjs && node scripts/verify-world-data-selection.mjs",
-    "test:authoritative-ui": "node scripts/verify-authoritative-ui-publication.mjs",
+    "test:authoritative-ui": "node scripts/sync-official-ui-country-data.mjs --check && node scripts/verify-authoritative-ui-publication.mjs",
     "v09:staging:plan": "node scripts/v09-staging-evidence.mjs --dry-run",
     "v09:staging:execute": "node scripts/v09-staging-evidence.mjs --execute",
     "registry:generate": "python3 tools/build_core_registries.py && prettier --write packages/core/src/registries/fixed-catalog.ts",
