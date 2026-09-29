@@ -34,12 +34,16 @@ published runtime files are checked against the delivered manifest by
 `pnpm test:authoritative-ui`. The older React page remains at `legacy.html`
 for reference. No original EconMind main-site files are changed.
 
-This is a static, local-planning UI release. Its bundled country preview
-population totals 14,714,012,813, whereas the official selected World data
-totals 14,712,146,434. The UI's preview numbers therefore must **not** be
-treated as official economic state until a reviewed data adapter replaces
-them. Login, authoritative commands, settlement and live receipts are not
-connected by this publication.
+The country pages and atlas now bind their displayed opening numbers to the
+selected 70-country package: 14,712,146,434 people, 1,374 facility records,
+and 240 geological deposits. `pnpm test:authoritative-ui` checks the generated
+country files against that pinned package. The original UI archive's older
+14,714,012,813-person preview remains only as historical source provenance.
+See [the numerical binding report](docs/reports/ui/OFFICIAL_OPENING_DATA_BINDING_2026_09_29.md)
+for field meanings and coverage. This is still a static, local-planning UI:
+the official opening inputs are not a committed World State, and login,
+authoritative commands, settlement, live prices and receipts are not connected.
+Country-scoped routes do not fall back to the older North Harbour sample ledger.
 
 ## Latest code integration (2026-09-27)
 
