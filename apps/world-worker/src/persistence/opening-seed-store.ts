@@ -144,6 +144,21 @@ export class WorldOpeningSeedStore {
     const canonicalPayload = canonicalSeedPayload(input.seed);
     const replayBinding = canonicalSerialize(input.seed.replayBinding);
     return this.#database.transaction(async (transaction) => {
+      // A restart may retry the same immutable bootstrap after World history
+      // has advanced. Read the authoritative row before the INSERT trigger's
+      // WorldVersion-zero check; a matching seed is a no-op, never a rewrite.
+      const existing = await this.#readOptionalWith(
+        transaction,
+        input.seed.worldId,
+      );
+      if (existing !== null) {
+        if (canonicalSerialize(existing) !== canonicalSerialize(input.seed)) {
+          invalid(
+            'Opening seed bootstrap conflicts with immutable server lineage',
+          );
+        }
+        return 'ALREADY_BOOTSTRAPPED';
+      }
       const inserted = await transaction.query(
         `insert into world_v2.opening_seed
            (world_id, seed_id, opening_world_version, replay_binding,
@@ -189,6 +204,15 @@ export class WorldOpeningSeedStore {
     executor: SqlExecutor,
     worldId: string,
   ): Promise<Readonly<OpeningSeed>> {
+    const seed = await this.#readOptionalWith(executor, worldId);
+    if (seed === null) invalid('No immutable opening seed exists for World');
+    return seed;
+  }
+
+  async #readOptionalWith(
+    executor: SqlExecutor,
+    worldId: string,
+  ): Promise<Readonly<OpeningSeed> | null> {
     const result = await executor.query<OpeningSeedRow>(
       `select world_id, seed_id, opening_world_version, replay_binding,
               canonical_payload, seed_fingerprint
@@ -197,9 +221,8 @@ export class WorldOpeningSeedStore {
       [worldId],
     );
     const row = result.rows[0];
-    if (row === undefined || result.rows.length !== 1) {
-      invalid('No immutable opening seed exists for World');
-    }
+    if (row === undefined) return null;
+    if (result.rows.length !== 1) invalid('Duplicated immutable opening seed');
     return seedFromRow(row, this.#sha256Hex);
   }
 }
