@@ -323,7 +323,7 @@ postgresDescribe('World V2 selected-country server reader role', () => {
     const policies = await currentAdmin().query<{
       tablename: string;
       policyname: string;
-      roles: readonly string[];
+      roles: string;
       cmd: string;
       qual: string | null;
       with_check: string | null;
@@ -346,7 +346,7 @@ postgresDescribe('World V2 selected-country server reader role', () => {
       {
         tablename: 'country_candidate_artifact',
         policyname: 'country_candidate_artifact_selected_source_server_read',
-        roles: [READER_ROLE],
+        roles: `{${READER_ROLE}}`,
         cmd: 'SELECT',
         qual: "bundle_id='BALANCED_2026_09_28_V1'ANDartifact_path='source/646174612f636f756e74726965732e6a736f6e'",
         with_check: null,
@@ -354,7 +354,7 @@ postgresDescribe('World V2 selected-country server reader role', () => {
       {
         tablename: 'country_candidate_bundle',
         policyname: 'country_candidate_bundle_selected_source_server_read',
-        roles: [READER_ROLE],
+        roles: `{${READER_ROLE}}`,
         cmd: 'SELECT',
         qual: "bundle_id='BALANCED_2026_09_28_V1'",
         with_check: null,
