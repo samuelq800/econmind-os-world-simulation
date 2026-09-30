@@ -28,12 +28,12 @@ not dispatched. No retry was made.
 
 A subsequent read-only management query found ledger row 20:
 
-| Field | Value |
-| --- | --- |
-| migration | 0020_world_v2_official_country_reader |
-| artifact SHA-256 | 083e06aca86763e4bc32a34347c1a86b26aa910f3c6a191b9393021347211618 |
-| source artifact commit | f3413bae195b75e80d28d6afa314ca0e394bdfbc |
-| release order | 20 |
+| Field                  | Value                                                            |
+| ---------------------- | ---------------------------------------------------------------- |
+| migration              | 0020_world_v2_official_country_reader                            |
+| artifact SHA-256       | 083e06aca86763e4bc32a34347c1a86b26aa910f3c6a191b9393021347211618 |
+| source artifact commit | f3413bae195b75e80d28d6afa314ca0e394bdfbc                         |
+| release order          | 20                                                               |
 
 Both reader roles are NOLOGIN, NOINHERIT, NOBYPASSRLS, and NOSUPERUSER. The
 two candidate tables have exactly the two expected SELECT policies, scoped to
@@ -44,10 +44,10 @@ The strict initial verifier expected only the credentialless API-login role to
 belong to world_v2_api_reader. Actual membership also contains the PostgreSQL
 control-plane role postgres:
 
-| member | grantor | admin | inherit | set |
-| --- | --- | --- | --- | --- |
-| postgres | supabase_admin | true | false | false |
-| world_v2_api_login | postgres | false | false | true |
+| member             | grantor        | admin | inherit | set   |
+| ------------------ | -------------- | ----- | ------- | ----- |
+| postgres           | supabase_admin | true  | false   | false |
+| world_v2_api_login | postgres       | false | false   | true  |
 
 postgres is not a superuser, but it can log in, has BYPASSRLS, can create
 roles, and inherits privileges. This record does not treat it as harmless or

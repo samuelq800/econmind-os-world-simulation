@@ -68,10 +68,7 @@
       "canCreateRole": true,
       "inheritsPrivileges": true
     },
-    "schemaUsage": [
-      "public",
-      "world_v2"
-    ],
+    "schemaUsage": ["public", "world_v2"],
     "columnSelectPrivilegeCount": 8,
     "tablePrivilegeCount": 0,
     "candidateTablePolicyCount": 2
