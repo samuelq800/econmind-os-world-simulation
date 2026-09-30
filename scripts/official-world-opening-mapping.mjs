@@ -3,6 +3,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { format, resolveConfig } from 'prettier';
+
 import {
   BALANCED_CANDIDATE_ID,
   BALANCED_CANDIDATE_ROOT,
@@ -1785,9 +1787,21 @@ export async function writeOfficialWorldOpeningMapping(repositoryRoot) {
   ]) {
     const outputPath = path.join(repositoryRoot, relativePath);
     await mkdir(path.dirname(outputPath), { recursive: true });
-    await writeFile(outputPath, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+    await writeFile(
+      outputPath,
+      await serializeOfficialWorldArtifact(outputPath, value),
+      'utf8',
+    );
   }
   return result;
+}
+
+export async function serializeOfficialWorldArtifact(outputPath, value) {
+  const prettierConfig = (await resolveConfig(outputPath)) ?? {};
+  return format(JSON.stringify(value), {
+    ...prettierConfig,
+    filepath: outputPath,
+  });
 }
 
 const invokedPath = process.argv[1] && path.resolve(process.argv[1]);
