@@ -340,6 +340,98 @@ function collectSourceReferences(value, countries, regions) {
   }
 }
 
+function collectDirectCountryContext(value, countries) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return;
+  }
+  if (
+    typeof value.countryId === 'string' &&
+    /^visual-territory-\d{2}$/u.test(value.countryId)
+  ) {
+    countries.add(value.countryId);
+  }
+}
+
+function sameStringSet(left, right) {
+  return (
+    left.size === right.size && [...left].every((value) => right.has(value))
+  );
+}
+
+function resolveSourceBindings(value, countryById, regionById, label) {
+  const directCountryReferences = new Set();
+  const directCountryContexts = new Set();
+  const regionReferences = new Set();
+  collectSourceReferences(value, directCountryReferences, regionReferences);
+  collectDirectCountryContext(value, directCountryContexts);
+
+  for (const countryId of directCountryReferences) {
+    requireReference(countryById, countryId, `${label} country`);
+  }
+
+  const derivedCountryReferences = new Set();
+  const regionBindings = [...regionReferences].sort().map((regionId) => {
+    const region = requireReference(
+      regionById,
+      regionId,
+      `${label} region binding`,
+    );
+    const derivedCountryId = string(
+      region.countryId,
+      `${label} region country`,
+    );
+    requireReference(countryById, derivedCountryId, `${label} derived country`);
+    derivedCountryReferences.add(derivedCountryId);
+    return Object.freeze({
+      sourceRegionId: regionId,
+      normalizedRegionId: normalizedRegionId(regionId, derivedCountryId),
+    });
+  });
+
+  if (
+    directCountryContexts.size > 0 &&
+    derivedCountryReferences.size > 0 &&
+    !sameStringSet(directCountryContexts, derivedCountryReferences)
+  ) {
+    reject('OFFICIAL_WORLD_COUNTRY_REGION_REFERENCE_CONFLICT', label);
+  }
+
+  const countryReferences = new Set([
+    ...directCountryReferences,
+    ...derivedCountryReferences,
+  ]);
+  return Object.freeze({
+    countryBindings: Object.freeze(
+      [...countryReferences].sort().map((countryId) =>
+        Object.freeze({
+          sourceCountryId: countryId,
+          coreCountryId: coreCountryId(countryId),
+        }),
+      ),
+    ),
+    regionBindings: Object.freeze(regionBindings),
+  });
+}
+
+export function resolveOfficialWorldSourceBindings(
+  value,
+  countries,
+  regions,
+  label = 'source record',
+) {
+  const countryById = uniqueIndex(
+    array(countries, `${label} countries`),
+    (row) => string(row.id, `${label} country id`),
+    `${label} country`,
+  );
+  const regionById = uniqueIndex(
+    array(regions, `${label} regions`),
+    (row) => string(row.id, `${label} region id`),
+    `${label} region`,
+  );
+  return resolveSourceBindings(value, countryById, regionById, label);
+}
+
 function datasetName(relativePath) {
   const match = /^data\/(.+)\.json$/u.exec(relativePath);
   if (match === null)
@@ -726,39 +818,16 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
     const source = readData(relativePath);
     const sourceRecords = Array.isArray(source) ? source : [source];
     const records = sourceRecords.map((record, index) => {
-      const countryReferences = new Set();
-      const regionReferences = new Set();
-      collectSourceReferences(record, countryReferences, regionReferences);
-      for (const countryId of countryReferences) {
-        requireReference(countryById, countryId, `${relativePath} country`);
-      }
-      for (const regionId of regionReferences) {
-        requireReference(regionById, regionId, `${relativePath} region`);
-      }
+      const bindings = resolveSourceBindings(
+        record,
+        countryById,
+        regionById,
+        `${relativePath}[${index}]`,
+      );
       return Object.freeze({
         sourceIndex: index,
-        countryBindings: Object.freeze(
-          [...countryReferences].sort().map((countryId) => ({
-            sourceCountryId: countryId,
-            coreCountryId: coreCountryId(countryId),
-          })),
-        ),
-        regionBindings: Object.freeze(
-          [...regionReferences].sort().map((regionId) => {
-            const region = requireReference(
-              regionById,
-              regionId,
-              `${relativePath} region binding`,
-            );
-            return {
-              sourceRegionId: regionId,
-              normalizedRegionId: normalizedRegionId(
-                regionId,
-                region.countryId,
-              ),
-            };
-          }),
-        ),
+        countryBindings: bindings.countryBindings,
+        regionBindings: bindings.regionBindings,
         source: record,
       });
     });

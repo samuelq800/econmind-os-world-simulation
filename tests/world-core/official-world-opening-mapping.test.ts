@@ -4,7 +4,10 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-import { buildOfficialWorldOpeningMapping } from '../../scripts/official-world-opening-mapping.mjs';
+import {
+  buildOfficialWorldOpeningMapping,
+  resolveOfficialWorldSourceBindings,
+} from '../../scripts/official-world-opening-mapping.mjs';
 
 const root = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -51,10 +54,24 @@ interface CompleteDatasetRow {
   readonly dataset: string;
   readonly sourceRecordCount: number;
   readonly structuredMappingStatus: string;
-  readonly records: readonly unknown[];
+  readonly records: readonly DatasetRecord[];
+}
+
+interface DatasetRecord {
+  readonly countryBindings: readonly {
+    readonly sourceCountryId: string;
+    readonly coreCountryId: string;
+  }[];
+  readonly regionBindings: readonly {
+    readonly sourceRegionId: string;
+    readonly normalizedRegionId: string;
+  }[];
+  readonly source: Record<string, unknown>;
 }
 
 interface CoverageCountryRow {
+  readonly sourceCountryId: string;
+  readonly structuredDatasets: readonly string[];
   readonly structuredDatasetCount: number;
   readonly versionedMapAssetCount: number;
 }
@@ -211,6 +228,52 @@ describe('official 70-country opening-input mapping', () => {
           dataset.records.length === dataset.sourceRecordCount,
       ),
     ).toBe(true);
+
+    const seasonalWater = datasets.get('seasonal-water');
+    const changes = datasets.get('changes');
+    expect(seasonalWater?.records).toHaveLength(122);
+    expect(changes?.records).toHaveLength(130);
+    expect(
+      seasonalWater?.records.every(
+        (record) =>
+          record.countryBindings.length === 1 &&
+          record.regionBindings.length === 1,
+      ),
+    ).toBe(true);
+    expect(
+      changes?.records.every(
+        (record) =>
+          record.countryBindings.length === 1 &&
+          record.regionBindings.length === 1,
+      ),
+    ).toBe(true);
+
+    const regionsByCountry = new Map<string, Set<string>>();
+    for (const region of mapping.mappings.regions) {
+      const regionIds =
+        regionsByCountry.get(region.sourceCountryId) ?? new Set();
+      regionIds.add(region.sourceRegionId);
+      regionsByCountry.set(region.sourceCountryId, regionIds);
+    }
+    for (const country of coverage.countries as readonly CoverageCountryRow[]) {
+      expect(country.structuredDatasets).toContain('seasonal-water');
+      expect(country.structuredDatasets).toContain('changes');
+      const expectedRegionIds = regionsByCountry.get(country.sourceCountryId);
+      expect(expectedRegionIds).toBeDefined();
+      const countrySeasonalRows = seasonalWater?.records.filter((record) =>
+        record.countryBindings.some(
+          (binding) => binding.sourceCountryId === country.sourceCountryId,
+        ),
+      );
+      expect(countrySeasonalRows).toHaveLength(expectedRegionIds?.size ?? 0);
+      expect(
+        countrySeasonalRows?.every((record) =>
+          record.regionBindings.every((binding) =>
+            expectedRegionIds?.has(binding.sourceRegionId),
+          ),
+        ),
+      ).toBe(true);
+    }
     expect(coverage.sourceArtifacts).toHaveLength(87);
     expect(coverage.mapAssets).toHaveLength(203);
     expect(
@@ -227,6 +290,75 @@ describe('official 70-country opening-input mapping', () => {
       productionWritesInReadback: '0',
     });
   }, 30_000);
+
+  it('derives region-only country bindings and rejects unknown or conflicting references', () => {
+    const countries = [
+      { id: 'visual-territory-01' },
+      { id: 'visual-territory-02' },
+    ];
+    const regions = [
+      {
+        id: 'visual-territory-01-E1',
+        countryId: 'visual-territory-01',
+      },
+      {
+        id: 'visual-territory-02-E1',
+        countryId: 'visual-territory-02',
+      },
+    ];
+
+    expect(
+      resolveOfficialWorldSourceBindings(
+        { objectId: 'visual-territory-01-E1' },
+        countries,
+        regions,
+        'region-only change',
+      ),
+    ).toEqual({
+      countryBindings: [
+        {
+          sourceCountryId: 'visual-territory-01',
+          coreCountryId: 'COUNTRY_01',
+        },
+      ],
+      regionBindings: [
+        {
+          sourceRegionId: 'visual-territory-01-E1',
+          normalizedRegionId: 'REGION_01_E1',
+        },
+      ],
+    });
+    expect(
+      resolveOfficialWorldSourceBindings(
+        { scope: 'WORLD_LEVEL_NO_COUNTRY_REFERENCE' },
+        countries,
+        regions,
+      ),
+    ).toEqual({ countryBindings: [], regionBindings: [] });
+    expect(() =>
+      resolveOfficialWorldSourceBindings(
+        { regionId: 'visual-territory-01-E9' },
+        countries,
+        regions,
+        'unknown region',
+      ),
+    ).toThrow(
+      /OFFICIAL_WORLD_UNKNOWN_REFERENCE:unknown region region binding/u,
+    );
+    expect(() =>
+      resolveOfficialWorldSourceBindings(
+        {
+          countryId: 'visual-territory-02',
+          regionId: 'visual-territory-01-E1',
+        },
+        countries,
+        regions,
+        'conflicting country and region',
+      ),
+    ).toThrow(
+      /OFFICIAL_WORLD_COUNTRY_REGION_REFERENCE_CONFLICT:conflicting country and region/u,
+    );
+  });
 
   it('maps identifiers and all stock cells while leaving ownership unresolved', async () => {
     const { mapping } = await buildOfficialWorldOpeningMapping(root);

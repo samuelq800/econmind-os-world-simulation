@@ -1,8 +1,8 @@
 {
   "schemaVersion": "OFFICIAL_WORLD_COMPLETE_COVERAGE_V1",
   "status": "COMPLETE_SOURCE_SIDE_COVERAGE_WITH_CONNECTION_GAPS",
-  "mappingFingerprint": "sha256:3463413929b1a659f0a089e041f8698c09d37caa2ad1d88fbc930db9bb9fffbb",
-  "gapsFingerprint": "sha256:b0e37cc97802080be7f14f5a0d3bf4ef457f3c6c1e60f6560c79d110493772c5",
+  "mappingFingerprint": "sha256:230f8d695c25ea839fb6415de3c4c2985dd6d95e6261fa10dbec73053dedac82",
+  "gapsFingerprint": "sha256:f374ed3a888305a467f52d0aeaf7c545a6513cf17accc10c9537850694b68e95",
   "distinctions": {
     "originalsPreserved": "87 candidate artifacts are hash-verified locally and reported in immutable production candidate storage.",
     "structuredOfflineMapping": "Every data/*.json dataset is included losslessly with country and region bindings where present.",
@@ -1105,7 +1105,7 @@
       "sourceBytes": 26863,
       "sourceShape": "ARRAY",
       "sourceRecordCount": 130,
-      "associatedCountryCount": 0,
+      "associatedCountryCount": 70,
       "associatedRegionCount": 122,
       "structuredMappingStatus": "FULL_SOURCE_RECORDS_INCLUDED_LOSSLESS",
       "offlineQueryStatus": "MACHINE_READABLE",
@@ -1537,7 +1537,7 @@
       "sourceBytes": 62791,
       "sourceShape": "ARRAY",
       "sourceRecordCount": 122,
-      "associatedCountryCount": 0,
+      "associatedCountryCount": 70,
       "associatedRegionCount": 122,
       "structuredMappingStatus": "FULL_SOURCE_RECORDS_INCLUDED_LOSSLESS",
       "offlineQueryStatus": "MACHINE_READABLE",
@@ -4541,6 +4541,7 @@
       "sourceCountryId": "visual-territory-01",
       "coreCountryId": "COUNTRY_01",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4559,13 +4560,14 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "trade-plans",
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 23,
+      "structuredDatasetCount": 25,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/01-avenor.svg",
         "apps/world-web/src/assets/country-scenes/01.png"
@@ -4576,6 +4578,7 @@
       "sourceCountryId": "visual-territory-02",
       "coreCountryId": "COUNTRY_02",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4594,6 +4597,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -4601,7 +4605,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/02-brelis.svg",
         "apps/world-web/src/assets/country-scenes/02.png"
@@ -4612,6 +4616,7 @@
       "sourceCountryId": "visual-territory-03",
       "coreCountryId": "COUNTRY_03",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4630,6 +4635,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -4637,7 +4643,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/03-caedon.svg",
         "apps/world-web/src/assets/country-scenes/03.png"
@@ -4648,6 +4654,7 @@
       "sourceCountryId": "visual-territory-04",
       "coreCountryId": "COUNTRY_04",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4666,6 +4673,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -4673,7 +4681,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/04-darsin.svg",
         "apps/world-web/src/assets/country-scenes/04.png"
@@ -4684,6 +4692,7 @@
       "sourceCountryId": "visual-territory-05",
       "coreCountryId": "COUNTRY_05",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4702,13 +4711,14 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "trade-plans",
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 23,
+      "structuredDatasetCount": 25,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/05-ellovar.svg",
         "apps/world-web/src/assets/country-scenes/05.png"
@@ -4719,6 +4729,7 @@
       "sourceCountryId": "visual-territory-06",
       "coreCountryId": "COUNTRY_06",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4737,13 +4748,14 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "trade-plans",
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 23,
+      "structuredDatasetCount": 25,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/06-faren.svg",
         "apps/world-web/src/assets/country-scenes/06.png"
@@ -4754,6 +4766,7 @@
       "sourceCountryId": "visual-territory-07",
       "coreCountryId": "COUNTRY_07",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4772,6 +4785,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -4779,7 +4793,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/07-galdra.svg",
         "apps/world-web/src/assets/country-scenes/07.png"
@@ -4790,6 +4804,7 @@
       "sourceCountryId": "visual-territory-08",
       "coreCountryId": "COUNTRY_08",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4808,6 +4823,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -4815,7 +4831,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/08-hethen.svg",
         "apps/world-web/src/assets/country-scenes/08.png"
@@ -4826,6 +4842,7 @@
       "sourceCountryId": "visual-territory-09",
       "coreCountryId": "COUNTRY_09",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4844,6 +4861,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -4851,7 +4869,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/09-istrel.svg",
         "apps/world-web/src/assets/country-scenes/09.png"
@@ -4862,6 +4880,7 @@
       "sourceCountryId": "visual-territory-10",
       "coreCountryId": "COUNTRY_10",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4880,6 +4899,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -4887,7 +4907,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/10-jorun.svg",
         "apps/world-web/src/assets/country-scenes/10.png"
@@ -4898,6 +4918,7 @@
       "sourceCountryId": "visual-territory-11",
       "coreCountryId": "COUNTRY_11",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4916,6 +4937,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -4924,7 +4946,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 25,
+      "structuredDatasetCount": 27,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/11-keldan.svg",
         "apps/world-web/src/assets/country-scenes/11.png"
@@ -4935,6 +4957,7 @@
       "sourceCountryId": "visual-territory-12",
       "coreCountryId": "COUNTRY_12",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4953,6 +4976,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -4961,7 +4985,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 25,
+      "structuredDatasetCount": 27,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/12-lumer.svg",
         "apps/world-web/src/assets/country-scenes/12.png"
@@ -4972,6 +4996,7 @@
       "sourceCountryId": "visual-territory-13",
       "coreCountryId": "COUNTRY_13",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -4990,6 +5015,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -4997,7 +5023,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/13-meros.svg",
         "apps/world-web/src/assets/country-scenes/13.png"
@@ -5008,6 +5034,7 @@
       "sourceCountryId": "visual-territory-14",
       "coreCountryId": "COUNTRY_14",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5026,6 +5053,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5033,7 +5061,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/14-nadrin.svg",
         "apps/world-web/src/assets/country-scenes/14.png"
@@ -5044,6 +5072,7 @@
       "sourceCountryId": "visual-territory-15",
       "coreCountryId": "COUNTRY_15",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5062,6 +5091,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5069,7 +5099,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/15-orelis.svg",
         "apps/world-web/src/assets/country-scenes/15.png"
@@ -5080,6 +5110,7 @@
       "sourceCountryId": "visual-territory-16",
       "coreCountryId": "COUNTRY_16",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5098,6 +5129,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5105,7 +5137,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/16-paryn.svg",
         "apps/world-web/src/assets/country-scenes/16.png"
@@ -5116,6 +5148,7 @@
       "sourceCountryId": "visual-territory-17",
       "coreCountryId": "COUNTRY_17",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5134,6 +5167,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5142,7 +5176,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 25,
+      "structuredDatasetCount": 27,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/17-quoran.svg",
         "apps/world-web/src/assets/country-scenes/17.png"
@@ -5153,6 +5187,7 @@
       "sourceCountryId": "visual-territory-18",
       "coreCountryId": "COUNTRY_18",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5171,6 +5206,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5178,7 +5214,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/18-rassel.svg",
         "apps/world-web/src/assets/country-scenes/18.png"
@@ -5189,6 +5225,7 @@
       "sourceCountryId": "visual-territory-19",
       "coreCountryId": "COUNTRY_19",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5207,6 +5244,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5215,7 +5253,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 25,
+      "structuredDatasetCount": 27,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/19-siven.svg",
         "apps/world-web/src/assets/country-scenes/19.png"
@@ -5226,6 +5264,7 @@
       "sourceCountryId": "visual-territory-20",
       "coreCountryId": "COUNTRY_20",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5244,6 +5283,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5251,7 +5291,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/20-talan.svg",
         "apps/world-web/src/assets/country-scenes/20.png"
@@ -5262,6 +5302,7 @@
       "sourceCountryId": "visual-territory-21",
       "coreCountryId": "COUNTRY_21",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5280,6 +5321,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5287,7 +5329,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/21-uvren.svg",
         "apps/world-web/src/assets/country-scenes/21.png"
@@ -5298,6 +5340,7 @@
       "sourceCountryId": "visual-territory-22",
       "coreCountryId": "COUNTRY_22",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5316,6 +5359,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5323,7 +5367,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/22-vardis.svg",
         "apps/world-web/src/assets/country-scenes/22.png"
@@ -5334,6 +5378,7 @@
       "sourceCountryId": "visual-territory-23",
       "coreCountryId": "COUNTRY_23",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5352,6 +5397,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5359,7 +5405,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/23-wexar.svg",
         "apps/world-web/src/assets/country-scenes/23.png"
@@ -5370,6 +5416,7 @@
       "sourceCountryId": "visual-territory-24",
       "coreCountryId": "COUNTRY_24",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5388,6 +5435,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5396,7 +5444,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 25,
+      "structuredDatasetCount": 27,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/24-xandor.svg",
         "apps/world-web/src/assets/country-scenes/24.png"
@@ -5407,6 +5455,7 @@
       "sourceCountryId": "visual-territory-25",
       "coreCountryId": "COUNTRY_25",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5425,6 +5474,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5432,7 +5482,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/25-ysol.svg",
         "apps/world-web/src/assets/country-scenes/25.png"
@@ -5443,6 +5493,7 @@
       "sourceCountryId": "visual-territory-26",
       "coreCountryId": "COUNTRY_26",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5461,6 +5512,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5468,7 +5520,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/26-zarev.svg",
         "apps/world-web/src/assets/country-scenes/26.png"
@@ -5479,6 +5531,7 @@
       "sourceCountryId": "visual-territory-27",
       "coreCountryId": "COUNTRY_27",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5497,6 +5550,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5504,7 +5558,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/27-adara.svg",
         "apps/world-web/src/assets/country-scenes/27.png"
@@ -5515,6 +5569,7 @@
       "sourceCountryId": "visual-territory-28",
       "coreCountryId": "COUNTRY_28",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5533,6 +5588,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5540,7 +5596,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/28-belm.svg",
         "apps/world-web/src/assets/country-scenes/28.png"
@@ -5551,6 +5607,7 @@
       "sourceCountryId": "visual-territory-29",
       "coreCountryId": "COUNTRY_29",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5569,6 +5626,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5577,7 +5635,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 25,
+      "structuredDatasetCount": 27,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/29-corven.svg",
         "apps/world-web/src/assets/country-scenes/29.png"
@@ -5588,6 +5646,7 @@
       "sourceCountryId": "visual-territory-30",
       "coreCountryId": "COUNTRY_30",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5606,6 +5665,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5613,7 +5673,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/30-delyra.svg",
         "apps/world-web/src/assets/country-scenes/30.png"
@@ -5624,6 +5684,7 @@
       "sourceCountryId": "visual-territory-31",
       "coreCountryId": "COUNTRY_31",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5642,6 +5703,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5650,7 +5712,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 25,
+      "structuredDatasetCount": 27,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/31-erdan.svg",
         "apps/world-web/src/assets/country-scenes/31.png"
@@ -5661,6 +5723,7 @@
       "sourceCountryId": "visual-territory-32",
       "coreCountryId": "COUNTRY_32",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5679,6 +5742,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5686,7 +5750,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/32-falcor.svg",
         "apps/world-web/src/assets/country-scenes/32.png"
@@ -5697,6 +5761,7 @@
       "sourceCountryId": "visual-territory-33",
       "coreCountryId": "COUNTRY_33",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5715,13 +5780,14 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "trade-plans",
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 23,
+      "structuredDatasetCount": 25,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/33-gysel.svg",
         "apps/world-web/src/assets/country-scenes/33.png"
@@ -5732,6 +5798,7 @@
       "sourceCountryId": "visual-territory-34",
       "coreCountryId": "COUNTRY_34",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5750,6 +5817,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "trade-plans",
@@ -5757,7 +5825,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/34-harin.svg",
         "apps/world-web/src/assets/country-scenes/34.png"
@@ -5768,6 +5836,7 @@
       "sourceCountryId": "visual-territory-35",
       "coreCountryId": "COUNTRY_35",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5786,6 +5855,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5793,7 +5863,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/35-inovar.svg",
         "apps/world-web/src/assets/country-scenes/35.png"
@@ -5804,6 +5874,7 @@
       "sourceCountryId": "visual-territory-36",
       "coreCountryId": "COUNTRY_36",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5822,6 +5893,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5829,7 +5901,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/36-jessa.svg",
         "apps/world-web/src/assets/country-scenes/36.png"
@@ -5840,6 +5912,7 @@
       "sourceCountryId": "visual-territory-37",
       "coreCountryId": "COUNTRY_37",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5858,6 +5931,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5865,7 +5939,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/37-koryn.svg",
         "apps/world-web/src/assets/country-scenes/37.png"
@@ -5876,6 +5950,7 @@
       "sourceCountryId": "visual-territory-38",
       "coreCountryId": "COUNTRY_38",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5894,6 +5969,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5901,7 +5977,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/38-lydan.svg",
         "apps/world-web/src/assets/country-scenes/38.png"
@@ -5912,6 +5988,7 @@
       "sourceCountryId": "visual-territory-39",
       "coreCountryId": "COUNTRY_39",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5930,6 +6007,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5937,7 +6015,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/39-mirea.svg",
         "apps/world-web/src/assets/country-scenes/39.png"
@@ -5948,6 +6026,7 @@
       "sourceCountryId": "visual-territory-40",
       "coreCountryId": "COUNTRY_40",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -5966,6 +6045,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -5973,7 +6053,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/40-norvak.svg",
         "apps/world-web/src/assets/country-scenes/40.png"
@@ -5984,6 +6064,7 @@
       "sourceCountryId": "visual-territory-41",
       "coreCountryId": "COUNTRY_41",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6002,6 +6083,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6009,7 +6091,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/41-ostra.svg",
         "apps/world-web/src/assets/country-scenes/41.png"
@@ -6020,6 +6102,7 @@
       "sourceCountryId": "visual-territory-42",
       "coreCountryId": "COUNTRY_42",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6038,6 +6121,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6045,7 +6129,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/42-pavan.svg",
         "apps/world-web/src/assets/country-scenes/42.png"
@@ -6056,6 +6140,7 @@
       "sourceCountryId": "visual-territory-43",
       "coreCountryId": "COUNTRY_43",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6074,6 +6159,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6081,7 +6167,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/43-qemra.svg",
         "apps/world-web/src/assets/country-scenes/43.png"
@@ -6092,6 +6178,7 @@
       "sourceCountryId": "visual-territory-44",
       "coreCountryId": "COUNTRY_44",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6110,6 +6197,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6117,7 +6205,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/44-ruvan.svg",
         "apps/world-web/src/assets/country-scenes/44.png"
@@ -6128,6 +6216,7 @@
       "sourceCountryId": "visual-territory-45",
       "coreCountryId": "COUNTRY_45",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6146,6 +6235,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6153,7 +6243,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/45-selka.svg",
         "apps/world-web/src/assets/country-scenes/45.png"
@@ -6164,6 +6254,7 @@
       "sourceCountryId": "visual-territory-46",
       "coreCountryId": "COUNTRY_46",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6182,6 +6273,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6190,7 +6282,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 25,
+      "structuredDatasetCount": 27,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/46-tirren.svg",
         "apps/world-web/src/assets/country-scenes/46.png"
@@ -6201,6 +6293,7 @@
       "sourceCountryId": "visual-territory-47",
       "coreCountryId": "COUNTRY_47",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6219,13 +6312,14 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "trade-plans",
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 23,
+      "structuredDatasetCount": 25,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/47-ulyss.svg",
         "apps/world-web/src/assets/country-scenes/47.png"
@@ -6236,6 +6330,7 @@
       "sourceCountryId": "visual-territory-48",
       "coreCountryId": "COUNTRY_48",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6254,6 +6349,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6261,7 +6357,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/48-varos.svg",
         "apps/world-web/src/assets/country-scenes/48.png"
@@ -6272,6 +6368,7 @@
       "sourceCountryId": "visual-territory-49",
       "coreCountryId": "COUNTRY_49",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6290,6 +6387,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6298,7 +6396,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 25,
+      "structuredDatasetCount": 27,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/49-wrenna.svg",
         "apps/world-web/src/assets/country-scenes/49.png"
@@ -6309,6 +6407,7 @@
       "sourceCountryId": "visual-territory-50",
       "coreCountryId": "COUNTRY_50",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6327,6 +6426,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6334,7 +6434,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/50-xyren.svg",
         "apps/world-web/src/assets/country-scenes/50.png"
@@ -6345,6 +6445,7 @@
       "sourceCountryId": "visual-territory-51",
       "coreCountryId": "COUNTRY_51",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6363,6 +6464,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6370,7 +6472,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/51-yara.svg",
         "apps/world-web/src/assets/country-scenes/51.png"
@@ -6381,6 +6483,7 @@
       "sourceCountryId": "visual-territory-52",
       "coreCountryId": "COUNTRY_52",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6399,6 +6502,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6406,7 +6510,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/52-zorin.svg",
         "apps/world-web/src/assets/country-scenes/52.png"
@@ -6417,6 +6521,7 @@
       "sourceCountryId": "visual-territory-53",
       "coreCountryId": "COUNTRY_53",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6435,6 +6540,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6442,7 +6548,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/53-alera.svg",
         "apps/world-web/src/assets/country-scenes/53.png"
@@ -6453,6 +6559,7 @@
       "sourceCountryId": "visual-territory-54",
       "coreCountryId": "COUNTRY_54",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6471,6 +6578,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6478,7 +6586,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/54-brin.svg",
         "apps/world-web/src/assets/country-scenes/54.png"
@@ -6489,6 +6597,7 @@
       "sourceCountryId": "visual-territory-55",
       "coreCountryId": "COUNTRY_55",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6507,6 +6616,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6514,7 +6624,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/55-cassa.svg",
         "apps/world-web/src/assets/country-scenes/55.png"
@@ -6525,6 +6635,7 @@
       "sourceCountryId": "visual-territory-56",
       "coreCountryId": "COUNTRY_56",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6542,6 +6653,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6549,7 +6661,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 23,
+      "structuredDatasetCount": 25,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/56-doren.svg",
         "apps/world-web/src/assets/country-scenes/56.png"
@@ -6560,6 +6672,7 @@
       "sourceCountryId": "visual-territory-57",
       "coreCountryId": "COUNTRY_57",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6577,6 +6690,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6584,7 +6698,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 23,
+      "structuredDatasetCount": 25,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/57-everen.svg",
         "apps/world-web/src/assets/country-scenes/57.png"
@@ -6595,6 +6709,7 @@
       "sourceCountryId": "visual-territory-58",
       "coreCountryId": "COUNTRY_58",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6612,13 +6727,14 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "trade-plans",
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 22,
+      "structuredDatasetCount": 24,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/58-fenna.svg",
         "apps/world-web/src/assets/country-scenes/58.png"
@@ -6629,6 +6745,7 @@
       "sourceCountryId": "visual-territory-59",
       "coreCountryId": "COUNTRY_59",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6646,6 +6763,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6653,7 +6771,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 23,
+      "structuredDatasetCount": 25,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/59-garan.svg",
         "apps/world-web/src/assets/country-scenes/59.png"
@@ -6664,6 +6782,7 @@
       "sourceCountryId": "visual-territory-60",
       "coreCountryId": "COUNTRY_60",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6681,6 +6800,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6688,7 +6808,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 23,
+      "structuredDatasetCount": 25,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/60-hylos.svg",
         "apps/world-web/src/assets/country-scenes/60.png"
@@ -6699,6 +6819,7 @@
       "sourceCountryId": "visual-territory-61",
       "coreCountryId": "COUNTRY_61",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6716,6 +6837,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6723,7 +6845,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 23,
+      "structuredDatasetCount": 25,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/61-ivara.svg",
         "apps/world-web/src/assets/country-scenes/61.png"
@@ -6734,6 +6856,7 @@
       "sourceCountryId": "visual-territory-62",
       "coreCountryId": "COUNTRY_62",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6751,6 +6874,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6758,7 +6882,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 23,
+      "structuredDatasetCount": 25,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/62-jalen.svg",
         "apps/world-web/src/assets/country-scenes/62.png"
@@ -6769,6 +6893,7 @@
       "sourceCountryId": "visual-territory-63",
       "coreCountryId": "COUNTRY_63",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6787,6 +6912,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6794,7 +6920,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/63-korra.svg",
         "apps/world-web/src/assets/country-scenes/63.png"
@@ -6805,6 +6931,7 @@
       "sourceCountryId": "visual-territory-64",
       "coreCountryId": "COUNTRY_64",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6823,6 +6950,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6830,7 +6958,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/64-lethis.svg",
         "apps/world-web/src/assets/country-scenes/64.png"
@@ -6841,6 +6969,7 @@
       "sourceCountryId": "visual-territory-65",
       "coreCountryId": "COUNTRY_65",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6859,6 +6988,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6866,7 +6996,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/65-marn.svg",
         "apps/world-web/src/assets/country-scenes/65.png"
@@ -6877,6 +7007,7 @@
       "sourceCountryId": "visual-territory-66",
       "coreCountryId": "COUNTRY_66",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6895,6 +7026,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6902,7 +7034,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/66-nivor.svg",
         "apps/world-web/src/assets/country-scenes/66.png"
@@ -6913,6 +7045,7 @@
       "sourceCountryId": "visual-territory-67",
       "coreCountryId": "COUNTRY_67",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6931,6 +7064,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6938,7 +7072,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/67-orsa.svg",
         "apps/world-web/src/assets/country-scenes/67.png"
@@ -6949,6 +7083,7 @@
       "sourceCountryId": "visual-territory-68",
       "coreCountryId": "COUNTRY_68",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -6967,6 +7102,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -6974,7 +7110,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/68-pella.svg",
         "apps/world-web/src/assets/country-scenes/68.png"
@@ -6985,6 +7121,7 @@
       "sourceCountryId": "visual-territory-69",
       "coreCountryId": "COUNTRY_69",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -7003,6 +7140,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -7010,7 +7148,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/69-quillan.svg",
         "apps/world-web/src/assets/country-scenes/69.png"
@@ -7021,6 +7159,7 @@
       "sourceCountryId": "visual-territory-70",
       "coreCountryId": "COUNTRY_70",
       "structuredDatasets": [
+        "changes",
         "countries",
         "deposits",
         "domestic-access",
@@ -7039,6 +7178,7 @@
         "power",
         "production-plans",
         "regions",
+        "seasonal-water",
         "settlements",
         "stocks",
         "technology-proposals",
@@ -7046,7 +7186,7 @@
         "transport-routes",
         "water-allocations"
       ],
-      "structuredDatasetCount": 24,
+      "structuredDatasetCount": 26,
       "versionedMapAssets": [
         "apps/world-web/src/assets/country-detail/70-rhea.svg",
         "apps/world-web/src/assets/country-scenes/70.png"
@@ -7064,5 +7204,5 @@
     "COMPLETE_DOMAIN_PAGE_CONNECTION_NOT_YET_EVIDENCED",
     "ALL_MAP_FILES_PRODUCTION_STATIC_PUBLICATION_NOT_YET_EVIDENCED"
   ],
-  "coverageFingerprint": "sha256:9438a0c4b67d60a55d68fc2df676c70f63c57b8a48d6d25371cd4d6bdae6c651"
+  "coverageFingerprint": "sha256:8b915aadb1aa299cc1c2529eb8ed996f1e8ff9c8ad5bd7ff88731c6d459efa2d"
 }
