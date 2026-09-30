@@ -277,9 +277,7 @@
       "sha256": "083e06aca86763e4bc32a34347c1a86b26aa910f3c6a191b9393021347211618",
       "artifact_source_commit": "f3413bae195b75e80d28d6afa314ca0e394bdfbc",
       "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
-      "affected_schemas": [
-        "world_v2"
-      ],
+      "affected_schemas": ["world_v2"],
       "rls_or_grants_changed": true,
       "backfill": "NONE",
       "lock_or_downtime_risk": "P0 additive server-only role, column grant and RLS-policy candidate; roles must be absent, browser roles remain ungranted, and no login credential is created",
