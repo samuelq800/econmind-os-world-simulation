@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildOfficialWorldOpeningMapping,
   resolveOfficialWorldSourceBindings,
+  serializeOfficialWorldArtifact,
 } from '../../scripts/official-world-opening-mapping.mjs';
 
 const root = path.resolve(
@@ -515,35 +516,34 @@ describe('official 70-country opening-input mapping', () => {
     const second = await buildOfficialWorldOpeningMapping(root);
     expect(second).toEqual(first);
 
-    const committedMapping = JSON.parse(
-      await readFile(
-        path.join(
-          root,
-          'docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_MAPPING.json',
-        ),
-        'utf8',
-      ),
+    const mappingPath = path.join(
+      root,
+      'docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_MAPPING.json',
     );
-    const committedGaps = JSON.parse(
-      await readFile(
-        path.join(
-          root,
-          'docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_GAPS.json',
-        ),
-        'utf8',
-      ),
+    const gapsPath = path.join(
+      root,
+      'docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_GAPS.json',
     );
-    const committedCoverage = JSON.parse(
-      await readFile(
-        path.join(
-          root,
-          'docs/reports/world-connection/C_OFFICIAL_WORLD_COMPLETE_COVERAGE.json',
-        ),
-        'utf8',
-      ),
+    const coveragePath = path.join(
+      root,
+      'docs/reports/world-connection/C_OFFICIAL_WORLD_COMPLETE_COVERAGE.json',
     );
-    expect(committedMapping).toEqual(first.mapping);
-    expect(committedGaps).toEqual(first.gaps);
-    expect(committedCoverage).toEqual(first.coverage);
-  }, 30_000);
+    const [mappingText, gapsText, coverageText] = await Promise.all([
+      readFile(mappingPath, 'utf8'),
+      readFile(gapsPath, 'utf8'),
+      readFile(coveragePath, 'utf8'),
+    ]);
+    expect(JSON.parse(mappingText)).toEqual(first.mapping);
+    expect(JSON.parse(gapsText)).toEqual(first.gaps);
+    expect(JSON.parse(coverageText)).toEqual(first.coverage);
+    expect(mappingText).toBe(
+      await serializeOfficialWorldArtifact(mappingPath, first.mapping),
+    );
+    expect(gapsText).toBe(
+      await serializeOfficialWorldArtifact(gapsPath, first.gaps),
+    );
+    expect(coverageText).toBe(
+      await serializeOfficialWorldArtifact(coveragePath, first.coverage),
+    );
+  }, 60_000);
 });
