@@ -45,6 +45,11 @@ export {
   type NarrowTreasuryGcuDeliveryPreparationSource,
 } from './persistence/narrow-treasury-gcu-delivery-draft.js';
 export { WorldOpeningSeedStore } from './persistence/opening-seed-store.js';
+export { WorldOpeningBootstrapReadback } from './persistence/world-opening-bootstrap-readback.js';
+export {
+  OfficialWorldOpeningBootstrapper,
+  inspectOfficialWorldOpeningAdmission,
+} from './preparation/official-world-opening-admission.js';
 export { DurableV08LedgerLineageReader } from './persistence/durable-v08-ledger-lineage-reader.js';
 export {
   createSqlNarrowTreasuryGcuDeliveryCandidateFactory,

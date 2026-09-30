@@ -1,0 +1,63 @@
+name: F official World opening focused evidence
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/f-opening-seed-70-country
+    paths:
+      - apps/world-worker/src/persistence/opening-seed-store.ts
+      - apps/world-worker/src/persistence/world-opening-bootstrap-readback.ts
+      - apps/world-worker/src/preparation/official-world-opening-admission.ts
+      - apps/world-worker/src/index.ts
+      - tests/integration/f-official-opening-postgres.test.ts
+      - tests/world-core/official-world-opening-admission.test.ts
+      - tests/world-core/opening-seed-store.test.ts
+      - tests/support/tsconfig.f-official-opening.json
+      - .github/workflows/f-official-opening.yml
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-opening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @econmind/core build
+      - run: pnpm --filter @econmind/world-worker build
+      - run: pnpm exec tsc -p tests/support/tsconfig.f-official-opening.json --pretty false
+      - run: pnpm exec prettier --check apps/world-worker/src/persistence/opening-seed-store.ts apps/world-worker/src/persistence/world-opening-bootstrap-readback.ts apps/world-worker/src/preparation/official-world-opening-admission.ts apps/world-worker/src/index.ts tests/integration/f-official-opening-postgres.test.ts tests/world-core/official-world-opening-admission.test.ts tests/world-core/opening-seed-store.test.ts tests/support/tsconfig.f-official-opening.json .github/workflows/f-official-opening.yml
+      - run: pnpm exec eslint apps/world-worker/src/persistence/opening-seed-store.ts apps/world-worker/src/persistence/world-opening-bootstrap-readback.ts apps/world-worker/src/preparation/official-world-opening-admission.ts apps/world-worker/src/index.ts tests/integration/f-official-opening-postgres.test.ts tests/world-core/official-world-opening-admission.test.ts tests/world-core/opening-seed-store.test.ts
+      - run: pnpm exec vitest run tests/world-core/official-world-opening-admission.test.ts tests/world-core/opening-seed-store.test.ts
+      - run: node scripts/v09-postgres-test-environment.mjs
+      - run: pnpm exec vitest run tests/integration/f-official-opening-postgres.test.ts
+      - run: git diff --check origin/main...HEAD
