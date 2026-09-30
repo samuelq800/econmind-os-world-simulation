@@ -31,6 +31,10 @@ import {
   createOfficialMapAssetRoute,
   OFFICIAL_MAP_ASSET_LIST_PATH,
 } from './integration/official-map-asset-route.js';
+import {
+  handleOfficialPublicCors,
+  readOfficialPublicCorsOrigins,
+} from './integration/official-public-cors.js';
 
 const supportedEnvironments = new Set(['local', 'ci', 'staging', 'production']);
 const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
@@ -39,6 +43,7 @@ export interface ApiRuntimeConfig {
   readonly season1MyTeam?: Season1LobbySupabaseConfiguration;
   readonly officialCountryDatabase?: OfficialCountryDatabaseConfiguration;
   readonly officialAllData?: true;
+  readonly officialPublicCorsOrigins?: readonly string[];
   readonly environment: string;
   readonly host: string;
   readonly port: number;
@@ -84,6 +89,10 @@ export function readApiRuntimeConfig(
     environment,
     environmentName,
   );
+  const officialPublicCorsOrigins = readOfficialPublicCorsOrigins(
+    environment,
+    environmentName,
+  );
   const allDataFlag = environment.WORLD_API_ALL_DATA_ENABLED;
   if (
     allDataFlag !== undefined &&
@@ -103,6 +112,9 @@ export function readApiRuntimeConfig(
       ? {}
       : { officialCountryDatabase }),
     ...(allDataFlag === 'true' ? { officialAllData: true as const } : {}),
+    ...(officialPublicCorsOrigins === undefined
+      ? {}
+      : { officialPublicCorsOrigins }),
     environment: environmentName,
     host: parseHost(environment.WORLD_API_HOST),
     port: parsePort(environment.WORLD_API_PORT, 4101),
@@ -208,6 +220,14 @@ function createApiServer(
       officialMapAssets !== undefined &&
       path === OFFICIAL_MAP_ASSET_LIST_PATH
     ) {
+      if (
+        handleOfficialPublicCors(
+          request,
+          response,
+          config.officialPublicCorsOrigins,
+        )
+      )
+        return;
       officialMapAssets(request, response);
       return;
     }
@@ -216,6 +236,14 @@ function createApiServer(
       (path === OFFICIAL_DATASET_LIST_PATH ||
         path?.startsWith(`${OFFICIAL_DATASET_LIST_PATH}/`))
     ) {
+      if (
+        handleOfficialPublicCors(
+          request,
+          response,
+          config.officialPublicCorsOrigins,
+        )
+      )
+        return;
       void officialDatasets(request, response).catch(() => {
         if (!response.headersSent && !response.destroyed) {
           sendJson(request, response, 503, {
@@ -231,6 +259,14 @@ function createApiServer(
       (path === OFFICIAL_COUNTRY_LIST_PATH ||
         path?.startsWith(`${OFFICIAL_COUNTRY_LIST_PATH}/`))
     ) {
+      if (
+        handleOfficialPublicCors(
+          request,
+          response,
+          config.officialPublicCorsOrigins,
+        )
+      )
+        return;
       void officialCountries(request, response).catch(() => {
         if (!response.headersSent && !response.destroyed) {
           sendJson(request, response, 503, {
