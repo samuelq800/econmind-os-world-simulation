@@ -11,6 +11,8 @@ to initialize a production World or advance the simulation.
 - Isolated branch: `codex/f-opening-seed-70-country`.
 - Initial code commit: `0c2cdc71a9d047f4b90d12e999595f6ed48601f7`.
 - V2-contract code commit: `4698f0f55a1bd6b6489f8f5471dc99de1915b04f`.
+- Independent complete-coverage oracle code commit:
+  `9308eb7cc07f029f2956da859a8b2821c30f4402`.
 - Dedicated [native PostgreSQL 16 CI run](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36651575056): success on that exact code commit;
   PGlite focused tests 6/6 and native PostgreSQL tests 2/2 with no skip in CI.
   Worker/Core build, focused test typecheck, lint, formatting and diff check
@@ -22,16 +24,25 @@ to initialize a production World or advance the simulation.
   success on exact code commit `4698f0f55a1bd6b6489f8f5471dc99de1915b04f`.
   PGlite focused tests 7/7 and native PostgreSQL tests 2/2 passed; build,
   typecheck, lint, formatting and diff check passed in the same run.
+- [Independent-oracle native PostgreSQL 16 CI run](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36654334181):
+  success on exact code commit `9308eb7cc07f029f2956da859a8b2821c30f4402`.
+  PGlite focused tests 13/13 and native PostgreSQL tests 2/2 passed, with
+  Worker/Core build, focused typecheck, lint, formatting and diff check green.
+  Local boundary scan passed (210 files). The old C report at
+  `592ccbf5eca3440d87bda51660dddd09f807948a` was rejected by the new
+  region-country oracle; corrected C input at
+  `ef3af983aa9f996f599a392bb244872a3cb59a32` was accepted structurally
+  but returned `BLOCKED` on six unresolved OpeningSeed semantics.
 - P0 independent review: **PENDING**. No `VERIFIED`, mainline merge or Gate B
   claim is made by F.
 
-The subsequent V2-contract integration was exercised locally against C's
-then-current pushed report files: all three canonical fingerprints matched, 70
-countries/840 stock cells/70 finance rows were read, and the admission result
-was `BLOCKED` with six named OpeningSeed blockers. Focused PGlite tests now
-pass 7/7, including a re-fingerprinted report missing one map asset being
-rejected. This local check is not a production readback or proof of complete
-per-country binding of region-only records.
+The current admission oracle independently checks the fixed source checksum
+manifest, map manifest and original region roster by their pinned SHA-256
+values. Against these trusted bytes it checks all 87 source-artifact and 203
+map-asset identities, exact path/hash/size sets, 70 unique country rows,
+country/asset references, all 34 structured dataset references and each
+region-derived country attribution. Equal counts with empty objects,
+duplicated paths or wrong country references are rejected.
 
 ## What the Worker now owns
 
@@ -46,14 +57,15 @@ fingerprint, World ID and WorldVersion agreement against the reconstructed
 inventory/financial ledgers. This is not a second ledger.
 
 `inspectOfficialWorldOpeningAdmission` verifies the selected owner record,
-canonical C mapping/gap/coverage report fingerprints, 70 mapped Country IDs,
+canonical C mapping/gap/coverage report fingerprints and the independent
+source-manifest oracles above, 70 mapped Country IDs,
 14,712,146,434 people, all 840 stock cells (619 positive), catalog units,
 70 finance rows and exact zero reserved/in-transit stock. It reports opening
 blockers separately from deferred runtime or team/role assignments. A report
 marked ready while an opening blocker remains is rejected.
 
 `OfficialWorldOpeningBootstrapper` is an explicit E-operated call, not a
-startup hook. It accepts only independently pinned mapping, gap and seed
+startup hook. It accepts only independently pinned mapping, gap, coverage and seed
 fingerprints; verifies Core source provenance, source stock quantities,
 approved title/risk binding, country coverage and balanced Core ledger
 reconstruction; then delegates to the existing store/readback. A matching
@@ -61,30 +73,21 @@ fingerprint checks identity, not policy approval. No direct UI/API route and
 no automatic Worker dispatch were added. `getWorkerFoundationStatus()`
 continues to report simulation disabled.
 
-The F admission was exercised against C's full-domain V2 mapping at exact pushed C candidate
-`592ccbf5eca3440d87bda51660dddd09f807948a` (mapping implementation
-`cf76332b9f41e6ac2f468892edff1b4388efcbb1`). Its mapping fingerprint is
-`sha256:3463413929b1a659f0a089e041f8698c09d37caa2ad1d88fbc930db9bb9fffbb`,
+The corrected C V2 fixed input is
+`ef3af983aa9f996f599a392bb244872a3cb59a32` (mapping implementation
+`f711869b5265003e12adb29996ad8158cc00fd03`). Its mapping fingerprint is
+`sha256:230f8d695c25ea839fb6415de3c4c2985dd6d95e6261fa10dbec73053dedac82`,
 gap fingerprint is
-`sha256:b0e37cc97802080be7f14f5a0d3bf4ef457f3c6c1e60f6560c79d110493772c5`,
+`sha256:f374ed3a888305a467f52d0aeaf7c545a6513cf17accc10c9537850694b68e95`,
 and complete-coverage fingerprint is
-`sha256:9438a0c4b67d60a55d68fc2df676c70f63c57b8a48d6d25371cd4d6bdae6c651`.
-The earlier V1 output is superseded. F cross-checks V2's 34 structured-dataset
-manifest and complete-coverage ledger plus 203-file map-package counts as well
-as opening facts; it does not claim that source preservation itself executes
-those records. C V2 remains
-`BLOCKED` for formal OpeningSeed, so no database call is permitted by the
-official bootstrapper.
-
-Control Tower subsequently reported a defect in that C V2 candidate:
-region-only seasonal-water records were not all associated with their country.
-The source records themselves were preserved, but this candidate is **not a
-complete per-country opening input** and is superseded pending C's corrected
-exact SHA. F's current 34-dataset/203-asset count checks do not detect that
-association defect. The current F code and its CI are therefore
-`IMPLEMENTED_UNVERIFIED`, not a final complete-data admission proof. F must
-check C's corrected country/region association evidence and rerun focused
-tests before claiming final V2 compatibility.
+`sha256:8b915aadb1aa299cc1c2529eb8ed996f1e8ff9c8ad5bd7ff88731c6d459efa2d`.
+F's real-report read against that exact C checkout accepted all structural
+evidence (70 countries, 840 stock cells, 70 finance rows) and returned
+`BLOCKED` with six named OpeningSeed gaps. The superseded C report at
+`592ccbf5eca3440d87bda51660dddd09f807948a` was independently rejected for
+its missing region-to-country association; source records were preserved but
+the old country index was incomplete. Neither report is an approved seed, and
+this read-only check is not a production readback.
 
 ## Complete data scope: source retention is not runtime adoption
 
@@ -127,9 +130,10 @@ deferred team assignments, facility/resource/water/power/employment/social
 execution gaps. These are not excuses to omit their source data; they prevent
 only unsupported runtime promotion.
 
-When the C V2 candidate passes independent review and the remaining semantic
+When the corrected C V2 candidate passes independent review and the remaining semantic
 gaps are formally resolved, an E-only explicit invocation needs the checked-in
-`status/world-data-selection.json` bytes; exact C mapping, gaps and
+`status/world-data-selection.json`, original `CHECKSUMS.json`, map manifest and
+`data/regions.json` bytes; exact C mapping, gaps and
 complete-coverage JSON; their independently pinned canonical fingerprints; a fully
 reviewed Core `OpeningSeed` with an independently pinned fingerprint; and a
 canonical UTC millisecond bootstrap timestamp. The seed must bind the one
@@ -143,7 +147,7 @@ not call the bootstrapper.
 
 F owns no API, UI, migration, asset-publication or production-connection
 change. Formal `status/progress.json` and the original EconMind site remain
-untouched. The corrected C V2 report and F focused rerun remain pending, as
-does B's narrow independent P0 review, before Control Tower can consider merge or E
+untouched. B's narrow independent P0 review of the new F code is pending before
+Control Tower can consider merge or E
 production execution. Even a passing Worker test does not close C's semantic
 gaps or authorize formal adoption.
