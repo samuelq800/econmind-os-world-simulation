@@ -63,6 +63,17 @@ function expectedCountryIds(): readonly string[] {
   );
 }
 
+function mapAssetCountry(path: string): string | null {
+  const scene =
+    /^apps\/world-web\/src\/assets\/country-scenes\/(\d{2})\.png$/.exec(path);
+  const detail =
+    /^apps\/world-web\/src\/assets\/country-detail\/(\d{2})-[^/]+\.svg$/.exec(
+      path,
+    );
+  const number = scene?.[1] ?? detail?.[1];
+  return number === undefined ? null : `COUNTRY_${number}`;
+}
+
 // C's external evidence format permits JSON integer counts and geographic
 // floats. Core's economic canonical serializer intentionally rejects JS
 // numbers, so reproduce C's sorted-key JSON preimage only for report identity.
@@ -431,20 +442,36 @@ export function inspectOfficialWorldOpeningAdmission(input: {
   const coveredCountryIds = new Set<string>();
   const assetPathsByCountry = new Map<string, Set<string>>();
   for (const asset of coveredAssets.values()) {
-    if (asset.coreCountryId === null && asset.sourceCountryId === null) {
+    const path = text(asset.path, 'Map asset path');
+    const derivedCountry = mapAssetCountry(path);
+    if (derivedCountry === null) {
+      if (asset.coreCountryId !== null || asset.sourceCountryId !== null) {
+        invalid('C global map asset is assigned to a country');
+      }
       continue;
     }
-    const coreId = text(asset.coreCountryId, 'Map asset Core Country ID');
-    const sourceId = text(asset.sourceCountryId, 'Map asset source Country ID');
+    const number = derivedCountry.slice('COUNTRY_'.length);
     if (
-      !countrySet.has(coreId) ||
-      countryRows[expected.indexOf(coreId)]?.sourceCountryId !== sourceId
+      !countrySet.has(derivedCountry) ||
+      asset.coreCountryId !== derivedCountry ||
+      asset.sourceCountryId !== `visual-territory-${number}`
     ) {
-      invalid('C map asset refers to an unmapped country');
+      invalid('C map asset country differs from its trusted path');
     }
-    const paths = assetPathsByCountry.get(coreId) ?? new Set<string>();
-    paths.add(text(asset.path, 'Map asset path'));
-    assetPathsByCountry.set(coreId, paths);
+    const paths = assetPathsByCountry.get(derivedCountry) ?? new Set<string>();
+    paths.add(path);
+    assetPathsByCountry.set(derivedCountry, paths);
+  }
+  if (
+    [...assetPathsByCountry.values()].reduce(
+      (sum, paths) => sum + paths.size,
+      0,
+    ) !== 140 ||
+    [...countrySet].some(
+      (country) => assetPathsByCountry.get(country)?.size !== 2,
+    )
+  ) {
+    invalid('Trusted map package does not provide two assets per country');
   }
   for (const coveredCountry of coverageCountries) {
     const coreId = text(
@@ -460,6 +487,7 @@ export function inspectOfficialWorldOpeningAdmission(input: {
       !Array.isArray(assetPaths) ||
       assetPaths.some((path) => typeof path !== 'string') ||
       coveredCountry.versionedMapAssetCount !== assetPaths.length ||
+      assetPaths.length !== 2 ||
       new Set(assetPaths).size !== assetPaths.length ||
       assetPaths.length !== (assetPathsByCountry.get(coreId)?.size ?? 0) ||
       assetPaths.some(

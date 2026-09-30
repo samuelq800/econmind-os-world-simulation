@@ -503,6 +503,64 @@ describe('selected official World opening admission', () => {
     ).toThrow('Covered map asset path is not a non-empty string');
   });
 
+  it('rejects a consistently forged country assignment for a trusted map path', async () => {
+    const fixture = await blockedSourceFixture();
+    const changed = structuredClone(fixture.coverage);
+    const path = 'apps/world-web/src/assets/country-scenes/01.png';
+    const asset = changed.mapAssets.find((item) => item.path === path);
+    const first = changed.countries.find(
+      (country) => country.coreCountryId === 'COUNTRY_01',
+    );
+    const second = changed.countries.find(
+      (country) => country.coreCountryId === 'COUNTRY_02',
+    );
+    if (asset === undefined || first === undefined || second === undefined) {
+      throw new Error('Missing map association fixture');
+    }
+    asset.coreCountryId = 'COUNTRY_02';
+    asset.sourceCountryId = 'visual-territory-02';
+    first.versionedMapAssets = first.versionedMapAssets.filter(
+      (candidate) => candidate !== path,
+    );
+    first.versionedMapAssetCount = first.versionedMapAssets.length;
+    second.versionedMapAssets.push(path);
+    second.versionedMapAssetCount = second.versionedMapAssets.length;
+    expect(() =>
+      inspectOfficialWorldOpeningAdmission({
+        ...fixture,
+        coverage: rebindCoverage(
+          changed,
+          fixture.mapping.mappingFingerprint,
+          fixture.gaps.gapsFingerprint,
+        ),
+        sha256Hex,
+      }),
+    ).toThrow('map asset country differs from its trusted path');
+  });
+
+  it('rejects assigning a global support asset to a country', async () => {
+    const fixture = await blockedSourceFixture();
+    const changed = structuredClone(fixture.coverage);
+    const global = changed.mapAssets.find(
+      (asset) =>
+        asset.path === 'apps/world-web/src/assets/continent-scenes/index.json',
+    );
+    if (global === undefined) throw new Error('Missing global map fixture');
+    global.coreCountryId = 'COUNTRY_01';
+    global.sourceCountryId = 'visual-territory-01';
+    expect(() =>
+      inspectOfficialWorldOpeningAdmission({
+        ...fixture,
+        coverage: rebindCoverage(
+          changed,
+          fixture.mapping.mappingFingerprint,
+          fixture.gaps.gapsFingerprint,
+        ),
+        sha256Hex,
+      }),
+    ).toThrow('global map asset is assigned to a country');
+  });
+
   it('rejects a duplicated country row at the same country count', async () => {
     const fixture = await blockedSourceFixture();
     const changed = structuredClone(fixture.coverage);
