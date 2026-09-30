@@ -279,7 +279,7 @@ postgresDescribe('World V2 selected-country server reader role', () => {
       [LOGIN_ROLE, READER_ROLE],
     );
     expect(membership.rows).toEqual([
-      { admin_option: false, inherit_option: true, set_option: true },
+      { admin_option: false, inherit_option: false, set_option: true },
     ]);
 
     const columns = await currentAdmin().query<{

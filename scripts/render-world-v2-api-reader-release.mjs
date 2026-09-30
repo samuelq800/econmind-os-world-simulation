@@ -108,20 +108,19 @@ select jsonb_build_object(
       'inherits_privileges', rolinherit
     ) from pg_roles where rolname = 'world_v2_api_login'
   ),
-  'reader_membership', (
-    select jsonb_build_object(
+  'reader_memberships', coalesce((
+    select jsonb_agg(jsonb_build_object(
       'member', member_role.rolname,
       'role', granted_role.rolname,
       'admin_option', membership.admin_option,
       'inherit_option', membership.inherit_option,
       'set_option', membership.set_option
-    )
+    ) order by member_role.rolname)
     from pg_auth_members membership
     join pg_roles member_role on member_role.oid = membership.member
     join pg_roles granted_role on granted_role.oid = membership.roleid
-    where member_role.rolname = 'world_v2_api_login'
-      and granted_role.rolname = 'world_v2_api_reader'
-  ),
+    where granted_role.rolname = 'world_v2_api_reader'
+  ), '[]'::jsonb),
   'schema_usage', coalesce((
     select jsonb_agg(namespace.nspname order by namespace.nspname)
     from pg_namespace namespace
@@ -138,7 +137,7 @@ select jsonb_build_object(
     from pg_attribute attribute
     join pg_class relation on relation.oid = attribute.attrelid
     join pg_namespace namespace on namespace.oid = relation.relnamespace
-    where namespace.nspname = 'world_v2'
+    where namespace.nspname in ('auth', 'public', 'storage', 'world_v2')
       and relation.relkind in ('p', 'r')
       and attribute.attnum > 0
       and not attribute.attisdropped
@@ -150,7 +149,7 @@ select jsonb_build_object(
     select jsonb_agg(relation.relname order by relation.relname)
     from pg_class relation
     join pg_namespace namespace on namespace.oid = relation.relnamespace
-    where namespace.nspname = 'world_v2'
+    where namespace.nspname in ('auth', 'public', 'storage', 'world_v2')
       and relation.relkind in ('p', 'r')
       and has_table_privilege(
         'world_v2_api_reader', relation.oid, 'SELECT'
@@ -165,7 +164,7 @@ select jsonb_build_object(
     join pg_namespace namespace on namespace.oid = relation.relnamespace
     cross join (values ('DELETE'), ('INSERT'), ('TRUNCATE'), ('UPDATE'))
       as action(name)
-    where namespace.nspname = 'world_v2'
+    where namespace.nspname in ('auth', 'public', 'storage', 'world_v2')
       and relation.relkind in ('p', 'r')
       and has_table_privilege(
         'world_v2_api_reader', relation.oid, action.name

@@ -37,7 +37,7 @@ assert.ok(
     "artifact_path = 'source/646174612f636f756e74726965732e6a736f6e'",
   ),
 );
-assert.ok(release.query.includes('reader_membership'));
+assert.ok(release.query.includes('reader_memberships'));
 assert.ok(release.query.includes('set_option'));
 assert.ok(release.query.includes('selected_source_policies'));
 assert.ok(release.query.includes('column_select_privileges'));
