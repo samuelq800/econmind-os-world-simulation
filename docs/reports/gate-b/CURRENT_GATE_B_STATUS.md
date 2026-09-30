@@ -1,10 +1,37 @@
 # Gate B current evidence and remaining route
 
-**Snapshot:** 2026-09-24. **Decision:** `GATE_B_WORLD_CORE_HARD_GATE = PENDING`.
+**Snapshot:** 2026-09-30. **Decision:** `GATE_B_WORLD_CORE_HARD_GATE = PENDING`.
 This is a factual integration index, not a change to `status/progress.json`,
 an independent review, or permission to use production Supabase.
 
-## What is integrated
+## September 30 update
+
+Main baseline: `d8a1b4a9c0970414d6e0a9486f494bf1a3f47ec8` (PR #32 merge).
+The fixed code candidate `d355bb6557492aa0d5a9edde3d408a115a85a99f`
+passed [run 36661049743](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36661049743):
+unmodified official `pnpm check` and isolated native PostgreSQL V09/V10 jobs.
+B approved this exact CI-baseline repair for merge, not Gate B. The repair
+preserves exact migration provenance, limits reader-role operations to the
+marked disposable path and rejects extended 0020/0021 chains from dedicated
+staging before client creation. It is not new dedicated-staging evidence.
+
+The separate [0020 production read-only audit](WORLD_V2_API_READER_READBACK_AUDIT_2026_09_30.md)
+passed in run `36657427073`; the earlier cancelled publication remains
+historically UNKNOWN. The successful audit proves the bounded inactive reader
+configuration, not deployed API credentials, 0021, browser E2E or World startup.
+See the [current full-data integration record](../world-connection/CURRENT_INTEGRATION_STATUS_2026_09_30.md)
+for merged API/UI/source work and the remaining connection sequence.
+
+The dated evidence and failures below are preserved, not reassigned to the new
+SHA. Their old fixture/default-UI and missing approval-reader descriptions are
+historical: the immutable approval reference and native reader are now merged
+as recorded in the [September 27 integration record](../../exec-plans/CODE_COMPLETION_2026_09_27.md).
+Real authenticated command/Worker/browser execution, dedicated staging/TLS,
+deployment-role evidence and final independent gate review are not supplied by
+the September 30 source-data integration or CI repair. No formal step or gate
+is promoted by this documentation update.
+
+## Historical integration evidence (September 24 onward)
 
 - `origin/main` reached `884696c8213b2f946c8d153d37f547507d6af612` before
   this status-note update. The frozen
@@ -90,7 +117,11 @@ an independent review, or permission to use production Supabase.
   passed the local authenticated bridge's native PostgreSQL job. The later
   documentation-only commits do not turn these runs into Gate B approval.
 
-## Still required for Gate B
+## Historical remaining-evidence matrix
+
+The classifications below retain their original candidate binding. For the
+latest code/CI candidate, use the September 30 update above; the missing
+dedicated-staging and live execution evidence is not closed by it.
 
 | Evidence                                                                    | Current classification                      | Next action                                                                                                                                     |
 | --------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |

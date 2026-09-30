@@ -5,6 +5,25 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
+## Current integration snapshot (2026-09-30)
+
+Evidence baseline: main `d8a1b4a9c0970414d6e0a9486f494bf1a3f47ec8`.
+The [current data-connection record](docs/reports/world-connection/CURRENT_INTEGRATION_STATUS_2026_09_30.md)
+supersedes the dated capability summaries below; it does not replace the formal
+gate ledger in `status/progress.json`.
+
+| Layer           | Verified scope                                                                                                    | Remaining boundary                                                                                                          |
+| --------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                | Source preservation is not runtime economic adoption                                                                        |
+| Supabase        | Balanced package readback passed; a separate successful read-only audit verified the applied 0020 reader boundary | 0021 full-data permissions, server credential and live API activation are not established by that audit                     |
+| API code        | Country, paginated full-dataset and map-catalog routes plus exact-origin CORS merged                              | Opt-in server deployment and browser-to-production verification remain unverified; map catalogue `publicUrl` is still null  |
+| Page code       | Selected immersive UI retains official country data and adds a 34-dataset Source intel drawer                     | Source reads are not live prices, settlement, receipts or a running World; layout fix PR #33 is still open at this snapshot |
+| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI               | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                           |
+
+Lobby entry and team/person/office assignment are intentionally deferred by the
+owner. Public official-source connections can proceed without inventing those
+assignments. Neither a green CI nor a merged UI implies a production release.
+
 ## Official 70-country data selection (2026-09-28)
 
 The project owner selected the complete, immutable 70-country balanced package
@@ -40,12 +59,17 @@ and 240 geological deposits. `pnpm test:authoritative-ui` checks the generated
 country files against that pinned package. The original UI archive's older
 14,714,012,813-person preview remains only as historical source provenance.
 See [the numerical binding report](docs/reports/ui/OFFICIAL_OPENING_DATA_BINDING_2026_09_29.md)
-for field meanings and coverage. This is still a static, local-planning UI:
+for field meanings and coverage. The page remains non-authoritative: static
+opening displays and local planning coexist with an opt-in source-data drawer.
+The drawer's production connection is not yet evidenced;
 the official opening inputs are not a committed World State, and login,
 authoritative commands, settlement, live prices and receipts are not connected.
 Country-scoped routes do not fall back to the older North Harbour sample ledger.
 
-## Latest code integration (2026-09-27)
+## Historical code integration (2026-09-27)
+
+This is the retained September 27 snapshot, not today's schema count or
+connection status. Use the September 30 record above for subsequent evidence.
 
 The reviewed main-site release chain has now published the isolated `world_v2`
 schema to the shared Supabase project: 17 exact migration records and 21 tables,
@@ -106,16 +130,19 @@ These preparations are not a real 70-country World long run, measured load
 test, security acceptance or V29/V30 gate pass; see [`docs/reports/V29.1/PREPARATION_GAP_AUDIT.md`](docs/reports/V29.1/PREPARATION_GAP_AUDIT.md)
 and [`docs/reports/V30.1/IMPLEMENTATION.md`](docs/reports/V30.1/IMPLEMENTATION.md).
 
-The runnable API process currently exposes health/readiness endpoints only.
-The default web prototype is `LOCAL_FIXTURE`; an authorized local read requires
+At this September 24 baseline, the runnable API exposed health/readiness only.
+That description is superseded by the merged opt-in source routes above.
+The then-default web prototype was `LOCAL_FIXTURE`; an authorized local read required
 an explicit trusted-host opt-in and is not mounted by the default entrypoint.
 An optional local-only final-receipt lookup and web command/UNKNOWN-receipt
 loop are now integrated as unactivated preparations; the web lookup port is
 also merged but still requires a real trusted-host transport and live E2E.
 A separate development-only audit host renders `NOT CONNECTED` without a
 trusted injection and is excluded from the production web build.
-There is no proven end-to-end authorized browser command/receipt flow, live
-forecast model, production database rollout, or product release.
+This historical evidence did not prove an end-to-end authorized browser
+command/receipt flow, live forecast model, production database rollout or
+product release. Later schema/source-readback evidence is recorded above;
+it does not establish the remaining runtime claims.
 
 **Gate B is PENDING.** A narrow cleanup-decoding fix now passes the disposable
 PostgreSQL fault runner, V09/V10 recovery suites and official `pnpm check`
