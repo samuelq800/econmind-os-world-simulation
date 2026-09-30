@@ -283,6 +283,20 @@
       "lock_or_downtime_risk": "P0 additive server-only role, column grant and RLS-policy candidate; roles must be absent, browser roles remain ungranted, and no login credential is created",
       "rollback_strategy": "forward-fix",
       "production_approval": null
+    },
+    {
+      "migration_id": "0021_world_v2_official_full_data_reader",
+      "release_order": 21,
+      "path": "database/migrations/artifacts/0021_world_v2_official_full_data_reader.sql",
+      "sha256": "e5c75c9f731283571680647d0447fd88924bf8a1476f67fe71b7c663ead1f670",
+      "artifact_source_commit": "f2ceea4bce70e8d2a193c641f87af5ce8d2e47e3",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": true,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "P0 additive server-only RLS whitelist for exactly 34 frozen selected-source JSON paths and their four-digit chunks; no new grant, browser access, World, OpeningSeed, worker, mutation, CSV, map-blob or legacy schema action",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }
