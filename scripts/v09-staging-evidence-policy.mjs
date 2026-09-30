@@ -32,7 +32,59 @@ export const V09_STAGING_MIGRATION_IDS = Object.freeze([
   '0017_world_v2_narrow_transfer_approval_reference',
   '0018_world_v2_country_candidate_intake',
   '0019_world_v2_balanced_candidate_status',
+  '0020_world_v2_official_country_reader',
 ]);
+export const V09_STAGING_API_READER_ROLES = Object.freeze([
+  'world_v2_api_reader',
+  'world_v2_api_login',
+]);
+export const V09_STAGING_CANDIDATE_0021 = Object.freeze({
+  migration_id: '0021_world_v2_official_full_data_reader',
+  path: 'database/migrations/artifacts/0021_world_v2_official_full_data_reader.sql',
+  sha256: 'e5c75c9f731283571680647d0447fd88924bf8a1476f67fe71b7c663ead1f670',
+  artifact_source_commit: '7631a97e8313e79719524140e3339d54b6563897',
+});
+const REVIEWED_ADDITIONS = Object.freeze([
+  Object.freeze({
+    migration_id: '0020_world_v2_official_country_reader',
+    path: 'database/migrations/artifacts/0020_world_v2_official_country_reader.sql',
+    sha256: '083e06aca86763e4bc32a34347c1a86b26aa910f3c6a191b9393021347211618',
+    artifact_source_commit: 'f3413bae195b75e80d28d6afa314ca0e394bdfbc',
+  }),
+  V09_STAGING_CANDIDATE_0021,
+]);
+
+/** The committed 20-chain or one exactly pinned 0021 candidate. Generic
+ * manifest provenance validation remains mandatory after this allowlist. */
+export function assertV09StagingMigrationAllowlist(migrations) {
+  const base = V09_STAGING_MIGRATION_IDS;
+  if (
+    !Array.isArray(migrations) ||
+    (migrations.length !== base.length &&
+      migrations.length !== base.length + 1) ||
+    base.some((id, index) => migrations[index]?.migration_id !== id) ||
+    (migrations.length === base.length + 1 &&
+      migrations.at(-1)?.migration_id !==
+        V09_STAGING_CANDIDATE_0021.migration_id) ||
+    REVIEWED_ADDITIONS.some((reviewed) => {
+      const entry = migrations.find(
+        (migration) => migration?.migration_id === reviewed.migration_id,
+      );
+      return (
+        (reviewed === V09_STAGING_CANDIDATE_0021 &&
+          migrations.length === base.length + 1 &&
+          entry === undefined) ||
+        (entry !== undefined &&
+          (entry.path !== reviewed.path ||
+            entry.sha256 !== reviewed.sha256 ||
+            entry.artifact_source_commit !== reviewed.artifact_source_commit))
+      );
+    })
+  ) {
+    throw new Error('V09_STAGING_MIGRATION_CHAIN_NOT_REVIEWED');
+  }
+  return migrations.map((migration) => migration.migration_id);
+}
 
 const PROJECT_REF = /^[a-z0-9]{20}$/u;
 const ROLE_NAME = /^[a-z_][a-z0-9_]{0,62}$/u;
@@ -290,6 +342,8 @@ export function buildV09StagingDryRunPlan(approval) {
       overwriteAllowed: false,
     }),
     execution: 'DRY_RUN_ONLY_UNTIL_EXPLICIT_CONFIRMATION',
+    currentManifestExecution:
+      'BLOCKED_GLOBAL_API_ROLE_DDL_NOT_APPROVED_FOR_DEDICATED_STAGING',
     migrations: V09_STAGING_MIGRATION_IDS,
     roleChecks: Object.freeze([
       'SCHEMA_OWNERSHIP',

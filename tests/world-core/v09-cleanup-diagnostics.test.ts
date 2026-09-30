@@ -27,6 +27,28 @@ function evidence() {
 }
 
 describe('V09 disposable cleanup diagnostics', () => {
+  it('never touches global API reader roles without disposable authorization', async () => {
+    const output = {
+      ...evidence(),
+      migrations: ['0020_world_v2_official_country_reader'],
+    };
+    let calls = 0;
+    await expect(
+      cleanupMarkedBoundary(
+        {
+          execute: async () => {
+            calls += 1;
+            return { rows: [] };
+          },
+        },
+        approval,
+        output,
+      ),
+    ).rejects.toMatchObject({ stage: 'CLEANUP_INCOMPLETE' });
+    expect(output.cleanup.status).toBe('CLEANUP_INCOMPLETE');
+    expect(calls).toBe(0);
+  });
+
   it('requires an exact zero integer count of external dependents', () => {
     expect(hasNoExternalDependents([{ dependent_count: 0 }])).toBe(true);
     expect(hasNoExternalDependents([{ dependent_count: 1 }])).toBe(false);

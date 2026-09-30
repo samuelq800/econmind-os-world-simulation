@@ -10,6 +10,7 @@ import {
   readMigrationGitProvenance,
   validateMigrationManifest,
 } from './migration-policy.mjs';
+import { assertV09StagingMigrationAllowlist } from './v09-staging-evidence-policy.mjs';
 
 const execFileAsync = promisify(execFile);
 const MIGRATION_ID = '0019_world_v2_balanced_candidate_status';
@@ -48,10 +49,17 @@ async function verifiedMigration(repositoryRoot) {
     manifest.migrations,
   );
   const result = validateMigrationManifest(manifest, artifacts, provenance);
-  if (result.status !== 'PASS' || manifest.migrations.length !== 19) {
+  if (result.status !== 'PASS') {
     throw new Error('BALANCED_CANDIDATE_MIGRATION_CHAIN_INVALID');
   }
-  const migration = manifest.migrations.at(-1);
+  try {
+    // 0019 remains the release being rendered. Later reviewed reader grants
+    // may be present in the repository manifest but are never re-rendered here.
+    assertV09StagingMigrationAllowlist(manifest.migrations);
+  } catch {
+    throw new Error('BALANCED_CANDIDATE_MIGRATION_CHAIN_INVALID');
+  }
+  const migration = manifest.migrations[18];
   if (
     migration.migration_id !== MIGRATION_ID ||
     migration.release_order !== 19

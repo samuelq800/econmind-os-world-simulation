@@ -10,7 +10,16 @@ import {
   runV09DedicatedStagingEvidence,
   runV09DisposablePostgresEvidence,
 } from '../../scripts/v09-staging-evidence-runner.mjs';
-import { V09_STAGING_MIGRATION_IDS } from '../../scripts/v09-staging-evidence-policy.mjs';
+import {
+  V09_STAGING_API_READER_ROLES,
+  V09_STAGING_CANDIDATE_0021,
+  V09_STAGING_EXECUTION_CONFIRMATION,
+  V09_STAGING_MIGRATION_IDS,
+  V09_STAGING_OWNER_CONFIRMATION,
+  V09_STAGING_TARGET_SCHEMA_VERSION,
+  assertV09StagingMigrationAllowlist,
+  createV09StagingTargetFingerprint,
+} from '../../scripts/v09-staging-evidence-policy.mjs';
 
 const OUTPUT = '/private/tmp/v09-disposable-evidence-test.json';
 
@@ -29,12 +38,12 @@ function environment(
 }
 
 describe('V09 disposable PostgreSQL evidence boundary', () => {
-  it('binds the current 19-artifact chain and exact new cleanup objects', async () => {
+  it('binds the current 20-artifact main chain and exact new cleanup objects', async () => {
     const migrations = await loadV09StagingMigrationChain();
     expect(migrations.map((migration) => migration.migration_id)).toEqual(
       V09_STAGING_MIGRATION_IDS,
     );
-    expect(migrations).toHaveLength(19);
+    expect(migrations).toHaveLength(20);
 
     const inventory = expectedV09StagingCleanupInventory({
       roles: { migration_owner: 'v09_staging_migration_owner' },
@@ -47,8 +56,56 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
         'RELATION|country_candidate_profile|r|v09_staging_migration_owner',
         'FUNCTION|validate_narrow_transfer_approval_reference|0|v09_staging_migration_owner',
         'TRIGGER|narrow_transfer_approval_reference_cannot_truncate|narrow_transfer_approval_reference|v09_staging_migration_owner',
+        'POLICY|country_candidate_bundle_selected_source_server_read|country_candidate_bundle|v09_staging_migration_owner',
+        'POLICY|country_candidate_artifact_selected_source_server_read|country_candidate_artifact|v09_staging_migration_owner',
       ]),
     );
+    expect(inventory).not.toContain(
+      'POLICY|country_candidate_artifact_selected_full_source_server_read|country_candidate_artifact|v09_staging_migration_owner',
+    );
+  });
+
+  it('accepts only the exact fixed 0021 candidate after main, never a missing, extra, reordered or repinned migration', async () => {
+    const manifest = JSON.parse(
+      await readFile(
+        new URL('../../database/migrations/manifest.json', import.meta.url),
+        'utf8',
+      ),
+    );
+    const main = manifest.migrations as Array<Record<string, unknown>>;
+    const candidate = {
+      ...V09_STAGING_CANDIDATE_0021,
+      release_order: 21,
+    };
+    const complete = [...main, candidate];
+    expect(assertV09StagingMigrationAllowlist(main)).toEqual(
+      V09_STAGING_MIGRATION_IDS,
+    );
+    expect(assertV09StagingMigrationAllowlist(complete)).toHaveLength(21);
+    expect(V09_STAGING_API_READER_ROLES).toEqual([
+      'world_v2_api_reader',
+      'world_v2_api_login',
+    ]);
+    expect(
+      expectedV09StagingCleanupInventory(
+        { roles: { migration_owner: 'v09_staging_migration_owner' } },
+        complete.map((migration) => String(migration.migration_id)),
+      ),
+    ).toContain(
+      'POLICY|country_candidate_artifact_selected_full_source_server_read|country_candidate_artifact|v09_staging_migration_owner',
+    );
+    for (const rejected of [
+      main.slice(0, -1),
+      [...main, { ...candidate, migration_id: '0021_unknown' }],
+      [...main, candidate, { ...candidate, migration_id: '0022_unknown' }],
+      [...main.slice(0, -2), main.at(-1), main.at(-2)],
+      [...main.slice(0, -1), { ...main.at(-1), sha256: '0'.repeat(64) }],
+      [...main, { ...candidate, sha256: '0'.repeat(64) }],
+      [...main, { ...candidate, artifact_source_commit: '0'.repeat(40) }],
+    ])
+      expect(() => assertV09StagingMigrationAllowlist(rejected)).toThrow(
+        'V09_STAGING_MIGRATION_CHAIN_NOT_REVIEWED',
+      );
   });
 
   it('keeps the dedicated staging entry point policy-gated before client creation', async () => {
@@ -62,6 +119,54 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
 
     expect(result).toMatchObject({
       failure: { stage: 'POLICY_REJECTED' },
+      status: 'FAIL_CLOSED',
+    });
+  });
+
+  it('rejects 0020 global-role DDL on dedicated staging before creating any client', async () => {
+    const approvalBase = {
+      schema_version: V09_STAGING_TARGET_SCHEMA_VERSION,
+      project_ref: 'abcdefghijklmnopqrst',
+      target_classification: 'DEDICATED_NONPRODUCTION',
+      production_target: false,
+      shared_target: false,
+      database_host: 'staging.example.com',
+      database_port: 5432,
+      database_name: 'econmind_v09',
+      admin_database_role: 'postgres',
+      disposable_namespace: 'world_v2',
+      roles: {
+        migration_owner: 'v09_staging_migration_owner',
+        worker: 'v09_staging_worker',
+        reader: 'v09_staging_reader',
+      },
+      owner_confirmation: V09_STAGING_OWNER_CONFIRMATION,
+      evidence_output_path: '/private/tmp/v09-dedicated-fail-closed.json',
+    };
+    const target_fingerprint = createV09StagingTargetFingerprint(approvalBase);
+    let clientsCreated = 0;
+    const result = await runV09DedicatedStagingEvidence({
+      approval: { ...approvalBase, target_fingerprint },
+      environment: {
+        ECONMIND_ENV: 'staging',
+        V09_STAGING_EXECUTION_CONFIRMATION: V09_STAGING_EXECUTION_CONFIRMATION,
+        V09_STAGING_TARGET_FINGERPRINT: target_fingerprint,
+        V09_STAGING_ADMIN_DATABASE_URL:
+          'postgresql://postgres:synthetic@staging.example.com:5432/econmind_v09?ssl=true',
+      },
+      clientFactory: () => {
+        clientsCreated += 1;
+        throw new Error('dedicated staging must not connect');
+      },
+      loadLinkedProjectRef: async () => undefined,
+      loadMigrationChain: async () => [
+        { migration_id: '0020_world_v2_official_country_reader' },
+      ],
+      writeEvidence: async () => undefined,
+    });
+    expect(clientsCreated).toBe(0);
+    expect(result).toMatchObject({
+      failure: { stage: 'LOCAL_MANIFEST' },
       status: 'FAIL_CLOSED',
     });
   });
@@ -243,6 +348,114 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
     ).toBeLessThan(
       steps.indexOf('APPLY_MIGRATION_0002_WORLD_V2_COMMAND_EVENT_LEDGER'),
     );
+  });
+
+  it('preflights API roles and uses the disposable admin only for 0020 global-role DDL', async () => {
+    const steps: string[] = [];
+    let checkedRoles: string[] = [];
+    const result = await runV09DisposablePostgresEvidence({
+      environment: environment(),
+      clientFactory: () => ({
+        connect: async () => undefined,
+        end: async () => undefined,
+        execute: async ({
+          step,
+          values,
+        }: {
+          step: string;
+          values?: string[][];
+        }) => {
+          steps.push(step);
+          if (step === 'VERIFY_CONNECTED_ADMIN_ROLE')
+            return { rows: [{ current_user: 'postgres' }] };
+          if (step === 'PRECHECK_NAMESPACE_ABSENT')
+            return { rows: [{ exists: false }] };
+          if (step === 'PRECHECK_ROLES_ABSENT') {
+            checkedRoles = values?.[0] ?? [];
+            return { rows: [] };
+          }
+          if (step === 'APPLY_MIGRATION_0022_STOP_TEST')
+            throw new Error('stop after checking the reviewed 0020 boundary');
+          return { rows: [] };
+        },
+      }),
+      loadLinkedProjectRef: async () => undefined,
+      loadMigrationChain: async () => [
+        {
+          artifact_sha256: '1'.repeat(64),
+          migration_id: '0001_world_v2_namespace',
+          source_repo_commit: 'a'.repeat(40),
+          sql: 'create schema if not exists world_v2',
+        },
+        {
+          artifact_sha256: '2'.repeat(64),
+          migration_id: '0020_world_v2_official_country_reader',
+          source_repo_commit: 'b'.repeat(40),
+          sql: 'create role world_v2_api_reader nologin',
+        },
+        {
+          artifact_sha256: '3'.repeat(64),
+          migration_id: '0022_stop_test',
+          source_repo_commit: 'c'.repeat(40),
+          sql: 'select 1',
+        },
+      ],
+      writeEvidence: async () => undefined,
+    });
+    expect(result).toMatchObject({
+      cleanup: { status: 'TRANSACTION_ROLLED_BACK' },
+      failure: { stage: 'APPLY_MIGRATIONS' },
+      status: 'FAIL_CLOSED',
+    });
+    expect(checkedRoles).toEqual(
+      expect.arrayContaining(V09_STAGING_API_READER_ROLES),
+    );
+    expect(steps.indexOf('RESET_OWNER_FOR_API_ROLE_MIGRATION')).toBeLessThan(
+      steps.indexOf('APPLY_MIGRATION_0020_WORLD_V2_OFFICIAL_COUNTRY_READER'),
+    );
+    expect(
+      steps.indexOf('APPLY_MIGRATION_0020_WORLD_V2_OFFICIAL_COUNTRY_READER'),
+    ).toBeLessThan(steps.indexOf('REASSERT_OWNER_AFTER_API_ROLE_MIGRATION'));
+    expect(
+      steps.indexOf('REASSERT_OWNER_AFTER_API_ROLE_MIGRATION'),
+    ).toBeLessThan(steps.indexOf('APPLY_MIGRATION_0022_STOP_TEST'));
+  });
+
+  it('refuses a pre-existing API reader role before marker creation or cleanup', async () => {
+    const steps: string[] = [];
+    const result = await runV09DisposablePostgresEvidence({
+      environment: environment(),
+      clientFactory: () => ({
+        connect: async () => undefined,
+        end: async () => undefined,
+        execute: async ({ step }: { step: string }) => {
+          steps.push(step);
+          if (step === 'VERIFY_CONNECTED_ADMIN_ROLE')
+            return { rows: [{ current_user: 'postgres' }] };
+          if (step === 'PRECHECK_NAMESPACE_ABSENT')
+            return { rows: [{ exists: false }] };
+          if (step === 'PRECHECK_ROLES_ABSENT')
+            return { rows: [{ rolname: 'world_v2_api_reader' }] };
+          return { rows: [] };
+        },
+      }),
+      loadLinkedProjectRef: async () => undefined,
+      loadMigrationChain: async () => [
+        {
+          artifact_sha256: '1'.repeat(64),
+          migration_id: '0020_world_v2_official_country_reader',
+          source_repo_commit: 'a'.repeat(40),
+          sql: 'create role world_v2_api_reader nologin',
+        },
+      ],
+      writeEvidence: async () => undefined,
+    });
+    expect(result).toMatchObject({
+      failure: { stage: 'PRISTINE_BOUNDARY' },
+      status: 'FAIL_CLOSED',
+    });
+    expect(steps).not.toContain('CREATE_DISPOSABLE_NAMESPACE');
+    expect(steps.some((step) => step.startsWith('CLEANUP_'))).toBe(false);
   });
 
   it('rejects runtime or Supabase configuration before a client can be created', () => {
