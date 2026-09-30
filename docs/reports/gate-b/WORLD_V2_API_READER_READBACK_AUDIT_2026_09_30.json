@@ -1,0 +1,83 @@
+{
+  "reportType": "WORLD_V2_API_READER_READBACK_AUDIT",
+  "recordedAt": "2026-09-30",
+  "status": "EVIDENCED_NARROW_READER_BOUNDARY",
+  "authority": "SERVER_ONLY_INACTIVE_CANDIDATE_READ",
+  "scope": "Already-applied 0020 selected-country reader role, RLS, ACL, and ledger readback only",
+  "historicalPublication": {
+    "runId": 36654533470,
+    "status": "WORLD_V2_RELEASE_UNKNOWN",
+    "supersededForBoundaryVerificationBy": 36657427073,
+    "interpretation": "The historical cancellation record is preserved. The later read-only audit independently verifies the resulting bounded production state."
+  },
+  "reviewedAuditChain": {
+    "worldSource": {
+      "pullRequest": 27,
+      "reviewedCommit": "d3884d81435816cedd6f8a0a46510dfd49c1ba5e",
+      "mainMergeCommit": "cb026300267c3ce7a0c749c9ec4d9557c27ba870",
+      "sourceCiRun": 36657099187,
+      "nativePostgresCiRun": 36657099242
+    },
+    "mainPublisher": {
+      "pullRequest": 76,
+      "reviewedCommit": "988dd279ce5fd0f90626094d2c77f3c5df86f9f9",
+      "mainMergeCommit": "4458712184363ef510e4d3a18f0e24141a34220e",
+      "publisherCiRun": 36657141899,
+      "fullCiRun": 36657146738
+    },
+    "reviewConclusion": "APPROVED_FOR_MERGE_AND_SINGLE_READ_ONLY_AUDIT"
+  },
+  "productionAudit": {
+    "runId": 36657427073,
+    "jobId": 109704673747,
+    "workflowHeadCommit": "4458712184363ef510e4d3a18f0e24141a34220e",
+    "conclusion": "success",
+    "verifierStatus": "WORLD_V2_API_READER_READBACK_AUDIT_VERIFIED",
+    "ledgerEntries": [
+      {
+        "migrationId": "0020_world_v2_official_country_reader",
+        "artifactSha256": "083e06aca86763e4bc32a34347c1a86b26aa910f3c6a191b9393021347211618",
+        "sourceRepoCommit": "f3413bae195b75e80d28d6afa314ca0e394bdfbc",
+        "releaseOrder": 20
+      }
+    ],
+    "readerRole": {
+      "canLogin": false,
+      "canBypassRls": false,
+      "isSuperuser": false,
+      "inheritsPrivileges": false
+    },
+    "loginRole": {
+      "canLogin": false,
+      "canBypassRls": false,
+      "isSuperuser": false,
+      "inheritsPrivileges": false
+    },
+    "controlPlaneRole": {
+      "name": "postgres",
+      "canLogin": true,
+      "canBypassRls": true,
+      "isSuperuser": false,
+      "canCreateRole": true,
+      "inheritsPrivileges": true
+    },
+    "readerMembershipCount": 2,
+    "schemaUsage": ["public", "world_v2"],
+    "columnSelectPrivilegeCount": 8,
+    "tablePrivilegeCount": 0,
+    "candidateTablePolicyCount": 2,
+    "unknownOutcomeRecorded": false
+  },
+  "notEstablished": [
+    "A server credential or deployed API connection",
+    "API/CORS enablement or public-client access",
+    "0021 full-data reader publication or access to 34 datasets",
+    "World, OpeningSeed, worker, simulation, team, office, or player-state activation",
+    "Gate B or public readiness"
+  ],
+  "notPerformed": [
+    "No 0020 retry, DDL, compensation, or membership revocation",
+    "No 0021 full-data policy publication",
+    "No credential provisioning, API enablement, or CORS activation"
+  ]
+}
