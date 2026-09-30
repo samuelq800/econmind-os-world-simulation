@@ -66,19 +66,50 @@ async function blockedSourceFixture() {
   const stocks = JSON.parse(
     await readFile(path.join(packageRoot, 'stocks.json'), 'utf8'),
   ) as SourceStock[];
+  const checksumRows = JSON.parse(
+    await readFile(
+      path.join(root, 'artifacts/world-balanced-candidate-v1/CHECKSUMS.json'),
+      'utf8',
+    ),
+  ) as Array<{ path: string; sha256: string; bytes: number }>;
+  const dataFiles = Object.fromEntries(
+    checksumRows
+      .filter(
+        (row) => row.path.startsWith('data/') && row.path.endsWith('.json'),
+      )
+      .map((row) => [row.path, { sha256: row.sha256, bytes: row.bytes }]),
+  );
+  const allOfficialDatasets = Object.entries(dataFiles).map(
+    ([sourcePath, sourceFile]) => ({
+      sourcePath,
+      sourceSha256: sourceFile.sha256,
+      sourceBytes: sourceFile.bytes,
+      structuredMappingStatus: 'FULL_SOURCE_RECORDS_INCLUDED_LOSSLESS',
+      records: [{}],
+    }),
+  );
   const core = (source: string) => `COUNTRY_${source.slice(-2)}`;
   const mapping = withFingerprint(
     {
-      schemaVersion: 'OFFICIAL_WORLD_OPENING_MAPPING_V1',
+      schemaVersion: 'OFFICIAL_WORLD_OPENING_MAPPING_V2',
       source: {
         selectionSha256: sha256Hex(selectionBytes),
         packageId: 'BALANCED_2026_09_28_V1',
         checksumsSha256: checksum,
+        checksumEntries: 86,
+        verifiedArtifactsIncludingChecksumManifest: 87,
+        dataFiles,
+        mapPackage: {
+          filesVerified: 203,
+          authority: 'VERSIONED_FILE_ASSETS_ONLY_NOT_WORLD_STATE',
+        },
       },
       authority: {
         officialSelectedSourceDataset: true,
+        sourceProposalLabelsPreserved: true,
         proposalRecordsExecuted: false,
         workerStarted: false,
+        productionDatabaseMutated: false,
         openingSeedReady: false,
       },
       invariants: {
@@ -90,6 +121,9 @@ async function blockedSourceFixture() {
         positiveStockCellCount: stocks.filter((stock) => stock.available > 0)
           .length,
         financeRowCount: countries.length,
+        completeStructuredDatasetCount: 34,
+        candidateArtifactsEnumerated: 87,
+        mapPackageFilesEnumerated: 203,
       },
       mappings: {
         countries: countries.map((country) => ({
@@ -114,6 +148,7 @@ async function blockedSourceFixture() {
           coreCountryId: core(country.id),
           coreSettlementCurrency: null,
         })),
+        allOfficialDatasets,
       },
       countryReports: countries.map((country) => ({
         sourceCountryId: country.id,
@@ -152,7 +187,56 @@ async function blockedSourceFixture() {
     },
     'gapsFingerprint',
   );
-  return { selectionBytes, mapping, gaps };
+  const coverage = withFingerprint(
+    {
+      schemaVersion: 'OFFICIAL_WORLD_COMPLETE_COVERAGE_V1',
+      mappingFingerprint: mapping.mappingFingerprint,
+      gapsFingerprint: gaps.gapsFingerprint,
+      counts: {
+        checksumManifestEntries: 86,
+        sourceArtifactsIncludingChecksumManifest: 87,
+        structuredJsonDatasets: 34,
+        mapPackageFiles: 203,
+        countries: 70,
+        omittedSourceArtifacts: 0,
+        omittedStructuredDatasets: 0,
+        omittedMapPackageFiles: 0,
+      },
+      sourceArtifacts: Array.from({ length: 87 }, () => ({})),
+      structuredDatasets: allOfficialDatasets.map((dataset) => ({
+        sourcePath: dataset.sourcePath,
+        sourceSha256: dataset.sourceSha256,
+        sourceBytes: dataset.sourceBytes,
+        sourceRecordsIncludedInMappingV2: true,
+      })),
+      mapAssets: Array.from({ length: 203 }, () => ({})),
+      countries: countries.map((country) => ({
+        sourceCountryId: country.id,
+        coreCountryId: core(country.id),
+      })),
+      omissions: {
+        sourceArtifacts: [],
+        structuredDatasets: [],
+        mapPackageFiles: [],
+      },
+    },
+    'coverageFingerprint',
+  );
+  return { selectionBytes, mapping, gaps, coverage };
+}
+
+function rebindCoverage(
+  coverage: Record<string, unknown>,
+  mappingFingerprint: string,
+  gapsFingerprint: string,
+) {
+  const body = Object.fromEntries(
+    Object.entries(coverage).filter(([key]) => key !== 'coverageFingerprint'),
+  );
+  return withFingerprint(
+    { ...body, mappingFingerprint, gapsFingerprint },
+    'coverageFingerprint',
+  );
 }
 
 describe('selected official World opening admission', () => {
@@ -170,6 +254,9 @@ describe('selected official World opening admission', () => {
     expect(result.countryIds).toHaveLength(70);
     expect(result.stocks).toHaveLength(840);
     expect(result.finance).toHaveLength(70);
+    expect(result.coverageFingerprint).toBe(
+      fixture.coverage.coverageFingerprint,
+    );
     expect(result.blockerCodes).toEqual([
       'OWNER_LEGAL_ENTITY_BINDING_REQUIRED',
       'WORLD_ID_BINDING_REQUIRED',
@@ -211,6 +298,11 @@ describe('selected official World opening admission', () => {
         selectionBytes: fixture.selectionBytes,
         mapping: missingMapping,
         gaps: reboundGaps,
+        coverage: rebindCoverage(
+          fixture.coverage,
+          missingMapping.mappingFingerprint,
+          reboundGaps.gapsFingerprint,
+        ),
         sha256Hex,
       }),
     ).toThrow('does not bind the selected 70-country package');
@@ -238,9 +330,30 @@ describe('selected official World opening admission', () => {
         selectionBytes: fixture.selectionBytes,
         mapping: resignedMapping,
         gaps: resignedGaps,
+        coverage: rebindCoverage(
+          fixture.coverage,
+          resignedMapping.mappingFingerprint,
+          resignedGaps.gapsFingerprint,
+        ),
         sha256Hex,
       }),
     ).toThrow('readiness contradicts');
+  });
+
+  it('rejects a re-fingerprinted coverage ledger with one map asset missing', async () => {
+    const fixture = await blockedSourceFixture();
+    const changed = structuredClone(fixture.coverage);
+    changed.mapAssets.pop();
+    const body = Object.fromEntries(
+      Object.entries(changed).filter(([key]) => key !== 'coverageFingerprint'),
+    );
+    expect(() =>
+      inspectOfficialWorldOpeningAdmission({
+        ...fixture,
+        coverage: withFingerprint(body, 'coverageFingerprint'),
+        sha256Hex,
+      }),
+    ).toThrow('complete coverage ledger');
   });
 
   it('fails before any database write when the actual opening handoff is blocked', async () => {
@@ -256,6 +369,7 @@ describe('selected official World opening admission', () => {
           ...fixture,
           expectedMappingFingerprint: fixture.mapping.mappingFingerprint,
           expectedGapsFingerprint: fixture.gaps.gapsFingerprint,
+          expectedCoverageFingerprint: fixture.coverage.coverageFingerprint,
           expectedSeedFingerprint: 'sha256:NOT_AN_APPROVED_SEED',
           seed: null,
           bootstrappedAtReal: '2026-09-30T00:00:00.000Z',

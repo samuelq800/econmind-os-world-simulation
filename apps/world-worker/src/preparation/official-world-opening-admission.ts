@@ -93,6 +93,7 @@ export interface OfficialOpeningAdmission {
   readonly checksumsSha256: typeof CHECKSUMS_SHA256;
   readonly mappingFingerprint: string;
   readonly gapsFingerprint: string;
+  readonly coverageFingerprint: string;
   readonly countryIds: readonly string[];
   readonly blockerCodes: readonly string[];
   readonly deferredCodes: readonly string[];
@@ -109,6 +110,7 @@ export function inspectOfficialWorldOpeningAdmission(input: {
   readonly selectionBytes: string;
   readonly mapping: unknown;
   readonly gaps: unknown;
+  readonly coverage: unknown;
   readonly sha256Hex: Sha256Hex;
 }): Readonly<OfficialOpeningAdmission> {
   let selection: JsonRecord;
@@ -132,15 +134,22 @@ export function inspectOfficialWorldOpeningAdmission(input: {
   }
   const mapping = record(input.mapping, 'C opening mapping');
   const gaps = record(input.gaps, 'C opening gaps');
+  const coverage = record(input.coverage, 'C complete coverage');
   const source = record(mapping.source, 'C mapping source');
   const authority = record(mapping.authority, 'C mapping authority');
   const invariants = record(mapping.invariants, 'C mapping invariants');
   const mapped = record(mapping.mappings, 'C mapping identities');
   const records = record(mapping.records, 'C mapping records');
+  const dataFiles = record(source.dataFiles, 'C source data files');
+  const mapPackage = record(source.mapPackage, 'C map package');
   const countryRows = rows(mapped.countries, 'C countries');
   const countryReports = rows(mapping.countryReports, 'C country reports');
   const stockRows = rows(records.stocks, 'C stocks');
   const financeRows = rows(records.finance, 'C finance');
+  const allDatasets = rows(
+    records.allOfficialDatasets,
+    'C complete structured datasets',
+  );
   const gapCountries = rows(gaps.countries, 'C gap countries');
   const expected = expectedCountryIds();
   const mappingFingerprint = fingerprint(
@@ -149,8 +158,13 @@ export function inspectOfficialWorldOpeningAdmission(input: {
     input.sha256Hex,
   );
   const gapsFingerprint = fingerprint(gaps, 'gapsFingerprint', input.sha256Hex);
+  const coverageFingerprint = fingerprint(
+    coverage,
+    'coverageFingerprint',
+    input.sha256Hex,
+  );
   if (
-    mapping.schemaVersion !== 'OFFICIAL_WORLD_OPENING_MAPPING_V1' ||
+    mapping.schemaVersion !== 'OFFICIAL_WORLD_OPENING_MAPPING_V2' ||
     gaps.schemaVersion !== 'OFFICIAL_WORLD_OPENING_GAPS_V1' ||
     source.selectionSha256 !== input.sha256Hex(input.selectionBytes) ||
     source.packageId !== PACKAGE_ID ||
@@ -159,13 +173,24 @@ export function inspectOfficialWorldOpeningAdmission(input: {
     gaps.sourceChecksumsSha256 !== CHECKSUMS_SHA256 ||
     gaps.mappingFingerprint !== mappingFingerprint ||
     authority.officialSelectedSourceDataset !== true ||
+    authority.sourceProposalLabelsPreserved !== true ||
     authority.proposalRecordsExecuted !== false ||
     authority.workerStarted !== false ||
+    authority.productionDatabaseMutated !== false ||
+    source.checksumEntries !== 86 ||
+    source.verifiedArtifactsIncludingChecksumManifest !== 87 ||
+    mapPackage.filesVerified !== 203 ||
+    mapPackage.authority !== 'VERSIONED_FILE_ASSETS_ONLY_NOT_WORLD_STATE' ||
     invariants.countryCount !== 70 ||
     invariants.populationTotal !== '14712146434' ||
     invariants.stockCellCount !== 840 ||
     invariants.positiveStockCellCount !== 619 ||
     invariants.financeRowCount !== 70 ||
+    invariants.completeStructuredDatasetCount !== 34 ||
+    invariants.candidateArtifactsEnumerated !== 87 ||
+    invariants.mapPackageFilesEnumerated !== 203 ||
+    Object.keys(dataFiles).length !== 34 ||
+    allDatasets.length !== 34 ||
     countryRows.length !== 70 ||
     countryReports.length !== 70 ||
     stockRows.length !== 840 ||
@@ -173,6 +198,75 @@ export function inspectOfficialWorldOpeningAdmission(input: {
     gapCountries.length !== 70
   ) {
     invalid('C opening mapping does not bind the selected 70-country package');
+  }
+  const observedDatasets = new Set<string>();
+  for (const dataset of allDatasets) {
+    const sourcePath = text(dataset.sourcePath, 'Structured source path');
+    const sourceFile = record(dataFiles[sourcePath], 'Structured source file');
+    if (
+      observedDatasets.has(sourcePath) ||
+      !sourcePath.startsWith('data/') ||
+      !sourcePath.endsWith('.json') ||
+      dataset.sourceSha256 !== sourceFile.sha256 ||
+      dataset.sourceBytes !== sourceFile.bytes ||
+      dataset.structuredMappingStatus !==
+        'FULL_SOURCE_RECORDS_INCLUDED_LOSSLESS' ||
+      !Array.isArray(dataset.records)
+    ) {
+      invalid('C complete dataset coverage differs from source manifest');
+    }
+    observedDatasets.add(sourcePath);
+  }
+  if (Object.keys(dataFiles).some((path) => !observedDatasets.has(path))) {
+    invalid('C complete dataset coverage omits source files');
+  }
+  const coverageCounts = record(coverage.counts, 'C coverage counts');
+  const omissions = record(coverage.omissions, 'C coverage omissions');
+  const coverageDatasets = rows(
+    coverage.structuredDatasets,
+    'C coverage structured datasets',
+  );
+  if (
+    coverage.schemaVersion !== 'OFFICIAL_WORLD_COMPLETE_COVERAGE_V1' ||
+    coverage.mappingFingerprint !== mappingFingerprint ||
+    coverage.gapsFingerprint !== gapsFingerprint ||
+    coverageCounts.checksumManifestEntries !== 86 ||
+    coverageCounts.sourceArtifactsIncludingChecksumManifest !== 87 ||
+    coverageCounts.structuredJsonDatasets !== 34 ||
+    coverageCounts.mapPackageFiles !== 203 ||
+    coverageCounts.countries !== 70 ||
+    coverageCounts.omittedSourceArtifacts !== 0 ||
+    coverageCounts.omittedStructuredDatasets !== 0 ||
+    coverageCounts.omittedMapPackageFiles !== 0 ||
+    rows(coverage.sourceArtifacts, 'C coverage source artifacts').length !==
+      87 ||
+    coverageDatasets.length !== 34 ||
+    rows(coverage.mapAssets, 'C coverage map assets').length !== 203 ||
+    rows(coverage.countries, 'C coverage countries').length !== 70 ||
+    rows(omissions.sourceArtifacts, 'C omitted source artifacts').length !==
+      0 ||
+    rows(omissions.structuredDatasets, 'C omitted structured datasets')
+      .length !== 0 ||
+    rows(omissions.mapPackageFiles, 'C omitted map files').length !== 0
+  ) {
+    invalid('C complete coverage ledger does not bind all selected sources');
+  }
+  const coveragePaths = new Set<string>();
+  for (const dataset of coverageDatasets) {
+    const sourcePath = text(dataset.sourcePath, 'Coverage source path');
+    const sourceFile = record(dataFiles[sourcePath], 'Coverage source file');
+    if (
+      coveragePaths.has(sourcePath) ||
+      dataset.sourceSha256 !== sourceFile.sha256 ||
+      dataset.sourceBytes !== sourceFile.bytes ||
+      dataset.sourceRecordsIncludedInMappingV2 !== true
+    ) {
+      invalid('C coverage dataset differs from complete mapping');
+    }
+    coveragePaths.add(sourcePath);
+  }
+  if ([...observedDatasets].some((path) => !coveragePaths.has(path))) {
+    invalid('C coverage ledger omits a structured dataset');
   }
   const observed = countryRows.map((country, index) => {
     const number = String(index + 1).padStart(2, '0');
@@ -312,6 +406,7 @@ export function inspectOfficialWorldOpeningAdmission(input: {
     checksumsSha256: CHECKSUMS_SHA256,
     mappingFingerprint,
     gapsFingerprint,
+    coverageFingerprint,
     countryIds: Object.freeze(observed),
     blockerCodes: Object.freeze([...gapCodes].sort()),
     deferredCodes: Object.freeze([...deferredCodes].sort()),
@@ -342,8 +437,10 @@ export class OfficialWorldOpeningBootstrapper {
     readonly selectionBytes: string;
     readonly mapping: unknown;
     readonly gaps: unknown;
+    readonly coverage: unknown;
     readonly expectedMappingFingerprint: string;
     readonly expectedGapsFingerprint: string;
+    readonly expectedCoverageFingerprint: string;
     readonly expectedSeedFingerprint: string;
     readonly seed: unknown;
     readonly bootstrappedAtReal: string;
@@ -352,6 +449,7 @@ export class OfficialWorldOpeningBootstrapper {
       selectionBytes: input.selectionBytes,
       mapping: input.mapping,
       gaps: input.gaps,
+      coverage: input.coverage,
       sha256Hex: this.#sha256Hex,
     });
     if (admission.status !== 'SOURCE_READY_NOT_APPROVAL') {
@@ -361,7 +459,8 @@ export class OfficialWorldOpeningBootstrapper {
     }
     if (
       admission.mappingFingerprint !== input.expectedMappingFingerprint ||
-      admission.gapsFingerprint !== input.expectedGapsFingerprint
+      admission.gapsFingerprint !== input.expectedGapsFingerprint ||
+      admission.coverageFingerprint !== input.expectedCoverageFingerprint
     ) {
       invalid('Opening handoff differs from independently pinned fingerprints');
     }
