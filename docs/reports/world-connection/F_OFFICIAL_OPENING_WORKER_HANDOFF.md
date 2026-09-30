@@ -10,6 +10,7 @@ to initialize a production World or advance the simulation.
   worktree creation).
 - Isolated branch: `codex/f-opening-seed-70-country`.
 - Initial code commit: `0c2cdc71a9d047f4b90d12e999595f6ed48601f7`.
+- V2-contract code commit: `4698f0f55a1bd6b6489f8f5471dc99de1915b04f`.
 - Dedicated [native PostgreSQL 16 CI run](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36651575056): success on that exact code commit;
   PGlite focused tests 6/6 and native PostgreSQL tests 2/2 with no skip in CI.
   Worker/Core build, focused test typecheck, lint, formatting and diff check
@@ -17,8 +18,19 @@ to initialize a production World or advance the simulation.
 - The native tests use an explicitly test-only empty OpeningSeed to check
   storage, exact retry, concurrent retry and readback. They **do not** prove
   that the selected 70-country economics can yet be made into a valid seed.
+- [V2-contract native PostgreSQL 16 CI run](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36652734592):
+  success on exact code commit `4698f0f55a1bd6b6489f8f5471dc99de1915b04f`.
+  PGlite focused tests 7/7 and native PostgreSQL tests 2/2 passed; build,
+  typecheck, lint, formatting and diff check passed in the same run.
 - P0 independent review: **PENDING**. No `VERIFIED`, mainline merge or Gate B
   claim is made by F.
+
+The subsequent V2-contract integration was exercised locally against C's
+exact pushed report files: all three canonical fingerprints matched, 70
+countries/840 stock cells/70 finance rows were read, and the admission result
+was `BLOCKED` with six named OpeningSeed blockers. Focused PGlite tests now
+pass 7/7, including a re-fingerprinted report missing one map asset being
+rejected. This local check is not a production readback.
 
 ## What the Worker now owns
 
@@ -33,7 +45,7 @@ fingerprint, World ID and WorldVersion agreement against the reconstructed
 inventory/financial ledgers. This is not a second ledger.
 
 `inspectOfficialWorldOpeningAdmission` verifies the selected owner record,
-canonical C mapping/gap report fingerprints, 70 mapped Country IDs,
+canonical C mapping/gap/coverage report fingerprints, 70 mapped Country IDs,
 14,712,146,434 people, all 840 stock cells (619 positive), catalog units,
 70 finance rows and exact zero reserved/in-transit stock. It reports opening
 blockers separately from deferred runtime or team/role assignments. A report
@@ -48,12 +60,20 @@ fingerprint checks identity, not policy approval. No direct UI/API route and
 no automatic Worker dispatch were added. `getWorkerFoundationStatus()`
 continues to report simulation disabled.
 
-The F admission currently targets C's V1 machine-report shape. C is extending
-that report to full-domain V2. The V1 output is **superseded-in-progress** and
-must not be used as final E execution input; F must recheck the exact V2
-contract and rerun focused evidence on the final candidate. Current V1 data
-is correctly classified `BLOCKED`, with no database call from the official
-bootstrapper.
+The F admission targets C's full-domain V2 mapping at exact pushed C candidate
+`592ccbf5eca3440d87bda51660dddd09f807948a` (mapping implementation
+`cf76332b9f41e6ac2f468892edff1b4388efcbb1`). Its mapping fingerprint is
+`sha256:3463413929b1a659f0a089e041f8698c09d37caa2ad1d88fbc930db9bb9fffbb`,
+gap fingerprint is
+`sha256:b0e37cc97802080be7f14f5a0d3bf4ef457f3c6c1e60f6560c79d110493772c5`,
+and complete-coverage fingerprint is
+`sha256:9438a0c4b67d60a55d68fc2df676c70f63c57b8a48d6d25371cd4d6bdae6c651`.
+The earlier V1 output is superseded. F cross-checks V2's 34 structured-dataset
+manifest and complete-coverage ledger plus 203-file map-package counts as well
+as opening facts; it does not claim that source preservation itself executes
+those records. C V2 remains
+`BLOCKED` for formal OpeningSeed, so no database call is permitted by the
+official bootstrapper.
 
 ## Complete data scope: source retention is not runtime adoption
 
@@ -88,7 +108,7 @@ opening adoption and UI display are four different statuses.
 
 ## Current opening blockers and E input boundary
 
-The C V1 record identifies these OpeningSeed blockers: existing production
+The C V2 record identifies these OpeningSeed blockers: existing production
 World ID binding; legal title/risk bearer for positive stock; scenario
 currency-to-Core GCU decision; Treasury/central-bank split; 56 source deposit
 liability and 62 equity discrepancies. F's admission also preserves separate
@@ -96,9 +116,10 @@ deferred team assignments, facility/resource/water/power/employment/social
 execution gaps. These are not excuses to omit their source data; they prevent
 only unsupported runtime promotion.
 
-When the exact C V2 contract is fixed, an E-only explicit invocation needs:
-the checked-in `status/world-data-selection.json` bytes; exact C mapping and
-gaps JSON; their independently pinned canonical fingerprints; a fully
+When the C V2 candidate passes independent review and the remaining semantic
+gaps are formally resolved, an E-only explicit invocation needs the checked-in
+`status/world-data-selection.json` bytes; exact C mapping, gaps and
+complete-coverage JSON; their independently pinned canonical fingerprints; a fully
 reviewed Core `OpeningSeed` with an independently pinned fingerprint; and a
 canonical UTC millisecond bootstrap timestamp. The seed must bind the one
 selected World, official package checksum, all 70 mapped countries, 840
@@ -111,6 +132,7 @@ not call the bootstrapper.
 
 F owns no API, UI, migration, asset-publication or production-connection
 change. Formal `status/progress.json` and the original EconMind site remain
-untouched. The final candidate requires C V2 exact SHA/hash integration,
-focused rerun and B's narrow independent P0 review before Control Tower can
-consider merge or E production execution.
+untouched. The F candidate has completed the focused V2 rerun; B's narrow
+independent P0 review is pending before Control Tower can consider merge or E
+production execution. Even a passing Worker test does not close C's semantic
+gaps or authorize formal adoption.
