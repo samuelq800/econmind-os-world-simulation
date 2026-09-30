@@ -10,12 +10,24 @@ import {
   SEASON1_MY_TEAM_PATH,
 } from './integration/season1-my-team-route.js';
 import type { Season1LobbySupabaseConfiguration } from './integration/season1-lobby-supabase-reader.js';
+import {
+  createOfficialCountryBaselineRoute,
+  OFFICIAL_COUNTRY_LIST_PATH,
+  readOfficialCountries,
+} from './integration/official-country-baseline.js';
+import {
+  createOfficialCountryReadPool,
+  readOfficialCountryDatabaseConfiguration,
+  type ManagedOfficialCountryPool,
+  type OfficialCountryDatabaseConfiguration,
+} from './integration/official-country-postgres.js';
 
 const supportedEnvironments = new Set(['local', 'ci', 'staging', 'production']);
 const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
 
 export interface ApiRuntimeConfig {
   readonly season1MyTeam?: Season1LobbySupabaseConfiguration;
+  readonly officialCountryDatabase?: OfficialCountryDatabaseConfiguration;
   readonly environment: string;
   readonly host: string;
   readonly port: number;
@@ -57,8 +69,15 @@ export function readApiRuntimeConfig(
     throw new Error(`Unsupported ECONMIND_ENV: ${environmentName}`);
   }
   const season1MyTeam = readSeason1MyTeamRouteConfiguration(environment);
+  const officialCountryDatabase = readOfficialCountryDatabaseConfiguration(
+    environment,
+    environmentName,
+  );
   return {
     ...(season1MyTeam === undefined ? {} : { season1MyTeam }),
+    ...(officialCountryDatabase === undefined
+      ? {}
+      : { officialCountryDatabase }),
     environment: environmentName,
     host: parseHost(environment.WORLD_API_HOST),
     port: parsePort(environment.WORLD_API_PORT, 4101),
@@ -84,8 +103,24 @@ function sendJson(
 function createApiServer(
   config: ApiRuntimeConfig,
   requestFetch?: typeof fetch,
+  officialCountryPool?: ManagedOfficialCountryPool,
 ) {
   let ready = false;
+  let databaseReady = officialCountryPool === undefined;
+  const officialCountries =
+    officialCountryPool === undefined
+      ? undefined
+      : createOfficialCountryBaselineRoute(officialCountryPool);
+  const probeDatabase = async () => {
+    if (officialCountryPool === undefined) return true;
+    try {
+      await readOfficialCountries(officialCountryPool);
+      databaseReady = true;
+    } catch {
+      databaseReady = false;
+    }
+    return databaseReady;
+  };
   const season1MyTeam =
     config.season1MyTeam === undefined
       ? undefined
@@ -95,6 +130,21 @@ function createApiServer(
         });
   const server = createServer((request, response) => {
     const path = request.url?.split('?', 1)[0];
+    if (
+      officialCountries !== undefined &&
+      (path === OFFICIAL_COUNTRY_LIST_PATH ||
+        path?.startsWith(`${OFFICIAL_COUNTRY_LIST_PATH}/`))
+    ) {
+      void officialCountries(request, response).catch(() => {
+        if (!response.headersSent && !response.destroyed) {
+          sendJson(request, response, 503, {
+            ok: false,
+            error: { code: 'SOURCE_UNAVAILABLE' },
+          });
+        }
+      });
+      return;
+    }
     if (path === SEASON1_MY_TEAM_PATH && season1MyTeam !== undefined) {
       void season1MyTeam(request, response).catch(() => {
         if (!response.headersSent && !response.destroyed) {
@@ -115,19 +165,28 @@ function createApiServer(
       sendJson(request, response, 200, {
         service: 'world-api',
         status: 'ok',
-        ready,
+        ready: ready && databaseReady,
         role: 'command-query-boundary',
         authoritativeMutationEnabled: false,
       });
       return;
     }
     if (path === '/readyz') {
-      sendJson(request, response, ready ? 200 : 503, {
-        service: 'world-api',
-        status: ready ? 'ok' : 'not-ready',
-        ready,
-        role: 'command-query-boundary',
-        authoritativeMutationEnabled: false,
+      void probeDatabase().then((databaseAvailable) => {
+        if (response.destroyed) return;
+        const isReady = ready && databaseAvailable;
+        sendJson(request, response, isReady ? 200 : 503, {
+          service: 'world-api',
+          status: isReady ? 'ok' : 'not-ready',
+          ready: isReady,
+          role: 'command-query-boundary',
+          authoritativeMutationEnabled: false,
+          ...(officialCountryPool === undefined
+            ? {}
+            : {
+                officialCountryDatabaseReady: databaseAvailable,
+              }),
+        });
       });
       return;
     }
@@ -144,7 +203,7 @@ function createApiServer(
   });
   return {
     server,
-    ready: () => ready,
+    ready: () => ready && databaseReady,
     stopReadiness: () => {
       ready = false;
     },
@@ -168,23 +227,41 @@ function closeServer(server: Server, graceMs: number): Promise<void> {
 
 export async function startApiRuntime(
   config: ApiRuntimeConfig = readApiRuntimeConfig(),
-  dependencies: { readonly season1Fetch?: typeof fetch } = {},
+  dependencies: {
+    readonly season1Fetch?: typeof fetch;
+    readonly officialCountryPool?: ManagedOfficialCountryPool;
+  } = {},
 ): Promise<RunningApiRuntime> {
-  const lifecycle = createApiServer(config, dependencies.season1Fetch);
-  await new Promise<void>((resolve, reject) => {
-    const startupError = (error: Error) => {
-      lifecycle.server.off('listening', resolve);
-      reject(error);
-    };
-    lifecycle.server.once('error', startupError);
-    lifecycle.server.listen(config.port, config.host, () => {
-      lifecycle.server.off('error', startupError);
-      resolve();
+  const officialCountryPool =
+    config.officialCountryDatabase === undefined
+      ? undefined
+      : (dependencies.officialCountryPool ??
+        createOfficialCountryReadPool(config.officialCountryDatabase));
+  const lifecycle = createApiServer(
+    config,
+    dependencies.season1Fetch,
+    officialCountryPool,
+  );
+  try {
+    await new Promise<void>((resolve, reject) => {
+      const startupError = (error: Error) => {
+        lifecycle.server.off('listening', resolve);
+        reject(error);
+      };
+      lifecycle.server.once('error', startupError);
+      lifecycle.server.listen(config.port, config.host, () => {
+        lifecycle.server.off('error', startupError);
+        resolve();
+      });
     });
-  });
+  } catch (error) {
+    await officialCountryPool?.end();
+    throw error;
+  }
   const address = lifecycle.server.address();
   if (address === null || typeof address === 'string') {
     await closeServer(lifecycle.server, config.shutdownGraceMs);
+    await officialCountryPool?.end();
     throw new Error('world-api did not acquire a TCP address');
   }
   let shutdownPromise: Promise<void> | undefined;
@@ -197,7 +274,10 @@ export async function startApiRuntime(
     ready: lifecycle.ready,
     shutdown: () => {
       lifecycle.stopReadiness();
-      shutdownPromise ??= closeServer(lifecycle.server, config.shutdownGraceMs);
+      shutdownPromise ??= (async () => {
+        await closeServer(lifecycle.server, config.shutdownGraceMs);
+        await officialCountryPool?.end();
+      })();
       return shutdownPromise;
     },
   };
