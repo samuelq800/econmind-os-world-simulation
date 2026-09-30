@@ -210,7 +210,10 @@ export function WorldExplorer() {
   const fit = useCallback((id: string) => {
     const c = countries.find((item) => item.id === id);
     if (!c) {
-      setCamera(world);
+      setCamera({
+        ...world,
+        width: sizeRef.current.width < 600 ? 700 : world.width,
+      });
       return;
     }
     const scene = sceneModeRef.current
@@ -353,8 +356,14 @@ export function WorldExplorer() {
             <small>⌄</small>
           </button>
         </nav>
-        <a className="old-atlas" href="?atlas=coast-boundaries">
-          规划工作台 ↗
+        <a className="old-atlas explorer-map-link" href="?atlas=map">
+          图层工作台 ↗
+        </a>
+        <a
+          className="old-atlas explorer-national-link"
+          href="./season1-immersive/?role=finance&country=01#country"
+        >
+          国家操作 ↗
         </a>
       </header>
       <div className="explorer-layout">
@@ -477,6 +486,16 @@ export function WorldExplorer() {
               <filter id="terrain-contrast">
                 <feColorMatrix type="saturate" values=".85" />
               </filter>
+              {!country &&
+                countries.map((item) => (
+                  <clipPath
+                    key={item.id}
+                    id={`mosaic-${item.number}`}
+                    clipPathUnits="userSpaceOnUse"
+                  >
+                    <path d={item.path} />
+                  </clipPath>
+                ))}
             </defs>
             <rect
               x={box.x}
@@ -504,12 +523,35 @@ export function WorldExplorer() {
                 preserveAspectRatio="none"
               />
             ) : (
-              <image
-                href={terrain}
-                width="1774"
-                height="887"
-                filter="url(#terrain-contrast)"
-              />
+              <>
+                <image
+                  href={terrain}
+                  width="1774"
+                  height="887"
+                  filter="url(#terrain-contrast)"
+                />
+                {detailMaps.map((map) => {
+                  const territory = countries.find(
+                    (item) => item.id === map.id,
+                  );
+                  if (!territory) return null;
+                  return (
+                    <image
+                      className="explorer-mosaic-tile"
+                      key={map.id}
+                      aria-hidden="true"
+                      href={countryDetailUrls[map.file]}
+                      x={map.viewBox[0]}
+                      y={map.viewBox[1]}
+                      width={map.viewBox[2]}
+                      height={map.viewBox[3]}
+                      preserveAspectRatio="none"
+                      clipPath={`url(#mosaic-${territory.number})`}
+                      data-mosaic-country={territory.number}
+                    />
+                  );
+                })}
+              </>
             )}
             {!scene &&
               countries.map((c) => (
@@ -584,6 +626,7 @@ export function WorldExplorer() {
             )}
           </div>
           {!country &&
+            size.width >= 600 &&
             countries
               .filter((c) => visiblePoint(c.label))
               .map((c) => (
@@ -598,6 +641,11 @@ export function WorldExplorer() {
                   <span>{c.name}</span>
                 </button>
               ))}
+          {!country && visiblePoint([824, 541]) && (
+            <span className="explorer-island-badge" style={project([824, 541])}>
+              Callum Island
+            </span>
+          )}
           {country && (
             <svg
               className="explorer-leaders"
@@ -752,7 +800,9 @@ export function WorldExplorer() {
             <small>
               {scene
                 ? '本国规划场景插画 · 建筑为示意复原 · 能力为情景估值'
-                : '地理底图 · 国界、水系与设施坐标来自地图数据'}
+                : country
+                  ? '地理底图 · 国界、水系与设施坐标来自地图数据'
+                  : '70 国地理细图按国界拼接 · 情景制图 / 非实时 World State'}
             </small>
             <b>
               {scene

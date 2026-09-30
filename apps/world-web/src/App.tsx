@@ -16,14 +16,19 @@ const previewBoundary =
 
 export function App() {
   const atlas = new URLSearchParams(window.location.search).get('atlas');
-  if (atlas === 'continents' || atlas === 'explorer' || atlas === 'map') {
+  if (
+    atlas === null ||
+    atlas === 'continents' ||
+    atlas === 'explorer' ||
+    atlas === 'map'
+  ) {
     const view =
       atlas === 'continents' ? (
         <ContinentExplorer />
-      ) : atlas === 'explorer' ? (
-        <WorldExplorer />
-      ) : (
+      ) : atlas === 'map' ? (
         <FictionalWorldMap />
+      ) : (
+        <WorldExplorer />
       );
     return (
       <Suspense

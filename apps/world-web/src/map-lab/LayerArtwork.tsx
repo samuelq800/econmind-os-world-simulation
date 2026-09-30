@@ -562,6 +562,11 @@ export function LayerArtwork({
           ))}
         </g>
       )}
+      {showLabels && !detail && (
+        <text x="824" y="541" className="map-text island-name">
+          Callum Island
+        </text>
+      )}
       {selectedIndex >= 0 && (
         <g className="selected-region">
           <path

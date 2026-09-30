@@ -439,7 +439,7 @@ export const FICTIONAL_ATLAS: FictionalAtlas = {
     },
     {
       id: 'western-drift-island',
-      name: 'Western Drift Island',
+      name: 'Callum Island',
       category: 'ISLAND',
       polygon: shape(
         [11_300, 9_200],

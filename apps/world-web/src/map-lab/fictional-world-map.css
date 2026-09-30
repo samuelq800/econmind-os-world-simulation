@@ -305,6 +305,11 @@ input:focus-visible {
   font-size: 15px;
   font-weight: 500;
 }
+.island-name {
+  fill: #ffeab0;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
 .country-labels.subdued {
   opacity: 0.6;
 }

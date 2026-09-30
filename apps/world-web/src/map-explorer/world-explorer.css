@@ -94,6 +94,24 @@
   position: absolute;
   inset: 0;
 }
+.explorer-island-badge {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff1bc;
+  background: #102b35c7;
+  font:
+    700 12px Georgia,
+    serif;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.explorer-mosaic-tile {
+  mix-blend-mode: screen;
+}
 .explorer-country {
   fill: #adbd8a08;
   stroke: #dedbb47a;
@@ -806,6 +824,24 @@
   .explorer-country-pin {
     padding: 3px;
     font-size: 9px;
+  }
+}
+@media (max-width: 520px) {
+  .explorer-topbar nav > button:first-child,
+  .explorer-topbar nav > a,
+  .explorer-topbar nav > span,
+  .explorer-map-link {
+    display: none;
+  }
+  .explorer-topbar nav {
+    justify-content: center;
+  }
+  .explorer-topbar nav button,
+  .explorer-national-link {
+    white-space: nowrap;
+  }
+  .explorer-heading h1 {
+    font-size: 30px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
