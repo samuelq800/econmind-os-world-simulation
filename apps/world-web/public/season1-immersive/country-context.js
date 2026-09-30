@@ -5,6 +5,10 @@
   const selectionChecksum = '88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315';
   const sourceStatus = 'OFFICIAL_SELECTED_OPENING_DATA_NOT_RUNTIME_STATE';
   const numberPattern = /^(?:0[1-9]|[1-6][0-9]|70)$/;
+  const sourceSlugs = 'assumptions changes commodity-catalog countries coverage deposits domestic-access employment entities facilities facility-map-links finance geography hazard-proposals illustration-links land-program license-proposals manifest nodes opening-material-reconciliation population-services power production-plans recipes regions seasonal-water settlements stocks supplier-concentration-policy technology-proposals trade-plans transit-proposals transport-routes water-allocations'.split(' ');
+  const sourceSlugSet = new Set(sourceSlugs);
+  const geographyArraySections = new Set(['partition.territories', 'climates', 'physical', 'currents', 'maritime.countries', 'maritime.assumptions', 'maritime.sources', 'basins', 'backgroundResources']);
+  const geographyStringSections = new Set(['partition.coastPath', 'maritime.territorialPath', 'maritime.eezPath', 'maritime.highSeasPath', 'maritime.overlapPath', 'maritime.territorialOverlapPath', 'maritime.oceanPath']);
   const requiredProfile = ['population', 'labourForce', 'scenarioUnemployed', 'treasuryCentralBankBalanceGcu', 'bankReservesGcu', 'bankDepositsGcu', 'bankEquityGcu', 'foodAvailableStockTonnes', 'foodDemandTonnesDay'];
   const record = value => value && typeof value === 'object' && !Array.isArray(value);
   const nonnegative = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
@@ -82,13 +86,150 @@
 
   async function boundedRead(fetcher, url, options) {
     const controller = new AbortController();
-    let timer;
+    const outside = options.signal;
+    if (outside?.aborted) throw Error('DATA_ABORTED');
+    let timer, onAbort;
     try {
+      const aborted = new Promise((_, reject) => {
+        onAbort = () => { controller.abort(); reject(Error('DATA_ABORTED')); };
+        outside?.addEventListener('abort', onAbort, { once: true });
+      });
       return await Promise.race([
         fetcher(url, { ...options, signal: controller.signal }).then(json),
         new Promise((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(Error('DATA_TIMEOUT')); }, 5000); }),
+        aborted,
       ]);
-    } finally { clearTimeout(timer); controller.abort(); }
+    } finally { clearTimeout(timer); outside?.removeEventListener('abort', onAbort); controller.abort(); }
+  }
+
+  function validSourceMetadata(value, slug) {
+    return record(value) && value.schemaVersion === 'official-source-dataset-v1' &&
+      value.dataNature === 'OFFICIAL_SELECTED_SOURCE_DATASET' &&
+      value.packageId === packageId && value.selectionChecksumSha256 === selectionChecksum &&
+      value.dataset === slug && value.sourcePath === `data/${slug}.json` &&
+      /^[0-9a-f]{64}$/.test(value.sourceSha256) && Number.isSafeInteger(value.sourceBytes) && value.sourceBytes > 0 &&
+      ['ARRAY', 'OBJECT', 'GEOGRAPHY'].includes(value.sourceKind) &&
+      value.unitTreatment === 'SOURCE_UNITS_PRESERVED_NO_CONVERSION' &&
+      value.numericEncoding === 'DECIMAL_STRING_EXACT' && value.unitsSourcePath === 'DATA_DICTIONARY.md' &&
+      value.proposalFieldsAreExecuted === false && value.liveWorldState === false &&
+      record(value.associations) && ['countryFields', 'entityFields', 'referenceFields'].every(key =>
+        Array.isArray(value.associations[key]) && value.associations[key].every(field => typeof field === 'string'));
+  }
+
+  function noNumericTokens(value) {
+    if (typeof value === 'number') return false;
+    if (Array.isArray(value)) return value.every(noNumericTokens);
+    if (record(value)) return Object.values(value).every(noNumericTokens);
+    return true;
+  }
+
+  function createDatasetSession(number, options = {}) {
+    const fetcher = options.fetcher || fetch;
+    const config = options.config === undefined ? globalThis.__ECONMIND_WORLD_READ_CONFIG__ : options.config;
+    const origin = apiOrigin(config);
+    let countryNumber = number, generation = 0, controller = null, catalogue = null;
+    function cancel() { generation += 1; controller?.abort(); controller = null; }
+    function setCountry(nextNumber) { cancel(); countryNumber = nextNumber; catalogue = null; }
+    async function request(path, validator) {
+      if (!numberPattern.test(countryNumber)) return { kind: 'INVALID', reason: 'COUNTRY_ID_INVALID' };
+      if (config == null) return { kind: 'NOT_CONNECTED', reason: 'API_NOT_CONFIGURED' };
+      if (!origin) return { kind: 'INVALID', reason: 'API_ORIGIN_INVALID' };
+      cancel();
+      const current = generation, signal = (controller = new AbortController()).signal;
+      try {
+        const data = await boundedRead(fetcher, new URL(path, origin), {
+          method: 'GET', credentials: 'omit', redirect: 'error', cache: 'no-store', referrerPolicy: 'no-referrer',
+          headers: { accept: 'application/json' }, signal,
+        });
+        if (current !== generation || signal.aborted) return { kind: 'STALE', reason: 'READ_RETIRED' };
+        return validator(data);
+      } catch {
+        return current !== generation || signal.aborted
+          ? { kind: 'STALE', reason: 'READ_RETIRED' }
+          : { kind: 'UNAVAILABLE', reason: 'API_UNAVAILABLE' };
+      } finally { if (current === generation) controller = null; }
+    }
+    async function loadCatalogue() {
+      const result = await request('v1/world-data/datasets', data => {
+        if (!record(data) || data.ok !== true || data.schemaVersion !== 'official-source-catalog-v1' ||
+          data.dataNature !== 'OFFICIAL_SELECTED_SOURCE_DATASET' || data.packageId !== packageId ||
+          data.selectionChecksumSha256 !== selectionChecksum || data.datasetCount !== 34 ||
+          data.databaseAvailability !== 'VERIFY_PER_REQUEST' || data.liveWorldState !== false ||
+          !Array.isArray(data.datasets) || data.datasets.length !== 34 ||
+          new Set(data.datasets.map(item => item?.dataset)).size !== 34 ||
+          !data.datasets.every(item => sourceSlugSet.has(item?.dataset) && validSourceMetadata(item, item.dataset))) {
+          return { kind: 'INVALID', reason: 'CATALOGUE_MISMATCH' };
+        }
+        catalogue = new Map(data.datasets.map(item => [item.dataset, item]));
+        return { kind: 'CATALOGUE', datasets: data.datasets };
+      });
+      if (result.kind !== 'CATALOGUE' && result.kind !== 'STALE') catalogue = null;
+      return result;
+    }
+    async function loadDataset(slug, options = {}) {
+      const spec = catalogue?.get(slug);
+      if (!spec || !sourceSlugSet.has(slug)) return { kind: 'INVALID', reason: 'DATASET_NOT_IN_CATALOGUE' };
+      const offset = options.offset ?? 0, limit = options.limit ?? 20;
+      if (!Number.isSafeInteger(offset) || offset < 0 || offset > 1000000 ||
+        !Number.isSafeInteger(limit) || limit < 1 || limit > 50) return { kind: 'INVALID', reason: 'PAGE_INVALID' };
+      const query = new URLSearchParams(), countryId = expectedId(countryNumber);
+      let filtered = false;
+      if (spec.sourceKind === 'ARRAY') {
+        query.set('offset', String(offset)); query.set('limit', String(limit));
+        filtered = spec.associations.countryFields.length > 0 || ['changes', 'seasonal-water'].includes(slug);
+        if (filtered) query.set('countryId', countryId);
+      } else if (spec.sourceKind === 'GEOGRAPHY' && options.section) {
+        if (typeof options.section !== 'string' || !/^[a-zA-Z.]+$/.test(options.section)) return { kind: 'INVALID', reason: 'SECTION_INVALID' };
+        query.set('section', options.section);
+        if (geographyArraySections.has(options.section)) {
+          query.set('offset', String(offset)); query.set('limit', String(limit));
+          filtered = ['partition.territories', 'maritime.countries', 'basins', 'backgroundResources'].includes(options.section);
+          if (filtered) query.set('countryId', countryId);
+        } else if (geographyStringSections.has(options.section)) {
+          query.set('fragmentOffset', String(offset)); query.set('fragmentLength', '16384');
+        }
+      }
+      const suffix = query.size ? `?${query}` : '';
+      return request(`v1/world-data/datasets/${slug}${suffix}`, data => {
+        if (!validSourceMetadata(data, slug) || data.ok !== true ||
+          ['sourceSha256', 'sourceBytes', 'sourceKind'].some(key => data[key] !== spec[key]))
+          return { kind: 'INVALID', reason: 'DATASET_MISMATCH' };
+        if (spec.sourceKind === 'OBJECT') {
+          if (!record(data.data) || !noNumericTokens(data.data)) return { kind: 'INVALID', reason: 'DATASET_SHAPE_INVALID' };
+          return { kind: 'DATA', dataset: slug, data: data.data, sourceKind: 'OBJECT' };
+        }
+        if (spec.sourceKind === 'GEOGRAPHY' && !options.section) {
+          if (!Array.isArray(data.sections) || !data.sections.every(section => typeof section === 'string'))
+            return { kind: 'INVALID', reason: 'DATASET_SHAPE_INVALID' };
+          return { kind: 'SECTIONS', dataset: slug, sections: data.sections };
+        }
+        if (spec.sourceKind === 'GEOGRAPHY' && data.section !== options.section)
+          return { kind: 'INVALID', reason: 'SECTION_MISMATCH' };
+        if (spec.sourceKind === 'GEOGRAPHY' && geographyStringSections.has(options.section)) {
+          if (typeof data.fragment !== 'string' || !Number.isSafeInteger(data.totalLength) ||
+            data.fragmentOffset !== offset || (data.nextFragmentOffset !== null && !Number.isSafeInteger(data.nextFragmentOffset)))
+            return { kind: 'INVALID', reason: 'FRAGMENT_INVALID' };
+          return { kind: 'FRAGMENT', dataset: slug, section: options.section, fragment: data.fragment,
+            nextOffset: data.nextFragmentOffset, total: data.totalLength };
+        }
+        if (spec.sourceKind === 'GEOGRAPHY' && !geographyArraySections.has(options.section)) {
+          if (!record(data.data) || !noNumericTokens(data.data)) return { kind: 'INVALID', reason: 'DATASET_SHAPE_INVALID' };
+          return { kind: 'DATA', dataset: slug, section: options.section, data: data.data, sourceKind: 'GEOGRAPHY' };
+        }
+        if (!Array.isArray(data.items) || data.offset !== offset || data.returned !== data.items.length ||
+          data.items.length > limit || !Number.isSafeInteger(data.total) || data.total < 0 ||
+          !record(data.filters) || data.filters.countryId !== (filtered ? countryId : null) ||
+          data.nextOffset !== (offset + data.items.length < data.total ? offset + data.items.length : null) ||
+          !noNumericTokens(data.items)) return { kind: 'INVALID', reason: 'DATASET_SHAPE_INVALID' };
+        if (filtered && spec.sourceKind === 'ARRAY' && spec.associations.countryFields.length &&
+          data.items.some(row => !record(row) || !spec.associations.countryFields.some(field =>
+            row[field] === countryId || (Array.isArray(row[field]) && row[field].includes(countryId)))))
+          return { kind: 'INVALID', reason: 'COUNTRY_FILTER_MISMATCH' };
+        return { kind: 'PAGE', dataset: slug, section: options.section || null, items: data.items,
+          total: data.total, nextOffset: data.nextOffset, filteredCountryId: filtered ? countryId : null };
+      });
+    }
+    return Object.freeze({ loadCatalogue, loadDataset, cancel, setCountry, countryId: () => expectedId(countryNumber) });
   }
 
   async function loadCountry(number, options = {}) {
@@ -130,7 +271,7 @@
     }
   }
 
-  globalThis.EconWorldRead = Object.freeze({ loadCountry, validCountry });
+  globalThis.EconWorldRead = Object.freeze({ loadCountry, validCountry, createDatasetSession });
 })();
 // National geography and local interaction state are separate from authoritative world settlement.
 let contextCountry=null,contextCountrySource=null;
