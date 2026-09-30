@@ -108,17 +108,87 @@ select jsonb_build_object(
       'inherits_privileges', rolinherit
     ) from pg_roles where rolname = 'world_v2_api_login'
   ),
-  'login_may_set_reader_role', pg_has_role(
-    'world_v2_api_login', 'world_v2_api_reader', 'member'
+  'reader_membership', (
+    select jsonb_build_object(
+      'member', member_role.rolname,
+      'role', granted_role.rolname,
+      'admin_option', membership.admin_option,
+      'inherit_option', membership.inherit_option,
+      'set_option', membership.set_option
+    )
+    from pg_auth_members membership
+    join pg_roles member_role on member_role.oid = membership.member
+    join pg_roles granted_role on granted_role.oid = membership.roleid
+    where member_role.rolname = 'world_v2_api_login'
+      and granted_role.rolname = 'world_v2_api_reader'
   ),
-  'selected_source_policy_count', (
-    select count(*) from pg_policies
-    where schemaname = 'world_v2'
-      and policyname in (
+  'schema_usage', coalesce((
+    select jsonb_agg(namespace.nspname order by namespace.nspname)
+    from pg_namespace namespace
+    where namespace.nspname in ('auth', 'public', 'storage', 'world_v2')
+      and has_schema_privilege(
+        'world_v2_api_reader', namespace.oid, 'USAGE'
+      )
+  ), '[]'::jsonb),
+  'column_select_privileges', coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'table', relation.relname,
+      'column', attribute.attname
+    ) order by relation.relname, attribute.attnum)
+    from pg_attribute attribute
+    join pg_class relation on relation.oid = attribute.attrelid
+    join pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'world_v2'
+      and relation.relkind in ('p', 'r')
+      and attribute.attnum > 0
+      and not attribute.attisdropped
+      and has_column_privilege(
+        'world_v2_api_reader', relation.oid, attribute.attname, 'SELECT'
+      )
+  ), '[]'::jsonb),
+  'table_select_privileges', coalesce((
+    select jsonb_agg(relation.relname order by relation.relname)
+    from pg_class relation
+    join pg_namespace namespace on namespace.oid = relation.relnamespace
+    where namespace.nspname = 'world_v2'
+      and relation.relkind in ('p', 'r')
+      and has_table_privilege(
+        'world_v2_api_reader', relation.oid, 'SELECT'
+      )
+  ), '[]'::jsonb),
+  'nonselect_table_privileges', coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'table', relation.relname,
+      'privilege', action.name
+    ) order by relation.relname, action.name)
+    from pg_class relation
+    join pg_namespace namespace on namespace.oid = relation.relnamespace
+    cross join (values ('DELETE'), ('INSERT'), ('TRUNCATE'), ('UPDATE'))
+      as action(name)
+    where namespace.nspname = 'world_v2'
+      and relation.relkind in ('p', 'r')
+      and has_table_privilege(
+        'world_v2_api_reader', relation.oid, action.name
+      )
+  ), '[]'::jsonb),
+  'selected_source_policies', coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'schema', policy.schemaname,
+      'table', policy.tablename,
+      'name', policy.policyname,
+      'roles', to_jsonb(policy.roles),
+      'command', policy.cmd,
+      'permissive', policy.permissive,
+      'qual', policy.qual,
+      'with_check', policy.with_check
+    ) order by policy.policyname)
+    from pg_policies policy
+    where policy.schemaname = 'world_v2'
+      and policy.policyname in (
         'country_candidate_bundle_selected_source_server_read',
         'country_candidate_artifact_selected_source_server_read'
       )
-  )
+  ), '[]'::jsonb)
 ) as evidence from world_v2.schema_release
 where migration_id = ${sqlLiteral(MIGRATION_ID)};`;
 }

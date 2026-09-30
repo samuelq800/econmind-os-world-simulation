@@ -130,6 +130,13 @@ async function queryAsReader(
   }
 }
 
+function normalizePolicyQual(value: string | null): string {
+  return (value ?? '')
+    .replaceAll('::text', '')
+    .replaceAll(/\s+/g, '')
+    .replaceAll(/[()]/g, '');
+}
+
 postgresDescribe('World V2 selected-country server reader role', () => {
   beforeAll(async () => {
     const environment = assertV09PostgresTestEnvironment();
@@ -255,5 +262,103 @@ postgresDescribe('World V2 selected-country server reader role', () => {
         [LOGIN_ROLE, READER_ROLE],
       ),
     ).resolves.toMatchObject({ rows: [{ may_set_role: true }] });
+  }, 30_000);
+
+  it('retains exact membership options, column grants, and selected-source policies', async () => {
+    const membership = await currentAdmin().query<{
+      admin_option: boolean;
+      inherit_option: boolean;
+      set_option: boolean;
+    }>(
+      `select membership.admin_option, membership.inherit_option,
+              membership.set_option
+         from pg_auth_members membership
+         join pg_roles member_role on member_role.oid = membership.member
+         join pg_roles granted_role on granted_role.oid = membership.roleid
+        where member_role.rolname = $1 and granted_role.rolname = $2`,
+      [LOGIN_ROLE, READER_ROLE],
+    );
+    expect(membership.rows).toEqual([
+      { admin_option: false, inherit_option: true, set_option: true },
+    ]);
+
+    const columns = await currentAdmin().query<{
+      table_name: string;
+      column_name: string;
+    }>(
+      `select relation.relname as table_name, attribute.attname as column_name
+         from pg_attribute attribute
+         join pg_class relation on relation.oid = attribute.attrelid
+         join pg_namespace namespace on namespace.oid = relation.relnamespace
+        where namespace.nspname = 'world_v2'
+          and relation.relkind in ('p', 'r')
+          and attribute.attnum > 0 and not attribute.attisdropped
+          and has_column_privilege($1, relation.oid, attribute.attname, 'SELECT')
+        order by relation.relname, attribute.attnum`,
+      [READER_ROLE],
+    );
+    expect(columns.rows).toEqual([
+      { table_name: 'country_candidate_artifact', column_name: 'bundle_id' },
+      {
+        table_name: 'country_candidate_artifact',
+        column_name: 'artifact_path',
+      },
+      {
+        table_name: 'country_candidate_artifact',
+        column_name: 'content_sha256',
+      },
+      { table_name: 'country_candidate_artifact', column_name: 'content_utf8' },
+      { table_name: 'country_candidate_bundle', column_name: 'bundle_id' },
+      {
+        table_name: 'country_candidate_bundle',
+        column_name: 'package_manifest_sha256',
+      },
+      { table_name: 'country_candidate_bundle', column_name: 'source_status' },
+      {
+        table_name: 'country_candidate_bundle',
+        column_name: 'activation_allowed',
+      },
+    ]);
+
+    const policies = await currentAdmin().query<{
+      tablename: string;
+      policyname: string;
+      roles: readonly string[];
+      cmd: string;
+      qual: string | null;
+      with_check: string | null;
+    }>(
+      `select tablename, policyname, roles, cmd, qual, with_check
+         from pg_policies
+        where schemaname = 'world_v2'
+          and policyname in (
+            'country_candidate_bundle_selected_source_server_read',
+            'country_candidate_artifact_selected_source_server_read'
+          )
+        order by policyname`,
+    );
+    expect(
+      policies.rows.map((policy) => ({
+        ...policy,
+        qual: normalizePolicyQual(policy.qual),
+      })),
+    ).toEqual([
+      {
+        tablename: 'country_candidate_artifact',
+        policyname: 'country_candidate_artifact_selected_source_server_read',
+        roles: [READER_ROLE],
+        cmd: 'SELECT',
+        qual: "bundle_id='BALANCED_2026_09_28_V1'ANDartifact_path='source/646174612f636f756e74726965732e6a736f6e'",
+        with_check: null,
+      },
+      {
+        tablename: 'country_candidate_bundle',
+        policyname: 'country_candidate_bundle_selected_source_server_read',
+        roles: [READER_ROLE],
+        cmd: 'SELECT',
+        qual: "bundle_id='BALANCED_2026_09_28_V1'",
+        with_check: null,
+      },
+    ]);
   }, 30_000);
 });
