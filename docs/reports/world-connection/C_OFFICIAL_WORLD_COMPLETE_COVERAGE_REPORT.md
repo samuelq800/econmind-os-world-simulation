@@ -2,12 +2,13 @@
 
 Status: `IMPLEMENTED_UNVERIFIED`
 
-Branch: `codex/c-official-world-complete-coverage`
+Branch: `codex/c-official-world-json-format`
 
-Base candidate: `c66de7efe84539dd61e9f578d6f9ecb6b2ad9f63` (fixed PR #19; not rewritten)
+Main baseline: `07775051bed73111e308810e24c0e09e1473db0e` (includes merged
+PR #20)
 
 Exact V2 implementation candidate:
-`f711869b5265003e12adb29996ad8158cc00fd03`
+`db0ac77827dd8703a565d14469bdcd8b2ae3b1c3`
 
 ## Why V2 exists
 
@@ -22,7 +23,7 @@ page.
 
 | Artifact                                  |      Bytes | File SHA-256                                                       | Canonical fingerprint                                                     |
 | ----------------------------------------- | ---------: | ------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| `C_OFFICIAL_WORLD_OPENING_MAPPING.json`   | 33,555,486 | `91a8c281a88fb60e1cb31de28de2fa9ceed996aa9719d65ff23f306ac990f4f1` | `sha256:230f8d695c25ea839fb6415de3c4c2985dd6d95e6261fa10dbec73053dedac82` |
+| `C_OFFICIAL_WORLD_OPENING_MAPPING.json`   | 29,609,172 | `d2811910a9021e68fabe894504701d6dc8d88e362fc2354b0c826e3446456253` | `sha256:230f8d695c25ea839fb6415de3c4c2985dd6d95e6261fa10dbec73053dedac82` |
 | `C_OFFICIAL_WORLD_OPENING_GAPS.json`      |    227,292 | `1254b3c2929e10d3b8a582e032bc22648b04d01236e3098a18a1c39974d46539` | `sha256:f374ed3a888305a467f52d0aeaf7c545a6513cf17accc10c9537850694b68e95` |
 | `C_OFFICIAL_WORLD_COMPLETE_COVERAGE.json` |    294,812 | `c42a8336b59eec986c576427c85c6db4aca986fc0632e6b572b9e997f4f835e9` | `sha256:8b915aadb1aa299cc1c2529eb8ed996f1e8ff9c8ad5bd7ff88731c6d459efa2d` |
 
@@ -92,7 +93,9 @@ mutation is authorized by this package.
 
 ## Verification at the implementation candidate
 
-- targeted Prettier: `PASS`;
+- the deterministic writer formats every generated JSON artifact with the
+  repository-resolved Prettier configuration before writing;
+- targeted Prettier, including the 29.6 MB mapping artifact: `PASS`;
 - targeted ESLint: `PASS`;
 - strict TypeScript using `tests/tsconfig.official-world-mapping.json`: `PASS`;
 - targeted Vitest: `PASS` (7/7), including region-only attribution, per-country
@@ -100,5 +103,10 @@ mutation is authorized by this package.
   world-level non-association;
 - deterministic regeneration: all three canonical fingerprints and file
   SHA-256 values reproduced exactly.
+
+The formatting correction changes only the mapping artifact's serialized
+bytes and file SHA-256. All three canonical fingerprints, the gaps file hash
+and the coverage file hash remain unchanged. No source data, normalized
+binding, economic value or authority status changed.
 
 Independent B review and Gate B approval remain separate and are not claimed.
