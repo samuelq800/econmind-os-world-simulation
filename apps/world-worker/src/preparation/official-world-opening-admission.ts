@@ -16,6 +16,9 @@ import type { SqlDatabase } from '../persistence/sql-database.js';
 const PACKAGE_ID = 'BALANCED_2026_09_28_V1';
 const CHECKSUMS_SHA256 =
   '88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315';
+const MAP_MANIFEST_SHA256 =
+  '9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f';
+const MAP_PACKAGE_ID = 'WORLD_MAP_FILES_V1_2026_09_28';
 const SOURCE_LOCATOR = 'artifacts/world-balanced-candidate-v1/CHECKSUMS.json';
 
 type JsonRecord = Readonly<Record<string, unknown>>;
@@ -41,6 +44,14 @@ function text(value: unknown, label: string): string {
     invalid(`${label} is not a non-empty string`);
   }
   return value;
+}
+
+function json(value: string, label: string): unknown {
+  try {
+    return JSON.parse(value) as unknown;
+  } catch {
+    invalid(`${label} is not valid JSON`);
+  }
 }
 
 function expectedCountryIds(): readonly string[] {
@@ -108,19 +119,41 @@ export interface OfficialOpeningAdmission {
  */
 export function inspectOfficialWorldOpeningAdmission(input: {
   readonly selectionBytes: string;
+  readonly checksumsBytes: string;
+  readonly mapManifestBytes: string;
+  readonly regionsBytes: string;
   readonly mapping: unknown;
   readonly gaps: unknown;
   readonly coverage: unknown;
   readonly sha256Hex: Sha256Hex;
 }): Readonly<OfficialOpeningAdmission> {
-  let selection: JsonRecord;
-  try {
-    selection = record(
-      JSON.parse(input.selectionBytes),
-      'World data selection',
-    );
-  } catch {
-    invalid('World data selection is not valid JSON');
+  const selection = record(
+    json(input.selectionBytes, 'World data selection'),
+    'World data selection',
+  );
+  if (
+    input.sha256Hex(input.checksumsBytes) !== CHECKSUMS_SHA256 ||
+    input.sha256Hex(input.mapManifestBytes) !== MAP_MANIFEST_SHA256
+  ) {
+    invalid('Trusted source manifests differ from fixed selected package');
+  }
+  const checksumRows = rows(
+    json(input.checksumsBytes, 'Selected package checksums'),
+    'Selected package checksums',
+  );
+  const trustedMapManifest = record(
+    json(input.mapManifestBytes, 'Selected map manifest'),
+    'Selected map manifest',
+  );
+  const trustedMapFiles = rows(trustedMapManifest.files, 'Selected map files');
+  if (
+    checksumRows.length !== 86 ||
+    trustedMapManifest.packageId !== MAP_PACKAGE_ID ||
+    trustedMapManifest.authority !==
+      'VERSIONED_FILE_ASSETS_ONLY_NOT_WORLD_STATE' ||
+    trustedMapFiles.length !== 203
+  ) {
+    invalid('Trusted manifests do not contain the selected package');
   }
   const selected = record(selection.balancedData, 'Selected balanced data');
   if (
@@ -143,6 +176,7 @@ export function inspectOfficialWorldOpeningAdmission(input: {
   const dataFiles = record(source.dataFiles, 'C source data files');
   const mapPackage = record(source.mapPackage, 'C map package');
   const countryRows = rows(mapped.countries, 'C countries');
+  const regionRows = rows(mapped.regions, 'C regions');
   const countryReports = rows(mapping.countryReports, 'C country reports');
   const stockRows = rows(records.stocks, 'C stocks');
   const financeRows = rows(records.finance, 'C finance');
@@ -180,6 +214,8 @@ export function inspectOfficialWorldOpeningAdmission(input: {
     source.checksumEntries !== 86 ||
     source.verifiedArtifactsIncludingChecksumManifest !== 87 ||
     mapPackage.filesVerified !== 203 ||
+    mapPackage.packageId !== MAP_PACKAGE_ID ||
+    mapPackage.manifestSha256 !== MAP_MANIFEST_SHA256 ||
     mapPackage.authority !== 'VERSIONED_FILE_ASSETS_ONLY_NOT_WORLD_STATE' ||
     invariants.countryCount !== 70 ||
     invariants.populationTotal !== '14712146434' ||
@@ -192,6 +228,7 @@ export function inspectOfficialWorldOpeningAdmission(input: {
     Object.keys(dataFiles).length !== 34 ||
     allDatasets.length !== 34 ||
     countryRows.length !== 70 ||
+    regionRows.length !== 122 ||
     countryReports.length !== 70 ||
     stockRows.length !== 840 ||
     financeRows.length !== 70 ||
@@ -199,16 +236,83 @@ export function inspectOfficialWorldOpeningAdmission(input: {
   ) {
     invalid('C opening mapping does not bind the selected 70-country package');
   }
+  const trustedArtifacts = new Map<string, { sha256: string; bytes: number }>();
+  for (const artifact of checksumRows) {
+    const path = text(artifact.path, 'Selected source artifact path');
+    const sha256 = text(artifact.sha256, 'Selected source artifact hash');
+    if (
+      trustedArtifacts.has(path) ||
+      !/^[0-9a-f]{64}$/.test(sha256) ||
+      !Number.isSafeInteger(artifact.bytes) ||
+      (artifact.bytes as number) < 0
+    ) {
+      invalid('Selected source manifest has duplicate or malformed artifact');
+    }
+    trustedArtifacts.set(path, { sha256, bytes: artifact.bytes as number });
+  }
+  trustedArtifacts.set('CHECKSUMS.json', {
+    sha256: CHECKSUMS_SHA256,
+    bytes: Buffer.byteLength(input.checksumsBytes, 'utf8'),
+  });
+  const trustedRegions = trustedArtifacts.get('data/regions.json');
+  if (
+    trustedRegions === undefined ||
+    input.sha256Hex(input.regionsBytes) !== trustedRegions.sha256 ||
+    Buffer.byteLength(input.regionsBytes, 'utf8') !== trustedRegions.bytes
+  ) {
+    invalid('Source regions differ from trusted selected package');
+  }
+  const sourceRegions = rows(
+    json(input.regionsBytes, 'Source regions'),
+    'Source regions',
+  );
+  if (sourceRegions.length !== 122) {
+    invalid('Source region roster differs from selected package');
+  }
+  const sourceRegionCountryById = new Map<string, string>();
+  for (const region of sourceRegions) {
+    const id = text(region.id, 'Source region ID');
+    const sourceCountry = text(region.countryId, 'Source region Country ID');
+    if (sourceRegionCountryById.has(id)) {
+      invalid('Source region roster has duplicate IDs');
+    }
+    sourceRegionCountryById.set(id, sourceCountry);
+  }
+  const trustedMapAssets = new Map<string, { sha256: string; bytes: number }>();
+  for (const asset of trustedMapFiles) {
+    const path = text(asset.path, 'Selected map asset path');
+    const sha256 = text(asset.sha256, 'Selected map asset hash');
+    if (
+      trustedMapAssets.has(path) ||
+      !/^[0-9a-f]{64}$/.test(sha256) ||
+      !Number.isSafeInteger(asset.bytes) ||
+      (asset.bytes as number) < 0
+    ) {
+      invalid('Selected map manifest has duplicate or malformed asset');
+    }
+    trustedMapAssets.set(path, { sha256, bytes: asset.bytes as number });
+  }
+  const trustedDataPaths = [...trustedArtifacts.keys()].filter(
+    (path) => path.startsWith('data/') && path.endsWith('.json'),
+  );
+  if (
+    trustedDataPaths.length !== 34 ||
+    Object.keys(dataFiles).some((path) => !trustedDataPaths.includes(path))
+  ) {
+    invalid('C structured data manifest differs from selected checksums');
+  }
   const observedDatasets = new Set<string>();
   for (const dataset of allDatasets) {
     const sourcePath = text(dataset.sourcePath, 'Structured source path');
     const sourceFile = record(dataFiles[sourcePath], 'Structured source file');
+    const trusted = trustedArtifacts.get(sourcePath);
     if (
       observedDatasets.has(sourcePath) ||
-      !sourcePath.startsWith('data/') ||
-      !sourcePath.endsWith('.json') ||
+      !trustedDataPaths.includes(sourcePath) ||
       dataset.sourceSha256 !== sourceFile.sha256 ||
       dataset.sourceBytes !== sourceFile.bytes ||
+      dataset.sourceSha256 !== trusted?.sha256 ||
+      dataset.sourceBytes !== trusted?.bytes ||
       dataset.structuredMappingStatus !==
         'FULL_SOURCE_RECORDS_INCLUDED_LOSSLESS' ||
       !Array.isArray(dataset.records)
@@ -226,6 +330,12 @@ export function inspectOfficialWorldOpeningAdmission(input: {
     coverage.structuredDatasets,
     'C coverage structured datasets',
   );
+  const coverageSourceArtifacts = rows(
+    coverage.sourceArtifacts,
+    'C coverage source artifacts',
+  );
+  const coverageMapAssets = rows(coverage.mapAssets, 'C coverage map assets');
+  const coverageCountries = rows(coverage.countries, 'C coverage countries');
   if (
     coverage.schemaVersion !== 'OFFICIAL_WORLD_COMPLETE_COVERAGE_V1' ||
     coverage.mappingFingerprint !== mappingFingerprint ||
@@ -238,11 +348,10 @@ export function inspectOfficialWorldOpeningAdmission(input: {
     coverageCounts.omittedSourceArtifacts !== 0 ||
     coverageCounts.omittedStructuredDatasets !== 0 ||
     coverageCounts.omittedMapPackageFiles !== 0 ||
-    rows(coverage.sourceArtifacts, 'C coverage source artifacts').length !==
-      87 ||
+    coverageSourceArtifacts.length !== 87 ||
     coverageDatasets.length !== 34 ||
-    rows(coverage.mapAssets, 'C coverage map assets').length !== 203 ||
-    rows(coverage.countries, 'C coverage countries').length !== 70 ||
+    coverageMapAssets.length !== 203 ||
+    coverageCountries.length !== 70 ||
     rows(omissions.sourceArtifacts, 'C omitted source artifacts').length !==
       0 ||
     rows(omissions.structuredDatasets, 'C omitted structured datasets')
@@ -250,6 +359,47 @@ export function inspectOfficialWorldOpeningAdmission(input: {
     rows(omissions.mapPackageFiles, 'C omitted map files').length !== 0
   ) {
     invalid('C complete coverage ledger does not bind all selected sources');
+  }
+  const coveredArtifacts = new Set<string>();
+  for (const artifact of coverageSourceArtifacts) {
+    const path = text(artifact.sourcePath, 'Covered source artifact path');
+    const trusted = trustedArtifacts.get(path);
+    if (
+      coveredArtifacts.has(path) ||
+      trusted === undefined ||
+      artifact.sha256 !== trusted.sha256 ||
+      artifact.bytes !== trusted.bytes ||
+      artifact.repositoryOriginalVerified !== true ||
+      artifact.proposalExecuted !== false
+    ) {
+      invalid('C source artifact coverage differs from trusted checksums');
+    }
+    coveredArtifacts.add(path);
+  }
+  if (
+    [...trustedArtifacts.keys()].some((path) => !coveredArtifacts.has(path))
+  ) {
+    invalid('C source artifact coverage omits a trusted file');
+  }
+  const coveredAssets = new Map<string, JsonRecord>();
+  for (const asset of coverageMapAssets) {
+    const path = text(asset.path, 'Covered map asset path');
+    const trusted = trustedMapAssets.get(path);
+    if (
+      coveredAssets.has(path) ||
+      trusted === undefined ||
+      asset.sha256 !== trusted.sha256 ||
+      asset.bytes !== String(trusted.bytes) ||
+      asset.stableVersionedPath !== path ||
+      asset.repositoryOriginalVerified !== true ||
+      asset.worldStateAuthority !== 'NONE_DISPLAY_OR_SOURCE_ONLY'
+    ) {
+      invalid('C map asset coverage differs from trusted map manifest');
+    }
+    coveredAssets.set(path, asset);
+  }
+  if ([...trustedMapAssets.keys()].some((path) => !coveredAssets.has(path))) {
+    invalid('C map asset coverage omits a trusted file');
   }
   const coveragePaths = new Set<string>();
   for (const dataset of coverageDatasets) {
@@ -278,6 +428,148 @@ export function inspectOfficialWorldOpeningAdmission(input: {
     return coreId;
   });
   const countrySet = new Set<string>(observed);
+  const coveredCountryIds = new Set<string>();
+  const assetPathsByCountry = new Map<string, Set<string>>();
+  for (const asset of coveredAssets.values()) {
+    if (asset.coreCountryId === null && asset.sourceCountryId === null) {
+      continue;
+    }
+    const coreId = text(asset.coreCountryId, 'Map asset Core Country ID');
+    const sourceId = text(asset.sourceCountryId, 'Map asset source Country ID');
+    if (
+      !countrySet.has(coreId) ||
+      countryRows[expected.indexOf(coreId)]?.sourceCountryId !== sourceId
+    ) {
+      invalid('C map asset refers to an unmapped country');
+    }
+    const paths = assetPathsByCountry.get(coreId) ?? new Set<string>();
+    paths.add(text(asset.path, 'Map asset path'));
+    assetPathsByCountry.set(coreId, paths);
+  }
+  for (const coveredCountry of coverageCountries) {
+    const coreId = text(
+      coveredCountry.coreCountryId,
+      'Covered Core Country ID',
+    );
+    const assetPaths = coveredCountry.versionedMapAssets;
+    if (
+      coveredCountryIds.has(coreId) ||
+      !countrySet.has(coreId) ||
+      coveredCountry.sourceCountryId !==
+        countryRows[expected.indexOf(coreId)]?.sourceCountryId ||
+      !Array.isArray(assetPaths) ||
+      assetPaths.some((path) => typeof path !== 'string') ||
+      coveredCountry.versionedMapAssetCount !== assetPaths.length ||
+      new Set(assetPaths).size !== assetPaths.length ||
+      assetPaths.length !== (assetPathsByCountry.get(coreId)?.size ?? 0) ||
+      assetPaths.some(
+        (path) => !assetPathsByCountry.get(coreId)?.has(path as string),
+      )
+    ) {
+      invalid('C country coverage differs from mapped assets');
+    }
+    coveredCountryIds.add(coreId);
+  }
+  if ([...countrySet].some((country) => !coveredCountryIds.has(country))) {
+    invalid('C country coverage omits a mapped country');
+  }
+  const regionCountryById = new Map<string, string>();
+  const normalizedRegionById = new Map<string, string>();
+  for (const region of regionRows) {
+    const sourceRegionId = text(region.sourceRegionId, 'C source region ID');
+    const normalizedRegionId = text(
+      region.normalizedRegionId,
+      'C normalized region ID',
+    );
+    const coreCountryId = text(region.coreCountryId, 'C region country ID');
+    if (
+      regionCountryById.has(sourceRegionId) ||
+      sourceRegionCountryById.get(sourceRegionId) !== region.sourceCountryId ||
+      !countrySet.has(coreCountryId) ||
+      region.sourceCountryId !==
+        countryRows[expected.indexOf(coreCountryId)]?.sourceCountryId
+    ) {
+      invalid('C region identity is duplicate or outside mapped countries');
+    }
+    regionCountryById.set(sourceRegionId, coreCountryId);
+    normalizedRegionById.set(sourceRegionId, normalizedRegionId);
+  }
+  if (
+    [...sourceRegionCountryById.keys()].some((id) => !regionCountryById.has(id))
+  ) {
+    invalid('C region mapping omits a trusted source region');
+  }
+  // Every record already attributed to a mapped region must also be
+  // queryable by that region's country. This does not execute the record.
+  const datasetNamesByCountry = new Map<string, Set<string>>();
+  for (const dataset of allDatasets) {
+    const datasetName = text(dataset.dataset, 'C dataset name');
+    if (dataset.sourcePath !== `data/${datasetName}.json`) {
+      invalid('C dataset name differs from its trusted source path');
+    }
+    for (const sourceRecord of rows(dataset.records, 'C dataset records')) {
+      const regionBindings = rows(
+        sourceRecord.regionBindings ?? [],
+        'C dataset region bindings',
+      );
+      const countryBindings = rows(
+        sourceRecord.countryBindings ?? [],
+        'C dataset country bindings',
+      );
+      for (const countryBinding of countryBindings) {
+        const coreId = text(
+          countryBinding.coreCountryId,
+          'C dataset Core Country ID',
+        );
+        if (
+          !countrySet.has(coreId) ||
+          countryBinding.sourceCountryId !==
+            countryRows[expected.indexOf(coreId)]?.sourceCountryId
+        ) {
+          invalid('C dataset record refers to an unmapped country');
+        }
+        const names = datasetNamesByCountry.get(coreId) ?? new Set<string>();
+        names.add(datasetName);
+        datasetNamesByCountry.set(coreId, names);
+      }
+      for (const regionBinding of regionBindings) {
+        const sourceRegionId = text(
+          regionBinding.sourceRegionId,
+          'C dataset source region ID',
+        );
+        const coreCountryId = regionCountryById.get(sourceRegionId);
+        if (
+          coreCountryId === undefined ||
+          regionBinding.normalizedRegionId !==
+            normalizedRegionById.get(sourceRegionId) ||
+          !countryBindings.some(
+            (countryBinding) => countryBinding.coreCountryId === coreCountryId,
+          )
+        ) {
+          invalid('C region record is missing its country association');
+        }
+      }
+    }
+  }
+  for (const coveredCountry of coverageCountries) {
+    const coreId = text(
+      coveredCountry.coreCountryId,
+      'Covered Core Country ID',
+    );
+    const datasets = coveredCountry.structuredDatasets;
+    const observedNames =
+      datasetNamesByCountry.get(coreId) ?? new Set<string>();
+    if (
+      !Array.isArray(datasets) ||
+      datasets.some((name) => typeof name !== 'string') ||
+      coveredCountry.structuredDatasetCount !== datasets.length ||
+      new Set(datasets).size !== datasets.length ||
+      datasets.length !== observedNames.size ||
+      datasets.some((name) => !observedNames.has(name as string))
+    ) {
+      invalid('C country dataset references differ from complete mapping');
+    }
+  }
   const population = countryReports.reduce((sum, country, index) => {
     if (
       country.coreCountryId !== expected[index] ||
@@ -435,6 +727,9 @@ export class OfficialWorldOpeningBootstrapper {
 
   async bootstrap(input: {
     readonly selectionBytes: string;
+    readonly checksumsBytes: string;
+    readonly mapManifestBytes: string;
+    readonly regionsBytes: string;
     readonly mapping: unknown;
     readonly gaps: unknown;
     readonly coverage: unknown;
@@ -447,6 +742,9 @@ export class OfficialWorldOpeningBootstrapper {
   }) {
     const admission = inspectOfficialWorldOpeningAdmission({
       selectionBytes: input.selectionBytes,
+      checksumsBytes: input.checksumsBytes,
+      mapManifestBytes: input.mapManifestBytes,
+      regionsBytes: input.regionsBytes,
       mapping: input.mapping,
       gaps: input.gaps,
       coverage: input.coverage,

@@ -17,6 +17,8 @@ const packageRoot = path.join(
 );
 const checksum =
   '88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315';
+const mapManifestSha =
+  '9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f';
 const sha256Hex = (value: string): string =>
   createHash('sha256').update(value, 'utf8').digest('hex');
 
@@ -66,12 +68,30 @@ async function blockedSourceFixture() {
   const stocks = JSON.parse(
     await readFile(path.join(packageRoot, 'stocks.json'), 'utf8'),
   ) as SourceStock[];
-  const checksumRows = JSON.parse(
-    await readFile(
-      path.join(root, 'artifacts/world-balanced-candidate-v1/CHECKSUMS.json'),
-      'utf8',
-    ),
-  ) as Array<{ path: string; sha256: string; bytes: number }>;
+  const checksumsBytes = await readFile(
+    path.join(root, 'artifacts/world-balanced-candidate-v1/CHECKSUMS.json'),
+    'utf8',
+  );
+  const mapManifestBytes = await readFile(
+    path.join(root, 'artifacts/world-map-files-v1/manifest.json'),
+    'utf8',
+  );
+  const regionsBytes = await readFile(
+    path.join(packageRoot, 'regions.json'),
+    'utf8',
+  );
+  const sourceRegions = JSON.parse(regionsBytes) as Array<{
+    id: string;
+    countryId: string;
+  }>;
+  const checksumRows = JSON.parse(checksumsBytes) as Array<{
+    path: string;
+    sha256: string;
+    bytes: number;
+  }>;
+  const mapManifest = JSON.parse(mapManifestBytes) as {
+    files: Array<{ path: string; sha256: string; bytes: number }>;
+  };
   const dataFiles = Object.fromEntries(
     checksumRows
       .filter(
@@ -81,11 +101,30 @@ async function blockedSourceFixture() {
   );
   const allOfficialDatasets = Object.entries(dataFiles).map(
     ([sourcePath, sourceFile]) => ({
+      dataset: sourcePath.slice('data/'.length, -'.json'.length),
       sourcePath,
       sourceSha256: sourceFile.sha256,
       sourceBytes: sourceFile.bytes,
       structuredMappingStatus: 'FULL_SOURCE_RECORDS_INCLUDED_LOSSLESS',
-      records: [{}],
+      records:
+        sourcePath === 'data/seasonal-water.json'
+          ? [
+              {
+                regionBindings: [
+                  {
+                    sourceRegionId: 'visual-territory-01-E1',
+                    normalizedRegionId: 'REGION_01_E1',
+                  },
+                ],
+                countryBindings: [
+                  {
+                    sourceCountryId: 'visual-territory-01',
+                    coreCountryId: 'COUNTRY_01',
+                  },
+                ],
+              },
+            ]
+          : [{}],
     }),
   );
   const core = (source: string) => `COUNTRY_${source.slice(-2)}`;
@@ -100,6 +139,8 @@ async function blockedSourceFixture() {
         verifiedArtifactsIncludingChecksumManifest: 87,
         dataFiles,
         mapPackage: {
+          packageId: 'WORLD_MAP_FILES_V1_2026_09_28',
+          manifestSha256: mapManifestSha,
           filesVerified: 203,
           authority: 'VERSIONED_FILE_ASSETS_ONLY_NOT_WORLD_STATE',
         },
@@ -129,6 +170,14 @@ async function blockedSourceFixture() {
         countries: countries.map((country) => ({
           sourceCountryId: country.id,
           coreCountryId: core(country.id),
+        })),
+        regions: sourceRegions.map((region) => ({
+          sourceRegionId: region.id,
+          normalizedRegionId: region.id
+            .replace('visual-territory-', 'REGION_')
+            .replace('-E', '_E'),
+          sourceCountryId: region.countryId,
+          coreCountryId: core(region.countryId),
         })),
       },
       records: {
@@ -202,17 +251,56 @@ async function blockedSourceFixture() {
         omittedStructuredDatasets: 0,
         omittedMapPackageFiles: 0,
       },
-      sourceArtifacts: Array.from({ length: 87 }, () => ({})),
+      sourceArtifacts: [
+        ...checksumRows.map((row) => ({
+          sourcePath: row.path,
+          sha256: row.sha256,
+          bytes: row.bytes,
+          repositoryOriginalVerified: true,
+          proposalExecuted: false,
+        })),
+        {
+          sourcePath: 'CHECKSUMS.json',
+          sha256: checksum,
+          bytes: Buffer.byteLength(checksumsBytes, 'utf8'),
+          repositoryOriginalVerified: true,
+          proposalExecuted: false,
+        },
+      ],
       structuredDatasets: allOfficialDatasets.map((dataset) => ({
         sourcePath: dataset.sourcePath,
         sourceSha256: dataset.sourceSha256,
         sourceBytes: dataset.sourceBytes,
         sourceRecordsIncludedInMappingV2: true,
       })),
-      mapAssets: Array.from({ length: 203 }, () => ({})),
+      mapAssets: mapManifest.files.map((file) => {
+        const match = file.path.match(
+          /\/(?:country-detail|country-scenes)\/(\d{2})[^/]*\.(?:svg|png)$/,
+        );
+        return {
+          path: file.path,
+          sha256: file.sha256,
+          bytes: String(file.bytes),
+          stableVersionedPath: file.path,
+          repositoryOriginalVerified: true,
+          worldStateAuthority: 'NONE_DISPLAY_OR_SOURCE_ONLY',
+          sourceCountryId: match ? `visual-territory-${match[1]}` : null,
+          coreCountryId: match ? `COUNTRY_${match[1]}` : null,
+        };
+      }),
       countries: countries.map((country) => ({
         sourceCountryId: country.id,
         coreCountryId: core(country.id),
+        versionedMapAssets: mapManifest.files
+          .filter((file) =>
+            new RegExp(
+              `/(?:country-detail|country-scenes)/${country.number}[^/]*\\.(?:svg|png)$`,
+            ).test(file.path),
+          )
+          .map((file) => file.path),
+        versionedMapAssetCount: 2,
+        structuredDatasets: country.number === '01' ? ['seasonal-water'] : [],
+        structuredDatasetCount: country.number === '01' ? 1 : 0,
       })),
       omissions: {
         sourceArtifacts: [],
@@ -222,7 +310,15 @@ async function blockedSourceFixture() {
     },
     'coverageFingerprint',
   );
-  return { selectionBytes, mapping, gaps, coverage };
+  return {
+    selectionBytes,
+    checksumsBytes,
+    mapManifestBytes,
+    regionsBytes,
+    mapping,
+    gaps,
+    coverage,
+  };
 }
 
 function rebindCoverage(
@@ -295,7 +391,7 @@ describe('selected official World opening admission', () => {
     );
     expect(() =>
       inspectOfficialWorldOpeningAdmission({
-        selectionBytes: fixture.selectionBytes,
+        ...fixture,
         mapping: missingMapping,
         gaps: reboundGaps,
         coverage: rebindCoverage(
@@ -327,7 +423,7 @@ describe('selected official World opening admission', () => {
     );
     expect(() =>
       inspectOfficialWorldOpeningAdmission({
-        selectionBytes: fixture.selectionBytes,
+        ...fixture,
         mapping: resignedMapping,
         gaps: resignedGaps,
         coverage: rebindCoverage(
@@ -354,6 +450,163 @@ describe('selected official World opening admission', () => {
         sha256Hex,
       }),
     ).toThrow('complete coverage ledger');
+  });
+
+  it('rejects empty source evidence even when the artifact count is unchanged', async () => {
+    const fixture = await blockedSourceFixture();
+    const changed = structuredClone(fixture.coverage);
+    changed.sourceArtifacts[0] = {} as (typeof changed.sourceArtifacts)[number];
+    expect(() =>
+      inspectOfficialWorldOpeningAdmission({
+        ...fixture,
+        coverage: rebindCoverage(
+          changed,
+          fixture.mapping.mappingFingerprint,
+          fixture.gaps.gapsFingerprint,
+        ),
+        sha256Hex,
+      }),
+    ).toThrow('Covered source artifact path is not a non-empty string');
+  });
+
+  it('rejects replacing one map path with a duplicate at the same count', async () => {
+    const fixture = await blockedSourceFixture();
+    const changed = structuredClone(fixture.coverage);
+    changed.mapAssets[1] = structuredClone(changed.mapAssets[0]!);
+    expect(() =>
+      inspectOfficialWorldOpeningAdmission({
+        ...fixture,
+        coverage: rebindCoverage(
+          changed,
+          fixture.mapping.mappingFingerprint,
+          fixture.gaps.gapsFingerprint,
+        ),
+        sha256Hex,
+      }),
+    ).toThrow('map asset coverage differs from trusted map manifest');
+  });
+
+  it('rejects an empty map asset at the same manifest count', async () => {
+    const fixture = await blockedSourceFixture();
+    const changed = structuredClone(fixture.coverage);
+    changed.mapAssets[0] = {} as (typeof changed.mapAssets)[number];
+    expect(() =>
+      inspectOfficialWorldOpeningAdmission({
+        ...fixture,
+        coverage: rebindCoverage(
+          changed,
+          fixture.mapping.mappingFingerprint,
+          fixture.gaps.gapsFingerprint,
+        ),
+        sha256Hex,
+      }),
+    ).toThrow('Covered map asset path is not a non-empty string');
+  });
+
+  it('rejects a duplicated country row at the same country count', async () => {
+    const fixture = await blockedSourceFixture();
+    const changed = structuredClone(fixture.coverage);
+    changed.countries[1] = structuredClone(changed.countries[0]!);
+    expect(() =>
+      inspectOfficialWorldOpeningAdmission({
+        ...fixture,
+        coverage: rebindCoverage(
+          changed,
+          fixture.mapping.mappingFingerprint,
+          fixture.gaps.gapsFingerprint,
+        ),
+        sha256Hex,
+      }),
+    ).toThrow('country coverage differs from mapped assets');
+  });
+
+  it('rejects a region-only record missing its derived country association', async () => {
+    const fixture = await blockedSourceFixture();
+    const changed = structuredClone(fixture.mapping);
+    const seasonal = changed.records.allOfficialDatasets.find(
+      (dataset) => dataset.sourcePath === 'data/seasonal-water.json',
+    );
+    if (seasonal === undefined) throw new Error('Missing seasonal fixture');
+    const record = seasonal.records[0] as { countryBindings?: unknown[] };
+    record.countryBindings = [];
+    const remapped = withFingerprint(
+      Object.fromEntries(
+        Object.entries(changed).filter(([key]) => key !== 'mappingFingerprint'),
+      ),
+      'mappingFingerprint',
+    );
+    const updatedGaps = withFingerprint(
+      {
+        ...Object.fromEntries(
+          Object.entries(fixture.gaps).filter(
+            ([key]) => key !== 'gapsFingerprint',
+          ),
+        ),
+        mappingFingerprint: remapped.mappingFingerprint,
+      },
+      'gapsFingerprint',
+    );
+    expect(() =>
+      inspectOfficialWorldOpeningAdmission({
+        ...fixture,
+        mapping: remapped,
+        gaps: updatedGaps,
+        coverage: rebindCoverage(
+          fixture.coverage,
+          remapped.mappingFingerprint,
+          updatedGaps.gapsFingerprint,
+        ),
+        sha256Hex,
+      }),
+    ).toThrow('region record is missing its country association');
+  });
+
+  it('rejects a region record attributed to the wrong mapped country', async () => {
+    const fixture = await blockedSourceFixture();
+    const changed = structuredClone(fixture.mapping);
+    const seasonal = changed.records.allOfficialDatasets.find(
+      (dataset) => dataset.sourcePath === 'data/seasonal-water.json',
+    );
+    if (seasonal === undefined) throw new Error('Missing seasonal fixture');
+    const record = seasonal.records[0] as {
+      countryBindings?: Array<{
+        sourceCountryId: string;
+        coreCountryId: string;
+      }>;
+    };
+    record.countryBindings = [
+      { sourceCountryId: 'visual-territory-02', coreCountryId: 'COUNTRY_02' },
+    ];
+    const remapped = withFingerprint(
+      Object.fromEntries(
+        Object.entries(changed).filter(([key]) => key !== 'mappingFingerprint'),
+      ),
+      'mappingFingerprint',
+    );
+    const updatedGaps = withFingerprint(
+      {
+        ...Object.fromEntries(
+          Object.entries(fixture.gaps).filter(
+            ([key]) => key !== 'gapsFingerprint',
+          ),
+        ),
+        mappingFingerprint: remapped.mappingFingerprint,
+      },
+      'gapsFingerprint',
+    );
+    expect(() =>
+      inspectOfficialWorldOpeningAdmission({
+        ...fixture,
+        mapping: remapped,
+        gaps: updatedGaps,
+        coverage: rebindCoverage(
+          fixture.coverage,
+          remapped.mappingFingerprint,
+          updatedGaps.gapsFingerprint,
+        ),
+        sha256Hex,
+      }),
+    ).toThrow('region record is missing its country association');
   });
 
   it('fails before any database write when the actual opening handoff is blocked', async () => {
