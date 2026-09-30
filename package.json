@@ -28,6 +28,7 @@
     "env:check": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
     "migration:validate": "node scripts/validate-migrations.mjs",
     "test:world-v2-api-reader-release": "node scripts/test-world-v2-api-reader-release.mjs",
+    "test:world-v2-official-edge": "node scripts/check-world-v2-official-edge-bundle.mjs && vitest run tests/world-api/official-edge-read.test.ts",
     "migration:rehearse": "node scripts/rehearse-migrations.mjs",
     "types:world-read:generate": "node scripts/generate-world-v2-read-types.mjs",
     "types:world-read:check": "node scripts/generate-world-v2-read-types.mjs --check",
@@ -43,7 +44,7 @@
     "secrets:check": "node scripts/check-repository-secrets.mjs",
     "supabase:safe": "node scripts/supabase-safe.mjs",
     "build": "pnpm -r --if-present build",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:boundaries && pnpm env:check && pnpm migration:validate && pnpm migration:rehearse && pnpm foundation:policy && pnpm secrets:check && pnpm test:balanced-candidate && pnpm test:authoritative-ui && pnpm build"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm test:world-v2-official-edge && pnpm test:boundaries && pnpm env:check && pnpm migration:validate && pnpm migration:rehearse && pnpm foundation:policy && pnpm secrets:check && pnpm test:balanced-candidate && pnpm test:authoritative-ui && pnpm build"
   },
   "devDependencies": {
     "@econmind/core": "workspace:*",

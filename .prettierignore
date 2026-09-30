@@ -3,6 +3,7 @@ dist/
 coverage/
 pnpm-lock.yaml
 supabase/.temp/
+supabase/functions/world-v2-official-read/lib/
 docs/governance/r2/source/
 docs/reports/archive/
 docs/reports/governance/

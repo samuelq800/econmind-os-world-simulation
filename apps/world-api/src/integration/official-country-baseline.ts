@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { Buffer } from 'node:buffer';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 export const OFFICIAL_COUNTRY_PACKAGE_ID = 'BALANCED_2026_09_28_V1';
