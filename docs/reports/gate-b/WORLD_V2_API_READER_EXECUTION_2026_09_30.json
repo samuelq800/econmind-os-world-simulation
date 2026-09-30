@@ -1,0 +1,90 @@
+{
+  "reportType": "WORLD_V2_API_READER_EXECUTION_READBACK",
+  "recordedAt": "2026-09-30",
+  "status": "APPLIED_BUT_UNVERIFIED",
+  "authority": "SERVER_ONLY_INACTIVE_CANDIDATE_READ",
+  "targetProjectRef": "vimksjrhaxdpnkvgsavz",
+  "reviewedWorldSource": {
+    "commit": "701784a3d9c3c8add16baf9c59b51c54182671fe",
+    "pullRequest": 18,
+    "mainMergeCommit": "b9433abcf56a78873676ee37cacfc2b5435a353e"
+  },
+  "reviewedPublisher": {
+    "commit": "e2ecc9d8c0fd328c451c70cb8cfce6539098ffcc",
+    "pullRequest": 75,
+    "mainMergeCommit": "b84c4e7a620dfdc81f01118643b77468600d96cd"
+  },
+  "workflow": {
+    "runId": 36654533470,
+    "finalConclusion": "cancelled",
+    "finalEvidenceArtifact": "WORLD_V2_RELEASE_UNKNOWN",
+    "requestStep": "success",
+    "verificationStep": "success",
+    "doNotRetry": true,
+    "interpretation": "Cancellation was requested after the management request and verification steps had completed. The workflow conclusion and uploaded artifact are not proof that the database write did not occur."
+  },
+  "productionReadback": {
+    "ledger": {
+      "migrationId": "0020_world_v2_official_country_reader",
+      "artifactSha256": "083e06aca86763e4bc32a34347c1a86b26aa910f3c6a191b9393021347211618",
+      "sourceRepoCommit": "f3413bae195b75e80d28d6afa314ca0e394bdfbc",
+      "releaseOrder": 20
+    },
+    "readerRole": {
+      "canLogin": false,
+      "canBypassRls": false,
+      "isSuperuser": false,
+      "inheritsPrivileges": false
+    },
+    "loginRole": {
+      "canLogin": false,
+      "canBypassRls": false,
+      "isSuperuser": false,
+      "inheritsPrivileges": false
+    },
+    "readerMemberships": [
+      {
+        "member": "postgres",
+        "role": "world_v2_api_reader",
+        "grantor": "supabase_admin",
+        "adminOption": true,
+        "inheritOption": false,
+        "setOption": false
+      },
+      {
+        "member": "world_v2_api_login",
+        "role": "world_v2_api_reader",
+        "grantor": "postgres",
+        "adminOption": false,
+        "inheritOption": false,
+        "setOption": true
+      }
+    ],
+    "controlPlaneRole": {
+      "name": "postgres",
+      "canLogin": true,
+      "canBypassRls": true,
+      "isSuperuser": false,
+      "canCreateRole": true,
+      "inheritsPrivileges": true
+    },
+    "schemaUsage": [
+      "public",
+      "world_v2"
+    ],
+    "columnSelectPrivilegeCount": 8,
+    "tablePrivilegeCount": 0,
+    "candidateTablePolicyCount": 2
+  },
+  "requiredBeforeReclassification": [
+    "B must decide whether the exact postgres control-plane membership is an allowed PostgreSQL 16 bootstrap exception.",
+    "A new immutable read-only audit/verifier candidate must model exactly the two observed memberships and reject every other membership, role, ACL, ledger, or policy difference.",
+    "The audit must be rerun read-only against this project. It must not replay migration 0020."
+  ],
+  "notPerformed": [
+    "No retry or compensating DDL after the cancelled workflow.",
+    "No 0021 full-data policy publication.",
+    "No server credential provisioning or API enablement.",
+    "No World, OpeningSeed, worker, simulation, team, office, or player-state activation."
+  ]
+}
