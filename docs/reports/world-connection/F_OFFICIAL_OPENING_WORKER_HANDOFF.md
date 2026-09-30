@@ -13,6 +13,8 @@ to initialize a production World or advance the simulation.
 - V2-contract code commit: `4698f0f55a1bd6b6489f8f5471dc99de1915b04f`.
 - Independent complete-coverage oracle code commit:
   `9308eb7cc07f029f2956da859a8b2821c30f4402`.
+- Map-path-derived country ownership correction code commit:
+  `442c91504075ca9464fd6a83556045c69516750f`.
 - Dedicated [native PostgreSQL 16 CI run](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36651575056): success on that exact code commit;
   PGlite focused tests 6/6 and native PostgreSQL tests 2/2 with no skip in CI.
   Worker/Core build, focused test typecheck, lint, formatting and diff check
@@ -33,6 +35,12 @@ to initialize a production World or advance the simulation.
   region-country oracle; corrected C input at
   `ef3af983aa9f996f599a392bb244872a3cb59a32` was accepted structurally
   but returned `BLOCKED` on six unresolved OpeningSeed semantics.
+- [Map-path ownership correction native PostgreSQL 16 CI run](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/36654895560):
+  success on exact code commit `442c91504075ca9464fd6a83556045c69516750f`.
+  PGlite focused tests 15/15 and native PostgreSQL tests 2/2 passed; build,
+  typecheck, lint, formatting and diff check passed in the same run. The
+  corrected C report still returned `BLOCKED` with six opening gaps in a
+  separate local read-only check.
 - P0 independent review: **PENDING**. No `VERIFIED`, mainline merge or Gate B
   claim is made by F.
 
@@ -43,6 +51,12 @@ map-asset identities, exact path/hash/size sets, 70 unique country rows,
 country/asset references, all 34 structured dataset references and each
 region-derived country attribution. Equal counts with empty objects,
 duplicated paths or wrong country references are rejected.
+After B found that the first asset association check compared two fields from
+the same C report, F now derives country ownership from the trusted
+`country-scenes/NN.png` and `country-detail/NN-*.svg` paths. Each of the 70
+countries must have exactly two such assets; global/support files must have
+no country. The focused negative reassigns country 01's scene to country 02
+and consistently rewrites both reported country lists, yet is rejected.
 
 ## What the Worker now owns
 
