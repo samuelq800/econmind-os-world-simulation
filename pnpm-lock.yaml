@@ -172,6 +172,9 @@ importers:
       '@econmind/world-worker':
         specifier: workspace:*
         version: link:../world-worker
+      pg:
+        specifier: 8.16.3
+        version: 8.16.3
     devDependencies:
       typescript:
         specifier: 6.0.3
