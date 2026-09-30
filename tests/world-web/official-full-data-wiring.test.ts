@@ -22,6 +22,9 @@ const matrix = JSON.parse(
     'utf8',
   ),
 ) as {
+  pageState: string;
+  apiState: string;
+  runtimeState: string;
   datasets: {
     slug: string;
     sourcePath: string;
@@ -35,6 +38,12 @@ const matrix = JSON.parse(
 };
 
 describe('D selected-source full-data wiring matrix', () => {
+  it('records the mounted page reader without claiming a verified live API', () => {
+    expect(matrix.pageState).toBe('CODE_WIRED_LIVE_API_NOT_VERIFIED');
+    expect(matrix.apiState).toBe('CODE_MERGED_OPT_IN_DEPLOYMENT_NOT_VERIFIED');
+    expect(matrix.runtimeState).toBe('NOT_LIVE_WORLD');
+  });
+
   it('covers each of A’s 34 fixed datasets and real source fields exactly once', () => {
     const specs = new Map(OFFICIAL_DATASETS.map((item) => [item.slug, item]));
     expect(matrix.datasets).toHaveLength(34);
