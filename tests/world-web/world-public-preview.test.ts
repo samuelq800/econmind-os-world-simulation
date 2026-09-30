@@ -13,6 +13,10 @@ const deploymentWorkflow = readFileSync(
   '.github/workflows/deploy-world-web.yml',
   'utf8',
 );
+const candidateWorkflow = readFileSync(
+  '.github/workflows/world-web-atlas-candidate.yml',
+  'utf8',
+);
 const landingPage = readFileSync('apps/world-web/index.html', 'utf8');
 
 describe('public World preview deployment', () => {
@@ -20,6 +24,8 @@ describe('public World preview deployment', () => {
     expect(runtimeApp).toContain('atlas === null');
     expect(runtimeApp).toContain('<WorldExplorer />');
     expect(atlasPage).toContain('data-mosaic-country={territory.number}');
+    expect(atlasPage).toContain('visibleDetailMaps.map((map) =>');
+    expect(atlasPage).toContain('放大后按需叠加 70 国地理细图');
     expect(atlasPage).toContain(
       './season1-immersive/?role=finance&country=01#country',
     );
@@ -49,5 +55,15 @@ describe('public World preview deployment', () => {
     expect(deploymentWorkflow).toContain('path: apps/world-web/dist');
     expect(deploymentWorkflow).not.toContain('SUPABASE');
     expect(deploymentWorkflow).not.toContain('WORLD_API_');
+  });
+
+  it('keeps atlas candidate CI separate from Pages deployment', () => {
+    expect(candidateWorkflow).toContain('pull_request:');
+    expect(candidateWorkflow).toContain('contents: read');
+    expect(candidateWorkflow).toContain('pnpm install --frozen-lockfile');
+    expect(candidateWorkflow).toContain('pnpm test:authoritative-ui');
+    expect(candidateWorkflow).not.toContain('deploy-pages');
+    expect(candidateWorkflow).not.toContain('SUPABASE');
+    expect(candidateWorkflow).not.toContain('secrets.');
   });
 });

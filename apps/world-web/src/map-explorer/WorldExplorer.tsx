@@ -5,6 +5,7 @@ import { continentSceneUrls } from './continent-scene-urls.js';
 import { continentFor } from './continent-layout.js';
 import { countryDetailUrls } from './country-detail-urls.js';
 import { countrySceneUrls } from './country-scene-urls.js';
+import { shouldMountDetailTile } from './detail-tile-visibility.js';
 import { layoutLabels } from './label-layout.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import terrain from '../assets/asterra-satellite-terrain-v8.png';
@@ -354,6 +355,15 @@ export function WorldExplorer() {
       result.push(<path key={`y${y}`} d={`M${box.x} ${y}h${box.width}`} />);
     return result;
   }, [camera.width, box.x, box.y, box.width, box.height]);
+  const visibleDetailMaps = !country
+    ? detailMaps.filter((map) => {
+        const territory = countries.find((item) => item.id === map.id);
+        return (
+          territory &&
+          shouldMountDetailTile(box, territory.bounds, !showArtwork)
+        );
+      })
+    : [];
   return (
     <main className="world-explorer">
       <header className="explorer-topbar">
@@ -588,7 +598,7 @@ export function WorldExplorer() {
                       data-continent-art={art.id}
                     />
                   ))}
-                {detailMaps.map((map) => {
+                {visibleDetailMaps.map((map) => {
                   const territory = countries.find(
                     (item) => item.id === map.id,
                   );
@@ -892,7 +902,9 @@ export function WorldExplorer() {
                 ? '本国规划场景插画 · 建筑为示意复原 · 能力为情景估值'
                 : country
                   ? '地理底图 · 国界、水系与设施坐标来自地图数据'
-                  : '四大陆精绘与 70 国地理细图叠合 · 国界与水系保留 / 非实时 World State'}
+                  : showArtwork
+                    ? '四大陆精绘 · 放大后按需叠加 70 国地理细图 · 国界与水系保留 / 非实时 World State'
+                    : '70 国地理细图全图模式 · 细图正按需载入 · 国界与水系保留 / 非实时 World State'}
             </small>
             <b>
               {scene
