@@ -7,7 +7,7 @@ Branch: `codex/c-official-world-complete-coverage`
 Base candidate: `c66de7efe84539dd61e9f578d6f9ecb6b2ad9f63` (fixed PR #19; not rewritten)
 
 Exact V2 implementation candidate:
-`cf76332b9f41e6ac2f468892edff1b4388efcbb1`
+`f711869b5265003e12adb29996ad8158cc00fd03`
 
 ## Why V2 exists
 
@@ -22,9 +22,9 @@ page.
 
 | Artifact                                  |      Bytes | File SHA-256                                                       | Canonical fingerprint                                                     |
 | ----------------------------------------- | ---------: | ------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| `C_OFFICIAL_WORLD_OPENING_MAPPING.json`   | 33,517,938 | `676b78fa3c00d9e194a8a1a34d13eb7900b076da1007a5d02a0db29a9071e7b7` | `sha256:3463413929b1a659f0a089e041f8698c09d37caa2ad1d88fbc930db9bb9fffbb` |
-| `C_OFFICIAL_WORLD_OPENING_GAPS.json`      |    227,292 | `3b0d6bc97739732c2510ff04e7b1cf1199f3c9bfe4f6db0718ec3d7f10ccc4fd` | `sha256:b0e37cc97802080be7f14f5a0d3bf4ef457f3c6c1e60f6560c79d110493772c5` |
-| `C_OFFICIAL_WORLD_COMPLETE_COVERAGE.json` |    291,660 | `c2dddd419c476609ce1e731adf62eef1cbd7a1ebce2614b15c03876a5f1fed39` | `sha256:9438a0c4b67d60a55d68fc2df676c70f63c57b8a48d6d25371cd4d6bdae6c651` |
+| `C_OFFICIAL_WORLD_OPENING_MAPPING.json`   | 33,555,486 | `91a8c281a88fb60e1cb31de28de2fa9ceed996aa9719d65ff23f306ac990f4f1` | `sha256:230f8d695c25ea839fb6415de3c4c2985dd6d95e6261fa10dbec73053dedac82` |
+| `C_OFFICIAL_WORLD_OPENING_GAPS.json`      |    227,292 | `1254b3c2929e10d3b8a582e032bc22648b04d01236e3098a18a1c39974d46539` | `sha256:f374ed3a888305a467f52d0aeaf7c545a6513cf17accc10c9537850694b68e95` |
+| `C_OFFICIAL_WORLD_COMPLETE_COVERAGE.json` |    294,812 | `c42a8336b59eec986c576427c85c6db4aca986fc0632e6b572b9e997f4f835e9` | `sha256:8b915aadb1aa299cc1c2529eb8ed996f1e8ff9c8ad5bd7ff88731c6d459efa2d` |
 
 ## Coverage result
 
@@ -32,6 +32,9 @@ page.
 - source artifacts including `CHECKSUMS.json`: 87;
 - structured JSON datasets included losslessly: 34;
 - map-package files individually hash-verified and enumerated: 203;
+- map-package composition: 160 image files (90 PNG + 70 SVG) and 43
+  supporting data/index/documentation files; the package is not described as
+  203 images;
 - map assets directly associated with countries: 140 (70 country scenes + 70
   country-detail vectors);
 - global map/index/geography/support files: 63;
@@ -48,6 +51,15 @@ allocations.
 All source number tokens remain lossless decimal strings. Each dataset is
 included in full; detected country and region references receive explicit
 source→normalized bindings. Proposal records remain proposal records.
+
+Region-only records derive their country association through the verified
+122-row region table. This now assigns all 122 `seasonal-water` records and all
+130 audit-only `changes` records to the correct countries, with all 70
+countries represented. Unknown regions and conflicting top-level
+`countryId`/derived-country references are rejected. Truly world-level records
+without either reference remain unbound. The `changes` dataset remains
+`VALIDATION_METADATA` / `METADATA_NOT_RUNTIME_STATE`; association does not make
+it an OpeningSeed calculation input.
 
 ## Four distinct completion states
 
@@ -83,7 +95,9 @@ mutation is authorized by this package.
 - targeted Prettier: `PASS`;
 - targeted ESLint: `PASS`;
 - strict TypeScript using `tests/tsconfig.official-world-mapping.json`: `PASS`;
-- targeted Vitest: `PASS` (6/6);
+- targeted Vitest: `PASS` (7/7), including region-only attribution, per-country
+  isolation, unknown-region rejection, country/region conflict rejection and
+  world-level non-association;
 - deterministic regeneration: all three canonical fingerprints and file
   SHA-256 values reproduced exactly.
 

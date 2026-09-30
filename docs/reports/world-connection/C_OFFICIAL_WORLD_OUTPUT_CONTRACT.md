@@ -29,20 +29,24 @@ itself, the map manifest and all 203 map files before returning output.
 
 The mapping artifact schema is `OFFICIAL_WORLD_OPENING_MAPPING_V2`. Its
 fingerprint is
-`sha256:3463413929b1a659f0a089e041f8698c09d37caa2ad1d88fbc930db9bb9fffbb`.
+`sha256:230f8d695c25ea839fb6415de3c4c2985dd6d95e6261fa10dbec73053dedac82`.
 
 The gaps schema is `OFFICIAL_WORLD_OPENING_GAPS_V1`. Its fingerprint is
-`sha256:b0e37cc97802080be7f14f5a0d3bf4ef457f3c6c1e60f6560c79d110493772c5`.
+`sha256:f374ed3a888305a467f52d0aeaf7c545a6513cf17accc10c9537850694b68e95`.
 
 The coverage schema is `OFFICIAL_WORLD_COMPLETE_COVERAGE_V1`. Its fingerprint
 is
-`sha256:9438a0c4b67d60a55d68fc2df676c70f63c57b8a48d6d25371cd4d6bdae6c651`.
+`sha256:8b915aadb1aa299cc1c2529eb8ed996f1e8ff9c8ad5bd7ff88731c6d459efa2d`.
 
 ## Consumer rules
 
 1. Country identity is explicit:
    `visual-territory-NN` → `COUNTRY_NN`. Region identity is
    `visual-territory-NN-Ex` → `REGION_NN_Ex`.
+   Region-only records derive their country binding exclusively through the
+   verified region table. Unknown regions and conflicting top-level
+   `countryId`/derived-country references fail closed. A world-level record
+   with no country or region reference remains unbound.
 2. All source numeric tokens are read losslessly and normalized as decimal
    strings. Consumers must not pass them through binary floating-point before
    Core decimal parsing.
