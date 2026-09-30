@@ -10,7 +10,7 @@
       "code": "WORLD_ID_BINDING_REQUIRED",
       "domain": "WORLD",
       "blockingTarget": "OPENING_SEED",
-      "message": "The selected source deliberately has no production World ID; the sole existing World must be bound externally."
+      "message": "The selected source deliberately has no production World ID; the single authorized World ID must be supplied by the production executor without creating a competing World."
     }
   ],
   "countries": [
@@ -5344,5 +5344,5 @@
     }
   ],
   "rejections": [],
-  "gapsFingerprint": "sha256:2f5d8449692f53c3f03e9791e23112e1c04798a413c47bf8e0eef4347b519db1"
+  "gapsFingerprint": "sha256:75f34b4a2943370cba1bd7bf64e697b03dfc44d0013f0fe3cb41c4919c2e0ca5"
 }

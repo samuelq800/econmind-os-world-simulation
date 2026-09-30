@@ -923,7 +923,7 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
       'WORLD_ID_BINDING_REQUIRED',
       'WORLD',
       'OPENING_SEED',
-      'The selected source deliberately has no production World ID; the sole existing World must be bound externally.',
+      'The selected source deliberately has no production World ID; the single authorized World ID must be supplied by the production executor without creating a competing World.',
     ),
   ]);
   const countryGaps = [];
