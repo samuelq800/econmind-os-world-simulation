@@ -27,6 +27,7 @@
     "foundation:policy": "node scripts/foundation-gate-policy.mjs",
     "env:check": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
     "migration:validate": "node scripts/validate-migrations.mjs",
+    "test:world-v2-api-reader-release": "node scripts/test-world-v2-api-reader-release.mjs",
     "migration:rehearse": "node scripts/rehearse-migrations.mjs",
     "types:world-read:generate": "node scripts/generate-world-v2-read-types.mjs",
     "types:world-read:check": "node scripts/generate-world-v2-read-types.mjs --check",
