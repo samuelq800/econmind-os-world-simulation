@@ -168,6 +168,8 @@ describe('official 70-country opening-input mapping', () => {
       financeDepositMismatchCountries: 56,
       financeEquityMismatchCountries: 62,
       financeEconomicSemanticArithmeticMismatchCountries: 0,
+      maximumAbsoluteDepositLiabilityDelta: '0.00001',
+      maximumAbsoluteBankEquityDelta: '0.000017',
       financeSourceValuesCorrectedOrRounded: false,
     });
     expect(mapping.records.finance[0]).toMatchObject({

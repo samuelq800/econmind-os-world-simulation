@@ -211,6 +211,18 @@ function absoluteLessThanOrEqual(value, threshold, label) {
   return (left < 0n ? -left : left) <= (right < 0n ? -right : right);
 }
 
+function maxAbsoluteDecimal(values, label) {
+  return values.reduce((maximum, value) => {
+    const [left, right] = align(
+      decimalParts(value, label),
+      decimalParts(maximum, label),
+    );
+    return (left < 0n ? -left : left) > (right < 0n ? -right : right)
+      ? renderDecimal(decimalParts(value, label)).replace(/^-/, '')
+      : maximum;
+  }, '0');
+}
+
 function sumDecimals(values, label) {
   return values.reduce(
     (sum, value) => addDecimals(sum, canonicalDecimal(value, label), label),
@@ -1077,6 +1089,16 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
       row.reconciliation.bankEquityDeltaClassification ===
         'ECONOMIC_SEMANTIC_DIFFERENCE',
   ).length;
+  const maximumAbsoluteDepositLiabilityDelta = maxAbsoluteDecimal(
+    normalizedFinance.map(
+      (row) => row.reconciliation.depositLiabilityDelta,
+    ),
+    'maximum deposit liability delta',
+  );
+  const maximumAbsoluteBankEquityDelta = maxAbsoluteDecimal(
+    normalizedFinance.map((row) => row.reconciliation.bankEquityDelta),
+    'maximum bank equity delta',
+  );
 
   const mappingBody = Object.freeze({
     schemaVersion: OFFICIAL_WORLD_MAPPING_SCHEMA_VERSION,
@@ -1180,6 +1202,8 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
       financeEquityMismatchCountries: financeEquityMismatches,
       financeEconomicSemanticArithmeticMismatchCountries:
         financeEconomicSemanticArithmeticMismatches,
+      maximumAbsoluteDepositLiabilityDelta,
+      maximumAbsoluteBankEquityDelta,
       facilityCount: normalizedFacilities.length,
       openingPortfolioFacilityProposals: openingPortfolioFacilities,
       developmentOptionFacilityProposals: developmentOptionFacilities,
