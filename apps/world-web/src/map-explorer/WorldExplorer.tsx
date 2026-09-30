@@ -1,5 +1,8 @@
 import detailMaps from '../assets/country-detail/index.json';
+import continentArtworks from '../assets/continent-scenes/index.json';
 import sceneIndex from '../assets/country-scenes/index.json';
+import { continentSceneUrls } from './continent-scene-urls.js';
+import { continentFor } from './continent-layout.js';
 import { countryDetailUrls } from './country-detail-urls.js';
 import { countrySceneUrls } from './country-scene-urls.js';
 import { layoutLabels } from './label-layout.js';
@@ -119,6 +122,7 @@ export function WorldExplorer() {
   const [search, setSearch] = useState('');
   const [drawer, setDrawer] = useState(false);
   const [showWater, setShowWater] = useState(true);
+  const [showArtwork, setShowArtwork] = useState(true);
   const [sceneMode, setSceneMode] = useState(true);
   const [showLabels, setShowLabels] = useState(true);
   const sceneModeRef = useRef(sceneMode);
@@ -234,6 +238,17 @@ export function WorldExplorer() {
       width: Math.max(x1 - x0, (y1 - y0) * ratio) * (scene ? 1.015 : 1.55),
     });
   }, []);
+  const focusContinent = (id: string) => {
+    const art = continentArtworks.find((item) => item.id === id);
+    if (!art || country) return;
+    const [x, y, width, height] = art.frame;
+    const ratio = sizeRef.current.width / sizeRef.current.height;
+    setCamera({
+      x: x! + width! / 2,
+      y: y! + height! / 2,
+      width: Math.max(width!, height! * ratio) * 1.06,
+    });
+  };
   const navigate = useCallback(
     (id: string) => {
       const c = countries.find((item) => item.id === id);
@@ -486,6 +501,18 @@ export function WorldExplorer() {
               <filter id="terrain-contrast">
                 <feColorMatrix type="saturate" values=".85" />
               </filter>
+              <filter id="continent-land-art" colorInterpolationFilters="sRGB">
+                <feColorMatrix
+                  type="matrix"
+                  values="1 0 0 0 0
+                          0 1 0 0 0
+                          0 0 1 0 0
+                          1.4 .8 -1.8 0 .2"
+                />
+                <feComponentTransfer>
+                  <feFuncA type="linear" slope="1.8" />
+                </feComponentTransfer>
+              </filter>
               {!country &&
                 countries.map((item) => (
                   <clipPath
@@ -494,6 +521,20 @@ export function WorldExplorer() {
                     clipPathUnits="userSpaceOnUse"
                   >
                     <path d={item.path} />
+                  </clipPath>
+                ))}
+              {!country &&
+                continentArtworks.map((scene) => (
+                  <clipPath
+                    key={scene.id}
+                    id={`continent-land-${scene.id}`}
+                    clipPathUnits="userSpaceOnUse"
+                  >
+                    {countries
+                      .filter((item) => continentFor(item.label) === scene.id)
+                      .map((item) => (
+                        <path key={item.id} d={item.path} />
+                      ))}
                   </clipPath>
                 ))}
             </defs>
@@ -530,6 +571,23 @@ export function WorldExplorer() {
                   height="887"
                   filter="url(#terrain-contrast)"
                 />
+                {showArtwork &&
+                  continentArtworks.map((art) => (
+                    <image
+                      key={art.id}
+                      className="explorer-continent-art"
+                      aria-hidden="true"
+                      href={continentSceneUrls[art.file]}
+                      x={art.frame[0]}
+                      y={art.frame[1]}
+                      width={art.frame[2]}
+                      height={art.frame[3]}
+                      preserveAspectRatio="xMidYMid slice"
+                      filter="url(#continent-land-art)"
+                      clipPath={`url(#continent-land-${art.id})`}
+                      data-continent-art={art.id}
+                    />
+                  ))}
                 {detailMaps.map((map) => {
                   const territory = countries.find(
                     (item) => item.id === map.id,
@@ -537,7 +595,7 @@ export function WorldExplorer() {
                   if (!territory) return null;
                   return (
                     <image
-                      className="explorer-mosaic-tile"
+                      className={`explorer-mosaic-tile ${showArtwork ? 'with-artwork' : ''}`}
                       key={map.id}
                       aria-hidden="true"
                       href={countryDetailUrls[map.file]}
@@ -579,6 +637,16 @@ export function WorldExplorer() {
                     key={f.id}
                     d={f.path}
                     className={`explorer-water ${f.kind}`}
+                  />
+                ))}
+            {!scene &&
+              artwork.physical
+                .filter((feature) => feature.kind === 'mountain')
+                .map((feature) => (
+                  <path
+                    key={feature.id}
+                    d={feature.path}
+                    className="explorer-mountain"
                   />
                 ))}
             {!scene &&
@@ -751,6 +819,20 @@ export function WorldExplorer() {
             </span>
           </div>
           <div className="explorer-layer-controls explorer-floating">
+            {!country && (
+              <select
+                aria-label="聚焦大陆精绘"
+                value=""
+                onChange={(event) => focusContinent(event.target.value)}
+              >
+                <option value="">聚焦大陆…</option>
+                {continentArtworks.map((art) => (
+                  <option key={art.id} value={art.id}>
+                    {art.name}
+                  </option>
+                ))}
+              </select>
+            )}
             {country && scenes.some((s) => s.id === countryId) && (
               <button
                 aria-pressed={Boolean(scene)}
@@ -774,6 +856,14 @@ export function WorldExplorer() {
             )}
             {!scene && (
               <>
+                {!country && (
+                  <button
+                    aria-pressed={showArtwork}
+                    onClick={() => setShowArtwork((value) => !value)}
+                  >
+                    大陆精绘
+                  </button>
+                )}
                 <button
                   aria-pressed={showWater}
                   onClick={() => setShowWater((v) => !v)}
@@ -802,7 +892,7 @@ export function WorldExplorer() {
                 ? '本国规划场景插画 · 建筑为示意复原 · 能力为情景估值'
                 : country
                   ? '地理底图 · 国界、水系与设施坐标来自地图数据'
-                  : '70 国地理细图按国界拼接 · 情景制图 / 非实时 World State'}
+                  : '四大陆精绘与 70 国地理细图叠合 · 国界与水系保留 / 非实时 World State'}
             </small>
             <b>
               {scene
