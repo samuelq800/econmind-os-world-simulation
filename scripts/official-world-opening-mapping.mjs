@@ -11,15 +11,21 @@ import {
 } from './balanced-country-candidate-intake.mjs';
 
 export const OFFICIAL_WORLD_MAPPING_SCHEMA_VERSION =
-  'OFFICIAL_WORLD_OPENING_MAPPING_V1';
+  'OFFICIAL_WORLD_OPENING_MAPPING_V2';
 export const OFFICIAL_WORLD_GAPS_SCHEMA_VERSION =
   'OFFICIAL_WORLD_OPENING_GAPS_V1';
+export const OFFICIAL_WORLD_COVERAGE_SCHEMA_VERSION =
+  'OFFICIAL_WORLD_COMPLETE_COVERAGE_V1';
 export const OFFICIAL_WORLD_CHECKSUMS_SHA256 =
   '88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315';
 
 const EXPECTED_MAP_MANIFEST_SHA256 =
   '9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f';
 const MAP_MANIFEST_PATH = 'artifacts/world-map-files-v1/manifest.json';
+const PRODUCTION_READBACK_PATH =
+  'docs/reports/gate-b/WORLD_V2_BALANCED_CANDIDATE_PRODUCTION_READBACK_2026_09_30.json';
+const PRODUCTION_READBACK_SHA256 =
+  '01acf677497f7f684b1d80cbfc414e7c8a1413e5836185fc92f5860ed579d27b';
 const OFFICIAL_COUNTRY_SCENE_INDEX =
   'apps/world-web/src/assets/country-scenes/index.json';
 const OFFICIAL_COUNTRY_DETAIL_INDEX =
@@ -28,6 +34,8 @@ const MAPPING_OUTPUT =
   'docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_MAPPING.json';
 const GAPS_OUTPUT =
   'docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_GAPS.json';
+const COVERAGE_OUTPUT =
+  'docs/reports/world-connection/C_OFFICIAL_WORLD_COMPLETE_COVERAGE.json';
 const EXPECTED_COMMODITIES = Object.freeze([
   ['BATTERIES', 'MWh-equivalent'],
   ['COPPER', 'tonne'],
@@ -59,6 +67,48 @@ const REQUIRED_DATA_FILES = Object.freeze([
   'data/stocks.json',
   'data/water-allocations.json',
 ]);
+const DATASET_POLICY = Object.freeze({
+  assumptions: ['ASSUMPTIONS', 'VALIDATION_METADATA'],
+  changes: ['CHANGE_LEDGER', 'VALIDATION_METADATA'],
+  'commodity-catalog': ['COMMODITIES', 'OPENING_INPUT_SOURCE'],
+  countries: ['COUNTRIES', 'OPENING_INPUT_SOURCE'],
+  coverage: ['COVERAGE', 'VALIDATION_METADATA'],
+  deposits: ['DEPOSITS', 'PROPOSAL_READ_ONLY'],
+  'domestic-access': ['DOMESTIC_ACCESS', 'PROPOSAL_READ_ONLY'],
+  employment: ['EMPLOYMENT', 'PROPOSAL_READ_ONLY'],
+  entities: ['ENTITIES', 'PROPOSAL_READ_ONLY'],
+  facilities: ['FACILITIES', 'PROPOSAL_READ_ONLY'],
+  'facility-map-links': ['FACILITY_MAP_LINKS', 'DISPLAY_ASSOCIATION'],
+  finance: ['FINANCE', 'OPENING_INPUT_BLOCKED_ON_SEMANTICS'],
+  geography: ['GEOGRAPHY', 'OPENING_INPUT_SOURCE'],
+  'hazard-proposals': ['HAZARDS', 'PROPOSAL_READ_ONLY'],
+  'illustration-links': ['ILLUSTRATION_LINKS', 'DISPLAY_ASSOCIATION'],
+  'land-program': ['LAND_PROGRAM', 'PROPOSAL_READ_ONLY'],
+  'license-proposals': ['LICENCES', 'PROPOSAL_READ_ONLY'],
+  manifest: ['MANIFEST', 'VALIDATION_METADATA'],
+  nodes: ['NODES', 'OPENING_INPUT_SOURCE'],
+  'opening-material-reconciliation': [
+    'MATERIAL_RECONCILIATION',
+    'VALIDATION_METADATA',
+  ],
+  'population-services': ['POPULATION_SERVICES', 'PROPOSAL_READ_ONLY'],
+  power: ['POWER', 'PROPOSAL_READ_ONLY'],
+  'production-plans': ['PRODUCTION_PLANS', 'PROPOSAL_READ_ONLY'],
+  recipes: ['RECIPES', 'PROPOSAL_READ_ONLY'],
+  regions: ['REGIONS', 'OPENING_INPUT_SOURCE'],
+  'seasonal-water': ['SEASONAL_WATER', 'PROPOSAL_READ_ONLY'],
+  settlements: ['SETTLEMENTS', 'OPENING_INPUT_SOURCE'],
+  stocks: ['STOCKS', 'OPENING_INPUT_BLOCKED_ON_OWNERSHIP'],
+  'supplier-concentration-policy': [
+    'SUPPLIER_CONCENTRATION',
+    'PROPOSAL_READ_ONLY',
+  ],
+  'technology-proposals': ['TECHNOLOGY', 'PROPOSAL_READ_ONLY'],
+  'trade-plans': ['TRADE_PLANS', 'PROPOSAL_READ_ONLY'],
+  'transit-proposals': ['TRANSIT', 'PROPOSAL_READ_ONLY'],
+  'transport-routes': ['TRANSPORT_ROUTES', 'PROPOSAL_READ_ONLY'],
+  'water-allocations': ['WATER', 'PROPOSAL_READ_ONLY'],
+});
 const DECIMAL = /^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/u;
 
 function sha256(bytes) {
@@ -274,6 +324,157 @@ function group(rows, identity) {
   return result;
 }
 
+function collectSourceReferences(value, countries, regions) {
+  if (typeof value === 'string') {
+    if (/^visual-territory-\d{2}$/u.test(value)) countries.add(value);
+    if (/^visual-territory-\d{2}-E[1-9]\d*$/u.test(value)) regions.add(value);
+    return;
+  }
+  if (value === null || typeof value !== 'object') return;
+  if (Array.isArray(value)) {
+    for (const item of value) collectSourceReferences(item, countries, regions);
+    return;
+  }
+  for (const item of Object.values(value)) {
+    collectSourceReferences(item, countries, regions);
+  }
+}
+
+function collectDirectCountryContext(value, countries) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return;
+  }
+  if (
+    typeof value.countryId === 'string' &&
+    /^visual-territory-\d{2}$/u.test(value.countryId)
+  ) {
+    countries.add(value.countryId);
+  }
+}
+
+function sameStringSet(left, right) {
+  return (
+    left.size === right.size && [...left].every((value) => right.has(value))
+  );
+}
+
+function resolveSourceBindings(value, countryById, regionById, label) {
+  const directCountryReferences = new Set();
+  const directCountryContexts = new Set();
+  const regionReferences = new Set();
+  collectSourceReferences(value, directCountryReferences, regionReferences);
+  collectDirectCountryContext(value, directCountryContexts);
+
+  for (const countryId of directCountryReferences) {
+    requireReference(countryById, countryId, `${label} country`);
+  }
+
+  const derivedCountryReferences = new Set();
+  const regionBindings = [...regionReferences].sort().map((regionId) => {
+    const region = requireReference(
+      regionById,
+      regionId,
+      `${label} region binding`,
+    );
+    const derivedCountryId = string(
+      region.countryId,
+      `${label} region country`,
+    );
+    requireReference(countryById, derivedCountryId, `${label} derived country`);
+    derivedCountryReferences.add(derivedCountryId);
+    return Object.freeze({
+      sourceRegionId: regionId,
+      normalizedRegionId: normalizedRegionId(regionId, derivedCountryId),
+    });
+  });
+
+  if (
+    directCountryContexts.size > 0 &&
+    derivedCountryReferences.size > 0 &&
+    !sameStringSet(directCountryContexts, derivedCountryReferences)
+  ) {
+    reject('OFFICIAL_WORLD_COUNTRY_REGION_REFERENCE_CONFLICT', label);
+  }
+
+  const countryReferences = new Set([
+    ...directCountryReferences,
+    ...derivedCountryReferences,
+  ]);
+  return Object.freeze({
+    countryBindings: Object.freeze(
+      [...countryReferences].sort().map((countryId) =>
+        Object.freeze({
+          sourceCountryId: countryId,
+          coreCountryId: coreCountryId(countryId),
+        }),
+      ),
+    ),
+    regionBindings: Object.freeze(regionBindings),
+  });
+}
+
+export function resolveOfficialWorldSourceBindings(
+  value,
+  countries,
+  regions,
+  label = 'source record',
+) {
+  const countryById = uniqueIndex(
+    array(countries, `${label} countries`),
+    (row) => string(row.id, `${label} country id`),
+    `${label} country`,
+  );
+  const regionById = uniqueIndex(
+    array(regions, `${label} regions`),
+    (row) => string(row.id, `${label} region id`),
+    `${label} region`,
+  );
+  return resolveSourceBindings(value, countryById, regionById, label);
+}
+
+function datasetName(relativePath) {
+  const match = /^data\/(.+)\.json$/u.exec(relativePath);
+  if (match === null)
+    reject('OFFICIAL_WORLD_INVALID_DATASET_PATH', relativePath);
+  return match[1];
+}
+
+function candidateFileClassification(relativePath) {
+  if (relativePath === 'CHECKSUMS.json') return 'CHECKSUM_MANIFEST';
+  if (/^data\/.+\.json$/u.test(relativePath)) return 'STRUCTURED_JSON_SOURCE';
+  if (/^data\/.+\.csv$/u.test(relativePath)) return 'REDUNDANT_TABULAR_EXPORT';
+  if (relativePath.startsWith('inputs/')) return 'FROZEN_SOURCE_SNAPSHOT';
+  if (/\.(?:py|txt)$/u.test(relativePath)) return 'REPRODUCIBILITY_SOURCE';
+  if (/\.(?:md|html)$/u.test(relativePath)) return 'DOCUMENTATION_OR_REPORT';
+  if (relativePath.endsWith('.csv')) return 'HUMAN_READABLE_TABULAR_EXPORT';
+  if (relativePath.endsWith('.json')) return 'VALIDATION_OR_MANIFEST_SOURCE';
+  return 'SOURCE_ARTIFACT';
+}
+
+function mapFileClassification(relativePath) {
+  if (/\/country-scenes\/\d{2}\.png$/u.test(relativePath)) {
+    return 'COUNTRY_SCENE_IMAGE';
+  }
+  if (/\/country-detail\/\d{2}-[^/]+\.svg$/u.test(relativePath)) {
+    return 'COUNTRY_DETAIL_VECTOR';
+  }
+  if (/\/continent-scenes\/[^/]+\.png$/u.test(relativePath)) {
+    return 'CONTINENT_SCENE_IMAGE';
+  }
+  if (/\.(?:png|svg)$/u.test(relativePath)) return 'MAP_IMAGE_OR_PREVIEW';
+  if (/\.(?:json|csv|xlsx)$/u.test(relativePath)) return 'MAP_DATA_OR_INDEX';
+  if (/\.md$/u.test(relativePath)) return 'MAP_DOCUMENTATION';
+  return 'MAP_SUPPORT_FILE';
+}
+
+function mapFileCountryId(relativePath) {
+  const match =
+    /\/(?:country-scenes|country-detail)\/(\d{2})(?:-[^/]+)?\.(?:png|svg)$/u.exec(
+      relativePath,
+    );
+  return match === null ? null : `visual-territory-${match[1]}`;
+}
+
 function requireReference(index, key, label) {
   const value = index.get(key);
   if (value === undefined)
@@ -334,11 +535,14 @@ async function verifyMapPackage(repositoryRoot, selection) {
     }
   }
   return Object.freeze({
-    packageId: selected.packageId,
-    manifestPath: MAP_MANIFEST_PATH,
-    manifestSha256: EXPECTED_MAP_MANIFEST_SHA256,
-    filesVerified: files.length,
-    authority: manifest.authority,
+    summary: Object.freeze({
+      packageId: selected.packageId,
+      manifestPath: MAP_MANIFEST_PATH,
+      manifestSha256: EXPECTED_MAP_MANIFEST_SHA256,
+      filesVerified: files.length,
+      authority: manifest.authority,
+    }),
+    files: Object.freeze(files),
   });
 }
 
@@ -383,10 +587,63 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
   ) {
     reject('OFFICIAL_WORLD_BALANCED_INTAKE_MISMATCH');
   }
-  const mapPackage = await verifyMapPackage(repositoryRoot, selection);
+  const verifiedMapPackage = await verifyMapPackage(repositoryRoot, selection);
+  const mapPackage = verifiedMapPackage.summary;
+  const mapFiles = verifiedMapPackage.files;
+  const productionReadbackBytes = await readFile(
+    path.join(repositoryRoot, PRODUCTION_READBACK_PATH),
+  );
+  if (sha256(productionReadbackBytes) !== PRODUCTION_READBACK_SHA256) {
+    reject('OFFICIAL_WORLD_PRODUCTION_READBACK_HASH_MISMATCH');
+  }
+  const productionReadback = parseLosslessJson(
+    productionReadbackBytes.toString('utf8'),
+    PRODUCTION_READBACK_PATH,
+  );
+  if (
+    productionReadback.authority !== 'PRODUCTION_READBACK_NOT_GATE_APPROVAL' ||
+    productionReadback.selected_balanced_candidate?.bundle_id !==
+      BALANCED_CANDIDATE_ID ||
+    productionReadback.selected_balanced_candidate?.package_manifest_sha256 !==
+      OFFICIAL_WORLD_CHECKSUMS_SHA256 ||
+    productionReadback.selected_balanced_candidate?.source_artifact_count !==
+      '87' ||
+    productionReadback.selected_balanced_candidate
+      ?.immutable_storage_row_count !== '278' ||
+    productionReadback.authority_boundaries?.opening_seed_committed !== false ||
+    productionReadback.authority_boundaries?.world_created !== false ||
+    productionReadback.authority_boundaries?.worker_started !== false
+  ) {
+    reject('OFFICIAL_WORLD_PRODUCTION_READBACK_MISMATCH');
+  }
+
+  const checksumArtifact = sourceArtifact(candidate, 'CHECKSUMS.json');
+  const checksumEntries = array(
+    parseLosslessJson(checksumArtifact.content, 'CHECKSUMS.json'),
+    'candidate checksum entries',
+  );
+  if (checksumEntries.length !== 86) {
+    reject('OFFICIAL_WORLD_CHECKSUM_ENTRY_COUNT_MISMATCH');
+  }
+  const structuredDataPaths = checksumEntries
+    .map((entry) => entry.path)
+    .filter((relativePath) => /^data\/.+\.json$/u.test(relativePath))
+    .sort();
+  const policyDatasets = Object.keys(DATASET_POLICY).sort();
+  const selectedDatasets = structuredDataPaths.map(datasetName).sort();
+  if (
+    canonicalSerialize(policyDatasets) !== canonicalSerialize(selectedDatasets)
+  ) {
+    reject('OFFICIAL_WORLD_DATASET_POLICY_COVERAGE_MISMATCH');
+  }
+  for (const requiredPath of REQUIRED_DATA_FILES) {
+    if (!structuredDataPaths.includes(requiredPath)) {
+      reject('OFFICIAL_WORLD_REQUIRED_DATASET_MISSING', requiredPath);
+    }
+  }
 
   const sourceMeta = Object.fromEntries(
-    REQUIRED_DATA_FILES.map((relativePath) => {
+    structuredDataPaths.map((relativePath) => {
       const artifact = sourceArtifact(candidate, relativePath);
       return [
         relativePath,
@@ -397,9 +654,18 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
       ];
     }),
   );
+  const structuredDataByPath = new Map(
+    structuredDataPaths.map((relativePath) => {
+      const artifact = sourceArtifact(candidate, relativePath);
+      return [relativePath, parseLosslessJson(artifact.content, relativePath)];
+    }),
+  );
   const readData = (relativePath) => {
-    const artifact = sourceArtifact(candidate, relativePath);
-    return parseLosslessJson(artifact.content, relativePath);
+    const value = structuredDataByPath.get(relativePath);
+    if (value === undefined) {
+      reject('OFFICIAL_WORLD_STRUCTURED_DATASET_MISSING', relativePath);
+    }
+    return value;
   };
 
   const countries = array(readData('data/countries.json'), 'countries');
@@ -542,6 +808,57 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
   ) {
     reject('OFFICIAL_WORLD_MAP_COUNTRY_COVERAGE_MISMATCH');
   }
+
+  const structuredDatasets = structuredDataPaths.map((relativePath) => {
+    const name = datasetName(relativePath);
+    const policy = DATASET_POLICY[name];
+    if (policy === undefined) {
+      reject('OFFICIAL_WORLD_DATASET_POLICY_MISSING', name);
+    }
+    const source = readData(relativePath);
+    const sourceRecords = Array.isArray(source) ? source : [source];
+    const records = sourceRecords.map((record, index) => {
+      const bindings = resolveSourceBindings(
+        record,
+        countryById,
+        regionById,
+        `${relativePath}[${index}]`,
+      );
+      return Object.freeze({
+        sourceIndex: index,
+        countryBindings: bindings.countryBindings,
+        regionBindings: bindings.regionBindings,
+        source: record,
+      });
+    });
+    const openingApplicability = policy[1];
+    const formalOpeningStatus =
+      openingApplicability === 'OPENING_INPUT_SOURCE'
+        ? 'SOURCE_MAPPED_REQUIRES_F_FORMAL_ADOPTION'
+        : openingApplicability.startsWith('OPENING_INPUT_BLOCKED')
+          ? 'BLOCKED_ON_NAMED_GAPS'
+          : openingApplicability === 'PROPOSAL_READ_ONLY'
+            ? 'PRESERVED_NOT_EXECUTED'
+            : openingApplicability === 'DISPLAY_ASSOCIATION'
+              ? 'DISPLAY_ONLY_NOT_WORLD_STATE'
+              : 'METADATA_NOT_RUNTIME_STATE';
+    return Object.freeze({
+      dataset: name,
+      domain: policy[0],
+      sourcePath: relativePath,
+      sourceSha256: sourceMeta[relativePath].sha256,
+      sourceBytes: sourceMeta[relativePath].bytes,
+      sourceShape: Array.isArray(source) ? 'ARRAY' : 'OBJECT',
+      sourceRecordCount: sourceRecords.length,
+      structuredMappingStatus: 'FULL_SOURCE_RECORDS_INCLUDED_LOSSLESS',
+      offlineQueryStatus: 'MACHINE_READABLE',
+      serverQueryApiStatus: 'NOT_YET_COMPLETE_FOR_DOMAIN',
+      pageConnectionStatus: 'NOT_YET_COMPLETE_FOR_DOMAIN',
+      openingApplicability,
+      formalOpeningStatus,
+      records: Object.freeze(records),
+    });
+  });
 
   const normalizedEntities = entities.map((entity) => {
     requireReference(countryById, entity.countryId, 'entity country');
@@ -1098,6 +1415,103 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
     'maximum bank equity delta',
   );
 
+  const candidateArtifactCoverage = [...candidate.artifacts]
+    .sort((left, right) => left.sourcePath.localeCompare(right.sourcePath))
+    .map((artifact) => {
+      const classification = candidateFileClassification(artifact.sourcePath);
+      const jsonTwin = artifact.sourcePath.endsWith('.csv')
+        ? artifact.sourcePath.replace(/\.csv$/u, '.json')
+        : null;
+      const structuredEquivalentJsonPath =
+        jsonTwin !== null && structuredDataPaths.includes(jsonTwin)
+          ? jsonTwin
+          : null;
+      const structuredDataset = artifact.sourcePath.startsWith('data/')
+        ? structuredDatasets.find(
+            (dataset) => dataset.sourcePath === artifact.sourcePath,
+          )
+        : undefined;
+      return Object.freeze({
+        sourcePath: artifact.sourcePath,
+        sha256: artifact.sha256,
+        bytes: Buffer.byteLength(artifact.content),
+        classification,
+        repositoryOriginalVerified: true,
+        productionPreservationStatus:
+          'READBACK_REPORTED_IN_IMMUTABLE_CANDIDATE_STORAGE',
+        structuredMappingStatus:
+          structuredDataset?.structuredMappingStatus ??
+          (structuredEquivalentJsonPath === null
+            ? 'SOURCE_PRESERVED_NOT_STRUCTURED_RECORDSET'
+            : 'SOURCE_PRESERVED_WITH_STRUCTURED_JSON_EQUIVALENT'),
+        structuredEquivalentJsonPath,
+        openingApplicability:
+          structuredDataset?.openingApplicability ?? 'NOT_DIRECT_OPENING_INPUT',
+        proposalExecuted: false,
+      });
+    });
+  const mapAssetCoverage = mapFiles.map((entry) => {
+    const sourceCountryId = mapFileCountryId(entry.path);
+    if (sourceCountryId !== null) {
+      requireReference(countryById, sourceCountryId, 'map file country');
+    }
+    return Object.freeze({
+      path: entry.path,
+      sha256: entry.sha256,
+      bytes: entry.bytes,
+      classification: mapFileClassification(entry.path),
+      sourceCountryId,
+      coreCountryId:
+        sourceCountryId === null ? null : coreCountryId(sourceCountryId),
+      repositoryOriginalVerified: true,
+      stableVersionedPath: entry.path,
+      productionDatabaseStorageStatus: 'NOT_CLAIMED',
+      staticPublicationStatus:
+        'VERSIONED_REPOSITORY_ASSET_PRODUCTION_PUBLICATION_NOT_VERIFIED',
+      structuredAssociationStatus:
+        sourceCountryId === null
+          ? 'GLOBAL_MAP_PACKAGE_ASSET'
+          : 'COUNTRY_ASSOCIATION_VERIFIED',
+      worldStateAuthority: 'NONE_DISPLAY_OR_SOURCE_ONLY',
+    });
+  });
+  const completeCountryCoverage = expectedCountryIds.map((countryId) => {
+    const associatedDatasets = structuredDatasets
+      .filter((dataset) =>
+        dataset.records.some((record) =>
+          record.countryBindings.some(
+            (binding) => binding.sourceCountryId === countryId,
+          ),
+        ),
+      )
+      .map((dataset) => dataset.dataset)
+      .sort();
+    const associatedMapAssets = mapAssetCoverage
+      .filter((asset) => asset.sourceCountryId === countryId)
+      .map((asset) => asset.path)
+      .sort();
+    return Object.freeze({
+      sourceCountryId: countryId,
+      coreCountryId: coreCountryId(countryId),
+      structuredDatasets: Object.freeze(associatedDatasets),
+      structuredDatasetCount: associatedDatasets.length,
+      versionedMapAssets: Object.freeze(associatedMapAssets),
+      versionedMapAssetCount: associatedMapAssets.length,
+    });
+  });
+  if (
+    candidateArtifactCoverage.length !== 87 ||
+    structuredDatasets.length !== structuredDataPaths.length ||
+    mapAssetCoverage.length !== 203 ||
+    completeCountryCoverage.some(
+      (country) =>
+        country.structuredDatasetCount === 0 ||
+        country.versionedMapAssetCount !== 2,
+    )
+  ) {
+    reject('OFFICIAL_WORLD_COMPLETE_COVERAGE_MISMATCH');
+  }
+
   const mappingBody = Object.freeze({
     schemaVersion: OFFICIAL_WORLD_MAPPING_SCHEMA_VERSION,
     status: 'MAPPED_WITH_BLOCKING_GAPS',
@@ -1112,6 +1526,23 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
       frozenSourceDrift: candidate.sourceDrift,
       dataFiles: Object.freeze(sourceMeta),
       mapPackage,
+      productionPreservationReadback: Object.freeze({
+        path: PRODUCTION_READBACK_PATH,
+        sha256: PRODUCTION_READBACK_SHA256,
+        authority: productionReadback.authority,
+        sourceArtifactCount:
+          productionReadback.selected_balanced_candidate.source_artifact_count,
+        immutableStorageRowCount:
+          productionReadback.selected_balanced_candidate
+            .immutable_storage_row_count,
+        productionWritesInReadback:
+          productionReadback.readback.production_writes_this_turn,
+        openingSeedCommitted:
+          productionReadback.authority_boundaries.opening_seed_committed,
+        worldCreated: productionReadback.authority_boundaries.world_created,
+        workerStarted: productionReadback.authority_boundaries.worker_started,
+        mapFilesStoredInWorldBusinessTables: false,
+      }),
       officialMapIndexes: Object.freeze({
         countryScenes: Object.freeze({
           path: OFFICIAL_COUNTRY_SCENE_INDEX,
@@ -1184,6 +1615,7 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
       employment: Object.freeze(normalizedEmployment),
       populationServices: Object.freeze(normalizedServices),
       countryScenes: Object.freeze(normalizedScenes),
+      allOfficialDatasets: Object.freeze(structuredDatasets),
     }),
     countryReports: Object.freeze(countryReports),
     invariants: Object.freeze({
@@ -1212,6 +1644,15 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
       populationServiceRowCount: normalizedServices.length,
       countrySceneCount: normalizedScenes.length,
       balancedFrozenIllustrationSceneCount: balancedFrozenCountryScenes.length,
+      completeStructuredDatasetCount: structuredDatasets.length,
+      candidateArtifactsEnumerated: candidateArtifactCoverage.length,
+      mapPackageFilesEnumerated: mapAssetCoverage.length,
+      countryAssociatedMapAssets: mapAssetCoverage.filter(
+        (asset) => asset.sourceCountryId !== null,
+      ).length,
+      globalMapPackageAssets: mapAssetCoverage.filter(
+        (asset) => asset.sourceCountryId === null,
+      ).length,
       stockSourceValuesCorrectedOrRounded: false,
       financeSourceValuesCorrectedOrRounded: false,
     }),
@@ -1233,7 +1674,106 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
     ...gapsBody,
     gapsFingerprint: `sha256:${sha256(canonicalSerialize(gapsBody))}`,
   });
-  return Object.freeze({ mapping, gaps });
+  const coverageBody = Object.freeze({
+    schemaVersion: OFFICIAL_WORLD_COVERAGE_SCHEMA_VERSION,
+    status: 'COMPLETE_SOURCE_SIDE_COVERAGE_WITH_CONNECTION_GAPS',
+    mappingFingerprint,
+    gapsFingerprint: gaps.gapsFingerprint,
+    distinctions: Object.freeze({
+      originalsPreserved:
+        '87 candidate artifacts are hash-verified locally and reported in immutable production candidate storage.',
+      structuredOfflineMapping:
+        'Every data/*.json dataset is included losslessly with country and region bindings where present.',
+      formalOpeningAdoption:
+        'Only F/Core may adopt permitted records after named semantic gaps close; proposal rows remain unexecuted.',
+      structuredServerQuery:
+        'Complete-domain API query support is not yet evidenced by this C package.',
+      pageConnection:
+        'Complete-domain UI wiring is not yet evidenced by this C package.',
+      mapPublication:
+        'All 203 versioned repository files are verified; production static publication of every file is not claimed.',
+    }),
+    productionPreservationEvidence: Object.freeze({
+      path: PRODUCTION_READBACK_PATH,
+      sha256: PRODUCTION_READBACK_SHA256,
+      authority: productionReadback.authority,
+      immutableSourceArtifacts:
+        productionReadback.selected_balanced_candidate.source_artifact_count,
+      immutableStorageRows:
+        productionReadback.selected_balanced_candidate
+          .immutable_storage_row_count,
+      mapFileDatabaseStorageClaim: 'NONE',
+      productionWritesInReadback:
+        productionReadback.readback.production_writes_this_turn,
+    }),
+    counts: Object.freeze({
+      checksumManifestEntries: checksumEntries.length,
+      sourceArtifactsIncludingChecksumManifest:
+        candidateArtifactCoverage.length,
+      structuredJsonDatasets: structuredDatasets.length,
+      mapPackageFiles: mapAssetCoverage.length,
+      countryAssociatedMapAssets: mapAssetCoverage.filter(
+        (asset) => asset.sourceCountryId !== null,
+      ).length,
+      globalMapPackageFiles: mapAssetCoverage.filter(
+        (asset) => asset.sourceCountryId === null,
+      ).length,
+      countries: completeCountryCoverage.length,
+      omittedSourceArtifacts: 0,
+      omittedStructuredDatasets: 0,
+      omittedMapPackageFiles: 0,
+    }),
+    sourceArtifacts: Object.freeze(candidateArtifactCoverage),
+    structuredDatasets: Object.freeze(
+      structuredDatasets.map((dataset) => {
+        const associatedCountries = new Set(
+          dataset.records.flatMap((record) =>
+            record.countryBindings.map((binding) => binding.sourceCountryId),
+          ),
+        );
+        const associatedRegions = new Set(
+          dataset.records.flatMap((record) =>
+            record.regionBindings.map((binding) => binding.sourceRegionId),
+          ),
+        );
+        return Object.freeze({
+          dataset: dataset.dataset,
+          domain: dataset.domain,
+          sourcePath: dataset.sourcePath,
+          sourceSha256: dataset.sourceSha256,
+          sourceBytes: dataset.sourceBytes,
+          sourceShape: dataset.sourceShape,
+          sourceRecordCount: dataset.sourceRecordCount,
+          associatedCountryCount: associatedCountries.size,
+          associatedRegionCount: associatedRegions.size,
+          structuredMappingStatus: dataset.structuredMappingStatus,
+          offlineQueryStatus: dataset.offlineQueryStatus,
+          serverQueryApiStatus: dataset.serverQueryApiStatus,
+          pageConnectionStatus: dataset.pageConnectionStatus,
+          openingApplicability: dataset.openingApplicability,
+          formalOpeningStatus: dataset.formalOpeningStatus,
+          sourceRecordsIncludedInMappingV2: true,
+        });
+      }),
+    ),
+    mapAssets: Object.freeze(mapAssetCoverage),
+    countries: Object.freeze(completeCountryCoverage),
+    omissions: Object.freeze({
+      sourceArtifacts: Object.freeze([]),
+      structuredDatasets: Object.freeze([]),
+      mapPackageFiles: Object.freeze([]),
+    }),
+    connectionGaps: Object.freeze([
+      'COMPLETE_DOMAIN_SERVER_QUERY_API_NOT_YET_EVIDENCED',
+      'COMPLETE_DOMAIN_PAGE_CONNECTION_NOT_YET_EVIDENCED',
+      'ALL_MAP_FILES_PRODUCTION_STATIC_PUBLICATION_NOT_YET_EVIDENCED',
+    ]),
+  });
+  const coverage = Object.freeze({
+    ...coverageBody,
+    coverageFingerprint: `sha256:${sha256(canonicalSerialize(coverageBody))}`,
+  });
+  return Object.freeze({ mapping, gaps, coverage });
 }
 
 export async function writeOfficialWorldOpeningMapping(repositoryRoot) {
@@ -1241,6 +1781,7 @@ export async function writeOfficialWorldOpeningMapping(repositoryRoot) {
   for (const [relativePath, value] of [
     [MAPPING_OUTPUT, result.mapping],
     [GAPS_OUTPUT, result.gaps],
+    [COVERAGE_OUTPUT, result.coverage],
   ]) {
     const outputPath = path.join(repositoryRoot, relativePath);
     await mkdir(path.dirname(outputPath), { recursive: true });
@@ -1264,6 +1805,10 @@ if (invokedPath === fileURLToPath(import.meta.url)) {
       status: result.mapping.status,
       mappingFingerprint: result.mapping.mappingFingerprint,
       gapsFingerprint: result.gaps.gapsFingerprint,
+      coverageFingerprint: result.coverage.coverageFingerprint,
+      structuredDatasets:
+        result.mapping.invariants.completeStructuredDatasetCount,
+      mapPackageFiles: result.mapping.invariants.mapPackageFilesEnumerated,
       countries: result.mapping.invariants.countryCount,
       stockCells: result.mapping.invariants.stockCellCount,
       openingSeedReady: result.mapping.authority.openingSeedReady,

@@ -3,7 +3,7 @@
   "status": "BLOCKING_GAPS_PRESENT",
   "sourcePackageId": "BALANCED_2026_09_28_V1",
   "sourceChecksumsSha256": "88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315",
-  "mappingFingerprint": "sha256:3cec8010e0dfb6cb82aca699f95610d40ae70e30c27a1fa0abf119682885706d",
+  "mappingFingerprint": "sha256:230f8d695c25ea839fb6415de3c4c2985dd6d95e6261fa10dbec73053dedac82",
   "openingSeedReady": false,
   "globalGaps": [
     {
@@ -5344,5 +5344,5 @@
     }
   ],
   "rejections": [],
-  "gapsFingerprint": "sha256:75f34b4a2943370cba1bd7bf64e697b03dfc44d0013f0fe3cb41c4919c2e0ca5"
+  "gapsFingerprint": "sha256:f374ed3a888305a467f52d0aeaf7c545a6513cf17accc10c9537850694b68e95"
 }

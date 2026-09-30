@@ -2,6 +2,11 @@
 
 Status: `IMPLEMENTED_UNVERIFIED`
 
+This report records the V1 opening-domain candidate fixed at
+`c66de7efe84539dd61e9f578d6f9ecb6b2ad9f63` and PR #19. On the complete
+coverage branch, its generated output files are superseded by V2; see
+`C_OFFICIAL_WORLD_COMPLETE_COVERAGE_REPORT.md`. PR #19 itself remains unchanged.
+
 ## Immutable identity
 
 - base: `cf6707d67fb56761ec7e4a403c272897401ae035`

@@ -1,6 +1,6 @@
 # C → F/E official-world opening-input contract
 
-Status: `IMPLEMENTED_UNVERIFIED`
+Status: `IMPLEMENTED_UNVERIFIED_V2_COMPLETE_SOURCE_COVERAGE`
 
 ## Immutable source binding
 
@@ -24,19 +24,29 @@ itself, the map manifest and all 203 map files before returning output.
   `docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_MAPPING.json`
 - gap/rejection artifact:
   `docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_GAPS.json`
+- complete coverage ledger:
+  `docs/reports/world-connection/C_OFFICIAL_WORLD_COMPLETE_COVERAGE.json`
 
-The mapping artifact schema is `OFFICIAL_WORLD_OPENING_MAPPING_V1`. Its
+The mapping artifact schema is `OFFICIAL_WORLD_OPENING_MAPPING_V2`. Its
 fingerprint is
-`sha256:3cec8010e0dfb6cb82aca699f95610d40ae70e30c27a1fa0abf119682885706d`.
+`sha256:230f8d695c25ea839fb6415de3c4c2985dd6d95e6261fa10dbec73053dedac82`.
 
 The gaps schema is `OFFICIAL_WORLD_OPENING_GAPS_V1`. Its fingerprint is
-`sha256:75f34b4a2943370cba1bd7bf64e697b03dfc44d0013f0fe3cb41c4919c2e0ca5`.
+`sha256:f374ed3a888305a467f52d0aeaf7c545a6513cf17accc10c9537850694b68e95`.
+
+The coverage schema is `OFFICIAL_WORLD_COMPLETE_COVERAGE_V1`. Its fingerprint
+is
+`sha256:8b915aadb1aa299cc1c2529eb8ed996f1e8ff9c8ad5bd7ff88731c6d459efa2d`.
 
 ## Consumer rules
 
 1. Country identity is explicit:
    `visual-territory-NN` → `COUNTRY_NN`. Region identity is
    `visual-territory-NN-Ex` → `REGION_NN_Ex`.
+   Region-only records derive their country binding exclusively through the
+   verified region table. Unknown regions and conflicting top-level
+   `countryId`/derived-country references fail closed. A world-level record
+   with no country or region reference remains unbound.
 2. All source numeric tokens are read losslessly and normalized as decimal
    strings. Consumers must not pass them through binary floating-point before
    Core decimal parsing.
@@ -53,13 +63,21 @@ The gaps schema is `OFFICIAL_WORLD_OPENING_GAPS_V1`. Its fingerprint is
 6. Facilities, deposits, water, power, employment and population-service
    records retain their proposal/unapproved/unenergized status. Display links
    remain display-only.
-7. `openingSeedReady=false`, `worldId=null`, `workerStarted=false` and
+7. `records.allOfficialDatasets` contains every one of the 34 `data/*.json`
+   datasets losslessly. Each record includes detected country/region bindings;
+   datasets without such IDs are still included in full.
+8. The coverage ledger enumerates all 86 checksum-manifest entries plus the
+   checksum manifest itself, and all 203 versioned map-package files. It marks
+   original preservation, offline structured mapping, formal-opening
+   applicability, server-query status, page connection and static-publication
+   evidence separately.
+9. `openingSeedReady=false`, `worldId=null`, `workerStarted=false` and
    `productionDatabaseMutated=false`. The output is not permission to create a
    second World, commit a seed or start simulation.
-8. A consumer must reject a changed schema, source hash, mapping fingerprint,
-   country count, identifier, unit or reference. It may consume fully mapped
-   domains independently, but must fail closed for the named blocking target
-   of each unresolved gap.
+10. A consumer must reject a changed schema, source hash, mapping fingerprint,
+    country count, identifier, unit or reference. It may consume fully mapped
+    domains independently, but must fail closed for the named blocking target
+    of each unresolved gap.
 
 ## Current named blockers
 
