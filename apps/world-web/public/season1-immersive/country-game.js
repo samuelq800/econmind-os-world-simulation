@@ -21,7 +21,10 @@
  root.querySelector('.national-world-status small').textContent='Opening data only';
  root.querySelector('.national-time small').textContent='Official opening dataset';
  root.querySelector('.national-time span').textContent='No live World clock';
- root.querySelector('.national-edition').textContent='Selected official opening data · Local decisions only · No live settlement';
+ root.querySelector('.national-destination small').textContent=f().record.operational?'Marked operational in opening source · not live':'Opening proposal · not commissioned';
+ const sourceLabel=contextCountrySource?.kind==='API_COUNTRY_VERIFIED'?'API-verified country record · bundled sites and resources':contextCountrySource?.kind==='STATIC_DISCONNECTED'?'API unavailable or mismatched · bundled opening baseline':'Bundled official opening baseline';
+ root.dataset.dataSource=contextCountrySource?.kind||'MISSING';
+ root.querySelector('.national-edition').textContent=sourceLabel+' · Proposed sites are not operating · Local decisions only · No live World projection';
  root.scrollTop=scroll;updatePlan();updateTime();positionSites();observeSize();
  }
 
@@ -32,8 +35,8 @@
  function updateTime(){const el=document.querySelector('[data-national-time]');if(el)el.textContent='Not started';}
  function drawer(title,body){const el=document.querySelector('.national-drawer');if(!el)return;el.hidden=false;el.innerHTML=`<div class="national-drawer-head"><h2>${title}</h2><button data-cmd="country-dismiss" aria-label="Close">×</button></div>${body}`;el.querySelector('button')?.focus();window.EconI18n?.refresh();}
  commands['country-dismiss']=()=>{document.querySelector('.national-drawer').hidden=true;};
- commands['country-sites']=()=>drawer('Local sites',`<div class="national-site-list">${c().facilities.map(site=>`<button data-cmd="country-site" data-id="${site.id}"><small>${site.id}</small><h3>${site.record.name}</h3><p>${n(site.record.requiredWorkers)} people · ${n(site.record.requiredPowerMW)} MW</p><span>${site.record.operational?'Operational':'Not commissioned'}</span></button>`).join('')}</div>`);
- commands['country-site']=b=>{plan.site=b.dataset.id;if(!office.national)plan.amount=0;storePlan();mapHome();if(office.national)drawer(f().record.name,`<p class="national-drawer-note">${n(f().record.requiredWorkers)} people · ${n(f().record.requiredPowerMW)} MW</p><p class="national-drawer-note">${f().record.operational?'Operational':'Not commissioned'}</p>`);};
+ commands['country-sites']=()=>drawer('Local sites',`<div class="national-site-list">${c().facilities.map(site=>`<button data-cmd="country-site" data-id="${site.id}"><small>${site.id}</small><h3>${site.record.name}</h3><p>${n(site.record.requiredWorkers)} people · ${n(site.record.requiredPowerMW)} MW</p><span>${site.record.operational?'Marked operational in opening source':'Proposal · not commissioned'}</span></button>`).join('')}</div>`);
+ commands['country-site']=b=>{plan.site=b.dataset.id;if(!office.national)plan.amount=0;storePlan();mapHome();if(office.national)drawer(f().record.name,`<p class="national-drawer-note">${n(f().record.requiredWorkers)} people · ${n(f().record.requiredPowerMW)} MW</p><p class="national-drawer-note">${f().record.operational?'Marked operational in opening source':'Proposal · not commissioned'}</p>`);};
  commands['country-token']=b=>{const v=Number(b.dataset.value);plan.amount=plan.amount===v?Math.max(0,v-office.step):v;updatePlan();};
  commands['country-adjust']=b=>{plan.amount=Math.max(0,Math.min(office.max,plan.amount+Number(b.dataset.delta)*office.step));updatePlan();};
  commands['country-confirm']=()=>{const d=derived();if(plan.amount<=0||d.remaining<0)return;const decision={id:Date.now(),country:c().id,office:role,site:office.national?null:f().id,subject:office.national||f().record.name,scope:office.national?'national':'facility',value:d.value,unit:d.unit,setting:plan.amount,settingUnit:office.unit,status:'LOCAL_NOT_EXECUTED'};const last=plan.records[0];if(last&&last.site===decision.site&&last.setting===decision.setting){document.querySelector('[data-national-status]').textContent='This allocation is already saved';return;}plan.records.unshift(decision);plan.records=plan.records.slice(0,40);storePlan();document.querySelector('[data-national-status]').textContent='Local decision saved';document.querySelector('.national-confirm').classList.remove('sealed');requestAnimationFrame(()=>document.querySelector('.national-confirm')?.classList.add('sealed'));};
