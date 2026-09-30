@@ -26,11 +26,12 @@ to initialize a production World or advance the simulation.
   claim is made by F.
 
 The subsequent V2-contract integration was exercised locally against C's
-exact pushed report files: all three canonical fingerprints matched, 70
+then-current pushed report files: all three canonical fingerprints matched, 70
 countries/840 stock cells/70 finance rows were read, and the admission result
 was `BLOCKED` with six named OpeningSeed blockers. Focused PGlite tests now
 pass 7/7, including a re-fingerprinted report missing one map asset being
-rejected. This local check is not a production readback.
+rejected. This local check is not a production readback or proof of complete
+per-country binding of region-only records.
 
 ## What the Worker now owns
 
@@ -60,7 +61,7 @@ fingerprint checks identity, not policy approval. No direct UI/API route and
 no automatic Worker dispatch were added. `getWorkerFoundationStatus()`
 continues to report simulation disabled.
 
-The F admission targets C's full-domain V2 mapping at exact pushed C candidate
+The F admission was exercised against C's full-domain V2 mapping at exact pushed C candidate
 `592ccbf5eca3440d87bda51660dddd09f807948a` (mapping implementation
 `cf76332b9f41e6ac2f468892edff1b4388efcbb1`). Its mapping fingerprint is
 `sha256:3463413929b1a659f0a089e041f8698c09d37caa2ad1d88fbc930db9bb9fffbb`,
@@ -74,6 +75,16 @@ as opening facts; it does not claim that source preservation itself executes
 those records. C V2 remains
 `BLOCKED` for formal OpeningSeed, so no database call is permitted by the
 official bootstrapper.
+
+Control Tower subsequently reported a defect in that C V2 candidate:
+region-only seasonal-water records were not all associated with their country.
+The source records themselves were preserved, but this candidate is **not a
+complete per-country opening input** and is superseded pending C's corrected
+exact SHA. F's current 34-dataset/203-asset count checks do not detect that
+association defect. The current F code and its CI are therefore
+`IMPLEMENTED_UNVERIFIED`, not a final complete-data admission proof. F must
+check C's corrected country/region association evidence and rerun focused
+tests before claiming final V2 compatibility.
 
 ## Complete data scope: source retention is not runtime adoption
 
@@ -132,7 +143,7 @@ not call the bootstrapper.
 
 F owns no API, UI, migration, asset-publication or production-connection
 change. Formal `status/progress.json` and the original EconMind site remain
-untouched. The F candidate has completed the focused V2 rerun; B's narrow
-independent P0 review is pending before Control Tower can consider merge or E
+untouched. The corrected C V2 report and F focused rerun remain pending, as
+does B's narrow independent P0 review, before Control Tower can consider merge or E
 production execution. Even a passing Worker test does not close C's semantic
 gaps or authorize formal adoption.
