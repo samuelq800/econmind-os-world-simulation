@@ -1,5 +1,10 @@
 # Code completion priority — 2026-09-27
 
+Historical round record. The current connection priorities and A–F ownership
+are in [the September 30 integration record](../reports/world-connection/CURRENT_INTEGRATION_STATUS_2026_09_30.md).
+Preserve the findings and exact candidate evidence below; do not interpret the
+old round assignments as new work orders or production authority.
+
 Owner instruction: continue mainline code construction; defer actual-user
 feedback. This is an execution order, not a claim that V00–V32 or Gate B is
 complete. Preserve existing UI/maps/engines and implement missing connections.
