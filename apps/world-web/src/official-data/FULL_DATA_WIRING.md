@@ -41,6 +41,11 @@ separate states without fixture or zero-value substitution. The React
 `OfficialSourceStatus` remains a prewire; the mounted product entry is the
 static `season1-immersive` page and its equivalent status drawer.
 
+The matrix `pageState` is `CODE_WIRED_LIVE_API_NOT_VERIFIED`: the drawer is
+mounted and its optional source reader is implemented, but no production API
+connection or browser readback has been verified. It does not mean ONLINE or
+that the Office HUD uses live World state.
+
 Current boundary: A's read code is merged, but production host/role/readback,
 static map URLs and formal OpeningSeed are separate E/owner evidence. This is
 code-level optional API binding, not a verified online connection. Existing

@@ -4,7 +4,7 @@
   "sourceState": "OFFICIAL_SELECTED_SOURCE_NOT_OPENING_SEED",
   "apiState": "CODE_MERGED_OPT_IN_DEPLOYMENT_NOT_VERIFIED",
   "runtimeState": "NOT_LIVE_WORLD",
-  "pageState": "MATRIX_ONLY_NOT_API_CONNECTED",
+  "pageState": "CODE_WIRED_LIVE_API_NOT_VERIFIED",
   "numericEncoding": "DECIMAL_STRING_EXACT",
   "datasetRoute": "/v1/world-data/datasets/{slug}?offset=0&limit=20",
   "fieldCoverageRule": "Every top-level source field is preserved in the API row or object. focusFields identify intended game interactions, not a projection or an exhaustive display list.",
