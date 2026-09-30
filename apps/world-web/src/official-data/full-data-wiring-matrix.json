@@ -1,0 +1,522 @@
+{
+  "schemaVersion": "world-web-full-data-wiring-v1",
+  "packageId": "BALANCED_2026_09_28_V1",
+  "sourceState": "OFFICIAL_SELECTED_SOURCE_NOT_OPENING_SEED",
+  "apiState": "CODE_MERGED_OPT_IN_DEPLOYMENT_NOT_VERIFIED",
+  "runtimeState": "NOT_LIVE_WORLD",
+  "pageState": "MATRIX_ONLY_NOT_API_CONNECTED",
+  "numericEncoding": "DECIMAL_STRING_EXACT",
+  "datasetRoute": "/v1/world-data/datasets/{slug}?offset=0&limit=20",
+  "fieldCoverageRule": "Every top-level source field is preserved in the API row or object. focusFields identify intended game interactions, not a projection or an exhaustive display list.",
+  "mapAssets": {
+    "route": "/v1/world-data/map-assets?offset=0&limit=50&countryId={countryId}",
+    "joinKey": "sourceCountryId=visual-territory-NN",
+    "packageFiles": 203,
+    "countryAssociatedFiles": 140,
+    "countryScenePngAndDetailSvgPerCountry": 2,
+    "publicUrlState": "NULL_NOT_VERIFIED",
+    "renderRule": "Keep the published static map; never turn a catalog path into an unverified public URL."
+  },
+  "datasets": [
+    {
+      "slug": "assumptions",
+      "sourcePath": "data/assumptions.json",
+      "kind": "OBJECT",
+      "filter": "none",
+      "nature": "METHODOLOGY",
+      "surfaces": ["national"],
+      "focusFields": [
+        "openingCapital",
+        "financialAndRecipeNumbers",
+        "demographicDynamics"
+      ]
+    },
+    {
+      "slug": "changes",
+      "sourcePath": "data/changes.json",
+      "kind": "ARRAY",
+      "filter": "countryId-via-regions",
+      "nature": "AUDIT_METADATA",
+      "surfaces": ["national", "map"],
+      "focusFields": ["objectId", "field", "from", "to", "reason"]
+    },
+    {
+      "slug": "commodity-catalog",
+      "sourcePath": "data/commodity-catalog.json",
+      "kind": "ARRAY",
+      "filter": "none",
+      "nature": "REFERENCE",
+      "surfaces": ["industry", "trade", "social"],
+      "focusFields": [
+        "id",
+        "unit",
+        "referencePriceGcu",
+        "finalDemandPerPersonDay"
+      ]
+    },
+    {
+      "slug": "countries",
+      "sourcePath": "data/countries.json",
+      "kind": "ARRAY",
+      "filter": "countryId",
+      "nature": "MIXED_SOURCE_AND_PROPOSAL",
+      "surfaces": [
+        "national",
+        "map",
+        "captain",
+        "finance",
+        "bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "focusFields": [
+        "id",
+        "name",
+        "population",
+        "labourForce",
+        "regionIds",
+        "teamAssignment",
+        "economyIdProposal"
+      ]
+    },
+    {
+      "slug": "coverage",
+      "sourcePath": "data/coverage.json",
+      "kind": "ARRAY",
+      "filter": "none",
+      "nature": "AUDIT_METADATA",
+      "surfaces": ["national"],
+      "focusFields": [
+        "domain",
+        "candidateData",
+        "remainingAdapterWork",
+        "runtimeActivation"
+      ]
+    },
+    {
+      "slug": "deposits",
+      "sourcePath": "data/deposits.json",
+      "kind": "ARRAY",
+      "filter": "countryId",
+      "nature": "MIXED_SOURCE_AND_PROPOSAL",
+      "surfaces": ["map", "industry", "trade"],
+      "focusFields": [
+        "id",
+        "countryId",
+        "regionId",
+        "commodityId",
+        "point",
+        "recoverableRemaining",
+        "openingExtractionPlanPerDay",
+        "runtimeExtractionPerDay"
+      ]
+    },
+    {
+      "slug": "domestic-access",
+      "sourcePath": "data/domestic-access.json",
+      "kind": "ARRAY",
+      "filter": "countryId",
+      "nature": "PROPOSAL",
+      "surfaces": ["map", "industry", "trade"],
+      "focusFields": [
+        "id",
+        "countryId",
+        "fromId",
+        "toId",
+        "capacityTonnesDayProposal",
+        "engineeringStatus"
+      ]
+    },
+    {
+      "slug": "employment",
+      "sourcePath": "data/employment.json",
+      "kind": "ARRAY",
+      "filter": "countryId",
+      "nature": "SOURCE_SCENARIO",
+      "surfaces": ["national", "industry", "social"],
+      "focusFields": [
+        "countryId",
+        "labourForce",
+        "employed",
+        "unemployed",
+        "sectors"
+      ]
+    },
+    {
+      "slug": "entities",
+      "sourcePath": "data/entities.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-entityId",
+      "nature": "UNBOUND_ENTITY_PROPOSAL",
+      "surfaces": ["captain", "finance", "industry", "trade"],
+      "focusFields": [
+        "id",
+        "countryId",
+        "role",
+        "bindingMode",
+        "realTeamBinding"
+      ]
+    },
+    {
+      "slug": "facilities",
+      "sourcePath": "data/facilities.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-entityId",
+      "nature": "MIXED_SOURCE_AND_PROPOSAL",
+      "surfaces": ["map", "captain", "finance", "industry", "social"],
+      "focusFields": [
+        "id",
+        "countryId",
+        "regionId",
+        "operatorId",
+        "ownerId",
+        "requiredPowerMW",
+        "requiredWorkers",
+        "runtimeOperational",
+        "constructionStatusProposal"
+      ]
+    },
+    {
+      "slug": "facility-map-links",
+      "sourcePath": "data/facility-map-links.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-referenceId",
+      "nature": "MAP_LINK",
+      "surfaces": ["map", "industry", "social"],
+      "focusFields": [
+        "facilityId",
+        "countryId",
+        "sceneAnchor",
+        "geographicPoint",
+        "markerAction"
+      ]
+    },
+    {
+      "slug": "finance",
+      "sourcePath": "data/finance.json",
+      "kind": "ARRAY",
+      "filter": "countryId",
+      "nature": "MIXED_SOURCE_AND_PROPOSAL",
+      "surfaces": ["national", "captain", "finance", "bank"],
+      "focusFields": [
+        "countryId",
+        "treasuryCentralBankBalance",
+        "bankReserveAssets",
+        "bankDepositLiabilities",
+        "cashRunwayDays",
+        "taxRateProposal"
+      ]
+    },
+    {
+      "slug": "geography",
+      "sourcePath": "data/geography.json",
+      "kind": "GEOGRAPHY",
+      "filter": "section",
+      "nature": "MAP_GEOGRAPHY",
+      "surfaces": ["map", "national", "captain"],
+      "focusFields": ["partition", "climates", "physical", "maritime", "basins"]
+    },
+    {
+      "slug": "hazard-proposals",
+      "sourcePath": "data/hazard-proposals.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-referenceId",
+      "nature": "PROPOSAL",
+      "surfaces": ["map", "captain", "social"],
+      "focusFields": [
+        "countryId",
+        "regionId",
+        "kind",
+        "annualEventProbabilityProposal",
+        "productionLossFractionProposal"
+      ]
+    },
+    {
+      "slug": "illustration-links",
+      "sourcePath": "data/illustration-links.json",
+      "kind": "OBJECT",
+      "filter": "none",
+      "nature": "MAP_LINK",
+      "surfaces": ["map", "national"],
+      "focusFields": ["continentScenes", "countryScenes", "interpretation"]
+    },
+    {
+      "slug": "land-program",
+      "sourcePath": "data/land-program.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-referenceId",
+      "nature": "PROPOSAL",
+      "surfaces": ["map", "captain", "industry", "social"],
+      "focusFields": [
+        "countryId",
+        "regionId",
+        "areaKm2",
+        "from",
+        "to",
+        "reason"
+      ]
+    },
+    {
+      "slug": "license-proposals",
+      "sourcePath": "data/license-proposals.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-entityId",
+      "nature": "PROPOSAL",
+      "surfaces": ["captain", "industry", "trade"],
+      "focusFields": [
+        "id",
+        "countryId",
+        "grantorId",
+        "holderId",
+        "activity",
+        "status",
+        "feeGcuProposal"
+      ]
+    },
+    {
+      "slug": "manifest",
+      "sourcePath": "data/manifest.json",
+      "kind": "OBJECT",
+      "filter": "none",
+      "nature": "SOURCE_METADATA",
+      "surfaces": ["national"],
+      "focusFields": ["activationAllowed", "worldIdentity", "version", "status"]
+    },
+    {
+      "slug": "nodes",
+      "sourcePath": "data/nodes.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-referenceId",
+      "nature": "MAP_LINK",
+      "surfaces": ["map", "trade", "industry"],
+      "focusFields": ["id", "countryId", "regionId", "point"]
+    },
+    {
+      "slug": "opening-material-reconciliation",
+      "sourcePath": "data/opening-material-reconciliation.json",
+      "kind": "ARRAY",
+      "filter": "none",
+      "nature": "AUDIT_METADATA",
+      "surfaces": ["industry", "trade"],
+      "focusFields": [
+        "commodityId",
+        "unit",
+        "openingStockRawEquivalent",
+        "historicalConsumed"
+      ]
+    },
+    {
+      "slug": "population-services",
+      "sourcePath": "data/population-services.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-referenceId",
+      "nature": "SOURCE_SCENARIO",
+      "surfaces": ["map", "social", "captain"],
+      "focusFields": [
+        "id",
+        "countryId",
+        "regionId",
+        "population",
+        "hospitalBeds",
+        "schoolSeats",
+        "waterDomesticM3Day"
+      ]
+    },
+    {
+      "slug": "power",
+      "sourcePath": "data/power.json",
+      "kind": "ARRAY",
+      "filter": "countryId",
+      "nature": "MIXED_SOURCE_AND_PROPOSAL",
+      "surfaces": ["map", "industry", "social"],
+      "focusFields": [
+        "countryId",
+        "averageDemandMW",
+        "averageDeliveredMW",
+        "solarMW",
+        "windMW",
+        "hourlyDispatchValidated"
+      ]
+    },
+    {
+      "slug": "production-plans",
+      "sourcePath": "data/production-plans.json",
+      "kind": "ARRAY",
+      "filter": "countryId",
+      "nature": "PROPOSAL",
+      "surfaces": ["industry", "trade", "social"],
+      "focusFields": [
+        "countryId",
+        "commodityId",
+        "outputPerDay",
+        "usePerDay",
+        "netPerDay"
+      ]
+    },
+    {
+      "slug": "recipes",
+      "sourcePath": "data/recipes.json",
+      "kind": "ARRAY",
+      "filter": "none",
+      "nature": "REFERENCE_PROPOSAL",
+      "surfaces": ["industry", "trade"],
+      "focusFields": [
+        "id",
+        "commodityId",
+        "inputsPerUnit",
+        "outputQuantity",
+        "electricityMWhPerUnit",
+        "workersPerDailyOutputUnit"
+      ]
+    },
+    {
+      "slug": "regions",
+      "sourcePath": "data/regions.json",
+      "kind": "ARRAY",
+      "filter": "countryId",
+      "nature": "MAP_GEOGRAPHY",
+      "surfaces": ["map", "national", "captain", "industry", "social"],
+      "focusFields": [
+        "id",
+        "countryId",
+        "path",
+        "basinId",
+        "landUseKm2",
+        "settlementAccess"
+      ]
+    },
+    {
+      "slug": "seasonal-water",
+      "sourcePath": "data/seasonal-water.json",
+      "kind": "ARRAY",
+      "filter": "countryId-via-regions",
+      "nature": "PROPOSAL",
+      "surfaces": ["map", "industry", "social"],
+      "focusFields": [
+        "regionId",
+        "basinId",
+        "monthlyRunoffM3Proposal",
+        "ecologicalReserveShare"
+      ]
+    },
+    {
+      "slug": "settlements",
+      "sourcePath": "data/settlements.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-referenceId",
+      "nature": "MAP_GEOGRAPHY",
+      "surfaces": ["map", "captain", "social"],
+      "focusFields": [
+        "id",
+        "countryId",
+        "regionId",
+        "name",
+        "population",
+        "representativePoint"
+      ]
+    },
+    {
+      "slug": "stocks",
+      "sourcePath": "data/stocks.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-entityId",
+      "nature": "SOURCE_SCENARIO",
+      "surfaces": ["national", "finance", "industry", "trade", "social"],
+      "focusFields": [
+        "id",
+        "countryId",
+        "commodityId",
+        "ownerId",
+        "available",
+        "reserved",
+        "inTransit",
+        "bufferDays"
+      ]
+    },
+    {
+      "slug": "supplier-concentration-policy",
+      "sourcePath": "data/supplier-concentration-policy.json",
+      "kind": "ARRAY",
+      "filter": "none",
+      "nature": "POLICY_PROPOSAL",
+      "surfaces": ["trade", "captain"],
+      "focusFields": ["commodityId", "maxCountryOutputShare", "basis"]
+    },
+    {
+      "slug": "technology-proposals",
+      "sourcePath": "data/technology-proposals.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-entityId",
+      "nature": "PROPOSAL",
+      "surfaces": ["industry", "trade"],
+      "focusFields": [
+        "countryId",
+        "holderId",
+        "technologyId",
+        "levelProposal",
+        "status"
+      ]
+    },
+    {
+      "slug": "trade-plans",
+      "sourcePath": "data/trade-plans.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-entityId",
+      "nature": "PROPOSAL",
+      "surfaces": ["map", "finance", "trade"],
+      "focusFields": [
+        "id",
+        "sellerCountryId",
+        "buyerCountryId",
+        "commodityId",
+        "quantityPerDay",
+        "travelSimDaysEstimate",
+        "status"
+      ]
+    },
+    {
+      "slug": "transit-proposals",
+      "sourcePath": "data/transit-proposals.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-referenceId",
+      "nature": "PROPOSAL",
+      "surfaces": ["map", "captain", "trade"],
+      "focusFields": ["id", "countryIds", "flowId", "consentStatus"]
+    },
+    {
+      "slug": "transport-routes",
+      "sourcePath": "data/transport-routes.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-referenceId",
+      "nature": "MIXED_SOURCE_AND_PROPOSAL",
+      "surfaces": ["map", "industry", "trade"],
+      "focusFields": [
+        "id",
+        "fromCountryId",
+        "toCountryId",
+        "fromNodeId",
+        "toNodeId",
+        "distanceKm",
+        "engineeringAndRightsApproved"
+      ]
+    },
+    {
+      "slug": "water-allocations",
+      "sourcePath": "data/water-allocations.json",
+      "kind": "ARRAY",
+      "filter": "countryId-or-referenceId",
+      "nature": "SOURCE_SCENARIO",
+      "surfaces": ["map", "industry", "social"],
+      "focusFields": [
+        "countryId",
+        "regionId",
+        "basinId",
+        "availableM3Day",
+        "allocatedM3Day",
+        "remainingM3Day",
+        "rightsStatus"
+      ]
+    }
+  ]
+}
