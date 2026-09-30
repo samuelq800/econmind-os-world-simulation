@@ -10,6 +10,8 @@ Status: `IMPLEMENTED_UNVERIFIED`
 - finance-bound refinement: `a3725160b8857052451efb1d6b7d2da06a96e069`
 - final formatted mapping candidate: `831ffc9e982b76ede628563778b8136baa0bcb5d`
 - production-readback wording fix: `945462030f97e683ece66700cc75759e5768cfd3`
+- integrated `origin/main`: `725a4e02605a1c295a2cb192d36ca6c9297febf6`
+- post-merge tested candidate: `89449235502108031ccb9a69f062773f5d9e98f1`
 - branch: `codex/c-official-world-mapping`
 
 ## Output
@@ -76,7 +78,7 @@ energized grid, runtime job, social asset or team assignment.
 - targeted ESLint: `PASS`;
 - targeted Prettier: `PASS` for source, test, plan and test config;
 - deterministic regeneration: `PASS`;
-- repository secrets: `PASS` — 1,758 files scanned;
+- repository secrets: `PASS` — 1,760 files scanned on the post-merge candidate;
 - `git diff --check`: `PASS`.
 
 ## Explicit `NOT_RUN`
