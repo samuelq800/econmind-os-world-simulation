@@ -1090,9 +1090,7 @@ export async function buildOfficialWorldOpeningMapping(repositoryRoot) {
         'ECONOMIC_SEMANTIC_DIFFERENCE',
   ).length;
   const maximumAbsoluteDepositLiabilityDelta = maxAbsoluteDecimal(
-    normalizedFinance.map(
-      (row) => row.reconciliation.depositLiabilityDelta,
-    ),
+    normalizedFinance.map((row) => row.reconciliation.depositLiabilityDelta),
     'maximum deposit liability delta',
   );
   const maximumAbsoluteBankEquityDelta = maxAbsoluteDecimal(
