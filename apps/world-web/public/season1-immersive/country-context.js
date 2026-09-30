@@ -115,7 +115,7 @@
         envelope.dataNature !== 'OFFICIAL_SELECTED_SOURCE_DATASET' ||
         envelope.packageId !== packageId || envelope.selectionChecksumSha256 !== selectionChecksum ||
         envelope.countriesSha256 !== local.officialOpening.countriesSha256 ||
-        envelope.sourcePath !== 'data/countries.json' || envelope.countryCount !== 70 ||
+        envelope.sourcePath !== 'data/countries.json' ||
         envelope.proposalFieldsAreExecuted !== false || envelope.liveWorldState !== false ||
         !record(envelope.units) || envelope.units.population !== 'persons' ||
         envelope.units.areaKm2 !== 'km2' || envelope.units.gcuReference !== 'GCU_SCENARIO_ACCOUNTING_UNIT' ||

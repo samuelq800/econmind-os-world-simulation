@@ -72,7 +72,6 @@ function route(
     countriesSha256:
       '5d493e93dfab1425731191ba7491cce47949d176e4769b33fdca48d2d31dba89',
     sourcePath: 'data/countries.json',
-    countryCount: 70,
     units: {
       population: 'persons',
       areaKm2: 'km2',
@@ -170,6 +169,9 @@ describe('selected World V2 country read adapter', () => {
 
   it('uses an exact-provenance API response only when it matches the published baseline', async () => {
     const data = country('46');
+    // A's fixed detail route returns metadata + countryId + country.
+    // countryCount is present only on the separate list route.
+    expect(route(officialCountry('46'))).not.toHaveProperty('countryCount');
     const fetch = fetcher(data);
     const result = await adapter().loadCountry('46', {
       fetcher: fetch,
@@ -195,9 +197,19 @@ describe('selected World V2 country read adapter', () => {
 
   it.each([
     [
+      'wrong package',
+      (data: Record<string, unknown>) =>
+        route(data, { packageId: 'OTHER_PACKAGE' }),
+    ],
+    [
       'wrong checksum',
       (data: Record<string, unknown>) =>
         route(data, { selectionChecksumSha256: '0'.repeat(64) }),
+    ],
+    [
+      'wrong country source hash',
+      (data: Record<string, unknown>) =>
+        route(data, { countriesSha256: '0'.repeat(64) }),
     ],
     [
       'wrong country',
