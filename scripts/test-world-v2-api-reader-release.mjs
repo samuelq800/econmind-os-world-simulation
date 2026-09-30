@@ -40,6 +40,8 @@ assert.ok(
 assert.ok(release.query.includes('reader_memberships'));
 assert.ok(release.query.includes('set_option'));
 assert.ok(release.query.includes('selected_source_policies'));
+assert.ok(release.query.includes('policy.tablename in ('));
+assert.ok(!release.query.includes('policy.policyname in ('));
 assert.ok(release.query.includes('column_select_privileges'));
 assert.ok(release.query.includes('table_select_privileges'));
 assert.ok(release.query.includes('nonselect_table_privileges'));

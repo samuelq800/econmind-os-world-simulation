@@ -183,9 +183,9 @@ select jsonb_build_object(
     ) order by policy.policyname)
     from pg_policies policy
     where policy.schemaname = 'world_v2'
-      and policy.policyname in (
-        'country_candidate_bundle_selected_source_server_read',
-        'country_candidate_artifact_selected_source_server_read'
+      and policy.tablename in (
+        'country_candidate_bundle',
+        'country_candidate_artifact'
       )
   ), '[]'::jsonb)
 ) as evidence from world_v2.schema_release

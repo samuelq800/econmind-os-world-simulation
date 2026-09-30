@@ -361,9 +361,9 @@ postgresDescribe('World V2 selected-country server reader role', () => {
       `select tablename, policyname, roles, cmd, qual, with_check
          from pg_policies
         where schemaname = 'world_v2'
-          and policyname in (
-            'country_candidate_bundle_selected_source_server_read',
-            'country_candidate_artifact_selected_source_server_read'
+          and tablename in (
+            'country_candidate_bundle',
+            'country_candidate_artifact'
           )
         order by policyname`,
     );
@@ -388,6 +388,42 @@ postgresDescribe('World V2 selected-country server reader role', () => {
         cmd: 'SELECT',
         qual: "bundle_id='BALANCED_2026_09_28_V1'",
         with_check: null,
+      },
+    ]);
+  }, 30_000);
+
+  it('surfaces an additional permissive policy on a reader table', async () => {
+    await currentAdmin().query(
+      `create policy country_candidate_artifact_unexpected_reader_scope
+       on world_v2.country_candidate_artifact
+       for select to ${READER_ROLE}
+       using (true)`,
+    );
+    const policies = await currentAdmin().query<{
+      tablename: string;
+      policyname: string;
+    }>(
+      `select tablename, policyname
+         from pg_policies
+        where schemaname = 'world_v2'
+          and tablename in (
+            'country_candidate_bundle',
+            'country_candidate_artifact'
+          )
+        order by policyname`,
+    );
+    expect(policies.rows).toEqual([
+      {
+        tablename: 'country_candidate_artifact',
+        policyname: 'country_candidate_artifact_selected_source_server_read',
+      },
+      {
+        tablename: 'country_candidate_artifact',
+        policyname: 'country_candidate_artifact_unexpected_reader_scope',
+      },
+      {
+        tablename: 'country_candidate_bundle',
+        policyname: 'country_candidate_bundle_selected_source_server_read',
       },
     ]);
   }, 30_000);
