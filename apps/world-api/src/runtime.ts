@@ -21,6 +21,16 @@ import {
   type ManagedOfficialCountryPool,
   type OfficialCountryDatabaseConfiguration,
 } from './integration/official-country-postgres.js';
+import {
+  createOfficialDatasetRoute,
+  OFFICIAL_DATASET_LIST_PATH,
+} from './integration/official-dataset-route.js';
+import { OFFICIAL_DATASETS } from './integration/official-dataset-registry.js';
+import { readOfficialDatasetSource } from './integration/official-dataset-source.js';
+import {
+  createOfficialMapAssetRoute,
+  OFFICIAL_MAP_ASSET_LIST_PATH,
+} from './integration/official-map-asset-route.js';
 
 const supportedEnvironments = new Set(['local', 'ci', 'staging', 'production']);
 const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
@@ -28,6 +38,7 @@ const supportedHosts = new Set(['127.0.0.1', 'localhost', '::1', '0.0.0.0']);
 export interface ApiRuntimeConfig {
   readonly season1MyTeam?: Season1LobbySupabaseConfiguration;
   readonly officialCountryDatabase?: OfficialCountryDatabaseConfiguration;
+  readonly officialAllData?: true;
   readonly environment: string;
   readonly host: string;
   readonly port: number;
@@ -73,11 +84,25 @@ export function readApiRuntimeConfig(
     environment,
     environmentName,
   );
+  const allDataFlag = environment.WORLD_API_ALL_DATA_ENABLED;
+  if (
+    allDataFlag !== undefined &&
+    allDataFlag !== 'false' &&
+    allDataFlag !== 'true'
+  ) {
+    throw new Error('WORLD_API_ALL_DATA_ENABLED must be literal true or false');
+  }
+  if (allDataFlag === 'true' && officialCountryDatabase === undefined) {
+    throw new Error(
+      'WORLD_API_ALL_DATA_ENABLED requires the official database reader',
+    );
+  }
   return {
     ...(season1MyTeam === undefined ? {} : { season1MyTeam }),
     ...(officialCountryDatabase === undefined
       ? {}
       : { officialCountryDatabase }),
+    ...(allDataFlag === 'true' ? { officialAllData: true as const } : {}),
     environment: environmentName,
     host: parseHost(environment.WORLD_API_HOST),
     port: parsePort(environment.WORLD_API_PORT, 4101),
@@ -107,15 +132,64 @@ function createApiServer(
 ) {
   let ready = false;
   let databaseReady = officialCountryPool === undefined;
+  let allDataVerifiedAt = 0;
+  let allDataProbe: Promise<boolean> | undefined;
   const officialCountries =
     officialCountryPool === undefined
       ? undefined
       : createOfficialCountryBaselineRoute(officialCountryPool);
+  const officialDatasets =
+    config.officialAllData === true && officialCountryPool !== undefined
+      ? createOfficialDatasetRoute(officialCountryPool)
+      : undefined;
+  const officialMapAssets =
+    config.officialAllData === true && officialCountryPool !== undefined
+      ? createOfficialMapAssetRoute()
+      : undefined;
+  const verifyAllData = async (pool: ManagedOfficialCountryPool) => {
+    if (allDataVerifiedAt > 0 && Date.now() - allDataVerifiedAt < 300_000)
+      return true;
+    allDataProbe ??= (async () => {
+      try {
+        for (let index = 0; index < OFFICIAL_DATASETS.length; index += 4) {
+          await Promise.all(
+            OFFICIAL_DATASETS.slice(index, index + 4).map((spec) =>
+              readOfficialDatasetSource(pool, spec),
+            ),
+          );
+        }
+        allDataVerifiedAt = Date.now();
+        return true;
+      } catch {
+        allDataVerifiedAt = 0;
+        return false;
+      } finally {
+        allDataProbe = undefined;
+      }
+    })();
+    return allDataProbe;
+  };
+  const boundedAllDataProbe = async (pool: ManagedOfficialCountryPool) => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        verifyAllData(pool),
+        new Promise<false>((resolve) => {
+          timer = setTimeout(() => resolve(false), 10_000);
+          timer.unref();
+        }),
+      ]);
+    } finally {
+      if (timer !== undefined) clearTimeout(timer);
+    }
+  };
   const probeDatabase = async () => {
     if (officialCountryPool === undefined) return true;
     try {
       await readOfficialCountries(officialCountryPool);
-      databaseReady = true;
+      databaseReady =
+        config.officialAllData !== true ||
+        (await boundedAllDataProbe(officialCountryPool));
     } catch {
       databaseReady = false;
     }
@@ -130,6 +204,28 @@ function createApiServer(
         });
   const server = createServer((request, response) => {
     const path = request.url?.split('?', 1)[0];
+    if (
+      officialMapAssets !== undefined &&
+      path === OFFICIAL_MAP_ASSET_LIST_PATH
+    ) {
+      officialMapAssets(request, response);
+      return;
+    }
+    if (
+      officialDatasets !== undefined &&
+      (path === OFFICIAL_DATASET_LIST_PATH ||
+        path?.startsWith(`${OFFICIAL_DATASET_LIST_PATH}/`))
+    ) {
+      void officialDatasets(request, response).catch(() => {
+        if (!response.headersSent && !response.destroyed) {
+          sendJson(request, response, 503, {
+            ok: false,
+            error: { code: 'SOURCE_UNAVAILABLE' },
+          });
+        }
+      });
+      return;
+    }
     if (
       officialCountries !== undefined &&
       (path === OFFICIAL_COUNTRY_LIST_PATH ||
@@ -185,6 +281,14 @@ function createApiServer(
             ? {}
             : {
                 officialCountryDatabaseReady: databaseAvailable,
+                ...(config.officialAllData === true
+                  ? {
+                      officialAllDataVerifiedAt:
+                        allDataVerifiedAt > 0
+                          ? new Date(allDataVerifiedAt).toISOString()
+                          : null,
+                    }
+                  : {}),
               }),
         });
       });

@@ -6,6 +6,8 @@ import {
   OFFICIAL_COUNTRY_SOURCE_STORAGE_PATH,
   type OfficialCountrySqlReader,
 } from './official-country-baseline.js';
+import { OFFICIAL_DATASETS } from './official-dataset-registry.js';
+import { OFFICIAL_DATASET_SOURCE_QUERY } from './official-dataset-source.js';
 
 export interface OfficialCountryDatabaseConfiguration {
   readonly connectionString: string;
@@ -103,11 +105,16 @@ export function createRoleScopedOfficialCountryReader(
 ): OfficialCountrySqlReader {
   return {
     async query(text, values) {
+      const allowedCountry =
+        text === OFFICIAL_COUNTRY_SOURCE_QUERY &&
+        values[1] === OFFICIAL_COUNTRY_SOURCE_STORAGE_PATH;
+      const allowedDataset =
+        text === OFFICIAL_DATASET_SOURCE_QUERY &&
+        OFFICIAL_DATASETS.some((spec) => spec.storagePath === values[1]);
       if (
-        text !== OFFICIAL_COUNTRY_SOURCE_QUERY ||
         values.length !== 2 ||
         values[0] !== OFFICIAL_COUNTRY_PACKAGE_ID ||
-        values[1] !== OFFICIAL_COUNTRY_SOURCE_STORAGE_PATH
+        (!allowedCountry && !allowedDataset)
       ) {
         throw new Error('OFFICIAL_COUNTRY_FIXED_QUERY_REQUIRED');
       }
