@@ -12,6 +12,9 @@ const manifest = JSON.parse(
 );
 const release = await renderBalancedCountryCandidateRelease(root);
 if (
+  release.migration.migration_id !==
+    '0019_world_v2_balanced_candidate_status' ||
+  release.migration.release_order !== 19 ||
   release.sourceArtifacts !== 87 ||
   release.countries !== 70 ||
   release.bundle.population !== 14_712_146_434 ||

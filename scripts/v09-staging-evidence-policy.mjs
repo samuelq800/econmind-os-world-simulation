@@ -331,7 +331,6 @@ export function buildV09StagingDryRunPlan(approval) {
         target.roles.migration_owner,
         target.roles.worker,
         target.roles.reader,
-        ...V09_STAGING_API_READER_ROLES,
       ]),
       requiresRunMarker: true,
       broadResetAllowed: false,
@@ -343,6 +342,8 @@ export function buildV09StagingDryRunPlan(approval) {
       overwriteAllowed: false,
     }),
     execution: 'DRY_RUN_ONLY_UNTIL_EXPLICIT_CONFIRMATION',
+    currentManifestExecution:
+      'BLOCKED_GLOBAL_API_ROLE_DDL_NOT_APPROVED_FOR_DEDICATED_STAGING',
     migrations: V09_STAGING_MIGRATION_IDS,
     roleChecks: Object.freeze([
       'SCHEMA_OWNERSHIP',

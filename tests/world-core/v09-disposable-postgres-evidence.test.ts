@@ -13,8 +13,12 @@ import {
 import {
   V09_STAGING_API_READER_ROLES,
   V09_STAGING_CANDIDATE_0021,
+  V09_STAGING_EXECUTION_CONFIRMATION,
   V09_STAGING_MIGRATION_IDS,
+  V09_STAGING_OWNER_CONFIRMATION,
+  V09_STAGING_TARGET_SCHEMA_VERSION,
   assertV09StagingMigrationAllowlist,
+  createV09StagingTargetFingerprint,
 } from '../../scripts/v09-staging-evidence-policy.mjs';
 
 const OUTPUT = '/private/tmp/v09-disposable-evidence-test.json';
@@ -115,6 +119,54 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
 
     expect(result).toMatchObject({
       failure: { stage: 'POLICY_REJECTED' },
+      status: 'FAIL_CLOSED',
+    });
+  });
+
+  it('rejects 0020 global-role DDL on dedicated staging before creating any client', async () => {
+    const approvalBase = {
+      schema_version: V09_STAGING_TARGET_SCHEMA_VERSION,
+      project_ref: 'abcdefghijklmnopqrst',
+      target_classification: 'DEDICATED_NONPRODUCTION',
+      production_target: false,
+      shared_target: false,
+      database_host: 'staging.example.com',
+      database_port: 5432,
+      database_name: 'econmind_v09',
+      admin_database_role: 'postgres',
+      disposable_namespace: 'world_v2',
+      roles: {
+        migration_owner: 'v09_staging_migration_owner',
+        worker: 'v09_staging_worker',
+        reader: 'v09_staging_reader',
+      },
+      owner_confirmation: V09_STAGING_OWNER_CONFIRMATION,
+      evidence_output_path: '/private/tmp/v09-dedicated-fail-closed.json',
+    };
+    const target_fingerprint = createV09StagingTargetFingerprint(approvalBase);
+    let clientsCreated = 0;
+    const result = await runV09DedicatedStagingEvidence({
+      approval: { ...approvalBase, target_fingerprint },
+      environment: {
+        ECONMIND_ENV: 'staging',
+        V09_STAGING_EXECUTION_CONFIRMATION: V09_STAGING_EXECUTION_CONFIRMATION,
+        V09_STAGING_TARGET_FINGERPRINT: target_fingerprint,
+        V09_STAGING_ADMIN_DATABASE_URL:
+          'postgresql://postgres:synthetic@staging.example.com:5432/econmind_v09?ssl=true',
+      },
+      clientFactory: () => {
+        clientsCreated += 1;
+        throw new Error('dedicated staging must not connect');
+      },
+      loadLinkedProjectRef: async () => undefined,
+      loadMigrationChain: async () => [
+        { migration_id: '0020_world_v2_official_country_reader' },
+      ],
+      writeEvidence: async () => undefined,
+    });
+    expect(clientsCreated).toBe(0);
+    expect(result).toMatchObject({
+      failure: { stage: 'LOCAL_MANIFEST' },
       status: 'FAIL_CLOSED',
     });
   });

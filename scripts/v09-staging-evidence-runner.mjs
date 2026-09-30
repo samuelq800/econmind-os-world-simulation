@@ -1112,6 +1112,7 @@ async function applyMigrations(
   databaseName,
   migrations,
   evidence,
+  permitGlobalReaderRoleDdl,
 ) {
   const schema = identifier(approval.disposable_namespace);
   const owner = approval.roles.migration_owner;
@@ -1119,6 +1120,8 @@ async function applyMigrations(
     const globalRoleMigration =
       migration.migration_id === '0020_world_v2_official_country_reader';
     if (globalRoleMigration) {
+      if (!permitGlobalReaderRoleDdl)
+        failed('global API reader role DDL is disposable-only');
       // Only after the pristine-role check, the marked disposable transaction
       // may temporarily use its admin role for 0020's CREATE ROLE statements.
       await command(client, 'RESET_OWNER_FOR_API_ROLE_MIGRATION', 'reset role');
@@ -2057,12 +2060,16 @@ export async function cleanupMarkedBoundary(
   client,
   approval,
   evidence,
-  { captureDiagnostic = false } = {},
+  { captureDiagnostic = false, disposableRoleCleanupAuthorized = false } = {},
 ) {
   const schema = identifier(approval.disposable_namespace);
   const { migration_owner: owner, reader, worker } = approval.roles;
   const migrationIds = evidence.migrations ?? [];
   const apiReaderCreated = hasApiReaderMigration(migrationIds);
+  if (apiReaderCreated && !disposableRoleCleanupAuthorized) {
+    evidence.cleanup.status = CLEANUP_INCOMPLETE;
+    failStage(CLEANUP_INCOMPLETE);
+  }
   const diagnostic = captureDiagnostic ? { current: undefined } : undefined;
   const cleanupClient = cleanupDiagnosticClient(client, diagnostic);
   evidence.cleanup.status = 'RUNNING';
@@ -2416,6 +2423,7 @@ async function runV09AuthorizedPostgresEvidence({
   writeEvidence = writeV09StagingEvidence,
   annotateEvidence = (evidence) => evidence,
   captureCleanupDiagnostic = false,
+  permitGlobalReaderRoleDdl = false,
 }) {
   const evidence = publicEvidence(authorized.approval, runId);
   let canRun = true;
@@ -2432,11 +2440,22 @@ async function runV09AuthorizedPostgresEvidence({
   let migrations;
   if (canRun) {
     try {
-      migrations = await audited(
-        evidence,
-        'LOCAL_MANIFEST',
-        loadMigrationChain,
-      );
+      migrations = await audited(evidence, 'LOCAL_MANIFEST', async () => {
+        const chain = await loadMigrationChain();
+        if (
+          !permitGlobalReaderRoleDdl &&
+          chain.some((migration) =>
+            [
+              '0020_world_v2_official_country_reader',
+              V09_STAGING_CANDIDATE_0021.migration_id,
+            ].includes(migration.migration_id),
+          )
+        )
+          failed(
+            'dedicated staging has no global API reader role DDL approval',
+          );
+        return chain;
+      });
     } catch {
       evidence.status = 'FAIL_CLOSED';
       evidence.failure = { stage: 'LOCAL_MANIFEST' };
@@ -2503,6 +2522,7 @@ async function runV09AuthorizedPostgresEvidence({
           authorized.target.database_name,
           migrations,
           evidence,
+          permitGlobalReaderRoleDdl,
         ),
       );
       await audited(evidence, 'LEASE_EVIDENCE', () =>
@@ -2579,6 +2599,7 @@ async function runV09AuthorizedPostgresEvidence({
               evidence,
               {
                 captureDiagnostic: captureCleanupDiagnostic,
+                disposableRoleCleanupAuthorized: permitGlobalReaderRoleDdl,
               },
             ),
           );
@@ -2678,6 +2699,7 @@ export async function runV09DisposablePostgresEvidence({
     runId,
     writeEvidence,
     captureCleanupDiagnostic: true,
+    permitGlobalReaderRoleDdl: true,
     annotateEvidence: (evidence) =>
       annotateDisposableEvidence(evidence, immutableInput, resolvedMigrations),
   });
