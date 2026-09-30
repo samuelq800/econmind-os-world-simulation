@@ -19,8 +19,11 @@ import {
   validateMigrationManifest,
 } from './migration-policy.mjs';
 import {
+  V09_STAGING_API_READER_ROLES,
+  V09_STAGING_CANDIDATE_0021,
   V09_STAGING_MIGRATION_IDS,
   assertNoLinkedSupabaseProject,
+  assertV09StagingMigrationAllowlist,
   assertV09DedicatedStagingExecution,
 } from './v09-staging-evidence-policy.mjs';
 import { assertV09PostgresTestEnvironment } from './v09-postgres-test-environment.mjs';
@@ -433,6 +436,45 @@ const RUN_POLICIES = Object.freeze([
   { name: 'v09_staging_reader_world_head', table: 'world_head' },
   { name: 'v09_staging_reader_lease', table: 'world_writer_lease' },
 ]);
+const API_READER_POLICIES_0020 = Object.freeze([
+  {
+    name: 'country_candidate_bundle_selected_source_server_read',
+    table: 'country_candidate_bundle',
+  },
+  {
+    name: 'country_candidate_artifact_selected_source_server_read',
+    table: 'country_candidate_artifact',
+  },
+]);
+const API_READER_POLICIES_0021 = Object.freeze([
+  {
+    name: 'country_candidate_artifact_selected_full_source_server_read',
+    table: 'country_candidate_artifact',
+  },
+]);
+
+function hasApiReaderMigration(migrationIds) {
+  return migrationIds.includes('0020_world_v2_official_country_reader');
+}
+
+function runPolicies(migrationIds) {
+  return [
+    ...RUN_POLICIES,
+    ...(hasApiReaderMigration(migrationIds) ? API_READER_POLICIES_0020 : []),
+    ...(migrationIds.includes(V09_STAGING_CANDIDATE_0021.migration_id)
+      ? API_READER_POLICIES_0021
+      : []),
+  ];
+}
+
+function runRoles(approval, migrationIds) {
+  return [
+    ...Object.values(approval.roles),
+    ...(hasApiReaderMigration(migrationIds)
+      ? V09_STAGING_API_READER_ROLES
+      : []),
+  ];
+}
 
 function identifier(value) {
   return `"${value.replaceAll('"', '""')}"`;
@@ -949,14 +991,12 @@ export async function loadV09StagingMigrationChain() {
   const migrations = Array.isArray(manifest.migrations)
     ? manifest.migrations
     : [];
-  if (
-    migrations.length !== V09_STAGING_MIGRATION_IDS.length ||
-    migrations.some(
-      (migration, index) =>
-        migration.migration_id !== V09_STAGING_MIGRATION_IDS[index],
-    )
-  ) {
-    failed('the runner accepts only the exact branch-local 0001–0019 chain');
+  try {
+    assertV09StagingMigrationAllowlist(migrations);
+  } catch {
+    failed(
+      'the runner accepts only the exact reviewed 0001–0020 chain or pinned 0021 candidate',
+    );
   }
   const artifacts = new Map();
   for (const migration of migrations) {
@@ -983,7 +1023,7 @@ export async function loadV09StagingMigrationChain() {
   );
 }
 
-async function preflightPristine(client, approval) {
+async function preflightPristine(client, approval, migrations) {
   const namespace = await command(
     client,
     'PRECHECK_NAMESPACE_ABSENT',
@@ -999,12 +1039,17 @@ async function preflightPristine(client, approval) {
     client,
     'PRECHECK_ROLES_ABSENT',
     'select rolname from pg_roles where rolname = any($1::text[])',
-    [Object.values(approval.roles)],
+    [
+      runRoles(
+        approval,
+        migrations.map((migration) => migration.migration_id),
+      ),
+    ],
   );
   assertRows(
     roles,
     (records) => records.length === 0,
-    'refusing to reuse pre-existing dedicated staging roles',
+    'refusing to reuse pre-existing dedicated staging or API reader roles',
   );
 }
 
@@ -1071,6 +1116,13 @@ async function applyMigrations(
   const schema = identifier(approval.disposable_namespace);
   const owner = approval.roles.migration_owner;
   for (const migration of migrations) {
+    const globalRoleMigration =
+      migration.migration_id === '0020_world_v2_official_country_reader';
+    if (globalRoleMigration) {
+      // Only after the pristine-role check, the marked disposable transaction
+      // may temporarily use its admin role for 0020's CREATE ROLE statements.
+      await command(client, 'RESET_OWNER_FOR_API_ROLE_MIGRATION', 'reset role');
+    }
     await command(
       client,
       `APPLY_MIGRATION_${migration.migration_id.toUpperCase()}`,
@@ -1090,6 +1142,13 @@ async function applyMigrations(
       ],
     );
     evidence.migrations.push(migration.migration_id);
+    if (globalRoleMigration) {
+      await command(
+        client,
+        'REASSERT_OWNER_AFTER_API_ROLE_MIGRATION',
+        `set local role ${identifier(owner)}`,
+      );
+    }
     if (migration.migration_id === V09_STAGING_MIGRATION_IDS[0]) {
       await command(
         client,
@@ -1718,7 +1777,10 @@ function cleanupInventoryKey(record) {
     .join('|');
 }
 
-export function expectedV09StagingCleanupInventory(approval) {
+export function expectedV09StagingCleanupInventory(
+  approval,
+  migrationIds = V09_STAGING_MIGRATION_IDS,
+) {
   const owner = approval.roles.migration_owner;
   return [
     ...RUN_TABLES_REVERSE.map((name) => `RELATION|${name}|r|${owner}`),
@@ -1728,13 +1790,18 @@ export function expectedV09StagingCleanupInventory(approval) {
     ...RUN_TRIGGERS_REVERSE.map(
       ({ name, table }) => `TRIGGER|${name}|${table}|${owner}`,
     ),
-    ...RUN_POLICIES.map(
+    ...runPolicies(migrationIds).map(
       ({ name, table }) => `POLICY|${name}|${table}|${owner}`,
     ),
   ].sort();
 }
 
-async function verifyExactRunInventory(client, approval, diagnostic) {
+async function verifyExactRunInventory(
+  client,
+  approval,
+  migrationIds,
+  diagnostic,
+) {
   const inventory = await command(
     client,
     'CLEANUP_VERIFY_EXACT_ALLOWLIST',
@@ -1775,7 +1842,7 @@ async function verifyExactRunInventory(client, approval, diagnostic) {
     [approval.disposable_namespace],
   );
   const actual = rows(inventory).map(cleanupInventoryKey).sort();
-  const expected = expectedV09StagingCleanupInventory(approval);
+  const expected = expectedV09StagingCleanupInventory(approval, migrationIds);
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     cleanupFailClosedAssertion(diagnostic, 'CLEANUP_ASSERT_EXACT_ALLOWLIST');
   }
@@ -1886,7 +1953,67 @@ async function verifyExactCleanupRoleBoundary(client, approval, diagnostic) {
   }
 }
 
-async function verifyNoRoleResidue(client, approval, diagnostic) {
+async function verifyExactApiReaderRoleBoundary(client, diagnostic) {
+  const attributes = await command(
+    client,
+    'CLEANUP_VERIFY_API_READER_ROLE_ATTRIBUTES',
+    `select rolname,
+            rolcanlogin,
+            rolsuper,
+            rolcreaterole,
+            rolcreatedb,
+            rolinherit,
+            rolreplication,
+            rolbypassrls
+       from pg_roles
+      where rolname = any($1::text[])
+      order by rolname`,
+    [V09_STAGING_API_READER_ROLES],
+  );
+  if (
+    rows(attributes).length !== V09_STAGING_API_READER_ROLES.length ||
+    rows(attributes).some(
+      (record) =>
+        !V09_STAGING_API_READER_ROLES.includes(record?.rolname) ||
+        record?.rolcanlogin !== false ||
+        record?.rolsuper !== false ||
+        record?.rolcreaterole !== false ||
+        record?.rolcreatedb !== false ||
+        record?.rolinherit !== false ||
+        record?.rolreplication !== false ||
+        record?.rolbypassrls !== false,
+    )
+  ) {
+    cleanupFailClosedAssertion(
+      diagnostic,
+      'CLEANUP_ASSERT_API_READER_ROLE_ATTRIBUTES',
+    );
+  }
+  const memberships = await command(
+    client,
+    'CLEANUP_VERIFY_API_READER_MEMBERSHIP',
+    `select granted.rolname as role_name, member.rolname as member_name
+       from pg_auth_members membership
+       join pg_roles granted on granted.oid = membership.roleid
+       join pg_roles member on member.oid = membership.member
+      where granted.rolname = any($1::text[])
+         or member.rolname = any($1::text[])
+      order by granted.rolname, member.rolname`,
+    [V09_STAGING_API_READER_ROLES],
+  );
+  if (
+    rows(memberships).length !== 1 ||
+    rows(memberships)[0]?.role_name !== 'world_v2_api_reader' ||
+    rows(memberships)[0]?.member_name !== 'world_v2_api_login'
+  ) {
+    cleanupFailClosedAssertion(
+      diagnostic,
+      'CLEANUP_ASSERT_API_READER_MEMBERSHIP',
+    );
+  }
+}
+
+async function verifyNoRoleResidue(client, approval, migrationIds, diagnostic) {
   const residue = await command(
     client,
     'CLEANUP_VERIFY_NO_ROLE_RESIDUE',
@@ -1898,14 +2025,14 @@ async function verifyNoRoleResidue(client, approval, diagnostic) {
        join pg_roles role on role.oid = dependency.refobjid
       where role.rolname = any($1::text[])
       order by role.rolname, class_name, object_id`,
-    [Object.values(approval.roles)],
+    [runRoles(approval, migrationIds)],
   );
   if (rows(residue).length !== 0) {
     cleanupFailClosedAssertion(diagnostic, 'CLEANUP_ASSERT_NO_ROLE_RESIDUE');
   }
 }
 
-async function verifyNoRunResidue(client, approval, diagnostic) {
+async function verifyNoRunResidue(client, approval, migrationIds, diagnostic) {
   const namespace = await command(
     client,
     'CLEANUP_VERIFY_NAMESPACE_ABSENT',
@@ -1919,7 +2046,7 @@ async function verifyNoRunResidue(client, approval, diagnostic) {
     client,
     'CLEANUP_VERIFY_ROLES_ABSENT',
     'select rolname from pg_roles where rolname = any($1::text[])',
-    [Object.values(approval.roles)],
+    [runRoles(approval, migrationIds)],
   );
   if (rows(roles).length !== 0) {
     cleanupFailClosedAssertion(diagnostic, 'CLEANUP_ASSERT_ROLES_ABSENT');
@@ -1934,6 +2061,8 @@ export async function cleanupMarkedBoundary(
 ) {
   const schema = identifier(approval.disposable_namespace);
   const { migration_owner: owner, reader, worker } = approval.roles;
+  const migrationIds = evidence.migrations ?? [];
+  const apiReaderCreated = hasApiReaderMigration(migrationIds);
   const diagnostic = captureDiagnostic ? { current: undefined } : undefined;
   const cleanupClient = cleanupDiagnosticClient(client, diagnostic);
   evidence.cleanup.status = 'RUNNING';
@@ -2017,13 +2146,20 @@ export async function cleanupMarkedBoundary(
         record?.schema_owner === owner && record?.all_objects_owned === true,
       'cleanup refuses a namespace that includes non-run-owned objects',
     );
-    await verifyExactRunInventory(cleanupClient, approval, diagnostic);
+    await verifyExactRunInventory(
+      cleanupClient,
+      approval,
+      migrationIds,
+      diagnostic,
+    );
     await verifyNoUnexpectedStandaloneObjects(
       cleanupClient,
       approval,
       diagnostic,
     );
     await verifyExactCleanupRoleBoundary(cleanupClient, approval, diagnostic);
+    if (apiReaderCreated)
+      await verifyExactApiReaderRoleBoundary(cleanupClient, diagnostic);
     const externalDependents = await command(
       cleanupClient,
       'CLEANUP_VERIFY_NO_EXTERNAL_DEPENDENTS',
@@ -2149,7 +2285,7 @@ export async function cleanupMarkedBoundary(
       hasNoExternalDependents,
       'cleanup refuses an external dependency outside this run namespace',
     );
-    for (const policy of [...RUN_POLICIES].reverse()) {
+    for (const policy of runPolicies(migrationIds).reverse()) {
       await command(
         cleanupClient,
         `CLEANUP_DROP_POLICY_${policy.name.toUpperCase()}`,
@@ -2203,6 +2339,20 @@ export async function cleanupMarkedBoundary(
       `drop schema ${schema} restrict`,
     );
     await command(cleanupClient, 'CLEANUP_RESET_ROLE', 'reset role');
+    if (apiReaderCreated) {
+      await command(
+        cleanupClient,
+        'CLEANUP_REVOKE_API_READER_FROM_LOGIN',
+        'revoke "world_v2_api_reader" from "world_v2_api_login"',
+      );
+      for (const role of [...V09_STAGING_API_READER_ROLES].reverse()) {
+        await command(
+          cleanupClient,
+          `CLEANUP_DROP_API_ROLE_${role.toUpperCase()}_RESTRICT`,
+          `drop role ${identifier(role)}`,
+        );
+      }
+    }
     for (const role of [owner, worker, reader]) {
       await command(
         cleanupClient,
@@ -2210,7 +2360,12 @@ export async function cleanupMarkedBoundary(
         `revoke ${identifier(role)} from current_user`,
       );
     }
-    await verifyNoRoleResidue(cleanupClient, approval, diagnostic);
+    await verifyNoRoleResidue(
+      cleanupClient,
+      approval,
+      migrationIds,
+      diagnostic,
+    );
     for (const role of [owner, worker, reader]) {
       // PostgreSQL DROP ROLE has no CASCADE form: outstanding dependencies fail.
       await command(
@@ -2219,7 +2374,7 @@ export async function cleanupMarkedBoundary(
         `drop role ${identifier(role)}`,
       );
     }
-    await verifyNoRunResidue(cleanupClient, approval, diagnostic);
+    await verifyNoRunResidue(cleanupClient, approval, migrationIds, diagnostic);
     await command(cleanupClient, 'CLEANUP_COMMIT', 'commit');
     evidence.cleanup.status = 'PASS';
   } catch (error) {
@@ -2315,7 +2470,7 @@ async function runV09AuthorizedPostgresEvidence({
         );
       });
       await audited(evidence, 'PRISTINE_BOUNDARY', () =>
-        preflightPristine(client, authorized.approval),
+        preflightPristine(client, authorized.approval, migrations),
       );
       await audited(evidence, 'BEGIN_TRANSACTION', async () => {
         await command(client, 'BEGIN_EVIDENCE_TRANSACTION', 'begin');
