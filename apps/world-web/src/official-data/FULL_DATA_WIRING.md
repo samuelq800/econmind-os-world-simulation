@@ -24,10 +24,25 @@ object/reference datasets are read without a fabricated country filter;
 geography uses its bounded section route. Exact decimal strings retain source
 units and are not turned into live HUD numbers by this matrix.
 
-Current boundary: A's read code is merged, but the opt-in flag, dedicated
-database role, production readback, static map URLs and formal OpeningSeed are
-separate E/owner evidence. This slice does not connect the six game pages to
-those APIs. `OfficialSourceStatus` is a fail-closed prewire: disconnected,
-invalid, unavailable and empty states show no fixture value or command action.
-Existing office gameplay remains local rehearsal until authorized runtime
-projection and command receipts are independently verified.
+The active static Season 1 country game now has a read-only **Source intel**
+drawer. It loads the 34-item catalog only when opened, then fetches one chosen
+dataset page at a time. Each Office's relevant dossiers appear first; all 34
+remain reachable. Array reads use a country filter only when A's actual
+association contract permits it. Exact source decimal strings and top-level
+fields appear without numeric coercion; concise field glances are optional, and
+every fetched row has an expandable full-field view. Geography sections and
+large string fragments remain bounded. A country switch, drawer close or page
+exit retires the old read. The existing map, local planning loop and Office
+actions are unchanged and do not consume these rows as authority.
+
+With no verified API origin, the drawer says **Source not connected** and makes
+no request. Invalid provenance, lost source or an empty country result have
+separate states without fixture or zero-value substitution. The React
+`OfficialSourceStatus` remains a prewire; the mounted product entry is the
+static `season1-immersive` page and its equivalent status drawer.
+
+Current boundary: A's read code is merged, but production host/role/readback,
+static map URLs and formal OpeningSeed are separate E/owner evidence. This is
+code-level optional API binding, not a verified online connection. Existing
+Office gameplay remains local rehearsal until authorized runtime projection
+and command receipts are independently verified.
