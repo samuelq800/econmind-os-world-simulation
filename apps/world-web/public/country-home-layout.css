@@ -1,0 +1,13 @@
+/* Non-authoritative country-home layout overlay; the selected UI source stays immutable. */
+.country-map-home .national-world {
+  background-color: #143e3e;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+@media (min-width: 1001px) {
+  .country-map-home .country-game {
+    height: auto;
+    min-height: max(930px, 100dvh);
+  }
+}
