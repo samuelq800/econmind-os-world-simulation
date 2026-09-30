@@ -1,7 +1,7 @@
 # World V2 data connections — current integration record
 
 Snapshot: 2026-09-30. Repository: `samuelq800/econmind-os-world-simulation`.
-Observed main: `d8a1b4a9c0970414d6e0a9486f494bf1a3f47ec8`.
+Observed World main: `d32eb2a232415429ea95975ecbdc7afa159ec8cf`.
 This is a factual delivery index, not a migration instruction or a replacement
 for `status/progress.json`. No gate, ADR or economic rule is approved here.
 
@@ -30,11 +30,12 @@ events. Source decimal values and provenance are preserved, not fabricated.
 | Source preservation       | Production readback: 87 balanced artifacts in 278 immutable rows, 70 profiles, matching population and integrity guard        | All map images stored as business-table rows                                          |
 | Offline mapping           | PR #20 merged at `d019ea1`; deterministic formatting fix #23 at `833fc03`; all 34 datasets and 203 map identities covered     | All source fields adopted as authoritative opening state                              |
 | Country / full-source API | #16 at `65bb72c`, #22 at `94b9e28`; fixed server whitelist, hash checks, lossless decimals and bounded pagination             | A deployed production host, usable server credential or successful live browser fetch |
+| Full-source DB permission | #30 merged at `ede72d1`; main-site publisher #77/#78 merged and run `36672349466` verified 0021 production readback           | API process deployment, dedicated LOGIN credential, browser connection or Gate B      |
 | Public CORS               | #26 at `e36bcd3`; exact-origin opt-in for approved public read routes only                                                    | Credentialed/private/Command route exposure                                           |
 | Immersive page            | #17 at `0777505`, #28 at `ed0ad12`, status clarification #31 at `a5cc630`; country binding and 34-dataset Source intel drawer | Live economic state, prices, settlement or durable receipt execution                  |
 | Map files                 | Separate pinned manifest and query catalogue; existing static page maps retained                                              | Catalogue `publicUrl` is still null; all 203 published URLs have not been evidenced   |
 | Opening admission         | #21 at `ef2b785`; independent source/map/country checks and transactional readback code                                       | Valid official OpeningSeed: six semantic gaps remain in the reviewed handoff          |
-| CI baseline               | #32 at `d8a1b4a`; exact candidate `d355bb6`, run `36661049743` SUCCESS and B APPROVED_FOR_MERGE                               | Dedicated staging, production dispatch or Gate B approval                             |
+| CI baseline               | #32 at `d8a1b4a`; exact candidate `d355bb6`, run `36661049743` SUCCESS and B APPROVED_FOR_MERGE                               | API staging/production deployment or Gate B approval                                  |
 
 PR references above are in the World repository. Short merge IDs identify
 integration points, not independent test targets. Older implementation reports
@@ -56,35 +57,52 @@ policies and real 0020 ledger row. Main-site run `36657427073` succeeded on
 this update. It used a read-only query, not a migration retry. The earlier
 cancelled publication run `36654533470` remains historically UNKNOWN.
 
-PR #30 (0021 full-source reader) is still OPEN at
-`70ab4acbcde68bde73ce4fc40b924383d5e9e068`, based on PR #32's merged main.
-B confirmed unchanged SQL/permission semantics and the updated reachable source
-provenance; final combined CI and B's final integration approval remain pending
-at this snapshot. The 0020 audit does not authorize or prove 0021
-publication. Production execution remains E-owned through the approved
-main-site release chain; no duplicate executor or ad hoc SQL path is added.
-Legacy `public`, `auth`, `storage` and the original website remain out of scope.
+PR #30 (0021 full-source reader) subsequently merged to World main at
+`ede72d1adc97272c56ec0733227d72c2b8e89207`. The main-site controlled
+publisher #77 and its strict preflight correction #78 merged to main at
+`2470c5062d97ed2fb12a9db0e21a8651f58880f5` and
+`4b58a28bfea93cdca33bd2e79782bf048376adfe`, respectively. Its first
+authorized run `36668095506` stopped before writing 0021 because the
+preflight incorrectly expected unchunked storage roots; that run remains
+UNKNOWN for publication, not a failed migration. The separately authorized
+single retry [run `36672349466`](https://github.com/samuelq800/econmind-os/actions/runs/36672349466)
+on the exact #78 main head succeeded: read-only preflight, one atomic 0021
+write, and post-write verifier all passed. The verifier reported
+`WORLD_V2_API_FULL_READER_RELEASE_VERIFIED`, with the exact 20-to-21 ledger
+transition, 2-to-3 policies, 142 preserved source-storage rows (23 roots and
+119 chunks), 34 reconstructed dataset digests, and unchanged source/bundle
+state. The non-secret [main-site release report](https://github.com/samuelq800/econmind-os/blob/31d37dc8f700bec4e4cbbd6f29e9cf52e74babdc/docs/WORLD_V2_0021_FULL_READER_RELEASE_2026_09_30.md)
+holds the pinned run and artifact checksums. This is **database publication
+evidence only**: the bundle remains `IMPLEMENTED_UNVERIFIED_CANDIDATE` with
+`activation_allowed=false`; no production API process, dedicated LOGIN,
+browser fetch, OpeningSeed, worker or Gate B is established. Legacy `public`,
+`auth`, `storage` and the original website remain out of scope.
 
 ## Next connection sequence and ownership
 
-1. **E / B:** finish PR #30 combined-candidate checks and incremental review;
-   retain the frozen migration bytes/hash/provenance. Merge only after those
-   checks, then handle any separately authorized publication and readback once.
-2. **E / A:** establish the actual server host and least-privilege credential
-   configuration. Required country-reader settings include `WORLD_DATABASE_URL`,
-   `WORLD_API_DB_LOGIN_ROLE`, `WORLD_API_DB_READER_ROLE` and
-   `WORLD_API_OFFICIAL_COUNTRY_DB_ENABLED`. Public read CORS uses
-   `WORLD_API_OFFICIAL_PUBLIC_ORIGINS`; the verified Pages browser origin is
-   `https://samuelq800.github.io`. Do not put database secrets in browser config.
-   No production API base URL is confirmed by this record.
-3. **D / E:** verify the actual page-to-API connection across all dataset
+1. **E / A:** select and authorize an actual server host and deploy the already
+   merged `apps/world-api` process with a dedicated non-admin PostgreSQL LOGIN
+   credential, granted only membership in `world_v2_api_reader`. Repository
+   inspection found `apps/world-api` build/start scripts but no production API
+   deployment workflow, host manifest or confirmed API base URL. The server
+   needs `ECONMIND_ENV=production`, `WORLD_DATABASE_URL` (remote TLS),
+   `WORLD_DATABASE_FINGERPRINT=world-v2-production`,
+   `WORLD_API_DB_LOGIN_ROLE`, `WORLD_API_DB_READER_ROLE=world_v2_api_reader`,
+   `WORLD_API_OFFICIAL_COUNTRY_DB_ENABLED=true`, and
+   `WORLD_API_ALL_DATA_ENABLED=true`. Set
+   `WORLD_API_OFFICIAL_PUBLIC_ORIGINS=https://samuelq800.github.io` for the
+   verified Pages browser origin and an approved bind host/port. Keep the
+   database credential server-only; no LOGIN creation or activation is
+   authorized by this status record. Prove host identity, least privileges,
+   `/readyz` and bounded dataset reads before assigning a browser API URL.
+2. **D / E:** verify the actual page-to-API connection across all dataset
    categories, paging, country/region association, geography and empty/error
    states. Verify map publication URLs against their pinned identities.
    Merged frontend wiring is not a substitute for this deployed readback.
-4. **F:** finish the separate scrolling/map-fit repair, PR #33 (OPEN at this
-   snapshot), preserving the authoritative UI and D's data wiring. Review and
+3. **F:** finish the separate scrolling/map-fit repair, PR #33 (OPEN at its
+   earlier snapshot), preserving the authoritative UI and D's data wiring. Review and
    publish separately from database permissions; do not claim it is already live.
-5. **C / F:** preserve the complete mapping and six opening-semantic gaps in
+4. **C / F:** preserve the complete mapping and six opening-semantic gaps in
    [the opening handoff](F_OFFICIAL_OPENING_WORKER_HANDOFF.md). Resolve currency,
    Treasury/Central-Bank separation and ownership/authority semantics before
    any authoritative seed conversion. Do not invent missing values or start a
@@ -98,7 +116,7 @@ be fabricated. Existing UI, maps and engines should be reused, not rebuilt.
 
 This update changes documentation only. Its verification is changed-file
 formatting, local link-target existence and `git diff --check`; it does not
-rerun the economic suites or claim a new production readback. The PR #32 CI
+rerun the economic suites or perform another production readback. The PR #32 CI
 result is tied only to `d355bb6557492aa0d5a9edde3d408a115a85a99f`.
 B's decision used manual exact-diff review plus exact-SHA CI; an incomplete
 security-plugin scan is not recorded as PASS.
