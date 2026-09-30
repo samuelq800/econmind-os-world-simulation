@@ -42,7 +42,7 @@ export const V09_STAGING_CANDIDATE_0021 = Object.freeze({
   migration_id: '0021_world_v2_official_full_data_reader',
   path: 'database/migrations/artifacts/0021_world_v2_official_full_data_reader.sql',
   sha256: 'e5c75c9f731283571680647d0447fd88924bf8a1476f67fe71b7c663ead1f670',
-  artifact_source_commit: '7631a97e8313e79719524140e3339d54b6563897',
+  artifact_source_commit: 'f2ceea4bce70e8d2a193c641f87af5ce8d2e47e3',
 });
 const REVIEWED_ADDITIONS = Object.freeze([
   Object.freeze({

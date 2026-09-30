@@ -38,12 +38,12 @@ function environment(
 }
 
 describe('V09 disposable PostgreSQL evidence boundary', () => {
-  it('binds the current 20-artifact main chain and exact new cleanup objects', async () => {
+  it('binds the current exact 0021-pinned chain and main cleanup baseline', async () => {
     const migrations = await loadV09StagingMigrationChain();
     expect(migrations.map((migration) => migration.migration_id)).toEqual(
-      V09_STAGING_MIGRATION_IDS,
+      [...V09_STAGING_MIGRATION_IDS, V09_STAGING_CANDIDATE_0021.migration_id],
     );
-    expect(migrations).toHaveLength(20);
+    expect(migrations).toHaveLength(21);
 
     const inventory = expectedV09StagingCleanupInventory({
       roles: { migration_owner: 'v09_staging_migration_owner' },
@@ -72,12 +72,13 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
         'utf8',
       ),
     );
-    const main = manifest.migrations as Array<Record<string, unknown>>;
+    const complete = manifest.migrations as Array<Record<string, unknown>>;
+    const main = complete.slice(0, -1);
     const candidate = {
       ...V09_STAGING_CANDIDATE_0021,
       release_order: 21,
     };
-    const complete = [...main, candidate];
+    expect(complete.at(-1)).toMatchObject(candidate);
     expect(assertV09StagingMigrationAllowlist(main)).toEqual(
       V09_STAGING_MIGRATION_IDS,
     );
