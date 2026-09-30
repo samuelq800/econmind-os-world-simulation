@@ -40,9 +40,10 @@ function environment(
 describe('V09 disposable PostgreSQL evidence boundary', () => {
   it('binds the current exact 0021-pinned chain and main cleanup baseline', async () => {
     const migrations = await loadV09StagingMigrationChain();
-    expect(migrations.map((migration) => migration.migration_id)).toEqual(
-      [...V09_STAGING_MIGRATION_IDS, V09_STAGING_CANDIDATE_0021.migration_id],
-    );
+    expect(migrations.map((migration) => migration.migration_id)).toEqual([
+      ...V09_STAGING_MIGRATION_IDS,
+      V09_STAGING_CANDIDATE_0021.migration_id,
+    ]);
     expect(migrations).toHaveLength(21);
 
     const inventory = expectedV09StagingCleanupInventory({
