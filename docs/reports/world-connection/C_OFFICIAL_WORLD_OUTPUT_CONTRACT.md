@@ -30,7 +30,7 @@ fingerprint is
 `sha256:3cec8010e0dfb6cb82aca699f95610d40ae70e30c27a1fa0abf119682885706d`.
 
 The gaps schema is `OFFICIAL_WORLD_OPENING_GAPS_V1`. Its fingerprint is
-`sha256:2f5d8449692f53c3f03e9791e23112e1c04798a413c47bf8e0eef4347b519db1`.
+`sha256:75f34b4a2943370cba1bd7bf64e697b03dfc44d0013f0fe3cb41c4919c2e0ca5`.
 
 ## Consumer rules
 
@@ -63,7 +63,7 @@ The gaps schema is `OFFICIAL_WORLD_OPENING_GAPS_V1`. Its fingerprint is
 
 ## Current named blockers
 
-- sole existing World ID binding;
+- single authorized production World ID binding;
 - approved inventory title-holder/risk-bearer identity semantics;
 - scenario accounting-unit → Core settlement-currency authority;
 - Treasury/Central-Bank balance split;

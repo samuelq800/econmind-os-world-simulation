@@ -9,6 +9,7 @@ Status: `IMPLEMENTED_UNVERIFIED`
 - implementation: `d101ac877eda23d44407ee82db35b5128f456b98`
 - finance-bound refinement: `a3725160b8857052451efb1d6b7d2da06a96e069`
 - final formatted mapping candidate: `831ffc9e982b76ede628563778b8136baa0bcb5d`
+- production-readback wording fix: `945462030f97e683ece66700cc75759e5768cfd3`
 - branch: `codex/c-official-world-mapping`
 
 ## Output
@@ -16,7 +17,7 @@ Status: `IMPLEMENTED_UNVERIFIED`
 | Artifact                                |     Bytes | File SHA-256                                                       |
 | --------------------------------------- | --------: | ------------------------------------------------------------------ |
 | `C_OFFICIAL_WORLD_OPENING_MAPPING.json` | 7,067,847 | `bf6f9dfa48177e331728922dd9fa5178773f904ed448d24209fff0c492f1cca1` |
-| `C_OFFICIAL_WORLD_OPENING_GAPS.json`    |   227,231 | `7529976fc28dfca24e3b3ee61f232d2bb9b0ff5a269f3b1a28280cbfb1d06cbb` |
+| `C_OFFICIAL_WORLD_OPENING_GAPS.json`    |   227,292 | `750793c20afcfe55359f960a2a298ad64444a564015b1f6e18c70417cae0c346` |
 
 Canonical object fingerprints are recorded in the output contract. Regeneration
 from the selected immutable packages reproduced both file hashes exactly.
