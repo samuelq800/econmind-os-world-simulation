@@ -32,4 +32,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:world-v2-official-edge
       - run: deno check supabase/functions/world-v2-official-read/index.ts
+      - run: pnpm --filter @econmind/core build
+      - run: pnpm --filter @econmind/world-worker build
       - run: pnpm --filter @econmind/world-api typecheck
