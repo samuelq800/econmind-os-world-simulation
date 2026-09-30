@@ -58,12 +58,16 @@ function auditQuery(migration) {
   return [
     'select jsonb_build_object(',
     "  'phase', 'READBACK_AUDIT',",
-    "  'migration_id', " + sqlLiteral(migration.migration_id) + ',',
-    "  'artifact_sha256', " + sqlLiteral(migration.sha256) + ',',
-    "  'source_repo_commit', " +
-      sqlLiteral(migration.artifact_source_commit) +
-      ',',
-    "  'release_order', " + Number(migration.release_order) + ',',
+    "  'ledger_entries', coalesce((",
+    '    select jsonb_agg(jsonb_build_object(',
+    "      'migration_id', ledger.migration_id,",
+    "      'artifact_sha256', ledger.artifact_sha256,",
+    "      'source_repo_commit', ledger.source_repo_commit,",
+    "      'release_order', ledger.release_order",
+    '    ) order by ledger.migration_id, ledger.artifact_sha256, ledger.source_repo_commit, ledger.release_order)',
+    '    from world_v2.schema_release ledger',
+    '    where ledger.migration_id = ' + sqlLiteral(migration.migration_id),
+    "  ), '[]'::jsonb),",
     "  'reader_role', (",
     '    select jsonb_build_object(',
     "      'can_login', rolcanlogin,",

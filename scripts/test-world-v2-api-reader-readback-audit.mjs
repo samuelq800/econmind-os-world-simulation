@@ -13,6 +13,13 @@ assert.equal(
 );
 assert.equal(audit.migration.release_order, 20);
 assert.ok(audit.query.includes("'READBACK_AUDIT'"));
+assert.ok(audit.query.includes('world_v2.schema_release ledger'));
+assert.ok(audit.query.includes("'ledger_entries'"));
+assert.ok(
+  audit.query.includes(
+    "where ledger.migration_id = '0020_world_v2_official_country_reader'",
+  ),
+);
 assert.ok(audit.query.includes("'postgres'"));
 assert.ok(audit.query.includes('rolcreaterole'));
 assert.ok(audit.query.includes('grantor_role.rolname'));
