@@ -1,0 +1,35 @@
+name: World V2 reader readback audit source
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/e-reader-readback-audit
+    paths:
+      - .github/workflows/world-v2-api-reader-readback-audit.yml
+      - database/migrations/**
+      - scripts/migration-policy.mjs
+      - scripts/render-world-v2-api-reader-readback-audit.mjs
+      - scripts/test-world-v2-api-reader-readback-audit.mjs
+
+permissions:
+  contents: read
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm migration:validate
+      - run: node scripts/test-world-v2-api-reader-readback-audit.mjs
