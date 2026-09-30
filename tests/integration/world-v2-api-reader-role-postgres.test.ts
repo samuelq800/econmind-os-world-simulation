@@ -282,6 +282,19 @@ postgresDescribe('World V2 selected-country server reader role', () => {
       { admin_option: false, inherit_option: false, set_option: true },
     ]);
 
+    const schemaUsage = await currentAdmin().query<{ nspname: string }>(
+      `select namespace.nspname
+         from pg_namespace namespace
+        where namespace.nspname in ('auth', 'public', 'storage', 'world_v2')
+          and has_schema_privilege($1, namespace.oid, 'USAGE')
+        order by namespace.nspname`,
+      [READER_ROLE],
+    );
+    expect(schemaUsage.rows).toEqual([
+      { nspname: 'public' },
+      { nspname: 'world_v2' },
+    ]);
+
     const columns = await currentAdmin().query<{
       table_name: string;
       column_name: string;
@@ -319,6 +332,23 @@ postgresDescribe('World V2 selected-country server reader role', () => {
         column_name: 'activation_allowed',
       },
     ]);
+
+    const tablePrivileges = await currentAdmin().query<{
+      table_name: string;
+      privilege: string;
+    }>(
+      `select relation.relname as table_name, action.name as privilege
+         from pg_class relation
+         join pg_namespace namespace on namespace.oid = relation.relnamespace
+         cross join (values ('DELETE'), ('INSERT'), ('SELECT'), ('TRUNCATE'), ('UPDATE'))
+           as action(name)
+        where namespace.nspname in ('auth', 'public', 'storage', 'world_v2')
+          and relation.relkind in ('p', 'r')
+          and has_table_privilege($1, relation.oid, action.name)
+        order by relation.relname, action.name`,
+      [READER_ROLE],
+    );
+    expect(tablePrivileges.rows).toEqual([]);
 
     const policies = await currentAdmin().query<{
       tablename: string;
