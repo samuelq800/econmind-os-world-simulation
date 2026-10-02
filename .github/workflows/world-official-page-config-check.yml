@@ -8,11 +8,14 @@ on:
       - apps/world-web/package.json
       - apps/world-web/public/season1-immersive/country-context.js
       - apps/world-web/src/official-data/**
+      - apps/world-web/src/components/OfficialSourceConnectionStatus.tsx
+      - apps/world-web/src/App.tsx
       - apps/world-web/public/season1-immersive/country-game.js
       - scripts/configure-official-page-read.mjs
       - tests/world-web/official-*.test.ts
       - tests/tsconfig.official-explorer-country.json
       - tests/tsconfig.official-metric-source.json
+      - tests/tsconfig.official-source-status.json
   workflow_dispatch:
 
 permissions:
@@ -33,7 +36,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Actual Edge DTO, source identity and retired-session regressions
-        run: pnpm exec vitest run tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts tests/world-web/official-world-read-source.test.ts tests/world-web/official-explorer-country.test.ts tests/world-web/official-static-country-navigation.test.ts
+        run: pnpm exec vitest run tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts tests/world-web/official-world-read-source.test.ts tests/world-web/official-explorer-country.test.ts tests/world-web/official-static-country-navigation.test.ts tests/world-web/official-source-status-catalog.test.ts tests/world-web/official-source-status-view.test.ts
       - name: Focused lint and format
         run: |
           pnpm exec tsc -p tests/tsconfig.official-explorer-country.json
@@ -41,6 +44,9 @@ jobs:
           pnpm exec prettier --check scripts/configure-official-page-read.mjs tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts tests/world-web/official-static-country-navigation.test.ts apps/world-web/package.json .github/workflows/deploy-world-web.yml .github/workflows/world-official-page-config-check.yml apps/world-web/src/official-data/WORLD_READ_SOURCE.md
           pnpm exec eslint apps/world-web/src/official-data/official-explorer-country*.ts tests/world-web/official-explorer-country.test.ts
           pnpm exec prettier --check apps/world-web/src/official-data/official-explorer-country*.ts apps/world-web/src/official-data/OFFICIAL_EXPLORER_CONTRACT.md tests/world-web/official-explorer-country.test.ts tests/tsconfig.official-explorer-country.json
+          pnpm exec tsc -p tests/tsconfig.official-source-status.json
+          pnpm exec eslint apps/world-web/src/official-data/official-source-status-*.ts apps/world-web/src/components/OfficialSourceConnectionStatus.tsx apps/world-web/src/App.tsx tests/world-web/official-source-status-*.test.ts
+          pnpm exec prettier --check apps/world-web/src/official-data/official-source-status-* apps/world-web/src/components/OfficialSourceConnectionStatus.tsx apps/world-web/src/App.tsx tests/world-web/official-source-status-*.test.ts tests/tsconfig.official-source-status.json
       - name: Browser boundaries, secrets and selected UI source
         run: |
           pnpm --filter @econmind/core build

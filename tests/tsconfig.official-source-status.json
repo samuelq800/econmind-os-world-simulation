@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client", "vitest/globals"]
+  },
+  "include": [
+    "world-web/official-source-status-*.test.ts",
+    "../apps/world-web/src/official-data/official-source-status-*.ts",
+    "../apps/world-web/src/components/OfficialSourceConnectionStatus.tsx"
+  ]
+}

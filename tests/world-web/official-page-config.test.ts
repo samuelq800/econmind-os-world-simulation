@@ -3,7 +3,10 @@ import { readFileSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import { describe, expect, it, vi } from 'vitest';
 
-import { configurePage } from '../../scripts/configure-official-page-read.mjs';
+import {
+  configurePage,
+  configureRootPage,
+} from '../../scripts/configure-official-page-read.mjs';
 import {
   OFFICIAL_COUNTRY_SOURCE_QUERY,
   OFFICIAL_COUNTRY_PACKAGE_ID,
@@ -223,5 +226,71 @@ describe('six-role official-source page configuration', () => {
       );
     }
     expect(query).toHaveBeenCalled();
+  });
+});
+
+// Root shares the same post-build config path; no new public file or env key.
+describe('root official-source page configuration', () => {
+  const rootHtml = readFileSync(
+    new URL('../../apps/world-web/index.html', import.meta.url),
+    'utf8',
+  );
+  it('leaves a disabled root byte-identical and removes a previous injection', () => {
+    expect(configureRootPage(rootHtml, undefined)).toBe(rootHtml);
+    expect(configureRootPage(configureRootPage(rootHtml, base), '')).toBe(
+      rootHtml,
+    );
+  });
+  it('injects exactly the same frozen config as the six-role page and replaces it idempotently', () => {
+    const output = configureRootPage(rootHtml, base);
+    const readConfig = (text: string) =>
+      text.match(
+        /<script>(window\.__ECONMIND_WORLD_READ_CONFIG__[\s\S]*?)<\/script>/,
+      )?.[1];
+    expect(readConfig(output)).toBe(readConfig(configurePage(html, base)));
+    expect(configureRootPage(output, base)).toBe(output);
+    expect(
+      output.indexOf('window.__ECONMIND_WORLD_READ_CONFIG__'),
+    ).toBeLessThan(output.indexOf('</head>'));
+    expect(
+      configureRootPage(
+        output,
+        base.replace('edge.example', 'replacement.example'),
+      ),
+    ).not.toContain('edge.example');
+    const sandbox: { __ECONMIND_WORLD_READ_CONFIG__?: object } = {};
+    runInNewContext(`const window=globalThis;${readConfig(output)}`, sandbox);
+    expect(sandbox.__ECONMIND_WORLD_READ_CONFIG__).toEqual({
+      apiBaseUrl: `${base}/`,
+    });
+    expect(Object.isFrozen(sandbox.__ECONMIND_WORLD_READ_CONFIG__)).toBe(true);
+  });
+  it.each([
+    'not a URL',
+    'http://edge.example/functions/v1/world-v2-official-read',
+    'https://user:password@edge.example/functions/v1/world-v2-official-read',
+    `${base}?token=synthetic`,
+    `${base}#fragment`,
+    'https://edge.example/functions/v1/other-function',
+    `${base}/</script><script>alert(1)</script>`,
+  ])('rejects an invalid or script-bearing root address: %s', (address) => {
+    expect(() => configureRootPage(rootHtml, address)).toThrow(
+      'OFFICIAL_READ_BASE_URL_INVALID',
+    );
+  });
+  it('safely serializes an allowed quote-bearing hostname and rejects missing or duplicate root anchors', () => {
+    const address = base.replace('edge.example', "quote'host.example");
+    const output = configureRootPage(rootHtml, address);
+    expect(
+      output.match(/window\.__ECONMIND_WORLD_READ_CONFIG__/g),
+    ).toHaveLength(1);
+    expect(output.match(/<script>window\./g)).toHaveLength(1);
+    expect(output).toContain(`"apiBaseUrl":"${address}/"`);
+    expect(() => configureRootPage('', base)).toThrow(
+      'OFFICIAL_READ_ROOT_ANCHOR_INVALID',
+    );
+    expect(() => configureRootPage(rootHtml + '</head>', base)).toThrow(
+      'OFFICIAL_READ_ROOT_ANCHOR_INVALID',
+    );
   });
 });
