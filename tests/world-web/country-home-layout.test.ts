@@ -26,7 +26,9 @@ describe('country-home map layout guardrails', () => {
   it('keeps the original desktop projection and does not fabricate anchorless map pins', () => {
     expect(css).not.toContain('anchor-size(');
     expect(css).not.toContain('scale(');
-    expect(css).toContain('clip-path: inset(205px 460px 250px calc(31% + 28px))');
+    expect(css).toContain(
+      'clip-path: inset(205px 460px 250px calc(31% + 28px))',
+    );
     expect(css).toMatch(
       /\.national-site-pins button:not\(\[style\*=['"]left:['"]\]\)\s*\{\s*display: none;/,
     );
