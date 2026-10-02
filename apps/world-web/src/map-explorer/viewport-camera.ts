@@ -2,7 +2,11 @@
 export type ExplorerCamera = Readonly<{ x: number; y: number; width: number }>;
 export type ExplorerViewport = Readonly<{ width: number; height: number }>;
 export type ExplorerCameraFit =
-  | Readonly<{ kind: 'world'; camera: ExplorerCamera }>
+  | Readonly<{
+      kind: 'world';
+      camera: ExplorerCamera;
+      frame: readonly [number, number];
+    }>
   | Readonly<{
       kind: 'bounds';
       bounds: readonly [number, number, number, number];
@@ -26,8 +30,19 @@ export function cameraForViewport(
   fit: ExplorerCameraFit | null,
 ): ExplorerCamera {
   if (fit === null || !isUsableViewport(size)) return current;
-  if (fit.kind === 'world')
-    return { ...fit.camera, width: size.width < 600 ? 700 : fit.camera.width };
+  if (fit.kind === 'world') {
+    const [width, height] = fit.frame;
+    // Preserve the existing overview center and horizontal margin, but fit
+    // both source dimensions instead of cropping with a mobile width cap.
+    const padding = fit.camera.width / width;
+    return {
+      ...fit.camera,
+      width: Math.max(
+        fit.camera.width,
+        ((height * size.width) / size.height) * padding,
+      ),
+    };
+  }
   const [left, top, right, bottom] = fit.bounds;
   return {
     x: (left + right) / 2,

@@ -34,6 +34,11 @@ const scenes = sceneIndex as CountryScene[];
 type Camera = { x: number; y: number; width: number };
 type Size = { width: number; height: number };
 const world: Camera = { x: 887, y: 443.5, width: 1900 };
+const worldFit: ExplorerCameraFit = {
+  kind: 'world',
+  camera: world,
+  frame: [partition.width, partition.height],
+};
 const countries = partition.territories.map((country, index) => {
   const values = (
     country.path.match(/-?\d+(?:\.\d+)?(?:e[+-]?\d+)?/gi) ?? []
@@ -462,10 +467,7 @@ export function WorldExplorer({
   const official =
     officialState.kind === 'ready' ? officialState.data : undefined;
   const [camera, setCamera] = useState<Camera>(world);
-  const cameraFit = useRef<ExplorerCameraFit | null>({
-    kind: 'world',
-    camera: world,
-  });
+  const cameraFit = useRef<ExplorerCameraFit | null>(worldFit);
   const cameraRef = useRef(camera),
     sizeRef = useRef(size);
   cameraRef.current = camera;
@@ -558,7 +560,7 @@ export function WorldExplorer({
   const fit = useCallback((id: string) => {
     const c = countries.find((item) => item.id === id);
     if (!c) {
-      cameraFit.current = { kind: 'world', camera: world };
+      cameraFit.current = worldFit;
       setCamera((current) =>
         cameraForViewport(current, sizeRef.current, cameraFit.current),
       );

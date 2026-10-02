@@ -7,6 +7,7 @@ import {
   type ExplorerCameraFit,
 } from '../../apps/world-web/src/map-explorer/viewport-camera.js';
 import scenes from '../../apps/world-web/src/assets/country-scenes/index.json';
+import partition from '../../apps/world-web/src/map-lab/land-partition.json';
 
 const initial = { x: 887, y: 443.5, width: 1900 };
 const sizes = [
@@ -99,13 +100,54 @@ describe('Root viewport FIT versus MANUAL camera policy', () => {
     },
   );
 
-  it('preserves existing world mobile/desktop framing and continent bounds fitting', () => {
-    const fit: ExplorerCameraFit = { kind: 'world', camera: initial };
-    expect(cameraForViewport(initial, sizes[1]!, fit)).toEqual({
-      ...initial,
-      width: 700,
-    });
+  it('keeps the complete overview source frame on mobile/short desktop without changing its center or margin', () => {
+    const fit: ExplorerCameraFit = {
+      kind: 'world',
+      camera: initial,
+      frame: [partition.width, partition.height],
+    };
+    for (const size of [
+      { width: 390, height: 730 },
+      { width: 1440, height: 394 },
+      { width: 390, height: 390 },
+      { width: 1440, height: 794 },
+    ]) {
+      const camera = cameraForViewport(initial, size, fit);
+      const height = (camera.width * size.height) / size.width;
+      expect(camera.x).toBe(initial.x);
+      expect(camera.y).toBe(initial.y);
+      expect(camera.x - camera.width / 2).toBeLessThanOrEqual(0);
+      expect(camera.x + camera.width / 2).toBeGreaterThanOrEqual(
+        partition.width,
+      );
+      expect(camera.y - height / 2).toBeLessThanOrEqual(0);
+      expect(camera.y + height / 2).toBeGreaterThanOrEqual(partition.height);
+      const manual = { x: 900, y: 400, width: 700 };
+      expect(cameraForViewport(manual, size, null)).toBe(manual);
+      // 0/center restore the full overview fit even after manual zoom/pan.
+      expect(cameraForViewport(manual, size, fit)).toEqual(camera);
+    }
+    expect(cameraForViewport(initial, sizes[1]!, fit).width).toBe(1900);
     expect(cameraForViewport(initial, sizes[0]!, fit)).toEqual(initial);
+  });
+
+  it('restores full overview fitting through resize round trips and keeps continent bounds fitting', () => {
+    const fit: ExplorerCameraFit = {
+      kind: 'world',
+      camera: initial,
+      frame: [partition.width, partition.height],
+    };
+    const desktop = { width: 1440, height: 794 },
+      mobile = { width: 390, height: 730 },
+      short = { width: 1440, height: 394 };
+    const first = cameraForViewport(initial, desktop, fit);
+    const resized = cameraForViewport(
+      cameraForViewport(first, mobile, fit),
+      short,
+      fit,
+    );
+    expect(resized.width).toBeGreaterThan(1900);
+    expect(cameraForViewport(resized, desktop, fit)).toEqual(first);
     const continent: ExplorerCameraFit = {
       kind: 'bounds',
       bounds: [200, 100, 600, 400],
