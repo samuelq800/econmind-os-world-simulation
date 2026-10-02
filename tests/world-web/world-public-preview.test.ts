@@ -94,6 +94,7 @@ const officialLoader = () =>
         readFileSync(
           `apps/world-web/public/season1-immersive/countries/data/${/(\d{2})\.json$/.exec(String(url))![1]}.json`,
         ),
+        { headers: { 'content-type': 'application/json' } },
       )) as typeof fetch,
   });
 async function officialCountry(
