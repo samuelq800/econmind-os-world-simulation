@@ -23,6 +23,16 @@ describe('country-home map layout guardrails', () => {
     expect(js).toMatch(/function positionSites\(\).*scale=Math\.min\(w,h\)/);
   });
 
+  it('keeps the original desktop projection and does not fabricate anchorless map pins', () => {
+    expect(css).not.toContain('anchor-size(');
+    expect(css).not.toContain('scale(');
+    expect(css).toMatch(
+      /\.national-site-pins button:not\(\[style\*=['"]left:['"]\]\)\s*\{\s*display: none;/,
+    );
+    expect(js).toContain('if(!anchor)continue');
+    expect(js).toContain("commands['country-sites']");
+  });
+
   it('docks selected source details instead of stacking them over plans or missions', () => {
     expect(css).toContain('top: 460px !important');
     expect(css).toContain('.country-map-home .national-destination[hidden]');
