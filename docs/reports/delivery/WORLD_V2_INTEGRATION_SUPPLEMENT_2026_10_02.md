@@ -18,6 +18,16 @@ Root 已单独授权的一次纯 SELECT run `37036290594` 已产生真实回执�
 READBACK_LOCK 已退休并回读各锁名字为空；原 `37031019041` 仍 UNKNOWN，历史完整 ACL/bucket 保全仍 NOT_EVIDENCED，不能补造旧成功。
 条件已成立，Root 另授权既有 #85 一次新鲜权限 preflight（请求 ID `CT-SNAPSHOT-PREFLIGHT-POSTREADBACK-37036290594-V1`），B 同步窄核真实回执；无 key/Storage/Edge 发布授权，不重放 DDL。
 
+更新：新鲜 preflight `37037210421` 实际 PASS，权限原件 SHA-256 `ed27c28e34cce80304c7edd5399e8d8495fd87afe37055ce5a94c9d219e2949a`；B 独立真实回执窄核后给 existing85 技术 RELEASE_GO。
+Root 另行单次授权 publish `37038527126`，实际 **FAILURE** 于 `SNAPSHOT_PUBLISHER_KEY_AMBIGUOUS`。
+凭据 metadata 响应已收到，但未选出可用 publisher key；候选数量未记录，不能推断多个 key、缺 key 或类型错误是哪一种。
+transport callback 未进入、Storage API 调用 0：输入 34、attempted/created/byte-verified/对象操作失败均 0、not-attempted 34。
+新 Edge deploy、GET/OPTIONS/CORS 全 SKIPPED/NOT_RUN；Pages URL 配置不改，来源 API 仍未接通。
+runner 私有文件已清理、RELEASE_LOCK 退休、各 World 锁为空；无远端 cleanup/覆盖/迁移/LOGIN/经济启动，原 UNKNOWN 不变。
+耐久 `artifacts/e-snapshot-publish-once.OHX0P4/handoff.json` SHA-256 `29af83ed49810983e722c48cda4f2d4040655472350133f95a4f879d1d100c87`，Root 实际重算/读取一致。
+下一步仅离线按[官方 Management API 契约](https://supabase.com/docs/reference/api/v1-get-project-api-keys)检查 selector、区分非秘密失败类别；必要时准备独立有界 metadata-only 诊断候选，经 B 窄审和 Root 新授权后才运行。
+本次失败不自动重试，不搜索旧站环境密钥、不新建/轮换 key、不泄漏原 API 响应。
+
 完整原始 70 国 × 6 职位 × 桌面/手机的 **840 HOME 原图已全部实际目视**，583 有问题、257 本范围未见重大问题、0 未查看。
 原始功能矩阵完成 420/420 组合，2,520 来源抽屉通过；旧异步导航 harness 阻塞和 7 个短超时失败均保留原件。
 19 个对应控件有界复核未复现，但不改写原始 FAIL。#58 的 navigation-only 补充已完成全部 840：838 PASS、59/central_bank/desktop 本地连接中断后 FAIL、60/finance/desktop 可见入口等待超时 BLOCKED；0 NOT_RUN。仅两项独立有界复核现均未复现，真实返回身份/href 和 59 的实际职位切换正确，零 page/console/request error；原件不改。
