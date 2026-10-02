@@ -14,6 +14,7 @@ import {
 } from '../support/v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
+import { snapshotStorageFixtureSql } from '../support/snapshot-storage-fixture.js';
 import { createV10TwoCountryTestFixture } from '../support/v10-two-country-fixture.js';
 
 const root = path.resolve(import.meta.dirname, '../..');
@@ -59,6 +60,7 @@ describe(`real staged HTTP lifecycle / ${native ? 'native PostgreSQL' : 'PGlite'
         'utf8',
       ),
     ) as { migrations: { path: string }[] };
+    await db.executeScript(snapshotStorageFixtureSql);
     for (const migration of manifest.migrations)
       await db.executeScript(
         await readFile(path.join(root, migration.path), 'utf8'),

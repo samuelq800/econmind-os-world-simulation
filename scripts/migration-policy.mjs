@@ -54,6 +54,22 @@ export function inspectMigrationSql(sql) {
   return [...new Set(violations)];
 }
 
+// Historical World-only staging must never execute the Storage-only companion.
+// Callers still validate the complete manifest/artifact provenance first.
+export function historicalWorldOnlyMigrations(migrations) {
+  if (migrations.length <= 21) return migrations;
+  const last = migrations.at(-1);
+  if (
+    migrations.length !== 22 ||
+    last.migration_id !== STORAGE_VETO_MIGRATION_ID ||
+    last.path !== STORAGE_VETO_PATH ||
+    last.sha256 !== STORAGE_VETO_SHA256 ||
+    last.artifact_source_commit !== '41f387700cf8f933a777f924c503d11cbcd99ffe'
+  )
+    throw new Error('STORAGE_VETO_HISTORICAL_PREFIX_INVALID');
+  return migrations.slice(0, 21);
+}
+
 function provenanceKey(commit, artifactPath) {
   return `${commit}:${artifactPath}`;
 }
