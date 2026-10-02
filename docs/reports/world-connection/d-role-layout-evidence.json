@@ -1,0 +1,3718 @@
+{
+  "schemaVersion": 1,
+  "baseSha": "85725830f0a6d102e73ae89697ab008f92208285",
+  "fullRepresentativeSha": "f599bc57d7acf77fb5da8b23cf08a6eca3042d40",
+  "clipRepresentativeSha": "9a2c966ebb2abc60c434053b24f8864009d4cd5d",
+  "visualReviewIsNotAutomatic": true,
+  "economicActionsExecuted": false,
+  "liveSourceVerified": false,
+  "full420Acceptance": false,
+  "evidenceFiles": [
+    {
+      "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/capture.json",
+      "sha256": "4bd2cb10e88a1a1f2cac334062d8c7b62a0b892a92c581194608812f852c04d2",
+      "bytes": 1147557
+    },
+    {
+      "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/manual-review-d.json",
+      "sha256": "4d6c743474479a38f56c069e509c38740ff074c9f6a7e9b72ca57d02dbfc84b9",
+      "bytes": 110874
+    },
+    {
+      "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/capture.json",
+      "sha256": "f3f634b82f7b091bdd1da905a1096a1af59c42d595bd5a13168e86d43f367a5e",
+      "bytes": 315805
+    },
+    {
+      "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/manual-review-d.json",
+      "sha256": "816d16586cd9c5c473b7d1065c4c8539261df40a8c045ac675d145c7590ee008",
+      "bytes": 24380
+    }
+  ],
+  "screenshotFiles": [
+    {
+      "path": "d-role-layout-evidence/67-captain-desktop-home.jpg",
+      "sha256": "3c92d43db42f08a3411c6a859b5a1c22e290d0377b89a5f2510f8e649cc44f3b",
+      "bytes": 354538
+    },
+    {
+      "path": "d-role-layout-evidence/01-central_bank-mobile-home.jpg",
+      "sha256": "9656815c80aceecdebebee217e1c651dca4f6aaaec525e5cef70bd7ae45b344f",
+      "bytes": 184705
+    },
+    {
+      "path": "d-role-layout-evidence/56-captain-mobile-home.jpg",
+      "sha256": "5a09a8471248d245b6ea80a9ebea91d4a7174af441520285bcb8f355ec1e4fb7",
+      "bytes": 171583
+    },
+    {
+      "path": "d-role-layout-evidence/56-central_bank-mobile-source-bottom.jpg",
+      "sha256": "0ab178fd033c2a87260ef8b64e7b96beacc1dd5728a1f424206fda3495291a5f",
+      "bytes": 63765
+    }
+  ],
+  "fullRepresentativeManualRows": [
+    {
+      "key": "01-captain-desktop",
+      "country": "01",
+      "role": "captain",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-captain-desktop-home.jpg",
+        "bytes": 327993,
+        "sha256": "5d7feac39802d8d50a2745c6cb327ce427f0aa0423b6a76aa31bd49885e2cb17"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-captain-mobile",
+      "country": "01",
+      "role": "captain",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-captain-mobile-home.jpg",
+        "bytes": 171511,
+        "sha256": "e7fd9b938b7697af8039582f7f0d4188ba1089661745943bab5bc08abb3a8932"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-finance-desktop",
+      "country": "01",
+      "role": "finance",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-finance-desktop-home.jpg",
+        "bytes": 335692,
+        "sha256": "3655ff018445cef18e3e58a30f2589c767319176a0c93793a82906177ac38f22"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-finance-mobile",
+      "country": "01",
+      "role": "finance",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-finance-mobile-home.jpg",
+        "bytes": 180996,
+        "sha256": "c07e8a2975c79cae1934f6a4e670b02f0a93bf7abdcdac5046dd225b581c581f"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-central_bank-desktop",
+      "country": "01",
+      "role": "central_bank",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-central_bank-desktop-home.jpg",
+        "bytes": 338647,
+        "sha256": "850c3bb42475f5dcb932c8cbac68ed00c772f2effb05d58291daf8d9bb4b3a5c"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-central_bank-mobile",
+      "country": "01",
+      "role": "central_bank",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-central_bank-mobile-home.jpg",
+        "bytes": 184705,
+        "sha256": "9656815c80aceecdebebee217e1c651dca4f6aaaec525e5cef70bd7ae45b344f"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-industry-desktop",
+      "country": "01",
+      "role": "industry",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-industry-desktop-home.jpg",
+        "bytes": 335742,
+        "sha256": "4bbfe36819d60a3da0070509e62ea6783ac8c593f8735dbd7965672bd0c89de3"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-industry-mobile",
+      "country": "01",
+      "role": "industry",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-industry-mobile-home.jpg",
+        "bytes": 181513,
+        "sha256": "6e0d69ceddf3becd5b05964a00cbf0295fcd2b4505910e0b76d171a44c1f371b"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-trade-desktop",
+      "country": "01",
+      "role": "trade",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-trade-desktop-home.jpg",
+        "bytes": 343243,
+        "sha256": "1a9bdedaab9a0d318374af2e43d318bf700d8259b67a7dbc0b83ec05df414822"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-trade-mobile",
+      "country": "01",
+      "role": "trade",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-trade-mobile-home.jpg",
+        "bytes": 194149,
+        "sha256": "718a0a307b4df998caa9ebc7bfd86f65b7a72a341a5534d75eccd8568fab8c2c"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-social-desktop",
+      "country": "01",
+      "role": "social",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-social-desktop-home.jpg",
+        "bytes": 343029,
+        "sha256": "364a6e57c053866501788a89500808596eb4a69ad1a634bb267666b915eb16b8"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-social-mobile",
+      "country": "01",
+      "role": "social",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/01-social-mobile-home.jpg",
+        "bytes": 187877,
+        "sha256": "872f423c61fa122b9fa44302463cd1cc937700ef6ef91af9ac67799ef318c326"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "03-captain-desktop",
+      "country": "03",
+      "role": "captain",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-captain-desktop-home.jpg",
+        "bytes": 355407,
+        "sha256": "53750e30e54d816ad6c76eb4a9897c7be6aba9da7760110ff37e4b5c00305e9e"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "03-captain-mobile",
+      "country": "03",
+      "role": "captain",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-captain-mobile-home.jpg",
+        "bytes": 181441,
+        "sha256": "0353d672b7691f9fa1b85c5455f78326c618b30eab66896064f41f31d4f908da"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "03-finance-desktop",
+      "country": "03",
+      "role": "finance",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-finance-desktop-home.jpg",
+        "bytes": 362918,
+        "sha256": "c5edd74c181cb17a17c8227e8ebde2a7c9a70a647ec7a79ebe2aaf779d218161"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "03-finance-mobile",
+      "country": "03",
+      "role": "finance",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-finance-mobile-home.jpg",
+        "bytes": 190776,
+        "sha256": "7af04b48323a4fbf0474cc00658023039e113ec0ef58968f9551be0f18217646"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "03-central_bank-desktop",
+      "country": "03",
+      "role": "central_bank",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-central_bank-desktop-home.jpg",
+        "bytes": 365411,
+        "sha256": "84c29eea12c7bff7f810b343bbf7669885262b36ff36bea1c1ba5759b64a9d69"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "03-central_bank-mobile",
+      "country": "03",
+      "role": "central_bank",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-central_bank-mobile-home.jpg",
+        "bytes": 193872,
+        "sha256": "3a25bfed138ce2f659a25df969d9bd87e4ab73846bca1622e598c433057eb52d"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "03-industry-desktop",
+      "country": "03",
+      "role": "industry",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-industry-desktop-home.jpg",
+        "bytes": 363364,
+        "sha256": "000564118b18cabeb9b3984ad3fc8bc653bac5b1b1cd5e27f36251542dbb1812"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "03-industry-mobile",
+      "country": "03",
+      "role": "industry",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-industry-mobile-home.jpg",
+        "bytes": 191026,
+        "sha256": "4cdafadf43ac6c9cfcf6a2b3b65bbecccbb689a1e64d41da47e73bcc31006343"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "03-trade-desktop",
+      "country": "03",
+      "role": "trade",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-trade-desktop-home.jpg",
+        "bytes": 370298,
+        "sha256": "7524590e61cfcc8170cd707bc16529f34def8e6c69241bee475775c7e6e41a67"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "03-trade-mobile",
+      "country": "03",
+      "role": "trade",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-trade-mobile-home.jpg",
+        "bytes": 203371,
+        "sha256": "54f2d16075154f6d74da743d661203f66abb7739b722cab745c7f1753a25f4ca"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "03-social-desktop",
+      "country": "03",
+      "role": "social",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-social-desktop-home.jpg",
+        "bytes": 371029,
+        "sha256": "09b544e600bbd4164eac59687bceb2ec608f8a97af19b5cab6829ce216d50162"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "03-social-mobile",
+      "country": "03",
+      "role": "social",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/03-social-mobile-home.jpg",
+        "bytes": 197682,
+        "sha256": "74b4fdc365d9260e0951179add86921d4d217a9a20b737bbc478b94781c3b2aa"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "05-captain-desktop",
+      "country": "05",
+      "role": "captain",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-captain-desktop-home.jpg",
+        "bytes": 369036,
+        "sha256": "6bbf6a78944384cb8665e4bd60ab934da423cae5b2a2f462ff7e2f07a35a04aa"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "05-captain-mobile",
+      "country": "05",
+      "role": "captain",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-captain-mobile-home.jpg",
+        "bytes": 177575,
+        "sha256": "759edf0bdbc4bd04de7b10cba5fc54cea4373a6188f6b300d25c5ca33c7d5287"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "05-finance-desktop",
+      "country": "05",
+      "role": "finance",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-finance-desktop-home.jpg",
+        "bytes": 376894,
+        "sha256": "7ddef912826961252f39f541d8405344c0494d162ce96f260d5912d6e84932d7"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "05-finance-mobile",
+      "country": "05",
+      "role": "finance",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-finance-mobile-home.jpg",
+        "bytes": 187117,
+        "sha256": "73cfc015c7e52ad28b0e32ef83d3216199e892faa1cd29264648695ff502f44e"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "05-central_bank-desktop",
+      "country": "05",
+      "role": "central_bank",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-central_bank-desktop-home.jpg",
+        "bytes": 379683,
+        "sha256": "8a54d8c896887780be48462012b3a0fb35e4c6c59bf2cfb2092eb158e67b123c"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "05-central_bank-mobile",
+      "country": "05",
+      "role": "central_bank",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-central_bank-mobile-home.jpg",
+        "bytes": 190302,
+        "sha256": "fd5f163e05998bfd0f3b9ec90e125ab61c64040a8ad86b2402797a364c453273"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "05-industry-desktop",
+      "country": "05",
+      "role": "industry",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-industry-desktop-home.jpg",
+        "bytes": 377306,
+        "sha256": "759333d3f018f6a3390b14c9880ca5c5eb5838f83048b1cae9dd44cba9ae2985"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "05-industry-mobile",
+      "country": "05",
+      "role": "industry",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-industry-mobile-home.jpg",
+        "bytes": 187596,
+        "sha256": "eac655887c78784297c938e76315f413e65eeab87a87480b1c7bbf0d39c4be9e"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "05-trade-desktop",
+      "country": "05",
+      "role": "trade",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-trade-desktop-home.jpg",
+        "bytes": 383876,
+        "sha256": "cb55022705b328795f7985159be33f56b69fa564af18b6f2bdf0cf23c6926a6b"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "05-trade-mobile",
+      "country": "05",
+      "role": "trade",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-trade-mobile-home.jpg",
+        "bytes": 200193,
+        "sha256": "75a8684655755c95f65daae61165e6eb194133110909b8cb8fc1c5ea2d83badb"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "05-social-desktop",
+      "country": "05",
+      "role": "social",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-social-desktop-home.jpg",
+        "bytes": 383477,
+        "sha256": "f431a8791dab756e2dd8358b3f85d175f2b982b193fd4716a73783adb49d5fa9"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "05-social-mobile",
+      "country": "05",
+      "role": "social",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/05-social-mobile-home.jpg",
+        "bytes": 194128,
+        "sha256": "efab11838d96c5db08070450839588953c4d7565b3d242916874080cd8a729fd"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 21
+        }
+      ]
+    },
+    {
+      "key": "56-captain-desktop",
+      "country": "56",
+      "role": "captain",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-captain-desktop-home.jpg",
+        "bytes": 334853,
+        "sha256": "12504473cf1e35f824dfd5ea681310f5432fd1c322389509d2ebe89d24140a90"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "56-captain-mobile",
+      "country": "56",
+      "role": "captain",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-captain-mobile-home.jpg",
+        "bytes": 171583,
+        "sha256": "5a09a8471248d245b6ea80a9ebea91d4a7174af441520285bcb8f355ec1e4fb7"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "56-finance-desktop",
+      "country": "56",
+      "role": "finance",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-finance-desktop-home.jpg",
+        "bytes": 341881,
+        "sha256": "29d8299fe86c3c6663a9aa06d422455076330f00e0ed8de111a0534f3b459304"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "56-finance-mobile",
+      "country": "56",
+      "role": "finance",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-finance-mobile-home.jpg",
+        "bytes": 181097,
+        "sha256": "f58991c18a2202160dc0c74db259f890ee430e629507a784c694e8199d582ca5"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "56-central_bank-desktop",
+      "country": "56",
+      "role": "central_bank",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-central_bank-desktop-home.jpg",
+        "bytes": 344445,
+        "sha256": "93792601679a69746bebde0bb66f94f131e62dd5546d32419c694bf9609bf045"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "56-central_bank-mobile",
+      "country": "56",
+      "role": "central_bank",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-central_bank-mobile-home.jpg",
+        "bytes": 183806,
+        "sha256": "3da441ba55cf831e753c31a71c1faafe5652c4dc9ca629cc328a8d2c1b6a85a0"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "56-industry-desktop",
+      "country": "56",
+      "role": "industry",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-industry-desktop-home.jpg",
+        "bytes": 342795,
+        "sha256": "8f4448fbd9d34a9d17d53a390f038d7964f8a020a67be914e0f53f220130eb43"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "56-industry-mobile",
+      "country": "56",
+      "role": "industry",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-industry-mobile-home.jpg",
+        "bytes": 181239,
+        "sha256": "863823470ff839b63e0a8eeda948bcfa71d2239811fff323d2b54d5af96def99"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "56-trade-desktop",
+      "country": "56",
+      "role": "trade",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-trade-desktop-home.jpg",
+        "bytes": 348879,
+        "sha256": "9e56d53b0e7b10600d7151eb16ca43cbe2cc6835d8dd7c3b46298f72bd3b59a8"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "56-trade-mobile",
+      "country": "56",
+      "role": "trade",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-trade-mobile-home.jpg",
+        "bytes": 193472,
+        "sha256": "1c72c6fb787a579c030c6eba354e6729b94f076f8b59057c40b0d665e4911d77"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "56-social-desktop",
+      "country": "56",
+      "role": "social",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-social-desktop-home.jpg",
+        "bytes": 350521,
+        "sha256": "367861894726be6828b1ebf97e6a44dee5ef32d7f2a4a9d957f3473fdeb352de"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "56-social-mobile",
+      "country": "56",
+      "role": "social",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/56-social-mobile-home.jpg",
+        "bytes": 187798,
+        "sha256": "834bab683992df6b2661d13640f07ec266364e323861b1290bd83a9a7c1317c3"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-captain-desktop",
+      "country": "57",
+      "role": "captain",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-captain-desktop-home.jpg",
+        "bytes": 366363,
+        "sha256": "9d9bc0207fd40f34dd73c2c30aca85f5f96a81c3cd858fa2d7621f577e860799"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-captain-mobile",
+      "country": "57",
+      "role": "captain",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-captain-mobile-home.jpg",
+        "bytes": 177247,
+        "sha256": "1fb226824a830bdcbb23df09dce6453740c004827c5a29ddd0681db6fb11304c"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-finance-desktop",
+      "country": "57",
+      "role": "finance",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-finance-desktop-home.jpg",
+        "bytes": 374831,
+        "sha256": "4bf96bd2748b97fd04dc55fa728ee4a2a482698cfabcd89230c2fb0610077c81"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-finance-mobile",
+      "country": "57",
+      "role": "finance",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-finance-mobile-home.jpg",
+        "bytes": 186818,
+        "sha256": "55247eadb669fb16f60cf63b1df0c42390e497d725c70b665f57980a47450e23"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-central_bank-desktop",
+      "country": "57",
+      "role": "central_bank",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-central_bank-desktop-home.jpg",
+        "bytes": 376071,
+        "sha256": "5ec1ce92215003c181d1ff79dfad84c3de90b60a2853923100654e2b4574db2d"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-central_bank-mobile",
+      "country": "57",
+      "role": "central_bank",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-central_bank-mobile-home.jpg",
+        "bytes": 189850,
+        "sha256": "0020f1169820b74c7b2b6c915508dc33523b80aa3af188b98c6a1c29e542de78"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-industry-desktop",
+      "country": "57",
+      "role": "industry",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-industry-desktop-home.jpg",
+        "bytes": 374947,
+        "sha256": "faacb5de5583e271cc79ba5e9e4db2debf23d207d297362159d2103b68c9df21"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-industry-mobile",
+      "country": "57",
+      "role": "industry",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-industry-mobile-home.jpg",
+        "bytes": 187055,
+        "sha256": "178e612256c0ad9b06ed28b8df75aca7cc5bea56515abc184506be22d62f2035"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-trade-desktop",
+      "country": "57",
+      "role": "trade",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-trade-desktop-home.jpg",
+        "bytes": 381744,
+        "sha256": "75424ea4b9ccf70491f13ce2ce30ce80f802222fb90b197f51e437608a918e13"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-trade-mobile",
+      "country": "57",
+      "role": "trade",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-trade-mobile-home.jpg",
+        "bytes": 199576,
+        "sha256": "23cbd41f6531c1c814852896a17c985bfb28857be8f699cc737ba04fc955aeeb"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-social-desktop",
+      "country": "57",
+      "role": "social",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-social-desktop-home.jpg",
+        "bytes": 380100,
+        "sha256": "28b4ef36904f280d1393a99b6737dd391e2d0aff5afbc6e631ec5e704ba816c0"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "57-social-mobile",
+      "country": "57",
+      "role": "social",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/57-social-mobile-home.jpg",
+        "bytes": 193704,
+        "sha256": "f35bad91d7a8fda7bdbbdb0503d551346421844642dc87392e4eb54f5c21ffac"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Unanchored source records have no fabricated map location. Complete 20-item Local sites remains accessible.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 20
+        }
+      ]
+    },
+    {
+      "key": "64-captain-desktop",
+      "country": "64",
+      "role": "captain",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-captain-desktop-home.jpg",
+        "bytes": 369908,
+        "sha256": "39a35356b2264f76fa98f6ebc1c1f70b074f674cccd2c9bf97f50f887f24358a"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "64-captain-mobile",
+      "country": "64",
+      "role": "captain",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-captain-mobile-home.jpg",
+        "bytes": 181519,
+        "sha256": "2d33316d9874a39fa1b46de1599aa9278f66afe413a8f5793d4ec57e82c9c8f8"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "64-finance-desktop",
+      "country": "64",
+      "role": "finance",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-finance-desktop-home.jpg",
+        "bytes": 377893,
+        "sha256": "9a4ff849655ad3b5a0171c7ecb03bb926a7eb2c450e597c774430a75e5051372"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "64-finance-mobile",
+      "country": "64",
+      "role": "finance",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-finance-mobile-home.jpg",
+        "bytes": 191212,
+        "sha256": "9f65e9e7b0a777605bfa3fa38efc45085781d1b0bdb361ce1f4bcdae6a75661c"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "64-central_bank-desktop",
+      "country": "64",
+      "role": "central_bank",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-central_bank-desktop-home.jpg",
+        "bytes": 379791,
+        "sha256": "8b66893feb58d30dde3d94a1e8664bffc714e6e5a9eb3577f0afd0b177bf9886"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "64-central_bank-mobile",
+      "country": "64",
+      "role": "central_bank",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-central_bank-mobile-home.jpg",
+        "bytes": 193718,
+        "sha256": "c4fdf9dd4899980568c38079e1bd0cd65a1366bc8ea447cf01fa357aa76db289"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "64-industry-desktop",
+      "country": "64",
+      "role": "industry",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-industry-desktop-home.jpg",
+        "bytes": 378151,
+        "sha256": "984878d0509507d6ed03189b2afe4b1618de973adc4cbb4374503f6202b39a2b"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "64-industry-mobile",
+      "country": "64",
+      "role": "industry",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-industry-mobile-home.jpg",
+        "bytes": 191445,
+        "sha256": "3759f08a570084dd79fb6f988e18ea228b6ed16a8fb8b3af39b316b72e60776d"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "64-trade-desktop",
+      "country": "64",
+      "role": "trade",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-trade-desktop-home.jpg",
+        "bytes": 384035,
+        "sha256": "c6698ab9236e8bff9b91cad506533a3f89156f9859104f79d2580aaa89652f4a"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "64-trade-mobile",
+      "country": "64",
+      "role": "trade",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-trade-mobile-home.jpg",
+        "bytes": 203621,
+        "sha256": "002e3ae54e08b4ce9b3729c98e92999db0747db1f3bf43291e0c4ce7d0d95db9"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "64-social-desktop",
+      "country": "64",
+      "role": "social",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-social-desktop-home.jpg",
+        "bytes": 383827,
+        "sha256": "65b59df6537a69c14c46c1f4e0dc8520942ef4d3b3d1b000683c23aad88f8082"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "64-social-mobile",
+      "country": "64",
+      "role": "social",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/64-social-mobile-home.jpg",
+        "bytes": 198081,
+        "sha256": "2b99469ce16a646449c5521ac71be397c0b7b4059df5445b2caed01f9a78bbca"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 24
+        }
+      ]
+    },
+    {
+      "key": "67-captain-desktop",
+      "country": "67",
+      "role": "captain",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-captain-desktop-home.jpg",
+        "bytes": 354641,
+        "sha256": "07c2b1deec1d1ffd2e2844a2dea566dc979af003eb0883fc8ad1dd962db5ffd9"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Marker 16 overlaps mission progress. Real original-image issue retained; later clip-only fix has separate evidence.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-captain-mobile",
+      "country": "67",
+      "role": "captain",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-captain-mobile-home.jpg",
+        "bytes": 175184,
+        "sha256": "9896693b63bf291c983e45d7890f4f15c1afc1c479e03e85ba0cd86c8563f125"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-finance-desktop",
+      "country": "67",
+      "role": "finance",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-finance-desktop-home.jpg",
+        "bytes": 361103,
+        "sha256": "59bb76153bbe94ecc2a4a0b762aa23f662f240de6c14772a2c3e392063f7d55a"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Marker 16 overlaps mission progress. Real original-image issue retained; later clip-only fix has separate evidence.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-finance-mobile",
+      "country": "67",
+      "role": "finance",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-finance-mobile-home.jpg",
+        "bytes": 184755,
+        "sha256": "884e7d073d468e9ffc3db0033a8b727622fb2a051ed95ee790fcc3addabe7667"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-central_bank-desktop",
+      "country": "67",
+      "role": "central_bank",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-central_bank-desktop-home.jpg",
+        "bytes": 364520,
+        "sha256": "fc0b4cc656d1bddd460dabf696f6fc27969e3dac84adfe84a61fe97964f67498"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Marker 16 overlaps mission progress. Real original-image issue retained; later clip-only fix has separate evidence.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-central_bank-mobile",
+      "country": "67",
+      "role": "central_bank",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-central_bank-mobile-home.jpg",
+        "bytes": 187215,
+        "sha256": "a9d97802acc276300a78054f788df3df68e925f3617f95e0a0b1db29f93da147"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-industry-desktop",
+      "country": "67",
+      "role": "industry",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-industry-desktop-home.jpg",
+        "bytes": 362587,
+        "sha256": "a95453bf1c11cd9d37bc64308d660bd6ea3339c0b67e73e3ee39abeb0d73c973"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Marker 16 overlaps mission progress. Real original-image issue retained; later clip-only fix has separate evidence.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-industry-mobile",
+      "country": "67",
+      "role": "industry",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-industry-mobile-home.jpg",
+        "bytes": 184981,
+        "sha256": "bc03815e40bd5ec529afdabd05cd6a90eebdf4f19a11169ada4950a59f0055df"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-trade-desktop",
+      "country": "67",
+      "role": "trade",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-trade-desktop-home.jpg",
+        "bytes": 368154,
+        "sha256": "e129409badea25323c590e8138eba1f67c205d9e5b4077272fd5b712935d1509"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Marker 16 overlaps mission progress. Real original-image issue retained; later clip-only fix has separate evidence.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-trade-mobile",
+      "country": "67",
+      "role": "trade",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-trade-mobile-home.jpg",
+        "bytes": 197292,
+        "sha256": "6fa858456f97d54e2b767be7352d48fc6f1d8f08600df58273b4cab9edc04d08"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-social-desktop",
+      "country": "67",
+      "role": "social",
+      "viewport": "desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-social-desktop-home.jpg",
+        "bytes": 368750,
+        "sha256": "019286897fb1bcf18bf6a676dc7e8dc70dc94506e5ed8d0bf77632ec070b72fb"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "HUD, role title, toolbar and selected-record dock readable. Covered known pins remain a desktop limitation; not an all-pin visibility PASS.",
+      "countryFinding": "Marker 16 overlaps mission progress. Real original-image issue retained; later clip-only fix has separate evidence.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-social-mobile",
+      "country": "67",
+      "role": "social",
+      "viewport": "mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/safe-fix/67-social-mobile-home.jpg",
+        "bytes": 191552,
+        "sha256": "026f940f0f568c0e4a6bc1ae389f3594de99d7a862f596da1ec6ad1c0ce4d803"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Full native role title, separate toolbar, full square scene, readable selected record, flowing plan and cards.",
+      "countryFinding": "Selected source-site record visible in dock; no numeric/source/coordinate edit.",
+      "scope": "HOME image only; source/bottom images not blanket-marked visually reviewed",
+      "toolbarChecks": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    }
+  ],
+  "clipManualRows": [
+    {
+      "key": "01-captain-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-captain-desktop-home.jpg",
+        "bytes": 328055,
+        "sha256": "bc3b8268505900ab36b6fe968e08caf869390cf5489832b9eedc6ea9d366ed76"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-captain-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-captain-mobile-home.jpg",
+        "bytes": 171511,
+        "sha256": "e7fd9b938b7697af8039582f7f0d4188ba1089661745943bab5bc08abb3a8932"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-finance-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-finance-desktop-home.jpg",
+        "bytes": 335740,
+        "sha256": "47424d871b235424b397c59c6d3c96568e211f29facc9835173f8d65fae47261"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-finance-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-finance-mobile-home.jpg",
+        "bytes": 180996,
+        "sha256": "c07e8a2975c79cae1934f6a4e670b02f0a93bf7abdcdac5046dd225b581c581f"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-central_bank-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-central_bank-desktop-home.jpg",
+        "bytes": 338636,
+        "sha256": "79ee6c53bf1e287c8c7b3ef10fad3ef25722f9ad2574f609878a5fb93c8890e1"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-central_bank-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-central_bank-mobile-home.jpg",
+        "bytes": 184705,
+        "sha256": "9656815c80aceecdebebee217e1c651dca4f6aaaec525e5cef70bd7ae45b344f"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-industry-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-industry-desktop-home.jpg",
+        "bytes": 335797,
+        "sha256": "b7fa3d2f6378085479522e03aeceafb0aff983dd3be481853235f00287f4cb38"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-industry-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-industry-mobile-home.jpg",
+        "bytes": 181513,
+        "sha256": "6e0d69ceddf3becd5b05964a00cbf0295fcd2b4505910e0b76d171a44c1f371b"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-trade-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-trade-desktop-home.jpg",
+        "bytes": 343292,
+        "sha256": "b41af5992dedc62b1536e6d770d710ea6d82e04e8998e0f4e5e2be781fd595db"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-trade-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-trade-mobile-home.jpg",
+        "bytes": 194149,
+        "sha256": "718a0a307b4df998caa9ebc7bfd86f65b7a72a341a5534d75eccd8568fab8c2c"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-social-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-social-desktop-home.jpg",
+        "bytes": 343026,
+        "sha256": "fd9672714d2af5b1f568999c96394851e7425a3f412e73781df13d488ebbcc37"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "01-social-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/01-social-mobile-home.jpg",
+        "bytes": 187877,
+        "sha256": "872f423c61fa122b9fa44302463cd1cc937700ef6ef91af9ac67799ef318c326"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 16
+        }
+      ]
+    },
+    {
+      "key": "67-captain-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-captain-desktop-home.jpg",
+        "bytes": 354538,
+        "sha256": "3c92d43db42f08a3411c6a859b5a1c22e290d0377b89a5f2510f8e649cc44f3b"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-captain-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-captain-mobile-home.jpg",
+        "bytes": 175184,
+        "sha256": "9896693b63bf291c983e45d7890f4f15c1afc1c479e03e85ba0cd86c8563f125"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-finance-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-finance-desktop-home.jpg",
+        "bytes": 360970,
+        "sha256": "6aec1caea41b44ba6b7bfc3019b7652a48867957b7959a7eae946c5bc8b268c3"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-finance-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-finance-mobile-home.jpg",
+        "bytes": 184755,
+        "sha256": "884e7d073d468e9ffc3db0033a8b727622fb2a051ed95ee790fcc3addabe7667"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-central_bank-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-central_bank-desktop-home.jpg",
+        "bytes": 364381,
+        "sha256": "6fc99efdedbd8a937303d58dd8464126133c536e5915f75e77c1c2669045aea9"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-central_bank-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-central_bank-mobile-home.jpg",
+        "bytes": 187215,
+        "sha256": "a9d97802acc276300a78054f788df3df68e925f3617f95e0a0b1db29f93da147"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-industry-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-industry-desktop-home.jpg",
+        "bytes": 362473,
+        "sha256": "aa11d08bdc6c8e180ff360e2ca1af4003253866437aebd0f81c33c0926743a5c"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-industry-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-industry-mobile-home.jpg",
+        "bytes": 184981,
+        "sha256": "bc03815e40bd5ec529afdabd05cd6a90eebdf4f19a11169ada4950a59f0055df"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-trade-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-trade-desktop-home.jpg",
+        "bytes": 368040,
+        "sha256": "152a69d669cbb5826d31d071dc717bb0a2be62157e5e3aedbbd71e5c24daa58d"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-trade-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-trade-mobile-home.jpg",
+        "bytes": 197292,
+        "sha256": "6fa858456f97d54e2b767be7352d48fc6f1d8f08600df58273b4cab9edc04d08"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-social-desktop",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-social-desktop-home.jpg",
+        "bytes": 368650,
+        "sha256": "d04f696227b68d4cae4b313cb459f1d7c21c406335b705ae01807dc233e14364"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Mission and progress unobstructed; full record dock readable. Some pins are clipped to protect panels; complete Local sites remains accessible.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    },
+    {
+      "key": "67-social-mobile",
+      "home": {
+        "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/d-captain-finance-8572583/clip-fix/67-social-mobile-home.jpg",
+        "bytes": 191552,
+        "sha256": "026f940f0f568c0e4a6bc1ae389f3594de99d7a862f596da1ec6ad1c0ce4d803"
+      },
+      "actualImageReview": "REVIEWED_BY_D_WITH_VIEW_IMAGE",
+      "finding": "Flowing square scene, full role title, selected record, plan and cards retained.",
+      "toolbar": [
+        {
+          "command": "country-functions",
+          "result": "OPENED",
+          "heading": "All office actions",
+          "siteCount": null
+        },
+        {
+          "command": "country-records",
+          "result": "OPENED",
+          "heading": "Decision record",
+          "siteCount": null
+        },
+        {
+          "command": "country-sites",
+          "result": "OPENED",
+          "heading": "Local sites",
+          "siteCount": 22
+        }
+      ]
+    }
+  ]
+}
