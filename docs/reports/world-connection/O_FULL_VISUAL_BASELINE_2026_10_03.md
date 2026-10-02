@@ -43,7 +43,9 @@ F 第一组临时目录的全部原件已复制到上述耐久目录，hash 未�
 CI `37030821721` 的 63 项聚焦测试通过。Root 已实际查看四张交付原图并审阅实现。
 这不是修后全 840 画面 PASS。
 合并后 D/F/G 分别承担 Captain/Finance、Industry/Trade、Central Bank/Social 的固定
-`ca522a1` 各 280 个画面复核。D 已完成 Captain/Finance 全 280 HOME 实际目视、280 次 Local sites 打开和 140 次手机到底滚动；F/G 完整结果仍 **PENDING**。
+`ca522a1` 各 280 个画面复核。D、F、G 均已完成；修后全部 **840/840 HOME 实际目视，0 未查看**。
+按完整 Local Sites 与 dock 替代边缘装饰 marker 的限定 HOME 标准，未发现新的阻断性主布局问题；不扩大为所有抽屉、所有设施行或完整玩法通过。
+D 已完成 Captain/Finance 的 280 次 Local sites 打开和 140 次手机到底滚动；F、G 分别完成 Industry/Trade、Central Bank/Social 的独立 280 HOME 实际目视。
 
 D 结果为 `PARTIAL_HOME_PASS_AUXILIARY_UX_ISSUES`，不是全页 PASS：主 HOME 标题/入口/map/dock/工具/底部流程未见新遮挡，但手机设施列表还有两层滚动、长文本裁切与混合语言。66 手机中心 marker 文字重叠、桌面边缘装饰 pin 裁切分别记录；完整目录/dock 可替代 marker，不造 NULL 点位。
 报告 `.econmind-artifacts/d-captain-finance-post-fix-ca522a19/POST_FIX_REVIEW.md` SHA-256
@@ -51,8 +53,58 @@ D 结果为 `PARTIAL_HOME_PASS_AUXILIARY_UX_ISSUES`，不是全页 PASS：主 HO
 280 行台账 `manual-review.json` SHA-256 `a9cd2ac3b1b7f8e797be0eb33f081a4b9e91d0be6df99a5859d263ef9aa4ec38`；Root 实际重算一致，实际查看 57/70 手机恢复原图确认问题。
 新授权仅修派生手机 drawer 视口包含、单滚动与列表完整换行，原记录/文字/IDs/源 hash 不改；混合语言不靠修改源 name 掩盖。
 
+F 的结论为 `NO_BLOCKING_HOME_ISSUE_OBSERVED`，不等于全页/全发布 GO：70 张原尺寸板图含全部 280 HOME，另实际查看 10 HOME 原图、20 drawer 原图、10 页尾原图与 2 有界 drawer reachability 原图。
+280 次 Local sites 打开保留完整源 ID；没有逐行视觉接受全部设施。F 同样确认手机 drawer 双滚动摩擦及 66 手机装饰 marker 集群，已并入 D 的同一修复责任，不重复开工。
+耐久 `artifacts/f-industry-trade-postfix-ca522a19/POST_FIX_HANDOFF.md` SHA-256
+`619a2250af05980eacfbc052d8e6c5811f32a32ab0910d27ba64c24fcffd38bd`；
+逐画面 `postfix-visual-matrix.json` SHA-256
+`df73c15ae71e26c321877a1fde21acfc5a3c4f0a8a419984d6d06a5867a139ca`。
+Root 实际重算一致；F 已停止，未修改产品/数据库/正式状态。
+
+G 的 Central Bank/Social 280 HOME 均单独展示原始 PNG 后判定，另 5 个 Local Sites/滚动/最后记录选择样本、18 辅助原图实际检查。
+其中列表计数 21/21/20/20/25 与源 IDs 相同；66 手机装饰集群 10/79/41 重叠仍记账，完整 25 记录可达；56–62 NULL 不造点。
+耐久 `econmind-g-bank-social-postfix-evidence/20261002T1610Z/POST_FIX.md` SHA-256
+`34ba86a7899f1b924adb289118abdf1d097d532483d876c5f963453b76742c2c`；
+逐图 `RESULTS.json` SHA-256 `e6e999530bf18087b348210f0cf94d9ac05a7b94d2f561ca6de7794b9a7c699a`；
+`PROVENANCE.json` SHA-256 `5dc0d669729e024231aa3cc9e35c99be0fa5c3c0009cd15f3ec798a6f47b8541`。
+Root 实际读取报告/重算 hash 一致。G 已停止，本地预览关闭；未修改产品/生产或旧 baseline。
+
+### #64：手机列表的部分改进与仍未闭合字形问题
+
+固定候选 `e4ab2db7c02b350dbbbd01402018dcc5a09f9aee`，合并 main
+`66d57ec3a2bfa47d2d2081ee746214c111795105`；仅派生 CSS 与 3 个聚焦测试追加，不改 JS/JSON/raw names/IDs/单位/archive/MANIFEST。
+手机 drawer 固定于视口 safe-area 内、单内部滚动、sticky Close、长文本单列完整换行；Source intel 旧 inline bounds 被有限覆盖，source details 与焦点恢复保留。
+14 真实列表样本保持 ordered IDs 精确，12 手机末卡/Close 在视口内、pageScroll=0，3 source details/error/Escape 样本有证据；同 head CI `37035476222` SUCCESS，78 atlas/camera/layout 聚焦测试。
+
+Root 实际看过 delivery/isolated57/70原图，**57 曾真实出现 ID/名称前缀缺损**；不能用 DOM 完整或几何 PASS 关闭。
+后续严格 3 个清洁 context、同 57 Finance、fonts.ready/双 RAF、有界对比默认字体与 system font/paint reset，10 原图均实际查看且未复现；没有“失败→修好”的因果对比，不更换产品字体。
+字形问题保持 `IMPLEMENTED_UNVERIFIED / INCONCLUSIVE`；本合并仅接受已证滚动/关闭/换行改善，不是完整文字修复或整页 PASS。
+耐久 `.econmind-artifacts/d-mobile-drawer-86ee5be/REPORT.md` SHA-256
+`ed67d7fb5149ae7e7a0f4f01fc3e403536d45aeadffe4f149486dbc579c380f3`；
+`delivery/evidence.json` SHA-256 `45726db57d1ba879b9e95ee6ea49956e17bcfc2f4c04b6c8687e888acb87a50d`；
+`font-diagnosis/DIAGNOSIS.md` SHA-256 `df91b5547826ad0ca60a93d10a71ba77cf0550954bbf87f145014705eea5092a`。
+Root 重算一致，另实际查看默认字体诊断原图。此前缺损原件不改；混合语言与装饰 marker 集群仍为单独待办。
+本修复只改抽屉/打开态表面，未把其样本扩大为重新执行 840 HOME 或全部浏览器验收。
+
 主 Root atlas 自适应由 A #60 独立候选完成：FIT 随窗口调整，MANUAL 保留用户平移/缩放；世界总览包含原始完整 frame，手机与短屏不再使用旧 700 宽裁切。
-Root 已实际查看手机与短桌面修后原图。最终候选 `4800a124da4ddf07ada313a7a9c402d0aeeac793` 保留 #61 布局和两组测试；CI `37032206789` 通过，合并 main `c1354ac857eb65b9fd573b6deadd7ebd2d0f10c0`。其实际 Pages 线上验收仍须单独取证。
+Root 已实际查看手机与短桌面修后原图。最终候选 `4800a124da4ddf07ada313a7a9c402d0aeeac793` 保留 #61 布局和两组测试；CI `37032206789` 通过，合并 main `c1354ac857eb65b9fd573b6deadd7ebd2d0f10c0`。
+
+### #60 / #61 的有界真实线上验收
+
+A 已实际绑定 Pages `37032508901` 的产品 SHA `c1354ac`，build/deploy SUCCESS；不把之后的文档 SHA 误写成该产品部署。
+24 份选定静态资源实际 HTTP 200 与固定源/已审阅 build hash 匹配；22 张原始截图已由 A 逐张实际查看，Root 另实际查看手机 390×844 与短桌面 1440×500 的总览原图。
+两种总览完整包含原始 1774×887 frame；短桌面 map 底部为 500px。
+
+01/56/64/70 的完整设施 ID 分别为 16/20/24/14，最后一项实际打开再返回完整目录；Root 底部 pager 可达。
+每国六职位入口保留国号，对应 24 份实际公开页面身份检查正确。
+finance01 / central_bank56 / industry64 / social70 的真实 atlas 点击及返回保留国家、职位，390×500 与 1440×500 实际滚动可到页尾并返回顶部。
+没有全 70 国线上 gallery、840 线上页面或全指标重新验收；短桌面标题仍覆盖部分地图标签，未宣称 label-layout 重设计。
+
+耐久原件在 `artifacts/a-pr60-live-preserved.EDLPz2/`（workspace 根下），包含全部 earlier harness attempts 与 22 张原图。
+`results.json` SHA-256 `7f8d346eb950395c0ed0df74ee5a04277ac32006eab849ecf7db26f07eed3fef`，
+`REPORT.md` SHA-256 `ef14a16e9a61561026c42a81debbba3c81b371ea7981be2609e45d211ed4a059`；Root 实际重算并复制保存，一致不改。
+Root 来源为 `NOT_CONFIGURED`，角色抽屉为 `NOT_CONNECTED / API_NOT_CONFIGURED`，可见“不替代值”；没有真实来源 API GET 或经济动作。
+原 global network-idle 超时、两项本地取证脚本错误和五个 unused journey image `ERR_ABORTED` 均保留；只在目标 DOM/首图就绪后完成实际返回，不把取消图片声称为加载成功。
 
 ## 功能矩阵与目视分开记录
 
