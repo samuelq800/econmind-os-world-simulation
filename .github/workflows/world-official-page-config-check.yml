@@ -1,0 +1,45 @@
+name: Official-source page wiring (no deploy)
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/world-official-page-config-check.yml
+      - .github/workflows/deploy-world-web.yml
+      - apps/world-web/package.json
+      - apps/world-web/public/season1-immersive/country-context.js
+      - scripts/configure-official-page-read.mjs
+      - tests/world-web/official-*.test.ts
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  page-config:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Actual Edge DTO, source identity and retired-session regressions
+        run: pnpm exec vitest run tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts tests/world-web/official-world-read-source.test.ts
+      - name: Focused lint and format
+        run: |
+          pnpm exec eslint scripts/configure-official-page-read.mjs tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts
+          pnpm exec prettier --check scripts/configure-official-page-read.mjs tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts apps/world-web/package.json .github/workflows/deploy-world-web.yml .github/workflows/world-official-page-config-check.yml apps/world-web/src/official-data/WORLD_READ_SOURCE.md
+      - name: Browser boundaries, secrets and selected UI source
+        run: |
+          pnpm --filter @econmind/core build
+          pnpm --filter @econmind/world-worker build
+          node scripts/check-boundaries.mjs
+          pnpm secrets:check
+          pnpm test:authoritative-ui
+      - name: Non-connected static build
+        run: pnpm --filter @econmind/world-web build

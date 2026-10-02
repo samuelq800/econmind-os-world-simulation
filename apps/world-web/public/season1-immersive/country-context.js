@@ -43,12 +43,18 @@
   }
 
   function apiOrigin(config) {
-    if (!record(config) || typeof config.apiOrigin !== 'string') return null;
+    if (!record(config) || (config.apiBaseUrl !== undefined && config.apiOrigin !== undefined)) return null;
+    const address = config.apiBaseUrl ?? config.apiOrigin;
+    if (typeof address !== 'string') return null;
     try {
-      const url = new URL(config.apiOrigin);
+      const url = new URL(address);
       const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+      const edgePath = '/functions/v1/world-v2-official-read';
+      const validPath = url.pathname === '/' || (config.apiBaseUrl !== undefined &&
+        [edgePath, `${edgePath}/`].includes(url.pathname));
       if ((url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback)) ||
-        url.username || url.password || url.search || url.hash || url.pathname !== '/') return null;
+        url.username || url.password || url.search || url.hash || !validPath) return null;
+      if (!url.pathname.endsWith('/')) url.pathname += '/';
       return url;
     } catch { return null; }
   }
@@ -150,6 +156,8 @@
       } finally { if (current === generation) controller = null; }
     }
     async function loadCatalogue() {
+      // A refreshed or failed catalogue must never leave old source identities usable.
+      catalogue = null;
       const result = await request('v1/world-data/datasets', data => {
         if (!record(data) || data.ok !== true || data.schemaVersion !== 'official-source-catalog-v1' ||
           data.dataNature !== 'OFFICIAL_SELECTED_SOURCE_DATASET' || data.packageId !== packageId ||
@@ -190,7 +198,7 @@
         }
       }
       const suffix = query.size ? `?${query}` : '';
-      return request(`v1/world-data/datasets/${slug}${suffix}`, data => {
+      const result = await request(`v1/world-data/datasets/${slug}${suffix}`, data => {
         if (!validSourceMetadata(data, slug) || data.ok !== true ||
           ['sourceSha256', 'sourceBytes', 'sourceKind'].some(key => data[key] !== spec[key]))
           return { kind: 'INVALID', reason: 'DATASET_MISMATCH' };
@@ -228,6 +236,8 @@
         return { kind: 'PAGE', dataset: slug, section: options.section || null, items: data.items,
           total: data.total, nextOffset: data.nextOffset, filteredCountryId: filtered ? countryId : null };
       });
+      if (result.kind === 'INVALID' || result.kind === 'UNAVAILABLE') catalogue = null;
+      return result;
     }
     return Object.freeze({ loadCatalogue, loadDataset, cancel, setCountry, countryId: () => expectedId(countryNumber) });
   }

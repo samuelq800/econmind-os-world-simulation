@@ -8,6 +8,7 @@ on:
     paths:
       - .github/workflows/deploy-world-web.yml
       - apps/world-web/**
+      - scripts/configure-official-page-read.mjs
       - package.json
       - pnpm-lock.yaml
 
@@ -44,6 +45,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build the non-authoritative World web preview
+        env:
+          WORLD_OFFICIAL_READ_BASE_URL: ${{ vars.WORLD_OFFICIAL_READ_BASE_URL }}
         run: pnpm --filter @econmind/world-web build
 
       - name: Configure Pages
