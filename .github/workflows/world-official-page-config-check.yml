@@ -33,12 +33,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Actual Edge DTO, source identity and retired-session regressions
-        run: pnpm exec vitest run tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts tests/world-web/official-world-read-source.test.ts tests/world-web/official-explorer-country.test.ts
+        run: pnpm exec vitest run tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts tests/world-web/official-world-read-source.test.ts tests/world-web/official-explorer-country.test.ts tests/world-web/official-static-country-navigation.test.ts
       - name: Focused lint and format
         run: |
           pnpm exec tsc -p tests/tsconfig.official-explorer-country.json
-          pnpm exec eslint scripts/configure-official-page-read.mjs tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts
-          pnpm exec prettier --check scripts/configure-official-page-read.mjs tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts apps/world-web/package.json .github/workflows/deploy-world-web.yml .github/workflows/world-official-page-config-check.yml apps/world-web/src/official-data/WORLD_READ_SOURCE.md
+          pnpm exec eslint scripts/configure-official-page-read.mjs tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts tests/world-web/official-static-country-navigation.test.ts
+          pnpm exec prettier --check scripts/configure-official-page-read.mjs tests/world-web/official-page-config.test.ts tests/world-web/official-full-data-page-read.test.ts tests/world-web/official-static-country-navigation.test.ts apps/world-web/package.json .github/workflows/deploy-world-web.yml .github/workflows/world-official-page-config-check.yml apps/world-web/src/official-data/WORLD_READ_SOURCE.md
           pnpm exec eslint apps/world-web/src/official-data/official-explorer-country*.ts tests/world-web/official-explorer-country.test.ts
           pnpm exec prettier --check apps/world-web/src/official-data/official-explorer-country*.ts apps/world-web/src/official-data/OFFICIAL_EXPLORER_CONTRACT.md tests/world-web/official-explorer-country.test.ts tests/tsconfig.official-explorer-country.json
       - name: Browser boundaries, secrets and selected UI source
