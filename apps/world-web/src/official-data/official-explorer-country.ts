@@ -240,7 +240,8 @@ export function validateOfficialExplorerCountryPayload(
     ) !== profile.population
   )
     return false;
-  if (value.officialSource !== undefined) {
+  if (value.officialSource === undefined) return false;
+  {
     const source = value.officialSource;
     if (
       !record(source) ||

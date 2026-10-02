@@ -16,6 +16,7 @@ export const OFFICIAL_EXPLORER_SUMMARY = Object.freeze({
   facilitiesExact: '1374',
   resourcesExact: '240',
   regionsExact: '122',
+  historicalDevelopmentOptionsExact: '350',
   kind: 'selected-source-display',
   ...OFFICIAL_EXPLORER_SOURCE,
   liveWorldState: false,

@@ -52,6 +52,7 @@ describe('official selected-source explorer lazy country adapter', () => {
       expect(data.regions).toEqual(raw.regions);
       expect(data.profile).toEqual(raw.profile);
       expect(data.officialOpening).toEqual(raw.officialOpening);
+      expect(data.officialSource).toEqual(raw.officialSource);
       expect(data.source).toMatchObject({
         kind: 'selected-source-display',
         countryFileSha256: spec.sha256,
@@ -173,6 +174,15 @@ describe('official selected-source explorer lazy country adapter', () => {
     },
     (x: ReturnType<typeof payload>) => {
       x.officialSource = { authority: 'LIVE_WORLD_STATE' };
+    },
+    (x: ReturnType<typeof payload>) => {
+      delete x.officialSource;
+    },
+    (x: ReturnType<typeof payload>) => {
+      x.officialSource.sourceChecksumsSha256 = '0'.repeat(64);
+    },
+    (x: ReturnType<typeof payload>) => {
+      delete x.officialSource.fields['/profile/population'].exact;
     },
   ])(
     'rejects missing/wrong source, country or record structure (%#)',
