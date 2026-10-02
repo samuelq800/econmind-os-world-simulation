@@ -8,9 +8,11 @@ on:
       - apps/world-web/package.json
       - apps/world-web/public/season1-immersive/country-context.js
       - apps/world-web/src/official-data/**
+      - apps/world-web/public/season1-immersive/country-game.js
       - scripts/configure-official-page-read.mjs
       - tests/world-web/official-*.test.ts
       - tests/tsconfig.official-explorer-country.json
+      - tests/tsconfig.official-metric-source.json
   workflow_dispatch:
 
 permissions:
@@ -48,3 +50,9 @@ jobs:
           pnpm test:authoritative-ui
       - name: Non-connected static build
         run: pnpm --filter @econmind/world-web build
+      - name: Six-role metric provenance and local-preview regressions
+        run: |
+          pnpm exec tsc -p tests/tsconfig.official-metric-source.json
+          pnpm exec vitest run tests/world-web/official-metric-source.test.ts
+          pnpm exec eslint tests/world-web/official-metric-source.test.ts
+          pnpm exec prettier --check tests/world-web/official-metric-source.test.ts tests/tsconfig.official-metric-source.json
