@@ -1,0 +1,118 @@
+{
+  "sourceRepository": "samuelq800/econmind-os",
+  "sourceCommit": "7b4db3b8cbdb1db86288a1172896ac9bb8febaa4",
+  "worldBaseCommit": "4b5937a980f2358fc7ed1e4ccded512bdc5bbfce",
+  "method": "gh api contents at fixed ref, base64 decode; scoped semantic adaptation",
+  "sources": [
+    {
+      "path": "app/globals.css",
+      "blob": "12984e72601f787a4100ddc7a225bf6307971130",
+      "sha256": "61a07229c44b317446e92215296ccb1f4e306b7dd68963cf31a863284b6c520b",
+      "url": "https://github.com/samuelq800/econmind-os/blob/7b4db3b8cbdb1db86288a1172896ac9bb8febaa4/app/globals.css",
+      "extraction": [
+        {
+          "start": 57,
+          "end": 63,
+          "purpose": "body font and font smoothing",
+          "sha256": "1ce5d73c90d3488d50fae7b9f5d5d3c27d8ddeb528255dbfd3de6cc19c9fa193"
+        },
+        {
+          "start": 81,
+          "end": 84,
+          "purpose": "selection colors",
+          "sha256": "0dd7b1dea182c678a65c8e4e5bef8345c34e79dfcdb8b9108373ba8efd093d90"
+        }
+      ]
+    },
+    {
+      "path": "app/visual-pilot-city.css",
+      "blob": "963f9b2e9404f9681a80fdae5a7996c4aeb5722a",
+      "sha256": "948191c9227114d8f96bf6b533dc0ed79423a883fd438f6f3d9c7553a6562aad",
+      "url": "https://github.com/samuelq800/econmind-os/blob/7b4db3b8cbdb1db86288a1172896ac9bb8febaa4/app/visual-pilot-city.css",
+      "extraction": [
+        {
+          "start": 2,
+          "end": 7,
+          "purpose": "light control tokens",
+          "sha256": "76c783958e240f4e2bfa1b54028952a3c559f11819ddffc0dcac50eb459c35a1"
+        },
+        {
+          "start": 16,
+          "end": 23,
+          "purpose": "dark palette and shadow",
+          "sha256": "207d05d1bc0c9bdbadf8ece0cc48288ed0adce7eaaacf456fd7f3667a27819a2"
+        },
+        {
+          "start": 48,
+          "end": 48,
+          "purpose": "keyboard focus outline",
+          "sha256": "1358ba97bd599e5c36881d10f7095e5027c02725c61c353e26a9c52b75d64762"
+        },
+        {
+          "start": 57,
+          "end": 57,
+          "purpose": "Georgia heading font",
+          "sha256": "35b337b1832df576e5d40774f5a55dccb4252de10ebc3bf10abe4da641ead413"
+        },
+        {
+          "start": 62,
+          "end": 63,
+          "purpose": "primary action and hover",
+          "sha256": "64aaa44648c887c986303c463b1c8297c51916290d00e44237b6a1cb6f20d00b"
+        },
+        {
+          "start": 65,
+          "end": 68,
+          "purpose": "heading and border semantics",
+          "sha256": "4282ac9d34acb7194f30f9589297407b671ec3a463ad1e736269dd2cc6acd5a0"
+        },
+        {
+          "start": 104,
+          "end": 107,
+          "purpose": "reduced motion",
+          "sha256": "73a86db88e930ee97a6c43b7ea89f4f24d334a836caae08dc57cf09e07b89daf"
+        },
+        {
+          "start": 210,
+          "end": 212,
+          "purpose": "form and table surface semantics",
+          "sha256": "b17636022078a7a88dd6b7600bff611d278b52b3fb2cd4f7360cb961e87ee693"
+        }
+      ]
+    },
+    {
+      "path": "app/layout.tsx",
+      "blob": "5af209d419d1b1642614b1b9b5d80a2206887c7a",
+      "sha256": "d6201c9892de9c1144d190cd4c97a1e77f103e1f4908bd58756d33aa3fd13541",
+      "url": "https://github.com/samuelq800/econmind-os/blob/7b4db3b8cbdb1db86288a1172896ac9bb8febaa4/app/layout.tsx",
+      "extraction": [
+        {
+          "start": 1,
+          "end": 58,
+          "purpose": "both stylesheet imports",
+          "sha256": "d6201c9892de9c1144d190cd4c97a1e77f103e1f4908bd58756d33aa3fd13541"
+        }
+      ]
+    }
+  ],
+  "excluded": [
+    "Tailwind import and Next layout",
+    "home animations and backdrops",
+    "remote images and remote stylesheet dependencies",
+    "SiteHeader and global directory navigation"
+  ],
+  "worldScopes": [
+    ".world-explorer",
+    ".country-game",
+    ".journey-scene",
+    "body.season1-lobby focus, selection and reduced motion"
+  ],
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "riskClass": "P3",
+  "authorityChanged": false,
+  "notes": [
+    "The existing World topbar contains country switching and map-return controls, so it is retained.",
+    "National map control surfaces use the source light palette; play panels use the source dark palette.",
+    "Shared CSS has no dimensions, position, transforms, overflow, scroll behavior, visibility or data behavior changes."
+  ]
+}

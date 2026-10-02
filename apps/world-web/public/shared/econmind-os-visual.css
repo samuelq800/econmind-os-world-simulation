@@ -1,0 +1,204 @@
+/* EconMind OS visual contract, scoped to the two World entry points.
+ * Source: samuelq800/econmind-os @ 7b4db3b8cbdb1db86288a1172896ac9bb8febaa4.
+ * Extraction ranges and blob identities: docs/reports/world-shared-visual/SOURCE.json.
+ * Paint and typography only: map geometry, scrolling and economic behavior stay owned by World.
+ */
+html:has(#root),
+html:has(body.season1-lobby) {
+  --em-canvas: #06141b;
+  --em-surface: #0c222a;
+  --em-surface-subtle: #102b34;
+  --em-surface-strong: #173b42;
+  --em-ink: #f3f8f6;
+  --em-ink-muted: #b0c5c9;
+  --em-ink-faint: #8daab0;
+  --em-line: #27545c;
+  --em-line-strong: #3a7378;
+  --em-accent: #72ead8;
+  --em-accent-strong: #a2fff0;
+  --em-accent-soft: #163e3e;
+  --em-gold: #f4ce95;
+  --em-on-accent: #05242a;
+  --em-shadow: 0 14px 42px rgba(0, 3, 12, 0.22);
+  --em-font: Arial, Helvetica, sans-serif;
+  --em-heading-font: Georgia, 'Times New Roman', serif;
+}
+
+body .world-explorer,
+body.season1-lobby .journey-scene {
+  font-family: var(--em-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+body .world-explorer {
+  color: var(--em-ink);
+  background-color: var(--em-canvas);
+}
+body
+  .world-explorer
+  :is(.explorer-topbar, .explorer-sidebar, .explorer-country-drawer) {
+  background-color: var(--em-surface);
+  border-color: var(--em-line);
+}
+body
+  .world-explorer
+  :is(.explorer-brand, .explorer-heading h1, .sidebar-title h2) {
+  font-family: var(--em-heading-font);
+  color: var(--em-gold);
+}
+body .world-explorer :is(.old-atlas, .explorer-topbar button) {
+  color: var(--em-ink-muted);
+}
+body
+  .world-explorer
+  :is(
+    .explorer-controls button,
+    .explorer-layer-controls select,
+    .explorer-country-drawer input
+  ) {
+  background-color: var(--em-surface-subtle);
+  border-color: var(--em-line-strong);
+  color: var(--em-ink);
+}
+body .world-explorer .explorer-primary {
+  background-color: var(--em-accent);
+  color: var(--em-on-accent);
+}
+body
+  .world-explorer
+  :is(.explorer-primary:hover, .explorer-country-drawer section button:hover) {
+  background-color: var(--em-accent-soft);
+  color: var(--em-accent-strong);
+}
+
+/* National map controls retain the source's light contract for readability over art. */
+body.season1-lobby .country-game {
+  --em-light-surface: #f0f4f1;
+  --em-light-subtle: #d8e5e1;
+  --em-light-ink: #102d32;
+  --em-light-muted: #48686d;
+  --em-light-line: #c5dad6;
+  --em-light-accent: #087060;
+  --em-light-gold: #84612b;
+  color: var(--em-light-ink);
+}
+body.season1-lobby
+  .country-game
+  :is(
+    .national-identity,
+    .national-atlas,
+    .national-resources,
+    .national-card,
+    .national-drawer,
+    .national-site-list button
+  ) {
+  background: var(--em-light-surface);
+  border-color: var(--em-light-line);
+  color: var(--em-light-ink);
+  box-shadow: var(--em-shadow);
+}
+body.season1-lobby
+  .country-game
+  :is(.national-card p, .national-resources small) {
+  color: var(--em-light-muted);
+}
+body.season1-lobby
+  .country-game
+  :is(.national-card > small, .national-identity small) {
+  color: var(--em-light-gold);
+}
+body.season1-lobby
+  .country-game
+  :is(.national-time, .national-play, .national-world-status) {
+  background: var(--em-surface);
+  border-color: var(--em-line-strong);
+  color: var(--em-ink);
+  box-shadow: var(--em-shadow);
+}
+body.season1-lobby
+  .country-game
+  :is(
+    .national-time span,
+    .national-reading small,
+    .national-lesson,
+    .national-save-status
+  ) {
+  color: var(--em-ink-muted);
+}
+body.season1-lobby .country-game .national-play-heading {
+  color: var(--em-gold);
+}
+body.season1-lobby
+  .country-game
+  :is(.national-confirm, .national-tokens button.allocated) {
+  background: var(--em-accent);
+  border-color: var(--em-accent-strong);
+  color: var(--em-on-accent);
+  box-shadow: var(--em-shadow);
+}
+body.season1-lobby
+  .country-game
+  :is(.national-confirm:hover, .national-tokens button.allocated:hover) {
+  background: var(--em-accent-strong);
+}
+body.season1-lobby
+  .country-game
+  :is(.national-play-heading button, .national-tools button) {
+  background-color: var(--em-surface-subtle);
+  border-color: var(--em-line-strong);
+  color: var(--em-ink);
+}
+
+body.season1-lobby .journey-scene {
+  --ink: var(--em-ink);
+  --muted: var(--em-ink-muted);
+  --brass: var(--em-accent);
+}
+body.season1-lobby
+  .journey-scene
+  :is(.journey-choice, .decision-object, .office-modules button) {
+  border-color: var(--em-line-strong);
+  box-shadow: var(--em-shadow);
+}
+body.season1-lobby .journey-scene :is(h1, h2) {
+  font-family: var(--em-heading-font);
+}
+body.season1-lobby
+  :is(.journey-scene, .country-game)
+  :is(input, select, textarea) {
+  accent-color: var(--em-accent);
+}
+
+/* Include selects, ranges and the keyboard-operable map viewport. */
+body .world-explorer :focus-visible,
+body.season1-lobby :focus-visible {
+  outline: 2px solid var(--em-accent);
+  outline-offset: 4px;
+}
+body.season1-lobby
+  .country-game
+  :is(
+    .national-identity,
+    .national-atlas,
+    .national-resources,
+    .national-card,
+    .national-drawer
+  )
+  :focus-visible,
+body.season1-lobby
+  .country-game
+  :is(.national-atlas, .national-card):focus-visible {
+  outline-color: var(--em-light-accent);
+}
+body .world-explorer ::selection,
+body.season1-lobby ::selection {
+  background: var(--em-accent-soft);
+  color: var(--em-accent-strong);
+}
+@media (prefers-reduced-motion: reduce) {
+  body .world-explorer *,
+  body.season1-lobby * {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
