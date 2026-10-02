@@ -1,6 +1,6 @@
 .world-explorer {
   height: 100dvh;
-  min-height: 550px;
+  min-height: 0;
   background: #0b252e;
   color: #ede9d6;
   font-family: Inter, 'PingFang SC', 'Microsoft YaHei', sans-serif;
@@ -738,6 +738,11 @@
   }
 }
 @media (max-width: 900px) {
+  /* Keep a usable map and the existing sidebar on short/mobile screens.
+     The Root page can scroll vertically instead of clipping these regions. */
+  .world-explorer {
+    min-height: 696px; /* 56px toolbar + 390px map + 250px sidebar */
+  }
   .explorer-topbar {
     padding: 0 16px;
     gap: 16px;
