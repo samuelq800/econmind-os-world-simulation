@@ -47,6 +47,7 @@ jobs:
       - name: Build the non-authoritative World web preview
         env:
           WORLD_OFFICIAL_READ_BASE_URL: ${{ vars.WORLD_OFFICIAL_READ_BASE_URL }}
+          WORLD_WEB_PUBLIC_BASE_PATH: ${{ vars.WORLD_WEB_PUBLIC_BASE_PATH }}
         run: pnpm --filter @econmind/world-web build
 
       - name: Configure Pages

@@ -8,6 +8,33 @@ import type { ViteDevServer } from 'vite';
 
 import { assertSafeViteEnvironment } from '../../scripts/vite-environment-policy.mjs';
 
+export function resolvePublicBasePath({
+  publicBasePath,
+  githubActions,
+}: {
+  readonly publicBasePath?: string | undefined;
+  readonly githubActions?: string | undefined;
+}): string {
+  if (publicBasePath === undefined || publicBasePath === '') {
+    return githubActions === 'true' ? '/econmind-os-world-simulation/' : '/';
+  }
+
+  // Accept only canonical absolute directory paths, never URLs or encoded paths.
+  if (
+    /^\/(?:[A-Za-z0-9._~-]+\/)*$/u.exec(publicBasePath)?.[0] !==
+      publicBasePath ||
+    publicBasePath
+      .split('/')
+      .some((segment) => segment === '.' || segment === '..')
+  ) {
+    throw new Error(
+      'WORLD_WEB_PUBLIC_BASE_PATH must be / or a canonical absolute path ending in /, without a URL, query, hash, or dot segment',
+    );
+  }
+
+  return publicBasePath;
+}
+
 const worldWebRoot = fileURLToPath(new URL('.', import.meta.url));
 const publicPageInputs = {
   main: resolve(worldWebRoot, 'index.html'),
@@ -246,12 +273,13 @@ export default defineConfig(({ mode }) => {
     'WORLD_API_PORT',
   );
   const apiOrigin = `http://${connectHost(apiHost)}:${apiPort}`;
+  const publicBasePath = resolvePublicBasePath({
+    publicBasePath: process.env.WORLD_WEB_PUBLIC_BASE_PATH,
+    githubActions: process.env.GITHUB_ACTIONS,
+  });
 
   return {
-    base:
-      process.env.GITHUB_ACTIONS === 'true'
-        ? '/econmind-os-world-simulation/'
-        : '/',
+    base: publicBasePath,
     build: {
       rollupOptions: {
         input: publicPageInputs,
