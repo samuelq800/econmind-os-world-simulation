@@ -62,6 +62,11 @@ export function OfficialSourceConnectionPanel({
             地图数字仍来自锁定的官方静态文件。目录身份核对不验证全部原始字节，也不代表经济状态刷新或世界已启动。
           </p>
           <p>
+            <a href="./official-map-source/">
+              官方地图与原件目录（203 份文件）
+            </a>
+          </p>
+          <p>
             {country
               ? `国家 ${country} · 未选国家时使用默认 01。进入职位国家页面后，使用 ◈ 来源按钮查看 dossiers。`
               : '国家参数无效，请回到地图选择国家。'}

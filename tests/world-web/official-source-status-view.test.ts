@@ -35,6 +35,8 @@ describe('catalog connection display and public office entries', () => {
     expect(html).toContain('地图数字仍来自锁定的官方静态文件');
     expect(html).toContain('不验证全部原始字节');
     expect(html).toContain('不代表经济状态刷新');
+    expect(html).toContain('href="./official-map-source/"');
+    expect(html).toContain('官方地图与原件目录（203 份文件）');
     for (const [office] of SOURCE_DOSSIER_OFFICES)
       expect(html).toContain(`role=${office}&amp;country=70#country`);
   });
@@ -72,6 +74,20 @@ describe('catalog connection display and public office entries', () => {
       }),
     );
     expect(html).toContain('国家参数无效');
-    expect(html).not.toContain('href=');
+    // Invalid country disables only the six country-specific offices; the
+    // public immutable source directory is independent of country selection.
+    expect(html.match(/href=/gu)).toHaveLength(1);
+    expect(html).toContain('href="./official-map-source/"');
+  });
+
+  it('resolves the directory at local and GitHub Pages project bases', () => {
+    for (const base of [
+      'http://127.0.0.1:4123/',
+      'https://samuelq800.github.io/econmind-os-world-simulation/',
+    ]) {
+      expect(new URL('./official-map-source/', base).href).toBe(
+        `${base}official-map-source/`,
+      );
+    }
   });
 });

@@ -201,8 +201,34 @@ export function renderOfficialMapDirectory(index) {
     )
     .join('\n');
   return `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Official map source files</title></head>
-<body><h1>Official map source files</h1>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Official map source files</title>
+<style>
+.official-map-directory { max-width: 80rem; margin: 0 auto; padding: 1rem; color: #182d3c; background: #fff; font: 1rem/1.5 system-ui, sans-serif; }
+.official-map-directory * { box-sizing: border-box; }
+.official-map-directory h1 { font-size: clamp(1.5rem, 5vw, 2rem); line-height: 1.2; }
+.official-map-directory a { color: #075aa0; text-underline-offset: .15em; }
+.official-map-directory a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.official-map-directory p, .official-map-directory code, .official-map-directory th, .official-map-directory td { overflow-wrap: anywhere; }
+.official-map-directory code { font-size: .8rem; }
+.official-map-directory table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: .875rem; }
+.official-map-directory caption { padding: .75rem 0; text-align: left; font-weight: 600; }
+.official-map-directory th, .official-map-directory td { padding: .6rem .4rem; border: 1px solid #c9d5dd; text-align: left; vertical-align: top; }
+.official-map-directory th { background: #edf3f7; }
+.official-map-directory th:nth-child(1) { width: 12%; }
+.official-map-directory th:nth-child(2) { width: 40%; }
+.official-map-directory th:nth-child(3) { width: 12%; }
+.official-map-directory th:nth-child(4) { width: 36%; }
+.official-map-directory td:nth-child(3) { white-space: nowrap; font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) {
+  .official-map-directory { padding: .75rem; }
+  .official-map-directory table, .official-map-directory code { font-size: .75rem; }
+  .official-map-directory th, .official-map-directory td { padding: .45rem .2rem; }
+  .official-map-directory th:nth-child(1), .official-map-directory th:nth-child(3) { width: 16%; }
+  .official-map-directory th:nth-child(2), .official-map-directory th:nth-child(4) { width: 34%; }
+  .official-map-directory td:nth-child(3) { font-size: .6875rem; }
+}
+</style></head>
+<body class="official-map-directory"><h1>Official map source files</h1>
 <p>Selected source files, not live World State. No coordinates or economic permissions are inferred.</p>
 <p>Publication follows the owner's source selection. Third-party rights remain UNKNOWN; no third-party rights proof is claimed. Supporting files are source downloads, not executable operations.</p>
 <p>${index.counts.files} files: ${index.counts.images} images and ${index.counts.support} supporting files. <a href="./index.json">JSON catalogue</a></p>

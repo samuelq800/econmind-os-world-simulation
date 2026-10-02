@@ -178,10 +178,22 @@ describe('selected official map source publication (not live World State)', () =
     expect(html.match(/<tr><td>/gu)).toHaveLength(203);
     expect(html).not.toContain('<script');
     expect(html).not.toContain('<img');
+    expect(html).toContain('<body class="official-map-directory">');
+    expect(html).toContain(
+      '.official-map-directory table { width: 100%; table-layout: fixed;',
+    );
+    expect(html).toContain('overflow-wrap: anywhere');
+    expect(html).toContain('@media (max-width: 480px)');
+    expect(html).toContain(
+      'white-space: nowrap; font-variant-numeric: tabular-nums;',
+    );
+    expect(html).not.toMatch(/text-overflow|line-clamp|overflow:\s*hidden/gu);
     for (const file of index.files) {
       expect(html).toContain(
         `href="./${file.publicUrl.slice('official-map-source/'.length)}"`,
       );
+      expect(html).toContain(`<code>${file.sha256}</code>`);
+      expect(html).toContain(`>${file.sourcePath}</a>`);
     }
   });
 
