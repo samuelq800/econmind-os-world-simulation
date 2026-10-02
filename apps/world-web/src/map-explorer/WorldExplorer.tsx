@@ -386,7 +386,10 @@ export function WorldExplorer() {
         </a>
         <a
           className="old-atlas explorer-national-link"
-          href="./season1-immersive/?role=finance&country=01#country"
+          href={`./season1-immersive/?role=finance&country=${country?.number ?? '01'}#country`}
+          title={
+            country ? `${country.name} · 国家操作` : '默认国家 01 · Avenor'
+          }
         >
           国家操作 ↗
         </a>
