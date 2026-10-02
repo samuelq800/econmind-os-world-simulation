@@ -1,7 +1,7 @@
 # EconMind World V2 — 数据接线与视觉合流补充交付
 
 日期：2026-10-02（Asia/Shanghai）；补充更新于 2026-10-03。
-最新已合并地图/布局基线：World main `c1354ac857eb65b9fd573b6deadd7ebd2d0f10c0`。
+最新已合并地图/布局基线：World main `66d57ec3a2bfa47d2d2081ee746214c111795105`。
 下文 15:20 UTC 各项保留为当时检查点，不当作更新后的状态。
 本文件更新[首轮交付报告](WORLD_V2_DELIVERY_REPORT_2026_10_02.md)中的待办，不覆盖其历史失败、取证或原件。
 不是 Gate B 批准书，不更改经济规则、开局状态或正式步骤记录。
@@ -12,12 +12,18 @@
 唯一授权 policy 发布 run `37031019041` 的 Management 请求步骤成功，但回执校验失败
 `SNAPSHOT_POLICY_PUBLICATION_EVIDENCE_INVALID`，实际数据库提交/回滚为 **UNKNOWN**。
 已停止，不重放 DDL、不盲目重试；临时发布 lock 已删除；34 文件运输、取 key、Edge 部署和经济启动均 NOT_RUN。
-下一步仅准备新的有界纯读恢复核实方案，经独立窄审及 Root 新授权后才执行。
+后续 main-site #88 的严格 OID 验证修复及一次纯 SELECT 恢复入口已由 B 独立 25 项窄审、真实 PG17 完整 CLI 及常规 CI 通过，Root 合并 `9d1207921a5f2715268d9f98547ef81bd8775e08`；原 proof finding CLOSED_IN_CODE，原生产 run UNKNOWN 不变。
+Root 已单独授权的一次纯 SELECT run `37036290594` 已产生真实回执：`CURRENT_STATE_RECOVERED / EXACT_VETO_AND_LEDGER22_PRESENT`，精确两 policy+ledger22 当前存在，历史前 21 条/旧权限摘要、NOLOGIN/NOINHERIT、source inactive、空新 bucket/object 等 guards 全 true，普通角色 Storage write DENIED。
+耐久原件 `artifacts/e-policy-current-state-readback.vVgEPT/readback.json` SHA-256 `6201a29a79d6766b32b974667c14928ef14df342a5e052b8fe2f7c42dcb87f4e`，Root 实际重算/读取一致，B 独立从真实 artifact 核对一致。
+READBACK_LOCK 已退休并回读各锁名字为空；原 `37031019041` 仍 UNKNOWN，历史完整 ACL/bucket 保全仍 NOT_EVIDENCED，不能补造旧成功。
+条件已成立，Root 另授权既有 #85 一次新鲜权限 preflight（请求 ID `CT-SNAPSHOT-PREFLIGHT-POSTREADBACK-37036290594-V1`），B 同步窄核真实回执；无 key/Storage/Edge 发布授权，不重放 DDL。
 
 完整原始 70 国 × 6 职位 × 桌面/手机的 **840 HOME 原图已全部实际目视**，583 有问题、257 本范围未见重大问题、0 未查看。
 原始功能矩阵完成 420/420 组合，2,520 来源抽屉通过；旧异步导航 harness 阻塞和 7 个短超时失败均保留原件。
 19 个对应控件有界复核未复现，但不改写原始 FAIL。#58 的 navigation-only 补充已完成全部 840：838 PASS、59/central_bank/desktop 本地连接中断后 FAIL、60/finance/desktop 可见入口等待超时 BLOCKED；0 NOT_RUN。仅两项独立有界复核现均未复现，真实返回身份/href 和 59 的实际职位切换正确，零 page/console/request error；原件不改。
-#61 共享布局修复已合并；修后 108 HOME / 324 工具打开有实际证据，修后全 840 复核仍 PENDING。
+#61 共享布局修复已合并；后续修后全 840 HOME 实际目视已完成，未发现新的阻断性主布局问题。
+#64 手机 drawer 的视口包含、单内部滚动、sticky Close/完整换行改进另已合并；14 实际列表样本和聚焦 CI 通过，但真实偶发文字前缀缺损在 3 清洁 context 诊断未复现、因果仍未确认，保留 IMPLEMENTED_UNVERIFIED。
+不把 HOME 无阻断扩大成全页、全字段或正式玩法通过；原先 583 问题原件及新列表/marker/混合语言待办均保留。
 详见[完整视觉记录](../world-connection/O_FULL_VISUAL_BASELINE_2026_10_03.md)。
 
 #57 响应式地图原件目录/入口已合并。Pages run `37026163647` 已成功，Root 实际六次 HTTP 读回
