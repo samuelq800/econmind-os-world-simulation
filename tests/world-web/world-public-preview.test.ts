@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { createElement } from '../../apps/world-web/node_modules/react';
+import { renderToStaticMarkup } from '../../apps/world-web/node_modules/react-dom/server';
+import { WorldExplorer } from '../../apps/world-web/src/map-explorer/WorldExplorer.js';
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const runtimeApp = readFileSync('apps/world-web/src/App.tsx', 'utf8');
 const atlasPage = readFileSync(
@@ -26,9 +29,6 @@ describe('public World preview deployment', () => {
     expect(atlasPage).toContain('data-mosaic-country={territory.number}');
     expect(atlasPage).toContain('visibleDetailMaps.map((map) =>');
     expect(atlasPage).toContain('放大后按需叠加 70 国地理细图');
-    expect(atlasPage).toContain(
-      './season1-immersive/?role=finance&country=01#country',
-    );
     expect(runtimeApp).toContain('Open national command');
     expect(runtimeApp).toContain('./command.html');
     expect(runtimeApp).toContain('does not connect to World State');
@@ -65,5 +65,31 @@ describe('public World preview deployment', () => {
     expect(candidateWorkflow).not.toContain('deploy-pages');
     expect(candidateWorkflow).not.toContain('SUPABASE');
     expect(candidateWorkflow).not.toContain('secrets.');
+  });
+});
+
+describe('atlas country-operation gateway', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it.each([
+    ['01', '01', 'Avenor'],
+    ['visual-territory-01', '01', 'Avenor'],
+    ['70', '70', 'Rhea'],
+    ['visual-territory-70', '70', 'Rhea'],
+    ['', '01', '默认国家 01 · Avenor'],
+    ['unknown-country', '01', '默认国家 01 · Avenor'],
+  ])('maps selected country %s to national page %s', (id, number, label) => {
+    vi.stubGlobal('window', {
+      location: { search: id ? `?atlas=explorer&country=${id}` : '' },
+    });
+    const markup = renderToStaticMarkup(createElement(WorldExplorer));
+    const link = markup.match(
+      /<a\b[^>]*class="old-atlas explorer-national-link"[^>]*>/,
+    )?.[0];
+    expect(link).toBeDefined();
+    expect(link).toContain(
+      `href="./season1-immersive/?role=finance&amp;country=${number}#country"`,
+    );
+    expect(link).toContain(label);
   });
 });
