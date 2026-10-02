@@ -1,7 +1,7 @@
 {
   "sourceRepository": "samuelq800/econmind-os",
   "sourceCommit": "7b4db3b8cbdb1db86288a1172896ac9bb8febaa4",
-  "worldBaseCommit": "4b5937a980f2358fc7ed1e4ccded512bdc5bbfce",
+  "worldBaseCommit": "2a4f0535826f15925f99076a14bbff1a053f02ff",
   "method": "gh api contents at fixed ref, base64 decode; scoped semantic adaptation",
   "sources": [
     {
@@ -108,11 +108,16 @@
     "body.season1-lobby focus, selection and reduced motion"
   ],
   "status": "IMPLEMENTED_UNVERIFIED",
-  "riskClass": "P3",
+  "riskClass": "P2",
   "authorityChanged": false,
   "notes": [
     "The existing World topbar contains country switching and map-return controls, so it is retained.",
     "National map control surfaces use the source light palette; play panels use the source dark palette.",
     "Shared CSS has no dimensions, position, transforms, overflow, scroll behavior, visibility or data behavior changes."
-  ]
+  ],
+  "adaptedOutput": {
+    "path": "apps/world-web/public/shared/econmind-os-visual.css",
+    "bytes": 5461,
+    "sha256": "c73be2dc0837df8f3362945ac8f58eaae28461e42f76c52d639bd325b8f05235"
+  }
 }
