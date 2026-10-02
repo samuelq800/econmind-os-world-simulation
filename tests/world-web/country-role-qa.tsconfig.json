@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "lib": ["ES2024", "DOM"],
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "official-country-role-qa.test.ts",
+    "../../scripts/country-role-qa.mjs",
+    "../../scripts/balanced-country-candidate-intake.mjs",
+    "../../scripts/official-world-opening-mapping.mjs"
+  ]
+}
