@@ -7,6 +7,7 @@ import { PGlite } from '@electric-sql/pglite';
 import {
   readMigrationGitProvenance,
   validateMigrationManifest,
+  STORAGE_VETO_MIGRATION_ID,
 } from './migration-policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -27,8 +28,8 @@ if (validation.status !== 'PASS') {
   process.exit(1);
 }
 
-async function applyChain(database) {
-  for (const migration of manifest.migrations) {
+async function applyChain(database, migrations) {
+  for (const migration of migrations) {
     await database.exec(artifacts.get(migration.path).toString('utf8'));
     await database.query(
       `insert into world_v2.schema_release
@@ -53,14 +54,15 @@ async function rehearse(mode) {
         'create schema world_v2; create table world_v2.preexisting_marker (id integer primary key);',
       );
     }
-    await applyChain(database);
+    const legacy = manifest.migrations.filter((m) => m.migration_id !== STORAGE_VETO_MIGRATION_ID);
+    await applyChain(database, legacy);
     const release = await database.query(
       'select migration_id, artifact_sha256, source_repo_commit, release_order from world_v2.schema_release order by release_order',
     );
     const shared = await database.query(
       "select schema_name from information_schema.schemata where schema_name in ('auth', 'public', 'storage') order by schema_name",
     );
-    if (release.rows.length !== manifest.migrations.length)
+    if (release.rows.length !== legacy.length)
       throw new Error(`${mode} release ledger mismatch`);
     if (
       release.rows.some(
@@ -77,7 +79,22 @@ async function rehearse(mode) {
       )
     )
       throw new Error(`${mode} created a shared Supabase-owned schema`);
-    return { mode, releaseRows: release.rows.length, status: 'PASS' };
+    // The complete historical no-shared-schema assertion above stays intact.
+    // Only a disposable, preexisting Storage fixture supports the new veto.
+    const veto = manifest.migrations.find((m) => m.migration_id === STORAGE_VETO_MIGRATION_ID);
+    if (veto) {
+      await database.exec(`create role anon nologin; create role authenticated nologin;
+        create schema storage; create table storage.objects(bucket_id text);
+        alter table storage.objects enable row level security;
+        create policy existing_fixture on storage.objects for all to public using(true) with check(true);`);
+      await applyChain(database, [veto]);
+      const policies = await database.query("select policyname from pg_policies where schemaname='storage' order by policyname");
+      if (JSON.stringify(policies.rows.map((p) => p.policyname)) !== JSON.stringify([
+        'existing_fixture', 'world_v2_snapshot_objects_delete_deny', 'world_v2_snapshot_objects_insert_deny',
+      ])) throw new Error(`${mode} Storage delta is not exactly the two reviewed policies`);
+    }
+    return { mode, legacyReleaseRows: release.rows.length, releaseRows: manifest.migrations.length,
+      existingSharedSchemaAssertion: 'PASS_BEFORE_DISPOSABLE_STORAGE_FIXTURE', status: 'PASS' };
   } finally {
     await database.close();
   }
