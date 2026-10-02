@@ -7,20 +7,20 @@ engines or hidden buffs.
 
 ## Current integration snapshot (2026-10-02)
 
-Code baseline: main `fa4b18ce01c5558ab15cfa3e936efbf1cd0a6ef8`.
+Code baseline: main `ab6e21cd3b7888ca9d8ff28504241c511425b771` (15:20 UTC checkpoint).
 The [October 2 integration supplement](docs/reports/delivery/WORLD_V2_INTEGRATION_SUPPLEMENT_2026_10_02.md)
 updates the earlier [October 2 delivery report](docs/reports/delivery/WORLD_V2_DELIVERY_REPORT_2026_10_02.md) and
 supersedes the dated capability summaries below. It separates code integration,
 Pages publication, database publication, live API access and economic execution;
 it does not replace the formal gate ledger in `status/progress.json`.
 
-| Layer           | Verified scope                                                                                                                                       | Remaining boundary                                                                                                                                      |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                                                   | Source preservation is not runtime economic adoption                                                                                                    |
-| Supabase        | Balanced readback and separate 0020 audit passed; controlled run `36672349466` verified 0021 full-source permissions                                 | Server LOGIN and live Edge deployment are not established by those database releases                                                                    |
-| API code        | Credential-free immutable source-snapshot reader #41 merged; main-site #84 create-only publisher preparation/mock merged                             | New Storage transport and release still under construction; old DB reader remains NOLOGIN / RELEASE_HOLD                                                |
-| Page code       | Exact field provenance #42, lazy country loader #44, official root-map numbers #45, six-role metric sources #46 and scoped shared visuals #43 merged | Pages #45 has representative live readback; later integrated browser review and complete 420 matrix are pending; production API config remains disabled |
-| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI                                                  | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                                                       |
+| Layer           | Verified scope                                                                                                                                        | Remaining boundary                                                                                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                                                    | Source preservation is not runtime economic adoption                                                                                                                   |
+| Supabase        | Balanced readback and separate 0020 audit passed; controlled run `36672349466` verified 0021 full-source permissions                                  | Server LOGIN and live Edge deployment are not established by those database releases                                                                                   |
+| API code        | Credential-free immutable source reader #41 and main-site #85 controlled transport merged; #51 all-data readback tool merged                          | Actual preflight found missing new-bucket write vetoes; #50 correction and independent review pending; no Storage/Edge publication; old DB path remains HOLD           |
+| Page code       | Source metrics, shared visuals, public role navigation #49, 203-file map publication #52, catalog-status component #53 and atlas text wrap #54 merged | Latest combined Pages deployment pending; local root-map 70-country data checks passed, but 420 functional/visual acceptance is still in progress; API config disabled |
+| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI                                                   | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                                                                      |
 
 Lobby entry and team/person/office assignment are intentionally deferred by the
 owner. Public official-source connections can proceed without inventing those
