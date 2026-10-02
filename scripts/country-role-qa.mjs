@@ -527,6 +527,55 @@ async function readOnlyDrawer(page, selector) {
   }
 }
 
+// Atlas data/rendering is asynchronous. Never use a background brand-home link
+// as a substitute for the visible modal's explicit read-only return control.
+export async function awaitCountryAtlasReturn(
+  page,
+  { path: expectedPath, country, role, countryId },
+  timeoutMs = 8000,
+) {
+  const selector = 'a[data-country-atlas-return]:visible';
+  const link = page.locator(selector).first();
+  try {
+    await link.waitFor({ state: 'visible', timeout: timeoutMs });
+  } catch (error) {
+    return { status: 'NOT_IMPLEMENTED', selector, error: String(error) };
+  }
+  const href = await link.getAttribute('href');
+  const target = new URL(href ?? '', page.url());
+  if (
+    target.origin !== new URL(page.url()).origin ||
+    target.pathname !== expectedPath ||
+    target.searchParams.getAll('country').length !== 1 ||
+    target.searchParams.getAll('role').length !== 1 ||
+    target.searchParams.get('country') !== country ||
+    target.searchParams.get('role') !== role
+  )
+    return { status: 'FAIL_HREF_IDENTITY', selector, href: target.href };
+  await link.click({ timeout: timeoutMs });
+  await page.locator('.country-game').waitFor({ timeout: timeoutMs });
+  const returned = await page.evaluate(() => ({
+    countryId: window.CountryGame?.country?.()?.id ?? null,
+    countryNumber:
+      document.querySelector('.country-game')?.dataset.country ?? null,
+    office: document.querySelector('.country-game')?.dataset.office ?? null,
+    runtimeRole: window.GameTest?.role?.() ?? null,
+    url: window.location.href,
+  }));
+  return {
+    status:
+      returned.countryId === countryId &&
+      returned.countryNumber === country &&
+      returned.office === role &&
+      returned.runtimeRole === role
+        ? 'PASS'
+        : 'FAIL_RETURN_IDENTITY',
+    selector,
+    href: target.href,
+    returned,
+  };
+}
+
 export async function runCountryRoleAudit({
   browser = null,
   inputs,
@@ -815,30 +864,18 @@ export async function runCountryRoleAudit({
                 state.searchParams.get('role') !== role
               )
                 result.failures.push('ATLAS_NAVIGATION_LOST_COUNTRY_OR_ROLE');
-              const returnIndex = await page.locator('a[href]').evaluateAll(
-                (links, args) =>
-                  links.findIndex((link) => {
-                    const url = new URL(link.href);
-                    return (
-                      url.pathname === args.path &&
-                      url.searchParams.get('country') === args.country &&
-                      url.searchParams.get('role') === args.role
-                    );
-                  }),
-                {
-                  path: new URL('season1-immersive/', base).pathname,
-                  country,
-                  role,
-                },
-              );
-              result.navigation.matchingReturnLinkIndex = returnIndex;
-              if (returnIndex >= 0) {
-                await page.locator('a[href]').nth(returnIndex).click();
-                await page.locator('.country-game').waitFor({ timeout: 8000 });
+              const returnEvidence = await awaitCountryAtlasReturn(page, {
+                ...result.navigation.expectedReturn,
+                countryId: expected.id,
+              });
+              result.navigation.atlasReturnEvidence = returnEvidence;
+              if (returnEvidence.status === 'PASS') {
                 result.navigation.atlasReturn = 'IN_APP_RETURN_RENDERED';
               } else {
                 await page.goBack();
-                result.gaps.push('IN_APP_ATLAS_RETURN_MISSING');
+                if (returnEvidence.status === 'NOT_IMPLEMENTED')
+                  result.gaps.push('IN_APP_ATLAS_RETURN_MISSING');
+                else result.failures.push(returnEvidence.status);
               }
               const returned = await renderedSnapshot(page);
               if (
