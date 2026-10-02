@@ -1,5 +1,6 @@
 import './landing.css';
 import { lazy, Suspense } from 'react';
+import { OfficialSourceConnectionStatus } from './components/OfficialSourceConnectionStatus.js';
 
 const ContinentExplorer = lazy(async () => ({
   default: (await import('./map-explorer/ContinentExplorer.js'))
@@ -30,12 +31,20 @@ export function App() {
       ) : (
         <WorldExplorer />
       );
-    return (
+    const map = (
       <Suspense
         fallback={<main className="world-landing">Loading atlas…</main>}
       >
         {view}
       </Suspense>
+    );
+    return atlas === null || atlas === 'explorer' ? (
+      <div className="official-source-map-shell">
+        <OfficialSourceConnectionStatus />
+        {map}
+      </div>
+    ) : (
+      map
     );
   }
 
