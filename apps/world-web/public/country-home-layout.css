@@ -10,4 +10,214 @@
     height: auto;
     min-height: max(930px, 100dvh);
   }
+
+  .country-map-home .national-tools {
+    top: 205px;
+  }
+
+  /* Preserve the source projection. Only the unobstructed map is a pin hit area;
+     covered sites remain available in Local sites and the selected-record dock. */
+  .country-map-home .national-site-pins {
+    clip-path: inset(205px 460px 250px calc(31% + 28px));
+  }
+
+  /* Selected record details are a readable dock, not another map coordinate. */
+  .country-map-home .national-destination {
+    left: 28px !important;
+    top: 460px !important;
+    transform: none;
+    width: min(340px, calc(31% - 28px));
+    max-width: none;
+  }
+}
+
+/* A record without a source anchor has no map location. It remains accessible
+   in Local sites and the selected-record dock; never invent a default pin. */
+.country-map-home .national-site-pins button:not([style*='left:']) {
+  display: none;
+}
+
+.country-map-home .national-destination[hidden] {
+  display: block;
+}
+
+.country-map-home .national-destination :is(strong, small) {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .country-map-home .national-hud {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .country-map-home .national-identity {
+    grid-column: 1 / -1;
+  }
+
+  .country-map-home .national-identity > div {
+    flex: 1;
+  }
+
+  .country-map-home .national-identity strong {
+    width: 100%;
+    max-width: none;
+  }
+
+  .country-map-home .national-time {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .country-map-home .national-atlas {
+    position: static;
+    grid-column: 1;
+    grid-row: 2;
+    align-self: start;
+    justify-self: start;
+    margin-top: 4px;
+  }
+
+  .country-map-home #language-switch {
+    top: 155px;
+    left: 14px;
+    right: auto;
+  }
+
+  .country-map-home .national-tools {
+    position: relative;
+    top: auto;
+    right: auto;
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+
+  .country-map-home .national-destination {
+    position: relative;
+    left: auto !important;
+    top: auto !important;
+    transform: none;
+    width: auto;
+    max-width: none;
+    margin-top: 16px;
+  }
+
+  /* Flowing the scene requires rebasing the existing root-relative pin layer.
+     This is only a CSS offset: original source anchors and JS remain unchanged.
+     Older engines retain the contained background rather than misplacing pins. */
+  @supports (top: anchor(--country-scene center)) {
+    .country-map-home .country-game {
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      min-height: 100dvh;
+      padding-bottom: 24px;
+    }
+
+    .country-map-home .national-hud {
+      order: 1;
+    }
+    .country-map-home .national-mission {
+      order: 2;
+    }
+    .country-map-home .national-tools {
+      order: 3;
+    }
+    .country-map-home .national-world {
+      order: 4;
+    }
+    .country-map-home .national-play {
+      order: 5;
+    }
+    .country-map-home .national-destination {
+      order: 6;
+    }
+    .country-map-home .national-buildings {
+      order: 7;
+    }
+    .country-map-home .national-bottom {
+      order: 8;
+    }
+    .country-map-home .national-edition {
+      order: 9;
+    }
+
+    .country-map-home .national-world {
+      position: relative;
+      inset: auto;
+      width: calc(100% + 28px);
+      height: auto;
+      aspect-ratio: 1;
+      flex: 0 0 auto;
+      align-self: center;
+      background-position: center;
+      margin-top: 18px;
+      anchor-name: --country-scene;
+    }
+
+    .country-map-home .national-site-pins {
+      top: anchor(--country-scene center);
+      bottom: auto;
+      height: 100%;
+      transform: translateY(-50%);
+    }
+
+    .country-map-home .national-play {
+      width: 100%;
+      max-width: none;
+    }
+
+    .country-map-home .national-buildings {
+      position: relative;
+      inset: auto;
+      flex-direction: row;
+      justify-content: space-between;
+      max-width: none;
+      margin-top: 18px;
+      gap: 10px;
+    }
+
+    .country-map-home .national-bottom {
+      position: relative;
+      inset: auto;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .country-map-home .national-hand {
+      width: 100%;
+    }
+
+    .country-map-home .national-card {
+      height: auto;
+      min-height: 150px;
+      min-width: 0;
+    }
+
+    .country-map-home .national-card p {
+      font-size: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .country-map-home .national-world-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      min-height: 0;
+      padding: 12px;
+    }
+
+    .country-map-home .national-edition {
+      position: relative;
+      left: auto;
+      bottom: auto;
+      max-width: none;
+      margin-top: 20px;
+      font-size: 10px;
+      line-height: 1.5;
+    }
+  }
 }
