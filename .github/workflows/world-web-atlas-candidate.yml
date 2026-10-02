@@ -10,6 +10,7 @@ on:
       - tests/world-web/fictional-atlas.test.ts
       - tests/world-web/shared-visual-contract.test.ts
       - tests/world-web/visual-publication-integrity.test.ts
+      - tests/world-web/country-home-layout.test.ts
       - docs/reports/world-shared-visual/SOURCE.json
       - tests/world-web/detail-tile-visibility.test.ts
       - tests/world-web/viewport-camera.test.ts
@@ -50,3 +51,9 @@ jobs:
           pnpm exec prettier --ignore-path /dev/null --check apps/world-web/public/shared/econmind-os-visual.css
           pnpm exec eslint apps/world-web/src/map-explorer/viewport-camera.ts tests/world-web/viewport-camera.test.ts
           pnpm exec prettier --check apps/world-web/src/map-explorer/viewport-camera.ts apps/world-web/src/map-explorer/world-explorer.css tests/world-web/viewport-camera.test.ts
+      - name: Country role layout guardrails
+        run: |
+          pnpm exec vitest run tests/world-web/country-home-layout.test.ts
+          pnpm exec eslint tests/world-web/country-home-layout.test.ts
+          pnpm exec prettier --check tests/world-web/country-home-layout.test.ts .github/workflows/world-web-atlas-candidate.yml
+          pnpm exec prettier --ignore-path /dev/null --check apps/world-web/public/country-home-layout.css
