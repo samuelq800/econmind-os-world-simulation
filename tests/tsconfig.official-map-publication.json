@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "lib": ["ES2024", "DOM"],
+    "types": ["node", "vitest/globals"]
+  },
+  "include": ["world-web/official-map-publication.test.ts"]
+}

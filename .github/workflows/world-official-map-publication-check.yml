@@ -1,0 +1,64 @@
+name: Official map source publication (no deploy)
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/world-official-map-publication-check.yml
+      - apps/world-web/package.json
+      - apps/world-web/public/official-map-source/**
+      - scripts/official-map-publication-*
+      - tests/world-web/official-map-publication-*.test.ts
+      - tests/world-web/official-map-publication.test.ts
+      - tests/tsconfig.official-map-publication.json
+      - status/world-data-selection.json
+      - artifacts/world-map-files-v1/manifest.json
+      - apps/world-web/src/assets/**
+      - apps/world-web/src/map-lab/**
+      - artifacts/world-geography/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  official-map-publication:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Exact selected originals and derived publication regressions
+        run: |
+          node scripts/official-map-publication-generate.mjs --check
+          node scripts/verify-world-map-file-package.mjs
+          pnpm exec vitest run tests/world-web/official-map-publication.test.ts
+          pnpm exec tsc -p tests/tsconfig.official-map-publication.json
+          pnpm exec eslint scripts/official-map-publication-*.mjs tests/world-web/official-map-publication.test.ts
+          pnpm exec prettier --check scripts/official-map-publication-*.mjs scripts/official-map-publication-*.d.mts tests/world-web/official-map-publication.test.ts tests/tsconfig.official-map-publication.json apps/world-web/package.json .github/workflows/world-official-map-publication-check.yml
+      - name: Browser and source-publication boundaries
+        run: |
+          pnpm --filter @econmind/core build
+          pnpm --filter @econmind/world-worker build
+          node scripts/check-boundaries.mjs
+          node scripts/check-authoritative-patterns.mjs
+          pnpm secrets:check
+          pnpm test:authoritative-ui
+      - name: Actual static build including package byte count
+        run: pnpm --filter @econmind/world-web build
+      - name: Two-country and global file HTTP readback at Pages project base
+        run: |
+          pnpm --filter @econmind/world-web exec vite preview --host 127.0.0.1 --port 4123 --strictPort > /tmp/official-map-publication-preview.log 2>&1 &
+          map_preview_pid=$!
+          trap 'kill "$map_preview_pid"' EXIT
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --silent --output /dev/null http://127.0.0.1:4123/econmind-os-world-simulation/official-map-source/index.json; then break; fi
+            sleep 1
+          done
+          node scripts/official-map-publication-smoke.mjs --site-base http://127.0.0.1:4123/econmind-os-world-simulation/
