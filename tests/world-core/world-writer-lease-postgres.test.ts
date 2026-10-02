@@ -5,6 +5,7 @@ import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { assertV09PostgresTestEnvironment } from '../../scripts/v09-postgres-test-environment.mjs';
+import { snapshotStorageFixtureSql } from '../support/snapshot-storage-fixture.js';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const testDatabaseConfigured = Boolean(process.env.V09_TEST_DATABASE_URL);
@@ -110,6 +111,9 @@ describePostgres('V09.1 real PostgreSQL lease/fencing evidence', () => {
           'utf8',
         ),
       ) as MigrationManifest;
+      // Fresh disposable target only; the actual existing Supabase objects are
+      // a required precondition of the separately controlled 0022 companion.
+      await client.query(snapshotStorageFixtureSql);
       for (const migration of manifest.migrations) {
         await client.query(
           await readFile(path.join(root, migration.path), 'utf8'),

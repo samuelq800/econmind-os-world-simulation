@@ -297,6 +297,21 @@
       "lock_or_downtime_risk": "P0 additive server-only RLS whitelist for exactly 34 frozen selected-source JSON paths and their four-digit chunks; no new grant, browser access, World, OpeningSeed, worker, mutation, CSV, map-blob or legacy schema action",
       "rollback_strategy": "forward-fix",
       "production_approval": null
+    },
+    {
+      "migration_id": "0022_world_v2_snapshot_storage_veto",
+      "release_order": 22,
+      "path": "database/migrations/artifacts/0022_world_v2_snapshot_storage_veto.sql",
+      "sha256": "c1ceebbf6265b54c67230d550f438e1b197415c42b3921cc358cf247482b4ef1",
+      "artifact_source_commit": "41f387700cf8f933a777f924c503d11cbcd99ffe",
+      "scope_authority": "CONTROL_TOWER_OWNER_DELEGATION",
+      "required_shared_schema_version": "EXISTING_STORAGE_OBJECTS_BOUND_BY_MAIN_SITE_ATOMIC_PREFLIGHT",
+      "affected_schemas": ["storage"],
+      "rls_or_grants_changed": true,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "P0 two additive restrictive INSERT/DELETE vetoes for one new World bucket only; bounded table DDL lock, no old policy/grant/row/bucket mutation, no credentials or economic activation; publication requires independent fixed-candidate review",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }

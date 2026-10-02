@@ -17,6 +17,7 @@ import { Client } from 'pg';
 import {
   readMigrationGitProvenance,
   validateMigrationManifest,
+  historicalWorldOnlyMigrations,
 } from './migration-policy.mjs';
 import {
   V09_STAGING_API_READER_ROLES,
@@ -991,13 +992,6 @@ export async function loadV09StagingMigrationChain() {
   const migrations = Array.isArray(manifest.migrations)
     ? manifest.migrations
     : [];
-  try {
-    assertV09StagingMigrationAllowlist(migrations);
-  } catch {
-    failed(
-      'the runner accepts only the exact reviewed 0001–0020 chain or pinned 0021 candidate',
-    );
-  }
   const artifacts = new Map();
   for (const migration of migrations) {
     artifacts.set(
@@ -1013,7 +1007,15 @@ export async function loadV09StagingMigrationChain() {
   if (validation.status !== 'PASS') {
     failed('local migration provenance validation failed');
   }
-  return migrations.map((migration) =>
+  const historical = historicalWorldOnlyMigrations(migrations);
+  try {
+    assertV09StagingMigrationAllowlist(historical);
+  } catch {
+    failed(
+      'the runner accepts only the exact reviewed 0001–0020 chain or pinned 0021 candidate',
+    );
+  }
+  return historical.map((migration) =>
     Object.freeze({
       artifact_sha256: migration.sha256,
       migration_id: migration.migration_id,

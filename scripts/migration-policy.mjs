@@ -6,6 +6,10 @@ import { promisify } from 'node:util';
 export const WORLD_V2_NAMESPACE = 'world_v2';
 export const WORLD_V2_MIGRATION_ROOT = 'database/migrations/artifacts';
 export const PRODUCTION_PUBLISHER = 'main-site-release-chain';
+export const STORAGE_VETO_MIGRATION_ID = '0022_world_v2_snapshot_storage_veto';
+export const STORAGE_VETO_SHA256 =
+  'c1ceebbf6265b54c67230d550f438e1b197415c42b3921cc358cf247482b4ef1';
+export const STORAGE_VETO_PATH = `${WORLD_V2_MIGRATION_ROOT}/${STORAGE_VETO_MIGRATION_ID}.sql`;
 
 const MIGRATION_ID = /^\d{4}_[a-z][a-z0-9_]*$/u;
 const SHA256 = /^[0-9a-f]{64}$/u;
@@ -35,6 +39,8 @@ export function sha256(bytes) {
 }
 
 export function inspectMigrationSql(sql) {
+  // Exact immutable two-policy artifact only. No general Storage DDL waiver.
+  if (sha256(Buffer.from(sql, 'utf8')) === STORAGE_VETO_SHA256) return [];
   const violations = [];
   for (const rule of FORBIDDEN_SQL) {
     if (rule.pattern.test(sql)) violations.push(rule.category);
@@ -46,6 +52,22 @@ export function inspectMigrationSql(sql) {
     violations.push('WORLD_V2_NAMESPACE_MISSING');
   }
   return [...new Set(violations)];
+}
+
+// Historical World-only staging must never execute the Storage-only companion.
+// Callers still validate the complete manifest/artifact provenance first.
+export function historicalWorldOnlyMigrations(migrations) {
+  if (migrations.length <= 21) return migrations;
+  const last = migrations.at(-1);
+  if (
+    migrations.length !== 22 ||
+    last.migration_id !== STORAGE_VETO_MIGRATION_ID ||
+    last.path !== STORAGE_VETO_PATH ||
+    last.sha256 !== STORAGE_VETO_SHA256 ||
+    last.artifact_source_commit !== '41f387700cf8f933a777f924c503d11cbcd99ffe'
+  )
+    throw new Error('STORAGE_VETO_HISTORICAL_PREFIX_INVALID');
+  return migrations.slice(0, 21);
 }
 
 function provenanceKey(commit, artifactPath) {
@@ -151,7 +173,26 @@ export function validateMigrationManifest(manifest, artifacts, provenance) {
     if (migration?.created_from_commit !== undefined) {
       violations.push(`LEGACY_PROVENANCE_FIELD:${migration?.migration_id}`);
     }
+    const exactStorageVeto =
+      migration?.migration_id === STORAGE_VETO_MIGRATION_ID &&
+      migration.path === STORAGE_VETO_PATH &&
+      migration.sha256 === STORAGE_VETO_SHA256 &&
+      migration.release_order === 22 &&
+      migration.artifact_source_commit ===
+        '41f387700cf8f933a777f924c503d11cbcd99ffe' &&
+      migration.scope_authority === 'CONTROL_TOWER_OWNER_DELEGATION' &&
+      JSON.stringify(migration.affected_schemas) ===
+        JSON.stringify(['storage']) &&
+      migration.production_approval === null;
     if (
+      (migration?.migration_id === STORAGE_VETO_MIGRATION_ID ||
+        migration?.sha256 === STORAGE_VETO_SHA256 ||
+        migration?.path === STORAGE_VETO_PATH) &&
+      !exactStorageVeto
+    )
+      violations.push(`STORAGE_VETO_SCOPE_INVALID:${migration?.migration_id}`);
+    if (
+      !exactStorageVeto &&
       migration?.affected_schemas?.some(
         (schema) => schema !== WORLD_V2_NAMESPACE,
       )

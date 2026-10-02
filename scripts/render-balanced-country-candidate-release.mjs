@@ -9,6 +9,7 @@ import { loadBalancedCountryCandidate } from './balanced-country-candidate-intak
 import {
   readMigrationGitProvenance,
   validateMigrationManifest,
+  historicalWorldOnlyMigrations,
 } from './migration-policy.mjs';
 import { assertV09StagingMigrationAllowlist } from './v09-staging-evidence-policy.mjs';
 
@@ -55,7 +56,9 @@ async function verifiedMigration(repositoryRoot) {
   try {
     // 0019 remains the release being rendered. Later reviewed reader grants
     // may be present in the repository manifest but are never re-rendered here.
-    assertV09StagingMigrationAllowlist(manifest.migrations);
+    assertV09StagingMigrationAllowlist(
+      historicalWorldOnlyMigrations(manifest.migrations),
+    );
   } catch {
     throw new Error('BALANCED_CANDIDATE_MIGRATION_CHAIN_INVALID');
   }

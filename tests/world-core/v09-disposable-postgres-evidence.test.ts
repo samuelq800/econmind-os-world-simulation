@@ -73,7 +73,13 @@ describe('V09 disposable PostgreSQL evidence boundary', () => {
         'utf8',
       ),
     );
-    const complete = manifest.migrations as Array<Record<string, unknown>>;
+    // The unchanged V09 runner remains capped at the immutable 0021 chain.
+    expect(() =>
+      assertV09StagingMigrationAllowlist(manifest.migrations),
+    ).toThrow('V09_STAGING_MIGRATION_CHAIN_NOT_REVIEWED');
+    const complete = manifest.migrations.slice(0, 21) as Array<
+      Record<string, unknown>
+    >;
     const main = complete.slice(0, -1);
     const candidate = {
       ...V09_STAGING_CANDIDATE_0021,
