@@ -13,6 +13,7 @@ on:
       - tests/world-web/country-home-layout.test.ts
       - docs/reports/world-shared-visual/SOURCE.json
       - tests/world-web/detail-tile-visibility.test.ts
+      - tests/world-web/viewport-camera.test.ts
       - docs/reports/world-connection/F_CALLUM_ISLAND_MOSAIC_HOME_2026_09_30.md
       - scripts/verify-authoritative-ui-publication.mjs
       - scripts/sync-official-ui-country-data.mjs
@@ -38,7 +39,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Focused atlas and public-preview tests
-        run: pnpm exec vitest run tests/world-web/callum-home-mosaic.test.ts tests/world-web/detail-tile-visibility.test.ts tests/world-web/world-public-preview.test.ts tests/world-web/fictional-atlas.test.ts tests/world-web/shared-visual-contract.test.ts tests/world-web/visual-publication-integrity.test.ts
+        run: pnpm exec vitest run tests/world-web/callum-home-mosaic.test.ts tests/world-web/detail-tile-visibility.test.ts tests/world-web/viewport-camera.test.ts tests/world-web/world-public-preview.test.ts tests/world-web/fictional-atlas.test.ts tests/world-web/shared-visual-contract.test.ts tests/world-web/visual-publication-integrity.test.ts
       - name: World web typecheck and build
         run: pnpm --filter @econmind/world-web build
       - name: Selected national UI publication boundary
@@ -48,6 +49,8 @@ jobs:
           pnpm exec eslint scripts/verify-authoritative-ui-publication.mjs tests/world-web/shared-visual-contract.test.ts tests/world-web/visual-publication-integrity.test.ts apps/world-web/src/App.tsx apps/world-web/src/map-explorer/WorldExplorer.tsx apps/world-web/src/map-explorer/continent-layout.ts apps/world-web/src/map-explorer/detail-tile-visibility.ts tests/world-web/callum-home-mosaic.test.ts tests/world-web/detail-tile-visibility.test.ts tests/world-web/world-public-preview.test.ts
           pnpm exec prettier --check scripts/verify-authoritative-ui-publication.mjs tests/world-web/shared-visual-contract.test.ts tests/world-web/visual-publication-integrity.test.ts docs/reports/world-shared-visual/SOURCE.json .github/workflows/world-web-atlas-candidate.yml apps/world-web/src/map-explorer/WorldExplorer.tsx apps/world-web/src/map-explorer/detail-tile-visibility.ts tests/world-web/detail-tile-visibility.test.ts
           pnpm exec prettier --ignore-path /dev/null --check apps/world-web/public/shared/econmind-os-visual.css
+          pnpm exec eslint apps/world-web/src/map-explorer/viewport-camera.ts tests/world-web/viewport-camera.test.ts
+          pnpm exec prettier --check apps/world-web/src/map-explorer/viewport-camera.ts apps/world-web/src/map-explorer/world-explorer.css tests/world-web/viewport-camera.test.ts
       - name: Country role layout guardrails
         run: |
           pnpm exec vitest run tests/world-web/country-home-layout.test.ts

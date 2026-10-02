@@ -7,6 +7,11 @@ import { countryDetailUrls } from './country-detail-urls.js';
 import { countrySceneUrls } from './country-scene-urls.js';
 import { shouldMountDetailTile } from './detail-tile-visibility.js';
 import { layoutLabels } from './label-layout.js';
+import {
+  cameraForViewport,
+  isUsableViewport,
+  type ExplorerCameraFit,
+} from './viewport-camera.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import terrain from '../assets/asterra-satellite-terrain-v8.png';
 import { artwork, partition } from '../map-lab/display-layers.js';
@@ -29,6 +34,11 @@ const scenes = sceneIndex as CountryScene[];
 type Camera = { x: number; y: number; width: number };
 type Size = { width: number; height: number };
 const world: Camera = { x: 887, y: 443.5, width: 1900 };
+const worldFit: ExplorerCameraFit = {
+  kind: 'world',
+  camera: world,
+  frame: [partition.width, partition.height],
+};
 const countries = partition.territories.map((country, index) => {
   const values = (
     country.path.match(/-?\d+(?:\.\d+)?(?:e[+-]?\d+)?/gi) ?? []
@@ -457,6 +467,7 @@ export function WorldExplorer({
   const official =
     officialState.kind === 'ready' ? officialState.data : undefined;
   const [camera, setCamera] = useState<Camera>(world);
+  const cameraFit = useRef<ExplorerCameraFit | null>(worldFit);
   const cameraRef = useRef(camera),
     sizeRef = useRef(size);
   cameraRef.current = camera;
@@ -549,10 +560,10 @@ export function WorldExplorer({
   const fit = useCallback((id: string) => {
     const c = countries.find((item) => item.id === id);
     if (!c) {
-      setCamera({
-        ...world,
-        width: sizeRef.current.width < 600 ? 700 : world.width,
-      });
+      cameraFit.current = worldFit;
+      setCamera((current) =>
+        cameraForViewport(current, sizeRef.current, cameraFit.current),
+      );
       return;
     }
     const scene = sceneModeRef.current
@@ -566,23 +577,27 @@ export function WorldExplorer({
           scene.frame[1]! + scene.frame[3]!,
         ]
       : c.bounds;
-    const ratio = sizeRef.current.width / sizeRef.current.height;
-    setCamera({
-      x: (x0 + x1) / 2,
-      y: (y0 + y1) / 2,
-      width: Math.max(x1 - x0, (y1 - y0) * ratio) * (scene ? 1.015 : 1.55),
-    });
+    cameraFit.current = {
+      kind: 'bounds',
+      bounds: [x0!, y0!, x1!, y1!],
+      padding: scene ? 1.015 : 1.55,
+    };
+    setCamera((current) =>
+      cameraForViewport(current, sizeRef.current, cameraFit.current),
+    );
   }, []);
   const focusContinent = (id: string) => {
     const art = continentArtworks.find((item) => item.id === id);
     if (!art || country) return;
     const [x, y, width, height] = art.frame;
-    const ratio = sizeRef.current.width / sizeRef.current.height;
-    setCamera({
-      x: x! + width! / 2,
-      y: y! + height! / 2,
-      width: Math.max(width!, height! * ratio) * 1.06,
-    });
+    cameraFit.current = {
+      kind: 'bounds',
+      bounds: [x!, y!, x! + width!, y! + height!],
+      padding: 1.06,
+    };
+    setCamera((current) =>
+      cameraForViewport(current, sizeRef.current, cameraFit.current),
+    );
   };
   const navigate = useCallback(
     (id: string) => {
@@ -608,13 +623,21 @@ export function WorldExplorer({
           width: entry.contentRect.width,
           height: entry.contentRect.height,
         };
+        if (!isUsableViewport(next)) return;
         sizeRef.current = next;
         setSize(next);
+        setCamera((current) =>
+          cameraForViewport(current, next, cameraFit.current),
+        );
       }
     });
     observer.observe(el);
     const bounds = el.getBoundingClientRect();
-    sizeRef.current = { width: bounds.width, height: bounds.height };
+    const measured = { width: bounds.width, height: bounds.height };
+    if (isUsableViewport(measured)) {
+      sizeRef.current = measured;
+      setSize(measured);
+    }
     fit(readCountry());
     const back = () => {
       const id = readCountry();
@@ -630,6 +653,7 @@ export function WorldExplorer({
     };
   }, [fit]);
   const zoomAt = useCallback((factor: number, px: number, py: number) => {
+    cameraFit.current = null;
     setCamera((c) => {
       const s = sizeRef.current;
       // Numerical guard only: no previous 220-pixel detail ceiling. Vector markers stay sharp.
@@ -666,6 +690,7 @@ export function WorldExplorer({
   const focusSite = (id: string) => {
     const site = local.find((f) => f.id === id)!;
     setSelectedSite(id);
+    cameraFit.current = null;
     setCamera((c) => ({
       x: site.point[0]!,
       y: site.point[1]!,
@@ -812,6 +837,7 @@ export function WorldExplorer({
               suppressClick.current = true;
             const unitsPerPixel =
               cameraRef.current.width / sizeRef.current.width;
+            if (deltaX !== 0 || deltaY !== 0) cameraFit.current = null;
             setCamera((c) => ({
               ...c,
               x: c.x - deltaX * unitsPerPixel,
