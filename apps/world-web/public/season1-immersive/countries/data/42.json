@@ -1483,8 +1483,8 @@
         "rowIndex": 495,
         "field": "outputPerDay",
         "sourcePointer": "/495/outputPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/profile/foodDemandTonnesDay": {
@@ -1495,8 +1495,8 @@
         "rowIndex": 495,
         "field": "usePerDay",
         "sourcePointer": "/495/usePerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/profile/foodAvailableStockTonnes": {
@@ -1543,8 +1543,8 @@
         "rowIndex": 41,
         "field": "dailyLabourIncomeReference",
         "sourcePointer": "/41/dailyLabourIncomeReference",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_CURRENCY_AND_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_SEMANTICS"
       },
       "/profile/treasuryCentralBankBalanceGcu": {
@@ -1627,8 +1627,8 @@
         "rowIndex": 41,
         "field": "dailyLabourIncomeReference",
         "sourcePointer": "/41/dailyLabourIncomeReference",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_CURRENCY_AND_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_SEMANTICS"
       },
       "/officialOpening/finance/treasuryCentralBankBalance": {
@@ -1735,8 +1735,8 @@
         "rowIndex": 41,
         "field": "dailyReferenceTradeNet",
         "sourcePointer": "/41/dailyReferenceTradeNet",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_CURRENCY_AND_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_SEMANTICS"
       },
       "/officialOpening/finance/taxRateProposal": {
@@ -1771,8 +1771,8 @@
         "rowIndex": 41,
         "field": "dailyMaintenanceBudgetGcu",
         "sourcePointer": "/41/dailyMaintenanceBudgetGcu",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_CURRENCY_AND_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_SEMANTICS"
       },
       "/officialOpening/finance/dailyInboundFreightBudgetGcu": {
@@ -1783,8 +1783,8 @@
         "rowIndex": 41,
         "field": "dailyInboundFreightBudgetGcu",
         "sourcePointer": "/41/dailyInboundFreightBudgetGcu",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_CURRENCY_AND_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_SEMANTICS"
       },
       "/officialOpening/finance/dailyTaxRevenueReferenceGcu": {
@@ -1795,8 +1795,8 @@
         "rowIndex": 41,
         "field": "dailyTaxRevenueReferenceGcu",
         "sourcePointer": "/41/dailyTaxRevenueReferenceGcu",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_CURRENCY_AND_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_SEMANTICS"
       },
       "/officialOpening/finance/dailyNetCashDrainGcu": {
@@ -1807,8 +1807,8 @@
         "rowIndex": 41,
         "field": "dailyNetCashDrainGcu",
         "sourcePointer": "/41/dailyNetCashDrainGcu",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_CURRENCY_AND_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_SEMANTICS"
       },
       "/officialOpening/finance/cashRunwayDays": {
@@ -1819,8 +1819,8 @@
         "rowIndex": 41,
         "field": "cashRunwayDays",
         "sourcePointer": "/41/cashRunwayDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_SEMANTICS"
       },
       "/officialOpening/employment/labourForce": {
@@ -2095,8 +2095,8 @@
         "rowIndex": 492,
         "field": "bufferDays",
         "sourcePointer": "/492/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/stocks/1/available": {
@@ -2143,8 +2143,8 @@
         "rowIndex": 493,
         "field": "bufferDays",
         "sourcePointer": "/493/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/stocks/2/available": {
@@ -2191,8 +2191,8 @@
         "rowIndex": 494,
         "field": "bufferDays",
         "sourcePointer": "/494/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/stocks/3/available": {
@@ -2239,8 +2239,8 @@
         "rowIndex": 495,
         "field": "bufferDays",
         "sourcePointer": "/495/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/stocks/4/available": {
@@ -2287,8 +2287,8 @@
         "rowIndex": 496,
         "field": "bufferDays",
         "sourcePointer": "/496/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/stocks/5/available": {
@@ -2335,8 +2335,8 @@
         "rowIndex": 497,
         "field": "bufferDays",
         "sourcePointer": "/497/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/stocks/6/available": {
@@ -2383,8 +2383,8 @@
         "rowIndex": 498,
         "field": "bufferDays",
         "sourcePointer": "/498/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/stocks/7/available": {
@@ -2431,8 +2431,8 @@
         "rowIndex": 499,
         "field": "bufferDays",
         "sourcePointer": "/499/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/stocks/8/available": {
@@ -2479,8 +2479,8 @@
         "rowIndex": 500,
         "field": "bufferDays",
         "sourcePointer": "/500/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/stocks/9/available": {
@@ -2527,8 +2527,8 @@
         "rowIndex": 501,
         "field": "bufferDays",
         "sourcePointer": "/501/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/stocks/10/available": {
@@ -2575,8 +2575,8 @@
         "rowIndex": 502,
         "field": "bufferDays",
         "sourcePointer": "/502/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/stocks/11/available": {
@@ -2623,8 +2623,8 @@
         "rowIndex": 503,
         "field": "bufferDays",
         "sourcePointer": "/503/bufferDays",
-        "unit": "sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_BLOCKED_ON_OWNERSHIP"
       },
       "/officialOpening/productionPlans/0/outputPerDay": {
@@ -2635,8 +2635,8 @@
         "rowIndex": 492,
         "field": "outputPerDay",
         "sourcePointer": "/492/outputPerDay",
-        "unit": "barrel/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "barrel/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/0/usePerDay": {
@@ -2647,8 +2647,8 @@
         "rowIndex": 492,
         "field": "usePerDay",
         "sourcePointer": "/492/usePerDay",
-        "unit": "barrel/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "barrel/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/0/netPerDay": {
@@ -2659,8 +2659,8 @@
         "rowIndex": 492,
         "field": "netPerDay",
         "sourcePointer": "/492/netPerDay",
-        "unit": "barrel/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "barrel/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/1/outputPerDay": {
@@ -2671,8 +2671,8 @@
         "rowIndex": 493,
         "field": "outputPerDay",
         "sourcePointer": "/493/outputPerDay",
-        "unit": "MMBtu/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "MMBtu/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/1/usePerDay": {
@@ -2683,8 +2683,8 @@
         "rowIndex": 493,
         "field": "usePerDay",
         "sourcePointer": "/493/usePerDay",
-        "unit": "MMBtu/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "MMBtu/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/1/netPerDay": {
@@ -2695,8 +2695,8 @@
         "rowIndex": 493,
         "field": "netPerDay",
         "sourcePointer": "/493/netPerDay",
-        "unit": "MMBtu/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "MMBtu/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/2/outputPerDay": {
@@ -2707,8 +2707,8 @@
         "rowIndex": 494,
         "field": "outputPerDay",
         "sourcePointer": "/494/outputPerDay",
-        "unit": "tonne U/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne U/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/2/usePerDay": {
@@ -2719,8 +2719,8 @@
         "rowIndex": 494,
         "field": "usePerDay",
         "sourcePointer": "/494/usePerDay",
-        "unit": "tonne U/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne U/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/2/netPerDay": {
@@ -2731,8 +2731,8 @@
         "rowIndex": 494,
         "field": "netPerDay",
         "sourcePointer": "/494/netPerDay",
-        "unit": "tonne U/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne U/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/3/outputPerDay": {
@@ -2743,8 +2743,8 @@
         "rowIndex": 495,
         "field": "outputPerDay",
         "sourcePointer": "/495/outputPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/3/usePerDay": {
@@ -2755,8 +2755,8 @@
         "rowIndex": 495,
         "field": "usePerDay",
         "sourcePointer": "/495/usePerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/3/netPerDay": {
@@ -2767,8 +2767,8 @@
         "rowIndex": 495,
         "field": "netPerDay",
         "sourcePointer": "/495/netPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/4/outputPerDay": {
@@ -2779,8 +2779,8 @@
         "rowIndex": 496,
         "field": "outputPerDay",
         "sourcePointer": "/496/outputPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/4/usePerDay": {
@@ -2791,8 +2791,8 @@
         "rowIndex": 496,
         "field": "usePerDay",
         "sourcePointer": "/496/usePerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/4/netPerDay": {
@@ -2803,8 +2803,8 @@
         "rowIndex": 496,
         "field": "netPerDay",
         "sourcePointer": "/496/netPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/5/outputPerDay": {
@@ -2815,8 +2815,8 @@
         "rowIndex": 497,
         "field": "outputPerDay",
         "sourcePointer": "/497/outputPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/5/usePerDay": {
@@ -2827,8 +2827,8 @@
         "rowIndex": 497,
         "field": "usePerDay",
         "sourcePointer": "/497/usePerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/5/netPerDay": {
@@ -2839,8 +2839,8 @@
         "rowIndex": 497,
         "field": "netPerDay",
         "sourcePointer": "/497/netPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/6/outputPerDay": {
@@ -2851,8 +2851,8 @@
         "rowIndex": 498,
         "field": "outputPerDay",
         "sourcePointer": "/498/outputPerDay",
-        "unit": "tonne LCE/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne LCE/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/6/usePerDay": {
@@ -2863,8 +2863,8 @@
         "rowIndex": 498,
         "field": "usePerDay",
         "sourcePointer": "/498/usePerDay",
-        "unit": "tonne LCE/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne LCE/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/6/netPerDay": {
@@ -2875,8 +2875,8 @@
         "rowIndex": 498,
         "field": "netPerDay",
         "sourcePointer": "/498/netPerDay",
-        "unit": "tonne LCE/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne LCE/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/7/outputPerDay": {
@@ -2887,8 +2887,8 @@
         "rowIndex": 499,
         "field": "outputPerDay",
         "sourcePointer": "/499/outputPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/7/usePerDay": {
@@ -2899,8 +2899,8 @@
         "rowIndex": 499,
         "field": "usePerDay",
         "sourcePointer": "/499/usePerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/7/netPerDay": {
@@ -2911,8 +2911,8 @@
         "rowIndex": 499,
         "field": "netPerDay",
         "sourcePointer": "/499/netPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/8/outputPerDay": {
@@ -2923,8 +2923,8 @@
         "rowIndex": 500,
         "field": "outputPerDay",
         "sourcePointer": "/500/outputPerDay",
-        "unit": "barrel equivalent/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "barrel equivalent/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/8/usePerDay": {
@@ -2935,8 +2935,8 @@
         "rowIndex": 500,
         "field": "usePerDay",
         "sourcePointer": "/500/usePerDay",
-        "unit": "barrel equivalent/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "barrel equivalent/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/8/netPerDay": {
@@ -2947,8 +2947,8 @@
         "rowIndex": 500,
         "field": "netPerDay",
         "sourcePointer": "/500/netPerDay",
-        "unit": "barrel equivalent/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "barrel equivalent/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/9/outputPerDay": {
@@ -2959,8 +2959,8 @@
         "rowIndex": 501,
         "field": "outputPerDay",
         "sourcePointer": "/501/outputPerDay",
-        "unit": "equipment unit/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "equipment unit/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/9/usePerDay": {
@@ -2971,8 +2971,8 @@
         "rowIndex": 501,
         "field": "usePerDay",
         "sourcePointer": "/501/usePerDay",
-        "unit": "equipment unit/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "equipment unit/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/9/netPerDay": {
@@ -2983,8 +2983,8 @@
         "rowIndex": 501,
         "field": "netPerDay",
         "sourcePointer": "/501/netPerDay",
-        "unit": "equipment unit/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "equipment unit/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/10/outputPerDay": {
@@ -2995,8 +2995,8 @@
         "rowIndex": 502,
         "field": "outputPerDay",
         "sourcePointer": "/502/outputPerDay",
-        "unit": "standardised chip unit/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "standardised chip unit/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/10/usePerDay": {
@@ -3007,8 +3007,8 @@
         "rowIndex": 502,
         "field": "usePerDay",
         "sourcePointer": "/502/usePerDay",
-        "unit": "standardised chip unit/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "standardised chip unit/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/10/netPerDay": {
@@ -3019,8 +3019,8 @@
         "rowIndex": 502,
         "field": "netPerDay",
         "sourcePointer": "/502/netPerDay",
-        "unit": "standardised chip unit/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "standardised chip unit/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/11/outputPerDay": {
@@ -3031,8 +3031,8 @@
         "rowIndex": 503,
         "field": "outputPerDay",
         "sourcePointer": "/503/outputPerDay",
-        "unit": "MWh-equivalent/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "MWh-equivalent/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/11/usePerDay": {
@@ -3043,8 +3043,8 @@
         "rowIndex": 503,
         "field": "usePerDay",
         "sourcePointer": "/503/usePerDay",
-        "unit": "MWh-equivalent/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "MWh-equivalent/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/productionPlans/11/netPerDay": {
@@ -3055,8 +3055,8 @@
         "rowIndex": 503,
         "field": "netPerDay",
         "sourcePointer": "/503/netPerDay",
-        "unit": "MWh-equivalent/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "MWh-equivalent/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/populationServices/0/population": {
@@ -3151,8 +3151,8 @@
         "rowIndex": 72,
         "field": "dailyMedicalVisits",
         "sourcePointer": "/72/dailyMedicalVisits",
-        "unit": "visit/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "visit/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/officialOpening/populationServices/0/waterDomesticM3Day": {
@@ -3163,8 +3163,8 @@
         "rowIndex": 72,
         "field": "waterDomesticM3Day",
         "sourcePointer": "/72/waterDomesticM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/power/solarMW": {
@@ -3391,8 +3391,8 @@
         "rowIndex": 205,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/205/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/0/record/maintenanceGcuDay": {
@@ -3403,8 +3403,8 @@
         "rowIndex": 205,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/205/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/0/record/equipmentUnits": {
@@ -3523,8 +3523,8 @@
         "rowIndex": 206,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/206/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/1/record/maintenanceGcuDay": {
@@ -3535,8 +3535,8 @@
         "rowIndex": 206,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/206/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/1/record/equipmentUnits": {
@@ -3655,8 +3655,8 @@
         "rowIndex": 207,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/207/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/2/record/maintenanceGcuDay": {
@@ -3667,8 +3667,8 @@
         "rowIndex": 207,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/207/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/2/record/equipmentUnits": {
@@ -3787,8 +3787,8 @@
         "rowIndex": 208,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/208/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/3/record/maintenanceGcuDay": {
@@ -3799,8 +3799,8 @@
         "rowIndex": 208,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/208/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/3/record/equipmentUnits": {
@@ -3919,8 +3919,8 @@
         "rowIndex": 209,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/209/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/4/record/maintenanceGcuDay": {
@@ -3931,8 +3931,8 @@
         "rowIndex": 209,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/209/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/4/record/equipmentUnits": {
@@ -4051,8 +4051,8 @@
         "rowIndex": 951,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/951/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/5/record/maintenanceGcuDay": {
@@ -4063,8 +4063,8 @@
         "rowIndex": 951,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/951/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/5/record/equipmentUnits": {
@@ -4159,8 +4159,8 @@
         "rowIndex": 952,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/952/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/6/record/maintenanceGcuDay": {
@@ -4171,8 +4171,8 @@
         "rowIndex": 952,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/952/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/6/record/equipmentUnits": {
@@ -4267,8 +4267,8 @@
         "rowIndex": 953,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/953/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/7/record/maintenanceGcuDay": {
@@ -4279,8 +4279,8 @@
         "rowIndex": 953,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/953/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/7/record/equipmentUnits": {
@@ -4375,8 +4375,8 @@
         "rowIndex": 954,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/954/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/8/record/maintenanceGcuDay": {
@@ -4387,8 +4387,8 @@
         "rowIndex": 954,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/954/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/8/record/equipmentUnits": {
@@ -4483,8 +4483,8 @@
         "rowIndex": 955,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/955/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/9/record/maintenanceGcuDay": {
@@ -4495,8 +4495,8 @@
         "rowIndex": 955,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/955/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/9/record/equipmentUnits": {
@@ -4591,8 +4591,8 @@
         "rowIndex": 956,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/956/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/10/record/maintenanceGcuDay": {
@@ -4603,8 +4603,8 @@
         "rowIndex": 956,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/956/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/10/record/equipmentUnits": {
@@ -4699,8 +4699,8 @@
         "rowIndex": 957,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/957/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/11/record/maintenanceGcuDay": {
@@ -4711,8 +4711,8 @@
         "rowIndex": 957,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/957/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/11/record/equipmentUnits": {
@@ -4807,8 +4807,8 @@
         "rowIndex": 958,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/958/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/12/record/maintenanceGcuDay": {
@@ -4819,8 +4819,8 @@
         "rowIndex": 958,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/958/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/12/record/equipmentUnits": {
@@ -4915,8 +4915,8 @@
         "rowIndex": 959,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/959/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/13/record/maintenanceGcuDay": {
@@ -4927,8 +4927,8 @@
         "rowIndex": 959,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/959/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/13/record/equipmentUnits": {
@@ -5023,8 +5023,8 @@
         "rowIndex": 960,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/960/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/14/record/maintenanceGcuDay": {
@@ -5035,8 +5035,8 @@
         "rowIndex": 960,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/960/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/14/record/equipmentUnits": {
@@ -5131,8 +5131,8 @@
         "rowIndex": 961,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/961/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/15/record/maintenanceGcuDay": {
@@ -5143,8 +5143,8 @@
         "rowIndex": 961,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/961/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/15/record/equipmentUnits": {
@@ -5239,8 +5239,8 @@
         "rowIndex": 962,
         "field": "requiredWaterM3Day",
         "sourcePointer": "/962/requiredWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/16/record/maintenanceGcuDay": {
@@ -5251,8 +5251,8 @@
         "rowIndex": 962,
         "field": "maintenanceGcuDayProposal",
         "sourcePointer": "/962/maintenanceGcuDayProposal",
-        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "GCU_SCENARIO_ACCOUNTING_UNIT/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/facilities/16/record/equipmentUnits": {
@@ -5431,8 +5431,8 @@
         "rowIndex": 177,
         "field": "extractionCapacityPerDay",
         "sourcePointer": "/177/extractionCapacityPerDay",
-        "unit": "tonne LCE/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne LCE/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/resources/0/deposit/uncertaintyFactor/0": {
@@ -5491,8 +5491,8 @@
         "rowIndex": 177,
         "field": "runtimeExtractionPerDay",
         "sourcePointer": "/177/runtimeExtractionPerDay",
-        "unit": "tonne LCE/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne LCE/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/resources/0/deposit/openingStockRawEquivalentAllocated": {
@@ -5659,8 +5659,8 @@
         "rowIndex": 178,
         "field": "extractionCapacityPerDay",
         "sourcePointer": "/178/extractionCapacityPerDay",
-        "unit": "MMBtu/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "MMBtu/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/resources/1/deposit/uncertaintyFactor/0": {
@@ -5719,8 +5719,8 @@
         "rowIndex": 178,
         "field": "runtimeExtractionPerDay",
         "sourcePointer": "/178/runtimeExtractionPerDay",
-        "unit": "MMBtu/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "MMBtu/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/resources/1/deposit/openingStockRawEquivalentAllocated": {
@@ -5887,8 +5887,8 @@
         "rowIndex": 179,
         "field": "extractionCapacityPerDay",
         "sourcePointer": "/179/extractionCapacityPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/resources/2/deposit/uncertaintyFactor/0": {
@@ -5947,8 +5947,8 @@
         "rowIndex": 179,
         "field": "runtimeExtractionPerDay",
         "sourcePointer": "/179/runtimeExtractionPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/resources/2/deposit/openingExtractionPlanPerDay": {
@@ -5959,8 +5959,8 @@
         "rowIndex": 179,
         "field": "openingExtractionPlanPerDay",
         "sourcePointer": "/179/openingExtractionPlanPerDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_UNIT_AND_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "PROPOSAL_READ_ONLY"
       },
       "/resources/2/deposit/openingStockRawEquivalentAllocated": {
@@ -6295,8 +6295,8 @@
         "rowIndex": 72,
         "field": "natural.allocatableWaterM3Day",
         "sourcePointer": "/72/natural/allocatableWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_SOURCE"
       },
       "/regions/0/natural/drySeasonWaterM3Day": {
@@ -6307,8 +6307,8 @@
         "rowIndex": 72,
         "field": "natural.drySeasonWaterM3Day",
         "sourcePointer": "/72/natural/drySeasonWaterM3Day",
-        "unit": "m3/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "m3/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_SOURCE"
       },
       "/regions/0/natural/grainPotentialTonnesYear": {
@@ -6343,8 +6343,8 @@
         "rowIndex": 72,
         "field": "natural.solarKwhM2Day",
         "sourcePointer": "/72/natural/solarKwhM2Day",
-        "unit": "kWh/m2/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "kWh/m2/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_SOURCE"
       },
       "/regions/0/natural/windMps": {
@@ -6511,8 +6511,8 @@
         "rowIndex": 72,
         "field": "initial.grainTonnesDay",
         "sourcePointer": "/72/initial/grainTonnesDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_SOURCE"
       },
       "/regions/0/initial/grainDemandTonnesDay": {
@@ -6523,8 +6523,8 @@
         "rowIndex": 72,
         "field": "initial.grainDemandTonnesDay",
         "sourcePointer": "/72/initial/grainDemandTonnesDay",
-        "unit": "tonne/sim-day",
-        "unitBasis": "SOURCE_FIELD_NAME",
+        "unit": "tonne/day",
+        "unitBasis": "TIME_BASIS_UNSPECIFIED",
         "nature": "OPENING_INPUT_SOURCE"
       },
       "/regions/0/initial/foodStockTonnes": {

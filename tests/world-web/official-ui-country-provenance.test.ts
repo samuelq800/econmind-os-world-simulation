@@ -251,7 +251,8 @@ describe('C exact selected-source UI provenance', () => {
     expect(field('/profile/foodDemandTonnesDay')).toMatchObject({
       dataset: 'production-plans',
       rowId: 'visual-territory-01:GRAIN',
-      unit: 'tonne/sim-day',
+      unit: 'tonne/day',
+      unitBasis: 'TIME_BASIS_UNSPECIFIED',
       nature: 'PROPOSAL_READ_ONLY',
     });
     expect(field('/profile/foodAvailableStockTonnes')).toMatchObject({
@@ -336,9 +337,77 @@ describe('C exact selected-source UI provenance', () => {
       dataset: 'facilities',
       rowId: 'P01',
       field: 'maintenanceGcuDayProposal',
-      unit: 'GCU_SCENARIO_ACCOUNTING_UNIT/sim-day',
+      unit: 'GCU_SCENARIO_ACCOUNTING_UNIT/day',
+      unitBasis: 'TIME_BASIS_UNSPECIFIED',
       nature: 'PROPOSAL_READ_ONLY',
     });
+  });
+
+  it('never turns an unspecified source day into a Simulation Clock day', () => {
+    expect(
+      requireField(firstCountry, '/regions/0/natural/solarKwhM2Day'),
+    ).toMatchObject({
+      rawToken: '3.95',
+      exact: '3.95',
+      unit: 'kWh/m2/day',
+      unitBasis: 'TIME_BASIS_UNSPECIFIED',
+    });
+    for (const [dataset, row, field, unit] of [
+      ['production-plans', { unit: 'tonne' }, 'outputPerDay', 'tonne/day'],
+      [
+        'deposits',
+        { unit: 'barrel' },
+        'extractionCapacityPerDay',
+        'barrel/day',
+      ],
+      [
+        'finance',
+        { currency: 'GCU_SCENARIO_ACCOUNTING_UNIT' },
+        'dailyLabourIncomeReference',
+        'GCU_SCENARIO_ACCOUNTING_UNIT/day',
+      ],
+      [
+        'finance',
+        { currency: 'GCU_SCENARIO_ACCOUNTING_UNIT' },
+        'cashRunwayDays',
+        'day',
+      ],
+      [
+        'facilities',
+        {},
+        'maintenanceGcuDayProposal',
+        'GCU_SCENARIO_ACCOUNTING_UNIT/day',
+      ],
+      ['stocks', {}, 'bufferDays', 'day'],
+      ['countries', {}, 'longestInboundLeadDays', 'day'],
+      ['population-services', {}, 'dailyMedicalVisits', 'visit/day'],
+      ['regions', {}, 'waterDomesticM3Day', 'm3/day'],
+      ['regions', {}, 'grainTonnesDay', 'tonne/day'],
+    ] as const)
+      expect(officialFieldUnit(dataset, row, [field])).toEqual({
+        unit,
+        unitBasis: 'TIME_BASIS_UNSPECIFIED',
+      });
+    expect(
+      officialFieldUnit('facilities', {}, ['constructionSimDaysProposal']),
+    ).toEqual({ unit: 'sim-day', unitBasis: 'SOURCE_FIELD_NAME' });
+    expect(
+      officialFieldUnit('facilities', { capacityUnit: 'tonne/sim-day' }, [
+        'capacity',
+      ]),
+    ).toEqual({ unit: 'tonne/sim-day', unitBasis: 'SOURCE_CAPACITY_UNIT' });
+    for (const country of countries) {
+      for (const field of Object.values(country.officialSource.fields)) {
+        if (!field.unit.includes('sim-day')) continue;
+        if (/SimDays(?:Proposal)?$/.test(field.field)) {
+          expect(field.unitBasis).toBe('SOURCE_FIELD_NAME');
+        } else {
+          expect(field.unitBasis).toBe('SOURCE_CAPACITY_UNIT');
+          const row = sources.get(field.dataset)!.rows[field.rowIndex];
+          expect(row?.capacityUnit).toBe(field.unit);
+        }
+      }
+    }
   });
 
   it('re-generates twice byte-identically and checks committed outputs without promoting verification status', async () => {

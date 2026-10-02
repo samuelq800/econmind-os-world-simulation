@@ -33,24 +33,21 @@ export function officialFieldUnit(dataset, row, parts) {
     dataset === 'production-plans' &&
     ['outputPerDay', 'usePerDay', 'netPerDay'].includes(field)
   )
-    return source(`${row.unit}/sim-day`, 'SOURCE_UNIT_AND_FIELD_NAME');
+    return source(`${row.unit}/day`, 'TIME_BASIS_UNSPECIFIED');
   if (dataset === 'finance') {
     if (field === 'taxRateProposal')
       return source('fraction', 'SOURCE_FIELD_NAME');
     if (field === 'cashRunwayDays')
-      return source('sim-day', 'SOURCE_FIELD_NAME');
+      return source('day', 'TIME_BASIS_UNSPECIFIED');
     if (
       field === 'dailyLabourIncomeReference' ||
       /^daily.*(?:Gcu|Net)$/u.test(field)
     )
-      return source(
-        `${row.currency}/sim-day`,
-        'SOURCE_CURRENCY_AND_FIELD_NAME',
-      );
+      return source(`${row.currency}/day`, 'TIME_BASIS_UNSPECIFIED');
     return source(row.currency, 'SOURCE_CURRENCY');
   }
   if (/GcuDay|GcuDayProposal/u.test(field))
-    return source('GCU_SCENARIO_ACCOUNTING_UNIT/sim-day', 'SOURCE_FIELD_NAME');
+    return source('GCU_SCENARIO_ACCOUNTING_UNIT/day', 'TIME_BASIS_UNSPECIFIED');
   if (/Gcu$/u.test(field))
     return source('GCU_SCENARIO_ACCOUNTING_UNIT', 'SOURCE_FIELD_NAME');
   if (/Km2$/u.test(field) || parts.includes('landUseKm2'))
@@ -60,7 +57,7 @@ export function officialFieldUnit(dataset, row, parts) {
     return source('ha', 'SOURCE_FIELD_NAME');
   if (/Tonnes$/u.test(field)) return source('tonne', 'SOURCE_FIELD_NAME');
   if (/TonnesDay$/u.test(field))
-    return source('tonne/sim-day', 'SOURCE_FIELD_NAME');
+    return source('tonne/day', 'TIME_BASIS_UNSPECIFIED');
   if (/TonnesYear$/u.test(field))
     return source('tonne/year', 'SOURCE_FIELD_NAME');
   if (/TonnesHa$/u.test(field)) return source('tonne/ha', 'SOURCE_FIELD_NAME');
@@ -70,13 +67,16 @@ export function officialFieldUnit(dataset, row, parts) {
   if (field === 'meanElevationM') return source('m', 'SOURCE_FIELD_NAME');
   if (field === 'temperatureC') return source('degC', 'SOURCE_FIELD_NAME');
   if (field === 'solarKwhM2Day')
-    return source('kWh/m2/sim-day', 'SOURCE_FIELD_NAME');
+    return source('kWh/m2/day', 'TIME_BASIS_UNSPECIFIED');
   if (field === 'windMps') return source('m/s', 'SOURCE_FIELD_NAME');
   if (/MW$/u.test(field)) return source('MW', 'SOURCE_FIELD_NAME');
   if (/MWh$/u.test(field)) return source('MWh', 'SOURCE_FIELD_NAME');
-  if (/M3Day$/u.test(field)) return source('m3/sim-day', 'SOURCE_FIELD_NAME');
-  if (/Days$|SimDays(?:Proposal)?$|bufferDays$/u.test(field))
+  if (/M3Day$/u.test(field)) return source('m3/day', 'TIME_BASIS_UNSPECIFIED');
+  // A source day is not a Simulation Clock day. Only explicitly named SimDays
+  // or a verbatim source capacityUnit may claim the simulation time basis.
+  if (/SimDays(?:Proposal)?$/u.test(field))
     return source('sim-day', 'SOURCE_FIELD_NAME');
+  if (/Days$/u.test(field)) return source('day', 'TIME_BASIS_UNSPECIFIED');
   if (
     /population|Population|labourForce|employed|unemployed|Workers|teachers|medicalWorkers/u.test(
       field,
@@ -90,7 +90,7 @@ export function officialFieldUnit(dataset, row, parts) {
     if (/Geological|Consumed|Extracted|Remaining|Allocated/u.test(field))
       return source(row.unit, 'SOURCE_UNIT');
     if (/PerDay$/u.test(field))
-      return source(`${row.unit}/sim-day`, 'SOURCE_UNIT_AND_FIELD_NAME');
+      return source(`${row.unit}/day`, 'TIME_BASIS_UNSPECIFIED');
     if (field === 'depthM') return source('m', 'SOURCE_FIELD_NAME');
   }
   if (/Factor$|Fraction$|Share$/u.test(field))
@@ -104,7 +104,7 @@ export function officialFieldUnit(dataset, row, parts) {
   if (field === 'hospitalBeds')
     return source('hospital bed', 'SOURCE_FIELD_NAME');
   if (field === 'dailyMedicalVisits')
-    return source('visit/sim-day', 'SOURCE_FIELD_NAME');
+    return source('visit/day', 'TIME_BASIS_UNSPECIFIED');
   return source('UNIT_NOT_SPECIFIED_IN_SOURCE', 'NOT_SPECIFIED');
 }
 
