@@ -40,6 +40,24 @@ const candidateWorkflow = readFileSync(
 const landingPage = readFileSync('apps/world-web/index.html', 'utf8');
 
 describe('public World preview deployment', () => {
+  it('wraps complete facility status text inside atlas cards without truncation', () => {
+    const css = readFileSync(
+      'apps/world-web/src/map-explorer/world-explorer.css',
+      'utf8',
+    );
+    const label = /\.explorer-site \.site-label\s*\{([^}]*)\}/.exec(css)?.[1];
+    const status = /\.explorer-site \.site-label em\s*\{([^}]*)\}/.exec(
+      css,
+    )?.[1];
+    expect(label).toContain('min-width: 0;');
+    expect(status).toContain('white-space: normal;');
+    expect(status).toContain('overflow-wrap: anywhere;');
+    expect(status).not.toMatch(
+      /overflow:\s*hidden|text-overflow|line-clamp|display:\s*none/,
+    );
+    expect(atlasPage).toContain('{site.id} · {site.record.lifecycle} / 未投运');
+  });
+
   it('opens the atlas at the root and retains the selected national page', () => {
     expect(runtimeApp).toContain('atlas === null');
     expect(runtimeApp).toContain('<WorldExplorer />');
