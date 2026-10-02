@@ -5,8 +5,9 @@
 - 仓库：`samuelq800/econmind-os-world-simulation`。
 - 分支：`codex/custom-domain-readiness-20261002-side`。
 - 初始检查基线：`85725830f0a6d102e73ae89697ab008f92208285`。
-- 发布前同步的 main：`9b48a1618ce86ddebb08ab0617fc93552d4a28c5`。
-- 同步后的代码提交：`589469dd084bcb2f932ae12bec5c735cdbfa0340`；本报告是随后追加的文档记录。
+- 第一轮发布前同步的 main：`9b48a1618ce86ddebb08ab0617fc93552d4a28c5`。
+- 之后主线程合入地图原件页与连接状态组件，第二轮同步到 `ab6e21cd3b7888ca9d8ff28504241c511425b771`，保留这些上游改动。
+- 当前补丁代码提交：`71a12a4`；本报告是随后追加的文档记录。
 - 所有修改隔离在独立工作树；未修改主线程的工作文件、打断其他窗口或调用子代理。
 
 ## 1. Files changed
@@ -63,7 +64,9 @@ env -u WORLD_OFFICIAL_READ_BASE_URL \
 node scripts/check-world-web-public-base.mjs /
 ```
 
-两种模式均通过；每种均检查 76 个 HTML、114 个可达文件、626 次本地路径引用、70 国记录及 140 条 scene/detail 地图引用。当前模式入口资源为 `/econmind-os-world-simulation/assets/...`；根模式为 `/assets/...`。根模式生成的 runtime JS/CSS 不含旧 repository prefix。
+两种模式均通过。第一轮每种检查 76 个 HTML、114 个可达文件、626 次本地路径引用；同步新增地图原件页后再跑两模式，每种检查 77 个 HTML、319 个可达文件、830 次本地路径引用。每轮均包含 70 国记录及 140 条 scene/detail 地图引用。当前模式入口资源为 `/econmind-os-world-simulation/assets/...`；根模式为 `/assets/...`。根模式生成的 runtime JS/CSS 不含旧 repository prefix。
+
+保留上游新发布步骤后，构建额外校验并复制 203 个地图原件/支持文件（160 张图、43 个支持文件）；整个静态输出约 937.6 MB，原有 1,000 MB 构建预算尚余约 62.4 MB。本补丁未新增地图素材，也未放宽该预算。
 
 两次构建各复制并按权威 UI manifest 校验 140 张地图。手写 immersive HTML 在两模式下完全一致：
 
@@ -97,7 +100,19 @@ node scripts/check-boundaries.mjs
 git diff --check
 ```
 
-上述最终 Vitest 运行 6 个文件、82 项测试，全部通过；typecheck、ESLint、Prettier、环境安全及 diff 检查通过。authoritative UI 检查通过：288 个发布文件、75 个派生文件、2 个视觉集成文件、70 个国家页及 140 个地图资产。边界检查通过，扫描 229 个源码文件。Core/Worker 只编译到此隔离工作树的产物目录，未启动任何执行服务。
+第一轮 Vitest 运行 6 个文件、82 项测试，全部通过；typecheck、ESLint、Prettier、环境安全及 diff 检查通过。authoritative UI 检查通过：288 个发布文件、75 个派生文件、2 个视觉集成文件、70 个国家页及 140 个地图资产。边界检查通过，扫描 229 个源码文件。Core/Worker 只编译到此隔离工作树的产物目录，未启动任何执行服务。
+
+同步上游地图原件页与连接状态组件后，额外实际执行以下目标，7 个文件 146 项测试全部通过；这是第二轮相关集成回归，不与第一轮重复测试累加：
+
+```sh
+pnpm exec vitest run tests/world-web/public-base-path.test.ts \
+  tests/world-web/world-public-preview.test.ts \
+  tests/world-web/official-page-config.test.ts \
+  tests/world-web/shared-visual-contract.test.ts \
+  tests/world-web/official-map-publication.test.ts \
+  tests/world-web/official-source-status-catalog.test.ts \
+  tests/world-web/official-source-status-view.test.ts
+```
 
 另外实际用非法完整 URL 启动 Vite build，构建 exit 1，错误明确指向 `WORLD_WEB_PUBLIC_BASE_PATH`，验证了 fail-closed 行为。
 
