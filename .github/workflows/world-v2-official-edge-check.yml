@@ -1,0 +1,37 @@
+name: World V2 official Edge reader candidate
+
+on:
+  pull_request:
+    paths:
+      - 'apps/world-api/src/integration/official-*'
+      - 'supabase/functions/world-v2-official-read/**'
+      - 'supabase/config.toml'
+      - 'tsconfig.world-v2-official-edge-bundle.json'
+      - 'scripts/check-world-v2-official-edge-bundle.mjs'
+      - 'tests/world-api/official-edge-read.test.ts'
+      - '.github/workflows/world-v2-official-edge-check.yml'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.5.6
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:world-v2-official-edge
+      - run: deno check supabase/functions/world-v2-official-read/index.ts
+      - run: pnpm --filter @econmind/core build
+      - run: pnpm --filter @econmind/world-worker build
+      - run: pnpm --filter @econmind/world-api typecheck

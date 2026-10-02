@@ -7,7 +7,7 @@ const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 /** A missing setting adds no cross-origin capability. Values must be exact,
  * canonical origins; paths, wildcards, credentials and opaque origins fail. */
 export function readOfficialPublicCorsOrigins(
-  environment: NodeJS.ProcessEnv,
+  environment: Readonly<Record<string, string | undefined>>,
   environmentName: string,
 ): readonly string[] | undefined {
   const raw = environment.WORLD_API_OFFICIAL_PUBLIC_ORIGINS;

@@ -1,7 +1,6 @@
 /** Frozen selected-source JSON registry. Hashes and byte counts are from the
  * owner-selected BALANCED_2026_09_28_V1 CHECKSUMS.json, not HTTP inputs. */
 import { Buffer } from 'node:buffer';
-
 const DATASETS = `
 assumptions|2061|92fc7883367f11ceea3a6151cb8459c6733b86da7c33c58664be7fad616c39ae|OBJECT
 changes|26863|034ff4d1b7b2f57bb4f4b50d83a94f9b515ef8e0b2183448c0a9d7caa88cf0cc|ARRAY
@@ -38,114 +37,81 @@ transit-proposals|27257|d5b1293e447fef3bb87052cf808222ed2c482779d202250611b289c7
 transport-routes|3487702|a55863d91f7fafcfb7776cfb6c6bb94636d4156f59bf8bf20777023bdbba6f66|ARRAY
 water-allocations|54600|53b4d7cd0425f6a0789cad2e1bcd0800420a5010f38307e895742df1c0567841|ARRAY
 `.trim();
-
-export type OfficialDatasetKind = 'ARRAY' | 'OBJECT' | 'GEOGRAPHY';
-
-export interface OfficialDatasetSpec {
-  readonly slug: string;
-  readonly sourcePath: string;
-  readonly storagePath: string;
-  readonly sha256: string;
-  readonly bytes: number;
-  readonly kind: OfficialDatasetKind;
-  readonly countryFields: readonly string[];
-  readonly entityFields: readonly string[];
-  readonly referenceFields: readonly string[];
-}
-
-const ASSOCIATIONS: Readonly<
-  Record<
-    string,
-    {
-      readonly country?: readonly string[];
-      readonly entity?: readonly string[];
-      readonly reference?: readonly string[];
-    }
-  >
-> = {
-  changes: { reference: ['objectId'] },
-  countries: { country: ['id'] },
-  deposits: { country: ['countryId'], reference: ['provinceId'] },
-  'domestic-access': { country: ['countryId'], reference: ['fromId', 'toId'] },
-  employment: { country: ['countryId'] },
-  entities: { country: ['countryId'], entity: ['id'] },
-  facilities: {
-    country: ['countryId'],
-    entity: ['operatorId', 'ownerId'],
-    reference: ['regionId', 'projectId'],
-  },
-  'facility-map-links': { country: ['countryId'], reference: ['facilityId'] },
-  finance: { country: ['countryId'] },
-  'hazard-proposals': { country: ['countryId'], reference: ['regionId'] },
-  'land-program': { country: ['countryId'], reference: ['regionId'] },
-  'license-proposals': {
-    country: ['countryId'],
-    entity: ['grantorId', 'holderId'],
-  },
-  nodes: { country: ['countryId'], reference: ['regionId'] },
-  'population-services': { country: ['countryId'], reference: ['regionId'] },
-  power: { country: ['countryId'] },
-  'production-plans': { country: ['countryId'] },
-  regions: { country: ['countryId'] },
-  'seasonal-water': { reference: ['regionId', 'basinId'] },
-  settlements: { country: ['countryId'], reference: ['regionId'] },
-  stocks: {
-    country: ['countryId'],
-    entity: ['ownerId'],
-    reference: ['warehouseId'],
-  },
-  'technology-proposals': { country: ['countryId'], entity: ['holderId'] },
-  'trade-plans': {
-    country: ['sellerCountryId', 'buyerCountryId'],
-    entity: ['sellerEntityId', 'buyerEntityId'],
-  },
-  'transit-proposals': { country: ['countryIds'], reference: ['flowId'] },
-  'transport-routes': {
-    country: [
-      'fromCountryId',
-      'toCountryId',
-      'portCountryIds',
-      'transitCountryIds',
-    ],
-    reference: ['fromNodeId', 'toNodeId'],
-  },
-  'water-allocations': {
-    country: ['countryId'],
-    reference: ['regionId', 'basinId'],
-  },
+const ASSOCIATIONS = {
+    changes: { reference: ['objectId'] },
+    countries: { country: ['id'] },
+    deposits: { country: ['countryId'], reference: ['provinceId'] },
+    'domestic-access': { country: ['countryId'], reference: ['fromId', 'toId'] },
+    employment: { country: ['countryId'] },
+    entities: { country: ['countryId'], entity: ['id'] },
+    facilities: {
+        country: ['countryId'],
+        entity: ['operatorId', 'ownerId'],
+        reference: ['regionId', 'projectId'],
+    },
+    'facility-map-links': { country: ['countryId'], reference: ['facilityId'] },
+    finance: { country: ['countryId'] },
+    'hazard-proposals': { country: ['countryId'], reference: ['regionId'] },
+    'land-program': { country: ['countryId'], reference: ['regionId'] },
+    'license-proposals': {
+        country: ['countryId'],
+        entity: ['grantorId', 'holderId'],
+    },
+    nodes: { country: ['countryId'], reference: ['regionId'] },
+    'population-services': { country: ['countryId'], reference: ['regionId'] },
+    power: { country: ['countryId'] },
+    'production-plans': { country: ['countryId'] },
+    regions: { country: ['countryId'] },
+    'seasonal-water': { reference: ['regionId', 'basinId'] },
+    settlements: { country: ['countryId'], reference: ['regionId'] },
+    stocks: {
+        country: ['countryId'],
+        entity: ['ownerId'],
+        reference: ['warehouseId'],
+    },
+    'technology-proposals': { country: ['countryId'], entity: ['holderId'] },
+    'trade-plans': {
+        country: ['sellerCountryId', 'buyerCountryId'],
+        entity: ['sellerEntityId', 'buyerEntityId'],
+    },
+    'transit-proposals': { country: ['countryIds'], reference: ['flowId'] },
+    'transport-routes': {
+        country: [
+            'fromCountryId',
+            'toCountryId',
+            'portCountryIds',
+            'transitCountryIds',
+        ],
+        reference: ['fromNodeId', 'toNodeId'],
+    },
+    'water-allocations': {
+        country: ['countryId'],
+        reference: ['regionId', 'basinId'],
+    },
 };
-
-export const OFFICIAL_DATASETS: readonly OfficialDatasetSpec[] = Object.freeze(
-  DATASETS.split('\n').map((line) => {
+export const OFFICIAL_DATASETS = Object.freeze(DATASETS.split('\n').map((line) => {
     const [slug, bytesText, sha256, kind] = line.split('|');
-    if (
-      !slug ||
-      !bytesText ||
-      !sha256 ||
-      !kind ||
-      !/^[a-z][a-z-]+$/u.test(slug) ||
-      !/^[0-9a-f]{64}$/u.test(sha256) ||
-      !['ARRAY', 'OBJECT', 'GEOGRAPHY'].includes(kind)
-    ) {
-      throw new Error('OFFICIAL_DATASET_REGISTRY_INVALID');
+    if (!slug ||
+        !bytesText ||
+        !sha256 ||
+        !kind ||
+        !/^[a-z][a-z-]+$/u.test(slug) ||
+        !/^[0-9a-f]{64}$/u.test(sha256) ||
+        !['ARRAY', 'OBJECT', 'GEOGRAPHY'].includes(kind)) {
+        throw new Error('OFFICIAL_DATASET_REGISTRY_INVALID');
     }
     const sourcePath = `data/${slug}.json`;
     const association = ASSOCIATIONS[slug] ?? {};
     return Object.freeze({
-      slug,
-      sourcePath,
-      storagePath: `source/${Buffer.from(sourcePath, 'utf8').toString('hex')}`,
-      sha256,
-      bytes: Number(bytesText),
-      kind: kind as OfficialDatasetKind,
-      countryFields: association.country ?? [],
-      entityFields: association.entity ?? [],
-      referenceFields: association.reference ?? [],
+        slug,
+        sourcePath,
+        storagePath: `source/${Buffer.from(sourcePath, 'utf8').toString('hex')}`,
+        sha256,
+        bytes: Number(bytesText),
+        kind: kind,
+        countryFields: association.country ?? [],
+        entityFields: association.entity ?? [],
+        referenceFields: association.reference ?? [],
     });
-  }),
-);
-
-export const OFFICIAL_DATASET_BY_SLUG: ReadonlyMap<
-  string,
-  OfficialDatasetSpec
-> = new Map(OFFICIAL_DATASETS.map((dataset) => [dataset.slug, dataset]));
+}));
+export const OFFICIAL_DATASET_BY_SLUG = new Map(OFFICIAL_DATASETS.map((dataset) => [dataset.slug, dataset]));

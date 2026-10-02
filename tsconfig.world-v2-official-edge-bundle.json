@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "types": ["node"],
+    "rootDir": "./apps/world-api/src/integration",
+    "outDir": "./supabase/functions/world-v2-official-read/lib",
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": false
+  },
+  "include": [
+    "apps/world-api/src/integration/official-edge-database-config.ts",
+    "apps/world-api/src/integration/official-edge-fetch-adapter.ts",
+    "apps/world-api/src/integration/official-country-role-reader.ts",
+    "apps/world-api/src/integration/official-public-cors.ts"
+  ]
+}

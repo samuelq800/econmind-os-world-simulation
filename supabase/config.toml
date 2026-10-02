@@ -1,1 +1,6 @@
 project_id = "econmind-os"
+
+# Only this public selected-source reader bypasses gateway JWT verification.
+# The handler still exposes only frozen GET/HEAD routes with exact-origin CORS.
+[functions.world-v2-official-read]
+verify_jwt = false

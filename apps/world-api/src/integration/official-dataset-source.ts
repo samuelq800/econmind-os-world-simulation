@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { Buffer } from 'node:buffer';
 
 import {
   OFFICIAL_COUNTRY_PACKAGE_ID,

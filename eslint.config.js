@@ -10,6 +10,7 @@ export default tseslint.config(
       '**/node_modules/**',
       'apps/world-web/public/**',
       'supabase/.temp/**',
+      'supabase/functions/world-v2-official-read/lib/**',
     ],
   },
   eslint.configs.recommended,
