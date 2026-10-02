@@ -23,6 +23,51 @@
     width: min(340px, calc(31% - 28px));
     max-width: none;
   }
+
+  /* Keep the complete scene in the free space between the two reading panels. */
+  @supports (top: anchor(--country-scene center)) {
+    .country-map-home .national-world {
+      left: calc(31% + 20px);
+      right: 460px;
+      top: 205px;
+      bottom: 190px;
+      background-position: center;
+      anchor-name: --country-scene;
+    }
+
+    .country-map-home .national-site-pins {
+      left: anchor(--country-scene center);
+      top: anchor(--country-scene center);
+      right: auto;
+      bottom: auto;
+      width: 100%;
+      height: 100%;
+      transform: translate(-50%, -50%)
+        scale(
+          calc(
+            min(
+                anchor-size(--country-scene width),
+                anchor-size(--country-scene height)
+              ) /
+              max(930px, 100dvh)
+          )
+        );
+    }
+
+    .country-map-home .national-site-pins button {
+      transform: translate(-50%, -50%)
+        scale(
+          calc(
+            max(930px, 100dvh) /
+              min(
+                anchor-size(--country-scene width),
+                anchor-size(--country-scene height)
+              )
+          )
+        );
+      position-anchor: --country-scene;
+    }
+  }
 }
 
 .country-map-home .national-destination[hidden] {
