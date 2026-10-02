@@ -145,9 +145,12 @@ for (let index = 1; index <= 70; index += 1) {
 
 const siteEntry = await readFile(path.join(root, selection.siteEntry), 'utf8');
 if (
+  !siteEntry.includes('<div id="root"></div>') ||
+  !siteEntry.includes('src="/src/main.tsx"') ||
   !siteEntry.includes(
-    'url=season1-immersive/?role=finance&amp;country=01#country',
-  )
+    'href="./season1-immersive/?role=finance&amp;country=01#country"',
+  ) ||
+  siteEntry.includes('http-equiv="refresh"')
 ) {
   throw new Error('UI_DEFAULT_SITE_ENTRY_MISMATCH');
 }

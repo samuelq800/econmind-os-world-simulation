@@ -94,10 +94,35 @@
   position: absolute;
   inset: 0;
 }
+.explorer-island-badge {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff1bc;
+  background: #102b35c7;
+  font:
+    700 12px Georgia,
+    serif;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.explorer-mosaic-tile {
+  mix-blend-mode: screen;
+}
+.explorer-continent-art {
+  pointer-events: none;
+}
+.explorer-mosaic-tile.with-artwork {
+  mix-blend-mode: normal;
+  opacity: 0.16;
+}
 .explorer-country {
   fill: #adbd8a08;
-  stroke: #dedbb47a;
-  stroke-width: 0.8;
+  stroke: #e5ddadad;
+  stroke-width: 1;
   vector-effect: non-scaling-stroke;
   cursor: pointer;
 }
@@ -121,6 +146,13 @@
 .explorer-water.lake {
   fill: #377b91;
   stroke: #78c3d1;
+}
+.explorer-mountain {
+  fill: none;
+  stroke: #e3dec48a;
+  stroke-width: 0.55;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
 }
 .explorer-corridor {
   fill: none;
@@ -337,13 +369,18 @@
   gap: 6px;
   z-index: 6;
 }
-.explorer-layer-controls button {
+.explorer-layer-controls button,
+.explorer-layer-controls select {
   border: 1px solid #b4bd9a55;
   color: #abc4c2;
   background: #0b2932e8;
   border-radius: 3px;
   padding: 8px 13px;
   font-size: 11px;
+}
+.explorer-layer-controls select {
+  max-width: 135px;
+  cursor: pointer;
 }
 .explorer-layer-controls button[aria-pressed='true'] {
   color: #ebd79e;
@@ -796,9 +833,13 @@
     bottom: 65px;
     left: 18px;
   }
-  .explorer-layer-controls button {
+  .explorer-layer-controls button,
+  .explorer-layer-controls select {
     font-size: 10px;
     padding: 6px 9px;
+  }
+  .explorer-layer-controls select {
+    max-width: 90px;
   }
   .explorer-country-drawer {
     width: min(290px, 85%);
@@ -806,6 +847,24 @@
   .explorer-country-pin {
     padding: 3px;
     font-size: 9px;
+  }
+}
+@media (max-width: 520px) {
+  .explorer-topbar nav > button:first-child,
+  .explorer-topbar nav > a,
+  .explorer-topbar nav > span,
+  .explorer-map-link {
+    display: none;
+  }
+  .explorer-topbar nav {
+    justify-content: center;
+  }
+  .explorer-topbar nav button,
+  .explorer-national-link {
+    white-space: nowrap;
+  }
+  .explorer-heading h1 {
+    font-size: 30px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

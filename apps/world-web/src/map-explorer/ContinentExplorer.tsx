@@ -2,16 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import continents from '../assets/continent-scenes/index.json';
 import { artwork, partition } from '../map-lab/display-layers.js';
 import { continentSceneUrls } from './continent-scene-urls.js';
+import { continentFor } from './continent-layout.js';
 import './continent-explorer.css';
 const readId = () =>
   new URLSearchParams(window.location.search).get('continent') ?? 'northwest';
-function groupFor(point: number[]) {
-  const [x = 0, y = 0] = point;
-  if (x < 600 && y >= 465) return 'southwest';
-  if (x < 870 && y < 465) return 'northwest';
-  if (x < 1090) return 'central';
-  return 'east';
-}
 export function ContinentExplorer() {
   const [id, setId] = useState(readId),
     [search, setSearch] = useState('');
@@ -24,7 +18,7 @@ export function ContinentExplorer() {
     .map((c, i) => ({ ...c, name: artwork.political.countries[i]!.name }))
     .filter(
       (c) =>
-        groupFor(c.label) === current.id &&
+        continentFor(c.label) === current.id &&
         `${c.number} ${c.name}`.toLowerCase().includes(search.toLowerCase()),
     );
   const choose = (next: string) => {

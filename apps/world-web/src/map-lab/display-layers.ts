@@ -126,7 +126,7 @@ export function visibilityFor(...ids: LayerId[]): LayerVisibility {
 export const mapViews = [
   { id: 'overview', name: '全图', box: [0, 0, 1774, 887] },
   { id: 'northwest', name: '西北大陆', box: [55, 112, 720, 415] },
-  { id: 'central', name: '中央陆地', box: [555, 290, 535, 405] },
+  { id: 'central', name: 'Callum Island', box: [555, 290, 535, 405] },
   { id: 'northeast', name: '东北半岛', box: [1260, 205, 480, 355] },
   { id: 'southeast', name: '东南大陆', box: [910, 475, 750, 365] },
   { id: 'southwest', name: '西南群岛', box: [100, 480, 520, 325] },

@@ -1,7 +1,11 @@
 import detailMaps from '../assets/country-detail/index.json';
+import continentArtworks from '../assets/continent-scenes/index.json';
 import sceneIndex from '../assets/country-scenes/index.json';
+import { continentSceneUrls } from './continent-scene-urls.js';
+import { continentFor } from './continent-layout.js';
 import { countryDetailUrls } from './country-detail-urls.js';
 import { countrySceneUrls } from './country-scene-urls.js';
+import { shouldMountDetailTile } from './detail-tile-visibility.js';
 import { layoutLabels } from './label-layout.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import terrain from '../assets/asterra-satellite-terrain-v8.png';
@@ -119,6 +123,7 @@ export function WorldExplorer() {
   const [search, setSearch] = useState('');
   const [drawer, setDrawer] = useState(false);
   const [showWater, setShowWater] = useState(true);
+  const [showArtwork, setShowArtwork] = useState(true);
   const [sceneMode, setSceneMode] = useState(true);
   const [showLabels, setShowLabels] = useState(true);
   const sceneModeRef = useRef(sceneMode);
@@ -210,7 +215,10 @@ export function WorldExplorer() {
   const fit = useCallback((id: string) => {
     const c = countries.find((item) => item.id === id);
     if (!c) {
-      setCamera(world);
+      setCamera({
+        ...world,
+        width: sizeRef.current.width < 600 ? 700 : world.width,
+      });
       return;
     }
     const scene = sceneModeRef.current
@@ -231,6 +239,17 @@ export function WorldExplorer() {
       width: Math.max(x1 - x0, (y1 - y0) * ratio) * (scene ? 1.015 : 1.55),
     });
   }, []);
+  const focusContinent = (id: string) => {
+    const art = continentArtworks.find((item) => item.id === id);
+    if (!art || country) return;
+    const [x, y, width, height] = art.frame;
+    const ratio = sizeRef.current.width / sizeRef.current.height;
+    setCamera({
+      x: x! + width! / 2,
+      y: y! + height! / 2,
+      width: Math.max(width!, height! * ratio) * 1.06,
+    });
+  };
   const navigate = useCallback(
     (id: string) => {
       const c = countries.find((item) => item.id === id);
@@ -336,6 +355,15 @@ export function WorldExplorer() {
       result.push(<path key={`y${y}`} d={`M${box.x} ${y}h${box.width}`} />);
     return result;
   }, [camera.width, box.x, box.y, box.width, box.height]);
+  const visibleDetailMaps = !country
+    ? detailMaps.filter((map) => {
+        const territory = countries.find((item) => item.id === map.id);
+        return (
+          territory &&
+          shouldMountDetailTile(box, territory.bounds, !showArtwork)
+        );
+      })
+    : [];
   return (
     <main className="world-explorer">
       <header className="explorer-topbar">
@@ -353,8 +381,14 @@ export function WorldExplorer() {
             <small>⌄</small>
           </button>
         </nav>
-        <a className="old-atlas" href="?atlas=coast-boundaries">
-          规划工作台 ↗
+        <a className="old-atlas explorer-map-link" href="?atlas=map">
+          图层工作台 ↗
+        </a>
+        <a
+          className="old-atlas explorer-national-link"
+          href="./season1-immersive/?role=finance&country=01#country"
+        >
+          国家操作 ↗
         </a>
       </header>
       <div className="explorer-layout">
@@ -477,6 +511,42 @@ export function WorldExplorer() {
               <filter id="terrain-contrast">
                 <feColorMatrix type="saturate" values=".85" />
               </filter>
+              <filter id="continent-land-art" colorInterpolationFilters="sRGB">
+                <feColorMatrix
+                  type="matrix"
+                  values="1 0 0 0 0
+                          0 1 0 0 0
+                          0 0 1 0 0
+                          1.4 .8 -1.8 0 .2"
+                />
+                <feComponentTransfer>
+                  <feFuncA type="linear" slope="1.8" />
+                </feComponentTransfer>
+              </filter>
+              {!country &&
+                countries.map((item) => (
+                  <clipPath
+                    key={item.id}
+                    id={`mosaic-${item.number}`}
+                    clipPathUnits="userSpaceOnUse"
+                  >
+                    <path d={item.path} />
+                  </clipPath>
+                ))}
+              {!country &&
+                continentArtworks.map((scene) => (
+                  <clipPath
+                    key={scene.id}
+                    id={`continent-land-${scene.id}`}
+                    clipPathUnits="userSpaceOnUse"
+                  >
+                    {countries
+                      .filter((item) => continentFor(item.label) === scene.id)
+                      .map((item) => (
+                        <path key={item.id} d={item.path} />
+                      ))}
+                  </clipPath>
+                ))}
             </defs>
             <rect
               x={box.x}
@@ -504,12 +574,52 @@ export function WorldExplorer() {
                 preserveAspectRatio="none"
               />
             ) : (
-              <image
-                href={terrain}
-                width="1774"
-                height="887"
-                filter="url(#terrain-contrast)"
-              />
+              <>
+                <image
+                  href={terrain}
+                  width="1774"
+                  height="887"
+                  filter="url(#terrain-contrast)"
+                />
+                {showArtwork &&
+                  continentArtworks.map((art) => (
+                    <image
+                      key={art.id}
+                      className="explorer-continent-art"
+                      aria-hidden="true"
+                      href={continentSceneUrls[art.file]}
+                      x={art.frame[0]}
+                      y={art.frame[1]}
+                      width={art.frame[2]}
+                      height={art.frame[3]}
+                      preserveAspectRatio="xMidYMid slice"
+                      filter="url(#continent-land-art)"
+                      clipPath={`url(#continent-land-${art.id})`}
+                      data-continent-art={art.id}
+                    />
+                  ))}
+                {visibleDetailMaps.map((map) => {
+                  const territory = countries.find(
+                    (item) => item.id === map.id,
+                  );
+                  if (!territory) return null;
+                  return (
+                    <image
+                      className={`explorer-mosaic-tile ${showArtwork ? 'with-artwork' : ''}`}
+                      key={map.id}
+                      aria-hidden="true"
+                      href={countryDetailUrls[map.file]}
+                      x={map.viewBox[0]}
+                      y={map.viewBox[1]}
+                      width={map.viewBox[2]}
+                      height={map.viewBox[3]}
+                      preserveAspectRatio="none"
+                      clipPath={`url(#mosaic-${territory.number})`}
+                      data-mosaic-country={territory.number}
+                    />
+                  );
+                })}
+              </>
             )}
             {!scene &&
               countries.map((c) => (
@@ -537,6 +647,16 @@ export function WorldExplorer() {
                     key={f.id}
                     d={f.path}
                     className={`explorer-water ${f.kind}`}
+                  />
+                ))}
+            {!scene &&
+              artwork.physical
+                .filter((feature) => feature.kind === 'mountain')
+                .map((feature) => (
+                  <path
+                    key={feature.id}
+                    d={feature.path}
+                    className="explorer-mountain"
                   />
                 ))}
             {!scene &&
@@ -584,6 +704,7 @@ export function WorldExplorer() {
             )}
           </div>
           {!country &&
+            size.width >= 600 &&
             countries
               .filter((c) => visiblePoint(c.label))
               .map((c) => (
@@ -598,6 +719,11 @@ export function WorldExplorer() {
                   <span>{c.name}</span>
                 </button>
               ))}
+          {!country && visiblePoint([824, 541]) && (
+            <span className="explorer-island-badge" style={project([824, 541])}>
+              Callum Island
+            </span>
+          )}
           {country && (
             <svg
               className="explorer-leaders"
@@ -703,6 +829,20 @@ export function WorldExplorer() {
             </span>
           </div>
           <div className="explorer-layer-controls explorer-floating">
+            {!country && (
+              <select
+                aria-label="聚焦大陆精绘"
+                value=""
+                onChange={(event) => focusContinent(event.target.value)}
+              >
+                <option value="">聚焦大陆…</option>
+                {continentArtworks.map((art) => (
+                  <option key={art.id} value={art.id}>
+                    {art.name}
+                  </option>
+                ))}
+              </select>
+            )}
             {country && scenes.some((s) => s.id === countryId) && (
               <button
                 aria-pressed={Boolean(scene)}
@@ -726,6 +866,14 @@ export function WorldExplorer() {
             )}
             {!scene && (
               <>
+                {!country && (
+                  <button
+                    aria-pressed={showArtwork}
+                    onClick={() => setShowArtwork((value) => !value)}
+                  >
+                    大陆精绘
+                  </button>
+                )}
                 <button
                   aria-pressed={showWater}
                   onClick={() => setShowWater((v) => !v)}
@@ -752,7 +900,11 @@ export function WorldExplorer() {
             <small>
               {scene
                 ? '本国规划场景插画 · 建筑为示意复原 · 能力为情景估值'
-                : '地理底图 · 国界、水系与设施坐标来自地图数据'}
+                : country
+                  ? '地理底图 · 国界、水系与设施坐标来自地图数据'
+                  : showArtwork
+                    ? '四大陆精绘 · 放大后按需叠加 70 国地理细图 · 国界与水系保留 / 非实时 World State'
+                    : '70 国地理细图全图模式 · 细图正按需载入 · 国界与水系保留 / 非实时 World State'}
             </small>
             <b>
               {scene
