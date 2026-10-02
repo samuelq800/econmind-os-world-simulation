@@ -56,7 +56,7 @@ Control Tower 负责固定 SHA 合并、范围裁决、README/本报告和最终
 | 0020 reader       | 独立只读审计 [36657427073](https://github.com/samuelq800/econmind-os/actions/runs/36657427073) 成功，核对 ledger/角色边界                                              | 不代表可用 LOGIN 或部署 API                                                        |
 | 0021 完整来源权限 | 受控运行 [36672349466](https://github.com/samuelq800/econmind-os/actions/runs/36672349466) 成功：ledger 20→21、policy 2→3、142 行重建、34 摘要及来源状态保持           | 不代表经济执行、浏览器直连数据库                                                   |
 | Edge 读取代码     | World [PR #37](https://github.com/samuelq800/econmind-os-world-simulation/pull/37) 经 B 固定 SHA 审查后合并为 `8efe907`                                                | 合并不是部署                                                                       |
-| 服务器凭据与部署  | PR #81 的有效权限修复通过回归，生产只读取证 37007399395 返回 BLOCKED                                                                                                   | 两角色仍 NOLOGIN，未设置新 secrets，未部署 Edge；代码修复不等于生产权限已满足      |
+| 服务器凭据与部署  | #81 经 B CODE_MERGE_GO 与 CI37008877520 后合并为 `7b4db3b8cbdb1db86288a1172896ac9bb8febaa4`，发布守卫/源锁/报告已进入原网站 main                                       | 生产 RELEASE_HOLD：两角色 NOLOGIN，没有新 secrets/函数部署；只合并安全准备代码     |
 | 前端真实 base URL | [PR #38](https://github.com/samuelq800/econmind-os-world-simulation/pull/38) 经 D 独立审查、37 聚焦测试及两 CI 成功后合并为 `36cb6bb4b015ca622f7e5303b298d84a09daf356` | 构建注入与 Edge 子路径已实现，生产变量未设置、仍 DISABLED；不声称真实 fetch 已通过 |
 
 0021 [非秘密发布归档](https://github.com/samuelq800/econmind-os/blob/31d37dc8f700bec4e4cbbd6f29e9cf52e74babdc/docs/WORLD_V2_0021_FULL_READER_RELEASE_2026_09_30.md) 保存固定 run 与证据摘要。
@@ -77,7 +77,9 @@ Control Tower 独立检查非秘密 artifact 的实际 status 和角色标志，
 `control-plane-evidence.json` SHA-256：`c76dadf1aa46b7e29a6196fe7e37c7d5e7c339cb10eaa206dea95cc818e497df`。
 PUBLIC 权限影响所有角色，NOINHERIT 或角色自己的 REVOKE 不能消除它；当前旧站保护范围内不能直接全局撤销。
 故本轮不设置新凭据、不启 LOGIN、不部署函数、不启前端生产配置，也不重放 0021。只读权限门槛修复和真实生产隔离是两件事。
-上述历史取证枚举未含 PostgreSQL 17+ 的 MAINTAIN 表权限；它已独立证明 BLOCKED，但不得把其对象覆盖数冒充所有权限类型完整放行证据。B 在收尾回归中发现该遗漏，E 正补代码及 PG17 原生负例；本轮无需重复生产查询来再次证明已知阻塞。
+上述历史取证枚举未含 PostgreSQL 17+ 的 MAINTAIN 表权限；它已独立证明 BLOCKED，但不得把其对象覆盖数冒充所有权限类型完整放行证据。B 在收尾回归中发现该遗漏，E 在最终候选 `6466d72729959d9e9c4eb053a983b4fd9958cc8b` 补齐共享投影、事务内复查与 PG17 原生负例。该候选另把生产 HOLD 硬编码在工作流第一步；解除 HOLD 需要新的审查，不能靠 dispatch 参数绕过。本轮无需重复生产查询来再次证明已知阻塞。
+
+完整 [E 非秘密 readiness 报告](https://github.com/samuelq800/econmind-os/blob/6466d72729959d9e9c4eb053a983b4fd9958cc8b/docs/WORLD_V2_EDGE_READER_READINESS_2026_10_02.md) 保存实际 pooler、旧七函数版本/hash/源码读取名称、生产 catalog 结果与安全边界。最终代码 CI/独立审查结论单独补在收尾记录，不将生产 HOLD 标为已关闭。
 
 ### 明确的数据连接点
 
@@ -109,6 +111,14 @@ F 已在实际网址集中验证桌面/手机：4 大陆、70 国家项、41 条
 “国家操作”固定 01 国的问题已由 [PR #39](https://github.com/samuelq800/econmind-os-world-simulation/pull/39) 修复并合并为 `305cf27901412053b32b10e8d24b69e75b3dbb09`。固定候选 `7bc1ec9f9309b39428ed9369560cc32432eda9e8` 的 26 聚焦测试及 [CI 37007603136](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37007603136) 成功。新 Pages [37007770659](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37007770659) 成功，deployment `6808567801` 绑定同一 merge SHA。F 实际选择 70 Rhea、点击一次国家操作后落地 `?role=finance&country=70#country`，title 为 Rhea · Finance Minister · EconMind，画面有 Rhea/SEASON1、SF328 Lithium mine、14 Local sites，非 Avenor；console warnings/errors 为空。本修复线上验收 PASS，未重跑全图/性能/经济测试。
 接受的性能边界：初始 14 请求约 16.19 MB，比旧稿传输少约 32.5%，不初载 70 SVG，放大后按视窗加载。
 本地缓存关闭、10 Mbps/100 ms 下控件约 0.8–0.9 秒可用，大陆完整图像约 13.5 秒完成；不是生产 SLA，不能承诺弱网秒开。
+
+### 重要剩余项：新首页地图的数值层尚未统一到平衡包
+
+Control Tower 对主线文件做一次定向来源核对发现：新根首页 `WorldExplorer.tsx` 仍 import `map-lab/geographic-scenario.json`。
+国家场景人口、设施候选数、区域数和设施详情来自该 illustrative 图层；这个文件的 70 国人口合计是 **14,714,012,813**、设施候选 **350**，不是平衡包的 **14,712,146,434 / 1,374**。
+这解释了地图 Rhea 的 3 个候选与正式来源角色页 14 个 Local sites 的差异：两处尚未共用数值层。
+地图交互/入口验收已通过，不等于它的所有数值已正式接线。六职位开局包与原地图原件不重写，但新首页的动态数字/详情需接选定官方来源并明确资产点位与经济设施的对应关系。
+不能只改总数标签而把旧设施详情继续冒充正式数据；此项列入下一轮实际功能接线，不在本轮报告工作中擅自扩成页面重设计。
 
 ## 五、六职位：已有显示与未接通功能
 
@@ -157,21 +167,21 @@ V31–V32 灰度、切换、归档、运营尚无接受报告，不宣称完成�
 
 ## 七、发现的错误与处置
 
-| 问题                        | 处理/状态                                                                                                                                                                                                                                     |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PR #81 有效权限遗漏         | B 在隔离合成库复现：PUBLIC SELECT + 默认 PUBLIC EXECUTE SECURITY DEFINER 写函数仍通过旧前检/LOGIN 激活。`PR81-MAJ-01` 为 OPEN_MAJOR=1，E 正补 login/reader/可 SET 角色闭包的有效权限白名单、激活事务复查和负例；不是对生产现有 ACL 失败的断言 |
-| API 发布 smoke 只查静态目录 | B 要求新增真正 countries 数据读取与 CORS；目录绿不能证明 pooler 连通                                                                                                                                                                          |
-| 页面配置拒绝 Edge 子路径    | #38 已修复并合并，D MERGE_GO；page-config 37006973467、atlas 37006973650 成功；生产仍 DISABLED                                                                                                                                                |
-| 地图选国后操作入口仍固定 01 | #39 已修所选国家链接，01/70/full IDs/未选/非法选择回归通过，merge `305cf279`；新版本线上点击另验                                                                                                                                              |
-| README 过期                 | 更新 #33/#35/#37 与 0021 实际状态，保留旧报告日期/失败历史                                                                                                                                                                                    |
-| 0020 首次取消               | 历史 UNKNOWN 保留，后续成功审计是独立证据                                                                                                                                                                                                     |
-| 0021 分块前检误判           | `36668095506` 在写前跳过；修正后另一次授权运行成功，不算重放失败迁移                                                                                                                                                                          |
-| 图像加载慢                  | #35 降初载与视窗加载，保留约 13.5 秒限制，不隐瞒弱网成本                                                                                                                                                                                      |
+| 问题                        | 处理/状态                                                                                                                                                                         |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PR #81 有效权限遗漏         | 初始 PUBLIC 有效权限缺陷与收尾 MAINTAIN 漏项已修复，B 对最终6466d727判定 PR81-MAJ-01 CLOSED、代码 OPEN_BLOCKER=0/OPEN_MAJOR=0；生产 PUBLIC/net 权限仍 BLOCKED，不等于已修旧站 ACL |
+| API 发布 smoke 只查静态目录 | B 要求新增真正 countries 数据读取与 CORS；目录绿不能证明 pooler 连通                                                                                                              |
+| 页面配置拒绝 Edge 子路径    | #38 已修复并合并，D MERGE_GO；page-config 37006973467、atlas 37006973650 成功；生产仍 DISABLED                                                                                    |
+| 地图选国后操作入口仍固定 01 | #39 已修所选国家链接，01/70/full IDs/未选/非法选择回归通过，merge `305cf279`；新版本线上点击另验                                                                                  |
+| README 过期                 | 更新 #33/#35/#37 与 0021 实际状态，保留旧报告日期/失败历史                                                                                                                        |
+| 0020 首次取消               | 历史 UNKNOWN 保留，后续成功审计是独立证据                                                                                                                                         |
+| 0021 分块前检误判           | `36668095506` 在写前跳过；修正后另一次授权运行成功，不算重放失败迁移                                                                                                              |
+| 图像加载慢                  | #35 降初载与视窗加载，保留约 13.5 秒限制，不隐瞒弱网成本                                                                                                                          |
 
 ## 八、剩余工作按优先级排序
 
 1. **先裁决只读凭据隔离路径（E/B）**：生产 catalog 已证禁止权限，保持 NOLOGIN。单个角色不能通过负向 REVOKE 抵消 PUBLIC 授予。需单独审查保持旧站不变的隔离方案，或用户明确扩大旧站 PUBLIC ACL 范围后评估精确影响；不能用 admin/service-role 或只读 GUC 代替最小权限。此轮不擅自改旧站、不创建付费基础设施。隔离通过后才部署、验证 country/34 类/hash/decimal/地理/CORS、启用已合并的 #38 配置和浏览器烟测。
-2. **补地图目录 URL 的独立交付证据**：#39 的单次线上点击验收已 PASS，首页/大陆/边界/滚动原证据已接受，不重跑全图性能；来源保存与全部地址验收分开。
+2. **统一新首页地图数值层，并补目录 URL 证据**：#39 线上点击已 PASS，但新根首页仍用旧 illustrative 人口/350 设施候选。下一轮在保留图像/交互的前提下绑定完整平衡包指标/设施详情，明确静态点位与正式设施对应，不只替换总数标签。另核所有地图交付 URL；不重跑已通过的全图性能。
 3. **C/F 解决正式开局六类语义**：唯一 World ID；70 国正库存合法 title/risk 主体；场景货币→Core GCU；Treasury/CB 拆分；56 负债/62 权益尾差（最大 0.00001/0.000017）的明确规则。源数据不静默 round；准备提案需独立 P0 审查。设施/许可、水权、通电、岗位和社会资产另需域 adoption/执行授权。
 4. **A/D 与 Worker owner 接真实玩家闭环**：席位授权、projection/WorldVersion、幂等发送、异步执行、持久回执、刷新数值与事件追踪；复用既有引擎而非造第二模型。队伍名单仍延期，最终身份权威不可凭空编造。
 5. **B 定向闭合 Gate B**：专用非生产 staging/TLS/connection-loss、真实部署 role/JWT→GUC 权限、双国双职位 browser→Command→Worker→FINAL receipt→projection→refresh、最终固定候选独立审查。既有证据不重复乱跑，只补真缺口。
@@ -180,7 +190,18 @@ V31–V32 灰度、切换、归档、运营尚无接受报告，不宣称完成�
 不按版本编号给虚假百分比：**展示和来源保存已充分；只读连接代码已齐，但生产凭据被共享 PUBLIC 权限明确阻塞；授权经济闭环与正式验收仍是实质工作。**
 原网站 PR #50（队伍 lifecycle）与 #36（School Leader）不属本轮交付，不因“所有稿件”就合并。
 
-## 九、报告自身检查
+## 九、收尾检查记录
+
+PR #81 最终代码候选为 `6466d72729959d9e9c4eb053a983b4fd9958cc8b`。
+同 SHA [CI 37008877520](https://github.com/samuelq800/econmind-os/actions/runs/37008877520) 的 verify、member-identity-database、season1-database、world-v2-edge-role 四 job 均 SUCCESS。
+B 已独立验证合法基线/激活正例及 8 类权限拒绝：PUBLIC 表/列/SD/sequence/schema CREATE、reader 额外 SET、PUBLIC MAINTAIN、reader 直接 MAINTAIN；前检和激活事务拒绝均保留 NOLOGIN。
+生产环境禁止权限仍 OPEN，旧站 ACL 未改。B 最终结论为 `APPROVED_FOR_CODE_MERGE / RELEASE_HOLD`，PR81-MAJ-01（含 MAINTAIN）CLOSED、代码 OPEN_BLOCKER=0/OPEN_MAJOR=0。
+Control Tower 于 `2026-10-02T12:52:28Z` 按授权将固定候选合并为原网站 main `7b4db3b8cbdb1db86288a1172896ac9bb8febaa4`。只合并代码/报告，未 dispatch 生产 release；API live smoke 仍 NOT_RUN，Gate B 仍 PENDING。
+
+本轮已完成稿件 #35/#37/#38/#39 和原网站 #81 全部在对应 main；README/本报告通过 [World PR #40](https://github.com/samuelq800/econmind-os-world-simulation/pull/40) 发布。
+A–F 的本轮任务均已交付停止，Control Tower 在归档后停止；不存在后台继续尝试 LOGIN 或模拟的授权延伸。
+
+### 文档检查
 
 README/本报告为 P3 非行为变更，检查限改动文件格式、相对链接和 `git diff --check`；不为文档重跑经济全量，也不新增生产读写。
 测试只绑定各自 SHA，合并不自动证明部署；历史 UNKNOWN/NOT_RUN/FAIL 与边界保留。

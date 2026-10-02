@@ -13,13 +13,13 @@ supersedes the dated capability summaries below. It separates code integration,
 Pages publication, database publication, live API access and economic execution;
 it does not replace the formal gate ledger in `status/progress.json`.
 
-| Layer           | Verified scope                                                                                                               | Remaining boundary                                                                                               |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                           | Source preservation is not runtime economic adoption                                                             |
-| Supabase        | Balanced readback and separate 0020 audit passed; controlled run `36672349466` verified 0021 full-source permissions         | Server LOGIN and live Edge deployment are not established by those database releases                             |
-| API code        | Country/full-dataset/map-catalog/CORS and Edge reader #37 merged; page wiring #38 merged                                     | Production preflight found forbidden PUBLIC effective access; LOGIN remains disabled and Edge release is BLOCKED |
-| Page code       | Six-role official static numbers, Source intel, scroll/fit and root atlas published; selected-country gateway fix #39 merged | Production API config remains disabled; role actions are local rehearsal, not Command/receipt execution          |
-| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI                          | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                |
+| Layer           | Verified scope                                                                                                                                       | Remaining boundary                                                                                                            |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                                                   | Source preservation is not runtime economic adoption                                                                          |
+| Supabase        | Balanced readback and separate 0020 audit passed; controlled run `36672349466` verified 0021 full-source permissions                                 | Server LOGIN and live Edge deployment are not established by those database releases                                          |
+| API code        | Country/full-dataset/map-catalog/CORS and Edge reader #37 plus page wiring #38 merged; main-site #81 fail-closed release tooling reviewed and merged | Production PUBLIC effective access remains forbidden: NOLOGIN, no new secrets/deployment, RELEASE_HOLD; map publicUrl is null |
+| Page code       | Six-role official static numbers, Source intel, scroll/fit and root atlas published; selected-country gateway fix #39 merged                         | Production API config remains disabled; role actions are local rehearsal, not Command/receipt execution                       |
+| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI                                                  | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                             |
 
 Lobby entry and team/person/office assignment are intentionally deferred by the
 owner. Public official-source connections can proceed without inventing those
@@ -55,7 +55,7 @@ published runtime files are checked against the delivered manifest by
 `pnpm test:authoritative-ui`. The older React page remains at `legacy.html`
 for reference. No original EconMind main-site files are changed.
 
-The country pages and atlas now bind their displayed opening numbers to the
+The selected immersive country pages and their atlas bind their opening numbers to the
 selected 70-country package: 14,712,146,434 people, 1,374 facility records,
 and 240 geological deposits. `pnpm test:authoritative-ui` checks the generated
 country files against that pinned package. The original UI archive's older
@@ -67,6 +67,12 @@ The drawer's production connection is not yet evidenced;
 the official opening inputs are not a committed World State, and login,
 authoritative commands, settlement, live prices and receipts are not connected.
 Country-scoped routes do not fall back to the older North Harbour sample ledger.
+
+The newly published root explorer is a separate display entrypoint. Its scene
+statistics still use `map-lab/geographic-scenario.json` (illustrative population
+14,714,012,813 and 350 facility candidates), not the selected balanced package.
+Do not describe all root-map numbers as official; rebinding those display fields
+is a remaining integration item in the October 2 report.
 
 ## Historical code integration (2026-09-27)
 
