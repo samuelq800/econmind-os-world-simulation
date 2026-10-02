@@ -1,33 +1,20 @@
-import { Pool } from 'pg';
-
-import { readOfficialEdgeDatabaseConfig } from './lib/official-edge-database-config.js';
 import { createOfficialEdgeFetchHandler } from './lib/official-edge-fetch-adapter.js';
-import { createRoleScopedOfficialCountryReader } from './lib/official-country-role-reader.js';
-import { readOfficialPublicCorsOrigins } from './lib/official-public-cors.js';
+import { createOfficialSourceSnapshotReader } from './lib/official-source-snapshot-reader.js';
 
-// Initialization is fail-closed. No Supabase admin, service-role or anon key
-// participates in this reader, and no connection opens until a source request.
-const environment = Deno.env.toObject();
-const database = readOfficialEdgeDatabaseConfig(environment);
-if (!database) throw new Error('OFFICIAL_EDGE_DATABASE_CONFIGURATION_INVALID');
-const allowedOrigins = readOfficialPublicCorsOrigins(environment, 'production');
-if (allowedOrigins === undefined)
-  throw new Error('OFFICIAL_EDGE_PUBLIC_ORIGINS_REQUIRED');
-
-// One connection per warm isolate. A shared transaction pooler keeps SET LOCAL
-// ROLE and the source SELECT on one backend for the read-only transaction.
-const pool = new Pool({
-  connectionString: database.connectionString,
-  ssl: { rejectUnauthorized: true },
-  max: 1,
-  connectionTimeoutMillis: 3_000,
-  idleTimeoutMillis: 10_000,
-  query_timeout: 5_500,
-  application_name: 'econmind-world-v2-official-edge-read',
-});
-const reader = createRoleScopedOfficialCountryReader(pool, {
-  statementTimeoutMillis: 5_000,
-});
+// Forward candidate only: immutable selected-source snapshot, not a live DB
+// projection. No environment, password, admin/service-role or browser key.
+// The old DB publisher remains HOLD and its guards are not bypassed.
+const allowedOrigins = ['https://samuelq800.github.io'];
+const reader = createOfficialSourceSnapshotReader();
 const handle = createOfficialEdgeFetchHandler({ reader, allowedOrigins });
 
-export default { fetch: handle };
+export default {
+  async fetch(request: Request) {
+    const response = await handle(request);
+    response.headers.set(
+      'x-world-source-transport',
+      'HASH_PINNED_IMMUTABLE_SOURCE_SNAPSHOT',
+    );
+    return response;
+  },
+};
