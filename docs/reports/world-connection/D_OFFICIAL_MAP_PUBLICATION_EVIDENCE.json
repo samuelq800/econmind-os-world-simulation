@@ -1,0 +1,158 @@
+{
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "recordedAt": "2026-10-02 15:02:18 UTC",
+  "sourceBaseline": "8992178303677ec0f54398f3401a38bfbac0b528",
+  "implementationCommit": "f09cfc2865876389afc534e5b4cab6fb2585ac1b",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4"
+  },
+  "manifestSha256": "9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f",
+  "originalFiles": 203,
+  "images": 160,
+  "supportingFiles": 43,
+  "originalBytes": 302234965,
+  "sourceFilesRegenerated": false,
+  "sourceFilesDuplicatedInGit": false,
+  "staticOutput": {
+    "files": 738,
+    "bytes": 937544136,
+    "budgetBytes": 1000000000,
+    "remainingBytes": 62455864,
+    "budgetInterpretation": "CONSERVATIVE_DECIMAL_NOT_OFFICIAL_GB_GIB_DEFINITION"
+  },
+  "catalogSha256": "0ee3fc6ae44d41a2d95cd20f2dcddfeea927ad0485036f0874b117414700904d",
+  "commands": [
+    {
+      "command": "pnpm exec vitest run tests/world-web/official-map-publication.test.ts tests/world-web/official-full-data-wiring.test.ts",
+      "exitCode": 0,
+      "testFiles": 2,
+      "tests": 33,
+      "newTests": 28
+    },
+    {
+      "command": "pnpm exec tsc -p tests/tsconfig.official-map-publication.json",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm exec eslint scripts/official-map-publication-*.mjs tests/world-web/official-map-publication.test.ts",
+      "exitCode": 0
+    },
+    {
+      "command": "pnpm exec prettier --check scripts/official-map-publication-*.mjs scripts/official-map-publication-*.d.mts tests/world-web/official-map-publication.test.ts tests/tsconfig.official-map-publication.json apps/world-web/package.json .github/workflows/world-official-map-publication-check.yml docs/reports/world-connection/D_OFFICIAL_MAP_PUBLICATION.md",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/verify-world-map-file-package.mjs",
+      "exitCode": 0,
+      "files": 203
+    },
+    {
+      "command": "pnpm test:authoritative-ui",
+      "exitCode": 0,
+      "sourceCountryFiles": 70,
+      "reusedMapAssets": 140,
+      "economicStateConnected": false
+    },
+    {
+      "command": "pnpm test:boundaries",
+      "exitCode": 0,
+      "tests": 34
+    },
+    {
+      "command": "pnpm env:check",
+      "exitCode": 0,
+      "databaseConfigured": false,
+      "linkedSupabaseProject": "NOT_LINKED",
+      "databaseMutationAllowed": false
+    },
+    {
+      "command": "pnpm secrets:check",
+      "exitCode": 0,
+      "scannedFiles": 1898
+    },
+    {
+      "command": "GITHUB_ACTIONS=true pnpm --filter @econmind/world-web build",
+      "exitCode": 0,
+      "existing140AssetCopyPreserved": true,
+      "officialSourceRead": "NOT_CONFIGURED"
+    },
+    {
+      "command": "node scripts/official-map-publication-smoke.mjs --site-base http://127.0.0.1:4123/econmind-os-world-simulation/",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "httpReadback": {
+    "status": "PASS",
+    "siteBase": "http://127.0.0.1:4123/econmind-os-world-simulation/",
+    "manifestSha256": "9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f",
+    "requests": [
+      {
+        "url": "http://127.0.0.1:4123/econmind-os-world-simulation/official-map-source/index.json",
+        "bytes": 186843,
+        "sha256": "0ee3fc6ae44d41a2d95cd20f2dcddfeea927ad0485036f0874b117414700904d",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4123/econmind-os-world-simulation/official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/index.json",
+        "bytes": 186843,
+        "sha256": "0ee3fc6ae44d41a2d95cd20f2dcddfeea927ad0485036f0874b117414700904d",
+        "status": 200
+      },
+      {
+        "url": "http://127.0.0.1:4123/econmind-os-world-simulation/official-map-source/index.html",
+        "bytes": 67781,
+        "sha256": "ffb35c64dc6e334f6032552c5e9675c7fbfe0d74b8770e80b3ba0d394b750624",
+        "status": 200
+      },
+      {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/02.png",
+        "countryNumber": "02",
+        "url": "http://127.0.0.1:4123/econmind-os-world-simulation/official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/02.png",
+        "bytes": 3306774,
+        "sha256": "d1ae294e910ab4317d8edf3daf085007a870d8bbe3ea67b3c5815be0e28bd84d",
+        "contentType": "image/png",
+        "status": 200
+      },
+      {
+        "sourcePath": "apps/world-web/src/assets/country-detail/70-rhea.svg",
+        "countryNumber": "70",
+        "url": "http://127.0.0.1:4123/econmind-os-world-simulation/official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-detail/70-rhea.svg",
+        "bytes": 411274,
+        "sha256": "de2aee1275514c5646291208f00e02f2ed63c8c105a51d1a7371aec99f73ef30",
+        "contentType": "image/svg+xml",
+        "status": 200
+      },
+      {
+        "sourcePath": "artifacts/world-geography/previews/国家总表.png",
+        "countryNumber": null,
+        "url": "http://127.0.0.1:4123/econmind-os-world-simulation/official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/artifacts/world-geography/previews/%E5%9B%BD%E5%AE%B6%E6%80%BB%E8%A1%A8.png",
+        "bytes": 42081,
+        "sha256": "a09a560385089ad6b510d9c45d2409d22693389267c22ab01c88277b9c1f78e4",
+        "contentType": "image/png",
+        "status": 200
+      }
+    ],
+    "sampleCountries": ["02", "70"],
+    "globalSamples": 1,
+    "filesFetched": 3,
+    "liveWorldState": false,
+    "productionDeploymentVerified": false
+  },
+  "limitations": {
+    "productionPagesReadback": "NOT_RUN",
+    "independentReview": "PENDING",
+    "merge": "NOT_DONE_BY_D",
+    "apiMapCatalogPublicUrl": "UNCHANGED_NULL",
+    "economicApiRequests": "NOT_RUN",
+    "databaseOrStorageWrites": "NOT_RUN",
+    "full420Audit": "NOT_RUN",
+    "simulationStarted": false,
+    "thirdPartyRights": "UNKNOWN",
+    "thirdPartyRightsProofProvided": false
+  }
+}
