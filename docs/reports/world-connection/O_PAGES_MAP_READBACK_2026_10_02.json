@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "repository": "samuelq800/econmind-os-world-simulation",
+  "deploymentSha": "ab6e21cd3b7888ca9d8ff28504241c511425b771",
+  "pagesRun": 37026163647,
+  "pagesBuild": "SUCCESS",
+  "pagesDeploy": "SUCCESS",
+  "siteBase": "https://samuelq800.github.io/econmind-os-world-simulation/",
+  "method": "GET",
+  "redirect": "error",
+  "comparison": "Actual HTTP response bytes equal git show deploymentSha:path",
+  "requests": 6,
+  "catalogFiles": 203,
+  "catalogImages": 160,
+  "catalogSupport": 43,
+  "originalFileSamples": 3,
+  "all203RemoteBytes": "NOT_RUN",
+  "fullCountryRoleBrowserAcceptance": "NOT_CLAIMED",
+  "sourceOnly": true,
+  "worldActivation": false,
+  "economicRequests": 0,
+  "results": [
+    {
+      "path": "official-map-source/index.json",
+      "status": 200,
+      "bytes": 186843,
+      "sha256": "0ee3fc6ae44d41a2d95cd20f2dcddfeea927ad0485036f0874b117414700904d",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "path": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/index.json",
+      "status": 200,
+      "bytes": 186843,
+      "sha256": "0ee3fc6ae44d41a2d95cd20f2dcddfeea927ad0485036f0874b117414700904d",
+      "contentType": "application/json; charset=utf-8"
+    },
+    {
+      "path": "official-map-source/index.html",
+      "status": 200,
+      "bytes": 67781,
+      "sha256": "ffb35c64dc6e334f6032552c5e9675c7fbfe0d74b8770e80b3ba0d394b750624",
+      "contentType": "text/html; charset=utf-8"
+    },
+    {
+      "path": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-detail/70-rhea.svg",
+      "status": 200,
+      "bytes": 411274,
+      "sha256": "de2aee1275514c5646291208f00e02f2ed63c8c105a51d1a7371aec99f73ef30",
+      "contentType": "image/svg+xml"
+    },
+    {
+      "path": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/02.png",
+      "status": 200,
+      "bytes": 3306774,
+      "sha256": "d1ae294e910ab4317d8edf3daf085007a870d8bbe3ea67b3c5815be0e28bd84d",
+      "contentType": "image/png"
+    },
+    {
+      "path": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/artifacts/world-geography/previews/%E5%9B%BD%E5%AE%B6%E6%80%BB%E8%A1%A8.png",
+      "status": 200,
+      "bytes": 42081,
+      "sha256": "a09a560385089ad6b510d9c45d2409d22693389267c22ab01c88277b9c1f78e4",
+      "contentType": "image/png"
+    }
+  ]
+}
