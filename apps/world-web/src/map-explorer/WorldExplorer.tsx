@@ -9,12 +9,14 @@ import { shouldMountDetailTile } from './detail-tile-visibility.js';
 import { layoutLabels } from './label-layout.js';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import terrain from '../assets/asterra-satellite-terrain-v8.png';
-import {
-  artwork,
-  partition,
-  resourceTypeById,
-} from '../map-lab/display-layers.js';
+import { artwork, partition } from '../map-lab/display-layers.js';
 import scenario from '../map-lab/geographic-scenario.json';
+import {
+  createOfficialExplorerCountryLoader,
+  type OfficialExplorerCountry,
+  type OfficialExplorerCountryLoadState,
+} from '../official-data/official-explorer-country.js';
+import { OFFICIAL_EXPLORER_SUMMARY } from '../official-data/official-explorer-country-manifest.js';
 import './world-explorer.css';
 
 type CountryScene = {
@@ -44,10 +46,270 @@ const countries = partition.territories.map((country, index) => {
     ] as const,
   };
 });
-const facilities = [...artwork.nodes, ...artwork.facilities].map((site) => ({
-  ...site,
-  record: scenario.facilities.find((f) => f.id === site.id)!,
-}));
+type OfficialFacility = OfficialExplorerCountry['facilities'][number];
+export type ExplorerCountryBinding = {
+  countryId: string;
+  state: OfficialExplorerCountryLoadState;
+};
+
+// A switch must hide the previous country's numbers before its next effect runs.
+export function currentExplorerSource(
+  id: string,
+  binding: ExplorerCountryBinding,
+): OfficialExplorerCountryLoadState {
+  if (!id) return { kind: 'idle' };
+  if (binding.countryId !== id) return { kind: 'loading' };
+  if (binding.state.kind === 'ready' && binding.state.data.id !== id)
+    return { kind: 'error', reason: 'SOURCE_INVALID' };
+  return binding.state;
+}
+
+export function requestExplorerCountry(
+  id: string,
+  loader: ReturnType<typeof createOfficialExplorerCountryLoader>,
+  publish: (binding: ExplorerCountryBinding) => void,
+) {
+  const abort = new AbortController();
+  let active = true;
+  publish({ countryId: id, state: { kind: id ? 'loading' : 'idle' } });
+  if (id) {
+    void loader.load(id, { signal: abort.signal }).then(
+      (state) => {
+        if (active) publish({ countryId: id, state });
+      },
+      () => {
+        if (active)
+          publish({
+            countryId: id,
+            state: { kind: 'error', reason: 'SOURCE_UNAVAILABLE' },
+          });
+      },
+    );
+  }
+  return () => {
+    active = false;
+    abort.abort();
+  };
+}
+
+export function ExactOfficialValue({
+  data,
+  path,
+  showUnit = false,
+}: {
+  data: OfficialExplorerCountry;
+  path: string;
+  showUnit?: boolean;
+}) {
+  const source = data.officialSource;
+  const field = source?.fields?.[path];
+  const dataset = field && source?.datasets?.[field.dataset];
+  if (
+    !field ||
+    !dataset ||
+    typeof field.exact !== 'string' ||
+    !/^-?\d+(?:\.\d+)?$/.test(field.exact)
+  )
+    return <span data-source-field={path}>精确值缺失</span>;
+  return (
+    <span
+      data-source-field={path}
+      title={`${field.dataset} / ${field.rowId} / ${field.field}; ${field.sourcePointer}; raw=${field.rawToken}; ${dataset?.sha256 ?? '来源hash缺失'}; ${field.unit}; ${field.unitBasis}; ${field.nature}`}
+    >
+      {field.exact}
+      {showUnit &&
+        ` ${field.unit === 'UNIT_NOT_SPECIFIED_IN_SOURCE' ? '（源未注明单位）' : field.unit}`}
+    </span>
+  );
+}
+
+export function OfficialFacilityFacts({
+  data,
+  index,
+}: {
+  data: OfficialExplorerCountry;
+  index: number;
+}) {
+  const site = data.facilities[index];
+  if (!site) return <p>官方设施记录缺失</p>;
+  return (
+    <>
+      <div className="facility-status">
+        ● {site.record.lifecycle} · operational:
+        {String(site.record.operational)} · 非实时投运状态
+      </div>
+      <div className="facility-big-number">
+        <ExactOfficialValue
+          data={data}
+          path={`/facilities/${index}/record/estimatedCapacity`}
+        />
+        <small>{site.record.capacityUnit} · 开局能力记录，不是已执行产量</small>
+      </div>
+      <dl>
+        <div>
+          <dt>项目编号</dt>
+          <dd>{site.record.projectId ?? '源未指定'}</dd>
+        </div>
+        <div>
+          <dt>设施编号</dt>
+          <dd>{site.id}</dd>
+        </div>
+        {[
+          ['所需人员', 'requiredWorkers'],
+          ['用电需求', 'requiredPowerMW'],
+          ['用水需求', 'requiredWaterM3Day'],
+          ['设备需求', 'equipmentUnits'],
+          ['维护提案', 'maintenanceGcuDay'],
+          ['建设期提案', 'constructionSimDays'],
+        ].map(([label, key]) => (
+          <div key={key}>
+            <dt>{label}</dt>
+            <dd>
+              <ExactOfficialValue
+                data={data}
+                path={`/facilities/${index}/record/${key}`}
+                showUnit
+              />
+            </dd>
+          </div>
+        ))}
+        <div>
+          <dt>配方状态</dt>
+          <dd>{site.record.recipeStatus}</dd>
+        </div>
+        <div>
+          <dt>来源角色</dt>
+          <dd>{site.record.scenarioRole}</dd>
+        </div>
+        <div>
+          <dt>开局可用性提案</dt>
+          <dd>{String(site.record.openingAvailabilityProposal)} · 非已批准</dd>
+        </div>
+      </dl>
+    </>
+  );
+}
+
+export function OfficialCountryFacts({
+  data,
+}: {
+  data: OfficialExplorerCountry;
+}) {
+  const metrics = (
+    base: string,
+    fields: readonly (readonly [string, string])[],
+  ) => (
+    <dl className="official-country-metrics">
+      {fields.map(([label, key]) => (
+        <div key={key}>
+          <dt>{label}</dt>
+          <dd>
+            <ExactOfficialValue data={data} path={`${base}/${key}`} showUnit />
+          </dd>
+        </div>
+      ))}
+    </dl>
+  );
+  return (
+    <div className="country-note official-country-facts">
+      <h3>官方开局条件</h3>
+      <p>
+        {data.source.packageId} · 选定来源，不是运行时 World
+        State；开局种子未提交。设施是完整源集合，历史开发选项只是子集。
+      </p>
+      {metrics('', [['国土面积', 'areaKm2']])}
+      {metrics('/profile', [
+        ['人口', 'population'],
+        ['劳动力', 'labourForce'],
+        ['就业分配提案', 'scenarioEmployed'],
+        ['未就业分配提案', 'scenarioUnemployed'],
+        ['粮食产出参考', 'foodProductionTonnesDay'],
+        ['粮食需求参考', 'foodDemandTonnesDay'],
+        ['粮食开局库存', 'foodAvailableStockTonnes'],
+      ])}
+      <h3>资源记录 · {data.resources.length}</h3>
+      {data.resources.map((resource, index) => (
+        <details key={resource.id} data-resource-id={resource.id}>
+          <summary>
+            {resource.type.name} · {resource.id}
+          </summary>
+          <p>{resource.visibility} · 不因显示而可交易或开采</p>
+          {metrics(`/resources/${index}/deposit`, [
+            ['初始地质储量', 'initialGeological'],
+            ['剩余地质储量', 'remainingGeological'],
+            ['已发现剩余', 'discoveredRemaining'],
+            ['可采剩余', 'recoverableRemaining'],
+            ['已开发剩余（有条件）', 'developedRemaining'],
+            ['能力提案', 'extractionCapacityPerDay'],
+            ['运行时开采量字段（非live）', 'runtimeExtractionPerDay'],
+            ['埋深', 'depthM'],
+          ])}
+        </details>
+      ))}
+      <h3>区域记录 · {data.regions.length}</h3>
+      {data.regions.map((region, index) => (
+        <details key={region.id} data-region-id={region.id}>
+          <summary>{region.id}</summary>
+          {metrics(`/regions/${index}`, [['区域面积', 'areaKm2']])}
+          {metrics(`/regions/${index}/initial`, [
+            ['区域人口', 'population'],
+            ['耕地', 'croplandHa'],
+            ['粮食产出参考', 'grainTonnesDay'],
+          ])}
+          {metrics(`/regions/${index}/natural`, [
+            ['平均海拔', 'meanElevationM'],
+            ['温度', 'temperatureC'],
+            ['年降水', 'annualRainMm'],
+            ['可分配水参考', 'allocatableWaterM3Day'],
+            ['旱季水参考', 'drySeasonWaterM3Day'],
+            ['太阳能条件', 'solarKwhM2Day'],
+            ['风速', 'windMps'],
+          ])}
+          <p>
+            月降水（源单位）：
+            {Array.from({ length: 12 }, (_, month) => (
+              <span key={month}>
+                {month > 0 ? ' / ' : ''}
+                <ExactOfficialValue
+                  data={data}
+                  path={`/regions/${index}/natural/monthlyRainMm/${month}`}
+                />
+              </span>
+            ))}
+          </p>
+        </details>
+      ))}
+      <details>
+        <summary>数字来源与版本</summary>
+        <p>
+          STATIC_BASELINE · proposalFieldsAreExecuted:false ·
+          liveWorldState:false
+        </p>
+        <p>countries SHA256: {data.source.countriesSha256}</p>
+        <p>本国文件 SHA256: {data.source.countryFileSha256}</p>
+        <p>
+          数值保留源十进制原文；悬停数字可查看dataset、row、field、单位与hash。
+        </p>
+      </details>
+    </div>
+  );
+}
+function sourceStatus(state: OfficialExplorerCountryLoadState) {
+  switch (state.kind) {
+    case 'ready':
+      return '官方选定开局数据 · STATIC_BASELINE · 非实时 World State';
+    case 'loading':
+      return '官方开局数据加载中 · 不显示旧情景数值';
+    case 'missing':
+      return `官方开局数据缺失 · ${state.reason}`;
+    case 'stale':
+      return `官方开局数据版本不匹配 · ${state.reason}`;
+    case 'error':
+      return `官方开局数据加载失败 · ${state.reason}`;
+    default:
+      return '选择国家后按需读取官方开局数据';
+  }
+}
 const units: Record<string, string> = {
   MW: 'MW',
   MWh: 'MWh',
@@ -63,8 +325,6 @@ const units: Record<string, string> = {
 };
 const format = (n: number) =>
   n.toLocaleString('zh-CN', { maximumFractionDigits: 1 });
-const shortPopulation = (n: number) =>
-  n >= 1e8 ? `${(n / 1e8).toFixed(2)} 亿` : `${(n / 1e4).toFixed(0)} 万`;
 const readCountry = () => {
   const id = new URLSearchParams(window.location.search).get('country');
   return countries.find((c) => c.number === id || c.id === id)?.id ?? '';
@@ -90,29 +350,40 @@ function FacilityIcon({ kind }: { kind: string }) {
     </svg>
   );
 }
-function placeName(site: (typeof facilities)[number]) {
-  const country = countries.find((c) => c.id === site.countryId)!;
-  const [x0, y0, x1, y1] = country.bounds;
-  const sourcePoint =
-    facilities.find((candidate) => candidate.id === site.id)?.point ??
-    site.point;
-  const dx = (sourcePoint[0]! - (x0 + x1) / 2) / (x1 - x0),
-    dy = (sourcePoint[1]! - (y0 + y1) / 2) / (y1 - y0);
-  const direction =
-    Math.abs(dx) > Math.abs(dy)
-      ? dx < 0
-        ? '西部'
-        : '东部'
-      : dy < 0
-        ? '北部'
-        : '南部';
-  return `${direction}${site.record.name}`;
+function placeName(site: Pick<OfficialFacility, 'name'>) {
+  return site.name;
 }
 
-export function WorldExplorer() {
+export function officialFacilityPoint(
+  site: OfficialFacility,
+  frame?: readonly number[],
+) {
+  return frame && site.anchor
+    ? ([
+        frame[0]! + site.anchor[0] * frame[2]!,
+        frame[1]! + site.anchor[1] * frame[3]!,
+      ] as const)
+    : site.point;
+}
+
+export function WorldExplorer({
+  initialOfficialSource,
+}: { initialOfficialSource?: ExplorerCountryBinding } = {}) {
   const viewport = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<Size>({ width: 1200, height: 800 });
   const [countryId, setCountryId] = useState(readCountry);
+  const loader = useMemo(() => createOfficialExplorerCountryLoader({}), []);
+  const [officialBinding, setOfficialBinding] =
+    useState<ExplorerCountryBinding>(
+      initialOfficialSource ?? { countryId: '', state: { kind: 'idle' } },
+    );
+  useEffect(
+    () => requestExplorerCountry(countryId, loader, setOfficialBinding),
+    [countryId, loader],
+  );
+  const officialState = currentExplorerSource(countryId, officialBinding);
+  const official =
+    officialState.kind === 'ready' ? officialState.data : undefined;
   const [camera, setCamera] = useState<Camera>(world);
   const cameraRef = useRef(camera),
     sizeRef = useRef(size);
@@ -145,22 +416,13 @@ export function WorldExplorer() {
   const country = countries.find((c) => c.id === countryId);
   const detailMap = detailMaps.find((m) => m.id === countryId);
   const scene = sceneMode ? scenes.find((m) => m.id === countryId) : undefined;
-  const society = scenario.countries.find((c) => c.countryId === countryId);
-  const local = facilities
-    .filter((f) => f.countryId === countryId)
-    .map((f) => {
-      const anchor = scene?.anchors[f.id];
-      return {
-        ...f,
-        point:
-          scene && anchor
-            ? [
-                scene.frame[0]! + anchor[0]! * scene.frame[2]!,
-                scene.frame[1]! + anchor[1]! * scene.frame[3]!,
-              ]
-            : f.point,
-      };
-    });
+  const local = (official?.facilities ?? []).map((f, sourceIndex) => {
+    return {
+      ...f,
+      sourceIndex,
+      point: officialFacilityPoint(f, scene ? official?.frame : undefined),
+    };
+  });
   const selected = local.find((f) => f.id === selectedSite);
   const shown = local.filter((f) => filter === '全部' || f.kind === filter);
   const height = (camera.width * size.height) / size.width;
@@ -286,6 +548,7 @@ export function WorldExplorer() {
       const id = readCountry();
       setCountryId(id);
       setSelectedSite('');
+      setFilter('全部');
       fit(id);
     };
     window.addEventListener('popstate', back);
@@ -686,25 +949,45 @@ export function WorldExplorer() {
                 ? `${country.number} 号经济体 · ${scene ? '独立国家场景' : '地理与国界'} · 聚居与基础设施`
                 : '选择一个国家，沿着河谷、城市与产业进入它的内部。'}
             </p>
-            {society && (
+            {official && (
               <div className="country-key-stats">
                 <span>
-                  <b>{shortPopulation(society.population)}</b>情景人口
-                </span>
-                <span>
-                  <b>{local.length}</b>设施候选
-                </span>
-                <span>
                   <b>
-                    {
-                      scenario.regions.filter((r) => r.countryId === countryId)
-                        .length
-                    }
+                    <ExactOfficialValue
+                      data={official}
+                      path="/profile/population"
+                    />
                   </b>
+                  开局人口（人）
+                </span>
+                <span>
+                  <b>{local.length}</b>完整设施记录（非已投运）
+                </span>
+                <span>
+                  <b>{official.regions.length}</b>
                   经济区域
                 </span>
               </div>
             )}
+            {!country && (
+              <div
+                className="country-key-stats"
+                title="官方选定平衡包固定汇总 · 非live World State"
+              >
+                <span>
+                  <b>{OFFICIAL_EXPLORER_SUMMARY.countriesExact}</b>国家
+                </span>
+                <span>
+                  <b>{OFFICIAL_EXPLORER_SUMMARY.populationExact}</b>
+                  开局人口（人）
+                </span>
+                <span>
+                  <b>{OFFICIAL_EXPLORER_SUMMARY.facilitiesExact}</b>
+                  完整设施记录（非已投运）
+                </span>
+              </div>
+            )}
+            {country && <p role="status">{sourceStatus(officialState)}</p>}
           </div>
           {!country &&
             size.width >= 600 &&
@@ -780,35 +1063,35 @@ export function WorldExplorer() {
                   <span className="site-label">
                     <strong>{placeName(site)}</strong>
                     <small>
-                      {site.record.estimatedCapacity >= 10000
-                        ? `${(site.record.estimatedCapacity / 10000).toFixed(1)}万`
-                        : format(site.record.estimatedCapacity)}{' '}
+                      {official && (
+                        <ExactOfficialValue
+                          data={official}
+                          path={`/facilities/${site.sourceIndex}/record/estimatedCapacity`}
+                        />
+                      )}{' '}
                       {units[site.record.capacityUnit] ??
                         site.record.capacityUnit}
                     </small>
-                    <em>{site.id} · 候选 / 未投运</em>
+                    <em>
+                      {site.id} · {site.record.lifecycle} / 未投运
+                    </em>
                   </span>
                 </button>
               );
             })}
           {!scene &&
             showResources &&
-            artwork.resources
-              .filter(
-                (r) =>
-                  r.countryId === countryId &&
-                  r.classification === 'geological' &&
-                  visiblePoint(r.point),
-              )
+            (official?.resources ?? [])
+              .filter((r) => visiblePoint(r.point))
               .map((r) => (
                 <span
                   key={r.id}
                   className="explorer-resource-pin"
                   style={project(r.point)}
-                  title={`${r.id} · ${resourceTypeById.get(r.kind)?.name}`}
+                  title={`${r.id} · ${r.type.name} · 选定开局储量，非运行时开采`}
                 >
                   <i>◇</i>
-                  {resourceTypeById.get(r.kind)?.name}
+                  {r.type.name}
                 </span>
               ))}
           <div className="explorer-controls explorer-floating">
@@ -902,9 +1185,9 @@ export function WorldExplorer() {
             <span>拖拽平移 · 滚轮 / 双指缩放 · 双击放大</span>
             <small>
               {scene
-                ? '本国规划场景插画 · 建筑为示意复原 · 能力为情景估值'
+                ? '本国场景插画仅供展示 · 图内旧文字不是数值来源 · 数字只取官方选定开局包 / 非实时 World State'
                 : country
-                  ? '地理底图 · 国界、水系与设施坐标来自地图数据'
+                  ? '历史地理底图仅供展示 · 图内旧文字不是数值来源 · 设施坐标取官方生成记录 / 非实时 World State'
                   : showArtwork
                     ? '四大陆精绘 · 放大后按需叠加 70 国地理细图 · 国界与水系保留 / 非实时 World State'
                     : '70 国地理细图全图模式 · 细图正按需载入 · 国界与水系保留 / 非实时 World State'}
@@ -962,51 +1245,12 @@ export function WorldExplorer() {
                 <p>点击地图标牌，或从下面定位。</p>
               )}
             </div>
-            {selected ? (
+            {selected && official ? (
               <div className="facility-inspector">
-                <div className="facility-status">● 候选设施 · 尚未投运</div>
-                <div className="facility-big-number">
-                  {format(selected.record.estimatedCapacity)}
-                  <small>
-                    {units[selected.record.capacityUnit] ??
-                      selected.record.capacityUnit}
-                  </small>
-                </div>
-                <dl>
-                  {[
-                    ['项目编号', selected.record.projectId],
-                    ['设施编号', selected.id],
-                    [
-                      '所需人员',
-                      `${format(selected.record.requiredWorkers)} 人`,
-                    ],
-                    [
-                      '用电需求',
-                      `${format(selected.record.requiredPowerMW)} MW`,
-                    ],
-                    [
-                      '用水需求',
-                      `${format(selected.record.requiredWaterM3Day)} m³/日`,
-                    ],
-                    [
-                      '设备需求',
-                      `${format(selected.record.equipmentUnits)} 单位`,
-                    ],
-                    [
-                      '维护估计',
-                      `${format(selected.record.maintenanceGcuDay)} GCU/日`,
-                    ],
-                    [
-                      '建设估计',
-                      `${selected.record.constructionSimDays} 模拟日`,
-                    ],
-                  ].map(([label, value]) => (
-                    <div key={label}>
-                      <dt>{label}</dt>
-                      <dd>{value}</dd>
-                    </div>
-                  ))}
-                </dl>
+                <OfficialFacilityFacts
+                  data={official}
+                  index={selected.sourceIndex}
+                />
                 <button
                   className="explorer-primary"
                   onClick={() => focusSite(selected.id)}
@@ -1015,34 +1259,44 @@ export function WorldExplorer() {
                 </button>
                 <p>
                   {scene
-                    ? '场景图展示规划建成后的形态，标记对应图中设施；精确地理位置请切换地理图。'
-                    : '投运需要完成建设、人员、电网、运输与配方核验。标记位置来自当前地图数据。'}
+                    ? '插画不是数值来源。标记只复用源记录已有anchor；anchor为空时保留源point，不臆造图内位置。'
+                    : '坐标复用官方生成记录point，仍是展示定位，不证明测绘精度或已投运。'}
                 </p>
               </div>
             ) : (
               <>
-                <div className="facility-filters">
-                  {[
-                    ['全部', '全部'],
-                    ['mine', '矿业'],
-                    ['energy', '能源'],
-                    ['port', '港口'],
-                    ['hub', '物流'],
-                    ['factory', '产业 / 社会'],
-                  ].map(([id, name]) => (
-                    <button
-                      key={id}
-                      className={filter === id ? 'active' : ''}
-                      onClick={() => setFilter(id!)}
-                    >
-                      {name}
-                    </button>
-                  ))}
-                </div>
+                <p className="official-source-status" role="status">
+                  {sourceStatus(officialState)}
+                </p>
+                {official && (
+                  <div className="facility-filters">
+                    {[
+                      ['全部', '全部'],
+                      ['mine', '矿业'],
+                      ['energy', '能源'],
+                      ['port', '港口'],
+                      ['hub', '物流'],
+                      ['factory', '产业 / 社会'],
+                      ['farm', '农业'],
+                      ['education', '教育'],
+                      ['health', '医疗'],
+                      ['housing', '住房'],
+                    ].map(([id, name]) => (
+                      <button
+                        key={id}
+                        className={filter === id ? 'active' : ''}
+                        onClick={() => setFilter(id!)}
+                      >
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <div className="facility-directory">
                   {shown.map((site) => (
                     <button
                       key={site.id}
+                      data-official-facility={site.id}
                       onClick={() => {
                         focusSite(site.id);
                       }}
@@ -1051,7 +1305,13 @@ export function WorldExplorer() {
                       <span>
                         <strong>{placeName(site)}</strong>
                         <small>
-                          {site.id} · {format(site.record.estimatedCapacity)}{' '}
+                          {site.id} ·{' '}
+                          {official && (
+                            <ExactOfficialValue
+                              data={official}
+                              path={`/facilities/${site.sourceIndex}/record/estimatedCapacity`}
+                            />
+                          )}{' '}
                           {units[site.record.capacityUnit] ??
                             site.record.capacityUnit}
                         </small>
@@ -1060,15 +1320,7 @@ export function WorldExplorer() {
                     </button>
                   ))}
                 </div>
-                <div className="country-note">
-                  <h3>这里的条件</h3>
-                  <p>
-                    人口、资源和设施候选依据地图及地理情景推导。起步机会只建议用金融与技术调节；设施不会因标注而自动投运。
-                  </p>
-                  <a href={`?atlas=coast-boundaries&country=${country.number}`}>
-                    查看完整推导工作台 ↗
-                  </a>
-                </div>
+                {official && <OfficialCountryFacts data={official} />}
               </>
             )}
             <footer className="country-pager">
