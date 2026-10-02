@@ -7,7 +7,8 @@ export const WORLD_V2_NAMESPACE = 'world_v2';
 export const WORLD_V2_MIGRATION_ROOT = 'database/migrations/artifacts';
 export const PRODUCTION_PUBLISHER = 'main-site-release-chain';
 export const STORAGE_VETO_MIGRATION_ID = '0022_world_v2_snapshot_storage_veto';
-export const STORAGE_VETO_SHA256 = 'c1ceebbf6265b54c67230d550f438e1b197415c42b3921cc358cf247482b4ef1';
+export const STORAGE_VETO_SHA256 =
+  'c1ceebbf6265b54c67230d550f438e1b197415c42b3921cc358cf247482b4ef1';
 export const STORAGE_VETO_PATH = `${WORLD_V2_MIGRATION_ROOT}/${STORAGE_VETO_MIGRATION_ID}.sql`;
 
 const MIGRATION_ID = /^\d{4}_[a-z][a-z0-9_]*$/u;
@@ -156,17 +157,27 @@ export function validateMigrationManifest(manifest, artifacts, provenance) {
     if (migration?.created_from_commit !== undefined) {
       violations.push(`LEGACY_PROVENANCE_FIELD:${migration?.migration_id}`);
     }
-    const exactStorageVeto = migration?.migration_id === STORAGE_VETO_MIGRATION_ID &&
-      migration.path === STORAGE_VETO_PATH && migration.sha256 === STORAGE_VETO_SHA256 &&
-      migration.release_order === 22 && migration.artifact_source_commit === '41f387700cf8f933a777f924c503d11cbcd99ffe' &&
+    const exactStorageVeto =
+      migration?.migration_id === STORAGE_VETO_MIGRATION_ID &&
+      migration.path === STORAGE_VETO_PATH &&
+      migration.sha256 === STORAGE_VETO_SHA256 &&
+      migration.release_order === 22 &&
+      migration.artifact_source_commit ===
+        '41f387700cf8f933a777f924c503d11cbcd99ffe' &&
       migration.scope_authority === 'CONTROL_TOWER_OWNER_DELEGATION' &&
-      JSON.stringify(migration.affected_schemas) === JSON.stringify(['storage']) &&
+      JSON.stringify(migration.affected_schemas) ===
+        JSON.stringify(['storage']) &&
       migration.production_approval === null;
-    if ((migration?.migration_id === STORAGE_VETO_MIGRATION_ID ||
-      migration?.sha256 === STORAGE_VETO_SHA256 || migration?.path === STORAGE_VETO_PATH) && !exactStorageVeto)
+    if (
+      (migration?.migration_id === STORAGE_VETO_MIGRATION_ID ||
+        migration?.sha256 === STORAGE_VETO_SHA256 ||
+        migration?.path === STORAGE_VETO_PATH) &&
+      !exactStorageVeto
+    )
       violations.push(`STORAGE_VETO_SCOPE_INVALID:${migration?.migration_id}`);
     if (
-      !exactStorageVeto && migration?.affected_schemas?.some(
+      !exactStorageVeto &&
+      migration?.affected_schemas?.some(
         (schema) => schema !== WORLD_V2_NAMESPACE,
       )
     ) {

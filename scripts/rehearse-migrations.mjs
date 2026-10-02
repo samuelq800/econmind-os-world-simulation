@@ -54,7 +54,9 @@ async function rehearse(mode) {
         'create schema world_v2; create table world_v2.preexisting_marker (id integer primary key);',
       );
     }
-    const legacy = manifest.migrations.filter((m) => m.migration_id !== STORAGE_VETO_MIGRATION_ID);
+    const legacy = manifest.migrations.filter(
+      (m) => m.migration_id !== STORAGE_VETO_MIGRATION_ID,
+    );
     await applyChain(database, legacy);
     const release = await database.query(
       'select migration_id, artifact_sha256, source_repo_commit, release_order from world_v2.schema_release order by release_order',
@@ -81,20 +83,37 @@ async function rehearse(mode) {
       throw new Error(`${mode} created a shared Supabase-owned schema`);
     // The complete historical no-shared-schema assertion above stays intact.
     // Only a disposable, preexisting Storage fixture supports the new veto.
-    const veto = manifest.migrations.find((m) => m.migration_id === STORAGE_VETO_MIGRATION_ID);
+    const veto = manifest.migrations.find(
+      (m) => m.migration_id === STORAGE_VETO_MIGRATION_ID,
+    );
     if (veto) {
       await database.exec(`create role anon nologin; create role authenticated nologin;
         create schema storage; create table storage.objects(bucket_id text);
         alter table storage.objects enable row level security;
         create policy existing_fixture on storage.objects for all to public using(true) with check(true);`);
       await applyChain(database, [veto]);
-      const policies = await database.query("select policyname from pg_policies where schemaname='storage' order by policyname");
-      if (JSON.stringify(policies.rows.map((p) => p.policyname)) !== JSON.stringify([
-        'existing_fixture', 'world_v2_snapshot_objects_delete_deny', 'world_v2_snapshot_objects_insert_deny',
-      ])) throw new Error(`${mode} Storage delta is not exactly the two reviewed policies`);
+      const policies = await database.query(
+        "select policyname from pg_policies where schemaname='storage' order by policyname",
+      );
+      if (
+        JSON.stringify(policies.rows.map((p) => p.policyname)) !==
+        JSON.stringify([
+          'existing_fixture',
+          'world_v2_snapshot_objects_delete_deny',
+          'world_v2_snapshot_objects_insert_deny',
+        ])
+      )
+        throw new Error(
+          `${mode} Storage delta is not exactly the two reviewed policies`,
+        );
     }
-    return { mode, legacyReleaseRows: release.rows.length, releaseRows: manifest.migrations.length,
-      existingSharedSchemaAssertion: 'PASS_BEFORE_DISPOSABLE_STORAGE_FIXTURE', status: 'PASS' };
+    return {
+      mode,
+      legacyReleaseRows: release.rows.length,
+      releaseRows: manifest.migrations.length,
+      existingSharedSchemaAssertion: 'PASS_BEFORE_DISPOSABLE_STORAGE_FIXTURE',
+      status: 'PASS',
+    };
   } finally {
     await database.close();
   }
