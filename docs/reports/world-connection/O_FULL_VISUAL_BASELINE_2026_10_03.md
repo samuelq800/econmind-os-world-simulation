@@ -43,7 +43,13 @@ F 第一组临时目录的全部原件已复制到上述耐久目录，hash 未�
 CI `37030821721` 的 63 项聚焦测试通过。Root 已实际查看四张交付原图并审阅实现。
 这不是修后全 840 画面 PASS。
 合并后 D/F/G 分别承担 Captain/Finance、Industry/Trade、Central Bank/Social 的固定
-`ca522a1` 各 280 个画面复核；本记录写入时结果仍 **PENDING**，须后续固定证据补充。
+`ca522a1` 各 280 个画面复核。D 已完成 Captain/Finance 全 280 HOME 实际目视、280 次 Local sites 打开和 140 次手机到底滚动；F/G 完整结果仍 **PENDING**。
+
+D 结果为 `PARTIAL_HOME_PASS_AUXILIARY_UX_ISSUES`，不是全页 PASS：主 HOME 标题/入口/map/dock/工具/底部流程未见新遮挡，但手机设施列表还有两层滚动、长文本裁切与混合语言。66 手机中心 marker 文字重叠、桌面边缘装饰 pin 裁切分别记录；完整目录/dock 可替代 marker，不造 NULL 点位。
+报告 `.econmind-artifacts/d-captain-finance-post-fix-ca522a19/POST_FIX_REVIEW.md` SHA-256
+`5c489944b986bec6e1f87cbb9a17edffef5452f5b99a02fbad5b320ca5a2a38e`，
+280 行台账 `manual-review.json` SHA-256 `a9cd2ac3b1b7f8e797be0eb33f081a4b9e91d0be6df99a5859d263ef9aa4ec38`；Root 实际重算一致，实际查看 57/70 手机恢复原图确认问题。
+新授权仅修派生手机 drawer 视口包含、单滚动与列表完整换行，原记录/文字/IDs/源 hash 不改；混合语言不靠修改源 name 掩盖。
 
 主 Root atlas 自适应由 A #60 独立候选完成：FIT 随窗口调整，MANUAL 保留用户平移/缩放；世界总览包含原始完整 frame，手机与短屏不再使用旧 700 宽裁切。
 Root 已实际查看手机与短桌面修后原图。最终候选 `4800a124da4ddf07ada313a7a9c402d0aeeac793` 保留 #61 布局和两组测试；CI `37032206789` 通过，合并 main `c1354ac857eb65b9fd573b6deadd7ebd2d0f10c0`。其实际 Pages 线上验收仍须单独取证。
@@ -57,8 +63,27 @@ SHA-256 `a0481d2aa038b1844893ac160250b287885a8641dad77f10266975489b02ad15`。
 - 2,520/2,520 指标/来源抽屉字段、dataset hash 与 provenance 检查通过。
 - 原始结果为 0 PASS / 7 FAIL / 413 BLOCKED；840 views 的异步 atlas 返回链接读取存在 harness 竞态。
 - 7 个失败画面的 19 个对应控件以 3 秒有界、只读 trial/focus 重查，19/19 未复现；结论是 `NOT_REPRODUCED_IN_BOUNDED_RECHECK`，原始 FAIL 不改写。
-- #58 增加等待真实可见 atlas 返回入口和独立 navigation-only 补充；本记录写入时全 840 导航补充仍 PENDING。
+- #58 的独立 navigation-only 补充已实际完成 840/840，838 PASS / 1 FAIL / 1 BLOCKED / 0 NOT_RUN；固定 helper/UI 为 `74768eafc8461767a02c3a7008e3acf8ccfbb4d9`，四个 UI trees 与原始 UI 一致，不是最新 #61 布局验收。
 - 控件补充和导航补充不重复指标、经济动作或性能测试，也不能证明最新布局全部视觉通过。
 
 所有检查均未点击正式经济确认、未改变 Supabase、未启用 Worker/OpeningSeed。
 生产来源查询、正式席位、Command → FINAL → projection 闭环和 Gate B 仍各自需要真实证据。
+
+### 导航补充的两项非通过（原件保留）
+
+全导航补充开始 `2026-10-02T15:41:18.594Z`，结束 `2026-10-02T16:20:43.367Z`。
+原件 `artifacts/country-role-qa/85725830-20261002.vDlkrJ/navigation-only-74768ea.json`，
+SHA-256 `f364d36f1e4933cbe91be50168ee902fb665913e0f352f0d18bd79f82e93d2fa`；Root 实际重算 hash、读取完成时间和汇总一致。
+
+- 59 / central_bank / desktop：返回 atlas 本身通过；后续 native role switch 到 industry 的本地只读 GET 出现 `ECONNRESET`，随后 8 秒等待超时。不能把它推断为经济代码或生产网络故障。
+- 60 / finance / desktop：初始国家/职位与 atlas URL 正确，显式可见返回链接等待 8 秒超时，记录 BLOCKED。没有 page/console/request error，不能据此断言缺少该功能。
+
+仅这两个样本获新授权进行一次独立、清洁 context、15 秒有界只读导航复核，现均为
+`NOT_REPRODUCED_IN_BOUNDED_RECHECK`：真实返回后国家/role/href 正确，59 再实际 native 切到 industry，国家仍为 59。
+零 page/console/request error；无 cache、无请求自动 retry，一次/tuple，未改写全导航原件或旧 FAIL/BLOCKED。
+复核开始 `2026-10-02T16:24:19.060Z`，结束 `2026-10-02T16:24:27.496Z`。
+独立 `navigation-two-tuple-74768ea.json` SHA-256
+`55e525ca25fa550a09139500d651ea88fd5e0c6d3ea7621de46f256e065e5433`；
+完整小摘要 `C_QA_HANDOFF_SUMMARY.json` SHA-256
+`79ee9bb368fbe6fbb292ec8f2917828c86c8db0e726ee13f2c39c2083b00165a`。
+文件均在上述固定原始证据目录；C 已停止，没有重复完整矩阵。

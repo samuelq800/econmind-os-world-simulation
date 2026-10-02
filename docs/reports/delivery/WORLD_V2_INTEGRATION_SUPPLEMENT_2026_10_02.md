@@ -16,7 +16,7 @@
 
 完整原始 70 国 × 6 职位 × 桌面/手机的 **840 HOME 原图已全部实际目视**，583 有问题、257 本范围未见重大问题、0 未查看。
 原始功能矩阵完成 420/420 组合，2,520 来源抽屉通过；旧异步导航 harness 阻塞和 7 个短超时失败均保留原件。
-19 个对应控件有界复核未复现，但不改写原始 FAIL。#58 的独立 navigation-only 补充还在完成。
+19 个对应控件有界复核未复现，但不改写原始 FAIL。#58 的 navigation-only 补充已完成全部 840：838 PASS、59/central_bank/desktop 本地连接中断后 FAIL、60/finance/desktop 可见入口等待超时 BLOCKED；0 NOT_RUN。仅两项独立有界复核现均未复现，真实返回身份/href 和 59 的实际职位切换正确，零 page/console/request error；原件不改。
 #61 共享布局修复已合并；修后 108 HOME / 324 工具打开有实际证据，修后全 840 复核仍 PENDING。
 详见[完整视觉记录](../world-connection/O_FULL_VISUAL_BASELINE_2026_10_03.md)。
 
