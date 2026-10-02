@@ -156,7 +156,10 @@ describe('one credential-free bounded catalog read', () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
   it('verifies actual merged Edge metadata with one GET and survives StrictMode resubscription', async () => {
-    const fetcher = vi.fn(async () => Response.json(catalog));
+    const fetcher = vi.fn(async (...args: Parameters<typeof fetch>) => {
+      expect(args[0]).toBeInstanceOf(URL);
+      return Response.json(catalog);
+    });
     const session = createOfficialSourceStatusSession(config, fetcher);
     expect(session.getSnapshot().kind).toBe('LOADING');
     const first = session.subscribe(vi.fn());
@@ -219,12 +222,12 @@ describe('one credential-free bounded catalog read', () => {
   it('retires a timed-out transport and ignores its late success without polling', async () => {
     vi.useFakeTimers();
     let resolve!: (value: Response) => void;
-    const fetcher = vi.fn(
-      (_url: RequestInfo | URL, _init?: RequestInit) =>
-        new Promise<Response>((done) => {
-          resolve = done;
-        }),
-    );
+    const fetcher = vi.fn((...args: Parameters<typeof fetch>) => {
+      expect(args[0]).toBeInstanceOf(URL);
+      return new Promise<Response>((done) => {
+        resolve = done;
+      });
+    });
     const session = createOfficialSourceStatusSession(config, fetcher);
     const stop = session.subscribe(vi.fn());
     await vi.advanceTimersByTimeAsync(5001);
@@ -260,12 +263,12 @@ describe('one credential-free bounded catalog read', () => {
   });
   it('aborts a real unmount and never republishes the retired reply', async () => {
     let resolve!: (value: Response) => void;
-    const fetcher = vi.fn(
-      (_url: RequestInfo | URL, _init?: RequestInit) =>
-        new Promise<Response>((done) => {
-          resolve = done;
-        }),
-    );
+    const fetcher = vi.fn((...args: Parameters<typeof fetch>) => {
+      expect(args[0]).toBeInstanceOf(URL);
+      return new Promise<Response>((done) => {
+        resolve = done;
+      });
+    });
     const session = createOfficialSourceStatusSession(config, fetcher);
     const observer = vi.fn();
     const stop = session.subscribe(observer);

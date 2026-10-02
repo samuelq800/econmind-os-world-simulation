@@ -1,0 +1,199 @@
+{
+  "status": "PASS",
+  "actualEdgeMetadata": true,
+  "economicRowQueries": 0,
+  "productionRequests": 0,
+  "results": [
+    {
+      "scenario": "desktop-unconfigured",
+      "state": "NOT_CONFIGURED",
+      "catalogGETs": 0,
+      "roleCountry": "70",
+      "keyboardToggle": true,
+      "currentCountryFocus": true,
+      "boxes": {
+        "panel": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 139.375,
+          "bottom": 139.375
+        },
+        "topbar": {
+          "x": 0,
+          "y": 139.375,
+          "width": 1440,
+          "height": 68,
+          "bottom": 207.375
+        },
+        "map": {
+          "x": 0,
+          "y": 207.375,
+          "width": 1110,
+          "height": 692.625,
+          "bottom": 900
+        },
+        "scrollWidth": 1440,
+        "viewport": 1440
+      },
+      "errors": [],
+      "unexpected": []
+    },
+    {
+      "scenario": "desktop-verified",
+      "state": "SELECTED_SOURCE_CATALOG_VERIFIED",
+      "catalogGETs": 1,
+      "roleCountry": "70",
+      "keyboardToggle": true,
+      "currentCountryFocus": true,
+      "boxes": {
+        "panel": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 139.375,
+          "bottom": 139.375
+        },
+        "topbar": {
+          "x": 0,
+          "y": 139.375,
+          "width": 1440,
+          "height": 68,
+          "bottom": 207.375
+        },
+        "map": {
+          "x": 0,
+          "y": 207.375,
+          "width": 1110,
+          "height": 692.625,
+          "bottom": 900
+        },
+        "scrollWidth": 1440,
+        "viewport": 1440
+      },
+      "errors": [],
+      "unexpected": []
+    },
+    {
+      "scenario": "mobile-verified",
+      "state": "SELECTED_SOURCE_CATALOG_VERIFIED",
+      "catalogGETs": 1,
+      "roleCountry": "02",
+      "keyboardToggle": true,
+      "currentCountryFocus": true,
+      "boxes": {
+        "panel": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 240.75,
+          "bottom": 240.75
+        },
+        "topbar": {
+          "x": 0,
+          "y": 240.75,
+          "width": 390,
+          "height": 56,
+          "bottom": 296.75
+        },
+        "map": {
+          "x": 0,
+          "y": 296.75,
+          "width": 390,
+          "height": 390,
+          "bottom": 686.75
+        },
+        "scrollWidth": 390,
+        "viewport": 390
+      },
+      "errors": [],
+      "unexpected": []
+    },
+    {
+      "scenario": "mobile-wrong-hash",
+      "state": "UNAVAILABLE",
+      "catalogGETs": 1,
+      "roleCountry": "02",
+      "keyboardToggle": true,
+      "currentCountryFocus": true,
+      "boxes": {
+        "panel": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 240.75,
+          "bottom": 240.75
+        },
+        "topbar": {
+          "x": 0,
+          "y": 240.75,
+          "width": 390,
+          "height": 56,
+          "bottom": 296.75
+        },
+        "map": {
+          "x": 0,
+          "y": 296.75,
+          "width": 390,
+          "height": 390,
+          "bottom": 686.75
+        },
+        "scrollWidth": 390,
+        "viewport": 390
+      },
+      "errors": [],
+      "unexpected": []
+    },
+    {
+      "scenario": "mobile-http-failure",
+      "state": "UNAVAILABLE",
+      "catalogGETs": 1,
+      "roleCountry": "01",
+      "keyboardToggle": true,
+      "currentCountryFocus": true,
+      "boxes": {
+        "panel": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 240.75,
+          "bottom": 240.75
+        },
+        "topbar": {
+          "x": 0,
+          "y": 240.75,
+          "width": 390,
+          "height": 56,
+          "bottom": 296.75
+        },
+        "map": {
+          "x": 0,
+          "y": 296.75,
+          "width": 390,
+          "height": 390,
+          "bottom": 686.75
+        },
+        "scrollWidth": 390,
+        "viewport": 390
+      },
+      "errors": [],
+      "unexpected": []
+    }
+  ],
+  "mapBaseCommit": "85725830f0a6d102e73ae89697ab008f92208285",
+  "localOrigin": "http://127.0.0.1:4198",
+  "publicConfigFixture": "https://edge.example/functions/v1/world-v2-official-read/",
+  "responseTransport": "Intercepted browser HTTP; actual local Edge handler metadata; no production connection",
+  "screenshots": [
+    {
+      "path": "/tmp/econmind-g-source-status/desktop-verified.png",
+      "sha256": "d7fe88752094ee8471fb30176986b59d69b1afa74a9173ad558b0f81437fd0ca",
+      "visuallyInspected": true
+    },
+    {
+      "path": "/tmp/econmind-g-source-status/mobile-verified.png",
+      "sha256": "90cb717a139e700fad045be5ee7eeb7a5279d1be28dad3aa62e00d403b6ef11d",
+      "visuallyInspected": true
+    }
+  ]
+}

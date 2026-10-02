@@ -1,5 +1,4 @@
-import { createElement } from '../../apps/world-web/node_modules/react';
-import { renderToStaticMarkup } from '../../apps/world-web/node_modules/react-dom/server';
+import { createRequire } from 'node:module';
 import { describe, expect, it } from 'vitest';
 import { OfficialSourceConnectionPanel } from '../../apps/world-web/src/components/OfficialSourceConnectionStatus.js';
 import {
@@ -7,6 +6,15 @@ import {
   sourceDossierHref,
   SOURCE_DOSSIER_OFFICES,
 } from '../../apps/world-web/src/official-data/official-source-status-dossier.js';
+
+// Resolve the web app's declared React dependencies without adding root packages.
+const requireWeb = createRequire(
+  new URL('../../apps/world-web/package.json', import.meta.url),
+);
+const { createElement } = requireWeb('react') as typeof import('react');
+const { renderToStaticMarkup } = requireWeb(
+  'react-dom/server',
+) as typeof import('react-dom/server');
 
 describe('catalog connection display and public office entries', () => {
   it.each([
