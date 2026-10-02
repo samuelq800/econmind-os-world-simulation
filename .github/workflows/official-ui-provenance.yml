@@ -1,0 +1,55 @@
+name: Official UI exact provenance (no deploy)
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/official-ui-provenance.yml
+      - scripts/sync-official-ui-country-data.mjs
+      - scripts/official-world-opening-mapping.mjs
+      - scripts/balanced-country-candidate-intake.mjs
+      - tests/world-web/official-ui-country-provenance.test.ts
+      - tests/world-web/official-full-data-wiring.test.ts
+      - tests/tsconfig.official-ui-provenance.json
+      - apps/world-web/public/season1-immersive/countries/data/**
+      - package.json
+      - pnpm-lock.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Precision, source coverage and byte-stable generation regressions
+        run: pnpm exec vitest run tests/world-web/official-ui-country-provenance.test.ts tests/world-web/official-full-data-wiring.test.ts
+      - name: Focused types, lint and format
+        run: |
+          pnpm exec tsc -p tests/tsconfig.official-ui-provenance.json
+          pnpm exec eslint scripts/sync-official-ui-country-data.mjs scripts/official-world-opening-mapping.mjs tests/world-web/official-ui-country-provenance.test.ts
+          pnpm exec prettier --check .github/workflows/official-ui-provenance.yml scripts/sync-official-ui-country-data.mjs scripts/official-world-opening-mapping.mjs tests/world-web/official-ui-country-provenance.test.ts tests/tsconfig.official-ui-provenance.json
+      - name: Build boundary type dependencies without running database tests
+        run: |
+          pnpm --filter @econmind/core build
+          pnpm --filter @econmind/world-worker build
+          pnpm --filter @econmind/world-api build
+      - name: Browser boundaries, safe environment and secret scan
+        run: |
+          pnpm test:boundaries
+          pnpm env:check
+          pnpm secrets:check
+      - name: Non-connected web build and static publication consistency
+        run: |
+          pnpm --filter @econmind/world-web build
+          pnpm test:authoritative-ui

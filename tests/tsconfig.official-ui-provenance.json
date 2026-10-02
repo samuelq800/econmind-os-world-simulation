@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "lib": ["ES2024", "DOM"],
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "world-web/official-ui-country-provenance.test.ts",
+    "../scripts/sync-official-ui-country-data.mjs",
+    "../scripts/official-world-opening-mapping.mjs",
+    "../scripts/balanced-country-candidate-intake.mjs"
+  ]
+}
