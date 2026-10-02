@@ -4,9 +4,11 @@ import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
+import { runCountryRoleNavigationRecheck } from '../../scripts/country-role-navigation-qa.mjs';
 
 import {
   auditMatrix,
+  awaitCountryAtlasReturn,
   assessCountryRoleSnapshot,
   controlNature,
   countryRoleBrowser,
@@ -209,7 +211,14 @@ async function fixtureServer(mode = 'normal') {
     const back = `/season1-immersive/?country=${country}&role=${role}#country`;
     if (url.searchParams.get('atlas')) {
       response.writeHead(200, { 'content-type': 'text/html' });
-      response.end(`<a href="${back}">Return to selected country</a>`);
+      const realLink = `<a data-country-atlas-return href="${mode === 'bad-atlas' ? back.replace(country, '01') : back}">Return to selected country</a>`;
+      response.end(
+        mode === 'async-atlas'
+          ? `<a href="${back}" hidden>Background brand-home link</a><div id="modal">Loading source…</div><script>setTimeout(()=>document.querySelector('#modal').innerHTML=${JSON.stringify(realLink)},120)</script>`
+          : mode === 'no-atlas'
+            ? `<a href="${back}" hidden>Background link is not a return control</a>`
+            : realLink,
+      );
       return;
     }
     const data = inputs.countries.get(country)!.data;
@@ -326,6 +335,99 @@ describe.skipIf(process.env.COUNTRY_ROLE_BROWSER_TESTS !== '1')(
       } finally {
         await runtime.browser.close();
         await server.close();
+      }
+    });
+    it('awaits a genuinely asynchronous visible atlas return, ignoring the hidden background link', async () => {
+      const runtime = await countryRoleBrowser();
+      const server = await fixtureServer('async-atlas');
+      try {
+        const result = await runCountryRoleAudit({
+          browser: runtime.browser,
+          inputs,
+          baseUrl: server.baseUrl,
+          countries: ['02'],
+          roles: ['finance'],
+          runKind: 'FIXTURE',
+        });
+        const cell = result.matrix.find(
+          (row) => row.country === '02' && row.role === 'finance',
+        )!;
+        expect(cell.technicalStatus, JSON.stringify(cell.viewports)).toBe(
+          'PASS',
+        );
+      } finally {
+        await runtime.browser.close();
+        await server.close();
+      }
+    });
+    it('runs only navigation in the async fixture supplement, never a second full acceptance', async () => {
+      const runtime = await countryRoleBrowser();
+      const server = await fixtureServer('async-atlas');
+      try {
+        const navigation = await runCountryRoleNavigationRecheck({
+          browser: runtime.browser,
+          inputs,
+          baseUrl: server.baseUrl,
+          source: {
+            fixture: true,
+            cases: [
+              {
+                country: '02',
+                role: 'finance',
+                viewport: 'desktop',
+                originalTechnicalStatus: 'BLOCKED',
+                originalGaps: ['IN_APP_ATLAS_RETURN_MISSING'],
+              },
+            ],
+          },
+        });
+        expect(navigation.runKind).toBe('NAVIGATION_ONLY_RECHECK');
+        expect(navigation.summary.PASS).toBe(1);
+        expect(navigation.fullBrowserAuditExecuted).toBe(false);
+        expect(navigation.metricsControlsMissingPerformanceRechecked).toBe(
+          false,
+        );
+      } finally {
+        await runtime.browser.close();
+        await server.close();
+      }
+    });
+    it('keeps genuinely missing returns BLOCKED and rejects wrong-country hrefs without clicking them', async () => {
+      const runtime = await countryRoleBrowser();
+      try {
+        for (const mode of ['no-atlas', 'bad-atlas']) {
+          const server = await fixtureServer(mode);
+          const context = await runtime.browser.newContext();
+          const page = await context.newPage();
+          try {
+            await page.goto(
+              new URL(
+                'season1-immersive/?country=02&role=finance&atlas=1',
+                server.baseUrl,
+              ).href,
+            );
+            const before = page.url();
+            const result = await awaitCountryAtlasReturn(
+              page,
+              {
+                path: '/season1-immersive/',
+                country: '02',
+                role: 'finance',
+                countryId: country02.id,
+              },
+              250,
+            );
+            expect(result.status).toBe(
+              mode === 'no-atlas' ? 'NOT_IMPLEMENTED' : 'FAIL_HREF_IDENTITY',
+            );
+            expect(page.url()).toBe(before);
+          } finally {
+            await context.close();
+            await server.close();
+          }
+        }
+      } finally {
+        await runtime.browser.close();
       }
     });
   },

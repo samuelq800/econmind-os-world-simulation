@@ -9,6 +9,8 @@
   },
   "include": [
     "official-country-role-qa.test.ts",
+    "official-country-role-navigation-qa.test.ts",
+    "../../scripts/country-role-navigation-qa.mjs",
     "../../scripts/country-role-qa.mjs",
     "../../scripts/balanced-country-candidate-intake.mjs",
     "../../scripts/official-world-opening-mapping.mjs"

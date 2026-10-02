@@ -13,10 +13,10 @@ missing dependency fails explicitly. The default cached module is documented in
 the script and the result records its path and actual Chromium version.
 
 ```sh
-COUNTRY_ROLE_BROWSER_TESTS=1 pnpm exec vitest run tests/world-web/official-country-role-qa.test.ts
+COUNTRY_ROLE_BROWSER_TESTS=1 pnpm exec vitest run tests/world-web/official-country-role-qa.test.ts tests/world-web/official-country-role-navigation-qa.test.ts
 pnpm exec tsc -p tests/world-web/country-role-qa.tsconfig.json
-pnpm exec eslint scripts/country-role-qa.mjs tests/world-web/official-country-role-qa.test.ts
-pnpm exec prettier --check scripts/country-role-qa.mjs scripts/README-country-role-qa.md tests/world-web/official-country-role-qa.test.ts tests/world-web/country-role-qa.tsconfig.json
+pnpm exec eslint scripts/country-role-qa.mjs scripts/country-role-navigation-qa.mjs tests/world-web/official-country-role-qa.test.ts tests/world-web/official-country-role-navigation-qa.test.ts
+pnpm exec prettier --check scripts/country-role-qa.mjs scripts/country-role-navigation-qa.mjs scripts/README-country-role-qa.md tests/world-web/official-country-role-qa.test.ts tests/world-web/official-country-role-navigation-qa.test.ts tests/world-web/country-role-qa.tsconfig.json
 ```
 
 The browser tests use small DOM fixtures with actual selected-country JSON, not
@@ -59,7 +59,7 @@ each at both viewport sizes, plus missing-data probes. The script rejects a full
 run without explicit matching integration confirmation, duplicate/invalid
 selections, and partial runs labelled full. It does not infer that integration
 is complete merely because this flag is supplied; the coordinating owner must
-establish that before execution. This workstream has **not run full 420**.
+establish that before execution. Only a completed, SHA-bound result is execution evidence.
 
 ## What is checked and what remains separate
 
@@ -108,3 +108,40 @@ for the new test filename but does **not** execute this harness's focused tests 
 browser cases. Its green result must not be presented as harness test evidence.
 Use the actual local commands above until a separately authorized CI owner wires
 this tooling into CI.
+
+## Navigation-only supplement for the original asynchronous readiness gap
+
+The original harness queried anchors immediately after atlas navigation, before
+the country atlas fetched/rendered its data. Do not reinterpret the original
+BLOCKED matrix as PASS. The repair waits up to eight seconds for the visible
+`a[data-country-atlas-return]`, validates origin/path/country/role, actually clicks
+that control, and checks the returned identity. Hidden brand-home anchors are
+never a substitute. A genuinely missing hook remains BLOCKED, and a wrong href
+fails without clicking it. Real async, hidden-background, missing-hook and
+wrong-country fixtures exercise this behavior.
+
+After the original full report is completed and its SHA-256 is saved, a separate
+navigation-only supplement selects **only** its affected country/role/viewport
+tuples. It compares Git tree identities for the national pages/data, shared
+publication and both country asset directories between the original target SHA
+and the fixed helper candidate. A changed page tree, incorrect report hash,
+incomplete original report or dirty candidate checkout fails closed.
+
+```sh
+node scripts/country-role-navigation-qa.mjs --sha FIXED_HELPER_CANDIDATE_SHA --source-report /absolute/original/full-420.json --source-report-sha256 ORIGINAL_REPORT_SHA256 --output /absolute/new/navigation-only.json
+```
+
+`COUNTRY_ROLE_NAVIGATION_RECHECK_V1` is always `NAVIGATION_ONLY_RECHECK`. Even if
+all 840 affected views need navigation checks, it is **not another full browser
+audit**. It reuses a 256 MiB read-only resource cache and the same request guard,
+and checks only atlas return, country/role identity and native static-role
+switching. It does not reopen metric drawers, run allocation controls,
+missing-data probes or performance tests. Actual progress is emitted every 20
+completed views. At most two representative atlas-return images are retained.
+
+The report binds the original report path/hash/SHA, candidate SHA, identical page
+trees, per-tuple navigation evidence and runtime. The original bytes are checked
+again at completion and never overwritten. Join evidence by the same
+country/role/viewport and identical page trees; do not relabel the original
+BLOCKED results or declare all metrics/controls tested on the helper's new SHA.
+Economic execution, FINAL receipts and full playability acceptance remain ungranted.
