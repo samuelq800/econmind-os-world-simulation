@@ -136,7 +136,7 @@ function checkedRelativePath(value) {
   return value;
 }
 
-function parseLosslessJson(text, label) {
+export function parseLosslessJson(text, label) {
   try {
     return JSON.parse(text, (_key, value, context) =>
       typeof value === 'number' ? context.source : value,
@@ -251,7 +251,7 @@ function subtractDecimals(left, right, label = 'decimal subtraction') {
   return renderDecimal({ coefficient: a - b, scale });
 }
 
-function canonicalDecimal(value, label) {
+export function canonicalDecimal(value, label) {
   return renderDecimal(decimalParts(value, label));
 }
 
