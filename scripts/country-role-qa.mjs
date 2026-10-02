@@ -796,10 +796,20 @@ export async function runCountryRoleAudit({
             result.navigation = {
               atlasReturn: 'NOT_IMPLEMENTED',
               roleSwitch: 'NOT_IMPLEMENTED',
+              atlasSelector: '.national-atlas',
+              atlasUrl: null,
+              expectedReturn: {
+                path: new URL('season1-immersive/', base).pathname,
+                country,
+                role,
+              },
+              matchingReturnLinkIndex: null,
+              roleSwitchSelector: 'select[data-country-role-switch]',
             };
             if (await atlas.isVisible().catch(() => false)) {
               await atlas.click({ timeout: 2000 });
               const state = new URL(page.url());
+              result.navigation.atlasUrl = state.href;
               if (
                 state.searchParams.get('country') !== country ||
                 state.searchParams.get('role') !== role
@@ -821,6 +831,7 @@ export async function runCountryRoleAudit({
                   role,
                 },
               );
+              result.navigation.matchingReturnLinkIndex = returnIndex;
               if (returnIndex >= 0) {
                 await page.locator('a[href]').nth(returnIndex).click();
                 await page.locator('.country-game').waitFor({ timeout: 8000 });
@@ -838,7 +849,9 @@ export async function runCountryRoleAudit({
               )
                 result.failures.push('ATLAS_RETURN_LOST_COUNTRY_OR_ROLE');
             } else result.gaps.push('ATLAS_LINK_MISSING');
-            const switcher = page.locator('[data-country-role-switch]').first();
+            const switcher = page
+              .locator('select[data-country-role-switch]')
+              .first();
             if (await switcher.isVisible().catch(() => false)) {
               const nextRole =
                 QA_ROLES[(QA_ROLES.indexOf(role) + 1) % QA_ROLES.length];

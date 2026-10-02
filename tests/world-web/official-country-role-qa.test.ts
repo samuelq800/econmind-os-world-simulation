@@ -276,6 +276,12 @@ describe.skipIf(process.env.COUNTRY_ROLE_BROWSER_TESTS !== '1')(
             (row) => row.status === 'PASS_NO_FALLBACK',
           ),
         ).toBe(true);
+        expect(
+          result.missingDataProbes.every(
+            (row) =>
+              row.loading.status === 'PASS_NO_FALLBACK_WHILE_SOURCE_PENDING',
+          ),
+        ).toBe(true);
         expect(result.resourceCache.hits).toBeGreaterThan(0);
         expect(
           server.methods.every((method) =>
