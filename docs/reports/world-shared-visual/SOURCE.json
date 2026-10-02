@@ -1,7 +1,7 @@
 {
   "sourceRepository": "samuelq800/econmind-os",
   "sourceCommit": "7b4db3b8cbdb1db86288a1172896ac9bb8febaa4",
-  "worldBaseCommit": "2a4f0535826f15925f99076a14bbff1a053f02ff",
+  "worldBaseCommit": "72883bb34753a5889e82b9a10525c15fa932ecf7",
   "method": "gh api contents at fixed ref, base64 decode; scoped semantic adaptation",
   "sources": [
     {
