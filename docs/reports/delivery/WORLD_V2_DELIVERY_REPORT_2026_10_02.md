@@ -1,6 +1,7 @@
 # EconMind World V2 — 检查、发布与剩余工作交付报告
 
 日期：2026-10-02。World 仓库：`samuelq800/econmind-os-world-simulation`。
+本文件保留首轮事实快照；后续数据接线、视觉合流与剩余事项以[同日补充交付](WORLD_V2_INTEGRATION_SUPPLEMENT_2026_10_02.md)为准。
 本轮代码基线：`305cf27901412053b32b10e8d24b69e75b3dbb09`（#38 接线及 #39 入口修复合并后）。
 这是事实交付报告，不是 Gate B 批准书，不修改经济规则或正式步骤状态。
 地图与入口修复已上线且浏览器验收通过；只读 API 生产门槛明确 BLOCKED，未完成项不会写成 PASS。

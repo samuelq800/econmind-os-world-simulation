@@ -7,19 +7,20 @@ engines or hidden buffs.
 
 ## Current integration snapshot (2026-10-02)
 
-Code baseline: main `305cf27901412053b32b10e8d24b69e75b3dbb09`.
-The [October 2 delivery report](docs/reports/delivery/WORLD_V2_DELIVERY_REPORT_2026_10_02.md)
+Code baseline: main `fa4b18ce01c5558ab15cfa3e936efbf1cd0a6ef8`.
+The [October 2 integration supplement](docs/reports/delivery/WORLD_V2_INTEGRATION_SUPPLEMENT_2026_10_02.md)
+updates the earlier [October 2 delivery report](docs/reports/delivery/WORLD_V2_DELIVERY_REPORT_2026_10_02.md) and
 supersedes the dated capability summaries below. It separates code integration,
 Pages publication, database publication, live API access and economic execution;
 it does not replace the formal gate ledger in `status/progress.json`.
 
-| Layer           | Verified scope                                                                                                                                       | Remaining boundary                                                                                                            |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                                                   | Source preservation is not runtime economic adoption                                                                          |
-| Supabase        | Balanced readback and separate 0020 audit passed; controlled run `36672349466` verified 0021 full-source permissions                                 | Server LOGIN and live Edge deployment are not established by those database releases                                          |
-| API code        | Country/full-dataset/map-catalog/CORS and Edge reader #37 plus page wiring #38 merged; main-site #81 fail-closed release tooling reviewed and merged | Production PUBLIC effective access remains forbidden: NOLOGIN, no new secrets/deployment, RELEASE_HOLD; map publicUrl is null |
-| Page code       | Six-role official static numbers, Source intel, scroll/fit and root atlas published; selected-country gateway fix #39 merged                         | Production API config remains disabled; role actions are local rehearsal, not Command/receipt execution                       |
-| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI                                                  | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                             |
+| Layer           | Verified scope                                                                                                                                       | Remaining boundary                                                                                                                                      |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                                                   | Source preservation is not runtime economic adoption                                                                                                    |
+| Supabase        | Balanced readback and separate 0020 audit passed; controlled run `36672349466` verified 0021 full-source permissions                                 | Server LOGIN and live Edge deployment are not established by those database releases                                                                    |
+| API code        | Credential-free immutable source-snapshot reader #41 merged; main-site #84 create-only publisher preparation/mock merged                             | New Storage transport and release still under construction; old DB reader remains NOLOGIN / RELEASE_HOLD                                                |
+| Page code       | Exact field provenance #42, lazy country loader #44, official root-map numbers #45, six-role metric sources #46 and scoped shared visuals #43 merged | Pages #45 has representative live readback; later integrated browser review and complete 420 matrix are pending; production API config remains disabled |
+| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI                                                  | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                                                       |
 
 Lobby entry and team/person/office assignment are intentionally deferred by the
 owner. Public official-source connections can proceed without inventing those
@@ -68,11 +69,20 @@ the official opening inputs are not a committed World State, and login,
 authoritative commands, settlement, live prices and receipts are not connected.
 Country-scoped routes do not fall back to the older North Harbour sample ledger.
 
-The newly published root explorer is a separate display entrypoint. Its scene
-statistics still use `map-lab/geographic-scenario.json` (illustrative population
-14,714,012,813 and 350 facility candidates), not the selected balanced package.
-Do not describe all root-map numbers as official; rebinding those display fields
-is a remaining integration item in the October 2 report.
+The root explorer now lazily loads hash/byte-bound country files from the same
+selected balanced package. Dynamic numbers and the complete 1,374-facility
+directory no longer use the illustrative geographic-scenario statistics.
+The 986 facilities without source map anchors remain in the directory without
+invented positions. Existing geometry and baked artwork remain historical
+display assets, not numerical authority. Source details preserve exact decimal
+tokens, units, time-basis uncertainty and field provenance; failures show a
+disconnected state and read-only retry, not old-number fallback.
+
+Six-role HUD and local-preview inputs expose source inspection. A verified
+source match, when the approved read-only API is configured, is still not live
+World State. Shared visual styling is adapted from fixed main-site files without
+changing that product; the original UI archive remains immutable and publication
+verification permits only the exact reviewed stylesheet integration.
 
 ## Historical code integration (2026-09-27)
 
