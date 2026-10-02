@@ -254,6 +254,10 @@ describe('official all-data product-page read', () => {
     expect(await session.loadCatalogue()).toMatchObject({ kind: 'CATALOGUE' });
     const old = session.loadDataset('stocks');
     session.setCountry('02');
+    expect(await session.loadDataset('stocks')).toMatchObject({
+      kind: 'INVALID',
+      reason: 'DATASET_NOT_IN_CATALOGUE',
+    });
     expect(oldSignal?.aborted).toBe(true);
     resolveOld?.(Response.json(page('stocks', 'visual-territory-01')));
     expect(await old).toMatchObject({ kind: 'STALE' });
@@ -263,6 +267,68 @@ describe('official all-data product-page read', () => {
       filteredCountryId: 'visual-territory-02',
     });
   });
+
+  it('invalidates a previous catalogue immediately on refresh and on source mismatch', async () => {
+    let fail = false;
+    const fetcher = vi.fn(async (url: URL | RequestInfo) => {
+      if (String(url).endsWith('/datasets')) {
+        if (fail) throw Error('offline');
+        return Response.json(catalogue);
+      }
+      return Response.json({
+        ...page('finance', 'visual-territory-01'),
+        sourceSha256: '0'.repeat(64),
+      });
+    }) as unknown as typeof fetch;
+    const session = adapter().createDatasetSession('01', {
+      fetcher,
+      config: {
+        apiBaseUrl: 'https://world.example/functions/v1/world-v2-official-read',
+      },
+    });
+    expect(await session.loadCatalogue()).toMatchObject({ kind: 'CATALOGUE' });
+    expect(await session.loadDataset('finance')).toMatchObject({
+      kind: 'INVALID',
+      reason: 'DATASET_MISMATCH',
+    });
+    expect(await session.loadDataset('stocks')).toMatchObject({
+      reason: 'DATASET_NOT_IN_CATALOGUE',
+    });
+    expect(await session.loadCatalogue()).toMatchObject({ kind: 'CATALOGUE' });
+    fail = true;
+    const refresh = session.loadCatalogue();
+    expect(await session.loadDataset('stocks')).toMatchObject({
+      reason: 'DATASET_NOT_IN_CATALOGUE',
+    });
+    expect(await refresh).toMatchObject({ kind: 'UNAVAILABLE' });
+    expect(await session.loadDataset('stocks')).toMatchObject({
+      reason: 'DATASET_NOT_IN_CATALOGUE',
+    });
+  });
+
+  it.each([
+    { apiBaseUrl: 'https://world.example/functions/v1/other' },
+    {
+      apiBaseUrl:
+        'https://world.example/functions/v1/world-v2-official-read?token=synthetic',
+    },
+    { apiBaseUrl: 'http://world.example/' },
+    {
+      apiBaseUrl: 'https://world.example/',
+      apiOrigin: 'https://other.example/',
+    },
+  ])(
+    'does not fetch from an invalid or ambiguous base config',
+    async (config) => {
+      const fetcher = vi.fn() as unknown as typeof fetch;
+      const session = adapter().createDatasetSession('01', { fetcher, config });
+      expect(await session.loadCatalogue()).toMatchObject({
+        kind: 'INVALID',
+        reason: 'API_ORIGIN_INVALID',
+      });
+      expect(fetcher).not.toHaveBeenCalled();
+    },
+  );
 
   it('mounts source status in the existing country game drawer and escapes raw rows', async () => {
     const drawer = {
