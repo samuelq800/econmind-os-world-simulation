@@ -28,6 +28,12 @@ runner 私有文件已清理、RELEASE_LOCK 退休、各 World 锁为空；无�
 下一步仅离线按[官方 Management API 契约](https://supabase.com/docs/reference/api/v1-get-project-api-keys)检查 selector、区分非秘密失败类别；必要时准备独立有界 metadata-only 诊断候选，经 B 窄审和 Root 新授权后才运行。
 本次失败不自动重试，不搜索旧站环境密钥、不新建/轮换 key、不泄漏原 API 响应。
 
+后续 main-site #89 固定 head `e882e1ca3520018458879c2b81fc351558d294b2` 经 B 独立窄审通过，Root 合并为 `33d504540d0f11f7f61d3a601a394911eed8795d`；CI `37040873808` 五 job 成功，测试 checkout 为合成 merge，完整 tree 与候选一致，不冒称纯 head 检查。
+Root 新授权 ID `CT-SNAPSHOT-KEY-METADATA-37038527126-V1` 的唯一 metadata-only run `37042407081` / job `110955490935` 实际 SUCCESS，绑定上述 main/tree；固定 `GET .../api-keys?reveal=false` 恰好一次，无重试、选 key、Storage、Edge 或数据库操作。
+仅聚合回执：当前 4 entries（2 legacy、1 publishable、1 secret），严格 role predicate 匹配 1 modern service-role secret 和 1 legacy service-role，合计 2；没有保存 key/id/custom name/template/raw response。当前 metadata 不证明历史失败根因或 key 可用性。
+耐久原件 `artifacts/e-snapshot-key-metadata-once.XzCXaR/receipt/metadata.json` SHA-256 `cff069ca818066dd13042d0b14f04876b87e833dc92f41fb75a9a60f4febbefc`，Root 实际读取/重算一致。METADATA_LOCK 已撤销，全部 World V2 锁名为空。
+下一步 E 仅构建最小 admission 候选：唯一严格合格 modern 优先，多个 modern 拒绝；没有 modern 时才允许唯一严格 legacy；选中 modern 非法或缺值停止，不 fallback。格式/ref/role 检查不放宽，需 B 新固定候选窄审、新 fingerprint 和 Root 新单次授权才可发布。当前 publication retry 仍 HOLD，34 文件真实 API 接线未完成。
+
 完整原始 70 国 × 6 职位 × 桌面/手机的 **840 HOME 原图已全部实际目视**，583 有问题、257 本范围未见重大问题、0 未查看。
 原始功能矩阵完成 420/420 组合，2,520 来源抽屉通过；旧异步导航 harness 阻塞和 7 个短超时失败均保留原件。
 19 个对应控件有界复核未复现，但不改写原始 FAIL。#58 的 navigation-only 补充已完成全部 840：838 PASS、59/central_bank/desktop 本地连接中断后 FAIL、60/finance/desktop 可见入口等待超时 BLOCKED；0 NOT_RUN。仅两项独立有界复核现均未复现，真实返回身份/href 和 59 的实际职位切换正确，零 page/console/request error；原件不改。
