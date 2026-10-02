@@ -5,20 +5,21 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current integration snapshot (2026-09-30)
+## Current integration snapshot (2026-10-02)
 
-Evidence baseline: main `d8a1b4a9c0970414d6e0a9486f494bf1a3f47ec8`.
-The [current data-connection record](docs/reports/world-connection/CURRENT_INTEGRATION_STATUS_2026_09_30.md)
-supersedes the dated capability summaries below; it does not replace the formal
-gate ledger in `status/progress.json`.
+Code baseline: main `305cf27901412053b32b10e8d24b69e75b3dbb09`.
+The [October 2 delivery report](docs/reports/delivery/WORLD_V2_DELIVERY_REPORT_2026_10_02.md)
+supersedes the dated capability summaries below. It separates code integration,
+Pages publication, database publication, live API access and economic execution;
+it does not replace the formal gate ledger in `status/progress.json`.
 
-| Layer           | Verified scope                                                                                                    | Remaining boundary                                                                                                          |
-| --------------- | ----------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                | Source preservation is not runtime economic adoption                                                                        |
-| Supabase        | Balanced package readback passed; a separate successful read-only audit verified the applied 0020 reader boundary | 0021 full-data permissions, server credential and live API activation are not established by that audit                     |
-| API code        | Country, paginated full-dataset and map-catalog routes plus exact-origin CORS merged                              | Opt-in server deployment and browser-to-production verification remain unverified; map catalogue `publicUrl` is still null  |
-| Page code       | Selected immersive UI retains official country data and adds a 34-dataset Source intel drawer                     | Source reads are not live prices, settlement, receipts or a running World; layout fix PR #33 is still open at this snapshot |
-| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI               | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                           |
+| Layer           | Verified scope                                                                                                               | Remaining boundary                                                                                               |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                           | Source preservation is not runtime economic adoption                                                             |
+| Supabase        | Balanced readback and separate 0020 audit passed; controlled run `36672349466` verified 0021 full-source permissions         | Server LOGIN and live Edge deployment are not established by those database releases                             |
+| API code        | Country/full-dataset/map-catalog/CORS and Edge reader #37 merged; page wiring #38 merged                                     | Production preflight found forbidden PUBLIC effective access; LOGIN remains disabled and Edge release is BLOCKED |
+| Page code       | Six-role official static numbers, Source intel, scroll/fit and root atlas published; selected-country gateway fix #39 merged | Production API config remains disabled; role actions are local rehearsal, not Command/receipt execution          |
+| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI                          | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                |
 
 Lobby entry and team/person/office assignment are intentionally deferred by the
 owner. Public official-source connections can proceed without inventing those
@@ -47,7 +48,8 @@ OpeningSeed, start a Worker, write to Supabase, or change Gate status.
 
 The sole selected page UI is the Season 1 immersive experience at
 `apps/world-web/public/season1-immersive/`. The World V2 Pages home route
-opens its country-map entry. The exact owner handoff and source-archive hash
+now mounts the reviewed root atlas with links into the selected country pages.
+The exact owner handoff and source-archive hash
 are pinned in [`status/ui-selection.json`](status/ui-selection.json); the
 published runtime files are checked against the delivered manifest by
 `pnpm test:authoritative-ui`. The older React page remains at `legacy.html`
@@ -69,7 +71,7 @@ Country-scoped routes do not fall back to the older North Harbour sample ledger.
 ## Historical code integration (2026-09-27)
 
 This is the retained September 27 snapshot, not today's schema count or
-connection status. Use the September 30 record above for subsequent evidence.
+connection status. Use the October 2 delivery report above for subsequent evidence.
 
 The reviewed main-site release chain has now published the isolated `world_v2`
 schema to the shared Supabase project: 17 exact migration records and 21 tables,
