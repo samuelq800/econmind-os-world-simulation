@@ -10,6 +10,49 @@
   social:{heading:'Bring people into the country’s next chapter',lead:'Match a workforce to a local facility. Assignment does not imply training or arrival.',label:'Workforce coverage',unit:'%',max:100,step:10,rooms:[['Technical academy','Arrange skills training','social-12','♧'],['Employment bureau','Connect people with jobs','social-10','♙'],['Community clinic','Plan healthcare services','social-5','✚']]}
  };
  const planKey=KEY+':map-decisions-v1';let plan;try{plan=JSON.parse(localStorage.getItem(planKey))}catch{};plan=plan&&plan.country===countryScope&&plan.role===role?plan:{country:countryScope,role,site:null,amount:0,records:[]};
+ // Public view navigation only: never setRole, grant an Office, or dispatch a command.
+ function countryRoleViewHref(number, nextRole, href) {
+  if (!/^(?:0[1-9]|[1-6][0-9]|70)$/.test(number) || !Object.hasOwn(config, nextRole)) return null;
+  try {
+   const current = new URL(href);
+   const incomingRole = current.searchParams.get('role');
+   if (current.searchParams.getAll('role').length > 1 || current.searchParams.getAll('country').length !== 1 || current.searchParams.get('country') !== number || (incomingRole !== null && !Object.hasOwn(config, incomingRole))) return null;
+   return new URL(`?role=${nextRole}&country=${number}#country`, new URL('./', current)).href;
+  } catch { return null; }
+ }
+ function mountCountryRoleSwitch(root) {
+  const identity = root.querySelector('.national-identity strong');
+  if (!identity || typeof location.href !== 'string') return;
+  const currentHref = countryRoleViewHref(countryScope, role, location.href);
+  if (!currentHref) return;
+  const label = document.createElement('label');
+  label.setAttribute('style', 'display:block;max-width:100%;font-size:9px');
+  label.textContent = 'Static view · No seat grant';
+  const select = document.createElement('select');
+  select.setAttribute('data-country-role-switch', '');
+  select.setAttribute('aria-label', 'Switch this country’s public role view (no Office authorization)');
+  select.setAttribute('style', 'display:block;max-width:100%;width:100%;min-height:44px;margin-top:4px;font:12px Georgia,serif;color:#254a41;background:#fff6d9;border:1px solid #bbaa72;border-radius:6px');
+  for (const key of Object.keys(config)) {
+   const option = document.createElement('option');
+   option.value = key;
+   option.textContent = roles[key].name;
+   option.selected = key === role;
+   select.append(option);
+  }
+  select.value = role;
+  select.addEventListener('change', () => {
+   const target = countryRoleViewHref(countryScope, select.value, location.href);
+   if (target) location.assign(target);
+   else select.value = role;
+  });
+  select.addEventListener('focus', () => { select.style.outline = '3px solid #ffd26f'; });
+  select.addEventListener('blur', () => { select.style.outline = ''; });
+  label.append(select);
+  identity.replaceChildren(label);
+  // Keep the native 44px control within the existing HUD row; no shared layout edit.
+  const badgeIdentity = root.querySelector('.national-identity');
+  if (badgeIdentity) badgeIdentity.style.paddingBlock = '0';
+ }
  const office=config[role],n=v=>Number(v).toLocaleString('en-US',{maximumFractionDigits:2}),c=()=>contextCountry,f=()=>c().facilities.find(x=>x.id===plan.site)||c().facilities[0];
  const sourceSession=EconWorldRead.createDatasetSession(countryScope);
  const sourceOffice={captain:['countries','regions','facilities','population-services','hazard-proposals','land-program'],finance:['finance','stocks','trade-plans','facilities','countries'],central_bank:['finance','countries','entities'],industry:['facilities','deposits','production-plans','recipes','power','water-allocations','employment'],trade:['stocks','trade-plans','transport-routes','transit-proposals','commodity-catalog','supplier-concentration-policy'],social:['population-services','employment','settlements','water-allocations','hazard-proposals','facilities']};
@@ -448,6 +491,7 @@
  function mapHome(){if(!contextCountry||!catalog)return;sourceRequest++;sourceSession.cancel();view='country-home';document.body.classList.remove('in-scene');document.body.classList.add('country-bound','country-map-home');document.querySelector('#overlay').innerHTML='';document.querySelector('.result-receipt')?.remove();document.querySelector('#world-clock')?.setAttribute('hidden','');pathTo('country',true);document.title=c().name+' · '+roles[role].name+' · EconMind';const previous=document.querySelector('.country-game'),scroll=previous?.scrollTop||0;
  document.querySelector('#game').innerHTML=`<main class="country-game" data-country="${countryScope}" data-office="${role}" style="--national-art:url('countries/${c().scene}')"><div class="national-world" role="img" aria-label="${esc(c().name)}"></div><div class="national-light"></div><header class="national-hud"><div class="national-identity"><span class="brand-badge-mini"><img class="brand-badge-mini-image" src="assets/lobby/econmind-badge-96.png" alt="EconMind"></span><div><small>${esc(c().name)} / SEASON 1</small><strong>${roles[role].name}</strong></div></div><a class="national-atlas" href="countries/?role=${role}&country=${countryScope}&view=atlas">Country atlas ↗</a><div class="national-time"><small>World preview · Real time ×10</small><strong data-national-time></strong><span>1 day = 2h 24m real time</span></div><div class="national-resources">${stats().map(([label,value,unit])=>`<div><small>${label}</small><strong>${value} <em>${unit}</em></strong></div>`).join('')}</div></header><section class="national-mission"><small>CHAPTER I / ${roles[role].tag}</small><h1>${office.heading}</h1><p>${office.lead}</p><div class="national-progress"><i data-national-progress></i></div><span>${c().name} · <span data-selected-site>${office.national||f().record.name}</span></span></section><nav class="national-tools"><button data-cmd="country-functions" title="All office actions" aria-label="All office actions">▤</button><button data-cmd="country-records" title="Decision record" aria-label="Decision record">◷</button><button data-cmd="country-sites" title="Local sites" aria-label="Local sites">⌖</button></nav><section class="national-play" ${office.national?'data-national-drop':''}><div class="national-play-heading"><small>${office.label}</small>${office.national?'<small>National</small>':`<button data-cmd="country-sites">${f().id} ▾</button>`}</div><h2>${office.national||f().record.name}</h2><div class="national-tokens">${Array.from({length:office.max/office.step},(_,i)=>`<button data-cmd="country-token" data-value="${(i+1)*office.step}" draggable="true" aria-label="${office.label} ${(i+1)*office.step} ${office.unit}" class="${(i+1)*office.step<=plan.amount?'allocated':''}"><span>${office.step}${role==='finance'?'d':role==='captain'?'':'%'}</span></button>`).join('')}</div><div class="national-slider"><button data-cmd="country-adjust" data-delta="-1" aria-label="Decrease allocation">−</button><input data-national-amount type="range" min="0" max="${office.max}" step="${office.step}" value="${plan.amount}" aria-label="${office.label}"><button data-cmd="country-adjust" data-delta="1" aria-label="Increase allocation">+</button></div><div class="national-reading"><strong data-national-value></strong><small data-national-remaining></small></div><p class="national-lesson">${derived().lesson}</p><button class="national-confirm" data-cmd="country-confirm">Confirm allocation <span>→</span></button><small class="national-save-status" data-national-status>${plan.records.length?'Local decision saved':'Local planning · Not executed'}</small></section><div class="national-site-pins">${c().facilities.map(site=>`<button data-cmd="country-site" data-id="${site.id}" title="${esc(site.record.name)}" aria-label="${site.id} ${esc(site.record.name)}" class="${site.id===f().id?'selected':''}">${site.id.slice(-2)}</button>`).join('')}</div><div class="national-destination" ${office.national?'':'data-national-drop'}><span>${f().id}</span><strong>${f().record.name}</strong><small>Local site · ${f().record.operational?'Operational':'Not commissioned'}</small></div><nav class="national-buildings" aria-label="Ministry locations">${office.rooms.map(([name,desc,module,icon],i)=>`<button data-cmd="country-room" data-id="${i}" data-module="${module}" class="national-building"><span>${icon}</span><strong>${name}</strong></button>`).join('')}</nav><footer class="national-bottom"><div class="national-hand">${office.rooms.map(([name,desc,module,icon],i)=>`<button class="national-card" data-cmd="country-room" data-id="${i}" data-module="${module}"><small>0${i+1}</small><span>${icon}</span><h3>${name}</h3><p>${desc}</p></button>`).join('')}</div><button class="national-world-status" data-cmd="country-records"><span>◷</span><strong>World running</strong><small>Automatic ×10</small></button></footer><div class="national-edition">Country scenario references · Local decisions · Official settlement not connected</div><div class="national-drawer" hidden></div></main>`;
  const root=document.querySelector('.country-game');
+ mountCountryRoleSwitch(root);
  mountMetricLinks(root);
  if(!document.querySelector('#country-home-layout')){const layoutLink=document.createElement('link');layoutLink.id='country-home-layout';layoutLink.rel='stylesheet';layoutLink.href='../country-home-layout.css';document.head.append(layoutLink);}
  const sourceButton=document.createElement('button');sourceButton.type='button';sourceButton.dataset.cmd='country-source';sourceButton.title='Official source intel';sourceButton.setAttribute('aria-label','Official source intel');sourceButton.textContent='◈';root.querySelector('.national-tools').append(sourceButton);
