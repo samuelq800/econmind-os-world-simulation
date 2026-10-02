@@ -129,6 +129,40 @@
     return true;
   }
 
+  function sourceProvenance(country, dataset) {
+    const source = country?.officialSource, spec = source?.datasets?.[dataset];
+    if (!numberPattern.test(country?.number) || country.id !== expectedId(country.number) ||
+      !record(source) || source.schemaVersion !== 'OFFICIAL_UI_FIELD_PROVENANCE_V1' ||
+      source.sourcePackageId !== packageId || source.sourceChecksumsSha256 !== selectionChecksum ||
+      source.authority !== 'SELECTED_SOURCE_NOT_RUNTIME' || !sourceSlugSet.has(dataset) ||
+      !record(spec) || spec.sourcePath !== `data/${dataset}.json` || !/^[0-9a-f]{64}$/.test(spec.sha256)) return null;
+    return { dataset, sourcePath: spec.sourcePath, sourceSha256: spec.sha256, packageId,
+      selectionChecksumSha256: selectionChecksum, liveWorldState: false, proposalFieldsAreExecuted: false };
+  }
+
+  function fieldSource(country, pointer) {
+    const field = country?.officialSource?.fields?.[pointer];
+    if (!record(field) || typeof field.exact !== 'string' || !/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/.test(field.exact) ||
+      !['rawToken', 'rowId', 'field', 'sourcePointer', 'unit', 'unitBasis', 'nature'].every(key => typeof field[key] === 'string' && field[key].length > 0) ||
+      !/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(field.rawToken) ||
+      !Number.isSafeInteger(field.rowIndex) || field.rowIndex < 0) return null;
+    const source = sourceProvenance(country, field.dataset);
+    return source ? Object.freeze({ ...field, ...source, outputPointer: pointer }) : null;
+  }
+
+  function collectionSource(country, name) {
+    const collection = country?.officialSource?.collections?.[name];
+    if (!record(collection) || typeof collection.countExact !== 'string' || !/^(?:0|[1-9]\d*)$/.test(collection.countExact) ||
+      !Array.isArray(collection.sourceRowIds) || !collection.sourceRowIds.every(id => typeof id === 'string' && id.length > 0) ||
+      collection.countExact !== String(collection.sourceRowIds.length) ||
+      new Set(collection.sourceRowIds).size !== collection.sourceRowIds.length ||
+      !record(collection.predicate) || collection.predicate.countryId !== country.id ||
+      typeof collection.unit !== 'string' || !collection.unit || collection.nature !== 'DERIVED_SOURCE_COUNT_NOT_RUNTIME' ||
+      !['FILTER_COUNTRY_ID', 'FILTER_COUNTRY_ID_AND_SCENARIO_ROLE_DEVELOPMENT_OPTION'].includes(collection.rule)) return null;
+    const source = sourceProvenance(country, collection.dataset);
+    return source ? Object.freeze({ ...collection, ...source, exact: collection.countExact, field: 'countryId' }) : null;
+  }
+
   function createDatasetSession(number, options = {}) {
     const fetcher = options.fetcher || fetch;
     const config = options.config === undefined ? globalThis.__ECONMIND_WORLD_READ_CONFIG__ : options.config;
@@ -237,9 +271,16 @@
           total: data.total, nextOffset: data.nextOffset, filteredCountryId: filtered ? countryId : null };
       });
       if (result.kind === 'INVALID' || result.kind === 'UNAVAILABLE') catalogue = null;
+      if (['PAGE', 'DATA', 'SECTIONS', 'FRAGMENT'].includes(result.kind)) result.sourceMetadata = Object.freeze({
+        dataset: spec.dataset, sourcePath: spec.sourcePath, sourceSha256: spec.sourceSha256,
+        packageId, selectionChecksumSha256: selectionChecksum,
+        numericEncoding: 'DECIMAL_STRING_EXACT', proposalFieldsAreExecuted: false, liveWorldState: false,
+      });
       return result;
     }
-    return Object.freeze({ loadCatalogue, loadDataset, cancel, setCountry, countryId: () => expectedId(countryNumber) });
+    return Object.freeze({ loadCatalogue, loadDataset, cancel, setCountry, countryId: () => expectedId(countryNumber),
+      configurationState: () => config == null ? 'NOT_CONNECTED' : origin ? 'CONFIGURED_READ_ONLY' : 'INVALID',
+    });
   }
 
   async function loadCountry(number, options = {}) {
@@ -281,7 +322,7 @@
     }
   }
 
-  globalThis.EconWorldRead = Object.freeze({ loadCountry, validCountry, createDatasetSession });
+  globalThis.EconWorldRead = Object.freeze({ loadCountry, validCountry, createDatasetSession, fieldSource, collectionSource });
 })();
 // National geography and local interaction state are separate from authoritative world settlement.
 let contextCountry=null,contextCountrySource=null;

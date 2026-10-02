@@ -368,7 +368,8 @@ describe('official all-data product-page read', () => {
       },
       commands,
       document: {
-        querySelector: () => drawer,
+        querySelector: (selector: string) =>
+          selector === '.national-drawer' ? drawer : null,
         addEventListener: vi.fn(),
       },
       window: { addEventListener: vi.fn(), EconI18n: null },
