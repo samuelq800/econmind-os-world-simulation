@@ -45,7 +45,78 @@
   overflow-wrap: anywhere;
 }
 
+.country-map-home .national-site-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* The drawer uses an opaque surface; avoid filtering a moving scroll layer. */
+.country-map-home .national-drawer {
+  backdrop-filter: none;
+}
+
+.country-map-home .national-site-list button :is(small, span) {
+  display: block;
+}
+
+/* Keep IDs, raw mixed-language names, units and provenance fully readable. */
+.country-map-home
+  .national-drawer
+  :is(button, h3, p, small, span, strong, pre) {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  text-overflow: clip;
+}
+
+.country-map-home .national-source-json {
+  white-space: pre-wrap;
+}
+
 @media (max-width: 600px) {
+  /* The source game is isolated; lift it only while a drawer is open so the
+     external language toggle cannot cover its text. */
+  .country-map-home .country-game:has(.national-drawer:not([hidden])) {
+    z-index: 6;
+  }
+
+  /* All drawer variants share one viewport-contained scroll surface. These
+     bounds also override the legacy Source intel/error inline positioning. */
+  .country-map-home .national-drawer {
+    position: fixed !important;
+    top: max(12px, env(safe-area-inset-top)) !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: none !important;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scroll-padding-top: 72px;
+  }
+
+  .country-map-home .national-drawer-head {
+    position: sticky;
+    top: -16px;
+    z-index: 1;
+    margin: -16px -16px 16px;
+    padding: 16px;
+    background: #f9f1db;
+  }
+
+  .country-map-home .national-drawer-head h2 {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .country-map-home .national-drawer-head button {
+    flex: 0 0 32px;
+  }
+
+  .country-map-home .national-site-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .country-map-home .national-hud {
     grid-template-columns: minmax(0, 1fr) auto;
   }
