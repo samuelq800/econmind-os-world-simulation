@@ -266,6 +266,24 @@ describe('official selected-source explorer lazy country adapter', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
+  it('cancels a stalled response body when the selection is retired', async () => {
+    const cancel = vi.fn();
+    const body = new ReadableStream<Uint8Array>({ pull() {}, cancel });
+    const fetcher = vi.fn(
+      async () =>
+        new Response(body, { headers: { 'content-type': 'application/json' } }),
+    ) as unknown as typeof fetch;
+    const controller = new AbortController();
+    const pending = makeLoader(fetcher).load('01', {
+      signal: controller.signal,
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    controller.abort();
+    expect(await pending).toEqual({ kind: 'stale', reason: 'READ_ABORTED' });
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
   it('rejects invalid bases, absent crypto and an already cancelled read without requesting data', async () => {
     const fetcher = vi.fn() as unknown as typeof fetch;
     const invalid = createOfficialExplorerCountryLoader({
