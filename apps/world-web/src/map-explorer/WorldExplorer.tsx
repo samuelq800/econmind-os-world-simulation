@@ -123,6 +123,76 @@ export function ExactOfficialValue({
   );
 }
 
+export function OfficialSourceDetails({
+  data,
+  prefix = '',
+}: {
+  data: OfficialExplorerCountry;
+  prefix?: string;
+}) {
+  const source = data.officialSource;
+  return (
+    <details className="official-source-details">
+      <summary>数字来源与版本 · 展开逐字段详情</summary>
+      <p>
+        STATIC_BASELINE · proposalFieldsAreExecuted:false · liveWorldState:false
+      </p>
+      <p>countries SHA256: {data.source.countriesSha256}</p>
+      <p>本国文件 SHA256: {data.source.countryFileSha256}</p>
+      <p>数值保留源十进制原文；以下详情可用触屏或键盘展开，不换算时间单位。</p>
+      {Object.entries(source?.fields ?? {})
+        .filter(([path]) => path.startsWith(prefix))
+        .map(([path, field]) => (
+          <details key={path} data-source-detail={path}>
+            <summary>{path}</summary>
+            <dl>
+              {[
+                ['dataset', field.dataset],
+                ['rowId', field.rowId],
+                ['field', field.field],
+                ['outputPointer', path],
+                ['sourcePointer', field.sourcePointer],
+                ['exact', field.exact],
+                ['rawToken', field.rawToken],
+                ['unit', field.unit],
+                ['unitBasis', field.unitBasis],
+                ['nature', field.nature],
+                [
+                  'SHA256',
+                  source?.datasets?.[field.dataset]?.sha256 ?? '来源hash缺失',
+                ],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </details>
+        ))}
+    </details>
+  );
+}
+
+export function OfficialSourceState({
+  state,
+  onRetry,
+}: {
+  state: OfficialExplorerCountryLoadState;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="official-source-status" data-source-state={state.kind}>
+      <p role="status">{sourceStatus(state)}</p>
+      {state.kind !== 'ready' && state.kind !== 'idle' && (
+        <button type="button" onClick={onRetry}>
+          重新读取本国来源（只读）
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function OfficialFacilityFacts({
   data,
   index,
@@ -186,6 +256,7 @@ export function OfficialFacilityFacts({
           <dd>{String(site.record.openingAvailabilityProposal)} · 非已批准</dd>
         </div>
       </dl>
+      <OfficialSourceDetails data={data} prefix={`/facilities/${index}/`} />
     </>
   );
 }
@@ -279,18 +350,7 @@ export function OfficialCountryFacts({
           </p>
         </details>
       ))}
-      <details>
-        <summary>数字来源与版本</summary>
-        <p>
-          STATIC_BASELINE · proposalFieldsAreExecuted:false ·
-          liveWorldState:false
-        </p>
-        <p>countries SHA256: {data.source.countriesSha256}</p>
-        <p>本国文件 SHA256: {data.source.countryFileSha256}</p>
-        <p>
-          数值保留源十进制原文；悬停数字可查看dataset、row、field、单位与hash。
-        </p>
-      </details>
+      <OfficialSourceDetails data={data} />
     </div>
   );
 }
@@ -377,10 +437,22 @@ export function WorldExplorer({
     useState<ExplorerCountryBinding>(
       initialOfficialSource ?? { countryId: '', state: { kind: 'idle' } },
     );
-  useEffect(
-    () => requestExplorerCountry(countryId, loader, setOfficialBinding),
-    [countryId, loader],
-  );
+  const cancelOfficialRequest = useRef<(() => void) | undefined>(undefined);
+  const retryOfficialSource = useCallback(() => {
+    cancelOfficialRequest.current?.();
+    cancelOfficialRequest.current = requestExplorerCountry(
+      countryId,
+      loader,
+      setOfficialBinding,
+    );
+  }, [countryId, loader]);
+  useEffect(() => {
+    retryOfficialSource();
+    return () => {
+      cancelOfficialRequest.current?.();
+      cancelOfficialRequest.current = undefined;
+    };
+  }, [retryOfficialSource]);
   const officialState = currentExplorerSource(countryId, officialBinding);
   const official =
     officialState.kind === 'ready' ? officialState.data : undefined;
@@ -1265,9 +1337,10 @@ export function WorldExplorer({
               </div>
             ) : (
               <>
-                <p className="official-source-status" role="status">
-                  {sourceStatus(officialState)}
-                </p>
+                <OfficialSourceState
+                  state={officialState}
+                  onRetry={retryOfficialSource}
+                />
                 {official && (
                   <div className="facility-filters">
                     {[

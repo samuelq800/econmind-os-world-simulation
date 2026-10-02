@@ -6,6 +6,8 @@ import {
   WorldExplorer,
   ExactOfficialValue,
   OfficialFacilityFacts,
+  OfficialSourceDetails,
+  OfficialSourceState,
   currentExplorerSource,
   requestExplorerCountry,
   officialFacilityPoint,
@@ -205,6 +207,94 @@ describe('atlas official opening numbers and complete facility records', () => {
     expect(markup).not.toContain('情景人口');
     expect(markup).toContain('官方开局数据');
     expect(markup).toContain('role="status"');
+    expect(markup).toContain(`data-source-state="${state.kind}"`);
+    expect(markup).toContain('重新读取本国来源（只读）');
+  });
+
+  it.each<OfficialExplorerCountryLoadState>([{ kind: 'idle' }])(
+    'does not offer a retry without a selected country',
+    (state) => {
+      const markup = renderToStaticMarkup(
+        createElement(OfficialSourceState, { state, onRetry: vi.fn() }),
+      );
+      expect(markup).not.toContain('<button');
+    },
+  );
+
+  it('exposes native keyboard/touch source details without relying on hover titles', async () => {
+    const data = await officialCountry('70');
+    const path = '/facilities/0/record/estimatedCapacity';
+    const field = data.officialSource.fields[path]!;
+    const markup = renderToStaticMarkup(
+      createElement(OfficialSourceDetails, { data, prefix: '/facilities/0/' }),
+    );
+    expect(markup).toContain('<details');
+    expect(markup).toContain('<summary>数字来源与版本');
+    expect(markup).toContain(`data-source-detail="${path}"`);
+    expect(markup).not.toContain('data-source-detail="/facilities/1/');
+    for (const key of [
+      'dataset',
+      'rowId',
+      'field',
+      'sourcePointer',
+      'exact',
+      'rawToken',
+      'unit',
+      'unitBasis',
+      'nature',
+    ] as const) {
+      expect(markup).toContain(`<dt>${key}</dt>`);
+      const encoded = renderToStaticMarkup(
+        createElement('dd', null, field[key]),
+      );
+      expect(markup).toContain(encoded);
+    }
+    expect(markup).toContain(
+      data.officialSource.datasets[field.dataset]!.sha256,
+    );
+    expect(markup).not.toContain('title=');
+  });
+
+  it('retries the same country with an immediate loading state and discards the aborted attempt', async () => {
+    const data = await officialCountry('70');
+    const attempts: {
+      signal: AbortSignal;
+      resolve: (state: OfficialExplorerCountryLoadResult) => void;
+    }[] = [];
+    const loader = {
+      load: vi.fn(
+        (_id: string, options?: { signal?: AbortSignal }) =>
+          new Promise<OfficialExplorerCountryLoadResult>((resolve) => {
+            attempts.push({ signal: options!.signal!, resolve });
+          }),
+      ),
+    };
+    const published: ExplorerCountryBinding[] = [];
+    const publish = (binding: ExplorerCountryBinding) =>
+      published.push(binding);
+    const cancelOld = requestExplorerCountry(data.id, loader, publish);
+    cancelOld();
+    const cancelRetry = requestExplorerCountry(data.id, loader, publish);
+    expect(attempts[0]!.signal.aborted).toBe(true);
+    expect(attempts[1]!.signal.aborted).toBe(false);
+    expect(loader.load.mock.calls.map(([id]) => id)).toEqual([
+      data.id,
+      data.id,
+    ]);
+    expect(published.at(-1)).toEqual({
+      countryId: data.id,
+      state: { kind: 'loading' },
+    });
+    attempts[0]!.resolve({ kind: 'error', reason: 'SOURCE_HASH_MISMATCH' });
+    await Promise.resolve();
+    expect(published.at(-1)!.state.kind).toBe('loading');
+    attempts[1]!.resolve({ kind: 'ready', data });
+    await Promise.resolve();
+    expect(published.at(-1)).toEqual({
+      countryId: data.id,
+      state: { kind: 'ready', data },
+    });
+    cancelRetry();
   });
 
   it('immediately hides ready country01 when switching to70, even before effect cleanup', async () => {
@@ -305,7 +395,10 @@ describe('atlas official opening numbers and complete facility records', () => {
     expect(exact).toContain('raw=5.57013500000000000000001e2');
     const absent = renderToStaticMarkup(
       createElement(ExactOfficialValue, {
-        data: { ...raw, officialSource: undefined },
+        data: {
+          ...raw,
+          officialSource: undefined,
+        } as unknown as OfficialExplorerCountry,
         path,
       }),
     );

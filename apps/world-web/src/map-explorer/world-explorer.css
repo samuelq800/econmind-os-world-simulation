@@ -234,6 +234,26 @@
   color: #adc2ba;
   overflow-wrap: anywhere;
 }
+.official-source-status button {
+  padding: 10px;
+  margin-bottom: 12px;
+}
+.official-source-details {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.official-source-details summary {
+  cursor: pointer;
+  padding: 10px 0;
+}
+.official-source-details summary:focus-visible,
+.official-source-status button:focus-visible {
+  outline: 2px solid #efead8;
+  outline-offset: 3px;
+}
+.official-source-details dd {
+  margin: 6px 0 12px;
+}
 .official-country-facts p,
 .official-country-facts dd,
 .official-country-facts summary {
