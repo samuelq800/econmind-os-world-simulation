@@ -5,26 +5,35 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current integration snapshot (2026-10-02)
+## Current integration snapshot (2026-10-03)
 
-Code baseline: main `ab6e21cd3b7888ca9d8ff28504241c511425b771` (15:20 UTC checkpoint).
+Code baseline: main `c1354ac857eb65b9fd573b6deadd7ebd2d0f10c0` (October 2 UTC / October 3 Shanghai checkpoint).
 The [October 2 integration supplement](docs/reports/delivery/WORLD_V2_INTEGRATION_SUPPLEMENT_2026_10_02.md)
 updates the earlier [October 2 delivery report](docs/reports/delivery/WORLD_V2_DELIVERY_REPORT_2026_10_02.md) and
 supersedes the dated capability summaries below. It separates code integration,
 Pages publication, database publication, live API access and economic execution;
 it does not replace the formal gate ledger in `status/progress.json`.
 
-| Layer           | Verified scope                                                                                                                                        | Remaining boundary                                                                                                                                                     |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                                                    | Source preservation is not runtime economic adoption                                                                                                                   |
-| Supabase        | Balanced readback and separate 0020 audit passed; controlled run `36672349466` verified 0021 full-source permissions                                  | Server LOGIN and live Edge deployment are not established by those database releases                                                                                   |
-| API code        | Credential-free immutable source reader #41 and main-site #85 controlled transport merged; #51 all-data readback tool merged                          | Actual preflight found missing new-bucket write vetoes; #50 correction and independent review pending; no Storage/Edge publication; old DB path remains HOLD           |
-| Page code       | Source metrics, shared visuals, public role navigation #49, 203-file map publication #52, catalog-status component #53 and atlas text wrap #54 merged | Latest combined Pages deployment pending; local root-map 70-country data checks passed, but 420 functional/visual acceptance is still in progress; API config disabled |
-| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI                                                   | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                                                                      |
+| Layer           | Verified scope                                                                                                                                                                | Remaining boundary                                                                                                                                                                                  |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                                                                            | Source preservation is not runtime economic adoption                                                                                                                                                |
+| Supabase        | Balanced readback and separate 0020 audit passed; controlled run `36672349466` verified 0021 full-source permissions                                                          | Server LOGIN and live Edge deployment are not established by those database releases                                                                                                                |
+| API code        | Credential-free reader #41, controlled transport, #51 all-data readback tool, reviewed #50 correction and main-site #87 atomic policy publisher merged                        | One authorized policy request ran, but evidence verification failed: UNKNOWN_STOP_NO_RETRY. No confirmed policy rollout, Storage/Edge publication or live source readback; old DB path remains HOLD |
+| Page code       | Source metrics, shared visuals, role/atlas navigation, all 203 map files, catalog status, responsive map directory #57, role layout #61 and Root FIT/MANUAL camera #60 merged | Original 840 HOME views actually inspected; issues preserved, post-fix 840 review pending. Latest camera/layout Pages readback is separate; API config disabled                                     |
+| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI                                                                           | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                                                                                                   |
 
 Lobby entry and team/person/office assignment are intentionally deferred by the
 owner. Public official-source connections can proceed without inventing those
 assignments. Neither a green CI nor a merged UI implies a production release.
+
+The [complete visual baseline and repair record](docs/reports/world-connection/O_FULL_VISUAL_BASELINE_2026_10_03.md)
+binds every country/role/screen to retained evidence. Pages run `37026163647`
+successfully published the 203-file map directory; six actual HTTP readbacks
+matched the fixed deployment bytes, including three original map samples.
+This does not claim remote hash verification of all 203 files or economic activation.
+Main-site policy run `37031019041` ended with `SNAPSHOT_POLICY_PUBLICATION_EVIDENCE_INVALID`;
+the database commit/rollback state is unknown. Its temporary release lock was
+retired; no blind retry, snapshot transport, key acquisition or Edge deployment followed.
 
 ## Official 70-country data selection (2026-09-28)
 
