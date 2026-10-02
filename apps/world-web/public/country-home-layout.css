@@ -15,6 +15,12 @@
     top: 205px;
   }
 
+  /* Preserve the source projection. Only the unobstructed map is a pin hit area;
+     covered sites remain available in Local sites and the selected-record dock. */
+  .country-map-home .national-site-pins {
+    clip-path: inset(205px 460px 250px calc(31% + 28px));
+  }
+
   /* Selected record details are a readable dock, not another map coordinate. */
   .country-map-home .national-destination {
     left: 28px !important;
