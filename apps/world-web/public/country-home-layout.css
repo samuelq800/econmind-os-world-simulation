@@ -46,7 +46,7 @@
     flex: 1;
   }
 
-  .country-map-home .country-role-select {
+  .country-map-home .national-identity strong {
     width: 100%;
     max-width: none;
   }

@@ -35,7 +35,7 @@ describe('country-home map layout guardrails', () => {
   it('exposes the whole mobile role title and separates toolbar from the HUD', () => {
     expect(css).toMatch(/\.national-identity\s*\{[^}]*grid-column: 1 \/ -1;/);
     expect(css).toMatch(
-      /\.country-role-select\s*\{[^}]*width: 100%;[^}]*max-width: none;/,
+      /\.national-identity strong\s*\{[^}]*width: 100%;[^}]*max-width: none;/,
     );
     expect(css).toMatch(
       /\.national-tools\s*\{[^}]*position: relative;[^}]*top: auto;/,
