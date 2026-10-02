@@ -22,4 +22,33 @@ describe('country-home map layout guardrails', () => {
   it('positions site pins against the contained square image', () => {
     expect(js).toMatch(/function positionSites\(\).*scale=Math\.min\(w,h\)/);
   });
+
+  it('docks selected source details instead of stacking them over plans or missions', () => {
+    expect(css).toContain('top: 460px !important');
+    expect(css).toContain('.country-map-home .national-destination[hidden]');
+    expect(css).toContain('overflow-wrap: anywhere');
+    expect(css).toMatch(
+      /\.national-destination\s*\{[^}]*position: relative;[^}]*top: auto !important;/,
+    );
+  });
+
+  it('exposes the whole mobile role title and separates toolbar from the HUD', () => {
+    expect(css).toMatch(/\.national-identity\s*\{[^}]*grid-column: 1 \/ -1;/);
+    expect(css).toMatch(
+      /\.country-role-select\s*\{[^}]*width: 100%;[^}]*max-width: none;/,
+    );
+    expect(css).toMatch(
+      /\.national-tools\s*\{[^}]*position: relative;[^}]*top: auto;/,
+    );
+  });
+
+  it('rebases unchanged source anchors to the flowing scene only when CSS anchors are supported', () => {
+    expect(css).toContain('@supports (top: anchor(--country-scene center))');
+    expect(css).toContain('anchor-name: --country-scene');
+    expect(css).toMatch(
+      /\.national-site-pins\s*\{[^}]*top: anchor\(--country-scene center\);[^}]*height: 100%;[^}]*transform: translateY\(-50%\);/,
+    );
+    expect(css).toContain('aspect-ratio: 1');
+    expect(css).toContain('.national-world-status');
+  });
 });
