@@ -10,6 +10,7 @@
     "emitDeclarationOnly": false
   },
   "include": [
+    "apps/world-api/src/integration/official-source-snapshot-reader.ts",
     "apps/world-api/src/integration/official-edge-database-config.ts",
     "apps/world-api/src/integration/official-edge-fetch-adapter.ts",
     "apps/world-api/src/integration/official-country-role-reader.ts",

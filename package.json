@@ -28,7 +28,7 @@
     "env:check": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
     "migration:validate": "node scripts/validate-migrations.mjs",
     "test:world-v2-api-reader-release": "node scripts/test-world-v2-api-reader-release.mjs",
-    "test:world-v2-official-edge": "node scripts/check-world-v2-official-edge-bundle.mjs && vitest run tests/world-api/official-edge-read.test.ts",
+    "test:world-v2-official-edge": "node scripts/check-world-v2-official-edge-bundle.mjs && vitest run tests/world-api/official-edge-read.test.ts tests/world-api/official-source-snapshot.test.ts",
     "migration:rehearse": "node scripts/rehearse-migrations.mjs",
     "types:world-read:generate": "node scripts/generate-world-v2-read-types.mjs",
     "types:world-read:check": "node scripts/generate-world-v2-read-types.mjs --check",
