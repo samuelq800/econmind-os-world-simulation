@@ -948,6 +948,8 @@
 }
 .explorer-site .site-label em {
   font-size: 8px;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .explorer-leaders {
   position: absolute;
