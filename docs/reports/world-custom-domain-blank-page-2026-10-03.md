@@ -133,3 +133,17 @@ The focused deployment regression rerun passed 5 tests; its 20 intentionally
 unselected tests are not counted as passing (the earlier complete run passed
 all 118 tests). Final live publication/readback follows the second push and
 must be reported with its actual Pages run.
+
+Final publication: `c6ceb69e4e243e86fb8726305a60424d69921039`,
+[Pages run 37133967005](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37133967005),
+completed with `success`. Live root HTML includes the explicit brand icon and
+root-based runtime assets. The final strict Chrome command
+`node D:/dev/automation/econmind-world-domain-qa/smoke.cjs / https://world.econmind.group`
+exited 0: both 1280×800 and 390×844 mounted the home, waited for Avenor's
+official static facility records, and opened the national page; zero console
+errors, page errors, failed requests or HTTP resource errors. A screenshot was
+also inspected to confirm rendered map art and facility records. Final
+`pnpm secrets:check` passed (1934 files); the working tree was clean and synced.
+This confirms the requested static-page repair, not independent R2 verification
+or a connection to live World State. The website currently reports the official
+live read source as unconfigured; this patch does not invent an endpoint.
