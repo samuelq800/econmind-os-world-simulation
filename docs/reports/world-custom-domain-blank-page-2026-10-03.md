@@ -105,3 +105,31 @@ commit/run separately. Local tests do not establish live API, economic
 functionality, all 420 country/office combinations, or a full repository-suite
 result. The requested static-site repair does not start the repository's pending
 V09 gate or grant `VERIFIED` to any step.
+
+## Live readback and icon follow-up
+
+The initial patch was published from `5536170ad39b0b447be76327b82adc3e0e0849ae`
+by [Pages run 37133510640](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37133510640):
+build, path validation, upload and deployment all succeeded. Logs confirmed
+`WORLD_WEB_PUBLIC_BASE_PATH: /`. Live HTTPS readback returned the corrected
+`/assets/main-CcRs1ufX.js` reference and 200 JavaScript MIME for that module.
+Both live viewport scenarios mounted the atlas, Avenor and the national page.
+The strict browser console check still failed on the previously missing
+`https://world.econmind.group/favicon.ico`; this was identified, not ignored.
+
+Follow-up implementation: `91d123abc01eff1e080c95362489717c28409a29`. The root
+HTML explicitly uses the existing, accessible EconMind badge as its favicon.
+The path checker now identifies generated runtime scripts and stylesheet tags,
+so a public icon whose path also contains `assets` is not misclassified as a Vite
+entry bundle. The ordinary traversal still validates that icon's path and file.
+No source asset bytes or hash expectations changed.
+
+Both final root/project builds and both strict browser scenarios per build
+passed again, including waiting for country facility data to finish rendering;
+resource checks now cover 831 references. A deliberate root-base check against
+the project build correctly exited 1. Changed-file ESLint, Prettier, boundary
+scanner, authoritative UI check and `git diff --check` passed with exit 0.
+The focused deployment regression rerun passed 5 tests; its 20 intentionally
+unselected tests are not counted as passing (the earlier complete run passed
+all 118 tests). Final live publication/readback follows the second push and
+must be reported with its actual Pages run.
