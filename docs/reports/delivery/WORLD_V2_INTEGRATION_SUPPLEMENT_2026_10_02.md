@@ -8,6 +8,16 @@
 
 ## 一、当前结论
 
+最新实际状态：main-site #90/#91/#92 均经固定候选独立窄审、同 tree 实际 CI 并由 Root 合并。#92 main `fc5c328965403cbbbf9b77a3639559cc7bb619df` / tree `d40257fec85c2a70a11265eabf2a5862545299ad` 的唯一新授权 publish `37130549747` / job `111224628180` / attempt 1 实际 **SUCCESS**。同 run fresh 权限否决验证、固定 World source `ae57dc090f736ea17aa9d67b0e1295f10c97e4c6` / function tree `4d38784bf907397e2a71d0f1ff654d9e3cc3991c` / DB proof `36672349466`、34 JSON 完整公开字节校验、新 reader 部署、旧 7 函数身份保全、GET200/OPTIONS204/exact CORS 均成功；RELEASE_LOCK 已撤销，全部 World 锁名回读为空。
+
+范围：选定输入 34、最终公开 byte-verified 34、未完成 0；87 原始来源验证，不等于另 53 原件或 203 地图上传 Storage。既有回执未分别记录 bucket create / 新 object POST 次数，不能写成“新创建 34 个对象”。新 reader ACTIVE/version1/verify_jwt=false；路由来源是 `HASH_PINNED_IMMUTABLE_SOURCE_SNAPSHOT`，`database_projection=false` / `live_world_state=false`。子 Storage 回执保留其原阶段 `deployment=NOT_RUN` / `production_release=HOLD`，实际后续部署由独立 function/route 回执证明，不篡改子回执。
+
+耐久目录 `/Users/samuel/Documents/econclub/artifacts/e-snapshot-publish-compat92.7MGt6k/receipt/`：Storage SHA-256 `710001d829dd2cb35e0dc488df9777e69aa1e5121df9680ee6bd7066201628bf`；function `3457f1cd405719d8eb896d59017c47da2041ffc33cf65d932d8c05e7285b86a0`；route `13a33e563a4e49cba5ef0e4e8797e2ea48578b95e867f19182b092bf9295c826`；permission `ed27c28e34cce80304c7edd5399e8d8495fd87afe37055ce5a94c9d219e2949a`。Root 实际读取前三项并重算 hash 一致。GitHub artifact `11276344090` digest `49c5155e3c6e9622c8dde2b5ed7d9398018211ba41a26fe34bb5cb8bec6d8c42`。
+
+A 已获一次全资料 API 只读验收授权，B 窄核实际发布回执，G 仅准备 Pages 接通路径；这些验收尚未交付。页面 API 配置仍未启用，完整经济执行、LOGIN/World/Core/Worker 和 Gate B 未获本次放行。以下故障及中间 HOLD 保留为历史顺序，不覆盖本段最新成功，也不因成功抹去历史 UNKNOWN。
+
+新增历史：#90 单次 publish `37044748085` 在首次 bucket GET 失败，Storage write 0；#91 单次诊断 `37128962923` 观察 HTTP400/`KNOWN_NO_SUCH_BUCKET_SHAPE_NOT_ABSENCE_PROOF`，只 Management GET1 + bucket GET1、write0，锁已确认退休。诊断 SHA `83a6a392ac169e77e7914d15d17cef16d626173a8c582ebe6091738b3629618c`；不据此推断 bucket absence/key usable/旧失败根因。#92 只增加 bucket 专用严格 HTTP400 识别，所有 create-only/no-overwrite/失败 UNKNOWN_STOP、对象读取与权限规则保留。
+
 最新增量：World #50 及原站原子发布封装 #87 已经独立审查、CI 通过并合并。
 唯一授权 policy 发布 run `37031019041` 的 Management 请求步骤成功，但回执校验失败
 `SNAPSHOT_POLICY_PUBLICATION_EVIDENCE_INVALID`，实际数据库提交/回滚为 **UNKNOWN**。

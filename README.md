@@ -14,13 +14,13 @@ supersedes the dated capability summaries below. It separates code integration,
 Pages publication, database publication, live API access and economic execution;
 it does not replace the formal gate ledger in `status/progress.json`.
 
-| Layer           | Verified scope                                                                                                                                                          | Remaining boundary                                                                                                                                                |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                                                                      | Source preservation is not runtime economic adoption                                                                                                              |
-| Supabase        | Balanced source and 0021 full-source permissions evidenced; actual readback 37036290594 confirms exact veto policies and ledger22 currently present                     | Original publication run remains UNKNOWN; current readback cannot prove missing historical full ACL/bucket comparisons. No LOGIN or economic activation           |
-| API code        | Source reader, transport and full-data audit tool merged; fresh preflight 37037210421 passed; main-site #89 metadata-only diagnostic merged and run 37042407081 passed  | Publish 37038527126 failed before Storage (0 writes); current selector matches modern and legacy candidates. Admission fix pending; live API and old DB path HOLD |
-| Page code       | Responsive Root camera, role layout and partial mobile drawer fixes merged; original and post-fix 840 HOME images actually reviewed; bounded online c135 samples passed | Drawer glyph-prefix loss remains INCONCLUSIVE; mixed source labels/66 decorative cluster retained. API config disabled; no full gameplay or all-page acceptance   |
-| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI                                                                     | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                                                                 |
+| Layer           | Verified scope                                                                                                                                                          | Remaining boundary                                                                                                                                              |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Official source | 87 source artifacts; all 34 JSON datasets mapped; 203 map-package files catalogued                                                                                      | Source preservation is not runtime economic adoption                                                                                                            |
+| Supabase        | Balanced source and 0021 full-source permissions evidenced; actual readback 37036290594 confirms exact veto policies and ledger22 currently present                     | Original publication run remains UNKNOWN; current readback cannot prove missing historical full ACL/bucket comparisons. No LOGIN or economic activation         |
+| API code        | Actual snapshot release 37130549747 passed: all 34 JSON bytes verified, new read-only Edge ACTIVE, GET/OPTIONS/CORS passed; old seven function identities unchanged     | Complete dataset/country API audit is in progress; Pages API configuration remains disabled. Source snapshot is not runtime state; old DB path remains HOLD     |
+| Page code       | Responsive Root camera, role layout and partial mobile drawer fixes merged; original and post-fix 840 HOME images actually reviewed; bounded online c135 samples passed | Drawer glyph-prefix loss remains INCONCLUSIVE; mixed source labels/66 decorative cluster retained. API config disabled; no full gameplay or all-page acceptance |
+| Opening / gates | Admission and transactional seed-readback code merged; PR #32 passed B review and exact-SHA full CI                                                                     | Six recorded opening-semantic gaps remain; Gate B remains PENDING                                                                                               |
 
 Lobby entry and team/person/office assignment are intentionally deferred by the
 owner. Public official-source connections can proceed without inventing those
@@ -40,8 +40,18 @@ stopped at key selection before any Storage call or Edge deployment. The subsequ
 single metadata-only run `37042407081` observed two current selector candidates
 (one modern service-role secret and one legacy service-role key), without selecting
 or using a key. This does not establish the historical failure's cause or key validity.
-Its diagnostic lock was retired; a minimal admission fix requires independent
-review and new release authorization. No publication retry is currently authorized.
+Its diagnostic lock was retired. Main-site #90 corrected admission; its separately
+authorized publish `37044748085` stopped at the first bucket read, with zero writes.
+The #91 single diagnostic `37128962923` observed HTTP400/NoSuchBucket; this does
+not prove absence, credential usability or the historical failure cause. The #92
+strict bucket-only compatibility fix passed independent review and CI, then
+merged as `fc5c328965403cbbbf9b77a3639559cc7bb619df`.
+The new single release `37130549747` succeeded: all 34 fixed JSON objects were
+publicly byte-verified, the new reader was deployed, and GET/OPTIONS/CORS passed.
+The release lock was retired. The receipt does not count newly created objects
+separately, so this is not a claim that 34 new object POSTs occurred.
+Complete API readback and Pages connection remain pending; no LOGIN, World/Core,
+Worker, command execution or Gate approval follows from this source release.
 
 ## Official 70-country data selection (2026-09-28)
 
