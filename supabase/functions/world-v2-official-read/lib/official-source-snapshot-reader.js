@@ -1,8 +1,8 @@
 import { Buffer } from 'node:buffer';
 import { createHash } from 'node:crypto';
 import { OFFICIAL_COUNTRY_PACKAGE_ID, OFFICIAL_COUNTRY_SELECTION_SHA256, OFFICIAL_COUNTRY_SOURCE_QUERY, OFFICIAL_COUNTRY_SOURCE_STORAGE_PATH, } from './official-country-baseline.js';
-import { OFFICIAL_DATASETS } from './official-dataset-registry.js';
-import { OFFICIAL_DATASET_SOURCE_QUERY } from './official-dataset-source.js';
+import { OFFICIAL_DATASETS, } from './official-dataset-registry.js';
+import { OFFICIAL_DATASET_SOURCE_QUERY, registerOfficialSnapshotSourceStore, } from './official-dataset-source.js';
 export const OFFICIAL_SOURCE_BUCKET = 'world-v2-official-source-v1';
 export const OFFICIAL_SOURCE_PUBLIC_BASE = `https://vimksjrhaxdpnkvgsavz.supabase.co/storage/v1/object/public/${OFFICIAL_SOURCE_BUCKET}/${OFFICIAL_COUNTRY_SELECTION_SHA256}`;
 const MAX_PART_BYTES = 150_000;
@@ -26,10 +26,55 @@ function splitUtf8(content) {
     return parts;
 }
 /** Server-only adapter for an exact selected-source copy, not a database or
- * live World projection. The old fixed-query interface is reused solely to
- * retain existing DTO/hash/decimal validation; no SQL is executed here. */
+ * live World projection. Structured dataset reads use a bounded verified parsed
+ * store; the country/legacy fixed-query bridge remains available. No SQL runs. */
 export function createOfficialSourceSnapshotReader(fetchSource = (url, init) => fetch(url, init)) {
-    return {
+    async function loadBytes(spec) {
+        if (!OFFICIAL_DATASETS.includes(spec) ||
+            spec.bytes < 1 ||
+            spec.bytes > MAX_SOURCE_BYTES)
+            throw new Error('OFFICIAL_SOURCE_FIXED_QUERY_REQUIRED');
+        const response = await fetchSource(`${OFFICIAL_SOURCE_PUBLIC_BASE}/${spec.sha256}.json`, {
+            method: 'GET',
+            redirect: 'error',
+            credentials: 'omit',
+            headers: { accept: 'application/json' },
+            signal: AbortSignal.timeout(5_000),
+        });
+        if (response.status !== 200 ||
+            response.body === null ||
+            response.redirected ||
+            response.headers
+                .get('content-type')
+                ?.split(';')[0]
+                ?.trim()
+                .toLowerCase() !== 'application/json')
+            throw new Error('OFFICIAL_SOURCE_SNAPSHOT_UNAVAILABLE');
+        const stream = response.body.getReader();
+        const chunks = [];
+        let bytes = 0;
+        try {
+            for (;;) {
+                const { done, value } = await stream.read();
+                if (done)
+                    break;
+                bytes += value.byteLength;
+                if (bytes > spec.bytes)
+                    throw new Error('OFFICIAL_SOURCE_SNAPSHOT_INVALID');
+                chunks.push(value);
+            }
+        }
+        finally {
+            await stream.cancel().catch(() => undefined);
+            stream.releaseLock();
+        }
+        const raw = Buffer.concat(chunks);
+        if (bytes !== spec.bytes ||
+            createHash('sha256').update(raw).digest('hex') !== spec.sha256)
+            throw new Error('OFFICIAL_SOURCE_SNAPSHOT_INVALID');
+        return raw;
+    }
+    const reader = {
         async query(text, values) {
             const spec = OFFICIAL_DATASETS.find((candidate) => candidate.storagePath === values[1]);
             const country = text === OFFICIAL_COUNTRY_SOURCE_QUERY &&
@@ -41,44 +86,7 @@ export function createOfficialSourceSnapshotReader(fetchSource = (url, init) => 
                 spec.bytes < 1 ||
                 spec.bytes > MAX_SOURCE_BYTES)
                 throw new Error('OFFICIAL_SOURCE_FIXED_QUERY_REQUIRED');
-            const response = await fetchSource(`${OFFICIAL_SOURCE_PUBLIC_BASE}/${spec.sha256}.json`, {
-                method: 'GET',
-                redirect: 'error',
-                credentials: 'omit',
-                headers: { accept: 'application/json' },
-                signal: AbortSignal.timeout(5_000),
-            });
-            if (response.status !== 200 ||
-                response.body === null ||
-                response.redirected ||
-                response.headers
-                    .get('content-type')
-                    ?.split(';')[0]
-                    ?.trim()
-                    .toLowerCase() !== 'application/json')
-                throw new Error('OFFICIAL_SOURCE_SNAPSHOT_UNAVAILABLE');
-            const stream = response.body.getReader();
-            const chunks = [];
-            let bytes = 0;
-            try {
-                for (;;) {
-                    const { done, value } = await stream.read();
-                    if (done)
-                        break;
-                    bytes += value.byteLength;
-                    if (bytes > spec.bytes)
-                        throw new Error('OFFICIAL_SOURCE_SNAPSHOT_INVALID');
-                    chunks.push(value);
-                }
-            }
-            finally {
-                await stream.cancel().catch(() => undefined);
-                stream.releaseLock();
-            }
-            const raw = Buffer.concat(chunks);
-            if (bytes !== spec.bytes ||
-                createHash('sha256').update(raw).digest('hex') !== spec.sha256)
-                throw new Error('OFFICIAL_SOURCE_SNAPSHOT_INVALID');
+            const raw = await loadBytes(spec);
             const content = new TextDecoder('utf-8', { fatal: true }).decode(raw);
             const parts = country ? [content] : splitUtf8(content);
             return {
@@ -98,4 +106,6 @@ export function createOfficialSourceSnapshotReader(fetchSource = (url, init) => 
             };
         },
     };
+    registerOfficialSnapshotSourceStore(reader, loadBytes);
+    return reader;
 }

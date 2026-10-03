@@ -15,6 +15,137 @@ limit 100
 const MAX_CHUNK_BYTES = 150_000;
 const MAX_SOURCE_BYTES = 9_000_000;
 const JSON_NUMBER = /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?/uy;
+/** Per snapshot-reader isolate. Accounted value bytes are a conservative retained
+ * tree budget, not a promise about the JS engine's total RSS or cold allocations. */
+export const OFFICIAL_SNAPSHOT_CACHE_LIMITS = Object.freeze({
+    entries: 4,
+    sourceBytes: 12_000_000,
+    valueBytes: 32_000_000,
+    inFlight: 2,
+});
+const snapshotStores = new WeakMap();
+function parseSource(content, spec) {
+    let parsed;
+    try {
+        parsed = parseLosslessOfficialJson(content);
+    }
+    catch {
+        invalid();
+    }
+    if ((spec.kind === 'ARRAY' && !Array.isArray(parsed)) ||
+        (spec.kind !== 'ARRAY' &&
+            (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed))))
+        invalid();
+    return parsed;
+}
+function freezeAndAccount(value) {
+    const pending = [value];
+    let bytes = 0;
+    while (pending.length > 0) {
+        const item = pending.pop();
+        if (typeof item === 'string')
+            bytes += 32 + item.length * 2;
+        else if (item !== null && typeof item === 'object') {
+            bytes += 64;
+            for (const [key, child] of Object.entries(item)) {
+                bytes += 32 + key.length * 2;
+                pending.push(child);
+            }
+            Object.freeze(item);
+        }
+        else
+            bytes += 16;
+    }
+    return bytes;
+}
+/** Server-only registration: generic SQL readers are never silently cached.
+ * The loader supplies bytes, not trusted parsed data. Every new load is verified
+ * here before parsing, freezing and admission. Lower limits aid focused tests;
+ * callers cannot raise the production caps. No raw bytes are retained. */
+export function registerOfficialSnapshotSourceStore(reader, load, requested = {}) {
+    if (snapshotStores.has(reader))
+        throw new Error('SNAPSHOT_STORE_ALREADY_SET');
+    const limits = { ...OFFICIAL_SNAPSHOT_CACHE_LIMITS, ...requested };
+    for (const key of Object.keys(limits)) {
+        if (!Number.isSafeInteger(limits[key]) ||
+            limits[key] < 1 ||
+            limits[key] > OFFICIAL_SNAPSHOT_CACHE_LIMITS[key])
+            throw new Error('SNAPSHOT_CACHE_LIMIT_INVALID');
+    }
+    const cache = new Map();
+    const pending = new Map();
+    let sourceBytes = 0;
+    let valueBytes = 0;
+    snapshotStores.set(reader, async (spec) => {
+        const key = JSON.stringify([
+            OFFICIAL_COUNTRY_PACKAGE_ID,
+            OFFICIAL_COUNTRY_SELECTION_SHA256,
+            spec.slug,
+            spec.sourcePath,
+            spec.storagePath,
+            spec.sha256,
+            spec.bytes,
+            spec.kind,
+        ]);
+        const hit = cache.get(key);
+        if (hit !== undefined) {
+            cache.delete(key);
+            cache.set(key, hit);
+            return hit.value;
+        }
+        const existing = pending.get(key);
+        if (existing !== undefined)
+            return existing;
+        if (pending.size >= limits.inFlight)
+            throw new OfficialDatasetFailure('SOURCE_UNAVAILABLE');
+        // Defer the loader so even a synchronous throw occurs after registration.
+        const task = Promise.resolve().then(async () => {
+            try {
+                if (spec.bytes < 1 || spec.bytes > MAX_SOURCE_BYTES)
+                    invalid();
+                const raw = await load(spec);
+                if (raw.byteLength !== spec.bytes ||
+                    createHash('sha256').update(raw).digest('hex') !== spec.sha256)
+                    invalid();
+                let content;
+                try {
+                    content = new TextDecoder('utf-8', { fatal: true }).decode(raw);
+                }
+                catch {
+                    invalid();
+                }
+                const value = parseSource(content, spec);
+                const cost = freezeAndAccount(value);
+                if (spec.bytes <= limits.sourceBytes && cost <= limits.valueBytes) {
+                    while (cache.size >= limits.entries ||
+                        sourceBytes + spec.bytes > limits.sourceBytes ||
+                        valueBytes + cost > limits.valueBytes) {
+                        const oldest = cache.entries().next().value;
+                        if (oldest === undefined)
+                            break;
+                        cache.delete(oldest[0]);
+                        sourceBytes -= oldest[1].sourceBytes;
+                        valueBytes -= oldest[1].valueBytes;
+                    }
+                    cache.set(key, { value, sourceBytes: spec.bytes, valueBytes: cost });
+                    sourceBytes += spec.bytes;
+                    valueBytes += cost;
+                }
+                return value;
+            }
+            catch (error) {
+                if (error instanceof OfficialDatasetFailure)
+                    throw error;
+                throw new OfficialDatasetFailure('SOURCE_UNAVAILABLE');
+            }
+            finally {
+                pending.delete(key);
+            }
+        });
+        pending.set(key, task);
+        return task;
+    });
+}
 export class OfficialDatasetFailure extends Error {
     code;
     constructor(code) {
@@ -69,6 +200,9 @@ export function parseLosslessOfficialJson(content) {
 /** Reconstructs exact UTF-8 chunks under the selected bundle only. The
  * source's historical candidate status remains unchanged and non-runtime. */
 export async function readOfficialDatasetSource(reader, spec) {
+    const snapshotStore = snapshotStores.get(reader);
+    if (snapshotStore !== undefined)
+        return snapshotStore(spec);
     let rows;
     try {
         const result = await reader.query(OFFICIAL_DATASET_SOURCE_QUERY, [
@@ -108,16 +242,5 @@ export async function readOfficialDatasetSource(reader, spec) {
         spec.bytes > MAX_SOURCE_BYTES ||
         createHash('sha256').update(content, 'utf8').digest('hex') !== spec.sha256)
         invalid();
-    let parsed;
-    try {
-        parsed = parseLosslessOfficialJson(content);
-    }
-    catch {
-        invalid();
-    }
-    if ((spec.kind === 'ARRAY' && !Array.isArray(parsed)) ||
-        (spec.kind !== 'ARRAY' &&
-            (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed))))
-        invalid();
-    return parsed;
+    return parseSource(content, spec);
 }
