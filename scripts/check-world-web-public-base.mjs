@@ -104,9 +104,18 @@ for (const file of outputFiles.filter((item) => item.endsWith('.css'))) {
   }
 }
 const entry = readFileSync(path.join(root, 'index.html'), 'utf8');
-const entryAssets = [
-  ...entry.matchAll(/\b(?:src|href)=["']([^"']*\/assets\/[^"']+)["']/gu),
-].map((match) => match[1]);
+// Only generated runtime scripts/styles use Vite's assets directory. Public
+// icons can contain an unrelated assets segment and are checked by visit above.
+const entryAssets = [...entry.matchAll(/<(?:script|link)\b[^>]*>/gu)]
+  .map((match) => match[0])
+  .filter(
+    (tag) => tag.startsWith('<script') || /\brel=["']stylesheet["']/u.test(tag),
+  )
+  .flatMap((tag) =>
+    [...tag.matchAll(/\b(?:src|href)=["']([^"']*\/assets\/[^"']+)["']/gu)].map(
+      (match) => match[1],
+    ),
+  );
 assert(
   entryAssets.length > 0 &&
     entryAssets.every((ref) => ref.startsWith(`${base}assets/`)),
