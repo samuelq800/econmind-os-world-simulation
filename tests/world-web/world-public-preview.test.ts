@@ -101,6 +101,38 @@ describe('public World preview deployment', () => {
     expect(candidateWorkflow).not.toContain('SUPABASE');
     expect(candidateWorkflow).not.toContain('secrets.');
   });
+
+  it('builds and validates assets using the configured Pages site path before upload', () => {
+    const configure = deploymentWorkflow.indexOf(
+      '      - name: Configure Pages',
+    );
+    const build = deploymentWorkflow.indexOf(
+      '      - name: Build the non-authoritative World web preview',
+    );
+    const validate = deploymentWorkflow.indexOf(
+      '      - name: Verify static assets against the configured Pages path',
+    );
+    const upload = deploymentWorkflow.indexOf(
+      '      - name: Upload static World preview',
+    );
+    expect(configure).toBeGreaterThan(-1);
+    expect(build).toBeGreaterThan(configure);
+    expect(validate).toBeGreaterThan(build);
+    expect(upload).toBeGreaterThan(validate);
+    expect(deploymentWorkflow.slice(configure, build)).toContain('id: pages');
+    for (const step of [
+      deploymentWorkflow.slice(build, validate),
+      deploymentWorkflow.slice(validate, upload),
+    ]) {
+      expect(step).toContain(
+        'WORLD_WEB_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}/',
+      );
+    }
+    expect(deploymentWorkflow).not.toContain('vars.WORLD_WEB_PUBLIC_BASE_PATH');
+    expect(deploymentWorkflow).toContain(
+      'node scripts/check-world-web-public-base.mjs "$WORLD_WEB_PUBLIC_BASE_PATH"',
+    );
+  });
 });
 
 const officialLoader = () =>
