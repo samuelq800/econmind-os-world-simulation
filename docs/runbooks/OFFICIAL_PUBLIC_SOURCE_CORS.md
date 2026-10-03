@@ -1,5 +1,39 @@
 # Official public source CORS boundary
 
+## Selected-source snapshot Edge publication
+
+The deployable `supabase/functions/world-v2-official-read/index.ts` candidate
+uses a fixed allowlist: `https://samuelq800.github.io` and
+`https://world.econmind.group`. These are exact HTTPS origins, with no wildcard,
+HTTP alias, opaque `null` origin, suffix match, credentials or arbitrary Origin
+reflection. Existing GET/HEAD and Accept-only OPTIONS semantics are retained.
+This code change requires independent review and an authorized Edge release;
+it does not itself alter the deployed function or Pages settings.
+
+Pages must be opened over HTTPS. The provider's HTTP page URL or a redirect to
+HTTP cannot use this CORS allowance. Enforcing HTTPS is a separate Pages
+configuration action for the release owner, not an automatic code operation.
+For a custom domain mounted at `/`, the existing
+`WORLD_WEB_PUBLIC_BASE_PATH` variable must be `/`; an absent value in GitHub
+Actions defaults to `/econmind-os-world-simulation/`, which is the project-site
+path rather than the custom-domain root. Verify the actual root asset URLs
+and six-role entry links after an authorized Pages build.
+
+The existing public `WORLD_OFFICIAL_READ_BASE_URL` variable must contain
+`https://vimksjrhaxdpnkvgsavz.supabase.co/functions/v1/world-v2-official-read/`.
+Do not append `/v1/world-data`: the build injector validates the function root,
+and the browser reader appends the selected-source route. Setting a variable
+does not trigger a build. The existing `deploy-world-web.yml` workflow builds
+and deploys on manual dispatch or a qualifying main push. Both variable changes
+and dispatch require separate release authorization.
+
+The transport remains `HASH_PINNED_IMMUTABLE_SOURCE_SNAPSHOT`, with
+`liveWorldState: false`, unexecuted proposal fields and browser reads using
+`credentials: 'omit'`. A verified source catalogue/country/field does not
+establish a runtime, executed decision, worker or economic settlement.
+
+## Separate database-backed API configuration
+
 `WORLD_API_OFFICIAL_PUBLIC_ORIGINS` is an optional, comma-separated list of
 exact canonical browser origins. It is absent by default; absent means no
 cross-origin headers or preflight capability. At most eight origins are allowed.

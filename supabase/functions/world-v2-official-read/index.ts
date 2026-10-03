@@ -4,7 +4,12 @@ import { createOfficialSourceSnapshotReader } from './lib/official-source-snapsh
 // Forward candidate only: immutable selected-source snapshot, not a live DB
 // projection. No environment, password, admin/service-role or browser key.
 // The old DB publisher remains HOLD and its guards are not bypassed.
-const allowedOrigins = ['https://samuelq800.github.io'];
+// Exact HTTPS publication origins only. HTTP/custom-domain aliases do not gain
+// browser read access; no credentials or arbitrary Origin reflection are used.
+const allowedOrigins = [
+  'https://samuelq800.github.io',
+  'https://world.econmind.group',
+];
 const reader = createOfficialSourceSnapshotReader();
 const handle = createOfficialEdgeFetchHandler({ reader, allowedOrigins });
 

@@ -18,6 +18,7 @@ import {
 import { OFFICIAL_DATASETS } from '../../apps/world-api/src/integration/official-dataset-registry.js';
 import { OFFICIAL_DATASET_SOURCE_QUERY } from '../../apps/world-api/src/integration/official-dataset-source.js';
 import { createRoleScopedOfficialCountryReader } from '../../apps/world-api/src/integration/official-country-role-reader.js';
+import officialSnapshotEdge from '../../supabase/functions/world-v2-official-read/index.js';
 
 const origin = 'https://samuelq800.github.io';
 const base = `https://vimksjrhaxdpnkvgsavz.supabase.co${OFFICIAL_EDGE_FUNCTION_PREFIX}`;
@@ -27,6 +28,116 @@ const artifact = new URL(
 );
 const sha256 = (content: string) =>
   createHash('sha256').update(content).digest('hex');
+
+describe('snapshot Edge publication origin configuration', () => {
+  const url = `${base}/v1/world-data/map-assets?limit=1`;
+  const approved = [
+    'https://samuelq800.github.io',
+    'https://world.econmind.group',
+  ];
+
+  it.each(approved)(
+    'allows credential-free GET and OPTIONS from %s',
+    async (browserOrigin) => {
+      // Exercise the actual deployable entry, not a separately copied allowlist.
+      const response = await officialSnapshotEdge.fetch(
+        new Request(url, { headers: { origin: browserOrigin } }),
+      );
+      expect(response.status).toBe(200);
+      expect(response.headers.get('access-control-allow-origin')).toBe(
+        browserOrigin,
+      );
+      expect(
+        response.headers.get('access-control-allow-credentials'),
+      ).toBeNull();
+      expect(response.headers.get('x-world-source-transport')).toBe(
+        'HASH_PINNED_IMMUTABLE_SOURCE_SNAPSHOT',
+      );
+      expect(await response.json()).toMatchObject({
+        liveWorldState: false,
+        returned: 1,
+      });
+      const preflight = await officialSnapshotEdge.fetch(
+        new Request(url, {
+          method: 'OPTIONS',
+          headers: {
+            origin: browserOrigin,
+            'access-control-request-method': 'GET',
+            'access-control-request-headers': 'Accept',
+          },
+        }),
+      );
+      expect(preflight.status).toBe(204);
+      expect(preflight.headers.get('access-control-allow-origin')).toBe(
+        browserOrigin,
+      );
+      expect(preflight.headers.get('access-control-allow-methods')).toBe(
+        'GET, HEAD',
+      );
+      expect(
+        preflight.headers.get('access-control-allow-credentials'),
+      ).toBeNull();
+    },
+  );
+
+  it.each([
+    'http://world.econmind.group',
+    'http://samuelq800.github.io',
+    'https://evil.invalid',
+    'https://world.econmind.group.evil.invalid',
+    'https://evilworld.econmind.group',
+    'https://world.econmind.group/',
+    'https://user:password@world.econmind.group',
+    'null',
+  ])('denies browser access and preflight from %s', async (browserOrigin) => {
+    const response = await officialSnapshotEdge.fetch(
+      new Request(url, { headers: { origin: browserOrigin } }),
+    );
+    // Public GET remains public; browser permission is withheld.
+    expect(response.status).toBe(200);
+    expect(response.headers.get('access-control-allow-origin')).toBeNull();
+    expect(response.headers.get('access-control-allow-credentials')).toBeNull();
+    const preflight = await officialSnapshotEdge.fetch(
+      new Request(url, {
+        method: 'OPTIONS',
+        headers: {
+          origin: browserOrigin,
+          'access-control-request-method': 'GET',
+        },
+      }),
+    );
+    expect(preflight.status).toBe(403);
+    expect(preflight.headers.get('access-control-allow-origin')).toBeNull();
+  });
+
+  it.each(approved)(
+    'rejects credential-header preflights from %s',
+    async (browserOrigin) => {
+      for (const credentialHeader of [
+        'Authorization',
+        'Cookie',
+        'Accept, Authorization',
+      ]) {
+        const response = await officialSnapshotEdge.fetch(
+          new Request(url, {
+            method: 'OPTIONS',
+            headers: {
+              origin: browserOrigin,
+              'access-control-request-method': 'GET',
+              'access-control-request-headers': credentialHeader,
+            },
+          }),
+        );
+        expect(response.status).toBe(403);
+        expect(response.headers.get('access-control-allow-origin')).toBeNull();
+        expect(
+          response.headers.get('access-control-allow-credentials'),
+        ).toBeNull();
+      }
+    },
+  );
+});
+
 const environment = {
   WORLD_DATABASE_URL:
     'postgresql://world_v2_api_login.vimksjrhaxdpnkvgsavz:synthetic@aws-0-us-west-1.pooler.supabase.com:6543/postgres?sslmode=require',
