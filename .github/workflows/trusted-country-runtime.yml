@@ -1,0 +1,62 @@
+name: Trusted country runtime candidate (no deploy)
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/trusted-country-runtime.yml
+      - apps/world-web/src/country-runtime/**
+      - apps/world-web/src/authorized-client/**
+      - apps/world-web/src/prototype/local-authorized-read.ts
+      - apps/world-web/src/prototype/authorized-read-adapter.ts
+      - apps/world-web/public/season1-immersive/country-game.js
+      - apps/world-web/vite.config.ts
+      - tests/world-web/trusted-country-runtime.test.ts
+      - tests/world-web/official-metric-source.test.ts
+  push:
+    branches: [codex/c-trusted-runtime-ui-bridge]
+    paths:
+      - .github/workflows/trusted-country-runtime.yml
+      - apps/world-web/src/country-runtime/**
+      - apps/world-web/src/authorized-client/**
+      - apps/world-web/src/prototype/local-authorized-read.ts
+      - apps/world-web/src/prototype/authorized-read-adapter.ts
+      - apps/world-web/public/season1-immersive/country-game.js
+      - apps/world-web/vite.config.ts
+      - tests/world-web/trusted-country-runtime.test.ts
+      - tests/world-web/official-metric-source.test.ts
+
+permissions:
+  contents: read
+
+jobs:
+  trusted-country-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Actual offline runtime lifecycle and reviewed controller regressions
+        run: pnpm exec vitest run --reporter=verbose tests/world-web/trusted-country-runtime.test.ts tests/world-web/local-command-disconnect-liveness.test.ts tests/world-web/local-command-loop.test.ts tests/world-web/local-authorized-read.test.ts tests/world-web/official-metric-source.test.ts
+      - name: Focused typecheck, lint and format
+        run: |
+          pnpm --filter @econmind/world-web typecheck
+          pnpm exec tsc --noEmit --target ES2024 --lib ES2024,DOM,DOM.Iterable --module ESNext --moduleResolution bundler --jsx react-jsx --skipLibCheck --strict --exactOptionalPropertyTypes --noUncheckedIndexedAccess --types node,vite/client tests/world-web/trusted-country-runtime.test.ts
+          pnpm exec eslint apps/world-web/src/country-runtime apps/world-web/vite.config.ts tests/world-web/trusted-country-runtime.test.ts tests/world-web/official-metric-source.test.ts
+          pnpm exec prettier --check apps/world-web/src/country-runtime apps/world-web/vite.config.ts tests/world-web/trusted-country-runtime.test.ts tests/world-web/official-metric-source.test.ts .github/workflows/trusted-country-runtime.yml
+      - name: Browser ownership, environment, secrets and immutable UI source boundaries
+        run: |
+          pnpm --filter @econmind/core build
+          pnpm --filter @econmind/world-worker build
+          node scripts/check-boundaries.mjs
+          pnpm env:check
+          pnpm secrets:check
+          pnpm test:authoritative-ui
+      - name: Default disconnected non-authoritative static build
+        run: pnpm --filter @econmind/world-web build
