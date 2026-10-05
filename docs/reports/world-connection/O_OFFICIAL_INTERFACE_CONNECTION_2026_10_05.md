@@ -129,9 +129,63 @@ online role views or a mobile/playability acceptance.
   70/70 country detail and each country's three association results are
   recorded. Original `ALL_DATA_READBACK_FAIL` and historical 546 cause UNKNOWN
   remain unchanged; complete geography in this new traversal is VERIFIED.
-- G is preparing/checking country 01 and 70 across six offices and desktop /
-  mobile. This bounded online subset must not overwrite the retained original
-  and post-fix 840-image local HOME visual evidence.
+- G completed the bounded online check of country 01 and 70 across six offices
+  and desktop/mobile. The precise results and remaining observation gaps are
+  recorded below. This subset does not overwrite the retained original and
+  post-fix 840-image local HOME visual evidence.
+
+## Six-office browser acceptance — bounded scope complete
+
+G's final report and ledger were directly read by Root; all four reported
+document/ledger/mapping hashes match. The published web/config baseline is
+still the same `0ec30a28...` artifact; no new deployment was needed.
+
+| Evidence layer               | Actual accepted result                                                                     | Limit                                                                              |
+| ---------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| Country/Office HOME          | 24/24 correct country and role, `API_COUNTRY_VERIFIED`, no horizontal overflow             | Only countries 01 and 70, six Offices, two viewports                               |
+| Selected metric source match | 12/12 desktop pairs visibly `VERIFIED_SOURCE`, exact value/dataset/field/unit/nature match | One selected metric per pair, not all HUD fields online                            |
+| Source directory/detail      | 12/12 mobile pairs, 34-source directory and relevant country source detail available       | Separate mobile observations, not 24 complete drawer cross-checks                  |
+| Native API HTTP/CORS         | 60/60 observed HTTP200, exact custom-domain Origin/ACAO, no ACAC, snapshot transport       | Only 39/60 independent observer JSON summaries captured; remaining 21 INCONCLUSIVE |
+| Country atlas return         | Four actual returns PASS, exact country/role retained                                      | Two countries, Captain, both viewports; not completion of every lazy atlas image   |
+| Offline provenance           | 70 valid inputs, 1,260 HOME metric mappings and 5,496 site fields, zero missing            | Local structural checks, not 420 online country/role views                         |
+
+Selected metrics were Captain population, Finance combined Treasury/CB,
+Central Bank reserves, Industry site power, Trade grain stock and Social
+labour force. Source `0` values remain exact source values, not missing-data
+substitutes. Units and blocked/proposal natures remain literal.
+
+G separately viewed 42 selected originals: 24 HOME, 12 source details,
+two Finance metric drawers and four atlas-return views. Root verified all
+42 file hashes and sampled the country-01 Finance metric and country-70
+Social mobile HOME images. Root does not claim to have re-viewed all 42 images.
+
+The raw strict observer's 4 PASS / 20 FAIL and two wrong-page atlas-selector
+timeouts are retained. The interpretation ledger separately documents
+same-URL document reuse without a new country GET, initial mobile images
+with an already-open drawer, wrong React-root expectations on the static
+country atlas, and post-read controller-abort observations. Corrected mobile
+HOME images supersede but do not delete the originals. The raw network records
+retain 23 aborts (21 API and two initial journey images); exact timing and the
+21 unavailable observer bodies are INCONCLUSIVE. Successful DOM source matching
+does not independently prove those bodies or establish an abort root cause.
+No all-body PASS, zero-abort claim or silent raw-failure rewrite is made.
+
+Durable directory:
+`/Users/samuel/Documents/econclub/econmind-g-page-read-preparation-evidence/20261005T1402Z/`.
+
+- `G_FINAL.md`: SHA-256
+  `6c4c3ad9ea442b463587c0326b22f3e2699775d703097e22c2a435e12183d3dd`.
+- `ACCEPTANCE_LEDGER.json`: SHA-256
+  `abb937b1c1331cc6121ca95d86b54747eace00b39fc3c6f2d302e12110aa3f76`.
+- `IMAGE_INDEX.json`: SHA-256
+  `ed3ba6f35e626e04641a59a03b2010fa012f5649ae9cb098926d60c9c3a11895`.
+- `OFFICE_MAPPING.json`: SHA-256
+  `db345255a77d6afca2bf59cf3b406920f17b57602924f3fb4cf5e0c765e22f6e`.
+
+No missing adapter mapping requiring a code patch was found in this scope.
+A and G have completed their assigned connection checks and stopped.
+Full 420 online coverage, all map/atlas asset completion and economic runtime
+acceptance remain outside this finite source-interface acceptance.
 
 Login, team/person/Office assignment, source-to-runtime opening adoption,
 Core/Worker execution, command-to-FINAL and Gate B remain separate unfinished
