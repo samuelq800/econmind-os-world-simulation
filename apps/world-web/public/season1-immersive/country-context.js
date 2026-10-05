@@ -102,7 +102,7 @@
       });
       return await Promise.race([
         fetcher(url, { ...options, signal: controller.signal }).then(json),
-        new Promise((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(Error('DATA_TIMEOUT')); }, 5000); }),
+        new Promise((_, reject) => { timer = setTimeout(() => { controller.abort(); reject(Error('DATA_TIMEOUT')); }, 15000); }),
         aborted,
       ]);
     } finally { clearTimeout(timer); outside?.removeEventListener('abort', onAbort); controller.abort(); }
