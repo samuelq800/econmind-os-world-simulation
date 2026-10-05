@@ -222,17 +222,62 @@ describe('V06 owner-authorized package continuation', () => {
         package_verified: false,
       },
     });
-    expect(progress.current_gate).toMatchObject({
+    expect(progress.current_gate).toEqual({
       step_id: 'V09.1',
       status: 'PLANNED',
+      review: 'V08_MAINLINE_INTEGRATED_PENDING_ISOLATED_V09_PREFLIGHT',
       next_step: 'V09.1',
       next_step_ready: false,
       next_step_blockers: [
-        'ADR-18 before V09.1 real persistence/concurrency evidence',
+        'Isolated V09 preflight and required real persistence/concurrency/runtime evidence remain pending; ADR-18 isolation approval is already recorded and does not authorize production',
       ],
       required_gate: 'V09.1_ADR_18_DECISION',
       gate_status: 'PENDING',
     });
+    const decisions = readJson('status/decisions.json').decisions;
+    const isolationDecision = decisions.find(
+      (decision) => decision.id === 'ADR-18',
+    );
+    expect(isolationDecision).toMatchObject({
+      status: 'APPROVED',
+      approval_required_from: 'RESPONSIBLE_HUMAN_OWNER',
+      approval_record: 'docs/architecture/decisions/ADR-18.md',
+    });
+    const isolationApproval = readFileSync(
+      resolve(root, isolationDecision.approval_record),
+      'utf8',
+    ).replace(/\s+/gu, ' ');
+    expect(isolationApproval).toContain('disposable local/CI PostgreSQL');
+    expect(isolationApproval).toContain(
+      'does not authorize production access, publication, cutover, or mutation.',
+    );
+    expect(
+      ['V09.1', 'V09.2', 'V09.3', 'V10.4'].map((step) => progress.steps[step]),
+    ).toEqual(['PLANNED', 'PLANNED', 'PLANNED', 'PLANNED']);
+    const pendingDecisions = decisions.filter(
+      (decision) => decision.status !== 'APPROVED',
+    );
+    expect(pendingDecisions).toHaveLength(11);
+    expect(
+      pendingDecisions.every(
+        (decision) =>
+          decision.status === 'PROPOSED_NOT_APPROVED' &&
+          decision.approval_record === null,
+      ),
+    ).toBe(true);
+    expect(
+      decisions.find((decision) => decision.id === 'ADR-09'),
+    ).toMatchObject({
+      status: 'PROPOSED_NOT_APPROVED',
+      approval_required_from: 'RESPONSIBLE_HUMAN_OWNER',
+      approval_record: null,
+    });
+    expect(
+      readFileSync(
+        resolve(root, 'docs/reports/gate-b/CURRENT_GATE_B_STATUS.md'),
+        'utf8',
+      ),
+    ).toContain('GATE_B_WORLD_CORE_HARD_GATE = PENDING');
     expect(progress.v08_integration).toMatchObject({
       branch: 'codex/world-core-v08',
       approved_package_target: 'b3a1f4949efa85d1c310819ebdf37505589f1b49',
