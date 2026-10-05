@@ -15,7 +15,11 @@ the exact Treasury/CB source field. PR #71's bounded remaining-data audit tool
 is merged; its single authorized traversal completed with 511 HTTP200 reads,
 303/303 new groups verified, 22 complete new datasets, 70 country details and
 210 country associations. Together with the preserved 12 earlier dataset
-results, this is mixed-version source evidence, not same-version full PASS. This does not
+results, this is mixed-version source evidence, not same-version full PASS.
+G's bounded online checks cover countries 01/70 across all six Offices:
+24 desktop/mobile HOME views, 12 selected desktop metric matches, 12 mobile
+source-detail entries and four atlas returns. Offline provenance checks found
+no missing mappings in 1,260 HOME metrics or 5,496 site fields. This does not
 claim all-country online acceptance, live economic state or Gate B approval.
 The October 3 checkpoint below is retained as history and is superseded only
 within this new record's explicitly verified scope.
