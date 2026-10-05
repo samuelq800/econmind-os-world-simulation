@@ -5,7 +5,19 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current integration snapshot (2026-10-03)
+## Current integration snapshot (2026-10-05)
+
+Latest connection checkpoint: [official interface connection](docs/reports/world-connection/O_OFFICIAL_INTERFACE_CONNECTION_2026_10_05.md).
+The actual reader-v2 update `37136193366` is verified, and discovered Pages
+publication `37188781902` already has `CONFIGURED_READ_ONLY` at
+`https://world.econmind.group/`. A real country-01 Finance browser read matched
+the exact Treasury/CB source field. PR #71's bounded remaining-data audit tool
+is merged; its separately authorized final traversal is pending. This does not
+claim all-country online acceptance, live economic state or Gate B approval.
+The October 3 checkpoint below is retained as history and is superseded only
+within this new record's explicitly verified scope.
+
+### Retained October 3 checkpoint
 
 Code baseline: main `66d57ec3a2bfa47d2d2081ee746214c111795105` (October 2 UTC / October 3 Shanghai checkpoint).
 The [October 2 integration supplement](docs/reports/delivery/WORLD_V2_INTEGRATION_SUPPLEMENT_2026_10_02.md)
