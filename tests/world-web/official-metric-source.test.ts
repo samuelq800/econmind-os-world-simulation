@@ -305,7 +305,7 @@ function game(
 
 describe('six-role official metric source links', () => {
   it.each(Object.keys(roles) as (keyof typeof roles)[])(
-    '%s opens published exact field provenance offline and keeps confirmation local',
+    '%s preserves source planning but disables allocation Confirm without a trusted command',
     async (role) => {
       const page = game(role);
       for (const key of roles[role]) {
@@ -328,10 +328,11 @@ describe('six-role official metric source links', () => {
         'LOCAL_REHEARSAL',
       );
       expect(page.nodes.get('.national-drawer')!.innerHTML).toContain(
-        'Confirm saves a local decision.',
+        'Local planning only. Allocation Confirm is disabled.',
       );
       page.commands['country-confirm']!();
-      expect(page.state().records[0]?.status).toBe('LOCAL_NOT_EXECUTED');
+      expect(page.state().records).toEqual([]);
+      expect(page.nodes.get('.national-confirm')!.disabled).toBe(true);
       expect(page.fetcher).not.toHaveBeenCalled();
       expect(page.saved).toHaveBeenCalled();
       expect(page.nodes.get('.country-game')!.scrollTop).toBe(42);

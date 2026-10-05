@@ -38,6 +38,10 @@ export function resolvePublicBasePath({
 const worldWebRoot = fileURLToPath(new URL('.', import.meta.url));
 const publicPageInputs = {
   main: resolve(worldWebRoot, 'index.html'),
+  'country-runtime-entry': resolve(
+    worldWebRoot,
+    'src/country-runtime/entry.ts',
+  ),
   ...(existsSync(resolve(worldWebRoot, 'legacy.html'))
     ? { legacy: resolve(worldWebRoot, 'legacy.html') }
     : {}),
@@ -86,6 +90,20 @@ function selectedUiMapAssetPlugin(): Plugin {
         createReadStream(source)
           .on('error', () => response.destroy())
           .pipe(response);
+      });
+    },
+  };
+}
+
+function countryRuntimeEntryPlugin(): Plugin {
+  return {
+    name: 'country-runtime-entry-dev',
+    configureServer(server) {
+      server.middlewares.use((request, _response, next) => {
+        if (request.url?.split('?')[0] === '/country-runtime-entry.js') {
+          request.url = '/src/country-runtime/entry.ts';
+        }
+        next();
       });
     },
   };
@@ -283,10 +301,21 @@ export default defineConfig(({ mode }) => {
     build: {
       rollupOptions: {
         input: publicPageInputs,
+        output: {
+          entryFileNames: (chunk) =>
+            chunk.name === 'country-runtime-entry'
+              ? 'country-runtime-entry.js'
+              : 'assets/[name]-[hash].js',
+        },
       },
     },
     envDir: worldWebRoot,
-    plugins: [react(), lifecyclePlugin(apiOrigin), selectedUiMapAssetPlugin()],
+    plugins: [
+      react(),
+      lifecyclePlugin(apiOrigin),
+      selectedUiMapAssetPlugin(),
+      countryRuntimeEntryPlugin(),
+    ],
     preview: {
       host: runtimeHost(process.env.WORLD_WEB_HOST, 'WORLD_WEB_HOST'),
       port: runtimePort(process.env.WORLD_WEB_PORT, 4100, 'WORLD_WEB_PORT'),
