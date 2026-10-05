@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { createContext, runInContext, runInNewContext } from 'node:vm';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { OFFICIAL_DATASETS } from '../../apps/world-api/src/integration/official-dataset-registry.js';
 
@@ -100,6 +100,120 @@ function adapter(): ReadSource {
   if (!context.EconWorldRead) throw Error('WORLD_READ_SOURCE_NOT_INSTALLED');
   return context.EconWorldRead;
 }
+
+describe('official source shared GET and body deadline', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  function pendingRead(stage: 'headers' | 'body') {
+    let signal: AbortSignal | undefined;
+    let complete: () => void;
+    const response =
+      stage === 'headers'
+        ? new Promise<Response>((resolve) => {
+            complete = () => resolve(Response.json(catalogue));
+          })
+        : Promise.resolve(
+            new Response(
+              new ReadableStream<Uint8Array>({
+                start(controller) {
+                  complete = () => {
+                    controller.enqueue(
+                      new TextEncoder().encode(JSON.stringify(catalogue)),
+                    );
+                    controller.close();
+                  };
+                },
+              }),
+              { headers: { 'content-type': 'application/json' } },
+            ),
+          );
+    const fetcher = vi.fn((_url: URL | RequestInfo, options?: RequestInit) => {
+      signal = options?.signal ?? undefined;
+      return response;
+    }) as unknown as typeof fetch;
+    const session = adapter().createDatasetSession('01', {
+      fetcher,
+      config: { apiOrigin: 'https://world.example/' },
+    });
+    return {
+      fetcher,
+      session,
+      complete: () => complete(),
+      aborted: () => signal?.aborted,
+    };
+  }
+
+  it.each(['headers', 'body'] as const)(
+    'accepts a valid catalogue after six seconds waiting for %s without a retry',
+    async (stage) => {
+      const pending = pendingRead(stage);
+      const read = pending.session.loadCatalogue();
+      let settled = false;
+      void read.then(() => {
+        settled = true;
+      });
+      await vi.advanceTimersByTimeAsync(5_000);
+      expect(settled).toBe(false);
+      expect(pending.aborted()).toBe(false);
+      await vi.advanceTimersByTimeAsync(1_000);
+      pending.complete();
+      expect(await read).toMatchObject({ kind: 'CATALOGUE' });
+      expect(pending.fetcher).toHaveBeenCalledOnce();
+      expect(vi.getTimerCount()).toBe(0);
+    },
+  );
+
+  it.each(['headers', 'body'] as const)(
+    'times out at fifteen seconds waiting for %s and never adopts the late catalogue',
+    async (stage) => {
+      const pending = pendingRead(stage);
+      const read = pending.session.loadCatalogue();
+      let settled = false;
+      void read.then(() => {
+        settled = true;
+      });
+      await vi.advanceTimersByTimeAsync(14_999);
+      expect(settled).toBe(false);
+      expect(pending.aborted()).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(await read).toMatchObject({
+        kind: 'UNAVAILABLE',
+        reason: 'API_UNAVAILABLE',
+      });
+      expect(pending.aborted()).toBe(true);
+      expect(vi.getTimerCount()).toBe(0);
+      pending.complete();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(await pending.session.loadDataset('finance')).toMatchObject({
+        reason: 'DATASET_NOT_IN_CATALOGUE',
+      });
+      expect(pending.fetcher).toHaveBeenCalledOnce();
+    },
+  );
+
+  it.each(['headers', 'body'] as const)(
+    'retires %s immediately without waiting for the deadline or adopting late data',
+    async (stage) => {
+      const pending = pendingRead(stage);
+      const read = pending.session.loadCatalogue();
+      await vi.advanceTimersByTimeAsync(100);
+      pending.session.cancel();
+      expect(pending.aborted()).toBe(true);
+      expect(await read).toMatchObject({
+        kind: 'STALE',
+        reason: 'READ_RETIRED',
+      });
+      expect(vi.getTimerCount()).toBe(0);
+      pending.complete();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(await pending.session.loadDataset('finance')).toMatchObject({
+        reason: 'DATASET_NOT_IN_CATALOGUE',
+      });
+      expect(pending.fetcher).toHaveBeenCalledOnce();
+    },
+  );
+});
 
 describe('official all-data product-page read', () => {
   it('stays disconnected without explicit API origin and makes no request', async () => {
