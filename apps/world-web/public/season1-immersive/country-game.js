@@ -396,7 +396,7 @@
    drawer(
      planning ? 'Planning inputs' : 'Metric source',
      sourceNote +
-       `<p role="status" class="national-drawer-note">${connected ? 'Read-only source verification available' : connectionState + ' · Published provenance only'}${message ? ' · ' + esc(message) : ''}</p>${planning ? `<p class="national-drawer-note">${plan.amount} ${esc(office.unit || 'priority')} · LOCAL_REHEARSAL<br>${esc(formula)}<br>Confirm saves a local decision.</p>` : ''}${keys.map(metricEntry).join('')}<div class="national-site-list"><button type="button" data-cmd="country-metric-verify" data-metric="${key}" data-disabled-reason="${disabledReason}" ${disabledReason ? 'disabled' : ''}><h3>Verify source fields →</h3></button><button type="button" data-cmd="country-source"><h3>All source dossiers →</h3></button></div>`,
+       `<p role="status" class="national-drawer-note">${connected ? 'Read-only source verification available' : connectionState + ' · Published provenance only'}${message ? ' · ' + esc(message) : ''}</p>${planning ? `<p class="national-drawer-note">${plan.amount} ${esc(office.unit || 'priority')} · LOCAL_REHEARSAL<br>${esc(formula)}<br>Local planning only. Allocation Confirm is disabled.</p>` : ''}${keys.map(metricEntry).join('')}<div class="national-site-list"><button type="button" data-cmd="country-metric-verify" data-metric="${key}" data-disabled-reason="${disabledReason}" ${disabledReason ? 'disabled' : ''}><h3>Verify source fields →</h3></button><button type="button" data-cmd="country-source"><h3>All source dossiers →</h3></button></div>`,
    );
  }
  function matchesMetricRow(row, key) {
@@ -509,7 +509,7 @@
  let sizeObserver;
  function observeSize(){sizeObserver?.disconnect();sizeObserver=new ResizeObserver(positionSites);sizeObserver.observe(document.querySelector('.country-game'));}
  function positionSites(){const root=document.querySelector('.country-game');if(!root)return;const w=root.clientWidth,h=root.clientHeight,scale=Math.min(w,h);for(const site of c().facilities){const anchor=site.anchor;if(!anchor)continue;const x=w/2+(anchor[0]-.5)*scale,y=h/2+(anchor[1]-.5)*scale,pin=root.querySelector('.national-site-pins [data-id="'+site.id+'"]');if(pin){pin.style.left=x+'px';pin.style.top=y+'px';pin.hidden=x<12||x>w-12||y<200||y>h-210;}if(site.id===f().id){const label=root.querySelector('.national-destination');label.style.left=x+'px';label.style.top=y+'px';label.hidden=x<100||x>w-100||y<240||y>h-320;}}}
- function updatePlan(){if(view!=='country-home')return;const d=derived(),root=document.querySelector('.country-game');if(!root)return;const preview=previewNumbers();root.querySelector('[data-national-value]').textContent=preview.value+' '+(['finance','central_bank'].includes(role)?'scenario GCU':d.unit);root.querySelector('[data-national-remaining]').textContent=preview.remaining+' '+d.other;root.querySelector('[data-national-setting]').textContent=plan.amount+' '+(office.unit||'priority');root.querySelector('[data-national-progress]').style.width=plan.amount/office.max*100+'%';root.querySelector('[data-national-amount]').value=plan.amount;root.querySelectorAll('[data-cmd=country-token]').forEach(b=>b.classList.toggle('allocated',Number(b.dataset.value)<=plan.amount));root.querySelector('.national-confirm').disabled=plan.amount<=0||d.remaining<0;storePlan();window.EconI18n?.refresh();}
+ function updatePlan(){if(view!=='country-home')return;const d=derived(),root=document.querySelector('.country-game');if(!root)return;const preview=previewNumbers();root.querySelector('[data-national-value]').textContent=preview.value+' '+(['finance','central_bank'].includes(role)?'scenario GCU':d.unit);root.querySelector('[data-national-remaining]').textContent=preview.remaining+' '+d.other;root.querySelector('[data-national-setting]').textContent=plan.amount+' '+(office.unit||'priority');root.querySelector('[data-national-progress]').style.width=plan.amount/office.max*100+'%';root.querySelector('[data-national-amount]').value=plan.amount;root.querySelectorAll('[data-cmd=country-token]').forEach(b=>b.classList.toggle('allocated',Number(b.dataset.value)<=plan.amount));root.querySelector('.national-confirm').disabled=true;root.querySelector('.national-confirm').textContent='Confirm unavailable · local planning only';storePlan();window.EconI18n?.refresh();}
  function updateTime(){const el=document.querySelector('[data-national-time]');if(el)el.textContent='Not started';}
  function drawer(title,body){
   const el=document.querySelector('.national-drawer');if(!el)return;
@@ -555,7 +555,8 @@
  commands['country-site']=b=>{plan.site=b.dataset.id;if(!office.national)plan.amount=0;storePlan();mapHome();if(office.national)drawer(f().record.name,`<p class="national-drawer-note">${n(f().record.requiredWorkers)} people · ${n(f().record.requiredPowerMW)} MW</p><p class="national-drawer-note">${f().record.operational?'Marked operational in opening source':'Proposal · not commissioned'}</p>`);};
  commands['country-token']=b=>{const v=Number(b.dataset.value);plan.amount=plan.amount===v?Math.max(0,v-office.step):v;updatePlan();};
  commands['country-adjust']=b=>{plan.amount=Math.max(0,Math.min(office.max,plan.amount+Number(b.dataset.delta)*office.step));updatePlan();};
- commands['country-confirm']=()=>{const d=derived();if(plan.amount<=0||d.remaining<0)return;const decision={id:Date.now(),country:c().id,office:role,site:office.national?null:f().id,subject:office.national||f().record.name,scope:office.national?'national':'facility',value:d.value,unit:d.unit,setting:plan.amount,settingUnit:office.unit,status:'LOCAL_NOT_EXECUTED'};const last=plan.records[0];if(last&&last.site===decision.site&&last.setting===decision.setting){document.querySelector('[data-national-status]').textContent='This allocation is already saved';return;}plan.records.unshift(decision);plan.records=plan.records.slice(0,40);storePlan();document.querySelector('[data-national-status]').textContent='Local decision saved';document.querySelector('.national-confirm').classList.remove('sealed');requestAnimationFrame(()=>document.querySelector('.national-confirm')?.classList.add('sealed'));};
+ // Planning remains local. Only the separate trusted runtime can submit a host-prepared Command.
+ commands['country-confirm']=()=>toast('Local allocation cannot execute a World Command. Use the trusted runtime review when connected.');
  commands['country-records']=()=>drawer('Decision record',`<p class="national-drawer-note">Local decisions · Official settlement not connected</p>${plan.records.length?plan.records.map(x=>`<article class="national-record"><small>${esc(x.subject||x.site)} · ${new Date(x.id).toLocaleTimeString('en-GB')}</small><strong>${n(x.value)} ${x.unit}</strong><span>Local decision saved</span></article>`).join(''):'<p>No local decisions yet</p>'}`);
  commands['country-functions']=()=>drawer('All office actions',`<div class="national-site-list">${catalog.modules.filter(m=>m.role===roles[role].code).map(m=>`<button data-cmd="country-module" data-module="${m.id}"><h3>${esc(m.title==='VAT'?'增值税':m.title)}</h3><small>${m.fields.length} parameters ↗</small></button>`).join('')}</div>`);
  commands['country-room']=commands['country-module']=b=>{document.body.classList.remove('country-map-home');openModule(b.dataset.module);};
@@ -572,3 +573,14 @@
  const init=setInterval(()=>{if(!window.GameTest||!contextCountry)return;clearInterval(init);if(bootHash.startsWith('#action/')||bootHash.startsWith('#office/'))routeFromHash(bootHash);else mapHome();},40);
  setInterval(updateTime,250);window.CountryGame={home:mapHome,country:()=>c(),state:()=>structuredClone(plan),derived,rooms:office.rooms,clockScale:10};
 })();
+
+// A stable built module reuses the reviewed local controller, never prototype fixtures.
+// Failure leaves the native allocation Confirm disabled; there is no fallback execution.
+if (document.currentScript?.src) {
+  const runtimeEntry = new URL('../country-runtime-entry.js', document.currentScript.src);
+  const runtimeModule = document.createElement('script');
+  runtimeModule.type = 'module';
+  runtimeModule.src = runtimeEntry.href;
+  runtimeModule.onerror = () => console.warn('Trusted runtime module unavailable · NOT_CONNECTED');
+  document.head.append(runtimeModule);
+}
