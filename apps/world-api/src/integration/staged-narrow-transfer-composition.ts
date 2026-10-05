@@ -10,6 +10,10 @@ import {
 } from './staged-narrow-transfer-service.js';
 import { createLocalNonproductionWorldHttpBridge } from './local-nonproduction-http-bridge.js';
 import type { JwtSignatureVerifier } from './identity.js';
+import type { ParameterizedPgReadExecutor } from './postgres-read-adapter.js';
+import type { AuthenticatedWorldReadPolicy } from './authenticated-read-boundary.js';
+import { createAuthenticatedWorldReadQueryHandler } from './authenticated-read-query-handler.js';
+import { createAuthenticatedFinalReceiptQueryHandler } from './authenticated-final-receipt-query-handler.js';
 
 /** Opt-in local/CI composition. SQL authority, verified JWT, actor directory
  * and clocks are server-owned, never deserialized from HTTP. No settlement. */
@@ -25,6 +29,11 @@ export function createLocalStagedNarrowTransferBridge(input: {
   readonly resolveActorId: StagedTransferServiceInput['resolveActorId'];
   readonly clock: StagedTransferServiceInput['clock'];
   readonly allowedBrowserOrigin?: string;
+  /** Existing authenticated query boundaries; omission keeps routes unavailable. */
+  readonly queries?: {
+    readonly executor: ParameterizedPgReadExecutor;
+    readonly policy: AuthenticatedWorldReadPolicy;
+  };
 }) {
   const sha256Hex = (text: string) =>
     createHash('sha256').update(text).digest('hex');
@@ -42,6 +51,19 @@ export function createLocalStagedNarrowTransferBridge(input: {
   });
   return createLocalNonproductionWorldHttpBridge({
     environment: input.environment,
+    ...(input.queries === undefined
+      ? {}
+      : {
+          readHandler: createAuthenticatedWorldReadQueryHandler({
+            ...input.queries,
+            verifier: input.verifier,
+          }),
+          receiptHandler: createAuthenticatedFinalReceiptQueryHandler({
+            executor: input.queries.executor,
+            policy: input.queries.policy.jwt,
+            verifier: input.verifier,
+          }),
+        }),
     ...(input.allowedBrowserOrigin === undefined
       ? {}
       : { allowedBrowserOrigin: input.allowedBrowserOrigin }),

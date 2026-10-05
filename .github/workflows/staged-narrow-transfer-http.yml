@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - codex/staged-narrow-transfer-http
+      - codex/live-command-bridge
 
 permissions:
   contents: read
@@ -48,5 +49,8 @@ jobs:
       - run: pnpm pretest
       - run: pnpm exec tsc -p tests/support/tsconfig.staged-http.json
       - run: node scripts/check-boundaries.mjs
+      - run: node scripts/check-authoritative-patterns.mjs
+      - run: pnpm secrets:check
+      - run: pnpm exec eslint apps/world-worker/src/preparation/local-narrow-reservation-worker.ts apps/world-api/src/integration/staged-narrow-transfer-composition.ts tests/integration/staged-narrow-transfer-http.test.ts
       - name: Native PostgreSQL through actual staged HTTP
-        run: pnpm exec vitest run tests/integration/staged-narrow-transfer-http.test.ts tests/world-api/local-nonproduction-http-bridge.test.ts
+        run: pnpm exec vitest run --reporter=verbose --disableConsoleIntercept tests/integration/staged-narrow-transfer-http.test.ts tests/world-api/local-nonproduction-http-bridge.test.ts
