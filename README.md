@@ -5,7 +5,41 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current integration snapshot (2026-10-05)
+## Current integration snapshot (2026-10-06)
+
+Latest bounded acceptance record:
+[420 online HOME/source acceptance and runtime boundaries](docs/reports/world-connection/O_ONLINE420_PAGE_RUNTIME_2026_10_06.md).
+The fixed published source `0ec30a28d19f4ae51d81edad42d0598c356dc127`
+(Pages `37188781902`) now has accepted evidence for all 420 country/Office pairs,
+840 desktop/mobile HOME cells and matching hashes for all 840 selected images.
+Countries 01/70 reuse same-version prior evidence; the other 408 pairs were newly
+traversed. Original failures, retries, late observations and body-read
+INCONCLUSIVE records remain separate. This is HOME/read-only source acceptance,
+not all HUD fields, every map pin, 120 Office modules, full gameplay or Gate B.
+
+PR76's actual native PostgreSQL CI `37330480159` proves one isolated inventory
+reservation (AVAILABLE4→2, RESERVED0→2 tonne, WorldVersion0→1 and one FINAL),
+not payment/Ship/Deliver or formal 70-country activation. Reviewed PR80 combined
+the bounded source deadline and explicit trusted staged UI entry, then merged
+as `dcc921dbafd48d021dc1605ce7f1946b8b50b614`. Its current-base no-deploy CI
+and independent code/binding reviews passed. The automatically triggered Pages
+run `37347162279` completed SUCCESS on that merge SHA. Root's bounded native
+desktop smoke of 01/Trade and 70/Finance confirmed correct hydrated country
+views; the new runtime drawer shows no host and disabled execution controls.
+Initial local-sample loading content and plain runtime-drawer styling remain
+known limitations. This is not a repeated full420 acceptance of the new release.
+Default runtime host remains absent/fail-closed. Connected native browser
+economic E2E is still NOT_RUN; B approved the repaired separate local harness
+with9/9 pure regression checks, while bootstrap setup/handoff awaits review
+and exact phase execution before any fixture runs.
+
+Formal World remains NOT_STARTED/HOLD and Gate B PENDING. World/head/seed
+binding, legal stock ownership, GCU interpretation, Treasury/central-bank
+funding semantics, exact bank opening closure and the production execution
+path remain separate conditions. No missing amount is invented, no combined
+balance is counted twice, and proposed facilities are not treated as operating.
+
+### Retained October 5 checkpoint
 
 Latest connection checkpoint: [official interface connection](docs/reports/world-connection/O_OFFICIAL_INTERFACE_CONNECTION_2026_10_05.md).
 The actual reader-v2 update `37136193366` is verified, and discovered Pages
@@ -110,10 +144,14 @@ country files against that pinned package. The original UI archive's older
 See [the numerical binding report](docs/reports/ui/OFFICIAL_OPENING_DATA_BINDING_2026_09_29.md)
 for field meanings and coverage. The page remains non-authoritative: static
 opening displays and local planning coexist with an opt-in source-data drawer.
-The drawer's production connection is not yet evidenced;
+The approved read-only source reader is configured and the fixed October 6
+HOME/source evidence above supersedes the earlier disconnected-drawer status;
 the official opening inputs are not a committed World State, and login,
 authoritative commands, settlement, live prices and receipts are not connected.
-Country-scoped routes do not fall back to the older North Harbour sample ledger.
+Settled country-scoped views retain their selected source, not the older North
+Harbour sample ledger. A transient local prototype journey observed during
+country loading remains a bounded UI timing limitation, not a live World clock
+or accepted country economic state.
 
 The root explorer now lazily loads hash/byte-bound country files from the same
 selected balanced package. Dynamic numbers and the complete 1,374-facility
@@ -153,7 +191,7 @@ registration/signature/reference/enqueue/read. The staged HTTP candidate
 `19dbc3a` passed native PostgreSQL plus HTTP 19/19; its test composition uses a
 test SQL adapter and reaches QUEUED, not economic execution or FINAL.
 
-The current functional gap is a reviewed server-side bridge from durable
+At this historical checkpoint the functional gap was a reviewed server-side bridge from durable
 approval/Command authority to branded Core contexts, followed by real Reserve
 candidate/queue execution. Existing UI/maps, engines and opening/lineage
 modules are reusable, but default fixture UI, full World initialization/NPC,
@@ -227,10 +265,14 @@ merged preparation module is Gate B approval.
 
 `status/progress.json` is the formal governance ledger and still lists V09
 onward as `PLANNED`; it has not been silently promoted to match merged
-preparation code. Its old ADR-18 blocker wording is inconsistent with the
-approved ADR-18 record in `status/decisions.json` and needs a separate
-governance reconciliation. The V28 single-World candidate also remains outside
-main while the older two-orchestrator V28.1/ADR-14 contract is reconciled.
+preparation code. PR75 reconciled the descriptive ADR-18 blocker wording with
+the already-approved isolation record; historical required-gate identity and
+PENDING status remain. PR79 aligned the stale test expectation and strengthened
+the isolation-only/unapproved-economic-decision assertions (11/11 focused and
+14/14 read-only governance checks). Neither change promotes runtime readiness.
+At the retained September checkpoint the V28 single-World candidate remained
+outside main while the older two-orchestrator V28.1/ADR-14 contract was being
+reconciled.
 
 ## Frozen toolchain
 
