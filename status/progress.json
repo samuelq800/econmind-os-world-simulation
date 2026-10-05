@@ -2,7 +2,7 @@
   "schema_version": "R2-101.1",
   "derived_at": "2026-09-10T16:20:14Z",
   "source_commit": "b3a1f4949efa85d1c310819ebdf37505589f1b49",
-  "note": "Gate A, V06, V07 and V08 are verified and V08 is merged to main with runtime equivalence PASS. Independent Review B approved immutable V08 target b3a1f49, closing B01/B02 with zero open blockers or majors; direct project-owner confirmation recorded OWNER_POLICY_AUTO_ACCEPTANCE. V09 runtime remains NOT_STARTED pending the ADR-18 delegated-owner decision and V09 preflight. No production mutation is authorized.",
+  "note": "Gate A, V06, V07 and V08 are verified and V08 is merged to main with runtime equivalence PASS. Independent Review B approved immutable V08 target b3a1f49, closing B01/B02 with zero open blockers or majors; direct project-owner confirmation recorded OWNER_POLICY_AUTO_ACCEPTANCE. ADR-18 is already APPROVED for disposable local/CI and isolated staging, not production topology, publication or cutover. V09 remains PLANNED and next_step_ready=false pending the isolated preflight and required package/runtime evidence. The historical required_gate identifier is retained; this descriptive reconciliation does not approve a gate or authorize production mutation. See docs/reports/governance/ADR18_PROGRESS_RECORD_RECONCILIATION_2026_10_05.md.",
   "mainline_mode": "FAST_MAINLINE",
   "governance_sync": {
     "branch": "chore/r2-governance-sync",
@@ -168,11 +168,11 @@
   "current_gate": {
     "step_id": "V09.1",
     "status": "PLANNED",
-    "review": "V08_MAINLINE_INTEGRATED_PENDING_ADR_18_DECISION",
+    "review": "V08_MAINLINE_INTEGRATED_PENDING_ISOLATED_V09_PREFLIGHT",
     "next_step": "V09.1",
     "next_step_ready": false,
     "next_step_blockers": [
-      "ADR-18 before V09.1 real persistence/concurrency evidence"
+      "Isolated V09 preflight and required real persistence/concurrency/runtime evidence remain pending; ADR-18 isolation approval is already recorded and does not authorize production"
     ],
     "required_gate": "V09.1_ADR_18_DECISION",
     "gate_status": "PENDING"
