@@ -1,0 +1,26 @@
+name: Fixed official source resume adapter (offline)
+on:
+  pull_request:
+    paths:
+      - 'scripts/official-source-resume-audit.mjs'
+      - 'tests/world-web/official-source-resume-audit.test.ts'
+      - '.github/workflows/world-official-source-resume-check.yml'
+  workflow_dispatch:
+jobs:
+  focused:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec eslint scripts/official-source-resume-audit.mjs tests/world-web/official-source-resume-audit.test.ts
+      - run: pnpm exec prettier --check scripts/official-source-resume-audit.mjs tests/world-web/official-source-resume-audit.test.ts
+      - run: pnpm exec vitest run tests/world-web/official-source-resume-audit.test.ts
