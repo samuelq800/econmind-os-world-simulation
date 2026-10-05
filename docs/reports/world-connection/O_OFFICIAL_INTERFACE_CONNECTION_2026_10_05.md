@@ -105,10 +105,30 @@ online role views or a mobile/playability acceptance.
 - Root authorized A's single remaining-group traversal as
   `CT-OFFICIAL-SOURCE-REMAINING303-READER-V2-V1`: 22 new dataset groups,
   country list, 70 detail groups and 210 association groups. Original 13
-  completed groups remain historical-only. Execution is separately reported;
-  at this checkpoint the final traversal report is pending.
-- Maximum traversal success is `MIXED_VERSION_ALL_GROUPS_EVIDENCED`, not
-  same-version full PASS. No retries or rerunning completed groups are implied.
+  completed groups remain historical-only. The one actual traversal completed
+  2026-10-05 22:04:57–22:09:05 Shanghai, exit 0: 511 actual GET responses,
+  all HTTP200, all complete received body hashes, 303/303 new groups VERIFIED,
+  FAILED/NOT_RUN/READING 0. Results: 22 complete new dataset trees, 70 country
+  details, 210 country associations, exact population `14712146434`.
+- Actual status is `MIXED_VERSION_ALL_GROUPS_EVIDENCED`, with
+  `sameVersionFullPass=false`. The earlier 12 complete dataset trees are
+  separately bound historical evidence; together all 34 selected datasets have
+  complete-tree evidence across the two versions. No retries, new probe,
+  fake skipped HTTP, extra original/map requests or economic writes occurred.
+- Durable raw report:
+  `artifacts/a-remaining303-v2.dSZ55A/readback/report.json`, SHA-256
+  `19a4e3ea1cc4063c7d48959cdc67133f2775d190b46108a89e2eb03eed2dade6`.
+  Root directly read the report, recalculated its hash, checked all 303 states,
+  all 511 response status/body-hash/size records, fixed endpoint and exact
+  GitHub Origin CORS, and recalculated the unchanged original inputs/ledger/
+  report hashes. Source declaration and exact reconstructed DTO-tree checks
+  are not a new remote raw-original hash verification claim.
+- Per-country report:
+  `artifacts/a-remaining303-v2.dSZ55A/REPORT.md`, SHA-256
+  `d712a27e27ad22295666aa32fcdc3379061442159317b2e24fac7c483c4d9cad`.
+  70/70 country detail and each country's three association results are
+  recorded. Original `ALL_DATA_READBACK_FAIL` and historical 546 cause UNKNOWN
+  remain unchanged; complete geography in this new traversal is VERIFIED.
 - G is preparing/checking country 01 and 70 across six offices and desktop /
   mobile. This bounded online subset must not overwrite the retained original
   and post-fix 840-image local HOME visual evidence.

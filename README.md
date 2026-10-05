@@ -12,7 +12,10 @@ The actual reader-v2 update `37136193366` is verified, and discovered Pages
 publication `37188781902` already has `CONFIGURED_READ_ONLY` at
 `https://world.econmind.group/`. A real country-01 Finance browser read matched
 the exact Treasury/CB source field. PR #71's bounded remaining-data audit tool
-is merged; its separately authorized final traversal is pending. This does not
+is merged; its single authorized traversal completed with 511 HTTP200 reads,
+303/303 new groups verified, 22 complete new datasets, 70 country details and
+210 country associations. Together with the preserved 12 earlier dataset
+results, this is mixed-version source evidence, not same-version full PASS. This does not
 claim all-country online acceptance, live economic state or Gate B approval.
 The October 3 checkpoint below is retained as history and is superseded only
 within this new record's explicitly verified scope.
