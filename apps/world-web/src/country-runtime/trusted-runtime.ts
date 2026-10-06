@@ -187,6 +187,9 @@ export function createTrustedCountryRuntime(
   let lifecycle: ReservationLifecycle | 'IDLE' | 'INSPECTING' | 'SUBMITTING' =
       'IDLE',
     receipt: BrowserFinalReceipt | null = null;
+  // Observation of exact INSPECT equality, not authority to enqueue or execute.
+  let inspectionStatus: 'NOT_INSPECTED' | 'PENDING' | 'MATCHED' | 'FAILED' =
+    'NOT_INSPECTED';
   let stopHost: (() => void) | null = null;
   const listeners = new Set<() => void>(),
     notify = () => {
@@ -239,6 +242,7 @@ export function createTrustedCountryRuntime(
     retired = true;
     reviewed = false;
     inspected = false;
+    inspectionStatus = 'NOT_INSPECTED';
     receipt = null;
     controller?.disconnect();
     port?.retire();
@@ -311,6 +315,18 @@ export function createTrustedCountryRuntime(
           : ('NOT_CONNECTED' as const),
         snapshot: snapshot ? structuredClone(snapshot) : null,
         lifecycle: snapshot ? lifecycle : ('IDLE' as const),
+        inspectionStatus: snapshot
+          ? inspectionStatus
+          : ('NOT_INSPECTED' as const),
+        inspectedIntent:
+          snapshot && inspected && inspectionStatus === 'MATCHED'
+            ? {
+                commandId: c!.preparedReservation.commandId,
+                commandFingerprint: c!.preparedReservation.commandFingerprint,
+                expectedWorldVersion:
+                  c!.preparedReservation.expectedWorldVersion,
+              }
+            : null,
         receipt: snapshot && receipt ? structuredClone(receipt) : null,
         projection: projection(),
         ui: snapshot
@@ -355,17 +371,21 @@ export function createTrustedCountryRuntime(
       if (!ensureCurrent() || busy || attempted) return;
       reviewed = false;
       inspected = false;
+      inspectionStatus = 'PENDING';
       busy = true;
       lifecycle = 'INSPECTING';
       notify();
+      let matched = false;
       try {
-        inspected = await port!.inspect();
+        matched = await port!.inspect();
       } catch {
-        inspected = false;
+        // Do not expose transport errors or host-provided identity as verified.
       }
       busy = false;
+      if (!ensureCurrent()) return;
+      inspected = matched;
+      inspectionStatus = matched ? 'MATCHED' : 'FAILED';
       lifecycle = inspected ? 'IDLE' : 'UNAVAILABLE';
-      ensureCurrent();
       notify();
     },
     review() {
