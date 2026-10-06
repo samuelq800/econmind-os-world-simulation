@@ -7,6 +7,16 @@ engines or hidden buffs.
 
 ## Current integration snapshot (2026-10-06)
 
+Current data-interface checkpoint:
+[source connection and remaining write boundaries](docs/reports/world-connection/O_DATA_INTERFACE_CHECKPOINT_2026_10_06.md).
+Eight current public reads passed, including country coverage, the 34-source
+directory, exact finance/mineral/facility source identities and climate data;
+the exact HTTPS Origin and credential-free CORS matched. Stale wiring-matrix
+labels are corrected only to evidenced read-only scope. No import, production
+permission change or economic activation followed. C and E are preparing the
+same-World successor connection and policy operator; execution remains NOT_RUN
+pending fixed-candidate independent review and a separate bounded authorization.
+
 Latest bounded acceptance record:
 [420 online HOME/source acceptance and runtime boundaries](docs/reports/world-connection/O_ONLINE420_PAGE_RUNTIME_2026_10_06.md).
 The fixed published source `0ec30a28d19f4ae51d81edad42d0598c356dc127`
