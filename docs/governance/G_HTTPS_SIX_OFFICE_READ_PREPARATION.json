@@ -1,0 +1,69 @@
+{
+  "schema_version": "ROOT_OFFLINE_PARALLEL_PREPARATION_SCOPE-1",
+  "record_type": "ROOT_SCOPED_PARALLEL_PREPARATION",
+  "status": "PENDING_INDEPENDENT_SCOPE_REVIEW",
+  "authority": "ROOT_AS_OWNER_DELEGATED_COORDINATOR",
+  "root_thread": "01a08bf9-fe19-7440-88fa-159677b611bd",
+  "user_instruction_evidence": {
+    "current_request": "可以开始接通了",
+    "standing_scope": "User authorized A-G coordination, implementation and suitable checked/reviewed main integration; no repeat approval questions for ordinary in-scope construction.",
+    "not_claimed": "No specific missing economic semantics, formal activation, ADR, privileged production access, dependency verification or architecture topology has been approved by this record."
+  },
+  "base": "67b5302fa73f4a082c6ab773410aa614f343f54e",
+  "branch": "codex/g-production-read-preparation",
+  "execution_mode": "PARALLEL_PREPARATION_ONLY",
+  "r2_step_execution": false,
+  "formal_dependencies_bypassed": false,
+  "formal_gate_or_status_change": false,
+  "scope": {
+    "purpose": "Isolated, unmounted, offline-only source preparation for a future reviewed HTTPS six-Office authorized read and durable narrow-transfer FINAL lookup adapter.",
+    "allowed_paths": [
+      "apps/world-web/src/production-read/contract.ts",
+      "apps/world-web/src/production-read/client.ts",
+      "apps/world-api/src/integration/https-authenticated-read-composition.ts",
+      "tests/world-web/production-read-client.test.ts",
+      "tests/world-api/https-authenticated-read-composition.test.ts",
+      "docs/reports/world-connection/G_HTTPS_SIX_OFFICE_READ_PREPARATION.md"
+    ],
+    "conditional_path": "The new HTTP-neutral API composition file and its test are permitted only if existing handlers cannot express the required server-verified read binding without altering their contracts.",
+    "operations": ["READ_WORLD_PROJECTION", "READ_FINAL_NARROW_TRANSFER_RECEIPT"],
+    "office_domain": ["CAPTAIN", "FINANCE", "CENTRAL_BANK", "INDUSTRY", "TRADE", "SOCIAL"],
+    "result_state": "IMPLEMENTED_UNVERIFIED_PREPARATION_ONLY",
+    "terminal_boundary": "INDEPENDENT_FIXED_SOURCE_REVIEW_THEN_STOP"
+  },
+  "controls": [
+    "Constitution, AGENTS.md, PLANS.md and FAST_MAINLINE remain controlling; this record does not amend R2 dependencies or unlock V25.2/V31/V32 implementation or production activation.",
+    "G may write source only after trusted B independent review explicitly accepts this exact offline preparation scope; a JSON hash or fabricated GO cannot authenticate that decision.",
+    "Exact HTTPS origin and routes come from an explicitly trusted reviewed configuration, not URL/storage/VITE discovery; missing approved external pins remain NOT_CONNECTED.",
+    "Real session token is supplied only through an opaque callback; server owns verified subject, active seat, capability, classification and revision. DOM role/country is not authorization.",
+    "Read responses retain exact World/seed/version/identity scope; official selected source values are never promoted to live state.",
+    "Final receipt lookup for a committed command is independent of offer renewal; this preparation creates no resumed economic write capability.",
+    "No existing UI/route/runtime mount or local-loopback guard is changed; no existing Core/API/Worker/auth service contract is weakened.",
+    "No independent approval, VERIFIED, Gate acceptance or main/release authority is self-awarded; final frozen candidate needs its own applicable checks and independent review.",
+    "Any adoption into a formal R2 dependent implementation still requires the existing real dependencies and decisions; optional unmounted foundation integration needs separate Root decision after review.",
+    "Stop and report any instruction conflict or source-visible security/regression finding; do not broaden the preparation scope to bypass it."
+  ],
+  "prohibited": [
+    "private config or credential acquisition",
+    "network/DB/HTTP/browser/production operations",
+    "actual host admission or phase authority creation",
+    "commands/REGISTER/SIGN/BIND/ENQUEUE/Worker/Clock",
+    "new seat grants, public schema/auth/storage changes",
+    "seed creation, legal/financial semantic invention",
+    "deployment, migration, release-chain change",
+    "F public country UI or A local recovery support changes",
+    "original EconMind website changes",
+    "direct merge or production activation"
+  ],
+  "required_evidence": [
+    "Immutable base/head/patch and precise path list",
+    "Offline clearly labeled fixtures and directly relevant ordinary tests",
+    "Scoped types/import boundaries/environment/secret checks",
+    "Independent review of the exact prepared candidate",
+    "Explicit external missing-pin and governance-dependency ledger"
+  ],
+  "independent_scope_review": "PENDING",
+  "implementation_commit": null,
+  "verification_claimed": false,
+  "production_authority": "NOT_GRANTED"
+}
