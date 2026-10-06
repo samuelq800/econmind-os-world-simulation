@@ -28,10 +28,15 @@ desktop smoke of 01/Trade and 70/Finance confirmed correct hydrated country
 views; the new runtime drawer shows no host and disabled execution controls.
 Initial local-sample loading content and plain runtime-drawer styling remain
 known limitations. This is not a repeated full420 acceptance of the new release.
-Default runtime host remains absent/fail-closed. Connected native browser
-economic E2E is still NOT_RUN; B approved the repaired separate local harness
-with9/9 pure regression checks, while bootstrap setup/handoff awaits review
-and exact phase execution before any fixture runs.
+Default published runtime host remains absent/fail-closed. The separate local
+fixture's restricted permissions were actually installed and freshly read back;
+complete preflight, opening seed, signed approval preparation and initial
+projection passed. Browser enqueue/Worker/FINAL remain NOT_RUN: one attempt
+stopped at a blank local page, then a reviewed continuation stopped at an agent
+browser-control error before tab creation. Root's independent no-DB native
+display check verified the corrected `.mjs` MIME and rendered page. The original
+test command is now expired and must not be extended or replayed. See the
+[actual local permission/runtime checkpoint](docs/reports/world-connection/O_LOCAL_PERMISSION_RUNTIME_2026_10_06.md).
 
 Formal World remains NOT_STARTED/HOLD and Gate B PENDING. World/head/seed
 binding, legal stock ownership, GCU interpretation, Treasury/central-bank
