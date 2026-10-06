@@ -41,13 +41,19 @@ separate states without fixture or zero-value substitution. The React
 `OfficialSourceStatus` remains a prewire; the mounted product entry is the
 static `season1-immersive` page and its equivalent status drawer.
 
-The matrix `pageState` is `CODE_WIRED_LIVE_API_NOT_VERIFIED`: the drawer is
-mounted and its optional source reader is implemented, but no production API
-connection or browser readback has been verified. It does not mean ONLINE or
-that the Office HUD uses live World state.
+The matrix now records `ONLINE_HOME_SOURCE_SCOPE_EVIDENCED` and
+`READ_ONLY_SOURCE_READER_DEPLOYMENT_EVIDENCED`, with the exact evidence scope in
+[the October 6 interface checkpoint](../../../../docs/reports/world-connection/O_DATA_INTERFACE_CHECKPOINT_2026_10_06.md).
+The read-only reader is deployed; all 34 datasets have complete-tree evidence
+across two versions (`sameVersionFullPass=false`). Accepted online HOME/source
+coverage is 420 country/Office pairs, not every HUD field or gameplay action.
+Eight additional current public GETs passed on October 6 without re-imports,
+credentials, retries or another complete traversal. These status fields are
+evidence metadata, not a runtime admission or an execution permission.
 
-Current boundary: A's read code is merged, but production host/role/readback,
-static map URLs and formal OpeningSeed are separate E/owner evidence. This is
-code-level optional API binding, not a verified online connection. Existing
-Office gameplay remains local rehearsal until authorized runtime projection
-and command receipts are independently verified.
+Current boundary: `runtimeState` remains `NOT_LIVE_WORLD`. Production execution
+host/JWT/seat authorization, formal OpeningSeed semantics and economic receipts
+remain separate unfinished conditions. The map catalog's null-URL contract is
+unchanged; published static-map evidence does not make every catalog URL
+verified. Existing Office gameplay remains local rehearsal until authorized
+runtime projection and command receipts are independently verified.

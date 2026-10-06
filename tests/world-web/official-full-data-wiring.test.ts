@@ -1,8 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, statSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { createElement } from '../../apps/world-web/node_modules/react';
-import { renderToStaticMarkup } from '../../apps/world-web/node_modules/react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import { OFFICIAL_DATASETS } from '../../apps/world-api/src/integration/official-dataset-registry.js';
@@ -11,6 +10,15 @@ import {
   OFFICIAL_MAP_MANIFEST_SHA256,
 } from '../../apps/world-api/src/integration/generated/official-map-catalog.js';
 import { OfficialSourceStatus } from '../../apps/world-web/src/official-data/OfficialSourceStatus.js';
+
+// Use the app's declared dependencies, with package-level type declarations.
+const requireWeb = createRequire(
+  new URL('../../apps/world-web/package.json', import.meta.url),
+);
+const { createElement } = requireWeb('react') as typeof import('react');
+const { renderToStaticMarkup } = requireWeb(
+  'react-dom/server',
+) as typeof import('react-dom/server');
 
 const repository = fileURLToPath(new URL('../../', import.meta.url));
 const matrix = JSON.parse(
@@ -25,6 +33,17 @@ const matrix = JSON.parse(
   pageState: string;
   apiState: string;
   runtimeState: string;
+  connectionEvidence: {
+    checkpoint: string;
+    sourceReadback: string;
+    sameVersionFullPass: boolean;
+    currentConnectivity: string;
+    currentReadCount: number;
+    currentReceiptSha256: string;
+    onlineHomeCountryOfficePairs: number;
+    allHudFieldsOnlineVerified: boolean;
+    economicRuntimeVerified: boolean;
+  };
   datasets: {
     slug: string;
     sourcePath: string;
@@ -38,10 +57,34 @@ const matrix = JSON.parse(
 };
 
 describe('D selected-source full-data wiring matrix', () => {
-  it('records the mounted page reader without claiming a verified live API', () => {
-    expect(matrix.pageState).toBe('CODE_WIRED_LIVE_API_NOT_VERIFIED');
-    expect(matrix.apiState).toBe('CODE_MERGED_OPT_IN_DEPLOYMENT_NOT_VERIFIED');
+  it('records bounded source connection evidence without claiming live economic state', () => {
+    expect(matrix.pageState).toBe('ONLINE_HOME_SOURCE_SCOPE_EVIDENCED');
+    expect(matrix.apiState).toBe(
+      'READ_ONLY_SOURCE_READER_DEPLOYMENT_EVIDENCED',
+    );
     expect(matrix.runtimeState).toBe('NOT_LIVE_WORLD');
+    expect(matrix.connectionEvidence).toEqual({
+      checkpoint:
+        'docs/reports/world-connection/O_DATA_INTERFACE_CHECKPOINT_2026_10_06.md',
+      sourceReadback: 'MIXED_VERSION_ALL_GROUPS_EVIDENCED',
+      sameVersionFullPass: false,
+      currentConnectivity: 'BOUNDED_CURRENT_CONNECTIVITY_PASS',
+      currentReadCount: 8,
+      currentReceiptSha256:
+        '172e669e3e2bf5bb84758abe3c0f105109bcbbf2b9336d425fe5bee8bfaa54a8',
+      onlineHomeCountryOfficePairs: 420,
+      allHudFieldsOnlineVerified: false,
+      economicRuntimeVerified: false,
+    });
+    const checkpoint = readFileSync(
+      `${repository}${matrix.connectionEvidence.checkpoint}`,
+      'utf8',
+    );
+    expect(checkpoint).toContain(
+      matrix.connectionEvidence.currentReceiptSha256,
+    );
+    expect(checkpoint).toContain('8/8');
+    expect(checkpoint).toContain('NOT_RUN');
   });
 
   it('covers each of A’s 34 fixed datasets and real source fields exactly once', () => {
