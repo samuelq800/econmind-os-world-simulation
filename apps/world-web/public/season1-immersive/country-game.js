@@ -559,7 +559,11 @@
  commands['country-confirm']=()=>toast('Local allocation cannot execute a World Command. Use the trusted runtime review when connected.');
  commands['country-records']=()=>drawer('Decision record',`<p class="national-drawer-note">Local decisions · Official settlement not connected</p>${plan.records.length?plan.records.map(x=>`<article class="national-record"><small>${esc(x.subject||x.site)} · ${new Date(x.id).toLocaleTimeString('en-GB')}</small><strong>${n(x.value)} ${x.unit}</strong><span>Local decision saved</span></article>`).join(''):'<p>No local decisions yet</p>'}`);
  commands['country-functions']=()=>drawer('All office actions',`<div class="national-site-list">${catalog.modules.filter(m=>m.role===roles[role].code).map(m=>`<button data-cmd="country-module" data-module="${m.id}"><h3>${esc(m.title==='VAT'?'增值税':m.title)}</h3><small>${m.fields.length} parameters ↗</small></button>`).join('')}</div>`);
- commands['country-room']=commands['country-module']=b=>{document.body.classList.remove('country-map-home');openModule(b.dataset.module);};
+ // Country modules remain fail-closed; do not hide HOME before that guard resolves.
+ function blockedModule(module){
+  drawer('World module unavailable',`<p role="status" class="national-drawer-note">${esc(module.title)} · World 实时数据与命令接口尚未接通；不能使用本地样例结算。</p><p class="national-drawer-note">No World command was submitted. Country opening data remains read only.</p><button data-cmd="country-home">Return to country home →</button>`);
+ }
+ commands['country-room']=commands['country-module']=b=>{openModule(b.dataset.module);};
  commands['country-home']=commands.close=commands['journey-home']=mapHome;
  commands.close=()=>{const el=document.querySelector('.national-drawer');if(el&&!el.hidden)commands['country-dismiss']();else mapHome();};
  commands.codex=()=>{mapHome();commands['country-functions']();};
@@ -571,7 +575,7 @@
  const previousRender=render;render=function(){if(contextCountry&&(view===null||view==='country-home'))mapHome();else if(contextCountry)previousRender();};
  routeFromHash=function(hash=location.hash){mapHome();if(hash.startsWith('#action/')||hash.startsWith('#office/'))toast('Live World commands are not connected. Local planning cannot settle the world.');};
  const init=setInterval(()=>{if(!window.GameTest||!contextCountry)return;clearInterval(init);if(bootHash.startsWith('#action/')||bootHash.startsWith('#office/'))routeFromHash(bootHash);else mapHome();},40);
- setInterval(updateTime,250);window.CountryGame={home:mapHome,country:()=>c(),state:()=>structuredClone(plan),derived,rooms:office.rooms,clockScale:10};
+ setInterval(updateTime,250);window.CountryGame={home:mapHome,blockedModule,country:()=>c(),state:()=>structuredClone(plan),derived,rooms:office.rooms,clockScale:10};
 })();
 
 // A stable built module reuses the reviewed local controller, never prototype fixtures.
