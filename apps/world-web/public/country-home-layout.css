@@ -1,8 +1,68 @@
 /* Non-authoritative country-home layout overlay; the selected UI source stays immutable. */
 .country-map-home .national-world {
-  background-color: #143e3e;
+  /* The surrounding atlas is a distinct layer beneath the complete scene. */
+  background-color: transparent;
   background-size: contain;
   background-repeat: no-repeat;
+}
+
+.country-map-home .national-surroundings {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  overflow: hidden;
+  pointer-events: none;
+  background: #143e3e;
+}
+
+.country-map-home .national-surroundings svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.country-map-home .national-surroundings image {
+  filter: saturate(0.45) brightness(0.55);
+}
+
+.country-map-home .national-surrounding-boundaries path {
+  fill: #14333b40;
+  stroke: #adccc570;
+  stroke-width: 1;
+}
+
+.country-map-home .national-surrounding-selected {
+  fill: #f0d89918;
+  stroke: #ffe5a3;
+  stroke-width: 2;
+}
+
+/* A visible frame separates the artistic scene from the geographic projection.
+   It is exactly the contained square; no source anchors are rebased or edited. */
+.country-map-home .national-world::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--country-scene-size, 0px);
+  height: var(--country-scene-size, 0px);
+  transform: translate(-50%, -50%);
+  outline: 1px solid #ffe5a380;
+  outline-offset: -1px;
+  pointer-events: none;
+}
+
+.country-map-home .national-map-layer-note {
+  display: inline;
+  margin-left: 12px;
+  font: inherit;
+  color: #d8e8db;
+}
+
+@media (min-width: 1001px) {
+  .country-map-home .national-edition {
+    max-width: calc(100% - 56px);
+  }
 }
 
 @media (min-width: 1001px) {
