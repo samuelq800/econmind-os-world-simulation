@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AuthorizedBrowserIdentity } from '../../apps/world-web/src/authorized-client/client.js';
 import {
   LOCAL_PENDING_MARKER_KEY,
@@ -16,6 +16,13 @@ import {
   type CountryRuntimeView,
   type TrustedCountryRuntimeConfig,
 } from '../../apps/world-web/src/country-runtime/trusted-runtime.js';
+import * as runtimeModule from '../../apps/world-web/src/country-runtime/trusted-runtime.js';
+import { installCountryRuntime } from '../../apps/world-web/src/country-runtime/entry.js';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 const identity: AuthorizedBrowserIdentity = {
   worldId: 'WORLD_TEST',
@@ -270,7 +277,271 @@ async function ready(p: ReturnType<typeof scenario>) {
   expect(p.runtime.review()).toBe(true);
 }
 
+/** Small offline DOM contract double, not evidence of a native browser run. */
+function mountedEntry(p: ReturnType<typeof scenario>) {
+  const createRuntime = runtimeModule.createTrustedCountryRuntime;
+  vi.spyOn(runtimeModule, 'createTrustedCountryRuntime').mockImplementation(
+    (config, view) => createRuntime(config, view, p.factory),
+  );
+  let activeElement: TestElement | null = null;
+  const focusElement = (element: TestElement) => {
+    activeElement = element;
+  };
+  class TestElement {
+    dataset: Record<string, string> = {};
+    children: TestElement[] = [];
+    attributes = new Map<string, string>();
+    listeners = new Map<string, () => void>();
+    disabled = false;
+    open = false;
+    ownText = '';
+    constructor(readonly tag: string) {}
+    set textContent(value: string) {
+      this.ownText = value;
+    }
+    get textContent(): string {
+      return [
+        this.ownText,
+        ...this.children.map((child) => child.textContent),
+      ].join('\n');
+    }
+    setAttribute(key: string, value: string) {
+      this.attributes.set(key, value);
+    }
+    append(...items: TestElement[]) {
+      this.children.push(...items);
+    }
+    replaceChildren(...items: TestElement[]) {
+      this.children = items;
+    }
+    contains(item: unknown): boolean {
+      return (
+        item === this || this.children.some((child) => child.contains(item))
+      );
+    }
+    querySelector(selector: string) {
+      return selector === '.national-tools' ? tools : null;
+    }
+    querySelectorAll() {
+      return [];
+    }
+    addEventListener(event: string, action: () => void) {
+      this.listeners.set(event, action);
+    }
+    click() {
+      if (!this.disabled) this.listeners.get('click')?.();
+    }
+    focus() {
+      focusElement(this);
+    }
+    showModal() {
+      this.open = true;
+    }
+    close() {
+      this.open = false;
+    }
+    remove() {
+      /* No node is remounted in these contract tests. */
+    }
+  }
+  const tools = new TestElement('div'),
+    root = new TestElement('div');
+  root.dataset = { country: '01', office: 'trade' };
+  const document = {
+    body: new TestElement('body'),
+    get activeElement() {
+      return activeElement;
+    },
+    querySelector: () => root,
+    createElement: (tag: string) => new TestElement(tag),
+    addEventListener: vi.fn(),
+  };
+  vi.stubGlobal(
+    'MutationObserver',
+    class {
+      observe() {
+        /* Explicit sync is enough for this fixed DOM double. */
+      }
+    },
+  );
+  const api = installCountryRuntime(
+    document as unknown as Document,
+    { addEventListener: vi.fn() } as unknown as Window,
+  );
+  api.connect(p.config);
+  tools.children[0]!.click();
+  const dialog = root.children.find((node) => node.tag === 'dialog')!;
+  const action = (key: string) =>
+    dialog.children.find((node) => node.dataset.runtimeAction === key)!;
+  return { api, dialog, action };
+}
+
+describe('trusted country entry inspection observability (offline DOM contract)', () => {
+  it('renders pending/matched inspection, safe identity and the required projection-before-review step', async () => {
+    const p = scenario(),
+      entry = mountedEntry(p);
+    expect(entry.dialog.textContent).toContain('INSPECT: NOT_INSPECTED');
+    expect(entry.dialog.textContent).not.toContain(prepared.commandId);
+    expect(entry.dialog.textContent).toContain(
+      'Inspect registered intent → Read authorized projection (expected version) → Review',
+    );
+    let release!: (token: string) => void;
+    vi.mocked(p.config.getAccessToken).mockImplementationOnce(
+      () =>
+        new Promise<string>((resolve) => {
+          release = resolve;
+        }),
+    );
+    entry.action('inspect').click();
+    expect(entry.dialog.textContent).toContain('INSPECT: PENDING');
+    expect(entry.dialog.textContent).not.toContain(prepared.commandId);
+    expect(entry.action('review').disabled).toBe(true);
+    release('test-token');
+    await vi.waitFor(() =>
+      expect(entry.api.getState().inspectionStatus).toBe('MATCHED'),
+    );
+    expect(entry.dialog.textContent).toContain(
+      `Verified INSPECT intent: ${prepared.commandId}`,
+    );
+    expect(entry.dialog.textContent).toContain(prepared.commandFingerprint);
+    expect(entry.dialog.textContent).toContain(
+      'INSPECT alone does not enable Review.',
+    );
+    expect(entry.dialog.textContent).toContain('FINAL command: UNAVAILABLE');
+    expect(entry.dialog.textContent).not.toContain('test-token');
+    expect(entry.action('review').disabled).toBe(true);
+    entry.action('read').click();
+    await vi.waitFor(() => expect(entry.api.getState().canReview).toBe(true));
+    expect(entry.action('review').disabled).toBe(false);
+    expect(entry.action('confirm').disabled).toBe(true);
+    entry.action('review').click();
+    expect(entry.action('confirm').disabled).toBe(false);
+    expect(p.countEnqueue()).toBe(0);
+    p.revoke();
+    expect(entry.dialog.textContent).toContain('INSPECT: NOT_INSPECTED');
+    expect(entry.dialog.textContent).not.toContain(prepared.commandId);
+    expect(entry.action('confirm').disabled).toBe(true);
+  });
+  it('renders failed inspection without verified identity or enabled Review', async () => {
+    const p = scenario();
+    p.badInspect();
+    const entry = mountedEntry(p);
+    entry.action('inspect').click();
+    await vi.waitFor(() =>
+      expect(entry.api.getState().inspectionStatus).toBe('FAILED'),
+    );
+    expect(entry.dialog.textContent).toContain(
+      'INSPECT failed or did not match.',
+    );
+    expect(entry.dialog.textContent).not.toContain('Verified INSPECT intent:');
+    expect(entry.dialog.textContent).not.toContain(prepared.commandId);
+    expect(entry.action('review').disabled).toBe(true);
+    expect(entry.action('confirm').disabled).toBe(true);
+  });
+});
+
 describe('static country → actual A staged reservation contract (offline)', () => {
+  it('exposes matched INSPECT identity without enabling Review until the expected projection is read', async () => {
+    const p = scenario();
+    expect(p.runtime.getState()).toMatchObject({
+      inspectionStatus: 'NOT_INSPECTED',
+      inspectedIntent: null,
+    });
+    await p.runtime.inspect();
+    expect(p.runtime.getState()).toMatchObject({
+      connection: 'HOST_BOUND_LOCAL_PREPARATION',
+      lifecycle: 'IDLE',
+      inspectionStatus: 'MATCHED',
+      inspectedIntent: {
+        commandId: prepared.commandId,
+        commandFingerprint: prepared.commandFingerprint,
+        expectedWorldVersion: '0',
+      },
+      projection: null,
+      canReview: false,
+      canConfirm: false,
+    });
+    expect(p.runtime.review()).toBe(false);
+    await p.runtime.readProjection();
+    expect(p.runtime.getState().canReview).toBe(true);
+    expect(p.runtime.getState().canConfirm).toBe(false);
+    expect(p.runtime.review()).toBe(true);
+    expect(p.countEnqueue()).toBe(0);
+  });
+  it('publishes PENDING before awaiting INSPECT and exposes no unverified identity', async () => {
+    const p = scenario();
+    let release!: (token: string) => void;
+    vi.mocked(p.config.getAccessToken).mockImplementationOnce(
+      () =>
+        new Promise<string>((resolve) => {
+          release = resolve;
+        }),
+    );
+    const observed: string[] = [];
+    p.runtime.subscribe(() =>
+      observed.push(p.runtime.getState().inspectionStatus),
+    );
+    const inspecting = p.runtime.inspect();
+    expect(p.runtime.getState()).toMatchObject({
+      inspectionStatus: 'PENDING',
+      inspectedIntent: null,
+      lifecycle: 'INSPECTING',
+      canInspect: false,
+      canReview: false,
+    });
+    release('test-token');
+    await inspecting;
+    expect(observed).toEqual(['PENDING', 'MATCHED']);
+  });
+  it('clears previously matched identity on failed exact INSPECT without leaking an error', async () => {
+    const p = scenario();
+    await p.runtime.inspect();
+    p.badInspect();
+    await p.runtime.inspect();
+    await p.runtime.readProjection();
+    expect(p.runtime.getState()).toMatchObject({
+      inspectionStatus: 'FAILED',
+      inspectedIntent: null,
+      lifecycle: 'UNAVAILABLE',
+      canReview: false,
+      canConfirm: false,
+    });
+    expect(p.countEnqueue()).toBe(0);
+  });
+  it('does not restore verified identity when an in-flight INSPECT returns after invalidation', async () => {
+    const p = scenario();
+    let release!: (token: string) => void;
+    vi.mocked(p.config.getAccessToken).mockImplementationOnce(
+      () =>
+        new Promise<string>((resolve) => {
+          release = resolve;
+        }),
+    );
+    const inspecting = p.runtime.inspect();
+    p.revoke();
+    release('test-token');
+    await inspecting;
+    expect(p.runtime.getState()).toMatchObject({
+      connection: 'NOT_CONNECTED',
+      inspectionStatus: 'NOT_INSPECTED',
+      inspectedIntent: null,
+      canReview: false,
+    });
+  });
+  it('clears matched identity on explicit disconnect and rejects wrong-version projections', async () => {
+    const p = scenario();
+    await p.runtime.inspect();
+    p.setVersion('1');
+    await p.runtime.readProjection();
+    expect(p.runtime.getState().inspectionStatus).toBe('MATCHED');
+    expect(p.runtime.getState().canReview).toBe(false);
+    p.runtime.disconnect();
+    expect(p.runtime.getState()).toMatchObject({
+      inspectionStatus: 'NOT_INSPECTED',
+      inspectedIntent: null,
+      projection: null,
+    });
+  });
   it('has no trusted host defaults or network without complete injection', async () => {
     const factory = vi.fn();
     const runtime = createTrustedCountryRuntime(null, () => selected, factory);

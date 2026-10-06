@@ -68,9 +68,45 @@ export function installCountryRuntime(document: Document, host: Window) {
         'Isolated browser integration preparation. Host claims are not server admission. Source fields and local allocations are not live projection or Command terms.',
       ),
     );
+    const inspection = text('p', `INSPECT: ${state.inspectionStatus}`);
+    inspection.setAttribute('role', 'status');
+    inspection.setAttribute('aria-label', 'Registered intent inspection');
+    dialog.append(inspection);
+    if (state.inspectedIntent) {
+      const intent = state.inspectedIntent;
+      dialog.append(
+        text(
+          'p',
+          `Verified INSPECT intent: ${intent.commandId} · ${intent.commandFingerprint} · Expected World version ${intent.expectedWorldVersion}. Server response matched the frozen intent; this is not ENQUEUE admission or execution authority.`,
+        ),
+      );
+      if (!state.canReview && !state.receipt && state.canRead)
+        dialog.append(
+          text(
+            'p',
+            `Before Review, read / refresh the authorized projection at expected World version ${intent.expectedWorldVersion}. INSPECT alone does not enable Review.`,
+          ),
+        );
+    } else if (state.inspectionStatus === 'PENDING')
+      dialog.append(
+        text('p', 'INSPECT pending; wait for the server response.'),
+      );
+    else if (state.inspectionStatus === 'FAILED')
+      dialog.append(
+        text(
+          'p',
+          'INSPECT failed or did not match. No verified intent; Review is blocked.',
+        ),
+      );
+    dialog.append(
+      text(
+        'p',
+        'Workflow: Inspect registered intent → Read authorized projection (expected version) → Review → Confirm ENQUEUE once → Read FINAL → Refresh authorized projection. Each step keeps its existing server and session checks.',
+      ),
+    );
     if (state.snapshot?.reason) dialog.append(text('p', state.snapshot.reason));
     if (state.ui) {
-      dialog.append(text('p', `Command: ${state.ui.command.kind}`));
+      dialog.append(text('p', `FINAL command: ${state.ui.command.kind}`));
       const receipt = state.receipt;
       if (receipt)
         dialog.append(
@@ -97,7 +133,7 @@ export function installCountryRuntime(document: Document, host: Window) {
         dialog.append(
           text(
             'p',
-            'Authorized movement projection unavailable; refresh after a verified FINAL.',
+            'Authorized movement projection unavailable. Before Review, read the expected version; after a verified FINAL, refresh again.',
           ),
         );
     }
