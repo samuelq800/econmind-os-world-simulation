@@ -150,6 +150,200 @@ afterEach(() => {
 });
 
 describe('unmounted HTTPS production read preparation / OFFLINE TEST_ONLY', () => {
+  it.each(['identity', 'liveness', 'predicate throws'])(
+    'B-G-READ-01 permanently retires observed token loss: %s',
+    async (loss) => {
+      const f = fixture();
+      let lost = false,
+        release: ((token: string) => void) | undefined;
+      const token = vi.fn(f.config.getAccessToken);
+      token.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            release = resolve;
+          }),
+      );
+      const fetcher = fetcherFor(f.projection());
+      const client = createProductionReadClient(
+        {
+          ...f.config,
+          getAccessToken: token,
+          session: {
+            ...f.config.session,
+            isCurrent: () => {
+              if (lost && loss === 'predicate throws')
+                throw new Error('TEST_ONLY_LIFETIME');
+              return !(lost && loss === 'liveness');
+            },
+          },
+        },
+        { fetcher },
+      );
+      const pending = client.readProjection(requestId);
+      lost = true;
+      if (loss === 'identity') f.replaceIdentity(null);
+      release?.('TEST_ONLY_OPAQUE_TOKEN');
+      expect(await pending).toEqual({ status: 'STALE' });
+      lost = false;
+      f.replaceIdentity(f.config.identity);
+      // No state() or invalidation callback may supply the retirement latch.
+      expect(await client.readProjection(requestId)).toEqual({
+        status: 'NOT_CONNECTED',
+      });
+      expect(fetcher).not.toHaveBeenCalled();
+      expect(f.listeners.size).toBe(0);
+    },
+  );
+  it.each(['fetch response', 'fetch rejection', 'token rejection'])(
+    'B-G-READ-01 permanently retires observed async loss: %s',
+    async (fence) => {
+      const f = fixture();
+      let resolve: ((response: Response) => void) | undefined,
+        reject: ((reason: Error) => void) | undefined;
+      const deferred = new Promise<Response>((res, rej) => {
+        resolve = res;
+        reject = rej;
+      });
+      const fetcher = fetcherFor(f.projection());
+      const token = vi.fn(f.config.getAccessToken);
+      if (fence === 'token rejection')
+        token.mockImplementationOnce(() =>
+          deferred.then(() => 'TEST_ONLY_OPAQUE_TOKEN'),
+        );
+      else fetcher.mockImplementationOnce(() => deferred);
+      const client = createProductionReadClient(
+        { ...f.config, getAccessToken: token },
+        { fetcher },
+      );
+      const pending = client.readProjection(requestId);
+      if (fence !== 'token rejection')
+        await vi.waitFor(() => expect(fetcher).toHaveBeenCalledOnce());
+      f.replaceIdentity(null);
+      if (fence === 'fetch response') resolve?.(Response.json(f.projection()));
+      else reject?.(new Error('TEST_ONLY_FAILURE'));
+      expect(await pending).toEqual({ status: 'STALE' });
+      f.replaceIdentity(f.config.identity);
+      expect(await client.lookupFinal(requestId, lookup)).toEqual({
+        status: 'NOT_CONNECTED',
+      });
+      expect(fetcher).toHaveBeenCalledTimes(
+        fence === 'token rejection' ? 0 : 1,
+      );
+      expect(f.listeners.size).toBe(0);
+    },
+  );
+  it.each(['throws', 'hangs'])(
+    'B-G-READ-01 retires before body cancellation that %s',
+    async (cleanup) => {
+      const f = fixture();
+      let controller: ReadableStreamDefaultController<Uint8Array> | undefined;
+      const cancel = vi.fn(() => {
+        if (cleanup === 'throws') throw new Error('TEST_ONLY_CANCEL');
+        return new Promise<void>(() => {});
+      });
+      const body = new ReadableStream<Uint8Array>({
+        start(c) {
+          controller = c;
+        },
+        cancel,
+      });
+      const fetcher = vi.fn(
+        async () =>
+          new Response(body, {
+            headers: { 'content-type': 'application/json' },
+          }),
+      );
+      const client = createProductionReadClient(f.config, { fetcher });
+      const pending = client.readProjection(requestId);
+      await vi.waitFor(() => expect(body.locked).toBe(true));
+      f.replaceIdentity(null);
+      controller?.enqueue(
+        new TextEncoder().encode(JSON.stringify(f.projection())),
+      );
+      expect(await pending).toEqual({ status: 'STALE' });
+      f.replaceIdentity(f.config.identity);
+      expect(await client.readProjection(requestId)).toEqual({
+        status: 'NOT_CONNECTED',
+      });
+      expect(cancel).toHaveBeenCalledOnce();
+      expect(fetcher).toHaveBeenCalledOnce();
+      expect(f.listeners.size).toBe(0);
+    },
+  );
+  it('B-G-READ-01 observed loss aborts sibling reads without notification', async () => {
+    const f = fixture();
+    let release: ((response: Response) => void) | undefined;
+    const signals: AbortSignal[] = [];
+    const fetcher = vi.fn(
+      (_url: string | URL | Request, init?: RequestInit) => {
+        if (init?.signal) signals.push(init.signal);
+        return new Promise<Response>((resolve) => {
+          if (signals.length === 1) release = resolve;
+        });
+      },
+    );
+    const client = createProductionReadClient(f.config, { fetcher });
+    const first = client.readProjection(requestId),
+      sibling = client.lookupFinal(requestId, lookup);
+    await vi.waitFor(() => expect(fetcher).toHaveBeenCalledTimes(2));
+    f.replaceIdentity(null);
+    release?.(Response.json(f.projection()));
+    expect(await Promise.all([first, sibling])).toEqual([
+      { status: 'STALE' },
+      { status: 'STALE' },
+    ]);
+    expect(signals.every((signal) => signal.aborted)).toBe(true);
+    f.replaceIdentity(f.config.identity);
+    expect(await client.readProjection(requestId)).toEqual({
+      status: 'NOT_CONNECTED',
+    });
+    expect(f.listeners.size).toBe(0);
+  });
+  it('B-G-READ-01 continuous lifetime and transient network failure remain retryable', async () => {
+    const f = fixture(),
+      fetcher = fetcherFor(f.projection()),
+      client = createProductionReadClient(f.config, { fetcher });
+    expect(await client.readProjection(requestId)).toMatchObject({
+      status: 'PROJECTION',
+    });
+    fetcher.mockRejectedValueOnce(new Error('TEST_ONLY_NETWORK'));
+    expect(await client.readProjection(requestId)).toEqual({
+      status: 'UNAVAILABLE',
+    });
+    expect(await client.readProjection(requestId)).toMatchObject({
+      status: 'PROJECTION',
+    });
+    expect(f.listeners.size).toBe(1);
+    client.disconnect();
+  });
+  it('B-G-READ-01 timeout alone does not retire a current lifetime', async () => {
+    vi.useFakeTimers();
+    const f = fixture(),
+      token = vi.fn(f.config.getAccessToken),
+      fetcher = fetcherFor(f.projection());
+    let release: ((token: string) => void) | undefined;
+    token.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    );
+    const client = createProductionReadClient(
+      { ...f.config, getAccessToken: token },
+      { fetcher },
+    );
+    const pending = client.readProjection(requestId);
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(await pending).toEqual({ status: 'UNAVAILABLE' });
+    release?.('TEST_ONLY_OPAQUE_TOKEN');
+    await Promise.resolve();
+    expect(fetcher).not.toHaveBeenCalled();
+    expect(await client.readProjection(requestId)).toMatchObject({
+      status: 'PROJECTION',
+    });
+    expect(f.listeners.size).toBe(1);
+    client.disconnect();
+  });
   it('has only read/final/disconnect and defaults to NOT_CONNECTED without discovery', async () => {
     const fetcher = fetcherFor({}),
       client = createProductionReadClient(null, { fetcher });
@@ -463,7 +657,9 @@ describe('unmounted HTTPS production read preparation / OFFLINE TEST_ONLY', () =
     const fetcher = vi.fn(async () => {
       step++;
       if (step === 2) throw new Error('TEST_ONLY_DISCONNECT');
-      return Response.json(step === 1 ? f.final() : f.projection('2'));
+      return Response.json(
+        step === 1 ? f.final() : f.projection(step === 3 ? '2' : '3'),
+      );
     });
     const client = createProductionReadClient(f.config, { fetcher });
     expect(await client.lookupFinal(requestId, lookup)).toMatchObject({
@@ -473,6 +669,11 @@ describe('unmounted HTTPS production read preparation / OFFLINE TEST_ONLY', () =
       status: 'UNAVAILABLE',
     });
     expect(await client.readProjection(requestId)).toEqual({ status: 'STALE' });
+    expect(await client.readProjection(requestId)).toMatchObject({
+      status: 'PROJECTION',
+      worldVersion: '3',
+    });
+    client.disconnect();
   });
   it('rejects a foreign response URL even when its binding JSON matches', async () => {
     const f = fixture(),

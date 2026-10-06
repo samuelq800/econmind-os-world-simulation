@@ -117,6 +117,11 @@ export function createProductionReadClient(
       return false;
     }
   }
+  function ensureCurrent() {
+    if (current()) return true;
+    retire();
+    return false;
+  }
   function failure(status: Failure['status']): Failure {
     bound = false;
     cache.revokeAuthorization();
@@ -131,8 +136,7 @@ export function createProductionReadClient(
     retire();
     return disconnected;
   }
-  if (!current()) {
-    retire();
+  if (!ensureCurrent()) {
     return disconnected;
   }
 
@@ -148,8 +152,7 @@ export function createProductionReadClient(
         readonly authority: ServerReadAuthority;
       }
   > {
-    if (!current()) {
-      retire();
+    if (!ensureCurrent()) {
       return { status: 'NOT_CONNECTED' };
     }
     const controller = new AbortController();
@@ -185,7 +188,7 @@ export function createProductionReadClient(
     > => {
       try {
         const token = await c.getAccessToken();
-        if (!current() || controller.signal.aborted)
+        if (!ensureCurrent() || controller.signal.aborted)
           return requestFailure('STALE');
         if (!token || token.length > 8192 || !/^[A-Za-z0-9._~-]+$/u.test(token))
           return failure('NOT_CONNECTED');
@@ -193,7 +196,7 @@ export function createProductionReadClient(
         if (new TextEncoder().encode(serialized).byteLength > 16384)
           return failure('UNAVAILABLE');
         // No await between the final lifetime fence and dispatch; only fixed read paths.
-        if (!current() || controller.signal.aborted)
+        if (!ensureCurrent() || controller.signal.aborted)
           return requestFailure('STALE');
         const target = new URL(path, c.endpoints.origin);
         const response = await fetcher(target, {
@@ -208,7 +211,7 @@ export function createProductionReadClient(
           cache: 'no-store',
           signal: controller.signal,
         });
-        if (!current() || controller.signal.aborted)
+        if (!ensureCurrent() || controller.signal.aborted)
           return requestFailure('STALE');
         if (response.status === 401 || response.status === 403) {
           retire('DENIED');
@@ -230,8 +233,13 @@ export function createProductionReadClient(
         try {
           while (true) {
             const next = await reader.read();
-            if (!current() || controller.signal.aborted) {
-              await reader.cancel();
+            if (!ensureCurrent() || controller.signal.aborted) {
+              // Retirement precedes best-effort cleanup; a host stream may hang.
+              try {
+                void reader.cancel().catch(() => undefined);
+              } catch {
+                /* Cancellation cannot restore the retired lifetime. */
+              }
               return requestFailure('STALE');
             }
             if (next.done) break;
@@ -254,7 +262,7 @@ export function createProductionReadClient(
         const envelope = row(
           JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(raw)),
         );
-        if (!current() || controller.signal.aborted)
+        if (!ensureCurrent() || controller.signal.aborted)
           return requestFailure('STALE');
         if (
           !envelope ||
@@ -297,7 +305,7 @@ export function createProductionReadClient(
         }
         return { status: 'RESPONSE', result, authority };
       } catch {
-        return requestFailure(current() ? 'UNAVAILABLE' : 'STALE');
+        return requestFailure(ensureCurrent() ? 'UNAVAILABLE' : 'STALE');
       }
     };
     try {
@@ -310,7 +318,7 @@ export function createProductionReadClient(
   }
   return Object.freeze({
     state: () => {
-      if (!current()) retire();
+      ensureCurrent();
       return bound && !retired ? 'READ_ONLY_BOUND' : 'NOT_CONNECTED';
     },
     disconnect: () => retire(),
@@ -347,8 +355,7 @@ export function createProductionReadClient(
         data.payload === undefined
       )
         return failure('UNAVAILABLE');
-      if (!current()) {
-        retire();
+      if (!ensureCurrent()) {
         return { status: 'STALE' };
       }
       cache.bindAuthorization(
@@ -431,8 +438,7 @@ export function createProductionReadClient(
               BigInt(response.authority.readback.worldVersion)))
       )
         return failure('UNAVAILABLE');
-      if (!current()) {
-        retire();
+      if (!ensureCurrent()) {
         return { status: 'STALE' };
       }
       if (

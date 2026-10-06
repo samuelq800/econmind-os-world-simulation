@@ -139,3 +139,35 @@ deployment, CI network runs, full PG, online420, Worker/Clock, economic actions,
 main merge and release are `NOT_RUN`. The prepared module may only be adopted
 after a separate fixed-candidate B review and Root decision; formal dependent
 implementation still requires its real gates. Stop after frozen handoff.
+
+## B-G-READ-01 observed lifetime loss repair
+
+B reviewed candidate `a6a3af52fc5258c6239782a1070302231190dab3` as
+`CHANGES_REQUIRED`. Its deterministic token-fence reproduction observed STALE,
+then restored the old identity and obtained a projection from the same port.
+That failed candidate, B report and original failure evidence remain preserved.
+
+The shared `ensureCurrent()` fence now irreversibly retires the port whenever
+an identity or lifetime predicate is false or throws. Token, dispatch, fetch,
+body, envelope, catch and final acceptance fences all use it. Retirement clears
+the cache, aborts active reads and removes the invalidation subscription without
+requiring a notification or a subsequent `state()` call. Body retirement occurs
+before best-effort cancellation; cancellation rejection or noncompletion cannot
+block it. A timeout abort alone does not retire a still-current lifetime.
+
+Eleven added offline regressions cover silent identity/liveness loss and predicate
+exceptions, token/fetch/catch/body continuations, throwing/hanging cancellation,
+sibling aborts, restoration without revival, continuous valid lifetime and
+retryable timeout/network errors. The existing version-floor regression also
+checks recovery at the retained floor after a lower-version STALE result.
+Existing explicit invalidation and DENIED controls remain required. The added
+token regressions were run against the old client first: three FAIL; their actual
+log is retained alongside the passing repair verification.
+
+This repair remains `IMPLEMENTED_UNVERIFIED_PREPARATION_ONLY`, risk P0. Local
+verification and a fresh read-only repair review do not replace B fixed-candidate
+recheck or Root adoption. Exact commands, results, tip/base/tree/patch hashes and
+the unchanged governance hash accompany the frozen repair handoff. No provider,
+server/API, UI mount, governance or existing local guard is changed. All external
+pins remain MISSING; network, database, production, merge and deployment remain
+NOT_RUN.
