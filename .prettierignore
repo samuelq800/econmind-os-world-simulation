@@ -31,3 +31,6 @@ docs/reports/V25.1/
 # Preserve the hash-verified owner-selected UI runtime files without rewriting them.
 apps/world-web/public/
 artifacts/ui-authority/
+# Preserve the exact proposal fixture bytes pinned by the non-activated A/E contracts.
+# SHA-256: 15383e28d523bad7ff4fdbe14e141c7a46f21072c9bd4a81faa5a5acc378c7cb
+artifacts/E_OPENING_SEMANTIC_MAPPING_PROPOSAL_2026_10_07.md
