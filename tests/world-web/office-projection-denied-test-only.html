@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TEST_ONLY read-authority retirement</title>
+  </head>
+  <body>
+    <h1>TEST_ONLY — HTTP denial regression, not a live country or seat</h1>
+    <p>
+      Offline client-local transport. No real token, endpoint, command or World.
+    </p>
+    <button id="connect">Connect TEST_ONLY read fixture</button>
+    <button id="deny401">TEST_ONLY: next response is HTTP 401</button>
+    <button id="deny403">TEST_ONLY: next response is HTTP 403</button>
+    <main class="country-game" data-country="01" data-office="finance">
+      <nav class="national-tools" aria-label="TEST_ONLY source controls"></nav>
+    </main>
+    <script
+      type="module"
+      src="./office-projection-denied-test-only.ts"
+    ></script>
+  </body>
+</html>
