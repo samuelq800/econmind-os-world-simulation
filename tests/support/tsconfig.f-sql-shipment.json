@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "types": ["node", "vitest"], "skipLibCheck": true },
+  "include": [
+    "../../apps/world-worker/src/persistence/sql-narrow-treasury-gcu-shipment-preparation-source.ts",
+    "../../apps/world-worker/src/persistence/narrow-treasury-gcu-shipment-draft.ts",
+    "../world-core/sql-narrow-treasury-gcu-shipment-preparation.test.ts"
+  ]
+}
