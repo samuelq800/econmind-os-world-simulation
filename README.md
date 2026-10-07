@@ -7,6 +7,28 @@ engines or hidden buffs.
 
 ## Current integration snapshot (2026-10-07)
 
+Latest implementation checkpoint:
+[D02 implementation, evidence levels and remaining construction](docs/reports/world-connection/WORLD_V2_FINANCIAL_IMPLEMENTATION_AND_VERIFICATION_2026_10_07.md).
+Reviewed PR94 durable reference storage, PR95 actual human Owner provenance,
+and PR96 exact fuel-cap repair are on main. The
+[actual non-host decisions](docs/governance/OWNER_NON_HOST_DECISIONS_2026_10_07.md)
+adopt full B=TGA, paired R, scoped opening reconciliation and physical-domain
+rules. They do not supply missing amounts, admit a seed or start production.
+
+The completed [source audit](docs/reports/world-connection/D02_D04_SOURCE_RESOLUTION_AUDIT_2026_10_07.md)
+and [123-row matrix](docs/reports/world-connection/D02_D04_SOURCE_RESOLUTION_MATRIX_2026_10_07.json)
+preserve their earlier fixed-baseline statuses; the
+[later adoption crosswalk](docs/reports/world-connection/OWNER_MINIMUM_DECISIONS_AFTER_D02_D04_AUDIT_2026_10_07.md)
+prevents repeated approval questions. Current
+[remaining Owner/source inputs](docs/reports/world-connection/WORLD_V2_OWNER_ACTIONS_REMAINING_2026_10_07.md)
+are completeness/denomination/identity evidence, not a reopened model choice.
+Six Offices remain in scope. New E/G/C/F/D increments have their own reviews and
+consumer checks; no Finance-only, source-only or TEST_ONLY pass closes the whole
+project. B's new C readback lock-order finding must be repaired before that
+candidate merges. Production host/activation (D05) remains explicitly deferred.
+
+### Earlier October 7 source checkpoint
+
 [Current source integration and remaining runtime connections](docs/reports/world-connection/O_ONLINE_SOURCE_COMPONENTS_2026_10_07.md)
 records reviewed PR90/91/92. Opening reconciliation and the canonical Seed
 bridge, real Supabase JWKS signature verification, and a PostgreSQL current
