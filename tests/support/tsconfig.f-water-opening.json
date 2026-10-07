@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "rootDir": "../.."
+  },
+  "include": [
+    "../../apps/world-worker/src/preparation/official-water-opening-adoption.ts",
+    "../../packages/core/src/water/**/*.ts",
+    "../world-core/official-water-opening-adoption.test.ts"
+  ]
+}
