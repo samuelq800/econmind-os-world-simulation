@@ -118,7 +118,7 @@ async function facts(world: string) {
       await db().query<{ row_text: string }>(
         `select to_jsonb(fact)::text as row_text
          from world_v2.${quotedTable} as fact where world_id=$1
-         order by row_text collate "C"`,
+         order by to_jsonb(fact)::text collate "C"`,
         [world],
       )
     ).rows;

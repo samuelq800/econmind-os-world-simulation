@@ -2,8 +2,9 @@
 
 ## Authority, preparation gate and ownership
 
-PREPARATION_ONLY_NOT_V09_2_STARTED. Implementation preparation only; real
-PostgreSQL execution is NOT_RUN. This test supplement touches P0 single-writer
+PREPARATION_ONLY_NOT_V09_2_STARTED. This source-fix candidate has no new real
+PostgreSQL execution; the previous native run failed all four cases as recorded
+below. This test supplement touches P0 single-writer
 acceptance evidence and requires B's independent narrow review, not self-approval.
 
 Control Tower requested this bounded supplement on 2026-10-07, from exact base
@@ -92,3 +93,59 @@ disposable target; passing preparation checks are not real-PG evidence.
   fixture, PostgreSQL RLS/grants/concurrency semantics: NOT_RUN, not PASS.
 - git diff --check: exit 0. Final pins/check output are frozen separately in the
   local handoff artifact; no repository status update or review approval.
+
+## Historical native failure and source-only observer correction
+
+The preceding preparation checks above are historical, not native evidence.
+Root subsequently authorized one fresh disposable native run of exact candidate
+`811b96fa7087ef4cd031be6044f55fb67f65916b` under scope
+`O_F_REAL_RENEWAL_DISPOSABLE_20261007_ONCE`. Actual result: **4 FAIL, 0 PASS,
+0 SKIP**, exit 1. Each case failed in facts() with `column "row_text" does not
+exist` at `ORDER BY row_text COLLATE "C"`. The lease acceptance assertions did
+not complete. Full22 fixture and partial facts were preserved; the generation
+was stopped safely and retained, with no rerun or source repair in that scope.
+
+Frozen historical package (not overwritten):
+`/Users/samuel/Documents/econclub/artifacts/f-v09-real-renewal-once-20261007.4U3FbV/`.
+Handoff SHA256: `fca9724e3745693ecc8e4dcd40d9d1c1e6a211aca1deeaea141d29165ff3e134`.
+CHECKS SHA256: `8573179a907fa2b7b09992ff4b791b20e1ed812efb421b6373a18f0db8106c05`.
+Raw output SHA256: `2ffb5ad763168df21e48856dcb3ebeae58f0b73f483173e2cf5be3c75bbd1f08`.
+
+Root's separate source-only authorization creates isolated branch
+`codex/f-v09-renewal-observer-sql-fix` from exact `811b96fa...`, without editing
+the old clean checkout. The only test-source change repeats the actual selected
+SQL expression in ORDER BY: `to_jsonb(fact)::text COLLATE "C"`. Returned
+`row_text`, fixed `$1` World filter, quoted catalog identifier, raw PG text/C
+ordering, table traversal, four cases and all lease/time/fence/error assertions
+remain unchanged. This repairs test observation syntax, not authoritative lease
+SQL, not data normalization and not an alternative observer/lease algorithm.
+
+One separately isolated in-memory locked-PGlite diagnostic is permitted with
+three tiny synthetic rows and the exact old/new observer queries. It must
+reproduce the old undefined-column error and verify the new raw JSONB text,
+same-World filtering and C text ordering. Diagnostic script/output are ordinary
+external artifacts, not governed product dependencies or real renewal evidence.
+Only targeted strict types/lint/two-path formatting/source-pin checks follow;
+no already-passing test suite or four-case collection rerun is needed.
+
+New real PostgreSQL cases remain NOT_RUN; historical native renewal remains
+NOT_PASSED. The former generation and scope are consumed. No real DB/cluster
+restart, Supabase, Worker/Clock, push/main, status promotion or weakening is
+authorized. Freeze new exact base/head/tree/binary diff/patch/checks and hand to
+Root for B exact-delta review; a new reviewed fresh-generation authority is
+required before any future native run. Then STOP.
+
+### Source-fix diagnostic result
+
+One locked PGlite 0.5.8 in-memory instance, three tiny rows, one old/new query
+each: exit 0, PASS_PGLITE_SYNTAX_REPRO_ONLY. Exact source query templates were
+extracted and only the catalog table identifier substituted for the tiny probe.
+Old query actually raised 42703 / `column "row_text" does not exist`; new query
+returned two exact raw JSONB text strings for only WORLD_PG_RENEW_PROBE, id11
+before id2 (C text order, not numeric order). No JS parsing/normalizing/sorting
+was used; the unrelated World row was excluded. Instance closed.
+
+This establishes observer syntax/filter/sort on that embedded parser only.
+There was no new native PostgreSQL execution, no real lease case, migration,
+cluster, old database access or four-case collection. Native renewal remains
+NOT_PASSED and the earlier 4 FAIL record remains intact.
