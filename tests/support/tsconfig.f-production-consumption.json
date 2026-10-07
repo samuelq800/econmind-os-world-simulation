@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "rootDir": "../.."
+  },
+  "include": [
+    "../world-core/production-consumption-posting.test.ts",
+    "../../apps/world-worker/src/persistence/atomic-transition-repository.ts",
+    "../../apps/world-worker/src/persistence/durable-v08-ledger-lineage-reader.ts"
+  ]
+}

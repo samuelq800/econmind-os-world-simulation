@@ -6,6 +6,8 @@ import {
   createAuthoritativeTransition,
   createFinancialPostingBatch,
   createInventoryPosting,
+  PRODUCTION_CONSUMPTION_SCHEMA_VERSION,
+  PRODUCTION_PERSISTENCE_SCHEMA_NOT_ADMITTED,
   commandId,
   eventId,
   financialAccountId,
@@ -22,7 +24,7 @@ import {
   type CanonicalCommand,
   type FinancialPostingBatch,
   type FinancialPostingDirection,
-  type InventoryPosting,
+  type InventoryLedgerPosting,
   type InventoryPostingEntry,
   type RebuiltV08Ledgers,
   type Sha256Hex,
@@ -245,11 +247,20 @@ function parseInventoryPosting(input: {
   readonly row: PostingRow;
   readonly sha256Hex: Sha256Hex;
   readonly transition: AuthoritativeTransition;
-}): InventoryPosting {
+}): InventoryLedgerPosting {
   const payload = canonicalObject(
     input.row.canonical_payload,
     'Inventory Posting',
   );
+  if (
+    payload.schemaVersion === PRODUCTION_CONSUMPTION_SCHEMA_VERSION ||
+    payload.operation === 'PRODUCE_AND_CONSUME'
+  ) {
+    throw new DomainError(
+      DOMAIN_ERROR_CODES.VERSION_MISMATCH,
+      PRODUCTION_PERSISTENCE_SCHEMA_NOT_ADMITTED,
+    );
+  }
   const posting = createInventoryPosting(
     {
       schemaVersion: text(

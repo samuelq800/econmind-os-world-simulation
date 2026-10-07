@@ -10,6 +10,9 @@ import {
   commandId,
   createFinancialPostingBatch,
   createInventoryPosting,
+  createProductionConsumptionPosting,
+  assertInventoryPersistenceSchemaAdmitted,
+  PRODUCTION_CONSUMPTION_SCHEMA_VERSION,
   eventId,
   idempotencyKey,
   isCommitAuthorizationProof,
@@ -25,7 +28,7 @@ import {
   type FinalCommandOutcome,
   type FinalCommandReceipt,
   type FinancialPostingBatch,
-  type InventoryPosting,
+  type InventoryLedgerPosting,
   type OutboxMessage,
   type QueueAuthorityKind,
   type Sha256Hex,
@@ -54,7 +57,7 @@ export interface PreparedCurrentMaterialization {
 
 export interface AtomicTransitionDraft {
   readonly transition: AuthoritativeTransition;
-  readonly inventoryPostings: readonly InventoryPosting[];
+  readonly inventoryPostings: readonly InventoryLedgerPosting[];
   readonly financialPostingBatches: readonly FinancialPostingBatch[];
   readonly receipt: FinalCommandReceipt;
   readonly outboxMessages: readonly OutboxMessage[];
@@ -70,7 +73,7 @@ export interface PrivateAtomicTransitionCandidate {
   readonly [privateAtomicCandidate]: true;
   readonly command: CanonicalCommand;
   readonly transition: AuthoritativeTransition;
-  readonly inventoryPostings: readonly InventoryPosting[];
+  readonly inventoryPostings: readonly InventoryLedgerPosting[];
   readonly financialPostingBatches: readonly FinancialPostingBatch[];
   readonly receipt: FinalCommandReceipt;
   readonly outboxMessages: readonly OutboxMessage[];
@@ -150,11 +153,25 @@ function assertCommitAssertion(input: {
 }
 
 function validateInventoryPosting(input: {
-  readonly posting: InventoryPosting;
+  readonly posting: InventoryLedgerPosting;
   readonly command: CanonicalCommand;
   readonly transition: AuthoritativeTransition;
   readonly sha256Hex: Sha256Hex;
-}): Readonly<InventoryPosting> {
+}): Readonly<InventoryLedgerPosting> {
+  if (input.posting.schemaVersion === PRODUCTION_CONSUMPTION_SCHEMA_VERSION) {
+    const verified = createProductionConsumptionPosting(
+      {
+        postingId: input.posting.postingId,
+        evidence: input.posting.evidence,
+        command: input.command,
+        transition: input.transition,
+      },
+      input.sha256Hex,
+    );
+    if (canonicalSerialize(verified) !== canonicalSerialize(input.posting))
+      invalid('Production Posting evidence is forged or non-canonical');
+    return verified;
+  }
   const verified = createInventoryPosting(
     {
       schemaVersion: input.posting.schemaVersion,
@@ -213,7 +230,7 @@ function validateFinancialPosting(input: {
  * the database can independently recompute the fingerprint binding.
  */
 function canonicalPostingIntent(
-  posting: InventoryPosting | FinancialPostingBatch,
+  posting: InventoryLedgerPosting | FinancialPostingBatch,
 ): string {
   const { fingerprint: _fingerprint, ...intent } = posting;
   void _fingerprint;
@@ -796,6 +813,8 @@ export class AtomicTransitionRepository {
     if (!privateCandidates.has(candidate)) {
       invalid('Atomic repository accepts a validated private candidate only');
     }
+    // Explicit schema gate BEFORE opening a database transaction or writing any fact.
+    assertInventoryPersistenceSchemaAdmitted(candidate.inventoryPostings);
     if (candidate.commitAssertion.holderId !== this.#workerId) {
       throw new DomainError(
         DOMAIN_ERROR_CODES.WRITER_FENCE_STALE,

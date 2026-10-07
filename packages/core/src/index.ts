@@ -5,6 +5,7 @@ export * from './authorization/identity.js';
 export * from './authorization/offices.js';
 export * from './authorization/projections.js';
 export * from './commands/command.js';
+export * from './commands/captain-political-capital-allocation.js';
 export * from './commands/receipt.js';
 export * from './commands/authenticated-financial-intake-contract.js';
 export * from './events/event.js';
@@ -53,6 +54,7 @@ export {
   type InventoryPostingReceipt,
   type InventoryPostingResult,
 } from './inventory/inventory-ledger.js';
+export * from './inventory/production-consumption-posting.js';
 export * from './labour/labour-engine.js';
 export * from './labour/population-labour-invariants.js';
 export * from './labour/approved-opening-projection.js';
