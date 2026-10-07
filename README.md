@@ -7,10 +7,14 @@ engines or hidden buffs.
 
 ## Current integration snapshot (2026-10-07)
 
-Latest implementation checkpoint:
+Latest merged-source checkpoint:
+[October 7 main integration closeout and remaining runtime work](docs/reports/world-connection/WORLD_V2_MAIN_INTEGRATION_CLOSEOUT_2026_10_07.md).
+The following earlier implementation checkpoint is retained with its original evidence bounds:
 [D02 implementation, evidence levels and remaining construction](docs/reports/world-connection/WORLD_V2_FINANCIAL_IMPLEMENTATION_AND_VERIFICATION_2026_10_07.md).
 Reviewed PR94 durable reference storage, PR95 actual human Owner provenance,
-and PR96 exact fuel-cap repair are on main. The
+PR96 exact fuel-cap repair, PR97 source-audit records, PR98 full authorized read
+provider, PR99 actual Owner/source adoption, PR100 isolated financial runtime
+and lock-order repair, and PR101 physical opening projections are on main. The
 [actual non-host decisions](docs/governance/OWNER_NON_HOST_DECISIONS_2026_10_07.md)
 adopt full B=TGA, paired R, scoped opening reconciliation and physical-domain
 rules. They do not supply missing amounts, admit a seed or start production.
@@ -22,10 +26,16 @@ preserve their earlier fixed-baseline statuses; the
 prevents repeated approval questions. Current
 [remaining Owner/source inputs](docs/reports/world-connection/WORLD_V2_OWNER_ACTIONS_REMAINING_2026_10_07.md)
 are completeness/denomination/identity evidence, not a reopened model choice.
-Six Offices remain in scope. New E/G/C/F/D increments have their own reviews and
-consumer checks; no Finance-only, source-only or TEST_ONLY pass closes the whole
-project. B's new C readback lock-order finding must be repaired before that
-candidate merges. Production host/activation (D05) remains explicitly deferred.
+Six Offices remain in scope. C's financial readback lock-order finding was
+repaired, independently source-reviewed and merged in PR100. A fresh disposable
+PostgreSQL 16.15 overlap regression passed one selected test; the ten other
+cases were not rerun in that invocation. D's six-role projection UI, G's
+authenticated financial intake and C's labour/social increment are separate
+fixed candidates awaiting review/integration at this checkpoint. F's water
+increment is also frozen for narrow review; A's financial carrier/seed bridge
+remains under construction.
+No Finance-only, source-only or TEST_ONLY pass closes the whole project.
+Production host/activation (D05) remains explicitly deferred.
 
 ### Earlier October 7 source checkpoint
 
