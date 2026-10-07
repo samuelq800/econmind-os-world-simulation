@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "rootDir": "../.."
+  },
+  "include": [
+    "../../apps/world-worker/src/preparation/official-labour-social-opening-adoption.ts",
+    "../../packages/core/src/labour/approved-opening-projection.ts",
+    "../world-core/c-labour-social-opening.test.ts"
+  ]
+}
