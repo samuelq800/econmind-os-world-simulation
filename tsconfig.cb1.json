@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "paths": { "@econmind/core": ["./tests/support/cb1-core-composition.ts"] }
+  },
+  "include": [
+    "packages/core/src",
+    "apps/world-worker/src/persistence/central-bank-omo-candidate-source.ts",
+    "tests/support/cb1-core-composition.ts",
+    "tests/world-core/cb1-omo-source-draft.test.ts"
+  ]
+}
