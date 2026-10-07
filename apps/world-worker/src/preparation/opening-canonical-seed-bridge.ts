@@ -461,6 +461,8 @@ export function prepareOwnerAdoptedOpeningSeed(input: {
         valueDate: fx.valueDate,
         openingFx: fx,
         original: c.rawFinance,
+        sourceRowPointer: c.sourceRowPointer,
+        financialDenominations: c.denominations,
         localBankL: L.toCanonicalValue(),
         localBankE: E.toCanonicalValue(),
         bankAdoptedMinusOriginalL: L.subtract(
