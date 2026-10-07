@@ -1,0 +1,7 @@
+/* Demo-only. Shared source CSS and geometry are unchanged. */
+.demo-watermark { position: fixed; z-index: 10000; left: 0; right: 0; bottom: 0; padding: 5px 12px; background: #f4d789; color: #263a39; text-align: center; font: 11px Arial, sans-serif; pointer-events: none; }
+.demo-office .immersive-scene { min-height: 100vh; overflow-y: auto; padding-bottom: 42px; }
+.demo-office .scene-footer { position: relative; }
+.demo-office .object-cabinet { max-height: calc(100vh - 60px); overflow-y: auto; }
+.demo-office .national-drawer { padding-bottom: 40px; }
+.demo-office .national-world { background-color: transparent; }

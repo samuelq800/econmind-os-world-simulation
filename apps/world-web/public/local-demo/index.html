@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>EconMind · DEMO_LOCAL</title><link rel="icon" href="office/assets/lobby/econmind-badge-48.png"><link rel="stylesheet" href="shared/econmind-os-visual.css"><link rel="stylesheet" href="demo.css"></head>
+<body><header class="demo-header"><img src="office/assets/lobby/econmind-badge-96.png" alt="EconMind"><div><small>ECONMIND / DEMO_LOCAL</small><h1>Your country. Your next move.</h1></div><strong class="demo-label">Local sample · Not an official World</strong></header>
+<main><div class="demo-controls"><label>Country<select id="country" aria-label="Country"></select></label><label>Office<select id="office" aria-label="Office"></select></label><button id="reset">Reset this demo</button><button id="advance">Next demo event</button></div>
+<nav class="demo-tabs" aria-label="Preview pages"><button data-page="home" aria-current="page">Country home</button><button data-page="map">World map</button><button data-page="actions">Office actions</button><button data-page="scenario">Playable scenes</button><button data-page="log">Demo log</button></nav>
+<p id="status" role="status">Loading local assets…</p>
+<section id="map-panel" hidden><div class="map-toolbar"><h2 id="map-title">World map</h2><button id="regional">Country & neighbours</button><button id="world">Fit world</button><button id="zoom-in" aria-label="Zoom in">+</button><button id="zoom-out" aria-label="Zoom out">−</button></div><div class="map-scroll"><svg id="atlas" role="group" aria-label="Interactive map of 70 countries" preserveAspectRatio="xMidYMid meet"></svg></div><div id="neighbours" class="neighbours"></div><p>Map: existing display geometry. Gold: selected country. No geographic or economic data is changed.</p></section>
+<section id="scenario-panel" hidden><h2>Choose a scene</h2><div id="scenes" class="scenes"></div><p>Existing sample missions. All accounts, signatures, outcomes and event steps are DEMO only.</p></section>
+<iframe id="office-frame" title="Local sample office — not an official World" src="about:blank"></iframe>
+<section id="log-panel" hidden><h2>Demo action log</h2><p>Local browser records only. Not World events or receipts.</p><ol id="log"></ol></section>
+</main><script type="module" src="demo.js"></script></body></html>
