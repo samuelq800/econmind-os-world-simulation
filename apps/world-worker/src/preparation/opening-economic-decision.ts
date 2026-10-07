@@ -15,6 +15,9 @@ import {
   financialClaimId,
   openingSourceId,
   createFinancialAccount,
+  parseWorldDecimal,
+  assertWorldDecimalResult,
+  canonicalDecimal,
   type CanonicalSha256,
 } from '@econmind/core';
 
@@ -64,6 +67,62 @@ export interface OpeningEconomicScope {
   readonly orchestratorVersion: string;
   readonly sourcePackageId: string;
   readonly sourceChecksumsSha256: string;
+}
+
+/** Field-level exact conversion, not denomination inference or FX approval.
+ * Caller must already have independently loaded the field/FX source. */
+export function openingBookMoney(input: {
+  readonly rawAmount: string;
+  readonly denomination: 'GCU_EQUIVALENT' | 'LOCAL_CURRENCY';
+  readonly localCurrency: string;
+  readonly localCurrencyPerGcu: string;
+}): Money {
+  need(
+    input.localCurrency !== 'GCU',
+    'localCurrency',
+    'LOCAL_CURRENCY_REQUIRED',
+  );
+  const rate = parseWorldDecimal(input.localCurrencyPerGcu);
+  need(rate.gt('0'), 'openingFx', 'POSITIVE_OPENING_FX_REQUIRED');
+  choice(
+    input.denomination,
+    ['GCU_EQUIVALENT', 'LOCAL_CURRENCY'],
+    'denomination',
+  );
+  const raw = parseWorldDecimal(input.rawAmount);
+  const result =
+    input.denomination === 'GCU_EQUIVALENT'
+      ? assertWorldDecimalResult(raw.mul(rate))
+      : raw;
+  return Money.from(canonicalDecimal(result), input.localCurrency);
+}
+
+/** An opening-only calculation. It cannot update running state or excuse an
+ * incomplete holding register. Inputs are already valued in one book currency. */
+export function openingCentralBankNetWorth(input: {
+  readonly assets: readonly Money[];
+  readonly liabilities: readonly Money[];
+  readonly localCurrency: string;
+  readonly registerCompleteness: 'COMPLETE' | 'SOURCE_MISSING';
+}): Money {
+  need(
+    input.registerCompleteness === 'COMPLETE',
+    'completeAssetAndLiabilityHoldingRegister',
+    'CB_OPENING_HOLDING_REGISTER_COMPLETENESS_NOT_ESTABLISHED',
+  );
+  const total = (values: readonly Money[]) =>
+    values.reduce(
+      (sum, value) => {
+        need(
+          !value.amount.isNegative(),
+          'position',
+          'NEGATIVE_CB_ASSET_OR_LIABILITY',
+        );
+        return sum.add(value);
+      },
+      Money.from('0', input.localCurrency),
+    );
+  return total(input.assets).subtract(total(input.liabilities));
 }
 export interface OpeningProvenanceV1 {
   readonly ref: string;
@@ -420,12 +479,9 @@ export function parseOpeningEconomicDecision(
       for (const v of Object.values(l)) legalEntityId(str(v, 'legalEntityId'));
       need(new Set(Object.values(l)).size === 3, 'legalEntities');
     }
-    choice(
-      c.fundsModel,
-      ['INDEPENDENT_GENESIS_POOLS', 'TREASURY_DEPOSIT_AT_CB'],
-      'fundsModel',
-      true,
-    );
+    // D01 adopted 2026-10-07. Historical proposal bytes remain unchanged,
+    // but this current parser cannot execute the superseded two-pool model.
+    choice(c.fundsModel, ['TREASURY_DEPOSIT_AT_CB'], 'fundsModel', true);
     for (const f of ['treasuryOpeningBalance', 'centralBankOpeningBalance'])
       if (c[f] !== null) amount(c[f], f);
     claim(c.reserveClaim, 'reserveClaim');
@@ -449,12 +505,7 @@ export function parseOpeningEconomicDecision(
       choice(b.accountClass, ['ASSET', 'LIABILITY', 'EQUITY'], 'accountClass');
       choice(
         b.purpose,
-        [
-          'GENESIS_POOL',
-          'RESERVE_CLAIM',
-          'TREASURY_CLAIM',
-          'EXPLICIT_ADOPTED_POSITION',
-        ],
+        ['RESERVE_CLAIM', 'TREASURY_CLAIM', 'EXPLICIT_ADOPTED_POSITION'],
         'purpose',
       );
       amount(b.amount, 'CB amount', b.accountClass === 'EQUITY');
@@ -701,9 +752,7 @@ export function inspectOpeningEconomicDecision(input: {
     if (
       c.decisionStatus === 'UNRESOLVED_HUMAN_ECONOMIC_INPUT' ||
       c.fundsModel === null ||
-      c.treasuryOpeningBalance === null ||
-      (c.fundsModel === 'INDEPENDENT_GENESIS_POOLS' &&
-        c.centralBankOpeningBalance === null)
+      c.treasuryOpeningBalance === null
     )
       fail('allocation', 'UNRESOLVED_HUMAN_ECONOMIC_INPUT');
     function valueProof(ref: string, value: string | null, ownerOnly = false) {
@@ -743,40 +792,20 @@ export function inspectOpeningEconomicDecision(input: {
       c.treasuryOpeningBalance,
       true,
     );
-    if (c.fundsModel === 'TREASURY_DEPOSIT_AT_CB') {
-      if (c.centralBankOpeningBalance !== null)
-        fail(
-          'centralBankOpeningBalance',
-          'NO_SEPARATE_CASH_POOL_IN_CLAIM_MODEL',
-        );
-    } else
-      valueProof(
-        c.fieldProvenance.centralBankOpeningBalance!,
-        c.centralBankOpeningBalance,
-        true,
-      );
+    if (c.centralBankOpeningBalance !== null)
+      fail('centralBankOpeningBalance', 'NO_SEPARATE_CASH_POOL_IN_CLAIM_MODEL');
+    if (
+      c.treasuryOpeningBalance !== null &&
+      !Money.from(c.treasuryOpeningBalance, 'GCU').amount.equals(
+        Money.from(c.sourceFinance.treasuryCentralBankBalance, 'GCU').amount,
+      )
+    )
+      fail('treasuryOpeningBalance', 'D01_FULL_B_TGA_REQUIRED');
     if (c.legalEntities === null) {
       fail('legalEntities', 'UNRESOLVED_LEGAL_ENTITY');
       continue;
     }
     const owners = c.legalEntities;
-    if (
-      c.fundsModel === 'INDEPENDENT_GENESIS_POOLS' &&
-      c.treasuryOpeningBalance !== null &&
-      c.centralBankOpeningBalance !== null
-    ) {
-      if (
-        !Money.from(c.treasuryOpeningBalance, 'GCU')
-          .add(Money.from(c.centralBankOpeningBalance, 'GCU'))
-          .amount.equals(
-            Money.from(c.sourceFinance.treasuryCentralBankBalance, 'GCU')
-              .amount,
-          )
-      )
-        fail('allocation', 'INDEPENDENT_POOLS_SUM_MISMATCH');
-      if (c.treasuryClaim !== null)
-        fail('treasuryClaim', 'FUNDS_MODEL_CLAIM_CONFLICT');
-    }
     if (c.fundsModel === 'TREASURY_DEPOSIT_AT_CB' && c.treasuryClaim === null)
       fail('treasuryClaim', 'TREASURY_CLAIM_COUNTERPART_MISSING');
     if (c.reserveClaim === null)
@@ -898,31 +927,11 @@ export function inspectOpeningEconomicDecision(input: {
           p.claimId === c.treasuryClaim?.claimId)
       )
         fail(p.accountId, 'DUPLICATED_CLAIM_AS_BACKING');
-      if (
-        p.purpose === 'GENESIS_POOL' &&
-        (c.fundsModel !== 'INDEPENDENT_GENESIS_POOLS' ||
-          p.accountClass !== 'ASSET' ||
-          p.claimId !== null ||
-          c.centralBankOpeningBalance === null ||
-          !Money.from(p.amount, 'GCU').amount.equals(
-            Money.from(c.centralBankOpeningBalance, 'GCU').amount,
-          ))
-      )
-        fail(p.accountId, 'GENESIS_POOL_BINDING_MISMATCH');
       const m = Money.from(p.amount, 'GCU');
       if (p.accountClass === 'ASSET') assets = assets.add(m);
       else if (p.accountClass === 'LIABILITY') liabilities = liabilities.add(m);
       else equity = equity.add(m);
     }
-    if (
-      c.fundsModel === 'INDEPENDENT_GENESIS_POOLS' &&
-      c.centralBankPositions.filter((p) => p.purpose === 'GENESIS_POOL')
-        .length !== 1
-    )
-      fail(
-        'centralBankOpeningBalance',
-        'GENESIS_POOL_POSITION_MISSING_OR_DUPLICATED',
-      );
     if (!assets.amount.equals(liabilities.add(equity).amount))
       fail('centralBankPositions', 'CENTRAL_BANK_UNBALANCED');
     if (

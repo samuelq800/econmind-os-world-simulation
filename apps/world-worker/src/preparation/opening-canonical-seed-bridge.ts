@@ -10,6 +10,7 @@ import {
   Money,
   Quantity,
   canonicalSerialize,
+  canonicalDecimal,
   canonicalHashInput,
   canonicalSha256,
   createOpeningSource,
@@ -19,6 +20,10 @@ import {
   createInventoryAccount,
   createFinancialAccount,
   openingSourceId,
+  financialAccountId,
+  financialClaimId,
+  legalEntityId,
+  countryId,
   openingSeedId,
   openingInventoryEntryId,
   financialOpeningBatchId,
@@ -34,10 +39,18 @@ import {
 import {
   inspectOpeningEconomicDecision,
   OPENING_FINANCE_FIELDS,
+  openingBookMoney,
+  openingCentralBankNetWorth,
   type TrustedOpeningDecisionInputs,
   type OpeningEconomicDecisionInspection,
   type OpeningFinancialAllocationV1,
 } from './opening-economic-decision.js';
+import {
+  isOwnerNonHostSourceAdoption,
+  CENTRAL_BANK_OPENING_CATEGORIES,
+  type OwnerNonHostSourceAdoption,
+  type CentralBankOpeningCategory,
+} from './owner-non-host-source-adoption.js';
 
 export const FROZEN_OPENING_MAPPING_SHA256 =
   'd2811910a9021e68fabe894504701d6dc8d88e362fc2354b0c826e3446456253';
@@ -68,6 +81,471 @@ interface Stock {
   proposedInventoryEntryId: string;
   proposedBatchId: string;
   proposedInventoryLocationId: string;
+}
+
+export interface TestOnlyCentralBankHolding {
+  readonly countryId: string;
+  readonly category: CentralBankOpeningCategory;
+  readonly disposition: 'TEST_ONLY_AMOUNT' | 'TEST_ONLY_NOT_APPLICABLE';
+  readonly holdingId: string;
+  readonly amount: string | null;
+  readonly currency: string | null;
+  readonly counterpartyEntityId: string | null;
+}
+export interface TestOnlyCentralBankRegister {
+  readonly worldId: string;
+  readonly rows: readonly TestOnlyCentralBankHolding[];
+  readonly sourceKind: 'DOCUMENTED_ASSUMPTION';
+  readonly authority: 'TEST_ONLY_NOT_OWNER_ECONOMIC_ADOPTION';
+}
+const testRegisters = new WeakSet<object>();
+/** Mechanism fixtures only. No production/Owner approval constructor exists.
+ * Every category is explicit; missing/null amount is never defaulted to zero. */
+export function createTestOnlyCentralBankRegister(input: {
+  readonly worldId: string;
+  readonly rows: readonly TestOnlyCentralBankHolding[];
+}): TestOnlyCentralBankRegister {
+  if (!/^WORLD_TEST_ONLY_[A-Z0-9_]+$/u.test(input.worldId))
+    throw new Error('TEST_ONLY_WORLD_REQUIRED');
+  worldId(input.worldId);
+  const register: TestOnlyCentralBankRegister = Object.freeze({
+    worldId: input.worldId,
+    sourceKind: 'DOCUMENTED_ASSUMPTION',
+    authority: 'TEST_ONLY_NOT_OWNER_ECONOMIC_ADOPTION',
+    rows: Object.freeze(
+      clone<TestOnlyCentralBankHolding[]>(input.rows).map((row) =>
+        Object.freeze(row),
+      ),
+    ),
+  });
+  testRegisters.add(register);
+  return register;
+}
+/** The actual E branded source/policy consumer. Does not manufacture legacy
+ * full-intent owner records. Current real gaps remain exact per-country gaps.
+ * Complete mechanism fixtures use the SAME Core seed/store path but can never
+ * satisfy OfficialWorldOpeningBootstrapper's AUTHORITATIVE_DATASET boundary. */
+export function prepareOwnerAdoptedOpeningSeed(input: {
+  readonly sourceAdoption: OwnerNonHostSourceAdoption;
+  readonly seedId: string;
+  readonly sourceId: string;
+  readonly testOnlyCentralBankRegister?: TestOnlyCentralBankRegister;
+}): Readonly<OpeningCanonicalSeedBridgeResult> {
+  if (!isOwnerNonHostSourceAdoption(input.sourceAdoption))
+    throw new Error('UNTRUSTED_OWNER_NON_HOST_SOURCE_ADOPTION');
+  const adopted = input.sourceAdoption;
+  const blockers: OpeningSeedBridgeBlocker[] = [];
+  const fail = (countryId: string, field: string, code: string) =>
+    blockers.push({ countryId, field, code });
+  let seed: Readonly<OpeningSeed> | null = null;
+  const finish = (): Readonly<OpeningCanonicalSeedBridgeResult> =>
+    Object.freeze({
+      status: blockers.length ? 'BLOCKED' : 'NOT_ADMITTED',
+      seed: blockers.length ? null : seed,
+      blockers: Object.freeze(
+        blockers.sort((a, b) =>
+          canonicalSerialize(a).localeCompare(canonicalSerialize(b), 'en'),
+        ),
+      ),
+      decisionFingerprint: 'sha256:' + adopted.ownerPolicy.receiptSha256,
+      sourceIdentity: Object.freeze({
+        mappingSha256: FROZEN_OPENING_MAPPING_SHA256,
+        mappingFingerprint: null,
+        mappingBytesVerified: true,
+        checksumsSha256: CHECKSUMS,
+        financeSha256: FINANCE_SHA,
+        countryCount: '70',
+        stockCellCount: '840',
+        positiveStockCellCount: '619',
+        zeroStockCellCount: '221',
+      }),
+      activationAllowed: false,
+      admissionEvaluated: false,
+    });
+  const register = input.testOnlyCentralBankRegister;
+  if (
+    register !== undefined &&
+    (!testRegisters.has(register) ||
+      adopted.scope.environment !== 'TEST_ONLY' ||
+      register.worldId !== adopted.scope.worldId)
+  )
+    throw new Error('TEST_REGISTER_CANNOT_ENTER_PRODUCTION_OR_WRONG_WORLD');
+  if (adopted.scope.environment !== 'TEST_ONLY' || register === undefined) {
+    for (const gap of adopted.manifest.gaps)
+      for (const cid of gap.countryId === null ? COUNTRIES : [gap.countryId])
+        fail(cid, gap.objectId + '.' + gap.field, gap.code);
+    for (const c of adopted.manifest.countries)
+      for (const item of c.cbInput)
+        if (item.gcuEquivalentAmount === null)
+          fail(
+            c.countryId,
+            c.holderRoster.centralBank + '.' + item.category,
+            'CB_CATEGORY_SOURCE_MISSING_NOT_APPROVED_ZERO',
+          );
+    return finish();
+  }
+  const batches: FinancialOpeningBatch[] = [];
+  const reconciliations: object[] = [];
+  const globalHoldings = new Set<string>();
+  const rowsByCountry = new Map(
+    COUNTRIES.map((cid) => [
+      cid,
+      register.rows.filter((r) => r.countryId === cid),
+    ]),
+  );
+  if (register.rows.some((r) => !rowsByCountry.has(r.countryId)))
+    fail(COUNTRIES[0]!, 'register', 'CB_REGISTER_COUNTRY_OUT_OF_SCOPE');
+  for (const c of adopted.manifest.countries) {
+    const cid = c.countryId,
+      nn = cid.slice(-2),
+      start = blockers.length;
+    try {
+      const rows = rowsByCountry.get(cid)!;
+      if (
+        rows.length !== CENTRAL_BANK_OPENING_CATEGORIES.length ||
+        CENTRAL_BANK_OPENING_CATEGORIES.some(
+          ([category]) =>
+            rows.filter((r) => r.category === category).length !== 1,
+        )
+      ) {
+        fail(cid, 'cbInput', 'CB_COMPLETE_CATEGORY_REGISTER_REQUIRED');
+        continue;
+      }
+      const d = c.denominations.treasuryCentralBankBalance;
+      if (!d.openingFx || !d.localBookValue) {
+        fail(cid, 'openingFx', 'OPENING_FX_SOURCE_MISSING');
+        continue;
+      }
+      const fx = d.openingFx,
+        lc = d.localBookValue.currency;
+      const valued = (amount: string, currency: string) =>
+        currency === lc
+          ? Money.from(amount, lc)
+          : currency === 'GCU'
+            ? openingBookMoney({
+                rawAmount: amount,
+                denomination: 'GCU_EQUIVALENT',
+                localCurrency: lc,
+                localCurrencyPerGcu: fx.localCurrencyPerGcu,
+              })
+            : (() => {
+                throw new Error('UNSUPPORTED_CB_CURRENCY');
+              })();
+      const legs: FinancialOpeningBatch['legs'][number][] = [];
+      const nativeCb = new Map<string, Money>();
+      const assets: Money[] = [],
+        liabilities: Money[] = [],
+        originalEquity: Money[] = [];
+      const account = (
+        id: string,
+        owner: string,
+        kind: FinancialAccount['accountClass'],
+        currency: string,
+        claim: string | null = null,
+        cp: string | null = null,
+      ) =>
+        createFinancialAccount({
+          worldId: worldId(register.worldId),
+          countryId: countryId(cid),
+          accountId: financialAccountId(id),
+          ownerId: legalEntityId(owner),
+          accountClass: kind,
+          currency,
+          claimId: claim === null ? null : financialClaimId(claim),
+          counterpartyEntityId: cp === null ? null : legalEntityId(cp),
+        });
+      const addLeg = (
+        id: string,
+        owner: string,
+        kind: FinancialAccount['accountClass'],
+        money: Money,
+        claim: string | null = null,
+        cp: string | null = null,
+      ) => {
+        if (money.amount.isZero()) return;
+        const debit =
+          kind === 'ASSET'
+            ? !money.amount.isNegative()
+            : money.amount.isNegative();
+        legs.push({
+          legId: financialOpeningLegId('LEG_' + id),
+          account: account(id, owner, kind, money.currency, claim, cp),
+          direction: debit ? 'DEBIT' : 'CREDIT',
+          amount: Money.from(
+            canonicalDecimal(money.amount.abs()),
+            money.currency,
+          ),
+          counterpartLegId: financialOpeningLegId('PENDING_COUNTERPART'),
+        });
+      };
+      const pair = (
+        purpose: string,
+        holder: string,
+        issuer: string,
+        money: Money,
+      ) => {
+        const claim = `CLAIM_TEST_ONLY_${purpose}_${nn}`;
+        const assetId = `${purpose}_ASSET_${nn}`,
+          liabilityId = `${purpose}_LIABILITY_${nn}`;
+        addLeg(assetId, holder, 'ASSET', money, claim, issuer);
+        addLeg(liabilityId, issuer, 'LIABILITY', money, claim, holder);
+      };
+      const local = (field: (typeof OPENING_FINANCE_FIELDS)[number]) => {
+        const entry = c.denominations[field];
+        if (
+          !entry.localBookValue ||
+          !entry.openingFx ||
+          entry.localBookValue.currency !== lc ||
+          canonicalSerialize(entry.openingFx) !== canonicalSerialize(fx)
+        )
+          throw new Error('FIELD_FX_MISSING_OR_CONFLICT');
+        const converted = openingBookMoney({
+          rawAmount: entry.rawLexeme,
+          denomination: 'GCU_EQUIVALENT',
+          localCurrency: lc,
+          localCurrencyPerGcu: fx.localCurrencyPerGcu,
+        });
+        if (
+          canonicalSerialize(converted.toCanonicalValue()) !==
+          canonicalSerialize(entry.localBookValue)
+        )
+          throw new Error('FIELD_DENOMINATION_CONFLICT');
+        return converted;
+      };
+      const B = local('treasuryCentralBankBalance'),
+        R = local('bankReserveAssets'),
+        H = local('householdBankDeposits'),
+        D = local('businessBankDeposits'),
+        A = local('bankLoanAssets');
+      if (!A.amount.isZero()) {
+        fail(
+          cid,
+          'bankLoanAssets.borrowersAndClaims',
+          'SOURCE_LOAN_COUNTERPART_REGISTER_MISSING',
+        );
+        continue;
+      }
+      const L = H.add(D),
+        E = R.add(A).subtract(L);
+      pair('TGA', c.holderRoster.treasury, c.holderRoster.centralBank, B);
+      pair('RESERVE', c.holderRoster.bank, c.holderRoster.centralBank, R);
+      pair(
+        'HOUSEHOLD_DEPOSIT',
+        c.holderRoster.households,
+        c.holderRoster.bank,
+        H,
+      );
+      pair('BUSINESS_DEPOSIT', c.holderRoster.operator, c.holderRoster.bank, D);
+      for (const [owner, amount, id] of [
+        [c.holderRoster.treasury, B, 'GOV'],
+        [c.holderRoster.households, H, 'HOUSEHOLDS'],
+        [c.holderRoster.operator, D, 'OP'],
+        [c.holderRoster.bank, E, 'BANK'],
+      ] as const)
+        addLeg(`INITIAL_NETWORTH_${id}_${nn}`, owner, 'EQUITY', amount);
+      for (const [category, kind] of CENTRAL_BANK_OPENING_CATEGORIES) {
+        const row = rows.find((r) => r.category === category)!;
+        if (!/^[A-Z][A-Z0-9_]*$/u.test(row.holdingId))
+          throw new Error('CB_HOLDING_ID_INVALID');
+        if (globalHoldings.has(row.holdingId))
+          throw new Error('DUPLICATE_CB_HOLDING');
+        globalHoldings.add(row.holdingId);
+        if (row.disposition === 'TEST_ONLY_NOT_APPLICABLE') {
+          if (
+            row.amount !== null ||
+            row.currency !== null ||
+            row.counterpartyEntityId !== null
+          )
+            throw new Error('NOT_APPLICABLE_MUST_NOT_HAVE_BALANCE');
+          if (
+            category === 'COMMERCIAL_BANK_RESERVE_ACCOUNTS' ||
+            category === 'TREASURY_GOVERNMENT_DEPOSIT'
+          )
+            throw new Error('REQUIRED_CB_CLAIM_CANNOT_BE_NOT_APPLICABLE');
+          continue;
+        }
+        if (
+          row.disposition !== 'TEST_ONLY_AMOUNT' ||
+          row.amount === null ||
+          row.currency === null
+        )
+          throw new Error('CB_AMOUNT_SOURCE_MISSING_NOT_ZERO');
+        const money = Money.from(row.amount, row.currency),
+          book = valued(row.amount, row.currency);
+        if (kind !== 'EQUITY' && money.amount.isNegative())
+          throw new Error('NEGATIVE_CB_POSITION');
+        if (kind === 'EQUITY') {
+          originalEquity.push(book);
+          continue; // Original subcomponents retained, not fabricated earnings/losses.
+        }
+        if (kind === 'ASSET') assets.push(book);
+        else liabilities.push(book);
+        const net = nativeCb.get(row.currency) ?? Money.from('0', row.currency);
+        nativeCb.set(
+          row.currency,
+          kind === 'ASSET' ? net.add(money) : net.subtract(money),
+        );
+        const expectedPair =
+          category === 'COMMERCIAL_BANK_RESERVE_ACCOUNTS'
+            ? R
+            : category === 'TREASURY_GOVERNMENT_DEPOSIT'
+              ? B
+              : null;
+        if (expectedPair !== null) {
+          const cp =
+            category === 'COMMERCIAL_BANK_RESERVE_ACCOUNTS'
+              ? c.holderRoster.bank
+              : c.holderRoster.treasury;
+          if (
+            money.currency !== expectedPair.currency ||
+            !money.amount.equals(expectedPair.amount) ||
+            row.counterpartyEntityId !== cp
+          )
+            throw new Error('CB_CLAIM_DENOMINATION_OR_COUNTERPART_MISMATCH');
+        } else {
+          if (money.amount.isZero()) continue; // Explicit fixture zero only, never missing/null.
+          // Mechanism fixture cash only; unsupported instruments keep explicit counterpart/carrier gap.
+          if (category !== 'FX_CASH_AND_DEPOSITS')
+            throw new Error('CB_INSTRUMENT_PAIRED_CARRIER_REQUIRED');
+          if (row.counterpartyEntityId !== null)
+            throw new Error('CB_DEPOSIT_PAIRED_CARRIER_REQUIRED');
+          addLeg(
+            `CB_HOLDING_${nn}_${category}`,
+            c.holderRoster.centralBank,
+            kind,
+            money,
+          );
+        }
+      }
+      const netWorth = openingCentralBankNetWorth({
+        assets,
+        liabilities,
+        localCurrency: lc,
+        registerCompleteness: 'COMPLETE',
+      });
+      for (const [currency, money] of nativeCb)
+        addLeg(
+          `CB_INITIAL_NETWORTH_${nn}_${currency}`,
+          c.holderRoster.centralBank,
+          'EQUITY',
+          money,
+        );
+      for (const currency of [
+        ...new Set(legs.map((l) => l.amount.currency)),
+      ].sort()) {
+        const group = legs
+          .filter((l) => l.amount.currency === currency)
+          .sort((a, b) => (a.legId < b.legId ? -1 : 1));
+        const paired = group.map((l) => {
+          const other =
+            l.account.claimId === null
+              ? group.find((x) => x.direction !== l.direction)
+              : group.find(
+                  (x) =>
+                    x.account.claimId === l.account.claimId &&
+                    x.legId !== l.legId,
+                );
+          if (!other || other.direction === l.direction)
+            throw new Error('OPPOSITE_OPENING_LEG_MISSING');
+          return { ...l, counterpartLegId: other.legId };
+        });
+        batches.push({
+          batchId: financialOpeningBatchId(`BATCH_TEST_ONLY_${nn}_${currency}`),
+          sourceId: openingSourceId(input.sourceId),
+          settlementCurrency: currency,
+          legs: paired,
+        });
+      }
+      reconciliations.push({
+        countryId: cid,
+        valueDate: fx.valueDate,
+        openingFx: fx,
+        original: c.rawFinance,
+        sourceRowPointer: c.sourceRowPointer,
+        financialDenominations: c.denominations,
+        localBankL: L.toCanonicalValue(),
+        localBankE: E.toCanonicalValue(),
+        bankAdoptedMinusOriginalL: L.subtract(
+          local('bankDepositLiabilities'),
+        ).toCanonicalValue(),
+        bankAdoptedMinusOriginalE: E.subtract(
+          local('bankEquity'),
+        ).toCanonicalValue(),
+        centralBankNetWorth: netWorth.toCanonicalValue(),
+        originalCbCategoryInputs: rows,
+        originalCbEquity: originalEquity
+          .reduce((sum, money) => sum.add(money), Money.from('0', lc))
+          .toCanonicalValue(),
+        derivedMinusOriginalCbEquity: netWorth
+          .subtract(
+            originalEquity.reduce(
+              (sum, money) => sum.add(money),
+              Money.from('0', lc),
+            ),
+          )
+          .toCanonicalValue(),
+        equityMethod:
+          'OPENING_ONCE_NATIVE_CURRENCY_COMPONENTS_NO_GOVERNMENT_INJECTION',
+        runtimeResetAllowed: false,
+        isCash: false,
+      });
+    } catch (error) {
+      fail(
+        cid,
+        'financialRegister',
+        error instanceof Error ? error.message : 'CB_REGISTER_INVALID',
+      );
+    }
+    if (blockers.length !== start) continue;
+  }
+  if (blockers.length) return finish();
+  try {
+    const source = createOpeningSource(
+      {
+        schemaVersion: OPENING_SOURCE_SCHEMA_VERSION,
+        sourceId: openingSourceId(input.sourceId),
+        sourceKind: 'DOCUMENTED_ASSUMPTION',
+        locator:
+          'TEST_ONLY_NON_HOST_FINANCIAL_MECHANISM_NOT_PRODUCTION_ADMISSION',
+        sourceVersion: adopted.ownerPolicy.receiptSha256,
+        payload: {
+          scope: adopted.scope,
+          ownerPolicy: adopted.ownerPolicy,
+          sourcePins: adopted.manifest.sourcePins,
+          originalStockCells: adopted.manifest.stockRights,
+          reconciliations,
+          testOnlyRegister: register,
+          admissionAllowed: false,
+        },
+      },
+      sha,
+    );
+    const constructed = createOpeningSeed(
+      {
+        schemaVersion: OPENING_SEED_SCHEMA_VERSION,
+        seedId: openingSeedId(input.seedId),
+        worldId: worldId(register.worldId),
+        openingWorldVersion: '0',
+        replayBinding: CURRENT_REPLAY_BINDING,
+        sources: [source],
+        inventoryEntries: adopted.inventoryEntries.map((e) => ({
+          ...e,
+          sourceId: source.sourceId,
+        })),
+        financialBatches: batches,
+      },
+      sha,
+    );
+    seed = parseOpeningSeed(clone(constructed), sha);
+    rebuildV08LedgersFromLineage({ seed, sha256Hex: sha });
+  } catch (error) {
+    fail(
+      COUNTRIES[0]!,
+      'coreSeed',
+      error instanceof Error ? error.message : 'CORE_SEED_CONTRACT_REJECTED',
+    );
+  }
+  return finish();
 }
 interface Mapping {
   mappingFingerprint: string;
@@ -681,9 +1159,7 @@ function validateFinancial(
     if (
       a.ownerId === roster.government &&
       a.accountClass === 'ASSET' &&
-      ((c.fundsModel === 'INDEPENDENT_GENESIS_POOLS' && a.claimId !== null) ||
-        (c.fundsModel === 'TREASURY_DEPOSIT_AT_CB' &&
-          a.accountId !== c.treasuryClaim?.assetAccountId))
+      a.accountId !== c.treasuryClaim?.assetAccountId
     )
       fail(a.accountId, 'TREASURY_MODEL_ACCOUNT_MISMATCH');
   }
