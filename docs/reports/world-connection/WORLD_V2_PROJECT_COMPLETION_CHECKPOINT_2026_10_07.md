@@ -31,6 +31,26 @@ trusted-country-runtime37641566891及atlas37641566880均IN_PROGRESS，不能称C
 该build可从固定9e重新生成。可用空间恢复到约348MB，仍不适合大地图构建或
 并行native数据库。Root没有删其他窗口的源文件、经济数据或证据。
 
+### 23:06 后续记录：CI实质失败与前置修复
+
+PR112 两个精确856ae9候选CI后来均FAIL，原run37641566891/37641566880不改写。
+失败日志证明新浏览器消费者找不到已批准公共合同的dist/.d.ts：trusted workflow
+把Core构建放在消费者测试之后，atlas workflow根本没有先构建Core。后续unknown
+类型错误是缺失模块的连带错误；没有通过改业务类型、撤销测试或退回server barrel绕过。
+
+Root将实际Core构建提前，trusted Worker prerequisite也提前且不再重复；增加
+Core/financial消费者路径触发与两条先构建合同的回归检查，权限仍contents:read、
+no-deploy，无continue-on-error/skip或生产secret。这个CI/tooling时序增量属P2，按
+Owner本轮“你有权直接发布main。完成整个项目”的正常main授权处理，不变更P0
+经济/权限/账本边界。23:05:56实际受影响trusted消费者+金融30控件+CI两控件
+**73PASS，2.26s，exit0**；scoped lint/format/diff通过。修复候选尚待新的provider
+CI结果，不能用旧失败run或本地73PASS宣称新GitHub CI已通过。
+
+C固定SOC-1七文件也已获独立B source-only批准，31newPASS、生产者75独立保留；
+Root正常重放时仅公共barrel冲突，保留全部既有exports并追加一个Social export。
+六个owned文件逐字节匹配087cb85；Core/Worker组合构建exit0。真实admitted reader、
+automatic grant、原子SQL提交与完整Social运行仍未实现，不能把源码批准称上线。
+
 ## 已正常合并 main
 
 Owner 已授权正常安全发布。下列 P0 源码均先获得独立 B 对固定候选的窄审，
