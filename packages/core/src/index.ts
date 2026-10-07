@@ -8,6 +8,7 @@ export * from './commands/command.js';
 export * from './commands/captain-political-capital-allocation.js';
 export * from './commands/receipt.js';
 export * from './commands/authenticated-financial-intake-contract.js';
+export * from './commands/social-employment-service.js';
 export * from './events/event.js';
 export {
   FINANCIAL_AUTHORITATIVE_WRITER,
