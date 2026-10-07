@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>TEST_ONLY — six-role DTO wiring</title>
+  </head>
+  <body>
+    <h1>TEST_ONLY — offline DTO wiring, not a country or seat</h1>
+    <p>No real endpoint, token, admission, command or World is used.</p>
+    <label
+      >Test office
+      <select id="test-role">
+        <option value="captain">CAPTAIN</option>
+        <option value="finance">FINANCE</option>
+        <option value="central_bank">CENTRAL_BANK</option>
+        <option value="industry">INDUSTRY</option>
+        <option value="trade">TRADE</option>
+        <option value="social">SOCIAL</option>
+      </select></label
+    >
+    <button id="test-connect">Connect TEST_ONLY fixture</button>
+    <button id="test-revoke">Revoke TEST_ONLY session</button>
+    <main class="country-game" data-country="01" data-office="captain">
+      <nav class="national-tools" aria-label="Test source controls"></nav>
+    </main>
+    <script type="module" src="./office-projection-test-only.ts"></script>
+  </body>
+</html>
