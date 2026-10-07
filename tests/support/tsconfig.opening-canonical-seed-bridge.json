@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "rootDir": "../.."
+  },
+  "include": [
+    "../../apps/world-worker/src/preparation/opening-canonical-seed-bridge.ts",
+    "../world-core/opening-canonical-seed-bridge.test.ts"
+  ]
+}
