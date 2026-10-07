@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "types": ["node"], "lib": ["ES2024", "DOM"] },
+  "include": [
+    "../../packages/core/src/commands/captain-political-capital-allocation.ts",
+    "../../apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts",
+    "../world-core/captain-political-capital-slice.test.ts"
+  ]
+}
