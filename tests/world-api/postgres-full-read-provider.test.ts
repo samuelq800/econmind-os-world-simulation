@@ -1,3 +1,4 @@
+import { classifiedActivityWireFixture } from '../support/classified-activity-wire-fixture.js';
 import { execFileSync } from 'node:child_process';
 import { createHash, generateKeyPairSync, sign } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync, mkdirSync } from 'node:fs';
@@ -205,14 +206,7 @@ async function fixture(
   );
   await admin.query(
     "insert into world_v2.read_projection values($1,'OFFICE_PRIVATE',$2,'world-projection-read-v1',0,0,$3,now())",
-    [
-      WORLD,
-      PRIVATE,
-      {
-        balance: '9007199254740993.25',
-        nature: 'TEST_ONLY_DERIVED_PROJECTION',
-      },
-    ],
+    [WORLD, PRIVATE, classifiedActivityWireFixture('COUNTRY_01', 'TRADE')],
   );
   const insertAdmission = () =>
     admin.query(
@@ -446,7 +440,7 @@ describe.skipIf(!nativeEnabled)(
         result: {
           ok: true,
           data: {
-            payload: { balance: '9007199254740993.25' },
+            payload: classifiedActivityWireFixture('COUNTRY_01', 'TRADE'),
             watermark: { worldVersion: '0', eventSequence: '0' },
           },
         },
@@ -497,7 +491,9 @@ describe.skipIf(!nativeEnabled)(
           },
           result: {
             ok: true,
-            data: { payload: { balance: '9007199254740993.25' } },
+            data: {
+              payload: classifiedActivityWireFixture('COUNTRY_01', 'TRADE'),
+            },
           },
         });
         expect(

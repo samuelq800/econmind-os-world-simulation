@@ -8,11 +8,16 @@ import {
   officeId,
   workerId,
   type CountryId,
+  type EconomicReadScope,
   type OfficeId,
   type WorldWriterCommitAssertion,
 } from '@econmind/core';
 
 import type { SqlDatabase, SqlExecutor } from '../persistence/sql-database.js';
+import {
+  SqlEconomicReadVisibilitySource,
+  type EconomicReadVisibilitySnapshot,
+} from './economic-read-visibility-source.js';
 import {
   countryReadProjectionScopeKey,
   officePrivateReadProjectionScopeKey,
@@ -94,6 +99,7 @@ interface LedgerEconomicSummary {
 }
 
 interface FinancialPositionAccumulator {
+  readonly accountIdentity: string;
   readonly accountClass: string;
   readonly accountId: string;
   readonly currency: string;
@@ -226,7 +232,7 @@ function emptyLedgerEconomicSummary(): LedgerEconomicSummary {
 
 function ledgerAccumulator(
   values: Map<string, LedgerEconomicAccumulator>,
-  country: CountryId,
+  country: string,
 ): LedgerEconomicAccumulator {
   const existing = values.get(country);
   if (existing !== undefined) return existing;
@@ -341,6 +347,17 @@ function parseActivity(row: EventActivityRow): ActivitySummary {
   });
 }
 
+function readScope(
+  world: string,
+  scope: CountryOfficeScope,
+): EconomicReadScope {
+  return Object.freeze({
+    worldId: world,
+    ...scope,
+    classification: 'OFFICE_PRIVATE',
+  });
+}
+
 function countryKey(country: CountryId): string {
   return country;
 }
@@ -376,6 +393,7 @@ function prepareProjection(input: {
  */
 export class AuthoritativeActivityReadProjectionPublisher {
   readonly #database: SqlDatabase;
+  readonly #visibility: SqlEconomicReadVisibilitySource;
   readonly #workerId: ReturnType<typeof workerId>;
 
   constructor(input: {
@@ -383,6 +401,7 @@ export class AuthoritativeActivityReadProjectionPublisher {
     readonly workerId: string;
   }) {
     this.#database = input.database;
+    this.#visibility = new SqlEconomicReadVisibilitySource(input.database);
     this.#workerId = workerId(input.workerId);
   }
 
@@ -412,12 +431,23 @@ export class AuthoritativeActivityReadProjectionPublisher {
         input.assertion.worldId,
         watermark,
       );
+      const visibility = await this.#visibility.loadFrom(transaction, {
+        worldId: input.assertion.worldId,
+        ...watermark,
+      });
       const economics = await this.#readLedgerEconomics(
         transaction,
         input.assertion.worldId,
         watermark,
+        scopes.offices,
+        visibility,
       );
-      const projections = this.#deriveProjections(scopes, activity, economics);
+      const projections = this.#deriveProjections(
+        scopes,
+        activity,
+        economics,
+        visibility,
+      );
 
       await transaction.query(
         `delete from world_v2.read_projection
@@ -532,7 +562,7 @@ export class AuthoritativeActivityReadProjectionPublisher {
         where world_id = $1
           and active
         order by country_id, office_id, auth_subject, capability
-        for key share`,
+        for share`,
       [worldId],
     );
     const countries = new Map<string, CountryId>();
@@ -621,6 +651,8 @@ export class AuthoritativeActivityReadProjectionPublisher {
     transaction: SqlExecutor,
     worldId: string,
     watermark: Readonly<{ eventSequence: string; worldVersion: string }>,
+    scopes: readonly CountryOfficeScope[],
+    visibility: EconomicReadVisibilitySnapshot,
   ): Promise<ReadonlyMap<string, LedgerEconomicSummary>> {
     const [inventory, financial] = await Promise.all([
       transaction.query<CanonicalPostingRow>(
@@ -647,6 +679,8 @@ export class AuthoritativeActivityReadProjectionPublisher {
         row,
         worldId,
         watermark.worldVersion,
+        scopes,
+        visibility,
       );
     }
     for (const row of financial.rows) {
@@ -655,6 +689,8 @@ export class AuthoritativeActivityReadProjectionPublisher {
         row,
         worldId,
         watermark.worldVersion,
+        scopes,
+        visibility,
       );
     }
     return new Map(
@@ -669,6 +705,8 @@ export class AuthoritativeActivityReadProjectionPublisher {
     row: CanonicalPostingRow,
     worldId: string,
     watermarkWorldVersion: string,
+    scopes: readonly CountryOfficeScope[],
+    visibility: EconomicReadVisibilitySnapshot,
   ): void {
     const payload = canonicalPostingPayload(
       row.canonical_payload,
@@ -724,18 +762,28 @@ export class AuthoritativeActivityReadProjectionPublisher {
       } catch {
         invalid('Inventory posting delta is not an exact canonical quantity');
       }
-      const accumulator = ledgerAccumulator(countries, country);
-      const key = exactKey([commodityId, unit, bucket]);
-      const prior = accumulator.inventory.get(key);
-      accumulator.inventory.set(
-        key,
-        Object.freeze({
-          bucket,
-          commodityId,
-          unit,
-          value: prior === undefined ? quantity : prior.value.add(quantity),
-        }),
-      );
+      // Selection precedes aggregation; private account details cannot leak
+      // through an aggregate built from all country accounts.
+      for (const scope of scopes) {
+        if (scope.countryId !== country) continue;
+        if (
+          visibility.inventory(account, readScope(worldId, scope)).status !==
+          'AUTHORIZED'
+        )
+          continue;
+        const accumulator = ledgerAccumulator(countries, officeKey(scope));
+        const key = exactKey([commodityId, unit, bucket]);
+        const prior = accumulator.inventory.get(key);
+        accumulator.inventory.set(
+          key,
+          Object.freeze({
+            bucket,
+            commodityId,
+            unit,
+            value: prior === undefined ? quantity : prior.value.add(quantity),
+          }),
+        );
+      }
     }
   }
 
@@ -744,6 +792,8 @@ export class AuthoritativeActivityReadProjectionPublisher {
     row: CanonicalPostingRow,
     worldId: string,
     watermarkWorldVersion: string,
+    scopes: readonly CountryOfficeScope[],
+    visibility: EconomicReadVisibilitySnapshot,
   ): void {
     const payload = canonicalPostingPayload(
       row.canonical_payload,
@@ -803,23 +853,35 @@ export class AuthoritativeActivityReadProjectionPublisher {
       if (direction !== 'DEBIT' && direction !== 'CREDIT') {
         invalid('Financial posting leg has an unsupported direction');
       }
-      const accumulator = ledgerAccumulator(countries, country);
-      const key = exactKey([accountId, currency]);
-      const prior = accumulator.financial.get(key);
-      const balance =
-        prior === undefined ? Money.from('0', currency) : prior.value;
-      accumulator.financial.set(
-        key,
-        Object.freeze({
-          accountClass,
-          accountId,
-          currency,
-          value:
-            direction === 'DEBIT'
-              ? balance.add(value)
-              : balance.subtract(value),
-        }),
-      );
+      for (const scope of scopes) {
+        if (scope.countryId !== country) continue;
+        if (
+          visibility.financial(account, readScope(worldId, scope)).status !==
+          'AUTHORIZED'
+        )
+          continue;
+        const accumulator = ledgerAccumulator(countries, officeKey(scope));
+        const key = exactKey([accountId, currency]);
+        const prior = accumulator.financial.get(key);
+        const accountIdentity = canonicalSerialize(account);
+        if (prior !== undefined && prior.accountIdentity !== accountIdentity)
+          invalid('Financial movement redefines an account identity');
+        const balance =
+          prior === undefined ? Money.from('0', currency) : prior.value;
+        accumulator.financial.set(
+          key,
+          Object.freeze({
+            accountIdentity,
+            accountClass,
+            accountId,
+            currency,
+            value:
+              direction === 'DEBIT'
+                ? balance.add(value)
+                : balance.subtract(value),
+          }),
+        );
+      }
     }
   }
 
@@ -855,6 +917,7 @@ export class AuthoritativeActivityReadProjectionPublisher {
       offices: ReadonlyMap<string, ActivitySummary>;
     }>,
     economics: ReadonlyMap<string, LedgerEconomicSummary>,
+    visibility: EconomicReadVisibilitySnapshot,
   ): readonly PreparedProjection[] {
     const countries = scopes.countries.map((country) =>
       prepareProjection({
@@ -864,8 +927,15 @@ export class AuthoritativeActivityReadProjectionPublisher {
           activity:
             activity.countries.get(countryKey(country)) ?? emptyActivity(),
           countryId: country,
-          ledger:
-            economics.get(countryKey(country)) ?? emptyLedgerEconomicSummary(),
+          ledger: {
+            ...emptyLedgerEconomicSummary(),
+            visibility: visibility.summary({
+              worldId: visibility.worldId,
+              countryId: country,
+              classification: 'COUNTRY',
+              officeId: null,
+            }),
+          },
           schemaVersion: WORLD_ACTIVITY_PROJECTION_SCHEMA_VERSION,
         },
       }),
@@ -877,9 +947,13 @@ export class AuthoritativeActivityReadProjectionPublisher {
         payload: {
           activity: activity.offices.get(officeKey(scope)) ?? emptyActivity(),
           countryId: scope.countryId,
-          ledger:
-            economics.get(countryKey(scope.countryId)) ??
-            emptyLedgerEconomicSummary(),
+          ledger: {
+            ...(economics.get(officeKey(scope)) ??
+              emptyLedgerEconomicSummary()),
+            visibility: visibility.summary(
+              readScope(visibility.worldId, scope),
+            ),
+          },
           officeId: scope.officeId,
           schemaVersion: WORLD_ACTIVITY_PROJECTION_SCHEMA_VERSION,
         },

@@ -232,6 +232,7 @@ function mapProjectionRow(
       receipts: [],
       events: [],
     });
+    assertClassifiedActivityPayload(projection);
     if (
       Buffer.byteLength(JSON.stringify(projection), 'utf8') >
       MAX_WORLD_READ_RESPONSE_BYTES
@@ -242,6 +243,125 @@ function mapProjectionRow(
   } catch (error) {
     if (error instanceof WorldReadFailure) throw error;
     protocol('PostgreSQL projection row failed DTO validation');
+  }
+}
+
+/** A legacy row cannot escape merely because its entitlement and watermark are
+ * current. This validates the sole publisher's bounded wire shape; a marker is
+ * not a grant, and signed/current SQL authorization remains mandatory. */
+function assertClassifiedActivityPayload(projection: WorldProjectionDto): void {
+  if (projection.classification === 'NEGOTIATION_PARTY') return;
+  function boundedObject(
+    value: unknown,
+    allowed: readonly string[],
+  ): Record<string, unknown> {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      protocol('Classified activity projection is unavailable');
+    const record = value as Record<string, unknown>;
+    const keys = Object.keys(record);
+    if (
+      keys.length !== allowed.length ||
+      keys.some((k) => !allowed.includes(k))
+    )
+      protocol('Classified activity projection is unavailable');
+    return record;
+  }
+  const office = projection.classification === 'OFFICE_PRIVATE';
+  const payload = boundedObject(
+    projection.payload,
+    office
+      ? ['activity', 'countryId', 'officeId', 'ledger', 'schemaVersion']
+      : ['activity', 'countryId', 'ledger', 'schemaVersion'],
+  );
+  if (
+    payload.schemaVersion !== 'world-activity-projection-v1' ||
+    typeof payload.countryId !== 'string'
+  )
+    protocol('Classified activity projection is unavailable');
+  const country = countryId(payload.countryId);
+  if (office) {
+    if (
+      typeof payload.officeId !== 'string' ||
+      !CANONICAL_OFFICE_IDS.some((id) => id === payload.officeId)
+    )
+      protocol('Classified activity scope is invalid');
+    const key = `OFFICE_${Buffer.from(country, 'utf8').toString('hex').toUpperCase()}_${Buffer.from(payload.officeId, 'utf8').toString('hex').toUpperCase()}`;
+    if (projection.scopeKey !== key)
+      protocol('Classified activity scope is invalid');
+  } else if (projection.scopeKey !== country)
+    protocol('Classified activity scope is invalid');
+  const activity = boundedObject(payload.activity, [
+    'authoritativeEventCount',
+    'lastAuthoritativeEventSequence',
+    'lastAuthoritativeEventWorldVersion',
+  ]);
+  for (const value of Object.values(activity))
+    if (typeof value !== 'string' || !/^(?:0|[1-9]\d*)$/u.test(value))
+      protocol('Classified activity is invalid');
+  const ledger = boundedObject(payload.ledger, [
+    'financialPositions',
+    'inventoryPositions',
+    'visibility',
+  ]);
+  const visibility = boundedObject(ledger.visibility, [
+    'schemaVersion',
+    'financialDetail',
+    'inventoryDetail',
+    'countrySummary',
+  ]);
+  if (
+    visibility.schemaVersion !== ECONOMIC_READ_VISIBILITY_SCHEMA ||
+    !['AUTHORIZED_FILTERED', 'NOT_AUTHORIZED'].includes(
+      String(visibility.financialDetail),
+    ) ||
+    visibility.inventoryDetail !== 'NOT_AUTHORIZED' ||
+    visibility.countrySummary !== 'NOT_AUTHORIZED' ||
+    !Array.isArray(ledger.financialPositions) ||
+    !Array.isArray(ledger.inventoryPositions) ||
+    ledger.inventoryPositions.length !== 0
+  )
+    protocol('Classified economic projection is unavailable');
+  if (visibility.financialDetail === 'AUTHORIZED_FILTERED') {
+    if (
+      !office ||
+      !['FINANCE', 'CENTRAL_BANK'].includes(String(payload.officeId))
+    )
+      protocol('Financial detail is outside its private scope');
+  } else if (ledger.financialPositions.length !== 0)
+    protocol('Unclassified financial detail cannot be served');
+  const identities = new Set<string>();
+  for (const value of ledger.financialPositions) {
+    const position = boundedObject(value, [
+      'accountId',
+      'accountClass',
+      'currency',
+      'netDebitBalance',
+    ]);
+    if (
+      typeof position.accountId !== 'string' ||
+      !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(position.accountId) ||
+      typeof position.accountClass !== 'string' ||
+      ![
+        'CASH',
+        'DEPOSIT',
+        'ASSET',
+        'LIABILITY',
+        'EQUITY',
+        'REVENUE',
+        'EXPENSE',
+        'RECEIVABLE',
+        'PAYABLE',
+      ].includes(position.accountClass) ||
+      typeof position.currency !== 'string' ||
+      typeof position.netDebitBalance !== 'string' ||
+      Money.from(position.netDebitBalance, position.currency).toCanonicalValue()
+        .amount !== position.netDebitBalance
+    )
+      protocol('Classified financial position is invalid');
+    const key = JSON.stringify([position.accountId, position.currency]);
+    if (identities.has(key))
+      protocol('Classified financial position is duplicated');
+    identities.add(key);
   }
 }
 
@@ -311,3 +431,9 @@ export async function readEntitledWorldProjection(input: {
   }
   return mapProjectionRow(rows[0], request);
 }
+import {
+  CANONICAL_OFFICE_IDS,
+  countryId,
+  Money,
+  ECONOMIC_READ_VISIBILITY_SCHEMA,
+} from '@econmind/core';

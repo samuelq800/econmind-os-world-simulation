@@ -1,3 +1,7 @@
+import {
+  classifiedActivityWireFixture,
+  classifiedOfficeScope,
+} from '../support/classified-activity-wire-fixture.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   createHttpsAuthenticatedReadComposition,
@@ -36,7 +40,7 @@ function fixture(office = 'TRADE') {
       worldId: 'TEST_WORLD',
       countryId: 'TEST_COUNTRY',
       officeId: office,
-      scopeKey: `TEST_SCOPE_${office}`,
+      scopeKey: classifiedOfficeScope('TEST_COUNTRY', office),
       classification: 'OFFICE_PRIVATE',
       authorizationRevision: 'TEST_REVISION',
       modelVersion: 'TEST_MODEL',
@@ -61,15 +65,12 @@ function fixture(office = 'TRADE') {
   const projectionRow = {
     world_id: 'TEST_WORLD',
     classification: 'OFFICE_PRIVATE',
-    scope_key: `TEST_SCOPE_${office}`,
+    scope_key: classifiedOfficeScope('TEST_COUNTRY', office),
     schema_version: 'world-projection-read-v1',
     world_version: '2',
     event_sequence: '2',
     generated_at: '2026-10-06T00:00:00.000Z',
-    payload: {
-      canonicalValue: '9007199254740993.25',
-      nature: 'TEST_ONLY_DERIVED_PROJECTION',
-    },
+    payload: classifiedActivityWireFixture('TEST_COUNTRY', office),
   };
   const receiptRow = {
     receipt_world_id: 'TEST_WORLD',
@@ -149,7 +150,7 @@ function fixture(office = 'TRADE') {
     payload: {
       worldId: 'TEST_WORLD',
       classification: 'OFFICE_PRIVATE',
-      scopeKey: `TEST_SCOPE_${office}`,
+      scopeKey: classifiedOfficeScope('TEST_COUNTRY', office),
     },
   };
   const finalRequest = {
@@ -221,7 +222,7 @@ describe('HTTP-neutral authenticated read composition / OFFLINE TEST_ONLY', () =
           ok: true,
           data: {
             watermark: { worldVersion: '2' },
-            payload: { canonicalValue: '9007199254740993.25' },
+            payload: classifiedActivityWireFixture('TEST_COUNTRY', office),
           },
         },
       });
@@ -235,7 +236,7 @@ describe('HTTP-neutral authenticated read composition / OFFLINE TEST_ONLY', () =
           subject,
           'TEST_WORLD',
           'OFFICE_PRIVATE',
-          `TEST_SCOPE_${office}`,
+          classifiedOfficeScope('TEST_COUNTRY', office),
           '0',
           '0',
         ],
@@ -244,7 +245,7 @@ describe('HTTP-neutral authenticated read composition / OFFLINE TEST_ONLY', () =
         verifiedSubject: subject,
         worldId: 'TEST_WORLD',
         projectionSelector: {
-          scopeKey: `TEST_SCOPE_${office}`,
+          scopeKey: classifiedOfficeScope('TEST_COUNTRY', office),
           classification: 'OFFICE_PRIVATE',
         },
         finalSelector: null,
@@ -528,7 +529,7 @@ describe('HTTP-neutral authenticated read composition / OFFLINE TEST_ONLY', () =
       expect(await client.readProjection(requestId)).toMatchObject({
         status: 'PROJECTION',
         worldVersion: '2',
-        payload: { canonicalValue: '9007199254740993.25' },
+        payload: classifiedActivityWireFixture('TEST_COUNTRY', office),
       });
       // A fabricated fixture receipt tests the query protocol, not this Office's
       // ability to author a narrow transfer or any other economic command.
