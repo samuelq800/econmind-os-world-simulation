@@ -7,9 +7,12 @@ engines or hidden buffs.
 
 ## Current integration snapshot (2026-10-07)
 
-Latest merged-source checkpoint (through PR110):
+Latest merged-source checkpoint (through PR112, with a dated addendum):
 [Project-completion construction, actual merges, checks and remaining boundaries](docs/reports/world-connection/WORLD_V2_PROJECT_COMPLETION_CHECKPOINT_2026_10_07.md).
 Executable main at that snapshot is `ea492a2d76daf2eab600a58c866d7f600a53112f`.
+Its later reviewed financial-browser merge is
+`2987eb608b573326bf71363121e6f15d5f669be0`; provider CI was still running at
+merge, not deployment acceptance.
 Reviewed financial opening bridge, fixed authenticated intake, Captain allocation,
 production posting protocol and browser-safe contract export are merged. An
 actual isolated PostgreSQL JWT-to-Reserve/Ship/Deliver-to-FINAL joint test passed;
