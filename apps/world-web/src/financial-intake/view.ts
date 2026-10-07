@@ -6,7 +6,7 @@ import {
   officeProjectionRoles,
   type OfficeProjectionView,
 } from '../office-projection/model.js';
-import type { FinancialIntakeAction } from '@econmind/core';
+import type { FinancialIntakeAction } from '@econmind/core/authenticated-financial-intake-contract';
 
 const labels: Record<FinancialIntakeAction, string> = {
   REGISTER: 'Register this offer',

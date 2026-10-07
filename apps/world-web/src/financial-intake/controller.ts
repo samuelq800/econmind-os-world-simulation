@@ -2,7 +2,7 @@ import {
   AUTHENTICATED_FINANCIAL_INTAKE_SCHEMA,
   FINANCIAL_INTAKE_OFFICE_ACTIONS,
   type AuthenticatedFinancialIntakeRequestDto,
-} from '@econmind/core';
+} from '@econmind/core/authenticated-financial-intake-contract';
 import { exactJson } from '../country-runtime/staged-reservation-client.js';
 import { createOfficeProjectionController } from '../office-projection/controller.js';
 import {

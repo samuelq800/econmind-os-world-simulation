@@ -3,7 +3,7 @@ import {
   AUTHENTICATED_FINANCIAL_INTAKE_PATH,
   FINANCIAL_INTAKE_OFFICE_ACTIONS,
   type FinancialIntakeAction,
-} from '@econmind/core';
+} from '@econmind/core/authenticated-financial-intake-contract';
 import { createFinancialIntakeController } from '../../apps/world-web/src/financial-intake/controller.js';
 import { createFinancialIntakeTransport } from '../../apps/world-web/src/financial-intake/transport.js';
 import type { OfficeProjectionView } from '../../apps/world-web/src/office-projection/model.js';
@@ -397,4 +397,44 @@ describe('G frozen public port / OFFLINE TEST_ONLY browser consumer', () => {
       vi.useRealTimers();
     }
   });
+  it.each([401, 403])(
+    'route-level HTTP %i with fallback requestId still retires private FINAL',
+    async (status) => {
+      const f = setup();
+      let denied = false;
+      const fetcher: typeof fetch = (input, init) =>
+        denied
+          ? Promise.resolve(
+              Response.json(
+                {
+                  schemaVersion: f.binding.request.schemaVersion,
+                  requestId: '00000000-0000-4000-8000-000000000000',
+                  ok: false,
+                  error: { code: 'AUTHENTICATION_REQUIRED', retryable: false },
+                },
+                { status },
+              ),
+            )
+          : f.fetcher(input, init);
+      const c = createFinancialIntakeController(
+        f.binding,
+        () => f.binding.view,
+        { fetcher, readFactory: () => f.f.client(), requestId: uuid },
+      );
+      await c.lookupAndRefresh();
+      expect(c.getState().read?.receipt?.outcome).toBe('COMMITTED');
+      denied = true;
+      await c.inspect();
+      expect(c.getState()).toMatchObject({
+        status: 'DENIED',
+        request: null,
+        read: null,
+        canInspect: false,
+        canLookupFinal: false,
+        canSubmit: false,
+      });
+      c.disconnect();
+      f.c.disconnect();
+    },
+  );
 });

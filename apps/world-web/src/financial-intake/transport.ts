@@ -5,7 +5,7 @@ import {
   type AuthenticatedFinancialIntakeClientPort,
   type AuthenticatedFinancialIntakeResponseDto,
   type FinancialIntakeStateStatus,
-} from '@econmind/core';
+} from '@econmind/core/authenticated-financial-intake-contract';
 import {
   canonicalId,
   parseAuthority,
@@ -134,11 +134,18 @@ export function createFinancialIntakeTransport(
         return failure('REQUEST_TOO_LARGE');
       const writes = !['INSPECT', 'READ'].includes(selection.action),
         controller = new AbortController();
-      let dispatched = false;
+      let dispatched = false,
+        authenticationDenied = false;
+      const denied = (): AuthenticatedFinancialIntakeResponseDto => ({
+        ...failure('AUTHORIZATION_DENIED'),
+        ...(writes ? { state: { status: 'UNKNOWN' } } : {}),
+      });
       const interrupted = () =>
-        dispatched && writes
-          ? uncertain()
-          : failure('UPSTREAM_UNAVAILABLE', true);
+        authenticationDenied
+          ? denied()
+          : dispatched && writes
+            ? uncertain()
+            : failure('UPSTREAM_UNAVAILABLE', true);
       let finish: (v: AuthenticatedFinancialIntakeResponseDto) => void = () =>
         undefined;
       const cancellation = new Promise<AuthenticatedFinancialIntakeResponseDto>(
@@ -171,11 +178,11 @@ export function createFinancialIntakeTransport(
               cache: 'no-store',
               signal: controller.signal,
             });
+            // Route-level denials can precede request decoding and carry a
+            // fallback requestId. They still revoke privacy, not prove rollback.
+            authenticationDenied =
+              response.status === 401 || response.status === 403;
             if (!live() || controller.signal.aborted) return interrupted();
-            const denied = (): AuthenticatedFinancialIntakeResponseDto => ({
-              ...failure('AUTHORIZATION_DENIED'),
-              ...(writes ? { state: { status: 'UNKNOWN' } } : {}),
-            });
             if (
               response.redirected ||
               (response.url && response.url !== target) ||
@@ -234,7 +241,7 @@ export function createFinancialIntakeTransport(
                 ? denied()
                 : uncertain();
             if (response.status === 401 || response.status === 403)
-              return failure('AUTHORIZATION_DENIED');
+              return denied();
             if (envelope.ok !== true) {
               if (state?.status === 'UNKNOWN') return uncertain();
               if (
