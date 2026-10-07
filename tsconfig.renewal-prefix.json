@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"]
+  },
+  "include": [
+    "tests/support/renewal-frozen-migration-fixture.ts",
+    "tests/world-core/renewal-frozen-migration-fixture.test.ts",
+    "tests/world-core/world-writer-lease-renewal-postgres.test.ts"
+  ]
+}
