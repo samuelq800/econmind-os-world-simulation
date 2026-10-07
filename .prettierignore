@@ -38,3 +38,5 @@ artifacts/E_OPENING_SEMANTIC_MAPPING_PROPOSAL_2026_10_07.md
 docs/governance/owner-inputs/2026-10-07/
 # Preserve the fixed-baseline audit matrix publication bytes and component evidence.
 docs/reports/world-connection/D02_D04_SOURCE_RESOLUTION_MATRIX_2026_10_07.json
+# Actual Owner original reused as an immutable mechanism-test input, not approval.
+tests/fixtures/physical-opening/owner-non-host-decisions-20261007.md

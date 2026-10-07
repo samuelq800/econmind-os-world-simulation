@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "rootDir": "../.."
+  },
+  "include": [
+    "../../apps/world-worker/src/preparation/official-physical-opening-adoption.ts",
+    "../../packages/core/src/resource-inventory/approved-opening-projection.ts",
+    "../world-core/official-physical-opening-adoption.test.ts"
+  ]
+}
