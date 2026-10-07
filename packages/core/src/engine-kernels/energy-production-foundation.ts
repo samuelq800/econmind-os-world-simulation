@@ -251,20 +251,23 @@ export function calculateV13EnergyAllocation(
   if (usableFuel.unit !== requiredFuel.unit) {
     kernelInvalid('V12 usable fuel unit must equal generation fuel unit');
   }
-  const fuelFactor = requiredFuel.amount.isZero()
-    ? decimal('1', 'fuelFactor.one')
-    : minimum(
-        [
-          decimal('1', 'fuelFactor.one'),
-          usableFuel.amount.dividedBy(requiredFuel.amount),
-        ],
-        'fuelFactor',
-      );
-  const generatedAmount = mwh(
+  const fuelConsumedAmount = minimum(
+    [usableFuel.amount, requiredFuel.amount],
+    'fuelConsumed',
+  );
+  const potentialGeneration = mwh(
     unconstrained.generated,
     'unconstrained.generated',
-  ).times(fuelFactor);
-  const fuelConsumedAmount = requiredFuel.amount.times(fuelFactor);
+  );
+  // Clamp the physical stock exactly, then multiply before division so an
+  // intermediate repeating ratio cannot corrupt an exactly representable
+  // final amount (for example 16.4583 * 8 / 16.4583 = 8). Non-representable
+  // final quantities still fail the existing canonical result-domain checks.
+  const generatedAmount = requiredFuel.amount.isZero()
+    ? potentialGeneration
+    : potentialGeneration
+        .times(fuelConsumedAmount)
+        .dividedBy(requiredFuel.amount);
   const generated = renderQuantity(generatedAmount, 'MWh');
   const fuelConsumed = renderQuantity(fuelConsumedAmount, usableFuel.unit);
   const usableFuelAfter = renderQuantity(
