@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"]
+  },
+  "include": [
+    "../../apps/world-worker/src/preparation/owner-non-host-source-adoption.ts",
+    "../world-core/owner-non-host-source-adoption.test.ts"
+  ]
+}

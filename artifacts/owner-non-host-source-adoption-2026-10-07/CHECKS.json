@@ -1,0 +1,182 @@
+{
+  "schemaVersion": "E_OWNER_NON_HOST_CHECKS_V1",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "independentReview": "PENDING",
+  "base": "d0926f288dcb84559cfdef94c7d283ea7ac180e7",
+  "evidenceFormat": "Actual tool-transcript command/exit summaries; not archived raw process logs.",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "nodeExecutable": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node",
+    "pnpmEntry": "/Users/samuel/.cache/node/corepack/v1/pnpm/12.3.4/bin/pnpm.mjs"
+  },
+  "environment": {
+    "name": "local",
+    "databaseConfigured": false,
+    "linkedSupabaseProject": "NOT_LINKED",
+    "productionMutationAllowed": false
+  },
+  "commands": [
+    {
+      "command": "vitest run tests/world-core/owner-non-host-source-adoption.test.ts tests/world-core/official-opening-decision-reconciliation.test.ts",
+      "exitCode": 0,
+      "status": "PASS",
+      "result": "31/31 assertions, 2 files; final run 21:38:14, 7.04s"
+    },
+    {
+      "command": "tsc -p tests/support/tsconfig.owner-non-host-source-adoption.json --pretty false",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "eslint apps/world-worker/src/preparation/owner-non-host-source-adoption.ts tests/world-core/owner-non-host-source-adoption.test.ts",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "prettier --check apps/world-worker/src/preparation/owner-non-host-source-adoption.ts tests/world-core/owner-non-host-source-adoption.test.ts tests/support/tsconfig.owner-non-host-source-adoption.json plans/e-owner-non-host-source-adoption.md artifacts/owner-non-host-source-adoption-2026-10-07/*",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm --filter @econmind/core build",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "pnpm --filter @econmind/world-worker build",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "result": "254 source files"
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "result": "Core75/source249; no violations"
+    },
+    {
+      "command": "node scripts/check-repository-secrets.mjs",
+      "exitCode": 0,
+      "status": "PASS",
+      "result": "2020 files before package; 2024 files in final package, both passed"
+    },
+    {
+      "command": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
+      "exitCode": 0,
+      "status": "PASS"
+    },
+    {
+      "command": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node --input-type=module -e 'import {readFileSync} from '\\''node:fs'\\'';import {createHash} from '\\''node:crypto'\\'';const write=process.stdout.write.bind(process.stdout);process.stdout.write=(s)=>{if(s!==readFileSync('\\''./artifacts/owner-non-host-source-adoption-2026-10-07/REVIEW_MANIFEST.json'\\'','\\''utf8'\\''))throw new Error('\\''PROJECTION_BYTE_DRIFT'\\'');const m=JSON.parse(s);write(JSON.stringify({byteIdentical:true,sha256:createHash('\\''sha256'\\'').update(s).digest('\\''hex'\\''),fullManifestFingerprint:m.fullManifestFingerprint,counts:m.counts,gapCounts:m.gapCounts,legacyInspection:m.legacyInspection,seedAdmissionAllowed:m.seedAdmissionAllowed,productionAuthorized:m.productionAuthorized}));return true};await import('\\''./artifacts/owner-non-host-source-adoption-2026-10-07/generate-review-manifest.mjs'\\'')'",
+      "exitCode": 0,
+      "status": "PASS",
+      "result": {
+        "byteIdentical": true,
+        "sha256": "2704c61c4177917e9e3726d609b48742f4673f0cdc8bbd0790fce0b9592bdd8f",
+        "fullManifestFingerprint": "sha256:73c96665334557656836aa218108c85ad50b6b091a3fab722696bf7e0ae95ba9",
+        "counts": {
+          "countries": "70",
+          "entities": "350",
+          "stockRights": "840",
+          "positiveStocks": "619",
+          "zeroSourceCells": "221",
+          "cbCategoriesPerCountry": "21",
+          "inventoryEntriesInNonActivatedScope": "0",
+          "sourceGaps": "1051"
+        },
+        "gapCounts": {
+          "OPENING_LC_CODE_SOURCE_MISSING": "490",
+          "OPENING_FX_SOURCE_MISSING": "490",
+          "CB_OPENING_HOLDING_REGISTER_COMPLETENESS_NOT_ESTABLISHED": "70",
+          "WORLD_BINDING_NOT_VERIFIED_NO_SEED": "1"
+        },
+        "legacyInspection": {
+          "status": "BLOCKED",
+          "ownerRecordsCount": "0",
+          "wholeLegacyProposalAdopted": false
+        },
+        "seedAdmissionAllowed": false,
+        "productionAuthorized": false
+      }
+    },
+    {
+      "command": "git diff --cached --check",
+      "exitCode": 0,
+      "status": "PASS",
+      "result": "Final staged eight-file increment checked; no whitespace errors"
+    }
+  ],
+  "retainedFailedAttempts": [
+    {
+      "command": "Focused typecheck (first scaffold)",
+      "exitCode": 2,
+      "reason": "Unused canonicalSerialize; subsequently used for actual manifest fingerprint."
+    },
+    {
+      "command": "New focused tests (first beforeAll)",
+      "exitCode": 1,
+      "reason": "Core canonicalSerialize rejects numeric metadata; count metadata fixed to strings; 15 tests framework-skipped because beforeAll failed, not PASS."
+    },
+    {
+      "command": "New focused tests (second)",
+      "exitCode": 1,
+      "reason": "13 passed / 2 failed: wrong D06 substring assertion and Decimal.isPositive accepted zero FX. Assertion corrected to exact crosswalk; actual rate code changed to .gt('0')."
+    },
+    {
+      "command": "Scoped ESLint (first)",
+      "exitCode": 1,
+      "reason": "Unused _name; categoryName included in typed CB input."
+    },
+    {
+      "command": "Prettier check after categoryName patch",
+      "exitCode": 1,
+      "reason": "Source formatting; formatter applied, final checks required."
+    },
+    {
+      "command": "PATH=pinned-node:$PATH pnpm --filter @econmind/core build (fallback pnpm)",
+      "exitCode": 1,
+      "reason": "Fallback pnpm11.19/Node24.19 engine mismatch. Existing pinned pnpm12.3.4 now invoked through Node24.20, no install."
+    },
+    {
+      "command": "pnpm --filter @econmind/world-worker build (first pinned)",
+      "exitCode": 1,
+      "reason": "TS4058 private Core ID brand in inferred declaration; named LegalEntityId annotation added; build then passed."
+    },
+    {
+      "command": "Manifest length diagnostic, first shell quoting attempt",
+      "exitCode": 1,
+      "reason": "Shell removed nested JS quotes; quoting corrected; no source/database mutation."
+    },
+    {
+      "command": "Manifest byte-equivalence (first)",
+      "exitCode": 1,
+      "reason": "Generator default formatting differed from repository formatting, values unchanged. Generator now resolves existing repository Prettier config; byte-identical pass."
+    }
+  ],
+  "notRun": [
+    "Native PostgreSQL",
+    "Financial claim materialization",
+    "Canonical opening-seed admission",
+    "Full command/HTTP/JWT loop",
+    "Clock/Worker runtime",
+    "Concurrency/crash recovery",
+    "UI/browser",
+    "Production Supabase",
+    "Migrations",
+    "Full old test suite",
+    "Independent P0 review"
+  ],
+  "unresolvedSourceGapCounts": {
+    "OPENING_LC_CODE_SOURCE_MISSING": "490",
+    "OPENING_FX_SOURCE_MISSING": "490",
+    "CB_OPENING_HOLDING_REGISTER_COMPLETENESS_NOT_ESTABLISHED": "70",
+    "WORLD_BINDING_NOT_VERIFIED_NO_SEED": "1"
+  },
+  "seedAdmissionAllowed": false,
+  "productionAuthorized": false
+}
