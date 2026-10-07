@@ -91,14 +91,14 @@ export function createOfficeProjectionController(
     for (const fn of listeners) fn();
   };
   const port = binding ? factory(binding.read) : null;
-  function disconnect() {
+  function retire(reason: 'MISSING' | 'DENIED') {
     retired = true;
     epoch++;
     busy = false;
     model = null;
     receipt = null;
-    status = 'MISSING';
-    code = 'TRUSTED_READ_BINDING_MISSING';
+    status = reason;
+    code = reason === 'DENIED' ? 'DENIED' : 'TRUSTED_READ_BINDING_MISSING';
     port?.disconnect();
     const stop = stopHost;
     stopHost = null;
@@ -108,6 +108,9 @@ export function createOfficeProjectionController(
       /* Detached; cannot reconnect. */
     }
     notify();
+  }
+  function disconnect() {
+    retire('MISSING');
   }
   function current() {
     if (!binding || retired) return false;
@@ -143,9 +146,15 @@ export function createOfficeProjectionController(
     checkLiveness();
   }
   function fail(reason: string) {
+    // A real client DENIED retires its authority, not merely its current read.
+    // Retire the host lifetime too: clear FINAL, unsubscribe and fence late work.
+    if (reason === 'DENIED') {
+      retire('DENIED');
+      return;
+    }
     model = null;
     code = reason;
-    status = reason === 'STALE' || reason === 'DENIED' ? reason : 'UNAVAILABLE';
+    status = reason === 'STALE' ? reason : 'UNAVAILABLE';
   }
   async function read(minimumVersion?: string) {
     if (!binding || !port || !checkLiveness()) return;

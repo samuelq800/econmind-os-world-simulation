@@ -166,6 +166,7 @@ export function officeProjectionFixture(role: OfficeRole) {
     payload,
     calls,
     lookup,
+    fetcher,
     binding: {
       read: config,
       view: { countryDisplayId: '01', role },
