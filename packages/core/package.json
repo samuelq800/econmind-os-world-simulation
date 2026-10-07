@@ -7,6 +7,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./authenticated-financial-intake-contract": {
+      "types": "./dist/commands/authenticated-financial-intake-contract.d.ts",
+      "default": "./dist/commands/authenticated-financial-intake-contract.js"
     }
   },
   "scripts": {
