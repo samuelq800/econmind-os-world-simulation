@@ -11,6 +11,10 @@
     "./approval-store": {
       "types": "./dist/persistence/narrow-transfer-approval-store.d.ts",
       "default": "./dist/persistence/narrow-transfer-approval-store.js"
+    },
+    "./runtime-read-binding-store": {
+      "types": "./dist/persistence/runtime-read-binding-store.d.ts",
+      "default": "./dist/persistence/runtime-read-binding-store.js"
     }
   },
   "scripts": {
