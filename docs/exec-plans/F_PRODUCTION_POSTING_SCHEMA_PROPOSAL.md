@@ -161,3 +161,18 @@ Worker `PRODUCTION_PERSISTENCE_SCHEMA_NOT_ADMITTED` remains intact. Any later
 admission requires explicit Control Tower direction, independent approval,
 the reviewed release-chain result and complete actual runtime validation.
 This candidate alone cannot open the gate.
+
+## Second-commit manifest evidence
+
+The artifact source is now immutable at
+`4714c1da7af9324741996b94c6da036bf54c39a4`, tree
+`c00068af6672028af902a81c7a4d9960c284d102`. The second-commit manifest entry
+uses that exact full source commit and the artifact SHA-256 recorded above.
+`production_approval` remains `null`; old 0001–0022 entries are unchanged.
+
+`GIT_NO_REPLACE_OBJECTS=1 node scripts/validate-migrations.mjs` returned
+23 migrations, PASS, zero violations, exit 0. Independently reading the artifact
+with `git -c core.useReplaceRefs=false show <source>:<path>` and hashing its
+bytes returned the same SHA-256. Manifest formatting and whitespace checks
+passed. This is provenance evidence, not whole-chain rehearsal, review,
+publication, native PostgreSQL proof or runtime gate admission.
