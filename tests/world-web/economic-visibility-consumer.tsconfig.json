@@ -1,0 +1,9 @@
+{
+  "extends": "./financial-intake.tsconfig.json",
+  "include": [
+    "economic-visibility-consumer.test.ts",
+    "office-projection.test.ts",
+    "office-projection-test-only.ts",
+    "trusted-country-runtime.test.ts"
+  ]
+}

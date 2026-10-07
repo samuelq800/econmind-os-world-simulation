@@ -29,14 +29,19 @@ describe('six-office real DTO wiring / OFFLINE TEST_ONLY', () => {
         officeId: officeProjectionRoles[role],
         admissionRef: 'TEST_ADMISSION',
       });
-      expect(model.readouts[1]).toMatchObject({
-        canonicalValue: '9007199254740993.25',
-        unit: 'GCU',
-        nature: 'NET_POSTING_MOVEMENT',
-      });
-      expect(model.readouts[2]).toMatchObject({
-        canonicalValue: '-0.125',
-        unit: 'tonne',
+      if (['finance', 'central_bank'].includes(role))
+        expect(model.readouts[1]).toMatchObject({
+          canonicalValue: '9007199254740993.25',
+          unit: 'GCU',
+          nature: 'NET_POSTING_MOVEMENT',
+        });
+      else expect(model.readouts).toHaveLength(1);
+      expect(model.economicAvailability).toMatchObject({
+        financial: ['finance', 'central_bank'].includes(role)
+          ? 'AVAILABLE'
+          : 'NOT_AUTHORIZED',
+        inventory: 'NOT_AUTHORIZED',
+        countrySummary: 'NOT_AUTHORIZED',
       });
       expect(model.missing).toHaveLength(3);
       expect(
@@ -161,21 +166,27 @@ describe('six-office real DTO wiring / OFFLINE TEST_ONLY', () => {
     'schema',
     'activity-head',
   ])('fails closed for malformed/mismatched %s DTO', async (mode) => {
-    const f = officeProjectionFixture('captain'),
+    const f = officeProjectionFixture('finance'),
       p = f.payload;
     if (mode === 'country') p.countryId = 'TEST_OTHER';
     if (mode === 'office') p.officeId = 'SOCIAL';
     if (mode === 'decimal')
       p.ledger.financialPositions[0]!.netDebitBalance = '1.00';
-    if (mode === 'unit') p.ledger.inventoryPositions[0]!.unit = '';
+    if (mode === 'unit')
+      p.ledger.inventoryPositions.push({
+        bucket: 'RESERVED',
+        commodityId: 'TEST_STEEL',
+        quantity: '-0.125',
+        unit: '',
+      });
     if (mode === 'duplicate')
-      p.ledger.inventoryPositions.push({ ...p.ledger.inventoryPositions[0]! });
+      p.ledger.financialPositions.push({ ...p.ledger.financialPositions[0]! });
     if (mode === 'schema') p.schemaVersion = 'TEST_UNSUPPORTED';
     if (mode === 'activity-head')
       p.activity.lastAuthoritativeEventSequence = '999';
     const port = f.client(),
       result = await port.readProjection(uuid());
-    expect(consumeOfficeProjection(result, f.config, 'captain').kind).toBe(
+    expect(consumeOfficeProjection(result, f.config, 'finance').kind).toBe(
       'MISSING',
     );
     port.disconnect();

@@ -10,13 +10,25 @@ const ui = installOfficeProjection(document, window, (binding, view) =>
   createOfficeProjectionController(binding, view, () => fixture.client()),
 );
 const select = document.querySelector<HTMLSelectElement>('#test-role')!;
-select.addEventListener('change', () => {
+const visibility =
+  document.querySelector<HTMLSelectElement>('#test-visibility')!;
+function replaceFixture() {
   ui.disconnect();
   fixture.invalidate();
   const role = select.value as OfficeRole;
   document.querySelector<HTMLElement>('.country-game')!.dataset.office = role;
   fixture = officeProjectionFixture(role);
-});
+  const ledger = fixture.payload.ledger as unknown as Record<string, unknown>;
+  if (visibility.value === 'legacy') delete ledger.visibility;
+  if (visibility.value === 'denied')
+    fixture.payload.ledger.visibility.financialDetail = 'NOT_AUTHORIZED';
+  if (visibility.value === 'empty')
+    fixture.payload.ledger.financialPositions = [];
+  if (visibility.value === 'country')
+    Object.assign(fixture.config.identity, { classification: 'COUNTRY' });
+}
+select.addEventListener('change', replaceFixture);
+visibility.addEventListener('change', replaceFixture);
 document
   .querySelector('#test-connect')!
   .addEventListener('click', () => ui.connect(fixture.binding));
