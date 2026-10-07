@@ -69,6 +69,13 @@ preparation and the one-line observer SQL correction; the latter report hash
 is `2cfab459bb167bef58117704e079a1397bb8a97e081250f737c25847accef9e2`.
 Those preparation reviews alone were not execution or merge permission.
 
+The scoped `v09-renewal-supplement.yml` CI entry runs only this native file
+against an ephemeral PostgreSQL 16 service and rejects any result other than
+four actual passes with zero failed/pending tests. It uses the existing
+disposable guard and pinned Node/pnpm/lockfile, has read-only repository
+permissions and no deployment/production secrets. CI results are separate
+from the local PostgreSQL 16.15 evidence above; no CI pass is asserted here.
+
 The original native invocation at 811 remains **0 PASS / 4 FAIL / 0 SKIP**,
 caused by `ORDER BY row_text COLLATE "C"` alias lookup in the raw-facts observer.
 Its files and failed stopped generation are preserved. The corrected expression

@@ -1,0 +1,77 @@
+name: Scoped native PostgreSQL lease renewal
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/v09-renewal-supplement.yml
+      - tests/world-core/world-writer-lease-renewal-postgres.test.ts
+      - tests/support/snapshot-storage-fixture.ts
+      - scripts/v09-postgres-test-environment.mjs
+      - database/migrations/**
+      - package.json
+      - pnpm-lock.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-renewal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: econmind_v09_renewal_ci
+          POSTGRES_HOST_AUTH_METHOD: trust
+        options: >-
+          --health-cmd "pg_isready -U postgres -d econmind_v09_renewal_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+    env:
+      ECONMIND_ENV: ci
+      V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+      V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09_renewal_ci
+      LC_ALL: C
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Verify the explicit disposable environment
+        run: node scripts/v09-postgres-test-environment.mjs
+      - name: Run only the four native renewal cases
+        run: >-
+          node node_modules/vitest/vitest.mjs run
+          tests/world-core/world-writer-lease-renewal-postgres.test.ts
+          --reporter=json --outputFile="${{ runner.temp }}/renewal-results.json"
+      - name: Reject skipped or partial acceptance
+        env:
+          RENEWAL_RESULT_PATH: ${{ runner.temp }}/renewal-results.json
+        run: |
+          node --input-type=module -e '
+          import { readFileSync } from "node:fs";
+          const result = JSON.parse(readFileSync(process.env.RENEWAL_RESULT_PATH, "utf8"));
+          if (result.success !== true || result.numTotalTests !== 4 || result.numPassedTests !== 4 || result.numFailedTests !== 0 || result.numPendingTests !== 0) {
+            throw new Error("NATIVE_RENEWAL_EXPECTED_EXACTLY_FOUR_PASS_NO_SKIP");
+          }
+          console.log("SCOPED_NATIVE_RENEWAL_4_PASS_0_FAIL_0_SKIP");
+          '
+      - name: Preserve scoped raw runner results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-renewal-${{ github.sha }}
+          path: ${{ runner.temp }}/renewal-results.json
+          if-no-files-found: error
