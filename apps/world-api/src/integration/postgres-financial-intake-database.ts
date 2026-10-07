@@ -53,6 +53,18 @@ function deny(): never {
   );
 }
 
+/** A semantic cause is not a definite denial when transaction cleanup was
+ * unacknowledged. Preserve diagnostics, but never unwrap it as API403. */
+export class FinancialIntakeRollbackUnconfirmedError extends Error {
+  readonly outcome = 'ROLLBACK_UNCONFIRMED' as const;
+  constructor(
+    cause: unknown,
+    readonly rollbackError: unknown,
+  ) {
+    super('Financial intake rollback was not acknowledged', { cause });
+  }
+}
+
 /** Per-request managed writer transaction adapter. Only reviewed Worker intake
  * and approval stores receive it. No economic writes or arbitrary HTTP SQL.
  * A connection/commit acknowledgement failure is thrown, not replayed here.
@@ -193,13 +205,22 @@ export function createPostgresFinancialIntakeDatabase(input: {
       open = false;
       return result;
     } catch (error) {
+      if (open && released)
+        throw new FinancialIntakeRollbackUnconfirmedError(
+          error,
+          new Error('FINANCIAL_INTAKE_CONNECTION_ALREADY_DESTROYED'),
+        );
       if (open && !released)
         try {
           await client.query('rollback');
           open = false;
           if (bindingDenial) rolledBackBindingDenial = bindingDenial;
-        } catch {
+        } catch (rollbackError) {
           release(true);
+          throw new FinancialIntakeRollbackUnconfirmedError(
+            error,
+            rollbackError,
+          );
         }
       throw error;
     } finally {

@@ -15,7 +15,10 @@ import type {
   HttpsReadCompositionConfig,
 } from './https-authenticated-read-composition.js';
 import { createPostgresServerReadBindingProvider } from './postgres-full-read-provider.js';
-import { createPostgresFinancialIntakeDatabase } from './postgres-financial-intake-database.js';
+import {
+  createPostgresFinancialIntakeDatabase,
+  FinancialIntakeRollbackUnconfirmedError,
+} from './postgres-financial-intake-database.js';
 import { createSupabaseJwksSignatureVerifier } from './supabase-jwks-signature-verifier.js';
 import { verifySupabaseJwtClaims } from './identity.js';
 import {
@@ -79,8 +82,12 @@ function sameBinding(
   );
 }
 function domain(error: unknown): DomainError | null {
-  for (let i = 0; i < 8 && error instanceof Error; i++, error = error.cause)
+  for (let i = 0; i < 8 && error instanceof Error; i++, error = error.cause) {
+    // Stop before a semantic cause beneath uncertain cleanup. Direct approval
+    // stores have no intake recovery layer; dispatched outcomes remain UNKNOWN.
+    if (error instanceof FinancialIntakeRollbackUnconfirmedError) return null;
     if (error instanceof DomainError) return error;
+  }
   return null;
 }
 
