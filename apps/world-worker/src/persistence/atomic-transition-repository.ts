@@ -37,6 +37,10 @@ import {
 
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import type { AtomicNarrowTransferApprovalGuard } from './narrow-transfer-approval-store.js';
+import {
+  assertCurrentMaterializationObservation,
+  type CurrentMaterializationObservation,
+} from './current-materialization-observation.js';
 
 const NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/u;
 const POSITIVE_INTEGER = /^[1-9]\d*$/u;
@@ -47,12 +51,14 @@ const MATERIALIZATION_KEY = /^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$/u;
 export interface CurrentMaterializationInput {
   readonly key: string;
   readonly payload: unknown;
+  readonly observation?: CurrentMaterializationObservation;
 }
 
 export interface PreparedCurrentMaterialization {
   readonly key: string;
   readonly canonicalPayload: string;
   readonly payloadHash: `sha256:${string}`;
+  readonly observation: CurrentMaterializationObservation | null;
 }
 
 export interface AtomicTransitionDraft {
@@ -360,9 +366,18 @@ export function prepareAtomicTransitionCandidate(input: {
         invalid('Current materialization keys must be canonical and unique');
       }
       materializationKeys.add(materialization.key);
+      if (materialization.observation !== undefined) {
+        assertCurrentMaterializationObservation({
+          observation: materialization.observation,
+          worldId: command.worldId,
+          key: materialization.key,
+          expectedWorldVersion: transition.worldVersionBefore,
+        });
+      }
       const canonicalPayload = canonicalSerialize(materialization.payload);
       return Object.freeze({
         key: materialization.key,
+        observation: materialization.observation ?? null,
         canonicalPayload,
         payloadHash: canonicalSha256(
           canonicalHashInput(materialization.payload),
@@ -1134,6 +1149,52 @@ export class AtomicTransitionRepository {
     candidate: PrivateAtomicTransitionCandidate,
   ): Promise<void> {
     for (const materialization of candidate.currentMaterializations) {
+      const observation = materialization.observation;
+      if (observation !== null) {
+        // This executes only after the unchanged World-head, fencing, current
+        // authorization and Command guards in this same atomic transaction.
+        // A country cache can legitimately lag the global head. Compare its
+        // exact observed version AND hash, not a guessed global predecessor.
+        const result =
+          observation.valueWorldVersion === null
+            ? await transaction.query(
+                `insert into world_v2.current_materialization
+                   (world_id, materialization_key, world_version, source_command_id,
+                    canonical_payload, payload_sha256)
+                 values ($1, $2, $3, $4, $5, $6)
+                 on conflict (world_id, materialization_key) do nothing`,
+                [
+                  candidate.command.worldId,
+                  materialization.key,
+                  candidate.transition.worldVersionAfter,
+                  candidate.command.commandId,
+                  materialization.canonicalPayload,
+                  materialization.payloadHash,
+                ],
+              )
+            : await transaction.query(
+                `update world_v2.current_materialization
+                    set world_version = $3, source_command_id = $4,
+                        canonical_payload = $5, payload_sha256 = $6
+                  where world_id = $1 and materialization_key = $2
+                    and world_version = $7 and payload_sha256 = $8`,
+                [
+                  candidate.command.worldId,
+                  materialization.key,
+                  candidate.transition.worldVersionAfter,
+                  candidate.command.commandId,
+                  materialization.canonicalPayload,
+                  materialization.payloadHash,
+                  observation.valueWorldVersion,
+                  observation.payloadHash,
+                ],
+              );
+        requireOneRow(
+          result,
+          'Observed current materialization compare-and-swap',
+        );
+        continue;
+      }
       const result = await transaction.query(
         `insert into world_v2.current_materialization
            (world_id, materialization_key, world_version, source_command_id,
