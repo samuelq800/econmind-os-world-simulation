@@ -1,6 +1,4 @@
 // PREPARATION_ONLY_NOT_V09_2_STARTED. Real PG requires separate execution authority.
-import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { Pool } from 'pg';
@@ -8,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { assertV09PostgresTestEnvironment } from '../../scripts/v09-postgres-test-environment.mjs';
 import { snapshotStorageFixtureSql } from '../support/snapshot-storage-fixture.js';
+import { loadFrozenRenewalMigrationFixture } from '../support/renewal-frozen-migration-fixture.js';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const describePostgres = process.env.V09_TEST_DATABASE_URL
@@ -154,27 +153,13 @@ describePostgres(
     beforeAll(async () => {
       // The existing canonical guard MUST run before any connection or SQL.
       const environment = assertV09PostgresTestEnvironment();
-      const manifestBytes = await readFile(
-        path.join(root, 'database/migrations/manifest.json'),
-      );
-      expect(createHash('sha256').update(manifestBytes).digest('hex')).toBe(
-        manifestHash,
-      );
-      const manifest = JSON.parse(
-        manifestBytes.toString('utf8'),
-      ) as MigrationManifest;
+      // Full current chain/provenance is validated, but these four historical
+      // cases execute the exact frozen 22 only; 0023 is never applied here.
+      const fixture = await loadFrozenRenewalMigrationFixture(root);
+      expect(fixture.frozenManifestHash).toBe(manifestHash);
+      const manifest: MigrationManifest = fixture.manifest;
       expect(manifest.migrations).toHaveLength(22);
-      // Check every artifact before applying any DDL, preserving manifest order.
-      const artifacts = await Promise.all(
-        manifest.migrations.map(async (migration, index) => {
-          expect(migration.release_order).toBe(index + 1);
-          const sql = await readFile(path.join(root, migration.path), 'utf8');
-          expect(createHash('sha256').update(sql).digest('hex')).toBe(
-            migration.sha256,
-          );
-          return sql;
-        }),
-      );
+      const artifacts = fixture.artifacts;
       database = new Pool({
         connectionString: environment.connectionString,
         max: 2,
