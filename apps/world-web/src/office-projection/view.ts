@@ -3,6 +3,7 @@ import {
   type OfficeProjectionBinding,
 } from './controller.js';
 import {
+  economicAvailabilityMessages,
   officeProjectionRoles,
   roleProjectionGaps,
   type OfficeProjectionView,
@@ -98,11 +99,18 @@ export function installOfficeProjection(
           node('dd', `${field.canonicalValue} ${field.unit}`),
         );
       dialog.append(fields);
-      if (state.model.readouts.length === 1)
+      for (const message of economicAvailabilityMessages(
+        state.model.economicAvailability,
+      ))
+        dialog.append(node('p', message));
+      if (
+        state.model.economicAvailability.financial === 'AVAILABLE' &&
+        state.model.readouts.length === 1
+      )
         dialog.append(
           node(
             'p',
-            'No non-zero Posting positions in this projection. Opening balances are not included.',
+            'No authorized financial movement entries. This is not a zero or spendable balance.',
           ),
         );
     }

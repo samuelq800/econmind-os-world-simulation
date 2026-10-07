@@ -80,7 +80,8 @@ function scenario() {
     inspectMatches = true,
     failEnqueue = false,
     receiptMatches = true,
-    projectionSchema = 'world-activity-projection-v1';
+    projectionSchema = 'world-activity-projection-v1',
+    legacyVisibility = false;
   const storage = new Storage(),
     cleanup = vi.fn();
   const config: TrustedCountryRuntimeConfig = {
@@ -132,6 +133,16 @@ function scenario() {
             officeId: identity.officeId,
             activity: {},
             ledger: {
+              ...(legacyVisibility
+                ? {}
+                : {
+                    visibility: {
+                      schemaVersion: 'economic-read-visibility-v1',
+                      financialDetail: 'NOT_AUTHORIZED',
+                      inventoryDetail: 'NOT_AUTHORIZED',
+                      countrySummary: 'NOT_AUTHORIZED',
+                    },
+                  }),
               financialPositions: [],
               inventoryPositions:
                 worldVersion === '0'
@@ -258,6 +269,9 @@ function scenario() {
     },
     sourcePayload: () => {
       projectionSchema = 'API_COUNTRY_VERIFIED';
+    },
+    legacyProjection: () => {
+      legacyVisibility = true;
     },
     changeView: (v: CountryRuntimeView | null) => {
       view = v;
@@ -441,6 +455,40 @@ describe('trusted country entry inspection observability (offline DOM contract)'
 });
 
 describe('static country → actual A staged reservation contract (offline)', () => {
+  it('legacy visibility cannot expose inventory, a raw snapshot or enable Review', async () => {
+    const p = scenario();
+    p.legacyProjection();
+    p.setVersion('1');
+    await p.runtime.readProjection();
+    await p.runtime.inspect();
+    expect(p.runtime.getState()).toMatchObject({
+      projection: null,
+      canReview: false,
+      canConfirm: false,
+      snapshot: { read: null },
+    });
+    expect(JSON.stringify(p.runtime.getState())).not.toContain(
+      '"quantity":"-2"',
+    );
+    p.runtime.disconnect();
+  });
+  it('a classified withheld inventory is rendered as NOT_AUTHORIZED, not zero', async () => {
+    const p = scenario(),
+      entry = mountedEntry(p);
+    p.setVersion('1');
+    entry.action('read').click();
+    await vi.waitFor(() =>
+      expect(entry.api.getState().projection?.worldVersion).toBe('1'),
+    );
+    expect(entry.dialog.textContent).toContain(
+      'Inventory movements · NOT_AUTHORIZED',
+    );
+    expect(entry.dialog.textContent).toContain(
+      'This is not a zero stock balance.',
+    );
+    expect(entry.dialog.textContent).not.toContain('GRAIN AVAILABLE: -2');
+    p.runtime.disconnect();
+  });
   it('exposes matched INSPECT identity without enabling Review until the expected projection is read', async () => {
     const p = scenario();
     expect(p.runtime.getState()).toMatchObject({
@@ -720,11 +768,13 @@ describe('static country → actual A staged reservation contract (offline)', ()
     await p.runtime.readProjection();
     expect(p.runtime.getState().projection).toMatchObject({
       worldVersion: '1',
-      movements: [
-        { bucket: 'AVAILABLE', quantity: '-2', unit: 'tonne' },
-        { bucket: 'RESERVED', quantity: '2', unit: 'tonne' },
-      ],
+      movements: [],
+      inventoryAvailability: 'NOT_AUTHORIZED',
     });
+    expect(JSON.stringify(p.runtime.getState())).not.toContain(
+      '"quantity":"-2"',
+    );
+    expect(p.runtime.getState().snapshot?.read).toBeNull();
     expect(p.storage.getItem(LOCAL_PENDING_MARKER_KEY)).toBeNull();
     expect(p.runtime.getState().canConfirm).toBe(false);
   });

@@ -39,6 +39,53 @@ export interface OfficeReadout {
   readonly unit: string;
   readonly nature: 'ACTIVITY_COUNT' | 'NET_POSTING_MOVEMENT';
 }
+/** UI availability, not a membership or disclosure grant. The server must
+ * already have filtered accounts using admitted owners before publication. */
+export interface EconomicAvailability {
+  readonly financial: 'AVAILABLE' | 'NOT_AUTHORIZED' | 'UNAVAILABLE';
+  readonly inventory: 'NOT_AUTHORIZED' | 'UNAVAILABLE';
+  readonly countrySummary: 'NOT_AUTHORIZED' | 'UNAVAILABLE';
+}
+export function consumeEconomicAvailability(
+  value: unknown,
+  identity: Readonly<{ classification: string; officeId: string }>,
+): EconomicAvailability {
+  const visibility = row(value);
+  if (
+    visibility?.schemaVersion !== 'economic-read-visibility-v1' ||
+    (visibility.financialDetail !== 'AUTHORIZED_FILTERED' &&
+      visibility.financialDetail !== 'NOT_AUTHORIZED') ||
+    visibility.inventoryDetail !== 'NOT_AUTHORIZED' ||
+    visibility.countrySummary !== 'NOT_AUTHORIZED'
+  )
+    return Object.freeze({
+      financial: 'UNAVAILABLE',
+      inventory: 'UNAVAILABLE',
+      countrySummary: 'UNAVAILABLE',
+    });
+  return Object.freeze({
+    financial:
+      visibility.financialDetail === 'AUTHORIZED_FILTERED' &&
+      identity.classification === 'OFFICE_PRIVATE' &&
+      ['FINANCE', 'CENTRAL_BANK'].includes(identity.officeId)
+        ? 'AVAILABLE'
+        : 'NOT_AUTHORIZED',
+    inventory: 'NOT_AUTHORIZED',
+    countrySummary: 'NOT_AUTHORIZED',
+  });
+}
+export function economicAvailabilityMessages(
+  availability: EconomicAvailability,
+): readonly string[] {
+  return [
+    ['Financial movements', availability.financial],
+    ['Inventory movements', availability.inventory],
+    ['Country economic summary', availability.countrySummary],
+  ].map(
+    ([label, status]) =>
+      `${label} · ${status === 'AVAILABLE' ? 'Authorized, server-filtered' : status === 'UNAVAILABLE' ? 'Unavailable · ECONOMIC_VISIBILITY_UNAVAILABLE' : 'NOT_AUTHORIZED'}`,
+  );
+}
 export interface OfficeProjectionModel {
   readonly kind: 'CURRENT';
   readonly role: OfficeRole;
@@ -61,6 +108,7 @@ export interface OfficeProjectionModel {
     readonly projectionVersion: string;
   };
   readonly readouts: readonly OfficeReadout[];
+  readonly economicAvailability: EconomicAvailability;
   readonly missing: readonly {
     readonly field: string;
     readonly code: 'ROLE_FIELD_NOT_PROJECTED';
@@ -134,6 +182,10 @@ export function consumeOfficeProjection(
       nature: 'ACTIVITY_COUNT',
     },
   ];
+  const economicAvailability = consumeEconomicAvailability(
+    ledger.visibility,
+    config.identity,
+  );
   const keys = new Set<string>();
   for (const value of ledger.financialPositions) {
     const p = row(value);
@@ -149,13 +201,14 @@ export function consumeOfficeProjection(
     const key = JSON.stringify(['financial', p.accountId, p.currency]);
     if (keys.has(key)) return missing('INVALID_ACTIVITY_DTO');
     keys.add(key);
-    readouts.push({
-      key,
-      label: `${p.accountId} / ${p.accountClass} · net debit movement`,
-      canonicalValue: p.netDebitBalance,
-      unit: p.currency,
-      nature: 'NET_POSTING_MOVEMENT',
-    });
+    if (economicAvailability.financial === 'AVAILABLE')
+      readouts.push({
+        key,
+        label: `${p.accountId} / ${p.accountClass} · net debit movement`,
+        canonicalValue: p.netDebitBalance,
+        unit: p.currency,
+        nature: 'NET_POSTING_MOVEMENT',
+      });
   }
   for (const value of ledger.inventoryPositions) {
     const p = row(value);
@@ -170,13 +223,8 @@ export function consumeOfficeProjection(
     const key = JSON.stringify(['inventory', p.commodityId, p.unit, p.bucket]);
     if (keys.has(key)) return missing('INVALID_ACTIVITY_DTO');
     keys.add(key);
-    readouts.push({
-      key,
-      label: `${p.commodityId} / ${String(p.bucket)} · inventory movement`,
-      canonicalValue: p.quantity,
-      unit: p.unit,
-      nature: 'NET_POSTING_MOVEMENT',
-    });
+    // The fixed carrier has no authorized inventory detail. Validate shape but
+    // never expose, aggregate or reinterpret withheld / legacy raw positions.
   }
   return {
     kind: 'CURRENT',
@@ -200,6 +248,7 @@ export function consumeOfficeProjection(
       projectionVersion: config.identity.projectionVersion,
     },
     readouts,
+    economicAvailability,
     missing: roleProjectionGaps[role].map((field) => ({
       field,
       code: 'ROLE_FIELD_NOT_PROJECTED',

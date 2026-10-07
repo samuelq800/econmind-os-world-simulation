@@ -3,6 +3,7 @@ import {
   type FinancialIntakeBinding,
 } from './controller.js';
 import {
+  economicAvailabilityMessages,
   officeProjectionRoles,
   type OfficeProjectionView,
 } from '../office-projection/model.js';
@@ -203,6 +204,10 @@ export function installFinancialIntake(
             `Country refreshed · World v${state.read.model.head.worldVersion} / event ${state.read.model.head.eventSequence}`,
           ),
         );
+        for (const message of economicAvailabilityMessages(
+          state.read.model.economicAvailability,
+        ))
+          dialog.append(node('p', message));
         const values = document.createElement('dl');
         for (const field of state.read.model.readouts)
           values.append(
