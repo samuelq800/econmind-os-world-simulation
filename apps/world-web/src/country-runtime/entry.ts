@@ -121,7 +121,17 @@ export function installCountryRuntime(document: Document, host: Window) {
         dialog.append(
           text(
             'h3',
-            `Authorized Posting movement · version ${state.projection.worldVersion} · not opening-inclusive stock balances`,
+            `Recorded World head · version ${state.projection.worldVersion} · not opening-inclusive stock balances`,
+          ),
+        );
+        dialog.append(
+          text(
+            'p',
+            `Inventory movements · ${state.projection.inventoryAvailability}`,
+          ),
+          text(
+            'p',
+            'No inventory quantity shown. This is not a zero stock balance.',
           ),
         );
         for (const movement of state.projection.movements)

@@ -7,6 +7,7 @@ import {
   sameAuthorizedIdentity,
 } from '../prototype/authorized-read-adapter.js';
 import { createLocalAuthorizedReadController } from '../prototype/local-authorized-read.js';
+import { consumeEconomicAvailability } from '../office-projection/model.js';
 import {
   createStagedReservationClient,
   exactJson,
@@ -56,8 +57,7 @@ export interface TrustedCountryRuntimeConfig {
 const id = /^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u,
   version = /^(?:0|[1-9]\d*)$/u,
   hash = /^sha256:[0-9a-f]{64}$/u;
-const decimal = /^(?:0|[1-9]\d*)(?:\.\d*[1-9])?$/u,
-  signedDecimal = /^-?(?:0|[1-9]\d*)(?:\.\d*[1-9])?$/u;
+const decimal = /^(?:0|[1-9]\d*)(?:\.\d*[1-9])?$/u;
 const text = (v: unknown): v is string =>
   typeof v === 'string' && v.length > 0 && v.length <= 256;
 function validConfig(c: TrustedCountryRuntimeConfig) {
@@ -121,7 +121,10 @@ export interface InventoryMovement {
 function movements(
   payload: unknown,
   identity: AuthorizedBrowserIdentity,
-): readonly InventoryMovement[] | null {
+): {
+  readonly values: readonly InventoryMovement[];
+  readonly availability: 'NOT_AUTHORIZED';
+} | null {
   const row = record(payload),
     ledger = record(row?.ledger);
   if (
@@ -132,28 +135,11 @@ function movements(
     !Array.isArray(ledger?.inventoryPositions)
   )
     return null;
-  const result: InventoryMovement[] = [];
-  for (const item of ledger.inventoryPositions) {
-    const p = record(item);
-    if (
-      !p ||
-      !['AVAILABLE', 'RESERVED', 'IN_TRANSIT'].includes(String(p.bucket)) ||
-      !text(p.commodityId) ||
-      !id.test(p.commodityId) ||
-      !text(p.unit) ||
-      typeof p.quantity !== 'string' ||
-      !signedDecimal.test(p.quantity) ||
-      p.quantity === '-0'
-    )
-      return null;
-    result.push({
-      bucket: String(p.bucket),
-      commodityId: p.commodityId,
-      quantity: p.quantity,
-      unit: p.unit,
-    });
-  }
-  return result;
+  const availability = consumeEconomicAvailability(ledger.visibility, identity);
+  if (availability.inventory === 'UNAVAILABLE') return null;
+  // The fixed carrier authorizes no inventory detail. A current read head can
+  // still gate the existing reviewed command, but withheld values never appear.
+  return { values: [], availability: availability.inventory };
 }
 /** Reuses D's scoped projection/liveness controller, never its synchronous cash submit. */
 export function createTrustedCountryRuntime(
@@ -278,7 +264,8 @@ export function createTrustedCountryRuntime(
       ? {
           worldVersion: read.worldVersion,
           snapshotRef: read.snapshotRef,
-          movements: values,
+          movements: values.values,
+          inventoryAvailability: values.availability,
         }
       : null;
   }
@@ -313,7 +300,11 @@ export function createTrustedCountryRuntime(
         connection: snapshot
           ? ('HOST_BOUND_LOCAL_PREPARATION' as const)
           : ('NOT_CONNECTED' as const),
-        snapshot: snapshot ? structuredClone(snapshot) : null,
+        // Never return legacy / withheld raw ledger payload through this UI's
+        // public state. Server-side filtering and cache validation remain mandatory.
+        snapshot: snapshot
+          ? structuredClone({ ...snapshot, read: null })
+          : null,
         lifecycle: snapshot ? lifecycle : ('IDLE' as const),
         inspectionStatus: snapshot
           ? inspectionStatus

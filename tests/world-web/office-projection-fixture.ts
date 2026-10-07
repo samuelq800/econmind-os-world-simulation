@@ -65,22 +65,32 @@ export function officeProjectionFixture(role: OfficeRole) {
       lastAuthoritativeEventWorldVersion: '1',
     },
     ledger: {
-      financialPositions: [
-        {
-          accountId: 'TEST_TREASURY',
-          accountClass: 'TREASURY',
-          currency: 'GCU',
-          netDebitBalance: '9007199254740993.25',
-        },
-      ],
-      inventoryPositions: [
-        {
-          bucket: 'RESERVED',
-          commodityId: 'TEST_STEEL',
-          quantity: '-0.125',
-          unit: 'tonne',
-        },
-      ],
+      visibility: {
+        schemaVersion: 'economic-read-visibility-v1',
+        financialDetail: ['finance', 'central_bank'].includes(role)
+          ? 'AUTHORIZED_FILTERED'
+          : 'NOT_AUTHORIZED',
+        inventoryDetail: 'NOT_AUTHORIZED',
+        countrySummary: 'NOT_AUTHORIZED',
+      },
+      financialPositions: ['finance', 'central_bank'].includes(role)
+        ? [
+            {
+              accountId:
+                role === 'central_bank' ? 'TEST_CB_ACCOUNT' : 'TEST_TREASURY',
+              accountClass:
+                role === 'central_bank' ? 'CENTRAL_BANK' : 'TREASURY',
+              currency: 'GCU',
+              netDebitBalance: '9007199254740993.25',
+            },
+          ]
+        : [],
+      inventoryPositions: [] as {
+        bucket: string;
+        commodityId: string;
+        quantity: string;
+        unit: string;
+      }[],
     },
   };
   let worldVersion = '2';
