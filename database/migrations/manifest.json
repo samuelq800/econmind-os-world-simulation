@@ -312,6 +312,21 @@
       "lock_or_downtime_risk": "P0 two additive restrictive INSERT/DELETE vetoes for one new World bucket only; bounded table DDL lock, no old policy/grant/row/bucket mutation, no credentials or economic activation; publication requires independent fixed-candidate review",
       "rollback_strategy": "forward-fix",
       "production_approval": null
+    },
+    {
+      "migration_id": "0023_world_v2_production_consumption_posting",
+      "release_order": 23,
+      "path": "database/migrations/artifacts/0023_world_v2_production_consumption_posting.sql",
+      "sha256": "0e1ec372429164acb94f9b9588beac75fbf984f5a41413af13715e28a4e94a36",
+      "artifact_source_commit": "4714c1da7af9324741996b94c6da036bf54c39a4",
+      "scope_authority": "CONTROL_TOWER_OWNER_DELEGATION",
+      "required_shared_schema_version": "UNSPECIFIED_NO_SHARED_SCHEMA_WRITE",
+      "affected_schemas": ["world_v2"],
+      "rls_or_grants_changed": false,
+      "backfill": "NONE",
+      "lock_or_downtime_risk": "P0 candidate-only additive fifth inventory operation on the existing append-only table, preserved four-movement validator and exact production/Event/funding/final-receipt guards; bounded DDL locks and indexes require sole release-chain review, no runtime admission or production authority",
+      "rollback_strategy": "forward-fix",
+      "production_approval": null
     }
   ]
 }
