@@ -58,16 +58,42 @@ export function inspectMigrationSql(sql) {
 // Callers still validate the complete manifest/artifact provenance first.
 export function historicalWorldOnlyMigrations(migrations) {
   if (migrations.length <= 21) return migrations;
-  const last = migrations.at(-1);
+  const veto = migrations[21];
   if (
-    migrations.length !== 22 ||
-    last.migration_id !== STORAGE_VETO_MIGRATION_ID ||
-    last.path !== STORAGE_VETO_PATH ||
-    last.sha256 !== STORAGE_VETO_SHA256 ||
-    last.artifact_source_commit !== '41f387700cf8f933a777f924c503d11cbcd99ffe'
+    ![22, 23].includes(migrations.length) ||
+    veto.migration_id !== STORAGE_VETO_MIGRATION_ID ||
+    veto.path !== STORAGE_VETO_PATH ||
+    veto.sha256 !== STORAGE_VETO_SHA256 ||
+    veto.artifact_source_commit !==
+      '41f387700cf8f933a777f924c503d11cbcd99ffe' ||
+    veto.release_order !== 22 ||
+    veto.scope_authority !== 'CONTROL_TOWER_OWNER_DELEGATION' ||
+    JSON.stringify(veto.affected_schemas) !== JSON.stringify(['storage']) ||
+    veto.production_approval !== null
   )
     throw new Error('STORAGE_VETO_HISTORICAL_PREFIX_INVALID');
-  return migrations.slice(0, 21);
+  if (migrations.length === 22) return migrations.slice(0, 21);
+  // Admit one exact World-only rehearsal suffix, never arbitrary future DDL.
+  // Full manifest + Git artifact provenance validation remains the caller's gate.
+  // This selection is neither a production approval nor permission to run Storage.
+  const suffix = migrations[22];
+  if (
+    suffix.migration_id !== '0023_world_v2_production_consumption_posting' ||
+    suffix.path !==
+      `${WORLD_V2_MIGRATION_ROOT}/0023_world_v2_production_consumption_posting.sql` ||
+    suffix.sha256 !==
+      '0e1ec372429164acb94f9b9588beac75fbf984f5a41413af13715e28a4e94a36' ||
+    suffix.artifact_source_commit !==
+      '4714c1da7af9324741996b94c6da036bf54c39a4' ||
+    suffix.release_order !== 23 ||
+    suffix.scope_authority !== 'CONTROL_TOWER_OWNER_DELEGATION' ||
+    JSON.stringify(suffix.affected_schemas) !== JSON.stringify(['world_v2']) ||
+    suffix.production_approval !== null ||
+    suffix.rls_or_grants_changed !== false ||
+    suffix.backfill !== 'NONE'
+  )
+    throw new Error('WORLD_ONLY_REHEARSAL_SUFFIX_INVALID');
+  return [...migrations.slice(0, 21), suffix];
 }
 
 function provenanceKey(commit, artifactPath) {
