@@ -49,6 +49,10 @@ admission, economic data or old-site business semantics changed.
 ## Handoff
 
 Review only this three-file immutable increment after F's source-only schema
-review. Root must not merge it until independent approval. Then the sole existing
-release/staging callers can select this suffix after full provenance validation;
-selection does not grant permission to execute against any production target.
+review. Root must not merge it until independent approval. This helper can select
+the exact suffix after full provenance validation, but actual release/staging
+callers remain blocked: their unchanged `assertV09StagingMigrationAllowlist`
+accepts only 20/21 World entries and rejects the selected 22-entry World chain.
+Caller readiness is NOT_READY; a separately governed exact suffix admission and
+complete-chain rehearsal are still required. This increment does not widen that
+allowlist. Selection never grants production execution permission.
