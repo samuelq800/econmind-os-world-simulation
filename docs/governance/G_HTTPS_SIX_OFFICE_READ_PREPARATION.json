@@ -26,8 +26,18 @@
       "docs/reports/world-connection/G_HTTPS_SIX_OFFICE_READ_PREPARATION.md"
     ],
     "conditional_path": "The new HTTP-neutral API composition file and its test are permitted only if existing handlers cannot express the required server-verified read binding without altering their contracts.",
-    "operations": ["READ_WORLD_PROJECTION", "READ_FINAL_NARROW_TRANSFER_RECEIPT"],
-    "office_domain": ["CAPTAIN", "FINANCE", "CENTRAL_BANK", "INDUSTRY", "TRADE", "SOCIAL"],
+    "operations": [
+      "READ_WORLD_PROJECTION",
+      "READ_FINAL_NARROW_TRANSFER_RECEIPT"
+    ],
+    "office_domain": [
+      "CAPTAIN",
+      "FINANCE",
+      "CENTRAL_BANK",
+      "INDUSTRY",
+      "TRADE",
+      "SOCIAL"
+    ],
     "result_state": "IMPLEMENTED_UNVERIFIED_PREPARATION_ONLY",
     "terminal_boundary": "INDEPENDENT_FIXED_SOURCE_REVIEW_THEN_STOP"
   },

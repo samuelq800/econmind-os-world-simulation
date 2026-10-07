@@ -47,8 +47,8 @@ import {
   type FinancialAccountClass,
   type MembershipSnapshot,
   type CommitAuthorizationProof,
-} from '../support/cb1-core-composition.js';
-import { applyFinancialPostingBatch } from '../../packages/core/src/finance/financial-ledger.js';
+} from '@econmind/core';
+import { applyFinancialPostingBatch } from '../../packages/core/dist/finance/financial-ledger.js';
 import { createTransactionCutoffAuthorizationGuard } from '../../apps/world-worker/src/authoritative-execution.js';
 import {
   createCentralBankOmoCandidateFactory,
