@@ -51,6 +51,84 @@ Root正常重放时仅公共barrel冲突，保留全部既有exports并追加一
 六个owned文件逐字节匹配087cb85；Core/Worker组合构建exit0。真实admitted reader、
 automatic grant、原子SQL提交与完整Social运行仍未实现，不能把源码批准称上线。
 
+### 23:20 本地收口增量：不是远端发布
+
+最后provider确认的main仍为PR113 `ead5636a1c871e3a4d7f0d81518125f99fb5730b`。
+以下本地组合的代码候选为 `f9d0642269b4ceeb7c69da2cb1b845d17faeb282`，tree
+`6871014a844434488a425945dc64d6d7602ca1af`，分支
+`codex/reviewed-runtime-composition`。分支名不表示全部增量已审；CB、0023以及
+Root后缀选择仍需各自独立批准。文档提交另记，不把文档head混作测试代码head。
+
+| 增量               | 固定源 / 本地重放                                  | 审查与实际证据                                                                                       |
+| ------------------ | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Social SOC-1       | `087cb859` / `9772653c`                            | B已独立31newPASS，source-only批准；并非完整Social operating reader                                   |
+| 稀疏状态CAS        | `9a637542` / `12cee370`                            | B已独立9PASS，source-only批准；保持原legacy/global/fence守卫                                         |
+| CI前置修复         | `36383a22`                                         | P2；本地73PASS，旧两条CI仍FAIL，新provider CI未运行                                                  |
+| CB OMO             | `ed7d98f9` / `89ec5146` + `521ef209`单一真实export | 本地实际Core/Worker源构建0、25CB用例PASS；独立审查PENDING                                            |
+| G明细权限          | `b17c9c95` / `eb1682c1`                            | B独立source-only批准；19文件中17owned逐字节相同，其余仅公共出口并集                                  |
+| D权限消费          | `61c6a512` / `f9d06422`                            | B独立48+2+1分批PASS，source-only批准；13owned UI/test/report原样重放                                 |
+| 生产Posting SQL    | `4714c1da` + `92cb5b99` / `9a7ab541` + `05c61305`  | F原22PGlite用例及23制品Git provenance通过；独立审查PENDING、production_approval:null                 |
+| World-only后缀选择 | `c709286a`                                         | Root仅三文件；4policy用例PASS、23制品provenancePASS，独立审查PENDING；不执行Storage0022或任何生产DDL |
+
+G服务端先以真实同seed/admission/法律实体来源分类，再按Finance/CB过滤聚合。
+COUNTRY、其他Office及无法证明授权的库存/账户明细保留NOT_AUTHORIZED；实际API
+拒绝legacy裸缓存及嵌套额外raw字段。D不补零、不保留已拒绝旧私有值、不把
+NET_POSTING_MOVEMENT变成余额；原FINAL/head仍保留。G报告SHA256
+`4b03a655a2ea2b43c62b10f2cfe55b57216a4d3247d6f12a608aacb75275195e`，D报告
+`f1b152b84b116fdae3c0e81f829d7767d67f815cedb75b289dc8655ebb7b5819`。
+
+Root在实际组合中保留两个合法公共subpath及CB/Social等所有既有exports。
+23:16组合Core/Worker/API构建均exit0，公共visibility/CI守卫3PASS；另一条真实
+financial公共出口2PASS。23:18:55在G+D+CB+F/后缀组合上用同一web tsconfig、
+缓存写 `/dev/null` 的noEmit类型检查exit0，14visibility+2financial出口+1visibility
+出口+2CI守卫，共19PASS/四文件/1.37s。这是源/合同组合，不是G SQL→D浏览器
+或六Office正式运行联合验收。没有重跑旧202、420在线或937MB大地图构建。
+
+第一次普通push被GitHub500拒绝：15:07:18Z `A98F:EC8DE:142361:1BC6CC:6AC66024`。
+另一候选push15:08:36Z同样500 `AA5B:1808D1:161813:1DC074:6AC66073`。
+完成更多本地构建后的一次正常push又因github.com:443 LibreSSL
+SSL_ERROR_SYSCALL退出128。F、D独立分支也保留其失败日志，没有force、改TLS、
+换凭据、管理员绕过或改用不受控发布途径。没有PR114或后续main发布证明。
+不把网络错误推断成所有GitHub功能都不可用，也不盲目循环重试。
+
+#### 不可由代码臆造的Social源阻塞
+
+C按有界源核对查了actual admission、immutable seed store、global lineage reader、
+两个实际opening bridge及genuine social opening consumer。当前canonicalPayload
+只有测试金融机制或未admitted的decision/finance/inventory assembly，没有合法完整
+SOC经营genesis及readFacts。既有Social返回labourState/serviceState=null、1066gaps；
+测试中的jobs/wages/slots明确TEST_ONLY。单一阻塞为
+`SOCIAL_ADMITTED_OPERATING_OPENING_CARRIER_MISSING`，不是允许空reader补零。
+C没有造新port/表/ledger或提升fixture权限，已停止该依赖项。
+诊断原件：`artifacts/c-social-runtime-reader-source-blocker-20261007.uEdOLa/SOURCE_BLOCKER.md`
+（控制塔外部artifact），SHA256
+`cc08889ec5ab96b51f6f30f40e0d5c3d643000f390d5afdd9a4202372ecdfe17`。
+恢复需要真实E03技能/状态与职位、雇主offer/资金、工资/最低工资生效版本、E02可用性、
+有限服务池及既有使用、同World/source-backed clock/readFacts的合法immutable载体。
+
+G已在独立新分支构建真实opening-inclusive位置：复用同DurableV08LedgerLineageReader
+和Core金融重放，不另算第二账本；尚无交付或批准，不提前写成完成。其最终carrier
+再交D接线。独立审查队列为F0023、CB OMO、Root精确后缀；不会用本记录自批准。
+旧表/旧检查为各自时间快照，本段只覆盖上述实际推进，不解除任何正式Gate。
+
+### 23:22 后续记录：F source-only批准与实际组合控制
+
+B已完成固定F0023的独立22用例PGlite窄审、原四movement保留及制品Git来源核验，
+结论SOURCE_ONLY_MERGE_APPROVED、OPEN_BLOCKER=0、OPEN_MAJOR=0。报告SHA256
+`5b760ddffdb2aaf722ecef049daabdaf7ed797cbe25069b7c3e25845cd9ec259`。
+这只替代上方F的待审时间快照；runtime gate仍拒绝未admitted schema，
+production_approval仍null，没有执行正式DDL、授予生产权限或宣称全链rehearsal。
+Root验证六owned文件逐字节匹配92cb5b99；SQL原件SHA仍为
+`0e1ec372429164acb94f9b9588beac75fbf984f5a41413af13715e28a4e94a36`。
+
+在同一 `f9d0642269b4ceeb7c69da2cb1b845d17faeb282` 实际代码组合上，Root又执行
+本次CI会用的trusted browser43、financial30、CI prerequisite2，
+23:22:05 **75PASS/三文件/3.13s/exit0**。这包含早期相关用例，不与19PASS累加
+伪称94个独立控制。边界288源文件PASS、权威模式283/87Core PASS、secret2150
+文件PASS、local环境NOT_LINKED且databaseMutationAllowed=false、diff0。
+未隐藏任何前轮失败或把本地检查当provider CI。CB及Root后缀的固定独立审查
+继续；GitHub正常发布和六Office正式可运行仍不是已完成事项。
+
 ## 已正常合并 main
 
 Owner 已授权正常安全发布。下列 P0 源码均先获得独立 B 对固定候选的窄审，

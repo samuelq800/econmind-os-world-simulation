@@ -7,18 +7,27 @@ engines or hidden buffs.
 
 ## Current integration snapshot (2026-10-07)
 
-Latest merged-source checkpoint (through PR112, with a dated addendum):
+Last provider-confirmed main is PR113's documentation merge,
+`ead5636a1c871e3a4d7f0d81518125f99fb5730b`; executable source includes PR112.
+Later integration is currently **local and unpublished**: reviewed Social,
+sparse CAS, server financial disclosure and six-Office privacy consumers;
+CI prerequisite repairs, CB OMO and exact production-schema/rehearsal candidates.
+The schema has source-only independent approval; CB/rehearsal independent
+reviews remain pending at this snapshot.
+Normal pushes failed with GitHub 500 and then TLS connection failure; no forced
+publication or production mutation followed. PR112's two no-deploy CI runs
+failed on missing prebuilt shared contracts; the local fix has targeted evidence,
+not a new successful provider CI. See the dated local addendum in:
 [Project-completion construction, actual merges, checks and remaining boundaries](docs/reports/world-connection/WORLD_V2_PROJECT_COMPLETION_CHECKPOINT_2026_10_07.md).
-Executable main at that snapshot is `ea492a2d76daf2eab600a58c866d7f600a53112f`.
-Its later reviewed financial-browser merge is
-`2987eb608b573326bf71363121e6f15d5f669be0`; provider CI was still running at
-merge, not deployment acceptance.
+The retained 22:55 executable snapshot is
+`ea492a2d76daf2eab600a58c866d7f600a53112f`; its later reviewed financial-browser
+merge is `2987eb608b573326bf71363121e6f15d5f669be0`.
 Reviewed financial opening bridge, fixed authenticated intake, Captain allocation,
 production posting protocol and browser-safe contract export are merged. An
 actual isolated PostgreSQL JWT-to-Reserve/Ship/Deliver-to-FINAL joint test passed;
 this is not production activation or six-Office completion. Production posting
-persistence still refuses unsupported schema before SQL. Source-based private
-account visibility, other Office runtime consumers, admitted domain sources and
+persistence still refuses unsupported schema before SQL. Opening-inclusive
+authorized balances, other Office runtime consumers, admitted domain sources and
 complete official financial opening remain genuine construction requirements.
 Production host/activation (D05) remains explicitly deferred; Gate B is PENDING.
 
