@@ -8,6 +8,7 @@ import {
   roleProjectionGaps,
   type OfficeProjectionView,
 } from './model.js';
+import { renderCurrentFinancialPosition } from './financial-position-view.js';
 
 /** Additive drawer in the approved country shell. No map, opening HUD, source
  * asset or original form is replaced. No URL/storage/VITE credentials loaded. */
@@ -73,10 +74,7 @@ export function installOfficeProjection(
     status.setAttribute('role', 'status');
     dialog.append(status);
     dialog.append(
-      node(
-        'p',
-        'Posting movement only · Not opening balances or spendable funds',
-      ),
+      node('p', 'Server readout · Ledger positions are not spendable funds'),
     );
     if (state.model) {
       const source = node('details', '');
@@ -91,6 +89,13 @@ export function installOfficeProjection(
         list.append(node('dt', key), node('dd', value));
       source.append(list);
       dialog.append(source);
+      dialog.append(
+        renderCurrentFinancialPosition(
+          document,
+          state.model.currentFinancialPosition,
+        ),
+        node('h3', 'Net Posting movement / activity'),
+      );
       const fields = document.createElement('dl');
       fields.setAttribute('aria-label', 'Exact authorized projection values');
       for (const field of state.model.readouts)

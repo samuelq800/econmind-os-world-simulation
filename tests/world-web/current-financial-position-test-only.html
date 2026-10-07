@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>TEST_ONLY current ledger position</title>
+  </head>
+  <body>
+    <h1>TEST_ONLY — offline public-wire consumer</h1>
+    <p>No real country, admission, command or monetary replay.</p>
+    <label
+      >Office
+      <select id="test-role">
+        <option value="finance">FINANCE</option>
+        <option value="central_bank">CENTRAL_BANK</option>
+        <option value="captain">CAPTAIN</option>
+        <option value="industry">INDUSTRY</option>
+        <option value="trade">TRADE</option>
+        <option value="social">SOCIAL</option>
+      </select></label
+    >
+    <label
+      >Carrier
+      <select id="test-carrier">
+        <option value="current">Current</option>
+        <option value="empty">Sparse empty</option>
+        <option value="negative">Signed equity</option>
+        <option value="legacy">Legacy missing</option>
+        <option value="seed">Wrong seed</option>
+        <option value="denied">Denied</option>
+      </select></label
+    >
+    <button id="test-connect">Connect TEST_ONLY fixture</button
+    ><button id="test-revoke">Revoke TEST_ONLY session</button>
+    <main class="country-game" data-country="01" data-office="finance">
+      <nav class="national-tools" aria-label="Test controls"></nav>
+    </main>
+    <script
+      type="module"
+      src="./current-financial-position-test-only.ts"
+    ></script>
+  </body>
+</html>
