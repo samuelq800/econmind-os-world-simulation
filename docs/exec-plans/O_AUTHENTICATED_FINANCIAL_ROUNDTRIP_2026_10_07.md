@@ -139,3 +139,32 @@ action-specific canonical shapes; no frozen Core repair is made here.
 Freeze this four-file test-only increment and exact source hashes. Send Root
 the candidate for composed-main acceptance, then B's incremental narrow review
 as Root directs. STOP; no selfmerge, production mutation or dependent activation.
+
+## Root composed-main acceptance — forward-only fixture revision
+
+Root replayed unchanged G and O onto main `afff74f3b7dd3611aa3d8a8d62dc8e9f0eb33c11`
+as `c32f94b` and `4471f3e`; the original four-file O diff hash remains
+`8b19eaad9cec472db087db734d1d7ce8723b33395e20f106acebd9453236f724`.
+Combined Core/Worker/API builds passed. The initial credential-empty invocation
+failed PostgreSQL startup before any economic mechanism ran. A diagnostic-only
+fixture change preserved the bounded startup log before cleanup; the second
+invocation exposed `postmaster became multithreaded during startup`, with the
+actual PostgreSQL hint to set a valid `LC_ALL`. Both setup failures remain FAIL,
+not economic test passes. Original producer evidence remains separate.
+
+An explicitly valid C locale then allowed one complete native roundtrip to pass.
+The final forward-only helper pins a minimal, credential-empty PostgreSQL child
+environment with `LC_ALL=C`/`LANG=C` for init/start/stop and keeps bounded failure
+logs. The final source, without a locale in its parent environment, passed one
+complete native test at 22:20:49 Asia/Shanghai, duration 4.77s. Focused strict
+types and helper lint passed. No assertion, source/admission guard, economics,
+World or original G code was weakened. Disposable clusters were stopped and
+removed by the owned fixture.
+
+This acceptance does not close B's separate G-INTAKE-01 uncertain-rollback
+finding, approve account visibility in the existing projection, or admit an
+official World. G source remains held pending its independent repair review.
+Root's helper revision and test evidence need their own bounded review before
+publication with the fixed G dependency. Disk exhaustion subsequently prevented
+the first attempt to save this record; the source remained unchanged until
+only Root's unused generated web build was removed, not user source/evidence.

@@ -28,6 +28,13 @@ const roles = {
   writer: 'o_test_only_intake',
   publisher: 'o_test_only_seat',
 } as const;
+// PostgreSQL on macOS can fail during startup when a credential-empty parent
+// has no valid locale. Pin only the disposable child process environment.
+const postgresEnvironment = {
+  PATH: '/opt/homebrew/bin:/usr/bin:/bin',
+  LC_ALL: 'C',
+  LANG: 'C',
+} as const;
 async function loopbackPort() {
   const server = createServer();
   await new Promise<void>((resolve, reject) => {
@@ -59,7 +66,7 @@ export async function createOAuthenticatedFinancialRoundtripFixture() {
       execFileSync(
         '/opt/homebrew/bin/pg_ctl',
         ['-D', join(root, 'data'), '-m', 'immediate', '-w', 'stop'],
-        { stdio: 'pipe' },
+        { stdio: 'pipe', env: postgresEnvironment },
       );
       started = false;
     }
@@ -91,7 +98,7 @@ export async function createOAuthenticatedFinancialRoundtripFixture() {
         '-E',
         'UTF8',
       ],
-      { stdio: 'pipe' },
+      { stdio: 'pipe', env: postgresEnvironment },
     );
     execFileSync(
       '/opt/homebrew/bin/pg_ctl',
@@ -105,7 +112,7 @@ export async function createOAuthenticatedFinancialRoundtripFixture() {
         '-w',
         'start',
       ],
-      { stdio: 'pipe' },
+      { stdio: 'pipe', env: postgresEnvironment },
     );
     started = true;
     const clusterAdmin = pool('postgres');
@@ -411,7 +418,19 @@ export async function createOAuthenticatedFinancialRoundtripFixture() {
       close,
     };
   } catch (error) {
+    // Preserve bounded startup diagnostics before removing this owned test
+    // cluster. A failed setup is never economic/runtime acceptance.
+    let startupLog = 'PostgreSQL startup log unavailable';
+    try {
+      startupLog = readFileSync(join(root, 'postgres.log'), 'utf8').slice(
+        -12000,
+      );
+    } catch {
+      // initdb may have failed before PostgreSQL created a log.
+    }
     await close();
-    throw error;
+    throw new Error(`O_NATIVE_FIXTURE_SETUP_FAILED\n${startupLog}`, {
+      cause: error,
+    });
   }
 }
