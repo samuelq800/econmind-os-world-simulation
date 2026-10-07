@@ -28,6 +28,14 @@ import {
   admitVisibilitySeed,
 } from '../support/g-economic-visibility-fixture.js';
 
+import { persistCanonicalVisibilityMovement } from '../support/g-canonical-financial-movement-fixture.js';
+
+import {
+  createWorldReadRequest,
+  readEntitledWorldProjection,
+  parseSupabaseAuthSubject,
+} from '../../apps/world-api/src/index.js';
+
 const root = path.resolve(import.meta.dirname, '../..');
 const migrations = [
   '0001_world_v2_namespace.sql',
@@ -446,7 +454,14 @@ describe('V10.1 authoritative activity read-projection publication', () => {
         lastAuthoritativeEventWorldVersion: '2',
       },
       countryId: 'COUNTRY_SELLER',
-      ledger: withheldLedger,
+      ledger: {
+        ...withheldLedger,
+        authoritativeFinancialPosition: {
+          schemaVersion: 'authoritative-financial-position-v1',
+          status: 'NOT_AUTHORIZED',
+          reason: 'SCOPE_NOT_AUTHORIZED',
+        },
+      },
       schemaVersion: 'world-activity-projection-v1',
     });
     expect(rowByScope(result.rows, 'COUNTRY', 'COUNTRY_BUYER')).toEqual({
@@ -456,7 +471,14 @@ describe('V10.1 authoritative activity read-projection publication', () => {
         lastAuthoritativeEventWorldVersion: '0',
       },
       countryId: 'COUNTRY_BUYER',
-      ledger: withheldLedger,
+      ledger: {
+        ...withheldLedger,
+        authoritativeFinancialPosition: {
+          schemaVersion: 'authoritative-financial-position-v1',
+          status: 'NOT_AUTHORIZED',
+          reason: 'SCOPE_NOT_AUTHORIZED',
+        },
+      },
       schemaVersion: 'world-activity-projection-v1',
     });
     expect(
@@ -688,7 +710,7 @@ describe('V10.1 authoritative activity read-projection publication', () => {
 
   it('filters existing movements before publication to all six Offices and removes revoked scopes without copying private COUNTRY detail', async () => {
     const db = await database();
-    await persistVisibilitySeed(db, WORLD);
+    const seed = await persistVisibilitySeed(db, WORLD);
     await admitVisibilitySeed(db, WORLD);
     for (const office of [
       'CAPTAIN',
@@ -711,19 +733,7 @@ describe('V10.1 authoritative activity read-projection publication', () => {
         capability: 'TEST_' + office,
       });
     }
-    await seedAuthoritativeEvent(db, {
-      authSubject: SELLER_SUBJECT,
-      commandId: 'COMMAND_ACTIVITY_SELLER_TRADE',
-      countryId: 'COUNTRY_SELLER',
-      eventId: 'EVENT_ACTIVITY_SELLER_TRADE',
-      officeId: 'TRADE',
-      sequence: '1',
-    });
-    await seedLedgerPostings(db);
-    await db.query(
-      'update world_v2.world_head set world_version=1,event_sequence=1 where world_id=$1',
-      [WORLD],
-    );
+    await persistCanonicalVisibilityMovement(db, seed);
     await acquireLease(db);
     const publisher = new AuthoritativeActivityReadProjectionPublisher({
       database: db,
@@ -852,6 +862,222 @@ describe('V10.1 authoritative activity read-projection publication', () => {
           }).financialDetail,
         ).toBe('NOT_AUTHORIZED');
       });
+    },
+  );
+  it('serves classified opening plus real global posting replay through the actual SQL API while retaining movement semantics', async () => {
+    const db = await database();
+    const seed = await persistVisibilitySeed(db, WORLD);
+    await admitVisibilitySeed(db, WORLD);
+    await persistCanonicalVisibilityMovement(db, seed, '3');
+    for (const country of ['COUNTRY_SELLER', 'COUNTRY_BUYER'])
+      for (const office of [
+        'CAPTAIN',
+        'FINANCE',
+        'CENTRAL_BANK',
+        'TRADE',
+        'INDUSTRY',
+        'SOCIAL',
+      ])
+        await seedCurrentAuthorization(db, {
+          authSubject: SELLER_SUBJECT,
+          capability: 'TEST_' + office,
+          countryId: country,
+          officeId: office,
+        });
+    await acquireLease(db);
+    const publisher = new AuthoritativeActivityReadProjectionPublisher({
+      database: db,
+      workerId: WORKER,
+    });
+    await publisher.replace({ assertion: assertion('1'), observedAtReal: AT });
+    const rows = (
+      await db.query<{
+        classification: string;
+        scope_key: string;
+        payload: string;
+      }>(
+        'select classification,scope_key,payload::text as payload from world_v2.read_projection where world_id=$1',
+        [WORLD],
+      )
+    ).rows;
+    const financeScope = officePrivateReadProjectionScopeKey({
+      countryId: countryId('COUNTRY_SELLER'),
+      officeId: officeId('FINANCE'),
+    });
+    const cbScope = officePrivateReadProjectionScopeKey({
+      countryId: countryId('COUNTRY_BUYER'),
+      officeId: officeId('CENTRAL_BANK'),
+    });
+    const finance = rowByScope(rows, 'OFFICE_PRIVATE', financeScope).ledger;
+    const cb = rowByScope(rows, 'OFFICE_PRIVATE', cbScope).ledger;
+    expect(finance.financialPositions[0].netDebitBalance).toBe('3');
+    expect(cb.financialPositions[0].netDebitBalance).toBe('-3');
+    expect(finance.authoritativeFinancialPosition).toMatchObject({
+      status: 'AUTHORIZED_FILTERED',
+      semantics: 'OPENING_PLUS_POSTING_LINEAGE',
+      positionCoverage: 'NONZERO_LEDGER_POSITIONS',
+      opening: {
+        seedId: seed.seedId,
+        seedFingerprint: seed.fingerprint,
+        openingWorldVersion: '0',
+      },
+      sourceHead: { worldVersion: '1', eventSequence: '1' },
+    });
+    expect(
+      finance.authoritativeFinancialPosition.positions.find(
+        (p: { accountId: string }) =>
+          p.accountId === 'ACCOUNT_ACTIVITY_SELLER_CASH',
+      ).netDebitBalance,
+    ).toBe('13');
+    expect(
+      cb.authoritativeFinancialPosition.positions.find(
+        (p: { accountId: string }) =>
+          p.accountId === 'ACCOUNT_ACTIVITY_BUYER_CASH',
+      ).netDebitBalance,
+    ).toBe('7');
+    for (const row of rows) {
+      const view = JSON.parse(row.payload);
+      if (
+        row.classification === 'COUNTRY' ||
+        !['FINANCE', 'CENTRAL_BANK'].includes(view.officeId)
+      )
+        expect(view.ledger.authoritativeFinancialPosition).toMatchObject({
+          status: 'NOT_AUTHORIZED',
+        });
+      expect(view.ledger.inventoryPositions).toEqual([]);
+    }
+    await db.query(
+      `insert into world_v2.projection_entitlement(world_id,auth_subject,classification,scope_key,authorization_version,granted_at)
+      values ($1,$2::uuid,'OFFICE_PRIVATE',$3,'AUTH_MECHANISM_TEST',$4)`,
+      [WORLD, SELLER_SUBJECT, financeScope, AT],
+    );
+    const read = (scopeKey = financeScope, subject = SELLER_SUBJECT) =>
+      readEntitledWorldProjection({
+        executor: { query: ({ text, values }) => db.query(text, values) },
+        authSubject: parseSupabaseAuthSubject(subject),
+        request: createWorldReadRequest({
+          requestId: '123e4567-e89b-42d3-a456-426614174010',
+          worldId: WORLD,
+          classification: 'OFFICE_PRIVATE',
+          scopeKey,
+        }),
+      });
+    await expect(read()).resolves.toMatchObject({
+      payload: {
+        ledger: {
+          authoritativeFinancialPosition:
+            finance.authoritativeFinancialPosition,
+        },
+      },
+    });
+    await expect(read(cbScope)).resolves.toBeNull();
+    await expect(read(financeScope, BUYER_SUBJECT)).resolves.toBeNull();
+    await db.query(
+      'update world_v2.projection_entitlement set active=false,revoked_at=$2 where world_id=$1',
+      [WORLD, AT],
+    );
+    await expect(read()).resolves.toBeNull();
+  });
+
+  it.each(['badHead', 'badEvent'])(
+    'fails closed before replacing classified positions for %s durable lineage',
+    async (failure) => {
+      const db = await database();
+      const seed = await persistVisibilitySeed(db, WORLD);
+      await admitVisibilitySeed(db, WORLD);
+      await persistCanonicalVisibilityMovement(
+        db,
+        seed,
+        '3',
+        failure === 'badEvent',
+      );
+      await seedCurrentAuthorization(db, {
+        authSubject: SELLER_SUBJECT,
+        capability: 'TEST_FINANCE',
+        countryId: 'COUNTRY_SELLER',
+        officeId: 'FINANCE',
+      });
+      if (failure === 'badHead')
+        await db.query(
+          'update world_v2.world_head set world_version=2,event_sequence=2 where world_id=$1',
+          [WORLD],
+        );
+      await acquireLease(db);
+      await expect(
+        new AuthoritativeActivityReadProjectionPublisher({
+          database: db,
+          workerId: WORKER,
+        }).replace({
+          assertion: assertion(failure === 'badHead' ? '2' : '1'),
+          observedAtReal: AT,
+        }),
+      ).rejects.toMatchObject({
+        cause: { code: 'TRANSITION_EVIDENCE_INVALID' },
+      });
+      expect(
+        (
+          await db.query(
+            'select * from world_v2.read_projection where world_id=$1',
+            [WORLD],
+          )
+        ).rows,
+      ).toEqual([]);
+    },
+  );
+
+  it.each(['missingAdmission', 'wrongSource'])(
+    'withholds current position instead of inventing zero for %s',
+    async (failure) => {
+      const db = await database();
+      const seed = await persistVisibilitySeed(
+        db,
+        WORLD,
+        failure === 'wrongSource'
+          ? (payload) => {
+              payload.decisionFingerprint = 'sha256:' + 'f'.repeat(64);
+            }
+          : undefined,
+      );
+      if (failure === 'wrongSource') await admitVisibilitySeed(db, WORLD);
+      await persistCanonicalVisibilityMovement(db, seed, '3');
+      await seedCurrentAuthorization(db, {
+        authSubject: SELLER_SUBJECT,
+        capability: 'TEST_FINANCE',
+        countryId: 'COUNTRY_SELLER',
+        officeId: 'FINANCE',
+      });
+      await acquireLease(db);
+      await new AuthoritativeActivityReadProjectionPublisher({
+        database: db,
+        workerId: WORKER,
+      }).replace({ assertion: assertion('1'), observedAtReal: AT });
+      const rows = (
+        await db.query<{
+          classification: string;
+          scope_key: string;
+          payload: string;
+        }>(
+          'select classification,scope_key,payload::text as payload from world_v2.read_projection where world_id=$1',
+          [WORLD],
+        )
+      ).rows;
+      const view = rowByScope(
+        rows,
+        'OFFICE_PRIVATE',
+        officePrivateReadProjectionScopeKey({
+          countryId: countryId('COUNTRY_SELLER'),
+          officeId: officeId('FINANCE'),
+        }),
+      );
+      expect(view.ledger.authoritativeFinancialPosition).toEqual({
+        schemaVersion: 'authoritative-financial-position-v1',
+        status: 'NOT_AUTHORIZED',
+        reason: 'ADMITTED_SOURCE_UNAVAILABLE',
+      });
+      expect(view.ledger.financialPositions).toEqual([]);
+      expect(JSON.stringify(view)).not.toMatch(
+        /seedFingerprint|netDebitBalance/,
+      );
     },
   );
 });

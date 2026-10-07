@@ -84,6 +84,8 @@ export * from './water/index.js';
 export * from './commands/central-bank-open-market-operation.js';
 export {
   ECONOMIC_READ_VISIBILITY_SCHEMA,
+  AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA,
+  type AuthoritativeFinancialPosition,
   type EconomicReadScope,
   type EconomicReadDisclosure,
   type EconomicReadDenialReason,

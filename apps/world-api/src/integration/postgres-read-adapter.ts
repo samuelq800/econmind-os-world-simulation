@@ -302,6 +302,12 @@ function assertClassifiedActivityPayload(projection: WorldProjectionDto): void {
     'financialPositions',
     'inventoryPositions',
     'visibility',
+    ...(Object.prototype.hasOwnProperty.call(
+      payload.ledger ?? {},
+      'authoritativeFinancialPosition',
+    )
+      ? ['authoritativeFinancialPosition']
+      : []),
   ]);
   const visibility = boundedObject(ledger.visibility, [
     'schemaVersion',
@@ -329,39 +335,148 @@ function assertClassifiedActivityPayload(projection: WorldProjectionDto): void {
       protocol('Financial detail is outside its private scope');
   } else if (ledger.financialPositions.length !== 0)
     protocol('Unclassified financial detail cannot be served');
-  const identities = new Set<string>();
-  for (const value of ledger.financialPositions) {
-    const position = boundedObject(value, [
-      'accountId',
-      'accountClass',
-      'currency',
-      'netDebitBalance',
-    ]);
-    if (
-      typeof position.accountId !== 'string' ||
-      !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(position.accountId) ||
-      typeof position.accountClass !== 'string' ||
-      ![
-        'CASH',
-        'DEPOSIT',
-        'ASSET',
-        'LIABILITY',
-        'EQUITY',
-        'REVENUE',
-        'EXPENSE',
-        'RECEIVABLE',
-        'PAYABLE',
-      ].includes(position.accountClass) ||
-      typeof position.currency !== 'string' ||
-      typeof position.netDebitBalance !== 'string' ||
-      Money.from(position.netDebitBalance, position.currency).toCanonicalValue()
-        .amount !== position.netDebitBalance
+  function validatePositions(values: unknown[], nonzero = false): void {
+    const identities = new Set<string>();
+    for (const value of values) {
+      const position = boundedObject(value, [
+        'accountId',
+        'accountClass',
+        'currency',
+        'netDebitBalance',
+      ]);
+      if (
+        typeof position.accountId !== 'string' ||
+        !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(position.accountId) ||
+        typeof position.accountClass !== 'string' ||
+        ![
+          'CASH',
+          'DEPOSIT',
+          'ASSET',
+          'LIABILITY',
+          'EQUITY',
+          'REVENUE',
+          'EXPENSE',
+          'RECEIVABLE',
+          'PAYABLE',
+        ].includes(position.accountClass) ||
+        typeof position.currency !== 'string' ||
+        typeof position.netDebitBalance !== 'string' ||
+        Money.from(
+          position.netDebitBalance,
+          position.currency,
+        ).toCanonicalValue().amount !== position.netDebitBalance
+      )
+        protocol('Classified financial position is invalid');
+      const key = JSON.stringify([position.accountId, position.currency]);
+      if (identities.has(key))
+        protocol('Classified financial position is duplicated');
+      if (
+        nonzero &&
+        Money.from(
+          String(position.netDebitBalance),
+          String(position.currency),
+        ).amount.isZero()
+      )
+        protocol(
+          'Authoritative financial positions must preserve sparse Core coverage',
+        );
+      identities.add(key);
+    }
+  }
+  validatePositions(ledger.financialPositions);
+  if (
+    Object.prototype.hasOwnProperty.call(
+      ledger,
+      'authoritativeFinancialPosition',
     )
-      protocol('Classified financial position is invalid');
-    const key = JSON.stringify([position.accountId, position.currency]);
-    if (identities.has(key))
-      protocol('Classified financial position is duplicated');
-    identities.add(key);
+  ) {
+    const raw = ledger.authoritativeFinancialPosition as {
+      status?: unknown;
+    } | null;
+    const absolute = boundedObject(
+      raw,
+      raw?.status === 'NOT_AUTHORIZED'
+        ? ['schemaVersion', 'status', 'reason']
+        : [
+            'schemaVersion',
+            'status',
+            'semantics',
+            'positionCoverage',
+            'sourceHead',
+            'opening',
+            'sourceUnits',
+            'positions',
+          ],
+    );
+    if (absolute.schemaVersion !== AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA)
+      protocol('Authoritative financial position schema is unavailable');
+    if (absolute.status === 'NOT_AUTHORIZED') {
+      if (
+        ![
+          'ADMITTED_SOURCE_UNAVAILABLE',
+          'OWNER_MAPPING_UNAVAILABLE',
+          'SCOPE_NOT_AUTHORIZED',
+          'SUMMARY_SOURCE_UNAVAILABLE',
+        ].includes(String(absolute.reason))
+      )
+        protocol('Authoritative financial position denial is invalid');
+    } else {
+      if (
+        absolute.status !== 'AUTHORIZED_FILTERED' ||
+        visibility.financialDetail !== 'AUTHORIZED_FILTERED' ||
+        !office ||
+        !['FINANCE', 'CENTRAL_BANK'].includes(String(payload.officeId)) ||
+        absolute.semantics !== 'OPENING_PLUS_POSTING_LINEAGE' ||
+        absolute.positionCoverage !== 'NONZERO_LEDGER_POSITIONS' ||
+        !Array.isArray(absolute.positions) ||
+        !Array.isArray(absolute.sourceUnits)
+      )
+        protocol(
+          'Authoritative financial position is outside its classified scope',
+        );
+      const head = boundedObject(absolute.sourceHead, [
+        'worldVersion',
+        'eventSequence',
+      ]);
+      if (
+        head.worldVersion !== projection.watermark.worldVersion ||
+        head.eventSequence !== projection.watermark.eventSequence
+      )
+        protocol('Authoritative financial position is outside its source head');
+      const opening = boundedObject(absolute.opening, [
+        'seedId',
+        'seedFingerprint',
+        'openingWorldVersion',
+      ]);
+      if (
+        typeof opening.seedId !== 'string' ||
+        !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(opening.seedId) ||
+        typeof opening.seedFingerprint !== 'string' ||
+        !/^sha256:[0-9a-f]{64}$/u.test(opening.seedFingerprint) ||
+        typeof opening.openingWorldVersion !== 'string' ||
+        !/^(?:0|[1-9]\d*)$/u.test(opening.openingWorldVersion) ||
+        BigInt(opening.openingWorldVersion) >
+          BigInt(projection.watermark.worldVersion)
+      )
+        protocol(
+          'Authoritative financial position opening provenance is invalid',
+        );
+      const units =
+        payload.officeId === 'FINANCE'
+          ? ['CONSTITUTION-U0381', 'CONSTITUTION-U0382', 'FINANCE-U0831']
+          : [
+              'CONSTITUTION-U0381',
+              'CONSTITUTION-U0382',
+              'CENTRAL_BANK-U0585',
+              'CENTRAL_BANK-U0586',
+            ];
+      if (
+        new Set(absolute.sourceUnits).size !== absolute.sourceUnits.length ||
+        absolute.sourceUnits.some((unit) => !units.includes(String(unit)))
+      )
+        protocol('Authoritative financial position source units are invalid');
+      validatePositions(absolute.positions, true);
+    }
   }
 }
 
@@ -436,4 +551,5 @@ import {
   countryId,
   Money,
   ECONOMIC_READ_VISIBILITY_SCHEMA,
+  AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA,
 } from '@econmind/core';

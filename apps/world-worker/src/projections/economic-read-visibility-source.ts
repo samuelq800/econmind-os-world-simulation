@@ -53,6 +53,11 @@ export interface EconomicReadVisibilitySnapshot {
   readonly worldId: string;
   readonly worldVersion: string;
   readonly eventSequence: string;
+  readonly openingBinding: Readonly<{
+    seedId: string;
+    seedFingerprint: string;
+    openingWorldVersion: string;
+  }> | null;
   financial(
     account: Readonly<Record<string, unknown>>,
     scope: EconomicReadScope,
@@ -112,6 +117,7 @@ export class SqlEconomicReadVisibilitySource implements EconomicReadVisibilitySo
       to_regclass('world_v2.runtime_opening_admission')::text as admission`);
     const row = tables.rows[0];
     let mapping: ReadonlyMap<string, OwnerMapping> | null = null;
+    let openingBinding: EconomicReadVisibilitySnapshot['openingBinding'] = null;
     if (row?.opening != null && row.admission != null) {
       const admissions = await executor.query<Row>(
         `select admission_ref, world_id, seed_id, seed_fingerprint, model_version, replay_binding
@@ -131,6 +137,12 @@ export class SqlEconomicReadVisibilitySource implements EconomicReadVisibilitySo
           admitted.replay_binding === canonicalSerialize(seed.replayBinding)
         ) {
           mapping = admittedRoster(seed);
+          if (mapping !== null)
+            openingBinding = Object.freeze({
+              seedId: seed.seedId,
+              seedFingerprint: seed.fingerprint,
+              openingWorldVersion: seed.openingWorldVersion,
+            });
         }
       }
     }
@@ -176,6 +188,7 @@ export class SqlEconomicReadVisibilitySource implements EconomicReadVisibilitySo
     }
     return Object.freeze({
       ...input,
+      openingBinding,
       financial,
       // No governing source binds raw stock-account rights to an Office. Never
       // infer Trade/Industry visibility from commodity, holder or capability.

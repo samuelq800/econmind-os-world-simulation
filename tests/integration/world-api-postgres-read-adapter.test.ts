@@ -387,6 +387,86 @@ describe('forward-only parameterized PostgreSQL read adapter', () => {
       }),
     ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
   });
+  it.each([
+    'wrongHead',
+    'extraSeedField',
+    'countryScope',
+    'deniedWithPositions',
+    'movementSemantics',
+    'zeroPosition',
+    'badSourceUnit',
+    'duplicatePosition',
+  ])(
+    'refuses %s in the optional opening-inclusive position at the actual server map boundary',
+    async (kind) => {
+      const payload: Record<string, unknown> = classifiedPayload(
+        kind !== 'countryScope',
+      );
+      const absolute: Record<string, unknown> = {
+        schemaVersion: 'authoritative-financial-position-v1',
+        status: 'AUTHORIZED_FILTERED',
+        semantics: 'OPENING_PLUS_POSTING_LINEAGE',
+        positionCoverage: 'NONZERO_LEDGER_POSITIONS',
+        sourceHead: { worldVersion: '9', eventSequence: '14' },
+        opening: {
+          seedId: 'SEED_TEST',
+          seedFingerprint: 'sha256:' + 'a'.repeat(64),
+          openingWorldVersion: '0',
+        },
+        sourceUnits: [
+          'CONSTITUTION-U0381',
+          'CONSTITUTION-U0382',
+          'FINANCE-U0831',
+        ],
+        positions: [
+          {
+            accountId: 'ACCOUNT_TEST',
+            accountClass: 'CASH',
+            currency: 'GCU',
+            netDebitBalance: '13',
+          },
+        ],
+      };
+      if (kind === 'wrongHead')
+        absolute.sourceHead = { worldVersion: '8', eventSequence: '14' };
+      if (kind === 'extraSeedField')
+        (absolute.opening as Record<string, unknown>).roster = 'SENSITIVE_TEST';
+      if (kind === 'deniedWithPositions') absolute.status = 'NOT_AUTHORIZED';
+      if (kind === 'movementSemantics')
+        absolute.semantics = 'NET_POSTING_MOVEMENT';
+      if (kind === 'zeroPosition')
+        (
+          absolute.positions as { netDebitBalance: string }[]
+        )[0]!.netDebitBalance = '0';
+      if (kind === 'badSourceUnit')
+        absolute.sourceUnits = ['CAPTAIN_FAKE_GRANT'];
+      if (kind === 'duplicatePosition')
+        (absolute.positions as unknown[]).push(
+          (absolute.positions as unknown[])[0],
+        );
+      (
+        payload.ledger as Record<string, unknown>
+      ).authoritativeFinancialPosition = absolute;
+      const replay: ParameterizedPgReadExecutor = {
+        query: async (call) => {
+          const result = await executor.query(call);
+          return {
+            rows: result.rows.map((row) => ({ ...(row as object), payload })),
+          };
+        },
+      };
+      await expect(
+        readEntitledWorldProjection({
+          executor: replay,
+          authSubject: kind === 'countryScope' ? countrySubject : officeSubject,
+          request: request(
+            kind === 'countryScope' ? 'COUNTRY' : 'OFFICE_PRIVATE',
+            kind === 'countryScope' ? 'COUNTRY_A' : officeScope,
+          ),
+        }),
+      ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
+    },
+  );
 });
 
 function databaseMigrationRoot(): string {

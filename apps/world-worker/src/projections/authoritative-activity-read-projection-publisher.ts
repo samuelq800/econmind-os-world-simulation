@@ -1,4 +1,7 @@
+import { createHash } from 'node:crypto';
 import {
+  AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA,
+  type AuthoritativeFinancialPosition,
   DOMAIN_ERROR_CODES,
   DomainError,
   Money,
@@ -13,6 +16,7 @@ import {
   type WorldWriterCommitAssertion,
 } from '@econmind/core';
 
+import { DurableV08LedgerLineageReader } from '../persistence/durable-v08-ledger-lineage-reader.js';
 import type { SqlDatabase, SqlExecutor } from '../persistence/sql-database.js';
 import {
   SqlEconomicReadVisibilitySource,
@@ -394,6 +398,7 @@ function prepareProjection(input: {
 export class AuthoritativeActivityReadProjectionPublisher {
   readonly #database: SqlDatabase;
   readonly #visibility: SqlEconomicReadVisibilitySource;
+  readonly #lineage: DurableV08LedgerLineageReader;
   readonly #workerId: ReturnType<typeof workerId>;
 
   constructor(input: {
@@ -402,6 +407,11 @@ export class AuthoritativeActivityReadProjectionPublisher {
   }) {
     this.#database = input.database;
     this.#visibility = new SqlEconomicReadVisibilitySource(input.database);
+    this.#lineage = new DurableV08LedgerLineageReader({
+      database: input.database,
+      sha256Hex: (value) =>
+        createHash('sha256').update(value, 'utf8').digest('hex'),
+    });
     this.#workerId = workerId(input.workerId);
   }
 
@@ -442,11 +452,17 @@ export class AuthoritativeActivityReadProjectionPublisher {
         scopes.offices,
         visibility,
       );
+      const absolute = await this.#readAuthoritativeFinancialPosition(
+        transaction,
+        scopes.offices,
+        visibility,
+      );
       const projections = this.#deriveProjections(
         scopes,
         activity,
         economics,
         visibility,
+        absolute,
       );
 
       await transaction.query(
@@ -885,6 +901,76 @@ export class AuthoritativeActivityReadProjectionPublisher {
     }
   }
 
+  /** Uses the existing joint ledger authority; no second balance arithmetic. */
+  async #readAuthoritativeFinancialPosition(
+    transaction: SqlExecutor,
+    scopes: readonly CountryOfficeScope[],
+    visibility: EconomicReadVisibilitySnapshot,
+  ): Promise<ReadonlyMap<string, AuthoritativeFinancialPosition>> {
+    const binding = visibility.openingBinding;
+    const allowed = scopes.filter(
+      (scope) =>
+        visibility.summary(readScope(visibility.worldId, scope))
+          .financialDetail === 'AUTHORIZED_FILTERED',
+    );
+    if (binding === null || allowed.length === 0) return new Map();
+    const replay = await this.#lineage.rebuildFrom(
+      transaction,
+      visibility.worldId,
+    );
+    if (
+      replay.headWorldVersion !== visibility.worldVersion ||
+      replay.headEventSequence !== visibility.eventSequence ||
+      replay.ledgers.seedId !== binding.seedId ||
+      replay.ledgers.seedFingerprint !== binding.seedFingerprint ||
+      replay.ledgers.financial.worldId !== visibility.worldId ||
+      replay.ledgers.financial.worldVersion !== visibility.worldVersion
+    )
+      invalid(
+        'Authoritative financial position differs from its admitted held source/head',
+      );
+    return new Map(
+      allowed.map((scope) => {
+        const sourceUnits = new Set<string>();
+        const positions = replay.ledgers.financial.positions.flatMap(
+          (position) => {
+            const disclosure = visibility.financial(
+              position.account as unknown as Record<string, unknown>,
+              readScope(visibility.worldId, scope),
+            );
+            if (disclosure.status !== 'AUTHORIZED') return [];
+            disclosure.sourceUnits.forEach((unit) => sourceUnits.add(unit));
+            return [
+              Object.freeze({
+                accountId: position.account.accountId,
+                accountClass: position.account.accountClass,
+                currency: position.account.currency,
+                netDebitBalance:
+                  position.netDebitBalance.toCanonicalValue().amount,
+              }),
+            ];
+          },
+        );
+        return [
+          officeKey(scope),
+          Object.freeze({
+            schemaVersion: AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA,
+            status: 'AUTHORIZED_FILTERED' as const,
+            semantics: 'OPENING_PLUS_POSTING_LINEAGE' as const,
+            positionCoverage: 'NONZERO_LEDGER_POSITIONS' as const,
+            opening: binding,
+            sourceHead: Object.freeze({
+              worldVersion: replay.headWorldVersion,
+              eventSequence: replay.headEventSequence,
+            }),
+            sourceUnits: Object.freeze([...sourceUnits].sort()),
+            positions: Object.freeze(positions),
+          }),
+        ] as const;
+      }),
+    );
+  }
+
   #combineActivity(
     left: ActivitySummary,
     right: ActivitySummary,
@@ -918,6 +1004,7 @@ export class AuthoritativeActivityReadProjectionPublisher {
     }>,
     economics: ReadonlyMap<string, LedgerEconomicSummary>,
     visibility: EconomicReadVisibilitySnapshot,
+    absolute: ReadonlyMap<string, AuthoritativeFinancialPosition>,
   ): readonly PreparedProjection[] {
     const countries = scopes.countries.map((country) =>
       prepareProjection({
@@ -929,6 +1016,11 @@ export class AuthoritativeActivityReadProjectionPublisher {
           countryId: country,
           ledger: {
             ...emptyLedgerEconomicSummary(),
+            authoritativeFinancialPosition: {
+              schemaVersion: AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA,
+              status: 'NOT_AUTHORIZED',
+              reason: 'SCOPE_NOT_AUTHORIZED',
+            },
             visibility: visibility.summary({
               worldId: visibility.worldId,
               countryId: country,
@@ -950,6 +1042,14 @@ export class AuthoritativeActivityReadProjectionPublisher {
           ledger: {
             ...(economics.get(officeKey(scope)) ??
               emptyLedgerEconomicSummary()),
+            authoritativeFinancialPosition: absolute.get(officeKey(scope)) ?? {
+              schemaVersion: AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA,
+              status: 'NOT_AUTHORIZED',
+              reason:
+                visibility.openingBinding === null
+                  ? 'ADMITTED_SOURCE_UNAVAILABLE'
+                  : 'SCOPE_NOT_AUTHORIZED',
+            },
             visibility: visibility.summary(
               readScope(visibility.worldId, scope),
             ),

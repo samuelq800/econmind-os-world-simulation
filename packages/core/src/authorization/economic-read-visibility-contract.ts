@@ -21,3 +21,32 @@ export interface EconomicReadVisibilitySummary {
   readonly inventoryDetail: 'NOT_AUTHORIZED';
   readonly countrySummary: 'NOT_AUTHORIZED';
 }
+
+/** Sparse canonical debit positions, never a spendable-funds calculation. */
+export const AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA =
+  'authoritative-financial-position-v1' as const;
+export type AuthoritativeFinancialPosition =
+  | Readonly<{
+      schemaVersion: typeof AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA;
+      status: 'NOT_AUTHORIZED';
+      reason: EconomicReadDenialReason;
+    }>
+  | Readonly<{
+      schemaVersion: typeof AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA;
+      status: 'AUTHORIZED_FILTERED';
+      semantics: 'OPENING_PLUS_POSTING_LINEAGE';
+      positionCoverage: 'NONZERO_LEDGER_POSITIONS';
+      sourceHead: Readonly<{ worldVersion: string; eventSequence: string }>;
+      opening: Readonly<{
+        seedId: string;
+        seedFingerprint: string;
+        openingWorldVersion: string;
+      }>;
+      sourceUnits: readonly string[];
+      positions: readonly Readonly<{
+        accountId: string;
+        accountClass: string;
+        currency: string;
+        netDebitBalance: string;
+      }>[];
+    }>;
