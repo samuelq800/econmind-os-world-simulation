@@ -1,0 +1,59 @@
+{
+  "schema_version": "OWNER_NON_HOST_DECISION_RECEIPT_V1",
+  "record_id": "OWNER_NON_HOST_2026_10_07_V1",
+  "recorded_date": "2026-10-07",
+  "timezone": "Asia/Shanghai",
+  "authority": "RESPONSIBLE_HUMAN_OWNER_DIRECT_INSTRUCTION",
+  "approval_evidence": {
+    "channel": "DIRECT_USER_MESSAGE_IN_CURRENT_ROOT_CHAT",
+    "user_instruction_literal": "就此执行",
+    "attached_source_path": "/Users/samuel/Downloads/EconMind_World_V2_Owner_Decisions_Codex_Prompt_20261007.md",
+    "attached_source_sha256": "57bfdec38a9a400991cb26362a99d33d7a81c8e6258c03460185e51501fb5ac5",
+    "root_read_complete_source_and_verified_hash": true,
+    "external_signature_claimed": false,
+    "verified_production_admin_user_id": null
+  },
+  "implementation_supplement": {
+    "source_path": "/Users/samuel/.codex/attachments/0ad1e144-6235-4882-8f90-fbc22399fa5d/Pasted text.txt",
+    "sha256": "5d07a94e087f545dc3c1948a321ccd74c16aecb4483f5266de59085186c7d29b",
+    "scope": "D02_IMPLEMENTATION_WITH_EXISTING_APPROVALS_REUSED",
+    "does_not_revoke_prior_explicit_decisions": true,
+    "does_not_approve_unknown_numeric_values": true
+  },
+  "fixed_source_scope": {
+    "package_id": "BALANCED_2026_09_28_V1",
+    "checksums_sha256": "88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315",
+    "selected_e_proposal_sha256": "15383e28d523bad7ff4fdbe14e141c7a46f21072c9bd4a81faa5a5acc378c7cb",
+    "country_count": 70,
+    "population_total": "14712146434",
+    "original_source_rewrite_authorized": false,
+    "formal_world_id": null,
+    "formal_world_binding_verified_this_round": false
+  },
+  "decisions": [
+    {"id":"D01","state":"DECISION_ADOPTED","source_section":"2","rule":"B_FULL_TREASURY_DEPOSIT_AT_CENTRAL_BANK","exceptions":"NONE","separate_T_plus_C_pools":"NOT_SELECTED"},
+    {"id":"D02","state":"DECISION_ADOPTED","source_section":"3","rules":["R_FULL_BANK_ASSET_AND_CENTRAL_BANK_RESERVE_LIABILITY_SAME_CLAIM","SOURCE_SUPPORTED_CB_ASSETS_ONLY","ONE_TIME_COMPLETE_OPENING_NET_WORTH_A_MINUS_L_NEGATIVE_ALLOWED"],"unknown_positions_or_missing_fields":"SOURCE_MISSING_NOT_ZERO","running_equity_rebalance":"PROHIBITED"},
+    {"id":"D03","state":"DECISION_ADOPTED","source_section":"4","adopted_e_subset":["EXACT_SCENARIO_GCU_TO_CORE_GCU_1_TO_1_NOT_LC","FIVE_EXISTING_ENTITIES_PER_COUNTRY","619_POSITIVE_STOCKS_OP_TITLE_AND_RISK_221_ZERO_CELLS_PRESERVED","H_HOUSEHOLDS_D_OP_TREASURY_GOV_ACCOUNT_OWNERS","OPENING_ONLY_JOINT_BANK_L_H_PLUS_D_E_R_PLUS_A_MINUS_L"],"other_e_proposal_terms":"NOT_BLANKET_APPROVED"},
+    {"id":"D04","state":"DECISION_ADOPTED","source_section":"5","scope":"ONLY_EXPLICIT_ADOPTION_AND_OPERATING_CONSTRAINT_RULES_IN_SECTION_5","missing_operating_inputs":"NOT_READY_WITH_EXACT_GAPS","unbuilt_options":"NOT_ADOPTED_UNBUILT","actual_service_and_output":"NOT_GENERATED_BY_ADOPTION"},
+    {"id":"D05","state":"OWNER_EXCLUDED_DEFERRED","source_section":"0_AND_DECISION_SUMMARY","production_host_deployment_or_startup":"NOT_AUTHORIZED"},
+    {"id":"D06","state":"DECISION_ADOPTED","source_section":"6","isolated_test_country_scope":"FIRST_TWO_ELIGIBLE_CANONICAL_COUNTRIES_IN_ONE_ISOLATED_WORLD","office_scope":"SIX_EXISTING_INDEPENDENT_OFFICES_PER_ELIGIBLE_COUNTRY","test_seat_real_time_lifetime_hours":24,"actual_test_seat_issue_requires":"REAL_SERVER_VERIFIED_OWNER_OR_ADMIN_AND_EXISTING_AUTHORIZATION_CHAIN","production_test_seat":"NOT_AUTHORIZED","autonomous_policy_npc":"OFF_FOR_ALL_70","lawful_existing_system_settlement":"RETAINED_NOT_ACTIVATED"},
+    {"id":"TIME_360","state":"DECISION_ADOPTED","source_section":"7","annual_interest_denominator_simulation_days":360,"existing_clock_multiplier":"10X_UNCHANGED","hydrologic_months":"SECTION_5_3_NOT_ASSUMED_30_DAYS"}
+  ],
+  "historical_decision_crosswalk": {
+    "audit_D06_bank_reconciliation": "CURRENT_D03_SECTION_4_5_JOINT_BANK_OPENING_RECONCILIATION",
+    "current_D06": "IDENTITY_SEAT_PERMISSION_AND_NPC_POLICY",
+    "number_alone_is_approval_evidence": false,
+    "historical_audits_modified": false
+  },
+  "stage": "DECISION_ADOPTED",
+  "source_reconciled": false,
+  "materialized": false,
+  "verified_in_isolation": false,
+  "production_bound": false,
+  "production_verified": false,
+  "formal_seed_admission_or_insert_veto_removal_approved_by_receipt_alone": false,
+  "production_migration_or_sql_execution_authorized": false,
+  "production_api_worker_clock_active_authorized": false,
+  "legacy_public_auth_storage_mutation_authorized": false,
+  "client_supplied_copy_of_this_receipt_grants_authority": false
+}
