@@ -1,0 +1,4 @@
+{
+  "extends": "./office-projection-denied.tsconfig.json",
+  "include": ["financial-intake.test.ts", "financial-intake-test-only.ts"]
+}
