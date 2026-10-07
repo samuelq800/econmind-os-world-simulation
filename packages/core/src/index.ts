@@ -6,6 +6,7 @@ export * from './authorization/offices.js';
 export * from './authorization/projections.js';
 export * from './commands/command.js';
 export * from './commands/receipt.js';
+export * from './commands/authenticated-financial-intake-contract.js';
 export * from './events/event.js';
 export {
   FINANCIAL_AUTHORITATIVE_WRITER,
