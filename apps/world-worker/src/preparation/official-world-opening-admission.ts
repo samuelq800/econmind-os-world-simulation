@@ -3,6 +3,7 @@ import {
   DomainError,
   COMMODITY_ENTRIES,
   Quantity,
+  Money,
   countryId,
   parseOpeningSeed,
   rebuildV08LedgersFromLineage,
@@ -711,12 +712,19 @@ export function inspectOfficialWorldOpeningAdmission(input: {
       }
     }
     for (const finance of financeRows) {
+      const localCurrency = text(
+        finance.coreSettlementCurrency,
+        'Opening local currency',
+      );
+      Money.from('0', localCurrency);
       if (
-        finance.coreSettlementCurrency !== 'GCU' ||
+        localCurrency === 'GCU' ||
         finance.currencyAuthority !== 'APPROVED' ||
-        finance.treasuryCentralBankBoundary !== 'SPLIT_APPROVED'
+        finance.treasuryCentralBankBoundary !== 'TREASURY_DEPOSIT_AT_CB'
       ) {
-        invalid('Opening-ready finance lacks approved Core currency or split');
+        invalid(
+          'Opening-ready finance lacks approved local currency or TGA claim model; source GCU is not LC',
+        );
       }
     }
   }
@@ -873,14 +881,18 @@ function assertSelectedOpening(
     if (actualAmount !== amount)
       invalid(`Opening inventory differs from selected stock: ${key}`);
   }
-  if (inventoryCountries.size !== 70 || seed.financialBatches.length !== 70) {
+  if (inventoryCountries.size !== 70) {
     invalid('Opening ledger does not cover all 70 countries');
   }
   const financeCountries = new Set<string>();
+  const financialCountryCurrencies = new Set<string>();
+  const localCurrencies = new Map(
+    admission.finance.map((row) => [
+      text(row.coreCountryId, 'Finance country'),
+      text(row.coreSettlementCurrency, 'Opening local currency'),
+    ]),
+  );
   for (const batch of seed.financialBatches) {
-    if (batch.settlementCurrency !== 'GCU') {
-      invalid('Opening financial batch is not in Core GCU');
-    }
     const countries = new Set(batch.legs.map((leg) => leg.account.countryId));
     if (countries.size !== 1)
       invalid('Opening financial batch spans multiple countries');
@@ -888,13 +900,31 @@ function assertSelectedOpening(
     if (
       country === undefined ||
       !countryIds.has(country) ||
-      financeCountries.has(country)
+      financialCountryCurrencies.has(`${country}/${batch.settlementCurrency}`)
     ) {
       invalid('Opening finance country coverage is duplicated or missing');
     }
+    const localCurrency = localCurrencies.get(country);
+    if (
+      localCurrency === undefined ||
+      localCurrency === 'GCU' ||
+      (batch.settlementCurrency !== localCurrency &&
+        batch.settlementCurrency !== 'GCU')
+    ) {
+      invalid(
+        'Opening financial denomination differs from approved local/native currency',
+      );
+    }
+    financialCountryCurrencies.add(`${country}/${batch.settlementCurrency}`);
     financeCountries.add(country);
   }
-  if (financeCountries.size !== 70)
+  if (
+    financeCountries.size !== 70 ||
+    [...localCurrencies].some(
+      ([country, currency]) =>
+        !financialCountryCurrencies.has(`${country}/${currency}`),
+    )
+  )
     invalid('Opening finance lacks a selected country');
   rebuildV08LedgersFromLineage({ seed, sha256Hex });
 }
