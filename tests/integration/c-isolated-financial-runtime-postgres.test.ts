@@ -3,6 +3,7 @@ import path from 'node:path';
 import { Pool } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { canonicalSerialize } from '@econmind/core';
+import { PostgresNarrowTransferIntake } from '../../apps/world-worker/src/intake/postgres-narrow-transfer-intake.js';
 import {
   PostgresSqlDatabase,
   PostgresTransactionError,
@@ -496,6 +497,145 @@ native('C TEST_ONLY isolated financial durable composition / native PG', () => {
       world_version: '0',
       events: '0',
       receipts: '0',
+    });
+    await host.stop();
+  });
+  it('postcommit readback and real duplicate intake overlap without a reversed-lock deadlock', async () => {
+    const f = await fixture();
+    await queued(f);
+    function gate() {
+      let release!: () => void;
+      const ready = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      return { ready, release };
+    }
+    async function deadline<T>(operation: Promise<T>): Promise<T> {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        return await Promise.race([
+          operation,
+          new Promise<never>((_, reject) => {
+            timer = setTimeout(
+              () => reject(new Error('C_READBACK_LOCK_BARRIER_TIMEOUT')),
+              5000,
+            );
+          }),
+        ]);
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    const firstReadbackLock = gate();
+    const resumeReadback = gate();
+    const intakeSubmissionRequested = gate();
+    const intakeSubmissionLocked = gate();
+    let economicsCommitted = false;
+    let paused = false;
+    let firstLock: 'COMMAND' | 'HEAD' | null = null;
+    const sqlErrors: unknown[] = [];
+    const backendPids = new Set<number>();
+    function observed(role: 'WORKER' | 'INTAKE'): SqlDatabase {
+      return {
+        query: (sql, params) => database.query(sql, params),
+        async transaction(operation) {
+          let wroteEconomics = false;
+          const result = await database.transaction(async (transaction) => {
+            const pid = await transaction.query<{ pid: number }>(
+              'select pg_backend_pid() as pid',
+            );
+            backendPids.add(pid.rows[0]!.pid);
+            return operation({
+              async query<Row extends object>(
+                sql: string,
+                params?: readonly unknown[],
+              ) {
+                const submission =
+                  sql.includes('from world_v2.command_submission') &&
+                  /for (?:share|update)/iu.test(sql);
+                const head =
+                  sql.includes('from world_v2.world_head') &&
+                  /for share/iu.test(sql);
+                if (role === 'INTAKE' && submission)
+                  intakeSubmissionRequested.release();
+                try {
+                  const rows = await transaction.query<Row>(sql, params);
+                  if (/insert into world_v2\.inventory_posting/iu.test(sql))
+                    wroteEconomics = true;
+                  if (role === 'INTAKE' && submission)
+                    intakeSubmissionLocked.release();
+                  if (
+                    role === 'WORKER' &&
+                    economicsCommitted &&
+                    !paused &&
+                    (submission || head)
+                  ) {
+                    paused = true;
+                    firstLock = submission ? 'COMMAND' : 'HEAD';
+                    firstReadbackLock.release();
+                    await deadline(resumeReadback.ready);
+                  }
+                  return rows;
+                } catch (error) {
+                  sqlErrors.push(error);
+                  throw error;
+                }
+              },
+            });
+          });
+          if (wroteEconomics) economicsCommitted = true;
+          return result;
+        },
+      };
+    }
+    const host = createIsolatedFinancialRuntimeComposition({
+      ...f.hostInput,
+      database: observed('WORKER'),
+    });
+    const duplicateIntake = new PostgresNarrowTransferIntake({
+      database: observed('INTAKE'),
+      sha256Hex: f.hostInput.sha256Hex,
+    });
+    await host.startIsolation();
+    // Attach handlers immediately; old code must fail visibly without leaking
+    // unhandled rejection or stranding either real PostgreSQL connection.
+    const work = host.consumeOnce().then(
+      (value) => ({ value, error: null }),
+      (error) => ({ value: null, error: error as unknown }),
+    );
+    let duplicate: ReturnType<typeof duplicateIntake.read> | undefined;
+    try {
+      await deadline(firstReadbackLock.ready);
+      duplicate = duplicateIntake.read(f.intakeInput);
+      await deadline(
+        firstLock === 'HEAD'
+          ? intakeSubmissionLocked.ready
+          : intakeSubmissionRequested.ready,
+      );
+    } finally {
+      resumeReadback.release();
+    }
+    const [worked, read] = await deadline(Promise.all([work, duplicate!]));
+    expect(sqlErrors).toEqual([]);
+    expect(firstLock).toBe('COMMAND');
+    expect(backendPids.size).toBeGreaterThanOrEqual(2);
+    expect(worked.error).toBeNull();
+    expect(worked.value?.step).toMatchObject({
+      status: 'PROCESSED',
+      receipt: { outcome: 'COMMITTED', worldVersionAfter: '1' },
+    });
+    expect(read).toMatchObject({
+      status: 'FINAL',
+      receipt: { outcome: 'COMMITTED', worldVersionAfter: '1' },
+    });
+    expect(host.state()).toBe('READY');
+    expect(await footprint(f.world)).toMatchObject({
+      world_version: '1',
+      events: '1',
+      inventory: '1',
+      receipts: '1',
+      outbox: '1',
+      financial: '0',
     });
     await host.stop();
   });

@@ -104,6 +104,18 @@ export function createIsolatedFinancialRuntimeComposition(input: {
         invalid(
           'Actual connection is not a disposable loopback PostgreSQL target',
         );
+      // Match intake / atomic commit's submission-before-head lock order.
+      // Commands are append-only, so this early canonical read stays valid
+      // while the later shared head lock pins opening / replay / receipt facts.
+      // Never acquire a submission lock underneath an already-held head lock.
+      const command =
+        receipt === undefined
+          ? null
+          : await lineage.readCommandFrom(
+              transaction,
+              world,
+              receipt.commandId,
+            );
       // The reader holds a shared head lock throughout opening / ledger /
       // receipt inspection. It reconstructs, never materializes another truth.
       const snapshot = await lineage.rebuildFrom(transaction, world);
@@ -115,11 +127,7 @@ export function createIsolatedFinancialRuntimeComposition(input: {
       )
         invalid('Persisted opening differs from the isolated host binding');
       if (receipt !== undefined) {
-        const command = await lineage.readCommandFrom(
-          transaction,
-          world,
-          receipt.commandId,
-        );
+        if (command === null) invalid('Receipt command binding is absent');
         validateFinalReceiptForCommand({ command, receipt });
         const facts = await transaction.query<{
           receipt: unknown;
