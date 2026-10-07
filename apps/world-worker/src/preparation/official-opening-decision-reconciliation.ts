@@ -1,5 +1,19 @@
 import { createHash } from 'node:crypto';
 
+import {
+  FIXED_OPENING_PROPOSAL_E,
+  OPENING_ECONOMIC_DECISION_SCHEMA,
+  OPENING_FINANCE_FIELDS,
+  OpeningEconomicDecisionInvalid,
+  inspectOpeningEconomicDecision,
+  type OpeningEconomicDecisionInspection,
+  type OpeningEconomicDecisionV1,
+  type OpeningEconomicScope,
+  type OpeningFinanceValues,
+  type OpeningProvenanceV1,
+  type TrustedOpeningDecisionInputs,
+} from './opening-economic-decision.js';
+
 /** Frozen inputs only. This module has no filesystem, SQL or runtime caller. */
 export const OFFICIAL_OPENING_RECONCILIATION_PINS = Object.freeze({
   packageId: 'BALANCED_2026_09_28_V1',
@@ -508,4 +522,304 @@ export function isVerifiedOfficialOpeningDecisionSource(
   return (
     value !== null && typeof value === 'object' && verifiedSources.has(value)
   );
+}
+
+/** Only the pinned, branded source inspection may populate A's source side.
+ * No owner registry, request DTO or adoption labels are read here. */
+export function officialOpeningTrustedDecisionSource(
+  source: VerifiedOfficialOpeningSource,
+): TrustedOpeningDecisionInputs['source'] {
+  if (!isVerifiedOfficialOpeningDecisionSource(source)) {
+    fail('source', 'A fabricated source inspection cannot establish trust');
+  }
+  const finance = source.domains.find((domain) => domain.dataset === 'finance');
+  if (finance === undefined)
+    fail('source/finance', 'Finance provenance is missing');
+  return freeze({
+    sourcePackageId: source.pins.packageId,
+    sourceChecksumsSha256: source.pins.checksumsSha256,
+    financeSha256: finance.sourceSha256,
+    finance: source.financeOriginals.map((row, index) => {
+      const countryId = `COUNTRY_${text(row.countryId, 'source/countryId').slice(-2)}`;
+      if (!source.countryIds.includes(countryId))
+        fail('source/countryId', 'Finance country is not selected', countryId);
+      return {
+        countryId,
+        sourceRowPointer: `/${index}`,
+        values: Object.fromEntries(
+          OPENING_FINANCE_FIELDS.map((field) => [
+            field,
+            text(row[field], `source/${countryId}/${field}`),
+          ]),
+        ) as OpeningFinanceValues,
+      };
+    }),
+  });
+}
+
+/** A diagnostic candidate only: null allocations/rules/owners, no arithmetic.
+ * Missing replay metadata is explicitly unresolved, not an invented binding. */
+export function unresolvedOfficialOpeningDecision(
+  source: VerifiedOfficialOpeningSource,
+  replayScope?: Pick<
+    OpeningEconomicScope,
+    'worldId' | 'modelVersion' | 'orchestratorVersion'
+  >,
+): OpeningEconomicDecisionV1 {
+  const trusted = officialOpeningTrustedDecisionSource(source);
+  const provenance: OpeningProvenanceV1[] = [];
+  const countries = trusted.finance.map((row) => {
+    const number = row.countryId.slice(-2);
+    const fieldProvenance: Record<string, string> = {};
+    for (const field of OPENING_FINANCE_FIELDS) {
+      const ref = `SOURCE_FINANCE_${number}_${field.toUpperCase()}`;
+      fieldProvenance[field] = ref;
+      provenance.push({
+        ref,
+        kind: 'SOURCE_IMMUTABLE',
+        value: row.values[field],
+        inputRefs: [],
+        rule: null,
+        ownerRecordRef: null,
+        source: {
+          locator: 'artifacts/world-balanced-candidate-v1/data/finance.json',
+          sha256: trusted.financeSha256,
+          pointer: `${row.sourceRowPointer}/${field}`,
+        },
+      });
+    }
+    for (const field of [
+      'treasuryOpeningBalance',
+      'centralBankOpeningBalance',
+    ]) {
+      const ref = `UNRESOLVED_FINANCE_${number}_${field.toUpperCase()}`;
+      fieldProvenance[field] = ref;
+      provenance.push({
+        ref,
+        kind: 'PROPOSAL_ONLY',
+        value: null,
+        inputRefs: [],
+        rule: null,
+        ownerRecordRef: null,
+        source: null,
+      });
+    }
+    return {
+      countryId: row.countryId,
+      decisionStatus: 'UNRESOLVED_HUMAN_ECONOMIC_INPUT' as const,
+      sourceFinance: row.values,
+      legalEntities: null,
+      fundsModel: null,
+      treasuryOpeningBalance: null,
+      centralBankOpeningBalance: null,
+      reserveClaim: null,
+      treasuryClaim: null,
+      centralBankPositions: [],
+      fieldProvenance,
+    };
+  });
+  return freeze({
+    schemaVersion: OPENING_ECONOMIC_DECISION_SCHEMA,
+    decisionVersion: 'UNRESOLVED_OFFICIAL_SOURCE_DIAGNOSTIC_V1',
+    proposal: FIXED_OPENING_PROPOSAL_E,
+    sourceMutationAllowed: false,
+    effectiveScope: {
+      worldId: replayScope?.worldId ?? null,
+      modelVersion: replayScope?.modelVersion ?? 'UNRESOLVED_MODEL_VERSION',
+      orchestratorVersion:
+        replayScope?.orchestratorVersion ?? 'UNRESOLVED_ORCHESTRATOR_VERSION',
+      sourcePackageId: trusted.sourcePackageId,
+      sourceChecksumsSha256: trusted.sourceChecksumsSha256,
+    },
+    rules: {
+      currency: null,
+      legalOwnership: null,
+      bankReconciliation: null,
+      reserve: null,
+      transformationVersion: null,
+    },
+    ownerAdoption: null,
+    countries,
+    provenance,
+  });
+}
+
+export interface OfficialOpeningDecisionManifest {
+  readonly schemaVersion: 'official-opening-decision-reconciliation-v1';
+  readonly status: 'DECISION_RECONCILED_NOT_SEED';
+  readonly sourceIdentity: typeof OFFICIAL_OPENING_RECONCILIATION_PINS;
+  readonly decisionFingerprint: string;
+  readonly decisionIntentFingerprint: string;
+  readonly ownerRecordReference: string;
+  readonly ownerRecordFingerprint: string;
+  readonly effectiveScope: OpeningEconomicScope;
+  readonly countryIds: readonly string[];
+  readonly financeOriginals: readonly RecordValue[];
+  readonly reportedReconciliation: readonly RecordValue[];
+  readonly derivedByAdoptedRule: OpeningEconomicDecisionInspection['derivedBank'];
+  readonly domains: readonly OpeningDomainProvenance[];
+  readonly openingAdmissionAllowed: false;
+  readonly inventoryRightsMaterialized: false;
+  readonly domainCarriersMaterialized: false;
+  readonly fingerprint: string;
+}
+
+export interface OfficialOpeningDecisionReconciliation {
+  readonly status: 'BLOCKED' | 'DECISION_RECONCILED_NOT_SEED';
+  readonly blockers: readonly OpeningReconciliationBlocker[];
+  readonly source: VerifiedOfficialOpeningSource | null;
+  readonly decisionInspection: OpeningEconomicDecisionInspection | null;
+  readonly manifest: OfficialOpeningDecisionManifest | null;
+  readonly openingAdmissionAllowed: false;
+}
+
+/** Owner records are a separate server-composition input, NEVER populated from
+ * decision/request JSON. Default [] keeps the real official source unresolved.
+ * This adapter is not an owner-record loader and is not installed in runtime. */
+export function reconcileOfficialOpeningDecision(
+  input: Readonly<{
+    sourceBytes: OfficialOpeningSourceBytes;
+    decision?: unknown;
+  }>,
+  serverOwnerRecords: TrustedOpeningDecisionInputs['ownerRecords'] = [],
+): OfficialOpeningDecisionReconciliation {
+  const checked = inspectOfficialOpeningDecisionSource(input.sourceBytes);
+  const blocked = (
+    blockers: readonly OpeningReconciliationBlocker[],
+    inspection: OpeningEconomicDecisionInspection | null = null,
+  ): OfficialOpeningDecisionReconciliation =>
+    freeze({
+      status: 'BLOCKED',
+      blockers,
+      source: checked.source,
+      decisionInspection: inspection,
+      manifest: null,
+      openingAdmissionAllowed: false,
+    });
+  if (checked.source === null) return blocked(checked.blockers);
+  const source = checked.source;
+  if (FIXED_OPENING_PROPOSAL_E.proposalSha256 !== source.pins.proposalSha256)
+    return blocked([
+      {
+        field: 'proposalSha256',
+        countryId: null,
+        code: 'DECISION_DEPENDENCY_PROPOSAL_MISMATCH',
+        detail: 'A and E must consume the same fixed proposal',
+      },
+    ]);
+  let inspection: OpeningEconomicDecisionInspection;
+  try {
+    inspection = inspectOpeningEconomicDecision({
+      decision: input.decision ?? unresolvedOfficialOpeningDecision(source),
+      trusted: {
+        source: officialOpeningTrustedDecisionSource(source),
+        ownerRecords: serverOwnerRecords,
+      },
+    });
+  } catch (error) {
+    return blocked([
+      {
+        field:
+          error instanceof OpeningEconomicDecisionInvalid
+            ? error.field
+            : 'decision',
+        countryId: null,
+        code:
+          error instanceof OpeningEconomicDecisionInvalid
+            ? error.code
+            : 'DECISION_VALIDATION_FAILED',
+        detail:
+          'A decision parser/validator rejected this candidate; no adoption or manifest',
+      },
+    ]);
+  }
+  if (inspection.status === 'BLOCKED' || inspection.blockers.length !== 0)
+    return blocked(
+      inspection.blockers.map((item) => ({
+        ...item,
+        detail: 'Unresolved or invalid decision reported by A',
+      })),
+      inspection,
+    );
+  const body = inspection.candidate.body;
+  const countryIds = body.countries.map((row) => row.countryId).sort();
+  if (canonical(countryIds) !== canonical(source.countryIds))
+    return blocked(
+      [
+        {
+          field: 'countries',
+          code: 'OFFICIAL_70_COUNTRY_DECISION_COVERAGE_REQUIRED',
+          countryId: null,
+          detail:
+            'A validated subset cannot form the official reconciliation manifest',
+        },
+      ],
+      inspection,
+    );
+  const derivedIds = inspection.derivedBank.map((row) => row.countryId).sort();
+  if (
+    canonical(derivedIds) !== canonical(source.countryIds) ||
+    body.ownerAdoption === null
+  )
+    return blocked(
+      [
+        {
+          field: 'derivedBank',
+          code: 'ADOPTED_DERIVATION_COVERAGE_REQUIRED',
+          countryId: null,
+          detail:
+            'A must validate an owner-bound derivation for every official country',
+        },
+      ],
+      inspection,
+    );
+  const mismatches: OpeningReconciliationBlocker[] = [];
+  for (const derived of inspection.derivedBank) {
+    const reported = source.financeReportedReconciliation.find(
+      (row) => row.coreCountryId === derived.countryId,
+    );
+    if (
+      reported === undefined ||
+      derived.bankDepositLiabilities !== reported.expectedDepositLiabilities ||
+      derived.bankEquity !== reported.expectedBankEquity
+    )
+      mismatches.push({
+        countryId: derived.countryId,
+        field: 'derivedBank',
+        code: 'ADOPTED_DERIVATION_FROZEN_REPORT_MISMATCH',
+        detail:
+          'A-derived values differ from the existing exact component-anchor report; source originals remain unchanged',
+      });
+  }
+  if (mismatches.length !== 0) return blocked(mismatches, inspection);
+  const intent = {
+    schemaVersion: 'official-opening-decision-reconciliation-v1' as const,
+    status: 'DECISION_RECONCILED_NOT_SEED' as const,
+    sourceIdentity: source.pins,
+    decisionFingerprint: inspection.candidate.fingerprint,
+    decisionIntentFingerprint: inspection.candidate.intentFingerprint,
+    ownerRecordReference: body.ownerAdoption.reference,
+    ownerRecordFingerprint: body.ownerAdoption.recordFingerprint,
+    effectiveScope: body.effectiveScope,
+    countryIds,
+    financeOriginals: source.financeOriginals,
+    reportedReconciliation: source.financeReportedReconciliation,
+    derivedByAdoptedRule: inspection.derivedBank,
+    domains: source.domains,
+    openingAdmissionAllowed: false as const,
+    inventoryRightsMaterialized: false as const,
+    domainCarriersMaterialized: false as const,
+  };
+  const manifest = freeze({
+    ...intent,
+    fingerprint: `sha256:${hash(canonical(intent))}`,
+  });
+  return freeze({
+    status: 'DECISION_RECONCILED_NOT_SEED',
+    blockers: [],
+    source,
+    decisionInspection: inspection,
+    manifest,
+    openingAdmissionAllowed: false,
+  });
 }

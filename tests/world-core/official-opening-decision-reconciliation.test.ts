@@ -8,6 +8,9 @@ import {
   isVerifiedOfficialOpeningDecisionSource,
   OFFICIAL_OPENING_RECONCILIATION_PINS,
   type OfficialOpeningSourceBytes,
+  officialOpeningTrustedDecisionSource,
+  unresolvedOfficialOpeningDecision,
+  reconcileOfficialOpeningDecision,
 } from '../../apps/world-worker/src/preparation/official-opening-decision-reconciliation.js';
 
 const root = path.resolve(import.meta.dirname, '../..');
@@ -195,5 +198,153 @@ describe('frozen official opening source reconciliation (not adoption)', () => {
         source: null,
       });
     }
+  });
+});
+
+describe('A decision contract consumer (no official adoption)', () => {
+  const inspected = inspectOfficialOpeningDecisionSource(fixture);
+  if (inspected.source === null)
+    throw new Error(JSON.stringify(inspected.blockers));
+  const source = inspected.source;
+
+  it('populates only A trusted source from raw rows with real JSON pointers', () => {
+    const trusted = officialOpeningTrustedDecisionSource(source);
+    expect(trusted.finance).toHaveLength(70);
+    expect(
+      trusted.finance.find((row) => row.countryId === 'COUNTRY_54'),
+    ).toMatchObject({
+      sourceRowPointer: '/53',
+      values: {
+        bankDepositLiabilities: '80651120697.70354',
+        bankEquity: '8065112069.770354',
+      },
+    });
+    expect(Object.keys(trusted.finance[0]!.values)).toHaveLength(7);
+    expect(trusted).not.toHaveProperty('ownerRecords');
+    expect(() => officialOpeningTrustedDecisionSource({ ...source })).toThrow(
+      'fabricated source inspection',
+    );
+  });
+
+  it('defaults to empty owner registry and unresolved 70-country decisions, with no manifest or derivation', () => {
+    const decision = unresolvedOfficialOpeningDecision(source);
+    expect(decision.ownerAdoption).toBeNull();
+    expect(decision.rules.bankReconciliation).toBeNull();
+    expect(decision.effectiveScope.worldId).toBeNull();
+    expect(
+      decision.countries.every(
+        (row) =>
+          row.treasuryOpeningBalance === null &&
+          row.centralBankOpeningBalance === null,
+      ),
+    ).toBe(true);
+    const result = reconcileOfficialOpeningDecision({ sourceBytes: fixture });
+    expect(result).toMatchObject({
+      status: 'BLOCKED',
+      manifest: null,
+      openingAdmissionAllowed: false,
+    });
+    expect(result.decisionInspection?.derivedBank).toEqual([]);
+    expect(result.blockers).toContainEqual(
+      expect.objectContaining({
+        field: 'ownerAdoption',
+        code: 'OWNER_ADOPTION_RECORD_MISSING',
+      }),
+    );
+    for (const countryId of source.countryIds)
+      expect(result.blockers).toContainEqual(
+        expect.objectContaining({
+          countryId,
+          code: 'UNRESOLVED_HUMAN_ECONOMIC_INPUT',
+        }),
+      );
+    expect(
+      result.blockers.some(
+        (row) =>
+          row.code === 'SOURCE_MUTATION_OR_MISMATCH' ||
+          row.code === 'BROKEN_SOURCE_PROVENANCE',
+      ),
+    ).toBe(false);
+    expect(result.source?.financeOriginals[0]?.bankDepositLiabilities).toBe(
+      '23398053465.6',
+    );
+  });
+
+  it('does not accept caller ownerRecords embedded in decision JSON', () => {
+    const result = reconcileOfficialOpeningDecision({
+      sourceBytes: fixture,
+      decision: {
+        ...unresolvedOfficialOpeningDecision(source),
+        ownerRecords: [{ reference: 'caller', record: { approved: true } }],
+      },
+    });
+    expect(result).toMatchObject({
+      status: 'BLOCKED',
+      manifest: null,
+      decisionInspection: null,
+    });
+    expect(result.blockers[0]?.code).toBe('INVALID_DECISION_CONTRACT');
+  });
+
+  it('does not silently adopt reported corrected L/E as original source Finance', () => {
+    const decision = unresolvedOfficialOpeningDecision(source);
+    const first = decision.countries[0]!;
+    const result = reconcileOfficialOpeningDecision({
+      sourceBytes: fixture,
+      decision: {
+        ...decision,
+        countries: [
+          {
+            ...first,
+            sourceFinance: {
+              ...first.sourceFinance,
+              bankDepositLiabilities: '23398053465.599997',
+            },
+          },
+          ...decision.countries.slice(1),
+        ],
+      },
+    });
+    expect(result).toMatchObject({ status: 'BLOCKED', manifest: null });
+    expect(result.blockers).toContainEqual(
+      expect.objectContaining({
+        countryId: 'COUNTRY_01',
+        field: 'bankDepositLiabilities',
+        code: 'SOURCE_MUTATION_OR_MISMATCH',
+      }),
+    );
+    expect(result.decisionInspection?.derivedBank).toEqual([]);
+  });
+
+  it('rejects partial country decisions and malformed contracts', () => {
+    const decision = unresolvedOfficialOpeningDecision(source);
+    const partial = reconcileOfficialOpeningDecision({
+      sourceBytes: fixture,
+      decision: { ...decision, countries: decision.countries.slice(0, 1) },
+    });
+    expect(partial).toMatchObject({ status: 'BLOCKED', manifest: null });
+    expect(partial.blockers).toContainEqual(
+      expect.objectContaining({ code: 'SOURCE_COUNTRY_COVERAGE_MISMATCH' }),
+    );
+    expect(
+      reconcileOfficialOpeningDecision({
+        sourceBytes: fixture,
+        decision: { status: 'APPROVED' },
+      }),
+    ).toMatchObject({ status: 'BLOCKED', manifest: null });
+  });
+
+  it('requires source identity before inspecting any decision', () => {
+    const result = reconcileOfficialOpeningDecision({
+      sourceBytes: { ...fixture, mappingBytes: '{}' },
+      decision: unresolvedOfficialOpeningDecision(source),
+    });
+    expect(result).toMatchObject({
+      status: 'BLOCKED',
+      manifest: null,
+      decisionInspection: null,
+      source: null,
+    });
+    expect(result.blockers[0]?.field).toBe('mappingBytes');
   });
 });
