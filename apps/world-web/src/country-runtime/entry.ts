@@ -5,6 +5,7 @@ import {
   type TrustedCountryRuntime,
   type TrustedCountryRuntimeConfig,
 } from './trusted-runtime.js';
+import { installOfficeProjection } from '../office-projection/view.js';
 
 /** Mounted by the selected static page; no prototype/fixture entry is imported. */
 export function installCountryRuntime(document: Document, host: Window) {
@@ -289,5 +290,6 @@ declare global {
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   window.EconMindCountryRuntime = installCountryRuntime(document, window);
+  window.EconMindOfficeProjection = installOfficeProjection(document, window);
   document.dispatchEvent(new Event('econmind-country-runtime-ready'));
 }
