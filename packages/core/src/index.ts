@@ -53,6 +53,7 @@ export {
   type InventoryPostingReceipt,
   type InventoryPostingResult,
 } from './inventory/inventory-ledger.js';
+export * from './inventory/production-consumption-posting.js';
 export * from './labour/labour-engine.js';
 export * from './labour/population-labour-invariants.js';
 export * from './labour/approved-opening-projection.js';
