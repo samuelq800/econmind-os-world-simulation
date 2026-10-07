@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "vite/client"],
+    "lib": ["ES2024", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "../../apps/world-api/src/integration/https-authenticated-read-route.ts",
+    "../world-api/https-authenticated-read-route.test.ts",
+    "../world-api/https-authenticated-read-composition.test.ts"
+  ]
+}
