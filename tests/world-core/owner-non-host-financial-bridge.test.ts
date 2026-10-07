@@ -348,11 +348,19 @@ describe('actual non-host Owner policy financial consumer', () => {
     const payload = JSON.parse(seed.sources[0]!.canonicalPayload) as {
       reconciliations: {
         original: unknown;
+        sourceRowPointer: string;
+        financialDenominations: unknown;
         bankAdoptedMinusOriginalL: unknown;
         bankAdoptedMinusOriginalE: unknown;
       }[];
     };
     expect(payload.reconciliations[0]!.original).toEqual(c.rawFinance);
+    expect(payload.reconciliations[0]!.sourceRowPointer).toBe(
+      c.sourceRowPointer,
+    );
+    expect(payload.reconciliations[0]!.financialDenominations).toEqual(
+      c.denominations,
+    );
     expect(payload.reconciliations[0]!.bankAdoptedMinusOriginalL).toEqual(
       openingBookMoney({
         rawAmount: c.bankOpening.adoptedMinusOriginalL,
