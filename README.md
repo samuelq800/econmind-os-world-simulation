@@ -7,8 +7,21 @@ engines or hidden buffs.
 
 ## Current integration snapshot (2026-10-07)
 
-Latest merged-source checkpoint:
-[October 7 main integration closeout and remaining runtime work](docs/reports/world-connection/WORLD_V2_MAIN_INTEGRATION_CLOSEOUT_2026_10_07.md).
+Latest merged-source checkpoint (through PR110):
+[Project-completion construction, actual merges, checks and remaining boundaries](docs/reports/world-connection/WORLD_V2_PROJECT_COMPLETION_CHECKPOINT_2026_10_07.md).
+Executable main at that snapshot is `ea492a2d76daf2eab600a58c866d7f600a53112f`.
+Reviewed financial opening bridge, fixed authenticated intake, Captain allocation,
+production posting protocol and browser-safe contract export are merged. An
+actual isolated PostgreSQL JWT-to-Reserve/Ship/Deliver-to-FINAL joint test passed;
+this is not production activation or six-Office completion. Production posting
+persistence still refuses unsupported schema before SQL. Source-based private
+account visibility, other Office runtime consumers, admitted domain sources and
+complete official financial opening remain genuine construction requirements.
+Production host/activation (D05) remains explicitly deferred; Gate B is PENDING.
+
+### Retained earlier October 7 integration snapshot
+
+[22:05 main integration closeout and remaining runtime work](docs/reports/world-connection/WORLD_V2_MAIN_INTEGRATION_CLOSEOUT_2026_10_07.md).
 The following earlier implementation checkpoint is retained with its original evidence bounds:
 [D02 implementation, evidence levels and remaining construction](docs/reports/world-connection/WORLD_V2_FINANCIAL_IMPLEMENTATION_AND_VERIFICATION_2026_10_07.md).
 Reviewed PR94 durable reference storage, PR95 actual human Owner provenance,
