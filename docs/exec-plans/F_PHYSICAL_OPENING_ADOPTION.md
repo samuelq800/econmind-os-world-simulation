@@ -39,3 +39,36 @@ Post-repair receipt: Root approved the minimal public export; all Worker imports
 Actual compiled Worker consumer inspection (Node, exit 0): manifest hash `34f23c352cc6d93ed56ef12ba673cc1b0ce2d6df5a12c8b83a2866f1f8d76db3`; source fingerprint `sha256:230f8d695c25ea839fb6415de3c4c2985dd6d95e6261fa10dbec73053dedac82`. Counts: 1374 facilities = 1024 built + 350 unbuilt; 240 deposits = 191 Core states + 49 unit-blocked; 106 conditional deposit scopes; 70 power and 70 equipment-backed opening storage records. The explicit per-object gap list has 12113 entries (12064 SOURCE_MISSING, 49 SOURCE_CONFLICT); runtimeEnabled false, seedAdmitted false. Counts are preparation coverage, not operating readiness. Staged `git diff --check` exit 0 covers all seven files including the exact-byte fixture.
 
 Earlier focused runs failed on new fixture classification/canonical reference/priority representation and the existing Core precision limitation. The three new-fixture defects were corrected without editing source values, existing tests, or existing kernels. The Core defect was reported with exact input and remains assigned to Root.
+
+## Root integration with the independently reviewed fuel repair
+
+The preceding producer section describes its original fixed base/candidate,
+not the current repaired Core. Root replayed F source candidate
+`201617bbba085dbbe4bf5dfab05eab98c9a577f3` without conflicts onto main
+`2a74376bc497ba5487b689d3b08c6405cc7f5361`, which already includes approved
+fuel repair PR96. Producer source files/raw inputs are preserved; Root changes
+only the obsolete rejection characterization into exact generation/consumption/
+allocation assertions and protects the original-byte test fixture from global
+formatting. No new fuel rate, efficiency, rounding, epsilon or source value is
+introduced. All inputs in that consumer remain explicitly TEST_ONLY.
+
+Before updating its expectation, Root ran only the old characterization against
+the repaired Core: it failed because the call correctly no longer throws. That
+compatibility failure is retained separately from the original arithmetic
+failure. It is not hidden by skipping the consumer. The strengthened test now
+requires exactly 8 MWh generated, 8 tonnes consumed, zero remaining fuel and
+8 MWh delivered with runtimeEnabled=false. Non-terminating final allocation
+refusal remains a separate unchanged test.
+
+This combined source candidate still requires independent P0 review. The original
+F manifest counts/operating gaps/49 gas-unit conflicts remain unchanged; passing
+the repaired consumer is not official seed admission or production operation.
+
+Root actual combined evidence: Worker build and focused strict typecheck exited
+0; three focused files (new physical consumer + existing resource and V13/V14)
+passed 33/33. The old characterization-only run exited 1 with one failed
+expect-to-throw and 20 explicitly filtered tests, because approved repaired Core
+correctly returned the exact result. Changed-module lint, format, repository
+boundary/authoritative-pattern checks and whitespace check passed. No whole
+suite, native database or official operating coefficients were exercised by
+this combined check. The immutable original-byte fixture retains SHA57bf.

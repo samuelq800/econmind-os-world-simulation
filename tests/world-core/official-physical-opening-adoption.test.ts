@@ -372,29 +372,32 @@ describe('Owner D04 physical adoption using fixed source and real Core consumers
     expect(OPENING_ELECTRICITY_PRIORITY).toHaveLength(6);
     expect(output.runtimeEnabled).toBe(false);
   });
-  it('exposes the existing Core non-terminating fuel-scaling precision limitation without rounding it away', () => {
+  it('consumes exactly eight units through the repaired public Core fuel-cap consumer', () => {
     const e = energy();
-    const fuel = fact('NON_TERMINATING_FUEL', {
+    const fuel = fact('EXACT_FUEL_CAP', {
       ...e.fuelAvailability.payload,
       usableBefore: Q('8', 'tonne'),
     });
-    // 100 * .164583 = 16.4583; Core's intermediate 8/16.4583 division
-    // currently creates a >120-digit generation lexeme instead of exact 8.
-    // This is an explicit failed capability, not a successful runtime proof.
-    expect(() =>
-      previewOfficialOpeningElectricity({
-        manifest,
-        countryId: 'COUNTRY_01',
-        energy: { ...e, fuelAvailability: fuel },
-        demands: [
-          {
-            id: 'TEST_ONLY.PRECISION',
-            priority: 'HOUSEHOLDS',
-            requested: Q('8', 'MWh'),
-          },
-        ],
-      }),
-    ).toThrow(/generation must be a canonical exact decimal/);
+    // The original consumer failure is retained in the producer handoff.
+    // The independently reviewed repair multiplies before dividing; this is
+    // a TEST_ONLY operating mechanism, not a new source fuel coefficient.
+    const output = previewOfficialOpeningElectricity({
+      manifest,
+      countryId: 'COUNTRY_01',
+      energy: { ...e, fuelAvailability: fuel },
+      demands: [
+        {
+          id: 'TEST_ONLY.PRECISION',
+          priority: 'HOUSEHOLDS',
+          requested: Q('8', 'MWh'),
+        },
+      ],
+    });
+    expect(output.result.generated).toEqual(Q('8', 'MWh'));
+    expect(output.result.fuelConsumed).toEqual(Q('8', 'tonne'));
+    expect(output.result.usableFuelAfter).toEqual(Q('0', 'tonne'));
+    expect(output.allocations[0]?.delivered).toEqual(Q('8', 'MWh'));
+    expect(output.runtimeEnabled).toBe(false);
   });
   it('rejects non-terminating proportional values, duplicate demand and foreign equipment/lineage instead of defaulting', () => {
     const e = energy();
