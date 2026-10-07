@@ -14,8 +14,10 @@ import {
 } from '../../apps/world-worker/src/preparation/official-opening-decision-reconciliation.js';
 
 const root = path.resolve(import.meta.dirname, '../..');
-const proposalPath =
-  '/Users/samuel/Documents/econclub/artifacts/E_OPENING_SEMANTIC_MAPPING_PROPOSAL_2026_10_07.md';
+const proposalPath = new URL(
+  '../../artifacts/E_OPENING_SEMANTIC_MAPPING_PROPOSAL_2026_10_07.md',
+  import.meta.url,
+);
 const read = (file: string) => readFile(path.join(root, file), 'utf8');
 const mappingBytes = await read(
   'docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_MAPPING.json',
