@@ -5,6 +5,8 @@ import type { ServerReadBindingPort } from './https-authenticated-read-compositi
 import { parseSupabaseAuthSubject } from './identity.js';
 import { WorldReadFailure } from './transport.js';
 
+/** Legacy facts-only port omits these authority references. The full provider
+ * now reads the reviewed persisted storage; this is not a schema-absence claim. */
 export const POSTGRES_READ_BINDING_MISSING_PERSISTED_AUTHORITY = Object.freeze([
   'seatRef',
   'seed.admissionRef',
@@ -62,6 +64,15 @@ export const POSTGRES_BINDING_READER_ROLE_QUERY = `
 select current_user as role_name, rolsuper, rolbypassrls
 from pg_catalog.pg_roles where rolname=current_user`.trim();
 
+export interface PostgresBindingSnapshotExecutor {
+  query<Row extends object = Record<string, unknown>>(
+    statement: string,
+    parameters?: readonly unknown[],
+  ): Promise<{
+    readonly rows: readonly Row[];
+    readonly rowCount: number | null;
+  }>;
+}
 type Request = Parameters<ServerReadBindingPort['resolve']>[0];
 export interface ExistingPostgresReadBindingFacts {
   readonly scope: Readonly<{
@@ -239,13 +250,13 @@ function mapFacts(
 /**
  * Non-activated managed read pool only. Reuses verified-subject transaction GUC
  * semantics. No pool/credentials/roles/grants/admission/seat IDs are created.
- * Current schema cannot supply the full admitted-seat DTO. This is explicitly
+ * Facts-only output cannot supply the full admitted-seat DTO. This is explicitly
  * a facts reader, not a ServerReadBindingPort or a permanently-null provider.
  */
-export function createPostgresServerReadBindingFactsReader(input: {
+export function createPostgresServerReadBindingSnapshotReader(input: {
   readonly pool: Pick<Pool, 'connect'>;
   readonly readerRole: string;
-}): Readonly<PostgresServerReadBindingFactsReader> {
+}) {
   if (
     !/^[a-z][a-z0-9_]{0,62}$/u.test(input.readerRole) ||
     [
@@ -257,9 +268,13 @@ export function createPostgresServerReadBindingFactsReader(input: {
     ].includes(input.readerRole)
   )
     throw new Error('POSTGRES_BINDING_READER_ROLE_REQUIRED');
-  async function inspectExistingFacts(
+  async function read<Result>(
     request: Request,
-  ): Promise<Readonly<ExistingPostgresReadBindingFacts> | null> {
+    consume: (
+      facts: Readonly<ExistingPostgresReadBindingFacts>,
+      executor: PostgresBindingSnapshotExecutor,
+    ) => Promise<Result | null>,
+  ): Promise<Result | null> {
     if (request.signal.aborted)
       throw new WorldReadFailure('CANCELLED', 'Binding read cancelled', false);
     if (!validRequest(request)) return null;
@@ -293,7 +308,7 @@ export function createPostgresServerReadBindingFactsReader(input: {
           throw new Error('CANCELLED');
         }
         client = acquired;
-        const query = async (sql: string, values?: readonly string[]) => {
+        const query = async (sql: string, values?: readonly unknown[]) => {
           if (abandoned || request.signal.aborted) throw new Error('CANCELLED');
           const result = await acquired.query(
             sql,
@@ -350,9 +365,20 @@ export function createPostgresServerReadBindingFactsReader(input: {
           if (seeds.rows.length === 1)
             facts = mapFacts(scoped.rows[0], seeds.rows[0], request);
         }
+        const executor: PostgresBindingSnapshotExecutor = {
+          async query<Row extends object>(
+            statement: string,
+            parameters?: readonly unknown[],
+          ) {
+            const result = await query(statement, parameters);
+            return { rows: result.rows as Row[], rowCount: result.rowCount };
+          },
+        };
+        const result = facts === null ? null : await consume(facts, executor);
+        if (abandoned || request.signal.aborted) throw new Error('CANCELLED');
         await query('commit');
         open = false;
-        return facts;
+        return result;
       } catch {
         if (open && client && !released) {
           try {
@@ -383,5 +409,17 @@ export function createPostgresServerReadBindingFactsReader(input: {
       request.signal.removeEventListener('abort', onAbort);
     }
   }
-  return Object.freeze({ inspectExistingFacts });
+  return Object.freeze({ read });
+}
+
+/** Existing facts-only port remains compatible; no persisted authority inferred. */
+export function createPostgresServerReadBindingFactsReader(input: {
+  readonly pool: Pick<Pool, 'connect'>;
+  readonly readerRole: string;
+}): Readonly<PostgresServerReadBindingFactsReader> {
+  const snapshot = createPostgresServerReadBindingSnapshotReader(input);
+  return Object.freeze({
+    inspectExistingFacts: (request: Request) =>
+      snapshot.read(request, async (facts) => facts),
+  });
 }
