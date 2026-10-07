@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.g-economic-read-privacy.json",
+  "include": [
+    "../world-api/financial-position-read-binding.test.ts",
+    "../world-core/v10-authoritative-activity-read-projection-publisher.test.ts",
+    "../integration/world-api-postgres-read-adapter.test.ts",
+    "../world-api/postgres-full-read-provider.test.ts"
+  ]
+}

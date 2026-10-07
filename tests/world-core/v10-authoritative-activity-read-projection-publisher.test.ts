@@ -864,7 +864,7 @@ describe('V10.1 authoritative activity read-projection publication', () => {
       });
     },
   );
-  it('serves classified opening plus real global posting replay through the actual SQL API while retaining movement semantics', async () => {
+  it('publishes classified opening plus real global posting replay and refuses absolute API reads without persisted context', async () => {
     const db = await database();
     const seed = await persistVisibilitySeed(db, WORLD);
     await admitVisibilitySeed(db, WORLD);
@@ -962,13 +962,9 @@ describe('V10.1 authoritative activity read-projection publication', () => {
           scopeKey,
         }),
       });
-    await expect(read()).resolves.toMatchObject({
-      payload: {
-        ledger: {
-          authoritativeFinancialPosition:
-            finance.authoritativeFinancialPosition,
-        },
-      },
+    await expect(read()).rejects.toMatchObject({
+      code: 'PROTOCOL_ERROR',
+      retryable: false,
     });
     await expect(read(cbScope)).resolves.toBeNull();
     await expect(read(financeScope, BUYER_SUBJECT)).resolves.toBeNull();

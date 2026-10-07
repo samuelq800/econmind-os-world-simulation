@@ -66,9 +66,26 @@ export function createPostgresRuntimeReadExecutor(input: {
         );
       }
       const result = await snapshot.read(binding, async (facts, executor) => {
-        if (!(await consume(binding, facts, executor))) return null;
+        const verified = await consume(binding, facts, executor);
+        if (!verified) return null;
         const result = await executor.query(request.text, request.values);
-        return Object.freeze({ rows: result.rows });
+        return Object.freeze({
+          rows: result.rows,
+          ...(request.text === WORLD_V2_ENTITLED_PROJECTION_QUERY
+            ? {
+                verifiedProjectionAuthority: Object.freeze({
+                  authSubject: verified.identity.authSubjectId,
+                  worldId: verified.identity.worldId,
+                  classification: verified.identity.classification,
+                  scopeKey: verified.identity.scopeKey,
+                  seedRef: verified.seed.seedRef,
+                  contentHash: verified.seed.contentHash,
+                  worldVersion: facts.head.worldVersion,
+                  eventSequence: facts.head.eventSequence,
+                }),
+              }
+            : {}),
+        });
       });
       return result ?? Object.freeze({ rows: [] });
     },

@@ -32,8 +32,21 @@ export interface ParameterizedPgReadRequest {
   readonly signal?: AbortSignal;
 }
 
+/** Server-only facts returned by the actual persisted consumer in the same
+ * verified-subject read snapshot. Never accepted from request/config/HTTP. */
+export interface VerifiedProjectionReadAuthority {
+  readonly authSubject: string;
+  readonly worldId: string;
+  readonly classification: 'COUNTRY' | 'OFFICE_PRIVATE';
+  readonly scopeKey: string;
+  readonly seedRef: string;
+  readonly contentHash: string;
+  readonly worldVersion: string;
+  readonly eventSequence: string;
+}
 export interface ParameterizedPgReadResult {
   readonly rows: readonly unknown[];
+  readonly verifiedProjectionAuthority?: Readonly<VerifiedProjectionReadAuthority>;
 }
 
 /**
@@ -207,6 +220,8 @@ function validateRequest(request: unknown): WorldReadRequestEnvelope & {
 function mapProjectionRow(
   value: unknown,
   expected: WorldReadRequestEnvelope,
+  executorResult: ParameterizedPgReadResult,
+  authSubject: SupabaseAuthSubject,
 ): WorldProjectionDto {
   const row = record(value);
   if (
@@ -232,7 +247,11 @@ function mapProjectionRow(
       receipts: [],
       events: [],
     });
-    assertClassifiedActivityPayload(projection);
+    assertClassifiedActivityPayload(
+      projection,
+      executorResult.verifiedProjectionAuthority,
+      authSubject,
+    );
     if (
       Buffer.byteLength(JSON.stringify(projection), 'utf8') >
       MAX_WORLD_READ_RESPONSE_BYTES
@@ -249,7 +268,11 @@ function mapProjectionRow(
 /** A legacy row cannot escape merely because its entitlement and watermark are
  * current. This validates the sole publisher's bounded wire shape; a marker is
  * not a grant, and signed/current SQL authorization remains mandatory. */
-function assertClassifiedActivityPayload(projection: WorldProjectionDto): void {
+function assertClassifiedActivityPayload(
+  projection: WorldProjectionDto,
+  authority: unknown,
+  authSubject: SupabaseAuthSubject,
+): void {
   if (projection.classification === 'NEGOTIATION_PARTY') return;
   function boundedObject(
     value: unknown,
@@ -476,6 +499,31 @@ function assertClassifiedActivityPayload(projection: WorldProjectionDto): void {
       )
         protocol('Authoritative financial position source units are invalid');
       validatePositions(absolute.positions, true);
+      // Shape is not lineage. Require the actual query executor's persisted
+      // admission context, including current head and verified subject/scope.
+      const verified = boundedObject(authority, [
+        'authSubject',
+        'worldId',
+        'classification',
+        'scopeKey',
+        'seedRef',
+        'contentHash',
+        'worldVersion',
+        'eventSequence',
+      ]);
+      if (
+        verified.authSubject !== authSubject ||
+        verified.worldId !== projection.worldId ||
+        verified.classification !== projection.classification ||
+        verified.scopeKey !== projection.scopeKey ||
+        verified.worldVersion !== head.worldVersion ||
+        verified.eventSequence !== head.eventSequence ||
+        verified.seedRef !== opening.seedId ||
+        verified.contentHash !== opening.seedFingerprint
+      )
+        protocol(
+          'Authoritative financial position differs from the current admitted read context',
+        );
     }
   }
 }
@@ -544,7 +592,7 @@ export async function readEntitledWorldProjection(input: {
   if (rows.length !== 1) {
     protocol('PostgreSQL query returned duplicate projection rows');
   }
-  return mapProjectionRow(rows[0], request);
+  return mapProjectionRow(rows[0], request, result, authSubject);
 }
 import {
   CANONICAL_OFFICE_IDS,
