@@ -336,6 +336,53 @@ function rebindCoverage(
 }
 
 describe('selected official World opening admission', () => {
+  it('a re-fingerprinted ready label cannot call source GCU the local currency under adopted D03.1', async () => {
+    const f = await blockedSourceFixture();
+    const body = structuredClone(f.mapping);
+    body.authority.openingSeedReady = true;
+    for (const stock of body.records.stocks) {
+      stock.titleHolderId = 'ENTITY_TEST_ONLY_OP' as unknown as null;
+      stock.riskBearerId = 'ENTITY_TEST_ONLY_OP' as unknown as null;
+    }
+    body.records.finance = body.records.finance.map((row) => ({
+      ...row,
+      coreSettlementCurrency: 'GCU' as unknown as null,
+      currencyAuthority: 'APPROVED',
+      treasuryCentralBankBoundary: 'TREASURY_DEPOSIT_AT_CB',
+    }));
+    const mapping = withFingerprint(
+      Object.fromEntries(
+        Object.entries(body).filter(([key]) => key !== 'mappingFingerprint'),
+      ),
+      'mappingFingerprint',
+    );
+    const gapsBody = {
+      ...f.gaps,
+      openingSeedReady: true,
+      mappingFingerprint: mapping.mappingFingerprint,
+      globalGaps: [],
+      countries: f.gaps.countries.map((c) => ({ ...c, gaps: [] })),
+    };
+    const gaps = withFingerprint(
+      Object.fromEntries(
+        Object.entries(gapsBody).filter(([key]) => key !== 'gapsFingerprint'),
+      ),
+      'gapsFingerprint',
+    );
+    expect(() =>
+      inspectOfficialWorldOpeningAdmission({
+        ...f,
+        mapping,
+        gaps,
+        coverage: rebindCoverage(
+          f.coverage,
+          mapping.mappingFingerprint,
+          gaps.gapsFingerprint,
+        ),
+        sha256Hex,
+      }),
+    ).toThrow('source GCU is not LC');
+  });
   it('binds 70 countries and 840 stock cells but reports only opening blockers', async () => {
     const fixture = await blockedSourceFixture();
     const result = inspectOfficialWorldOpeningAdmission({

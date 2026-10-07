@@ -85,9 +85,9 @@ function fixture() {
           centralBank: 'ENTITY_CB',
           bank: 'ENTITY_BANK',
         },
-        fundsModel: 'INDEPENDENT_GENESIS_POOLS',
-        treasuryOpeningBalance: '30',
-        centralBankOpeningBalance: '70',
+        fundsModel: 'TREASURY_DEPOSIT_AT_CB',
+        treasuryOpeningBalance: '100',
+        centralBankOpeningBalance: null,
         reserveClaim: {
           claimId: 'CLAIM_RESERVE',
           amount: '20',
@@ -97,12 +97,20 @@ function fixture() {
           liabilityOwnerId: 'ENTITY_CB',
           provenanceRef: 'ADOPTED_RESERVE',
         },
-        treasuryClaim: null,
+        treasuryClaim: {
+          claimId: 'CLAIM_TREASURY',
+          amount: '100',
+          assetAccountId: 'TREASURY_DEPOSIT',
+          liabilityAccountId: 'CB_TREASURY',
+          assetOwnerId: 'ENTITY_TREASURY',
+          liabilityOwnerId: 'ENTITY_CB',
+          provenanceRef: 'ADOPTED_TREASURY',
+        },
         centralBankPositions: [
           {
             accountId: 'CB_POOL',
             accountClass: 'ASSET',
-            purpose: 'GENESIS_POOL',
+            purpose: 'EXPLICIT_ADOPTED_POSITION',
             amount: '70',
             claimId: null,
             counterpartyEntityId: null,
@@ -121,10 +129,19 @@ function fixture() {
             accountId: 'CB_CAPITAL',
             accountClass: 'EQUITY',
             purpose: 'EXPLICIT_ADOPTED_POSITION',
-            amount: '50',
+            amount: '-50',
             claimId: null,
             counterpartyEntityId: null,
             provenanceRef: 'ADOPTED_CAPITAL',
+          },
+          {
+            accountId: 'CB_TREASURY',
+            accountClass: 'LIABILITY',
+            purpose: 'TREASURY_CLAIM',
+            amount: '100',
+            claimId: 'CLAIM_TREASURY',
+            counterpartyEntityId: 'ENTITY_TREASURY',
+            provenanceRef: 'ADOPTED_TREASURY',
           },
         ],
         fieldProvenance: {
@@ -136,10 +153,10 @@ function fixture() {
     ],
     provenance: [
       ...sourceNodes,
-      adopted('ADOPTED_TREASURY', '30'),
+      adopted('ADOPTED_TREASURY', '100'),
       adopted('ADOPTED_CB', '70'),
       adopted('ADOPTED_RESERVE', '20', 'SOURCE_3'),
-      adopted('ADOPTED_CAPITAL', '50'),
+      adopted('ADOPTED_CAPITAL', '-50'),
     ],
   };
   const trusted = {
@@ -293,13 +310,14 @@ describe('opening economic decision source-only authority contract', () => {
     ).toBe(true);
     expect(r.candidate.body.countries[0]!.treasuryOpeningBalance).toBeNull();
   });
-  it('only independent pools apply exact T+C=B; tiny mismatch has no tolerance', () => {
+  it('rejects the superseded independent-pools grammar and exact partial B adoption', () => {
     const f = fixture();
-    f.decision.countries[0]!.centralBankOpeningBalance = '70.000000000000001';
-    f.decision.provenance.find((p) => p.ref === 'ADOPTED_CB')!.value =
-      '70.000000000000001';
+    f.decision.countries[0]!.fundsModel = 'INDEPENDENT_GENESIS_POOLS';
+    expect(() => inspect(f)).toThrow();
+    f.decision.countries[0]!.fundsModel = 'TREASURY_DEPOSIT_AT_CB';
+    f.decision.countries[0]!.treasuryOpeningBalance = '99.999999999999999';
     adopt(f);
-    expect(codes(f)).toContain('INDEPENDENT_POOLS_SUM_MISMATCH');
+    expect(codes(f)).toContain('D01_FULL_B_TGA_REQUIRED');
   });
   it('Treasury CB-deposit uses one claim, not a second C cash pool or T+C=B', () => {
     const f = fixture(),
@@ -320,18 +338,18 @@ describe('opening economic decision source-only authority contract', () => {
       provenanceRef: 'ADOPTED_TREASURY',
     };
     c.centralBankPositions[0]!.purpose = 'EXPLICIT_ADOPTED_POSITION';
-    c.centralBankPositions[0]!.amount = '170';
+    c.centralBankPositions[0]!.amount = '70';
     c.centralBankPositions[0]!.provenanceRef = 'ADOPTED_BACKING';
     f.decision.provenance.push({
       ref: 'ADOPTED_BACKING',
       kind: 'OWNER_ADOPTED_VALUE',
-      value: '170',
+      value: '70',
       inputRefs: ['SOURCE_0'],
       rule: 'EXPLICIT_OWNER_VALUE',
       ownerRecordRef: ref,
       source: null,
     });
-    c.centralBankPositions.push({
+    c.centralBankPositions[3] = {
       accountId: 'CB_TREASURY',
       accountClass: 'LIABILITY',
       purpose: 'TREASURY_CLAIM',
@@ -339,7 +357,7 @@ describe('opening economic decision source-only authority contract', () => {
       claimId: 'CLAIM_TREASURY',
       counterpartyEntityId: 'ENTITY_TREASURY',
       provenanceRef: 'ADOPTED_TREASURY',
-    });
+    };
     adopt(f);
     const r = inspect(f);
     expect(r.blockers).toEqual([]);

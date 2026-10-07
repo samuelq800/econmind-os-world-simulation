@@ -196,9 +196,9 @@ function fixture(): Fixture {
         centralBank: roster.centralBank,
         bank: roster.bank,
       },
-      fundsModel: 'INDEPENDENT_GENESIS_POOLS',
+      fundsModel: 'TREASURY_DEPOSIT_AT_CB',
       treasuryOpeningBalance: values.treasuryCentralBankBalance,
-      centralBankOpeningBalance: '0',
+      centralBankOpeningBalance: null,
       reserveClaim: {
         claimId: reserveId,
         amount: values.bankReserveAssets,
@@ -208,12 +208,20 @@ function fixture(): Fixture {
         liabilityOwnerId: roster.centralBank,
         provenanceRef: reserve,
       },
-      treasuryClaim: null,
+      treasuryClaim: {
+        claimId: `CLAIM_TREASURY_${nn}`,
+        amount: values.treasuryCentralBankBalance,
+        assetAccountId: `TREASURY_POOL_${nn}`,
+        liabilityAccountId: `CB_TREASURY_${nn}`,
+        assetOwnerId: roster.government,
+        liabilityOwnerId: roster.centralBank,
+        provenanceRef: treasury,
+      },
       centralBankPositions: [
         {
           accountId: `CB_POOL_${nn}`,
           accountClass: 'ASSET',
-          purpose: 'GENESIS_POOL',
+          purpose: 'EXPLICIT_ADOPTED_POSITION',
           amount: '0',
           claimId: null,
           counterpartyEntityId: null,
@@ -236,6 +244,31 @@ function fixture(): Fixture {
           claimId: null,
           counterpartyEntityId: null,
           provenanceRef: backing,
+        },
+        {
+          accountId: `CB_TREASURY_${nn}`,
+          accountClass: 'LIABILITY',
+          purpose: 'TREASURY_CLAIM',
+          amount: values.treasuryCentralBankBalance,
+          claimId: `CLAIM_TREASURY_${nn}`,
+          counterpartyEntityId: roster.government,
+          provenanceRef: treasury,
+        },
+        {
+          accountId: `CB_NETWORTH_${nn}`,
+          accountClass: 'EQUITY',
+          purpose: 'EXPLICIT_ADOPTED_POSITION',
+          amount: Money.from('0', 'GCU')
+            .subtract(Money.from(values.treasuryCentralBankBalance, 'GCU'))
+            .toCanonicalValue().amount,
+          claimId: null,
+          counterpartyEntityId: null,
+          provenanceRef: adopted(
+            'NETWORTH',
+            Money.from('0', 'GCU')
+              .subtract(Money.from(values.treasuryCentralBankBalance, 'GCU'))
+              .toCanonicalValue().amount,
+          ),
         },
       ],
       fieldProvenance: {
@@ -410,7 +443,9 @@ function fixture(): Fixture {
             'ASSET',
             values.treasuryCentralBankBalance,
             'DEBIT',
-            'TREASURY_FUNDING',
+            'CB_TREASURY',
+            'CLAIM_TREASURY',
+            roster.centralBank,
           ),
           leg(
             'TREASURY_FUNDING',
@@ -418,7 +453,25 @@ function fixture(): Fixture {
             'EQUITY',
             values.treasuryCentralBankBalance,
             'CREDIT',
+            'CB_NETWORTH',
+          ),
+          leg(
+            'CB_TREASURY',
+            roster.centralBank,
+            'LIABILITY',
+            values.treasuryCentralBankBalance,
+            'CREDIT',
             'TREASURY_POOL',
+            'CLAIM_TREASURY',
+            roster.government,
+          ),
+          leg(
+            'CB_NETWORTH',
+            roster.centralBank,
+            'EQUITY',
+            values.treasuryCentralBankBalance,
+            'DEBIT',
+            'TREASURY_FUNDING',
           ),
         ],
       },
@@ -540,7 +593,7 @@ describe('source-only decision → existing Core seed bridge', () => {
       '2339805346.56',
     );
   });
-  it('Core carries an explicitly adopted Treasury deposit as one claim, without claiming existing admission compatibility', () => {
+  it('Core carries the adopted full-B TGA as one claim and preserves historical mapping bytes', () => {
     const f = fixture(),
       c = f.decision.countries[0]!,
       country = f.assembly.countries[0]!,
@@ -556,21 +609,32 @@ describe('source-only decision → existing Core seed bridge', () => {
       financialBatch: {
         ...s.financialBatch,
         legs: [
-          ...s.financialBatch.legs.map((l) =>
-            l.account.accountId === 'CB_BACKING_01'
-              ? { ...l, amount: { ...l.amount, amount: backing } }
-              : l.account.accountId === 'TREASURY_POOL_01'
-                ? {
-                    ...l,
-                    account: {
-                      ...l.account,
-                      claimId: financialClaimId(claim),
-                      counterpartyEntityId: legalEntityId(s.roster.centralBank),
-                    },
-                    counterpartLegId: cbLeg,
-                  }
-                : l,
-          ),
+          ...s.financialBatch.legs
+            .filter(
+              (l) =>
+                !['CB_TREASURY_01', 'CB_NETWORTH_01'].includes(
+                  l.account.accountId,
+                ),
+            )
+            .map((l) =>
+              l.account.accountId === 'CB_BACKING_01'
+                ? { ...l, amount: { ...l.amount, amount: backing } }
+                : l.account.accountId === 'TREASURY_POOL_01'
+                  ? {
+                      ...l,
+                      account: {
+                        ...l.account,
+                        claimId: financialClaimId(claim),
+                        counterpartyEntityId: legalEntityId(
+                          s.roster.centralBank,
+                        ),
+                      },
+                      counterpartLegId: cbLeg,
+                    }
+                  : l.account.accountId === 'TREASURY_FUNDING_01'
+                    ? { ...l, counterpartLegId: 'LEG_TREASURY_POOL_01' }
+                    : l,
+            ),
           {
             legId: cbLeg,
             account: createFinancialAccount({
@@ -613,7 +677,12 @@ describe('source-only decision → existing Core seed bridge', () => {
               },
               centralBankPositions: [
                 ...d.centralBankPositions
-                  .filter((p) => p.purpose !== 'GENESIS_POOL')
+                  .filter(
+                    (p) =>
+                      p.purpose !== 'TREASURY_CLAIM' &&
+                      p.accountId !== 'CB_NETWORTH_01' &&
+                      p.accountId !== 'CB_POOL_01',
+                  )
                   .map((p) =>
                     p.accountId === 'CB_BACKING_01'
                       ? { ...p, amount: backing }
@@ -932,7 +1001,7 @@ describe('source-only decision → existing Core seed bridge', () => {
         financialBatch: {
           ...c.financialBatch,
           legs: c.financialBatch.legs.map((l) =>
-            l.account.accountId === 'TREASURY_POOL_01'
+            l.account.accountId === 'CB_BACKING_01'
               ? { ...l, counterpartLegId: l.legId }
               : l,
           ),
