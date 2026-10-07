@@ -38,6 +38,9 @@ export interface OpeningDomainProvenance {
   readonly sourceRecordCount: number;
   readonly countryIds: readonly string[];
   readonly regionIds: readonly string[];
+  /** Only explicit unit/capacityUnit/currency declarations; no inferred scale. */
+  readonly sourceDeclaredUnits: readonly string[];
+  readonly unitAuthority: 'EXPLICIT_SOURCE_FIELDS_ONLY';
   readonly openingApplicability: string;
   readonly adoptionStatus: 'SOURCE_ONLY_NOT_ADOPTED' | 'PROPOSAL_ONLY';
 }
@@ -176,6 +179,21 @@ function freeze<T>(value: T): T {
     Object.freeze(value);
   }
   return value;
+}
+
+function collectDeclaredUnits(value: unknown, units: Set<string>): void {
+  if (Array.isArray(value)) {
+    for (const child of value) collectDeclaredUnits(child, units);
+  } else if (value !== null && typeof value === 'object') {
+    for (const [key, child] of Object.entries(value)) {
+      if (
+        ['unit', 'capacityUnit', 'currency'].includes(key) &&
+        typeof child === 'string'
+      )
+        units.add(child);
+      else collectDeclaredUnits(child, units);
+    }
+  }
 }
 
 function checkedCountries(
@@ -359,6 +377,8 @@ function inspectSource(
       dataset.openingApplicability,
       'openingApplicability',
     );
+    const units = new Set<string>();
+    collectDeclaredUnits(raw, units);
     domains.push({
       dataset: text(dataset.dataset, 'dataset'),
       sourcePath,
@@ -367,6 +387,8 @@ function inspectSource(
       sourceRecordCount: originalRows.length,
       countryIds: [...countryRefs].sort(),
       regionIds: [...regionRefs].sort(),
+      sourceDeclaredUnits: [...units].sort(),
+      unitAuthority: 'EXPLICIT_SOURCE_FIELDS_ONLY',
       openingApplicability: applicability,
       adoptionStatus:
         applicability === 'PROPOSAL_READ_ONLY'

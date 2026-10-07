@@ -118,6 +118,8 @@ describe('frozen official opening source reconciliation (not adoption)', () => {
       sourceSha256:
         '4f30d7dd43aa2190604d4fb73c776a8d4aaa263653dc783def6f7c2c5cc80805',
       countryIds: result.source.countryIds,
+      sourceDeclaredUnits: ['GCU_SCENARIO_ACCOUNTING_UNIT'],
+      unitAuthority: 'EXPLICIT_SOURCE_FIELDS_ONLY',
     });
     expect(isVerifiedOfficialOpeningDecisionSource({ ...result.source })).toBe(
       false,
