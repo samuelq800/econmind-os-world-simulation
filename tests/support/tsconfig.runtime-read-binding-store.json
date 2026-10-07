@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "rootDir": "../.."
+  },
+  "include": [
+    "../../apps/world-worker/src/persistence/runtime-read-binding-store.ts",
+    "../world-core/runtime-read-binding-store.test.ts"
+  ]
+}
