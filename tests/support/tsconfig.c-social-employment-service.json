@@ -3,8 +3,7 @@
   "compilerOptions": {
     "types": ["node"],
     "lib": ["ES2024", "DOM"],
-    "rootDir": "../..",
-    "paths": { "@econmind/core": ["../../packages/core/src/index.ts"] }
+    "rootDir": "../.."
   },
   "include": [
     "../../packages/core/src/commands/social-employment-service.ts",

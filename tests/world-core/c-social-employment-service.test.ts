@@ -37,7 +37,7 @@ import {
   type ReplayReducerEvent,
   type SocialEmploymentReadFacts,
   type SocialEmploymentServiceState,
-} from '../../packages/core/src/index.js';
+} from '@econmind/core';
 import { inspectOfficialOpeningDecisionSource } from '../../apps/world-worker/src/preparation/official-opening-decision-reconciliation.js';
 import { createOfficialLabourSocialOpeningAdoption } from '../../apps/world-worker/src/preparation/official-labour-social-opening-adoption.js';
 import {
