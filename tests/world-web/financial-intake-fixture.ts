@@ -3,7 +3,7 @@ import {
   AUTHENTICATED_FINANCIAL_INTAKE_SCHEMA,
   type FinancialIntakeAction,
   type FinancialIntakeStateDto,
-} from '@econmind/core';
+} from '@econmind/core/authenticated-financial-intake-contract';
 import type { FinancialIntakeBinding } from '../../apps/world-web/src/financial-intake/controller.js';
 import type { OfficeRole } from '../../apps/world-web/src/office-projection/model.js';
 import { officeProjectionFixture } from './office-projection-fixture.js';
