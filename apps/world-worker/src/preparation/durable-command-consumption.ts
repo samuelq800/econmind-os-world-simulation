@@ -16,6 +16,7 @@ import { createAuthoritativeWorkerExecution } from '../authoritative-execution.j
 import { DurableV08LedgerLineageReader } from '../persistence/durable-v08-ledger-lineage-reader.js';
 import { PostgresTransactionError } from '../persistence/postgres-sql-database.js';
 import { createSqlNarrowTreasuryGcuDeliveryCandidateFactory } from '../persistence/sql-narrow-treasury-gcu-delivery-preparation-source.js';
+import { createSqlNarrowTreasuryGcuShipmentCandidateFactory } from '../persistence/sql-narrow-treasury-gcu-shipment-preparation-source.js';
 import type { SqlDatabase, SqlExecutor } from '../persistence/sql-database.js';
 import { createLocalNarrowReservationWorker } from './local-narrow-reservation-worker.js';
 
@@ -150,6 +151,16 @@ export function createDurableCommandConsumptionPreparation(input: {
       sha256Hex: input.sha256Hex,
     }),
   });
+  const shipment = createAuthoritativeWorkerExecution({
+    database: input.database,
+    workerId: holder,
+    sha256Hex: input.sha256Hex,
+    candidateFactory: createSqlNarrowTreasuryGcuShipmentCandidateFactory({
+      database: input.database,
+      workerId: holder,
+      sha256Hex: input.sha256Hex,
+    }),
+  });
   const reservation =
     clock === null
       ? null
@@ -209,11 +220,20 @@ export function createDurableCommandConsumptionPreparation(input: {
     return lease;
   }
 
-  async function claimDelivery(
+  async function claimAutomatic(
     command: CanonicalCommand,
     at: string,
     simTime: SimTime,
   ) {
+    if (
+      command.commandType !== 'CORE_GOODS_SHIPMENT_V1' &&
+      command.commandType !== 'CORE_GOODS_DELIVERY_V1'
+    )
+      invalid('Only the fixed Shipment or Delivery may use this claim path');
+    const label =
+      command.commandType === 'CORE_GOODS_SHIPMENT_V1'
+        ? 'Shipment'
+        : 'Delivery';
     await input.database.transaction(async (transaction) => {
       // Follow atomic/intake submission-before-lease/head lock order. Never
       // take the queue lock in the selector and then wait for a submission.
@@ -227,7 +247,7 @@ export function createDurableCommandConsumptionPreparation(input: {
         command.commandId,
       );
       if (canonicalSerialize(durable) !== canonicalSerialize(command))
-        invalid('Delivery differs from durable canonical Command');
+        invalid(`${label} differs from durable canonical Command`);
       const lease = await checkSource(transaction, durable, at);
       const queue = await transaction.query<QueueRow>(
         `select command_id, authority_kind, queue_state, available_at_sim_time::text,
@@ -242,7 +262,7 @@ export function createDurableCommandConsumptionPreparation(input: {
         row.authority_kind !== 'VERSIONED_AUTOMATIC' ||
         SimTime.fromTicks(row.available_at_sim_time).ticks > simTime.ticks
       )
-        invalid('Delivery is not an automatic due durable queue member');
+        invalid(`${label} is not an automatic due durable queue member`);
       if (row.queue_state === 'CLAIMED') {
         if (
           row.claimed_by !== holder ||
@@ -254,7 +274,7 @@ export function createDurableCommandConsumptionPreparation(input: {
         return;
       }
       if (row.queue_state !== 'PENDING')
-        invalid('Delivery queue is not executable');
+        invalid(`${label} queue is not executable`);
       const updated = await transaction.query(
         `update world_v2.command_queue
             set queue_state='CLAIMED', claimed_by=$3, claimed_at_real=$4::timestamptz,
@@ -263,7 +283,7 @@ export function createDurableCommandConsumptionPreparation(input: {
         [world, command.commandId, holder, at, lease.fencingToken],
       );
       if (updated.rowCount !== 1)
-        invalid('Delivery claim must update exactly one durable row');
+        invalid(`${label} claim must update exactly one durable row`);
     });
   }
 
@@ -299,13 +319,9 @@ export function createDurableCommandConsumptionPreparation(input: {
       });
       if (selected === null) return Object.freeze({ status: 'IDLE' });
       const { command, row } = selected;
-      if (command.commandType === 'CORE_GOODS_SHIPMENT_V1')
-        return blocked(
-          'MISSING_SQL_SHIP_PREPARATION_SOURCE',
-          command.commandId,
-        );
       if (
         command.commandType !== 'CORE_GOODS_TRANSFER_V1' &&
+        command.commandType !== 'CORE_GOODS_SHIPMENT_V1' &&
         command.commandType !== 'CORE_GOODS_DELIVERY_V1'
       )
         return blocked('UNSUPPORTED_COMMAND', command.commandId);
@@ -339,8 +355,10 @@ export function createDurableCommandConsumptionPreparation(input: {
           receipt: result.receipt,
         });
       }
-      await claimDelivery(command, at, simTime);
-      const result = await delivery.executeQueuedCommand({
+      await claimAutomatic(command, at, simTime);
+      const execution =
+        command.commandType === 'CORE_GOODS_SHIPMENT_V1' ? shipment : delivery;
+      const result = await execution.executeQueuedCommand({
         command,
         authorityKind: 'VERSIONED_AUTOMATIC',
         commitSimTime: simTime,

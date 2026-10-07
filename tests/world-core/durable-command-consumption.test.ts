@@ -3,9 +3,19 @@ import { createHash } from 'node:crypto';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   COMMAND_SCHEMA_VERSION,
+  EVENT_SCHEMA_VERSION,
+  INVENTORY_POSTING_SCHEMA_VERSION,
   DomainError,
+  Quantity,
+  canonicalSerialize,
+  createAuthoritativeTransition,
   createFinalCommandReceipt,
+  createInventoryAccount,
+  createReservationPosting,
+  inventoryPostingId,
+  parseAuthoritativeEvent,
   parseCanonicalCommand,
+  worldId,
   type CanonicalCommand,
 } from '@econmind/core';
 
@@ -13,6 +23,7 @@ import * as authoritative from '../../apps/world-worker/src/authoritative-execut
 import { DurableV08LedgerLineageReader } from '../../apps/world-worker/src/persistence/durable-v08-ledger-lineage-reader.js';
 import { PostgresTransactionError } from '../../apps/world-worker/src/persistence/postgres-sql-database.js';
 import * as deliverySource from '../../apps/world-worker/src/persistence/sql-narrow-treasury-gcu-delivery-preparation-source.js';
+import * as shipmentSource from '../../apps/world-worker/src/persistence/sql-narrow-treasury-gcu-shipment-preparation-source.js';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
 import {
   DURABLE_COMMAND_CONSUMPTION_STATUS,
@@ -20,6 +31,7 @@ import {
   type DurableConsumptionClock,
 } from '../../apps/world-worker/src/preparation/durable-command-consumption.js';
 import * as reservation from '../../apps/world-worker/src/preparation/local-narrow-reservation-worker.js';
+import { createV10TwoCountryTestFixture } from '../support/v10-two-country-fixture.js';
 
 const AT = '2026-10-07T00:00:00.000Z';
 const WORLD = 'WORLD_CONSUMPTION_MECHANISM';
@@ -60,6 +72,7 @@ function harness(
     readonly authority?: string;
     readonly clock?: DurableConsumptionClock | null;
     readonly actualDelivery?: boolean;
+    readonly actualShipment?: boolean;
   } = {},
 ) {
   const durable = options.command ?? command();
@@ -77,6 +90,7 @@ function harness(
     idle: false,
     claimRows: 1,
     failure: null as unknown,
+    reserveProof: [] as Record<string, unknown>[],
   };
   const statements: { sql: string; values: readonly unknown[] }[] = [];
   const database: SqlDatabase = {
@@ -87,7 +101,9 @@ function harness(
       statements.push({ sql, values });
       if (state.failure) throw state.failure;
       let rows: object[];
-      if (sql.includes('from world_v2.command_queue'))
+      if (sql.includes('join world_v2.command_receipt'))
+        rows = state.reserveProof;
+      else if (sql.includes('from world_v2.command_queue'))
         rows = state.idle ? [] : [{ ...row }];
       else if (sql.includes('from world_v2.command_receipt')) rows = [];
       else if (sql.includes('from world_v2.world_writer_lease'))
@@ -148,6 +164,9 @@ function harness(
   const executeDelivery = vi
     .fn()
     .mockResolvedValue({ source: 'EXISTING_FINAL', receipt });
+  const executeShipment = vi
+    .fn()
+    .mockResolvedValue({ source: 'EXISTING_FINAL', receipt });
   const sqlFactory = vi.spyOn(
     deliverySource,
     'createSqlNarrowTreasuryGcuDeliveryCandidateFactory',
@@ -156,11 +175,26 @@ function harness(
     authoritative,
     'createAuthoritativeWorkerExecution',
   );
-  if (!options.actualDelivery)
-    executionFactory.mockImplementation((input) => ({
-      ...realExecution(input),
-      executeQueuedCommand: executeDelivery,
-    }));
+  // Spies observe the real fixed factory; neither SQL source is substituted.
+  const sqlShipmentFactory = vi.spyOn(
+    shipmentSource,
+    'createSqlNarrowTreasuryGcuShipmentCandidateFactory',
+  );
+  const loadShipment = vi.spyOn(
+    shipmentSource.SqlNarrowTreasuryGcuShipmentPreparationSource.prototype,
+    'load',
+  );
+  executionFactory.mockImplementation((input) => {
+    const isShipment =
+      input.candidateFactory === sqlShipmentFactory.mock.results.at(-1)?.value;
+    const execution = realExecution(input);
+    if (isShipment ? options.actualShipment : options.actualDelivery)
+      return execution;
+    return {
+      ...execution,
+      executeQueuedCommand: isShipment ? executeShipment : executeDelivery,
+    };
+  });
   const clock =
     options.clock === undefined
       ? { nowReal: () => AT, simTime: vi.fn(async () => '10') }
@@ -184,14 +218,169 @@ function harness(
     receipt,
     executeReserve,
     executeDelivery,
+    executeShipment,
     reserveFactory,
     sqlFactory,
+    sqlShipmentFactory,
+    loadShipment,
     executionFactory,
     clock,
   };
 }
 
 afterEach(() => vi.restoreAllMocks());
+
+function changedCommand(
+  original: CanonicalCommand,
+  overrides: Record<string, unknown>,
+) {
+  const { fingerprint, payloadHash, canonicalPayload, simTime, ...identity } =
+    original;
+  void fingerprint;
+  void payloadHash;
+  return parseCanonicalCommand(
+    {
+      ...identity,
+      payload: JSON.parse(canonicalPayload),
+      simTime: simTime.toCanonicalValue(),
+      ...overrides,
+    },
+    hash,
+  );
+}
+
+function shipmentFacts() {
+  // Reuse the existing TEST_ONLY inventory account fixture, not F's code or
+  // SQL economic preparation. Pure Core builders create only mock row facts.
+  const fixture = createV10TwoCountryTestFixture();
+  const available = createInventoryAccount({
+    ...fixture.inventoryAccounts.sellerAvailable,
+    worldId: worldId(WORLD),
+  });
+  const reserved = createInventoryAccount({
+    ...fixture.inventoryAccounts.sellerReserved,
+    worldId: worldId(WORLD),
+  });
+  const transfer = changedCommand(command('CORE_GOODS_TRANSFER_V1', 'TRADE'), {
+    commandId: 'COMMAND_C_RESERVE',
+    countryId: available.countryId,
+    payload: {
+      schemaVersion: 'core-goods-transfer-v1',
+      commodityId: 'GRAIN',
+      sellerCountryId: available.countryId,
+      buyerCountryId: fixture.countries.buyer,
+      quantity: { amount: '2', unit: 'tonne' },
+      price: { amount: '3', currency: 'GCU', perUnit: 'tonne' },
+      assetSource: {
+        batchId: available.batchId,
+        physicalLocationId: available.physicalLocationId,
+        titleHolderId: available.titleHolderId,
+        riskBearerId: available.riskBearerId,
+        economicRecognitionId: available.economicRecognitionId,
+      },
+      paymentSource: 'BUYER_TREASURY_GCU',
+      policyVersion: 'V10_TREASURY_GCU_V1',
+      threshold: {
+        policyVersion: 'V10_TREASURY_GCU_THRESHOLD_V1',
+        maxSettlement: { amount: '6', currency: 'GCU' },
+      },
+      expiresAtReal: '2026-10-07T00:10:00.000Z',
+    },
+  });
+  const shipment = changedCommand(command('CORE_GOODS_SHIPMENT_V1'), {
+    countryId: transfer.countryId,
+    expectedWorldVersion: '1',
+    payload: {
+      schemaVersion: 'core-goods-shipment-v1',
+      shipmentId: 'SHIPMENT_C_CONSUMPTION',
+      transferCommandId: transfer.commandId,
+      transferFingerprint: transfer.fingerprint,
+    },
+  });
+  const event = parseAuthoritativeEvent(
+    {
+      schemaVersion: EVENT_SCHEMA_VERSION,
+      eventId: 'EVENT_C_RESERVE',
+      eventType: 'NARROW_TREASURY_GCU_RESERVED_V1',
+      worldId: WORLD,
+      causationCommandId: transfer.commandId,
+      correlationId: transfer.correlationId,
+      sequence: '1',
+      worldVersion: '1',
+      simTime: '10',
+      recordedAtReal: AT,
+      correctsEventId: null,
+      payload: { purpose: 'MOCK_CONSUMER_SOURCE_REJECTION_ONLY' },
+    },
+    hash,
+  );
+  const transition = createAuthoritativeTransition({
+    command: transfer,
+    worldVersionBefore: '0',
+    worldVersionAfter: '1',
+    events: [event],
+  });
+  const posting = createReservationPosting(
+    {
+      schemaVersion: INVENTORY_POSTING_SCHEMA_VERSION,
+      postingId: inventoryPostingId('POSTING_C_RESERVE'),
+      worldId: worldId(WORLD),
+      causationCommandId: transfer.commandId,
+      causationEventIds: transition.eventIds,
+      worldVersionBefore: '0',
+      worldVersionAfter: '1',
+      simTime: transfer.simTime,
+      command: transfer,
+      transition,
+      quantity: Quantity.from('2', 'tonne'),
+      source: available,
+      destination: reserved,
+    },
+    hash,
+  );
+  const { fingerprint, ...postingIntent } = posting;
+  const proof = {
+    canonical_payload: canonicalSerialize(postingIntent),
+    fingerprint,
+    command_fingerprint: transfer.fingerprint,
+    outcome: 'COMMITTED',
+    reason_code: null,
+    transition_id: transfer.commandId,
+    world_version_before: '0',
+    world_version_after: '1',
+    sim_time: '10',
+    event_ids: transition.eventIds,
+    committed_event_ids: transition.eventIds,
+  };
+  return { transfer, shipment, reserved, available, posting, proof };
+}
+
+function actualShipmentHarness() {
+  const facts = shipmentFacts();
+  const h = harness({ command: facts.shipment, actualShipment: true });
+  h.state.headVersion = '1';
+  h.read.mockImplementation(async (_transaction, _world, commandId) =>
+    commandId === facts.transfer.commandId ? facts.transfer : facts.shipment,
+  );
+  h.rebuild.mockResolvedValue({
+    headWorldVersion: '1',
+    headEventSequence: '1',
+    ledgers: {
+      inventory: {
+        balances: [],
+        appliedPostings: [
+          {
+            postingId: facts.posting.postingId,
+            fingerprint: facts.posting.fingerprint,
+          },
+        ],
+      },
+    },
+  } as unknown as Awaited<
+    ReturnType<DurableV08LedgerLineageReader['rebuildFrom']>
+  >);
+  return { ...h, facts };
+}
 
 describe('durable command consumption — mocked mechanism, NOT native runtime acceptance', () => {
   it('does no I/O on construction/start; requires explicit lifecycle and does not restart after stop', async () => {
@@ -237,10 +426,10 @@ describe('durable command consumption — mocked mechanism, NOT native runtime a
     expect(h.read).not.toHaveBeenCalled();
   });
 
-  it.each([
-    ['CORE_GOODS_SHIPMENT_V1', 'MISSING_SQL_SHIP_PREPARATION_SOURCE'],
-    ['OTHER_COMMAND_V1', 'UNSUPPORTED_COMMAND'],
-  ])(
+  // Historical 5cac/25-case evidence retains MISSING_SQL_SHIP_PREPARATION_SOURCE.
+  // Fixed F is now present: its fail-closed source regressions below replace
+  // that obsolete absence expectation; unsupported-head assertions stay intact.
+  it.each([['OTHER_COMMAND_V1', 'UNSUPPORTED_COMMAND']])(
     'blocks first due %s without skipping it, claiming or using an economic fallback',
     async (type, reason) => {
       const h = harness({ command: command(type) });
@@ -253,6 +442,7 @@ describe('durable command consumption — mocked mechanism, NOT native runtime a
       expect(h.statements).toHaveLength(1);
       expect(h.executeDelivery).not.toHaveBeenCalled();
       expect(h.executeReserve).not.toHaveBeenCalled();
+      expect(h.executeShipment).not.toHaveBeenCalled();
     },
   );
 
@@ -265,6 +455,14 @@ describe('durable command consumption — mocked mechanism, NOT native runtime a
     {
       authority: 'VERSIONED_AUTOMATIC',
       command: command('CORE_GOODS_DELIVERY_V1', 'TRADE'),
+    },
+    {
+      authority: 'DISCRETIONARY_USER',
+      command: command('CORE_GOODS_SHIPMENT_V1'),
+    },
+    {
+      authority: 'VERSIONED_AUTOMATIC',
+      command: command('CORE_GOODS_SHIPMENT_V1', 'TRADE'),
     },
   ])(
     'rejects command/queue authority mismatch before claim',
@@ -349,6 +547,134 @@ describe('durable command consumption — mocked mechanism, NOT native runtime a
       commandId: 'COMMAND_CONSUMPTION',
     });
     expect(h.executeDelivery).not.toHaveBeenCalled();
+    expect(h.executeShipment).not.toHaveBeenCalled();
+    expect(h.statements.some(({ sql }) => sql.startsWith('update'))).toBe(
+      false,
+    );
+  });
+
+  it('routes exactly Ship to F fixed factory/executor after the unchanged fenced claim', async () => {
+    const h = harness({ command: command('CORE_GOODS_SHIPMENT_V1') });
+    h.worker.startPreparation();
+    expect(await h.worker.consumeOnce()).toEqual({
+      status: 'PROCESSED',
+      commandId: 'COMMAND_CONSUMPTION',
+      source: 'EXISTING_FINAL',
+      receipt: h.receipt,
+    });
+    expect(h.receipt.outcome).toBe('REJECTED');
+    expect(h.sqlShipmentFactory).toHaveBeenCalledExactlyOnceWith({
+      database: h.database,
+      workerId: HOLDER,
+      sha256Hex: hash,
+    });
+    expect(h.executionFactory.mock.calls[1]?.[0].candidateFactory).toBe(
+      h.sqlShipmentFactory.mock.results[0]?.value,
+    );
+    expect(h.executeShipment).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({
+        command: command('CORE_GOODS_SHIPMENT_V1'),
+        authorityKind: 'VERSIONED_AUTOMATIC',
+        recordedAtReal: AT,
+      }),
+    );
+    expect(h.executeDelivery).not.toHaveBeenCalled();
+    expect(h.executeReserve).not.toHaveBeenCalled();
+    const update = h.statements.filter(({ sql }) => sql.startsWith('update'));
+    expect(update).toHaveLength(1);
+    expect(update[0]?.values).toEqual([
+      WORLD,
+      'COMMAND_CONSUMPTION',
+      HOLDER,
+      AT,
+      '7',
+    ]);
+    const locks = h.statements
+      .filter(
+        ({ sql }) =>
+          sql.includes('command_submission') ||
+          sql.includes('world_writer_lease') ||
+          sql.includes('command_queue where'),
+      )
+      .map(({ sql }) => sql);
+    expect(locks[0]).toContain('command_submission');
+    expect(locks[1]).toContain('world_writer_lease');
+    expect(locks[2]).toContain('command_queue where');
+    expect(
+      h.statements.some(({ sql }) =>
+        /insert|acquire_world_writer_lease|delete/u.test(sql),
+      ),
+    ).toBe(false);
+  });
+
+  it('replaces the historical missing-adapter Ship expectation with real fixed-source missing-transfer rejection', async () => {
+    const h = harness({
+      command: command('CORE_GOODS_SHIPMENT_V1'),
+      actualShipment: true,
+    });
+    h.worker.startPreparation();
+    expect(await h.worker.consumeOnce()).toMatchObject({
+      status: 'BLOCKED',
+      domainCode: 'TRANSITION_EVIDENCE_INVALID',
+      detail: 'Original transfer ID is absent',
+    });
+    expect(h.loadShipment).toHaveBeenCalledExactlyOnceWith({
+      shipmentCommand: command('CORE_GOODS_SHIPMENT_V1'),
+      observedAtReal: AT,
+    });
+    expect(h.executeShipment).not.toHaveBeenCalled();
+    expect(h.executeDelivery).not.toHaveBeenCalled();
+  });
+
+  it('passes actual fixed Ship source missing original committed Reserve rejection without a receipt fallback', async () => {
+    const h = actualShipmentHarness();
+    h.worker.startPreparation();
+    expect(await h.worker.consumeOnce()).toMatchObject({
+      status: 'BLOCKED',
+      domainCode: 'TRANSITION_EVIDENCE_INVALID',
+      detail:
+        'Committed original Reserve must resolve to exactly one durable record',
+    });
+    expect(h.loadShipment).toHaveBeenCalledTimes(1);
+    expect(
+      h.statements.some(({ sql }) =>
+        sql.includes('join world_v2.command_receipt'),
+      ),
+    ).toBe(true);
+    expect(h.executeShipment).not.toHaveBeenCalled();
+    expect(h.executeDelivery).not.toHaveBeenCalled();
+    expect(h.statements.some(({ sql }) => /insert|delete/u.test(sql))).toBe(
+      false,
+    );
+  });
+
+  it('passes actual fixed Ship source missing replayed RESERVED position rejection', async () => {
+    const h = actualShipmentHarness();
+    h.state.reserveProof = [h.facts.proof];
+    h.worker.startPreparation();
+    expect(await h.worker.consumeOnce()).toMatchObject({
+      status: 'BLOCKED',
+      domainCode: 'TRANSITION_EVIDENCE_INVALID',
+      detail:
+        'Replayed original reserved position must resolve to exactly one durable record',
+    });
+    expect(h.loadShipment).toHaveBeenCalledTimes(1);
+    expect(h.executeShipment).not.toHaveBeenCalled();
+    expect(h.executeDelivery).not.toHaveBeenCalled();
+  });
+
+  it('blocks Ship with missing Opening before claim without bypassing the existing lineage reader', async () => {
+    const h = actualShipmentHarness();
+    h.rebuild.mockRejectedValue(
+      new DomainError('OPENING_SEED_INVALID', 'Opening seed row is absent'),
+    );
+    h.worker.startPreparation();
+    expect(await h.worker.consumeOnce()).toMatchObject({
+      status: 'BLOCKED',
+      domainCode: 'OPENING_SEED_INVALID',
+      detail: 'Opening seed row is absent',
+    });
+    expect(h.loadShipment).not.toHaveBeenCalled();
     expect(h.statements.some(({ sql }) => sql.startsWith('update'))).toBe(
       false,
     );
@@ -414,96 +740,124 @@ describe('durable command consumption — mocked mechanism, NOT native runtime a
     expect(h.statements).toEqual([]);
   });
 
-  it('does not replay an executor after a claim when commit acknowledgement is unknown', async () => {
-    const h = harness();
-    h.executeDelivery.mockRejectedValue(
-      new PostgresTransactionError({
-        outcome: 'COMMIT_OUTCOME_UNKNOWN',
-        cause: new Error('Lost acknowledgement'),
-      }),
-    );
-    h.worker.startPreparation();
-    expect(await h.worker.consumeOnce()).toMatchObject({
-      status: 'FAILED',
-      commandId: 'COMMAND_CONSUMPTION',
-    });
-    expect(h.worker.state()).toBe('FAULTED');
-    expect(await h.worker.consumeOnce()).toMatchObject({
-      reason: 'LIFECYCLE_FAULTED',
-    });
-    expect(h.executeDelivery).toHaveBeenCalledTimes(1);
-    expect(
-      h.statements.filter(({ sql }) => sql.startsWith('update')),
-    ).toHaveLength(1);
-  });
+  it.each(['CORE_GOODS_DELIVERY_V1', 'CORE_GOODS_SHIPMENT_V1'])(
+    'does not replay %s after a claim when commit acknowledgement is unknown',
+    async (type) => {
+      const h = harness({ command: command(type) });
+      const execute =
+        type === 'CORE_GOODS_SHIPMENT_V1'
+          ? h.executeShipment
+          : h.executeDelivery;
+      execute.mockRejectedValue(
+        new PostgresTransactionError({
+          outcome: 'COMMIT_OUTCOME_UNKNOWN',
+          cause: new Error('Lost acknowledgement'),
+        }),
+      );
+      h.worker.startPreparation();
+      expect(await h.worker.consumeOnce()).toMatchObject({
+        status: 'FAILED',
+        commandId: 'COMMAND_CONSUMPTION',
+      });
+      expect(h.worker.state()).toBe('FAULTED');
+      expect(await h.worker.consumeOnce()).toMatchObject({
+        reason: 'LIFECYCLE_FAULTED',
+      });
+      expect(execute).toHaveBeenCalledTimes(1);
+      expect(
+        h.statements.filter(({ sql }) => sql.startsWith('update')),
+      ).toHaveLength(1);
+    },
+  );
 
-  it('rejects a durable identity change before the claim', async () => {
-    const h = harness();
-    h.read
-      .mockResolvedValueOnce(command())
-      .mockResolvedValueOnce(command('OTHER_COMMAND_V1'));
-    h.worker.startPreparation();
-    expect(await h.worker.consumeOnce()).toMatchObject({
-      detail: 'Delivery differs from durable canonical Command',
-    });
-    expect(h.statements.some(({ sql }) => sql.startsWith('update'))).toBe(
-      false,
-    );
-    expect(h.executeDelivery).not.toHaveBeenCalled();
-  });
+  it.each(['CORE_GOODS_DELIVERY_V1', 'CORE_GOODS_SHIPMENT_V1'])(
+    'rejects a %s durable identity change before the claim',
+    async (type) => {
+      const h = harness({ command: command(type) });
+      h.read
+        .mockResolvedValueOnce(command(type))
+        .mockResolvedValueOnce(command('OTHER_COMMAND_V1'));
+      h.worker.startPreparation();
+      expect(await h.worker.consumeOnce()).toMatchObject({
+        detail: `${type === 'CORE_GOODS_SHIPMENT_V1' ? 'Shipment' : 'Delivery'} differs from durable canonical Command`,
+      });
+      expect(h.statements.some(({ sql }) => sql.startsWith('update'))).toBe(
+        false,
+      );
+      expect(h.executeDelivery).not.toHaveBeenCalled();
+      expect(h.executeShipment).not.toHaveBeenCalled();
+    },
+  );
 
-  it('does not claim with a missing lease or stale version', async () => {
-    const h = harness();
-    h.worker.startPreparation();
-    h.state.lease = false;
-    expect(await h.worker.consumeOnce()).toMatchObject({
-      reason: 'DURABLE_PRIMITIVE_REJECTED',
-      detail:
-        'Existing active writer lease is required; no acquisition fallback',
-    });
-    h.state.lease = true;
-    h.state.headVersion = '1';
-    expect(await h.worker.consumeOnce()).toMatchObject({
-      domainCode: 'VERSION_MISMATCH',
-    });
-    expect(h.statements.some(({ sql }) => sql.startsWith('update'))).toBe(
-      false,
-    );
-    expect(h.executeDelivery).not.toHaveBeenCalled();
-  });
+  it.each(['CORE_GOODS_DELIVERY_V1', 'CORE_GOODS_SHIPMENT_V1'])(
+    'does not claim %s with a missing lease or stale version',
+    async (type) => {
+      const h = harness({ command: command(type) });
+      h.worker.startPreparation();
+      h.state.lease = false;
+      expect(await h.worker.consumeOnce()).toMatchObject({
+        reason: 'DURABLE_PRIMITIVE_REJECTED',
+        detail:
+          'Existing active writer lease is required; no acquisition fallback',
+      });
+      h.state.lease = true;
+      h.state.headVersion = '1';
+      expect(await h.worker.consumeOnce()).toMatchObject({
+        domainCode: 'VERSION_MISMATCH',
+      });
+      expect(h.statements.some(({ sql }) => sql.startsWith('update'))).toBe(
+        false,
+      );
+      expect(h.executeDelivery).not.toHaveBeenCalled();
+      expect(h.executeShipment).not.toHaveBeenCalled();
+    },
+  );
 
-  it('does not steal another claim; resumes own exact fence without a second claim', async () => {
-    const h = harness();
-    h.row.queue_state = 'CLAIMED';
-    h.row.claimed_by = 'WORKER_OTHER';
-    h.row.claim_fencing_token = '7';
-    h.worker.startPreparation();
-    expect(await h.worker.consumeOnce()).toMatchObject({
-      reason: 'CLAIM_REQUIRES_REVIEWED_RECOVERY',
-    });
-    h.row.claimed_by = HOLDER;
-    h.row.claim_fencing_token = '6';
-    expect(await h.worker.consumeOnce()).toMatchObject({
-      reason: 'DURABLE_PRIMITIVE_REJECTED',
-    });
-    h.row.claim_fencing_token = '7';
-    expect(await h.worker.consumeOnce()).toMatchObject({ status: 'PROCESSED' });
-    expect(h.statements.some(({ sql }) => sql.startsWith('update'))).toBe(
-      false,
-    );
-    expect(h.executeDelivery).toHaveBeenCalledTimes(1);
-  });
+  it.each(['CORE_GOODS_DELIVERY_V1', 'CORE_GOODS_SHIPMENT_V1'])(
+    'does not steal another %s claim; resumes own exact fence without a second claim',
+    async (type) => {
+      const h = harness({ command: command(type) });
+      h.row.queue_state = 'CLAIMED';
+      h.row.claimed_by = 'WORKER_OTHER';
+      h.row.claim_fencing_token = '7';
+      h.worker.startPreparation();
+      expect(await h.worker.consumeOnce()).toMatchObject({
+        reason: 'CLAIM_REQUIRES_REVIEWED_RECOVERY',
+      });
+      h.row.claimed_by = HOLDER;
+      h.row.claim_fencing_token = '6';
+      expect(await h.worker.consumeOnce()).toMatchObject({
+        reason: 'DURABLE_PRIMITIVE_REJECTED',
+      });
+      h.row.claim_fencing_token = '7';
+      expect(await h.worker.consumeOnce()).toMatchObject({
+        status: 'PROCESSED',
+      });
+      expect(h.statements.some(({ sql }) => sql.startsWith('update'))).toBe(
+        false,
+      );
+      expect(
+        type === 'CORE_GOODS_SHIPMENT_V1'
+          ? h.executeShipment
+          : h.executeDelivery,
+      ).toHaveBeenCalledTimes(1);
+    },
+  );
 
-  it('rejects a claim update that did not affect exactly one row', async () => {
-    const h = harness();
-    h.state.claimRows = 0;
-    h.worker.startPreparation();
-    expect(await h.worker.consumeOnce()).toMatchObject({
-      reason: 'DURABLE_PRIMITIVE_REJECTED',
-      detail: 'Delivery claim must update exactly one durable row',
-    });
-    expect(h.executeDelivery).not.toHaveBeenCalled();
-  });
+  it.each(['CORE_GOODS_DELIVERY_V1', 'CORE_GOODS_SHIPMENT_V1'])(
+    'rejects a %s claim update that did not affect exactly one row',
+    async (type) => {
+      const h = harness({ command: command(type) });
+      h.state.claimRows = 0;
+      h.worker.startPreparation();
+      expect(await h.worker.consumeOnce()).toMatchObject({
+        reason: 'DURABLE_PRIMITIVE_REJECTED',
+        detail: `${type === 'CORE_GOODS_SHIPMENT_V1' ? 'Shipment' : 'Delivery'} claim must update exactly one durable row`,
+      });
+      expect(h.executeDelivery).not.toHaveBeenCalled();
+      expect(h.executeShipment).not.toHaveBeenCalled();
+    },
+  );
 
   it('never falls back from corrupt durable command identity', async () => {
     const h = harness();
