@@ -76,3 +76,4 @@ export * from './transfers/narrow-treasury-gcu-delivery.js';
 export * from './transfers/narrow-treasury-gcu-transfer.js';
 export * from './versions.js';
 export * from './writer/world-writer-lease.js';
+export * from './water/index.js';
