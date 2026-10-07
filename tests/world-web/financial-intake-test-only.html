@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>TEST_ONLY transfer order consumer</title>
+    <link rel="stylesheet" href="/season1-immersive/country-game.css" />
+    <link rel="stylesheet" href="/shared/econmind-os-visual.css" />
+  </head>
+  <body>
+    <h1>TEST_ONLY — offline transfer orders, not live authority</h1>
+    <p>
+      No real endpoint, signed token, seat, admission, command or settlement.
+    </p>
+    <label
+      >Test office
+      <select id="role">
+        <option value="trade">TRADE</option>
+        <option value="finance">FINANCE</option>
+        <option value="captain">CAPTAIN</option>
+        <option value="central_bank">CENTRAL_BANK</option>
+        <option value="industry">INDUSTRY</option>
+        <option value="social">SOCIAL</option>
+      </select></label
+    >
+    <button id="connect">Connect TEST_ONLY fixture</button>
+    <button id="unknown">TEST_ONLY: next write is UNKNOWN</button>
+    <button id="revoke">Revoke TEST_ONLY session</button>
+    <main class="country-game" data-country="01" data-office="trade">
+      <nav
+        class="national-tools"
+        aria-label="TEST_ONLY transfer controls"
+      ></nav>
+    </main>
+    <script type="module" src="./financial-intake-test-only.ts"></script>
+  </body>
+</html>
