@@ -37,6 +37,15 @@ import {
   type WorldId,
 } from '../ids.js';
 import { Quantity } from '../numeric/quantity.js';
+import {
+  assertProductionFunding,
+  isValidatedProductionPosting,
+  type InventoryLedgerPosting,
+} from './production-consumption-posting.js';
+import {
+  type FinancialPostingBatch,
+  type FinancialLedgerState,
+} from '../finance/financial-ledger.js';
 import { isSimTime, type SimTime } from '../numeric/sim-time.js';
 import {
   canonicalHashInput,
@@ -114,6 +123,14 @@ export interface InventoryBalance {
 export interface AppliedInventoryPosting {
   readonly postingId: InventoryPostingId;
   readonly fingerprint: CanonicalSha256;
+  readonly production?: Readonly<{
+    runId: string;
+    outcomeRef: string;
+    facilityTickKey: string;
+    outputBatchId: InventoryBatchId;
+    inputBatchIds: readonly InventoryBatchId[];
+    costLegKey: string;
+  }>;
 }
 
 export interface InventoryLedgerSnapshot {
@@ -450,9 +467,39 @@ export function parseInventoryLedgerSnapshot(input: {
       if (!CANONICAL_SHA256.test(posting.fingerprint)) {
         invalid('Applied posting fingerprint must be canonical SHA-256');
       }
+      if (
+        posting.production !== undefined &&
+        (!/^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u.test(posting.production.runId) ||
+          !/^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u.test(
+            posting.production.outcomeRef,
+          ) ||
+          typeof posting.production.facilityTickKey !== 'string' ||
+          posting.production.facilityTickKey.length === 0 ||
+          !/^[A-Z][A-Z0-9_]*:[A-Z][A-Z0-9_]*$/u.test(
+            posting.production.costLegKey,
+          ) ||
+          !Array.isArray(posting.production.inputBatchIds))
+      )
+        invalid('Invalid hydrated production recognition');
       return Object.freeze({
         postingId: inventoryPostingId(posting.postingId),
         fingerprint: posting.fingerprint,
+        ...(posting.production === undefined
+          ? {}
+          : {
+              production: Object.freeze({
+                runId: posting.production.runId,
+                outcomeRef: posting.production.outcomeRef,
+                facilityTickKey: posting.production.facilityTickKey,
+                outputBatchId: inventoryBatchId(
+                  posting.production.outputBatchId,
+                ),
+                inputBatchIds: Object.freeze(
+                  posting.production.inputBatchIds.map(inventoryBatchId),
+                ),
+                costLegKey: posting.production.costLegKey,
+              }),
+            }),
       });
     })(),
   );
@@ -473,7 +520,7 @@ export function parseInventoryLedgerSnapshot(input: {
 }
 
 function receipt(
-  posting: InventoryPosting,
+  posting: InventoryLedgerPosting,
   outcome: InventoryPostingReceipt['outcome'],
 ): Readonly<InventoryPostingReceipt> {
   return Object.freeze({
@@ -490,7 +537,12 @@ function receipt(
 /** @internal Per-projection step used only by the joint V08 lineage writer. */
 export function applyInventoryPosting(
   state: InventoryLedgerState,
-  posting: InventoryPosting,
+  posting: InventoryLedgerPosting,
+  productionContext?: {
+    readonly settledBatches: readonly FinancialPostingBatch[];
+    readonly financial: FinancialLedgerState;
+    readonly sha256Hex: Sha256Hex;
+  },
 ): Readonly<InventoryPostingResult> {
   if (
     state.schemaVersion !== INVENTORY_LEDGER_SCHEMA_VERSION ||
@@ -501,7 +553,8 @@ export function applyInventoryPosting(
       'Unsupported inventory ledger schema version',
     );
   }
-  if (!inventoryPostingInstances.has(posting)) {
+  const production = isValidatedProductionPosting(posting);
+  if (!inventoryPostingInstances.has(posting) && !production) {
     invalid('Inventory writer accepts validated canonical postings only');
   }
   const existing = state.appliedPostings.find(
@@ -527,6 +580,66 @@ export function applyInventoryPosting(
       DOMAIN_ERROR_CODES.INVENTORY_POSTING_CONFLICT,
       'Inventory posting does not extend the current World ledger version',
     );
+  }
+  if (production) {
+    if (!productionContext)
+      invalid('Production requires settled lineage context');
+    const { fingerprint, ...intent } = posting;
+    if (
+      canonicalSha256(
+        canonicalHashInput(intent),
+        productionContext.sha256Hex,
+      ) !== fingerprint
+    )
+      invalid('Production canonical intent was modified after validation');
+    assertProductionFunding(
+      posting,
+      productionContext.settledBatches,
+      productionContext.financial,
+    );
+    if (
+      canonicalSha256(
+        canonicalHashInput(state),
+        productionContext.sha256Hex,
+      ) !== posting.evidence.inventorySnapshotHash
+    )
+      invalid('Production inventory snapshot hash mismatch');
+    const costLegKey = `${posting.evidence.operating.payload.fundingBatchId}:${posting.evidence.operating.payload.costLegId}`;
+    if (
+      state.appliedPostings.some(
+        (p) =>
+          p.production?.runId === posting.evidence.runId ||
+          p.production?.outcomeRef === posting.result.outcomeRef ||
+          p.production?.facilityTickKey ===
+            `${posting.result.facilityRef}:${posting.simTime.ticks.toString()}` ||
+          p.production?.outputBatchId === posting.evidence.output.batchId ||
+          p.production?.inputBatchIds.includes(
+            posting.evidence.output.batchId,
+          ) ||
+          p.production?.costLegKey === costLegKey,
+      ) ||
+      state.balances.some(
+        (b) => b.account.batchId === posting.evidence.output.batchId,
+      )
+    )
+      invalid(
+        'Production run, output batch or settled cost is already recognized',
+      );
+    for (const material of posting.evidence.materials) {
+      const before =
+        state.balances.find(
+          (b) => accountKey(b.account) === accountKey(material.account),
+        )?.quantity ?? Quantity.from('0', material.account.unit);
+      const fact = posting.evidence.input.materials.find(
+        (m) => m.payload.materialRef === material.materialRef,
+      );
+      if (
+        !fact ||
+        canonicalSerialize(before.toCanonicalValue()) !==
+          canonicalSerialize(fact.payload.usableBefore)
+      )
+        invalid('Production usable stock must equal current E08 balance');
+    }
   }
   const byAccount = new Map(
     state.balances.map((balance) => [accountKey(balance.account), balance]),
@@ -563,6 +676,20 @@ export function applyInventoryPosting(
       Object.freeze({
         postingId: posting.postingId,
         fingerprint: posting.fingerprint,
+        ...(production
+          ? {
+              production: Object.freeze({
+                runId: posting.evidence.runId,
+                outcomeRef: posting.result.outcomeRef,
+                facilityTickKey: `${posting.result.facilityRef}:${posting.simTime.ticks.toString()}`,
+                outputBatchId: posting.evidence.output.batchId,
+                inputBatchIds: Object.freeze(
+                  posting.evidence.materials.map((m) => m.account.batchId),
+                ),
+                costLegKey: `${posting.evidence.operating.payload.fundingBatchId}:${posting.evidence.operating.payload.costLegId}`,
+              }),
+            }
+          : {}),
       }),
     ]),
   });

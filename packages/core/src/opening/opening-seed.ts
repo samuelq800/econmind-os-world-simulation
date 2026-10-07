@@ -26,8 +26,8 @@ import {
   type InventoryAccount,
   type InventoryLedgerSnapshot,
   type InventoryLedgerState,
-  type InventoryPosting,
 } from '../inventory/inventory-ledger.js';
+import { type InventoryLedgerPosting } from '../inventory/production-consumption-posting.js';
 import { isMoney, Money } from '../numeric/money.js';
 import { isQuantity, Quantity } from '../numeric/quantity.js';
 import {
@@ -135,7 +135,7 @@ export interface RebuiltV08Ledgers {
 export interface V08AuthoritativeLedgerTransition {
   readonly command: CanonicalCommand;
   readonly transition: AuthoritativeTransition;
-  readonly inventoryPostings: readonly InventoryPosting[];
+  readonly inventoryPostings: readonly InventoryLedgerPosting[];
   readonly financialPostingBatches: readonly FinancialPostingBatch[];
 }
 
@@ -692,7 +692,7 @@ function financialStateAtVersion(
 }
 
 function assertInventoryPostingBinding(
-  posting: InventoryPosting,
+  posting: InventoryLedgerPosting,
   binding: AuthoritativeTransitionBinding,
 ): void {
   if (
@@ -734,6 +734,7 @@ export function rebuildV08LedgersFromLineage(input: {
   const idempotencyCommands = new Map<string, string>();
   const inventoryPostingIds = new Set<string>();
   const financialBatchIds = new Set<string>();
+  const settledFinancialBatches: FinancialPostingBatch[] = [];
   let expectedEventSequence = 1n;
 
   for (const value of input.transitions ?? []) {
@@ -795,23 +796,6 @@ export function rebuildV08LedgersFromLineage(input: {
       financialBatchIds.add(batch.batchId);
     }
 
-    let candidateInventory = inventory;
-    for (const posting of value.inventoryPostings) {
-      candidateInventory = applyInventoryPosting(
-        inventoryStateAtVersion(
-          candidateInventory,
-          transition.worldVersionBefore,
-        ),
-        posting,
-      ).state;
-    }
-    if (value.inventoryPostings.length === 0) {
-      candidateInventory = inventoryStateAtVersion(
-        candidateInventory,
-        transition.worldVersionAfter,
-      );
-    }
-
     let candidateFinancial = financial;
     for (const batch of value.financialPostingBatches) {
       candidateFinancial = applyFinancialPostingBatch(
@@ -825,6 +809,28 @@ export function rebuildV08LedgersFromLineage(input: {
     if (value.financialPostingBatches.length === 0) {
       candidateFinancial = financialStateAtVersion(
         candidateFinancial,
+        transition.worldVersionAfter,
+      );
+    }
+    settledFinancialBatches.push(...value.financialPostingBatches);
+    let candidateInventory = inventory;
+    for (const posting of value.inventoryPostings) {
+      candidateInventory = applyInventoryPosting(
+        inventoryStateAtVersion(
+          candidateInventory,
+          transition.worldVersionBefore,
+        ),
+        posting,
+        {
+          settledBatches: settledFinancialBatches,
+          financial: candidateFinancial,
+          sha256Hex: input.sha256Hex,
+        },
+      ).state;
+    }
+    if (value.inventoryPostings.length === 0) {
+      candidateInventory = inventoryStateAtVersion(
+        candidateInventory,
         transition.worldVersionAfter,
       );
     }
