@@ -5,7 +5,25 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current integration snapshot (2026-10-06)
+## Current integration snapshot (2026-10-07)
+
+[Current source integration and remaining runtime connections](docs/reports/world-connection/O_ONLINE_SOURCE_COMPONENTS_2026_10_07.md)
+records reviewed PR90/91/92. Opening reconciliation and the canonical Seed
+bridge, real Supabase JWKS signature verification, and a PostgreSQL current
+permission/seed/head facts reader are merged. They remain opt-in: no default
+authenticated endpoint, user seat, admitted World, economic Worker or clock was
+installed by these merges. Real local crypto and fixture SQL checks are not
+production keys, TLS, deployment-role permissions or economic activation.
+
+The opt-in HTTP read transport is also independently source-approved and
+included in this update; its default route remains unmounted. Full server read
+binding still requires durable seat and
+admission records and exact projection/readback mappings. Human opening
+economics and API/Worker hosting remain unresolved. Formal World is still
+NOT_STARTED/HOLD; Gate B is PENDING. The October 6 public-source and HOME
+evidence below is retained, not rerun or promoted to gameplay acceptance.
+
+### Retained October 6 checkpoint
 
 Current data-interface checkpoint:
 [source connection and remaining write boundaries](docs/reports/world-connection/O_DATA_INTERFACE_CHECKPOINT_2026_10_06.md).
