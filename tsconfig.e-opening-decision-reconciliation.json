@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals"],
+    "lib": ["ES2024", "DOM"]
+  },
+  "include": [
+    "apps/world-worker/src/preparation/official-opening-decision-reconciliation.ts",
+    "tests/world-core/official-opening-decision-reconciliation.test.ts"
+  ]
+}
