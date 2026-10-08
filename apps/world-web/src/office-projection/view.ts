@@ -9,6 +9,7 @@ import {
   type OfficeProjectionView,
 } from './model.js';
 import { renderCurrentFinancialPosition } from './financial-position-view.js';
+import { renderDecisionResult } from './decision-result-view.js';
 
 /** Additive drawer in the approved country shell. No map, opening HUD, source
  * asset or original form is replaced. No URL/storage/VITE credentials loaded. */
@@ -89,6 +90,7 @@ export function installOfficeProjection(
         list.append(node('dt', key), node('dd', value));
       source.append(list);
       dialog.append(source);
+      dialog.append(renderDecisionResult(document, state.model.decisionResult));
       dialog.append(
         renderCurrentFinancialPosition(
           document,
@@ -143,7 +145,7 @@ export function installOfficeProjection(
     }
     const missing = document.createElement('details');
     missing.open = true;
-    missing.append(node('summary', 'Not supplied by the current contract'));
+    missing.append(node('summary', 'Current office state not supplied'));
     for (const field of view ? roleProjectionGaps[view.role] : [])
       missing.append(node('p', `${field} · ROLE_FIELD_NOT_PROJECTED`));
     dialog.append(missing);
