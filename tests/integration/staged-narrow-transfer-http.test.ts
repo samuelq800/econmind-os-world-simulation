@@ -500,10 +500,17 @@ describe(`real staged HTTP lifecycle / ${native ? 'native PostgreSQL' : 'PGlite'
         watermark: { worldVersion: '1', eventSequence: '1' },
         payload: {
           ledger: {
-            inventoryPositions: [
-              { bucket: 'AVAILABLE', quantity: '-2', unit: 'tonne' },
-              { bucket: 'RESERVED', quantity: '2', unit: 'tonne' },
-            ],
+            // COUNTRY reads withhold private economic detail. These empty
+            // arrays are not zero balances; the durable SQL inventory and
+            // financial conservation assertions above remain authoritative.
+            inventoryPositions: [],
+            financialPositions: [],
+            visibility: {
+              schemaVersion: 'economic-read-visibility-v1',
+              financialDetail: 'NOT_AUTHORIZED',
+              inventoryDetail: 'NOT_AUTHORIZED',
+              countrySummary: 'NOT_AUTHORIZED',
+            },
           },
         },
       },
