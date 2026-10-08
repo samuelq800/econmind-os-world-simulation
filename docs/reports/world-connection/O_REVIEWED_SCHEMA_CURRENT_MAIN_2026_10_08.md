@@ -157,3 +157,28 @@ config, focused lint and format passed. Actual authoritative UI check passed
 70 source countries, 286 original / 75 derived / 2 visual / 2 boot files and
 70 pages / 140 maps, with `economicStateConnected=false`. This is not a fresh
 whole local check, native result, final CI receipt or economic activation.
+
+## Final bounded forward fixture and current-main closeout
+
+The next real full provider run37780566377 still FAILED:2866 PASS /3 FAIL /153
+SKIP,829.06s. All three original Country/Office source fixtures lacked a FINAL
+receipt and used placeholder hashes. Artifact upload also timed out; the retained
+provider transcript is not a downloaded raw tee artifact. No failure is relabelled.
+
+A froze c0549e13b6424c828f05007db0c5f57342247421 /treef2474a1 against7bc960a.
+Three files only; real Core canonical hashes/FINAL receipt plus atomic repository
+replace the illegal TEST_ONLY source setup. Original three test blocks remain
+byte-identical. Orphan event, bad receipt time and hash rejection preserve the
+last published projection; related four-file producer check100 PASS. B narrow
+review of this fixed new delta remains pending at this record freeze.
+
+Root replay93016f8 preserves all three source files exactly. Normal current-main
+merges842a15c and3618b75 include reviewed D and G source releases, without new
+business behavior. Only conflict: additive CI prerequisite test blocks; both
+are preserved, six prerequisites PASS. Fixture7 plus earlier prerequisites5
+passed as12 tests; focused fixture strict types and configured workspace
+typecheck also PASS. Exact0023 SQL remains unchanged against7461a053. Trusted
+CI now directly exercises the original repaired integration file and strict
+configuration. No push is used to repeatedly run whole checks for small edits:
+one final immutable composition is to receive its own applicable CI/native
+results. Source approval, merge and production activation remain separate.
