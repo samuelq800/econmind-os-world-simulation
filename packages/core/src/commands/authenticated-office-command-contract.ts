@@ -1,6 +1,5 @@
 /** Pure transport for manual Office intent. A parsed intent grants no authority.
- * This version rejects every supported family until its real source and the
- * sole durable consumer are wired. REJECTED is no acceptance, queue or result. */
+ * Durable acknowledgement is queue registration only; no economic outcome. */
 export const AUTHENTICATED_OFFICE_COMMAND_SCHEMA =
   'world-authenticated-office-command-v1' as const;
 
@@ -27,18 +26,40 @@ export interface AuthenticatedOfficeCommandRequestDto {
   readonly request: ManualOfficeCommandRequestDto;
 }
 
-export interface AuthenticatedOfficeCommandResponseDto {
-  readonly schemaVersion: typeof AUTHENTICATED_OFFICE_COMMAND_SCHEMA;
-  readonly requestId: string;
-  readonly ok: false;
-  readonly error: Readonly<{ code: string; retryable: boolean }>;
-  readonly state?: Readonly<{
-    status: 'REJECTED';
-    reason: 'SOURCE_RUNTIME_UNAVAILABLE';
-    commandType: ManualOfficeCommandFamily;
-    /** This call created no submission, acceptance, queue row or result. */
-    submitted: false;
-    queued: false;
-    missing: readonly ('ADMITTED_DOMAIN_SOURCE' | 'SOLE_DURABLE_CONSUMER')[];
-  }>;
+export interface ManualOfficeSourceRejectionDto {
+  readonly status: 'REJECTED';
+  readonly reason: 'SOURCE_RUNTIME_UNAVAILABLE';
+  readonly commandType: ManualOfficeCommandFamily;
+  readonly submitted: false;
+  readonly queued: false;
+  readonly missing: readonly (
+    'ADMITTED_DOMAIN_SOURCE' | 'SOLE_DURABLE_CONSUMER'
+  )[];
 }
+export interface ManualOfficeQueueAcknowledgementDto {
+  readonly status: 'QUEUED' | 'EXECUTING' | 'FINALIZED';
+  readonly source: 'NEW' | 'EXISTING';
+  readonly commandType: ManualOfficeCommandFamily;
+  readonly commandId: string;
+  readonly commandFingerprint: string;
+  /** True only when this transaction inserted the command and queue. */
+  readonly submitted: boolean;
+  /** Existing durable queue membership; never an economic commit receipt. */
+  readonly queued: true;
+}
+export type AuthenticatedOfficeCommandResponseDto = Readonly<{
+  schemaVersion: typeof AUTHENTICATED_OFFICE_COMMAND_SCHEMA;
+  requestId: string;
+}> &
+  (
+    | Readonly<{
+        ok: false;
+        error: Readonly<{ code: string; retryable: boolean }>;
+        state?: ManualOfficeSourceRejectionDto;
+      }>
+    | Readonly<{
+        ok: true;
+        error?: never;
+        state: ManualOfficeQueueAcknowledgementDto;
+      }>
+  );

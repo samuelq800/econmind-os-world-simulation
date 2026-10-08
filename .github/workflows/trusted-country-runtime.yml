@@ -18,6 +18,9 @@ on:
       - apps/world-api/src/integration/postgres-runtime-read-executor.ts
       - apps/world-api/src/integration/authenticated-office-command-service.ts
       - apps/world-worker/src/intake/postgres-office-command-intake.ts
+      - apps/world-worker/src/intake/manual-office-intake-runtime.ts
+      - tests/world-api/positive-manual-office-command.test.ts
+      - tests/support/g-manual-office-api-test-only-fixture.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
       - database/migrations/**
       - scripts/migration-policy.mjs
@@ -74,6 +77,9 @@ on:
       - apps/world-api/src/integration/postgres-runtime-read-executor.ts
       - apps/world-api/src/integration/authenticated-office-command-service.ts
       - apps/world-worker/src/intake/postgres-office-command-intake.ts
+      - apps/world-worker/src/intake/manual-office-intake-runtime.ts
+      - tests/world-api/positive-manual-office-command.test.ts
+      - tests/support/g-manual-office-api-test-only-fixture.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
       - database/migrations/**
       - scripts/migration-policy.mjs
@@ -149,6 +155,10 @@ jobs:
           node --test tests/foundation/migration-rehearsal-filtered-provenance.test.mjs
           pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/production-posting-schema.test.ts tests/foundation/snapshot-storage-migration-policy.test.ts
           pnpm exec tsc --noEmit -p tests/support/tsconfig.f-production-schema.json
+      - name: Conditional positive manual SQL intake and queue acknowledgement
+        run: |
+          pnpm exec vitest run --reporter=verbose tests/world-api/positive-manual-office-command.test.ts
+          pnpm exec tsc --noEmit -p tests/world-api/tsconfig.positive-manual-office-command.json
       - name: Private opening authority and actual blocked-source regressions
         run: |
           pnpm exec vitest run --reporter=verbose tests/world-core/official-opening-admission-publication.test.ts tests/world-core/official-opening-decision-reconciliation.test.ts
