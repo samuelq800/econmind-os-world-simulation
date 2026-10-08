@@ -36,3 +36,16 @@
 ## Exit condition
 
 Deliver reproducible local tooling, generated reports, an input worksheet, immutable implementation identity and actual evidence. Missing source/identity/host inputs remain blockers. No production-ready, P0 VERIFIED, Gate B approval or activated World claim is permitted from this package.
+
+## October 8 release follow-up
+
+- Direct user request: turn preparation into the formal version, deploy, and explain the current World. The user selected Cloudflare Workers within the free allowance as the service target.
+- Main source refreshed to `96217db583db4c1bd6ef74714b2e0a5ef6b7ed6d`; local integration candidate `1006d5df213c34b533637165fcc4c03a77480418`, PR124.
+- Publish the already integrated main web through the existing Pages workflow; capture the exact run and public HTTP readback.
+- Run existing isolated PostgreSQL 16 CI and retain its actual durable receipt. Do not equate disposable evidence with dedicated staging, review approval or Gate B closure.
+- Prepare a Cloudflare configuration reusing the previously integrated public source Fetch handler and snapshot reader. Keep their frozen-source hash checks, public origins and read-only route contract. No new economic handler, SQL binding, queue, state store, cron or background executor is introduced.
+- Use isolated Wrangler 4.148.0 under `D:\dev\node\isolated\world-cloudflare-tools`, leaving the repository toolchain and lockfile unchanged. Verify provider bundling and local workerd requests before any Cloudflare publication.
+- The account token cannot read billing subscriptions (HTTP403). Obtain the account owner's factual plan confirmation before publishing under the free-only constraint. This is a missing account fact, not a request to reauthorize deployment.
+- Formal economic activation remains blocked by the actual opening/identity/schema/runtime gates. This follow-up must report partial publication plainly and must not manufacture an ACTIVE World or self-approve a P0 gate.
+- Actual workerd testing found that Cloudflare rejects `redirect: "error"` before I/O. Add a narrow source transport adapter using `manual`; the existing loader rejects every non-200 response without following redirects. Preserve the original failing smoke separately. Six regression cases and the subsequent real local workerd smoke pass.
+- The user explicitly confirmed the existing account uses Workers Free. This confirms the account fact; no plan upgrade or paid resource is authorized. Effective incremental scope is non-authoritative public-read transport/configuration, without a P0 economic boundary change. Formal gate status remains unchanged.
