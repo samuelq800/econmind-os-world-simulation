@@ -1,6 +1,6 @@
 # C O native privacy joint test — 2026-10-08
 
-Status: IMPLEMENTED_UNVERIFIED; corrected candidate native NOT_RUN.
+Status: IMPLEMENTED_UNVERIFIED; corrected scoped TEST_ONLY native case 1 PASS.
 First and second native FAIL snapshots retained. Independent review pending.
 No merge, push, PR, deployment, production mutation, admission release, 420 or Gate B claim.
 
@@ -157,3 +157,41 @@ source carrier, admission veto or current context changes.
 This corrected commit must be fixed before the authorized third run. At this
 record stage its native status is NOT_RUN, not PASS. Both earlier FAIL outputs
 and the first classification UNKNOWN correction are immutable evidence.
+
+## Actual third native result
+
+Tested corrected commit: 33f60a595b4d9e43fb1a8c874cfb40fe21937ab8.
+Tested tree: cb37700e263fde94785f99e4238672e4242b2467.
+Test SHA256: 112d562057afe1ac96b72e46eb3244656afdc49c78d32e772a43bb5cc63543f0.
+Fixture SHA256: 5c443b18ba4c554d307c278a0d3511f89307873618b22f67008cca27b7b1a047.
+Started 2026-10-08 05:08:39 UTC (13:08:39 Asia/Shanghai).
+Actual root-config Vitest run: exit 0; 1 PASS / 0 FAIL; duration 3.41 seconds.
+Raw output and exact credential-empty command: native-o-final-third.json.
+No fourth native run was authorized or performed.
+
+This run completed the whole retained TEST_ONLY case: genuine JWT and persisted
+binding, three signatures, once discretionary enqueue, exact Command and fenced
+Reserve/Ship/Deliver, actual opening-aware 2/8 GCU and 2 tonne, real version/event
+3 projection, all three OFFICE_PRIVATE positive reads, seller single-Office
+COUNTRY positive, exact buyer multi-Office COUNTRY ambiguity rejection, empty raw
+financial/inventory arrays with actual NOT_AUTHORIZED visibility, cross-country
+scope negatives, original fingerprint-bound FINAL receipt (COMMITTED, version1),
+staged READ/REGISTER FINAL retries, idle/idempotent stable economic footprint,
+revoked seller FINAL/intake/Office/Country denial, and nonactivated flags.
+The existing finally stopped and removed only the owned disposable cluster.
+
+Dedicated O typecheck, scoped lint, format and diff checks passed before the
+fixed third-run commit. Core/Worker/API own builds from the same bf2 source had
+already passed and application source/dist were unchanged. No full suite, CI,
+production test, deployment, independent approval or acceptance gate is claimed.
+Three total authorized singletons: first FAIL, diagnostic FAIL, corrected PASS;
+all original output remains immutable and independently attributable.
+
+Finance lawful raw-detail positive remains NOT_RUN_SOURCE_BLOCKED. The PASS
+does not supply a real admitted role carrier or admission publication. The
+unchanged fixture's explicit TEST_ONLY admission-veto override remains a limitation.
+Multi-Office COUNTRY product-selector compatibility is a separate actual
+requirement/contract decision, not an API change within this slice.
+Final report-only commit may follow the tested commit without changing test or
+fixture bytes. Hand off fixed SHA/tree/hashes/raw run to Root for narrow B review
+then STOP. Original historical O 1 PASS, SOC2e93 and SOCIAL1066 remain unchanged.
