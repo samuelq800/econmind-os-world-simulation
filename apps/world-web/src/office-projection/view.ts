@@ -58,7 +58,13 @@ export function installOfficeProjection(
       trigger.title = `World readout · ${state.model ? 'v' + state.model.head.worldVersion : state.status}${state.code ? ' · ' + state.code : ''}`;
       trigger.dataset.officeProjectionState = state.status;
     }
-    if (!dialog?.open) return;
+    if (!dialog) return;
+    // Hidden is not retired: remove the old private DOM on every closed-state
+    // notification, while a still-authorized model may be rendered on reopen.
+    if (!dialog.open) {
+      dialog.replaceChildren();
+      return;
+    }
     const focused = dialog.contains(document.activeElement)
       ? (document.activeElement as HTMLElement).dataset.officeReadAction
       : undefined;
@@ -182,6 +188,7 @@ export function installOfficeProjection(
         true,
         () => {
           dialog?.close();
+          dialog?.replaceChildren();
           trigger?.focus();
         },
       ],
@@ -238,6 +245,12 @@ export function installOfficeProjection(
           overflowWrap: 'anywhere',
         });
         dialog.setAttribute('aria-label', 'Authorized office World readout');
+        const surface = dialog;
+        // Also cover native Escape/close(). A queued close event must not clear
+        // a surface already reopened with a current, authorized readout.
+        surface.addEventListener('close', () => {
+          if (!surface.open) surface.replaceChildren();
+        });
         root.append(dialog);
       }
     }

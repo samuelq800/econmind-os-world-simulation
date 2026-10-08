@@ -1,4 +1,7 @@
 {
   "extends": "./economic-visibility-consumer.tsconfig.json",
-  "include": ["office-decision-result-consumer.test.ts"]
+  "include": [
+    "office-decision-result-consumer.test.ts",
+    "office-projection-closed-drawer.test.ts"
+  ]
 }
