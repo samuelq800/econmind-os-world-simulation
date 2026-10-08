@@ -42,6 +42,25 @@ describe('fresh CI public contract prerequisites', () => {
     );
   });
 
+  it('trusted CI runs the explicit Office transport with strict types without activating a host', () => {
+    const source = readFileSync(
+      new URL(
+        '../../.github/workflows/trusted-country-runtime.yml',
+        import.meta.url,
+      ),
+      'utf8',
+    );
+    expect(source).toContain(
+      'tests/world-api/https-authenticated-office-command-route.test.ts',
+    );
+    expect(source).toContain(
+      'pnpm exec tsc --noEmit -p tests/world-api/tsconfig.https-office-command-route.json',
+    );
+    expect(source).not.toMatch(
+      /world-worker (?:dev|start)|workflow_dispatch|supabase db/u,
+    );
+  });
+
   it('every explicit trusted-CI test, helper and config path exists instead of being silently omitted', () => {
     const source = readFileSync(
       new URL(
