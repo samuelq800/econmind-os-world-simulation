@@ -1,0 +1,47 @@
+{
+  "schema": "EXACT_OFFICIAL_BOOT_DERIVATION_V1",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "sourceRepository": "samuelq800/econmind-os-world-simulation",
+  "sourceCommit": "5c1f355aecc7656c45a44bbab444699c0295b526",
+  "sourceTree": "85f74be67a84ceac9f9394b4356ab205c9978e9c",
+  "sourceParent": "bcfc66787631a13aa5093df42954070c2d7dd66b",
+  "integrationBase": "1340774e872c02ae7c47707d6c7c618ffd0abdb1",
+  "archive": {
+    "selectionId": "ECONMIND_S1_AUTHORITATIVE_UI_20260928T134420Z",
+    "sha256": "d436904dc061b6f909c8b5c180104f82299e987f6e89732f9b82dc9a40e3db71",
+    "bytes": 639321078,
+    "payloadFiles": 860,
+    "manifestPath": "artifacts/ui-authority/20260928T134420Z/MANIFEST.json",
+    "manifestSha256": "ed79cd79d2bf6a22a9fa2f57931f9bde89ee70fe30ae828fc87bba951a0a61dd",
+    "packagePath": "artifacts/ui-authority/20260928T134420Z/PACKAGE.json",
+    "packageSha256": "89e3f9fa7bfdae39269512fec7b384c7e9bf250ba079777a15734735e29c619a"
+  },
+  "files": [
+    {
+      "sourcePath": "role-prototypes/season1-immersive/journey.js",
+      "original": {
+        "bytes": 20820,
+        "sha256": "e76476784e38f014e792d277bcce598105563893c0af2fda1b26b595c3355b25"
+      },
+      "adaptedOutput": {
+        "path": "apps/world-web/public/season1-immersive/journey.js",
+        "bytes": 20941,
+        "sha256": "4f70c8bdcae72472f5bd4d1023ef4ee13bae9cb3b043cc962f7fb4f1dbb4a4e1"
+      }
+    },
+    {
+      "sourcePath": "role-prototypes/season1-immersive/world-clock.js",
+      "original": {
+        "bytes": 5770,
+        "sha256": "eb61b7889868048a45c5d2f37581ebb6386ce2d5710280526cf2c96ff0bdf646"
+      },
+      "adaptedOutput": {
+        "path": "apps/world-web/public/season1-immersive/world-clock.js",
+        "bytes": 5816,
+        "sha256": "b8318e701d88bc403b699cd4687e427bf402db904fc509640bbd94f3986a33bc"
+      }
+    }
+  ],
+  "authorityChanged": false,
+  "purpose": "Prevent local sample journey and Running clock during official country source loading. Exact publication provenance only; no economic activation, baseline replacement or additional visual exceptions."
+}
