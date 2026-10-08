@@ -56,9 +56,12 @@ separately from this composition's successful provider checks. A subsequent
 independently reviewed positive manual-intake candidate passed Root's composed
 132 assertions, with 14 native Social cases SKIP/NOT_RUN, and merged in PR121.
 Its historical FINALIZED acknowledgement is not an economic COMMITTED receipt.
-Separate PR118's
-full check still failed on an uncaught lifecycle transport error despite passing
-2698 assertions. Neither branch is presented as a production activation.
+Separate PR118's earlier full check failed on an uncaught lifecycle transport
+error despite passing 2698 assertions. Its reviewed cleanup is now composed;
+the next full run `37780566377` failed three old Country/Office fixtures missing
+valid committed receipts (2866 pass, 153 skip). A is making a bounded fixture
+correction without relaxing production validation. These failures remain
+separate; no candidate is presented as a production activation.
 
 ## Retained integration snapshot (2026-10-07)
 

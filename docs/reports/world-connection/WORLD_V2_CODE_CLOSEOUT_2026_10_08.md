@@ -18,17 +18,28 @@ trusted runtime `37779511289`、atlas `37779511298`、main Pages `37779992133`
 
 ## 当前三个收尾包
 
-| 包                 | 固定来源与实际检查                                                                                                                         | 当前边界                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| Schema / lifecycle | PR118 `7bc960afde36423a6e6e4a46da2476a2c225ffc7`，tree9879272；B 固定来源组合 APPROVED；A 清理已获 E 独审；新 native receipt 四项实际 PASS | 全量 provider `37780566377` 在本稿时仍 IN_PROGRESS；未提前 merge         |
-| 正式结果 drawer    | D `15d5b8e` 加修复 `3354c29d2f9d039cd8d491dc8ede48325fb09753`；Root 正常 replay `c5c59cc` / `ef762d1`                                      | 原候选 CHANGES_REQUIRED、215 PASS 和三例 FAIL 保留；修复独审尚未最终落账 |
-| Office HTTP route  | G 从固定7502补现有真实 service 的 HTTP 边界                                                                                                | 施工中，固定交付、独审和对应 CI 尚未完成；不默认启动或注册生产           |
+| 包                 | 固定来源与实际检查                                                                                                                         | 当前边界                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Schema / lifecycle | PR118 `7bc960afde36423a6e6e4a46da2476a2c225ffc7`，tree9879272；B 固定来源组合 APPROVED；A 清理已获 E 独审；新 native receipt 四项实际 PASS | 全量 provider `37780566377` FAIL，三例旧 source fixture 不合法；A 定点修复中，未 merge |
+| 正式结果 drawer    | D `15d5b8e` 加修复 `3354c29d2f9d039cd8d491dc8ede48325fb09753`；Root 正常 replay `c5c59cc` / `ef762d1`                                      | F 修复独审 APPROVED，13实际 PASS；原 CHANGES_REQUIRED、215 PASS 和三例 FAIL 保留       |
+| Office HTTP route  | G 从固定7502补现有真实 service 的 HTTP 边界                                                                                                | 施工中，固定交付、独审和对应 CI 尚未完成；不默认启动或注册生产                         |
 
 Schema 新 native run `37780566375` 的实际执行 checkout
 `7398e8c0aa0b295fcf97ad7ecfd2a8336a0399a5` 与候选 tree 相同；Root 下载 JSON 后核实
 4 PASS /0 FAIL /0 SKIP，SHA256
 `094e3a98dab153e3810e2e28e8131eb679670bac8230a352d2eba5c64501dd46`。
 旧 `37772932185` 的未捕获 EINVAL 仍为 FAIL，不用新的 source approval 或窄检覆盖。
+
+新 whole run `37780566377` 的实际结果为 **2866 PASS /3 FAIL /153 SKIP**、829.06s。
+三个失败都是 `v10-1-country-office-read-flow` 的旧真实 PGlite fixture 没有 FINAL receipt，
+仅有占位 hash 的 command/event；新 publisher 严格拒绝 `decision receipt must be an object`。
+A 正核实并构造合法来源，不能移除 receipt/hash 校验或跳过断言。该 run 的 raw artifact
+upload 另因 provider CreateArtifact 超时失败；此处不声称已经下载不存在的 artifact。
+
+F 对 D 修复的固定 delta 独审报告 SHA256：
+`d744ad909a07fce951c71533818d179b73e6a0134a8bc3a186db299f831b628d`。
+原三个 closed-drawer 反例原样重跑 PASS，新增十项合法 close/reopen/readback 等控制 PASS。
+这是源码独审，Root 的组合与发布仍需各自实际 CI，不提前当作已部署。
 
 Root 对组合 drawer 实际运行 44 consumer +10 closed-drawer +4 CI prerequisite，
 共 **58 PASS /3 files**。自有 Core/Worker/API builds、strict consumer types、focused lint、
