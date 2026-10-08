@@ -18,6 +18,9 @@ on:
       - apps/world-api/src/integration/postgres-runtime-read-executor.ts
       - apps/world-api/src/integration/authenticated-office-command-service.ts
       - apps/world-worker/src/intake/postgres-office-command-intake.ts
+      - apps/world-worker/src/intake/manual-office-intake-runtime.ts
+      - tests/world-api/positive-manual-office-command.test.ts
+      - tests/support/g-manual-office-api-test-only-fixture.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
       - apps/world-worker/src/admission/**
       - tests/world-core/official-opening-admission-publication.test.ts
@@ -68,6 +71,9 @@ on:
       - apps/world-api/src/integration/postgres-runtime-read-executor.ts
       - apps/world-api/src/integration/authenticated-office-command-service.ts
       - apps/world-worker/src/intake/postgres-office-command-intake.ts
+      - apps/world-worker/src/intake/manual-office-intake-runtime.ts
+      - tests/world-api/positive-manual-office-command.test.ts
+      - tests/support/g-manual-office-api-test-only-fixture.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
       - apps/world-worker/src/admission/**
       - tests/world-core/official-opening-admission-publication.test.ts
@@ -131,6 +137,10 @@ jobs:
         run: pnpm exec vitest run --reporter=verbose tests/world-web/current-financial-position.test.ts tests/world-web/economic-visibility-consumer.test.ts tests/world-api/financial-position-read-binding.test.ts tests/integration/staged-narrow-transfer-http.test.ts tests/integration/world-api-authenticated-read-boundary.test.ts
       - name: Source-blocked manual command and Captain preparation regressions
         run: pnpm exec vitest run --reporter=verbose tests/world-api/authenticated-office-command.test.ts tests/world-core/captain-runtime-source-adapter.test.ts tests/world-core/captain-political-capital-slice.test.ts
+      - name: Conditional positive manual SQL intake and queue acknowledgement
+        run: |
+          pnpm exec vitest run --reporter=verbose tests/world-api/positive-manual-office-command.test.ts
+          pnpm exec tsc --noEmit -p tests/world-api/tsconfig.positive-manual-office-command.json
       - name: Private opening authority and actual blocked-source regressions
         run: |
           pnpm exec vitest run --reporter=verbose tests/world-core/official-opening-admission-publication.test.ts tests/world-core/official-opening-decision-reconciliation.test.ts

@@ -11,8 +11,10 @@ engines or hidden buffs.
 The Owner stopped further local preview/DEMO maintenance: work targets the
 formal `apps/world-web`, API/Worker/Core and normal release chain. Existing user
 preview services are not closed; isolated formal-code regressions remain valid.
-Last verified main is PR117 `7f1c05c7bf5b26cd2aae13f25569a4e8852f0c58`
-(documentation only; last verified functional Pages source remains PR116 `bcfc667`).
+Last verified main is PR120 `4532c20b62176de181bafe7df88f98091205087b`.
+Its three exact-head provider checks passed, the merged tree equals reviewed
+candidate `218fb03`, and Pages run `37777894945` successfully published that main.
+Static publication is not an economic API/Worker deployment or activation.
 The original PR115 `bf2fa055` complete local check **failed** on two legacy
 read-contract tests (2523 passed, 139 skipped). Both tests are now fixed without
 broadening private-data access; the formal G+D composition passed the focused
@@ -37,13 +39,17 @@ Historical D05 deferral is not a permanent construction blocker. The current
 [activation work and concrete cutover prerequisites](docs/reports/world-connection/WORLD_V2_ACTIVATION_WORK_2026_10_08.md)
 distinguish this authorization from missing source, identity and production
 deployment evidence. The engine is **not activated**; Gate B remains PENDING.
-The next [reviewed runtime source composition](docs/reports/world-connection/O_FORMAL_RUNTIME_SOURCE_CLOSURE_2026_10_08.md)
-is PR120, not an already merged or activated release. It includes independently
+The merged [reviewed runtime source composition](docs/reports/world-connection/O_FORMAL_RUNTIME_SOURCE_CLOSURE_2026_10_08.md)
+is PR120. It includes independently
 reviewed admission mechanisms, sole manual dispatch, Social SQL compatibility,
 exact unregistered release policy, formal boot guards/provenance and strict
 Office result delivery. Root's new result-chain 93, release-policy 60 and
 boot/provenance/CI 74 focused checks passed; old provider failures are retained
-until the new fixed composition obtains its own required CI. Separate PR118's
+separately from this composition's successful provider checks. A subsequent
+independently reviewed positive manual-intake candidate passed Root's composed
+132 assertions, with 14 native Social cases SKIP/NOT_RUN, and is not yet merged.
+Its historical FINALIZED acknowledgement is not an economic COMMITTED receipt.
+Separate PR118's
 full check still failed on an uncaught lifecycle transport error despite passing
 2698 assertions. Neither branch is presented as a production activation.
 
