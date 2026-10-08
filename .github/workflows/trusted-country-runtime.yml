@@ -9,6 +9,12 @@ on:
       - apps/world-web/src/financial-intake/**
       - apps/world-web/src/office-projection/**
       - apps/world-api/src/integration/postgres-read-adapter.ts
+      - apps/world-api/src/integration/office-decision-result-validator.ts
+      - apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.ts
+      - apps/world-worker/src/projections/office-decision-result-projector.ts
+      - tests/world-core/office-decision-result-projector.test.ts
+      - tests/world-core/v10-authoritative-activity-read-projection-publisher.test.ts
+      - tests/integration/world-api-postgres-read-adapter.test.ts
       - apps/world-api/src/integration/postgres-runtime-read-executor.ts
       - apps/world-api/src/integration/authenticated-office-command-service.ts
       - apps/world-worker/src/intake/postgres-office-command-intake.ts
@@ -26,6 +32,9 @@ on:
       - apps/world-web/public/season1-immersive/journey.js
       - apps/world-web/public/season1-immersive/world-clock.js
       - tests/world-web/official-country-boot-guard.test.ts
+      - scripts/verify-authoritative-ui-publication.mjs
+      - docs/reports/D_BOOT_PUBLICATION_PROVENANCE/SOURCE.json
+      - tests/world-web/boot-publication-integrity.test.ts
       - packages/core/**
       - tests/world-web/financial-intake.test.ts
       - tests/world-web/current-financial-position.test.ts
@@ -50,6 +59,12 @@ on:
       - apps/world-web/src/financial-intake/**
       - apps/world-web/src/office-projection/**
       - apps/world-api/src/integration/postgres-read-adapter.ts
+      - apps/world-api/src/integration/office-decision-result-validator.ts
+      - apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.ts
+      - apps/world-worker/src/projections/office-decision-result-projector.ts
+      - tests/world-core/office-decision-result-projector.test.ts
+      - tests/world-core/v10-authoritative-activity-read-projection-publisher.test.ts
+      - tests/integration/world-api-postgres-read-adapter.test.ts
       - apps/world-api/src/integration/postgres-runtime-read-executor.ts
       - apps/world-api/src/integration/authenticated-office-command-service.ts
       - apps/world-worker/src/intake/postgres-office-command-intake.ts
@@ -67,6 +82,9 @@ on:
       - apps/world-web/public/season1-immersive/journey.js
       - apps/world-web/public/season1-immersive/world-clock.js
       - tests/world-web/official-country-boot-guard.test.ts
+      - scripts/verify-authoritative-ui-publication.mjs
+      - docs/reports/D_BOOT_PUBLICATION_PROVENANCE/SOURCE.json
+      - tests/world-web/boot-publication-integrity.test.ts
       - packages/core/**
       - tests/world-web/financial-intake.test.ts
       - tests/world-web/current-financial-position.test.ts
@@ -121,11 +139,15 @@ jobs:
         run: |
           pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/manual-office-durable-dispatch.test.ts tests/world-core/c-social-employment-service.test.ts tests/world-core/durable-command-consumption.test.ts
           pnpm exec tsc --noEmit -p tests/support/tsconfig.g-manual-office-dispatch.json
+      - name: Scoped office decision results across the strict read boundary
+        run: |
+          pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/office-decision-result-projector.test.ts tests/integration/world-api-postgres-read-adapter.test.ts tests/world-core/v10-authoritative-activity-read-projection-publisher.test.ts
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.office-decision-results.json
       - name: Exact unregistered release policy and formal country boot guards
         run: |
           node --test tests/foundation/production-posting-release-policy.test.mjs
           pnpm exec tsc --noEmit -p tests/support/tsconfig.f-production-posting-release.json
-          pnpm exec vitest run --reporter=verbose tests/world-web/official-country-boot-guard.test.ts tests/world-web/country-module-home-guard.test.ts
+          pnpm exec vitest run --reporter=verbose tests/world-web/official-country-boot-guard.test.ts tests/world-web/country-module-home-guard.test.ts tests/world-web/boot-publication-integrity.test.ts tests/world-web/visual-publication-integrity.test.ts
       - name: Focused typecheck, lint and format
         run: |
           pnpm --filter @econmind/world-web typecheck

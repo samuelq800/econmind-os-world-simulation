@@ -44,6 +44,37 @@ provider CI、main merge、Pages 部署和正式浏览器 AFTER 结果须分别�
 
 ## 保留的激活边界
 
+### 后续独立修复与 Root 组合（同日）
+
+原 `1340774` 的 provider FAIL 保留，不改成 PASS。
+后续真实修复已完成独立审查并按原件正常 replay：
+
+- E 完整 `b64a14066c9761f483001698bb9b6b06304adeaa`（含旧 a6384 与 remediation）
+  获 A **APPROVED SOURCE / TEST_ONLY**，Root replay `acb970a` + `5e8a405`。
+  旧候选单独拒收的 CHANGES_REQUIRED 保留；新严格 reader 只接精确可选结果字段。
+  Root 实际 projector→reader 与旧 publisher 组合 **93 PASS**，自有 Core/Worker/API build
+  与 narrow types 通过。COUNTRY withheld、CB visibility、Social partial 及 Industry unavailable
+  不变；不补虚构前态，不把 mapping 正例当正式 admitted SQL。
+- F `5d74f0c479cdee2225ee9b2ebb2f075121437aac` 获 B **APPROVED SOURCE_ONLY**，
+  Root replay `09ac4fd`。仅支持同一仓库 exact HTTPS 的有/无 `.git` 写法，
+  Root 真实 Git/PGlite **60 PASS / 0 FAIL / 0 SKIP**。原 production policy 与 23 个旧测试
+  保持字节相同；caller 仍 NOT_REGISTERED / CALLER_NOT_READY。
+- D `73b7d952f788c621d14e34af35ce0cb96f711acb` 获 C **APPROVED**（仅来源校验修复），
+  Root replay `75dab05`。固定记录绑定原 archive 和 exact 两个正式 JS；不采用非空文件豁免。
+  Root `test:authoritative-ui` **PASS**：286 original、75 derived、2 visual、2 boot、70 页/140 maps；
+  4 个正式 UI suite 加 CI prerequisite **74 PASS**。原 archive 和两个正式 JS 没再改。
+
+上述 producer、reviewer 与 Root 计数分开记录。CI 增补严格结果消费者与 boot provenance
+路径/测试，不扩大权限或新增部署步骤。组合候选须取得自己的 provider 回执后才正常合并；
+本段没有提前宣布 CI、main 或正式浏览器 AFTER 成功。
+
+另一个 schema PR118 的 `9f7ed35` provider 全量实际为 **FAIL**：2698 assertion PASS、
+139 SKIP，但有一个 Node/Undici `setTypeOfService EINVAL` 未捕获异常。
+不得忽略该异常；A 正在单独修复 owned loopback lifecycle 探测/清理，原 FAIL 保留。
+其 native renewal 的真实固定回执另为 **4 PASS / 0 FAIL / 0 SKIP**，不是全量成功。
+
+G 后续正向 intake 与 D 浏览器真实结果消费仍是独立候选，尚不纳入本段。
+
 - 本包没有 SQL/schema、Supabase、旧站 public/auth/storage、开局数据或地图原件改动。
 - A 的机制需要真实签名 Owner registry、完整 source bundle 与正式 publication connector；
   当前缺源不是 ADMITTED。原 SQL veto/role/grants 未绕过。

@@ -11,7 +11,8 @@ engines or hidden buffs.
 The Owner stopped further local preview/DEMO maintenance: work targets the
 formal `apps/world-web`, API/Worker/Core and normal release chain. Existing user
 preview services are not closed; isolated formal-code regressions remain valid.
-Last verified main is PR116 `bcfc66787631a13aa5093df42954070c2d7dd66b`.
+Last verified main is PR117 `7f1c05c7bf5b26cd2aae13f25569a4e8852f0c58`
+(documentation only; last verified functional Pages source remains PR116 `bcfc667`).
 The original PR115 `bf2fa055` complete local check **failed** on two legacy
 read-contract tests (2523 passed, 139 skipped). Both tests are now fixed without
 broadening private-data access; the formal G+D composition passed the focused
@@ -36,6 +37,15 @@ Historical D05 deferral is not a permanent construction blocker. The current
 [activation work and concrete cutover prerequisites](docs/reports/world-connection/WORLD_V2_ACTIVATION_WORK_2026_10_08.md)
 distinguish this authorization from missing source, identity and production
 deployment evidence. The engine is **not activated**; Gate B remains PENDING.
+The next [reviewed runtime source composition](docs/reports/world-connection/O_FORMAL_RUNTIME_SOURCE_CLOSURE_2026_10_08.md)
+is PR120, not an already merged or activated release. It includes independently
+reviewed admission mechanisms, sole manual dispatch, Social SQL compatibility,
+exact unregistered release policy, formal boot guards/provenance and strict
+Office result delivery. Root's new result-chain 93, release-policy 60 and
+boot/provenance/CI 74 focused checks passed; old provider failures are retained
+until the new fixed composition obtains its own required CI. Separate PR118's
+full check still failed on an uncaught lifecycle transport error despite passing
+2698 assertions. Neither branch is presented as a production activation.
 
 ## Retained integration snapshot (2026-10-07)
 
