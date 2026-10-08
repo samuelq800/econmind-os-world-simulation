@@ -30,16 +30,18 @@ source registration and rehearsal are not actual production caller registration,
 Pinned Node 24.20.0 / pnpm 12.3.4, Root-owned checkout and compiled dependencies.
 Direct checks, not a repeated full `pnpm check`:
 
-| Check                                                          | Actual result                                      |
-| -------------------------------------------------------------- | -------------------------------------------------- |
-| Exact twelve-file comparison with reviewed PR114               | PASS, zero byte differences                        |
-| Migration manifest / artifact / Git provenance                 | PASS, 23 entries, zero violations                  |
-| Ephemeral clean-baseline and existing-schema PGlite rehearsals | Both PASS; 23 release rows; productionAccess=false |
-| Filtered execution-chain provenance controls                   | 12 PASS, zero skip                                 |
-| Production-posting SQL regressions                             | 22 PASS; one file, 3.38s                           |
-| Snapshot/Storage exact-suffix policy                           | 4 PASS; separate invocation, 1.15s                 |
-| Public-contract / Pages / schema CI prerequisites              | 4 PASS, 119ms                                      |
-| Production-schema strict TypeScript                            | PASS, exit 0                                       |
+| Check                                                          | Actual result                                          |
+| -------------------------------------------------------------- | ------------------------------------------------------ |
+| Exact twelve-file comparison with reviewed PR114               | PASS, zero byte differences                            |
+| Migration manifest / artifact / Git provenance                 | PASS, 23 entries, zero violations                      |
+| Ephemeral clean-baseline and existing-schema PGlite rehearsals | Both PASS; 23 release rows; productionAccess=false     |
+| Filtered execution-chain provenance controls                   | 12 PASS, zero skip                                     |
+| Production-posting SQL regressions                             | 22 PASS; one file, 3.38s                               |
+| Snapshot/Storage exact-suffix policy                           | 4 PASS; separate invocation, 1.15s                     |
+| Public-contract / Pages / schema CI prerequisites              | 4 PASS, 119ms                                          |
+| Production-schema strict TypeScript                            | PASS, exit 0                                           |
+| Scoped ESLint, Prettier and whitespace                         | PASS, exit 0                                           |
+| AST / environment / secret scan                                | PASS; 292 sources / local DB unconfigured / 2178 files |
 
 The first combined Vitest selector used a nonexistent `tests/world-core/` path
 for the snapshot policy and therefore ran only the 22 posting tests. It did not
@@ -60,8 +62,17 @@ read-only/no-deploy permissions and absence of production dispatch/credentials.
 No existing assertion is weakened or ignored; no `continue-on-error` is added.
 
 The historical PR114 native-renewal failure is not relabeled PASS. A's frozen
-renewal fixture compatibility candidate `fe8c4f2` is undergoing B's independent
-review separately; its four real native cases are still required. New provider
+renewal fixture compatibility candidate `fe8c4f2` completed B's independent
+source-only review: `SOURCE_ONLY_MERGE_APPROVED`, zero new blockers/majors,
+23 pure controls passed independently. The report SHA-256 is
+`4b70ead0ce7be23aa8a12a98f763ebb99d8c29acf150cb9a9346657e8ed12bb8`.
+The seven exact reviewed files were replayed as `a9dbd08`; their four real native
+cases are still required. The retained old failed JSON is not a fresh provider
+download; its reconstructed original bytes are separately labeled by B.
+Root's seven-file comparison was byte-identical to `fe8c4f2`; fresh composed
+23 pure controls passed in 2.21s at 15:20:38 Asia/Shanghai, and the focused
+strict renewal TypeScript check exited 0. This is still not native renewal.
+New provider
 results and downloaded receipts must be bound to the final composed candidate.
 Source-only merge is held until applicable checks and required review close.
 Old PR114 stays separate; no automatic production dispatch or rerun was issued.
