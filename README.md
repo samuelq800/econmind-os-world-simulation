@@ -11,7 +11,7 @@ engines or hidden buffs.
 The Owner stopped further local preview/DEMO maintenance: work targets the
 formal `apps/world-web`, API/Worker/Core and normal release chain. Existing user
 preview services are not closed; isolated formal-code regressions remain valid.
-Last verified main is PR115 `38894fb2835ff2793832b1e0e98424e6cc451518`.
+Last verified main is PR116 `bcfc66787631a13aa5093df42954070c2d7dd66b`.
 The original PR115 `bf2fa055` complete local check **failed** on two legacy
 read-contract tests (2523 passed, 139 skipped). Both tests are now fixed without
 broadening private-data access; the formal G+D composition passed the focused
@@ -24,12 +24,18 @@ the public Core contract. The exact final PR115 candidate passed three provider
 checks and was normally merged; Pages publication `37734036448` also completed
 successfully. Live runtime-entry JS and shared CSS match exact release bytes.
 These are formal static-source delivery, not economic activation or full gameplay.
-The next reviewed source-only package adds manual-Office rejection boundaries,
-Captain source-to-Draft preparation and native-test compatibility; official domain
-sources and positive sole-consumer execution remain blocked.
+PR116 also merged the independently reviewed manual-Office rejection boundaries,
+Captain source-to-Draft preparation and native-test compatibility. Its fixed
+candidate passed trusted runtime and atlas CI; main Pages publication
+`37736879174` completed successfully. Official domain sources and positive
+sole-consumer execution remain blocked.
 No source-only, TEST_ONLY or green CI result admits official
 opening state, activates production, completes six Offices or closes Gate B.
-Production host/activation (D05) remains deferred; Gate B remains PENDING.
+The latest Owner instruction now requests formal economic-engine activation.
+Historical D05 deferral is not a permanent construction blocker. The current
+[activation work and concrete cutover prerequisites](docs/reports/world-connection/WORLD_V2_ACTIVATION_WORK_2026_10_08.md)
+distinguish this authorization from missing source, identity and production
+deployment evidence. The engine is **not activated**; Gate B remains PENDING.
 
 ## Retained integration snapshot (2026-10-07)
 
