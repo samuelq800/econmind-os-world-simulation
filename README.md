@@ -5,6 +5,13 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
+## Current collaborator handoff (2026-10-08)
+
+[当前版本说明与协作交接（中文）](docs/HANDOFF_CURRENT.zh-CN.md)：包含同步分支、代码入口、
+本地检查、实际发布状态与剩余阻塞。同伴负责仓库代码和测试，不操作 Cloudflare；
+Cloudflare 发布由项目负责人负责。PR124 的交付分支在本文记录时尚未合入 main，
+只拉取 main 不会取得该分支的完整变更。下列历史 checkpoint 保留各自的证据范围。
+
 ## Current formal-release checkpoint (2026-10-08)
 
 [Current code closeout and the external opening/Worker handoff](docs/reports/world-connection/WORLD_V2_CODE_CLOSEOUT_2026_10_08.md).
