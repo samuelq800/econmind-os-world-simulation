@@ -54,10 +54,12 @@ async function verifiedMigration(repositoryRoot) {
     throw new Error('BALANCED_CANDIDATE_MIGRATION_CHAIN_INVALID');
   }
   try {
-    // 0019 remains the release being rendered. Later reviewed reader grants
-    // may be present in the repository manifest but are never re-rendered here.
+    // Validate the complete manifest/Git provenance above and the exact 0022/
+    // 0023 identities in the historical selector before taking this prefix.
+    // The old staging allowlist still checks only its reviewed 20/21 chain;
+    // 0019 alone is rendered, never either later companion's SQL.
     assertV09StagingMigrationAllowlist(
-      historicalWorldOnlyMigrations(manifest.migrations),
+      historicalWorldOnlyMigrations(manifest.migrations).slice(0, 21),
     );
   } catch {
     throw new Error('BALANCED_CANDIDATE_MIGRATION_CHAIN_INVALID');
