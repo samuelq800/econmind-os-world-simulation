@@ -22,7 +22,7 @@ export const PRODUCTION_POSTING_RELEASE = Object.freeze({
   callerRegistration: 'NOT_REGISTERED',
   callerReadiness: 'CALLER_NOT_READY',
 });
-const REMOTE = 'https://github.com/samuelq800/econmind-os-world-simulation.git';
+const REMOTE = 'https://github.com/samuelq800/econmind-os-world-simulation';
 const hash = (/** @type {string | Buffer} */ bytes) =>
   createHash('sha256').update(bytes).digest('hex');
 const literal = (/** @type {string} */ value) =>
@@ -78,11 +78,12 @@ function ledger(/** @type {Migration[]} */ entries) {
 }
 async function verifiedSource(/** @type {string} */ root) {
   const fixed = PRODUCTION_POSTING_RELEASE;
-  if (
-    (await requiredGit(root, ['remote', 'get-url', 'origin']))
-      .toString()
-      .trim() !== REMOTE
-  )
+  // Git emits one record newline. Accept two exact HTTPS spellings, never URL
+  // normalization that could admit ports, userinfo, encoded paths or suffixes.
+  const remote = (await requiredGit(root, ['remote', 'get-url', 'origin']))
+    .toString()
+    .replace(/\n$/u, '');
+  if (remote !== REMOTE && remote !== `${REMOTE}.git`)
     fail('POSTING_RELEASE_REMOTE_INVALID');
   if (
     (
