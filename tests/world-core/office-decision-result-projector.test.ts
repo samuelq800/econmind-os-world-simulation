@@ -40,6 +40,13 @@ import {
 } from '../../apps/world-worker/src/projections/office-decision-result-projector.js';
 import { AuthoritativeActivityReadProjectionPublisher } from '../../apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.js';
 import type { EconomicReadVisibilitySnapshot } from '../../apps/world-worker/src/projections/economic-read-visibility-source.js';
+import {
+  createWorldReadRequest,
+  parseSupabaseAuthSubject,
+  parseWorldProjectionDto,
+  readEntitledWorldProjection,
+} from '../../apps/world-api/src/index.js';
+import type { ParameterizedPgReadExecutor } from '../../apps/world-api/src/integration/postgres-read-adapter.js';
 import type {
   SqlDatabase,
   SqlExecutor,
@@ -837,8 +844,15 @@ class HeldDatabase implements SqlDatabase {
   active = true;
   corrupt = false;
   readonly statements: string[] = [];
-  projections: readonly { classification: unknown; payload: string }[] = [];
-  readonly value = captain();
+  projections: readonly {
+    classification: unknown;
+    payload: string;
+    row: Record<string, unknown>;
+  }[] = [];
+  constructor(
+    readonly value = captain(),
+    readonly scopedOffice = value.command.officeId ?? 'SOCIAL',
+  ) {}
   async transaction<R>(
     operation: (transaction: SqlExecutor) => Promise<R>,
   ): Promise<R> {
@@ -861,12 +875,14 @@ class HeldDatabase implements SqlDatabase {
     if (sql.includes('assert_world_writer_commit_guard'))
       rows = [{ world_version: '1', event_sequence: '1' }];
     else if (sql.includes('from world_v2.current_commit_authorization'))
-      rows = this.active ? [{ country_id: COUNTRY, office_id: 'CAPTAIN' }] : [];
+      rows = this.active
+        ? [{ country_id: COUNTRY, office_id: this.scopedOffice }]
+        : [];
     else if (sql.includes('count(event.event_id)'))
       rows = [
         {
           country_id: COUNTRY,
-          office_id: 'CAPTAIN',
+          office_id: c.officeId,
           event_count: '1',
           last_event_sequence: '1',
           last_event_world_version: '1',
@@ -940,7 +956,20 @@ class HeldDatabase implements SqlDatabase {
     else if (sql.includes('insert into world_v2.read_projection'))
       this.projections = [
         ...this.projections,
-        { classification: parameters[1], payload: String(parameters[6]) },
+        {
+          classification: parameters[1],
+          payload: String(parameters[6]),
+          row: {
+            world_id: parameters[0],
+            classification: parameters[1],
+            scope_key: parameters[2],
+            schema_version: parameters[3],
+            world_version: parameters[4],
+            event_sequence: parameters[5],
+            payload: JSON.parse(String(parameters[6])),
+            generated_at: parameters[7],
+          },
+        },
       ];
     else if (sql.includes('count(*)')) rows = [{ count: '0' }];
     else if (!sql.includes('posting'))
@@ -962,6 +991,288 @@ describe('SHARED-4 existing sole replace writer integration (SQL double, not Pos
       ).lease,
       '1',
     );
+  const subject = parseSupabaseAuthSubject(
+    '11111111-1111-4111-8111-111111111111',
+  );
+  async function publish(db = new HeldDatabase()) {
+    await new AuthoritativeActivityReadProjectionPublisher({
+      database: db,
+      workerId: 'WORKER_TEST_ONLY_RESULT',
+    }).replace({ assertion: assertion(), observedAtReal: AT });
+    return db;
+  }
+  function readRow(
+    db: HeldDatabase,
+    row: Record<string, unknown>,
+    edit?: (
+      payload: Record<string, unknown>,
+      row: Record<string, unknown>,
+    ) => void,
+  ) {
+    const copy = structuredClone(row);
+    edit?.(copy.payload as Record<string, unknown>, copy);
+    const executor: ParameterizedPgReadExecutor = {
+      query: async (request) => {
+        expect(request.values.slice(0, 4)).toEqual([
+          subject,
+          WORLD,
+          row.classification,
+          row.scope_key,
+        ]);
+        expect(request.verifiedAuthSubject).toBe(subject);
+        expect(request.text).toMatch(/entitlement.active/u);
+        expect(request.text).toMatch(/entitlement.revoked_at is null/u);
+        return { rows: db.active ? [copy] : [] };
+      },
+    };
+    return readEntitledWorldProjection({
+      executor,
+      authSubject: subject,
+      request: createWorldReadRequest({
+        requestId: '11111111-1111-4111-8111-111111111112',
+        worldId: WORLD,
+        classification: row.classification as 'COUNTRY' | 'OFFICE_PRIVATE',
+        scopeKey: String(row.scope_key),
+      }),
+    });
+  }
+  it('delivers actual publisher country/private rows through strict reader and DTO; legacy bodies remain compatible', async () => {
+    const db = await publish();
+    for (const projection of db.projections) {
+      const dto = await readRow(db, projection.row);
+      expect(dto).not.toBeNull();
+      expect(parseWorldProjectionDto(dto)).toEqual(dto);
+      expect(dto!.payload).toEqual(JSON.parse(projection.payload));
+      const legacy = await readRow(db, projection.row, (payload) => {
+        delete payload.decisionResult;
+        delete payload.decisionResults;
+      });
+      expect(legacy).not.toBeNull();
+      expect(JSON.stringify(legacy)).not.toContain('decisionResult');
+    }
+    const privateRow = db.projections.find(
+      (p) => p.classification === 'OFFICE_PRIVATE',
+    )!.row;
+    db.active = false;
+    await expect(readRow(db, privateRow)).resolves.toBeNull();
+  });
+  it.each(['CENTRAL_BANK', 'SOCIAL', 'INDUSTRY', 'TRADE'])(
+    'delivers actual publisher %s denial/partial/unsupported result without upgrading readiness',
+    async (office) => {
+      const db = await publish(
+        new HeldDatabase(
+          office === 'CENTRAL_BANK'
+            ? cb()
+            : office === 'SOCIAL'
+              ? social()[0]!
+              : captain(),
+          office,
+        ),
+      );
+      const row = db.projections.find(
+        (p) => p.classification === 'OFFICE_PRIVATE',
+      )!.row;
+      const dto = await readRow(db, row);
+      expect(dto!.payload).toEqual(row.payload);
+      const result = (dto!.payload as Record<string, unknown>).decisionResult;
+      if (office === 'CENTRAL_BANK')
+        expect(result).toMatchObject({
+          status: 'NOT_AUTHORIZED',
+          cause: null,
+          metrics: [],
+        });
+      if (office === 'INDUSTRY')
+        expect(result).toMatchObject({
+          status: 'SOURCE_UNAVAILABLE',
+          cause: null,
+          metrics: [],
+        });
+      if (office === 'TRADE') expect(result).toBeNull();
+      if (office === 'SOCIAL')
+        expect(result).toMatchObject({
+          status: 'COMMITTED',
+          businessState: 'PLAN_PENDING',
+          afterState: null,
+          reason: 'PREDECESSOR_STATE_NOT_CARRIED',
+        });
+    },
+  );
+  it.each([
+    'countryPrivateDetail',
+    'wrongCountry',
+    'wrongOffice',
+    'wrongWorld',
+    'wrongHead',
+    'wrongSchema',
+    'unknownField',
+    'missingField',
+    'lastCauseFuture',
+    'lastCauseVersion',
+    'lastCauseHash',
+    'wrongKind',
+    'metricDelta',
+    'metricIdentity',
+    'nullSupported',
+    'rowScope',
+    'rowSchema',
+    'rowMetadata',
+    'wrongClassification',
+    'arrayResult',
+    'headExtra',
+    'metricExtra',
+    'wrongTopField',
+    'lastCauseStale',
+  ])(
+    'rejects %s from actual published row at strict reader boundary',
+    async (kind) => {
+      const db = await publish();
+      const country = kind === 'countryPrivateDetail';
+      const row = db.projections.find(
+        (p) => p.classification === (country ? 'COUNTRY' : 'OFFICE_PRIVATE'),
+      )!.row;
+      await expect(
+        readRow(db, row, (payload, rawRow) => {
+          const result = payload[
+            country ? 'decisionResults' : 'decisionResult'
+          ] as Record<string, unknown>;
+          const head = result.sourceHead as Record<string, unknown>,
+            cause = result.cause as Record<string, unknown>;
+          const metric = (
+            result.metrics as Record<string, unknown>[] | undefined
+          )?.[0];
+          if (kind === 'countryPrivateDetail')
+            result.metrics = [{ before: '11.5' }];
+          if (kind === 'wrongCountry') result.countryId = 'COUNTRY_OTHER';
+          if (kind === 'wrongOffice') result.officeId = 'SOCIAL';
+          if (kind === 'wrongWorld') head.worldId = 'WORLD_OTHER';
+          if (kind === 'wrongHead') head.eventSequence = '2';
+          if (kind === 'wrongSchema')
+            result.schemaVersion = 'office-decision-results-v2';
+          if (kind === 'unknownField')
+            result.privateRawEvent = { secret: 'TEST_ONLY' };
+          if (kind === 'missingField') delete result.afterState;
+          if (kind === 'lastCauseFuture') cause.eventSequence = '2';
+          if (kind === 'lastCauseVersion') cause.worldVersionBefore = '1';
+          if (kind === 'lastCauseHash') cause.eventFingerprint = 'unverified';
+          if (kind === 'wrongKind') result.businessState = 'MATCH_SETTLED';
+          if (kind === 'metricDelta') metric!.delta = '9';
+          if (kind === 'metricIdentity') metric!.key = 'CABINET_PRIVATE_ROSTER';
+          if (kind === 'nullSupported') payload.decisionResult = null;
+          if (kind === 'rowScope') rawRow.scope_key = 'COUNTRY_OTHER';
+          if (kind === 'rowSchema')
+            rawRow.schema_version = 'world-projection-read-v2';
+          if (kind === 'rowMetadata') rawRow.authorization = 'fabricated';
+          if (kind === 'wrongClassification') result.classification = 'COUNTRY';
+          if (kind === 'arrayResult') payload.decisionResult = [];
+          if (kind === 'headExtra') head.privateSeed = 'TEST_ONLY';
+          if (kind === 'metricExtra') metric!.privateAccount = 'TEST_ONLY';
+          if (kind === 'wrongTopField') payload.decisionResults = result;
+          if (kind === 'lastCauseStale') {
+            rawRow.world_version = '2';
+            rawRow.event_sequence = '2';
+            head.worldVersion = '2';
+            head.eventSequence = '2';
+            const activity = payload.activity as Record<string, unknown>;
+            activity.lastAuthoritativeEventWorldVersion = '2';
+            activity.lastAuthoritativeEventSequence = '2';
+          }
+        }),
+      ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
+    },
+  );
+  it('preserves an older last business cause under a newer sparse publication head', async () => {
+    const db = await publish(),
+      row = db.projections.find(
+        (p) => p.classification === 'OFFICE_PRIVATE',
+      )!.row;
+    const copy = structuredClone(row);
+    copy.world_version = '2';
+    copy.event_sequence = '2';
+    (
+      (copy.payload as Record<string, unknown>).decisionResult as Record<
+        string,
+        unknown
+      >
+    ).sourceHead = {
+      worldId: WORLD,
+      worldVersion: '2',
+      eventSequence: '2',
+    };
+    const dto = await readRow(db, copy);
+    expect(
+      (dto!.payload as Record<string, unknown>).decisionResult,
+    ).toMatchObject({
+      sourceHead: { worldVersion: '2' },
+      cause: { worldVersionAfter: '1' },
+      semantics: 'COMMITTED_EVENT_RESULT_NOT_CURRENT_POSITION',
+    });
+  });
+  it('rejects unavailable reason arrays, denied detail, and non-null unsupported office bodies', async () => {
+    for (const office of ['CAPTAIN', 'CENTRAL_BANK', 'TRADE']) {
+      const db = await publish(new HeldDatabase(captain(), office));
+      const row = db.projections.find(
+        (p) => p.classification === 'OFFICE_PRIVATE',
+      )!.row;
+      await expect(
+        readRow(db, row, (payload) => {
+          if (office === 'TRADE')
+            payload.decisionResult = project([captain()], 'CAPTAIN');
+          else if (office === 'CENTRAL_BANK')
+            (payload.decisionResult as Record<string, unknown>).metrics = [
+              { after: '100' },
+            ];
+          else
+            Object.assign(payload.decisionResult as Record<string, unknown>, {
+              status: 'SOURCE_UNAVAILABLE',
+              reason: ['NO_COMMITTED_DOMAIN_RESULT'],
+              source: null,
+              businessState: null,
+              cause: null,
+              metrics: [],
+            });
+        }),
+      ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
+    }
+  });
+  it('validates real projector CB and Social due DTO shapes; refuses CB visibility bypass and fabricated Social before', async () => {
+    const db = await publish();
+    const baseRow = db.projections.find(
+      (p) => p.classification === 'OFFICE_PRIVATE',
+    )!.row;
+    for (const office of ['CENTRAL_BANK', 'SOCIAL']) {
+      const result = project(
+        office === 'CENTRAL_BANK' ? [cb()] : social(),
+        office,
+      )!;
+      const row = structuredClone(baseRow),
+        payload = row.payload as Record<string, unknown>;
+      payload.officeId = office;
+      payload.decisionResult = result;
+      row.scope_key = `OFFICE_${Buffer.from(COUNTRY).toString('hex').toUpperCase()}_${Buffer.from(office).toString('hex').toUpperCase()}`;
+      row.world_version = result.sourceHead.worldVersion;
+      row.event_sequence = result.sourceHead.eventSequence;
+      const ledger = payload.ledger as Record<string, unknown>;
+      (ledger.visibility as Record<string, unknown>).financialDetail =
+        office === 'CENTRAL_BANK' ? 'AUTHORIZED_FILTERED' : 'NOT_AUTHORIZED';
+      expect(await readRow(db, row)).not.toBeNull();
+      await expect(
+        readRow(db, row, (wire) => {
+          if (office === 'CENTRAL_BANK')
+            (
+              (wire.ledger as Record<string, unknown>).visibility as Record<
+                string,
+                unknown
+              >
+            ).financialDetail = 'NOT_AUTHORIZED';
+          else
+            (
+              (wire.decisionResult as Record<string, unknown>)
+                .metrics as Record<string, unknown>[]
+            )[0]!.before = '0';
+        }),
+      ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
+    }
+  });
   it('publishes exact result inside existing replace with current scopes; revocation removes private projection', async () => {
     const db = new HeldDatabase(),
       publisher = new AuthoritativeActivityReadProjectionPublisher({
