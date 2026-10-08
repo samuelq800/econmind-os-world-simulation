@@ -1,6 +1,8 @@
 // TEST_ONLY: real PGlite transaction/request, no network/native/prod caller.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
@@ -42,6 +44,116 @@ const gitBytes = (ref) =>
       GIT_CONFIG_GLOBAL: '/dev/null',
     },
   });
+
+test('exact HTTPS origin accepts optional .git only using actual Git objects', async (t) => {
+  const fixtureRoot = await mkdtemp(path.join(tmpdir(), 'f-posting-remote-'));
+  const fixtureRepository = path.join(fixtureRoot, 'source.git');
+  const remote = 'https://github.com/samuelq800/econmind-os-world-simulation';
+  const fixtureGit = (args) =>
+    execFileSync('git', ['--no-replace-objects', ...args], {
+      cwd: fixtureRoot,
+      env: {
+        PATH: '/usr/bin:/bin',
+        GIT_CONFIG_NOSYSTEM: '1',
+        GIT_CONFIG_GLOBAL: '/dev/null',
+      },
+      stdio: 'pipe',
+    });
+  try {
+    // Local shared bare clone: genuine immutable objects, no fetch/network.
+    // Only this owned fixture's origin is changed; never the subject config.
+    fixtureGit([
+      'clone',
+      '--bare',
+      '--shared',
+      repositoryRoot,
+      fixtureRepository,
+    ]);
+    for (const url of [remote, remote + '.git']) {
+      await t.test(`accepts ${url}`, async () => {
+        fixtureGit([
+          '-C',
+          fixtureRepository,
+          'remote',
+          'set-url',
+          'origin',
+          url,
+        ]);
+        for (const phase of ['publish', 'readback']) {
+          const plan = await prepareProductionPostingRelease({
+            ...options(phase),
+            repositoryRoot: fixtureRepository,
+          });
+          assert.deepEqual(
+            plan.request,
+            phase === 'publish' ? publish.request : readback.request,
+          );
+          assert.equal(plan.callerRegistration, 'NOT_REGISTERED');
+          assert.equal(plan.callerReadiness, 'CALLER_NOT_READY');
+        }
+      });
+    }
+    for (const url of [
+      'http://github.com/samuelq800/econmind-os-world-simulation',
+      'https://example.com/samuelq800/econmind-os-world-simulation',
+      'https://github.com.evil.test/samuelq800/econmind-os-world-simulation',
+      'https://github.com/other/econmind-os-world-simulation',
+      'https://github.com/samuelq800/other',
+      remote + '/',
+      remote + '.git/',
+      remote + '.git.git',
+      remote + '-other',
+      remote + '.git/extra',
+      remote + '?ref=main',
+      remote + '.git?ref=main',
+      remote + '#main',
+      remote + '.git#main',
+      'https://github.com:443/samuelq800/econmind-os-world-simulation',
+      'https://github.com:8443/samuelq800/econmind-os-world-simulation',
+      'https://user@github.com/samuelq800/econmind-os-world-simulation',
+      'https://user:password@github.com/samuelq800/econmind-os-world-simulation',
+      'https://github.com@evil.test/samuelq800/econmind-os-world-simulation',
+      'https://github.com./samuelq800/econmind-os-world-simulation',
+      'https://GITHUB.COM/samuelq800/econmind-os-world-simulation',
+      'https://github.com/Samuelq800/econmind-os-world-simulation',
+      'https://github.com/samuelq800/Econmind-os-world-simulation',
+      'https://github.com/samuelq800/%65conmind-os-world-simulation',
+      'https://github.com/samuelq800/econmind-os-world-simulation%2egit',
+      'https://github.com/samuelq800%2feconmind-os-world-simulation',
+      'https://github.com/samuelq800/../samuelq800/econmind-os-world-simulation',
+      'https://github.com//samuelq800/econmind-os-world-simulation',
+      'git@github.com:samuelq800/econmind-os-world-simulation.git',
+      'ssh://git@github.com/samuelq800/econmind-os-world-simulation.git',
+      ' ' + remote,
+      remote + ' ',
+      remote + '\n',
+      remote + '\r',
+    ]) {
+      await t.test(
+        `denies non-exact origin ${JSON.stringify(url)}`,
+        async () => {
+          fixtureGit([
+            '-C',
+            fixtureRepository,
+            'remote',
+            'set-url',
+            'origin',
+            url,
+          ]);
+          await assert.rejects(
+            prepareProductionPostingRelease({
+              ...options(),
+              repositoryRoot: fixtureRepository,
+            }),
+            /POSTING_RELEASE_REMOTE_INVALID/u,
+          );
+        },
+      );
+    }
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
+});
 
 test('selects fixed PR114 Git bytes even though current HEAD/main lacks 0023', () => {
   assert.equal(fixed.sourceCommit, '7461a053a74131fcc8273a8ac981e28b510ca03c');
