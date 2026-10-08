@@ -1,6 +1,9 @@
 # Classified committed-result drawer consumer
 
-Status: `IMPLEMENTED_UNVERIFIED`. Independent review, composed CI and publication pending.
+Status: `IMPLEMENTED_UNVERIFIED` for the narrow remediation below. F reviewed
+original candidate `15d5b8e3d510eedb696128c6a1dc87fa3dc91346` as
+`CHANGES_REQUIRED` (F-D-01). That verdict/evidence is preserved; this replacement
+has not independently closed it. Independent review, composed CI and publication pending.
 
 Base: `5e8a405004b1617233d1274f0d40339336d7826c`.
 Base tree: `34c97b7ec3c3e14081a0cd3aaaa978ee895b9a5b`.
@@ -150,3 +153,59 @@ derived display is not approval; commands remain disabled. After approved
 host binding and publication, verify one genuine authorized result and a
 revocation clear in the official browser. Until then the correct default remains
 missing/unavailable, with no sample-result fallback.
+
+## F-D-01 closed-drawer remediation delta
+
+Remediation parent: `15d5b8e3d510eedb696128c6a1dc87fa3dc91346`, tree
+`56878a69fbb2ba0b6e96eafba1a156bae24bc11e`. Same owned branch/worktree.
+The independent 215 PASS does not cancel F's separate **3 FAIL**.
+
+Read-only original F report and helper were read and SHA-256 verified against
+Root's frozen handoff. They remain unchanged:
+
+- Report SHA: `4e898e2435c8cd22951421b3417e456d13d07bbf6a3fccabc5407c5f90f75d39`.
+- Helper SHA: `fa261d6b7f150ce46eb631b93ff998dcb578426846cfa83564ee133cf0ddf328`.
+- Both are under `/Users/samuel/.codex/state/plugins/codex-security/scans/d-office-decision-result-consumer/artifacts-8d66da755f2372f0545c0bbeba93231080f47f658ae4c7614900087a2e551017/artifacts/F_D_RESULT_REVIEW_2026_10_08/`.
+
+Only production change: existing `office-projection/view.ts`. A closed drawer
+now removes all child nodes before returning from a render notification. This
+removes metrics, cause/fingerprints, source/authorization metadata, financial
+readouts and FINAL history from the materialized sink. The Close button also
+clears immediately; a native close-event listener covers Escape/host close and
+does not clear a surface already reopened before a queued event arrives.
+No CSS-only hiding, alternate state, DTO/backend/controller/client or authority
+change. Normal Close retains a still-valid model/receipt and seat lifetime;
+reopen renders only after the original current/liveness check. Revocation,
+disconnect, navigation and failed/late reads keep the original state semantics.
+
+New owned `office-projection-closed-drawer.test.ts` ports F's installed-view
+integration mechanism to a strict-typed DOM double. The first three losses
+also isolate the render guard by closing without delivering a close event, so
+they cannot pass merely because the Close button discarded old nodes. Separate
+controls exercise actual Close/native-close callbacks and reopening. The
+existing focused tsconfig includes this regression. This report is the only
+other changed file; the original 215 tests and all result parsing stay unchanged.
+
+Actual delta evidence, Node 24.20.0 / pnpm 12.3.4, 2026-10-08:
+
+- Before the view fix, `pnpm exec vitest run tests/world-web/office-projection-closed-drawer.test.ts -t 'closed drawer clears result'`:
+  exit **1**, **3 FAIL** (revoke, disconnect, same-element role change). Each had
+  `model=null` but **18** old dialog children. Six other registered cases were
+  intentionally unselected/NOT_RUN, not acceptance evidence.
+- After the fix, the new installed-drawer test file: exit **0**, **10/10 PASS**.
+  The three original loss scenarios pass. Additional controls cover normal
+  Close/focus/model preservation/reopen without duplicate read/fresh readback,
+  native close, queued-close-after-reopen, country change, pagehide, closed FINAL
+  and financial history revocation, and closed pending read/late retirement.
+- Focused strict tsc, ESLint, Prettier and `git diff --check`: PASS.
+- Delta outside view/new regression/tsconfig/report: zero. Core/API/Worker,
+  DTO, parser/model/controller/client, public scripts/UI/map, preview, database,
+  authority and status/gate remain untouched.
+- Original **215** tests were **not rerun**, as directed; their independent F
+  PASS and separate FAIL packet remain valid historical evidence, not a new
+  full-suite claim. Full build/composed publication/real browser/native DB/
+  real host/engine/Gate B were not repeated or activated by this delta.
+
+Implementation is ready only for F's immutable **delta** re-review. Do not mark
+F-D-01 independently closed or publish until Root obtains that review and
+performs the separately required composed publication checks.
