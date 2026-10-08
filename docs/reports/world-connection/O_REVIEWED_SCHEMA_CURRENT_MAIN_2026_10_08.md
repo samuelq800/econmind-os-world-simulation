@@ -76,3 +76,42 @@ New provider
 results and downloaded receipts must be bound to the final composed candidate.
 Source-only merge is held until applicable checks and required review close.
 Old PR114 stays separate; no automatic production dispatch or rerun was issued.
+
+## Fresh provider failure and narrow forward correction
+
+PR118 candidate `3bfc5864d1277cac9db86406927a7dcb6adeb821` passed trusted runtime
+`37743026353`, native renewal `37743026333`, disposable V09/V10 and Storage-source
+checks. Downloaded native JSON independently confirms 4PASS/0FAIL/0SKIP;
+actual merge checkout and candidate share tree `e1f1c11842c3557f027e3b93d433bedad1ad09c0`.
+Raw JSON SHA-256: `0c998d8a7a03a610cb0287dd6e80f1eb96bbb89b58856eed0a9a34237358a389`.
+
+The whole official check `37743026415` nevertheless **FAILS**:
+2676PASS / 1FAIL / 139SKIP, 733.07s. Its sole failure is the legacy
+`v09-disposable-postgres-evidence` expectation that the current manifest still
+loads as a capped 0021 staging chain. The unchanged loader correctly rejects
+the newly registered 0023 suffix. This is not permission to broaden the old
+staging allowlist or ignore the failure.
+
+The forward correction changes only that stale positive expectation into an
+exact registered-0023 identity check and an actual loader rejection. The same
+file's legitimate 20/21 controls, missing/reordered/unknown/repinned rejection,
+client-before-policy prohibitions and complete cleanup footprint assertions
+remain intact. Runner, selector, staging policy, SQL, roles, source and default
+callers are unchanged. The corrected file passed all 14 tests in 1.21s at
+15:56:21 Asia/Shanghai; scoped lint and whitespace checks passed.
+This test-only correction requires independent narrow closure and a fresh final
+provider check before merge; the failed result remains failed.
+
+Configured `pnpm typecheck` passed after the correction, including fresh Core
+and Worker builds and all workspace typecheck commands. An extra ad-hoc strict
+check of this legacy test with JavaScript inference was **FAIL**, not a new
+test-type PASS: five diagnostics in unchanged mock-client/readonly/UUID bodies.
+An in-memory TypeScript-host control loaded the immutable `3bfc5864` test at its
+original path and found six diagnostics: the same five plus the removed old
+mapping's implicit-any parameter. No new diagnostic was introduced. An initial
+control wrongly expected equal diagnostic counts and failed; the subsequent
+multiset comparison established zero added diagnostics. Neither script/config
+nor any unchanged test body was weakened; this does not claim the optional
+ad-hoc typecheck passed or excuse any mandatory configured check.
+The downloaded whole-check FAIL log is retained separately with SHA-256
+`aa4be0c8c4d2cea520f9f8d60da665d11836cb6d5978280ffd80f8062f0b32b8`.
