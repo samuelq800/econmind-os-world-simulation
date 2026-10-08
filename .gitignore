@@ -17,3 +17,4 @@ supabase/.temp/
 .vite-env-test-*/
 /artifacts/world-seed-delivery-v1/
 /.seed-validation/
+**/.wrangler/
