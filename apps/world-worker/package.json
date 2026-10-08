@@ -8,6 +8,10 @@
       "types": "./dist/intake/postgres-narrow-transfer-intake.d.ts",
       "default": "./dist/intake/postgres-narrow-transfer-intake.js"
     },
+    "./office-command-intake": {
+      "types": "./dist/intake/postgres-office-command-intake.d.ts",
+      "default": "./dist/intake/postgres-office-command-intake.js"
+    },
     "./approval-store": {
       "types": "./dist/persistence/narrow-transfer-approval-store.d.ts",
       "default": "./dist/persistence/narrow-transfer-approval-store.js"
