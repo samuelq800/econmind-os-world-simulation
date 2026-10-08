@@ -14,10 +14,18 @@ import { PostgresSqlDatabase } from '../../apps/world-worker/src/persistence/pos
 import { RuntimeReadBindingStore } from '../../apps/world-worker/src/persistence/runtime-read-binding-store.js';
 import { CurrentAuthorizationEntitlementPublisher } from '../../apps/world-worker/src/projections/current-authorization-entitlement-publisher.js';
 import { AuthoritativeActivityReadProjectionPublisher } from '../../apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.js';
-import { officePrivateReadProjectionScopeKey } from '../../apps/world-worker/src/projections/current-authorization-entitlement-publisher.js';
+import {
+  countryReadProjectionScopeKey,
+  officePrivateReadProjectionScopeKey,
+} from '../../apps/world-worker/src/projections/current-authorization-entitlement-publisher.js';
+import { SqlEconomicReadVisibilitySource } from '../../apps/world-worker/src/projections/economic-read-visibility-source.js';
+import { WorldOpeningSeedStore } from '../../apps/world-worker/src/persistence/opening-seed-store.js';
 import { createAuthenticatedFinancialIntakeComposition } from '../../apps/world-api/src/integration/authenticated-financial-intake-composition.js';
 import { createNonactivatedRuntimeReadHost } from '../../apps/world-api/src/integration/nonactivated-runtime-read-host.js';
-import { createCIsolatedFinancialFixture } from './c-isolated-financial-fixture.js';
+import {
+  cIsolatedHash,
+  createCIsolatedFinancialFixture,
+} from './c-isolated-financial-fixture.js';
 import type { V10FixtureActorKey } from './v10-two-country-fixture.js';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
 
@@ -358,7 +366,11 @@ export async function createOAuthenticatedFinancialRoundtripFixture() {
         countryId: c.original.officeActors[seat].membership.countryId,
         officeId: c.original.officeActors[seat].officeId,
       });
-    const projection = (seat: V10FixtureActorKey, scopeKey = scope(seat)) =>
+    const projection = (
+      seat: V10FixtureActorKey,
+      scopeKey = scope(seat),
+      classification: 'OFFICE_PRIVATE' | 'COUNTRY' = 'OFFICE_PRIVATE',
+    ) =>
       readHost.composition.handleProjection({
         authorization: `Bearer ${token(seat)}`,
         request: {
@@ -367,10 +379,80 @@ export async function createOAuthenticatedFinancialRoundtripFixture() {
           operation: 'READ_WORLD_PROJECTION',
           payload: {
             worldId: c.world,
-            classification: 'OFFICE_PRIVATE',
+            classification,
             scopeKey,
           },
         },
+      });
+    const countryProjection = (
+      seat: V10FixtureActorKey,
+      country = c.original.officeActors[seat].membership.countryId,
+    ) => projection(seat, countryReadProjectionScopeKey(country), 'COUNTRY');
+    // Read the persisted seed/admission and the actual disclosure consumer at
+    // one held SQL head. This is diagnostic evidence, never an injected grant
+    // or a replacement for the read host's real server-held binding executor.
+    const disclosureEvidence = () =>
+      database.transaction(async (tx) => {
+        const head = await tx.query<{
+          world_version: string;
+          event_sequence: string;
+        }>(
+          'select world_version::text, event_sequence::text from world_v2.world_head where world_id=$1 for share',
+          [c.world],
+        );
+        const seed = await new WorldOpeningSeedStore({
+          database,
+          sha256Hex: cIsolatedHash,
+        }).loadFrom(tx, c.world);
+        const visibility = await new SqlEconomicReadVisibilitySource(
+          database,
+        ).loadFrom(tx, {
+          worldId: c.world,
+          worldVersion: head.rows[0]!.world_version,
+          eventSequence: head.rows[0]!.event_sequence,
+        });
+        const admission = await tx.query(
+          'select admission_ref, seed_id, seed_fingerprint from world_v2.runtime_opening_admission where world_id=$1 for share',
+          [c.world],
+        );
+        const trigger = await tx.query(
+          "select tgenabled from pg_trigger where tgrelid='world_v2.runtime_opening_admission'::regclass and tgname='runtime_opening_admission_requires_real_publication'",
+        );
+        return {
+          head: head.rows[0]!,
+          seedId: seed.seedId,
+          seedFingerprint: seed.fingerprint,
+          sources: seed.sources.map((source) => ({
+            sourceKind: source.sourceKind,
+            locator: source.locator,
+            payload: JSON.parse(source.canonicalPayload) as unknown,
+          })),
+          admissions: admission.rows,
+          publicationVeto: trigger.rows,
+          scopes: Object.entries(c.original.officeActors).map(
+            ([seat, actor]) => {
+              const scope = {
+                worldId: c.world,
+                countryId: actor.membership.countryId,
+                classification: 'OFFICE_PRIVATE' as const,
+                officeId: actor.officeId,
+              };
+              return {
+                seat,
+                summary: visibility.summary(scope),
+                financial: seed.financialBatches.flatMap((batch) =>
+                  batch.legs.map((leg) => ({
+                    accountId: leg.account.accountId,
+                    disclosure: visibility.financial(leg.account, scope),
+                  })),
+                ),
+                inventory: seed.inventoryEntries.map((entry) => ({
+                  disclosure: visibility.inventory(entry.account, scope),
+                })),
+              };
+            },
+          ),
+        };
       });
     const final = () =>
       readHost.composition.handleFinalLookup({
@@ -409,6 +491,8 @@ export async function createOAuthenticatedFinancialRoundtripFixture() {
       staged,
       scope,
       projection,
+      countryProjection,
+      disclosureEvidence,
       final,
       intent,
       commandId,

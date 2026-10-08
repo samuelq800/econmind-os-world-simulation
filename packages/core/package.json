@@ -12,6 +12,10 @@
       "types": "./dist/commands/authenticated-financial-intake-contract.d.ts",
       "default": "./dist/commands/authenticated-financial-intake-contract.js"
     },
+    "./authenticated-office-command-contract": {
+      "types": "./dist/commands/authenticated-office-command-contract.d.ts",
+      "default": "./dist/commands/authenticated-office-command-contract.js"
+    },
     "./economic-read-visibility-contract": {
       "types": "./dist/authorization/economic-read-visibility-contract.d.ts",
       "default": "./dist/authorization/economic-read-visibility-contract.js"
