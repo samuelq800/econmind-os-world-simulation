@@ -10,11 +10,16 @@ on:
       - apps/world-web/src/office-projection/**
       - apps/world-api/src/integration/postgres-read-adapter.ts
       - apps/world-api/src/integration/postgres-runtime-read-executor.ts
+      - apps/world-api/src/integration/authenticated-office-command-service.ts
+      - apps/world-worker/src/intake/postgres-office-command-intake.ts
+      - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
       - packages/core/**
       - tests/world-web/financial-intake.test.ts
       - tests/world-web/current-financial-position.test.ts
       - tests/world-web/economic-visibility-consumer.test.ts
       - tests/world-api/financial-position-read-binding.test.ts
+      - tests/world-api/authenticated-office-command.test.ts
+      - tests/world-core/captain-runtime-source-adapter.test.ts
       - tests/integration/staged-narrow-transfer-http.test.ts
       - tests/integration/world-api-authenticated-read-boundary.test.ts
       - apps/world-web/src/prototype/local-authorized-read.ts
@@ -33,11 +38,16 @@ on:
       - apps/world-web/src/office-projection/**
       - apps/world-api/src/integration/postgres-read-adapter.ts
       - apps/world-api/src/integration/postgres-runtime-read-executor.ts
+      - apps/world-api/src/integration/authenticated-office-command-service.ts
+      - apps/world-worker/src/intake/postgres-office-command-intake.ts
+      - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
       - packages/core/**
       - tests/world-web/financial-intake.test.ts
       - tests/world-web/current-financial-position.test.ts
       - tests/world-web/economic-visibility-consumer.test.ts
       - tests/world-api/financial-position-read-binding.test.ts
+      - tests/world-api/authenticated-office-command.test.ts
+      - tests/world-core/captain-runtime-source-adapter.test.ts
       - tests/integration/staged-narrow-transfer-http.test.ts
       - tests/integration/world-api-authenticated-read-boundary.test.ts
       - apps/world-web/src/prototype/local-authorized-read.ts
@@ -73,6 +83,8 @@ jobs:
         run: pnpm exec vitest run --reporter=verbose tests/world-web/trusted-country-runtime.test.ts tests/world-web/local-command-disconnect-liveness.test.ts tests/world-web/local-command-loop.test.ts tests/world-web/local-authorized-read.test.ts tests/world-web/official-metric-source.test.ts tests/world-web/financial-intake.test.ts tests/architecture/world-web-shared-core-ci-prerequisites.test.ts
       - name: Classified financial position and authenticated read regressions
         run: pnpm exec vitest run --reporter=verbose tests/world-web/current-financial-position.test.ts tests/world-web/economic-visibility-consumer.test.ts tests/world-api/financial-position-read-binding.test.ts tests/integration/staged-narrow-transfer-http.test.ts tests/integration/world-api-authenticated-read-boundary.test.ts
+      - name: Source-blocked manual command and Captain preparation regressions
+        run: pnpm exec vitest run --reporter=verbose tests/world-api/authenticated-office-command.test.ts tests/world-core/captain-runtime-source-adapter.test.ts tests/world-core/captain-political-capital-slice.test.ts
       - name: Focused typecheck, lint and format
         run: |
           pnpm --filter @econmind/world-web typecheck
