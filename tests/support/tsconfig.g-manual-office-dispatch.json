@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "../world-core/manual-office-durable-dispatch.test.ts",
+    "../world-core/durable-command-consumption.test.ts"
+  ]
+}

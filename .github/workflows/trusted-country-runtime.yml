@@ -9,10 +9,32 @@ on:
       - apps/world-web/src/financial-intake/**
       - apps/world-web/src/office-projection/**
       - apps/world-api/src/integration/postgres-read-adapter.ts
+      - apps/world-api/src/integration/office-decision-result-validator.ts
+      - apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.ts
+      - apps/world-worker/src/projections/office-decision-result-projector.ts
+      - tests/world-core/office-decision-result-projector.test.ts
+      - tests/world-core/v10-authoritative-activity-read-projection-publisher.test.ts
+      - tests/integration/world-api-postgres-read-adapter.test.ts
       - apps/world-api/src/integration/postgres-runtime-read-executor.ts
       - apps/world-api/src/integration/authenticated-office-command-service.ts
       - apps/world-worker/src/intake/postgres-office-command-intake.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
+      - apps/world-worker/src/admission/**
+      - tests/world-core/official-opening-admission-publication.test.ts
+      - tests/support/tsconfig.official-opening-admission-publication.json
+      - apps/world-worker/src/preparation/durable-command-consumption.ts
+      - apps/world-worker/src/preparation/manual-office-command-composition.ts
+      - apps/world-worker/src/persistence/social-job-match-candidate-source.ts
+      - tests/world-core/manual-office-durable-dispatch.test.ts
+      - tests/world-core/c-social-employment-service.test.ts
+      - scripts/production-posting-release-policy.mjs
+      - tests/foundation/production-posting-release-policy.test.mjs
+      - apps/world-web/public/season1-immersive/journey.js
+      - apps/world-web/public/season1-immersive/world-clock.js
+      - tests/world-web/official-country-boot-guard.test.ts
+      - scripts/verify-authoritative-ui-publication.mjs
+      - docs/reports/D_BOOT_PUBLICATION_PROVENANCE/SOURCE.json
+      - tests/world-web/boot-publication-integrity.test.ts
       - packages/core/**
       - tests/world-web/financial-intake.test.ts
       - tests/world-web/current-financial-position.test.ts
@@ -37,10 +59,32 @@ on:
       - apps/world-web/src/financial-intake/**
       - apps/world-web/src/office-projection/**
       - apps/world-api/src/integration/postgres-read-adapter.ts
+      - apps/world-api/src/integration/office-decision-result-validator.ts
+      - apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.ts
+      - apps/world-worker/src/projections/office-decision-result-projector.ts
+      - tests/world-core/office-decision-result-projector.test.ts
+      - tests/world-core/v10-authoritative-activity-read-projection-publisher.test.ts
+      - tests/integration/world-api-postgres-read-adapter.test.ts
       - apps/world-api/src/integration/postgres-runtime-read-executor.ts
       - apps/world-api/src/integration/authenticated-office-command-service.ts
       - apps/world-worker/src/intake/postgres-office-command-intake.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
+      - apps/world-worker/src/admission/**
+      - tests/world-core/official-opening-admission-publication.test.ts
+      - tests/support/tsconfig.official-opening-admission-publication.json
+      - apps/world-worker/src/preparation/durable-command-consumption.ts
+      - apps/world-worker/src/preparation/manual-office-command-composition.ts
+      - apps/world-worker/src/persistence/social-job-match-candidate-source.ts
+      - tests/world-core/manual-office-durable-dispatch.test.ts
+      - tests/world-core/c-social-employment-service.test.ts
+      - scripts/production-posting-release-policy.mjs
+      - tests/foundation/production-posting-release-policy.test.mjs
+      - apps/world-web/public/season1-immersive/journey.js
+      - apps/world-web/public/season1-immersive/world-clock.js
+      - tests/world-web/official-country-boot-guard.test.ts
+      - scripts/verify-authoritative-ui-publication.mjs
+      - docs/reports/D_BOOT_PUBLICATION_PROVENANCE/SOURCE.json
+      - tests/world-web/boot-publication-integrity.test.ts
       - packages/core/**
       - tests/world-web/financial-intake.test.ts
       - tests/world-web/current-financial-position.test.ts
@@ -66,6 +110,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 12.3.4
@@ -85,6 +131,23 @@ jobs:
         run: pnpm exec vitest run --reporter=verbose tests/world-web/current-financial-position.test.ts tests/world-web/economic-visibility-consumer.test.ts tests/world-api/financial-position-read-binding.test.ts tests/integration/staged-narrow-transfer-http.test.ts tests/integration/world-api-authenticated-read-boundary.test.ts
       - name: Source-blocked manual command and Captain preparation regressions
         run: pnpm exec vitest run --reporter=verbose tests/world-api/authenticated-office-command.test.ts tests/world-core/captain-runtime-source-adapter.test.ts tests/world-core/captain-political-capital-slice.test.ts
+      - name: Private opening authority and actual blocked-source regressions
+        run: |
+          pnpm exec vitest run --reporter=verbose tests/world-core/official-opening-admission-publication.test.ts tests/world-core/official-opening-decision-reconciliation.test.ts
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.official-opening-admission-publication.json
+      - name: Sole manual dispatcher and formal Social source compatibility
+        run: |
+          pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/manual-office-durable-dispatch.test.ts tests/world-core/c-social-employment-service.test.ts tests/world-core/durable-command-consumption.test.ts
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.g-manual-office-dispatch.json
+      - name: Scoped office decision results across the strict read boundary
+        run: |
+          pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/office-decision-result-projector.test.ts tests/integration/world-api-postgres-read-adapter.test.ts tests/world-core/v10-authoritative-activity-read-projection-publisher.test.ts
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.office-decision-results.json
+      - name: Exact unregistered release policy and formal country boot guards
+        run: |
+          node --test tests/foundation/production-posting-release-policy.test.mjs
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.f-production-posting-release.json
+          pnpm exec vitest run --reporter=verbose tests/world-web/official-country-boot-guard.test.ts tests/world-web/country-module-home-guard.test.ts tests/world-web/boot-publication-integrity.test.ts tests/world-web/visual-publication-integrity.test.ts
       - name: Focused typecheck, lint and format
         run: |
           pnpm --filter @econmind/world-web typecheck

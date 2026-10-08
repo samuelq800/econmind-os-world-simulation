@@ -19,6 +19,14 @@ import { createSqlNarrowTreasuryGcuDeliveryCandidateFactory } from '../persisten
 import { createSqlNarrowTreasuryGcuShipmentCandidateFactory } from '../persistence/sql-narrow-treasury-gcu-shipment-preparation-source.js';
 import type { SqlDatabase, SqlExecutor } from '../persistence/sql-database.js';
 import { createLocalNarrowReservationWorker } from './local-narrow-reservation-worker.js';
+import {
+  authorizeManualOfficeCommand,
+  createManualOfficeCommandComposition,
+  isManualOfficeSourceMissing,
+  manualOfficeCapability,
+  type ManualOfficeRuntimeReaders,
+} from './manual-office-command-composition.js';
+import type { AuthorizedOfficeContext } from '@econmind/core';
 
 export const DURABLE_COMMAND_CONSUMPTION_STATUS =
   'PREPARATION_ONLY_NOT_RUNTIME_ACCEPTANCE' as const;
@@ -121,6 +129,8 @@ export function createDurableCommandConsumptionPreparation(input: {
   readonly worldId: string;
   readonly sha256Hex: Sha256Hex;
   readonly clock: DurableConsumptionClock | null;
+  /** Trusted server constructors only; absent sources never enable a family. */
+  readonly officeReaders?: ManualOfficeRuntimeReaders;
 }) {
   if (!['local', 'ci'].includes(input.environment.ECONMIND_ENV ?? '')) {
     invalid('Durable command preparation is local/CI only');
@@ -140,6 +150,7 @@ export function createDurableCommandConsumptionPreparation(input: {
   const world = worldId(input.worldId);
   const holder = workerId(input.workerId);
   const clock = input.clock;
+  const officeReaders = Object.freeze({ ...input.officeReaders });
   const lineage = new DurableV08LedgerLineageReader(input);
   const delivery = createAuthoritativeWorkerExecution({
     database: input.database,
@@ -287,6 +298,99 @@ export function createDurableCommandConsumptionPreparation(input: {
     });
   }
 
+  async function claimManual(
+    command: CanonicalCommand,
+    authorization: AuthorizedOfficeContext,
+    at: string,
+    simTime: SimTime,
+  ) {
+    await input.database.transaction(async (transaction) => {
+      await transaction.query(
+        'select command_id from world_v2.command_submission where world_id=$1 and command_id=$2 for update',
+        [world, command.commandId],
+      );
+      const durable = await lineage.readCommandFrom(
+        transaction,
+        world,
+        command.commandId,
+      );
+      if (canonicalSerialize(durable) !== canonicalSerialize(command))
+        invalid('Manual command differs from durable submission');
+      const lease = await leaseFrom(transaction, at);
+      const head = await transaction.query<{ world_version: string }>(
+        'select world_version::text from world_v2.world_head where world_id=$1 for share',
+        [world],
+      );
+      if (
+        head.rows.length !== 1 ||
+        head.rows[0]?.world_version !== command.expectedWorldVersion
+      )
+        throw new DomainError(
+          DOMAIN_ERROR_CODES.VERSION_MISMATCH,
+          'Manual claim expected WorldVersion changed',
+        );
+      const current = await transaction.query<{
+        team_id: string;
+        authorization_version: string;
+      }>(
+        `select team_id,authorization_version from world_v2.current_commit_authorization
+         where world_id=$1 and auth_subject=$2::uuid and country_id=$3 and office_id=$4
+           and capability=$5 and active for share`,
+        [
+          world,
+          command.authSubject,
+          command.countryId,
+          command.officeId,
+          authorization.capability,
+        ],
+      );
+      if (
+        current.rows.length !== 1 ||
+        current.rows[0]?.team_id !== authorization.teamId ||
+        current.rows[0]?.authorization_version !==
+          authorization.authorizationVersion
+      )
+        throw new DomainError(
+          DOMAIN_ERROR_CODES.AUTHORIZATION_DENIED,
+          'Manual claim current capability/revision changed',
+        );
+      const queued = await transaction.query<QueueRow>(
+        `select command_id,authority_kind,queue_state,available_at_sim_time::text,claimed_by,claim_fencing_token::text
+         from world_v2.command_queue where world_id=$1 and command_id=$2 for update`,
+        [world, command.commandId],
+      );
+      const row = queued.rows[0];
+      if (
+        queued.rows.length !== 1 ||
+        !row ||
+        row.authority_kind !== 'DISCRETIONARY_USER' ||
+        SimTime.fromTicks(row.available_at_sim_time).ticks > simTime.ticks ||
+        command.simTime.ticks > simTime.ticks
+      )
+        invalid(
+          'Manual command must be the same discretionary due queue member',
+        );
+      if (row.queue_state === 'CLAIMED') {
+        if (
+          row.claimed_by !== holder ||
+          row.claim_fencing_token !== lease.fencingToken
+        )
+          invalid('Manual claim requires reviewed holder/fence recovery');
+        return;
+      }
+      if (row.queue_state !== 'PENDING')
+        invalid('Manual queue is not executable');
+      const result = await transaction.query(
+        `update world_v2.command_queue set queue_state='CLAIMED',claimed_by=$3,claimed_at_real=$4::timestamptz,
+          claim_fencing_token=$5::bigint,attempt_count=attempt_count+1
+         where world_id=$1 and command_id=$2 and queue_state='PENDING'`,
+        [world, command.commandId, holder, at, lease.fencingToken],
+      );
+      if (result.rowCount !== 1)
+        invalid('Manual claim must update exactly one durable row');
+    });
+  }
+
   async function step(): Promise<DurableConsumptionStep> {
     if (clock === null) return blocked('SERVER_CLOCK_NOT_BOUND');
     let selectedId: string | null = null;
@@ -319,17 +423,20 @@ export function createDurableCommandConsumptionPreparation(input: {
       });
       if (selected === null) return Object.freeze({ status: 'IDLE' });
       const { command, row } = selected;
+      const manualCapability = manualOfficeCapability(command);
       if (
         command.commandType !== 'CORE_GOODS_TRANSFER_V1' &&
         command.commandType !== 'CORE_GOODS_SHIPMENT_V1' &&
-        command.commandType !== 'CORE_GOODS_DELIVERY_V1'
+        command.commandType !== 'CORE_GOODS_DELIVERY_V1' &&
+        manualCapability === null
       )
         return blocked('UNSUPPORTED_COMMAND', command.commandId);
       const isReserve = command.commandType === 'CORE_GOODS_TRANSFER_V1';
+      const discretionary = isReserve || manualCapability !== null;
       if (
         row.authority_kind !==
-          (isReserve ? 'DISCRETIONARY_USER' : 'VERSIONED_AUTOMATIC') ||
-        (!isReserve && command.officeId !== null) ||
+          (discretionary ? 'DISCRETIONARY_USER' : 'VERSIONED_AUTOMATIC') ||
+        (!discretionary && command.officeId !== null) ||
         command.expectedWorldVersion === null
       )
         return blocked('COMMAND_QUEUE_AUTHORITY_MISMATCH', command.commandId);
@@ -340,6 +447,51 @@ export function createDurableCommandConsumptionPreparation(input: {
         return blocked('COMMAND_NOT_DUE', command.commandId);
       if (row.queue_state === 'CLAIMED' && row.claimed_by !== holder)
         return blocked('CLAIM_REQUIRES_REVIEWED_RECOVERY', command.commandId);
+      if (manualCapability !== null) {
+        const composition = createManualOfficeCommandComposition({
+          command,
+          database: input.database,
+          workerId: holder,
+          sha256Hex: input.sha256Hex,
+          readers: officeReaders,
+        });
+        if (composition === null)
+          return blocked('MANUAL_OFFICE_SOURCE_NOT_BOUND', command.commandId);
+        const execution = createAuthoritativeWorkerExecution({
+          database: input.database,
+          workerId: holder,
+          sha256Hex: input.sha256Hex,
+          candidateFactory: composition.factory,
+        });
+        const existing = await execution.repository.readFinalReceipt(command);
+        if (existing !== null)
+          return Object.freeze({
+            status: 'PROCESSED',
+            commandId: command.commandId,
+            source: 'EXISTING_FINAL',
+            receipt: existing,
+          });
+        const authorization = await authorizeManualOfficeCommand({
+          database: input.database,
+          command,
+        });
+        await composition.assertSourceBeforeClaim(at);
+        await claimManual(command, authorization, at, simTime);
+        const result = await execution.executeQueuedCommand({
+          command,
+          authorityKind: 'DISCRETIONARY_USER',
+          requiredCapability: manualCapability,
+          intakeAuthorization: authorization,
+          commitSimTime: simTime,
+          recordedAtReal: timestamp(clock.nowReal()),
+        });
+        return Object.freeze({
+          status: 'PROCESSED',
+          commandId: command.commandId,
+          source: result.source,
+          receipt: result.receipt,
+        });
+      }
       if (isReserve) {
         await input.database.transaction((transaction) =>
           checkSource(transaction, command, at),
@@ -371,6 +523,13 @@ export function createDurableCommandConsumptionPreparation(input: {
         receipt: result.receipt,
       });
     } catch (error) {
+      if (
+        isManualOfficeSourceMissing(error) ||
+        (error instanceof PostgresTransactionError &&
+          error.outcome === 'ROLLED_BACK' &&
+          isManualOfficeSourceMissing(error.cause))
+      )
+        return blocked('MANUAL_OFFICE_SOURCE_UNAVAILABLE', selectedId);
       const semantic = domainFailure(error);
       if (semantic)
         return Object.freeze({

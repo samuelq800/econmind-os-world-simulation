@@ -7,6 +7,10 @@ import {
   Money,
   Quantity,
   canonicalSerialize,
+  createAuthoritativeTransition,
+  createFinalCommandReceipt,
+  parseAuthoritativeEvent,
+  SimTime,
   countryId,
   officeId,
   workerId,
@@ -14,7 +18,14 @@ import {
   type EconomicReadScope,
   type OfficeId,
   type WorldWriterCommitAssertion,
+  type DecisionResultHead,
 } from '@econmind/core';
+import {
+  projectCountryDecisionResultSummary,
+  projectOfficeDecisionResults,
+  validateCommittedDecisionLineage,
+  type CommittedOfficeDecisionTransition,
+} from './office-decision-result-projector.js';
 
 import { DurableV08LedgerLineageReader } from '../persistence/durable-v08-ledger-lineage-reader.js';
 import type { SqlDatabase, SqlExecutor } from '../persistence/sql-database.js';
@@ -457,12 +468,22 @@ export class AuthoritativeActivityReadProjectionPublisher {
         scopes.offices,
         visibility,
       );
+      const decisionHead = Object.freeze({
+        worldId: input.assertion.worldId,
+        ...watermark,
+      });
+      const decisions = await this.#readCommittedDecisions(
+        transaction,
+        decisionHead,
+      );
       const projections = this.#deriveProjections(
         scopes,
         activity,
         economics,
         visibility,
         absolute,
+        decisions,
+        decisionHead,
       );
 
       await transaction.query(
@@ -971,6 +992,138 @@ export class AuthoritativeActivityReadProjectionPublisher {
     );
   }
 
+  /** The existing replace transaction is the only writer. No cache or materialization source. */
+  async #readCommittedDecisions(
+    transaction: SqlExecutor,
+    head: DecisionResultHead,
+  ): Promise<readonly CommittedOfficeDecisionTransition[]> {
+    const result = await transaction.query<{
+      event_row: unknown;
+      receipt_row: unknown;
+    }>(
+      `select to_jsonb(event) || jsonb_build_object(
+                'event_sequence', event.event_sequence::text,
+                'world_version', event.world_version::text,
+                'sim_time', event.sim_time::text) as event_row,
+              to_jsonb(receipt) || jsonb_build_object(
+                'world_version_before', receipt.world_version_before::text,
+                'world_version_after', receipt.world_version_after::text,
+                'sim_time', receipt.sim_time::text) as receipt_row
+         from world_v2.authoritative_event as event
+         left join world_v2.command_receipt as receipt
+           on receipt.world_id = event.world_id and receipt.command_id = event.causation_command_id
+        where event.world_id = $1
+        order by event.event_sequence`,
+      [head.worldId],
+    );
+    const sha256Hex = (value: string) =>
+      createHash('sha256').update(value, 'utf8').digest('hex');
+    const groups = new Map<
+      string,
+      {
+        receipt: Readonly<Record<string, unknown>>;
+        events: ReturnType<typeof parseAuthoritativeEvent>[];
+      }
+    >();
+    const real = (value: unknown) => {
+      const parsed =
+        value instanceof Date
+          ? value
+          : new Date(requiredString(value, 'durable timestamp'));
+      if (!Number.isFinite(parsed.getTime()))
+        invalid('Decision durable timestamp is invalid');
+      return parsed.toISOString();
+    };
+    for (const raw of result.rows) {
+      const row = object(raw.event_row, 'decision Event'),
+        receipt = object(raw.receipt_row, 'decision receipt');
+      const event = parseAuthoritativeEvent(
+        {
+          schemaVersion: row.schema_version,
+          worldId: row.world_id,
+          eventId: row.event_id,
+          eventType: row.event_type,
+          causationCommandId: row.causation_command_id,
+          correlationId: row.correlation_id,
+          worldVersion: databaseInteger(row.world_version, 'decision version'),
+          sequence: databaseInteger(row.event_sequence, 'decision sequence'),
+          simTime: databaseInteger(row.sim_time, 'decision SimTime'),
+          recordedAtReal: real(row.recorded_at_real),
+          correctsEventId: row.corrects_event_id,
+          payload: canonicalPostingPayload(
+            row.canonical_payload,
+            'decision Event',
+          ),
+        },
+        sha256Hex,
+      );
+      if (
+        event.fingerprint !== row.event_fingerprint ||
+        event.payloadHash !== row.payload_sha256
+      )
+        invalid('Durable decision Event hashes differ');
+      const existing = groups.get(event.causationCommandId);
+      if (
+        existing &&
+        canonicalSerialize(existing.receipt) !== canonicalSerialize(receipt)
+      )
+        invalid('Decision receipt differs within a transition');
+      if (existing) existing.events.push(event);
+      else groups.set(event.causationCommandId, { receipt, events: [event] });
+    }
+    const transitions: CommittedOfficeDecisionTransition[] = [];
+    for (const [commandId, group] of groups) {
+      const command = await this.#lineage.readCommandFrom(
+        transaction,
+        head.worldId,
+        commandId,
+      );
+      const row = group.receipt;
+      const transition = createAuthoritativeTransition({
+        command,
+        events: group.events,
+        worldVersionBefore: databaseInteger(
+          row.world_version_before,
+          'decision receipt before',
+        ),
+        worldVersionAfter: databaseInteger(
+          row.world_version_after,
+          'decision receipt after',
+        ),
+      });
+      const receipt = createFinalCommandReceipt({
+        command,
+        transition,
+        outcome: 'COMMITTED',
+        reasonCode: null,
+        simTime: SimTime.fromTicks(
+          databaseInteger(row.sim_time, 'decision receipt SimTime'),
+        ),
+        recordedAtReal: real(row.recorded_at_real),
+      });
+      if (
+        row.world_id !== receipt.worldId ||
+        row.command_id !== receipt.commandId ||
+        row.schema_version !== receipt.schemaVersion ||
+        row.command_fingerprint !== receipt.commandFingerprint ||
+        row.idempotency_key !== receipt.idempotencyKey ||
+        row.outcome !== receipt.outcome ||
+        row.reason_code !== null ||
+        row.transition_id !== receipt.transitionId ||
+        canonicalSerialize(row.event_ids) !==
+          canonicalSerialize(receipt.eventIds)
+      )
+        invalid('Decision durable receipt differs from canonical transition');
+      transitions.push(Object.freeze({ command, transition, receipt }));
+    }
+    validateCommittedDecisionLineage({
+      sourceHead: head,
+      transitions,
+      sha256Hex,
+    });
+    return Object.freeze(transitions);
+  }
+
   #combineActivity(
     left: ActivitySummary,
     right: ActivitySummary,
@@ -1005,7 +1158,17 @@ export class AuthoritativeActivityReadProjectionPublisher {
     economics: ReadonlyMap<string, LedgerEconomicSummary>,
     visibility: EconomicReadVisibilitySnapshot,
     absolute: ReadonlyMap<string, AuthoritativeFinancialPosition>,
+    decisions: readonly CommittedOfficeDecisionTransition[],
+    decisionHead: DecisionResultHead,
   ): readonly PreparedProjection[] {
+    const decisionResults = projectOfficeDecisionResults({
+      sourceHead: decisionHead,
+      transitions: decisions,
+      visibility,
+      scopes: scopes.offices,
+      sha256Hex: (value) =>
+        createHash('sha256').update(value, 'utf8').digest('hex'),
+    });
     const countries = scopes.countries.map((country) =>
       prepareProjection({
         classification: 'COUNTRY',
@@ -1014,6 +1177,10 @@ export class AuthoritativeActivityReadProjectionPublisher {
           activity:
             activity.countries.get(countryKey(country)) ?? emptyActivity(),
           countryId: country,
+          decisionResults: projectCountryDecisionResultSummary(
+            country,
+            decisionHead,
+          ),
           ledger: {
             ...emptyLedgerEconomicSummary(),
             authoritativeFinancialPosition: {
@@ -1039,6 +1206,10 @@ export class AuthoritativeActivityReadProjectionPublisher {
         payload: {
           activity: activity.offices.get(officeKey(scope)) ?? emptyActivity(),
           countryId: scope.countryId,
+          decisionResult:
+            decisionResults.get(
+              canonicalSerialize([scope.countryId, scope.officeId]),
+            ) ?? null,
           ledger: {
             ...(economics.get(officeKey(scope)) ??
               emptyLedgerEconomicSummary()),

@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 describe('fresh CI public contract prerequisites', () => {
@@ -40,5 +40,26 @@ describe('fresh CI public contract prerequisites', () => {
     expect(source).not.toMatch(
       /supabase|migration:|seed:|world-worker (?:dev|start)/u,
     );
+  });
+
+  it('every explicit trusted-CI test, helper and config path exists instead of being silently omitted', () => {
+    const source = readFileSync(
+      new URL(
+        '../../.github/workflows/trusted-country-runtime.yml',
+        import.meta.url,
+      ),
+      'utf8',
+    );
+    const paths = [
+      ...new Set(
+        source.match(/(?:tests|scripts)\/[A-Za-z0-9_./-]+\.(?:ts|mjs|json)/gu),
+      ),
+    ];
+    expect(paths.length).toBeGreaterThan(20);
+    for (const file of paths) {
+      expect(existsSync(new URL(`../../${file}`, import.meta.url)), file).toBe(
+        true,
+      );
+    }
   });
 });

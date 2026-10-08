@@ -6,6 +6,7 @@ import {
   type WorldReadRequestEnvelope,
 } from './contracts.js';
 import type { ReadProjectionRow } from './generated/world-v2-read-model.js';
+import { assertDecisionResultPayload } from './office-decision-result-validator.js';
 import {
   parseSupabaseAuthSubject,
   type SupabaseAuthSubject,
@@ -290,12 +291,15 @@ function assertClassifiedActivityPayload(
     return record;
   }
   const office = projection.classification === 'OFFICE_PRIVATE';
-  const payload = boundedObject(
-    projection.payload,
-    office
+  const resultField = office ? 'decisionResult' : 'decisionResults';
+  const payload = boundedObject(projection.payload, [
+    ...(office
       ? ['activity', 'countryId', 'officeId', 'ledger', 'schemaVersion']
-      : ['activity', 'countryId', 'ledger', 'schemaVersion'],
-  );
+      : ['activity', 'countryId', 'ledger', 'schemaVersion']),
+    ...(Object.prototype.hasOwnProperty.call(projection.payload, resultField)
+      ? [resultField]
+      : []),
+  ]);
   if (
     payload.schemaVersion !== 'world-activity-projection-v1' ||
     typeof payload.countryId !== 'string'
@@ -407,6 +411,22 @@ function assertClassifiedActivityPayload(
     }
   }
   validatePositions(ledger.financialPositions);
+  if (Object.prototype.hasOwnProperty.call(payload, resultField)) {
+    assertDecisionResultPayload({
+      value: payload[resultField],
+      worldId: projection.worldId,
+      countryId: country,
+      officeId: office ? String(payload.officeId) : null,
+      worldVersion: projection.watermark.worldVersion,
+      eventSequence: projection.watermark.eventSequence,
+      financialDetail: visibility.financialDetail,
+      lastOfficeActivity: {
+        eventCount: String(activity.authoritativeEventCount),
+        eventSequence: String(activity.lastAuthoritativeEventSequence),
+        worldVersion: String(activity.lastAuthoritativeEventWorldVersion),
+      },
+    });
+  }
   if (
     Object.prototype.hasOwnProperty.call(
       ledger,
