@@ -11,7 +11,7 @@ import type { WorldFinalReceiptReadResponseEnvelope } from '../../apps/world-api
 describe.skipIf(process.env.O_NATIVE_AUTHENTICATED_ROUNDTRIP !== '1')(
   'O TEST_ONLY JWT -> persisted seat/admission -> G intake -> C economic lineage -> authorized read',
   () => {
-    it('executes one once-queued exact Command through fenced Reserve/Ship/Deliver and reads real FINAL and exact posting projection', async () => {
+    it('executes one once-queued exact Command through fenced Reserve/Ship/Deliver, reads real FINAL and withholds unbound raw economics', async () => {
       const f = await createOAuthenticatedFinancialRoundtripFixture();
       const state = (result: Awaited<ReturnType<typeof f.call>>) =>
         result.body.state!;
@@ -302,63 +302,140 @@ describe.skipIf(process.env.O_NATIVE_AUTHENTICATED_ROUNDTRIP !== '1')(
           countryProjections: 2,
           officePrivateProjections: 3,
         });
-        // Existing projection publisher sums committed Posting facts only; it
-        // omits the opening. Assert its exact wire changes (-6/+6), not fake
-        // absolute balances (actual opening-aware ledger above is 2/8).
-        for (const [seat, account, change, quantity] of [
-          [
-            'buyerFinance',
-            f.c.original.financialAccounts.buyerTreasury.accountId,
-            '-6',
-            '2',
-          ],
-          [
-            'sellerTrade',
-            f.c.original.financialAccounts.sellerSettlement.accountId,
-            '6',
-            '-2',
-          ],
-        ] as const) {
-          const read = await f.projection(seat);
-          expect(read.ok).toBe(true);
-          if (!read.ok) throw new Error('O_AUTHORIZED_PROJECTION_DENIED');
-          expect(read.authority.identity.worldId).toBe(f.c.world);
-          expect(read.authority.seed.contentHash).toBe(f.c.seed.fingerprint);
-          expect(read.authority.readback.worldVersion).toBe('3');
-          const result = read.result as WorldReadResponseEnvelope;
-          expect(result.ok).toBe(true);
-          if (!result.ok) throw new Error('O_PROJECTION_QUERY_DENIED');
-          expect(result.data.watermark).toMatchObject({
-            worldVersion: '3',
-            eventSequence: '3',
-          });
-          const payload = result.data.payload as {
-            ledger: {
-              financialPositions: Array<{
-                accountId: string;
-                netDebitBalance: string;
-                currency: string;
-              }>;
-              inventoryPositions: Array<{
-                bucket: string;
-                quantity: string;
-                unit: string;
-              }>;
-            };
-          };
-          expect(
-            payload.ledger.financialPositions.find(
-              (p) => p.accountId === account,
-            ),
-          ).toMatchObject({ netDebitBalance: change, currency: 'GCU' });
-          expect(
-            payload.ledger.inventoryPositions.find(
-              (p) => p.bucket === 'AVAILABLE',
-            ),
-          ).toMatchObject({ quantity, unit: 'tonne' });
+        const withheld = {
+          schemaVersion: 'economic-read-visibility-v1',
+          financialDetail: 'NOT_AUTHORIZED',
+          inventoryDetail: 'NOT_AUTHORIZED',
+          countrySummary: 'NOT_AUTHORIZED',
+        };
+        const disclosure = await f.disclosureEvidence();
+        expect(disclosure.head).toEqual({
+          world_version: '3',
+          event_sequence: '3',
+        });
+        expect(disclosure.seedId).toBe(f.c.seed.seedId);
+        expect(disclosure.seedFingerprint).toBe(f.c.seed.fingerprint);
+        expect(disclosure.admissions).toEqual([
+          {
+            admission_ref: 'ADMISSION_O_TEST_ONLY',
+            seed_id: f.c.seed.seedId,
+            seed_fingerprint: f.c.seed.fingerprint,
+          },
+        ]);
+        expect(disclosure.publicationVeto).toEqual([{ tgenabled: 'O' }]);
+        expect(disclosure.sources).toEqual([
+          {
+            sourceKind: 'DOCUMENTED_ASSUMPTION',
+            locator: 'tests/support/c-isolated-financial-fixture.ts#TEST_ONLY',
+            payload: {
+              status: 'TEST_ONLY_NON_AUTHORITATIVE',
+              worldId: f.c.world,
+              productionFallback: false,
+              originalFixture: f.c.original.fixtureVersion,
+            },
+          },
+        ]);
+        expect(disclosure.scopes.map((scope) => scope.seat).sort()).toEqual([
+          'buyerFinance',
+          'buyerTrade',
+          'sellerTrade',
+        ]);
+        for (const scope of disclosure.scopes) {
+          expect(scope.summary).toEqual(withheld);
+          expect(scope.financial).toHaveLength(4);
+          for (const account of scope.financial)
+            expect(account.disclosure).toEqual({
+              status: 'NOT_AUTHORIZED',
+              reason: 'ADMITTED_SOURCE_UNAVAILABLE',
+            });
+          expect(scope.inventory).toHaveLength(1);
+          for (const account of scope.inventory)
+            expect(account.disclosure).toEqual({
+              status: 'NOT_AUTHORIZED',
+              reason: 'OWNER_MAPPING_UNAVAILABLE',
+            });
         }
+        // Current admitted TEST_ONLY source has no lawful Finance mapping.
+        // Successful JWT/binding/scope reads are positive controls, not grants
+        // to disclose treasury-looking owners or raw Trade/inventory details.
+        // The actual opening-aware 2/8 balances and 2 tonne remain asserted
+        // above against Worker lineage, not a public net-movement projection.
+        for (const seat of [
+          'buyerFinance',
+          'buyerTrade',
+          'sellerTrade',
+        ] as const) {
+          for (const classification of ['OFFICE_PRIVATE', 'COUNTRY'] as const) {
+            const read =
+              classification === 'COUNTRY'
+                ? await f.countryProjection(seat)
+                : await f.projection(seat);
+            expect(read.ok).toBe(true);
+            if (!read.ok) throw new Error('O_AUTHORIZED_PROJECTION_DENIED');
+            expect(read.authority.identity.worldId).toBe(f.c.world);
+            expect(read.authority.seed.contentHash).toBe(f.c.seed.fingerprint);
+            expect(read.authority.readback.worldVersion).toBe('3');
+            const result = read.result as WorldReadResponseEnvelope;
+            expect(result.ok).toBe(true);
+            if (!result.ok) throw new Error('O_PROJECTION_QUERY_DENIED');
+            expect(result.data.watermark).toMatchObject({
+              worldVersion: '3',
+              eventSequence: '3',
+            });
+            const payload = result.data.payload as {
+              countryId: string;
+              officeId?: string;
+              ledger: {
+                visibility: typeof withheld;
+                financialPositions: Array<{
+                  accountId: string;
+                  netDebitBalance: string;
+                  currency: string;
+                }>;
+                inventoryPositions: Array<{
+                  bucket: string;
+                  quantity: string;
+                  unit: string;
+                }>;
+              };
+            };
+            expect(payload.countryId).toBe(
+              f.c.original.officeActors[seat].membership.countryId,
+            );
+            if (classification === 'OFFICE_PRIVATE')
+              expect(payload.officeId).toBe(
+                f.c.original.officeActors[seat].officeId,
+              );
+            else expect(payload.officeId).toBeUndefined();
+            expect(payload.ledger.visibility).toEqual(withheld);
+            expect(payload.ledger.financialPositions).toEqual([]);
+            expect(payload.ledger.inventoryPositions).toEqual([]);
+          }
+        }
+        console.info(
+          'O_NATIVE_PRIVACY_SOURCE_BLOCKER',
+          JSON.stringify({
+            code: 'FINANCE_ADMITTED_ROLE_CARRIER_MISSING',
+            evidence: disclosure,
+            financeRawFinancialPositive: 'NOT_RUN_SOURCE_BLOCKED',
+            economicAssertions: {
+              buyerTreasury: '2 GCU',
+              sellerSettlement: '8 GCU',
+              buyerInventory: '2 tonne',
+            },
+            mechanismOnly: true,
+          }),
+        );
         expect(
           (await f.projection('buyerFinance', f.scope('sellerTrade'))).ok,
+        ).toBe(false);
+        expect(
+          (
+            await f.countryProjection(
+              'buyerFinance',
+              f.c.original.countries.seller,
+            )
+          ).ok,
         ).toBe(false);
         const final = await f.final();
         expect(final.ok).toBe(true);
@@ -403,6 +480,8 @@ describe.skipIf(process.env.O_NATIVE_AUTHENTICATED_ROUNDTRIP !== '1')(
         );
         expect((await f.final()).ok).toBe(false);
         expect((await f.call(f.staged('READ'))).body.ok).toBe(false);
+        expect((await f.projection('sellerTrade')).ok).toBe(false);
+        expect((await f.countryProjection('sellerTrade')).ok).toBe(false);
         expect([
           f.intake.simulationEnabled,
           f.readHost.simulationEnabled,
