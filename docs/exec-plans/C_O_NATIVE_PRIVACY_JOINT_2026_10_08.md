@@ -85,3 +85,19 @@ External raw commands and immutable manifest:
 /Users/samuel/Documents/econclub/artifacts/c-o-native-privacy-joint-20261008.88r8rx.
 Retain this FAIL candidate for Root/independent review. Further native execution
 requires new authority; no application fix or extra cluster was attempted.
+
+## Diagnostic-only follow-up
+
+First FAIL snapshot: 08ed440eb2dd856fe1dd04fcabf0e1784875803f,
+tree 5ba0d27aca81336f1bf8bca149775a78299574a6. Its native output is unchanged.
+Root requested safe diagnostics after that snapshot. A subsequent test-only
+change logs only seat/classification, a finite allowlist of outer error codes
+and retryability before the existing strict query assertion. It also moves
+the source-blocker log before that assertion and removes account-row details
+from the log. No authority, SQL, fixture grants, economic assertion or query
+expectation changes. The diagnostic version has NOT_RUN native status.
+Original false-only output cannot distinguish the internal cause. Static
+inspection confirms the composition returns fail-closed errors for several
+different binding/authentication/database failures; none has been established
+as this run's cause. Source denial is not an outer query success or failure code.
+An explicit second-singleton proposal was sent to Root; approval is PENDING.

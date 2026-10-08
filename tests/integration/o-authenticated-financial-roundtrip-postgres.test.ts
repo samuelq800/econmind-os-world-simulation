@@ -355,6 +355,18 @@ describe.skipIf(process.env.O_NATIVE_AUTHENTICATED_ROUNDTRIP !== '1')(
               reason: 'OWNER_MAPPING_UNAVAILABLE',
             });
         }
+        console.info(
+          'O_NATIVE_PRIVACY_SOURCE_BLOCKER',
+          JSON.stringify({
+            code: 'FINANCE_ADMITTED_ROLE_CARRIER_MISSING',
+            sourceKinds: disclosure.sources.map((source) => source.sourceKind),
+            financialReason: 'ADMITTED_SOURCE_UNAVAILABLE',
+            inventoryReason: 'OWNER_MAPPING_UNAVAILABLE',
+            financeRawFinancialPositive: 'NOT_RUN_SOURCE_BLOCKED',
+            economicAssertionsReached: true,
+            mechanismOnly: true,
+          }),
+        );
         // Current admitted TEST_ONLY source has no lawful Finance mapping.
         // Successful JWT/binding/scope reads are positive controls, not grants
         // to disclose treasury-looking owners or raw Trade/inventory details.
@@ -370,6 +382,27 @@ describe.skipIf(process.env.O_NATIVE_AUTHENTICATED_ROUNDTRIP !== '1')(
               classification === 'COUNTRY'
                 ? await f.countryProjection(seat)
                 : await f.projection(seat);
+            if (!read.ok) {
+              const allowedCodes = [
+                'INVALID_REQUEST',
+                'NOT_CONNECTED',
+                'CANCELLED',
+                'AUTHORIZATION_DENIED',
+                'UPSTREAM_UNAVAILABLE',
+                'STALE_PROJECTION',
+              ];
+              console.error(
+                'O_NATIVE_PROJECTION_FAILURE',
+                JSON.stringify({
+                  seat,
+                  classification,
+                  code: allowedCodes.includes(read.error.code)
+                    ? read.error.code
+                    : 'UNRECOGNIZED_ERROR_CODE',
+                  retryable: read.error.retryable,
+                }),
+              );
+            }
             expect(read.ok).toBe(true);
             if (!read.ok) throw new Error('O_AUTHORIZED_PROJECTION_DENIED');
             expect(read.authority.identity.worldId).toBe(f.c.world);
@@ -412,20 +445,6 @@ describe.skipIf(process.env.O_NATIVE_AUTHENTICATED_ROUNDTRIP !== '1')(
             expect(payload.ledger.inventoryPositions).toEqual([]);
           }
         }
-        console.info(
-          'O_NATIVE_PRIVACY_SOURCE_BLOCKER',
-          JSON.stringify({
-            code: 'FINANCE_ADMITTED_ROLE_CARRIER_MISSING',
-            evidence: disclosure,
-            financeRawFinancialPositive: 'NOT_RUN_SOURCE_BLOCKED',
-            economicAssertions: {
-              buyerTreasury: '2 GCU',
-              sellerSettlement: '8 GCU',
-              buyerInventory: '2 tonne',
-            },
-            mechanismOnly: true,
-          }),
-        );
         expect(
           (await f.projection('buyerFinance', f.scope('sellerTrade'))).ok,
         ).toBe(false);
