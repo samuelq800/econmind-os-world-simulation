@@ -25,6 +25,10 @@ on:
       - apps/world-worker/src/intake/manual-office-intake-runtime.ts
       - tests/world-api/positive-manual-office-command.test.ts
       - tests/support/g-manual-office-api-test-only-fixture.ts
+      - apps/world-api/src/integration/https-authenticated-office-command-route.ts
+      - tests/world-api/https-authenticated-office-command-route.test.ts
+      - tests/world-api/tsconfig.https-office-command-route.json
+      - tests/support/g-office-route-test-only-fixture.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
       - database/migrations/**
       - scripts/migration-policy.mjs
@@ -94,6 +98,10 @@ on:
       - apps/world-worker/src/intake/manual-office-intake-runtime.ts
       - tests/world-api/positive-manual-office-command.test.ts
       - tests/support/g-manual-office-api-test-only-fixture.ts
+      - apps/world-api/src/integration/https-authenticated-office-command-route.ts
+      - tests/world-api/https-authenticated-office-command-route.test.ts
+      - tests/world-api/tsconfig.https-office-command-route.json
+      - tests/support/g-office-route-test-only-fixture.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
       - database/migrations/**
       - scripts/migration-policy.mjs
@@ -187,6 +195,11 @@ jobs:
         run: |
           pnpm exec vitest run --reporter=verbose tests/world-api/positive-manual-office-command.test.ts
           pnpm exec tsc --noEmit -p tests/world-api/tsconfig.positive-manual-office-command.json
+      - name: Explicit Office HTTP transport and real source-service regressions
+        # Explicit adapter only: no default host, consumer or production activation.
+        run: |
+          pnpm exec vitest run --reporter=verbose tests/world-api/https-authenticated-office-command-route.test.ts
+          pnpm exec tsc --noEmit -p tests/world-api/tsconfig.https-office-command-route.json
       - name: Private opening authority and actual blocked-source regressions
         run: |
           pnpm exec vitest run --reporter=verbose tests/world-core/official-opening-admission-publication.test.ts tests/world-core/official-opening-decision-reconciliation.test.ts
