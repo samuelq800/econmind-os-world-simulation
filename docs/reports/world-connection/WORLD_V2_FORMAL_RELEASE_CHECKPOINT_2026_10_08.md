@@ -49,6 +49,36 @@ migration validate 与两次 PGlite rehearsal PASS；balanced candidate 与正�
 
 在修复及相关回归通过前，PR115 不合并。未开始无意义地重跑全部 2523 项。
 
+### 13:39 正式发布候选增量收口
+
+上述两处旧测试已修复：A 原始固定候选 `3416a641135c220372351e35548957f8492aa278`，
+仅两测试及报告；原 SQL 2/2 库存、守恒、JWT subject、COMMITTED/FINAL 和幂等断言
+未改。增加缺 visibility 与 denied-marker 携带 raw inventory 两个拒绝控制；
+policy 类型使用实际 API 公共类型，保留 timeout=1 负例。生产者 30PASS。
+Root 重放 `8f93a82` 并在真实 G+D 组合上运行这两文件及原 CI prerequisites：
+**32PASS**，13:35:12，4.93 秒，exit0。原 bf 的完整检查 FAIL 保留；未声称新候选
+已重复全量通过。这使原两项已知失败成为已修复历史，而非静默忽略。
+
+D811 已获 B 独立 source-only 批准：45 consumer 回归及四个独立契约/渲染控制通过，
+真实公共 G 合同 hash 匹配；没有 server→在线浏览器验收。Root 重放 `7cc2722`，
+四个正式 browser 文件及直接测试字节与原 D 候选一致；新消费者和原披露控制
+**45PASS**（13:31:48），strict web/direct types、lint、AST/import boundaries exit0。
+G 两个 API 实现、publisher 与纯公开合同与独审 `2711a54` 字节一致，既有 Core
+公共出口保留，新增两个财务公开出口。
+
+代码/工具链候选 `07434d467e75424222a3871cc249d8d2b3a82ca7`，tree
+`a51468255b52988e8c9bc8ccaa3a52a50b8e1230`，仍不包含 F0023。
+正式新 web build exit0，203 地图制品、741 静态输出文件、937628391 bytes，
+运行连接与部署状态仍明确 false。CI 新增 actual financial position/read regressions，
+Core/Worker/API 构建在测试之前，contents:read/no-deploy 不变。
+
+Root 还修复正式 Pages 全新环境缺 Core dist 的构建顺序：发布 workflow 先构建
+纯 Core 合同再编译网页，Core 路径触发更新；没有 database/seed/server 启用步骤。
+原两条 no-deploy 构建顺序回归不变，新增 Pages 控制，**3PASS**，13:39:00，exit0；
+lint/format/diff exit0。首次新增测试的 Prettier FAIL 已格式修复，未变更语义。
+此增量属于非权威 CI/tooling，按 Owner 正常发布授权处理，不改变 P0 经济或权限。
+新 provider CI、main merge、Pages 实际发布结果必须另外回读，不能复用 bf 的绿灯。
+
 ## 正式财务读取与页面消费
 
 G 的固定原始增量 `41559a3` 重放真实 admitted opening + Posting，输出
@@ -92,6 +122,12 @@ Social Plan。实际领域 source/sole dispatcher 缺失时在写入前精确
 独立审查 PENDING；不能把安全拒绝称作三个职位已执行闭环。
 E 在构建 Captain source-to-AtomicDraft；不制造新的 genesis 或第二份权威状态。
 
+E 随后冻结 source-to-Draft 四文件候选 `85e62917678b14b59f295d631a5cc04b2734d0b8`，
+tree `dd90d30d5ec8795963f12df48e4fef9568f2af48`；实际新18和旧27分次通过，
+没有真实数据库提交/完整历史源重放。已交 C 独立窄审，尚未整合或批准。
+G73c834 的新 read-only source-blocked 命令入口已交 F 独立窄审，尚未整合或批准。
+不因窗口交付而把两项新的 P0 IMPLEMENTED_UNVERIFIED 改成 VERIFIED。
+
 E 的固定源审计确认本次原始规范与选定平衡包没有政治资本开局余额/生成函数：
 `MISSING_GENESIS_INPUT_IN_FIXED_SOURCES`。七分桶规则和守恒已知，但不能把
 物理 openingCapital、首都坐标、TEST_ONLY 90/100 或均分值作为官方政治资本。
@@ -105,6 +141,8 @@ PR114 独立保留 F0023/schema 候选。A 的 rehearsal 过滤索引修复
 Storage、shared-schema、原始20/21 staging 门控不变。只批准 source-only 修复；
 **CALLER_READINESS=NOT_READY**，不启用 SchemaAdmitted，不执行生产 SQL。
 F 不是审查其自己编写的 0023 SQL；原 schema 审查证据独立保留。
+该 source-only 修复已正常 fast-forward/push 至原 PR114 分支，provider 回读 head
+为 `7461a05`、仍 draft；不是 main merge、SQL 发布或旧 CI FAIL 改判。
 
 真实完整金融开局、Social operating carrier、政治资本 genesis、合法身份/当前席位、
 四 Office sole-consumer/自动调度/真实领域写入仍有具体源或代码缺口。
