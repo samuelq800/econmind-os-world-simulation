@@ -1,5 +1,9 @@
 import type { ProjectionResult } from '../production-read/client.js';
 import {
+  consumeDecisionResult,
+  type DecisionResultView,
+} from './decision-result.js';
+import {
   parseAuthority,
   row,
   version,
@@ -111,6 +115,7 @@ export interface OfficeProjectionModel {
   readonly readouts: readonly OfficeReadout[];
   readonly economicAvailability: EconomicAvailability;
   readonly currentFinancialPosition: CurrentFinancialPositionView;
+  readonly decisionResult: DecisionResultView;
   readonly missing: readonly {
     readonly field: string;
     readonly code: 'ROLE_FIELD_NOT_PROJECTED';
@@ -318,6 +323,12 @@ export function consumeOfficeProjection(
     return missing('IDENTITY_MISMATCH');
   if (
     payload.schemaVersion !== 'world-activity-projection-v1' ||
+    Object.hasOwn(
+      payload,
+      config.identity.classification === 'COUNTRY'
+        ? 'decisionResult'
+        : 'decisionResults',
+    ) ||
     !activity ||
     !ledger ||
     !version(activity.authoritativeEventCount) ||
@@ -408,6 +419,30 @@ export function consumeOfficeProjection(
     },
     readouts,
     economicAvailability,
+    decisionResult: consumeDecisionResult(
+      payload[
+        config.identity.classification === 'COUNTRY'
+          ? 'decisionResults'
+          : 'decisionResult'
+      ],
+      {
+        worldId: config.identity.worldId,
+        countryId: config.identity.countryId,
+        officeId: config.identity.officeId,
+        classification: config.identity.classification,
+        worldVersion: result.worldVersion,
+        eventSequence: authority.readback.eventSequence,
+        financialDetail:
+          economicAvailability.financial === 'AVAILABLE'
+            ? 'AUTHORIZED_FILTERED'
+            : 'NOT_AUTHORIZED',
+        activity: {
+          eventCount: activity.authoritativeEventCount,
+          eventSequence: activity.lastAuthoritativeEventSequence,
+          worldVersion: activity.lastAuthoritativeEventWorldVersion,
+        },
+      },
+    ),
     currentFinancialPosition: consumeCurrentFinancialPosition(
       ledger.authoritativeFinancialPosition,
       economicAvailability,

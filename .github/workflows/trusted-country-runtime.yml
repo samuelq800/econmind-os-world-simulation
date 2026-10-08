@@ -8,6 +8,10 @@ on:
       - apps/world-web/src/authorized-client/**
       - apps/world-web/src/financial-intake/**
       - apps/world-web/src/office-projection/**
+      - tests/world-web/office-decision-result-consumer.test.ts
+      - tests/world-web/office-projection-closed-drawer.test.ts
+      - tests/world-web/office-decision-result-consumer.tsconfig.json
+      - tests/support/office-decision-result-consumer-fixture.ts
       - apps/world-api/src/integration/postgres-read-adapter.ts
       - apps/world-api/src/integration/office-decision-result-validator.ts
       - apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.ts
@@ -71,6 +75,10 @@ on:
       - apps/world-web/src/authorized-client/**
       - apps/world-web/src/financial-intake/**
       - apps/world-web/src/office-projection/**
+      - tests/world-web/office-decision-result-consumer.test.ts
+      - tests/world-web/office-projection-closed-drawer.test.ts
+      - tests/world-web/office-decision-result-consumer.tsconfig.json
+      - tests/support/office-decision-result-consumer-fixture.ts
       - apps/world-api/src/integration/postgres-read-adapter.ts
       - apps/world-api/src/integration/office-decision-result-validator.ts
       - apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.ts
@@ -183,6 +191,10 @@ jobs:
         run: |
           pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/office-decision-result-projector.test.ts tests/integration/world-api-postgres-read-adapter.test.ts tests/world-core/v10-authoritative-activity-read-projection-publisher.test.ts
           pnpm exec tsc --noEmit -p tests/support/tsconfig.office-decision-results.json
+      - name: Classified decision result drawer and closed-state privacy cleanup
+        run: |
+          pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-web/office-decision-result-consumer.test.ts tests/world-web/office-projection-closed-drawer.test.ts
+          pnpm exec tsc --noEmit -p tests/world-web/office-decision-result-consumer.tsconfig.json
       - name: Exact unregistered release policy and formal country boot guards
         run: |
           node --test tests/foundation/production-posting-release-policy.test.mjs

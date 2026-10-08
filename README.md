@@ -7,13 +7,20 @@ engines or hidden buffs.
 
 ## Current formal-release checkpoint (2026-10-08)
 
+[Current code closeout and the external opening/Worker handoff](docs/reports/world-connection/WORLD_V2_CODE_CLOSEOUT_2026_10_08.md).
+The latest Owner instruction limits work to finishing and normally merging the
+current candidates, then stopping for authoritative opening data and an external
+Worker connection. No new feature programme or production startup is implied.
+
 [Formal source integration, actual checks and remaining runtime dependencies](docs/reports/world-connection/WORLD_V2_FORMAL_RELEASE_CHECKPOINT_2026_10_08.md).
 The Owner stopped further local preview/DEMO maintenance: work targets the
 formal `apps/world-web`, API/Worker/Core and normal release chain. Existing user
 preview services are not closed; isolated formal-code regressions remain valid.
-Last verified main is PR120 `4532c20b62176de181bafe7df88f98091205087b`.
-Its three exact-head provider checks passed, the merged tree equals reviewed
-candidate `218fb03`, and Pages run `37777894945` successfully published that main.
+Last verified main at the start of this closeout is PR121
+`f4384167cc26aec693f9e40c7ed5caf30da06f43`. Its two applicable provider checks
+passed, the merged tree equals fixed candidate `7502eca`, and Pages run
+`37779992133` successfully published that main. The preceding PR120's three
+checks and Pages run `37777894945` also passed against their separate fixed head.
 Static publication is not an economic API/Worker deployment or activation.
 The original PR115 `bf2fa055` complete local check **failed** on two legacy
 read-contract tests (2523 passed, 139 skipped). Both tests are now fixed without
@@ -47,11 +54,14 @@ Office result delivery. Root's new result-chain 93, release-policy 60 and
 boot/provenance/CI 74 focused checks passed; old provider failures are retained
 separately from this composition's successful provider checks. A subsequent
 independently reviewed positive manual-intake candidate passed Root's composed
-132 assertions, with 14 native Social cases SKIP/NOT_RUN, and is not yet merged.
+132 assertions, with 14 native Social cases SKIP/NOT_RUN, and merged in PR121.
 Its historical FINALIZED acknowledgement is not an economic COMMITTED receipt.
-Separate PR118's
-full check still failed on an uncaught lifecycle transport error despite passing
-2698 assertions. Neither branch is presented as a production activation.
+Separate PR118's earlier full check failed on an uncaught lifecycle transport
+error despite passing 2698 assertions. Its reviewed cleanup is now composed;
+the next full run `37780566377` failed three old Country/Office fixtures missing
+valid committed receipts (2866 pass, 153 skip). A is making a bounded fixture
+correction without relaxing production validation. These failures remain
+separate; no candidate is presented as a production activation.
 
 ## Retained integration snapshot (2026-10-07)
 
