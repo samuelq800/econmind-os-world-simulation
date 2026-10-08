@@ -2,6 +2,7 @@
  * Durable acknowledgement is queue registration only; no economic outcome. */
 export const AUTHENTICATED_OFFICE_COMMAND_SCHEMA =
   'world-authenticated-office-command-v1' as const;
+export const AUTHENTICATED_OFFICE_COMMAND_PATH = '/v1/office-command' as const;
 
 export type ManualOfficeCommandFamily =
   | 'CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1'
