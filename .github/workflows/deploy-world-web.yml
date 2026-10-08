@@ -8,6 +8,7 @@ on:
     paths:
       - .github/workflows/deploy-world-web.yml
       - apps/world-web/**
+      - packages/core/**
       - scripts/configure-official-page-read.mjs
       - scripts/check-world-web-public-base.mjs
       - package.json
@@ -48,6 +49,9 @@ jobs:
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
+
+      - name: Build shared public contracts before web compilation
+        run: pnpm --filter @econmind/core build
 
       - name: Build the non-authoritative World web preview
         env:
