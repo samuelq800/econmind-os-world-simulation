@@ -7,13 +7,21 @@ engines or hidden buffs.
 
 ## Current formal-release checkpoint (2026-10-08)
 
+[Current code closeout and the external opening/Worker handoff](docs/reports/world-connection/WORLD_V2_CODE_CLOSEOUT_2026_10_08.md).
+The latest Owner instruction limits work to finishing and normally merging the
+current candidates, then stopping for authoritative opening data and an external
+Worker connection. No new feature programme or production startup is implied.
+
 [Formal source integration, actual checks and remaining runtime dependencies](docs/reports/world-connection/WORLD_V2_FORMAL_RELEASE_CHECKPOINT_2026_10_08.md).
 The Owner stopped further local preview/DEMO maintenance: work targets the
 formal `apps/world-web`, API/Worker/Core and normal release chain. Existing user
 preview services are not closed; isolated formal-code regressions remain valid.
-Last verified main is PR120 `4532c20b62176de181bafe7df88f98091205087b`.
-Its three exact-head provider checks passed, the merged tree equals reviewed
-candidate `218fb03`, and Pages run `37777894945` successfully published that main.
+Latest verified merged main is PR122
+`c205a36e6ad526c53d02229315b0a9b5f7ee41f1`. Its two applicable provider checks
+passed, the merged tree equals fixed candidate `bb6c17f`, and Pages run
+`37784260654` successfully published that main. PR121's positive intake and its
+own checks/Pages run `37779992133` remain separate evidence. The preceding PR120's three
+checks and Pages run `37777894945` also passed against their separate fixed head.
 Static publication is not an economic API/Worker deployment or activation.
 The original PR115 `bf2fa055` complete local check **failed** on two legacy
 read-contract tests (2523 passed, 139 skipped). Both tests are now fixed without
@@ -34,7 +42,8 @@ candidate passed trusted runtime and atlas CI; main Pages publication
 sole-consumer execution remain blocked.
 No source-only, TEST_ONLY or green CI result admits official
 opening state, activates production, completes six Offices or closes Gate B.
-The latest Owner instruction now requests formal economic-engine activation.
+The latest Owner instruction limits this round to finishing and merging current
+code, then waiting for authoritative opening data and an external Worker.
 Historical D05 deferral is not a permanent construction blocker. The current
 [activation work and concrete cutover prerequisites](docs/reports/world-connection/WORLD_V2_ACTIVATION_WORK_2026_10_08.md)
 distinguish this authorization from missing source, identity and production
@@ -47,11 +56,17 @@ Office result delivery. Root's new result-chain 93, release-policy 60 and
 boot/provenance/CI 74 focused checks passed; old provider failures are retained
 separately from this composition's successful provider checks. A subsequent
 independently reviewed positive manual-intake candidate passed Root's composed
-132 assertions, with 14 native Social cases SKIP/NOT_RUN, and is not yet merged.
+132 assertions, with 14 native Social cases SKIP/NOT_RUN, and merged in PR121.
 Its historical FINALIZED acknowledgement is not an economic COMMITTED receipt.
-Separate PR118's
-full check still failed on an uncaught lifecycle transport error despite passing
-2698 assertions. Neither branch is presented as a production activation.
+Separate PR118's earlier full check failed on an uncaught lifecycle transport
+error despite passing 2698 assertions. Its reviewed cleanup is now composed;
+the next full run `37780566377` failed three old Country/Office fixtures missing
+valid committed receipts (2866 pass, 153 skip). A is making a bounded fixture
+correction without relaxing production validation. These failures remain
+separate; no candidate is presented as a production activation.
+The explicit Office HTTP adapter is a current source candidate under independent
+review; it does not register or start a production host. No further feature work
+is included in this closeout.
 
 ## Retained integration snapshot (2026-10-07)
 

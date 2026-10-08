@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.authenticated-office-command.json",
+  "include": [
+    "https-authenticated-office-command-route.test.ts",
+    "../support/g-office-route-test-only-fixture.ts"
+  ]
+}

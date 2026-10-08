@@ -8,6 +8,10 @@ on:
       - apps/world-web/src/authorized-client/**
       - apps/world-web/src/financial-intake/**
       - apps/world-web/src/office-projection/**
+      - tests/world-web/office-decision-result-consumer.test.ts
+      - tests/world-web/office-projection-closed-drawer.test.ts
+      - tests/world-web/office-decision-result-consumer.tsconfig.json
+      - tests/support/office-decision-result-consumer-fixture.ts
       - apps/world-api/src/integration/postgres-read-adapter.ts
       - apps/world-api/src/integration/office-decision-result-validator.ts
       - apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.ts
@@ -21,6 +25,10 @@ on:
       - apps/world-worker/src/intake/manual-office-intake-runtime.ts
       - tests/world-api/positive-manual-office-command.test.ts
       - tests/support/g-manual-office-api-test-only-fixture.ts
+      - apps/world-api/src/integration/https-authenticated-office-command-route.ts
+      - tests/world-api/https-authenticated-office-command-route.test.ts
+      - tests/world-api/tsconfig.https-office-command-route.json
+      - tests/support/g-office-route-test-only-fixture.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
       - apps/world-worker/src/admission/**
       - tests/world-core/official-opening-admission-publication.test.ts
@@ -61,6 +69,10 @@ on:
       - apps/world-web/src/authorized-client/**
       - apps/world-web/src/financial-intake/**
       - apps/world-web/src/office-projection/**
+      - tests/world-web/office-decision-result-consumer.test.ts
+      - tests/world-web/office-projection-closed-drawer.test.ts
+      - tests/world-web/office-decision-result-consumer.tsconfig.json
+      - tests/support/office-decision-result-consumer-fixture.ts
       - apps/world-api/src/integration/postgres-read-adapter.ts
       - apps/world-api/src/integration/office-decision-result-validator.ts
       - apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.ts
@@ -74,6 +86,10 @@ on:
       - apps/world-worker/src/intake/manual-office-intake-runtime.ts
       - tests/world-api/positive-manual-office-command.test.ts
       - tests/support/g-manual-office-api-test-only-fixture.ts
+      - apps/world-api/src/integration/https-authenticated-office-command-route.ts
+      - tests/world-api/https-authenticated-office-command-route.test.ts
+      - tests/world-api/tsconfig.https-office-command-route.json
+      - tests/support/g-office-route-test-only-fixture.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
       - apps/world-worker/src/admission/**
       - tests/world-core/official-opening-admission-publication.test.ts
@@ -141,6 +157,11 @@ jobs:
         run: |
           pnpm exec vitest run --reporter=verbose tests/world-api/positive-manual-office-command.test.ts
           pnpm exec tsc --noEmit -p tests/world-api/tsconfig.positive-manual-office-command.json
+      - name: Explicit Office HTTP transport and real source-service regressions
+        # Explicit adapter only: no default host, consumer or production activation.
+        run: |
+          pnpm exec vitest run --reporter=verbose tests/world-api/https-authenticated-office-command-route.test.ts
+          pnpm exec tsc --noEmit -p tests/world-api/tsconfig.https-office-command-route.json
       - name: Private opening authority and actual blocked-source regressions
         run: |
           pnpm exec vitest run --reporter=verbose tests/world-core/official-opening-admission-publication.test.ts tests/world-core/official-opening-decision-reconciliation.test.ts
@@ -153,6 +174,10 @@ jobs:
         run: |
           pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/office-decision-result-projector.test.ts tests/integration/world-api-postgres-read-adapter.test.ts tests/world-core/v10-authoritative-activity-read-projection-publisher.test.ts
           pnpm exec tsc --noEmit -p tests/support/tsconfig.office-decision-results.json
+      - name: Classified decision result drawer and closed-state privacy cleanup
+        run: |
+          pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-web/office-decision-result-consumer.test.ts tests/world-web/office-projection-closed-drawer.test.ts
+          pnpm exec tsc --noEmit -p tests/world-web/office-decision-result-consumer.tsconfig.json
       - name: Exact unregistered release policy and formal country boot guards
         run: |
           node --test tests/foundation/production-posting-release-policy.test.mjs
