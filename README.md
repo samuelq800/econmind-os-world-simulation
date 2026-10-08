@@ -5,7 +5,24 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current integration snapshot (2026-10-07)
+## Current formal-release checkpoint (2026-10-08)
+
+[Formal source integration, actual checks and remaining runtime dependencies](docs/reports/world-connection/WORLD_V2_FORMAL_RELEASE_CHECKPOINT_2026_10_08.md).
+The Owner stopped further local preview/DEMO maintenance: work targets the
+formal `apps/world-web`, API/Worker/Core and normal release chain. Existing user
+preview services are not closed; isolated formal-code regressions remain valid.
+Last verified main is PR113 `ead5636a1c871e3a4d7f0d81518125f99fb5730b`.
+PR115 `bf2fa055` has independent source reviews and two successful no-deploy CI
+runs, but its complete local check **failed** on two legacy read-contract tests
+(2523 passed, 139 skipped). Those tests are being repaired without broadening
+private-data access; the original failure is retained and merge is held.
+Opening-inclusive financial positions now have an independently reviewed
+current-admission binding fix; formal browser consumption is separately reviewed
+before integration. No source-only, TEST_ONLY or green CI result admits official
+opening state, activates production, completes six Offices or closes Gate B.
+Production host/activation (D05) remains deferred; Gate B remains PENDING.
+
+## Retained integration snapshot (2026-10-07)
 
 Latest merged-source checkpoint and separately dated construction addenda:
 [Project-completion construction, actual merges, checks and remaining boundaries](docs/reports/world-connection/WORLD_V2_PROJECT_COMPLETION_CHECKPOINT_2026_10_07.md).
