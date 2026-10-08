@@ -262,8 +262,10 @@ export class SqlSocialJobMatchCandidateSource {
       const q = only(
         (
           await transaction.query<Row>(
-            `select command_type,authority_kind,queue_state,available_at_sim_time::text,claimed_by,claim_fencing_token::text
-         from world_v2.command_queue where world_id=$1 and command_id=$2 for share`,
+            `select s.command_type,q.authority_kind,q.queue_state,q.available_at_sim_time::text,q.claimed_by,q.claim_fencing_token::text
+         from world_v2.command_queue q
+         join world_v2.command_submission s on s.world_id=q.world_id and s.command_id=q.command_id
+         where q.world_id=$1 and q.command_id=$2 for share of q`,
             [command.worldId, command.commandId],
           )
         ).rows,

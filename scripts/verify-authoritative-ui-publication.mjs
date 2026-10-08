@@ -13,6 +13,91 @@ const visualMount = Buffer.from(
   '<link rel="stylesheet" href="../shared/econmind-os-visual.css">',
 );
 
+const bootRecordPath = 'docs/reports/D_BOOT_PUBLICATION_PROVENANCE/SOURCE.json';
+// Pin the complete reviewed record, not caller-supplied hashes or a JS allowlist.
+// Any new derivation requires a new immutable source package and review.
+const bootRecordSha256 =
+  '3f9030346e38a76cd68987ed32ccc5471818025d4de94d2d4fbdf87292e11737';
+const bootSourcePaths = new Set([
+  'role-prototypes/season1-immersive/journey.js',
+  'role-prototypes/season1-immersive/world-clock.js',
+]);
+const bootProofs = new WeakMap();
+
+export function verifyBootPublicationRecord({
+  recordBytes,
+  manifestBytes,
+  packageBytes,
+  selection,
+}) {
+  if (hash(recordBytes) !== bootRecordSha256)
+    throw new Error('UI_BOOT_RECORD_HASH_MISMATCH');
+  const record = JSON.parse(recordBytes.toString('utf8'));
+  if (
+    hash(manifestBytes) !== record.archive.manifestSha256 ||
+    hash(packageBytes) !== record.archive.packageSha256
+  )
+    throw new Error('UI_BOOT_ARCHIVE_RECORD_HASH_MISMATCH');
+  const manifest = JSON.parse(manifestBytes.toString('utf8'));
+  const packageRecord = JSON.parse(packageBytes.toString('utf8'));
+  if (
+    selection?.selectionId !== record.archive.selectionId ||
+    selection.archiveSha256 !== record.archive.sha256 ||
+    selection.sourcePayloadFiles !== record.archive.payloadFiles ||
+    packageRecord.selectionId !== record.archive.selectionId ||
+    packageRecord.sha256 !== record.archive.sha256 ||
+    packageRecord.archiveBytes !== record.archive.bytes ||
+    packageRecord.payloadFiles !== record.archive.payloadFiles ||
+    manifest.files.length !== record.archive.payloadFiles
+  )
+    throw new Error('UI_BOOT_ARCHIVE_IDENTITY_MISMATCH');
+  const originals = new Map(manifest.files.map((entry) => [entry.path, entry]));
+  if (originals.size !== manifest.files.length)
+    throw new Error('UI_BOOT_ARCHIVE_DUPLICATE_PATH');
+  for (const file of record.files) {
+    const entry = originals.get(file.sourcePath);
+    if (
+      !entry ||
+      entry.bytes !== file.original.bytes ||
+      entry.sha256 !== file.original.sha256
+    )
+      throw new Error(`UI_BOOT_ORIGINAL_IDENTITY_MISMATCH:${file.sourcePath}`);
+  }
+  // Private record identity prevents fabricated or mutated grants in pure callers.
+  const proof = Object.freeze({});
+  bootProofs.set(
+    proof,
+    new Map(record.files.map((file) => [file.sourcePath, file])),
+  );
+  return proof;
+}
+
+export function verifyBootPublicationBytes({
+  proof,
+  sourcePath,
+  publishedPath,
+  entry,
+  bytes,
+}) {
+  const files = bootProofs.get(proof);
+  if (!files) throw new Error('UI_BOOT_PROVENANCE_NOT_VALIDATED');
+  const file = files.get(sourcePath);
+  if (!file || publishedPath !== file.adaptedOutput.path)
+    throw new Error(`UI_BOOT_FILE_PATH_MISMATCH:${sourcePath}`);
+  if (
+    entry?.path !== sourcePath ||
+    entry.bytes !== file.original.bytes ||
+    entry.sha256 !== file.original.sha256
+  )
+    throw new Error(`UI_BOOT_ORIGINAL_IDENTITY_MISMATCH:${sourcePath}`);
+  if (
+    bytes.length !== file.adaptedOutput.bytes ||
+    hash(bytes) !== file.adaptedOutput.sha256
+  )
+    throw new Error(`UI_BOOT_FILE_HASH_MISMATCH:${sourcePath}`);
+  return 'boot';
+}
+
 // A reviewed visual integration has two exact exceptions; the archive remains immutable.
 // SOURCE.json is a review-bound derived artifact record, never a replacement UI MANIFEST.
 export function verifyVisualOrOriginalBytes({
@@ -76,21 +161,24 @@ async function main() {
       'utf8',
     ),
   );
-  const manifest = JSON.parse(
-    await readFile(
-      path.join(root, 'artifacts/ui-authority/20260928T134420Z/MANIFEST.json'),
-      'utf8',
-    ),
+  const manifestBytes = await readFile(
+    path.join(root, 'artifacts/ui-authority/20260928T134420Z/MANIFEST.json'),
   );
+  const manifest = JSON.parse(manifestBytes.toString('utf8'));
   const selection = JSON.parse(
     await readFile(path.join(root, 'status/ui-selection.json'), 'utf8'),
   );
-  const packageRecord = JSON.parse(
-    await readFile(
-      path.join(root, 'artifacts/ui-authority/20260928T134420Z/PACKAGE.json'),
-      'utf8',
-    ),
+  const packageBytes = await readFile(
+    path.join(root, 'artifacts/ui-authority/20260928T134420Z/PACKAGE.json'),
   );
+  const packageRecord = JSON.parse(packageBytes.toString('utf8'));
+  // Validate the complete immutable provenance closure before processing files.
+  const bootProof = verifyBootPublicationRecord({
+    recordBytes: await readFile(path.join(root, bootRecordPath)),
+    manifestBytes,
+    packageBytes,
+    selection,
+  });
   const expected = new Map(manifest.files.map((entry) => [entry.path, entry]));
   // The owner-selected UI remains the visual source. These reviewed integration
   // files intentionally diverge to bind the selected 70-country opening data and
@@ -127,9 +215,24 @@ async function main() {
   let verifiedFiles = 0;
   let derivedFiles = 0;
   let visualIntegrationFiles = 0;
+  let bootIntegrationFiles = 0;
   async function verifyFile(absolutePath, sourcePath) {
     const entry = expected.get(sourcePath);
     const bytes = await readFile(absolutePath);
+    if (bootSourcePaths.has(sourcePath)) {
+      verifyBootPublicationBytes({
+        proof: bootProof,
+        sourcePath,
+        publishedPath: path
+          .relative(root, absolutePath)
+          .split(path.sep)
+          .join('/'),
+        entry,
+        bytes,
+      });
+      bootIntegrationFiles += 1;
+      return;
+    }
     if (derivedUiFiles.has(sourcePath)) {
       if (!entry)
         throw new Error(`UI_FILE_NOT_IN_SOURCE_MANIFEST:${sourcePath}`);
@@ -177,6 +280,8 @@ async function main() {
   await verifyCopiedTree('specs-markdown-2026-09-27');
   if (visualIntegrationFiles !== 2)
     throw new Error('UI_VISUAL_INTEGRATION_FILE_COUNT_MISMATCH');
+  if (bootIntegrationFiles !== 2)
+    throw new Error('UI_BOOT_INTEGRATION_FILE_COUNT_MISMATCH');
   if (derivedFiles !== derivedUiFiles.size) {
     throw new Error('UI_DERIVED_FILE_COUNT_MISMATCH');
   }
@@ -244,6 +349,7 @@ async function main() {
       verifiedPublishedFiles: verifiedFiles,
       derivedFiles,
       visualIntegrationFiles,
+      bootIntegrationFiles,
       countryPages: 70,
       reusedMapAssets: 140,
       economicStateConnected: false,

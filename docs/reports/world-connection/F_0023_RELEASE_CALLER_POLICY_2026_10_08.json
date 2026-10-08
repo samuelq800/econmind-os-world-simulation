@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "risk": "P0",
+  "repository": "samuelq800/econmind-os-world-simulation",
+  "branch": "codex/f-0023-release-caller-policy",
+  "baseline": "bcfc66787631a13aa5093df42954070c2d7dd66b",
+  "baselineTree": "ff81dd455f32719e6383c96d5430e9c38fe9fa92",
+  "implementation": "c996b913fed2e2e4565957cd13418097d984ae63",
+  "implementationTree": "176b948840999e088710311049e13f424dc67fc7",
+  "fixedArtifactCandidate": "7461a053a74131fcc8273a8ac981e28b510ca03c",
+  "fixedMigrationTree": "97cd00dea1a9e9ff600278fb2c41fa67a037c667",
+  "artifactSource": "4714c1da7af9324741996b94c6da036bf54c39a4",
+  "artifactSha256": "0e1ec372429164acb94f9b9588beac75fbf984f5a41413af13715e28a4e94a36",
+  "policyFingerprint": "348335f6f71ea5bf29a82ab4ddcd5396030426e3ae71848a047ec622e898cac9",
+  "callerRegistration": "NOT_REGISTERED",
+  "callerReadiness": "CALLER_NOT_READY",
+  "schemaAdmitted": false,
+  "economicActivation": false,
+  "productionAccess": false,
+  "ownerSideRegistrationRequired": true,
+  "directTests": {
+    "pass": 23,
+    "fail": 0,
+    "skip": 0,
+    "exitCode": 0,
+    "durationMs": 3985.85475,
+    "includesNodeParentTest": true,
+    "database": "PGlite ephemeral TEST_ONLY",
+    "credentials": "EMPTY_ENV",
+    "network": "OS_DENIED"
+  },
+  "historicalFailures": [
+    { "check": "initial strict checkJs", "diagnostic": "TS18046" },
+    {
+      "check": "initial direct tests",
+      "pass": 21,
+      "fail": 2,
+      "skip": 0,
+      "exitCode": 1,
+      "durationMs": 4034.60425,
+      "cause": "One incorrect baseline-vs-conflict child assertion plus parent failure"
+    }
+  ],
+  "checks": {
+    "strictImplementationCheckJs": "PASS",
+    "scopedLint": "PASS",
+    "scopedFormat": "PASS",
+    "syntax": "PASS",
+    "diffCheck": "PASS",
+    "protectedFilesDelta": "EMPTY",
+    "nativePostgreSQL": "NOT_RUN",
+    "nativeConcurrency": "NOT_RUN",
+    "realNetworkOrAcknowledgementLoss": "NOT_RUN",
+    "production": "NOT_RUN",
+    "providerCI": "NOT_RUN",
+    "fullSuites": "NOT_RUN",
+    "independentReview": "PENDING"
+  },
+  "files": {
+    "scripts/production-posting-release-policy.mjs": "80a324a6bbedbf2bc1ce0e805612cadf8bfc26c222d7adc50bdbee8b722a9977",
+    "tests/foundation/production-posting-release-policy.test.mjs": "0650a53e60e7582283f58cacb732c1be298d1a39085e16fb4a5ffc0e81121bb1",
+    "tests/support/tsconfig.f-production-posting-release.json": "650730ee24d552af41a1f951b80a3703ef50862771516fb44217907dbea64b1d",
+    "docs/exec-plans/F_0023_RELEASE_CALLER_POLICY_2026_10_08.md": "b65990b4b148305d5eb6b96e2eed05ff9ae78e1a710036f48e1eaa58f11e3438"
+  }
+}

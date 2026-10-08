@@ -82,6 +82,7 @@ export * from './versions.js';
 export * from './writer/world-writer-lease.js';
 export * from './water/index.js';
 export * from './commands/central-bank-open-market-operation.js';
+export * from './authorization/office-decision-result-contract.js';
 export {
   ECONOMIC_READ_VISIBILITY_SCHEMA,
   AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA,

@@ -1,7 +1,10 @@
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { Pool } from 'pg';
 import {
   COMMAND_SCHEMA_VERSION,
   SimTime,
@@ -48,6 +51,10 @@ import {
   type SocialEmploymentRuntimeSnapshotReader,
 } from '../../apps/world-worker/src/persistence/social-job-match-candidate-source.js';
 import { prepareAtomicTransitionCandidate } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
+import {
+  PostgresSqlDatabase,
+  PostgresTransactionError,
+} from '../../apps/world-worker/src/persistence/postgres-sql-database.js';
 import type {
   SqlDatabase,
   SqlExecutor,
@@ -588,7 +595,10 @@ function sqlFixture(
             correlation_id: c.correlationId,
           },
         ];
-      } else if (sql.includes('command_submission'))
+      } else if (
+        sql.includes('command_submission') &&
+        !sql.includes('command_queue')
+      )
         rows = [{ command_id: cmd.commandId }];
       else if (sql.includes('world_writer_lease'))
         rows = [
@@ -990,3 +1000,365 @@ describe('SOC-1 server source → real AtomicTransitionDraft, TEST_ONLY SQL prot
     expect(commits).toBe(0);
   });
 });
+
+/** Explicit native opt-in; NOT_RUN otherwise. Only a fresh owned cluster with
+ * TCP disabled, no caller DSN, no queue expansion and no admitted Social state.
+ * Query compatibility is not economic settlement or concurrency validation. */
+describe.skipIf(process.env.C_SOCIAL_FORMAL_SCHEMA_NATIVE !== '1')(
+  'SOC-1 source SQL against formal migrations 0001–0012',
+  () => {
+    let database: Pool;
+    let source: SqlSocialJobMatchCandidateSource;
+    let cluster: string | undefined;
+    let started = false;
+    const postgresBin =
+      process.env.C_SOCIAL_TEST_POSTGRES_BIN ?? '/opt/homebrew/bin';
+    const postgresEnvironment = {
+      PATH: `${postgresBin}:/usr/bin:/bin`,
+      LC_ALL: 'C',
+      LANG: 'C',
+    };
+    const queries: { sql: string; params: readonly unknown[] }[] = [];
+    let readerCalls = 0;
+    const executor = (client: SqlExecutor): SqlExecutor => ({
+      async query<Row extends object>(sql: string, params = []) {
+        queries.push({ sql, params });
+        return client.query<Row>(sql, params);
+      },
+    });
+    let ordinal = 0;
+    const next = () => command({ worldId: `WORLD_SOCIAL_SCHEMA_${++ordinal}` });
+    async function rejection(cmd: CanonicalCommand) {
+      let failure: unknown;
+      try {
+        await source.load({ command: cmd, observedAtReal: at });
+      } catch (error) {
+        failure = error;
+      }
+      expect(failure).toBeInstanceOf(PostgresTransactionError);
+      if (!(failure instanceof PostgresTransactionError))
+        throw new Error('Expected real PostgreSQL transaction failure');
+      expect(failure.outcome).toBe('ROLLED_BACK');
+      return failure.cause;
+    }
+    async function insertSubmission(
+      cmd: CanonicalCommand,
+      storedType: string = cmd.commandType,
+    ) {
+      await database.query(
+        'insert into world_v2.world_head (world_id,world_version,event_sequence) values ($1,$2,$2) on conflict do nothing',
+        [cmd.worldId, cmd.expectedWorldVersion],
+      );
+      await database.query(
+        `insert into world_v2.command_submission
+       (world_id,command_id,idempotency_key,command_type,schema_version,canonical_payload,
+        payload_sha256,command_fingerprint,auth_subject,actor_id,country_id,office_id,
+        expected_world_version,sim_time,correlation_id,submitted_at_real)
+       values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+        [
+          cmd.worldId,
+          cmd.commandId,
+          cmd.idempotencyKey,
+          storedType,
+          cmd.schemaVersion,
+          cmd.canonicalPayload,
+          cmd.payloadHash,
+          cmd.fingerprint,
+          cmd.authSubject,
+          cmd.actorId,
+          cmd.countryId,
+          cmd.officeId,
+          cmd.expectedWorldVersion,
+          cmd.simTime.toCanonicalValue(),
+          cmd.correlationId,
+          cmd.submittedAtReal,
+        ],
+      );
+    }
+    async function seed(
+      cmd: CanonicalCommand,
+      original?: CanonicalCommand,
+      storedType: string = cmd.commandType,
+    ) {
+      await insertSubmission(cmd, storedType);
+      if (original) await insertSubmission(original);
+      await database.query(
+        `insert into world_v2.world_writer_lease
+       (world_id,holder_id,fencing_token,acquired_at_real,renewed_at_real,lease_expires_at_real)
+       values ($1,'WORKER_SOCIAL',1,'2026-10-07T00:00:00.000Z','2026-10-07T00:00:00.000Z','2026-10-07T01:00:00.000Z')`,
+        [cmd.worldId],
+      );
+      await database.query(
+        `insert into world_v2.command_queue (world_id,command_id,authority_kind,available_at_sim_time)
+       values ($1,$2,$3,$4)`,
+        [
+          cmd.worldId,
+          cmd.commandId,
+          cmd.officeId === null ? 'VERSIONED_AUTOMATIC' : 'DISCRETIONARY_USER',
+          cmd.simTime.toCanonicalValue(),
+        ],
+      );
+      await database.query(
+        `update world_v2.command_queue set queue_state='CLAIMED',claimed_by='WORKER_SOCIAL',
+       claim_fencing_token=1,claimed_at_real=$3,attempt_count=1 where world_id=$1 and command_id=$2`,
+        [cmd.worldId, cmd.commandId, at],
+      );
+      queries.length = 0;
+      readerCalls = 0;
+    }
+    beforeAll(async () => {
+      cluster = await mkdtemp('/tmp/c-social-formal-schema-');
+      const socket = path.join(cluster, 'socket');
+      await mkdir(socket);
+      execFileSync(
+        path.join(postgresBin, 'initdb'),
+        [
+          '-D',
+          path.join(cluster, 'data'),
+          '-U',
+          'postgres',
+          '-A',
+          'trust',
+          '--no-locale',
+          '-E',
+          'UTF8',
+        ],
+        { stdio: 'pipe', env: postgresEnvironment },
+      );
+      execFileSync(
+        path.join(postgresBin, 'pg_ctl'),
+        [
+          '-D',
+          path.join(cluster, 'data'),
+          '-l',
+          path.join(cluster, 'postgres.log'),
+          '-o',
+          `-k ${socket} -c listen_addresses=''`,
+          '-w',
+          'start',
+        ],
+        { stdio: 'pipe', env: postgresEnvironment },
+      );
+      started = true;
+      const admin = new Pool({
+        host: socket,
+        user: 'postgres',
+        database: 'postgres',
+      });
+      try {
+        await admin.query('create database econmind_v09_c_social_schema');
+      } finally {
+        await admin.end();
+      }
+      database = new Pool({
+        host: socket,
+        user: 'postgres',
+        database: 'econmind_v09_c_social_schema',
+        max: 2,
+        options: '-c lock_timeout=2000 -c statement_timeout=10000',
+      });
+      expect(
+        (
+          await database.query(
+            'select current_database() as database,inet_server_addr() as host',
+          )
+        ).rows[0],
+      ).toEqual({ database: 'econmind_v09_c_social_schema', host: null });
+      const adapter = new PostgresSqlDatabase(database);
+      const sql: SqlDatabase = {
+        query: executor(adapter).query,
+        transaction: (operation) =>
+          adapter.transaction((tx) => operation(executor(tx))),
+      };
+      source = new SqlSocialJobMatchCandidateSource({
+        mode: 'OFFICIAL_RUNTIME',
+        database: sql,
+        workerId: 'WORKER_SOCIAL',
+        sha256Hex: digest,
+        openingAdoption: adoption,
+        snapshotReader: {
+          async readFrom() {
+            readerCalls++;
+            return { status: 'MISSING_OPERATING_STATE' };
+          },
+        },
+        automaticAuthority: null,
+      });
+      const migrations = [
+        '0001_world_v2_namespace.sql',
+        '0002_world_v2_command_event_ledger.sql',
+        '0003_world_v2_command_receipts_outbox.sql',
+        '0004_world_v2_receipt_event_set_integrity.sql',
+        '0005_world_v2_writer_lease_fencing.sql',
+        '0006_world_v2_writer_lease_lineage_guard.sql',
+        '0007_world_v2_atomic_transition_facts.sql',
+        '0008_world_v2_materialization_recovery.sql',
+        '0009_world_v2_posting_payload_integrity.sql',
+        '0010_world_v2_command_claim_fencing.sql',
+        '0011_world_v2_current_commit_authorization.sql',
+        '0012_world_v2_command_claim_active_lease_guard.sql',
+      ];
+      for (const migration of migrations)
+        await database.query(
+          await read(`database/migrations/artifacts/${migration}`),
+        );
+    });
+    afterAll(async () => {
+      await database?.end();
+      if (started && cluster) {
+        execFileSync(
+          path.join(postgresBin, 'pg_ctl'),
+          ['-D', path.join(cluster, 'data'), '-m', 'fast', '-w', 'stop'],
+          { stdio: 'pipe', env: postgresEnvironment },
+        );
+        started = false;
+      }
+      if (cluster && !started)
+        await rm(cluster, { recursive: true, force: true });
+    });
+    it('uses the real queue shape; type exists only on submission', async () => {
+      const columns = await database.query<{
+        table_name: string;
+        column_name: string;
+      }>(
+        "select table_name,column_name from information_schema.columns where table_schema='world_v2' and table_name in ('command_submission','command_queue')",
+      );
+      expect(
+        columns.rows
+          .filter((r) => r.column_name === 'command_type')
+          .map((r) => r.table_name),
+      ).toEqual(['command_submission']);
+      expect(
+        columns.rows.some(
+          (r) =>
+            r.table_name === 'command_queue' &&
+            r.column_name === 'claim_fencing_token',
+        ),
+      ).toBe(true);
+    });
+    it.each(['PLAN', 'MATCH'] as const)(
+      'reads %s with exact claim and original-plan locks, then retains NOT_READY',
+      async (kind) => {
+        const original = next();
+        const cmd =
+          kind === 'PLAN'
+            ? original
+            : due(original, { worldId: original.worldId });
+        await seed(cmd, kind === 'MATCH' ? original : undefined);
+        expect(await rejection(cmd)).toBeInstanceOf(
+          SocialOperatingStateMissingError,
+        );
+        expect(readerCalls).toBe(1);
+        const queueIndex = queries.findIndex((q) =>
+          q.sql.includes('command_queue'),
+        );
+        const leaseIndex = queries.findIndex((q) =>
+          q.sql.includes('world_writer_lease'),
+        );
+        const headIndex = queries.findIndex((q) =>
+          q.sql.includes('world_head'),
+        );
+        expect(queries[0]!.sql).toContain('for update');
+        expect(queries[0]!.params).toEqual([cmd.worldId, cmd.commandId]);
+        expect(leaseIndex).toBe(kind === 'PLAN' ? 2 : 3);
+        if (kind === 'MATCH') {
+          expect(queries[2]!.sql).toContain('command_actor_id');
+          expect(queries[2]!.params).toEqual([cmd.worldId, original.commandId]);
+        }
+        expect(headIndex).toBeGreaterThan(leaseIndex);
+        expect(queueIndex).toBeGreaterThan(headIndex);
+        expect(queries[queueIndex]!.params).toEqual([
+          cmd.worldId,
+          cmd.commandId,
+        ]);
+        expect(queries[queueIndex]!.sql).toContain('for share of q');
+        expect(
+          queries.filter((q) => q.sql.includes('command_queue')),
+        ).toHaveLength(1);
+        expect(
+          queries.every((q) => !/^(?:insert|update|delete)\b/iu.test(q.sql)),
+        ).toBe(true);
+      },
+    );
+    it.each(['world', 'id', 'missing submission'] as const)(
+      'refuses current %s mismatch before reader',
+      async (fault) => {
+        const stored = next();
+        await seed(stored);
+        const cmd = command({
+          worldId: fault === 'world' ? 'WORLD_SOCIAL_ABSENT' : stored.worldId,
+          commandId:
+            fault === 'world'
+              ? stored.commandId
+              : fault === 'id'
+                ? 'SOCIAL_WRONG_ID'
+                : 'SOCIAL_NO_SUBMISSION',
+        });
+        expect(await rejection(cmd)).toMatchObject({
+          message: 'SOC-1: Submission lock must resolve exactly once',
+        });
+        expect(readerCalls).toBe(0);
+      },
+    );
+    it('refuses stored command type differing from canonical fingerprint and forbids type mutation', async () => {
+      const cmd = next();
+      await seed(cmd, undefined, 'OTHER_COMMAND_V1');
+      expect(await rejection(cmd)).toMatchObject({
+        message: 'Durable Command hashes differ from canonical command intent',
+      });
+      expect(readerCalls).toBe(0);
+      await expect(
+        database.query(
+          'update world_v2.command_submission set command_type=$3 where world_id=$1 and command_id=$2',
+          [cmd.worldId, cmd.commandId, cmd.commandType],
+        ),
+      ).rejects.toThrow('append-only');
+    });
+    it.each([
+      'missing',
+      'world',
+      'id',
+      'type',
+      'fingerprint',
+      'country',
+      'day',
+    ] as const)(
+      'refuses automatic original-plan %s mismatch before reader',
+      async (fault) => {
+        const original = next();
+        const cmd = due(original, { worldId: original.worldId });
+        const stored =
+          fault === 'missing'
+            ? undefined
+            : command({
+                worldId:
+                  fault === 'world'
+                    ? `WORLD_OTHER_${ordinal}`
+                    : original.worldId,
+                commandId:
+                  fault === 'id' ? 'SOCIAL_OTHER_PLAN' : original.commandId,
+                commandType:
+                  fault === 'type' ? 'OTHER_COMMAND_V1' : original.commandType,
+                countryId:
+                  fault === 'country' ? 'COUNTRY_02' : original.countryId,
+                payload:
+                  fault === 'day'
+                    ? { ...planPayload, dueDayIndex: '2' }
+                    : fault === 'fingerprint'
+                      ? { ...planPayload, requestedMatches: '2' }
+                      : planPayload,
+              });
+        await seed(cmd, stored);
+        const cause = await rejection(cmd);
+        expect(cause).toMatchObject({
+          message: ['missing', 'world', 'id'].includes(fault)
+            ? 'Durable Command is absent or duplicated'
+            : fault === 'type'
+              ? 'SOC-1: Wrong family/Office; due syntax is not automatic authority'
+              : 'SOC-1: Due does not bind original durable plan',
+        });
+        expect(readerCalls).toBe(0);
+      },
+    );
+  },
+);
