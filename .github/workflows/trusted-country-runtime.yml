@@ -28,6 +28,10 @@ on:
       - tests/world-core/production-posting-schema.test.ts
       - tests/foundation/snapshot-storage-migration-policy.test.ts
       - tests/foundation/migration-rehearsal-filtered-provenance.test.mjs
+      - tests/foundation/public-runtime-lifecycle.test.ts
+      - tests/foundation/public-runtime-http-probe.test.ts
+      - tests/support/public-runtime-http-probe.ts
+      - tests/support/tsconfig.public-runtime-http-probe.json
       - apps/world-worker/src/admission/**
       - tests/world-core/official-opening-admission-publication.test.ts
       - tests/support/tsconfig.official-opening-admission-publication.json
@@ -87,6 +91,10 @@ on:
       - tests/world-core/production-posting-schema.test.ts
       - tests/foundation/snapshot-storage-migration-policy.test.ts
       - tests/foundation/migration-rehearsal-filtered-provenance.test.mjs
+      - tests/foundation/public-runtime-lifecycle.test.ts
+      - tests/foundation/public-runtime-http-probe.test.ts
+      - tests/support/public-runtime-http-probe.ts
+      - tests/support/tsconfig.public-runtime-http-probe.json
       - apps/world-worker/src/admission/**
       - tests/world-core/official-opening-admission-publication.test.ts
       - tests/support/tsconfig.official-opening-admission-publication.json
@@ -155,6 +163,10 @@ jobs:
           node --test tests/foundation/migration-rehearsal-filtered-provenance.test.mjs
           pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/production-posting-schema.test.ts tests/foundation/snapshot-storage-migration-policy.test.ts
           pnpm exec tsc --noEmit -p tests/support/tsconfig.f-production-schema.json
+      - name: Owned lifecycle HTTP cleanup and strict original test types
+        run: |
+          pnpm exec vitest run --reporter=verbose tests/foundation/public-runtime-http-probe.test.ts
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.public-runtime-http-probe.json
       - name: Conditional positive manual SQL intake and queue acknowledgement
         run: |
           pnpm exec vitest run --reporter=verbose tests/world-api/positive-manual-office-command.test.ts

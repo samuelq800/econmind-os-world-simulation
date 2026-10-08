@@ -115,3 +115,45 @@ nor any unchanged test body was weakened; this does not claim the optional
 ad-hoc typecheck passed or excuse any mandatory configured check.
 The downloaded whole-check FAIL log is retained separately with SHA-256
 `aa4be0c8c4d2cea520f9f8d60da665d11836cb6d5978280ffd80f8062f0b32b8`.
+
+## Subsequent actual failure and fixed main composition
+
+The balanced-renderer exact-chain correction `755dd92` obtained F independent
+SOURCE_ONLY approval and was replayed as `9f7ed3547a4f04903a0c2108105d68edda65cc1b`.
+Its balanced PGlite check passed 108 batches / 70 countries; UI provenance and
+build passed. Native renewal provider `37772932248` yielded a genuinely
+downloaded 4 PASS / 0 FAIL / 0 SKIP receipt, SHA256
+`8bc4562e05e12f4d37ba313866ad1a47ea0c4f310887ee0aa7fc1f1335a05559`.
+Actual merge checkout `2a7a7cfb0bfaa1874cf566a3c5e73f337472e2e7` has the same tree
+`8a45ca2406bec7645b7b766181ee6e2568f48e65` as that candidate.
+
+The same candidate's whole official check `37772932185` nevertheless **FAILS**:
+2698 assertions PASS / 139 SKIP / 0 assertion FAIL, plus one uncaught Node/Undici
+`setTypeOfService EINVAL` attributed to the public runtime lifecycle test.
+Zero failing assertions does not make an uncaught exception a successful check.
+
+A's forward five-file test-only cleanup `5fdf93cbc55cc14bcec46b26ca2405a1d7c9c37a`
+obtained E independent **APPROVED** for the exact patch. E report SHA256:
+`5d0c99d94fecfbe5eb9341200f76319557c046ef85464d04f2ce25201d19b4c0`.
+A's original lifecycle 20 and helper 8 passed; E independently ran helper 8
+and three additional socket/deadline controls and verified unchanged original
+44 expectation-call and five test-definition bytes. The helper consumes bodies,
+enforces an absolute deadline and closes each owned native HTTP socket, without
+a shared Undici pool, skips, ignored unhandled errors or production edits.
+Neither reviewer nor Root claims that the vendor root cause was fully explained.
+Final Linux/provider full check remains necessary.
+
+Root composed actual reviewed main PR120 and PR121 (`f4384167cc26aec693f9e40c7ed5caf30da06f43`)
+with the schema candidate through normal merges `6e5160a` and `95468d5`, retaining
+both additive schema and runtime CI steps and both prerequisite tests. The first
+CI union passed five actual prerequisite tests; neither side's assertions were
+dropped. A's exact source patch was replayed as `348a9cf`; CI now directly checks
+the helper and strict original-test config. No production SQL or startup occurred.
+This is a forward candidate, not a reclassification of either old provider FAIL.
+
+Root's new composed helper/prerequisite check passed **13 tests / 2 files**;
+configured workspace typecheck (with fresh Core/Worker builds), strict helper
+config, focused lint and format passed. Actual authoritative UI check passed
+70 source countries, 286 original / 75 derived / 2 visual / 2 boot files and
+70 pages / 140 maps, with `economicStateConnected=false`. This is not a fresh
+whole local check, native result, final CI receipt or economic activation.
