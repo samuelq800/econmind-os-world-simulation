@@ -10,6 +10,8 @@ import {
 } from '@econmind/core/authenticated-office-command-contract';
 import {
   PostgresOfficeCommandIntake,
+  OfficeCommandOutcomeUnknownError,
+  type ManualOfficeIntakeRuntime,
   parseManualOfficeCommandRequest,
 } from '@econmind/world-worker/office-command-intake';
 import type { AuthenticatedFinancialIntakeCompositionConfig } from './authenticated-financial-intake-composition.js';
@@ -19,7 +21,9 @@ import { createSupabaseJwksSignatureVerifier } from './supabase-jwks-signature-v
 import { verifySupabaseJwtClaims } from './identity.js';
 
 export type AuthenticatedOfficeCommandServiceConfig =
-  AuthenticatedFinancialIntakeCompositionConfig;
+  AuthenticatedFinancialIntakeCompositionConfig & {
+    readonly runtime?: ManualOfficeIntakeRuntime | null;
+  };
 
 const uuid = (v: unknown): v is string =>
   typeof v === 'string' &&
@@ -40,7 +44,8 @@ function sameBinding(
 /** Server composition only. Real JWT and persisted current binding, server
  * identity/clock, strict Core family parser and actual SQL preflight. No HTTP
  * installation, dispatcher, writer grant or simulation activation. The fixed
- * Worker returns no acceptance or queue for these currently unwired families. */
+ * Default rejects unwired families; a private real server runtime binding can
+ * atomically register one durable command/queue, never settle economics. */
 export function createAuthenticatedOfficeCommandService(
   config: AuthenticatedOfficeCommandServiceConfig | null = null,
 ) {
@@ -68,6 +73,7 @@ export function createAuthenticatedOfficeCommandService(
         pool: c.writerPool,
         role: c.writerRole,
         clock: c.clock,
+        runtime: c.runtime ?? null,
       })
     : null;
 
@@ -100,7 +106,13 @@ export function createAuthenticatedOfficeCommandService(
     const cancelled = new Promise<ReturnType<typeof failure>>((resolve) => {
       cancel = resolve;
     });
-    const onAbort = () => cancel(failure(499, 'CANCELLED'));
+    let intakeStarted = false;
+    const onAbort = () =>
+      cancel(
+        c.runtime && intakeStarted
+          ? failure(503, 'WRITE_OUTCOME_UNKNOWN', false)
+          : failure(499, 'CANCELLED'),
+      );
     controller.signal.addEventListener('abort', onAbort, { once: true });
 
     async function execute() {
@@ -196,6 +208,7 @@ export function createAuthenticatedOfficeCommandService(
             ).toISOString(),
           },
         };
+        intakeStarted = true;
         const state = await intake!.submit({
           request,
           binding: before,
@@ -203,6 +216,19 @@ export function createAuthenticatedOfficeCommandService(
           actor,
           signal: controller.signal,
         });
+        if (state.status !== 'REJECTED') {
+          // SQL cutoff is held through the actual commit. A later head/seat
+          // change cannot turn a committed queue acknowledgement into API403.
+          return {
+            httpStatus: state.source === 'NEW' ? 202 : 200,
+            body: {
+              schemaVersion: AUTHENTICATED_OFFICE_COMMAND_SCHEMA,
+              requestId,
+              ok: true as const,
+              state,
+            },
+          };
+        }
         const after = await reader!.resolve(selector);
         if (controller.signal.aborted) return failure(499, 'CANCELLED');
         if (!after || !sameBinding(before, after))
@@ -213,8 +239,9 @@ export function createAuthenticatedOfficeCommandService(
         };
       } catch (error) {
         if (controller.signal.aborted) return failure(499, 'CANCELLED');
-        // The Worker is read-only. Operational/cleanup uncertainty cannot be
-        // reported as a definite Core denial, acceptance, queue or write result.
+        if (error instanceof OfficeCommandOutcomeUnknownError)
+          return failure(503, 'WRITE_OUTCOME_UNKNOWN', false);
+        // Uncertain writes/cleanup never become a definite Core denial or result.
         if (error instanceof DomainError)
           return failure(
             error.code === 'AUTHORIZATION_DENIED'

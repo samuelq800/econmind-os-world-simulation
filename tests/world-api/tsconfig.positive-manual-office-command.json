@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.authenticated-office-command.json",
+  "include": [
+    "authenticated-office-command.test.ts",
+    "positive-manual-office-command.test.ts"
+  ]
+}

@@ -75,6 +75,30 @@ provider CI、main merge、Pages 部署和正式浏览器 AFTER 结果须分别�
 
 G 后续正向 intake 与 D 浏览器真实结果消费仍是独立候选，尚不纳入本段。
 
+### 实际发布与下一固定增量
+
+PR120 已正常合并：main `4532c20b62176de181bafe7df88f98091205087b`，
+tree `25183f1730e4ea384144c09d3717c1b375397194`，与候选 `218fb03` 完全相同。
+候选 trusted runtime `37776796333`、page-config `37776796305`、atlas
+`37776796275` 均 SUCCESS。main Pages `37777894945` SUCCESS，head 为上述 main。
+原 FAIL 不改写；正式浏览器 AFTER 另由 C 做只读窄检，不计入本地测试。
+
+下一增量采用 G 原件 `798facf1c4edeea8a5243d233eed329a1891f2e3`，
+已获 E 独立 **APPROVED SOURCE_ONLY**，只 replay 正向 intake 的十文件增量
+为 `e753446`，不重复已合入的 60a8 dispatcher dependency。
+Root 在 main 4532 上使用自有 Core/Worker/API 构建，实际组合结果为
+**132 PASS / 14 SKIP（5 files，146 total）**：包含正向入队、旧默认拒绝、
+既有 dispatch/goods 和 C Social pure；14 native Social 仍为 NOT_RUN。
+新 strict positive-intake 类型检查、focused lint/format、CI path prerequisite
+**4 PASS**。CI 增补正向测试及 strict config，不改变默认启动、SQL veto或授权。
+本增量仍须自己的固定 provider 检查与正常合并，不能沿用 PR120 绿灯。
+
+正例证明 TEST_ONLY 真实入队→既有唯一 consumer→Atomic FINAL→历史
+FINALIZED acknowledgement；没有经济 receipt/COMMITTED、生产 seat/admission、
+HTTP host部署、真实 CB/Social 正向结算或 clock activation。
+D 的后续真实结果 browser consumer `15d5b8e` 与 A lifecycle cleanup `5fdf93c`
+分别交 F/E 窄审，未计入本候选，未提前批准或启用。
+
 - 本包没有 SQL/schema、Supabase、旧站 public/auth/storage、开局数据或地图原件改动。
 - A 的机制需要真实签名 Owner registry、完整 source bundle 与正式 publication connector；
   当前缺源不是 ADMITTED。原 SQL veto/role/grants 未绕过。
