@@ -1,6 +1,7 @@
 # C O native privacy joint test — 2026-10-08
 
-Status: IMPLEMENTED_UNVERIFIED; native joint test FAIL. Independent review pending.
+Status: IMPLEMENTED_UNVERIFIED; corrected candidate native NOT_RUN.
+First and second native FAIL snapshots retained. Independent review pending.
 No merge, push, PR, deployment, production mutation, admission release, 420 or Gate B claim.
 
 ## Immutable scope
@@ -17,8 +18,10 @@ No G 415/271 candidate or fabricated current context was used.
 
 Replaced the old raw Trade/Finance movements and inventory disclosure assertions
 with current source-derived fail-closed assertions. All three actual seats retain
-positive OFFICE_PRIVATE and COUNTRY query expectations; raw financial/inventory
+positive OFFICE_PRIVATE query expectations; raw financial/inventory
 arrays must be empty with NOT_AUTHORIZED visibility for this actual seed.
+Single-Office seller COUNTRY remains a positive; multi-Office buyer COUNTRY
+has an exact NOT_CONNECTED ambiguity negative under the base unique-facts contract.
 Cross-country and revoked-seat negative controls are retained/extended.
 The query expectation was NOT relaxed to accept an outer query failure.
 
@@ -38,7 +41,7 @@ One credential-empty env run using root vitest.config.ts and
 O_NATIVE_AUTHENTICATED_ROUNDTRIP=1, started 2026-10-08 04:57:08 UTC.
 One fresh owned loopback native PostgreSQL cluster; no supplied DSN.
 Result: 1 FAIL / 0 PASS; duration 2.66 seconds. Original failure is preserved in
-native-o.json; no second PostgreSQL run was made.
+native-o.json; at that point no second PostgreSQL run had been made.
 
 Reached assertions before line 373 prove real JWT registration, three signatures,
 one discretionary enqueue despite retry, exact immutable Command, actual fenced
@@ -80,12 +83,12 @@ Original SOCIAL source blocker / 1066 gaps remains unchanged.
 Full suite, native full matrix, live read host deployment, current-context future
 feature, production privileges and gates remain NOT_RUN / unadvanced.
 
-## Handoff and stop
+## First failure handoff
 
 External raw commands and immutable manifest:
 /Users/samuel/Documents/econclub/artifacts/c-o-native-privacy-joint-20261008.88r8rx.
-Retain this FAIL candidate for Root/independent review. Further native execution
-requires new authority; no application fix or extra cluster was attempted.
+The first FAIL candidate was retained for Root/independent review. Subsequent
+execution required and received new, precisely scoped Root authority.
 
 ## Diagnostic-only follow-up
 
@@ -111,7 +114,7 @@ Started 2026-10-08 05:02:58 UTC; duration 2.99 seconds; exit 1; 1 FAIL / 0 PASS.
 Original second output: native-o-diagnostic.json in the external evidence folder.
 The same pinned toolchain, credential-empty environment, application base and
 unchanged TEST_ONLY fixture/privileges/veto were used. Owned cluster was cleaned
-by finally. No third native run, application fix or grant expansion.
+by finally. At that point no third native run, application fix or grant expansion.
 
 Safe log: seat buyerFinance, classification COUNTRY, code NOT_CONNECTED,
 retryable false. The preceding buyerFinance OFFICE_PRIVATE query fully passed:
@@ -132,7 +135,7 @@ fail-closed ambiguous-binding policy, not financial SOURCE_UNAVAILABLE or an
 established grant failure/API regression. No underlying database error was logged.
 
 The test introduced an unjustified positive COUNTRY expectation for this
-multi-Office buyer. Proposed minimal test correction, awaiting Root direction:
+multi-Office buyer. Proposed minimal test correction, subsequently authorized by Root:
 retain all three OFFICE_PRIVATE positives, use the single-seat seller COUNTRY
 positive for real withheld COUNTRY wire evidence, explicitly assert ambiguous
 multi-Office buyer COUNTRY denial. No silent assertion relaxation was made.
@@ -140,3 +143,17 @@ If product requirements demand successful multi-Office COUNTRY access, Root
 must own an explicit selector/binding identity contract decision and any API
 change; C must not arbitrarily select an Office or fabricate current context.
 Original 08ed FAIL and second e909 FAIL are both preserved separately.
+
+## Authorized correction and third-run preparation
+
+Root explicitly authorized the minimal test correction and one final third
+exclusive native singleton. Only the test changes: all three OFFICE_PRIVATE
+positives retain strict true/watermark/identity/withheld wire checks; the seller
+single-Office COUNTRY positive remains strict true; both buyer seats' COUNTRY
+queries must return precisely NOT_CONNECTED / retryable false for ambiguity.
+The original 2/8 GCU, 2 tonne, three signatures/once-enqueue, FINAL, cross-scope,
+revocation and idempotency assertions remain unchanged. No API, fixture, grants,
+source carrier, admission veto or current context changes.
+This corrected commit must be fixed before the authorized third run. At this
+record stage its native status is NOT_RUN, not PASS. Both earlier FAIL outputs
+and the first classification UNKNOWN correction are immutable evidence.

@@ -377,7 +377,11 @@ describe.skipIf(process.env.O_NATIVE_AUTHENTICATED_ROUNDTRIP !== '1')(
           'buyerTrade',
           'sellerTrade',
         ] as const) {
-          for (const classification of ['OFFICE_PRIVATE', 'COUNTRY'] as const) {
+          const classifications =
+            seat === 'sellerTrade'
+              ? (['OFFICE_PRIVATE', 'COUNTRY'] as const)
+              : (['OFFICE_PRIVATE'] as const);
+          for (const classification of classifications) {
             const read =
               classification === 'COUNTRY'
                 ? await f.countryProjection(seat)
@@ -444,6 +448,19 @@ describe.skipIf(process.env.O_NATIVE_AUTHENTICATED_ROUNDTRIP !== '1')(
             expect(payload.ledger.financialPositions).toEqual([]);
             expect(payload.ledger.inventoryPositions).toEqual([]);
           }
+        }
+        // COUNTRY bindings require one distinct current Office fact. The
+        // buyer's real subject holds both Finance and Trade; do not arbitrarily
+        // choose an Office or confuse this ambiguity with source withholding.
+        for (const seat of ['buyerFinance', 'buyerTrade'] as const) {
+          const ambiguous = await f.countryProjection(seat);
+          expect(ambiguous.ok).toBe(false);
+          if (ambiguous.ok)
+            throw new Error('O_AMBIGUOUS_COUNTRY_BINDING_GRANTED');
+          expect(ambiguous.error).toEqual({
+            code: 'NOT_CONNECTED',
+            retryable: false,
+          });
         }
         expect(
           (await f.projection('buyerFinance', f.scope('sellerTrade'))).ok,
