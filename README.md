@@ -11,7 +11,7 @@ engines or hidden buffs.
 The Owner stopped further local preview/DEMO maintenance: work targets the
 formal `apps/world-web`, API/Worker/Core and normal release chain. Existing user
 preview services are not closed; isolated formal-code regressions remain valid.
-Last verified main is PR113 `ead5636a1c871e3a4d7f0d81518125f99fb5730b`.
+Last verified main is PR115 `38894fb2835ff2793832b1e0e98424e6cc451518`.
 The original PR115 `bf2fa055` complete local check **failed** on two legacy
 read-contract tests (2523 passed, 139 skipped). Both tests are now fixed without
 broadening private-data access; the formal G+D composition passed the focused
@@ -20,8 +20,13 @@ strict types and static web build. The original whole-check failure is retained,
 not relabeled as a new full pass. Opening-inclusive financial positions and their
 current-admission server binding and browser consumption have independent fixed
 source approvals. CI now covers these reads; the formal Pages build first builds
-the public Core contract. New provider CI, main merge and deployed-page evidence
-remain separate from local checks and prior-candidate green runs.
+the public Core contract. The exact final PR115 candidate passed three provider
+checks and was normally merged; Pages publication `37734036448` also completed
+successfully. Live runtime-entry JS and shared CSS match exact release bytes.
+These are formal static-source delivery, not economic activation or full gameplay.
+The next reviewed source-only package adds manual-Office rejection boundaries,
+Captain source-to-Draft preparation and native-test compatibility; official domain
+sources and positive sole-consumer execution remain blocked.
 No source-only, TEST_ONLY or green CI result admits official
 opening state, activates production, completes six Offices or closes Gate B.
 Production host/activation (D05) remains deferred; Gate B remains PENDING.

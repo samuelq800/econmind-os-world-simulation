@@ -79,6 +79,46 @@ lint/format/diff exit0。首次新增测试的 Prettier FAIL 已格式修复，�
 此增量属于非权威 CI/tooling，按 Owner 正常发布授权处理，不改变 P0 经济或权限。
 新 provider CI、main merge、Pages 实际发布结果必须另外回读，不能复用 bf 的绿灯。
 
+### 13:50 实际 main / Pages 交付及下一批源码
+
+正式候选 `94e5fe5beacb0731a915f6b27ebe418218439a17` 的新 provider checks 实际
+SUCCESS：trusted `37733659225`、atlas `37733659204`、page-config `37733659226`。
+Root 用精确匹配 head 的正常 merge 完成 PR115：main
+`38894fb2835ff2793832b1e0e98424e6cc451518`，tree
+`38d49ffe2341e9029019cdfaf329b6c1771751e6`，候选与实际 main tree diff 为零。
+Pages `37734036448` 对该 main 的 build/deploy 已实际 SUCCESS，包含新 Core
+前置构建。原较早 Pages `37641622795` FAIL 保留。没有生产数据库或模拟启用。
+正式域名实际 HTTP200 的 `country-runtime-entry.js`（54960 bytes）与共享 CSS
+（5461 bytes）均与固定本地 release 输出逐字节 hash 一致，MIME 正确。
+JS SHA256 `81d3ad836a73dd8d39bd48226ebb52f2d61d73c6a2e18f10d91338e0d31c2f1a`；
+CSS SHA256 `c73be2dc0837df8f3362945ac8f58eaae28461e42f76c52d639bd325b8f05235`。
+这是两个静态资产验收，不是浏览器完整渲染、全部职位可玩性或实际金融 source 验收。
+
+下一批单独 source-only 候选，代码 tip
+`08732f25c837cb2ebeafe33a0daa79ed776ee7db`，tree
+`ded86d27a3a799cc26b01433ceda1880e7398118`：
+
+- G73c834 经 F 独立固定补丁窄审，direct30 实际通过，报告 SHA256
+  `60ea43406c4ffd2d499a345003247c030378a08085d1fa7756b35ab6e68b624f`。
+  Root 重放 `5aeaa56`，Core/Worker/API build、直接 types/lint/boundaries exit0，
+  新读取入口 30PASS，13:45:42，39.35 秒。只证明实际 JWT/当前绑定/严格命令检查
+  以及 SOURCE_RUNTIME_UNAVAILABLE 零写效应，不提供正向 sink、writer grant 或 hosted route。
+- E85e629 经 C 独立窄审，新18+旧27实际 45PASS，报告 SHA256
+  `d3268224a8790b79ac97f9e7511bb234a20172e915538d01871f1ee948e2830e`。
+  Root 重放 `b86e87a`，Worker/API builds 与定点 type/lint exit0，threads 模式
+  45PASS，13:49:09，1.84 秒。源→Core 一跳 replay→AtomicDraft 不等于 admitted
+  genesis、完整历史 reader 或真实 SQL commit；政治资本 postings 为空。
+  C 初次 forks 清理 EPERM/timeout 警告保留，不把其称为 clean forks PASS。
+- C65b93 经 B 独立测试兼容闭环，报告 SHA256
+  `9d84124b7a0299044e4b72db2eb2a7ef651d4115c9baa3b04100d1b233d2da5a`。
+  Root 正常重放完整六提交历史至 `08732f2`，保留 FAIL/FAIL/PASS 原始记录；
+  两测试制品及报告与原65b93字节相同，定点 type/lint/format exit0。
+  没有第四次 native 执行，不将已绑定的 producer 第三次1PASS 冒充新组合 native。
+
+所有 owned 文件与各自独审原件字节一致，既有 exports 保留，只有新 subpaths。
+当前 main 的原 schema/permissions/status 未变；这三项新源码批准不赋予 runtime
+或 Gate B 批准。下一批 provider CI、main merge 和新 Pages 结果仍需独立回读。
+
 ## 正式财务读取与页面消费
 
 G 的固定原始增量 `41559a3` 重放真实 admitted opening + Posting，输出
