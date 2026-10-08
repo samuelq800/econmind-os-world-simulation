@@ -96,7 +96,7 @@ change logs only seat/classification, a finite allowlist of outer error codes
 and retryability before the existing strict query assertion. It also moves
 the source-blocker log before that assertion and removes account-row details
 from the log. No authority, SQL, fixture grants, economic assertion or query
-expectation changes. The diagnostic version has NOT_RUN native status.
+expectation changes. At creation, the diagnostic version had NOT_RUN native status.
 Original false-only output cannot distinguish the internal cause. Static
 inspection confirms the composition returns fail-closed errors for several
 different binding/authentication/database failures; none has been established
