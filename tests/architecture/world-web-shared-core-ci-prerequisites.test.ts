@@ -41,4 +41,31 @@ describe('fresh CI public contract prerequisites', () => {
       /supabase|migration:|seed:|world-worker (?:dev|start)/u,
     );
   });
+
+  it('reviewed schema CI retains Git provenance and runs direct ephemeral regressions', () => {
+    const source = readFileSync(
+      new URL(
+        '../../.github/workflows/trusted-country-runtime.yml',
+        import.meta.url,
+      ),
+      'utf8',
+    );
+    expect(source).toContain('fetch-depth: 0');
+    expect(source).toContain('- database/migrations/**');
+    expect(source).toContain('pnpm migration:validate');
+    expect(source).toContain(
+      'node --test tests/foundation/migration-rehearsal-filtered-provenance.test.mjs',
+    );
+    expect(source).toContain(
+      'tests/world-core/production-posting-schema.test.ts',
+    );
+    expect(source).toContain(
+      'tests/foundation/snapshot-storage-migration-policy.test.ts',
+    );
+    expect(source).toContain('--no-file-parallelism');
+    expect(source).not.toMatch(
+      /workflow_dispatch|supabase|service_role|management\/v1/u,
+    );
+    expect(source).not.toContain('continue-on-error');
+  });
 });

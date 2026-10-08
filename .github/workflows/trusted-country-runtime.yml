@@ -13,6 +13,12 @@ on:
       - apps/world-api/src/integration/authenticated-office-command-service.ts
       - apps/world-worker/src/intake/postgres-office-command-intake.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
+      - database/migrations/**
+      - scripts/migration-policy.mjs
+      - scripts/rehearse-migrations.mjs
+      - tests/world-core/production-posting-schema.test.ts
+      - tests/foundation/snapshot-storage-migration-policy.test.ts
+      - tests/foundation/migration-rehearsal-filtered-provenance.test.mjs
       - packages/core/**
       - tests/world-web/financial-intake.test.ts
       - tests/world-web/current-financial-position.test.ts
@@ -41,6 +47,12 @@ on:
       - apps/world-api/src/integration/authenticated-office-command-service.ts
       - apps/world-worker/src/intake/postgres-office-command-intake.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
+      - database/migrations/**
+      - scripts/migration-policy.mjs
+      - scripts/rehearse-migrations.mjs
+      - tests/world-core/production-posting-schema.test.ts
+      - tests/foundation/snapshot-storage-migration-policy.test.ts
+      - tests/foundation/migration-rehearsal-filtered-provenance.test.mjs
       - packages/core/**
       - tests/world-web/financial-intake.test.ts
       - tests/world-web/current-financial-position.test.ts
@@ -66,6 +78,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 12.3.4
@@ -85,6 +99,12 @@ jobs:
         run: pnpm exec vitest run --reporter=verbose tests/world-web/current-financial-position.test.ts tests/world-web/economic-visibility-consumer.test.ts tests/world-api/financial-position-read-binding.test.ts tests/integration/staged-narrow-transfer-http.test.ts tests/integration/world-api-authenticated-read-boundary.test.ts
       - name: Source-blocked manual command and Captain preparation regressions
         run: pnpm exec vitest run --reporter=verbose tests/world-api/authenticated-office-command.test.ts tests/world-core/captain-runtime-source-adapter.test.ts tests/world-core/captain-political-capital-slice.test.ts
+      - name: Exact reviewed schema and immutable provenance regressions (ephemeral only)
+        run: |
+          pnpm migration:validate
+          node --test tests/foundation/migration-rehearsal-filtered-provenance.test.mjs
+          pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/production-posting-schema.test.ts tests/foundation/snapshot-storage-migration-policy.test.ts
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.f-production-schema.json
       - name: Focused typecheck, lint and format
         run: |
           pnpm --filter @econmind/world-web typecheck
