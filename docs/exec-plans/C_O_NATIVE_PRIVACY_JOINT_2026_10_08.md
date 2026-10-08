@@ -48,10 +48,11 @@ posting batch, and actual projection publication for 2 countries / 3 offices.
 Persisted source/admission diagnostic and three-seat disclosure denial assertions
 also passed before the first query.
 
-First buyerFinance OFFICE_PRIVATE read returned outer ok=false where true was
+The first failing loop assertion returned outer ok=false where true was
 required, at tests/integration/o-authenticated-financial-roundtrip-postgres.test.ts:373.
 The test did not log the failure envelope or underlying binding/query reason.
-Root cause remains UNKNOWN, not presumed to be the economic visibility denial.
+The classification was not recorded. The initial OFFICE_PRIVATE attribution
+was incorrect; it was not established by that log. See the second run below.
 Remaining wire visibility, COUNTRY reads, cross-country read negatives, original
 FINAL and revoked-seat/idle checks were NOT_RUN after the assertion failure.
 Their assertions remain in the test. Do not claim a complete new roundtrip.
@@ -71,9 +72,9 @@ All actual opening financial accounts returned NOT_AUTHORIZED /
 ADMITTED_SOURCE_UNAVAILABLE for all three seats. Inventory returned
 NOT_AUTHORIZED / OWNER_MAPPING_UNAVAILABLE. No complete admitted authoritative
 decision + assembly + legal-entity role carrier exists in this O seed.
-Finance lawful raw-financial positive is NOT_RUN_SOURCE_BLOCKED. The same-country
-Finance query failure above is a separate unresolved failure, not a successful
-withheld wire result. Never relabel owner IDs or movements as lawful balances.
+Finance lawful raw-financial positive is NOT_RUN_SOURCE_BLOCKED. The COUNTRY
+binding failure diagnosed below is separate from financial detail withholding.
+Never relabel owner IDs or movements as lawful balances.
 
 Original SOCIAL source blocker / 1066 gaps remains unchanged.
 Full suite, native full matrix, live read host deployment, current-context future
@@ -100,4 +101,42 @@ Original false-only output cannot distinguish the internal cause. Static
 inspection confirms the composition returns fail-closed errors for several
 different binding/authentication/database failures; none has been established
 as this run's cause. Source denial is not an outer query success or failure code.
-An explicit second-singleton proposal was sent to Root; approval is PENDING.
+Root subsequently authorized precisely one second singleton diagnostic run.
+
+## Authorized second native run and scope correction
+
+Actual tested diagnostic commit e909a17531ae9901e73ffcd247f8a751b0ae43bf,
+tree 11733b7574b57de77f3aec9c782b0dfb0e5d1cb6.
+Started 2026-10-08 05:02:58 UTC; duration 2.99 seconds; exit 1; 1 FAIL / 0 PASS.
+Original second output: native-o-diagnostic.json in the external evidence folder.
+The same pinned toolchain, credential-empty environment, application base and
+unchanged TEST_ONLY fixture/privileges/veto were used. Owned cluster was cleaned
+by finally. No third native run, application fix or grant expansion.
+
+Safe log: seat buyerFinance, classification COUNTRY, code NOT_CONNECTED,
+retryable false. The preceding buyerFinance OFFICE_PRIVATE query fully passed:
+outer binding, nested query, exact head, country/office identity, empty financial
+and inventory arrays and NOT_AUTHORIZED visibility. Earlier economic assertions
+and source-denial assertions again passed. Subsequent Trade/Country/FINAL/tail
+checks remain NOT_RUN after this failure. This is not a new joint-chain PASS.
+
+Static source diagnosis (not a captured SQL row-count trace):
+postgres-server-read-binding.ts lines 17-40 selects authz.office_id as part of
+DISTINCT and maps COUNTRY entitlement to country scope. This fixture's same
+buyer subject has FINANCE and TRADE with the same country/revision. Therefore
+two distinct Office rows match the same COUNTRY request. Lines 354-366 require
+exactly one scoped row before mapFacts; ambiguity yields null. The HTTPS
+composition lines 395-402 maps missing before-binding to NOT_CONNECTED.
+This explains the actual diagnostic and is consistent with the declared
+fail-closed ambiguous-binding policy, not financial SOURCE_UNAVAILABLE or an
+established grant failure/API regression. No underlying database error was logged.
+
+The test introduced an unjustified positive COUNTRY expectation for this
+multi-Office buyer. Proposed minimal test correction, awaiting Root direction:
+retain all three OFFICE_PRIVATE positives, use the single-seat seller COUNTRY
+positive for real withheld COUNTRY wire evidence, explicitly assert ambiguous
+multi-Office buyer COUNTRY denial. No silent assertion relaxation was made.
+If product requirements demand successful multi-Office COUNTRY access, Root
+must own an explicit selector/binding identity contract decision and any API
+change; C must not arbitrarily select an Office or fabricate current context.
+Original 08ed FAIL and second e909 FAIL are both preserved separately.
