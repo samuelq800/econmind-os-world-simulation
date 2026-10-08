@@ -11,6 +11,10 @@ import {
   canonicalSerialize,
   countryId,
   createWorldWriterCommitAssertion,
+  parseCanonicalCommand,
+  parseAuthoritativeEvent,
+  createAuthoritativeTransition,
+  createFinalCommandReceipt,
   officeId,
   workerId,
   worldId,
@@ -58,7 +62,6 @@ const AT = '2026-09-14T00:00:00.000Z';
 const EXPIRY = '2026-09-14T00:05:00.000Z';
 const SELLER_SUBJECT = '550e8400-e29b-41d4-a716-446655440011';
 const BUYER_SUBJECT = '550e8400-e29b-41d4-a716-446655440012';
-const HASH = `sha256:${'a'.repeat(64)}`;
 
 const sha256Hex = (preimage: string): string =>
   createHash('sha256').update(preimage, 'utf8').digest('hex');
@@ -140,22 +143,61 @@ async function seedAuthoritativeEvent(
     officeId: string;
     sequence: string;
   }>,
-): Promise<void> {
+) {
+  const before = (BigInt(input.sequence) - 1n).toString();
+  const command = parseCanonicalCommand(
+    {
+      worldId: WORLD,
+      commandId: input.commandId,
+      commandType: 'V10_ACTIVITY_TEST',
+      schemaVersion: 'command-v1',
+      payload: {},
+      actorId: 'ACTOR_V10_ACTIVITY',
+      authSubject: input.authSubject,
+      countryId: input.countryId,
+      officeId: input.officeId,
+      expectedWorldVersion: before,
+      simTime: '0',
+      idempotencyKey: null,
+      correlationId: `CORRELATION_${input.commandId}`,
+      submittedAtReal: AT,
+    },
+    sha256Hex,
+  );
+  const event = parseAuthoritativeEvent(
+    {
+      worldId: WORLD,
+      eventId: input.eventId,
+      sequence: input.sequence,
+      worldVersion: input.sequence,
+      causationCommandId: input.commandId,
+      correlationId: command.correlationId,
+      eventType: 'V10_ACTIVITY_RECORDED',
+      schemaVersion: 'event-v1',
+      payload: {},
+      simTime: '0',
+      recordedAtReal: AT,
+      correctsEventId: null,
+    },
+    sha256Hex,
+  );
   await database.query(
     `insert into world_v2.command_submission
        (world_id, command_id, idempotency_key, command_type, schema_version,
         canonical_payload, payload_sha256, command_fingerprint, auth_subject,
         actor_id, country_id, office_id, expected_world_version, sim_time,
         correlation_id, submitted_at_real)
-     values ($1, $2, null, 'V10_ACTIVITY_TEST', 'command-v1', '{}', $3, $3,
-             $4::uuid, 'ACTOR_V10_ACTIVITY', $5, $6, 0, 0, $7, $8)`,
+     values ($1, $2, null, 'V10_ACTIVITY_TEST', 'command-v1', '{}', $3, $4,
+             $5::uuid, 'ACTOR_V10_ACTIVITY', $6, $7, $8::bigint, 0, $9, $10)`,
     [
       WORLD,
       input.commandId,
-      HASH,
+      command.payloadHash,
+      command.fingerprint,
       input.authSubject,
       input.countryId,
       input.officeId,
+      before,
       `CORRELATION_${input.commandId}`,
       AT,
     ],
@@ -167,28 +209,63 @@ async function seedAuthoritativeEvent(
         canonical_payload, payload_sha256, event_fingerprint, sim_time,
         recorded_at_real, corrects_event_id)
      values ($1, $2, $3::bigint, $3::bigint, $4, $5, 'V10_ACTIVITY_RECORDED',
-             'event-v1', '{}', $6, $6, 0, $7, null)`,
+             'event-v1', '{}', $6, $7, 0, $8, null)`,
     [
       WORLD,
       input.eventId,
       input.sequence,
       input.commandId,
       `CORRELATION_${input.commandId}`,
-      HASH,
+      event.payloadHash,
+      event.fingerprint,
       AT,
     ],
   );
+  const transition = createAuthoritativeTransition({
+    command,
+    events: [event],
+    worldVersionBefore: before,
+    worldVersionAfter: input.sequence,
+  });
+  const receipt = createFinalCommandReceipt({
+    command,
+    transition,
+    outcome: 'COMMITTED',
+    reasonCode: null,
+    simTime: command.simTime,
+    recordedAtReal: AT,
+  });
+  await database.query(
+    `insert into world_v2.command_receipt
+       (world_id, command_id, idempotency_key, schema_version,
+        command_fingerprint, outcome, reason_code, transition_id,
+        world_version_before, world_version_after, sim_time, event_ids,
+        recorded_at_real)
+     values ($1, $2, null, 'command-receipt-v2', $3, 'COMMITTED', null, $2,
+             $4::bigint, $5::bigint, 0, $6::jsonb, $7::timestamptz)`,
+    [
+      WORLD,
+      command.commandId,
+      command.fingerprint,
+      receipt.worldVersionBefore,
+      receipt.worldVersionAfter,
+      canonicalSerialize(receipt.eventIds),
+      AT,
+    ],
+  );
+  return { command, event };
 }
 
 async function seedLedgerPostings(
   database: V09AtomicTestDatabase,
+  evidence: Awaited<ReturnType<typeof seedAuthoritativeEvent>>,
 ): Promise<void> {
   const commandId = 'COMMAND_ACTIVITY_SELLER_TRADE';
   const eventId = 'EVENT_ACTIVITY_SELLER_TRADE';
   const transitionBinding = {
-    commandFingerprint: HASH,
+    commandFingerprint: evidence.command.fingerprint,
     commandId,
-    eventFingerprints: [HASH],
+    eventFingerprints: [evidence.event.fingerprint],
     eventIds: [eventId],
     expectedWorldVersion: '0',
     idempotencyKey: null,
@@ -199,16 +276,6 @@ async function seedLedgerPostings(
     worldVersionAfter: '1',
     worldVersionBefore: '0',
   };
-  await database.query(
-    `insert into world_v2.command_receipt
-       (world_id, command_id, idempotency_key, schema_version,
-        command_fingerprint, outcome, reason_code, transition_id,
-        world_version_before, world_version_after, sim_time, event_ids,
-        recorded_at_real)
-     values ($1, $2, null, 'command-receipt-v2', $3, 'COMMITTED', null, $2,
-             0, 1, 0, $4::jsonb, $5::timestamptz)`,
-    [WORLD, commandId, HASH, canonicalSerialize([eventId]), AT],
-  );
   const inventoryPayload = {
     causationCommandId: commandId,
     causationEventIds: [eventId],
@@ -377,7 +444,7 @@ describe('V10.1 authoritative activity read-projection publication', () => {
       officeId: 'TRADE',
       capability: 'TRADE_ACCEPT',
     });
-    await seedAuthoritativeEvent(testDatabase, {
+    const postingEvidence = await seedAuthoritativeEvent(testDatabase, {
       authSubject: SELLER_SUBJECT,
       commandId: 'COMMAND_ACTIVITY_SELLER_TRADE',
       countryId: 'COUNTRY_SELLER',
@@ -393,7 +460,7 @@ describe('V10.1 authoritative activity read-projection publication', () => {
       officeId: 'FINANCE',
       sequence: '2',
     });
-    await seedLedgerPostings(testDatabase);
+    await seedLedgerPostings(testDatabase, postingEvidence);
     await testDatabase.query(
       `update world_v2.world_head
           set world_version = 2, event_sequence = 2
@@ -448,6 +515,14 @@ describe('V10.1 authoritative activity read-projection publication', () => {
       },
     };
     expect(rowByScope(result.rows, 'COUNTRY', 'COUNTRY_SELLER')).toEqual({
+      decisionResults: {
+        schemaVersion: 'office-decision-results-v1',
+        classification: 'COUNTRY',
+        countryId: 'COUNTRY_SELLER',
+        sourceHead: { worldId: WORLD, worldVersion: '2', eventSequence: '2' },
+        status: 'NOT_AUTHORIZED',
+        reason: 'OFFICE_DECISION_DETAIL_PRIVATE',
+      },
       activity: {
         authoritativeEventCount: '2',
         lastAuthoritativeEventSequence: '2',
@@ -465,6 +540,14 @@ describe('V10.1 authoritative activity read-projection publication', () => {
       schemaVersion: 'world-activity-projection-v1',
     });
     expect(rowByScope(result.rows, 'COUNTRY', 'COUNTRY_BUYER')).toEqual({
+      decisionResults: {
+        schemaVersion: 'office-decision-results-v1',
+        classification: 'COUNTRY',
+        countryId: 'COUNTRY_BUYER',
+        sourceHead: { worldId: WORLD, worldVersion: '2', eventSequence: '2' },
+        status: 'NOT_AUTHORIZED',
+        reason: 'OFFICE_DECISION_DETAIL_PRIVATE',
+      },
       activity: {
         authoritativeEventCount: '0',
         lastAuthoritativeEventSequence: '0',
