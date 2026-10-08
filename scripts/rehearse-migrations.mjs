@@ -46,6 +46,23 @@ async function applyChain(database, migrations) {
   }
 }
 
+// Compare against the exact entries executed, not positions in an unfiltered
+// manifest. Artifact path/bytes/source provenance remain validated above.
+export function assertRehearsalReleaseProvenance(mode, executed, rows) {
+  if (rows.length !== executed.length)
+    throw new Error(`${mode} release ledger mismatch`);
+  if (
+    rows.some(
+      (row, index) =>
+        row.migration_id !== executed[index]?.migration_id ||
+        row.artifact_sha256 !== executed[index]?.sha256 ||
+        row.source_repo_commit !== executed[index]?.artifact_source_commit ||
+        row.release_order !== executed[index]?.release_order,
+    )
+  )
+    throw new Error(`${mode} release provenance mismatch`);
+}
+
 async function rehearse(mode) {
   const database = new PGlite();
   try {
@@ -64,17 +81,7 @@ async function rehearse(mode) {
     const shared = await database.query(
       "select schema_name from information_schema.schemata where schema_name in ('auth', 'public', 'storage') order by schema_name",
     );
-    if (release.rows.length !== legacy.length)
-      throw new Error(`${mode} release ledger mismatch`);
-    if (
-      release.rows.some(
-        (row, index) =>
-          row.source_repo_commit !==
-          manifest.migrations[index]?.artifact_source_commit,
-      )
-    ) {
-      throw new Error(`${mode} release provenance mismatch`);
-    }
+    assertRehearsalReleaseProvenance(mode, legacy, release.rows);
     if (
       shared.rows.some(
         (row) => row.schema_name === 'auth' || row.schema_name === 'storage',
