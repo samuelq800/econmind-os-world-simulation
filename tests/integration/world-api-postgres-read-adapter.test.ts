@@ -28,6 +28,29 @@ const officeSubject = parseSupabaseAuthSubject(
 const negotiationSubject = parseSupabaseAuthSubject(
   '123e4567-e89b-42d3-a456-426614174003',
 );
+const officeScope = 'OFFICE_434F554E5452595F41_46494E414E4345';
+function classifiedPayload(office = false) {
+  return {
+    schemaVersion: 'world-activity-projection-v1',
+    countryId: 'COUNTRY_A',
+    ...(office ? { officeId: 'FINANCE' } : {}),
+    activity: {
+      authoritativeEventCount: '0',
+      lastAuthoritativeEventSequence: '0',
+      lastAuthoritativeEventWorldVersion: '0',
+    },
+    ledger: {
+      financialPositions: [],
+      inventoryPositions: [],
+      visibility: {
+        schemaVersion: 'economic-read-visibility-v1',
+        financialDetail: office ? 'AUTHORIZED_FILTERED' : 'NOT_AUTHORIZED',
+        inventoryDetail: 'NOT_AUTHORIZED',
+        countrySummary: 'NOT_AUTHORIZED',
+      },
+    },
+  };
+}
 const unauthorizedSubject = parseSupabaseAuthSubject(
   '123e4567-e89b-42d3-a456-426614174002',
 );
@@ -68,13 +91,13 @@ describe('forward-only parameterized PostgreSQL read adapter', () => {
         (world_id, classification, scope_key, schema_version, world_version, event_sequence, payload, generated_at)
        values
         ($1, 'COUNTRY', 'COUNTRY_A', 'world-projection-read-v1', 9, 14, $2::jsonb, $3),
-        ($1, 'OFFICE_PRIVATE', 'OFFICE_A', 'world-projection-read-v1', 9, 14, $4::jsonb, $3),
+        ($1, 'OFFICE_PRIVATE', 'OFFICE_434F554E5452595F41_46494E414E4345', 'world-projection-read-v1', 9, 14, $4::jsonb, $3),
         ($1, 'NEGOTIATION_PARTY', 'PARTY_A', 'world-projection-read-v1', 9, 14, $5::jsonb, $3)`,
       [
         'WORLD_1',
-        JSON.stringify({ country: 'COUNTRY_A', status: 'READY' }),
+        JSON.stringify(classifiedPayload()),
         '2026-09-12T02:00:00.000Z',
-        JSON.stringify({ office: 'OFFICE_A', status: 'READY' }),
+        JSON.stringify(classifiedPayload(true)),
         JSON.stringify({ party: 'PARTY_A', status: 'READY' }),
       ],
     );
@@ -83,7 +106,7 @@ describe('forward-only parameterized PostgreSQL read adapter', () => {
         (world_id, auth_subject, classification, scope_key, authorization_version, granted_at)
        values
         ($1, $2::uuid, 'COUNTRY', 'COUNTRY_A', 'AUTH_1', $5),
-        ($1, $3::uuid, 'OFFICE_PRIVATE', 'OFFICE_A', 'AUTH_1', $5),
+        ($1, $3::uuid, 'OFFICE_PRIVATE', 'OFFICE_434F554E5452595F41_46494E414E4345', 'AUTH_1', $5),
         ($1, $4::uuid, 'NEGOTIATION_PARTY', 'PARTY_A', 'AUTH_1', $5)`,
       [
         'WORLD_1',
@@ -113,7 +136,7 @@ describe('forward-only parameterized PostgreSQL read adapter', () => {
     ).resolves.toMatchObject({
       classification: 'COUNTRY',
       scopeKey: 'COUNTRY_A',
-      payload: { country: 'COUNTRY_A', status: 'READY' },
+      payload: classifiedPayload(),
       watermark: { worldVersion: '9', eventSequence: '14' },
       receipts: [],
       events: [],
@@ -125,12 +148,12 @@ describe('forward-only parameterized PostgreSQL read adapter', () => {
       readEntitledWorldProjection({
         executor,
         authSubject: officeSubject,
-        request: request('OFFICE_PRIVATE', 'OFFICE_A'),
+        request: request('OFFICE_PRIVATE', officeScope),
       }),
     ).resolves.toMatchObject({
       classification: 'OFFICE_PRIVATE',
-      scopeKey: 'OFFICE_A',
-      payload: { office: 'OFFICE_A', status: 'READY' },
+      scopeKey: officeScope,
+      payload: classifiedPayload(true),
     });
   });
 
@@ -281,6 +304,169 @@ describe('forward-only parameterized PostgreSQL read adapter', () => {
       }),
     ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
   });
+  it.each([
+    'legacyRaw',
+    'countryRelabel',
+    'unauthorizedFinancial',
+    'privateExtra',
+    'wrongScope',
+    'inventoryDetail',
+  ])(
+    'rejects %s at the actual server mapping boundary before a payload can be returned',
+    async (kind) => {
+      const payload: Record<string, unknown> =
+        structuredClone(classifiedPayload());
+      const ledger = payload.ledger as {
+        visibility: Record<string, unknown>;
+        financialPositions: unknown[];
+        inventoryPositions: unknown[];
+      };
+      if (kind === 'legacyRaw')
+        delete (payload.ledger as Record<string, unknown>).visibility;
+      if (kind === 'countryRelabel')
+        ledger.visibility.financialDetail = 'AUTHORIZED_FILTERED';
+      if (kind === 'unauthorizedFinancial')
+        ledger.financialPositions.push({
+          accountId: 'ACCOUNT_SECRET_TREASURY',
+          accountClass: 'CASH',
+          currency: 'GCU',
+          netDebitBalance: '999',
+        });
+      if (kind === 'privateExtra')
+        payload.secretTreasuryForecast = 'SENSITIVE_TEST_PAYLOAD';
+      if (kind === 'wrongScope') payload.countryId = 'COUNTRY_OTHER';
+      if (kind === 'inventoryDetail')
+        ledger.inventoryPositions.push({
+          commodityId: 'PRIVATE_STOCK',
+          quantity: '9',
+          unit: 'tonne',
+          bucket: 'AVAILABLE',
+        });
+      const replay: ParameterizedPgReadExecutor = {
+        query: async (call) => {
+          const result = await executor.query(call);
+          return {
+            rows: result.rows.map((row) => ({ ...(row as object), payload })),
+          };
+        },
+      };
+      await expect(
+        readEntitledWorldProjection({
+          executor: replay,
+          authSubject: countrySubject,
+          request: request('COUNTRY', 'COUNTRY_A'),
+        }),
+      ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
+    },
+  );
+
+  it('rejects a current private financial marker assigned to Trade rather than Finance/CB', async () => {
+    const payload = { ...classifiedPayload(true), officeId: 'TRADE' };
+    const tradeScope = 'OFFICE_434F554E5452595F41_5452414445';
+    const wrongOffice: ParameterizedPgReadExecutor = {
+      query: async () => ({
+        rows: [
+          {
+            world_id: 'WORLD_1',
+            classification: 'OFFICE_PRIVATE',
+            scope_key: tradeScope,
+            schema_version: 'world-projection-read-v1',
+            world_version: '9',
+            event_sequence: '14',
+            payload,
+            generated_at: '2026-09-12T02:00:00.000Z',
+          },
+        ],
+      }),
+    };
+    await expect(
+      readEntitledWorldProjection({
+        executor: wrongOffice,
+        authSubject: officeSubject,
+        request: request('OFFICE_PRIVATE', tradeScope),
+      }),
+    ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
+  });
+  it.each([
+    'wrongHead',
+    'extraSeedField',
+    'countryScope',
+    'deniedWithPositions',
+    'movementSemantics',
+    'zeroPosition',
+    'badSourceUnit',
+    'duplicatePosition',
+  ])(
+    'refuses %s in the optional opening-inclusive position at the actual server map boundary',
+    async (kind) => {
+      const payload: Record<string, unknown> = classifiedPayload(
+        kind !== 'countryScope',
+      );
+      const absolute: Record<string, unknown> = {
+        schemaVersion: 'authoritative-financial-position-v1',
+        status: 'AUTHORIZED_FILTERED',
+        semantics: 'OPENING_PLUS_POSTING_LINEAGE',
+        positionCoverage: 'NONZERO_LEDGER_POSITIONS',
+        sourceHead: { worldVersion: '9', eventSequence: '14' },
+        opening: {
+          seedId: 'SEED_TEST',
+          seedFingerprint: 'sha256:' + 'a'.repeat(64),
+          openingWorldVersion: '0',
+        },
+        sourceUnits: [
+          'CONSTITUTION-U0381',
+          'CONSTITUTION-U0382',
+          'FINANCE-U0831',
+        ],
+        positions: [
+          {
+            accountId: 'ACCOUNT_TEST',
+            accountClass: 'CASH',
+            currency: 'GCU',
+            netDebitBalance: '13',
+          },
+        ],
+      };
+      if (kind === 'wrongHead')
+        absolute.sourceHead = { worldVersion: '8', eventSequence: '14' };
+      if (kind === 'extraSeedField')
+        (absolute.opening as Record<string, unknown>).roster = 'SENSITIVE_TEST';
+      if (kind === 'deniedWithPositions') absolute.status = 'NOT_AUTHORIZED';
+      if (kind === 'movementSemantics')
+        absolute.semantics = 'NET_POSTING_MOVEMENT';
+      if (kind === 'zeroPosition')
+        (
+          absolute.positions as { netDebitBalance: string }[]
+        )[0]!.netDebitBalance = '0';
+      if (kind === 'badSourceUnit')
+        absolute.sourceUnits = ['CAPTAIN_FAKE_GRANT'];
+      if (kind === 'duplicatePosition')
+        (absolute.positions as unknown[]).push(
+          (absolute.positions as unknown[])[0],
+        );
+      (
+        payload.ledger as Record<string, unknown>
+      ).authoritativeFinancialPosition = absolute;
+      const replay: ParameterizedPgReadExecutor = {
+        query: async (call) => {
+          const result = await executor.query(call);
+          return {
+            rows: result.rows.map((row) => ({ ...(row as object), payload })),
+          };
+        },
+      };
+      await expect(
+        readEntitledWorldProjection({
+          executor: replay,
+          authSubject: kind === 'countryScope' ? countrySubject : officeSubject,
+          request: request(
+            kind === 'countryScope' ? 'COUNTRY' : 'OFFICE_PRIVATE',
+            kind === 'countryScope' ? 'COUNTRY_A' : officeScope,
+          ),
+        }),
+      ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
+    },
+  );
 });
 
 function databaseMigrationRoot(): string {

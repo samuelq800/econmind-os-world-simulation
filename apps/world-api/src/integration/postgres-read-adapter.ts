@@ -32,8 +32,21 @@ export interface ParameterizedPgReadRequest {
   readonly signal?: AbortSignal;
 }
 
+/** Server-only facts returned by the actual persisted consumer in the same
+ * verified-subject read snapshot. Never accepted from request/config/HTTP. */
+export interface VerifiedProjectionReadAuthority {
+  readonly authSubject: string;
+  readonly worldId: string;
+  readonly classification: 'COUNTRY' | 'OFFICE_PRIVATE';
+  readonly scopeKey: string;
+  readonly seedRef: string;
+  readonly contentHash: string;
+  readonly worldVersion: string;
+  readonly eventSequence: string;
+}
 export interface ParameterizedPgReadResult {
   readonly rows: readonly unknown[];
+  readonly verifiedProjectionAuthority?: Readonly<VerifiedProjectionReadAuthority>;
 }
 
 /**
@@ -207,6 +220,8 @@ function validateRequest(request: unknown): WorldReadRequestEnvelope & {
 function mapProjectionRow(
   value: unknown,
   expected: WorldReadRequestEnvelope,
+  executorResult: ParameterizedPgReadResult,
+  authSubject: SupabaseAuthSubject,
 ): WorldProjectionDto {
   const row = record(value);
   if (
@@ -232,6 +247,11 @@ function mapProjectionRow(
       receipts: [],
       events: [],
     });
+    assertClassifiedActivityPayload(
+      projection,
+      executorResult.verifiedProjectionAuthority,
+      authSubject,
+    );
     if (
       Buffer.byteLength(JSON.stringify(projection), 'utf8') >
       MAX_WORLD_READ_RESPONSE_BYTES
@@ -242,6 +262,269 @@ function mapProjectionRow(
   } catch (error) {
     if (error instanceof WorldReadFailure) throw error;
     protocol('PostgreSQL projection row failed DTO validation');
+  }
+}
+
+/** A legacy row cannot escape merely because its entitlement and watermark are
+ * current. This validates the sole publisher's bounded wire shape; a marker is
+ * not a grant, and signed/current SQL authorization remains mandatory. */
+function assertClassifiedActivityPayload(
+  projection: WorldProjectionDto,
+  authority: unknown,
+  authSubject: SupabaseAuthSubject,
+): void {
+  if (projection.classification === 'NEGOTIATION_PARTY') return;
+  function boundedObject(
+    value: unknown,
+    allowed: readonly string[],
+  ): Record<string, unknown> {
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      protocol('Classified activity projection is unavailable');
+    const record = value as Record<string, unknown>;
+    const keys = Object.keys(record);
+    if (
+      keys.length !== allowed.length ||
+      keys.some((k) => !allowed.includes(k))
+    )
+      protocol('Classified activity projection is unavailable');
+    return record;
+  }
+  const office = projection.classification === 'OFFICE_PRIVATE';
+  const payload = boundedObject(
+    projection.payload,
+    office
+      ? ['activity', 'countryId', 'officeId', 'ledger', 'schemaVersion']
+      : ['activity', 'countryId', 'ledger', 'schemaVersion'],
+  );
+  if (
+    payload.schemaVersion !== 'world-activity-projection-v1' ||
+    typeof payload.countryId !== 'string'
+  )
+    protocol('Classified activity projection is unavailable');
+  const country = countryId(payload.countryId);
+  if (office) {
+    if (
+      typeof payload.officeId !== 'string' ||
+      !CANONICAL_OFFICE_IDS.some((id) => id === payload.officeId)
+    )
+      protocol('Classified activity scope is invalid');
+    const key = `OFFICE_${Buffer.from(country, 'utf8').toString('hex').toUpperCase()}_${Buffer.from(payload.officeId, 'utf8').toString('hex').toUpperCase()}`;
+    if (projection.scopeKey !== key)
+      protocol('Classified activity scope is invalid');
+  } else if (projection.scopeKey !== country)
+    protocol('Classified activity scope is invalid');
+  const activity = boundedObject(payload.activity, [
+    'authoritativeEventCount',
+    'lastAuthoritativeEventSequence',
+    'lastAuthoritativeEventWorldVersion',
+  ]);
+  for (const value of Object.values(activity))
+    if (typeof value !== 'string' || !/^(?:0|[1-9]\d*)$/u.test(value))
+      protocol('Classified activity is invalid');
+  const ledger = boundedObject(payload.ledger, [
+    'financialPositions',
+    'inventoryPositions',
+    'visibility',
+    ...(Object.prototype.hasOwnProperty.call(
+      payload.ledger ?? {},
+      'authoritativeFinancialPosition',
+    )
+      ? ['authoritativeFinancialPosition']
+      : []),
+  ]);
+  const visibility = boundedObject(ledger.visibility, [
+    'schemaVersion',
+    'financialDetail',
+    'inventoryDetail',
+    'countrySummary',
+  ]);
+  if (
+    visibility.schemaVersion !== ECONOMIC_READ_VISIBILITY_SCHEMA ||
+    !['AUTHORIZED_FILTERED', 'NOT_AUTHORIZED'].includes(
+      String(visibility.financialDetail),
+    ) ||
+    visibility.inventoryDetail !== 'NOT_AUTHORIZED' ||
+    visibility.countrySummary !== 'NOT_AUTHORIZED' ||
+    !Array.isArray(ledger.financialPositions) ||
+    !Array.isArray(ledger.inventoryPositions) ||
+    ledger.inventoryPositions.length !== 0
+  )
+    protocol('Classified economic projection is unavailable');
+  if (visibility.financialDetail === 'AUTHORIZED_FILTERED') {
+    if (
+      !office ||
+      !['FINANCE', 'CENTRAL_BANK'].includes(String(payload.officeId))
+    )
+      protocol('Financial detail is outside its private scope');
+  } else if (ledger.financialPositions.length !== 0)
+    protocol('Unclassified financial detail cannot be served');
+  function validatePositions(values: unknown[], nonzero = false): void {
+    const identities = new Set<string>();
+    for (const value of values) {
+      const position = boundedObject(value, [
+        'accountId',
+        'accountClass',
+        'currency',
+        'netDebitBalance',
+      ]);
+      if (
+        typeof position.accountId !== 'string' ||
+        !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(position.accountId) ||
+        typeof position.accountClass !== 'string' ||
+        ![
+          'CASH',
+          'DEPOSIT',
+          'ASSET',
+          'LIABILITY',
+          'EQUITY',
+          'REVENUE',
+          'EXPENSE',
+          'RECEIVABLE',
+          'PAYABLE',
+        ].includes(position.accountClass) ||
+        typeof position.currency !== 'string' ||
+        typeof position.netDebitBalance !== 'string' ||
+        Money.from(
+          position.netDebitBalance,
+          position.currency,
+        ).toCanonicalValue().amount !== position.netDebitBalance
+      )
+        protocol('Classified financial position is invalid');
+      const key = JSON.stringify([position.accountId, position.currency]);
+      if (identities.has(key))
+        protocol('Classified financial position is duplicated');
+      if (
+        nonzero &&
+        Money.from(
+          String(position.netDebitBalance),
+          String(position.currency),
+        ).amount.isZero()
+      )
+        protocol(
+          'Authoritative financial positions must preserve sparse Core coverage',
+        );
+      identities.add(key);
+    }
+  }
+  validatePositions(ledger.financialPositions);
+  if (
+    Object.prototype.hasOwnProperty.call(
+      ledger,
+      'authoritativeFinancialPosition',
+    )
+  ) {
+    const raw = ledger.authoritativeFinancialPosition as {
+      status?: unknown;
+    } | null;
+    const absolute = boundedObject(
+      raw,
+      raw?.status === 'NOT_AUTHORIZED'
+        ? ['schemaVersion', 'status', 'reason']
+        : [
+            'schemaVersion',
+            'status',
+            'semantics',
+            'positionCoverage',
+            'sourceHead',
+            'opening',
+            'sourceUnits',
+            'positions',
+          ],
+    );
+    if (absolute.schemaVersion !== AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA)
+      protocol('Authoritative financial position schema is unavailable');
+    if (absolute.status === 'NOT_AUTHORIZED') {
+      if (
+        ![
+          'ADMITTED_SOURCE_UNAVAILABLE',
+          'OWNER_MAPPING_UNAVAILABLE',
+          'SCOPE_NOT_AUTHORIZED',
+          'SUMMARY_SOURCE_UNAVAILABLE',
+        ].includes(String(absolute.reason))
+      )
+        protocol('Authoritative financial position denial is invalid');
+    } else {
+      if (
+        absolute.status !== 'AUTHORIZED_FILTERED' ||
+        visibility.financialDetail !== 'AUTHORIZED_FILTERED' ||
+        !office ||
+        !['FINANCE', 'CENTRAL_BANK'].includes(String(payload.officeId)) ||
+        absolute.semantics !== 'OPENING_PLUS_POSTING_LINEAGE' ||
+        absolute.positionCoverage !== 'NONZERO_LEDGER_POSITIONS' ||
+        !Array.isArray(absolute.positions) ||
+        !Array.isArray(absolute.sourceUnits)
+      )
+        protocol(
+          'Authoritative financial position is outside its classified scope',
+        );
+      const head = boundedObject(absolute.sourceHead, [
+        'worldVersion',
+        'eventSequence',
+      ]);
+      if (
+        head.worldVersion !== projection.watermark.worldVersion ||
+        head.eventSequence !== projection.watermark.eventSequence
+      )
+        protocol('Authoritative financial position is outside its source head');
+      const opening = boundedObject(absolute.opening, [
+        'seedId',
+        'seedFingerprint',
+        'openingWorldVersion',
+      ]);
+      if (
+        typeof opening.seedId !== 'string' ||
+        !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(opening.seedId) ||
+        typeof opening.seedFingerprint !== 'string' ||
+        !/^sha256:[0-9a-f]{64}$/u.test(opening.seedFingerprint) ||
+        typeof opening.openingWorldVersion !== 'string' ||
+        !/^(?:0|[1-9]\d*)$/u.test(opening.openingWorldVersion) ||
+        BigInt(opening.openingWorldVersion) >
+          BigInt(projection.watermark.worldVersion)
+      )
+        protocol(
+          'Authoritative financial position opening provenance is invalid',
+        );
+      const units =
+        payload.officeId === 'FINANCE'
+          ? ['CONSTITUTION-U0381', 'CONSTITUTION-U0382', 'FINANCE-U0831']
+          : [
+              'CONSTITUTION-U0381',
+              'CONSTITUTION-U0382',
+              'CENTRAL_BANK-U0585',
+              'CENTRAL_BANK-U0586',
+            ];
+      if (
+        new Set(absolute.sourceUnits).size !== absolute.sourceUnits.length ||
+        absolute.sourceUnits.some((unit) => !units.includes(String(unit)))
+      )
+        protocol('Authoritative financial position source units are invalid');
+      validatePositions(absolute.positions, true);
+      // Shape is not lineage. Require the actual query executor's persisted
+      // admission context, including current head and verified subject/scope.
+      const verified = boundedObject(authority, [
+        'authSubject',
+        'worldId',
+        'classification',
+        'scopeKey',
+        'seedRef',
+        'contentHash',
+        'worldVersion',
+        'eventSequence',
+      ]);
+      if (
+        verified.authSubject !== authSubject ||
+        verified.worldId !== projection.worldId ||
+        verified.classification !== projection.classification ||
+        verified.scopeKey !== projection.scopeKey ||
+        verified.worldVersion !== head.worldVersion ||
+        verified.eventSequence !== head.eventSequence ||
+        verified.seedRef !== opening.seedId ||
+        verified.contentHash !== opening.seedFingerprint
+      )
+        protocol(
+          'Authoritative financial position differs from the current admitted read context',
+        );
+    }
   }
 }
 
@@ -309,5 +592,12 @@ export async function readEntitledWorldProjection(input: {
   if (rows.length !== 1) {
     protocol('PostgreSQL query returned duplicate projection rows');
   }
-  return mapProjectionRow(rows[0], request);
+  return mapProjectionRow(rows[0], request, result, authSubject);
 }
+import {
+  CANONICAL_OFFICE_IDS,
+  countryId,
+  Money,
+  ECONOMIC_READ_VISIBILITY_SCHEMA,
+  AUTHORITATIVE_FINANCIAL_POSITION_SCHEMA,
+} from '@econmind/core';

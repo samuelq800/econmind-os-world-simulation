@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "rootDir": "../.."
+  },
+  "include": [
+    "../../packages/core/src/commands/social-employment-service.ts",
+    "../../apps/world-worker/src/persistence/social-job-match-candidate-source.ts",
+    "../world-core/c-social-employment-service.test.ts"
+  ]
+}

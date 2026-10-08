@@ -18,6 +18,18 @@
         <option value="social">SOCIAL</option>
       </select></label
     >
+    <label
+      >TEST_ONLY disclosure carrier
+      <select id="test-visibility">
+        <option value="current">Current classified projection</option>
+        <option value="denied">NOT_AUTHORIZED with tainted raw cache</option>
+        <option value="legacy">Legacy cache — missing classification</option>
+        <option value="empty">Authorized empty financial movements</option>
+        <option value="country">
+          COUNTRY cannot grant private financial detail
+        </option>
+      </select>
+    </label>
     <button id="test-connect">Connect TEST_ONLY fixture</button>
     <button id="test-revoke">Revoke TEST_ONLY session</button>
     <main class="country-game" data-country="01" data-office="captain">

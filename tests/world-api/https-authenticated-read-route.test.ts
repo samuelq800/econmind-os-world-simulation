@@ -1,4 +1,8 @@
 import {
+  classifiedActivityWireFixture,
+  classifiedOfficeScope,
+} from '../support/classified-activity-wire-fixture.js';
+import {
   createServer,
   request as httpRequest,
   type Server,
@@ -41,7 +45,7 @@ const projectionRequest = {
   payload: {
     worldId: 'TEST_WORLD',
     classification: 'OFFICE_PRIVATE',
-    scopeKey: 'TEST_SCOPE_TRADE',
+    scopeKey: classifiedOfficeScope('TEST_COUNTRY', 'TRADE'),
   },
 };
 const finalRequest = {
@@ -54,7 +58,7 @@ const finalRequest = {
     idempotencyKey: 'TEST_KEY',
   },
 };
-function fixture() {
+function fixture(office = 'TRADE') {
   let binding: ServerVerifiedReadBinding | null = {
     source: 'SERVER_VERIFIED_READ_BINDING',
     capability: 'READ_AUTHORIZED_PROJECTION_AND_FINAL',
@@ -64,8 +68,8 @@ function fixture() {
       authSubjectId: subject,
       worldId: 'TEST_WORLD',
       countryId: 'TEST_COUNTRY',
-      officeId: 'TRADE',
-      scopeKey: 'TEST_SCOPE_TRADE',
+      officeId: office,
+      scopeKey: classifiedOfficeScope('TEST_COUNTRY', office),
       classification: 'OFFICE_PRIVATE',
       authorizationRevision: 'TEST_REVISION',
       modelVersion: 'TEST_MODEL',
@@ -90,12 +94,12 @@ function fixture() {
   const projectionRow = {
     world_id: 'TEST_WORLD',
     classification: 'OFFICE_PRIVATE',
-    scope_key: 'TEST_SCOPE_TRADE',
+    scope_key: classifiedOfficeScope('TEST_COUNTRY', office),
     schema_version: 'world-projection-read-v1',
     world_version: '2',
     event_sequence: '2',
     generated_at: '2026-10-07T00:00:00.000Z',
-    payload: { amount: '9007199254740993.25', nature: 'TEST_ONLY' },
+    payload: classifiedActivityWireFixture('TEST_COUNTRY', office),
   };
   const receiptRow = {
     receipt_world_id: 'TEST_WORLD',
@@ -817,18 +821,69 @@ describe('opt-in authenticated Node route / TEST_ONLY loopback HTTP', () => {
   });
 
   it('caps response bytes at the browser bound without leaking payloads', async () => {
-    const f = fixture();
+    const f = fixture('FINANCE');
+    f.projectionRow.payload = classifiedActivityWireFixture(
+      'TEST_COUNTRY',
+      'FINANCE',
+      [
+        {
+          accountId: 'ACCOUNT_SIZE_TEST',
+          accountClass: 'CASH',
+          currency: 'GCU',
+          netDebitBalance: '1',
+        },
+      ],
+    );
     const h = await host(f.config);
-    // Keep projection itself below the existing reader's one MiB cap. The
-    // additional required authority/envelope must still fit the browser bound.
-    const baseline = JSON.parse((await send(h.port)).body);
+    const body = JSON.stringify({
+      ...projectionRequest,
+      payload: {
+        ...projectionRequest.payload,
+        scopeKey: classifiedOfficeScope('TEST_COUNTRY', 'FINANCE'),
+      },
+    });
+    const baseline = JSON.parse((await send(h.port, { body })).body);
     expect(baseline.result.ok).toBe(true);
-    const remaining =
-      1024 * 1024 - Buffer.byteLength(JSON.stringify(baseline.result.data)) - 1;
-    f.projectionRow.payload.nature += 'x'.repeat(remaining);
-    const reply = await send(h.port);
+    // Pure bounded wire-size fixture, not an account/source grant. Keep each
+    // row canonical and the reader DTO just below one MiB; the authority
+    // envelope must independently enforce its own one MiB bound.
+    const limit = 1024 * 1024;
+    const rows = f.projectionRow.payload.ledger.financialPositions;
+    for (let i = 1; i < 6000; i++)
+      rows.push({
+        accountId: `ACCOUNT_SIZE_${i}_${'A'.repeat(96)}`,
+        accountClass: 'CASH',
+        currency: 'GCU',
+        netDebitBalance: '1',
+      });
+    while (
+      Buffer.byteLength(
+        JSON.stringify({
+          ...baseline.result.data,
+          payload: f.projectionRow.payload,
+        }),
+      ) >= limit
+    )
+      rows.pop();
+    let spare =
+      limit -
+      1 -
+      Buffer.byteLength(
+        JSON.stringify({
+          ...baseline.result.data,
+          payload: f.projectionRow.payload,
+        }),
+      );
+    for (const row of rows) {
+      const add = Math.min(spare, 128 - row.accountId.length);
+      row.accountId += 'A'.repeat(add);
+      spare -= add;
+      if (!spare) break;
+    }
+    expect(spare).toBe(0);
+    const reply = await send(h.port, { body });
     expectError(reply, 502, 'RESPONSE_TOO_LARGE');
-    expect(reply.body).not.toContain('TEST_ONLY');
+    expect(reply.body).not.toContain('ACCOUNT_SIZE');
   });
 
   it('pins route paths at construction, never from Host/forwarded headers', async () => {

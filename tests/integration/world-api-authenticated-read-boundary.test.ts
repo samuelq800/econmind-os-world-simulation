@@ -4,6 +4,7 @@ import {
   createWorldReadRequest,
   executeAuthenticatedWorldProjectionRead,
   verifySupabaseJwtClaims,
+  type AuthenticatedWorldReadPolicy,
   type ParameterizedPgReadExecutor,
 } from '../../apps/world-api/src/index.js';
 
@@ -34,6 +35,29 @@ function verifiedClaims(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function classifiedCountryPayload() {
+  return {
+    schemaVersion: 'world-activity-projection-v1',
+    countryId: 'COUNTRY_A',
+    activity: {
+      authoritativeEventCount: '0',
+      lastAuthoritativeEventSequence: '0',
+      lastAuthoritativeEventWorldVersion: '0',
+    },
+    ledger: {
+      // Withheld detail, not a zero economic balance or a disclosure grant.
+      financialPositions: [],
+      inventoryPositions: [],
+      visibility: {
+        schemaVersion: 'economic-read-visibility-v1',
+        financialDetail: 'NOT_AUTHORIZED',
+        inventoryDetail: 'NOT_AUTHORIZED',
+        countrySummary: 'NOT_AUTHORIZED',
+      },
+    },
+  };
+}
+
 function projectionRows() {
   return [
     {
@@ -43,7 +67,7 @@ function projectionRows() {
       schema_version: 'world-projection-read-v1',
       world_version: '9',
       event_sequence: '14',
-      payload: { status: 'READY' },
+      payload: classifiedCountryPayload(),
       generated_at: '2026-09-12T02:00:00.000Z',
     },
   ];
@@ -53,7 +77,7 @@ function input(
   overrides: Partial<{
     readonly authorization: unknown;
     readonly executor: ParameterizedPgReadExecutor;
-    readonly policy: typeof policy;
+    readonly policy: AuthenticatedWorldReadPolicy;
     readonly request: unknown;
     readonly signal: AbortSignal;
     readonly verifier: {
@@ -92,7 +116,52 @@ describe('authenticated World read boundary', () => {
       }),
     );
     expect(observed).toEqual(['untrusted.token.value', subject]);
-    expect(projection?.payload).toEqual({ status: 'READY' });
+    expect(projection?.payload).toEqual(classifiedCountryPayload());
+  });
+
+  it('rejects a legacy ledger without disclosure classification', async () => {
+    await expect(
+      executeAuthenticatedWorldProjectionRead(
+        input({
+          executor: {
+            query: async () => ({
+              rows: projectionRows().map((row) => ({
+                ...row,
+                payload: {
+                  ...row.payload,
+                  ledger: { financialPositions: [], inventoryPositions: [] },
+                },
+              })),
+            }),
+          },
+        }),
+      ),
+    ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
+  });
+
+  it('rejects raw inventory even with the current withheld marker', async () => {
+    await expect(
+      executeAuthenticatedWorldProjectionRead(
+        input({
+          executor: {
+            query: async () => ({
+              rows: projectionRows().map((row) => ({
+                ...row,
+                payload: {
+                  ...row.payload,
+                  ledger: {
+                    ...row.payload.ledger,
+                    inventoryPositions: [
+                      { bucket: 'AVAILABLE', quantity: '-2', unit: 'tonne' },
+                    ],
+                  },
+                },
+              })),
+            }),
+          },
+        }),
+      ),
+    ).rejects.toMatchObject({ code: 'PROTOCOL_ERROR', retryable: false });
   });
 
   it('rejects an invalid signature or claims without querying the read model', async () => {

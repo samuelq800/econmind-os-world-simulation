@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   COMMAND_SCHEMA_VERSION,
+  DOMAIN_ERROR_CODES,
   EVENT_SCHEMA_VERSION,
   FINANCIAL_POSTING_SCHEMA_VERSION,
   INVENTORY_POSTING_SCHEMA_VERSION,
@@ -52,7 +53,12 @@ import {
   type AtomicCommitFaultInjector,
   type AtomicCommitAuthorizationGuard,
   type PrivateAtomicTransitionCandidate,
+  type CurrentMaterializationInput,
 } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
+import {
+  observeCurrentMaterialization,
+  type CurrentMaterializationObservation,
+} from '../../apps/world-worker/src/persistence/current-materialization-observation.js';
 import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
 import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
 import {
@@ -157,10 +163,17 @@ async function database(): Promise<V09AtomicTestDatabase> {
 
 function candidate(
   commandType: string = 'TEST_ATOMIC_COMMAND',
+  options: {
+    readonly worldVersionBefore?: string;
+    readonly materializations?: readonly CurrentMaterializationInput[];
+  } = {},
 ): PrivateAtomicTransitionCandidate {
+  const before = options.worldVersionBefore ?? '0';
+  const after = String(BigInt(before) + 1n);
+  const suffix = before === '0' ? '' : `_${before}`;
   const simTime = SimTime.fromTicks('10000');
-  const commandIdentity = commandId('COMMAND_ATOMIC_REPOSITORY');
-  const eventIdentity = eventId('EVENT_ATOMIC_REPOSITORY');
+  const commandIdentity = commandId(`COMMAND_ATOMIC_REPOSITORY${suffix}`);
+  const eventIdentity = eventId(`EVENT_ATOMIC_REPOSITORY${suffix}`);
   const command = parseCanonicalCommand(
     {
       actorId: 'ACTOR_ATOMIC_REPOSITORY',
@@ -169,8 +182,8 @@ function candidate(
       commandType,
       correlationId: 'CORRELATION_ATOMIC_REPOSITORY',
       countryId: COUNTRY,
-      expectedWorldVersion: '0',
-      idempotencyKey: 'IDEMPOTENCY_ATOMIC_REPOSITORY',
+      expectedWorldVersion: before,
+      idempotencyKey: `IDEMPOTENCY_ATOMIC_REPOSITORY${suffix}`,
       officeId: null,
       payload: { operation: 'ATOMIC_REPOSITORY_TEST' },
       schemaVersion: COMMAND_SCHEMA_VERSION,
@@ -190,17 +203,17 @@ function candidate(
       payload: { commandId: command.commandId },
       recordedAtReal: OBSERVED_AT,
       schemaVersion: EVENT_SCHEMA_VERSION,
-      sequence: '1',
+      sequence: after,
       simTime: simTime.toCanonicalValue(),
       worldId: WORLD,
-      worldVersion: '1',
+      worldVersion: after,
     },
     sha256Hex,
   );
   const transition = createAuthoritativeTransition({
     command,
-    worldVersionBefore: '0',
-    worldVersionAfter: '1',
+    worldVersionBefore: before,
+    worldVersionAfter: after,
     events: [event],
   });
   const available = createInventoryAccount({
@@ -244,8 +257,8 @@ function candidate(
       worldId: WORLD,
       causationCommandId: command.commandId,
       causationEventIds: transition.eventIds,
-      worldVersionBefore: '0',
-      worldVersionAfter: '1',
+      worldVersionBefore: before,
+      worldVersionAfter: after,
       simTime,
       command,
       transition,
@@ -262,8 +275,8 @@ function candidate(
       worldId: WORLD,
       causationCommandId: command.commandId,
       causationEventIds: transition.eventIds,
-      worldVersionBefore: '0',
-      worldVersionAfter: '1',
+      worldVersionBefore: before,
+      worldVersionAfter: after,
       simTime,
       command,
       transition,
@@ -297,7 +310,7 @@ function candidate(
   });
   const outboxPayload = { commandId: command.commandId, kind: 'COMMITTED' };
   const outbox = createOutboxMessage({
-    messageId: 'OUTBOX_ATOMIC_REPOSITORY',
+    messageId: `OUTBOX_ATOMIC_REPOSITORY${suffix}`,
     worldId: WORLD,
     commandId: command.commandId,
     eventId: eventIdentity,
@@ -320,15 +333,15 @@ function candidate(
     commitAuthorization: null,
     draft: {
       transition,
-      inventoryPostings: [inventoryPosting],
-      financialPostingBatches: [financialPosting],
+      inventoryPostings: before === '0' ? [inventoryPosting] : [],
+      financialPostingBatches: before === '0' ? [financialPosting] : [],
       receipt,
       outboxMessages: [outbox],
-      currentMaterializations: [
-        { key: 'ATOMIC_STATE', payload: { worldVersion: '1' } },
+      currentMaterializations: options.materializations ?? [
+        { key: 'ATOMIC_STATE', payload: { worldVersion: after } },
       ],
       authorityKind: 'VERSIONED_AUTOMATIC',
-      commitAssertion: createWorldWriterCommitAssertion(lease, '0'),
+      commitAssertion: createWorldWriterCommitAssertion(lease, before),
       observedAtReal: OBSERVED_AT,
     },
     sha256Hex,
@@ -340,9 +353,12 @@ async function seed(
   prepared: PrivateAtomicTransitionCandidate,
 ): Promise<void> {
   const command = prepared.command;
-  await value.query(`insert into world_v2.world_head (world_id) values ($1)`, [
-    command.worldId,
-  ]);
+  if (command.expectedWorldVersion === '0') {
+    await value.query(
+      `insert into world_v2.world_head (world_id) values ($1)`,
+      [command.worldId],
+    );
+  }
   await value.query(
     `insert into world_v2.command_submission
        (world_id, command_id, idempotency_key, command_type, schema_version,
@@ -369,10 +385,12 @@ async function seed(
       command.submittedAtReal,
     ],
   );
-  await value.query(
-    `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
-    [command.worldId, WORKER, '2026-09-12T00:00:00.000Z', '300000'],
-  );
+  if (command.expectedWorldVersion === '0') {
+    await value.query(
+      `select * from world_v2.acquire_world_writer_lease($1, $2, $3, $4)`,
+      [command.worldId, WORKER, '2026-09-12T00:00:00.000Z', '300000'],
+    );
+  }
   await value.query(
     `insert into world_v2.command_queue
        (world_id, command_id, authority_kind, priority_rank,
@@ -430,6 +448,197 @@ function repository(
     ...(faultInjector === undefined ? {} : { faultInjector }),
   });
 }
+
+describe('sparse materialization compare-and-swap', () => {
+  async function sparseWorld() {
+    const value = await database();
+    const first = candidate();
+    await seed(value, first);
+    await repository(value).commit(first);
+    const unrelated = candidate('TEST_ATOMIC_COMMAND', {
+      worldVersionBefore: '1',
+      materializations: [{ key: 'OTHER_STATE', payload: { counter: '1' } }],
+    });
+    await seed(value, unrelated);
+    await repository(value).commit(unrelated);
+    return value;
+  }
+
+  async function observe(value: V09AtomicTestDatabase, key = 'ATOMIC_STATE') {
+    return observeCurrentMaterialization({
+      executor: value,
+      worldId: WORLD,
+      key,
+      expectedWorldVersion: '2',
+      sha256Hex,
+    });
+  }
+
+  function third(observation?: CurrentMaterializationObservation) {
+    return candidate('TEST_ATOMIC_COMMAND', {
+      worldVersionBefore: '2',
+      materializations: [
+        {
+          key: observation?.key ?? 'ATOMIC_STATE',
+          payload: { counter: '2' },
+          ...(observation === undefined ? {} : { observation }),
+        },
+      ],
+    });
+  }
+
+  async function head(value: V09AtomicTestDatabase) {
+    return (
+      await value.query<{ readonly world_version: string }>(
+        'select world_version::text from world_v2.world_head where world_id = $1',
+        [WORLD],
+      )
+    ).rows[0]!.world_version;
+  }
+
+  it('retains old global CAS rejection, then commits an observed version1 country at global2 once', async () => {
+    const value = await sparseWorld();
+    const old = third();
+    await seed(value, old);
+    await expect(repository(value).commit(old)).rejects.toThrow();
+    expect(await head(value)).toBe('2');
+    const observation = await observe(value);
+    expect(observation).toMatchObject({
+      observedWorldVersion: '2',
+      valueWorldVersion: '1',
+    });
+    const prepared = third(observation);
+    expect((await repository(value).commit(prepared)).source).toBe(
+      'NEW_COMMIT',
+    );
+    expect((await repository(value).commit(prepared)).source).toBe(
+      'EXISTING_COMMIT',
+    );
+    expect(await head(value)).toBe('3');
+    expect(
+      (
+        await value.query(
+          'select world_version::text, canonical_payload from world_v2.current_materialization where materialization_key=$1',
+          ['ATOMIC_STATE'],
+        )
+      ).rows[0],
+    ).toEqual({ world_version: '3', canonical_payload: '{"counter":"2"}' });
+    expect(
+      (
+        await value.query(
+          'select count(*)::int as n from world_v2.authoritative_event',
+        )
+      ).rows[0],
+    ).toEqual({ n: 3 });
+  });
+
+  it.each(['HASH_CHANGED', 'ROW_DELETED'] as const)(
+    'rolls back all third-command effects on %s after observation',
+    async (change) => {
+      const value = await sparseWorld();
+      const prepared = third(await observe(value));
+      await seed(value, prepared);
+      if (change === 'ROW_DELETED') {
+        await value.query(
+          'delete from world_v2.current_materialization where materialization_key=$1',
+          ['ATOMIC_STATE'],
+        );
+      } else {
+        const payload = { counter: 'externally-rebuilt' };
+        await value.query(
+          'update world_v2.current_materialization set canonical_payload=$2,payload_sha256=$3 where materialization_key=$1',
+          [
+            'ATOMIC_STATE',
+            canonicalSerialize(payload),
+            canonicalSha256(canonicalHashInput(payload), sha256Hex),
+          ],
+        );
+      }
+      await expect(repository(value).commit(prepared)).rejects.toThrow();
+      expect(await head(value)).toBe('2');
+      expect(
+        (
+          await value.query(
+            'select count(*)::int as n from world_v2.authoritative_event',
+          )
+        ).rows[0],
+      ).toEqual({ n: 2 });
+      expect(
+        (
+          await value.query(
+            'select count(*)::int as n from world_v2.command_receipt',
+          )
+        ).rows[0],
+      ).toEqual({ n: 2 });
+    },
+  );
+
+  it('requires an observed absent row to remain absent and permits a genuine first write', async () => {
+    const value = await sparseWorld();
+    const observation = await observe(value, 'NEW_STATE');
+    expect(observation.valueWorldVersion).toBeNull();
+    const prepared = third(observation);
+    await seed(value, prepared);
+    await value.query(`insert into world_v2.current_materialization
+      (world_id,materialization_key,world_version,source_command_id,canonical_payload,payload_sha256)
+      select world_id,'NEW_STATE',world_version,source_command_id,canonical_payload,payload_sha256
+      from world_v2.current_materialization where materialization_key='OTHER_STATE'`);
+    await expect(repository(value).commit(prepared)).rejects.toThrow();
+    expect(await head(value)).toBe('2');
+    await value.query(
+      "delete from world_v2.current_materialization where materialization_key='NEW_STATE'",
+    );
+    expect((await repository(value).commit(prepared)).source).toBe(
+      'NEW_COMMIT',
+    );
+    expect(await head(value)).toBe('3');
+  });
+
+  it('rejects forged, wrong-key, wrong-world and stale-head observations before candidate creation', async () => {
+    const value = await sparseWorld();
+    const observation = await observe(value);
+    for (const forged of [
+      { ...observation },
+      { ...observation, key: 'OTHER_STATE' },
+      { ...observation, worldId: worldId('OTHER_WORLD') },
+      { ...observation, observedWorldVersion: '1' },
+    ]) {
+      expect(() =>
+        third(forged as CurrentMaterializationObservation),
+      ).toThrow();
+    }
+    expect(() =>
+      candidate('TEST_ATOMIC_COMMAND', {
+        worldVersionBefore: '2',
+        materializations: [{ key: 'OTHER_STATE', payload: {}, observation }],
+      }),
+    ).toThrow();
+    await expect(
+      observeCurrentMaterialization({
+        executor: value,
+        worldId: WORLD,
+        key: 'ATOMIC_STATE',
+        expectedWorldVersion: '1',
+        sha256Hex,
+      }),
+    ).rejects.toMatchObject({
+      code: DOMAIN_ERROR_CODES.WORLD_VERSION_MISMATCH,
+    });
+    expect(await head(value)).toBe('2');
+  });
+
+  it('refuses a corrupt current cache hash rather than branding it as a domain observation', async () => {
+    const value = await sparseWorld();
+    await value.query(
+      "update world_v2.current_materialization set payload_sha256=$1 where materialization_key='ATOMIC_STATE'",
+      [`sha256:${'0'.repeat(64)}`],
+    );
+    await expect(observe(value)).rejects.toMatchObject({
+      code: DOMAIN_ERROR_CODES.TRANSITION_EVIDENCE_INVALID,
+    });
+    expect(await head(value)).toBe('2');
+  });
+});
 
 describe('V09 private atomic repository preparation', () => {
   it('fails closed before any effect when a V10 narrow transfer lacks the server-held approval guard', async () => {

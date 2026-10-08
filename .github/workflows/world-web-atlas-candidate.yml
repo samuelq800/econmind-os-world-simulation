@@ -5,6 +5,7 @@ on:
     paths:
       - .github/workflows/world-web-atlas-candidate.yml
       - apps/world-web/**
+      - packages/core/**
       - tests/world-web/callum-home-mosaic.test.ts
       - tests/world-web/world-public-preview.test.ts
       - tests/world-web/fictional-atlas.test.ts
@@ -38,6 +39,8 @@ jobs:
           node-version: 24.20.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Build shared public Core contracts before browser consumers
+        run: pnpm --filter @econmind/core build
       - name: Focused atlas and public-preview tests
         run: pnpm exec vitest run tests/world-web/callum-home-mosaic.test.ts tests/world-web/detail-tile-visibility.test.ts tests/world-web/viewport-camera.test.ts tests/world-web/world-public-preview.test.ts tests/world-web/fictional-atlas.test.ts tests/world-web/shared-visual-contract.test.ts tests/world-web/visual-publication-integrity.test.ts
       - name: World web typecheck and build

@@ -31,6 +31,81 @@ trusted-country-runtime37641566891及atlas37641566880均IN_PROGRESS，不能称C
 该build可从固定9e重新生成。可用空间恢复到约348MB，仍不适合大地图构建或
 并行native数据库。Root没有删其他窗口的源文件、经济数据或证据。
 
+### 23:06 后续记录：CI实质失败与前置修复
+
+PR112 两个精确856ae9候选CI后来均FAIL，原run37641566891/37641566880不改写。
+失败日志证明新浏览器消费者找不到已批准公共合同的dist/.d.ts：trusted workflow
+把Core构建放在消费者测试之后，atlas workflow根本没有先构建Core。后续unknown
+类型错误是缺失模块的连带错误；没有通过改业务类型、撤销测试或退回server barrel绕过。
+
+Root将实际Core构建提前，trusted Worker prerequisite也提前且不再重复；增加
+Core/financial消费者路径触发与两条先构建合同的回归检查，权限仍contents:read、
+no-deploy，无continue-on-error/skip或生产secret。这个CI/tooling时序增量属P2，按
+Owner本轮“你有权直接发布main。完成整个项目”的正常main授权处理，不变更P0
+经济/权限/账本边界。23:05:56实际受影响trusted消费者+金融30控件+CI两控件
+**73PASS，2.26s，exit0**；scoped lint/format/diff通过。修复候选尚待新的provider
+CI结果，不能用旧失败run或本地73PASS宣称新GitHub CI已通过。
+
+C固定SOC-1七文件也已获独立B source-only批准，31newPASS、生产者75独立保留；
+Root正常重放时仅公共barrel冲突，保留全部既有exports并追加一个Social export。
+六个owned文件逐字节匹配087cb85；Core/Worker组合构建exit0。真实admitted reader、
+automatic grant、原子SQL提交与完整Social运行仍未实现，不能把源码批准称上线。
+
+### 23:44 后续记录：运行时与 schema 分离收口
+
+当前可核实 main 是 PR113 的 `ead5636a1c871e3a4d7f0d81518125f99fb5730b`。
+下方旧表、待审状态和失败保留其历史时间，不是本段的新状态。
+运行时 main 候选独立分支 `codex/mainline-reviewed-runtime` 从该 main 构建；
+不包含 F0023、Root 后缀 selector 或 caller allowlist 改动。其数据库制品、
+manifest 和 migration policy 与此 main 完全一致，不借源码批准直接执行 SQL。
+
+实际构建检查固定在 `ae610e128634cf8d67183e908d9588a96b769937`，tree
+`2f776319e7a5f0c664690a387249b9b6818eb3e7`：Core/Worker/API 构建、同一严格
+web tsconfig 的 noEmit 检查均 exit0；trusted/financial/CI prerequisite/CB
+四文件 **100PASS**，23:40:26，4.55s。此范围不是完整 pnpm check、浏览器或生产。
+
+C 的 default Social 测试曾真实 26PASS/5FAIL；source Core 与 Worker compiled
+Core 的类身份混用导致 canonical serialization 提前拒绝。固定修复
+`2e93b128710a66e47494498f4324f0bc4750f82b` 只改一个 Core import、删除两个
+source alias 和报告，31 个断言不变。Root 重放为 `b08275e`，实际 default
+**31PASS**，23:43:16，3.10s。原失败不改写；B named closure 尚待返回。
+
+C SOC-1、A CB-1、Root sparse CAS、G b17 隐私分类及 D61c 消费均已有独立
+source-only 批准。CB default/scoped 模块身份修复也经 B named closure；
+原 default 18PASS/7FAIL 和衍生 23PASS/2FAIL 保留。B closure 报告 SHA256
+`7ff03e2535a797d4ca9549d4f34a25f4d03e072f75fe0a37eea8890c2d57855a`。
+这些批准未提供 official Social admitted operating carrier：实际仍为
+`SOCIAL_ADMITTED_OPERATING_OPENING_CARRIER_MISSING`，1066 缺口及 seed admission
+拒绝不变，不能把 TEST_ONLY 工资、岗位或服务容量转成官方经营事实。
+
+GitHub 网络恢复后，组合 schema 候选已正常 push 并建立 draft
+[PR114](https://github.com/samuelq800/econmind-os-world-simulation/pull/114)。
+初始 ff8 候选的 trusted `37643561536`、atlas `37643561854` 实际 SUCCESS，
+均 no-deploy。migration/native CI 初始 FAIL 于不可达的 0023 source commit；
+F 原始 `92cb5b9922f1bdb58ea482a65e6b9c2f3d3c487a` 分支后来已正常 push，
+不能因此倒改旧 FAIL 或宣称重跑成功。official check 的 JSON 格式 FAIL 已纯格式
+修复并核实解析内容一致；renewal 的旧22项 fixture 对新增23项 manifest 的
+前置 FAIL 另有 A 固定兼容候选，真实 PostgreSQL 四例仍 NOT_RUN。
+
+F0023 本身获 B 22 项独立隔离 source-only 批准；Root selector 的文档过度
+caller-ready 表述已更正并经 named closure。现有 staging allowlist 只接收
+20/21项，所选 legacy21+0023 的22项链仍被实际 gate 拒绝，
+**CALLER_READINESS=NOT_READY**。实际 rehearsal 也发现过滤掉0022后使用未过滤
+manifest 索引比较 provenance 的不匹配。保留问题、拆开主线，不放宽 allowlist、
+不重写 source hash、不直接发布生产 schema。
+
+进一步固定而未合并的候选：G `41559a3` 重放 admitted opening+Posting 的真实
+ledger；G `2711a54` 将同事务当前 persisted admission seed/head/subject 绑定传给
+server adapter；D `811ebe7` 展示严格区分的 opening-inclusive 财务头寸和净分录
+变动。这些不是 spendable cash，signed sparse/denied/missing 不补零；尚待独立
+审核及正常依赖集成。181/89/45 等生产者选测数量属于各自固定矩阵，不能相加
+或代替 Root 新组合验收。真实官方 carrier、native新链、完整420/UI、生产启用
+均未由这些候选证明。
+
+本段不改变正式 `PLANNED`、`PENDING`、`next_step_ready=false`。D05 host/activation
+仍是 Owner 明确 deferred；四类真实金融/身份源输入及四 Office 执行接线仍缺，
+不能宣称整个项目完工。README 与本记录按证据分层更新，不把代码发布当运行授权。
+
 ## 已正常合并 main
 
 Owner 已授权正常安全发布。下列 P0 源码均先获得独立 B 对固定候选的窄审，

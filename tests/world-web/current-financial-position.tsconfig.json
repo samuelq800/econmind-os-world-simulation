@@ -1,0 +1,7 @@
+{
+  "extends": "./economic-visibility-consumer.tsconfig.json",
+  "include": [
+    "current-financial-position.test.ts",
+    "current-financial-position-test-only.ts"
+  ]
+}

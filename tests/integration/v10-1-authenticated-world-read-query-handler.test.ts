@@ -1,3 +1,4 @@
+import { classifiedActivityWireFixture } from '../support/classified-activity-wire-fixture.js';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -56,10 +57,7 @@ describe('V10.1 authenticated World read query handler', () => {
             row({
               classification: 'COUNTRY',
               scopeKey,
-              payload: {
-                fixtureStatus: fixture.authoritative.fixtureStatus,
-                countryId: scopeKey,
-              },
+              payload: classifiedActivityWireFixture(scopeKey),
             }),
           ],
         };

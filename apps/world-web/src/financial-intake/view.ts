@@ -3,6 +3,7 @@ import {
   type FinancialIntakeBinding,
 } from './controller.js';
 import {
+  economicAvailabilityMessages,
   officeProjectionRoles,
   type OfficeProjectionView,
 } from '../office-projection/model.js';
@@ -203,7 +204,18 @@ export function installFinancialIntake(
             `Country refreshed · World v${state.read.model.head.worldVersion} / event ${state.read.model.head.eventSequence}`,
           ),
         );
+        for (const message of economicAvailabilityMessages(
+          state.read.model.economicAvailability,
+        ))
+          dialog.append(node('p', message));
         const values = document.createElement('dl');
+        dialog.append(
+          renderCurrentFinancialPosition(
+            document,
+            state.read.model.currentFinancialPosition,
+          ),
+          node('h3', 'Net Posting movement / activity'),
+        );
         for (const field of state.read.model.readouts)
           values.append(
             node('dt', field.label),
@@ -316,3 +328,4 @@ declare global {
     EconMindFinancialIntake?: ReturnType<typeof installFinancialIntake>;
   }
 }
+import { renderCurrentFinancialPosition } from '../office-projection/financial-position-view.js';

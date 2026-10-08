@@ -22,6 +22,19 @@ import {
 } from '../../apps/world-worker/src/index.js';
 import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
+import { SqlEconomicReadVisibilitySource } from '../../apps/world-worker/src/projections/economic-read-visibility-source.js';
+import {
+  persistVisibilitySeed,
+  admitVisibilitySeed,
+} from '../support/g-economic-visibility-fixture.js';
+
+import { persistCanonicalVisibilityMovement } from '../support/g-canonical-financial-movement-fixture.js';
+
+import {
+  createWorldReadRequest,
+  readEntitledWorldProjection,
+  parseSupabaseAuthSubject,
+} from '../../apps/world-api/src/index.js';
 
 const root = path.resolve(import.meta.dirname, '../..');
 const migrations = [
@@ -344,7 +357,7 @@ function rowByScope(
 }
 
 describe('V10.1 authoritative activity read-projection publication', () => {
-  it('rebuilds Country and Office activity plus exact ledger payloads from authoritative facts', async () => {
+  it('preserves activity and fenced rebuilds while withholding unclassified legacy ledger details', async () => {
     const testDatabase = await database();
     await seedCurrentAuthorization(testDatabase, {
       authSubject: SELLER_SUBJECT,
@@ -424,6 +437,16 @@ describe('V10.1 authoritative activity read-projection publication', () => {
       [WORLD],
     );
     expect(result.rows).toHaveLength(7);
+    const withheldLedger = {
+      financialPositions: [],
+      inventoryPositions: [],
+      visibility: {
+        schemaVersion: 'economic-read-visibility-v1',
+        financialDetail: 'NOT_AUTHORIZED',
+        inventoryDetail: 'NOT_AUTHORIZED',
+        countrySummary: 'NOT_AUTHORIZED',
+      },
+    };
     expect(rowByScope(result.rows, 'COUNTRY', 'COUNTRY_SELLER')).toEqual({
       activity: {
         authoritativeEventCount: '2',
@@ -432,22 +455,12 @@ describe('V10.1 authoritative activity read-projection publication', () => {
       },
       countryId: 'COUNTRY_SELLER',
       ledger: {
-        financialPositions: [
-          {
-            accountClass: 'CASH',
-            accountId: 'ACCOUNT_ACTIVITY_SELLER_CASH',
-            currency: 'GCU',
-            netDebitBalance: '30',
-          },
-        ],
-        inventoryPositions: [
-          {
-            bucket: 'IN_TRANSIT',
-            commodityId: 'ACTIVITY_GRAIN',
-            quantity: '-5',
-            unit: 'tonne',
-          },
-        ],
+        ...withheldLedger,
+        authoritativeFinancialPosition: {
+          schemaVersion: 'authoritative-financial-position-v1',
+          status: 'NOT_AUTHORIZED',
+          reason: 'SCOPE_NOT_AUTHORIZED',
+        },
       },
       schemaVersion: 'world-activity-projection-v1',
     });
@@ -459,22 +472,12 @@ describe('V10.1 authoritative activity read-projection publication', () => {
       },
       countryId: 'COUNTRY_BUYER',
       ledger: {
-        financialPositions: [
-          {
-            accountClass: 'CASH',
-            accountId: 'ACCOUNT_ACTIVITY_BUYER_CASH',
-            currency: 'GCU',
-            netDebitBalance: '-30',
-          },
-        ],
-        inventoryPositions: [
-          {
-            bucket: 'AVAILABLE',
-            commodityId: 'ACTIVITY_GRAIN',
-            quantity: '5',
-            unit: 'tonne',
-          },
-        ],
+        ...withheldLedger,
+        authoritativeFinancialPosition: {
+          schemaVersion: 'authoritative-financial-position-v1',
+          status: 'NOT_AUTHORIZED',
+          reason: 'SCOPE_NOT_AUTHORIZED',
+        },
       },
       schemaVersion: 'world-activity-projection-v1',
     });
@@ -490,26 +493,18 @@ describe('V10.1 authoritative activity read-projection publication', () => {
     ).toMatchObject({
       activity: { authoritativeEventCount: '1' },
       countryId: 'COUNTRY_SELLER',
-      ledger: {
-        financialPositions: [
-          {
-            accountClass: 'CASH',
-            accountId: 'ACCOUNT_ACTIVITY_SELLER_CASH',
-            currency: 'GCU',
-            netDebitBalance: '30',
-          },
-        ],
-        inventoryPositions: [
-          {
-            bucket: 'IN_TRANSIT',
-            commodityId: 'ACTIVITY_GRAIN',
-            quantity: '-5',
-            unit: 'tonne',
-          },
-        ],
-      },
       officeId: 'TRADE',
+      ledger: withheldLedger,
     });
+    // All actual posting identities/amounts remain withheld without admitted
+    // role source, even if current memberships/capabilities exist.
+    for (const row of result.rows.filter((r) =>
+      ['COUNTRY', 'OFFICE_PRIVATE'].includes(r.classification),
+    )) {
+      expect(JSON.stringify(JSON.parse(row.payload))).not.toMatch(
+        /ACCOUNT_ACTIVITY|ACTIVITY_GRAIN|netDebitBalance|"quantity"/,
+      );
+    }
     expect(
       rowByScope(result.rows, 'NEGOTIATION_PARTY', 'PARTY_FUTURE'),
     ).toEqual({});
@@ -617,4 +612,468 @@ describe('V10.1 authoritative activity read-projection publication', () => {
       ),
     ).resolves.toMatchObject({ rows: [{ count: '0' }] });
   }, 30_000);
+  it('resolves real persisted admitted roster for opening and movement through the same classification port', async () => {
+    const db = await database();
+    const seed = await persistVisibilitySeed(db, WORLD);
+    const source = new SqlEconomicReadVisibilitySource(db);
+    const input = { worldId: WORLD, worldVersion: '0', eventSequence: '0' };
+    await db.transaction(async (tx) => {
+      const unadmitted = await source.loadFrom(tx, input);
+      expect(
+        unadmitted.financial(
+          seed.financialBatches[0]!.legs[0]!.account as unknown as Record<
+            string,
+            unknown
+          >,
+          {
+            worldId: WORLD,
+            countryId: 'COUNTRY_SELLER',
+            classification: 'OFFICE_PRIVATE',
+            officeId: 'FINANCE',
+          },
+        ),
+      ).toMatchObject({
+        status: 'NOT_AUTHORIZED',
+        reason: 'ADMITTED_SOURCE_UNAVAILABLE',
+      });
+    });
+    await admitVisibilitySeed(db, WORLD);
+    await db.transaction(async (tx) => {
+      const view = await source.loadFrom(tx, input);
+      for (const batch of seed.financialBatches)
+        for (const leg of batch.legs) {
+          const account = leg.account as unknown as Record<string, unknown>;
+          const expected =
+            leg.account.ownerId === 'ENTITY_ACTIVITY_SELLER' ||
+            leg.account.ownerId === 'ENTITY_OTHER_BUYER_GOV'
+              ? 'FINANCE'
+              : 'CENTRAL_BANK';
+          for (const office of [
+            'CAPTAIN',
+            'FINANCE',
+            'CENTRAL_BANK',
+            'TRADE',
+            'INDUSTRY',
+            'SOCIAL',
+          ]) {
+            const scope = {
+              worldId: WORLD,
+              countryId: leg.account.countryId,
+              classification: 'OFFICE_PRIVATE' as const,
+              officeId: office,
+            };
+            expect(view.financial(account, scope).status).toBe(
+              office === expected ? 'AUTHORIZED' : 'NOT_AUTHORIZED',
+            );
+            expect(view.inventory(account, scope).status).toBe(
+              'NOT_AUTHORIZED',
+            );
+            expect(
+              view.financial(
+                { ...account, ownerId: 'ENTITY_TREASURY_FAKE' },
+                scope,
+              ).status,
+            ).toBe('NOT_AUTHORIZED');
+            expect(
+              view.financial(account, {
+                ...scope,
+                countryId: 'COUNTRY_FOREIGN',
+              }).status,
+            ).toBe('NOT_AUTHORIZED');
+            expect(
+              view.financial(account, { ...scope, worldId: 'WORLD_FOREIGN' })
+                .status,
+            ).toBe('NOT_AUTHORIZED');
+          }
+          expect(
+            view.financial(account, {
+              worldId: WORLD,
+              countryId: leg.account.countryId,
+              classification: 'COUNTRY',
+              officeId: null,
+            }).status,
+          ).toBe('NOT_AUTHORIZED');
+          expect(leg.amount.toCanonicalValue().amount).toBe('10');
+        }
+    });
+    await expect(
+      db.transaction((tx) =>
+        source.loadFrom(tx, { ...input, worldVersion: '1' }),
+      ),
+    ).rejects.toMatchObject({ cause: { code: 'TRANSITION_EVIDENCE_INVALID' } });
+    await expect(
+      db.transaction((tx) =>
+        source.loadFrom(tx, { ...input, eventSequence: '1' }),
+      ),
+    ).rejects.toMatchObject({ cause: { code: 'TRANSITION_EVIDENCE_INVALID' } });
+  });
+
+  it('filters existing movements before publication to all six Offices and removes revoked scopes without copying private COUNTRY detail', async () => {
+    const db = await database();
+    const seed = await persistVisibilitySeed(db, WORLD);
+    await admitVisibilitySeed(db, WORLD);
+    for (const office of [
+      'CAPTAIN',
+      'FINANCE',
+      'CENTRAL_BANK',
+      'TRADE',
+      'INDUSTRY',
+      'SOCIAL',
+    ]) {
+      await seedCurrentAuthorization(db, {
+        authSubject: SELLER_SUBJECT,
+        countryId: 'COUNTRY_SELLER',
+        officeId: office,
+        capability: 'TEST_' + office,
+      });
+      await seedCurrentAuthorization(db, {
+        authSubject: BUYER_SUBJECT,
+        countryId: 'COUNTRY_BUYER',
+        officeId: office,
+        capability: 'TEST_' + office,
+      });
+    }
+    await persistCanonicalVisibilityMovement(db, seed);
+    await acquireLease(db);
+    const publisher = new AuthoritativeActivityReadProjectionPublisher({
+      database: db,
+      workerId: WORKER,
+    });
+    await publisher.replace({ assertion: assertion('1'), observedAtReal: AT });
+    const read = () =>
+      db.query<{ classification: string; payload: string; scope_key: string }>(
+        `select classification,scope_key,payload::text as payload from world_v2.read_projection where world_id=$1`,
+        [WORLD],
+      );
+    const rows = (await read()).rows;
+    expect(rows).toHaveLength(14);
+    for (const country of ['COUNTRY_SELLER', 'COUNTRY_BUYER']) {
+      expect(rowByScope(rows, 'COUNTRY', country).ledger).toMatchObject({
+        financialPositions: [],
+        inventoryPositions: [],
+        visibility: { financialDetail: 'NOT_AUTHORIZED' },
+      });
+      for (const office of [
+        'CAPTAIN',
+        'FINANCE',
+        'CENTRAL_BANK',
+        'TRADE',
+        'INDUSTRY',
+        'SOCIAL',
+      ]) {
+        const view = rowByScope(
+          rows,
+          'OFFICE_PRIVATE',
+          officePrivateReadProjectionScopeKey({
+            countryId: countryId(country),
+            officeId: officeId(office),
+          }),
+        );
+        const allowed =
+          country === 'COUNTRY_SELLER'
+            ? office === 'FINANCE'
+            : office === 'CENTRAL_BANK';
+        expect(view.ledger.financialPositions).toEqual(
+          allowed
+            ? [
+                {
+                  accountClass: 'CASH',
+                  accountId:
+                    country === 'COUNTRY_SELLER'
+                      ? 'ACCOUNT_ACTIVITY_SELLER_CASH'
+                      : 'ACCOUNT_ACTIVITY_BUYER_CASH',
+                  currency: 'GCU',
+                  netDebitBalance: country === 'COUNTRY_SELLER' ? '30' : '-30',
+                },
+              ]
+            : [],
+        );
+        expect(view.ledger.inventoryPositions).toEqual([]);
+        expect(view.ledger.visibility.inventoryDetail).toBe('NOT_AUTHORIZED');
+        expect(view.ledger.visibility.countrySummary).toBe('NOT_AUTHORIZED');
+        expect(JSON.stringify(view)).not.toMatch(
+          /ownerAdoption|roster|decisionFingerprint|ACTIVITY_GRAIN|ENTITY_/,
+        );
+      }
+    }
+    // Existing meaning stays movement-only: opening 10 is not added to 30.
+    await db.query(
+      "update world_v2.current_commit_authorization set active=false where world_id=$1 and country_id='COUNTRY_SELLER' and office_id='FINANCE'",
+      [WORLD],
+    );
+    await publisher.replace({ assertion: assertion('1'), observedAtReal: AT });
+    const revoked = (await read()).rows;
+    expect(revoked).toHaveLength(13);
+    expect(
+      revoked.some(
+        (r) =>
+          r.scope_key ===
+          officePrivateReadProjectionScopeKey({
+            countryId: countryId('COUNTRY_SELLER'),
+            officeId: officeId('FINANCE'),
+          }),
+      ),
+    ).toBe(false);
+    expect(revoked.map((r) => r.payload).join('')).not.toContain(
+      'ACCOUNT_ACTIVITY_SELLER_CASH',
+    );
+    await expect(
+      publisher.replace({ assertion: assertion('0'), observedAtReal: AT }),
+    ).rejects.toBeDefined();
+    expect((await read()).rows).toEqual(revoked);
+  });
+
+  it.each(['decisionFingerprint', 'assemblyBinding', 'nonHostSource'])(
+    'rejects source %s despite a fixture admission row and unchanged balances',
+    async (failure) => {
+      const db = await database();
+      const seed = await persistVisibilitySeed(db, WORLD, (payload) => {
+        if (failure === 'nonHostSource') {
+          delete payload.decision;
+          delete payload.assembly;
+          payload.ownerPolicy = { adopted: true };
+          payload.admissionAllowed = false;
+        } else if (failure === 'decisionFingerprint')
+          payload.decisionFingerprint = `sha256:${'f'.repeat(64)}`;
+        else (payload.assembly as { seedId: string }).seedId = 'SEED_OTHER';
+      });
+      await admitVisibilitySeed(db, WORLD);
+      await db.transaction(async (tx) => {
+        const view = await new SqlEconomicReadVisibilitySource(db).loadFrom(
+          tx,
+          { worldId: WORLD, worldVersion: '0', eventSequence: '0' },
+        );
+        const account = seed.financialBatches[0]!.legs[0]!
+          .account as unknown as Record<string, unknown>;
+        expect(
+          view.financial(account, {
+            worldId: WORLD,
+            countryId: 'COUNTRY_SELLER',
+            classification: 'OFFICE_PRIVATE',
+            officeId: 'FINANCE',
+          }),
+        ).toMatchObject({ status: 'NOT_AUTHORIZED' });
+        expect(
+          view.summary({
+            worldId: WORLD,
+            countryId: 'COUNTRY_SELLER',
+            classification: 'OFFICE_PRIVATE',
+            officeId: 'FINANCE',
+          }).financialDetail,
+        ).toBe('NOT_AUTHORIZED');
+      });
+    },
+  );
+  it('publishes classified opening plus real global posting replay and refuses absolute API reads without persisted context', async () => {
+    const db = await database();
+    const seed = await persistVisibilitySeed(db, WORLD);
+    await admitVisibilitySeed(db, WORLD);
+    await persistCanonicalVisibilityMovement(db, seed, '3');
+    for (const country of ['COUNTRY_SELLER', 'COUNTRY_BUYER'])
+      for (const office of [
+        'CAPTAIN',
+        'FINANCE',
+        'CENTRAL_BANK',
+        'TRADE',
+        'INDUSTRY',
+        'SOCIAL',
+      ])
+        await seedCurrentAuthorization(db, {
+          authSubject: SELLER_SUBJECT,
+          capability: 'TEST_' + office,
+          countryId: country,
+          officeId: office,
+        });
+    await acquireLease(db);
+    const publisher = new AuthoritativeActivityReadProjectionPublisher({
+      database: db,
+      workerId: WORKER,
+    });
+    await publisher.replace({ assertion: assertion('1'), observedAtReal: AT });
+    const rows = (
+      await db.query<{
+        classification: string;
+        scope_key: string;
+        payload: string;
+      }>(
+        'select classification,scope_key,payload::text as payload from world_v2.read_projection where world_id=$1',
+        [WORLD],
+      )
+    ).rows;
+    const financeScope = officePrivateReadProjectionScopeKey({
+      countryId: countryId('COUNTRY_SELLER'),
+      officeId: officeId('FINANCE'),
+    });
+    const cbScope = officePrivateReadProjectionScopeKey({
+      countryId: countryId('COUNTRY_BUYER'),
+      officeId: officeId('CENTRAL_BANK'),
+    });
+    const finance = rowByScope(rows, 'OFFICE_PRIVATE', financeScope).ledger;
+    const cb = rowByScope(rows, 'OFFICE_PRIVATE', cbScope).ledger;
+    expect(finance.financialPositions[0].netDebitBalance).toBe('3');
+    expect(cb.financialPositions[0].netDebitBalance).toBe('-3');
+    expect(finance.authoritativeFinancialPosition).toMatchObject({
+      status: 'AUTHORIZED_FILTERED',
+      semantics: 'OPENING_PLUS_POSTING_LINEAGE',
+      positionCoverage: 'NONZERO_LEDGER_POSITIONS',
+      opening: {
+        seedId: seed.seedId,
+        seedFingerprint: seed.fingerprint,
+        openingWorldVersion: '0',
+      },
+      sourceHead: { worldVersion: '1', eventSequence: '1' },
+    });
+    expect(
+      finance.authoritativeFinancialPosition.positions.find(
+        (p: { accountId: string }) =>
+          p.accountId === 'ACCOUNT_ACTIVITY_SELLER_CASH',
+      ).netDebitBalance,
+    ).toBe('13');
+    expect(
+      cb.authoritativeFinancialPosition.positions.find(
+        (p: { accountId: string }) =>
+          p.accountId === 'ACCOUNT_ACTIVITY_BUYER_CASH',
+      ).netDebitBalance,
+    ).toBe('7');
+    for (const row of rows) {
+      const view = JSON.parse(row.payload);
+      if (
+        row.classification === 'COUNTRY' ||
+        !['FINANCE', 'CENTRAL_BANK'].includes(view.officeId)
+      )
+        expect(view.ledger.authoritativeFinancialPosition).toMatchObject({
+          status: 'NOT_AUTHORIZED',
+        });
+      expect(view.ledger.inventoryPositions).toEqual([]);
+    }
+    await db.query(
+      `insert into world_v2.projection_entitlement(world_id,auth_subject,classification,scope_key,authorization_version,granted_at)
+      values ($1,$2::uuid,'OFFICE_PRIVATE',$3,'AUTH_MECHANISM_TEST',$4)`,
+      [WORLD, SELLER_SUBJECT, financeScope, AT],
+    );
+    const read = (scopeKey = financeScope, subject = SELLER_SUBJECT) =>
+      readEntitledWorldProjection({
+        executor: { query: ({ text, values }) => db.query(text, values) },
+        authSubject: parseSupabaseAuthSubject(subject),
+        request: createWorldReadRequest({
+          requestId: '123e4567-e89b-42d3-a456-426614174010',
+          worldId: WORLD,
+          classification: 'OFFICE_PRIVATE',
+          scopeKey,
+        }),
+      });
+    await expect(read()).rejects.toMatchObject({
+      code: 'PROTOCOL_ERROR',
+      retryable: false,
+    });
+    await expect(read(cbScope)).resolves.toBeNull();
+    await expect(read(financeScope, BUYER_SUBJECT)).resolves.toBeNull();
+    await db.query(
+      'update world_v2.projection_entitlement set active=false,revoked_at=$2 where world_id=$1',
+      [WORLD, AT],
+    );
+    await expect(read()).resolves.toBeNull();
+  });
+
+  it.each(['badHead', 'badEvent'])(
+    'fails closed before replacing classified positions for %s durable lineage',
+    async (failure) => {
+      const db = await database();
+      const seed = await persistVisibilitySeed(db, WORLD);
+      await admitVisibilitySeed(db, WORLD);
+      await persistCanonicalVisibilityMovement(
+        db,
+        seed,
+        '3',
+        failure === 'badEvent',
+      );
+      await seedCurrentAuthorization(db, {
+        authSubject: SELLER_SUBJECT,
+        capability: 'TEST_FINANCE',
+        countryId: 'COUNTRY_SELLER',
+        officeId: 'FINANCE',
+      });
+      if (failure === 'badHead')
+        await db.query(
+          'update world_v2.world_head set world_version=2,event_sequence=2 where world_id=$1',
+          [WORLD],
+        );
+      await acquireLease(db);
+      await expect(
+        new AuthoritativeActivityReadProjectionPublisher({
+          database: db,
+          workerId: WORKER,
+        }).replace({
+          assertion: assertion(failure === 'badHead' ? '2' : '1'),
+          observedAtReal: AT,
+        }),
+      ).rejects.toMatchObject({
+        cause: { code: 'TRANSITION_EVIDENCE_INVALID' },
+      });
+      expect(
+        (
+          await db.query(
+            'select * from world_v2.read_projection where world_id=$1',
+            [WORLD],
+          )
+        ).rows,
+      ).toEqual([]);
+    },
+  );
+
+  it.each(['missingAdmission', 'wrongSource'])(
+    'withholds current position instead of inventing zero for %s',
+    async (failure) => {
+      const db = await database();
+      const seed = await persistVisibilitySeed(
+        db,
+        WORLD,
+        failure === 'wrongSource'
+          ? (payload) => {
+              payload.decisionFingerprint = 'sha256:' + 'f'.repeat(64);
+            }
+          : undefined,
+      );
+      if (failure === 'wrongSource') await admitVisibilitySeed(db, WORLD);
+      await persistCanonicalVisibilityMovement(db, seed, '3');
+      await seedCurrentAuthorization(db, {
+        authSubject: SELLER_SUBJECT,
+        capability: 'TEST_FINANCE',
+        countryId: 'COUNTRY_SELLER',
+        officeId: 'FINANCE',
+      });
+      await acquireLease(db);
+      await new AuthoritativeActivityReadProjectionPublisher({
+        database: db,
+        workerId: WORKER,
+      }).replace({ assertion: assertion('1'), observedAtReal: AT });
+      const rows = (
+        await db.query<{
+          classification: string;
+          scope_key: string;
+          payload: string;
+        }>(
+          'select classification,scope_key,payload::text as payload from world_v2.read_projection where world_id=$1',
+          [WORLD],
+        )
+      ).rows;
+      const view = rowByScope(
+        rows,
+        'OFFICE_PRIVATE',
+        officePrivateReadProjectionScopeKey({
+          countryId: countryId('COUNTRY_SELLER'),
+          officeId: officeId('FINANCE'),
+        }),
+      );
+      expect(view.ledger.authoritativeFinancialPosition).toEqual({
+        schemaVersion: 'authoritative-financial-position-v1',
+        status: 'NOT_AUTHORIZED',
+        reason: 'ADMITTED_SOURCE_UNAVAILABLE',
+      });
+      expect(view.ledger.financialPositions).toEqual([]);
+      expect(JSON.stringify(view)).not.toMatch(
+        /seedFingerprint|netDebitBalance/,
+      );
+    },
+  );
 });

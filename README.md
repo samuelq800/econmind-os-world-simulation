@@ -5,21 +5,47 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current integration snapshot (2026-10-07)
+## Current formal-release checkpoint (2026-10-08)
 
-Latest merged-source checkpoint (through PR112, with a dated addendum):
+[Formal source integration, actual checks and remaining runtime dependencies](docs/reports/world-connection/WORLD_V2_FORMAL_RELEASE_CHECKPOINT_2026_10_08.md).
+The Owner stopped further local preview/DEMO maintenance: work targets the
+formal `apps/world-web`, API/Worker/Core and normal release chain. Existing user
+preview services are not closed; isolated formal-code regressions remain valid.
+Last verified main is PR113 `ead5636a1c871e3a4d7f0d81518125f99fb5730b`.
+The original PR115 `bf2fa055` complete local check **failed** on two legacy
+read-contract tests (2523 passed, 139 skipped). Both tests are now fixed without
+broadening private-data access; the formal G+D composition passed the focused
+32-test closure, separate 47 read/publisher/export and 45 consumer regressions,
+strict types and static web build. The original whole-check failure is retained,
+not relabeled as a new full pass. Opening-inclusive financial positions and their
+current-admission server binding and browser consumption have independent fixed
+source approvals. CI now covers these reads; the formal Pages build first builds
+the public Core contract. New provider CI, main merge and deployed-page evidence
+remain separate from local checks and prior-candidate green runs.
+No source-only, TEST_ONLY or green CI result admits official
+opening state, activates production, completes six Offices or closes Gate B.
+Production host/activation (D05) remains deferred; Gate B remains PENDING.
+
+## Retained integration snapshot (2026-10-07)
+
+Latest merged-source checkpoint and separately dated construction addenda:
 [Project-completion construction, actual merges, checks and remaining boundaries](docs/reports/world-connection/WORLD_V2_PROJECT_COMPLETION_CHECKPOINT_2026_10_07.md).
-Executable main at that snapshot is `ea492a2d76daf2eab600a58c866d7f600a53112f`.
-Its later reviewed financial-browser merge is
-`2987eb608b573326bf71363121e6f15d5f669be0`; provider CI was still running at
-merge, not deployment acceptance.
+Last verified main is `ead5636a1c871e3a4d7f0d81518125f99fb5730b` (PR113).
+The reviewed runtime integration branch adds Social/CB kernels, sparse CAS and
+classified private-read/browser consumers; its fresh composed builds and 100
+selected tests passed, followed by a separate default Social 31-test pass.
+Independent closure and exact provider checks remain separate from main merge.
+PR114 retains the separate 0023 SQL/selector candidate: source review does not
+make its existing release callers ready. Historical CI failures are retained.
 Reviewed financial opening bridge, fixed authenticated intake, Captain allocation,
 production posting protocol and browser-safe contract export are merged. An
 actual isolated PostgreSQL JWT-to-Reserve/Ship/Deliver-to-FINAL joint test passed;
 this is not production activation or six-Office completion. Production posting
 persistence still refuses unsupported schema before SQL. Source-based private
-account visibility, other Office runtime consumers, admitted domain sources and
-complete official financial opening remain genuine construction requirements.
+account visibility has a reviewed source candidate; opening-inclusive financial
+positions and their server/UI binding are further fixed candidates under review.
+Other Office runtime connections, admitted domain sources and complete official
+financial opening remain genuine construction requirements.
 Production host/activation (D05) remains explicitly deferred; Gate B is PENDING.
 
 ### Retained earlier October 7 integration snapshot

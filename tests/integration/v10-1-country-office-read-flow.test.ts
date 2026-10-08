@@ -149,6 +149,95 @@ function executor(
 }
 
 describe('V10.1 Country/Office source-to-query flow', () => {
+  it('rejects an entitled legacy raw cache on the server and serves only a replacement from the sole classified publisher', async () => {
+    const db = await database();
+    await seedAuthoritativeCountryActivity(db);
+    const publisher = new AuthoritativeActivityReadProjectionPublisher({
+      database: db,
+      workerId: WORKER,
+    });
+    await publisher.replace({ assertion: assertion(), observedAtReal: AT });
+    await new CurrentAuthorizationEntitlementPublisher({
+      database: db,
+      workerId: WORKER,
+    }).replace({ assertion: assertion(), observedAtReal: AT });
+    await db.query(
+      `update world_v2.read_projection set payload=$2::jsonb
+      where world_id=$1 and classification='COUNTRY' and scope_key='COUNTRY_SELLER'`,
+      [
+        WORLD,
+        JSON.stringify({
+          schemaVersion: 'world-activity-projection-v1',
+          countryId: 'COUNTRY_SELLER',
+          activity: {
+            authoritativeEventCount: '1',
+            lastAuthoritativeEventSequence: '1',
+            lastAuthoritativeEventWorldVersion: '1',
+          },
+          ledger: {
+            financialPositions: [
+              {
+                accountId: 'SECRET_TREASURY_TEST',
+                currency: 'GCU',
+                accountClass: 'CASH',
+                netDebitBalance: '999',
+              },
+            ],
+            inventoryPositions: [],
+          },
+        }),
+      ],
+    );
+    const handler = createAuthenticatedWorldReadQueryHandler({
+      executor: executor(db),
+      policy,
+      verifier: {
+        async verify() {
+          return verifiedClaims(SELLER_SUBJECT);
+        },
+      },
+    });
+    const request = createWorldReadRequest({
+      requestId: '123e4567-e89b-42d3-a456-426614174129',
+      worldId: WORLD,
+      classification: 'COUNTRY',
+      scopeKey: 'COUNTRY_SELLER',
+    });
+    const response = await handler.handle({
+      authorization: 'Bearer verified-test',
+      request,
+      minimumWatermark: { worldVersion: '1', eventSequence: '1' },
+    });
+    expect(response).toMatchObject({
+      ok: false,
+      error: { code: 'PROTOCOL_ERROR' },
+    });
+    expect(JSON.stringify(response)).not.toMatch(
+      /SECRET_TREASURY_TEST|999|financialPositions/,
+    );
+    await publisher.replace({ assertion: assertion(), observedAtReal: AT });
+    await expect(
+      handler.handle({
+        authorization: 'Bearer verified-test',
+        request,
+        minimumWatermark: { worldVersion: '1', eventSequence: '1' },
+      }),
+    ).resolves.toMatchObject({
+      ok: true,
+      data: {
+        payload: {
+          ledger: {
+            financialPositions: [],
+            inventoryPositions: [],
+            visibility: {
+              schemaVersion: 'economic-read-visibility-v1',
+              financialDetail: 'NOT_AUTHORIZED',
+            },
+          },
+        },
+      },
+    });
+  });
   it('serves the source-bound Country and Office-private activity projections only to the current entitled subject', async () => {
     const testDatabase = await database();
     await seedAuthoritativeCountryActivity(testDatabase);

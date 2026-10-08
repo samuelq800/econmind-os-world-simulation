@@ -1,3 +1,4 @@
+import { classifiedActivityWireFixture } from '../support/classified-activity-wire-fixture.js';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -172,7 +173,11 @@ async function projection(
       input.worldId,
       input.classification,
       input.scopeKey,
-      JSON.stringify({ scope: input.scopeKey }),
+      JSON.stringify(
+        input.classification === 'COUNTRY'
+          ? classifiedActivityWireFixture(input.scopeKey)
+          : classifiedActivityWireFixture('COUNTRY_BRAVO', 'FINANCE'),
+      ),
       AT,
     ],
   );
@@ -492,7 +497,7 @@ describe('V30.2 World V2 database permission negative preparation', () => {
         );
 
       await expect(assert(), scenario.label).resolves.toBeUndefined();
-      await testDatabase.query(scenario.statement, scenario.values);
+      await testDatabase.query(scenario.statement, [...scenario.values]);
       await expect(assert(), scenario.label).rejects.toMatchObject({
         code: 'AUTHORIZATION_DENIED',
       });
