@@ -1,0 +1,316 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "CLOUDFLARE_POSTGRES_BOUNDED_PREPARATION",
+  "implementation_status": "IMPLEMENTED_UNVERIFIED",
+  "risk_class": "P0",
+  "commit": "35dee047d8e4db822bdc60c93f80d925e11429e4",
+  "tree": "adff3040693836d7bd1f4c7f1c8aaddc81b88fd3",
+  "preparation_base": "95ca908",
+  "ci_checkout": "2cc7cb3d89835427fde244d0a4cbc2e72170d05c",
+  "ci_tree_verified_equal": true,
+  "environment": {
+    "name": "Windows local and macOS/Ubuntu isolated CI",
+    "versions": {
+      "node": "24.20.0",
+      "pnpm": "12.3.4",
+      "wrangler": "4.148.0",
+      "pg": "8.16.3",
+      "nativePostgres": "18.6 (Homebrew CI)"
+    },
+    "production_access": false,
+    "production_mutation": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm exec tsc --noEmit -p tests/support/tsconfig.cloudflare-postgres.json",
+      "environment": "Windows local; actual Wrangler-generated bindings",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @econmind/world-api typecheck",
+      "environment": "Windows local",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec eslint tests/support/cloudflare-postgres-workerd-fixture.ts tests/integration/cloudflare-postgres-command-roundtrip.test.ts",
+      "environment": "Windows local",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec prettier --write tests/support/cloudflare-postgres-workerd-fixture.ts tests/integration/cloudflare-postgres-command-roundtrip.test.ts",
+      "environment": "Windows local",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Both unchanged"
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-api/cloudflare-postgres-pools.test.ts tests/world-api/cloudflare-jwks-verifier.test.ts",
+      "environment": "Windows local",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-api/cloudflare-jwks-verifier.test.ts tests/world-api/supabase-jwks-signature-verifier.test.ts tests/world-api/https-authenticated-office-command-route.test.ts tests/world-api/production-runtime-binding.test.ts tests/world-api/runtime-environment-hold.test.ts tests/architecture/boundaries.test.ts --reporter=json --outputFile=artifacts/world-runtime-postgres/local-focused-tests.json",
+      "environment": "Windows local",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed": 208,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "environment": "Windows local",
+      "exit_code": 0,
+      "result": "PASS",
+      "scannedFiles": 313
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "environment": "Windows local",
+      "exit_code": 0,
+      "result": "PASS",
+      "scannedFiles": 308
+    },
+    {
+      "command": "node scripts/check-repository-secrets.mjs",
+      "environment": "Windows local before evidence docs",
+      "exit_code": 0,
+      "result": "PASS",
+      "scannedFiles": 2314
+    },
+    {
+      "command": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
+      "environment": "Windows local (PowerShell env assignment)",
+      "exit_code": 0,
+      "result": "PASS",
+      "databaseConfigured": false,
+      "databaseMutationAllowed": false
+    },
+    {
+      "command": "O_WORKERD_POSTGRES_ROUNDTRIP=1 pnpm exec vitest run tests/integration/cloudflare-postgres-command-roundtrip.test.ts --reporter=json --outputFile=workerd-postgres-roundtrip.json",
+      "environment": "macOS CI, workerd, owned loopback native PostgreSQL18.6",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "job_id": 113785320613,
+      "duration_ms": 6141
+    },
+    {
+      "command": "pnpm check",
+      "environment": "macOS CI",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Unmodified complete official check succeeded: lint, format, types, test main3072 PASS/154 opt-in SKIP/0 FAIL; Edge29/boundary40, env, migration validation/rehearsal, foundation, secrets, data/UI selection and build PASS.",
+      "job_id": 113785320656,
+      "passed": 3072,
+      "failed": 0,
+      "skipped": 154
+    },
+    {
+      "command": "node scripts/check-repository-secrets.mjs",
+      "environment": "Windows local after new evidence docs",
+      "exit_code": 0,
+      "result": "PASS",
+      "scannedFiles": 2317
+    },
+    {
+      "command": "O_NATIVE_AUTHENTICATED_ROUNDTRIP=1 pnpm exec vitest run tests/integration/o-authenticated-financial-roundtrip-postgres.test.ts --reporter=json --outputFile=native-authenticated-roundtrip.json",
+      "environment": "macOS CI, owned disposable PostgreSQL18.6",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "job_id": 113785320656
+    }
+  ],
+  "ci": {
+    "run_id": 37919982783,
+    "url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37919982783",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 113785320293,
+        "name": "workerd",
+        "conclusion": "success",
+        "focused_pass": 208,
+        "workerd_pass": 11
+      },
+      {
+        "id": 113785320613,
+        "name": "workerd-native-postgres",
+        "conclusion": "success",
+        "pool_pass": 8,
+        "mechanism_pass": 1,
+        "mechanism_skip": 0
+      },
+      {
+        "id": 113785320656,
+        "name": "official-and-native-postgres",
+        "conclusion": "success",
+        "official_suite": {
+          "passed": 3072,
+          "failed": 0,
+          "skipped": 154
+        },
+        "edge_pass": 29,
+        "boundary_pass": 40,
+        "native_authenticated_pass": 1,
+        "native_authenticated_skip": 0
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "artifact_id": 11611895390,
+      "file": "artifacts/world-runtime-postgres/ci-35dee/workerd-native.zip",
+      "bytes": 850989,
+      "sha256": "43c9da8b788d5fb3b4c72085c88ea0f75daa6ad718c481d4d26360f4644f9c98"
+    },
+    {
+      "job_id": 113785320613,
+      "file": "artifacts/world-runtime-postgres/ci-35dee/workerd-native.log",
+      "bytes": 36777,
+      "sha256": "94adbb53a497b3a880afc6b4b2d40b84d6e7001e843d250295ae3174377be86d"
+    },
+    {
+      "artifact_id": 11611590561,
+      "file": "artifacts/world-runtime-postgres/ci-35dee/workerd-public.zip",
+      "bytes": 671943,
+      "sha256": "ab3b4cf2720087925c906459bec8de91a86799e3f6c235fd51fb11f5e3126500"
+    },
+    {
+      "artifact_id": 11611863885,
+      "file": "artifacts/world-runtime-postgres/ci-35dee/official-native.zip",
+      "bytes": 30928,
+      "sha256": "9e3420de209f0df621a20bb3be37ab94baca03ac0778e0b1cdbb20dae1c04f8f"
+    },
+    {
+      "job_id": 113785320656,
+      "file": "artifacts/world-runtime-postgres/ci-35dee/official-native.log",
+      "bytes": 337116,
+      "sha256": "f956e49b4ed76664fde634bffd11a884f6ee6efe6057c8c4e1dec7bbc65652b9"
+    }
+  ],
+  "superseded_failures": [
+    {
+      "run_id": 37906331441,
+      "commit": "f514416d08e632421d3bea3db6276936212446d1",
+      "result": "FAIL",
+      "reason": "JSONC trailing comma parsed using JSON.parse; fixed with pinned TypeScript JSONC parser",
+      "artifact_id": 11605351253,
+      "sha256": "0f70f0599f086ddb7fee7e7b5b97dd92b73304a6435ff037683cc755cc5a9f54"
+    },
+    {
+      "run_id": 37913591864,
+      "commit": "821d1d262ba6e7761d1c2508b77fb1ca21375363",
+      "result": "FAIL",
+      "reason": "Miniflare local Hyperdrive requires nonempty password. Superseded remaining full job canceled; no full PASS claim.",
+      "artifact_id": 11607249618,
+      "sha256": "9d7c0af184b63bd6dc064623dbd849a0ab11762e4705d48c5ebd4ee001206add"
+    },
+    {
+      "run_id": 37914012779,
+      "commit": "2caa99ab41c09995b8c02d43f2023692505a12cc",
+      "result": "FAIL",
+      "reason": "TEST_ONLY raw receipt.simTime BigInt could not serialize; fixed known receipt field using existing canonical conversion.",
+      "artifact_id": 11609355046,
+      "sha256": "396d5d25438d17693e168e42db2f63a5f4dc4bffa38fe6547a9d8fa623cff508"
+    }
+  ],
+  "negative_cases": [
+    "Real signed JWT with wrong current seat rejected",
+    "Duplicate ENQUEUE returns one canonical command",
+    "IDLE after settlement produces no second execution",
+    "Revoked current seat denies final lookup and staged read",
+    "Pool error or cleanup uncertainty prevents success acknowledgement",
+    "Unknown COMMIT error preserved without transaction retry"
+  ],
+  "database_rls_evidence": [
+    "Owned disposable fixture only; real least-privilege reader/intake roles and executor workerd I/O",
+    "TEST_ONLY admission trigger override in original owned fixture restored immediately; never production"
+  ],
+  "invariant_evidence": [
+    "Reserve/Ship/Deliver commits worldVersions1/2/3",
+    "Canonical receipt times10000/10200 remain strings",
+    "Exact buyer2GCU/seller8GCU/buyerInventory2tonne",
+    "Three durable commands/receipts and matching command fingerprint",
+    "Persisted FINAL and current-seat authorization"
+  ],
+  "independent_review": {
+    "decision": "APPROVED",
+    "file": "docs/reports/world-connection/CLOUDFLARE_POSTGRES_INDEPENDENT_REVIEW_2026_10_09.md",
+    "reviewed_commit": "35dee047d8e4db822bdc60c93f80d925e11429e4",
+    "reviewed_tree": "adff3040693836d7bd1f4c7f1c8aaddc81b88fd3",
+    "scope": "95ca908 to35dee047 transport and disposable mechanism only",
+    "open_blockers": 0,
+    "open_majors": 0,
+    "production_approval": false,
+    "whole_pr_approval": false
+  },
+  "unresolved_gaps": [
+    "No formal runtime PG credentials or Hyperdrive",
+    "0023 formal publisher caller unregistered",
+    "runtime-read schema proposal not registered; formal ADMITTED publisher missing",
+    "LC/FX/complete central-bank producer source contracts and implementations missing",
+    "Consumer remains local/CI-only; no approved formal production host",
+    "Gate B/V09 runtime evidence pending",
+    "Local Hyperdrive does not prove cloud TLS/cache disablement/Free CPU budget/production permissions",
+    "TEST_ONLY automatic scheduling and Node projection publication are not formal scheduler or projection producer"
+  ],
+  "cloud_readback": {
+    "health_status": 200,
+    "ready_status": 503,
+    "runtimeMode": "HOLD",
+    "executorTransport": "ALIVE_HOLD",
+    "databaseConnected": false,
+    "simulationEnabled": false,
+    "clockEnabled": false,
+    "authoritativeCommandsEnabled": false,
+    "redeployed": false
+  },
+  "retained_mechanism_result": {
+    "file": "docs/reports/world-connection/CLOUDFLARE_POSTGRES_WORKERD_TEST_2026_10_09.json",
+    "formatting": "Parsed provider JSON retained with repository formatting; original ZIP hash above binds exact downloaded bytes."
+  },
+  "other_ci": [
+    {
+      "run_id": 37919982839,
+      "name": "Scoped native PostgreSQL lease renewal",
+      "conclusion": "success"
+    },
+    {
+      "run_id": 37919982758,
+      "name": "World web atlas candidate (no deploy)",
+      "conclusion": "success"
+    },
+    {
+      "run_id": 37919982771,
+      "name": "Official UI exact provenance (no deploy)",
+      "conclusion": "success"
+    },
+    {
+      "run_id": 37919982755,
+      "name": "V09 PostgreSQL candidate",
+      "conclusion": "success"
+    }
+  ],
+  "retained_native_result": {
+    "file": "docs/reports/world-connection/CLOUDFLARE_POSTGRES_NATIVE_TEST_2026_10_09.json",
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0
+  },
+  "formal_connection_status": "BLOCKED",
+  "bounded_preparation_status": "VERIFIED"
+}

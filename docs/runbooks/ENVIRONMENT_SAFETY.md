@@ -17,6 +17,27 @@ The wrapper rejects all other Supabase command arguments. Direct invocation of
 the globally installed CLI is outside the repository guard and remains
 prohibited by policy.
 
+## Reusing an installed CLI
+
+The wrapper can reuse a Supabase CLI installed in another repository without
+adding a dependency or copying credentials, production link caches or migration
+workflows. Set `SUPABASE_CLI_ENTRYPOINT` to the absolute JavaScript entrypoint of
+that installation, or create the ignored root `.supabase-cli.local.json` with
+exactly one `entrypoint` property. The environment override takes precedence.
+Both methods retain the exact `status` / `--version` allowlist and invoke Node
+without a shell. The local file contains only a tool path, never a password.
+
+This machine reuses the existing pinned CLI2.115.0 at
+`D:/projects/econmind-os/node_modules/supabase/dist/supabase.js`. Other machines
+must verify their actual installed location; this path is not a shared default.
+Use `pnpm supabase:safe -- --version` to confirm availability. `status` reports
+local Supabase services, not hosted database connectivity.
+
+CLI platform login, project metadata, and PostgreSQL runtime authentication are
+separate. Reusing a logged-in CLI does not provide runtime login credentials or
+authorize a new schema publisher. The main repository remains the sole approved
+production migration chain.
+
 ## Prohibited against the linked project
 
 - migrations, `db push`, `db reset`, seed operations, and arbitrary SQL;

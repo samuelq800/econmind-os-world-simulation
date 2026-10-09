@@ -1,0 +1,205 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "WORLD_PUBLIC_READ_CLOUDFLARE_DELIVERY_NOT_ECONOMIC_ACTIVATION",
+  "commit": "586363f0b3779e4d5b7499538b8a2ea8941bc358",
+  "cloudflare_source_commit": "909161e8c95311ecc623cc90c332b81c204fc76e",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "official_activation": "BLOCKED",
+  "independent_review_claimed": false,
+  "environment": {
+    "name": "Windows local; Linux disposable PostgreSQL16 CI; macOS full official pnpm check; GitHub Pages; Cloudflare Workers Free",
+    "versions": {
+      "node": "24.20.0",
+      "pnpm": "12.3.4",
+      "wrangler": "4.148.0"
+    },
+    "production_access": true,
+    "production_access_scope": [
+      "PUBLIC_HTTPS_READ",
+      "CLOUDFLARE_PUBLIC_READER_DEPLOY",
+      "PAGES_STATIC_DEPLOY"
+    ],
+    "production_sql": false,
+    "economic_mutation": false,
+    "free_plan_evidence": "DIRECT_USER_CONFIRMATION_BILLING_API_UNAVAILABLE_HTTP403",
+    "paid_plan_upgrade": false,
+    "lockfile_changed": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm seed:report",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Diagnostic export succeeded; no authoritative Seed or admission produced."
+    },
+    {
+      "command": "pnpm seed:check",
+      "exit_code": 2,
+      "result": "FAIL",
+      "stdout_stderr_summary": "Correctly refuses readiness: actual opening/source/World facts remain incomplete."
+    },
+    {
+      "command": "pnpm exec vitest run Cloudflare, official-edge, snapshot and preflight specified test files",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "43 passed, 0 failed, 0 skipped; not a full repository test claim."
+    },
+    {
+      "command": "pnpm exec vitest run tests/integration/v10-1-country-office-read-flow.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "7 passed after reusing existing real atomic fixture repair 93016f8; source guards unchanged."
+    },
+    {
+      "command": "API typecheck, scoped strict test typechecks, eslint, prettier, boundary/pattern/environment/secret checks",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Appropriate local checks passed; pinned repository lockfile unchanged."
+    },
+    {
+      "command": "node scripts/check-world-v2-official-edge-bundle.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "22 frozen source modules match compiler output; SHA256 00fee14abf7db94190e818e76a0298f64de070f4dab003955d5ed0986c230c7f."
+    },
+    {
+      "command": "wrangler deploy --dry-run; wrangler types; standalone bundled Worker dry-run",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Both repository entry and standalone artifact bundle successfully; zero bindings."
+    },
+    {
+      "command": "Initial direct local workerd public source smoke",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "Workers rejects redirect:error before I/O. Original source reads returned 503; original failure retained."
+    },
+    {
+      "command": "Direct local workerd smoke after manual-redirect transport adaptation",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Six expected responses, including sources and write-route rejection. Separate bridged Miniflare evidence is not substituted for this result."
+    },
+    {
+      "command": "wrangler deploy --config config/cloudflare/world-official-read.wrangler.jsonc",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Published econmind-world-read, version 7c90b4bc-6886-4cff-8c76-bb6e19f66417; startup 9ms, not per-invocation CPU."
+    },
+    {
+      "command": "34 bounded real Cloudflare source HTTPS queries",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "34/34 HTTP200, pinned source hashes match, liveWorldState=false. Three initial invalid OBJECT pagination requests remain separately preserved."
+    },
+    {
+      "command": "Live command rejection, CORS preflight and unapproved-browser-Origin checks",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "POST405, OPTIONS204, public GET200 without ACAO. Initial incorrect expectation that public GET should return403 is preserved separately; product policy unchanged."
+    },
+    {
+      "command": "Existing deploy-world-web.yml runs 37788541320 and 37791371716",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Both main96217db static releases succeeded. Actual main HTML confirms Cloudflare source configuration; no new browser visual acceptance claimed."
+    },
+    {
+      "command": "Gate B disposable diagnostic CI37788536214",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Durable PostgreSQL16 disposable receipt PASS; marker cleanup, acknowledgement loss, rollback, RLS/role, lease and recovery checks passed. Dedicated staging NOT_RUN."
+    },
+    {
+      "command": "Official pnpm check CI37788517329 before fixture repair",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "2891 passed, 3 failed, 153 skipped. Missing FINAL receipts in old Country/Office fixtures; preserved raw log. PR head1006d5d, runner synthetic merge392693db."
+    },
+    {
+      "command": "Official pnpm check CI37791157942 after fixture repair",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Provider terminal SUCCESS. Main suite 2904 passed, 0 failed, 153 skipped across252 files; subsequent existing Edge29 and architecture34 tests and all remaining unmodified pnpm check stages passed. PR head586363f; actual runner checkout dfb8b41ea53806ffe0dba6757f3703d51066ab5c. Raw job log SHA256829375152b62a1949e0039c8546fc72485c1a1be53ad64869e61d4241a0c44a5. Not production economic acceptance or independent review."
+    },
+    {
+      "command": "Current-head disposable PostgreSQL CI37791157942 native job113358589586",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "50 passed, 0 failed, 1 skipped in five native regression invocations; marked durable diagnostic steps skipped on pull_request. Separate prior workflow_dispatch receipt supplies durable evidence."
+    }
+  ],
+  "database_rls_evidence": [
+    {
+      "scope": "DISPOSABLE_LOOPBACK_POSTGRESQL",
+      "run": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37788536214",
+      "receipt_commit": "1006d5df213c34b533637165fcc4c03a77480418",
+      "artifact_zip_sha256": "231f8adcd86d575d1a456119cce88c8214c83ad7ac9148726814470eb4541d26",
+      "durable_evidence": "PASS",
+      "gate_b_dedicated_staging": "NOT_RUN"
+    }
+  ],
+  "unresolved_gaps": [
+    "Actual complete opening facts and lawful source adoption",
+    "Actual World/seed/admission lineage and Owner/lawful-seat registry",
+    "Required governance gates and exact0023 approved publication/readback",
+    "Cloudflare authoritative execution adaptation, budget/performance and real JWT/lease/lifecycle/economic acceptance",
+    "Blocking independent review where P0 applies; no self-approval"
+  ],
+  "recorded_at": "2026-10-08T14:40:21.187Z",
+  "official_check": {
+    "run_id": 37791157942,
+    "pr_head": "586363f0b3779e4d5b7499538b8a2ea8941bc358",
+    "runner_checkout": "dfb8b41ea53806ffe0dba6757f3703d51066ab5c",
+    "provider_conclusion": "success",
+    "main_suite": {
+      "passed": 2904,
+      "failed": 0,
+      "skipped": 153
+    },
+    "source_log_sha256": "829375152b62a1949e0039c8546fc72485c1a1be53ad64869e61d4241a0c44a5",
+    "linux_native": {
+      "passed": 50,
+      "failed": 0,
+      "skipped": 1
+    },
+    "local_frozen_edge_compiler_sha256": "00fee14abf7db94190e818e76a0298f64de070f4dab003955d5ed0986c230c7f",
+    "macos_ci_frozen_edge_compiler_sha256": "2b2c29f65889ae045e937bfaf07fe39e3ffcd64aeebf95697adb4571c4e6cd12",
+    "cross_platform_compiled_byte_equivalence_claimed": false
+  },
+  "supporting_provider_runs": [
+    {
+      "id": 37791157709,
+      "name": "Official UI exact provenance (no deploy)",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "586363f0b3779e4d5b7499538b8a2ea8941bc358",
+      "html_url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37791157709"
+    },
+    {
+      "id": 37791157698,
+      "name": "World web atlas candidate (no deploy)",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "586363f0b3779e4d5b7499538b8a2ea8941bc358",
+      "html_url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37791157698"
+    },
+    {
+      "id": 37791157664,
+      "name": "Scoped native PostgreSQL lease renewal",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "586363f0b3779e4d5b7499538b8a2ea8941bc358",
+      "html_url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37791157664"
+    },
+    {
+      "id": 37791371716,
+      "name": "Deploy EconMind World preview",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "96217db583db4c1bd6ef74714b2e0a5ef6b7ed6d",
+      "html_url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37791371716"
+    }
+  ]
+}

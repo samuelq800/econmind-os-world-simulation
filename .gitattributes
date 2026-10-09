@@ -1,0 +1,10 @@
+# Byte-pinned source bundles must survive Windows checkout without conversion.
+/artifacts/world-balanced-candidate-v1/** -text
+/artifacts/world-map-files-v1/** -text
+/artifacts/E_OPENING_SEMANTIC_MAPPING_PROPOSAL_2026_10_07.md -text
+/docs/governance/owner-inputs/** -text
+/docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_MAPPING.json -text
+/docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_GAPS.json -text
+/docs/reports/world-connection/C_OFFICIAL_WORLD_COMPLETE_COVERAGE.json -text
+/status/world-data-selection.json -text
+/database/migrations/artifacts/*.sql -text

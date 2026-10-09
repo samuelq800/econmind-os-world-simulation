@@ -40,3 +40,8 @@ docs/governance/owner-inputs/2026-10-07/
 docs/reports/world-connection/D02_D04_SOURCE_RESOLUTION_MATRIX_2026_10_07.json
 # Actual Owner original reused as an immutable mechanism-test input, not approval.
 tests/fixtures/physical-opening/owner-non-host-decisions-20261007.md
+# Generated diagnostic exports preserve their own recorded bytes/checksums.
+artifacts/world-seed-delivery-v1/
+.seed-validation/
+artifacts/world-runtime-environment-2026-10-09/
+artifacts/world-runtime-postgres/
