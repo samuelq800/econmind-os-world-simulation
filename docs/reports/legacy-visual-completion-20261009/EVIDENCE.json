@@ -1,0 +1,116 @@
+{
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "worldBaseCommit": "96217db583db4c1bd6ef74714b2e0a5ef6b7ed6d",
+  "branch": "codex/legacy-econmind-visual-20261009",
+  "legacyVisualCommit": "7b4db3b8cbdb1db86288a1172896ac9bb8febaa4",
+  "legacyReferenceHead": "c8396ff",
+  "cssSha256": "8a7f57f622e6e30e44f29e6cea04e49d1318f7579b7603154b48d803eb474711",
+  "cssBytes": 12588,
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4"
+  },
+  "checks": {
+    "frozenInstall": {
+      "exit": 0,
+      "status": "PASS",
+      "priorOfflineAttempt": "FAIL_MISSING_CACHE"
+    },
+    "lint": {
+      "exit": 0,
+      "status": "PASS"
+    },
+    "typecheck": {
+      "exit": 0,
+      "status": "PASS"
+    },
+    "visualIntegrityTests": {
+      "exit": 0,
+      "files": 2,
+      "tests": 16,
+      "status": "PASS"
+    },
+    "worldWebTests": {
+      "exit": 1,
+      "passed": 834,
+      "failed": 1,
+      "skipped": 5,
+      "reason": "Default sandbox cannot start local static test server; exact failed file rerun without this sandbox restriction."
+    },
+    "worldWebFailedFileRetry": {
+      "exit": 0,
+      "passed": 7,
+      "skipped": 5,
+      "status": "PASS"
+    },
+    "boundaryTests": {
+      "exit": 0,
+      "tests": 34,
+      "status": "PASS"
+    },
+    "environmentSecretsGovernance": {
+      "exit": 0,
+      "status": "PASS"
+    },
+    "fullBuild": {
+      "exit": 0,
+      "status": "PASS"
+    },
+    "authoritativePublication": {
+      "exit": 0,
+      "status": "PASS"
+    },
+    "existingBrowser": {
+      "exit": 0,
+      "rows": 14,
+      "status": "PASS"
+    },
+    "completionBrowser": {
+      "exit": 0,
+      "rows": 21,
+      "status": "PASS"
+    },
+    "productionDatabaseRLSSettlement": "NOT_RUN",
+    "liveOfficeFormAndChartInteriors": "NOT_RUN_GUARDED_BY_DISCONNECTED_RUNTIME",
+    "deployment": "NOT_RUN"
+  },
+  "boundaries": {
+    "economicLogicChanged": false,
+    "dataChanged": false,
+    "authenticationChanged": false,
+    "clockSemanticsChanged": false,
+    "publicationVerifierChanged": false,
+    "engineActivated": false,
+    "pushed": false,
+    "deployed": false
+  },
+  "screenshotsDirectory": "/Users/samuel/Documents/Codex/2026-10-09/task/evidence",
+  "notes": [
+    "Original browser helper was copied and narrowed to the existing non-native role=dialog drawer because two new closed native dialogs caused a stale strict-selector failure; no assertion was removed.",
+    "Typography reflow was repaired by preserving source metrics in fitted HUD/allocation panels and narrow country flow. Final original geometry assertions passed.",
+    "The full-format first run failed only for newly generated BROWSER_CHECK.json; final formatting is run after all report files are generated.",
+    "Closure confirmed earlier interrupted format actually completed successfully. Current full format, report-script lint and diff checks are recorded separately; no full test/browser rerun. Source provenance was rechecked from exact local Git blobs.",
+    "First staged diff check detected trailing whitespace/blank EOF lines in raw tool logs. Raw bytes retained locally and hashes recorded in LOG_NORMALIZATION.json; committed copies only normalize whitespace. Final staged check includes every added report and log."
+  ],
+  "closureChecks": {
+    "fullFormat": {
+      "exit": 0,
+      "status": "PASS"
+    },
+    "reportScriptsLint": {
+      "exit": 0,
+      "status": "PASS"
+    },
+    "diffWhitespace": {
+      "exit": 0,
+      "status": "PASS"
+    },
+    "sourceProvenance": {
+      "status": "PASS",
+      "sourceBlobs": 3,
+      "lineExtractions": 12,
+      "report": "SOURCE_RECHECK.json"
+    }
+  },
+  "boundaryObservationPhase": "initial implementation, before independent-branch delivery"
+}

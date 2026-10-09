@@ -1,0 +1,3 @@
+$ node scripts/sync-official-ui-country-data.mjs --check && node scripts/verify-authoritative-ui-publication.mjs
+{"status":"CHECKED","sourceSha256":"5d493e93dfab1425731191ba7491cce47949d176e4769b33fdca48d2d31dba89","countries":70,"population":14712146434,"facilities":1374,"deposits":240,"runtimeConnected":false}
+{"status":"PASS","selectionId":"ECONMIND_S1_AUTHORITATIVE_UI_20260928T134420Z","verifiedPublishedFiles":286,"derivedFiles":75,"visualIntegrationFiles":2,"bootIntegrationFiles":2,"countryPages":70,"reusedMapAssets":140,"economicStateConnected":false}

@@ -1,0 +1,8 @@
+
+ RUN  v5.0.0 /Users/samuel/Documents/Codex/2026-10-09/task/world-visual
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed | 5 skipped (12)
+   Start at  11:39:47
+   Duration  747ms (import 80%, transform 11%, tests 8%)

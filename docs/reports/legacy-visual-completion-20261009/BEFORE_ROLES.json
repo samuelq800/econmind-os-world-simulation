@@ -1,0 +1,115 @@
+{
+  "baseCommit": "96217db583db4c1bd6ef74714b2e0a5ef6b7ed6d",
+  "sharedCssSha256": "c73be2dc0837df8f3362945ac8f58eaae28461e42f76c52d639bd325b8f05235",
+  "capture": "Rendered local built pages via browser at 1440x900 and 390x844; read-only state and controls",
+  "rows": [
+    {
+      "size": "desktop",
+      "role": "captain",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 47,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "size": "desktop",
+      "role": "finance",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 50,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "size": "desktop",
+      "role": "central_bank",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 53,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "size": "desktop",
+      "role": "industry",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 54,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "size": "desktop",
+      "role": "trade",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 63,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "size": "desktop",
+      "role": "social",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 54,
+      "scrollWidth": 1440,
+      "width": 1440
+    },
+    {
+      "size": "mobile",
+      "role": "captain",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 47,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    {
+      "size": "mobile",
+      "role": "finance",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 50,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    {
+      "size": "mobile",
+      "role": "central_bank",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 53,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    {
+      "size": "mobile",
+      "role": "industry",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 54,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    {
+      "size": "mobile",
+      "role": "trade",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 63,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    {
+      "size": "mobile",
+      "role": "social",
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "confirmDisabled": true,
+      "controls": 54,
+      "scrollWidth": 390,
+      "width": 390
+    }
+  ]
+}

@@ -1,0 +1,227 @@
+{
+  "status": "PASS",
+  "base": "http://127.0.0.1:4198/",
+  "sharedCssSha256": "8a7f57f622e6e30e44f29e6cea04e49d1318f7579b7603154b48d803eb474711",
+  "viewports": ["1440x900", "390x844"],
+  "results": [
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "desktop",
+      "role": "captain",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 10,
+      "errors": []
+    },
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "desktop",
+      "role": "finance",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 21,
+      "errors": []
+    },
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "desktop",
+      "role": "central_bank",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 16,
+      "errors": []
+    },
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "desktop",
+      "role": "industry",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 24,
+      "errors": []
+    },
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "desktop",
+      "role": "trade",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 29,
+      "errors": []
+    },
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "desktop",
+      "role": "social",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 26,
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "map": true,
+      "geometryUnchanged": true,
+      "focus": "solid",
+      "keyboardZoom": true,
+      "wheelZoom": true,
+      "sidebar": {
+        "scrollHeight": 2761,
+        "clientHeight": 794,
+        "overflow": "auto"
+      },
+      "drawerScroll": {
+        "scrollTop": 150,
+        "scrollHeight": 2940,
+        "clientHeight": 615
+      },
+      "errors": []
+    },
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "mobile",
+      "role": "captain",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 10,
+      "errors": []
+    },
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "mobile",
+      "role": "finance",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 21,
+      "errors": []
+    },
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "mobile",
+      "role": "central_bank",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 16,
+      "errors": []
+    },
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "mobile",
+      "role": "industry",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 24,
+      "errors": []
+    },
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "mobile",
+      "role": "trade",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 29,
+      "errors": []
+    },
+    {
+      "sourceAccessible": true,
+      "moduleAvailability": "DISCONNECTED_OFFICIAL_BRIDGE",
+      "name": "mobile",
+      "role": "social",
+      "cssStatus": 200,
+      "geometryUnchanged": true,
+      "focus": {
+        "tag": "SELECT",
+        "outline": "solid",
+        "color": "rgb(255, 210, 111)"
+      },
+      "moduleCount": 26,
+      "errors": []
+    },
+    {
+      "name": "mobile",
+      "map": true,
+      "geometryUnchanged": true,
+      "focus": "solid",
+      "keyboardZoom": true,
+      "wheelZoom": true,
+      "sidebar": {
+        "scrollHeight": 1297,
+        "clientHeight": 249,
+        "overflow": "auto"
+      },
+      "drawerScroll": {
+        "scrollTop": 150,
+        "scrollHeight": 2940,
+        "clientHeight": 551
+      },
+      "errors": []
+    }
+  ],
+  "failures": []
+}
