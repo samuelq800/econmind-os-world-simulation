@@ -1,0 +1,53 @@
+{
+  "numTotalTestSuites": 2,
+  "numPassedTestSuites": 2,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 1,
+  "numPassedTests": 1,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1791544131265,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "O TEST_ONLY JWT -> persisted seat/admission -> G intake -> C economic lineage -> authorized read"
+          ],
+          "fullName": "O TEST_ONLY JWT -> persisted seat/admission -> G intake -> C economic lineage -> authorized read executes one once-queued exact Command through fenced Reserve/Ship/Deliver, reads real FINAL and withholds unbound raw economics",
+          "status": "passed",
+          "title": "executes one once-queued exact Command through fenced Reserve/Ship/Deliver, reads real FINAL and withholds unbound raw economics",
+          "duration": 2037.552375,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791544132492,
+      "endTime": 1791544134529.5525,
+      "status": "passed",
+      "message": "",
+      "name": "/Users/runner/work/econmind-os-world-simulation/econmind-os-world-simulation/tests/integration/o-authenticated-financial-roundtrip-postgres.test.ts"
+    }
+  ]
+}

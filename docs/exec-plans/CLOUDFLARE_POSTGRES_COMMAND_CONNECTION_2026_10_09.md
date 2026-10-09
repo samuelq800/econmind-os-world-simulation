@@ -2,7 +2,10 @@
 
 Owner request: finish the formal Supabase connection and economic command path.
 Preparation base: `95ca908` (PR125/126 merged into the existing delivery branch).
-Status: IN_PROGRESS; P0 independent review required before publication.
+Status: bounded preparation independently APPROVED / VERIFIED at immutable
+candidate `35dee047d8e4db822bdc60c93f80d925e11429e4`; formal connection BLOCKED.
+See the implementation/evidence and scoped independent review under
+`docs/reports/world-connection/CLOUDFLARE_POSTGRES_*_2026_10_09.*`.
 
 The authoritative `status/progress.json` gate is V09.1 PLANNED. Its hard
 dependencies V02.3/V07.3/V08.3 are VERIFIED. ADR-18 permits disposable local/CI
@@ -28,7 +31,9 @@ replace private runtime constructor identity with a remote READY declaration.
 
 - Account Hyperdrive inventory was empty (Wrangler list, exit 0).
 - Shared production project is `vimksjrhaxdpnkvgsavz`; no known least-privilege
-  runtime connection file or binding was provided. Credential question pending.
+  runtime connection file or binding was provided. The owner answered that the
+  database exists but likely has no other configuration; this is not a runtime
+  credential or approved access grant.
 - Main-site publisher `origin/main` observed at `dc7c75e`: exact 0023 caller is
   not registered. World source policy expressly remains CALLER_NOT_READY.
 - PR125/126 source closeout says LC/FX and complete central-bank producer

@@ -1,5 +1,9 @@
 # Cloudflare 运行环境交接（2026-10-09）
 
+后续 PostgreSQL 传输适配、真实 workerd 命令机制测试和正式依赖清单见
+[Supabase 与经济命令连接交接](SUPABASE_COMMAND_CONNECTION.zh-CN.md)。
+这项新增 P0 候选的检查/审查范围与下述已批准 HOLD 托管范围分别记录。
+
 本次交付对应分工中的“运行环境线”。API 和独立执行 Worker 已有可打包的
 Cloudflare 入口，默认固定 HOLD。新增代码触及架构边界和 JWT 验签，已由用户授权的
 独立审查代理批准不可变候选 `e7ecf45`，并完成两个 HOLD 服务发布及15项真实云端
