@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { isAbsolute, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { parseConfigFileTextToJson } from 'typescript';
 import { parseCanonicalCommand, type CanonicalCommand } from '@econmind/core';
 import { DurableV08LedgerLineageReader } from '../../apps/world-worker/src/persistence/durable-v08-ledger-lineage-reader.js';
 import { cIsolatedHash } from '../support/c-isolated-financial-fixture.js';
@@ -58,12 +59,15 @@ describe.skipIf(process.env.O_WORKERD_POSTGRES_ROUNDTRIP !== '1')(
           entry,
           `import { createCloudflarePostgresTestFixture } from '../../tests/support/cloudflare-postgres-workerd-fixture.js'; export default createCloudflarePostgresTestFixture(${JSON.stringify(config)});\n`,
         );
-        const wranglerConfig = JSON.parse(
-          await readFile(
-            'tests/support/cloudflare-postgres-test.wrangler.jsonc',
-            'utf8',
-          ),
+        const configPath =
+          'tests/support/cloudflare-postgres-test.wrangler.jsonc';
+        const parsedConfig = parseConfigFileTextToJson(
+          configPath,
+          await readFile(configPath, 'utf8'),
         );
+        if (parsedConfig.error)
+          throw new Error('TEST_ONLY_WRANGLER_CONFIG_INVALID');
+        const wranglerConfig = parsedConfig.config;
         const runtimeConfig = resolve(
           'artifacts/world-runtime-postgres/test-only.wrangler.jsonc',
         );

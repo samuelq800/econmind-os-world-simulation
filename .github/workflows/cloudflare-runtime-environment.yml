@@ -102,6 +102,39 @@ jobs:
         env:
           O_NATIVE_AUTHENTICATED_ROUNDTRIP: '1'
         run: pnpm exec vitest run tests/integration/o-authenticated-financial-roundtrip-postgres.test.ts --reporter=json --outputFile=native-authenticated-roundtrip.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime-official-native-${{ github.sha }}
+          path: |
+            official-pnpm-check.log
+            native-authenticated-roundtrip.json
+          if-no-files-found: error
+
+  workerd-native-postgres:
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build actual Core and persistence modules
+        run: |
+          pnpm --filter @econmind/core build
+          pnpm --filter @econmind/world-worker build
+          pnpm --filter @econmind/world-api build
+      - name: Owned native PostgreSQL fixture tools
+        run: |
+          brew install postgresql@18
+          brew link --force postgresql@18
+          /opt/homebrew/bin/initdb --version
+          /opt/homebrew/bin/pg_ctl --version
       - name: Install pinned Workers CLI in an isolated tool directory
         run: |
           mkdir -p "$RUNNER_TEMP/world-cloudflare-tools"
@@ -123,9 +156,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: runtime-official-native-${{ github.sha }}
+          name: workerd-native-postgres-${{ github.sha }}
           path: |
-            official-pnpm-check.log
-            native-authenticated-roundtrip.json
             workerd-postgres-roundtrip.json
+            artifacts/world-runtime-postgres/
           if-no-files-found: error
