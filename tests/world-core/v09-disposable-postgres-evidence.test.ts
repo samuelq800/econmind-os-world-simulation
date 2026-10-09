@@ -38,13 +38,23 @@ function environment(
 }
 
 describe('V09 disposable PostgreSQL evidence boundary', () => {
-  it('binds the current exact 0021-pinned chain and main cleanup baseline', async () => {
-    const migrations = await loadV09StagingMigrationChain();
-    expect(migrations.map((migration) => migration.migration_id)).toEqual([
-      ...V09_STAGING_MIGRATION_IDS,
-      V09_STAGING_CANDIDATE_0021.migration_id,
-    ]);
-    expect(migrations).toHaveLength(21);
+  it('rejects the registered 0023 suffix without widening the pinned staging chain or cleanup baseline', async () => {
+    const manifest = JSON.parse(
+      await readFile(
+        new URL('../../database/migrations/manifest.json', import.meta.url),
+        'utf8',
+      ),
+    );
+    expect(manifest.migrations.at(-1)).toMatchObject({
+      migration_id: '0023_world_v2_production_consumption_posting',
+      release_order: 23,
+      artifact_source_commit: '4714c1da7af9324741996b94c6da036bf54c39a4',
+      sha256:
+        '0e1ec372429164acb94f9b9588beac75fbf984f5a41413af13715e28a4e94a36',
+    });
+    await expect(loadV09StagingMigrationChain()).rejects.toThrow(
+      'the runner accepts only the exact reviewed 0001–0020 chain or pinned 0021 candidate',
+    );
 
     const inventory = expectedV09StagingCleanupInventory({
       roles: { migration_owner: 'v09_staging_migration_owner' },
