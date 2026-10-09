@@ -21,3 +21,4 @@ supabase/.temp/
 /artifacts/world-runtime-environment-2026-10-09/
 artifacts/world-runtime-postgres/
 /.supabase-cli.local.json
+/artifacts/world-runtime-actions/

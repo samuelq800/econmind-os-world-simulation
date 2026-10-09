@@ -1,0 +1,168 @@
+name: World runtime Actions (reviewed HOLD only)
+run-name: World HOLD · publish=${{ inputs.publish_hold || false }} · @${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_hold:
+        description: Publish the previously reviewed HOLD API/executor (no database or economic activation)
+        type: boolean
+        required: true
+        default: false
+      confirmation:
+        description: Publication only - type PUBLISH_REVIEWED_HOLD
+        type: string
+        required: false
+        default: ''
+  pull_request:
+    paths:
+      - .github/workflows/world-runtime-actions.yml
+      - scripts/world-runtime-actions.mjs
+      - tests/foundation/world-runtime-actions.test.ts
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: workflow
+
+env:
+  HOLD_SOURCE_COMMIT: e7ecf45184baad69a37e2e51fff8862a635267dc
+  WRANGLER_SEND_METRICS: 'false'
+
+jobs:
+  caller-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: workflow
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+          cache-dependency-path: workflow/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Unmodified full caller check (no cloud credentials)
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/world-runtime-actions
+          pnpm check 2>&1 | tee artifacts/world-runtime-actions/caller-check.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: world-actions-caller-${{ github.sha }}
+          path: workflow/artifacts/world-runtime-actions/caller-check.log
+          if-no-files-found: error
+
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: workflow
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+          cache-dependency-path: workflow/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Check manual publication request before any credentials
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_hold
+        env:
+          PUBLISH_CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          test "$GITHUB_REF" = 'refs/heads/main'
+          test "$PUBLISH_CONFIRMATION" = 'PUBLISH_REVIEWED_HOLD'
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.115.0
+      - name: Supabase CLI availability only (no login, link or DB password)
+        run: pnpm supabase:safe -- --version
+      - name: Caller release guards
+        run: pnpm exec vitest run tests/foundation/world-runtime-actions.test.ts --reporter=json --outputFile=actions-release-guards.json
+      - uses: actions/checkout@v5
+        with:
+          path: reviewed-hold
+          ref: ${{ env.HOLD_SOURCE_COMMIT }}
+          persist-credentials: false
+      - name: Verify the previously approved immutable source
+        run: node scripts/world-runtime-actions.mjs source "$GITHUB_WORKSPACE/reviewed-hold"
+      - name: Build the actual reviewed Core, Worker and API
+        run: |
+          pnpm --dir "$GITHUB_WORKSPACE/reviewed-hold" install --frozen-lockfile
+          pnpm --dir "$GITHUB_WORKSPACE/reviewed-hold" --filter @econmind/core build
+          pnpm --dir "$GITHUB_WORKSPACE/reviewed-hold" --filter @econmind/world-worker build
+          pnpm --dir "$GITHUB_WORKSPACE/reviewed-hold" --filter @econmind/world-api build
+      - name: Install pinned Workers tool outside both checkouts
+        run: |
+          npm install --prefix "$RUNNER_TEMP/world-cloudflare-tools" --no-audit --no-fund wrangler@4.148.0
+          echo "WORLD_CLOUDFLARE_TOOL_ROOT=$RUNNER_TEMP/world-cloudflare-tools" >> "$GITHUB_ENV"
+      - name: Bundle and run real workerd without cloud credentials
+        run: |
+          cli="$WORLD_CLOUDFLARE_TOOL_ROOT/node_modules/.bin/wrangler"
+          source_root="$GITHUB_WORKSPACE/reviewed-hold"
+          "$cli" deploy --dry-run --env staging --config "$source_root/config/cloudflare/world-runtime-executor.wrangler.jsonc" --outdir "$source_root/artifacts/world-runtime-environment-2026-10-09/executor"
+          "$cli" deploy --dry-run --env staging --config "$source_root/config/cloudflare/world-runtime-api.wrangler.jsonc" --outdir "$source_root/artifacts/world-runtime-environment-2026-10-09/api"
+          node "$source_root/scripts/check-cloudflare-runtime-local.mjs"
+          node scripts/world-runtime-actions.mjs prepare "$source_root" "$GITHUB_WORKSPACE/workflow/artifacts/world-runtime-actions"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reviewed-hold-${{ github.sha }}
+          path: |
+            workflow/artifacts/world-runtime-actions/*.js
+            workflow/artifacts/world-runtime-actions/*.json
+            workflow/actions-release-guards.json
+          if-no-files-found: error
+
+  publish:
+    if: github.event_name == 'workflow_dispatch' && inputs.publish_hold
+    needs: [caller-check, prepare]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: world-cloudflare-hold
+    concurrency:
+      group: world-cloudflare-hold-publication
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: workflow
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+      - uses: actions/checkout@v5
+        with:
+          path: reviewed-hold
+          ref: ${{ env.HOLD_SOURCE_COMMIT }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: reviewed-hold-${{ github.sha }}
+          path: downloaded
+      - name: Install pinned Workers tool
+        run: npm install --prefix "$RUNNER_TEMP/world-cloudflare-tools" --no-audit --no-fund wrangler@4.148.0
+      - name: Publish exact bundles after checking existing HOLD targets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          PUBLISH_CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          node scripts/world-runtime-actions.mjs publish "$GITHUB_WORKSPACE/reviewed-hold" "$GITHUB_WORKSPACE/downloaded/artifacts/world-runtime-actions" "$RUNNER_TEMP/world-cloudflare-tools"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: world-hold-publication-${{ github.run_id }}
+          path: downloaded/artifacts/world-runtime-actions/publication.json
+          if-no-files-found: warn
