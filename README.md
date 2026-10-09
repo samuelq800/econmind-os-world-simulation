@@ -20,7 +20,30 @@ PR118 的源码合并不等于生产迁移发布。
 Cloudflare 发布由项目负责人负责。PR124 的交付分支在本文记录时尚未合入 main，
 只拉取 main 不会取得该分支的完整变更。下列历史 checkpoint 保留各自的证据范围。
 
-## Current formal-release checkpoint (2026-10-08)
+## Current opening-interface preparation (2026-10-09)
+
+The Owner resumed bounded preparation to accept a real opening package and wire
+existing interfaces. This is SOURCE_ONLY construction, not production startup.
+[Opening/data-interface ownership and readiness plan](docs/exec-plans/OPENING_DATA_CONNECTION_READINESS_2026_10_09.md).
+
+PR118 now normally merged as `3eb6e049d02a76e010cb5cb449d6d7151ae63573`;
+candidate, actual CI checkout and main share tree `945c82b916da2ed28f64e4132cfa4d863df298d3`.
+B source approval, all applicable checks and the actual complete check succeeded.
+[Full-check artifact and merge receipt](docs/reports/world-connection/O_PR118_FULL_CHECK_MAIN_RECEIPT_2026_10_09.md).
+Historical failures and runner-capacity cancellation below remain recorded.
+
+The private opening-byte preflight, explicit nonactivated API composition and
+trusted browser-session wiring are now normally merged in PR125 as
+`56cdcfa9573464c64c7368571dea7c6abb8ffa24`. B/E/F approved their fixed scopes;
+final trusted/atlas CI passed, and main matches the candidate's complete tree.
+[Source merge receipt and exact opening-package connection points](docs/reports/world-connection/O_OPENING_INTERFACE_SOURCE_MERGE_2026_10_09.md).
+Missing inputs remain blocked; formal
+LC/FX/complete central-bank producer contracts are still absent. These interfaces
+do not invent source values, grant seats, publish schema, admit a seed, mount a
+production host or start an external Worker. The engine remains NOT_ACTIVATED
+and Gate B PENDING. A package arrival alone is not a runnable-world guarantee.
+
+## Retained formal-release checkpoint (2026-10-08)
 
 [Current code closeout and the external opening/Worker handoff](docs/reports/world-connection/WORLD_V2_CODE_CLOSEOUT_2026_10_08.md).
 The latest Owner instruction limits work to finishing and normally merging the

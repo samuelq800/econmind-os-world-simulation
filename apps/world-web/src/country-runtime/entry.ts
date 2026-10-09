@@ -7,6 +7,7 @@ import {
 } from './trusted-runtime.js';
 import { installOfficeProjection } from '../office-projection/view.js';
 import { installFinancialIntake } from '../financial-intake/view.js';
+import { installTrustedHost } from '../trusted-host/bootstrap.js';
 
 /** Mounted by the selected static page; no prototype/fixture entry is imported. */
 export function installCountryRuntime(document: Document, host: Window) {
@@ -303,5 +304,10 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   window.EconMindCountryRuntime = installCountryRuntime(document, window);
   window.EconMindOfficeProjection = installOfficeProjection(document, window);
   window.EconMindFinancialIntake = installFinancialIntake(document, window);
+  window.EconMindTrustedHost = installTrustedHost(document, window, {
+    projection: window.EconMindOfficeProjection,
+    financial: window.EconMindFinancialIntake,
+    localTrade: window.EconMindCountryRuntime,
+  });
   document.dispatchEvent(new Event('econmind-country-runtime-ready'));
 }

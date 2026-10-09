@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client"],
+    "skipLibCheck": false
+  },
+  "include": [
+    "trusted-host-session.test.ts",
+    "trusted-host-financial-privacy.test.ts",
+    "trusted-host-dom.ts"
+  ]
+}

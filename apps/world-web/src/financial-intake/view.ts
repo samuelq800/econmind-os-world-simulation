@@ -40,7 +40,12 @@ export function installFinancialIntake(
       : null;
   };
   let controller = factory(null, currentView),
-    unsubscribe = controller.subscribe(render);
+    unsubscribe = controller.subscribe(changed);
+  const listeners = new Set<() => void>();
+  function changed() {
+    render();
+    for (const listener of [...listeners]) listener();
+  }
   let root: HTMLElement | null = null,
     trigger: HTMLButtonElement | null = null,
     dialog: HTMLDialogElement | null = null,
@@ -73,7 +78,14 @@ export function installFinancialIntake(
       trigger.title = `Transfer orders · ${state.status}`;
       trigger.setAttribute('aria-label', 'Transfer orders');
     }
-    if (!dialog?.open) return;
+    if (!dialog) return;
+    if (!dialog.open) {
+      // A closed surface is still private DOM. Clear retired originals now,
+      // including direct connect consumers without a shared host installation.
+      // Ordinary close while the original remains authorized is unchanged.
+      if (!state.request) dialog.replaceChildren();
+      return;
+    }
     const focus = dialog.contains(document.activeElement)
       ? (document.activeElement as HTMLElement).dataset.financialAction
       : undefined;
@@ -315,12 +327,17 @@ export function installFinancialIntake(
       controller.disconnect();
       unsubscribe();
       controller = factory(binding, currentView);
-      unsubscribe = controller.subscribe(render);
+      unsubscribe = controller.subscribe(changed);
       render();
       return controller.getState().status;
     },
     disconnect: () => controller.disconnect(),
     getState: () => controller.getState(),
+    /** Stable relay across explicit controller replacement; no new authority. */
+    subscribe(listener: () => void) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
   });
 }
 declare global {

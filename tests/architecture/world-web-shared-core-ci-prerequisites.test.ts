@@ -88,6 +88,36 @@ describe('fresh CI public contract prerequisites', () => {
     );
   });
 
+  it('explicit opening and host compositions retain strict candidate coverage without activation', () => {
+    const source = readFileSync(
+      new URL(
+        '../../.github/workflows/trusted-country-runtime.yml',
+        import.meta.url,
+      ),
+      'utf8',
+    );
+    for (const path of [
+      'apps/world-web/src/trusted-host/**',
+      'apps/world-worker/src/preparation/official-opening-bundle-*.ts',
+      'apps/world-api/src/integration/nonactivated-runtime-api-host.ts',
+      'tests/world-core/official-opening-bundle-preflight.test.ts',
+      'tests/world-api/nonactivated-runtime-api-host.test.ts',
+      'tests/world-web/trusted-host-session.test.ts',
+      'tests/world-web/trusted-host-financial-privacy.test.ts',
+      'tests/support/g-runtime-api-host-test-only-fixture.ts',
+    ])
+      expect(source).toContain(path);
+    for (const config of [
+      'tests/support/tsconfig.official-opening-bundle-preflight.json',
+      'tests/world-api/tsconfig.nonactivated-runtime-api-host.json',
+      'tests/world-web/trusted-host-session.tsconfig.json',
+    ])
+      expect(source).toContain(`pnpm exec tsc --noEmit -p ${config}`);
+    expect(source).not.toMatch(
+      /continue-on-error|workflow_dispatch|world-worker (?:dev|start)|supabase db/u,
+    );
+  });
+
   it('every explicit trusted-CI test, helper and config path exists instead of being silently omitted', () => {
     const source = readFileSync(
       new URL(
