@@ -33,12 +33,14 @@ env:
 
 jobs:
   caller-check:
-    runs-on: ubuntu-latest
+    # Match the repository's existing official full-check environment.
+    runs-on: macos-15
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v5
         with:
           path: workflow
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 12.3.4

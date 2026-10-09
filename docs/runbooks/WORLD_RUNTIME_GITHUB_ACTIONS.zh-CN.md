@@ -15,6 +15,8 @@ PR 自动运行完整调用者检查及打包验证；手动运行默认 `publis
 CI 安装 Supabase CLI2.115.0 并只检查版本，安装隔离的 Wrangler4.148.0，构建
 固定源码，运行真实 workerd11项检查及本工作流的发布守卫测试，保留可追溯构件。
 上传物仅包括两个 HOLD JS、公开检查 JSON；TEST_ONLY JWT 载体/私钥不上传。
+完整 pnpm check 沿用仓库既有 macOS 门禁并拉取完整来源历史；workerd 打包
+准备仍在 Linux。初次 Ubuntu 全量验收的失败见报告，不代表已验收 Linux Node 宿主。
 
 工作流须先经独立审查合入 main，GitHub 才会提供手动 Run workflow 入口。
 既有运行服务源码已随 PR124 合并；本工作流仍是单独审查范围。

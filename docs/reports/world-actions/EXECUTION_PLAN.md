@@ -41,7 +41,8 @@ publication and its Secrets remain in econmind-os's unique approved chain.
 
 Run pinned Node24.20.0/pnpm12.3.4 with frozen dependencies, actionlint1.7.7,
 JavaScript syntax, targeted lint/format and release guards. Run unmodified full
-pnpm check on the actual CI checkout. Build immutable HOLD with Wrangler4.148.0,
+pnpm check with complete history in the existing macOS full-check environment.
+Build immutable HOLD with Wrangler4.148.0,
 run real workerd eleven checks, validate original bundle hashes and download
 the prepared artifact to verify its layout and bytes.
 
