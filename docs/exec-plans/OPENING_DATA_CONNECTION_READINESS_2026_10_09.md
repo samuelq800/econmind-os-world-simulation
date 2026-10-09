@@ -46,7 +46,11 @@ native37786268901、trusted37786268875、Storage37786268873及真实PG子jobSUCC
 
 C已冻结d9313b5180895d20e9563f3f9dc34830b702785e，206定向测试PASS，交F独审；
 其中直接Financial view closed失效后清私密DOM，原3FAIL及修后4PASS分别保留。
-A与G仍须交固定候选；G原socket超时修后11PASS，最终descriptor检查待冻结复核。
+A已固定49e8359a4bfa76a1622ab0dc6645bfb5160c90f6，14PASS，实际93文件/34JSON校验，交B独审。
+G已固定89ae38a8412de1beb8c4566c1a6b19bc89c8a71d，最终socket11PASS，交E独审；
+borrowed clock不冻结、不执行getter，真实private identity与原守卫不变。
+Root正常replay三方原件，已逐文件确认与各自固定候选相同；新增CI覆盖与strict配置，
+不放宽任何原测试。独审结论及组合检查尚待收口，不能提前自批合并。
 各窗口的SOURCE_ONLY成果在独审前均不当作已合并或生产连通。
 
 E已从fixed96217db极窄只读确认：old canonical assembly仅单GCU batch，正式bootstrap
