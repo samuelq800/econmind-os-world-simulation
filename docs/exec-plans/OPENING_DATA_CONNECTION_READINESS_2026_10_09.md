@@ -19,6 +19,27 @@ G定位existing三route→显式服务host；C定位正式browser→统一真实
 先核实最小缺口，再绑定精确文件实施；不再造已经存在的接口。
 Root只负责固定组合、CI接线、检查结果与交接记录。独审另交未参与实现的窗口。
 
+已完成一次轻量定位，现已精确授权以下源码准备：
+
+- A：新增Worker私有opening-bundle loader/preflight、专用测试/config/report；
+  真实固定byte/hash/UTF8/集合与现有验证器接通，无DB、bootstrap或publisher调用。
+- G：新增nonactivated-runtime-api-host、专用实际socket测试/config/report；
+  复用existing read-host/financial/Office constructors，四exactpath与配置一致性验证，
+  无listen、默认mount或production解锁。API factory export若需要仅限本工厂/types。
+- C：新增trusted-host session/bootstrap、entry薄安装和专用测试/config/report；
+  必要时仅在两个既有view增加真实controller.subscribe观察出口，统一撤权清理。
+  复用existingread/financial binding，禁止自动生成command或挪用localTrade路径。
+- E：只读确认旧GCU batch→正式各国LC batch、FX/CB register真实producer缺口，
+  不创建新经济规则或缺失carrier。A不占用此桥的生产代码。
+
+已经明确的实际边界：当前没有生产host/session的connect调用；各单route存在并不代表
+默认API进程已挂载。manualOffice runtime还有私有同pool/clock/World引用与local/CI-only
+consumer守卫，不能通过一个URL/JSON跨进程宣称已接外部Worker。开局旧桥与LC batch
+要求也不能仅把函数串起来就宣布已准备完毕；须用合法真实carrier接口解决。
+
+PR118取消job的单次恢复已取得真实runner并执行原始pnpm check；未改workflow/skip
+或重跑四个已有SUCCESS。旧CANCELLED保留，新attempt独立等待实际结果。
+
 允许：在隔离本地/CI验证现有真实链、数据形状/hash/拒绝控制及transport/session清理。
 不允许：新SQL/schema/旧站改动、生产任意写入、自动启动、默认READY、补零、
 mock成功回调、替代Core权威链、测试签名作为正式任职或source authority。
