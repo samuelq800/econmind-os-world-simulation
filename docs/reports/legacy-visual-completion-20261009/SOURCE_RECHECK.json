@@ -1,0 +1,114 @@
+{
+  "status": "PASS",
+  "worldBaseCommit": "96217db583db4c1bd6ef74714b2e0a5ef6b7ed6d",
+  "legacyVisualCommit": "7b4db3b8cbdb1db86288a1172896ac9bb8febaa4",
+  "method": "Read exact local Git blobs; SHA-256 full files and inclusive original line extractions; verify current bytes and previous base output. No source or verifier change.",
+  "sources": [
+    {
+      "path": "app/globals.css",
+      "blob": "12984e72601f787a4100ddc7a225bf6307971130",
+      "sha256": "61a07229c44b317446e92215296ccb1f4e306b7dd68963cf31a863284b6c520b",
+      "bytes": 84690,
+      "extractions": [
+        {
+          "start": 57,
+          "end": 63,
+          "sha256": "1ce5d73c90d3488d50fae7b9f5d5d3c27d8ddeb528255dbfd3de6cc19c9fa193",
+          "status": "PASS"
+        },
+        {
+          "start": 81,
+          "end": 84,
+          "sha256": "0dd7b1dea182c678a65c8e4e5bef8345c34e79dfcdb8b9108373ba8efd093d90",
+          "status": "PASS"
+        },
+        {
+          "start": 25,
+          "end": 46,
+          "sha256": "10c12328712f408adffab2a97bbc04e0d16083c885bba5bdea0447212b4a4cca",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "path": "app/visual-pilot-city.css",
+      "blob": "963f9b2e9404f9681a80fdae5a7996c4aeb5722a",
+      "sha256": "948191c9227114d8f96bf6b533dc0ed79423a883fd438f6f3d9c7553a6562aad",
+      "bytes": 20395,
+      "extractions": [
+        {
+          "start": 2,
+          "end": 7,
+          "sha256": "76c783958e240f4e2bfa1b54028952a3c559f11819ddffc0dcac50eb459c35a1",
+          "status": "PASS"
+        },
+        {
+          "start": 16,
+          "end": 23,
+          "sha256": "207d05d1bc0c9bdbadf8ece0cc48288ed0adce7eaaacf456fd7f3667a27819a2",
+          "status": "PASS"
+        },
+        {
+          "start": 48,
+          "end": 48,
+          "sha256": "1358ba97bd599e5c36881d10f7095e5027c02725c61c353e26a9c52b75d64762",
+          "status": "PASS"
+        },
+        {
+          "start": 57,
+          "end": 57,
+          "sha256": "35b337b1832df576e5d40774f5a55dccb4252de10ebc3bf10abe4da641ead413",
+          "status": "PASS"
+        },
+        {
+          "start": 62,
+          "end": 63,
+          "sha256": "64aaa44648c887c986303c463b1c8297c51916290d00e44237b6a1cb6f20d00b",
+          "status": "PASS"
+        },
+        {
+          "start": 65,
+          "end": 68,
+          "sha256": "4282ac9d34acb7194f30f9589297407b671ec3a463ad1e736269dd2cc6acd5a0",
+          "status": "PASS"
+        },
+        {
+          "start": 104,
+          "end": 107,
+          "sha256": "73a86db88e930ee97a6c43b7ea89f4f24d334a836caae08dc57cf09e07b89daf",
+          "status": "PASS"
+        },
+        {
+          "start": 210,
+          "end": 212,
+          "sha256": "b17636022078a7a88dd6b7600bff611d278b52b3fb2cd4f7360cb961e87ee693",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "path": "app/layout.tsx",
+      "blob": "5af209d419d1b1642614b1b9b5d80a2206887c7a",
+      "sha256": "d6201c9892de9c1144d190cd4c97a1e77f103e1f4908bd58756d33aa3fd13541",
+      "bytes": 2433,
+      "extractions": [
+        {
+          "start": 1,
+          "end": 58,
+          "sha256": "d6201c9892de9c1144d190cd4c97a1e77f103e1f4908bd58756d33aa3fd13541",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "adaptedOutput": {
+    "path": "apps/world-web/public/shared/econmind-os-visual.css",
+    "bytes": 12588,
+    "sha256": "8a7f57f622e6e30e44f29e6cea04e49d1318f7579b7603154b48d803eb474711"
+  },
+  "previousAdaptedOutput": {
+    "path": "apps/world-web/public/shared/econmind-os-visual.css",
+    "bytes": 5461,
+    "sha256": "c73be2dc0837df8f3362945ac8f58eaae28461e42f76c52d639bd325b8f05235"
+  }
+}

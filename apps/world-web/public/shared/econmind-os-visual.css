@@ -22,12 +22,54 @@ html:has(body.season1-lobby) {
   --em-shadow: 0 14px 42px rgba(0, 3, 12, 0.22);
   --em-font: Arial, Helvetica, sans-serif;
   --em-heading-font: Georgia, 'Times New Roman', serif;
+  --em-warning: #f0b866;
+  --em-error: #ed8c88;
+  --em-info: #81b2eb;
 }
 
 body .world-explorer,
+body .world-landing,
+body.season1-lobby .country-game,
 body.season1-lobby .journey-scene {
   font-family: var(--em-font);
   -webkit-font-smoothing: antialiased;
+}
+
+/* The loading/legacy landing shares the OS canvas, not a separate theme. */
+body .world-landing {
+  background: var(--em-canvas);
+  color: var(--em-ink);
+}
+body .world-landing__panel {
+  background: var(--em-surface);
+  border-color: var(--em-line);
+  box-shadow: var(--em-shadow);
+}
+body .world-landing h1 {
+  font-family: var(--em-heading-font);
+  font-weight: 400;
+}
+body .world-landing__eyebrow {
+  color: var(--em-gold);
+}
+body :is(.world-landing__copy, .world-landing__boundary) {
+  color: var(--em-ink-muted);
+  border-color: var(--em-line);
+}
+body .world-landing__action {
+  background: var(--em-accent);
+  color: var(--em-on-accent);
+}
+body .world-landing__action:hover {
+  background: var(--em-accent-strong);
+}
+body .world-landing__atlas-links a {
+  color: var(--em-accent);
+}
+body .world-landing :focus-visible,
+body .official-source-connection :focus-visible {
+  outline: 2px solid var(--em-accent);
+  outline-offset: 4px;
 }
 
 body .world-explorer {
@@ -82,6 +124,25 @@ body.season1-lobby .country-game {
   --em-light-gold: #84612b;
   color: var(--em-light-ink);
 }
+body.season1-lobby .country-game :is(h1, h2, h3) {
+  font-family: var(--em-heading-font);
+}
+/* These fitted HUD/readout panels keep the selected UI's type metrics. */
+body.season1-lobby .country-game :is(.national-hud, .national-play) {
+  font-family: var(--ornate-serif);
+}
+body.season1-lobby .country-game .national-play h2 {
+  font-family: inherit;
+}
+/* Narrow country pages flow around the scene: retain their source type metrics
+ * so the scene, site anchors and readout stay at exactly the same coordinates.
+ */
+@media (max-width: 1000px) {
+  body.season1-lobby .country-game,
+  body.season1-lobby .country-game :is(h1, h2, h3) {
+    font-family: var(--ornate-serif);
+  }
+}
 body.season1-lobby
   .country-game
   :is(
@@ -106,6 +167,100 @@ body.season1-lobby
   .country-game
   :is(.national-card > small, .national-identity small) {
   color: var(--em-light-gold);
+}
+
+/* National controls: same source light surfaces and mint actions as OS.
+ * The role picker has inline paint from the archived UI; override paint only.
+ */
+body.season1-lobby .country-game [data-country-role-switch] {
+  background: var(--em-light-surface) !important;
+  border-color: var(--em-light-line) !important;
+  color: var(--em-light-ink) !important;
+  font-family: var(--em-font) !important;
+}
+body.season1-lobby .country-game .national-identity label {
+  color: var(--em-light-muted);
+}
+body.season1-lobby
+  .country-game
+  :is(.national-tokens button, .national-slider button) {
+  background: var(--em-accent-soft);
+  border-color: var(--em-accent);
+  color: var(--em-accent-strong);
+  box-shadow: var(--em-shadow);
+}
+body.season1-lobby .country-game .national-tokens button:hover {
+  background: var(--em-surface-strong);
+}
+body.season1-lobby .country-game .national-building :is(span, strong) {
+  background: var(--em-light-surface);
+  border-color: var(--em-light-line);
+  color: var(--em-light-ink);
+  box-shadow: var(--em-shadow);
+}
+body.season1-lobby .country-game .national-destination {
+  background: var(--em-surface-subtle);
+  border-color: var(--em-line-strong);
+  color: var(--em-ink);
+  box-shadow: var(--em-shadow);
+}
+body.season1-lobby
+  .country-game
+  :is(.national-destination > span, .national-mission > small) {
+  color: var(--em-gold);
+}
+body.season1-lobby .country-game .national-mission {
+  border-color: var(--em-gold);
+  color: var(--em-ink);
+}
+body.season1-lobby .country-game .national-mission p,
+body.season1-lobby .country-game .national-mission > span {
+  color: var(--em-ink-muted);
+}
+body.season1-lobby .country-game .national-site-pins button {
+  background: var(--em-surface-subtle);
+  border-color: var(--em-line-strong);
+  color: var(--em-ink);
+}
+body.season1-lobby .country-game .national-site-pins button.selected {
+  background: var(--em-accent);
+  border-color: var(--em-accent-strong);
+  color: var(--em-on-accent);
+}
+body.season1-lobby .country-game :is(.national-drawer-head, .national-record) {
+  border-color: var(--em-light-line);
+}
+body.season1-lobby
+  .country-game
+  :is(
+    .national-drawer-note,
+    .national-record small,
+    .national-site-list small
+  ) {
+  color: var(--em-light-muted);
+}
+body.season1-lobby .country-game .national-drawer-head button {
+  background: var(--em-light-accent);
+  color: var(--em-light-surface);
+}
+body.season1-lobby .country-game .national-site-list button:hover {
+  background: var(--em-light-subtle);
+  border-color: var(--em-light-accent);
+}
+body.season1-lobby .country-game dialog.national-drawer {
+  background: var(--em-light-surface);
+  color: var(--em-light-ink);
+  border-color: var(--em-light-line);
+}
+body.season1-lobby .country-game dialog::backdrop {
+  background: rgb(0 3 12 / 60%);
+}
+body.season1-lobby .country-game .national-drawer [role='status'] {
+  color: var(--em-light-gold);
+}
+body.season1-lobby .country-game .national-time :is(small, strong),
+body.season1-lobby .country-game .national-world-status :is(strong, small) {
+  color: var(--em-gold);
 }
 body.season1-lobby
   .country-game
@@ -156,6 +311,59 @@ body.season1-lobby .journey-scene {
 }
 body.season1-lobby
   .journey-scene
+  :is(
+    .journey-header,
+    .office-navigation,
+    .journey-choice,
+    .office-modules button
+  ) {
+  background: var(--em-surface);
+  border-color: var(--em-line);
+  color: var(--em-ink);
+}
+body.season1-lobby
+  .journey-scene
+  :is(.journey-eyebrow, .choice-ordinal, .office-navigation small) {
+  color: var(--em-gold);
+}
+body.season1-lobby
+  .journey-scene
+  :is(
+    .office-modules small,
+    .office-modules i,
+    .journey-status,
+    .journey-intro > p
+  ) {
+  color: var(--em-ink-muted);
+}
+body.season1-lobby .journey-scene .office-navigation button {
+  color: var(--em-ink-muted);
+  border-color: var(--em-line);
+}
+body.season1-lobby
+  .journey-scene
+  :is(
+    .office-navigation button.selected,
+    .office-navigation button:hover,
+    .office-modules button:hover
+  ) {
+  background: var(--em-accent-soft);
+  color: var(--em-accent-strong);
+  border-color: var(--em-line-strong);
+}
+body.season1-lobby .journey-scene .journey-button {
+  background: var(--em-accent);
+  color: var(--em-on-accent) !important;
+  border-color: var(--em-accent-strong);
+  box-shadow: var(--em-shadow);
+}
+body.season1-lobby .journey-scene .journey-button.secondary {
+  background: var(--em-surface-subtle);
+  color: var(--em-ink) !important;
+  border-color: var(--em-line-strong);
+}
+body.season1-lobby
+  .journey-scene
   :is(.journey-choice, .decision-object, .office-modules button) {
   border-color: var(--em-line-strong);
   box-shadow: var(--em-shadow);
@@ -167,6 +375,43 @@ body.season1-lobby
   :is(.journey-scene, .country-game)
   :is(input, select, textarea) {
   accent-color: var(--em-accent);
+}
+
+/* Existing editors and result tables inherit source surface semantics.
+ * This cannot open a guarded module or alter a validation/receipt message.
+ */
+body.season1-lobby :is(.editor, .field) {
+  background: #f0f4f1;
+  border-color: #c5dad6;
+  color: #102d32;
+  font-family: var(--em-font);
+}
+body.season1-lobby .field input:not([type='range']):not([type='checkbox']),
+body.season1-lobby .field select,
+body.season1-lobby .field textarea {
+  background: #fff;
+  border-color: #9ebeb8;
+  color: #102d32;
+}
+body.season1-lobby .field :is(.source, summary) {
+  color: #48686d;
+}
+body.season1-lobby .editor-tabs button {
+  background: #d8e5e1;
+  color: #102d32;
+}
+body.season1-lobby .editor-tabs button.active {
+  background: #087060;
+  color: #fff;
+}
+body.season1-lobby :is(.editor, .national-drawer) :is(th, td) {
+  border-color: #c5dad6;
+}
+body.season1-lobby #toast {
+  background: var(--em-surface);
+  border-color: var(--em-line-strong);
+  color: var(--em-ink);
+  box-shadow: var(--em-shadow);
 }
 
 /* Include selects, ranges and the keyboard-operable map viewport. */

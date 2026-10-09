@@ -1,0 +1,529 @@
+{
+  "status": "PASS",
+  "base": "http://127.0.0.1:4198/",
+  "cssSha256": "8a7f57f622e6e30e44f29e6cea04e49d1318f7579b7603154b48d803eb474711",
+  "results": [
+    {
+      "name": "desktop",
+      "role": "captain",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "controls": 47,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 9,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Cabinet agenda · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "role": "finance",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "controls": 50,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 20,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Funding participation terms · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "role": "central_bank",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "controls": 53,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 15,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Reserves and capital · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "role": "industry",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "controls": 54,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 23,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Power allocation · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "role": "trade",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "controls": 63,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 28,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Spot import orders · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "role": "social",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "controls": 54,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 25,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Skills training · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "atlas": {
+        "width": 1440,
+        "scrollWidth": 1440,
+        "connection": "NOT_CONFIGURED"
+      },
+      "publicRoleSwitch": true,
+      "atlasReturnAndBack": true,
+      "errors": []
+    },
+    {
+      "name": "mobile",
+      "role": "captain",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": 47,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 9,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Cabinet agenda · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "mobile",
+      "role": "finance",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": 50,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 20,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Funding participation terms · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "mobile",
+      "role": "central_bank",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": 53,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 15,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Reserves and capital · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "mobile",
+      "role": "industry",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": 54,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 23,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Power allocation · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "mobile",
+      "role": "trade",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": 63,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 28,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Spot import orders · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "mobile",
+      "role": "social",
+      "width": 390,
+      "scrollWidth": 390,
+      "controls": 54,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 25,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Skills training · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "mobile",
+      "atlas": {
+        "width": 390,
+        "scrollWidth": 390,
+        "connection": "NOT_CONFIGURED"
+      },
+      "publicRoleSwitch": true,
+      "atlasReturnAndBack": true,
+      "errors": []
+    },
+    {
+      "name": "narrow",
+      "role": "captain",
+      "width": 320,
+      "scrollWidth": 320,
+      "controls": 47,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 9,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Cabinet agenda · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "narrow",
+      "role": "finance",
+      "width": 320,
+      "scrollWidth": 320,
+      "controls": 50,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 20,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Funding participation terms · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "narrow",
+      "role": "central_bank",
+      "width": 320,
+      "scrollWidth": 320,
+      "controls": 53,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 15,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Reserves and capital · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "narrow",
+      "role": "industry",
+      "width": 320,
+      "scrollWidth": 320,
+      "controls": 54,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 23,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Power allocation · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "narrow",
+      "role": "trade",
+      "width": 320,
+      "scrollWidth": 320,
+      "controls": 63,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 28,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Spot import orders · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "narrow",
+      "role": "social",
+      "width": 320,
+      "scrollWidth": 320,
+      "controls": 54,
+      "confirmDisabled": true,
+      "clock": "Official opening dataset\nNot started\nNo live World clock",
+      "roleOptions": [
+        "captain",
+        "finance",
+        "central_bank",
+        "industry",
+        "trade",
+        "social"
+      ],
+      "navigationBars": 1,
+      "moduleCount": 25,
+      "missing": "NOT_CONNECTED · MISSING · TRUSTED_READ_BINDING_MISSING",
+      "drawerContrast": {
+        "fg": "rgb(72, 104, 109)",
+        "bg": "rgb(240, 244, 241)",
+        "ratio": 5.440969407225327
+      },
+      "notice": "Skills training · World 实时数据与命令接口尚未接通; 不能使用本地样例结算.",
+      "errors": []
+    },
+    {
+      "name": "narrow",
+      "atlas": {
+        "width": 320,
+        "scrollWidth": 320,
+        "connection": "NOT_CONFIGURED"
+      },
+      "publicRoleSwitch": true,
+      "atlasReturnAndBack": true,
+      "errors": []
+    }
+  ],
+  "failures": [],
+  "liveEconomicExecution": "NOT_RUN",
+  "formAndChartInteriors": "NOT_RUN_GUARDED_BY_DISCONNECTED_RUNTIME"
+}

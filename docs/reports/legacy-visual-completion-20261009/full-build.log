@@ -1,0 +1,194 @@
+$ pnpm -r --if-present build
+packages/core build$ tsc -p tsconfig.build.json
+apps/world-web build$ tsc -b && vite build && node ../../scripts/publish-authoritative-ui-map-assets.mjs && node ../../scripts/configure-official-page-read.mjs && node ../../scripts/official-map-publication-build.mjs
+apps/world-web build: vite v8.2.2 building client environment for production...
+apps/world-web build: transforming...
+apps/world-web build:
+apps/world-web build: ./shared/econmind-os-visual.css doesn't exist at build time, it will remain unchanged to be resolved at runtime
+apps/world-web build: ✓ 252 modules transformed.
+apps/world-web build: rendering chunks...
+apps/world-web build: computing gzip size...
+apps/world-web build: dist/legacy.html                                           0.48 kB │ gzip:     0.29 kB
+apps/world-web build: dist/command.html                                          0.67 kB │ gzip:     0.36 kB
+apps/world-web build: dist/prototype.html                                        0.68 kB │ gzip:     0.37 kB
+apps/world-web build: dist/index.html                                            0.89 kB │ gzip:     0.54 kB
+apps/world-web build: dist/assets/11-keldan-CKCgMO0p.svg                       219.63 kB │ gzip:    38.64 kB
+apps/world-web build: dist/assets/13-meros-9DzhpAiF.svg                        233.17 kB │ gzip:    39.86 kB
+apps/world-web build: dist/assets/20-talan-BeJ-HZP9.svg                        245.29 kB │ gzip:    44.56 kB
+apps/world-web build: dist/assets/19-siven-q7sutaC2.svg                        275.82 kB │ gzip:    51.14 kB
+apps/world-web build: dist/assets/45-selka-CloKRG9d.svg                        277.00 kB │ gzip:    52.28 kB
+apps/world-web build: dist/assets/18-rassel-D8SD1igI.svg                       296.69 kB │ gzip:    57.23 kB
+apps/world-web build: dist/assets/40-norvak-BwTQ_VKZ.svg                       308.29 kB │ gzip:    56.45 kB
+apps/world-web build: dist/assets/17-quoran-R8V8CKQV.svg                       318.41 kB │ gzip:    64.61 kB
+apps/world-web build: dist/assets/49-wrenna-D6TGc1Oa.svg                       339.93 kB │ gzip:    66.90 kB
+apps/world-web build: dist/assets/01-avenor-Cce0XsxT.svg                       346.48 kB │ gzip:    74.83 kB
+apps/world-web build: dist/assets/42-pavan-Dm2wjSXJ.svg                        351.77 kB │ gzip:    81.56 kB
+apps/world-web build: dist/assets/59-garan-BChjP66E.svg                        355.73 kB │ gzip:    84.15 kB
+apps/world-web build: dist/assets/37-koryn-XqLoBllF.svg                        368.77 kB │ gzip:    76.87 kB
+apps/world-web build: [plugin builtin:vite-reporter]
+apps/world-web build: dist/assets/22-vardis-BCrqzyDu.svg                       372.64 kB │ gzip:    80.61 kB
+apps/world-web build: dist/assets/36-jessa-CSgvpbk_.svg                        374.80 kB │ gzip:    78.35 kB
+apps/world-web build: dist/assets/07-galdra-BAjWo5zL.svg                       396.20 kB │ gzip:    77.98 kB
+apps/world-web build: dist/assets/14-nadrin-CIm7ojcu.svg                       396.47 kB │ gzip:    76.83 kB
+apps/world-web build: dist/assets/52-zorin-Cg0uxUrZ.svg                        405.94 kB │ gzip:    87.87 kB
+apps/world-web build: dist/assets/12-lumer-Bxw0XKFq.svg                        411.01 kB │ gzip:    82.82 kB
+apps/world-web build: dist/assets/70-rhea-xQy1wVP3.svg                         411.27 kB │ gzip:   100.05 kB
+apps/world-web build: dist/assets/02-brelis-XBqMGlUO.svg                       414.06 kB │ gzip:    85.63 kB
+apps/world-web build: dist/assets/55-cassa-ASGnwO-O.svg                        414.21 kB │ gzip:    99.31 kB
+apps/world-web build: dist/assets/43-qemra-EqQzkQJM.svg                        415.81 kB │ gzip:    97.95 kB
+apps/world-web build: dist/assets/48-varos-DgL_tlGC.svg                        417.49 kB │ gzip:    99.78 kB
+apps/world-web build: dist/assets/09-istrel-Cc3RLOwU.svg                       433.46 kB │ gzip:    87.11 kB
+apps/world-web build: dist/assets/25-ysol-yGaEbe2V.svg                         450.64 kB │ gzip:    98.83 kB
+apps/world-web build: dist/assets/33-gysel-X_uiu57E.svg                        468.18 kB │ gzip:   100.13 kB
+apps/world-web build: dist/assets/05-ellovar-DyvGwAbC.svg                      473.12 kB │ gzip:   103.25 kB
+apps/world-web build: dist/assets/21-uvren-CbX2HCE1.svg                        479.56 kB │ gzip:    97.65 kB
+apps/world-web build: dist/assets/41-ostra-DsgrZ2Xq.svg                        485.12 kB │ gzip:   103.61 kB
+apps/world-web build: dist/assets/51-yara-JPnOCx0r.svg                         496.31 kB │ gzip:   111.08 kB
+apps/world-web build: dist/assets/69-quillan-NBbPdJY_.svg                      498.25 kB │ gzip:   121.10 kB
+apps/world-web build: dist/assets/26-zarev-B3okFPBf.svg                        498.71 kB │ gzip:   103.44 kB
+apps/world-web build: dist/assets/39-mirea-DzbLMLnk.svg                        513.77 kB │ gzip:   109.53 kB
+apps/world-web build: dist/assets/24-xandor-Dg9mvd5t.svg                       531.34 kB │ gzip:   118.75 kB
+apps/world-web build: dist/assets/50-xyren-CMOFsizC.svg                        537.23 kB │ gzip:   120.25 kB
+apps/world-web build: dist/assets/10-jorun-C3v8IfeX.svg                        541.01 kB │ gzip:   118.14 kB
+apps/world-web build: dist/assets/08-hethen-V4Ih1ZHD.svg                       541.95 kB │ gzip:   112.18 kB
+apps/world-web build: dist/assets/35-inovar-DQPwreZd.svg                       542.53 kB │ gzip:   117.17 kB
+apps/world-web build: dist/assets/57-everen-Cq_6Gu54.svg                       545.97 kB │ gzip:   117.33 kB
+apps/world-web build: dist/assets/27-adara-UT31c3Wo.svg                        564.24 kB │ gzip:   117.46 kB
+apps/world-web build: dist/assets/46-tirren-BRdnfBhy.svg                       572.01 kB │ gzip:   125.24 kB
+apps/world-web build: dist/assets/03-caedon-DTqiyRFQ.svg                       573.17 kB │ gzip:   129.05 kB
+apps/world-web build: dist/assets/68-pella-BS8oetOG.svg                        576.49 kB │ gzip:   138.57 kB
+apps/world-web build: dist/assets/30-delyra-D5E1-GZR.svg                       597.75 kB │ gzip:   133.40 kB
+apps/world-web build: dist/assets/44-ruvan-BRAXoXsM.svg                        600.73 kB │ gzip:   133.82 kB
+apps/world-web build: dist/assets/32-falcor-Cgp3i_wS.svg                       603.03 kB │ gzip:   132.29 kB
+apps/world-web build: dist/assets/31-erdan-DOgVxVrU.svg                        604.05 kB │ gzip:   130.22 kB
+apps/world-web build: dist/assets/28-belm-B0KwIM-V.svg                         609.25 kB │ gzip:   129.99 kB
+apps/world-web build: dist/assets/15-orelis-I85KO0bA.svg                       611.10 kB │ gzip:   127.82 kB
+apps/world-web build: dist/assets/58-fenna-eNBnqIOv.svg                        611.35 kB │ gzip:   135.92 kB
+apps/world-web build: dist/assets/34-harin-Dia7Bk8o.svg                        628.64 kB │ gzip:   134.11 kB
+apps/world-web build: (!) Some chunks are larger than 500 kB after minification. Consider:
+apps/world-web build: dist/assets/67-orsa-BIROXLGO.svg                         631.04 kB │ gzip:   149.64 kB
+apps/world-web build: dist/assets/23-wexar-CWtu77ec.svg                        633.16 kB │ gzip:   136.12 kB
+apps/world-web build: dist/assets/53-alera-D67nADFW.svg                        645.74 kB │ gzip:   146.08 kB
+apps/world-web build: dist/assets/29-corven-R2D549pM.svg                       659.73 kB │ gzip:   143.31 kB
+apps/world-web build: dist/assets/61-ivara-Csm4HtS1.svg                        662.86 kB │ gzip:   147.47 kB
+apps/world-web build: dist/assets/47-ulyss-CHD02189.svg                        674.06 kB │ gzip:   144.60 kB
+apps/world-web build: dist/assets/04-darsin-DsTm2X6f.svg                       700.10 kB │ gzip:   161.55 kB
+apps/world-web build: dist/assets/66-nivor-B-E_5axp.svg                        700.19 kB │ gzip:   160.88 kB
+apps/world-web build: dist/assets/63-korra-CyzQN4KW.svg                        702.81 kB │ gzip:   161.99 kB
+apps/world-web build: dist/assets/65-marn-ByB9djIn.svg                         705.77 kB │ gzip:   163.52 kB
+apps/world-web build: dist/assets/60-hylos-Cm6HnpZx.svg                        731.60 kB │ gzip:   169.50 kB
+apps/world-web build: dist/assets/54-brin-CELhPHrt.svg                         738.30 kB │ gzip:   162.95 kB
+apps/world-web build: dist/assets/06-faren-FVdoSwB1.svg                        742.71 kB │ gzip:   161.31 kB
+apps/world-web build: dist/assets/38-lydan-axO7U9cZ.svg                        743.83 kB │ gzip:   170.84 kB
+apps/world-web build: dist/assets/56-doren-Don6DZzJ.svg                        749.12 kB │ gzip:   165.50 kB
+apps/world-web build: dist/assets/62-jalen-onhi4BUJ.svg                        749.44 kB │ gzip:   181.77 kB
+apps/world-web build: dist/assets/16-paryn-CjIt8dC1.svg                        788.42 kB │ gzip:   174.31 kB
+apps/world-web build: dist/assets/64-lethis-C0xzfSD4.svg                       806.06 kB │ gzip:   187.64 kB
+apps/world-web build: dist/assets/asterra-satellite-terrain-v8-DS1ge576.png  2,590.14 kB
+apps/world-web build: dist/assets/53-BJ7rHhlf.png                            2,950.53 kB
+apps/world-web build: dist/assets/central-BOlIU2Wv.png                       2,964.63 kB
+apps/world-web build: dist/assets/70-CS9QkfCp.png                            3,062.74 kB
+apps/world-web build: dist/assets/44-Cjw6HQSp.png                            3,070.13 kB
+apps/world-web build: dist/assets/59-BXZvhvuI.png                            3,078.61 kB
+apps/world-web build: dist/assets/61-Db-cWmeI.png                            3,093.87 kB
+apps/world-web build: dist/assets/36-DQEI_2Z9.png                            3,105.97 kB
+apps/world-web build: dist/assets/54-CY3a6xlR.png                            3,109.11 kB
+apps/world-web build: dist/assets/01-zCI_I-NR.png                            3,114.23 kB
+apps/world-web build: dist/assets/32-RaLQLgeU.png                            3,128.58 kB
+apps/world-web build: dist/assets/39-BDxCDg5G.png                            3,138.37 kB
+apps/world-web build: dist/assets/23-BXxBWPXt.png                            3,163.65 kB
+apps/world-web build: dist/assets/60-DDyUHIlY.png                            3,166.38 kB
+apps/world-web build: dist/assets/68-DdmIjCf-.png                            3,179.57 kB
+apps/world-web build: dist/assets/50-q0dt3FaX.png                            3,181.07 kB
+apps/world-web build: dist/assets/55-DPnKQyS6.png                            3,183.09 kB
+apps/world-web build: dist/assets/10-DJj0_nEO.png                            3,189.53 kB
+apps/world-web build: dist/assets/66-CbEKz13Y.png                            3,192.28 kB
+apps/world-web build: dist/assets/southwest-BzfR_N7r.png                     3,200.51 kB
+apps/world-web build: dist/assets/51-D5UlVdrX.png                            3,208.23 kB
+apps/world-web build: dist/assets/22-BBay1Xh_.png                            3,213.61 kB
+apps/world-web build: dist/assets/56-Cam6qFes.png                            3,217.36 kB
+apps/world-web build: dist/assets/17-B7G2XA60.png                            3,222.58 kB
+apps/world-web build: dist/assets/46-C5ryUzU4.png                            3,230.14 kB
+apps/world-web build: dist/assets/25--4ZK5y0k.png                            3,246.08 kB
+apps/world-web build: dist/assets/52-Bi9RZDZ1.png                            3,257.75 kB
+apps/world-web build: - Using dynamic import() to code-split the application
+apps/world-web build: - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+apps/world-web build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+apps/world-web build: dist/assets/69-C7sprnNT.png                            3,300.46 kB
+apps/world-web build: dist/assets/02-fjByg-of.png                            3,306.77 kB
+apps/world-web build: dist/assets/40-yGQAtchn.png                            3,314.28 kB
+apps/world-web build: dist/assets/12-BVhSBw0P.png                            3,315.17 kB
+apps/world-web build: dist/assets/48-XoN4EVry.png                            3,324.83 kB
+apps/world-web build: dist/assets/16-CCapac7z.png                            3,325.85 kB
+apps/world-web build: dist/assets/65-BFyG3UuL.png                            3,327.37 kB
+apps/world-web build: dist/assets/18-jfs5r2Ll.png                            3,329.74 kB
+apps/world-web build: dist/assets/67-ClioTNkX.png                            3,330.11 kB
+apps/world-web build: dist/assets/38-B6iJkKoX.png                            3,345.52 kB
+apps/world-web build: dist/assets/03-DmwnkNIm.png                            3,345.67 kB
+apps/world-web build: dist/assets/13-DEBEQcNG.png                            3,345.85 kB
+apps/world-web build: dist/assets/33-DtPBYZ10.png                            3,348.09 kB
+apps/world-web build: dist/assets/20-KceLU3r2.png                            3,351.46 kB
+apps/world-web build: dist/assets/42-bKfXRJQp.png                            3,359.46 kB
+apps/world-web build: dist/assets/07-BLqRy2t-.png                            3,361.37 kB
+apps/world-web build: dist/assets/37-HtTWHDRa.png                            3,369.32 kB
+apps/world-web build: dist/assets/26-VxRXvR9j.png                            3,369.81 kB
+apps/world-web build: dist/assets/62-B_XJ8Agi.png                            3,370.72 kB
+apps/world-web build: dist/assets/29-CW95BbxM.png                            3,372.66 kB
+apps/world-web build: dist/assets/49-DHkhcbnu.png                            3,380.64 kB
+apps/world-web build: dist/assets/24-gIzAcN_I.png                            3,387.27 kB
+apps/world-web build: dist/assets/08-5fPGnvHU.png                            3,391.71 kB
+apps/world-web build: dist/assets/06-B_ODDziN.png                            3,395.06 kB
+apps/world-web build: dist/assets/14-yD5J-5GS.png                            3,396.25 kB
+apps/world-web build: dist/assets/35-BEZN6xAc.png                            3,399.72 kB
+apps/world-web build: dist/assets/east-DponFHmE.png                          3,409.43 kB
+apps/world-web build: dist/assets/58-B5EYG6W1.png                            3,415.49 kB
+apps/world-web build: dist/assets/27-Cfb5l1wx.png                            3,420.20 kB
+apps/world-web build: dist/assets/63-DRx9eFN-.png                            3,423.66 kB
+apps/world-web build: dist/assets/57-CmyO6hku.png                            3,427.91 kB
+apps/world-web build: dist/assets/19-xKu1Ee3k.png                            3,439.04 kB
+apps/world-web build: dist/assets/09-DYIk5WE7.png                            3,449.55 kB
+apps/world-web build: dist/assets/64-DF3MKYmL.png                            3,463.84 kB
+apps/world-web build: dist/assets/11-RB4jnnJS.png                            3,466.57 kB
+apps/world-web build: dist/assets/05-RMKZafJI.png                            3,468.07 kB
+apps/world-web build: dist/assets/43-hEk75Dup.png                            3,476.86 kB
+apps/world-web build: dist/assets/28-Ca1tvzGr.png                            3,480.28 kB
+apps/world-web build: dist/assets/15-C53IotPS.png                            3,484.94 kB
+apps/world-web build: dist/assets/31-BJFt6w6C.png                            3,501.04 kB
+apps/world-web build: dist/assets/northwest-DHVy-ePk.png                     3,501.90 kB
+apps/world-web build: dist/assets/04-DpW3riQF.png                            3,502.53 kB
+apps/world-web build: dist/assets/30-CnxmK40Y.png                            3,518.21 kB
+apps/world-web build: dist/assets/34-D8cpEcWZ.png                            3,522.92 kB
+apps/world-web build: dist/assets/45-DvRjtatb.png                            3,558.30 kB
+apps/world-web build: dist/assets/41-C6or4e73.png                            3,564.52 kB
+apps/world-web build: dist/assets/21-9qtxqP5b.png                            3,572.15 kB
+apps/world-web build: dist/assets/47-IiEF6VL-.png                            3,604.54 kB
+apps/world-web build: dist/assets/main-B90QIcXM.css                              2.94 kB │ gzip:     1.09 kB
+apps/world-web build: dist/assets/ContinentExplorer-m1uq3r3D.css                 4.63 kB │ gzip:     1.48 kB
+apps/world-web build: dist/assets/LegacyFictionalWorldMap-CBJUCK6Y.css           8.28 kB │ gzip:     2.46 kB
+apps/world-web build: dist/assets/FictionalWorldMap-iTctUedy.css                12.23 kB │ gzip:     3.49 kB
+apps/world-web build: dist/assets/WorldExplorer-0GWCKuRM.css                    14.60 kB │ gzip:     3.87 kB
+apps/world-web build: dist/assets/main-BLVKFgOo.css                            191.29 kB │ gzip:    28.51 kB
+apps/world-web build: dist/assets/asterra-satellite-terrain-v8-BiNz6I4U.js       0.07 kB │ gzip:     0.08 kB
+apps/world-web build: dist/assets/continent-layout-Bz2iRLVF.js                   1.06 kB │ gzip:     0.64 kB
+apps/world-web build: dist/assets/ContinentExplorer-gehdLauA.js                  4.39 kB │ gzip:     1.89 kB
+apps/world-web build: dist/assets/main-CcRs1ufX.js                              26.91 kB │ gzip:    10.94 kB
+apps/world-web build: dist/assets/local-authorized-read-CTF_aFnO.js             28.77 kB │ gzip:     8.24 kB
+apps/world-web build: dist/assets/LegacyFictionalWorldMap-CeENemlA.js           46.86 kB │ gzip:    13.74 kB
+apps/world-web build: dist/country-runtime-entry.js                             63.27 kB │ gzip:    18.91 kB
+apps/world-web build: dist/assets/WorldExplorer-C3zOZXs5.js                     92.38 kB │ gzip:    27.94 kB
+apps/world-web build: dist/assets/main-BL8AYabv.js                             187.65 kB │ gzip:    47.10 kB
+apps/world-web build: dist/assets/preload-helper-A2lDP9aK.js                   191.47 kB │ gzip:    60.34 kB
+apps/world-web build: dist/assets/geographic-scenario-DdjBYvFC.js            1,163.64 kB │ gzip:   178.51 kB
+apps/world-web build: dist/assets/display-layers-DaCiAOfT.js                 1,475.53 kB │ gzip:   272.74 kB
+apps/world-web build: dist/assets/FictionalWorldMap-CVVzzQQH.js              7,185.54 kB │ gzip: 1,922.48 kB
+apps/world-web build:
+apps/world-web build: ✓ built in 1.30s
+apps/world-web build: {"status":"PASS","copiedMapAssets":140}
+apps/world-web build: {"officialSourceRead":"NOT_CONFIGURED","liveWorldState":false}
+packages/core build: Done
+apps/world-worker build$ tsc -p tsconfig.build.json
+apps/world-web build: {"status":"PASS","files":203,"images":160,"support":43,"countries":70,"countryAssociatedFiles":140,"totalBytes":302234965,"liveWorldState":false,"deploymentVerified":false,"staticOutputFiles":741,"staticOutputBytes":937643996,"staticOutputBudgetBytes":1000000000,"staticOutputRemainingBytes":62356004}
+apps/world-web build: Done
+apps/world-worker build: Done
+apps/world-api build$ tsc -p tsconfig.build.json
+apps/world-api build: Done
