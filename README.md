@@ -17,9 +17,12 @@ B source approval, all applicable checks and the actual complete check succeeded
 [Full-check artifact and merge receipt](docs/reports/world-connection/O_PR118_FULL_CHECK_MAIN_RECEIPT_2026_10_09.md).
 Historical failures and runner-capacity cancellation below remain recorded.
 
-The new private opening-byte preflight, explicit nonactivated API composition and
-trusted browser-session wiring are fixed source candidates pending independent
-review and their own integration checks. Missing inputs remain blocked; formal
+The private opening-byte preflight, explicit nonactivated API composition and
+trusted browser-session wiring are now normally merged in PR125 as
+`56cdcfa9573464c64c7368571dea7c6abb8ffa24`. B/E/F approved their fixed scopes;
+final trusted/atlas CI passed, and main matches the candidate's complete tree.
+[Source merge receipt and exact opening-package connection points](docs/reports/world-connection/O_OPENING_INTERFACE_SOURCE_MERGE_2026_10_09.md).
+Missing inputs remain blocked; formal
 LC/FX/complete central-bank producer contracts are still absent. These interfaces
 do not invent source values, grant seats, publish schema, admit a seed, mount a
 production host or start an external Worker. The engine remains NOT_ACTIVATED
