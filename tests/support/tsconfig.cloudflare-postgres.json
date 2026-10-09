@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["node", "vitest/globals"],
+    "lib": ["ES2024", "DOM"]
+  },
+  "include": [
+    "../../artifacts/world-runtime-postgres/workerd-env.d.ts",
+    "cloudflare-postgres-workerd-fixture.ts",
+    "../world-api/cloudflare-postgres-pools.test.ts",
+    "../integration/cloudflare-postgres-command-roundtrip.test.ts"
+  ]
+}

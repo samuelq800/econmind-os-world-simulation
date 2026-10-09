@@ -486,6 +486,11 @@ export async function createOAuthenticatedFinancialRoundtripFixture() {
       roles,
       root,
       port,
+      // Public ephemeral test material only. The private signing key and all
+      // disposable setup privileges stay in this Node fixture.
+      token,
+      auth,
+      admittedWorldPins,
       publish,
       call,
       staged,

@@ -14,6 +14,11 @@ on:
       - scripts/boundary-rules.mjs
       - tests/architecture/boundaries.test.ts
       - tests/world-api/cloudflare-jwks-verifier.test.ts
+      - tests/world-api/cloudflare-postgres-pools.test.ts
+      - tests/integration/cloudflare-postgres-command-roundtrip.test.ts
+      - tests/support/cloudflare-postgres-*
+      - tests/support/o-authenticated-financial-roundtrip-fixture.ts
+      - tests/support/tsconfig.cloudflare-postgres.json
       - tests/world-api/runtime-environment-hold.test.ts
       - tests/support/cloudflare-jwks-workerd-fixture.ts
       - tests/support/tsconfig.runtime-environment-hold.json
@@ -97,6 +102,24 @@ jobs:
         env:
           O_NATIVE_AUTHENTICATED_ROUNDTRIP: '1'
         run: pnpm exec vitest run tests/integration/o-authenticated-financial-roundtrip-postgres.test.ts --reporter=json --outputFile=native-authenticated-roundtrip.json
+      - name: Install pinned Workers CLI in an isolated tool directory
+        run: |
+          mkdir -p "$RUNNER_TEMP/world-cloudflare-tools"
+          npm install --prefix "$RUNNER_TEMP/world-cloudflare-tools" --no-audit --no-fund wrangler@4.148.0
+          echo "WORLD_CLOUDFLARE_TOOL_ROOT=$RUNNER_TEMP/world-cloudflare-tools" >> "$GITHUB_ENV"
+      - name: Generate actual workerd bindings and check connection source/types
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          mkdir -p artifacts/world-runtime-postgres
+          "$WORLD_CLOUDFLARE_TOOL_ROOT/node_modules/.bin/wrangler" types artifacts/world-runtime-postgres/workerd-env.d.ts --env-interface CloudflarePostgresTestEnv --config tests/support/cloudflare-postgres-test.wrangler.jsonc --strict-vars false
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.cloudflare-postgres.json
+          pnpm exec vitest run tests/world-api/cloudflare-postgres-pools.test.ts
+      - name: Actual workerd to native PostgreSQL economic mechanism roundtrip
+        env:
+          O_WORKERD_POSTGRES_ROUNDTRIP: '1'
+          WRANGLER_SEND_METRICS: 'false'
+        run: pnpm exec vitest run tests/integration/cloudflare-postgres-command-roundtrip.test.ts --reporter=json --outputFile=workerd-postgres-roundtrip.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -104,4 +127,5 @@ jobs:
           path: |
             official-pnpm-check.log
             native-authenticated-roundtrip.json
+            workerd-postgres-roundtrip.json
           if-no-files-found: error
