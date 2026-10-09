@@ -203,7 +203,11 @@ describe.skipIf(process.env.O_WORKERD_POSTGRES_ROUNDTRIP !== '1')(
           return (await response.json()) as {
             step: {
               status: string;
-              receipt?: { outcome: string; worldVersionAfter: string };
+              receipt?: {
+                outcome: string;
+                worldVersionAfter: string;
+                simTime: string;
+              };
             };
             worldVersion: string;
             financial: Array<{
@@ -218,7 +222,11 @@ describe.skipIf(process.env.O_WORKERD_POSTGRES_ROUNDTRIP !== '1')(
         };
         expect((await consume('10000')).step).toMatchObject({
           status: 'PROCESSED',
-          receipt: { outcome: 'COMMITTED', worldVersionAfter: '1' },
+          receipt: {
+            outcome: 'COMMITTED',
+            worldVersionAfter: '1',
+            simTime: '10000',
+          },
         });
         function automatic(kind: 'SHIP' | 'DELIVERY'): CanonicalCommand {
           const destination = f.c.original.inventoryAccounts.buyerAvailable;
@@ -276,7 +284,11 @@ describe.skipIf(process.env.O_WORKERD_POSTGRES_ROUNDTRIP !== '1')(
         const delivered = await consume('10200');
         expect(delivered.step).toMatchObject({
           status: 'PROCESSED',
-          receipt: { outcome: 'COMMITTED', worldVersionAfter: '3' },
+          receipt: {
+            outcome: 'COMMITTED',
+            worldVersionAfter: '3',
+            simTime: '10200',
+          },
         });
         expect(
           delivered.financial.find(

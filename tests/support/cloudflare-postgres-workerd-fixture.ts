@@ -71,7 +71,16 @@ export function createCloudflarePostgresTestFixture(config: FixtureConfig) {
           await host.startIsolation();
           const result = await host.consumeOnce();
           return Response.json({
-            step: result.step,
+            step:
+              result.step.status === 'PROCESSED'
+                ? {
+                    ...result.step,
+                    receipt: {
+                      ...result.step.receipt,
+                      simTime: result.step.receipt.simTime.toCanonicalValue(),
+                    },
+                  }
+                : result.step,
             worldVersion: result.readback.headWorldVersion,
             financial: result.readback.ledgers.financial.positions.map((p) => ({
               accountId: p.account.accountId,
