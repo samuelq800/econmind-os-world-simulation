@@ -5,20 +5,30 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Runtime preparation update (2026-10-09)
+## Current window closeout (2026-10-09)
+
+[A–G、运行准备与六职位视觉收官回执](docs/reports/world-connection/O_WINDOW_SOURCE_CLOSEOUT_2026_10_09.md).
+本轮各窗口交付已收齐。PR124 的完整固定源码范围经独立审查后正常合并为
+`2fd51eac0930661511dc1076209df267ee58f6b5`；PR127 的六职位共用视觉及来源记录
+经独审、最终组合 CI 后正常合并为 `1222e66ba99aa7ab808793ae7078f4b7a344af04`。
+对应 Pages `37931924371` 已成功，正式域名 CSS 字节与批准原件一致。
+六职位视觉覆盖共120模块，不等于六职位经济功能、420在线视图或正式开局验收。
+本轮没有生产写库、seed/admission、经济/Clock 启动或 Gate B 状态变更。
+
+## Retained runtime preparation checkpoint (2026-10-09)
 
 [Cloudflare 运行环境交接（中文）](docs/CLOUDFLARE_RUNTIME_HANDOFF.zh-CN.md)：API 与内部
 executor 的 HOLD 部署入口、共用 Supabase 目标、无账号本机/CI验证，以及负责人发布边界。
-本次 HOLD 候选已通过 P0 独立审查并发布两个运行服务，15项真实云端检查通过。
-生产数据库尚未连接，经济世界未启动；批准范围不覆盖整个 PR124 的合并。
-PR118 的源码合并不等于生产迁移发布。
+原 HOLD 候选交接记录了两个运行服务与15项真实云端检查；本轮收官未重部署或重跑这些检查。
+原 HOLD 审查仅覆盖其固定范围；后续 PR124 整包审查与源码合并见上方最新回执。
+生产数据库尚未连接，经济世界未启动；PR118 的源码合并不等于生产迁移发布。
 
-## Current collaborator handoff (2026-10-08)
+## Retained collaborator handoff (2026-10-08)
 
 [当前版本说明与协作交接（中文）](docs/HANDOFF_CURRENT.zh-CN.md)：包含同步分支、代码入口、
 本地检查、实际发布状态与剩余阻塞。同伴负责仓库代码和测试，不操作 Cloudflare；
-Cloudflare 发布由项目负责人负责。PR124 的交付分支在本文记录时尚未合入 main，
-只拉取 main 不会取得该分支的完整变更。下列历史 checkpoint 保留各自的证据范围。
+Cloudflare 发布由项目负责人负责。该历史交接记录时 PR124 尚未合入；现已正常合并，
+更新 main 可取得已批准源码。下列历史 checkpoint 保留各自的证据范围。
 
 ## Current opening-interface preparation (2026-10-09)
 
