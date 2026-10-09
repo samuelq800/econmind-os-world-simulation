@@ -7,6 +7,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { probePublicRuntimeEndpoint } from '../support/public-runtime-http-probe.js';
+
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -139,12 +141,7 @@ async function waitUntil<T>(
 
 async function waitForHttp(port: number) {
   return waitUntil(
-    async () => {
-      const response = await fetch(`http://127.0.0.1:${port}/readyz`, {
-        cache: 'no-store',
-      });
-      return response.ok ? response : undefined;
-    },
+    () => probePublicRuntimeEndpoint(port, '/readyz'),
     15_000,
     `readiness on port ${port}`,
   );
@@ -152,11 +149,7 @@ async function waitForHttp(port: number) {
 
 async function endpointIsReachable(port: number) {
   try {
-    const response = await fetch(`http://127.0.0.1:${port}/healthz`, {
-      cache: 'no-store',
-      signal: AbortSignal.timeout(250),
-    });
-    return response.ok;
+    return await probePublicRuntimeEndpoint(port, '/healthz');
   } catch {
     return false;
   }
@@ -214,8 +207,8 @@ async function readProcessTable(): Promise<ProcessRow[]> {
         ppid: Number(match[2]),
         pgid: Number(match[3]),
         session: Number(match[4]),
-        state: match[5],
-        command: match[6],
+        state: match[5]!,
+        command: match[6]!,
       } satisfies ProcessRow;
     })
     .filter((row): row is ProcessRow => row !== undefined);
@@ -461,7 +454,7 @@ async function failedBuildAttack(service: ServiceDefinition) {
 }
 
 async function unexpectedRuntimeSignalAttack() {
-  const service = services[0];
+  const service = services[0]!;
   const port = await freePort();
   const managed = startPublicCommand(service, port);
   let captured: ProcessRow[] = [];
@@ -490,7 +483,9 @@ describe.skipIf(process.platform === 'win32')(
   () => {
     it.each(
       services.flatMap((service) =>
-        (['SIGINT', 'SIGTERM'] as const).map((signal) => [service, signal]),
+        (['SIGINT', 'SIGTERM'] as const).map(
+          (signal) => [service, signal] as const,
+        ),
       ),
     )(
       'stops every descendant and releases the listener for $0.command $1',

@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "rootDir": "../..",
+    "allowJs": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "./production-schema-fixture.ts",
+    "../world-core/production-posting-schema.test.ts"
+  ]
+}

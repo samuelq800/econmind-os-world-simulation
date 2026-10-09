@@ -30,6 +30,18 @@ on:
       - tests/world-api/tsconfig.https-office-command-route.json
       - tests/support/g-office-route-test-only-fixture.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
+      - database/migrations/**
+      - scripts/migration-policy.mjs
+      - scripts/rehearse-migrations.mjs
+      - tests/world-core/production-posting-schema.test.ts
+      - tests/foundation/snapshot-storage-migration-policy.test.ts
+      - tests/foundation/migration-rehearsal-filtered-provenance.test.mjs
+      - tests/foundation/public-runtime-lifecycle.test.ts
+      - tests/integration/v10-1-country-office-read-flow.test.ts
+      - tests/support/tsconfig.country-office-committed-fixture.json
+      - tests/foundation/public-runtime-http-probe.test.ts
+      - tests/support/public-runtime-http-probe.ts
+      - tests/support/tsconfig.public-runtime-http-probe.json
       - apps/world-worker/src/admission/**
       - tests/world-core/official-opening-admission-publication.test.ts
       - tests/support/tsconfig.official-opening-admission-publication.json
@@ -91,6 +103,18 @@ on:
       - tests/world-api/tsconfig.https-office-command-route.json
       - tests/support/g-office-route-test-only-fixture.ts
       - apps/world-worker/src/persistence/captain-political-capital-candidate-source.ts
+      - database/migrations/**
+      - scripts/migration-policy.mjs
+      - scripts/rehearse-migrations.mjs
+      - tests/world-core/production-posting-schema.test.ts
+      - tests/foundation/snapshot-storage-migration-policy.test.ts
+      - tests/foundation/migration-rehearsal-filtered-provenance.test.mjs
+      - tests/foundation/public-runtime-lifecycle.test.ts
+      - tests/integration/v10-1-country-office-read-flow.test.ts
+      - tests/support/tsconfig.country-office-committed-fixture.json
+      - tests/foundation/public-runtime-http-probe.test.ts
+      - tests/support/public-runtime-http-probe.ts
+      - tests/support/tsconfig.public-runtime-http-probe.json
       - apps/world-worker/src/admission/**
       - tests/world-core/official-opening-admission-publication.test.ts
       - tests/support/tsconfig.official-opening-admission-publication.json
@@ -153,6 +177,20 @@ jobs:
         run: pnpm exec vitest run --reporter=verbose tests/world-web/current-financial-position.test.ts tests/world-web/economic-visibility-consumer.test.ts tests/world-api/financial-position-read-binding.test.ts tests/integration/staged-narrow-transfer-http.test.ts tests/integration/world-api-authenticated-read-boundary.test.ts
       - name: Source-blocked manual command and Captain preparation regressions
         run: pnpm exec vitest run --reporter=verbose tests/world-api/authenticated-office-command.test.ts tests/world-core/captain-runtime-source-adapter.test.ts tests/world-core/captain-political-capital-slice.test.ts
+      - name: Exact reviewed schema and immutable provenance regressions (ephemeral only)
+        run: |
+          pnpm migration:validate
+          node --test tests/foundation/migration-rehearsal-filtered-provenance.test.mjs
+          pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/production-posting-schema.test.ts tests/foundation/snapshot-storage-migration-policy.test.ts
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.f-production-schema.json
+      - name: Owned lifecycle HTTP cleanup and strict original test types
+        run: |
+          pnpm exec vitest run --reporter=verbose tests/foundation/public-runtime-http-probe.test.ts
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.public-runtime-http-probe.json
+      - name: Committed Country and Office source evidence without weakened authorization
+        run: |
+          pnpm exec vitest run --reporter=verbose tests/integration/v10-1-country-office-read-flow.test.ts
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.country-office-committed-fixture.json
       - name: Conditional positive manual SQL intake and queue acknowledgement
         run: |
           pnpm exec vitest run --reporter=verbose tests/world-api/positive-manual-office-command.test.ts
