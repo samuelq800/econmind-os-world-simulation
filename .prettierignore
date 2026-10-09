@@ -43,3 +43,4 @@ tests/fixtures/physical-opening/owner-non-host-decisions-20261007.md
 # Generated diagnostic exports preserve their own recorded bytes/checksums.
 artifacts/world-seed-delivery-v1/
 .seed-validation/
+artifacts/world-runtime-environment-2026-10-09/

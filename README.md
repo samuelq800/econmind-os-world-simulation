@@ -5,6 +5,13 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
+## Runtime preparation update (2026-10-09)
+
+[Cloudflare 运行环境交接（中文）](docs/CLOUDFLARE_RUNTIME_HANDOFF.zh-CN.md)：API 与内部
+executor 的 HOLD 部署入口、共用 Supabase 目标、无账号本机/CI验证，以及负责人发布边界。
+本次候选待 P0 独立审查，尚未发布两个运行服务，未连接生产数据库或启动经济世界。
+PR118 的源码合并不等于生产迁移发布。
+
 ## Current collaborator handoff (2026-10-08)
 
 [当前版本说明与协作交接（中文）](docs/HANDOFF_CURRENT.zh-CN.md)：包含同步分支、代码入口、

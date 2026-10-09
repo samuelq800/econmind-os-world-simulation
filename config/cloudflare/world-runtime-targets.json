@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "WORLD_RUNTIME_TARGET_INVENTORY_V1",
+  "recordedOn": "2026-10-09",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "authority": "Inventory only; does not approve architecture, migration, admission or economic activation",
+  "cloudflare": {
+    "plan": "Workers Free",
+    "planEvidence": "Direct user confirmation in this task; billing API unavailable",
+    "api": {
+      "name": "econmind-world-api-staging",
+      "config": "config/cloudflare/world-runtime-api.wrangler.jsonc",
+      "publication": "NOT_DEPLOYED",
+      "workersDev": true,
+      "mode": "HOLD"
+    },
+    "executor": {
+      "name": "econmind-world-executor-staging",
+      "config": "config/cloudflare/world-runtime-executor.wrangler.jsonc",
+      "publication": "NOT_DEPLOYED",
+      "workersDev": false,
+      "reachableVia": "API WORLD_EXECUTOR service binding only",
+      "mode": "HOLD"
+    },
+    "existingPublicReader": {
+      "name": "econmind-world-read",
+      "url": "https://econmind-world-read.observer-lagesan.workers.dev/functions/v1/world-v2-official-read/v1/world-data/datasets",
+      "publication": "PREVIOUSLY_DEPLOYED",
+      "versionId": "7c90b4bc-6886-4cff-8c76-bb6e19f66417",
+      "liveWorldState": false
+    },
+    "paidResourcesCreated": false,
+    "cronQueueOrAutomaticConsumerConfigured": false,
+    "databaseBindingConfigured": false
+  },
+  "supabase": {
+    "purpose": "Shared main-repository production integration target",
+    "projectRef": "vimksjrhaxdpnkvgsavz",
+    "projectEvidence": "Repository configuration and direct user confirmation of shared Supabase",
+    "issuer": "https://vimksjrhaxdpnkvgsavz.supabase.co/auth/v1",
+    "jwksUrl": "https://vimksjrhaxdpnkvgsavz.supabase.co/auth/v1/.well-known/jwks.json",
+    "audience": "authenticated",
+    "publicJwksObservation": {
+      "result": "PASS_PUBLIC_READ_ONLY",
+      "keys": 1,
+      "algorithms": ["ES256"],
+      "sha256": "f6d19fd8e3c47695887fb254c83750467d4c1e292a5a88f01563b03116d6d7ad"
+    },
+    "actualUserJwt": "NOT_RUN",
+    "productionDatabaseConnection": "NOT_RUN",
+    "productionRolesAndSchema": "NOT_VERIFIED",
+    "sourceMigration0023": "MERGED_IN_MAIN_NOT_PRODUCTION_PUBLICATION_EVIDENCE",
+    "publicationOwner": "Main repository approved migration release chain",
+    "productionWritesPerformed": false,
+    "isolatedCloudStagingDatabase": "NONE_CONFIRMED_BY_USER"
+  },
+  "activation": {
+    "runtimeReady": false,
+    "authoritativeCommandsEnabled": false,
+    "writerLeaseAcquired": false,
+    "openingPublished": false,
+    "clockEnabled": false,
+    "simulationEnabled": false,
+    "independentReview": "PENDING",
+    "governanceGateAdvanced": false
+  }
+}

@@ -2,7 +2,6 @@ import {
   constants,
   createPublicKey,
   verify as cryptoVerify,
-  type KeyObject,
 } from 'node:crypto';
 import type { JwtSignatureVerifier } from './identity.js';
 
@@ -20,7 +19,7 @@ export const SUPABASE_JWKS_LIMITS = Object.freeze({
 type Algorithm = 'ES256' | 'RS256';
 interface VerificationKey {
   readonly alg: Algorithm;
-  readonly key: KeyObject;
+  readonly key: string | Buffer;
   readonly signatureBytes: number;
 }
 type Keys = ReadonlyMap<string, VerificationKey>;
@@ -165,7 +164,14 @@ function publicKeys(value: Record<string, unknown>): Keys {
           (key.asymmetricKeyDetails?.modulusLength ?? 0) > 4096))
     )
       failure();
-    keys.set(id, { alg, key, signatureBytes });
+    // Cache only the already validated public SPKI. Workers' Node crypto can
+    // reject a KeyObject nested in verify options; PEM is accepted by Node and
+    // workerd without relaxing algorithm/curve/modulus/signature checks.
+    keys.set(id, {
+      alg,
+      key: key.export({ type: 'spki', format: 'pem' }),
+      signatureBytes,
+    });
   }
   return keys;
 }

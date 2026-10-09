@@ -18,3 +18,4 @@ supabase/.temp/
 /artifacts/world-seed-delivery-v1/
 /.seed-validation/
 **/.wrangler/
+/artifacts/world-runtime-environment-2026-10-09/

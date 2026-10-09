@@ -66,6 +66,16 @@ not created in V00.1 because they would imply capabilities that do not exist.
 
 ## Enforced checks
 
+### Cloudflare nonactivated hosting bridge
+
+Only the exact WORLD_API source `apps/world-api/cloudflare/runtime-api.mjs`
+may import the platform builtin `cloudflare:node` to adapt the existing Node
+HTTP transport. This is a server-only hosting edge, not a browser/shared export,
+database binding or grant of economic authority. Other `cloudflare:*` imports,
+including imports from web, Core, other API files and Worker files, remain denied.
+The bridge mounts the reviewed Office adapter with composition=null. Health
+does not imply readiness, admission, authorization, lease acquisition or Clock.
+
 `pnpm test:boundaries` statically scans current web and future core source roots.
 Vitest includes negative fixtures proving the rules detect forbidden imports.
 These are foundation guardrails; they do not replace later dependency graph,
