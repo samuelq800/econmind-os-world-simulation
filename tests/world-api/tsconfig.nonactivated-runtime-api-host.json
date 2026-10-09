@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.authenticated-office-command.json",
+  "include": [
+    "nonactivated-runtime-api-host.test.ts",
+    "../support/g-runtime-api-host-test-only-fixture.ts"
+  ]
+}
