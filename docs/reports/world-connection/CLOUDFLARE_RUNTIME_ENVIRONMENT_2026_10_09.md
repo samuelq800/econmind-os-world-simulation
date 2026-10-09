@@ -1,5 +1,9 @@
 # Cloudflare 运行环境准备交付
 
+这是发布前的候选及证据快照。后续已完成该候选的独立审查和 HOLD 托管发布，
+最新结果见 [实际部署记录](CLOUDFLARE_RUNTIME_DEPLOYMENT_2026_10_09.md)。下文的
+PENDING/尚未发布描述保留其当时的证据范围；生产经济接入仍未完成。
+
 实现候选：`e7ecf45184baad69a37e2e51fff8862a635267dc`，基线
 `812e8ae95f83c8c8bd6811ccffa21217561ea8cf`，main 来源为已合并 PR118
 `3eb6e049d02a76e010cb5cb449d6d7151ae63573`。源码位于 PR124 的交付分支。

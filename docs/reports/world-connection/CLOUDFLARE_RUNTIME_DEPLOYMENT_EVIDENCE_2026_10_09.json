@@ -1,0 +1,293 @@
+{
+  "schema_version": "WORLD_RUNTIME_DEPLOYMENT_V1",
+  "recorded_at": "2026-10-09T07:01:33.067Z",
+  "display_timezone": "Asia/Shanghai",
+  "result": "PASS",
+  "status_scope": "Reviewed HOLD hosting publication only; no R2 gate, production DB or economic activation",
+  "source_commit": "e7ecf45184baad69a37e2e51fff8862a635267dc",
+  "deployment_source_head": "02c4695f36063047b2ba34c99d1397b6f271c453",
+  "source_delta_since_review": "NONE_FOR_DEPLOYABLE_SOURCE",
+  "review": {
+    "decision": "APPROVED",
+    "method": "INDEPENDENT_REVIEW",
+    "file": "docs/reports/world-connection/CLOUDFLARE_RUNTIME_INDEPENDENT_REVIEW_2026_10_09.md",
+    "sha256": "621e9e7f574424a5e613b9ccb4babc65071517e911a57ad4caac0808b7c129b8",
+    "risk_class": "P0",
+    "entire_pr124_merge_approved": false
+  },
+  "versions": {
+    "api": {
+      "id": "dc5c245d-efc2-4905-a47d-4e7a75ea0902",
+      "name": "econmind-world-api-staging",
+      "created_on": "2026-10-09T06:57:29.885956Z",
+      "startup_ms": 22,
+      "url": "https://econmind-world-api-staging.observer-lagesan.workers.dev",
+      "deployment_id": "2dd17f89-17c1-4a9d-b484-5f31a110c9f3",
+      "percentage": 100,
+      "runtime": {
+        "compatibility_date": "2026-10-09",
+        "compatibility_flags": ["nodejs_compat"],
+        "usage_model": "standard"
+      },
+      "bindings": [
+        {
+          "name": "RUNTIME_MODE",
+          "text": "HOLD",
+          "type": "plain_text"
+        },
+        {
+          "environment": "production",
+          "name": "WORLD_EXECUTOR",
+          "service": "econmind-world-executor-staging",
+          "type": "service"
+        }
+      ],
+      "subdomain": {
+        "enabled": true,
+        "previews_enabled": false
+      },
+      "bundle_sha256": "b7a07ec01d2f67818ee0753246eddf611543e7480e28c828f108018a2bb209d4"
+    },
+    "executor": {
+      "id": "69f347ce-ee0e-45a2-97cf-84e4fe7984bb",
+      "name": "econmind-world-executor-staging",
+      "created_on": "2026-10-09T06:57:18.47693Z",
+      "startup_ms": 1,
+      "deployment_id": "182f470b-9814-46af-924a-9d2764da43d1",
+      "percentage": 100,
+      "runtime": {
+        "compatibility_date": "2026-10-09",
+        "compatibility_flags": ["nodejs_compat"],
+        "usage_model": "standard"
+      },
+      "bindings": [
+        {
+          "name": "RUNTIME_MODE",
+          "text": "HOLD",
+          "type": "plain_text"
+        }
+      ],
+      "subdomain": {
+        "enabled": false,
+        "previews_enabled": false
+      },
+      "bundle_sha256": "37e92b7229786e61f5b57acfc4c8cbb96b739ac3198a522b98dd688fab0468b9"
+    }
+  },
+  "commands": [
+    {
+      "command": "wrangler deploy --env staging --config config/cloudflare/world-runtime-executor.wrangler.jsonc",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "wrangler deploy --env staging --config config/cloudflare/world-runtime-api.wrangler.jsonc",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node artifacts/world-runtime-environment-2026-10-09/probe-cloud-runtime.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "checks": 15
+    },
+    {
+      "command": "wrangler versions view [both version IDs] --env staging --config [respective configs] --json; wrangler deployments list [respective configs] --json",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "Cloudflare GET workers/scripts/[each name]/subdomain with existing OAuth",
+      "exit_code": 0,
+      "result": "PASS",
+      "scope": "read-only; credentials never exported"
+    }
+  ],
+  "probes": {
+    "schemaVersion": "WORLD_RUNTIME_CLOUD_PROBE_V1",
+    "observedAt": "2026-10-09T06:57:56.891Z",
+    "base": "https://econmind-world-api-staging.observer-lagesan.workers.dev",
+    "scope": "ACTUAL_DEPLOYED_HOLD_HTTP_NO_REAL_JWT_OR_DATABASE_OR_ECONOMIC_ACTIVATION",
+    "sourceCommit": "e7ecf45184baad69a37e2e51fff8862a635267dc",
+    "checks": [
+      {
+        "name": "health",
+        "method": "GET",
+        "route": "/healthz",
+        "status": 200,
+        "expected": 200,
+        "result": "PASS"
+      },
+      {
+        "name": "health-head",
+        "method": "HEAD",
+        "route": "/healthz",
+        "status": 200,
+        "expected": 200,
+        "result": "PASS"
+      },
+      {
+        "name": "ready",
+        "method": "GET",
+        "route": "/readyz",
+        "status": 503,
+        "expected": 503,
+        "result": "PASS"
+      },
+      {
+        "name": "ready-head",
+        "method": "HEAD",
+        "route": "/readyz",
+        "status": 503,
+        "expected": 503,
+        "result": "PASS"
+      },
+      {
+        "name": "office-preflight",
+        "method": "OPTIONS",
+        "route": "/v1/office-command",
+        "status": 204,
+        "expected": 204,
+        "result": "PASS"
+      },
+      {
+        "name": "office-hold",
+        "method": "POST",
+        "route": "/v1/office-command",
+        "status": 503,
+        "expected": 503,
+        "result": "PASS"
+      },
+      {
+        "name": "office-no-bearer",
+        "method": "POST",
+        "route": "/v1/office-command",
+        "status": 401,
+        "expected": 401,
+        "result": "PASS"
+      },
+      {
+        "name": "office-origin-denied",
+        "method": "POST",
+        "route": "/v1/office-command",
+        "status": 403,
+        "expected": 403,
+        "result": "PASS"
+      },
+      {
+        "name": "office-cookie-denied",
+        "method": "POST",
+        "route": "/v1/office-command",
+        "status": 403,
+        "expected": 403,
+        "result": "PASS"
+      },
+      {
+        "name": "office-body-limit",
+        "method": "POST",
+        "route": "/v1/office-command",
+        "status": 413,
+        "expected": 413,
+        "result": "PASS"
+      },
+      {
+        "name": "denied-tick",
+        "method": "POST",
+        "route": "/tick",
+        "status": 405,
+        "expected": 405,
+        "result": "PASS"
+      },
+      {
+        "name": "denied-seed",
+        "method": "POST",
+        "route": "/seed",
+        "status": 405,
+        "expected": 405,
+        "result": "PASS"
+      },
+      {
+        "name": "denied-open",
+        "method": "POST",
+        "route": "/open",
+        "status": 405,
+        "expected": 405,
+        "result": "PASS"
+      },
+      {
+        "name": "denied-lease",
+        "method": "POST",
+        "route": "/lease",
+        "status": 405,
+        "expected": 405,
+        "result": "PASS"
+      },
+      {
+        "name": "denied-dispatch",
+        "method": "POST",
+        "route": "/dispatch",
+        "status": 405,
+        "expected": 405,
+        "result": "PASS"
+      }
+    ],
+    "result": "PASS"
+  },
+  "local_startup_profile": {
+    "result": "PASS",
+    "scope": "Local profile only, not cloud CPU guarantee",
+    "profile_window_ms": 63.8,
+    "sampled_time_ms": 63.5,
+    "active_ms": 39.3,
+    "idle_ms": 24.3,
+    "command": "wrangler check startup --workerBundle [dry-run --outfile multipart bundle] --config config/cloudflare/world-runtime-api.wrangler.jsonc --env staging --outfile [local cpuprofile]",
+    "initial_cli_failures": [
+      {
+        "result": "FAIL",
+        "reason": "check startup internal dry-run omitted config; monorepo root detection error"
+      },
+      {
+        "result": "FAIL",
+        "reason": "workerBundle expects multipart outfile, not the JS outdir file"
+      }
+    ],
+    "remediation": "Use deploy --dry-run --outfile to create the correct multipart input; corrected profiler exit0"
+  },
+  "mutation_scope": {
+    "cloudflare": "Only reviewed HOLD Worker services and service binding; Workers Free confirmed directly by user",
+    "paid_resources_created": false,
+    "repository_dependency_or_lockfile_change": false,
+    "production_supabase_sql": false,
+    "migrations_published": false,
+    "production_credentials_or_real_jwt_used": false,
+    "opening": false,
+    "clock": false,
+    "writer_lease": false,
+    "automatic_consumer": false,
+    "governance_gate_advanced": false
+  },
+  "legacy_impact": "Existing source-reader deployment and main site unchanged",
+  "unresolved": [
+    "Production Supabase schema/roles/database connection NOT_VERIFIED/NOT_RUN",
+    "Real user JWT and lawful current seats NOT_RUN",
+    "Opening admission, writer lease and economic lifecycle remain gated",
+    "PR124 whole historical merge delta has not been approved; PR stays draft"
+  ],
+  "affected_owners": [
+    "Cloudflare account owner",
+    "world-api identity/transport",
+    "world-worker executor",
+    "architecture boundary owner",
+    "main repository production schema/role owner"
+  ],
+  "delivery_artifact": {
+    "path": "artifacts/world-runtime-environment-2026-10-09/world-runtime-cloudflare-hold-release-v1.zip",
+    "bytes": 743017,
+    "sha256": "add6bb5daa432cee73d856e734364f67ce52fa73ca8d8430140d6b72d505725e",
+    "payload_hashes_verified": 24,
+    "zip_entries_verified": 25,
+    "secrets_scan": "PASS",
+    "test_auth_worker_entry_included": false,
+    "scope": "Reviewed deployed HOLD hosting only"
+  }
+}

@@ -9,7 +9,8 @@ engines or hidden buffs.
 
 [Cloudflare 运行环境交接（中文）](docs/CLOUDFLARE_RUNTIME_HANDOFF.zh-CN.md)：API 与内部
 executor 的 HOLD 部署入口、共用 Supabase 目标、无账号本机/CI验证，以及负责人发布边界。
-本次候选待 P0 独立审查，尚未发布两个运行服务，未连接生产数据库或启动经济世界。
+本次 HOLD 候选已通过 P0 独立审查并发布两个运行服务，15项真实云端检查通过。
+生产数据库尚未连接，经济世界未启动；批准范围不覆盖整个 PR124 的合并。
 PR118 的源码合并不等于生产迁移发布。
 
 ## Current collaborator handoff (2026-10-08)

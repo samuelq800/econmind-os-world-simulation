@@ -1,7 +1,7 @@
 {
   "schemaVersion": "WORLD_RUNTIME_TARGET_INVENTORY_V1",
   "recordedOn": "2026-10-09",
-  "status": "IMPLEMENTED_UNVERIFIED",
+  "status": "VERIFIED",
   "authority": "Inventory only; does not approve architecture, migration, admission or economic activation",
   "cloudflare": {
     "plan": "Workers Free",
@@ -9,17 +9,24 @@
     "api": {
       "name": "econmind-world-api-staging",
       "config": "config/cloudflare/world-runtime-api.wrangler.jsonc",
-      "publication": "NOT_DEPLOYED",
+      "publication": "DEPLOYED_HOLD",
       "workersDev": true,
-      "mode": "HOLD"
+      "mode": "HOLD",
+      "versionId": "dc5c245d-efc2-4905-a47d-4e7a75ea0902",
+      "baseUrl": "https://econmind-world-api-staging.observer-lagesan.workers.dev",
+      "healthUrl": "https://econmind-world-api-staging.observer-lagesan.workers.dev/healthz",
+      "readinessUrl": "https://econmind-world-api-staging.observer-lagesan.workers.dev/readyz",
+      "previewsEnabled": false
     },
     "executor": {
       "name": "econmind-world-executor-staging",
       "config": "config/cloudflare/world-runtime-executor.wrangler.jsonc",
-      "publication": "NOT_DEPLOYED",
+      "publication": "DEPLOYED_HOLD_INTERNAL_ONLY",
       "workersDev": false,
       "reachableVia": "API WORLD_EXECUTOR service binding only",
-      "mode": "HOLD"
+      "mode": "HOLD",
+      "versionId": "69f347ce-ee0e-45a2-97cf-84e4fe7984bb",
+      "previewsEnabled": false
     },
     "existingPublicReader": {
       "name": "econmind-world-read",
@@ -30,7 +37,12 @@
     },
     "paidResourcesCreated": false,
     "cronQueueOrAutomaticConsumerConfigured": false,
-    "databaseBindingConfigured": false
+    "databaseBindingConfigured": false,
+    "cloudProbes": {
+      "result": "PASS",
+      "checks": 15,
+      "record": "docs/reports/world-connection/CLOUDFLARE_RUNTIME_DEPLOYMENT_EVIDENCE_2026_10_09.json"
+    }
   },
   "supabase": {
     "purpose": "Shared main-repository production integration target",
@@ -60,7 +72,16 @@
     "openingPublished": false,
     "clockEnabled": false,
     "simulationEnabled": false,
-    "independentReview": "PENDING",
+    "independentReview": "APPROVED_FOR_HOLD_HOSTING_ONLY",
     "governanceGateAdvanced": false
+  },
+  "statusScope": "Reviewed HOLD hosting implementation and actual publication only; not economic runtime, R2 gate, ADR or production database acceptance",
+  "review": {
+    "decision": "APPROVED",
+    "method": "INDEPENDENT_REVIEW",
+    "reviewedCommit": "e7ecf45184baad69a37e2e51fff8862a635267dc",
+    "baseline": "812e8ae95f83c8c8bd6811ccffa21217561ea8cf",
+    "record": "docs/reports/world-connection/CLOUDFLARE_RUNTIME_INDEPENDENT_REVIEW_2026_10_09.md",
+    "scope": "23-file HOLD candidate delta; not all historical PR124 changes"
   }
 }

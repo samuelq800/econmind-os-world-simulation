@@ -1,14 +1,19 @@
 # Cloudflare 运行环境交接（2026-10-09）
 
 本次交付对应分工中的“运行环境线”。API 和独立执行 Worker 已有可打包的
-Cloudflare 入口，默认固定 HOLD。新增代码触及架构边界和 JWT 验签，因此状态为
-`IMPLEMENTED_UNVERIFIED`，独立审查通过前不能合并或发布本次服务。正式 World
-没有因这次准备工作开局，Clock、命令消费、数据库连接、writer lease 均未启用。
+Cloudflare 入口，默认固定 HOLD。新增代码触及架构边界和 JWT 验签，已由用户授权的
+独立审查代理批准不可变候选 `e7ecf45`，并完成两个 HOLD 服务发布及15项真实云端
+检查。`VERIFIED` 仅适用于这次 HOLD 托管候选；正式 World 没有开局，Clock、
+命令消费、数据库连接、writer lease 均未启用。整个 PR124 仍为 draft，未据此合并。
+
+[独立审查记录](reports/world-connection/CLOUDFLARE_RUNTIME_INDEPENDENT_REVIEW_2026_10_09.md) ·
+[实际部署记录](reports/world-connection/CLOUDFLARE_RUNTIME_DEPLOYMENT_2026_10_09.md)
 
 ## 服务和正式数据库
 
 `config/cloudflare/world-runtime-targets.json` 是无秘密的目标清单，不是批准记录。
-API 的 staging 名称为 `econmind-world-api-staging`，执行 Worker 为
+API 的 staging 名称为 `econmind-world-api-staging`，地址为
+https://econmind-world-api-staging.observer-lagesan.workers.dev；执行 Worker 为
 `econmind-world-executor-staging`。后者不开放 workers.dev，只通过 API 的
 `WORLD_EXECUTOR` 服务绑定访问。`/healthz` 返回200只说明存活；`/readyz` 返回503，
 即使执行 Worker 存活，也不会转为经济系统就绪。现有 Office HTTP 路径保留
@@ -69,9 +74,12 @@ node scripts/check-cloudflare-runtime-local.mjs
 
 ## 后续发布和接入的负责人动作
 
-本次源码和证据需要绑定不可变 commit 的 P0 独立审查；通过后，由拥有 Cloudflare
-权限的负责人先发布 HOLD executor，再发布 HOLD API，记录两个 version ID 和
-实际健康、503就绪及拒绝路径结果。同伴只提交代码，不承担账号操作。
+本次源码和证据已绑定不可变 commit 的 P0 独立审查。账号负责人已先发布 HOLD
+executor，再发布 HOLD API；版本分别为 `69f347ce-ee0e-45a2-97cf-84e4fe7984bb`
+和 `dc5c245d-efc2-4905-a47d-4e7a75ea0902`。实际健康、503就绪、内部绑定、CORS、
+请求体上限及拒绝路径检查通过；两个服务的 preview URL 均关闭，executor 没有
+公共 workers.dev 路由。同伴只提交代码，不承担账号操作。后续改动须重新完成
+相应检查和审查；本次批准不覆盖整个 PR124 的历史合并 delta。
 Workers Free 由用户确认；配置没有付费资源、cron、Queue 或数据库绑定。请求受
 平台免费套餐限制，不作无限可用承诺。
 
