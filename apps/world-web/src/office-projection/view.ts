@@ -200,7 +200,12 @@ export function installOfficeProjection(
       if (key === focused) el.focus();
     }
   }
-  let unsubscribe = controller.subscribe(render);
+  const listeners = new Set<() => void>();
+  function changed() {
+    render();
+    for (const listener of [...listeners]) listener();
+  }
+  let unsubscribe = controller.subscribe(changed);
   function sync() {
     const next = document.querySelector<HTMLElement>('.country-game'),
       view = currentView();
@@ -273,12 +278,17 @@ export function installOfficeProjection(
       controller.disconnect();
       unsubscribe();
       controller = createController(binding, currentView);
-      unsubscribe = controller.subscribe(render);
+      unsubscribe = controller.subscribe(changed);
       render();
       return controller.getState().status;
     },
     disconnect: () => controller.disconnect(),
     getState: () => controller.getState(),
+    /** Stable relay across explicit controller replacement; no new authority. */
+    subscribe(listener: () => void) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
   });
 }
 
