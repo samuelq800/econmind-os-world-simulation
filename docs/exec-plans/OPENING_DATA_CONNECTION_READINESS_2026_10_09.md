@@ -5,8 +5,9 @@ Owner 当前请求：先准备随时接入开局包，该处理的数据接口�
 
 ## 固定起点与实际依赖
 
-- 实际 main：96217db583db4c1bd6ef74714b2e0a5ef6b7ed6d，treef605d1a。
-- PR118 source组合已获B独审，四项检查通过；完整check尚未通过，不能当作main。
+- 本轮施工起点：96217db583db4c1bd6ef74714b2e0a5ef6b7ed6d，treef605d1a。
+- PR118已获B独审及全部适用CI通过，正常合并后的实际main为
+  3eb6e049d02a76e010cb5cb449d6d7151ae63573，tree945c82b；与候选068f885完整tree相同。
 - 完整check的取消原因已通过GitHub实际annotations定位：hosted runner未获得，
   macOS arm64容量不足、没有执行步骤。Root仅恢复该取消job一次，保留旧CANCELLED。
 - 现有read、financial intake、Office command routes各自实现，不等于默认API已mount。
@@ -37,8 +38,16 @@ Root只负责固定组合、CI接线、检查结果与交接记录。独审另�
 consumer守卫，不能通过一个URL/JSON跨进程宣称已接外部Worker。开局旧桥与LC batch
 要求也不能仅把函数串起来就宣布已准备完毕；须用合法真实carrier接口解决。
 
-PR118取消job的单次恢复已取得真实runner并执行原始pnpm check；未改workflow/skip
-或重跑四个已有SUCCESS。旧CANCELLED保留，新attempt独立等待实际结果。
+PR118取消job的单次恢复已执行原始pnpm check并实际SUCCESS；未改workflow/skip。
+完整run37786268839 attempt2的原始artifact已下载，主suite2967PASS/153SKIP/0FAIL；
+另有29与34PASS的子suite，不累加为唯一测试数量。旧CANCELLED与历史FAIL保留。
+native37786268901、trusted37786268875、Storage37786268873及真实PG子jobSUCCESS；
+源码合并不等于生产schema发布或开局。旧PR114已作superseded关闭，未删分支。
+
+C已冻结d9313b5180895d20e9563f3f9dc34830b702785e，206定向测试PASS，交F独审；
+其中直接Financial view closed失效后清私密DOM，原3FAIL及修后4PASS分别保留。
+A与G仍须交固定候选；G原socket超时修后11PASS，最终descriptor检查待冻结复核。
+各窗口的SOURCE_ONLY成果在独审前均不当作已合并或生产连通。
 
 E已从fixed96217db极窄只读确认：old canonical assembly仅单GCU batch，正式bootstrap
 要求各国获批LC batch（允许额外GCU）；Core本身已有合法multi-currency FinancialOpeningBatch[]。
