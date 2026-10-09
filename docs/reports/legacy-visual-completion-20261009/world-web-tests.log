@@ -1,0 +1,30 @@
+
+ RUN  v5.0.0 /Users/samuel/Documents/Codex/2026-10-09/task/world-visual
+
+ ❯ tests/world-web/official-country-role-qa.test.ts (12 tests | 1 failed | 5 skipped) 30051ms
+   ❯ C country-role browser audit accounting and safety (7)
+     × serves real publication modules with JavaScript MIME and rejects writes/outside paths 30010ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/world-web/official-country-role-qa.test.ts > C country-role browser audit accounting and safety > serves real publication modules with JavaScript MIME and rejects writes/outside paths
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ tests/world-web/official-country-role-qa.test.ts:97:3
+     95|     );
+     96|   });
+     97|   it('serves real publication modules with JavaScript MIME and rejects…
+       |   ^
+     98|     const preview = await countryRolePreview(root, sha);
+     99|     try {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 59 passed (60)
+      Tests  1 failed | 834 passed | 5 skipped (840)
+   Start at  11:37:32
+   Duration  80.15s (tests 92%, transform 4%, import 4%)
+
+    Isolate  60 workers spawned · ~91ms startup each (spawn + environment, per file)
+             at least ~5.35s faster with isolate: false — reuses workers across files instead of one per file

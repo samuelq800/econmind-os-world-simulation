@@ -1,5 +1,11 @@
 # Shared EconMind OS visual adaptation
 
+2026-10-09: `SOURCE.json` now binds the expanded local visual candidate based on
+`96217db583db4c1bd6ef74714b2e0a5ef6b7ed6d`. See
+`../legacy-visual-completion-20261009/README.md` for its fresh checks and
+screenshots. The validation and browser evidence below describe the earlier
+candidate and remain historical evidence, not verification of the new CSS.
+
 Status: IMPLEMENTED_UNVERIFIED. P2 non-authoritative visual integration candidate; root window review and merge remain pending.
 
 World base: `72883bb34753a5889e82b9a10525c15fa932ecf7` (includes merged A/C/E/F changes).

@@ -1,0 +1,42 @@
+Scope: all 6 workspace projects
+✓ Lockfile passes supply-chain policies (verified 9d ago)
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 161, reused 0, downloaded 1, added 0
+Downloading @rolldown/binding-darwin-arm64@1.2.7: 0.00 B/7.22 MB
+Downloading @electric-sql/pglite@0.5.8: 0.00 B/8.79 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.7: 482.76 kB/7.22 MB
+Downloading @electric-sql/pglite@0.5.8: 925.13 kB/8.79 MB
+Downloading @electric-sql/pglite@0.5.8: 1.58 MB/8.79 MB
+Downloading @electric-sql/pglite@0.5.8: 2.38 MB/8.79 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.7: 3.05 MB/7.22 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.7: 4.07 MB/7.22 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.7: 5.34 MB/7.22 MB
+Downloading @rolldown/binding-darwin-arm64@1.2.7: 7.00 MB/7.22 MB
+Packages: +161
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Progress: resolved 161, reused 0, downloaded 161, added 161, done
+. preinstall$ node scripts/verify-toolchain.mjs
+. preinstall: Toolchain verified: Node v24.20.0, pnpm 12.3.4
+. preinstall: Done
+
+devDependencies:
++ @econmind/core link:packages/core
++ @electric-sql/pglite 0.5.8
++ @eslint/js 10.0.1
++ @types/node 24.13.3
++ @types/pg 8.15.5
++ @types/react 19.2.18
++ @types/react-dom 19.2.7
++ @vitejs/plugin-react 6.1.1
++ comlink 4.4.2
++ eslint 10.10.0
++ fast-check 4.9.0
++ globals 17.12.0
++ pg 8.16.3
++ prettier 3.9.6
++ typescript 6.0.3
++ typescript-eslint 8.70.0
++ vite 8.2.2
++ vitest 5.0.0
+
+Done in 16.1s using pnpm v12.3.4

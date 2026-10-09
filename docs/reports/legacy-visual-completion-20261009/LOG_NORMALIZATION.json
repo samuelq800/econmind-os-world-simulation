@@ -1,0 +1,96 @@
+{
+  "purpose": "Raw tool output preserved in task/evidence/closure-raw-logs; committed logs strip trailing whitespace and extra blank EOF lines only. Test counts, errors, timings and messages unchanged.",
+  "firstStagedDiffCheck": "FAIL_LOG_WHITESPACE_ONLY",
+  "logs": [
+    {
+      "path": "boundaries.log",
+      "originalSha256": "f9b2ec9cd3d7973f182544d3d526b9e36b411aee6a53ba3958c51c0d04d2a07e",
+      "committedSha256": "f9b2ec9cd3d7973f182544d3d526b9e36b411aee6a53ba3958c51c0d04d2a07e",
+      "whitespaceChanged": false
+    },
+    {
+      "path": "closure-diff.log",
+      "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "whitespaceChanged": false
+    },
+    {
+      "path": "closure-format.log",
+      "originalSha256": "1d66faad74f5e8709353f7288592866bd3a9095da1174a916e7aa632949971e2",
+      "committedSha256": "1d66faad74f5e8709353f7288592866bd3a9095da1174a916e7aa632949971e2",
+      "whitespaceChanged": false
+    },
+    {
+      "path": "closure-qa-lint.log",
+      "originalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "committedSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "whitespaceChanged": false
+    },
+    {
+      "path": "completion-browser.log",
+      "originalSha256": "7ed771ee7a799f18405ed5b8839eac81353384e2c805500aa4b7cb4354b05a5d",
+      "committedSha256": "7ed771ee7a799f18405ed5b8839eac81353384e2c805500aa4b7cb4354b05a5d",
+      "whitespaceChanged": false
+    },
+    {
+      "path": "dependency-install.log",
+      "originalSha256": "d4ca1f1647e13be90a2db8c744b4b7ac7808b1f91d28650c9ac32ed7cb3e6237",
+      "committedSha256": "d4ca1f1647e13be90a2db8c744b4b7ac7808b1f91d28650c9ac32ed7cb3e6237",
+      "whitespaceChanged": false
+    },
+    {
+      "path": "existing-browser.log",
+      "originalSha256": "91d20bd63c66c31dc4a84d510385d463e0020c059d74e23c2c2de17b9c291d5c",
+      "committedSha256": "91d20bd63c66c31dc4a84d510385d463e0020c059d74e23c2c2de17b9c291d5c",
+      "whitespaceChanged": false
+    },
+    {
+      "path": "final-visual-tests.log",
+      "originalSha256": "3792d77eafcfed5f26e589a62115251ee67dc60971e20840fb6fee689949e4b5",
+      "committedSha256": "ca6b172cc6f12a0b0d4a314432e57dd5caf3bb48a8f156e45afcf1a0ddc87efb",
+      "whitespaceChanged": true
+    },
+    {
+      "path": "format.log",
+      "originalSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "committedSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "whitespaceChanged": false
+    },
+    {
+      "path": "full-build.log",
+      "originalSha256": "6d0067bb0a37d0de59222ef73a51d1b9b3216e459075439db5dd6e56cff6ff79",
+      "committedSha256": "9092efcb47eb90e243dc82c77232a5554c9781032080a99527af9ce89aa10559",
+      "whitespaceChanged": true
+    },
+    {
+      "path": "lint.log",
+      "originalSha256": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1",
+      "committedSha256": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1",
+      "whitespaceChanged": false
+    },
+    {
+      "path": "publication.log",
+      "originalSha256": "1c8e3bbca14fcaac13709630d68b7559a8dd65fb692a73711e1dd9756ef66954",
+      "committedSha256": "1c8e3bbca14fcaac13709630d68b7559a8dd65fb692a73711e1dd9756ef66954",
+      "whitespaceChanged": false
+    },
+    {
+      "path": "role-qa-retry.log",
+      "originalSha256": "5f892d34f0b6cf3ffc64a4618713f5605873c6af6dfb1ec7cb346165633725aa",
+      "committedSha256": "6f3443231c3f55cfeaaf2f3bc37aa29500cf431b7b7c7e8fcd8cd228b9fa92e6",
+      "whitespaceChanged": true
+    },
+    {
+      "path": "typecheck.log",
+      "originalSha256": "3d3bf767e5863bea182d5241be044454068ac9956c99659eca4f18d7874c76e7",
+      "committedSha256": "3d3bf767e5863bea182d5241be044454068ac9956c99659eca4f18d7874c76e7",
+      "whitespaceChanged": false
+    },
+    {
+      "path": "world-web-tests.log",
+      "originalSha256": "e94ac10b26b30f3c23e8222ff91350644a3f713313736afbb4244edcb4c15969",
+      "committedSha256": "69b7dcc7a18d2e38950acff1e4ccf98174fe2731be4a814a4fa86798599f5850",
+      "whitespaceChanged": true
+    }
+  ]
+}
