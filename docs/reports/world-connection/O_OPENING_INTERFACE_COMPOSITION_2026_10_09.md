@@ -16,8 +16,12 @@ The three implementation candidates share their original base `96217db583db4c1bd
 Root verified all replayed source/tests/config files against the fixed originals:
 all diffs empty. No original parser, ledger, authority, service or schema rule was relaxed.
 Root adds only CI coverage, one CI prerequisite assertion and integration records.
-Existing CI steps and six prerequisite cases remain intact. New strict configs run
-without skipLibCheck or continue-on-error. No production workflow is dispatched.
+Existing CI steps and six prerequisite cases remain intact. A and C focused configs
+check dependency declarations (A inherits no skipLibCheck; C explicitly sets false).
+G inherits existing `tsconfig.authenticated-office-command.json` with
+`skipLibCheck:true`: vendor declarations are NOT_CHECKED. Domain strict/index/optional
+checks remain intact; this is not a new compiler relaxation by G or Root.
+No continue-on-error or production workflow dispatch is added.
 
 ## Concrete connection points
 
@@ -45,7 +49,8 @@ Root local check after unchanged replay:
 - Core → Worker → API builds: exit0; no process startup.
 - Five targeted files: 71 PASS /0 FAIL /0 SKIP, 25.48s.
   Opening14 +API11 +browser35 +direct Financial privacy4 +CI prerequisites7.
-- Three dedicated strict configs, actual World Web types and Root CI-test lint: exit0.
+- Three dedicated config checks, actual World Web types and Root CI-test lint: exit0.
+  A/C dependency declarations checked; G inherited vendor declarations NOT_CHECKED.
 - Formal static Web build: exit0; existing CSS-at-build-time and large-chunk warnings retained.
 - Authoritative UI source verification: PASS; 70 countries, 286 published files verified.
 - Source boundaries: PASS, 307 scanned files. Owned format and git diff checks: PASS.
