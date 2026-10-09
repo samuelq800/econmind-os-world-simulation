@@ -92,7 +92,10 @@ describe.skipIf(process.env.O_WORKERD_POSTGRES_ROUNDTRIP !== '1')(
           },
         );
         const url = (user: string) =>
-          `postgresql://${user}@127.0.0.1:${f.port}/econmind_v09_o_authenticated_roundtrip`;
+          // Local Hyperdrive requires a nonempty password field. This owned
+          // PostgreSQL fixture uses loopback trust; this TEST_ONLY marker is
+          // not a production credential or a password-authentication proof.
+          `postgresql://${user}:TEST_ONLY_LOOPBACK@127.0.0.1:${f.port}/econmind_v09_o_authenticated_roundtrip`;
         mf = new Miniflare(
           convertV4MiniflareOptions({
             host: '127.0.0.1',
