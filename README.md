@@ -23,10 +23,12 @@ Worker connection. No new feature programme or production startup is implied.
 The Owner stopped further local preview/DEMO maintenance: work targets the
 formal `apps/world-web`, API/Worker/Core and normal release chain. Existing user
 preview services are not closed; isolated formal-code regressions remain valid.
-Latest verified merged main is PR122
-`c205a36e6ad526c53d02229315b0a9b5f7ee41f1`. Its two applicable provider checks
-passed, the merged tree equals fixed candidate `bb6c17f`, and Pages run
-`37784260654` successfully published that main. PR121's positive intake and its
+Latest observed merged main before final schema closeout is PR123
+`96217db583db4c1bd6ef74714b2e0a5ef6b7ed6d`, tree identical to fixed candidate
+`d77d1f9`. E independently approved the explicit Office route; trusted
+`37784975542` and atlas `37784975505` passed. Pages run `37785798701` was still
+in progress at this freeze. PR122's separate checks and Pages `37784260654`
+successfully delivered the reviewed drawer. PR121's positive intake and its
 own checks/Pages run `37779992133` remain separate evidence. The preceding PR120's three
 checks and Pages run `37777894945` also passed against their separate fixed head.
 Static publication is not an economic API/Worker deployment or activation.
@@ -71,8 +73,8 @@ the next full run `37780566377` failed three old Country/Office fixtures missing
 valid committed receipts (2866 pass, 153 skip). A is making a bounded fixture
 correction without relaxing production validation. These failures remain
 separate; no candidate is presented as a production activation.
-The explicit Office HTTP adapter is a current source candidate under independent
-review; it does not register or start a production host. No further feature work
+The explicit Office HTTP adapter is now normally merged source;
+it does not register or start a production host. No further feature work
 is included in this closeout.
 
 ## Retained integration snapshot (2026-10-07)

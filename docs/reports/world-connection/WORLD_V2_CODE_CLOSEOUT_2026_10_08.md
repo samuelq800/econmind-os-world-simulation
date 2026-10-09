@@ -18,11 +18,11 @@ trusted runtime `37779511289`、atlas `37779511298`、main Pages `37779992133`
 
 ## 当前三个收尾包
 
-| 包                 | 固定来源与实际检查                                                                                                                         | 当前边界                                                                               |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| Schema / lifecycle | PR118 `7bc960afde36423a6e6e4a46da2476a2c225ffc7`，tree9879272；B 固定来源组合 APPROVED；A 清理已获 E 独审；新 native receipt 四项实际 PASS | 全量 provider `37780566377` FAIL，三例旧 source fixture 不合法；A 定点修复中，未 merge |
-| 正式结果 drawer    | D `15d5b8e` 加修复 `3354c29d2f9d039cd8d491dc8ede48325fb09753`；Root 正常 replay `c5c59cc` / `ef762d1`                                      | F 修复独审 APPROVED；PR122 已正常合并 c205a36，两个 CI 与 Pages 通过；原 FAIL 保留     |
-| Office HTTP route  | G 固定98373e3437ed23a4f2d858557bdbccab5e62631b /treea474694；六文件、85实际 PASS；Root 从 c205a36 replay9c32aed                            | E 独审和组合候选 CI 尚未完成；不默认启动或注册生产                                     |
+| 包                 | 固定来源与实际检查                                                                                                    | 当前边界                                                                           |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Schema / lifecycle | PR118旧7bc960a source组合已获B批准，旧native4PASS；A新fixture fixed c0549e13b6424c828f05007db0c5f57342247421，100PASS | 旧full37780566377 FAIL保留；新fixture独审与最终组合CI仍需完成，未merge             |
+| 正式结果 drawer    | D `15d5b8e` 加修复 `3354c29d2f9d039cd8d491dc8ede48325fb09753`；Root 正常 replay `c5c59cc` / `ef762d1`                 | F 修复独审 APPROVED；PR122 已正常合并 c205a36，两个 CI 与 Pages 通过；原 FAIL 保留 |
+| Office HTTP route  | G固定98373e，E独审APPROVED；Root replay9c32aed及CI fixed d77d1f9                                                      | PR123正常合并96217db，treef605d1a与候选相同；两CI通过，不默认启动或注册生产        |
 
 Schema 新 native run `37780566375` 的实际执行 checkout
 `7398e8c0aa0b295fcf97ad7ecfd2a8336a0399a5` 与候选 tree 相同；Root 下载 JSON 后核实
@@ -33,7 +33,9 @@ Schema 新 native run `37780566375` 的实际执行 checkout
 新 whole run `37780566377` 的实际结果为 **2866 PASS /3 FAIL /153 SKIP**、829.06s。
 三个失败都是 `v10-1-country-office-read-flow` 的旧真实 PGlite fixture 没有 FINAL receipt，
 仅有占位 hash 的 command/event；新 publisher 严格拒绝 `decision receipt must be an object`。
-A 正核实并构造合法来源，不能移除 receipt/hash 校验或跳过断言。该 run 的 raw artifact
+A已交付仅测试fixture的c0549e1：真实Core hash/FINAL receipt与Atomic repo，
+原三个测试块字节相同，孤立event/错误receipt时间/错误hash拒绝且投影保留；100定向PASS。
+B对固定新fixture窄审尚需完成；不能移除receipt/hash校验或跳过断言。该 run 的 raw artifact
 upload 另因 provider CreateArtifact 超时失败；此处不声称已经下载不存在的 artifact。
 
 F 对 D 修复的固定 delta 独审报告 SHA256：
@@ -56,6 +58,17 @@ Root 对 G 的实际 main 组合仅新增 route39 +CI prerequisite5，**44 PASS 
 `745abf7397ac1d9617645582fe5b65841265dcdeec7c534c5c587e46be374a6d`
 与 G 固定原件一致；独审仍以 fixed98373e 为目标。CI 明确增加新实际请求测试和 strictconfig，
 不增加部署、host 或任何启动动作。未将真实 loopback HTTP 检查表述为 TLS/生产运行。
+
+G独审报告SHA256：`03ae0869e97dbea67bf022f9bc4e56911d454748b69079a256d669948b4a21e6`。
+E实际9项route定向检查及2补充控制通过；未保存完整raw9项log的限制原样保留。
+Root核实报告hash，PR123正常合并为96217db583db4c1bd6ef74714b2e0a5ef6b7ed6d，
+treef605d1a与候选d77d1f9相同，适用两CI均SUCCESS；Pages37785798701在本次freeze时仍进行中。
+
+Root最终schema源码组合已加入上述两份已合并main和A新fixture（replay93016f8），
+正常merge842a15c/3618b75。唯一冲突是CI prerequisite两边独立测试块，均完整保留，
+实际6项CI检查PASS；A fixture7 +此前CI5共12PASS，strictfixture/types及完整配置workspace
+typecheck PASS。A三文件与fixedc0549e1逐字节相同，0023SQL与fixed7461原件相同。
+最终适用provider与新native回执尚待自己的固定候选结果，不能套用旧native或窄检当全量通过。
 
 ## 合并后停在什么状态
 
