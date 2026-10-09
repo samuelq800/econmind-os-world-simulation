@@ -20,3 +20,4 @@ supabase/.temp/
 **/.wrangler/
 /artifacts/world-runtime-environment-2026-10-09/
 artifacts/world-runtime-postgres/
+/.supabase-cli.local.json

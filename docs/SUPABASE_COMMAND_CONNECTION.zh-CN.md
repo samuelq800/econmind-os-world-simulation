@@ -13,6 +13,11 @@
 [独立审查](reports/world-connection/CLOUDFLARE_POSTGRES_INDEPENDENT_REVIEW_2026_10_09.md)
 不批准整个 PR124、正式数据库接入、开局或 gate。
 
+补充：本机已复用主仓库 CLI2.115.0，本机平台登录可用；主仓库 GitHub Secrets
+已有 access token 和数据库密码，但无法读回明文。CLI 可用不证明 World 运行
+连接就绪。操作及21项现有回归结果见
+[CLI 复用检查](reports/world-connection/SUPABASE_CLI_REUSE_2026_10_09.md)。
+
 ## 现在可用的工程入口
 
 - `apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts`：在单次
