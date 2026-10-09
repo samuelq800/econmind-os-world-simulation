@@ -114,7 +114,7 @@ jobs:
           source_root="$GITHUB_WORKSPACE/reviewed-hold"
           "$cli" deploy --dry-run --env staging --config "$source_root/config/cloudflare/world-runtime-executor.wrangler.jsonc" --outdir "$source_root/artifacts/world-runtime-environment-2026-10-09/executor"
           "$cli" deploy --dry-run --env staging --config "$source_root/config/cloudflare/world-runtime-api.wrangler.jsonc" --outdir "$source_root/artifacts/world-runtime-environment-2026-10-09/api"
-          node "$source_root/scripts/check-cloudflare-runtime-local.mjs"
+          (cd "$source_root" && node scripts/check-cloudflare-runtime-local.mjs)
           node scripts/world-runtime-actions.mjs prepare "$source_root" "$GITHUB_WORKSPACE/workflow/artifacts/world-runtime-actions"
       - uses: actions/upload-artifact@v4
         if: always()

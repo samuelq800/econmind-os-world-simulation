@@ -21,6 +21,9 @@ CI 安装 Supabase CLI2.115.0 并只检查版本，安装隔离的 Wrangler4.148
 
 ## 账号负责人配置一次
 
+本轮现有 GitHub 凭证尝试创建环境时返回403，环境及变量未创建。需要有仓库
+管理权限的人完成以下设置；World 同伴改源码、提交 PR、看验证不受此影响。
+
 在此仓库 Settings → Environments 创建 **world-cloudflare-hold**，部署分支
 仅允许 `main`；发布环境使用：
 
@@ -31,6 +34,8 @@ CI 安装 Supabase CLI2.115.0 并只检查版本，安装隔离的 Wrangler4.148
 
 Token 使用 Cloudflare 当前 Workers 部署授权方式，仅授权上述账号及这两个
 Worker；按平台支持的粒度授予所需编辑权限。不要上传本机 OAuth 登录缓存。
+创建入口：Cloudflare 头像 → My Profile → API Tokens → Create Token；创建
+专用 Workers 部署 Token 后，直接保存到上表的 Environment secret。
 Token 不写源码、聊天、构件或前端变量；主仓库已有 Secrets 不能从 GitHub
 读回明文或自动继承到另一仓库。
 

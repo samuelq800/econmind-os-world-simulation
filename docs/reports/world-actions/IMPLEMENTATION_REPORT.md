@@ -49,14 +49,20 @@ contract. Initial raw OAuth reads returned401; Wrangler's ordinary whoami
 refreshed its existing local login, then all six read-only calls succeeded.
 No OAuth token was exported to Actions or printed.
 
-Full caller check, real workerd rebuild and downloadable artifact evidence:
-pending CI, not inherited from previous PR124 runs. These results must be
-recorded after actual execution, including any failures.
+First run37940394704 preparation FAIL: workerd used the caller checkout as
+cwd while its scripts were under the separate reviewed-hold checkout. It rejected
+the resulting parent-directory traversal. Fixed by launching the original
+unmodified check from its source root; bundle/source checks remain unchanged.
+The first twenty guard tests passed on Linux. Full caller check, repaired real
+workerd rebuild and downloadable artifact evidence require actual final CI.
 
 CI Cloudflare publication: NOT_RUN (user confirmed no deployment Token).
 Formal Supabase/economic activation: NOT_RUN, still blocked independently of
 the hosting Token. Environment protection configuration is not implied merely
-by the workflow's environment field; actual settings require readback.
+by the workflow's environment field; actual settings require readback. The attempted
+GitHub PUT environment returned403; no environment or variable was created.
+Existing environment inventory contained only github-pages. Repository admin
+must configure world-cloudflare-hold/main restriction/account variable/Token.
 
 ## Incomplete and deferred work
 
