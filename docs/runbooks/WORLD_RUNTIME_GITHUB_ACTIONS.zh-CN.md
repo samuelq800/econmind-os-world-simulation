@@ -45,6 +45,16 @@ Token 不写源码、聊天、构件或前端变量；主仓库已有 Secrets �
 并从 main 手动发布。Environment 可以配置 GitHub 的 required reviewers，但
 当前是否实际启用必须由设置读回确认，不能仅因写了 environment 字段而声称受保护。
 
+## 同伴继续修改时
+
+修改 API/Worker 源码不会自动替换线上服务；当前流程固定发布上述 HOLD 版本。
+要发布新的版本，先为新源码和实际构件完成必要审查，再更新工作流/辅助脚本的
+固定 commit、tree 和两个 bundle SHA256，运行验证并审查该发布变更。负责人
+合并后手动发布。同伴无需登录 Cloudflare，也无需取得数据库密码。
+
+正式经济版本的启用还受仓库当前 gate 和唯一数据库发布链约束，不能仅把 HOLD
+改成 ACTIVE 或换成 TEST_ONLY 构件。
+
 ## 发布已审查 HOLD
 
 在 Actions 选择该工作流，main 分支；开启 `publish_hold`，confirmation 填

@@ -73,8 +73,27 @@ No test, timeout or assertion was weakened. Linux lifecycle failures remain an
 explicit evidence gap outside this macOS/full-check plus Linux/workerd scope;
 this delivery must not claim a new Linux Node execution-host acceptance.
 
-The repaired immutable candidate needs its own actual unmodified full caller
-receipt. See TEST_EVIDENCE.json and PR129 for the final results.
+The repaired immutable candidate ad6fbda42ef26822f21810973cfb759a0b9c18fb has
+actual full-check PASS in run37943034895, macos-15:3092 PASS/0 FAIL/154 SKIP,
+911.08s. The twenty new guards are included in this unique count;29 official-edge
+and40 boundary repetitions are not added to it. Unmodified pnpm check exit0
+completed lint, format, typecheck, suite, edge, boundaries, environment, migration
+validation/rehearsal, policy, secrets, candidate/UI checks and build. Native
+PostgreSQL checks were not newly executed by this pipeline; existing skipped
+tests and formal database gaps remain explicit.
+
+Implementation and actual checkout29607395f68016c18d52b2e5962c92c50cc91f99
+have identical tree81dd9ebb22c6ab31976d0d3685a8a0ff27f403f5. Latest preparation
+again passed all20/11 checks. Actual downloaded artifact11622321399 (159842 bytes)
+ZIP SHA256:5f1b5fd295ad6fc3392e0433bff39c007fb6e9272c138d50aeeec3a3ca387c46;
+layout and bundle byte checks passed. Caller log SHA256:
+cfa6916938c0e5818b1b663f500aa2497a241aa027757bb6fdfa4bd738e2ced9.
+
+The subsequent record changes only non-executable reports and handoff wording;
+workflow/helper/tests/config/lockfile remain at the tested implementation. Its
+P3 metadata checks do not approve the P0 pipeline, close Linux failures, merge
+the PR or advance a gate. CI is not repeated for this evidence-only record.
+See TEST_EVIDENCE.json and PR129 for exact commands and source identity.
 
 CI Cloudflare publication: NOT_RUN (user confirmed no deployment Token).
 Formal Supabase/economic activation: NOT_RUN, still blocked independently of
@@ -93,7 +112,7 @@ seed/admission/host dependencies and Gate B are not completed by these Actions.
 
 ## Next action
 
-Finish actual CI evidence and independent review; merge only the approved
+Complete independent pipeline review; merge only the approved
 candidate. Configure the scoped environment Token, then use the manual HOLD
 publication path when needed. Continue formal database/economic release through
 the repository-controlled approved chain; do not treat HOLD success as activation.
