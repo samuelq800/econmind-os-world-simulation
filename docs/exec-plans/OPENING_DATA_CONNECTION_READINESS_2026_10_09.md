@@ -40,6 +40,14 @@ consumer守卫，不能通过一个URL/JSON跨进程宣称已接外部Worker。�
 PR118取消job的单次恢复已取得真实runner并执行原始pnpm check；未改workflow/skip
 或重跑四个已有SUCCESS。旧CANCELLED保留，新attempt独立等待实际结果。
 
+E已从fixed96217db极窄只读确认：old canonical assembly仅单GCU batch，正式bootstrap
+要求各国获批LC batch（允许额外GCU）；Core本身已有合法multi-currency FinancialOpeningBatch[]。
+Owner-adopted FX/CB输入仍仅TEST_ONLY品牌，正式FX/完整CB register producer契约不存在。
+这是一项尚未接通的金融输入代码边界，不是“收到任何开局包就能直接跑”的保证。
+金融producer在真实LC/FX版本/日期/字段币种与完整持仓/claim/counterparty来源契约到达前HOLD；
+届时另做窄producer工程及独审。loader真实预检必须原样报出限制，不改币种标签、
+不默认FX=1、未知持仓不填0、TEST_ONLY不升格。不阻塞其他existing接口的非启用接线。
+
 允许：在隔离本地/CI验证现有真实链、数据形状/hash/拒绝控制及transport/session清理。
 不允许：新SQL/schema/旧站改动、生产任意写入、自动启动、默认READY、补零、
 mock成功回调、替代Core权威链、测试签名作为正式任职或source authority。
