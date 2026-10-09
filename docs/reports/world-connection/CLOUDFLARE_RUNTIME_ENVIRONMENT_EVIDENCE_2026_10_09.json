@@ -1,0 +1,316 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "CLOUDFLARE_RUNTIME_ENVIRONMENT_PREPARATION",
+  "commit": "e7ecf45184baad69a37e2e51fff8862a635267dc",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "risk_class": "P0",
+  "environment": {
+    "name": "Windows local plus isolated GitHub Actions",
+    "versions": {
+      "node": "24.20.0",
+      "pnpm": "12.3.4",
+      "wrangler": "4.148.0",
+      "miniflare": "5.20261006.0-alpha",
+      "latest_workers_types_retrieved": "5.20261009.1",
+      "native_ci_postgresql": "18.6 (Homebrew)"
+    },
+    "production_access": "Public unauthenticated JWKS GET only; no SQL, session, migration or cloud mutation"
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm --filter @econmind/world-api build",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm --filter @econmind/world-worker build",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm typecheck",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec tsc --noEmit -p tests/support/tsconfig.runtime-environment-hold.json",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec vitest run [six focused files listed in workflow] --reporter=json --outputFile=artifacts/world-runtime-environment-2026-10-09/focused-tests.json",
+      "exit_code": 0,
+      "result": "PASS",
+      "passed": 208,
+      "failed": 0,
+      "skipped": 0
+    },
+    {
+      "command": "pnpm exec eslint [all changed source and test files]",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec prettier --check [all changed source, configuration, test and docs files]; git diff --check",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "wrangler deploy --dry-run --env staging --config config/cloudflare/world-runtime-api.wrangler.jsonc --outdir [local artifact API directory]",
+      "exit_code": 0,
+      "result": "PASS",
+      "total_upload_KiB": 720.98,
+      "gzip_KiB": 152.63
+    },
+    {
+      "command": "wrangler deploy --dry-run --env staging --config config/cloudflare/world-runtime-executor.wrangler.jsonc --outdir [local artifact executor directory]",
+      "exit_code": 0,
+      "result": "PASS",
+      "total_upload_KiB": 1.22,
+      "gzip_KiB": 0.62
+    },
+    {
+      "command": "wrangler types [local declaration output] --env-interface CloudflareRuntimeApiEnv --config config/cloudflare/world-runtime-api.wrangler.jsonc --env staging; strict tsc checkJs as recorded in workflow",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "WORLD_CLOUDFLARE_TOOL_ROOT=[isolated tools] node scripts/check-cloudflare-runtime-local.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "checks": 11
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "scanned_files": 307
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "scanned_files": 302
+    },
+    {
+      "command": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "database_configured": false
+    },
+    {
+      "command": "pnpm secrets:check",
+      "exit_code": 0,
+      "result": "PASS",
+      "scanned_files": 2280
+    },
+    {
+      "command": "pnpm migration:validate; pnpm migration:rehearse; pnpm foundation:policy",
+      "exit_code": 0,
+      "result": "PASS",
+      "migration_count": 23,
+      "database": "PGlite ephemeral only"
+    },
+    {
+      "command": "pnpm test:world-v2-official-edge",
+      "exit_code": 0,
+      "result": "PASS",
+      "tests": 29,
+      "frozen_generated_files": 22
+    },
+    {
+      "command": "npm pack @cloudflare/workers-types@5.20261009.1 --pack-destination [isolated tool directory]",
+      "exit_code": 0,
+      "result": "PASS",
+      "repository_dependency_change": false
+    }
+  ],
+  "negative_cases": [
+    {
+      "name": "api-ready-hold",
+      "status": 503,
+      "expected": 503,
+      "result": "PASS"
+    },
+    {
+      "name": "office-not-connected",
+      "status": 503,
+      "expected": 503,
+      "result": "PASS"
+    },
+    {
+      "name": "office-origin-denied",
+      "status": 403,
+      "expected": 403,
+      "result": "PASS"
+    },
+    {
+      "name": "tick-not-mounted",
+      "status": 405,
+      "expected": 405,
+      "result": "PASS"
+    },
+    {
+      "name": "workerd-expired-jwt",
+      "status": 401,
+      "expected": 401,
+      "result": "PASS"
+    },
+    {
+      "name": "workerd-wrong-issuer",
+      "status": 401,
+      "expected": 401,
+      "result": "PASS"
+    },
+    {
+      "name": "workerd-invalid-signature",
+      "status": 401,
+      "expected": 401,
+      "result": "PASS"
+    }
+  ],
+  "database_rls_evidence": [
+    {
+      "result": "PASS",
+      "scope": "TEST_ONLY native PostgreSQL JWT/persisted seat/intake/fenced Reserve Ship Deliver/FINAL and authorized read",
+      "production": false,
+      "source": "CI artifact11600245534 native-authenticated-roundtrip.json"
+    }
+  ],
+  "invariant_evidence": [
+    "Existing JWT algorithm/provenance/size/cache/claims regressions retained",
+    "All prior boundary tests retained; exact bridge allowance and five negative cases added",
+    "Health cannot grant readiness, command composition fixed null",
+    "No opening, Clock, lease, queue consumer or production SQL mounted"
+  ],
+  "ci": {
+    "run_id": 37893668787,
+    "url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37893668787",
+    "source_head": "e7ecf45184baad69a37e2e51fff8862a635267dc",
+    "actual_checkout": "fcda97aed51eead36f1c85f4bac9aa713a2e27e4",
+    "workerd_job": "PASS",
+    "workerd_artifact_id": 11599248422,
+    "workerd_artifact_sha256": "a137fffb5e820e2b58664d3601385e0cf414f22699726bbded4d0da52a765249",
+    "workerd_tests": {
+      "passed": 208,
+      "failed": 0,
+      "skipped": 0
+    },
+    "bundles_match_local": true,
+    "official_check": {
+      "result": "PASS",
+      "exit_code": 0,
+      "main_suite": {
+        "passed": 2999,
+        "failed": 0,
+        "skipped": 153
+      },
+      "subsequent_edge": {
+        "passed": 29,
+        "failed": 0
+      },
+      "subsequent_boundary": {
+        "passed": 40,
+        "failed": 0
+      },
+      "log_sha256": "8336780e09de0df79826c082bca284f5146c8ff8357795f38c6eb94b6face5f0"
+    },
+    "native_authenticated_roundtrip": {
+      "result": "PASS",
+      "exit_code": 0,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "scope": "TEST_ONLY owned native loopback PostgreSQL, real signatures, persisted seats, fenced settlement and authorized read; not production"
+    },
+    "checkout_tree": "8ac834bca15b11ef517154133c4e6740ae87ff59",
+    "source_tree": "8ac834bca15b11ef517154133c4e6740ae87ff59",
+    "tree_equivalence": "PASS",
+    "native_artifact_id": 11600245534,
+    "native_artifact_sha256": "4e26cc4a23b806bf75000dd5d10e3a2d04a2d747d8c64fbbab2bf90994a6e98e",
+    "workflow_result": "PASS",
+    "related": [
+      {
+        "id": 37893668743,
+        "name": "V09 PostgreSQL candidate",
+        "result": "PASS"
+      },
+      {
+        "id": 37893668782,
+        "name": "Scoped native PostgreSQL lease renewal",
+        "result": "PASS"
+      },
+      {
+        "id": 37893668868,
+        "name": "World web atlas candidate",
+        "result": "PASS"
+      },
+      {
+        "id": 37893668716,
+        "name": "Official UI exact provenance",
+        "result": "PASS"
+      }
+    ],
+    "native_job_log_sha256": "fc716920444ece7f86f8edca6cec0b5098f146d2d44b12618194268b019ad0aa"
+  },
+  "prior_failures": [
+    {
+      "result": "FAIL",
+      "scope": "First actual workerd JWT validation",
+      "finding": "PublicKeyObject in options.key rejected by workerd",
+      "remediation": "Export already validated public JWK to SPKI PEM; all original checks retained",
+      "evidence": "workerd-local-initial-failure.json"
+    },
+    {
+      "result": "FAIL",
+      "scope": "First new manual redirect test fixture",
+      "finding": "TEST_ONLY token missing mandatory typ JWT",
+      "remediation": "Correct test token to satisfy original header validation",
+      "evidence": "focused-tests-initial-failure.json"
+    },
+    {
+      "result": "FAIL",
+      "scope": "Local pnpm lint",
+      "finding": "Generated Wrangler bundles/declarations, diagnostic scripts and earlier generated artifacts in local checkout are scanned by eslint",
+      "remediation": "Scoped authored-source lint passed; clean CI official check remains mandatory; no eslint rule changed"
+    }
+  ],
+  "affected_owners": [
+    "world-api identity/transport",
+    "world-worker executor",
+    "architecture boundary owner",
+    "Cloudflare account owner",
+    "main-repository production migration/roles owner"
+  ],
+  "permissions": "No new production permissions; no real seats or activation grants; collaborator requires no Cloudflare access",
+  "migrations": "No new migration authored/published by this preparation; merged main source has 0023, not production publication evidence",
+  "legacy_impact": "Shared production Supabase unmodified; original main site deployment unmodified",
+  "independent_review": "PENDING",
+  "unresolved_gaps": [
+    "P0 independent review before merge or cloud publication",
+    "Cloudflare API/executor publication and version IDs NOT_RUN",
+    "Real project JWT/session and lawful current seats NOT_RUN",
+    "Shared production database connection, roles/schema, minimal-privilege bindings NOT_VERIFIED",
+    "Opening source/admission, writer lease and lifecycle activation remain gated; Clock disabled",
+    "No isolated cloud staging PostgreSQL target per user confirmation"
+  ],
+  "current_public_reader": {
+    "result": "PASS",
+    "http_status": 200,
+    "datasets": 34,
+    "liveWorldState": false,
+    "authentication": false,
+    "database_mutation": false
+  },
+  "delivery_artifact": {
+    "path": "artifacts/world-runtime-environment-2026-10-09/world-runtime-cloudflare-candidate-e7ecf45.zip",
+    "bytes": 726109,
+    "sha256": "7a16d1b76aeeaf88a6d56e55aac50d60ff19654a4fb81a29ac73728bb58ac4e2",
+    "payload_hashes_verified": 19,
+    "zip_entries_verified": 20,
+    "secrets_scan": "PASS",
+    "deployable_test_auth_worker_included": false,
+    "status": "CANDIDATE_ONLY_NOT_DEPLOYED"
+  }
+}

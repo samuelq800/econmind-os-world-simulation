@@ -358,4 +358,30 @@ describe('resolved repository authority boundaries', () => {
     expect(result.exitCode).toBe(1);
     expect(result.output).toContain('UNRESOLVED_DYNAMIC_REFERENCE');
   });
+
+  it('allows only the exact server-owned Cloudflare HTTP bridge', async () => {
+    const result = await runBoundaryFixture({
+      source: 'export const browserIsNonAuthoritative = true;',
+      files: {
+        'apps/world-api/cloudflare/runtime-api.mjs':
+          "import { handleAsNodeRequest } from 'cloudflare:node'; export { handleAsNodeRequest };",
+      },
+    });
+    expect(result.exitCode, result.output).toBe(0);
+  });
+
+  it.each([
+    ['apps/world-web/src/cloud.ts', 'cloudflare:node'],
+    ['packages/core/src/cloud.ts', 'cloudflare:node'],
+    ['apps/world-api/src/cloud.ts', 'cloudflare:node'],
+    ['apps/world-worker/src/cloud.ts', 'cloudflare:node'],
+    ['apps/world-api/cloudflare/runtime-api.mjs', 'cloudflare:sockets'],
+  ])('rejects a platform import from %s (%s)', async (file, specifier) => {
+    const result = await runBoundaryFixture({
+      source: 'export const browserIsNonAuthoritative = true;',
+      files: { [file]: `import '${specifier}';` },
+    });
+    expect(result.exitCode).toBe(1);
+    expect(result.output).toContain('FORBIDDEN_ARCHITECTURE_DEPENDENCY');
+  });
 });

@@ -247,6 +247,16 @@ function resolveTarget({ compilerOptions, filePath, specifier }) {
 function externalViolation(source, specifier) {
   const name = packageNameFromSpecifier(specifier);
   if (
+    specifier.startsWith('cloudflare:') &&
+    !(
+      source.owner === OWNERS.WORLD_API &&
+      source.relativePath === 'apps/world-api/cloudflare/runtime-api.mjs' &&
+      specifier === 'cloudflare:node'
+    )
+  ) {
+    return `Cloudflare platform imports require the exact server-only HTTP bridge`;
+  }
+  if (
     source.relativePath === 'packages/core/src/serialization/canonical.ts' &&
     specifier === 'node:util'
   ) {
@@ -347,7 +357,12 @@ export function analyzeBoundarySource({
       rule = 'FORBIDDEN_ARCHITECTURE_DEPENDENCY';
       detail = externalReason;
     } else if (
-      (installedExternal || isBuiltin(specifier)) &&
+      (installedExternal ||
+        isBuiltin(specifier) ||
+        (sourceArchitecture.owner === OWNERS.WORLD_API &&
+          sourceArchitecture.relativePath ===
+            'apps/world-api/cloudflare/runtime-api.mjs' &&
+          specifier === 'cloudflare:node')) &&
       sourceArchitecture.governed
     ) {
       continue;

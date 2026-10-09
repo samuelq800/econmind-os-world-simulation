@@ -1,0 +1,17 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "test-only-world-pg-do-not-deploy",
+  "main": "cloudflare-postgres-workerd-fixture.ts",
+  "compatibility_date": "2026-10-09",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "hyperdrive": [
+    { "binding": "TEST_ONLY_READER", "id": "00000000000000000000000000000001" },
+    { "binding": "TEST_ONLY_INTAKE", "id": "00000000000000000000000000000002" },
+    {
+      "binding": "TEST_ONLY_EXECUTOR",
+      "id": "00000000000000000000000000000003",
+    },
+  ],
+}

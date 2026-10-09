@@ -1,0 +1,163 @@
+name: Cloudflare runtime preparation (no deploy)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/cloudflare-runtime-environment.yml
+      - apps/world-api/cloudflare/**
+      - apps/world-api/src/runtime-preparation/**
+      - apps/world-api/src/integration/supabase-jwks-signature-verifier.ts
+      - apps/world-worker/src/runtime-preparation/**
+      - config/cloudflare/world-runtime-*.wrangler.jsonc
+      - scripts/check-cloudflare-runtime-local.mjs
+      - scripts/boundary-rules.mjs
+      - tests/architecture/boundaries.test.ts
+      - tests/world-api/cloudflare-jwks-verifier.test.ts
+      - tests/world-api/cloudflare-postgres-pools.test.ts
+      - tests/integration/cloudflare-postgres-command-roundtrip.test.ts
+      - tests/support/cloudflare-postgres-*
+      - tests/support/o-authenticated-financial-roundtrip-fixture.ts
+      - tests/support/tsconfig.cloudflare-postgres.json
+      - tests/world-api/runtime-environment-hold.test.ts
+      - tests/support/cloudflare-jwks-workerd-fixture.ts
+      - tests/support/tsconfig.runtime-environment-hold.json
+
+permissions:
+  contents: read
+
+jobs:
+  workerd:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build actual API and Worker modules
+        run: |
+          pnpm --filter @econmind/core build
+          pnpm --filter @econmind/world-worker build
+          pnpm --filter @econmind/world-api build
+      - name: Install pinned CLI outside repository dependency graph
+        run: |
+          mkdir -p "$RUNNER_TEMP/world-cloudflare-tools"
+          npm install --prefix "$RUNNER_TEMP/world-cloudflare-tools" --no-audit --no-fund wrangler@4.148.0
+          echo "WORLD_CLOUDFLARE_TOOL_ROOT=$RUNNER_TEMP/world-cloudflare-tools" >> "$GITHUB_ENV"
+      - name: Bundle without account, credentials, database or cloud mutation
+        run: |
+          "$WORLD_CLOUDFLARE_TOOL_ROOT/node_modules/.bin/wrangler" deploy --dry-run --env staging --config config/cloudflare/world-runtime-executor.wrangler.jsonc --outdir "$GITHUB_WORKSPACE/artifacts/world-runtime-environment-2026-10-09/executor"
+          "$WORLD_CLOUDFLARE_TOOL_ROOT/node_modules/.bin/wrangler" deploy --dry-run --env staging --config config/cloudflare/world-runtime-api.wrangler.jsonc --outdir "$GITHUB_WORKSPACE/artifacts/world-runtime-environment-2026-10-09/api"
+          "$WORLD_CLOUDFLARE_TOOL_ROOT/node_modules/.bin/wrangler" types "$GITHUB_WORKSPACE/artifacts/world-runtime-environment-2026-10-09/runtime-api-env.d.ts" --env-interface CloudflareRuntimeApiEnv --config config/cloudflare/world-runtime-api.wrangler.jsonc --env staging
+          pnpm exec tsc --allowJs --checkJs --noEmit --strict --skipLibCheck --module NodeNext --moduleResolution NodeNext --target ES2024 --lib ES2024,DOM --types node artifacts/world-runtime-environment-2026-10-09/runtime-api-env.d.ts apps/world-api/cloudflare/runtime-api.mjs
+      - name: Real workerd service binding and real ES256/RS256 signature checks
+        run: node scripts/check-cloudflare-runtime-local.mjs
+      - name: Existing JWT, authorization, HTTP, ownership and strict type regressions
+        run: |
+          pnpm exec vitest run tests/world-api/runtime-environment-hold.test.ts tests/world-api/cloudflare-jwks-verifier.test.ts tests/world-api/supabase-jwks-signature-verifier.test.ts tests/world-api/https-authenticated-office-command-route.test.ts tests/world-api/production-runtime-binding.test.ts tests/architecture/boundaries.test.ts --reporter=json --outputFile=artifacts/world-runtime-environment-2026-10-09/focused-tests.json
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.runtime-environment-hold.json
+          node scripts/check-boundaries.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cloudflare-runtime-local-${{ github.sha }}
+          path: artifacts/world-runtime-environment-2026-10-09/
+          if-no-files-found: error
+
+  official-and-native-postgres:
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Native PostgreSQL tools for the existing owned disposable fixture
+        run: |
+          brew install postgresql@18
+          brew link --force postgresql@18
+          /opt/homebrew/bin/initdb --version
+          /opt/homebrew/bin/pg_ctl --version
+      - name: Unmodified complete official check
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm check 2>&1 | tee official-pnpm-check.log
+      - name: Actual JWT to persisted seat, intake, fenced settlement, FINAL and authorized read
+        env:
+          O_NATIVE_AUTHENTICATED_ROUNDTRIP: '1'
+        run: pnpm exec vitest run tests/integration/o-authenticated-financial-roundtrip-postgres.test.ts --reporter=json --outputFile=native-authenticated-roundtrip.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: runtime-official-native-${{ github.sha }}
+          path: |
+            official-pnpm-check.log
+            native-authenticated-roundtrip.json
+          if-no-files-found: error
+
+  workerd-native-postgres:
+    runs-on: macos-15
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build actual Core and persistence modules
+        run: |
+          pnpm --filter @econmind/core build
+          pnpm --filter @econmind/world-worker build
+          pnpm --filter @econmind/world-api build
+      - name: Owned native PostgreSQL fixture tools
+        run: |
+          brew install postgresql@18
+          brew link --force postgresql@18
+          /opt/homebrew/bin/initdb --version
+          /opt/homebrew/bin/pg_ctl --version
+      - name: Install pinned Workers CLI in an isolated tool directory
+        run: |
+          mkdir -p "$RUNNER_TEMP/world-cloudflare-tools"
+          npm install --prefix "$RUNNER_TEMP/world-cloudflare-tools" --no-audit --no-fund wrangler@4.148.0
+          echo "WORLD_CLOUDFLARE_TOOL_ROOT=$RUNNER_TEMP/world-cloudflare-tools" >> "$GITHUB_ENV"
+      - name: Generate actual workerd bindings and check connection source/types
+        env:
+          WRANGLER_SEND_METRICS: 'false'
+        run: |
+          mkdir -p artifacts/world-runtime-postgres
+          "$WORLD_CLOUDFLARE_TOOL_ROOT/node_modules/.bin/wrangler" types artifacts/world-runtime-postgres/workerd-env.d.ts --env-interface CloudflarePostgresTestEnv --config tests/support/cloudflare-postgres-test.wrangler.jsonc --strict-vars false
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.cloudflare-postgres.json
+          pnpm exec vitest run tests/world-api/cloudflare-postgres-pools.test.ts
+      - name: Actual workerd to native PostgreSQL economic mechanism roundtrip
+        env:
+          O_WORKERD_POSTGRES_ROUNDTRIP: '1'
+          WRANGLER_SEND_METRICS: 'false'
+        run: pnpm exec vitest run tests/integration/cloudflare-postgres-command-roundtrip.test.ts --reporter=json --outputFile=workerd-postgres-roundtrip.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workerd-native-postgres-${{ github.sha }}
+          path: |
+            workerd-postgres-roundtrip.json
+            artifacts/world-runtime-postgres/
+          if-no-files-found: error

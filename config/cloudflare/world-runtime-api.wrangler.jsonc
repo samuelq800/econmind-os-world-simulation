@@ -1,0 +1,22 @@
+{
+  "name": "econmind-world-api-runtime",
+  "main": "../../apps/world-api/cloudflare/runtime-api.mjs",
+  "compatibility_date": "2026-10-09",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true, "head_sampling_rate": 0.01 },
+  "env": {
+    "staging": {
+      "name": "econmind-world-api-staging",
+      "workers_dev": true,
+      "vars": { "RUNTIME_MODE": "HOLD" },
+      "services": [
+        {
+          "binding": "WORLD_EXECUTOR",
+          "service": "econmind-world-executor-staging",
+        },
+      ],
+    },
+  },
+}

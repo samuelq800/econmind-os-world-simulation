@@ -1,0 +1,211 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "WORLD_SEED_DELIVERY_PREPARATION_NOT_V27_ACCEPTANCE",
+  "commit": "2041e18643fb5fb09105d8471d609b1fc937e2d6",
+  "base_commit": "f4384167cc26aec693f9e40c7ed5caf30da06f43",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "official_activation": "BLOCKED",
+  "environment": {
+    "name": "Windows local; owned disposable loopback PostgreSQL and ephemeral PGlite",
+    "versions": { "node": "24.20.0", "pnpm": "12.3.4", "postgresql": "18.4" },
+    "production_access": false,
+    "lockfile_changed": false,
+    "dependency_install": "NOT_RUN_EXISTING_DEPENDENCIES_USED",
+    "postgresql_16_equivalence": "NOT_CLAIMED"
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm --filter @econmind/core build; pnpm --filter @econmind/world-worker build",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Both existing server build prerequisites succeeded."
+    },
+    {
+      "command": "Initial loadOwnerNonHostSourceAdoption repository-source probe",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "SOURCE_DRIFT:mapping due to local Windows CRLF conversion; original failure retained."
+    },
+    {
+      "command": "Restore byte-identical Git source reports and immutable SQL only after newline-only comparison",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "3 mapping reports and 22 migration SQL files restored to original Git bytes; fixed hashes and economic contents unchanged."
+    },
+    {
+      "command": "vitest run tests/world-core/world-seed-preflight.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "8 PASS / 0 FAIL / 0 SKIP; final report preflight-tests-final.json."
+    },
+    {
+      "command": "vitest run opening-seed-store opening-seed-reconciliation opening-canonical-seed-bridge owner-non-host-source-adoption official-opening-admission-publication official-opening-decision-reconciliation replay replay-properties opening-reconciliation-properties selected files",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "107 PASS / 0 FAIL / 0 SKIP across 9 selected files; seed-regression-tests.json contains exact test paths/results."
+    },
+    {
+      "command": "vitest run tests/integration/f-official-opening-postgres.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "2 PASS / 0 FAIL / 0 SKIP on owned PostgreSQL 18.4; native-opening-tests.json."
+    },
+    {
+      "command": "vitest run tests/world-core/world-writer-lease-postgres.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "3 PASS / 0 FAIL / 0 SKIP on separate disposable database; native-writer-tests.json."
+    },
+    {
+      "command": "vitest run tests/architecture/boundaries.test.ts tests/architecture/foundation-gates.test.ts tests/architecture/foundation-ci-gate.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "34 PASS / 0 FAIL / 0 SKIP; architecture-tests.json."
+    },
+    {
+      "command": "pnpm --filter @econmind/world-api build; pnpm --filter @econmind/world-worker typecheck; pnpm --filter @econmind/world-api typecheck",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "All three commands succeeded."
+    },
+    {
+      "command": "tsc -p tests/support/tsconfig.world-seed-preflight.json --pretty false, initial",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "Three possibly-undefined accesses in new tests; corrected by explicit country presence check and optional diagnostic-group access."
+    },
+    {
+      "command": "tsc -p tests/support/tsconfig.world-seed-preflight.json --pretty false, final",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Strict direct new-test typecheck succeeded; tests then rerun, 8 PASS."
+    },
+    {
+      "command": "pnpm lint",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Full repository ESLint succeeded."
+    },
+    {
+      "command": "prettier --check changed script/test/config/docs, initial",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "New delivery README needed formatting; no semantic failure."
+    },
+    {
+      "command": "prettier --check changed script/test/config/docs, after formatting",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "All selected files matched Prettier style."
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs; node scripts/check-authoritative-patterns.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Boundary and authoritative-pattern checks passed."
+    },
+    {
+      "command": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs; node scripts/check-repository-secrets.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No configured runtime database, Supabase NOT_LINKED, mutation disallowed; secret scan passed."
+    },
+    {
+      "command": "node scripts/validate-migrations.mjs, initial",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "22 byte-hash mismatches from CRLF conversion; exact pinned Storage veto also failed recognition."
+    },
+    {
+      "command": "node scripts/validate-migrations.mjs, after original-byte restoration",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "22 migrations, zero violations; no SQL content or manifest changes."
+    },
+    {
+      "command": "node scripts/rehearse-migrations.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Ephemeral PGlite clean-baseline and existing-schema rehearsal both passed, 22 release rows."
+    },
+    {
+      "command": "node scripts/v09-disposable-postgres-evidence.mjs, attempt 1",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "LOCAL_MANIFEST failed before source-byte restoration; durable evidence writing also failed. No gate acceptance."
+    },
+    {
+      "command": "node scripts/v09-disposable-postgres-evidence.mjs, attempt 2",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "LOCAL_MANIFEST passed; PRISTINE_BOUNDARY refused existing cluster-level fixture roles; durable writing failed. Console log retained."
+    },
+    {
+      "command": "node scripts/v09-disposable-postgres-evidence.mjs, attempt 3 on new exclusive cluster",
+      "exit_code": 1,
+      "result": "FAIL",
+      "stdout_stderr_summary": "Execution steps, rollback/commit-acknowledgement-loss and cleanup passed; final DURABLE_EVIDENCE_WRITE_FAILED; whole run remains FAIL_CLOSED. Console log is not a successful durable receipt."
+    },
+    {
+      "command": "Node directory open/sync probe on artifacts/world-seed-delivery-v1",
+      "exit_code": 0,
+      "result": "FAIL",
+      "stdout_stderr_summary": "Probe caught win32 fsync(directory) EPERM, reproducing the durable evidence limitation; exit 0 reflects diagnostic handling only."
+    },
+    {
+      "command": "pnpm seed:report",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Successful export with status BLOCKED and all activation/write capabilities false."
+    },
+    {
+      "command": "pnpm seed:check",
+      "exit_code": 2,
+      "result": "INSUFFICIENT_EVIDENCE",
+      "stdout_stderr_summary": "Expected fail-closed refusal: missing authoritative source, formal binding and runtime/gate evidence. This is not a readiness pass."
+    },
+    {
+      "command": "git diff --cached --check before implementation commit",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "No whitespace errors in implementation commit."
+    },
+    {
+      "command": "pg_ctl stop for both owned disposable clusters",
+      "exit_code": 0,
+      "result": "PASS",
+      "stdout_stderr_summary": "Both processes stopped. Automatic approval blocked later recursive directory cleanup; directories remain ignored."
+    },
+    {
+      "command": "pnpm check; PostgreSQL 16 revalidation; remote CI; independent review; staging/production seed/admission/deployment and economic E2E",
+      "exit_code": null,
+      "result": "NOT_RUN",
+      "stdout_stderr_summary": "Outside completed scoped validation or blocked on actual sources/identity/host/gate; never claimed as passed."
+    }
+  ],
+  "negative_cases": [
+    "Source drift refuses forged READY/approval",
+    "Activation/output-path CLI arguments rejected",
+    "Native conflicting immutable Seed rejected",
+    "Native exact retries persist one Seed",
+    "Writer fencing rejects stale authority"
+  ],
+  "database_rls_evidence": [
+    "Disposable PostgreSQL only; native seed and lease suites passed",
+    "No production, RLS, grant or migration content changes",
+    "Complete V09 durable result FAIL_CLOSED"
+  ],
+  "invariant_evidence": [
+    "Existing financial and inventory opening reconciliation regressions",
+    "Existing deterministic replay and property tests",
+    "No fabricated amounts or repeated bootstrap state reset"
+  ],
+  "unresolved_gaps": [
+    "Missing complete CB holdings/denomination and political-capital genesis",
+    "Physical/water/labour-social actual operating input gaps",
+    "Formal World, admin/current seats and deployment evidence",
+    "Complete V09 durable evidence and required review/gate acceptance",
+    "Windows directory-fsync portability; original durability requirement retained"
+  ]
+}

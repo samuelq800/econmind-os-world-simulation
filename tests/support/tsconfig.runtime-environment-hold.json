@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals"],
+    "lib": ["ES2024", "DOM"],
+    "skipLibCheck": true
+  },
+  "include": [
+    "../world-api/runtime-environment-hold.test.ts",
+    "../world-api/cloudflare-jwks-verifier.test.ts",
+    "cloudflare-jwks-workerd-fixture.ts"
+  ]
+}
