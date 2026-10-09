@@ -75,3 +75,13 @@ mock成功回调、替代Core权威链、测试签名作为正式任职或source
 
 只在真实输入和外部连接到达、受控发布与读回完成后报告生产连通。
 Gate B、admission、worldId、seed和启动状态不因本接线计划改变。
+
+## 收口：源码已合并，未启用
+
+上述施工快照已由最终回执更新：B/E/F固定范围APPROVED；PR125 final a435a31的
+trusted37893770119与atlas37893770112实际SUCCESS，正常merge main56cdcfa9573464c64c7368571dea7c6abb8ffa24。
+candidate/实际CI checkout85cdcde/main完整tree均69381337f3fe8aab845e761a79a6b8a0e7159bee。
+新增四文件64PASS/0FAIL/0SKIP、25.56s；这是适用CI，不是完整pnpm check或production验收。
+G继承skipLibCheck=true/vendor声明NOT_CHECKED的报告表述已修正，原件配置未变。
+F首轮timeout UNKNOWN及其他历史失败仍保留；不追加全量重复检查。
+见[固定合并回执与接包入口](../reports/world-connection/O_OPENING_INTERFACE_SOURCE_MERGE_2026_10_09.md)。
