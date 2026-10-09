@@ -80,7 +80,7 @@ describe.skipIf(process.env.O_WORKERD_POSTGRES_ROUNDTRIP !== '1')(
             '--config',
             runtimeConfig,
             '--outdir',
-            'artifacts/world-runtime-postgres/bundle',
+            resolve('artifacts/world-runtime-postgres/bundle'),
           ],
           {
             env: { ...process.env, WRANGLER_SEND_METRICS: 'false' },
