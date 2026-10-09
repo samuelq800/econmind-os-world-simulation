@@ -8,6 +8,15 @@ on:
       - apps/world-web/src/authorized-client/**
       - apps/world-web/src/financial-intake/**
       - apps/world-web/src/office-projection/**
+      - apps/world-web/src/trusted-host/**
+      - tests/world-web/trusted-host-*
+      - apps/world-worker/src/preparation/official-opening-bundle-*.ts
+      - tests/world-core/official-opening-bundle-preflight.test.ts
+      - tests/support/tsconfig.official-opening-bundle-preflight.json
+      - apps/world-api/src/integration/nonactivated-runtime-api-host.ts
+      - tests/world-api/nonactivated-runtime-api-host.test.ts
+      - tests/world-api/tsconfig.nonactivated-runtime-api-host.json
+      - tests/support/g-runtime-api-host-test-only-fixture.ts
       - tests/world-web/office-decision-result-consumer.test.ts
       - tests/world-web/office-projection-closed-drawer.test.ts
       - tests/world-web/office-decision-result-consumer.tsconfig.json
@@ -81,6 +90,15 @@ on:
       - apps/world-web/src/authorized-client/**
       - apps/world-web/src/financial-intake/**
       - apps/world-web/src/office-projection/**
+      - apps/world-web/src/trusted-host/**
+      - tests/world-web/trusted-host-*
+      - apps/world-worker/src/preparation/official-opening-bundle-*.ts
+      - tests/world-core/official-opening-bundle-preflight.test.ts
+      - tests/support/tsconfig.official-opening-bundle-preflight.json
+      - apps/world-api/src/integration/nonactivated-runtime-api-host.ts
+      - tests/world-api/nonactivated-runtime-api-host.test.ts
+      - tests/world-api/tsconfig.nonactivated-runtime-api-host.json
+      - tests/support/g-runtime-api-host-test-only-fixture.ts
       - tests/world-web/office-decision-result-consumer.test.ts
       - tests/world-web/office-projection-closed-drawer.test.ts
       - tests/world-web/office-decision-result-consumer.tsconfig.json
@@ -204,6 +222,12 @@ jobs:
         run: |
           pnpm exec vitest run --reporter=verbose tests/world-core/official-opening-admission-publication.test.ts tests/world-core/official-opening-decision-reconciliation.test.ts
           pnpm exec tsc --noEmit -p tests/support/tsconfig.official-opening-admission-publication.json
+      - name: Explicit opening bytes, API host and browser session composition (nonactivated only)
+        run: |
+          pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/official-opening-bundle-preflight.test.ts tests/world-api/nonactivated-runtime-api-host.test.ts tests/world-web/trusted-host-session.test.ts tests/world-web/trusted-host-financial-privacy.test.ts
+          pnpm exec tsc --noEmit -p tests/support/tsconfig.official-opening-bundle-preflight.json
+          pnpm exec tsc --noEmit -p tests/world-api/tsconfig.nonactivated-runtime-api-host.json
+          pnpm exec tsc --noEmit -p tests/world-web/trusted-host-session.tsconfig.json
       - name: Sole manual dispatcher and formal Social source compatibility
         run: |
           pnpm exec vitest run --reporter=verbose --no-file-parallelism tests/world-core/manual-office-durable-dispatch.test.ts tests/world-core/c-social-employment-service.test.ts tests/world-core/durable-command-consumption.test.ts

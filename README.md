@@ -5,7 +5,27 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current formal-release checkpoint (2026-10-08)
+## Current opening-interface preparation (2026-10-09)
+
+The Owner resumed bounded preparation to accept a real opening package and wire
+existing interfaces. This is SOURCE_ONLY construction, not production startup.
+[Opening/data-interface ownership and readiness plan](docs/exec-plans/OPENING_DATA_CONNECTION_READINESS_2026_10_09.md).
+
+PR118 now normally merged as `3eb6e049d02a76e010cb5cb449d6d7151ae63573`;
+candidate, actual CI checkout and main share tree `945c82b916da2ed28f64e4132cfa4d863df298d3`.
+B source approval, all applicable checks and the actual complete check succeeded.
+[Full-check artifact and merge receipt](docs/reports/world-connection/O_PR118_FULL_CHECK_MAIN_RECEIPT_2026_10_09.md).
+Historical failures and runner-capacity cancellation below remain recorded.
+
+The new private opening-byte preflight, explicit nonactivated API composition and
+trusted browser-session wiring are fixed source candidates pending independent
+review and their own integration checks. Missing inputs remain blocked; formal
+LC/FX/complete central-bank producer contracts are still absent. These interfaces
+do not invent source values, grant seats, publish schema, admit a seed, mount a
+production host or start an external Worker. The engine remains NOT_ACTIVATED
+and Gate B PENDING. A package arrival alone is not a runnable-world guarantee.
+
+## Retained formal-release checkpoint (2026-10-08)
 
 [Current code closeout and the external opening/Worker handoff](docs/reports/world-connection/WORLD_V2_CODE_CLOSEOUT_2026_10_08.md).
 The latest Owner instruction limits work to finishing and normally merging the
