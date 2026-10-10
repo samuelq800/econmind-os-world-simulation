@@ -5,7 +5,19 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current window closeout (2026-10-09)
+## Current preparation integration (2026-10-10)
+
+[最新窗口收口与证据边界](docs/reports/start-ready-20261010/O/WINDOW_CLOSURE.md)。
+PR131 的 A 金融计算、C 浏览器命令/session、D SQL lease supervisor 和 F 原恢复证据
+分别经独立审查后，正常合并为 `27307a108ce5c0c3e2ce28e3776f8ba15ed73d3b`。
+候选 `ed0e4df`、实际 CI checkout `8b565a5` 和该 main 的完整 tree 相同。
+五项适用 CI 均成功；完整检查的主测试集为 3194 PASS / 163 SKIP，另有单独的
+1-case native authenticated roundtrip。原报告格式 FAIL 保留，不追溯改成 PASS。
+已有严格金融计算契约不等于真实补充来源采用、正式 seed 或 preflight/publisher 接通。
+E/G 后继候选和 Oct10 地图视觉批次不在 PR131 中；地图仅受理本地固定树独审，未因此批准合并/发布。
+生产数据库、权限、Worker/Clock 及正式经济世界没有随此次源码合并启用；Gate B 状态不变。
+
+## Retained window closeout (2026-10-09)
 
 [A–G、运行准备与六职位视觉收官回执](docs/reports/world-connection/O_WINDOW_SOURCE_CLOSEOUT_2026_10_09.md).
 本轮各窗口交付已收齐。PR124 的完整固定源码范围经独立审查后正常合并为
