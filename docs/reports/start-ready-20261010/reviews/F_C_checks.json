@@ -1,0 +1,101 @@
+{
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "not invoked; cloned frozen dependencies"
+  },
+  "execution": "sandbox-exec: network denied, env -i, writes confined to managed temporary subject copy",
+  "checks": {
+    "tests": {
+      "cmd": "/usr/bin/sandbox-exec -f \"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/review.sb\" /usr/bin/env -i PATH=/usr/bin:/bin TMPDIR=\"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed\" LC_ALL=C /Users/samuel/.npm/_npx/92e92e656f04b72c/node_modules/node/bin/node node_modules/vitest/vitest.mjs run tests/world-web/office-command.test.ts tests/world-web/office-command-schema.test.ts tests/world-web/formal-session-adapter.test.ts tests/world-web/trusted-host-session.test.ts tests/world-web/trusted-host-financial-privacy.test.ts --pool=threads --reporter=default --reporter=json --outputFile.json=/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/c-scoped-tests.json",
+      "chunk_id": "0a8819",
+      "wall_time_seconds": 0.000008041,
+      "session_id": 51364,
+      "original_token_count": 319,
+      "output": "\n\u001b[1m\u001b[30m\u001b[46m RUN \u001b[49m\u001b[39m\u001b[22m \u001b[36mv5.0.0 \u001b[39m\u001b[90m/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/subject\u001b[39m\n\n \u001b[32m✓\u001b[39m tests/world-web/trusted-host-session.test.ts \u001b[2m(\u001b[22m\u001b[2m35 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 1399\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m tests/world-web/office-command.test.ts \u001b[2m(\u001b[22m\u001b[2m31 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 142\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m tests/world-web/formal-session-adapter.test.ts \u001b[2m(\u001b[22m\u001b[2m15 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 133\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m tests/world-web/office-command-schema.test.ts \u001b[2m(\u001b[22m\u001b[2m5 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 37\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m tests/world-web/trusted-host-financial-privacy.test.ts \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 5\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[32m5 passed\u001b[39m\u001b[22m\u001b[90m (5)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[32m90 passed\u001b[39m\u001b[22m\u001b[90m (90)\u001b[39m\n\u001b[2m   Start at \u001b[22m 19:18:27\n\u001b[2m   Duration \u001b[22m 2.69s\u001b[2m (tests 71%, transform 20%, import 8%)\u001b[22m\n\nJSON report written to /private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/c-scoped-tests.json\n",
+      "exit_code": 0
+    },
+    "strict": {
+      "cmd": "/usr/bin/sandbox-exec -f \"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/review.sb\" /usr/bin/env -i PATH=/usr/bin:/bin TMPDIR=\"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed\" LC_ALL=C /Users/samuel/.npm/_npx/92e92e656f04b72c/node_modules/node/bin/node node_modules/typescript/bin/tsc --noEmit -p tests/world-web/office-command.tsconfig.json",
+      "chunk_id": "4d55fa",
+      "wall_time_seconds": 0.00000275,
+      "session_id": 28691,
+      "original_token_count": 0,
+      "output": "",
+      "exit_code": 0
+    },
+    "web-types": {
+      "cmd": "/usr/bin/sandbox-exec -f \"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/review.sb\" /usr/bin/env -i PATH=/usr/bin:/bin TMPDIR=\"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed\" LC_ALL=C /Users/samuel/.npm/_npx/92e92e656f04b72c/node_modules/node/bin/node node_modules/typescript/bin/tsc -b apps/world-web/tsconfig.json --pretty false",
+      "chunk_id": "6efdac",
+      "wall_time_seconds": 0.000002708,
+      "session_id": 79267,
+      "original_token_count": 0,
+      "output": "",
+      "exit_code": 0
+    },
+    "lint": {
+      "cmd": "/usr/bin/sandbox-exec -f \"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/review.sb\" /usr/bin/env -i PATH=/usr/bin:/bin TMPDIR=\"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed\" LC_ALL=C /Users/samuel/.npm/_npx/92e92e656f04b72c/node_modules/node/bin/node node_modules/eslint/bin/eslint.js apps/world-web/src/office-command apps/world-web/src/trusted-host/formal-session-adapter.ts apps/world-web/src/trusted-host/bootstrap.ts apps/world-web/src/country-runtime/entry.ts tests/world-web/office-command.test.ts tests/world-web/office-command-fixture.ts tests/world-web/office-command-schema.test.ts tests/world-web/formal-session-adapter.test.ts",
+      "chunk_id": "73698d",
+      "wall_time_seconds": 0.000004583,
+      "session_id": 55034,
+      "original_token_count": 0,
+      "output": "",
+      "exit_code": 0
+    },
+    "independent": {
+      "cmd": "/usr/bin/sandbox-exec -f \"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/review.sb\" /usr/bin/env -i PATH=/usr/bin:/bin TMPDIR=\"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed\" LC_ALL=C /Users/samuel/.npm/_npx/92e92e656f04b72c/node_modules/node/bin/node node_modules/vitest/vitest.mjs run tests/world-web/f-independent-c-controls.test.ts --pool=threads --reporter=default --reporter=json --outputFile.json=/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/f-independent-tests.json",
+      "chunk_id": "41a695",
+      "wall_time_seconds": 0.528813666,
+      "exit_code": 0,
+      "original_token_count": 200,
+      "output": "\n\u001b[1m\u001b[30m\u001b[46m RUN \u001b[49m\u001b[39m\u001b[22m \u001b[36mv5.0.0 \u001b[39m\u001b[90m/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/subject\u001b[39m\n\n \u001b[32m✓\u001b[39m tests/world-web/f-independent-c-controls.test.ts \u001b[2m(\u001b[22m\u001b[2m4 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 180\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[32m1 passed\u001b[39m\u001b[22m\u001b[90m (1)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[32m4 passed\u001b[39m\u001b[22m\u001b[90m (4)\u001b[39m\n\u001b[2m   Start at \u001b[22m 19:19:30\n\u001b[2m   Duration \u001b[22m 334ms\u001b[2m (tests 64%, transform 29%, import 6%, worker 1%)\u001b[22m\n\nJSON report written to /private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/f-independent-tests.json\n"
+    },
+    "boundaries": {
+      "cmd": "/usr/bin/sandbox-exec -f \"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/review.sb\" /usr/bin/env -i PATH=/usr/bin:/bin TMPDIR=\"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed\" LC_ALL=C /Users/samuel/.npm/_npx/92e92e656f04b72c/node_modules/node/bin/node scripts/check-boundaries.mjs",
+      "chunk_id": "6c79b3",
+      "wall_time_seconds": 0.776385291,
+      "exit_code": 0,
+      "original_token_count": 116,
+      "output": "{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 318,\n  \"guardedRoots\": [\n    \"apps\",\n    \"packages\",\n    \"apps/world-web/server.mjs\",\n    \"scripts/environment-policy.mjs\",\n    \"scripts/vite-environment-policy.mjs\",\n    \"scripts/vite-environment-policy.d.mts\",\n    \"scripts/run-development-service.mjs\",\n    \"scripts/run-development-stack.mjs\"\n  ],\n  \"sourceExtensions\": [\n    \".ts\",\n    \".tsx\",\n    \".mts\",\n    \".cts\",\n    \".js\",\n    \".jsx\",\n    \".mjs\",\n    \".cjs\"\n  ]\n}\n"
+    },
+    "authority": {
+      "cmd": "/usr/bin/sandbox-exec -f \"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/review.sb\" /usr/bin/env -i PATH=/usr/bin:/bin TMPDIR=\"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed\" LC_ALL=C /Users/samuel/.npm/_npx/92e92e656f04b72c/node_modules/node/bin/node scripts/check-authoritative-patterns.mjs",
+      "chunk_id": "5a713d",
+      "wall_time_seconds": 0.633570333,
+      "exit_code": 0,
+      "original_token_count": 23,
+      "output": "{\n  \"scannedCoreFiles\": 89,\n  \"scannedFiles\": 313,\n  \"status\": \"PASS\",\n  \"violations\": []\n}\n"
+    },
+    "format": {
+      "cmd": "/usr/bin/sandbox-exec -f \"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/review.sb\" /usr/bin/env -i PATH=/usr/bin:/bin TMPDIR=\"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed\" LC_ALL=C /Users/samuel/.npm/_npx/92e92e656f04b72c/node_modules/node/bin/node node_modules/prettier/bin/prettier.cjs --check apps/world-web/src/office-command apps/world-web/src/trusted-host/formal-session-adapter.ts apps/world-web/src/trusted-host/bootstrap.ts apps/world-web/src/country-runtime/entry.ts tests/world-web/office-command.test.ts tests/world-web/office-command-fixture.ts tests/world-web/office-command-schema.test.ts tests/world-web/formal-session-adapter.test.ts tests/world-web/office-command.tsconfig.json",
+      "chunk_id": "83751f",
+      "wall_time_seconds": 0.458696417,
+      "exit_code": 0,
+      "original_token_count": 17,
+      "output": "Checking formatting...\nAll matched files use Prettier code style!\n"
+    },
+    "secrets": {
+      "cmd": "/usr/bin/sandbox-exec -f \"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/review.sb\" /usr/bin/env -i PATH=/usr/bin:/bin TMPDIR=\"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed\" LC_ALL=C /Users/samuel/.npm/_npx/92e92e656f04b72c/node_modules/node/bin/node --input-type=module -e 'import {readFileSync} from \"node:fs\"; import {findSensitivePatterns} from \"./scripts/repository-secrets-policy.mjs\"; const files=[\"apps/world-web/src/country-runtime/entry.ts\",\"apps/world-web/src/office-command/client.ts\",\"apps/world-web/src/office-command/contract.ts\",\"apps/world-web/src/office-command/controller.ts\",\"apps/world-web/src/office-command/view.ts\",\"apps/world-web/src/trusted-host/bootstrap.ts\",\"apps/world-web/src/trusted-host/formal-session-adapter.ts\",\"docs/reports/start-ready-20261010/C/EVIDENCE.json\",\"docs/reports/start-ready-20261010/C/IMPLEMENTATION.md\",\"docs/reports/start-ready-20261010/C/REPORT.md\",\"tests/world-web/formal-session-adapter.test.ts\",\"tests/world-web/office-command-fixture.ts\",\"tests/world-web/office-command-schema.test.ts\",\"tests/world-web/office-command.test.ts\",\"tests/world-web/office-command.tsconfig.json\"]; const violations=files.flatMap(file=>findSensitivePatterns(readFileSync(file,\"utf8\")).map(pattern=>({file,pattern}))); console.log(JSON.stringify({status:violations.length?\"FAIL\":\"PASS\",scannedFiles:files.length,violations})); if(violations.length)process.exitCode=1;'",
+      "chunk_id": "6482bb",
+      "wall_time_seconds": 0.003624542,
+      "exit_code": 0,
+      "original_token_count": 13,
+      "output": "{\"status\":\"PASS\",\"scannedFiles\":15,\"violations\":[]}\n"
+    },
+    "build-core": {
+      "cmd": "/usr/bin/sandbox-exec -f \"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/review.sb\" /usr/bin/env -i PATH=/usr/bin:/bin TMPDIR=\"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed\" LC_ALL=C /Users/samuel/.npm/_npx/92e92e656f04b72c/node_modules/node/bin/node node_modules/typescript/bin/tsc -p packages/core/tsconfig.build.json",
+      "chunk_id": "14b045",
+      "wall_time_seconds": 1.001789625,
+      "original_token_count": 0,
+      "output": "",
+      "exit_code": 0
+    },
+    "build-worker": {
+      "cmd": "/usr/bin/sandbox-exec -f \"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed/artifacts/review.sb\" /usr/bin/env -i PATH=/usr/bin:/bin TMPDIR=\"/private/var/folders/lc/qw6zqhv13kgbygqw1g4c4l5r0000gn/T/codex-security-artifacts-33d49ffadcc73099536118ed9181c1bcd0f5dc5d5d9208364aca69839fb2e3ed\" LC_ALL=C /Users/samuel/.npm/_npx/92e92e656f04b72c/node_modules/node/bin/node node_modules/typescript/bin/tsc -p apps/world-worker/tsconfig.build.json",
+      "chunk_id": "74145e",
+      "wall_time_seconds": 1.002285583,
+      "original_token_count": 0,
+      "output": "",
+      "exit_code": 0
+    }
+  }
+}

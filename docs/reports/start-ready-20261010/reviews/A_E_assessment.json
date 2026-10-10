@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "patch": {
+    "repository": "/Users/samuel/Documents/econclub/econmind-os-world-simulation",
+    "sourceType": "commit_range",
+    "base": "42991acfee9d0eacc702ba47a380c938a4516f03",
+    "head": "68b0f4970a70df4d194c8e444795a26aa12f6ff0",
+    "changedFiles": [
+      "docs/reports/start-ready-20261010/E/IMPLEMENTATION_DESIGN.md",
+      "docs/reports/start-ready-20261010/E/permission-oracle.test.mjs"
+    ],
+    "sha256": "ab786bce813f0d4c53949bd3c6547183ef97b44039a6929d971bf0d3bf604ba8"
+  },
+  "recommendation": "revise",
+  "workflowLabel": "revise",
+  "impact": {
+    "rating": "high",
+    "rationale": "Proposed privileged intake/persistence contract; current patch changes only design and a local test, not production."
+  },
+  "regressionLikelihood": {
+    "rating": "high",
+    "rationale": "Design lines77-79 re-lock submission after holding head; normal racing retries can deadlock."
+  },
+  "regressionProtection": {
+    "rating": "partial",
+    "rationale": "Exact-head oracle independently passes24 checks, but uses one function and misses the two-stage protocol.",
+    "exactHeadChecksPassed": true
+  },
+  "recoverability": {
+    "rating": "easy",
+    "rationale": "Revise design/test only; no schema, persisted state or deployed runtime changed."
+  },
+  "confidence": {
+    "rating": "moderate",
+    "rationale": "Exact source proves protocol contradiction; real World SQL and production grants remain unimplemented."
+  },
+  "applicability": {
+    "status": "confirmed",
+    "rationale": "Requested design governs future manual Office intake; it is not current production SQL."
+  },
+  "statusQuoRisk": {
+    "rating": "moderate",
+    "rationale": "Implementation readiness remains blocked; HOLD preserves the production boundary."
+  },
+  "autoMergeExclusions": [
+    "privileged_boundary",
+    "public_contract",
+    "architecture_specific_rollout"
+  ],
+  "affectedRuntimeRoots": [
+    "apps/world-worker/src/intake/postgres-office-command-intake.ts",
+    "apps/world-worker/src/admission/official-opening-admission-publication.ts",
+    "scripts/production-posting-release-policy.mjs"
+  ],
+  "materialBoundaries": [
+    {
+      "id": "lock-order",
+      "invariant": "No new submission lock after head.",
+      "runtimeRoot": "manual Office intake",
+      "counterexample": "A cutoff misses S; B inserts S; A holds H; C locks S waiting H; A register waits S.",
+      "legitimateControl": "Base intake lines517-525 and oracle lines134-136 re-read without another submission lock.",
+      "result": "contradicted"
+    },
+    {
+      "id": "definer",
+      "invariant": "Runtime has no direct head/authz UPDATE or submission INSERT.",
+      "runtimeRoot": "restricted database functions",
+      "counterexample": "Caller directly mutates authoritative columns or assumes owner.",
+      "legitimateControl": "Design lines67,82,86-110; exact-head local oracle denies DML, role assumption and PUBLIC/reader execution.",
+      "result": "supported"
+    },
+    {
+      "id": "authority",
+      "invariant": "Current coherent authorization remains valid through commit.",
+      "runtimeRoot": "manual Office intake",
+      "counterexample": "Conflicting membership inserted while only existing auth rows are locked.",
+      "legitimateControl": "Design line80 requires all auth writers to serialize on head; formal provisioning denied without that contract.",
+      "result": "unresolved"
+    },
+    {
+      "id": "admission",
+      "invariant": "Revocation and admission commit have a durable atomic ordering.",
+      "runtimeRoot": "opening admission publisher",
+      "counterexample": "Registry authority revoked after a callback check but before SQL commit.",
+      "legitimateControl": "Design line142 explicitly withholds admission INSERT/EXECUTE pending durable locking or fencing.",
+      "result": "unresolved"
+    },
+    {
+      "id": "unknown-and-release",
+      "invariant": "Unknown commit is not success; only the old-site chain publishes schema.",
+      "runtimeRoot": "intake and schema release",
+      "counterexample": "ACK loss triggers blind replay or a new publisher bulk-upgrades the prefix.",
+      "legitimateControl": "Design lines144,148-150 retain UNKNOWN_STOP, exact successor/readback and sole publisher.",
+      "result": "supported"
+    }
+  ],
+  "validation": [
+    {
+      "name": "Immutable head/tree/base and two-file diff",
+      "status": "passed",
+      "protects": "Candidate identity, preserved checkout and exact patch SHA256."
+    },
+    {
+      "name": "Sandboxed pinned Node syntax check",
+      "status": "passed",
+      "protects": "Exact candidate oracle parses."
+    },
+    {
+      "name": "One disposable PG16.15 oracle run",
+      "status": "passed",
+      "protects": "24 synthetic permission/transaction checks; PASS_MECHANISM_ONLY."
+    },
+    {
+      "name": "Two-stage racing-original interleaving",
+      "status": "skipped",
+      "protects": "No executable two-function implementation exists; counterexample established from design/source, not claimed as an executed failure."
+    },
+    {
+      "name": "Real World schema, admission, ACK loss and formal grants",
+      "status": "skipped",
+      "protects": "No production readiness or P0 implementation approval is inferred."
+    }
+  ],
+  "unknowns": [
+    {
+      "summary": "Real SQL/DCL and two-stage regression are not implemented; required before implementation approval.",
+      "decisionCritical": true
+    },
+    {
+      "summary": "Authorization-writer serialization, durable private authority and host/login configuration remain separately gated.",
+      "decisionCritical": true
+    },
+    {
+      "summary": "Production prefix/catalog, TLS/Hyperdrive and release caller were not queried.",
+      "decisionCritical": true
+    }
+  ],
+  "evidencePlan": []
+}

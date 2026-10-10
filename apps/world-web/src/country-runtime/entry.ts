@@ -8,6 +8,8 @@ import {
 import { installOfficeProjection } from '../office-projection/view.js';
 import { installFinancialIntake } from '../financial-intake/view.js';
 import { installTrustedHost } from '../trusted-host/bootstrap.js';
+import { installOfficeCommand } from '../office-command/view.js';
+import { installFormalSessionAdapter } from '../trusted-host/formal-session-adapter.js';
 
 /** Mounted by the selected static page; no prototype/fixture entry is imported. */
 export function installCountryRuntime(document: Document, host: Window) {
@@ -304,10 +306,17 @@ if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   window.EconMindCountryRuntime = installCountryRuntime(document, window);
   window.EconMindOfficeProjection = installOfficeProjection(document, window);
   window.EconMindFinancialIntake = installFinancialIntake(document, window);
+  window.EconMindOfficeCommand = installOfficeCommand(document, window);
   window.EconMindTrustedHost = installTrustedHost(document, window, {
     projection: window.EconMindOfficeProjection,
     financial: window.EconMindFinancialIntake,
+    office: window.EconMindOfficeCommand,
     localTrade: window.EconMindCountryRuntime,
   });
+  window.EconMindFormalSession = installFormalSessionAdapter(
+    document,
+    window,
+    window.EconMindTrustedHost,
+  );
   document.dispatchEvent(new Event('econmind-country-runtime-ready'));
 }

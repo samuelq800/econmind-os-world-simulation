@@ -17,6 +17,13 @@ import {
   type OfficeProjectionView,
 } from '../office-projection/model.js';
 import type { installOfficeProjection } from '../office-projection/view.js';
+import {
+  validOfficeBinding,
+  type OfficeCommandBinding,
+} from '../office-command/controller.js';
+import type { installOfficeCommand } from '../office-command/view.js';
+import { type OfficeCommandEndpoint } from '../office-command/contract.js';
+import { AUTHENTICATED_OFFICE_COMMAND_PATH } from '@econmind/core/authenticated-office-command-contract';
 import { sameAuthorizedIdentity } from '../prototype/authorized-read-adapter.js';
 import {
   canonicalId,
@@ -37,14 +44,17 @@ import {
 export interface TrustedHostTargets {
   readonly read: ApprovedReadEndpoints;
   readonly financial?: FinancialIntakeEndpoint;
+  readonly office?: OfficeCommandEndpoint;
 }
 export interface TrustedHostBinding {
   readonly projection: OfficeProjectionBinding;
   readonly financial?: FinancialIntakeBinding;
+  readonly office?: OfficeCommandBinding;
 }
 export interface TrustedHostConsumers {
   readonly projection: ReturnType<typeof installOfficeProjection>;
   readonly financial: ReturnType<typeof installFinancialIntake>;
+  readonly office?: ReturnType<typeof installOfficeCommand>;
   readonly localTrade: Pick<
     ReturnType<typeof installCountryRuntime>,
     'disconnect'
@@ -132,6 +142,7 @@ export function installTrustedHost(
   let targets: TrustedHostTargets | null = null,
     active: TrustedHostSession | null = null,
     financialConfigured = false,
+    officeConfigured = false,
     epoch = 0,
     reason = 'TRUSTED_HOST_BINDING_MISSING',
     connecting = false,
@@ -153,11 +164,13 @@ export function installTrustedHost(
     consumers.localTrade.disconnect();
     consumers.projection.disconnect();
     consumers.financial.disconnect();
+    consumers.office?.disconnect();
   }
   function disconnect(code = 'HOST_DISCONNECTED') {
     const previous = active;
     active = null;
     financialConfigured = false;
+    officeConfigured = false;
     reason = code;
     epoch++;
     previous?.retire(code);
@@ -169,17 +182,27 @@ export function installTrustedHost(
     try {
       if (!active.isCurrent()) return;
       const p = consumers.projection.getState(),
-        f = consumers.financial.getState();
+        f = consumers.financial.getState(),
+        o = consumers.office?.getState();
       if (
         p.status === 'DENIED' ||
         f.status === 'DENIED' ||
-        f.read?.status === 'DENIED'
+        f.read?.status === 'DENIED' ||
+        o?.status === 'DENIED'
       )
         disconnect('DENIED');
-      else if (!p.canRead || (financialConfigured && !f.canInspect))
+      else if (
+        !p.canRead ||
+        (financialConfigured && !f.canInspect) ||
+        (officeConfigured && !o?.canRead)
+      )
         // Busy reads have canRead/canInspect=false, but are still live. Only the
         // permanently missing consumers retire the shared lifetime here.
-        if (p.status === 'MISSING' || (financialConfigured && !f.request))
+        if (
+          p.status === 'MISSING' ||
+          (financialConfigured && !f.request) ||
+          (officeConfigured && o?.status === 'MISSING')
+        )
           disconnect('CONSUMER_RETIRED');
     } finally {
       checking = false;
@@ -187,6 +210,7 @@ export function installTrustedHost(
   }
   consumers.projection.subscribe(check);
   consumers.financial.subscribe(check);
+  consumers.office?.subscribe(check);
   const observer = new MutationObserver(check);
   observer.observe(document.body, {
     childList: true,
@@ -211,10 +235,23 @@ export function installTrustedHost(
             !canonicalId(supplied.financial.deploymentRef))
         )
           return false;
+        if (
+          supplied.office &&
+          (!validEndpoints({
+            ...supplied.read,
+            origin: supplied.office.origin,
+          }) ||
+            supplied.office.path !== AUTHENTICATED_OFFICE_COMMAND_PATH ||
+            !canonicalId(supplied.office.deploymentRef))
+        )
+          return false;
         targets = Object.freeze({
           read: Object.freeze({ ...supplied.read }),
           ...(supplied.financial
             ? { financial: Object.freeze({ ...supplied.financial }) }
+            : {}),
+          ...(supplied.office
+            ? { office: Object.freeze({ ...supplied.office }) }
             : {}),
         });
         return true;
@@ -227,7 +264,8 @@ export function installTrustedHost(
       try {
         if (!targets || !supplied) return false;
         const p = supplied.projection,
-          f = supplied.financial;
+          f = supplied.financial,
+          o = supplied.office;
         if (
           !validConfig(p.read) ||
           !sameEndpoints(p.read.endpoints, targets.read) ||
@@ -236,7 +274,16 @@ export function installTrustedHost(
           !/^(0[1-9]|[1-6][0-9]|70)$/u.test(p.view.countryDisplayId) ||
           !validLookup(p.finalLookup) ||
           usedSessions.has(p.read.session.sessionRef) ||
-          (f && !validFinancial(f, p, targets.financial))
+          (f && !validFinancial(f, p, targets.financial)) ||
+          (o &&
+            (!consumers.office ||
+              !targets.office ||
+              !validOfficeBinding(o) ||
+              !sameRead(o.read, p.read) ||
+              !sameView(o.view, p.view) ||
+              o.endpoint.origin !== targets.office.origin ||
+              o.endpoint.path !== targets.office.path ||
+              o.endpoint.deploymentRef !== targets.office.deploymentRef))
         )
           return false;
         // Detached originals only, never manufacture or derive terms from UI.
@@ -265,6 +312,14 @@ export function installTrustedHost(
             read: session.read,
           });
         }
+        if (o && consumers.office) {
+          officeConfigured = true;
+          consumers.office.connect({
+            ...o,
+            endpoint: { ...o.endpoint },
+            read: session.read,
+          });
+        }
         reason = 'EXPLICIT_CONFIGURATION_ONLY';
         connecting = false;
         check();
@@ -287,6 +342,7 @@ export function installTrustedHost(
         reason,
         epoch,
         financialConfigured,
+        officeConfigured,
       });
     },
   });

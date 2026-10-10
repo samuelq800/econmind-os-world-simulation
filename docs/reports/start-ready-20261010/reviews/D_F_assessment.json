@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "patch": {
+    "repository": "https://github.com/samuelq800/econmind-os-world-simulation",
+    "sourceType": "commit_range",
+    "base": "42991acfee9d0eacc702ba47a380c938a4516f03",
+    "head": "d9853754b3eb2080a5ac4d30c71cae4db013fe0c",
+    "changedFiles": [
+      "docs/reports/start-ready-20261010/F/ACCEPTANCE_GAPS.md",
+      "docs/reports/start-ready-20261010/F/V09_EVIDENCE_RECEIPT.md",
+      "docs/reports/start-ready-20261010/F/V09_SOURCE_INHERITANCE.json",
+      "tests/support/f-v09-source-inheritance.mjs",
+      "tests/support/tsconfig.f-v09-native-claim.json",
+      "tests/world-core/f-v09-native-claim-recovery.test.ts"
+    ],
+    "sha256": "4e6f12290237b3383092ae1333782a51086cc683d89d852ffb6d000c167a88bc"
+  },
+  "recommendation": "merge",
+  "workflowLabel": "human_review_required",
+  "impact": {
+    "rating": "high",
+    "rationale": "P0 recovery/fencing evidence could mislead later release gates if wrong; this diff itself changes no runtime, schema or production state."
+  },
+  "regressionLikelihood": {
+    "rating": "low",
+    "rationale": "Six additive test/evidence files; immutable native test blob is unchanged from a821018; scoped inheritance reproduced byte-for-byte."
+  },
+  "regressionProtection": {
+    "rating": "partial",
+    "rationale": "Producer native2 and CI raw/scoped equality are evidenced. Reviewer ran exact-head inheritance only, not native2; pre-run Core dist provenance is explicitly unavailable.",
+    "exactHeadChecksPassed": false
+  },
+  "recoverability": {
+    "rating": "easy",
+    "rationale": "Revert six additive test/docs files; no deployed source or production migration/state was changed."
+  },
+  "confidence": {
+    "rating": "moderate",
+    "rationale": "Exact patch, original raw hashes, real stopped PG identity, source guards and assertion sinks verified; native build-artifact provenance remains bounded."
+  },
+  "applicability": {
+    "status": "confirmed",
+    "rationale": "Explicit owned native test runner and read-only provenance helper are supported consumers; approval is solely for these test/evidence additions."
+  },
+  "statusQuoRisk": {
+    "rating": "moderate",
+    "rationale": "Without the patch, PGlite recovery could be mistaken for native coverage and reusable CI provenance remains less explicit."
+  },
+  "autoMergeExclusions": ["privileged_boundary", "other"],
+  "affectedRuntimeRoots": [
+    "Opt-in tests/world-core/f-v09-native-claim-recovery.test.ts",
+    "Read-only tests/support/f-v09-source-inheritance.mjs; existing Core/Worker/SQL code unchanged"
+  ],
+  "importantCallers": [
+    "WorldRecoveryCoordinator.reclaimAbandonedCommand",
+    "PostgresSqlDatabase.transaction",
+    "world_v2.assert_world_writer_commit_guard",
+    "world_v2.acquire_world_writer_lease"
+  ],
+  "riskDrivers": [
+    "P0 evidence inheritance must not become activation authority",
+    "Native2 pre-run ignored Core dist hash unavailable",
+    "Local superuser/trust and hardcoded owned PG16.15 target are not production permissions/TLS"
+  ],
+  "protectiveFactors": [
+    "Exact CI checkout ac3123e is distinguished from metadata head",
+    "516 identical blobs; one disclosed HOLD-runner difference and zero deletions",
+    "Exact rollback errors, fence/attempt assertions and eleven-table raw footprints",
+    "Historical FAIL/SKIP/UNKNOWN and staging/TLS gaps remain explicit"
+  ],
+  "materialBoundaries": [
+    {
+      "id": "inheritance",
+      "invariant": "Inherited results bind the actual tested checkout and unchanged relevant blobs.",
+      "runtimeRoot": "f-v09-source-inheritance.mjs and V09_SOURCE_INHERITANCE.json",
+      "counterexample": "Use metadata head or silently inherit the changed HOLD deployment runner.",
+      "legitimateControl": "Helper pins ac3123e and base42991ac; exact replay returns516 equal/one disclosed change/no deletion. Head diff is six additions only.",
+      "result": "supported"
+    },
+    {
+      "id": "owned-target",
+      "invariant": "Native setup mutates only a fresh owned disposable loopback generation.",
+      "runtimeRoot": "Native test beforeAll/connect",
+      "counterexample": "Runtime/Supabase overrides, nonloopback URL, wrong data directory/system or existing world schema.",
+      "legitimateControl": "Shared environment guard precedes Pool connection; read-only actual system/host/port/database/version/directory/socket/empty-schema checks precede DDL; artifacts pin stopped PG7694989011588890045.",
+      "result": "supported"
+    },
+    {
+      "id": "claim-fence",
+      "invariant": "Only a later current fence may reclaim once; stale/current-generation claims are rejected.",
+      "runtimeRoot": "WorldRecoveryCoordinator.reclaimAbandonedCommand via real pg Pool",
+      "counterexample": "Repeated reclaim increments attempts or old writer successfully changes a current claim.",
+      "legitimateControl": "Native assertions require fence2/attempt2, exact ROLLED_BACK causes on repeat/current claim, SQL WORLD_WRITER_FENCE_STALE, and unchanged raw economic footprint.",
+      "result": "supported"
+    },
+    {
+      "id": "evidence-scope",
+      "invariant": "Mechanism evidence never grants formal V09/Gate B/production authority.",
+      "runtimeRoot": "V09_EVIDENCE_RECEIPT.md and historical ACCEPTANCE_GAPS.md",
+      "counterexample": "Count PGlite9/CI skipped fault runner as native; assert exact-head Core build provenance or populated settlement from empty facts.",
+      "legitimateControl": "Receipt distinguishes all types/heads, excludes skipped runner, records missing pre-run dist pin, historical failures, empty facts and NOT_RUN staging/TLS. Industry names are proposals only.",
+      "result": "supported"
+    }
+  ],
+  "validation": [
+    {
+      "name": "Immutable base/head/tree, exact diff and diff --check",
+      "status": "passed",
+      "protects": "Head tree fb2b1f8f; six additions; no existing production/test/workflow modifications; canonical patch hash retained."
+    },
+    {
+      "name": "Sandboxed exact-head inheritance helper and byte comparison",
+      "status": "passed",
+      "protects": "Network denied, credentials absent, writes confined to disposable clone; output matches committed JSON byte-for-byte."
+    },
+    {
+      "name": "Seven producer artifact SHA256 checks and raw CI inspection",
+      "status": "passed",
+      "protects": "Native2, renewal4, actual checkout ac3123e, official historical results and skipped marked-fault steps remain distinct."
+    },
+    {
+      "name": "Native PG data/control and original log read-only inspection",
+      "status": "passed",
+      "protects": "PG16.15, correct generation7694989011588890045, stale-fence SQL error and shut-down state; no database restart/write."
+    },
+    {
+      "name": "Producer native2 observation at a821018, unchanged native blob at head",
+      "status": "passed",
+      "protects": "Two actual claim scenarios, not PGlite or reviewer reexecution; exact source test blob equality only, with pre-run Core dist limitation."
+    },
+    {
+      "name": "Reviewer native/full/crash/lost-ack reruns, production TLS and Gate B",
+      "status": "skipped",
+      "protects": "Deliberately not claimed; no full rerun, production connection or gate advancement."
+    }
+  ],
+  "unknowns": [
+    {
+      "summary": "Ignored Core dist bytes used by the producer native2 were not pinned before that run; later build cannot retroactively prove them. Noncritical for bounded test/evidence merge, still excluded from full source-bound runtime acceptance.",
+      "decisionCritical": false
+    },
+    {
+      "summary": "Formal staging/TLS/minimal-role/host activation and populated six-role gameplay remain outside this patch; historical TLS failure remains unresolved.",
+      "decisionCritical": false
+    }
+  ],
+  "evidencePlan": []
+}

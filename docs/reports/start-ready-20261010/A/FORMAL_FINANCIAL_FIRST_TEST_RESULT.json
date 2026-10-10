@@ -1,0 +1,369 @@
+{
+  "numTotalTestSuites": 3,
+  "numPassedTestSuites": 0,
+  "numFailedTestSuites": 3,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 25,
+  "numPassedTests": 23,
+  "numFailedTests": 2,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1791629537943,
+  "success": false,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) requires the actual independently loaded non-activated adoption, not a clone, fixture scope or approval DTO",
+          "status": "failed",
+          "title": "requires the actual independently loaded non-activated adoption, not a clone, fixture scope or approval DTO",
+          "duration": 47.14716700000008,
+          "failureMessages": [
+            "AssertionError: expected [Function] to throw error including 'REAL_NON_ACTIVATED_ADOPTION_REQUIRED' but got 'Canonical serialization rejects number'\n    at Proxy.<anonymous> (file:///Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/node_modules/.pnpm/vitest@5.0.0_@types+node@24.13.3_vite@8.2.2_@types+node@24.13.3_/node_modules/vitest/dist/chunks/index.OVGXnVRj.js:2277:114)\n    at Proxy.<anonymous> (file:///Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/node_modules/.pnpm/vitest@5.0.0_@types+node@24.13.3_vite@8.2.2_@types+node@24.13.3_/node_modules/vitest/dist/chunks/index.OVGXnVRj.js:1934:14)\n    at Proxy.methodWrapper (file:///Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/node_modules/.pnpm/chai@6.2.2/node_modules/chai/index.js:1700:25)\n    at /Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/tests/world-core/formal-financial-opening.test.ts:223:70\n    at file:///Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/node_modules/.pnpm/vitest@5.0.0_@types+node@24.13.3_vite@8.2.2_@types+node@24.13.3_/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:1628:35\n    at file:///Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/node_modules/.pnpm/vitest@5.0.0_@types+node@24.13.3_vite@8.2.2_@types+node@24.13.3_/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:2783:26\n    at file:///Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/node_modules/.pnpm/vitest@5.0.0_@types+node@24.13.3_vite@8.2.2_@types+node@24.13.3_/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:3319:20\n    at new Promise (<anonymous>)\n    at runWithCancel (file:///Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/node_modules/.pnpm/vitest@5.0.0_@types+node@24.13.3_vite@8.2.2_@types+node@24.13.3_/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:3314:10)\n    at file:///Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/node_modules/.pnpm/vitest@5.0.0_@types+node@24.13.3_vite@8.2.2_@types+node@24.13.3_/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:3299:20"
+          ],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects changed ownerReceiptSha256 source/adoption binding",
+          "status": "passed",
+          "title": "rejects changed ownerReceiptSha256 source/adoption binding",
+          "duration": 24.21570799999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects changed adoptionManifestFingerprint source/adoption binding",
+          "status": "passed",
+          "title": "rejects changed adoptionManifestFingerprint source/adoption binding",
+          "duration": 19.759915999999976,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects changed financeSha256 source/adoption binding",
+          "status": "passed",
+          "title": "rejects changed financeSha256 source/adoption binding",
+          "duration": 20.791375000000016,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) requires current parser provenance again after JSON transport, and snapshots/freezes inputs",
+          "status": "passed",
+          "title": "requires current parser provenance again after JSON transport, and snapshots/freezes inputs",
+          "duration": 63.615792000000056,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects missing/nonpositive/noncanonical FX 0",
+          "status": "passed",
+          "title": "rejects missing/nonpositive/noncanonical FX 0",
+          "duration": 38.087833000000046,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects missing/nonpositive/noncanonical FX -1",
+          "status": "passed",
+          "title": "rejects missing/nonpositive/noncanonical FX -1",
+          "duration": 38.94683299999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects missing/nonpositive/noncanonical FX 1.00",
+          "status": "passed",
+          "title": "rejects missing/nonpositive/noncanonical FX 1.00",
+          "duration": 37.556332999999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects missing/nonpositive/noncanonical FX 1e3",
+          "status": "passed",
+          "title": "rejects missing/nonpositive/noncanonical FX 1e3",
+          "duration": 38.03387499999985,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects missing/nonpositive/noncanonical FX 1",
+          "status": "passed",
+          "title": "rejects missing/nonpositive/noncanonical FX 1",
+          "duration": 19.600167000000056,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects missing/nonpositive/noncanonical FX null",
+          "status": "passed",
+          "title": "rejects missing/nonpositive/noncanonical FX null",
+          "duration": 38.33574999999996,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) checks real calendar dates, uniform value dates and source versions",
+          "status": "passed",
+          "title": "checks real calendar dates, uniform value dates and source versions",
+          "duration": 94.89808400000015,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects altered bytes, wrong hash, unresolved pointer and mismatched source value",
+          "status": "passed",
+          "title": "rejects altered bytes, wrong hash, unresolved pointer and mismatched source value",
+          "duration": 78.20758300000011,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects canonical JSON collisions/numbers, oversized documents and traversal provenance",
+          "status": "passed",
+          "title": "rejects canonical JSON collisions/numbers, oversized documents and traversal provenance",
+          "duration": 50.87237499999992,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) requires exactly all countries, distinct LC and complete declared category coverage",
+          "status": "passed",
+          "title": "requires exactly all countries, distinct LC and complete declared category coverage",
+          "duration": 156.46483300000045,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "strict formal financial calculation contract (never formal approval)"
+          ],
+          "fullName": "strict formal financial calculation contract (never formal approval) rejects unknown versus zero, missing counterpart, unsupported instruments and conflicting native valuation",
+          "status": "passed",
+          "title": "rejects unknown versus zero, missing counterpart, unsupported instruments and conflicting native valuation",
+          "duration": 190.28670799999963,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority"
+          ],
+          "fullName": "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority builds 70 LC + 70 native GCU batches; exact source conversion once, paired B/R and no CB backing plug",
+          "status": "passed",
+          "title": "builds 70 LC + 70 native GCU batches; exact source conversion once, paired B/R and no CB backing plug",
+          "duration": 361.0190829999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority"
+          ],
+          "fullName": "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority derives NEGATIVE CB opening net worth without fabricated historical equity/asset",
+          "status": "passed",
+          "title": "derives NEGATIVE CB opening net worth without fabricated historical equity/asset",
+          "duration": 288.5408749999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority"
+          ],
+          "fullName": "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority derives ZERO CB opening net worth without fabricated historical equity/asset",
+          "status": "passed",
+          "title": "derives ZERO CB opening net worth without fabricated historical equity/asset",
+          "duration": 287.0761669999997,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority"
+          ],
+          "fullName": "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority derives POSITIVE CB opening net worth without fabricated historical equity/asset",
+          "status": "passed",
+          "title": "derives POSITIVE CB opening net worth without fabricated historical equity/asset",
+          "duration": 306.849209,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority"
+          ],
+          "fullName": "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority does not treat SOURCE_CANDIDATE or a chosen formal-looking World ID as economic/World approval",
+          "status": "passed",
+          "title": "does not treat SOURCE_CANDIDATE or a chosen formal-looking World ID as economic/World approval",
+          "duration": 319.53491699999995,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority"
+          ],
+          "fullName": "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority has stable fingerprints after transport/reparse and input enumeration changes",
+          "status": "passed",
+          "title": "has stable fingerprints after transport/reparse and input enumeration changes",
+          "duration": 1091.7866669999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority"
+          ],
+          "fullName": "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority fails all-or-zero when TGA/R source totals or native valuation fail",
+          "status": "passed",
+          "title": "fails all-or-zero when TGA/R source totals or native valuation fail",
+          "duration": 71.52800000000025,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority"
+          ],
+          "fullName": "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority rejects exact decimal result overflow without rounding or a partial candidate",
+          "status": "failed",
+          "title": "rejects exact decimal result overflow without rounding or a partial candidate",
+          "duration": 1.9284579999994094,
+          "failureMessages": [
+            "DomainError: Exact authoritative decimal result exceeds 120 digits\n    at assertWorldDecimalResult (/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/packages/core/dist/numeric/world-decimal.js:33:15)\n    at openingBookMoney (/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/apps/world-worker/src/preparation/opening-economic-decision.ts:95:9)\n    at local (/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/tests/world-core/formal-financial-opening.test.ts:61:9)\n    at /Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/tests/world-core/formal-financial-opening.test.ts:67:17\n    at Array.map (<anonymous>)\n    at vector (/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/tests/world-core/formal-financial-opening.test.ts:53:45)\n    at /Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/tests/world-core/formal-financial-opening.test.ts:571:19\n    at file:///Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/node_modules/.pnpm/vitest@5.0.0_@types+node@24.13.3_vite@8.2.2_@types+node@24.13.3_/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:1628:35\n    at file:///Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/node_modules/.pnpm/vitest@5.0.0_@types+node@24.13.3_vite@8.2.2_@types+node@24.13.3_/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:2783:26\n    at file:///Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/node_modules/.pnpm/vitest@5.0.0_@types+node@24.13.3_vite@8.2.2_@types+node@24.13.3_/node_modules/vitest/dist/chunks/run.CQOUYP-x.js:3319:20"
+          ],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": [
+            "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority"
+          ],
+          "fullName": "D01/D02/D03 actual multi-currency calculation with explicit unresolved authority preserves exact conversion and per-currency conservation for bounded generated rates",
+          "status": "passed",
+          "title": "preserves exact conversion and per-currency conservation for bounded generated rates",
+          "duration": 2488.8629999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1791629539482,
+      "endTime": 1791629545657.863,
+      "status": "failed",
+      "message": "",
+      "name": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/tests/world-core/formal-financial-opening.test.ts"
+    }
+  ]
+}

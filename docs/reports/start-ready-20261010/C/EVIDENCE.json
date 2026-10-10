@@ -1,0 +1,190 @@
+{
+  "schemaVersion": "C_OFFICE_BROWSER_IMPLEMENTATION_EVIDENCE_V1",
+  "date": "2026-10-10",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "effectiveRisk": "P0",
+  "baseCommit": "42991acfee9d0eacc702ba47a380c938a4516f03",
+  "implementationCommit": "213c5820e631b204134e567e28cbd0c917d649ab",
+  "implementationTree": "1df5f0fabd1c64457512d89c57f98e6ddd6c582a",
+  "branch": "codex/c-office-browser-20261010",
+  "worktree": "/Users/samuel/Documents/econclub/.econmind-worktrees/c-browser-trusted-host",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "nodePath": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node",
+    "pnpmInvocation": "npx --yes pnpm@12.3.4 with pinned Node on PATH",
+    "lockfileChanged": false
+  },
+  "checks": [
+    {
+      "name": "core-public-contract-build",
+      "command": "pnpm --filter @econmind/core build",
+      "exit_code": 0,
+      "result": "PASS",
+      "scope": "Local ignored dist output only; no Core source/contract change"
+    },
+    {
+      "name": "targeted-tests",
+      "command": "pnpm exec vitest run tests/world-web/office-command.test.ts tests/world-web/office-command-schema.test.ts tests/world-web/formal-session-adapter.test.ts tests/world-web/trusted-host-session.test.ts tests/world-web/trusted-host-financial-privacy.test.ts --pool=threads",
+      "exit_code": 0,
+      "result": "PASS",
+      "files": 5,
+      "tests": 90,
+      "newTests": 51,
+      "existingSharedHostAndPrivacyTests": 39,
+      "durationSeconds": 9.67,
+      "startTimeLocal": "19:01:12",
+      "scope": "Actual shipped clients/controllers/views, real Core parsers and existing SQL receipt serializer/projector exercised with explicitly TEST_ONLY intercepted transport, row executor and DOM double; not native/live/database/JWT evidence"
+    },
+    {
+      "name": "strict",
+      "command": "env PATH=/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin:$PATH npx --yes pnpm@12.3.4 exec tsc --noEmit -p tests/world-web/office-command.tsconfig.json",
+      "exit_code": 0,
+      "result": "PASS",
+      "output": "npm warn Unknown project config \"strict-peer-dependencies\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n"
+    },
+    {
+      "name": "web-types",
+      "command": "env PATH=/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin:$PATH npx --yes pnpm@12.3.4 --filter @econmind/world-web typecheck",
+      "exit_code": 0,
+      "result": "PASS",
+      "output": "npm warn Unknown project config \"strict-peer-dependencies\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n$ tsc -b --pretty false\n"
+    },
+    {
+      "name": "lint",
+      "command": "env PATH=/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin:$PATH npx --yes pnpm@12.3.4 exec eslint apps/world-web/src/office-command apps/world-web/src/trusted-host/formal-session-adapter.ts apps/world-web/src/trusted-host/bootstrap.ts apps/world-web/src/country-runtime/entry.ts tests/world-web/office-command*.ts tests/world-web/formal-session-adapter.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "output": "npm warn Unknown project config \"strict-peer-dependencies\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n"
+    },
+    {
+      "name": "format",
+      "command": "env PATH=/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin:$PATH npx --yes pnpm@12.3.4 exec prettier --check apps/world-web/src/office-command apps/world-web/src/trusted-host/formal-session-adapter.ts apps/world-web/src/trusted-host/bootstrap.ts apps/world-web/src/country-runtime/entry.ts tests/world-web/office-command*.ts tests/world-web/formal-session-adapter.test.ts tests/world-web/office-command.tsconfig.json",
+      "exit_code": 0,
+      "result": "PASS",
+      "output": "npm warn Unknown project config \"strict-peer-dependencies\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\nChecking formatting...\nAll matched files use Prettier code style!\n"
+    },
+    {
+      "name": "boundaries",
+      "command": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node scripts/check-boundaries.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "output": "{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 318,\n  \"guardedRoots\": [\n    \"apps\",\n    \"packages\",\n    \"apps/world-web/server.mjs\",\n    \"scripts/environment-policy.mjs\",\n    \"scripts/vite-environment-policy.mjs\",\n    \"scripts/vite-environment-policy.d.mts\",\n    \"scripts/run-development-service.mjs\",\n    \"scripts/run-development-stack.mjs\"\n  ],\n  \"sourceExtensions\": [\n    \".ts\",\n    \".tsx\",\n    \".mts\",\n    \".cts\",\n    \".js\",\n    \".jsx\",\n    \".mjs\",\n    \".cjs\"\n  ]\n}\n"
+    },
+    {
+      "name": "authority-patterns",
+      "command": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node scripts/check-authoritative-patterns.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "output": "{\n  \"scannedCoreFiles\": 89,\n  \"scannedFiles\": 313,\n  \"status\": \"PASS\",\n  \"violations\": []\n}\n"
+    },
+    {
+      "name": "safe-environment",
+      "command": "ECONMIND_ENV=local /Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node scripts/assert-safe-environment.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "output": "{\n  \"status\": \"PASS\",\n  \"environment\": \"local\",\n  \"databaseConfigured\": false,\n  \"validatedViteModes\": [\n    \"development\",\n    \"production\"\n  ],\n  \"linkedSupabaseProject\": \"NOT_LINKED\",\n  \"databaseMutationAllowed\": false\n}\n"
+    },
+    {
+      "name": "secrets",
+      "command": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node scripts/check-repository-secrets.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "output": "{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 2363\n}\n"
+    },
+    {
+      "name": "source-build",
+      "command": "env PATH=/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin:$PATH npx --yes pnpm@12.3.4 --filter @econmind/world-web exec vite build --logLevel warn",
+      "exit_code": 0,
+      "result": "PASS",
+      "output": "npm warn Unknown project config \"strict-peer-dependencies\". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.\n\n./shared/econmind-os-visual.css doesn't exist at build time, it will remain unchanged to be resolved at runtime\n[plugin builtin:vite-reporter] \n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n"
+    }
+  ],
+  "preservedFailures": [
+    {
+      "stage": "first web typecheck",
+      "result": "FAIL",
+      "exit_code": 1,
+      "detail": "view called renderDecisionResult with 3 arguments instead of 2; corrected to append its returned element"
+    },
+    {
+      "stage": "first new-test strict check",
+      "result": "FAIL",
+      "exit_code": null,
+      "detail": "TypeScript error observed; individual tsc exit not separately captured (enclosing test group exit 1). Core family parser test incorrectly passed raw payload instead of CanonicalCommand plus digest; corrected to use actual parseCanonicalCommand and family parser"
+    },
+    {
+      "stage": "first new targeted run",
+      "result": "FAIL",
+      "exit_code": 1,
+      "passed": 33,
+      "failed": 4,
+      "total": 37,
+      "detail": "Three test parser invocation failures plus duplicate requestId fixture prevented fresh rebind; preserved and corrected, no test weakened/skipped"
+    },
+    {
+      "stage": "intermediate targeted run",
+      "result": "PASS",
+      "exit_code": 0,
+      "passed": 37,
+      "total": 37
+    },
+    {
+      "stage": "schema-extension targeted run",
+      "result": "PASS",
+      "exit_code": 0,
+      "passed": 42,
+      "total": 42
+    },
+    {
+      "stage": "pre-country-mapping targeted regression run",
+      "result": "PASS",
+      "exit_code": 0,
+      "passed": 89,
+      "total": 89
+    }
+  ],
+  "notRun": [
+    "full pnpm check",
+    "previous complete 206-test suite",
+    "70x6 native/online acceptance",
+    "native browser/layout verification",
+    "real auth provider/login",
+    "approved G seat HTTP endpoint",
+    "real database/JWT/production authorization test",
+    "actual admitted domain source or durable economic commit via new browser chain",
+    "CI",
+    "push",
+    "PR",
+    "independent review",
+    "merge",
+    "deploy/publication",
+    "production DB",
+    "Clock/start/opening/activation",
+    "Gate B"
+  ],
+  "unresolved": [
+    "Real external auth provider installation BLOCKED",
+    "G seat endpoint/response contract PENDING_G_REVIEW; no new endpoint invented",
+    "Explicit approved host country display-to-server-ID directory and endpoint/world pins required",
+    "Industry unsupported by unchanged current public API contract",
+    "Finance/Trade original staged intents are not synthesized by formal adapter"
+  ],
+  "invariants": {
+    "noCoreApiWorkerSourceChanges": true,
+    "noGateStatusChanges": true,
+    "noOldSiteOrMapCssChanges": true,
+    "noCredentialPersistence": true,
+    "noAutomaticWriteReplay": true,
+    "noQueueAckAsEconomicCommit": true,
+    "noParallelFinalApi": true,
+    "providerJsonAloneInsufficient": true,
+    "defaultDisconnected": true
+  },
+  "independentReview": {
+    "required": true,
+    "approved": false,
+    "mergeAuthorized": false,
+    "dependentIntegrationAuthorized": false
+  }
+}
