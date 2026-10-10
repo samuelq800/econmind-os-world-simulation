@@ -1,0 +1,503 @@
+{
+  "schemaVersion": "owner-input-catalog-verification-v1",
+  "preparedAtUtc": "2026-10-10T12:48:50Z",
+  "status": "DOCUMENTATION_CANDIDATE_NOT_RELEASE_AUTHORITY",
+  "repository": "https://github.com/samuelq800/econmind-os-world-simulation.git",
+  "worktree": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010",
+  "branch": "codex/o-owner-inputs-exact-20261010",
+  "fixedMain": "27307a108ce5c0c3e2ce28e3776f8ba15ed73d3b",
+  "fixedRootDraft": "5a2d7a0ca0baf92bd2843e818a6f1ab5d5c1d6cc",
+  "remoteMainReadback": {
+    "command": "git ls-remote origin refs/heads/main",
+    "exitCode": 0,
+    "sha": "27307a108ce5c0c3e2ce28e3776f8ba15ed73d3b"
+  },
+  "document": {
+    "path": "docs/reports/start-ready-20261010/O/OWNER_INPUTS.md",
+    "sha256": "150119e1a71a160007751d7ffd35987b7c61510e894be70ffc891fbb9e96209c",
+    "bytes": 33094,
+    "lines": 125
+  },
+  "ownership": {
+    "allowedPaths": [
+      "docs/reports/start-ready-20261010/O/OWNER_INPUTS.md",
+      "docs/reports/start-ready-20261010/O/OWNER_INPUTS_VERIFICATION.json"
+    ],
+    "rootOwnedFilesNotChanged": [
+      "docs/reports/start-ready-20261010/O/WINDOW_CLOSURE.md",
+      "docs/reports/start-ready-20261010/README.md"
+    ],
+    "maps": "LOCAL_UNPUBLISHED_NOT_MODIFIED"
+  },
+  "checks": {
+    "originalMainAndRootDraftEqual": true,
+    "originalOwnerInputsSha256": "bca8b470f591d524e81b6592958a995122c5801625ca32a86fec8cd32db9757e",
+    "aCalculatorModulesMatchFixedMain": true,
+    "aCalculatorCommitIsMainAncestor": false,
+    "sourcePackage13FilesMatchChecksums": true,
+    "exact70CountryIds": true,
+    "sixOfficeRowsPresent": true,
+    "threeInputPackagesAndAuthorityBlockersPresent": true,
+    "noStartReadyOrProductionPromotion": true,
+    "onlyOwnerInputsTrackedPathChanged": true,
+    "staleAWaitingReviewPhraseAbsent": true,
+    "inlineDocumentHashesMatchActualSources": true,
+    "referencedSourceCount": 33,
+    "sourceHashing": "bounded listed files and fixed Git objects only; no whole-repository rescan",
+    "newEconomicAnalysis": "NOT_RUN; counts/conflicts inherited from frozen evidence, only source identity/structure/country enumeration checked",
+    "format": {
+      "tool": "Prettier existing pinned dependency",
+      "node": "v24.20.0",
+      "writeExitCode": 0,
+      "checkExitCode": 0
+    },
+    "diffWhitespace": {
+      "command": "git diff --check",
+      "exitCode": 0
+    },
+    "reviewScope": "document author source reconciliation, not independent product approval",
+    "finalReceiptBindingAndScope": "PASS checked with document SHA256/byte count,33 distinct source IDs,13 source files,70 countries,inline hash backing and exact two allowed paths"
+  },
+  "countryCoverage": {
+    "count": 70,
+    "ids": [
+      "visual-territory-01",
+      "visual-territory-02",
+      "visual-territory-03",
+      "visual-territory-04",
+      "visual-territory-05",
+      "visual-territory-06",
+      "visual-territory-07",
+      "visual-territory-08",
+      "visual-territory-09",
+      "visual-territory-10",
+      "visual-territory-11",
+      "visual-territory-12",
+      "visual-territory-13",
+      "visual-territory-14",
+      "visual-territory-15",
+      "visual-territory-16",
+      "visual-territory-17",
+      "visual-territory-18",
+      "visual-territory-19",
+      "visual-territory-20",
+      "visual-territory-21",
+      "visual-territory-22",
+      "visual-territory-23",
+      "visual-territory-24",
+      "visual-territory-25",
+      "visual-territory-26",
+      "visual-territory-27",
+      "visual-territory-28",
+      "visual-territory-29",
+      "visual-territory-30",
+      "visual-territory-31",
+      "visual-territory-32",
+      "visual-territory-33",
+      "visual-territory-34",
+      "visual-territory-35",
+      "visual-territory-36",
+      "visual-territory-37",
+      "visual-territory-38",
+      "visual-territory-39",
+      "visual-territory-40",
+      "visual-territory-41",
+      "visual-territory-42",
+      "visual-territory-43",
+      "visual-territory-44",
+      "visual-territory-45",
+      "visual-territory-46",
+      "visual-territory-47",
+      "visual-territory-48",
+      "visual-territory-49",
+      "visual-territory-50",
+      "visual-territory-51",
+      "visual-territory-52",
+      "visual-territory-53",
+      "visual-territory-54",
+      "visual-territory-55",
+      "visual-territory-56",
+      "visual-territory-57",
+      "visual-territory-58",
+      "visual-territory-59",
+      "visual-territory-60",
+      "visual-territory-61",
+      "visual-territory-62",
+      "visual-territory-63",
+      "visual-territory-64",
+      "visual-territory-65",
+      "visual-territory-66",
+      "visual-territory-67",
+      "visual-territory-68",
+      "visual-territory-69",
+      "visual-territory-70"
+    ]
+  },
+  "authorityCrosswalk": [
+    {
+      "input": "I01",
+      "required": "real 70-country LC/FX and complete21-category CB supplemental source bytes/version/valueDate/pointers",
+      "state": "NOT_PROVIDED",
+      "existingDataNotRequestedAgain": "original490 financial lexemes; A=0"
+    },
+    {
+      "input": "I02",
+      "required": "real scoped Human Owner instruction/receipt/independent registration for exact new document set and targetWorld/seed/model/replay/orchestrator/assembly intent",
+      "state": "NOT_PROVIDED",
+      "priorReceiptFormalWorldId": null,
+      "notGranted": [
+        "source admission",
+        "schema publication",
+        "seat",
+        "production host",
+        "startup"
+      ]
+    },
+    {
+      "input": "I03",
+      "required": "only frozen per-ID residual facts/conflict corrections after applying existing D04 adoption",
+      "state": "CONDITIONAL_SOURCE_RESIDUALS_NOT_BLANKET_OWNER_BLOCK",
+      "alreadyResolvedByHuman": "D04 section5 mineral/water/energy/employment/service adoption policies",
+      "industry": "executable family/lifecycle absent is engineering; exact P01 recipe/capex/conflicts remain source issues"
+    },
+    {
+      "input": "identity",
+      "required": "existing server verified lawful subject/assignment only when publishing actual seats",
+      "playerRoster": "DEFERRED_NOT_REQUESTED",
+      "isolatedTestScope": "D06 first two eligible canonical countries; six distinct Offices;24 real hours;no production seats"
+    },
+    {
+      "input": "persistent permissions",
+      "required": "reviewed exact runtime roles/functions/host bindings and registered sole publication artifact followed by authorized secure operation",
+      "state": "PROPOSED_NOT_PROVISIONED",
+      "undefinedBindings": "engineering contract precondition; no invented binding IDs or request for secret values"
+    }
+  ],
+  "sources": [
+    {
+      "id": "AUTH01",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/CHECKSUMS.json",
+      "sha256": "88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315",
+      "bytes": 12967,
+      "role": "frozen source checksums",
+      "expectedSha256": "88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "AUTH02",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_MAPPING.json",
+      "sha256": "d2811910a9021e68fabe894504701d6dc8d88e362fc2354b0c826e3446456253",
+      "bytes": 29609172,
+      "role": "frozen mapping",
+      "expectedSha256": "d2811910a9021e68fabe894504701d6dc8d88e362fc2354b0c826e3446456253",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "AUTH03",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/docs/reports/world-connection/C_OFFICIAL_WORLD_COMPLETE_COVERAGE.json",
+      "sha256": "c42a8336b59eec986c576427c85c6db4aca986fc0632e6b572b9e997f4f835e9",
+      "bytes": 294812,
+      "role": "frozen coverage",
+      "expectedSha256": "c42a8336b59eec986c576427c85c6db4aca986fc0632e6b572b9e997f4f835e9",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "AUTH04",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/docs/reports/world-connection/C_OFFICIAL_WORLD_OPENING_GAPS.json",
+      "sha256": "1254b3c2929e10d3b8a582e032bc22648b04d01236e3098a18a1c39974d46539",
+      "bytes": 227292,
+      "role": "frozen gaps; not rewritten"
+    },
+    {
+      "id": "AUTH05",
+      "path": "/Users/samuel/Downloads/EconMind_World_V2_Owner_Decisions_Codex_Prompt_20261007.md",
+      "sha256": "57bfdec38a9a400991cb26362a99d33d7a81c8e6258c03460185e51501fb5ac5",
+      "bytes": 36506,
+      "role": "actual human instruction; section5 resolves historical D04 owner questions",
+      "expectedSha256": "57bfdec38a9a400991cb26362a99d33d7a81c8e6258c03460185e51501fb5ac5",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "AUTH06",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/docs/governance/owner-inputs/2026-10-07/OWNER_NON_HOST_DECISION_RECEIPT.json",
+      "sha256": "2c06c4bd1157a2d245143190c4d17b0499b5d09f42159a414846d0f9bcb8d99e",
+      "bytes": 4500,
+      "role": "prior actual receipt; null formal World",
+      "expectedSha256": "2c06c4bd1157a2d245143190c4d17b0499b5d09f42159a414846d0f9bcb8d99e",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "R01",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/docs/reports/start-ready-20261010/reviews/B_A_independent-review.md",
+      "sha256": "471e816024ff23e5077f6778d1e96e1f0a68f216f5ac9a696631e43cbf573070",
+      "bytes": 9868,
+      "role": "APPROVED source-only calculator36ee5c1"
+    },
+    {
+      "id": "R02",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/docs/reports/start-ready-20261010/A/SOURCE_ADOPTION_PREFLIGHT_DESIGN.md",
+      "sha256": "e96f228cb9d9b4ae9477c8b01352cd995fcbb3221f9a0f625d35d33d17946845",
+      "bytes": 29850,
+      "role": "ba92a1b design-only",
+      "expectedSha256": "e96f228cb9d9b4ae9477c8b01352cd995fcbb3221f9a0f625d35d33d17946845",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "R03",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/world-map-full-integration/docs/reports/start-ready-20261010/reviews/F_A_SOURCE_DESIGN_REVIEW.md",
+      "sha256": "6fd20f7576e439184054971ebcc56ebf3ee0d525048f38852971f0529d0fe7ac",
+      "bytes": 16232,
+      "role": "APPROVED_WITH_EXACT_IMPLEMENTATION_BOUNDARIES design only"
+    },
+    {
+      "id": "R04",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/e-db-permission-design-20261010/docs/reports/start-ready-20261010/E/IMPLEMENTATION_DESIGN.md",
+      "sha256": "5603d7c380ac748687452ebf9315083703eeafe948de196f25d140458ae52fd8",
+      "bytes": 51388,
+      "role": "1883d65 proposed roles/functions/columns; not provisioned",
+      "expectedSha256": "5603d7c380ac748687452ebf9315083703eeafe948de196f25d140458ae52fd8",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "R05",
+      "path": "/Users/samuel/.codex/state/plugins/codex-security/scans/e-db-permission-design-20261010/artifacts-cbc02102c2f2129442f61193309d4d912d4d91bc2eb8276390cca586dc800d52/artifacts/D_E01_DELTA_REVIEW/review.md",
+      "sha256": "fbfefb0e2e58ea3273f18c3e2ce7503858ecae59db00352984bfdef3effc2642",
+      "bytes": 8762,
+      "role": "APPROVED design/synthetic oracle only",
+      "expectedSha256": "fbfefb0e2e58ea3273f18c3e2ce7503858ecae59db00352984bfdef3effc2642",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "R06",
+      "path": "/Users/samuel/.codex/state/plugins/codex-security/scans/g-nonactivated-runtime-api-host/artifacts-5188513d79bd81986a823019895128cbe4a8422cd6bb52fe5b000cadca2cefad/artifacts/F_G_SLICES_1_2_SOURCE_REVIEW_20261010/F_REVIEW.md",
+      "sha256": "6fd61cd4b01cd134c9bd82d6e47bd3d1bffda9dbdff43f33f4cc3bece04be157",
+      "bytes": 12421,
+      "role": "CHANGES_REQUIRED fixed89c4446/3249064; not review of later corrections"
+    },
+    {
+      "id": "R07",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/docs/reports/start-ready-20261010/F/ACCEPTANCE_GAPS.md",
+      "sha256": "38bb664edcc8ff33df28cebaad4069b5626bd30846723c0cffe2dae90784f6fe",
+      "bytes": 25653,
+      "role": "six Office contract gaps; historical source snapshot"
+    },
+    {
+      "id": "R08",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/docs/reports/start-ready-20261010/F/V09_EVIDENCE_RECEIPT.md",
+      "sha256": "b5cc30a5e9e3ba9ca4f2172441426a8feb629091553185ea3fb545cf4ec88fdf",
+      "bytes": 27148,
+      "role": "V09 source inheritance and Industry exact known example; not rerun"
+    },
+    {
+      "id": "R09",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/docs/reports/world-connection/D02_D04_SOURCE_RESOLUTION_AUDIT_2026_10_07.md",
+      "sha256": "f1fe355e37d8a38d838cdd671469024c7aeac27d0ca5add0621f3be6572da805",
+      "bytes": 34202,
+      "role": "historical facts/conflicts; owner flags crosswalk to AUTH05/06"
+    },
+    {
+      "id": "CODE01",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/apps/world-worker/src/preparation/formal-financial-opening-contract.ts",
+      "sha256": "3037372c2469b8cfc981c1597bf251b30bc6718e720b6d2729d394382541c6e6",
+      "bytes": 19754,
+      "role": "exact existing financial parser fields/categories",
+      "expectedSha256": "3037372c2469b8cfc981c1597bf251b30bc6718e720b6d2729d394382541c6e6",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "CODE02",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/apps/world-worker/src/preparation/formal-financial-opening-producer.ts",
+      "sha256": "049e3ebf922f0e2f7d3b6e96874a08d74df2b5b20068af371703f87ddec82ecf",
+      "bytes": 17713,
+      "role": "raw producer unconditional BLOCKED boundary",
+      "expectedSha256": "049e3ebf922f0e2f7d3b6e96874a08d74df2b5b20068af371703f87ddec82ecf",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "CODE03",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/scripts/production-posting-release-policy.mjs",
+      "sha256": "82cf5235edd170844ea218bc4aac5962feffa9b33163893e4a761673119e3a89",
+      "bytes": 13135,
+      "role": "fixed0023 policy; not registered generic caller",
+      "expectedSha256": "82cf5235edd170844ea218bc4aac5962feffa9b33163893e4a761673119e3a89",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "CODE04",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/o-owner-inputs-exact-20261010/database/proposals/runtime-read-binding-storage.sql",
+      "sha256": "8bb715881ebbe78336d11460306421b136f215f451c0253817b14d3916e7c0fe",
+      "bytes": 9097,
+      "role": "unregistered proposal; admission veto retained",
+      "expectedSha256": "8bb715881ebbe78336d11460306421b136f215f451c0253817b14d3916e7c0fe",
+      "expectedHashCheck": "PASS"
+    },
+    {
+      "id": "S01",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/countries.json",
+      "sha256": "5d493e93dfab1425731191ba7491cce47949d176e4769b33fdca48d2d31dba89",
+      "bytes": 146348,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "5d493e93dfab1425731191ba7491cce47949d176e4769b33fdca48d2d31dba89"
+    },
+    {
+      "id": "S02",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/entities.json",
+      "sha256": "d53e64a28110ea3615d42be03fc740a2fe72b55e6aeb5d4a584f5d2c117a6593",
+      "bytes": 82043,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "d53e64a28110ea3615d42be03fc740a2fe72b55e6aeb5d4a584f5d2c117a6593"
+    },
+    {
+      "id": "S03",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/finance.json",
+      "sha256": "4f30d7dd43aa2190604d4fb73c776a8d4aaa263653dc783def6f7c2c5cc80805",
+      "bytes": 89045,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "4f30d7dd43aa2190604d4fb73c776a8d4aaa263653dc783def6f7c2c5cc80805"
+    },
+    {
+      "id": "S04",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/facilities.json",
+      "sha256": "049e39330646048b95636d3a075fc1423ee62762999184a2326df161a198b485",
+      "bytes": 1897241,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "049e39330646048b95636d3a075fc1423ee62762999184a2326df161a198b485"
+    },
+    {
+      "id": "S05",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/deposits.json",
+      "sha256": "62076847d10529da672de8a97607dd98387be459cf6fd617c24d33f29875f516",
+      "bytes": 254092,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "62076847d10529da672de8a97607dd98387be459cf6fd617c24d33f29875f516"
+    },
+    {
+      "id": "S06",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/water-allocations.json",
+      "sha256": "53b4d7cd0425f6a0789cad2e1bcd0800420a5010f38307e895742df1c0567841",
+      "bytes": 54600,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "53b4d7cd0425f6a0789cad2e1bcd0800420a5010f38307e895742df1c0567841"
+    },
+    {
+      "id": "S07",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/seasonal-water.json",
+      "sha256": "704f59f6204096b1f696d9d35c8727845a92f44efd8948b87eda0e740845fc66",
+      "bytes": 62791,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "704f59f6204096b1f696d9d35c8727845a92f44efd8948b87eda0e740845fc66"
+    },
+    {
+      "id": "S08",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/geography.json",
+      "sha256": "c1a3d521ae91b37845f764be4ede73d522bc6958be90f4676ad5a19395b26a35",
+      "bytes": 8441668,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "c1a3d521ae91b37845f764be4ede73d522bc6958be90f4676ad5a19395b26a35"
+    },
+    {
+      "id": "S09",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/power.json",
+      "sha256": "81e910b36558260e0372f6b00474147e431ed502387b78bfdcc0d8dd2f26713e",
+      "bytes": 39232,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "81e910b36558260e0372f6b00474147e431ed502387b78bfdcc0d8dd2f26713e"
+    },
+    {
+      "id": "S10",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/employment.json",
+      "sha256": "f5e5f79d9d0453f291c05840ee468fa71b7e021e29a79766cc75530a1986155f",
+      "bytes": 42708,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "f5e5f79d9d0453f291c05840ee468fa71b7e021e29a79766cc75530a1986155f"
+    },
+    {
+      "id": "S11",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/population-services.json",
+      "sha256": "86e828a421346aecaa31c95a7805289a022c80df93399545aeea39f6ce361615",
+      "bytes": 56412,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "86e828a421346aecaa31c95a7805289a022c80df93399545aeea39f6ce361615"
+    },
+    {
+      "id": "S12",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/recipes.json",
+      "sha256": "205259654c754d2ebe6e774f3a902f367455bdff4a51f7b0449e0d74334aeb7c",
+      "bytes": 4940,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "205259654c754d2ebe6e774f3a902f367455bdff4a51f7b0449e0d74334aeb7c"
+    },
+    {
+      "id": "S13",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010/artifacts/world-balanced-candidate-v1/data/manifest.json",
+      "sha256": "b1072645a6ade9eb48b0d105bf38b2c475a9b667f2f14224c805fef88be3befb",
+      "bytes": 3319,
+      "role": "existing frozen candidate; not new adoption",
+      "expectedHashCheck": "PASS",
+      "expectedSha256": "b1072645a6ade9eb48b0d105bf38b2c475a9b667f2f14224c805fef88be3befb"
+    },
+    {
+      "id": "R10",
+      "path": "docs/reports/start-ready-20261010/G/IMPLEMENTATION_DESIGN.md",
+      "gitRepository": "/Users/samuel/Documents/econclub/.econmind-worktrees/g-nonactivated-runtime-api-host",
+      "gitCommit": "f19e8bad4983ae0cd247182b8ce9a0f74315a03d",
+      "sha256": "6c3244d1c6f03bf42f0ead6b949f91810bbc34c4cd6b5b2313b525e319d51c65",
+      "bytes": 35931,
+      "role": "fixed G design, not current working tree"
+    }
+  ],
+  "retainedNonAcceptanceEvents": [
+    {
+      "event": "initial read-only locator misses for G design/root artifact location",
+      "effect": "no acceptance PASS inferred; resolved using fixed G Git blob and known A source directory"
+    },
+    {
+      "event": "first apply_patch attempted delete+add same path",
+      "result": "rejected before mutation; subsequent single Update File applied"
+    },
+    {
+      "event": "initial metadata harness asserted calculator commit ancestry",
+      "exitCode": 1,
+      "result": "36ee5c1 is not an ancestor of fixed main; documented correctly. Exact two module bytes match fixed main; ancestry is not claimed",
+      "subsequentCheck": "PASS exact fixed Git content equality"
+    },
+    {
+      "event": "initial metadata-only Node execution used ambientv26.5.0",
+      "result": "no subject code executed; final source/document identity checks and formatting used pinnedv24.20.0"
+    },
+    {
+      "event": "first final scope-check helper trimmed leading porcelain status whitespace",
+      "exitCode": 1,
+      "result": "helper misread first path as ocs/...; no product/document defect. Corrected helper uses git status --porcelain -z without trim; no subject files changed to satisfy it."
+    }
+  ],
+  "notRun": [
+    "runtime implementation",
+    "new migration or DDL",
+    "runtime/schema/status mutation",
+    "database connection or production access",
+    "credentials or member-details retrieval",
+    "product test rerun",
+    "whole-repository analysis",
+    "full/native/420/browser acceptance",
+    "CI rerun or new CI PASS claim",
+    "source adoption or formal World binding issuance",
+    "permission provisioning",
+    "map commit/push/merge",
+    "UI release",
+    "push/merge/deployment/activation"
+  ],
+  "stopPoint": "Fixed documentation and separate receipt only. Do not wait for other windows or release UI. No VERIFIED/START_READY/GateB claim."
+}
