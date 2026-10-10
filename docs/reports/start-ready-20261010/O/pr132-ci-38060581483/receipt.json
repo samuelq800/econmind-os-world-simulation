@@ -1,0 +1,225 @@
+{
+  "schemaVersion": "START_READY_CANDIDATE_CI_1",
+  "classification": "NONDEPLOYABLE_CI_NOT_GATE_OR_ACTIVATION_APPROVAL",
+  "base": "42991acfee9d0eacc702ba47a380c938a4516f03",
+  "checkoutSha": "6a7b196a747782093c4da2a36a48e02ae6c8cb87",
+  "checkoutTree": "fa5b7e753e323a15cd5585672d75a6367bf31183",
+  "inputsStatus": "PASS",
+  "fullCheck": {
+    "status": "NOT_RUN_BY_SUPPLEMENTAL_CI",
+    "responsibleWorkflow": ".github/workflows/cloudflare-runtime-environment.yml",
+    "rule": "External full result requires matching actual checkout SHA/tree; no inherited PASS",
+    "historicalReference": {
+      "run": "38048771913",
+      "job": "114203506317",
+      "metadataHead": "95926300c35645d9a684ec7dedd51114e1962935",
+      "actualCheckout": "a61a26a90a0ea932401caa9f529a18a25eca0697",
+      "actualTree": "3bbed0dae40a2cc85b414e1a87893f514d26da7a",
+      "observedResult": "FAIL_FORMAT_CHECK_C_REPORT_NATIVE_SKIPPED",
+      "scope": "HISTORICAL_REFERENCE_ONLY_NOT_THIS_CI_CHECKOUT_RESULT"
+    }
+  },
+  "builds": [
+    {
+      "name": "@econmind/core",
+      "command": ["pnpm", "--filter", "@econmind/core", "build"],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "name": "@econmind/world-worker",
+      "command": ["pnpm", "--filter", "@econmind/world-worker", "build"],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null
+    }
+  ],
+  "strictTypes": [
+    {
+      "config": "tests/support/tsconfig.formal-financial-opening.json",
+      "command": [
+        "pnpm",
+        "exec",
+        "tsc",
+        "-p",
+        "tests/support/tsconfig.formal-financial-opening.json",
+        "--noEmit",
+        "--strict",
+        "--skipLibCheck",
+        "false"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "config": "tests/world-web/office-command.tsconfig.json",
+      "command": [
+        "pnpm",
+        "exec",
+        "tsc",
+        "-p",
+        "tests/world-web/office-command.tsconfig.json",
+        "--noEmit",
+        "--strict",
+        "--skipLibCheck",
+        "false"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "config": "tests/world-core/writer-lease-supervisor.tsconfig.json",
+      "command": [
+        "pnpm",
+        "exec",
+        "tsc",
+        "-p",
+        "tests/world-core/writer-lease-supervisor.tsconfig.json",
+        "--noEmit",
+        "--strict",
+        "--skipLibCheck",
+        "false"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "config": "tests/support/tsconfig.f-v09-native-claim.json",
+      "command": [
+        "pnpm",
+        "exec",
+        "tsc",
+        "-p",
+        "tests/support/tsconfig.f-v09-native-claim.json",
+        "--noEmit",
+        "--strict",
+        "--skipLibCheck",
+        "false"
+      ],
+      "status": "PASS",
+      "exitCode": 0,
+      "signal": null
+    }
+  ],
+  "native": {
+    "dSupervisor": {
+      "status": "PASS",
+      "expectedTests": 7,
+      "migrationPrefix": 6,
+      "guard": {
+        "command": [
+          "/opt/hostedtoolcache/node/24.20.0/x64/bin/node",
+          "scripts/v09-postgres-test-environment.mjs"
+        ],
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null
+      },
+      "execution": {
+        "command": [
+          "pnpm",
+          "exec",
+          "vitest",
+          "run",
+          "tests/world-core/writer-lease-supervisor-postgres.test.ts",
+          "--reporter=default",
+          "--reporter=json",
+          "--outputFile.json=/home/runner/work/_temp/start-ready-candidate/native-d-results.json"
+        ],
+        "status": "PASS",
+        "exitCode": 0,
+        "signal": null
+      },
+      "counts": {
+        "passed": 7,
+        "failed": 0,
+        "pending": 0,
+        "total": 7
+      }
+    },
+    "fClaimRecovery": {
+      "status": "NOT_RUN",
+      "reason": "Machine-owned generation, fixed macOS data directory and PG160015 guard are not portable; no guard changed",
+      "independentLocalEvidence": {
+        "kind": "REFERENCE_ONLY_NOT_CI_REEXECUTION_OR_BUILD_PROVENANCE_CLOSURE",
+        "commit": "d9853754b3eb2080a5ac4d30c71cae4db013fe0c",
+        "path": "docs/reports/start-ready-20261010/F/V09_EVIDENCE_RECEIPT.md",
+        "artifact": "/Users/samuel/Documents/econclub/artifacts/f-v09-claim-recovery-20261010.KgSwqT/NATIVE_RESULTS.json",
+        "artifactSha256": "fbba98a2b2214b1ea05cc512eaaa4a468af37e5abbabc28a5bdd9d6de3008fd7",
+        "limitation": "Producer-reported 2 PASS; original Core dist provenance limitation is retained; independent review remains separate",
+        "independentReview": {
+          "path": "docs/reports/start-ready-20261010/reviews/D_F_review.md",
+          "sha256": "2ff88ab43b861eb9f9963c039985962c8830874d247ea6bc1ce98ab97efe1c2e",
+          "scope": "Independent D review of d985375 six-file candidate; not reexecution of native2"
+        }
+      }
+    }
+  },
+  "productionAccess": false,
+  "gatePromotion": false,
+  "missingInputs": [],
+  "inputsSha256": {
+    "tests/support/tsconfig.formal-financial-opening.json": "8e6ec971f566e4aa0dd03e9f592d0dd7321362c9a8a1dd26ed73515558ec232f",
+    "tests/world-web/office-command.tsconfig.json": "0ac9742e35b20deee17e802e829f5743a1d50c0c0c92ae2b2e7708e3b0efdc23",
+    "tests/world-core/writer-lease-supervisor.tsconfig.json": "4e683abe855acc3eb6f854a88dcd5a71a148bc3b921f66857a397be31dd8b544",
+    "tests/support/tsconfig.f-v09-native-claim.json": "15d373572bc015545bf6b30606563782fa0a76f460ac85001821a8e03404f4ed",
+    "apps/world-worker/src/preparation/formal-financial-opening-contract.ts": "3037372c2469b8cfc981c1597bf251b30bc6718e720b6d2729d394382541c6e6",
+    "apps/world-worker/src/preparation/formal-financial-opening-producer.ts": "049e3ebf922f0e2f7d3b6e96874a08d74df2b5b20068af371703f87ddec82ecf",
+    "tests/world-core/formal-financial-opening.test.ts": "89afef7b1c3160091bf027efefaa0f6e979524f9ff0d20442e009313cd986328",
+    "apps/world-web/src/office-command/client.ts": "211a1961f940dfebfd7cb2419bbaab23818a75b31fc943162dfbecc0c7d30e0e",
+    "apps/world-web/src/office-command/contract.ts": "5d24e1e2784c254a15028285553c9b527fea367b3da9b16859f90cbfc5d47da6",
+    "apps/world-web/src/office-command/controller.ts": "3a85dd5fe891b069191c60c3f0f7909cc725b7f2ae5d9a4b25cd535393ee5460",
+    "apps/world-web/src/office-command/view.ts": "8de7bdb0e4ad74205bfc32b4e78e204ccb853e4ef7eaea9f8a8512ed2f4ae1fe",
+    "apps/world-web/src/trusted-host/formal-session-adapter.ts": "480c036a4fc0053f2fc91413e93cdb146b389aac656d7eb7ff82ccfcf7161be1",
+    "tests/world-web/formal-session-adapter.test.ts": "dc352ba91035ca4f965c39966b6629ebd349ac3fd85631796d3bbb45d9ff77a1",
+    "tests/world-web/office-command.test.ts": "f7c2c7bf1be0e3c5bea7e5b2309514db00ee41947ecb9e95fb1d3469a150987f",
+    "apps/world-worker/src/runtime-preparation/writer-lease-supervisor.ts": "8f5a8f4565e8cf977506ce8aba06ce7296228c3e5653e4d94064d6254f64ff80",
+    "tests/world-core/writer-lease-supervisor.test.ts": "f38d9d7bf57cf976968323934adff75faa3a8c94ea04032d505fd5d733be168c",
+    "tests/world-core/writer-lease-supervisor-postgres.test.ts": "b4c96c0c55bdebc0caf1749a6c921c60ea5a98c25f0c0358fffa879e8befc7f1",
+    "tests/world-core/f-v09-native-claim-recovery.test.ts": "bec7f77b6f8d2a2d7d364bd90ea7d0facd7362b1f41bee04fc6480838f140e5d",
+    "tests/support/f-v09-source-inheritance.mjs": "b407b20dbc88a47dc77209f9ffa9f630e6c7c9de89a42c55707e9daab63771ed",
+    "package.json": "e1492f2baef6fbcf2e15975b1912ef3e45da316c72b8be2190a35996791fa55b",
+    "pnpm-lock.yaml": "342c7d83c20f04e19e91cb122e32bbdb1bdb8af51999dfe2db25ada877b69ab5"
+  },
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4"
+  },
+  "finalSource": {
+    "checkoutSha": "6a7b196a747782093c4da2a36a48e02ae6c8cb87",
+    "checkoutTree": "fa5b7e753e323a15cd5585672d75a6367bf31183"
+  },
+  "trackedChanges": "",
+  "stepOutcomes": {
+    "INPUTS_OUTCOME": "success",
+    "INSTALL_OUTCOME": "success",
+    "CI_CONTRACT_OUTCOME": "success",
+    "BUILD_OUTCOME": "success",
+    "STRICT_TYPES_OUTCOME": "success",
+    "NATIVE_D_OUTCOME": "success",
+    "PG_START_OUTCOME": "success",
+    "PG_STOP_OUTCOME": "success"
+  },
+  "logsSha256": {
+    "build-1.log": "24c42b76aecef2c39c8a5639a3536efb936b03bdac9a8f8be50c0e71ffbc7af8",
+    "build-2.log": "24c42b76aecef2c39c8a5639a3536efb936b03bdac9a8f8be50c0e71ffbc7af8",
+    "ci-contract.log": "5088a43f3c2aa1c6d671713ba4a19a2baa23f38085c37ab4609482bb9f957426",
+    "install.log": "de9767fbeb024c2e1be2ad113cf98f49c14947116a78f82a7fa5ffd335a67701",
+    "native-d-environment-guard.log": "ebe03926c913355d3ff57e2582962ef66ce92a6e38ec2b55102796f7767a917f",
+    "native-d-results.json": "6c32331cdbfcbaeeddb1cbae60cb7e5109c5d39aaadb810b778525680b3d9a90",
+    "native-d.log": "556df96ef8dbe327894a7b6b95a38a50a81f4397c4e6c3cd0e2512bee407a03d",
+    "postgres-owned-cluster.json": "69b2345009674e42219c1afc6fc25bde79fb1a8e6c53546286d06a17da079b05",
+    "postgres-server.log": "660dfab6122ad5024f47fbf6959c547fe072fa55056e2fc0d362f882448fce7b",
+    "postgres-start.log": "b952e08baea6b84c91a4e455651a9938a20ce8998bc6c19c71dbcef8c6c652a9",
+    "postgres-stop.log": "644f0b22d9da7c302fa4e22b08beb8346d27756ea2163463869390aa8a670258",
+    "strict-types-1.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "strict-types-2.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "strict-types-3.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "strict-types-4.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "result": "PASS_SUPPLEMENTAL_CI_ONLY_FULL_SEPARATE"
+}

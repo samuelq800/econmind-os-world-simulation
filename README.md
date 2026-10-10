@@ -7,6 +7,14 @@ engines or hidden buffs.
 
 ## Current preparation integration (2026-10-10)
 
+[本批受审源码整合与 CI 收官](docs/reports/start-ready-20261010/O/BD_COMPOSITION_RECEIPT.md)。
+PR133 已正常合并 G 的未挂载 slices1/2 与 A 的精确输入目录，main 为 `eb033a4`。
+PR132 的 loopback 修复经 A 独审后，在真实 Linux PostgreSQL16.15 上完成七项原生测试、
+四组 strict、启动与清理，并正常合并为 `5089a69`；原失败和 SKIP 不追溯改写。
+本批候选继续整合 F 已关闭 F-B-01 的 B 来源组装代码，以及 E 独审批准的 D 列权限 guard；
+组合回归 84 PASS，正式来源采用、writer/Clock/actor、六职位完整闭环及生产启用仍未建立。
+G3A 和授权写入/消费链兼容修复是独立后继候选，不能继承本批批准或自动解除 HOLD。
+
 [最新窗口收口与证据边界](docs/reports/start-ready-20261010/O/WINDOW_CLOSURE.md)。
 PR131 的 A 金融计算、C 浏览器命令/session、D SQL lease supervisor 和 F 原恢复证据
 分别经独立审查后，正常合并为 `27307a108ce5c0c3e2ce28e3776f8ba15ed73d3b`。
