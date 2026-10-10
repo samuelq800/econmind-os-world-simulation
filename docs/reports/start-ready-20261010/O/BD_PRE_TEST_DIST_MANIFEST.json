@@ -1,0 +1,2128 @@
+{
+  "sourceSha": "9427a86b1873459d195cfacc6066f0a74e0b257a",
+  "sourceTree": "9805fb25fac5f7cb0b59ea3eeea82d8c778d5004",
+  "buildOrder": ["Core", "Worker", "API"],
+  "entries": [
+    {
+      "path": "apps/world-api/dist/index.d.ts",
+      "bytes": 1152,
+      "sha256": "2a983b44fc396ca62ba70feff94df73841657197668013d5d0e11d110c01496f"
+    },
+    {
+      "path": "apps/world-api/dist/index.js",
+      "bytes": 1095,
+      "sha256": "9e72945fe503acc53726dac881cc2ff091313fbf953241953afcd7795ccd2c36"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-command-recovery-reader.d.ts",
+      "bytes": 2070,
+      "sha256": "dee3353deaeb25108859f4afa66793874533b83b1f8cc62e5a6dc84da4e56a14"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-command-recovery-reader.js",
+      "bytes": 4839,
+      "sha256": "bb568ad7a8771d776711970eb00b0dc9469fba653ccfc772c9b15f1ab97f0555"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-command-recovery-service.d.ts",
+      "bytes": 538,
+      "sha256": "8502cdd57e230b74235fb985fd10473eb12637adbc3a50f323c3e42fc705bd56"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-command-recovery-service.js",
+      "bytes": 4073,
+      "sha256": "986e9e29d718b4c5f3ef6a62819afa041fa6a4cbc47e19398f2ac6449d4fb9a0"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-current-seat-reader.d.ts",
+      "bytes": 1308,
+      "sha256": "52ea2c700624879d5222cc653bd8691064bc17a1ff49719def09917115406133"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-current-seat-reader.js",
+      "bytes": 2396,
+      "sha256": "c3ae0c85bc136329ab4e390e1a102bf1e762aeb44f766ca0caf0ac48b92fe44e"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-current-seat-service.d.ts",
+      "bytes": 526,
+      "sha256": "18cfde0d559347cf3821c43eca80494f8f7ea4cde118216ff22c3629037d73a3"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-current-seat-service.js",
+      "bytes": 4054,
+      "sha256": "17175238904758bc2c43a2aa5d0b6bbe2d759a185b1b883182c68155662a7d22"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-final-receipt-query-handler.d.ts",
+      "bytes": 2133,
+      "sha256": "7b54601ad7be7002945b96088e084db4a120f0463d95a618774b7d81f638e065"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-final-receipt-query-handler.js",
+      "bytes": 6591,
+      "sha256": "35aec734c930b955a351225afe900d113148e066f52b5257021a8de952238fd1"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-financial-intake-composition.d.ts",
+      "bytes": 1902,
+      "sha256": "0863dcd217ba84f1e6bc2bb32c14510aa046433988eee68b6de67969104df4d7"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-financial-intake-composition.js",
+      "bytes": 11938,
+      "sha256": "bb3764c70e5e1fd60a8c1914c7f96f92dd20c5af91d9bd66bdee2261a805435c"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-narrow-transfer-command-handler.d.ts",
+      "bytes": 5210,
+      "sha256": "193b907dffec8a67778b8937d427fea5e02c840042783af1735ae0254608d53e"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-narrow-transfer-command-handler.js",
+      "bytes": 11473,
+      "sha256": "e48b3f3954c81280c96081bf0dd12c225bff4f7cad1b3f65fafba1eb9b95ea51"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-office-command-service.d.ts",
+      "bytes": 1393,
+      "sha256": "62ef233898f0e788f287db73dd8f2ca1cb818c2053618578275ec3f67844720d"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-office-command-service.js",
+      "bytes": 11008,
+      "sha256": "55dd49bb8f96b5aa4d759664e3adfbfa18645d91ac1f1ccb18732552315be224"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-read-boundary.d.ts",
+      "bytes": 1189,
+      "sha256": "364938935728ff0594ea79ab56d7bad01b8fa7c94b12fa40a43c5042d3fc6688"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-read-boundary.js",
+      "bytes": 3670,
+      "sha256": "db01b01fe4907c065ebaa29787278c47eeb9a6d9fd1b64eab6785c0dffcbcc63"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-read-query-handler.d.ts",
+      "bytes": 1435,
+      "sha256": "97103e57d8cae1bde4e67e1b13c292350a053f53fce6e5288040ab55b2d3e551"
+    },
+    {
+      "path": "apps/world-api/dist/integration/authenticated-read-query-handler.js",
+      "bytes": 2789,
+      "sha256": "bd756d5931199725aaf3522326084bc7cc5177fd5f5e633dc372c0b9d72805df"
+    },
+    {
+      "path": "apps/world-api/dist/integration/cloudflare-official-read.d.ts",
+      "bytes": 554,
+      "sha256": "fdbc4ba5d902ffbae9d53a636c667b79ba6c0ad381fe12d53744c4f8422a0409"
+    },
+    {
+      "path": "apps/world-api/dist/integration/cloudflare-official-read.js",
+      "bytes": 1110,
+      "sha256": "a1fdf8b14c4cb8afa3b57be7032c28528ba2df5b635718c56e35a2785c292662"
+    },
+    {
+      "path": "apps/world-api/dist/integration/contracts.d.ts",
+      "bytes": 3324,
+      "sha256": "3e2b06c10a7e7410d60ee162e8fe6c23130d1ab62a6cab8bb2d4b2f5001bb329"
+    },
+    {
+      "path": "apps/world-api/dist/integration/contracts.js",
+      "bytes": 10401,
+      "sha256": "cc3f1f72708056ad8fcd67d11d857b436612a7619eb14980446cb9f4c8e9a6b8"
+    },
+    {
+      "path": "apps/world-api/dist/integration/generated/official-map-catalog.d.ts",
+      "bytes": 67599,
+      "sha256": "27ee4813a173f5f88b83e2b2dc0a08982774928aaf75e8337f302016e1c33672"
+    },
+    {
+      "path": "apps/world-api/dist/integration/generated/official-map-catalog.js",
+      "bytes": 63230,
+      "sha256": "79ad8836c8365557a160e9b57971630e46d7e484164a4e38e0b4452dbdcdce94"
+    },
+    {
+      "path": "apps/world-api/dist/integration/generated/world-v2-read-model.d.ts",
+      "bytes": 1626,
+      "sha256": "77bd11448727b33f4bdafaefa6aefee3c37199550ee39e69ee36e08004d9b00a"
+    },
+    {
+      "path": "apps/world-api/dist/integration/generated/world-v2-read-model.js",
+      "bytes": 836,
+      "sha256": "3c722f7f7fb37e5987e169f27e9a7016bd833d7a2a26b128b2f0d56f57039acd"
+    },
+    {
+      "path": "apps/world-api/dist/integration/https-authenticated-financial-intake-route.d.ts",
+      "bytes": 886,
+      "sha256": "210827a7f6c977fb7151a40bd0ad738ff249f81989af1ff44f89b43014234453"
+    },
+    {
+      "path": "apps/world-api/dist/integration/https-authenticated-financial-intake-route.js",
+      "bytes": 8771,
+      "sha256": "b369401d176393f34e7c3f0252fac3ffe08b25c40513df7d5f6ce6fbbc9b39e7"
+    },
+    {
+      "path": "apps/world-api/dist/integration/https-authenticated-office-command-route.d.ts",
+      "bytes": 943,
+      "sha256": "0149444d9ba61d77c9ea263b8f9a4f2af7e08a34492aab636febe28d4257a244"
+    },
+    {
+      "path": "apps/world-api/dist/integration/https-authenticated-office-command-route.js",
+      "bytes": 9941,
+      "sha256": "29abc8511f85475e7772d4c3b174db3e0bd8d39b176f7582d986dc4b4c3e103e"
+    },
+    {
+      "path": "apps/world-api/dist/integration/https-authenticated-read-composition.d.ts",
+      "bytes": 4414,
+      "sha256": "3ede9c03df510a48c685e3ba1ea568e59c0137b991bea8ff38ee310293eb80ce"
+    },
+    {
+      "path": "apps/world-api/dist/integration/https-authenticated-read-composition.js",
+      "bytes": 13571,
+      "sha256": "5817c36aab6e7aad804d2c28285bd1cc007385bec6328ed575d78fdaf8cbc14b"
+    },
+    {
+      "path": "apps/world-api/dist/integration/https-authenticated-read-route.d.ts",
+      "bytes": 1092,
+      "sha256": "af2eee90cc3cd04d66a90ca6edcc0df7bbdc774e0e1c96ef53434029737b63dd"
+    },
+    {
+      "path": "apps/world-api/dist/integration/https-authenticated-read-route.js",
+      "bytes": 13129,
+      "sha256": "274ea8adfedd0f40d645c58b43711a1223145069f76622c6a6af606a9da1b1a7"
+    },
+    {
+      "path": "apps/world-api/dist/integration/identity.d.ts",
+      "bytes": 1397,
+      "sha256": "f6ced5a91ab3683b4e1da23fc623b63c7b5305c2553fe710736408db37a9c741"
+    },
+    {
+      "path": "apps/world-api/dist/integration/identity.js",
+      "bytes": 3372,
+      "sha256": "6f5cd7fc7311f37891f0b0befb17430a9f7d314d988a0f850d495bfbd7033761"
+    },
+    {
+      "path": "apps/world-api/dist/integration/local-nonproduction-authenticated-binding.d.ts",
+      "bytes": 1525,
+      "sha256": "fc54dc58a4dfd6d97811f5cb5bc271ee8eaa4833f0be2d571535bcd5be863188"
+    },
+    {
+      "path": "apps/world-api/dist/integration/local-nonproduction-authenticated-binding.js",
+      "bytes": 1985,
+      "sha256": "cd735ff3cc0f440b3518939dd342ebc6e4ee7633a157142d47bfab777b2708c6"
+    },
+    {
+      "path": "apps/world-api/dist/integration/local-nonproduction-http-bridge.d.ts",
+      "bytes": 2496,
+      "sha256": "5ce1aacf97afd47671cf23eccba69a6431a52c07be9993a30b4884d59402acda"
+    },
+    {
+      "path": "apps/world-api/dist/integration/local-nonproduction-http-bridge.js",
+      "bytes": 13943,
+      "sha256": "864a9573c2599af64edd0335aea9054c5a7dea3c17044512f7394b8a74e8dbc9"
+    },
+    {
+      "path": "apps/world-api/dist/integration/local-trusted-postgres-binding.d.ts",
+      "bytes": 1046,
+      "sha256": "c63e590600312ae58a8ed35935928dfeec75027ddbc8da945fc0023973f8a6dc"
+    },
+    {
+      "path": "apps/world-api/dist/integration/local-trusted-postgres-binding.js",
+      "bytes": 5238,
+      "sha256": "d709d34f87e1f69531a6b75949f29bb0b487d58d71801d480c31b8d2b26281f9"
+    },
+    {
+      "path": "apps/world-api/dist/integration/non-host-isolated-seat-policy.d.ts",
+      "bytes": 2762,
+      "sha256": "9a12a044b3ff95b18290915e96dd215ee444192edb43ceb90e1e98ce017d0311"
+    },
+    {
+      "path": "apps/world-api/dist/integration/non-host-isolated-seat-policy.js",
+      "bytes": 5242,
+      "sha256": "53b9850cd8976c0f96f71b48f1354109522f1103300892bdcabbefeef3f266ea"
+    },
+    {
+      "path": "apps/world-api/dist/integration/nonactivated-runtime-api-host.d.ts",
+      "bytes": 2210,
+      "sha256": "48f4b4d4a67f6af6861828ed1cf511b32845041e89c6449ee4018ce59f4a5874"
+    },
+    {
+      "path": "apps/world-api/dist/integration/nonactivated-runtime-api-host.js",
+      "bytes": 8766,
+      "sha256": "c24b24a3b748cf78d2fa04ea9eabd928969be03fb4aae4bc5806d8b74c6d18a2"
+    },
+    {
+      "path": "apps/world-api/dist/integration/nonactivated-runtime-read-host.d.ts",
+      "bytes": 1487,
+      "sha256": "4f993f1dc341357d0d979a283a434a8302d6171bfed4629838127649afb56d02"
+    },
+    {
+      "path": "apps/world-api/dist/integration/nonactivated-runtime-read-host.js",
+      "bytes": 1773,
+      "sha256": "2529b98de3855c95a413d93fd89af27fa74f5a2016205ba4ec8bc88bb861ebee"
+    },
+    {
+      "path": "apps/world-api/dist/integration/office-decision-result-validator.d.ts",
+      "bytes": 701,
+      "sha256": "0531e654a338edd9882be143e656eab56ceec729e59bcc4bfe820bf723c38665"
+    },
+    {
+      "path": "apps/world-api/dist/integration/office-decision-result-validator.js",
+      "bytes": 8983,
+      "sha256": "313f993b49d45ef69036b0a85d316fcd30ac177bd3d5623e39884cc95701ff23"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-country-baseline.d.ts",
+      "bytes": 1763,
+      "sha256": "4e10da4e57da76784550b3fbd8f4c7498a4600d8b6284ef0f1140894402b799e"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-country-baseline.js",
+      "bytes": 7158,
+      "sha256": "c0d13af16a78f61696141e98d6685a6e53324f4f35511a75b75ce28d3af681c7"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-country-postgres.d.ts",
+      "bytes": 996,
+      "sha256": "2b78929eafbffa7501464998d73df605ea804571a1937aac51eed9588dcefd3b"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-country-postgres.js",
+      "bytes": 3739,
+      "sha256": "142d33b2fc357c638fb0dc50ff5a93177b5a69173bd022b6274a13813893522a"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-country-role-reader.d.ts",
+      "bytes": 743,
+      "sha256": "94676f91b83e37705ccd64a88772c1515bba096748593b13515643ddc07f2648"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-country-role-reader.js",
+      "bytes": 2407,
+      "sha256": "b342250bf913898691b642eea6449513c39073a47eb60f0bbc602c5e761bfed6"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-dataset-registry.d.ts",
+      "bytes": 603,
+      "sha256": "ce1efd83a3ade96edd82eb233a30cba520c21c84947371b7a7bca7163aa3c88d"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-dataset-registry.js",
+      "bytes": 6384,
+      "sha256": "041d724162758c047999ef66a30631d68fa3f2f9ff0e78440484ce168dbe9afb"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-dataset-route.d.ts",
+      "bytes": 505,
+      "sha256": "1fd9f36c09087790b97c509a41d8e36f1c13560d77cb201dc97cd671c1f549ef"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-dataset-route.js",
+      "bytes": 17601,
+      "sha256": "7bd1871981172806e0333b57f2bd9d5745d510bb3f33a58f18602c3a5ef94216"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-dataset-source.d.ts",
+      "bytes": 1907,
+      "sha256": "9e4093370b9b7896da2f34a6e0808de291bdf3a98c8f6bc4ba41a2cd7fd86c62"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-dataset-source.js",
+      "bytes": 9551,
+      "sha256": "649108b4110a58c203ba4985711da3cca95c3219dad528e01af1525d4c52e6dd"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-edge-database-config.d.ts",
+      "bytes": 866,
+      "sha256": "16db4383e47a76a63d1c270698f7d0cb8f8965eb2bab2b52bed610f769d8b74e"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-edge-database-config.js",
+      "bytes": 1931,
+      "sha256": "4a8736e0ff5905b4bd32f3801a2ace889f89801761a1bcd17613659b4026bcf4"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-edge-fetch-adapter.d.ts",
+      "bytes": 692,
+      "sha256": "77d1b649f564ca2884aa422feeb0598edcc816774b1d9e34c90ceeef11928b15"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-edge-fetch-adapter.js",
+      "bytes": 4876,
+      "sha256": "e2072936dd9d4aa1f744148ba2e76cec17c89b33773001d88ffc5b6b5d53fae6"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-map-asset-route.d.ts",
+      "bytes": 420,
+      "sha256": "358ea670ce2a8c2a301bb9ba07f9c89f2ef094c3a9555bd9ab22d7119e3adfe5"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-map-asset-route.js",
+      "bytes": 3977,
+      "sha256": "f8208ffeca237a42e506bc96856464f5b92830be7cd7440a3cadd04efd517190"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-public-cors.d.ts",
+      "bytes": 708,
+      "sha256": "cf2699dafbcc8d386261849638c377b9bc0be381328124a5e35210b7834d2ab2"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-public-cors.js",
+      "bytes": 3547,
+      "sha256": "97f91379b7b6a232966c34f9c54ec103ef60389978b6f62cfd49e516d5c67259"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-source-snapshot-reader.d.ts",
+      "bytes": 813,
+      "sha256": "697aeab49d0cbd2a34f2e1409b615fbf3af0ac9287266595e5c34dc053ecfa58"
+    },
+    {
+      "path": "apps/world-api/dist/integration/official-source-snapshot-reader.js",
+      "bytes": 5004,
+      "sha256": "5911b1e41ef134625f815383ae26dd871513ff406c2909c690b700436af596da"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-buyer-finance-approval-reader.d.ts",
+      "bytes": 951,
+      "sha256": "21746278fba3ce5681e0571b0832ebe6923e0f4415d74d59752752060e2eab82"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-buyer-finance-approval-reader.js",
+      "bytes": 4923,
+      "sha256": "9f1b95aa72fd5d9d59a98a6f55cf612b0a86912d0521a960c6632a5f647e0a7b"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-final-receipt-reader.d.ts",
+      "bytes": 2323,
+      "sha256": "9ebf0acb309807ece0ffb4e1619260f9734e35b3c81d0b38dd0163a5bc3d2a55"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-final-receipt-reader.js",
+      "bytes": 16160,
+      "sha256": "ab919bae2a591624c814d15f7ed6ed5f88946e7b0243f4feac4615cd9847d29b"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-financial-intake-database.d.ts",
+      "bytes": 1857,
+      "sha256": "750526a40d7d7df6b53c22fb762ca2b115bb48131feaf83c8ef00fdcc0a82cf7"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-financial-intake-database.js",
+      "bytes": 9095,
+      "sha256": "bd6f6a3c2de4edc2591e57e38980ae8852fbe3dfe03ab2cf0d0615c7009ea0ad"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-full-read-provider.d.ts",
+      "bytes": 1357,
+      "sha256": "98e171243c5e7f5b29ffcbef7084ee8bad0485fb30e09b3bb632712fbaa8332f"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-full-read-provider.js",
+      "bytes": 3980,
+      "sha256": "7a98176795b65cc6a9bde52c9a814f3d4b5cb480527881cbc895c0a00f67557b"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-read-adapter.d.ts",
+      "bytes": 2212,
+      "sha256": "321b69ebddf5e08f0604ee8a9d65bb38ae6abf88a26c8ad3125e246f5ff03899"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-read-adapter.js",
+      "bytes": 18895,
+      "sha256": "2dea8780e29b43a8e53b71ae1ba5b61ea4c8b457fc25a5755addc2f3e131bd27"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-runtime-read-executor.d.ts",
+      "bytes": 585,
+      "sha256": "5bdbe4b336cccafbcc31381a2a735d5524f6cb8ad3cfe26ef42c2f47a2325ea0"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-runtime-read-executor.js",
+      "bytes": 4015,
+      "sha256": "fe95074089654b7180f12b6b05e4ad57fc9f98d250667f7a3ff428f0644dcb86"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-server-read-binding.d.ts",
+      "bytes": 4430,
+      "sha256": "b14e3bb4e882628001758ef6348a202a8aedec6c356ed7bd25fb2c40348bdba9"
+    },
+    {
+      "path": "apps/world-api/dist/integration/postgres-server-read-binding.js",
+      "bytes": 19433,
+      "sha256": "fba449a189868e58e9ad9a76f547d410c293f477ff1d292d5985ee363e2a9e33"
+    },
+    {
+      "path": "apps/world-api/dist/integration/production-runtime-binding.d.ts",
+      "bytes": 5404,
+      "sha256": "0c5d6a5c9c72873add5a636d5d9e6e98ee6a8ada77718f112ae61b14bf116185"
+    },
+    {
+      "path": "apps/world-api/dist/integration/production-runtime-binding.js",
+      "bytes": 12625,
+      "sha256": "c07007e7fc50b519fc1ffbd0bad107669442d066380e796b16a08e3491531bf7"
+    },
+    {
+      "path": "apps/world-api/dist/integration/season1-lobby-supabase-reader.d.ts",
+      "bytes": 3327,
+      "sha256": "afce3058f1e1d51ca1eb9ad87cfe3df04c7e35d577ad47713de83564b80dd426"
+    },
+    {
+      "path": "apps/world-api/dist/integration/season1-lobby-supabase-reader.js",
+      "bytes": 11873,
+      "sha256": "e1cee2e7d00c353d4f9165a3b578e4d52f7c1188d3f335b715ea6e1efb402074"
+    },
+    {
+      "path": "apps/world-api/dist/integration/season1-my-team-route.d.ts",
+      "bytes": 963,
+      "sha256": "b0d45009708b68679bae6437a74a0903868e2667d2a8cb164f5bc41ff1688681"
+    },
+    {
+      "path": "apps/world-api/dist/integration/season1-my-team-route.js",
+      "bytes": 5226,
+      "sha256": "0fe01e44e1e7b2b68c3e34b2cafbad65908048660d112c080192f90650568907"
+    },
+    {
+      "path": "apps/world-api/dist/integration/staged-narrow-transfer-composition.d.ts",
+      "bytes": 1464,
+      "sha256": "5c8818d997d00103280f5797d1112bd70656c6edf80e985d15206b49411dcc50"
+    },
+    {
+      "path": "apps/world-api/dist/integration/staged-narrow-transfer-composition.js",
+      "bytes": 2633,
+      "sha256": "b3dc6a471ed34e0d90e435c4d84c0034506d1a3fb92a579e4c8a42c891f35e98"
+    },
+    {
+      "path": "apps/world-api/dist/integration/staged-narrow-transfer-handler.d.ts",
+      "bytes": 1915,
+      "sha256": "eb9d7c530cf4ac0c960c4e9229f54432383337136fb97d40b5d0a5d5624be2be"
+    },
+    {
+      "path": "apps/world-api/dist/integration/staged-narrow-transfer-handler.js",
+      "bytes": 6209,
+      "sha256": "7aab9128e8c51837f08ff541b68d4f1ea206de97f492ebbc07c144c3d7133207"
+    },
+    {
+      "path": "apps/world-api/dist/integration/staged-narrow-transfer-service.d.ts",
+      "bytes": 3117,
+      "sha256": "aa784ff5bcf56a767ca3e0721ee5a7344fc5f42a44bd5545d0ae1c5d5aef9861"
+    },
+    {
+      "path": "apps/world-api/dist/integration/staged-narrow-transfer-service.js",
+      "bytes": 13888,
+      "sha256": "044573fc1c8f6437a209b2ee4c3cb0510e52a1dd03cb0edee523b5d9d0f49243"
+    },
+    {
+      "path": "apps/world-api/dist/integration/supabase-jwks-signature-verifier.d.ts",
+      "bytes": 1127,
+      "sha256": "e260a29ec623d13a6265369752cf70c055fe5dd19ca7e826014bacab4c86ac4c"
+    },
+    {
+      "path": "apps/world-api/dist/integration/supabase-jwks-signature-verifier.js",
+      "bytes": 14078,
+      "sha256": "af9187129b49cbe046bd413698f99d641b8c06e804d1bc0c697671570cdaa732"
+    },
+    {
+      "path": "apps/world-api/dist/integration/transport.d.ts",
+      "bytes": 1834,
+      "sha256": "2cfa4d214a03cfc6d576257951f41448b10e7ccde792fda0672fb4c309843bac"
+    },
+    {
+      "path": "apps/world-api/dist/integration/transport.js",
+      "bytes": 9156,
+      "sha256": "6e9d45bb880be5bab335f129df7a16c726b4941397e35b1a7dcb82ffd09a7f6b"
+    },
+    {
+      "path": "apps/world-api/dist/main.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "apps/world-api/dist/main.js",
+      "bytes": 315,
+      "sha256": "52300cd4f52366b214f17926629f7c255ae78448216eef7f9f6f8ebae1bc936a"
+    },
+    {
+      "path": "apps/world-api/dist/read-models/trade-contract-read-projection.d.ts",
+      "bytes": 4599,
+      "sha256": "7c7ba779901bb72040e818da6003eab9a45befb437222a085670699190606cfa"
+    },
+    {
+      "path": "apps/world-api/dist/read-models/trade-contract-read-projection.js",
+      "bytes": 8319,
+      "sha256": "e77a72c37456ddcffed2e26fa0e2ccb39307aeb7540fd0e1b9538f5ba65e7048"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/bounded-executor-transport.d.ts",
+      "bytes": 3162,
+      "sha256": "c07dd1654d82f708a3f001703bb337eec8de2bbf9a675a5eac80f0398246412a"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/bounded-executor-transport.js",
+      "bytes": 22849,
+      "sha256": "b88212c1836647e02dd361619b13cbfca6852b032e8b423d4bea0c714a73c51b"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/cloudflare-jwks-verifier.d.ts",
+      "bytes": 906,
+      "sha256": "2c8f3ffdea274fde6ca69e4c2f83240286ef96fa486d23e0bac4275617c11477"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/cloudflare-jwks-verifier.js",
+      "bytes": 918,
+      "sha256": "e28bfc0750c1d29b38c45fdd824e575544a9f9e219bd532f0464d28a485c3658"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/cloudflare-postgres-pools.d.ts",
+      "bytes": 1231,
+      "sha256": "178cb7ec3700a8b10b461bc2a614f603346863104f427a486715a2da6d2473b8"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/cloudflare-postgres-pools.js",
+      "bytes": 2522,
+      "sha256": "475d6543e6a05512538b0ad943d5ed0ea1b1bac875c6de1a04ebb7a330691230"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/current-seat-fetch-handler.d.ts",
+      "bytes": 402,
+      "sha256": "988cdeaf40dc6cca5a93c9301b6f07291a5c30cec51d04df19fba80736f9fde9"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/current-seat-fetch-handler.js",
+      "bytes": 5115,
+      "sha256": "67cc0a8189c20a1721cf95c6ae1f7ea4d6d9a07d58712dad3ea348cfb98c30e4"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/executor-command-forwarder.d.ts",
+      "bytes": 631,
+      "sha256": "15751b4bd1ac0f4bdf20c09b2c60dcc5e7093c15800f7bd955942fb50a811208"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/executor-command-forwarder.js",
+      "bytes": 9145,
+      "sha256": "e75232f41fe5be6c4533727be3beccaa5455f43f492410097826249df982de61"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/explicit-read-preparation-config.d.ts",
+      "bytes": 866,
+      "sha256": "3fb1a89853470c2c7c877108bca6b0679ce8840554f050fb8ac62a500b6f8af1"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/explicit-read-preparation-config.js",
+      "bytes": 3342,
+      "sha256": "380388e0d249b5969656b2adf0ed3e2b2d0a9f20732017650e918d35ed08dabb"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/hold-api-server.d.ts",
+      "bytes": 428,
+      "sha256": "d5297581d049473ca18bb40200f303d8a8a7db61cfe3799c8a9592913825ff2d"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/hold-api-server.js",
+      "bytes": 2394,
+      "sha256": "fede2a65c61dbc2abbe0f4632a35a48a5baaffdb0b33b1dfc758f7e7eba9699b"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/internal-executor-command-handler.d.ts",
+      "bytes": 1207,
+      "sha256": "229a9aab9e30950bd039c64389948f38d8ebeb07d633399dd19f45a324aba09b"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/internal-executor-command-handler.js",
+      "bytes": 7431,
+      "sha256": "d10213c02e5fbec8d8acf42e5e965df2426eec088cbeeee64419a083580e443a"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/request-completion.d.ts",
+      "bytes": 449,
+      "sha256": "7383fc077d709c3db8cca232022fc1ae75874249ed6db114d44ad52e560da787"
+    },
+    {
+      "path": "apps/world-api/dist/runtime-preparation/request-completion.js",
+      "bytes": 1417,
+      "sha256": "0265f964d91877592a86f942daf5bbf1fd88b50ee9f1c7471098b94a0399af87"
+    },
+    {
+      "path": "apps/world-api/dist/runtime.d.ts",
+      "bytes": 1192,
+      "sha256": "ac38152b1e6c29787871a6c6b9c5b78910d463d7844025a89686e69e12050c79"
+    },
+    {
+      "path": "apps/world-api/dist/runtime.js",
+      "bytes": 14495,
+      "sha256": "238717e5b1a77af03190029bcb3990e2116cf81b8bad0de58374b83933271b5c"
+    },
+    {
+      "path": "apps/world-worker/dist/admission/official-opening-admission-publication.d.ts",
+      "bytes": 2637,
+      "sha256": "72e932fb79cef58019a7dcd819258d70e849c738e430272780cc84672e38eb35"
+    },
+    {
+      "path": "apps/world-worker/dist/admission/official-opening-admission-publication.js",
+      "bytes": 15194,
+      "sha256": "da9da92265cfa445a517eabfe0793da5e46de1db0cf260deb84d2c5d87464682"
+    },
+    {
+      "path": "apps/world-worker/dist/admission/private-opening-admission-authority.d.ts",
+      "bytes": 2593,
+      "sha256": "9b2a9e863fa425b0520f9bc2b614f243d52e3e357327e0e70030ac8938704cd3"
+    },
+    {
+      "path": "apps/world-worker/dist/admission/private-opening-admission-authority.js",
+      "bytes": 5695,
+      "sha256": "f0dead77b9146a92fe75f856051392472ff3cca226c517af7f69ded8564d3341"
+    },
+    {
+      "path": "apps/world-worker/dist/authoritative-execution.d.ts",
+      "bytes": 1902,
+      "sha256": "441c1c066ec23a2486b67700ceade3efb4f8c7e2653aa1d15c2f0b9d8f08555b"
+    },
+    {
+      "path": "apps/world-worker/dist/authoritative-execution.js",
+      "bytes": 7601,
+      "sha256": "5399fa5d969abaf4da97d25f71ca67c5dad07397c1751616354e39cf0d05f7df"
+    },
+    {
+      "path": "apps/world-worker/dist/index.d.ts",
+      "bytes": 2397,
+      "sha256": "824443fe7e62fdea4a65b996649e88160280ef6b5d04bc051170e509bfb1c310"
+    },
+    {
+      "path": "apps/world-worker/dist/index.js",
+      "bytes": 1995,
+      "sha256": "a497d2563e7377fd1b8d8ca5ab6e547764cc13ba48cc812ee37b6a0a2b6f38ef"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/manual-office-command-intent.d.ts",
+      "bytes": 1278,
+      "sha256": "9b538b41fdb181976c1a4a4085cf18ac5709041bd1c63d8506f6761aac68a651"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/manual-office-command-intent.js",
+      "bytes": 2760,
+      "sha256": "d0ae2e58afb81c046d87a74d8bcd824024f503909de34dfad9c8d518e9e5d15d"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/manual-office-intake-runtime.d.ts",
+      "bytes": 1745,
+      "sha256": "d94bfc3b7e412699d74e2808e66514fe8e9d7247a072f0cbc1eb3ec837865665"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/manual-office-intake-runtime.js",
+      "bytes": 5322,
+      "sha256": "91e749257019b4f0fd59496a1a83be607b6f2c20594f29b206df4634e5e7a29d"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/postgres-narrow-transfer-intake.d.ts",
+      "bytes": 1895,
+      "sha256": "b72e795df86b35d306c1c5c98717331ae27b729072a4baf3793082683e5478b0"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/postgres-narrow-transfer-intake.js",
+      "bytes": 14118,
+      "sha256": "a1080b273ea80dc4a9a985e68b59b2371d3d2fabecabc256878f14bcc34f3192"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/postgres-office-command-intake.d.ts",
+      "bytes": 2124,
+      "sha256": "9576fdbbf4d469f8f5eea89bd345391d92cbe1c96e6a014bf3b9e313828e0be4"
+    },
+    {
+      "path": "apps/world-worker/dist/intake/postgres-office-command-intake.js",
+      "bytes": 22749,
+      "sha256": "656aee3656a8b8962b17feb740c3f824b93131e2073a0dadeb776f90fa17547a"
+    },
+    {
+      "path": "apps/world-worker/dist/main.d.ts",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "apps/world-worker/dist/main.js",
+      "bytes": 324,
+      "sha256": "6c55e8e9977bfb62bb109c9dda2f356dae21a2e4c5964c79186c8f41cd118a5b"
+    },
+    {
+      "path": "apps/world-worker/dist/outbox/narrow-treasury-gcu-delivery-outbox-consumer.d.ts",
+      "bytes": 1706,
+      "sha256": "6aad3fcdbdd2ed62d6eb53f9507ff33df8341f1cbd4b2b2e858b22ee4495efe7"
+    },
+    {
+      "path": "apps/world-worker/dist/outbox/narrow-treasury-gcu-delivery-outbox-consumer.js",
+      "bytes": 11745,
+      "sha256": "24fa30543cadf7cc559ab98eb343d890f9a9bfb7c792104fb4d11735f18f7ab8"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/atomic-transition-repository.d.ts",
+      "bytes": 5851,
+      "sha256": "b8ee1c5e4661504bf30fb59f7003973b1dd80fdcfc2912ab120fa861b65bde29"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/atomic-transition-repository.js",
+      "bytes": 38772,
+      "sha256": "dd0fb6a1e820c95d6d21e6a1ae41cb11f40fb84d4c7eabc436bdd16adb894773"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/captain-political-capital-candidate-source.d.ts",
+      "bytes": 3268,
+      "sha256": "d9e35f7238ab69fbadbd3f0d7edc4dd437a40ce9c1a560997cd8c86bbfd5e22c"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/captain-political-capital-candidate-source.js",
+      "bytes": 10175,
+      "sha256": "c81c3a53305960f78111509630555710a0951d4e711b6149652e2d034220f6b3"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/central-bank-omo-candidate-source.d.ts",
+      "bytes": 2380,
+      "sha256": "39a5765f9bc2e6e9d877dbee2d20fcaf7c4529e1f4fd37e5ac070fce65b8e428"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/central-bank-omo-candidate-source.js",
+      "bytes": 5705,
+      "sha256": "936fd58aa87bebda5e5ebca2db4fdb0ba4deb42e9d862d1d30bb46c6aa74d88f"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/current-materialization-observation.d.ts",
+      "bytes": 1377,
+      "sha256": "37b86815ef0f8380a6572a890511cce27715c8ae55b61203478130b523d567a7"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/current-materialization-observation.js",
+      "bytes": 3596,
+      "sha256": "b1152b6b348fc8f62e80e23e465a3cb78f3b8274cbb67188daf8d26b68f5be7e"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/durable-v08-ledger-lineage-reader.d.ts",
+      "bytes": 1257,
+      "sha256": "0227d06f8e923c5643d34bb3ee2c80fc7f0bda8a8a70c6ede7130be02b2d8b3a"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/durable-v08-ledger-lineage-reader.js",
+      "bytes": 20216,
+      "sha256": "c4c1efcbf6d6b699eae60f4766423b4475149ad533ba92c1d2ca2ecf641e8869"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/narrow-transfer-approval-store.d.ts",
+      "bytes": 2588,
+      "sha256": "9607cc4ee7740fea4a76dfb4b3d8a4092537cbdf557aa65fd0facc400a0044e8"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/narrow-transfer-approval-store.js",
+      "bytes": 22329,
+      "sha256": "068f5993dc47d6425a6aac801c925bfbbbb8b070f70f364470b79ef4ad04c005"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/narrow-treasury-gcu-delivery-draft.d.ts",
+      "bytes": 4121,
+      "sha256": "b39b94a44b1962a2312a4fc8f2e86b56c61e047a4c123502473c8124e31f9a9c"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/narrow-treasury-gcu-delivery-draft.js",
+      "bytes": 8416,
+      "sha256": "f61d10ac7c7b367508258ef42ee14f7764a4bd83fefc510236385d583d7f2eda"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/narrow-treasury-gcu-shipment-draft.d.ts",
+      "bytes": 1555,
+      "sha256": "ce2cecce241e3d5801432e16986a50b79e577f6fa1a48919e47025bd6f7faf23"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/narrow-treasury-gcu-shipment-draft.js",
+      "bytes": 5085,
+      "sha256": "4e74470415d4a22813e825bfe8a2c97399c321289e1352d2779dbf634564fc22"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/opening-seed-store.d.ts",
+      "bytes": 990,
+      "sha256": "6d7f6e8d9406a07c67322e847f76be1cfa273a95617510116eb9b3e6e51d3b7e"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/opening-seed-store.js",
+      "bytes": 6491,
+      "sha256": "c34deb30a0359428f78b9f02601023439f68ce2777861249d650ffb6713e8d99"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/postgres-sql-database.d.ts",
+      "bytes": 1197,
+      "sha256": "a662cf7d66ee6cc10af3bd798c32f2909dccecb8eaf45fecf9320929d906aa21"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/postgres-sql-database.js",
+      "bytes": 2985,
+      "sha256": "8e1024c0455f3a98978b273e3e1ec2bc84758834bf6bece0786a9dd45b8edfa4"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/runtime-read-binding-store.d.ts",
+      "bytes": 2669,
+      "sha256": "17584f804df679ea20c956c86369790d1e7d57ebb959204d4806b4988e81c0e1"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/runtime-read-binding-store.js",
+      "bytes": 12359,
+      "sha256": "70bd5ad919dd7e429f7c197b11e604febfbe0d16d490a49d63819b856b2cdad7"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/social-job-match-candidate-source.d.ts",
+      "bytes": 4404,
+      "sha256": "3b3d923252e6268f43e52eec641b95159bb2cd7849e2e479f71d8a2987f7cfb0"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/social-job-match-candidate-source.js",
+      "bytes": 14053,
+      "sha256": "cb1c63641326d1c75a7bbbec3e8441bcdfd658cc1bfc5668828d76126da01653"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/sql-database.d.ts",
+      "bytes": 779,
+      "sha256": "9376d1f1776e9bf6871e44a4f23b82d09d4eb5c6d1b7f3f7ab614b80938bf76b"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/sql-database.js",
+      "bytes": 11,
+      "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/sql-narrow-treasury-gcu-delivery-preparation-source.d.ts",
+      "bytes": 1224,
+      "sha256": "4bee3dfe15bf1ca479787398f0078b38adb3ccee1ef14425326e975e4bf62ff1"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/sql-narrow-treasury-gcu-delivery-preparation-source.js",
+      "bytes": 7512,
+      "sha256": "cac3f848ae9059c433468937b57b511d199dac26b030858c590880b6fb9e5bfb"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/sql-narrow-treasury-gcu-shipment-preparation-source.d.ts",
+      "bytes": 1071,
+      "sha256": "c2326c51e150f5a2092bd921c8640c6e6da078187058af19a1cc14190686694d"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/sql-narrow-treasury-gcu-shipment-preparation-source.js",
+      "bytes": 11218,
+      "sha256": "3d89389ba1061f766c5254430560fd75e97749466e1593467a12d3797aa6f385"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/world-opening-bootstrap-readback.d.ts",
+      "bytes": 1146,
+      "sha256": "52e084b08dc2e0abbc107f7e92b9c09df0e94627eb99071da45b1dbc7241beda"
+    },
+    {
+      "path": "apps/world-worker/dist/persistence/world-opening-bootstrap-readback.js",
+      "bytes": 2672,
+      "sha256": "0fa1912d528cffb5aa1981347b0c891e892a10a38ab7d36d3250eee0b0f2a026"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/durable-command-consumption.d.ts",
+      "bytes": 2129,
+      "sha256": "3b8069b934aacce2abd20e1cb33e577158010704ab534e59f7a2019bd7d2a1c3"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/durable-command-consumption.js",
+      "bytes": 19962,
+      "sha256": "e3a650b071c4f35234bd616e8a6af4e2d840ee274f1a4b663d12cf482902f1c8"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/existing-opening-read.d.ts",
+      "bytes": 1095,
+      "sha256": "ad81bfe3a6d8057e533b1161745d96d9ab86eb9a1dfc94187b5c2e4a691b4195"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/existing-opening-read.js",
+      "bytes": 1510,
+      "sha256": "50be27223b13fba4e808545b74e3d7ae8a79dcf6197a563646976ca4ad588a8f"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/formal-financial-opening-contract.d.ts",
+      "bytes": 3634,
+      "sha256": "5dc583fe25392f92e1816df4f31062531b339ac6ea32abd0cdf1f6d16ff49d34"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/formal-financial-opening-contract.js",
+      "bytes": 15094,
+      "sha256": "bcd691f06ed5f21aa0bba9032a844cd6d6514bdcf9f59baa12276490afb45367"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/formal-financial-opening-producer.d.ts",
+      "bytes": 2527,
+      "sha256": "5d33098a1e0767fe884b1acfc0c214b49f1dc10685305dcb993a131124d1d47b"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/formal-financial-opening-producer.js",
+      "bytes": 15788,
+      "sha256": "39e9902cf43bb5d9fe90fc31f85991c3581d2c38e2a2b9a85b8408c507996bb6"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/isolated-financial-runtime-composition.d.ts",
+      "bytes": 2055,
+      "sha256": "bfb172ba8c5985b99dd96602a11731bcc53c57e98f09f3c727bd96958043c9b8"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/isolated-financial-runtime-composition.js",
+      "bytes": 8220,
+      "sha256": "1dcec0aa4f3ad9e89d69eada58c42910ffa96719188259ff8f04bbd61929bc92"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/local-narrow-reservation-worker.d.ts",
+      "bytes": 1082,
+      "sha256": "563b955281cf7e6f044e296989161de2d0c7c9b2e823291bd90c72e96d4a9279"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/local-narrow-reservation-worker.js",
+      "bytes": 17134,
+      "sha256": "a1d22c3e67be584ba8234d3c718409a1ac095524f77615a87f446a1bc6d6cde1"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/manual-office-command-composition.d.ts",
+      "bytes": 2325,
+      "sha256": "5ab48c3ab0a1d9674bf4131b968f1ad27f426ebf4a3af67c9a05a1ff4120f16d"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/manual-office-command-composition.js",
+      "bytes": 12176,
+      "sha256": "fd59f35d76c206037323db3ed7d22c172a1a06540927ec8f37f3223d189ebe7d"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-labour-social-opening-adoption.d.ts",
+      "bytes": 7239,
+      "sha256": "e969736862c7cc1bf21995129b7e3f5c1a716acbd206f6837519014b757f5518"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-labour-social-opening-adoption.js",
+      "bytes": 23505,
+      "sha256": "89a587b562130981f116a35254b5e27d62f016d8b6951a55d2ac740553b3df4c"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-opening-bundle-loader.d.ts",
+      "bytes": 4728,
+      "sha256": "6e5c989998f9eb9e8fca0f8703cdd65eae7e2ef96da2914b724b780405024d38"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-opening-bundle-loader.js",
+      "bytes": 17736,
+      "sha256": "1af7f4159860c7b17fe64837fad3c85462ada721db8e59171d27a63ce8078551"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-opening-bundle-preflight.d.ts",
+      "bytes": 2177,
+      "sha256": "59b6135052001e689be2f1f28e23f394f1c33276c247cce120ba05a7772e8c6f"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-opening-bundle-preflight.js",
+      "bytes": 9647,
+      "sha256": "960c1152adabf29fc31a7712c067bc01286990eaa08b908d8cf388f590203b8d"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-opening-candidate-composition.d.ts",
+      "bytes": 1658,
+      "sha256": "caa47cd7d6f610ffc4e3b2e0db3eeb1b2eb89e434250bdab457a7ab36b21b90f"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-opening-candidate-composition.js",
+      "bytes": 10493,
+      "sha256": "8150843d23c21388ea2ee2b7c5bcccaa2f0a0fead78b12e248976f949852d509"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-opening-decision-reconciliation.d.ts",
+      "bytes": 5705,
+      "sha256": "6ea23510c3a287233c11e929213d4416dfbeb1f46579be2324fd9872446e59ab"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-opening-decision-reconciliation.js",
+      "bytes": 24024,
+      "sha256": "27dbf33c4a9f4d173538376498487900fdbf9b44ea645c90b2c2b91e88d5e030"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-physical-opening-adoption.d.ts",
+      "bytes": 5466,
+      "sha256": "56007e83633fbebd02e58b857cc49d8fba2d56fe4c54a423a204c088c7008e73"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-physical-opening-adoption.js",
+      "bytes": 18349,
+      "sha256": "5e491fc54b5e4de44b801813555c909bf892969f9e12464b7bc4fa822b6e498f"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-water-opening-adoption.d.ts",
+      "bytes": 3950,
+      "sha256": "ca8d62c870ac05cff25bd8e32eedb3c1a461d3dfdcd407edc1a8d5542ef928a9"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-water-opening-adoption.js",
+      "bytes": 15590,
+      "sha256": "bf69d2365665cb98017010a09b9fbafb2431a8ed5ef07292555e60d42309dfb7"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-world-opening-admission.d.ts",
+      "bytes": 2803,
+      "sha256": "138e361d653c98d0161e6dc7ac2b967613f75239c58269616997e0dbf2da049f"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/official-world-opening-admission.js",
+      "bytes": 33800,
+      "sha256": "ebd11081545627bb07bd14a727c16a020a2e9cf67b58946fef35567ccffd8ab0"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/opening-canonical-seed-bridge.d.ts",
+      "bytes": 6687,
+      "sha256": "94bff127aab69fe0eb829f1471480767093e009a074b9f4e948d2f49f0395cdb"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/opening-canonical-seed-bridge.js",
+      "bytes": 46815,
+      "sha256": "24822b562dec559dfbbb19658eb8dcb4d1cb0c9f83b2a2b8de4c1fb02cddfaf4"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/opening-economic-decision.d.ts",
+      "bytes": 7669,
+      "sha256": "11c212ee7b529efd617b3d808c9311b8352a206c812f0eec4f3622bd66e830f5"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/opening-economic-decision.js",
+      "bytes": 28002,
+      "sha256": "cf1092d0373c12e7c938a282d3a62efd5fa5437c32b0c624e02865ed5e57c54c"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/owner-non-host-source-adoption.d.ts",
+      "bytes": 17681,
+      "sha256": "42ad2a09ad63b481cef4da4eec6e0a031d484e559c59fa5563a96be0927959b5"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/owner-non-host-source-adoption.js",
+      "bytes": 37028,
+      "sha256": "9ff2767dcfb4b9206655336cdfaa311bb9234659d398efb1d6dbeeb9bf8f800d"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/single-world-preflight.d.ts",
+      "bytes": 409,
+      "sha256": "47e383cfc3040efbecac0f2410ce9c32bec0ab2ce9abebd395b7b6cdf58664ad"
+    },
+    {
+      "path": "apps/world-worker/dist/preparation/single-world-preflight.js",
+      "bytes": 421,
+      "sha256": "7d00d5af54dfc56e63fec3d80ff5a77bf2c45af89b83b97866ceef579e450135"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/authoritative-activity-read-projection-publisher.d.ts",
+      "bytes": 1160,
+      "sha256": "bbf52a51f56a2bcff10c7f2e8519ccb107d9c6f55258757a375fd84a1dc226d3"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/authoritative-activity-read-projection-publisher.js",
+      "bytes": 35272,
+      "sha256": "be82769e40e9f0756db681bd970868aede0cecaa2193744fbbc30cc2cc261de1"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/current-authorization-entitlement-publisher.d.ts",
+      "bytes": 1843,
+      "sha256": "1eb6afebec53e54a173a239826454326702cceb0a48744acba58780092ca843f"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/current-authorization-entitlement-publisher.js",
+      "bytes": 7782,
+      "sha256": "d7a315af9b8e283d318a320e3490d95501bb02e29c46dc91e838185b4df3fd46"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/current-negotiation-party-read-publisher.d.ts",
+      "bytes": 1377,
+      "sha256": "638a8a93848f361a8a9eb04e859cd6ed7f6e963c8fffa9b4ca6fe642ea5f28f7"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/current-negotiation-party-read-publisher.js",
+      "bytes": 11463,
+      "sha256": "d5fe76c3a426b6c71fde5149b9ce890ac9d9d30e5d9d67ef547463622a9a777d"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/economic-read-visibility-source.d.ts",
+      "bytes": 1921,
+      "sha256": "0bd1cba345f7384874717904c91e804709131968a3a66cb286edf5d0125349e2"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/economic-read-visibility-source.js",
+      "bytes": 11288,
+      "sha256": "586bdf7efb01df377651e8d7beef554fc064a6ba84394719df0c27446003f6c9"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/narrow-treasury-gcu-delivery-projection.d.ts",
+      "bytes": 707,
+      "sha256": "947579420cc9ab1e0e659ad743ff8ce4d83bd425607f22628eb7319a337c8dd3"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/narrow-treasury-gcu-delivery-projection.js",
+      "bytes": 7053,
+      "sha256": "705c1b6c57b41db5cda74600ca0cbcdff5d8a11f8954830bbdead83be3be3038"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/office-decision-result-projector.d.ts",
+      "bytes": 2036,
+      "sha256": "5002297a47a8fe23b674e7e1aca6d61ebae8311cd999aa8cbd5cf6da7538e18a"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/office-decision-result-projector.js",
+      "bytes": 18258,
+      "sha256": "4d0337c6a323670f7fb620f774afb35e66b249fd5c95f7f0950a2dd84e654c79"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/world-read-projection-publisher.d.ts",
+      "bytes": 1773,
+      "sha256": "474d7463dd4c5792ce3cf250419270a3b84c23265965280b6d5ef5d141d952a2"
+    },
+    {
+      "path": "apps/world-worker/dist/projections/world-read-projection-publisher.js",
+      "bytes": 1158,
+      "sha256": "9c335f372f59e32916bdcccc0768653e2b748600fb72311ee006afcd276fca85"
+    },
+    {
+      "path": "apps/world-worker/dist/recovery/world-recovery.d.ts",
+      "bytes": 1941,
+      "sha256": "23d78fb944df043ccc1297b6a9e6af6c916e70c395c9a6b03d3854973da1185b"
+    },
+    {
+      "path": "apps/world-worker/dist/recovery/world-recovery.js",
+      "bytes": 17170,
+      "sha256": "26f8001b0c918ad6ed4b20282ec272de6997a6b24c1ff12431a4addbe546712f"
+    },
+    {
+      "path": "apps/world-worker/dist/runtime-preparation/hold-executor.d.ts",
+      "bytes": 323,
+      "sha256": "25dc8ad30760942a5c9803221397f857f2f6067b2cc3dc047581eea72046a0c4"
+    },
+    {
+      "path": "apps/world-worker/dist/runtime-preparation/hold-executor.js",
+      "bytes": 1201,
+      "sha256": "532645e96da270dc93fd3c1251400e95a3ee13e32dbc31c65d9313c02120528d"
+    },
+    {
+      "path": "apps/world-worker/dist/runtime-preparation/writer-lease-supervisor.d.ts",
+      "bytes": 2021,
+      "sha256": "58542083aee0d7e8859c5eeb33c2a600e753c9351496b08673b9654595b968a0"
+    },
+    {
+      "path": "apps/world-worker/dist/runtime-preparation/writer-lease-supervisor.js",
+      "bytes": 15695,
+      "sha256": "0c783ae9049549bbd1ca8714e2d1107c8d408a59c7ecdffcb8a3cdc5c77a08c8"
+    },
+    {
+      "path": "apps/world-worker/dist/runtime.d.ts",
+      "bytes": 611,
+      "sha256": "8f1d3e71a95310ab15e820cb7d6eb5e2a3979ad4c39a9c8b97c770eabaa4cfca"
+    },
+    {
+      "path": "apps/world-worker/dist/runtime.js",
+      "bytes": 6425,
+      "sha256": "cd146d8e99ce91bbab6c47a9daf9ab15bf3babafea153f748c044f9967f2cf14"
+    },
+    {
+      "path": "packages/core/dist/authorization/approvals.d.ts",
+      "bytes": 2445,
+      "sha256": "698fa531b0929ec3e6612346a45f4b9358f1721fea1c02f1aba362757e6863cd"
+    },
+    {
+      "path": "packages/core/dist/authorization/approvals.js",
+      "bytes": 4625,
+      "sha256": "f11d09ce041218577b4bdf6e652ad6f6d09d83da774dc870840f0f1fa2a47351"
+    },
+    {
+      "path": "packages/core/dist/authorization/economic-read-visibility-contract.d.ts",
+      "bytes": 1985,
+      "sha256": "179f9dd2e441075977b6cac68e2986653ddfc47bc70adcc2602a6876423f85bd"
+    },
+    {
+      "path": "packages/core/dist/authorization/economic-read-visibility-contract.js",
+      "bytes": 332,
+      "sha256": "24502a7e6b6bdbf1cf421f8b7f12b1200c8d05c6292c0a4fdc06ebd00531ccb9"
+    },
+    {
+      "path": "packages/core/dist/authorization/identity.d.ts",
+      "bytes": 1054,
+      "sha256": "957c8fa75c1709c6619d98ff45be41402648d494be823c0486e25c3374220236"
+    },
+    {
+      "path": "packages/core/dist/authorization/identity.js",
+      "bytes": 2086,
+      "sha256": "56e7cbd4ecfa0e40f5a45abb2b8e523ce55afb8fe5537623061a9b3742c2b46f"
+    },
+    {
+      "path": "packages/core/dist/authorization/office-decision-result-contract.d.ts",
+      "bytes": 2430,
+      "sha256": "17a315a8c842834df86dc176af6f60c63ce0633b8333cdb34be7862b327bd9b8"
+    },
+    {
+      "path": "packages/core/dist/authorization/office-decision-result-contract.js",
+      "bytes": 163,
+      "sha256": "170f097eebf87f9ec54b4d86e9e02b4d52b64dc9dfb0e963818569cdc70cf728"
+    },
+    {
+      "path": "packages/core/dist/authorization/offices.d.ts",
+      "bytes": 4310,
+      "sha256": "6bde118ff3b11d0a1d99a21b187ba4c2e0620fad2cfd114518c0af96d69ec76f"
+    },
+    {
+      "path": "packages/core/dist/authorization/offices.js",
+      "bytes": 8742,
+      "sha256": "c9ee0c36e03333e16b48398f138f1c3de360dda4857d65c5df12e5f84823e9ce"
+    },
+    {
+      "path": "packages/core/dist/authorization/projections.d.ts",
+      "bytes": 1528,
+      "sha256": "0c9ed2ccce5d88ec206a9384877cfedb932bc4df4b3b01e4e0853489b4c45b49"
+    },
+    {
+      "path": "packages/core/dist/authorization/projections.js",
+      "bytes": 2269,
+      "sha256": "e71b92e6f854d1283f3a9f1285a495a8ea396939b3fcdaac7ee3a5ad87b56083"
+    },
+    {
+      "path": "packages/core/dist/calibration/country-input-closure.d.ts",
+      "bytes": 5107,
+      "sha256": "ac0eca6cd07dc7debb8faccf633051ed3405e26050391fccce276348cc0f8c16"
+    },
+    {
+      "path": "packages/core/dist/calibration/country-input-closure.js",
+      "bytes": 26179,
+      "sha256": "7bf43f4d40bf084adf02bd8d93f0397f116f83bb14bb52d7af1bd08f8c274ff1"
+    },
+    {
+      "path": "packages/core/dist/calibration/country-provenance-adapter.d.ts",
+      "bytes": 3861,
+      "sha256": "ee79adb5490dd2e6f741d0b255db1dfdab26503a5b7776eb8a804056058552e2"
+    },
+    {
+      "path": "packages/core/dist/calibration/country-provenance-adapter.js",
+      "bytes": 18760,
+      "sha256": "b90c6366a0f036e5af884a5fbf20320ab55956f4c7b8677bf93f16d615a836bb"
+    },
+    {
+      "path": "packages/core/dist/calibration/existing-data-seed-closure.d.ts",
+      "bytes": 3676,
+      "sha256": "654a3be1b0ea7126d4703dbc5702b8f806dca257204b663d60bf9cc33889cfc4"
+    },
+    {
+      "path": "packages/core/dist/calibration/existing-data-seed-closure.js",
+      "bytes": 16190,
+      "sha256": "d7d25060464f81c108ad581fd11e9742e728dbf492b8a12b3b4c74dfc090dfb9"
+    },
+    {
+      "path": "packages/core/dist/calibration/index.d.ts",
+      "bytes": 44,
+      "sha256": "87702ce9859977c9223a3c150cec84ebe848c5040a4aafa18edae23ec81de9c0"
+    },
+    {
+      "path": "packages/core/dist/calibration/index.js",
+      "bytes": 44,
+      "sha256": "87702ce9859977c9223a3c150cec84ebe848c5040a4aafa18edae23ec81de9c0"
+    },
+    {
+      "path": "packages/core/dist/commands/authenticated-command-recovery-contract.d.ts",
+      "bytes": 2003,
+      "sha256": "4765cc7c4b513bcfcf169ac79a8905b5f1da43e8e22cd2cac3fbd43478fefff3"
+    },
+    {
+      "path": "packages/core/dist/commands/authenticated-command-recovery-contract.js",
+      "bytes": 157,
+      "sha256": "9960d35e7d124a8142c56aeca702f16887820f5cba9177889c3e1a1e40d157ab"
+    },
+    {
+      "path": "packages/core/dist/commands/authenticated-current-seat-contract.d.ts",
+      "bytes": 1068,
+      "sha256": "14e1c0e63525ba5cfaa14dbd0f819e6aaf54b2415377dc4d2109bf3fc7f22f9d"
+    },
+    {
+      "path": "packages/core/dist/commands/authenticated-current-seat-contract.js",
+      "bytes": 141,
+      "sha256": "042ff378f5d15c5ad909a382d3cb53e33534094aa00f0ece80cfb84a042fc6f2"
+    },
+    {
+      "path": "packages/core/dist/commands/authenticated-financial-intake-contract.d.ts",
+      "bytes": 4659,
+      "sha256": "028b9b40baa977786374048d98d14daa65c471b764bd6dae0c74f026e82bdacd"
+    },
+    {
+      "path": "packages/core/dist/commands/authenticated-financial-intake-contract.js",
+      "bytes": 948,
+      "sha256": "7032673a0c22a33afd5c8eccd029743770fb04702a03f1bef7128acd3b437281"
+    },
+    {
+      "path": "packages/core/dist/commands/authenticated-office-command-contract.d.ts",
+      "bytes": 2388,
+      "sha256": "21550b94e3f21af13897051ae62690e0534086282be9cd5ddac6bf9b63895612"
+    },
+    {
+      "path": "packages/core/dist/commands/authenticated-office-command-contract.js",
+      "bytes": 324,
+      "sha256": "941aa64d5d30b9017e580eb3099567d6bfb0ff9f88616240b9a6c0f067305bd2"
+    },
+    {
+      "path": "packages/core/dist/commands/captain-political-capital-allocation.d.ts",
+      "bytes": 3574,
+      "sha256": "cba35e3725624a4f30d5b619e13b9f022e95e673ea04f5999d1dbfb7f346d8ee"
+    },
+    {
+      "path": "packages/core/dist/commands/captain-political-capital-allocation.js",
+      "bytes": 12760,
+      "sha256": "09dd9cbb29e6ab3be8eb45edf780b6c3cdbea34afb99146e600957274434d2f6"
+    },
+    {
+      "path": "packages/core/dist/commands/central-bank-open-market-operation.d.ts",
+      "bytes": 5539,
+      "sha256": "54863ee962977c8c2f28225f3526bda57409933874cdf06f26b81db8e957c821"
+    },
+    {
+      "path": "packages/core/dist/commands/central-bank-open-market-operation.js",
+      "bytes": 22280,
+      "sha256": "70f6a4be4a9df38f7036711ea73cde9a976e573390b8957ac83dce9536e1f1e5"
+    },
+    {
+      "path": "packages/core/dist/commands/command.d.ts",
+      "bytes": 3469,
+      "sha256": "ed74071c070005a4ecdd49ae2aa778c28e6ae0420c98c1d640f6042d46198f98"
+    },
+    {
+      "path": "packages/core/dist/commands/command.js",
+      "bytes": 7750,
+      "sha256": "047b84bbcfd88d593e930b868e3c191aff3deb05fc69dcf8405c9532a278c5a1"
+    },
+    {
+      "path": "packages/core/dist/commands/receipt.d.ts",
+      "bytes": 10512,
+      "sha256": "49b8b99754cd632dcae53029a6ced9492074b430713d0124792e7883ea4df09b"
+    },
+    {
+      "path": "packages/core/dist/commands/receipt.js",
+      "bytes": 20976,
+      "sha256": "785bf4b597bdd18b6c0d9a2ce06f23aa596f1fce2ba47aeb3c7fa084cfd396df"
+    },
+    {
+      "path": "packages/core/dist/commands/social-employment-service.d.ts",
+      "bytes": 6263,
+      "sha256": "dc519d222cf7a364c908fd6979cb0095662c24c3c04dfb34cfa7b10ff88cebed"
+    },
+    {
+      "path": "packages/core/dist/commands/social-employment-service.js",
+      "bytes": 29316,
+      "sha256": "581845eadb076fd3990c9d7d40d44d9c743b76b7dec8038c6952316716b6bebf"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/bank-central-foundation.d.ts",
+      "bytes": 11683,
+      "sha256": "f487bb3e9ea81417567ee8f774875b7319cafef00917f9b7ea748c31a34c4233"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/bank-central-foundation.js",
+      "bytes": 40682,
+      "sha256": "7b6cc659447de6dbc04b4b00d318c70d0f5d6e5fdfa154243a649dd898cc2380"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/captain-strategy-governance-preparation.d.ts",
+      "bytes": 17245,
+      "sha256": "8cb5dbb629b5620e3be45ea4c1d60faed81272842bb811b2a9f0c007af8710f9"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/captain-strategy-governance-preparation.js",
+      "bytes": 49209,
+      "sha256": "762737f992b24d1f4eba9027b3e393796b70aee9c034b051b8efaba0427d4c98"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/causal-channels.d.ts",
+      "bytes": 3199,
+      "sha256": "8c5d51f3b1509011dd4299591a76716aaafd2a5df08b80e15f6e87cfe8a157d5"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/causal-channels.js",
+      "bytes": 69296,
+      "sha256": "f105410be1b03963706de269dbe62c23016731b026332b73d892d09506152168"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/causal-values.d.ts",
+      "bytes": 3271,
+      "sha256": "de81ba220a8fe2b4719a74cb46964675429c7609473146ef447d7162c7d01b70"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/causal-values.js",
+      "bytes": 8990,
+      "sha256": "fcfac317763f2c631e051bbd347fdaafbe8181b3b05dc2afa577e981de3d21fc"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/common.d.ts",
+      "bytes": 4185,
+      "sha256": "39c110b08ef3550b6ce04adac23b62d77d522d73d0e67858ec427af52e84ca74"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/common.js",
+      "bytes": 7460,
+      "sha256": "458de4ab3312dc0be7bbbdf686c99a5a658cd6e9ff44204145711e5aea8c53bc"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/crisis-cause-composer-foundation.d.ts",
+      "bytes": 5550,
+      "sha256": "b2a0370c2c68b113c1e9521e2e83cdee97ce939a656faa3bf1242b238a40bffa"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/crisis-cause-composer-foundation.js",
+      "bytes": 16694,
+      "sha256": "88f7a5b2e010410de3c291dc2906aabf82c95a1ca36202e2b291817ef7bc9beb"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/energy-production-foundation.d.ts",
+      "bytes": 6465,
+      "sha256": "1a166992689023ad5dc5c295f17bc94ccc22da6e6de24725b2b817eddfa43693"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/energy-production-foundation.js",
+      "bytes": 18313,
+      "sha256": "ac1f6ba157066a4266b8e2474fac63fcea8e3d22ca85dea3d8d31bd1c1e77058"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/firm-ecology.d.ts",
+      "bytes": 7888,
+      "sha256": "d60229b20d0ebba61c83f4f92cb6fd1911581de4bfb9e8b35ae49ad3ffcf8a28"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/firm-ecology.js",
+      "bytes": 19267,
+      "sha256": "fe6ee613b6c3966488979ff59003519f2f0cc6d4783ad7aa49cacdd67b725357"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/foundation-provenance.d.ts",
+      "bytes": 4244,
+      "sha256": "4ac2ad44bcbd2e6e64c3380e7cdbfec1c5d18180240290854f6a76dded5c02a3"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/foundation-provenance.js",
+      "bytes": 9212,
+      "sha256": "5a8c5783429584227e0cf85411f423cfb7524acade1872519ea3b9cbe008322f"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/fx-international-foundation.d.ts",
+      "bytes": 12980,
+      "sha256": "c1024b6ccbf88296bcdacb1b7069a5cbfa723a44d2fbe11eb4b68236f93584cc"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/fx-international-foundation.js",
+      "bytes": 41219,
+      "sha256": "38a207bb48ee50d95a19e20645d24ed4838f86825f60618bdb088c1aa14d6efd"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/global-order-book-foundation.d.ts",
+      "bytes": 5112,
+      "sha256": "4be18a7273bf13ef0ecb49b5010d6c2d07368d37995bf8686fc8e3735b7b7e54"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/global-order-book-foundation.js",
+      "bytes": 22324,
+      "sha256": "09be3d61ba3f6ca114e40f8a52cfbcd076bc0cde8c07adc704e97635ee850952"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/governance-brief-conflict-expiry-foundation.d.ts",
+      "bytes": 7962,
+      "sha256": "1508f423c0ada388b88ddcec9be08ad42932e2f6c5bdfdc6220fb729f71141d4"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/governance-brief-conflict-expiry-foundation.js",
+      "bytes": 17496,
+      "sha256": "2a15c3be5638488045b69824664765516e6202277ea68413391897004b67e11d"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/household-fiscal-closure.d.ts",
+      "bytes": 9428,
+      "sha256": "9cb66c6d55de8d9830dabc6c9b5ba5675a6baac1d8831caa351d77f78361b346"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/household-fiscal-closure.js",
+      "bytes": 30861,
+      "sha256": "66249380e31d7db8ac496294050e6de13d2fa012985180560874628dacc0a6c5"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/index.d.ts",
+      "bytes": 987,
+      "sha256": "3289983a78955374fc775c75a6ab7d3c2886c969604b8a927548d3d6aa9ca4dc"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/index.js",
+      "bytes": 987,
+      "sha256": "3289983a78955374fc775c75a6ab7d3c2886c969604b8a927548d3d6aa9ca4dc"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/international-contract-foundation.d.ts",
+      "bytes": 12700,
+      "sha256": "b15c142e4469fb20bfcc48e80cd89b8b79146d7e97ce9e5c74c6adfebbcddb33"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/international-contract-foundation.js",
+      "bytes": 34605,
+      "sha256": "0c447a5cd8590ad84f55820a5417d231233f285ef45f79f2fdbbc11d56ff73da"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/international-executors-a-foundation.d.ts",
+      "bytes": 8139,
+      "sha256": "5418409833020ed6b1db25be337ec83d2293f7a5f9714cef40dc7eec75c0d6c3"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/international-executors-a-foundation.js",
+      "bytes": 28242,
+      "sha256": "0bd6f26d42061375b536183fea07b4f72d2e11c568435514b37e67e8e6cd01a0"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/international-executors-b-preparation.d.ts",
+      "bytes": 21813,
+      "sha256": "b18a17e6069a5882264c0b4e0c8ffb892fc8dc23b6633c5ce4e5394315f6bdd8"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/international-executors-b-preparation.js",
+      "bytes": 63584,
+      "sha256": "6fae67bd24d71eaf33d128a3f38c298cd483833214107f7c7c496c3bac58c740"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/international-settlement.d.ts",
+      "bytes": 3514,
+      "sha256": "5df874dd0d572e592cb47392294dc7d2ef2de45d85c4d5802fba915789125a25"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/international-settlement.js",
+      "bytes": 7095,
+      "sha256": "ef23adf1b3039815e7c41e5a25d9e6faf205d1e91b4e429f9efa5c54ad51b34f"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/national-accounts-production-foundation.d.ts",
+      "bytes": 5550,
+      "sha256": "8ea08037dfcca5339d9b9aaf3c312b632be7043db6d80f059ab8262f9b79c1b5"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/national-accounts-production-foundation.js",
+      "bytes": 13444,
+      "sha256": "c336d2bd676afa6327a81a39dfbb47801e624c016c3bace5c0172f8572f90041"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/national-accounts-reconciliation-foundation.d.ts",
+      "bytes": 6182,
+      "sha256": "43b8e142739f539f7ab22e623b346bc17b58738f5d7f9106efc9565049089181"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/national-accounts-reconciliation-foundation.js",
+      "bytes": 16389,
+      "sha256": "291ee7e207837e584bd7a63a4cbfdc00f5b6566324db708d7706f0408419e780"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/national-risk-score-foundation.d.ts",
+      "bytes": 5074,
+      "sha256": "84e9df840ebd9b72196fcb615525ecfa2d4e545559033b734314ccb40abfc876"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/national-risk-score-foundation.js",
+      "bytes": 15099,
+      "sha256": "12bc501ef4ecec9d551521da67e43449532833a5941be69534e45f0c022a286d"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/population-labour-services.d.ts",
+      "bytes": 5907,
+      "sha256": "a962fbe7997807f7f9bd9ce538bc6a0a74b18486141bfe48ae1e3cbbaa9bd275"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/population-labour-services.js",
+      "bytes": 13450,
+      "sha256": "eba0f4286a952a07ae629d8c9745cf41c86b829522ecbfdb18fb41b976176974"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/quantified-node-registry.d.ts",
+      "bytes": 1000,
+      "sha256": "f692a19ad7c2da08be31490271b77716f87ee094929fb5d748318b4a4fae58f3"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/quantified-node-registry.js",
+      "bytes": 12589,
+      "sha256": "e454cbf004dce3de27df34e3dbf1b22f87617c04d05b6a147f391990b517fa07"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/quantified-systems.d.ts",
+      "bytes": 1013,
+      "sha256": "fcec87f2f3eae2855039a9beb5f6049257f648485a161f4d097dfee8f8bdea9f"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/quantified-systems.js",
+      "bytes": 1257,
+      "sha256": "9208935935f2b18e7f2a962382ea5f37e5e0e506225422874b2f263ea8b9b482"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/resources-energy-production.d.ts",
+      "bytes": 5485,
+      "sha256": "f39f56ed3f2b10a8fadb3d46f7ec9429de8e4a0d20a3ff0df8ce7035e08d0300"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/resources-energy-production.js",
+      "bytes": 16894,
+      "sha256": "3a10fb9c333a347d37ae3e708daf87a8d82f6abdfdb210fb523ab0b40ab7af9d"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/social-foundation.d.ts",
+      "bytes": 13413,
+      "sha256": "484dda5e915a5991bcc0af92b7941d567603bf8400f2b97d78aec2db65b72bab"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/social-foundation.js",
+      "bytes": 29789,
+      "sha256": "dc23be6dd0f88ce2442bf94c3bc3b994ad0563baa6d8f0d96b2dfb96a6822528"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/technology-project-foundation.d.ts",
+      "bytes": 6994,
+      "sha256": "d5a32a14adba002947d3d1256e29e92fa967483d0c7f9fc0a96bb9d3e5b8391a"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/technology-project-foundation.js",
+      "bytes": 19660,
+      "sha256": "413df958640cffc5d1cb76bdb4e92d2669454e6aee9a73c712c4f6d991015206"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/technology-project-household-fiscal.d.ts",
+      "bytes": 5951,
+      "sha256": "ed030c7ada6c5f46d4635861f4374bdac5f1bb499a94bd276df56df5ce604702"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/technology-project-household-fiscal.js",
+      "bytes": 11630,
+      "sha256": "468b68bdb051fb1f3ddcabb7ce0ed8056a9fc5660363b2033f67068512080f11"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/trade-logistics-foundation.d.ts",
+      "bytes": 7748,
+      "sha256": "507c9aaa333ef8d3360c9d8a3a69837197eef378b39b50fb1e088564289a6038"
+    },
+    {
+      "path": "packages/core/dist/engine-kernels/trade-logistics-foundation.js",
+      "bytes": 20506,
+      "sha256": "59cdd60cf9a5b9c99669576ca16c601f1a68ff7b10e8fe7becdc82f929d4f362"
+    },
+    {
+      "path": "packages/core/dist/errors.d.ts",
+      "bytes": 3764,
+      "sha256": "87427849637a7b4bf3e6bc9313bfcb5aac94a4f9989aab7c6b00e007f0b29917"
+    },
+    {
+      "path": "packages/core/dist/errors.js",
+      "bytes": 3199,
+      "sha256": "2e6615748548b869dc42d800d8a862f09b19c5e11342f1b8bf2ae98e96517d0c"
+    },
+    {
+      "path": "packages/core/dist/events/event.d.ts",
+      "bytes": 1422,
+      "sha256": "992aca66fad914d97f06a0a7f9c823e45f2579d6dc5338873647c631332d3250"
+    },
+    {
+      "path": "packages/core/dist/events/event.js",
+      "bytes": 5268,
+      "sha256": "ec285bd5f9d5aa7dc12596a701892e342106d949a1dda85f61f93b4648b63e81"
+    },
+    {
+      "path": "packages/core/dist/finance/financial-ledger.d.ts",
+      "bytes": 5181,
+      "sha256": "21d3a0187077bc177ab65c90f24d87d2b1bf74c47e631f5b37c7c6bdc8032fd3"
+    },
+    {
+      "path": "packages/core/dist/finance/financial-ledger.js",
+      "bytes": 15681,
+      "sha256": "af0cb9662b31ba0ddcd34802e58b4e0c6a5b9bbdf062acb04e30161046cc5e8f"
+    },
+    {
+      "path": "packages/core/dist/ids.d.ts",
+      "bytes": 6033,
+      "sha256": "2d12b87adbd0e92e64ee623b0bc1ecbfb8369f9e0d0c7c6d14700acc1179b47f"
+    },
+    {
+      "path": "packages/core/dist/ids.js",
+      "bytes": 3679,
+      "sha256": "d83ccfcb5cf192f05e0f120357a4f6109ba8107e799fc5a5acc2def6714ad54f"
+    },
+    {
+      "path": "packages/core/dist/index.d.ts",
+      "bytes": 3509,
+      "sha256": "c851cd7dfefe2055f6368aeafb4ad8d4ce193fbd5a966986dc472fcd89937235"
+    },
+    {
+      "path": "packages/core/dist/index.js",
+      "bytes": 2656,
+      "sha256": "21cf985a9c8ac9bc5a67b46429b9e29ec890c5a24770268de4c4226e10000cf4"
+    },
+    {
+      "path": "packages/core/dist/inventory/inventory-ledger.d.ts",
+      "bytes": 6451,
+      "sha256": "8c6e28093b324e27a0d1734340d277ee0f51a74f2ef25eb49eda849c917914ca"
+    },
+    {
+      "path": "packages/core/dist/inventory/inventory-ledger.js",
+      "bytes": 21321,
+      "sha256": "5788f86d8ab8fe39ffecbbe3eabd0aa9a48d429aa600d462a31a0f0ba8ee976f"
+    },
+    {
+      "path": "packages/core/dist/inventory/production-consumption-posting.d.ts",
+      "bytes": 4685,
+      "sha256": "870b81fa70519cf1c5817a33278deff63cba18ee8acb5c6c68fe9c4bf8f7b8f0"
+    },
+    {
+      "path": "packages/core/dist/inventory/production-consumption-posting.js",
+      "bytes": 12423,
+      "sha256": "71de0fb483ff880d864270564f941f9b10ac5f405188d62d8c9ba36d970a213c"
+    },
+    {
+      "path": "packages/core/dist/labour/approved-opening-projection.d.ts",
+      "bytes": 3744,
+      "sha256": "d6db2b53bd5aa11b3507fbb9e0968d5ad7cdfd3cf84931ea5e3ebe8e497804f4"
+    },
+    {
+      "path": "packages/core/dist/labour/approved-opening-projection.js",
+      "bytes": 10503,
+      "sha256": "2731e37d8df8b3401500b36d3e6ed2304c5c20995dbb2e65f85138b798ef0406"
+    },
+    {
+      "path": "packages/core/dist/labour/labour-engine.d.ts",
+      "bytes": 5535,
+      "sha256": "f19b3fafadfe1e3f7042415be53ad1e0164007540a21f4d8e62095a2ed71bae3"
+    },
+    {
+      "path": "packages/core/dist/labour/labour-engine.js",
+      "bytes": 35709,
+      "sha256": "773f6744f1f8b3217ba4b9f3fa7728a1fc1798b2cdbad45851f33df8ac9777d8"
+    },
+    {
+      "path": "packages/core/dist/labour/population-labour-invariants.d.ts",
+      "bytes": 2070,
+      "sha256": "aa2159300febae72ecbe0e03283eb717aec22816054cc4fdcfc29d18bf300003"
+    },
+    {
+      "path": "packages/core/dist/labour/population-labour-invariants.js",
+      "bytes": 19129,
+      "sha256": "83bb2111243e6b0c0cfb081c3be213f7767c104510547b52f759f8a3c0201efb"
+    },
+    {
+      "path": "packages/core/dist/npc/intent-preparation.d.ts",
+      "bytes": 2932,
+      "sha256": "c58e2d4d673cc380f3cd71ad312ea3b73631acde1773d87c07086239ce39d45f"
+    },
+    {
+      "path": "packages/core/dist/npc/intent-preparation.js",
+      "bytes": 7539,
+      "sha256": "b134bf8d5c45d985cf6f0505f13df21e292500a985b5d43435c0b967f93a0ccc"
+    },
+    {
+      "path": "packages/core/dist/numeric/index.d.ts",
+      "bytes": 181,
+      "sha256": "6b23127fa45c069c56d95d31b0c4ad29fcec4f15dc2cbe59c356e98b27a3bebe"
+    },
+    {
+      "path": "packages/core/dist/numeric/index.js",
+      "bytes": 181,
+      "sha256": "6b23127fa45c069c56d95d31b0c4ad29fcec4f15dc2cbe59c356e98b27a3bebe"
+    },
+    {
+      "path": "packages/core/dist/numeric/money.d.ts",
+      "bytes": 489,
+      "sha256": "b40e95cd0194ae4f7e5295dce0bc40d5749c8b62cb8c6b42f17c5a80c351a5eb"
+    },
+    {
+      "path": "packages/core/dist/numeric/money.js",
+      "bytes": 1455,
+      "sha256": "6ec5260f522b3becf43dc0d2b0749151b6c9043b3353ebdbac36ab3f81cdecbd"
+    },
+    {
+      "path": "packages/core/dist/numeric/price.d.ts",
+      "bytes": 587,
+      "sha256": "a8678ed2407d906b0bb1e888069bc8087b160157ee3aff44305acb4a607160c4"
+    },
+    {
+      "path": "packages/core/dist/numeric/price.js",
+      "bytes": 1369,
+      "sha256": "a3075a62652054b0e14f6fb7e9dd71359f3d5f735b8bc53bc9b45da5418462b2"
+    },
+    {
+      "path": "packages/core/dist/numeric/quantity.d.ts",
+      "bytes": 497,
+      "sha256": "0a86aa9d6cfa24a569bec8ee89d24a4cefaf673988e00297aa1b92edb469e885"
+    },
+    {
+      "path": "packages/core/dist/numeric/quantity.js",
+      "bytes": 1421,
+      "sha256": "f4f0b1aadf6f52f6eac60b09ad91ef3dabdbb7d60bd87ebb02ac431df3619e12"
+    },
+    {
+      "path": "packages/core/dist/numeric/rate.d.ts",
+      "bytes": 290,
+      "sha256": "3f5633ed2fcadaf89941b81e38dbdd9e2f11e00cc5347fb1045e0ced93de727c"
+    },
+    {
+      "path": "packages/core/dist/numeric/rate.js",
+      "bytes": 823,
+      "sha256": "970c60338a5f0cc502249719981c7c74f08caab420c53dc2b97f37f9bb2ad1fe"
+    },
+    {
+      "path": "packages/core/dist/numeric/sim-time.d.ts",
+      "bytes": 235,
+      "sha256": "fb1cb4d22549b0b112c9dbdc3e60afd8dd729fee179029adda8486cd1fbd8959"
+    },
+    {
+      "path": "packages/core/dist/numeric/sim-time.js",
+      "bytes": 735,
+      "sha256": "698fad3d1e4766b125de9636c3ea0f9d767749d817812711778d947b3f33b9c3"
+    },
+    {
+      "path": "packages/core/dist/numeric/world-decimal.d.ts",
+      "bytes": 574,
+      "sha256": "95602439e9d8e3fbf4fb3cdcf3f418b432b75591dad8bb99dda680f40f29db93"
+    },
+    {
+      "path": "packages/core/dist/numeric/world-decimal.js",
+      "bytes": 2125,
+      "sha256": "a842cb7d06ccf11ccc8f547eb51a3f5d67dcb257b8a39cd29b67495c752fba6e"
+    },
+    {
+      "path": "packages/core/dist/opening/country-seed-provenance-preparation.d.ts",
+      "bytes": 3116,
+      "sha256": "09dac9ffd53c2b65a9b261ec0805ccb58e3fce12d6c1f8c66e3ec5dcca1312dc"
+    },
+    {
+      "path": "packages/core/dist/opening/country-seed-provenance-preparation.js",
+      "bytes": 14213,
+      "sha256": "e692752903a3820f34d77a2f9750bbce01068478fc863b907ab526c1b0d163d9"
+    },
+    {
+      "path": "packages/core/dist/opening/ledger-authority.d.ts",
+      "bytes": 845,
+      "sha256": "5183e05a5ed61fa41a86e5d408d790e10eeeba767f8ea91aa5c0bfaeccdf1ff2"
+    },
+    {
+      "path": "packages/core/dist/opening/ledger-authority.js",
+      "bytes": 574,
+      "sha256": "d5244cd07c27892f379f9e92ed979713bcd45436a2710ac14787cef524599823"
+    },
+    {
+      "path": "packages/core/dist/opening/opening-seed.d.ts",
+      "bytes": 5501,
+      "sha256": "89d69e7d57af88fb8f464cb106c7c8a079afe10b512be7a894c89bd1ffdfc076"
+    },
+    {
+      "path": "packages/core/dist/opening/opening-seed.js",
+      "bytes": 24829,
+      "sha256": "a8bbb15caea5d974434fc9c430422534ce721993541ce2b8f31419ef008a41ae"
+    },
+    {
+      "path": "packages/core/dist/orchestration/shared-core-opening-input.d.ts",
+      "bytes": 1885,
+      "sha256": "b051a97e1d4394fbbbbc0d263f67662fe867c6dd40513355b1ca22f88acb7ab3"
+    },
+    {
+      "path": "packages/core/dist/orchestration/shared-core-opening-input.js",
+      "bytes": 3728,
+      "sha256": "246c14fab57edf3da8050d5e34de17bd5d8add87ead7b3906c05454872a2aff6"
+    },
+    {
+      "path": "packages/core/dist/orchestration/single-world-configuration.d.ts",
+      "bytes": 1705,
+      "sha256": "8e2148be00ecf85476c54baaaa6fd1cf700fefc9ff420bd17af7bb19bcf34cab"
+    },
+    {
+      "path": "packages/core/dist/orchestration/single-world-configuration.js",
+      "bytes": 4361,
+      "sha256": "1c24dc93e50f333281afe54c55e6d99d220fb50b210989b9aa7c92d9ad9701ff"
+    },
+    {
+      "path": "packages/core/dist/orchestration/single-world-preflight.d.ts",
+      "bytes": 2544,
+      "sha256": "66cc572c8ffaba82de1617f97ceb51767157b5344edd810d7224cd734420356b"
+    },
+    {
+      "path": "packages/core/dist/orchestration/single-world-preflight.js",
+      "bytes": 4350,
+      "sha256": "9ec7620c3848d8b661868e6d496943d0da5af9c2e5f2ced9fa4b1e3e418dc1e1"
+    },
+    {
+      "path": "packages/core/dist/population/population-engine.d.ts",
+      "bytes": 6340,
+      "sha256": "3cc5f9833c7ecbe8fdf077e980d80ef3240319777df883b7c435612b76280a28"
+    },
+    {
+      "path": "packages/core/dist/population/population-engine.js",
+      "bytes": 29840,
+      "sha256": "f2ec167030f32de84bd10e2c9ebcaab31c9991d027f4da532c6dd6c4d3c21707"
+    },
+    {
+      "path": "packages/core/dist/registries/fixed-catalog.d.ts",
+      "bytes": 1508,
+      "sha256": "29875b2cae2affd38787e3e58b4e7c3ec6643d83e9382417dca4d1fce7531d0b"
+    },
+    {
+      "path": "packages/core/dist/registries/fixed-catalog.js",
+      "bytes": 17924,
+      "sha256": "462755e558ab7938b9f8f262cb53759057956d8a53caf1ef50cb5191d4929b17"
+    },
+    {
+      "path": "packages/core/dist/registries/registry.d.ts",
+      "bytes": 329,
+      "sha256": "5aae29f42d50b6575f7436500edc67c69941508eae254cac6ee2f9ffa4e1298d"
+    },
+    {
+      "path": "packages/core/dist/registries/registry.js",
+      "bytes": 928,
+      "sha256": "2b45300fe61acb9debbf08d399a08e23edbe6a15541be6d48d461489f830fe25"
+    },
+    {
+      "path": "packages/core/dist/replay/replay.d.ts",
+      "bytes": 3909,
+      "sha256": "ed5c5052372466e08697e9d5268a1240786cd2ab9f95e1405614aea668a0edf3"
+    },
+    {
+      "path": "packages/core/dist/replay/replay.js",
+      "bytes": 13346,
+      "sha256": "ecb985372b85314c4a21c2b39cb17ca1ede933e9bf99fc7f1997645e27b479db"
+    },
+    {
+      "path": "packages/core/dist/resource-inventory/approved-opening-projection.d.ts",
+      "bytes": 748,
+      "sha256": "942f705e8b9888b69ae1e0cbec40c47427734dc13d264f816d8885ff16cf2d61"
+    },
+    {
+      "path": "packages/core/dist/resource-inventory/approved-opening-projection.js",
+      "bytes": 1687,
+      "sha256": "e54dcbe397a2f5f35073d912aaa02d2d7c6e4e98d06510e109064d31d6cef44c"
+    },
+    {
+      "path": "packages/core/dist/resource-inventory/foundation.d.ts",
+      "bytes": 7237,
+      "sha256": "7242632e3bfa48251459813e45783e47a6b03a40f47800fadf6ace910abdb3b9"
+    },
+    {
+      "path": "packages/core/dist/resource-inventory/foundation.js",
+      "bytes": 18349,
+      "sha256": "6310a177819ad341db4f758427aadee8efe89f4b82f86502c89a6cdd9812e049"
+    },
+    {
+      "path": "packages/core/dist/resource-inventory/index.d.ts",
+      "bytes": 151,
+      "sha256": "f3d1f6fc8f4a0689de4560c8f2767c4052da74932b6801a92c0f3f8d5d083034"
+    },
+    {
+      "path": "packages/core/dist/resource-inventory/index.js",
+      "bytes": 123,
+      "sha256": "4ea9e761053cbb833c38d00be789cb711ed0ea62c704acfb240f38d9714924b9"
+    },
+    {
+      "path": "packages/core/dist/serialization/canonical.d.ts",
+      "bytes": 194,
+      "sha256": "0bff6a972e2ffe2a3f305630b956736e0ca166e880d506ea72e85de941b66b0a"
+    },
+    {
+      "path": "packages/core/dist/serialization/canonical.js",
+      "bytes": 5293,
+      "sha256": "1ae1ab4c36715a7b8cf7d9e35555aa33a702f5022e013d35582a2119c7e0adec"
+    },
+    {
+      "path": "packages/core/dist/time/deterministic-order.d.ts",
+      "bytes": 3026,
+      "sha256": "798ff91c233921078faa58dc94a0fcb054ea96d2424edc42e3f89fcd42419360"
+    },
+    {
+      "path": "packages/core/dist/time/deterministic-order.js",
+      "bytes": 7178,
+      "sha256": "b6d85930a85d9e72dac7915c48296d4aae222d05dbb62aae7b186deb2e5fd570"
+    },
+    {
+      "path": "packages/core/dist/time/simulation-clock.d.ts",
+      "bytes": 1641,
+      "sha256": "0a5f5ce59a2ddb64fe1c50750b26d5445553b16b9589b94008e8f5bbabc0828b"
+    },
+    {
+      "path": "packages/core/dist/time/simulation-clock.js",
+      "bytes": 4220,
+      "sha256": "a077a456c793691d2d7a9353e06d691c2da513020c513cb03351c719b1d64a87"
+    },
+    {
+      "path": "packages/core/dist/time/simulation-scheduler.d.ts",
+      "bytes": 4528,
+      "sha256": "31a1a78f7b13055341ab52919a0bdeb9ce48d5ddbc034865b7e7ff2d22a4642f"
+    },
+    {
+      "path": "packages/core/dist/time/simulation-scheduler.js",
+      "bytes": 19454,
+      "sha256": "71702324641048381308713cb0205160c1556e8d1cb2600609a36b1823da63a5"
+    },
+    {
+      "path": "packages/core/dist/transfers/narrow-treasury-gcu-delivery.d.ts",
+      "bytes": 4042,
+      "sha256": "4223893cd5a0dba885a51126cf7504af67f98f3e824261e3bbe1c2e197d4697b"
+    },
+    {
+      "path": "packages/core/dist/transfers/narrow-treasury-gcu-delivery.js",
+      "bytes": 15578,
+      "sha256": "b933f06ed4ddb04d0591b744541124ae620c835895726d01d408c5fd9adfa5d3"
+    },
+    {
+      "path": "packages/core/dist/transfers/narrow-treasury-gcu-transfer.d.ts",
+      "bytes": 5371,
+      "sha256": "3575d61d4ae4b1b1776e81c63ded0cafe6a1305d789fbdb7652fb40b595d8830"
+    },
+    {
+      "path": "packages/core/dist/transfers/narrow-treasury-gcu-transfer.js",
+      "bytes": 18978,
+      "sha256": "32c36dbdaa48957d9600c36c0f0203fd437770767571c65399b8e2d73b3263b0"
+    },
+    {
+      "path": "packages/core/dist/versions.d.ts",
+      "bytes": 456,
+      "sha256": "22967444ebe69cb7e1433664c25d87a96a99b4a6a6793f8994d3d61dd55632b6"
+    },
+    {
+      "path": "packages/core/dist/versions.js",
+      "bytes": 688,
+      "sha256": "16fbfcdaa3502fa64175c609f52dbd046d4827688324fd38170c16e65cdd47e8"
+    },
+    {
+      "path": "packages/core/dist/water/calendar.d.ts",
+      "bytes": 1203,
+      "sha256": "4d87fa39d52f8df8a1b8fdc223474da411903979a620cb3661d1889b4eb67fa9"
+    },
+    {
+      "path": "packages/core/dist/water/calendar.js",
+      "bytes": 5560,
+      "sha256": "aca461ce497f8e7086bfbe60178b151492dd477528d1662e7d482f96fde433eb"
+    },
+    {
+      "path": "packages/core/dist/water/exact-volume.d.ts",
+      "bytes": 1754,
+      "sha256": "d6d44d730c8ff6b5018ec91b7ccf97d98e264f31993c9681f573c6ea3334554e"
+    },
+    {
+      "path": "packages/core/dist/water/exact-volume.js",
+      "bytes": 5141,
+      "sha256": "7612fedad02ee8088e7b3b7bb1bee7780cf9a4504513d714ba85d95ae0ac019e"
+    },
+    {
+      "path": "packages/core/dist/water/foundation.d.ts",
+      "bytes": 4352,
+      "sha256": "999bb15e6b358f7512ff07056646404fda8daa84190b15d175eb46652d5b337c"
+    },
+    {
+      "path": "packages/core/dist/water/foundation.js",
+      "bytes": 13395,
+      "sha256": "3d68f1cc570b99d0db92b1e2c4e124188ba47cfef03a0b48b227b4f7c975c919"
+    },
+    {
+      "path": "packages/core/dist/water/index.d.ts",
+      "bytes": 99,
+      "sha256": "7b6db30a74b7a58f8442a17c0c00b9424a8c057e44e510ea0d31c31050657af5"
+    },
+    {
+      "path": "packages/core/dist/water/index.js",
+      "bytes": 99,
+      "sha256": "7b6db30a74b7a58f8442a17c0c00b9424a8c057e44e510ea0d31c31050657af5"
+    },
+    {
+      "path": "packages/core/dist/writer/world-writer-lease.d.ts",
+      "bytes": 3350,
+      "sha256": "1ffc13abff42324c5bb530ae1d5ce4b6b7391b8c2113eae6beaa1354d406dca3"
+    },
+    {
+      "path": "packages/core/dist/writer/world-writer-lease.js",
+      "bytes": 11893,
+      "sha256": "f2e5b1db462058f8c1010a627d7c40da8aaf4052f2b090484ea178b1efa26d0b"
+    }
+  ],
+  "aggregate": "3e3fcaebd2bce27cbf87f3a0a14e3513b04206053be82d3c81fbe51dc03469f6"
+}

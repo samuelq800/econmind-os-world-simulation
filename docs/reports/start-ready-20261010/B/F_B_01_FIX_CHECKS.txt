@@ -1,0 +1,278 @@
+F-B-01 MINIMAL FIX DELTA: CAPTURED LOCAL OUTPUT
+Code candidate: 2d986f3794ce81e5eb7d0fba3e2056fdd3b5daa8
+ANSI color removed only. Red block is captured tool-completion output before
+changing the extracted original hash predicate. Original logs remain in the
+local evidence directory; hashes/commands are recorded in the adjacent JSON.
+
+=== red: original predicate (exit 1; 3 failed / 2 passed) ===
+ ❯ tests/world-core/financial-candidate-bridge-fingerprint.test.ts (5 tests | 3 failed) 753ms
+   ❯ F-B-01 original producer / bridge fingerprint compatibility only (5)
+     × accepts the actual original producer fingerprint without relabelling mechanism output 18ms
+     × rejects the domain-prefixed shared-hash protocol and other wrong fingerprints 15ms
+     ✓ rejects changed authoritative candidate content under its stale original fingerprint 17ms
+     × preserves canonical key/enumeration-order compatibility for the actual producer candidate 15ms
+     ✓ a correct fingerprint still cannot replace the genuine adoption proof boundary 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/world-core/financial-candidate-bridge-fingerprint.test.ts > F-B-01 original producer / bridge fingerprint compatibility only > accepts the actual original producer fingerprint without relabelling mechanism output
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/world-core/financial-candidate-bridge-fingerprint.test.ts:32:65
+     30|     const {fingerprint,...body}=candidate;
+     31|     expect(fingerprint).toBe('sha256:'+sha(canonicalSerialize(body)));
+     32|     expect(hasOriginalFinancialCandidateFingerprint(candidate)).toBe(t…
+       |                                                                 ^
+     33|     expect(candidate.provenance).toBe('UNADOPTED_FINANCIAL_CALCULATION…
+     34|     expect(result).toMatchObject({status:'BLOCKED',seed:null,admission…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/world-core/financial-candidate-bridge-fingerprint.test.ts > F-B-01 original producer / bridge fingerprint compatibility only > rejects the domain-prefixed shared-hash protocol and other wrong fingerprints
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/world-core/financial-candidate-bridge-fingerprint.test.ts:43:90
+     41|     expect(domainPrefixed).not.toBe(fingerprint);
+     42|     for(const wrong of [domainPrefixed,'sha256:'+'0'.repeat(64),finger…
+     43|       expect(hasOriginalFinancialCandidateFingerprint({...candidate,fi…
+       |                                                                                          ^
+     44|   });
+     45|   it('rejects changed authoritative candidate content under its stale …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/world-core/financial-candidate-bridge-fingerprint.test.ts > F-B-01 original producer / bridge fingerprint compatibility only > preserves canonical key/enumeration-order compatibility for the actual producer candidate
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/world-core/financial-candidate-bridge-fingerprint.test.ts:53:67
+     51|     const transported=JSON.parse(canonicalSerialize(candidate)) as For…
+     52|     const reordered=Object.fromEntries(Object.entries(transported).rev…
+     53|     expect(hasOriginalFinancialCandidateFingerprint(transported)).toBe…
+       |                                                                   ^
+     54|     expect(hasOriginalFinancialCandidateFingerprint(reordered)).toBe(t…
+     55|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 2 passed (5)
+   Start at  21:37:04
+   Duration  1.20s (tests 67%, transform 27%, import 6%)
+
+
+=== focused-green.log (exit 0) ===
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/b-opening-source-composition-20261010
+
+ ✓ tests/world-core/financial-candidate-bridge-fingerprint.test.ts (5 tests) 898ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  21:37:54
+   Duration  1.35s (tests 70%, transform 24%, import 6%)
+
+
+=== selected-regressions.log (exit 0) ===
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/b-opening-source-composition-20261010
+
+ ✓ tests/world-core/formal-financial-opening.test.ts (31 tests | 29 skipped) 2005ms
+   ✓ D01/D02/D03 actual multi-currency calculation with explicit unresolved authority (15)
+     ✓ has stable fingerprints after transport/reparse and input enumeration changes 599ms
+     ✓ reproduces the same candidate in a fresh Node process with reloaded real adoption 895ms
+ ✓ tests/world-core/opening-canonical-seed-bridge.test.ts (16 tests | 15 skipped) 1004ms
+   ✓ source-only decision → existing Core seed bridge (16)
+     ✓ returns deterministic fingerprints across restart and source/country enumeration order 1003ms
+
+ Test Files  2 passed (2)
+      Tests  3 passed | 44 skipped (47)
+   Start at  21:39:12
+   Duration  3.61s (tests 86%, transform 8%, import 6%)
+
+
+=== strict.log (exit 0) ===
+(empty output)
+
+=== worker-build.log (exit 0) ===
+(empty output)
+
+=== lint.log (exit 0) ===
+(empty output)
+
+=== format.log (exit 0) ===
+Checking formatting...
+All matched files use Prettier code style!
+
+=== boundaries.log (exit 0) ===
+{
+  "status": "PASS",
+  "scannedFiles": 322,
+  "guardedRoots": [
+    "apps",
+    "packages",
+    "apps/world-web/server.mjs",
+    "scripts/environment-policy.mjs",
+    "scripts/vite-environment-policy.mjs",
+    "scripts/vite-environment-policy.d.mts",
+    "scripts/run-development-service.mjs",
+    "scripts/run-development-stack.mjs"
+  ],
+  "sourceExtensions": [
+    ".ts",
+    ".tsx",
+    ".mts",
+    ".cts",
+    ".js",
+    ".jsx",
+    ".mjs",
+    ".cjs"
+  ]
+}
+
+=== secrets.log (exit 0) ===
+{
+  "status": "PASS",
+  "scannedFiles": 2409
+}
+
+=== authoritative-patterns.log (exit 0) ===
+{
+  "scannedCoreFiles": 89,
+  "scannedFiles": 317,
+  "status": "PASS",
+  "violations": []
+}
+
+=== governance.json (exit 0) ===
+{
+  "scope": "R2_GOVERNANCE_READ_ONLY",
+  "status": "PASS",
+  "application_code_executed": false,
+  "database_access": false,
+  "checks": [
+    {
+      "name": "required_governance_files",
+      "status": "PASS"
+    },
+    {
+      "name": "fast_mainline_policy",
+      "status": "PASS"
+    },
+    {
+      "name": "r2_step_manifest",
+      "status": "PASS"
+    },
+    {
+      "name": "step_dependencies",
+      "status": "PASS"
+    },
+    {
+      "name": "human_navigation_matches_json",
+      "status": "PASS"
+    },
+    {
+      "name": "work_packages",
+      "status": "PASS"
+    },
+    {
+      "name": "control_and_step_prompts",
+      "status": "PASS"
+    },
+    {
+      "name": "progress_truth",
+      "status": "PASS"
+    },
+    {
+      "name": "decision_register",
+      "status": "PASS"
+    },
+    {
+      "name": "source_material",
+      "status": "PASS"
+    },
+    {
+      "name": "v01_traceability",
+      "status": "PASS"
+    },
+    {
+      "name": "v01_adr_graph",
+      "status": "PASS"
+    },
+    {
+      "name": "v01_integration_contract",
+      "status": "PASS"
+    },
+    {
+      "name": "templates",
+      "status": "PASS"
+    }
+  ],
+  "metrics": {
+    "required_files": 20,
+    "review_mode": "FAST_MAINLINE",
+    "execution_modes": {
+      "NORMAL": 99,
+      "PARALLEL_PREPARATION": 2
+    },
+    "work_packages": 33,
+    "steps": 101,
+    "dependency_graph": "ACYCLIC",
+    "work_package_dependency_graph": "ACYCLIC",
+    "step_prompts": 101,
+    "control_prompts": 8,
+    "implementation_agent_statuses": [
+      "BLOCKED",
+      "IMPLEMENTED_UNVERIFIED",
+      "IN_PROGRESS"
+    ],
+    "static_prompt_references": 1,
+    "progress_states": {
+      "BLOCKED": 0,
+      "CHANGES_REQUIRED": 0,
+      "DEFERRED_WITH_APPROVAL": 0,
+      "IMPLEMENTED_UNVERIFIED": 0,
+      "IN_PROGRESS": 0,
+      "PLANNED": 74,
+      "UNASSESSED": 0,
+      "VERIFIED": 27
+    },
+    "governance_sync_status": "VERIFIED",
+    "governance_integration": "MERGED",
+    "approved_reviews": 28,
+    "v002_ready": true,
+    "required_gate": "V09.1_ADR_18_DECISION",
+    "foundation_candidate_steps": 12,
+    "decisions": 20,
+    "approved_decisions": 9,
+    "source_documents": 8,
+    "v01_requirements": 139,
+    "v01_source_units": 8743,
+    "v01_adrs": 20,
+    "v01_adr_relationships": 32,
+    "v01_adr_package_edges": 114,
+    "v01_identity_fields": 3,
+    "v01_preserved_route_groups": 5,
+    "v01_next_gate": "V01_PACKAGE_LEVEL_REVIEW",
+    "standard_templates": 6
+  },
+  "errors": []
+}

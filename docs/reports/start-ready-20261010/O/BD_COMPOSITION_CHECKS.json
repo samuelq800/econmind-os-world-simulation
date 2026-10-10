@@ -1,0 +1,176 @@
+[
+  {
+    "cmd": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/core build",
+    "chunk_id": "87207e",
+    "wall_time_seconds": 1.000804083,
+    "session_id": 33168,
+    "original_token_count": 8,
+    "output": "$ tsc -p tsconfig.build.json\n"
+  },
+  {
+    "kind": "completion",
+    "chunk_id": "192b53",
+    "wall_time_seconds": 0.000010875,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "cmd": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/world-worker build",
+    "chunk_id": "1cfed8",
+    "wall_time_seconds": 1.000711583,
+    "session_id": 75476,
+    "original_token_count": 8,
+    "output": "$ tsc -p tsconfig.build.json\n"
+  },
+  {
+    "kind": "completion",
+    "chunk_id": "6eed1f",
+    "wall_time_seconds": 0.000006625,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "cmd": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/world-api build",
+    "chunk_id": "aff6e6",
+    "wall_time_seconds": 1.001854916,
+    "session_id": 30025,
+    "original_token_count": 8,
+    "output": "$ tsc -p tsconfig.build.json\n"
+  },
+  {
+    "kind": "completion",
+    "chunk_id": "1ebc44",
+    "wall_time_seconds": 0.000014,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "cmd": "env -i PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:/opt/homebrew/bin:/usr/bin:/bin ECONMIND_ENV=local pnpm exec vitest run tests/world-core/official-opening-candidate-composition.test.ts tests/world-core/financial-candidate-bridge-fingerprint.test.ts tests/world-core/writer-lease-supervisor.test.ts tests/world-core/world-writer-lease.test.ts",
+    "chunk_id": "d1f5da",
+    "wall_time_seconds": 1.001128583,
+    "session_id": 66232,
+    "original_token_count": 36,
+    "output": "\n\u001b[1m\u001b[30m\u001b[46m RUN \u001b[49m\u001b[39m\u001b[22m \u001b[36mv5.0.0 \u001b[39m\u001b[90m/Users/samuel/Documents/econclub/.econmind-worktrees/world-map-full-integration\u001b[39m\n\n"
+  },
+  {
+    "cmd": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH node scripts/check-authoritative-patterns.mjs",
+    "chunk_id": "0b2ec1",
+    "wall_time_seconds": 0.685383375,
+    "exit_code": 0,
+    "original_token_count": 23,
+    "output": "{\n  \"scannedCoreFiles\": 91,\n  \"scannedFiles\": 330,\n  \"status\": \"PASS\",\n  \"violations\": []\n}\n"
+  },
+  {
+    "cmd": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec tsc -p tests/support/tsconfig.official-opening-candidate-composition.json --noEmit --pretty false",
+    "chunk_id": "5d3893",
+    "wall_time_seconds": 1.001719083,
+    "session_id": 78913,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "cmd": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec tsc -p tests/support/tsconfig.financial-candidate-bridge-fingerprint.json --noEmit --pretty false",
+    "chunk_id": "1e2ba4",
+    "wall_time_seconds": 1.001226083,
+    "session_id": 25785,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "cmd": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec tsc -p tests/world-core/writer-lease-supervisor.tsconfig.json --noEmit --pretty false",
+    "chunk_id": "b8e85d",
+    "wall_time_seconds": 1.001543916,
+    "session_id": 57389,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "cmd": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH node scripts/check-boundaries.mjs",
+    "chunk_id": "0ebd00",
+    "wall_time_seconds": 1.000600583,
+    "session_id": 98289,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "kind": "completion",
+    "forSession": 66232,
+    "chunk_id": "a5ae41",
+    "wall_time_seconds": 0.000013083,
+    "exit_code": 0,
+    "original_token_count": 529,
+    "output": " \u001b[32m✓\u001b[39m tests/world-core/official-opening-candidate-composition.test.ts \u001b[2m(\u001b[22m\u001b[2m19 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 10616\u001b[2mms\u001b[22m\u001b[39m\n   \u001b[32m✓\u001b[39m genuine V2 read-only financial composition (no formal source installed) \u001b[2m(16)\u001b[22m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m publication digest binds every supplemental/parent/adoption byte and retained reference\u001b[33m 755\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m actually calls the original producer and preserves all raw BLOCKED labels and obligations\u001b[33m 800\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m preflight shares the assembler and reports actual wiring, while keeping every deferred/nonfinancial gap\u001b[33m 1250\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m rejects structural JSON clone and spread of loader snapshots; proof DTO cannot enter bridge\u001b[33m 413\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m retagging a mechanism vector without independently registered adoption still fails closed\u001b[33m 900\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m contract embedded document cannot differ from independently bounded loader bytes\u001b[33m 775\u001b[2mms\u001b[22m\u001b[39m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m publication calls the shared genuine V2 path and denies structural V2 before any SQL\u001b[33m 1656\u001b[2mms\u001b[22m\u001b[39m\n   \u001b[32m✓\u001b[39m acyclic deterministic V2 assembly intent, not authority \u001b[2m(3)\u001b[22m\n     \u001b[33m\u001b[2m✓\u001b[22m\u001b[39m fresh processes reload identical bytes and reproduce intent/output/blockers in either import order\u001b[33m 2743\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m tests/world-core/world-writer-lease.test.ts \u001b[2m(\u001b[22m\u001b[2m5 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 3\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m tests/world-core/writer-lease-supervisor.test.ts \u001b[2m(\u001b[22m\u001b[2m55 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[32m 11\u001b[2mms\u001b[22m\u001b[39m\n \u001b[32m✓\u001b[39m tests/world-core/financial-candidate-bridge-fingerprint.test.ts \u001b[2m(\u001b[22m\u001b[2m5 tests\u001b[22m\u001b[2m)\u001b[22m\u001b[33m 827\u001b[2mms\u001b[22m\u001b[39m\n\n\u001b[2m Test Files \u001b[22m \u001b[1m\u001b[32m4 passed\u001b[39m\u001b[22m\u001b[90m (4)\u001b[39m\n\u001b[2m      Tests \u001b[22m \u001b[1m\u001b[32m84 passed\u001b[39m\u001b[22m\u001b[90m (84)\u001b[39m\n\u001b[2m   Start at \u001b[22m 22:46:22\n\u001b[2m   Duration \u001b[22m 12.77s\u001b[2m (tests 92%, transform 5%, import 3%)\u001b[22m\n\n"
+  },
+  {
+    "kind": "completion",
+    "forSession": 78913,
+    "chunk_id": "bd8de3",
+    "wall_time_seconds": 0.000006459,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "kind": "completion",
+    "forSession": 25785,
+    "chunk_id": "6c2d5b",
+    "wall_time_seconds": 0.000006291,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "kind": "completion",
+    "forSession": 57389,
+    "chunk_id": "de8c09",
+    "wall_time_seconds": 0.000006208,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "kind": "completion",
+    "forSession": 98289,
+    "chunk_id": "100c17",
+    "wall_time_seconds": 0.000006209,
+    "exit_code": 0,
+    "original_token_count": 116,
+    "output": "{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 335,\n  \"guardedRoots\": [\n    \"apps\",\n    \"packages\",\n    \"apps/world-web/server.mjs\",\n    \"scripts/environment-policy.mjs\",\n    \"scripts/vite-environment-policy.mjs\",\n    \"scripts/vite-environment-policy.d.mts\",\n    \"scripts/run-development-service.mjs\",\n    \"scripts/run-development-stack.mjs\"\n  ],\n  \"sourceExtensions\": [\n    \".ts\",\n    \".tsx\",\n    \".mts\",\n    \".cts\",\n    \".js\",\n    \".jsx\",\n    \".mjs\",\n    \".cjs\"\n  ]\n}\n"
+  },
+  {
+    "cmd": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec prettier --check --ignore-unknown 'apps/world-worker/src/admission/official-opening-admission-publication.ts' 'apps/world-worker/src/preparation/official-opening-bundle-loader.ts' 'apps/world-worker/src/preparation/official-opening-bundle-preflight.ts' 'apps/world-worker/src/preparation/official-opening-candidate-composition.ts' 'apps/world-worker/src/preparation/opening-canonical-seed-bridge.ts' 'apps/world-worker/src/preparation/owner-non-host-source-adoption.ts' 'apps/world-worker/src/runtime-preparation/writer-lease-supervisor.ts' 'docs/reports/start-ready-20261010/B/F_B_01_FIX_CHECKS.txt' 'docs/reports/start-ready-20261010/B/F_B_01_FIX_DELTA.md' 'docs/reports/start-ready-20261010/B/F_B_01_FIX_EVIDENCE.json' 'docs/reports/start-ready-20261010/B/SOURCE_ADOPTION_PREFLIGHT_CHECKS.txt' 'docs/reports/start-ready-20261010/B/SOURCE_ADOPTION_PREFLIGHT_EVIDENCE.json' 'docs/reports/start-ready-20261010/B/SOURCE_ADOPTION_PREFLIGHT_IMPLEMENTATION.md' 'docs/reports/start-ready-20261010/D/EI02_COLUMN_GUARD_IMPLEMENTATION.md' 'tests/support/financial-composition-vector.ts' 'tests/support/tsconfig.financial-candidate-bridge-fingerprint.json' 'tests/support/tsconfig.official-opening-candidate-composition.json' 'tests/world-core/financial-candidate-bridge-fingerprint.test.ts' 'tests/world-core/official-opening-candidate-composition.test.ts' 'tests/world-core/writer-lease-supervisor-columns-postgres.test.ts' 'tests/world-core/writer-lease-supervisor-postgres.test.ts' 'tests/world-core/writer-lease-supervisor.test.ts' 'tests/world-core/writer-lease-supervisor.tsconfig.json'",
+    "chunk_id": "88d69b",
+    "wall_time_seconds": 0.496099333,
+    "exit_code": 0,
+    "original_token_count": 17,
+    "output": "Checking formatting...\nAll matched files use Prettier code style!\n"
+  },
+  {
+    "cmd": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec eslint 'apps/world-worker/src/admission/official-opening-admission-publication.ts' 'apps/world-worker/src/preparation/official-opening-bundle-loader.ts' 'apps/world-worker/src/preparation/official-opening-bundle-preflight.ts' 'apps/world-worker/src/preparation/official-opening-candidate-composition.ts' 'apps/world-worker/src/preparation/opening-canonical-seed-bridge.ts' 'apps/world-worker/src/preparation/owner-non-host-source-adoption.ts' 'apps/world-worker/src/runtime-preparation/writer-lease-supervisor.ts' 'tests/support/financial-composition-vector.ts' 'tests/world-core/financial-candidate-bridge-fingerprint.test.ts' 'tests/world-core/official-opening-candidate-composition.test.ts' 'tests/world-core/writer-lease-supervisor-columns-postgres.test.ts' 'tests/world-core/writer-lease-supervisor-postgres.test.ts' 'tests/world-core/writer-lease-supervisor.test.ts'",
+    "chunk_id": "29982c",
+    "wall_time_seconds": 0.975314625,
+    "exit_code": 0,
+    "original_token_count": 0,
+    "output": ""
+  },
+  {
+    "cmd": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm secrets:check",
+    "chunk_id": "28b0dc",
+    "wall_time_seconds": 1.001668,
+    "session_id": 99278,
+    "original_token_count": 11,
+    "output": "$ node scripts/check-repository-secrets.mjs\n"
+  },
+  {
+    "kind": "completion",
+    "forSession": 99278,
+    "chunk_id": "891603",
+    "wall_time_seconds": 0.000006584,
+    "exit_code": 0,
+    "original_token_count": 12,
+    "output": "{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 2490\n}\n"
+  }
+]

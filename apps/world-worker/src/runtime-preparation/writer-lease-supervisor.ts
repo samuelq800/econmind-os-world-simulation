@@ -115,17 +115,42 @@ export function createWriterLeaseSupervisor(input: {
   let stopping: Promise<void> | null = null;
 
   async function bind(sql: SqlExecutor): Promise<void> {
+    // Column checks include table/PUBLIC/inherited grants. Check the forbidden
+    // effective rights separately, and refuse memberships (including SET-only
+    // paths) rather than trusting the role's current effective privilege set.
+    // A changed column layout requires review, never an implicit writable field.
     const result = await sql.query<Record<string, unknown>>(`
       select current_user as role_name, session_user as session_role,
         r.rolsuper, r.rolbypassrls, r.rolcreatedb, r.rolcreaterole, r.rolreplication,
         current_setting('transaction_read_only') as read_only,
         has_schema_privilege(current_user,'world_v2','CREATE') as schema_creator,
+        exists(select 1 from pg_auth_members m where m.member=r.oid) as role_membership,
         (has_table_privilege(current_user,'world_v2.world_writer_lease','SELECT')
          and has_table_privilege(current_user,'world_v2.world_writer_lease','INSERT')
-         and has_table_privilege(current_user,'world_v2.world_writer_lease','UPDATE')) as lease_access,
+         and has_column_privilege(current_user,'world_v2.world_writer_lease','holder_id','UPDATE')
+         and has_column_privilege(current_user,'world_v2.world_writer_lease','fencing_token','UPDATE')
+         and has_column_privilege(current_user,'world_v2.world_writer_lease','acquired_at_real','UPDATE')
+         and has_column_privilege(current_user,'world_v2.world_writer_lease','renewed_at_real','UPDATE')
+         and has_column_privilege(current_user,'world_v2.world_writer_lease','lease_expires_at_real','UPDATE')) as lease_access,
         has_table_privilege(current_user,'world_v2.world_writer_lease','DELETE,TRUNCATE') as lease_delete,
         (has_table_privilege(current_user,'world_v2.world_head','SELECT')
-         and has_table_privilege(current_user,'world_v2.world_head','UPDATE')) as head_access,
+         and has_column_privilege(current_user,'world_v2.world_head','world_version','UPDATE')
+         and has_column_privilege(current_user,'world_v2.world_head','event_sequence','UPDATE')) as head_access,
+        (has_table_privilege(current_user,'world_v2.world_head','UPDATE')
+         or has_table_privilege(current_user,'world_v2.world_writer_lease','UPDATE')) as broad_update,
+        (has_column_privilege(current_user,'world_v2.world_head','world_id','UPDATE')
+         or has_column_privilege(current_user,'world_v2.world_writer_lease','world_id','UPDATE')) as identity_update,
+        (exists(select 1 from pg_attribute a where a.attrelid='world_v2.world_head'::regclass
+           and a.attnum>0 and not a.attisdropped
+           and has_column_privilege(current_user,a.attrelid,a.attnum,'INSERT'))
+         or has_table_privilege(current_user,'world_v2.world_head','DELETE')
+         or has_table_privilege(current_user,'world_v2.world_head','TRUNCATE')) as head_write,
+        ((select array_agg(a.attname::text order by a.attnum) from pg_attribute a
+           where a.attrelid='world_v2.world_head'::regclass and a.attnum>0 and not a.attisdropped)
+           = array['world_id','world_version','event_sequence']::text[]
+         and (select array_agg(a.attname::text order by a.attnum) from pg_attribute a
+           where a.attrelid='world_v2.world_writer_lease'::regclass and a.attnum>0 and not a.attisdropped)
+           = array['world_id','holder_id','fencing_token','acquired_at_real','renewed_at_real','lease_expires_at_real']::text[]) as column_layout_valid,
         has_function_privilege(current_user,'world_v2.acquire_world_writer_lease(text,text,timestamptz,bigint)','EXECUTE') as acquire_access,
         has_function_privilege(current_user,'world_v2.assert_world_writer_commit_guard(text,text,bigint,bigint,timestamptz)','EXECUTE') as guard_access
       from pg_roles r where r.rolname=current_user`);
@@ -143,11 +168,19 @@ export function createWriterLeaseSupervisor(input: {
         'rolcreaterole',
         'rolreplication',
         'schema_creator',
+        'role_membership',
         'lease_delete',
+        'broad_update',
+        'identity_update',
+        'head_write',
       ].some((key) => row[key] !== false) ||
-      ['lease_access', 'head_access', 'acquire_access', 'guard_access'].some(
-        (key) => row[key] !== true,
-      )
+      [
+        'lease_access',
+        'head_access',
+        'acquire_access',
+        'guard_access',
+        'column_layout_valid',
+      ].some((key) => row[key] !== true)
     )
       fail('DATABASE_ROLE_DENIED');
     const head = await sql.query<{ world_id: string }>(

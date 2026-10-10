@@ -1,0 +1,114 @@
+[
+  {
+    "path": "apps/world-worker/src/admission/official-opening-admission-publication.ts",
+    "owner": "B",
+    "ref": "517deccbe3b27ba0d9eb05e34392939ddad1c504",
+    "match": true,
+    "sha256": "6636e487f29be897b5c32be8397dd32e24c258ebe2a70de4dba5bb3d0d94e363"
+  },
+  {
+    "path": "apps/world-worker/src/preparation/official-opening-bundle-loader.ts",
+    "owner": "B",
+    "ref": "517deccbe3b27ba0d9eb05e34392939ddad1c504",
+    "match": true,
+    "sha256": "601a2c2af1928fa950ded89965a243b9e89b37a8d1203849405339c70b226e85"
+  },
+  {
+    "path": "apps/world-worker/src/preparation/official-opening-bundle-preflight.ts",
+    "owner": "B",
+    "ref": "517deccbe3b27ba0d9eb05e34392939ddad1c504",
+    "match": true,
+    "sha256": "535ac125bc25603872ef857e7a5d205212a5615366843cb54ae6fe3d545390a6"
+  },
+  {
+    "path": "apps/world-worker/src/preparation/official-opening-candidate-composition.ts",
+    "owner": "B",
+    "ref": "517deccbe3b27ba0d9eb05e34392939ddad1c504",
+    "match": true,
+    "sha256": "c1c7147bfcfc15324069019e84d6d24d7305ac427fd12345e5237f32859bcb6e"
+  },
+  {
+    "path": "apps/world-worker/src/preparation/opening-canonical-seed-bridge.ts",
+    "owner": "B",
+    "ref": "517deccbe3b27ba0d9eb05e34392939ddad1c504",
+    "match": true,
+    "sha256": "d9291655eae77e119082ab6e4afb5d6cb2ffd9c26713494852547a406bbe6647"
+  },
+  {
+    "path": "apps/world-worker/src/preparation/owner-non-host-source-adoption.ts",
+    "owner": "B",
+    "ref": "517deccbe3b27ba0d9eb05e34392939ddad1c504",
+    "match": true,
+    "sha256": "479d67a6f84707a358c4c161c9c4b638b4be5164e7e74d26bf05c9efc8096419"
+  },
+  {
+    "path": "apps/world-worker/src/runtime-preparation/writer-lease-supervisor.ts",
+    "owner": "D",
+    "ref": "ad3c4609f43507c00710038256facc8fd6e94b99",
+    "match": true,
+    "sha256": "e1005304cd8b0726974aef03d7531429849f8936292b3b4067ca74474be2f5d3"
+  },
+  {
+    "path": "tests/support/financial-composition-vector.ts",
+    "owner": "B",
+    "ref": "517deccbe3b27ba0d9eb05e34392939ddad1c504",
+    "match": true,
+    "sha256": "3fd76076cd6887dc01dd85ea5f6bfc0f67fa7fee19a37c5950ecbb46900e8700"
+  },
+  {
+    "path": "tests/support/tsconfig.financial-candidate-bridge-fingerprint.json",
+    "owner": "B",
+    "ref": "517deccbe3b27ba0d9eb05e34392939ddad1c504",
+    "match": true,
+    "sha256": "e17cdba5da9d86e5e25ce49d8373e45a3c8e624be76eaf847fa23c836710f403"
+  },
+  {
+    "path": "tests/support/tsconfig.official-opening-candidate-composition.json",
+    "owner": "B",
+    "ref": "517deccbe3b27ba0d9eb05e34392939ddad1c504",
+    "match": true,
+    "sha256": "2ac90111c3bc3e249b308d51e7faebe2d6ff5b7f5bfb6d8914d2a9cb34917ab5"
+  },
+  {
+    "path": "tests/world-core/financial-candidate-bridge-fingerprint.test.ts",
+    "owner": "B",
+    "ref": "517deccbe3b27ba0d9eb05e34392939ddad1c504",
+    "match": true,
+    "sha256": "d3d9ae6313343a6ffdaa352ef8d020b2ccb80e72340684f74e821915e55200a7"
+  },
+  {
+    "path": "tests/world-core/official-opening-candidate-composition.test.ts",
+    "owner": "B",
+    "ref": "517deccbe3b27ba0d9eb05e34392939ddad1c504",
+    "match": true,
+    "sha256": "e8f2d23e0a8ab3fc43dd714d3eb3bb2eb4fc151ace89ef00ea3928f7c8ce11cf"
+  },
+  {
+    "path": "tests/world-core/writer-lease-supervisor-columns-postgres.test.ts",
+    "owner": "D",
+    "ref": "ad3c4609f43507c00710038256facc8fd6e94b99",
+    "match": true,
+    "sha256": "b54b7952afaa2f777d9975c63dc16aaf5438973031e35d47d36c8b6bd33cb0c0"
+  },
+  {
+    "path": "tests/world-core/writer-lease-supervisor-postgres.test.ts",
+    "owner": "D",
+    "ref": "ad3c4609f43507c00710038256facc8fd6e94b99",
+    "match": true,
+    "sha256": "7787482d65ce9f3d849cfbecfbfb02a7ca6d50f9dc0006012caed106d8651e14"
+  },
+  {
+    "path": "tests/world-core/writer-lease-supervisor.test.ts",
+    "owner": "D",
+    "ref": "ad3c4609f43507c00710038256facc8fd6e94b99",
+    "match": true,
+    "sha256": "d656a7d538bbda861e12c26b7c27c9951127a371631215578448d5bb97b61ecc"
+  },
+  {
+    "path": "tests/world-core/writer-lease-supervisor.tsconfig.json",
+    "owner": "D",
+    "ref": "ad3c4609f43507c00710038256facc8fd6e94b99",
+    "match": true,
+    "sha256": "36e89959787a7f5ac7fb26c1bec0b6747aef643a6f0286f8834e2847816138ff"
+  }
+]

@@ -8,8 +8,18 @@ import { inspectOfficialWorldOpeningAdmission } from '../preparation/official-wo
 import {
   reconcileOfficialOpeningDecision,
   officialOpeningTrustedDecisionSource,
-  type OfficialOpeningSourceBytes,
 } from '../preparation/official-opening-decision-reconciliation.js';
+import {
+  OfficialOpeningBundleLoader,
+  isLoadedOfficialOpeningBundle,
+  isOfficialOpeningBundleV2,
+  officialOpeningPublicationSourceSha256,
+  type LoadedOfficialOpeningBundle,
+  type OfficialOpeningPublicationSourceBundle,
+} from '../preparation/official-opening-bundle-loader.js';
+import { prepareOfficialOpeningBundleCandidate } from '../preparation/official-opening-candidate-composition.js';
+export { officialOpeningPublicationSourceSha256 } from '../preparation/official-opening-bundle-loader.js';
+export type { OfficialOpeningPublicationSourceBundle } from '../preparation/official-opening-bundle-loader.js';
 import { prepareOpeningCanonicalSeed } from '../preparation/opening-canonical-seed-bridge.js';
 import { WorldOpeningSeedStore } from '../persistence/opening-seed-store.js';
 import { DurableV08LedgerLineageReader } from '../persistence/durable-v08-ledger-lineage-reader.js';
@@ -24,30 +34,8 @@ import {
   type OpeningPublicationAuthorization,
 } from './private-opening-admission-authority.js';
 
-export interface OfficialOpeningPublicationSourceBundle {
-  readonly source: OfficialOpeningSourceBytes;
-  readonly selectionBytes: string;
-  readonly mapManifestBytes: string;
-  readonly regionsBytes: string;
-  readonly gapsBytes: string;
-  readonly decisionBytes: string;
-  readonly assemblyBytes: string;
-  /** Independently retained owner registry bytes, not approval flags. All bytes
-   * and references are bound by the signed bundle digest and economic validator. */
-  readonly ownerRecords: readonly Readonly<{
-    reference: string;
-    recordBytes: string;
-  }>[];
-}
-
 const sha = (bytes: string) =>
   createHash('sha256').update(bytes, 'utf8').digest('hex');
-export function officialOpeningPublicationSourceSha256(
-  bundle: OfficialOpeningPublicationSourceBundle,
-): string {
-  return sha(canonicalSerialize(bundle));
-}
-
 export class OpeningAdmissionPublicationError extends Error {
   constructor(
     readonly code:
@@ -81,8 +69,28 @@ function fail(
 
 function selectedSeed(
   bundle: OfficialOpeningPublicationSourceBundle,
+  loaded?: LoadedOfficialOpeningBundle,
 ): OpeningSeed {
   try {
+    if (isOfficialOpeningBundleV2(bundle)) {
+      if (
+        !loaded ||
+        !isLoadedOfficialOpeningBundle(loaded) ||
+        loaded.bundle !== bundle
+      )
+        fail('OPENING_SOURCE_INVALID');
+      const prepared = prepareOfficialOpeningBundleCandidate(loaded);
+      if (
+        !prepared.seed ||
+        prepared.status !== 'VALIDATED_CANDIDATE_NOT_ADMITTED' ||
+        prepared.blockers.length
+      )
+        fail(
+          'OPENING_SOURCE_BLOCKED',
+          prepared.blockers.map((b) => b.code),
+        );
+      return prepared.seed;
+    }
     const source = inspectOfficialWorldOpeningAdmission({
       selectionBytes: bundle.selectionBytes,
       checksumsBytes: bundle.source.checksumsBytes,
@@ -175,7 +183,11 @@ export class OfficialOpeningAdmissionPublicationService {
   readonly #sources: Readonly<{
     load(
       sha256: string,
-    ): Promise<OfficialOpeningPublicationSourceBundle | null>;
+    ): Promise<
+      | OfficialOpeningPublicationSourceBundle
+      | OfficialOpeningBundleLoader
+      | null
+    >;
   }>;
   readonly #nowReal: () => string;
   readonly #role: string;
@@ -188,7 +200,11 @@ export class OfficialOpeningAdmissionPublicationService {
     readonly sources: Readonly<{
       load(
         sha256: string,
-      ): Promise<OfficialOpeningPublicationSourceBundle | null>;
+      ): Promise<
+        | OfficialOpeningPublicationSourceBundle
+        | OfficialOpeningBundleLoader
+        | null
+      >;
     }>;
     readonly nowReal: () => string;
     readonly publisherRole: string;
@@ -241,20 +257,34 @@ export class OfficialOpeningAdmissionPublicationService {
       this.#nowReal(),
     );
     if (claims.worldId !== requestedWorld) fail('OPENING_BINDING_MISMATCH');
-    const bundle = await this.#sources
+    const source = await this.#sources
       .load(claims.sourceBundleSha256)
       .catch(() => fail('OPENING_SOURCE_UNAVAILABLE'));
+    if (!source) fail('OPENING_SOURCE_UNAVAILABLE');
+    // The digest registry selects server-owned loader configuration, never a
+    // cached preflight DTO/snapshot. Reload raw files for every V2 publication.
+    const loaded =
+      source instanceof OfficialOpeningBundleLoader
+        ? await source.load().catch(() => fail('OPENING_SOURCE_UNAVAILABLE'))
+        : undefined;
+    const bundle = loaded
+      ? loaded.bundle
+      : (source as OfficialOpeningPublicationSourceBundle);
     if (!bundle) fail('OPENING_SOURCE_UNAVAILABLE');
+    if (isOfficialOpeningBundleV2(bundle) && !loaded)
+      fail('OPENING_SOURCE_INVALID');
     // Snapshot untrusted loader objects before awaiting the database/registry.
-    const snapshot = JSON.parse(
-      canonicalSerialize(bundle),
-    ) as OfficialOpeningPublicationSourceBundle;
+    const snapshot = isOfficialOpeningBundleV2(bundle)
+      ? bundle
+      : (JSON.parse(
+          canonicalSerialize(bundle),
+        ) as OfficialOpeningPublicationSourceBundle);
     if (
       officialOpeningPublicationSourceSha256(snapshot) !==
       claims.sourceBundleSha256
     )
       fail('OPENING_SOURCE_IDENTITY_MISMATCH');
-    const seed = selectedSeed(snapshot);
+    const seed = selectedSeed(snapshot, loaded);
     matchesAuthorization(seed, claims);
     const authorizationSha256 = sha(canonicalSerialize(claims));
     const admissionRef = `ADMISSION_${authorizationSha256.toUpperCase()}`;

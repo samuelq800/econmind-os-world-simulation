@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import type { FormalFinancialOpeningContract } from './formal-financial-opening-contract.js';
+import type { FormalFinancialCandidate } from './formal-financial-opening-producer.js';
 import {
   Money,
   Quantity,
@@ -1060,4 +1062,245 @@ export async function loadOwnerNonHostSourceAdoption(
     scope: input.scope,
     ...(input.openingFx === undefined ? {} : { openingFx: input.openingFx }),
   });
+}
+
+/** Independently provisioned by the existing Root provenance owner. This is a
+ * private deployment dependency, not a record field or request-supplied manifest.
+ * No real registration is installed by this implementation. */
+export interface FinancialSupplementRegistration {
+  readonly recordId: string;
+  readonly ownerIdentity: string;
+  readonly expectedReceiptSha256: string;
+  readonly expectedInstructionSha256: string;
+  readonly retainedReference: string;
+  readonly channel: 'DIRECT_USER_MESSAGE_IN_CURRENT_ROOT_CHAT';
+}
+export interface FinancialSupplementAdoption {
+  readonly recordId: string;
+  readonly receiptSha256: string;
+  readonly instructionSha256: string;
+  readonly retainedReference: string;
+  readonly parent: OwnerNonHostSourceAdoption;
+  readonly contractFingerprint: string;
+  readonly candidateFingerprint: string;
+  readonly assemblyIntentFingerprint: string;
+  readonly worldId: string;
+  readonly seedId: string;
+  readonly replayBinding: typeof CURRENT_REPLAY_BINDING;
+  readonly orchestratorVersion: string;
+  readonly record: Readonly<Record<string, unknown>>;
+  readonly admissionAllowed: false;
+}
+const financialAdoptions = new WeakSet<object>();
+export function isFinancialSupplementAdoption(
+  v: unknown,
+): v is FinancialSupplementAdoption {
+  return typeof v === 'object' && v !== null && financialAdoptions.has(v);
+}
+export function snapshotFinancialSupplementRegistration(
+  input: FinancialSupplementRegistration,
+): FinancialSupplementRegistration {
+  requireCondition(
+    input &&
+      Object.keys(input).sort().join('|') ===
+        [
+          'recordId',
+          'ownerIdentity',
+          'expectedReceiptSha256',
+          'expectedInstructionSha256',
+          'retainedReference',
+          'channel',
+        ]
+          .sort()
+          .join('|'),
+    'FINANCIAL_REGISTRATION_INVALID',
+    'registration',
+  );
+  requireCondition(
+    /^[A-Z][A-Z0-9_]{0,127}$/u.test(input.recordId) &&
+      typeof input.ownerIdentity === 'string' &&
+      input.ownerIdentity.length > 0 &&
+      input.ownerIdentity.length <= 256 &&
+      /^[0-9a-f]{64}$/u.test(input.expectedReceiptSha256) &&
+      /^[0-9a-f]{64}$/u.test(input.expectedInstructionSha256) &&
+      /^git:[0-9a-f]{40}:docs\/governance\/owner-inputs\/[A-Za-z0-9_./-]+\.json$/u.test(
+        input.retainedReference,
+      ) &&
+      !input.retainedReference.includes('..') &&
+      input.channel === 'DIRECT_USER_MESSAGE_IN_CURRENT_ROOT_CHAT',
+    'FINANCIAL_REGISTRATION_INVALID',
+    'registration',
+  );
+  return freeze({ ...input });
+}
+
+/** Same provenance ownership as the original rule loader, not an admission
+ * signature issuer. Caller is the sole genuine bundle composition path. */
+export function loadFinancialSupplementAdoption(input: {
+  readonly registration: FinancialSupplementRegistration;
+  readonly receiptBytes: string;
+  readonly instructionBytes: string;
+  readonly parent: OwnerNonHostSourceAdoption;
+  readonly contract: FormalFinancialOpeningContract;
+  readonly candidate: FormalFinancialCandidate;
+  readonly assemblyIntentFingerprint: string;
+  readonly seedId: string;
+  readonly orchestratorVersion: string;
+}): FinancialSupplementAdoption {
+  const reg = snapshotFinancialSupplementRegistration(input.registration);
+  requireCondition(
+    isOwnerNonHostSourceAdoption(input.parent) &&
+      input.parent.scope.environment === 'NON_ACTIVATED_PREPARATION',
+    'REAL_NON_ACTIVATED_ADOPTION_REQUIRED',
+    'parent',
+  );
+  requireCondition(
+    hash(input.receiptBytes) === reg.expectedReceiptSha256 &&
+      hash(input.instructionBytes) === reg.expectedInstructionSha256,
+    'REGISTERED_FINANCIAL_ADOPTION_IDENTITY_MISMATCH',
+    'receipt',
+  );
+  const record = JSON.parse(input.receiptBytes) as Record<string, unknown>;
+  const expectedKeys = [
+    'schemaVersion',
+    'recordId',
+    'purpose',
+    'ownerIdentity',
+    'adoptedAtReal',
+    'ownerInstructionSha256',
+    'parentReceiptSha256',
+    'sourcePins',
+    'adoptionManifestFingerprint',
+    'contractFingerprint',
+    'candidateFingerprint',
+    'assemblyIntentFingerprint',
+    'worldId',
+    'seedId',
+    'sourceId',
+    'sourceVersion',
+    'valueDate',
+    'replayBinding',
+    'orchestratorVersion',
+    'documents',
+    'completeness',
+    'exclusions',
+  ];
+  requireCondition(
+    record &&
+      Object.keys(record).sort().join('|') === expectedKeys.sort().join('|'),
+    'FINANCIAL_ADOPTION_EXACT_KEYS_REQUIRED',
+    'receipt',
+  );
+  const contract = input.contract;
+  const equal = (a: unknown, b: unknown) =>
+    canonicalSerialize(a) === canonicalSerialize(b);
+  const documents = contract.documents
+    .map((d) => ({
+      documentId: d.documentId,
+      sourcePath: d.sourcePath,
+      sha256: d.sha256,
+      bytes: String(Buffer.byteLength(d.bytes, 'utf8')),
+      version: d.version,
+      valueDate: d.valueDate,
+    }))
+    .sort((a, b) => (a.documentId < b.documentId ? -1 : 1));
+  requireCondition(
+    contract.evidenceKind === 'SOURCE_CANDIDATE' &&
+      typeof input.orchestratorVersion === 'string' &&
+      input.orchestratorVersion.length > 0 &&
+      input.orchestratorVersion.length <= 128 &&
+      record.schemaVersion === 'financial-supplement-adoption-v1' &&
+      record.purpose ===
+        'ADOPT_FINANCIAL_SUPPLEMENT_FOR_NON_ACTIVATED_PREPARATION' &&
+      record.recordId === reg.recordId &&
+      record.ownerIdentity === reg.ownerIdentity &&
+      typeof record.adoptedAtReal === 'string' &&
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(
+        record.adoptedAtReal,
+      ) &&
+      new Date(record.adoptedAtReal).toISOString() === record.adoptedAtReal &&
+      record.ownerInstructionSha256 === reg.expectedInstructionSha256 &&
+      record.parentReceiptSha256 === input.parent.ownerPolicy.receiptSha256 &&
+      equal(record.sourcePins, input.parent.ownerPolicy.sourcePins) &&
+      record.adoptionManifestFingerprint === input.parent.manifestFingerprint &&
+      record.contractFingerprint === input.candidate.contractFingerprint &&
+      input.candidate.contractFingerprint ===
+        'sha256:' + hash(canonicalSerialize(contract)) &&
+      input.candidate.requestedWorldId === contract.worldId &&
+      record.candidateFingerprint === input.candidate.fingerprint &&
+      record.assemblyIntentFingerprint === input.assemblyIntentFingerprint &&
+      record.worldId === contract.worldId &&
+      record.seedId === input.seedId &&
+      record.sourceId === contract.sourceId &&
+      record.sourceVersion === contract.sourceVersion &&
+      record.valueDate === contract.valueDate &&
+      equal(record.replayBinding, CURRENT_REPLAY_BINDING) &&
+      record.orchestratorVersion === input.orchestratorVersion &&
+      equal(record.documents, documents) &&
+      equal(record.exclusions, [
+        'HOST_STARTUP',
+        'SQL_SCHEMA_GRANTS',
+        'IDENTITY_SEATS_NPC',
+        'RUNTIME_ADMISSION',
+        'RUNTIME_NET_WORTH_RESET',
+        'WHOLE_LEGACY_E_PROPOSAL',
+      ]),
+    'FINANCIAL_ADOPTION_SCOPE_MISMATCH',
+    'receipt',
+  );
+  const coverage = record.completeness as {
+    documentId: string;
+    pointer: string;
+  };
+  requireCondition(
+    coverage &&
+      Object.keys(coverage).sort().join('|') === 'documentId|pointer' &&
+      typeof coverage.pointer === 'string' &&
+      coverage.pointer.startsWith('/') &&
+      !/~(?![01])/u.test(coverage.pointer),
+    'COMPLETENESS_SOURCE_REQUIRED',
+    'completeness',
+  );
+  const document = contract.documents.find(
+    (d) => d.documentId === coverage.documentId,
+  );
+  requireCondition(document, 'COMPLETENESS_SOURCE_REQUIRED', 'documentId');
+  let value: unknown = JSON.parse(document.bytes);
+  for (const raw of coverage.pointer.slice(1).split('/')) {
+    const key = raw.replace(/~1/gu, '/').replace(/~0/gu, '~');
+    requireCondition(
+      value && typeof value === 'object' && Object.hasOwn(value, key),
+      'COMPLETENESS_SOURCE_REQUIRED',
+      coverage.pointer,
+    );
+    value = (value as Record<string, unknown>)[key];
+  }
+  requireCondition(
+    equal(value, {
+      countryIds: contract.countries.map((c) => c.countryId),
+      categoryCount: '21',
+      cbRegisterComplete: true,
+      valueDate: contract.valueDate,
+    }),
+    'COMPLETENESS_SOURCE_MISMATCH',
+    'completeness',
+  );
+  const proof: FinancialSupplementAdoption = freeze({
+    recordId: reg.recordId,
+    receiptSha256: reg.expectedReceiptSha256,
+    instructionSha256: reg.expectedInstructionSha256,
+    retainedReference: reg.retainedReference,
+    parent: input.parent,
+    contractFingerprint: input.candidate.contractFingerprint,
+    candidateFingerprint: input.candidate.fingerprint,
+    assemblyIntentFingerprint: input.assemblyIntentFingerprint,
+    worldId: contract.worldId,
+    seedId: input.seedId,
+    replayBinding: CURRENT_REPLAY_BINDING,
+    orchestratorVersion: input.orchestratorVersion,
+    record,
+    admissionAllowed: false,
+  });
+  financialAdoptions.add(proof);
+  return proof;
 }
