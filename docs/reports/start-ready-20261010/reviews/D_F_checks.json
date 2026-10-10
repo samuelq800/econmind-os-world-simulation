@@ -1,0 +1,30 @@
+{
+  "head": "d9853754b3eb2080a5ac4d30c71cae4db013fe0c",
+  "decision": "APPROVED_EXACT_SIX_TEST_EVIDENCE_FILES_ONLY",
+  "patchSha256": "4e6f12290237b3383092ae1333782a51086cc683d89d852ffb6d000c167a88bc",
+  "immutableGitAndDiffCheckExit": 0,
+  "sandboxedInheritanceExit": 0,
+  "inheritanceByteComparisonExit": 0,
+  "inheritanceOutputSha256": "b4df014a2a69c74ac39846018f9437c3255076a40893d2f4f1183516af3b830e",
+  "producerArtifactHashesMatched": 7,
+  "producerNative": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "rerunByReviewer": false,
+    "preRunCoreDistPin": "NOT_RECORDED"
+  },
+  "producerRenewal": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "rerunByReviewer": false
+  },
+  "pgSystemIdentifier": "7694989011588890045",
+  "pgClusterState": "shut down",
+  "validatorExit": 0,
+  "subjectUnchanged": true,
+  "gateAdvanced": false,
+  "merge": false,
+  "productionAccess": false
+}

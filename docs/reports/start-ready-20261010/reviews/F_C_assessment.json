@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "patch": {
+    "repository": "econmind-os-world-simulation",
+    "sourceType": "commit_range",
+    "base": "42991acfee9d0eacc702ba47a380c938a4516f03",
+    "head": "60687418ef8235e6505e7e0b117b2115dfca00df",
+    "changedFiles": [
+      "apps/world-web/src/country-runtime/entry.ts",
+      "apps/world-web/src/office-command/client.ts",
+      "apps/world-web/src/office-command/contract.ts",
+      "apps/world-web/src/office-command/controller.ts",
+      "apps/world-web/src/office-command/view.ts",
+      "apps/world-web/src/trusted-host/bootstrap.ts",
+      "apps/world-web/src/trusted-host/formal-session-adapter.ts",
+      "docs/reports/start-ready-20261010/C/EVIDENCE.json",
+      "docs/reports/start-ready-20261010/C/IMPLEMENTATION.md",
+      "docs/reports/start-ready-20261010/C/REPORT.md",
+      "tests/world-web/formal-session-adapter.test.ts",
+      "tests/world-web/office-command-fixture.ts",
+      "tests/world-web/office-command-schema.test.ts",
+      "tests/world-web/office-command.test.ts",
+      "tests/world-web/office-command.tsconfig.json"
+    ],
+    "sha256": "9bef447fc7ba8c4e4fa19a51e27d53c3db6cbb2825db159d11a5e3c6ab59d9da"
+  },
+  "recommendation": "merge",
+  "workflowLabel": "human_review_required",
+  "impact": {
+    "rating": "high",
+    "rationale": "P0 bearer identity, private country/Office DOM and canonical command/receipt boundaries; a regression could expose private data or misrepresent durable outcomes."
+  },
+  "regressionLikelihood": {
+    "rating": "low",
+    "rationale": "Exact source traced through installed host and unchanged authenticated API. 90 scoped tests plus four independent boundary controls pass; no material source defect found."
+  },
+  "regressionProtection": {
+    "rating": "partial",
+    "rationale": "Actual clients/controllers/views, Core parsers and SQL serializer/projector with TEST_ONLY transport/DOM. No native browser, real provider, TLS or deployment acceptance.",
+    "exactHeadChecksPassed": true
+  },
+  "recoverability": {
+    "rating": "managed",
+    "rationale": "No migration/server contract change; browser code can revert to disconnected baseline. Already queued commands remain durable and require existing FINAL recovery, never automatic replay."
+  },
+  "confidence": {
+    "rating": "high",
+    "rationale": "High for this explicitly disconnected browser source candidate only: exact patch/hash, all 15 copied blobs and nine unchanged contracts pinned, fresh Core/Worker builds and focused checks."
+  },
+  "applicability": {
+    "status": "confirmed",
+    "rationale": "country-runtime/entry.ts installs Office drawer and formal adapter; optional shared host composition reaches shipped consumers. Real login remains explicitly BLOCKED."
+  },
+  "statusQuoRisk": {
+    "rating": "moderate",
+    "rationale": "Without this patch the supported three manual Office families lack this browser Review/Confirm/FINAL path; provider integration remains blocked either way. Not merging does not grant unsafe authority."
+  },
+  "autoMergeExclusions": ["privileged_boundary", "public_contract"],
+  "affectedRuntimeRoots": [
+    "apps/world-web/src/country-runtime/entry.ts",
+    "apps/world-web/src/trusted-host/bootstrap.ts",
+    "apps/world-web/src/trusted-host/formal-session-adapter.ts",
+    "apps/world-web/src/office-command/view.ts"
+  ],
+  "importantCallers": [
+    "createProductionReadClient",
+    "createAuthenticatedOfficeCommandService (unchanged)",
+    "PostgresOfficeCommandIntake (unchanged)",
+    "readAuthenticatedPostgresFinalCommandReceipt (unchanged)"
+  ],
+  "riskDrivers": [
+    "Bearer target configuration and asynchronous identity lifetime",
+    "Queue acknowledgement versus durable economic FINAL",
+    "Closed private DOM and same-element navigation"
+  ],
+  "protectiveFactors": [
+    "Default disconnected; no provider or G endpoint invented",
+    "No actor/authSubject/SimTime minted by intent parser",
+    "HTTPS pinned target, omit credentials, no redirects/cache/retry",
+    "Independent server JWT/current-seat re-resolution remains intact"
+  ],
+  "materialBoundaries": [
+    {
+      "id": "seat",
+      "invariant": "Provider JSON cannot grant a seat or connect without authenticated readback.",
+      "runtimeRoot": "formal-session-adapter.ts:261-347",
+      "counterexample": "Valid-shaped counterfeit seatRef or revocation during actual readback await; independent controls reject both.",
+      "legitimateControl": "Existing parseAuthority and authenticated production-read client match identity/seat/admission; unchanged API verifies JWT and current durable binding.",
+      "result": "supported"
+    },
+    {
+      "id": "confirm",
+      "invariant": "Review/Confirm dispatches the original detached request at most once.",
+      "runtimeRoot": "office-command/controller.ts:258-333",
+      "counterexample": "Mutate input/returned state, double confirm, stale version or extra authority fields.",
+      "legitimateControl": "parseOfficeIntent strict public envelope, copied JSON, current projection/version and attempted/busy guards; actual Core three-family parser tests pass.",
+      "result": "supported"
+    },
+    {
+      "id": "unknown",
+      "invariant": "UNKNOWN does not replay or fabricate rollback/receipt.",
+      "runtimeRoot": "office-command/client.ts:68-215; controller.ts:334-350",
+      "counterexample": "Timeout, malformed response, lost ACK or wrong command ACK.",
+      "legitimateControl": "One dispatch, deadline/abort, UNKNOWN, original id/key plus server fingerprint for existing read-only FINAL lookup; 31 controller/client tests cover rejection and uncertainty.",
+      "result": "supported"
+    },
+    {
+      "id": "final",
+      "invariant": "Queue FINALIZED is not COMMITTED; completion requires same-command durable FINAL and authorized readback.",
+      "runtimeRoot": "office-command/controller.ts:240-251,352-373",
+      "counterexample": "Wrong command/key/fingerprint, stale readback or another visible decision result.",
+      "legitimateControl": "Unchanged FINAL parser correlates original references; floor rejects older readback; completion matches cause command/fingerprint/version/event. Actual SQL serializer and classified projector tests pass.",
+      "result": "supported"
+    },
+    {
+      "id": "privacy",
+      "invariant": "Retirement clears private state/installed DOM and fences late responses.",
+      "runtimeRoot": "office-command/view.ts:55-65,218-263; trusted-host/bootstrap.ts:161-210",
+      "counterexample": "Country/Office switch in same root while drawer is closed, late 403/ACK, or queued native-close callback after reopen.",
+      "legitimateControl": "Shared lifetime retirement, controller nulling and epoch/liveness checks, replaceChildren on closed render, captured close handler checks open. Four independent controls plus shared privacy tests pass.",
+      "result": "supported"
+    },
+    {
+      "id": "scope",
+      "invariant": "The browser does not add economic authority or unsupported families.",
+      "runtimeRoot": "office-command/contract.ts:31-41; formal-session-adapter.ts:400-407",
+      "counterexample": "Industry request, Finance/Trade sent through this port, or adapter status presented as live login.",
+      "legitimateControl": "Independent unchanged Core DTO enumerates only Captain/CB/Social. Industry remains unsupported; real login and G seat contract remain BLOCKED/PENDING. No cookie/PKCE/cache/credential persistence added.",
+      "result": "supported"
+    }
+  ],
+  "validation": [
+    {
+      "name": "fresh isolated Core and Worker builds",
+      "status": "passed",
+      "protects": "Pinned Node24.20.0, cloned frozen dependencies, source-only fresh generated dist; network denied and writes confined to disposable copy."
+    },
+    {
+      "name": "five scoped files",
+      "status": "passed",
+      "protects": "90 PASS/0 FAIL/0 SKIP; shipped parser/client/controller/installed DOM/shared host/privacy."
+    },
+    {
+      "name": "four independent controls",
+      "status": "passed",
+      "protects": "Counterfeit seatRef, revoke during authenticated readback, closed-DOM same-element country and Office switch; 4 PASS."
+    },
+    {
+      "name": "strict test types and web types",
+      "status": "passed",
+      "protects": "skipLibCheck=false and affected web compilation."
+    },
+    {
+      "name": "scoped ESLint and Prettier",
+      "status": "passed",
+      "protects": "Seven product files and added test/helper/config."
+    },
+    {
+      "name": "boundaries and authoritative patterns",
+      "status": "passed",
+      "protects": "318 boundary files; 313 pattern files/Core89, zero violations."
+    },
+    {
+      "name": "15-file secret scan and exact copy pins",
+      "status": "passed",
+      "protects": "Actual repository patterns find no credentials; all changed files match exact head bytes; unchanged API/Core/FINAL/session/lockfile contracts pinned."
+    },
+    {
+      "name": "immutable diff check",
+      "status": "passed",
+      "protects": "git diff --check at exact range, matching canonical patch SHA256 and source-only implementation versus report-only successor."
+    },
+    {
+      "name": "real provider/native browser/TLS/DB/full/420",
+      "status": "skipped",
+      "protects": "Outside authorized narrow source review. No live revocation, rollout, activation or Gate B claim."
+    }
+  ],
+  "unknowns": [
+    {
+      "summary": "Real auth provider and approved G endpoint/country directory are not installed; explicit BLOCKED/PENDING behavior is approved only as preparation, not live readiness.",
+      "decisionCritical": false
+    },
+    {
+      "summary": "Native-browser visual and production TLS/JWT/RLS acceptance not performed; any future activation requires separate exact-source gated review.",
+      "decisionCritical": false
+    }
+  ],
+  "evidencePlan": []
+}

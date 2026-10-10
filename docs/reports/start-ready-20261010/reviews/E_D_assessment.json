@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "patch": {
+    "repository": "samuelq800/econmind-os-world-simulation",
+    "sourceType": "commit_range",
+    "base": "42991acfee9d0eacc702ba47a380c938a4516f03",
+    "head": "3b4406eb8129fffa8c54433433b11b8c6d25b03a",
+    "changedFiles": [
+      "apps/world-worker/src/runtime-preparation/writer-lease-supervisor.ts",
+      "docs/reports/start-ready-20261010/D/WRITER_LEASE_SUPERVISOR.md",
+      "tests/world-core/writer-lease-supervisor-postgres.test.ts",
+      "tests/world-core/writer-lease-supervisor.test.ts",
+      "tests/world-core/writer-lease-supervisor.tsconfig.json"
+    ],
+    "sha256": "2d1f68e4465c3f41d7a2e4339f606ff662f91490f09acaf0288b61c0ffb2565e"
+  },
+  "recommendation": "merge",
+  "workflowLabel": "human_review_required",
+  "impact": {
+    "rating": "high",
+    "rationale": "P0 lease/fencing and operational persistent state if explicitly used; tests do not lower this impact."
+  },
+  "regressionLikelihood": {
+    "rating": "moderate",
+    "rationale": "Exact acquire/renew/guard and terminal failure paths are checked; real hosting and future production role compatibility remain separately scoped."
+  },
+  "regressionProtection": {
+    "rating": "partial",
+    "rationale": "Independent strict builds, 25 unit/Core tests and 3 negative adapter/drain controls passed. Producer native 7 and readbacks were hash-verified, not rerun; no formal host/consumer or process-kill proof.",
+    "exactHeadChecksPassed": true
+  },
+  "recoverability": {
+    "rating": "managed",
+    "rationale": "No schema or deployed entry changes. Disable/unmount caller and stop renewals; retain the existing lease until expiry, never delete/reset a fence."
+  },
+  "confidence": {
+    "rating": "high",
+    "rationale": "Exact five-file commit/tree/patch and raw evidence hashes are pinned; source, SQL functions, unchanged adapter and downstream atomic guard were traced."
+  },
+  "applicability": {
+    "status": "confirmed",
+    "rationale": "Owned Worker preparation API with explicit standalone consumers/tests; currently not mounted, exported through package API, or deployed. This is preparation approval, not activation."
+  },
+  "statusQuoRisk": {
+    "rating": "low",
+    "rationale": "Without the patch the existing HOLD entry remains inert; postponement delays supervised lease preparation but does not activate unsafe economic work."
+  },
+  "autoMergeExclusions": ["privileged_boundary", "persistent_state", "other"],
+  "affectedRuntimeRoots": [
+    "apps/world-worker/src/runtime-preparation/writer-lease-supervisor.ts",
+    "explicit server-owned SqlDatabase caller; no deployed mount"
+  ],
+  "importantCallers": [
+    "native standalone lifecycle tests",
+    "future host must retain AtomicTransitionRepository SQL commit guard; no caller integration is approved here"
+  ],
+  "riskDrivers": [
+    "P0 lease mutation and fencing",
+    "explicit operational time and unique live holder identity",
+    "unknown COMMIT/cleanup outcomes",
+    "future caller must not promote local status to authority"
+  ],
+  "protectiveFactors": [
+    "no schema/grants/timer/consumer/host edits",
+    "actual current_user/session_user and World binding",
+    "SQL lease-generation validation and no hidden retries",
+    "terminal LOST/UNKNOWN and awaited active transaction",
+    "existing economic in-transaction guard unchanged"
+  ],
+  "materialBoundaries": [
+    {
+      "id": "identity_world",
+      "invariant": "Actual scoped session and requested World must bind every SQL operation.",
+      "runtimeRoot": "writer-lease-supervisor.ts:117-158",
+      "counterexample": "SET ROLE from privileged session, configured-role mismatch or absent World cannot pass actual session/flags/head checks.",
+      "legitimateControl": "Scoped native dedicated-role lease operation; same binding is checked before and after the sensitive SQL call.",
+      "result": "supported"
+    },
+    {
+      "id": "lease_generation",
+      "invariant": "Renewal cannot silently reacquire, change generation, or accept duplicate live holder startup.",
+      "runtimeRoot": "writer-lease-supervisor.ts:239-289",
+      "counterexample": "Remote takeover, changed prior tuple or initial RENEWED response is rejected and rolled back.",
+      "legitimateControl": "Native unchanged-fence renewal and expired takeover via existing acquire_world_writer_lease; exact ACQUIRED/TAKEN_OVER/RENEWED tuple validation.",
+      "result": "supported"
+    },
+    {
+      "id": "sql_single_writer",
+      "invariant": "Local single-flight and preflight assertion must not replace SQL single-writer fencing at economic commit.",
+      "runtimeRoot": "writer-lease-supervisor.ts:318-354; atomic-transition-repository.ts:966",
+      "counterexample": "A locally ACTIVE old holder after remote takeover is rejected by actual SQL guard; takeover after preflight still faces unchanged economic transaction guard.",
+      "legitimateControl": "Native dual-instance contention and stale-holder rejection; downstream guard and existing migration functions are unchanged.",
+      "result": "supported"
+    },
+    {
+      "id": "unknown",
+      "invariant": "Unacknowledged transaction outcome must never install a confirmed lease or trigger hidden retry.",
+      "runtimeRoot": "writer-lease-supervisor.ts:207-218,287-289",
+      "counterexample": "Real committed acquisition followed by lost ACK remains UNKNOWN with no confirmed lease and no second transaction.",
+      "legitimateControl": "Hash-verified native real-COMMIT/lost-ACK case and reviewer release-failure negative control.",
+      "result": "supported"
+    },
+    {
+      "id": "drain",
+      "invariant": "Drain rejects new operations immediately and waits for active SQL settlement/cleanup before terminal status.",
+      "runtimeRoot": "writer-lease-supervisor.ts:292-301,378-382; postgres-sql-database.ts",
+      "counterexample": "Late connect, cancelled query with pending rollback or throwing synchronous release cannot create ready or prematurely successful drain.",
+      "legitimateControl": "Three independently executed negative controls on actual unchanged PostgresSqlDatabase plus inherited native in-flight renewal barrier.",
+      "result": "supported"
+    },
+    {
+      "id": "hold_clock",
+      "invariant": "Preparation approval cannot mount consumer, activate Clock/admission, or authorize production topology.",
+      "runtimeRoot": "unchanged config/cloudflare/world-runtime-executor.wrangler.jsonc and hold-executor.ts",
+      "counterexample": "Treating local status.ready or suggested alarm/coordinator as production authority has no deployed/configured path in this patch.",
+      "legitimateControl": "HOLD entry, package exports, schema, governance and economic code unchanged; ADR-03 time rules remain approved while hosting topology remains separately undecided.",
+      "result": "supported"
+    }
+  ],
+  "validation": [
+    {
+      "name": "exact patch/tree/source/report hashes and preserved subject",
+      "status": "passed",
+      "protects": "Five new files only; tree13ea4ec19e8fe6cbdb004148aab9cfe9bf35e15e; subject README remains untracked and E design unchanged."
+    },
+    {
+      "name": "independent credential-empty, network-denied strict Core/Worker builds and scoped tsc",
+      "status": "passed",
+      "protects": "Actual immutable source/type compatibility; all writes confined to disposable clone."
+    },
+    {
+      "name": "independent unit/Core rerun",
+      "status": "passed",
+      "protects": "25/25 = 20 new supervisor boundaries + 5 unchanged Core; zero fail/skip; independent-unit.json."
+    },
+    {
+      "name": "independent negative transport controls",
+      "status": "passed",
+      "protects": "3/3 late-connect, cancelled-query rollback and synchronous release-failure controls on actual adapter; no positive lease rows fabricated."
+    },
+    {
+      "name": "producer native and readback artifacts inherited",
+      "status": "passed",
+      "protects": "7/7 actual native PG16.15; exact raw hashes and source/report/receipt binding verified; distinct from independent reruns."
+    },
+    {
+      "name": "formal host, consumer drain, process kill and production permissions",
+      "status": "unavailable",
+      "protects": "Explicitly outside this nonactivated candidate; no claim of runtime readiness, TLS, admission or economic closure."
+    }
+  ],
+  "unknowns": [
+    {
+      "summary": "Formal host/consumer/Clock wiring and actual scheduler topology remain unimplemented and require separate authority/review.",
+      "decisionCritical": false
+    },
+    {
+      "summary": "Current bind requires table-level lease/head rights; compatibility with future column-only E grants or definer provisioning is not approved. Do not broaden real grants to satisfy this candidate automatically.",
+      "decisionCritical": false
+    },
+    {
+      "summary": "No independent native suite repeat, process kill or production authentication/TLS verification; producer native mechanism evidence was inherited and hash-verified as explicitly requested.",
+      "decisionCritical": false
+    }
+  ],
+  "evidencePlan": []
+}

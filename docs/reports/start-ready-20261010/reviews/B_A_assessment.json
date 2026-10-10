@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "patch": {
+    "repository": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-start-ready-audit-20261010",
+    "sourceType": "commit_range",
+    "base": "42991acfee9d0eacc702ba47a380c938a4516f03",
+    "head": "36ee5c1be849b37a40e97c091af40d3c22398b22",
+    "changedFiles": [
+      "apps/world-worker/src/preparation/formal-financial-opening-contract.ts",
+      "apps/world-worker/src/preparation/formal-financial-opening-producer.ts",
+      "docs/reports/start-ready-20261010/A/FORMAL_FINANCIAL_FIRST_TEST_RESULT.json",
+      "docs/reports/start-ready-20261010/A/FORMAL_FINANCIAL_IMPLEMENTATION.md",
+      "docs/reports/start-ready-20261010/A/FORMAL_FINANCIAL_IMPLEMENTATION_EVIDENCE.json",
+      "docs/reports/start-ready-20261010/A/OPENING_CHAIN_GAP_AUDIT.md",
+      "tests/support/tsconfig.formal-financial-opening.json",
+      "tests/world-core/formal-financial-opening.test.ts"
+    ],
+    "sha256": "0f672b733d76c1669f4d0d26dcd774729ccc02b704b81f12a10aa23bdd4303a1"
+  },
+  "recommendation": "merge",
+  "workflowLabel": "human_review_required",
+  "impact": {
+    "rating": "high",
+    "rationale": "P0 financial calculation/serialized source contract and provenance boundary; wrong values could contaminate downstream opening candidates. Current unconditional BLOCKED/no seed/no admission and no production caller contain immediate effects."
+  },
+  "regressionLikelihood": {
+    "rating": "low",
+    "rationale": "Additive two-module slice; unchanged existing runtime/authority guards; inspected economic and source counterexamples reject or remain non-importable; exact-head focused tests and sanity checks pass."
+  },
+  "regressionProtection": {
+    "rating": "strong",
+    "rationale": "Scoped pure-calculation paths: 76/76 exact-head cases across four files, including 31 new cases, fixed-seed properties, fresh-process rebuild, source/Owner/bridge/preflight controls; builds/types/lint/format/boundaries pass. No deployment/persistence path changed.",
+    "exactHeadChecksPassed": true
+  },
+  "recoverability": {
+    "rating": "easy",
+    "rationale": "Additive unmounted preparation modules; no migration, persisted writes or activation. Revert the slice without economic rollback."
+  },
+  "confidence": {
+    "rating": "high",
+    "rationale": "Exact range/tree/patch digest and source evidence hashes verified; all changed code and affected deterministic helpers/authority consumers inspected; independent isolated tests pass."
+  },
+  "applicability": {
+    "status": "confirmed",
+    "rationale": "Implements requested Worker-owned source-only financial calculator. New tests directly consume it; no runtime, loader, preflight, publisher, package export or deployment calls it."
+  },
+  "statusQuoRisk": {
+    "rating": "moderate",
+    "rationale": "Without this slice, source-bound multi-batch financial calculation remains missing; formal import must remain blocked either way."
+  },
+  "autoMergeExclusions": ["privileged_boundary", "public_contract", "other"],
+  "affectedRuntimeRoots": [
+    "Worker preparation: parseFormalFinancialOpeningContract",
+    "Worker preparation: produceFormalFinancialOpening",
+    "Existing Core opening seed validation and V08 lineage rebuild; validation-only discarded TEST_FIXTURE seed"
+  ],
+  "importantCallers": [
+    "tests/world-core/formal-financial-opening.test.ts; no production caller at this head"
+  ],
+  "riskDrivers": [
+    "Financial source/valuation and reciprocal claim semantics are P0",
+    "Supplemental integrity is not supplemental source adoption",
+    "Future integration must not lift unconditional blockers without separate approval"
+  ],
+  "protectiveFactors": [
+    "Real pinned Owner/source adoption and private parser brands; frozen results",
+    "Exact decimals, source references, 21-category coverage, B/R component checks, Core conservation/rebuild",
+    "No existing code/authority/SQL/runtime/status changes; no importable seed"
+  ],
+  "materialBoundaries": [
+    {
+      "id": "authority",
+      "invariant": "Calculation cannot mint formal source or World admission.",
+      "runtimeRoot": "formal-financial-opening-contract.ts:219; producer.ts:95-144",
+      "counterexample": "Copied adoption/parsed DTO or relabelled SOURCE_CANDIDATE/formal-looking World; clones reject and relabelling still returns BLOCKED with seed null.",
+      "legitimateControl": "Base pinned Owner/source loader and WeakSet; new real nonactivated adoption checks, private parsed brand and unconditional frozen finish. Existing preflight/publisher unchanged.",
+      "result": "supported"
+    },
+    {
+      "id": "source-integrity",
+      "invariant": "Every calculated supplemental value binds exact supplied bytes/reference/version/date; missing is not zero.",
+      "runtimeRoot": "formal-financial-opening-contract.ts:267-608",
+      "counterexample": "Wrong hash, missing pointer, changed value/version or missing category/amount rejects. Coherently replaced supplemental bytes may calculate but are never authenticated/admitted by their self-hash.",
+      "legitimateControl": "Original independently pinned adoption; strict canonical source JSON, exact pointer values, all 70 countries/21 categories, explicit declarations, positive FX/native valuation checks.",
+      "result": "supported"
+    },
+    {
+      "id": "financial-semantics",
+      "invariant": "Exact once-only conversion, same-claim B/R and per-currency conservation; no fabricated bank/CB backing.",
+      "runtimeRoot": "formal-financial-opening-producer.ts:151-438",
+      "counterexample": "Updated-hash inconsistent B/R, extra CB-bank loan, conflicting valuation or overflow produces no candidate; valid FX=1.25/native holdings produce exact reciprocal claims and conserved batches.",
+      "legitimateControl": "Base D01-D03 subset receipt, openingBookMoney and net-worth helpers; producer component totals and reciprocal accounts; Core canonical batch and ledger rebuild.",
+      "result": "supported"
+    },
+    {
+      "id": "immutability-restart",
+      "invariant": "Post-parse mutation cannot retarget calculation; restart reproduces output, never partial authority.",
+      "runtimeRoot": "formal-financial-opening-contract.ts:600-610; producer.ts:441-497",
+      "counterexample": "Mutating input or passing serialized parser output cannot mutate/mint its brand; a failed country returns candidate null; reordered/reparsed inputs and fresh Node process reproduce fingerprint.",
+      "legitimateControl": "Canonical snapshot, deep freeze, local parser WeakSet, deterministic IDs/sorts, canonical parse/rebuild, whole-result failure.",
+      "result": "supported"
+    }
+  ],
+  "validation": [
+    {
+      "name": "Immutable identity/evidence hashes/git diff --check",
+      "status": "passed",
+      "protects": "Exact base/head/tree, 8-file scope, 4 source/test hashes; original worktree remains clean."
+    },
+    {
+      "name": "Core/Worker builds and dedicated strict types",
+      "status": "passed",
+      "protects": "Existing Core and Worker integration and new test/source type contract."
+    },
+    {
+      "name": "Independent focused Vitest: 4 files / 76 cases",
+      "status": "passed",
+      "protects": "31 new + 45 existing; source/adoption/order/FX/conservation/restart and blocked admission, including bounded properties."
+    },
+    {
+      "name": "Boundary/pattern/lint/format/safe-environment checks",
+      "status": "passed",
+      "protects": "315 governed files, zero authoritative-pattern violations, scoped style/types and no configured DB; initial incomplete dependency-copy boundary failure was corrected without source edits."
+    },
+    {
+      "name": "Native DB/full/420/deployment/formal source admission",
+      "status": "skipped",
+      "protects": "Outside this pure-calculation slice; not claimed as passing or as formal readiness."
+    }
+  ],
+  "unknowns": [
+    {
+      "summary": "No independently adopted complete supplemental LC/FX/CB package or formal World binding; implementation always blocks those inputs from admission.",
+      "decisionCritical": false
+    },
+    {
+      "summary": "All actual fixed-source bank A values are zero; positive-A source-backed path remains NOT_VERIFIED, no source was fabricated.",
+      "decisionCritical": false
+    }
+  ],
+  "evidencePlan": []
+}
