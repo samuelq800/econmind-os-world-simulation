@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["ES2024", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "skipLibCheck": false,
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    "narrow-approval-lock-order-native.test.ts",
+    "../support/b-narrow-approval-lock-native.ts"
+  ]
+}

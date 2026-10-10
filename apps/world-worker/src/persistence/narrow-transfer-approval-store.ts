@@ -265,7 +265,13 @@ async function readCurrentAuthorization(
 /**
  * An internally canonical object is not enough to open or sign an offer. The
  * immutable Command ledger must already contain the same intent, locked before
- * any proposal or signature is created.
+ * any proposal or signature is created. Then hold the same-World head before
+ * any authority/proposal/signature lock, including proposal FK checks. This
+ * serializes with H-first authorization publication without an A -> H cycle.
+ * Caller-owned transactions must enter on the existing durable S frontier;
+ * this is not a first-SUBMIT helper for an H-first transaction without S.
+ * SHARE conflicts with an H-first writer but does not upgrade a lineage
+ * reader's existing H SHARE lock; approval does not mutate the World head.
  */
 async function lockAndAssertDurableCommand(
   transaction: SqlExecutor,
@@ -291,6 +297,14 @@ async function lockAndAssertDurableCommand(
       command.fingerprint
   ) {
     conflict('Durable Command identity is bound to different canonical intent');
+  }
+  const head = await transaction.query<{ readonly world_id: string }>(
+    `select world_id from world_v2.world_head
+      where world_id = $1 for share`,
+    [command.worldId],
+  );
+  if (head.rows.length !== 1 || head.rows[0]?.world_id !== command.worldId) {
+    deny('Approval requires the existing same-World authoritative head');
   }
 }
 
