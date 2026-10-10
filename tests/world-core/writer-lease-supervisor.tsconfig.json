@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "lib": ["ES2024", "DOM"],
+    "types": ["node"]
+  },
+  "include": [
+    "writer-lease-supervisor.test.ts",
+    "writer-lease-supervisor-postgres.test.ts"
+  ]
+}
