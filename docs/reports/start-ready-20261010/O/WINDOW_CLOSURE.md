@@ -64,3 +64,24 @@
 - G 的半成品 turn 曾在 context compaction 后空消息结束；已恢复原 dirty WT，继续已批准切片 1/2，不视作完成交付。
 
 PR131 仍未 merge；先修上述格式失败并取得适用组合检查结果，不能忽略失败直接放行。
+
+## 最后调度补充（本地记录，尚未追加推送）
+
+- 格式修复已推送为 `ed0e4df4571e30fdb8b2f3e95b43f4680c19acb8`。新的 run38049099833 及 trusted38049099688 已触发；atlas、workerd、workerd-native-postgres SUCCESS，完整 official/trusted 仍 IN_PROGRESS，不记全绿或 merge。
+- B 冻结其单独补充 CI 后，仅做一次 PR131 收口检查：全部适用检查成功且 head 精确一致才允许正常 merge；仍运行就报告 pending 后停止，失败则给具体修复项，不轮询、不强制合并。
+- C 最新实际核实旧视觉候选 29 个文件已与 main42991 逐项同内容。此前“旧视觉未合”交接描述过时；已取消重复应用/重复测试，C 只补既有 PR127/独审来源核验并停止。Oct10 地图仍是独立新变更。
+- A 来源采用/preflight 设计已冻结为 `ba92a1b7a4f1853710b1883078b1829ca6b537ff`，仅新设计文档；已交 F 独立设计审查，尚未批准实现。F 的 provenance 补证仍由 D 审增量。
+- E 因另一项 main 工作区同步请求中断设计修复；已明确使用安全独立 checkout、不碰旧登记和未审源，并继续 E-01 设计/oracle修正。
+- 地图窗口已恢复施工，报告渐暗/窄屏修复及 884 PASS/5 SKIP、类型/边界/构建/来源检查；Atlas 交互验收仍未完成。其耗时截图工具不再重试，待其冻结明确限制的候选，不将部分验证计作完整视觉收官。
+
+这次本地补记不为更新文档额外触发正在运行的完整 CI；未改变 PR131 的固定源码。
+
+## 后续增量分支（不改变 PR131）
+
+- D 已独立 APPROVED F 的 `d9853754` → `23fe8e5d` 补证增量。原报告 SHA256 `31ce032f8efcc1b6c402e9f9f4e39cb4efebd201027dd303aab32319e5c4ae78`；[格式整理展示副本](../reviews/D_F_DELTA_review.md)。9 项独立无数据库控制与原严格 TS 通过，原 2-case 新 generation 及构建次序已核实；不是重新跑 native，也不追溯升级旧运行。
+- 总控在独立 `codex/start-ready-provenance-20261010` 分支接入这两个已审增量提交，产品与测试文件保持原 bytes；不推回 PR131 分支、不重启其正在运行的完整检查。新增 helper/native 证据仅适用于其原固定 F 来源，不能声称组合树已有新 native 执行。
+- B 的补充 CI 固定为 `d4fce6646ddcf2387ae0f7e37e18a8032d7d90b7` / tree `4caf1125d4ad1a5650ad2af1d083a231c1fdde89`，10 个纯契约检查通过，已交 C 窄审。该未审候选未接入任何总控分支。
+- G 新报告：双 Node socket/rawbytes/两端 JWT/PGlite 链 9 PASS，迟到 fetch/connect 与 cleanup 控制 4 PASS；受限 native 首轮 19 项中 14 PASS/5 FAIL 原件保留。其中 fixture 的 capability/lease 问题正在按真实约束修正，recovery 缺失其他 Office seat 的真实缺陷正在改为同快照枚举/水合全部 active Office。G 尚未冻结候选，不合并、不部署、不计完成。
+- C 已完成视觉去重，核验收据 SHA256 `61f81652ce7e1c06ddeb81619c00cdb0e26c90ca98d2a4794f4fb5c533aa9604`：29/29 已在 main，由 PR127/`1222e66` 和既有 F SOURCE_ONLY APPROVED 覆盖。此次不新增批准、不重复合并。
+
+当前 PR131 仍有完整 official check IN_PROGRESS，其余四项 SUCCESS。窗口报告中的通过数属于各自固定范围；没有叠加成六角色/420/正式世界或 Gate B 完成。
