@@ -6,5 +6,5 @@
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "types": ["node"]
   },
-  "include": ["G-constructor-3a.test.ts"]
+  "include": ["G-constructor-3a.test.ts", "G-source-pool-delta.test.ts"]
 }

@@ -61,9 +61,10 @@ export async function withCloudflareExecutorRoutePools<Result>(
   const intakeConnectionString = input.intake
     ? connection(input.intake.connectionString)
     : null;
-  const sourceConnectionString = input.sourceConnectionString
-    ? connection(input.sourceConnectionString)
-    : null;
+  const sourceConnectionString =
+    input.sourceConnectionString !== null
+      ? connection(input.sourceConnectionString)
+      : null;
   const remaining = Math.min(
     10000,
     (budget?.deadlineMs ?? Date.now() + 10000) - Date.now(),
