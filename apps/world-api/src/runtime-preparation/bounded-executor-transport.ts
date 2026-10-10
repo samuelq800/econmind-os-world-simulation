@@ -2,6 +2,10 @@ import {
   AUTHENTICATED_CURRENT_SEAT_SCHEMA,
   AUTHENTICATED_COMMAND_RECOVERY_SCHEMA,
   AUTHENTICATED_FINANCIAL_INTAKE_SCHEMA,
+  FINANCIAL_INTAKE_OFFICE_ACTIONS,
+  type FinancialIntakeAction,
+  type FinancialIntakeOffice,
+  type FinancialIntakeStateStatus,
   type AuthenticatedCurrentSeatRequestDto,
   type AuthenticatedCommandRecoveryRequestDto,
 } from '@econmind/core';
@@ -489,6 +493,54 @@ function validAuthority(
     BigInt(b.worldVersion as string) >= BigInt(p.minimumWorldVersion)
   );
 }
+// Existing staged service branches; this only validates the response protocol.
+// REGISTER/READ/ENQUEUE reuse the existing intake. ENQUEUE cannot acknowledge
+// an unchanged pending proposal: its original recovery maps that to UNKNOWN.
+const financialSuccessStates: Readonly<
+  Record<FinancialIntakeAction, readonly FinancialIntakeStateStatus[]>
+> = {
+  REGISTER: [
+    'PENDING_APPROVAL_OR_ENQUEUE',
+    'QUEUED',
+    'EXECUTING',
+    'FINAL',
+    'UNKNOWN',
+  ],
+  INSPECT: ['INTENT', 'NOT_FOUND'],
+  SIGN_SELLER: ['SIGNATURE_RECORDED', 'NOT_FOUND'],
+  SIGN_BUYER_TRADE: ['SIGNATURE_RECORDED', 'NOT_FOUND'],
+  SIGN_BUYER_FINANCE: ['SIGNATURE_RECORDED', 'NOT_FOUND'],
+  BIND_REFERENCE: ['REFERENCE_BOUND', 'NOT_FOUND'],
+  ENQUEUE: ['QUEUED', 'EXECUTING', 'FINAL', 'UNKNOWN', 'NOT_FOUND'],
+  READ: [
+    'PENDING_APPROVAL_OR_ENQUEUE',
+    'QUEUED',
+    'EXECUTING',
+    'FINAL',
+    'UNKNOWN',
+    'NOT_FOUND',
+  ],
+};
+function financialSuccessAllowed(
+  request: Record<string, unknown>,
+  state: Record<string, unknown>,
+): boolean {
+  if (
+    typeof request.officeId !== 'string' ||
+    !Object.hasOwn(FINANCIAL_INTAKE_OFFICE_ACTIONS, request.officeId) ||
+    typeof request.action !== 'string' ||
+    !Object.hasOwn(financialSuccessStates, request.action)
+  )
+    return false;
+  const actions: readonly string[] =
+    FINANCIAL_INTAKE_OFFICE_ACTIONS[request.officeId as FinancialIntakeOffice];
+  return (
+    actions.includes(request.action) &&
+    financialSuccessStates[request.action as FinancialIntakeAction].includes(
+      state.status as FinancialIntakeStateStatus,
+    )
+  );
+}
 export function validateReply(
   path: ExecutorPublicPath,
   v: unknown,
@@ -614,7 +666,11 @@ export function validateReply(
           ['QUEUED', 'CLAIMED'].includes(String(state.status)) &&
           sameCommand(state, request);
   }
-  if (!validAuthority(r.authority, request, subject, c)) return false;
+  if (
+    !financialSuccessAllowed(request, state) ||
+    !validAuthority(r.authority, request, subject, c)
+  )
+    return false;
   if (state.status === 'NOT_FOUND') return shape(state, ['status']);
   if (state.status === 'UNKNOWN')
     return (

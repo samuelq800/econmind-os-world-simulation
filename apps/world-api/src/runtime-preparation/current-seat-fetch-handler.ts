@@ -96,7 +96,7 @@ export function createCurrentSeatFetchHandler(
             throw new ExecutorTransportError(415, 'INVALID_REQUEST');
           const authorization = bearer(request.headers.get('authorization'));
           const parsed = parseCurrentSeatRequest(
-            jsonBytes(await boundedBytes(request, 2048, budget.signal, true)),
+            jsonBytes(await boundedBytes(request, 1024, budget.signal, true)),
           );
           requestId = parsed.requestId;
           const result = await createAuthenticatedCurrentSeatService(c).handle({
