@@ -123,3 +123,23 @@ F 已审增量仍留在独立总控分支等待单独收口；正式源/权限/a
 - C、E 已完成本轮交付，保留空闲，不为填满窗口重复检查。D/地图本地预览保持原状，旧站风格29文件已在 main，无需重合。
 
 上述审查原件与格式整理副本 hash 分别保留。一次报告归档命令的 Node 语法错误发生在读取阶段，未产生文件；修正命令后才生成副本，不属于产品或测试失败。当前后继批尚未合并 main，不冒称生产接通或正式 World 运行。
+
+## PR132 平台失败与下一批实际修复（本地待归档记录）
+
+PR132 head `5a2d7a0ca0baf92bd2843e818a6f1ab5d5c1d6cc` 已推送，tree `545d0e0991481045531cc7e803d73068e43d9728`。应用附件仍因 identity 超过100失败，PR实际存在，不重建。
+GitHub `statusCheckRollup=[]` 不等于无失败：进一步定位到 [run38050960530](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38050960530)，固定同一head，push事件，FAILURE、jobs为空；check suite `103099775241` FAILURE，check runs count0。CLI提示 workflow file issue。尚未证明具体解析原因，不把它误报为测试失败或全绿。已交 C 修确切平台上下文/语法问题，保留原失败；新固定delta需独立窄审后才更新PR，不绕过检查。
+
+- G 完整证据tip `324906488e2c0ca7d8be70067f55085a281ab766` / tree `b08add361aeba12ebc1583d836eca51b7b465632` 与产品 `89c44467` 仅17份报告/check文本差异；两份报告hash已实核。F独审 CHANGES_REQUIRED：Financial回复缺 action/state 绑定、current-seat 2048偏离批准1024。已交 G 最小修复与否定测试，新delta再交 F审。旧227本地PASS不能覆盖这两个缺陷；native构建dist来源不足等限制保留。
+- D 对 E-01 `1883d65` APPROVED，仅设计/oracle；原报告SHA `fbfefb0e2e58ea3273f18c3e2ce7503858ecae59db00352984bfdef3effc2642`。root已启动原设计 LOCAL_CANDIDATE：E 在真实隔离World schema验证三manual families原语、权限与writer/claim兼容；超出已审writer/authorization协议先补设计独审。不注册迁移，不创建生产角色，不移除admission veto。
+- A 对地图 tree `c518d493` APPROVED_SOURCE_ONLY；报告SHA `ceaf34c8e6d0a87890ac1488c4578cf3108cae28aad78dd779062426d71b6454`。地图仍本地未提交/未推送/未合并/未部署。A转向已有来源的具体 OWNER_INPUTS 收敛，避免将工程缺口或已定规则交回用户。
+- B继续已审 source/preflight接入实现，不打断。D新增仅设计的 durable private-admission revoke/commit 原子性收口，独占docs，不与B publisher V2适配、E原语或G接口代码重叠。
+
+本节为后续实际状态，保留前面每个检查点的历史原貌。当前仍未正式导入/运行World或扩张持久权限；不是“只差数据就能启动”。
+
+## 已审 CI 修复接入，继续独立审查工程
+
+- C 修复 `1d6d3355846c8db7d56fe04625177dbf21fb4527` 已获 D 独审 APPROVED，原报告 SHA256 `1a12aa760f071b23868db6503382c06668a1e28f240a752bee0f99506511229f`；仓库展示副本 `../reviews/D_PR132_CI_CONTEXT_DELTA_REVIEW.md` 格式归一，不冒充原件字节hash。root 接入原两个提交为 `8a5ffa3`/`dc0c196`，仍使用 PR132，不新建重复 PR。明确根因 job-level env 不允许 runner context，现由最前 bash step 的 RUNNER_TEMP/GITHUB_ENV 初始化路径；原其他步骤/权限/预算/四strict/D7/F NOT_RUN均不变。D 实际11纯控制、actionlint原FAIL/修PASS及失败路径验证不等于修后 provider CI；本检查点修后 CI 仍未执行。
+- F 对 G 修复产品 `1bc24450aaa5323afab42c93f7d1e9e6d610f67c` / 证据 `e70a8bcb64aab70549a9978a9e03cb4320200ef0` APPROVED，关闭 F-G-01/02，原报告 SHA256 `99006e93b1b5c0c02af6e4fea402002b2f7253373a29a0219a3930e99dbab966`。仅接受未挂载1/2和有限端口机制，旧native stall根因与dist来源缺口保留，不解锁3/4/5；root将其单独整合，不混入本CI修复PR范围。
+- B 已冻结产品 `ae4424f681414a00a6bd3fd6268ed733632690bb` / 证据 `0943142b798df8bca401f5f0987c31a7db9434ac`，已交非实施者 F 独审。132 focused/90 architecture与新strict是本地producer证据，真实formal正向尚缺；两旧配置额外第三方声明检查FAIL保留，交审判断其必要性，不伪装全绿。
+- E 真实schema integration delta `b457e44a32b90a1f3bbc82f11d8781c09e852e0d` 已交 D 独立契约审查：head-first authorization writer 与 D column-aware supervisor 兼容尚未产品实现；9诊断不能代manual原语验证。尚不扩grants、注册迁移或启用正式authority。
+- A OWNER_INPUTS两文档更新冻结 `3f9fce4965b73f6a7dcdef188d3a3a57a073fe7a`，待root核对归档；地图继续本地未发布。各工程有明确后继，不将代码未完成统称等待用户数据。
