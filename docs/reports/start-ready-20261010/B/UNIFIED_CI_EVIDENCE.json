@@ -1,0 +1,162 @@
+{
+  "schemaVersion": "START_READY_SUPPLEMENTAL_CI_IMPLEMENTATION_EVIDENCE_1",
+  "classification": "IMPLEMENTED_UNVERIFIED_PENDING_C_INDEPENDENT_REVIEW",
+  "base": "42991acfee9d0eacc702ba47a380c938a4516f03",
+  "codeCandidate": "a7f938d5c97d095571072bb014f8d8ad9c179d73",
+  "codeTree": "7bb474366ebd9b592248637a99fd8ce745a19c4e",
+  "branch": "codex/b-start-ready-candidate-ci-20261010",
+  "scope": "Supplemental strict types and guarded D native preparation only. No full-run entry.",
+  "actualValidation": [
+    {
+      "name": "contracts",
+      "command": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node --test tests/support/start-ready-candidate-ci.test.mjs",
+      "chunk_id": "c43153",
+      "wall_time_seconds": 0.421847792,
+      "exit_code": 0,
+      "original_token_count": 255,
+      "output": "✔ exact base, four mandatory configs and strict compiler switches (2.028917ms)\n✔ missing combined inputs are reported, never optional or silently skipped (2.358625ms)\n✔ actual checkout SHA/tree, not event metadata, identify the tested source (140.64225ms)\n✔ fresh receipts retain NOT_RUN and nonportable local evidence limitations (34.829458ms)\nSTDOUT_CONTROL\nSTDERR_CONTROL\n✔ raw stdout and stderr survive successful command execution (47.405375ms)\nEXPECTED_FAILURE\n✔ nonzero command failure is retained with its exact exit code (51.230292ms)\n✔ missing executable is FAIL rather than PASS or skipped (1.688375ms)\n✔ native PASS requires all seven applicable cases, not exit0/empty/skipped evidence (0.164166ms)\n✔ an existing raw log prevents child execution rather than retrying (0.43325ms)\n✔ workflow has bounded triggers, readonly permissions and no deployment inputs (0.801792ms)\nℹ tests 10\nℹ suites 0\nℹ pass 10\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 477.8375\n",
+      "expectedExitCode": 0
+    },
+    {
+      "name": "lint",
+      "command": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node node_modules/eslint/bin/eslint.js tests/support/start-ready-candidate-ci.mjs tests/support/start-ready-candidate-ci.test.mjs",
+      "chunk_id": "a465b7",
+      "wall_time_seconds": 0.8714785,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": "",
+      "expectedExitCode": 0
+    },
+    {
+      "name": "format",
+      "command": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node node_modules/prettier/bin/prettier.cjs --check .github/workflows/start-ready-candidate.yml tests/support/start-ready-candidate-ci.mjs tests/support/start-ready-candidate-ci.test.mjs",
+      "chunk_id": "aac906",
+      "wall_time_seconds": 0.123253708,
+      "exit_code": 0,
+      "original_token_count": 17,
+      "output": "Checking formatting...\nAll matched files use Prettier code style!\n",
+      "expectedExitCode": 0
+    },
+    {
+      "name": "syntax",
+      "command": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node --check tests/support/start-ready-candidate-ci.mjs && /Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node --check tests/support/start-ready-candidate-ci.test.mjs",
+      "chunk_id": "3d0c69",
+      "wall_time_seconds": 0.00001275,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": "",
+      "expectedExitCode": 0
+    },
+    {
+      "name": "governance",
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "chunk_id": "832115",
+      "wall_time_seconds": 1.827038875,
+      "exit_code": 0,
+      "original_token_count": 622,
+      "output": "{\n  \"scope\": \"R2_GOVERNANCE_READ_ONLY\",\n  \"status\": \"PASS\",\n  \"application_code_executed\": false,\n  \"database_access\": false,\n  \"checks\": [\n    {\n      \"name\": \"required_governance_files\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"fast_mainline_policy\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"r2_step_manifest\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"step_dependencies\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"human_navigation_matches_json\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"work_packages\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"control_and_step_prompts\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"progress_truth\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"decision_register\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"source_material\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"v01_traceability\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"v01_adr_graph\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"v01_integration_contract\",\n      \"status\": \"PASS\"\n    },\n    {\n      \"name\": \"templates\",\n      \"status\": \"PASS\"\n    }\n  ],\n  \"metrics\": {\n    \"required_files\": 20,\n    \"review_mode\": \"FAST_MAINLINE\",\n    \"execution_modes\": {\n      \"NORMAL\": 99,\n      \"PARALLEL_PREPARATION\": 2\n    },\n    \"work_packages\": 33,\n    \"steps\": 101,\n    \"dependency_graph\": \"ACYCLIC\",\n    \"work_package_dependency_graph\": \"ACYCLIC\",\n    \"step_prompts\": 101,\n    \"control_prompts\": 8,\n    \"implementation_agent_statuses\": [\n      \"BLOCKED\",\n      \"IMPLEMENTED_UNVERIFIED\",\n      \"IN_PROGRESS\"\n    ],\n    \"static_prompt_references\": 1,\n    \"progress_states\": {\n      \"BLOCKED\": 0,\n      \"CHANGES_REQUIRED\": 0,\n      \"DEFERRED_WITH_APPROVAL\": 0,\n      \"IMPLEMENTED_UNVERIFIED\": 0,\n      \"IN_PROGRESS\": 0,\n      \"PLANNED\": 74,\n      \"UNASSESSED\": 0,\n      \"VERIFIED\": 27\n    },\n    \"governance_sync_status\": \"VERIFIED\",\n    \"governance_integration\": \"MERGED\",\n    \"approved_reviews\": 28,\n    \"v002_ready\": true,\n    \"required_gate\": \"V09.1_ADR_18_DECISION\",\n    \"foundation_candidate_steps\": 12,\n    \"decisions\": 20,\n    \"approved_decisions\": 9,\n    \"source_documents\": 8,\n    \"v01_requirements\": 139,\n    \"v01_source_units\": 8743,\n    \"v01_adrs\": 20,\n    \"v01_adr_relationships\": 32,\n    \"v01_adr_package_edges\": 114,\n    \"v01_identity_fields\": 3,\n    \"v01_preserved_route_groups\": 5,\n    \"v01_next_gate\": \"V01_PACKAGE_LEVEL_REVIEW\",\n    \"standard_templates\": 6\n  },\n  \"errors\": []\n}\n",
+      "expectedExitCode": 0
+    },
+    {
+      "name": "secret_sanity",
+      "command": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node scripts/check-repository-secrets.mjs",
+      "chunk_id": "ecd568",
+      "wall_time_seconds": 3.822871333,
+      "exit_code": 0,
+      "original_token_count": 12,
+      "output": "{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 2355\n}\n",
+      "expectedExitCode": 0
+    },
+    {
+      "name": "environment",
+      "command": "env -i PATH=/usr/bin:/bin ECONMIND_ENV=local /Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node scripts/assert-safe-environment.mjs",
+      "chunk_id": "d39ac1",
+      "wall_time_seconds": 0.115564667,
+      "exit_code": 0,
+      "original_token_count": 56,
+      "output": "{\n  \"status\": \"PASS\",\n  \"environment\": \"local\",\n  \"databaseConfigured\": false,\n  \"validatedViteModes\": [\n    \"development\",\n    \"production\"\n  ],\n  \"linkedSupabaseProject\": \"NOT_LINKED\",\n  \"databaseMutationAllowed\": false\n}\n",
+      "expectedExitCode": 0
+    },
+    {
+      "name": "missing_input_cli",
+      "command": "env -i PATH=/usr/bin:/bin CI_EVIDENCE_DIRECTORY=/private/tmp/start-ready-ci-missing-inputs.OO56Bv /Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node tests/support/start-ready-candidate-ci.mjs initialize",
+      "chunk_id": "a103ac",
+      "wall_time_seconds": 0.00002175,
+      "exit_code": 1,
+      "original_token_count": 438,
+      "output": "file:///Users/samuel/Documents/econclub/.econmind-worktrees/b-start-ready-candidate-ci-20261010/tests/support/start-ready-candidate-ci.mjs:190\n      throw Error(\n            ^\n\nError: Combined candidate missing: tests/support/tsconfig.formal-financial-opening.json, tests/world-web/office-command.tsconfig.json, tests/world-core/writer-lease-supervisor.tsconfig.json, tests/support/tsconfig.f-v09-native-claim.json, apps/world-worker/src/preparation/formal-financial-opening-contract.ts, apps/world-worker/src/preparation/formal-financial-opening-producer.ts, tests/world-core/formal-financial-opening.test.ts, apps/world-web/src/office-command/client.ts, apps/world-web/src/office-command/contract.ts, apps/world-web/src/office-command/controller.ts, apps/world-web/src/office-command/view.ts, apps/world-web/src/trusted-host/formal-session-adapter.ts, tests/world-web/formal-session-adapter.test.ts, tests/world-web/office-command.test.ts, apps/world-worker/src/runtime-preparation/writer-lease-supervisor.ts, tests/world-core/writer-lease-supervisor.test.ts, tests/world-core/writer-lease-supervisor-postgres.test.ts, tests/world-core/f-v09-native-claim-recovery.test.ts, tests/support/f-v09-source-inheritance.mjs\n    at main (file:///Users/samuel/Documents/econclub/.econmind-worktrees/b-start-ready-candidate-ci-20261010/tests/support/start-ready-candidate-ci.mjs:190:13)\n    at file:///Users/samuel/Documents/econclub/.econmind-worktrees/b-start-ready-candidate-ci-20261010/tests/support/start-ready-candidate-ci.mjs:366:9\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)\n\nNode.js v24.20.0\n",
+      "expectedExitCode": 1
+    },
+    {
+      "name": "not_run_finalize",
+      "command": "env -i PATH=/usr/bin:/bin CI_EVIDENCE_DIRECTORY=/private/tmp/start-ready-ci-missing-inputs.OO56Bv /Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node tests/support/start-ready-candidate-ci.mjs finalize",
+      "chunk_id": "56f9a3",
+      "wall_time_seconds": 0.000006125,
+      "exit_code": 1,
+      "original_token_count": 1183,
+      "output": "{\n  \"schemaVersion\": \"START_READY_CANDIDATE_CI_1\",\n  \"classification\": \"NONDEPLOYABLE_CI_NOT_GATE_OR_ACTIVATION_APPROVAL\",\n  \"base\": \"42991acfee9d0eacc702ba47a380c938a4516f03\",\n  \"checkoutSha\": \"a7f938d5c97d095571072bb014f8d8ad9c179d73\",\n  \"checkoutTree\": \"7bb474366ebd9b592248637a99fd8ce745a19c4e\",\n  \"inputsStatus\": \"FAIL\",\n  \"fullCheck\": {\n    \"status\": \"NOT_RUN_BY_SUPPLEMENTAL_CI\",\n    \"responsibleWorkflow\": \".github/workflows/cloudflare-runtime-environment.yml\",\n    \"rule\": \"External full result requires matching actual checkout SHA/tree; no inherited PASS\",\n    \"historicalReference\": {\n      \"run\": \"38048771913\",\n      \"job\": \"114203506317\",\n      \"metadataHead\": \"95926300c35645d9a684ec7dedd51114e1962935\",\n      \"actualCheckout\": \"a61a26a90a0ea932401caa9f529a18a25eca0697\",\n      \"actualTree\": \"3bbed0dae40a2cc85b414e1a87893f514d26da7a\",\n      \"observedResult\": \"FAIL_FORMAT_CHECK_C_REPORT_NATIVE_SKIPPED\",\n      \"scope\": \"HISTORICAL_REFERENCE_ONLY_NOT_THIS_CI_CHECKOUT_RESULT\"\n    }\n  },\n  \"builds\": [\n    {\n      \"name\": \"@econmind/core\",\n      \"status\": \"NOT_RUN\"\n    },\n    {\n      \"name\": \"@econmind/world-worker\",\n      \"status\": \"NOT_RUN\"\n    }\n  ],\n  \"strictTypes\": [\n    {\n      \"config\": \"tests/support/tsconfig.formal-financial-opening.json\",\n      \"status\": \"NOT_RUN\"\n    },\n    {\n      \"config\": \"tests/world-web/office-command.tsconfig.json\",\n      \"status\": \"NOT_RUN\"\n    },\n    {\n      \"config\": \"tests/world-core/writer-lease-supervisor.tsconfig.json\",\n      \"status\": \"NOT_RUN\"\n    },\n    {\n      \"config\": \"tests/support/tsconfig.f-v09-native-claim.json\",\n      \"status\": \"NOT_RUN\"\n    }\n  ],\n  \"native\": {\n    \"dSupervisor\": {\n      \"status\": \"NOT_RUN\",\n      \"expectedTests\": 7,\n      \"migrationPrefix\": 6\n    },\n    \"fClaimRecovery\": {\n      \"status\": \"NOT_RUN\",\n      \"reason\": \"Machine-owned generation, fixed macOS data directory and PG160015 guard are not portable; no guard changed\",\n      \"independentLocalEvidence\": {\n        \"kind\": \"REFERENCE_ONLY_NOT_CI_REEXECUTION_OR_BUILD_PROVENANCE_CLOSURE\",\n        \"commit\": \"d9853754b3eb2080a5ac4d30c71cae4db013fe0c\",\n        \"path\": \"docs/reports/start-ready-20261010/F/V09_EVIDENCE_RECEIPT.md\",\n        \"artifact\": \"/Users/samuel/Documents/econclub/artifacts/f-v09-claim-recovery-20261010.KgSwqT/NATIVE_RESULTS.json\",\n        \"artifactSha256\": \"fbba98a2b2214b1ea05cc512eaaa4a468af37e5abbabc28a5bdd9d6de3008fd7\",\n        \"limitation\": \"Producer-reported 2 PASS; original Core dist provenance limitation is retained; independent review remains separate\",\n        \"independentReview\": {\n          \"path\": \"docs/reports/start-ready-20261010/reviews/D_F_review.md\",\n          \"sha256\": \"2ff88ab43b861eb9f9963c039985962c8830874d247ea6bc1ce98ab97efe1c2e\",\n          \"scope\": \"Independent D review of d985375 six-file candidate; not reexecution of native2\"\n        }\n      }\n    }\n  },\n  \"productionAccess\": false,\n  \"gatePromotion\": false,\n  \"missingInputs\": [\n    \"tests/support/tsconfig.formal-financial-opening.json\",\n    \"tests/world-web/office-command.tsconfig.json\",\n    \"tests/world-core/writer-lease-supervisor.tsconfig.json\",\n    \"tests/support/tsconfig.f-v09-native-claim.json\",\n    \"apps/world-worker/src/preparation/formal-financial-opening-contract.ts\",\n    \"apps/world-worker/src/preparation/formal-financial-opening-producer.ts\",\n    \"tests/world-core/formal-financial-opening.test.ts\",\n    \"apps/world-web/src/office-command/client.ts\",\n    \"apps/world-web/src/office-command/contract.ts\",\n    \"apps/world-web/src/office-command/controller.ts\",\n    \"apps/world-web/src/office-command/view.ts\",\n    \"apps/world-web/src/trusted-host/formal-session-adapter.ts\",\n    \"tests/world-web/formal-session-adapter.test.ts\",\n    \"tests/world-web/office-command.test.ts\",\n    \"apps/world-worker/src/runtime-preparation/writer-lease-supervisor.ts\",\n    \"tests/world-core/writer-lease-supervisor.test.ts\",\n    \"tests/world-core/writer-lease-supervisor-postgres.test.ts\",\n    \"tests/world-core/f-v09-native-claim-recovery.test.ts\",\n    \"tests/support/f-v09-source-inheritance.mjs\"\n  ],\n  \"inputsSha256\": {\n    \"package.json\": \"e1492f2baef6fbcf2e15975b1912ef3e45da316c72b8be2190a35996791fa55b\",\n    \"pnpm-lock.yaml\": \"342c7d83c20f04e19e91cb122e32bbdb1bdb8af51999dfe2db25ada877b69ab5\"\n  },\n  \"finalSource\": {\n    \"checkoutSha\": \"a7f938d5c97d095571072bb014f8d8ad9c179d73\",\n    \"checkoutTree\": \"7bb474366ebd9b592248637a99fd8ce745a19c4e\"\n  },\n  \"trackedChanges\": \"\",\n  \"stepOutcomes\": {\n    \"INPUTS_OUTCOME\": \"NOT_RUN\",\n    \"INSTALL_OUTCOME\": \"NOT_RUN\",\n    \"CI_CONTRACT_OUTCOME\": \"NOT_RUN\",\n    \"BUILD_OUTCOME\": \"NOT_RUN\",\n    \"STRICT_TYPES_OUTCOME\": \"NOT_RUN\",\n    \"NATIVE_D_OUTCOME\": \"NOT_RUN\"\n  },\n  \"logsSha256\": {},\n  \"result\": \"FAIL_OR_NOT_RUN\"\n}\n",
+      "expectedExitCode": 1
+    },
+    {
+      "name": "yaml_shell",
+      "command": "ruby -ryaml -ropen3 -e 'w=YAML.safe_load(File.read(ARGV[0])); abort \"permissions\" unless w[\"permissions\"]=={\"contents\"=>\"read\"}; abort \"jobs\" unless w[\"jobs\"].size==1; w[\"jobs\"].each_value { |j| j[\"steps\"].each { |s| next unless s[\"run\"]; out,err,status=Open3.capture3(\"bash\",\"-n\",stdin_data:s[\"run\"]); abort err unless status.success? } }; puts \"YAML parse, readonly permissions, one job, all run-block bash syntax PASS\"' .github/workflows/start-ready-candidate.yml",
+      "chunk_id": "d8ed16",
+      "wall_time_seconds": 0.016308917,
+      "exit_code": 0,
+      "original_token_count": 19,
+      "output": "YAML parse, readonly permissions, one job, all run-block bash syntax PASS\n",
+      "expectedExitCode": 0
+    },
+    {
+      "name": "diff_check",
+      "command": "git diff --check 42991acfee9d0eacc702ba47a380c938a4516f03 HEAD",
+      "chunk_id": "ce6472",
+      "wall_time_seconds": 0.000010042,
+      "exit_code": 0,
+      "original_token_count": 0,
+      "output": "",
+      "expectedExitCode": 0
+    }
+  ],
+  "initialFailure": {
+    "name": "draft lint",
+    "exitCode": 1,
+    "detail": "Five no-regex-spaces violations at draft test lines152,153,167,175,184; fixed with explicit quantifiers before codeCandidate. Final real lint exit0, no suppression."
+  },
+  "limitations": {
+    "actionlint": "NOT_RUN_NOT_INSTALLED",
+    "frozenInstall": "NOT_RUN_THIS_TURN_NO_DEPENDENCY_CHANGE; reused read-only existing node_modules for local lint/format",
+    "fullCheck": "NOT_RUN_THIS_TURN_OR_BY_NEW_WORKFLOW",
+    "fourCompilerInvocations": "NOT_RUN_NO_C_D_OR_F_INTEGRATED_IN_THIS_BRANCH",
+    "dNative": "NOT_RUN_THIS_TURN; future guarded job only",
+    "fNative": "NOT_RUN; specific owned generation remains unchanged",
+    "providerDispatch": "NOT_RUN",
+    "merge": "NOT_RUN",
+    "push": "NOT_RUN",
+    "productionAccess": false,
+    "statusOrGateMutation": false
+  },
+  "externalReadOnlyObservation": {
+    "workflow": ".github/workflows/cloudflare-runtime-environment.yml",
+    "run": 38048771913,
+    "runAttempt": 1,
+    "job": 114203506317,
+    "metadataHead": "95926300c35645d9a684ec7dedd51114e1962935",
+    "actualCheckout": "a61a26a90a0ea932401caa9f529a18a25eca0697",
+    "actualTree": "3bbed0dae40a2cc85b414e1a87893f514d26da7a",
+    "result": "FAILURE",
+    "stage": "pnpm format:check",
+    "affectedPath": "docs/reports/start-ready-20261010/C/REPORT.md",
+    "authenticatedNativeStep": "SKIPPED",
+    "basis": "Live GitHub run/job metadata, raw job checkout/git-log and format failure excerpt, commit API tree; not artifact download or rerun.",
+    "notCurrentSupplementalCheckoutResult": true
+  },
+  "immutableIdentityCheck": {
+    "chunk_id": "d26906",
+    "wall_time_seconds": 0.000008209,
+    "exit_code": 0,
+    "original_token_count": 117,
+    "output": ".github/workflows/start-ready-candidate.yml\ntests/support/start-ready-candidate-ci.mjs\ntests/support/start-ready-candidate-ci.test.mjs\nc2e55f068956f526fcc62cdfa8976c3f2db67f148a0d69cd40ec9d8e54511748  .github/workflows/start-ready-candidate.yml\n217bc8198572e4ba7bd78a16ca977a6ef84fce19ca339b3432dfc5766afb2238  tests/support/start-ready-candidate-ci.mjs\n9cf9686ab70149d3790d46f8c0369f5d8f66f7135a82039093740f64e5ab04d9  tests/support/start-ready-candidate-ci.test.mjs\n"
+  },
+  "failClosedReceiptDirectory": "/private/tmp/start-ready-ci-missing-inputs.OO56Bv"
+}
