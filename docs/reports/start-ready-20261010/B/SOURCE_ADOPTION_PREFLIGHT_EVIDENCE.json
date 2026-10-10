@@ -1,0 +1,227 @@
+{
+  "schemaVersion": "b-opening-source-composition-implementation-evidence-v1",
+  "status": "IMPLEMENTED_UNVERIFIED_INDEPENDENT_REVIEW_REQUIRED",
+  "branch": "codex/b-opening-source-composition-20261010",
+  "baseCommit": "27307a108ce5c0c3e2ce28e3776f8ba15ed73d3b",
+  "baseTree": "69c04e4ca079e082e5f1bf85ce5d937ac6085b4d",
+  "designCommit": "ba92a1b7a4f1853710b1883078b1829ca6b537ff",
+  "designReviewSha256": "5d8603b45091137dfbd29d60459292fa93ec8ac7d29669efb7c3f4ca54c58e51",
+  "codeCommit": "ae4424f681414a00a6bd3fd6268ed733632690bb",
+  "codeTree": "a544893ef4465fb6ef42b09511416401469ad3b2",
+  "canonicalGitDiffSha256": "36579b753bf9e5b17c6a38bc65d997b91701939e157f0b1aea4a2b9189c2218a",
+  "canonicalGitDiffCommand": "git diff --binary --full-index --no-ext-diff 27307a108ce5c0c3e2ce28e3776f8ba15ed73d3b ae4424f681414a00a6bd3fd6268ed733632690bb",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "dependencySource": "copied pinned installed workspace dependencies; lockfile unchanged",
+    "testEnvironment": "env -i with pinned local PATH; no database URL or production credentials"
+  },
+  "codeFileSha256": {
+    "apps/world-worker/src/admission/official-opening-admission-publication.ts": "6636e487f29be897b5c32be8397dd32e24c258ebe2a70de4dba5bb3d0d94e363",
+    "apps/world-worker/src/preparation/official-opening-bundle-loader.ts": "601a2c2af1928fa950ded89965a243b9e89b37a8d1203849405339c70b226e85",
+    "apps/world-worker/src/preparation/official-opening-bundle-preflight.ts": "535ac125bc25603872ef857e7a5d205212a5615366843cb54ae6fe3d545390a6",
+    "apps/world-worker/src/preparation/official-opening-candidate-composition.ts": "c1c7147bfcfc15324069019e84d6d24d7305ac427fd12345e5237f32859bcb6e",
+    "apps/world-worker/src/preparation/opening-canonical-seed-bridge.ts": "144ba6c37c1a741cec00af46a5d39a675051fbace0f1750227a60f010c8f514c",
+    "apps/world-worker/src/preparation/owner-non-host-source-adoption.ts": "479d67a6f84707a358c4c161c9c4b638b4be5164e7e74d26bf05c9efc8096419",
+    "tests/support/financial-composition-vector.ts": "3fd76076cd6887dc01dd85ea5f6bfc0f67fa7fee19a37c5950ecbb46900e8700",
+    "tests/support/tsconfig.official-opening-candidate-composition.json": "2ac90111c3bc3e249b308d51e7faebe2d6ff5b7f5bfb6d8914d2a9cb34917ab5",
+    "tests/world-core/official-opening-candidate-composition.test.ts": "e8f2d23e0a8ab3fc43dd714d3eb3bb2eb4fc151ace89ef00ea3928f7c8ce11cf"
+  },
+  "checks": {
+    "coreBuild": {
+      "command": "node node_modules/typescript/bin/tsc -p packages/core/tsconfig.build.json",
+      "exitCode": 0
+    },
+    "workerBuild": {
+      "command": "node node_modules/typescript/bin/tsc -p apps/world-worker/tsconfig.build.json",
+      "exitCode": 0
+    },
+    "focusedTests": {
+      "command": "node node_modules/vitest/vitest.mjs run tests/world-core/{official-opening-candidate-composition,official-opening-bundle-preflight,official-opening-admission-publication,formal-financial-opening,owner-non-host-source-adoption,owner-non-host-financial-bridge,opening-canonical-seed-bridge}.test.ts",
+      "files": 7,
+      "passed": 132,
+      "failed": 0,
+      "newTests": 19,
+      "existingTests": 113,
+      "exitCode": 0
+    },
+    "architectureTests": {
+      "command": "node node_modules/vitest/vitest.mjs run tests/architecture",
+      "files": 16,
+      "passed": 90,
+      "failed": 0,
+      "exitCode": 0
+    },
+    "focusedStrict": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit --skipLibCheck false -p tests/support/tsconfig.<name>.json",
+      "configurations": [
+        "official-opening-candidate-composition",
+        "formal-financial-opening",
+        "official-opening-bundle-preflight",
+        "owner-non-host-source-adoption",
+        "opening-canonical-seed-bridge"
+      ],
+      "exitCode": 0
+    },
+    "legacyTypecheck": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit -p tests/support/tsconfig.<name>.json",
+      "configurations": [
+        "official-opening-admission-publication",
+        "owner-non-host-financial-bridge"
+      ],
+      "originalSkipLibCheck": true,
+      "exitCode": 0
+    },
+    "lint": {
+      "scope": "eight changed TypeScript source/test/helper files",
+      "command": "node node_modules/eslint/bin/eslint.js <eight files>",
+      "exitCode": 0
+    },
+    "format": {
+      "scope": "nine code candidate files",
+      "command": "node node_modules/prettier/bin/prettier.cjs --check <nine files>",
+      "exitCode": 0
+    },
+    "governance": {
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "checks": 14,
+      "exitCode": 0
+    },
+    "boundaries": {
+      "command": "node scripts/check-boundaries.mjs",
+      "exitCode": 0
+    },
+    "authoritativePatterns": {
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "exitCode": 0
+    },
+    "secrets": {
+      "command": "node scripts/check-repository-secrets.mjs",
+      "exitCode": 0
+    },
+    "environment": {
+      "command": "ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
+      "exitCode": 0
+    },
+    "whitespace": {
+      "command": "git diff --cached --check",
+      "exitCode": 0
+    }
+  },
+  "retainedFailures": [
+    {
+      "kind": "INITIAL_TOOL_SETUP",
+      "exitCode": 1,
+      "detail": "Core build attempted before private dependency copy finished: TypeScript module not found. Copy completed; real Core/Worker builds subsequently exit 0."
+    },
+    {
+      "kind": "INITIAL_NEW_TEST_ASSERTIONS",
+      "exitCode": 1,
+      "detail": "Initial 18-case run: 16 passed/2 failed. Document whitespace failed earlier original canonical JSON guard; test now changes canonical extra document row to reach independent-byte equality check. Publication exposes codes in blockerCodes, not Error.message; assertion now checks exact error code and complete blocker set. No product checks weakened."
+    },
+    {
+      "kind": "INITIAL_NEW_TEST_TYPECHECK",
+      "exitCode": 2,
+      "detail": "Two readonly-to-mutable negative-fixture casts corrected via explicit unknown, confined to generated invalid test inputs."
+    },
+    {
+      "kind": "EXTRA_DECLARATION_CHECK",
+      "config": "official-opening-admission-publication",
+      "override": "--skipLibCheck false",
+      "exitCode": 2,
+      "detail": "Unchanged tinybench declaration lacks DOMHighResTimeStamp under this old ES2024-only config. New strict composition config includes DOM and passes. Original config unchanged."
+    },
+    {
+      "kind": "EXTRA_DECLARATION_CHECK",
+      "config": "owner-non-host-financial-bridge",
+      "override": "--skipLibCheck false",
+      "exitCode": 2,
+      "detail": "Unchanged PGlite declaration lacks Emscripten/FS ambient types. Original config unchanged; original configured typecheck passes. No declaration stub added."
+    }
+  ],
+  "rawEvidenceDirectory": "/private/tmp/b-opening-source-composition-evidence.Mi9Ku4",
+  "originalLogSha256": {
+    "final-focused-tests.log": {
+      "sha256": "b47c657969d4b05a278e76d847c43f146230fb683cfc0ef4d68a6da2eb747892",
+      "exitCode": 0
+    },
+    "final-architecture-tests.log": {
+      "sha256": "602b347c9711368aa01b17116b2ab6aebe2a19150330d3904b179da635e35c54",
+      "exitCode": 0
+    },
+    "governance.json": {
+      "sha256": "8376ba6567f88d218a67a3e9281879154d492b82371aa80e4565d37523d9085e",
+      "exitCode": 0
+    },
+    "secrets.log": {
+      "sha256": "c0f6f6afbdef79fddec20d64ea840319bae64c96436e02590747be5e3b7d7c43",
+      "exitCode": 0
+    },
+    "environment.log": {
+      "sha256": "9162d2eeb2f369c4f55318667a2155f125901467ae023ceecb6fa6b2e504088a",
+      "exitCode": 0
+    },
+    "final-boundaries.log": {
+      "sha256": "802856fbb08863f544bb96445450835ed68e7c095f475a3e578af96bc9dd3aea",
+      "exitCode": 0
+    },
+    "final-authoritative-patterns.log": {
+      "sha256": "5150770f52c3194c8ef5b28a0a03e1c36d7ef29d1b47a697062ee4206b71d06e",
+      "exitCode": 0
+    },
+    "final-format.log": {
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "exitCode": 0
+    },
+    "final-lint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exitCode": 0
+    },
+    "strict-composition.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exitCode": 0
+    },
+    "extra-declaration-publication.log": {
+      "sha256": "4e22c14cf49e669301816c2d11e63088641ae0f5210174be013efe1886b78df7",
+      "exitCode": 2
+    },
+    "extra-declaration-financial-bridge.log": {
+      "sha256": "f84e279cc31e1da7b383d530799bc7a0bf03bbdfc065f93f4228370983932a52",
+      "exitCode": 2
+    }
+  },
+  "persistentOutputCopy": "docs/reports/start-ready-20261010/B/SOURCE_ADOPTION_PREFLIGHT_CHECKS.txt",
+  "notRun": [
+    "full suite",
+    "native PostgreSQL / external SQL",
+    "420 Office/browser matrix",
+    "positive formally adopted V2 source/seed",
+    "real financial adoption provisioning",
+    "actual private registry provisioning",
+    "production bootstrap/admission/readback",
+    "deploy",
+    "merge",
+    "push",
+    "gate or status promotion"
+  ],
+  "unchangedBoundaries": [
+    "packages/core",
+    "original financial parser/producer",
+    "private admission authority",
+    "persistence and SQL",
+    "migrations and grants",
+    "original opening source values/pins/audits",
+    "Office/host/production configuration",
+    "status/progress.json",
+    "status/decisions.json"
+  ],
+  "resultingAuthority": {
+    "sourceAdoption": "NOT_PROVISIONED",
+    "formalWorldBinding": "UNRESOLVED",
+    "formalSeed": "NOT_PRODUCED",
+    "runtimeAdmission": "NOT_GRANTED",
+    "allSixOfficesComplete": "NOT_ESTABLISHED",
+    "production": "HOLD"
+  },
+  "stop": "FROZEN_FOR_ROOT_DISPATCH_TO_INDEPENDENT_REVIEW; NOT_SELF_APPROVED"
+}
