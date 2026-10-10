@@ -1,0 +1,12 @@
+Command: pnpm exec prettier --check docs/reports/start-ready-20261010/G/F_DELTA_IMPLEMENTATION.md docs/reports/start-ready-20261010/G/F_DELTA_EVIDENCE.json && pnpm secrets:check && git diff --check
+Toolchain PATH prefix: /private/tmp/econmind-control-tower-toolchain.451x0O
+Working directory: /Users/samuel/Documents/econclub/.econmind-worktrees/g-nonactivated-runtime-api-host
+Exit code: 0
+Captured stdout/stderr:
+Checking formatting...
+All matched files use Prettier code style!
+$ node scripts/check-repository-secrets.mjs
+{
+  "status": "PASS",
+  "scannedFiles": 2403
+}

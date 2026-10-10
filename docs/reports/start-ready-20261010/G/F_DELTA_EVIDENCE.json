@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-10",
+  "timezone": "Asia/Shanghai",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "independentDeltaReview": "PENDING",
+  "worktree": "/Users/samuel/Documents/econclub/.econmind-worktrees/g-nonactivated-runtime-api-host",
+  "branch": "codex/g-executor-slices-1-2-20261010",
+  "historicalProduct": {
+    "sha": "89c4446722a22b990c410dbc5726eb1a1208fd1a",
+    "tree": "1c645b99de2cd3f608d7ebc980a2780aba320e29"
+  },
+  "parentEvidence": {
+    "sha": "324906488e2c0ca7d8be70067f55085a281ab766",
+    "tree": "b08add361aeba12ebc1583d836eca51b7b465632"
+  },
+  "review": {
+    "path": "/Users/samuel/.codex/state/plugins/codex-security/scans/g-nonactivated-runtime-api-host/artifacts-5188513d79bd81986a823019895128cbe4a8422cd6bb52fe5b000cadca2cefad/artifacts/F_G_SLICES_1_2_SOURCE_REVIEW_20261010/F_REVIEW.md",
+    "sha256": "6fd61cd4b01cd134c9bd82d6e47bd3d1bffda9dbdff43f33f4cc3bece04be157",
+    "decision": "CHANGES_REQUIRED"
+  },
+  "deltaProduct": {
+    "sha": "1bc24450aaa5323afab42c93f7d1e9e6d610f67c",
+    "tree": "5894e79078284376417193d88255a12a171910d7",
+    "fullIndexBinaryPatchSha256": "2c1965543d6c620148b017c37abff4aa950e26530413d96c90629a3b064079f0",
+    "files": 3,
+    "productFiles": 2,
+    "testFiles": 1,
+    "insertions": 537,
+    "deletions": 2,
+    "manifest": [
+      {
+        "path": "apps/world-api/src/runtime-preparation/bounded-executor-transport.ts",
+        "bytes": 23003,
+        "sha256": "3c0bd71fa8f50daa937cd0397164152e27421ba3a70a0b2676e22f18bdcf8927"
+      },
+      {
+        "path": "apps/world-api/src/runtime-preparation/current-seat-fetch-handler.ts",
+        "bytes": 4732,
+        "sha256": "374b25c3cf2f1b6d351dbc17209735b310aa8a778278ab95b1b1ce59bc0124b0"
+      },
+      {
+        "path": "tests/world-api/G-review-delta.test.ts",
+        "bytes": 14519,
+        "sha256": "d09a10c4574cad27907f25e3897b0e1224364e15a841a312913add92c5a33270"
+      }
+    ]
+  },
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "pathPrefix": "/private/tmp/econmind-control-tower-toolchain.451x0O"
+  },
+  "checks": [
+    {
+      "name": "boundaries",
+      "command": "pnpm test:boundaries",
+      "exitCode": 0,
+      "rawPath": "docs/reports/start-ready-20261010/G/f-delta-checks/boundaries.txt"
+    },
+    {
+      "name": "diff",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "rawPath": "docs/reports/start-ready-20261010/G/f-delta-checks/diff.txt"
+    },
+    {
+      "name": "environment",
+      "command": "pnpm env:check",
+      "exitCode": 0,
+      "rawPath": "docs/reports/start-ready-20261010/G/f-delta-checks/environment.txt"
+    },
+    {
+      "name": "focused",
+      "command": "pnpm exec vitest run tests/world-api/G-review-delta.test.ts tests/world-api/G-executor-transport.test.ts tests/world-api/G-completion-drain.test.ts",
+      "exitCode": 0,
+      "rawPath": "docs/reports/start-ready-20261010/G/f-delta-checks/focused.txt"
+    },
+    {
+      "name": "format",
+      "command": "pnpm exec prettier --check apps/world-api/src/runtime-preparation/bounded-executor-transport.ts apps/world-api/src/runtime-preparation/current-seat-fetch-handler.ts tests/world-api/G-review-delta.test.ts",
+      "exitCode": 0,
+      "rawPath": "docs/reports/start-ready-20261010/G/f-delta-checks/format.txt"
+    },
+    {
+      "name": "lint",
+      "command": "pnpm exec eslint apps/world-api/src/runtime-preparation/bounded-executor-transport.ts apps/world-api/src/runtime-preparation/current-seat-fetch-handler.ts tests/world-api/G-review-delta.test.ts",
+      "exitCode": 0,
+      "rawPath": "docs/reports/start-ready-20261010/G/f-delta-checks/lint.txt"
+    },
+    {
+      "name": "secrets",
+      "command": "pnpm secrets:check",
+      "exitCode": 0,
+      "rawPath": "docs/reports/start-ready-20261010/G/f-delta-checks/secrets.txt"
+    },
+    {
+      "name": "strict",
+      "command": "pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false",
+      "exitCode": 0,
+      "rawPath": "docs/reports/start-ready-20261010/G/f-delta-checks/strict.txt"
+    }
+  ],
+  "testAccounting": {
+    "focusedTests": 30,
+    "existingTransportAndDrainTests": 15,
+    "newDeltaTests": 15,
+    "matrixTestCases": 8,
+    "matrixAssertions": 432,
+    "legalMatrixControls": 28,
+    "illegalMatrixControls": 404,
+    "invalidSuccessDispatchCases": 2,
+    "preservedOutcomeTestCases": 1,
+    "preservedOutcomeControls": 6,
+    "exactBodyBoundaryCases": 4,
+    "boundaryTests": 40,
+    "totalTestCases": 70,
+    "matrixAssertionsAreNotAdditionalTestCases": true
+  },
+  "failureHistoryPath": "docs/reports/start-ready-20261010/G/f-delta-checks/failure-history.txt",
+  "priorNativeDistProvenance": {
+    "preRunExactDistManifest": "NOT_AVAILABLE_IN_PRIOR_PACKET",
+    "staleDist": "NOT_ESTABLISHED",
+    "nativeRerun": "NOT_RUN",
+    "retrospectiveCertification": "NOT_PERFORMED"
+  },
+  "limits": [
+    "New current-seat 1024 controls prove parser/JWT/SQL admission with deliberately unavailable SQL, not positive seat hydration.",
+    "New financial positive shapes are wire protocol controls, not business execution or economic settlement.",
+    "Prior native instrumentation stall root cause remains NOT_ESTABLISHED.",
+    "Arbitrary never-settling ports remain unsupported.",
+    "Current-seat six binding coverage does not establish six complete Office workflows; Industry executable family absent.",
+    "Slices3/4 HOLD; slice5/platform/mount NOT_RUN; formal preflight HOLD.",
+    "No full/420/CI/build/native/production/credentials/grants/migrations/admission/activation/merge/push/deployment in this delta."
+  ],
+  "reportAndRawManifest": [
+    {
+      "path": "docs/reports/start-ready-20261010/G/F_DELTA_IMPLEMENTATION.md",
+      "bytes": 6628,
+      "sha256": "85c18eef2e78264dee91c7bd85e0f0c7091f42710c9c57f977b178fe21554cf2"
+    },
+    {
+      "path": "docs/reports/start-ready-20261010/G/f-delta-checks/boundaries.txt",
+      "bytes": 1240,
+      "sha256": "3020531aff0cdab6bde5f4694a934e2f63c541a311daf5e2817e8061724e310f"
+    },
+    {
+      "path": "docs/reports/start-ready-20261010/G/f-delta-checks/diff.txt",
+      "bytes": 243,
+      "sha256": "cb5c8c4824bc47ade3b048b3488b1ffcf60c9b6162581059adf92e54415a5132"
+    },
+    {
+      "path": "docs/reports/start-ready-20261010/G/f-delta-checks/environment.txt",
+      "bytes": 527,
+      "sha256": "dd187fdd37d15afbd2bc344830dab97556acfaf968429ea4b6b2852091d8abe0"
+    },
+    {
+      "path": "docs/reports/start-ready-20261010/G/f-delta-checks/failure-history.txt",
+      "bytes": 1764,
+      "sha256": "01defc0754c52ce7af0220e0af8aa1db9e99c40f0aca7737199c83af30604d13"
+    },
+    {
+      "path": "docs/reports/start-ready-20261010/G/f-delta-checks/focused.txt",
+      "bytes": 608,
+      "sha256": "9f4a8774c8d88d4083d72aac14c687cf32719d494f3238617aa6908840344b2e"
+    },
+    {
+      "path": "docs/reports/start-ready-20261010/G/f-delta-checks/format.txt",
+      "bytes": 496,
+      "sha256": "3abb528493d1d87af1a6453f41514168ec1273e4546503574d94b3e71c02c91a"
+    },
+    {
+      "path": "docs/reports/start-ready-20261010/G/f-delta-checks/lint.txt",
+      "bytes": 420,
+      "sha256": "aea9429514618646aebf500fe0cd5fbafc69b3af487e0e9e858d815bd8a27882"
+    },
+    {
+      "path": "docs/reports/start-ready-20261010/G/f-delta-checks/packet.txt",
+      "bytes": 572,
+      "sha256": "87728ac657e50f3a25596c46034f90ada419a93a1299235894a5629ec50eaa92"
+    },
+    {
+      "path": "docs/reports/start-ready-20261010/G/f-delta-checks/secrets.txt",
+      "bytes": 336,
+      "sha256": "5263939de0b8908f6ec25351ae6ec9401fed7f4d0f15cc01272f762cd3a7d01c"
+    },
+    {
+      "path": "docs/reports/start-ready-20261010/G/f-delta-checks/strict.txt",
+      "bytes": 306,
+      "sha256": "48439708a78789eeee68f0cc5723b4c5e6d24c138133fe37c1665ad2233ba0c4"
+    }
+  ],
+  "packetCheck": {
+    "exitCode": 0,
+    "rawPath": "docs/reports/start-ready-20261010/G/f-delta-checks/packet.txt",
+    "scope": "reports format, final secrets and diff; manifest is mechanically inserted afterward"
+  }
+}
