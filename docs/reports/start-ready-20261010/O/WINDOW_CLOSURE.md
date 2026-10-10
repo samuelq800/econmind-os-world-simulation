@@ -26,8 +26,8 @@
 | G API/executor         | B 对 `f19e8bad` 仅设计批准切片 1/2，G 正在实施有界 raw command 转发、真实 bearer 复核、seat/recovery 及 drain。切片 3/4 的正式构造、消费、Clock 仍 HOLD。                  |
 | F 新测试构建来源       | F 在完成 C 审查后，只补 pre-build/runtime dist hash 绑定和全新隔离 PG 的 2-case 重跑；原证据不覆盖、不追认。新增量需独审。                                                 |
 | A 正式来源到 preflight | 已安排下一最小设计：复用现有可信采用与 private authority，绑定补充来源和 World；不新造权威，不把计算成功变正式 seed。此设计未批准前不改权威接入。                          |
-| 单一组合 CI            | B 正在准备无部署、无秘密的专用 CI；完整检查在一个固定组合 SHA 上集中执行，另显式检查本批严格 tsconfig。不得用路径不存在静默跳过适用检查。                                  |
-| 旧站风格迁移稿         | `d1b4c4356a718c80922e2bb42f21a31837c4d49e` 已冻结并推远端，但此前尚未独审/合并。D 已接手定向独审，与 Oct10 地图任务分开。                                                  |
+| 单一组合 CI            | 现有 Cloudflare no-deploy workflow 已自动执行完整检查；B 的新增 CI 仅补四个严格 tsconfig、D native 与固定来源收据，不再默认重复 full。不得用路径不存在静默跳过适用检查。   |
+| 旧站风格迁移稿         | `d1b4c4356a718c80922e2bb42f21a31837c4d49e` 已冻结并推远端，但此前尚未独审/合并。D 另按用户直接要求打开预览后，此窄审已转 C；与 Oct10 地图任务分开。                        |
 | Oct10 地图视觉         | 《修复 World 地图界面》仍缺连续渐暗及最终桌面/窄屏交互验收；上轮因本机断连停止。已让原窗口先确认一次连接，恢复后继续现有工作区；若仍断连则具体报告，不无界重试。           |
 
 《导出 Season1 队伍表》已交付 36 队/67 成员的私有导出并核验；无需重做。
@@ -52,3 +52,15 @@
 不得从已接入整合分支推断已发布。既有 HOLD 部署、唯一旧站数据库发布链与所有 local/CI guards 保持。
 真实补充源值/采用、正式 World/seat、最小权限/生产 prefix、staging/TLS 与完整 host/Clock/六角色闭环
 仍分别受控；不是“全部完成”或“只差开局数据”。
+
+## 后续实际结果：PR131 与首轮 CI
+
+- 已 push 固定组合 `95926300c35645d9a684ec7dedd51114e1962935`，创建 [PR131](https://github.com/samuelq800/econmind-os-world-simulation/pull/131)。应用 attachment 因已有 identity 超过 100 而失败；GitHub PR 本身已创建，URL 保留，不重复创建。
+- 自动 [run38048771913](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38048771913) 的 workerd 与 workerd-native-postgres 已 SUCCESS，atlas-candidate 亦 SUCCESS；不据此批准部署或经济启用。
+- `official-and-native-postgres` job114203506317 的首轮 `pnpm check` 在 `format:check` 失败：`C/REPORT.md` 两张 Markdown 表格未按仓库格式对齐。lint 已通过，后续 type/test/native roundtrip 未执行（SKIPPED），不记为 PASS。原 FAIL 可由固定 run/job 与原始上传日志追溯。
+- 总控只对该报告运行既有 formatter：表格空白对齐，未改变事实/产品/测试/权限或削弱检查。原候选报告原件仍在 Git `60687418`；代码/测试与已审候选仍一致，展示报告的字节不同明确保留。
+- 在 `95926300` 产品组合上，清空环境后依次实际 build Core/Worker、严格检查 A/C/D/F 四个新增 tsconfig，整个命令 exit0；没有连数据库或重复测试。此项是本地严格检查，不冒充完整 CI。
+- F 补证固定增量 `d9853754` → `23fe8e5d0b27aa72b9d6ee925c5eba76756467b4` 已交 D 窄审：153 源码输入/280 dist 绑定，新 owned PG 两例 PASS；未审增量尚未接入本 PR。
+- G 的半成品 turn 曾在 context compaction 后空消息结束；已恢复原 dirty WT，继续已批准切片 1/2，不视作完成交付。
+
+PR131 仍未 merge；先修上述格式失败并取得适用组合检查结果，不能忽略失败直接放行。
