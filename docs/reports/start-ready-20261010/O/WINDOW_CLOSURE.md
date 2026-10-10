@@ -64,3 +64,82 @@
 - G 的半成品 turn 曾在 context compaction 后空消息结束；已恢复原 dirty WT，继续已批准切片 1/2，不视作完成交付。
 
 PR131 仍未 merge；先修上述格式失败并取得适用组合检查结果，不能忽略失败直接放行。
+
+## 最后调度补充（本地记录，尚未追加推送）
+
+- 格式修复已推送为 `ed0e4df4571e30fdb8b2f3e95b43f4680c19acb8`。新的 run38049099833 及 trusted38049099688 已触发；atlas、workerd、workerd-native-postgres SUCCESS，完整 official/trusted 仍 IN_PROGRESS，不记全绿或 merge。
+- B 冻结其单独补充 CI 后，仅做一次 PR131 收口检查：全部适用检查成功且 head 精确一致才允许正常 merge；仍运行就报告 pending 后停止，失败则给具体修复项，不轮询、不强制合并。
+- C 最新实际核实旧视觉候选 29 个文件已与 main42991 逐项同内容。此前“旧视觉未合”交接描述过时；已取消重复应用/重复测试，C 只补既有 PR127/独审来源核验并停止。Oct10 地图仍是独立新变更。
+- A 来源采用/preflight 设计已冻结为 `ba92a1b7a4f1853710b1883078b1829ca6b537ff`，仅新设计文档；已交 F 独立设计审查，尚未批准实现。F 的 provenance 补证仍由 D 审增量。
+- E 因另一项 main 工作区同步请求中断设计修复；已明确使用安全独立 checkout、不碰旧登记和未审源，并继续 E-01 设计/oracle修正。
+- 地图窗口已恢复施工，报告渐暗/窄屏修复及 884 PASS/5 SKIP、类型/边界/构建/来源检查；Atlas 交互验收仍未完成。其耗时截图工具不再重试，待其冻结明确限制的候选，不将部分验证计作完整视觉收官。
+
+这次本地补记不为更新文档额外触发正在运行的完整 CI；未改变 PR131 的固定源码。
+
+## 后续增量分支（不改变 PR131）
+
+- D 已独立 APPROVED F 的 `d9853754` → `23fe8e5d` 补证增量。原报告 SHA256 `31ce032f8efcc1b6c402e9f9f4e39cb4efebd201027dd303aab32319e5c4ae78`；[格式整理展示副本](../reviews/D_F_DELTA_review.md)。9 项独立无数据库控制与原严格 TS 通过，原 2-case 新 generation 及构建次序已核实；不是重新跑 native，也不追溯升级旧运行。
+- 总控在独立 `codex/start-ready-provenance-20261010` 分支接入这两个已审增量提交，产品与测试文件保持原 bytes；不推回 PR131 分支、不重启其正在运行的完整检查。新增 helper/native 证据仅适用于其原固定 F 来源，不能声称组合树已有新 native 执行。
+- B 的补充 CI 固定为 `d4fce6646ddcf2387ae0f7e37e18a8032d7d90b7` / tree `4caf1125d4ad1a5650ad2af1d083a231c1fdde89`，10 个纯契约检查通过，已交 C 窄审。该未审候选未接入任何总控分支。
+- G 新报告：双 Node socket/rawbytes/两端 JWT/PGlite 链 9 PASS，迟到 fetch/connect 与 cleanup 控制 4 PASS；受限 native 首轮 19 项中 14 PASS/5 FAIL 原件保留。其中 fixture 的 capability/lease 问题正在按真实约束修正，recovery 缺失其他 Office seat 的真实缺陷正在改为同快照枚举/水合全部 active Office。G 尚未冻结候选，不合并、不部署、不计完成。
+- C 已完成视觉去重，核验收据 SHA256 `61f81652ce7e1c06ddeb81619c00cdb0e26c90ca98d2a4794f4fb5c533aa9604`：29/29 已在 main，由 PR127/`1222e66` 和既有 F SOURCE_ONLY APPROVED 覆盖。此次不新增批准、不重复合并。
+
+当前 PR131 仍有完整 official check IN_PROGRESS，其余四项 SUCCESS。窗口报告中的通过数属于各自固定范围；没有叠加成六角色/420/正式世界或 Gate B 完成。
+
+## PR131 正常合并与 Oct10 地图受理
+
+2026-10-10 19:56 Asia/Shanghai，PR131 正常 merge 为
+`27307a108ce5c0c3e2ce28e3776f8ba15ed73d3b`；未使用 admin、auto-merge 或绕过检查。
+固定候选 `ed0e4df4571e30fdb8b2f3e95b43f4680c19acb8`、日志实际 CI checkout
+`8b565a5949bd60278bbe0431bc2d7e4ab194ad01`、合并 main 的完整 tree 均为
+`69c04e4ca079e082e5f1bf85ce5d937ac6085b4d`。五项适用检查全部 SUCCESS。
+
+- `38049099833` 的 workerd、workerd-native-postgres、official-and-native-postgres 成功；trusted `38049099688`、atlas `38049099704` 成功。
+- 未改 `pnpm check` 的主 Vitest 集：254 files PASS /18 skipped；3194 cases PASS /163 skipped。后续 official-edge 29、boundary 40 是单独命令，不相加宣称唯一用例总数。
+- 主完整检查及 native raw artifact `11669086273`，provider ZIP digest `1a21b6ed812514ba95c084ba6c72976b18209e1c9e33574cd1c6c8c75ce5362c`；总控实际下载到 `/private/tmp/econmind-pr131-receipt.pF23Dx`。
+- 原始 `official-pnpm-check.log` SHA256 `6ec5892a9008e738ce03e5d405639cc57ff5c0d181c5ea2f1226653db0020222`；`native-authenticated-roundtrip.json` SHA256 `6891722f78b1d838d4f0e24ad4ef41e38c856fd3f48692e77ccf8f0a9dc38fe3`，实际 1 PASS /0 FAIL /0 pending。属于隔离机制，不是生产账户或正式经济运行。
+- 原首轮 `38048771913` 的格式 FAIL 及 native SKIPPED 保留；新成功不改写旧失败。Pages 发布状态未在本检查点核实；源码 merge 不冒充线上部署。
+
+独立视觉移交已受理：Oct10 tree `c518d4936c6212aa37136df5df123bdedce5b461`，
+基线 `42991ac`；原 WT 保持无新 commit 的 dirty 状态，以 tree/19-file freeze 为准。
+总控确认 tree 对象存在，完整读报告并核实报告 SHA256
+`b1d4d78d8ce04de591671454ea01accc7a7c4316a2c0154770b10da5be2fc3cf`、
+ZIP SHA256 `238cf12398505b80f2ca2dfd7981cd2b9e82e43d36743d1968808e9b6646b27f`。
+已交非实现者 A 独审真实来源、原始日志/截图、必要定向控制及与新 main/runtime 的兼容；
+不只根据 worker 自报 888 PASS/5 SKIP 批准，不重做昨日 d1b4c435，不重跑420。
+地图本批只审本地成果，不因移交自动获准 commit/push/merge/deploy。
+
+此 merge 不包含 F 新 provenance 增量、B 未审补充 CI、E/G 后继实现或上述地图。
+F 已审增量仍留在独立总控分支等待单独收口；正式源/权限/admission/经济/Clock/gate 均未因此改变。
+
+## 补充批收口及剩余窗口分工
+
+- C 已独立 APPROVED B 补充 CI `d4fce6646ddcf2387ae0f7e37e18a8032d7d90b7`；原报告 SHA256 `76e2e8558dcd7686085414d3850580166cfc6cb319a8a03c2a412a6eeaae9c7b`，展示副本 `../reviews/C_B_SUPPLEMENTAL_CI_REVIEW.md`。总控接入两个原提交为 `deb19e2`/`4231ce2`，连同此前已审 F provenance 补证组成后继 PR 候选；产品文件没有另行重写。
+- 组合后新增 CI 的纯契约实际 10 PASS/0 FAIL/0 SKIP；四个变更代码/测试文件的定向 ESLint exit0；repository secrets 检查 PASS（2414 files）。未再运行 full/native/420；四 strict 与 D native 的真正 provider 执行交由新增补充 CI，尚未运行不标 PASS。
+- 组合定向 `test:boundaries` 实际 40 PASS，两个静态 architecture 扫描 PASS；14 个变更文件 Prettier check 与 Git whitespace 检查 exit0。各命令独立报告，不把继承 F native 数或 PR131 full 数加为本组合实际运行数。
+- F 已独立批准 A 来源采用/preflight 设计 `ba92a1b7a4f1853710b1883078b1829ca6b537ff`，原报告 SHA256 `5d8603b45091137dfbd29d60459292fa93ec8ac7d29669efb7c3f4ca54c58e51`，展示副本 `../reviews/F_A_SOURCE_DESIGN_REVIEW.md`。总控明确将七项已审机械接入边界交 B 实现；不改 Core 经济算法、SQL/private authority、真实来源登记、生产权限或 gate。A 保持地图独审，不中断。
+- E 修复冻结为 `1883d65ba4756a243118e90f458b0845f698dd9a` / tree `078c05d057e64f0f63e667e5eab7fdf1c7931287`，已交 D 对 E-01 进行独立增量设计/oracle 审查。E 自报旧24/新21真实控制通过不替代独审，不发布正式 SQL 或 grants。
+- G 产品冻结为 `89c4446722a22b990c410dbc5726eb1a1208fd1a` / tree `1c645b99de2cd3f608d7ebc980a2780aba320e29`，parent `f19e8bad`，25 files。G 自报39新机制（22 native/2真实timer）、148旧回归及40boundary本地通过；最终 packet 尚在整理。已交 F 先审固定产品对象，完整 packet 到达前证据不判完成。切片3/4/5、正式 host/Clock/consumer/部署仍 HOLD。
+- C、E 已完成本轮交付，保留空闲，不为填满窗口重复检查。D/地图本地预览保持原状，旧站风格29文件已在 main，无需重合。
+
+上述审查原件与格式整理副本 hash 分别保留。一次报告归档命令的 Node 语法错误发生在读取阶段，未产生文件；修正命令后才生成副本，不属于产品或测试失败。当前后继批尚未合并 main，不冒称生产接通或正式 World 运行。
+
+## PR132 平台失败与下一批实际修复（本地待归档记录）
+
+PR132 head `5a2d7a0ca0baf92bd2843e818a6f1ab5d5c1d6cc` 已推送，tree `545d0e0991481045531cc7e803d73068e43d9728`。应用附件仍因 identity 超过100失败，PR实际存在，不重建。
+GitHub `statusCheckRollup=[]` 不等于无失败：进一步定位到 [run38050960530](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38050960530)，固定同一head，push事件，FAILURE、jobs为空；check suite `103099775241` FAILURE，check runs count0。CLI提示 workflow file issue。尚未证明具体解析原因，不把它误报为测试失败或全绿。已交 C 修确切平台上下文/语法问题，保留原失败；新固定delta需独立窄审后才更新PR，不绕过检查。
+
+- G 完整证据tip `324906488e2c0ca7d8be70067f55085a281ab766` / tree `b08add361aeba12ebc1583d836eca51b7b465632` 与产品 `89c44467` 仅17份报告/check文本差异；两份报告hash已实核。F独审 CHANGES_REQUIRED：Financial回复缺 action/state 绑定、current-seat 2048偏离批准1024。已交 G 最小修复与否定测试，新delta再交 F审。旧227本地PASS不能覆盖这两个缺陷；native构建dist来源不足等限制保留。
+- D 对 E-01 `1883d65` APPROVED，仅设计/oracle；原报告SHA `fbfefb0e2e58ea3273f18c3e2ce7503858ecae59db00352984bfdef3effc2642`。root已启动原设计 LOCAL_CANDIDATE：E 在真实隔离World schema验证三manual families原语、权限与writer/claim兼容；超出已审writer/authorization协议先补设计独审。不注册迁移，不创建生产角色，不移除admission veto。
+- A 对地图 tree `c518d493` APPROVED_SOURCE_ONLY；报告SHA `ceaf34c8e6d0a87890ac1488c4578cf3108cae28aad78dd779062426d71b6454`。地图仍本地未提交/未推送/未合并/未部署。A转向已有来源的具体 OWNER_INPUTS 收敛，避免将工程缺口或已定规则交回用户。
+- B继续已审 source/preflight接入实现，不打断。D新增仅设计的 durable private-admission revoke/commit 原子性收口，独占docs，不与B publisher V2适配、E原语或G接口代码重叠。
+
+本节为后续实际状态，保留前面每个检查点的历史原貌。当前仍未正式导入/运行World或扩张持久权限；不是“只差数据就能启动”。
+
+## 已审 CI 修复接入，继续独立审查工程
+
+- C 修复 `1d6d3355846c8db7d56fe04625177dbf21fb4527` 已获 D 独审 APPROVED，原报告 SHA256 `1a12aa760f071b23868db6503382c06668a1e28f240a752bee0f99506511229f`；仓库展示副本 `../reviews/D_PR132_CI_CONTEXT_DELTA_REVIEW.md` 格式归一，不冒充原件字节hash。root 接入原两个提交为 `8a5ffa3`/`dc0c196`，仍使用 PR132，不新建重复 PR。明确根因 job-level env 不允许 runner context，现由最前 bash step 的 RUNNER_TEMP/GITHUB_ENV 初始化路径；原其他步骤/权限/预算/四strict/D7/F NOT_RUN均不变。D 实际11纯控制、actionlint原FAIL/修PASS及失败路径验证不等于修后 provider CI；本检查点修后 CI 仍未执行。
+- F 对 G 修复产品 `1bc24450aaa5323afab42c93f7d1e9e6d610f67c` / 证据 `e70a8bcb64aab70549a9978a9e03cb4320200ef0` APPROVED，关闭 F-G-01/02，原报告 SHA256 `99006e93b1b5c0c02af6e4fea402002b2f7253373a29a0219a3930e99dbab966`。仅接受未挂载1/2和有限端口机制，旧native stall根因与dist来源缺口保留，不解锁3/4/5；root将其单独整合，不混入本CI修复PR范围。
+- B 已冻结产品 `ae4424f681414a00a6bd3fd6268ed733632690bb` / 证据 `0943142b798df8bca401f5f0987c31a7db9434ac`，已交非实施者 F 独审。132 focused/90 architecture与新strict是本地producer证据，真实formal正向尚缺；两旧配置额外第三方声明检查FAIL保留，交审判断其必要性，不伪装全绿。
+- E 真实schema integration delta `b457e44a32b90a1f3bbc82f11d8781c09e852e0d` 已交 D 独立契约审查：head-first authorization writer 与 D column-aware supervisor 兼容尚未产品实现；9诊断不能代manual原语验证。尚不扩grants、注册迁移或启用正式authority。
+- A OWNER_INPUTS两文档更新冻结 `3f9fce4965b73f6a7dcdef188d3a3a57a073fe7a`，待root核对归档；地图继续本地未发布。各工程有明确后继，不将代码未完成统称等待用户数据。

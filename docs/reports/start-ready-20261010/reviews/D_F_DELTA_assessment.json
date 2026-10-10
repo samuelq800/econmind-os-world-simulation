@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "patch": {
+    "repository": "https://github.com/samuelq800/econmind-os-world-simulation.git",
+    "sourceType": "commit_range",
+    "base": "d9853754b3eb2080a5ac4d30c71cae4db013fe0c",
+    "head": "23fe8e5d0b27aa72b9d6ee925c5eba76756467b4",
+    "changedFiles": [
+      "tests/support/f-v09-dist-provenance.mjs",
+      "tests/world-core/f-v09-native-claim-recovery.test.ts",
+      "docs/reports/start-ready-20261010/F/V09_PROVENANCE_REPAIR.md"
+    ],
+    "sha256": "e2c8ae2e1f49e18b397f81ec4b9fdf543d541be742d694656f521f985a86e0ab"
+  },
+  "recommendation": "merge",
+  "workflowLabel": "human_review_required",
+  "impact": {
+    "rating": "high",
+    "rationale": "P0 recovery acceptance evidence can mislead downstream privileged runtime decisions if provenance is wrong; actual delta adds a test guard only and does not alter production execution."
+  },
+  "regressionLikelihood": {
+    "rating": "low",
+    "rationale": "Three-file delta; original assertions unchanged; source/dist manifest exactly reproduced in isolated copy; positive and six rejection controls pass; original native result and shutdown are independently bound."
+  },
+  "regressionProtection": {
+    "rating": "partial",
+    "rationale": "Independent exact-tip helper controls and strict TS test-graph check pass; two native cases ran at code commit 86af039 with identical complete executable inputs at final documentation-only tip. No native/full rerun, hermetic dependency proof, populated settlement, production or TLS checks.",
+    "exactHeadChecksPassed": true
+  },
+  "recoverability": {
+    "rating": "easy",
+    "rationale": "Revert three test/evidence files; no production migration or incompatible persisted state introduced; owned native cluster is stopped and retained."
+  },
+  "confidence": {
+    "rating": "high",
+    "rationale": "Immutable commits/tree/diff, all seven evidence hashes, source/dist binding, original tool-command ordering, pre/post readback, current stopped control data and focused failure controls verified."
+  },
+  "applicability": {
+    "status": "confirmed",
+    "rationale": "The helper is called by F native test before connect()/SQL when the explicit owned-generation flag is enabled; no production callers found."
+  },
+  "statusQuoRisk": {
+    "rating": "moderate",
+    "rationale": "Base native evidence lacks pre-run dist binding; retaining it alone leaves the known provenance limitation unresolved."
+  },
+  "autoMergeExclusions": ["other"],
+  "affectedRuntimeRoots": [
+    "tests/world-core/f-v09-native-claim-recovery.test.ts beforeAll; test-only privileged disposable PostgreSQL harness"
+  ],
+  "importantCallers": [
+    "assertFNativeBuildProvenance -> captureFNativeBuildProvenance -> local Git object/file hashing and import.meta.resolve; then existing test connect()/identity guard"
+  ],
+  "riskDrivers": [
+    "P0 evidence integrity",
+    "Hash capture alone does not prove compilation occurred",
+    "JS helper uses unchanged checkJs=false; strict TS proof applies to test/import graph, not independently strict JS"
+  ],
+  "protectiveFactors": [
+    "Only guard/helper/docs changed",
+    "No network or SQL in helper",
+    "Real source bytes checked against Git blobs",
+    "Exact manifest bytes checked before fresh capture deep equality",
+    "All dist regular files recursively hashed; symlinks rejected",
+    "Actual resolved Core export constrained to owned checkout",
+    "Fresh generation identity and stopped state verified"
+  ],
+  "materialBoundaries": [
+    {
+      "id": "manifest-source-dist",
+      "invariant": "Actual source and complete generated-file set must match pinned manifest before database access.",
+      "runtimeRoot": "native test beforeAll -> helper",
+      "counterexample": "Wrong/missing expected hash, old source commit, or extra dist file; helper must reject.",
+      "legitimateControl": "Exact 153-source/280-dist capture equals c9c4c953... manifest and valid assertion succeeds. Independent isolated controls reject all counterexamples.",
+      "result": "supported"
+    },
+    {
+      "id": "filesystem-runtime-export",
+      "invariant": "Manifest/source files and dist must not silently redirect identity; actual Core export must resolve inside owned checkout.",
+      "runtimeRoot": "helper realpath/lstat/walk/import.meta.resolve",
+      "counterexample": "Dist symlink or root Core package redirected to subject checkout; rejected, runtime redirection tested in fresh process to avoid resolver cache.",
+      "legitimateControl": "Original regular dist and local Core export accepted; restored copy again equals manifest.",
+      "result": "supported"
+    },
+    {
+      "id": "build-and-run-generation",
+      "invariant": "Fresh compile and manifest capture precede native run on a new owned generation; shutdown evidence binds same identity.",
+      "runtimeRoot": "F producer invocation -> beforeAll -> existing SQL harness",
+      "counterexample": "Old ignored dist reuse or old cluster relabeling as fresh.",
+      "legitimateControl": "Original tool history moves prior dist, asserts outputs absent, Core build index52 and Worker build54 pass, capture57 precedes native64; system7694999330990948403 differs from prior generation, pre-empty schema and post results bind same server, pg_controldata reports shut down.",
+      "result": "supported"
+    },
+    {
+      "id": "acceptance-authority",
+      "invariant": "Two synthetic claim cases cannot authorize production activation, six roles or Gate B.",
+      "runtimeRoot": "provenance repair report and retained native result",
+      "counterexample": "Treating native 2 PASS as populated settlement, TLS or production acceptance.",
+      "legitimateControl": "Report explicitly preserves historical gaps and marks preparation-only; current review approves only exact provenance delta.",
+      "result": "supported"
+    }
+  ],
+  "validation": [
+    {
+      "name": "Exact identity and full-index delta",
+      "status": "passed",
+      "protects": "Two commits 86af039/23fe8e5, tree92ad0db, three files, clean subject, patch SHA e2c8ae2e verified."
+    },
+    {
+      "name": "Original evidence hashes and native result",
+      "status": "passed",
+      "protects": "Seven raw package hashes match report; NATIVE_RESULTS has two passed assertions, zero failed/pending; report hash2b168a47 matches."
+    },
+    {
+      "name": "Original build ordering and generation evidence",
+      "status": "passed",
+      "protects": "Producer tool history directly retrieved; both fresh builds precede capture and native; original pre/post read-only and stop match current control data."
+    },
+    {
+      "name": "Independent isolated helper controls",
+      "status": "passed",
+      "protects": "Nine checks: exact capture, valid manifest, wrong/missing hash, old source identity, extra dist file, symlink, redirected export, restored capture; zero DB connections, network denied, disposable-only writes."
+    },
+    {
+      "name": "Strict native-test TS graph",
+      "status": "passed",
+      "protects": "Pinned Node24.20.0, original strict config and skipLibCheck=false; isolated first attempt lacked dependency linkage, after linking existing core dependencies final exit0. JS checkJs=false unchanged."
+    },
+    {
+      "name": "Native/full/420/production rerun",
+      "status": "skipped",
+      "protects": "Explicit narrow review constraint; inherits exact original two native cases only, no repeated database writes or production access."
+    }
+  ],
+  "unknowns": [
+    {
+      "summary": "Dependency packages and compiler installation are version/lock pinned, not cryptographically hermetic; capture is hash binding, not compilation attestation.",
+      "decisionCritical": false
+    },
+    {
+      "summary": "TLS, populated settlement, formal users/six offices and Gate B remain outside this delta and unapproved.",
+      "decisionCritical": false
+    }
+  ],
+  "evidencePlan": []
+}

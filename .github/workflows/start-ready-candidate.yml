@@ -1,0 +1,129 @@
+name: Start-ready supplemental candidate (no deploy, no full rerun)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/start-ready-candidate.yml
+      - tests/support/start-ready-candidate-ci.mjs
+      - tests/support/start-ready-candidate-ci.test.mjs
+      - tests/support/start-ready-postgres.mjs
+      - tests/support/start-ready-postgres.test.mjs
+      - apps/world-worker/src/preparation/formal-financial-opening-contract.ts
+      - apps/world-worker/src/preparation/formal-financial-opening-producer.ts
+      - tests/support/tsconfig.formal-financial-opening.json
+      - tests/world-core/formal-financial-opening.test.ts
+      - apps/world-web/src/country-runtime/entry.ts
+      - apps/world-web/src/office-command/client.ts
+      - apps/world-web/src/office-command/contract.ts
+      - apps/world-web/src/office-command/controller.ts
+      - apps/world-web/src/office-command/view.ts
+      - apps/world-web/src/trusted-host/bootstrap.ts
+      - apps/world-web/src/trusted-host/formal-session-adapter.ts
+      - tests/world-web/formal-session-adapter.test.ts
+      - tests/world-web/office-command-fixture.ts
+      - tests/world-web/office-command-schema.test.ts
+      - tests/world-web/office-command.test.ts
+      - tests/world-web/office-command.tsconfig.json
+      - apps/world-worker/src/runtime-preparation/writer-lease-supervisor.ts
+      - tests/world-core/writer-lease-supervisor-postgres.test.ts
+      - tests/world-core/writer-lease-supervisor.test.ts
+      - tests/world-core/writer-lease-supervisor.tsconfig.json
+      - tests/support/f-v09-source-inheritance.mjs
+      - tests/support/f-v09-dist-provenance.mjs
+      - tests/support/tsconfig.f-v09-native-claim.json
+      - tests/world-core/f-v09-native-claim-recovery.test.ts
+      - docs/reports/start-ready-20261010/A/**
+      - docs/reports/start-ready-20261010/C/**
+      - docs/reports/start-ready-20261010/D/**
+      - docs/reports/start-ready-20261010/F/**
+      - docs/reports/start-ready-20261010/B/UNIFIED_CI_IMPLEMENTATION.md
+
+permissions:
+  contents: read
+
+jobs:
+  combined-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      ECONMIND_ENV: ci
+    steps:
+      - name: Set runner-local evidence directory
+        shell: bash
+        run: |
+          printf 'CI_EVIDENCE_DIRECTORY=%s/start-ready-candidate\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+          run_install: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - name: Bind actual checkout and require the combined inputs
+        id: inputs
+        run: node tests/support/start-ready-candidate-ci.mjs initialize
+      - name: Install frozen dependencies
+        id: install
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm install --frozen-lockfile 2>&1 | tee "$CI_EVIDENCE_DIRECTORY/install.log"
+      - name: Pure CI contract tests
+        id: ci_contract
+        shell: bash
+        run: |
+          set -o pipefail
+          node --test tests/support/start-ready-candidate-ci.test.mjs tests/support/start-ready-postgres.test.mjs 2>&1 | tee "$CI_EVIDENCE_DIRECTORY/ci-contract.log"
+      - name: Build only shared Core and Worker dependencies
+        id: build
+        run: node tests/support/start-ready-candidate-ci.mjs build
+      - name: Strictly check all four additional configs
+        id: strict_types
+        if: always() && steps.inputs.outcome == 'success' && steps.install.outcome == 'success' && steps.build.outcome == 'success'
+        run: node tests/support/start-ready-candidate-ci.mjs types
+      - name: Start runner-owned loopback-only PostgreSQL 16.15
+        id: pg_start
+        if: always() && steps.inputs.outcome == 'success' && steps.install.outcome == 'success' && steps.build.outcome == 'success'
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/support/start-ready-postgres.mjs start 2>&1 | tee "$CI_EVIDENCE_DIRECTORY/postgres-start.log"
+      - name: D supervisor on guarded fresh disposable PostgreSQL
+        id: native_d
+        if: always() && steps.inputs.outcome == 'success' && steps.install.outcome == 'success' && steps.build.outcome == 'success' && steps.pg_start.outcome == 'success'
+        env:
+          V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
+          V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09_d_supervisor_ci
+        run: node tests/support/start-ready-candidate-ci.mjs native-d
+      - name: Always stop only this runner-owned cluster
+        id: pg_stop
+        if: always() && steps.inputs.outcome == 'success'
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/support/start-ready-postgres.mjs stop 2>&1 | tee "$CI_EVIDENCE_DIRECTORY/postgres-stop.log"
+      - name: Finalize actual-source receipt and raw-log digests
+        if: always()
+        env:
+          INPUTS_OUTCOME: ${{ steps.inputs.outcome }}
+          INSTALL_OUTCOME: ${{ steps.install.outcome }}
+          CI_CONTRACT_OUTCOME: ${{ steps.ci_contract.outcome }}
+          BUILD_OUTCOME: ${{ steps.build.outcome }}
+          STRICT_TYPES_OUTCOME: ${{ steps.strict_types.outcome }}
+          NATIVE_D_OUTCOME: ${{ steps.native_d.outcome }}
+          PG_START_OUTCOME: ${{ steps.pg_start.outcome }}
+          PG_STOP_OUTCOME: ${{ steps.pg_stop.outcome }}
+        run: node tests/support/start-ready-candidate-ci.mjs finalize
+      - name: Always retain raw logs and receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: start-ready-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.CI_EVIDENCE_DIRECTORY }}
+          if-no-files-found: error
