@@ -111,3 +111,15 @@ ZIP SHA256 `238cf12398505b80f2ca2dfd7981cd2b9e82e43d36743d1968808e9b6646b27f`。
 
 此 merge 不包含 F 新 provenance 增量、B 未审补充 CI、E/G 后继实现或上述地图。
 F 已审增量仍留在独立总控分支等待单独收口；正式源/权限/admission/经济/Clock/gate 均未因此改变。
+
+## 补充批收口及剩余窗口分工
+
+- C 已独立 APPROVED B 补充 CI `d4fce6646ddcf2387ae0f7e37e18a8032d7d90b7`；原报告 SHA256 `76e2e8558dcd7686085414d3850580166cfc6cb319a8a03c2a412a6eeaae9c7b`，展示副本 `../reviews/C_B_SUPPLEMENTAL_CI_REVIEW.md`。总控接入两个原提交为 `deb19e2`/`4231ce2`，连同此前已审 F provenance 补证组成后继 PR 候选；产品文件没有另行重写。
+- 组合后新增 CI 的纯契约实际 10 PASS/0 FAIL/0 SKIP；四个变更代码/测试文件的定向 ESLint exit0；repository secrets 检查 PASS（2414 files）。未再运行 full/native/420；四 strict 与 D native 的真正 provider 执行交由新增补充 CI，尚未运行不标 PASS。
+- 组合定向 `test:boundaries` 实际 40 PASS，两个静态 architecture 扫描 PASS；14 个变更文件 Prettier check 与 Git whitespace 检查 exit0。各命令独立报告，不把继承 F native 数或 PR131 full 数加为本组合实际运行数。
+- F 已独立批准 A 来源采用/preflight 设计 `ba92a1b7a4f1853710b1883078b1829ca6b537ff`，原报告 SHA256 `5d8603b45091137dfbd29d60459292fa93ec8ac7d29669efb7c3f4ca54c58e51`，展示副本 `../reviews/F_A_SOURCE_DESIGN_REVIEW.md`。总控明确将七项已审机械接入边界交 B 实现；不改 Core 经济算法、SQL/private authority、真实来源登记、生产权限或 gate。A 保持地图独审，不中断。
+- E 修复冻结为 `1883d65ba4756a243118e90f458b0845f698dd9a` / tree `078c05d057e64f0f63e667e5eab7fdf1c7931287`，已交 D 对 E-01 进行独立增量设计/oracle 审查。E 自报旧24/新21真实控制通过不替代独审，不发布正式 SQL 或 grants。
+- G 产品冻结为 `89c4446722a22b990c410dbc5726eb1a1208fd1a` / tree `1c645b99de2cd3f608d7ebc980a2780aba320e29`，parent `f19e8bad`，25 files。G 自报39新机制（22 native/2真实timer）、148旧回归及40boundary本地通过；最终 packet 尚在整理。已交 F 先审固定产品对象，完整 packet 到达前证据不判完成。切片3/4/5、正式 host/Clock/consumer/部署仍 HOLD。
+- C、E 已完成本轮交付，保留空闲，不为填满窗口重复检查。D/地图本地预览保持原状，旧站风格29文件已在 main，无需重合。
+
+上述审查原件与格式整理副本 hash 分别保留。一次报告归档命令的 Node 语法错误发生在读取阶段，未产生文件；修正命令后才生成副本，不属于产品或测试失败。当前后继批尚未合并 main，不冒称生产接通或正式 World 运行。
