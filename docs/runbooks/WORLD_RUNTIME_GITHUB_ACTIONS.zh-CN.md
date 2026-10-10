@@ -23,21 +23,27 @@ CI 安装 Supabase CLI2.115.0 并只检查版本，安装隔离的 Wrangler4.148
 
 ## 账号负责人配置一次
 
-本轮现有 GitHub 凭证尝试创建环境时返回403，环境及变量未创建。需要有仓库
-管理权限的人完成以下设置；World 同伴改源码、提交 PR、看验证不受此影响。
+早期现有 GitHub 凭证尝试创建环境时返回403。账号负责人已完成配置；
+2026-10-10（Asia/Shanghai）实际读回确认环境存在，部署策略仅允许 Branch `main`，
+仓库级 Secret 和账号变量均已保存。Token 的实际权限仍须由发布运行验证。
+World 同伴改源码、提交 PR、看验证不受此影响。
 
 在此仓库 Settings → Environments 创建 **world-cloudflare-hold**，部署分支
 仅允许 `main`；发布环境使用：
 
-| 类型                 | 名称                    | 内容                               |
-| -------------------- | ----------------------- | ---------------------------------- |
-| Environment secret   | `CLOUDFLARE_API_TOKEN`  | 专用 Cloudflare Workers 发布 Token |
-| Environment variable | `CLOUDFLARE_ACCOUNT_ID` | `9bad0b638402dc39700132716e3b312c` |
+| 类型                | 名称                    | 内容                               |
+| ------------------- | ----------------------- | ---------------------------------- |
+| Repository secret   | `CLOUDFLARE_API_TOKEN`  | 专用 Cloudflare Workers 发布 Token |
+| Repository variable | `CLOUDFLARE_ACCOUNT_ID` | `9bad0b638402dc39700132716e3b312c` |
+
+当前发布环境没有同名 Secret/variable，工作流使用上述仓库级配置。
+也可将凭据放到同名 Environment 配置中；同名环境配置会覆盖仓库配置，
+需要核对实际使用值，不能留下互相矛盾的副本。
 
 Token 使用 Cloudflare 当前 Workers 部署授权方式，仅授权上述账号及这两个
 Worker；按平台支持的粒度授予所需编辑权限。不要上传本机 OAuth 登录缓存。
-创建入口：Cloudflare 头像 → My Profile → API Tokens → Create Token；创建
-专用 Workers 部署 Token 后，直接保存到上表的 Environment secret。
+创建入口按 Cloudflare 当前 API Token 控制台为准；创建专用 Workers 部署
+Token 后，直接保存到上表的 Secret。
 Token 不写源码、聊天、构件或前端变量；主仓库已有 Secrets 不能从 GitHub
 读回明文或自动继承到另一仓库。
 

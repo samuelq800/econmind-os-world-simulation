@@ -1,0 +1,49 @@
+{
+  "schema_version": "WORLD_HOLD_CONFIGURATION_READBACK_V1",
+  "readback_date": "2026-10-10",
+  "timezone": "Asia/Shanghai",
+  "repository": "samuelq800/econmind-os-world-simulation",
+  "candidate": "d023d343a598d2ee570423632cb0df45759fba41",
+  "environment": {
+    "name": "world-cloudflare-hold",
+    "get_http_status": 200,
+    "deployment_branch_policy": {
+      "protected_branches": false,
+      "custom_branch_policies": true
+    },
+    "allowed_deployment_branches": [{ "name": "main", "type": "branch" }],
+    "required_reviewers_configured": false,
+    "environment_secret_names": [],
+    "environment_variable_names": []
+  },
+  "repository_configuration": {
+    "secret_name": "CLOUDFLARE_API_TOKEN",
+    "secret_present": true,
+    "secret_value_read": false,
+    "account_variable_name": "CLOUDFLARE_ACCOUNT_ID",
+    "account_variable_value": "9bad0b638402dc39700132716e3b312c",
+    "account_matches_reviewed_release": true,
+    "actual_token_validity": "NOT_RUN",
+    "actual_token_permissions": "NOT_RUN"
+  },
+  "prepublication_runtime": {
+    "health_http_status": 200,
+    "health_status": "ALIVE_NOT_ACTIVATED",
+    "readiness_http_status": 503,
+    "executor_transport": "ALIVE_HOLD",
+    "runtime_mode": "HOLD",
+    "database_connected": false,
+    "simulation_enabled": false,
+    "clock_enabled": false,
+    "authoritative_commands_enabled": false
+  },
+  "publication": "NOT_RUN_AT_CONFIGURATION_READBACK",
+  "authority": {
+    "user_instruction": "授权独立审查 agent，通过后继续发布",
+    "scope": "Independent review of PR129, then merge and manually publish the reviewed HOLD release only.",
+    "production_database_mutation": false,
+    "economic_activation": false,
+    "global_execution_gate_changed": false
+  },
+  "note": "Configuration metadata is not evidence of actual Cloudflare Token permissions or a successful publication. Historical missing-credential and HTTP403 reports remain valid records of their earlier attempts."
+}
