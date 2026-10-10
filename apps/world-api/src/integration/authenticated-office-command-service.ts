@@ -1,3 +1,4 @@
+import { trackRequestCompletion } from '../runtime-preparation/request-completion.js';
 import {
   DomainError,
   authSubject,
@@ -257,7 +258,7 @@ export function createAuthenticatedOfficeCommandService(
       }
     }
     try {
-      return await Promise.race([execute(), cancelled]);
+      return await Promise.race([trackRequestCompletion(execute()), cancelled]);
     } finally {
       clearTimeout(timer);
       controller.signal.removeEventListener('abort', onAbort);

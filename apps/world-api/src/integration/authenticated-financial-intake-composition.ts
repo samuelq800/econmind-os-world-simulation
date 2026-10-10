@@ -1,3 +1,4 @@
+import { trackRequestCompletion } from '../runtime-preparation/request-completion.js';
 import { createHash } from 'node:crypto';
 import type { Pool } from 'pg';
 import {
@@ -306,7 +307,7 @@ export function createAuthenticatedFinancialIntakeComposition(
       }
     }
     try {
-      return await Promise.race([execute(), cancelled]);
+      return await Promise.race([trackRequestCompletion(execute()), cancelled]);
     } finally {
       clearTimeout(timer);
       controller.signal.removeEventListener('abort', onAbort);
