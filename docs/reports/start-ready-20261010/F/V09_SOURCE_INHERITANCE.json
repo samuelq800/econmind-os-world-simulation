@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "F_V09_SOURCE_INHERITANCE-1",
+  "classification": "BLOB_IDENTITY_ONLY_NOT_REEXECUTION_OR_GATE_APPROVAL",
+  "workflowHead": "7ad2313cedb26fe1ff8e854208c1965d3a80bb9b",
+  "evidenceCheckout": "ac3123ed43864a4e5214bb907f62e1b73fadb4be",
+  "baseline": "42991acfee9d0eacc702ba47a380c938a4516f03",
+  "baselineTree": "1254c4144279717c9075e9bbf07b4b2ac4710558",
+  "scopes": [
+    "packages/core",
+    "packages/testkit",
+    "apps/world-worker",
+    "apps/world-api",
+    "tests/world-core",
+    "tests/property",
+    "tests/support",
+    "tests/fixtures",
+    "scripts",
+    ".github/workflows/v09-postgres.yml",
+    ".github/workflows/v09-renewal-supplement.yml",
+    "database",
+    "pnpm-lock.yaml",
+    "package.json",
+    "tsconfig.base.json",
+    "vitest.config.ts",
+    "pnpm-workspace.yaml"
+  ],
+  "identicalCount": 516,
+  "identicalIndexSha256": "385919f491b018c21964e06a1781fb058c9b02aa2b0d1fea136df37957253ea0",
+  "changed": [
+    {
+      "path": "scripts/world-runtime-actions.mjs",
+      "blob": "0a069d0090af327cf4b37b12d86ab82c3d8aca05"
+    }
+  ],
+  "deleted": [],
+  "critical": [
+    {
+      "path": "tests/world-core/v10.4-local-acceptance.test.ts",
+      "evidenceBlob": "15f6d0064dbf0cc78c4d0bb6c058ac75fdb9b038",
+      "baselineBlob": "15f6d0064dbf0cc78c4d0bb6c058ac75fdb9b038",
+      "sha256": "32aee1b0109978ec2d764e4d03eebed29b18b56ee34cae0dd1d0bd28b79b29cf"
+    },
+    {
+      "path": "tests/world-core/v09-atomic-recovery-postgres.test.ts",
+      "evidenceBlob": "f0889bf4ba9af5de7e20ea2623d0b1eeac77324d",
+      "baselineBlob": "f0889bf4ba9af5de7e20ea2623d0b1eeac77324d",
+      "sha256": "d6055b1864135809f771bfa4c95785703950f008047346361b92911b4ebbe936"
+    },
+    {
+      "path": "tests/world-core/v09-world-recovery-preparation.test.ts",
+      "evidenceBlob": "f059e5b037cbdeb1e4f5cb5c3509d25377968816",
+      "baselineBlob": "f059e5b037cbdeb1e4f5cb5c3509d25377968816",
+      "sha256": "a9a2c0cabf9c190452ac58a878286971a9840c284c4b800ebe9d017378d83011"
+    },
+    {
+      "path": "tests/world-core/world-writer-lease-renewal-postgres.test.ts",
+      "evidenceBlob": "23c2fc143171353f2ab31b83aecd0416b1f16435",
+      "baselineBlob": "23c2fc143171353f2ab31b83aecd0416b1f16435",
+      "sha256": "af33ae3db413ae863684b17add039e89218feabb2b04e9bbf12d7c1b68c2ba67"
+    },
+    {
+      "path": "tests/support/renewal-frozen-migration-fixture.ts",
+      "evidenceBlob": "06ed277a888639a48d923f54d71eec7d2c7684c5",
+      "baselineBlob": "06ed277a888639a48d923f54d71eec7d2c7684c5",
+      "sha256": "98be6c7203f5e6c46733bdfe205f9c7d336a248395b719bd71c65e9a2b6ee9fc"
+    },
+    {
+      "path": "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+      "evidenceBlob": "c65906faf022f6529fb5ca76c95f53d76a43e3c1",
+      "baselineBlob": "c65906faf022f6529fb5ca76c95f53d76a43e3c1",
+      "sha256": "9f3db3c8fc7a243dca2195e13cd3c46573df19d7294eae1574408c9432fb9eaf"
+    },
+    {
+      "path": "apps/world-worker/src/persistence/postgres-sql-database.ts",
+      "evidenceBlob": "2f45f56e9db5557eccfd8e7db779ba66e7a7eea5",
+      "baselineBlob": "2f45f56e9db5557eccfd8e7db779ba66e7a7eea5",
+      "sha256": "521dcf90b7ac1a77aff2f0275858706a115da8b56d765fec26f28c4e8d7ab1bb"
+    },
+    {
+      "path": "apps/world-worker/src/recovery/world-recovery.ts",
+      "evidenceBlob": "8546f423fb53ee78ccc42fe4aaeee811d7bffd45",
+      "baselineBlob": "8546f423fb53ee78ccc42fe4aaeee811d7bffd45",
+      "sha256": "02592424a8a7dd01ed0745b70f3af8cd086dcc823ab5bc7eeac6906939f3945c"
+    }
+  ],
+  "migrationManifestSha256": "e675bd8bd18ba6c51aeffa674320dba3ac79299b7e12eeef834fe28547f9025e",
+  "nativePrefix": [
+    {
+      "path": "database/migrations/artifacts/0001_world_v2_namespace.sql",
+      "sha256": "ad60fc9b95332c65301409f64d05e115816d3928fb3615e8232ddb1b94f536ad",
+      "sourceCommit": "43739ceb38c167c44e806361930b7603360647c3"
+    },
+    {
+      "path": "database/migrations/artifacts/0002_world_v2_command_event_ledger.sql",
+      "sha256": "92915905a159961ac0f8eb70f509501cf7697519471c1b84f832ef224cf87695",
+      "sourceCommit": "b8c8555bac1f5e8d36d1f147732a691f248431f8"
+    },
+    {
+      "path": "database/migrations/artifacts/0003_world_v2_command_receipts_outbox.sql",
+      "sha256": "fe8d6b6849b4ceb5a85789fff34bd2ed47cf7d07d662883dd0c345e88ad9255e",
+      "sourceCommit": "f589c8fba2e4e2a5686d8a1c4ded60a8688056fa"
+    },
+    {
+      "path": "database/migrations/artifacts/0004_world_v2_receipt_event_set_integrity.sql",
+      "sha256": "28bb8ff195d9c09b0cafcab79eb4a28868a1bf0170c7065fc4913a428bc17943",
+      "sourceCommit": "6f919d3a20835da39a042ee7863d849f140f4e0c"
+    },
+    {
+      "path": "database/migrations/artifacts/0005_world_v2_writer_lease_fencing.sql",
+      "sha256": "1559a0a44c82f55005a0209b9b2a64095625c384e39ed0999e1a44e573ba3cb3",
+      "sourceCommit": "7102cd3c3ba80cd2468032c3d4776a871dec515d"
+    },
+    {
+      "path": "database/migrations/artifacts/0006_world_v2_writer_lease_lineage_guard.sql",
+      "sha256": "8ee4a6b01d2916665fc9793a24bbdb9675afc216a6aaa64ae84e67cb44fa66f8",
+      "sourceCommit": "8ef4390beaa877aa3e3d971a4bb0587a0c7592bd"
+    },
+    {
+      "path": "database/migrations/artifacts/0007_world_v2_atomic_transition_facts.sql",
+      "sha256": "4f91759a05092b3d9432b3743ad2a4abddb20e5730eb02450ffa96c15d982a61",
+      "sourceCommit": "080502fdc5615a05910120c9170adaf113ad0ce0"
+    },
+    {
+      "path": "database/migrations/artifacts/0008_world_v2_materialization_recovery.sql",
+      "sha256": "f35ccc9273e94766a942d9b50ed87cf2fa32387993be44ee562a4853d400a1bb",
+      "sourceCommit": "81a0022be738f8720dc5f9ca379d6556943adede"
+    },
+    {
+      "path": "database/migrations/artifacts/0009_world_v2_posting_payload_integrity.sql",
+      "sha256": "88d54a0abccc91e23a1384c5cff4fe2918671169db6e2c67fc9a6440a6cdfa11",
+      "sourceCommit": "49c31cb0cac61e6b77fb41a915cc33f0fee10c4a"
+    },
+    {
+      "path": "database/migrations/artifacts/0010_world_v2_command_claim_fencing.sql",
+      "sha256": "7131f64afd486e26fe038839448dcb9f5df117a75d7265b453ca55b851fb1447",
+      "sourceCommit": "6276fbd8a53447be7e015e275b4d57725e41e98a"
+    },
+    {
+      "path": "database/migrations/artifacts/0011_world_v2_current_commit_authorization.sql",
+      "sha256": "89d7c6c3ae977fa835af6f3aa8d5dea012dee4a77f0ee38a0e7cc434d7373722",
+      "sourceCommit": "f86167afad56d3f27537df8e88131aa02b4bb0a8"
+    },
+    {
+      "path": "database/migrations/artifacts/0012_world_v2_command_claim_active_lease_guard.sql",
+      "sha256": "01bef128971818338cbb9e54eca010ac24d5585e035b9d1bd17373ab1e0677f9",
+      "sourceCommit": "f86167afad56d3f27537df8e88131aa02b4bb0a8"
+    }
+  ]
+}
