@@ -9,6 +9,20 @@ API/executor 托管验证与发布；正式 Supabase schema、账号授权和准
 托管的 `e7ecf45184baad69a37e2e51fff8862a635267dc`，而非触发分支的任意代码。
 API/executor bundle SHA-256 必须与既有正式 HOLD 发布回执一致。
 
+## 当前交付状态（2026-10-10）
+
+PR129 已通过 P0 独立审查并合入 main。首次 main 手动发布
+[Actions38028232852](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38028232852)
+已成功：完整检查3092通过、154跳过，20项发布守卫和11项真实 workerd 检查通过，
+内部 executor 与 API 的实际部署均获确认，Token 的实际读写部署能力已验证。
+公开 API `/healthz` 为200，`/readyz` 为503，executorTransport 为 ALIVE_HOLD；
+503是当前未启用经济世界的预期状态。完整可追溯回执见
+[PUBLICATION_2026_10_10.json](../reports/world-actions/PUBLICATION_2026_10_10.json)。
+
+同伴同步 main 后可以修改源码、提交 PR 和运行验证，无需登录 Cloudflare。
+当前交付完成的是可重复 HOLD 托管发布；数据库仍未连接，经济命令、模拟与 Clock
+仍关闭，开局和正式经济 gate 尚未完成。源码变更的发布方式见下文。
+
 ## 不需要密钥的部分
 
 PR 自动运行完整调用者检查及打包验证；手动运行默认 `publish_hold=false`。
@@ -25,7 +39,8 @@ CI 安装 Supabase CLI2.115.0 并只检查版本，安装隔离的 Wrangler4.148
 
 早期现有 GitHub 凭证尝试创建环境时返回403。账号负责人已完成配置；
 2026-10-10（Asia/Shanghai）实际读回确认环境存在，部署策略仅允许 Branch `main`，
-仓库级 Secret 和账号变量均已保存。Token 的实际权限仍须由发布运行验证。
+仓库级 Secret 和账号变量均已保存。随后首次发布已验证两个目标所需的实际权限；
+完整 Token 权限清单没有读回，不据此宣称 Token 只有这两项资源权限。
 World 同伴改源码、提交 PR、看验证不受此影响。
 
 在此仓库 Settings → Environments 创建 **world-cloudflare-hold**，部署分支

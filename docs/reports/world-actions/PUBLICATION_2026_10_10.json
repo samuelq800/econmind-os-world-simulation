@@ -1,0 +1,127 @@
+{
+  "schema_version": "WORLD_HOLD_ACTIONS_PUBLICATION_V1",
+  "status": "PASS_HOLD_ONLY",
+  "completed_at_utc": "2026-10-10T05:59:25Z",
+  "timezone": "Asia/Shanghai",
+  "repository": "samuelq800/econmind-os-world-simulation",
+  "pipeline": {
+    "pull_request": "https://github.com/samuelq800/econmind-os-world-simulation/pull/129",
+    "merge_commit": "bd001cb3ea4e7ff2629eda28afc88f28af331126",
+    "independent_review_candidate": "d023d343a598d2ee570423632cb0df45759fba41",
+    "independent_review": "APPROVED",
+    "review_file": "docs/reports/world-actions/INDEPENDENT_REVIEW_2026_10_10.md",
+    "run_id": 38028232852,
+    "run_url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38028232852",
+    "event": "workflow_dispatch",
+    "ref": "refs/heads/main",
+    "publish_hold": true,
+    "confirmation": "PUBLISH_REVIEWED_HOLD",
+    "conclusion": "success",
+    "jobs": {
+      "caller-check": "success",
+      "prepare": "success",
+      "publish": "success"
+    }
+  },
+  "validation": {
+    "unmodified_pnpm_check_exit_code": 0,
+    "full_check_runner": "macos-15",
+    "tests_passed": 3092,
+    "tests_failed": 0,
+    "tests_skipped": 154,
+    "test_duration_seconds": 986.69,
+    "release_guards_passed": 20,
+    "real_linux_workerd_checks_passed": 11,
+    "workerd_disposed": true,
+    "downloaded_bundle_verification": "PASS",
+    "repeated_edge_and_boundary_tests_added_to_unique_count": false,
+    "native_production_postgres_tested": false,
+    "historical_linux_node_bootstrap_failures_closed": false
+  },
+  "source": {
+    "commit": "e7ecf45184baad69a37e2e51fff8862a635267dc",
+    "tree": "8ac834bca15b11ef517154133c4e6740ae87ff59",
+    "wrangler": "4.148.0",
+    "account_id": "9bad0b638402dc39700132716e3b312c",
+    "workers_free_plan": "OWNER_CONFIRMED_NOT_BILLING_API_VERIFIED",
+    "paid_resource_creation": false
+  },
+  "targets": {
+    "executor": {
+      "name": "econmind-world-executor-staging",
+      "version_id_from_actual_deploy_log": "be51213f-96d4-4ade-af4d-cb8dc97fdfb0",
+      "bundle_sha256": "37e92b7229786e61f5b57acfc4c8cbb96b739ac3198a522b98dd688fab0468b9",
+      "attempted": true,
+      "acknowledged": true,
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false
+    },
+    "api": {
+      "name": "econmind-world-api-staging",
+      "version_id_from_actual_deploy_log": "96ef9651-3349-4aee-99fa-25df79860c36",
+      "bundle_sha256": "b7a07ec01d2f67818ee0753246eddf611543e7480e28c828f108018a2bb209d4",
+      "attempted": true,
+      "acknowledged": true,
+      "origin": "https://econmind-world-api-staging.observer-lagesan.workers.dev",
+      "workers_dev_enabled": true,
+      "preview_urls_enabled": false
+    }
+  },
+  "artifacts": {
+    "prepared": {
+      "id": 11660224346,
+      "zip_sha256": "541b99ed0e01ffa073075746995b95a737a729cfc8a47f2d1db8abd6689d5f00"
+    },
+    "caller": {
+      "id": 11661267919,
+      "zip_sha256": "fdf64ade7c3e77c4e28dd9a720aa5fa2836f897a5abb53385721133a053dc49b",
+      "log_sha256": "f7bbfed7a5a5cd4b801311b7fb2feb1cd091f842cd7a9037e10fc79673b25c1c"
+    },
+    "publication": {
+      "id": 11661855670,
+      "zip_sha256": "7faa3c448ba33d616ffdd8f2f53f5eed5995201ffe8149902eea3a4e2c053397",
+      "job_log_sha256": "993faeef2e268dd6583c6e99210d8461eac2d7ad002a7e601c21b06c87a5060d",
+      "receipt_result": "PASS_HOLD_ONLY"
+    }
+  },
+  "postpublication_readback": {
+    "existing_hold_topology_before_and_after": "PASS",
+    "health_http_status": 200,
+    "health_status": "ALIVE_NOT_ACTIVATED",
+    "readiness_http_status": 503,
+    "readiness_503_expected_for_hold": true,
+    "executor_transport": "ALIVE_HOLD",
+    "runtime_mode": "HOLD",
+    "runtime_ready": false,
+    "database_connected": false,
+    "simulation_enabled": false,
+    "clock_enabled": false,
+    "authoritative_commands_enabled": false,
+    "cron_schedules": []
+  },
+  "credential_evidence": {
+    "secret_name": "CLOUDFLARE_API_TOKEN",
+    "actual_read_and_deploy_permissions_for_both_targets": "PASS",
+    "secret_value_read_by_parent_agent": false,
+    "complete_token_permission_inventory": "NOT_READ"
+  },
+  "record_validation": {
+    "risk": "P3_NON_BEHAVIOURAL",
+    "actual_receipt_artifact_hashes_counts_and_version_ids": "PASS",
+    "corrected_inspection_exit_code": 0,
+    "initial_raw_log_match_exit_code": 1,
+    "initial_inspection_correction": "The raw CI log has ANSI color control characters. The exact text matcher initially failed; Node stripVTControlCharacters removed formatting before the same exact counts/duration assertions. Deployment and CI tests remained successful.",
+    "format_check_exit_code": 0,
+    "git_diff_check_exit_code": 0,
+    "secret_scan_exit_code": 0,
+    "secret_scan_files": 2352,
+    "executable_changes": false,
+    "full_ci_repeated_for_metadata_only_record": false
+  },
+  "boundaries": {
+    "production_database_mutation": false,
+    "economic_activation": false,
+    "global_execution_gate_changed": false,
+    "note": "This closes CI HOLD hosting publication only. Database, formal opening/admission, economic execution and activation gates remain independent and incomplete. The preparation/configuration reports retain their historical NOT_RUN entries."
+  }
+}
