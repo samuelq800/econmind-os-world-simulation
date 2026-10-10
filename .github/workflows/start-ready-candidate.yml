@@ -7,6 +7,8 @@ on:
       - .github/workflows/start-ready-candidate.yml
       - tests/support/start-ready-candidate-ci.mjs
       - tests/support/start-ready-candidate-ci.test.mjs
+      - tests/support/start-ready-postgres.mjs
+      - tests/support/start-ready-postgres.test.mjs
       - apps/world-worker/src/preparation/formal-financial-opening-contract.ts
       - apps/world-worker/src/preparation/formal-financial-opening-producer.ts
       - tests/support/tsconfig.formal-financial-opening.json
@@ -42,21 +44,8 @@ permissions:
 
 jobs:
   combined-candidate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: econmind_v09_d_supervisor_ci
-          POSTGRES_HOST_AUTH_METHOD: trust
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres -d econmind_v09_d_supervisor_ci"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
     env:
       ECONMIND_ENV: ci
     steps:
@@ -90,7 +79,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          node --test tests/support/start-ready-candidate-ci.test.mjs 2>&1 | tee "$CI_EVIDENCE_DIRECTORY/ci-contract.log"
+          node --test tests/support/start-ready-candidate-ci.test.mjs tests/support/start-ready-postgres.test.mjs 2>&1 | tee "$CI_EVIDENCE_DIRECTORY/ci-contract.log"
       - name: Build only shared Core and Worker dependencies
         id: build
         run: node tests/support/start-ready-candidate-ci.mjs build
@@ -98,13 +87,27 @@ jobs:
         id: strict_types
         if: always() && steps.inputs.outcome == 'success' && steps.install.outcome == 'success' && steps.build.outcome == 'success'
         run: node tests/support/start-ready-candidate-ci.mjs types
+      - name: Start runner-owned loopback-only PostgreSQL 16.15
+        id: pg_start
+        if: always() && steps.inputs.outcome == 'success' && steps.install.outcome == 'success' && steps.build.outcome == 'success'
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/support/start-ready-postgres.mjs start 2>&1 | tee "$CI_EVIDENCE_DIRECTORY/postgres-start.log"
       - name: D supervisor on guarded fresh disposable PostgreSQL
         id: native_d
-        if: always() && steps.inputs.outcome == 'success' && steps.install.outcome == 'success' && steps.build.outcome == 'success'
+        if: always() && steps.inputs.outcome == 'success' && steps.install.outcome == 'success' && steps.build.outcome == 'success' && steps.pg_start.outcome == 'success'
         env:
           V09_TEST_DATABASE_FINGERPRINT: world-v2-v09-test-ci
           V09_TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/econmind_v09_d_supervisor_ci
         run: node tests/support/start-ready-candidate-ci.mjs native-d
+      - name: Always stop only this runner-owned cluster
+        id: pg_stop
+        if: always() && steps.inputs.outcome == 'success'
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/support/start-ready-postgres.mjs stop 2>&1 | tee "$CI_EVIDENCE_DIRECTORY/postgres-stop.log"
       - name: Finalize actual-source receipt and raw-log digests
         if: always()
         env:
@@ -114,6 +117,8 @@ jobs:
           BUILD_OUTCOME: ${{ steps.build.outcome }}
           STRICT_TYPES_OUTCOME: ${{ steps.strict_types.outcome }}
           NATIVE_D_OUTCOME: ${{ steps.native_d.outcome }}
+          PG_START_OUTCOME: ${{ steps.pg_start.outcome }}
+          PG_STOP_OUTCOME: ${{ steps.pg_stop.outcome }}
         run: node tests/support/start-ready-candidate-ci.mjs finalize
       - name: Always retain raw logs and receipt
         if: always()

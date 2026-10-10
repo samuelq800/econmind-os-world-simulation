@@ -45,6 +45,19 @@ export const TYPE_ARGUMENTS = Object.freeze([
   '--skipLibCheck',
   'false',
 ]);
+export const STEP_OUTCOMES = Object.freeze([
+  'INPUTS_OUTCOME',
+  'INSTALL_OUTCOME',
+  'CI_CONTRACT_OUTCOME',
+  'BUILD_OUTCOME',
+  'STRICT_TYPES_OUTCOME',
+  'NATIVE_D_OUTCOME',
+  'PG_START_OUTCOME',
+  'PG_STOP_OUTCOME',
+]);
+
+export const successfulSteps = (outcomes) =>
+  STEP_OUTCOMES.every((name) => outcomes[name] === 'success');
 
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 const root = fileURLToPath(new URL('../..', import.meta.url));
@@ -327,19 +340,15 @@ async function main(mode) {
   receipt.finalSource = sourceIdentity(root);
   receipt.trackedChanges = git(root, 'diff', '--name-only', 'HEAD', '--');
   receipt.stepOutcomes = Object.fromEntries(
-    [
-      'INPUTS_OUTCOME',
-      'INSTALL_OUTCOME',
-      'CI_CONTRACT_OUTCOME',
-      'BUILD_OUTCOME',
-      'STRICT_TYPES_OUTCOME',
-      'NATIVE_D_OUTCOME',
-    ].map((name) => [name, process.env[name] || 'NOT_RUN']),
+    STEP_OUTCOMES.map((name) => [name, process.env[name] || 'NOT_RUN']),
   );
   receipt.logsSha256 = Object.fromEntries(
     readdirSync(directory)
       .filter(
-        (name) => name.endsWith('.log') || name === 'native-d-results.json',
+        (name) =>
+          name.endsWith('.log') ||
+          name === 'native-d-results.json' ||
+          name === 'postgres-owned-cluster.json',
       )
       .sort()
       .map((name) => [name, hash(readFileSync(path.join(directory, name)))]),
@@ -348,9 +357,7 @@ async function main(mode) {
     receipt.builds.every((row) => row.status === 'PASS') &&
     receipt.strictTypes.every((row) => row.status === 'PASS') &&
     receipt.native.dSupervisor.status === 'PASS' &&
-    Object.values(receipt.stepOutcomes).every(
-      (outcome) => outcome === 'success',
-    ) &&
+    successfulSteps(receipt.stepOutcomes) &&
     receipt.finalSource.checkoutSha === receipt.checkoutSha &&
     receipt.finalSource.checkoutTree === receipt.checkoutTree &&
     receipt.trackedChanges === ''
