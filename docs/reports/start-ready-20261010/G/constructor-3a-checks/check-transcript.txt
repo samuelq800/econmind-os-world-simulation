@@ -1,0 +1,333 @@
+G 3A check transcript
+Packet validation: initial Prettier exit 1 on implementation Markdown and dist manifest; formatted through Prettier API and apply_patch, final Prettier exit 0. Final packet secret check exit 0, scannedFiles 2467. git diff --check exit 0. All 12 candidate file bytes match the code commit and all 432 dist entries match the pre-test manifest; compact JSON aggregate verified.
+Pinned PATH: /private/tmp/econmind-control-tower-toolchain.451x0O
+Working directory: /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010
+
+=== diff ===
+$ git diff --check
+exit_code: 0
+
+=== local-ci-regression ===
+$ pnpm exec vitest run tests/world-api/positive-manual-office-command.test.ts tests/world-api/https-authenticated-office-command-route.test.ts tests/world-core/durable-command-consumption.test.ts tests/world-core/manual-office-durable-dispatch.test.ts
+exit_code: 0
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010
+
+
+ Test Files  4 passed (4)
+      Tests  110 passed (110)
+   Start at  22:26:13
+   Duration  53.73s (tests 97%, transform 2%, import 1%)
+
+
+=== 3a-focused ===
+$ pnpm exec vitest run tests/world-api/G-constructor-3a.test.ts tests/world-api/G-executor-transport.test.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-review-delta.test.ts
+exit_code: 1
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010
+
+ ❯ tests/world-api/G-completion-drain.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/world-api/G-completion-drain.test.ts [ tests/world-api/G-completion-drain.test.ts ]
+Error: Cannot find package '@econmind/world-worker/runtime-command-host' imported from /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010/tests/world-api/G-completion-drain.test.ts
+ ❯ tests/world-api/G-completion-drain.test.ts:7:1
+      5| import { createAuthenticatedCurrentSeatService } from '../../apps/worl…
+      6| import { RequestCompletion } from '../../apps/world-api/src/runtime-pr…
+      7| import { trackWorkerRequestCompletion } from '@econmind/world-worker/r…
+       | ^
+      8| import {
+      9|   EXECUTOR_PATHS,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  51 passed (51)
+   Start at  22:26:13
+   Duration  8.50s (tests 82%, transform 13%, import 5%)
+
+
+=== 3a-strict ===
+$ pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false
+exit_code: 0
+
+=== lint ===
+$ pnpm exec eslint apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/G-completion-drain.test.ts
+exit_code: 1
+
+/Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010/apps/world-worker/src/runtime-preparation/production-world-command-host.ts
+  27:3   error  '_binding' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  35:23  error  '_input' is defined but never used             @typescript-eslint/no-unused-vars
+
+✖ 2 problems (2 errors, 0 warnings)
+
+
+=== prior-g-strict ===
+$ pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false
+exit_code: 2
+tests/world-api/G-completion-drain.test.ts(7,46): error TS2307: Cannot find module '@econmind/world-worker/runtime-command-host' or its corresponding type declarations.
+
+=== format ===
+$ pnpm exec prettier --check apps/world-worker/package.json apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/tsconfig.G-constructor-3a.json tests/world-api/G-completion-drain.test.ts
+exit_code: 0
+Checking formatting...
+All matched files use Prettier code style!
+
+=== secrets ===
+$ pnpm secrets:check
+exit_code: 0
+$ node scripts/check-repository-secrets.mjs
+{
+  "status": "PASS",
+  "scannedFiles": 2463
+}
+
+=== boundaries ===
+$ pnpm test:boundaries
+exit_code: 0
+$ vitest run tests/architecture/boundaries.test.ts tests/architecture/foundation-gates.test.ts tests/architecture/foundation-ci-gate.test.ts && node scripts/check-authoritative-patterns.mjs && node scripts/check-boundaries.mjs
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010
+
+
+ Test Files  3 passed (3)
+      Tests  40 passed (40)
+   Start at  22:26:13
+   Duration  9.14s (tests 99%)
+
+{
+  "scannedCoreFiles": 91,
+  "scannedFiles": 334,
+  "status": "PASS",
+  "violations": []
+}
+{
+  "status": "PASS",
+  "scannedFiles": 339,
+  "guardedRoots": [
+    "apps",
+    "packages",
+    "apps/world-web/server.mjs",
+    "scripts/environment-policy.mjs",
+    "scripts/vite-environment-policy.mjs",
+    "scripts/vite-environment-policy.d.mts",
+    "scripts/run-development-service.mjs",
+    "scripts/run-development-stack.mjs"
+  ],
+  "sourceExtensions": [
+    ".ts",
+    ".tsx",
+    ".mts",
+    ".cts",
+    ".js",
+    ".jsx",
+    ".mjs",
+    ".cjs"
+  ]
+}
+
+=== environment ===
+$ pnpm env:check
+exit_code: 0
+$ ECONMIND_ENV=local node scripts/assert-safe-environment.mjs
+{
+  "status": "PASS",
+  "environment": "local",
+  "databaseConfigured": false,
+  "validatedViteModes": [
+    "development",
+    "production"
+  ],
+  "linkedSupabaseProject": "NOT_LINKED",
+  "databaseMutationAllowed": false
+}
+
+=== final-diff ===
+$ git diff --check
+exit_code: 0
+
+=== final-format ===
+$ pnpm exec prettier --check apps/world-worker/package.json apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/tsconfig.G-constructor-3a.json tests/world-api/G-completion-drain.test.ts
+exit_code: 0
+Checking formatting...
+All matched files use Prettier code style!
+
+=== final-lint ===
+$ pnpm exec eslint apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/G-completion-drain.test.ts
+exit_code: 0
+
+=== final-strict ===
+$ pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false && pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false
+exit_code: 0
+
+=== final-focused ===
+$ pnpm exec vitest run tests/world-api/G-constructor-3a.test.ts tests/world-api/G-executor-transport.test.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-review-delta.test.ts
+exit_code: 0
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010
+
+
+ Test Files  4 passed (4)
+      Tests  59 passed (59)
+   Start at  22:29:54
+   Duration  10.62s (tests 84%, transform 10%, import 5%)
+
+
+=== final-boundary-scans ===
+$ node scripts/check-authoritative-patterns.mjs && node scripts/check-boundaries.mjs
+exit_code: 0
+{
+  "scannedCoreFiles": 91,
+  "scannedFiles": 334,
+  "status": "PASS",
+  "violations": []
+}
+{
+  "status": "PASS",
+  "scannedFiles": 339,
+  "guardedRoots": [
+    "apps",
+    "packages",
+    "apps/world-web/server.mjs",
+    "scripts/environment-policy.mjs",
+    "scripts/vite-environment-policy.mjs",
+    "scripts/vite-environment-policy.d.mts",
+    "scripts/run-development-service.mjs",
+    "scripts/run-development-stack.mjs"
+  ],
+  "sourceExtensions": [
+    ".ts",
+    ".tsx",
+    ".mts",
+    ".cts",
+    ".js",
+    ".jsx",
+    ".mjs",
+    ".cjs"
+  ]
+}
+
+=== final-secrets ===
+$ pnpm secrets:check
+exit_code: 0
+$ node scripts/check-repository-secrets.mjs
+{
+  "status": "PASS",
+  "scannedFiles": 2463
+}
+
+=== candidate-boundary-secret ===
+$ node scripts/check-authoritative-patterns.mjs && node scripts/check-boundaries.mjs && pnpm secrets:check
+exit_code: 0
+{
+  "scannedCoreFiles": 91,
+  "scannedFiles": 334,
+  "status": "PASS",
+  "violations": []
+}
+{
+  "status": "PASS",
+  "scannedFiles": 339,
+  "guardedRoots": [
+    "apps",
+    "packages",
+    "apps/world-web/server.mjs",
+    "scripts/environment-policy.mjs",
+    "scripts/vite-environment-policy.mjs",
+    "scripts/vite-environment-policy.d.mts",
+    "scripts/run-development-service.mjs",
+    "scripts/run-development-stack.mjs"
+  ],
+  "sourceExtensions": [
+    ".ts",
+    ".tsx",
+    ".mts",
+    ".cts",
+    ".js",
+    ".jsx",
+    ".mjs",
+    ".cjs"
+  ]
+}
+$ node scripts/check-repository-secrets.mjs
+{
+  "status": "PASS",
+  "scannedFiles": 2463
+}
+
+=== candidate-strict ===
+$ pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false && pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false
+exit_code: 2
+tests/world-api/G-constructor-3a.test.ts(386,44): error TS2554: Expected 0 arguments, but got 1.
+
+=== candidate-focused ===
+$ pnpm exec vitest run tests/world-api/G-constructor-3a.test.ts tests/world-api/G-executor-transport.test.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-review-delta.test.ts
+exit_code: 0
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010
+
+
+ Test Files  4 passed (4)
+      Tests  61 passed (61)
+   Start at  22:34:12
+   Duration  12.28s (tests 83%, transform 12%, import 4%)
+
+
+=== candidate-lint-format ===
+$ pnpm exec eslint apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/G-completion-drain.test.ts && pnpm exec prettier --check apps/world-worker/package.json apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/tsconfig.G-constructor-3a.json tests/world-api/G-completion-drain.test.ts
+exit_code: 0
+Checking formatting...
+All matched files use Prettier code style!
+
+=== candidate-local-ci ===
+$ pnpm exec vitest run tests/world-api/positive-manual-office-command.test.ts tests/world-api/https-authenticated-office-command-route.test.ts tests/world-core/durable-command-consumption.test.ts tests/world-core/manual-office-durable-dispatch.test.ts
+exit_code: 0
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010
+
+
+ Test Files  4 passed (4)
+      Tests  110 passed (110)
+   Start at  22:34:12
+   Duration  51.15s (tests 96%, transform 2%, import 1%)
+
+
+=== candidate-strict-repair ===
+$ pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false && pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false
+exit_code: 0
+
+=== candidate-focused-repair ===
+$ pnpm exec vitest run tests/world-api/G-constructor-3a.test.ts tests/world-api/G-executor-transport.test.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-review-delta.test.ts
+exit_code: 0
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010
+
+
+ Test Files  4 passed (4)
+      Tests  61 passed (61)
+   Start at  22:37:03
+   Duration  10.27s (tests 87%, transform 9%, import 4%)
+
+
+=== candidate-lint-format-repair ===
+$ pnpm exec eslint apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/G-completion-drain.test.ts && pnpm exec prettier --check apps/world-worker/package.json apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/tsconfig.G-constructor-3a.json tests/world-api/G-completion-drain.test.ts
+exit_code: 1
+Checking formatting...
+[warn] tests/world-api/G-constructor-3a.test.ts
+[warn] Code style issues found in the above file. Run Prettier with --write to fix.
+
+=== candidate-format-final ===
+$ pnpm exec eslint apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/G-completion-drain.test.ts && pnpm exec prettier --check apps/world-worker/package.json apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/tsconfig.G-constructor-3a.json tests/world-api/G-completion-drain.test.ts
+exit_code: 0
+Checking formatting...
+All matched files use Prettier code style!
+
+=== initial-strict (before repairs) ===
+{
+  "name": "initial-strict",
+  "command": "pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false",
+  "exitCode": 2,
+  "output": "tests/world-api/G-constructor-3a.test.ts(386,17): error TS2352: Conversion of type '{ connect: () => Promise<never>; }' to type 'OwnedExecutorPool' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.\n  Property 'end' is missing in type '{ connect: () => Promise<never>; }' but required in type 'OwnedExecutorPool'."
+}
