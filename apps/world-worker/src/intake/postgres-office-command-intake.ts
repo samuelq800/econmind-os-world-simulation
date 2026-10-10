@@ -1,7 +1,15 @@
-import { createHash } from 'node:crypto';
+import {
+  buildManualOfficeCommandIntent,
+  decodeStoredManualOfficeCommand,
+  type StoredManualOfficeCommand,
+} from './manual-office-command-intent.js';
+export {
+  buildManualOfficeCommandIntent,
+  decodeStoredManualOfficeCommand,
+  type StoredManualOfficeCommand,
+} from './manual-office-command-intent.js';
 import type { Pool } from 'pg';
 import {
-  COMMAND_SCHEMA_VERSION,
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   CAPTAIN_POLITICAL_CAPITAL_CAPABILITY,
   CENTRAL_BANK_OMO_COMMAND,
@@ -10,7 +18,6 @@ import {
   SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY,
   DomainError,
   DOMAIN_ERROR_CODES,
-  actorId,
   authSubject,
   authorizeOfficeCapability,
   canonicalSerialize,
@@ -18,10 +25,6 @@ import {
   officeId,
   teamId,
   worldId,
-  parseCanonicalCommand,
-  parseCaptainPoliticalCapitalAllocation,
-  parseCentralBankOmoIntent,
-  parseSocialEmploymentServiceCommand,
   type AuthenticatedPrincipal,
   type CanonicalCommand,
 } from '@econmind/core';
@@ -47,7 +50,6 @@ export class OfficeCommandOutcomeUnknownError extends Error {
   }
 }
 
-const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 const reference = /^[A-Z][A-Z0-9]*([_-][A-Z0-9]+)*$/u;
 const integer = /^(?:0|[1-9]\d*)$/u;
 const maxBigint = 9_223_372_036_854_775_807n;
@@ -171,24 +173,7 @@ from pg_roles r where r.rolname=current_user`.trim();
 
 type IntakeState =
   ManualOfficeSourceRejectionDto | ManualOfficeQueueAcknowledgementDto;
-interface StoredCommand {
-  worldId: string;
-  commandId: string;
-  idempotencyKey: string;
-  commandType: string;
-  schemaVersion: string;
-  canonicalPayload: string;
-  payloadHash: string;
-  fingerprint: string;
-  actorId: string;
-  authSubject: string;
-  countryId: string;
-  officeId: string;
-  expectedWorldVersion: string;
-  simTime: string;
-  correlationId: string;
-  submittedAtReal: Date | string;
-}
+type StoredCommand = StoredManualOfficeCommand;
 
 /** Conditional server intake. Default is read-only/source-blocked. Only the
  * private identity of a real source+sole consumer composition can write the
@@ -381,74 +366,25 @@ export class PostgresOfficeCommandIntake {
         from world_v2.command_submission where world_id=$1 and (command_id=$2 or idempotency_key=$3)`,
         [request.worldId, request.commandId, request.idempotencyKey],
       );
-      const decode = (
-        records: StoredCommand[],
-      ): CanonicalCommand | undefined => {
-        if (records.length > 1) conflict();
-        const stored = records[0];
-        let original: CanonicalCommand | undefined;
-        if (stored) {
-          if (
-            stored.commandId !== request.commandId ||
-            stored.idempotencyKey !== request.idempotencyKey
-          )
-            conflict();
-          const { fingerprint, payloadHash, canonicalPayload, ...fields } =
-            stored;
-          original = parseCanonicalCommand(
-            {
-              ...fields,
-              submittedAtReal:
-                stored.submittedAtReal instanceof Date
-                  ? stored.submittedAtReal.toISOString()
-                  : stored.submittedAtReal,
-              payload: JSON.parse(canonicalPayload) as unknown,
-            },
-            sha,
-          );
-          if (
-            original.fingerprint !== fingerprint ||
-            original.payloadHash !== payloadHash ||
-            original.canonicalPayload !== canonicalPayload
-          )
-            conflict();
-        }
-        return original;
-      };
+      const decode = (records: StoredCommand[]) =>
+        decodeStoredManualOfficeCommand(records, request);
       let original = decode(storedRows);
       const build = async (original?: CanonicalCommand) =>
-        parseCanonicalCommand(
-          {
-            schemaVersion: COMMAND_SCHEMA_VERSION,
-            commandType: request.commandType,
-            worldId: request.worldId,
-            commandId: request.commandId,
-            idempotencyKey: request.idempotencyKey,
-            countryId: authorization.countryId,
-            officeId: authorization.officeId,
-            actorId: actorId(input.actor),
-            authSubject: authorization.authSubject,
-            expectedWorldVersion: request.expectedWorldVersion,
-            simTime:
-              original?.simTime.toCanonicalValue() ??
-              (await this.config.clock.simTime(request.worldId)),
-            submittedAtReal:
-              original?.submittedAtReal ?? this.config.clock.nowReal(),
-            correlationId:
-              original?.correlationId ?? `CORRELATION_${request.commandId}`,
-            payload: request.payload,
-          },
-          sha,
-        );
+        buildManualOfficeCommandIntent({
+          request,
+          countryId: authorization.countryId,
+          officeId: authorization.officeId,
+          actor: input.actor,
+          authSubject: authorization.authSubject,
+          simTime:
+            original?.simTime.toCanonicalValue() ??
+            (await this.config.clock.simTime(request.worldId)),
+          submittedAtReal:
+            original?.submittedAtReal ?? this.config.clock.nowReal(),
+          correlationId:
+            original?.correlationId ?? `CORRELATION_${request.commandId}`,
+        });
       let command = await build(original);
-      if (command.commandType === CAPTAIN_POLITICAL_CAPITAL_COMMAND)
-        parseCaptainPoliticalCapitalAllocation(command, sha);
-      else if (command.commandType === CENTRAL_BANK_OMO_COMMAND)
-        parseCentralBankOmoIntent(command, sha);
-      else if (
-        parseSocialEmploymentServiceCommand(command, sha).kind !== 'PLAN'
-      )
-        invalid();
       if (original && original.fingerprint !== command.fingerprint) conflict();
       if (
         (!positive || !original) &&

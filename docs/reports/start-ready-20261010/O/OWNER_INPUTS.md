@@ -1,47 +1,125 @@
 # 真正需要提供的输入与权限 — 2026-10-10
 
-当前不是再问经济模型选择。D01–D04、D06、ADR-03/18 已有明确决定；D05历史排除
-与后续源码准备范围分别保留，不重新问“是否同意D05”。新方案由工程方提出并独审。
+本清单只回答已有依据、真实缺项、交付人和安全通道；不重新决定经济规则，不批准来源、权限、发布或启动。
 
-## 需要真实来源 / 人类权威，代码不能代填
+固定 main：`27307a108ce5c0c3e2ce28e3776f8ba15ed73d3b`；总控草稿：`5a2d7a0ca0baf92bd2843e818a6f1ab5d5c1d6cc`。二者原 `OWNER_INPUTS.md` 字节相同。原件路径、完整 SHA256、国家枚举、核对范围及本文最终 hash 见同目录 `OWNER_INPUTS_VERIFICATION.json`。本文不是移动分支的实时状态面板。
 
-1. **70国本币与开局FX来源**：每国LC code、LC per 1 GCU的精确rate、version、valueDate、来源及采用依据。GCU scenario→Core GCU1:1已定，不代表LC=GCU。格式与精度校验由A实现，不要求用户设计JSON。
-2. **完整央行开局资产/负债/工具清单与计价来源**：声明哪些工具存在、哪些有来源支持的不存在/为零，及实际amount/native currency/holder/issuer/claim/counterparty、valuation/version/date与完整性范围。净值A−L及允许负值已定；未知清单不能由代码补成0。
-3. **实际身份与合法席位来源**：现存Auth administrator/subject到团队、国家、Office、capability/revision的合法发布输入与采用者。不是用户重新决定六职位权限模型；session/seat端点、严格绑定和撤权是C/G/E要完成的工程。玩家名单未定可保留未发布，不铸造生产测试席位。
+## 1. 已有决定和来源，不再索取一次
 
-以上先查已固定来源；若已存在就直接消费，不重复索取。以下是已固定候选中的具体定位，
-不是要求用户重新设计输入格式。
+- D01：B 全额为财政对央行 TGA 债权；D02：R 为银行对央行准备金债权，完整央行净值一次性 A−L、允许负值；D03：scenario GCU→Core GCU 1:1、五类主体、库存 title/risk、H→HOUSEHOLDS、D→OP、开局 L=H+D/E=R+A−L。不再问比例或补现金。
+- D04 §5 已采用既有物理资产、限域矿权/五池展开、水权采用/聚合持有人/短缺优先级/公历月展开、合法储能设施 initialSOC×MWh、缺电优先级、就业需求加权/整数最大余数展开、可对应社会服务存量。旧审计中的同名“待 Owner”是历史状态。缺参数不等于全部采用无效。
+- D06 已定：现有服务端已验证 Owner/admin 经既有链获得隔离测试 seat；同一隔离 World 中按 canonical country ID 排序取前两个合格国家，六 Office 独立，24 现实小时失效、可撤销。玩家分配后置，现在不收成员名单、不给生产测试席位。70 国政策 NPC=OFF 不关闭依法生效的系统结算。
+- ADR-03/18 不重开。D05 的历史生产/外接服务器排除不被本文改写；后续源码准备不是生产启动权限。
+- 原人类采用原文 SHA256 `57bfdec38a9a400991cb26362a99d33d7a81c8e6258c03460185e51501fb5ac5`；receipt SHA256 `2c06c4bd1157a2d245143190c4d17b0499b5d09f42159a414846d0f9bcb8d99e`，其中 `formal_world_id=null`。规则批准不采用任意新增数值或正式 World。
 
-### 已核实的来源边界和待交付字段
+固定底包 `BALANCED_2026_09_28_V1`；CHECKSUMS SHA256 `88dd44478f97d2e8893a4f11b3aaf96e256bdb13248aca0d08f097fabe10d315`。国家集合精确为 `visual-territory-01` 至 `visual-territory-70`（两位编号、无缺号）；地区/设施/矿床沿用原 ID。以下 S 编号对应核验回执中的原始路径、完整 hash 和 byte count，不需要重传已有原件。
 
-- **金融输入**：A 的 `36ee5c1be849b37a40e97c091af40d3c22398b22` 已实现严格契约和精确多币种生产器，仍待独审。每国需要 `localCurrency`、`openingFx.localCurrencyPerGcu/version/valueDate/source`，以及 CB register 的 `version/valueDate/source/categories/holdings` 和有来源的 `bankLoans`。金额与汇率使用精确十进制字符串；来源绑定原始 UTF-8 JSON 文档、路径、SHA256 和文档内 pointer。已有 scenario GCU 数值和 D01–D04 规则不构成本币/FX/补充清单的采用授权。
-- **CB 完整性**：21 类工具须逐类声明 `DECLARED` 或有来源的 `NO_DECLARED_INSTRUMENT`；存在的工具提供 amount、currency、holder、counterparty、usable status 和原币估值来源。来源支持的 0 与未知不同，不补零；净值可为负，不需重新批准这一规则。已有银行 A 全部为 0，正 A 的机制测试不算真实贷款来源。
-- **采用与 World 绑定**：A 候选即使所有计算通过，也返回 `BLOCKED`、`seed=null`、admission/activation=false；明确缺 `SUPPLEMENTAL_FINANCIAL_SOURCE_ADOPTION_UNRESOLVED` 与 `FORMAL_WORLD_BINDING_UNRESOLVED`。需要有权采用者绑定实际补充文档的 hash/version/date 和目标 World，而不是把测试向量或规则批准提升为正式 seed。正式 preflight/publisher 接入仍是工程任务，不能误报“仅差数据”。
-- **Industry 已有规则**：F 的 `d9853754b3eb2080a5ac4d30c71cae4db013fe0c` 已定位 MASTER U1149–1152、U1172–1183、U1186–1189、U1193–1199、INDUSTRY U1002 及既有 V14 project lifecycle kernel。建设不能免费生成 capacity、库存、就业或资金，无需用户重定这些规则。
-- **Industry 真正待决的源值**：固定 `facilities.json` SHA256 `049e39330646048b95636d3a075fc1423ee62762999184a2326df161a198b485` 的 P01/PROJECT-21/territory-44-E1 示例缺精确 construction recipe/capex/payment schedule；建设天数 proposal 90 与 legacy 270 冲突，power/water 顶层 0 与 legacy 49.32/4932 冲突，maintenance 10960 与 legacy 23121.13 冲突。需要固定采用哪个来源字段/版本或提供修正依据；不能默选较小值或把 0 当免费运营。350 个未建 development options 不当作 D04 已建 genesis。
+| 固定原件（`artifacts/world-balanced-candidate-v1/data/`）                       | 已有范围/值                                                                                                                                         |
+| ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S01 `countries.json` / S02 `entities.json`                                      | 70 国、350 个五类经济主体；不是玩家授权                                                                                                             |
+| S03 `finance.json`                                                              | 70×B/H/D/R/A/L/E 共490原始精确词法值；实际 A 全为0；SHA256 `4f30d7dd43aa2190604d4fb73c776a8d4aaa263653dc783def6f7c2c5cc80805`                       |
+| S04 `facilities.json` / S05 `deposits.json`                                     | 1374设施（1024 opening portfolio、350 development options）、240矿床；S04 SHA256 `049e39330646048b95636d3a075fc1423ee62762999184a2326df161a198b485` |
+| S06 `water-allocations.json` / S07 `seasonal-water.json` / S08 `geography.json` | 122地区用途m³/day、12月runoff m³、71 basin水文/湖库候选及明确简化限制                                                                               |
+| S09 `power.json`                                                                | 70国 MW/MWh/CF/loss/SOC/connection 候选；不证明已接网运行                                                                                           |
+| S10 `employment.json` / S11 `population-services.json`                          | 70国人数/部门、122地区住房/学位/教师/医护/床位等；不是已付工资/实际服务                                                                             |
+| S12 `recipes.json` / S13 `manifest.json`                                        | 12个既有recipe及单位/authority；World仍 `CANDIDATE_ONLY_NO_PRODUCTION_WORLD_ID`                                                                     |
 
-原件通过项目已有受控文件交付路径提交，保留来源、日期、单位和 hash；不在聊天粘贴秘密。
-工程方负责转换、逐国错误清单、校验与可回滚幂等导入准备；本轮不执行正式导入。
+包名日期、审计日期和经济 `valueDate` 不混同；候选值不因列在本表而变成可运行、已供给、已支付或新增正式采用事实。
 
-## 需要当次安全操作确认，不在聊天提供秘密
+## 2. 真正的来源与采用输入
 
-- **生产专用角色及持久连接**：E先固定最小DCL与唯一publisher设计并独审，再列出确切拟创建/授权对象。实际角色/登录、DB运行凭据/托管绑定须由有权人按安全入口配置；不借现有Cloudflare部署Token充当DB凭据，不复制旧站secret。
-- **隔离staging/TLS验收目标**：ADR-18已批准隔离路线，不重问ADR。F先继承现有同目标证据；若确缺受控目标或权限，由负责人提供安全连接/只读证据或作出明确替代决定。一次性PG机制通过不能冒充此证据。
-- **唯一数据库发布链实际执行**：E先完成可独审caller/manifest/readback工程，旧站唯一发布者按明确授权执行；World仓库不增第二条发布链。真实生产prefix目前UNKNOWN，不能盲发最初17项或当前23项。
+### I01 — 70国本币、opening FX、完整央行 register
 
-此文件没有请求密码/Token明文，没有新建或扩大持久权限。准备可启动不自动授权正式导入、经济运行、paid资源或修改gate。
+来源提供者只补冻结源没有的事实，不重交490个金融原值：
 
-## 已决定、正在实施，不需要用户再审批同一规则
+| 必需字段/覆盖                                                                                                                                                                                                                                              | 单位、日期与原件要求                                                                                                             | 当前缺口/阻断                                                                                                                          |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 每国 `countryId/localCurrency`；`openingFx.localCurrencyPerGcu/version/valueDate/source`                                                                                                                                                                   | 精确十进制字符串；严格 **LC per 1 GCU**、正数；`YYYY-MM-DD`，原币code/denomination可追溯                                         | 固定源currency是scenario GCU，无70国LC/FX表。不能默认1或改名LC；阻断正式金融opening                                                    |
+| 每国 `cbRegister.version/valueDate/source/categories/holdings` 与完整性声明pointer                                                                                                                                                                         | 70国各21类，逐类 `DECLARED` 或有来源的 `NO_DECLARED_INSTRUMENT`；来源支持的0/不存在须可追溯                                      | 类别目录有，完整逐国holdings/完整性证明无；未知不填0，净值计算通过不证明完整                                                           |
+| 每项 `holdingId/category/kind/amount/currency/localCurrencyPerUnit/holderId/counterpartyId/usableStatus/source`                                                                                                                                            | 原币精确金额、LC per unit估值、register日期/版本、claim/发行方语义出处                                                           | native holdings与LC估值分开，不重复计储备合计。当前carrier只支持既定主体/同国counterpart；超范围真实工具先由工程补受审表示，不伪造对手 |
+| `bankLoans[].loanId/borrowerId/amount/currency/source`                                                                                                                                                                                                     | 总额与原 A 精确一致；空清单也有来源支持                                                                                          | 原 A=0，不要求编造正贷款。正 A 机制向量不算真实输入                                                                                    |
+| 合同 `schemaVersion/evidenceKind/worldId/sourceId/sourceVersion/valueDate/ownerReceiptSha256/adoptionManifestFingerprint/financeSha256/documents/countries`；文档 `documentId/sourcePath/sha256/version/valueDate/bytes`；每项 `source.documentId/pointer` | 原UTF-8 JSON bytes、固定hash、文档内exact pointer/value；正式候选仅 `SOURCE_CANDIDATE`。工程负责转换/校验，不让Owner手写品牌对象 | 未有已注册真实补充包；新原件hash/version/valueDate均 **NOT_PROVIDED**，不得用今天日期或测试值补齐                                      |
 
-| 工作                                                       | 执行方与当前动作                                         |
-| ---------------------------------------------------------- | -------------------------------------------------------- |
-| LC多batch、B/TGA与R paired claims、银行开局reconciliation  | A实际生产器与严格输入代码；已有经济决定不重开。          |
-| 三族Office浏览器提交/FINAL、真实session生命周期            | C实际消费链；真实server seat输入缺失明确断开。           |
-| acquire/renew/fence/drain与正常恢复、既定10×/pause/catchup | D实际lease代码及既有ADR-03的Clock恢复方案。              |
-| 跨服务private authority、唯一publisher、最小权限           | G/E给技术方案，B独立设计审查；不让用户代做一般工程选择。 |
-| V09实际证据及Industry既有规范查明                          | F复用原件、只补真缺项；不重复全量或420巡检。             |
+`holdings.kind` 仅为 `CASH/CLAIM/SOURCE_EQUITY`；具体工具的来源语义必须可被该契约表达。21类范围来自原 CB 规范，不重新选模型，也不构成 holdings 证据：
 
-当前状态：A/C/D/F 已形成固定实现或证据候选，交叉独审进行中；E 权限设计独审中；
-G 仅按独立设计批准实施切片 1/2，生产构造与消费切片 3/4 仍 HOLD。仍非 START_READY。
-最小角色、绑定名称、发布前缀检测、Clock/host 接线与上述 preflight 接入由工程方解决，
-不把一般技术选择变成新的用户审批项；真实持久授权、来源采用及生产启动仍独立受控。
+- 资产10类：`FX_CASH_AND_DEPOSITS`、`FOREIGN_RESERVE_SECURITIES`、`RESERVE_SWAP_RECEIVABLES`、`GOLD_OTHER_RESERVE_ASSETS`、`DOMESTIC_GOVERNMENT_SECURITIES`、`REGULAR_REFINANCING_LOANS`、`ELA_LOANS`、`MONETARY_FINANCING_CLAIMS`、`ACCRUED_INTEREST_RECEIVABLE`、`OTHER_CENTRAL_BANK_ASSETS`。
+- 负债7类：`CURRENCY_IN_CIRCULATION`、`COMMERCIAL_BANK_RESERVE_ACCOUNTS`、`TREASURY_GOVERNMENT_DEPOSIT`、`CENTRAL_BANK_BILLS_TERM_DEPOSITS`、`RESERVE_SWAP_PAYABLES`、`ACCRUED_INTEREST_PAYABLE`、`OTHER_CENTRAL_BANK_LIABILITIES`。
+- 权益4类：`INITIAL_CENTRAL_BANK_CAPITAL`、`RETAINED_EARNINGS`、`VALUATION_RESERVE`、`ACCUMULATED_LOSSES`。
+
+### I02 — 真实补充bytes的采用与精确World preparation绑定
+
+I01到位后，有权 Human Owner 经**已有总控可信指令通道**采用具体文档集合、70国/21类完整性范围及唯一目标；总控独立留存原文/receipt并受审注册。
+
+需要固定 `recordId/ownerIdentity/adoptedAtReal`（UTC毫秒）、原始指令SHA/注册reference、父receipt/底包/文档hashes、版本/valueDate、合同/金融候选fingerprint，以及 `targetWorldId/seedId/model/replay/orchestrator/assemblyIntentFingerprint`。当前底包无production World ID，旧receipt World=null；调用者随填World不能成为权威绑定。新原文/receipt/目标绑定均未提供。
+
+无需新私钥/签名服务或Owner设计JSON；不是再批准D01–04，也不批准admission/schema/seat/host/startup。A原生产器仍真实返回 `BLOCKED/seed=null/admissionAllowed=false/activationAllowed=false`；`SUPPLEMENTAL_FINANCIAL_SOURCE_ADOPTION_UNRESOLVED` 与 `FORMAL_WORLD_BINDING_UNRESOLVED` 只能由新集成层的真实scoped proof分别满足，不改写原结果或过滤未知blocker。V2 loader/共用assembler/preflight/publisher接线属于B工程任务。
+
+### I03 — 非金融具体残余事实/冲突，不重新采用整包
+
+以下是冻结D02/D04审计与F定位中的**条件性补件**。工程先消费D04已批准内容，给出实际失败原ID/pointer；已能精确展开的直接用，不把未写constructor/mapper的全部国家列成缺Owner数据。
+
+| 原覆盖/定位                                                                         | 已有值/已定含义                                                                                                | 仅在原件/已采用规范仍未覆盖时补什么                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Industry：1374原facility IDs；首例P01/PROJECT-21/`visual-territory-44-E1`（国家44） | point[135,328]、capacity60056.27 tonne/sim-day、GOV-44/OP-44、workers2740、machinery137已有；350options未建    | 此例recipeId=null/`CORE_COEFFICIENT_BINDING_REQUIRED`：精确steel/copper/machinery construction quantities、total capex（币种/估值日）、payment schedule（SimTime）、recipe/tech/licence/milestone来源。`constructionSimDaysProposal=90` vs legacy270；power0 vs49.32MW、water0 vs4932m³/day、maintenance10960 vs23121.13 GCU/day：来源负责人固定采用字段/版本或更正bytes/hash，不默选低值。只确认该例，不声称遍检1374条 |
+| 水务：70国/122原region IDs、71basin引用                                             | D04已定配额基础/聚合持权人、生态/短缺优先级、公历实际月天数，**不再问新grant或月历政策**                       | 冻结审计104/122条domestic alias exact不同；首例service `waterDomesticM3Day=19049847.736111` vs water `domesticM3Day=19049847.736111112`：需来源负责人给字段优先/更正bytes/hash，不用epsilon。实际取水/处理/管网设施容量、损耗/可供事实若仍缺，按原region/basin/facility、m³或m³/day、有效SimTime/date/source补；配额不是送达                                                                                            |
+| 电力：70国power IDs及对应adopted设施                                                | capacity已在源中，D04已准合法initialSOC×MWh作为t0能量及缺电优先级；平均MW非peak                                | 只补未能由原资产/recipe对应的plant/grid commissioning/availability、fuel rate（明确燃料单位/MWh）、效率/损耗ratio、tech、真实连接及首段SimTime/peak-demand inputs。SOC/容量不重索取，不虚构历史充电；facility/source对应缺失首先是工程证明缺口                                                                                                                                                                          |
+| 就业：70国与122地区staffing引用                                                     | teachers/medicalWorkers分项已有，冻结审计70国exact合计educationAndHealth，不需50/50；聚合雇主/最大余数规则已定 | 只补仍不可映射的合法position/region/skill/status需求及工资（LC金额/周期/valueDate/source）、budget/payroll事实。工程先按既定规则展开，不另批employment genesis；残余不造岗位、不免费用工                                                                                                                                                                                                                                |
+| Social：122原service IDs、PROJECT-31/35/36引用                                      | 同一设施/社会容量不重复建资产；capacity≠入学/占床/入住/已服务；D04已允许既有状态genesis                        | 初始cohorts/programmes/duration（SimTime）、health demand/backlog/occupied beds、habitable/occupied住房、rent/subsidy（币种/周期）、适用staff/input/budget引用。原规范/来源有的照用，未知保持未展开，不默认满员或0；不编造历史safety事件                                                                                                                                                                                |
+| 矿产：240原deposit IDs、70国/原commodity-unit                                       | 五池、GOV/OP限域权属/既有区块采用已定；累计X非可售库存                                                         | 只补冻结条目真正缺的X/单位语义或技术、设备、许可、投入来源。`runtimeExtractionPerDay=0`不能推出X=0，constructor未接不重新批准全部矿权                                                                                                                                                                                                                                                                                   |
+
+新补件保留 `sourceId/version/valueDate/effectiveSimTime`（按事实适用）、原ID/pointer/单位/主体与fixed bytes/hash；无原件的hash标 **NOT_PROVIDED**。来源负责人解释数值/冲突，有权Owner只采用新增/更正范围；工程负责差异报告。不要上传全体国家所有历史，不合成阳性数据；未齐的具体操作保持BLOCKED。
+
+## 3. 六Office分开验收，Finance不能代替Industry
+
+| Office       | 冻结契约/证据边界                                                                                                          | 剩余工程与输入                                                                                                                                                                                                                                                |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CAPTAIN      | `/v1/office-command`：`CAPTAIN_POLITICAL_CAPITAL_ALLOCATE_V1`；manual family `CAPTAIN_CABINET`，非全角色完成               | 原族source/授权/intake→Worker→FINAL→projection链；政治资本/当前绑定来自已采用状态，不另造宏观规则                                                                                                                                                             |
+| CENTRAL_BANK | 同路由 `CORE_CENTRAL_BANK_OMO_V1` / `CENTRAL_BANK_MONETARY_POLICY`                                                         | OMO实际可用资产/账户/current authority，金融源依赖I01/I02；单族不证明完整政策角色                                                                                                                                                                             |
+| SOCIAL       | 同路由 `CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1` / `SOCIAL_LABOUR`；PLAN非MATCH                                             | I03岗位/预算/服务源；自动MATCH producer/唯一人员链是工程，不请Owner发明就业规则                                                                                                                                                                               |
+| FINANCE      | `/v1/financial-intake`仅 `INSPECT/SIGN_BUYER_FINANCE/BIND_REFERENCE`                                                       | 复用原narrow事务/FINAL，不称预算、税、债全产品完成；I01/I02不替代接线                                                                                                                                                                                         |
+| TRADE        | 同路由 `REGISTER/INSPECT/SIGN_SELLER_TRADE/SIGN_BUYER_TRADE/ENQUEUE/READ`；`CORE_GOODS_TRANSFER_V1`                        | 正式Ship/Delivery producer、履约/交付与授权结果；fixture-scheduled非正式producer，真实订单/权属/物流事实按原契约                                                                                                                                              |
+| INDUSTRY     | 当前无 `/v1/office-command` parser/durable executable family；建设演练只读，结果 `COMMITTED_PRODUCTION_SOURCE_UNAVAILABLE` | 必须实现原Project proposal/审批/施工/commission/source→receipt/projection。F提议 `CORE_INDUSTRY_PROJECT_PROPOSE_V1/CORE_PROJECT_CONSTRUCTION_PROGRESS_V1/CORE_PROJECT_COMMISSION_V1` 仍未注册工程候选。I03 recipe/cost是输入；缺family是工程，Finance不能替代 |
+
+共同权限链 `user → World → Country → Office/Seat → Permission`。正式发布时需服务端合法 `auth_subject/world_id/country_id/office_id/team_id/capability/authorization_version/active`，以及seat/admission/seed/model/replay/current head/entitlement精确对应。350经济主体、队名、URL、旧token、六项导航不能授权。
+
+**玩家名单现在不是Owner交件阻塞**。隔离测试若缺实际已验证管理员身份，由授权管理员在原服务端入口选定；聊天/仓库不收成员详情、不猜user_id。合法注册、revision/revocation、coherent read、FINAL/recovery、浏览器清私有DOM均为C/G/E工程。
+
+## 4. 持久权限：先固定受审对象，再安全执行
+
+E `1883d65ba4756a243118e90f458b0845f698dd9a` 经D `D_E01_DELTA_REVIEW`批准，**仅设计/synthetic oracle**。E正做actual World isolated LOCAL_CANDIDATE；未注册正式SQL/DCL、未provision生产角色。以下是拟议对象，不是已有grants：
+
+| 精确对象                               | 目的/最小上界                                                                                                                                                               | 阻断步骤与安全交付                                                                                                |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `world_v2_runtime_reader`              | 设计R显式列SELECT、subject/current-revision/RLS；无DML/DDL/mutation EXECUTE                                                                                                 | 正式authenticated reads；受审DCL后DB管理人经运维入口provision，不在聊天提供连接串                                 |
+| `world_v2_office_intake`               | binding/S/Q受限读；仅 `world_v2.lock_office_command_cutoff`（14 typed params）/`world_v2.register_office_command`（24 typed params）固定签名EXECUTE，无直接INSERT/UPDATE    | 三个原manual family登记；完整签名按固定E设计，不把新机制扩大到staged financial                                    |
+| `world_v2_intake_function_owner`       | NOLOGIN/非表owner；S INSERT/SELECT、Q四列INSERT/固定SELECT；head.world_version/authz.active/entitlement.active的UPDATE-column权限仅行锁，不实际改值；无submission UPDATE    | definer锁序/current authority/原子S+Q；actual writer/RLS/phantom条件须工程证明，synthetic oracle不能替代          |
+| `world_v2_runtime_executor`            | 原X显式event/posting/receipt/head/outbox/materialization/queue/lease列操作；现有 `world_v2.acquire_world_writer_lease`、`world_v2.assert_world_writer_commit_guard`固定签名 | 唯一Worker消费/commit；不兼任reader/intake/schema/bootstrap/seat/admission publisher                              |
+| `world_v2_seat_publisher`              | authz/seat只读、拟 `world_v2.bind_runtime_read_seat`；无直接seat INSERT/active UPDATE                                                                                       | current assignment→seat。独立NOLOGIN function-owner名/最终签名未固定：工程先交受审契约，不请Owner猜名或给通用写权 |
+| `world_v2_opening_admission_publisher` | seed/head/admission/lineage受限SELECT；**当前不请求EXECUTE/INSERT**                                                                                                         | durable authority/revoke-at-commit未闭合，veto保留；未来publication primitive/owner grants未固定，不批准未知权限  |
+| `main-site-release-chain`              | 既有逻辑唯一schema发布者，**不是拟创建DB login名**；只走注册exact caller/artifact                                                                                           | 生产发布前prefix/catalog readback、候选注册及当次授权；实际DB role未核实，不读旧站凭据、不建第二发布链            |
+
+所有runtime拟议角色NOINHERIT/NOSUPERUSER/NOBYPASSRLS/NOCREATEDB/NOCREATEROLE/NOREPLICATION，无CREATE、无owner/schema-publisher/runtime相互membership；NOLOGIN owner不变运行login。LOGIN/轮换/撤销由安全运维入口配置，不借超级用户放宽RLS。完整列矩阵/typed function signatures以固定E设计SHA256 `5603d7c380ac748687452ebf9315083703eeafe948de196f25d140458ae52fd8`为限，本文不扩大它。
+
+| 绑定/注册对象                    | 已知边界、仍缺什么                                                                                                                                                                                                       | 执行人/安全通道                                                                                                                                                                                                                                                  |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WORLD_EXECUTOR`                 | API→内部executor的server-owned service binding，固定内部 `/internal/v1/office-command`、`/internal/v1/financial-intake`、`/internal/v1/command-recovery`；非公网fallback                                                 | G交受审host target/composition，操作人以后在受控平台绑定；不请Owner选架构或提供任意转发URL                                                                                                                                                                       |
+| DB/host配置                      | 已有名 `RUNTIME_MODE/readerConnectionString/intakeConnectionString/readerRole/writerRole/runtimeReaderRole/authorizationPublisherRole/publisherRole`；正式reader/intake/executor Hyperdrive/secret **binding IDs未定义** | 名称/类型/角色映射/cache关闭/TLS契约是host工程前置，不写成Owner没给secret。候选批准后操作人经secret manager配置。`CLOUDFLARE_API_TOKEN`非DB凭据，TEST_ONLY不迁正式                                                                                               |
+| 唯一schema caller/manifest       | 0023策略只允许固定22→23候选；caller未注册，实际生产prefix/catalog UNKNOWN；runtime-read-binding-storage proposal未注册且veto保留                                                                                         | 唯一发布者先只读核验namespace/schema_release完整prefix/hash/source/order/catalog，再注册受审后继exact migration ID/artifact hash/target/phase/lock/confirmation；同事务校验/append ledger/readback。不盲发17/23项、不顺带补0022；ACK未知 `UNKNOWN_STOP_NO_RETRY` |
+| 私有admission registry/bootstrap | 原purpose仅 `AUTHORIZE_OFFICIAL_OPENING_ADMISSION_PUBLICATION`，绑定source digest/World/seed/model/replay/current authority                                                                                              | 工程先闭合durable revocation/commit和私有入口；有权人以后注册固定publication，source receipt不代替签名。schema发布/bootstrap/admission/runtime分开身份、事务、授权                                                                                               |
+| 隔离staging/TLS目标              | ADR18路线已定；F继承同目标原件，旧TLS `ERR_SSL_DECRYPTION_FAILED_OR_BAD_RECORD_MAC` FAIL保留；local PG/superuser非正式角色/TLS证据                                                                                       | 只在真实目标缺失时，有权运维人在安全平台给固定环境/endpoint identity/cert/角色映射与只读readback；secret不入文档。不重问ADR、不要求无关全量重跑                                                                                                                  |
+
+## 5. 已派发工程，不转成Owner审批/补数据
+
+| 执行方 | 固定依据/当前责任                                                                                                                                                                                                                                                                                      | 不能据此声称                                                                               |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| A / B  | A计算切片 `36ee5c1…` 经B `APPROVED—source-only`，两计算模块与固定main字节相同（不是该SHA为main祖先的声明）；A采用设计 `ba92a1b…` 经F `APPROVED_WITH_EXACT_IMPLEMENTATION_BOUNDARIES`。B负责V2 source/receipt loader、共用只读assembler、preflight/selectedSeed消费，保留V1/hash DAG/其他domain blocker | 已有真实补充采用/正式seed/World ready；不再写A计算器待独审                                 |
+| E      | D已关闭E-01设计锁序问题；actual World isolated SQL/DCL/最小权限候选及独审须完成                                                                                                                                                                                                                        | synthetic24+21不是生产permission oracle或正式grants                                        |
+| G      | F对产品 `89c4446…`/证据 `3249064…` 独审仍 `CHANGES_REQUIRED`：F-G-01金融action/state矩阵、F-G-02 current-seat 1024字节上限；G修复后再独审                                                                                                                                                              | 两项不需Owner新规则/凭据；slice1/2不完成六Office，constructor3/4与Clock consumer后继仍HOLD |
+| C      | 总控PR132 `5a2d7a0…` 最小CI workflow修复/独审/发布流程由工程处理；真实browser session/seat消费按受审边界完成                                                                                                                                                                                           | 不请Owner批准CI语法，不把local PASS写成该候选CI已绿                                        |
+| D / F  | 复用lease/fence/Clock恢复、V09 native/CI来源及六Office缺口；Industry按既有Project规范补family/lifecycle                                                                                                                                                                                                | 不重跑无关full/native/420，不重定10×/pause/catch-up/Industry规则                           |
+
+交付顺序：来源负责人经现有受控文件路径交I01/实际I03补件 → 工程给逐ID差异 → Human Owner只采用真实新增bytes与精确World scope（I02） → 工程独审固定host/SQL/DCL/caller → 有权运维人另行安全授权/配置/只读核验。未知原件、真实身份、生产prefix保持未知；前一步采用不自动解锁下一权限或启动gate。
+
+`OWNER_INPUT_CATALOG = PREPARED`；`ALL_SIX_OFFICES_COMPLETE = NOT_ESTABLISHED`；`START_READY = NOT_ESTABLISHED`；`PRODUCTION = HOLD`。
+
+本轮只改本文和独立核验回执；不动地图、runtime、经济规则、schema/migration/status、玩家资料、凭据或数据库；不提交/推送/合并地图、不发布UI，不等待其他窗口。

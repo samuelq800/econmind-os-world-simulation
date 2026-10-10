@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "G_START_READY_SOURCE_AUDIT_V1",
+  "date": "2026-10-10",
+  "base": "42991acfee9d0eacc702ba47a380c938a4516f03",
+  "baseTree": "1254c4144279717c9075e9bbf07b4b2ac4710558",
+  "deployedSource": "e7ecf45184baad69a37e2e51fff8862a635267dc",
+  "deployedTree": "8ac834bca15b11ef517154133c4e6740ae87ff59",
+  "deploymentEvidence": "Repository publication record only; no live query in this audit",
+  "newTestsRun": 0,
+  "productionIo": false,
+  "gateChanged": false,
+  "sourceInspection": {
+    "chunk_id": "b1417a",
+    "wall_time_seconds": 0.000010334,
+    "exit_code": 0,
+    "original_token_count": 561,
+    "output": "42991acfee9d0eacc702ba47a380c938a4516f03\n1254c4144279717c9075e9bbf07b4b2ac4710558\ne7ecf45184baad69a37e2e51fff8862a635267dc\n8ac834bca15b11ef517154133c4e6740ae87ff59\nA\tapps/world-api/src/integration/nonactivated-runtime-api-host.ts\nM\tapps/world-api/src/runtime-preparation/cloudflare-jwks-verifier.ts\nA\tapps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts\nA\tapps/world-worker/src/preparation/official-opening-bundle-loader.ts\nA\tapps/world-worker/src/preparation/official-opening-bundle-preflight.ts\nM\tconfig/cloudflare/world-runtime-targets.json\n100644 blob cb33b1abe2cda1b71e297710479d295cc518f3bd\tapps/world-api/cloudflare/runtime-api.mjs\n100644 blob 7811e9cb81e7baf73ba72ac55106095af75f54de\tapps/world-api/src/runtime-preparation/hold-api-server.ts\n100644 blob ddf6087632daa0d595bc2aaa11dbe8c257e10be8\tapps/world-worker/src/runtime-preparation/hold-executor.ts\n100644 blob cb33b1abe2cda1b71e297710479d295cc518f3bd\tapps/world-api/cloudflare/runtime-api.mjs\n100644 blob 7811e9cb81e7baf73ba72ac55106095af75f54de\tapps/world-api/src/runtime-preparation/hold-api-server.ts\n100644 blob ddf6087632daa0d595bc2aaa11dbe8c257e10be8\tapps/world-worker/src/runtime-preparation/hold-executor.ts\napps/world-api/src/integration/nonactivated-runtime-api-host.ts:180:export function createNonactivatedRuntimeApiHost(\napps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts:37:export async function withCloudflarePostgresPools<Result>(\napps/world-worker/src/preparation/durable-command-consumption.ts:554:    startPreparation(): void {\napps/world-worker/src/preparation/durable-command-consumption.ts:559:    consumeOnce(): Promise<DurableConsumptionStep> {\napps/world-worker/src/intake/postgres-office-command-intake.ts:41:  createManualOfficeIntakeRuntime,\napps/world-worker/src/intake/manual-office-intake-runtime.ts:41:export function createManualOfficeIntakeRuntime(\napps/world-worker/src/preparation/isolated-financial-runtime-composition.ts:191:        consumer.startPreparation();\napps/world-worker/src/preparation/isolated-financial-runtime-composition.ts:201:    async consumeOnce(): Promise<\napps/world-worker/src/preparation/isolated-financial-runtime-composition.ts:211:        const step = await consumer.consumeOnce();\n"
+  }
+}

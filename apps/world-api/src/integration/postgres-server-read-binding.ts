@@ -1,7 +1,24 @@
+import { trackRequestCompletion } from '../runtime-preparation/request-completion.js';
+import { createPersistedReadBindingConsumer } from './postgres-full-read-provider.js';
+import {
+  CurrentSeatReadError,
+  enumerateCurrentSeatSelectors,
+} from './authenticated-current-seat-reader.js';
+import {
+  readManualRecoveryFrom,
+  type ManualRecoverySnapshotRequest,
+} from './authenticated-command-recovery-reader.js';
 import { createHash } from 'node:crypto';
 import type { Pool, PoolClient } from 'pg';
-import { canonicalSerialize, parseOpeningSeed } from '@econmind/core';
-import type { ServerReadBindingPort } from './https-authenticated-read-composition.js';
+import {
+  DomainError,
+  canonicalSerialize,
+  parseOpeningSeed,
+} from '@econmind/core';
+import type {
+  ServerReadBindingPort,
+  ServerVerifiedReadBinding,
+} from './https-authenticated-read-composition.js';
 import { parseSupabaseAuthSubject } from './identity.js';
 import { WorldReadFailure } from './transport.js';
 
@@ -268,20 +285,26 @@ export function createPostgresServerReadBindingSnapshotReader(input: {
     ].includes(input.readerRole)
   )
     throw new Error('POSTGRES_BINDING_READER_ROLE_REQUIRED');
-  async function read<Result>(
-    request: Request,
+  type SnapshotRequest = Pick<
+    Request,
+    'verifiedSubject' | 'worldId' | 'signal'
+  >;
+  async function run<Result>(
+    request: SnapshotRequest,
     consume: (
-      facts: Readonly<ExistingPostgresReadBindingFacts>,
       executor: PostgresBindingSnapshotExecutor,
     ) => Promise<Result | null>,
+    preserveDenials = false,
   ): Promise<Result | null> {
     if (request.signal.aborted)
       throw new WorldReadFailure('CANCELLED', 'Binding read cancelled', false);
-    if (!validRequest(request)) return null;
+    parseSupabaseAuthSubject(request.verifiedSubject);
+    if (!id(request.worldId)) return null;
     let client: PoolClient | undefined,
       released = false,
       abandoned = false,
-      open = false;
+      open = false,
+      permissionDenied = false;
     const release = (destroy: boolean) => {
       if (client && !released) {
         released = true;
@@ -310,10 +333,22 @@ export function createPostgresServerReadBindingSnapshotReader(input: {
         client = acquired;
         const query = async (sql: string, values?: readonly unknown[]) => {
           if (abandoned || request.signal.aborted) throw new Error('CANCELLED');
-          const result = await acquired.query(
-            sql,
-            values ? [...values] : undefined,
-          );
+          let result;
+          try {
+            result = await acquired.query(
+              sql,
+              values ? [...values] : undefined,
+            );
+          } catch (error) {
+            if (
+              error &&
+              typeof error === 'object' &&
+              'code' in error &&
+              error.code === '42501'
+            )
+              permissionDenied = true;
+            throw error;
+          }
           if (abandoned || request.signal.aborted) throw new Error('CANCELLED');
           return result;
         };
@@ -336,35 +371,6 @@ export function createPostgresServerReadBindingSnapshotReader(input: {
           request.verifiedSubject,
         ]);
         await query("select set_config('statement_timeout', '10000', true)");
-        const selector = request.projectionSelector ?? request.finalSelector!;
-        const parameters = request.projectionSelector
-          ? [
-              request.verifiedSubject,
-              request.worldId,
-              request.projectionSelector.classification,
-              request.projectionSelector.scopeKey,
-            ]
-          : [
-              request.verifiedSubject,
-              request.worldId,
-              (selector as NonNullable<Request['finalSelector']>).commandId,
-              (selector as NonNullable<Request['finalSelector']>)
-                .idempotencyKey,
-            ];
-        const scoped = await query(
-          request.projectionSelector
-            ? POSTGRES_PROJECTION_BINDING_FACTS_QUERY
-            : POSTGRES_FINAL_BINDING_FACTS_QUERY,
-          parameters,
-        );
-        let facts: Readonly<ExistingPostgresReadBindingFacts> | null = null;
-        if (scoped.rows.length === 1) {
-          const seeds = await query(POSTGRES_OPENING_HEAD_FACTS_QUERY, [
-            request.worldId,
-          ]);
-          if (seeds.rows.length === 1)
-            facts = mapFacts(scoped.rows[0], seeds.rows[0], request);
-        }
         const executor: PostgresBindingSnapshotExecutor = {
           async query<Row extends object>(
             statement: string,
@@ -374,12 +380,12 @@ export function createPostgresServerReadBindingSnapshotReader(input: {
             return { rows: result.rows as Row[], rowCount: result.rowCount };
           },
         };
-        const result = facts === null ? null : await consume(facts, executor);
+        const result = await consume(executor);
         if (abandoned || request.signal.aborted) throw new Error('CANCELLED');
         await query('commit');
         open = false;
         return result;
-      } catch {
+      } catch (error) {
         if (open && client && !released) {
           try {
             await client.query('rollback');
@@ -394,6 +400,21 @@ export function createPostgresServerReadBindingSnapshotReader(input: {
             'Binding read cancelled',
             false,
           );
+        if (
+          preserveDenials &&
+          (permissionDenied ||
+            (error &&
+              typeof error === 'object' &&
+              'code' in error &&
+              error.code === '42501'))
+        )
+          throw new CurrentSeatReadError('NOT_CONNECTED');
+        if (
+          preserveDenials &&
+          (error instanceof DomainError ||
+            error instanceof CurrentSeatReadError)
+        )
+          throw error;
         throw new WorldReadFailure(
           'UPSTREAM_UNAVAILABLE',
           'Binding database unavailable',
@@ -404,12 +425,162 @@ export function createPostgresServerReadBindingSnapshotReader(input: {
       }
     };
     try {
-      return await Promise.race([operation(), cancelled]);
+      return await Promise.race([
+        trackRequestCompletion(operation()),
+        cancelled,
+      ]);
     } finally {
       request.signal.removeEventListener('abort', onAbort);
     }
   }
-  return Object.freeze({ read });
+  async function factsFrom(
+    executor: PostgresBindingSnapshotExecutor,
+    request: Request,
+    currentHead = false,
+  ) {
+    const p = request.projectionSelector;
+    const f = request.finalSelector;
+    const scoped = await executor.query(
+      p
+        ? POSTGRES_PROJECTION_BINDING_FACTS_QUERY
+        : POSTGRES_FINAL_BINDING_FACTS_QUERY,
+      p
+        ? [
+            request.verifiedSubject,
+            request.worldId,
+            p.classification,
+            p.scopeKey,
+          ]
+        : [
+            request.verifiedSubject,
+            request.worldId,
+            f!.commandId,
+            f!.idempotencyKey,
+          ],
+    );
+    if (scoped.rows.length !== 1) return null;
+    const seeds = await executor.query(POSTGRES_OPENING_HEAD_FACTS_QUERY, [
+      request.worldId,
+    ]);
+    if (seeds.rows.length !== 1) return null;
+    const scope = scoped.rows[0] as Record<string, unknown>,
+      seed = seeds.rows[0] as Record<string, unknown>;
+    if (
+      currentHead &&
+      (scope.projection_world_version !== seed.world_version ||
+        scope.projection_event_sequence !== seed.event_sequence)
+    )
+      return null;
+    return mapFacts(scope, seed, request);
+  }
+  async function read<Result>(
+    request: Request,
+    consume: (
+      facts: Readonly<ExistingPostgresReadBindingFacts>,
+      executor: PostgresBindingSnapshotExecutor,
+    ) => Promise<Result | null>,
+  ) {
+    if (!validRequest(request)) return null;
+    return run(request, async (executor) => {
+      const facts = await factsFrom(executor, request);
+      return facts ? consume(facts, executor) : null;
+    });
+  }
+  async function readCurrentSeats(
+    request: SnapshotRequest,
+    authorizationPublisherRole: string,
+  ) {
+    const hydrate = createPersistedReadBindingConsumer({
+      readerRole: input.readerRole,
+      authorizationPublisherRole,
+    });
+    return run(
+      request,
+      async (executor) => {
+        const selectors = await enumerateCurrentSeatSelectors(
+          executor,
+          request.verifiedSubject,
+          request.worldId,
+        );
+        const bindings = [];
+        for (const projectionSelector of selectors) {
+          const selected: Request = {
+            ...request,
+            projectionSelector,
+            finalSelector: null,
+          };
+          const facts = await factsFrom(executor, selected, true);
+          const binding = facts
+            ? await hydrate(selected, facts, executor)
+            : null;
+          if (!binding)
+            throw new CurrentSeatReadError('READ_BINDING_UNAVAILABLE');
+          bindings.push(binding);
+        }
+        return Object.freeze(bindings);
+      },
+      true,
+    );
+  }
+  async function readManualRecovery(
+    request: ManualRecoverySnapshotRequest,
+    authorizationPublisherRole: string,
+  ) {
+    const hydrate = createPersistedReadBindingConsumer({
+      readerRole: input.readerRole,
+      authorizationPublisherRole,
+    });
+    const dto = request.recovery.originalRequest.request;
+    return run(
+      request,
+      async (executor) => {
+        const selectors = await enumerateCurrentSeatSelectors(
+          executor,
+          request.verifiedSubject,
+          request.worldId,
+        );
+        let binding: ServerVerifiedReadBinding | null = null;
+        for (const projectionSelector of selectors) {
+          const selected: Request = {
+            ...request,
+            projectionSelector,
+            finalSelector: null,
+          };
+          const facts = await factsFrom(executor, selected, true);
+          const current = facts
+            ? await hydrate(selected, facts, executor)
+            : null;
+          const p = request.pins;
+          if (
+            !current ||
+            current.identity.worldId !== p.worldId ||
+            current.identity.modelVersion !== request.modelVersion ||
+            current.seed.seedRef !== p.seedRef ||
+            current.seed.contentHash !== p.contentHash ||
+            current.seed.admissionRef !== p.admissionRef ||
+            BigInt(current.readback.worldVersion) <
+              BigInt(p.minimumWorldVersion)
+          )
+            throw new CurrentSeatReadError('READ_BINDING_UNAVAILABLE');
+          if (
+            current.identity.countryId === dto.countryId &&
+            current.identity.officeId === dto.officeId
+          )
+            binding = current;
+        }
+        if (!binding)
+          throw new CurrentSeatReadError('READ_BINDING_UNAVAILABLE');
+        return readManualRecoveryFrom(
+          executor,
+          request.recovery,
+          binding,
+          request.signal,
+        );
+      },
+      true,
+    );
+  }
+  return Object.freeze({ read, readCurrentSeats, readManualRecovery });
 }
 
 /** Existing facts-only port remains compatible; no persisted authority inferred. */

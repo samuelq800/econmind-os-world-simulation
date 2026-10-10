@@ -92,3 +92,5 @@ export {
   type EconomicReadDenialReason,
   type EconomicReadVisibilitySummary,
 } from './authorization/economic-read-visibility-contract.js';
+export * from './commands/authenticated-current-seat-contract.js';
+export * from './commands/authenticated-command-recovery-contract.js';

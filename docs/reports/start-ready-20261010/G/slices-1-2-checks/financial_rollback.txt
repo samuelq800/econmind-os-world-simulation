@@ -1,0 +1,13 @@
+$ env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH G_NATIVE_FINANCIAL_INTAKE=1 pnpm exec vitest run tests/world-api/authenticated-financial-intake-rollback-uncertainty.test.ts
+
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-nonactivated-runtime-api-host
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  20:00:12
+   Duration  5.19s (tests 83%, transform 14%, import 3%)
+
+
+exit_code=0

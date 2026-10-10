@@ -1,0 +1,5 @@
+Command: pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false
+Toolchain PATH prefix: /private/tmp/econmind-control-tower-toolchain.451x0O
+Working directory: /Users/samuel/Documents/econclub/.econmind-worktrees/g-nonactivated-runtime-api-host
+Exit code: 0
+Captured stdout/stderr:

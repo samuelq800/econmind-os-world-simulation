@@ -1,0 +1,7 @@
+$ env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/core typecheck && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/world-worker typecheck && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/world-api typecheck
+
+$ tsc -p tsconfig.json --pretty false
+$ tsc -p tsconfig.json --pretty false
+$ tsc -p tsconfig.json --pretty false
+
+exit_code=0

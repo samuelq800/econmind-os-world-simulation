@@ -1,0 +1,13 @@
+$ env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH G_NATIVE_EXECUTOR_SLICES=1 pnpm exec vitest run tests/world-api/G-executor-transport.test.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-current-seat-recovery-native.test.ts
+
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-nonactivated-runtime-api-host
+
+
+ Test Files  3 passed (3)
+      Tests  37 passed (37)
+   Start at  19:58:24
+   Duration  20.07s (tests 92%, transform 6%, import 3%)
+
+
+exit_code=0

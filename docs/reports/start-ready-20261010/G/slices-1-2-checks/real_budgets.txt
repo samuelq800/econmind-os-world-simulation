@@ -1,0 +1,13 @@
+$ env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec vitest run tests/world-api/G-request-budget.test.ts
+
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-nonactivated-runtime-api-host
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  20:07:43
+   Duration  18.18s (tests 97%, transform 2%, import 1%)
+
+
+exit_code=0

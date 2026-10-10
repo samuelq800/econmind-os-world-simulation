@@ -1,0 +1,17 @@
+Command: pnpm env:check
+Toolchain PATH prefix: /private/tmp/econmind-control-tower-toolchain.451x0O
+Working directory: /Users/samuel/Documents/econclub/.econmind-worktrees/g-nonactivated-runtime-api-host
+Exit code: 0
+Captured stdout/stderr:
+$ ECONMIND_ENV=local node scripts/assert-safe-environment.mjs
+{
+  "status": "PASS",
+  "environment": "local",
+  "databaseConfigured": false,
+  "validatedViteModes": [
+    "development",
+    "production"
+  ],
+  "linkedSupabaseProject": "NOT_LINKED",
+  "databaseMutationAllowed": false
+}

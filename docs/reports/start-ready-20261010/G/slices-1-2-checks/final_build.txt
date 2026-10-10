@@ -1,0 +1,7 @@
+$ env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/core build && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/world-worker build && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/world-api build
+
+$ tsc -p tsconfig.build.json
+$ tsc -p tsconfig.build.json
+$ tsc -p tsconfig.build.json
+
+exit_code=0

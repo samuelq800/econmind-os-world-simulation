@@ -1,0 +1,15 @@
+$ env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH ECONMIND_ENV=local node scripts/assert-safe-environment.mjs
+
+{
+  "status": "PASS",
+  "environment": "local",
+  "databaseConfigured": false,
+  "validatedViteModes": [
+    "development",
+    "production"
+  ],
+  "linkedSupabaseProject": "NOT_LINKED",
+  "databaseMutationAllowed": false
+}
+
+exit_code=0

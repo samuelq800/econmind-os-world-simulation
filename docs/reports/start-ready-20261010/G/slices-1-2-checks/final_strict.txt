@@ -1,0 +1,4 @@
+$ env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false
+
+
+exit_code=0

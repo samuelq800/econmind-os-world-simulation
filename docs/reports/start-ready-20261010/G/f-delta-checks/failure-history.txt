@@ -1,0 +1,22 @@
+F delta failure history (selected actual diagnostics; not a full historic raw log)
+Date: 2026-10-10 Asia/Shanghai
+
+The initial pre-compaction execution returned a context-truncation result without a recoverable session/result. Its completion is UNKNOWN; it is not counted as a pass.
+
+Recovered rerun command:
+pnpm exec vitest run tests/world-api/G-review-delta.test.ts
+Exit code: 1
+Test Files 1 failed (1)
+Tests 1 failed | 14 passed (15)
+Start at 20:35:13
+Duration 520ms
+
+FAIL tests/world-api/G-review-delta.test.ts > F-G-02 approved current-seat1024-byte cap > 1025 bytes; real streamed=true
+AssertionError: expected false to be true // Object.is equality
+Expected true; Received false
+at tests/world-api/G-review-delta.test.ts:138:76 (before formatting)
+The response was 413 and JWT/SQL counters were zero; failure was only the fixture's cancel callback assertion. Default ReadableStream prefetch could close the finite source before reader cancellation. Fixture now uses highWaterMark:0 to keep the 1025-byte source open at the excess-byte rejection, allowing the actual cancel callback to be observed. Production body reader unchanged. Final focused run passes all 30 tests, including all 15 new cases.
+
+Two source-discovery commands also failed without validation/product effects: one guessed financial-command-intake-service.ts path did not exist (rg exit2), and one unquoted financial* glob had no matches (shell exit1). Corrected lookup used apps/world-worker/src/intake/postgres-narrow-transfer-intake.ts.
+
+Prior native test instrumentation stall/root cause remains NOT_ESTABLISHED. No native rerun or retrospective dist provenance certification in this delta. Refer to immutable prior packet and F_REVIEW.md for complete previously retained limitations.

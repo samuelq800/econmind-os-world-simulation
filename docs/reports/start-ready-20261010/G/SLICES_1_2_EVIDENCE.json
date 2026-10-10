@@ -1,0 +1,363 @@
+{
+  "schema_version": "G_EXECUTOR_SLICES_1_2_EVIDENCE_V1",
+  "date": "2026-10-10",
+  "timezone": "Asia/Shanghai",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "risk": "P0",
+  "independent_review": "PENDING",
+  "workspace": "/Users/samuel/Documents/econclub/.econmind-worktrees/g-nonactivated-runtime-api-host",
+  "branch": "codex/g-executor-slices-1-2-20261010",
+  "base": {
+    "commit": "42991acfee9d0eacc702ba47a380c938a4516f03",
+    "tree": "1254c4144279717c9075e9bbf07b4b2ac4710558"
+  },
+  "design": {
+    "commit": "f19e8bad4983ae0cd247182b8ce9a0f74315a03d",
+    "tree": "a44880f4f02458be50046e7a54c0426cb0896c5a",
+    "sha256": "6c3244d1c6f03bf42f0ead6b949f91810bbc34c4cd6b5b2313b525e319d51c65",
+    "review_path": "/Users/samuel/Documents/econclub/.econmind-worktrees/world-map-full-integration/docs/reports/start-ready-20261010/B/G_DESIGN_REVIEW_F19E8BAD.md",
+    "review_sha256": "70680ef80cfabfb8d778e8d92c1ef5d45976ad8e67cce2395cddfb032b23ad13",
+    "review_decision": "DESIGN_ONLY_APPROVED_WITH_BOUNDARIES"
+  },
+  "candidate": {
+    "commit": "89c4446722a22b990c410dbc5726eb1a1208fd1a",
+    "tree": "1c645b99de2cd3f608d7ebc980a2780aba320e29",
+    "parent": "f19e8bad4983ae0cd247182b8ce9a0f74315a03d",
+    "files": 25,
+    "product_files": 19,
+    "test_support_files": 6,
+    "insertions": 4296,
+    "deletions": 141,
+    "manifest": [
+      {
+        "path": "apps/world-api/src/integration/authenticated-command-recovery-reader.ts",
+        "sha256": "1e7a87100a90c43ac8081fb2c53cb82641b217b346acf717adb038e522bfb4ab",
+        "bytes": 5949
+      },
+      {
+        "path": "apps/world-api/src/integration/authenticated-command-recovery-service.ts",
+        "sha256": "2f4a61f231777025f3a42bdcf12f70c4aed6881f50c6fa30eca5ecf787644b49",
+        "bytes": 3866
+      },
+      {
+        "path": "apps/world-api/src/integration/authenticated-current-seat-reader.ts",
+        "sha256": "364f19c9ad8f4c24437f2054d1848858d90862dc31d4d7507bba18db2c6c4657",
+        "bytes": 2992
+      },
+      {
+        "path": "apps/world-api/src/integration/authenticated-current-seat-service.ts",
+        "sha256": "ae21ac29a3efa6022f46951e37a02155071fceb096231ee8b0fe0db6ab666317",
+        "bytes": 3826
+      },
+      {
+        "path": "apps/world-api/src/runtime-preparation/bounded-executor-transport.ts",
+        "sha256": "af9a89809d127593bdfa5b0868f425a6c6f181c27213d641799038bbf4187b60",
+        "bytes": 21219
+      },
+      {
+        "path": "apps/world-api/src/runtime-preparation/current-seat-fetch-handler.ts",
+        "sha256": "fc04f717b962000019cf85b5490f0dbbcd453f2bdbe3208918621a35e75338d7",
+        "bytes": 4732
+      },
+      {
+        "path": "apps/world-api/src/runtime-preparation/executor-command-forwarder.ts",
+        "sha256": "874da4bd7f669141e8b7db791100e286af246b551e052f934a01cec7defc2214",
+        "bytes": 8986
+      },
+      {
+        "path": "apps/world-api/src/runtime-preparation/explicit-read-preparation-config.ts",
+        "sha256": "8f8409403d6250b4a745d71d848db0c182e1a049e8fb0874f3f5aed66c9686ac",
+        "bytes": 3811
+      },
+      {
+        "path": "apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts",
+        "sha256": "b2b1d48b0f024490b34d3feb692c45172bed318fb0ee43ddcd24fd3c25a23b17",
+        "bytes": 7778
+      },
+      {
+        "path": "apps/world-api/src/runtime-preparation/request-completion.ts",
+        "sha256": "6f15834de1e985829846352a458bfa6b1ab1f2509a51ebc0768274d69d8a31ee",
+        "bytes": 1513
+      },
+      {
+        "path": "apps/world-worker/src/intake/manual-office-command-intent.ts",
+        "sha256": "edddadbae0323e2ee36cee07021823b0d8443b9b49d03b32707197f920936bc3",
+        "bytes": 3662
+      },
+      {
+        "path": "packages/core/src/commands/authenticated-command-recovery-contract.ts",
+        "sha256": "d5d87c7152c8e87ef88560be82c1db5d374ab8776ca381d2d2b0d920cc632629",
+        "bytes": 2065
+      },
+      {
+        "path": "packages/core/src/commands/authenticated-current-seat-contract.ts",
+        "sha256": "29ba1e0f7c9c4ff70a4c828318feaffa28b055f69ca385fb4e2f6c54c73b5fa8",
+        "bytes": 1121
+      },
+      {
+        "path": "tests/support/G-executor-slices-fixture.ts",
+        "sha256": "58aa195b513867bb8fac4ba97cafdceec157dfde6af1124c2fa5e56fc54ec12c",
+        "bytes": 3767
+      },
+      {
+        "path": "tests/world-api/G-completion-drain.test.ts",
+        "sha256": "9568252e8ff503bc0b8c038ba36c02d3918530a3e16fbf25d5fb7132bbb09265",
+        "bytes": 11549
+      },
+      {
+        "path": "tests/world-api/G-current-seat-recovery-native.test.ts",
+        "sha256": "d1a957607291d22086d3ba8d3a8ae4512065efe0111497e9ca08baf0f30bd597",
+        "bytes": 28486
+      },
+      {
+        "path": "tests/world-api/G-executor-transport.test.ts",
+        "sha256": "3b42d807fe9d1e53d7a0d232ce1a552aa515623eb132e0fd85ca9c62273fa3f6",
+        "bytes": 17052
+      },
+      {
+        "path": "tests/world-api/tsconfig.G-executor-slices.json",
+        "sha256": "2be407f4a7da45d98f4bc81ad8a96fa82a01f580006b0621c35fdf7b887512f6",
+        "bytes": 231
+      },
+      {
+        "path": "apps/world-api/src/integration/authenticated-financial-intake-composition.ts",
+        "sha256": "9022f4d2ece10fb27072b74967c52e6de8eb1cb6ea9ba9cfd4e7040a8969c829",
+        "bytes": 12376
+      },
+      {
+        "path": "apps/world-api/src/integration/authenticated-office-command-service.ts",
+        "sha256": "4421a6f410152f415914bd14b0f51693c69af95082303fd590cacc4bfd684c62",
+        "bytes": 10633
+      },
+      {
+        "path": "apps/world-api/src/integration/postgres-server-read-binding.ts",
+        "sha256": "b8fb4d078b9ea8baea8dbe1537a6aa291add73a58de5fc693cc074e55f87b12e",
+        "bytes": 20932
+      },
+      {
+        "path": "apps/world-api/src/integration/supabase-jwks-signature-verifier.ts",
+        "sha256": "d3b335332bdde41b1b57fe9036ec7ad2fb9feaa5f384210b557fbd45b6fd61eb",
+        "bytes": 14022
+      },
+      {
+        "path": "apps/world-worker/src/intake/postgres-office-command-intake.ts",
+        "sha256": "8d3f5aa403352f22c37181b4e257a07f59845dd069c5411b9d0b3f4e22050ced",
+        "bytes": 22925
+      },
+      {
+        "path": "packages/core/src/index.ts",
+        "sha256": "ed5c7d882fea627416de35ac5bfe2f6d999b2a244a1bd50b3cb0e651b7db0deb",
+        "bytes": 3611
+      },
+      {
+        "path": "tests/world-api/G-request-budget.test.ts",
+        "sha256": "7b732dca55cc2a8886fbc21bbfb05d0f687216fdf0dbc2b5528706772d7d7820",
+        "bytes": 4295
+      }
+    ]
+  },
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "prefix": "/private/tmp/econmind-control-tower-toolchain.451x0O"
+  },
+  "checks": [
+    {
+      "name": "focused",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH G_NATIVE_EXECUTOR_SLICES=1 pnpm exec vitest run tests/world-api/G-executor-transport.test.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-current-seat-recovery-native.test.ts",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/focused.txt"
+    },
+    {
+      "name": "real_budgets",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec vitest run tests/world-api/G-request-budget.test.ts",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/real_budgets.txt"
+    },
+    {
+      "name": "regressions",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec vitest run tests/world-api/authenticated-office-command.test.ts tests/world-api/positive-manual-office-command.test.ts tests/world-api/postgres-server-read-binding.test.ts tests/world-api/supabase-jwks-signature-verifier.test.ts tests/world-api/nonactivated-runtime-api-host.test.ts",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/regressions.txt"
+    },
+    {
+      "name": "financial_rollback",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH G_NATIVE_FINANCIAL_INTAKE=1 pnpm exec vitest run tests/world-api/authenticated-financial-intake-rollback-uncertainty.test.ts",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/financial_rollback.txt"
+    },
+    {
+      "name": "final_strict",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/final_strict.txt"
+    },
+    {
+      "name": "budget_quality",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec eslint tests/world-api/G-request-budget.test.ts && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec prettier --check tests/world-api/G-request-budget.test.ts",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/budget_quality.txt"
+    },
+    {
+      "name": "final_types",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/core typecheck && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/world-worker typecheck && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/world-api typecheck",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/final_types.txt"
+    },
+    {
+      "name": "final_build",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/core build && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/world-worker build && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm --filter @econmind/world-api build",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/final_build.txt"
+    },
+    {
+      "name": "final_lint",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec eslint apps/world-api/src/integration/authenticated-command-recovery-reader.ts apps/world-api/src/integration/authenticated-command-recovery-service.ts apps/world-api/src/integration/authenticated-current-seat-reader.ts apps/world-api/src/integration/authenticated-current-seat-service.ts apps/world-api/src/runtime-preparation/bounded-executor-transport.ts apps/world-api/src/runtime-preparation/current-seat-fetch-handler.ts apps/world-api/src/runtime-preparation/executor-command-forwarder.ts apps/world-api/src/runtime-preparation/explicit-read-preparation-config.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/request-completion.ts apps/world-worker/src/intake/manual-office-command-intent.ts packages/core/src/commands/authenticated-command-recovery-contract.ts packages/core/src/commands/authenticated-current-seat-contract.ts tests/support/G-executor-slices-fixture.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-current-seat-recovery-native.test.ts tests/world-api/G-executor-transport.test.ts apps/world-api/src/integration/authenticated-financial-intake-composition.ts apps/world-api/src/integration/authenticated-office-command-service.ts apps/world-api/src/integration/postgres-server-read-binding.ts apps/world-api/src/integration/supabase-jwks-signature-verifier.ts apps/world-worker/src/intake/postgres-office-command-intake.ts packages/core/src/index.ts",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/final_lint.txt"
+    },
+    {
+      "name": "final_format",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec prettier --check apps/world-api/src/integration/authenticated-command-recovery-reader.ts apps/world-api/src/integration/authenticated-command-recovery-service.ts apps/world-api/src/integration/authenticated-current-seat-reader.ts apps/world-api/src/integration/authenticated-current-seat-service.ts apps/world-api/src/runtime-preparation/bounded-executor-transport.ts apps/world-api/src/runtime-preparation/current-seat-fetch-handler.ts apps/world-api/src/runtime-preparation/executor-command-forwarder.ts apps/world-api/src/runtime-preparation/explicit-read-preparation-config.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/request-completion.ts apps/world-worker/src/intake/manual-office-command-intent.ts packages/core/src/commands/authenticated-command-recovery-contract.ts packages/core/src/commands/authenticated-current-seat-contract.ts tests/support/G-executor-slices-fixture.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-current-seat-recovery-native.test.ts tests/world-api/G-executor-transport.test.ts tests/world-api/tsconfig.G-executor-slices.json apps/world-api/src/integration/authenticated-financial-intake-composition.ts apps/world-api/src/integration/authenticated-office-command-service.ts apps/world-api/src/integration/postgres-server-read-binding.ts apps/world-api/src/integration/supabase-jwks-signature-verifier.ts apps/world-worker/src/intake/postgres-office-command-intake.ts packages/core/src/index.ts",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/final_format.txt"
+    },
+    {
+      "name": "final_boundaries",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm test:boundaries",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/final_boundaries.txt"
+    },
+    {
+      "name": "final_secrets",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH node scripts/check-repository-secrets.mjs",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/final_secrets.txt"
+    },
+    {
+      "name": "final_environment",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH ECONMIND_ENV=local node scripts/assert-safe-environment.mjs",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/final_environment.txt"
+    },
+    {
+      "name": "diff",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/diff.txt"
+    },
+    {
+      "name": "packet_quality",
+      "command": "env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec prettier --check docs/reports/start-ready-20261010/G/SLICES_1_2_IMPLEMENTATION.md docs/reports/start-ready-20261010/G/SLICES_1_2_EVIDENCE.json && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH node scripts/check-repository-secrets.mjs && git diff --check && git diff 42991acfee9d0eacc702ba47a380c938a4516f03 HEAD --check",
+      "exit_code": 0,
+      "raw_output": "slices-1-2-checks/packet_quality.txt"
+    }
+  ],
+  "test_counts": {
+    "new_mechanism_cases": 39,
+    "new_native_cases_included": 22,
+    "existing_regressions": 148,
+    "boundary_cases": 40,
+    "total_distinct_cases": 227,
+    "full_suite": "NOT_RUN",
+    "ci": "NOT_RUN",
+    "workerd_service_binding": "NOT_RUN"
+  },
+  "prior_failures": {
+    "provenance": "Selected diagnostic strings/counts transcribed from this task's tool results; not complete historical terminal logs.",
+    "attempts": [
+      {
+        "stage": "worker build",
+        "exit_code": 1,
+        "diagnostics": [
+          "TS6133: actorId is declared but its value is never read",
+          "TS6133: sha is declared but its value is never read"
+        ],
+        "resolution": "Removed obsolete imports/hash from pure extraction caller."
+      },
+      {
+        "stage": "API build",
+        "exit_code": 1,
+        "diagnostics": [
+          "TS2367: AuthSubject and SupabaseAuthSubject have no overlap",
+          "TS2322: IdempotencyKey | null is not assignable to string",
+          "TS2305: no exported AUTHENTICATED_OFFICE_COMMAND_SCHEMA on main Core entry",
+          "TS4058: AbortSignal cannot be named"
+        ],
+        "resolution": "Explicit string comparison/null rejection, existing contract subpath, named budget return shape."
+      },
+      {
+        "stage": "API build punctuation",
+        "exit_code": 1,
+        "diagnostics": ["TS1005: ',' expected"],
+        "resolution": "Split Pool.end promise construction from Promise.allSettled."
+      },
+      {
+        "stage": "initial native import/strict",
+        "exit_code": 1,
+        "diagnostics": [
+          "Cannot find package @econmind/world-worker/office-command-intake from tests root",
+          "TS2307: Cannot find module @econmind/world-worker/office-command-intake"
+        ],
+        "resolution": "Use existing test pattern: relative built Worker entry; no dependency/package edits."
+      },
+      {
+        "stage": "first native suite",
+        "exit_code": 1,
+        "tests": 19,
+        "passed": 14,
+        "failed": 5,
+        "diagnostics": [
+          "duplicate-office: expected 200 to be 409",
+          "missing-seat: expected true to be false",
+          "3 family CLAIM cases: Command claim must bind the exact active World writer lease holder and fencing token"
+        ],
+        "resolution": "Correct the new same-Office/multiple-capability fixture to assert one binding; obtain actual TEST_ONLY writer lease before claims; fix real recovery defect by enumerating/hydrating every current Office inside the same snapshot."
+      },
+      {
+        "stage": "second native suite",
+        "exit_code": 1,
+        "tests": 21,
+        "passed": 20,
+        "failed": 1,
+        "diagnostics": [
+          "commit-ack loss fixture: expected submissions '1', received '0'"
+        ],
+        "resolution": "Fault was initially injected at the earlier authorization transaction COMMIT. Refine injection to actual submission INSERT/COMMIT; zero-row UNKNOWN was conservative, not a fabricated positive."
+      },
+      {
+        "stage": "targeted native fault-injection attempt",
+        "exit_code": 1,
+        "passed": 0,
+        "failed": 1,
+        "skipped": 20,
+        "diagnostics": [
+          "Test timed out in 30000ms",
+          "afterAll: database g_test_only_intake_1 is being accessed by other users"
+        ],
+        "resolution": "Retired the test's repeated native Pool.connect/client.query monkeypatch in favor of an explicit adapter over an actual owned native Pool. Added defensive test pool cleanup. Stopped exact owned cluster /tmp/g-intake-test-wvBEwP with pg_ctl; verified PG_VERSION=16 and absence of postmaster.pid before removing its directory.",
+        "remaining_uncertainty": "The abandoned test instrumentation's precise stall cause was not established. This failure is retained; later passing checks do not prove arbitrary drivers/ports cannot stall."
+      },
+      {
+        "stage": "strict after transport cleanup refactor",
+        "exit_code": 2,
+        "diagnostics": [
+          "TS18048: upstream is possibly undefined",
+          "TS2345: Response | undefined is not assignable to Request | Response"
+        ],
+        "resolution": "Explicitly reject absent upstream before access; catches malformed JS service binding too."
+      }
+    ]
+  },
+  "limits": [
+    "Unmounted source-only constructors. No Cloudflare entry/config, deployment, host mount, workflow, production registry/issuer, status/gate, database release or public-site change.",
+    "Owned TEST_ONLY PG16 private Unix-socket clusters, TCP disabled, no environment DSN/linked Supabase. Existing native fixture's local admission veto bypass is mechanism evidence only; no official source/admission/production authority.",
+    "Positive manual private-runtime and source-drain checks use real signed JWT + PGlite SQL + original private local/CI runtime; not native authoritative manual source or production runtime construction.",
+    "Native financial SQL, READ ONLY snapshot, native query rejection/client close and actual Pool.end were exercised; driver/backend lifetime outside observed operations is not universally certified.",
+    "Real Node 5s body / shared10s + finite cleanup-tail behavior passed. Arbitrary ignored-abort, unbounded connection/source/Pool.end ports remain unsupported and cannot be enabled. Handlers wait for actual settle and fail closed on exceeded5s cleanup; no hard finite return for a never-settling port is claimed.",
+    "Mandatory read/writer pool ownership is checked; all extra source pools must be explicitly included by future reviewed construction. This transport shell cannot introspect hidden Worker database ownership or authorize production construction.",
+    "Current-seat proves verified JWT claims + this coherent current snapshot, not instantaneous upstream session revocation.",
+    "NOT_FOUND is read-only absence at a snapshot; it never resolves prior UNKNOWN or triggers automatic retry/new identity.",
+    "Slices3/4 HOLD; slice5 platform/mount evidence NOT_RUN. No merge/push/deploy/activation or self approval."
+  ]
+}

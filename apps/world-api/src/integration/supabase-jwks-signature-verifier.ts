@@ -1,3 +1,4 @@
+import { trackRequestCompletion } from '../runtime-preparation/request-completion.js';
 import {
   constants,
   createPublicKey,
@@ -177,6 +178,7 @@ function publicKeys(value: Record<string, unknown>): Keys {
 }
 
 function awaitAbort<T>(operation: Promise<T>, signal: AbortSignal): Promise<T> {
+  trackRequestCompletion(operation);
   if (signal.aborted) {
     // Still observe a late transport rejection (a custom fetch can ignore abort).
     void operation.catch(() => undefined);
@@ -236,7 +238,8 @@ export function createSupabaseJwksSignatureVerifier(input: {
         cache: 'no-store',
       }).then((result) => {
         if (signal.aborted) {
-          void result.body?.cancel().catch(() => undefined);
+          if (result.body)
+            trackRequestCompletion(result.body.cancel()).catch(() => undefined);
           failure();
         }
         return result;
@@ -281,10 +284,13 @@ export function createSupabaseJwksSignatureVerifier(input: {
     } finally {
       // Best effort cleanup cannot prolong authentication; no error contents leak.
       if (reader) {
-        void reader.cancel().catch(() => undefined);
-        reader.releaseLock();
+        const closing = reader;
+        trackRequestCompletion(
+          closing.cancel().finally(() => closing.releaseLock()),
+        ).catch(() => undefined);
       } else {
-        void response.body?.cancel().catch(() => undefined);
+        if (response.body)
+          trackRequestCompletion(response.body.cancel()).catch(() => undefined);
       }
     }
   }
@@ -317,6 +323,7 @@ export function createSupabaseJwksSignatureVerifier(input: {
         }
       }),
     };
+    trackRequestCompletion(mine.promise);
     pending = mine;
     return mine;
   }
