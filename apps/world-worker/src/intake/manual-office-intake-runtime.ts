@@ -8,6 +8,12 @@ import {
 import { PostgresTransactionError } from '../persistence/postgres-sql-database.js';
 import type { SqlDatabase } from '../persistence/sql-database.js';
 import {
+  boundProductionManualIntakeRuntime,
+  isProductionManualIntakeRuntime,
+  trackWorkerRequestCompletion,
+  type ProductionManualIntakeRuntime,
+} from '../runtime-preparation/production-world-command-host.js';
+import {
   createDurableCommandConsumptionPreparation,
   type DurableConsumptionClock,
 } from '../preparation/durable-command-consumption.js';
@@ -126,33 +132,43 @@ export function createManualOfficeIntakeRuntime(
   return runtime;
 }
 export function boundManualOfficeIntakeRuntime(
-  runtime: ManualOfficeIntakeRuntime | null | undefined,
+  runtime:
+    | ManualOfficeIntakeRuntime
+    | ProductionManualIntakeRuntime
+    | null
+    | undefined,
   input: {
     pool: Pick<Pool, 'connect'>;
     clock: DurableConsumptionClock;
     worldId: string;
   },
-): runtime is ManualOfficeIntakeRuntime {
+): runtime is ManualOfficeIntakeRuntime | ProductionManualIntakeRuntime {
   if (!runtime) return false;
-  const construction = constructions.get(runtime);
+  if (isProductionManualIntakeRuntime(runtime))
+    return boundProductionManualIntakeRuntime(runtime, input);
+  const localRuntime = runtime as ManualOfficeIntakeRuntime;
+  const construction = constructions.get(localRuntime);
   return (
     !!construction &&
     construction.intakePool === input.pool &&
     construction.clock === input.clock &&
     construction.worldId === input.worldId &&
-    ['PREPARED', 'READY'].includes(runtime.consumer.state())
+    ['PREPARED', 'READY'].includes(localRuntime.consumer.state())
   );
 }
 export async function preflightManualOfficeIntakeRuntime(
-  runtime: ManualOfficeIntakeRuntime,
+  runtime: ManualOfficeIntakeRuntime | ProductionManualIntakeRuntime,
   command: CanonicalCommand,
   observedAtReal: string,
 ): Promise<boolean> {
-  const construction = constructions.get(runtime);
+  // 3A installs no formal source constructor and cannot pass this branch.
+  if (isProductionManualIntakeRuntime(runtime)) return false;
+  const localRuntime = runtime as ManualOfficeIntakeRuntime;
+  const construction = constructions.get(localRuntime);
   if (
     !construction ||
     construction.worldId !== command.worldId ||
-    !['PREPARED', 'READY'].includes(runtime.consumer.state())
+    !['PREPARED', 'READY'].includes(localRuntime.consumer.state())
   )
     return false;
   const composition = createManualOfficeCommandComposition({
@@ -164,8 +180,10 @@ export async function preflightManualOfficeIntakeRuntime(
   });
   if (!composition) return false;
   try {
-    await composition.assertSourceBeforeClaim(observedAtReal);
-    return ['PREPARED', 'READY'].includes(runtime.consumer.state());
+    await trackWorkerRequestCompletion(
+      composition.assertSourceBeforeClaim(observedAtReal),
+    );
+    return ['PREPARED', 'READY'].includes(localRuntime.consumer.state());
   } catch (error) {
     if (
       isManualOfficeSourceMissing(error) ||

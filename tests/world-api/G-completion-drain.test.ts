@@ -4,6 +4,7 @@ import { createExecutorCommandForwarder } from '../../apps/world-api/src/runtime
 import { createInternalExecutorCommandHandler } from '../../apps/world-api/src/runtime-preparation/internal-executor-command-handler.js';
 import { createAuthenticatedCurrentSeatService } from '../../apps/world-api/src/integration/authenticated-current-seat-service.js';
 import { RequestCompletion } from '../../apps/world-api/src/runtime-preparation/request-completion.js';
+import { trackWorkerRequestCompletion } from '../../apps/world-worker/dist/runtime-preparation/production-world-command-host-exports.js';
 import {
   EXECUTOR_PATHS,
   TRANSPORT_VERSION,
@@ -15,6 +16,120 @@ import {
   jsonRequest,
 } from '../support/G-executor-slices-fixture.js';
 describe('G actual promise completion and cleanup failure', () => {
+  it('already expired budgets retain ordered protocol rejection with zero body/JWT/SQL', async () => {
+    const f = await fixture();
+    let connects = 0,
+      fetches = 0,
+      ends = 0;
+    for (const invalidVersion of [true, false]) {
+      const pool = {
+        connect: async () => {
+          connects++;
+          throw new Error('NO_SQL');
+        },
+        end: async () => {
+          ends++;
+        },
+      } as unknown as Pool;
+      const read = {
+        ...readConfig(f.config),
+        pool,
+        auth: {
+          ...f.config.auth,
+          fetch: (async () => {
+            fetches++;
+            throw new Error('NO_JWKS');
+          }) as typeof fetch,
+        },
+      };
+      const handler = createInternalExecutorCommandHandler({
+        read,
+        office: null,
+        financial: null,
+        ownedPools: [pool],
+      });
+      const response = await handler(
+        new Request(EXECUTOR_PATHS['/v1/command-recovery'], {
+          method: 'POST',
+          headers: {
+            'x-econmind-forward-version': invalidVersion
+              ? 'WRONG'
+              : TRANSPORT_VERSION,
+            'x-econmind-deadline-ms': String(Date.now() - 1),
+          },
+          body: 'not JSON',
+        }),
+      );
+      expect(response.status).toBe(invalidVersion ? 400 : 504);
+    }
+    expect({ connects, fetches, ends }).toEqual({
+      connects: 0,
+      fetches: 0,
+      ends: 2,
+    });
+  });
+  it('actual internal handler joins Worker async-context work before ending its owned pool', async () => {
+    const f = await fixture(),
+      entered = deferred(),
+      late = deferred();
+    let workerSettled = false,
+      ended = false,
+      returned = false;
+    const pool = {
+      connect: async () => {
+        trackWorkerRequestCompletion(
+          late.promise.then(() => {
+            workerSettled = true;
+          }),
+        );
+        entered.resolve();
+        throw new Error('TEST_ONLY_UNAVAILABLE_SQL');
+      },
+      end: async () => {
+        expect(workerSettled).toBe(true);
+        ended = true;
+      },
+    } as unknown as Pool;
+    const read = { ...readConfig(f.config), pool };
+    const handler = createInternalExecutorCommandHandler({
+      read,
+      office: null,
+      financial: null,
+      ownedPools: [pool],
+    });
+    const original = f.envelope();
+    const request = new Request(EXECUTOR_PATHS['/v1/command-recovery'], {
+      method: 'POST',
+      headers: {
+        authorization: 'Bearer ' + f.token(),
+        'content-type': 'application/json',
+        'x-econmind-forward-version': TRANSPORT_VERSION,
+        'x-econmind-deadline-ms': String(Date.now() + 10000),
+      },
+      body: JSON.stringify({
+        schemaVersion: 'world-command-recovery-v1',
+        requestId: original.requestId,
+        request: {
+          worldId: f.request.worldId,
+          commandId: f.request.commandId,
+          idempotencyKey: f.request.idempotencyKey,
+          originalRequest: original,
+        },
+      }),
+    });
+    const response = handler(request).then((r) => {
+      returned = true;
+      return r;
+    });
+    await entered.promise;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(ended).toBe(false);
+    expect(returned).toBe(false);
+    late.resolve();
+    expect((await response).status).toBe(503);
+    expect(ended).toBe(true);
+    expect(f.queries).toHaveLength(0);
+  });
   it('invalid upstream headers and declared oversize still drain actual response body cancellation', async () => {
     const f = await fixture();
     for (const oversized of [false, true]) {

@@ -13,10 +13,7 @@ import {
   explicitReadConfig,
   type ExplicitReadPreparationConfig,
 } from './explicit-read-preparation-config.js';
-import {
-  RequestCompletion,
-  trackRequestCompletion,
-} from './request-completion.js';
+import { ExecutorRequestResourceScope } from './executor-request-resources.js';
 import {
   EXECUTOR_PATHS,
   TRANSPORT_VERSION,
@@ -109,7 +106,6 @@ export function createInternalExecutorCommandHandler(
         'REQUEST_CONTEXT_RETIRED',
       );
     used = true;
-    const completion = new RequestCompletion();
     let requestId = ZERO_REQUEST_ID,
       response: Response | undefined,
       cleanupExceeded = false;
@@ -122,8 +118,10 @@ export function createInternalExecutorCommandHandler(
       request.signal,
       valid ? Number(supplied) : Date.now() - 1,
     );
+    const resources = new ExecutorRequestResourceScope(Infinity, budget.signal);
+    for (const pool of ownedPools) resources.own(pool);
     try {
-      response = await completion.run(async () => {
+      const execute = async () => {
         try {
           if (request.method !== 'POST')
             throw new ExecutorTransportError(405, 'METHOD_NOT_ALLOWED');
@@ -177,26 +175,25 @@ export function createInternalExecutorCommandHandler(
               : 'INVALID_REQUEST',
           );
         }
-      });
+      };
+      // Already-aborted requests still execute only the original ordered
+      // protocol rejection checks, before body/JWT/SQL. No resource run starts.
+      response = await (resources.signal.aborted
+        ? execute()
+        : resources.run(execute));
     } finally {
       budget.abort();
       const tail = setTimeout(() => {
         cleanupExceeded = true;
       }, 5000);
       try {
-        await completion.drain();
-        const closing = [...new Set(ownedPools)].map((pool) =>
-          trackRequestCompletion(Promise.resolve().then(() => pool.end())),
-        );
-        const closed = await Promise.allSettled(closing);
-        if (closed.some((r) => r.status === 'rejected')) cleanupExceeded = true;
-        await completion.drain();
+        await resources.close();
       } finally {
         clearTimeout(tail);
         budget.close();
       }
     }
-    if (cleanupExceeded || completion.cleanupFailed()) {
+    if (cleanupExceeded || resources.cleanupFailed()) {
       if (key === '/v1/financial-intake' && response) {
         const b = (await response.clone().json()) as {
           state?: { status?: string };
