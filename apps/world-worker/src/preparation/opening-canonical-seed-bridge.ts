@@ -662,6 +662,15 @@ export function openingV2AssemblyIntentFingerprint(input: unknown): string {
   return hash({ ...assembly, countries });
 }
 
+/** Fingerprint compatibility only, never an adoption proof or seed authority. */
+export function hasOriginalFinancialCandidateFingerprint(
+  candidate: FormalFinancialCandidate,
+): boolean {
+  const { fingerprint, ...candidateBody } = candidate;
+  // Original producer hashes plain canonical JSON, not the V1 domain prefix.
+  return 'sha256:' + sha(canonicalSerialize(candidateBody)) === fingerprint;
+}
+
 /** Read-only V2 bridge; uses original producer output, not a new calculator.
  * Source-adoption proof cannot replace source/inventory equality or Core rebuild. */
 export function prepareFinancialSupplementOpeningSeed(input: {
@@ -673,9 +682,9 @@ export function prepareFinancialSupplementOpeningSeed(input: {
     throw Error('GENUINE_FINANCIAL_ADOPTION_REQUIRED');
   const { proof, candidate } = input;
   const a = clone<OpeningCanonicalSeedAssemblyV2>(input.assembly);
-  const { fingerprint, ...candidateBody } = candidate;
+  const { fingerprint } = candidate;
   if (
-    hash(candidateBody) !== fingerprint ||
+    !hasOriginalFinancialCandidateFingerprint(candidate) ||
     fingerprint !== proof.candidateFingerprint ||
     candidate.contractFingerprint !== proof.contractFingerprint ||
     candidate.requestedWorldId !== proof.worldId ||
