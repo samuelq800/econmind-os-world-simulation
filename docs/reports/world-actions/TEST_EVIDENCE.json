@@ -1,0 +1,299 @@
+{
+  "schema_version": "WORLD_ACTIONS_HOLD_EVIDENCE_V1",
+  "implementation": {
+    "commit": "ad6fbda42ef26822f21810973cfb759a0b9c18fb",
+    "tree": "81dd9ebb22c6ab31976d0d3685a8a0ff27f403f5",
+    "base": "c74744b21d17bb47e960ff73fe24561884f4f408",
+    "status": "IMPLEMENTED_UNVERIFIED",
+    "risk": "P0",
+    "independent_review": "PENDING",
+    "pull_request": "https://github.com/samuelq800/econmind-os-world-simulation/pull/129"
+  },
+  "environment": {
+    "local": "Windows PowerShell; isolated managed worktree",
+    "ci": "macos-15 official full check; ubuntu-latest workerd preparation",
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "wrangler": "4.148.0",
+    "supabase_cli": "2.115.0",
+    "production_database_access": false
+  },
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "environment": "Windows",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node --check scripts/world-runtime-actions.mjs",
+      "environment": "Windows",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec eslint scripts/world-runtime-actions.mjs tests/foundation/world-runtime-actions.test.ts",
+      "environment": "Windows",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec vitest run tests/foundation/world-runtime-actions.test.ts",
+      "environment": "Windows",
+      "exit_code": 0,
+      "result": "PASS",
+      "tests": 20
+    },
+    {
+      "command": "actionlint1.7.7 -shellcheck= -pyflakes= .github/workflows/world-runtime-actions.yml",
+      "environment": "Windows",
+      "exit_code": 0,
+      "result": "PASS",
+      "optional_shellcheck_pyflakes": "NOT_RUN"
+    },
+    {
+      "command": "prettier --check changed workflow/runbook/report",
+      "environment": "Windows",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/check-repository-secrets.mjs",
+      "environment": "Windows",
+      "exit_code": 0,
+      "result": "PASS",
+      "scanned_files": 2347
+    },
+    {
+      "command": "pnpm check (unmodified caller)",
+      "environment": "GitHub Actions macos-15",
+      "exit_code": 0,
+      "result": "PASS",
+      "execution_status": "COMPLETED",
+      "tests": {
+        "passed": 3092,
+        "failed": 0,
+        "skipped": 154,
+        "duration_seconds": 911.08
+      },
+      "includes": [
+        "lint",
+        "format",
+        "typecheck",
+        "full suite",
+        "official edge",
+        "boundaries",
+        "environment",
+        "migration validation",
+        "disposable rehearsal",
+        "foundation policy",
+        "secrets",
+        "balanced candidate",
+        "authoritative UI",
+        "build"
+      ]
+    },
+    {
+      "command": "fixed-source build, Wrangler dry-run, original workerd check, helper preparation",
+      "environment": "GitHub Actions",
+      "exit_code": 0,
+      "result": "PASS",
+      "workerd_checks": 11
+    },
+    {
+      "command": "verifyArtifact on downloaded actual CI artifact",
+      "environment": "Windows",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "Cloudflare CI publication",
+      "environment": "GitHub Actions",
+      "exit_code": null,
+      "result": "NOT_RUN",
+      "reason": "No CI deployment Token; PR publish job skipped"
+    },
+    {
+      "command": "wrangler4.148.0 deploy <actual downloaded executor.js/api.js> --no-bundle --dry-run --env staging --config <unchanged reviewed config>",
+      "environment": "Windows",
+      "exit_code": 0,
+      "result": "PASS",
+      "output_hashes_unchanged": true,
+      "cloud_writes": 0
+    }
+  ],
+  "ci": {
+    "run_id": 37943034895,
+    "url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/37943034895",
+    "checkout": "29607395f68016c18d52b2e5962c92c50cc91f99",
+    "checkout_tree": "81dd9ebb22c6ab31976d0d3685a8a0ff27f403f5",
+    "source_candidate_tree_equal": true,
+    "prepare_job": 113862048212,
+    "caller_job": 113862048648,
+    "guard_tests": {
+      "passed": 20,
+      "failed": 0,
+      "skipped": 0
+    },
+    "artifact": {
+      "id": 11622321399,
+      "name": "reviewed-hold-29607395f68016c18d52b2e5962c92c50cc91f99",
+      "bytes": 159842,
+      "sha256": "5f1b5fd295ad6fc3392e0433bff39c007fb6e9272c138d50aeeec3a3ca387c46",
+      "downloaded": true,
+      "layout": "PASS",
+      "files": [
+        "actions-release-guards.json",
+        "artifacts/world-runtime-actions/api.js",
+        "artifacts/world-runtime-actions/executor.js",
+        "artifacts/world-runtime-actions/prepared.json",
+        "artifacts/world-runtime-actions/workerd-evidence.json"
+      ],
+      "private_key_or_test_fixture_uploaded": false
+    },
+    "prepare_log_sha256": "5f8f4ec9867bd250923ed352343c724b3971c3eadaa049ca891fcb0042507d9c",
+    "result": "PASS",
+    "publish_job": {
+      "id": 113869804490,
+      "conclusion": "skipped",
+      "reason": "pull_request is preparation only"
+    },
+    "caller_log": {
+      "sha256": "cfa6916938c0e5818b1b663f500aa2497a241aa027757bb6fdfa4bd738e2ced9",
+      "bytes": 334475,
+      "artifact_id": 11623262696
+    },
+    "repeated_subsets": {
+      "official_edge": 29,
+      "boundaries": 40,
+      "added_to_unique_count": false
+    }
+  },
+  "fixed_release": {
+    "commit": "e7ecf45184baad69a37e2e51fff8862a635267dc",
+    "tree": "8ac834bca15b11ef517154133c4e6740ae87ff59",
+    "api_sha256": "b7a07ec01d2f67818ee0753246eddf611543e7480e28c828f108018a2bb209d4",
+    "executor_sha256": "37e92b7229786e61f5b57acfc4c8cbb96b739ac3198a522b98dd688fab0468b9",
+    "workerd_result": "PASS",
+    "checks": 11,
+    "disposed": true,
+    "miniflare": "5.20261006.0-alpha",
+    "cloud_publication": "NOT_RUN",
+    "database_connected": false,
+    "economic_activation": false
+  },
+  "history": [
+    {
+      "run_id": 37940394704,
+      "commit": "47cbfeae6a32014b7bfaed46632ca1f711fd3ea3",
+      "prepare_result": "FAIL",
+      "prepare_exit_code": 1,
+      "reason": "workerd source path outside caller cwd; parent traversal rejected",
+      "fix": "Launch original unchanged workerd check from reviewed source root",
+      "caller_result": "NOT_RUN",
+      "caller_execution_status": "CANCELLED_SUPERSEDED"
+    },
+    {
+      "run_id": 37940843096,
+      "commit": "0c7da3d1e2103849bc7278645eb1ddffd811c488",
+      "caller_result": "FAIL",
+      "exit_code": 1,
+      "passed": 3078,
+      "failed": 14,
+      "skipped": 154,
+      "duration_seconds": 517.97,
+      "prepare_result": "PASS",
+      "reason": "11 historical Git provenance failures from shallow checkout; 3 Ubuntu bootstrap lifecycle failures",
+      "resolution": "Fetch complete history; use the repository's existing official macOS full-check environment",
+      "linux_bootstrap_acceptance": "NOT_CLOSED",
+      "test_assertions_weakened": false
+    }
+  ],
+  "github_environment": {
+    "attempted_creation": "world-cloudflare-hold",
+    "result": "FAIL",
+    "http_status": 403,
+    "created": false,
+    "variables_created": false,
+    "credentials_copied": false,
+    "required_admin_configuration": [
+      "main-only deployment branch policy",
+      "CLOUDFLARE_ACCOUNT_ID environment variable",
+      "CLOUDFLARE_API_TOKEN environment Secret"
+    ]
+  },
+  "cloud_readonly": {
+    "before_refresh": {
+      "status": 401
+    },
+    "writes": 0,
+    "oauth_exported_to_ci": false,
+    "after_wrangler_whoami": {
+      "settings": 200,
+      "subdomain": 200,
+      "schedules": 200,
+      "targets": [
+        "econmind-world-executor-staging",
+        "econmind-world-api-staging"
+      ],
+      "mode": "HOLD",
+      "database_bindings": 0,
+      "cron": 0,
+      "executor_public": false,
+      "api_public": true,
+      "preview_urls": false
+    },
+    "public_runtime_readback": {
+      "health_http": 200,
+      "ready_http": 503,
+      "mode": "HOLD",
+      "executor_transport": "ALIVE_HOLD",
+      "runtime_ready": false,
+      "database_connected": false,
+      "clock_enabled": false,
+      "simulation_enabled": false,
+      "authoritative_commands_enabled": false
+    }
+  },
+  "unchanged": {
+    "project_dependencies": true,
+    "lockfile": true,
+    "world_state": true,
+    "api_worker_core_implementations": true,
+    "production_schema": true,
+    "gate": true,
+    "legacy": true
+  },
+  "unresolved_gaps": [
+    "Independent P0 pipeline review and merge/main registration",
+    "Repository admin environment setup and scoped CI Token",
+    "Actual Cloudflare CI publication NOT_RUN",
+    "Formal database/economic prerequisites remain separate and blocked",
+    "Ubuntu bootstrap lifecycle failures remain unclosed; no Linux Node host acceptance is claimed"
+  ],
+  "metadata_record": {
+    "risk": "P3 non-executable evidence and handoff only",
+    "implementation_risk_remains": "P0",
+    "code_and_workflow_changed": false,
+    "ci_repeat": "Not requested; documentation record uses skip ci after completed unchanged-source evidence",
+    "independent_approval_claimed": false
+  },
+  "metadata_checks": [
+    {
+      "command": "prettier --check final reports and handoff",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/check-repository-secrets.mjs",
+      "exit_code": 0,
+      "result": "PASS",
+      "scanned_files": 2349
+    }
+  ]
+}
