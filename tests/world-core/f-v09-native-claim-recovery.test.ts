@@ -15,6 +15,7 @@ import {
 import { WorldRecoveryCoordinator } from '../../apps/world-worker/src/recovery/world-recovery.js';
 import { PostgresSqlDatabase } from '../../apps/world-worker/src/persistence/postgres-sql-database.js';
 import { assertV09PostgresTestEnvironment } from '../../scripts/v09-postgres-test-environment.mjs';
+import { assertFNativeBuildProvenance } from '../support/f-v09-dist-provenance.mjs';
 
 const enabled =
   process.env.F_NATIVE_CLAIM_RECOVERY === 'OWNED_FRESH_GENERATION';
@@ -45,6 +46,12 @@ const db = () => {
 
 beforeAll(async () => {
   if (!enabled) return;
+  // Required before any connection/SQL; binds current sources, actual Core
+  // runtime export and the complete fresh Core/Worker dist manifests.
+  console.info(
+    'F_NATIVE_BUILD_BINDING',
+    JSON.stringify(assertFNativeBuildProvenance()),
+  );
   // The shared guard rejects Supabase/runtime variables and URL overrides.
   // Additionally bind the actual server generation before the first mutation.
   const url = new URL(process.env.V09_TEST_DATABASE_URL ?? '');
