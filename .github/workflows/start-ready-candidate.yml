@@ -59,8 +59,11 @@ jobs:
           --health-retries 10
     env:
       ECONMIND_ENV: ci
-      CI_EVIDENCE_DIRECTORY: ${{ runner.temp }}/start-ready-candidate
     steps:
+      - name: Set runner-local evidence directory
+        shell: bash
+        run: |
+          printf 'CI_EVIDENCE_DIRECTORY=%s/start-ready-candidate\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0

@@ -217,3 +217,23 @@ test('workflow has bounded triggers, readonly permissions and no deployment inpu
     /secrets\.|pull_request_target|\n {2}push:|\n\s+environment:|contents: write|continue-on-error|F_NATIVE_CLAIM_RECOVERY/u,
   );
 });
+
+test('runner temp is resolved in a runtime step, never in job-level env', () => {
+  const workflow = readFileSync(
+    new URL(
+      '../../.github/workflows/start-ready-candidate.yml',
+      import.meta.url,
+    ),
+    'utf8',
+  );
+  // GitHub rejects runner context in jobs.<job_id>.env before any job starts.
+  // Keep this exact regression separate from YAML/bash syntax validation.
+  const jobEnv = workflow.match(/^ {4}env:\n((?: {6}[^\n]+\n)+)/mu)?.[1];
+  assert.equal(jobEnv, '      ECONMIND_ENV: ci\n');
+  assert.doesNotMatch(jobEnv, /\$\{\{\s*runner(?:\.|\[)/u);
+  assert.match(
+    workflow,
+    /steps:\n {6}- name: Set runner-local evidence directory\n {8}shell: bash\n {8}run: \|\n {10}printf 'CI_EVIDENCE_DIRECTORY=%s\/start-ready-candidate\\n' "\$RUNNER_TEMP" >> "\$GITHUB_ENV"\n {6}- uses: actions\/checkout@v5/u,
+  );
+  assert.match(workflow, /path: \$\{\{ env\.CI_EVIDENCE_DIRECTORY \}\}/u);
+});
