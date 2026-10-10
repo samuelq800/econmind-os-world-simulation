@@ -85,3 +85,29 @@ PR131 仍未 merge；先修上述格式失败并取得适用组合检查结果�
 - C 已完成视觉去重，核验收据 SHA256 `61f81652ce7e1c06ddeb81619c00cdb0e26c90ca98d2a4794f4fb5c533aa9604`：29/29 已在 main，由 PR127/`1222e66` 和既有 F SOURCE_ONLY APPROVED 覆盖。此次不新增批准、不重复合并。
 
 当前 PR131 仍有完整 official check IN_PROGRESS，其余四项 SUCCESS。窗口报告中的通过数属于各自固定范围；没有叠加成六角色/420/正式世界或 Gate B 完成。
+
+## PR131 正常合并与 Oct10 地图受理
+
+2026-10-10 19:56 Asia/Shanghai，PR131 正常 merge 为
+`27307a108ce5c0c3e2ce28e3776f8ba15ed73d3b`；未使用 admin、auto-merge 或绕过检查。
+固定候选 `ed0e4df4571e30fdb8b2f3e95b43f4680c19acb8`、日志实际 CI checkout
+`8b565a5949bd60278bbe0431bc2d7e4ab194ad01`、合并 main 的完整 tree 均为
+`69c04e4ca079e082e5f1bf85ce5d937ac6085b4d`。五项适用检查全部 SUCCESS。
+
+- `38049099833` 的 workerd、workerd-native-postgres、official-and-native-postgres 成功；trusted `38049099688`、atlas `38049099704` 成功。
+- 未改 `pnpm check` 的主 Vitest 集：254 files PASS /18 skipped；3194 cases PASS /163 skipped。后续 official-edge 29、boundary 40 是单独命令，不相加宣称唯一用例总数。
+- 主完整检查及 native raw artifact `11669086273`，provider ZIP digest `1a21b6ed812514ba95c084ba6c72976b18209e1c9e33574cd1c6c8c75ce5362c`；总控实际下载到 `/private/tmp/econmind-pr131-receipt.pF23Dx`。
+- 原始 `official-pnpm-check.log` SHA256 `6ec5892a9008e738ce03e5d405639cc57ff5c0d181c5ea2f1226653db0020222`；`native-authenticated-roundtrip.json` SHA256 `6891722f78b1d838d4f0e24ad4ef41e38c856fd3f48692e77ccf8f0a9dc38fe3`，实际 1 PASS /0 FAIL /0 pending。属于隔离机制，不是生产账户或正式经济运行。
+- 原首轮 `38048771913` 的格式 FAIL 及 native SKIPPED 保留；新成功不改写旧失败。Pages 发布状态未在本检查点核实；源码 merge 不冒充线上部署。
+
+独立视觉移交已受理：Oct10 tree `c518d4936c6212aa37136df5df123bdedce5b461`，
+基线 `42991ac`；原 WT 保持无新 commit 的 dirty 状态，以 tree/19-file freeze 为准。
+总控确认 tree 对象存在，完整读报告并核实报告 SHA256
+`b1d4d78d8ce04de591671454ea01accc7a7c4316a2c0154770b10da5be2fc3cf`、
+ZIP SHA256 `238cf12398505b80f2ca2dfd7981cd2b9e82e43d36743d1968808e9b6646b27f`。
+已交非实现者 A 独审真实来源、原始日志/截图、必要定向控制及与新 main/runtime 的兼容；
+不只根据 worker 自报 888 PASS/5 SKIP 批准，不重做昨日 d1b4c435，不重跑420。
+地图本批只审本地成果，不因移交自动获准 commit/push/merge/deploy。
+
+此 merge 不包含 F 新 provenance 增量、B 未审补充 CI、E/G 后继实现或上述地图。
+F 已审增量仍留在独立总控分支等待单独收口；正式源/权限/admission/经济/Clock/gate 均未因此改变。
