@@ -1,0 +1,13 @@
+$ env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec vitest run tests/world-api/authenticated-office-command.test.ts tests/world-api/positive-manual-office-command.test.ts tests/world-api/postgres-server-read-binding.test.ts tests/world-api/supabase-jwks-signature-verifier.test.ts tests/world-api/nonactivated-runtime-api-host.test.ts
+
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-nonactivated-runtime-api-host
+
+
+ Test Files  5 passed (5)
+      Tests  140 passed (140)
+   Start at  19:58:24
+   Duration  47.19s (tests 96%, transform 3%, import 1%)
+
+
+exit_code=0

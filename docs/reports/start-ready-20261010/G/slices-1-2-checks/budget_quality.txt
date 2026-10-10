@@ -1,0 +1,6 @@
+$ env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec eslint tests/world-api/G-request-budget.test.ts && env PATH=/private/tmp/econmind-control-tower-toolchain.451x0O:$PATH pnpm exec prettier --check tests/world-api/G-request-budget.test.ts
+
+Checking formatting...
+All matched files use Prettier code style!
+
+exit_code=0
