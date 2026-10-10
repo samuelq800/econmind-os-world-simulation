@@ -8,6 +8,7 @@
   },
   "include": [
     "writer-lease-supervisor.test.ts",
-    "writer-lease-supervisor-postgres.test.ts"
+    "writer-lease-supervisor-postgres.test.ts",
+    "writer-lease-supervisor-columns-postgres.test.ts"
   ]
 }

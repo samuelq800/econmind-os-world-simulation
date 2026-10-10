@@ -115,9 +115,11 @@ suite('writer supervisor — actual native PG isolated lifecycle', () => {
     );
     await admin.query(`grant usage on schema world_v2 to ${role}`);
     await admin.query(
-      `grant select,insert,update on world_v2.world_writer_lease to ${role}`,
+      `grant select,insert,update(holder_id,fencing_token,acquired_at_real,renewed_at_real,lease_expires_at_real) on world_v2.world_writer_lease to ${role}`,
     );
-    await admin.query(`grant select,update on world_v2.world_head to ${role}`);
+    await admin.query(
+      `grant select,update(world_version,event_sequence) on world_v2.world_head to ${role}`,
+    );
     await admin.query(
       `grant execute on function world_v2.acquire_world_writer_lease(text,text,timestamptz,bigint),world_v2.assert_world_writer_commit_guard(text,text,bigint,bigint,timestamptz) to ${role}`,
     );
