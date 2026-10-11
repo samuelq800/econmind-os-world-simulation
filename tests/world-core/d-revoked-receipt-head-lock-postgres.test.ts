@@ -416,7 +416,7 @@ suite('revoked receipt — actual-schema native H serialization', () => {
         (value) => ({ ok: true as const, value }),
         (error) => ({ ok: false as const, error }),
       );
-    let guardResult: { ok: boolean; error?: unknown } = { ok: false };
+    let guardResult: { ok: boolean; error?: unknown };
     try {
       await assertBlocked('d_revoked_consumer', pid);
       guardResult = await client
