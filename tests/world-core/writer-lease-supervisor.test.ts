@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { createWriterLeaseSupervisor } from '../../apps/world-worker/src/runtime-preparation/writer-lease-supervisor.js';
-import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
+import type {
+  SqlDatabase,
+  SqlExecutor,
+} from '../../apps/world-worker/src/persistence/sql-database.js';
+import { PostgresTransactionError } from '../../apps/world-worker/src/persistence/postgres-sql-database.js';
 
 const at = '2026-10-10T00:00:00.000Z';
 function inert() {
@@ -108,5 +112,91 @@ describe('writer supervisor source-only boundaries (no positive SQL fixture)', (
       failure: 'UNKNOWN',
       ready: false,
     });
+  });
+});
+
+describe('writer supervisor rejects incomplete/overprivileged catalog observations', () => {
+  // Negative-only port controls. Actual SQL and the positive column matrix are
+  // exercised by the dedicated native suite, not asserted by this fake row.
+  const observation = {
+    role_name: 'd_test_lease',
+    session_role: 'd_test_lease',
+    read_only: 'off',
+    rolsuper: false,
+    rolbypassrls: false,
+    rolcreatedb: false,
+    rolcreaterole: false,
+    rolreplication: false,
+    schema_creator: false,
+    role_membership: false,
+    lease_delete: false,
+    broad_update: false,
+    identity_update: false,
+    head_write: false,
+    lease_access: true,
+    head_access: true,
+    acquire_access: true,
+    guard_access: true,
+    column_layout_valid: true,
+  };
+  it.each([
+    ...[
+      'rolsuper',
+      'rolbypassrls',
+      'rolcreatedb',
+      'rolcreaterole',
+      'rolreplication',
+      'schema_creator',
+      'role_membership',
+      'lease_delete',
+      'broad_update',
+      'identity_update',
+      'head_write',
+    ].flatMap((key) => [[key, true] as const, [key, undefined] as const]),
+    ...[
+      'lease_access',
+      'head_access',
+      'acquire_access',
+      'guard_access',
+      'column_layout_valid',
+    ].flatMap((key) => [[key, false] as const, [key, undefined] as const]),
+    ['role_name', 'd_other'] as const,
+    ['session_role', 'd_other'] as const,
+    ['read_only', 'on'] as const,
+  ])('denies catalog field %s=%s before any mutation', async (key, value) => {
+    let queries = 0;
+    const port: SqlExecutor = {
+      async query<Row extends object>(statement: string) {
+        queries++;
+        expect(statement).toContain('pg_auth_members');
+        if (queries !== 1) throw Error('CATALOG_DENIAL_MUST_PRECEDE_SQL');
+        return {
+          rowCount: 1,
+          rows: [{ ...observation, [String(key)]: value } as unknown as Row],
+        };
+      },
+    };
+    const database: SqlDatabase = {
+      query: port.query,
+      async transaction(run) {
+        try {
+          return await run(port);
+        } catch (cause) {
+          throw new PostgresTransactionError({ outcome: 'ROLLED_BACK', cause });
+        }
+      },
+    };
+    const host = createWriterLeaseSupervisor({ ...inert().config, database });
+    await expect(host.acquire(at)).rejects.toMatchObject({
+      outcome: 'REJECTED',
+      cause: { cause: { code: 'DATABASE_ROLE_DENIED' } },
+    });
+    expect(queries).toBe(1);
+    expect(host.status(at)).toMatchObject({
+      ready: false,
+      failure: 'LOST',
+      lastConfirmedLease: null,
+    });
+    await host.stop();
   });
 });

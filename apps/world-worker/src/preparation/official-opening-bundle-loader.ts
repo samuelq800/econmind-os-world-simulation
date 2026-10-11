@@ -4,10 +4,15 @@ import { createHash } from 'node:crypto';
 import { constants as fsConstants } from 'node:fs';
 import { lstat, open, realpath } from 'node:fs/promises';
 import path from 'node:path';
+import { canonicalSerialize } from '@econmind/core';
+import type { OfficialOpeningSourceBytes } from './official-opening-decision-reconciliation.js';
 import {
-  officialOpeningPublicationSourceSha256,
-  type OfficialOpeningPublicationSourceBundle,
-} from '../admission/official-opening-admission-publication.js';
+  loadNonHostOwnerPolicy,
+  OWNER_NON_HOST_PINS,
+  snapshotFinancialSupplementRegistration,
+  type LoadedNonHostOwnerPolicy,
+  type FinancialSupplementRegistration,
+} from './owner-non-host-source-adoption.js';
 import { OFFICIAL_OPENING_RECONCILIATION_PINS } from './official-opening-decision-reconciliation.js';
 
 // File identity pins, not economic rules or permission to use the source.
@@ -74,6 +79,68 @@ export interface ServerOpeningIncomingManifest {
   }>[];
   readonly expectedBundleSha256: string;
 }
+export interface ServerOpeningIncomingManifestV2 extends Omit<
+  ServerOpeningIncomingManifest,
+  'expectedBundleSha256'
+> {
+  readonly schemaVersion: 'server-opening-incoming-v2';
+  readonly expectedBundleSha256: string;
+  readonly financial: Readonly<{
+    input: OpeningBundleFileIdentity;
+    adoptionReceipt: OpeningBundleFileIdentity;
+    ownerInstruction: OpeningBundleFileIdentity;
+    documents: readonly Readonly<{
+      documentId: string;
+      identity: OpeningBundleFileIdentity;
+    }>[];
+  }>;
+}
+export interface OfficialOpeningPublicationSourceBundle {
+  readonly source: OfficialOpeningSourceBytes;
+  readonly selectionBytes: string;
+  readonly mapManifestBytes: string;
+  readonly regionsBytes: string;
+  readonly gapsBytes: string;
+  readonly decisionBytes: string;
+  readonly assemblyBytes: string;
+  readonly ownerRecords: readonly Readonly<{
+    reference: string;
+    recordBytes: string;
+  }>[];
+}
+export interface OfficialOpeningPublicationSourceBundleV2 extends OfficialOpeningPublicationSourceBundle {
+  readonly schemaVersion: 'official-opening-publication-source-v2';
+  readonly financial: Readonly<{
+    inputBytes: string;
+    adoptionReceiptBytes: string;
+    ownerInstructionBytes: string;
+    parentOwnerReceiptBytes: string;
+    parentOwnerInstructionBytes: string;
+    registeredReference: string | null;
+    documents: readonly Readonly<{
+      documentId: string;
+      sourcePath: string;
+      bytes: string;
+    }>[];
+  }>;
+}
+export function officialOpeningPublicationSourceSha256(
+  bundle:
+    | OfficialOpeningPublicationSourceBundle
+    | OfficialOpeningPublicationSourceBundleV2,
+): string {
+  return createHash('sha256')
+    .update(canonicalSerialize(bundle), 'utf8')
+    .digest('hex');
+}
+export function isOfficialOpeningBundleV2(
+  bundle: OfficialOpeningPublicationSourceBundle,
+): bundle is OfficialOpeningPublicationSourceBundleV2 {
+  return (
+    'schemaVersion' in bundle &&
+    bundle.schemaVersion === 'official-opening-publication-source-v2'
+  );
+}
 export type OfficialOpeningSourceBundleInputs = Omit<
   OfficialOpeningPublicationSourceBundle,
   'decisionBytes' | 'assemblyBytes' | 'ownerRecords'
@@ -86,6 +153,10 @@ export interface LoadedOfficialOpeningBundle {
     OpeningBundleFileIdentity & { locator: string }
   >[];
   readonly totalBytes: number;
+  readonly financialProvenance?: Readonly<{
+    parentPolicy: LoadedNonHostOwnerPolicy;
+    registration: FinancialSupplementRegistration | null;
+  }>;
 }
 export class OpeningBundleLoadError extends Error {
   constructor(
@@ -163,17 +234,28 @@ function safeLocator(locator: string): void {
     fail('OPENING_FILE_PATH_DENIED', locator);
 }
 function snapshotIncoming(
-  value: ServerOpeningIncomingManifest,
-): ServerOpeningIncomingManifest {
+  value: ServerOpeningIncomingManifest | ServerOpeningIncomingManifestV2,
+): ServerOpeningIncomingManifest | ServerOpeningIncomingManifestV2 {
+  const v2 = 'schemaVersion' in value;
   keys(
     value,
-    ['decision', 'assembly', 'ownerRecords', 'expectedBundleSha256'],
+    v2
+      ? [
+          'schemaVersion',
+          'financial',
+          'decision',
+          'assembly',
+          'ownerRecords',
+          'expectedBundleSha256',
+        ]
+      : ['decision', 'assembly', 'ownerRecords', 'expectedBundleSha256'],
     'incoming',
   );
   if (
     !/^[0-9a-f]{64}$/u.test(value.expectedBundleSha256) ||
     !Array.isArray(value.ownerRecords) ||
-    value.ownerRecords.length > OFFICIAL_OPENING_BUNDLE_LIMITS.ownerRecords
+    value.ownerRecords.length + (v2 ? 2 : 0) >
+      OFFICIAL_OPENING_BUNDLE_LIMITS.ownerRecords
   )
     fail('OPENING_FILE_MANIFEST_INVALID', 'incoming');
   const records = value.ownerRecords.map((row) => {
@@ -199,29 +281,79 @@ function snapshotIncoming(
     new Set(records.map((r) => r.reference)).size !== records.length
   )
     fail('OPENING_FILE_SET_INVALID', 'incoming/owner-records');
-  return Object.freeze({
+  const base = Object.freeze({
     decision: identity(value.decision, 'incoming/decision.json'),
     assembly: identity(value.assembly, 'incoming/assembly.json'),
     ownerRecords: Object.freeze(records),
     expectedBundleSha256: value.expectedBundleSha256,
   });
+  if (!v2) return base;
+  if (value.schemaVersion !== 'server-opening-incoming-v2')
+    fail('OPENING_FILE_MANIFEST_INVALID', 'version');
+  const f = value.financial;
+  keys(
+    f,
+    ['input', 'adoptionReceipt', 'ownerInstruction', 'documents'],
+    'financial',
+  );
+  if (
+    !Array.isArray(f.documents) ||
+    f.documents.length === 0 ||
+    f.documents.length > 256 ||
+    new Set(f.documents.map((d) => d.documentId)).size !== f.documents.length
+  )
+    fail('OPENING_FILE_SET_INVALID', 'financial.documents');
+  let documentBytes = 0;
+  const documents = f.documents
+    .map((d) => {
+      keys(d, ['documentId', 'identity'], 'financial.document');
+      if (!/^[A-Z][A-Z0-9_]{0,127}$/u.test(d.documentId))
+        fail('OPENING_FILE_PATH_DENIED', 'documentId');
+      const checked = identity(d.identity, 'financial.document');
+      documentBytes += checked.bytes;
+      if (checked.bytes > 4 * 1024 * 1024 || documentBytes > 16 * 1024 * 1024)
+        fail('OPENING_FILE_SIZE_INVALID', 'financial.documents');
+      return Object.freeze({ documentId: d.documentId, identity: checked });
+    })
+    .sort((a, b) => (a.documentId < b.documentId ? -1 : 1));
+  return Object.freeze({
+    ...base,
+    schemaVersion: 'server-opening-incoming-v2',
+    financial: Object.freeze({
+      input: identity(f.input, 'financial.input'),
+      adoptionReceipt: identity(f.adoptionReceipt, 'financial.adoptionReceipt'),
+      ownerInstruction: identity(
+        f.ownerInstruction,
+        'financial.ownerInstruction',
+      ),
+      documents: Object.freeze(documents),
+    }),
+  });
 }
 
 export class OfficialOpeningBundleLoader {
   readonly #root: string;
-  readonly #incoming: ServerOpeningIncomingManifest | null;
+  readonly #incoming:
+    ServerOpeningIncomingManifest | ServerOpeningIncomingManifestV2 | null;
+  readonly #financialRegistration: FinancialSupplementRegistration | null;
   constructor(
     input: Readonly<{
       repositoryRoot: string;
-      incoming?: ServerOpeningIncomingManifest;
+      incoming?:
+        ServerOpeningIncomingManifest | ServerOpeningIncomingManifestV2;
+      financialAdoptionRegistration?: FinancialSupplementRegistration;
     }>,
   ) {
     // Constructor is a private deployment dependency, not an invocation DTO.
     keys(
       input,
-      input.incoming === undefined
-        ? ['repositoryRoot']
-        : ['repositoryRoot', 'incoming'],
+      [
+        'repositoryRoot',
+        ...(input.incoming === undefined ? [] : ['incoming']),
+        ...(input.financialAdoptionRegistration === undefined
+          ? []
+          : ['financialAdoptionRegistration']),
+      ],
       'composition',
     );
     if (!input.repositoryRoot || !path.isAbsolute(input.repositoryRoot))
@@ -229,6 +361,17 @@ export class OfficialOpeningBundleLoader {
     this.#root = path.resolve(input.repositoryRoot);
     this.#incoming =
       input.incoming === undefined ? null : snapshotIncoming(input.incoming);
+    if (
+      input.financialAdoptionRegistration !== undefined &&
+      (!this.#incoming || !('schemaVersion' in this.#incoming))
+    )
+      fail('OPENING_FILE_MANIFEST_INVALID', 'financialAdoptionRegistration');
+    this.#financialRegistration =
+      input.financialAdoptionRegistration === undefined
+        ? null
+        : snapshotFinancialSupplementRegistration(
+            input.financialAdoptionRegistration,
+          );
   }
 
   async load(): Promise<LoadedOfficialOpeningBundle> {
@@ -341,6 +484,7 @@ export class OfficialOpeningBundleLoader {
     });
     let bundle: OfficialOpeningPublicationSourceBundle | null = null;
     let sourceBundleSha256: string | null = null;
+    let financialProvenance: LoadedOfficialOpeningBundle['financialProvenance'];
     if (this.#incoming) {
       const decisionBytes = await read(
         'incoming/decision.json',
@@ -367,6 +511,67 @@ export class OfficialOpeningBundleLoader {
         assemblyBytes,
         ownerRecords: Object.freeze(ownerRecords),
       });
+      if ('schemaVersion' in this.#incoming) {
+        const f = this.#incoming.financial;
+        const inputBytes = await read('incoming/financial/input.json', f.input);
+        const adoptionReceiptBytes = await read(
+          'incoming/financial/adoption.json',
+          f.adoptionReceipt,
+        );
+        const ownerInstructionBytes = await read(
+          'incoming/financial/owner-instruction.md',
+          f.ownerInstruction,
+        );
+        const documents = [];
+        for (const d of f.documents) {
+          const sourcePath =
+            'incoming/financial/documents/' + d.documentId + '.json';
+          documents.push(
+            Object.freeze({
+              documentId: d.documentId,
+              sourcePath,
+              bytes: await read(sourcePath, d.identity),
+            }),
+          );
+        }
+        const parentRoot = 'docs/governance/owner-inputs/2026-10-07/';
+        const parentOwnerInstructionBytes = await read(
+          parentRoot + 'OWNER_NON_HOST_DECISIONS.original.md',
+          { sha256: OWNER_NON_HOST_PINS.documentSha256, bytes: 36506 },
+        );
+        const parentOwnerReceiptBytes = await read(
+          parentRoot + 'OWNER_NON_HOST_DECISION_RECEIPT.json',
+          { sha256: OWNER_NON_HOST_PINS.receiptSha256, bytes: 4500 },
+        );
+        const parentPolicy = await loadNonHostOwnerPolicy({
+          ownerDocumentPath: path.join(
+            root,
+            parentRoot + 'OWNER_NON_HOST_DECISIONS.original.md',
+          ),
+          rootReceiptPath: path.join(
+            root,
+            parentRoot + 'OWNER_NON_HOST_DECISION_RECEIPT.json',
+          ),
+        });
+        financialProvenance = Object.freeze({
+          parentPolicy,
+          registration: this.#financialRegistration,
+        });
+        bundle = Object.freeze({
+          ...bundle,
+          schemaVersion: 'official-opening-publication-source-v2' as const,
+          financial: Object.freeze({
+            inputBytes,
+            adoptionReceiptBytes,
+            ownerInstructionBytes,
+            parentOwnerInstructionBytes,
+            parentOwnerReceiptBytes,
+            registeredReference:
+              this.#financialRegistration?.retainedReference ?? null,
+            documents: Object.freeze(documents),
+          }),
+        });
+      }
       sourceBundleSha256 = officialOpeningPublicationSourceSha256(bundle);
       if (sourceBundleSha256 !== this.#incoming.expectedBundleSha256)
         fail('OPENING_BUNDLE_DIGEST_MISMATCH', 'incoming');
@@ -377,6 +582,7 @@ export class OfficialOpeningBundleLoader {
       sourceBundleSha256,
       validatedFiles: Object.freeze(validated),
       totalBytes,
+      ...(financialProvenance === undefined ? {} : { financialProvenance }),
     });
     loadedInstances.add(loaded);
     return loaded;

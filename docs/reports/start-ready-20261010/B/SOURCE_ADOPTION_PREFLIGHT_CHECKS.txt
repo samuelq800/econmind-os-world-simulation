@@ -1,0 +1,295 @@
+B SOURCE ADOPTION / PREFLIGHT - LOCAL CHECK OUTPUT
+Code candidate: ae4424f681414a00a6bd3fd6268ed733632690bb
+Plain-text copy of captured command output; ANSI color escapes removed only.
+Original byte hashes and command exit codes are in the adjacent evidence JSON.
+Empty output means no output; exit status is recorded separately, not inferred.
+
+=== final-focused-tests.log (exit 0) ===
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/b-opening-source-composition-20261010
+
+ ✓ tests/world-core/official-opening-candidate-composition.test.ts (19 tests) 10566ms
+   ✓ genuine V2 read-only financial composition (no formal source installed) (16)
+     ✓ publication digest binds every supplemental/parent/adoption byte and retained reference 767ms
+     ✓ actually calls the original producer and preserves all raw BLOCKED labels and obligations 805ms
+     ✓ preflight shares the assembler and reports actual wiring, while keeping every deferred/nonfinancial gap 1236ms
+     ✓ rejects structural JSON clone and spread of loader snapshots; proof DTO cannot enter bridge 381ms
+     ✓ retagging a mechanism vector without independently registered adoption still fails closed 905ms
+     ✓ contract embedded document cannot differ from independently bounded loader bytes 755ms
+     ✓ publication calls the shared genuine V2 path and denies structural V2 before any SQL 1653ms
+   ✓ acyclic deterministic V2 assembly intent, not authority (3)
+     ✓ fresh processes reload identical bytes and reproduce intent/output/blockers in either import order 2767ms
+ ✓ tests/world-core/owner-non-host-financial-bridge.test.ts (12 tests) 7048ms
+   ✓ actual non-host Owner policy financial consumer (12)
+     ✓ persists real Core carrier to isolated SQL, rehydrates balances/claims, retries identically and rejects conflicting seed 3097ms
+     ✓ injected post-insert failure rolls back actual SQL; retry leaves one canonical opening, never half-seed 1404ms
+     ✓ later non-deposit BANK liability survives deterministic restart replay; duplicate authoritative facts reject instead of resetting L=H+D 471ms
+ ✓ tests/world-core/formal-financial-opening.test.ts (31 tests) 5211ms
+   ✓ D01/D02/D03 actual multi-currency calculation with explicit unresolved authority (15)
+     ✓ preserves a supported additional native holding, paired sourced security, and original equity without duplicate cash 353ms
+     ✓ has stable fingerprints after transport/reparse and input enumeration changes 559ms
+     ✓ reproduces the same candidate in a fresh Node process with reloaded real adoption 828ms
+     ✓ preserves exact conversion and per-currency conservation for bounded generated rates 1302ms
+ ✓ tests/world-core/opening-canonical-seed-bridge.test.ts (16 tests) 4653ms
+   ✓ source-only decision → existing Core seed bridge (16)
+     ✓ constructs only an inert NOT_ADMITTED candidate through Core parser and replay 524ms
+     ✓ Core carries the adopted full-B TGA as one claim and preserves historical mapping bytes 363ms
+     ✓ rejects caller approval flags and missing independently loaded records 599ms
+     ✓ rejects missing inventory, zero entries and ownership swaps even if re-adopted in a mechanism fixture 430ms
+     ✓ returns deterministic fingerprints across restart and source/country enumeration order 978ms
+ ✓ tests/world-core/official-opening-admission-publication.test.ts (25 tests) 4943ms
+   ✓ private Owner publication authorization (not admission) (17)
+     ✓ rejects caller approval flags, ADMITTED results and a different purpose 310ms
+     ✓ rejects a forged signature, noncanonical envelope, missing/revoked record and wrong reference 313ms
+   ✓ official opening publication source-blocked entry (8)
+     ✓ reuses real fixed 70-country source; a signed authorization cannot fill its gaps 472ms
+     ✓ rejects modified source/decision/assembly/owner bytes against signed bundle identity 905ms
+     ✓ even signed changed source bytes must pass independent fixed-source validation 468ms
+     ✓ rejects caller READY/approval fields and broad publisher roles 422ms
+ ✓ tests/world-core/official-opening-bundle-preflight.test.ts (14 tests) 2910ms
+   ✓ actual frozen opening bundle read-only ingest (4)
+     ✓ actually runs existing source/admission/decision/bridge validators and retains real blockers without any write 817ms
+     ✓ can load a complete byte-bound incoming bundle but rejects actual subset receipt as a full-intent decision 1002ms
+   ✓ bounded ordinary file integrity rejection (10)
+     ✓ rejects changed incoming bytes and a mismatched whole-bundle digest 331ms
+ ✓ tests/world-core/owner-non-host-source-adoption.test.ts (15 tests) 646ms
+
+ Test Files  7 passed (7)
+      Tests  132 passed (132)
+   Start at  20:32:32
+   Duration  37.60s (tests 97%, import 2%, transform 1%)
+
+
+=== final-architecture-tests.log (exit 0) ===
+
+ RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/b-opening-source-composition-20261010
+
+ ✓ tests/architecture/v01-governance.test.ts (11 tests) 24ms
+ ✓ tests/architecture/boundaries.test.ts (35 tests) 5562ms
+   ✓ resolved repository authority boundaries (35)
+     ✓ checks dynamic import and require when they use static module strings 326ms
+     ✓ keeps the real Vite config, helpers, and installed npm imports valid 548ms
+ ✓ tests/architecture/vite-environment.test.ts (15 tests) 13410ms
+   ✓ world-web effective Vite environment (15)
+     ✓ accepts a legitimate public variable through the actual build config 4190ms
+     ✓ stops direct build and dev before an app-local service-role value can be emitted 380ms
+     ✓ rejects unsafe VITE_WORLD_DATABASE_URL at real Vite dev/build and effective-env CLI entries 1487ms
+     ✓ rejects unsafe VITE_UNAPPROVED_PUBLIC_SETTING at real Vite dev/build and effective-env CLI entries 1064ms
+     ✓ rejects unsafe VITE_WORLD_API_URL at real Vite dev/build and effective-env CLI entries 903ms
+     ✓ rejects unsafe VITE_WORLD_API_URL at real Vite dev/build and effective-env CLI entries 925ms
+     ✓ rejects unsafe VITE_WORLD_API_BASE_URL at real Vite dev/build and effective-env CLI entries 933ms
+     ✓ rejects unsafe VITE_WORLD_API_URL at real Vite dev/build and effective-env CLI entries 984ms
+     ✓ rejects the database variable supplied by process.env 363ms
+     ✓ uses native mode-aware loading of .env 396ms
+     ✓ preserves native precedence, expansion, NODE_ENV, and the approved local API URL 716ms
+ ✓ tests/architecture/world-web-shared-core-ci-prerequisites.test.ts (7 tests) 4ms
+ ✓ tests/architecture/foundation-gates.test.ts (3 tests) 753ms
+   ✓ V04 authoritative architecture gates (3)
+     ✓ passes against the real repository 473ms
+ ✓ tests/architecture/environment-safety.test.ts (7 tests) 5ms
+ ✓ tests/architecture/browser-safe-financial-contract-export.test.ts (2 tests) 35ms
+ ✓ tests/architecture/v15-v16-foundation-acceptance-governance.test.ts (1 test) 3ms
+ ✓ tests/architecture/v17-v18-foundation-acceptance-governance.test.ts (1 test) 2ms
+ ✓ tests/architecture/v12-foundation-acceptance-governance.test.ts (1 test) 2ms
+ ✓ tests/architecture/v13-v14-foundation-acceptance-governance.test.ts (1 test) 2ms
+ ✓ tests/architecture/v11-v18-foundation-integration-source-manifest.test.ts (1 test) 2ms
+ ✓ tests/architecture/v19-foundation-acceptance-governance.test.ts (1 test) 2ms
+ ✓ tests/architecture/boundary-command.test.ts (1 test) 7885ms
+   ✓ the actual pnpm test:boundaries command rejects the outside-src review bridge 7884ms
+ ✓ tests/architecture/foundation-ci-gate.test.ts (2 tests) 2ms
+ ✓ tests/architecture/economic-read-visibility-export.test.ts (1 test) 29ms
+
+ Test Files  16 passed (16)
+      Tests  90 passed (90)
+   Start at  20:34:15
+   Duration  28.77s (tests 99%)
+
+
+=== governance.json (exit 0) ===
+{
+  "scope": "R2_GOVERNANCE_READ_ONLY",
+  "status": "PASS",
+  "application_code_executed": false,
+  "database_access": false,
+  "checks": [
+    {
+      "name": "required_governance_files",
+      "status": "PASS"
+    },
+    {
+      "name": "fast_mainline_policy",
+      "status": "PASS"
+    },
+    {
+      "name": "r2_step_manifest",
+      "status": "PASS"
+    },
+    {
+      "name": "step_dependencies",
+      "status": "PASS"
+    },
+    {
+      "name": "human_navigation_matches_json",
+      "status": "PASS"
+    },
+    {
+      "name": "work_packages",
+      "status": "PASS"
+    },
+    {
+      "name": "control_and_step_prompts",
+      "status": "PASS"
+    },
+    {
+      "name": "progress_truth",
+      "status": "PASS"
+    },
+    {
+      "name": "decision_register",
+      "status": "PASS"
+    },
+    {
+      "name": "source_material",
+      "status": "PASS"
+    },
+    {
+      "name": "v01_traceability",
+      "status": "PASS"
+    },
+    {
+      "name": "v01_adr_graph",
+      "status": "PASS"
+    },
+    {
+      "name": "v01_integration_contract",
+      "status": "PASS"
+    },
+    {
+      "name": "templates",
+      "status": "PASS"
+    }
+  ],
+  "metrics": {
+    "required_files": 20,
+    "review_mode": "FAST_MAINLINE",
+    "execution_modes": {
+      "NORMAL": 99,
+      "PARALLEL_PREPARATION": 2
+    },
+    "work_packages": 33,
+    "steps": 101,
+    "dependency_graph": "ACYCLIC",
+    "work_package_dependency_graph": "ACYCLIC",
+    "step_prompts": 101,
+    "control_prompts": 8,
+    "implementation_agent_statuses": [
+      "BLOCKED",
+      "IMPLEMENTED_UNVERIFIED",
+      "IN_PROGRESS"
+    ],
+    "static_prompt_references": 1,
+    "progress_states": {
+      "BLOCKED": 0,
+      "CHANGES_REQUIRED": 0,
+      "DEFERRED_WITH_APPROVAL": 0,
+      "IMPLEMENTED_UNVERIFIED": 0,
+      "IN_PROGRESS": 0,
+      "PLANNED": 74,
+      "UNASSESSED": 0,
+      "VERIFIED": 27
+    },
+    "governance_sync_status": "VERIFIED",
+    "governance_integration": "MERGED",
+    "approved_reviews": 28,
+    "v002_ready": true,
+    "required_gate": "V09.1_ADR_18_DECISION",
+    "foundation_candidate_steps": 12,
+    "decisions": 20,
+    "approved_decisions": 9,
+    "source_documents": 8,
+    "v01_requirements": 139,
+    "v01_source_units": 8743,
+    "v01_adrs": 20,
+    "v01_adr_relationships": 32,
+    "v01_adr_package_edges": 114,
+    "v01_identity_fields": 3,
+    "v01_preserved_route_groups": 5,
+    "v01_next_gate": "V01_PACKAGE_LEVEL_REVIEW",
+    "standard_templates": 6
+  },
+  "errors": []
+}
+
+=== secrets.log (exit 0) ===
+{
+  "status": "PASS",
+  "scannedFiles": 2404
+}
+
+=== environment.log (exit 0) ===
+{
+  "status": "PASS",
+  "environment": "local",
+  "databaseConfigured": false,
+  "validatedViteModes": [
+    "development",
+    "production"
+  ],
+  "linkedSupabaseProject": "NOT_LINKED",
+  "databaseMutationAllowed": false
+}
+
+=== final-boundaries.log (exit 0) ===
+{
+  "status": "PASS",
+  "scannedFiles": 322,
+  "guardedRoots": [
+    "apps",
+    "packages",
+    "apps/world-web/server.mjs",
+    "scripts/environment-policy.mjs",
+    "scripts/vite-environment-policy.mjs",
+    "scripts/vite-environment-policy.d.mts",
+    "scripts/run-development-service.mjs",
+    "scripts/run-development-stack.mjs"
+  ],
+  "sourceExtensions": [
+    ".ts",
+    ".tsx",
+    ".mts",
+    ".cts",
+    ".js",
+    ".jsx",
+    ".mjs",
+    ".cjs"
+  ]
+}
+
+=== final-authoritative-patterns.log (exit 0) ===
+{
+  "scannedCoreFiles": 89,
+  "scannedFiles": 317,
+  "status": "PASS",
+  "violations": []
+}
+
+=== final-format.log (exit 0) ===
+Checking formatting...
+All matched files use Prettier code style!
+
+=== final-lint.log (exit 0) ===
+(empty output)
+
+=== strict-composition.log (exit 0) ===
+(empty output)
+
+=== extra-declaration-publication.log (exit 2) ===
+node_modules/.pnpm/tinybench@6.1.4/node_modules/tinybench/dist/index.d.ts(1031,37): error TS2304: Cannot find name 'DOMHighResTimeStamp'.
+
+=== extra-declaration-financial-bridge.log (exit 2) ===
+node_modules/.pnpm/@electric-sql+pglite@0.5.8/node_modules/@electric-sql/pglite/dist/pglite-BdeXTuy6.d.ts(250,14): error TS2503: Cannot find namespace 'Emscripten'.
+node_modules/.pnpm/@electric-sql+pglite@0.5.8/node_modules/@electric-sql/pglite/dist/pglite-BdeXTuy6.d.ts(254,18): error TS2693: 'FS' only refers to a type, but is being used as a value here.
+node_modules/.pnpm/@electric-sql+pglite@0.5.8/node_modules/@electric-sql/pglite/dist/pglite-BdeXTuy6.d.ts(256,16): error TS2503: Cannot find namespace 'Emscripten'.
+node_modules/.pnpm/@electric-sql+pglite@0.5.8/node_modules/@electric-sql/pglite/dist/pglite-BdeXTuy6.d.ts(257,17): error TS2503: Cannot find namespace 'Emscripten'.
+node_modules/.pnpm/@electric-sql+pglite@0.5.8/node_modules/@electric-sql/pglite/dist/pglite-BdeXTuy6.d.ts(262,36): error TS2304: Cannot find name 'EmscriptenModule'.
+node_modules/.pnpm/@electric-sql+pglite@0.5.8/node_modules/@electric-sql/pglite/dist/pglite-BdeXTuy6.d.ts(276,14): error TS2503: Cannot find namespace 'Emscripten'.

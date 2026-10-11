@@ -1,0 +1,16 @@
+{
+  "schema": "START_READY_OWNED_PG16_1",
+  "uid": 1001,
+  "root": "/home/runner/work/_temp/start-ready-d-pg16-qqPMpm",
+  "data": "/home/runner/work/_temp/start-ready-d-pg16-qqPMpm/data",
+  "bin": "/usr/lib/postgresql/16/bin",
+  "version": "16.15",
+  "versions": {
+    "initdb": "initdb (PostgreSQL) 16.15 (Ubuntu 16.15-1.pgdg24.04+2)",
+    "pg_ctl": "pg_ctl (PostgreSQL) 16.15 (Ubuntu 16.15-1.pgdg24.04+2)",
+    "createdb": "createdb (PostgreSQL) 16.15 (Ubuntu 16.15-1.pgdg24.04+2)",
+    "postgres": "postgres (PostgreSQL) 16.15 (Ubuntu 16.15-1.pgdg24.04+2)"
+  },
+  "runnerImage": "ubuntu24",
+  "runnerImageVersion": "20261004.327.1"
+}

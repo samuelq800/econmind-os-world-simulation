@@ -29,6 +29,9 @@ import {
   financialOpeningBatchId,
   financialOpeningLegId,
   worldId,
+  commodityId,
+  inventoryBatchId,
+  inventoryLocationId,
   type InventoryAccount,
   type FinancialAccount,
   type FinancialOpeningBatch,
@@ -50,7 +53,10 @@ import {
   CENTRAL_BANK_OPENING_CATEGORIES,
   type OwnerNonHostSourceAdoption,
   type CentralBankOpeningCategory,
+  isFinancialSupplementAdoption,
+  type FinancialSupplementAdoption,
 } from './owner-non-host-source-adoption.js';
+import type { FormalFinancialCandidate } from './formal-financial-opening-producer.js';
 
 export const FROZEN_OPENING_MAPPING_SHA256 =
   'd2811910a9021e68fabe894504701d6dc8d88e362fc2354b0c826e3446456253';
@@ -589,6 +595,226 @@ export interface OpeningCanonicalSeedAssembly {
   readonly replayBinding: Readonly<ReplayVersionBinding>;
   readonly orchestratorVersion: string;
   readonly countries: readonly OpeningCountrySeedAssembly[];
+}
+export interface OpeningCanonicalSeedAssemblyV2 {
+  readonly schemaVersion: 'opening-canonical-seed-assembly-v2';
+  readonly worldId: string;
+  readonly seedId: string;
+  readonly sourceId: string;
+  readonly adoptionRecordId: string;
+  readonly parentReceiptSha256: string;
+  readonly adoptionManifestFingerprint: string;
+  readonly contractFingerprint: string;
+  readonly candidateFingerprint: string;
+  readonly replayBinding: Readonly<ReplayVersionBinding>;
+  readonly orchestratorVersion: string;
+  readonly countries: readonly Readonly<{
+    countryId: string;
+    adoptionRef: string;
+    roster: OpeningCountrySeedAssembly['roster'];
+    inventoryEntries: OpeningCountrySeedAssembly['inventoryEntries'];
+    financialBatches: readonly unknown[];
+  }>[];
+}
+/** Stable record IDs, never receipt/seed/bundle self hashes. One complete
+ * canonical intent covers every country, inventory and currency batch. */
+export function openingV2AssemblyIntentFingerprint(input: unknown): string {
+  const assembly = clone<OpeningCanonicalSeedAssemblyV2>(input);
+  exactKeys(record(assembly), [
+    'schemaVersion',
+    'worldId',
+    'seedId',
+    'sourceId',
+    'adoptionRecordId',
+    'parentReceiptSha256',
+    'adoptionManifestFingerprint',
+    'contractFingerprint',
+    'candidateFingerprint',
+    'replayBinding',
+    'orchestratorVersion',
+    'countries',
+  ]);
+  if (
+    assembly.schemaVersion !== 'opening-canonical-seed-assembly-v2' ||
+    !Array.isArray(assembly.countries) ||
+    assembly.countries.length !== 70
+  )
+    throw Error('V2_ASSEMBLY_CONTRACT_INVALID');
+  const countries = assembly.countries
+    .map((c) => {
+      exactKeys(record(c), [
+        'countryId',
+        'adoptionRef',
+        'roster',
+        'inventoryEntries',
+        'financialBatches',
+      ]);
+      const { adoptionRef, ...intent } = c;
+      void adoptionRef;
+      return intent;
+    })
+    .sort((a, b) => (a.countryId < b.countryId ? -1 : 1));
+  if (
+    new Set(countries.map((c) => c.countryId)).size !== 70 ||
+    COUNTRIES.some((cid) => !countries.some((c) => c.countryId === cid))
+  )
+    throw Error('V2_ASSEMBLY_COUNTRY_SCOPE_INVALID');
+  return hash({ ...assembly, countries });
+}
+
+/** Fingerprint compatibility only, never an adoption proof or seed authority. */
+export function hasOriginalFinancialCandidateFingerprint(
+  candidate: FormalFinancialCandidate,
+): boolean {
+  const { fingerprint, ...candidateBody } = candidate;
+  // Original producer hashes plain canonical JSON, not the V1 domain prefix.
+  return 'sha256:' + sha(canonicalSerialize(candidateBody)) === fingerprint;
+}
+
+/** Read-only V2 bridge; uses original producer output, not a new calculator.
+ * Source-adoption proof cannot replace source/inventory equality or Core rebuild. */
+export function prepareFinancialSupplementOpeningSeed(input: {
+  readonly assembly: unknown;
+  readonly proof: FinancialSupplementAdoption;
+  readonly candidate: FormalFinancialCandidate;
+}): OpeningSeed {
+  if (!isFinancialSupplementAdoption(input.proof))
+    throw Error('GENUINE_FINANCIAL_ADOPTION_REQUIRED');
+  const { proof, candidate } = input;
+  const a = clone<OpeningCanonicalSeedAssemblyV2>(input.assembly);
+  const { fingerprint } = candidate;
+  if (
+    !hasOriginalFinancialCandidateFingerprint(candidate) ||
+    fingerprint !== proof.candidateFingerprint ||
+    candidate.contractFingerprint !== proof.contractFingerprint ||
+    candidate.requestedWorldId !== proof.worldId ||
+    openingV2AssemblyIntentFingerprint(a) !== proof.assemblyIntentFingerprint ||
+    a.worldId !== proof.worldId ||
+    a.seedId !== proof.seedId ||
+    a.adoptionRecordId !== proof.recordId ||
+    a.parentReceiptSha256 !== proof.parent.ownerPolicy.receiptSha256 ||
+    a.adoptionManifestFingerprint !== proof.parent.manifestFingerprint ||
+    a.contractFingerprint !== proof.contractFingerprint ||
+    a.candidateFingerprint !== proof.candidateFingerprint ||
+    a.orchestratorVersion !== proof.orchestratorVersion ||
+    canonicalSerialize(a.replayBinding) !==
+      canonicalSerialize(proof.replayBinding) ||
+    candidate.financialBatches.some((b) => b.sourceId !== a.sourceId)
+  )
+    throw Error('V2_ASSEMBLY_ADOPTION_BINDING_MISMATCH');
+  const inventory: OpeningInventoryEntry[] = [];
+  for (const country of [...a.countries].sort((x, y) =>
+    x.countryId < y.countryId ? -1 : 1,
+  )) {
+    const adopted = proof.parent.manifest.countries.find(
+      (c) => c.countryId === country.countryId,
+    )!;
+    if (
+      country.adoptionRef !== proof.recordId ||
+      canonicalSerialize(country.roster) !==
+        canonicalSerialize({
+          operator: adopted.holderRoster.operator,
+          government: adopted.holderRoster.treasury,
+          households: adopted.holderRoster.households,
+          bank: adopted.holderRoster.bank,
+          centralBank: adopted.holderRoster.centralBank,
+        })
+    )
+      throw Error('V2_ROSTER_ADOPTION_MISMATCH');
+    const expected = proof.parent.manifest.stockRights
+      .filter((s) => s.countryId === country.countryId && s.positive)
+      .map((s) => ({
+        entryId: s.inventoryEntryId,
+        account: createInventoryAccount({
+          worldId: worldId(proof.worldId),
+          countryId: countryId(s.countryId),
+          commodityId: commodityId(s.commodityId),
+          batchId: inventoryBatchId(s.batchId),
+          physicalLocationId: inventoryLocationId(s.locationId),
+          unit: s.unit,
+          bucket: 'AVAILABLE',
+          reservationId: null,
+          shipmentId: null,
+          titleHolderId: s.titleHolderId,
+          riskBearerId: s.riskBearerId,
+          economicRecognitionId: null,
+        }),
+        quantity: Quantity.from(s.available, s.unit).toCanonicalValue(),
+      }));
+    const sorted = (rows: readonly { entryId: string }[]) =>
+      [...rows].sort((x, y) => (x.entryId < y.entryId ? -1 : 1));
+    if (
+      !Array.isArray(country.inventoryEntries) ||
+      canonicalSerialize(sorted(country.inventoryEntries)) !==
+        canonicalSerialize(sorted(expected))
+    )
+      throw Error('V2_INVENTORY_SOURCE_OR_RIGHTS_MISMATCH');
+    const batches = candidate.financialBatches.filter((b) =>
+      b.legs.every((l) => l.account.countryId === country.countryId),
+    );
+    if (
+      !Array.isArray(country.financialBatches) ||
+      canonicalSerialize(country.financialBatches) !==
+        canonicalSerialize(batches)
+    )
+      throw Error('V2_FINANCIAL_BATCHES_DIFFER_FROM_ORIGINAL_PRODUCER');
+    inventory.push(
+      ...expected.map((e) => ({
+        entryId: openingInventoryEntryId(e.entryId),
+        sourceId: openingSourceId(a.sourceId),
+        account: e.account,
+        quantity: Quantity.from(e.quantity.amount, e.quantity.unit),
+      })),
+    );
+  }
+  const source = createOpeningSource(
+    {
+      schemaVersion: OPENING_SOURCE_SCHEMA_VERSION,
+      sourceId: openingSourceId(a.sourceId),
+      sourceKind: 'AUTHORITATIVE_DATASET',
+      locator: 'incoming/financial/adoption.json',
+      sourceVersion: proof.receiptSha256,
+      payload: {
+        schemaVersion: 'adopted-financial-opening-source-v2',
+        parentReceiptSha256: proof.parent.ownerPolicy.receiptSha256,
+        sourcePins: proof.parent.ownerPolicy.sourcePins,
+        adoptionManifestFingerprint: proof.parent.manifestFingerprint,
+        record: proof.record,
+        retainedReference: proof.retainedReference,
+        receiptSha256: proof.receiptSha256,
+        instructionSha256: proof.instructionSha256,
+        assembly: {
+          ...a,
+          countries: [...a.countries].sort((x, y) =>
+            x.countryId < y.countryId ? -1 : 1,
+          ),
+        },
+        reconciliations: candidate.reconciliations,
+        contractFingerprint: proof.contractFingerprint,
+        candidateFingerprint: proof.candidateFingerprint,
+      },
+    },
+    sha,
+  );
+  const seed = createOpeningSeed(
+    {
+      schemaVersion: OPENING_SEED_SCHEMA_VERSION,
+      seedId: openingSeedId(a.seedId),
+      worldId: worldId(proof.worldId),
+      openingWorldVersion: '0',
+      replayBinding: a.replayBinding,
+      sources: [source],
+      inventoryEntries: inventory,
+      financialBatches: candidate.financialBatches,
+    },
+    sha,
+  );
+  const parsed = parseOpeningSeed(
+    JSON.parse(canonicalSerialize(seed)) as unknown,
+    sha,
+  );
+  rebuildV08LedgersFromLineage({ seed: parsed, sha256Hex: sha });
+  return parsed;
 }
 /** Fingerprint utility only, not approval. A's independently loaded owner intent
  * must already bind a matching DOMAIN_ADOPTED node for every country. */

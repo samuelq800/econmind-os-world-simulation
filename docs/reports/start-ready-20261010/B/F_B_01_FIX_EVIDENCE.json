@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "b-f-b-01-fix-delta-evidence-v1",
+  "status": "IMPLEMENTED_UNVERIFIED_PENDING_F_REVIEW",
+  "finding": "F-B-01",
+  "findingClosure": "NOT_SELF_AWARDED",
+  "baseCommit": "0943142b798df8bca401f5f0987c31a7db9434ac",
+  "baseTree": "3a7566d164e444656e9a6d3f275867e1af0815cd",
+  "codeCommit": "2d986f3794ce81e5eb7d0fba3e2056fdd3b5daa8",
+  "codeTree": "a9d89c1a8675bdbfa55050e94cd6279afc5c6f4e",
+  "patchSha256": "7e02544e0b1d4dcf007ac7f8d71addd219bc2e90edbe67fa225c5cabc5925432",
+  "patchCommand": "git diff --binary --full-index --no-ext-diff 0943142b798df8bca401f5f0987c31a7db9434ac 2d986f3794ce81e5eb7d0fba3e2056fdd3b5daa8",
+  "reviewSha256": "3bf4b2b2c2ae778684a529677910fc0eebed83cde9b15be29b805713b4c9c5cf",
+  "branch": "codex/b-opening-source-composition-20261010",
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "environment": "env -i pinned PATH; no database or credentials"
+  },
+  "codeFileSha256": {
+    "apps/world-worker/src/preparation/opening-canonical-seed-bridge.ts": "d9291655eae77e119082ab6e4afb5d6cb2ffd9c26713494852547a406bbe6647",
+    "tests/support/tsconfig.financial-candidate-bridge-fingerprint.json": "e17cdba5da9d86e5e25ce49d8373e45a3c8e624be76eaf847fa23c836710f403",
+    "tests/world-core/financial-candidate-bridge-fingerprint.test.ts": "d3d9ae6313343a6ffdaa352ef8d020b2ccb80e72340684f74e821915e55200a7"
+  },
+  "implementation": {
+    "predicate": "hasOriginalFinancialCandidateFingerprint",
+    "protocol": "sha256: + SHA256(canonicalSerialize(candidate without fingerprint))",
+    "unchanged": "global shared hash, V1, Core, original producer/parser, genuine proof gate and remaining bridge checks"
+  },
+  "checks": [
+    {
+      "name": "RED_ORIGINAL_PREDICATE",
+      "command": "node node_modules/vitest/vitest.mjs run tests/world-core/financial-candidate-bridge-fingerprint.test.ts",
+      "exitCode": 1,
+      "passed": 2,
+      "failed": 3,
+      "note": "Helper first extracted using the identical original hash(candidateBody) expression; tests added; not a frozen code target. Failure retained."
+    },
+    {
+      "name": "GREEN_FIX",
+      "command": "node node_modules/vitest/vitest.mjs run tests/world-core/financial-candidate-bridge-fingerprint.test.ts",
+      "exitCode": 0,
+      "passed": 5,
+      "failed": 0
+    },
+    {
+      "name": "SELECTED_EXISTING_FINGERPRINT_RESTART",
+      "command": "node node_modules/vitest/vitest.mjs run tests/world-core/formal-financial-opening.test.ts tests/world-core/opening-canonical-seed-bridge.test.ts -t 'stable fingerprints|reproduces the same candidate|returns deterministic fingerprints across restart'",
+      "exitCode": 0,
+      "passed": 3,
+      "notSelected": 44,
+      "note": "Explicit name filter, no test deletion/weakening; not a rerun of 132/90 baseline."
+    },
+    {
+      "name": "STRICT_NEW",
+      "command": "node node_modules/typescript/bin/tsc --noEmit -p tests/support/tsconfig.financial-candidate-bridge-fingerprint.json",
+      "exitCode": 0,
+      "skipLibCheck": false
+    },
+    {
+      "name": "WORKER_BUILD",
+      "command": "node node_modules/typescript/bin/tsc -p apps/world-worker/tsconfig.build.json",
+      "exitCode": 0
+    },
+    {
+      "name": "LINT",
+      "command": "node node_modules/eslint/bin/eslint.js apps/world-worker/src/preparation/opening-canonical-seed-bridge.ts tests/world-core/financial-candidate-bridge-fingerprint.test.ts",
+      "exitCode": 0
+    },
+    {
+      "name": "FORMAT",
+      "command": "node node_modules/prettier/bin/prettier.cjs --check <three delta code files>",
+      "exitCode": 0
+    },
+    {
+      "name": "BOUNDARIES",
+      "command": "node scripts/check-boundaries.mjs",
+      "exitCode": 0
+    },
+    {
+      "name": "AUTHORITATIVE_PATTERNS",
+      "command": "node scripts/check-authoritative-patterns.mjs",
+      "exitCode": 0
+    },
+    {
+      "name": "SECRETS",
+      "command": "node scripts/check-repository-secrets.mjs",
+      "exitCode": 0
+    },
+    {
+      "name": "GOVERNANCE",
+      "command": "python3 tools/validate_r2_governance.py --json",
+      "exitCode": 0
+    },
+    {
+      "name": "DIFF_WHITESPACE",
+      "command": "git diff --cached --check",
+      "exitCode": 0
+    }
+  ],
+  "originalLogSha256": {
+    "focused-green.log": "2d3692fa46073ced572acc78967baaba622ce1fe3d759cbbd9695d90a684dddf",
+    "selected-regressions.log": "f37adc443ea692959b65ea7c066933f351ce52e826a03ae4325db091b1b8b68c",
+    "strict.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "worker-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "format.log": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "boundaries.log": "802856fbb08863f544bb96445450835ed68e7c095f475a3e578af96bc9dd3aea",
+    "secrets.log": "b29c52fd7f2799f043c07498f64290b291315e6ab8ebc97731ab8fad5b44482a",
+    "authoritative-patterns.log": "5150770f52c3194c8ef5b28a0a03e1c36d7ef29d1b47a697062ee4206b71d06e",
+    "governance.json": "8376ba6567f88d218a67a3e9281879154d492b82371aa80e4565d37523d9085e"
+  },
+  "rawLogDirectory": "/private/tmp/b-fb01-delta-evidence.edfbDu",
+  "capturedOutput": "docs/reports/start-ready-20261010/B/F_B_01_FIX_CHECKS.txt",
+  "historicalEvidence": {
+    "target": "0943142b798df8bca401f5f0987c31a7db9434ac",
+    "focused132": "NOT_RERUN_UNCHANGED_HISTORY",
+    "architecture90": "NOT_RERUN_UNCHANGED_HISTORY",
+    "extraThirdPartyDeclarationFailures": "TWO_EXIT_2_FAILURES_RETAINED_NOT_RERUN_NOT_ERASED"
+  },
+  "remainingLimits": [
+    "Actual original producer mechanism output is non-formal and retains raw BLOCKED/null seed/false authority, two authority obligations and the mechanism-only blocker.",
+    "Formal genuine financial proof-to-seed positive NOT_RUN: real independently adopted supplemental input/registration is absent.",
+    "Parent policy still rereads files using original readFile after loader bounded reads; bounded bytes are not reused. Private server-owned immutable source directory remains a required deployment condition not proven by this delta. No new P1 claimed, no architecture refactor.",
+    "Durable private registry/revocation/commit gap and six-role/420/browser acceptance remain independent unresolved work."
+  ],
+  "notRun": [
+    "old 132-test run",
+    "old 90-test architecture suite",
+    "old extra third-party declaration checks",
+    "full suite",
+    "native/external PostgreSQL",
+    "420 Office/browser",
+    "formal genuine proof-to-seed positive",
+    "production",
+    "push",
+    "merge",
+    "deploy",
+    "gate/status mutation"
+  ],
+  "authority": {
+    "sourceAdoption": "NOT_PROVISIONED",
+    "formalWorldBinding": "UNRESOLVED",
+    "formalSeedPositive": "NOT_RUN",
+    "runtimeAuthority": "NOT_GRANTED",
+    "allSixOfficeComplete": "NOT_ESTABLISHED",
+    "production": "HOLD"
+  },
+  "stop": "Frozen delta for Root to dispatch F re-review. No independent closure claimed."
+}

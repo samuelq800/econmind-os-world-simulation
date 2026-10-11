@@ -8,8 +8,13 @@ import {
 } from '@econmind/core';
 import {
   isLoadedOfficialOpeningBundle,
+  isOfficialOpeningBundleV2,
   type LoadedOfficialOpeningBundle,
 } from './official-opening-bundle-loader.js';
+import {
+  prepareOfficialOpeningBundleCandidate,
+  type OfficialOpeningV2Candidate,
+} from './official-opening-candidate-composition.js';
 import {
   inspectOfficialOpeningDecisionSource,
   reconcileOfficialOpeningDecision,
@@ -18,7 +23,8 @@ import {
 import { inspectOfficialWorldOpeningAdmission } from './official-world-opening-admission.js';
 import { prepareOpeningCanonicalSeed } from './opening-canonical-seed-bridge.js';
 
-type Stage = 'source' | 'admission' | 'decision' | 'bridge' | 'core';
+type Stage =
+  'source' | 'admission' | 'decision' | 'bridge' | 'core' | 'financial';
 export interface OfficialOpeningBundlePreflightBlocker {
   readonly stage: Stage;
   readonly code: string;
@@ -42,16 +48,18 @@ export interface OfficialOpeningBundlePreflight {
   readonly seedFingerprint: string | null;
   readonly seedWorldId: string | null;
   readonly blockers: readonly OfficialOpeningBundlePreflightBlocker[];
-  readonly realFinancialProducer: 'NOT_CONNECTED_IN_CURRENT_BASE';
+  readonly realFinancialProducer:
+    | 'NOT_CONNECTED_IN_CURRENT_BASE'
+    | 'CALLED_ORIGINAL_PRODUCER'
+    | 'NOT_RUN_INPUT_REJECTED';
   readonly producerGap: Readonly<{
     legacyBridge: 'ONE_GCU_BATCH_PER_COUNTRY';
     officialConsumer: 'LC_BATCH_PER_COUNTRY_OPTIONAL_ADDITIONAL_GCU';
     coreInterface: 'OpeningSeed.financialBatches: FinancialOpeningBatch[]';
     missingContract: 'FORMAL_LC_FX_AND_COMPLETE_CB_REGISTER_PRODUCER';
-  }>;
-  readonly implementationGaps: readonly [
-    'REAL_FINANCIAL_PRODUCER_NOT_CONNECTED',
-  ];
+  }> | null;
+  readonly implementationGaps: readonly string[];
+  readonly financialComposition?: OfficialOpeningV2Candidate;
   readonly activationAllowed: false;
   readonly admissionEvaluated: false;
 }
@@ -68,6 +76,39 @@ export function preflightOfficialOpeningBundle(
 ): OfficialOpeningBundlePreflight {
   if (!isLoadedOfficialOpeningBundle(loaded))
     throw new Error('OPENING_BUNDLE_LOADER_SNAPSHOT_REQUIRED');
+  if (loaded.bundle && isOfficialOpeningBundleV2(loaded.bundle)) {
+    const composed = prepareOfficialOpeningBundleCandidate(loaded);
+    return Object.freeze({
+      status: composed.status,
+      sourcePackageId: 'BALANCED_2026_09_28_V1',
+      validatedFileCount: loaded.validatedFiles.length,
+      structuredDatasetCount: Object.keys(loaded.inputs.source.datasets).length,
+      sourceBundleSha256: composed.sourceBundleSha256,
+      decisionOrigin: 'INCOMING_FILE',
+      sourceStatus: composed.sourceStatus,
+      admissionStatus:
+        composed.status === 'PREFLIGHT_BLOCKED'
+          ? 'BLOCKED'
+          : 'SOURCE_READY_NOT_APPROVAL',
+      decisionStatus: composed.sourceAdoptionStatus,
+      bridgeStatus: composed.bridgeStatus,
+      coreValidation:
+        composed.bridgeStatus === 'CORE_PARSED_AND_REBUILT_NOT_ADMITTED'
+          ? 'PARSED_AND_REBUILT'
+          : 'NOT_RUN_NO_SEED',
+      seedFingerprint: composed.seed?.fingerprint ?? null,
+      seedWorldId: composed.seed?.worldId ?? null,
+      blockers: composed.blockers,
+      realFinancialProducer: composed.rawFinancialResult
+        ? 'CALLED_ORIGINAL_PRODUCER'
+        : 'NOT_RUN_INPUT_REJECTED',
+      producerGap: null,
+      implementationGaps: Object.freeze([]),
+      financialComposition: composed,
+      activationAllowed: false,
+      admissionEvaluated: false,
+    });
+  }
   const { inputs, bundle } = loaded;
   const blockers: OfficialOpeningBundlePreflightBlocker[] = [];
   const add = (
