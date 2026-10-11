@@ -5,7 +5,16 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current preparation integration (2026-10-10)
+## Current preparation integration (2026-10-11)
+
+PR135 已正常合并 G3A 修复与 B 审批锁序兼容，main 为 `5f104f1`，
+四项适用 CI 全部成功。完整主测试集 3326 PASS / 237 SKIP；另有独立原生往返通过。
+这仍是未启用的源码整合，不代表正式授权源、Clock 或经济世界已运行。
+当前负责人已直接恢复“先待审改，再隔离 World Clock”的有限任务，
+详见[两阶段执行记录](docs/exec-plans/REVIEW_THEN_ISOLATED_CLOCK_2026_10_11.md)。
+既有停止快照保留为历史，不据此启动正式世界或重开无关任务。
+
+### Retained PR134 checkpoint
 
 [2026-10-11 已核实的 PR134 main 收官](docs/reports/start-ready-20261010/O/PR134_MAIN_CLOSURE_2026_10_11.md)。
 B 来源组装/指纹修复与 D 精确列权限 guard 已经独审、组合回归及五项适用 CI，

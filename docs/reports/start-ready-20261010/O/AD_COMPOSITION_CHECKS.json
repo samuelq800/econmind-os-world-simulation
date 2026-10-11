@@ -1,0 +1,166 @@
+{
+  "kind": "ROOT_AD_UNCHANGED_REVIEWED_COMPOSITION",
+  "base": "5f104f1d6a9618ae409862e4359a27b910837ced",
+  "sourceHead": "650304c",
+  "sourceFileEquivalence": {
+    "files": [
+      {
+        "path": "apps/world-worker/src/preparation/current-authorization-publication-preparation.ts",
+        "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+        "expectedSha256": "4119ff4e7ae118af5e1ec23bf5169e296ea95ee2a320839422136603bae98d03",
+        "currentSha256": "4119ff4e7ae118af5e1ec23bf5169e296ea95ee2a320839422136603bae98d03",
+        "equal": true
+      },
+      {
+        "path": "apps/world-worker/src/preparation/current-authorization-source-contract.ts",
+        "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+        "expectedSha256": "cbbb4e308354304635d9454f5118a27ac2f71b70ddb4773b641e33bd4db289a0",
+        "currentSha256": "cbbb4e308354304635d9454f5118a27ac2f71b70ddb4773b641e33bd4db289a0",
+        "equal": true
+      },
+      {
+        "path": "database/proposals/current-authorization-writer-preparation.sql",
+        "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+        "expectedSha256": "8959061ecf497fac86d78f07ca9db571c5a0388edf13a8635ea7e291746c0233",
+        "currentSha256": "8959061ecf497fac86d78f07ca9db571c5a0388edf13a8635ea7e291746c0233",
+        "equal": true
+      },
+      {
+        "path": "tests/support/current-authorization-preparation-fixture.ts",
+        "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+        "expectedSha256": "5a6a74ac862065055b0d46df6e25110798bcc8ebd4e5e94c55c075f6785992c9",
+        "currentSha256": "5a6a74ac862065055b0d46df6e25110798bcc8ebd4e5e94c55c075f6785992c9",
+        "equal": true
+      },
+      {
+        "path": "tests/support/tsconfig.current-authorization-preparation.json",
+        "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+        "expectedSha256": "970ca0f82532c31f79c1e13caa05a48c289b97c80403d7138b15621daec89805",
+        "currentSha256": "970ca0f82532c31f79c1e13caa05a48c289b97c80403d7138b15621daec89805",
+        "equal": true
+      },
+      {
+        "path": "tests/world-core/current-authorization-publication-postgres.test.ts",
+        "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+        "expectedSha256": "8d4aab4d9cb42b1f44e73da6020a32e595e3fc57061cdb307151916e4b87f190",
+        "currentSha256": "8d4aab4d9cb42b1f44e73da6020a32e595e3fc57061cdb307151916e4b87f190",
+        "equal": true
+      },
+      {
+        "path": "tests/world-core/current-authorization-publication-preparation.test.ts",
+        "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+        "expectedSha256": "1eaa466c1ad8471e2021c3d18f9f217a8afa8438e72438625e26e355c8c4f643",
+        "currentSha256": "1eaa466c1ad8471e2021c3d18f9f217a8afa8438e72438625e26e355c8c4f643",
+        "equal": true
+      },
+      {
+        "path": "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+        "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+        "expectedSha256": "2690220e7844b581312c6ec3a9b6a9b7988924ff72b08a0816631bb2eaf611af",
+        "currentSha256": "2690220e7844b581312c6ec3a9b6a9b7988924ff72b08a0816631bb2eaf611af",
+        "equal": true
+      },
+      {
+        "path": "tests/support/d-revoked-receipt-fixture.ts",
+        "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+        "expectedSha256": "b705dad5040da5916112d36fab5097c90e49a1c6495d4499a92f3a9880a536ab",
+        "currentSha256": "b705dad5040da5916112d36fab5097c90e49a1c6495d4499a92f3a9880a536ab",
+        "equal": true
+      },
+      {
+        "path": "tests/world-core/d-revoked-receipt-head-lock-embedded.test.ts",
+        "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+        "expectedSha256": "41812b7b792870e03a0a9b939e858bf7d7a528358beed9e10a6ac1508acd8c2a",
+        "currentSha256": "41812b7b792870e03a0a9b939e858bf7d7a528358beed9e10a6ac1508acd8c2a",
+        "equal": true
+      },
+      {
+        "path": "tests/world-core/d-revoked-receipt-head-lock-embedded.tsconfig.json",
+        "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+        "expectedSha256": "82f31ed45b7fd1faca5db18a9b019c1ab17d0c6c8074b39db0797bfcbb8bc7c2",
+        "currentSha256": "82f31ed45b7fd1faca5db18a9b019c1ab17d0c6c8074b39db0797bfcbb8bc7c2",
+        "equal": true
+      },
+      {
+        "path": "tests/world-core/d-revoked-receipt-head-lock-postgres.test.ts",
+        "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+        "expectedSha256": "9019244c21405207b0f2c9d61fbd9248dedbf1575ee722b96955611d0bcffe53",
+        "currentSha256": "9019244c21405207b0f2c9d61fbd9248dedbf1575ee722b96955611d0bcffe53",
+        "equal": true
+      },
+      {
+        "path": "tests/world-core/d-revoked-receipt-head-lock.test.ts",
+        "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+        "expectedSha256": "e80bb7ae6509fc781020d556d97cfe3f9b704b02f490203aa881c876088cc773",
+        "currentSha256": "e80bb7ae6509fc781020d556d97cfe3f9b704b02f490203aa881c876088cc773",
+        "equal": true
+      },
+      {
+        "path": "tests/world-core/d-revoked-receipt-head-lock.tsconfig.json",
+        "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+        "expectedSha256": "8483566c7bb9aade8fc72d37c4e844f3928329cee197dd9891a99084dc889580",
+        "currentSha256": "8483566c7bb9aade8fc72d37c4e844f3928329cee197dd9891a99084dc889580",
+        "equal": true
+      }
+    ],
+    "count": 14,
+    "allEqual": true
+  },
+  "independentReviews": [
+    {
+      "target": "C_A_MECHANICAL_FINAL_REVIEW.md",
+      "source": "/Users/samuel/.codex/state/plugins/codex-security/scans/a-current-authz-mechanical-prep-20261010/artifacts-3a5f1928e91c2f702d47f1bc133ce934a2d8b8e0a119271987ab2fa534f6a963/artifacts/C_AUTHZ_PREPARATION_REVIEW/review.md",
+      "sha256": "b6511b3eb074eec8f0ea9f166b0669a9c192b5fe4df3efbdb3c461b9b6414d80"
+    },
+    {
+      "target": "F_D_FINAL_RECEIPT_REVIEW.md",
+      "source": "/Users/samuel/.codex/state/plugins/codex-security/scans/d-revoked-receipt-head-lock-20261010/artifacts-91211b81606b703e12367571ac3a55c8ad1b5d6424df727d0a2a12dc45db3e13/artifacts/F_D_REVOKED_RECEIPT_REVIEW_20261011/F_REVIEW.md",
+      "sha256": "1c3cd30e6e9c195063f04ba518fed4e17a74c71dfb902ba0204fbd3dc2b257bf"
+    }
+  ],
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4"
+  },
+  "build": {
+    "command": "pnpm pretest",
+    "exitCode": 0,
+    "scope": "current checkout Core Worker API"
+  },
+  "checks": {
+    "ad-focus": {
+      "command": "pnpm exec vitest run tests/world-core/current-authorization-publication-preparation.test.ts tests/world-core/d-revoked-receipt-head-lock.test.ts tests/world-core/d-revoked-receipt-head-lock-embedded.test.ts tests/world-core/atomic-transition-repository.test.ts",
+      "exitCode": 0,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/world-map-full-integration\n\n ✓ tests/world-core/current-authorization-publication-preparation.test.ts (15 tests) 8ms\n ✓ tests/world-core/d-revoked-receipt-head-lock-embedded.test.ts (6 tests) 1854ms\n ✓ tests/world-core/d-revoked-receipt-head-lock.test.ts (5 tests) 5ms\n\n Test Files  3 passed (3)\n      Tests  26 passed (26)\n   Start at  16:05:19\n   Duration  2.84s (tests 71%, transform 17%, import 11%)\n\n"
+    },
+    "ad-existing": {
+      "command": "pnpm exec vitest run tests/world-core/v09-atomic-repository-preparation.test.ts tests/world-core/v09-commit-authorization-cutoff.test.ts tests/world-core/v09-worker-authoritative-execution.test.ts",
+      "exitCode": 0,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/world-map-full-integration\n\n ✓ tests/world-core/v09-atomic-repository-preparation.test.ts (29 tests) 15023ms\n   ✓ sparse materialization compare-and-swap (6)\n     ✓ retains old global CAS rejection, then commits an observed version1 country at global2 once 947ms\n     ✓ rolls back all third-command effects on HASH_CHANGED after observation 543ms\n     ✓ rolls back all third-command effects on ROW_DELETED after observation 528ms\n     ✓ requires an observed absent row to remain absent and permits a genuine first write 554ms\n     ✓ rejects forged, wrong-key, wrong-world and stale-head observations before candidate creation 536ms\n     ✓ refuses a corrupt current cache hash rather than branding it as a domain observation 503ms\n   ✓ V09 private atomic repository preparation (23)\n     ✓ fails closed before any effect when a V10 narrow transfer lacks the server-held approval guard 484ms\n     ✓ commits every authoritative fact once and returns the durable receipt on retry 525ms\n     ✓ rejects direct forged Inventory and Financial evidence despite valid V07 source binding 498ms\n     ✓ leaves no partial authoritative fact when BEFORE_EVENTS fails 519ms\n     ✓ leaves no partial authoritative fact when AFTER_EVENTS fails 549ms\n     ✓ leaves no partial authoritative fact when BEFORE_INVENTORY_POSTINGS fails 513ms\n     ✓ leaves no partial authoritative fact when AFTER_INVENTORY_POSTINGS fails 468ms\n     ✓ leaves no partial authoritative fact when BEFORE_FINANCIAL_POSTINGS fails 494ms\n     ✓ leaves no partial authoritative fact when AFTER_FINANCIAL_POSTINGS fails 468ms\n     ✓ leaves no partial authoritative fact when BEFORE_AUTHORIZATION_AUDIT fails 571ms\n     ✓ leaves no partial authoritative fact when AFTER_AUTHORIZATION_AUDIT fails 489ms\n     ✓ leaves no partial authoritative fact when BEFORE_RECEIPT fails 495ms\n     ✓ leaves no partial authoritative fact when AFTER_RECEIPT fails 510ms\n     ✓ leaves no partial authoritative fact when BEFORE_MATERIALIZATIONS fails 499ms\n     ✓ leaves no partial authoritative fact when AFTER_MATERIALIZATIONS fails 470ms\n     ✓ leaves no partial authoritative fact when BEFORE_OUTBOX fails 466ms\n     ✓ leaves no partial authoritative fact when AFTER_OUTBOX fails 465ms\n     ✓ leaves no partial authoritative fact when BEFORE_QUEUE_FINALIZATION fails 479ms\n     ✓ leaves no partial authoritative fact when AFTER_QUEUE_FINALIZATION fails 486ms\n     ✓ leaves no partial authoritative fact when BEFORE_WORLD_HEAD fails 505ms\n     ✓ leaves no partial authoritative fact when AFTER_WORLD_HEAD fails 493ms\n     ✓ leaves no partial authoritative fact when BEFORE_TRANSACTION_COMMIT fails 480ms\n     ✓ recovers a committed receipt after acknowledgement is lost 485ms\n ✓ tests/world-core/v09-commit-authorization-cutoff.test.ts (1 test) 770ms\n   ✓ V09 real Core-issued authorization at transaction cutoff (1)\n     ✓ rejects a genuine Core-issued proof when the SQL-held revision changes or authority is revoked before commit 770ms\n ✓ tests/world-core/v09-worker-authoritative-execution.test.ts (2 tests) 2ms\n\n Test Files  3 passed (3)\n      Tests  32 passed (32)\n   Start at  16:06:03\n   Duration  16.47s (tests 97%, transform 2%, import 1%)\n\n"
+    },
+    "ad-types": {
+      "command": "pnpm exec tsc -p tests/support/tsconfig.current-authorization-preparation.json --noEmit --strict --skipLibCheck false && pnpm exec tsc -p tests/world-core/d-revoked-receipt-head-lock.tsconfig.json --noEmit --strict --skipLibCheck false && pnpm exec tsc -p tests/world-core/d-revoked-receipt-head-lock-embedded.tsconfig.json --noEmit",
+      "exitCode": 0,
+      "output": ""
+    },
+    "ad-boundaries": {
+      "command": "pnpm test:boundaries && pnpm migration:validate && pnpm env:check",
+      "exitCode": 0,
+      "output": "$ vitest run tests/architecture/boundaries.test.ts tests/architecture/foundation-gates.test.ts tests/architecture/foundation-ci-gate.test.ts && node scripts/check-authoritative-patterns.mjs && node scripts/check-boundaries.mjs\n\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/world-map-full-integration\n\n ✓ tests/architecture/boundaries.test.ts (35 tests) 6169ms\n   ✓ resolved repository authority boundaries (35)\n     ✓ checks dynamic import and require when they use static module strings 446ms\n     ✓ keeps the real Vite config, helpers, and installed npm imports valid 557ms\n ✓ tests/architecture/foundation-gates.test.ts (3 tests) 671ms\n   ✓ V04 authoritative architecture gates (3)\n     ✓ passes against the real repository 415ms\n ✓ tests/architecture/foundation-ci-gate.test.ts (2 tests) 2ms\n\n Test Files  3 passed (3)\n      Tests  40 passed (40)\n   Start at  16:05:19\n   Duration  7.07s (tests 99%)\n\n{\n  \"scannedCoreFiles\": 91,\n  \"scannedFiles\": 337,\n  \"status\": \"PASS\",\n  \"violations\": []\n}\n{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 342,\n  \"guardedRoots\": [\n    \"apps\",\n    \"packages\",\n    \"apps/world-web/server.mjs\",\n    \"scripts/environment-policy.mjs\",\n    \"scripts/vite-environment-policy.mjs\",\n    \"scripts/vite-environment-policy.d.mts\",\n    \"scripts/run-development-service.mjs\",\n    \"scripts/run-development-stack.mjs\"\n  ],\n  \"sourceExtensions\": [\n    \".ts\",\n    \".tsx\",\n    \".mts\",\n    \".cts\",\n    \".js\",\n    \".jsx\",\n    \".mjs\",\n    \".cjs\"\n  ]\n}\n$ node scripts/validate-migrations.mjs\n{\n  \"migrations\": 23,\n  \"status\": \"PASS\",\n  \"violations\": []\n}\n$ ECONMIND_ENV=local node scripts/assert-safe-environment.mjs\n{\n  \"status\": \"PASS\",\n  \"environment\": \"local\",\n  \"databaseConfigured\": false,\n  \"validatedViteModes\": [\n    \"development\",\n    \"production\"\n  ],\n  \"linkedSupabaseProject\": \"NOT_LINKED\",\n  \"databaseMutationAllowed\": false\n}\n"
+    }
+  },
+  "counts": {
+    "focused": 58,
+    "boundary": 40,
+    "nativeRoot": "NOT_RUN"
+  },
+  "note": "First focused invocation included nonexistent atomic-transition-repository.test.ts; Vitest matched and passed only the other three files (26). Correct v09 repository/cutoff/Worker invocation separately passed32; no false 29-file assertion or rerun of26.",
+  "notRun": [
+    "LOCAL_FULL_CHECK",
+    "ROOT_NATIVE",
+    "PRODUCTION",
+    "FORMAL_WORLD",
+    "ACTIVATION"
+  ],
+  "review": "Prior C/F scoped independent approvals reused; no self-approval"
+}

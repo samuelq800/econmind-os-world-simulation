@@ -1,0 +1,104 @@
+{
+  "files": [
+    {
+      "path": "apps/world-worker/src/preparation/current-authorization-publication-preparation.ts",
+      "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+      "expectedSha256": "4119ff4e7ae118af5e1ec23bf5169e296ea95ee2a320839422136603bae98d03",
+      "currentSha256": "4119ff4e7ae118af5e1ec23bf5169e296ea95ee2a320839422136603bae98d03",
+      "equal": true
+    },
+    {
+      "path": "apps/world-worker/src/preparation/current-authorization-source-contract.ts",
+      "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+      "expectedSha256": "cbbb4e308354304635d9454f5118a27ac2f71b70ddb4773b641e33bd4db289a0",
+      "currentSha256": "cbbb4e308354304635d9454f5118a27ac2f71b70ddb4773b641e33bd4db289a0",
+      "equal": true
+    },
+    {
+      "path": "database/proposals/current-authorization-writer-preparation.sql",
+      "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+      "expectedSha256": "8959061ecf497fac86d78f07ca9db571c5a0388edf13a8635ea7e291746c0233",
+      "currentSha256": "8959061ecf497fac86d78f07ca9db571c5a0388edf13a8635ea7e291746c0233",
+      "equal": true
+    },
+    {
+      "path": "tests/support/current-authorization-preparation-fixture.ts",
+      "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+      "expectedSha256": "5a6a74ac862065055b0d46df6e25110798bcc8ebd4e5e94c55c075f6785992c9",
+      "currentSha256": "5a6a74ac862065055b0d46df6e25110798bcc8ebd4e5e94c55c075f6785992c9",
+      "equal": true
+    },
+    {
+      "path": "tests/support/tsconfig.current-authorization-preparation.json",
+      "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+      "expectedSha256": "970ca0f82532c31f79c1e13caa05a48c289b97c80403d7138b15621daec89805",
+      "currentSha256": "970ca0f82532c31f79c1e13caa05a48c289b97c80403d7138b15621daec89805",
+      "equal": true
+    },
+    {
+      "path": "tests/world-core/current-authorization-publication-postgres.test.ts",
+      "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+      "expectedSha256": "8d4aab4d9cb42b1f44e73da6020a32e595e3fc57061cdb307151916e4b87f190",
+      "currentSha256": "8d4aab4d9cb42b1f44e73da6020a32e595e3fc57061cdb307151916e4b87f190",
+      "equal": true
+    },
+    {
+      "path": "tests/world-core/current-authorization-publication-preparation.test.ts",
+      "reviewedTip": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+      "expectedSha256": "1eaa466c1ad8471e2021c3d18f9f217a8afa8438e72438625e26e355c8c4f643",
+      "currentSha256": "1eaa466c1ad8471e2021c3d18f9f217a8afa8438e72438625e26e355c8c4f643",
+      "equal": true
+    },
+    {
+      "path": "apps/world-worker/src/persistence/atomic-transition-repository.ts",
+      "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+      "expectedSha256": "2690220e7844b581312c6ec3a9b6a9b7988924ff72b08a0816631bb2eaf611af",
+      "currentSha256": "2690220e7844b581312c6ec3a9b6a9b7988924ff72b08a0816631bb2eaf611af",
+      "equal": true
+    },
+    {
+      "path": "tests/support/d-revoked-receipt-fixture.ts",
+      "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+      "expectedSha256": "b705dad5040da5916112d36fab5097c90e49a1c6495d4499a92f3a9880a536ab",
+      "currentSha256": "b705dad5040da5916112d36fab5097c90e49a1c6495d4499a92f3a9880a536ab",
+      "equal": true
+    },
+    {
+      "path": "tests/world-core/d-revoked-receipt-head-lock-embedded.test.ts",
+      "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+      "expectedSha256": "41812b7b792870e03a0a9b939e858bf7d7a528358beed9e10a6ac1508acd8c2a",
+      "currentSha256": "41812b7b792870e03a0a9b939e858bf7d7a528358beed9e10a6ac1508acd8c2a",
+      "equal": true
+    },
+    {
+      "path": "tests/world-core/d-revoked-receipt-head-lock-embedded.tsconfig.json",
+      "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+      "expectedSha256": "82f31ed45b7fd1faca5db18a9b019c1ab17d0c6c8074b39db0797bfcbb8bc7c2",
+      "currentSha256": "82f31ed45b7fd1faca5db18a9b019c1ab17d0c6c8074b39db0797bfcbb8bc7c2",
+      "equal": true
+    },
+    {
+      "path": "tests/world-core/d-revoked-receipt-head-lock-postgres.test.ts",
+      "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+      "expectedSha256": "9019244c21405207b0f2c9d61fbd9248dedbf1575ee722b96955611d0bcffe53",
+      "currentSha256": "9019244c21405207b0f2c9d61fbd9248dedbf1575ee722b96955611d0bcffe53",
+      "equal": true
+    },
+    {
+      "path": "tests/world-core/d-revoked-receipt-head-lock.test.ts",
+      "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+      "expectedSha256": "e80bb7ae6509fc781020d556d97cfe3f9b704b02f490203aa881c876088cc773",
+      "currentSha256": "e80bb7ae6509fc781020d556d97cfe3f9b704b02f490203aa881c876088cc773",
+      "equal": true
+    },
+    {
+      "path": "tests/world-core/d-revoked-receipt-head-lock.tsconfig.json",
+      "reviewedTip": "fddaa633f2e010e799a2e768469ae573e17a9965",
+      "expectedSha256": "8483566c7bb9aade8fc72d37c4e844f3928329cee197dd9891a99084dc889580",
+      "currentSha256": "8483566c7bb9aade8fc72d37c4e844f3928329cee197dd9891a99084dc889580",
+      "equal": true
+    }
+  ],
+  "count": 14,
+  "allEqual": true
+}
