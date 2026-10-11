@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "lib": ["ES2024", "DOM"],
+    "types": ["node"]
+  },
+  "include": [
+    "../../apps/world-worker/src/preparation/current-authorization-source-contract.ts",
+    "../../apps/world-worker/src/preparation/current-authorization-publication-preparation.ts",
+    "current-authorization-preparation-fixture.ts",
+    "../world-core/current-authorization-publication-preparation.test.ts",
+    "../world-core/current-authorization-publication-postgres.test.ts"
+  ]
+}
