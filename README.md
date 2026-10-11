@@ -7,6 +7,12 @@ engines or hidden buffs.
 
 ## Current preparation integration (2026-10-10)
 
+[2026-10-11 已核实的 PR134 main 收官](docs/reports/start-ready-20261010/O/PR134_MAIN_CLOSURE_2026_10_11.md)。
+B 来源组装/指纹修复与 D 精确列权限 guard 已经独审、组合回归及五项适用 CI，
+正常合并为 `590b56b`。完整主测试集 3285 PASS / 221 SKIP；另有独立原生往返与
+七项 supervisor 原生结果。SKIP 不是通过，源码合并不授予正式来源或经济启动权限。
+G3A 空 source 修复、授权写入和两条消费链兼容仍各按独立候选收官，不继承本批批准。
+
 [本批受审源码整合与 CI 收官](docs/reports/start-ready-20261010/O/BD_COMPOSITION_RECEIPT.md)。
 PR133 已正常合并 G 的未挂载 slices1/2 与 A 的精确输入目录，main 为 `eb033a4`。
 PR132 的 loopback 修复经 A 独审后，在真实 Linux PostgreSQL16.15 上完成七项原生测试、
