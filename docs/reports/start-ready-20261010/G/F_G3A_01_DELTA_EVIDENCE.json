@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "finding": "F-G3A-01",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "independentDeltaReview": "PENDING; F closure decision required",
+  "preparationStatus": "SOURCE_ONLY_UNMOUNTED_HOLD",
+  "date": "2026-10-11",
+  "candidate": {
+    "sha": "ea0632c7e8e5e0249ec0a886e05b7867e41e5a58",
+    "tree": "96dffcc4b41c077d5a775f5d27a5e40c50ccbeab",
+    "parent": "af005fb71545373542a5bd0565877b37e2580439",
+    "files": [
+      [
+        "apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts",
+        6399,
+        "f9dd47772184cded29d1638b7a9416297a100a32933e846f0049f7a1462ea86b"
+      ],
+      [
+        "tests/world-api/G-source-pool-delta.test.ts",
+        3933,
+        "6483d9cfc07d82e071c1861731da27212b7431aded3e6ed30e27031eeb6f900e"
+      ],
+      [
+        "tests/world-api/tsconfig.G-constructor-3a.json",
+        261,
+        "e5bbe5f49227a38ac468825762e4f517edfac80e71cba82c628d915f885de034"
+      ]
+    ]
+  },
+  "original": {
+    "code": "a2d59abfc768cc93744a7a2b82af514a7f12c84b",
+    "evidence": "af005fb71545373542a5bd0565877b37e2580439",
+    "evidenceTree": "e3b46c9812febfa7179238bb2e3ba79170d8c484",
+    "recordsUnchanged": true
+  },
+  "review": {
+    "decision": "CHANGES_REQUIRED; unique P2 finding does not downgrade overall P0 boundary",
+    "path": "/Users/samuel/.codex/state/plugins/codex-security/scans/g-constructor-3a-20261010/artifacts-a69e5e2691a02746f8e7236c0df7ee576d3b8c26bd1f6f9ea752668f1f5234b6/artifacts/F_G_CONSTRUCTOR_3A_REVIEW_20261010/F_REVIEW.md",
+    "sha256": "07aec25a71b653a4f2460f39f950b590c10329acc5087fa8e866bfb529761f38"
+  },
+  "scope": "Only selected source non-null validation before any pool allocation; isolated 10-case regression and strict config include",
+  "red": {
+    "command": "pnpm exec vitest run tests/world-api/G-source-pool-delta.test.ts",
+    "exitCode": 1,
+    "testFiles": 1,
+    "failed": 2,
+    "passed": 8,
+    "output": "RUN v5.0.0\nG-source-pool-delta.test.ts: 10 tests, 2 failed / 8 passed.\nBoth office-command and financial-intake empty-source cases failed: AssertionError: promise resolved \"undefined\" instead of rejecting. The other eight null/nonempty-invalid/valid/reader-only controls passed.\nStart at 00:58:53; Duration 221ms. Full raw error was returned in the tool call; this receipt is an exact substantive summary, not a full raw transcript."
+  },
+  "builds": [
+    {
+      "command": "pnpm --filter @econmind/world-api build",
+      "exitCode": 0,
+      "output": "$ tsc -p tsconfig.build.json\n",
+      "order": ["world-api only; existing Core and Worker dist unchanged"]
+    },
+    {
+      "command": "pnpm --filter @econmind/world-api build",
+      "chunk_id": "82a89f",
+      "wall_time_seconds": 1.003155083,
+      "original_token_count": 8,
+      "output": "$ tsc -p tsconfig.build.json\n",
+      "exitCode": 0
+    }
+  ],
+  "buildOrder": "API only, twice (first default Prettier formatting, then resolved repository configuration); Core/Worker not rebuilt and byte unchanged",
+  "manifestPath": "constructor-3a-checks/F_G3A_01-pre-test-dist-manifest.json",
+  "distAggregateSha256": "1a6788288e06ebb5031141aa399c035df8c71b5671fd4f6be09d247b82ba10d4",
+  "distFiles": 432,
+  "distChangedFromOriginal": [
+    [
+      "apps/world-api/dist/runtime-preparation/cloudflare-postgres-pools.js",
+      5135,
+      "ebd4fc0fe65fd62e5a8b4f74f216d996414de1c1f007bc3045e7696fc8fe362d"
+    ]
+  ],
+  "postTestMatchesPreTest": true,
+  "checks": [
+    {
+      "name": "focused",
+      "command": "pnpm exec vitest run tests/world-api/G-source-pool-delta.test.ts tests/world-api/G-constructor-3a.test.ts -t 'F-G3A-01|3A fixed route resources'",
+      "exitCode": 0,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010\n\n\n Test Files  2 passed (2)\n      Tests  18 passed | 21 skipped (39)\n   Start at  06:03:10\n   Duration  1.63s (transform 77%, import 21%, tests 1%, worker 1%)\n\n"
+    },
+    {
+      "name": "strict",
+      "command": "pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "lint-format-diff",
+      "command": "pnpm exec eslint apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-source-pool-delta.test.ts && pnpm exec prettier --check apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-source-pool-delta.test.ts tests/world-api/tsconfig.G-constructor-3a.json && git diff --check",
+      "exitCode": 1,
+      "output": "Checking formatting...\n[warn] apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts\n[warn] tests/world-api/G-source-pool-delta.test.ts\n[warn] Code style issues found in 2 files. Run Prettier with --write to fix.\n"
+    },
+    {
+      "name": "focused-final",
+      "command": "pnpm exec vitest run tests/world-api/G-source-pool-delta.test.ts tests/world-api/G-constructor-3a.test.ts -t 'F-G3A-01|3A fixed route resources'",
+      "exitCode": 0,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010\n\n\n Test Files  2 passed (2)\n      Tests  18 passed | 21 skipped (39)\n   Start at  06:38:17\n   Duration  1.58s (transform 76%, import 22%, tests 1%, worker 1%)\n\n"
+    },
+    {
+      "name": "strict-final",
+      "command": "pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "lint-format-diff-final",
+      "command": "pnpm exec eslint apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-source-pool-delta.test.ts && pnpm exec prettier --check apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-source-pool-delta.test.ts tests/world-api/tsconfig.G-constructor-3a.json && git diff --check",
+      "exitCode": 0,
+      "output": "Checking formatting...\nAll matched files use Prettier code style!\n"
+    }
+  ],
+  "finalAcceptance": {
+    "passed": 18,
+    "intentionallyFilteredOut": 21,
+    "totalDiscovered": 39,
+    "testFiles": 2,
+    "newRegressionCases": 10,
+    "oldRouteCases": 8,
+    "strictExitCode": 0,
+    "scopedLintFormatDiffExitCode": 0
+  },
+  "formattingHistory": "First programmatic Prettier call omitted resolveConfig and used double quotes; first scoped format failed on helper/test. Corrected through resolveConfig + apply_patch, reducing product delta to the non-null condition; rebuilt API and captured a new manifest before actual final focused rerun.",
+  "authority": "No source/clock/actor/token/host issuer/HOLD/defaultnull/consumer/economic chain/entry/config change; real lazy Pool constructors observed, no native connection or SQL",
+  "notRun": [
+    "original 61-test full focused selection",
+    "original110 local/CI suite",
+    "full/420",
+    "native PostgreSQL/SQL/driver",
+    "real5s/10s deadlines",
+    "CI/workerd/Linux topology",
+    "formal source admission/preflight/token issuance/retirement/startup",
+    "3B/4A/4B/5",
+    "production/deployment/grants/schema/migrations",
+    "new boundary/environment suite"
+  ],
+  "oldEvidence": "Original61/110 and all historical failures remain literal prior candidate evidence, not rerun or relabeled on this delta"
+}

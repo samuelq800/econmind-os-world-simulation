@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 1,
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "preparationStatus": "SOURCE_ONLY_UNMOUNTED_HOLD",
+  "independentImplementationReview": "PENDING",
+  "scope": "3A private identity and request resource lifecycle mechanical implementation only",
+  "candidate": {
+    "sha": "a2d59abfc768cc93744a7a2b82af514a7f12c84b",
+    "tree": "23efaedff642e6b364f02151c347216c76c2e247",
+    "parent": "eb033a4d9e717a9cb9149e450900b606c3457403",
+    "files": [
+      [
+        "apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts",
+        6382,
+        "f197f13258b2576e55253bfe8fddbcdb2cd0f001d7f5f930d4037aefd0bbd4d6"
+      ],
+      [
+        "apps/world-api/src/runtime-preparation/executor-request-resources.ts",
+        4423,
+        "848596f72f72b622c7f8e35f48e299c1024344b6b1171e537e71b5d57fe716fd"
+      ],
+      [
+        "apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts",
+        7774,
+        "5d41078905009930d282cfac77879f09d5d89f304446c847debd488cbc2ba214"
+      ],
+      [
+        "apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts",
+        913,
+        "f9c442250009979a5de47879f62f58ee31980032251d6cc668458badadca485a"
+      ],
+      [
+        "apps/world-worker/package.json",
+        1454,
+        "4147d670ea0a6a459f9a330bdc7142c1926359caa9611571dba7de6a2375d953"
+      ],
+      [
+        "apps/world-worker/src/intake/manual-office-intake-runtime.ts",
+        7080,
+        "7443597edf7761be70dc0b10677167057cf83c0832c07f8b27f231f165b1a9e2"
+      ],
+      [
+        "apps/world-worker/src/runtime-preparation/private-command-request-registry.ts",
+        3766,
+        "3f58f1296f5112398e9d2fe84137e441b941e75e063ee13ff2a1dfc00b07bf5a"
+      ],
+      [
+        "apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts",
+        299,
+        "060c2bedb73bca78074134593cb0bf317da314715b9f81ece356a63bc9c1f386"
+      ],
+      [
+        "apps/world-worker/src/runtime-preparation/production-world-command-host.ts",
+        3908,
+        "c5e85d65530266099a6d898581cbf1c1648507d307823cea340c254888e43e43"
+      ],
+      [
+        "tests/world-api/G-completion-drain.test.ts",
+        15083,
+        "2b9ab2a0ce9a97ddd916fe14f4d3bd3d152714c67911c576a5a2aaafe87d9087"
+      ],
+      [
+        "tests/world-api/G-constructor-3a.test.ts",
+        18560,
+        "27bcbae2b84ba9ca42fecd7e06f4ed643e41e0de533b3e548744c9635e6a1ca7"
+      ],
+      [
+        "tests/world-api/tsconfig.G-constructor-3a.json",
+        230,
+        "d67ccd45b83bc79a6038768ac9d9090e1b624fbf2b6e89dfa02f6d13019b98e5"
+      ]
+    ]
+  },
+  "baseTree": "13a60f04c1a9c54eb8ffbaca8b469bf25b293dce",
+  "design": {
+    "sha": "243d534667006ce0daee28043ec2ff8e1b20b317",
+    "tree": "56ab6a47ddb4a2bf5485e3675ee9514dcda1fc1b",
+    "path": "docs/reports/start-ready-20261010/G/CONSTRUCTOR_SLICES_3_4_DESIGN.md",
+    "sha256": "ab0de31b381eebb16ad4d0d2717e053e9fc21a5e905db221542c1492227a7405",
+    "review": "APPROVED_WITH_EXACT_BOUNDARIES / DESIGN_ONLY",
+    "reviewPath": "/Users/samuel/.codex/state/plugins/codex-security/scans/g-nonactivated-runtime-api-host/artifacts-5188513d79bd81986a823019895128cbe4a8422cd6bb52fe5b000cadca2cefad/artifacts/F_G_CONSTRUCTOR_DESIGN_REVIEW_20261010/F_REVIEW.md",
+    "reviewSha256": "93b2c283329c58eb2621ae37069c5e24f47e8de0678c102a8ddfe0b7fa1f5bcc"
+  },
+  "workspace": {
+    "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010",
+    "branch": "codex/g-constructor-3a-20261010",
+    "toolchainPath": "/private/tmp/econmind-control-tower-toolchain.451x0O",
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "installation": "pnpm install --offline --frozen-lockfile; PASS; reused 161, downloaded 0; earlier captured session result, raw install transcript not included",
+    "worktreeCreation": "Codex app create_worktree first failed invalid reference in surrounding repository; git worktree add from the World repository succeeded; no reset"
+  },
+  "build": {
+    "initialDist": {
+      "phase": "PRE_FIRST_BUILD",
+      "roots": [
+        {
+          "path": "packages/core/dist",
+          "exists": false
+        },
+        {
+          "path": "apps/world-worker/dist",
+          "exists": false
+        },
+        {
+          "path": "apps/world-api/dist",
+          "exists": false
+        }
+      ]
+    },
+    "order": [
+      "@econmind/core",
+      "@econmind/world-worker",
+      "@econmind/world-api"
+    ],
+    "initial": {
+      "command": "pnpm --filter @econmind/core build && pnpm --filter @econmind/world-worker build && pnpm --filter @econmind/world-api build",
+      "chunk_id": "3d2071",
+      "wall_time_seconds": 1.001245333,
+      "original_token_count": 8,
+      "output": "$ tsc -p tsconfig.build.json\n$ tsc -p tsconfig.build.json\n$ tsc -p tsconfig.build.json\n",
+      "exit_code": 0
+    },
+    "candidate": {
+      "command": "pnpm --filter @econmind/core build && pnpm --filter @econmind/world-worker build && pnpm --filter @econmind/world-api build",
+      "exit_code": 0,
+      "output": "$ tsc -p tsconfig.build.json\n$ tsc -p tsconfig.build.json\n$ tsc -p tsconfig.build.json\n"
+    },
+    "distManifest": "constructor-3a-checks/pre-test-dist-manifest.json",
+    "distAggregateSha256": "152f35a662161bf299e2d2a99d27349f5b6ef8c144d50a48793c98523f0154b1",
+    "aggregateEncoding": "SHA256 of UTF-8 JSON.stringify(files), no trailing newline; entries ordered by root Core, Worker, API then lexical relative path",
+    "postTest": {
+      "phase": "POST_CANDIDATE_TESTS",
+      "matchesPreTest": true,
+      "fileCount": 432,
+      "preTestAggregateSha256": "152f35a662161bf299e2d2a99d27349f5b6ef8c144d50a48793c98523f0154b1"
+    },
+    "sourceChangeAfterCandidateBuild": "Test-only callback arity and formatting repair; application/package files unchanged"
+  },
+  "selectedResults": [
+    {
+      "name": "candidate-focused-repair",
+      "testFiles": 4,
+      "passed": 61,
+      "exitCode": 0,
+      "scope": "29 constructor mechanism cases, 8 completion cases (2 added here), 9 transport, 15 prior review delta"
+    },
+    {
+      "name": "candidate-local-ci",
+      "testFiles": 4,
+      "passed": 110,
+      "exitCode": 0,
+      "scope": "Existing local/CI PGlite/manual guards; no production admission"
+    },
+    {
+      "name": "boundaries",
+      "testFiles": 3,
+      "passed": 40,
+      "exitCode": 0,
+      "scope": "Earlier same-WT boundary/foundation suite; final static authoritative/boundary scans rerun after application changes"
+    },
+    {
+      "name": "candidate-strict-repair",
+      "exitCode": 0,
+      "scope": "New strict config skipLibCheck=false plus prior G config"
+    },
+    {
+      "name": "candidate-format-final",
+      "exitCode": 0,
+      "scope": "All changed TS ESLint and all 12 files Prettier"
+    },
+    {
+      "name": "candidate-boundary-secret",
+      "exitCode": 0,
+      "scope": "Core91/all334 authoritative,339 boundary files,2463 secret files"
+    },
+    {
+      "name": "environment",
+      "exitCode": 0,
+      "scope": "local PASS; databaseConfigured=false; NOT_LINKED; databaseMutationAllowed=false"
+    }
+  ],
+  "distinctSelectedTests": 211,
+  "retriesDoubleCounted": false,
+  "checks": [
+    {
+      "name": "diff",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "local-ci-regression",
+      "command": "pnpm exec vitest run tests/world-api/positive-manual-office-command.test.ts tests/world-api/https-authenticated-office-command-route.test.ts tests/world-core/durable-command-consumption.test.ts tests/world-core/manual-office-durable-dispatch.test.ts",
+      "exitCode": 0,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010\n\n\n Test Files  4 passed (4)\n      Tests  110 passed (110)\n   Start at  22:26:13\n   Duration  53.73s (tests 97%, transform 2%, import 1%)\n\n"
+    },
+    {
+      "name": "3a-focused",
+      "command": "pnpm exec vitest run tests/world-api/G-constructor-3a.test.ts tests/world-api/G-executor-transport.test.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-review-delta.test.ts",
+      "exitCode": 1,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010\n\n ❯ tests/world-api/G-completion-drain.test.ts (0 test)\n\n⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯\n\n FAIL  tests/world-api/G-completion-drain.test.ts [ tests/world-api/G-completion-drain.test.ts ]\nError: Cannot find package '@econmind/world-worker/runtime-command-host' imported from /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010/tests/world-api/G-completion-drain.test.ts\n ❯ tests/world-api/G-completion-drain.test.ts:7:1\n      5| import { createAuthenticatedCurrentSeatService } from '../../apps/worl…\n      6| import { RequestCompletion } from '../../apps/world-api/src/runtime-pr…\n      7| import { trackWorkerRequestCompletion } from '@econmind/world-worker/r…\n       | ^\n      8| import {\n      9|   EXECUTOR_PATHS,\n\n⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯\n\n\n Test Files  1 failed | 3 passed (4)\n      Tests  51 passed (51)\n   Start at  22:26:13\n   Duration  8.50s (tests 82%, transform 13%, import 5%)\n\n"
+    },
+    {
+      "name": "3a-strict",
+      "command": "pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "lint",
+      "command": "pnpm exec eslint apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/G-completion-drain.test.ts",
+      "exitCode": 1,
+      "output": "\n/Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010/apps/world-worker/src/runtime-preparation/production-world-command-host.ts\n  27:3   error  '_binding' is assigned a value but never used  @typescript-eslint/no-unused-vars\n  35:23  error  '_input' is defined but never used             @typescript-eslint/no-unused-vars\n\n✖ 2 problems (2 errors, 0 warnings)\n\n"
+    },
+    {
+      "name": "prior-g-strict",
+      "command": "pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false",
+      "exitCode": 2,
+      "output": "tests/world-api/G-completion-drain.test.ts(7,46): error TS2307: Cannot find module '@econmind/world-worker/runtime-command-host' or its corresponding type declarations.\n"
+    },
+    {
+      "name": "format",
+      "command": "pnpm exec prettier --check apps/world-worker/package.json apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/tsconfig.G-constructor-3a.json tests/world-api/G-completion-drain.test.ts",
+      "exitCode": 0,
+      "output": "Checking formatting...\nAll matched files use Prettier code style!\n"
+    },
+    {
+      "name": "secrets",
+      "command": "pnpm secrets:check",
+      "exitCode": 0,
+      "output": "$ node scripts/check-repository-secrets.mjs\n{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 2463\n}\n"
+    },
+    {
+      "name": "boundaries",
+      "command": "pnpm test:boundaries",
+      "exitCode": 0,
+      "output": "$ vitest run tests/architecture/boundaries.test.ts tests/architecture/foundation-gates.test.ts tests/architecture/foundation-ci-gate.test.ts && node scripts/check-authoritative-patterns.mjs && node scripts/check-boundaries.mjs\n\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010\n\n\n Test Files  3 passed (3)\n      Tests  40 passed (40)\n   Start at  22:26:13\n   Duration  9.14s (tests 99%)\n\n{\n  \"scannedCoreFiles\": 91,\n  \"scannedFiles\": 334,\n  \"status\": \"PASS\",\n  \"violations\": []\n}\n{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 339,\n  \"guardedRoots\": [\n    \"apps\",\n    \"packages\",\n    \"apps/world-web/server.mjs\",\n    \"scripts/environment-policy.mjs\",\n    \"scripts/vite-environment-policy.mjs\",\n    \"scripts/vite-environment-policy.d.mts\",\n    \"scripts/run-development-service.mjs\",\n    \"scripts/run-development-stack.mjs\"\n  ],\n  \"sourceExtensions\": [\n    \".ts\",\n    \".tsx\",\n    \".mts\",\n    \".cts\",\n    \".js\",\n    \".jsx\",\n    \".mjs\",\n    \".cjs\"\n  ]\n}\n"
+    },
+    {
+      "name": "environment",
+      "command": "pnpm env:check",
+      "exitCode": 0,
+      "output": "$ ECONMIND_ENV=local node scripts/assert-safe-environment.mjs\n{\n  \"status\": \"PASS\",\n  \"environment\": \"local\",\n  \"databaseConfigured\": false,\n  \"validatedViteModes\": [\n    \"development\",\n    \"production\"\n  ],\n  \"linkedSupabaseProject\": \"NOT_LINKED\",\n  \"databaseMutationAllowed\": false\n}\n"
+    },
+    {
+      "name": "final-diff",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "final-format",
+      "command": "pnpm exec prettier --check apps/world-worker/package.json apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/tsconfig.G-constructor-3a.json tests/world-api/G-completion-drain.test.ts",
+      "exitCode": 0,
+      "output": "Checking formatting...\nAll matched files use Prettier code style!\n"
+    },
+    {
+      "name": "final-lint",
+      "command": "pnpm exec eslint apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/G-completion-drain.test.ts",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "final-strict",
+      "command": "pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false && pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "final-focused",
+      "command": "pnpm exec vitest run tests/world-api/G-constructor-3a.test.ts tests/world-api/G-executor-transport.test.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-review-delta.test.ts",
+      "exitCode": 0,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010\n\n\n Test Files  4 passed (4)\n      Tests  59 passed (59)\n   Start at  22:29:54\n   Duration  10.62s (tests 84%, transform 10%, import 5%)\n\n"
+    },
+    {
+      "name": "final-boundary-scans",
+      "command": "node scripts/check-authoritative-patterns.mjs && node scripts/check-boundaries.mjs",
+      "exitCode": 0,
+      "output": "{\n  \"scannedCoreFiles\": 91,\n  \"scannedFiles\": 334,\n  \"status\": \"PASS\",\n  \"violations\": []\n}\n{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 339,\n  \"guardedRoots\": [\n    \"apps\",\n    \"packages\",\n    \"apps/world-web/server.mjs\",\n    \"scripts/environment-policy.mjs\",\n    \"scripts/vite-environment-policy.mjs\",\n    \"scripts/vite-environment-policy.d.mts\",\n    \"scripts/run-development-service.mjs\",\n    \"scripts/run-development-stack.mjs\"\n  ],\n  \"sourceExtensions\": [\n    \".ts\",\n    \".tsx\",\n    \".mts\",\n    \".cts\",\n    \".js\",\n    \".jsx\",\n    \".mjs\",\n    \".cjs\"\n  ]\n}\n"
+    },
+    {
+      "name": "final-secrets",
+      "command": "pnpm secrets:check",
+      "exitCode": 0,
+      "output": "$ node scripts/check-repository-secrets.mjs\n{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 2463\n}\n"
+    },
+    {
+      "name": "candidate-boundary-secret",
+      "command": "node scripts/check-authoritative-patterns.mjs && node scripts/check-boundaries.mjs && pnpm secrets:check",
+      "exitCode": 0,
+      "output": "{\n  \"scannedCoreFiles\": 91,\n  \"scannedFiles\": 334,\n  \"status\": \"PASS\",\n  \"violations\": []\n}\n{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 339,\n  \"guardedRoots\": [\n    \"apps\",\n    \"packages\",\n    \"apps/world-web/server.mjs\",\n    \"scripts/environment-policy.mjs\",\n    \"scripts/vite-environment-policy.mjs\",\n    \"scripts/vite-environment-policy.d.mts\",\n    \"scripts/run-development-service.mjs\",\n    \"scripts/run-development-stack.mjs\"\n  ],\n  \"sourceExtensions\": [\n    \".ts\",\n    \".tsx\",\n    \".mts\",\n    \".cts\",\n    \".js\",\n    \".jsx\",\n    \".mjs\",\n    \".cjs\"\n  ]\n}\n$ node scripts/check-repository-secrets.mjs\n{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 2463\n}\n"
+    },
+    {
+      "name": "candidate-strict",
+      "command": "pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false && pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false",
+      "exitCode": 2,
+      "output": "tests/world-api/G-constructor-3a.test.ts(386,44): error TS2554: Expected 0 arguments, but got 1.\n"
+    },
+    {
+      "name": "candidate-focused",
+      "command": "pnpm exec vitest run tests/world-api/G-constructor-3a.test.ts tests/world-api/G-executor-transport.test.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-review-delta.test.ts",
+      "exitCode": 0,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010\n\n\n Test Files  4 passed (4)\n      Tests  61 passed (61)\n   Start at  22:34:12\n   Duration  12.28s (tests 83%, transform 12%, import 4%)\n\n"
+    },
+    {
+      "name": "candidate-lint-format",
+      "command": "pnpm exec eslint apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/G-completion-drain.test.ts && pnpm exec prettier --check apps/world-worker/package.json apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/tsconfig.G-constructor-3a.json tests/world-api/G-completion-drain.test.ts",
+      "exitCode": 0,
+      "output": "Checking formatting...\nAll matched files use Prettier code style!\n"
+    },
+    {
+      "name": "candidate-local-ci",
+      "command": "pnpm exec vitest run tests/world-api/positive-manual-office-command.test.ts tests/world-api/https-authenticated-office-command-route.test.ts tests/world-core/durable-command-consumption.test.ts tests/world-core/manual-office-durable-dispatch.test.ts",
+      "exitCode": 0,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010\n\n\n Test Files  4 passed (4)\n      Tests  110 passed (110)\n   Start at  22:34:12\n   Duration  51.15s (tests 96%, transform 2%, import 1%)\n\n"
+    },
+    {
+      "name": "candidate-strict-repair",
+      "command": "pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false && pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --pretty false",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "candidate-focused-repair",
+      "command": "pnpm exec vitest run tests/world-api/G-constructor-3a.test.ts tests/world-api/G-executor-transport.test.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-review-delta.test.ts",
+      "exitCode": 0,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/g-constructor-3a-20261010\n\n\n Test Files  4 passed (4)\n      Tests  61 passed (61)\n   Start at  22:37:03\n   Duration  10.27s (tests 87%, transform 9%, import 4%)\n\n"
+    },
+    {
+      "name": "candidate-lint-format-repair",
+      "command": "pnpm exec eslint apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/G-completion-drain.test.ts && pnpm exec prettier --check apps/world-worker/package.json apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/tsconfig.G-constructor-3a.json tests/world-api/G-completion-drain.test.ts",
+      "exitCode": 1,
+      "output": "Checking formatting...\n[warn] tests/world-api/G-constructor-3a.test.ts\n[warn] Code style issues found in the above file. Run Prettier with --write to fix.\n"
+    },
+    {
+      "name": "candidate-format-final",
+      "command": "pnpm exec eslint apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/G-completion-drain.test.ts && pnpm exec prettier --check apps/world-worker/package.json apps/world-worker/src/runtime-preparation/private-command-request-registry.ts apps/world-worker/src/runtime-preparation/production-world-command-host.ts apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts apps/world-worker/src/intake/manual-office-intake-runtime.ts apps/world-api/src/runtime-preparation/executor-request-resources.ts apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts tests/world-api/G-constructor-3a.test.ts tests/world-api/tsconfig.G-constructor-3a.json tests/world-api/G-completion-drain.test.ts",
+      "exitCode": 0,
+      "output": "Checking formatting...\nAll matched files use Prettier code style!\n"
+    }
+  ],
+  "initialStrictFailure": {
+    "name": "initial-strict",
+    "command": "pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --pretty false",
+    "exitCode": 2,
+    "output": "tests/world-api/G-constructor-3a.test.ts(386,17): error TS2352: Conversion of type '{ connect: () => Promise<never>; }' to type 'OwnedExecutorPool' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.\n  Property 'end' is missing in type '{ connect: () => Promise<never>; }' but required in type 'OwnedExecutorPool'."
+  },
+  "limits": [
+    "No production request token issued; test mechanism registries are disjoint from the private production registry and rejected by its binder",
+    "No source, clock, actor, authorization-writer or family-reader constructor; ServerCommandHostBinding is never and all composition routes remain HOLD/NOT_CONNECTED",
+    "Resource frame retirement and actual tracked promise drainage are implemented; production request token retirement cannot be demonstrated because issuance remains unavailable",
+    "Actual pg Pool objects in route inventory tests have totalCount=0 and no SQL; late-connect cleanup uses explicit controlled resource ports",
+    "Finite promise joins do not certify native PostgreSQL cancellation or hard termination of arbitrary never-settling drivers",
+    "No formal Office workflow completion; Industry has no command family",
+    "E authorization-writer and D lease/guard dependencies are not integrated; B source correction is separately reviewed and not admitted here",
+    "Prior native stall root cause remains NOT_ESTABLISHED and prior packet has no pre-run dist provenance; this new manifest does not retroactively certify it"
+  ],
+  "notRun": [
+    "full repository suite",
+    "420-test suite",
+    "native PostgreSQL driver or SQL in this batch",
+    "real 5s/10s wall-clock timer acceptance",
+    "Linux topology",
+    "workerd/Cloudflare deployment",
+    "CI on immutable candidate",
+    "production source admission/preflight",
+    "production token consumer or startup",
+    "3B source/clock/actor producers",
+    "4A E actual SQL/authz",
+    "4B D lease/source/once-FINAL/projection",
+    "5 platform activation",
+    "database migrations/grants/schema changes",
+    "Gate B"
+  ],
+  "packetValidation": {
+    "prettier": "PASS exit 0 after initial two-file formatting failure and API-format/apply_patch repair",
+    "secretCheck": "PASS exit 0, 2467 files including this evidence packet",
+    "diffCheck": "PASS exit 0",
+    "candidateFilesVerifiedAgainstCommit": 12,
+    "distFilesVerifiedAgainstPreTestManifest": 432,
+    "manifestAggregateVerified": true
+  },
+  "prohibitedOperationsPerformed": false
+}

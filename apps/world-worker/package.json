@@ -4,6 +4,10 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./runtime-command-host": {
+      "types": "./dist/runtime-preparation/production-world-command-host-exports.d.ts",
+      "default": "./dist/runtime-preparation/production-world-command-host-exports.js"
+    },
     "./intake": {
       "types": "./dist/intake/postgres-narrow-transfer-intake.d.ts",
       "default": "./dist/intake/postgres-narrow-transfer-intake.js"

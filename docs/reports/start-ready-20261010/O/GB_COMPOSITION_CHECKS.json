@@ -1,0 +1,86 @@
+{
+  "kind": "ROOT_COMPOSED_LOCAL_CHECKS_NOT_PRODUCTION",
+  "base": "590b56b6f138fba2aaf81067c3aad0e8e1a69890",
+  "sourceHead": "52d3fe621cc9e9f05fc736dda0f1a2281f15ba49",
+  "sourceTree": "2a3ada30e998f366ac0fe80971b5306d32d844b7",
+  "node": "24.20.0",
+  "pnpm": "12.3.4",
+  "environment": "env -i; ECONMIND_ENV=local; no database configuration; no linked Supabase",
+  "build": {
+    "command": "pnpm pretest",
+    "exit_code": 0,
+    "scope": "current checkout Core, Worker, API",
+    "retainedOutput": "$ pnpm --filter @econmind/core build && pnpm --filter @econmind/world-worker build && pnpm --filter @econmind/world-api build\n$ tsc -p tsconfig.build.json\n$ tsc -p tsconfig.build.json\n$ tsc -p tsconfig.build.json\n",
+    "note": "Output reconstructed only from observed two command chunks; no claim of separately retained raw build file"
+  },
+  "checks": {
+    "focus": {
+      "command": "pnpm exec vitest run tests/world-api/G-constructor-3a.test.ts tests/world-api/G-source-pool-delta.test.ts tests/world-api/G-completion-drain.test.ts tests/world-api/G-executor-transport.test.ts tests/world-api/G-review-delta.test.ts tests/world-core/v10-narrow-transfer-approval-store.test.ts",
+      "exit_code": 0,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/world-map-full-integration\n\n ✓ tests/world-core/v10-narrow-transfer-approval-store.test.ts (13 tests) 12148ms\n   ✓ V10.2 durable narrow transfer approval store (2)\n     ✓ rejects a different canonical intent with the same durable Command identity before creating a proposal 1494ms\n     ✓ binds all three current Office signatures and rechecks their revision at the atomic cutoff 911ms\n   ✓ approval-reference write contract (PGlite) (11)\n     ✓ binds the exact durable signature and concurrent retries return the first immutable row 1040ms\n     ✓ requires an already durable Command: reference binding and signing cannot bootstrap intake 968ms\n     ✓ does not backfill old signatures or treat an incomplete approval as valid 910ms\n     ✓ rejects reference replacement and changed canonical intent with zero added binding 852ms\n     ✓ arbitrates concurrent reuse of one reference across different approved Commands 868ms\n     ✓ recovers an acknowledgement-lost write through a fresh exact retry 873ms\n     ✓ rereads current FINANCE authority on first bind and retry 866ms\n     ✓ rereads current TRADE authority on first bind and retry 829ms\n     ✓ rejects expiry on first bind and retry without deleting immutable history 854ms\n     ✓ rolls back a failed binding transaction and permits an exact retry 841ms\n     ✓ enforces immutable rows and rejects direct SQL scope/signature substitution 839ms\n ✓ tests/world-api/G-constructor-3a.test.ts (29 tests) 28ms\n ✓ tests/world-api/G-executor-transport.test.ts (9 tests) 7546ms\n   ✓ G slices1/2 unmounted fixed transport (9)\n     ✓ default and invalid pins HOLD without body/JWKS/SQL; exact path and CORS 1261ms\n     ✓ two real socket handlers verify signed JWT independently; raw bytes, bearer and fixed headers survive 1040ms\n     ✓ executor rejects a signature changed after API verification before SQL, using the second verifier 868ms\n     ✓ private runtime object identity cannot be serialized/replaced by READY 924ms\n     ✓ after dispatch lost/truncated/mismatched/oversize replies are UNKNOWN with no replay 879ms\n     ✓ actual source completion drains after Office race, no late enqueue, then owned ends 922ms\n     ✓ body5s shares outer10s; actual cancellation settles and oversized UTF8 fails before dispatch 824ms\n     ✓ executor uses earliest supplied deadline, never resetting to its own10s 822ms\n ✓ tests/world-api/G-completion-drain.test.ts (8 tests) 7374ms\n   ✓ G actual promise completion and cleanup failure (8)\n     ✓ already expired budgets retain ordered protocol rejection with zero body/JWT/SQL 1197ms\n     ✓ actual internal handler joins Worker async-context work before ending its owned pool 862ms\n     ✓ invalid upstream headers and declared oversize still drain actual response body cancellation 884ms\n     ✓ late JWKS fetch and asynchronous body cancel settle before return, zero dispatch 1003ms\n     ✓ JWKS pending body read and cancel are tracked, without orphan rejection 889ms\n     ✓ late pool.connect acquisition is destroyed and observed before owned Pool.end and handler return 871ms\n     ✓ actual rollback completion and Pool.end rejection are observed; cleanup failure cannot return a definite write result 823ms\n     ✓ cleanup exceeding5s is a failed budget, never a fake successful drain 843ms\n ✓ tests/world-api/G-review-delta.test.ts (15 tests) 52ms\n ✓ tests/world-api/G-source-pool-delta.test.ts (10 tests) 8ms\n\n Test Files  6 passed (6)\n      Tests  84 passed (84)\n   Start at  10:19:11\n   Duration  29.82s (tests 93%, transform 4%, import 3%)\n\n"
+    },
+    "http": {
+      "command": "pnpm exec vitest run tests/integration/staged-narrow-transfer-http.test.ts",
+      "exit_code": 0,
+      "output": "\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/world-map-full-integration\n\nstdout | tests/integration/staged-narrow-transfer-http.test.ts > real staged HTTP lifecycle / PGlite > real HTTP → approved queue → SQL Worker → FINAL → durable inventory and authenticated projection\nHTTP_RESERVATION_CAUSAL_EVIDENCE {\"database\":\"PGLITE\",\"world\":\"WORLD_STAGED_HTTP_1\",\"commandId\":\"COMMAND_HTTP\",\"request\":\"REAL_LOOPBACK_HTTP\",\"final\":\"COMMITTED\",\"worldVersion\":\"0→1\",\"inventory\":\"AVAILABLE 4→2; RESERVED 0→2 tonne\",\"payment\":\"NOT_EXECUTED_RESERVATION_ONLY\",\"projection\":{\"schemaVersion\":\"world-read-api-v1\",\"requestId\":\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\",\"ok\":true,\"data\":{\"schemaVersion\":\"world-projection-read-v1\",\"worldId\":\"WORLD_STAGED_HTTP_1\",\"classification\":\"COUNTRY\",\"scopeKey\":\"COUNTRY_SELLER_TEST\",\"watermark\":{\"worldVersion\":\"1\",\"eventSequence\":\"1\",\"generatedAt\":\"2026-10-11T02:20:12.162Z\"},\"payload\":{\"ledger\":{\"visibility\":{\"schemaVersion\":\"economic-read-visibility-v1\",\"countrySummary\":\"NOT_AUTHORIZED\",\"financialDetail\":\"NOT_AUTHORIZED\",\"inventoryDetail\":\"NOT_AUTHORIZED\"},\"financialPositions\":[],\"inventoryPositions\":[],\"authoritativeFinancialPosition\":{\"reason\":\"SCOPE_NOT_AUTHORIZED\",\"status\":\"NOT_AUTHORIZED\",\"schemaVersion\":\"authoritative-financial-position-v1\"}},\"activity\":{\"authoritativeEventCount\":\"1\",\"lastAuthoritativeEventSequence\":\"1\",\"lastAuthoritativeEventWorldVersion\":\"1\"},\"countryId\":\"COUNTRY_SELLER_TEST\",\"schemaVersion\":\"world-activity-projection-v1\",\"decisionResults\":{\"reason\":\"OFFICE_DECISION_DETAIL_PRIVATE\",\"status\":\"NOT_AUTHORIZED\",\"countryId\":\"COUNTRY_SELLER_TEST\",\"sourceHead\":{\"worldId\":\"WORLD_STAGED_HTTP_1\",\"worldVersion\":\"1\",\"eventSequence\":\"1\"},\"schemaVersion\":\"office-decision-results-v1\",\"classification\":\"COUNTRY\"}},\"receipts\":[],\"events\":[]}},\"production\":\"NOT_RUN\"}\n\n ✓ tests/integration/staged-narrow-transfer-http.test.ts (20 tests) 2448ms\n\n Test Files  1 passed (1)\n      Tests  20 passed (20)\n   Start at  10:20:10\n   Duration  3.30s (tests 77%, transform 18%, import 6%)\n\n"
+    },
+    "strict": {
+      "command": "pnpm exec tsc -p tests/world-api/tsconfig.G-constructor-3a.json --noEmit --strict --skipLibCheck false && pnpm exec tsc -p tests/world-api/tsconfig.G-executor-slices.json --noEmit && pnpm exec tsc -p tests/world-core/tsconfig.b-approval-lock-order.json --noEmit --strict --skipLibCheck false",
+      "exit_code": 0,
+      "output": ""
+    },
+    "guards": {
+      "command": "pnpm test:boundaries && pnpm env:check && pnpm migration:validate && pnpm secrets:check",
+      "exit_code": 0,
+      "output": "$ vitest run tests/architecture/boundaries.test.ts tests/architecture/foundation-gates.test.ts tests/architecture/foundation-ci-gate.test.ts && node scripts/check-authoritative-patterns.mjs && node scripts/check-boundaries.mjs\n\n RUN  v5.0.0 /Users/samuel/Documents/econclub/.econmind-worktrees/world-map-full-integration\n\n ✓ tests/architecture/boundaries.test.ts (35 tests) 10404ms\n   ✓ resolved repository authority boundaries (35)\n     ✓ resolves configured TypeScript path aliases before applying ownership rules 326ms\n     ✓ checks dynamic import and require when they use static module strings 530ms\n     ✓ keeps bootstrap SERVER_TOOL code out of browser and runtime ownership 492ms\n     ✓ keeps the real Vite config, helpers, and installed npm imports valid 1058ms\n ✓ tests/architecture/foundation-gates.test.ts (3 tests) 1231ms\n   ✓ V04 authoritative architecture gates (3)\n     ✓ passes against the real repository 749ms\n ✓ tests/architecture/foundation-ci-gate.test.ts (2 tests) 3ms\n\n Test Files  3 passed (3)\n      Tests  40 passed (40)\n   Start at  10:19:11\n   Duration  12.08s (tests 99%, transform 1%)\n\n{\n  \"scannedCoreFiles\": 91,\n  \"scannedFiles\": 335,\n  \"status\": \"PASS\",\n  \"violations\": []\n}\n{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 340,\n  \"guardedRoots\": [\n    \"apps\",\n    \"packages\",\n    \"apps/world-web/server.mjs\",\n    \"scripts/environment-policy.mjs\",\n    \"scripts/vite-environment-policy.mjs\",\n    \"scripts/vite-environment-policy.d.mts\",\n    \"scripts/run-development-service.mjs\",\n    \"scripts/run-development-stack.mjs\"\n  ],\n  \"sourceExtensions\": [\n    \".ts\",\n    \".tsx\",\n    \".mts\",\n    \".cts\",\n    \".js\",\n    \".jsx\",\n    \".mjs\",\n    \".cjs\"\n  ]\n}\n$ ECONMIND_ENV=local node scripts/assert-safe-environment.mjs\n{\n  \"status\": \"PASS\",\n  \"environment\": \"local\",\n  \"databaseConfigured\": false,\n  \"validatedViteModes\": [\n    \"development\",\n    \"production\"\n  ],\n  \"linkedSupabaseProject\": \"NOT_LINKED\",\n  \"databaseMutationAllowed\": false\n}\n$ node scripts/validate-migrations.mjs\n{\n  \"migrations\": 23,\n  \"status\": \"PASS\",\n  \"violations\": []\n}\n$ node scripts/check-repository-secrets.mjs\n{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 2522\n}\n"
+    },
+    "lint": {
+      "command": "pnpm exec eslint $(git diff --name-only origin/main..HEAD -- '*.ts' '*.tsx' '*.mjs' '*.js')",
+      "exit_code": 0,
+      "output": ""
+    },
+    "format": {
+      "command": "pnpm exec prettier --check $(git diff --name-only origin/main..HEAD -- '*.ts' '*.json' '*.md') docs/reports/start-ready-20261010/O/GB_PRE_TEST_DIST_MANIFEST.json",
+      "exit_code": 0,
+      "output": "Checking formatting...\nAll matched files use Prettier code style!\n"
+    }
+  },
+  "reviews": [
+    {
+      "target": "F_G3A_ORIGINAL_REVIEW.md",
+      "source": "/Users/samuel/.codex/state/plugins/codex-security/scans/g-constructor-3a-20261010/artifacts-a69e5e2691a02746f8e7236c0df7ee576d3b8c26bd1f6f9ea752668f1f5234b6/artifacts/F_G_CONSTRUCTOR_3A_REVIEW_20261010/F_REVIEW.md",
+      "rawSha256": "07aec25a71b653a4f2460f39f950b590c10329acc5087fa8e866bfb529761f38"
+    },
+    {
+      "target": "F_G3A_FINAL_DELTA_REVIEW.md",
+      "source": "/Users/samuel/.codex/state/plugins/codex-security/scans/g-constructor-3a-20261010/artifacts-a69e5e2691a02746f8e7236c0df7ee576d3b8c26bd1f6f9ea752668f1f5234b6/artifacts/F_G_F_G3A_01_DELTA_REVIEW_20261011/F_DELTA_REVIEW.md",
+      "rawSha256": "fde1f9462adb47357fa0ec031701834c6602818cc9dc836ee3bb64dd75906813"
+    },
+    {
+      "target": "E_B_APPROVAL_LOCK_REVIEW.md",
+      "source": "/Users/samuel/.codex/state/plugins/codex-security/scans/b-approval-lock-order-20261010/artifacts-4220dc019d02c0a68159eb902784a77cb00a01c8bef481474ef9b3640414c71d/artifacts/E_B_APPROVAL_LOCK_REVIEW/review.md",
+      "rawSha256": "546859c992399d7825cdcc77d56cebbea7da219d12f11fdab03b9461c96f0459"
+    }
+  ],
+  "sourceEquivalence": {
+    "file": "GB_REVIEWED_SOURCE_EQUIVALENCE.json",
+    "count": 17,
+    "allEqual": true
+  },
+  "preTestDist": {
+    "file": "GB_PRE_TEST_DIST_MANIFEST.json",
+    "count": 434,
+    "aggregateSha256": "3c994151e0877f0c461e9f0c6d3e52915b3873db9078c18ae0b1a2bd9e2f46cb"
+  },
+  "notRun": [
+    "LOCAL_FULL_PNPM_CHECK",
+    "ROOT_NATIVE_POSTGRES",
+    "420_ONLINE_VIEWS",
+    "PRODUCTION",
+    "DEPLOYMENT",
+    "ACTIVATION"
+  ],
+  "ci": "PENDING_NEW_FIXED_HEAD",
+  "approval": "INDEPENDENT_SOURCE_ONLY_APPROVALS_NOT_ROOT_SELF_APPROVAL",
+  "economicReadiness": "HOLD"
+}
