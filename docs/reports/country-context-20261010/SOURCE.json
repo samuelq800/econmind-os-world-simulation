@@ -24,18 +24,18 @@
   "adaptedSources": [
     {
       "path": "apps/world-web/public/country-home-layout.css",
-      "bytes": 9385,
-      "sha256": "124fab376a70537a5b316b5b9b53e7f66b92e4d862f4940b5c460ba17acff2e4"
+      "bytes": 8485,
+      "sha256": "23d0f4f4674005fb75617a12b9168dcc885c5810342152056d4eeb3833c8a05d"
     },
     {
       "path": "apps/world-web/public/country-home-surroundings.js",
-      "bytes": 13031,
-      "sha256": "800a23730ac7a703f7e00fe94ee5fba46f5207cfbb0f6a9cb4aeffbed45bd1db"
+      "bytes": 10182,
+      "sha256": "759fc5b76988d492952f004391e0cfe1dc62c72ac06201991814e6df96ab0dba"
     },
     {
       "path": "apps/world-web/src/map-explorer/WorldExplorer.tsx",
-      "bytes": 52609,
-      "sha256": "4e4140e84f4541738e2846ec7f61186de269096db344fdff87fb6a1c95e66cbb"
+      "bytes": 54187,
+      "sha256": "545d43ca57d1535298f2d9e3d1e049830298236385e2e9658b1a318d41dd41d9"
     },
     {
       "path": "apps/world-web/src/map-explorer/viewport-camera.ts",
@@ -44,19 +44,19 @@
     },
     {
       "path": "apps/world-web/public/country-home-surroundings.d.ts",
-      "bytes": 211,
-      "sha256": "64b39147af24391d694d0f30b90584121d04ac934015131a9b1aa4f381fd9bfa"
+      "bytes": 208,
+      "sha256": "3bc11a10f6d1627a7ea7f0e5e6c83e17903c338ff2e57df1c16da2975084d015"
     }
   ],
-  "method": "One pinned world terrain image and all 70 unchanged paths share one SVG viewBox. Dilate the exact selected silhouette by 0.28 times its source frame extent, blur with sigma 0.14 times that extent, and saturate alpha above 0.75. This keeps both sides of the boundary clear before the continuous outer fade. Source facility world-pixel points use the same transform; Atlas camera changes do not change fade width.",
+  "method": "Pinned world terrain and all 70 unchanged paths form geographic context only. Each original 1254px country scene remains a separate complete illustration, with original scene-anchor positions. Original country detail SVGs retain their geographic coordinates. Context uses the exact selected silhouette distance fade; it never replaces a country image or supplies illustration pin coordinates.",
   "fallback": "If either fixed source hash fails, retain the original illustration and source controls with an unavailable notice; no fabricated geography.",
   "authorityChanged": false,
   "dataChanged": false,
   "neighbourHitTargets": false,
-  "panZoom": "Existing Atlas camera, drag/zoom and routes retained; focus/context visual fit padding adjusted to expose true neighbours. HOME remains a noninteractive contextual background.",
-  "oldSceneAssets": "Preserved byte-for-byte, used only as the failure fallback; illustrations are not treated as geographic tiles.",
-  "atlasSelectedCountry": "Existing Atlas country selection now uses the same world terrain and original 70 paths, an outline-based distance mask and source world-pixel facility positions. Existing framing toggle changes focus/context extent; no new sidebar, route, data loader or command.",
-  "legacyAtlas": "Existing country-directory zoom stage uses the same verified regional SVG. Native facility/resource pins are reprojected from their unchanged world-pixel points after native tab redraw; source records, actions, routing, zoom and scrolling remain unchanged. Original illustration remains fallback.",
+  "panZoom": "Existing Atlas camera, drag/zoom, scene/detail toggle and routes retained. HOME retains its independent contained illustration and native scene-anchor pins; geographic surroundings are a separate noninteractive background.",
+  "oldSceneAssets": "All 70 independent scene PNGs and 70 detail SVGs remain byte-for-byte unchanged and are primary country views. Illustrations are not treated as geographic tiles.",
+  "atlasSelectedCountry": "Original countrySceneUrls and countryDetailUrls render each selected country image above geographic context. Scene anchors are used only on scene illustrations; source world points are used on detail maps. Facilities without scene anchors remain in the complete directory and switch to the geographic detail view when located. No invented illustration coordinates or foreign controls.",
+  "legacyAtlas": "Native country.scene/detail images remain visible, and countries.js owns original scene/detail pin mapping, zoom, aspect and scrolling. A separate verified regional SVG is background only; it never hides the original image, overwrites native captions, rebases pins or overrides stage geometry.",
   "countryFit": "Automatic selected-country camera fits are contained in the real world source extent, preventing an empty strip beyond polar terrain on narrow screens. Manual drag/zoom intent and overview/continent fits remain unchanged.",
   "integration20261011": "The public legacy Atlas adapter is a statically resolved browser module, with the deployed public base passed explicitly so bundle relocation cannot change its immutable geography URLs. No authority or connection change. Runtime publication URL avoids asset-glob rewriting; the actual compiled legacy entry is browser checked."
 }

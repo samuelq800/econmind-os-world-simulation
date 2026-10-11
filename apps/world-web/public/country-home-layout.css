@@ -1,6 +1,6 @@
 /* Non-authoritative country-home layout overlay; the selected UI source stays immutable. */
 .country-map-home .national-world {
-  /* Legacy illustration fallback; the verified regional map replaces it. */
+  /* The complete country illustration remains distinct from geographic context. */
   background-color: transparent;
   background-size: contain;
   background-repeat: no-repeat;
@@ -9,7 +9,7 @@
 .country-map-home .national-surroundings {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: -3;
   overflow: hidden;
   pointer-events: none;
   background: #143e3e;
@@ -35,35 +35,6 @@
   fill: #f0d89918;
   stroke: #ffe5a3;
   stroke-width: 2;
-}
-
-/* Switch only after both geographic sources pass their fixed hashes. The
-   illustration remains the fail-closed fallback, never a geographic tile. */
-.country-map-home .country-game[data-regional-map] .national-world {
-  background-image: none;
-  filter: none;
-}
-
-.country-map-home .country-game[data-regional-map] .national-site-pins {
-  top: 0;
-  bottom: auto;
-  height: 100%;
-  transform: none;
-}
-
-.country-map-home .country-game[data-regional-map] .national-site-pins button {
-  display: none;
-}
-
-/* Same existing country-site buttons and source IDs; only their screen position
-   is projected from the existing world-pixel point. No foreign hit targets. */
-.country-map-home
-  .country-game[data-regional-map]
-  .national-site-pins
-  button[data-regional-location][data-regional-visible='true'] {
-  display: block;
-  left: var(--regional-pin-x) !important;
-  top: var(--regional-pin-y) !important;
 }
 
 .country-map-home .national-map-layer-note {

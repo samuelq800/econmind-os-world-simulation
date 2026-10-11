@@ -175,74 +175,48 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     for (const [url] of f.fetch.mock.calls)
       expect(String(url)).toContain('/deployed-prefix/official-map-source/');
   });
-  it('adapts the legacy Atlas stage and reprojects recreated native facility and resource pins without rewriting their data or zoom', async () => {
+  it('adds legacy geographic context without changing native scene/detail pins, zoom or scroll geometry', async () => {
     const f = fixture();
     const record = country('58');
     const before = JSON.stringify(record);
     const stage = new Node();
     stage.properties.height = '150%';
-    const pins = new Node();
-    const caption = new Node();
     const viewport = new Node();
     viewport.clientWidth = 960;
     viewport.clientHeight = 560;
     const facility = new Node();
     facility.dataset.id = record.facilities[0].id;
+    facility.properties.left = '21.7%';
     const resource = new Node();
     resource.dataset.id = record.resources[0].id;
+    resource.properties.left = '38.4673%';
+    const image = new Node('img');
+    image.attributes.src = record.scene;
     f.root.querySelector.mockImplementation((selector) =>
-      selector === '#map-stage'
-        ? stage
-        : selector === '.map-viewport'
-          ? viewport
-          : caption,
+      selector === '.map-viewport' ? viewport : stage,
     );
-    stage.querySelector.mockReturnValue(pins);
-    stage.querySelectorAll.mockReturnValue([facility, resource]);
+    stage.children = [image, facility, resource];
+    const native = structuredClone(stage.properties);
     await f.api.mountLegacyCountryAtlas(f.root, record);
     expect(f.root.dataset.regionalAtlas).toBe('true');
-    expect(stage.children).toHaveLength(1);
-    expect(stage.children[0].children[1].children).toHaveLength(70);
-    expect(stage.properties.height).toBe('150%');
-    const box = stage.children[0].attributes.viewBox.split(' ').map(Number);
-    const expected = f.api.projectPoint(
-      record.facilities[0].point,
-      box,
-      100,
-      100,
-    )!;
-    expect(facility.style).toMatchObject({
-      left: `${expected[0]}%`,
-      top: `${expected[1]}%`,
-    });
-    expect(resource.dataset.regionalLocation).toBe('source-point');
-    const recreated = new Node();
-    recreated.dataset.id = facility.dataset.id;
-    stage.querySelectorAll.mockReturnValue([recreated]);
-    f.observers[0].callback();
-    expect(recreated.style).toMatchObject({
-      left: `${expected[0]}%`,
-      top: `${expected[1]}%`,
-    });
+    expect(f.root.children).toHaveLength(1);
+    expect(f.root.children[0].children[1].children).toHaveLength(70);
+    expect(stage.children).toEqual([image, facility, resource]);
+    expect(stage.properties).toEqual(native);
+    expect(image.attributes.src).toBe(record.scene);
+    expect(facility.properties.left).toBe('21.7%');
+    expect(resource.properties.left).toBe('38.4673%');
+    expect(facility.dataset.regionalLocation).toBeUndefined();
+    expect(resource.dataset.regionalLocation).toBeUndefined();
     viewport.clientWidth = 332;
     viewport.clientHeight = 332;
-    f.observers[1].callback();
-    const resizedBox = stage.children[0].attributes.viewBox
+    f.observers[0].callback();
+    const resizedBox = f.root.children[0].attributes.viewBox
       .split(' ')
       .map(Number);
     expect(resizedBox[2] / resizedBox[3]).toBeCloseTo(1);
-    expect(stage.properties['--regional-stage-ratio']).toBe('1');
-    expect(stage.properties.height).toBe('150%');
-    const resizedPoint = f.api.projectPoint(
-      record.facilities[0].point,
-      resizedBox,
-      100,
-      100,
-    )!;
-    expect(recreated.style).toMatchObject({
-      left: `${resizedPoint[0]}%`,
-      top: `${resizedPoint[1]}%`,
-    });
+    expect(stage.properties).toEqual(native);
+    expect(stage.querySelectorAll).not.toHaveBeenCalled();
     expect(JSON.stringify(record)).toBe(before);
     expect(f.authority).not.toHaveBeenCalled();
   });
@@ -274,7 +248,7 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
       await f.api.mountCountrySurroundings(f.root, country('54'));
       expect(f.root.dataset.office).toBe(role);
       expect(
-        f.scene.children[0].children[0].attributes['data-selected-country'],
+        f.root.children[0].children[0].attributes['data-selected-country'],
       ).toBe('visual-territory-54');
       expect(f.authority).not.toHaveBeenCalled();
       const game = readFileSync(
@@ -379,13 +353,14 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     ).toBeNull();
   });
 
-  it('mounts once per HOME, caches the pinned source, projects the same geography for the flowing mobile map without editing source anchors and disposes the prior observer', async () => {
+  it('mounts once per HOME, caches context sources, preserves the independent scene and disposes the prior observer', async () => {
     const f = fixture();
     const record = country('54');
     const before = structuredClone(record);
     await f.api.mountCountrySurroundings(f.root, record);
-    expect(f.scene.children).toHaveLength(1);
-    const svg = f.scene.children[0].children[0];
+    expect(f.scene.children).toHaveLength(0);
+    expect(f.root.children).toHaveLength(1);
+    const svg = f.root.children[0].children[0];
     expect(svg.attributes.viewBox).toBe(
       f.api.regionalViewBox(record.frame, 1920, 1080, 1774, 887)!.join(' '),
     );
@@ -396,12 +371,12 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     f.scene.clientHeight = 390;
     f.observers[0].callback();
     expect(svg.attributes.viewBox).toBe(
-      f.api.regionalViewBox(record.frame, 390, 390, 1774, 887)!.join(' '),
+      f.api.regionalViewBox(record.frame, 390, 2400, 1774, 887)!.join(' '),
     );
     expect(f.scene.properties['--country-scene-size']).toBe('390px');
     expect(record).toEqual(before);
     await f.api.mountCountrySurroundings(f.root, record);
-    expect(f.scene.children).toHaveLength(1);
+    expect(f.root.children).toHaveLength(1);
     const nextRoot = new Node();
     nextRoot.querySelector = f.root.querySelector;
     await f.api.mountCountrySurroundings(nextRoot, record);
@@ -467,24 +442,22 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     ).toBeNull();
   });
 
-  it('repositions only existing own-country site buttons from their real source points, without editing records or enabling a foreign site', async () => {
+  it('leaves native illustration anchors and buttons untouched instead of projecting geographic points onto a scene', async () => {
     const f = fixture();
     const record = country('54');
     const first = record.facilities[0];
     const second = record.facilities[1];
     second.countryId = 'visual-territory-55';
     const before = structuredClone(record);
+    const pin = f.pins.get(first.id)!;
+    pin.style.setProperty('left', '48%');
+    pin.style.setProperty('top', '18.9%');
     await f.api.mountCountrySurroundings(f.root, record);
-    const box = f.api.regionalViewBox(record.frame, 1920, 1080, 1774, 887)!;
-    const projected = f.api.projectPoint(first.point, box, 1920, 1080)!;
-    expect(f.pins.get(first.id)?.properties['--regional-pin-x']).toBe(
-      `${projected[0]}px`,
-    );
-    expect(f.pins.get(first.id)?.properties['--regional-pin-y']).toBe(
-      `${projected[1]}px`,
-    );
-    expect(f.pins.get(first.id)?.dataset.regionalLocation).toBe('source-point');
+    expect(pin.properties).toEqual({ left: '48%', top: '18.9%' });
+    expect(pin.dataset.regionalLocation).toBeUndefined();
     expect(f.pins.get(second.id)?.dataset.regionalLocation).toBeUndefined();
+    expect(f.root.dataset.regionalMap).toBeUndefined();
+    expect(f.scene.children).toHaveLength(0);
     expect(record).toEqual(before);
     expect(f.authority).not.toHaveBeenCalled();
   });

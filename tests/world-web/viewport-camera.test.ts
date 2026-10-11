@@ -48,7 +48,7 @@ describe('Root viewport FIT versus MANUAL camera policy', () => {
       /\.explorer-sidebar\s*\{\s*width:\s*100%;\s*height:\s*250px;/u,
     );
   });
-  it.each(['01', '70'])(
+  it.each(scenes.map((scene) => scene.number))(
     'keeps country %s frame inside every viewport after rotation/details/short-window resize',
     (country) => {
       const fit = target(country);

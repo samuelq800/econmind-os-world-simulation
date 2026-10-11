@@ -408,22 +408,15 @@ body[data-econmind-brand-page] .country-world {
   margin-top: 0;
   padding-top: 76px;
 }
-.country-map[data-regional-atlas] .map-stage {
-  aspect-ratio: var(--regional-stage-ratio, 1);
-}
-.country-map[data-regional-atlas] .map-viewport {
-  position: absolute;
-  inset: 0;
-}
-.country-map[data-regional-atlas] #country-image,
-.country-map[data-regional-atlas] .map-halo {
-  visibility: hidden;
+.country-map[data-regional-atlas] {
+  isolation: isolate;
 }
 .legacy-regional-terrain {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  z-index: -1;
   pointer-events: none;
 }
 .legacy-regional-terrain .national-surrounding-boundaries path {

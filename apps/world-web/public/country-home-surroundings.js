@@ -1,5 +1,5 @@
 // Display-only context from the selected, immutable map publication.
-// One geographic projection for the country and every neighbouring territory.
+// Geographic context stays separate from each country's illustrated scene.
 const manifest =
   '9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f';
 const partitionHash =
@@ -226,7 +226,8 @@ export async function mountCountrySurroundings(root, country) {
   disposePrevious = undefined;
   const note = document.createElement('small');
   note.className = 'national-map-layer-note';
-  note.textContent = 'Regional atlas loading · No control over neighbours';
+  note.textContent =
+    'Regional atlas context only · Country scene is a separate illustration · No control over neighbours';
   root.querySelector('.national-edition').append(note);
   try {
     const [partition, terrain] = await Promise.all([
@@ -243,51 +244,19 @@ export async function mountCountrySurroundings(root, country) {
     backdrop.dataset.terrainSha256 = terrainHash;
     svg.children[0].setAttribute('href', terrain);
     backdrop.append(svg);
+    root.prepend(backdrop);
     const scene = root.querySelector('.national-world');
-    scene.append(backdrop);
-    root.dataset.regionalMap = 'true';
-    note.textContent = 'Regional atlas · Nearby countries are context only';
     const resize = () => {
       const box = regionalViewBox(
         country.frame,
-        scene.clientWidth,
-        scene.clientHeight,
+        root.clientWidth,
+        root.clientHeight,
         partition.width,
         partition.height,
       );
-      if (!box) return;
-      svg.setAttribute('viewBox', box.join(' '));
-      const sceneBounds = scene.getBoundingClientRect();
-      const rootBounds = root.getBoundingClientRect();
-      for (const site of country.facilities) {
-        const pin = root.querySelector(
-          `.national-site-pins [data-id="${site.id}"]`,
-        );
-        if (!pin || site.countryId !== country.id) continue;
-        const point = projectPoint(
-          site.point,
-          box,
-          scene.clientWidth,
-          scene.clientHeight,
-        );
-        if (!point) continue;
-        pin.style.setProperty(
-          '--regional-pin-x',
-          `${sceneBounds.left - rootBounds.left + point[0]}px`,
-        );
-        pin.style.setProperty(
-          '--regional-pin-y',
-          `${sceneBounds.top - rootBounds.top + point[1]}px`,
-        );
-        pin.dataset.regionalLocation = 'source-point';
-        pin.dataset.regionalVisible = String(
-          point[0] >= 12 &&
-            point[0] <= scene.clientWidth - 12 &&
-            point[1] >= 12 &&
-            point[1] <= scene.clientHeight - 12,
-        );
-      }
-      // Retained for the original illustration fallback and its unchanged pins.
+      if (box) svg.setAttribute('viewBox', box.join(' '));
+      // Original country-game.js owns normalized illustration anchors.
+      // Never project geographic world points onto the independent illustration.
       scene.style.setProperty(
         '--country-scene-size',
         `${Math.min(scene.clientWidth, scene.clientHeight)}px`,
@@ -305,14 +274,12 @@ export async function mountCountrySurroundings(root, country) {
   }
 }
 
-// The existing public country-directory page has its own scrollable zoom stage.
-// Adapt that stage only; its record, controls, pin actions and routing stay native.
+// Native country.scene/detail images, pin coordinates, zoom and scroll remain
+// owned by countries.js. This separate layer only supplies geographic context.
 export async function mountLegacyCountryAtlas(root, country, publicationBase) {
   if (!root.isConnected || root.dataset.regionalAtlas) return;
-  const stage = root.querySelector('#map-stage');
-  if (!stage) return;
-  // A bundled caller may relocate this module into assets/. Its explicit
-  // public base must resolve the same pinned package as the standalone HOME.
+  const viewport = root.querySelector('.map-viewport');
+  if (!viewport) return;
   if (publicationBase)
     sourceRoot = new URL(
       `official-map-source/${manifest}/files/apps/world-web/`,
@@ -325,72 +292,29 @@ export async function mountLegacyCountryAtlas(root, country, publicationBase) {
     ]);
     if (!root.isConnected) return;
     const svg = regionalSvg(partition, country);
-    const viewport = root.querySelector('.map-viewport');
-    if (!viewport) return;
-    let box = regionalViewBox(
-      country.frame,
-      viewport.clientWidth,
-      viewport.clientHeight,
-      partition.width,
-      partition.height,
-    );
-    if (!svg || !box) return;
-    stage.style.setProperty(
-      '--regional-stage-ratio',
-      String(viewport.clientWidth / viewport.clientHeight),
-    );
+    if (!svg) return;
     svg.children[0].setAttribute('href', terrain);
-    svg.setAttribute('viewBox', box.join(' '));
     svg.classList.add('legacy-regional-terrain');
-    stage.prepend(svg);
-    root.dataset.regionalAtlas = 'true';
-    root.dataset.sourceManifest = manifest;
-    const projectPins = () => {
-      for (const pin of stage.querySelectorAll('#map-pins [data-id]')) {
-        const record = [...country.facilities, ...country.resources].find(
-          (item) => item.id === pin.dataset.id && item.countryId === country.id,
-        );
-        const point = record && projectPoint(record.point, box, 100, 100);
-        if (!point) continue;
-        pin.style.left = `${point[0]}%`;
-        pin.style.top = `${point[1]}%`;
-        pin.dataset.regionalLocation = 'source-point';
-      }
-      const caption = root.querySelector('#map-caption-text');
-      const text = 'Regional atlas · Source coordinates · Nearby countries are context only';
-      if (caption && caption.textContent !== text) caption.textContent = text;
-    };
-    projectPins();
-    const observer = new MutationObserver(projectPins);
-    observer.observe(stage.querySelector('#map-pins'), {
-      childList: true,
-      subtree: true,
-    });
-    const resize = new ResizeObserver(() => {
-      if (!root.isConnected) {
-        resize.disconnect();
-        observer.disconnect();
-        return;
-      }
-      const next = regionalViewBox(
+    const resize = () => {
+      const box = regionalViewBox(
         country.frame,
         viewport.clientWidth,
         viewport.clientHeight,
         partition.width,
         partition.height,
       );
-      if (!next) return;
-      box = next;
-      stage.style.setProperty(
-        '--regional-stage-ratio',
-        String(viewport.clientWidth / viewport.clientHeight),
-      );
-      svg.setAttribute('viewBox', box.join(' '));
-      projectPins();
+      if (box) svg.setAttribute('viewBox', box.join(' '));
+    };
+    resize();
+    root.prepend(svg);
+    root.dataset.regionalAtlas = 'true';
+    root.dataset.sourceManifest = manifest;
+    const observer = new ResizeObserver(() => {
+      if (!root.isConnected) observer.disconnect();
+      else resize();
     });
-    resize.observe(viewport);
+    observer.observe(viewport);
   } catch {
-    // Keep the exact original illustration and interactive controls if the
-    // immutable geography cannot be verified; never synthesize neighbours.
+    // Native country images and controls remain available without context.
   }
 }
