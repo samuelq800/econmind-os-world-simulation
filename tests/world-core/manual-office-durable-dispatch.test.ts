@@ -185,7 +185,9 @@ async function fixture(
       const r = await db.query(text, values ? [...values] : undefined);
       return {
         rows: r.rows as Row[],
-        rowCount: r.affectedRows ?? r.rows.length,
+        // PGlite reports affectedRows=0 for SELECT, including locked SELECTs.
+        // Match node-postgres: selected/returned rows still have a row count.
+        rowCount: r.rows.length > 0 ? r.rows.length : (r.affectedRows ?? 0),
       };
     },
   };
@@ -356,6 +358,7 @@ async function fixture(
   };
   return {
     db,
+    database,
     command,
     holder,
     clock,
@@ -419,6 +422,29 @@ async function socialAdoption() {
 }
 
 describe('manual family → existing durable authoritative execution, TEST_ONLY actual SQL', () => {
+  it('fixture adapter preserves PostgreSQL row counts for locked SELECT and DML', async () => {
+    const f = await fixture();
+    await f.database.transaction(async (transaction) => {
+      const selected = await transaction.query(
+        'select world_id from world_v2.world_head where world_id=$1 for update',
+        [f.command.worldId],
+      );
+      expect(selected.rows).toHaveLength(1);
+      expect(selected.rowCount).toBe(1);
+      const missing = await transaction.query(
+        'select world_id from world_v2.world_head where world_id=$1 for update',
+        ['WORLD_TEST_ONLY_MISSING_HEAD'],
+      );
+      expect(missing.rows).toHaveLength(0);
+      expect(missing.rowCount).toBe(0);
+      const updated = await transaction.query(
+        'update world_v2.world_head set world_version=world_version where world_id=$1',
+        [f.command.worldId],
+      );
+      expect(updated.rows).toHaveLength(0);
+      expect(updated.rowCount).toBe(1);
+    });
+  });
   it.each(['CAPTAIN', 'CENTRAL_BANK'] as const)(
     '%s reads SQL source, invokes real Core factory and atomically finalizes once',
     async (kind) => {
