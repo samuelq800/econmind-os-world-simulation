@@ -499,6 +499,15 @@ export function WorldExplorer({
   const country = countries.find((c) => c.id === countryId);
   const detailMap = detailMaps.find((m) => m.id === countryId);
   const scene = sceneMode ? scenes.find((m) => m.id === countryId) : undefined;
+  // Keep the fade in world units when changing the focus/context camera.
+  const countryDistance = country
+    ? Math.max(
+        ...(scenes.find((item) => item.id === countryId)?.frame.slice(2) ?? [
+          country.bounds[2] - country.bounds[0],
+          country.bounds[3] - country.bounds[1],
+        ]),
+      ) * 0.14
+    : 0;
   const local = (official?.facilities ?? []).map((f, sourceIndex) => {
     return {
       ...f,
@@ -508,6 +517,7 @@ export function WorldExplorer({
   });
   const selected = local.find((f) => f.id === selectedSite);
   const shown = local.filter((f) => filter === '全部' || f.kind === filter);
+  const mapped = shown.filter((site) => !scene || site.anchor !== null);
   const height = (camera.width * size.height) / size.width;
   const box = {
     x: camera.x - camera.width / 2,
@@ -525,7 +535,7 @@ export function WorldExplorer({
     point[1]! > box.y &&
     point[1]! < box.y + box.height;
   const markers = layoutLabels(
-    (showLabels ? shown : [])
+    (showLabels ? mapped : [])
       .filter((s) => visiblePoint(s.point))
       .sort((a, b) => {
         const rank = (s: (typeof shown)[number]) =>
@@ -580,7 +590,11 @@ export function WorldExplorer({
     cameraFit.current = {
       kind: 'bounds',
       bounds: [x0!, y0!, x1!, y1!],
-      padding: scene ? 1.015 : 1.55,
+      padding: scene ? 1.55 : 1.95,
+      // Independent illustrations can extend beyond the geographic world frame.
+      ...(scene
+        ? {}
+        : { extent: [partition.width, partition.height] as const }),
     };
     setCamera((current) =>
       cameraForViewport(current, sizeRef.current, cameraFit.current),
@@ -689,6 +703,10 @@ export function WorldExplorer({
   }, [zoomAt]);
   const focusSite = (id: string) => {
     const site = local.find((f) => f.id === id)!;
+    if (scene && site.anchor === null) {
+      sceneModeRef.current = false;
+      setSceneMode(false);
+    }
     setSelectedSite(id);
     cameraFit.current = null;
     setCamera((c) => ({
@@ -887,6 +905,48 @@ export function WorldExplorer({
                   <feFuncA type="linear" slope="1.8" />
                 </feComponentTransfer>
               </filter>
+              {country && (
+                <>
+                  <filter
+                    id="explorer-country-distance"
+                    x="0"
+                    y="0"
+                    width="1774"
+                    height="887"
+                    filterUnits="userSpaceOnUse"
+                    colorInterpolationFilters="sRGB"
+                  >
+                    <feMorphology
+                      operator="dilate"
+                      radius={countryDistance * 2}
+                    />
+                    <feGaussianBlur stdDeviation={countryDistance} />
+                    <feComponentTransfer>
+                      <feFuncA
+                        type="table"
+                        tableValues="0 0.333333 0.666667 1 1"
+                      />
+                    </feComponentTransfer>
+                  </filter>
+                  <mask
+                    id="explorer-country-context"
+                    x="0"
+                    y="0"
+                    width="1774"
+                    height="887"
+                    maskUnits="userSpaceOnUse"
+                    style={{ maskType: 'luminance' }}
+                  >
+                    <rect x="0" y="0" width="1774" height="887" fill="white" />
+                    <path
+                      d={country.path}
+                      fill="black"
+                      filter="url(#explorer-country-distance)"
+                    />
+                    <path d={country.path} fill="black" />
+                  </mask>
+                </>
+              )}
               {!country &&
                 countries.map((item) => (
                   <clipPath
@@ -919,23 +979,13 @@ export function WorldExplorer({
               height={box.height}
               fill="#102e39"
             />
-            {scene ? (
+            {country ? (
               <image
-                href={countrySceneUrls[scene.file]}
-                x={scene.frame[0]}
-                y={scene.frame[1]}
-                width={scene.frame[2]}
-                height={scene.frame[3]}
-                preserveAspectRatio="none"
-              />
-            ) : detailMap ? (
-              <image
-                href={countryDetailUrls[detailMap.file]}
-                x={detailMap.viewBox[0]}
-                y={detailMap.viewBox[1]}
-                width={detailMap.viewBox[2]}
-                height={detailMap.viewBox[3]}
-                preserveAspectRatio="none"
+                href={terrain}
+                width="1774"
+                height="887"
+                filter="url(#terrain-contrast)"
+                data-regional-terrain="true"
               />
             ) : (
               <>
@@ -985,25 +1035,28 @@ export function WorldExplorer({
                 })}
               </>
             )}
-            {!scene &&
-              countries.map((c) => (
-                <path
-                  key={c.id}
-                  d={c.path}
-                  className={
-                    c.id === countryId
-                      ? 'explorer-country selected'
-                      : 'explorer-country'
-                  }
-                  data-country={c.id}
-                >
-                  <title>
-                    {c.number} · {c.name}
-                  </title>
-                </path>
-              ))}
-            {!scene &&
-              showWater &&
+            {countries.map((c) => (
+              <path
+                key={c.id}
+                d={c.path}
+                className={
+                  c.id === countryId
+                    ? 'explorer-country selected'
+                    : 'explorer-country'
+                }
+                data-country={c.id}
+                style={
+                  country && c.id !== countryId
+                    ? { pointerEvents: 'none' }
+                    : undefined
+                }
+              >
+                <title>
+                  {c.number} · {c.name}
+                </title>
+              </path>
+            ))}
+            {showWater &&
               artwork.physical
                 .filter((f) => f.kind !== 'mountain')
                 .map((f) => (
@@ -1013,18 +1066,16 @@ export function WorldExplorer({
                     className={`explorer-water ${f.kind}`}
                   />
                 ))}
-            {!scene &&
-              artwork.physical
-                .filter((feature) => feature.kind === 'mountain')
-                .map((feature) => (
-                  <path
-                    key={feature.id}
-                    d={feature.path}
-                    className="explorer-mountain"
-                  />
-                ))}
-            {!scene &&
-              showConnections &&
+            {artwork.physical
+              .filter((feature) => feature.kind === 'mountain')
+              .map((feature) => (
+                <path
+                  key={feature.id}
+                  d={feature.path}
+                  className="explorer-mountain"
+                />
+              ))}
+            {showConnections &&
               scenario.freight
                 .filter((l) => l.countryIds.includes(countryId))
                 .map((l) => (
@@ -1032,7 +1083,43 @@ export function WorldExplorer({
                     <title>待勘测连接 · 非已投运道路</title>
                   </path>
                 ))}
-            <g className="explorer-detail-grid">{!scene && gridLines}</g>
+            {country && (
+              <rect
+                x="0"
+                y="0"
+                width="1774"
+                height="887"
+                fill="#081c24"
+                opacity="0.88"
+                mask="url(#explorer-country-context)"
+                pointerEvents="none"
+                data-distance-fade="country-outline"
+              />
+            )}
+            <g className="explorer-detail-grid">{gridLines}</g>
+            {scene ? (
+              <image
+                href={countrySceneUrls[scene.file]}
+                x={scene.frame[0]}
+                y={scene.frame[1]}
+                width={scene.frame[2]}
+                height={scene.frame[3]}
+                preserveAspectRatio="xMidYMid meet"
+                pointerEvents="none"
+                data-country-scene={country?.number}
+              />
+            ) : detailMap ? (
+              <image
+                href={countryDetailUrls[detailMap.file]}
+                x={detailMap.viewBox[0]}
+                y={detailMap.viewBox[1]}
+                width={detailMap.viewBox[2]}
+                height={detailMap.viewBox[3]}
+                preserveAspectRatio="none"
+                pointerEvents="none"
+                data-country-detail={country?.number}
+              />
+            ) : null}
           </svg>
           <div className="explorer-vignette" />
           <div className="explorer-heading explorer-floating">
@@ -1044,7 +1131,7 @@ export function WorldExplorer({
             <h1>{country ? country.name : '一个世界，七十种起点'}</h1>
             <p>
               {country
-                ? `${country.number} 号经济体 · ${scene ? '独立国家场景' : '地理与国界'} · 聚居与基础设施`
+                ? `${country.number} 号经济体 · ${scene ? '独立高清场景插图' : '本国地理细图'} · 背景为真实地理与邻接国界`
                 : '选择一个国家，沿着河谷、城市与产业进入它的内部。'}
             </p>
             {official && (
@@ -1126,7 +1213,7 @@ export function WorldExplorer({
           )}
           {country &&
             showLabels &&
-            shown
+            mapped
               .filter((s) => visiblePoint(s.point))
               .map((site) => (
                 <button
@@ -1248,7 +1335,7 @@ export function WorldExplorer({
                 设施标注
               </button>
             )}
-            {!scene && (
+            {
               <>
                 {!country && (
                   <button
@@ -1277,24 +1364,21 @@ export function WorldExplorer({
                   接入草案
                 </button>
               </>
-            )}
+            }
           </div>
           <div className="explorer-map-caption explorer-floating">
             <span>拖拽平移 · 滚轮 / 双指缩放 · 双击放大</span>
             <small>
               {scene
-                ? '本国场景插画仅供展示 · 图内旧文字不是数值来源 · 数字只取官方选定开局包 / 非实时 World State'
+                ? '本国场景插画仅供展示 · 地理背景独立呈现邻国 · 图内旧文字不是数值来源 · 数字只取官方选定开局包 / 非实时 World State'
                 : country
-                  ? '历史地理底图仅供展示 · 图内旧文字不是数值来源 · 设施坐标取官方生成记录 / 非实时 World State'
+                  ? '历史地理底图仅供展示 · 邻国仅作背景 · 图内旧文字不是数值来源 · 设施坐标取官方生成记录 / 非实时 World State'
                   : showArtwork
                     ? '四大陆精绘 · 放大后按需叠加 70 国地理细图 · 国界与水系保留 / 非实时 World State'
                     : '70 国地理细图全图模式 · 细图正按需载入 · 国界与水系保留 / 非实时 World State'}
             </small>
             <b>
-              {scene
-                ? '场景视图'
-                : `${format((camera.width * 36000) / 1774 / 5)} km`}{' '}
-              <i />
+              {`${format((camera.width * 36000) / 1774 / 5)} km`} <i />
             </b>
           </div>
           {drawer && (
@@ -1357,7 +1441,7 @@ export function WorldExplorer({
                 </button>
                 <p>
                   {scene
-                    ? '插画不是数值来源。标记只复用源记录已有anchor；anchor为空时保留源point，不臆造图内位置。'
+                    ? '插画不是数值来源。标记只复用源记录已有anchor；无插画锚点的设施保留在目录，定位时切换地理图。'
                     : '坐标复用官方生成记录point，仍是展示定位，不证明测绘精度或已投运。'}
                 </p>
               </div>

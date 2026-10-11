@@ -1,6 +1,6 @@
 /* Non-authoritative country-home layout overlay; the selected UI source stays immutable. */
 .country-map-home .national-world {
-  /* The surrounding atlas is a distinct layer beneath the complete scene. */
+  /* The complete country illustration remains distinct from geographic context. */
   background-color: transparent;
   background-size: contain;
   background-repeat: no-repeat;
@@ -22,7 +22,7 @@
 }
 
 .country-map-home .national-surroundings image {
-  filter: saturate(0.45) brightness(0.55);
+  filter: saturate(0.88) brightness(0.96);
 }
 
 .country-map-home .national-surrounding-boundaries path {
@@ -37,26 +37,24 @@
   stroke-width: 2;
 }
 
-/* A visible frame separates the artistic scene from the geographic projection.
-   It is exactly the contained square; no source anchors are rebased or edited. */
-.country-map-home .national-world::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: var(--country-scene-size, 0px);
-  height: var(--country-scene-size, 0px);
-  transform: translate(-50%, -50%);
-  outline: 1px solid #ffe5a380;
-  outline-offset: -1px;
-  pointer-events: none;
-}
-
 .country-map-home .national-map-layer-note {
   display: inline;
   margin-left: 12px;
   font: inherit;
   color: #d8e8db;
+}
+
+.country-map-home .national-tools [data-office-command-entry] {
+  width: 56px;
+  max-width: 100%;
+  height: auto;
+  min-height: 43px;
+  margin: 0;
+  padding: 4px;
+  font-size: 14px;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 @media (min-width: 1001px) {
@@ -136,7 +134,11 @@
 @media (max-width: 600px) {
   /* The source game is isolated; lift it only while a drawer is open so the
      external language toggle cannot cover its text. */
-  .country-map-home .country-game:has(.national-drawer:not([hidden])) {
+  .country-map-home
+    .country-game:has(
+      .national-drawer:not(dialog):not([hidden]),
+      dialog.national-drawer[open]
+    ) {
     z-index: 6;
   }
 
@@ -219,8 +221,22 @@
     top: auto;
     right: auto;
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: flex-end;
+    width: 100%;
+    max-width: 100%;
     margin-top: 16px;
+  }
+
+  .country-map-home .national-tools button {
+    flex-shrink: 0;
+  }
+
+  .country-map-home .national-tools [data-office-command-entry] {
+    width: auto;
+    min-width: 35px;
+    min-height: 35px;
+    padding: 6px 10px;
   }
 
   .country-map-home .national-destination {

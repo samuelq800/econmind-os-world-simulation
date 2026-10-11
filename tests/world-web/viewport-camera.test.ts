@@ -48,7 +48,7 @@ describe('Root viewport FIT versus MANUAL camera policy', () => {
       /\.explorer-sidebar\s*\{\s*width:\s*100%;\s*height:\s*250px;/u,
     );
   });
-  it.each(['01', '70'])(
+  it.each(scenes.map((scene) => scene.number))(
     'keeps country %s frame inside every viewport after rotation/details/short-window resize',
     (country) => {
       const fit = target(country);
@@ -159,5 +159,27 @@ describe('Root viewport FIT versus MANUAL camera policy', () => {
       y: 250,
       width: ((300 * sizes[4]!.width) / sizes[4]!.height) * 1.06,
     });
+  });
+
+  it('keeps a polar island country fit within the real terrain extent on narrow and short screens', () => {
+    const fit: ExplorerCameraFit = {
+      kind: 'bounds',
+      bounds: [1062.3, 83.25, 1326.9, 347.85],
+      padding: 1.55,
+      extent: [1774, 887],
+    };
+    for (const size of [
+      { width: 390, height: 594 },
+      { width: 1110, height: 400 },
+    ]) {
+      const camera = cameraForViewport(initial, size, fit);
+      const height = (camera.width * size.height) / size.width;
+      expect(camera.x - camera.width / 2).toBeGreaterThanOrEqual(-1e-9);
+      expect(camera.y - height / 2).toBeGreaterThanOrEqual(-1e-9);
+      expect(camera.x + camera.width / 2).toBeLessThanOrEqual(1774 + 1e-9);
+      expect(camera.y + height / 2).toBeLessThanOrEqual(887 + 1e-9);
+    }
+    const manual = { x: -10, y: -10, width: 50 };
+    expect(cameraForViewport(manual, sizes[0]!, null)).toBe(manual);
   });
 });

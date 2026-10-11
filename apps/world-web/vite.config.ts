@@ -42,6 +42,7 @@ const publicPageInputs = {
     worldWebRoot,
     'src/country-runtime/entry.ts',
   ),
+  'brand-shell': resolve(worldWebRoot, 'src/brand-shell/entry.ts'),
   ...(existsSync(resolve(worldWebRoot, 'legacy.html'))
     ? { legacy: resolve(worldWebRoot, 'legacy.html') }
     : {}),
@@ -305,7 +306,9 @@ export default defineConfig(({ mode }) => {
           entryFileNames: (chunk) =>
             chunk.name === 'country-runtime-entry'
               ? 'country-runtime-entry.js'
-              : 'assets/[name]-[hash].js',
+              : chunk.name === 'brand-shell'
+                ? 'brand-shell.js'
+                : 'assets/[name]-[hash].js',
         },
       },
     },

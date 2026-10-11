@@ -1,0 +1,492 @@
+{
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "sourceRepository": "samuelq800/econmind-os",
+  "sourceCommit": "dc7c75ec097ed17bceaf365b855eaf256c2fec35",
+  "worldBaseCommit": "42991acfee9d0eacc702ba47a380c938a4516f03",
+  "method": "Exact fixed-ref local Git blobs; Oct10 live Mac Chrome measurements of the old shared Navbar/Footer; scoped public markup and CSS adaptation.",
+  "sources": [
+    {
+      "path": "components/layout/navbar.tsx",
+      "bytes": 28819,
+      "sha256": "a636969837b573cd712e93c9cb24a9086a88f7cc936be818623d87db3413b57c",
+      "gitBlob": "3ac143e369ebe5f38bb8c9ba19c4d41ba8adb503",
+      "url": "https://github.com/samuelq800/econmind-os/blob/dc7c75ec097ed17bceaf365b855eaf256c2fec35/components/layout/navbar.tsx"
+    },
+    {
+      "path": "components/layout/footer.tsx",
+      "bytes": 15435,
+      "sha256": "a595492b34b55676b380bb3f73524321c07e6bff753a70b816397068d1d7eed8",
+      "gitBlob": "837fe8491a7d0dbde60d2daf6f71dbb712ceaba7",
+      "url": "https://github.com/samuelq800/econmind-os/blob/dc7c75ec097ed17bceaf365b855eaf256c2fec35/components/layout/footer.tsx"
+    },
+    {
+      "path": "app/globals.css",
+      "bytes": 84690,
+      "sha256": "61a07229c44b317446e92215296ccb1f4e306b7dd68963cf31a863284b6c520b",
+      "gitBlob": "12984e72601f787a4100ddc7a225bf6307971130",
+      "url": "https://github.com/samuelq800/econmind-os/blob/dc7c75ec097ed17bceaf365b855eaf256c2fec35/app/globals.css"
+    },
+    {
+      "path": "app/visual-pilot-city.css",
+      "bytes": 20395,
+      "sha256": "948191c9227114d8f96bf6b533dc0ed79423a883fd438f6f3d9c7553a6562aad",
+      "gitBlob": "963f9b2e9404f9681a80fdae5a7996c4aeb5722a",
+      "url": "https://github.com/samuelq800/econmind-os/blob/dc7c75ec097ed17bceaf365b855eaf256c2fec35/app/visual-pilot-city.css"
+    },
+    {
+      "path": "public/brand/econmind-badge-96.png",
+      "bytes": 15412,
+      "sha256": "c5a802f204f42f795d09ef2de22a1ea66eabc602edc1f8b2187293f91f7bb75f",
+      "gitBlob": "25e91697438acdf3586652724e3519bfaeb6c61d",
+      "url": "https://github.com/samuelq800/econmind-os/blob/dc7c75ec097ed17bceaf365b855eaf256c2fec35/public/brand/econmind-badge-96.png"
+    },
+    {
+      "path": "public/brand/wechat-group-qr.png",
+      "bytes": 319861,
+      "sha256": "841af5ab4c7d6c0031c2862469e357a6d3252a3bff67a26d504ceb3c166d7b62",
+      "gitBlob": "2ffb8fa728660db0459aa57f671b428e49bd309a",
+      "url": "https://github.com/samuelq800/econmind-os/blob/dc7c75ec097ed17bceaf365b855eaf256c2fec35/public/brand/wechat-group-qr.png"
+    }
+  ],
+  "adaptedSources": [
+    {
+      "path": "apps/world-web/src/brand-shell/entry.ts",
+      "bytes": 2124,
+      "sha256": "f641b86825e18f60166f2845cc54b8804f3ed04f44a2d9e22be59e9dca77a3e0"
+    },
+    {
+      "path": "apps/world-web/src/brand-shell/brand-shell.css",
+      "bytes": 10259,
+      "sha256": "77354e481912b2579d9a02ead816fe685c96c47dd59d0c58b9623c454d808d18"
+    },
+    {
+      "path": "apps/world-web/src/brand-shell/brand-shell.html",
+      "bytes": 14809,
+      "sha256": "6c9ff77527e8b1d03ba4bf5cf2b5a236cd8f951f1aceb88295522b175a06b35c"
+    },
+    {
+      "path": "apps/world-web/public/brand/econmind-badge-96.png",
+      "bytes": 15412,
+      "sha256": "c5a802f204f42f795d09ef2de22a1ea66eabc602edc1f8b2187293f91f7bb75f"
+    },
+    {
+      "path": "apps/world-web/public/brand/wechat-group-qr.png",
+      "bytes": 319861,
+      "sha256": "841af5ab4c7d6c0031c2862469e357a6d3252a3bff67a26d504ceb3c166d7b62"
+    },
+    {
+      "path": "apps/world-web/src/main.tsx",
+      "bytes": 358,
+      "sha256": "b1e7206a9d9a82ad36ee1ee681b2c4f0301cdf40537981530ba0ab631e7228cc"
+    },
+    {
+      "path": "apps/world-web/vite.config.ts",
+      "bytes": 10378,
+      "sha256": "3440e70ecaf743ac5ea8bef9420e8a06d92b5b7084fa3f98d466a92f05bb5c7a"
+    },
+    {
+      "path": "apps/world-web/package.json",
+      "bytes": 828,
+      "sha256": "08df80946a5a66d4e13f768b17aae9da96ff9541054238f409dc235e287e7d6e"
+    }
+  ],
+  "immutablePageInputs": [
+    {
+      "path": "season1-immersive/index.html",
+      "bytes": 1186,
+      "sha256": "e8442a65ccac714f92a10fdc9fd04d31a81b7368663a5a596cef1966f1d1f9a0"
+    },
+    {
+      "path": "season1-immersive/countries/index.html",
+      "bytes": 592,
+      "sha256": "002b787d289990e4670350ca58e68480fb56db3623cbc260e6c0bac4ef276473"
+    },
+    {
+      "path": "season1-immersive/countries/01/index.html",
+      "bytes": 625,
+      "sha256": "265ec46ca6887e56c66f4e8b03e6db0a2c419718a214497bd664e36643feb281"
+    },
+    {
+      "path": "season1-immersive/countries/02/index.html",
+      "bytes": 625,
+      "sha256": "228621037c028885372e1528180634a301c1c5787df8ce36c454d6e4a459e125"
+    },
+    {
+      "path": "season1-immersive/countries/03/index.html",
+      "bytes": 625,
+      "sha256": "985ad80f178c203621c1f49494fbbe4c754170604afa31e01bc8e3c01541df26"
+    },
+    {
+      "path": "season1-immersive/countries/04/index.html",
+      "bytes": 625,
+      "sha256": "61bf4fbf5fa77a03ed2f3a858efdaf3e0d8fae97414e308ad741638f3d45a2fb"
+    },
+    {
+      "path": "season1-immersive/countries/05/index.html",
+      "bytes": 627,
+      "sha256": "9fcad5bc4ff78ce9ddd93e18f8b7e3a2e5224021470ac02e049fafbecfc49ca7"
+    },
+    {
+      "path": "season1-immersive/countries/06/index.html",
+      "bytes": 623,
+      "sha256": "4dd80407125fbb3bffe49eece9fb6f6a15bf593af2cb18405d43261483edfb24"
+    },
+    {
+      "path": "season1-immersive/countries/07/index.html",
+      "bytes": 625,
+      "sha256": "588c4e65d55e66c826b6e4383c2daad5369252f6740c1f037df547bbffd11c41"
+    },
+    {
+      "path": "season1-immersive/countries/08/index.html",
+      "bytes": 625,
+      "sha256": "56fc9e2d876e6cdc65a2e3f3ddee2c9724fcc1e877992a22786c3685f7fdb162"
+    },
+    {
+      "path": "season1-immersive/countries/09/index.html",
+      "bytes": 625,
+      "sha256": "6490daa64c6d95ae08eb5a51c6506b28d42e96ba0924aa93e3d69da88f2a70ea"
+    },
+    {
+      "path": "season1-immersive/countries/10/index.html",
+      "bytes": 623,
+      "sha256": "05f33d9dd742b878168c9bcd3f4b7fd86bb863dd19de2b17b1a528b72317f789"
+    },
+    {
+      "path": "season1-immersive/countries/11/index.html",
+      "bytes": 625,
+      "sha256": "8115bfe35e7e707b8739f0dc761a2fbd18db386413af7393e940324fb825bb2e"
+    },
+    {
+      "path": "season1-immersive/countries/12/index.html",
+      "bytes": 623,
+      "sha256": "6869275426bb069e49a0b362af36426ab012c3a71fcdcce926d45bf4b340ee3d"
+    },
+    {
+      "path": "season1-immersive/countries/13/index.html",
+      "bytes": 623,
+      "sha256": "b3f7abcde72c76070a55112d405302993ecb72c80466903472a658badacc34e6"
+    },
+    {
+      "path": "season1-immersive/countries/14/index.html",
+      "bytes": 625,
+      "sha256": "43c1ac93c29045d14ddb7561c0f0e445026f319e945d839bdd35a5b4d985435d"
+    },
+    {
+      "path": "season1-immersive/countries/15/index.html",
+      "bytes": 625,
+      "sha256": "4032f99e79f2717745870833643a3356fe669b0b916683d042883e6d98b64af6"
+    },
+    {
+      "path": "season1-immersive/countries/16/index.html",
+      "bytes": 623,
+      "sha256": "598a1ca3e5170e1262a6c3e695e2477e1fd2fe7e9dcf85ef31c39aa216767fb4"
+    },
+    {
+      "path": "season1-immersive/countries/17/index.html",
+      "bytes": 625,
+      "sha256": "3fc79c2073b400bb99cada4ccf3b0246703309e71617d69471594d7dda8f6984"
+    },
+    {
+      "path": "season1-immersive/countries/18/index.html",
+      "bytes": 625,
+      "sha256": "25490d4b2691e8505c3d6aa047bb5a583c4f06f74b0e106cb7f563fe77168885"
+    },
+    {
+      "path": "season1-immersive/countries/19/index.html",
+      "bytes": 623,
+      "sha256": "1144b41dfd3e2e1b2bff71d4eb31e8a6b705d66c34b803e2acbc2eeac83f1d1d"
+    },
+    {
+      "path": "season1-immersive/countries/20/index.html",
+      "bytes": 623,
+      "sha256": "a3c6bbe76af542bc6315e12cff86c7b9adc905627d39cf33044a3420f0e94659"
+    },
+    {
+      "path": "season1-immersive/countries/21/index.html",
+      "bytes": 623,
+      "sha256": "69f1e5150657bc47d15f0f349e585e81b8703b1cd796aaae85a3ce09a639a96b"
+    },
+    {
+      "path": "season1-immersive/countries/22/index.html",
+      "bytes": 625,
+      "sha256": "26583f71c9d1a302f54271057853fa4ac943962f558d8cdaade5cc31c16ddc22"
+    },
+    {
+      "path": "season1-immersive/countries/23/index.html",
+      "bytes": 623,
+      "sha256": "49ecc64bd757f7584df2371e3ce5ed7a55ab8ba1f030725142294e55a6e19444"
+    },
+    {
+      "path": "season1-immersive/countries/24/index.html",
+      "bytes": 625,
+      "sha256": "3da34e1a910c98402752bc2b34e6135b48a3e2b0bcfc3e3ff3daedf1a921c0e1"
+    },
+    {
+      "path": "season1-immersive/countries/25/index.html",
+      "bytes": 621,
+      "sha256": "fcd5daac7536a128a8413cd47190d283e14c20b8dfbb8f5b1c95678742fc2373"
+    },
+    {
+      "path": "season1-immersive/countries/26/index.html",
+      "bytes": 623,
+      "sha256": "2f92f1340d95c35eb66e3f04883c72588b529d8c877a407925a6806ed737b848"
+    },
+    {
+      "path": "season1-immersive/countries/27/index.html",
+      "bytes": 623,
+      "sha256": "2b0979dd24f500c89e1995efb6016a5d1f115a88b043139d7625b27bc054338b"
+    },
+    {
+      "path": "season1-immersive/countries/28/index.html",
+      "bytes": 621,
+      "sha256": "007c1af18a8755d7e04425ae19543f5dde5d7c33264fc91bcff7b38ec0ec409d"
+    },
+    {
+      "path": "season1-immersive/countries/29/index.html",
+      "bytes": 625,
+      "sha256": "83574a1a8cba535795dff21c23a96a984f8ee9c85b8ef62aa1a1ee033fad4417"
+    },
+    {
+      "path": "season1-immersive/countries/30/index.html",
+      "bytes": 625,
+      "sha256": "f7c60a09130523b32afabd3da0302ca72835abe157c66ea4854800701614229d"
+    },
+    {
+      "path": "season1-immersive/countries/31/index.html",
+      "bytes": 623,
+      "sha256": "c84d4897c87e823c7118704b0a5663909ab1009e149b86fed2e387d9d8f6d924"
+    },
+    {
+      "path": "season1-immersive/countries/32/index.html",
+      "bytes": 625,
+      "sha256": "474712ccf6a32ac56706cd67def55c3050e6b3afd7e5f1eca0b68e7b1044ac12"
+    },
+    {
+      "path": "season1-immersive/countries/33/index.html",
+      "bytes": 623,
+      "sha256": "0e96592d7ac28b58d96f79effaa316275a0e3f1cc4d9f6385cafe6b234260c06"
+    },
+    {
+      "path": "season1-immersive/countries/34/index.html",
+      "bytes": 623,
+      "sha256": "185ff36e190722f303d610b4c9abc9b3ebc165b56fce133e2e0167fbadadadd5"
+    },
+    {
+      "path": "season1-immersive/countries/35/index.html",
+      "bytes": 625,
+      "sha256": "08eac8ed6ad458d04752c564059a43b5093eb015f4d4d0ac13f553f9a0511f05"
+    },
+    {
+      "path": "season1-immersive/countries/36/index.html",
+      "bytes": 623,
+      "sha256": "9b8d20d9d7a1442004b515d66f82d23246ad87250db07da058dde28a95fa4996"
+    },
+    {
+      "path": "season1-immersive/countries/37/index.html",
+      "bytes": 623,
+      "sha256": "66a11f2251805b77f34a95bdb6da9bcbd86343d170bc903f620581a1b6fa8088"
+    },
+    {
+      "path": "season1-immersive/countries/38/index.html",
+      "bytes": 623,
+      "sha256": "25cf87a195f8e0b96d31d7ac9e54a47c95d8cc7fab15573e4162ffd2c2c5af59"
+    },
+    {
+      "path": "season1-immersive/countries/39/index.html",
+      "bytes": 623,
+      "sha256": "6b0ce61bf8380bdc0bb5c1ec7804d7644aafd97daa98c984a9d38b3774e1f92c"
+    },
+    {
+      "path": "season1-immersive/countries/40/index.html",
+      "bytes": 625,
+      "sha256": "52db01fd364f1515465da116367888f9827f683c3bcd906678e788a631297b38"
+    },
+    {
+      "path": "season1-immersive/countries/41/index.html",
+      "bytes": 623,
+      "sha256": "1bfb7788541d79fc48db7891201e7de006c4a0750458436a868f5f977b6fd98a"
+    },
+    {
+      "path": "season1-immersive/countries/42/index.html",
+      "bytes": 623,
+      "sha256": "97a0d9976721ae6b42d84b020e629780413453de6fbd52013ecd5cb605267722"
+    },
+    {
+      "path": "season1-immersive/countries/43/index.html",
+      "bytes": 623,
+      "sha256": "2a5c5f0f30cf64f83b4fc2f26cebae5b2d512ce8ab8ad7810ea2ee47d11af094"
+    },
+    {
+      "path": "season1-immersive/countries/44/index.html",
+      "bytes": 623,
+      "sha256": "1ed8e5ee4b5d635c5687587fd554a185d3b9d90eb2e1e76b3cd04845338c1334"
+    },
+    {
+      "path": "season1-immersive/countries/45/index.html",
+      "bytes": 623,
+      "sha256": "0134ca4d53d7c56eee174f143e24ee98be24856063987023d59f79cbcbd0e2b9"
+    },
+    {
+      "path": "season1-immersive/countries/46/index.html",
+      "bytes": 625,
+      "sha256": "6e45825e8b370da9bbe4f674c4ffdb8a3f544e96399684595efb9636b3d26dfa"
+    },
+    {
+      "path": "season1-immersive/countries/47/index.html",
+      "bytes": 623,
+      "sha256": "7b803dc18a835caf11c83658e4d1a41d0e30b60d9154896bc29d74d27b9673ab"
+    },
+    {
+      "path": "season1-immersive/countries/48/index.html",
+      "bytes": 623,
+      "sha256": "69044d040ff2e20ffcfc17bd52ad9de7630f166cda0a4c43919c72efc6f8e165"
+    },
+    {
+      "path": "season1-immersive/countries/49/index.html",
+      "bytes": 625,
+      "sha256": "ac60b4b9c985d05c06fe0119a0a79604d6a01ad6ec87c2eabeea1f71a2f8d400"
+    },
+    {
+      "path": "season1-immersive/countries/50/index.html",
+      "bytes": 623,
+      "sha256": "cf772f3432cbd4bf09ebe35025c7965ab14b8505e059d89b595ba85071fa0e28"
+    },
+    {
+      "path": "season1-immersive/countries/51/index.html",
+      "bytes": 621,
+      "sha256": "da7ff069f618a1684bf9f7c159ad1343ef238ee43e697c0420d38e05c931bfb1"
+    },
+    {
+      "path": "season1-immersive/countries/52/index.html",
+      "bytes": 623,
+      "sha256": "06e0e943952e2d4f0c1902de3a6b2d5705dd107aca099308a4c9b369282e466c"
+    },
+    {
+      "path": "season1-immersive/countries/53/index.html",
+      "bytes": 623,
+      "sha256": "9d07ef3a54b51db72ea3fc764c0b064f3002055b61b4856d05157347c140ca8d"
+    },
+    {
+      "path": "season1-immersive/countries/54/index.html",
+      "bytes": 621,
+      "sha256": "0c27c2ba255e9c7323689f9867d9985f551a58377a709095addce0e4509c4a54"
+    },
+    {
+      "path": "season1-immersive/countries/55/index.html",
+      "bytes": 623,
+      "sha256": "e6e814808133490bc78765f16574f7566db86496ad3a090de986b0f6eb8d0624"
+    },
+    {
+      "path": "season1-immersive/countries/56/index.html",
+      "bytes": 623,
+      "sha256": "dac4068c330acdff3035f4f049f9d34747e30d1e0d4d0a997c530cb80140a26b"
+    },
+    {
+      "path": "season1-immersive/countries/57/index.html",
+      "bytes": 625,
+      "sha256": "6b604256536a42915e71d313c8fea8af8f4abd795b6b7640f16d84db88580942"
+    },
+    {
+      "path": "season1-immersive/countries/58/index.html",
+      "bytes": 623,
+      "sha256": "7971cb5dc7a2308118fb5b985fc1d07dea7595d899459df5c92f1926502aa93e"
+    },
+    {
+      "path": "season1-immersive/countries/59/index.html",
+      "bytes": 623,
+      "sha256": "2751030c3d43cbdfb9eb51e2852d18d29aa41e1084e554e6e5f60835757e88ca"
+    },
+    {
+      "path": "season1-immersive/countries/60/index.html",
+      "bytes": 623,
+      "sha256": "a96878d9e8df992087ed4b64e1cbbf85362930c5530817f44ea7925560f93092"
+    },
+    {
+      "path": "season1-immersive/countries/61/index.html",
+      "bytes": 623,
+      "sha256": "5a4b17c2cef7ae31e173a6125c652014c72b10b4de6bd917343c67ee0aac2006"
+    },
+    {
+      "path": "season1-immersive/countries/62/index.html",
+      "bytes": 623,
+      "sha256": "d39f3198c192e3fa491d689ec3cee5b0c8dc373ca47b131724eb0fb6e08f8f0b"
+    },
+    {
+      "path": "season1-immersive/countries/63/index.html",
+      "bytes": 623,
+      "sha256": "72868cfaa78d1ba90cf40dacdac7cfbf4ae6d47ca5f3121977419d868c22f465"
+    },
+    {
+      "path": "season1-immersive/countries/64/index.html",
+      "bytes": 625,
+      "sha256": "6dd092a0b960309b18bef3d129df0564c472cda360164aebf2a9b1dc6a3173ef"
+    },
+    {
+      "path": "season1-immersive/countries/65/index.html",
+      "bytes": 621,
+      "sha256": "2261aa7c0da3a75cf1f4f9728dc6a685b9e79903e9dbf262b37e0757f6eaa950"
+    },
+    {
+      "path": "season1-immersive/countries/66/index.html",
+      "bytes": 623,
+      "sha256": "43a386216bb8439a36689db3faa8f6fd7d7381b747c171654f717c4591a4dacf"
+    },
+    {
+      "path": "season1-immersive/countries/67/index.html",
+      "bytes": 621,
+      "sha256": "4cc85e04aafa1c0c15208e20a3714c72df88b8095379061d43e948c8c45e30a3"
+    },
+    {
+      "path": "season1-immersive/countries/68/index.html",
+      "bytes": 623,
+      "sha256": "edeef0e6f68b0a11ead213710f58ded53e65b3d72c8d465464d89609f8ec7def"
+    },
+    {
+      "path": "season1-immersive/countries/69/index.html",
+      "bytes": 627,
+      "sha256": "00f58403a4db241a15f0245f8bb47bc43f9983ed38dc4549bae94d6ed715d1e4"
+    },
+    {
+      "path": "season1-immersive/countries/70/index.html",
+      "bytes": 621,
+      "sha256": "5fba89664a244af4f727fbbb8523fb954877b6bc56e55e1581b0d18a043c8250"
+    }
+  ],
+  "mountDerivation": "One selected module tag immediately before the unique closing head; removal reconstructs exact input bytes. The archived public sources and existing publication verifiers remain unchanged.",
+  "visualContract": {
+    "footerMaxWidthPx": 1560,
+    "fonts": ["Arial", "Helvetica", "sans-serif"],
+    "palette": [
+      "#0c222a",
+      "#102b34",
+      "#f3f8f6",
+      "#b0c5c9",
+      "#8daab0",
+      "#27545c",
+      "#72ead8"
+    ],
+    "footerColumns": {
+      "below640": 1,
+      "from640": 2,
+      "from1024": 3,
+      "from1280": 6
+    },
+    "cornerControlPx": 44,
+    "cornerOffsetPx": 16,
+    "headerDocumentHeightPx": 0
+  },
+  "adaptation": [
+    "Oct10 latest Owner steering: use the official badge as a compact upper-left corner entry, shared by atlas and existing country HOME; omit the added full-row header and top menu. Preserve existing identity, role, runtime/authentication and return controls.",
+    "The corner badge links to the real EconMind OS home; native World return/navigation links remain intact. OS footer relative destinations are absolute OS links. No new session implementation.",
+    "Old account-specific workspace/team footer links omitted; remaining public groups, QR, social SVGs and disclaimer are preserved.",
+    "FontAwesome SVG path attribution is preserved in the markup.",
+    "Oct11 existing direct country Atlas URLs also receive the same derived display mount. Original HTML, country-entry routing, data and auth remain byte-identical; 72 selected pages total."
+  ],
+  "excluded": [
+    "Economic and command logic",
+    "Country borders and source datasets",
+    "Authentication, permissions, settlement, clock",
+    "New world-to-country-to-Office page layout",
+    "Production publication/activation"
+  ]
+}

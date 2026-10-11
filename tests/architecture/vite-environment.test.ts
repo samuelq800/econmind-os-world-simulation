@@ -40,6 +40,7 @@ async function createViteFixture() {
     const scriptsRoot = path.join(fixtureRoot, 'scripts');
     await Promise.all([
       mkdir(appRoot, { recursive: true }),
+      mkdir(path.join(appRoot, 'public'), { recursive: true }),
       mkdir(scriptsRoot, { recursive: true }),
     ]);
     await Promise.all([
@@ -57,6 +58,14 @@ async function createViteFixture() {
       copyFile(
         path.join(repositoryRoot, 'apps/world-web/vite.config.ts'),
         path.join(appRoot, 'vite.config.ts'),
+      ),
+      // The real brand entry statically imports this module from public.
+      copyFile(
+        path.join(
+          repositoryRoot,
+          'apps/world-web/public/country-home-surroundings.js',
+        ),
+        path.join(appRoot, 'public/country-home-surroundings.js'),
       ),
       copyFile(
         path.join(repositoryRoot, 'scripts/vite-environment-policy.mjs'),
@@ -135,6 +144,21 @@ describe('world-web effective Vite environment', () => {
   it('accepts a legitimate public variable through the actual build config', async () => {
     const { appRoot, fixtureRoot } = await createViteFixture();
     try {
+      expect(await readdir(path.join(appRoot, 'public'))).toEqual([
+        'country-home-surroundings.js',
+      ]);
+      expect(
+        await readFile(
+          path.join(appRoot, 'public/country-home-surroundings.js'),
+        ),
+      ).toEqual(
+        await readFile(
+          path.join(
+            repositoryRoot,
+            'apps/world-web/public/country-home-surroundings.js',
+          ),
+        ),
+      );
       await writeFile(
         path.join(appRoot, '.env.local'),
         'VITE_WORLD_API_BASE_URL=https://safe.example.invalid\n',

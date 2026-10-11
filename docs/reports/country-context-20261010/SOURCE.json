@@ -1,0 +1,62 @@
+{
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "worldBaseCommit": "42991acfee9d0eacc702ba47a380c938a4516f03",
+  "projection": "V8_IMAGE_PIXELS_TOP_LEFT",
+  "extent": [1774, 887],
+  "sourceManifestSha256": "9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f",
+  "immutableInputs": [
+    {
+      "path": "apps/world-web/src/map-lab/land-partition.json",
+      "bytes": 662704,
+      "sha256": "394a43ffc94df7c27c8fe8610378d348f07c1680675c89ecad26300aa9c7b101"
+    },
+    {
+      "path": "apps/world-web/src/assets/asterra-satellite-terrain-v8.png",
+      "bytes": 2590149,
+      "sha256": "4cc5e79b1293c5c5c6dbfecc0688a66aa031307ec144332c22f3fc962c179ed7"
+    },
+    {
+      "path": "apps/world-web/public/official-map-source/index.json",
+      "bytes": 186843,
+      "sha256": "0ee3fc6ae44d41a2d95cd20f2dcddfeea927ad0485036f0874b117414700904d"
+    }
+  ],
+  "adaptedSources": [
+    {
+      "path": "apps/world-web/public/country-home-layout.css",
+      "bytes": 8485,
+      "sha256": "23d0f4f4674005fb75617a12b9168dcc885c5810342152056d4eeb3833c8a05d"
+    },
+    {
+      "path": "apps/world-web/public/country-home-surroundings.js",
+      "bytes": 10182,
+      "sha256": "759fc5b76988d492952f004391e0cfe1dc62c72ac06201991814e6df96ab0dba"
+    },
+    {
+      "path": "apps/world-web/src/map-explorer/WorldExplorer.tsx",
+      "bytes": 54187,
+      "sha256": "545d43ca57d1535298f2d9e3d1e049830298236385e2e9658b1a318d41dd41d9"
+    },
+    {
+      "path": "apps/world-web/src/map-explorer/viewport-camera.ts",
+      "bytes": 2277,
+      "sha256": "69412183b7ac5b54451419e5fdbcbdfaecc594f8553e239883630cf89253d666"
+    },
+    {
+      "path": "apps/world-web/public/country-home-surroundings.d.ts",
+      "bytes": 208,
+      "sha256": "3bc11a10f6d1627a7ea7f0e5e6c83e17903c338ff2e57df1c16da2975084d015"
+    }
+  ],
+  "method": "Pinned world terrain and all 70 unchanged paths form geographic context only. Each original 1254px country scene remains a separate complete illustration, with original scene-anchor positions. Original country detail SVGs retain their geographic coordinates. Context uses the exact selected silhouette distance fade; it never replaces a country image or supplies illustration pin coordinates.",
+  "fallback": "If either fixed source hash fails, retain the original illustration and source controls with an unavailable notice; no fabricated geography.",
+  "authorityChanged": false,
+  "dataChanged": false,
+  "neighbourHitTargets": false,
+  "panZoom": "Existing Atlas camera, drag/zoom, scene/detail toggle and routes retained. HOME retains its independent contained illustration and native scene-anchor pins; geographic surroundings are a separate noninteractive background.",
+  "oldSceneAssets": "All 70 independent scene PNGs and 70 detail SVGs remain byte-for-byte unchanged and are primary country views. Illustrations are not treated as geographic tiles.",
+  "atlasSelectedCountry": "Original countrySceneUrls and countryDetailUrls render each selected country image above geographic context. Scene anchors are used only on scene illustrations; source world points are used on detail maps. Facilities without scene anchors remain in the complete directory and switch to the geographic detail view when located. No invented illustration coordinates or foreign controls.",
+  "legacyAtlas": "Native country.scene/detail images remain visible, and countries.js owns original scene/detail pin mapping, zoom, aspect and scrolling. A separate verified regional SVG is background only; it never hides the original image, overwrites native captions, rebases pins or overrides stage geometry.",
+  "countryFit": "Automatic selected-country camera fits are contained in the real world source extent, preventing an empty strip beyond polar terrain on narrow screens. Manual drag/zoom intent and overview/continent fits remain unchanged.",
+  "integration20261011": "The public legacy Atlas adapter is a statically resolved browser module, with the deployed public base passed explicitly so bundle relocation cannot change its immutable geography URLs. No authority or connection change. Runtime publication URL avoids asset-glob rewriting; the actual compiled legacy entry is browser checked."
+}

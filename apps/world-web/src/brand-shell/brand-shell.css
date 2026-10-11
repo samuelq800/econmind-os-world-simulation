@@ -1,0 +1,444 @@
+/* EconMind OS public Navbar/Footer, scoped independently of the selected UI.
+ * Dimensions below belong to brand chrome, not Office or map contents. */
+.econmind-brand-shell {
+  --brand-surface: #0c222a;
+  --brand-subtle: #102b34;
+  --brand-ink: #f3f8f6;
+  --brand-muted: #b0c5c9;
+  --brand-faint: #8daab0;
+  --brand-line: #27545c;
+  --brand-accent: #72ead8;
+  --brand-accent-soft: #163e3e;
+  color: var(--brand-ink);
+  background: var(--brand-surface);
+  font:
+    16px/24px Arial,
+    Helvetica,
+    sans-serif;
+  text-align: left;
+  letter-spacing: normal;
+}
+.econmind-brand-shell,
+.econmind-brand-shell * {
+  box-sizing: border-box;
+}
+.econmind-brand-shell p {
+  margin: 0;
+}
+.econmind-brand-shell a {
+  color: inherit;
+  text-decoration: none;
+}
+.econmind-brand-shell img {
+  display: block;
+  max-width: 100%;
+}
+.econmind-brand-shell a:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 4px;
+}
+.econmind-brand-header {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 50;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 3px 12px #061e2c66;
+  pointer-events: none;
+}
+.econmind-brand-home {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  border-radius: 50%;
+  -webkit-user-drag: none;
+}
+.econmind-brand-badge-mini {
+  position: relative;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid #6f4814;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 215deg,
+    #8d5c18,
+    #f5d77e 15%,
+    #fff0ad 27%,
+    #bd8128 45%,
+    #f0c760 63%,
+    #815113 79%,
+    #e4b84e
+  );
+  box-shadow:
+    0 0 0 1px rgba(6, 35, 65, 0.9),
+    0 0 0 2px rgba(226, 184, 84, 0.58),
+    0 5px 13px rgba(5, 29, 51, 0.2);
+  padding: 2px;
+  isolation: isolate;
+}
+.econmind-brand-badge-mini::after {
+  position: absolute;
+  z-index: 2;
+  inset: 2px;
+  content: '';
+  pointer-events: none;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 235, 163, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(3, 31, 58, 0.5);
+}
+.econmind-brand-badge-mini img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+.econmind-brand-home:hover .econmind-brand-badge-mini {
+  box-shadow:
+    0 0 0 1px rgba(6, 35, 65, 0.92),
+    0 0 0 2px rgba(240, 200, 101, 0.82),
+    0 7px 17px rgba(5, 29, 51, 0.25);
+}
+.econmind-brand-footer {
+  border-top: 1px solid var(--brand-line);
+  padding: 40px 20px;
+  font-size: 14px;
+  line-height: 20px;
+}
+.econmind-brand-footer-grid {
+  display: grid;
+  max-width: 1560px;
+  margin: 0 auto;
+  gap: 32px;
+}
+.econmind-brand-footer-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.econmind-brand-footer-heading p {
+  font-weight: 800;
+  letter-spacing: -0.42px;
+}
+.econmind-brand-footer-badge {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-accent) 24%, transparent);
+}
+.econmind-brand-description {
+  max-width: 384px;
+  margin-top: 12px !important;
+  font-size: 12px;
+  line-height: 24px;
+  color: var(--brand-muted);
+}
+.econmind-brand-community {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+}
+.econmind-brand-community > div {
+  min-width: 0;
+  padding-top: 2px;
+  color: var(--brand-muted);
+  font-size: 12px;
+  line-height: 20px;
+}
+.econmind-brand-qr {
+  flex: none;
+  width: 112px;
+  height: 112px;
+  padding: 4px;
+  border: 1px solid var(--brand-line);
+  border-radius: 8px;
+  background: #fff;
+}
+.econmind-brand-community-label {
+  color: var(--brand-faint);
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.econmind-brand-community-purpose {
+  margin-top: 4px !important;
+}
+.econmind-brand-community-support {
+  margin-top: 8px !important;
+}
+.econmind-brand-community-support a {
+  font-weight: 700;
+  color: var(--brand-accent);
+}
+.econmind-brand-social {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+.econmind-brand-social a {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--brand-line);
+  border-radius: 50%;
+  background: var(--brand-subtle);
+  color: var(--brand-muted);
+  transition:
+    transform 0.2s,
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+.econmind-brand-social a:hover {
+  transform: translateY(-2px);
+  border-color: var(--brand-accent);
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent);
+}
+.econmind-brand-social-icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.econmind-brand-social-icon--large {
+  width: 18px;
+  height: 18px;
+}
+.econmind-brand-footer-links > p {
+  color: var(--brand-faint);
+  font-size: 10px;
+  line-height: 14.2857px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+.econmind-brand-footer-links > div {
+  display: grid;
+  margin-top: 12px;
+  gap: 8px;
+}
+.econmind-brand-footer-links a {
+  color: var(--brand-muted);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+}
+.econmind-brand-footer a:hover {
+  color: var(--brand-accent);
+}
+.econmind-brand-community-support a:hover {
+  text-decoration: underline;
+}
+.econmind-brand-footer-meta {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 1560px;
+  margin: 40px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--brand-line);
+  color: var(--brand-faint);
+  font-size: 11px;
+  line-height: 15.7143px;
+}
+/* Shared corner shell adds no document row or map-height reservation. */
+html:has(body[data-econmind-brand-page]) {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+body[data-econmind-brand-page] {
+  height: auto;
+  min-height: 100dvh;
+  max-height: none;
+  overflow: visible;
+  margin: 0;
+}
+body[data-econmind-brand-page] .official-source-map-shell,
+body[data-econmind-brand-page] #root > .world-explorer {
+  height: 100dvh;
+}
+body[data-econmind-brand-page] .official-source-map-shell {
+  position: relative;
+}
+/* The native country identity retains its layout and role controls. The shared
+   official badge supplies its single accessible home link at the same corner. */
+body[data-econmind-brand-page] .national-identity .brand-badge-mini {
+  visibility: hidden;
+}
+/* Existing atlas navigation remains available as compact map overlays. */
+body[data-econmind-brand-page] .explorer-topbar {
+  position: absolute;
+  top: 16px;
+  left: 76px;
+  right: auto;
+  z-index: 8;
+  height: auto;
+  min-height: 44px;
+  width: max-content;
+  max-width: calc(100% - 152px);
+  gap: 16px;
+  padding: 0 12px;
+  border: 1px solid var(--em-line, #27545c);
+  border-radius: 8px;
+  background: #0c222ae8;
+}
+body[data-econmind-brand-page] .explorer-brand {
+  display: none;
+}
+body[data-econmind-brand-page] .explorer-topbar nav {
+  flex: none;
+}
+body[data-econmind-brand-page] .explorer-layout {
+  height: 100%;
+}
+body[data-econmind-brand-page] .explorer-heading {
+  top: 76px;
+}
+body[data-econmind-brand-page] .official-source-connection {
+  position: absolute;
+  top: auto;
+  bottom: 132px;
+  right: 16px;
+  z-index: 8;
+  max-width: min(400px, calc(100% - 32px));
+  border: 1px solid var(--em-line, #27545c);
+  border-radius: 8px;
+}
+@media (min-width: 640px) {
+  .econmind-brand-footer {
+    padding-inline: 32px;
+  }
+  .econmind-brand-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .econmind-brand-footer-meta {
+    flex-direction: row;
+  }
+}
+@media (min-width: 1024px) {
+  .econmind-brand-footer {
+    padding-inline: 48px;
+  }
+  .econmind-brand-footer-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .econmind-brand-footer-grid {
+    grid-template-columns: 1.4fr repeat(5, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  body[data-econmind-brand-page] .explorer-topbar {
+    flex-wrap: wrap;
+    gap: 0 12px;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+  body[data-econmind-brand-page] .explorer-topbar nav {
+    gap: 8px;
+    width: 100%;
+    flex: auto;
+  }
+  body[data-econmind-brand-page] .official-source-connection {
+    right: 12px;
+    max-width: calc(100% - 24px);
+  }
+}
+@media (max-width: 600px) {
+  /* The country drawer keeps its native close control; reserve the shared
+     corner badge area so it cannot cover the drawer's heading. */
+  body[data-econmind-brand-page] .national-drawer-head {
+    padding-left: 64px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .econmind-brand-social a {
+    transition: none;
+  }
+  .econmind-brand-social a:hover {
+    transform: none;
+  }
+}
+
+/* Preserve the old Atlas controls as overlays, sharing the compact badge. */
+body[data-econmind-brand-page] .country-header {
+  position: absolute;
+  top: 16px;
+  left: 76px;
+  right: 16px;
+  height: 44px;
+  padding: 0 12px;
+  z-index: 8;
+  border-radius: 8px;
+}
+body[data-econmind-brand-page] .country-header .brand-home-link {
+  font-size: 11px;
+}
+body[data-econmind-brand-page] .country-header .brand-home-link img,
+body[data-econmind-brand-page] .country-header .brand-badge-mini,
+body[data-econmind-brand-page] .country-header .brand-beta,
+body[data-econmind-brand-page] .country-header .header-world {
+  display: none;
+}
+body[data-econmind-brand-page] .country-world {
+  margin-top: 0;
+  padding-top: 76px;
+}
+.country-map[data-regional-atlas] {
+  isolation: isolate;
+}
+.legacy-regional-terrain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+.legacy-regional-terrain .national-surrounding-boundaries path {
+  fill: none;
+  stroke: #d8daba;
+  stroke-width: 0.65;
+  opacity: 0.48;
+}
+.legacy-regional-terrain .national-surrounding-selected {
+  fill: none;
+  stroke: #ffe9a8;
+  stroke-width: 1.8;
+}
+@media (max-width: 700px) {
+  body[data-econmind-brand-page] .country-header {
+    gap: 8px;
+    padding: 0 8px;
+  }
+  body[data-econmind-brand-page] .country-header .brand-home-link span {
+    display: none;
+  }
+  body[data-econmind-brand-page] .country-header .brand-home-link::after {
+    content: '← Country';
+  }
+}

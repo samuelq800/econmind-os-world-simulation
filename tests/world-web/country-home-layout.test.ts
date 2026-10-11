@@ -21,7 +21,10 @@ describe('country-home map layout guardrails', () => {
 
   it('keeps the drawer close header reachable while long lists scroll internally', () => {
     expect(css).toMatch(
-      /\.country-game:has\(\.national-drawer:not\(\[hidden\]\)\)\s*\{[^}]*z-index: 6;/,
+      /\.country-game:has\(\s*\.national-drawer:not\(dialog\):not\(\[hidden\]\),\s*dialog\.national-drawer\[open\]\s*\)\s*\{[^}]*z-index: 6;/,
+    );
+    expect(css).not.toMatch(
+      /\.country-game:has\(\s*\.national-drawer:not\(\[hidden\]\)\s*\)\s*\{/,
     );
     expect(css).toMatch(
       /\.national-drawer-head\s*\{[^}]*position: sticky;[^}]*top: -16px;[^}]*z-index: 1;[^}]*background:/,
