@@ -354,7 +354,7 @@ describe('selected official map source publication (not live World State)', () =
       ),
     ) as { scripts: { build: string } };
     expect(pkg.scripts.build).toBe(
-      'tsc -b && vite build && node ../../scripts/publish-authoritative-ui-map-assets.mjs && node ../../scripts/configure-official-page-read.mjs && node ../../scripts/official-map-publication-build.mjs',
+      'tsc -b && vite build && node ../../scripts/publish-authoritative-ui-map-assets.mjs && node ../../scripts/publish-brand-shell.mjs && node ../../scripts/configure-official-page-read.mjs && node ../../scripts/official-map-publication-build.mjs',
     );
   });
 });

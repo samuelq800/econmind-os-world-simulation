@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import './brand-shell/entry.js';
 
 import { App } from './App.js';
 

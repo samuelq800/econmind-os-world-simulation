@@ -11,6 +11,7 @@ export type ExplorerCameraFit =
       kind: 'bounds';
       bounds: readonly [number, number, number, number];
       padding: number;
+      extent?: readonly [number, number];
     }>;
 
 export function isUsableViewport(size: ExplorerViewport): boolean {
@@ -44,11 +45,25 @@ export function cameraForViewport(
     };
   }
   const [left, top, right, bottom] = fit.bounds;
-  return {
+  const camera = {
     x: (left + right) / 2,
     y: (top + bottom) / 2,
     width:
       Math.max(right - left, ((bottom - top) * size.width) / size.height) *
       fit.padding,
+  };
+  if (!fit.extent) return camera;
+  const [worldWidth, worldHeight] = fit.extent;
+  const height = (camera.width * size.height) / size.width;
+  const scale = Math.min(1, worldWidth / camera.width, worldHeight / height);
+  const width = camera.width * scale;
+  const fittedHeight = height * scale;
+  return {
+    width,
+    x: Math.max(width / 2, Math.min(worldWidth - width / 2, camera.x)),
+    y: Math.max(
+      fittedHeight / 2,
+      Math.min(worldHeight - fittedHeight / 2, camera.y),
+    ),
   };
 }

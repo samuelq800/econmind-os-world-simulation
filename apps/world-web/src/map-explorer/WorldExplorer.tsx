@@ -4,7 +4,6 @@ import sceneIndex from '../assets/country-scenes/index.json';
 import { continentSceneUrls } from './continent-scene-urls.js';
 import { continentFor } from './continent-layout.js';
 import { countryDetailUrls } from './country-detail-urls.js';
-import { countrySceneUrls } from './country-scene-urls.js';
 import { shouldMountDetailTile } from './detail-tile-visibility.js';
 import { layoutLabels } from './label-layout.js';
 import {
@@ -497,13 +496,21 @@ export function WorldExplorer({
   const suppressClick = useRef(false);
   const pointerCountry = useRef('');
   const country = countries.find((c) => c.id === countryId);
-  const detailMap = detailMaps.find((m) => m.id === countryId);
   const scene = sceneMode ? scenes.find((m) => m.id === countryId) : undefined;
+  // Keep the fade in world units when changing the focus/context camera.
+  const countryDistance = country
+    ? Math.max(
+        ...(scenes.find((item) => item.id === countryId)?.frame.slice(2) ?? [
+          country.bounds[2] - country.bounds[0],
+          country.bounds[3] - country.bounds[1],
+        ]),
+      ) * 0.14
+    : 0;
   const local = (official?.facilities ?? []).map((f, sourceIndex) => {
     return {
       ...f,
       sourceIndex,
-      point: officialFacilityPoint(f, scene ? official?.frame : undefined),
+      point: officialFacilityPoint(f),
     };
   });
   const selected = local.find((f) => f.id === selectedSite);
@@ -580,7 +587,8 @@ export function WorldExplorer({
     cameraFit.current = {
       kind: 'bounds',
       bounds: [x0!, y0!, x1!, y1!],
-      padding: scene ? 1.015 : 1.55,
+      padding: scene ? 1.55 : 1.95,
+      extent: [partition.width, partition.height],
     };
     setCamera((current) =>
       cameraForViewport(current, sizeRef.current, cameraFit.current),
@@ -887,6 +895,48 @@ export function WorldExplorer({
                   <feFuncA type="linear" slope="1.8" />
                 </feComponentTransfer>
               </filter>
+              {country && (
+                <>
+                  <filter
+                    id="explorer-country-distance"
+                    x="0"
+                    y="0"
+                    width="1774"
+                    height="887"
+                    filterUnits="userSpaceOnUse"
+                    colorInterpolationFilters="sRGB"
+                  >
+                    <feMorphology
+                      operator="dilate"
+                      radius={countryDistance * 2}
+                    />
+                    <feGaussianBlur stdDeviation={countryDistance} />
+                    <feComponentTransfer>
+                      <feFuncA
+                        type="table"
+                        tableValues="0 0.333333 0.666667 1 1"
+                      />
+                    </feComponentTransfer>
+                  </filter>
+                  <mask
+                    id="explorer-country-context"
+                    x="0"
+                    y="0"
+                    width="1774"
+                    height="887"
+                    maskUnits="userSpaceOnUse"
+                    style={{ maskType: 'luminance' }}
+                  >
+                    <rect x="0" y="0" width="1774" height="887" fill="white" />
+                    <path
+                      d={country.path}
+                      fill="black"
+                      filter="url(#explorer-country-distance)"
+                    />
+                    <path d={country.path} fill="black" />
+                  </mask>
+                </>
+              )}
               {!country &&
                 countries.map((item) => (
                   <clipPath
@@ -919,23 +969,13 @@ export function WorldExplorer({
               height={box.height}
               fill="#102e39"
             />
-            {scene ? (
+            {country ? (
               <image
-                href={countrySceneUrls[scene.file]}
-                x={scene.frame[0]}
-                y={scene.frame[1]}
-                width={scene.frame[2]}
-                height={scene.frame[3]}
-                preserveAspectRatio="none"
-              />
-            ) : detailMap ? (
-              <image
-                href={countryDetailUrls[detailMap.file]}
-                x={detailMap.viewBox[0]}
-                y={detailMap.viewBox[1]}
-                width={detailMap.viewBox[2]}
-                height={detailMap.viewBox[3]}
-                preserveAspectRatio="none"
+                href={terrain}
+                width="1774"
+                height="887"
+                filter="url(#terrain-contrast)"
+                data-regional-terrain="true"
               />
             ) : (
               <>
@@ -985,25 +1025,28 @@ export function WorldExplorer({
                 })}
               </>
             )}
-            {!scene &&
-              countries.map((c) => (
-                <path
-                  key={c.id}
-                  d={c.path}
-                  className={
-                    c.id === countryId
-                      ? 'explorer-country selected'
-                      : 'explorer-country'
-                  }
-                  data-country={c.id}
-                >
-                  <title>
-                    {c.number} · {c.name}
-                  </title>
-                </path>
-              ))}
-            {!scene &&
-              showWater &&
+            {countries.map((c) => (
+              <path
+                key={c.id}
+                d={c.path}
+                className={
+                  c.id === countryId
+                    ? 'explorer-country selected'
+                    : 'explorer-country'
+                }
+                data-country={c.id}
+                style={
+                  country && c.id !== countryId
+                    ? { pointerEvents: 'none' }
+                    : undefined
+                }
+              >
+                <title>
+                  {c.number} · {c.name}
+                </title>
+              </path>
+            ))}
+            {showWater &&
               artwork.physical
                 .filter((f) => f.kind !== 'mountain')
                 .map((f) => (
@@ -1013,18 +1056,16 @@ export function WorldExplorer({
                     className={`explorer-water ${f.kind}`}
                   />
                 ))}
-            {!scene &&
-              artwork.physical
-                .filter((feature) => feature.kind === 'mountain')
-                .map((feature) => (
-                  <path
-                    key={feature.id}
-                    d={feature.path}
-                    className="explorer-mountain"
-                  />
-                ))}
-            {!scene &&
-              showConnections &&
+            {artwork.physical
+              .filter((feature) => feature.kind === 'mountain')
+              .map((feature) => (
+                <path
+                  key={feature.id}
+                  d={feature.path}
+                  className="explorer-mountain"
+                />
+              ))}
+            {showConnections &&
               scenario.freight
                 .filter((l) => l.countryIds.includes(countryId))
                 .map((l) => (
@@ -1032,7 +1073,20 @@ export function WorldExplorer({
                     <title>待勘测连接 · 非已投运道路</title>
                   </path>
                 ))}
-            <g className="explorer-detail-grid">{!scene && gridLines}</g>
+            {country && (
+              <rect
+                x="0"
+                y="0"
+                width="1774"
+                height="887"
+                fill="#081c24"
+                opacity="0.88"
+                mask="url(#explorer-country-context)"
+                pointerEvents="none"
+                data-distance-fade="country-outline"
+              />
+            )}
+            <g className="explorer-detail-grid">{gridLines}</g>
           </svg>
           <div className="explorer-vignette" />
           <div className="explorer-heading explorer-floating">
@@ -1044,7 +1098,7 @@ export function WorldExplorer({
             <h1>{country ? country.name : '一个世界，七十种起点'}</h1>
             <p>
               {country
-                ? `${country.number} 号经济体 · ${scene ? '独立国家场景' : '地理与国界'} · 聚居与基础设施`
+                ? `${country.number} 号经济体 · 真实地理与邻接国界 · 聚居与基础设施`
                 : '选择一个国家，沿着河谷、城市与产业进入它的内部。'}
             </p>
             {official && (
@@ -1237,7 +1291,7 @@ export function WorldExplorer({
                   fit(countryId);
                 }}
               >
-                {scene ? '地理图 ↗' : '场景图 ↗'}
+                {scene ? '扩大邻接视野 ↗' : '聚焦本国 ↗'}
               </button>
             )}
             {country && (
@@ -1248,7 +1302,7 @@ export function WorldExplorer({
                 设施标注
               </button>
             )}
-            {!scene && (
+            {
               <>
                 {!country && (
                   <button
@@ -1277,24 +1331,19 @@ export function WorldExplorer({
                   接入草案
                 </button>
               </>
-            )}
+            }
           </div>
           <div className="explorer-map-caption explorer-floating">
             <span>拖拽平移 · 滚轮 / 双指缩放 · 双击放大</span>
             <small>
-              {scene
-                ? '本国场景插画仅供展示 · 图内旧文字不是数值来源 · 数字只取官方选定开局包 / 非实时 World State'
-                : country
-                  ? '历史地理底图仅供展示 · 图内旧文字不是数值来源 · 设施坐标取官方生成记录 / 非实时 World State'
-                  : showArtwork
-                    ? '四大陆精绘 · 放大后按需叠加 70 国地理细图 · 国界与水系保留 / 非实时 World State'
-                    : '70 国地理细图全图模式 · 细图正按需载入 · 国界与水系保留 / 非实时 World State'}
+              {country
+                ? '本国与邻国沿用世界原始地形与国界 · 邻国仅作背景 · 图内旧文字不是数值来源 · 数字只取官方选定开局包 / 非实时 World State'
+                : showArtwork
+                  ? '四大陆精绘 · 放大后按需叠加 70 国地理细图 · 国界与水系保留 / 非实时 World State'
+                  : '70 国地理细图全图模式 · 细图正按需载入 · 国界与水系保留 / 非实时 World State'}
             </small>
             <b>
-              {scene
-                ? '场景视图'
-                : `${format((camera.width * 36000) / 1774 / 5)} km`}{' '}
-              <i />
+              {`${format((camera.width * 36000) / 1774 / 5)} km`} <i />
             </b>
           </div>
           {drawer && (

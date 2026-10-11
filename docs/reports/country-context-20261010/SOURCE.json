@@ -1,0 +1,62 @@
+{
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "worldBaseCommit": "42991acfee9d0eacc702ba47a380c938a4516f03",
+  "projection": "V8_IMAGE_PIXELS_TOP_LEFT",
+  "extent": [1774, 887],
+  "sourceManifestSha256": "9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f",
+  "immutableInputs": [
+    {
+      "path": "apps/world-web/src/map-lab/land-partition.json",
+      "bytes": 662704,
+      "sha256": "394a43ffc94df7c27c8fe8610378d348f07c1680675c89ecad26300aa9c7b101"
+    },
+    {
+      "path": "apps/world-web/src/assets/asterra-satellite-terrain-v8.png",
+      "bytes": 2590149,
+      "sha256": "4cc5e79b1293c5c5c6dbfecc0688a66aa031307ec144332c22f3fc962c179ed7"
+    },
+    {
+      "path": "apps/world-web/public/official-map-source/index.json",
+      "bytes": 186843,
+      "sha256": "0ee3fc6ae44d41a2d95cd20f2dcddfeea927ad0485036f0874b117414700904d"
+    }
+  ],
+  "adaptedSources": [
+    {
+      "path": "apps/world-web/public/country-home-layout.css",
+      "bytes": 9385,
+      "sha256": "124fab376a70537a5b316b5b9b53e7f66b92e4d862f4940b5c460ba17acff2e4"
+    },
+    {
+      "path": "apps/world-web/public/country-home-surroundings.js",
+      "bytes": 13031,
+      "sha256": "800a23730ac7a703f7e00fe94ee5fba46f5207cfbb0f6a9cb4aeffbed45bd1db"
+    },
+    {
+      "path": "apps/world-web/src/map-explorer/WorldExplorer.tsx",
+      "bytes": 52609,
+      "sha256": "4e4140e84f4541738e2846ec7f61186de269096db344fdff87fb6a1c95e66cbb"
+    },
+    {
+      "path": "apps/world-web/src/map-explorer/viewport-camera.ts",
+      "bytes": 2277,
+      "sha256": "69412183b7ac5b54451419e5fdbcbdfaecc594f8553e239883630cf89253d666"
+    },
+    {
+      "path": "apps/world-web/public/country-home-surroundings.d.ts",
+      "bytes": 211,
+      "sha256": "64b39147af24391d694d0f30b90584121d04ac934015131a9b1aa4f381fd9bfa"
+    }
+  ],
+  "method": "One pinned world terrain image and all 70 unchanged paths share one SVG viewBox. Dilate the exact selected silhouette by 0.28 times its source frame extent, blur with sigma 0.14 times that extent, and saturate alpha above 0.75. This keeps both sides of the boundary clear before the continuous outer fade. Source facility world-pixel points use the same transform; Atlas camera changes do not change fade width.",
+  "fallback": "If either fixed source hash fails, retain the original illustration and source controls with an unavailable notice; no fabricated geography.",
+  "authorityChanged": false,
+  "dataChanged": false,
+  "neighbourHitTargets": false,
+  "panZoom": "Existing Atlas camera, drag/zoom and routes retained; focus/context visual fit padding adjusted to expose true neighbours. HOME remains a noninteractive contextual background.",
+  "oldSceneAssets": "Preserved byte-for-byte, used only as the failure fallback; illustrations are not treated as geographic tiles.",
+  "atlasSelectedCountry": "Existing Atlas country selection now uses the same world terrain and original 70 paths, an outline-based distance mask and source world-pixel facility positions. Existing framing toggle changes focus/context extent; no new sidebar, route, data loader or command.",
+  "legacyAtlas": "Existing country-directory zoom stage uses the same verified regional SVG. Native facility/resource pins are reprojected from their unchanged world-pixel points after native tab redraw; source records, actions, routing, zoom and scrolling remain unchanged. Original illustration remains fallback.",
+  "countryFit": "Automatic selected-country camera fits are contained in the real world source extent, preventing an empty strip beyond polar terrain on narrow screens. Manual drag/zoom intent and overview/continent fits remain unchanged.",
+  "integration20261011": "The public legacy Atlas adapter is a statically resolved browser module, with the deployed public base passed explicitly so bundle relocation cannot change its immutable geography URLs. No authority or connection change. Runtime publication URL avoids asset-glob rewriting; the actual compiled legacy entry is browser checked."
+}
