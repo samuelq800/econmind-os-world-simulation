@@ -38,6 +38,7 @@ interface ProcessRow {
   readonly pid: number;
   readonly ppid: number;
   readonly state: string;
+  readonly started: string;
 }
 
 function preloadEnvironment(): NodeJS.ProcessEnv {
@@ -71,7 +72,8 @@ function startCommand(
     signal: NodeJS.Signals | null;
   }>((resolve, reject) => {
     child.once('error', reject);
-    child.once('exit', (code, signal) => resolve({ code, signal }));
+    // close follows exit and drains both captured output streams.
+    child.once('close', (code, signal) => resolve({ code, signal }));
   });
   return { child, exited, output: () => output };
 }
@@ -129,25 +131,50 @@ async function waitUntil<T>(
 async function waitForOutput(
   managed: ManagedCommand,
   pattern: RegExp,
+  captured: ProcessRow[],
   timeoutMs = 30_000,
 ) {
-  return waitUntil(
-    () => pattern.test(managed.output()),
-    timeoutMs,
-    `output matching ${String(pattern)}`,
-  );
+  const deadline = Date.now() + timeoutMs;
+  try {
+    while (Date.now() < deadline) {
+      // Observe ownership before READY: failures must not leave captured=[].
+      await captureCommand(managed, captured);
+      if (pattern.test(managed.output())) return;
+      if (
+        managed.child.exitCode !== null ||
+        managed.child.signalCode !== null
+      ) {
+        await managed.exited;
+        throw new Error('public command exited before expected output');
+      }
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+    throw new Error('timed out');
+  } catch (error) {
+    throw new Error(
+      `output matching ${String(pattern)}: ${error instanceof Error ? error.message : 'failed'}\n` +
+        `child=${JSON.stringify({ pid: managed.child.pid, exitCode: managed.child.exitCode, signalCode: managed.child.signalCode })}\n` +
+        `owned=${JSON.stringify(captured)}\noutput:\n${managed.output()}`,
+      { cause: error },
+    );
+  }
 }
 
 async function waitForExit(managed: ManagedCommand, timeoutMs = 20_000) {
-  return Promise.race([
-    managed.exited,
-    new Promise<never>((_, reject) => {
-      setTimeout(
-        () => reject(new Error('public command did not exit')),
-        timeoutMs,
-      );
-    }),
-  ]);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      managed.exited,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error('public command did not exit')),
+          timeoutMs,
+        );
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
 }
 
 async function freePort(): Promise<number> {
@@ -205,19 +232,20 @@ async function allPortsReusable(ports: StackPorts) {
 async function readProcessTable(): Promise<ProcessRow[]> {
   const { stdout } = await execFileAsync('ps', [
     '-axo',
-    'pid=,ppid=,stat=,command=',
+    'pid=,ppid=,stat=,lstart=,command=',
   ]);
   return stdout
     .trim()
     .split('\n')
     .map((line) => {
-      const match = line.match(/^\s*(\d+)\s+(\d+)\s+(\S+)\s+(.*)$/u);
+      const match = line.match(/^\s*(\d+)\s+(\d+)\s+(\S+)\s+(.{24})\s+(.*)$/u);
       if (!match) return undefined;
       return {
-        command: match[4],
+        command: match[5],
         pid: Number(match[1]),
         ppid: Number(match[2]),
         state: match[3],
+        started: match[4],
       } satisfies ProcessRow;
     })
     .filter((row): row is ProcessRow => row !== undefined);
@@ -240,8 +268,30 @@ function descendants(rows: readonly ProcessRow[], rootPid: number) {
 
 async function liveCapturedRows(captured: readonly ProcessRow[]) {
   const rows = await readProcessTable();
-  const pids = new Set(captured.map((row) => row.pid));
-  return rows.filter((row) => pids.has(row.pid) && !row.state.startsWith('Z'));
+  const starts = new Map(captured.map((row) => [row.pid, row.started]));
+  return rows.filter(
+    (row) => starts.get(row.pid) === row.started && !row.state.startsWith('Z'),
+  );
+}
+
+async function captureCommand(managed: ManagedCommand, captured: ProcessRow[]) {
+  if (
+    managed.child.pid === undefined ||
+    managed.child.exitCode !== null ||
+    managed.child.signalCode !== null
+  )
+    return;
+  const observed = descendants(await readProcessTable(), managed.child.pid);
+  for (const row of observed) {
+    const index = captured.findIndex((previous) => previous.pid === row.pid);
+    if (index < 0) captured.push(row);
+    else captured[index] = row;
+  }
+}
+
+async function cleanupCommand(managed: ManagedCommand, captured: ProcessRow[]) {
+  await captureCommand(managed, captured);
+  await cleanupCaptured(captured);
 }
 
 async function waitForCapturedExit(captured: readonly ProcessRow[]) {
@@ -274,6 +324,7 @@ async function cleanupCaptured(captured: readonly ProcessRow[]) {
       // The test-owned process exited between observation and cleanup.
     }
   }
+  await waitForCapturedExit(captured);
 }
 
 function eventCount(output: string, event: string) {
@@ -318,13 +369,9 @@ describe.skipIf(process.platform === 'win32')(
         const managed = startStack(ports, {
           TEST_PRIVATE_VALUE: secret,
         });
-        let captured: ProcessRow[] = [];
+        const captured: ProcessRow[] = [];
         try {
-          await waitForOutput(managed, /"event":"BOOTSTRAP_READY"/u);
-          captured = descendants(
-            await readProcessTable(),
-            managed.child.pid ?? -1,
-          );
+          await waitForOutput(managed, /"event":"BOOTSTRAP_READY"/u, captured);
           expect(runtimeProcess(captured, 'world-web')).toBeDefined();
           expect(runtimeProcess(captured, 'world-api')).toBeDefined();
           expect(runtimeProcess(captured, 'world-worker')).toBeDefined();
@@ -355,7 +402,7 @@ describe.skipIf(process.platform === 'win32')(
           expect(managed.output()).toContain('"event":"BOOTSTRAP_STOPPED"');
           expect(managed.output()).toContain('"outcome":"SUCCESS"');
         } finally {
-          await cleanupCaptured(captured);
+          await cleanupCommand(managed, captured);
         }
       },
     );
@@ -416,7 +463,7 @@ describe.skipIf(process.platform === 'win32')(
           WORLD_WEB_HOST: '127.0.0.1',
           WORLD_WEB_PORT: String(ports.web),
         });
-        let captured: ProcessRow[] = [];
+        const captured: ProcessRow[] = [];
         try {
           await waitUntil(
             async () => {
@@ -428,7 +475,7 @@ describe.skipIf(process.platform === 'win32')(
             10_000,
             'web readiness',
           );
-          captured = descendants(await readProcessTable(), web.child.pid ?? -1);
+          await captureCommand(web, captured);
           const endpoint = `http://127.0.0.1:${ports.web}/__bootstrap/api-health`;
           const beforeOk = apiHits;
           const ok = await fetch(endpoint);
@@ -456,9 +503,10 @@ describe.skipIf(process.platform === 'win32')(
           expect((await fetch(endpoint, { method: 'POST' })).status).toBe(405);
           expect((await fetch(endpoint, { method: 'HEAD' })).status).toBe(503);
         } finally {
+          await captureCommand(web, captured);
           web.child.kill('SIGTERM');
           await waitForExit(web).catch(() => undefined);
-          await cleanupCaptured(captured);
+          await cleanupCommand(web, captured);
           await Promise.all([closeServer(api), closeServer(redirectTarget)]);
         }
       },
@@ -485,6 +533,81 @@ describe.skipIf(process.platform === 'win32')(
           10_000,
           'partial-start ports reusable',
         );
+      },
+    );
+
+    it(
+      'preserves exit/output and owned-process evidence when READY is never reached',
+      { timeout: 35_000 },
+      async () => {
+        const ports = await freePorts();
+        const managed = startStack(ports, {
+          ...preloadEnvironment(),
+          TEST_BOOTSTRAP_FAIL_SERVICE: 'worker',
+        });
+        const captured: ProcessRow[] = [];
+        try {
+          const failure: unknown = await waitForOutput(
+            managed,
+            /"event":"BOOTSTRAP_READY"/u,
+            captured,
+          ).catch((error: unknown) => error);
+          expect(failure).toBeInstanceOf(Error);
+          const message = (failure as Error).message;
+          expect(message).toContain(
+            'public command exited before expected output',
+          );
+          expect(message).toContain('"exitCode":1');
+          expect(message).toContain('"event":"BOOTSTRAP_STOPPED"');
+          expect(message).toContain('"failed_service":"world-worker"');
+          expect(message).not.toContain('timed out');
+          expect(captured.some((row) => row.pid === managed.child.pid)).toBe(
+            true,
+          );
+          expect(eventCount(managed.output(), 'BOOTSTRAP_READY')).toBe(0);
+        } finally {
+          await cleanupCommand(managed, captured);
+        }
+        expect(await liveCapturedRows(captured)).toEqual([]);
+        expect(await allPortsReusable(ports)).toBe(true);
+      },
+    );
+
+    it(
+      'cleans observed owned children after a pre-READY output timeout',
+      { timeout: 35_000 },
+      async () => {
+        const ports = await freePorts();
+        const managed = startStack(ports, {
+          ...preloadEnvironment(),
+          TEST_BOOTSTRAP_DELAY_MS: '5000',
+          TEST_BOOTSTRAP_DELAY_SERVICE: 'worker',
+        });
+        const captured: ProcessRow[] = [];
+        try {
+          await waitForOutput(
+            managed,
+            /"event":"LISTENING","service":"world-web"/u,
+            captured,
+          );
+          const failure: unknown = await waitForOutput(
+            managed,
+            /"event":"BOOTSTRAP_READY"/u,
+            captured,
+            100,
+          ).catch((error: unknown) => error);
+          expect(failure).toBeInstanceOf(Error);
+          expect((failure as Error).message).toContain('timed out');
+          expect((failure as Error).message).toContain(
+            '"event":"BOOTSTRAP_WAITING"',
+          );
+          expect(runtimeProcess(captured, 'world-web')).toBeDefined();
+          expect(eventCount(managed.output(), 'BOOTSTRAP_READY')).toBe(0);
+        } finally {
+          await cleanupCommand(managed, captured);
+        }
+        expect(await liveCapturedRows(captured)).toEqual([]);
+        expect(await allPortsReusable(ports)).toBe(true);
       },
     );
 
@@ -574,12 +697,12 @@ describe.skipIf(process.platform === 'win32')(
           TEST_BOOTSTRAP_DELAY_MS: '5000',
           TEST_BOOTSTRAP_DELAY_SERVICE: 'worker',
         });
-        let captured: ProcessRow[] = [];
+        const captured: ProcessRow[] = [];
         try {
-          await waitForOutput(managed, /"event":"BOOTSTRAP_WAITING"/u);
-          captured = descendants(
-            await readProcessTable(),
-            managed.child.pid ?? -1,
+          await waitForOutput(
+            managed,
+            /"event":"BOOTSTRAP_WAITING"/u,
+            captured,
           );
           const coordinator = captured.find((row) =>
             row.command.includes('scripts/run-development-stack.mjs'),
@@ -597,7 +720,7 @@ describe.skipIf(process.platform === 'win32')(
           expect(managed.output()).toContain('"outcome":"CANCELLED"');
           expect(await allPortsReusable(ports)).toBe(true);
         } finally {
-          await cleanupCaptured(captured);
+          await cleanupCommand(managed, captured);
         }
       },
     );
@@ -608,13 +731,9 @@ describe.skipIf(process.platform === 'win32')(
       async () => {
         const ports = await freePorts();
         const managed = startStack(ports);
-        let captured: ProcessRow[] = [];
+        const captured: ProcessRow[] = [];
         try {
-          await waitForOutput(managed, /"event":"BOOTSTRAP_READY"/u);
-          captured = descendants(
-            await readProcessTable(),
-            managed.child.pid ?? -1,
-          );
+          await waitForOutput(managed, /"event":"BOOTSTRAP_READY"/u, captured);
           const worker = runtimeProcess(captured, 'world-worker');
           if (!worker) throw new Error('worker runtime was not found');
           process.kill(worker.pid, 'SIGKILL');
@@ -626,7 +745,7 @@ describe.skipIf(process.platform === 'win32')(
           expect(managed.output()).toContain('"failed_service":"world-worker"');
           expect(await allPortsReusable(ports)).toBe(true);
         } finally {
-          await cleanupCaptured(captured);
+          await cleanupCommand(managed, captured);
         }
       },
     );
@@ -639,12 +758,12 @@ describe.skipIf(process.platform === 'win32')(
         const managed = startStack(ports, {
           WORLD_BOOTSTRAP_COMMIT_DELAY_MS: '500',
         });
-        let captured: ProcessRow[] = [];
+        const captured: ProcessRow[] = [];
         try {
-          await waitForOutput(managed, /"event":"BOOTSTRAP_READY_CANDIDATE"/u);
-          captured = descendants(
-            await readProcessTable(),
-            managed.child.pid ?? -1,
+          await waitForOutput(
+            managed,
+            /"event":"BOOTSTRAP_READY_CANDIDATE"/u,
+            captured,
           );
           const api = runtimeProcess(captured, 'world-api');
           if (!api) throw new Error('API runtime was not found');
@@ -656,7 +775,7 @@ describe.skipIf(process.platform === 'win32')(
           expect(managed.output()).toContain('"outcome":"FAILED"');
           expect(await allPortsReusable(ports)).toBe(true);
         } finally {
-          await cleanupCaptured(captured);
+          await cleanupCommand(managed, captured);
         }
       },
     );
@@ -669,14 +788,10 @@ describe.skipIf(process.platform === 'win32')(
         const managed = startStack(ports, {
           WORLD_BOOTSTRAP_CLEANUP_TIMEOUT_MS: '100',
         });
-        let captured: ProcessRow[] = [];
+        const captured: ProcessRow[] = [];
         let socket: Socket | undefined;
         try {
-          await waitForOutput(managed, /"event":"BOOTSTRAP_READY"/u);
-          captured = descendants(
-            await readProcessTable(),
-            managed.child.pid ?? -1,
-          );
+          await waitForOutput(managed, /"event":"BOOTSTRAP_READY"/u, captured);
           const coordinator = captured.find((row) =>
             row.command.includes('scripts/run-development-stack.mjs'),
           );
@@ -698,7 +813,7 @@ describe.skipIf(process.platform === 'win32')(
           expect(await allPortsReusable(ports)).toBe(true);
         } finally {
           socket?.destroy();
-          await cleanupCaptured(captured);
+          await cleanupCommand(managed, captured);
         }
       },
     );
