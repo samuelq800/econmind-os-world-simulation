@@ -1,0 +1,5 @@
+{
+  "extends": "../tsconfig.v09-preparation.json",
+  "compilerOptions": { "lib": ["ES2024", "DOM"] },
+  "include": ["d-revoked-receipt-head-lock-embedded.test.ts"]
+}
