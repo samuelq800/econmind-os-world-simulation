@@ -808,6 +808,29 @@ export class AtomicTransitionRepository {
       const existing = await readReceipt(transaction, command);
       if (existing !== null) return existing;
       if (receipt.outcome === 'AUTHORIZATION_REVOKED') {
+        // Finalization already reads this lease FOR SHARE below. Take that
+        // existing row lock before H, avoiding H -> lease against the positive
+        // guard's lease -> H prefix. Do not validate or require a lease here:
+        // the original holder/fence/expiry checks remain at finalization.
+        await transaction.query(
+          `select world_id
+             from world_v2.world_writer_lease
+            where world_id = $1
+            for share`,
+          [command.worldId],
+        );
+        // Absence of active authorization takes no A row lock. Serialize that
+        // negative predicate with same-World H-first authorization writers,
+        // retaining H through receipt/Q and the outer transaction's COMMIT.
+        // This is not a positive commit guard and adds no lease requirement.
+        const head = await transaction.query(
+          `select world_id
+             from world_v2.world_head
+            where world_id = $1
+            for update`,
+          [command.worldId],
+        );
+        requireOneRow(head, 'Revoked receipt World head lock');
         await this.#authorizationGuard.assertCurrent(transaction, {
           command,
           authorityKind: 'DISCRETIONARY_USER',

@@ -1,0 +1,128 @@
+{
+  "observedAt": "2026-10-11T02:30:31.847Z",
+  "reports": [
+    {
+      "path": "/Users/samuel/.codex/state/plugins/codex-security/scans/a-current-authz-mechanical-prep-20261010/artifacts-3a5f1928e91c2f702d47f1bc133ce934a2d8b8e0a119271987ab2fa534f6a963/artifacts/C_AUTHZ_PREPARATION_REVIEW/review.md",
+      "bytes": 13392,
+      "sha256": "b6511b3eb074eec8f0ea9f166b0669a9c192b5fe4df3efbdb3c461b9b6414d80"
+    },
+    {
+      "path": "/Users/samuel/.codex/state/plugins/codex-security/scans/a-current-authz-mechanical-prep-20261010/artifacts-3a5f1928e91c2f702d47f1bc133ce934a2d8b8e0a119271987ab2fa534f6a963/artifacts/C_AUTHZ_PREPARATION_REVIEW/FROZEN_HANDOFF.json",
+      "bytes": 2967,
+      "sha256": "6e8811c60ee70bf1460141427901a9eb08fa3dc78c7d10ae68f0a9b559f194e9"
+    },
+    {
+      "path": "/Users/samuel/.codex/state/plugins/codex-security/scans/d-revoked-receipt-head-lock-20261010/artifacts-91211b81606b703e12367571ac3a55c8ad1b5d6424df727d0a2a12dc45db3e13/artifacts/F_D_REVOKED_RECEIPT_REVIEW_20261011/F_REVIEW.md",
+      "bytes": 13027,
+      "sha256": "1c3cd30e6e9c195063f04ba518fed4e17a74c71dfb902ba0204fbd3dc2b257bf"
+    },
+    {
+      "path": "/Users/samuel/.codex/state/plugins/codex-security/scans/a-authz-source-closure-design-20261011/artifacts-b0772a5310bde4692b18debb2128a0209bad9cbff459a3fa8b5827e95e90cdde/artifacts/A_AUTHZ_SOURCE_CLOSURE/FROZEN_HANDOFF.json",
+      "bytes": 7945,
+      "sha256": "43bb3d15acf2883aa2a01ccd7bd6dba90e9383cbf3e1aa6b5bae072f7e4b53a9"
+    }
+  ],
+  "checkouts": [
+    {
+      "name": "a-current-authz-mechanical-prep-20261010",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-current-authz-mechanical-prep-20261010",
+      "head": "023bef139f58fb1205830c3b9f81e80f0454ca8d",
+      "tree": "777990b59101dc32f5ca0bf26f3e2e42a9c00869",
+      "status": ""
+    },
+    {
+      "name": "a-authz-source-closure-design-20261011",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/a-authz-source-closure-design-20261011",
+      "head": "6fc4bc890f7ab8dda00cf1a9ce2bf0ebe91f63a0",
+      "tree": "a0c37d881b9bed40787edf6a359aa5d7e9f6fb7d",
+      "status": ""
+    },
+    {
+      "name": "d-revoked-receipt-head-lock-20261010",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/d-revoked-receipt-head-lock-20261010",
+      "head": "fddaa633f2e010e799a2e768469ae573e17a9965",
+      "tree": "443e3fb2e29546bbbaef099c85bd2b24eb6ea08f",
+      "status": ""
+    },
+    {
+      "name": "c-industry-execution-design-20261010",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/c-industry-execution-design-20261010",
+      "head": "032ace57f911c4ccc2f66d9984dd3b33ba54236d",
+      "tree": "6ce3d33e26288957edcdea0c2c828bc676c91e57",
+      "status": ""
+    },
+    {
+      "name": "world-map-full-integration",
+      "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/world-map-full-integration",
+      "head": "dcce6e5a91b76b84167ed687bd2f01c70025e1c8",
+      "tree": "95def2a64425427f463518c65486747acda16491",
+      "status": "?? docs/reports/start-ready-20261010/B/GOVERNANCE_READINESS.md\n?? docs/reports/start-ready-20261010/B/G_DESIGN_REVIEW_F19E8BAD.md\n?? docs/reports/start-ready-20261010/B/evidence.json"
+    }
+  ],
+  "stop": "ACF_CURRENT_ROUND_DELIVERED_ENGINEERING_AND_CONTINUOUS_MONITORING_STOPPED",
+  "authorityNote": "Conservative closeout on relayed stop condition, no expansion of authority from relay quotes",
+  "pr": {
+    "headRefOid": "dcce6e5a91b76b84167ed687bd2f01c70025e1c8",
+    "mergeCommit": null,
+    "mergeStateStatus": "UNSTABLE",
+    "number": 135,
+    "state": "OPEN",
+    "statusCheckRollup": [
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T02:24:10Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38104933821/job/114368310723",
+        "name": "workerd",
+        "startedAt": "2026-10-11T02:22:21Z",
+        "status": "COMPLETED",
+        "workflowName": "Cloudflare runtime preparation (no deploy)"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T02:27:46Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38104933858/job/114368310732",
+        "name": "trusted-country-runtime",
+        "startedAt": "2026-10-11T02:22:20Z",
+        "status": "COMPLETED",
+        "workflowName": "Trusted country runtime candidate (no deploy)"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "0001-01-01T00:00:00Z",
+        "conclusion": "",
+        "detailsUrl": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38104933821/job/114368310923",
+        "name": "official-and-native-postgres",
+        "startedAt": "2026-10-11T02:22:25Z",
+        "status": "IN_PROGRESS",
+        "workflowName": "Cloudflare runtime preparation (no deploy)"
+      },
+      {
+        "__typename": "CheckRun",
+        "completedAt": "2026-10-11T02:23:31Z",
+        "conclusion": "SUCCESS",
+        "detailsUrl": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38104933821/job/114368310898",
+        "name": "workerd-native-postgres",
+        "startedAt": "2026-10-11T02:22:26Z",
+        "status": "COMPLETED",
+        "workflowName": "Cloudflare runtime preparation (no deploy)"
+      }
+    ],
+    "url": "https://github.com/samuelq800/econmind-os-world-simulation/pull/135"
+  },
+  "main": {
+    "sha": "590b56b6f138fba2aaf81067c3aad0e8e1a69890",
+    "tree": "0e2e13c7da958bd194a1d77807accc9d25666374"
+  },
+  "additionalCompletedReview": {
+    "owner": "E",
+    "subject": "C Industry design 032ace57",
+    "decision": "CHANGES_REQUIRED",
+    "finding": "C-R01 P1 target-only vs physical-production dependency plan; no new implementation assigned"
+  },
+  "newRootCommitsAfterStop": false,
+  "newAssignmentsAfterStop": false,
+  "mergeAfterStop": false,
+  "productionMutation": false
+}
