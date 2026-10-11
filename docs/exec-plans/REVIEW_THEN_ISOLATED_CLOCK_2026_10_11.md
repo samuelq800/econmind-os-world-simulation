@@ -31,9 +31,21 @@ publication, World/consumer/Clock activation or unrelated map/branch programme.
   identity/old target and manual clock compatibility from operating facts/
   production schedule; meaningful pure parser/Event/replay first slice.
   E is the original delta reviewer; no T1 implementation in this stage.
+  E final C-R01/P1 CLOSED, revised design/partition APPROVED (DESIGN_ONLY),
+  13 identity/preservation checks PASS; no repeat of old24/10 source matrix.
+  Root unchanged cherry-picks0f8df0d/b20514d/64ab039. Final managed report
+  SHA25648416c5bede4605cf0c5bc42c3d4f8e8b47574ea0af5ebc5b722b9bc1591cd55;
+  original CHANGES_REQUIRED and final delta approval retained in O presentations.
 - B independently reviews A source-closure proposed document6fc4bc8;
   A owns any necessary precise design correction. Review cannot create a
   trust root, appoint a user, register a source or turn a proposal into live ACL.
+  Final B result: DESIGN_DIRECTION_ACCEPTED_FOR_N02_ONLY, no new roadmap
+  BLOCKER/MAJOR. N02 consumer/cutoff outcome matrix, versioned dual-country/
+  SIGN_OFFICE_APPROVAL compatibility, and accepted-source/UNKNOWN contract
+  remain future work, not implementation approval. Source document is unchanged
+  at root cherry-pick2c2459f. Managed review SHA256
+  `3d77f1c325ca049e2d34bcc61aaeea781a34399275152fc996c3857dd1a59d1b`;
+  repository presentation `O/B_AUTHZ_SOURCE_DESIGN_REVIEW.md` retains that scope.
 - Integrate only final approved fixed candidates, one composed check/CI point.
   Retain all original CHANGES_REQUIRED/failures; no gate/status promotion.
 
