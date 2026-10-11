@@ -1,0 +1,126 @@
+{
+  "head": "52d3fe621cc9e9f05fc736dda0f1a2281f15ba49",
+  "allEqual": true,
+  "count": 17,
+  "files": [
+    {
+      "path": "apps/world-api/src/runtime-preparation/cloudflare-postgres-pools.ts",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "f9dd47772184cded29d1638b7a9416297a100a32933e846f0049f7a1462ea86b",
+      "actualSha256": "f9dd47772184cded29d1638b7a9416297a100a32933e846f0049f7a1462ea86b",
+      "equal": true
+    },
+    {
+      "path": "apps/world-api/src/runtime-preparation/executor-request-resources.ts",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "848596f72f72b622c7f8e35f48e299c1024344b6b1171e537e71b5d57fe716fd",
+      "actualSha256": "848596f72f72b622c7f8e35f48e299c1024344b6b1171e537e71b5d57fe716fd",
+      "equal": true
+    },
+    {
+      "path": "apps/world-api/src/runtime-preparation/internal-executor-command-handler.ts",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "5d41078905009930d282cfac77879f09d5d89f304446c847debd488cbc2ba214",
+      "actualSha256": "5d41078905009930d282cfac77879f09d5d89f304446c847debd488cbc2ba214",
+      "equal": true
+    },
+    {
+      "path": "apps/world-api/src/runtime-preparation/source-owned-executor-composition.ts",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "f9c442250009979a5de47879f62f58ee31980032251d6cc668458badadca485a",
+      "actualSha256": "f9c442250009979a5de47879f62f58ee31980032251d6cc668458badadca485a",
+      "equal": true
+    },
+    {
+      "path": "apps/world-worker/package.json",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "4147d670ea0a6a459f9a330bdc7142c1926359caa9611571dba7de6a2375d953",
+      "actualSha256": "4147d670ea0a6a459f9a330bdc7142c1926359caa9611571dba7de6a2375d953",
+      "equal": true
+    },
+    {
+      "path": "apps/world-worker/src/intake/manual-office-intake-runtime.ts",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "7443597edf7761be70dc0b10677167057cf83c0832c07f8b27f231f165b1a9e2",
+      "actualSha256": "7443597edf7761be70dc0b10677167057cf83c0832c07f8b27f231f165b1a9e2",
+      "equal": true
+    },
+    {
+      "path": "apps/world-worker/src/runtime-preparation/private-command-request-registry.ts",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "3f58f1296f5112398e9d2fe84137e441b941e75e063ee13ff2a1dfc00b07bf5a",
+      "actualSha256": "3f58f1296f5112398e9d2fe84137e441b941e75e063ee13ff2a1dfc00b07bf5a",
+      "equal": true
+    },
+    {
+      "path": "apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "060c2bedb73bca78074134593cb0bf317da314715b9f81ece356a63bc9c1f386",
+      "actualSha256": "060c2bedb73bca78074134593cb0bf317da314715b9f81ece356a63bc9c1f386",
+      "equal": true
+    },
+    {
+      "path": "apps/world-worker/src/runtime-preparation/production-world-command-host.ts",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "c5e85d65530266099a6d898581cbf1c1648507d307823cea340c254888e43e43",
+      "actualSha256": "c5e85d65530266099a6d898581cbf1c1648507d307823cea340c254888e43e43",
+      "equal": true
+    },
+    {
+      "path": "tests/world-api/G-completion-drain.test.ts",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "2b9ab2a0ce9a97ddd916fe14f4d3bd3d152714c67911c576a5a2aaafe87d9087",
+      "actualSha256": "2b9ab2a0ce9a97ddd916fe14f4d3bd3d152714c67911c576a5a2aaafe87d9087",
+      "equal": true
+    },
+    {
+      "path": "tests/world-api/G-constructor-3a.test.ts",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "27bcbae2b84ba9ca42fecd7e06f4ed643e41e0de533b3e548744c9635e6a1ca7",
+      "actualSha256": "27bcbae2b84ba9ca42fecd7e06f4ed643e41e0de533b3e548744c9635e6a1ca7",
+      "equal": true
+    },
+    {
+      "path": "tests/world-api/G-source-pool-delta.test.ts",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "6483d9cfc07d82e071c1861731da27212b7431aded3e6ed30e27031eeb6f900e",
+      "actualSha256": "6483d9cfc07d82e071c1861731da27212b7431aded3e6ed30e27031eeb6f900e",
+      "equal": true
+    },
+    {
+      "path": "tests/world-api/tsconfig.G-constructor-3a.json",
+      "tip": "45ff2dd37504c111312b2dc708c599af31c07482",
+      "expectedSha256": "e5bbe5f49227a38ac468825762e4f517edfac80e71cba82c628d915f885de034",
+      "actualSha256": "e5bbe5f49227a38ac468825762e4f517edfac80e71cba82c628d915f885de034",
+      "equal": true
+    },
+    {
+      "path": "apps/world-worker/src/persistence/narrow-transfer-approval-store.ts",
+      "tip": "bdbc1c7c5f1d79c6c7ebc1707a9ba75f4ee93d85",
+      "expectedSha256": "5e11605ee9e36281cdcb40ff8dbb9dfefbded0b88e1977b5638d0aa551f89edb",
+      "actualSha256": "5e11605ee9e36281cdcb40ff8dbb9dfefbded0b88e1977b5638d0aa551f89edb",
+      "equal": true
+    },
+    {
+      "path": "tests/support/b-narrow-approval-lock-native.ts",
+      "tip": "bdbc1c7c5f1d79c6c7ebc1707a9ba75f4ee93d85",
+      "expectedSha256": "77bfef877ba884e43d6593d38caa81eda2b899f1c73bafc3eeaa2aa663ee66d8",
+      "actualSha256": "77bfef877ba884e43d6593d38caa81eda2b899f1c73bafc3eeaa2aa663ee66d8",
+      "equal": true
+    },
+    {
+      "path": "tests/world-core/narrow-approval-lock-order-native.test.ts",
+      "tip": "bdbc1c7c5f1d79c6c7ebc1707a9ba75f4ee93d85",
+      "expectedSha256": "2c7d96b75dde36b7d27dd0735c353f5bbb4e84aba2bbb66600653280957cb103",
+      "actualSha256": "2c7d96b75dde36b7d27dd0735c353f5bbb4e84aba2bbb66600653280957cb103",
+      "equal": true
+    },
+    {
+      "path": "tests/world-core/tsconfig.b-approval-lock-order.json",
+      "tip": "bdbc1c7c5f1d79c6c7ebc1707a9ba75f4ee93d85",
+      "expectedSha256": "bc10b0ceafd6b9cce443283b5ba59c7a25d9c85548927de8a29a02063ffa2208",
+      "actualSha256": "bc10b0ceafd6b9cce443283b5ba59c7a25d9c85548927de8a29a02063ffa2208",
+      "equal": true
+    }
+  ]
+}
