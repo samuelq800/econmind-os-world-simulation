@@ -1,0 +1,259 @@
+{
+  "schema_version": "B_APPROVAL_LOCK_ORDER_EVIDENCE_V1",
+  "disposition": "IMPLEMENTED_UNVERIFIED",
+  "base": {
+    "commit": "eb033a4d9e717a9cb9149e450900b606c3457403",
+    "tree": "13a60f04c1a9c54eb8ffbaca8b469bf25b293dce"
+  },
+  "code": {
+    "commit": "97ab122d4da146ea20d8d57dac4fd896992b5cec",
+    "tree": "95cac687e1b9a4a1deab0e42bbbee1483dcb6634"
+  },
+  "branch": "codex/b-approval-lock-order-20261010",
+  "source_review": {
+    "path": "/Users/samuel/.codex/state/plugins/codex-security/scans/o-owner-inputs-exact-20261010/artifacts-7c60b5ca12d34d85296a0b822c3e569cfac7d802a7e835c3a45003f825d27f98/artifacts/C_CURRENT_AUTHORIZATION_WRITER_DESIGN_REVIEW/review.md",
+    "sha256": "3555d9102ef51428645f798990e816de6391c78aa09012f1c13448e9713e6550"
+  },
+  "bindings": [
+    {
+      "sha256": "5e11605ee9e36281cdcb40ff8dbb9dfefbded0b88e1977b5638d0aa551f89edb",
+      "path": "apps/world-worker/src/persistence/narrow-transfer-approval-store.ts"
+    },
+    {
+      "sha256": "77bfef877ba884e43d6593d38caa81eda2b899f1c73bafc3eeaa2aa663ee66d8",
+      "path": "tests/support/b-narrow-approval-lock-native.ts"
+    },
+    {
+      "sha256": "2c7d96b75dde36b7d27dd0735c353f5bbb4e84aba2bbb66600653280957cb103",
+      "path": "tests/world-core/narrow-approval-lock-order-native.test.ts"
+    },
+    {
+      "sha256": "bc10b0ceafd6b9cce443283b5ba59c7a25d9c85548927de8a29a02063ffa2208",
+      "path": "tests/world-core/tsconfig.b-approval-lock-order.json"
+    },
+    {
+      "sha256": "8e5bc960c5a084919d4dfbf2d4ee7a43623afd773589a0bbb0d451599421420b",
+      "path": "apps/world-worker/src/intake/postgres-narrow-transfer-intake.ts"
+    },
+    {
+      "sha256": "9f3db3c8fc7a243dca2195e13cd3c46573df19d7294eae1574408c9432fb9eaf",
+      "path": "apps/world-worker/src/persistence/atomic-transition-repository.ts"
+    },
+    {
+      "sha256": "0035e731002e4815bd108eb49d34457c2338db2b69f234a6c53d711024e30b49",
+      "path": "apps/world-worker/src/preparation/local-narrow-reservation-worker.ts"
+    },
+    {
+      "sha256": "015b7afa87dd74a38330fad963d48a90eb3532e8f59da38979a2759fe713e6c3",
+      "path": "apps/world-worker/src/persistence/durable-v08-ledger-lineage-reader.ts"
+    },
+    {
+      "sha256": "e675bd8bd18ba6c51aeffa674320dba3ac79299b7e12eeef834fe28547f9025e",
+      "path": "database/migrations/manifest.json"
+    },
+    {
+      "sha256": "5c3ca3965ad6de94fb3f7164edb04f5209f37f1ab33a10cc9ff70c2146ecb3d0",
+      "path": "database/migrations/artifacts/0015_world_v2_narrow_transfer_approvals.sql"
+    },
+    {
+      "sha256": "9949281bcccc0d4d2d422a3579a93f39074882607678c6db92e2326814417781",
+      "path": "database/migrations/artifacts/0017_world_v2_narrow_transfer_approval_reference.sql"
+    },
+    {
+      "sha256": "c1ceebbf6265b54c67230d550f438e1b197415c42b3921cc358cf247482b4ef1",
+      "path": "database/migrations/artifacts/0022_world_v2_snapshot_storage_veto.sql"
+    },
+    {
+      "sha256": "0e1ec372429164acb94f9b9588beac75fbf984f5a41413af13715e28a4e94a36",
+      "path": "database/migrations/artifacts/0023_world_v2_production_consumption_posting.sql"
+    },
+    {
+      "sha256": "6e3b4ab19530cae747c3cd1e06754b9728379b01114b2dc838673ca5bcf5e2d8",
+      "path": "-"
+    }
+  ],
+  "toolchain": {
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "postgres": "16.15 (Homebrew), aarch64-apple-darwin25.6.0",
+    "cluster": "owned mkdtemp private Unix socket / TCP disabled / no ambient DSN",
+    "isolation": "READ COMMITTED",
+    "test_only_nonadmin_roles": [
+      "b_test_only_approval",
+      "b_test_only_auth_writer"
+    ],
+    "all_manifest_migrations_applied": 23,
+    "production_acl_validation": "NOT_RUN"
+  },
+  "final_tests": [
+    {
+      "command": "env -i PATH=/private/tmp/econmind-a-lifecycle-tools.d1oXAR:/opt/homebrew/bin:/usr/bin:/bin ECONMIND_ENV=local B_APPROVAL_LOCK_NATIVE=1 /Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node node_modules/vitest/vitest.mjs run tests/world-core/narrow-approval-lock-order-native.test.ts",
+      "exit_code": 0,
+      "files": 1,
+      "passed": 16,
+      "failed": 0,
+      "reported_start_at": "22:56:39",
+      "duration_seconds": 5.64,
+      "source_shaped_old_control": "one 40P01; direct source-shaped SQL, NOT execution of old API",
+      "actual_new_api_competition": "six entry/frontier variants x two commit orders; pg_blocking_pids observation",
+      "not_real_writer_source_proof": true
+    },
+    {
+      "command": "env PATH=/private/tmp/econmind-a-lifecycle-tools.d1oXAR:$PATH pnpm exec vitest run tests/world-core/v10-narrow-transfer-approval-store.test.ts tests/world-core/durable-command-consumption.test.ts tests/architecture/boundaries.test.ts tests/architecture/foundation-gates.test.ts tests/architecture/foundation-ci-gate.test.ts tests/architecture/v01-governance.test.ts",
+      "exit_code": 0,
+      "files": 6,
+      "passed": 100,
+      "failed": 0,
+      "reported_start_at": "22:57:12",
+      "duration_seconds": 16.93,
+      "native": false
+    },
+    {
+      "command": "env PATH=/private/tmp/econmind-a-lifecycle-tools.d1oXAR:$PATH pnpm exec vitest run tests/integration/staged-narrow-transfer-http.test.ts",
+      "exit_code": 0,
+      "files": 1,
+      "passed": 20,
+      "failed": 0,
+      "reported_start_at": "22:57:27",
+      "duration_seconds": 5.26,
+      "native": false,
+      "engine": "PGlite / real local HTTP"
+    }
+  ],
+  "final_checks": [
+    {
+      "id": "worker_strict",
+      "command": "env PATH=/private/tmp/econmind-a-lifecycle-tools.d1oXAR:$PATH pnpm exec tsc -p apps/world-worker/tsconfig.json",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "new_tests_strict",
+      "command": "env PATH=/private/tmp/econmind-a-lifecycle-tools.d1oXAR:$PATH pnpm exec tsc -p tests/world-core/tsconfig.b-approval-lock-order.json",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "focused_lint",
+      "command": "env PATH=/private/tmp/econmind-a-lifecycle-tools.d1oXAR:$PATH pnpm exec eslint apps/world-worker/src/persistence/narrow-transfer-approval-store.ts tests/support/b-narrow-approval-lock-native.ts tests/world-core/narrow-approval-lock-order-native.test.ts",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "id": "secrets",
+      "command": "/Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node scripts/check-repository-secrets.mjs",
+      "exit_code": 0,
+      "output": "{\n  \"status\": \"PASS\",\n  \"scannedFiles\": 2459\n}\n"
+    },
+    {
+      "id": "safe_environment",
+      "command": "env -i PATH=/private/tmp/econmind-a-lifecycle-tools.d1oXAR:/usr/bin:/bin ECONMIND_ENV=local /Users/samuel/.cache/npm/_npx/460b723c8ad28bd7/node_modules/node/bin/node scripts/assert-safe-environment.mjs",
+      "exit_code": 0,
+      "output": "{\n  \"status\": \"PASS\",\n  \"environment\": \"local\",\n  \"databaseConfigured\": false,\n  \"validatedViteModes\": [\n    \"development\",\n    \"production\"\n  ],\n  \"linkedSupabaseProject\": \"NOT_LINKED\",\n  \"databaseMutationAllowed\": false\n}\n"
+    }
+  ],
+  "other_actual_checks": [
+    {
+      "command": "pnpm --filter @econmind/core build (pinned PATH)",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm --filter @econmind/world-worker build (pinned PATH)",
+      "exit_code": 0
+    },
+    {
+      "command": "pnpm exec prettier --check [the four code candidate files] (pinned PATH)",
+      "exit_code": 0
+    },
+    {
+      "command": "node scripts/check-boundaries.mjs (pinned Node)",
+      "exit_code": 0,
+      "result": {
+        "status": "PASS",
+        "scannedFiles": 334
+      }
+    },
+    {
+      "command": "node scripts/check-authoritative-patterns.mjs (pinned Node)",
+      "exit_code": 0,
+      "result": {
+        "status": "PASS",
+        "scannedCoreFiles": 91,
+        "scannedFiles": 329,
+        "violations": []
+      }
+    },
+    {
+      "command": "node scripts/validate-migrations.mjs (pinned Node)",
+      "exit_code": 0,
+      "result": {
+        "status": "PASS",
+        "migrations": 23,
+        "violations": []
+      }
+    },
+    {
+      "command": "node scripts/foundation-gate-policy.mjs (pinned Node)",
+      "exit_code": 0,
+      "result": {
+        "status": "PASS",
+        "violations": []
+      }
+    },
+    {
+      "command": "git diff --check; git diff --cached --check",
+      "exit_code": 0
+    },
+    {
+      "command": "ps -axo comm,args | awk '$1 ~ /postgres$/ && $0 ~ /b-approval-lock-/ { print }'",
+      "exit_code": 0,
+      "output": "",
+      "meaning": "no owned native server remains after native fixture cleanup"
+    }
+  ],
+  "first_failures_preserved": [
+    {
+      "check": "first native draft",
+      "reported_start_at": "22:53:45",
+      "exit_code": 1,
+      "passed": 12,
+      "failed": 2,
+      "total": 14,
+      "errors": [
+        "bind approval-first expected ok:true but actual ok:false",
+        "permission denied for table narrow_transfer_approval_reference (SQLSTATE 42501), product read FOR UPDATE"
+      ],
+      "cause": "test-only nonadmin fixture lacked reference column UPDATE privilege required for its existing row-lock query",
+      "resolution": "test-only UPDATE(approval_ref) grant in own disposable fixture; production DDL/ACL unchanged",
+      "also_changed_before_final": "consumer H FOR UPDATE changed to FOR SHARE after caller-frontier inspection; two bounded controls added"
+    },
+    {
+      "check": "first new-test strict invocation",
+      "result": "FAIL diagnostics",
+      "diagnostic": "TS2345 at four call sites: Promise<void> | Promise<NarrowTransferApprovalReference> not assignable to Promise<void>",
+      "wrapper_exit_code": 0,
+      "warning": "first shell invocation chained eslint, so wrapper exit0 was NOT interpreted as strict PASS; individual tsc exit was not separately captured",
+      "resolution": "call helper explicitly returns Promise<unknown>; standalone strict rerun exit0; no skipLibCheck relaxation"
+    },
+    {
+      "check": "initial existing approval regression",
+      "exit_code": 0,
+      "files": 1,
+      "passed": 13,
+      "failed": 0,
+      "reported_start_at": "22:53:46",
+      "note": "intermediate result, not added to final totals"
+    }
+  ],
+  "not_run": [
+    "full suite / full check / 420",
+    "provider CI",
+    "A actual source writer integration or registered source positive",
+    "actual upstream cutoff/expiry fence",
+    "actual deployment role/catalog/ACL proof",
+    "D zero-effect compatibility retest",
+    "formal opening/runtime admission",
+    "production / deployment / push / merge / gate or status promotion",
+    "execution of immutable old API as native control"
+  ]
+}
