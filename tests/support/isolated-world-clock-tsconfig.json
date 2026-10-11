@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"]
+  },
+  "include": [
+    "../../apps/world-worker/src/time/*.ts",
+    "isolated-world-clock-*.ts",
+    "../world-core/durable-world-clock*.test.ts"
+  ]
+}
