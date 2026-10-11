@@ -26,6 +26,8 @@ interface StackPorts {
 
 interface ManagedCommand {
   readonly child: ChildProcess;
+  readonly closed: Promise<void>;
+  readonly isClosed: () => boolean;
   readonly exited: Promise<{
     code: number | null;
     signal: NodeJS.Signals | null;
@@ -54,12 +56,17 @@ function startCommand(
   script: 'dev' | 'dev:web',
   environment: NodeJS.ProcessEnv,
 ): ManagedCommand {
-  const child = spawn('pnpm', [script], {
-    cwd: repositoryRoot,
-    env: { ...process.env, ...environment },
-    shell: false,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
+  return observeCommand(
+    spawn('pnpm', [script], {
+      cwd: repositoryRoot,
+      env: { ...process.env, ...environment },
+      shell: false,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }),
+  );
+}
+
+function observeCommand(child: ChildProcess): ManagedCommand {
   let output = '';
   child.stdout?.on('data', (chunk: Buffer) => {
     output += chunk.toString();
@@ -72,10 +79,39 @@ function startCommand(
     signal: NodeJS.Signals | null;
   }>((resolve, reject) => {
     child.once('error', reject);
-    // close follows exit and drains both captured output streams.
-    child.once('close', (code, signal) => resolve({ code, signal }));
+    child.once('exit', (code, signal) => resolve({ code, signal }));
   });
-  return { child, exited, output: () => output };
+  // Observers can be checking output before they await the exit promise.
+  void exited.catch(() => undefined);
+  let closed = false;
+  const drained = new Promise<void>((resolve) => {
+    child.once('close', () => {
+      closed = true;
+      resolve();
+    });
+  });
+  return {
+    child,
+    exited,
+    closed: drained,
+    isClosed: () => closed,
+    output: () => output,
+  };
+}
+
+async function drainBefore(managed: ManagedCommand, deadline: number) {
+  if (managed.isClosed()) return true;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      managed.closed.then(() => true),
+      new Promise<false>((resolve) => {
+        timer = setTimeout(resolve, Math.max(0, deadline - Date.now()), false);
+      }),
+    ]);
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+  }
 }
 
 function stackEnvironment(
@@ -135,6 +171,7 @@ async function waitForOutput(
   timeoutMs = 30_000,
 ) {
   const deadline = Date.now() + timeoutMs;
+  let drain: 'not-attempted' | 'complete' | 'timed-out' = 'not-attempted';
   try {
     while (Date.now() < deadline) {
       // Observe ownership before READY: failures must not leave captured=[].
@@ -144,7 +181,9 @@ async function waitForOutput(
         managed.child.exitCode !== null ||
         managed.child.signalCode !== null
       ) {
-        await managed.exited;
+        drain = (await drainBefore(managed, deadline))
+          ? 'complete'
+          : 'timed-out';
         throw new Error('public command exited before expected output');
       }
       await new Promise((resolve) => setTimeout(resolve, 25));
@@ -153,7 +192,7 @@ async function waitForOutput(
   } catch (error) {
     throw new Error(
       `output matching ${String(pattern)}: ${error instanceof Error ? error.message : 'failed'}\n` +
-        `child=${JSON.stringify({ pid: managed.child.pid, exitCode: managed.child.exitCode, signalCode: managed.child.signalCode })}\n` +
+        `child=${JSON.stringify({ pid: managed.child.pid, exitCode: managed.child.exitCode, signalCode: managed.child.signalCode, drain })}\n` +
         `owned=${JSON.stringify(captured)}\noutput:\n${managed.output()}`,
       { cause: error },
     );
@@ -161,9 +200,10 @@ async function waitForOutput(
 }
 
 async function waitForExit(managed: ManagedCommand, timeoutMs = 20_000) {
+  const deadline = Date.now() + timeoutMs;
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
-    return await Promise.race([
+    const exit = await Promise.race([
       managed.exited,
       new Promise<never>((_, reject) => {
         timer = setTimeout(
@@ -172,6 +212,12 @@ async function waitForExit(managed: ManagedCommand, timeoutMs = 20_000) {
         );
       }),
     ]);
+    if (!(await drainBefore(managed, deadline))) {
+      throw new Error(
+        `public command exited ${JSON.stringify(exit)}; output drain timed out\n${managed.output()}`,
+      );
+    }
+    return exit;
   } finally {
     if (timer !== undefined) clearTimeout(timer);
   }
@@ -294,6 +340,24 @@ async function cleanupCommand(managed: ManagedCommand, captured: ProcessRow[]) {
   await cleanupCaptured(captured);
 }
 
+async function preserveCleanupFailure(
+  primary: unknown,
+  cleanup: () => Promise<void>,
+) {
+  try {
+    await cleanup();
+  } catch (error) {
+    if (primary !== undefined) {
+      throw new AggregateError(
+        [primary, error],
+        `original failure: ${primary instanceof Error ? primary.message : String(primary)}; cleanup failure: ${error instanceof Error ? error.message : String(error)}`,
+        { cause: error },
+      );
+    }
+    throw error;
+  }
+}
+
 async function waitForCapturedExit(captured: readonly ProcessRow[]) {
   await waitUntil(
     async () => (await liveCapturedRows(captured)).length === 0,
@@ -361,6 +425,218 @@ describe.skipIf(process.platform === 'win32')(
   'V00.3 unified bootstrap public boundary',
   () => {
     it(
+      'bounds drain after parent exit while an owned child retains the pipe',
+      { timeout: 10_000 },
+      async () => {
+        const managed = observeCommand(
+          spawn(
+            process.execPath,
+            [
+              path.join(
+                repositoryRoot,
+                'docs/reports/start-ready-20261011/C/bootstrap-lifecycle/control-output-pipe.mjs',
+              ),
+              'held-pipe',
+            ],
+            {
+              cwd: repositoryRoot,
+              env: process.env,
+              shell: false,
+              stdio: ['ignore', 'pipe', 'pipe'],
+            },
+          ),
+        );
+        const captured: ProcessRow[] = [];
+        let primaryFailure: unknown;
+        try {
+          await waitForOutput(managed, /CONTROL_CHILD_READY/u, captured);
+          await waitUntil(
+            () => managed.child.exitCode === 1,
+            2_000,
+            'control parent exit',
+          );
+          expect(managed.isClosed()).toBe(false);
+          const started = Date.now();
+          const failure: unknown = await waitForOutput(
+            managed,
+            /NEVER_READY/u,
+            captured,
+            100,
+          ).catch((error: unknown) => error);
+          expect(Date.now() - started).toBeLessThan(1_500);
+          expect(failure).toBeInstanceOf(Error);
+          expect((failure as Error).message).toContain(
+            'public command exited before expected output',
+          );
+          expect((failure as Error).message).toContain('"exitCode":1');
+          expect((failure as Error).message).toContain('"drain":"timed-out"');
+          expect((failure as Error).message).toContain('CONTROL_PARENT_EXIT');
+          expect(managed.isClosed()).toBe(false);
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
+        } finally {
+          await preserveCleanupFailure(primaryFailure, () =>
+            cleanupCommand(managed, captured),
+          );
+        }
+        expect(await liveCapturedRows(captured)).toEqual([]);
+      },
+    );
+
+    it(
+      'retains complete stdout/stderr for an ordinary fast exit',
+      { timeout: 5_000 },
+      async () => {
+        const managed = observeCommand(
+          spawn(
+            process.execPath,
+            [
+              path.join(
+                repositoryRoot,
+                'docs/reports/start-ready-20261011/C/bootstrap-lifecycle/control-output-pipe.mjs',
+              ),
+              'fast-exit',
+            ],
+            {
+              cwd: repositoryRoot,
+              env: process.env,
+              shell: false,
+              stdio: ['ignore', 'pipe', 'pipe'],
+            },
+          ),
+        );
+        const captured: ProcessRow[] = [];
+        let primaryFailure: unknown;
+        try {
+          const failure: unknown = await waitForOutput(
+            managed,
+            /NEVER_READY/u,
+            captured,
+            1_000,
+          ).catch((error: unknown) => error);
+          expect(failure).toBeInstanceOf(Error);
+          expect((failure as Error).message).toContain('"exitCode":1');
+          expect((failure as Error).message).toContain('"drain":"complete"');
+          expect((failure as Error).message).toContain('CONTROL_FINAL_STDOUT');
+          expect((failure as Error).message).toContain('CONTROL_FINAL_STDERR');
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
+        } finally {
+          await preserveCleanupFailure(primaryFailure, () =>
+            cleanupCommand(managed, captured),
+          );
+        }
+      },
+    );
+
+    it.each(['held-pipe', 'fast-exit', 'run-timeout'] as const)(
+      'finalizes wrapper evidence independently of close: %s',
+      { timeout: 10_000 },
+      async (mode) => {
+        const label = `pipe-wrapper-${mode}-${process.pid}`;
+        const managed = observeCommand(
+          spawn(
+            process.execPath,
+            [
+              path.join(
+                repositoryRoot,
+                'docs/reports/start-ready-20261011/C/bootstrap-lifecycle/run-focused.mjs',
+              ),
+              label,
+              `--control-${mode}`,
+            ],
+            {
+              cwd: repositoryRoot,
+              env: process.env,
+              shell: false,
+              stdio: ['ignore', 'pipe', 'pipe'],
+            },
+          ),
+        );
+        const captured: ProcessRow[] = [];
+        let primaryFailure: unknown;
+        try {
+          await waitForOutput(managed, /CONTROL_/u, captured);
+          const started = Date.now();
+          const exit = await waitForExit(managed, 3_000);
+          expect(Date.now() - started).toBeLessThan(2_500);
+          expect(exit.code).toBe(1); // The original failure never becomes success.
+          const evidence = JSON.parse(
+            await readFile(
+              path.join(
+                repositoryRoot,
+                `artifacts/c-bootstrap-lifecycle/${label}.processes.json`,
+              ),
+              'utf8',
+            ),
+          ) as {
+            exit: { code: number | null; signal: string | null };
+            timedOut: boolean;
+            drainTimedOut: boolean;
+            cleanupTimedOut: boolean;
+            closedBeforeFinalization: boolean;
+            cleanupSignals: { signal: string }[];
+            remainingAfterFallback: unknown[];
+            errors: unknown[];
+          };
+          expect(evidence.timedOut).toBe(mode === 'run-timeout');
+          if (mode === 'run-timeout') {
+            expect(evidence.exit).toEqual({ code: null, signal: 'SIGKILL' });
+          } else expect(evidence.exit.code).toBe(1);
+          expect(evidence.cleanupTimedOut).toBe(false);
+          expect(evidence.remainingAfterFallback).toEqual([]);
+          expect(evidence.errors).toEqual([]);
+          expect(evidence.closedBeforeFinalization).toBe(true);
+          if (mode === 'held-pipe') {
+            expect(evidence.drainTimedOut).toBe(true);
+            expect(
+              evidence.cleanupSignals.map((entry) => entry.signal),
+            ).toEqual(['SIGTERM', 'SIGKILL']);
+            expect(managed.output()).toContain('CONTROL_CHILD_TERM_IGNORED');
+          } else if (mode === 'run-timeout') {
+            expect(evidence.drainTimedOut).toBe(false);
+            expect(
+              evidence.cleanupSignals.map((entry) => entry.signal),
+            ).toEqual(['SIGTERM', 'SIGTERM', 'SIGKILL', 'SIGKILL']);
+            expect(managed.output()).toContain('CONTROL_PARENT_TERM_IGNORED');
+            expect(managed.output()).toContain('CONTROL_CHILD_TERM_IGNORED');
+          } else {
+            expect(evidence.drainTimedOut).toBe(false);
+            expect(evidence.cleanupSignals).toEqual([]);
+            expect(managed.output()).toContain('CONTROL_FINAL_STDOUT');
+            expect(managed.output()).toContain('CONTROL_FINAL_STDERR');
+          }
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
+        } finally {
+          await preserveCleanupFailure(primaryFailure, () =>
+            cleanupCommand(managed, captured),
+          );
+        }
+        expect(await liveCapturedRows(captured)).toEqual([]);
+      },
+    );
+
+    it('keeps the original failure together with a cleanup failure', async () => {
+      const primary = new Error('original exit 1; output drain timed out');
+      const cleanup = new Error('owned cleanup timed out');
+      const failure: unknown = await preserveCleanupFailure(
+        primary,
+        async () => {
+          throw cleanup;
+        },
+      ).catch((error: unknown) => error);
+      expect(failure).toBeInstanceOf(AggregateError);
+      expect((failure as AggregateError).errors).toEqual([primary, cleanup]);
+      expect((failure as AggregateError).cause).toBe(cleanup);
+      expect((failure as AggregateError).message).toContain(primary.message);
+      expect((failure as AggregateError).message).toContain(cleanup.message);
+    });
+
+    it(
       'starts all three real runtimes, checks dependency health, and emits READY exactly once',
       { timeout: 50_000 },
       async () => {
@@ -370,6 +646,7 @@ describe.skipIf(process.platform === 'win32')(
           TEST_PRIVATE_VALUE: secret,
         });
         const captured: ProcessRow[] = [];
+        let primaryFailure: unknown;
         try {
           await waitForOutput(managed, /"event":"BOOTSTRAP_READY"/u, captured);
           expect(runtimeProcess(captured, 'world-web')).toBeDefined();
@@ -401,8 +678,13 @@ describe.skipIf(process.platform === 'win32')(
           expect(await allPortsReusable(ports)).toBe(true);
           expect(managed.output()).toContain('"event":"BOOTSTRAP_STOPPED"');
           expect(managed.output()).toContain('"outcome":"SUCCESS"');
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
         } finally {
-          await cleanupCommand(managed, captured);
+          await preserveCleanupFailure(primaryFailure, () =>
+            cleanupCommand(managed, captured),
+          );
         }
       },
     );
@@ -464,6 +746,7 @@ describe.skipIf(process.platform === 'win32')(
           WORLD_WEB_PORT: String(ports.web),
         });
         const captured: ProcessRow[] = [];
+        let primaryFailure: unknown;
         try {
           await waitUntil(
             async () => {
@@ -502,12 +785,30 @@ describe.skipIf(process.platform === 'win32')(
 
           expect((await fetch(endpoint, { method: 'POST' })).status).toBe(405);
           expect((await fetch(endpoint, { method: 'HEAD' })).status).toBe(503);
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
         } finally {
-          await captureCommand(web, captured);
-          web.child.kill('SIGTERM');
-          await waitForExit(web).catch(() => undefined);
-          await cleanupCommand(web, captured);
-          await Promise.all([closeServer(api), closeServer(redirectTarget)]);
+          await preserveCleanupFailure(primaryFailure, async () => {
+            // Attempt every owned cleanup even if exit/drain or another
+            // resource fails; retain all failures instead of swallowing one.
+            const results = await Promise.allSettled([
+              cleanupCommand(web, captured),
+              waitForExit(web),
+              closeServer(api),
+              closeServer(redirectTarget),
+            ]);
+            const errors = results.flatMap((result) =>
+              result.status === 'rejected' ? [result.reason] : [],
+            );
+            if (errors.length) {
+              throw new AggregateError(
+                errors,
+                'Web command/resource cleanup failed',
+                { cause: errors[0] },
+              );
+            }
+          });
         }
       },
     );
@@ -546,6 +847,7 @@ describe.skipIf(process.platform === 'win32')(
           TEST_BOOTSTRAP_FAIL_SERVICE: 'worker',
         });
         const captured: ProcessRow[] = [];
+        let primaryFailure: unknown;
         try {
           const failure: unknown = await waitForOutput(
             managed,
@@ -565,8 +867,13 @@ describe.skipIf(process.platform === 'win32')(
             true,
           );
           expect(eventCount(managed.output(), 'BOOTSTRAP_READY')).toBe(0);
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
         } finally {
-          await cleanupCommand(managed, captured);
+          await preserveCleanupFailure(primaryFailure, () =>
+            cleanupCommand(managed, captured),
+          );
         }
         expect(await liveCapturedRows(captured)).toEqual([]);
         expect(await allPortsReusable(ports)).toBe(true);
@@ -584,6 +891,7 @@ describe.skipIf(process.platform === 'win32')(
           TEST_BOOTSTRAP_DELAY_SERVICE: 'worker',
         });
         const captured: ProcessRow[] = [];
+        let primaryFailure: unknown;
         try {
           await waitForOutput(
             managed,
@@ -603,8 +911,13 @@ describe.skipIf(process.platform === 'win32')(
           );
           expect(runtimeProcess(captured, 'world-web')).toBeDefined();
           expect(eventCount(managed.output(), 'BOOTSTRAP_READY')).toBe(0);
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
         } finally {
-          await cleanupCommand(managed, captured);
+          await preserveCleanupFailure(primaryFailure, () =>
+            cleanupCommand(managed, captured),
+          );
         }
         expect(await liveCapturedRows(captured)).toEqual([]);
         expect(await allPortsReusable(ports)).toBe(true);
@@ -698,6 +1011,7 @@ describe.skipIf(process.platform === 'win32')(
           TEST_BOOTSTRAP_DELAY_SERVICE: 'worker',
         });
         const captured: ProcessRow[] = [];
+        let primaryFailure: unknown;
         try {
           await waitForOutput(
             managed,
@@ -719,8 +1033,13 @@ describe.skipIf(process.platform === 'win32')(
           expect(managed.output()).toContain('"event":"BOOTSTRAP_STOPPED"');
           expect(managed.output()).toContain('"outcome":"CANCELLED"');
           expect(await allPortsReusable(ports)).toBe(true);
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
         } finally {
-          await cleanupCommand(managed, captured);
+          await preserveCleanupFailure(primaryFailure, () =>
+            cleanupCommand(managed, captured),
+          );
         }
       },
     );
@@ -732,6 +1051,7 @@ describe.skipIf(process.platform === 'win32')(
         const ports = await freePorts();
         const managed = startStack(ports);
         const captured: ProcessRow[] = [];
+        let primaryFailure: unknown;
         try {
           await waitForOutput(managed, /"event":"BOOTSTRAP_READY"/u, captured);
           const worker = runtimeProcess(captured, 'world-worker');
@@ -744,8 +1064,13 @@ describe.skipIf(process.platform === 'win32')(
           expect(managed.output()).toContain('"outcome":"FAILED"');
           expect(managed.output()).toContain('"failed_service":"world-worker"');
           expect(await allPortsReusable(ports)).toBe(true);
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
         } finally {
-          await cleanupCommand(managed, captured);
+          await preserveCleanupFailure(primaryFailure, () =>
+            cleanupCommand(managed, captured),
+          );
         }
       },
     );
@@ -759,6 +1084,7 @@ describe.skipIf(process.platform === 'win32')(
           WORLD_BOOTSTRAP_COMMIT_DELAY_MS: '500',
         });
         const captured: ProcessRow[] = [];
+        let primaryFailure: unknown;
         try {
           await waitForOutput(
             managed,
@@ -774,8 +1100,13 @@ describe.skipIf(process.platform === 'win32')(
           expect(eventCount(managed.output(), 'BOOTSTRAP_READY')).toBe(0);
           expect(managed.output()).toContain('"outcome":"FAILED"');
           expect(await allPortsReusable(ports)).toBe(true);
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
         } finally {
-          await cleanupCommand(managed, captured);
+          await preserveCleanupFailure(primaryFailure, () =>
+            cleanupCommand(managed, captured),
+          );
         }
       },
     );
@@ -790,6 +1121,7 @@ describe.skipIf(process.platform === 'win32')(
         });
         const captured: ProcessRow[] = [];
         let socket: Socket | undefined;
+        let primaryFailure: unknown;
         try {
           await waitForOutput(managed, /"event":"BOOTSTRAP_READY"/u, captured);
           const coordinator = captured.find((row) =>
@@ -811,9 +1143,14 @@ describe.skipIf(process.platform === 'win32')(
           );
           expect(managed.output()).toContain('"cleanup_forced":true');
           expect(await allPortsReusable(ports)).toBe(true);
+        } catch (error) {
+          primaryFailure = error;
+          throw error;
         } finally {
-          socket?.destroy();
-          await cleanupCommand(managed, captured);
+          await preserveCleanupFailure(primaryFailure, async () => {
+            socket?.destroy();
+            await cleanupCommand(managed, captured);
+          });
         }
       },
     );
