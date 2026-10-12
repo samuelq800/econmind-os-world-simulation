@@ -1,6 +1,18 @@
 import './landing.css';
 import { lazy, Suspense } from 'react';
 import { OfficialSourceConnectionStatus } from './components/OfficialSourceConnectionStatus.js';
+import { CrisisActionPage } from './crisis-action/index.js';
+import { CrisisGeography } from './map-explorer/CrisisGeography.js';
+import { isPublicWorldPreview } from './world-preview/public-route.js';
+import {
+  PublicWorldLoading,
+  PublicWorldErrorBoundary,
+} from './world-preview/Loading.js';
+
+const PublicWorldPreview = lazy(async () => ({
+  default: (await import('./world-preview/PublicWorldPreview.js'))
+    .PublicWorldPreview,
+}));
 
 const ContinentExplorer = lazy(async () => ({
   default: (await import('./map-explorer/ContinentExplorer.js'))
@@ -16,7 +28,36 @@ const previewBoundary =
   'This public preview uses illustrative planning data only and does not connect to World State or establish Gate B evidence.';
 
 export function App() {
+  if (
+    isPublicWorldPreview(
+      new URL(window.location.href),
+      import.meta.env.BASE_URL,
+    )
+  ) {
+    return (
+      <PublicWorldErrorBoundary>
+        <Suspense fallback={<PublicWorldLoading />}>
+          <PublicWorldPreview />
+        </Suspense>
+      </PublicWorldErrorBoundary>
+    );
+  }
   const atlas = new URLSearchParams(window.location.search).get('atlas');
+  if (atlas === 'crisis') {
+    const value = new URLSearchParams(window.location.search).get('country');
+    const country =
+      value && /^(0[1-9]|[1-6][0-9]|70)$/.test(value) ? value : null;
+    return (
+      <CrisisActionPage
+        {...(country ? { countryLabel: `国家 ${country}` } : {})}
+        worldHref="?atlas=explorer"
+        {...(country
+          ? { countryHref: `?atlas=explorer&country=${country}` }
+          : {})}
+        renderMap={() => <CrisisGeography countryNumber={country} />}
+      />
+    );
+  }
   if (
     atlas === null ||
     atlas === 'continents' ||

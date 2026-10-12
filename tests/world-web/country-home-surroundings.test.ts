@@ -13,6 +13,9 @@ const partition = JSON.parse(partitionBytes.toString());
 const terrainBytes = readFileSync(
   base + 'src/assets/asterra-satellite-terrain-v8.png',
 );
+const detailIndexBytes = readFileSync(
+  base + 'src/assets/country-detail/index.json',
+);
 const country = (number: string) =>
   JSON.parse(
     readFileSync(
@@ -29,15 +32,32 @@ class Node {
   className = '';
   classList = { add: (name: string) => (this.className += ` ${name}`) };
   textContent = '';
+  hidden = false;
+  value = '';
+  tabIndex = 0;
   clientWidth = 1920;
   clientHeight = 1080;
   isConnected = true;
   style = {
+    display: '',
+    maskImage: '',
+    maskComposite: '',
+    maskSize: '',
+    maskPosition: '',
+    maskRepeat: '',
     setProperty: (key: string, value: string) => {
       this.properties[key] = value;
     },
   };
   constructor(readonly tag = 'div') {}
+  get src() {
+    return this.attributes.src
+      ? new URL(this.attributes.src, 'https://fixture.invalid/').href
+      : '';
+  }
+  set src(value: string) {
+    this.attributes.src = value;
+  }
   getBoundingClientRect = () => ({
     left: 0,
     top: 0,
@@ -50,11 +70,19 @@ class Node {
   append = (...children: Node[]) => {
     this.children.push(...children);
   };
+  replaceChildren = (...children: Node[]) => {
+    this.children = children;
+  };
   prepend = (child: Node) => {
     this.children.unshift(child);
   };
+  insertBefore = (child: Node, reference: Node) => {
+    this.children.splice(this.children.indexOf(reference), 0, child);
+  };
   querySelector = vi.fn<(selector: string) => Node | null>(() => null);
   querySelectorAll = vi.fn<(selector: string) => Node[]>(() => []);
+  addEventListener = vi.fn();
+  removeEventListener = vi.fn();
 }
 
 function fixture(failure?: 'http' | 'hash' | 'terrain-hash') {
@@ -84,9 +112,11 @@ function fixture(failure?: 'http' | 'hash' | 'terrain-hash') {
         failure === 'hash' ||
           (failure === 'terrain-hash' && url.pathname.endsWith('.png'))
           ? [1, 2]
-          : url.pathname.endsWith('.png')
-            ? terrainBytes
-            : partitionBytes,
+          : url.pathname.endsWith('country-detail/index.json')
+            ? detailIndexBytes
+            : url.pathname.endsWith('.png')
+              ? terrainBytes
+              : partitionBytes,
       ).buffer,
   }));
   const authority = vi.fn(() => {
@@ -101,7 +131,7 @@ function fixture(failure?: 'http' | 'hash' | 'terrain-hash') {
           'https://fixture.invalid/prefix/country-home-surroundings.js',
         ),
       ) +
-      '\n({regionalViewBox,regionalSvg,mountCountrySurroundings,mountLegacyCountryAtlas,projectPoint})',
+      '\n({regionalViewBox,regionalSvg,mountCountrySurroundings,mountLegacyCountryAtlas,projectPoint,unambiguousPinIds,homeCamera,geographicPinGroups})',
     {
       URL,
       TextDecoder,
@@ -125,10 +155,36 @@ function fixture(failure?: 'http' | 'hash' | 'terrain-hash') {
           return observers.at(-1)!;
         }
       },
+      XMLSerializer: class {
+        serializeToString(node: Node): string {
+          const attributes = Object.entries(node.attributes)
+            .map(([key, value]) => ` ${key}="${value}"`)
+            .join('');
+          return `<${node.tag}${attributes}>${node.children
+            .map((child) => this.serializeToString(child))
+            .join('')}</${node.tag}>`;
+        }
+      },
       localStorage: { setItem: authority },
       submit: authority,
     },
   ) as {
+    homeCamera: (
+      box: number[],
+      scale: number,
+      dx: number,
+      dy: number,
+      w: number,
+      h: number,
+    ) => number[];
+    geographicPinGroups: (
+      points: { id: string; x: number; y: number }[],
+      diameter?: number,
+    ) => { id: string; x: number; y: number; ids: string[] }[];
+    unambiguousPinIds: (
+      points: { id: string; x: number; y: number }[],
+      diameter?: number,
+    ) => string[];
     projectPoint: (
       point: number[],
       box: number[],
@@ -159,12 +215,238 @@ function fixture(failure?: 'http' | 'hash' | 'terrain-hash') {
   return { api, root, mission, scene, observers, fetch, authority, pins };
 }
 
+describe('canonical HOME camera and dense hit groups', () => {
+  it('keeps bounded blank-edge camera motion without changing geography or viewport aspect, for 320/390/1440', () => {
+    const { api } = fixture();
+    for (const width of [320, 390, 1440]) {
+      const initial = api.regionalViewBox(
+        country('58').frame,
+        width,
+        590,
+        1774,
+        887,
+      )!;
+      for (const scale of [0.75, 1, 1.333333, 100])
+        for (const d of [-10000, 0, 10000]) {
+          const box = api.homeCamera(initial, scale, d, d, 1774, 887);
+          expect(box[0]).toBeGreaterThanOrEqual(-box[2]);
+          expect(box[1]).toBeGreaterThanOrEqual(-box[3]);
+          expect(box[0]).toBeLessThanOrEqual(1774);
+          expect(box[1]).toBeLessThanOrEqual(887);
+          expect(box[2] / box[3]).toBeCloseTo(initial[2] / initial[3]);
+        }
+    }
+  });
+  it('aggregates coincident and transitively dense IDs at an original point without mutating or losing any record', () => {
+    const { api } = fixture();
+    const points = [
+      { id: 'A', x: 10, y: 20 },
+      { id: 'B', x: 10, y: 20 },
+      { id: 'C', x: 35, y: 20 },
+      { id: 'D', x: 100, y: 100 },
+    ];
+    const before = structuredClone(points);
+    const groups = api.geographicPinGroups(points, 30);
+    expect(groups.map((g) => [g.id, g.x, g.y, g.ids])).toEqual([
+      ['A', 10, 20, ['A', 'B', 'C']],
+      ['D', 100, 100, ['D']],
+    ]);
+    expect(points).toEqual(before);
+    expect(groups.flatMap((g) => g.ids).sort()).toEqual(
+      points.map((p) => p.id).sort(),
+    );
+  });
+});
+
 describe('country HOME source-coordinate surroundings, not ownership', () => {
+  it.each([262, 332, 974])(
+    'keeps resource 58 direct hit targets unambiguous at stage width %s through zoom and translation',
+    (width) => {
+      const f = fixture();
+      const record = country('58');
+      const original = structuredClone(record.resources);
+      for (const zoom of [1, 1.25, 2]) {
+        const points = record.resources.map(
+          (r: { id: string; point: number[] }) => ({
+            id: r.id,
+            x:
+              ((r.point[0] - record.viewBox[0]) / record.viewBox[2]) *
+                width *
+                zoom -
+              156,
+            y:
+              ((r.point[1] - record.viewBox[1]) / record.viewBox[3]) *
+                width *
+                zoom -
+              295.5,
+          }),
+        );
+        expect(f.api.unambiguousPinIds(points)).toEqual(
+          record.resources.map((r: { id: string }) => r.id),
+        );
+      }
+      expect(record.resources).toEqual(original);
+    },
+  );
+  it('routes dense/coincident geography through ID choices instead of assigning one overlapping hit to another resource', () => {
+    const f = fixture();
+    const record = country('66');
+    const points = record.resources.map(
+      (r: { id: string; point: number[] }) => ({
+        id: r.id,
+        x: ((r.point[0] - record.viewBox[0]) / record.viewBox[2]) * 262,
+        y: ((r.point[1] - record.viewBox[1]) / record.viewBox[3]) * 262,
+      }),
+    );
+    const safe = f.api.unambiguousPinIds(points);
+    expect(safe).not.toContain('RES14');
+    expect(safe).not.toContain('RES47');
+    expect(safe).not.toContain('RES41');
+    expect(safe).not.toContain('RES79');
+    expect(
+      f.api.unambiguousPinIds([
+        { id: 'one', x: 0, y: 0 },
+        { id: 'two', x: 0, y: 0 },
+      ]),
+    ).toEqual([]);
+    expect(
+      f.api.unambiguousPinIds(
+        points.map((p) => ({ ...p, x: p.x * 2, y: p.y * 2 })),
+      ),
+    ).toContain('RES14');
+    expect(f.authority).not.toHaveBeenCalled();
+  });
+
+  it('makes dense resource points noninteractive and exposes exact native resource IDs without moving source anchors', async () => {
+    const f = fixture();
+    const record = country('66');
+    const before = structuredClone(record);
+    const image = new Node('img');
+    image.attributes.src = record.detail;
+    const stage = new Node();
+    const viewport = new Node();
+    const caption = new Node();
+    const pins = new Node();
+    const a = new Node('button');
+    const b = new Node('button');
+    a.dataset = { action: 'resource', id: 'RES14' };
+    b.dataset = { action: 'resource', id: 'RES47' };
+    a.properties = { left: '10%', top: '20%' };
+    b.properties = { left: '12%', top: '22%' };
+    a.getBoundingClientRect = () => ({
+      left: 0,
+      top: 0,
+      width: 28,
+      height: 28,
+      right: 28,
+      bottom: 28,
+    });
+    b.getBoundingClientRect = () => ({
+      left: 10,
+      top: 10,
+      width: 28,
+      height: 28,
+      right: 38,
+      bottom: 38,
+    });
+    pins.querySelectorAll.mockReturnValue([a, b]);
+    const label = new Node('em');
+    label.getBoundingClientRect = () => ({
+      left: 8,
+      top: 28,
+      width: 28,
+      height: 16,
+      right: 36,
+      bottom: 44,
+    });
+    a.querySelector.mockReturnValue(label);
+
+    f.root.querySelector.mockImplementation((selector) =>
+      selector === '#country-image'
+        ? image
+        : selector === '#map-stage'
+          ? stage
+          : selector === '#map-pins'
+            ? pins
+            : selector === '.map-caption'
+              ? caption
+              : viewport,
+    );
+    await f.api.mountLegacyCountryAtlas(f.root, record);
+    expect(a.dataset).toMatchObject({
+      action: 'resource',
+      id: 'RES14',
+      resourceCollision: 'true',
+    });
+    expect(b.dataset).toMatchObject({
+      action: 'resource',
+      id: 'RES47',
+      resourceCollision: 'true',
+    });
+    expect(a.attributes['aria-hidden']).toBe('true');
+    expect(a.dataset.resourceLabelHidden).toBe('true');
+    expect(a.properties).toEqual({ left: '10%', top: '20%' });
+    expect(b.properties).toEqual({ left: '12%', top: '22%' });
+    const choices = caption.children[0].children[1].children;
+    expect(choices.map((button) => button.dataset.id)).toEqual(
+      record.resources.map((r: { id: string }) => r.id),
+    );
+    expect(
+      choices.every((button) => button.dataset.action === 'resource'),
+    ).toBe(true);
+    expect(record).toEqual(before);
+    expect(f.authority).not.toHaveBeenCalled();
+  });
+  it('clips only legacy geographic artwork to its canonical country while keeping scene anchors and controls unchanged', async () => {
+    const f = fixture();
+    const record = country('58');
+    const before = JSON.stringify(record);
+    const image = new Node('img');
+    image.attributes.src = `https://fixture.invalid/${record.detail}`;
+    const viewport = new Node();
+    f.root.querySelector.mockImplementation((selector) =>
+      selector === '#country-image' ? image : viewport,
+    );
+    await f.api.mountLegacyCountryAtlas(f.root, record);
+    const canonical = partition.territories.find(
+      (territory: { id: string }) => territory.id === record.id,
+    );
+    const mask = decodeURIComponent(image.style.maskImage);
+    expect(mask).toContain(`viewBox="${record.viewBox.join(' ')}"`);
+    expect(mask).toContain(`d="${canonical.path}"`);
+    expect(image.style.maskComposite).toBe('add');
+    expect(image.attributes.src).toBe(
+      `https://fixture.invalid/${record.detail}#svgView(preserveAspectRatio(none))`,
+    );
+    image.attributes.src = `https://fixture.invalid/${record.scene}`;
+    f.observers
+      .find((o) =>
+        o.observe.mock.calls.some(([, options]) =>
+          options?.attributeFilter?.includes('src'),
+        ),
+      )!
+      .callback();
+    expect(image.style.maskComposite).toBe('add');
+    expect(image.style.maskImage).toBe('none');
+    expect(f.root.children[0].style.display).toBe('none');
+    expect(f.root.dataset.mapPresentation).toBe('independent-illustration');
+    expect(JSON.stringify(record)).toBe(before);
+    expect(f.authority).not.toHaveBeenCalled();
+    f.root.isConnected = false;
+    f.observers[0].callback();
+    expect(
+      f.observers.every((observer) => observer.disconnect.mock.calls.length),
+    ).toBe(true);
+  });
   it('resolves the bundled legacy Atlas geography from the explicit deployed public base', async () => {
     const f = fixture();
     const stage = new Node();
     const pins = new Node();
-    f.root.querySelector.mockReturnValue(stage);
+    const image = new Node('img');
+    image.attributes.src = country('58').scene;
+    f.root.querySelector.mockImplementation((selector) =>
+      selector === '#country-image' ? image : stage,
+    );
     stage.querySelector.mockReturnValue(pins);
     await f.api.mountLegacyCountryAtlas(
       f.root,
@@ -193,14 +475,21 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     const image = new Node('img');
     image.attributes.src = record.scene;
     f.root.querySelector.mockImplementation((selector) =>
-      selector === '.map-viewport' ? viewport : stage,
+      selector === '.map-viewport'
+        ? viewport
+        : selector === '#country-image'
+          ? image
+          : stage,
     );
+    let stageRect = { left: 200, top: 0, width: 560, height: 560 };
+    stage.getBoundingClientRect = () => stageRect;
     stage.children = [image, facility, resource];
     const native = structuredClone(stage.properties);
     await f.api.mountLegacyCountryAtlas(f.root, record);
     expect(f.root.dataset.regionalAtlas).toBe('true');
     expect(f.root.children).toHaveLength(1);
     expect(f.root.children[0].children[1].children).toHaveLength(70);
+    expect(f.root.children[0].attributes.preserveAspectRatio).toBe('none');
     expect(stage.children).toEqual([image, facility, resource]);
     expect(stage.properties).toEqual(native);
     expect(image.attributes.src).toBe(record.scene);
@@ -208,15 +497,36 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     expect(resource.properties.left).toBe('38.4673%');
     expect(facility.dataset.regionalLocation).toBeUndefined();
     expect(resource.dataset.regionalLocation).toBeUndefined();
+    const geographicCorner = [record.frame[0], record.frame[1]];
+    const camera = () =>
+      f.root.children[0].attributes.viewBox.split(' ').map(Number);
+    expect(f.api.projectPoint(geographicCorner, camera(), 960, 560)).toEqual([
+      200, 0,
+    ]);
+    stageRect = { left: -40, top: -70, width: 840, height: 840 };
+    f.observers[0].callback();
+    const afterZoom = f.api.projectPoint(geographicCorner, camera(), 960, 560)!;
+    expect(afterZoom[0]).toBeCloseTo(-40);
+    expect(afterZoom[1]).toBeCloseTo(-70);
+    expect(viewport.addEventListener).toHaveBeenCalledWith(
+      'scroll',
+      expect.any(Function),
+      { passive: true },
+    );
     viewport.clientWidth = 332;
     viewport.clientHeight = 332;
+    stageRect = { left: 0, top: 0, width: 332, height: 332 };
     f.observers[0].callback();
     const resizedBox = f.root.children[0].attributes.viewBox
       .split(' ')
       .map(Number);
     expect(resizedBox[2] / resizedBox[3]).toBeCloseTo(1);
     expect(stage.properties).toEqual(native);
-    expect(stage.querySelectorAll).not.toHaveBeenCalled();
+    expect(
+      stage.querySelectorAll.mock.calls.every(
+        ([selector]) => selector === 'button[data-action=resource]',
+      ),
+    ).toBe(true);
     expect(JSON.stringify(record)).toBe(before);
     expect(f.authority).not.toHaveBeenCalled();
   });
@@ -248,7 +558,7 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
       await f.api.mountCountrySurroundings(f.root, country('54'));
       expect(f.root.dataset.office).toBe(role);
       expect(
-        f.root.children[0].children[0].attributes['data-selected-country'],
+        f.scene.children[0].children[0].attributes['data-selected-country'],
       ).toBe('visual-territory-54');
       expect(f.authority).not.toHaveBeenCalled();
       const game = readFileSync(
@@ -309,13 +619,24 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
       expect(svg.attributes['aria-hidden']).toBe('true');
     }
     expect(source).not.toMatch(
-      /addEventListener|localStorage|Command|eez|territorialCandidate|cloneNode/,
+      /localStorage|Command|eez|territorialCandidate|cloneNode/,
     );
+    // Context may observe native scrolling; it cannot add input/authority
+    // handlers or foreign-country hit targets.
+    expect(
+      [
+        ...source
+          .slice(
+            source.indexOf('export async function mountLegacyCountryAtlas'),
+          )
+          .matchAll(/addEventListener\('([^']+)'/g),
+      ].map((m) => m[1]),
+    ).toEqual(['scroll']);
     expect(authority).not.toHaveBeenCalled();
   });
 
-  it.each(['01', '13', '54', '70'])(
-    'keeps %s geography in bounds and the viewport aspect intact for portrait and landscape',
+  it.each(['01', '13', '38', '54', '58', '70'])(
+    'centers %s original geography at the world edge and preserves portrait/landscape aspect',
     (number) => {
       const { api } = fixture();
       const record = country(number);
@@ -332,10 +653,16 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
           partition.width,
           partition.height,
         )!;
-        expect(box[0]).toBeGreaterThanOrEqual(0);
-        expect(box[1]).toBeGreaterThanOrEqual(0);
-        expect(box[0] + box[2]).toBeLessThanOrEqual(partition.width + 1e-9);
-        expect(box[1] + box[3]).toBeLessThanOrEqual(partition.height + 1e-9);
+        expect(box[0] + box[2] / 2).toBeCloseTo(
+          record.frame[0] + record.frame[2] / 2,
+          10,
+        );
+        expect(box[1] + box[3] / 2).toBeCloseTo(
+          record.frame[1] + record.frame[3] / 2,
+          10,
+        );
+        expect(box[2]).toBeGreaterThanOrEqual(record.frame[2]);
+        expect(box[3]).toBeGreaterThanOrEqual(record.frame[3]);
         expect(box[2] / box[3]).toBeCloseTo(width / height, 10);
       }
     },
@@ -353,37 +680,139 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     ).toBeNull();
   });
 
-  it('mounts once per HOME, caches context sources, preserves the independent scene and disposes the prior observer', async () => {
+  it('defaults HOME to canonical geography, retains an explicit original-scene switch, caches immutable sources and disposes the prior observer', async () => {
     const f = fixture();
     const record = country('54');
     const before = structuredClone(record);
     await f.api.mountCountrySurroundings(f.root, record);
-    expect(f.scene.children).toHaveLength(0);
-    expect(f.root.children).toHaveLength(1);
-    const svg = f.root.children[0].children[0];
+    expect(f.root.dataset.mapPresentation).toBe('geographic');
+    expect(f.scene.children).toHaveLength(6);
+    const viewport = f.scene.children[0];
+    const svg = viewport.children[0];
+    expect(svg.attributes['data-projection']).toBe('V8_IMAGE_PIXELS_TOP_LEFT');
+    expect(f.scene.children[3].textContent).toBe('查看原场景插图');
     expect(svg.attributes.viewBox).toBe(
-      f.api.regionalViewBox(record.frame, 1920, 1080, 1774, 887)!.join(' '),
+      f.api.regionalViewBox(record.viewBox, 1920, 1080, 1774, 887)!.join(' '),
     );
-    expect(f.scene.properties['--country-scene-size']).toBe('1080px');
+    expect(svg.children.at(-1)?.attributes['clip-path']).toContain(
+      'home-detail-',
+    );
+    expect(f.scene.properties['--national-scene-art']).toBe(
+      `url("https://fixture.invalid/prefix/season1-immersive/countries/${record.scene}")`,
+    );
+    const detail = svg.children.at(-1)!;
+    const neighborLayer = svg.children.find(
+      (n) => n.attributes['data-geographic-detail-context'] === 'true',
+    )!;
+    expect(neighborLayer.children.length).toBeGreaterThan(0);
+    expect(svg.children.indexOf(neighborLayer)).toBeLessThan(
+      svg.children.findIndex(
+        (n) => n.attributes['data-distance-fade'] === 'country-outline',
+      ),
+    );
+    const originals = JSON.parse(detailIndexBytes.toString());
+    for (const tile of neighborLayer.children) {
+      const original = originals.find(
+        (m: { number: string }) =>
+          m.number === tile.attributes['data-neighbor-detail'],
+      );
+      expect(
+        ['x', 'y', 'width', 'height'].map((k) => Number(tile.attributes[k])),
+      ).toEqual(original.viewBox);
+      expect(tile.attributes['pointer-events']).toBe('none');
+      expect(tile.attributes.href).toContain(
+        '#svgView(preserveAspectRatio(none))',
+      );
+      const clipId = tile.attributes['clip-path'].slice(5, -1);
+      const clip = svg.children
+        .flatMap((n) => n.children)
+        .find((n) => n.attributes.id === clipId)!;
+      expect(clip.children[0]!.attributes.d).toBe(
+        partition.territories.find((t: { id: string }) => t.id === original.id)
+          .path,
+      );
+    }
+    expect(
+      ['x', 'y', 'width', 'height'].map((key) =>
+        Number(detail.attributes[key]),
+      ),
+    ).toEqual(record.viewBox);
+    expect(record.viewBox).not.toEqual(record.frame);
     f.root.clientWidth = 390;
     f.root.clientHeight = 2400;
-    f.scene.clientWidth = 390;
-    f.scene.clientHeight = 390;
+    viewport.clientWidth = 390;
+    viewport.clientHeight = 440;
     f.observers[0].callback();
     expect(svg.attributes.viewBox).toBe(
-      f.api.regionalViewBox(record.frame, 390, 2400, 1774, 887)!.join(' '),
+      f.api.regionalViewBox(record.viewBox, 390, 440, 1774, 887)!.join(' '),
     );
-    expect(f.scene.properties['--country-scene-size']).toBe('390px');
+    expect(record).toEqual(before);
     expect(record).toEqual(before);
     await f.api.mountCountrySurroundings(f.root, record);
-    expect(f.root.children).toHaveLength(1);
+    expect(f.scene.children).toHaveLength(6);
     const nextRoot = new Node();
     nextRoot.querySelector = f.root.querySelector;
     await f.api.mountCountrySurroundings(nextRoot, record);
     expect(f.observers[0].disconnect).toHaveBeenCalledOnce();
-    expect(f.fetch).toHaveBeenCalledTimes(2);
+    expect(f.fetch).toHaveBeenCalledTimes(3);
     expect(f.authority).not.toHaveBeenCalled();
-    expect(f.mission.children[0].textContent).toContain('context only');
+    expect(f.mission.children[0].textContent).toContain(
+      'Continuous geographic',
+    );
+  });
+
+  it.each(['38', '58', '70'])(
+    'registers HOME %s detail in the original Atlas SVG viewBox, without stretching it into the scene frame',
+    async (number) => {
+      const f = fixture();
+      const record = country(number);
+      const before = structuredClone(record);
+      const nativeSvg = readFileSync(
+        base + 'src/assets/country-detail/' + record.detail.split('/').at(-1),
+        'utf8',
+      );
+      const nativeBox = nativeSvg
+        .match(/<svg[^>]*viewBox="([^"]+)"/)![1]!
+        .split(/\s+/)
+        .map(Number);
+      await f.api.mountCountrySurroundings(f.root, record);
+      const detail = f.scene.children[0]!.children[0]!.children.at(-1)!;
+      expect(
+        ['x', 'y', 'width', 'height'].map((key) =>
+          Number(detail.attributes[key]),
+        ),
+      ).toEqual(nativeBox);
+      expect(record.viewBox).toEqual(nativeBox);
+      expect(record.frame).not.toEqual(nativeBox);
+      expect(record).toEqual(before);
+      expect(f.scene.properties['--national-scene-art']).toBe(
+        `url("https://fixture.invalid/prefix/season1-immersive/countries/${record.scene}")`,
+      );
+    },
+  );
+
+  it('immediately redraws HOME marker avoidance every time the information panel closes', async () => {
+    const f = fixture();
+    await f.api.mountCountrySurroundings(f.root, country('54'));
+    const viewport = f.scene.children[0]!;
+    const markers = viewport.children[1]!;
+    const redraw = vi.spyOn(markers, 'replaceChildren');
+    const choice = f.scene.children[4]!.children[1]!.children[0]!;
+    const open = choice.addEventListener.mock.calls.find(
+      ([name]) => name === 'click',
+    )![1];
+    const inspector = f.scene.children[5]!;
+    for (let i = 0; i < 3; i++) {
+      open();
+      expect(inspector.hidden).toBe(false);
+      const close = inspector.children[2]!.addEventListener.mock.calls.find(
+        ([name]) => name === 'click',
+      )![1];
+      close();
+      expect(inspector.hidden).toBe(true);
+      expect(redraw).toHaveBeenCalledTimes((i + 1) * 2);
+    }
+    expect(f.authority).not.toHaveBeenCalled();
   });
 
   it.each(['http', 'hash', 'terrain-hash'] as const)(
@@ -457,7 +886,8 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     expect(pin.dataset.regionalLocation).toBeUndefined();
     expect(f.pins.get(second.id)?.dataset.regionalLocation).toBeUndefined();
     expect(f.root.dataset.regionalMap).toBeUndefined();
-    expect(f.scene.children).toHaveLength(0);
+    expect(f.scene.children).toHaveLength(6);
+    expect(f.root.dataset.mapPresentation).toBe('geographic');
     expect(record).toEqual(before);
     expect(f.authority).not.toHaveBeenCalled();
   });
@@ -468,5 +898,20 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     await f.api.mountCountrySurroundings(f.root, country('54'));
     expect(f.scene.children).toHaveLength(0);
     expect(f.observers).toHaveLength(0);
+  });
+});
+
+// The adapter attributes must disable native colliding pointer targets too.
+describe('legacy resource collision presentation contract', () => {
+  it('prevents the ignored native hit and exposes a usable source-ID chooser', () => {
+    const css = readFileSync(base + 'src/brand-shell/brand-shell.css', 'utf8');
+    expect(css).toMatch(
+      /\[data-resource-collision='true'\][^{]*\{[^}]*pointer-events: none/s,
+    );
+    expect(css).toMatch(
+      /\[data-resource-label-hidden='true'\] > em[^}]*visibility: hidden/s,
+    );
+    expect(css).toContain('.map-resource-choices');
+    expect(css).toMatch(/map-resource-choices button[^}]*min-height: 36px/s);
   });
 });

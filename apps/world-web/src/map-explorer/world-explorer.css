@@ -75,6 +75,127 @@
   display: flex;
   height: calc(100% - 68px);
 }
+.explorer-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+}
+:root .world-explorer.explorer-country-view {
+  height: max(650px, 100dvh);
+  min-height: 650px;
+  flex: none;
+}
+.explorer-country-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  flex-shrink: 0;
+  padding: 20px 24px;
+  border-bottom: 1px solid #607b7440;
+  background: #0e2831;
+}
+.explorer-country-heading > div > span {
+  color: #ddcda4;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+.explorer-country-heading h1 {
+  margin: 8px 0;
+  color: #efd495;
+  font:
+    32px Georgia,
+    'Songti SC',
+    serif;
+}
+.explorer-country-heading p {
+  margin: 0;
+  font-size: 10px;
+  color: #adc2ba;
+  overflow-wrap: anywhere;
+}
+.explorer-country-heading .country-key-stats {
+  margin: 0;
+  gap: 20px;
+}
+.explorer-view-switch {
+  display: flex;
+  gap: 4px;
+}
+.explorer-view-switch button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #71897b;
+  border-radius: 4px;
+  color: #adc2ba;
+  background: #102e37;
+}
+.explorer-view-switch button[aria-pressed='true'] {
+  color: #fff0ba;
+  background: #355057;
+  border-color: #d7c495;
+}
+.explorer-map-tools {
+  /* Overview controls retain their original floating presentation. */
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.explorer-map-tools button,
+.explorer-map-tools select {
+  pointer-events: auto;
+}
+.explorer-country-view .explorer-map-tools {
+  position: static;
+  flex-shrink: 0;
+  padding: 12px 24px;
+  background: #0e2831;
+  border-top: 1px solid #607b7440;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+.explorer-country-view .explorer-controls {
+  position: static;
+  flex-direction: row;
+}
+.explorer-country-view .explorer-controls button {
+  border-bottom: 0;
+  border-right: 1px solid #58727755;
+}
+.explorer-country-view .explorer-controls span {
+  align-self: center;
+  min-width: 40px;
+}
+.explorer-country-view .explorer-layer-controls,
+.explorer-country-view .explorer-map-caption {
+  position: static;
+}
+.explorer-country-view .explorer-layer-controls {
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+.explorer-country-view .explorer-map-caption {
+  padding-right: 0;
+  position: relative;
+  inset: auto;
+  flex-basis: 100%;
+}
+.explorer-country-view .explorer-map-caption:has(b) {
+  padding-right: 100px;
+}
+.explorer-country-view .explorer-map-caption small {
+  max-width: none;
+  line-height: 1.6;
+}
+.explorer-country-view .explorer-sidebar {
+  padding-bottom: 0;
+}
 .explorer-viewport {
   position: relative;
   flex: 1;
@@ -478,6 +599,9 @@
   flex-direction: column;
   overflow: auto;
 }
+.explorer-selection-preview {
+  display: none;
+}
 .sidebar-title {
   padding: 29px 25px 18px;
   border-bottom: 1px solid #55737147;
@@ -629,6 +753,7 @@
   padding: 10px 0;
   border-bottom: 1px solid #50716e3d;
   font-size: 11px;
+  min-width: 0;
 }
 .facility-inspector dt {
   color: #8aa5a3;
@@ -637,6 +762,8 @@
   margin: 0;
   color: #d2dece;
   text-align: right;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 .explorer-primary {
   width: 100%;
@@ -738,6 +865,59 @@
   }
 }
 @media (max-width: 900px) {
+  .explorer-selection-preview {
+    position: absolute;
+    z-index: 9;
+    bottom: 16px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 8px;
+    background: #081c24;
+    border: 1px solid #647d77;
+    font-size: 12px;
+  }
+  .explorer-selection-preview span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .explorer-selection-preview button {
+    min-height: 44px;
+    flex-shrink: 0;
+    padding: 0 8px;
+  }
+  :root .world-explorer.explorer-country-view {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .world-explorer.explorer-country-view .explorer-layout {
+    height: auto;
+  }
+  .explorer-country-heading {
+    padding: 16px 18px;
+    gap: 14px;
+  }
+  .explorer-country-heading h1 {
+    font-size: 28px;
+  }
+  .explorer-country-heading .country-key-stats {
+    width: 100%;
+    gap: 18px;
+  }
+  .explorer-country-view .explorer-map-tools {
+    padding: 12px 18px;
+  }
+  .explorer-country-view .explorer-viewport {
+    flex: none;
+    height: max(390px, 60dvh);
+  }
+  .explorer-country-view .explorer-sidebar {
+    height: 420px;
+  }
   /* Keep a usable map and the existing sidebar on short/mobile screens.
      The Root page can scroll vertically instead of clipping these regions. */
   .world-explorer {
@@ -813,8 +993,17 @@
   }
   .facility-inspector dl {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 0 16px;
+  }
+  .facility-inspector dl > div {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .facility-inspector dd {
+    text-align: left;
+    max-width: 100%;
   }
   .facility-big-number {
     font-size: 28px;
@@ -908,7 +1097,6 @@
   }
 }
 @media (max-width: 520px) {
-  .explorer-topbar nav > button:first-child,
   .explorer-topbar nav > a,
   .explorer-topbar nav > span,
   .explorer-map-link {
@@ -975,8 +1163,8 @@
 .explorer-facility-dot {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 29px;
-  height: 29px;
+  width: 36px;
+  height: 36px;
   padding: 5px;
   border-radius: 50%;
   border: 1px solid #bfebd7;
@@ -996,4 +1184,128 @@
   color: #fff1b6;
   border-color: #ffe59a;
   background: #385648;
+}
+
+.explorer-heading-toggle {
+  display: none;
+}
+@media (max-width: 749px) {
+  .explorer-heading-toggle {
+    display: block;
+    min-height: 36px;
+    background: #12303a;
+    color: #e9ecd9;
+    border: 1px solid #6e9292;
+    padding: 6px 10px;
+  }
+  .explorer-country-heading:not([data-expanded='true']) .country-key-stats,
+  .explorer-country-heading:not([data-expanded='true']) > div > span {
+    display: none;
+  }
+  .explorer-country-heading h1 {
+    font-size: 24px;
+    margin: 0 0 6px;
+  }
+  .explorer-country-heading {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+}
+.explorer-crisis-summary {
+  flex: none;
+  padding: 8px 16px;
+}
+.explorer-topbar nav > button {
+  min-height: 44px;
+  padding: 8px 2px;
+}
+.explorer-heading:not([data-expanded='true']) > span,
+.explorer-heading:not([data-expanded='true']) > p,
+.explorer-heading:not([data-expanded='true']) .country-key-stats {
+  display: none;
+}
+.explorer-heading:not([data-expanded='true']) h1 {
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+.explorer-world-heading-toggle {
+  pointer-events: auto;
+  min-height: 36px;
+  color: #e9ecd9;
+  background: #12303a;
+  border: 1px solid #6e9292;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+.explorer-cluster-choices {
+  position: absolute;
+  z-index: 12;
+  right: 12px;
+  bottom: 12px;
+  max-width: calc(100% - 24px);
+  max-height: min(260px, 80%);
+  overflow: auto;
+  background: #102a33fa;
+  border: 1px solid #719192;
+  padding: 8px;
+}
+.explorer-cluster-choices button {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  color: #eef5df;
+  border: 0;
+  background: none;
+  padding: 8px;
+  text-align: left;
+}
+.explorer-facility-cluster {
+  font-size: 10px;
+}
+.explorer-crisis-summary .crisis-summary,
+.econmind-home-crisis .crisis-summary {
+  gap: 5px;
+  padding: 10px 14px;
+  border-radius: 6px;
+}
+.explorer-crisis-summary .crisis-summary > div:first-child,
+.econmind-home-crisis .crisis-summary > div:first-child {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.explorer-crisis-summary .crisis-summary h2,
+.econmind-home-crisis .crisis-summary h2 {
+  font-size: 13px;
+}
+.explorer-crisis-summary .crisis-summary__feeds span,
+.econmind-home-crisis .crisis-summary__feeds span {
+  flex: 1 1 180px;
+  font-size: 10px;
+}
+
+@media (max-width: 749px) {
+  .explorer-country-heading:not([data-expanded='true']) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 8px;
+    padding: 6px 14px;
+  }
+  .explorer-country-heading:not([data-expanded='true']) h1 {
+    font-size: 18px;
+    margin: 0 0 3px;
+  }
+  .explorer-country-heading:not([data-expanded='true']) p {
+    font-size: 9px;
+    line-height: 1.25;
+  }
+  .explorer-country-heading:not([data-expanded='true']) .explorer-view-switch {
+    display: none;
+  }
+  .explorer-heading-toggle {
+    min-height: 44px;
+    max-width: 96px;
+    font-size: 11px;
+  }
 }

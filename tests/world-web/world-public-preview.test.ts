@@ -40,7 +40,30 @@ const candidateWorkflow = readFileSync(
 const landingPage = readFileSync('apps/world-web/index.html', 'utf8');
 
 describe('public World preview deployment', () => {
-  it('wraps complete facility status text inside atlas cards without truncation', () => {
+  it('bounds desktop country height while allowing mobile document flow and long field values', () => {
+    const css = readFileSync(
+      'apps/world-web/src/map-explorer/world-explorer.css',
+      'utf8',
+    );
+    const country =
+      /:root \.world-explorer\.explorer-country-view\s*\{([^}]*)\}/.exec(
+        css,
+      )?.[1];
+    expect(country).toContain('height: max(650px, 100dvh);');
+    expect(country).toContain('flex: none;');
+    const mobile = css.slice(css.indexOf('@media (max-width: 900px)'));
+    expect(mobile).toMatch(
+      /:root \.world-explorer\.explorer-country-view\s*\{[^}]*height: auto;/,
+    );
+    expect(mobile).toContain(
+      'grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);',
+    );
+    expect(css).toMatch(
+      /\.facility-inspector dd\s*\{[^}]*overflow-wrap: anywhere;/,
+    );
+  });
+
+  it('moves complete facility status into click-open details instead of covering the scene with cards', async () => {
     const css = readFileSync(
       'apps/world-web/src/map-explorer/world-explorer.css',
       'utf8',
@@ -55,7 +78,15 @@ describe('public World preview deployment', () => {
     expect(status).not.toMatch(
       /overflow:\s*hidden|text-overflow|line-clamp|display:\s*none/,
     );
-    expect(atlasPage).toContain('{site.id} · {site.record.lifecycle} / 未投运');
+    const data = await officialCountry('54');
+    const facts = renderToStaticMarkup(
+      createElement(OfficialFacilityFacts, { data, index: 0 }),
+    );
+    expect(facts).toContain(data.facilities[0]!.record.lifecycle);
+    expect(facts).toContain(data.facilities[0]!.id);
+    const markup = renderCountry('54', { kind: 'ready', data });
+    expect(markup).not.toContain('class="explorer-site');
+    expect(markup).not.toContain('class="explorer-leaders');
   });
 
   it('opens the atlas at the root and retains the selected national page', () => {
@@ -161,7 +192,7 @@ function renderCountry(
   bindingCountry = `visual-territory-${number}`,
 ) {
   vi.stubGlobal('window', {
-    location: { search: `?atlas=explorer&country=${number}` },
+    location: { search: `?atlas=explorer&country=${number}&view=scene` },
   });
   return renderToStaticMarkup(
     createElement(WorldExplorer, {
@@ -172,6 +203,62 @@ function renderCountry(
 
 describe('atlas official opening numbers and complete facility records', () => {
   afterEach(() => vi.unstubAllGlobals());
+
+  it.each(Array.from({ length: 70 }, (_, i) => String(i + 1).padStart(2, '0')))(
+    'separates country %s HD illustration from all geographic overlays and preserves its full directory',
+    async (number) => {
+      const data = await officialCountry(number);
+      const markup = renderCountry(number, { kind: 'ready', data });
+      expect(markup).toContain(`data-country-scene="${number}"`);
+      expect(markup).toContain('preserveAspectRatio="xMidYMid meet"');
+      expect(markup).toContain('data-explorer-view="scene"');
+      expect(markup).not.toContain('data-explorer-geography="true"');
+      expect(markup).not.toContain('data-regional-terrain="true"');
+      expect(markup).not.toContain('data-distance-fade="country-outline"');
+      const caption = markup.match(
+        /class="explorer-map-caption[^>]*>(.*?)<\/div>/s,
+      )?.[1];
+      expect(caption?.includes(' km')).toBe(false);
+      expect(caption?.includes('<b>')).toBe(false);
+      expect(markup).toContain('非地理比例');
+      expect(markup).toContain('>高清场景</button>');
+      expect(markup).toContain('>地理地图</button>');
+      // Country identity and controls occupy normal flow before the canvas.
+      expect(markup.indexOf('explorer-country-heading')).toBeLessThan(
+        markup.indexOf('class="explorer-viewport'),
+      );
+      expect(markup).not.toContain(
+        'class="explorer-heading explorer-floating"',
+      );
+      expect(markup.match(/data-official-facility=/g)).toHaveLength(
+        data.facilities.length,
+      );
+      if (number === '58')
+        expect(markup).not.toContain('class="explorer-facility-dot');
+    },
+  );
+
+  it('opens a country on continuous geography by default with separate scene control', () => {
+    vi.stubGlobal('window', {
+      location: { search: '?atlas=explorer&country=54' },
+    });
+    const markup = renderToStaticMarkup(createElement(WorldExplorer));
+    expect(markup).toContain('data-explorer-view="geography"');
+    expect(markup).toContain('data-explorer-geography="true"');
+    expect(markup).toContain('data-distance-fade="country-outline"');
+    expect(markup).not.toContain('data-country-scene=');
+    expect(markup).toContain('展开国家资料');
+  });
+
+  it('retains actual geography in the overview rather than removing it globally', () => {
+    vi.stubGlobal('window', { location: { search: '?atlas=explorer' } });
+    const markup = renderToStaticMarkup(createElement(WorldExplorer));
+    expect(markup).toContain('data-explorer-geography="true"');
+    expect(markup).toContain('data-explorer-view="geography"');
+    expect(markup).toContain('data-country="visual-territory-54"');
+    expect(markup).not.toContain('data-country-scene=');
+    expect(markup).toContain(' km');
+  });
 
   it.each(['01', '70'])(
     'shows exact %s source population, facilities, deposits and regions',

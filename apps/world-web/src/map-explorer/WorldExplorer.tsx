@@ -1,4 +1,5 @@
 import detailMaps from '../assets/country-detail/index.json';
+import { geographicPinGroups } from '../../public/country-home-surroundings.js';
 import continentArtworks from '../assets/continent-scenes/index.json';
 import sceneIndex from '../assets/country-scenes/index.json';
 import { continentSceneUrls } from './continent-scene-urls.js';
@@ -6,13 +7,24 @@ import { continentFor } from './continent-layout.js';
 import { countryDetailUrls } from './country-detail-urls.js';
 import { countrySceneUrls } from './country-scene-urls.js';
 import { shouldMountDetailTile } from './detail-tile-visibility.js';
-import { layoutLabels } from './label-layout.js';
+import {
+  prepareExplorerFacilitySelection,
+  restoreExplorerRouteStart,
+} from './navigation-scroll.js';
 import {
   cameraForViewport,
   isUsableViewport,
   type ExplorerCameraFit,
 } from './viewport-camera.js';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
 import terrain from '../assets/asterra-satellite-terrain-v8.png';
 import { artwork, partition } from '../map-lab/display-layers.js';
 import scenario from '../map-lab/geographic-scenario.json';
@@ -23,6 +35,9 @@ import {
 } from '../official-data/official-explorer-country.js';
 import { OFFICIAL_EXPLORER_SUMMARY } from '../official-data/official-explorer-country-manifest.js';
 import './world-explorer.css';
+import { CrisisSummary } from '../crisis-action/index.js';
+import { navigateToPublicWorld } from '../world-preview/public-route.js';
+import { messages, readPreviewLocale } from '../world-preview/locale.js';
 
 type CountryScene = {
   id: string;
@@ -39,6 +54,14 @@ const worldFit: ExplorerCameraFit = {
   camera: world,
   frame: [partition.width, partition.height],
 };
+const portraitWorldFit: ExplorerCameraFit = {
+  kind: 'bounds',
+  bounds: [0, 0, partition.width, partition.height],
+  padding: 1,
+  extent: [partition.width, partition.height],
+};
+const worldFitFor = (size: Size) =>
+  size.width < 750 && size.height > size.width ? portraitWorldFit : worldFit;
 const countries = partition.territories.map((country, index) => {
   const values = (
     country.path.match(/-?\d+(?:\.\d+)?(?:e[+-]?\d+)?/gi) ?? []
@@ -436,12 +459,62 @@ export function officialFacilityPoint(
     : site.point;
 }
 
+export function facilityHitGroups(
+  sites: readonly { id: string; point: readonly number[] }[],
+  box: { x: number; y: number; width: number; height: number },
+  size: Size,
+) {
+  return geographicPinGroups(
+    sites
+      .filter(
+        (s) =>
+          s.point[0]! > box.x &&
+          s.point[0]! < box.x + box.width &&
+          s.point[1]! > box.y &&
+          s.point[1]! < box.y + box.height,
+      )
+      .map((s) => ({
+        id: s.id,
+        x: ((s.point[0]! - box.x) / box.width) * size.width,
+        y: ((s.point[1]! - box.y) / box.height) * size.height,
+      })),
+    37,
+  );
+}
+
 export function WorldExplorer({
   initialOfficialSource,
 }: { initialOfficialSource?: ExplorerCountryBinding } = {}) {
   const viewport = useRef<HTMLDivElement>(null);
+  const topbar = useRef<HTMLElement>(null);
+  const [chromeSpace, setChromeSpace] = useState(76);
+  useEffect(() => {
+    const bar = topbar.current;
+    if (!bar) return;
+    const update = () => {
+      const top = bar.parentElement!.getBoundingClientRect().top;
+      const bottom = bar.getBoundingClientRect().bottom;
+      setChromeSpace(Math.ceil(bottom - top + 16));
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(bar);
+    update();
+    return () => observer.disconnect();
+  }, []);
   const [size, setSize] = useState<Size>({ width: 1200, height: 800 });
   const [countryId, setCountryId] = useState(readCountry);
+  const committedCountry = useRef(countryId);
+  const worldReturn = useRef<HTMLButtonElement>(null);
+  const countryDirectoryToggle = useRef<HTMLButtonElement>(null);
+  useLayoutEffect(() => {
+    restoreExplorerRouteStart(
+      committedCountry.current,
+      countryId,
+      countryId ? countryDirectoryToggle.current : worldReturn.current,
+      (options) => window.scrollTo(options),
+    );
+    committedCountry.current = countryId;
+  }, [countryId]);
   const loader = useMemo(() => createOfficialExplorerCountryLoader({}), []);
   const [officialBinding, setOfficialBinding] =
     useState<ExplorerCountryBinding>(
@@ -473,12 +546,29 @@ export function WorldExplorer({
   cameraRef.current = camera;
   sizeRef.current = size;
   const [selectedSite, setSelectedSite] = useState('');
+  const selectedHeading = useRef<HTMLHeadingElement>(null);
+  const inspector = useRef<HTMLElement>(null);
+  const selectedDetailsLink = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!selectedSite) return;
+    prepareExplorerFacilitySelection(
+      inspector.current,
+      window.matchMedia('(max-width: 900px)').matches
+        ? selectedDetailsLink.current
+        : selectedHeading.current,
+    );
+  }, [selectedSite]);
   const [filter, setFilter] = useState('全部');
+  const [headingExpanded, setHeadingExpanded] = useState(false);
+  const [worldHeadingExpanded, setWorldHeadingExpanded] = useState(false);
+  const [clusterIds, setClusterIds] = useState<string[]>([]);
   const [search, setSearch] = useState('');
   const [drawer, setDrawer] = useState(false);
   const [showWater, setShowWater] = useState(true);
   const [showArtwork, setShowArtwork] = useState(true);
-  const [sceneMode, setSceneMode] = useState(true);
+  const [sceneMode, setSceneMode] = useState(
+    () => new URLSearchParams(window.location.search).get('view') === 'scene',
+  );
   const [showLabels, setShowLabels] = useState(true);
   const sceneModeRef = useRef(sceneMode);
   sceneModeRef.current = sceneMode;
@@ -534,43 +624,24 @@ export function WorldExplorer({
     point[0]! < box.x + box.width &&
     point[1]! > box.y &&
     point[1]! < box.y + box.height;
-  const markers = layoutLabels(
-    (showLabels ? mapped : [])
-      .filter((s) => visiblePoint(s.point))
-      .sort((a, b) => {
-        const rank = (s: (typeof shown)[number]) =>
-          s.id === selectedSite
-            ? 0
-            : s.kind === 'port'
-              ? 1
-              : s.kind === 'factory'
-                ? 2
-                : s.kind === 'hub'
-                  ? 3
-                  : 4;
-        return rank(a) - rank(b);
-      })
-      .slice(0, size.width < 420 ? 1 : size.width < 750 ? 3 : 4)
-      .map((s) => ({
-        id: s.id,
-        x: ((s.point[0]! - box.x) / box.width) * size.width,
-        y: ((s.point[1]! - box.y) / box.height) * size.height,
-      })),
-    size,
-    [
-      {
-        x: 10,
-        y: 10,
-        width: Math.min(360, size.width * 0.65),
-        height: size.width < 750 ? 190 : 270,
-      },
-      { x: size.width - 66, y: 8, width: 62, height: 170 },
-    ],
+  const hitGroups = facilityHitGroups(mapped, box, size);
+  const singleHitIds = new Set(
+    hitGroups.filter((g) => g.ids.length === 1).map((g) => g.id),
   );
+  const neighborDetailMaps = country
+    ? detailMaps.filter(
+        (m) =>
+          m.id !== country.id &&
+          m.viewBox[0]! < box.x + box.width &&
+          m.viewBox[0]! + m.viewBox[2]! > box.x &&
+          m.viewBox[1]! < box.y + box.height &&
+          m.viewBox[1]! + m.viewBox[3]! > box.y,
+      )
+    : [];
   const fit = useCallback((id: string) => {
     const c = countries.find((item) => item.id === id);
     if (!c) {
-      cameraFit.current = worldFit;
+      cameraFit.current = worldFitFor(sizeRef.current);
       setCamera((current) =>
         cameraForViewport(current, sizeRef.current, cameraFit.current),
       );
@@ -590,11 +661,9 @@ export function WorldExplorer({
     cameraFit.current = {
       kind: 'bounds',
       bounds: [x0!, y0!, x1!, y1!],
-      padding: scene ? 1.55 : 1.95,
-      // Independent illustrations can extend beyond the geographic world frame.
-      ...(scene
-        ? {}
-        : { extent: [partition.width, partition.height] as const }),
+      padding: scene ? 1.06 : 1.45,
+      // Center this country even at the edge. Original geographic images stop
+      // at their real world extent; the remaining camera area stays blank.
     };
     setCamera((current) =>
       cameraForViewport(current, sizeRef.current, cameraFit.current),
@@ -615,6 +684,14 @@ export function WorldExplorer({
   };
   const navigate = useCallback(
     (id: string) => {
+      if (id === '') {
+        navigateToPublicWorld(window.location, import.meta.env.BASE_URL);
+        return;
+      }
+      if (id === countryId) {
+        setDrawer(false);
+        return;
+      }
       const c = countries.find((item) => item.id === id);
       const url = new URL(window.location.href);
       url.searchParams.set('atlas', 'explorer');
@@ -623,11 +700,14 @@ export function WorldExplorer({
       window.history.pushState({}, '', url);
       setCountryId(id);
       setSelectedSite('');
+      setClusterIds([]);
       setFilter('全部');
+      setHeadingExpanded(false);
+      setWorldHeadingExpanded(false);
       setDrawer(false);
       fit(id);
     },
-    [fit],
+    [fit, countryId],
   );
   useEffect(() => {
     const el = viewport.current!;
@@ -640,6 +720,11 @@ export function WorldExplorer({
         if (!isUsableViewport(next)) return;
         sizeRef.current = next;
         setSize(next);
+        if (
+          cameraFit.current === worldFit ||
+          cameraFit.current === portraitWorldFit
+        )
+          cameraFit.current = worldFitFor(next);
         setCamera((current) =>
           cameraForViewport(current, next, cameraFit.current),
         );
@@ -655,8 +740,13 @@ export function WorldExplorer({
     fit(readCountry());
     const back = () => {
       const id = readCountry();
+      if (id === committedCountry.current) return;
       setCountryId(id);
       setSelectedSite('');
+      setClusterIds([]);
+      setDrawer(false);
+      setHeadingExpanded(false);
+      setWorldHeadingExpanded(false);
       setFilter('全部');
       fit(id);
     };
@@ -733,6 +823,37 @@ export function WorldExplorer({
       result.push(<path key={`y${y}`} d={`M${box.x} ${y}h${box.width}`} />);
     return result;
   }, [camera.width, box.x, box.y, box.width, box.height]);
+  const zoomControls = (
+    <div className="explorer-controls explorer-floating">
+      <button
+        aria-label="放大地图"
+        onClick={() => zoomAt(0.65, size.width / 2, size.height / 2)}
+      >
+        ＋
+      </button>
+      <button
+        aria-label="缩小地图"
+        onClick={() => zoomAt(1.5, size.width / 2, size.height / 2)}
+      >
+        −
+      </button>
+      <button aria-label="适配当前国家" onClick={() => fit(countryId)}>
+        ⌖
+      </button>
+      {!country && (
+        <button
+          aria-label="适配完整世界"
+          onClick={() => {
+            cameraFit.current = null;
+            setCamera(cameraForViewport(world, sizeRef.current, worldFit));
+          }}
+        >
+          全图
+        </button>
+      )}
+      <span>{((scene?.frame[2] ?? 1900) / camera.width).toFixed(1)}×</span>
+    </div>
+  );
   const visibleDetailMaps = !country
     ? detailMaps.filter((map) => {
         const territory = countries.find((item) => item.id === map.id);
@@ -743,18 +864,32 @@ export function WorldExplorer({
       })
     : [];
   return (
-    <main className="world-explorer">
-      <header className="explorer-topbar">
+    <main
+      className={`world-explorer ${country ? 'explorer-country-view' : ''}`}
+      style={{ '--explorer-chrome-space': `${chromeSpace}px` } as CSSProperties}
+    >
+      <header ref={topbar} className="explorer-topbar">
         <a href="?atlas=explorer" className="explorer-brand">
           E<span>ASTERRA ATLAS</span>
         </a>
         <nav>
-          <button onClick={() => navigate('')}>世界总览</button>
+          <button
+            ref={worldReturn}
+            onClick={() => {
+              setClusterIds([]);
+              navigate('');
+            }}
+          >
+            {messages[readPreviewLocale()].overview}
+          </button>
           <a className="old-atlas" href="?atlas=continents">
             大陆图集
           </a>
           <span>/</span>
-          <button onClick={() => setDrawer((v) => !v)}>
+          <button
+            ref={countryDirectoryToggle}
+            onClick={() => setDrawer((v) => !v)}
+          >
             {country ? `${country.number} · ${country.name}` : '探索 70 个国家'}{' '}
             <small>⌄</small>
           </button>
@@ -773,613 +908,735 @@ export function WorldExplorer({
         </a>
       </header>
       <div className="explorer-layout">
-        <div
-          ref={viewport}
-          className={`explorer-viewport ${dragging ? 'is-dragging' : ''}`}
-          tabIndex={0}
-          aria-label="可拖拽缩放的世界地图"
-          onKeyDown={(e) => {
-            if (e.target !== e.currentTarget) return;
-            if (e.key === '+' || e.key === '=') {
-              e.preventDefault();
-              zoomAt(0.7, size.width / 2, size.height / 2);
+        <div className="explorer-main">
+          {country && (
+            <header
+              className="explorer-country-heading"
+              data-expanded={headingExpanded}
+            >
+              <div>
+                <span>COUNTRY / INDUSTRY & RESOURCES</span>
+                <h1>
+                  {country.number} · {country.name}
+                </h1>
+                <p role="status">{sourceStatus(officialState)}</p>
+              </div>
+              <button
+                className="explorer-heading-toggle"
+                aria-expanded={headingExpanded}
+                onClick={() => setHeadingExpanded((v) => !v)}
+              >
+                {headingExpanded ? '收起国家资料' : '展开国家资料'}
+              </button>
+              {official && (
+                <div className="country-key-stats">
+                  <span>
+                    <b>
+                      <ExactOfficialValue
+                        data={official}
+                        path="/profile/population"
+                      />
+                    </b>
+                    开局人口（人）
+                  </span>
+                  <span>
+                    <b>{local.length}</b>完整设施记录（非已投运）
+                  </span>
+                  <span>
+                    <b>{official.regions.length}</b>经济区域
+                  </span>
+                </div>
+              )}
+              <div
+                className="explorer-view-switch"
+                role="group"
+                aria-label="国家视图"
+              >
+                <button
+                  aria-pressed={Boolean(scene)}
+                  onClick={() => {
+                    sceneModeRef.current = true;
+                    setSceneMode(true);
+                    fit(countryId);
+                  }}
+                >
+                  高清场景
+                </button>
+                <button
+                  aria-pressed={!scene}
+                  onClick={() => {
+                    sceneModeRef.current = false;
+                    setSceneMode(false);
+                    fit(countryId);
+                  }}
+                >
+                  地理地图
+                </button>
+              </div>
+            </header>
+          )}
+          <div className="explorer-crisis-summary">
+            <CrisisSummary
+              {...(country
+                ? { countryLabel: `${country.number} · ${country.name}` }
+                : {})}
+              href={`?atlas=crisis${country ? `&country=${country.number}` : ''}`}
+            />
+          </div>
+          <div
+            ref={viewport}
+            className={`explorer-viewport ${dragging ? 'is-dragging' : ''}`}
+            data-explorer-view={scene ? 'scene' : 'geography'}
+            data-camera-policy={
+              country && !scene
+                ? 'COUNTRY_CENTERED_UNMAPPED_EDGE_BLANK'
+                : undefined
             }
-            if (e.key === '-') {
-              e.preventDefault();
-              zoomAt(1.4, size.width / 2, size.height / 2);
+            tabIndex={0}
+            aria-label={
+              scene ? '可拖拽缩放的国家高清场景' : '可拖拽缩放的世界地图'
             }
-            if (e.key === '0') fit(countryId);
-          }}
-          onDoubleClick={(e) => {
-            if ((e.target as HTMLElement).closest('button,.explorer-floating'))
-              return;
-            const r = e.currentTarget.getBoundingClientRect();
-            zoomAt(0.5, e.clientX - r.left, e.clientY - r.top);
-          }}
-          onPointerDown={(e) => {
-            if (
-              (e.target as HTMLElement).closest(
-                'button,input,select,a,.explorer-floating',
+            onKeyDown={(e) => {
+              if (e.target !== e.currentTarget) return;
+              if (e.key === '+' || e.key === '=') {
+                e.preventDefault();
+                zoomAt(0.7, size.width / 2, size.height / 2);
+              }
+              if (e.key === '-') {
+                e.preventDefault();
+                zoomAt(1.4, size.width / 2, size.height / 2);
+              }
+              if (e.key === '0') fit(countryId);
+            }}
+            onDoubleClick={(e) => {
+              if (
+                (e.target as HTMLElement).closest('button,.explorer-floating')
               )
-            )
-              return;
-            pointerCountry.current =
-              (e.target as Element)
-                .closest('[data-country]')
-                ?.getAttribute('data-country') ?? '';
-            e.currentTarget.setPointerCapture(e.pointerId);
-            pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-            pointer.current = {
-              id: e.pointerId,
-              x: e.clientX,
-              y: e.clientY,
-              startX: e.clientX,
-              startY: e.clientY,
-              moved: false,
-            };
-            setDragging(true);
-            suppressClick.current = false;
-          }}
-          onPointerMove={(e) => {
-            if (!pointers.current.has(e.pointerId)) return;
-            const previous = [...pointers.current.values()];
-            const before = pointers.current.get(e.pointerId)!;
-            pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
-            if (pointers.current.size === 2) {
-              const after = [...pointers.current.values()];
-              const a = previous[0]!,
-                b = previous[1]!,
-                c = after[0]!,
-                d = after[1]!;
-              const oldDistance = Math.hypot(a.x - b.x, a.y - b.y),
-                newDistance = Math.hypot(c.x - d.x, c.y - d.y);
-              const rect = e.currentTarget.getBoundingClientRect();
-              if (oldDistance > 0 && newDistance > 0)
-                zoomAt(
-                  oldDistance / newDistance,
-                  (c.x + d.x) / 2 - rect.left,
-                  (c.y + d.y) / 2 - rect.top,
-                );
-              suppressClick.current = true;
-              return;
-            }
-            const deltaX = e.clientX - before.x,
-              deltaY = e.clientY - before.y;
-            if (
-              pointer.current &&
-              Math.hypot(
-                e.clientX - pointer.current.startX,
-                e.clientY - pointer.current.startY,
-              ) > 4
-            )
-              suppressClick.current = true;
-            const unitsPerPixel =
-              cameraRef.current.width / sizeRef.current.width;
-            if (deltaX !== 0 || deltaY !== 0) cameraFit.current = null;
-            setCamera((c) => ({
-              ...c,
-              x: c.x - deltaX * unitsPerPixel,
-              y: c.y - deltaY * unitsPerPixel,
-            }));
-          }}
-          onPointerUp={(e) => {
-            if (
-              pointerCountry.current &&
-              !suppressClick.current &&
-              pointers.current.size === 1
-            )
-              navigate(pointerCountry.current);
-            pointerCountry.current = '';
-            pointers.current.delete(e.pointerId);
-            if (!pointers.current.size) {
+                return;
+              const r = e.currentTarget.getBoundingClientRect();
+              zoomAt(0.5, e.clientX - r.left, e.clientY - r.top);
+            }}
+            onPointerDown={(e) => {
+              if (
+                (e.target as HTMLElement).closest(
+                  'button,input,select,a,.explorer-floating',
+                )
+              )
+                return;
+              pointerCountry.current =
+                (e.target as Element)
+                  .closest('[data-country]')
+                  ?.getAttribute('data-country') ?? '';
+              e.currentTarget.setPointerCapture(e.pointerId);
+              pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+              pointer.current = {
+                id: e.pointerId,
+                x: e.clientX,
+                y: e.clientY,
+                startX: e.clientX,
+                startY: e.clientY,
+                moved: false,
+              };
+              setDragging(true);
+              suppressClick.current = false;
+            }}
+            onPointerMove={(e) => {
+              if (!pointers.current.has(e.pointerId)) return;
+              const previous = [...pointers.current.values()];
+              const before = pointers.current.get(e.pointerId)!;
+              pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+              if (pointers.current.size === 2) {
+                const after = [...pointers.current.values()];
+                const a = previous[0]!,
+                  b = previous[1]!,
+                  c = after[0]!,
+                  d = after[1]!;
+                const oldDistance = Math.hypot(a.x - b.x, a.y - b.y),
+                  newDistance = Math.hypot(c.x - d.x, c.y - d.y);
+                const rect = e.currentTarget.getBoundingClientRect();
+                if (oldDistance > 0 && newDistance > 0)
+                  zoomAt(
+                    oldDistance / newDistance,
+                    (c.x + d.x) / 2 - rect.left,
+                    (c.y + d.y) / 2 - rect.top,
+                  );
+                suppressClick.current = true;
+                return;
+              }
+              const deltaX = e.clientX - before.x,
+                deltaY = e.clientY - before.y;
+              if (
+                pointer.current &&
+                Math.hypot(
+                  e.clientX - pointer.current.startX,
+                  e.clientY - pointer.current.startY,
+                ) > 4
+              )
+                suppressClick.current = true;
+              const unitsPerPixel =
+                cameraRef.current.width / sizeRef.current.width;
+              if (deltaX !== 0 || deltaY !== 0) cameraFit.current = null;
+              setCamera((c) => ({
+                ...c,
+                x: c.x - deltaX * unitsPerPixel,
+                y: c.y - deltaY * unitsPerPixel,
+              }));
+            }}
+            onPointerUp={(e) => {
+              if (
+                pointerCountry.current &&
+                !suppressClick.current &&
+                pointers.current.size === 1
+              )
+                navigate(pointerCountry.current);
+              pointerCountry.current = '';
+              pointers.current.delete(e.pointerId);
+              if (!pointers.current.size) {
+                pointer.current = null;
+                setDragging(false);
+              }
+              if (e.currentTarget.hasPointerCapture(e.pointerId))
+                e.currentTarget.releasePointerCapture(e.pointerId);
+            }}
+            onPointerCancel={(e) => {
+              pointers.current.delete(e.pointerId);
               pointer.current = null;
               setDragging(false);
-            }
-            if (e.currentTarget.hasPointerCapture(e.pointerId))
-              e.currentTarget.releasePointerCapture(e.pointerId);
-          }}
-          onPointerCancel={(e) => {
-            pointers.current.delete(e.pointerId);
-            pointer.current = null;
-            setDragging(false);
-          }}
-        >
-          <svg
-            className="explorer-terrain"
-            viewBox={`${box.x} ${box.y} ${box.width} ${box.height}`}
-            aria-label="国家地形与设施位置"
+            }}
           >
-            <defs>
-              <filter id="terrain-contrast">
-                <feColorMatrix type="saturate" values=".85" />
-              </filter>
-              <filter id="continent-land-art" colorInterpolationFilters="sRGB">
-                <feColorMatrix
-                  type="matrix"
-                  values="1 0 0 0 0
+            <svg
+              className="explorer-terrain"
+              viewBox={`${box.x} ${box.y} ${box.width} ${box.height}`}
+              aria-label="国家地形与设施位置"
+            >
+              <defs>
+                <filter id="neighbor-detail-tone">
+                  <feComponentTransfer>
+                    <feFuncR type="linear" slope="0.7" />
+                    <feFuncG type="linear" slope="0.7" />
+                    <feFuncB type="linear" slope="0.7" />
+                  </feComponentTransfer>
+                </filter>
+                {neighborDetailMaps.map((m) => (
+                  <clipPath
+                    key={m.id}
+                    id={`neighbor-detail-${m.number}`}
+                    clipPathUnits="userSpaceOnUse"
+                  >
+                    <path d={countries.find((t) => t.id === m.id)!.path} />
+                  </clipPath>
+                ))}
+                <filter id="terrain-contrast">
+                  <feColorMatrix type="saturate" values=".85" />
+                </filter>
+                <filter
+                  id="continent-land-art"
+                  colorInterpolationFilters="sRGB"
+                >
+                  <feColorMatrix
+                    type="matrix"
+                    values="1 0 0 0 0
                           0 1 0 0 0
                           0 0 1 0 0
                           1.4 .8 -1.8 0 .2"
-                />
-                <feComponentTransfer>
-                  <feFuncA type="linear" slope="1.8" />
-                </feComponentTransfer>
-              </filter>
-              {country && (
-                <>
-                  <filter
-                    id="explorer-country-distance"
-                    x="0"
-                    y="0"
-                    width="1774"
-                    height="887"
-                    filterUnits="userSpaceOnUse"
-                    colorInterpolationFilters="sRGB"
-                  >
-                    <feMorphology
-                      operator="dilate"
-                      radius={countryDistance * 2}
-                    />
-                    <feGaussianBlur stdDeviation={countryDistance} />
-                    <feComponentTransfer>
-                      <feFuncA
-                        type="table"
-                        tableValues="0 0.333333 0.666667 1 1"
-                      />
-                    </feComponentTransfer>
-                  </filter>
-                  <mask
-                    id="explorer-country-context"
-                    x="0"
-                    y="0"
-                    width="1774"
-                    height="887"
-                    maskUnits="userSpaceOnUse"
-                    style={{ maskType: 'luminance' }}
-                  >
-                    <rect x="0" y="0" width="1774" height="887" fill="white" />
-                    <path
-                      d={country.path}
-                      fill="black"
-                      filter="url(#explorer-country-distance)"
-                    />
-                    <path d={country.path} fill="black" />
-                  </mask>
-                </>
-              )}
-              {!country &&
-                countries.map((item) => (
-                  <clipPath
-                    key={item.id}
-                    id={`mosaic-${item.number}`}
-                    clipPathUnits="userSpaceOnUse"
-                  >
-                    <path d={item.path} />
-                  </clipPath>
-                ))}
-              {!country &&
-                continentArtworks.map((scene) => (
-                  <clipPath
-                    key={scene.id}
-                    id={`continent-land-${scene.id}`}
-                    clipPathUnits="userSpaceOnUse"
-                  >
-                    {countries
-                      .filter((item) => continentFor(item.label) === scene.id)
-                      .map((item) => (
-                        <path key={item.id} d={item.path} />
-                      ))}
-                  </clipPath>
-                ))}
-            </defs>
-            <rect
-              x={box.x}
-              y={box.y}
-              width={box.width}
-              height={box.height}
-              fill="#102e39"
-            />
-            {country ? (
-              <image
-                href={terrain}
-                width="1774"
-                height="887"
-                filter="url(#terrain-contrast)"
-                data-regional-terrain="true"
-              />
-            ) : (
-              <>
-                <image
-                  href={terrain}
-                  width="1774"
-                  height="887"
-                  filter="url(#terrain-contrast)"
-                />
-                {showArtwork &&
-                  continentArtworks.map((art) => (
-                    <image
-                      key={art.id}
-                      className="explorer-continent-art"
-                      aria-hidden="true"
-                      href={continentSceneUrls[art.file]}
-                      x={art.frame[0]}
-                      y={art.frame[1]}
-                      width={art.frame[2]}
-                      height={art.frame[3]}
-                      preserveAspectRatio="xMidYMid slice"
-                      filter="url(#continent-land-art)"
-                      clipPath={`url(#continent-land-${art.id})`}
-                      data-continent-art={art.id}
-                    />
-                  ))}
-                {visibleDetailMaps.map((map) => {
-                  const territory = countries.find(
-                    (item) => item.id === map.id,
-                  );
-                  if (!territory) return null;
-                  return (
-                    <image
-                      className={`explorer-mosaic-tile ${showArtwork ? 'with-artwork' : ''}`}
-                      key={map.id}
-                      aria-hidden="true"
-                      href={countryDetailUrls[map.file]}
-                      x={map.viewBox[0]}
-                      y={map.viewBox[1]}
-                      width={map.viewBox[2]}
-                      height={map.viewBox[3]}
-                      preserveAspectRatio="none"
-                      clipPath={`url(#mosaic-${territory.number})`}
-                      data-mosaic-country={territory.number}
-                    />
-                  );
-                })}
-              </>
-            )}
-            {countries.map((c) => (
-              <path
-                key={c.id}
-                d={c.path}
-                className={
-                  c.id === countryId
-                    ? 'explorer-country selected'
-                    : 'explorer-country'
-                }
-                data-country={c.id}
-                style={
-                  country && c.id !== countryId
-                    ? { pointerEvents: 'none' }
-                    : undefined
-                }
-              >
-                <title>
-                  {c.number} · {c.name}
-                </title>
-              </path>
-            ))}
-            {showWater &&
-              artwork.physical
-                .filter((f) => f.kind !== 'mountain')
-                .map((f) => (
-                  <path
-                    key={f.id}
-                    d={f.path}
-                    className={`explorer-water ${f.kind}`}
                   />
-                ))}
-            {artwork.physical
-              .filter((feature) => feature.kind === 'mountain')
-              .map((feature) => (
-                <path
-                  key={feature.id}
-                  d={feature.path}
-                  className="explorer-mountain"
-                />
-              ))}
-            {showConnections &&
-              scenario.freight
-                .filter((l) => l.countryIds.includes(countryId))
-                .map((l) => (
-                  <path key={l.id} d={l.path} className="explorer-corridor">
-                    <title>待勘测连接 · 非已投运道路</title>
-                  </path>
-                ))}
-            {country && (
+                  <feComponentTransfer>
+                    <feFuncA type="linear" slope="1.8" />
+                  </feComponentTransfer>
+                </filter>
+                {country && (
+                  <>
+                    <clipPath
+                      id="explorer-selected-country"
+                      clipPathUnits="userSpaceOnUse"
+                    >
+                      <path d={country.path} />
+                    </clipPath>
+                    <filter
+                      id="explorer-country-distance"
+                      x="0"
+                      y="0"
+                      width="1774"
+                      height="887"
+                      filterUnits="userSpaceOnUse"
+                      colorInterpolationFilters="sRGB"
+                    >
+                      <feMorphology
+                        operator="dilate"
+                        radius={countryDistance * 2}
+                      />
+                      <feGaussianBlur stdDeviation={countryDistance} />
+                      <feComponentTransfer>
+                        <feFuncA
+                          type="table"
+                          tableValues="0 0.333333 0.666667 1 1"
+                        />
+                      </feComponentTransfer>
+                    </filter>
+                    <mask
+                      id="explorer-country-context"
+                      x="0"
+                      y="0"
+                      width="1774"
+                      height="887"
+                      maskUnits="userSpaceOnUse"
+                      style={{ maskType: 'luminance' }}
+                    >
+                      <rect
+                        x="0"
+                        y="0"
+                        width="1774"
+                        height="887"
+                        fill="white"
+                      />
+                      <path
+                        d={country.path}
+                        fill="black"
+                        filter="url(#explorer-country-distance)"
+                      />
+                      <path d={country.path} fill="black" />
+                    </mask>
+                  </>
+                )}
+                {!country &&
+                  countries.map((item) => (
+                    <clipPath
+                      key={item.id}
+                      id={`mosaic-${item.number}`}
+                      clipPathUnits="userSpaceOnUse"
+                    >
+                      <path d={item.path} />
+                    </clipPath>
+                  ))}
+                {!country &&
+                  continentArtworks.map((scene) => (
+                    <clipPath
+                      key={scene.id}
+                      id={`continent-land-${scene.id}`}
+                      clipPathUnits="userSpaceOnUse"
+                    >
+                      {countries
+                        .filter((item) => continentFor(item.label) === scene.id)
+                        .map((item) => (
+                          <path key={item.id} d={item.path} />
+                        ))}
+                    </clipPath>
+                  ))}
+              </defs>
               <rect
-                x="0"
-                y="0"
-                width="1774"
-                height="887"
-                fill="#081c24"
-                opacity="0.88"
-                mask="url(#explorer-country-context)"
-                pointerEvents="none"
-                data-distance-fade="country-outline"
+                x={box.x}
+                y={box.y}
+                width={box.width}
+                height={box.height}
+                fill="#102e39"
               />
-            )}
-            <g className="explorer-detail-grid">{gridLines}</g>
-            {scene ? (
-              <image
-                href={countrySceneUrls[scene.file]}
-                x={scene.frame[0]}
-                y={scene.frame[1]}
-                width={scene.frame[2]}
-                height={scene.frame[3]}
-                preserveAspectRatio="xMidYMid meet"
-                pointerEvents="none"
-                data-country-scene={country?.number}
-              />
-            ) : detailMap ? (
-              <image
-                href={countryDetailUrls[detailMap.file]}
-                x={detailMap.viewBox[0]}
-                y={detailMap.viewBox[1]}
-                width={detailMap.viewBox[2]}
-                height={detailMap.viewBox[3]}
-                preserveAspectRatio="none"
-                pointerEvents="none"
-                data-country-detail={country?.number}
-              />
-            ) : null}
-          </svg>
-          <div className="explorer-vignette" />
-          <div className="explorer-heading explorer-floating">
-            <span>
-              {country
-                ? 'COUNTRY / INDUSTRY & RESOURCES'
-                : 'WORLD / GEOGRAPHY & SETTLEMENTS'}
-            </span>
-            <h1>{country ? country.name : '一个世界，七十种起点'}</h1>
-            <p>
-              {country
-                ? `${country.number} 号经济体 · ${scene ? '独立高清场景插图' : '本国地理细图'} · 背景为真实地理与邻接国界`
-                : '选择一个国家，沿着河谷、城市与产业进入它的内部。'}
-            </p>
-            {official && (
-              <div className="country-key-stats">
-                <span>
-                  <b>
-                    <ExactOfficialValue
-                      data={official}
-                      path="/profile/population"
+              {!scene && (
+                <g data-explorer-geography="true">
+                  {country ? (
+                    <>
+                      <image
+                        href={terrain}
+                        width="1774"
+                        height="887"
+                        filter="url(#terrain-contrast)"
+                        data-regional-terrain="true"
+                      />
+                      <g
+                        data-geographic-detail-context="true"
+                        filter="url(#neighbor-detail-tone)"
+                      >
+                        {neighborDetailMaps.map((m) => (
+                          <image
+                            key={m.id}
+                            href={`${countryDetailUrls[m.file]}#svgView(preserveAspectRatio(none))`}
+                            x={m.viewBox[0]}
+                            y={m.viewBox[1]}
+                            width={m.viewBox[2]}
+                            height={m.viewBox[3]}
+                            preserveAspectRatio="none"
+                            clipPath={`url(#neighbor-detail-${m.number})`}
+                            pointerEvents="none"
+                            data-neighbor-detail={m.number}
+                          />
+                        ))}
+                      </g>
+                    </>
+                  ) : (
+                    <>
+                      <image
+                        href={terrain}
+                        width="1774"
+                        height="887"
+                        filter="url(#terrain-contrast)"
+                      />
+                      {showArtwork &&
+                        continentArtworks.map((art) => (
+                          <image
+                            key={art.id}
+                            className="explorer-continent-art"
+                            aria-hidden="true"
+                            href={continentSceneUrls[art.file]}
+                            x={art.frame[0]}
+                            y={art.frame[1]}
+                            width={art.frame[2]}
+                            height={art.frame[3]}
+                            preserveAspectRatio="xMidYMid slice"
+                            filter="url(#continent-land-art)"
+                            clipPath={`url(#continent-land-${art.id})`}
+                            data-continent-art={art.id}
+                          />
+                        ))}
+                      {visibleDetailMaps.map((map) => {
+                        const territory = countries.find(
+                          (item) => item.id === map.id,
+                        );
+                        if (!territory) return null;
+                        return (
+                          <image
+                            className={`explorer-mosaic-tile ${showArtwork ? 'with-artwork' : ''}`}
+                            key={map.id}
+                            aria-hidden="true"
+                            href={countryDetailUrls[map.file]}
+                            x={map.viewBox[0]}
+                            y={map.viewBox[1]}
+                            width={map.viewBox[2]}
+                            height={map.viewBox[3]}
+                            preserveAspectRatio="none"
+                            clipPath={`url(#mosaic-${territory.number})`}
+                            data-mosaic-country={territory.number}
+                          />
+                        );
+                      })}
+                    </>
+                  )}
+                  {countries.map((c) => (
+                    <path
+                      key={c.id}
+                      d={c.path}
+                      className={
+                        c.id === countryId
+                          ? 'explorer-country selected'
+                          : 'explorer-country'
+                      }
+                      data-country={c.id}
+                      style={
+                        country && c.id !== countryId
+                          ? { pointerEvents: 'none' }
+                          : undefined
+                      }
+                    >
+                      <title>{`${c.number} · ${c.name}`}</title>
+                    </path>
+                  ))}
+                  {showWater &&
+                    artwork.physical
+                      .filter((f) => f.kind !== 'mountain')
+                      .map((f) => (
+                        <path
+                          key={f.id}
+                          d={f.path}
+                          className={`explorer-water ${f.kind}`}
+                        />
+                      ))}
+                  {artwork.physical
+                    .filter((feature) => feature.kind === 'mountain')
+                    .map((feature) => (
+                      <path
+                        key={feature.id}
+                        d={feature.path}
+                        className="explorer-mountain"
+                      />
+                    ))}
+                  {showConnections &&
+                    scenario.freight
+                      .filter((l) => l.countryIds.includes(countryId))
+                      .map((l) => (
+                        <path
+                          key={l.id}
+                          d={l.path}
+                          className="explorer-corridor"
+                        >
+                          <title>待勘测连接 · 非已投运道路</title>
+                        </path>
+                      ))}
+                  {country && (
+                    <rect
+                      x="0"
+                      y="0"
+                      width="1774"
+                      height="887"
+                      fill="#081c24"
+                      opacity="0.88"
+                      mask="url(#explorer-country-context)"
+                      pointerEvents="none"
+                      data-distance-fade="country-outline"
                     />
-                  </b>
-                  开局人口（人）
+                  )}
+                  <g className="explorer-detail-grid">{gridLines}</g>
+                </g>
+              )}
+              {scene ? (
+                <image
+                  href={countrySceneUrls[scene.file]}
+                  x={scene.frame[0]}
+                  y={scene.frame[1]}
+                  width={scene.frame[2]}
+                  height={scene.frame[3]}
+                  preserveAspectRatio="xMidYMid meet"
+                  pointerEvents="none"
+                  data-country-scene={country?.number}
+                />
+              ) : detailMap ? (
+                <image
+                  href={`${countryDetailUrls[detailMap.file]}#svgView(preserveAspectRatio(none))`}
+                  x={detailMap.viewBox[0]}
+                  y={detailMap.viewBox[1]}
+                  width={detailMap.viewBox[2]}
+                  height={detailMap.viewBox[3]}
+                  preserveAspectRatio="none"
+                  clipPath="url(#explorer-selected-country)"
+                  pointerEvents="none"
+                  data-country-detail={country?.number}
+                />
+              ) : null}
+              {!scene && country && (
+                <path
+                  d={country.path}
+                  className="explorer-country selected"
+                  pointerEvents="none"
+                  data-selected-country-outline={country.number}
+                />
+              )}
+            </svg>
+            {!scene && <div className="explorer-vignette" />}
+            {selected && (
+              <div className="explorer-selection-preview explorer-floating">
+                <span role="status">
+                  已选择 {selected.id} · {placeName(selected)}
                 </span>
-                <span>
-                  <b>{local.length}</b>完整设施记录（非已投运）
-                </span>
-                <span>
-                  <b>{official.regions.length}</b>
-                  经济区域
-                </span>
+                <button
+                  ref={selectedDetailsLink}
+                  onClick={() => {
+                    selectedHeading.current?.focus({ preventScroll: true });
+                    selectedHeading.current?.scrollIntoView({
+                      block: 'start',
+                      behavior: 'instant',
+                    });
+                  }}
+                >
+                  查看设施详情
+                </button>
               </div>
             )}
             {!country && (
               <div
-                className="country-key-stats"
-                title="官方选定平衡包固定汇总 · 非live World State"
+                className="explorer-heading explorer-floating"
+                data-expanded={worldHeadingExpanded}
               >
-                <span>
-                  <b>{OFFICIAL_EXPLORER_SUMMARY.countriesExact}</b>国家
-                </span>
-                <span>
-                  <b>{OFFICIAL_EXPLORER_SUMMARY.populationExact}</b>
-                  开局人口（人）
-                </span>
-                <span>
-                  <b>{OFFICIAL_EXPLORER_SUMMARY.facilitiesExact}</b>
-                  完整设施记录（非已投运）
-                </span>
+                <span>WORLD / GEOGRAPHY & SETTLEMENTS</span>
+                <h1>一个世界，七十种起点</h1>
+                <button
+                  className="explorer-world-heading-toggle"
+                  aria-expanded={worldHeadingExpanded}
+                  onClick={() => setWorldHeadingExpanded((v) => !v)}
+                >
+                  {worldHeadingExpanded ? '收起世界资料' : '展开世界资料'}
+                </button>
+                <p>选择一个国家，沿着河谷、城市与产业进入它的内部。</p>
+                <div
+                  className="country-key-stats"
+                  title="官方选定平衡包固定汇总 · 非live World State"
+                >
+                  <span>
+                    <b>{OFFICIAL_EXPLORER_SUMMARY.countriesExact}</b>国家
+                  </span>
+                  <span>
+                    <b>{OFFICIAL_EXPLORER_SUMMARY.populationExact}</b>
+                    开局人口（人）
+                  </span>
+                  <span>
+                    <b>{OFFICIAL_EXPLORER_SUMMARY.facilitiesExact}</b>
+                    完整设施记录（非已投运）
+                  </span>
+                </div>
               </div>
             )}
-            {country && <p role="status">{sourceStatus(officialState)}</p>}
-          </div>
-          {!country &&
-            size.width >= 600 &&
-            countries
-              .filter((c) => visiblePoint(c.label))
-              .map((c) => (
-                <button
-                  key={c.id}
-                  className="explorer-country-pin"
-                  style={project(c.label)}
-                  onClick={() => navigate(c.id)}
-                  aria-label={`进入 ${c.number} ${c.name}`}
-                >
-                  <b>{c.number}</b>
-                  <span>{c.name}</span>
-                </button>
-              ))}
-          {!country && visiblePoint([824, 541]) && (
-            <span className="explorer-island-badge" style={project([824, 541])}>
-              Callum Island
-            </span>
-          )}
-          {country && (
-            <svg
-              className="explorer-leaders"
-              viewBox={`0 0 ${size.width} ${size.height}`}
-              aria-hidden="true"
-            >
-              {markers.map((m) => (
-                <g key={m.id}>
-                  <path
-                    d={`M${m.anchorX} ${m.anchorY}L${Math.max(m.x, Math.min(m.x + m.width, m.anchorX))} ${Math.max(m.y, Math.min(m.y + m.height, m.anchorY))}`}
-                  />
-                  <circle cx={m.anchorX} cy={m.anchorY} r="4" />
-                </g>
-              ))}
-            </svg>
-          )}
-          {country &&
-            showLabels &&
-            mapped
-              .filter((s) => visiblePoint(s.point))
-              .map((site) => (
-                <button
-                  key={`pin-${site.id}`}
-                  className={`explorer-facility-dot ${selectedSite === site.id ? 'active' : ''}`}
-                  style={project(site.point)}
-                  onClick={() => setSelectedSite(site.id)}
-                  aria-label={`查看${placeName(site)} ${site.id}`}
-                  title={`${placeName(site)} · ${site.id}`}
-                >
-                  <FacilityIcon kind={site.kind} />
-                </button>
-              ))}
-          {country &&
-            markers.map((marker) => {
-              const site = shown.find((s) => s.id === marker.id)!;
-              return (
-                <button
-                  key={site.id}
-                  className={`explorer-site ${selectedSite === site.id ? 'active' : ''}`}
-                  style={{
-                    left: marker.x,
-                    top: marker.y,
-                    width: marker.width,
-                    height: marker.height,
-                  }}
-                  onClick={() => setSelectedSite(site.id)}
-                  aria-label={`${placeName(site)} ${site.id}`}
-                >
-                  <span className="site-anchor" />
-                  <FacilityIcon kind={site.kind} />
-                  <span className="site-label">
-                    <strong>{placeName(site)}</strong>
-                    <small>
-                      {official && (
-                        <ExactOfficialValue
-                          data={official}
-                          path={`/facilities/${site.sourceIndex}/record/estimatedCapacity`}
-                        />
-                      )}{' '}
-                      {units[site.record.capacityUnit] ??
-                        site.record.capacityUnit}
-                    </small>
-                    <em>
-                      {site.id} · {site.record.lifecycle} / 未投运
-                    </em>
-                  </span>
-                </button>
-              );
-            })}
-          {!scene &&
-            showResources &&
-            (official?.resources ?? [])
-              .filter((r) => visiblePoint(r.point))
-              .map((r) => (
-                <span
-                  key={r.id}
-                  className="explorer-resource-pin"
-                  style={project(r.point)}
-                  title={`${r.id} · ${r.type.name} · 选定开局储量，非运行时开采`}
-                >
-                  <i>◇</i>
-                  {r.type.name}
-                </span>
-              ))}
-          <div className="explorer-controls explorer-floating">
-            <button
-              aria-label="放大地图"
-              onClick={() => zoomAt(0.65, size.width / 2, size.height / 2)}
-            >
-              ＋
-            </button>
-            <button
-              aria-label="缩小地图"
-              onClick={() => zoomAt(1.5, size.width / 2, size.height / 2)}
-            >
-              −
-            </button>
-            <button aria-label="适配当前国家" onClick={() => fit(countryId)}>
-              ⌖
-            </button>
-            <span>
-              {((scene?.frame[2] ?? 1900) / camera.width).toFixed(1)}×
-            </span>
-          </div>
-          <div className="explorer-layer-controls explorer-floating">
-            {!country && (
-              <select
-                aria-label="聚焦大陆精绘"
-                value=""
-                onChange={(event) => focusContinent(event.target.value)}
-              >
-                <option value="">聚焦大陆…</option>
-                {continentArtworks.map((art) => (
-                  <option key={art.id} value={art.id}>
-                    {art.name}
-                  </option>
-                ))}
-              </select>
-            )}
-            {country && scenes.some((s) => s.id === countryId) && (
-              <button
-                aria-pressed={Boolean(scene)}
-                onClick={() => {
-                  sceneModeRef.current = !sceneMode;
-                  setSceneMode(!sceneMode);
-                  setSelectedSite('');
-                  fit(countryId);
-                }}
-              >
-                {scene ? '地理图 ↗' : '场景图 ↗'}
-              </button>
-            )}
-            {country && (
-              <button
-                aria-pressed={showLabels}
-                onClick={() => setShowLabels((v) => !v)}
-              >
-                设施标注
-              </button>
-            )}
-            {
-              <>
-                {!country && (
+            {!country &&
+              size.width >= 600 &&
+              countries
+                .filter((c) => visiblePoint(c.label))
+                .map((c) => (
                   <button
-                    aria-pressed={showArtwork}
-                    onClick={() => setShowArtwork((value) => !value)}
+                    key={c.id}
+                    className="explorer-country-pin"
+                    style={project(c.label)}
+                    onClick={() => navigate(c.id)}
+                    aria-label={`进入 ${c.number} ${c.name}`}
                   >
-                    大陆精绘
+                    <b>{c.number}</b>
+                    <span>{c.name}</span>
                   </button>
-                )}
-                <button
-                  aria-pressed={showWater}
-                  onClick={() => setShowWater((v) => !v)}
-                >
-                  河湖
+                ))}
+            {!country && visiblePoint([824, 541]) && (
+              <span
+                className="explorer-island-badge"
+                style={project([824, 541])}
+              >
+                Callum Island
+              </span>
+            )}
+            {country &&
+              showLabels &&
+              mapped
+                .filter((s) => visiblePoint(s.point) && singleHitIds.has(s.id))
+                .map((site) => (
+                  <button
+                    key={`pin-${site.id}`}
+                    className={`explorer-facility-dot ${selectedSite === site.id ? 'active' : ''}`}
+                    style={project(site.point)}
+                    onClick={() => setSelectedSite(site.id)}
+                    aria-label={`查看${placeName(site)} ${site.id}`}
+                    title={`${placeName(site)} · ${site.id}`}
+                  >
+                    <FacilityIcon kind={site.kind} />
+                  </button>
+                ))}
+            {country &&
+              showLabels &&
+              hitGroups
+                .filter((g) => g.ids.length > 1)
+                .map((g) => (
+                  <button
+                    key={`cluster-${g.id}`}
+                    className={`explorer-facility-dot explorer-facility-cluster ${g.ids.includes(selectedSite) ? 'active' : ''}`}
+                    style={{ left: g.x, top: g.y }}
+                    aria-label={`选择重叠设施 ${g.ids.join(' ')}`}
+                    data-facility-ids={g.ids.join(',')}
+                    onClick={() => setClusterIds(g.ids)}
+                  >
+                    +{g.ids.length}
+                  </button>
+                ))}
+            {country && clusterIds.length > 0 && (
+              <div
+                className="explorer-cluster-choices explorer-floating"
+                role="group"
+                aria-label="重叠设施：按编号选择"
+              >
+                <button onClick={() => setClusterIds([])}>
+                  关闭重叠设施列表
                 </button>
-                <button
-                  aria-pressed={showResources}
-                  onClick={() => setShowResources((v) => !v)}
-                >
-                  矿产
-                </button>
-                <button
-                  aria-pressed={showConnections}
-                  onClick={() => setShowConnections((v) => !v)}
-                >
-                  接入草案
-                </button>
-              </>
-            }
+                {mapped
+                  .filter((s) => clusterIds.includes(s.id))
+                  .map((s) => (
+                    <button
+                      key={s.id}
+                      data-facility-id={s.id}
+                      aria-label={`查看${placeName(s)} ${s.id}`}
+                      onClick={() => {
+                        setClusterIds([]);
+                        setSelectedSite(s.id);
+                      }}
+                    >
+                      {s.id} · {placeName(s)}
+                    </button>
+                  ))}
+              </div>
+            )}
+            {!scene &&
+              showResources &&
+              (official?.resources ?? [])
+                .filter((r) => visiblePoint(r.point))
+                .map((r) => (
+                  <span
+                    key={r.id}
+                    className="explorer-resource-pin"
+                    style={project(r.point)}
+                    title={`${r.id} · ${r.type.name} · 选定开局储量，非运行时开采`}
+                  >
+                    <i>◇</i>
+                    {r.type.name}
+                  </span>
+                ))}
+            {!country && zoomControls}
           </div>
-          <div className="explorer-map-caption explorer-floating">
-            <span>拖拽平移 · 滚轮 / 双指缩放 · 双击放大</span>
-            <small>
-              {scene
-                ? '本国场景插画仅供展示 · 地理背景独立呈现邻国 · 图内旧文字不是数值来源 · 数字只取官方选定开局包 / 非实时 World State'
-                : country
-                  ? '历史地理底图仅供展示 · 邻国仅作背景 · 图内旧文字不是数值来源 · 设施坐标取官方生成记录 / 非实时 World State'
-                  : showArtwork
-                    ? '四大陆精绘 · 放大后按需叠加 70 国地理细图 · 国界与水系保留 / 非实时 World State'
-                    : '70 国地理细图全图模式 · 细图正按需载入 · 国界与水系保留 / 非实时 World State'}
-            </small>
-            <b>
-              {`${format((camera.width * 36000) / 1774 / 5)} km`} <i />
-            </b>
+          <div className="explorer-map-tools">
+            {country && zoomControls}
+            <div className="explorer-layer-controls explorer-floating">
+              {!country && (
+                <select
+                  aria-label="聚焦大陆精绘"
+                  value=""
+                  onChange={(event) => focusContinent(event.target.value)}
+                >
+                  <option value="">聚焦大陆…</option>
+                  {continentArtworks.map((art) => (
+                    <option key={art.id} value={art.id}>
+                      {art.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {country && (
+                <button
+                  aria-pressed={showLabels}
+                  onClick={() => setShowLabels((v) => !v)}
+                >
+                  设施图标
+                </button>
+              )}
+              {
+                <>
+                  {!country && (
+                    <button
+                      aria-pressed={showArtwork}
+                      onClick={() => setShowArtwork((value) => !value)}
+                    >
+                      大陆精绘
+                    </button>
+                  )}
+                  {!scene && (
+                    <>
+                      <button
+                        aria-pressed={showWater}
+                        onClick={() => setShowWater((v) => !v)}
+                      >
+                        河湖
+                      </button>
+                      <button
+                        aria-pressed={showResources}
+                        onClick={() => setShowResources((v) => !v)}
+                      >
+                        矿产
+                      </button>
+                      <button
+                        aria-pressed={showConnections}
+                        onClick={() => setShowConnections((v) => !v)}
+                      >
+                        接入草案
+                      </button>
+                    </>
+                  )}
+                </>
+              }
+            </div>
+            <div className="explorer-map-caption explorer-floating">
+              <span>拖拽平移 · 滚轮 / 双指缩放 · 双击放大</span>
+              <small>
+                {scene
+                  ? '独立高清场景 · 非地理比例 · 点击设施图标查看详情 · 图内旧文字不是数值来源 · 非实时 World State'
+                  : country
+                    ? '历史地理底图仅供展示 · 邻国仅作背景 · 图内旧文字不是数值来源 · 设施坐标取官方生成记录 / 非实时 World State'
+                    : showArtwork
+                      ? '四大陆精绘 · 放大后按需叠加 70 国地理细图 · 国界与水系保留 / 非实时 World State'
+                      : '70 国地理细图全图模式 · 细图正按需载入 · 国界与水系保留 / 非实时 World State'}
+              </small>
+              {!scene && (
+                <b>
+                  {`${format((camera.width * 36000) / 1774 / 5)} km`} <i />
+                </b>
+              )}
+            </div>
           </div>
           {drawer && (
             <aside className="explorer-country-drawer explorer-floating">
@@ -1417,14 +1674,16 @@ export function WorldExplorer({
           )}
         </div>
         {country && (
-          <aside className="explorer-sidebar">
+          <aside ref={inspector} className="explorer-sidebar">
             <div className="sidebar-title">
               <span>COUNTRY DIRECTORY</span>
-              <h2>{selected ? placeName(selected) : '基础设施图谱'}</h2>
+              <h2 ref={selectedHeading} tabIndex={-1}>
+                {selected ? placeName(selected) : '基础设施图谱'}
+              </h2>
               {selected ? (
                 <button onClick={() => setSelectedSite('')}>← 全部设施</button>
               ) : (
-                <p>点击地图标牌，或从下面定位。</p>
+                <p>点击设施图标或目录查看详情，再选择定位。</p>
               )}
             </div>
             {selected && official ? (
@@ -1480,9 +1739,7 @@ export function WorldExplorer({
                     <button
                       key={site.id}
                       data-official-facility={site.id}
-                      onClick={() => {
-                        focusSite(site.id);
-                      }}
+                      onClick={() => setSelectedSite(site.id)}
                     >
                       <FacilityIcon kind={site.kind} />
                       <span>

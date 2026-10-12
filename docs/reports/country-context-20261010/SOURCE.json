@@ -19,23 +19,28 @@
       "path": "apps/world-web/public/official-map-source/index.json",
       "bytes": 186843,
       "sha256": "0ee3fc6ae44d41a2d95cd20f2dcddfeea927ad0485036f0874b117414700904d"
+    },
+    {
+      "path": "apps/world-web/src/assets/country-detail/index.json",
+      "bytes": 38950,
+      "sha256": "b28794cb3285c6130c7f3c7d4e3af2f7c19f28eca625b3597e14636cdf360e06"
     }
   ],
   "adaptedSources": [
     {
       "path": "apps/world-web/public/country-home-layout.css",
-      "bytes": 8485,
-      "sha256": "23d0f4f4674005fb75617a12b9168dcc885c5810342152056d4eeb3833c8a05d"
+      "bytes": 14176,
+      "sha256": "99d045358ba5dcf0bb5acddf307f6d5526b535fc6b9f1cae319a034ffa2aa92a"
     },
     {
       "path": "apps/world-web/public/country-home-surroundings.js",
-      "bytes": 10182,
-      "sha256": "759fc5b76988d492952f004391e0cfe1dc62c72ac06201991814e6df96ab0dba"
+      "bytes": 31010,
+      "sha256": "9df3953829a7e742d6a75bfaee543cb2b0ef542e18fa662239059c73fd42bbaa"
     },
     {
       "path": "apps/world-web/src/map-explorer/WorldExplorer.tsx",
-      "bytes": 54187,
-      "sha256": "545d43ca57d1535298f2d9e3d1e049830298236385e2e9658b1a318d41dd41d9"
+      "bytes": 64680,
+      "sha256": "48643f7159fef66e7441238e33cfbc3f80e74c05a3517e450b9b1973b34b3056"
     },
     {
       "path": "apps/world-web/src/map-explorer/viewport-camera.ts",
@@ -44,8 +49,28 @@
     },
     {
       "path": "apps/world-web/public/country-home-surroundings.d.ts",
-      "bytes": 208,
-      "sha256": "3bc11a10f6d1627a7ea7f0e5e6c83e17903c338ff2e57df1c16da2975084d015"
+      "bytes": 513,
+      "sha256": "a267cda1ef44b2ad1b1a74e25a1d9552e789d533473bdcc3312187a6753c0cd5"
+    },
+    {
+      "path": "apps/world-web/src/map-explorer/world-explorer.css",
+      "bytes": 25408,
+      "sha256": "927d5ae64a9fe56f37de9b98ba083aaf0a26d54267b5871d80696fbe0721f535"
+    },
+    {
+      "path": "apps/world-web/src/map-explorer/navigation-scroll.ts",
+      "bytes": 859,
+      "sha256": "4524fde45ce93aafb9e5f598c614b76ca573e3c7d6f1bec4861c1ed5573d022e"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/public-route.ts",
+      "bytes": 885,
+      "sha256": "39b6426def6ba66c4b9d9d38bdd6edc9d0eaa1ad5a0c59b479bf11472777398a"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/locale.ts",
+      "bytes": 8210,
+      "sha256": "444911dc4544de9a96f8f55339ecc0bdcc172141fd4f650d7a90481a6d001423"
     }
   ],
   "method": "Pinned world terrain and all 70 unchanged paths form geographic context only. Each original 1254px country scene remains a separate complete illustration, with original scene-anchor positions. Original country detail SVGs retain their geographic coordinates. Context uses the exact selected silhouette distance fade; it never replaces a country image or supplies illustration pin coordinates.",
@@ -53,10 +78,57 @@
   "authorityChanged": false,
   "dataChanged": false,
   "neighbourHitTargets": false,
-  "panZoom": "Existing Atlas camera, drag/zoom, scene/detail toggle and routes retained. HOME retains its independent contained illustration and native scene-anchor pins; geographic surroundings are a separate noninteractive background.",
-  "oldSceneAssets": "All 70 independent scene PNGs and 70 detail SVGs remain byte-for-byte unchanged and are primary country views. Illustrations are not treated as geographic tiles.",
-  "atlasSelectedCountry": "Original countrySceneUrls and countryDetailUrls render each selected country image above geographic context. Scene anchors are used only on scene illustrations; source world points are used on detail maps. Facilities without scene anchors remain in the complete directory and switch to the geographic detail view when located. No invented illustration coordinates or foreign controls.",
+  "panZoom": "HOME defaults to continuous canonical geography with source-ID markers and independent original illustration toggle. React Atlas retains PR139 exclusive scene/geographic modes; geography is the default.",
+  "oldSceneAssets": "All original scene and detail bytes unchanged. Illustration is available in an explicit independent mode, using native source coordinates.",
+  "atlasSelectedCountry": "PR139 full scene separation and explicit sidebar locate remain. Default view is continuous geography; mobile country statistics are collapsed. Immutable season1-immersive pages stay unchanged; the verified public HOME adapter supplies geographic presentation.",
   "legacyAtlas": "Native country.scene/detail images remain visible, and countries.js owns original scene/detail pin mapping, zoom, aspect and scrolling. A separate verified regional SVG is background only; it never hides the original image, overwrites native captions, rebases pins or overrides stage geometry.",
   "countryFit": "Automatic selected-country camera fits are contained in the real world source extent, preventing an empty strip beyond polar terrain on narrow screens. Manual drag/zoom intent and overview/continent fits remain unchanged.",
-  "integration20261011": "The public legacy Atlas adapter is a statically resolved browser module, with the deployed public base passed explicitly so bundle relocation cannot change its immutable geography URLs. No authority or connection change. Runtime publication URL avoids asset-glob rewriting; the actual compiled legacy entry is browser checked."
+  "integration20261011": "The public legacy Atlas adapter is a statically resolved browser module, with the deployed public base passed explicitly so bundle relocation cannot change its immutable geography URLs. No authority or connection change. Runtime publication URL avoids asset-glob rewriting; the actual compiled legacy entry is browser checked.",
+  "successor20261012": {
+    "baseCommit": "0ba32ab46828fb6f7e0189f6b2501891de1516fa",
+    "baseTree": "7914403df0c3c8b81bc9d311235bf01fa30aff4a",
+    "inputLibraryId": "libfile_39808f2c70608191a101d65ce4b7c467",
+    "inputLibraryVersion": 5,
+    "defaultGeographicContext": "Original visible country-detail SVGs, each registered in its native viewBox and clipped to its canonical country; darker neighbors under the shared silhouette-distance fade. Geographic/presentation detail, not surveyed or newly generated texture.",
+    "worldChrome": "Measured navigation clearance, compact expandable world facts, visible World return at narrow widths. Portrait world camera fills the map viewport without changing geographic coordinates; full-world fit remains explicit.",
+    "hitTargets": "Overlapping 36px facility dots aggregate at the first original point; exact-ID choice buttons select the original record. No point/ID mutation.",
+    "realWindowLabel": "First 14 real days/two weeks, independent of target10x; no fabricated server time/date/countdown.",
+    "HDVisualAcceptance": "PENDING_INDEPENDENT_SCREENSHOT_REVIEW",
+    "perspectiveRasterGeoreferencing": "BLOCKED_NO_SHARED_GEOGRAPHIC_TRANSFORM",
+    "authorityChanged": false
+  },
+  "cameraSuccessor20261012": {
+    "baseTree": "5d0e37aed884b05687da5b9841a7f400910030ea",
+    "baseLibraryId": "libfile_1108d44e8f0881919cfafea950da276f",
+    "baseLibraryVersion": 0,
+    "cameraPolicy": "COUNTRY_CENTERED_UNMAPPED_EDGE_BLANK",
+    "assetGeometryChanged": false,
+    "geographyInventedBeyondWorldExtent": false,
+    "mobileNoncriticalCountryDetails": "EXPLICIT_DISCLOSURE",
+    "allFiveCrisisFeedbackSourcesVisible": true,
+    "HDVisualAcceptance": "CHANGES_REQUIRED_ASSET_REGISTRATION_BLOCKED",
+    "layoutAcceptance": "PENDING_INDEPENDENT_SCREENSHOT_REVIEW",
+    "unselectedCountryCrisisTextSurface": "OPAQUE_DARK_BRAND_NAV_AND_CLOCK_CARDS"
+  },
+  "routeScrollSuccessor20261012": {
+    "baseCommit": "c0bdeae4678b7e6ffecef71374045851ed65b271",
+    "baseTree": "f5fb0ccce2267dc65200aacdd52698de361d6f8e",
+    "routeReset": "POST_COMMIT_COUNTRY_CHANGE_ONLY",
+    "sameCountrySelection": "PRESERVE_CAMERA_SELECTION_AND_PAGE_SCROLL",
+    "facilitySelection": "INSPECTOR_SCROLL_ONLY_WITH_PREVENT_SCROLL_FOCUS",
+    "mobileDetails": "EXPLICIT_VIEW_DETAILS_ACTION",
+    "sourceCoordinatesChanged": false,
+    "HD": "BLOCKED_NO_VERIFIED_ORTHOGRAPHIC_REGISTRATION",
+    "independentReview": "PENDING_FRESH_BROWSER_QA"
+  },
+  "publicReturnSuccessor20261012": {
+    "baseCommit": "d561f78bdcf603f3fbd571a88b58d105bf8614af",
+    "baseTree": "2fa1e2c2e7862f1650cf95272a20a4adfd1c6ac5",
+    "emptyCountryReturn": "REAL_DOCUMENT_NAVIGATION_USING_BASE_URL",
+    "reason": "Cross legacy/public component and brand shell boundary, not merely pushState",
+    "returnLabel": "Shared saved ZH/EN preference",
+    "nonemptyCountryCameraSelectionHistory": "UNCHANGED",
+    "sourceGeographyAndAuthorityChanged": false,
+    "independentReview": "PENDING_NARROW_FIXED_SUCCESSOR_REVIEW"
+  }
 }
