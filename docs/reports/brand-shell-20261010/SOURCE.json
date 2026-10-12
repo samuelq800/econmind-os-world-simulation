@@ -56,8 +56,8 @@
     },
     {
       "path": "apps/world-web/src/brand-shell/brand-shell.css",
-      "bytes": 10259,
-      "sha256": "77354e481912b2579d9a02ead816fe685c96c47dd59d0c58b9623c454d808d18"
+      "bytes": 10872,
+      "sha256": "47a185c3383fbb77261b21df78ef13a9748d04095ee18791ddc3f657b7c702a7"
     },
     {
       "path": "apps/world-web/src/brand-shell/brand-shell.html",

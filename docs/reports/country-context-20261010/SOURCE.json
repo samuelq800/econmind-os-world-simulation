@@ -34,8 +34,8 @@
     },
     {
       "path": "apps/world-web/src/map-explorer/WorldExplorer.tsx",
-      "bytes": 54187,
-      "sha256": "545d43ca57d1535298f2d9e3d1e049830298236385e2e9658b1a318d41dd41d9"
+      "bytes": 54797,
+      "sha256": "1e10c96f4d5f30cac01695728ae4bbe465d242397a20ae697fb2f21ec15fb7a3"
     },
     {
       "path": "apps/world-web/src/map-explorer/viewport-camera.ts",
@@ -55,7 +55,7 @@
   "neighbourHitTargets": false,
   "panZoom": "Existing Atlas camera, drag/zoom, scene/detail toggle and routes retained. HOME retains its independent contained illustration and native scene-anchor pins; geographic surroundings are a separate noninteractive background.",
   "oldSceneAssets": "All 70 independent scene PNGs and 70 detail SVGs remain byte-for-byte unchanged and are primary country views. Illustrations are not treated as geographic tiles.",
-  "atlasSelectedCountry": "Original countrySceneUrls and countryDetailUrls render each selected country image above geographic context. Scene anchors are used only on scene illustrations; source world points are used on detail maps. Facilities without scene anchors remain in the complete directory and switch to the geographic detail view when located. No invented illustration coordinates or foreign controls.",
+  "atlasSelectedCountry": "React Atlas now separates HD illustration and geography into exclusive views. Scene view renders only the complete unchanged countrySceneUrls image and existing scene-anchor icons, without terrain, borders, geographic overlays or kilometre scale. Geography view retains the original terrain, selected-country highlight, neighbour boundaries and countryDetailUrls. Identity/statistics and map tools are outside the canvas; facility details open in the existing sidebar on click, with explicit locate/zoom. Unanchored facilities switch to geographic detail only on explicit locate. HOME and legacy Atlas remain unchanged. No invented coordinates, authority or data changes.",
   "legacyAtlas": "Native country.scene/detail images remain visible, and countries.js owns original scene/detail pin mapping, zoom, aspect and scrolling. A separate verified regional SVG is background only; it never hides the original image, overwrites native captions, rebases pins or overrides stage geometry.",
   "countryFit": "Automatic selected-country camera fits are contained in the real world source extent, preventing an empty strip beyond polar terrain on narrow screens. Manual drag/zoom intent and overview/continent fits remain unchanged.",
   "integration20261011": "The public legacy Atlas adapter is a statically resolved browser module, with the deployed public base passed explicitly so bundle relocation cannot change its immutable geography URLs. No authority or connection change. Runtime publication URL avoids asset-glob rewriting; the actual compiled legacy entry is browser checked."
