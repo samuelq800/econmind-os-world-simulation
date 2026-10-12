@@ -6,7 +6,8 @@ const partitionHash =
   '394a43ffc94df7c27c8fe8610378d348f07c1680675c89ecad26300aa9c7b101';
 const terrainHash =
   '4cc5e79b1293c5c5c6dbfecc0688a66aa031307ec144332c22f3fc962c179ed7';
-const detailIndexHash = 'b28794cb3285c6130c7f3c7d4e3af2f7c19f28eca625b3597e14636cdf360e06';
+const detailIndexHash =
+  'b28794cb3285c6130c7f3c7d4e3af2f7c19f28eca625b3597e14636cdf360e06';
 // Keep this runtime publication URL out of Vite's asset-glob transform.
 // The bundled legacy entry supplies its deployment base before loading sources.
 const moduleUrl = import.meta.url;
@@ -66,11 +67,29 @@ async function loadTerrain() {
 }
 
 async function loadDetailIndex() {
-  if (!detailIndexPromise) detailIndexPromise = sourceBytes('src/assets/country-detail/index.json', detailIndexHash, 'DETAIL_INDEX').then(bytes => {
-    const maps = JSON.parse(new TextDecoder().decode(bytes));
-    if (!Array.isArray(maps) || maps.length !== 70 || maps.some(m => !Array.isArray(m.viewBox) || m.viewBox.length !== 4 || !m.viewBox.every(Number.isFinite) || m.viewBox[2] <= 0 || m.viewBox[3] <= 0 || !/^\d{2}-[a-z]+\.svg$/.test(m.file))) throw Error('DETAIL_INDEX_GEOMETRY_MISMATCH');
-    return maps;
-  });
+  if (!detailIndexPromise)
+    detailIndexPromise = sourceBytes(
+      'src/assets/country-detail/index.json',
+      detailIndexHash,
+      'DETAIL_INDEX',
+    ).then((bytes) => {
+      const maps = JSON.parse(new TextDecoder().decode(bytes));
+      if (
+        !Array.isArray(maps) ||
+        maps.length !== 70 ||
+        maps.some(
+          (m) =>
+            !Array.isArray(m.viewBox) ||
+            m.viewBox.length !== 4 ||
+            !m.viewBox.every(Number.isFinite) ||
+            m.viewBox[2] <= 0 ||
+            m.viewBox[3] <= 0 ||
+            !/^\d{2}-[a-z]+\.svg$/.test(m.file),
+        )
+      )
+        throw Error('DETAIL_INDEX_GEOMETRY_MISMATCH');
+      return maps;
+    });
   return detailIndexPromise;
 }
 
@@ -79,14 +98,25 @@ async function loadDetailIndex() {
 // their original extent. No tiling, mirrored coast or invented water is added.
 export function regionalViewBox(frame, width, height, worldWidth, worldHeight) {
   if (
-    !Array.isArray(frame) || frame.length !== 4 ||
-    !frame.every(Number.isFinite) || frame[2] <= 0 || frame[3] <= 0 ||
-    ![width, height, worldWidth, worldHeight].every(value => Number.isFinite(value) && value > 0)
-  ) return null;
+    !Array.isArray(frame) ||
+    frame.length !== 4 ||
+    !frame.every(Number.isFinite) ||
+    frame[2] <= 0 ||
+    frame[3] <= 0 ||
+    ![width, height, worldWidth, worldHeight].every(
+      (value) => Number.isFinite(value) && value > 0,
+    )
+  )
+    return null;
   const aspect = width / height;
   const w = Math.max(frame[2], frame[3] * aspect) * 1.05;
   const h = w / aspect;
-  return [frame[0] + frame[2] / 2 - w / 2, frame[1] + frame[3] / 2 - h / 2, w, h];
+  return [
+    frame[0] + frame[2] / 2 - w / 2,
+    frame[1] + frame[3] / 2 - h / 2,
+    w,
+    h,
+  ];
 }
 
 function node(name, attributes = {}) {
@@ -255,12 +285,20 @@ export function geographicPinGroups(points, diameter = 30) {
 // remain owned by the legacy controller and are never reinterpreted as geography.
 export function homeCamera(box, scale, dx, dy, worldWidth, worldHeight) {
   const aspect = box[2] / box[3];
-  const width = Math.min(worldWidth * 2, worldHeight * aspect * 2, Math.max(24, box[2] * scale));
+  const width = Math.min(
+    worldWidth * 2,
+    worldHeight * aspect * 2,
+    Math.max(24, box[2] * scale),
+  );
   const height = width / aspect;
   const cx = box[0] + box[2] / 2 + dx;
   const cy = box[1] + box[3] / 2 + dy;
-  return [Math.max(-width, Math.min(worldWidth, cx - width / 2)),
-    Math.max(-height, Math.min(worldHeight, cy - height / 2)), width, height];
+  return [
+    Math.max(-width, Math.min(worldWidth, cx - width / 2)),
+    Math.max(-height, Math.min(worldHeight, cy - height / 2)),
+    width,
+    height,
+  ];
 }
 
 export async function mountCountrySurroundings(root, country) {
@@ -302,16 +340,39 @@ export async function mountCountrySurroundings(root, country) {
     svg.children[0].setAttribute('href', terrain);
     svg.classList.add('national-home-terrain');
     const selected = partition.territories.find((t) => t.id === country.id);
-    const neighborDetails = node('g', {class:'national-neighbor-details','data-geographic-detail-context':'true'});
-    const neighborDefs = node('defs');
-    const neighborImages = detailIndex.filter(m=>m.id!==country.id).map(m=>{
-      const territory=partition.territories.find(t=>t.id===m.id);
-      if (!territory) throw Error('DETAIL_INDEX_COUNTRY_MISMATCH');
-      const id=`home-neighbor-${m.number}`;
-      const clip=node('clipPath',{id,clipPathUnits:'userSpaceOnUse'});clip.append(node('path',{d:territory.path}));neighborDefs.append(clip);
-      return {box:m.viewBox,node:node('image',{href:new URL(`season1-immersive/countries/assets/details/${m.file}#svgView(preserveAspectRatio(none))`,moduleUrl).href,x:m.viewBox[0],y:m.viewBox[1],width:m.viewBox[2],height:m.viewBox[3],preserveAspectRatio:'none','clip-path':`url(#${id})`,'pointer-events':'none','data-neighbor-detail':m.number})};
+    const neighborDetails = node('g', {
+      class: 'national-neighbor-details',
+      'data-geographic-detail-context': 'true',
     });
-    svg.insertBefore(neighborDetails,svg.children[1]);
+    const neighborDefs = node('defs');
+    const neighborImages = detailIndex
+      .filter((m) => m.id !== country.id)
+      .map((m) => {
+        const territory = partition.territories.find((t) => t.id === m.id);
+        if (!territory) throw Error('DETAIL_INDEX_COUNTRY_MISMATCH');
+        const id = `home-neighbor-${m.number}`;
+        const clip = node('clipPath', { id, clipPathUnits: 'userSpaceOnUse' });
+        clip.append(node('path', { d: territory.path }));
+        neighborDefs.append(clip);
+        return {
+          box: m.viewBox,
+          node: node('image', {
+            href: new URL(
+              `season1-immersive/countries/assets/details/${m.file}#svgView(preserveAspectRatio(none))`,
+              moduleUrl,
+            ).href,
+            x: m.viewBox[0],
+            y: m.viewBox[1],
+            width: m.viewBox[2],
+            height: m.viewBox[3],
+            preserveAspectRatio: 'none',
+            'clip-path': `url(#${id})`,
+            'pointer-events': 'none',
+            'data-neighbor-detail': m.number,
+          }),
+        };
+      });
+    svg.insertBefore(neighborDetails, svg.children[1]);
     svg.append(neighborDefs);
     const clipId = `home-detail-${country.id}`;
     const clipDefs = node('defs');
@@ -449,8 +510,20 @@ export async function mountCountrySurroundings(root, country) {
     const render = () => {
       if (!box) return;
       svg.setAttribute('viewBox', box.join(' '));
-      const visibleDetails=neighborImages.filter(m=>m.box[0]<box[0]+box[2]&&m.box[0]+m.box[2]>box[0]&&m.box[1]<box[1]+box[3]&&m.box[1]+m.box[3]>box[1]).map(m=>m.node);
-      if (visibleDetails.length!==neighborDetails.children.length || visibleDetails.some((n,i)=>neighborDetails.children[i]!==n)) neighborDetails.replaceChildren(...visibleDetails);
+      const visibleDetails = neighborImages
+        .filter(
+          (m) =>
+            m.box[0] < box[0] + box[2] &&
+            m.box[0] + m.box[2] > box[0] &&
+            m.box[1] < box[1] + box[3] &&
+            m.box[1] + m.box[3] > box[1],
+        )
+        .map((m) => m.node);
+      if (
+        visibleDetails.length !== neighborDetails.children.length ||
+        visibleDetails.some((n, i) => neighborDetails.children[i] !== n)
+      )
+        neighborDetails.replaceChildren(...visibleDetails);
       const width = viewport.clientWidth,
         height = viewport.clientHeight;
       const points = sites.map((site) => {

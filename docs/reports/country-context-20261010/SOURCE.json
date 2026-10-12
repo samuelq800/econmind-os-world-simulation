@@ -29,13 +29,13 @@
   "adaptedSources": [
     {
       "path": "apps/world-web/public/country-home-layout.css",
-      "bytes": 14176,
-      "sha256": "99d045358ba5dcf0bb5acddf307f6d5526b535fc6b9f1cae319a034ffa2aa92a"
+      "bytes": 14178,
+      "sha256": "4989aceafb08db30095bbd17ee32dfdf93603dae6955bf3349ba603658ad5b0d"
     },
     {
       "path": "apps/world-web/public/country-home-surroundings.js",
-      "bytes": 31010,
-      "sha256": "9df3953829a7e742d6a75bfaee543cb2b0ef542e18fa662239059c73fd42bbaa"
+      "bytes": 31745,
+      "sha256": "e3ec6f59178a3548e603ae62b2a384824981c37b10c2692753f33057b4d6fbdb"
     },
     {
       "path": "apps/world-web/src/map-explorer/WorldExplorer.tsx",

@@ -373,7 +373,9 @@
 }
 
 /* HOME default is a real interactive geographic canvas, before office panels. */
-.national-neighbor-details { filter: brightness(0.7); }
+.national-neighbor-details {
+  filter: brightness(0.7);
+}
 .country-map-home .country-game[data-home-map] {
   display: flex;
   flex-direction: column;
