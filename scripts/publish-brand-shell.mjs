@@ -13,7 +13,7 @@ const countryRecordPath = 'docs/reports/country-context-20261010/SOURCE.json';
 export const brandRecordSha256 =
   '85222b07a85114bc29058c8e4b27181244ae0c208531a4ed811cb9cdb9974565';
 export const countryRecordSha256 =
-  '7f7d6a3d71180a725f05da5ef51876df8f36a0937d3be9edc41deec57b83ecf6';
+  'b320626143ce63790fa5a15552a41328ede1da9d294470c7084be1a8cb2f1701';
 export const sha256 = (bytes) =>
   createHash('sha256').update(bytes).digest('hex');
 const pageMounts = Object.freeze({

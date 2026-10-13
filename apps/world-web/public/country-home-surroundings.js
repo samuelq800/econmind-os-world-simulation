@@ -674,8 +674,7 @@ export async function mountCountrySurroundings(root, country) {
       },
       { passive: false },
     );
-    mode.addEventListener('click', () => {
-      const illustrated = root.dataset.mapPresentation === 'geographic';
+    const present = (illustrated) => {
       root.dataset.mapPresentation = illustrated
         ? 'independent-illustration'
         : 'geographic';
@@ -685,12 +684,22 @@ export async function mountCountrySurroundings(root, country) {
       controls.hidden = illustrated;
       chooser.hidden = illustrated;
       inspector.hidden = true;
+      scene.setAttribute(
+        'aria-label',
+        `${country.name} ${illustrated ? 'original independent illustration' : 'continuous geographic map'}`,
+      );
       if (!illustrated) render();
+    };
+    mode.addEventListener('click', () => {
+      present(root.dataset.mapPresentation === 'geographic');
     });
     scene.append(viewport, toolbar, controls, mode, chooser, inspector);
     const observer = new ResizeObserver(fit);
     observer.observe(viewport);
     fit();
+    // Restore the original asset and its own anchors, not a geographic warp.
+    // The verified geographic layer remains available as a separate view.
+    present(true);
     disposePrevious = () => observer.disconnect();
   } catch {
     note.textContent =

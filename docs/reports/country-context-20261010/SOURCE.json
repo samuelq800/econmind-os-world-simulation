@@ -34,13 +34,13 @@
     },
     {
       "path": "apps/world-web/public/country-home-surroundings.js",
-      "bytes": 31745,
-      "sha256": "e3ec6f59178a3548e603ae62b2a384824981c37b10c2692753f33057b4d6fbdb"
+      "bytes": 32119,
+      "sha256": "92aa39867412afd339f92d89d86ec0f931d1090687f42938297a8bc5043b4c32"
     },
     {
       "path": "apps/world-web/src/map-explorer/WorldExplorer.tsx",
-      "bytes": 64680,
-      "sha256": "48643f7159fef66e7441238e33cfbc3f80e74c05a3517e450b9b1973b34b3056"
+      "bytes": 64690,
+      "sha256": "0d44cd5f0a3bc3547eb06f661173986a0ec085678776bed9ff7a4f6139213586"
     },
     {
       "path": "apps/world-web/src/map-explorer/viewport-camera.ts",
@@ -78,9 +78,9 @@
   "authorityChanged": false,
   "dataChanged": false,
   "neighbourHitTargets": false,
-  "panZoom": "HOME defaults to continuous canonical geography with source-ID markers and independent original illustration toggle. React Atlas retains PR139 exclusive scene/geographic modes; geography is the default.",
-  "oldSceneAssets": "All original scene and detail bytes unchanged. Illustration is available in an explicit independent mode, using native source coordinates.",
-  "atlasSelectedCountry": "PR139 full scene separation and explicit sidebar locate remain. Default view is continuous geography; mobile country statistics are collapsed. Immutable season1-immersive pages stay unchanged; the verified public HOME adapter supplies geographic presentation.",
+  "panZoom": "HOME and selected-country React Atlas default to the unchanged original independent illustration and native illustration anchors. Canonical geography remains a distinct explicit view. Existing zoom and coordinate semantics are retained.",
+  "oldSceneAssets": "All original scene and detail bytes unchanged. Original illustrations are the default national presentation, not warped or clipped into geographic country silhouettes.",
+  "atlasSelectedCountry": "PR139 full scene separation and explicit sidebar locate remain. Default national view is the original illustration; view=geography explicitly selects canonical geography. Public world overview stays geographic, mobile country statistics collapsed, and immutable season1-immersive pages unchanged.",
   "legacyAtlas": "Native country.scene/detail images remain visible, and countries.js owns original scene/detail pin mapping, zoom, aspect and scrolling. A separate verified regional SVG is background only; it never hides the original image, overwrites native captions, rebases pins or overrides stage geometry.",
   "countryFit": "Automatic selected-country camera fits are contained in the real world source extent, preventing an empty strip beyond polar terrain on narrow screens. Manual drag/zoom intent and overview/continent fits remain unchanged.",
   "integration20261011": "The public legacy Atlas adapter is a statically resolved browser module, with the deployed public base passed explicitly so bundle relocation cannot change its immutable geography URLs. No authority or connection change. Runtime publication URL avoids asset-glob rewriting; the actual compiled legacy entry is browser checked.",
@@ -120,6 +120,15 @@
     "sourceCoordinatesChanged": false,
     "HD": "BLOCKED_NO_VERIFIED_ORTHOGRAPHIC_REGISTRATION",
     "independentReview": "PENDING_FRESH_BROWSER_QA"
+  },
+  "originalIllustrationRestoration20261013": {
+    "baseCommit": "3aa1d3b23df7628a0b52380d74318677d9dbd48b",
+    "scope": "RESTORE_ORIGINAL_DEFAULT_PRESENTATION_ONLY",
+    "originalAssetBytesChanged": false,
+    "illustrationWorldCoordinateRegistrationInvented": false,
+    "continuousGeographicHD": "BLOCKED_NO_VERIFIED_ORTHOGRAPHIC_REGISTRATION",
+    "publicOverviewOrOperationEntryChanged": false,
+    "independentVisualAcceptance": "PENDING"
   },
   "publicReturnSuccessor20261012": {
     "baseCommit": "d561f78bdcf603f3fbd571a88b58d105bf8614af",

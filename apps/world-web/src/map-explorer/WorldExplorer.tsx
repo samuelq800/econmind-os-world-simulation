@@ -567,7 +567,8 @@ export function WorldExplorer({
   const [showWater, setShowWater] = useState(true);
   const [showArtwork, setShowArtwork] = useState(true);
   const [sceneMode, setSceneMode] = useState(
-    () => new URLSearchParams(window.location.search).get('view') === 'scene',
+    () =>
+      new URLSearchParams(window.location.search).get('view') !== 'geography',
   );
   const [showLabels, setShowLabels] = useState(true);
   const sceneModeRef = useRef(sceneMode);

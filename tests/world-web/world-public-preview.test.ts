@@ -238,9 +238,24 @@ describe('atlas official opening numbers and complete facility records', () => {
     },
   );
 
-  it('opens a country on continuous geography by default with separate scene control', () => {
+  it.each(['01', '32', '38', '54', '58', '70'])(
+    'opens country %s on its unchanged original illustration by default',
+    (number) => {
+      vi.stubGlobal('window', {
+        location: { search: `?atlas=explorer&country=${number}` },
+      });
+      const markup = renderToStaticMarkup(createElement(WorldExplorer));
+      expect(markup).toContain(`data-country-scene="${number}"`);
+      expect(markup).toContain('data-explorer-view="scene"');
+      expect(markup).toContain('preserveAspectRatio="xMidYMid meet"');
+      expect(markup).not.toContain('data-explorer-geography="true"');
+      expect(markup).toContain('展开国家资料');
+    },
+  );
+
+  it('keeps canonical geography as an explicit country view', () => {
     vi.stubGlobal('window', {
-      location: { search: '?atlas=explorer&country=54' },
+      location: { search: '?atlas=explorer&country=54&view=geography' },
     });
     const markup = renderToStaticMarkup(createElement(WorldExplorer));
     expect(markup).toContain('data-explorer-view="geography"');
