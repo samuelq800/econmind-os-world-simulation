@@ -265,4 +265,34 @@ describe('public homepage original country scenes', () => {
       /role=finance|command\.html|data-office-command|data-financial-intake|Office intent/,
     );
   });
+  it('layout regression keeps neighbor context outside the image-only viewport', () => {
+    const html = render('63');
+    const footer = html.indexOf('<div class="preview-scene-footer">');
+    expect(footer).toBeGreaterThan(0);
+    expect(html.slice(0, footer).includes('preview-geography-context')).toBe(
+      false,
+    );
+    expect(html.slice(footer).includes('View geography and neighbors')).toBe(
+      true,
+    );
+    expect(html.includes('data-public-original-scene="63"')).toBe(true);
+  });
+  it('layout regression reserves normal-flow toolbar, canvas and context rows including mobile', async () => {
+    const css = await readFile(
+      'apps/world-web/src/world-preview/public-world-preview.css',
+      'utf8',
+    );
+    expect(css).toContain('grid-template-rows: auto minmax(0, 1fr) auto;');
+    const canvas =
+      /\.preview-map-stack\[data-presentation='illustration'\] \.preview-map-canvas\s*\{([^}]+)\}/.exec(
+        css,
+      )![1]!;
+    expect(canvas).toContain('position: relative;');
+    expect(canvas).toContain('grid-row: 2;');
+    const context = /\.preview-geography-context\s*\{([^}]+)\}/.exec(css)![1]!;
+    expect(context).not.toContain('position: absolute');
+    expect(css).toContain('min-height: calc(100vw + 200px);');
+    expect(css).toContain('grid-template-rows: auto auto;');
+    expect(css).toContain('grid-template-rows: 44px auto;');
+  });
 });

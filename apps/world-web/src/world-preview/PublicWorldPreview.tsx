@@ -153,6 +153,7 @@ export function PublicWorldPreview() {
       data-public-world-preview="true"
       data-preview-status="STATIC_PUBLIC_PREVIEW_NOT_LIVE_WORLD"
       data-selected-country={selected?.number ?? ''}
+      data-presentation={selected ? presentation : 'geography'}
       data-locale={locale}
       onKeyDown={(event) => {
         if (event.key === 'Escape') {
@@ -386,7 +387,10 @@ export function PublicWorldPreview() {
               {text.legend}
             </button>
           </div>
-          <div className="preview-map-stack">
+          <div
+            className="preview-map-stack"
+            data-presentation={selected ? presentation : 'geography'}
+          >
             <PublicWorldMap
               locale={locale}
               selected={selected}
@@ -398,64 +402,72 @@ export function PublicWorldPreview() {
               onMetrics={recordMetrics}
               apiRef={mapApi}
             />
-            {selected && (
-              <div
-                className="preview-presentation-controls"
-                role="group"
-                aria-label={selected.name}
-              >
-                {(['illustration', 'geography'] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    aria-pressed={presentation === mode}
-                    onClick={() => changePresentation(mode)}
-                  >
-                    {sceneText[mode]}
-                  </button>
-                ))}
-                <button
-                  aria-label={sceneText.fit}
-                  title={sceneText.fit}
-                  onClick={() => mapApi.current?.fit()}
+            <div
+              className={
+                selected && presentation === 'illustration'
+                  ? 'preview-scene-toolbar'
+                  : 'preview-map-toolbar'
+              }
+            >
+              {selected && (
+                <div
+                  className="preview-presentation-controls"
+                  role="group"
+                  aria-label={selected.name}
                 >
-                  ⛶
+                  {(['illustration', 'geography'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      aria-pressed={presentation === mode}
+                      onClick={() => changePresentation(mode)}
+                    >
+                      {sceneText[mode]}
+                    </button>
+                  ))}
+                  <button
+                    aria-label={sceneText.fit}
+                    title={sceneText.fit}
+                    onClick={() => mapApi.current?.fit()}
+                  >
+                    ⛶
+                  </button>
+                </div>
+              )}
+              <div
+                className="preview-map-tools"
+                role="group"
+                aria-label={text.map}
+              >
+                <button
+                  title={text.zoomIn}
+                  aria-label={text.zoomIn}
+                  onClick={() => mapApi.current?.zoom(0.8)}
+                >
+                  +
+                </button>
+                <button
+                  title={text.zoomOut}
+                  aria-label={text.zoomOut}
+                  onClick={() => mapApi.current?.zoom(1.25)}
+                >
+                  −
+                </button>
+                <button
+                  title={text.reset}
+                  aria-label={text.reset}
+                  onClick={reset}
+                >
+                  ⌖
+                </button>
+                <button
+                  title={text.layers}
+                  aria-label={text.layers}
+                  aria-expanded={overlay === 'layers'}
+                  onClick={() => openOverlay('layers')}
+                >
+                  ▱
                 </button>
               </div>
-            )}
-            <div
-              className="preview-map-tools"
-              role="group"
-              aria-label={text.map}
-            >
-              <button
-                title={text.zoomIn}
-                aria-label={text.zoomIn}
-                onClick={() => mapApi.current?.zoom(0.8)}
-              >
-                +
-              </button>
-              <button
-                title={text.zoomOut}
-                aria-label={text.zoomOut}
-                onClick={() => mapApi.current?.zoom(1.25)}
-              >
-                −
-              </button>
-              <button
-                title={text.reset}
-                aria-label={text.reset}
-                onClick={reset}
-              >
-                ⌖
-              </button>
-              <button
-                title={text.layers}
-                aria-label={text.layers}
-                aria-expanded={overlay === 'layers'}
-                onClick={() => openOverlay('layers')}
-              >
-                ▱
-              </button>
             </div>
             {overlay && (
               <section

@@ -319,8 +319,9 @@ export function PublicWorldMap({
     : world;
   const contextHeight = (contextCamera.width * 120) / 180;
   const radius = (camera.width / size.width) * 2.5;
-  return (
+  return [
     <div
+      key="canvas"
       ref={viewport}
       className="preview-map-canvas"
       role="group"
@@ -467,33 +468,6 @@ export function PublicWorldMap({
               />
             )}
           </svg>
-          <p className="preview-scene-note">{sceneText.note}</p>
-          <button
-            className="preview-geography-context"
-            onClick={onGeography}
-            aria-label={sceneText.context}
-          >
-            <svg
-              viewBox={`${contextCamera.x - contextCamera.width / 2} ${contextCamera.y - contextHeight / 2} ${contextCamera.width} ${contextHeight}`}
-              aria-hidden="true"
-            >
-              <image
-                href={terrain}
-                x={0}
-                y={0}
-                width={publicFrame[0]}
-                height={publicFrame[1]}
-              />
-              {countries.map((country) => (
-                <path
-                  key={country.id}
-                  d={country.path}
-                  className={`preview-country${country.id === selected?.id ? ' selected' : ''}`}
-                />
-              ))}
-            </svg>
-            <span>{sceneText.context} ↗</span>
-          </button>
         </>
       ) : (
         <svg
@@ -662,6 +636,37 @@ export function PublicWorldMap({
           {sceneRequested ? sceneText.error : text.textureError}
         </p>
       )}
-    </div>
-  );
+    </div>,
+    sceneRequested ? (
+      <div key="scene-context" className="preview-scene-footer">
+        <p className="preview-scene-note">{sceneText.note}</p>
+        <button
+          className="preview-geography-context"
+          onClick={onGeography}
+          aria-label={sceneText.context}
+        >
+          <svg
+            viewBox={`${contextCamera.x - contextCamera.width / 2} ${contextCamera.y - contextHeight / 2} ${contextCamera.width} ${contextHeight}`}
+            aria-hidden="true"
+          >
+            <image
+              href={terrain}
+              x={0}
+              y={0}
+              width={publicFrame[0]}
+              height={publicFrame[1]}
+            />
+            {countries.map((country) => (
+              <path
+                key={country.id}
+                d={country.path}
+                className={`preview-country${country.id === selected?.id ? ' selected' : ''}`}
+              />
+            ))}
+          </svg>
+          <span>{sceneText.context} ↗</span>
+        </button>
+      </div>
+    ) : null,
+  ];
 }
