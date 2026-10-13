@@ -1,8 +1,11 @@
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { constants } from 'node:fs';
 import {
   copyFile,
+  mkdir,
   mkdtemp,
+  open,
   readdir,
   readFile,
   realpath,
@@ -12,6 +15,7 @@ import {
 } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import ts from 'typescript';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -338,6 +342,77 @@ describe('financial package adapter finite preparation', () => {
     await expect(
       new FinancialOpeningPackageRegistryLoader({ packageRoot: dir }).load(),
     ).rejects.toThrow('SYMLINK_DENIED');
+  });
+  it('rejects FIFO and directory leaves within a finite child deadline and preserves regular wrong-size rejection', async () => {
+    const dir = await mkdtemp(
+      path.join(await realpath(tmpdir()), 'financial-package-guard-'),
+    );
+    temps.push(dir);
+    const moduleUrl = pathToFileURL(
+      path.join(
+        repositoryRoot,
+        'apps/world-worker/dist/preparation/financial-opening-package-registry.js',
+      ),
+    ).href;
+    const rejection = (root: string, code: string) => {
+      const child = spawnSync(
+        process.execPath,
+        [
+          '--input-type=module',
+          '-e',
+          `
+        import { FinancialOpeningPackageRegistryLoader } from ${JSON.stringify(moduleUrl)};
+        console.log('LOAD_STARTED');
+        try {
+          await new FinancialOpeningPackageRegistryLoader({packageRoot: ${JSON.stringify(root)}}).load();
+          process.exitCode = 1;
+        } catch (error) {
+          console.log(error.message);
+          if (!error.message.includes(${JSON.stringify(code)})) process.exitCode = 2;
+        }
+      `,
+        ],
+        {
+          timeout: 2500,
+          killSignal: 'SIGKILL',
+          encoding: 'utf8',
+          maxBuffer: 8192,
+        },
+      );
+      expect(child.error, child.stdout + child.stderr).toBeUndefined();
+      expect(child.signal).toBeNull();
+      expect(child.status, child.stdout + child.stderr).toBe(0);
+      expect(child.stdout).toContain('LOAD_STARTED');
+      expect(child.stdout).toContain(code);
+    };
+    const leaf = path.join(dir, 'PACKAGE_MANIFEST.json');
+    await writeFile(leaf, '{}');
+    rejection(dir, 'FILE_SIZE_MISMATCH');
+    await rm(leaf);
+    const fifo = spawnSync('mkfifo', [leaf], {
+      timeout: 2500,
+      encoding: 'utf8',
+    });
+    expect(fifo.error).toBeUndefined();
+    expect(fifo.status, fifo.stderr).toBe(0);
+    rejection(dir, 'REGULAR_FILE_REQUIRED');
+    // This is the open mode used if a regular leaf is replaced by a FIFO
+    // after lstat: no writer is needed, and descriptor validation can run.
+    const descriptor = await open(
+      leaf,
+      constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
+    );
+    try {
+      expect((await descriptor.stat()).isFIFO()).toBe(true);
+    } finally {
+      await descriptor.close();
+    }
+    await rm(leaf);
+    await mkdir(leaf);
+    rejection(dir, 'REGULAR_FILE_REQUIRED');
+    const nonDirectoryRoot = path.join(dir, 'not-a-directory');
+    await writeFile(nonDirectoryRoot, '{}');
+    rejection(nonDirectoryRoot, 'DIRECTORY_COMPONENT_REQUIRED');
   });
   it('rejects unlisted package members rather than accepting a new input or registration', async () => {
     const dir = await copiedPackage();

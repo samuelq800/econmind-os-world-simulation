@@ -904,18 +904,31 @@ export class FinancialOpeningPackageRegistryLoader {
       )
         fail('FILE_BUDGET_EXCEEDED', locator);
       if ((await realpath(root)) !== root) fail('PATH_DENIED', root);
+      if (
+        process.platform === 'win32' ||
+        !Number.isInteger(constants.O_NONBLOCK) ||
+        constants.O_NONBLOCK <= 0 ||
+        !Number.isInteger(constants.O_NOFOLLOW) ||
+        constants.O_NOFOLLOW <= 0
+      )
+        fail('SAFE_FILE_OPEN_UNSUPPORTED', locator);
       let current = path.parse(root).root;
-      for (const part of [
+      const components = [
         ...root.slice(current.length).split('/').filter(Boolean),
         ...locator.split('/'),
-      ]) {
+      ];
+      for (const [index, part] of components.entries()) {
         current = path.join(current, part);
         const stat = await lstat(current);
         if (stat.isSymbolicLink()) fail('SYMLINK_DENIED', locator);
+        if (index === components.length - 1) {
+          if (!stat.isFile()) fail('REGULAR_FILE_REQUIRED', locator);
+        } else if (!stat.isDirectory())
+          fail('DIRECTORY_COMPONENT_REQUIRED', locator);
       }
       const file = await open(
         current,
-        constants.O_RDONLY | constants.O_NOFOLLOW,
+        constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
       );
       try {
         const stat = await file.stat();
