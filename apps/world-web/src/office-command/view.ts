@@ -14,10 +14,12 @@ export function installOfficeCommand(
   host: Window,
   factory: typeof createOfficeCommandController = createOfficeCommandController,
 ) {
+  let root = document.querySelector<HTMLElement>('.country-game');
   const currentView = (): OfficeProjectionView | null => {
     const r = document.querySelector<HTMLElement>('.country-game'),
       role = r?.dataset.office;
-    return r?.dataset.country &&
+    return r === root &&
+      r?.dataset.country &&
       role &&
       Object.hasOwn(officeProjectionRoles, role)
       ? {
@@ -27,9 +29,10 @@ export function installOfficeCommand(
       : null;
   };
   let controller = factory(null, currentView),
-    root: HTMLElement | null = null,
     trigger: HTMLButtonElement | null = null,
     dialog: HTMLDialogElement | null = null;
+  let generation = 0,
+    reconciling = false;
   const listeners = new Set<() => void>();
   const node = (tag: string, text: string) => {
     const el = document.createElement(tag);
@@ -42,31 +45,79 @@ export function installOfficeCommand(
     enabled: boolean,
     action: () => unknown,
   ) {
+    const owner = controller,
+      lifetime = generation;
     const el = document.createElement('button');
     el.type = 'button';
     el.textContent = label;
     el.dataset.officeCommandAction = key;
     el.disabled = !enabled;
     el.addEventListener('click', () => {
-      void Promise.resolve(action()).catch(() => controller.disconnect());
+      if (!active(owner, lifetime, el)) return;
+      try {
+        void Promise.resolve(action()).catch(() => {
+          if (owner === controller && lifetime === generation)
+            owner.disconnect();
+        });
+      } catch {
+        if (owner === controller && lifetime === generation) owner.disconnect();
+      }
     });
     return el;
   }
-  function render() {
-    const state = controller.getState();
+  function active(
+    owner: typeof controller,
+    lifetime: number,
+    element: HTMLElement,
+  ) {
+    return (
+      owner === controller &&
+      lifetime === generation &&
+      root === document.querySelector('.country-game') &&
+      document.body.contains(element) &&
+      owner.checkLiveness()
+    );
+  }
+  function clearPrivateContent(surface: HTMLElement) {
+    for (const child of Array.from(surface.children))
+      clearPrivateContent(child as HTMLElement);
+    if ('value' in surface) (surface as HTMLInputElement).value = '';
+    surface.textContent = '';
+    surface.replaceChildren();
+  }
+  function removePrivateShell() {
+    const surface = dialog;
+    dialog = null;
+    if (surface) {
+      clearPrivateContent(surface);
+      if (surface.open) surface.close();
+      surface.remove();
+    }
+    if (trigger) {
+      trigger.title = '';
+      delete trigger.dataset.officeCommandState;
+      clearPrivateContent(trigger);
+      trigger.remove();
+    }
+    trigger = null;
+  }
+  function render(state: ReturnType<typeof controller.getState>) {
+    const owner = controller,
+      lifetime = generation;
     if (trigger) {
       trigger.title = `Office intent · ${state.status}`;
       trigger.dataset.officeCommandState = state.status;
     }
     if (!dialog) return;
     if (!dialog.open) {
-      dialog.replaceChildren();
+      clearPrivateContent(dialog);
       return;
     }
     const focused = dialog.contains(document.activeElement)
       ? (document.activeElement as HTMLElement).dataset.officeCommandAction
       : undefined;
-    dialog.replaceChildren(
+    clearPrivateContent(dialog);
+    dialog.append(
       node('h2', 'Manual Office intent — Captain / Central Bank / Social'),
     );
     const status = node(
@@ -75,6 +126,13 @@ export function installOfficeCommand(
     );
     status.setAttribute('role', 'status');
     dialog.append(status);
+    if (state.lastAuthorizedReadAtClient)
+      dialog.append(
+        node(
+          'p',
+          `${state.model ? 'Last read on this device' : 'Previous successful read'}: ${state.lastAuthorizedReadAtClient} · browser observation only`,
+        ),
+      );
     dialog.append(
       node(
         'p',
@@ -96,9 +154,9 @@ export function installOfficeCommand(
     dialog.append(
       button('Load explicit intent', 'stage', state.canStage, () => {
         try {
-          controller.stage(JSON.parse(draft.value));
+          owner.stage(JSON.parse(draft.value));
         } catch {
-          controller.stage(null);
+          owner.stage(null);
         }
       }),
     );
@@ -128,7 +186,7 @@ export function installOfficeCommand(
           state.canRecover,
           () => {
             if (state.intent)
-              controller.recoverLookup({
+              owner.recoverLookup({
                 commandId: state.intent.request.commandId,
                 idempotencyKey: state.intent.request.idempotencyKey,
                 commandFingerprint: fingerprint.value,
@@ -164,44 +222,33 @@ export function installOfficeCommand(
         ),
       );
     for (const [label, key, enabled, action] of [
-      [
-        'Read current authorization/projection',
-        'refresh',
-        state.canRead,
-        () => controller.refresh(),
-      ],
-      [
-        'Review exact intent',
-        'review',
-        state.canReview,
-        () => controller.review(),
-      ],
+      ['Manual refresh', 'refresh', state.canRead, () => owner.refresh()],
+      ['Review exact intent', 'review', state.canReview, () => owner.review()],
       [
         'Confirm once → queue',
         'confirm',
         state.canConfirm,
-        () => controller.confirm(),
+        () => owner.confirm(),
       ],
       [
         'Read original FINAL → authorized readback',
         'final',
         state.canLookupFinal,
-        () => controller.lookupAndRefresh(),
+        () => owner.lookupAndRefresh(),
       ],
-      [
-        'Disconnect',
-        'disconnect',
-        state.canRead,
-        () => controller.disconnect(),
-      ],
+      ['Disconnect', 'disconnect', state.canRead, () => owner.disconnect()],
       [
         'Close',
         'close',
         true,
         () => {
-          dialog?.close();
-          dialog?.replaceChildren();
-          trigger?.focus();
+          const surface = dialog,
+            entry = trigger;
+          if (surface) {
+            surface.close();
+            clearPrivateContent(surface);
+          }
+          if (entry && active(owner, lifetime, entry)) entry.focus();
         },
       ],
     ] as const) {
@@ -210,28 +257,51 @@ export function installOfficeCommand(
       if (focused === key) el.focus();
     }
   }
-  function changed() {
-    render();
+  function notify() {
     for (const fn of [...listeners]) fn();
   }
+  function changed() {
+    reconcile(true);
+    notify();
+  }
   let stop = controller.subscribe(changed);
-  function sync() {
-    const next = document.querySelector<HTMLElement>('.country-game');
-    controller.checkLiveness();
-    if (next !== root) {
-      trigger?.remove();
-      dialog?.remove();
-      root = next;
-      trigger = null;
-      dialog = null;
-      if (root) {
+  function retire() {
+    generation++;
+    stop();
+    stop = () => undefined;
+    controller.disconnect();
+    removePrivateShell();
+  }
+  function reconcile(redraw = false): boolean {
+    if (reconciling) return false;
+    reconciling = true;
+    let replaced = false;
+    try {
+      const next = document.querySelector<HTMLElement>('.country-game');
+      if (next !== root) {
+        retire();
+        root = next;
+        replaced = true;
+      }
+      const state = controller.getState();
+      if (!root || state.status === 'MISSING' || state.status === 'DENIED') {
+        removePrivateShell();
+        return replaced;
+      }
+      const tools = root.querySelector('.national-tools');
+      if (!tools) {
+        removePrivateShell();
+        return replaced;
+      }
+      if (trigger && !document.body.contains(trigger)) removePrivateShell();
+      if (!trigger || !dialog) {
         trigger = button('Office intent', 'open', true, () => {
-          dialog?.showModal();
-          render();
+          if (dialog && !dialog.open) dialog.showModal();
+          reconcile(true);
         });
         trigger.dataset.officeCommandEntry = '';
         trigger.className = 'national-atlas';
-        root.querySelector('.national-tools')?.append(trigger);
+        tools.append(trigger);
         dialog = document.createElement('dialog');
         dialog.dataset.officeCommandDialog = '';
         dialog.className = 'national-drawer';
@@ -246,12 +316,19 @@ export function installOfficeCommand(
         });
         const surface = dialog;
         surface.addEventListener('close', () => {
-          if (!surface.open) surface.replaceChildren();
+          if (!surface.open) clearPrivateContent(surface);
         });
         root.append(dialog);
+        redraw = true;
       }
-      render();
+      if (redraw) render(state);
+      return replaced;
+    } finally {
+      reconciling = false;
     }
+  }
+  function sync() {
+    if (reconcile()) notify();
   }
   const observer = new MutationObserver(sync);
   observer.observe(document.body, {
@@ -260,15 +337,25 @@ export function installOfficeCommand(
     attributes: true,
     attributeFilter: ['data-country', 'data-office'],
   });
-  host.addEventListener('pagehide', () => controller.disconnect());
+  host.addEventListener('pagehide', () => {
+    retire();
+    reconcile();
+    notify();
+  });
   sync();
   return Object.freeze({
     connect(binding: OfficeCommandBinding) {
-      controller.disconnect();
-      stop();
+      sync();
+      retire();
+      root = document.querySelector<HTMLElement>('.country-game');
       controller = factory(binding, currentView);
-      stop = controller.subscribe(changed);
-      render();
+      const owner = controller,
+        lifetime = generation;
+      stop = controller.subscribe(() => {
+        if (owner === controller && lifetime === generation) changed();
+      });
+      reconcile(true);
+      notify();
       return controller.getState().status;
     },
     disconnect: () => controller.disconnect(),
