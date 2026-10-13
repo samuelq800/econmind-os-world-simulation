@@ -10,14 +10,14 @@
     "lines": 654,
     "sha256": "bb490922c44b14c81818f6c61b1cfb5d37eec72f98078175da6c2be980663cd3"
   },
-  "scope": "Public static geography homepage; root and atlas=overview. Explicit downstream routes unchanged. Header68/sidebar288or260/footer32; native camera and source geometry. No runtime controls.",
+  "scope": "Public static world overview and selected original country illustrations; root and atlas=overview stay read-only. Explicit downstream routes unchanged. Header68/sidebar288or260/footer32; geographic source geometry preserved. No operation or runtime controls.",
   "geographicClassification": "Existing illustrated continentFor display grouping only, explicitly disclosed; no authoritative ownership/admin membership inferred.",
   "scale": "Native source pixels and source-pixels/screen-pixel ratio only; no ground kilometres fabricated.",
   "locale": "Shared econmind-ui-language preference; ZH/EN React strings; state survives changes without reload. Canonical source country spellings preserved.",
   "authorityChanged": false,
   "serverAuthenticationChanged": false,
   "hiddenControlsAreAuthentication": false,
-  "newHDAssets": "NOT_IN_SCOPE_NO_NEW_HD_CLAIM; old terrain and original detail SVG preserved, HD geographical registration separate BLOCKED workstream.",
+  "newHDAssets": "No new assets: reuse all 70 original independent country PNGs and existing geography. Continuous geographically registered HD remains BLOCKED.",
   "fullPublicationRun": false,
   "productionDeployment": false,
   "immutableInputs": [
@@ -45,6 +45,16 @@
       "path": "apps/world-web/src/assets/continent-scenes/index.json",
       "bytes": 783,
       "sha256": "4c3c45463e47e18a7326ee75a6da933aa5a1e14fbfd97bfe1ee28b5ea5cea8ea"
+    },
+    {
+      "path": "apps/world-web/src/assets/country-scenes/index.json",
+      "bytes": 41245,
+      "sha256": "574b61422113264dff99caca4f4ec53e6a8c8b4775441370a68eeda29ebd84fe"
+    },
+    {
+      "path": "apps/world-web/src/map-explorer/country-scene-urls.ts",
+      "bytes": 5458,
+      "sha256": "39b26df609f1252f0e3ff2cca821a54271028e7250021a9a251739a12c4cd5bb"
     }
   ],
   "adaptedSources": [
@@ -55,13 +65,13 @@
     },
     {
       "path": "apps/world-web/src/world-preview/PublicWorldMap.tsx",
-      "bytes": 15359,
-      "sha256": "e6f50b76557f2b1bc0cedd8a525cad46a85feff2d1be9777aae7e509f620ad86"
+      "bytes": 21442,
+      "sha256": "0f84538a738221eef18fd9a280bd970b3520a08cf8d88224c3d4bb0b5d19bdc6"
     },
     {
       "path": "apps/world-web/src/world-preview/PublicWorldPreview.tsx",
-      "bytes": 18033,
-      "sha256": "afe6009a5ef4d5b899df30c26fa4816da30c6c77588f4f9a284e25221c1d6a72"
+      "bytes": 22218,
+      "sha256": "5a32dead331d43edaaaed0ceaff14d475ddcec49e35792e5276390f5439b3d56"
     },
     {
       "path": "apps/world-web/src/world-preview/geography.ts",
@@ -80,8 +90,8 @@
     },
     {
       "path": "apps/world-web/src/world-preview/public-world-preview.css",
-      "bytes": 17574,
-      "sha256": "1520d7b1b42a83db3003980996db97476827f8d50856168147123b82455922b0"
+      "bytes": 20344,
+      "sha256": "1909192284df3cc9cfcc035bf5955776dbc45f4cc77b7d4b8f5ca1d55cfe72f6"
     },
     {
       "path": "apps/world-web/src/world-preview/source-catalog.json",
@@ -99,6 +109,18 @@
       "sha256": "a5237e8f08c415cb03a07557b0bbaf7f117b4ec881ad577e9580ddd17af80fed"
     }
   ],
+  "originalPublicSceneSelection20261013": {
+    "baseCommit": "335875bb229e6a5bbe9d982357af38bfef3d9752",
+    "baseTree": "06d1632e3dd67610f439b3294f7aa3f799a6bfdf",
+    "entry": "Native public homepage directory and map selection; not a redirect to operations Atlas",
+    "default": "Unchanged indexed original PNG, full independent square with meet, explicitly not to geographic scale",
+    "context": "Separate normal-flow footer outside the image-only viewport, with original terrain/outlines neighbor context and explicit geographic view; toolbar also outside the image viewport. No image georegistration or facility overlay.",
+    "sourceLoading": "Actual selected bitmap with retired load callbacks; missing source remains unavailable",
+    "publicOnly": true,
+    "operationControlsAdded": false,
+    "authorityChanged": false,
+    "independentReview": "PENDING_F_FIXED_SOURCE_REVIEW"
+  },
   "publicReturnSuccessor20261012": {
     "baseCommit": "d561f78bdcf603f3fbd571a88b58d105bf8614af",
     "baseTree": "2fa1e2c2e7862f1650cf95272a20a4adfd1c6ac5",

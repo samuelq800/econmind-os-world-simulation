@@ -6,6 +6,8 @@ import {
   type RefObject,
 } from 'react';
 import terrain from '../assets/asterra-satellite-terrain-v8.png';
+import scenes from '../assets/country-scenes/index.json';
+import { countrySceneUrls } from '../map-explorer/country-scene-urls.js';
 import { countryDetailUrls } from '../map-explorer/country-detail-urls.js';
 import { shouldMountDetailTile } from '../map-explorer/detail-tile-visibility.js';
 import {
@@ -32,9 +34,57 @@ const worldFit: ExplorerCameraFit = {
   camera: world,
   frame: publicFrame,
 };
+const sceneWorld = { x: 0.5, y: 0.5, width: 1.1 };
+const sceneFit: ExplorerCameraFit = {
+  kind: 'world',
+  camera: sceneWorld,
+  frame: [1, 1],
+};
+export type PublicPresentation = 'illustration' | 'geography';
+export const publicSceneLabels = {
+  zh: {
+    illustration: '原始场景',
+    geography: '地理视图',
+    note: '原始国家插画 · 非地理比例',
+    context: '查看地理与邻国',
+    fit: '适配当前视图',
+    error: '原图暂不可用；可切换地理视图。',
+    sources: '公开来源记录',
+    sourceNote: '仅原始插画与公开地理来源 · 非实时',
+    sourceStatus: '原始插画与公开地理来源',
+  },
+  en: {
+    illustration: 'Original scene',
+    geography: 'Geography',
+    note: 'Original country illustration · Not to geographic scale',
+    context: 'View geography and neighbors',
+    fit: 'Fit selected view',
+    error: 'Original scene unavailable; geography remains available.',
+    sources: 'Public source records',
+    sourceNote: 'Original illustrations and public geography · Not live',
+    sourceStatus: 'Original illustrations and public geography',
+  },
+} as const;
+export function publicCountryScene(country: PublicCountry | undefined) {
+  if (!country) return null;
+  const scene = scenes.find(
+    (item) => item.number === country.number && item.id === country.id,
+  );
+  const url = scene && countrySceneUrls[scene.file];
+  return scene && url
+    ? {
+        id: scene.id,
+        number: scene.number,
+        name: scene.name,
+        file: scene.file,
+        url,
+      }
+    : null;
+}
 export type PreviewMapApi = {
   zoom: (factor: number) => void;
   reset: () => void;
+  fit: () => void;
 };
 export type MapMetrics = {
   camera: ExplorerCamera;
@@ -46,6 +96,8 @@ export type MapMetrics = {
 export function PublicWorldMap({
   locale,
   selected,
+  presentation,
+  onGeography,
   allowedIds,
   layers,
   onSelect,
@@ -54,6 +106,8 @@ export function PublicWorldMap({
 }: {
   locale: PreviewLocale;
   selected: PublicCountry | undefined;
+  presentation: PublicPresentation;
+  onGeography: () => void;
   allowedIds: ReadonlySet<string>;
   layers: PreviewLayers;
   onSelect: (id: string) => void;
@@ -61,30 +115,67 @@ export function PublicWorldMap({
   apiRef: RefObject<PreviewMapApi | null>;
 }) {
   const text = messages[locale];
+  const sceneText = publicSceneLabels[locale];
+  const sceneRequested = !!selected && presentation === 'illustration';
+  const scene = publicCountryScene(selected);
+  const source = sceneRequested ? scene?.url : terrain;
+  const defaultFit: ExplorerCameraFit = sceneRequested
+    ? sceneFit
+    : selected
+      ? { kind: 'bounds', bounds: selected.bounds, padding: 1.45 }
+      : worldFit;
+  const defaultFitRef = useRef(defaultFit);
+  defaultFitRef.current = defaultFit;
   const viewport = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 1200, height: 700 });
-  const [camera, setCamera] = useState<ExplorerCamera>(world);
-  const [texture, setTexture] = useState<MapMetrics['texture']>('loading');
+  const [camera, setCamera] = useState<ExplorerCamera>(() =>
+    cameraForViewport(sceneRequested ? sceneWorld : world, size, defaultFit),
+  );
+  const [bitmapState, setBitmapState] = useState({
+    source,
+    status: (source ? 'loading' : 'error') as MapMetrics['texture'],
+    nativeWidth: 0,
+  });
+  const texture =
+    bitmapState.source === source
+      ? bitmapState.status
+      : source
+        ? 'loading'
+        : 'error';
   // SVG image load events can be missed on a warm-cache React mount. Observe
   // the same public bitmap with an HTML image; never infer ready from file existence.
   useEffect(() => {
+    setBitmapState({
+      source,
+      status: source ? 'loading' : 'error',
+      nativeWidth: 0,
+    });
+    if (!source) return;
     const bitmap = new Image();
     let active = true;
-    bitmap.onload = () => {
-      if (active) setTexture('ready');
+    const ready = () => {
+      if (active)
+        setBitmapState({
+          source,
+          status: 'ready',
+          nativeWidth: bitmap.naturalWidth,
+        });
     };
+    bitmap.onload = ready;
     bitmap.onerror = () => {
-      if (active) setTexture('error');
+      if (active) setBitmapState({ source, status: 'error', nativeWidth: 0 });
     };
-    bitmap.src = terrain;
-    if (bitmap.complete && bitmap.naturalWidth > 0) setTexture('ready');
+    bitmap.src = source;
+    if (bitmap.complete && bitmap.naturalWidth > 0) ready();
     return () => {
       active = false;
       bitmap.onload = null;
       bitmap.onerror = null;
     };
-  }, []);
-  const [point, setPoint] = useState<readonly number[]>([world.x, world.y]);
+  }, [source]);
+  const [point, setPoint] = useState<readonly number[]>(
+    sceneRequested ? [sceneWorld.x, sceneWorld.y] : [world.x, world.y],
+  );
   const fit = useRef<ExplorerCameraFit | null>(worldFit);
   const cameraRef = useRef(camera),
     sizeRef = useRef(size);
@@ -102,7 +193,10 @@ export function PublicWorldMap({
     fit.current = null;
     setCamera((current) => {
       const s = sizeRef.current,
-        width = Math.max(0.0001, Math.min(12000, current.width * factor));
+        width = Math.max(
+          sceneRequested ? 0.05 : 0.0001,
+          Math.min(sceneRequested ? 8 : 12000, current.width * factor),
+        );
       const dx = x / s.width - 0.5,
         dy = y / s.height - 0.5;
       return {
@@ -127,18 +221,28 @@ export function PublicWorldMap({
         fit.current = worldFit;
         setCamera(cameraForViewport(world, sizeRef.current, worldFit));
       },
+      fit: () => {
+        fit.current = defaultFitRef.current;
+        setCamera((current) =>
+          cameraForViewport(current, sizeRef.current, fit.current),
+        );
+      },
     }),
     [],
   );
 
   useEffect(() => {
-    fit.current = selected
-      ? { kind: 'bounds', bounds: selected.bounds, padding: 1.45 }
-      : worldFit;
-    setCamera((current) =>
-      cameraForViewport(current, sizeRef.current, fit.current),
+    fit.current = defaultFitRef.current;
+    pointers.current.clear();
+    drag.current = null;
+    const next = cameraForViewport(
+      cameraRef.current,
+      sizeRef.current,
+      fit.current,
     );
-  }, [selected]);
+    setCamera(next);
+    setPoint([next.x, next.y]);
+  }, [selected, presentation]);
   useEffect(() => {
     const element = viewport.current!;
     const observer = new ResizeObserver(([entry]) => {
@@ -169,13 +273,28 @@ export function PublicWorldMap({
     };
   }, []);
   useEffect(() => {
+    const pixelsPerUnit = sceneRequested
+      ? bitmapState.source === source && texture === 'ready'
+        ? bitmapState.nativeWidth
+        : 0
+      : 1;
     onMetrics({
       camera,
-      pointer: point,
+      pointer: point.map((value) => value * pixelsPerUnit),
       texture,
-      sourcePixelsPerScreenPixel: camera.width / size.width,
+      sourcePixelsPerScreenPixel: (camera.width * pixelsPerUnit) / size.width,
     });
-  }, [camera, point, texture, size.width, onMetrics]);
+  }, [
+    camera,
+    point,
+    texture,
+    size.width,
+    onMetrics,
+    sceneRequested,
+    bitmapState.nativeWidth,
+    bitmapState.source,
+    source,
+  ]);
 
   const height = (camera.width * size.height) / size.width;
   const box = {
@@ -184,21 +303,38 @@ export function PublicWorldMap({
     width: camera.width,
     height,
   };
-  const labels = visibleCountryLabels(
-    camera,
-    size,
-    selected?.id ?? '',
-    allowedIds,
-  );
+  const labels = sceneRequested
+    ? []
+    : visibleCountryLabels(camera, size, selected?.id ?? '', allowedIds);
+  const contextCamera = selected
+    ? cameraForViewport(
+        world,
+        { width: 180, height: 120 },
+        {
+          kind: 'bounds',
+          bounds: selected.bounds,
+          padding: 2.5,
+        },
+      )
+    : world;
+  const contextHeight = (contextCamera.width * 120) / 180;
   const radius = (camera.width / size.width) * 2.5;
-  return (
+  return [
     <div
+      key="canvas"
       ref={viewport}
       className="preview-map-canvas"
       role="group"
       tabIndex={0}
-      aria-label={text.map}
-      data-camera-policy="EXISTING_V8_CAMERA_COMPLETE_WORLD_FIT"
+      aria-label={
+        sceneRequested ? `${selected?.name} · ${sceneText.note}` : text.map
+      }
+      data-camera-policy={
+        sceneRequested
+          ? 'INDEPENDENT_CONTAINED_SQUARE_SCENE'
+          : 'EXISTING_V8_CAMERA_COMPLETE_WORLD_FIT'
+      }
+      data-presentation={sceneRequested ? 'illustration' : 'geography'}
       data-world-width={publicFrame[0]}
       data-world-height={publicFrame[1]}
       data-texture-state={texture}
@@ -312,152 +448,171 @@ export function PublicWorldMap({
         drag.current = null;
       }}
     >
-      <svg
-        viewBox={`${box.x} ${box.y} ${box.width} ${box.height}`}
-        preserveAspectRatio="none"
-        aria-label={text.overview}
-      >
-        <defs>
-          {countries.map((country) => (
-            <clipPath id={`public-clip-${country.number}`} key={country.id}>
-              <path d={country.path} fillRule="evenodd" clipRule="evenodd" />
-            </clipPath>
-          ))}
-        </defs>
-        {layers.terrain && (
-          <image
-            href={terrain}
-            x={0}
-            y={0}
-            width={publicFrame[0]}
-            height={publicFrame[1]}
-            onLoad={() => setTexture('ready')}
-            onError={() => setTexture('error')}
-          />
-        )}
-        {layers.details &&
-          publicDetailMaps
-            .filter((map) => {
-              const country = countries.find((c) => c.id === map.id)!;
-              return shouldMountDetailTile(box, country.bounds, false);
-            })
-            .map((map) => (
+      {sceneRequested ? (
+        <>
+          <svg
+            viewBox={`${box.x} ${box.y} ${box.width} ${box.height}`}
+            preserveAspectRatio="none"
+            aria-label={`${selected?.name} · ${sceneText.note}`}
+            data-scene-space="NORMALIZED_INDEPENDENT_ILLUSTRATION"
+          >
+            {scene && (
               <image
-                key={map.id}
-                data-native-detail={map.number}
-                href={`${countryDetailUrls[map.file]}#svgView(preserveAspectRatio(none))`}
-                x={map.viewBox[0]}
-                y={map.viewBox[1]}
-                width={map.viewBox[2]}
-                height={map.viewBox[3]}
-                clipPath={`url(#public-clip-${map.number})`}
+                data-public-original-scene={selected?.number}
+                href={scene.url}
+                x={0}
+                y={0}
+                width={1}
+                height={1}
+                preserveAspectRatio="xMidYMid meet"
+              />
+            )}
+          </svg>
+        </>
+      ) : (
+        <svg
+          viewBox={`${box.x} ${box.y} ${box.width} ${box.height}`}
+          preserveAspectRatio="none"
+          aria-label={text.overview}
+        >
+          <defs>
+            {countries.map((country) => (
+              <clipPath id={`public-clip-${country.number}`} key={country.id}>
+                <path d={country.path} fillRule="evenodd" clipRule="evenodd" />
+              </clipPath>
+            ))}
+          </defs>
+          {layers.terrain && (
+            <image
+              href={terrain}
+              x={0}
+              y={0}
+              width={publicFrame[0]}
+              height={publicFrame[1]}
+            />
+          )}
+          {layers.details &&
+            publicDetailMaps
+              .filter((map) => {
+                const country = countries.find((c) => c.id === map.id)!;
+                return shouldMountDetailTile(box, country.bounds, false);
+              })
+              .map((map) => (
+                <image
+                  key={map.id}
+                  data-native-detail={map.number}
+                  href={`${countryDetailUrls[map.file]}#svgView(preserveAspectRatio(none))`}
+                  x={map.viewBox[0]}
+                  y={map.viewBox[1]}
+                  width={map.viewBox[2]}
+                  height={map.viewBox[3]}
+                  clipPath={`url(#public-clip-${map.number})`}
+                  pointerEvents="none"
+                />
+              ))}
+          {layers.climate &&
+            geographicArtwork.climates.map((region) => (
+              <path
+                key={region.id}
+                d={region.path}
+                fill={region.color}
+                opacity={0.2}
                 pointerEvents="none"
               />
             ))}
-        {layers.climate &&
-          geographicArtwork.climates.map((region) => (
+          {geographicArtwork.physical
+            .filter((feature) =>
+              feature.kind === 'mountain' ? layers.mountains : layers.water,
+            )
+            .map((feature) => (
+              <path
+                key={feature.id}
+                d={feature.path}
+                className={`preview-feature ${feature.kind}`}
+                pointerEvents="none"
+              />
+            ))}
+          {layers.currents &&
+            geographicArtwork.currents.map((current) => (
+              <path
+                key={current.id}
+                d={current.path}
+                className="preview-current"
+                pointerEvents="none"
+              />
+            ))}
+          {layers.routes &&
+            geographicArtwork.routes.map((route) => (
+              <path
+                key={route.id}
+                d={route.path}
+                className="preview-route"
+                pointerEvents="none"
+              />
+            ))}
+          {layers.resourcesLayer &&
+            publicResources.map((resource) => (
+              <circle
+                key={resource.id}
+                data-resource-id={resource.id}
+                cx={resource.point[0]}
+                cy={resource.point[1]}
+                r={radius}
+                className="preview-resource"
+                pointerEvents="none"
+              >
+                <title>
+                  {text.resourcesLayer} · {resource.id}
+                </title>
+              </circle>
+            ))}
+          {layers.settlements &&
+            geographicArtwork.nodes.map((node) => (
+              <circle
+                key={node.id}
+                cx={node.point[0]}
+                cy={node.point[1]}
+                r={radius}
+                className="preview-settlement"
+                pointerEvents="none"
+              >
+                <title>
+                  {text.settlements} · {node.id}
+                </title>
+              </circle>
+            ))}
+          {countries.map((country) => (
             <path
-              key={region.id}
-              d={region.path}
-              fill={region.color}
-              opacity={0.2}
-              pointerEvents="none"
-            />
-          ))}
-        {geographicArtwork.physical
-          .filter((feature) =>
-            feature.kind === 'mountain' ? layers.mountains : layers.water,
-          )
-          .map((feature) => (
-            <path
-              key={feature.id}
-              d={feature.path}
-              className={`preview-feature ${feature.kind}`}
-              pointerEvents="none"
-            />
-          ))}
-        {layers.currents &&
-          geographicArtwork.currents.map((current) => (
-            <path
-              key={current.id}
-              d={current.path}
-              className="preview-current"
-              pointerEvents="none"
-            />
-          ))}
-        {layers.routes &&
-          geographicArtwork.routes.map((route) => (
-            <path
-              key={route.id}
-              d={route.path}
-              className="preview-route"
-              pointerEvents="none"
-            />
-          ))}
-        {layers.resourcesLayer &&
-          publicResources.map((resource) => (
-            <circle
-              key={resource.id}
-              data-resource-id={resource.id}
-              cx={resource.point[0]}
-              cy={resource.point[1]}
-              r={radius}
-              className="preview-resource"
-              pointerEvents="none"
+              key={country.id}
+              d={country.path}
+              data-country-id={country.id}
+              data-country-number={country.number}
+              className={`preview-country ${selected?.id === country.id ? 'selected' : ''} ${allowedIds.has(country.id) ? '' : 'filtered'}`}
+              style={{
+                strokeOpacity: layers.borders
+                  ? allowedIds.has(country.id)
+                    ? 1
+                    : 0.2
+                  : 0,
+              }}
+              fillRule="evenodd"
+              role="button"
+              tabIndex={0}
+              aria-label={`${text.selectCountry} ${country.number} ${country.name}`}
+              aria-pressed={selected?.id === country.id}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onSelect(country.id);
+                }
+              }}
             >
-              <title>
-                {text.resourcesLayer} · {resource.id}
-              </title>
-            </circle>
+              <title>{`${country.number} · ${country.name}`}</title>
+            </path>
           ))}
-        {layers.settlements &&
-          geographicArtwork.nodes.map((node) => (
-            <circle
-              key={node.id}
-              cx={node.point[0]}
-              cy={node.point[1]}
-              r={radius}
-              className="preview-settlement"
-              pointerEvents="none"
-            >
-              <title>
-                {text.settlements} · {node.id}
-              </title>
-            </circle>
-          ))}
-        {countries.map((country) => (
-          <path
-            key={country.id}
-            d={country.path}
-            data-country-id={country.id}
-            data-country-number={country.number}
-            className={`preview-country ${selected?.id === country.id ? 'selected' : ''} ${allowedIds.has(country.id) ? '' : 'filtered'}`}
-            style={{
-              strokeOpacity: layers.borders
-                ? allowedIds.has(country.id)
-                  ? 1
-                  : 0.2
-                : 0,
-            }}
-            fillRule="evenodd"
-            role="button"
-            tabIndex={0}
-            aria-label={`${text.selectCountry} ${country.number} ${country.name}`}
-            aria-pressed={selected?.id === country.id}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                event.stopPropagation();
-                onSelect(country.id);
-              }
-            }}
-          >
-            <title>
-              {country.number} · {country.name}
-            </title>
-          </path>
-        ))}
-      </svg>
+        </svg>
+      )}
       <div className="preview-number-labels">
         {labels.map((country) => (
           <button
@@ -478,9 +633,40 @@ export function PublicWorldMap({
       </div>
       {texture === 'error' && (
         <p className="preview-map-error" role="status">
-          {text.textureError}
+          {sceneRequested ? sceneText.error : text.textureError}
         </p>
       )}
-    </div>
-  );
+    </div>,
+    sceneRequested ? (
+      <div key="scene-context" className="preview-scene-footer">
+        <p className="preview-scene-note">{sceneText.note}</p>
+        <button
+          className="preview-geography-context"
+          onClick={onGeography}
+          aria-label={sceneText.context}
+        >
+          <svg
+            viewBox={`${contextCamera.x - contextCamera.width / 2} ${contextCamera.y - contextHeight / 2} ${contextCamera.width} ${contextHeight}`}
+            aria-hidden="true"
+          >
+            <image
+              href={terrain}
+              x={0}
+              y={0}
+              width={publicFrame[0]}
+              height={publicFrame[1]}
+            />
+            {countries.map((country) => (
+              <path
+                key={country.id}
+                d={country.path}
+                className={`preview-country${country.id === selected?.id ? ' selected' : ''}`}
+              />
+            ))}
+          </svg>
+          <span>{sceneText.context} ↗</span>
+        </button>
+      </div>
+    ) : null,
+  ];
 }

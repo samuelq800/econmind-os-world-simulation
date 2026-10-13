@@ -126,13 +126,13 @@
     },
     {
       "path": "apps/world-web/src/world-preview/PublicWorldMap.tsx",
-      "bytes": 15359,
-      "sha256": "e6f50b76557f2b1bc0cedd8a525cad46a85feff2d1be9777aae7e509f620ad86"
+      "bytes": 21442,
+      "sha256": "0f84538a738221eef18fd9a280bd970b3520a08cf8d88224c3d4bb0b5d19bdc6"
     },
     {
       "path": "apps/world-web/src/world-preview/PublicWorldPreview.tsx",
-      "bytes": 18033,
-      "sha256": "afe6009a5ef4d5b899df30c26fa4816da30c6c77588f4f9a284e25221c1d6a72"
+      "bytes": 22218,
+      "sha256": "5a32dead331d43edaaaed0ceaff14d475ddcec49e35792e5276390f5439b3d56"
     },
     {
       "path": "apps/world-web/src/world-preview/geography.ts",
@@ -151,8 +151,8 @@
     },
     {
       "path": "apps/world-web/src/world-preview/public-world-preview.css",
-      "bytes": 17574,
-      "sha256": "1520d7b1b42a83db3003980996db97476827f8d50856168147123b82455922b0"
+      "bytes": 20344,
+      "sha256": "1909192284df3cc9cfcc035bf5955776dbc45f4cc77b7d4b8f5ca1d55cfe72f6"
     },
     {
       "path": "apps/world-web/src/world-preview/source-catalog.json",
@@ -161,8 +161,8 @@
     },
     {
       "path": "docs/reports/public-world-overview-20261012/SOURCE.json",
-      "bytes": 4751,
-      "sha256": "1316d9d4a5012637f3472dc22e44dd4c450c4c87d273ea80d4a9eacfbd305cb4"
+      "bytes": 6103,
+      "sha256": "a6dce7250bcb30c556c21d09737f2e6480cbc7e74af8235cae9ced98b23dcb2d"
     }
   ],
   "immutablePageInputs": [
