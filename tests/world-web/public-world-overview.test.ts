@@ -1,6 +1,18 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import {
+  PublicWorldMap,
+  publicCountryScene,
+  publicSceneLabels,
+  type PublicPresentation,
+} from '../../apps/world-web/src/world-preview/PublicWorldMap.js';
+import {
+  PublicWorldPreview,
+  publicPresentationForSearch,
+} from '../../apps/world-web/src/world-preview/PublicWorldPreview.js';
 import { isPublicWorldPreview } from '../../apps/world-web/src/world-preview/public-route.js';
 import {
   countries,
@@ -155,5 +167,102 @@ describe('shared bilingual preference and coverage', () => {
     expect(messages.zh.screenPixels).toBe('屏幕像素');
     expect(messages.en.publicStatus).toContain('Not realtime');
     expect(messages.zh.publicStatus).toContain('非实时');
+  });
+});
+
+describe('public homepage original country scenes', () => {
+  const render = (
+    number: string | undefined,
+    presentation: PublicPresentation = 'illustration',
+    locale: 'zh' | 'en' = 'en',
+  ) =>
+    renderToStaticMarkup(
+      createElement(PublicWorldMap, {
+        locale,
+        selected: countries.find((country) => country.number === number),
+        presentation,
+        onGeography: () => undefined,
+        allowedIds: new Set(countries.map((country) => country.id)),
+        layers: initialLayers,
+        onSelect: () => undefined,
+        onMetrics: () => undefined,
+        apiRef: { current: null },
+      }),
+    );
+
+  it.each(['54', '63', '32'])(
+    'renders the original %s PNG as a complete independent square, not geographic detail',
+    async (number) => {
+      const selected = countries.find((country) => country.number === number)!;
+      const scene = publicCountryScene(selected)!;
+      expect(scene.id).toBe(selected.id);
+      expect(scene.file).toBe(`${number}.png`);
+      const bytes = await readFile(
+        `apps/world-web/src/assets/country-scenes/${scene.file}`,
+      );
+      expect(bytes.subarray(1, 4).toString()).toBe('PNG');
+      expect(bytes.readUInt32BE(16)).toBeGreaterThan(0);
+      expect(bytes.readUInt32BE(16)).toBe(bytes.readUInt32BE(20));
+      const html = render(number);
+      expect(html).toContain(`data-public-original-scene="${number}"`);
+      expect(html).toContain(`href="${scene.url}"`);
+      expect(html).toContain('preserveAspectRatio="xMidYMid meet"');
+      expect(html).toContain('NORMALIZED_INDEPENDENT_ILLUSTRATION');
+      expect(html).toContain('Not to geographic scale');
+      expect(html).toContain('View geography and neighbors');
+      expect(html).not.toContain('data-native-detail');
+      expect(html.match(/data-public-original-scene=/g)).toHaveLength(1);
+    },
+  );
+  it('leaves world overview and explicit geographic rendering geographic', () => {
+    for (const html of [render(undefined), render('54', 'geography')]) {
+      expect(html.includes('data-public-original-scene')).toBe(false);
+      expect(html.includes('data-presentation="geography"')).toBe(true);
+    }
+    const geographic = render('54', 'geography');
+    expect(geographic.includes('data-native-detail="54"')).toBe(true);
+    expect(geographic.includes(countries[53]!.path)).toBe(true);
+  });
+  it('uses only the matched source index and never invents another scene', () => {
+    expect(publicCountryScene(undefined)).toBeNull();
+    expect(
+      publicCountryScene({ ...countries[53]!, id: 'unmatched' }),
+    ).toBeNull();
+    const html = renderToStaticMarkup(
+      createElement(PublicWorldMap, {
+        locale: 'en',
+        selected: { ...countries[53]!, id: 'unmatched' },
+        presentation: 'illustration',
+        onGeography: () => undefined,
+        allowedIds: new Set<string>(),
+        layers: initialLayers,
+        onSelect: () => undefined,
+        onMetrics: () => undefined,
+        apiRef: { current: null },
+      }),
+    );
+    expect(html).not.toContain('data-public-original-scene');
+    expect(html).toContain(publicSceneLabels.en.error);
+    expect(html).toContain('data-texture-state="error"');
+  });
+  it('defaults public country URLs to illustration and restores only explicit geography', () => {
+    expect(publicPresentationForSearch('')).toBe('illustration');
+    expect(publicPresentationForSearch('?atlas=overview&country=54')).toBe(
+      'illustration',
+    );
+    expect(
+      publicPresentationForSearch('?atlas=overview&country=63&view=geography'),
+    ).toBe('geography');
+    expect(publicPresentationForSearch('?view=unknown')).toBe('illustration');
+  });
+  it('keeps scoped controls bilingual and exposes no operation/private controls', () => {
+    expect(Object.keys(publicSceneLabels.zh)).toEqual(
+      Object.keys(publicSceneLabels.en),
+    );
+    expect(render('54', 'illustration', 'zh')).toContain('非地理比例');
+    const html = renderToStaticMarkup(createElement(PublicWorldPreview));
+    expect(html).not.toMatch(
+      /role=finance|command\.html|data-office-command|data-financial-intake|Office intent/,
+    );
   });
 });

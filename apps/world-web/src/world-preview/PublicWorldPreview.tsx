@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   PublicWorldMap,
+  publicCountryScene,
+  publicSceneLabels,
+  type PublicPresentation,
   type MapMetrics,
   type PreviewMapApi,
 } from './PublicWorldMap.js';
@@ -30,6 +33,16 @@ const initialSelection = () => {
   const number = new URLSearchParams(window.location.search).get('country');
   return countries.find((country) => country.number === number)?.id ?? '';
 };
+export const publicPresentationForSearch = (
+  search: string,
+): PublicPresentation =>
+  new URLSearchParams(search).get('view') === 'geography'
+    ? 'geography'
+    : 'illustration';
+const initialPresentation = () =>
+  publicPresentationForSearch(
+    typeof window === 'undefined' ? '' : window.location.search,
+  );
 
 export function PublicWorldPreview() {
   const [locale, setLocale] = useState<PreviewLocale>(readPreviewLocale);
@@ -37,6 +50,8 @@ export function PublicWorldPreview() {
   const [query, setQuery] = useState('');
   const [group, setGroup] = useState('all');
   const [selectedId, setSelectedId] = useState(initialSelection);
+  const [presentation, setPresentation] = useState(initialPresentation);
+  const sceneText = publicSceneLabels[locale];
   const [layers, setLayers] = useState<PreviewLayers>(() => ({
     ...initialLayers,
   }));
@@ -55,6 +70,7 @@ export function PublicWorldPreview() {
   });
   const recordMetrics = useCallback((next: MapMetrics) => setMetrics(next), []);
   const selected = countries.find((country) => country.id === selectedId);
+  const selectedScene = publicCountryScene(selected);
   const matches = filterCountries(query, group);
   const allowed = new Set(matches.map((country) => country.id));
 
@@ -65,6 +81,7 @@ export function PublicWorldPreview() {
   useEffect(() => {
     const back = () => {
       setSelectedId(initialSelection());
+      setPresentation(initialPresentation());
       setOverlay(null);
       setDrawer(false);
       setMenu(false);
@@ -76,25 +93,39 @@ export function PublicWorldPreview() {
     const country = countries.find((item) => item.id === id);
     if (!country) return;
     setSelectedId(id);
+    setPresentation('illustration');
     setDrawer(false);
     setMenu(false);
     setOverlay(null);
     const url = new URL(window.location.href);
     url.searchParams.set('atlas', 'overview');
     url.searchParams.set('country', country.number);
+    url.searchParams.delete('view');
     window.history.pushState({}, '', url);
   }, []);
   const reset = () => {
     setSelectedId('');
+    setPresentation('illustration');
     setOverlay(null);
     setMenu(false);
+    setDrawer(false);
     mapApi.current?.reset();
     const url = new URL(window.location.href);
     url.searchParams.set('atlas', 'overview');
     url.searchParams.delete('country');
+    url.searchParams.delete('view');
+    window.history.pushState({}, '', url);
+  };
+  const changePresentation = (next: PublicPresentation) => {
+    setPresentation(next);
+    const url = new URL(window.location.href);
+    if (next === 'geography') url.searchParams.set('view', 'geography');
+    else url.searchParams.delete('view');
     window.history.pushState({}, '', url);
   };
   const openOverlay = (value: NonNullable<Overlay>) => {
+    if (value === 'layers' && selected && presentation === 'illustration')
+      changePresentation('geography');
     overlayTrigger.current =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
@@ -120,7 +151,7 @@ export function PublicWorldPreview() {
     <main
       className={`public-world-preview ${selected ? 'has-selection' : ''}`}
       data-public-world-preview="true"
-      data-preview-status="STATIC_PUBLIC_GEOGRAPHY_NOT_LIVE_WORLD"
+      data-preview-status="STATIC_PUBLIC_PREVIEW_NOT_LIVE_WORLD"
       data-selected-country={selected?.number ?? ''}
       data-locale={locale}
       onKeyDown={(event) => {
@@ -318,7 +349,7 @@ export function PublicWorldPreview() {
                 [countries.length, text.countryCount],
                 [publicGroups.length, text.groupCount],
                 [publicResources.length, text.resourceCount],
-                [sources.length, text.sourceCount],
+                [sources.length + (selectedScene ? 2 : 0), text.sourceCount],
               ].map(([value, label]) => (
                 <div key={label}>
                   <dt>{label}</dt>
@@ -344,7 +375,9 @@ export function PublicWorldPreview() {
             >
               ⌕
             </button>
-            <h1 id="preview-map-title">{text.overview}</h1>
+            <h1 id="preview-map-title">
+              {selected ? `${selected.number} ${selected.name}` : text.overview}
+            </h1>
             <span>{text.mapHelp}</span>
             <button
               onClick={() => openOverlay('legend')}
@@ -357,12 +390,38 @@ export function PublicWorldPreview() {
             <PublicWorldMap
               locale={locale}
               selected={selected}
+              presentation={presentation}
+              onGeography={() => changePresentation('geography')}
               allowedIds={allowed}
               layers={layers}
               onSelect={select}
               onMetrics={recordMetrics}
               apiRef={mapApi}
             />
+            {selected && (
+              <div
+                className="preview-presentation-controls"
+                role="group"
+                aria-label={selected.name}
+              >
+                {(['illustration', 'geography'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    aria-pressed={presentation === mode}
+                    onClick={() => changePresentation(mode)}
+                  >
+                    {sceneText[mode]}
+                  </button>
+                ))}
+                <button
+                  aria-label={sceneText.fit}
+                  title={sceneText.fit}
+                  onClick={() => mapApi.current?.fit()}
+                >
+                  ⛶
+                </button>
+              </div>
+            )}
             <div
               className="preview-map-tools"
               role="group"
@@ -408,7 +467,9 @@ export function PublicWorldPreview() {
                     ? text.layers
                     : overlay === 'legend'
                       ? text.legend
-                      : text.sourceTitle
+                      : selectedScene
+                        ? sceneText.sources
+                        : text.sourceTitle
                 }
                 onKeyDown={(event) => {
                   if (event.key === 'Escape') dismiss();
@@ -420,7 +481,9 @@ export function PublicWorldPreview() {
                       ? text.layers
                       : overlay === 'legend'
                         ? text.legend
-                        : text.sourceTitle}
+                        : selectedScene
+                          ? sceneText.sources
+                          : text.sourceTitle}
                   </h2>
                   <button aria-label={text.close} onClick={dismiss}>
                     ×
@@ -463,7 +526,32 @@ export function PublicWorldPreview() {
                 )}
                 {overlay === 'sources' && (
                   <div className="preview-source-records">
-                    <p>{text.sourceNote}</p>
+                    <p>
+                      {selectedScene ? sceneText.sourceNote : text.sourceNote}
+                    </p>
+                    {selectedScene && (
+                      <details>
+                        <summary>
+                          {sceneText.illustration} · {selectedScene.number}{' '}
+                          {selectedScene.name}
+                        </summary>
+                        <p>
+                          apps/world-web/src/assets/country-scenes/
+                          {selectedScene.file}
+                        </p>
+                        <p>
+                          apps/world-web/src/assets/country-scenes/index.json
+                        </p>
+                        <p>{sceneText.note}</p>
+                        <a
+                          href={selectedScene.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {selectedScene.file} ↗
+                        </a>
+                      </details>
+                    )}
                     {sources.map((source) => (
                       <details key={source.key}>
                         <summary>{text[source.key as MessageKey]}</summary>
@@ -533,15 +621,23 @@ export function PublicWorldPreview() {
         <span
           title={`${text.sourceScale}: ${metrics.sourcePixelsPerScreenPixel.toFixed(3)} ${text.sourcePixels} / ${text.screenPixels}`}
         >
-          {text.zoom} {(1900 / metrics.camera.width).toFixed(2)}×{' '}
+          {text.zoom}{' '}
+          {(
+            (selected && presentation === 'illustration' ? 1.1 : 1900) /
+            metrics.camera.width
+          ).toFixed(2)}
+          ×{' '}
           <span className="preview-footer-coordinates">
             {' '}
-            · {metrics.pointer.map((value) => value.toFixed(1)).join(', ')}{' '}
+            ·{' '}
+            {metrics.texture === 'ready'
+              ? metrics.pointer.map((value) => value.toFixed(1)).join(', ')
+              : '—'}{' '}
             {text.sourcePixels}
           </span>
         </span>
         <button
-          title={text.sourceStatus}
+          title={selectedScene ? sceneText.sourceStatus : text.sourceStatus}
           onClick={() => openOverlay('sources')}
         >
           {metrics.texture === 'loading'

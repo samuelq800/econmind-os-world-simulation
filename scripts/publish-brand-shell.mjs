@@ -11,7 +11,7 @@ const recordPath = 'docs/reports/brand-shell-20261010/SOURCE.json';
 const countryRecordPath = 'docs/reports/country-context-20261010/SOURCE.json';
 // Fixed source package for this visual candidate; changing it requires review.
 export const brandRecordSha256 =
-  '85222b07a85114bc29058c8e4b27181244ae0c208531a4ed811cb9cdb9974565';
+  '32edabae1c0c6420008ca946831702b5674b87424082c691d3369ffcd6bcf6e3';
 export const countryRecordSha256 =
   'be161465d964fdd576df842e7692c88a1d319ce6808431c99549fefa0fe9d243';
 export const sha256 = (bytes) =>
