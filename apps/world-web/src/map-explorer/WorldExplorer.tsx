@@ -447,16 +447,28 @@ function placeName(site: Pick<OfficialFacility, 'name'>) {
   return site.name;
 }
 
+// All 70 pinned original illustrations are square. Match xMidYMid meet's
+// actual image rectangle, not the surrounding (occasionally nonsquare) frame.
+export function containedCountrySceneFrame(frame: readonly number[]) {
+  const side = Math.min(frame[2]!, frame[3]!);
+  return [
+    frame[0]! + (frame[2]! - side) / 2,
+    frame[1]! + (frame[3]! - side) / 2,
+    side,
+    side,
+  ] as const;
+}
+
 export function officialFacilityPoint(
   site: OfficialFacility,
   frame?: readonly number[],
 ) {
-  return frame && site.anchor
-    ? ([
-        frame[0]! + site.anchor[0] * frame[2]!,
-        frame[1]! + site.anchor[1] * frame[3]!,
-      ] as const)
-    : site.point;
+  if (!frame || !site.anchor) return site.point;
+  const image = containedCountrySceneFrame(frame);
+  return [
+    image[0] + site.anchor[0] * image[2],
+    image[1] + site.anchor[1] * image[3],
+  ] as const;
 }
 
 export function facilityHitGroups(
@@ -590,6 +602,9 @@ export function WorldExplorer({
   const country = countries.find((c) => c.id === countryId);
   const detailMap = detailMaps.find((m) => m.id === countryId);
   const scene = sceneMode ? scenes.find((m) => m.id === countryId) : undefined;
+  const sceneImage = scene
+    ? containedCountrySceneFrame(scene.frame)
+    : undefined;
   // Keep the fade in world units when changing the focus/context camera.
   const countryDistance = country
     ? Math.max(
@@ -1379,10 +1394,10 @@ export function WorldExplorer({
               {scene ? (
                 <image
                   href={countrySceneUrls[scene.file]}
-                  x={scene.frame[0]}
-                  y={scene.frame[1]}
-                  width={scene.frame[2]}
-                  height={scene.frame[3]}
+                  x={sceneImage![0]}
+                  y={sceneImage![1]}
+                  width={sceneImage![2]}
+                  height={sceneImage![3]}
                   preserveAspectRatio="xMidYMid meet"
                   pointerEvents="none"
                   data-country-scene={country?.number}

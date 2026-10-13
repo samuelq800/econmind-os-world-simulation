@@ -39,8 +39,8 @@
     },
     {
       "path": "apps/world-web/src/map-explorer/WorldExplorer.tsx",
-      "bytes": 64690,
-      "sha256": "0d44cd5f0a3bc3547eb06f661173986a0ec085678776bed9ff7a4f6139213586"
+      "bytes": 65217,
+      "sha256": "fb6dfba339ab80f4f6196fd59babb36e371164dbea99d9e41878ae2a48a2d68b"
     },
     {
       "path": "apps/world-web/src/map-explorer/viewport-camera.ts",
@@ -129,6 +129,14 @@
     "continuousGeographicHD": "BLOCKED_NO_VERIFIED_ORTHOGRAPHIC_REGISTRATION",
     "publicOverviewOrOperationEntryChanged": false,
     "independentVisualAcceptance": "PENDING"
+  },
+  "originalIllustrationContainmentFix20261013": {
+    "supersededCandidate": "3f71fd938b440e00baee6cc66455799da7b164ca",
+    "finding": "Country 63 anchors used the nonsquare container rather than its centered square image",
+    "imageAndAnchorBasis": "SHARED_CENTERED_CONTAIN_RECT_FOR_PINNED_SQUARE_ORIGINAL_IMAGES",
+    "sourceFramesOrAnchorsChanged": false,
+    "geographicPointsChanged": false,
+    "independentDeltaReview": "PENDING"
   },
   "publicReturnSuccessor20261012": {
     "baseCommit": "d561f78bdcf603f3fbd571a88b58d105bf8614af",
