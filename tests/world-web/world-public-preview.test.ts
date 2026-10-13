@@ -11,6 +11,7 @@ import {
   currentExplorerSource,
   requestExplorerCountry,
   officialFacilityPoint,
+  containedCountrySceneFrame,
   type ExplorerCountryBinding,
 } from '../../apps/world-web/src/map-explorer/WorldExplorer.js';
 import {
@@ -238,9 +239,24 @@ describe('atlas official opening numbers and complete facility records', () => {
     },
   );
 
-  it('opens a country on continuous geography by default with separate scene control', () => {
+  it.each(['01', '32', '38', '54', '58', '70'])(
+    'opens country %s on its unchanged original illustration by default',
+    (number) => {
+      vi.stubGlobal('window', {
+        location: { search: `?atlas=explorer&country=${number}` },
+      });
+      const markup = renderToStaticMarkup(createElement(WorldExplorer));
+      expect(markup).toContain(`data-country-scene="${number}"`);
+      expect(markup).toContain('data-explorer-view="scene"');
+      expect(markup).toContain('preserveAspectRatio="xMidYMid meet"');
+      expect(markup).not.toContain('data-explorer-geography="true"');
+      expect(markup).toContain('展开国家资料');
+    },
+  );
+
+  it('keeps canonical geography as an explicit country view', () => {
     vi.stubGlobal('window', {
-      location: { search: '?atlas=explorer&country=54' },
+      location: { search: '?atlas=explorer&country=54&view=geography' },
     });
     const markup = renderToStaticMarkup(createElement(WorldExplorer));
     expect(markup).toContain('data-explorer-view="geography"');
@@ -303,6 +319,51 @@ describe('atlas official opening numbers and complete facility records', () => {
     },
   );
 
+  it('maps Korra anchors to the actual square image, not its wider frame', async () => {
+    const data = await officialCountry('63');
+    expect(data.frame).toEqual([286.9, 514.9, 200.2, 192.2]);
+    const image = containedCountrySceneFrame(data.frame);
+    expect(image[0]).toBeCloseTo(290.9, 10);
+    expect(image.slice(1)).toEqual([514.9, 192.2, 192.2]);
+    const port = data.facilities.find((site) => site.id === 'P06')!;
+    expect(port.anchor).toEqual([0.56, 0.64]);
+    expect(officialFacilityPoint(port, data.frame)[0]).toBeCloseTo(398.532, 10);
+    expect(officialFacilityPoint(port, data.frame)[1]).toBeCloseTo(637.908, 10);
+    const gas = data.facilities.find((site) => site.id === 'SF287')!;
+    expect(gas.anchor).toEqual([0.83, 0.51]);
+    expect(officialFacilityPoint(gas)).toBe(gas.point);
+    expect(officialFacilityPoint(gas, data.frame)[0]).toBeCloseTo(450.426, 10);
+    expect(officialFacilityPoint(gas, data.frame)[1]).toBeCloseTo(612.922, 10);
+    // Independent review's old whole-container counterexample stays explicit.
+    expect(data.frame[0] + 0.83 * data.frame[2] - 450.426).toBeCloseTo(
+      2.64,
+      10,
+    );
+    const markup = renderCountry('63', { kind: 'ready', data });
+    const rendered = markup.match(
+      /<image[^>]*data-country-scene="63"[^>]*>/,
+    )![0];
+    expect(rendered).toContain('width="192.2"');
+    expect(rendered).toContain('height="192.2"');
+    expect(rendered).toContain('preserveAspectRatio="xMidYMid meet"');
+    const squareControl = await officialCountry('38');
+    expect(containedCountrySceneFrame(squareControl.frame)).toEqual(
+      squareControl.frame,
+    );
+  });
+
+  it('keeps centered square placement for wide, tall and already-square frames', () => {
+    expect(containedCountrySceneFrame([10, 20, 200, 100])).toEqual([
+      60, 20, 100, 100,
+    ]);
+    expect(containedCountrySceneFrame([10, 20, 100, 200])).toEqual([
+      10, 70, 100, 100,
+    ]);
+    expect(containedCountrySceneFrame([10, 20, 100, 100])).toEqual([
+      10, 20, 100, 100,
+    ]);
+  });
+
   it('renders all 1374 source facilities, not only the 350 development subset', async () => {
     const ids = new Set<string>();
     let nullAnchors = 0;
@@ -321,9 +382,10 @@ describe('atlas official opening numbers and complete facility records', () => {
           nullAnchors++;
           expect(officialFacilityPoint(site, data.frame)).toBe(site.point);
         } else {
+          const side = Math.min(data.frame[2], data.frame[3]);
           expect(officialFacilityPoint(site, data.frame)).toEqual([
-            data.frame[0] + site.anchor[0] * data.frame[2],
-            data.frame[1] + site.anchor[1] * data.frame[3],
+            data.frame[0] + (data.frame[2] - side) / 2 + site.anchor[0] * side,
+            data.frame[1] + (data.frame[3] - side) / 2 + site.anchor[1] * side,
           ]);
         }
       }

@@ -680,17 +680,30 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     ).toBeNull();
   });
 
-  it('defaults HOME to canonical geography, retains an explicit original-scene switch, caches immutable sources and disposes the prior observer', async () => {
+  it('defaults HOME to the original illustration, retains explicit geography, caches immutable sources and disposes the prior observer', async () => {
     const f = fixture();
     const record = country('54');
     const before = structuredClone(record);
     await f.api.mountCountrySurroundings(f.root, record);
-    expect(f.root.dataset.mapPresentation).toBe('geographic');
+    expect(f.root.dataset.mapPresentation).toBe('independent-illustration');
     expect(f.scene.children).toHaveLength(6);
     const viewport = f.scene.children[0];
     const svg = viewport.children[0];
     expect(svg.attributes['data-projection']).toBe('V8_IMAGE_PIXELS_TOP_LEFT');
-    expect(f.scene.children[3].textContent).toBe('查看原场景插图');
+    const mode = f.scene.children[3];
+    expect(mode.textContent).toBe('返回连续地理图');
+    expect(mode.attributes['aria-pressed']).toBe('true');
+    expect(viewport.hidden).toBe(true);
+    const toggle = mode.addEventListener.mock.calls.find(
+      ([event]) => event === 'click',
+    )![1] as () => void;
+    toggle();
+    expect(f.root.dataset.mapPresentation).toBe('geographic');
+    expect(viewport.hidden).toBe(false);
+    expect(mode.attributes['aria-pressed']).toBe('false');
+    toggle();
+    expect(f.root.dataset.mapPresentation).toBe('independent-illustration');
+    expect(viewport.hidden).toBe(true);
     expect(svg.attributes.viewBox).toBe(
       f.api.regionalViewBox(record.viewBox, 1920, 1080, 1774, 887)!.join(' '),
     );
@@ -887,7 +900,7 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     expect(f.pins.get(second.id)?.dataset.regionalLocation).toBeUndefined();
     expect(f.root.dataset.regionalMap).toBeUndefined();
     expect(f.scene.children).toHaveLength(6);
-    expect(f.root.dataset.mapPresentation).toBe('geographic');
+    expect(f.root.dataset.mapPresentation).toBe('independent-illustration');
     expect(record).toEqual(before);
     expect(f.authority).not.toHaveBeenCalled();
   });
