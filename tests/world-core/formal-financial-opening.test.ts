@@ -208,6 +208,12 @@ function vector(
   };
 }
 const parse = (v: unknown) => parseFormalFinancialOpeningContract(v, real);
+// Reuse the same genuine non-activated loader and finite mechanism vector in
+// the four-path v2 tests; this exports no authority issuer or production source.
+export { vector as formalFinancialMechanismVector };
+export function formalFinancialTestAdoption(): OwnerNonHostSourceAdoption {
+  return real;
+}
 const run = (v: unknown) =>
   produceFormalFinancialOpening({ adoption: real, contract: parse(v) });
 // Mutable JSON-only copy for invalid-input tests; no forged authority brand.

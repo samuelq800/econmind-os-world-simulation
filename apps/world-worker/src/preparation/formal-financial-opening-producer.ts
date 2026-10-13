@@ -44,6 +44,7 @@ import {
   isParsedFormalFinancialOpeningContract,
   requireFinancialInput,
   type FormalFinancialOpeningContract,
+  type FinancialCrossCbMirror,
 } from './formal-financial-opening-contract.js';
 
 type CanonicalMoney = ReturnType<Money['toCanonicalValue']>;
@@ -80,6 +81,11 @@ export interface FormalFinancialCandidate {
   readonly requestedWorldId: string;
   readonly financialBatches: readonly FinancialOpeningBatch[];
   readonly reconciliations: readonly FormalFinancialReconciliation[];
+  readonly crossCbClaimEvidence?: readonly Readonly<{
+    financialClaimId: string;
+    canonicalSource: Readonly<{ documentId: string; pointer: string }>;
+    mirrors: readonly FinancialCrossCbMirror[];
+  }>[];
 }
 export interface FormalFinancialOpeningResult {
   readonly status: 'BLOCKED';
@@ -142,6 +148,8 @@ export function produceFormalFinancialOpening(
     });
   const batches: FinancialOpeningBatch[] = [],
     reconciliations: FormalFinancialReconciliation[] = [];
+  const v2 = contract.schemaVersion === 'formal-financial-opening-input-v2';
+  const domesticLegs: FinancialOpeningBatch['legs'][number][] = [];
   try {
     for (const c of contract.countries) {
       const original = adoption.manifest.countries.find(
@@ -319,6 +327,16 @@ export function produceFormalFinancialOpening(
             );
         }
       }
+      if (v2)
+        for (const mirror of c.cbRegister.crossCbMirrors!) {
+          const book = openingBookMoney({
+            rawAmount: mirror.claim.openingOutstandingAmount,
+            denomination: 'GCU_EQUIVALENT',
+            localCurrency: lc,
+            localCurrencyPerGcu: mirror.valuation.localCurrencyPerUnit,
+          });
+          (mirror.role === 'ASSET' ? assets : liabilities).push(book);
+        }
       requireFinancialInput(
         c.cbRegister.categories.find(
           (x) => x.category === 'COMMERCIAL_BANK_RESERVE_ACCOUNTS',
@@ -352,7 +370,8 @@ export function produceFormalFinancialOpening(
         'BANK_OPENING_COMPONENT_CONFLICT',
         cid,
       );
-      for (const [key, net] of [...netPositions].sort(([a], [b]) =>
+      if (v2) domesticLegs.push(...legs);
+      for (const [key, net] of (v2 ? [] : [...netPositions]).sort(([a], [b]) =>
         a < b ? -1 : 1,
       ))
         addLeg(
@@ -361,9 +380,9 @@ export function produceFormalFinancialOpening(
           'EQUITY',
           net.money,
         );
-      for (const currency of [
-        ...new Set(legs.map((x) => x.amount.currency)),
-      ].sort()) {
+      for (const currency of v2
+        ? []
+        : [...new Set(legs.map((x) => x.amount.currency))].sort()) {
         const group = legs
           .filter((l) => l.amount.currency === currency)
           .sort((a, b) => (a.legId < b.legId ? -1 : 1));
@@ -396,11 +415,12 @@ export function produceFormalFinancialOpening(
         });
       }
       requireFinancialInput(
-        batches.some(
-          (b) =>
-            b.settlementCurrency === lc &&
-            b.legs.every((l) => l.account.countryId === cid),
-        ),
+        v2 ||
+          batches.some(
+            (b) =>
+              b.settlementCurrency === lc &&
+              b.legs.every((l) => l.account.countryId === cid),
+          ),
         'LOCAL_CURRENCY_BATCH_MISSING',
         cid,
       );
@@ -438,6 +458,15 @@ export function produceFormalFinancialOpening(
         isCash: false,
       });
     }
+    const crossCbClaimEvidence = v2
+      ? composeCrossCbBatches(
+          contract,
+          adoption,
+          domesticLegs,
+          reconciliations,
+          batches,
+        )
+      : undefined;
     // Existing Core performs canonical batch/amount checks and real rebuild.
     // Its internal validation seed is explicitly TEST_FIXTURE and discarded;
     // callers receive no branded seed/source they could bootstrap or admit.
@@ -479,6 +508,7 @@ export function produceFormalFinancialOpening(
       requestedWorldId: contract.worldId,
       financialBatches: rehydrated.financialBatches,
       reconciliations,
+      ...(v2 ? { crossCbClaimEvidence: crossCbClaimEvidence! } : {}),
     };
     return finish({ ...body, fingerprint: fingerprint(body) });
   } catch (error) {
@@ -496,4 +526,268 @@ export function produceFormalFinancialOpening(
     });
     return finish(null); // No partially assembled country/ledger escapes.
   }
+}
+
+/** All source validation is complete before this pure v2 assembly. One native
+ * partition is composed globally, then opening net worth is finalized once.
+ * LC valuations are audit only: they never become additional native legs.
+ */
+function composeCrossCbBatches(
+  contract: FormalFinancialOpeningContract,
+  adoption: OwnerNonHostSourceAdoption,
+  legs: FinancialOpeningBatch['legs'][number][],
+  reconciliations: readonly FormalFinancialReconciliation[],
+  batches: FinancialOpeningBatch[],
+) {
+  const compareCanonicalText = (a: string, b: string): number =>
+    a < b ? -1 : a > b ? 1 : 0;
+  const stable = (prefix: string, ...parts: string[]) =>
+    prefix +
+    '_' +
+    financialInputSha256(
+      canonicalSerialize([
+        'CROSS_CB_V2',
+        contract.worldId,
+        contract.openingEpoch!,
+        contract.sourceId,
+        ...parts,
+      ]),
+    ).toUpperCase();
+  const domesticClaims = new Set(
+    legs.flatMap((l) =>
+      l.account.claimId === null ? [] : [String(l.account.claimId)],
+    ),
+  );
+  const mirrorIndex = new Map<string, FinancialCrossCbMirror[]>();
+  for (const c of contract.countries)
+    for (const mirror of c.cbRegister.crossCbMirrors!) {
+      const values = mirrorIndex.get(mirror.financialClaimId) ?? [];
+      values.push(mirror);
+      mirrorIndex.set(mirror.financialClaimId, values);
+    }
+  const evidence = contract.crossCbClaims!.map((claim) => {
+    requireFinancialInput(
+      !domesticClaims.has(claim.financialClaimId),
+      'CROSS_CB_CLAIM_CONFLICT',
+      claim.financialClaimId,
+    );
+    const mirrors = [...(mirrorIndex.get(claim.financialClaimId) ?? [])].sort(
+      (a, b) =>
+        compareCanonicalText(a.role, b.role) ||
+        compareCanonicalText(a.recordOwnerCb, b.recordOwnerCb) ||
+        compareCanonicalText(a.holdingId, b.holdingId) ||
+        compareCanonicalText(a.source.documentId, b.source.documentId) ||
+        compareCanonicalText(a.source.pointer, b.source.pointer),
+    );
+    requireFinancialInput(
+      mirrors.length === 2 &&
+        mirrors[0]!.role === 'ASSET' &&
+        mirrors[1]!.role === 'LIABILITY',
+      'CROSS_CB_MIRROR_COVERAGE_INVALID',
+      claim.financialClaimId,
+    );
+    const pair = (
+      [
+        [
+          'ASSET',
+          claim.creditorCountryId,
+          claim.creditorEntityId,
+          claim.issuerEntityId,
+        ],
+        [
+          'LIABILITY',
+          claim.issuerCountryId,
+          claim.issuerEntityId,
+          claim.creditorEntityId,
+        ],
+      ] as const
+    ).map(([role, cid, owner, other]) => {
+      const roster = adoption.manifest.countries.find(
+        (c) => c.countryId === cid,
+      );
+      requireFinancialInput(
+        roster?.holderRoster.centralBank === owner,
+        'CROSS_CB_ENDPOINT_OR_ROLE_INVALID',
+        claim.financialClaimId,
+      );
+      const identity = [
+        claim.financialClaimId,
+        cid,
+        owner,
+        role,
+        claim.currency,
+      ];
+      return {
+        legId: financialOpeningLegId(stable('LEG', ...identity)),
+        account: createFinancialAccount({
+          worldId: worldId(contract.worldId),
+          countryId: countryId(cid),
+          accountId: financialAccountId(stable('ACCOUNT', ...identity)),
+          ownerId: legalEntityId(owner),
+          accountClass: role,
+          currency: claim.currency,
+          claimId: financialClaimId(claim.financialClaimId),
+          counterpartyEntityId: legalEntityId(other),
+        }),
+        direction: role === 'ASSET' ? ('DEBIT' as const) : ('CREDIT' as const),
+        amount: Money.from(claim.openingOutstandingAmount, claim.currency),
+        counterpartLegId: financialOpeningLegId('PENDING_COUNTERPART'),
+      };
+    });
+    requireFinancialInput(
+      pair[0]!.account.countryId !== pair[1]!.account.countryId &&
+        pair[0]!.account.claimId === pair[1]!.account.claimId &&
+        pair[0]!.account.counterpartyEntityId === pair[1]!.account.ownerId &&
+        pair[1]!.account.counterpartyEntityId === pair[0]!.account.ownerId &&
+        pair[0]!.amount.amount.equals(pair[1]!.amount.amount),
+      'RECIPROCAL_OPENING_CLAIM_REQUIRED',
+      claim.financialClaimId,
+    );
+    legs.push(...pair);
+    return {
+      financialClaimId: claim.financialClaimId,
+      canonicalSource: claim.source,
+      mirrors,
+    };
+  });
+  const net = new Map<string, { cid: string; owner: string; money: Money }>();
+  for (const leg of legs) {
+    const cid = String(leg.account.countryId),
+      owner = String(leg.account.ownerId),
+      currency = leg.amount.currency;
+    const key = canonicalSerialize([cid, owner, currency]);
+    const prior = net.get(key)?.money ?? Money.from('0', currency);
+    net.set(key, {
+      cid,
+      owner,
+      money:
+        leg.account.accountClass === 'ASSET'
+          ? prior.add(leg.amount)
+          : prior.subtract(leg.amount),
+    });
+  }
+  // CB book A-L must equal the complete emitted native net worth valued once
+  // with that same country's explicitly sourced per-native quote.
+  for (const c of contract.countries) {
+    const owner = adoption.manifest.countries.find(
+      (x) => x.countryId === c.countryId,
+    )!.holderRoster.centralBank;
+    const rates = new Map<string, string>([
+      [c.localCurrency, '1'],
+      ['GCU', c.openingFx.localCurrencyPerGcu],
+    ]);
+    for (const h of c.cbRegister.holdings)
+      rates.set(h.currency, h.localCurrencyPerUnit);
+    for (const m of c.cbRegister.crossCbMirrors!)
+      rates.set(m.claim.currency, m.valuation.localCurrencyPerUnit);
+    let book = Money.from('0', c.localCurrency);
+    for (const partition of net.values())
+      if (partition.cid === c.countryId && partition.owner === owner) {
+        const rate = rates.get(partition.money.currency);
+        requireFinancialInput(
+          rate !== undefined,
+          'CROSS_CB_VALUATION_INVALID',
+          c.countryId,
+        );
+        book = book.add(
+          openingBookMoney({
+            rawAmount: partition.money.toCanonicalValue().amount,
+            denomination: 'GCU_EQUIVALENT',
+            localCurrency: c.localCurrency,
+            localCurrencyPerGcu: rate,
+          }),
+        );
+      }
+    requireFinancialInput(
+      book.toCanonicalValue().amount ===
+        reconciliations.find((x) => x.countryId === c.countryId)!.cbNetWorth
+          .amount,
+      'CROSS_CB_NATIVE_EQUITY_BOOK_MISMATCH',
+      c.countryId,
+    );
+  }
+  for (const [, partition] of [...net].sort(([a], [b]) => (a < b ? -1 : 1))) {
+    if (partition.money.amount.isZero()) continue;
+    const identity = [
+      'OPENING_NET_WORTH',
+      partition.cid,
+      partition.owner,
+      partition.money.currency,
+    ];
+    legs.push({
+      legId: financialOpeningLegId(stable('LEG_EQUITY', ...identity)),
+      account: createFinancialAccount({
+        worldId: worldId(contract.worldId),
+        countryId: countryId(partition.cid),
+        accountId: financialAccountId(stable('ACCOUNT_EQUITY', ...identity)),
+        ownerId: legalEntityId(partition.owner),
+        accountClass: 'EQUITY',
+        currency: partition.money.currency,
+        claimId: null,
+        counterpartyEntityId: null,
+      }),
+      direction: partition.money.amount.isNegative() ? 'DEBIT' : 'CREDIT',
+      amount: Money.from(
+        canonicalDecimal(partition.money.amount.abs()),
+        partition.money.currency,
+      ),
+      counterpartLegId: financialOpeningLegId('PENDING_COUNTERPART'),
+    });
+  }
+  requireFinancialInput(
+    new Set(legs.map((l) => l.legId)).size === legs.length &&
+      new Set(legs.map((l) => l.account.accountId)).size === legs.length,
+    'DUPLICATE_FINANCIAL_IMPLEMENTATION_ID',
+    'legs',
+  );
+  for (const currency of [
+    ...new Set(legs.map((l) => l.amount.currency)),
+  ].sort()) {
+    const group = legs
+      .filter((l) => l.amount.currency === currency)
+      .sort((a, b) => (a.legId < b.legId ? -1 : 1));
+    const claims = new Map<string, FinancialOpeningBatch['legs'][number][]>();
+    for (const leg of group)
+      if (leg.account.claimId !== null) {
+        const values = claims.get(leg.account.claimId) ?? [];
+        values.push(leg);
+        claims.set(leg.account.claimId, values);
+      }
+    const firstDebit = group.find((l) => l.direction === 'DEBIT');
+    const firstCredit = group.find((l) => l.direction === 'CREDIT');
+    const paired = group.map((leg) => {
+      const others =
+        leg.account.claimId === null ? [] : claims.get(leg.account.claimId)!;
+      const other =
+        leg.account.claimId === null
+          ? leg.direction === 'DEBIT'
+            ? firstCredit
+            : firstDebit
+          : others.find((l) => l.legId !== leg.legId);
+      requireFinancialInput(
+        other &&
+          other.direction !== leg.direction &&
+          (leg.account.claimId === null ||
+            (others.length === 2 &&
+              other.amount.amount.equals(leg.amount.amount) &&
+              other.account.counterpartyEntityId === leg.account.ownerId &&
+              leg.account.counterpartyEntityId === other.account.ownerId)),
+        'RECIPROCAL_OPENING_CLAIM_REQUIRED',
+        leg.legId,
+      );
+      return { ...leg, counterpartLegId: other.legId };
+    });
+    batches.push({
+      batchId: financialOpeningBatchId(stable('BATCH', currency)),
+      sourceId: openingSourceId(contract.sourceId),
+      settlementCurrency: currency,
+      legs: paired,
+    });
+  }
+  requireFinancialInput(
+    new Set(batches.map((b) => b.batchId)).size === batches.length,
+    'DUPLICATE_FINANCIAL_IMPLEMENTATION_ID',
+    'batches',
+  );
+  return evidence;
 }

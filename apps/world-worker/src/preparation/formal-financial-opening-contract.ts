@@ -55,6 +55,49 @@ export interface FinancialBankLoan {
   readonly currency: string;
   readonly source: FinancialSourceReference;
 }
+export interface FinancialCrossCbClaimBody {
+  readonly financialClaimId: string;
+  readonly instrumentCode: string;
+  readonly assetCategory: CentralBankOpeningCategory;
+  readonly liabilityCategory: CentralBankOpeningCategory;
+  readonly creditorCountryId: string;
+  readonly creditorEntityId: string;
+  readonly issuerCountryId: string;
+  readonly issuerEntityId: string;
+  readonly openingOutstandingAmount: string;
+  readonly currency: string;
+  readonly openingEpoch: string;
+  readonly valueDate: string;
+  readonly expiryDate: string | null;
+}
+export interface FinancialCrossCbClaim extends FinancialCrossCbClaimBody {
+  readonly source: FinancialSourceReference;
+}
+export interface FinancialScenarioOrigin {
+  readonly sourceClass: 'CONSTRUCTED_SCENARIO' | 'MECHANISM_TEST_VECTOR';
+  readonly version: string;
+  readonly rulesHash: string;
+  readonly paramsHash: string;
+  readonly source: FinancialSourceReference;
+}
+export interface FinancialCrossCbMirror {
+  readonly holdingId: string;
+  readonly financialClaimId: string;
+  readonly recordOwnerCb: string;
+  readonly role: 'ASSET' | 'LIABILITY';
+  readonly category: CentralBankOpeningCategory;
+  readonly claim: FinancialCrossCbClaimBody;
+  readonly valuation: Readonly<{
+    nativeCurrency: string;
+    bookCurrency: string;
+    localCurrencyPerUnit: string;
+    quoteDirection: 'BOOK_LC_PER_NATIVE_UNIT';
+    version: string;
+    valueDate: string;
+    source: FinancialSourceReference;
+  }>;
+  readonly source: FinancialSourceReference;
+}
 export interface FinancialCountryInput {
   readonly countryId: string;
   readonly localCurrency: string;
@@ -70,11 +113,14 @@ export interface FinancialCountryInput {
     source: FinancialSourceReference;
     categories: readonly FinancialCategoryCoverage[];
     holdings: readonly FinancialCbHolding[];
+    /** Required in v2, forbidden in v1 by exact runtime dispatch. */
+    crossCbMirrors?: readonly FinancialCrossCbMirror[];
   }>;
   readonly bankLoans: readonly FinancialBankLoan[];
 }
 export interface FormalFinancialOpeningContract {
-  readonly schemaVersion: 'formal-financial-opening-input-v1';
+  readonly schemaVersion:
+    'formal-financial-opening-input-v1' | 'formal-financial-opening-input-v2';
   readonly evidenceKind: 'SOURCE_CANDIDATE' | 'MECHANISM_TEST_VECTOR';
   /** A requested deterministic calculation namespace, never verified authority. */
   readonly worldId: string;
@@ -86,6 +132,10 @@ export interface FormalFinancialOpeningContract {
   readonly financeSha256: string;
   readonly documents: readonly FinancialSourceDocument[];
   readonly countries: readonly FinancialCountryInput[];
+  /** Required only by the exact v2 branch; these are not admission fields. */
+  readonly openingEpoch?: string;
+  readonly scenarioOrigin?: FinancialScenarioOrigin;
+  readonly crossCbClaims?: readonly FinancialCrossCbClaim[];
 }
 export class FormalFinancialOpeningInvalid extends Error {
   constructor(
@@ -119,6 +169,10 @@ export function freezeFinancialInput<T>(value: T): T {
   return value;
 }
 type Row = Record<string, unknown>;
+// Same code-unit ordering as the existing canonical document/ID comparisons;
+// host locale/ICU collation must never define a serialized financial order.
+const compareCanonicalText = (a: string, b: string): number =>
+  a < b ? -1 : a > b ? 1 : 0;
 function row(value: unknown, keys: readonly string[], field: string): Row {
   requireFinancialInput(
     value !== null && typeof value === 'object' && !Array.isArray(value),
@@ -227,8 +281,10 @@ export function parseFormalFinancialOpeningContract(
     'adoption',
   );
   // Canonical roundtrip rejects executable/non-JSON payloads and snapshots input.
+  const snapshot = JSON.parse(canonicalSerialize(input)) as Row;
+  const v2 = snapshot?.schemaVersion === 'formal-financial-opening-input-v2';
   const r = row(
-    JSON.parse(canonicalSerialize(input)) as unknown,
+    snapshot,
     [
       'schemaVersion',
       'evidenceKind',
@@ -241,11 +297,12 @@ export function parseFormalFinancialOpeningContract(
       'financeSha256',
       'documents',
       'countries',
+      ...(v2 ? ['openingEpoch', 'scenarioOrigin', 'crossCbClaims'] : []),
     ],
     'contract',
   );
   requireFinancialInput(
-    r.schemaVersion === 'formal-financial-opening-input-v1' &&
+    (v2 || r.schemaVersion === 'formal-financial-opening-input-v1') &&
       ['SOURCE_CANDIDATE', 'MECHANISM_TEST_VECTOR'].includes(
         String(r.evidenceKind),
       ),
@@ -332,7 +389,9 @@ export function parseFormalFinancialOpeningContract(
     const documentId = id(s.documentId, 'source.documentId'),
       pointer = typeof s.pointer === 'string' ? s.pointer : null;
     requireFinancialInput(
-      pointer !== null && docs.has(documentId),
+      pointer !== null &&
+        (!v2 || (pointer.length > 0 && pointer.length <= 1024)) &&
+        docs.has(documentId),
       'SOURCE_REFERENCE_UNRESOLVED',
       documentId,
     );
@@ -349,6 +408,141 @@ export function parseFormalFinancialOpeningContract(
       documentId + pointer,
     );
   };
+  const openingEpoch = v2 ? id(r.openingEpoch, 'openingEpoch') : undefined;
+  const origin = v2
+    ? row(
+        r.scenarioOrigin,
+        ['sourceClass', 'version', 'rulesHash', 'paramsHash', 'source'],
+        'scenarioOrigin',
+      )
+    : undefined;
+  if (origin) {
+    requireFinancialInput(
+      origin.sourceClass ===
+        (r.evidenceKind === 'MECHANISM_TEST_VECTOR'
+          ? 'MECHANISM_TEST_VECTOR'
+          : 'CONSTRUCTED_SCENARIO') &&
+        typeof origin.rulesHash === 'string' &&
+        /^[0-9a-f]{64}$/u.test(origin.rulesHash) &&
+        typeof origin.paramsHash === 'string' &&
+        /^[0-9a-f]{64}$/u.test(origin.paramsHash),
+      'SCENARIO_ORIGIN_INVALID',
+      'scenarioOrigin',
+    );
+    text(origin.version, 'scenarioOrigin.version');
+    verify(
+      origin.source,
+      {
+        sourceClass: origin.sourceClass,
+        version: origin.version,
+        rulesHash: origin.rulesHash,
+        paramsHash: origin.paramsHash,
+        openingEpoch,
+        valueDate,
+      },
+      String(origin.version),
+    );
+  }
+  const cbCountries = new Map<string, string>();
+  if (v2) {
+    for (const c of adoption.manifest.countries) {
+      requireFinancialInput(
+        !cbCountries.has(c.holderRoster.centralBank),
+        'CB_INDEX_NOT_INJECTIVE',
+        c.countryId,
+      );
+      cbCountries.set(c.holderRoster.centralBank, c.countryId);
+    }
+    requireFinancialInput(
+      cbCountries.size === 70,
+      'ALL_70_CB_IDENTITIES_REQUIRED',
+      'adoption',
+    );
+  }
+  const claimKeys = [
+    'financialClaimId',
+    'instrumentCode',
+    'assetCategory',
+    'liabilityCategory',
+    'creditorCountryId',
+    'creditorEntityId',
+    'issuerCountryId',
+    'issuerEntityId',
+    'openingOutstandingAmount',
+    'currency',
+    'openingEpoch',
+    'valueDate',
+    'expiryDate',
+  ] as const;
+  const claimsById = new Map<string, FinancialCrossCbClaim>();
+  const crossCbClaims = v2
+    ? array(r.crossCbClaims, 'crossCbClaims', 17920)
+        .map((value) => {
+          const c = row(value, [...claimKeys, 'source'], 'crossCbClaim');
+          const claimId = id(c.financialClaimId, 'financialClaimId');
+          requireFinancialInput(
+            !claimsById.has(claimId),
+            'DUPLICATE_CROSS_CB_CLAIM',
+            claimId,
+          );
+          id(c.instrumentCode, 'instrumentCode');
+          const creditor = text(c.creditorCountryId, 'creditorCountryId');
+          const issuer = text(c.issuerCountryId, 'issuerCountryId');
+          requireFinancialInput(
+            creditor !== issuer &&
+              cbCountries.get(String(c.creditorEntityId)) === creditor &&
+              cbCountries.get(String(c.issuerEntityId)) === issuer,
+            'CROSS_CB_ENDPOINT_OR_ROLE_INVALID',
+            claimId,
+          );
+          const allowedPairs = [
+            ['RESERVE_SWAP_RECEIVABLES', 'RESERVE_SWAP_PAYABLES'],
+            ['ACCRUED_INTEREST_RECEIVABLE', 'ACCRUED_INTEREST_PAYABLE'],
+            ['OTHER_CENTRAL_BANK_ASSETS', 'OTHER_CENTRAL_BANK_LIABILITIES'],
+          ];
+          requireFinancialInput(
+            allowedPairs.some(
+              ([a, l]) => a === c.assetCategory && l === c.liabilityCategory,
+            ),
+            'CROSS_CB_INSTRUMENT_INVALID',
+            claimId,
+          );
+          exactFinancialDecimal(
+            c.openingOutstandingAmount,
+            'crossCbClaim.amount',
+            true,
+          );
+          currency(c.currency, 'crossCbClaim.currency');
+          requireFinancialInput(
+            c.openingEpoch === openingEpoch &&
+              date(c.valueDate, 'crossCbClaim.valueDate') === valueDate,
+            'CROSS_CB_CLAIM_CONFLICT',
+            claimId,
+          );
+          if (c.expiryDate !== null)
+            requireFinancialInput(
+              date(c.expiryDate, 'crossCbClaim.expiryDate') >= valueDate,
+              'CROSS_CB_CLAIM_EXPIRED',
+              claimId,
+            );
+          const { source, ...body } = c;
+          verify(
+            source,
+            {
+              ...body,
+              sourceClass: origin!.sourceClass,
+              rulesHash: origin!.rulesHash,
+              paramsHash: origin!.paramsHash,
+            },
+            String(origin!.version),
+          );
+          const claim = c as unknown as FinancialCrossCbClaim;
+          claimsById.set(claimId, claim);
+          return claim;
+        })
+        .sort((a, b) => (a.financialClaimId < b.financialClaimId ? -1 : 1))
+    : [];
+  const mirrorsByClaim = new Map<string, FinancialCrossCbMirror[]>();
   const seenCountries = new Set<string>(),
     holdingIds = new Set<string>();
   const countries = array(r.countries, 'countries', 70)
@@ -393,7 +587,14 @@ export function parseFormalFinancialOpeningContract(
       );
       const cb = row(
         c.cbRegister,
-        ['version', 'valueDate', 'source', 'categories', 'holdings'],
+        [
+          'version',
+          'valueDate',
+          'source',
+          'categories',
+          'holdings',
+          ...(v2 ? ['crossCbMirrors'] : []),
+        ],
         'cbRegister',
       );
       const cbVersion = text(cb.version, 'cbRegister.version');
@@ -534,11 +735,144 @@ export function parseFormalFinancialOpeningContract(
           return h as unknown as FinancialCbHolding;
         })
         .sort((a, b) => (a.holdingId < b.holdingId ? -1 : 1));
+      const mirrors = v2
+        ? array(cb.crossCbMirrors, 'crossCbMirrors', 512)
+            .map((value) => {
+              const m = row(
+                value,
+                [
+                  'holdingId',
+                  'financialClaimId',
+                  'recordOwnerCb',
+                  'role',
+                  'category',
+                  'claim',
+                  'valuation',
+                  'source',
+                ],
+                'crossCbMirror',
+              );
+              const hid = id(m.holdingId, 'crossCbMirror.holdingId');
+              const claimId = id(
+                m.financialClaimId,
+                'crossCbMirror.financialClaimId',
+              );
+              const canonical = claimsById.get(claimId);
+              requireFinancialInput(
+                canonical && !holdingIds.has(hid) && hid !== claimId,
+                'CROSS_CB_MIRROR_COVERAGE_INVALID',
+                hid,
+              );
+              const repeated = row(m.claim, claimKeys, 'crossCbMirror.claim');
+              const { source: claimSource, ...claimBody } = canonical;
+              void claimSource;
+              requireFinancialInput(
+                canonicalSerialize(repeated) === canonicalSerialize(claimBody),
+                'CROSS_CB_CLAIM_CONFLICT',
+                claimId,
+              );
+              requireFinancialInput(
+                m.recordOwnerCb === original.holderRoster.centralBank &&
+                  ((m.role === 'ASSET' &&
+                    cid === canonical.creditorCountryId &&
+                    m.category === canonical.assetCategory) ||
+                    (m.role === 'LIABILITY' &&
+                      cid === canonical.issuerCountryId &&
+                      m.category === canonical.liabilityCategory)),
+                'CROSS_CB_ENDPOINT_OR_ROLE_INVALID',
+                hid,
+              );
+              holdingIds.add(hid);
+              const val = row(
+                m.valuation,
+                [
+                  'nativeCurrency',
+                  'bookCurrency',
+                  'localCurrencyPerUnit',
+                  'quoteDirection',
+                  'version',
+                  'valueDate',
+                  'source',
+                ],
+                'crossCbValuation',
+              );
+              const rate = exactFinancialDecimal(
+                val.localCurrencyPerUnit,
+                'crossCbValuation.rate',
+                true,
+              );
+              requireFinancialInput(
+                val.nativeCurrency === canonical.currency &&
+                  val.bookCurrency === lc &&
+                  val.quoteDirection === 'BOOK_LC_PER_NATIVE_UNIT' &&
+                  date(val.valueDate, 'crossCbValuation.valueDate') ===
+                    valueDate &&
+                  (canonical.currency !== lc || rate === '1') &&
+                  (canonical.currency !== 'GCU' ||
+                    (rate === fx.localCurrencyPerGcu &&
+                      val.version === fxVersion)),
+                'CROSS_CB_VALUATION_INVALID',
+                hid,
+              );
+              text(val.version, 'crossCbValuation.version');
+              const priorRate = valuationRates.get(canonical.currency);
+              requireFinancialInput(
+                priorRate === undefined || priorRate === rate,
+                'CROSS_CB_VALUATION_INVALID',
+                hid,
+              );
+              valuationRates.set(canonical.currency, rate);
+              const { source: valuationSource, ...valuation } = val;
+              verify(
+                valuationSource,
+                {
+                  ...valuation,
+                  countryId: cid,
+                  financialClaimId: claimId,
+                  openingEpoch,
+                  sourceClass: origin!.sourceClass,
+                  rulesHash: origin!.rulesHash,
+                  paramsHash: origin!.paramsHash,
+                },
+                String(val.version),
+              );
+              verify(
+                m.source,
+                {
+                  countryId: cid,
+                  valueDate,
+                  openingEpoch,
+                  holdingId: hid,
+                  financialClaimId: claimId,
+                  recordOwnerCb: m.recordOwnerCb,
+                  role: m.role,
+                  category: m.category,
+                  claim: claimBody,
+                  valuation,
+                  sourceClass: origin!.sourceClass,
+                  rulesHash: origin!.rulesHash,
+                  paramsHash: origin!.paramsHash,
+                },
+                cbVersion,
+              );
+              const mirror = m as unknown as FinancialCrossCbMirror;
+              const paired = mirrorsByClaim.get(claimId) ?? [];
+              paired.push(mirror);
+              mirrorsByClaim.set(claimId, paired);
+              return mirror;
+            })
+            .sort(
+              (a, b) =>
+                compareCanonicalText(a.role, b.role) ||
+                compareCanonicalText(a.holdingId, b.holdingId),
+            )
+        : [];
       requireFinancialInput(
         categories.every(
           (cat) =>
             (cat.disposition === 'DECLARED') ===
-            holdings.some((h) => h.category === cat.category),
+            (holdings.some((h) => h.category === cat.category) ||
+              mirrors.some((m) => m.category === cat.category)),
         ),
         'REGISTER_DECLARATION_MISMATCH',
         cid,
@@ -554,6 +888,9 @@ export function parseFormalFinancialOpeningContract(
             disposition,
           })),
           holdingIds: holdings.map((h) => h.holdingId),
+          ...(v2
+            ? { crossCbHoldingIds: mirrors.map((m) => m.holdingId).sort() }
+            : {}),
         },
         cbVersion,
       );
@@ -589,7 +926,12 @@ export function parseFormalFinancialOpeningContract(
         .sort((a, b) => (a.loanId < b.loanId ? -1 : 1));
       return {
         ...c,
-        cbRegister: { ...cb, categories, holdings },
+        cbRegister: {
+          ...cb,
+          categories,
+          holdings,
+          ...(v2 ? { crossCbMirrors: mirrors } : {}),
+        },
         bankLoans: loans,
       } as unknown as FinancialCountryInput;
     })
@@ -600,10 +942,22 @@ export function parseFormalFinancialOpeningContract(
     'ALL_70_COUNTRIES_REQUIRED',
     'countries',
   );
+  if (v2)
+    for (const claim of crossCbClaims) {
+      const mirrors = mirrorsByClaim.get(claim.financialClaimId) ?? [];
+      requireFinancialInput(
+        mirrors.length === 2 &&
+          mirrors.filter((m) => m.role === 'ASSET').length === 1 &&
+          mirrors.filter((m) => m.role === 'LIABILITY').length === 1,
+        'CROSS_CB_MIRROR_COVERAGE_INVALID',
+        claim.financialClaimId,
+      );
+    }
   const result = freezeFinancialInput({
     ...r,
     documents,
     countries,
+    ...(v2 ? { openingEpoch, scenarioOrigin: origin, crossCbClaims } : {}),
   }) as unknown as FormalFinancialOpeningContract;
   parsed.add(result);
   return result;
