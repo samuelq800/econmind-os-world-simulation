@@ -1,0 +1,112 @@
+{
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "baseCommit": "16de5fc9b94aaa7ae596d7ecdd6258939b064f9d",
+  "baseTree": "79123f4a2a739fcd47f3fedda38a5c953811ce3c",
+  "design": {
+    "libraryId": "libfile_e35163fea2e08191bc945ebce09cadc5",
+    "version": 0,
+    "fileId": "file_0000000099c4820eadc881e816c440ba",
+    "bytes": 18300,
+    "lines": 654,
+    "sha256": "bb490922c44b14c81818f6c61b1cfb5d37eec72f98078175da6c2be980663cd3"
+  },
+  "scope": "Public static geography homepage; root and atlas=overview. Explicit downstream routes unchanged. Header68/sidebar288or260/footer32; native camera and source geometry. No runtime controls.",
+  "geographicClassification": "Existing illustrated continentFor display grouping only, explicitly disclosed; no authoritative ownership/admin membership inferred.",
+  "scale": "Native source pixels and source-pixels/screen-pixel ratio only; no ground kilometres fabricated.",
+  "locale": "Shared econmind-ui-language preference; ZH/EN React strings; state survives changes without reload. Canonical source country spellings preserved.",
+  "authorityChanged": false,
+  "serverAuthenticationChanged": false,
+  "hiddenControlsAreAuthentication": false,
+  "newHDAssets": "NOT_IN_SCOPE_NO_NEW_HD_CLAIM; old terrain and original detail SVG preserved, HD geographical registration separate BLOCKED workstream.",
+  "fullPublicationRun": false,
+  "productionDeployment": false,
+  "immutableInputs": [
+    {
+      "path": "apps/world-web/src/assets/asterra-satellite-terrain-v8.png",
+      "bytes": 2590149,
+      "sha256": "4cc5e79b1293c5c5c6dbfecc0688a66aa031307ec144332c22f3fc962c179ed7"
+    },
+    {
+      "path": "apps/world-web/src/map-lab/land-partition.json",
+      "bytes": 662704,
+      "sha256": "394a43ffc94df7c27c8fe8610378d348f07c1680675c89ecad26300aa9c7b101"
+    },
+    {
+      "path": "apps/world-web/src/map-lab/atlas-layers.json",
+      "bytes": 912223,
+      "sha256": "49989ef13dfe2812835a8cdcba7110d5cb9dca13203c4288a5b35871726e0465"
+    },
+    {
+      "path": "apps/world-web/src/assets/country-detail/index.json",
+      "bytes": 38950,
+      "sha256": "b28794cb3285c6130c7f3c7d4e3af2f7c19f28eca625b3597e14636cdf360e06"
+    },
+    {
+      "path": "apps/world-web/src/assets/continent-scenes/index.json",
+      "bytes": 783,
+      "sha256": "4c3c45463e47e18a7326ee75a6da933aa5a1e14fbfd97bfe1ee28b5ea5cea8ea"
+    }
+  ],
+  "adaptedSources": [
+    {
+      "path": "apps/world-web/src/world-preview/Loading.tsx",
+      "bytes": 1109,
+      "sha256": "98f756809287afacd637bde038d22a623181fc5ee62efb9cfc841c6a656081e9"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/PublicWorldMap.tsx",
+      "bytes": 15359,
+      "sha256": "e6f50b76557f2b1bc0cedd8a525cad46a85feff2d1be9777aae7e509f620ad86"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/PublicWorldPreview.tsx",
+      "bytes": 18033,
+      "sha256": "afe6009a5ef4d5b899df30c26fa4816da30c6c77588f4f9a284e25221c1d6a72"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/geography.ts",
+      "bytes": 3820,
+      "sha256": "dea7410a9bbc9cc392ee46b8e005f724912d299a7742409fd68affcbab676668"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/locale.ts",
+      "bytes": 8210,
+      "sha256": "444911dc4544de9a96f8f55339ecc0bdcc172141fd4f650d7a90481a6d001423"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/public-route.ts",
+      "bytes": 885,
+      "sha256": "39b6426def6ba66c4b9d9d38bdd6edc9d0eaa1ad5a0c59b479bf11472777398a"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/public-world-preview.css",
+      "bytes": 17574,
+      "sha256": "1520d7b1b42a83db3003980996db97476827f8d50856168147123b82455922b0"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/source-catalog.json",
+      "bytes": 922,
+      "sha256": "fdc715d2ffe371fe18ab758145a58269c0c507a7f1c1bc911fecfa1195702ce6"
+    },
+    {
+      "path": "apps/world-web/src/App.tsx",
+      "bytes": 3788,
+      "sha256": "9fde380c44d8a78e436a39d52b338e039a705dc1d7e54ce21a133ba777af5a66"
+    },
+    {
+      "path": "apps/world-web/src/brand-shell/entry.ts",
+      "bytes": 4270,
+      "sha256": "a5237e8f08c415cb03a07557b0bbaf7f117b4ec881ad577e9580ddd17af80fed"
+    }
+  ],
+  "publicReturnSuccessor20261012": {
+    "baseCommit": "d561f78bdcf603f3fbd571a88b58d105bf8614af",
+    "baseTree": "2fa1e2c2e7862f1650cf95272a20a4adfd1c6ac5",
+    "emptyCountryReturn": "REAL_DOCUMENT_NAVIGATION_USING_BASE_URL",
+    "reason": "Cross legacy/public component and brand shell boundary, not merely pushState",
+    "returnLabel": "Shared saved ZH/EN preference",
+    "nonemptyCountryCameraSelectionHistory": "UNCHANGED",
+    "sourceGeographyAndAuthorityChanged": false,
+    "independentReview": "PENDING_NARROW_FIXED_SUCCESSOR_REVIEW"
+  }
+}

@@ -1,6 +1,15 @@
 import markup from './brand-shell.html?raw';
 import css from './brand-shell.css?inline';
+import crisisCss from '../crisis-action/crisis-action.css?inline';
 import { mountLegacyCountryAtlas } from '../../public/country-home-surroundings.js';
+import { createElement } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
+import { CrisisSummary } from '../crisis-action/index.js';
+import { isPublicWorldPreview } from '../world-preview/public-route.js';
+import {
+  applyPreviewLocale,
+  readPreviewLocale,
+} from '../world-preview/locale.js';
 
 /** Public brand chrome only: no session, storage, source read or command access. */
 export function mountEconMindBrandShell(document: Document, base: URL) {
@@ -17,7 +26,7 @@ export function mountEconMindBrandShell(document: Document, base: URL) {
   }
   const style = document.createElement('style');
   style.dataset.econmindBrandStyle = '';
-  style.textContent = css;
+  style.textContent = css + '\n' + crisisCss;
   document.head.append(style);
   document.body.dataset.econmindBrandPage = '';
   document.body.prepend(header);
@@ -25,10 +34,58 @@ export function mountEconMindBrandShell(document: Document, base: URL) {
 }
 
 if (typeof document !== 'undefined') {
-  mountEconMindBrandShell(
-    document,
-    new URL(import.meta.env.BASE_URL, window.location.origin),
+  const publicPreview = isPublicWorldPreview(
+    new URL(window.location.href),
+    import.meta.env.BASE_URL,
   );
+  if (publicPreview) {
+    document.body.dataset.econmindPublicPreview = '';
+    applyPreviewLocale(readPreviewLocale());
+  } else {
+    mountEconMindBrandShell(
+      document,
+      new URL(import.meta.env.BASE_URL, window.location.origin),
+    );
+  }
+  if (/\/season1-immersive\/$/u.test(window.location.pathname)) {
+    const mounts = new Map<HTMLElement, { host: HTMLElement; root: Root }>();
+    const attach = () => {
+      for (const [scene, mounted] of mounts) {
+        if (!scene.isConnected || !mounted.host.isConnected) {
+          mounted.root.unmount();
+          mounts.delete(scene);
+        }
+      }
+      const scene = document.querySelector<HTMLElement>('.national-world');
+      if (!scene || scene.parentElement?.querySelector('.econmind-home-crisis'))
+        return;
+      const host = document.createElement('div');
+      host.className = 'econmind-home-crisis';
+      scene.before(host);
+      const country = new URLSearchParams(window.location.search).get(
+        'country',
+      );
+      const number =
+        country && /^(0[1-9]|[1-6][0-9]|70)$/.test(country) ? country : null;
+      const url = new URL(
+        './',
+        new URL(import.meta.env.BASE_URL, window.location.origin),
+      );
+      url.searchParams.set('atlas', 'crisis');
+      if (number) url.searchParams.set('country', number);
+      const root = createRoot(host);
+      mounts.set(scene, { host, root });
+      root.render(
+        createElement(CrisisSummary, {
+          ...(number ? { countryLabel: `国家 ${number}` } : {}),
+          href: url.href,
+        }),
+      );
+    };
+    const observer = new MutationObserver(attach);
+    observer.observe(document.body, { childList: true, subtree: true });
+    attach();
+  }
   // Public legacy Atlas uses the same verified geography as HOME. Its own
   // renderer continues to own country selection, records and pin interactions.
   if (/\/countries\/(?:\d{2}\/)?$/u.test(window.location.pathname)) {

@@ -4,3 +4,13 @@ export function mountLegacyCountryAtlas(
   country: unknown,
   publicationBase?: URL,
 ): Promise<void>;
+
+export function unambiguousPinIds(
+  points: readonly { id: string; x: number; y: number }[],
+  diameter?: number,
+): string[];
+
+export function geographicPinGroups(
+  points: readonly { id: string; x: number; y: number }[],
+  diameter?: number,
+): { id: string; x: number; y: number; ids: string[] }[];

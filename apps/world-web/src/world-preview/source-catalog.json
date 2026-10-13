@@ -1,0 +1,27 @@
+[
+  {
+    "key": "terrainSource",
+    "file": "apps/world-web/src/assets/asterra-satellite-terrain-v8.png",
+    "sha256": "4cc5e79b1293c5c5c6dbfecc0688a66aa031307ec144332c22f3fc962c179ed7"
+  },
+  {
+    "key": "boundarySource",
+    "file": "apps/world-web/src/map-lab/land-partition.json",
+    "sha256": "394a43ffc94df7c27c8fe8610378d348f07c1680675c89ecad26300aa9c7b101"
+  },
+  {
+    "key": "layersSource",
+    "file": "apps/world-web/src/map-lab/atlas-layers.json",
+    "sha256": "49989ef13dfe2812835a8cdcba7110d5cb9dca13203c4288a5b35871726e0465"
+  },
+  {
+    "key": "detailSource",
+    "file": "apps/world-web/src/assets/country-detail/index.json",
+    "sha256": "b28794cb3285c6130c7f3c7d4e3af2f7c19f28eca625b3597e14636cdf360e06"
+  },
+  {
+    "key": "groupSource",
+    "file": "apps/world-web/src/assets/continent-scenes/index.json",
+    "sha256": "4c3c45463e47e18a7326ee75a6da933aa5a1e14fbfd97bfe1ee28b5ea5cea8ea"
+  }
+]

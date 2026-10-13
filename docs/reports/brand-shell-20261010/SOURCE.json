@@ -51,13 +51,13 @@
   "adaptedSources": [
     {
       "path": "apps/world-web/src/brand-shell/entry.ts",
-      "bytes": 2124,
-      "sha256": "f641b86825e18f60166f2845cc54b8804f3ed04f44a2d9e22be59e9dca77a3e0"
+      "bytes": 4270,
+      "sha256": "a5237e8f08c415cb03a07557b0bbaf7f117b4ec881ad577e9580ddd17af80fed"
     },
     {
       "path": "apps/world-web/src/brand-shell/brand-shell.css",
-      "bytes": 10259,
-      "sha256": "77354e481912b2579d9a02ead816fe685c96c47dd59d0c58b9623c454d808d18"
+      "bytes": 13729,
+      "sha256": "11e86480ff9f25bf6344e6636665b7a580bad3eca064635feed82e1558db9443"
     },
     {
       "path": "apps/world-web/src/brand-shell/brand-shell.html",
@@ -88,6 +88,81 @@
       "path": "apps/world-web/package.json",
       "bytes": 828,
       "sha256": "08df80946a5a66d4e13f768b17aae9da96ff9541054238f409dc235e287e7d6e"
+    },
+    {
+      "path": "apps/world-web/src/App.tsx",
+      "bytes": 3788,
+      "sha256": "9fde380c44d8a78e436a39d52b338e039a705dc1d7e54ce21a133ba777af5a66"
+    },
+    {
+      "path": "apps/world-web/src/map-explorer/CrisisGeography.tsx",
+      "bytes": 2869,
+      "sha256": "5cb8482f4be3226b80096a85a1265fbbdfaf1a8a4db0ca62365db802a7bff512"
+    },
+    {
+      "path": "apps/world-web/src/crisis-action/CrisisActionPage.tsx",
+      "bytes": 18061,
+      "sha256": "cea74d7e8a7c9fbfcd18536c51394271eb14d58ef99c194f6ecf427713e19303"
+    },
+    {
+      "path": "apps/world-web/src/crisis-action/crisis-action.css",
+      "bytes": 8642,
+      "sha256": "0b34bbd407007424fa19655d6fe06f3a192939e3a2d52d9c61607953a1506cbf"
+    },
+    {
+      "path": "apps/world-web/src/crisis-action/index.ts",
+      "bytes": 446,
+      "sha256": "195034f8f55c573edd950a2442b2d48cfaf21c2376727dec1cd88ef4359e193c"
+    },
+    {
+      "path": "apps/world-web/src/crisis-action/model.ts",
+      "bytes": 11331,
+      "sha256": "5c3105ba007aa300f082a2c4421f030bf0484604d33cc73ac6609a154623d2dd"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/Loading.tsx",
+      "bytes": 1109,
+      "sha256": "98f756809287afacd637bde038d22a623181fc5ee62efb9cfc841c6a656081e9"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/PublicWorldMap.tsx",
+      "bytes": 15359,
+      "sha256": "e6f50b76557f2b1bc0cedd8a525cad46a85feff2d1be9777aae7e509f620ad86"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/PublicWorldPreview.tsx",
+      "bytes": 18033,
+      "sha256": "afe6009a5ef4d5b899df30c26fa4816da30c6c77588f4f9a284e25221c1d6a72"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/geography.ts",
+      "bytes": 3820,
+      "sha256": "dea7410a9bbc9cc392ee46b8e005f724912d299a7742409fd68affcbab676668"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/locale.ts",
+      "bytes": 8210,
+      "sha256": "444911dc4544de9a96f8f55339ecc0bdcc172141fd4f650d7a90481a6d001423"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/public-route.ts",
+      "bytes": 885,
+      "sha256": "39b6426def6ba66c4b9d9d38bdd6edc9d0eaa1ad5a0c59b479bf11472777398a"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/public-world-preview.css",
+      "bytes": 17574,
+      "sha256": "1520d7b1b42a83db3003980996db97476827f8d50856168147123b82455922b0"
+    },
+    {
+      "path": "apps/world-web/src/world-preview/source-catalog.json",
+      "bytes": 922,
+      "sha256": "fdc715d2ffe371fe18ab758145a58269c0c507a7f1c1bc911fecfa1195702ce6"
+    },
+    {
+      "path": "docs/reports/public-world-overview-20261012/SOURCE.json",
+      "bytes": 4751,
+      "sha256": "1316d9d4a5012637f3472dc22e44dd4c450c4c87d273ea80d4a9eacfbd305cb4"
     }
   ],
   "immutablePageInputs": [
@@ -488,5 +563,61 @@
     "Authentication, permissions, settlement, clock",
     "New world-to-country-to-Office page layout",
     "Production publication/activation"
-  ]
+  ],
+  "successor20261012": {
+    "baseCommit": "0ba32ab46828fb6f7e0189f6b2501891de1516fa",
+    "baseTree": "7914403df0c3c8b81bc9d311235bf01fa30aff4a",
+    "inputLibraryId": "libfile_39808f2c70608191a101d65ce4b7c467",
+    "inputLibraryVersion": 5,
+    "defaultGeographicContext": "Original visible country-detail SVGs, each registered in its native viewBox and clipped to its canonical country; darker neighbors under the shared silhouette-distance fade. Geographic/presentation detail, not surveyed or newly generated texture.",
+    "worldChrome": "Measured navigation clearance, compact expandable world facts, visible World return at narrow widths. Portrait world camera fills the map viewport without changing geographic coordinates; full-world fit remains explicit.",
+    "hitTargets": "Overlapping 36px facility dots aggregate at the first original point; exact-ID choice buttons select the original record. No point/ID mutation.",
+    "realWindowLabel": "First 14 real days/two weeks, independent of target10x; no fabricated server time/date/countdown.",
+    "HDVisualAcceptance": "PENDING_INDEPENDENT_SCREENSHOT_REVIEW",
+    "perspectiveRasterGeoreferencing": "BLOCKED_NO_SHARED_GEOGRAPHIC_TRANSFORM",
+    "authorityChanged": false
+  },
+  "cameraSuccessor20261012": {
+    "baseTree": "5d0e37aed884b05687da5b9841a7f400910030ea",
+    "baseLibraryId": "libfile_1108d44e8f0881919cfafea950da276f",
+    "baseLibraryVersion": 0,
+    "cameraPolicy": "COUNTRY_CENTERED_UNMAPPED_EDGE_BLANK",
+    "assetGeometryChanged": false,
+    "geographyInventedBeyondWorldExtent": false,
+    "mobileNoncriticalCountryDetails": "EXPLICIT_DISCLOSURE",
+    "allFiveCrisisFeedbackSourcesVisible": true,
+    "HDVisualAcceptance": "CHANGES_REQUIRED_ASSET_REGISTRATION_BLOCKED",
+    "layoutAcceptance": "PENDING_INDEPENDENT_SCREENSHOT_REVIEW",
+    "unselectedCountryCrisisTextSurface": "OPAQUE_DARK_BRAND_NAV_AND_CLOCK_CARDS"
+  },
+  "routeScrollSuccessor20261012": {
+    "baseCommit": "c0bdeae4678b7e6ffecef71374045851ed65b271",
+    "baseTree": "f5fb0ccce2267dc65200aacdd52698de361d6f8e",
+    "routeReset": "POST_COMMIT_COUNTRY_CHANGE_ONLY",
+    "sameCountrySelection": "PRESERVE_CAMERA_SELECTION_AND_PAGE_SCROLL",
+    "facilitySelection": "INSPECTOR_SCROLL_ONLY_WITH_PREVENT_SCROLL_FOCUS",
+    "mobileDetails": "EXPLICIT_VIEW_DETAILS_ACTION",
+    "sourceCoordinatesChanged": false,
+    "HD": "BLOCKED_NO_VERIFIED_ORTHOGRAPHIC_REGISTRATION",
+    "independentReview": "PENDING_FRESH_BROWSER_QA"
+  },
+  "publicOverviewSuccessor20261012": {
+    "baseCommit": "16de5fc9b94aaa7ae596d7ecdd6258939b064f9d",
+    "baseTree": "79123f4a2a739fcd47f3fedda38a5c953811ce3c",
+    "sourceRecord": "docs/reports/public-world-overview-20261012/SOURCE.json",
+    "publicRootShell": "68px full-width branded header, public geography only; legacy corner shell only on downstream URLs",
+    "oldDirectRoutesPreserved": true,
+    "authorityChanged": false,
+    "independentReview": "PENDING_FIVE_VIEWPORT_BILINGUAL_REVIEW"
+  },
+  "publicReturnSuccessor20261012": {
+    "baseCommit": "d561f78bdcf603f3fbd571a88b58d105bf8614af",
+    "baseTree": "2fa1e2c2e7862f1650cf95272a20a4adfd1c6ac5",
+    "emptyCountryReturn": "REAL_DOCUMENT_NAVIGATION_USING_BASE_URL",
+    "reason": "Cross legacy/public component and brand shell boundary, not merely pushState",
+    "returnLabel": "Shared saved ZH/EN preference",
+    "nonemptyCountryCameraSelectionHistory": "UNCHANGED",
+    "sourceGeographyAndAuthorityChanged": false,
+    "independentReview": "PENDING_NARROW_FIXED_SUCCESSOR_REVIEW"
+  }
 }

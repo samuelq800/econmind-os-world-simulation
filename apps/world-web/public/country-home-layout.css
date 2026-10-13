@@ -4,6 +4,9 @@
   background-color: transparent;
   background-size: contain;
   background-repeat: no-repeat;
+  /* Illustration-owned anchors require a separate canvas, not blended land. */
+  background-color: #081c24;
+  mask-image: none;
 }
 
 .country-map-home .national-surroundings {
@@ -366,5 +369,278 @@
       font-size: 10px;
       line-height: 1.5;
     }
+  }
+}
+
+/* HOME default is a real interactive geographic canvas, before office panels. */
+.national-neighbor-details {
+  filter: brightness(0.7);
+}
+.country-map-home .country-game[data-home-map] {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  padding: 0 16px 24px;
+  min-height: 100dvh;
+}
+.country-map-home [data-home-map] .national-world {
+  order: 0;
+  position: relative;
+  inset: auto;
+  z-index: 0;
+  width: calc(100% + 32px);
+  height: clamp(460px, 80dvh, 720px);
+  flex: none;
+  align-self: center;
+  margin: 0;
+  anchor-name: --country-scene;
+  filter: none;
+}
+.country-map-home
+  [data-home-map][data-map-presentation='geographic']
+  .national-world {
+  background-image: none;
+}
+.country-map-home
+  [data-home-map][data-map-presentation='independent-illustration']
+  .national-world {
+  background-image: var(--national-scene-art);
+  background-size: contain;
+}
+.country-map-home [data-home-map] .national-light,
+.country-map-home [data-home-map] .national-site-pins {
+  display: none;
+}
+.country-map-home [data-home-map] .national-hud {
+  order: 1;
+  margin-top: 20px;
+}
+.country-map-home [data-home-map] .national-mission {
+  order: 2;
+  position: relative;
+  inset: auto;
+  transform: none;
+  width: 100%;
+  max-width: 700px;
+  margin-top: 24px;
+}
+.country-map-home [data-home-map] .national-tools {
+  order: 3;
+  position: relative;
+  inset: auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  width: 100%;
+  margin: 16px 0;
+}
+.country-map-home [data-home-map] .national-play {
+  order: 4;
+  position: relative;
+  inset: auto;
+  transform: none;
+  width: 100%;
+  max-width: 700px;
+  margin-top: 0;
+}
+.country-map-home [data-home-map] .national-destination {
+  order: 5;
+  position: relative;
+  left: auto !important;
+  top: auto !important;
+  width: auto;
+  max-width: 700px;
+  transform: none;
+  margin-top: 18px;
+}
+.country-map-home [data-home-map] .national-buildings {
+  order: 6;
+  position: relative;
+  inset: auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 24px;
+  max-width: none;
+  margin: 24px 0;
+}
+.country-map-home [data-home-map] .national-bottom {
+  order: 7;
+  position: relative;
+  inset: auto;
+  margin-top: 20px;
+}
+.country-map-home [data-home-map] .national-edition {
+  order: 8;
+  position: relative;
+  inset: auto;
+  margin-top: 20px;
+  max-width: 100%;
+}
+.national-geographic-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  outline-offset: -3px;
+}
+.national-geographic-viewport:active {
+  cursor: grabbing;
+}
+.national-geographic-viewport svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.national-geographic-viewport [hidden],
+.national-world > [hidden] {
+  display: none !important;
+}
+.national-geographic-markers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.national-geographic-pin {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  border: 1px solid #ffe4ab;
+  background: #12353eee;
+  color: #ffefc3;
+  padding: 0;
+  font: 9px system-ui;
+}
+.national-map-toolbar {
+  position: absolute;
+  top: 16px;
+  left: 76px;
+  right: 60px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: start;
+}
+.national-map-toolbar select {
+  width: min(180px, 100%);
+  min-width: 0;
+  height: 36px;
+  background: #102a33ee;
+  color: #eef5df;
+  border: 1px solid #719192;
+  border-radius: 6px;
+  font: 12px system-ui;
+}
+.national-map-toolbar a {
+  display: flex;
+  align-items: center;
+  color: #eef5df;
+  padding: 9px;
+  min-height: 44px;
+  font: 12px system-ui;
+  background: #102a33ee;
+  border-radius: 6px;
+}
+.national-map-camera {
+  position: absolute;
+  top: 16px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+}
+.national-map-camera button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #719192;
+  background: #102a33ee;
+  color: #eef5df;
+  font: 20px system-ui;
+}
+.national-map-mode {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  max-width: calc(100% - 180px);
+  min-height: 38px;
+  background: #102a33ee;
+  border: 1px solid #719192;
+  color: #eef5df;
+  border-radius: 6px;
+  padding: 8px;
+  font: 12px system-ui;
+}
+.national-map-sites {
+  position: absolute;
+  bottom: 16px;
+  right: 12px;
+  max-width: 160px;
+  color: #eef5df;
+  font: 12px system-ui;
+  background: #102a33f5;
+  border: 1px solid #719192;
+  border-radius: 6px;
+}
+.national-map-sites summary {
+  min-height: 38px;
+  padding: 10px;
+  cursor: pointer;
+}
+.national-map-sites > div {
+  max-height: 240px;
+  overflow: auto;
+}
+.national-map-sites button {
+  display: block;
+  width: 100%;
+  min-height: 36px;
+  background: none;
+  color: inherit;
+  border: 0;
+  padding: 8px;
+  text-align: left;
+  font: 12px system-ui;
+}
+.national-map-inspector {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 70px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  background: #102a33fa;
+  color: #eef5df;
+  border: 1px solid #719192;
+  border-radius: 6px;
+}
+.national-map-inspector a {
+  color: #b9f3dd;
+}
+.national-map-inspector button {
+  margin-left: auto;
+  background: none;
+  color: inherit;
+  border: 1px solid #719192;
+  min-height: 32px;
+}
+@media (max-width: 600px) {
+  .country-map-home [data-home-map] .national-world {
+    height: 70dvh;
+    min-height: 440px;
+    max-height: 600px;
+  }
+  .country-map-home [data-home-map] #language-switch {
+    top: auto;
+    bottom: 12px;
+    left: auto;
+    right: 12px;
+  }
+  .national-map-toolbar a {
+    padding: 8px 0;
   }
 }
