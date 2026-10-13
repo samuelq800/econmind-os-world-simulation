@@ -104,6 +104,8 @@ export function createOfficeCommandController(
   let floor = b?.read.world.minimumWorldVersion ?? '0';
   let submitStatus: Status | null = null;
   let submitCode: string | null = null;
+  // Local presentation metadata only; never source freshness or authority.
+  let lastAuthorizedReadAtClient: string | null = null;
   const notify = () => {
     for (const fn of [...listeners]) fn();
   };
@@ -118,6 +120,7 @@ export function createOfficeCommandController(
     acknowledgement = null;
     lookup = null;
     receipt = null;
+    lastAuthorizedReadAtClient = null;
     reader?.disconnect();
     writer?.disconnect();
     const cleanup = stop;
@@ -203,6 +206,11 @@ export function createOfficeCommandController(
     }
     floor = next.head.worldVersion;
     model = next;
+    try {
+      lastAuthorizedReadAtClient = new Date().toISOString();
+    } catch {
+      lastAuthorizedReadAtClient = null;
+    }
     code = receipt ? null : submitCode;
     status = receipt ? 'FINAL_VERIFIED' : (submitStatus ?? 'CURRENT');
   }
@@ -225,6 +233,7 @@ export function createOfficeCommandController(
           : null,
         receipt,
         acknowledgement,
+        lastAuthorizedReadAtClient,
         intent: intent
           ? (JSON.parse(
               JSON.stringify(intent),
