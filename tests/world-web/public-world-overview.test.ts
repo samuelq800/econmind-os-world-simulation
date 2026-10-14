@@ -1,8 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { describe, expect, it } from 'vitest';
-import { createElement } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
 import {
   PublicWorldMap,
   publicCountryScene,
@@ -33,6 +32,15 @@ import sources from '../../apps/world-web/src/world-preview/source-catalog.json'
 import partition from '../../apps/world-web/src/map-lab/land-partition.json';
 import artwork from '../../apps/world-web/src/map-lab/atlas-layers.json';
 import { continentFor } from '../../apps/world-web/src/map-explorer/continent-layout.js';
+
+// Resolve the web app's declared React dependencies without adding root packages.
+const requireWeb = createRequire(
+  new URL('../../apps/world-web/package.json', import.meta.url),
+);
+const { createElement } = requireWeb('react') as typeof import('react');
+const { renderToStaticMarkup } = requireWeb(
+  'react-dom/server',
+) as typeof import('react-dom/server');
 
 describe('public-only World overview routing', () => {
   it.each([
