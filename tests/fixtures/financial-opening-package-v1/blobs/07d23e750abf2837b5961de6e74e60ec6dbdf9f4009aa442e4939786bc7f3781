@@ -1,0 +1,263 @@
+{
+  "actualSeedId": null,
+  "actualWorldId": null,
+  "authoritativeGcuSource": {
+    "meaning": "Fixed reviewed input values, not formal adoption of this new scene",
+    "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/r3am-native-binding-20261013-corrected-r-v2/region_DAY0_FINANCE_REFERENCE.proposed.json",
+    "sha256": "35a727c49063981e987b7906ec053a58317abdc60ae4ccd8b1171457cea7d6b9"
+  },
+  "files": [
+    {
+      "bytes": 10995,
+      "path": "CB_BALANCE_70.csv",
+      "sha256": "8a8d0b372c69bb302d8a2bc41af18afbb669b2b99e2e764c5418207abb227161"
+    },
+    {
+      "bytes": 235954,
+      "path": "CB_COVERAGE_1470.csv",
+      "sha256": "4ddbd09762e4394ba6b0afefd1631ea6523398338fb4a11270256cecfff2c5bb"
+    },
+    {
+      "bytes": 3073,
+      "path": "CB_REGISTER_COVERAGE.design.json",
+      "sha256": "87ff21ced978016cbe0a8bdc2bfcfe25f8d20fe6c98160fad8c09d4acb61eef6"
+    },
+    {
+      "bytes": 1250467,
+      "path": "CB_REGISTER_COVERAGE.json",
+      "sha256": "fc2bc542f50cee653d3db548932e301fb6bd36a40c213b2a3c30a294c42dd0d6"
+    },
+    {
+      "bytes": 8333,
+      "path": "CONSTRUCTED_SCENARIO_MANIFEST.json",
+      "sha256": "acafc4a14e0c1ef290d9c68c877c2bc4d7619c623ff70e6175d6944581de6a00"
+    },
+    {
+      "bytes": 7024,
+      "path": "CURRENCY_FX_70.csv",
+      "sha256": "f1b045b39586a6a539970ed940e6389ae5cc025fe6a1ee48c0bd87e38784244c"
+    },
+    {
+      "bytes": 213759,
+      "path": "CURRENCY_FX_RULES_AND_CANDIDATE.json",
+      "sha256": "812e95994053837139afd6b8798a68d3ff4f4436fbd839dfb8f9568371c3e562"
+    },
+    {
+      "bytes": 4489,
+      "path": "CURRENCY_FX_RULES_AND_CANDIDATE.rules.json",
+      "sha256": "9d76ec696bd3856f37a5ed8fae9681a2d118ac7621ddbe4c5f7e0ee8c300ede9"
+    },
+    {
+      "bytes": 3488,
+      "path": "DATA_COMPOSITION_DRY_RUN.json",
+      "sha256": "9f56178b9161ec9c10ae0d041813d85cb04f649fb32047b3dc0532449e1d7f7b"
+    },
+    {
+      "bytes": 81246,
+      "path": "DEBT_FISCAL_STRESS_COUNTEREXAMPLES.json",
+      "sha256": "78a31e7b37c6338c2e888fb93eb5723d3710ae41cc1da927cfc6abc4cb506097"
+    },
+    {
+      "bytes": 1879,
+      "path": "EXECUTION_CHANNEL_CHECKPOINT.json",
+      "sha256": "01b45c2f1e0a65432d85ea7fbf218d58d8d712f4f69113b76df5d2911a6e2244"
+    },
+    {
+      "bytes": 1820,
+      "path": "FINAL_CONSTRUCTION_CHECKPOINT.json",
+      "sha256": "7876f2213cc2be6635feb3a66c65d9e4d5ff2b40dd04b4ef72b75a5bc29157f8"
+    },
+    {
+      "bytes": 377398,
+      "path": "FINANCE_INVENTORY_DAY0_JOINT.proposed.json",
+      "sha256": "76746d973e67a2d69d5172d2a99d84254ad8f70a70628fbec57f5c2a9509529f"
+    },
+    {
+      "bytes": 208741,
+      "path": "GOVERNMENT_INITIAL_DEBT_AND_TERMS.json",
+      "sha256": "a7d6aaa0a21af0b006fcbc209dd0de7f338ae89924d3c63e6a7c9f241e540dc7"
+    },
+    {
+      "bytes": 3930,
+      "path": "LOCAL_DATA_VALIDATION_RECEIPT.json",
+      "sha256": "36672db5c385d76cd6e606236c82f343452b6093c430bfd624810b5e99e088f4"
+    },
+    {
+      "bytes": 74425,
+      "path": "NATIVE_DECIMAL_READBACK_RECEIPT.json",
+      "sha256": "9bc082492ebfc92500651321555fa8417851864202b79dd43159833d37f5eb2d"
+    },
+    {
+      "bytes": 28771,
+      "path": "NEUTRAL_GEOGRAPHY_VERIFICATION.json",
+      "sha256": "c36079217dda3e6d443573cdd6bc1dcbe3b3fd94498e4263a3deb993c3ecb6c9"
+    },
+    {
+      "bytes": 32698,
+      "path": "NEUTRAL_MAP_CHECK.png",
+      "sha256": "5f2038767fe62678bbb62677a704cc89099cf73bd9cd853539dc03745c317f3a"
+    },
+    {
+      "bytes": 825645,
+      "path": "PAIRED_NATIVE_OPENING_POSITIONS.json",
+      "sha256": "22e0a293f9edbbdd28684c6c6c0c68c4621855b06a44fb17bd1bbda19b9fdfe3"
+    },
+    {
+      "bytes": 5125,
+      "path": "README_REVIEW.zh-CN.md",
+      "sha256": "85432e7187fe7b8a81216c1ed9dca7d7f505860781d37199243de9661652365b"
+    },
+    {
+      "bytes": 1639,
+      "path": "REGION_COUNTRY_BINDING.json",
+      "sha256": "e544b7a7141c2573fd2c17b77948f86adb79b7ea0e957e76ea4c968d661654e5"
+    },
+    {
+      "bytes": 2741,
+      "path": "SCENARIO_PARAMETERS.json",
+      "sha256": "29d0c985fa3c1c747c12ca4a6b545c0823b9680bacd968fb3abe5e0498df5eaa"
+    },
+    {
+      "bytes": 4895,
+      "path": "SCENARIO_RULES.v2.json",
+      "sha256": "32f40826a400f44e27c208cfafa70b27a0dc2d9df7ed43567ba991f9551c0f1f"
+    },
+    {
+      "bytes": 33551,
+      "path": "build_constructed_scene.py",
+      "sha256": "b174ae7a0e201105246428e1d3985ed733c74e2cfe686e65f3ab358da80c448a"
+    },
+    {
+      "bytes": 13676,
+      "path": "finalize_delivery.py",
+      "sha256": "5b185c6d503db0f0cc0a914ebf7242f49ea273147fbe8914fdf2059dce5a6291"
+    },
+    {
+      "bytes": 68945,
+      "path": "native-probe-output.json",
+      "sha256": "824a1902dfbd30a3be2d8b4fc7710d1f8bd0198fe297e0cbc1a60f83523df7f3"
+    },
+    {
+      "bytes": 8821,
+      "path": "native_decimal_scene_probe.mjs",
+      "sha256": "d3ab4b7bf186169b74cdb64d6c715c859961ea7bdffd1af76d8bc1b79060a365"
+    },
+    {
+      "bytes": 4695,
+      "path": "verify_neutral_geography.py",
+      "sha256": "fa233317bbb0facbd26fe17d4ca485da27061ca9f8cb418376828f9f4f58d631"
+    }
+  ],
+  "frozenHistoricalV1Drafts": [
+    "SCENARIO_PARAMETERS.json",
+    "CURRENCY_FX_RULES_AND_CANDIDATE.rules.json",
+    "CB_REGISTER_COVERAGE.design.json"
+  ],
+  "independentReviewPending": true,
+  "openingSourceAdoption": null,
+  "originalJournalSha256": "16b06ba4e581fed1b0810611bd9f23de8da17232082f3d244c028d0460efef8a",
+  "productionImportAllowed": false,
+  "readiness": "HOLD",
+  "schema": "fixed-new-scene-review-delivery-v2",
+  "scopeExclusions": [
+    "FIXED_DELIVERY_MANIFEST.json",
+    "LIBRARY_PUBLICATION_RECEIPT.json",
+    "R3AM-Review-Light-HOLD.zip"
+  ],
+  "sourceKind": "CONSTRUCTED_SCENARIO",
+  "sources": {
+    "atlas": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/geo-inputs/atlas-layers.json",
+      "sha256": "49989ef13dfe2812835a8cdcba7110d5cb9dca13203c4288a5b35871726e0465",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "cbSpec": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-12/task/visual-runtime-integration-20261012/specs/extracted/CENTRAL_BANK.md",
+      "sha256": "36019b179fa6d159bae2eb7f8652d2571ffe9c49aa1547f619da20ddb56cc353",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "closing": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/R3AM_PREPARATION_EXACT_GCU_CLOSING.proposed.json",
+      "sha256": "678c93987fafb2dc6ecddfd27a437951efa0800bdf3c71433029afcf7b47c277",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "contractCore": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-12/task/visual-runtime-integration-20261012/apps/world-worker/src/preparation/formal-financial-opening-contract.ts",
+      "sha256": "3037372c2469b8cfc981c1597bf251b30bc6718e720b6d2729d394382541c6e6",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "countries": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2/inputs/countries.json",
+      "sha256": "5d493e93dfab1425731191ba7491cce47949d176e4769b33fdca48d2d31dba89",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "crossClaimSources": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/r3am-native-binding-20261013-corrected-r-v2/CROSS_CB_REFERENCE_CLAIMS.proposed.json",
+      "sha256": "e907ff5cc1de5dd031ef982fe04de95c229874010eef23b9685f077f8e42d32a",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "fixed47": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/R3AM_FIXED_CHECKPOINT_MANIFEST.json",
+      "sha256": "28a8a2e9ecc88a89f98f2bd9847f04b400e3dceab658d32ca693d28bebd49a78",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "fxCore": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-12/task/visual-runtime-integration-20261012/packages/core/src/engine-kernels/fx-international-foundation.ts",
+      "sha256": "93c90e311a31d5de21e1efe9fed50a37903d16050b115adede8656ef0c6459e3",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "geoReceipt": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-fx-cb-scene-20261013-v1/NEUTRAL_GEOGRAPHY_VERIFICATION.json",
+      "sha256": "c36079217dda3e6d443573cdd6bc1dcbe3b3fd94498e4263a3deb993c3ecb6c9",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "inventory": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/r3am-native-binding-20261013-corrected-r-v2/region_DAY0_INVENTORY_OBSERVATIONS.json",
+      "sha256": "ce0dd3509779ef8c8897cec2a7ea454f96e15e66262f0986529f8eb9659d4d2e",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "moneyCore": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-12/task/visual-runtime-integration-20261012/packages/core/src/numeric/money.ts",
+      "sha256": "f54fca28535ab746341712f135dd7ec6b9a6db69188f84e01ea164117d882124",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "originalDeposits": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2/inputs/deposits.json",
+      "sha256": "62076847d10529da672de8a97607dd98387be459cf6fd617c24d33f29875f516",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "originalFacilities": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2/inputs/facilities.json",
+      "sha256": "049e39330646048b95636d3a075fc1423ee62762999184a2326df161a198b485",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "originalFinance": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2/inputs/finance.json",
+      "sha256": "4f30d7dd43aa2190604d4fb73c776a8d4aaa263653dc783def6f7c2c5cc80805",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "ownerRules": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-12/task/visual-runtime-integration-20261012/docs/governance/owner-inputs/2026-10-07/OWNER_NON_HOST_DECISIONS.original.md",
+      "sha256": "57bfdec38a9a400991cb26362a99d33d7a81c8e6258c03460185e51501fb5ac5",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "partition": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/geo-inputs/land-partition.json",
+      "sha256": "394a43ffc94df7c27c8fe8610378d348f07c1680675c89ecad26300aa9c7b101",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "regionFinance": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/r3am-native-binding-20261013-corrected-r-v2/region_DAY0_FINANCE_REFERENCE.proposed.json",
+      "sha256": "35a727c49063981e987b7906ec053a58317abdc60ae4ccd8b1171457cea7d6b9",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    },
+    "v2Execution": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/r3am-native-binding-20261013-corrected-r-v2/V2_EXECUTION_MANIFEST.json",
+      "sha256": "1545f2e6f993c87250b7172e369b839b1507263fd7d63efbdb0c59171eae6805",
+      "sourceClass": "RETAINED_BYTES_NOT_NEW_SCENE_ADOPTION"
+    }
+  },
+  "valueDate": "2026-10-13",
+  "version": "LCFX_CB_REGION_20261013_V2_PROPOSED",
+  "worldStartAllowed": false
+}

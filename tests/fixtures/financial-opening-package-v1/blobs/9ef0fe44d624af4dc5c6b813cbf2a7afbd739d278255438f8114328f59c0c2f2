@@ -1,0 +1,45 @@
+# E F14-R1 guard 补充窄审：接受，经济仍 HOLD
+
+**F14-R1 在固定“原V1 + 本补充”组合范围内 CLOSED。** 补丁风险建议 **merge / human_review_required**，这里表示可接受这份guard补充，不表示合入产品main、采用DATA经济方案或运行World。原V1单独读取仍保留旧<=守卫，后续消费方必须明确解析base+supplement，不能声称原包已被改写。
+
+## 固定身份
+
+- 原V1 manifest：ee5208193ff1f10677829e7b918d114a9e24bec8b59f953e78c32ad3a7cd4e62。
+- 补充manifest：8904b60769603d6c9410f6588850eec5ed419ee8773cf7a3694b51a1b764efee。
+- guard-correction.patch：**3,889字节**，SHA256 **32943624c7ea025d32f8cf980eb54ebd65c64bbd22112c88d655b7d967db7d37**。
+- 三份虚拟后像：verify_terminal.py 7a3f415c…；README_REVIEW.zh-CN.md 1d0e5753…；TERMINAL_REFERENCE_RECONCILIATION.json c8b5e926…。
+- 6个manifest payload、3份原/新字节/hash、10个protected原文件独立校验通过；旧V2 outer07d23e…仍匹配。
+- 自行按unified diff逐hunk核验上下文/行数，在受控临时位置构成后像，并匹配所有声明digest；不是仅相信CORRECTION_SPEC的文本替换。
+- receipt仅改变tests说明；210行金额、source、最大差、OP20历史负面证据及其他JSON字段保持相同。原CSV、clearing和大包未复制/修改。
+
+完整证据：[identity.json](./identity.json)、[原补丁](./input/guard-correction.patch)、[补充manifest](./input/SUPPLEMENT_MANIFEST.json)。
+
+## 实际窄验证
+
+从原/新verify_terminal.py的完整AST中定位唯一maxdiff assert，确认表达式分别精确等于：
+- 原：len(rows)==210 and maxdiff<=1
+- 新：len(rows)==210 and maxdiff<1
+
+只在无凭据、禁止网络、写入限临时目录的隔离Python -I/-B进程执行这条已验证断言，不执行模块imports/main、builder、NPZ或World。
+
+| 输入 | 新strict<1 | 原V1<=1 |
+| --- | --- | --- |
+| 0.999…（60个9）/210行 | 接受 | 接受 |
+| 1 /210行 | 拒绝 | 接受，原反例保留 |
+| 1.001 /210行 | 拒绝 | 拒绝 |
+
+另209行即便差值合格仍拒绝；原先已独立验证最大差0.028836784650043459282605256在210行条件下接受。该控制使用placeholder行只测试assert，不冒称再次计算210个数据差值。[独立边界结果](./boundary-result.json)、[脚本](./boundary-proof.py)。
+
+F的已固定RUN_RECEIPT/verification.log保留其**唯一一次210已保存终值校验**，最大精确分数3604598081255432410325657/125000000000000000000000000及差值未变。完整读取F验证器，确认其使用实际后像assert AST和Fraction，不导入原builder、不重新读NPZ、不重放模型。E本次复用此前已独立验证的210值及F的hash-bound一次结果，没有再执行F全验证器或210重算。[F单次结果](./input/verification.log)、[执行回执](./input/RUN_RECEIPT.json)。
+
+## 语义、风险与关闭范围
+
+本补充把比较恢复为原固定审计的严格<1，并同步README/receipt，保留210行数量条件。因此原F14-R1已修复；没有新的guard缺陷或决策关键未知。
+
+影响moderate（保存参考的审计证据，不是原生Money/产品runtime）；回归可能性low；保护partial（独立实际guard边界与保留单次210结果，不重跑全验证器）；恢复easy（原包不动）；信心high。没有新增生产入口、权限、网络、SQL、状态、经济写或迁移。持有补充文件/hash不授予源采用资格。
+
+原47项、原首次非终止除法失败、E先期中断/诊断和原经济HOLD均保留，不改旧报告/决定。980/旧140/corrected-R/buildTimeline/NPZ重读均NOT_RUN。四claim条款、真实GCU资金与权限、正常粮水、低劳动、运输/readmission、完整持续成本、source/model/规则/精度、seed、World/Clock均**不因guard关闭而获采用**。
+
+未实施补丁至原V1，未修改DATA或产品，未merge/push/deploy，未访问数据库/生产。下一步仅由已有owner消费这个固定补充；不需重开原47项或A/G领域决定。
+
+本轮assess-patch-risk将“guard工程可接受”与“经济仍HOLD”分开。机器风险评估经官方schema/invariant validator exit0：[assessment.json](./assessment.json)。关闭决定：[decision.json](./decision.json)。这不是P0经济或正式运行批准。

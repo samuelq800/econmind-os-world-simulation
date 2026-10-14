@@ -1,0 +1,161 @@
+{
+  "schema": "FIRST14_STRICT_GUARD_SUPPLEMENT_MANIFEST_V1",
+  "version": "FIRST14_STRICT_GUARD_CORRECTION_20261013_V1_SUPPLEMENT",
+  "kind": "PATCH_SUPPLEMENT_NOT_REPLACEMENT_DATA_PACKAGE",
+  "implementationStatus": "IMPLEMENTED_UNVERIFIED_PENDING_E_REVIEW",
+  "economicStatus": "HOLD",
+  "base": {
+    "directory": "/Users/samuel/Documents/Codex/2026-10-13/task/first14-finance-reconstruction-v1",
+    "manifest": "DELIVERY_MANIFEST.json",
+    "sha256": "ee5208193ff1f10677829e7b918d114a9e24bec8b59f953e78c32ad3a7cd4e62",
+    "originalFiles": 36,
+    "originalBytes": 91775774,
+    "immutableOriginalNotEdited": true
+  },
+  "reviewTrigger": {
+    "owner": "E",
+    "finding": "F14-R1",
+    "reviewPath": "/Users/samuel/.codex/state/plugins/codex-security/scans/first14-finance-reconstruction-v1/artifacts-a0fac7ce52cc1806ccbf85fa01c26f8ed7be053984fb1398f90d84cb5d504057/artifacts/E_FIRST14_DELTA_REVIEW/review.md",
+    "reviewSha256": "0e2a83483bd84fa03cc2862aab19c8d0ce4819645e90a14de4ee9a99c37cd623",
+    "original47ChecksNotRuntime": true,
+    "independentReReviewStatus": "PENDING"
+  },
+  "originalAudit": {
+    "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/audit_r3am_startup.py",
+    "sha256": "7b84ba017463a273c5b166fd39b20ee3f376bbcdf0a842ca3356cbc096f02171",
+    "line": 94,
+    "comparison": "< 1"
+  },
+  "fixedV2Outer": {
+    "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-fx-cb-scene-20261013-v1/FIXED_DELIVERY_MANIFEST.json",
+    "sha256": "07d23e750abf2837b5961de6e74e60ec6dbdf9f4009aa442e4939786bc7f3781"
+  },
+  "resolution": {
+    "method": "Apply exact declared text replacements IN MEMORY against the pinned V1 inputs to inspect virtual postimages. No patch applied to original directory.",
+    "unchangedData": "All CSV/amount/clearing/other original data resolve through immutable V1 manifest; none copied or rewritten.",
+    "noFullPackageRehashOrCopy": true
+  },
+  "guard": {
+    "oldOperator": "<=",
+    "newOperator": "<",
+    "thresholdGcu": "1",
+    "arithmetic": "exact Fraction on saved decimal displays",
+    "notNativeMoneyPrecision": true
+  },
+  "virtualPostimages": [
+    {
+      "path": "verify_terminal.py",
+      "oldSha256": "cb4c6065b0340471480982e690cefd37138c065cb6dbbe0e00a8c1200752f61f",
+      "newSha256": "7a3f415cfb9e003eaa8cc4954db2cd5182ed3dff7015ddf4289e133ceb9af7e3",
+      "oldBytes": 2438,
+      "newBytes": 2444,
+      "virtualPostimageOnly": true
+    },
+    {
+      "path": "README_REVIEW.zh-CN.md",
+      "oldSha256": "71c89cf808a8ef43fbdd9c1175b6f094ddae0d89e8393cca824af3bba5bb5e6e",
+      "newSha256": "1d0e57538a53167cf086d4076e5eb242bed36d2a1744e68a872e44cff11d1000",
+      "oldBytes": 8975,
+      "newBytes": 9030,
+      "virtualPostimageOnly": true
+    },
+    {
+      "path": "TERMINAL_REFERENCE_RECONCILIATION.json",
+      "oldSha256": "98974193fad22917d027d0e85f418025db6d2501bd41d63a24a723c6718b3b44",
+      "newSha256": "c8b5e92692361337f4375ed09c316aca40288b5ac8d1d84f339a6134a053bf7a",
+      "oldBytes": 61070,
+      "newBytes": 61077,
+      "virtualPostimageOnly": true
+    }
+  ],
+  "files": [
+    {
+      "path": "CORRECTION_SPEC.json",
+      "bytes": 2726,
+      "sha256": "4fee055e982457222697cbda218b12b34be21b1b2060c77e892c15fd5021e73c"
+    },
+    {
+      "path": "verify_correction.py",
+      "bytes": 10175,
+      "sha256": "80712778dce01c03e53ea99b39534873869b495825fadfc5c2a543c93fd40cf8"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "bytes": 2066,
+      "sha256": "d6f3383f7cfb01eb3811367e439d516124f5373d01fd4d69f2fe8c53715b4370"
+    },
+    {
+      "path": "guard-correction.patch",
+      "bytes": 3889,
+      "sha256": "32943624c7ea025d32f8cf980eb54ebd65c64bbd22112c88d655b7d967db7d37"
+    },
+    {
+      "path": "verification.log",
+      "bytes": 8768,
+      "sha256": "dcc02b9f5e4f76aef4afee495b46196b66d8c072edba9ddd715e038a475ba58a"
+    },
+    {
+      "path": "RUN_RECEIPT.json",
+      "bytes": 826,
+      "sha256": "fd427103bfaa99f4a8ee7c6d7b1125a4af89c45a96c07b33f9b050bdc6755a57"
+    }
+  ],
+  "verification": {
+    "receipt": "RUN_RECEIPT.json",
+    "rawLog": "verification.log",
+    "numericExecutions": 1,
+    "exitCode": 0,
+    "terminalValuesChecked": 210,
+    "maximumAbsoluteDifferenceGcu": "0.028836784650043459282605256",
+    "boundaryControls": [
+      {
+        "absoluteDifferenceGcu": "0.999999999999999999999999999999999999999999999999999999999999",
+        "expectedAccepted": true,
+        "patchedGuardAccepted": true,
+        "originalV1GuardAccepted": true
+      },
+      {
+        "absoluteDifferenceGcu": "1",
+        "expectedAccepted": false,
+        "patchedGuardAccepted": false,
+        "originalV1GuardAccepted": true
+      },
+      {
+        "absoluteDifferenceGcu": "1.001",
+        "expectedAccepted": false,
+        "patchedGuardAccepted": false,
+        "originalV1GuardAccepted": false
+      }
+    ],
+    "oldEqualityCounterexamplePreserved": true,
+    "wrongRowCountRejected": true,
+    "old140Replay": "NOT_RUN",
+    "core980": "NOT_RUN",
+    "correctedR": "NOT_RUN",
+    "buildTimeline": "NOT_RUN",
+    "npzReadAgain": false,
+    "sourceDataAmountsChanged": false
+  },
+  "authority": {
+    "independentApproval": false,
+    "p0Approval": false,
+    "clearingTermsAdopted": false,
+    "sourceOrModelAdopted": false,
+    "actualWorld": false,
+    "formalSeed": false,
+    "database": false,
+    "production": false,
+    "clockStarted": false
+  },
+  "holds": [
+    "E independent review pending",
+    "Four clearing lifecycle choices require owner/E approval",
+    "Actual funds, obligatory services, FX/counterparty permissions unknown",
+    "Normal food/water, low labour, transport/readmission and sustainable cost remain HOLD",
+    "No source/model/rules/native precision/seed/World adoption"
+  ],
+  "scopeExclusions": [
+    "SUPPLEMENT_MANIFEST.json",
+    "HANDOFF.json"
+  ]
+}

@@ -2,7 +2,10 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { constants } from 'node:fs';
 import {
+  chmod,
   copyFile,
+  cp,
+  lstat,
   mkdir,
   mkdtemp,
   open,
@@ -40,6 +43,7 @@ import { applyFinancialPostingBatch } from '../../packages/core/dist/finance/fin
 import { prepareAtomicTransitionCandidate } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
 import {
   FinancialOpeningPackageRegistryLoader,
+  createTestOnlyFinancialOpeningPackageRegistryLoader,
   inspectFinancialRegistryFact,
   parseFinancialRegistrySourceJson,
   resolveFinancialRegistrySource,
@@ -56,21 +60,30 @@ import {
 } from '../../apps/world-worker/src/preparation/financial-opening-package-preflight.js';
 import { createV10TwoCountryTestFixture } from '../support/v10-two-country-fixture.js';
 import {
+  materializeFinancialOpeningPackageFixture,
+  disposeFinancialOpeningPackageFixture,
+  type OwnedFinancialOpeningPackageFixture,
+} from '../support/financial-opening-package-fixture.js';
+import {
   formalFinancialMechanismVector,
   formalFinancialTestAdoption,
 } from './formal-financial-opening.test.js';
 
 const repositoryRoot = path.resolve(import.meta.dirname, '../..');
-const packageRoot =
-  '/Users/samuel/Documents/econclub/artifacts/g-funding-source-registry-20261013';
+let packageRoot: string;
+let fixture: OwnedFinancialOpeningPackageFixture;
 let loaded: LoadedFinancialOpeningPackageRegistry;
 let result: Awaited<ReturnType<typeof preflightFinancialOpeningPackage>>;
 const temps: string[] = [];
 const sha = (s: string) => createHash('sha256').update(s).digest('hex');
 beforeAll(async () => {
-  loaded = await new FinancialOpeningPackageRegistryLoader({
-    packageRoot,
-  }).load();
+  fixture = await materializeFinancialOpeningPackageFixture();
+  packageRoot = fixture.packageRoot;
+  loaded = await (
+    await createTestOnlyFinancialOpeningPackageRegistryLoader({
+      fixtureRoot: fixture.fixtureRoot,
+    })
+  ).load();
   result = await preflightFinancialOpeningPackage({
     registry: loaded,
     repositoryRoot,
@@ -78,18 +91,22 @@ beforeAll(async () => {
 }, 30000);
 afterAll(async () => {
   for (const dir of temps) await rm(dir, { recursive: true, force: true });
+  if (fixture) await disposeFinancialOpeningPackageFixture(fixture);
 });
 async function copiedPackage() {
   const dir = await mkdtemp(
     path.join(await realpath(tmpdir()), 'financial-package-test-'),
   );
   temps.push(dir);
-  for (const name of await readdir(packageRoot))
+  for (const name of await readdir(packageRoot)) {
     await copyFile(
       path.join(packageRoot, name),
       path.join(dir, name),
       constants.COPYFILE_FICLONE,
     );
+    // Only this freshly owned negative copy is writable, not fixture/original.
+    await chmod(path.join(dir, name), 0o600);
+  }
   return dir;
 }
 function cash(
@@ -240,6 +257,202 @@ function pairedMechanism(amount = '2') {
 }
 
 describe('financial package adapter finite preparation', () => {
+  it('provisions exact tracked bytes under an owned root with full cumulative IO and original parent gaps', async () => {
+    expect(loaded.bytesRead).toBe(6505847);
+    expect(fixture.io).toEqual({
+      inputFiles: 41,
+      outputFiles: 42,
+      sourceReadBytes: 6444829,
+      destinationVerificationReadBytes: 6425894,
+      writtenBytes: 6444893,
+      cleanupReadBytesReserved: 64,
+      lifecyclePreparationReadBytesUpperBound: 12870787,
+    });
+    expect(loaded.testOnlyReadReceipt).toEqual({
+      classification: 'TEST_ONLY_NOT_ADOPTION',
+      fixtureManifestSha256:
+        'a3306cc89cd8a9150c6bd4fb6820eeaa879f8a41e02f858514fee60344fa63cc',
+      originalReaderBytes: 6505847,
+      preparationReadBytesReserved: 12870787,
+      factoryVerificationBytes: 18935,
+      lifecycleReadBytesUpperBound: 19395569,
+    });
+    expect(result.originalSourceGaps).toHaveLength(1051);
+    expect(result.blockers).toHaveLength(2368);
+    expect(result.originalParentManifestFingerprint).toBe(
+      'sha256:73c96665334557656836aa218108c85ad50b6b091a3fab722696bf7e0ae95ba9',
+    );
+    expect(sha(canonicalSerialize(result.originalSourceGaps))).toBe(
+      '668a74df86b5550205d8dcc8f0680b0cff0b03b6846260b5efe9720c3334be3f',
+    );
+    const original = await lstat(
+      path.join(
+        repositoryRoot,
+        'tests/fixtures/financial-opening-package-v1/blobs/2f22d0d66cc01c0af0507beaa299646845a310836a61c3c5f9c3248d6c36eef7',
+      ),
+    );
+    const copy = await lstat(path.join(packageRoot, 'PACKAGE_MANIFEST.json'));
+    expect(copy.isFile()).toBe(true);
+    expect(copy.nlink).toBe(1);
+    expect(copy.mode & 0o222).toBe(0);
+    expect(copy.dev !== original.dev || copy.ino !== original.ino).toBe(true);
+  });
+  it('rejects bad fixture bytes and nonregular inputs without skipped setup or caller-controlled pins', async () => {
+    const kit = path.join(
+      repositoryRoot,
+      'tests/fixtures/financial-opening-package-v1',
+    );
+    const blobName =
+      '2f22d0d66cc01c0af0507beaa299646845a310836a61c3c5f9c3248d6c36eef7';
+    for (const mutation of [
+      'missing',
+      'size',
+      'hash',
+      'directory',
+      'symlink',
+      'fifo',
+    ]) {
+      const root = await mkdtemp(
+        path.join(await realpath(tmpdir()), 'financial-kit-negative-'),
+      );
+      temps.push(root);
+      await cp(kit, root, { recursive: true });
+      const blob = path.join(root, 'blobs', blobName);
+      const bytes = await readFile(blob);
+      await rm(blob);
+      if (mutation === 'size') await writeFile(blob, '{}');
+      if (mutation === 'hash') {
+        bytes[10] = bytes[10] === 32 ? 33 : 32;
+        await writeFile(blob, bytes);
+      }
+      if (mutation === 'directory') await mkdir(blob);
+      if (mutation === 'symlink')
+        await symlink(path.join(kit, 'blobs', blobName), blob);
+      if (mutation === 'fifo') {
+        const child = spawnSync('mkfifo', [blob], {
+          timeout: 2500,
+          encoding: 'utf8',
+        });
+        expect(child.error).toBeUndefined();
+        expect(child.status).toBe(0);
+      }
+      const helperUrl = pathToFileURL(
+        path.join(
+          repositoryRoot,
+          'tests/support/financial-opening-package-fixture.ts',
+        ),
+      ).href;
+      const expected =
+        mutation === 'missing'
+          ? 'FIXTURE_CLOSED_FILE_SET_REQUIRED'
+          : mutation === 'size'
+            ? 'FIXTURE_FILE_SIZE_MISMATCH'
+            : mutation === 'hash'
+              ? 'FIXTURE_FILE_HASH_MISMATCH'
+              : mutation === 'symlink'
+                ? 'FIXTURE_SYMLINK_DENIED'
+                : 'FIXTURE_REGULAR_COMPONENT_REQUIRED';
+      const child = spawnSync(
+        process.execPath,
+        [
+          '--experimental-strip-types',
+          '--input-type=module',
+          '-e',
+          `
+        const {materializeFinancialOpeningPackageFixture}=await import(${JSON.stringify(helperUrl)});
+        try { await materializeFinancialOpeningPackageFixture({fixtureKitRoot:${JSON.stringify(root)}}); process.exitCode=1; }
+        catch(e) { console.log(e.message); console.log(e.cause?.message ?? '');
+          if(!String(e.message).includes(${JSON.stringify(expected)}) && !String(e.cause?.message).includes(${JSON.stringify(expected)})) process.exitCode=2; }
+      `,
+        ],
+        {
+          timeout: 2500,
+          killSignal: 'SIGKILL',
+          encoding: 'utf8',
+          maxBuffer: 8192,
+        },
+      );
+      expect(child.error, child.stdout + child.stderr).toBeUndefined();
+      expect(child.signal).toBeNull();
+      expect(child.status, child.stdout + child.stderr).toBe(0);
+      expect(child.stdout).toContain(expected);
+    }
+    await expect(
+      createTestOnlyFinancialOpeningPackageRegistryLoader({
+        fixtureRoot: fixture.fixtureRoot,
+        sourceMap: {},
+      } as { fixtureRoot: string }),
+    ).rejects.toThrow('EXACT_KEYS_REQUIRED');
+    await expect(
+      disposeFinancialOpeningPackageFixture({ ...fixture }),
+    ).rejects.toThrow('GENUINE_OWNED_FIXTURE_REQUIRED');
+    const another = await createTestOnlyFinancialOpeningPackageRegistryLoader({
+      fixtureRoot: fixture.fixtureRoot,
+    });
+    await expect(
+      another.load.call(
+        Object.create(Object.getPrototypeOf(another)) as typeof another,
+      ),
+    ).rejects.toThrow();
+  });
+  it('has no physical archive-only files or old-root fallback in its verified TEST_ONLY layout', async () => {
+    expect((await readdir(fixture.fixtureRoot)).sort()).toEqual([
+      '.fixture-owner',
+      'fixture-manifest.json',
+      'package',
+      'sources',
+    ]);
+    const archived = (
+      loaded.sourceRegistry.sources as {
+        sourceId: string;
+        retainedRootId: string;
+        relativeLocator: string;
+      }[]
+    ).filter((s) => loaded.archiveOnlySourceIds.includes(s.sourceId));
+    expect(archived).toHaveLength(5);
+    for (const s of archived) {
+      const physicalRoot =
+        s.retainedRootId === 'G_FUNDING_REGISTRY'
+          ? packageRoot
+          : path.join(fixture.fixtureRoot, 'sources', s.retainedRootId);
+      await expect(
+        lstat(path.join(physicalRoot, s.relativeLocator)),
+      ).rejects.toMatchObject({ code: 'ENOENT' });
+    }
+    const loader = await createTestOnlyFinancialOpeningPackageRegistryLoader({
+      fixtureRoot: fixture.fixtureRoot,
+    });
+    expect((await loader.load()).bytesRead).toBe(6505847);
+    await expect(loader.load()).rejects.toThrow(
+      'TEST_FIXTURE_OPERATION_ALREADY_CONSUMED',
+    );
+  });
+  it('loads the same fixture through this candidate fresh compiled Worker in a finite child', () => {
+    const url = pathToFileURL(
+      path.join(
+        repositoryRoot,
+        'apps/world-worker/dist/preparation/financial-opening-package-registry.js',
+      ),
+    ).href;
+    const child = spawnSync(
+      process.execPath,
+      [
+        '--input-type=module',
+        '-e',
+        `
+      const { createTestOnlyFinancialOpeningPackageRegistryLoader } = await import(${JSON.stringify(url)});
+      const r = await (await createTestOnlyFinancialOpeningPackageRegistryLoader({fixtureRoot:${JSON.stringify(fixture.fixtureRoot)}})).load();
+      if(r.bytesRead!==6505847 || r.testOnlyReadReceipt.classification!=='TEST_ONLY_NOT_ADOPTION') throw Error('BAD_RECEIPT');
+      console.log('FRESH_CANDIDATE_TEST_ONLY_6505847');
+    `,
+      ],
+      { timeout: 15000, encoding: 'utf8', maxBuffer: 8192 },
+    );
+    expect(child.error, child.stdout + child.stderr).toBeUndefined();
+    expect(child.signal).toBeNull();
+    expect(child.status, child.stdout + child.stderr).toBe(0);
+    expect(child.stdout).toContain('FRESH_CANDIDATE_TEST_ONLY_6505847');
+  });
   it('loads the exact reviewed package and selected small sources, not five archived flows/journals', () => {
     expect(loaded.packageManifestSha256).toBe(
       '2f22d0d66cc01c0af0507beaa299646845a310836a61c3c5f9c3248d6c36eef7',

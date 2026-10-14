@@ -3,6 +3,7 @@
 import { createHash } from 'node:crypto';
 import { constants } from 'node:fs';
 import { lstat, open, readdir, realpath } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 import { canonicalSerialize, parseWorldDecimal } from '@econmind/core';
@@ -532,6 +533,14 @@ export interface LoadedFinancialOpeningPackageRegistry {
   readonly selectedSourceIds: readonly string[];
   readonly archiveOnlySourceIds: readonly string[];
   readonly bytesRead: number;
+  readonly testOnlyReadReceipt?: Readonly<{
+    classification: 'TEST_ONLY_NOT_ADOPTION';
+    fixtureManifestSha256: string;
+    originalReaderBytes: number;
+    preparationReadBytesReserved: number;
+    factoryVerificationBytes: number;
+    lifecycleReadBytesUpperBound: number;
+  }>;
 }
 const instances = new WeakSet<object>();
 const sourceSnapshots = new WeakMap<object, ReadonlyMap<string, string>>();
@@ -875,6 +884,248 @@ export function resolveFinancialRegistrySource(
     value: actual,
   });
 }
+interface FileReadBudget {
+  bytes: number;
+  reads: number;
+}
+// One guarded sink for production reads AND test-only manifest/source reads.
+async function readPinnedFinancialFile(
+  root: string,
+  locator: string,
+  pin: FilePin,
+  budget: FileReadBudget,
+): Promise<string> {
+  confined(locator);
+  if (
+    !Number.isSafeInteger(pin.bytes) ||
+    pin.bytes <= 0 ||
+    pin.bytes > FINANCIAL_PACKAGE_LIMITS.fileBytes ||
+    (budget.bytes += pin.bytes) > FINANCIAL_PACKAGE_LIMITS.totalBytes ||
+    ++budget.reads > FINANCIAL_PACKAGE_LIMITS.files
+  )
+    fail('FILE_BUDGET_EXCEEDED', locator);
+  if ((await realpath(root)) !== root) fail('PATH_DENIED', root);
+  if (
+    process.platform === 'win32' ||
+    !Number.isInteger(constants.O_NONBLOCK) ||
+    constants.O_NONBLOCK <= 0 ||
+    !Number.isInteger(constants.O_NOFOLLOW) ||
+    constants.O_NOFOLLOW <= 0
+  )
+    fail('SAFE_FILE_OPEN_UNSUPPORTED', locator);
+  let current = path.parse(root).root;
+  const components = [
+    ...root.slice(current.length).split('/').filter(Boolean),
+    ...locator.split('/'),
+  ];
+  for (const [index, part] of components.entries()) {
+    current = path.join(current, part);
+    const stat = await lstat(current);
+    if (stat.isSymbolicLink()) fail('SYMLINK_DENIED', locator);
+    if (index === components.length - 1) {
+      if (!stat.isFile()) fail('REGULAR_FILE_REQUIRED', locator);
+    } else if (!stat.isDirectory())
+      fail('DIRECTORY_COMPONENT_REQUIRED', locator);
+  }
+  const file = await open(
+    current,
+    constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
+  );
+  try {
+    const stat = await file.stat();
+    if (!stat.isFile() || stat.size !== pin.bytes)
+      fail('FILE_SIZE_MISMATCH', locator);
+    const buffer = Buffer.alloc(pin.bytes + 1);
+    let n = 0;
+    while (n < buffer.length) {
+      const r = await file.read(buffer, n, buffer.length - n, n);
+      if (!r.bytesRead) break;
+      n += r.bytesRead;
+    }
+    const b = buffer.subarray(0, n);
+    if (
+      n !== pin.bytes ||
+      createHash('sha256').update(b).digest('hex') !== pin.sha256
+    )
+      fail('FILE_HASH_MISMATCH', locator);
+    try {
+      return new TextDecoder('utf8', { fatal: true, ignoreBOM: true }).decode(
+        b,
+      );
+    } catch {
+      return fail('UTF8_INVALID', locator);
+    }
+  } finally {
+    await file.close();
+  }
+}
+
+const TEST_FIXTURE_MANIFEST_SHA256 =
+  'a3306cc89cd8a9150c6bd4fb6820eeaa879f8a41e02f858514fee60344fa63cc';
+const TEST_FIXTURE_MANIFEST_BYTES = 18935;
+// Reserve all fixed helper input reads, destination verification and the future
+// 64-byte cleanup-marker read BEFORE the reader charges any source. No discount
+// for the two sources sharing package bytes. Writes are separately disclosed.
+const TEST_PREPARATION_READ_RESERVATION =
+  2 * 6425894 + TEST_FIXTURE_MANIFEST_BYTES + 64;
+const testFixtureBindings = new WeakMap<
+  FinancialOpeningPackageRegistryLoader,
+  {
+    roots: ReadonlyMap<string, string>;
+    budget: FileReadBudget;
+    consumed: boolean;
+  }
+>();
+
+/** Separately reviewed TEST_ONLY composition; deliberately absent from barrels,
+ * host/API and production exports. Only fixed identical bytes can be relocated.
+ * An env/marker/type/hash supplied by a caller is never an authority input. */
+export async function createTestOnlyFinancialOpeningPackageRegistryLoader(
+  input: Readonly<{ fixtureRoot: string }>,
+): Promise<FinancialOpeningPackageRegistryLoader> {
+  exactKeys(
+    registryRow(input, 'testComposition'),
+    ['fixtureRoot'],
+    'testComposition',
+  );
+  if (
+    typeof input.fixtureRoot !== 'string' ||
+    !path.isAbsolute(input.fixtureRoot)
+  )
+    fail('PATH_DENIED', 'fixtureRoot');
+  const root = path.resolve(input.fixtureRoot);
+  const temporaryParent = await realpath(tmpdir());
+  const rootStat = await lstat(root);
+  if (
+    path.dirname(root) !== temporaryParent ||
+    !path.basename(root).startsWith('financial-opening-fixture-') ||
+    (await realpath(root)) !== root ||
+    !rootStat.isDirectory() ||
+    rootStat.isSymbolicLink() ||
+    rootStat.uid !== process.getuid?.() ||
+    (rootStat.mode & 0o777) !== 0o700
+  )
+    fail('OWNED_FIXTURE_ROOT_REQUIRED', 'fixtureRoot');
+  const budget = { bytes: TEST_PREPARATION_READ_RESERVATION, reads: 0 };
+  const manifest = registryRow(
+    json(
+      await readPinnedFinancialFile(
+        root,
+        'fixture-manifest.json',
+        {
+          path: 'fixture-manifest.json',
+          bytes: TEST_FIXTURE_MANIFEST_BYTES,
+          sha256: TEST_FIXTURE_MANIFEST_SHA256,
+        },
+        budget,
+      ),
+    ),
+    'fixtureManifest',
+  );
+  const roots = new Map<string, string>();
+  const expectedFiles = new Map<string, number>([
+    ['fixture-manifest.json', TEST_FIXTURE_MANIFEST_BYTES],
+    ['.fixture-owner', 64],
+  ]);
+  for (const r of FIXED_POLICY.retainedRoots)
+    roots.set(
+      r.rootId,
+      path.join(
+        root,
+        r.rootId === 'G_FUNDING_REGISTRY' ? 'package' : 'sources/' + r.rootId,
+      ),
+    );
+  for (const value of registryArray(
+    manifest.packageMembers,
+    'packageMembers',
+  )) {
+    const member = registryRow(value, 'packageMember');
+    const p = registryString(member.path, 'path');
+    confined(p);
+    if (!Number.isSafeInteger(member.bytes) || (member.bytes as number) <= 0)
+      fail('FILE_SIZE_MISMATCH', p);
+    expectedFiles.set('package/' + p, member.bytes as number);
+  }
+  const manifestSources = registryArray(manifest.sources, 'sources');
+  if (manifestSources.length !== FIXED_POLICY.sources.length)
+    fail('PRIVATE_SOURCE_BINDING_MISMATCH', 'fixtureSources');
+  for (const s of FIXED_POLICY.sources) {
+    const actual = registryRow(
+      manifestSources.find(
+        (v) => registryRow(v, 'source').sourceId === s.sourceId,
+      ),
+      'source',
+    );
+    for (const key of [
+      'sourceId',
+      'retainedRootId',
+      'relativeLocator',
+      'bytes',
+      'sha256',
+      'readMode',
+      'evidenceClass',
+    ] as const)
+      if (!isDeepStrictEqual(actual[key], s[key]))
+        fail('PRIVATE_SOURCE_BINDING_MISMATCH', s.sourceId);
+    if (s.readMode === 'ARCHIVE_ONLY_NO_DEREFERENCE') continue;
+    const physicalRoot = roots.get(s.retainedRootId);
+    if (!physicalRoot || s.bytes === null)
+      fail('PRIVATE_SOURCE_BINDING_MISMATCH', s.sourceId);
+    expectedFiles.set(
+      path.relative(root, path.join(physicalRoot, s.relativeLocator)),
+      s.bytes,
+    );
+  }
+  // Closed recursive layout: no archive paths, unexpected directories, special
+  // nodes, links, or additional source files may ride along with the binding.
+  const expectedDirectories = new Set<string>();
+  for (const filename of expectedFiles.keys()) {
+    for (
+      let dir = path.posix.dirname(filename);
+      dir !== '.';
+      dir = path.posix.dirname(dir)
+    )
+      expectedDirectories.add(dir);
+  }
+  let visited = 0;
+  const walk = async (relative: string): Promise<void> => {
+    for (const name of await readdir(path.join(root, relative))) {
+      const p = relative ? relative + '/' + name : name;
+      if (++visited > 128) fail('FILE_BUDGET_EXCEEDED', 'fixtureLayout');
+      const stat = await lstat(path.join(root, p));
+      if (stat.isSymbolicLink()) fail('SYMLINK_DENIED', p);
+      if (stat.isDirectory()) {
+        if (
+          !expectedDirectories.delete(p) ||
+          stat.uid !== rootStat.uid ||
+          (stat.mode & 0o777) !== 0o700
+        )
+          fail('FIXTURE_LAYOUT_INVALID', p);
+        await walk(p);
+      } else {
+        if (!stat.isFile()) fail('REGULAR_FILE_REQUIRED', p);
+        if (
+          !expectedFiles.has(p) ||
+          stat.size !== expectedFiles.get(p) ||
+          stat.uid !== rootStat.uid ||
+          stat.nlink !== 1 ||
+          (stat.mode & 0o222) !== 0
+        )
+          fail('FIXTURE_LAYOUT_INVALID', p);
+        expectedFiles.delete(p);
+      }
+    }
+  };
+  await walk('');
+  if (expectedFiles.size || expectedDirectories.size)
+    fail('FIXTURE_LAYOUT_INVALID', 'missing');
+  const loader = new FinancialOpeningPackageRegistryLoader({
+    packageRoot: path.join(root, 'package'),
+  });
+  testFixtureBindings.set(loader, { roots, budget, consumed: false });
+  return loader;
+}
+
 /** Constructor is reviewed private offline composition, never a request DTO.
  * Only the package directory is relocatable; all identities/source roots are fixed. */
 export class FinancialOpeningPackageRegistryLoader {
@@ -889,75 +1140,20 @@ export class FinancialOpeningPackageRegistryLoader {
     this.#root = path.resolve(input.packageRoot);
   }
   async load(): Promise<LoadedFinancialOpeningPackageRegistry> {
+    const binding = testFixtureBindings.get(this);
+    if (binding?.consumed)
+      fail('TEST_FIXTURE_OPERATION_ALREADY_CONSUMED', 'loader');
+    if (binding) binding.consumed = true;
+    const budget = binding?.budget ?? { bytes: 0, reads: 0 };
     let total = 0;
     const read = async (
       root: string,
       locator: string,
       pin: FilePin,
     ): Promise<string> => {
-      confined(locator);
-      if (
-        !Number.isSafeInteger(pin.bytes) ||
-        pin.bytes <= 0 ||
-        pin.bytes > FINANCIAL_PACKAGE_LIMITS.fileBytes ||
-        (total += pin.bytes) > FINANCIAL_PACKAGE_LIMITS.totalBytes
-      )
-        fail('FILE_BUDGET_EXCEEDED', locator);
-      if ((await realpath(root)) !== root) fail('PATH_DENIED', root);
-      if (
-        process.platform === 'win32' ||
-        !Number.isInteger(constants.O_NONBLOCK) ||
-        constants.O_NONBLOCK <= 0 ||
-        !Number.isInteger(constants.O_NOFOLLOW) ||
-        constants.O_NOFOLLOW <= 0
-      )
-        fail('SAFE_FILE_OPEN_UNSUPPORTED', locator);
-      let current = path.parse(root).root;
-      const components = [
-        ...root.slice(current.length).split('/').filter(Boolean),
-        ...locator.split('/'),
-      ];
-      for (const [index, part] of components.entries()) {
-        current = path.join(current, part);
-        const stat = await lstat(current);
-        if (stat.isSymbolicLink()) fail('SYMLINK_DENIED', locator);
-        if (index === components.length - 1) {
-          if (!stat.isFile()) fail('REGULAR_FILE_REQUIRED', locator);
-        } else if (!stat.isDirectory())
-          fail('DIRECTORY_COMPONENT_REQUIRED', locator);
-      }
-      const file = await open(
-        current,
-        constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
-      );
-      try {
-        const stat = await file.stat();
-        if (!stat.isFile() || stat.size !== pin.bytes)
-          fail('FILE_SIZE_MISMATCH', locator);
-        const buffer = Buffer.alloc(pin.bytes + 1);
-        let n = 0;
-        while (n < buffer.length) {
-          const r = await file.read(buffer, n, buffer.length - n, n);
-          if (!r.bytesRead) break;
-          n += r.bytesRead;
-        }
-        const b = buffer.subarray(0, n);
-        if (
-          n !== pin.bytes ||
-          createHash('sha256').update(b).digest('hex') !== pin.sha256
-        )
-          fail('FILE_HASH_MISMATCH', locator);
-        try {
-          return new TextDecoder('utf8', {
-            fatal: true,
-            ignoreBOM: true,
-          }).decode(b);
-        } catch {
-          return fail('UTF8_INVALID', locator);
-        }
-      } finally {
-        await file.close();
-      }
+      const bytes = await readPinnedFinancialFile(root, locator, pin, budget);
+      total += pin.bytes;
+      return bytes;
     };
     const manifest = registryRow(
       json(
@@ -1031,9 +1227,11 @@ export class FinancialOpeningPackageRegistryLoader {
         s.bytes === null
       )
         fail('PRIVATE_SOURCE_BINDING_MISMATCH', s.sourceId);
+      const physicalRoot = binding ? binding.roots.get(s.retainedRootId) : root;
+      if (!physicalRoot) fail('PRIVATE_SOURCE_BINDING_MISMATCH', s.sourceId);
       snapshots.set(
         s.sourceId,
-        await read(root, s.relativeLocator, {
+        await read(physicalRoot, s.relativeLocator, {
           path: s.relativeLocator,
           bytes: s.bytes,
           sha256: s.sha256,
@@ -1087,6 +1285,18 @@ export class FinancialOpeningPackageRegistryLoader {
         .filter((s) => s.readMode === 'ARCHIVE_ONLY_NO_DEREFERENCE')
         .map((s) => s.sourceId),
       bytesRead: total,
+      ...(binding
+        ? {
+            testOnlyReadReceipt: {
+              classification: 'TEST_ONLY_NOT_ADOPTION' as const,
+              fixtureManifestSha256: TEST_FIXTURE_MANIFEST_SHA256,
+              originalReaderBytes: total,
+              preparationReadBytesReserved: TEST_PREPARATION_READ_RESERVATION,
+              factoryVerificationBytes: TEST_FIXTURE_MANIFEST_BYTES,
+              lifecycleReadBytesUpperBound: budget.bytes,
+            },
+          }
+        : {}),
     };
     instances.add(loaded);
     sourceSnapshots.set(loaded, snapshots);

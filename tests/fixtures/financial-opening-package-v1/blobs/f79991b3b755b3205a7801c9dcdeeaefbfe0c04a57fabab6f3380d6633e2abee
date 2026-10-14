@@ -1,0 +1,21 @@
+# 资金来源归档与待结算候选，固定 V1
+
+本包仅整理既有来源、精确叶索引及缺口，**不是可运行开局包**。70国 actual GCU CASH账户、现金权属、availability/restriction、实际税收、非债必付、必要服务完整成本、funded FX、许可/fee/rounding/执行quote及真实结算仍UNKNOWN；formal ADOPTED为空。CB CASH→Treasury 的实际合法转移也没有证明，CB-owned CASH 即便存在亦不能自动当财政/私营付款资金。
+
+四个消费主件是 SOURCE_REGISTRY.json、COUNTRY_SOURCE_REGISTRY.json、NATIVE_LEAF_INDEX.json、SETTLEMENT_TERMS_CANDIDATE.json，各自有schemaVersion，精确hash/bytes在PACKAGE_MANIFEST.json。REGISTRY_SCHEMA.json与该manifest共同绑定接口。D提供最小字段反馈后，本包已一次对齐为：KNOWN_SOURCE_VALUE与UNKNOWN；所有money amount为原decimal string，非money使用valueKind；UNKNOWN的value/source均null且保留稳定gapId。缺失token的原位置在独立unknownEvidenceIndex，不冒充资金来源。
+
+来源只允许tagged JSON_POINTER或CSV_CELL。CSV以countryId/simDay复合key和column/originalValue定位，行号仅辅助审计；各country gross聚合保存在两个明确REFERENCE/CONSTRUCTED派生小索引，原CSV的同国相对日范围与exact Fraction求和是其lineage。不能把派生索引变成真实经济source。绝对路径只是档案位置；D应使用自己的reviewed root allowlist，加上retainedRootId/relativeLocator/hash/bytes，不能信外来路径或ADOPTED标签。
+
+原生主源明确为 UNIT_SAFE_NATIVE_BUCKETS.json SHA264b3b4d2278ebf407f4ff29446fc59d86cc72bcaced08ab7e60b54949ed2a8a 加actual native amount pointer。1470 owner金额叶与490 balance叶共1960；GCU lineage指针独立且不是native主源。原legacy财政reference、构造LC开局claim与实际现金分层，不将LC/TGA/reserve/应收转换为GCU CASH。
+
+353组已存REFERENCE跨境对手方关系保留稳定tuple hash ID、两端country/reference owner和原JSONL行/上游索引。gross付款与收款各1,012,043,193.75 GCU，分别保留、不净抵，均非实际World义务。四个canonical clearing claim本金总计1,723,275,000 GCU及183原OP journal指针保留；original known reference、constructed native positions与既有sim140零息/noncallable候选分开。原V2 lifecycle仍UNKNOWN。
+
+SETTLEMENT_TERMS_CANDIDATE仅复用这些既有数值/期限/利率，逐笔列flowId、两端country/候选owner/UNKNOWN实际账户、amountFact、relativeDueSimDay、feeFact、termsRefs、fundingRefs、atomic/未付/部分/退款/重复边界。fee不填0，账户不补造。quote/FX资金方仅在实际提出conversion时为条件依赖；直接GCU路径也没有因此得到资金/账户/许可证明。五条流程语义为PROPOSED待E审：有真实资金和采用条款才结算；两端原子；失败保留未付且不自动贷款；无原证据不推断partial/refund；沿原幂等规则且不净抵。没有生成正式financial-contract/issuer或采用注册。
+
+Guard已按新独审状态记为 CLOSED_FOR_BASE_PLUS_FIXED_SUPPLEMENT。消费者必须组合：原base ee5208193ff1f10677829e7b918d114a9e24bec8b59f953e78c32ad3a7cd4e62；supplement8904b60769603d6c9410f6588850eec5ed419ee8773cf7a3694b51a1b764efee；patch32943624c7ea025d32f8cf980eb54ebd65c64bbd22112c88d655b7d967db7d37；E guard closure。原包未修改，单读原V1仍是旧<=守卫；闭合仅属于组合，不代表现金、四terms或经济采用。
+
+复用E原30+17=47独审及210终值结果，没有重跑它们、980、140日或corrected-R，也未读NPZ/raw巨大journal。仅对选定小文件与已存分组cash/FX输入做来源hash、精确已有decimal聚合和leaf索引。上游183指针保留且明确本轮未逐条dereference；不是183个新World Posting。没有copy91MB包、执行原builder、改金额/条款/产品代码/SQL或启动World。
+
+可检查脚本：build_registry.py（归档构建；不执行旧模型），build_registry.py --verify（所用来源hash、1960 native叶、70国UNKNOWN和组合不变量），verify_bindings.py（typed Fact/精确JSON叶与CSV复合key）。这是有界归档验证，不重标为E47或runtime测试。Python jsonschema库未安装；没有声称执行完整第三方JSON Schema validator。
+
+最小后续责任在MINIMUM_DEPENDENCIES.json：Root绑定真实来源/owner；D在其原四文件适配范围消费固定schema并执行校验；E裁定经济/披露/结算流程，B签工程增量。不可用任何reference、构造值、guard绿灯或declaredhash消掉原carrier的BLOCKED/null seed/未采用结果。

@@ -1,0 +1,2448 @@
+{
+  "status": "DERIVED_EXACT_GCU_REFERENCE_PREPARATION_CLOSE_NOT_ADOPTED_SOURCE",
+  "period": {
+    "relativeFrom": -314,
+    "relativeThrough": -1,
+    "days": 314
+  },
+  "realD03ComponentAnchorApplied": true,
+  "sourceFinanceSha256": "4f30d7dd43aa2190604d4fb73c776a8d4aaa263653dc783def6f7c2c5cc80805",
+  "ownerReceiptSha256": "2c06c4bd1157a2d245143190c4d17b0499b5d09f42159a414846d0f9bcb8d99e",
+  "adoptionManifestFingerprint": "sha256:73c96665334557656836aa218108c85ad50b6b091a3fab722696bf7e0ae95ba9",
+  "journalSha256": "16b06ba4e581fed1b0810611bd9f23de8da17232082f3d244c028d0460efef8a",
+  "arraysSha256": "4b85d6bac89f1fe83ca7d271717584565b46793b5cff0b9a150873bb16b38db2",
+  "scriptSha256": "1b0e25ba7123594745a34eac4fd896209f4e5a3112c43ee8ac89a5465c7200c1",
+  "journalRecords": 930678,
+  "actualPairedCashTransferCount": 825055,
+  "ownerGenerationInternalUseRecordsNoNetCashTransfer": 105623,
+  "crossCountryPairedReferenceFlows": 183,
+  "maximumSourceTokenVsInitialFloatDeltaGcu": "0",
+  "maximumExactVsRecordedFloatClosingDeltaGcu": "0.02432676026550",
+  "globalGcuTransferResidual": "0.000000000000000000000000000",
+  "bankComponentResidual": "0",
+  "cbPairedLiabilityDeltaResidual": "0",
+  "rows": [
+    {
+      "countryId": "COUNTRY_01",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "34444483827.35898195610380",
+        "D": "7502675571.9169120151852",
+        "H": "28247000997.524103028711",
+        "R": "38089481916.00101804389620",
+        "A": "0",
+        "L": "35749676569.4410150438962",
+        "E": "2339805346.56000300000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00133804389620",
+        "OP-": "-0.0000629848148",
+        "HOUSEHOLDS-": "-0.000566971289"
+      },
+      "sourceOriginalEquityToken": "2339805346.56",
+      "adoptedOpeningEquityAnchorGcu": "2339805346.560003",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_01",
+        "operator": "ENTITY_OPERATOR_01",
+        "households": "ENTITY_HOUSEHOLDS_01",
+        "bank": "ENTITY_BANK_01",
+        "centralBank": "ENTITY_CENTRAL_BANK_01"
+      }
+    },
+    {
+      "countryId": "COUNTRY_02",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "43566431872.4097544810070",
+        "D": "9567061804.680051721816",
+        "H": "35930718889.950195797177",
+        "R": "48466587780.1982455189930",
+        "A": "0",
+        "L": "45497780694.630247518993",
+        "E": "2968807085.5679980000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0017555189930",
+        "OP-": "-0.000170278184",
+        "HOUSEHOLDS-": "0.001159797177"
+      },
+      "sourceOriginalEquityToken": "2968807085.568",
+      "adoptedOpeningEquityAnchorGcu": "2968807085.567998",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_02",
+        "operator": "ENTITY_OPERATOR_02",
+        "households": "ENTITY_HOUSEHOLDS_02",
+        "bank": "ENTITY_BANK_02",
+        "centralBank": "ENTITY_CENTRAL_BANK_02"
+      }
+    },
+    {
+      "countryId": "COUNTRY_03",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "95822217396.76475118616200",
+        "D": "20011871687.264538565697",
+        "H": "75631557611.563299248141",
+        "R": "102025617522.01410881383800",
+        "A": "0",
+        "L": "95643429298.827837813838",
+        "E": "6382188223.18627100000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00378881383800",
+        "OP-": "-0.002005434303",
+        "HOUSEHOLDS-": "0.000949248141"
+      },
+      "sourceOriginalEquityToken": "6382188223.18626",
+      "adoptedOpeningEquityAnchorGcu": "6382188223.186271",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_03",
+        "operator": "ENTITY_OPERATOR_03",
+        "households": "ENTITY_HOUSEHOLDS_03",
+        "bank": "ENTITY_BANK_03",
+        "centralBank": "ENTITY_CENTRAL_BANK_03"
+      }
+    },
+    {
+      "countryId": "COUNTRY_04",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "98102525219.28898395744000",
+        "D": "20740987387.103836104331",
+        "H": "78313963761.551366938229",
+        "R": "105626867027.58661604256000",
+        "A": "0",
+        "L": "99054951148.655203042560",
+        "E": "6571915878.93141300000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.00494395744000",
+        "OP-": "-0.002078895669",
+        "HOUSEHOLDS-": "-0.002663061771"
+      },
+      "sourceOriginalEquityToken": "6571915878.931419",
+      "adoptedOpeningEquityAnchorGcu": "6571915878.931413",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_04",
+        "operator": "ENTITY_OPERATOR_04",
+        "households": "ENTITY_HOUSEHOLDS_04",
+        "bank": "ENTITY_BANK_04",
+        "centralBank": "ENTITY_CENTRAL_BANK_04"
+      }
+    },
+    {
+      "countryId": "COUNTRY_05",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "66909475161.46800593122020",
+        "D": "14429963146.1571766093618",
+        "H": "54409482799.915918459418",
+        "R": "73364409982.99120406877980",
+        "A": "0",
+        "L": "68839445946.0730950687798",
+        "E": "4524964036.91810900000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00236406877980",
+        "OP-": "-0.0001413906382",
+        "HOUSEHOLDS-": "0.000223459418"
+      },
+      "sourceOriginalEquityToken": "4524964036.91811",
+      "adoptedOpeningEquityAnchorGcu": "4524964036.918109",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_05",
+        "operator": "ENTITY_OPERATOR_05",
+        "households": "ENTITY_HOUSEHOLDS_05",
+        "bank": "ENTITY_BANK_05",
+        "centralBank": "ENTITY_CENTRAL_BANK_05"
+      }
+    },
+    {
+      "countryId": "COUNTRY_06",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "98304970908.9080280327887599125681729",
+        "D": "21457126417.626186157009057401373984",
+        "H": "80599281022.1855328102021826860578431",
+        "R": "108735120051.4356919672112400874318271",
+        "A": "0",
+        "L": "102056407439.8117189672112400874318271",
+        "E": "6678712611.6239730000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0016080327887599125681729",
+        "OP-": "-0.000221842990942598626016",
+        "HOUSEHOLDS-": "-0.0000871897978173139421569"
+      },
+      "sourceOriginalEquityToken": "6678712611.623975",
+      "adoptedOpeningEquityAnchorGcu": "6678712611.623973",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_06",
+        "operator": "ENTITY_OPERATOR_06",
+        "households": "ENTITY_HOUSEHOLDS_06",
+        "bank": "ENTITY_BANK_06",
+        "centralBank": "ENTITY_CENTRAL_BANK_06"
+      }
+    },
+    {
+      "countryId": "COUNTRY_07",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "81409558950.851855929430773940775",
+        "D": "16933644713.168808432752601665885",
+        "H": "64122940900.34318263781662439334",
+        "R": "86472123765.657380070569226059225",
+        "A": "0",
+        "L": "81056585613.511991070569226059225",
+        "E": "5415538152.145389000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.007684070569226059225",
+        "OP-": "-0.000354567247398334115",
+        "HOUSEHOLDS-": "-0.00573236218337560666"
+      },
+      "sourceOriginalEquityToken": "5415538152.145386",
+      "adoptedOpeningEquityAnchorGcu": "5415538152.145389",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_07",
+        "operator": "ENTITY_OPERATOR_07",
+        "households": "ENTITY_HOUSEHOLDS_07",
+        "bank": "ENTITY_BANK_07",
+        "centralBank": "ENTITY_CENTRAL_BANK_07"
+      }
+    },
+    {
+      "countryId": "COUNTRY_08",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "81660311807.20804760782600",
+        "D": "17401272245.0790989797450",
+        "H": "65727797265.695053412429",
+        "R": "88622048888.04037239217400",
+        "A": "0",
+        "L": "83129069510.7741523921740",
+        "E": "5492979377.26622000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.01174239217400",
+        "OP-": "-0.0005370202550",
+        "HOUSEHOLDS-": "-0.002626587571"
+      },
+      "sourceOriginalEquityToken": "5492979377.26622",
+      "adoptedOpeningEquityAnchorGcu": "5492979377.26622",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_08",
+        "operator": "ENTITY_OPERATOR_08",
+        "households": "ENTITY_HOUSEHOLDS_08",
+        "bank": "ENTITY_BANK_08",
+        "centralBank": "ENTITY_CENTRAL_BANK_08"
+      }
+    },
+    {
+      "countryId": "COUNTRY_09",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "64738107063.17096213946320",
+        "D": "15272057071.8111637079738",
+        "H": "53977840389.2393401525630",
+        "R": "73703676778.52464786053680",
+        "A": "0",
+        "L": "69249897461.0505038605368",
+        "E": "4453779317.47414400000000",
+        "interCBPayable": "499500000.0",
+        "interCBReceivable": "874125000.00"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00154786053680",
+        "OP-": "0.0006857079738",
+        "HOUSEHOLDS-": "0.0007001525630"
+      },
+      "sourceOriginalEquityToken": "4453779317.474147",
+      "adoptedOpeningEquityAnchorGcu": "4453779317.474144",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_09",
+        "operator": "ENTITY_OPERATOR_09",
+        "households": "ENTITY_HOUSEHOLDS_09",
+        "bank": "ENTITY_BANK_09",
+        "centralBank": "ENTITY_CENTRAL_BANK_09"
+      }
+    },
+    {
+      "countryId": "COUNTRY_10",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "70317099754.3713837942064931985586472",
+        "D": "15379302263.4313310427494492503963408",
+        "H": "58007948851.2648451630440575510450120",
+        "R": "78177396143.6649362057935068014413528",
+        "A": "0",
+        "L": "73387251114.6961762057935068014413528",
+        "E": "4790145028.9687600000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0116137942064931985586472",
+        "OP-": "0.0005160427494492503963408",
+        "HOUSEHOLDS-": "0.0020551630440575510450120"
+      },
+      "sourceOriginalEquityToken": "4790145028.968757",
+      "adoptedOpeningEquityAnchorGcu": "4790145028.96876",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_10",
+        "operator": "ENTITY_OPERATOR_10",
+        "households": "ENTITY_HOUSEHOLDS_10",
+        "bank": "ENTITY_BANK_10",
+        "centralBank": "ENTITY_CENTRAL_BANK_10"
+      }
+    },
+    {
+      "countryId": "COUNTRY_11",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "47800443874.86647313660115",
+        "D": "10223756158.1257262589089",
+        "H": "38558181457.80780160448995",
+        "R": "52001350332.29353686339885",
+        "A": "0",
+        "L": "48781937615.93352786339885",
+        "E": "3219412716.36000900000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.00169313660115",
+        "OP-": "0.0003362589089",
+        "HOUSEHOLDS-": "-0.00024239551005"
+      },
+      "sourceOriginalEquityToken": "3219412716.360001",
+      "adoptedOpeningEquityAnchorGcu": "3219412716.360009",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_11",
+        "operator": "ENTITY_OPERATOR_11",
+        "households": "ENTITY_HOUSEHOLDS_11",
+        "bank": "ENTITY_BANK_11",
+        "centralBank": "ENTITY_CENTRAL_BANK_11"
+      }
+    },
+    {
+      "countryId": "COUNTRY_12",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "101416075841.1264157562367217487712501",
+        "D": "21743858879.29599690279754240930079",
+        "H": "81468842990.0124663409657358419279599",
+        "R": "110033661126.3229442437632782512287499",
+        "A": "0",
+        "L": "103212701869.3084632437632782512287499",
+        "E": "6820959257.0144810000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0009757562367217487712501",
+        "OP-": "0.00122690279754240930079",
+        "HOUSEHOLDS-": "-0.0055836590342641580720401"
+      },
+      "sourceOriginalEquityToken": "6820959257.014488",
+      "adoptedOpeningEquityAnchorGcu": "6820959257.014481",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_12",
+        "operator": "ENTITY_OPERATOR_12",
+        "households": "ENTITY_HOUSEHOLDS_12",
+        "bank": "ENTITY_BANK_12",
+        "centralBank": "ENTITY_CENTRAL_BANK_12"
+      }
+    },
+    {
+      "countryId": "COUNTRY_13",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "72213068168.146783185829868317",
+        "D": "15749138274.771397702410683083",
+        "H": "58814152882.8498441117594486",
+        "R": "79462496468.480036814170131683",
+        "A": "0",
+        "L": "74563291157.621241814170131683",
+        "E": "4899205310.858795000000000000",
+        "interCBPayable": "199800000.0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.012506814170131683",
+        "OP-": "-0.000531297589316917",
+        "HOUSEHOLDS-": "0.0043391117594486"
+      },
+      "sourceOriginalEquityToken": "4899205310.858802",
+      "adoptedOpeningEquityAnchorGcu": "4899205310.858795",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_13",
+        "operator": "ENTITY_OPERATOR_13",
+        "households": "ENTITY_HOUSEHOLDS_13",
+        "bank": "ENTITY_BANK_13",
+        "centralBank": "ENTITY_CENTRAL_BANK_13"
+      }
+    },
+    {
+      "countryId": "COUNTRY_14",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "67243323211.52261148043000",
+        "D": "14625982013.3207642462170",
+        "H": "54846188610.462363273353",
+        "R": "74029353751.62669851957000",
+        "A": "0",
+        "L": "69472170623.7831275195700",
+        "E": "4557183127.84357100000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.00449148043000",
+        "OP-": "0.0005642462170",
+        "HOUSEHOLDS-": "0.000853273353"
+      },
+      "sourceOriginalEquityToken": "4557183127.843574",
+      "adoptedOpeningEquityAnchorGcu": "4557183127.843571",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_14",
+        "operator": "ENTITY_OPERATOR_14",
+        "households": "ENTITY_HOUSEHOLDS_14",
+        "bank": "ENTITY_BANK_14",
+        "centralBank": "ENTITY_CENTRAL_BANK_14"
+      }
+    },
+    {
+      "countryId": "COUNTRY_15",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "87627785679.87114055843456466299190400",
+        "D": "19180108848.712888164567477870068699",
+        "H": "72045675477.710110276997957466939397",
+        "R": "97187569993.29940944156543533700809600",
+        "A": "0",
+        "L": "91225784326.422998441565435337008096",
+        "E": "5961785666.87641100000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00411944156543533700809600",
+        "OP-": "-0.000417835432522129931301",
+        "HOUSEHOLDS-": "0.004070276997957466939397"
+      },
+      "sourceOriginalEquityToken": "5961785666.876414",
+      "adoptedOpeningEquityAnchorGcu": "5961785666.876411",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_15",
+        "operator": "ENTITY_OPERATOR_15",
+        "households": "ENTITY_HOUSEHOLDS_15",
+        "bank": "ENTITY_BANK_15",
+        "centralBank": "ENTITY_CENTRAL_BANK_15"
+      }
+    },
+    {
+      "countryId": "COUNTRY_16",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "90728200289.93804198863500",
+        "D": "19587696001.3994745422810",
+        "H": "74114981983.886656469084",
+        "R": "99850373927.79354801136500",
+        "A": "0",
+        "L": "93702677985.2861310113650",
+        "E": "6147695942.50741700000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.01262801136500",
+        "OP-": "-0.0012024577190",
+        "HOUSEHOLDS-": "0.002156469084"
+      },
+      "sourceOriginalEquityToken": "6147695942.507418",
+      "adoptedOpeningEquityAnchorGcu": "6147695942.507417",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_16",
+        "operator": "ENTITY_OPERATOR_16",
+        "households": "ENTITY_HOUSEHOLDS_16",
+        "bank": "ENTITY_BANK_16",
+        "centralBank": "ENTITY_CENTRAL_BANK_16"
+      }
+    },
+    {
+      "countryId": "COUNTRY_17",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "53141785259.7450544761083532973676956",
+        "D": "11202680436.80803216415017720147967",
+        "H": "42002384645.2069133597414695011526344",
+        "R": "56749960093.4069455238916467026323044",
+        "A": "0",
+        "L": "53205065082.0149455238916467026323044",
+        "E": "3544895011.3920000000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0021255238916467026323044",
+        "OP-": "0.00008116415017720147967",
+        "HOUSEHOLDS-": "0.0021633597414695011526344"
+      },
+      "sourceOriginalEquityToken": "3544895011.392",
+      "adoptedOpeningEquityAnchorGcu": "3544895011.392",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_17",
+        "operator": "ENTITY_OPERATOR_17",
+        "households": "ENTITY_HOUSEHOLDS_17",
+        "bank": "ENTITY_BANK_17",
+        "centralBank": "ENTITY_CENTRAL_BANK_17"
+      }
+    },
+    {
+      "countryId": "COUNTRY_18",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "40141914971.61710360420510",
+        "D": "8632555434.044993313743",
+        "H": "32249673296.7379030820519",
+        "R": "43583033520.86289339579490",
+        "A": "0",
+        "L": "40882228730.7828963957949",
+        "E": "2700804790.07999700000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00259639579490",
+        "OP-": "0.000123313743",
+        "HOUSEHOLDS-": "0.0008430820519"
+      },
+      "sourceOriginalEquityToken": "2700804790.08",
+      "adoptedOpeningEquityAnchorGcu": "2700804790.079997",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_18",
+        "operator": "ENTITY_OPERATOR_18",
+        "households": "ENTITY_HOUSEHOLDS_18",
+        "bank": "ENTITY_BANK_18",
+        "centralBank": "ENTITY_CENTRAL_BANK_18"
+      }
+    },
+    {
+      "countryId": "COUNTRY_19",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "43144654559.2526568782150",
+        "D": "9139437635.404962229112",
+        "H": "34386388880.542379892673",
+        "R": "46414842551.7873411217850",
+        "A": "0",
+        "L": "43525826515.947342121785",
+        "E": "2889016035.8399990000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0000068782150",
+        "OP-": "0.000252229112",
+        "HOUSEHOLDS-": "-0.000380107327"
+      },
+      "sourceOriginalEquityToken": "2889016035.84",
+      "adoptedOpeningEquityAnchorGcu": "2889016035.839999",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_19",
+        "operator": "ENTITY_OPERATOR_19",
+        "households": "ENTITY_HOUSEHOLDS_19",
+        "bank": "ENTITY_BANK_19",
+        "centralBank": "ENTITY_CENTRAL_BANK_19"
+      }
+    },
+    {
+      "countryId": "COUNTRY_20",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "97152059999.385214924619981341440608246",
+        "D": "12300805059.2054778051598266349250913",
+        "H": "48791276168.730648270220192023634300454",
+        "R": "65128522847.788259075380018658559391754",
+        "A": "0",
+        "L": "61092081227.936126075380018658559391754",
+        "E": "4036441619.852133000000000000000000000",
+        "interCBPayable": "1023975000.00",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.002864924619981341440608246",
+        "OP-": "-0.0003361948401733650749087",
+        "HOUSEHOLDS-": "-0.002601729779807976365699546"
+      },
+      "sourceOriginalEquityToken": "4036441619.852134",
+      "adoptedOpeningEquityAnchorGcu": "4036441619.852133",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_20",
+        "operator": "ENTITY_OPERATOR_20",
+        "households": "ENTITY_HOUSEHOLDS_20",
+        "bank": "ENTITY_BANK_20",
+        "centralBank": "ENTITY_CENTRAL_BANK_20"
+      }
+    },
+    {
+      "countryId": "COUNTRY_21",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "86585396583.908785790892368469783239",
+        "D": "18775054903.824261717981063809263641",
+        "H": "70184875148.42922149112656772095312",
+        "R": "94811440940.125719209107631530216761",
+        "A": "0",
+        "L": "88959930052.253483209107631530216761",
+        "E": "5851510887.872236000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.002475790892368469783239",
+        "OP-": "0.000424717981063809263641",
+        "HOUSEHOLDS-": "0.00088149112656772095312"
+      },
+      "sourceOriginalEquityToken": "5851510887.872228",
+      "adoptedOpeningEquityAnchorGcu": "5851510887.872236",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_21",
+        "operator": "ENTITY_OPERATOR_21",
+        "households": "ENTITY_HOUSEHOLDS_21",
+        "bank": "ENTITY_BANK_21",
+        "centralBank": "ENTITY_CENTRAL_BANK_21"
+      }
+    },
+    {
+      "countryId": "COUNTRY_22",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "36358871093.013239782273524188002",
+        "D": "7934680843.628068153222102338498",
+        "H": "29689906525.7586950645043734735",
+        "R": "40090702651.466765217726475811998",
+        "A": "0",
+        "L": "37624587369.386763217726475811998",
+        "E": "2466115282.080002000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.000325217726475811998",
+        "OP-": "0.000058153222102338498",
+        "HOUSEHOLDS-": "-0.0006509354956265265"
+      },
+      "sourceOriginalEquityToken": "2466115282.08",
+      "adoptedOpeningEquityAnchorGcu": "2466115282.080002",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_22",
+        "operator": "ENTITY_OPERATOR_22",
+        "households": "ENTITY_HOUSEHOLDS_22",
+        "bank": "ENTITY_BANK_22",
+        "centralBank": "ENTITY_CENTRAL_BANK_22"
+      }
+    },
+    {
+      "countryId": "COUNTRY_23",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "132681475244.7737454333825179726081762",
+        "D": "27932654446.395131364276563208878047",
+        "H": "104237980917.6436832023409188185137768",
+        "R": "140999039050.9990545666174820273918238",
+        "A": "0",
+        "L": "132170635364.0388145666174820273918238",
+        "E": "8828403686.9602400000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0188245666174820273918238",
+        "OP-": "-0.000218635723436791121953",
+        "HOUSEHOLDS-": "-0.0026167976590811814862232"
+      },
+      "sourceOriginalEquityToken": "8828403686.960257",
+      "adoptedOpeningEquityAnchorGcu": "8828403686.96024",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_23",
+        "operator": "ENTITY_OPERATOR_23",
+        "households": "ENTITY_HOUSEHOLDS_23",
+        "bank": "ENTITY_BANK_23",
+        "centralBank": "ENTITY_CENTRAL_BANK_23"
+      }
+    },
+    {
+      "countryId": "COUNTRY_24",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "78697978219.76583378731884",
+        "D": "17769346127.9624802340859755",
+        "H": "63175026108.8976189785951845",
+        "R": "86237478918.74769621268116",
+        "A": "0",
+        "L": "80944372236.8600992126811600",
+        "E": "5293106681.8875970000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "849150000.0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00374621268116",
+        "OP-": "0.0001272340859755",
+        "HOUSEHOLDS-": "0.0013189785951845"
+      },
+      "sourceOriginalEquityToken": "5293106681.887593",
+      "adoptedOpeningEquityAnchorGcu": "5293106681.887597",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_24",
+        "operator": "ENTITY_OPERATOR_24",
+        "households": "ENTITY_HOUSEHOLDS_24",
+        "bank": "ENTITY_BANK_24",
+        "centralBank": "ENTITY_CENTRAL_BANK_24"
+      }
+    },
+    {
+      "countryId": "COUNTRY_25",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "41655649909.4170433635830009260922791",
+        "D": "9090434602.15676042251396920570730",
+        "H": "33813683396.1061982139030298682004209",
+        "R": "45722776928.5189566364169990739077209",
+        "A": "0",
+        "L": "42904117998.2629586364169990739077209",
+        "E": "2818658930.2559980000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0027973635830009260922791",
+        "OP-": "0.00059042251396920570730",
+        "HOUSEHOLDS-": "0.0018882139030298682004209"
+      },
+      "sourceOriginalEquityToken": "2818658930.256001",
+      "adoptedOpeningEquityAnchorGcu": "2818658930.255998",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_25",
+        "operator": "ENTITY_OPERATOR_25",
+        "households": "ENTITY_HOUSEHOLDS_25",
+        "bank": "ENTITY_BANK_25",
+        "centralBank": "ENTITY_CENTRAL_BANK_25"
+      }
+    },
+    {
+      "countryId": "COUNTRY_26",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "49882566778.1743446735440368702114779",
+        "D": "10865158316.984354805278211804333326",
+        "H": "40241227072.1996385211777513254551961",
+        "R": "54446211514.6908253264559631297885221",
+        "A": "0",
+        "L": "51106385389.1839933264559631297885221",
+        "E": "3339826125.5068320000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0025853264559631297885221",
+        "OP-": "-0.001309194721788195666674",
+        "HOUSEHOLDS-": "0.0004885211777513254551961"
+      },
+      "sourceOriginalEquityToken": "3339826125.506834",
+      "adoptedOpeningEquityAnchorGcu": "3339826125.506832",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_26",
+        "operator": "ENTITY_OPERATOR_26",
+        "households": "ENTITY_HOUSEHOLDS_26",
+        "bank": "ENTITY_BANK_26",
+        "centralBank": "ENTITY_CENTRAL_BANK_26"
+      }
+    },
+    {
+      "countryId": "COUNTRY_27",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "85366806092.4048355147508931369535074",
+        "D": "15632314271.686836698051246407186973",
+        "H": "57986854234.4323547871978604558595196",
+        "R": "78462168361.8835944852491068630464926",
+        "A": "0",
+        "L": "73619168506.1191914852491068630464926",
+        "E": "4842999855.7644030000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0021144852491068630464926",
+        "OP-": "-0.001027301948753592813027",
+        "HOUSEHOLDS-": "-0.0000952128021395441404804"
+      },
+      "sourceOriginalEquityToken": "4842999855.764403",
+      "adoptedOpeningEquityAnchorGcu": "4842999855.764403",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_27",
+        "operator": "ENTITY_OPERATOR_27",
+        "households": "ENTITY_HOUSEHOLDS_27",
+        "bank": "ENTITY_BANK_27",
+        "centralBank": "ENTITY_CENTRAL_BANK_27"
+      }
+    },
+    {
+      "countryId": "COUNTRY_28",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "86062392535.8398615857991481872020272",
+        "D": "17844572157.559132624708479200422763",
+        "H": "66765050566.8290667894923726123752098",
+        "R": "90298689899.7289984142008518127979728",
+        "A": "0",
+        "L": "84609622724.3881994142008518127979728",
+        "E": "5689067175.3407990000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0117784142008518127979728",
+        "OP-": "-0.002463375291520799577237",
+        "HOUSEHOLDS-": "-0.0048432105076273876247902"
+      },
+      "sourceOriginalEquityToken": "5689067175.340806",
+      "adoptedOpeningEquityAnchorGcu": "5689067175.340799",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_28",
+        "operator": "ENTITY_OPERATOR_28",
+        "households": "ENTITY_HOUSEHOLDS_28",
+        "bank": "ENTITY_BANK_28",
+        "centralBank": "ENTITY_CENTRAL_BANK_28"
+      }
+    },
+    {
+      "countryId": "COUNTRY_29",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "71612417200.11032800281374819996809794",
+        "D": "15427019628.615268318612310804861775",
+        "H": "57434116724.65222967857394099517012706",
+        "R": "77676921471.71328199718625180003190206",
+        "A": "0",
+        "L": "72861136353.26749799718625180003190206",
+        "E": "4815785118.44578400000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00405199718625180003190206",
+        "OP-": "-0.000353681387689195138225",
+        "HOUSEHOLDS-": "0.00170967857394099517012706"
+      },
+      "sourceOriginalEquityToken": "4815785118.445783",
+      "adoptedOpeningEquityAnchorGcu": "4815785118.445784",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_29",
+        "operator": "ENTITY_OPERATOR_29",
+        "households": "ENTITY_HOUSEHOLDS_29",
+        "bank": "ENTITY_BANK_29",
+        "centralBank": "ENTITY_CENTRAL_BANK_29"
+      }
+    },
+    {
+      "countryId": "COUNTRY_30",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "60963386113.2989926072792988310556506",
+        "D": "13378340060.855487922681792004227633",
+        "H": "49677486307.8029764700389091647167164",
+        "R": "67189800118.0572073927207011689443494",
+        "A": "0",
+        "L": "63055826368.6584643927207011689443494",
+        "E": "4133973749.3987430000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0060273927207011689443494",
+        "OP-": "0.000550922681792004227633",
+        "HOUSEHOLDS-": "-0.0015635299610908352832836"
+      },
+      "sourceOriginalEquityToken": "4133973749.398746",
+      "adoptedOpeningEquityAnchorGcu": "4133973749.398743",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_30",
+        "operator": "ENTITY_OPERATOR_30",
+        "households": "ENTITY_HOUSEHOLDS_30",
+        "bank": "ENTITY_BANK_30",
+        "centralBank": "ENTITY_CENTRAL_BANK_30"
+      }
+    },
+    {
+      "countryId": "COUNTRY_31",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "72734674672.439549694452147986166416",
+        "D": "15488624535.04128496641557320359349",
+        "H": "57829236053.521738339132278810240094",
+        "R": "78186278430.596280305547852013833584",
+        "A": "0",
+        "L": "73317860588.563023305547852013833584",
+        "E": "4868417842.033257000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.002649694452147986166416",
+        "OP-": "-0.00049203358442679640651",
+        "HOUSEHOLDS-": "0.002578339132278810240094"
+      },
+      "sourceOriginalEquityToken": "4868417842.033257",
+      "adoptedOpeningEquityAnchorGcu": "4868417842.033257",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_31",
+        "operator": "ENTITY_OPERATOR_31",
+        "households": "ENTITY_HOUSEHOLDS_31",
+        "bank": "ENTITY_BANK_31",
+        "centralBank": "ENTITY_CENTRAL_BANK_31"
+      }
+    },
+    {
+      "countryId": "COUNTRY_32",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "43394474751.30225698750539785754283819",
+        "D": "9519014857.68826344124868441412752344",
+        "H": "35666118938.96161257124591772832963837",
+        "R": "48137787414.91509001249460214245716181",
+        "A": "0",
+        "L": "45185133796.64987601249460214245716181",
+        "E": "2952653618.26521400000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.00421698750539785754283819",
+        "OP-": "0.00100344124868441412752344",
+        "HOUSEHOLDS-": "-0.00032742875408227167036163"
+      },
+      "sourceOriginalEquityToken": "2952653618.265213",
+      "adoptedOpeningEquityAnchorGcu": "2952653618.265214",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_32",
+        "operator": "ENTITY_OPERATOR_32",
+        "households": "ENTITY_HOUSEHOLDS_32",
+        "bank": "ENTITY_BANK_32",
+        "centralBank": "ENTITY_CENTRAL_BANK_32"
+      }
+    },
+    {
+      "countryId": "COUNTRY_33",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "54358976137.49503182046610",
+        "D": "11990847510.1192010208409",
+        "H": "44859759158.043489158693",
+        "R": "60557592761.68446217953390",
+        "A": "0",
+        "L": "56850606668.1626901795339",
+        "E": "3706986093.52177200000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.00388182046610",
+        "OP-": "-0.0010889791591",
+        "HOUSEHOLDS-": "-0.000800841307"
+      },
+      "sourceOriginalEquityToken": "3706986093.521772",
+      "adoptedOpeningEquityAnchorGcu": "3706986093.521772",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_33",
+        "operator": "ENTITY_OPERATOR_33",
+        "households": "ENTITY_HOUSEHOLDS_33",
+        "bank": "ENTITY_BANK_33",
+        "centralBank": "ENTITY_CENTRAL_BANK_33"
+      }
+    },
+    {
+      "countryId": "COUNTRY_34",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "67560441374.05246834356460",
+        "D": "14640452987.1622445307294",
+        "H": "54922919450.385285125706",
+        "R": "74134166231.26753165643540",
+        "A": "0",
+        "L": "69563372437.5475296564354",
+        "E": "4570793793.72000200000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.00997234356460",
+        "OP-": "0.0005945307294",
+        "HOUSEHOLDS-": "0.004029125706"
+      },
+      "sourceOriginalEquityToken": "4570793793.72",
+      "adoptedOpeningEquityAnchorGcu": "4570793793.720002",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_34",
+        "operator": "ENTITY_OPERATOR_34",
+        "households": "ENTITY_HOUSEHOLDS_34",
+        "bank": "ENTITY_BANK_34",
+        "centralBank": "ENTITY_CENTRAL_BANK_34"
+      }
+    },
+    {
+      "countryId": "COUNTRY_35",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "58577008397.5279603528119779600276844",
+        "D": "13125062276.708867343586326607081282",
+        "H": "48481510974.7346123036016954328910336",
+        "R": "65612692639.7426196471880220399723156",
+        "A": "0",
+        "L": "61606573251.4434796471880220399723156",
+        "E": "4006119388.2991400000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0069796471880220399723156",
+        "OP-": "-0.000254656413673392918718",
+        "HOUSEHOLDS-": "-0.0024576963983045671089664"
+      },
+      "sourceOriginalEquityToken": "4006119388.299144",
+      "adoptedOpeningEquityAnchorGcu": "4006119388.29914",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_35",
+        "operator": "ENTITY_OPERATOR_35",
+        "households": "ENTITY_HOUSEHOLDS_35",
+        "bank": "ENTITY_BANK_35",
+        "centralBank": "ENTITY_CENTRAL_BANK_35"
+      }
+    },
+    {
+      "countryId": "COUNTRY_36",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "28953042353.84432845319140",
+        "D": "6415118268.4185495509086",
+        "H": "24008115667.897121995900",
+        "R": "32402443145.98767354680860",
+        "A": "0",
+        "L": "30423233936.3156715468086",
+        "E": "1979209209.67200200000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.00106845319140",
+        "OP-": "-0.0000034490914",
+        "HOUSEHOLDS-": "0.001869995900"
+      },
+      "sourceOriginalEquityToken": "1979209209.672",
+      "adoptedOpeningEquityAnchorGcu": "1979209209.672002",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_36",
+        "operator": "ENTITY_OPERATOR_36",
+        "households": "ENTITY_HOUSEHOLDS_36",
+        "bank": "ENTITY_BANK_36",
+        "centralBank": "ENTITY_CENTRAL_BANK_36"
+      }
+    },
+    {
+      "countryId": "COUNTRY_37",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "30088886545.0023306540142637718748303",
+        "D": "6734396232.9755746573294198001056908",
+        "H": "24981717164.1820936886563164280194789",
+        "R": "33772825073.1976693459857362281251697",
+        "A": "0",
+        "L": "31716113397.1576683459857362281251697",
+        "E": "2056711676.0400010000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0003353459857362281251697",
+        "OP-": "-0.0002813426705801998943092",
+        "HOUSEHOLDS-": "0.0006776886563164280194789"
+      },
+      "sourceOriginalEquityToken": "2056711676.04",
+      "adoptedOpeningEquityAnchorGcu": "2056711676.040001",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_37",
+        "operator": "ENTITY_OPERATOR_37",
+        "households": "ENTITY_HOUSEHOLDS_37",
+        "bank": "ENTITY_BANK_37",
+        "centralBank": "ENTITY_CENTRAL_BANK_37"
+      }
+    },
+    {
+      "countryId": "COUNTRY_38",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "97925057290.216317552997022706292064",
+        "D": "21338554419.37885637991679200422763",
+        "H": "79274932870.540379067086185289480306",
+        "R": "107231438775.923792447002977293707936",
+        "A": "0",
+        "L": "100613487289.919235447002977293707936",
+        "E": "6617951486.004557000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.000232447002977293707936",
+        "OP-": "0.00038837991679200422763",
+        "HOUSEHOLDS-": "-0.002570932913814710519694"
+      },
+      "sourceOriginalEquityToken": "6617951486.004556",
+      "adoptedOpeningEquityAnchorGcu": "6617951486.004557",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_38",
+        "operator": "ENTITY_OPERATOR_38",
+        "households": "ENTITY_HOUSEHOLDS_38",
+        "bank": "ENTITY_BANK_38",
+        "centralBank": "ENTITY_CENTRAL_BANK_38"
+      }
+    },
+    {
+      "countryId": "COUNTRY_39",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "69933174827.6714012227496079396258659",
+        "D": "15650669517.715067082725489005812994",
+        "H": "57923926689.8263836945249030545611401",
+        "R": "78358188575.3817287772503920603741341",
+        "A": "0",
+        "L": "73574596207.5414507772503920603741341",
+        "E": "4783592367.8402780000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0076287772503920603741341",
+        "OP-": "0.000200082725489005812994",
+        "HOUSEHOLDS-": "0.0024536945249030545611401"
+      },
+      "sourceOriginalEquityToken": "4783592367.840285",
+      "adoptedOpeningEquityAnchorGcu": "4783592367.840278",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_39",
+        "operator": "ENTITY_OPERATOR_39",
+        "households": "ENTITY_HOUSEHOLDS_39",
+        "bank": "ENTITY_BANK_39",
+        "centralBank": "ENTITY_CENTRAL_BANK_39"
+      }
+    },
+    {
+      "countryId": "COUNTRY_40",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "75118920782.32490262654071003203727185",
+        "D": "15642512025.375939160888552404016253",
+        "H": "58743025615.37705921257073756394647515",
+        "R": "79369019588.18878737345928996796272815",
+        "A": "0",
+        "L": "74385537640.75299837345928996796272815",
+        "E": "4983481947.43578900000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00105737345928996796272815",
+        "OP-": "0.000247160888552404016253",
+        "HOUSEHOLDS-": "0.00053921257073756394647515"
+      },
+      "sourceOriginalEquityToken": "4983481947.43579",
+      "adoptedOpeningEquityAnchorGcu": "4983481947.435789",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_40",
+        "operator": "ENTITY_OPERATOR_40",
+        "households": "ENTITY_HOUSEHOLDS_40",
+        "bank": "ENTITY_BANK_40",
+        "centralBank": "ENTITY_CENTRAL_BANK_40"
+      }
+    },
+    {
+      "countryId": "COUNTRY_41",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "74336733444.5972797403586353532281129",
+        "D": "15998426342.008240738641662209406491",
+        "H": "59626009554.5302535209997024373653961",
+        "R": "80623141541.2430702596413646467718871",
+        "A": "0",
+        "L": "75624435896.5384942596413646467718871",
+        "E": "4998705644.7045760000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0032902596413646467718871",
+        "OP-": "-0.000109261358337790593509",
+        "HOUSEHOLDS-": "0.0017575209997024373653961"
+      },
+      "sourceOriginalEquityToken": "4998705644.704577",
+      "adoptedOpeningEquityAnchorGcu": "4998705644.704576",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_41",
+        "operator": "ENTITY_OPERATOR_41",
+        "households": "ENTITY_HOUSEHOLDS_41",
+        "bank": "ENTITY_BANK_41",
+        "centralBank": "ENTITY_CENTRAL_BANK_41"
+      }
+    },
+    {
+      "countryId": "COUNTRY_42",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "41615988992.5253857787067781116276783",
+        "D": "9273214286.64894200744953160443904",
+        "H": "34425031771.5456722138436902839332817",
+        "R": "46542053893.2186142212932218883723217",
+        "A": "0",
+        "L": "43698246058.1946142212932218883723217",
+        "E": "2843807835.0240000000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0004457787067781116276783",
+        "OP-": "0.00015500744953160443904",
+        "HOUSEHOLDS-": "-0.0000737861563097160667183"
+      },
+      "sourceOriginalEquityToken": "2843807835.024",
+      "adoptedOpeningEquityAnchorGcu": "2843807835.024",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_42",
+        "operator": "ENTITY_OPERATOR_42",
+        "households": "ENTITY_HOUSEHOLDS_42",
+        "bank": "ENTITY_BANK_42",
+        "centralBank": "ENTITY_CENTRAL_BANK_42"
+      }
+    },
+    {
+      "countryId": "COUNTRY_43",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "42170447121.7280858441030328520923892",
+        "D": "9437701707.237772046066594003170725",
+        "H": "35038642921.4341451098303731447368858",
+        "R": "47364571020.3519171558969671479076108",
+        "A": "0",
+        "L": "44476344628.6719171558969671479076108",
+        "E": "2888226391.6800000000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0034141558969671479076108",
+        "OP-": "-0.000060953933405996829275",
+        "HOUSEHOLDS-": "0.0008451098303731447368858"
+      },
+      "sourceOriginalEquityToken": "2888226391.68",
+      "adoptedOpeningEquityAnchorGcu": "2888226391.68",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_43",
+        "operator": "ENTITY_OPERATOR_43",
+        "households": "ENTITY_HOUSEHOLDS_43",
+        "bank": "ENTITY_BANK_43",
+        "centralBank": "ENTITY_CENTRAL_BANK_43"
+      }
+    },
+    {
+      "countryId": "COUNTRY_44",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "104522822089.4341259123562822318081484",
+        "D": "21915935041.267306036395719610780478",
+        "H": "81975694357.6209200512479981574113736",
+        "R": "110838777781.8324540876437177681918516",
+        "A": "0",
+        "L": "103891629398.8882260876437177681918516",
+        "E": "6947148382.9442280000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0067159123562822318081484",
+        "OP-": "-0.001253963604280389219522",
+        "HOUSEHOLDS-": "0.0014900512479981574113736"
+      },
+      "sourceOriginalEquityToken": "6947148382.944236",
+      "adoptedOpeningEquityAnchorGcu": "6947148382.944228",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_44",
+        "operator": "ENTITY_OPERATOR_44",
+        "households": "ENTITY_HOUSEHOLDS_44",
+        "bank": "ENTITY_BANK_44",
+        "centralBank": "ENTITY_CENTRAL_BANK_44"
+      }
+    },
+    {
+      "countryId": "COUNTRY_45",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "75428640864.4331230951910987129174407",
+        "D": "16727726590.59268936148333760126829",
+        "H": "61718069702.4909855433255636858142693",
+        "R": "83574944198.3343469048089012870825593",
+        "A": "0",
+        "L": "78445796293.0836749048089012870825593",
+        "E": "5129147905.2506720000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0056330951910987129174407",
+        "OP-": "0.00153536148333760126829",
+        "HOUSEHOLDS-": "-0.0018644566744363141857307"
+      },
+      "sourceOriginalEquityToken": "5129147905.250679",
+      "adoptedOpeningEquityAnchorGcu": "5129147905.250672",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_45",
+        "operator": "ENTITY_OPERATOR_45",
+        "households": "ENTITY_HOUSEHOLDS_45",
+        "bank": "ENTITY_BANK_45",
+        "centralBank": "ENTITY_CENTRAL_BANK_45"
+      }
+    },
+    {
+      "countryId": "COUNTRY_46",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "89082989839.11762145515700",
+        "D": "19081474659.297902342294",
+        "H": "72044681364.819636202549",
+        "R": "97133127552.89206254484300",
+        "A": "0",
+        "L": "91126156024.117538544843",
+        "E": "6006971528.77452400000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00272854484300",
+        "OP-": "-0.000071657706",
+        "HOUSEHOLDS-": "-0.003063797451"
+      },
+      "sourceOriginalEquityToken": "6006971528.774517",
+      "adoptedOpeningEquityAnchorGcu": "6006971528.774524",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_46",
+        "operator": "ENTITY_OPERATOR_46",
+        "households": "ENTITY_HOUSEHOLDS_46",
+        "bank": "ENTITY_BANK_46",
+        "centralBank": "ENTITY_CENTRAL_BANK_46"
+      }
+    },
+    {
+      "countryId": "COUNTRY_47",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "106715553789.98302229894000",
+        "D": "22935264065.0442195077790",
+        "H": "86726868981.945478193281",
+        "R": "116874722608.22197770106000",
+        "A": "0",
+        "L": "109662133046.9896977010600",
+        "E": "7212589561.23228000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.00357229894000",
+        "OP-": "-0.0018424922210",
+        "HOUSEHOLDS-": "-0.005111806719"
+      },
+      "sourceOriginalEquityToken": "7212589561.232273",
+      "adoptedOpeningEquityAnchorGcu": "7212589561.23228",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_47",
+        "operator": "ENTITY_OPERATOR_47",
+        "households": "ENTITY_HOUSEHOLDS_47",
+        "bank": "ENTITY_BANK_47",
+        "centralBank": "ENTITY_CENTRAL_BANK_47"
+      }
+    },
+    {
+      "countryId": "COUNTRY_48",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "43760185133.0864577648560131349116579",
+        "D": "9526500220.53716695100943760126829",
+        "H": "35612876128.7763782841345492638200521",
+        "R": "48102695065.3935472351439868650883421",
+        "A": "0",
+        "L": "45139376349.3135452351439868650883421",
+        "E": "2963318716.0800020000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0005737648560131349116579",
+        "OP-": "-0.00015304899056239873171",
+        "HOUSEHOLDS-": "0.0002682841345492638200521"
+      },
+      "sourceOriginalEquityToken": "2963318716.08",
+      "adoptedOpeningEquityAnchorGcu": "2963318716.080002",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_48",
+        "operator": "ENTITY_OPERATOR_48",
+        "households": "ENTITY_HOUSEHOLDS_48",
+        "bank": "ENTITY_BANK_48",
+        "centralBank": "ENTITY_CENTRAL_BANK_48"
+      }
+    },
+    {
+      "countryId": "COUNTRY_49",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "67036906377.1570222365867643711071283",
+        "D": "14481177641.728431793448686007398370",
+        "H": "53788654926.2041879699645496214945017",
+        "R": "72780057199.4355877634132356288928717",
+        "A": "0",
+        "L": "68269832567.9326197634132356288928717",
+        "E": "4510224631.5029680000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0090322365867643711071283",
+        "OP-": "-0.000190206551313992601630",
+        "HOUSEHOLDS-": "-0.0003520300354503785054983"
+      },
+      "sourceOriginalEquityToken": "4510224631.502964",
+      "adoptedOpeningEquityAnchorGcu": "4510224631.502968",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_49",
+        "operator": "ENTITY_OPERATOR_49",
+        "households": "ENTITY_HOUSEHOLDS_49",
+        "bank": "ENTITY_BANK_49",
+        "centralBank": "ENTITY_CENTRAL_BANK_49"
+      }
+    },
+    {
+      "countryId": "COUNTRY_50",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "71723646556.6490400322274115336960357",
+        "D": "15410330854.35209929052337520253658",
+        "H": "57832563963.7628696772492132637673843",
+        "R": "78075112863.9403739677725884663039643",
+        "A": "0",
+        "L": "73242894818.1149689677725884663039643",
+        "E": "4832218045.8254050000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0026299677725884663039643",
+        "OP-": "0.00033929052337520253658",
+        "HOUSEHOLDS-": "0.0018096772492132637673843"
+      },
+      "sourceOriginalEquityToken": "4832218045.825401",
+      "adoptedOpeningEquityAnchorGcu": "4832218045.825405",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_50",
+        "operator": "ENTITY_OPERATOR_50",
+        "households": "ENTITY_HOUSEHOLDS_50",
+        "bank": "ENTITY_BANK_50",
+        "centralBank": "ENTITY_CENTRAL_BANK_50"
+      }
+    },
+    {
+      "countryId": "COUNTRY_51",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "87568919104.1418637506449104333411708",
+        "D": "18081857585.015616679949908805918685",
+        "H": "68106957212.7952945694051807607401442",
+        "R": "91980739261.2091962493550895666588292",
+        "A": "0",
+        "L": "86188814797.8109112493550895666588292",
+        "E": "5791924463.3982850000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0094262493550895666588292",
+        "OP-": "-0.000923320050091194081315",
+        "HOUSEHOLDS-": "0.0022645694051807607401442"
+      },
+      "sourceOriginalEquityToken": "5791924463.398278",
+      "adoptedOpeningEquityAnchorGcu": "5791924463.398285",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_51",
+        "operator": "ENTITY_OPERATOR_51",
+        "households": "ENTITY_HOUSEHOLDS_51",
+        "bank": "ENTITY_BANK_51",
+        "centralBank": "ENTITY_CENTRAL_BANK_51"
+      }
+    },
+    {
+      "countryId": "COUNTRY_52",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "70966704774.4442831355870",
+        "D": "14265324846.151901686528",
+        "H": "54010001350.803814177885",
+        "R": "72916727229.3357068644130",
+        "A": "0",
+        "L": "68275326196.955715864413",
+        "E": "4641401032.3799910000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0038568644130",
+        "OP-": "-0.001155313472",
+        "HOUSEHOLDS-": "-0.003421822115"
+      },
+      "sourceOriginalEquityToken": "4641401032.38",
+      "adoptedOpeningEquityAnchorGcu": "4641401032.379991",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_52",
+        "operator": "ENTITY_OPERATOR_52",
+        "households": "ENTITY_HOUSEHOLDS_52",
+        "bank": "ENTITY_BANK_52",
+        "centralBank": "ENTITY_CENTRAL_BANK_52"
+      }
+    },
+    {
+      "countryId": "COUNTRY_53",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "100259565359.6693775990770",
+        "D": "21070086351.823369112445",
+        "H": "79861657059.781151288478",
+        "R": "107638120370.6469224009230",
+        "A": "0",
+        "L": "100931743411.604520400923",
+        "E": "6706376959.0424020000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0087224009230",
+        "OP-": "0.000929112445",
+        "HOUSEHOLDS-": "-0.000268711522"
+      },
+      "sourceOriginalEquityToken": "6706376959.04239",
+      "adoptedOpeningEquityAnchorGcu": "6706376959.042402",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_53",
+        "operator": "ENTITY_OPERATOR_53",
+        "households": "ENTITY_HOUSEHOLDS_53",
+        "bank": "ENTITY_BANK_53",
+        "centralBank": "ENTITY_CENTRAL_BANK_53"
+      }
+    },
+    {
+      "countryId": "COUNTRY_54",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "120212023069.9159302900180",
+        "D": "25406350633.130028962953",
+        "H": "96334988390.067574747029",
+        "R": "129806451092.9679597099820",
+        "A": "0",
+        "L": "121741339023.197603709982",
+        "E": "8065112069.7703560000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0022002900180",
+        "OP-": "-0.001651037047",
+        "HOUSEHOLDS-": "-0.002245252971"
+      },
+      "sourceOriginalEquityToken": "8065112069.770354",
+      "adoptedOpeningEquityAnchorGcu": "8065112069.770356",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_54",
+        "operator": "ENTITY_OPERATOR_54",
+        "households": "ENTITY_HOUSEHOLDS_54",
+        "bank": "ENTITY_BANK_54",
+        "centralBank": "ENTITY_CENTRAL_BANK_54"
+      }
+    },
+    {
+      "countryId": "COUNTRY_55",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "70079847792.814475956166422640625313",
+        "D": "13825053969.309938079698909791714147",
+        "H": "52782564068.83558396413466756766054",
+        "R": "71163866899.177524043833577359374687",
+        "A": "0",
+        "L": "66607618038.145522043833577359374687",
+        "E": "4556248861.032002000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.003545956166422640625313",
+        "OP-": "-0.000139920301090208285853",
+        "HOUSEHOLDS-": "-0.00019603586533243233946"
+      },
+      "sourceOriginalEquityToken": "4556248861.032001",
+      "adoptedOpeningEquityAnchorGcu": "4556248861.032002",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_55",
+        "operator": "ENTITY_OPERATOR_55",
+        "households": "ENTITY_HOUSEHOLDS_55",
+        "bank": "ENTITY_BANK_55",
+        "centralBank": "ENTITY_CENTRAL_BANK_55"
+      }
+    },
+    {
+      "countryId": "COUNTRY_56",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "120322799119.6558116463564920287921988",
+        "D": "25582094092.553111077728479200422763",
+        "H": "96191020896.7938732759150287707850382",
+        "R": "129842978792.9802683536435079712078012",
+        "A": "0",
+        "L": "121773114989.3469843536435079712078012",
+        "E": "8069863803.6332840000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0071016463564920287921988",
+        "OP-": "0.002234077728479200422763",
+        "HOUSEHOLDS-": "-0.0022067240849712292149618"
+      },
+      "sourceOriginalEquityToken": "8069863803.63328",
+      "adoptedOpeningEquityAnchorGcu": "8069863803.633284",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_56",
+        "operator": "ENTITY_OPERATOR_56",
+        "households": "ENTITY_HOUSEHOLDS_56",
+        "bank": "ENTITY_BANK_56",
+        "centralBank": "ENTITY_CENTRAL_BANK_56"
+      }
+    },
+    {
+      "countryId": "COUNTRY_57",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "76889640367.567684386550829715587766",
+        "D": "16664297302.31274540097670880591870",
+        "H": "62198267437.662955212472461478493534",
+        "R": "84054304910.227040613449170284412234",
+        "A": "0",
+        "L": "78862564739.975700613449170284412234",
+        "E": "5191740170.251340000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.010505613449170284412234",
+        "OP-": "-0.00064459902329119408130",
+        "HOUSEHOLDS-": "-0.001594787527538521506466"
+      },
+      "sourceOriginalEquityToken": "5191740170.251339",
+      "adoptedOpeningEquityAnchorGcu": "5191740170.25134",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_57",
+        "operator": "ENTITY_OPERATOR_57",
+        "households": "ENTITY_HOUSEHOLDS_57",
+        "bank": "ENTITY_BANK_57",
+        "centralBank": "ENTITY_CENTRAL_BANK_57"
+      }
+    },
+    {
+      "countryId": "COUNTRY_58",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "107425599184.0500646575160",
+        "D": "22725298007.484381374947",
+        "H": "85913695317.351921967537",
+        "R": "115841146408.4659453424840",
+        "A": "0",
+        "L": "108638993324.836303342484",
+        "E": "7202153083.6296420000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0014353424840",
+        "OP-": "-0.000863625053",
+        "HOUSEHOLDS-": "0.001091967537"
+      },
+      "sourceOriginalEquityToken": "7202153083.629638",
+      "adoptedOpeningEquityAnchorGcu": "7202153083.629642",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_58",
+        "operator": "ENTITY_OPERATOR_58",
+        "households": "ENTITY_HOUSEHOLDS_58",
+        "bank": "ENTITY_BANK_58",
+        "centralBank": "ENTITY_CENTRAL_BANK_58"
+      }
+    },
+    {
+      "countryId": "COUNTRY_59",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "24843612326.6087599616878977894019396",
+        "D": "5427358910.494717163057953403487796",
+        "H": "20262790663.1365208752541488071102644",
+        "R": "27374608303.6392370383121022105980604",
+        "A": "0",
+        "L": "25690149573.6312380383121022105980604",
+        "E": "1684458730.0079990000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0002049616878977894019396",
+        "OP-": "0.000611163057953403487796",
+        "HOUSEHOLDS-": "-0.0009151247458511928897356"
+      },
+      "sourceOriginalEquityToken": "1684458730.008",
+      "adoptedOpeningEquityAnchorGcu": "1684458730.007999",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_59",
+        "operator": "ENTITY_OPERATOR_59",
+        "households": "ENTITY_HOUSEHOLDS_59",
+        "bank": "ENTITY_BANK_59",
+        "centralBank": "ENTITY_CENTRAL_BANK_59"
+      }
+    },
+    {
+      "countryId": "COUNTRY_60",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "98055670523.99974230845400",
+        "D": "20854601353.785801328015",
+        "H": "78791082607.047189363531",
+        "R": "106235729110.32726769154600",
+        "A": "0",
+        "L": "99645683960.832990691546",
+        "E": "6590045149.49427700000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00415769154600",
+        "OP-": "0.000324328015",
+        "HOUSEHOLDS-": "0.005319363531"
+      },
+      "sourceOriginalEquityToken": "6590045149.494274",
+      "adoptedOpeningEquityAnchorGcu": "6590045149.494277",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_60",
+        "operator": "ENTITY_OPERATOR_60",
+        "households": "ENTITY_HOUSEHOLDS_60",
+        "bank": "ENTITY_BANK_60",
+        "centralBank": "ENTITY_CENTRAL_BANK_60"
+      }
+    },
+    {
+      "countryId": "COUNTRY_61",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "143594189127.59422676026550",
+        "D": "28663615759.5672941105675",
+        "H": "109012694893.244199129167",
+        "R": "147051993978.82506323973450",
+        "A": "0",
+        "L": "137676310652.8114932397345",
+        "E": "9375683326.01357000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.02432676026550",
+        "OP-": "0.0007581105675",
+        "HOUSEHOLDS-": "0.000989129167"
+      },
+      "sourceOriginalEquityToken": "9375683326.013573",
+      "adoptedOpeningEquityAnchorGcu": "9375683326.01357",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_61",
+        "operator": "ENTITY_OPERATOR_61",
+        "households": "ENTITY_HOUSEHOLDS_61",
+        "bank": "ENTITY_BANK_61",
+        "centralBank": "ENTITY_CENTRAL_BANK_61"
+      }
+    },
+    {
+      "countryId": "COUNTRY_62",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "70738406089.7956185406218218407273112",
+        "D": "15362389472.482254983305849405601621",
+        "H": "57089224718.7253534760723287536710678",
+        "R": "77224614867.2409354593781781592726888",
+        "A": "0",
+        "L": "72451614191.2076084593781781592726888",
+        "E": "4773000676.0333270000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0015785406218218407273112",
+        "OP-": "-0.001054016694150594398379",
+        "HOUSEHOLDS-": "-0.0010965239276712463289322"
+      },
+      "sourceOriginalEquityToken": "4773000676.033323",
+      "adoptedOpeningEquityAnchorGcu": "4773000676.033327",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_62",
+        "operator": "ENTITY_OPERATOR_62",
+        "households": "ENTITY_HOUSEHOLDS_62",
+        "bank": "ENTITY_BANK_62",
+        "centralBank": "ENTITY_CENTRAL_BANK_62"
+      }
+    },
+    {
+      "countryId": "COUNTRY_63",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "99960207697.1600654523419755768718123",
+        "D": "21156780310.05514809217543760126829",
+        "H": "79084932015.5605184554825868218598977",
+        "R": "106915109659.7082345476580244231281877",
+        "A": "0",
+        "L": "100241712325.6156665476580244231281877",
+        "E": "6673397334.0925680000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0063045476580244231281877",
+        "OP-": "0.00051009217543760126829",
+        "HOUSEHOLDS-": "-0.0014015445174131781401023"
+      },
+      "sourceOriginalEquityToken": "6673397334.092573",
+      "adoptedOpeningEquityAnchorGcu": "6673397334.092568",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_63",
+        "operator": "ENTITY_OPERATOR_63",
+        "households": "ENTITY_HOUSEHOLDS_63",
+        "bank": "ENTITY_BANK_63",
+        "centralBank": "ENTITY_CENTRAL_BANK_63"
+      }
+    },
+    {
+      "countryId": "COUNTRY_64",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "122688757419.13091913241900",
+        "D": "25512092944.169678399544",
+        "H": "96665050644.272210468037",
+        "R": "130339340288.69417086758100",
+        "A": "0",
+        "L": "122177143588.441888867581",
+        "E": "8162196700.25228200000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.00254913241900",
+        "OP-": "-0.000266600456",
+        "HOUSEHOLDS-": "0.002800468037"
+      },
+      "sourceOriginalEquityToken": "8162196700.252281",
+      "adoptedOpeningEquityAnchorGcu": "8162196700.252282",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_64",
+        "operator": "ENTITY_OPERATOR_64",
+        "households": "ENTITY_HOUSEHOLDS_64",
+        "bank": "ENTITY_BANK_64",
+        "centralBank": "ENTITY_CENTRAL_BANK_64"
+      }
+    },
+    {
+      "countryId": "COUNTRY_65",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "104971241305.69860408572300",
+        "D": "22110533692.4750455988370",
+        "H": "83696325825.038045315440",
+        "R": "112832796211.62025591427700",
+        "A": "0",
+        "L": "105806859517.5130909142770",
+        "E": "7025936694.10716500000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.00695408572300",
+        "OP-": "0.0014815988370",
+        "HOUSEHOLDS-": "-0.001524684560"
+      },
+      "sourceOriginalEquityToken": "7025936694.10717",
+      "adoptedOpeningEquityAnchorGcu": "7025936694.107165",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_65",
+        "operator": "ENTITY_OPERATOR_65",
+        "households": "ENTITY_HOUSEHOLDS_65",
+        "bank": "ENTITY_BANK_65",
+        "centralBank": "ENTITY_CENTRAL_BANK_65"
+      }
+    },
+    {
+      "countryId": "COUNTRY_66",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "107819669142.2310870862810800560670349",
+        "D": "22624508539.492706933350392004227641",
+        "H": "85425337134.8560409803685279397053241",
+        "R": "115245496168.2347329137189199439329651",
+        "A": "0",
+        "L": "108049845674.3487479137189199439329651",
+        "E": "7195650493.8859850000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.0001870862810800560670349",
+        "OP-": "0.000732933350392004227641",
+        "HOUSEHOLDS-": "0.0014709803685279397053241"
+      },
+      "sourceOriginalEquityToken": "7195650493.885983",
+      "adoptedOpeningEquityAnchorGcu": "7195650493.885985",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_66",
+        "operator": "ENTITY_OPERATOR_66",
+        "households": "ENTITY_HOUSEHOLDS_66",
+        "bank": "ENTITY_BANK_66",
+        "centralBank": "ENTITY_CENTRAL_BANK_66"
+      }
+    },
+    {
+      "countryId": "COUNTRY_67",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "91822771470.363875977128526309367043",
+        "D": "18989227531.272077609403906806975595",
+        "H": "71369731261.589079413467566883657362",
+        "R": "96431683134.968664022871473690632957",
+        "A": "0",
+        "L": "90358958792.861157022871473690632957",
+        "E": "6072724342.107507000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "0.010315977128526309367043",
+        "OP-": "-0.000558390596093193024405",
+        "HOUSEHOLDS-": "0.001829413467566883657362"
+      },
+      "sourceOriginalEquityToken": "6072724342.107504",
+      "adoptedOpeningEquityAnchorGcu": "6072724342.107507",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_67",
+        "operator": "ENTITY_OPERATOR_67",
+        "households": "ENTITY_HOUSEHOLDS_67",
+        "bank": "ENTITY_BANK_67",
+        "centralBank": "ENTITY_CENTRAL_BANK_67"
+      }
+    },
+    {
+      "countryId": "COUNTRY_68",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "65026198727.3979737057359005414116010",
+        "D": "14385846244.84255786303419100475609",
+        "H": "53728109398.7449514312299084538323090",
+        "R": "72551960789.2870562942640994585883990",
+        "A": "0",
+        "L": "68113955643.5875092942640994585883990",
+        "E": "4438005145.6995470000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0000962942640994585883990",
+        "OP-": "-0.00081613696580899524391",
+        "HOUSEHOLDS-": "-0.0003335687700915461676910"
+      },
+      "sourceOriginalEquityToken": "4438005145.699549",
+      "adoptedOpeningEquityAnchorGcu": "4438005145.699547",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_68",
+        "operator": "ENTITY_OPERATOR_68",
+        "households": "ENTITY_HOUSEHOLDS_68",
+        "bank": "ENTITY_BANK_68",
+        "centralBank": "ENTITY_CENTRAL_BANK_68"
+      }
+    },
+    {
+      "countryId": "COUNTRY_69",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "42563435336.0523443698835865200012935",
+        "D": "9535666829.47985503906306320887804",
+        "H": "35428146871.1078005910533502711206665",
+        "R": "47881388668.4756556301164134799987065",
+        "A": "0",
+        "L": "44963813700.5876556301164134799987065",
+        "E": "2917574967.8880000000000000000000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.0005806301164134799987065",
+        "OP-": "0.00084203906306320887804",
+        "HOUSEHOLDS-": "0.0010005910533502711206665"
+      },
+      "sourceOriginalEquityToken": "2917574967.888",
+      "adoptedOpeningEquityAnchorGcu": "2917574967.888",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_69",
+        "operator": "ENTITY_OPERATOR_69",
+        "households": "ENTITY_HOUSEHOLDS_69",
+        "bank": "ENTITY_BANK_69",
+        "centralBank": "ENTITY_CENTRAL_BANK_69"
+      }
+    },
+    {
+      "countryId": "COUNTRY_70",
+      "valueDate": null,
+      "localCurrency": null,
+      "openingFx": null,
+      "derivedGcuReference": {
+        "B": "27631694605.17093059628290",
+        "D": "6132490753.8099575141991",
+        "H": "23077096795.819112889518",
+        "R": "31104296954.78907140371710",
+        "A": "0",
+        "L": "29209587549.6290704037171",
+        "E": "1894709405.16000100000000",
+        "interCBPayable": "0",
+        "interCBReceivable": "0"
+      },
+      "exactMinusRecordedFloatCash": {
+        "GOV-": "-0.00022340371710",
+        "OP-": "0.0003035141991",
+        "HOUSEHOLDS-": "-0.000170110482"
+      },
+      "sourceOriginalEquityToken": "1894709405.16",
+      "adoptedOpeningEquityAnchorGcu": "1894709405.160001",
+      "ownerRoster": {
+        "treasury": "ENTITY_GOVERNMENT_70",
+        "operator": "ENTITY_OPERATOR_70",
+        "households": "ENTITY_HOUSEHOLDS_70",
+        "bank": "ENTITY_BANK_70",
+        "centralBank": "ENTITY_CENTRAL_BANK_70"
+      }
+    }
+  ],
+  "derivedBilateralCBReferenceClaimPairs": [
+    {
+      "debtorCountryId": "COUNTRY_09",
+      "creditorCountryId": "COUNTRY_24",
+      "liabilityIssuerId": "ENTITY_CENTRAL_BANK_09",
+      "claimAssetHolderId": "ENTITY_CENTRAL_BANK_24",
+      "amountGcuReference": "499500000.0",
+      "sourceJournalRowsZeroBased": [
+        224684,
+        304324,
+        384272,
+        464351,
+        544543
+      ],
+      "nativeLCFX": null,
+      "nativeInstrumentAdopted": false,
+      "existingFormalCountryContractCounterpartyAllowed": false
+    },
+    {
+      "debtorCountryId": "COUNTRY_13",
+      "creditorCountryId": "COUNTRY_24",
+      "liabilityIssuerId": "ENTITY_CENTRAL_BANK_13",
+      "claimAssetHolderId": "ENTITY_CENTRAL_BANK_24",
+      "amountGcuReference": "199800000.0",
+      "sourceJournalRowsZeroBased": [
+        206456,
+        249135,
+        292036,
+        335059,
+        378118
+      ],
+      "nativeLCFX": null,
+      "nativeInstrumentAdopted": false,
+      "existingFormalCountryContractCounterpartyAllowed": false
+    },
+    {
+      "debtorCountryId": "COUNTRY_20",
+      "creditorCountryId": "COUNTRY_09",
+      "liabilityIssuerId": "ENTITY_CENTRAL_BANK_20",
+      "claimAssetHolderId": "ENTITY_CENTRAL_BANK_09",
+      "amountGcuReference": "874125000.00",
+      "sourceJournalRowsZeroBased": [
+        241532,
+        244591,
+        247651,
+        250715,
+        253777,
+        256840,
+        259903,
+        262966,
+        266030,
+        269093,
+        272157,
+        275220,
+        278284,
+        281349,
+        284416,
+        287483,
+        290551,
+        293623,
+        296694,
+        299766,
+        302839,
+        305913,
+        308986,
+        312059,
+        315133,
+        318206,
+        321279,
+        324352,
+        327425,
+        330498,
+        333572,
+        336648,
+        339723,
+        342798,
+        345874,
+        348949,
+        352024,
+        355099,
+        358175,
+        361250,
+        364325,
+        367400,
+        370477,
+        373554,
+        376631,
+        379709,
+        382787,
+        385865,
+        388942,
+        392019,
+        395096,
+        398173,
+        401254,
+        404334,
+        407414,
+        410494,
+        413574,
+        416654,
+        419734,
+        422814,
+        425895,
+        428975,
+        432057,
+        435138,
+        438219,
+        441300,
+        444381,
+        447462,
+        450543,
+        453624,
+        456705,
+        459785,
+        462865,
+        465946,
+        469026,
+        472106,
+        475186,
+        478266,
+        481347,
+        484427,
+        487507,
+        490587,
+        493667,
+        496747,
+        499827,
+        502907,
+        505988,
+        509068,
+        512152,
+        515236,
+        518320,
+        521412,
+        524504,
+        527596,
+        530689,
+        533781,
+        536873,
+        539965,
+        543057,
+        546150,
+        549242,
+        552334,
+        555154,
+        557702,
+        560250,
+        562798,
+        565346,
+        567894,
+        570442,
+        573006,
+        575570,
+        578137,
+        580708,
+        583286,
+        585876,
+        588466,
+        591064,
+        593668,
+        596272,
+        598888,
+        601508,
+        604140,
+        606772,
+        609424,
+        612076,
+        614728,
+        617396,
+        620064,
+        622732,
+        625420,
+        628108,
+        630796,
+        633484,
+        636180,
+        638876,
+        641572,
+        644284,
+        647000,
+        649716,
+        652480,
+        655248,
+        658016,
+        660784,
+        663556,
+        666327,
+        669097,
+        671901,
+        674702,
+        677499,
+        680317,
+        683140,
+        685961,
+        688788,
+        691621,
+        694452,
+        697282,
+        700108,
+        702934,
+        705762,
+        708590,
+        711424,
+        714259,
+        717098,
+        719954,
+        722808,
+        725658,
+        728509,
+        731359,
+        734206
+      ],
+      "nativeLCFX": null,
+      "nativeInstrumentAdopted": false,
+      "existingFormalCountryContractCounterpartyAllowed": false
+    },
+    {
+      "debtorCountryId": "COUNTRY_20",
+      "creditorCountryId": "COUNTRY_24",
+      "liabilityIssuerId": "ENTITY_CENTRAL_BANK_20",
+      "claimAssetHolderId": "ENTITY_CENTRAL_BANK_24",
+      "amountGcuReference": "149850000.0",
+      "sourceJournalRowsZeroBased": [
+        233845,
+        331984,
+        430460,
+        529081
+      ],
+      "nativeLCFX": null,
+      "nativeInstrumentAdopted": false,
+      "existingFormalCountryContractCounterpartyAllowed": false
+    }
+  ],
+  "formalInputCarrierGap": {
+    "sourceFile": "apps/world-worker/src/preparation/formal-financial-opening-contract.ts",
+    "sourceLines": [
+      405,
+      524
+    ],
+    "gate": "COUNTERPART_SOURCE_CARRIER_REQUIRED",
+    "actualScope": "allowedEntities=Object.values(original.holderRoster), only five own-country entities",
+    "observedNeed": "R3AM preparation has paired foreign-CB reference payables/receivables, requiring an adopted carrier in the real composition; current country input cannot express these counterparts",
+    "notAnAssertionThatTheWholeCoreLedgerOrRuntimeTradeIsMissing": true
+  },
+  "sourceOriginalRawTokensAndRecordedFlowsPreserved": true,
+  "sourceFloatClosingArraysRewritten": false,
+  "newEconomicTransferOrMoneyCreated": false,
+  "cbAbsoluteAssetsOrBackingKnown": false,
+  "nativeLCFXOrSettlementCreated": false,
+  "derivedNewSourceAdopted": false,
+  "seedCreated": false,
+  "actualWorldId": null
+}

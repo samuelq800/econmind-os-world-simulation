@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "G_FUNDING_REGISTRY_PACKAGE_MANIFEST_V1",
+  "status": "FIXED_SOURCE_ARCHIVE_AND_TERMS_CANDIDATE_NOT_ADOPTED",
+  "frozenAtUTC": "2026-10-13T15:50:21.661909+00:00",
+  "primaryArtifacts": [
+    "SOURCE_REGISTRY.json",
+    "COUNTRY_SOURCE_REGISTRY.json",
+    "NATIVE_LEAF_INDEX.json",
+    "SETTLEMENT_TERMS_CANDIDATE.json"
+  ],
+  "schemaFile": "REGISTRY_SCHEMA.json",
+  "files": [
+    {
+      "path": "BUILD_RECEIPT.json",
+      "bytes": 408,
+      "sha256": "6235fe9964175b565ec4e8d9d4919aa45a8e2bb5538d060ea3c015c9d3589a74",
+      "schemaVersion": null
+    },
+    {
+      "path": "CLEARING_SOURCE_INDEX.json",
+      "bytes": 144447,
+      "sha256": "5bd900d7da622a67dcdc77210ef8fb695d722b203b9afb5b0e3da8ddf9dce80c",
+      "schemaVersion": "CLEARING_SOURCE_INDEX_V1"
+    },
+    {
+      "path": "COUNTRY_SOURCE_REGISTRY.json",
+      "bytes": 1241844,
+      "sha256": "6e3f32d32224b25793b94e95af7bc86612ba91b5c50394b56c381fddb99f2608",
+      "schemaVersion": "COUNTRY_FUNDING_SOURCE_INDEX_V1"
+    },
+    {
+      "path": "COVERAGE.json",
+      "bytes": 945,
+      "sha256": "6db73cdbe299fd9060ac86502f7dfc730b95c92edbd1fe42476218c840a5230e",
+      "schemaVersion": null
+    },
+    {
+      "path": "GROSS_CLEARING_CANDIDATE_AGGREGATES.json",
+      "bytes": 40112,
+      "sha256": "59ab4492b43f1d7a6f0b547e8bb67f8a2c711341d185a07de7de5428c91e6409",
+      "schemaVersion": "STORED_EXACT_GROSS_AGGREGATE_INDEX_V1"
+    },
+    {
+      "path": "GROSS_REFERENCE_AGGREGATES.json",
+      "bytes": 39841,
+      "sha256": "a217d35bb291941abf6d6e8a6ca0c1af7f4c31bb52654733df049cc129f8b3a6",
+      "schemaVersion": "STORED_EXACT_GROSS_AGGREGATE_INDEX_V1"
+    },
+    {
+      "path": "HANDOFF.md",
+      "bytes": 4636,
+      "sha256": "f79991b3b755b3205a7801c9dcdeeaefbfe0c04a57fabab6f3380d6633e2abee",
+      "schemaVersion": null
+    },
+    {
+      "path": "MINIMUM_DEPENDENCIES.json",
+      "bytes": 5665,
+      "sha256": "01197bdcf3e9ca9ece431be150d6e59d1e59b6f3034626c41611ef99a16ab6f9",
+      "schemaVersion": "FUNDING_DEPENDENCY_GAPS_V1"
+    },
+    {
+      "path": "NATIVE_LEAF_INDEX.json",
+      "bytes": 1661576,
+      "sha256": "7737c40f3804782f2e832fbbc7d62f4f47e2fdafc328a1dccdbe08e7af03ba57",
+      "schemaVersion": "NATIVE_LEAF_PRIMARY_INDEX_V1"
+    },
+    {
+      "path": "REFERENCE_COUNTERPARTY_INDEX.json",
+      "bytes": 346423,
+      "sha256": "39a86e5bd5f8edf7f7b8d9fec8c7339a7bcdcff9e89a0ed36f415d8b70c6579a",
+      "schemaVersion": "REFERENCE_COUNTERPARTY_INDEX_V1"
+    },
+    {
+      "path": "REGISTRY_SCHEMA.json",
+      "bytes": 9768,
+      "sha256": "41da4fc03c40e757a751f0c90bf3715a1adff4fee674d24ba81f2e6f8616cca9",
+      "schemaVersion": null
+    },
+    {
+      "path": "SETTLEMENT_TERMS_CANDIDATE.json",
+      "bytes": 37736,
+      "sha256": "9c09ce97e6afbdd037b83f28db7096375d42b095be5a303db55f173e1d427735",
+      "schemaVersion": "SETTLEMENT_TERMS_PROCESS_CANDIDATE_V1"
+    },
+    {
+      "path": "SOURCE_REGISTRY.json",
+      "bytes": 254421,
+      "sha256": "659564aaf18306bb7b8adb93e5e53f1cfb8c6aef5aebd4095d52cc7673386502",
+      "schemaVersion": "FUNDING_SOURCE_REGISTRY_V1_NOT_ADOPTION"
+    },
+    {
+      "path": "VERIFICATION_RECEIPT.json",
+      "bytes": 414,
+      "sha256": "36e64676a9ac3922d5385394a80a2f5ba81a35071e4745974f253e09a3d09451",
+      "schemaVersion": null
+    },
+    {
+      "path": "build_registry.py",
+      "bytes": 37134,
+      "sha256": "bd1564ce89f59856573eefd89d99ff6fc58e860d0e63c684f4b10eb2e10ba1ae",
+      "schemaVersion": null
+    },
+    {
+      "path": "verify_bindings.py",
+      "bytes": 2549,
+      "sha256": "a0c0b3aa765183106439c40c120fd8f9161dd034779e54bf73d415efc332dae4",
+      "schemaVersion": null
+    }
+  ],
+  "economicStatus": "HOLD",
+  "productEdits": 0,
+  "formalAdoptedFacts": 0,
+  "WorldStarted": false
+}
