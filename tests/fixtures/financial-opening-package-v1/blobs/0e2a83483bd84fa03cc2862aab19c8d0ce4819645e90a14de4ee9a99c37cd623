@@ -1,0 +1,65 @@
+# E first14 外来候选 S1–S4 定向独审
+
+## 总结：静态增量可带限制分享；一项守卫小修必需，经济采用继续 HOLD
+
+固定候选 manifest **ee5208193ff1f10677829e7b918d114a9e24bec8b59f953e78c32ad3a7cd4e62**。旧 V2 outer **07d23e750abf2837b5961de6e74e60ec6dbdf9f4009aa442e4939786bc7f3781** 未变。作者的97项是作者结果，不改称E独立通过；本次实际执行自己的30项主检查及17项定向补充检查，共47项检查为PASS。检查计数包含身份、结构和数值/反例，**不是47个产品/runtime测试**。
+
+这份审查不确认替代窗口或作者身份，不批准四个clearing条款，不采用源/model/seed/World，也不把候选场景转换成已发生事实。整体状态 **SHARE_WITH_CAVEATS_STATIC_DELTA_SUPPORTED_GUARD_REVISION_REQUIRED / economic HOLD**。机器决定：[decision.json](./decision.json)；一致性校验：[validation.json](./validation.json)。
+
+## 数据、粒度与独立执行范围
+
+来源为候选版本 CONSTRUCTED_SCENARIO_FIRST14_20261013_V1_PROPOSED；2026-10-13是估值日期，不是actualStartDate。按相对simDay0–140、70国核对9870行；真实14日汇总980行，每桶严格覆盖10模拟日、不重复Day0；owner EOD 29400行、FX需求9870行。Clock/实际启动未绑定，不能转换成实际日历到期或当下运行进度。
+
+36个manifest子文件共91,775,774字节，全部现场流式重算hash/size一致。**没有复制91MB数据包**，仅保留小型manifest/README/失败日志快照及自己的检查脚本/结果。旧V2 outer及被实际使用的4个固定V2子文件、旧finance、geography、旧固定失败checkpoint和旧审计hash定向验证；并未声称重新验证所有62源或重新抽取全部原大journal/jobs。保存NPZ只读取 terminalCash.npy 的70×3个float64，不重放模型。
+
+精确校验使用独立JavaScript BigInt分数；源finance数字lexeme通过lossless读取，不经Number舍入。没有执行作者的build/enrich/verify Python、980Core检查、旧140日replay或corrected-R。检查脚本：[check-v2.mjs](./check-v2.mjs)、[addendum.mjs](./addendum.mjs)；原始结果：[checks.json](./checks.json)、[addendum-checks.json](./addendum-checks.json)。
+
+## S1–S4 结论
+
+| 项目 | 独立支持的事实 | 仍未授权/证明 |
+| --- | --- | --- |
+| S1 四clearing | 4个canonical ID/本金/183原指针保持；总本金1,723,275,000 GCU；候选零息、不可随时call、sim140单次本金到期，未付款保留 | 原V2期限仍UNKNOWN；sim140只是高影响压力候选，不批准其期限/默认政策；无实际GCU支付源 |
+| S2 LC单位 | 70国1470个owner金额叶及490个balance表示均与原LC值精确一致，currency/unit正确；新paramsHash71fa0643…、rulesHash280f8f52…确实绑定当前文件 | 本包不是实际carrier composition；未来native primary source必须用转换产物hash+精确叶pointer，不能把GCU lineage当native主源 |
+| S3 时序与资金 | 140政府合同首券sim360、36真实日；bullet sim2880/3600/4320；sim0–140政府本金/票息现金到期为0；应计严格annualCoupon×day/360，不计现金 | 实际税、非债必付/可控成本、粮水必要成本、实际shortage、可支配GCU现金/FX对手方仍UNKNOWN |
+| S4 元数据 | grid20..600明确；JSON digest394a43ff…与原raster/source digest4cc5e79b…分名正确，partition JSON实际内嵌后一digest；未改地理成员 | 无runtime FX/精度/舍入采用；此处没有重新计算980报价/replay |
+
+政府合同6种边界/140合同=840事件，唯一且native到期额和GCU换算准确。sim359无券、sim360到期；day140应计不变成付款。候选clearing只在issuer sim140列一次本金，未虚构解冻、支付或净额抵销。
+
+预算路径严格核对openingAccessible+day×(taxReference−maintenanceBudget−freightBudget)及LC换算。条件不足sim1=19国、sim14=54、sim140=63；reportedDrain sim14=52属于另一压力口径。不是实际必付、违约或不可避免gameover。无证明税收时的140日每日保守支出上限为exact opening/140，选择性floor到0.01仅预算候选，不是采用Money舍入；必要服务/承诺支付未知，不能宣称减支可生存。
+
+FX逐国逐日gross出入各1,012,043,193.75 GCU，独立守恒。actual CASH、许可/有偿转换/资金对手方和实际缺口均UNKNOWN；不把incoming与outgoing净抵，也不把CB应收、LC账面TGA/R或票面额当GCU支付能力。四claim若owner选择其他条款，只需重新生成相关候选到期增量，不应因此重跑旧大模型。
+
+## Journal → EOD escrow 与终端对照
+
+对149038个分组流水检查589708原sourceIndices唯一且不重复；没有将这些聚合本身称为原journal逐条重新验证。按分组内原拨款−受限已接受跨国发票重建逐国逐日escrow；所有29400个owner日记录满足opening+in−out+paidValidationRelease−escrowReclassificationDelta=closing。
+
+276个OP日记录的原mid-phase snapshot与EOD不同，证实快照阶段不能混用。NPZ实际保存的210终端float64与提取值逐一匹配，独立精确最大差 **0.028836784650043459282605256 GCU**，全部当前值也满足原来的严格 **<1 GCU**。作者保留的OP20初次约9,415,575 GCU差异作为历史诊断，不删除；本次未重放该初次错误提取。
+
+### F14-R1：原执行守卫是 <1，而候选用 <=1 [低风险、必须小修]
+
+原固定审计 auditor hash **7b84ba017463a273c5b166fd39b20ee3f376bbcdf0a842ca3356cbc096f02171**，audit_r3am_startup.py:94及其他owner cash/invoice/escrow比较实际使用 **<1**。新 verify_terminal.py:24使用 **maxdiff<=1**，README/receipt却称“未扩大容差”。
+
+精确反例：差值恰好1 GCU，原守卫拒绝，新守卫接受。它不是当前210值的数值错误，当前最大差远小于1；但“未扩大”必须精确成立，不能让边界差异消失在绿色计数里。
+
+最小修订：把新守卫改成 **maxdiff<1**，文字/receipt同步为“严格<1”，重封仅变更文件及manifest。210数值不用改，旧980/140/corrected-R无需重跑。此发现保留在机器决定中，不因47项检查成功而抹掉。
+
+## 重建、运输、失败与成本边界
+
+2416运输事件保持plan/funded/departure/in-transit与arrival分离，全部countsAsWorldReceipt=false。五项旧参考工程的departure/arrival/reference完成顺序分别10/20/29、6/24/33、6/11/20、13/21/30、5/10/19；全部countsAsWorldComplete=false。字段commissioningRecordedSimDay只读为旧参考完成标记，不能当新World真实commissioning或A1已计产能。
+
+四笔sim140采购均有未交余量，funded−accepted=remaining精确；refund/penalty仍UNKNOWN，不自动退款，也不转换成贷款本金/票息。直接workface成本不是完整工程/车队/能源/支持预算，未归因项不能算零。
+
+旧正常R1粮食day1失败、水day109失败、15笔贷款；低劳动0.01粮水day1失败、49笔贷款/逾期6,227,968.610702347 GCU/919次被拒融资等checkpoint保留。R0.3 emergency200g/22L旧参考不等于正常粮水已解决。正常粮水、低劳动、真实运输许可/readmission、持续成本与actualWorld均HOLD。没有把计划到货、静态工作完成或旧独审变成新runtime采用。
+
+定向反例另检查：duplicate canonical claim、把首券推到359、UNKNOWN现金改0、LC叶错误标GCU、出发当到货等；只是独立数据不变量挑战，不声称作者runtime拒绝这些输入。
+
+## 修订、交接与限制
+
+1. 唯一已建立的小缺陷为F14-R1严格容差守卫/文字，先修再宣称完全保留原守卫。
+2. native主源接入前显式绑定UNIT_SAFE_NATIVE_BUCKETS.json当前digest和/countries/i/.../amount等实际原生叶pointer；原gcuLineagePointer只作lineage。本次不给未出现的carrier source记录代签。
+3. 四claim期限/利率/可call/未付政策仍由owner作高影响选择；资金、必付义务与必要服务端口不填假0、不注现金/黄金/权益plug、不免债。
+4. 这次静态支持不授予来源/model/规则采用或替代窗口身份，不授权产品/DB/正式seed/World/生产。B/C工程和owner采用继续独立。
+
+本轮使用validate-data与analyze-data-quality，将原版、候选、实际运行三层分开，并以精确复算、source粒度、UNKNOWN和既有失败为判断依据。用户要求的主产物为固定managedreview/decision，故保留可检查脚本与机器结果，不另造HTML/dashboard。无图表/渲染文档需视觉QA。
+
+原source-only容量中断/读源不计PASS；作者非终止预算除法失败日志完整快照保留。E初始检查helper括号语法失败发生在任何数据检查前，原helper保留，v2纠正后47项才是真实结果；初次决策校验receipt手工计数9已纠正为8个实际assert，旧receipt保留diagnostics。未改候选或源，未复制大包、安装依赖、访问生产或采用世界。

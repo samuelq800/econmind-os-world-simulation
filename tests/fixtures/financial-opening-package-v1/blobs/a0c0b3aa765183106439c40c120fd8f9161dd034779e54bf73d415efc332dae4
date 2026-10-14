@@ -1,0 +1,55 @@
+from pathlib import Path
+import csv
+import json
+
+P = Path(__file__).resolve().parent
+registry = json.loads((P / 'SOURCE_REGISTRY.json').read_text())
+schema = json.loads((P / 'REGISTRY_SCHEMA.json').read_text())
+assert set(registry) == set(schema['properties'])
+sources = {s['sourceId']: s for s in registry['sources']}
+assert all(set(s) == set(schema['$defs']['Source']['properties']) for s in sources.values())
+docs = {k: json.loads(Path(s['path']).read_text(), parse_float=str) for k, s in sources.items()
+        if s['verification'] == 'SELECTED_INPUT_HASH_VERIFIED' and s['path'].endswith('.json')}
+csvs = {}
+counts = {'knownFacts': 0, 'unknownFacts': 0, 'csvCompositeKeys': 0, 'jsonLeafBindings': 0}
+
+
+def pointer(d, p):
+    for t in p.split('/')[1:]:
+        t = t.replace('~1', '/').replace('~0', '~')
+        d = d[int(t)] if isinstance(d, list) else d[t]
+    return d
+
+
+def walk(d):
+    if isinstance(d, dict):
+        if d.get('status') == 'KNOWN_SOURCE_VALUE':
+            counts['knownFacts'] += 1
+            assert set(d) == set(schema['$defs']['Fact']['oneOf'][0]['properties'])
+            s = d['source']; q = s['selector']
+            assert q['kind'] in ['JSON_POINTER', 'CSV_CELL']
+            if q['kind'] == 'JSON_POINTER':
+                raw = pointer(docs[s['sourceId']], q['pointer'])
+                assert (str(raw) if d['valueKind'] == 'DECIMAL_STRING' else raw) == d['value']
+                counts['jsonLeafBindings'] += 1
+            else:
+                if s['sourceId'] not in csvs:
+                    with Path(sources[s['sourceId']]['path']).open(newline='') as f:
+                        csvs[s['sourceId']] = list(csv.DictReader(f))
+                matches = [r for r in csvs[s['sourceId']] if all(r[k] == v for k, v in q['key'].items())]
+                assert len(matches) == 1 and matches[0][q['column']] == q['originalValue'] == d['value']
+                counts['csvCompositeKeys'] += 1
+        elif d.get('status') == 'UNKNOWN':
+            counts['unknownFacts'] += 1
+            assert set(d) == set(schema['$defs']['Fact']['oneOf'][1]['properties'])
+            assert d['value'] is None and d['source'] is None
+        for x in d.values():
+            walk(x)
+    elif isinstance(d, list):
+        for x in d:
+            walk(x)
+
+
+for f in ['COUNTRY_SOURCE_REGISTRY.json', 'CLEARING_SOURCE_INDEX.json', 'SETTLEMENT_TERMS_CANDIDATE.json']:
+    walk(json.loads((P / f).read_text()))
+print(json.dumps({'status': 'PASS_FINITE_BINDINGS_NOT_JSONSCHEMA_LIBRARY_OR_ECONOMIC_REPLAY', 'coverage': counts}))

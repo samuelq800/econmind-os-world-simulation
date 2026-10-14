@@ -1,0 +1,66 @@
+{
+  "version": "CONSTRUCTED_SCENARIO_FIRST14_20261013_V1_PROPOSED",
+  "status": "HOLD_RUNTIME_SOURCE_OWNER_INPUT_REQUIRED",
+  "ports": [
+    {
+      "name": "payerGcuCash",
+      "required": [
+        "actualAccountId",
+        "ownerEntityId",
+        "currency=GCU",
+        "accountType=CASH",
+        "availableAmount",
+        "restrictedAmount",
+        "valueDate",
+        "permissionEvidence",
+        "sourceClass",
+        "sourceId/version/hash"
+      ],
+      "prohibitedSubstitutes": [
+        "LC TGA claim",
+        "BANK reserve claim",
+        "unsettled CB receivable",
+        "disputed/writeoff asset",
+        "constructed denomination quote"
+      ]
+    },
+    {
+      "name": "fundedConversion",
+      "required": [
+        "payingOwner",
+        "LC CASH account if used",
+        "GCU seller counterparty",
+        "existing funded GCU CASH account",
+        "locked quote direction",
+        "cash debit/credit pairing",
+        "fees/precision rule",
+        "value date and expiry",
+        "atomic receipt"
+      ],
+      "unknownInThisDelivery": true
+    },
+    {
+      "name": "bilateralDeliveryPayment",
+      "required": [
+        "buyer/seller actual accounts",
+        "committed accepted goods quantity",
+        "native settlement currency",
+        "gross required cash",
+        "matching bilateral postings",
+        "dedupe key",
+        "receipt",
+        "failed/partial/refund disposition"
+      ],
+      "referenceReplayIsNotThisPort": true
+    }
+  ],
+  "minimalEconomicRuleCandidates": [
+    "Separate mandatory obligations from spendable discretionary budgets; refuse unauthorized spend",
+    "Paid known-claim validation reclassifies existing frozen balance only after completion and permission",
+    "Unfunded FX capability stays blocked with unpaid amount preserved",
+    "Owner must adopt explicit four-claim lifecycle; no automatic netting or refinancing"
+  ],
+  "noRuntimeCodeWritten": true,
+  "noAccountsCreated": true,
+  "ownerAdoptionInvented": false
+}

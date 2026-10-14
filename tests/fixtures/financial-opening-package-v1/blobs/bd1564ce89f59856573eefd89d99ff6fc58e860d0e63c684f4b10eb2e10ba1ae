@@ -1,0 +1,461 @@
+"""Read-only source normalization. No simulation, adoption, account creation or SQL.
+
+Build: python3 build_registry.py
+Verify saved output/pointers: python3 build_registry.py --verify
+Only selected immutable inputs are hashed; raw journals/NPZ/old builders are not run.
+"""
+from pathlib import Path
+from fractions import Fraction
+from collections import defaultdict
+import csv
+import hashlib
+import json
+import sys
+
+OUT = Path(__file__).resolve().parent
+V1 = Path('/Users/samuel/Documents/Codex/2026-10-13/task/first14-finance-reconstruction-v1')
+V2 = Path('/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-fx-cb-scene-20261013-v1')
+EREVIEW = Path('/Users/samuel/.codex/state/plugins/codex-security/scans/first14-finance-reconstruction-v1/artifacts-a0fac7ce52cc1806ccbf85fa01c26f8ed7be053984fb1398f90d84cb5d504057/artifacts/E_FIRST14_DELTA_REVIEW')
+GUARD = Path('/Users/samuel/.codex/state/plugins/codex-security/scans/first14-finance-guard-correction-v1/artifacts-0a4a521b48984053b73ee8f991abab1fa945fd833a99e5ba09d426ff164f51cd/artifacts/E_F14_R1_GUARD_REVIEW')
+BASE_HASH = 'ee5208193ff1f10677829e7b918d114a9e24bec8b59f953e78c32ad3a7cd4e62'
+V2_HASH = '07d23e750abf2837b5961de6e74e60ec6dbdf9f4009aa442e4939786bc7f3781'
+SUP_HASH = '8904b60769603d6c9410f6588850eec5ed419ee8773cf7a3694b51a1b764efee'
+PATCH_HASH = '32943624c7ea025d32f8cf980eb54ebd65c64bbd22112c88d655b7d967db7d37'
+SOURCES = {}
+DOCS = {}
+CHECKS = []
+UNKNOWN_EVIDENCE = []
+
+
+def digest(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def decimal(value):
+    value = Fraction(value)
+    d = value.denominator
+    a = b = 0
+    while d % 2 == 0:
+        d //= 2
+        a += 1
+    while d % 5 == 0:
+        d //= 5
+        b += 1
+    assert d == 1, 'Only exact terminating sums of stored decimal values'
+    places = max(a, b)
+    n = value.numerator * 2 ** (places - a) * 5 ** (places - b)
+    if not places:
+        return str(n)
+    s = str(abs(n)).zfill(places + 1)
+    return ('-' if n < 0 else '') + (s[:-places] + '.' + s[-places:]).rstrip('0').rstrip('.')
+
+
+def register(key, path, expected=None, layer='CONSTRUCTED', read=True, derived=False):
+    path = Path(path)
+    assert derived or (path != OUT and OUT not in path.parents)
+    if read:
+        data = path.read_bytes()
+        actual = digest(data)
+        if expected is not None:
+            assert actual == expected, ('Changed selected input', key)
+        size = len(data)
+        state = 'SELECTED_INPUT_HASH_VERIFIED'
+    else:
+        actual = expected
+        size = None
+        state = 'UPSTREAM_POINTER_ONLY_NOT_DEREFERENCED_THIS_RUN'
+    SOURCES[key] = {'sourceId': key, 'path': str(path), 'sha256': actual,
+                    'bytes': size, 'evidenceClass': layer, 'verification': state}
+    return path
+
+
+def load(key, path, expected=None, layer='CONSTRUCTED'):
+    path = register(key, path, expected, layer)
+    # Keep numeric JSON token lexemes as strings; no binary-float conversion.
+    value = json.loads(path.read_text(), parse_float=str)
+    DOCS[key] = value
+    return value
+
+
+def ptr(doc, pointer):
+    for token in pointer.split('/')[1:]:
+        token = token.replace('~1', '/').replace('~0', '~')
+        doc = doc[int(token)] if isinstance(doc, list) else doc[token]
+    return doc
+
+
+def fact(source, pointer, meaning, currency=None, unit=None):
+    value = ptr(DOCS[source], pointer)
+    if currency is not None:
+        value = str(value)
+    kind = 'DECIMAL_STRING' if currency is not None else 'NULL' if value is None else 'BOOLEAN' if isinstance(value, bool) else 'INTEGER' if isinstance(value, int) else 'STRING'
+    return {'status': 'KNOWN_SOURCE_VALUE', 'evidenceClass': SOURCES[source]['evidenceClass'],
+            'value': value, 'valueKind': kind, 'currency': currency, 'unit': unit, 'meaning': meaning,
+            'source': {'sourceId': source, 'selector': {'kind': 'JSON_POINTER', 'pointer': pointer, 'originalValue': value}}}
+
+
+def unknown(gap, source=None):
+    if source is not None:
+        UNKNOWN_EVIDENCE.append({'gapId': gap, 'locator': source, 'meaning': 'Pointer to missing/UNKNOWN token only, not a funding or authorization source'})
+    return {'status': 'UNKNOWN', 'evidenceClass': None, 'value': None,
+            'gapId': gap, 'source': None}
+
+
+def csvcell(key, row, index, column, meaning, currency=None):
+    assert column in row
+    return {'status': 'KNOWN_SOURCE_VALUE', 'evidenceClass': SOURCES[key]['evidenceClass'],
+            'value': row[column], 'valueKind': 'DECIMAL_STRING' if currency else 'STRING', 'currency': currency, 'unit': currency,
+            'meaning': meaning, 'source': {'sourceId': key,
+                'selector': {'kind':'CSV_CELL', 'dataRowZeroBased': index, 'physicalLine': index + 2,
+                        'key': {'countryId': row['countryId'], **({'simDay': row['simDay']} if 'simDay' in row else {})},
+                        'column': column, 'originalValue': row[column]}}}
+
+
+def save(name, data):
+    (OUT / name).write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
+
+
+def ranges(indices):
+    result = []
+    for value in indices:
+        if result and value == result[-1][1] + 1:
+            result[-1][1] = value
+        else:
+            result.append([value, value])
+    return result
+
+
+def build():
+    manifest = load('first14_manifest', V1 / 'DELIVERY_MANIFEST.json', BASE_HASH)
+    older = load('v2_manifest', V2 / 'FIXED_DELIVERY_MANIFEST.json', V2_HASH)
+    v1hashes = {x['path']: x['sha256'] for x in manifest['files']}
+    v2hashes = {x['path']: x['sha256'] for x in older['files']}
+    evidence = load('source_evidence', V1 / 'SOURCE_EVIDENCE.json', v1hashes['SOURCE_EVIDENCE.json'])
+    upstream = {x['path']: x['sha256'] for x in evidence['sources']}
+    native = load('native_lc', V1 / 'UNIT_SAFE_NATIVE_BUCKETS.json', v1hashes['UNIT_SAFE_NATIVE_BUCKETS.json'])
+    budget = load('budget_candidates', V1 / 'BUDGET_CHOICE_PATHS.candidate.json', v1hashes['BUDGET_CHOICE_PATHS.candidate.json'])
+    terms = load('clearing_candidate', V1 / 'CLEARING_TERMS.candidate.json', v1hashes['CLEARING_TERMS.candidate.json'])
+    terminal = load('terminal_reference', V1 / 'TERMINAL_REFERENCE_RECONCILIATION.json', v1hashes['TERMINAL_REFERENCE_RECONCILIATION.json'], 'REFERENCE')
+    ports = load('existing_payment_ports', V1 / 'GCU_PAYMENT_PATH_REQUIREMENTS.json', v1hashes['GCU_PAYMENT_PATH_REQUIREMENTS.json'])
+    joint = load('joint_opening', V2 / 'FINANCE_INVENTORY_DAY0_JOINT.proposed.json', v2hashes['FINANCE_INVENTORY_DAY0_JOINT.proposed.json'])
+    quote = load('fx_quote_candidate', V2 / 'CURRENCY_FX_RULES_AND_CANDIDATE.json', v2hashes['CURRENCY_FX_RULES_AND_CANDIDATE.json'])
+    gov = load('gov_terms_candidate', V2 / 'GOVERNMENT_INITIAL_DEBT_AND_TERMS.json', v2hashes['GOVERNMENT_INITIAL_DEBT_AND_TERMS.json'])
+    positions = load('paired_positions_candidate', V2 / 'PAIRED_NATIVE_OPENING_POSITIONS.json', v2hashes['PAIRED_NATIVE_OPENING_POSITIONS.json'])
+    finance_path = Path(gov['contracts'][0]['source']['path'])
+    finance = load('legacy_finance_reference', finance_path, upstream[str(finance_path)], 'REFERENCE')
+    closing_path = Path(terms['terms'][0]['source']['closing']['path'])
+    closing = load('clearing_reference_closing', closing_path, terms['terms'][0]['source']['closing']['sha256'], 'REFERENCE')
+    ref_path = next(Path(p) for p in upstream if p.endswith('/CROSS_CB_REFERENCE_CLAIMS.proposed.json'))
+    references = load('clearing_reference_claims', ref_path, upstream[str(ref_path)], 'REFERENCE')
+    review = load('e47_decision', EREVIEW / 'decision.json', layer='REFERENCE')
+    register('e47_review', EREVIEW / 'review.md', layer='REFERENCE')
+    guard = load('guard_accepted_decision', GUARD / 'decision.json', layer='REFERENCE')
+    register('guard_accepted_review', GUARD / 'review.md', layer='REFERENCE')
+    supplement = load('guard_supplement', GUARD / 'input/SUPPLEMENT_MANIFEST.json', SUP_HASH)
+    register('guard_patch', GUARD / 'input/guard-correction.patch', PATCH_HASH)
+    assert guard['findingStatus'] == 'CLOSED_FOR_BASE_PLUS_FIXED_SUPPLEMENT'
+    assert guard['baseManifestSha256'] == BASE_HASH and guard['supplementManifestSha256'] == SUP_HASH
+    assert len(native['countries']) == len(finance) == len(joint['countryFinance']) == 70
+    assert len(terminal['rows']) == 210  # Index existing saved values; no numeric reconciliation rerun.
+
+    for key, filename, layer in [('fx_daily_reference', 'FX_SETTLEMENT_DAILY.csv', 'REFERENCE'),
+                                  ('fiscal_daily_candidate', 'COUNTRY_DAILY_FINANCE.csv', 'CONSTRUCTED'),
+                                  ('country_summary_candidate', 'COUNTRY_SUMMARY.csv', 'CONSTRUCTED')]:
+        register(key, V1 / filename, v1hashes[filename], layer)
+    fx = defaultdict(lambda: {'out': Fraction(0), 'in': Fraction(0), 'candidateOut': Fraction(0),
+                             'candidateIn': Fraction(0), 'rowIndices': []})
+    first_fx = {}
+    with (V1 / 'FX_SETTLEMENT_DAILY.csv').open(newline='') as stream:
+        for index, row in enumerate(csv.DictReader(stream)):
+            x = fx[row['countryId']]
+            x['out'] += Fraction(row['referenceGrossCrossBorderOutGcu'])
+            x['in'] += Fraction(row['referenceGrossCrossBorderInGcu'])
+            x['candidateOut'] += Fraction(row['candidateClearingPrincipalOutGcu'])
+            x['candidateIn'] += Fraction(row['candidateClearingPrincipalInGcu'])
+            x['rowIndices'].append(index)
+            if row['simDay'] == '0':
+                first_fx[row['countryId']] = (index, row)
+    fiscal0 = {}
+    with (V1 / 'COUNTRY_DAILY_FINANCE.csv').open(newline='') as stream:
+        for index, row in enumerate(csv.DictReader(stream)):
+            if row['simDay'] == '0':
+                fiscal0[row['countryId']] = (index, row)
+    with (V1 / 'COUNTRY_SUMMARY.csv').open(newline='') as stream:
+        summaries = {row['countryId']: (i, row) for i, row in enumerate(csv.DictReader(stream))}
+    # Only aggregate already-stored cross-country grouped records. No raw journal re-extraction.
+    register('reference_cash_groups', V1 / 'REFERENCE_CASH_EVENTS.jsonl', v1hashes['REFERENCE_CASH_EVENTS.jsonl'], 'REFERENCE')
+    relations = {}
+    with (V1 / 'REFERENCE_CASH_EVENTS.jsonl').open() as stream:
+        for index, line in enumerate(stream):
+            row = json.loads(line)
+            if row['fromCountry'] == row['toCountry']:
+                continue
+            key = (row['fromCountry'], row['toCountry'], row['fromOwner'], row['toOwner'], row['kind'])
+            x = relations.setdefault(key, {'sum': Fraction(0), 'lines': [], 'sourceIndices': []})
+            x['sum'] += Fraction(row['referenceGcu'])
+            x['lines'].append(index + 1)
+            x['sourceIndices'].extend(row['sourceIndices'])
+    grouped_journal = next(p for p in upstream if p.endswith('_D140_S1_JOURNAL.json'))
+    register('reference_group_upstream_journal', grouped_journal, upstream[grouped_journal], 'REFERENCE', read=False)
+    relation_rows = []
+    for i, (key, row) in enumerate(sorted(relations.items())):
+        a, b, payer, payee, kind = key
+        relation_rows.append({'relationId': 'REF_FLOW_' + digest(json.dumps(list(key), separators=(',', ':')).encode())[:24],
+            'evidenceClass': 'REFERENCE', 'fromCountryId': 'COUNTRY_' + a, 'toCountryId': 'COUNTRY_' + b,
+            'referencePayerOwner': payer, 'referencePayeeOwner': payee, 'kind': kind,
+            'grossReferenceGcu': decimal(row['sum']), 'currency': 'GCU',
+            'source': {'sourceId': 'reference_cash_groups', 'jsonl': {'physicalLines': row['lines'],
+                'amountPointerWithinEachRecord': '/referenceGcu', 'payerPointer': '/fromOwner', 'payeePointer': '/toOwner',
+                'aggregation': 'EXACT_SUM_STORED_DECIMAL_LEXEMES'}},
+            'upstreamJournalIndices': {'sourceId': 'reference_group_upstream_journal',
+                'zeroBasedIndices': row['sourceIndices'], 'dereferencedThisRun': False},
+            'actualAccountOrWorldSettlement': False})
+    assert sum((Fraction(x['grossReferenceGcu']) for x in relation_rows), Fraction(0)) == sum((x['out'] for x in fx.values()), Fraction(0))
+    assert decimal(sum((x['out'] for x in fx.values()), Fraction(0))) == review['S3']['referenceCrossBorderGrossEachWayGcu']
+    assert sum((x['out'] for x in fx.values()), Fraction(0)) == sum((x['in'] for x in fx.values()), Fraction(0))
+    for key, name, layer, fields in [
+        ('gross_reference', 'GROSS_REFERENCE_AGGREGATES.json', 'REFERENCE', [('referenceGrossCrossBorderOutGcu','out'),('referenceGrossCrossBorderInGcu','in')]),
+        ('gross_clearing_candidate', 'GROSS_CLEARING_CANDIDATE_AGGREGATES.json', 'CONSTRUCTED', [('candidateClearingPrincipalOutGcu','candidateOut'),('candidateClearingPrincipalInGcu','candidateIn')])]:
+        data = {'schemaVersion':'STORED_EXACT_GROSS_AGGREGATE_INDEX_V1', 'evidenceClass':layer, 'countries':[
+            {'countryId':cid, **{column:decimal(fx[cid][field]) for column,field in fields},
+             'derivation':{'sourceId':'fx_daily_reference','columns':[x[0] for x in fields], 'simDayInclusive':[0,140],
+                           'dataRowZeroBasedInclusiveRanges':ranges(fx[cid]['rowIndices']), 'operation':'EXACT_SUM_STORED_DECIMAL_LEXEMES'}}
+            for cid in sorted(fx)]}
+        save(name,data);register(key,OUT/name,layer=layer,derived=True);DOCS[key]=data
+
+    country_rows = []
+    leaf_rows = []
+    for i, country in enumerate(native['countries']):
+        cid = country['countryId']; suffix = cid[-2:]; currency = country['currencyCode']
+        assert cid == 'COUNTRY_' + str(i + 1).zfill(2)
+        assert finance[i]['countryId'] == 'visual-territory-' + suffix
+        assert joint['countryFinance'][i]['countryId'] == quote['countries'][i]['countryId'] == cid
+        for owner, buckets in country['ownerBucketsNative'].items():
+            for bucket, value in buckets.items():
+                if not isinstance(value, dict):
+                    continue
+                pointer = f'/countries/{i}/ownerBucketsNative/{owner}/{bucket}/amount'
+                leaf_rows.append({'countryId': cid, 'ownerLabel': owner, 'field': bucket,
+                    'sourceId': 'native_lc', 'nativeAmountPointer': pointer, 'amount': value['amount'],
+                    'currency': value['currency'], 'unit': value['unit'], 'evidenceClass': 'CONSTRUCTED',
+                    'originalGcuLineage': {'sourceId': 'joint_opening', 'jsonPointer': value['gcuLineagePointer'], 'primaryNativeSource': False},
+                    'spendableCash': False})
+        for name, value in country['valuesNative'].items():
+            leaf_rows.append({'countryId': cid, 'ownerLabel': None, 'field': name, 'sourceId': 'native_lc',
+                'nativeAmountPointer': f'/countries/{i}/valuesNative/{name}/amount', 'amount': value['amount'],
+                'currency': value['currency'], 'unit': value['unit'], 'evidenceClass': 'CONSTRUCTED', 'spendableCash': False})
+        fi, fd = fiscal0[cid]; xi, xd = first_fx[cid]; si, sr = summaries[cid]
+        for column in ['actualTaxReceiptsGcu', 'actualNonDebtRequiredPaymentsGcu', 'actualAvailableGcu', 'actualAvailableLC', 'actualRestrictedGcu']:
+            assert fd[column].startswith('UNKNOWN')
+        for column in ['verifiedPermittedGcuCashAccountId', 'verifiedFundedConversionCounterparty', 'verifiedSpendableGcuBalance']:
+            assert xd[column] == 'UNKNOWN'
+        row_locator = lambda source, index, column: {'sourceId': source, 'csv': {'dataRowZeroBased': index,
+            'physicalLine': index + 2, 'key': {'countryId': cid, 'simDay': '0'}, 'column': column}}
+        gross = lambda column, value, cls='REFERENCE': fact('gross_reference' if cls=='REFERENCE' else 'gross_clearing_candidate',
+            f'/countries/{i}/{column}', 'Stored gross only, not actual payable/available cash or nettable liquidity', 'GCU','GCU')
+        debt = []
+        for j, c in enumerate(gov['contracts']):
+            if c['countryId'] == cid:
+                debt.append({'sharedClaimId': c['sharedClaimId'], 'evidenceClass': 'CONSTRUCTED',
+                    'sourceId': 'gov_terms_candidate', 'jsonPointer': f'/contracts/{j}',
+                    'nativePrincipalPointer': f'/contracts/{j}/nativePrincipal',
+                    'firstCouponPointer': f'/contracts/{j}/firstCouponDueSimDay', 'actualDisbursement': False})
+        terminal_rows = []
+        for j, t in enumerate(terminal['rows']):
+            if t['owner'].endswith('-' + suffix):
+                terminal_rows.append({'ownerLabel': t['owner'], 'referenceEndSimDay': 140,
+                    'amount': fact('terminal_reference', f'/rows/{j}/extractedExactLexemeGcu', 'Reference endpoint only; not intraday minimum, opening or legal cash', 'GCU', 'GCU'),
+                    'savedFloatPointer': f'/rows/{j}/savedFloatDisplayGcu', 'reconciliationRerun': False})
+        country_rows.append({'countryId': cid, 'nativeCurrency': currency,
+            'identityCrosswalk': {'legacyFinanceSourceId': 'legacy_finance_reference', 'legacyPointer': f'/{i}/countryId',
+                'legacyCountryId': finance[i]['countryId'], 'nativePointer': f'/countries/{i}/countryId'},
+            'fiscal': {
+                'ownerSlot': 'GOV-' + suffix, 'ownerMeaning':'REFERENCE_OWNER_LABEL_NOT_ADOPTED_CASH_OWNER',
+                'openingAccessibleNativeClaim': fact('native_lc', f'/countries/{i}/ownerBucketsNative/GOV-{suffix}/accessible/amount', 'Native LC claim bucket; not a GCU CASH account or adopted spending permission', currency, 'LC'),
+                'openingReferenceGcuLineage': fact('joint_opening', f'/countryFinance/{i}/ownerClaimBucketsGcu/GOV-{suffix}/accessibleDecimal', 'Lineage accounting denomination only, not an available GCU payment source', 'GCU', 'GCU'),
+                'originalGenesisTreasuryReference': fact('legacy_finance_reference', f'/{i}/treasuryCentralBankBalance', 'Original reference genesis balance; not new World cash', 'GCU_SCENARIO_ACCOUNTING_UNIT', 'REFERENCE_UNIT'),
+                'dailyTaxReference': fact('legacy_finance_reference', f'/{i}/dailyTaxRevenueReferenceGcu', 'Reference sizing income, not a tax receipt', 'GCU', 'GCU'),
+                'dailyMaintenanceBudgetReference': fact('legacy_finance_reference', f'/{i}/dailyMaintenanceBudgetGcu', 'Reference budget request, not automatically mandatory', 'GCU', 'GCU'),
+                'dailyFreightBudgetReference': fact('legacy_finance_reference', f'/{i}/dailyInboundFreightBudgetGcu', 'Reference budget request, not automatically mandatory', 'GCU', 'GCU'),
+                'actualTaxReceipts': unknown('GAP_TAX_ACTUAL', row_locator('fiscal_daily_candidate', fi, 'actualTaxReceiptsGcu')),
+                'actualMandatoryNonDebtPayments': unknown('GAP_MANDATORY_ACTUAL', row_locator('fiscal_daily_candidate', fi, 'actualNonDebtRequiredPaymentsGcu')),
+                'authorizedControllableBudget': unknown('GAP_DISCRETIONARY_AUTHORIZATION'),
+                'essentialServicesCompleteCost': unknown('GAP_ESSENTIAL_COSTS', {'sourceId': 'budget_candidates', 'jsonPointer': f'/countries/{i}/mandatoryServicesCostGcu'}),
+                'existingMandatoryCommitments': unknown('GAP_MANDATORY_ACTUAL', {'sourceId': 'budget_candidates', 'jsonPointer': f'/countries/{i}/mandatoryExistingCommitmentsGcu'}),
+                'budgetCeilingCandidateNoVerifiedTax': fact('budget_candidates', f'/countries/{i}/zeroUnverifiedReceiptsStressDailySpendCeilingGcu', 'Unadopted sizing choice; 0.01 floor is not a runtime precision rule', 'GCU', 'GCU'),
+                'constructedGovernmentContracts': debt,
+                'constructedGovernmentCashDueThrough140': csvcell('country_summary_candidate', sr, si, 'newGovDueSim0Through140Gcu', 'Zero only for these constructed government contracts; actual other obligations remain unknown', 'GCU'),
+            },
+            'gcuCash': {'ownerSlot':'GOV-' + suffix, 'countryId':cid, 'currency':'GCU',
+                'nativeVersusBookMeaning':'ACTUAL_NATIVE_CASH_UNKNOWN; LC and book/reference GCU cannot fill this slot',
+                'candidateGovernmentEntityId': 'ENTITY_GOVERNMENT_' + suffix,
+                'actualOwnerEntityId': unknown('GAP_GCU_ACCOUNT_OWNERSHIP'),
+                'actualAccountId': unknown('GAP_GCU_ACCOUNT_OWNERSHIP', row_locator('fx_daily_reference', xi, 'verifiedPermittedGcuCashAccountId')),
+                'accountTypeCashEvidence': unknown('GAP_GCU_ACCOUNT_OWNERSHIP'),
+                'availableGcu': unknown('GAP_GCU_SPENDABILITY', row_locator('fx_daily_reference', xi, 'verifiedSpendableGcuBalance')),
+                'restrictedGcu': unknown('GAP_GCU_SPENDABILITY', row_locator('fiscal_daily_candidate', fi, 'actualRestrictedGcu')),
+                'valueDatePermissionAndRevision': unknown('GAP_GCU_SPENDABILITY'),
+                'referenceEndBalances': terminal_rows},
+            'fx': {'constructedLCperGCU': fact('fx_quote_candidate', f'/countries/{i}/LCperGCU', 'Constructed locked denomination; not a market/permissioned conversion quote', currency, 'LC_PER_GCU'),
+                'constructedGCUperLC': fact('fx_quote_candidate', f'/countries/{i}/GCUperLC', 'Constructed reciprocal denomination; does not provide funding', 'GCU', 'GCU_PER_LC'),
+                'referenceGrossOutgoing': gross('referenceGrossCrossBorderOutGcu', fx[cid]['out']),
+                'referenceGrossIncoming': gross('referenceGrossCrossBorderInGcu', fx[cid]['in']),
+                'candidateClearingGrossOutgoing': gross('candidateClearingPrincipalOutGcu', fx[cid]['candidateOut'], 'CONSTRUCTED'),
+                'candidateClearingGrossIncoming': gross('candidateClearingPrincipalInGcu', fx[cid]['candidateIn'], 'CONSTRUCTED'),
+                'referenceCounterpartyRelationIds': [x['relationId'] for x in relation_rows if cid in [x['fromCountryId'], x['toCountryId']]],
+                'fundedGcuSellerCounterparty': unknown('GAP_FX_FUNDED_PAIR', row_locator('fx_daily_reference', xi, 'verifiedFundedConversionCounterparty')),
+                'actualPayerAndPayeeCashAccounts': unknown('GAP_FX_FUNDED_PAIR'),
+                'permissionAndValueDate': unknown('GAP_FX_PERMISSION'), 'feePrecisionAndRoundingRule': unknown('GAP_FX_FEES_QUOTE'),
+                'executableLockedQuoteExpiry': unknown('GAP_FX_FEES_QUOTE'), 'atomicReceiptAndBilateralPostings': unknown('GAP_ATOMIC_SETTLEMENT'),
+                'netIncomingAgainstOutgoingAllowed': False, 'receivableIsCash': False},
+            'clearingIssuedClaimIds': [t['sharedClaimId'] for t in terms['terms'] if t['issuerId'].endswith('_' + suffix)],
+            'clearingHeldClaimIds': [t['sharedClaimId'] for t in terms['terms'] if t['assetHolderId'].endswith('_' + suffix)],
+            'adoptedFacts': []})
+    assert len(leaf_rows) == 1960
+
+    claims = []; pointers = []
+    fields = ['nativePrincipal', 'nativeCurrency', 'annualCoupon', 'interestDayCount', 'accrualStartSimDay', 'callable',
+              'maturitySimDays', 'firstPrincipalDueSimDay', 'firstCouponDueSimDay', 'settlementCurrency',
+              'paymentAccountId', 'fundedFxCounterpartyId', 'paymentSourceStatus', 'unpaidPolicy', 'activation']
+    for i, term in enumerate(terms['terms']):
+        cid = term['sharedClaimId']; ref = references['claimPairs'][i]; original = closing['derivedBilateralCBReferenceClaimPairs'][i]
+        assert term['source']['referenceClaimId'] == ref['referenceClaimId']
+        assert Fraction(term['nativePrincipal']) == Fraction(ref['amountGcuReference']) == Fraction(original['amountGcuReference'])
+        assert term['source']['journalPointers'] == ref['sourceJournalPointers']
+        jid = 'clearing_original_journal'
+        if jid not in SOURCES:
+            register(jid, term['source']['journalPath'], term['source']['journalSha256'], 'REFERENCE', read=False)
+        native_roles = [{'role': p['role'], 'holdingId': p['holdingId'], 'nativeAmountPointer': f'/positions/{j}/nativeAmount',
+                        'sourceId': 'paired_positions_candidate'} for j, p in enumerate(positions['positions']) if p['sharedClaimId'] == cid]
+        assert len(native_roles) == 2
+        claims.append({'canonicalClaimId': cid, 'referenceClaimId': ref['referenceClaimId'],
+            'originalKnownReference': {'issuerId': fact('clearing_reference_claims', f'/claimPairs/{i}/liabilityIssuerId', 'Reference counterparty, no native adopted issuer'),
+                'assetHolderId': fact('clearing_reference_claims', f'/claimPairs/{i}/claimAssetHolderId', 'Reference CB asset holder, not cash owner'),
+                'principalGcuReference': fact('clearing_reference_claims', f'/claimPairs/{i}/amountGcuReference', 'Reference principal preserved; no availability inference', 'GCU', 'GCU'),
+                'closingPrincipal': fact('clearing_reference_closing', f'/derivedBilateralCBReferenceClaimPairs/{i}/amountGcuReference', 'Original derived reference principal', 'GCU', 'GCU')},
+            'constructedCanonicalNativePositions': native_roles,
+            'fixedV2LifecycleTerms': unknown('GAP_CLEARING_TERMS', {'sourceId': 'clearing_candidate', 'jsonPointer': f'/terms/{i}/fixedV2TermsStatus'}),
+            'proposedTerms': {k: fact('clearing_candidate', f'/terms/{i}/{k}', 'Candidate only; not owner-adopted lifecycle') for k in fields},
+            'journalPointerCount': len(ref['sourceJournalPointers']), 'actualPaymentSource': unknown('GAP_GCU_ACCOUNT_OWNERSHIP'),
+            'sourceModelTermsAdopted': False})
+        for j, pointer in enumerate(ref['sourceJournalPointers']):
+            pointers.append({'canonicalClaimId': cid, 'referenceClaimId': ref['referenceClaimId'], 'sourceId': jid,
+                'upstreamJsonPointer': pointer, 'indexProvenance': {'sourceId': 'clearing_reference_claims',
+                    'jsonPointer': f'/claimPairs/{i}/sourceJournalPointers/{j}'},
+                'dereferencedThisRun': False, 'meaning': 'Preserved original OP reference pointer, not a new World Posting or new journal namespace'})
+    assert len(claims) == 4 and len(pointers) == 183
+    principal = decimal(sum((Fraction(t['nativePrincipal']) for t in terms['terms']), Fraction(0)))
+    assert principal == review['S1']['candidateTotalPrincipalGcu']
+    settlement=[]
+    for i,t in enumerate(terms['terms']):
+        endpoint=lambda entity:{'candidateOwnerId':entity,'countryId':'COUNTRY_'+entity[-2:],
+            'actualOwnerId':unknown('GAP_GCU_ACCOUNT_OWNERSHIP'),'accountRef':unknown('GAP_GCU_ACCOUNT_OWNERSHIP'),
+            'currency':'GCU','nativeVersusBookMeaning':'NATIVE_CASH_REQUIRED_NOT_CB_RECEIVABLE_OR_TGA',
+            'availableAmount':unknown('GAP_GCU_SPENDABILITY'),'restrictedAmount':unknown('GAP_GCU_SPENDABILITY'),
+            'permissionAndValueDate':unknown('GAP_GCU_SPENDABILITY')}
+        settlement.append({'flowId':'PROPOSED_CLEARING_PRINCIPAL_'+t['sharedClaimId'], 'canonicalClaimId':t['sharedClaimId'],
+            'status':'KNOWN_PROPOSED_NOT_ADOPTED','evidenceClass':'CONSTRUCTED',
+            'payer':endpoint(t['issuerId']),'payee':endpoint(t['assetHolderId']),
+            'nativeCurrency':fact('clearing_candidate',f'/terms/{i}/nativeCurrency','Existing proposal native currency'),
+            'amountFact':fact('clearing_candidate',f'/terms/{i}/nativePrincipal','Preserved original canonical principal; not new funding','GCU','GCU'),
+            'relativeDueSimDay':fact('clearing_candidate',f'/terms/{i}/firstPrincipalDueSimDay','Existing sim140 proposal only; not an adopted due date'),
+            'interest':fact('clearing_candidate',f'/terms/{i}/annualCoupon','Existing zero-coupon proposal only'),
+            'callable':fact('clearing_candidate',f'/terms/{i}/callable','Existing noncallable proposal only'),
+            'feeFact':unknown('GAP_FX_FEES_QUOTE'),'roundingPolicyRef':unknown('GAP_FX_FEES_QUOTE'),
+            'conversionRequired':unknown('GAP_FX_FUNDED_PAIR'),
+            'quote':{'applicability':'REQUIRED_ONLY_IF_CONVERSION_IS_PROPOSED; no accounts/route is inferred',
+                     'quoteId':unknown('GAP_FX_FEES_QUOTE'),'version':unknown('GAP_FX_FEES_QUOTE'),
+                     'direction':unknown('GAP_FX_FEES_QUOTE'),'expiry':unknown('GAP_FX_FEES_QUOTE'),
+                     'fundedCounterparty':unknown('GAP_FX_FUNDED_PAIR')},
+            'termsRefs':[{'sourceId':'clearing_candidate','selector':{'kind':'JSON_POINTER','pointer':f'/terms/{i}'}}],
+            'fundingRefs':unknown('GAP_GCU_ACCOUNT_OWNERSHIP'),'adoptedPolicyRef':unknown('GAP_CLEARING_TERMS'),
+            'twoEndedAtomicCommit':unknown('GAP_ATOMIC_SETTLEMENT'),
+            'partialPaymentPolicy':unknown('GAP_PARTIAL_REFUND_TERMS'),'refundPenaltyPolicy':unknown('GAP_PARTIAL_REFUND_TERMS'),
+            'durableIdempotencyReceipt':unknown('GAP_ATOMIC_SETTLEMENT'),
+            'unpaidPolicyCandidate':fact('clearing_candidate',f'/terms/{i}/unpaidPolicy','Existing proposed unpaid policy; not adopted'),
+            'originalPointerIndex':{'artifact':'CLEARING_SOURCE_INDEX.json','canonicalClaimId':t['sharedClaimId'],'count':len(t['source']['journalPointers'])}})
+    save('SETTLEMENT_TERMS_CANDIDATE.json',{'schemaVersion':'SETTLEMENT_TERMS_PROCESS_CANDIDATE_V1',
+        'status':'PROPOSED_NOT_ADOPTED_PENDING_E','terms':settlement,'newEconomicValuesChosen':False,
+        'processRulesCandidate':[
+            {'id':'P1','status':'PROPOSED','rule':'Settle only with actual permitted source-bound funds, exact adopted terms and supported original writer route; missing facts block.'},
+            {'id':'P2','status':'PROPOSED','rule':'Both original account sides commit atomically or neither; failed/unknown completion preserves the unpaid obligation, without fictional payment, forgiveness or automatic loan.'},
+            {'id':'P3','status':'PROPOSED','rule':'Partial/refund behavior stays blocked until explicit source-bound terms exist; transit/undelivered goods or timeout is not an automatic refund.'},
+            {'id':'P4','status':'PROPOSED','rule':'Use original canonical idempotency/receipt rules for identical retries; conflicting reuse rejects, never retry a timeout with a new economic key.'},
+            {'id':'P5','status':'PROPOSED','rule':'Keep gross outgoing, incoming and fees distinct; promises/receivables or book LC cannot fund GCU cash and are not netted.'}],
+        'execution':False,'sourceModelAdoption':False,'worldStart':False})
+    coverage = {'countries': len(country_rows), 'nativeOwnerAmountLeaves': sum(x['ownerLabel'] is not None for x in leaf_rows),
+        'nativeOtherBalanceLeaves': sum(x['ownerLabel'] is None for x in leaf_rows), 'nativeTotalLeaves': len(leaf_rows),
+        'constructedGovernmentContracts': len(gov['contracts']), 'referenceTerminalLeavesIndexedNotRecomputed': len(terminal['rows']),
+        'referenceCounterpartyRelations': len(relation_rows), 'clearingCanonicalClaims': len(claims), 'originalClearingPointers': len(pointers),
+        'candidateClearingPrincipalGcu': principal, 'referenceGrossOutgoingGcu': decimal(sum((x['out'] for x in fx.values()), Fraction(0))),
+        'referenceGrossIncomingGcu': decimal(sum((x['in'] for x in fx.values()), Fraction(0))),
+        'actualCashAccountsVerified': 0, 'actualFundedFxCounterpartiesVerified': 0, 'adoptedFacts': 0,
+        'unknownByCountry': {'actualTax': 70, 'mandatoryNonDebt': 70, 'authorizedControllableBudget': 70,
+            'essentialCompleteCost': 70, 'GcuCashOwnerAccount': 70, 'GcuAvailableRestricted': 70,
+            'fundedFxPairPermissionFeesQuote': 70, 'actualAtomicSettlement': 70},
+        'guard': 'CLOSED_FOR_BASE_PLUS_FIXED_SUPPLEMENT', 'economicReadiness': 'HOLD'}
+    composition = {'schemaVersion': 'FUNDING_SOURCE_REGISTRY_V1_NOT_ADOPTION', 'status': 'ARCHIVED_SOURCE_AND_GAPS_ONLY',
+        'evidenceLayers': ['REFERENCE', 'CONSTRUCTED', 'ADOPTED'], 'actualWorldId': None, 'actualSeedId': None,
+        'adoptedFacts': [], 'consumerComposition': {'baseManifestSourceId': 'first14_manifest',
+            'fixedV2ManifestSourceId': 'v2_manifest', 'guardSupplementSourceId': 'guard_supplement',
+            'guardPatchSourceId': 'guard_patch', 'guardApprovalSourceId': 'guard_accepted_decision',
+            'strictReferencePredicate': guard['strictReferencePredicate'], 'originalV1Modified': False,
+            'virtualPostimages': supplement['virtualPostimages'], 'guardFindingStatus': guard['findingStatus'],
+            'requireAllBindingsTogether': True, 'guardClosureDoesNotAdoptFunds': True},
+        'reusedIndependentEvidence': {'E47SourceId': 'e47_decision', 'primaryChecks': 30, 'addendumChecks': 17,
+            'rerun': False, 'saved210Recomputed': False, 'core980Rerun': False, 'old140ReplayRerun': False},
+        'sources': list(SOURCES.values()), 'unknownEvidenceIndex':UNKNOWN_EVIDENCE, 'files': {'countries': 'COUNTRY_SOURCE_REGISTRY.json',
+            'nativeLeaves': 'NATIVE_LEAF_INDEX.json', 'clearing': 'CLEARING_SOURCE_INDEX.json',
+            'referenceParties': 'REFERENCE_COUNTERPARTY_INDEX.json', 'gaps': 'MINIMUM_DEPENDENCIES.json',
+            'settlementTerms':'SETTLEMENT_TERMS_CANDIDATE.json'},
+        'prohibitedInferences': ['LC/TGA/reserve/receivable equals GCU CASH', 'Reference journal equals new World settlement',
+            'Gross incoming nets outgoing', 'Missing mandatory cost means zero', 'Cash/equity plug or new funding',
+            'Proposed clearing terms adopted', 'Guard closure equals economic readiness']}
+    roots={'FIRST14_V1':V1,'FX_CB_V2':V2,'LEGACY_FINANCE_INPUTS':finance_path.parent,
+           'CORRECTED_R_V2':ref_path.parent,'ORIGINAL_REFERENCE':closing_path.parent,
+           'E47_REVIEW':EREVIEW,'E_GUARD_REVIEW':GUARD,'G_FUNDING_REGISTRY':OUT}
+    composition['retainedRoots']=[{'rootId':k,'archiveAbsolutePath':str(v),'authority':'ARCHIVE_LOCATION_ONLY; D uses a private reviewed allowlist'} for k,v in roots.items()]
+    for s in composition['sources']:
+        matches=[(k,v) for k,v in roots.items() if Path(s['path']).is_relative_to(v)]
+        k,v=max(matches,key=lambda kv:len(str(kv[1])))
+        s['retainedRootId']=k;s['relativeLocator']=str(Path(s['path']).relative_to(v))
+    save('SOURCE_REGISTRY.json', composition)
+    save('COUNTRY_SOURCE_REGISTRY.json', {'schemaVersion': 'COUNTRY_FUNDING_SOURCE_INDEX_V1', 'countries': country_rows})
+    for leaf in leaf_rows:
+        leaf['source']={'sourceId':'native_lc','selector':{'kind':'JSON_POINTER','pointer':leaf['nativeAmountPointer'],'originalValue':leaf['amount']}}
+    save('NATIVE_LEAF_INDEX.json', {'schemaVersion':'NATIVE_LEAF_PRIMARY_INDEX_V1','primarySourceId': 'native_lc', 'nativeSourceDigest': SOURCES['native_lc']['sha256'], 'leaves': leaf_rows})
+    save('CLEARING_SOURCE_INDEX.json', {'schemaVersion':'CLEARING_SOURCE_INDEX_V1','claims': claims, 'originalJournalPointers': pointers, 'termsAdopted': False})
+    save('REFERENCE_COUNTERPARTY_INDEX.json', {'schemaVersion':'REFERENCE_COUNTERPARTY_INDEX_V1','relations': relation_rows, 'actualSettlement': False, 'actualFundedConversion': False})
+    save('COVERAGE.json', coverage)
+    save('BUILD_RECEIPT.json', {'status': 'SOURCE_ARCHIVE_GENERATED_NOT_RUNTIME_READY',
+        'selectedInputFilesHashed': sum(x['verification'] == 'SELECTED_INPUT_HASH_VERIFIED' for x in SOURCES.values()),
+        'rawJournalsOrNpzRead': False, 'packageCopied': False, 'E47Rerun': False, 'terminal210Rerun': False,
+        'builderOrReplayExecuted': False, 'numericMethod': 'Fraction sums of stored exact decimal lexemes only',
+        'newMoneyOrTermsCreated': False, 'inputFilesWritten': 0, 'sourceOrWorldAdoption': False})
+    print(json.dumps(coverage, ensure_ascii=False))
+
+
+def verify():
+    source = json.loads((OUT / 'SOURCE_REGISTRY.json').read_text())
+    for row in source['sources']:
+        if row['verification'] == 'SELECTED_INPUT_HASH_VERIFIED':
+            assert digest(Path(row['path']).read_bytes()) == row['sha256']
+    native = json.loads((OUT / 'NATIVE_LEAF_INDEX.json').read_text())
+    native_source = next(x for x in source['sources'] if x['sourceId'] == 'native_lc')
+    doc = json.loads(Path(native_source['path']).read_text())
+    for row in native['leaves']:
+        assert ptr(doc, row['nativeAmountPointer']) == row['amount']
+        assert row['unit'] == 'LC' and row['spendableCash'] is False
+    countries = json.loads((OUT / 'COUNTRY_SOURCE_REGISTRY.json').read_text())['countries']
+    assert len(countries) == len({x['countryId'] for x in countries}) == 70
+    assert all(not x['adoptedFacts'] and x['gcuCash']['availableGcu']['value'] is None for x in countries)
+    clearing = json.loads((OUT / 'CLEARING_SOURCE_INDEX.json').read_text())
+    assert len(clearing['claims']) == 4 and len(clearing['originalJournalPointers']) == 183
+    assert source['consumerComposition']['requireAllBindingsTogether']
+    assert source['consumerComposition']['guardFindingStatus'] == 'CLOSED_FOR_BASE_PLUS_FIXED_SUPPLEMENT'
+    assert not source['adoptedFacts']
+    print('PASS archive identities, native leaf pointers, country coverage, UNKNOWN and composition invariants; no economic replay')
+
+
+if __name__ == '__main__':
+    verify() if sys.argv[1:] == ['--verify'] else build()

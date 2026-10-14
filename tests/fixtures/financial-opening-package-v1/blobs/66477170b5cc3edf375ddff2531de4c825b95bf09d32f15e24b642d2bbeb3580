@@ -1,0 +1,8 @@
+{
+  "manifest": "PACKAGE_MANIFEST.json",
+  "manifestSha256": "2f22d0d66cc01c0af0507beaa299646845a310836a61c3c5f9c3248d6c36eef7",
+  "schemaSha256": "41da4fc03c40e757a751f0c90bf3715a1adff4fee674d24ba81f2e6f8616cca9",
+  "manifestBytes": 3790,
+  "fixedFiles": 16,
+  "payloadBytes": 3827919
+}

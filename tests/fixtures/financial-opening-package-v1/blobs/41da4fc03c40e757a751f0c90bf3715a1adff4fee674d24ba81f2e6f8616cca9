@@ -1,0 +1,405 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:econmind:funding-source-registry:v1",
+  "title": "Source registry only, not a financial opening/admission schema",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "status",
+    "evidenceLayers",
+    "actualWorldId",
+    "actualSeedId",
+    "adoptedFacts",
+    "consumerComposition",
+    "reusedIndependentEvidence",
+    "sources",
+    "files",
+    "prohibitedInferences"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "FUNDING_SOURCE_REGISTRY_V1_NOT_ADOPTION"
+    },
+    "status": {
+      "const": "ARCHIVED_SOURCE_AND_GAPS_ONLY"
+    },
+    "evidenceLayers": {
+      "const": [
+        "REFERENCE",
+        "CONSTRUCTED",
+        "ADOPTED"
+      ]
+    },
+    "actualWorldId": {
+      "type": "null"
+    },
+    "actualSeedId": {
+      "type": "null"
+    },
+    "adoptedFacts": {
+      "type": "array",
+      "maxItems": 0
+    },
+    "consumerComposition": {
+      "type": "object",
+      "required": [
+        "baseManifestSourceId",
+        "fixedV2ManifestSourceId",
+        "guardSupplementSourceId",
+        "guardPatchSourceId",
+        "guardApprovalSourceId",
+        "strictReferencePredicate",
+        "requireAllBindingsTogether",
+        "guardFindingStatus"
+      ],
+      "properties": {
+        "requireAllBindingsTogether": {
+          "const": true
+        },
+        "guardFindingStatus": {
+          "const": "CLOSED_FOR_BASE_PLUS_FIXED_SUPPLEMENT"
+        },
+        "strictReferencePredicate": {
+          "const": "len(rows)==210 and maxdiff<1"
+        }
+      }
+    },
+    "reusedIndependentEvidence": {
+      "type": "object",
+      "properties": {
+        "rerun": {
+          "const": false
+        },
+        "saved210Recomputed": {
+          "const": false
+        },
+        "core980Rerun": {
+          "const": false
+        },
+        "old140ReplayRerun": {
+          "const": false
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Source"
+      }
+    },
+    "files": {
+      "type": "object"
+    },
+    "prohibitedInferences": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "retainedRoots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "rootId",
+          "archiveAbsolutePath",
+          "authority"
+        ]
+      }
+    },
+    "unknownEvidenceIndex": {
+      "type": "array"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "Source": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "path",
+        "sha256",
+        "bytes",
+        "evidenceClass",
+        "verification",
+        "retainedRootId",
+        "relativeLocator"
+      ],
+      "properties": {
+        "sourceId": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "bytes": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "evidenceClass": {
+          "enum": [
+            "REFERENCE",
+            "CONSTRUCTED",
+            "ADOPTED"
+          ]
+        },
+        "verification": {
+          "enum": [
+            "SELECTED_INPUT_HASH_VERIFIED",
+            "UPSTREAM_POINTER_ONLY_NOT_DEREFERENCED_THIS_RUN"
+          ]
+        },
+        "retainedRootId": {
+          "type": "string"
+        },
+        "relativeLocator": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SourceLocator": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "selector"
+      ],
+      "properties": {
+        "sourceId": {
+          "type": "string"
+        },
+        "selector": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "pointer"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "JSON_POINTER"
+                },
+                "pointer": {
+                  "type": "string",
+                  "pattern": "^(?:/(?:[^~/]|~[01])*)*$"
+                },
+                "originalValue": {}
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": [
+                "kind",
+                "key",
+                "column",
+                "originalValue"
+              ],
+              "properties": {
+                "kind": {
+                  "const": "CSV_CELL"
+                },
+                "key": {
+                  "type": "object"
+                },
+                "column": {
+                  "type": "string"
+                },
+                "originalValue": {},
+                "dataRowZeroBased": {
+                  "type": "integer"
+                },
+                "physicalLine": {
+                  "type": "integer"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Fact": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "evidenceClass",
+            "value",
+            "currency",
+            "unit",
+            "meaning",
+            "source",
+            "valueKind"
+          ],
+          "properties": {
+            "status": {
+              "const": "KNOWN_SOURCE_VALUE"
+            },
+            "evidenceClass": {
+              "enum": [
+                "REFERENCE",
+                "CONSTRUCTED",
+                "ADOPTED"
+              ]
+            },
+            "source": {
+              "$ref": "#/$defs/SourceLocator"
+            },
+            "currency": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "unit": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "meaning": {
+              "type": "string"
+            },
+            "value": {},
+            "valueKind": {
+              "enum": [
+                "DECIMAL_STRING",
+                "STRING",
+                "BOOLEAN",
+                "INTEGER",
+                "NULL"
+              ]
+            }
+          },
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "valueKind": {
+                    "const": "DECIMAL_STRING"
+                  }
+                },
+                "required": [
+                  "valueKind"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "pattern": "^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]+)?$"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "status",
+            "evidenceClass",
+            "value",
+            "gapId",
+            "source"
+          ],
+          "properties": {
+            "status": {
+              "const": "UNKNOWN"
+            },
+            "evidenceClass": {
+              "type": "null"
+            },
+            "value": {
+              "type": "null"
+            },
+            "gapId": {
+              "type": "string",
+              "pattern": "^GAP_"
+            },
+            "source": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/$defs/SourceLocator"
+                }
+              ]
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "CountryRegistry": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "countries"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "COUNTRY_FUNDING_SOURCE_INDEX_V1"
+        },
+        "countries": {
+          "type": "array",
+          "minItems": 70,
+          "maxItems": 70,
+          "items": {
+            "type": "object",
+            "required": [
+              "countryId",
+              "nativeCurrency",
+              "identityCrosswalk",
+              "fiscal",
+              "gcuCash",
+              "fx",
+              "clearingIssuedClaimIds",
+              "clearingHeldClaimIds",
+              "adoptedFacts"
+            ],
+            "properties": {
+              "countryId": {
+                "type": "string",
+                "pattern": "^COUNTRY_[0-9]{2}$"
+              },
+              "nativeCurrency": {
+                "type": "string",
+                "pattern": "^[A-Z]{3}$"
+              },
+              "fiscal": {
+                "type": "object"
+              },
+              "gcuCash": {
+                "type": "object"
+              },
+              "fx": {
+                "type": "object"
+              },
+              "adoptedFacts": {
+                "type": "array",
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "description": "All amount-bearing source values retain original decimal strings. UNKNOWN never becomes0. The ADOPTED layer is defined for future independently admitted records, but this frozen registry explicitly contains none and is not valid as a formal opening bundle. Native primary pointers use UNIT_SAFE_NATIVE_BUCKETS digest; GCU pointers are lineage only."
+}

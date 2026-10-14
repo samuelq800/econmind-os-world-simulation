@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "noEmit": true,
+    "skipLibCheck": false
+  },
+  "include": ["../world-core/financial-opening-package-preflight.test.ts"]
+}

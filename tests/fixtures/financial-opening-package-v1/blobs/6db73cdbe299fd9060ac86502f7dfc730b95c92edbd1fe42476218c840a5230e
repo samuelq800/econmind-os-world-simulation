@@ -1,0 +1,29 @@
+{
+  "countries": 70,
+  "nativeOwnerAmountLeaves": 1470,
+  "nativeOtherBalanceLeaves": 490,
+  "nativeTotalLeaves": 1960,
+  "constructedGovernmentContracts": 140,
+  "referenceTerminalLeavesIndexedNotRecomputed": 210,
+  "referenceCounterpartyRelations": 353,
+  "clearingCanonicalClaims": 4,
+  "originalClearingPointers": 183,
+  "candidateClearingPrincipalGcu": "1723275000",
+  "referenceGrossOutgoingGcu": "1012043193.75",
+  "referenceGrossIncomingGcu": "1012043193.75",
+  "actualCashAccountsVerified": 0,
+  "actualFundedFxCounterpartiesVerified": 0,
+  "adoptedFacts": 0,
+  "unknownByCountry": {
+    "actualTax": 70,
+    "mandatoryNonDebt": 70,
+    "authorizedControllableBudget": 70,
+    "essentialCompleteCost": 70,
+    "GcuCashOwnerAccount": 70,
+    "GcuAvailableRestricted": 70,
+    "fundedFxPairPermissionFeesQuote": 70,
+    "actualAtomicSettlement": 70
+  },
+  "guard": "CLOSED_FOR_BASE_PLUS_FIXED_SUPPLEMENT",
+  "economicReadiness": "HOLD"
+}

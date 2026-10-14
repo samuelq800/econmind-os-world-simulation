@@ -1,0 +1,1616 @@
+{
+  "schemaVersion": "STORED_EXACT_GROSS_AGGREGATE_INDEX_V1",
+  "evidenceClass": "CONSTRUCTED",
+  "countries": [
+    {
+      "countryId": "COUNTRY_01",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            0,
+            140
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_02",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            141,
+            281
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_03",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            282,
+            422
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_04",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            423,
+            563
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_05",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            564,
+            704
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_06",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            705,
+            845
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_07",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            846,
+            986
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_08",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            987,
+            1127
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_09",
+      "candidateClearingPrincipalOutGcu": "499500000",
+      "candidateClearingPrincipalInGcu": "874125000",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1128,
+            1268
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_10",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1269,
+            1409
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_11",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1410,
+            1550
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_12",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1551,
+            1691
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_13",
+      "candidateClearingPrincipalOutGcu": "199800000",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1692,
+            1832
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_14",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1833,
+            1973
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_15",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1974,
+            2114
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_16",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2115,
+            2255
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_17",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2256,
+            2396
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_18",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2397,
+            2537
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_19",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2538,
+            2678
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_20",
+      "candidateClearingPrincipalOutGcu": "1023975000",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2679,
+            2819
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_21",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2820,
+            2960
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_22",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2961,
+            3101
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_23",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3102,
+            3242
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_24",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "849150000",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3243,
+            3383
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_25",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3384,
+            3524
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_26",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3525,
+            3665
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_27",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3666,
+            3806
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_28",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3807,
+            3947
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_29",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3948,
+            4088
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_30",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4089,
+            4229
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_31",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4230,
+            4370
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_32",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4371,
+            4511
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_33",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4512,
+            4652
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_34",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4653,
+            4793
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_35",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4794,
+            4934
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_36",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4935,
+            5075
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_37",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5076,
+            5216
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_38",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5217,
+            5357
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_39",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5358,
+            5498
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_40",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5499,
+            5639
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_41",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5640,
+            5780
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_42",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5781,
+            5921
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_43",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5922,
+            6062
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_44",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6063,
+            6203
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_45",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6204,
+            6344
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_46",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6345,
+            6485
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_47",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6486,
+            6626
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_48",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6627,
+            6767
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_49",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6768,
+            6908
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_50",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6909,
+            7049
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_51",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7050,
+            7190
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_52",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7191,
+            7331
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_53",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7332,
+            7472
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_54",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7473,
+            7613
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_55",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7614,
+            7754
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_56",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7755,
+            7895
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_57",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7896,
+            8036
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_58",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8037,
+            8177
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_59",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8178,
+            8318
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_60",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8319,
+            8459
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_61",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8460,
+            8600
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_62",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8601,
+            8741
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_63",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8742,
+            8882
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_64",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8883,
+            9023
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_65",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9024,
+            9164
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_66",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9165,
+            9305
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_67",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9306,
+            9446
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_68",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9447,
+            9587
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_69",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9588,
+            9728
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_70",
+      "candidateClearingPrincipalOutGcu": "0",
+      "candidateClearingPrincipalInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "candidateClearingPrincipalOutGcu",
+          "candidateClearingPrincipalInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9729,
+            9869
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    }
+  ]
+}
