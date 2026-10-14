@@ -1,0 +1,234 @@
+{
+  "version": "CONSTRUCTED_SCENARIO_FIRST14_20261013_V1_PROPOSED",
+  "sourceKind": "CONSTRUCTED_SCENARIO",
+  "fixedV2OuterSha256": "07d23e750abf2837b5961de6e74e60ec6dbdf9f4009aa442e4939786bc7f3781",
+  "readiness": "HOLD_PENDING_E_AND_OWNER",
+  "actualWorldId": null,
+  "actualSeedId": null,
+  "actualSourceAdoption": null,
+  "productionImportAllowed": false,
+  "worldStartAllowed": false,
+  "correctedRRecomputed": false,
+  "core980Rerun": false,
+  "old140ReplayRerun": false,
+  "rulesHash": "280f8f522d2a9cf5b27cec7b103f0ca26d9264f7a01a14e176cdc0f4201f2a25",
+  "paramsHash": "71fa06432ad09ecf51e0400948bf33c25ddb41c3cfd29ae2545ee9e251d4dcd0",
+  "files": [
+    {
+      "path": "BUDGET_CHOICE_PATHS.candidate.json",
+      "bytes": 90895,
+      "sha256": "78daf5f5641870924dd62f50c7b8f51cbb0b6bafda16268ae86efcecb5c532c2"
+    },
+    {
+      "path": "CLEARING_TERMS.candidate.json",
+      "bytes": 12790,
+      "sha256": "18204b8bb0fbeac969727b6b34935473ea8b32e00507f63e75491c018ef87fc8"
+    },
+    {
+      "path": "CONTRACT_EVENT_SCHEDULE.json",
+      "bytes": 412890,
+      "sha256": "126901ac027c4ba9cd65e36f41c7749462a8b76a79daeb21a3eeb4da17518f1a"
+    },
+    {
+      "path": "COUNTRY_DAILY_FINANCE.csv",
+      "bytes": 7181596,
+      "sha256": "0af3cdff2a04dcb5763e997b1b6bf022e4ce0837651b1f6d5cb9c22bd08fd7f6"
+    },
+    {
+      "path": "COUNTRY_REAL14_SUMMARY.csv",
+      "bytes": 272244,
+      "sha256": "69c59de41b22be814734bd29809f29c97552f07729a8e01507e5b6562085a2fb"
+    },
+    {
+      "path": "COUNTRY_SUMMARY.csv",
+      "bytes": 16340,
+      "sha256": "d2c1893358c3aaf4d2ed1464f8bddcbde07f41e550b35a52edd265f2ea8a8e2a"
+    },
+    {
+      "path": "EXECUTION_RECEIPT.json",
+      "bytes": 923,
+      "sha256": "4bf0345fe32a1c8768f599ad653a75f5786a4f1b53766b5b29d63ab0b697edd6"
+    },
+    {
+      "path": "FIELD_PROJECT_EXECUTION_JOINS.json",
+      "bytes": 64238,
+      "sha256": "b3c0912d2dd5895ada45a07f87b3e3a94292936be051a7e749a6bd97742d8e7a"
+    },
+    {
+      "path": "FX_SETTLEMENT_DAILY.csv",
+      "bytes": 2713516,
+      "sha256": "573b42a6f798bd4265b64a76377f26bc6512ccea20ba3ba83b11c1c1870af8f3"
+    },
+    {
+      "path": "GCU_PAYMENT_PATH_REQUIREMENTS.json",
+      "bytes": 2010,
+      "sha256": "ef3b95396de6861260c5ed1438ae594ebbea2d78134a6719f403838f81b94a4c"
+    },
+    {
+      "path": "GEOGRAPHY.metadata-delta.json",
+      "bytes": 2246,
+      "sha256": "befcb210175ef4659c272ad106f886bb84adac06c4cb44b4c90f73465942f2f1"
+    },
+    {
+      "path": "INDEPENDENT_ARTIFACT_CHECKS.json",
+      "bytes": 2475,
+      "sha256": "4289dc2ae8ba68194dd88168e0bf68e960b2845f25c363161ce04942aaed3a86"
+    },
+    {
+      "path": "MINIMUM_RULES_AND_HOLD.json",
+      "bytes": 2924,
+      "sha256": "3c1f8aa37553aaa68d3fd4e11173a1b173b6b2e446b1402ef8a60e4d12cf9ba2"
+    },
+    {
+      "path": "PARAMETERS.v1.json",
+      "bytes": 1804,
+      "sha256": "71fa06432ad09ecf51e0400948bf33c25ddb41c3cfd29ae2545ee9e251d4dcd0"
+    },
+    {
+      "path": "PROCUREMENT_DEADLINE_DISPOSITION.json",
+      "bytes": 3465,
+      "sha256": "73816fc16af89679d7fa5a06d28d467fa28bbbef7dbdc8c995ac7b18f8ab211e"
+    },
+    {
+      "path": "README_REVIEW.zh-CN.md",
+      "bytes": 8975,
+      "sha256": "71c89cf808a8ef43fbdd9c1175b6f094ddae0d89e8393cca824af3bba5bb5e6e"
+    },
+    {
+      "path": "RECONSTRUCTION_ACTIONS.json",
+      "bytes": 756152,
+      "sha256": "9c9a4d91cb16e17cc48fa23c801360f8c7c1c499d6ead61f7382dc40ce1f17e2"
+    },
+    {
+      "path": "RECONSTRUCTION_DAILY.jsonl",
+      "bytes": 27406844,
+      "sha256": "01830ae0d9e30bcfbd313a387282910ad929fa20999507384916528566fd81d5"
+    },
+    {
+      "path": "RECONSTRUCTION_TRANSPORT_EVENTS.json",
+      "bytes": 1833026,
+      "sha256": "2781606115a9b74116814024995052560275386bbfe22a8df1b418de37b90e96"
+    },
+    {
+      "path": "REFERENCE_CASH_EVENTS.jsonl",
+      "bytes": 36114001,
+      "sha256": "0599c4ac8f8dbb63cedc84f2c7c9705a6665c53fd05f50af4714f690c528bd25"
+    },
+    {
+      "path": "REFERENCE_OWNER_CASH_DAILY.csv",
+      "bytes": 14173654,
+      "sha256": "95301f14d58b9d4a64f99aa2d38c4a58930fdb8c3be75e85669b7cfb344cef1d"
+    },
+    {
+      "path": "RULES.metadata-delta.json",
+      "bytes": 5245,
+      "sha256": "280f8f522d2a9cf5b27cec7b103f0ca26d9264f7a01a14e176cdc0f4201f2a25"
+    },
+    {
+      "path": "SOURCE_EVIDENCE.json",
+      "bytes": 21810,
+      "sha256": "61c6b4dd8f0b434021e4320ab36b1da8c31dce1f21eb9b444e7ece0b497f2a84"
+    },
+    {
+      "path": "SUMMARY.json",
+      "bytes": 1067,
+      "sha256": "21c6e57f163de7771cc7561853a12781d0866532e1f206d7353f8390addbd868"
+    },
+    {
+      "path": "TERMINAL_REFERENCE_RECONCILIATION.json",
+      "bytes": 61070,
+      "sha256": "98974193fad22917d027d0e85f418025db6d2501bd41d63a24a723c6718b3b44"
+    },
+    {
+      "path": "TEST_RECEIPT.json",
+      "bytes": 9583,
+      "sha256": "d71e877b904f69db7ae8774f7b8e96bb26ef62b3c85c91fbe828cdd0133ddf33"
+    },
+    {
+      "path": "UNIT_SAFE_NATIVE_BUCKETS.json",
+      "bytes": 535600,
+      "sha256": "264b3b4d2278ebf407f4ff29446fc59d86cc72bcaced08ab7e60b54949ed2a8a"
+    },
+    {
+      "path": "build.attempt1.log",
+      "bytes": 896,
+      "sha256": "0b1729e7c81e4d3144ae51e443e0ac75791d829b9b1e3bd6cfb2bfed3376a786"
+    },
+    {
+      "path": "build.attempt2.log",
+      "bytes": 611,
+      "sha256": "817cd90f1da95e54765cf378fdcf06f1cef654025c37d22bc87eab2416bc626c"
+    },
+    {
+      "path": "build.log",
+      "bytes": 611,
+      "sha256": "817cd90f1da95e54765cf378fdcf06f1cef654025c37d22bc87eab2416bc626c"
+    },
+    {
+      "path": "build_timeline.py",
+      "bytes": 32318,
+      "sha256": "494133f3073a270b23be3626ec086883385480fc5d52e90dd539f42beb174073"
+    },
+    {
+      "path": "enrich_and_verify.py",
+      "bytes": 15798,
+      "sha256": "4dfaf8cee6ac04e205d3a99c7f07388473516420b56965a06a8128cef40b5a54"
+    },
+    {
+      "path": "enrichment.log",
+      "bytes": 149,
+      "sha256": "9f86491e08ca94635e3dd522bf146ea48cd297be60fb7d1f0119d4819ba69b8b"
+    },
+    {
+      "path": "finalize.py",
+      "bytes": 15422,
+      "sha256": "b013da955b0baf64a37e56c35bf8173dae453c15d83675904a9b3d8788852421"
+    },
+    {
+      "path": "terminal-verification.log",
+      "bytes": 148,
+      "sha256": "7c2a1aabe5f739ae09c458308d45f6116bb605b3b43092c174aff9550af6cbcf"
+    },
+    {
+      "path": "verify_terminal.py",
+      "bytes": 2438,
+      "sha256": "cb4c6065b0340471480982e690cefd37138c065cb6dbbe0e00a8c1200752f61f"
+    }
+  ],
+  "summary": {
+    "countryCount": 70,
+    "simDayRowsIncludingDay0": 9870,
+    "realDays": 14,
+    "simDays": 140,
+    "ownerCashRows": 29400,
+    "fixedNewGovContracts": 140,
+    "fixedNewGovCashDueThrough140Gcu": "0",
+    "clearingCandidateTerms": 4,
+    "referenceJobRows": 138966,
+    "reconstructionDailyGroups": 27127,
+    "actionGroups": 426,
+    "referenceJournalRows": 589708,
+    "referenceCashEventGroups": 149038,
+    "transportEvents": 2416,
+    "budgetShortageBySim14": 54,
+    "budgetShortageBySim140": 63,
+    "budgetShortageAtSim1": 19,
+    "actualShortageTimesKnown": 0,
+    "economicStatus": "HOLD",
+    "structuralChecksPassed": 75,
+    "sourceHashCount": 54,
+    "newWorldExecution": false,
+    "reportedDrainShortageBySim14": 52,
+    "newArtifactMutationChecksPassed": 19,
+    "terminalArrayReadChecksPassed": 3,
+    "totalNewStructuralAndArtifactChecksPassed": 97,
+    "referenceGrossCrossBorderOutGcu": "1012043193.75",
+    "referenceExtractedVsSavedFloatMaxDifferenceGcu": "0.028836784650043459282605256",
+    "referenceEndpointCashIsNotIntradayMinimum": true,
+    "referenceSameDayEscrowPhaseGapResolved": true
+  },
+  "scopeExclusions": [
+    "DELIVERY_MANIFEST.json",
+    "TOWER_HANDOFF_RECEIPT.json"
+  ]
+}

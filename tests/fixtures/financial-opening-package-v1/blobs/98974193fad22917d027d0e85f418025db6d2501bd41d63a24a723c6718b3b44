@@ -1,0 +1,1498 @@
+{
+  "version": "CONSTRUCTED_SCENARIO_FIRST14_20261013_V1_PROPOSED",
+  "status": "PASS_WITH_RETAINED_REFERENCE_FLOAT_TOLERANCE_NOT_NATIVE_EXACTNESS",
+  "testsPassed": 3,
+  "tests": [
+    "Saved terminalCash shape/type identity",
+    "210 exact-lexeme extraction vs saved reference terminal values within existing <=1GCU audit tolerance",
+    "Original NPZ read only and hashed"
+  ],
+  "source": {
+    "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/region_R3AM_STARTUP_strict_bridge_R0.3_D140_S1_ARRAYS.npz",
+    "sha256": "3a6c691f733928b4944234fadcf5ce03a49eb2eba3008d7de7967b495abcd0fa",
+    "bytes": 781336
+  },
+  "maximumAbsoluteDifferenceGcu": "0.028836784650043459282605256",
+  "rows": [
+    {
+      "owner": "GOV-01",
+      "extractedExactLexemeGcu": "30314517.8293167608767310856701169314",
+      "savedFloatDisplayGcu": "30314517.829317562",
+      "signedDifferenceGcu": "-0.0000008011232689143298830686",
+      "sourceArrayPointer": "/terminalCash/0/0"
+    },
+    {
+      "owner": "OP-01",
+      "extractedExactLexemeGcu": "674481771.131880310575235221247425349",
+      "savedFloatDisplayGcu": "674481771.1318861",
+      "signedDifferenceGcu": "-0.000005789424764778752574651",
+      "sourceArrayPointer": "/terminalCash/0/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-01",
+      "extractedExactLexemeGcu": "67243925.3533351533480336930824577196",
+      "savedFloatDisplayGcu": "67243925.35333586",
+      "signedDifferenceGcu": "-0.0000007066519663069175422804",
+      "sourceArrayPointer": "/terminalCash/0/2"
+    },
+    {
+      "owner": "GOV-02",
+      "extractedExactLexemeGcu": "91097699.9815208180339811181480399551",
+      "savedFloatDisplayGcu": "91097699.98152423",
+      "signedDifferenceGcu": "-0.0000034119660188818519600449",
+      "sourceArrayPointer": "/terminalCash/1/0"
+    },
+    {
+      "owner": "OP-02",
+      "extractedExactLexemeGcu": "891136709.9576908396657500966971922684",
+      "savedFloatDisplayGcu": "891136709.9576962",
+      "signedDifferenceGcu": "-0.0000053603342499033028077316",
+      "sourceArrayPointer": "/terminalCash/1/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-02",
+      "extractedExactLexemeGcu": "87485699.5649124400002687851547677765",
+      "savedFloatDisplayGcu": "87485699.56490712",
+      "signedDifferenceGcu": "0.0000053200002687851547677765",
+      "sourceArrayPointer": "/terminalCash/1/2"
+    },
+    {
+      "owner": "GOV-03",
+      "extractedExactLexemeGcu": "999487152.400036986447282374758449355064",
+      "savedFloatDisplayGcu": "999487152.4000584",
+      "signedDifferenceGcu": "-0.000021413552717625241550644936",
+      "sourceArrayPointer": "/terminalCash/2/0"
+    },
+    {
+      "owner": "OP-03",
+      "extractedExactLexemeGcu": "1846098206.457519522441584355994116529694",
+      "savedFloatDisplayGcu": "1846098206.457549",
+      "signedDifferenceGcu": "-0.000029477558415644005883470306",
+      "sourceArrayPointer": "/terminalCash/2/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-03",
+      "extractedExactLexemeGcu": "165863672.460630793042426660432612115242",
+      "savedFloatDisplayGcu": "165863672.46062708",
+      "signedDifferenceGcu": "0.000003713042426660432612115242",
+      "sourceArrayPointer": "/terminalCash/2/2"
+    },
+    {
+      "owner": "GOV-04",
+      "extractedExactLexemeGcu": "6912687667.5675927373784639204816568686",
+      "savedFloatDisplayGcu": "6912687667.567305",
+      "signedDifferenceGcu": "0.0002877373784639204816568686",
+      "sourceArrayPointer": "/terminalCash/3/0"
+    },
+    {
+      "owner": "OP-04",
+      "extractedExactLexemeGcu": "3199016578.22448803918563044406172006369",
+      "savedFloatDisplayGcu": "3199016578.2245364",
+      "signedDifferenceGcu": "-0.00004836081436955593827993631",
+      "sourceArrayPointer": "/terminalCash/3/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-04",
+      "extractedExactLexemeGcu": "3689319099.96401034186114195601475306771",
+      "savedFloatDisplayGcu": "3689319099.9641786",
+      "signedDifferenceGcu": "-0.00016825813885804398524693229",
+      "sourceArrayPointer": "/terminalCash/3/2"
+    },
+    {
+      "owner": "GOV-05",
+      "extractedExactLexemeGcu": "364124661.8593204668471788623661051515202",
+      "savedFloatDisplayGcu": "364124661.8593371",
+      "signedDifferenceGcu": "-0.0000166331528211376338948484798",
+      "sourceArrayPointer": "/terminalCash/4/0"
+    },
+    {
+      "owner": "OP-05",
+      "extractedExactLexemeGcu": "1337059890.2255394239219354719305033779618",
+      "savedFloatDisplayGcu": "1337059890.22556",
+      "signedDifferenceGcu": "-0.0000205760780645280694966220382",
+      "sourceArrayPointer": "/terminalCash/4/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-05",
+      "extractedExactLexemeGcu": "126735213.985741759379806773244492470518",
+      "savedFloatDisplayGcu": "126735213.9857374",
+      "signedDifferenceGcu": "0.000004359379806773244492470518",
+      "sourceArrayPointer": "/terminalCash/4/2"
+    },
+    {
+      "owner": "GOV-06",
+      "extractedExactLexemeGcu": "51822363.34850352088965985517114329365",
+      "savedFloatDisplayGcu": "51822363.34850323",
+      "signedDifferenceGcu": "0.00000029088965985517114329365",
+      "sourceArrayPointer": "/terminalCash/5/0"
+    },
+    {
+      "owner": "OP-06",
+      "extractedExactLexemeGcu": "1936602340.2805303639432431394765960916",
+      "savedFloatDisplayGcu": "1936602340.2805068",
+      "signedDifferenceGcu": "0.0000235639432431394765960916",
+      "sourceArrayPointer": "/terminalCash/5/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-06",
+      "extractedExactLexemeGcu": "191872955.97869376456709700535226061475",
+      "savedFloatDisplayGcu": "191872955.97869807",
+      "signedDifferenceGcu": "-0.00000430543290299464773938525",
+      "sourceArrayPointer": "/terminalCash/5/2"
+    },
+    {
+      "owner": "GOV-07",
+      "extractedExactLexemeGcu": "277735259.9624085764531442852224829982",
+      "savedFloatDisplayGcu": "277735259.96242857",
+      "signedDifferenceGcu": "-0.0000199935468557147775170018",
+      "sourceArrayPointer": "/terminalCash/6/0"
+    },
+    {
+      "owner": "OP-07",
+      "extractedExactLexemeGcu": "1423149360.5913998571774245979595932256",
+      "savedFloatDisplayGcu": "1423149360.5913892",
+      "signedDifferenceGcu": "0.0000106571774245979595932256",
+      "sourceArrayPointer": "/terminalCash/6/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-07",
+      "extractedExactLexemeGcu": "138381751.9358208273694311168179237762",
+      "savedFloatDisplayGcu": "138381751.93584138",
+      "signedDifferenceGcu": "-0.0000205526305688831820762238",
+      "sourceArrayPointer": "/terminalCash/6/2"
+    },
+    {
+      "owner": "GOV-08",
+      "extractedExactLexemeGcu": "69632210.77982821836131384658518179225",
+      "savedFloatDisplayGcu": "69632210.77983181",
+      "signedDifferenceGcu": "-0.00000359163868615341481820775",
+      "sourceArrayPointer": "/terminalCash/7/0"
+    },
+    {
+      "owner": "OP-08",
+      "extractedExactLexemeGcu": "1496438588.049505421402085899180838844",
+      "savedFloatDisplayGcu": "1496438588.0495017",
+      "signedDifferenceGcu": "0.000003721402085899180838844",
+      "sourceArrayPointer": "/terminalCash/7/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-08",
+      "extractedExactLexemeGcu": "149564974.93831446923660025423397936375",
+      "savedFloatDisplayGcu": "149564974.93831062",
+      "signedDifferenceGcu": "0.00000384923660025423397936375",
+      "sourceArrayPointer": "/terminalCash/7/2"
+    },
+    {
+      "owner": "GOV-09",
+      "extractedExactLexemeGcu": "1212516011.3103424726580517315352589985",
+      "savedFloatDisplayGcu": "1212516011.3102453",
+      "signedDifferenceGcu": "0.0000971726580517315352589985",
+      "sourceArrayPointer": "/terminalCash/8/0"
+    },
+    {
+      "owner": "OP-09",
+      "extractedExactLexemeGcu": "2305948010.13574281816032587210517025837",
+      "savedFloatDisplayGcu": "2305948010.135766",
+      "signedDifferenceGcu": "-0.00002318183967412789482974163",
+      "sourceArrayPointer": "/terminalCash/8/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-09",
+      "extractedExactLexemeGcu": "130968865.03759859775162239635957074313",
+      "savedFloatDisplayGcu": "130968865.03759246",
+      "signedDifferenceGcu": "0.00000613775162239635957074313",
+      "sourceArrayPointer": "/terminalCash/8/2"
+    },
+    {
+      "owner": "GOV-10",
+      "extractedExactLexemeGcu": "703418163.1095756175924958708933846680329863971172944",
+      "savedFloatDisplayGcu": "703418163.1094493",
+      "signedDifferenceGcu": "0.0001263175924958708933846680329863971172944",
+      "sourceArrayPointer": "/terminalCash/9/0"
+    },
+    {
+      "owner": "OP-10",
+      "extractedExactLexemeGcu": "1575678374.0438720084207597452188047750988985007926816",
+      "savedFloatDisplayGcu": "1575678374.0438566",
+      "signedDifferenceGcu": "0.0000154084207597452188047750988985007926816",
+      "sourceArrayPointer": "/terminalCash/9/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-10",
+      "extractedExactLexemeGcu": "138848368.620703240395446122022930556868115102090024",
+      "savedFloatDisplayGcu": "138848368.62067825",
+      "signedDifferenceGcu": "0.000024990395446122022930556868115102090024",
+      "sourceArrayPointer": "/terminalCash/9/2"
+    },
+    {
+      "owner": "GOV-11",
+      "extractedExactLexemeGcu": "3346691208.8380595652517485097946503228885",
+      "savedFloatDisplayGcu": "3346691208.837847",
+      "signedDifferenceGcu": "0.0002125652517485097946503228885",
+      "sourceArrayPointer": "/terminalCash/10/0"
+    },
+    {
+      "owner": "OP-11",
+      "extractedExactLexemeGcu": "1620584682.231520492658414959037677062311",
+      "savedFloatDisplayGcu": "1620584682.231431",
+      "signedDifferenceGcu": "0.000089492658414959037677062311",
+      "sourceArrayPointer": "/terminalCash/10/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-11",
+      "extractedExactLexemeGcu": "1793490813.2864190462660216231676626148005",
+      "savedFloatDisplayGcu": "1793490813.2864442",
+      "signedDifferenceGcu": "-0.0000251537339783768323373851995",
+      "sourceArrayPointer": "/terminalCash/10/2"
+    },
+    {
+      "owner": "GOV-12",
+      "extractedExactLexemeGcu": "508543445.7853817246265846628050874997567217487712501",
+      "savedFloatDisplayGcu": "508543445.7853878",
+      "signedDifferenceGcu": "-0.0000060753734153371949125002432782512287499",
+      "sourceArrayPointer": "/terminalCash/11/0"
+    },
+    {
+      "owner": "OP-12",
+      "extractedExactLexemeGcu": "1938970537.98000963774579562427105146089754240930079",
+      "savedFloatDisplayGcu": "1938970537.9800456",
+      "signedDifferenceGcu": "-0.00003596225420437572894853910245759069921",
+      "sourceArrayPointer": "/terminalCash/11/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-12",
+      "extractedExactLexemeGcu": "180458439.4223514722563974233587400393457358419279599",
+      "savedFloatDisplayGcu": "180458439.42238402",
+      "signedDifferenceGcu": "-0.0000325477436025766412599606542641580720401",
+      "sourceArrayPointer": "/terminalCash/11/2"
+    },
+    {
+      "owner": "GOV-13",
+      "extractedExactLexemeGcu": "1353207628.42415451991426189479493004297",
+      "savedFloatDisplayGcu": "1353207628.4240954",
+      "signedDifferenceGcu": "0.00005911991426189479493004297",
+      "sourceArrayPointer": "/terminalCash/12/0"
+    },
+    {
+      "owner": "OP-13",
+      "extractedExactLexemeGcu": "1508785449.3972462388994542491030095432",
+      "savedFloatDisplayGcu": "1508785449.397264",
+      "signedDifferenceGcu": "-0.0000177611005457508969904568",
+      "sourceArrayPointer": "/terminalCash/12/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-13",
+      "extractedExactLexemeGcu": "135512690.28271555381628385610206041383",
+      "savedFloatDisplayGcu": "135512690.28271848",
+      "signedDifferenceGcu": "-0.00000292618371614389793958617",
+      "sourceArrayPointer": "/terminalCash/12/2"
+    },
+    {
+      "owner": "GOV-14",
+      "extractedExactLexemeGcu": "232736617.13461100051542450711713266117",
+      "savedFloatDisplayGcu": "232736617.13460395",
+      "signedDifferenceGcu": "0.00000705051542450711713266117",
+      "sourceArrayPointer": "/terminalCash/13/0"
+    },
+    {
+      "owner": "OP-14",
+      "extractedExactLexemeGcu": "1343062502.7617308167479439933954246225",
+      "savedFloatDisplayGcu": "1343062502.761746",
+      "signedDifferenceGcu": "-0.0000151832520560066045753775",
+      "sourceArrayPointer": "/terminalCash/13/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-14",
+      "extractedExactLexemeGcu": "129988876.62299757173663149948744271633",
+      "savedFloatDisplayGcu": "129988876.62299156",
+      "signedDifferenceGcu": "0.00000601173663149948744271633",
+      "sourceArrayPointer": "/terminalCash/13/2"
+    },
+    {
+      "owner": "GOV-15",
+      "extractedExactLexemeGcu": "76208781.62293593016904478030930607485",
+      "savedFloatDisplayGcu": "76208781.6229357",
+      "signedDifferenceGcu": "0.00000023016904478030930607485",
+      "sourceArrayPointer": "/terminalCash/14/0"
+    },
+    {
+      "owner": "OP-15",
+      "extractedExactLexemeGcu": "1730064694.9342738077956834573208693469",
+      "savedFloatDisplayGcu": "1730064694.934258",
+      "signedDifferenceGcu": "0.0000158077956834573208693469",
+      "sourceArrayPointer": "/terminalCash/14/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-15",
+      "extractedExactLexemeGcu": "172270848.82156663163527176236982457825",
+      "savedFloatDisplayGcu": "172270848.82156768",
+      "signedDifferenceGcu": "-0.00000104836472823763017542175",
+      "sourceArrayPointer": "/terminalCash/14/2"
+    },
+    {
+      "owner": "GOV-16",
+      "extractedExactLexemeGcu": "187449698.8216790172943373786174256626",
+      "savedFloatDisplayGcu": "187449698.82170984",
+      "signedDifferenceGcu": "-0.0000308227056626213825743374",
+      "sourceArrayPointer": "/terminalCash/15/0"
+    },
+    {
+      "owner": "OP-16",
+      "extractedExactLexemeGcu": "1751588976.0794491716237797138797946286",
+      "savedFloatDisplayGcu": "1751588976.0794446",
+      "signedDifferenceGcu": "0.0000045716237797138797946286",
+      "sourceArrayPointer": "/terminalCash/15/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-16",
+      "extractedExactLexemeGcu": "172493560.3466919318818829075027797088",
+      "savedFloatDisplayGcu": "172493560.34668556",
+      "signedDifferenceGcu": "0.0000063718818829075027797088",
+      "sourceArrayPointer": "/terminalCash/15/2"
+    },
+    {
+      "owner": "GOV-17",
+      "extractedExactLexemeGcu": "499234719.7354365612429489227437953301007065947353912",
+      "savedFloatDisplayGcu": "499234719.73544395",
+      "signedDifferenceGcu": "-0.0000073887570510772562046698992934052646088",
+      "sourceArrayPointer": "/terminalCash/16/0"
+    },
+    {
+      "owner": "OP-17",
+      "extractedExactLexemeGcu": "1159421455.26418320138143161489169043860035440295934",
+      "savedFloatDisplayGcu": "1159421455.2641833",
+      "signedDifferenceGcu": "-0.00000009861856838510830956139964559704066",
+      "sourceArrayPointer": "/terminalCash/16/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-17",
+      "extractedExactLexemeGcu": "90704269.0562136999693201458845142312989390023052688",
+      "savedFloatDisplayGcu": "90704269.05619407",
+      "signedDifferenceGcu": "0.0000196299693201458845142312989390023052688",
+      "sourceArrayPointer": "/terminalCash/16/2"
+    },
+    {
+      "owner": "GOV-18",
+      "extractedExactLexemeGcu": "2816031513.685636428751118089394937981119",
+      "savedFloatDisplayGcu": "2816031513.6857104",
+      "signedDifferenceGcu": "-0.000073971248881910605062018881",
+      "sourceArrayPointer": "/terminalCash/17/0"
+    },
+    {
+      "owner": "OP-18",
+      "extractedExactLexemeGcu": "1343454221.91949063827021869279737866607",
+      "savedFloatDisplayGcu": "1343454221.9194684",
+      "signedDifferenceGcu": "0.00002223827021869279737866607",
+      "sourceArrayPointer": "/terminalCash/17/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-18",
+      "extractedExactLexemeGcu": "1512204323.562872122737226193807683352811",
+      "savedFloatDisplayGcu": "1512204323.5627835",
+      "signedDifferenceGcu": "0.000088622737226193807683352811",
+      "sourceArrayPointer": "/terminalCash/17/2"
+    },
+    {
+      "owner": "GOV-19",
+      "extractedExactLexemeGcu": "234645375.125091722604049573797105725415",
+      "savedFloatDisplayGcu": "234645375.1250858",
+      "signedDifferenceGcu": "0.000005922604049573797105725415",
+      "sourceArrayPointer": "/terminalCash/18/0"
+    },
+    {
+      "owner": "OP-19",
+      "extractedExactLexemeGcu": "825791340.079606236378606483412523200812",
+      "savedFloatDisplayGcu": "825791340.0796114",
+      "signedDifferenceGcu": "-0.000005163621393516587476799188",
+      "sourceArrayPointer": "/terminalCash/18/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-19",
+      "extractedExactLexemeGcu": "78295617.802201264687825017990370073773",
+      "savedFloatDisplayGcu": "78295617.80220293",
+      "signedDifferenceGcu": "-0.000001665312174982009629926227",
+      "sourceArrayPointer": "/terminalCash/18/2"
+    },
+    {
+      "owner": "GOV-20",
+      "extractedExactLexemeGcu": "1819230156.3032053506765918042241789768332",
+      "savedFloatDisplayGcu": "1819230156.3032718",
+      "signedDifferenceGcu": "-0.0000664493234081957758210231668",
+      "sourceArrayPointer": "/terminalCash/19/0"
+    },
+    {
+      "owner": "OP-20",
+      "extractedExactLexemeGcu": "1316176879.58072858656335360730472212853",
+      "savedFloatDisplayGcu": "1316176879.5807102",
+      "signedDifferenceGcu": "0.00001838656335360730472212853",
+      "sourceArrayPointer": "/terminalCash/19/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-20",
+      "extractedExactLexemeGcu": "119225146.5604482070530545884710988946368",
+      "savedFloatDisplayGcu": "119225146.56044635",
+      "signedDifferenceGcu": "0.0000018570530545884710988946368",
+      "sourceArrayPointer": "/terminalCash/19/2"
+    },
+    {
+      "owner": "GOV-21",
+      "extractedExactLexemeGcu": "300502669.1732065605807059459671072677",
+      "savedFloatDisplayGcu": "300502669.17320025",
+      "signedDifferenceGcu": "0.0000063105807059459671072677",
+      "sourceArrayPointer": "/terminalCash/20/0"
+    },
+    {
+      "owner": "OP-21",
+      "extractedExactLexemeGcu": "1729170551.7593484444974473453327433024",
+      "savedFloatDisplayGcu": "1729170551.7593448",
+      "signedDifferenceGcu": "0.0000036444974473453327433024",
+      "sourceArrayPointer": "/terminalCash/20/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-21",
+      "extractedExactLexemeGcu": "167324499.9418630719218467087001494299",
+      "savedFloatDisplayGcu": "167324499.94185793",
+      "signedDifferenceGcu": "0.0000051419218467087001494299",
+      "sourceArrayPointer": "/terminalCash/20/2"
+    },
+    {
+      "owner": "GOV-22",
+      "extractedExactLexemeGcu": "31661750.7021020532214264156313570199",
+      "savedFloatDisplayGcu": "31661750.70210206",
+      "signedDifferenceGcu": "-0.0000000067785735843686429801",
+      "sourceArrayPointer": "/terminalCash/21/0"
+    },
+    {
+      "owner": "OP-22",
+      "extractedExactLexemeGcu": "718078704.3975103307628424453235950995",
+      "savedFloatDisplayGcu": "718078704.3975149",
+      "signedDifferenceGcu": "-0.0000045692371575546764049005",
+      "sourceArrayPointer": "/terminalCash/21/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-22",
+      "extractedExactLexemeGcu": "71502258.0345572436157311390450478806",
+      "savedFloatDisplayGcu": "71502258.03455776",
+      "signedDifferenceGcu": "-0.0000005163842688609549521194",
+      "sourceArrayPointer": "/terminalCash/21/2"
+    },
+    {
+      "owner": "GOV-23",
+      "extractedExactLexemeGcu": "208499222.09726737639995514615441840888",
+      "savedFloatDisplayGcu": "208499222.09730664",
+      "signedDifferenceGcu": "-0.00003926360004485384558159112",
+      "sourceArrayPointer": "/terminalCash/22/0"
+    },
+    {
+      "owner": "OP-23",
+      "extractedExactLexemeGcu": "2313824655.6435283422924509001842876355",
+      "savedFloatDisplayGcu": "2313824655.643501",
+      "signedDifferenceGcu": "0.0000273422924509001842876355",
+      "sourceArrayPointer": "/terminalCash/22/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-23",
+      "extractedExactLexemeGcu": "223460713.30226270530759395366129395562",
+      "savedFloatDisplayGcu": "223460713.30226249",
+      "signedDifferenceGcu": "0.00000021530759395366129395562",
+      "sourceArrayPointer": "/terminalCash/22/2"
+    },
+    {
+      "owner": "GOV-24",
+      "extractedExactLexemeGcu": "688113081.29070397827821884986680569441768",
+      "savedFloatDisplayGcu": "688113081.290713",
+      "signedDifferenceGcu": "-0.00000902172178115013319430558232",
+      "sourceArrayPointer": "/terminalCash/23/0"
+    },
+    {
+      "owner": "OP-24",
+      "extractedExactLexemeGcu": "1785188559.674022008042296458526181510071951",
+      "savedFloatDisplayGcu": "1785188559.6740267",
+      "signedDifferenceGcu": "-0.000004691957703541473818489928049",
+      "sourceArrayPointer": "/terminalCash/23/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-24",
+      "extractedExactLexemeGcu": "138888144.925589502964185604858878795510369",
+      "savedFloatDisplayGcu": "138888144.9255476",
+      "signedDifferenceGcu": "0.000041902964185604858878795510369",
+      "sourceArrayPointer": "/terminalCash/23/2"
+    },
+    {
+      "owner": "GOV-25",
+      "extractedExactLexemeGcu": "2915535640.906035801363133504644899247169990739077209",
+      "savedFloatDisplayGcu": "2915535640.9058084",
+      "signedDifferenceGcu": "0.000227401363133504644899247169990739077209",
+      "sourceArrayPointer": "/terminalCash/24/0"
+    },
+    {
+      "owner": "OP-25",
+      "extractedExactLexemeGcu": "1428937131.108941556413492780136501706760307942927",
+      "savedFloatDisplayGcu": "1428937131.1089158",
+      "signedDifferenceGcu": "0.000025756413492780136501706760307942927",
+      "sourceArrayPointer": "/terminalCash/24/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-25",
+      "extractedExactLexemeGcu": "1574710981.522621936625694638418579046069701317995791",
+      "savedFloatDisplayGcu": "1574710981.5224304",
+      "signedDifferenceGcu": "0.000191536625694638418579046069701317995791",
+      "sourceArrayPointer": "/terminalCash/24/2"
+    },
+    {
+      "owner": "GOV-26",
+      "extractedExactLexemeGcu": "249653286.5578464353635242503443743771880368702114779",
+      "savedFloatDisplayGcu": "249653286.5578657",
+      "signedDifferenceGcu": "-0.0000192646364757496556256228119631297885221",
+      "sourceArrayPointer": "/terminalCash/25/0"
+    },
+    {
+      "owner": "OP-26",
+      "extractedExactLexemeGcu": "1034412695.211066372337081030247065156778211804333326",
+      "savedFloatDisplayGcu": "1034412695.2110808",
+      "signedDifferenceGcu": "-0.000014427662918969752934843221788195666674",
+      "sourceArrayPointer": "/terminalCash/25/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-26",
+      "extractedExactLexemeGcu": "95908730.0240481478883468867668984660337513254551961",
+      "savedFloatDisplayGcu": "95908730.02404773",
+      "signedDifferenceGcu": "0.0000004178883468867668984660337513254551961",
+      "sourceArrayPointer": "/terminalCash/25/2"
+    },
+    {
+      "owner": "GOV-27",
+      "extractedExactLexemeGcu": "15029035.00805348499718819870377281848",
+      "savedFloatDisplayGcu": "15029035.008053377",
+      "signedDifferenceGcu": "0.00000010799718819870377281848",
+      "sourceArrayPointer": "/terminalCash/26/0"
+    },
+    {
+      "owner": "OP-27",
+      "extractedExactLexemeGcu": "1359612114.7591947359846190013796615213",
+      "savedFloatDisplayGcu": "1359612114.7591903",
+      "signedDifferenceGcu": "0.0000044359846190013796615213",
+      "sourceArrayPointer": "/terminalCash/26/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-27",
+      "extractedExactLexemeGcu": "132950101.46150278941819279991656566022",
+      "savedFloatDisplayGcu": "132950101.46149974",
+      "signedDifferenceGcu": "0.00000304941819279991656566022",
+      "sourceArrayPointer": "/terminalCash/26/2"
+    },
+    {
+      "owner": "GOV-28",
+      "extractedExactLexemeGcu": "260020511.908360408415356410261480121929",
+      "savedFloatDisplayGcu": "260020511.90840128",
+      "signedDifferenceGcu": "-0.000040871584643589738519878071",
+      "sourceArrayPointer": "/terminalCash/27/0"
+    },
+    {
+      "owner": "OP-28",
+      "extractedExactLexemeGcu": "1459976788.3342644061401201618213910653",
+      "savedFloatDisplayGcu": "1459976788.334258",
+      "signedDifferenceGcu": "0.0000064061401201618213910653",
+      "sourceArrayPointer": "/terminalCash/27/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-28",
+      "extractedExactLexemeGcu": "139216751.669463377444523427917128812771",
+      "savedFloatDisplayGcu": "139216751.66947672",
+      "signedDifferenceGcu": "-0.000013342555476572082871187229",
+      "sourceArrayPointer": "/terminalCash/27/2"
+    },
+    {
+      "owner": "GOV-29",
+      "extractedExactLexemeGcu": "29068963.932755294457097234558124188226",
+      "savedFloatDisplayGcu": "29068963.932756882",
+      "signedDifferenceGcu": "-0.000001587542902765441875811774",
+      "sourceArrayPointer": "/terminalCash/28/0"
+    },
+    {
+      "owner": "OP-29",
+      "extractedExactLexemeGcu": "1320476196.27231432749653709136433984047",
+      "savedFloatDisplayGcu": "1320476196.2723143",
+      "signedDifferenceGcu": "0.00000002749653709136433984047",
+      "sourceArrayPointer": "/terminalCash/28/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-29",
+      "extractedExactLexemeGcu": "129209699.092468345446365674077535971304",
+      "savedFloatDisplayGcu": "129209699.09247123",
+      "signedDifferenceGcu": "-0.000002884553634325922464028696",
+      "sourceArrayPointer": "/terminalCash/28/2"
+    },
+    {
+      "owner": "GOV-30",
+      "extractedExactLexemeGcu": "96547768.76421778608472842420730652527",
+      "savedFloatDisplayGcu": "96547768.76422924",
+      "signedDifferenceGcu": "-0.00001145391527157579269347473",
+      "sourceArrayPointer": "/terminalCash/29/0"
+    },
+    {
+      "owner": "OP-30",
+      "extractedExactLexemeGcu": "1202554360.7246461916871493610210203648",
+      "savedFloatDisplayGcu": "1202554360.7246468",
+      "signedDifferenceGcu": "-0.0000006083128506389789796352",
+      "sourceArrayPointer": "/terminalCash/29/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-30",
+      "extractedExactLexemeGcu": "115701358.90866599542812221477167310993",
+      "savedFloatDisplayGcu": "115701358.908669",
+      "signedDifferenceGcu": "-0.00000300457187778522832689007",
+      "sourceArrayPointer": "/terminalCash/29/2"
+    },
+    {
+      "owner": "GOV-31",
+      "extractedExactLexemeGcu": "725133672.456826401280366346016831330204295972332832",
+      "savedFloatDisplayGcu": "725133672.4567996",
+      "signedDifferenceGcu": "0.000026801280366346016831330204295972332832",
+      "sourceArrayPointer": "/terminalCash/30/0"
+    },
+    {
+      "owner": "OP-31",
+      "extractedExactLexemeGcu": "1440120627.77268228551507051872680086353114640718698",
+      "savedFloatDisplayGcu": "1440120627.77269",
+      "signedDifferenceGcu": "-0.00000771448492948127319913646885359281302",
+      "sourceArrayPointer": "/terminalCash/30/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-31",
+      "extractedExactLexemeGcu": "126459910.229819151309633657261513806264557620480188",
+      "savedFloatDisplayGcu": "126459910.2297929",
+      "signedDifferenceGcu": "0.000026251309633657261513806264557620480188",
+      "sourceArrayPointer": "/terminalCash/30/2"
+    },
+    {
+      "owner": "GOV-32",
+      "extractedExactLexemeGcu": "3041995284.6473460435808716772889266917660214245716181",
+      "savedFloatDisplayGcu": "3041995284.6471405",
+      "signedDifferenceGcu": "0.0002055435808716772889266917660214245716181",
+      "sourceArrayPointer": "/terminalCash/31/0"
+    },
+    {
+      "owner": "OP-32",
+      "extractedExactLexemeGcu": "1528976822.4714012156235814890420978606631558587247656",
+      "savedFloatDisplayGcu": "1528976822.471298",
+      "signedDifferenceGcu": "0.0001032156235814890420978606631558587247656",
+      "sourceArrayPointer": "/terminalCash/31/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-32",
+      "extractedExactLexemeGcu": "1629600491.2379011649994613541476454475708227167036163",
+      "savedFloatDisplayGcu": "1629600491.23797",
+      "signedDifferenceGcu": "-0.0000688350005386458523545524291772832963837",
+      "sourceArrayPointer": "/terminalCash/31/2"
+    },
+    {
+      "owner": "GOV-33",
+      "extractedExactLexemeGcu": "296899834.1879999237494494687775630559661",
+      "savedFloatDisplayGcu": "296899834.18798",
+      "signedDifferenceGcu": "0.0000199237494494687775630559661",
+      "sourceArrayPointer": "/terminalCash/32/0"
+    },
+    {
+      "owner": "OP-33",
+      "extractedExactLexemeGcu": "1161473697.4587014603650329390532035028409",
+      "savedFloatDisplayGcu": "1161473697.4586918",
+      "signedDifferenceGcu": "0.0000096603650329390532035028409",
+      "sourceArrayPointer": "/terminalCash/32/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-33",
+      "extractedExactLexemeGcu": "109959066.033547341095100397826955441193",
+      "savedFloatDisplayGcu": "109959066.03355138",
+      "signedDifferenceGcu": "-0.000004038904899602173044558807",
+      "sourceArrayPointer": "/terminalCash/32/2"
+    },
+    {
+      "owner": "GOV-34",
+      "extractedExactLexemeGcu": "47277180.0209890824309974305600157636",
+      "savedFloatDisplayGcu": "47277180.02098666",
+      "signedDifferenceGcu": "0.0000024224309974305600157636",
+      "sourceArrayPointer": "/terminalCash/33/0"
+    },
+    {
+      "owner": "OP-34",
+      "extractedExactLexemeGcu": "1309799337.9789791265434265274635653433",
+      "savedFloatDisplayGcu": "1309799337.9789696",
+      "signedDifferenceGcu": "0.0000095265434265274635653433",
+      "sourceArrayPointer": "/terminalCash/33/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-34",
+      "extractedExactLexemeGcu": "130860216.3356440826255760419764188931",
+      "savedFloatDisplayGcu": "130860216.33564278",
+      "signedDifferenceGcu": "0.0000013026255760419764188931",
+      "sourceArrayPointer": "/terminalCash/33/2"
+    },
+    {
+      "owner": "GOV-35",
+      "extractedExactLexemeGcu": "176967683.69402221027681221566672642434",
+      "savedFloatDisplayGcu": "176967683.69404814",
+      "signedDifferenceGcu": "-0.00002592972318778433327357566",
+      "sourceArrayPointer": "/terminalCash/34/0"
+    },
+    {
+      "owner": "OP-35",
+      "extractedExactLexemeGcu": "1252428103.34836519299187319497770828",
+      "savedFloatDisplayGcu": "1252428103.3483844",
+      "signedDifferenceGcu": "-0.00001920700812680502229172",
+      "sourceArrayPointer": "/terminalCash/34/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-35",
+      "extractedExactLexemeGcu": "118514071.76075449173131458935556529566",
+      "savedFloatDisplayGcu": "118514071.76075906",
+      "signedDifferenceGcu": "-0.00000456826868541064443470434",
+      "sourceArrayPointer": "/terminalCash/34/2"
+    },
+    {
+      "owner": "GOV-36",
+      "extractedExactLexemeGcu": "26412804.3636031715693894155336207415",
+      "savedFloatDisplayGcu": "26412804.36360248",
+      "signedDifferenceGcu": "0.0000006915693894155336207415",
+      "sourceArrayPointer": "/terminalCash/35/0"
+    },
+    {
+      "owner": "OP-36",
+      "extractedExactLexemeGcu": "599538563.704696703206619774407327909",
+      "savedFloatDisplayGcu": "599538563.704698",
+      "signedDifferenceGcu": "-0.000001296793380225592672091",
+      "sourceArrayPointer": "/terminalCash/35/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-36",
+      "extractedExactLexemeGcu": "59606273.6860005072239908100590513495",
+      "savedFloatDisplayGcu": "59606273.685998365",
+      "signedDifferenceGcu": "0.0000021422239908100590513495",
+      "sourceArrayPointer": "/terminalCash/35/2"
+    },
+    {
+      "owner": "GOV-37",
+      "extractedExactLexemeGcu": "49048087.175104457436194664220454795295",
+      "savedFloatDisplayGcu": "49048087.175105326",
+      "signedDifferenceGcu": "-0.000000868563805335779545204705",
+      "sourceArrayPointer": "/terminalCash/36/0"
+    },
+    {
+      "owner": "OP-37",
+      "extractedExactLexemeGcu": "634017805.37255401081172254043818443018",
+      "savedFloatDisplayGcu": "634017805.3725609",
+      "signedDifferenceGcu": "-0.00000688918827745956181556982",
+      "sourceArrayPointer": "/terminalCash/36/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-37",
+      "extractedExactLexemeGcu": "60979915.267825385052082795341360774525",
+      "savedFloatDisplayGcu": "60979915.267823726",
+      "signedDifferenceGcu": "0.000001659052082795341360774525",
+      "sourceArrayPointer": "/terminalCash/36/2"
+    },
+    {
+      "owner": "GOV-38",
+      "extractedExactLexemeGcu": "977148075.712094541782866677328386934494045412584128",
+      "savedFloatDisplayGcu": "977148075.7120963",
+      "signedDifferenceGcu": "-0.000001758217133322671613065505954587415872",
+      "sourceArrayPointer": "/terminalCash/37/0"
+    },
+    {
+      "owner": "OP-38",
+      "extractedExactLexemeGcu": "2085217857.65290216664648432484662433743358400845526",
+      "savedFloatDisplayGcu": "2085217857.6529226",
+      "signedDifferenceGcu": "-0.00002043335351567515337566256641599154474",
+      "sourceArrayPointer": "/terminalCash/37/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-38",
+      "extractedExactLexemeGcu": "183283642.024101912347738158096094728072370578960612",
+      "savedFloatDisplayGcu": "183283642.0241307",
+      "signedDifferenceGcu": "-0.000028787652261841903905271927629421039388",
+      "sourceArrayPointer": "/terminalCash/37/2"
+    },
+    {
+      "owner": "GOV-39",
+      "extractedExactLexemeGcu": "4896864072.017304762990509738840154083843920603741341",
+      "savedFloatDisplayGcu": "4896864072.017778",
+      "signedDifferenceGcu": "-0.000473237009490261159845916156079396258659",
+      "sourceArrayPointer": "/terminalCash/38/0"
+    },
+    {
+      "owner": "OP-39",
+      "extractedExactLexemeGcu": "2533861052.10094531896600005538034059804510994187006",
+      "savedFloatDisplayGcu": "2533861052.100936",
+      "signedDifferenceGcu": "0.00000931896600005538034059804510994187006",
+      "sourceArrayPointer": "/terminalCash/38/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-39",
+      "extractedExactLexemeGcu": "2614818848.346648122965779853650985318110969454388599",
+      "savedFloatDisplayGcu": "2614818848.346631",
+      "signedDifferenceGcu": "0.000017122965779853650985318110969454388599",
+      "sourceArrayPointer": "/terminalCash/38/2"
+    },
+    {
+      "owner": "GOV-40",
+      "extractedExactLexemeGcu": "385913226.83723319836378787228029995915071003203727185",
+      "savedFloatDisplayGcu": "385913226.8372612",
+      "signedDifferenceGcu": "-0.00002800163621212771970004084928996796272815",
+      "sourceArrayPointer": "/terminalCash/39/0"
+    },
+    {
+      "owner": "OP-40",
+      "extractedExactLexemeGcu": "1321023382.441899244115761032985363647358552404016253",
+      "savedFloatDisplayGcu": "1321023382.441908",
+      "signedDifferenceGcu": "-0.000008755884238967014636352641447595983747",
+      "sourceArrayPointer": "/terminalCash/39/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-40",
+      "extractedExactLexemeGcu": "123850315.33663637602490951781223739349073756394647515",
+      "savedFloatDisplayGcu": "123850315.33663419",
+      "signedDifferenceGcu": "0.00000218602490951781223739349073756394647515",
+      "sourceArrayPointer": "/terminalCash/39/2"
+    },
+    {
+      "owner": "GOV-41",
+      "extractedExactLexemeGcu": "15202424.37322060653504131661812907688",
+      "savedFloatDisplayGcu": "15202424.373221586",
+      "signedDifferenceGcu": "-0.00000097946495868338187092312",
+      "sourceArrayPointer": "/terminalCash/40/0"
+    },
+    {
+      "owner": "OP-41",
+      "extractedExactLexemeGcu": "1361118254.5144599761673241439196245757",
+      "savedFloatDisplayGcu": "1361118254.5144494",
+      "signedDifferenceGcu": "0.0000105761673241439196245757",
+      "sourceArrayPointer": "/terminalCash/40/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-41",
+      "extractedExactLexemeGcu": "133499161.11953191609763453946224634742",
+      "savedFloatDisplayGcu": "133499161.11952037",
+      "signedDifferenceGcu": "0.00001154609763453946224634742",
+      "sourceArrayPointer": "/terminalCash/40/2"
+    },
+    {
+      "owner": "GOV-42",
+      "extractedExactLexemeGcu": "125599154.6641630636522064719036202354",
+      "savedFloatDisplayGcu": "125599154.66416356",
+      "signedDifferenceGcu": "-0.0000004963477935280963797646",
+      "sourceArrayPointer": "/terminalCash/41/0"
+    },
+    {
+      "owner": "OP-42",
+      "extractedExactLexemeGcu": "872477081.7557670078714607284861688159",
+      "savedFloatDisplayGcu": "872477081.7557651",
+      "signedDifferenceGcu": "0.0000019078714607284861688159",
+      "sourceArrayPointer": "/terminalCash/41/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-42",
+      "extractedExactLexemeGcu": "82635005.6753913434763327996102109487",
+      "savedFloatDisplayGcu": "82635005.67539205",
+      "signedDifferenceGcu": "-0.0000007065236672003897890513",
+      "sourceArrayPointer": "/terminalCash/41/2"
+    },
+    {
+      "owner": "GOV-43",
+      "extractedExactLexemeGcu": "18199359.6267607526089489039254600115",
+      "savedFloatDisplayGcu": "18199359.62676219",
+      "signedDifferenceGcu": "-0.0000014373910510960745399885",
+      "sourceArrayPointer": "/terminalCash/42/0"
+    },
+    {
+      "owner": "OP-43",
+      "extractedExactLexemeGcu": "870601295.2926194453082975625079970452",
+      "savedFloatDisplayGcu": "870601295.2926111",
+      "signedDifferenceGcu": "0.0000083453082975625079970452",
+      "sourceArrayPointer": "/terminalCash/42/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-43",
+      "extractedExactLexemeGcu": "84812926.5668924806827535335665429433",
+      "savedFloatDisplayGcu": "84812926.56689358",
+      "signedDifferenceGcu": "-0.0000010993172464664334570567",
+      "sourceArrayPointer": "/terminalCash/42/2"
+    },
+    {
+      "owner": "GOV-44",
+      "extractedExactLexemeGcu": "161401448.31620106158555379463525942354",
+      "savedFloatDisplayGcu": "161401448.3161891",
+      "signedDifferenceGcu": "0.00001196158555379463525942354",
+      "sourceArrayPointer": "/terminalCash/43/0"
+    },
+    {
+      "owner": "OP-44",
+      "extractedExactLexemeGcu": "1790727198.30288470197611816735142335",
+      "savedFloatDisplayGcu": "1790727198.3028708",
+      "signedDifferenceGcu": "0.00001390197611816735142335",
+      "sourceArrayPointer": "/terminalCash/43/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-44",
+      "extractedExactLexemeGcu": "173034780.16958244863832803801331722646",
+      "savedFloatDisplayGcu": "173034780.1695817",
+      "signedDifferenceGcu": "0.00000074863832803801331722646",
+      "sourceArrayPointer": "/terminalCash/43/2"
+    },
+    {
+      "owner": "GOV-45",
+      "extractedExactLexemeGcu": "751873582.5553329734426529788108198325221974258348814",
+      "savedFloatDisplayGcu": "751873582.5553194",
+      "signedDifferenceGcu": "0.0000135734426529788108198325221974258348814",
+      "sourceArrayPointer": "/terminalCash/44/0"
+    },
+    {
+      "owner": "OP-45",
+      "extractedExactLexemeGcu": "1669935933.83868016517111991014243106416667520253658",
+      "savedFloatDisplayGcu": "1669935933.8386683",
+      "signedDifferenceGcu": "0.00001186517111991014243106416667520253658",
+      "sourceArrayPointer": "/terminalCash/44/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-45",
+      "extractedExactLexemeGcu": "146823655.1594443241351014260803451033111273716285386",
+      "savedFloatDisplayGcu": "146823655.15945995",
+      "signedDifferenceGcu": "-0.0000156258648985739196548966888726283714614",
+      "sourceArrayPointer": "/terminalCash/44/2"
+    },
+    {
+      "owner": "GOV-46",
+      "extractedExactLexemeGcu": "6278810530.79611604647814259631315416028",
+      "savedFloatDisplayGcu": "6278810530.796145",
+      "signedDifferenceGcu": "-0.00002895352185740368684583972",
+      "sourceArrayPointer": "/terminalCash/45/0"
+    },
+    {
+      "owner": "OP-46",
+      "extractedExactLexemeGcu": "2984929226.03518348254826525724642362196",
+      "savedFloatDisplayGcu": "2984929226.0351944",
+      "signedDifferenceGcu": "-0.00001091745173474275357637804",
+      "sourceArrayPointer": "/terminalCash/45/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-46",
+      "extractedExactLexemeGcu": "3350900453.59515986888213351408882221776",
+      "savedFloatDisplayGcu": "3350900453.5953927",
+      "signedDifferenceGcu": "-0.00023283111786648591117778224",
+      "sourceArrayPointer": "/terminalCash/45/2"
+    },
+    {
+      "owner": "GOV-47",
+      "extractedExactLexemeGcu": "572086329.97867296226379891509786085784",
+      "savedFloatDisplayGcu": "572086329.9786094",
+      "signedDifferenceGcu": "0.00006356226379891509786085784",
+      "sourceArrayPointer": "/terminalCash/46/0"
+    },
+    {
+      "owner": "OP-47",
+      "extractedExactLexemeGcu": "2122172144.045587891022518957194097081279",
+      "savedFloatDisplayGcu": "2122172144.0455987",
+      "signedDifferenceGcu": "-0.000010808977481042805902918721",
+      "sourceArrayPointer": "/terminalCash/46/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-47",
+      "extractedExactLexemeGcu": "200403881.987946354091368964680762060881",
+      "savedFloatDisplayGcu": "200403881.98797542",
+      "signedDifferenceGcu": "-0.000029065908631035319237939119",
+      "sourceArrayPointer": "/terminalCash/46/2"
+    },
+    {
+      "owner": "GOV-48",
+      "extractedExactLexemeGcu": "10269201.08957300001973859665106294125",
+      "savedFloatDisplayGcu": "10269201.089572871",
+      "signedDifferenceGcu": "0.00000012901973859665106294125",
+      "sourceArrayPointer": "/terminalCash/47/0"
+    },
+    {
+      "owner": "OP-48",
+      "extractedExactLexemeGcu": "829623829.1666654839920731021562761913",
+      "savedFloatDisplayGcu": "829623829.1666676",
+      "signedDifferenceGcu": "-0.0000021160079268978437238087",
+      "sourceArrayPointer": "/terminalCash/47/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-48",
+      "extractedExactLexemeGcu": "81367213.38588363158818830119266086745",
+      "savedFloatDisplayGcu": "81367213.38588473",
+      "signedDifferenceGcu": "-0.00000109841181169880733913255",
+      "sourceArrayPointer": "/terminalCash/47/2"
+    },
+    {
+      "owner": "GOV-49",
+      "extractedExactLexemeGcu": "199461104.38055378869717365967759071616",
+      "savedFloatDisplayGcu": "199461104.38054025",
+      "signedDifferenceGcu": "0.00001353869717365967759071616",
+      "sourceArrayPointer": "/terminalCash/48/0"
+    },
+    {
+      "owner": "OP-49",
+      "extractedExactLexemeGcu": "1279712524.6299190133769501814435792528",
+      "savedFloatDisplayGcu": "1279712524.629922",
+      "signedDifferenceGcu": "-0.0000029866230498185564207472",
+      "sourceArrayPointer": "/terminalCash/48/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-49",
+      "extractedExactLexemeGcu": "121414800.55586098792587615887883003104",
+      "savedFloatDisplayGcu": "121414800.5558635",
+      "signedDifferenceGcu": "-0.00000251207412384112116996896",
+      "sourceArrayPointer": "/terminalCash/48/2"
+    },
+    {
+      "owner": "GOV-50",
+      "extractedExactLexemeGcu": "27936877.008502569985674203611662712616",
+      "savedFloatDisplayGcu": "27936877.008503895",
+      "signedDifferenceGcu": "-0.000001325014325796388337287384",
+      "sourceArrayPointer": "/terminalCash/49/0"
+    },
+    {
+      "owner": "OP-50",
+      "extractedExactLexemeGcu": "1301461852.9802933852714051106609128037",
+      "savedFloatDisplayGcu": "1301461852.9802847",
+      "signedDifferenceGcu": "0.0000086852714051106609128037",
+      "sourceArrayPointer": "/terminalCash/49/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-50",
+      "extractedExactLexemeGcu": "127548785.578611968342920685727424483684",
+      "savedFloatDisplayGcu": "127548785.5786131",
+      "signedDifferenceGcu": "-0.000001131657079314272575516316",
+      "sourceArrayPointer": "/terminalCash/49/2"
+    },
+    {
+      "owner": "GOV-51",
+      "extractedExactLexemeGcu": "139336102.88995003869782098795772573719",
+      "savedFloatDisplayGcu": "139336102.88996395",
+      "signedDifferenceGcu": "-0.00001391130217901204227426281",
+      "sourceArrayPointer": "/terminalCash/50/0"
+    },
+    {
+      "owner": "OP-51",
+      "extractedExactLexemeGcu": "1430128379.6536832501966630503246597852",
+      "savedFloatDisplayGcu": "1430128379.6536727",
+      "signedDifferenceGcu": "0.0000105501966630503246597852",
+      "sourceArrayPointer": "/terminalCash/50/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-51",
+      "extractedExactLexemeGcu": "138783104.60144298610551596171761447761",
+      "savedFloatDisplayGcu": "138783104.6014394",
+      "signedDifferenceGcu": "0.00000358610551596171761447761",
+      "sourceArrayPointer": "/terminalCash/50/2"
+    },
+    {
+      "owner": "GOV-52",
+      "extractedExactLexemeGcu": "708898798.626424258256031997446211146704",
+      "savedFloatDisplayGcu": "708898798.6264427",
+      "signedDifferenceGcu": "-0.000018441743968002553788853296",
+      "sourceArrayPointer": "/terminalCash/51/0"
+    },
+    {
+      "owner": "OP-52",
+      "extractedExactLexemeGcu": "1182437774.599251117906738499953329324956",
+      "savedFloatDisplayGcu": "1182437774.5992634",
+      "signedDifferenceGcu": "-0.000012282093261500046670675044",
+      "sourceArrayPointer": "/terminalCash/51/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-52",
+      "extractedExactLexemeGcu": "103482855.86673941362129144540045752834",
+      "savedFloatDisplayGcu": "103482855.86677589",
+      "signedDifferenceGcu": "-0.00003647637870855459954247166",
+      "sourceArrayPointer": "/terminalCash/51/2"
+    },
+    {
+      "owner": "GOV-53",
+      "extractedExactLexemeGcu": "118114679.73532770151903101829919904297",
+      "savedFloatDisplayGcu": "118114679.73533785",
+      "signedDifferenceGcu": "-0.00001014848096898170080095703",
+      "sourceArrayPointer": "/terminalCash/52/0"
+    },
+    {
+      "owner": "OP-53",
+      "extractedExactLexemeGcu": "1804133418.7541607387834293543260830738",
+      "savedFloatDisplayGcu": "1804133418.754164",
+      "signedDifferenceGcu": "-0.0000032612165706456739169262",
+      "sourceArrayPointer": "/terminalCash/52/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-53",
+      "extractedExactLexemeGcu": "177005092.42692491669753962737471788323",
+      "savedFloatDisplayGcu": "177005092.42693585",
+      "signedDifferenceGcu": "-0.00001093330246037262528211677",
+      "sourceArrayPointer": "/terminalCash/52/2"
+    },
+    {
+      "owner": "GOV-54",
+      "extractedExactLexemeGcu": "172588791.97419641998813154457097661914",
+      "savedFloatDisplayGcu": "172588791.97419578",
+      "signedDifferenceGcu": "0.00000063998813154457097661914",
+      "sourceArrayPointer": "/terminalCash/53/0"
+    },
+    {
+      "owner": "OP-54",
+      "extractedExactLexemeGcu": "2165617450.133206257876412016948835802",
+      "savedFloatDisplayGcu": "2165617450.133189",
+      "signedDifferenceGcu": "0.000017257876412016948835802",
+      "sourceArrayPointer": "/terminalCash/53/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-54",
+      "extractedExactLexemeGcu": "215288903.60770280113545643848018757886",
+      "savedFloatDisplayGcu": "215288903.60770142",
+      "signedDifferenceGcu": "0.00000138113545643848018757886",
+      "sourceArrayPointer": "/terminalCash/53/2"
+    },
+    {
+      "owner": "GOV-55",
+      "extractedExactLexemeGcu": "70540117.458708997597369580906975645",
+      "savedFloatDisplayGcu": "70540117.45870519",
+      "signedDifferenceGcu": "0.000003807597369580906975645",
+      "sourceArrayPointer": "/terminalCash/54/0"
+    },
+    {
+      "owner": "OP-55",
+      "extractedExactLexemeGcu": "1029698899.1376074791951967484019843037",
+      "savedFloatDisplayGcu": "1029698899.1376103",
+      "signedDifferenceGcu": "-0.0000028208048032515980156963",
+      "sourceArrayPointer": "/terminalCash/54/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-55",
+      "extractedExactLexemeGcu": "101193962.5077509531074336706910400513",
+      "savedFloatDisplayGcu": "101193962.5077488",
+      "signedDifferenceGcu": "0.0000021531074336706910400513",
+      "sourceArrayPointer": "/terminalCash/54/2"
+    },
+    {
+      "owner": "GOV-56",
+      "extractedExactLexemeGcu": "78995052.60823541826257843205490521776",
+      "savedFloatDisplayGcu": "78995052.60823491",
+      "signedDifferenceGcu": "0.00000050826257843205490521776",
+      "sourceArrayPointer": "/terminalCash/55/0"
+    },
+    {
+      "owner": "OP-56",
+      "extractedExactLexemeGcu": "2177487550.0946849468506183186876959271",
+      "savedFloatDisplayGcu": "2177487550.0946813",
+      "signedDifferenceGcu": "0.0000036468506183186876959271",
+      "sourceArrayPointer": "/terminalCash/55/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-56",
+      "extractedExactLexemeGcu": "208601167.54902062688680324925739885514",
+      "savedFloatDisplayGcu": "208601167.54901266",
+      "signedDifferenceGcu": "0.00000796688680324925739885514",
+      "sourceArrayPointer": "/terminalCash/55/2"
+    },
+    {
+      "owner": "GOV-57",
+      "extractedExactLexemeGcu": "47982081.48432806294583894111423615171",
+      "savedFloatDisplayGcu": "47982081.4843407",
+      "signedDifferenceGcu": "-0.00001263705416105888576384829",
+      "sourceArrayPointer": "/terminalCash/56/0"
+    },
+    {
+      "owner": "OP-57",
+      "extractedExactLexemeGcu": "1479192364.0056383406962504068888798142",
+      "savedFloatDisplayGcu": "1479192364.0056345",
+      "signedDifferenceGcu": "0.0000038406962504068888798142",
+      "sourceArrayPointer": "/terminalCash/56/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-57",
+      "extractedExactLexemeGcu": "141012023.63331154835791065199688403409",
+      "savedFloatDisplayGcu": "141012023.6333142",
+      "signedDifferenceGcu": "-0.00000265164208934800311596591",
+      "sourceArrayPointer": "/terminalCash/56/2"
+    },
+    {
+      "owner": "GOV-58",
+      "extractedExactLexemeGcu": "154128359.8876132742889055832934687983",
+      "savedFloatDisplayGcu": "154128359.88761353",
+      "signedDifferenceGcu": "-0.0000002557110944167065312017",
+      "sourceArrayPointer": "/terminalCash/57/0"
+    },
+    {
+      "owner": "OP-58",
+      "extractedExactLexemeGcu": "1950002941.685975364389532518763040547",
+      "savedFloatDisplayGcu": "1950002941.6859596",
+      "signedDifferenceGcu": "0.000015764389532518763040547",
+      "sourceArrayPointer": "/terminalCash/57/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-58",
+      "extractedExactLexemeGcu": "193766347.0489542353215618979434906547",
+      "savedFloatDisplayGcu": "193766347.04895738",
+      "signedDifferenceGcu": "-0.0000031446784381020565093453",
+      "sourceArrayPointer": "/terminalCash/57/2"
+    },
+    {
+      "owner": "GOV-59",
+      "extractedExactLexemeGcu": "16655459.7051225602636709120474781948",
+      "savedFloatDisplayGcu": "16655459.705122286",
+      "signedDifferenceGcu": "0.0000002742636709120474781948",
+      "sourceArrayPointer": "/terminalCash/58/0"
+    },
+    {
+      "owner": "OP-59",
+      "extractedExactLexemeGcu": "488943668.8445050878293479355313898546",
+      "savedFloatDisplayGcu": "488943668.8445026",
+      "signedDifferenceGcu": "0.0000024878293479355313898546",
+      "sourceArrayPointer": "/terminalCash/58/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-59",
+      "extractedExactLexemeGcu": "46783621.8559811750069811524211319506",
+      "savedFloatDisplayGcu": "46783621.85598325",
+      "signedDifferenceGcu": "-0.0000020749930188475788680494",
+      "sourceArrayPointer": "/terminalCash/58/2"
+    },
+    {
+      "owner": "GOV-60",
+      "extractedExactLexemeGcu": "93215021247.1687151914820797521042477037",
+      "savedFloatDisplayGcu": "93215021247.16933",
+      "signedDifferenceGcu": "-0.0006148085179202478957522963",
+      "sourceArrayPointer": "/terminalCash/59/0"
+    },
+    {
+      "owner": "OP-60",
+      "extractedExactLexemeGcu": "21597452265.3515748544088216393689282133",
+      "savedFloatDisplayGcu": "21597452265.3498",
+      "signedDifferenceGcu": "0.0017748544088216393689282133",
+      "sourceArrayPointer": "/terminalCash/59/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-60",
+      "extractedExactLexemeGcu": "73003813248.070806304109098608526824083",
+      "savedFloatDisplayGcu": "73003813248.06134",
+      "signedDifferenceGcu": "0.009466304109098608526824083",
+      "sourceArrayPointer": "/terminalCash/59/2"
+    },
+    {
+      "owner": "GOV-61",
+      "extractedExactLexemeGcu": "136489682511.381236784650043459282605256",
+      "savedFloatDisplayGcu": "136489682511.3524",
+      "signedDifferenceGcu": "0.028836784650043459282605256",
+      "sourceArrayPointer": "/terminalCash/60/0"
+    },
+    {
+      "owner": "OP-61",
+      "extractedExactLexemeGcu": "29366906991.968903245240732710770294053",
+      "savedFloatDisplayGcu": "29366906991.966915",
+      "signedDifferenceGcu": "0.001988245240732710770294053",
+      "sourceArrayPointer": "/terminalCash/60/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-61",
+      "extractedExactLexemeGcu": "101350385288.035293970109223829947100691",
+      "savedFloatDisplayGcu": "101350385288.03357",
+      "signedDifferenceGcu": "0.001723970109223829947100691",
+      "sourceArrayPointer": "/terminalCash/60/2"
+    },
+    {
+      "owner": "GOV-62",
+      "extractedExactLexemeGcu": "67242718789.8494189837033574918766281192",
+      "savedFloatDisplayGcu": "67242718789.84795",
+      "signedDifferenceGcu": "0.0014689837033574918766281192",
+      "sourceArrayPointer": "/terminalCash/61/0"
+    },
+    {
+      "owner": "OP-62",
+      "extractedExactLexemeGcu": "15892822524.7690517781027236531193218287",
+      "savedFloatDisplayGcu": "15892822524.77064",
+      "signedDifferenceGcu": "-0.0015882218972763468806781713",
+      "sourceArrayPointer": "/terminalCash/61/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-62",
+      "extractedExactLexemeGcu": "52894977952.3345948881939188550040500521",
+      "savedFloatDisplayGcu": "52894977952.333626",
+      "signedDifferenceGcu": "0.0009688881939188550040500521",
+      "sourceArrayPointer": "/terminalCash/61/2"
+    },
+    {
+      "owner": "GOV-63",
+      "extractedExactLexemeGcu": "95016541921.9777035538162989986474551324",
+      "savedFloatDisplayGcu": "95016541921.97705",
+      "signedDifferenceGcu": "0.0006535538162989986474551324",
+      "sourceArrayPointer": "/terminalCash/62/0"
+    },
+    {
+      "owner": "OP-63",
+      "extractedExactLexemeGcu": "21799408486.9047163012535465120293984651",
+      "savedFloatDisplayGcu": "21799408486.905785",
+      "signedDifferenceGcu": "-0.0010686987464534879706015349",
+      "sourceArrayPointer": "/terminalCash/62/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-63",
+      "extractedExactLexemeGcu": "73375873612.7545255449301544893231464025",
+      "savedFloatDisplayGcu": "73375873612.75906",
+      "signedDifferenceGcu": "-0.0045344550698455106768535975",
+      "sourceArrayPointer": "/terminalCash/62/2"
+    },
+    {
+      "owner": "GOV-64",
+      "extractedExactLexemeGcu": "302855207.7295385719101486748628490149",
+      "savedFloatDisplayGcu": "302855207.7295355",
+      "signedDifferenceGcu": "0.0000030719101486748628490149",
+      "sourceArrayPointer": "/terminalCash/63/0"
+    },
+    {
+      "owner": "OP-64",
+      "extractedExactLexemeGcu": "2136051433.0216559175795636458780621526",
+      "savedFloatDisplayGcu": "2136051433.0216677",
+      "signedDifferenceGcu": "-0.0000117824204363541219378474",
+      "sourceArrayPointer": "/terminalCash/63/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-64",
+      "extractedExactLexemeGcu": "210568856.4061634135102876792590888325",
+      "savedFloatDisplayGcu": "210568856.4061625",
+      "signedDifferenceGcu": "0.0000009135102876792590888325",
+      "sourceArrayPointer": "/terminalCash/63/2"
+    },
+    {
+      "owner": "GOV-65",
+      "extractedExactLexemeGcu": "887392075.9915738202198729341627869484",
+      "savedFloatDisplayGcu": "887392075.991462",
+      "signedDifferenceGcu": "0.0001118202198729341627869484",
+      "sourceArrayPointer": "/terminalCash/64/0"
+    },
+    {
+      "owner": "OP-65",
+      "extractedExactLexemeGcu": "2035773990.5549340173399513438357141444",
+      "savedFloatDisplayGcu": "2035773990.5549502",
+      "signedDifferenceGcu": "-0.0000161826600486561642858556",
+      "sourceArrayPointer": "/terminalCash/64/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-65",
+      "extractedExactLexemeGcu": "187077324.1742552554401757220014989072",
+      "savedFloatDisplayGcu": "187077324.17426795",
+      "signedDifferenceGcu": "-0.0000126945598242779985010928",
+      "sourceArrayPointer": "/terminalCash/64/2"
+    },
+    {
+      "owner": "GOV-66",
+      "extractedExactLexemeGcu": "5393903623.7397995960540317836862803527",
+      "savedFloatDisplayGcu": "5393903623.739868",
+      "signedDifferenceGcu": "-0.0000684039459682163137196473",
+      "sourceArrayPointer": "/terminalCash/65/0"
+    },
+    {
+      "owner": "OP-66",
+      "extractedExactLexemeGcu": "3001590558.5771735372268294808605587962",
+      "savedFloatDisplayGcu": "3001590558.5771933",
+      "signedDifferenceGcu": "-0.0000197627731705191394412038",
+      "sourceArrayPointer": "/terminalCash/65/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-66",
+      "extractedExactLexemeGcu": "2397981558.5120186167191387354531608511",
+      "savedFloatDisplayGcu": "2397981558.5119495",
+      "signedDifferenceGcu": "0.0000691167191387354531608511",
+      "sourceArrayPointer": "/terminalCash/65/2"
+    },
+    {
+      "owner": "GOV-67",
+      "extractedExactLexemeGcu": "87278222146.56832416079125324032673672354",
+      "savedFloatDisplayGcu": "87278222146.55331",
+      "signedDifferenceGcu": "0.01501416079125324032673672354",
+      "sourceArrayPointer": "/terminalCash/66/0"
+    },
+    {
+      "owner": "OP-67",
+      "extractedExactLexemeGcu": "19490692683.9359887307132907256421235668",
+      "savedFloatDisplayGcu": "19490692683.937958",
+      "signedDifferenceGcu": "-0.0019692692867092743578764332",
+      "sourceArrayPointer": "/terminalCash/66/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-67",
+      "extractedExactLexemeGcu": "66303728919.55946845849545603403113970966",
+      "savedFloatDisplayGcu": "66303728919.557076",
+      "signedDifferenceGcu": "0.00239245849545603403113970966",
+      "sourceArrayPointer": "/terminalCash/66/2"
+    },
+    {
+      "owner": "GOV-68",
+      "extractedExactLexemeGcu": "61815140668.76780981183963659845480607098",
+      "savedFloatDisplayGcu": "61815140668.76999",
+      "signedDifferenceGcu": "-0.00218018816036340154519392902",
+      "sourceArrayPointer": "/terminalCash/67/0"
+    },
+    {
+      "owner": "OP-68",
+      "extractedExactLexemeGcu": "14924953687.93737255405421858674234303004",
+      "savedFloatDisplayGcu": "14924953687.938961",
+      "signedDifferenceGcu": "-0.00158844594578141325765696996",
+      "sourceArrayPointer": "/terminalCash/67/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-68",
+      "extractedExactLexemeGcu": "49743052295.73102648410614481480285089898",
+      "savedFloatDisplayGcu": "49743052295.72909",
+      "signedDifferenceGcu": "0.00193648410614481480285089898",
+      "sourceArrayPointer": "/terminalCash/67/2"
+    },
+    {
+      "owner": "GOV-69",
+      "extractedExactLexemeGcu": "40462194132.9864234950122458443437826777",
+      "savedFloatDisplayGcu": "40462194132.986435",
+      "signedDifferenceGcu": "-0.0000115049877541556562173223",
+      "sourceArrayPointer": "/terminalCash/68/0"
+    },
+    {
+      "owner": "OP-69",
+      "extractedExactLexemeGcu": "9908915263.1512941852097466983111274114",
+      "savedFloatDisplayGcu": "9908915263.149824",
+      "signedDifferenceGcu": "0.0014701852097466983111274114",
+      "sourceArrayPointer": "/terminalCash/68/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-69",
+      "extractedExactLexemeGcu": "32779777188.6702823197780074573450899109",
+      "savedFloatDisplayGcu": "32779777188.669388",
+      "signedDifferenceGcu": "0.0008943197780074573450899109",
+      "sourceArrayPointer": "/terminalCash/68/2"
+    },
+    {
+      "owner": "GOV-70",
+      "extractedExactLexemeGcu": "430076603.3498029219883964801513222541",
+      "savedFloatDisplayGcu": "430076603.3498197",
+      "signedDifferenceGcu": "-0.0000167780116035198486777459",
+      "sourceArrayPointer": "/terminalCash/69/0"
+    },
+    {
+      "owner": "OP-70",
+      "extractedExactLexemeGcu": "661002999.1590669818983315684018836865",
+      "savedFloatDisplayGcu": "661002999.1590569",
+      "signedDifferenceGcu": "0.0000100818983315684018836865",
+      "sourceArrayPointer": "/terminalCash/69/1"
+    },
+    {
+      "owner": "HOUSEHOLDS-70",
+      "extractedExactLexemeGcu": "56929587.6050350871132719514467940594",
+      "savedFloatDisplayGcu": "56929587.60503667",
+      "signedDifferenceGcu": "-0.0000015828867280485532059406",
+      "sourceArrayPointer": "/terminalCash/69/2"
+    }
+  ],
+  "priorExtractionDifferencePreserved": {
+    "owner": "OP-20",
+    "absoluteDifferenceGcuApprox": "9415574.999981663436646392695",
+    "cause": "RECOVERY.daily escrow snapshot is before permanent grain accepted-invoice phase; it is not an EOD balance",
+    "fix": "Derive EOD escrow by original journal grants minus original restricted accepted machinery/grain invoices",
+    "oldSourceChanged": false,
+    "noToleranceWidening": true
+  },
+  "oldReplayExecuted": false,
+  "correctedRRecomputed": false
+}

@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "reviewKind": "INDEPENDENT_FINITE_DOMAIN_NUMERIC_DELTA_REVIEW",
+  "candidate": {
+    "directory": "/Users/samuel/Documents/Codex/2026-10-13/task/first14-finance-reconstruction-v1",
+    "version": "CONSTRUCTED_SCENARIO_FIRST14_20261013_V1_PROPOSED",
+    "manifestSha256": "ee5208193ff1f10677829e7b918d114a9e24bec8b59f953e78c32ad3a7cd4e62",
+    "manifestFiles": 36,
+    "manifestBytes": 91775774
+  },
+  "baseline": {
+    "outerManifestSha256": "07d23e750abf2837b5961de6e74e60ec6dbdf9f4009aa442e4939786bc7f3781",
+    "unchanged": true,
+    "priorEDecisionSha256": "6e1efe5801e4f614067f6c5957bba51ae26f7e130c0c7dce791861a2c8dba2ab"
+  },
+  "overall": "SHARE_WITH_CAVEATS_STATIC_DELTA_SUPPORTED_GUARD_REVISION_REQUIRED",
+  "economicReadiness": "HOLD",
+  "independentChecks": {
+    "primaryPassed": 30,
+    "addendumPassed": 17,
+    "failed": 0,
+    "author97NotRelabeledIndependent": true,
+    "checkScripts": [
+      "check-v2.mjs",
+      "addendum.mjs"
+    ],
+    "inputReadAttemptsNotCountedAsPass": true
+  },
+  "S1": {
+    "status": "EXPLICIT_LIFECYCLE_CANDIDATE_ONLY_OWNER_DECISION_OPEN",
+    "claims": 4,
+    "originalPointers": 183,
+    "nativePrincipalPreserved": true,
+    "candidateTotalPrincipalGcu": "1723275000",
+    "candidateMaturitySimDay": 140,
+    "zeroCoupon": true,
+    "callable": false,
+    "fixedV2TermsStill": "UNKNOWN",
+    "ownerAdoptionApproved": false,
+    "paymentSource": "UNKNOWN",
+    "unpaidAmountRetained": true
+  },
+  "S2": {
+    "status": "UNIT_SAFE_ARTIFACT_SUPPORTED_CONSUMER_PRIMARY_SOURCE_BINDING_PENDING",
+    "countries": 70,
+    "ownerAmountLeaves": 1470,
+    "otherBalanceLeaves": 490,
+    "amountsUnchanged": true,
+    "newRulesHash": "280f8f522d2a9cf5b27cec7b103f0ca26d9264f7a01a14e176cdc0f4201f2a25",
+    "newParamsHash": "71fa06432ad09ecf51e0400948bf33c25ddb41c3cfd29ae2545ee9e251d4dcd0",
+    "primarySourceRequirement": "Any future composition must reference this exact UNIT_SAFE_NATIVE_BUCKETS.json digest and leaf pointer; gcuLineagePointer/originalGcuLineage remain historical lineage only. No actual carrier composition/import supplied."
+  },
+  "S3": {
+    "status": "CONDITIONAL_TIMELINE_SUPPORTED_NOT_FUNDED_OPERATING_PLAN",
+    "countrySimDayRows": 9870,
+    "realDurationDays": 14,
+    "simDurationDays": 140,
+    "realDaySummaryRows": 980,
+    "annualCouponFirstSimDay": 360,
+    "firstCouponRealDay": 36,
+    "governmentCashDueThrough140Gcu": "0",
+    "accrualIsCash": false,
+    "conditionalShortageCounts": {
+      "sim1": 19,
+      "sim14": 54,
+      "sim140": 63,
+      "reportedDrainSim14": 52
+    },
+    "actualMandatoryPayments": "UNKNOWN",
+    "actualGcuLiquidity": "UNKNOWN",
+    "normalFoodWater": "HOLD",
+    "lowLabour": "HOLD",
+    "referenceCrossBorderGrossEachWayGcu": "1012043193.75",
+    "incomingNettingAllowed": false,
+    "earliestActualShortage": "UNKNOWN"
+  },
+  "S4": {
+    "status": "GRID_AND_GEO_HASH_NAMESPACE_METADATA_SUPPORTED_NOT_RUNTIME_PRECISION_APPROVAL",
+    "gridLCperGCU": [
+      "20",
+      "600"
+    ],
+    "partitionJsonSha256": "394a43ffc94df7c27c8fe8610378d348f07c1680675c89ecad26300aa9c7b101",
+    "partitionRasterSourceSha256": "4cc5e79b1293c5c5c6dbfecc0688a66aa031307ec144332c22f3fc962c179ed7",
+    "runtimeFxPrecisionApproved": false
+  },
+  "referenceReconciliation": {
+    "referenceOnly": true,
+    "sourceEventsGrouped": 149038,
+    "sourceIndicesUnique": 589708,
+    "ownerEodRows": 29400,
+    "midPhaseSnapshotIsNotEod": true,
+    "opDayRowsWithMidPhaseDifference": 276,
+    "terminalValues": 210,
+    "maximumAbsoluteDifferenceGcu": "0.028836784650043459282605256",
+    "allCurrentValuesPassStrictOriginalLessThan1": true,
+    "originalExecutableTolerance": "<1",
+    "newCandidatePredicate": "<=1",
+    "sameToleranceClaimStrictlyCorrect": false,
+    "findings": [
+      {
+        "id": "F14-R1",
+        "severity": "LOW_BOUNDED_GUARD_CONTRACT",
+        "established": true,
+        "oldAuditPath": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/audit_r3am_startup.py",
+        "oldCodeSha256": "7b84ba017463a273c5b166fd39b20ee3f376bbcdf0a842ca3356cbc096f02171",
+        "oldLine": 94,
+        "oldPredicate": "<1",
+        "newPredicate": "<=1",
+        "newFile": "verify_terminal.py",
+        "newLine": 24,
+        "counterexample": {
+          "absoluteDifferenceGcu": "1",
+          "originalWouldPass": false,
+          "newWouldPass": true
+        },
+        "actualCurrentMaximumGcu": "0.028836784650043459282605256",
+        "currentRowsPassOriginalStrictBound": true,
+        "remedy": "Use strict <1 and matching wording/noToleranceWidening receipt; current210 numeric values unchanged, no old replay needed."
+      }
+    ]
+  },
+  "reconstruction": {
+    "referenceProjects": 5,
+    "transportEvents": 2416,
+    "procurementRemainders": 4,
+    "plansTransitDoNotEqualArrival": true,
+    "referenceCompletionDoesNotEqualWorldCommissioning": true,
+    "normalR1AndLowLabourFailuresPreserved": true,
+    "oldWorldOrReplayExecuted": false
+  },
+  "minimalRequiredRevision": [
+    "Change verify_terminal.py:24 maxdiff<=1 to maxdiff<1; update README and noToleranceWidening wording to strict <1 and freeze only changed artifacts/new manifest. Current210 amounts need no change; no980/old140 replay.",
+    "Before any source composition, freeze normalized LC primary file hash plus exact native leaf pointer; do not use original GCU lineage pointer as native primary source."
+  ],
+  "authority": {
+    "replacementWindowIdentityConfirmed": false,
+    "sourceAdoption": false,
+    "fourClaimTermsApproved": false,
+    "modelApproved": false,
+    "seedImported": false,
+    "actualWorldRunning": false,
+    "worldStartAllowed": false,
+    "productionAccess": false,
+    "productModified": false,
+    "dbModified": false
+  },
+  "limitations": [
+    "No raw589708-row journal or138966 jobs re-extraction/replay; grouped event/unique-index coverage and EOD identities independently cross-checked against saved210 terminal array values.",
+    "No author97 execution rerun or conversion into independent approval.",
+    "Original source-only/model capacity interruption record and original author nonterminating-division failure preserved. Independent helper initial syntax failure executed no data checks and is retained separately.",
+    "No91MB bundle copied; streamed local artifact hashes and read necessary data only. Original NPZ only saved70x3 terminalCash member read."
+  ]
+}

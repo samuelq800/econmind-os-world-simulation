@@ -1,0 +1,1616 @@
+{
+  "schemaVersion": "STORED_EXACT_GROSS_AGGREGATE_INDEX_V1",
+  "evidenceClass": "REFERENCE",
+  "countries": [
+    {
+      "countryId": "COUNTRY_01",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            0,
+            140
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_02",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            141,
+            281
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_03",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            282,
+            422
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_04",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            423,
+            563
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_05",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            564,
+            704
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_06",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            705,
+            845
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_07",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            846,
+            986
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_08",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            987,
+            1127
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_09",
+      "referenceGrossCrossBorderOutGcu": "73526400",
+      "referenceGrossCrossBorderInGcu": "807148293.75",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1128,
+            1268
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_10",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1269,
+            1409
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_11",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1410,
+            1550
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_12",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1551,
+            1691
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_13",
+      "referenceGrossCrossBorderOutGcu": "105894000",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1692,
+            1832
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_14",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1833,
+            1973
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_15",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            1974,
+            2114
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_16",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2115,
+            2255
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_17",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "99000900",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2256,
+            2396
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_18",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2397,
+            2537
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_19",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2538,
+            2678
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_20",
+      "referenceGrossCrossBorderOutGcu": "832622793.75",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2679,
+            2819
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_21",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2820,
+            2960
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_22",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            2961,
+            3101
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_23",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3102,
+            3242
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_24",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "105894000",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3243,
+            3383
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_25",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3384,
+            3524
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_26",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3525,
+            3665
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_27",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3666,
+            3806
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_28",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3807,
+            3947
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_29",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            3948,
+            4088
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_30",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4089,
+            4229
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_31",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4230,
+            4370
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_32",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4371,
+            4511
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_33",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4512,
+            4652
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_34",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4653,
+            4793
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_35",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4794,
+            4934
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_36",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            4935,
+            5075
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_37",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5076,
+            5216
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_38",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5217,
+            5357
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_39",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5358,
+            5498
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_40",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5499,
+            5639
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_41",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5640,
+            5780
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_42",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5781,
+            5921
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_43",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            5922,
+            6062
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_44",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6063,
+            6203
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_45",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6204,
+            6344
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_46",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6345,
+            6485
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_47",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6486,
+            6626
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_48",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6627,
+            6767
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_49",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6768,
+            6908
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_50",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            6909,
+            7049
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_51",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7050,
+            7190
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_52",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7191,
+            7331
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_53",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7332,
+            7472
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_54",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7473,
+            7613
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_55",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7614,
+            7754
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_56",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7755,
+            7895
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_57",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            7896,
+            8036
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_58",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8037,
+            8177
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_59",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8178,
+            8318
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_60",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8319,
+            8459
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_61",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8460,
+            8600
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_62",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8601,
+            8741
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_63",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8742,
+            8882
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_64",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            8883,
+            9023
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_65",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9024,
+            9164
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_66",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9165,
+            9305
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_67",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9306,
+            9446
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_68",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9447,
+            9587
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_69",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9588,
+            9728
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    },
+    {
+      "countryId": "COUNTRY_70",
+      "referenceGrossCrossBorderOutGcu": "0",
+      "referenceGrossCrossBorderInGcu": "0",
+      "derivation": {
+        "sourceId": "fx_daily_reference",
+        "columns": [
+          "referenceGrossCrossBorderOutGcu",
+          "referenceGrossCrossBorderInGcu"
+        ],
+        "simDayInclusive": [
+          0,
+          140
+        ],
+        "dataRowZeroBasedInclusiveRanges": [
+          [
+            9729,
+            9869
+          ]
+        ],
+        "operation": "EXACT_SUM_STORED_DECIMAL_LEXEMES"
+      }
+    }
+  ]
+}

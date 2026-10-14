@@ -1,0 +1,36 @@
+--- a/verify_terminal.py
++++ b/verify_terminal.py
+@@ -19,9 +19,9 @@
+         differences.append({'owner':x['owner'],'extractedExactLexemeGcu':x['closingAvailableGcu'],'savedFloatDisplayGcu':saved,
+           'signedDifferenceGcu':b.decimal(diff),'sourceArrayPointer':f'/terminalCash/{i}/{j}'})
+     maxdiff=max(abs(F(x['signedDifferenceGcu'])) for x in differences)
+-    assert len(rows)==210 and maxdiff<=1
++    assert len(rows)==210 and maxdiff<1
+     receipt={'version':b.VERSION,'status':'PASS_WITH_RETAINED_REFERENCE_FLOAT_TOLERANCE_NOT_NATIVE_EXACTNESS',
+-      'testsPassed':3,'tests':['Saved terminalCash shape/type identity','210 exact-lexeme extraction vs saved reference terminal values within existing <=1GCU audit tolerance','Original NPZ read only and hashed'],
++      'testsPassed':3,'tests':['Saved terminalCash shape/type identity','210 exact-lexeme extraction vs saved reference terminal values within original strict <1 GCU audit tolerance','Original NPZ read only and hashed'],
+       'source':b.source(src),'maximumAbsoluteDifferenceGcu':b.decimal(maxdiff),'rows':differences,
+       'priorExtractionDifferencePreserved':{'owner':'OP-20','absoluteDifferenceGcuApprox':'9415574.999981663436646392695',
+         'cause':'RECOVERY.daily escrow snapshot is before permanent grain accepted-invoice phase; it is not an EOD balance',
+--- a/README_REVIEW.zh-CN.md
++++ b/README_REVIEW.zh-CN.md
+@@ -57,7 +57,7 @@
+ 
+ 实际执行 `python3 build_timeline.py`、`python3 enrich_and_verify.py`、`python3 verify_terminal.py`。新检查共97项PASS：75项构造/源hash与结构检查、19项第二种产物读取与变异反例检查、3项保存终端数组对照。这不是E独立签字，也不是产品runtime/DB测试。反例包括重复claim/票息、day359/360和bullet边界、错误FX倒数、缺失税收当零、订单/在途当到货、UNKNOWN资金被零替换、非终止小数误当精确Money。双边原生本金一次、参考gross GCU收支严格守恒；不对不同本币账面值直接相加。
+ 
+-源大部分参考记录原本由binary float输出；本轮保留原十进制lexeme，不把读回精确求和说成旧原生精度。参考活动daily escrow是粮食结算前的中间phase快照，最初误作EOD导致OP20差异9415575GCU；本轮从原拨款−受限已接受发票重建EOD并保留原snapshot字段。210项终端可用现金与原保存terminalCash最大差 **0.028836784650043459282605256 GCU**，在既有≤1GCU参考容差内，未扩大容差、未改源。第一轮非终止预算除法失败日志保留；最终全检查通过。
++源大部分参考记录原本由binary float输出；本轮保留原十进制lexeme，不把读回精确求和说成旧原生精度。参考活动daily escrow是粮食结算前的中间phase快照，最初误作EOD导致OP20差异9415575GCU；本轮从原拨款−受限已接受发票重建EOD并保留原snapshot字段。210项终端可用现金与原保存terminalCash最大差 **0.028836784650043459282605256 GCU**，满足原固定审计的严格<1 GCU参考容差；F14-R1补充将守卫恢复为严格<1，原金额与来源不变。第一轮非终止预算除法失败日志保留；最终全检查通过。
+ 
+ 复用V2作者39、980CoreFX/replay与corrected-R独审原件，仅读取并核哈希，不重新运行；旧140日replay未运行。额外读取NPZ仅210个保存terminalCash，未执行World。
+ 
+--- a/TERMINAL_REFERENCE_RECONCILIATION.json
++++ b/TERMINAL_REFERENCE_RECONCILIATION.json
+@@ -4,7 +4,7 @@
+   "testsPassed": 3,
+   "tests": [
+     "Saved terminalCash shape/type identity",
+-    "210 exact-lexeme extraction vs saved reference terminal values within existing <=1GCU audit tolerance",
++    "210 exact-lexeme extraction vs saved reference terminal values within original strict <1 GCU audit tolerance",
+     "Original NPZ read only and hashed"
+   ],
+   "source": {

@@ -1,0 +1,3648 @@
+{
+  "schemaVersion": "CLEARING_SOURCE_INDEX_V1",
+  "claims": [
+    {
+      "canonicalClaimId": "SCENE_CLEARING_09_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_BB0519270C3F8E559F31AA9D",
+      "originalKnownReference": {
+        "issuerId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "ENTITY_CENTRAL_BANK_09",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Reference counterparty, no native adopted issuer",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/0/liabilityIssuerId",
+              "originalValue": "ENTITY_CENTRAL_BANK_09"
+            }
+          }
+        },
+        "assetHolderId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "ENTITY_CENTRAL_BANK_24",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Reference CB asset holder, not cash owner",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/0/claimAssetHolderId",
+              "originalValue": "ENTITY_CENTRAL_BANK_24"
+            }
+          }
+        },
+        "principalGcuReference": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "499500000.0",
+          "valueKind": "DECIMAL_STRING",
+          "currency": "GCU",
+          "unit": "GCU",
+          "meaning": "Reference principal preserved; no availability inference",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/0/amountGcuReference",
+              "originalValue": "499500000.0"
+            }
+          }
+        },
+        "closingPrincipal": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "499500000.0",
+          "valueKind": "DECIMAL_STRING",
+          "currency": "GCU",
+          "unit": "GCU",
+          "meaning": "Original derived reference principal",
+          "source": {
+            "sourceId": "clearing_reference_closing",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/derivedBilateralCBReferenceClaimPairs/0/amountGcuReference",
+              "originalValue": "499500000.0"
+            }
+          }
+        }
+      },
+      "constructedCanonicalNativePositions": [
+        {
+          "role": "ASSET",
+          "holdingId": "SCENE_CLEARING_09_24_V2_ASSET",
+          "nativeAmountPointer": "/positions/560/nativeAmount",
+          "sourceId": "paired_positions_candidate"
+        },
+        {
+          "role": "LIABILITY",
+          "holdingId": "SCENE_CLEARING_09_24_V2_LIABILITY",
+          "nativeAmountPointer": "/positions/561/nativeAmount",
+          "sourceId": "paired_positions_candidate"
+        }
+      ],
+      "fixedV2LifecycleTerms": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_CLEARING_TERMS",
+        "source": null
+      },
+      "proposedTerms": {
+        "nativePrincipal": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "499500000",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/nativePrincipal",
+              "originalValue": "499500000"
+            }
+          }
+        },
+        "nativeCurrency": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "GCU",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/nativeCurrency",
+              "originalValue": "GCU"
+            }
+          }
+        },
+        "annualCoupon": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "0",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/annualCoupon",
+              "originalValue": "0"
+            }
+          }
+        },
+        "interestDayCount": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 360,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/interestDayCount",
+              "originalValue": 360
+            }
+          }
+        },
+        "accrualStartSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 0,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/accrualStartSimDay",
+              "originalValue": 0
+            }
+          }
+        },
+        "callable": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": false,
+          "valueKind": "BOOLEAN",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/callable",
+              "originalValue": false
+            }
+          }
+        },
+        "maturitySimDays": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 140,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/maturitySimDays",
+              "originalValue": 140
+            }
+          }
+        },
+        "firstPrincipalDueSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 140,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/firstPrincipalDueSimDay",
+              "originalValue": 140
+            }
+          }
+        },
+        "firstCouponDueSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/firstCouponDueSimDay",
+              "originalValue": null
+            }
+          }
+        },
+        "settlementCurrency": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "GCU",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/settlementCurrency",
+              "originalValue": "GCU"
+            }
+          }
+        },
+        "paymentAccountId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/paymentAccountId",
+              "originalValue": null
+            }
+          }
+        },
+        "fundedFxCounterpartyId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/fundedFxCounterpartyId",
+              "originalValue": null
+            }
+          }
+        },
+        "paymentSourceStatus": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "UNKNOWN_NO_VERIFIED_GCU_CASH_ACCOUNT_MAPPING",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/paymentSourceStatus",
+              "originalValue": "UNKNOWN_NO_VERIFIED_GCU_CASH_ACCOUNT_MAPPING"
+            }
+          }
+        },
+        "unpaidPolicy": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/unpaidPolicy",
+              "originalValue": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment"
+            }
+          }
+        },
+        "activation": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "NOT_ADOPTED_NOT_USED_TO_ASSERT_FIXED_V2_HAS_THIS_DUE_DATE",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/0/activation",
+              "originalValue": "NOT_ADOPTED_NOT_USED_TO_ASSERT_FIXED_V2_HAS_THIS_DUE_DATE"
+            }
+          }
+        }
+      },
+      "journalPointerCount": 5,
+      "actualPaymentSource": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+        "source": null
+      },
+      "sourceModelTermsAdopted": false
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_13_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_2E99C1DB23F3CE6EFB843A2D",
+      "originalKnownReference": {
+        "issuerId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "ENTITY_CENTRAL_BANK_13",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Reference counterparty, no native adopted issuer",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/1/liabilityIssuerId",
+              "originalValue": "ENTITY_CENTRAL_BANK_13"
+            }
+          }
+        },
+        "assetHolderId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "ENTITY_CENTRAL_BANK_24",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Reference CB asset holder, not cash owner",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/1/claimAssetHolderId",
+              "originalValue": "ENTITY_CENTRAL_BANK_24"
+            }
+          }
+        },
+        "principalGcuReference": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "199800000.0",
+          "valueKind": "DECIMAL_STRING",
+          "currency": "GCU",
+          "unit": "GCU",
+          "meaning": "Reference principal preserved; no availability inference",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/1/amountGcuReference",
+              "originalValue": "199800000.0"
+            }
+          }
+        },
+        "closingPrincipal": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "199800000.0",
+          "valueKind": "DECIMAL_STRING",
+          "currency": "GCU",
+          "unit": "GCU",
+          "meaning": "Original derived reference principal",
+          "source": {
+            "sourceId": "clearing_reference_closing",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/derivedBilateralCBReferenceClaimPairs/1/amountGcuReference",
+              "originalValue": "199800000.0"
+            }
+          }
+        }
+      },
+      "constructedCanonicalNativePositions": [
+        {
+          "role": "ASSET",
+          "holdingId": "SCENE_CLEARING_13_24_V2_ASSET",
+          "nativeAmountPointer": "/positions/562/nativeAmount",
+          "sourceId": "paired_positions_candidate"
+        },
+        {
+          "role": "LIABILITY",
+          "holdingId": "SCENE_CLEARING_13_24_V2_LIABILITY",
+          "nativeAmountPointer": "/positions/563/nativeAmount",
+          "sourceId": "paired_positions_candidate"
+        }
+      ],
+      "fixedV2LifecycleTerms": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_CLEARING_TERMS",
+        "source": null
+      },
+      "proposedTerms": {
+        "nativePrincipal": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "199800000",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/nativePrincipal",
+              "originalValue": "199800000"
+            }
+          }
+        },
+        "nativeCurrency": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "GCU",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/nativeCurrency",
+              "originalValue": "GCU"
+            }
+          }
+        },
+        "annualCoupon": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "0",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/annualCoupon",
+              "originalValue": "0"
+            }
+          }
+        },
+        "interestDayCount": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 360,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/interestDayCount",
+              "originalValue": 360
+            }
+          }
+        },
+        "accrualStartSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 0,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/accrualStartSimDay",
+              "originalValue": 0
+            }
+          }
+        },
+        "callable": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": false,
+          "valueKind": "BOOLEAN",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/callable",
+              "originalValue": false
+            }
+          }
+        },
+        "maturitySimDays": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 140,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/maturitySimDays",
+              "originalValue": 140
+            }
+          }
+        },
+        "firstPrincipalDueSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 140,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/firstPrincipalDueSimDay",
+              "originalValue": 140
+            }
+          }
+        },
+        "firstCouponDueSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/firstCouponDueSimDay",
+              "originalValue": null
+            }
+          }
+        },
+        "settlementCurrency": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "GCU",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/settlementCurrency",
+              "originalValue": "GCU"
+            }
+          }
+        },
+        "paymentAccountId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/paymentAccountId",
+              "originalValue": null
+            }
+          }
+        },
+        "fundedFxCounterpartyId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/fundedFxCounterpartyId",
+              "originalValue": null
+            }
+          }
+        },
+        "paymentSourceStatus": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "UNKNOWN_NO_VERIFIED_GCU_CASH_ACCOUNT_MAPPING",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/paymentSourceStatus",
+              "originalValue": "UNKNOWN_NO_VERIFIED_GCU_CASH_ACCOUNT_MAPPING"
+            }
+          }
+        },
+        "unpaidPolicy": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/unpaidPolicy",
+              "originalValue": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment"
+            }
+          }
+        },
+        "activation": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "NOT_ADOPTED_NOT_USED_TO_ASSERT_FIXED_V2_HAS_THIS_DUE_DATE",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/1/activation",
+              "originalValue": "NOT_ADOPTED_NOT_USED_TO_ASSERT_FIXED_V2_HAS_THIS_DUE_DATE"
+            }
+          }
+        }
+      },
+      "journalPointerCount": 5,
+      "actualPaymentSource": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+        "source": null
+      },
+      "sourceModelTermsAdopted": false
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "originalKnownReference": {
+        "issuerId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "ENTITY_CENTRAL_BANK_20",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Reference counterparty, no native adopted issuer",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/2/liabilityIssuerId",
+              "originalValue": "ENTITY_CENTRAL_BANK_20"
+            }
+          }
+        },
+        "assetHolderId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "ENTITY_CENTRAL_BANK_09",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Reference CB asset holder, not cash owner",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/2/claimAssetHolderId",
+              "originalValue": "ENTITY_CENTRAL_BANK_09"
+            }
+          }
+        },
+        "principalGcuReference": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "874125000.00",
+          "valueKind": "DECIMAL_STRING",
+          "currency": "GCU",
+          "unit": "GCU",
+          "meaning": "Reference principal preserved; no availability inference",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/2/amountGcuReference",
+              "originalValue": "874125000.00"
+            }
+          }
+        },
+        "closingPrincipal": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "874125000.00",
+          "valueKind": "DECIMAL_STRING",
+          "currency": "GCU",
+          "unit": "GCU",
+          "meaning": "Original derived reference principal",
+          "source": {
+            "sourceId": "clearing_reference_closing",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/derivedBilateralCBReferenceClaimPairs/2/amountGcuReference",
+              "originalValue": "874125000.00"
+            }
+          }
+        }
+      },
+      "constructedCanonicalNativePositions": [
+        {
+          "role": "ASSET",
+          "holdingId": "SCENE_CLEARING_20_09_V2_ASSET",
+          "nativeAmountPointer": "/positions/564/nativeAmount",
+          "sourceId": "paired_positions_candidate"
+        },
+        {
+          "role": "LIABILITY",
+          "holdingId": "SCENE_CLEARING_20_09_V2_LIABILITY",
+          "nativeAmountPointer": "/positions/565/nativeAmount",
+          "sourceId": "paired_positions_candidate"
+        }
+      ],
+      "fixedV2LifecycleTerms": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_CLEARING_TERMS",
+        "source": null
+      },
+      "proposedTerms": {
+        "nativePrincipal": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "874125000",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/nativePrincipal",
+              "originalValue": "874125000"
+            }
+          }
+        },
+        "nativeCurrency": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "GCU",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/nativeCurrency",
+              "originalValue": "GCU"
+            }
+          }
+        },
+        "annualCoupon": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "0",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/annualCoupon",
+              "originalValue": "0"
+            }
+          }
+        },
+        "interestDayCount": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 360,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/interestDayCount",
+              "originalValue": 360
+            }
+          }
+        },
+        "accrualStartSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 0,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/accrualStartSimDay",
+              "originalValue": 0
+            }
+          }
+        },
+        "callable": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": false,
+          "valueKind": "BOOLEAN",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/callable",
+              "originalValue": false
+            }
+          }
+        },
+        "maturitySimDays": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 140,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/maturitySimDays",
+              "originalValue": 140
+            }
+          }
+        },
+        "firstPrincipalDueSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 140,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/firstPrincipalDueSimDay",
+              "originalValue": 140
+            }
+          }
+        },
+        "firstCouponDueSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/firstCouponDueSimDay",
+              "originalValue": null
+            }
+          }
+        },
+        "settlementCurrency": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "GCU",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/settlementCurrency",
+              "originalValue": "GCU"
+            }
+          }
+        },
+        "paymentAccountId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/paymentAccountId",
+              "originalValue": null
+            }
+          }
+        },
+        "fundedFxCounterpartyId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/fundedFxCounterpartyId",
+              "originalValue": null
+            }
+          }
+        },
+        "paymentSourceStatus": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "UNKNOWN_NO_VERIFIED_GCU_CASH_ACCOUNT_MAPPING",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/paymentSourceStatus",
+              "originalValue": "UNKNOWN_NO_VERIFIED_GCU_CASH_ACCOUNT_MAPPING"
+            }
+          }
+        },
+        "unpaidPolicy": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/unpaidPolicy",
+              "originalValue": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment"
+            }
+          }
+        },
+        "activation": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "NOT_ADOPTED_NOT_USED_TO_ASSERT_FIXED_V2_HAS_THIS_DUE_DATE",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/2/activation",
+              "originalValue": "NOT_ADOPTED_NOT_USED_TO_ASSERT_FIXED_V2_HAS_THIS_DUE_DATE"
+            }
+          }
+        }
+      },
+      "journalPointerCount": 169,
+      "actualPaymentSource": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+        "source": null
+      },
+      "sourceModelTermsAdopted": false
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_426A7876B468F8B5DFABDA9C",
+      "originalKnownReference": {
+        "issuerId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "ENTITY_CENTRAL_BANK_20",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Reference counterparty, no native adopted issuer",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/3/liabilityIssuerId",
+              "originalValue": "ENTITY_CENTRAL_BANK_20"
+            }
+          }
+        },
+        "assetHolderId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "ENTITY_CENTRAL_BANK_24",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Reference CB asset holder, not cash owner",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/3/claimAssetHolderId",
+              "originalValue": "ENTITY_CENTRAL_BANK_24"
+            }
+          }
+        },
+        "principalGcuReference": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "149850000.0",
+          "valueKind": "DECIMAL_STRING",
+          "currency": "GCU",
+          "unit": "GCU",
+          "meaning": "Reference principal preserved; no availability inference",
+          "source": {
+            "sourceId": "clearing_reference_claims",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/claimPairs/3/amountGcuReference",
+              "originalValue": "149850000.0"
+            }
+          }
+        },
+        "closingPrincipal": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "REFERENCE",
+          "value": "149850000.0",
+          "valueKind": "DECIMAL_STRING",
+          "currency": "GCU",
+          "unit": "GCU",
+          "meaning": "Original derived reference principal",
+          "source": {
+            "sourceId": "clearing_reference_closing",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/derivedBilateralCBReferenceClaimPairs/3/amountGcuReference",
+              "originalValue": "149850000.0"
+            }
+          }
+        }
+      },
+      "constructedCanonicalNativePositions": [
+        {
+          "role": "ASSET",
+          "holdingId": "SCENE_CLEARING_20_24_V2_ASSET",
+          "nativeAmountPointer": "/positions/566/nativeAmount",
+          "sourceId": "paired_positions_candidate"
+        },
+        {
+          "role": "LIABILITY",
+          "holdingId": "SCENE_CLEARING_20_24_V2_LIABILITY",
+          "nativeAmountPointer": "/positions/567/nativeAmount",
+          "sourceId": "paired_positions_candidate"
+        }
+      ],
+      "fixedV2LifecycleTerms": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_CLEARING_TERMS",
+        "source": null
+      },
+      "proposedTerms": {
+        "nativePrincipal": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "149850000",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/nativePrincipal",
+              "originalValue": "149850000"
+            }
+          }
+        },
+        "nativeCurrency": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "GCU",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/nativeCurrency",
+              "originalValue": "GCU"
+            }
+          }
+        },
+        "annualCoupon": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "0",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/annualCoupon",
+              "originalValue": "0"
+            }
+          }
+        },
+        "interestDayCount": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 360,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/interestDayCount",
+              "originalValue": 360
+            }
+          }
+        },
+        "accrualStartSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 0,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/accrualStartSimDay",
+              "originalValue": 0
+            }
+          }
+        },
+        "callable": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": false,
+          "valueKind": "BOOLEAN",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/callable",
+              "originalValue": false
+            }
+          }
+        },
+        "maturitySimDays": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 140,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/maturitySimDays",
+              "originalValue": 140
+            }
+          }
+        },
+        "firstPrincipalDueSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": 140,
+          "valueKind": "INTEGER",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/firstPrincipalDueSimDay",
+              "originalValue": 140
+            }
+          }
+        },
+        "firstCouponDueSimDay": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/firstCouponDueSimDay",
+              "originalValue": null
+            }
+          }
+        },
+        "settlementCurrency": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "GCU",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/settlementCurrency",
+              "originalValue": "GCU"
+            }
+          }
+        },
+        "paymentAccountId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/paymentAccountId",
+              "originalValue": null
+            }
+          }
+        },
+        "fundedFxCounterpartyId": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": null,
+          "valueKind": "NULL",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/fundedFxCounterpartyId",
+              "originalValue": null
+            }
+          }
+        },
+        "paymentSourceStatus": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "UNKNOWN_NO_VERIFIED_GCU_CASH_ACCOUNT_MAPPING",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/paymentSourceStatus",
+              "originalValue": "UNKNOWN_NO_VERIFIED_GCU_CASH_ACCOUNT_MAPPING"
+            }
+          }
+        },
+        "unpaidPolicy": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/unpaidPolicy",
+              "originalValue": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment"
+            }
+          }
+        },
+        "activation": {
+          "status": "KNOWN_SOURCE_VALUE",
+          "evidenceClass": "CONSTRUCTED",
+          "value": "NOT_ADOPTED_NOT_USED_TO_ASSERT_FIXED_V2_HAS_THIS_DUE_DATE",
+          "valueKind": "STRING",
+          "currency": null,
+          "unit": null,
+          "meaning": "Candidate only; not owner-adopted lifecycle",
+          "source": {
+            "sourceId": "clearing_candidate",
+            "selector": {
+              "kind": "JSON_POINTER",
+              "pointer": "/terms/3/activation",
+              "originalValue": "NOT_ADOPTED_NOT_USED_TO_ASSERT_FIXED_V2_HAS_THIS_DUE_DATE"
+            }
+          }
+        }
+      },
+      "journalPointerCount": 4,
+      "actualPaymentSource": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+        "source": null
+      },
+      "sourceModelTermsAdopted": false
+    }
+  ],
+  "originalJournalPointers": [
+    {
+      "canonicalClaimId": "SCENE_CLEARING_09_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_BB0519270C3F8E559F31AA9D",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/224684",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/0/sourceJournalPointers/0"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_09_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_BB0519270C3F8E559F31AA9D",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/304324",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/0/sourceJournalPointers/1"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_09_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_BB0519270C3F8E559F31AA9D",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/384272",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/0/sourceJournalPointers/2"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_09_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_BB0519270C3F8E559F31AA9D",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/464351",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/0/sourceJournalPointers/3"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_09_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_BB0519270C3F8E559F31AA9D",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/544543",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/0/sourceJournalPointers/4"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_13_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_2E99C1DB23F3CE6EFB843A2D",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/206456",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/1/sourceJournalPointers/0"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_13_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_2E99C1DB23F3CE6EFB843A2D",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/249135",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/1/sourceJournalPointers/1"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_13_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_2E99C1DB23F3CE6EFB843A2D",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/292036",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/1/sourceJournalPointers/2"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_13_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_2E99C1DB23F3CE6EFB843A2D",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/335059",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/1/sourceJournalPointers/3"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_13_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_2E99C1DB23F3CE6EFB843A2D",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/378118",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/1/sourceJournalPointers/4"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/241532",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/0"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/244591",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/1"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/247651",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/2"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/250715",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/3"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/253777",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/4"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/256840",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/5"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/259903",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/6"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/262966",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/7"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/266030",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/8"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/269093",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/9"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/272157",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/10"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/275220",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/11"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/278284",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/12"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/281349",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/13"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/284416",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/14"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/287483",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/15"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/290551",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/16"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/293623",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/17"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/296694",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/18"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/299766",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/19"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/302839",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/20"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/305913",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/21"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/308986",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/22"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/312059",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/23"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/315133",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/24"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/318206",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/25"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/321279",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/26"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/324352",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/27"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/327425",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/28"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/330498",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/29"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/333572",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/30"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/336648",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/31"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/339723",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/32"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/342798",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/33"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/345874",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/34"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/348949",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/35"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/352024",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/36"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/355099",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/37"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/358175",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/38"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/361250",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/39"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/364325",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/40"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/367400",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/41"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/370477",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/42"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/373554",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/43"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/376631",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/44"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/379709",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/45"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/382787",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/46"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/385865",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/47"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/388942",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/48"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/392019",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/49"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/395096",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/50"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/398173",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/51"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/401254",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/52"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/404334",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/53"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/407414",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/54"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/410494",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/55"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/413574",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/56"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/416654",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/57"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/419734",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/58"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/422814",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/59"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/425895",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/60"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/428975",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/61"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/432057",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/62"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/435138",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/63"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/438219",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/64"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/441300",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/65"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/444381",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/66"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/447462",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/67"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/450543",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/68"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/453624",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/69"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/456705",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/70"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/459785",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/71"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/462865",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/72"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/465946",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/73"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/469026",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/74"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/472106",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/75"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/475186",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/76"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/478266",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/77"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/481347",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/78"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/484427",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/79"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/487507",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/80"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/490587",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/81"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/493667",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/82"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/496747",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/83"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/499827",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/84"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/502907",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/85"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/505988",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/86"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/509068",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/87"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/512152",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/88"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/515236",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/89"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/518320",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/90"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/521412",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/91"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/524504",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/92"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/527596",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/93"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/530689",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/94"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/533781",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/95"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/536873",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/96"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/539965",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/97"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/543057",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/98"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/546150",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/99"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/549242",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/100"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/552334",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/101"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/555154",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/102"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/557702",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/103"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/560250",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/104"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/562798",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/105"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/565346",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/106"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/567894",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/107"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/570442",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/108"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/573006",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/109"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/575570",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/110"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/578137",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/111"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/580708",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/112"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/583286",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/113"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/585876",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/114"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/588466",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/115"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/591064",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/116"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/593668",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/117"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/596272",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/118"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/598888",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/119"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/601508",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/120"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/604140",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/121"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/606772",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/122"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/609424",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/123"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/612076",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/124"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/614728",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/125"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/617396",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/126"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/620064",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/127"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/622732",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/128"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/625420",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/129"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/628108",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/130"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/630796",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/131"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/633484",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/132"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/636180",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/133"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/638876",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/134"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/641572",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/135"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/644284",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/136"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/647000",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/137"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/649716",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/138"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/652480",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/139"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/655248",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/140"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/658016",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/141"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/660784",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/142"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/663556",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/143"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/666327",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/144"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/669097",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/145"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/671901",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/146"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/674702",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/147"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/677499",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/148"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/680317",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/149"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/683140",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/150"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/685961",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/151"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/688788",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/152"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/691621",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/153"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/694452",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/154"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/697282",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/155"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/700108",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/156"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/702934",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/157"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/705762",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/158"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/708590",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/159"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/711424",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/160"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/714259",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/161"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/717098",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/162"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/719954",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/163"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/722808",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/164"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/725658",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/165"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/728509",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/166"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/731359",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/167"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_6CCBE80C1B68173E343CBE03",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/734206",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/2/sourceJournalPointers/168"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_426A7876B468F8B5DFABDA9C",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/233845",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/3/sourceJournalPointers/0"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_426A7876B468F8B5DFABDA9C",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/331984",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/3/sourceJournalPointers/1"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_426A7876B468F8B5DFABDA9C",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/430460",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/3/sourceJournalPointers/2"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    },
+    {
+      "canonicalClaimId": "SCENE_CLEARING_20_24_V2",
+      "referenceClaimId": "REFERENCE_CB_CLAIM_426A7876B468F8B5DFABDA9C",
+      "sourceId": "clearing_original_journal",
+      "upstreamJsonPointer": "/529081",
+      "indexProvenance": {
+        "sourceId": "clearing_reference_claims",
+        "jsonPointer": "/claimPairs/3/sourceJournalPointers/3"
+      },
+      "dereferencedThisRun": false,
+      "meaning": "Preserved original OP reference pointer, not a new World Posting or new journal namespace"
+    }
+  ],
+  "termsAdopted": false
+}

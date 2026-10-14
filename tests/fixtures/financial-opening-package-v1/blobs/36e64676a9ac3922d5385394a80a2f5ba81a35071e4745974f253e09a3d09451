@@ -1,0 +1,13 @@
+{
+  "status": "PASS_FINITE_REGISTRY_SCHEMA_SHAPE_AND_JSON_LEAF_BINDINGS",
+  "checks": {
+    "knownFacts": 1290,
+    "unknownFacts": 1294
+  },
+  "jsonSchemaLibraryRun": false,
+  "method": "Explicit shape and tagged selector/JSONPointer invariants; build_registry.py --verify gives repeatable identity/native checks",
+  "E47Rerun": false,
+  "saved210Recomputed": false,
+  "old140Replay": false,
+  "core980": false
+}

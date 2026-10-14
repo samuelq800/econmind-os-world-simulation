@@ -1,0 +1,1257 @@
+{
+  "schemaVersion": "SETTLEMENT_TERMS_PROCESS_CANDIDATE_V1",
+  "status": "PROPOSED_NOT_ADOPTED_PENDING_E",
+  "terms": [
+    {
+      "flowId": "PROPOSED_CLEARING_PRINCIPAL_SCENE_CLEARING_09_24_V2",
+      "canonicalClaimId": "SCENE_CLEARING_09_24_V2",
+      "status": "KNOWN_PROPOSED_NOT_ADOPTED",
+      "evidenceClass": "CONSTRUCTED",
+      "payer": {
+        "candidateOwnerId": "ENTITY_CENTRAL_BANK_09",
+        "countryId": "COUNTRY_09",
+        "actualOwnerId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "accountRef": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "currency": "GCU",
+        "nativeVersusBookMeaning": "NATIVE_CASH_REQUIRED_NOT_CB_RECEIVABLE_OR_TGA",
+        "availableAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "restrictedAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "permissionAndValueDate": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        }
+      },
+      "payee": {
+        "candidateOwnerId": "ENTITY_CENTRAL_BANK_24",
+        "countryId": "COUNTRY_24",
+        "actualOwnerId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "accountRef": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "currency": "GCU",
+        "nativeVersusBookMeaning": "NATIVE_CASH_REQUIRED_NOT_CB_RECEIVABLE_OR_TGA",
+        "availableAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "restrictedAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "permissionAndValueDate": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        }
+      },
+      "nativeCurrency": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "GCU",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing proposal native currency",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/0/nativeCurrency",
+            "originalValue": "GCU"
+          }
+        }
+      },
+      "amountFact": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "499500000",
+        "valueKind": "DECIMAL_STRING",
+        "currency": "GCU",
+        "unit": "GCU",
+        "meaning": "Preserved original canonical principal; not new funding",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/0/nativePrincipal",
+            "originalValue": "499500000"
+          }
+        }
+      },
+      "relativeDueSimDay": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": 140,
+        "valueKind": "INTEGER",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing sim140 proposal only; not an adopted due date",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/0/firstPrincipalDueSimDay",
+            "originalValue": 140
+          }
+        }
+      },
+      "interest": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "0",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing zero-coupon proposal only",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/0/annualCoupon",
+            "originalValue": "0"
+          }
+        }
+      },
+      "callable": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": false,
+        "valueKind": "BOOLEAN",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing noncallable proposal only",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/0/callable",
+            "originalValue": false
+          }
+        }
+      },
+      "feeFact": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FEES_QUOTE",
+        "source": null
+      },
+      "roundingPolicyRef": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FEES_QUOTE",
+        "source": null
+      },
+      "conversionRequired": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FUNDED_PAIR",
+        "source": null
+      },
+      "quote": {
+        "applicability": "REQUIRED_ONLY_IF_CONVERSION_IS_PROPOSED; no accounts/route is inferred",
+        "quoteId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "version": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "direction": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "expiry": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "fundedCounterparty": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FUNDED_PAIR",
+          "source": null
+        }
+      },
+      "termsRefs": [
+        {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/0"
+          }
+        }
+      ],
+      "fundingRefs": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+        "source": null
+      },
+      "adoptedPolicyRef": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_CLEARING_TERMS",
+        "source": null
+      },
+      "twoEndedAtomicCommit": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_ATOMIC_SETTLEMENT",
+        "source": null
+      },
+      "partialPaymentPolicy": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_PARTIAL_REFUND_TERMS",
+        "source": null
+      },
+      "refundPenaltyPolicy": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_PARTIAL_REFUND_TERMS",
+        "source": null
+      },
+      "durableIdempotencyReceipt": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_ATOMIC_SETTLEMENT",
+        "source": null
+      },
+      "unpaidPolicyCandidate": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing proposed unpaid policy; not adopted",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/0/unpaidPolicy",
+            "originalValue": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment"
+          }
+        }
+      },
+      "originalPointerIndex": {
+        "artifact": "CLEARING_SOURCE_INDEX.json",
+        "canonicalClaimId": "SCENE_CLEARING_09_24_V2",
+        "count": 5
+      }
+    },
+    {
+      "flowId": "PROPOSED_CLEARING_PRINCIPAL_SCENE_CLEARING_13_24_V2",
+      "canonicalClaimId": "SCENE_CLEARING_13_24_V2",
+      "status": "KNOWN_PROPOSED_NOT_ADOPTED",
+      "evidenceClass": "CONSTRUCTED",
+      "payer": {
+        "candidateOwnerId": "ENTITY_CENTRAL_BANK_13",
+        "countryId": "COUNTRY_13",
+        "actualOwnerId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "accountRef": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "currency": "GCU",
+        "nativeVersusBookMeaning": "NATIVE_CASH_REQUIRED_NOT_CB_RECEIVABLE_OR_TGA",
+        "availableAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "restrictedAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "permissionAndValueDate": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        }
+      },
+      "payee": {
+        "candidateOwnerId": "ENTITY_CENTRAL_BANK_24",
+        "countryId": "COUNTRY_24",
+        "actualOwnerId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "accountRef": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "currency": "GCU",
+        "nativeVersusBookMeaning": "NATIVE_CASH_REQUIRED_NOT_CB_RECEIVABLE_OR_TGA",
+        "availableAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "restrictedAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "permissionAndValueDate": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        }
+      },
+      "nativeCurrency": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "GCU",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing proposal native currency",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/1/nativeCurrency",
+            "originalValue": "GCU"
+          }
+        }
+      },
+      "amountFact": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "199800000",
+        "valueKind": "DECIMAL_STRING",
+        "currency": "GCU",
+        "unit": "GCU",
+        "meaning": "Preserved original canonical principal; not new funding",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/1/nativePrincipal",
+            "originalValue": "199800000"
+          }
+        }
+      },
+      "relativeDueSimDay": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": 140,
+        "valueKind": "INTEGER",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing sim140 proposal only; not an adopted due date",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/1/firstPrincipalDueSimDay",
+            "originalValue": 140
+          }
+        }
+      },
+      "interest": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "0",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing zero-coupon proposal only",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/1/annualCoupon",
+            "originalValue": "0"
+          }
+        }
+      },
+      "callable": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": false,
+        "valueKind": "BOOLEAN",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing noncallable proposal only",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/1/callable",
+            "originalValue": false
+          }
+        }
+      },
+      "feeFact": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FEES_QUOTE",
+        "source": null
+      },
+      "roundingPolicyRef": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FEES_QUOTE",
+        "source": null
+      },
+      "conversionRequired": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FUNDED_PAIR",
+        "source": null
+      },
+      "quote": {
+        "applicability": "REQUIRED_ONLY_IF_CONVERSION_IS_PROPOSED; no accounts/route is inferred",
+        "quoteId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "version": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "direction": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "expiry": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "fundedCounterparty": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FUNDED_PAIR",
+          "source": null
+        }
+      },
+      "termsRefs": [
+        {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/1"
+          }
+        }
+      ],
+      "fundingRefs": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+        "source": null
+      },
+      "adoptedPolicyRef": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_CLEARING_TERMS",
+        "source": null
+      },
+      "twoEndedAtomicCommit": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_ATOMIC_SETTLEMENT",
+        "source": null
+      },
+      "partialPaymentPolicy": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_PARTIAL_REFUND_TERMS",
+        "source": null
+      },
+      "refundPenaltyPolicy": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_PARTIAL_REFUND_TERMS",
+        "source": null
+      },
+      "durableIdempotencyReceipt": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_ATOMIC_SETTLEMENT",
+        "source": null
+      },
+      "unpaidPolicyCandidate": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing proposed unpaid policy; not adopted",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/1/unpaidPolicy",
+            "originalValue": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment"
+          }
+        }
+      },
+      "originalPointerIndex": {
+        "artifact": "CLEARING_SOURCE_INDEX.json",
+        "canonicalClaimId": "SCENE_CLEARING_13_24_V2",
+        "count": 5
+      }
+    },
+    {
+      "flowId": "PROPOSED_CLEARING_PRINCIPAL_SCENE_CLEARING_20_09_V2",
+      "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+      "status": "KNOWN_PROPOSED_NOT_ADOPTED",
+      "evidenceClass": "CONSTRUCTED",
+      "payer": {
+        "candidateOwnerId": "ENTITY_CENTRAL_BANK_20",
+        "countryId": "COUNTRY_20",
+        "actualOwnerId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "accountRef": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "currency": "GCU",
+        "nativeVersusBookMeaning": "NATIVE_CASH_REQUIRED_NOT_CB_RECEIVABLE_OR_TGA",
+        "availableAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "restrictedAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "permissionAndValueDate": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        }
+      },
+      "payee": {
+        "candidateOwnerId": "ENTITY_CENTRAL_BANK_09",
+        "countryId": "COUNTRY_09",
+        "actualOwnerId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "accountRef": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "currency": "GCU",
+        "nativeVersusBookMeaning": "NATIVE_CASH_REQUIRED_NOT_CB_RECEIVABLE_OR_TGA",
+        "availableAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "restrictedAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "permissionAndValueDate": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        }
+      },
+      "nativeCurrency": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "GCU",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing proposal native currency",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/2/nativeCurrency",
+            "originalValue": "GCU"
+          }
+        }
+      },
+      "amountFact": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "874125000",
+        "valueKind": "DECIMAL_STRING",
+        "currency": "GCU",
+        "unit": "GCU",
+        "meaning": "Preserved original canonical principal; not new funding",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/2/nativePrincipal",
+            "originalValue": "874125000"
+          }
+        }
+      },
+      "relativeDueSimDay": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": 140,
+        "valueKind": "INTEGER",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing sim140 proposal only; not an adopted due date",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/2/firstPrincipalDueSimDay",
+            "originalValue": 140
+          }
+        }
+      },
+      "interest": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "0",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing zero-coupon proposal only",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/2/annualCoupon",
+            "originalValue": "0"
+          }
+        }
+      },
+      "callable": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": false,
+        "valueKind": "BOOLEAN",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing noncallable proposal only",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/2/callable",
+            "originalValue": false
+          }
+        }
+      },
+      "feeFact": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FEES_QUOTE",
+        "source": null
+      },
+      "roundingPolicyRef": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FEES_QUOTE",
+        "source": null
+      },
+      "conversionRequired": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FUNDED_PAIR",
+        "source": null
+      },
+      "quote": {
+        "applicability": "REQUIRED_ONLY_IF_CONVERSION_IS_PROPOSED; no accounts/route is inferred",
+        "quoteId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "version": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "direction": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "expiry": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "fundedCounterparty": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FUNDED_PAIR",
+          "source": null
+        }
+      },
+      "termsRefs": [
+        {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/2"
+          }
+        }
+      ],
+      "fundingRefs": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+        "source": null
+      },
+      "adoptedPolicyRef": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_CLEARING_TERMS",
+        "source": null
+      },
+      "twoEndedAtomicCommit": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_ATOMIC_SETTLEMENT",
+        "source": null
+      },
+      "partialPaymentPolicy": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_PARTIAL_REFUND_TERMS",
+        "source": null
+      },
+      "refundPenaltyPolicy": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_PARTIAL_REFUND_TERMS",
+        "source": null
+      },
+      "durableIdempotencyReceipt": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_ATOMIC_SETTLEMENT",
+        "source": null
+      },
+      "unpaidPolicyCandidate": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing proposed unpaid policy; not adopted",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/2/unpaidPolicy",
+            "originalValue": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment"
+          }
+        }
+      },
+      "originalPointerIndex": {
+        "artifact": "CLEARING_SOURCE_INDEX.json",
+        "canonicalClaimId": "SCENE_CLEARING_20_09_V2",
+        "count": 169
+      }
+    },
+    {
+      "flowId": "PROPOSED_CLEARING_PRINCIPAL_SCENE_CLEARING_20_24_V2",
+      "canonicalClaimId": "SCENE_CLEARING_20_24_V2",
+      "status": "KNOWN_PROPOSED_NOT_ADOPTED",
+      "evidenceClass": "CONSTRUCTED",
+      "payer": {
+        "candidateOwnerId": "ENTITY_CENTRAL_BANK_20",
+        "countryId": "COUNTRY_20",
+        "actualOwnerId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "accountRef": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "currency": "GCU",
+        "nativeVersusBookMeaning": "NATIVE_CASH_REQUIRED_NOT_CB_RECEIVABLE_OR_TGA",
+        "availableAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "restrictedAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "permissionAndValueDate": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        }
+      },
+      "payee": {
+        "candidateOwnerId": "ENTITY_CENTRAL_BANK_24",
+        "countryId": "COUNTRY_24",
+        "actualOwnerId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "accountRef": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+          "source": null
+        },
+        "currency": "GCU",
+        "nativeVersusBookMeaning": "NATIVE_CASH_REQUIRED_NOT_CB_RECEIVABLE_OR_TGA",
+        "availableAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "restrictedAmount": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        },
+        "permissionAndValueDate": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_GCU_SPENDABILITY",
+          "source": null
+        }
+      },
+      "nativeCurrency": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "GCU",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing proposal native currency",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/3/nativeCurrency",
+            "originalValue": "GCU"
+          }
+        }
+      },
+      "amountFact": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "149850000",
+        "valueKind": "DECIMAL_STRING",
+        "currency": "GCU",
+        "unit": "GCU",
+        "meaning": "Preserved original canonical principal; not new funding",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/3/nativePrincipal",
+            "originalValue": "149850000"
+          }
+        }
+      },
+      "relativeDueSimDay": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": 140,
+        "valueKind": "INTEGER",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing sim140 proposal only; not an adopted due date",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/3/firstPrincipalDueSimDay",
+            "originalValue": 140
+          }
+        }
+      },
+      "interest": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "0",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing zero-coupon proposal only",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/3/annualCoupon",
+            "originalValue": "0"
+          }
+        }
+      },
+      "callable": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": false,
+        "valueKind": "BOOLEAN",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing noncallable proposal only",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/3/callable",
+            "originalValue": false
+          }
+        }
+      },
+      "feeFact": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FEES_QUOTE",
+        "source": null
+      },
+      "roundingPolicyRef": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FEES_QUOTE",
+        "source": null
+      },
+      "conversionRequired": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_FX_FUNDED_PAIR",
+        "source": null
+      },
+      "quote": {
+        "applicability": "REQUIRED_ONLY_IF_CONVERSION_IS_PROPOSED; no accounts/route is inferred",
+        "quoteId": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "version": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "direction": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "expiry": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FEES_QUOTE",
+          "source": null
+        },
+        "fundedCounterparty": {
+          "status": "UNKNOWN",
+          "evidenceClass": null,
+          "value": null,
+          "gapId": "GAP_FX_FUNDED_PAIR",
+          "source": null
+        }
+      },
+      "termsRefs": [
+        {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/3"
+          }
+        }
+      ],
+      "fundingRefs": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_GCU_ACCOUNT_OWNERSHIP",
+        "source": null
+      },
+      "adoptedPolicyRef": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_CLEARING_TERMS",
+        "source": null
+      },
+      "twoEndedAtomicCommit": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_ATOMIC_SETTLEMENT",
+        "source": null
+      },
+      "partialPaymentPolicy": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_PARTIAL_REFUND_TERMS",
+        "source": null
+      },
+      "refundPenaltyPolicy": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_PARTIAL_REFUND_TERMS",
+        "source": null
+      },
+      "durableIdempotencyReceipt": {
+        "status": "UNKNOWN",
+        "evidenceClass": null,
+        "value": null,
+        "gapId": "GAP_ATOMIC_SETTLEMENT",
+        "source": null
+      },
+      "unpaidPolicyCandidate": {
+        "status": "KNOWN_SOURCE_VALUE",
+        "evidenceClass": "CONSTRUCTED",
+        "value": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment",
+        "valueKind": "STRING",
+        "currency": null,
+        "unit": null,
+        "meaning": "Existing proposed unpaid policy; not adopted",
+        "source": {
+          "sourceId": "clearing_candidate",
+          "selector": {
+            "kind": "JSON_POINTER",
+            "pointer": "/terms/3/unpaidPolicy",
+            "originalValue": "At end of day140 retain full unpaid principal and overdue state; no forgiveness, rollover, netting or fictional payment"
+          }
+        }
+      },
+      "originalPointerIndex": {
+        "artifact": "CLEARING_SOURCE_INDEX.json",
+        "canonicalClaimId": "SCENE_CLEARING_20_24_V2",
+        "count": 4
+      }
+    }
+  ],
+  "newEconomicValuesChosen": false,
+  "processRulesCandidate": [
+    {
+      "id": "P1",
+      "status": "PROPOSED",
+      "rule": "Settle only with actual permitted source-bound funds, exact adopted terms and supported original writer route; missing facts block."
+    },
+    {
+      "id": "P2",
+      "status": "PROPOSED",
+      "rule": "Both original account sides commit atomically or neither; failed/unknown completion preserves the unpaid obligation, without fictional payment, forgiveness or automatic loan."
+    },
+    {
+      "id": "P3",
+      "status": "PROPOSED",
+      "rule": "Partial/refund behavior stays blocked until explicit source-bound terms exist; transit/undelivered goods or timeout is not an automatic refund."
+    },
+    {
+      "id": "P4",
+      "status": "PROPOSED",
+      "rule": "Use original canonical idempotency/receipt rules for identical retries; conflicting reuse rejects, never retry a timeout with a new economic key."
+    },
+    {
+      "id": "P5",
+      "status": "PROPOSED",
+      "rule": "Keep gross outgoing, incoming and fees distinct; promises/receivables or book LC cannot fund GCU cash and are not netted."
+    }
+  ],
+  "execution": false,
+  "sourceModelAdoption": false,
+  "worldStart": false
+}
