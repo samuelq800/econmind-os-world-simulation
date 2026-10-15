@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CrisisGeography } from '../../apps/world-web/src/map-explorer/CrisisGeography.js';
 import {
   CrisisActionPage,
@@ -526,4 +526,181 @@ describe('legacy crisis summary stylesheet wiring', () => {
     expect(entry).toContain('../crisis-action/crisis-action.css?inline');
     expect(entry).toMatch(/style\.textContent = css \+ '\\n' \+ crisisCss/);
   });
+});
+
+describe('legacy country crisis summary route mount (offline DOM branch)', () => {
+  afterEach(() => {
+    vi.doUnmock('react-dom/client');
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+    vi.resetModules();
+  });
+
+  async function loadRoute(href: string, base = '/') {
+    vi.resetModules();
+    vi.stubEnv('BASE_URL', base);
+    type Host = { className: string; isConnected: boolean };
+    const hosts: Host[] = [];
+    const roots: {
+      render: ReturnType<typeof vi.fn>;
+      unmount: ReturnType<typeof vi.fn>;
+    }[] = [];
+    let mutation = () => {};
+    const parent = {
+      querySelector: () => hosts.find((host) => host.isConnected) ?? null,
+    };
+    const makeScene = () => ({
+      isConnected: true,
+      parentElement: parent,
+      before(host: Host) {
+        host.isConnected = true;
+        hosts.push(host);
+      },
+    });
+    let scene: ReturnType<typeof makeScene> | null = makeScene();
+    const document = {
+      body: { dataset: {} },
+      querySelector(selector: string) {
+        // Existing chrome is already mounted. This test exercises the actual
+        // route/observer/React mount branch, not the separate markup installer.
+        if (selector === '[data-econmind-brand-header]') return {};
+        return selector === '.national-world' ? scene : null;
+      },
+      createElement: () => ({ className: '', isConnected: false }),
+    };
+    const fetcher = vi.fn();
+    vi.stubGlobal('document', document);
+    vi.stubGlobal('window', { location: new URL(href) });
+    vi.stubGlobal('fetch', fetcher);
+    vi.stubGlobal(
+      'MutationObserver',
+      class {
+        constructor(callback: () => void) {
+          mutation = callback;
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    // Only the DOM renderer is recorded; all actual entry/route/component/
+    // stylesheet/legacy source modules remain real imports. This is not a
+    // browser-rendering claim. CrisisSummary is separately rendered below.
+    vi.doMock('react-dom/client', () => ({
+      createRoot: () => {
+        const root = { render: vi.fn(), unmount: vi.fn() };
+        roots.push(root);
+        return root;
+      },
+    }));
+    await import('../../apps/world-web/src/brand-shell/entry.js');
+    return {
+      hosts,
+      roots,
+      fetcher,
+      mutation: () => mutation(),
+      removeHost: () => {
+        for (const host of hosts) host.isConnected = false;
+      },
+      removeScene: () => {
+        if (scene) scene.isConnected = false;
+        scene = null;
+      },
+      replaceScene: () => {
+        scene = makeScene();
+      },
+    };
+  }
+
+  it.each([
+    ['https://test.invalid/season1-immersive/', '/'],
+    ['https://test.invalid/season1-immersive/index.html', '/'],
+    [
+      'https://test.invalid/econmind-os-world-simulation/season1-immersive/',
+      '/econmind-os-world-simulation/',
+    ],
+    [
+      'https://test.invalid/econmind-os-world-simulation/season1-immersive/index.html',
+      '/econmind-os-world-simulation/',
+    ],
+    [
+      'https://test.invalid/season1-immersive/index.html?role=captain&country=01#country',
+      '/',
+    ],
+    [
+      'https://test.invalid/prefix/season1-immersive/?country=01#country',
+      '/prefix/',
+    ],
+  ])(
+    'mounts exactly one UNBOUND summary on actual pathname %s',
+    async (href, base) => {
+      const route = await loadRoute(href!, base!);
+      expect(route.roots).toHaveLength(1);
+      route.mutation();
+      route.mutation();
+      expect(route.roots).toHaveLength(1);
+      expect(route.hosts.filter((host) => host.isConnected)).toHaveLength(1);
+      const element = route.roots[0]!.render.mock.calls[0]![0];
+      const html = renderToStaticMarkup(element);
+      expect(html).toContain('正式危机数据尚未接入');
+      expect(html).not.toContain('TEST_ONLY');
+      expect(element.props).not.toHaveProperty('state');
+      const target = new URL(element.props.href);
+      expect(target.pathname).toBe(base);
+      expect(target.searchParams.get('atlas')).toBe('crisis');
+      expect(target.searchParams.get('country')).toBe(
+        new URL(href!).searchParams.get('country'),
+      );
+      expect(route.fetcher).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    '/season1-immersive',
+    '/season1-immersive/index.htm',
+    '/season1-immersive/index.html/',
+    '/season1-immersive/index.html/extra',
+    '/season1-immersive/index.html.extra',
+    '/season1-immersive//',
+    '/season1-immersive-extra/',
+    '/not-season1-immersive/index.html',
+    '/prefix/season1-immersive/countries/01/',
+    '/unrelated/?next=/season1-immersive/index.html#/season1-immersive/',
+  ])(
+    'does not mount a summary for similar or suffixed path %s',
+    async (pathname) => {
+      const route = await loadRoute(`https://test.invalid${pathname}`);
+      route.mutation();
+      expect(route.roots).toHaveLength(0);
+      expect(route.hosts).toHaveLength(0);
+      expect(route.fetcher).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(['/', '/index.html'])(
+    'retains disconnected-host/subtree cleanup and remount on alias %s',
+    async (suffix) => {
+      const route = await loadRoute(
+        `https://test.invalid/season1-immersive${suffix}`,
+      );
+      expect(route.roots).toHaveLength(1);
+      const first = route.roots[0]!;
+      route.removeHost();
+      route.mutation();
+      expect(first.unmount).toHaveBeenCalledTimes(1);
+      expect(route.roots).toHaveLength(2);
+      route.mutation();
+      expect(route.roots).toHaveLength(2);
+      const second = route.roots[1]!;
+      route.removeHost();
+      route.removeScene();
+      route.mutation();
+      expect(second.unmount).toHaveBeenCalledTimes(1);
+      route.mutation();
+      expect(second.unmount).toHaveBeenCalledTimes(1);
+      route.replaceScene();
+      route.mutation();
+      expect(route.roots).toHaveLength(3);
+      expect(route.hosts.filter((host) => host.isConnected)).toHaveLength(1);
+    },
+  );
 });
