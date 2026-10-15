@@ -26,6 +26,7 @@ import {
 } from '../../apps/world-worker/src/index.js';
 import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
 import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
+import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
 import { SqlEconomicReadVisibilitySource } from '../../apps/world-worker/src/projections/economic-read-visibility-source.js';
 import {
   persistVisibilitySeed,
@@ -424,6 +425,229 @@ function rowByScope(
 }
 
 describe('V10.1 authoritative activity read-projection publication', () => {
+  it('FB2 stores only unavailable Office snapshots at the held head, one row per scope, without economic writes', async () => {
+    const db = await database();
+    for (const office of [
+      'CAPTAIN',
+      'FINANCE',
+      'CENTRAL_BANK',
+      'TRADE',
+      'INDUSTRY',
+      'SOCIAL',
+    ])
+      await seedCurrentAuthorization(db, {
+        authSubject: SELLER_SUBJECT,
+        countryId: 'COUNTRY_SELLER',
+        officeId: office,
+        capability: 'TEST_' + office,
+      });
+    await acquireLease(db);
+    const publisher = new AuthoritativeActivityReadProjectionPublisher({
+      database: db,
+      workerId: WORKER,
+    });
+    const read = () =>
+      db.query<{ classification: string; scope_key: string; payload: string }>(
+        'select classification,scope_key,payload::text as payload from world_v2.read_projection where world_id=$1 order by classification,scope_key',
+        [WORLD],
+      );
+    const counters = () =>
+      db.query(
+        `select (select count(*)::text from world_v2.command_submission) as commands,
+       (select count(*)::text from world_v2.authoritative_event) as events,
+       (select count(*)::text from world_v2.command_receipt) as receipts,
+       (select count(*)::text from world_v2.financial_posting_batch) as postings,
+       world_version::text,event_sequence::text from world_v2.world_head where world_id=$1`,
+        [WORLD],
+      );
+    const before = await counters();
+    await publisher.replace({ assertion: assertion(), observedAtReal: AT });
+    const first = (await read()).rows;
+    expect(first).toHaveLength(7);
+    expect(
+      new Set(first.map((r) => r.classification + ':' + r.scope_key)).size,
+    ).toBe(7);
+    for (const row of first) {
+      const payload = JSON.parse(row.payload);
+      if (row.classification === 'COUNTRY') {
+        expect(Object.hasOwn(payload, 'feedback')).toBe(false);
+        continue;
+      }
+      expect(payload.feedback).toEqual({
+        schemaVersion: 'derived-system-feedback-v1',
+        classification: 'OFFICE_PRIVATE',
+        scopeKey: row.scope_key,
+        countryId: 'COUNTRY_SELLER',
+        officeId: payload.officeId,
+        sourceHead: { worldId: WORLD, worldVersion: '0', eventSequence: '0' },
+        generatedAt: AT,
+        citizen: {
+          status: 'UNAVAILABLE',
+          reason: 'MODEL_NOT_ADMITTED',
+          items: [],
+        },
+        government: {
+          status: 'UNAVAILABLE',
+          reason: 'DISCLOSURE_UNAVAILABLE',
+          items: [],
+        },
+      });
+      expect(JSON.stringify(payload.feedback)).not.toMatch(
+        /CURRENT|feedbackId|modelRef|TEST_ONLY/,
+      );
+    }
+    await publisher.replace({ assertion: assertion(), observedAtReal: AT });
+    expect((await read()).rows).toEqual(first);
+    expect(await counters()).toEqual(before);
+    // Current-scope removal is publication cleanup, not the read authorization gate.
+    await db.query(
+      "update world_v2.current_commit_authorization set active=false where world_id=$1 and office_id='SOCIAL'",
+      [WORLD],
+    );
+    await publisher.replace({ assertion: assertion(), observedAtReal: AT });
+    expect((await read()).rows).toHaveLength(6);
+    expect(
+      (await read()).rows.some(
+        (r) => JSON.parse(r.payload).officeId === 'SOCIAL',
+      ),
+    ).toBe(false);
+    expect(await counters()).toEqual(before);
+  });
+
+  it('FB2 rolls back delete/partial inserts and retains old snapshots on invalid head/fence', async () => {
+    const db = await database();
+    await seedCurrentAuthorization(db, {
+      authSubject: SELLER_SUBJECT,
+      countryId: 'COUNTRY_SELLER',
+      officeId: 'SOCIAL',
+      capability: 'TEST_SOCIAL',
+    });
+    await acquireLease(db);
+    const publisher = new AuthoritativeActivityReadProjectionPublisher({
+      database: db,
+      workerId: WORKER,
+    });
+    await publisher.replace({ assertion: assertion(), observedAtReal: AT });
+    const read = () =>
+      db.query(
+        'select classification,scope_key,payload::text as payload from world_v2.read_projection where world_id=$1 order by classification,scope_key',
+        [WORLD],
+      );
+    const before = await read();
+    let inserts = 0;
+    const faulty: SqlDatabase = {
+      query: db.query,
+      transaction: (operation) =>
+        db.transaction((tx) =>
+          operation({
+            query: async (text, values) => {
+              if (
+                text.includes('insert into world_v2.read_projection') &&
+                ++inserts === 2
+              )
+                throw new Error('FB2_TEST_SECOND_INSERT_FAILED');
+              return tx.query(text, values);
+            },
+          }),
+        ),
+    };
+    await expect(
+      new AuthoritativeActivityReadProjectionPublisher({
+        database: faulty,
+        workerId: WORKER,
+      }).replace({ assertion: assertion(), observedAtReal: AT }),
+    ).rejects.toMatchObject({ name: 'V09TransactionRolledBackError' });
+    expect(inserts).toBe(2);
+    expect(await read()).toEqual(before);
+    await expect(
+      publisher.replace({ assertion: assertion('1'), observedAtReal: AT }),
+    ).rejects.toThrow();
+    expect(await read()).toEqual(before);
+    await db.query(
+      'select * from world_v2.acquire_world_writer_lease($1,$2,$3,300000)',
+      [WORLD, 'WORKER_FB2_TAKEOVER', EXPIRY],
+    );
+    await expect(
+      publisher.replace({ assertion: assertion(), observedAtReal: EXPIRY }),
+    ).rejects.toThrow();
+    expect(await read()).toEqual(before);
+  });
+
+  it('FB2 publication lost-response retry replaces snapshots only, preserving the original durable receipt fixture once', async () => {
+    const db = await database();
+    await seedCurrentAuthorization(db, {
+      authSubject: SELLER_SUBJECT,
+      countryId: 'COUNTRY_SELLER',
+      officeId: 'TRADE',
+      capability: 'TEST_TRADE',
+    });
+    // Existing SQL lineage fixture, not a new Atomic/production completion proof.
+    await seedAuthoritativeEvent(db, {
+      authSubject: SELLER_SUBJECT,
+      commandId: 'COMMAND_FB2_FIXTURE',
+      countryId: 'COUNTRY_SELLER',
+      eventId: 'EVENT_FB2_FIXTURE',
+      officeId: 'TRADE',
+      sequence: '1',
+    });
+    await db.query(
+      'update world_v2.world_head set world_version=1,event_sequence=1 where world_id=$1',
+      [WORLD],
+    );
+    await acquireLease(db);
+    let lose = true,
+      transactions = 0;
+    const lostResponse: SqlDatabase = {
+      query: db.query,
+      transaction: async (operation) => {
+        transactions++;
+        const result = await db.transaction(operation);
+        if (lose) {
+          lose = false;
+          throw new Error('FB2_TEST_PUBLICATION_RESPONSE_LOST_AFTER_COMMIT');
+        }
+        return result;
+      },
+    };
+    const publisher = new AuthoritativeActivityReadProjectionPublisher({
+      database: lostResponse,
+      workerId: WORKER,
+    });
+    const read = () =>
+      db.query(
+        'select classification,scope_key,payload::text as payload from world_v2.read_projection where world_id=$1 order by classification,scope_key',
+        [WORLD],
+      );
+    await expect(
+      publisher.replace({ assertion: assertion('1'), observedAtReal: AT }),
+    ).rejects.toThrow('FB2_TEST_PUBLICATION_RESPONSE_LOST_AFTER_COMMIT');
+    expect(transactions).toBe(1); // Publisher never retries an economic command.
+    const committed = await read();
+    expect(committed.rows).toHaveLength(2);
+    await publisher.replace({ assertion: assertion('1'), observedAtReal: AT });
+    expect(transactions).toBe(2);
+    expect(await read()).toEqual(committed);
+    expect(
+      (
+        await db.query(
+          `select (select count(*)::text from world_v2.command_submission) as commands,
+      (select count(*)::text from world_v2.authoritative_event) as events,
+      (select count(*)::text from world_v2.command_receipt) as receipts,
+      world_version::text,event_sequence::text from world_v2.world_head where world_id=$1`,
+          [WORLD],
+        )
+      ).rows,
+    ).toEqual([
+      {
+        commands: '1',
+        events: '1',
+        receipts: '1',
+        world_version: '1',
+        event_sequence: '1',
+      },
+    ]);
+  });
+
   it('preserves activity and fenced rebuilds while withholding unclassified legacy ledger details', async () => {
     const testDatabase = await database();
     await seedCurrentAuthorization(testDatabase, {
