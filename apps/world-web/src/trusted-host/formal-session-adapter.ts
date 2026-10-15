@@ -15,8 +15,9 @@ import {
   validWorldPins,
   type AdmittedWorldPins,
   type ProductionReadConfig,
+  type ServerReadAuthority,
 } from '../production-read/contract.js';
-import { officeFamilies } from '../office-command/contract.js';
+import { exactKeys, officeFamilies } from '../office-command/contract.js';
 import type { installTrustedHost, TrustedHostTargets } from './bootstrap.js';
 
 /** Metadata only; tokens stay in provider/call memory, never state or DOM. */
@@ -30,8 +31,8 @@ export interface FormalAuthProvider {
   getAccessToken(): Promise<string | null>;
   subscribe(listener: () => void): () => void;
 }
-/** Pending G endpoint contract: return the EXISTING authorized-read envelope,
- * including persisted seat/admission authority; no positive/READY callback.
+/** Current-seat Core response or the existing authorized-read envelope;
+ * both require independent authenticated projection readback, never READY callbacks.
  * No endpoint is guessed or mounted here. The server still authenticates every
  * subsequent read/command. Structural consistency is not a browser grant. */
 export interface FormalSeatReceiptProvider {
@@ -240,7 +241,10 @@ export function installFormalSessionAdapter(
       const timer = setTimeout(() => {
         if (epoch === started) invalidate('SEAT_LOOKUP_TIMEOUT');
       }, 10000);
-      const current = () => sessionMatches(expected, expectedView, started);
+      let jwtExpiresAt: number | null = null;
+      const current = () =>
+        sessionMatches(expected, expectedView, started) &&
+        (jwtExpiresAt === null || now() < jwtExpiresAt);
       async function resolve() {
         try {
           const token = await c!.auth.getAccessToken();
@@ -268,11 +272,175 @@ export function installFormalSessionAdapter(
             }),
           );
           if (!current() || controller.signal.aborted) return false;
-          const authority = row(envelope?.authority),
-            identity = authority?.identity;
+          const listeners = new Set<() => void>();
+          const readFor = (
+            identity: AuthorizedBrowserIdentity,
+            seatRef: string,
+          ): ProductionReadConfig => ({
+            endpoints: c!.targets.read,
+            world: c!.world,
+            identity: { ...identity },
+            seatRef,
+            currentIdentity: () => (current() ? identity : null),
+            getAccessToken: async () => {
+              if (!current()) return null;
+              const next = await c!.auth.getAccessToken();
+              return current() ? next : null;
+            },
+            session: {
+              sessionRef: `${expected.sessionRef}:${id}`,
+              isCurrent: current,
+              onInvalidate(fn) {
+                listeners.add(fn);
+                return () => {
+                  listeners.delete(fn);
+                };
+              },
+            },
+          });
+          const rejectSeat = () => {
+            invalidate('SERVER_SEAT_RECEIPT_MISMATCH');
+            return false;
+          };
+          let authority = row(envelope?.authority);
+          const currentSeatSchema: AuthenticatedCurrentSeatResponseDto['schemaVersion'] =
+            'world-current-seat-v1';
+          if (envelope?.schemaVersion === currentSeatSchema) {
+            const times = row(envelope.session),
+              world = row(envelope.world);
+            if (
+              !exactKeys(envelope, [
+                'schemaVersion',
+                'requestId',
+                'ok',
+                'session',
+                'world',
+                'bindings',
+              ]) ||
+              envelope.requestId !== id ||
+              envelope.ok !== true ||
+              !times ||
+              !exactKeys(times, [
+                'authSubjectId',
+                'issuedAtEpochSeconds',
+                'expiresAtEpochSeconds',
+              ]) ||
+              times.authSubjectId !== expected.subject ||
+              typeof times.issuedAtEpochSeconds !== 'number' ||
+              typeof times.expiresAtEpochSeconds !== 'number' ||
+              !Number.isSafeInteger(times.issuedAtEpochSeconds) ||
+              !Number.isSafeInteger(times.expiresAtEpochSeconds) ||
+              times.issuedAtEpochSeconds < 0 ||
+              times.expiresAtEpochSeconds < 0 ||
+              times.issuedAtEpochSeconds >= times.expiresAtEpochSeconds ||
+              !validWorldPins(world) ||
+              !exactKeys(world, [
+                'worldId',
+                'seedRef',
+                'contentHash',
+                'admissionRef',
+                'minimumWorldVersion',
+              ]) ||
+              !Object.keys(c!.world).every(
+                (key) =>
+                  world[key as keyof AdmittedWorldPins] ===
+                  c!.world[key as keyof AdmittedWorldPins],
+              ) ||
+              !Array.isArray(envelope.bindings)
+            )
+              return rejectSeat();
+            const matches: ServerReadAuthority[] = [];
+            for (const value of envelope.bindings) {
+              const binding = row(value),
+                identity = row(binding?.identity),
+                seed = row(binding?.seed),
+                head = row(binding?.readback);
+              if (
+                !binding ||
+                !exactKeys(binding, [
+                  'source',
+                  'capability',
+                  'seatRef',
+                  'seatState',
+                  'identity',
+                  'seed',
+                  'readback',
+                ]) ||
+                !validReadIdentity(identity) ||
+                !exactKeys(identity, [
+                  'authSubjectId',
+                  'worldId',
+                  'countryId',
+                  'officeId',
+                  'scopeKey',
+                  'classification',
+                  'authorizationRevision',
+                  'modelVersion',
+                  'projectionVersion',
+                ]) ||
+                identity.authSubjectId !== expected.subject ||
+                identity.worldId !== c!.world.worldId ||
+                !canonicalId(binding.seatRef) ||
+                identity.countryId !==
+                  c!.countryIdsByDisplayId[expectedView.countryDisplayId] ||
+                !seed ||
+                !exactKeys(seed, [
+                  'worldId',
+                  'seedRef',
+                  'contentHash',
+                  'admissionRef',
+                ]) ||
+                !head ||
+                !exactKeys(head, [
+                  'worldId',
+                  'seedRef',
+                  'contentHash',
+                  'admissionRef',
+                  'worldVersion',
+                  'eventSequence',
+                  'readbackRef',
+                ])
+              )
+                return rejectSeat();
+              const checked = parseAuthority(
+                binding,
+                readFor(identity, binding.seatRef),
+              );
+              if (!checked) return rejectSeat();
+              if (
+                identity.countryId ===
+                  c!.countryIdsByDisplayId[expectedView.countryDisplayId] &&
+                identity.officeId ===
+                  officeProjectionRoles[expectedView.role] &&
+                identity.classification === 'OFFICE_PRIVATE'
+              )
+                matches.push(checked);
+            }
+            if (matches.length !== 1) return rejectSeat();
+            authority = row(matches[0]);
+            jwtExpiresAt = times.expiresAtEpochSeconds;
+            if (!current()) return rejectSeat();
+            // Arm before the second await; connection must not extend either expiry.
+            expiry = setTimeout(
+              () => {
+                if (epoch === started) invalidate('AUTH_SESSION_EXPIRED');
+              },
+              Math.min(
+                2147483647,
+                Math.max(
+                  0,
+                  (Math.min(expected.expiresAtEpochSeconds, jwtExpiresAt) -
+                    now()) *
+                    1000,
+                ),
+              ),
+            );
+          }
+          const identity = authority?.identity;
           if (
             !envelope ||
-            envelope.schemaVersion !== AUTHORIZED_READ_BINDING_SCHEMA ||
+            (envelope.schemaVersion !== AUTHORIZED_READ_BINDING_SCHEMA &&
+              envelope.schemaVersion !== currentSeatSchema) ||
             envelope.requestId !== id ||
             envelope.ok !== true ||
             !validReadIdentity(identity) ||
@@ -285,35 +453,11 @@ export function installFormalSessionAdapter(
             invalidate('SERVER_SEAT_RECEIPT_MISMATCH');
             return false;
           }
-          const listeners = new Set<() => void>();
           lifetime = () => {
             for (const fn of [...listeners]) fn();
             listeners.clear();
           };
-          const read: ProductionReadConfig = {
-            endpoints: c!.targets.read,
-            world: c!.world,
-            identity: { ...identity },
-            seatRef: String(authority!.seatRef),
-            currentIdentity: (): AuthorizedBrowserIdentity | null =>
-              current() ? identity : null,
-            getAccessToken: async () => {
-              if (!current()) return null;
-              const next = await c!.auth.getAccessToken();
-              return current() ? next : null;
-            },
-            session: {
-              // Browser lifetime label, not a minted seat or server grant.
-              sessionRef: `${expected.sessionRef}:${id}`,
-              isCurrent: current,
-              onInvalidate(fn) {
-                listeners.add(fn);
-                return () => {
-                  listeners.delete(fn);
-                };
-              },
-            },
-          };
+          const read = readFor(identity, String(authority!.seatRef));
           if (!parseAuthority(authority, read)) {
             invalidate('SERVER_SEAT_RECEIPT_MISMATCH');
             return false;
@@ -368,13 +512,14 @@ export function installFormalSessionAdapter(
           status = 'SESSION_CONFIGURED';
           reason = 'SERVER_SEAT_CONSISTENCY_CHECKED_NOT_AUTHORITY';
           pending = null;
-          expiry = setTimeout(
-            () => invalidate('AUTH_SESSION_EXPIRED'),
-            Math.min(
-              2147483647,
-              Math.max(0, (expected.expiresAtEpochSeconds - now()) * 1000),
-            ),
-          );
+          if (jwtExpiresAt === null)
+            expiry = setTimeout(
+              () => invalidate('AUTH_SESSION_EXPIRED'),
+              Math.min(
+                2147483647,
+                Math.max(0, (expected.expiresAtEpochSeconds - now()) * 1000),
+              ),
+            );
           return true;
         } catch {
           if (epoch === started)
@@ -414,3 +559,4 @@ declare global {
     EconMindFormalSession?: ReturnType<typeof installFormalSessionAdapter>;
   }
 }
+import type { AuthenticatedCurrentSeatResponseDto } from '@econmind/core';
