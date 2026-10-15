@@ -85,7 +85,10 @@ class Node {
   removeEventListener = vi.fn();
 }
 
-function fixture(failure?: 'http' | 'hash' | 'terrain-hash') {
+function fixture(
+  failure?: 'http' | 'hash' | 'terrain-hash',
+  initialLocale?: 'zh' | 'en',
+) {
   const mission = new Node();
   const scene = new Node();
   const root = new Node();
@@ -122,6 +125,26 @@ function fixture(failure?: 'http' | 'hash' | 'terrain-hash') {
   const authority = vi.fn(() => {
     throw Error('No authority permitted');
   });
+  let locale = initialLocale;
+  const languageListeners = new Map<
+    string,
+    Set<(event: { key?: string | null }) => void>
+  >();
+  const localeWindow = {
+    localStorage: { getItem: () => locale, setItem: authority },
+    addEventListener: (
+      name: string,
+      callback: (event: { key?: string | null }) => void,
+    ) => {
+      if (!languageListeners.has(name)) languageListeners.set(name, new Set());
+      languageListeners.get(name)!.add(callback);
+    },
+    removeEventListener: (
+      name: string,
+      callback: (event: { key?: string | null }) => void,
+    ) => languageListeners.get(name)?.delete(callback),
+    location: { assign: vi.fn() },
+  };
   const api = runInNewContext(
     source
       .replaceAll('export ', '')
@@ -139,6 +162,7 @@ function fixture(failure?: 'http' | 'hash' | 'terrain-hash') {
       Uint8Array,
       crypto: webcrypto,
       fetch,
+      ...(initialLocale ? { window: localeWindow } : {}),
       document: {
         createElement: (name: string) => new Node(name),
         createElementNS: (_ns: string, name: string) => new Node(name),
@@ -212,7 +236,22 @@ function fixture(failure?: 'http' | 'hash' | 'terrain-hash') {
       publicationBase?: URL,
     ) => Promise<void>;
   };
-  return { api, root, mission, scene, observers, fetch, authority, pins };
+  return {
+    api,
+    root,
+    mission,
+    scene,
+    observers,
+    fetch,
+    authority,
+    pins,
+    languageListeners,
+    changeLocale: (next: 'zh' | 'en', event = 'econmind-language-change') => {
+      locale = next;
+      for (const listener of languageListeners.get(event) ?? [])
+        listener({ key: 'econmind-ui-language' });
+    },
+  };
 }
 
 describe('canonical HOME camera and dense hit groups', () => {
@@ -769,8 +808,8 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     expect(f.observers[0].disconnect).toHaveBeenCalledOnce();
     expect(f.fetch).toHaveBeenCalledTimes(3);
     expect(f.authority).not.toHaveBeenCalled();
-    expect(f.mission.children[0].textContent).toContain(
-      'Continuous geographic',
+    expect(f.mission.children[0].textContent).toBe(
+      '连续地理细图 · 原始坐标 · 推演细节，非测绘',
     );
   });
 
@@ -912,6 +951,82 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     expect(f.scene.children).toHaveLength(0);
     expect(f.observers).toHaveLength(0);
   });
+});
+
+describe('explicit HOME geographic navigation locale', () => {
+  it('keeps the unavailable-source notice localized without inventing a map', async () => {
+    const f = fixture('http', 'zh');
+    await f.api.mountCountrySurroundings(f.root, country('54'));
+    expect(f.scene.children).toHaveLength(0);
+    expect(f.mission.children[0]!.textContent).toBe(
+      '连续地理图暂不可用 · 保留原始插画',
+    );
+    f.changeLocale('en');
+    expect(f.mission.children[0]!.textContent).toBe(
+      'Continuous geography unavailable · Original illustration retained',
+    );
+    f.changeLocale('zh');
+    expect(f.mission.children[0]!.textContent).toBe(
+      '连续地理图暂不可用 · 保留原始插画',
+    );
+    expect(f.authority).not.toHaveBeenCalled();
+  });
+  it.each(['econmind-language-change', 'storage'])(
+    'updates complete ZH→EN→ZH navigation on %s without changing the scene or geography',
+    async (event) => {
+      const f = fixture(undefined, 'zh');
+      const record = country('54');
+      const originalRecord = structuredClone(record);
+      await f.api.mountCountrySurroundings(f.root, record);
+      const viewport = f.scene.children[0]!;
+      const toolbar = f.scene.children[1]!;
+      const select = toolbar.children[0]!;
+      const world = toolbar.children[1]!;
+      const controls = f.scene.children[2]!;
+      const mode = f.scene.children[3]!;
+      const originalBox = viewport.children[0]!.attributes.viewBox;
+      const originalArt = f.scene.properties['--national-scene-art'];
+      const originalHref = (world as Node & { href: string }).href;
+      expect(select.attributes['aria-label']).toBe('切换地图国家');
+      expect(world.textContent).toBe('返回世界 ↗');
+      expect(mode.textContent).toBe('返回连续地理图');
+      f.changeLocale('en', event);
+      expect(select.attributes['aria-label']).toBe('Switch map country');
+      expect(select.children[0]!.textContent).toBe('Country 01');
+      expect(select.children[53]!.textContent).toBe(`54 · ${record.name}`);
+      expect(world.textContent).toBe('Return to world ↗');
+      expect(mode.textContent).toBe('Return to continuous geography');
+      expect(controls.children[0]!.attributes['aria-label']).toBe(
+        'Zoom in on country map',
+      );
+      expect(f.mission.children[0]!.textContent).toBe(
+        'Continuous geographic detail maps · Original coordinates · Illustrative, not surveyed',
+      );
+      const toggle = mode.addEventListener.mock.calls.find(
+        ([name]) => name === 'click',
+      )![1] as () => void;
+      toggle();
+      expect(mode.textContent).toBe('View original scene illustration');
+      expect(viewport.hidden).toBe(false);
+      f.changeLocale('zh', event);
+      expect(select.attributes['aria-label']).toBe('切换地图国家');
+      expect(world.textContent).toBe('返回世界 ↗');
+      expect(mode.textContent).toBe('查看原场景插图');
+      expect(viewport.hidden).toBe(false);
+      expect(viewport.children[0]!.attributes.viewBox).toBe(originalBox);
+      expect(f.scene.properties['--national-scene-art']).toBe(originalArt);
+      expect((world as Node & { href: string }).href).toBe(originalHref);
+      for (const node of [f.scene, viewport, toolbar, controls, mode])
+        expect(node.attributes['data-no-translate']).toBe('');
+      expect(record).toEqual(originalRecord);
+      expect(f.fetch).toHaveBeenCalledTimes(3);
+      expect(f.authority).not.toHaveBeenCalled();
+      f.root.isConnected = false;
+      f.changeLocale('en', event);
+      expect(f.languageListeners.get('econmind-language-change')?.size).toBe(0);
+      expect(f.languageListeners.get('storage')?.size).toBe(0);
+    },
+  );
 });
 
 // The adapter attributes must disable native colliding pointer targets too.

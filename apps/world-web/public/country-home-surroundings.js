@@ -21,6 +21,62 @@ let terrainPromise;
 let detailIndexPromise;
 let disposePrevious;
 
+// Same preference/event as the immutable page; never translate source names
+// or run the legacy substring translator over these owned controls.
+const homeMapMessages = {
+  zh: {
+    country: '国家',
+    switchCountry: '切换地图国家',
+    returnWorld: '返回世界 ↗',
+    returnGeography: '返回连续地理图',
+    showIllustration: '查看原场景插图',
+    mapHelp: '本国地图：方向键平移，加减键缩放',
+    continuousMap: '连续地理地图',
+    originalIllustration: '原始独立插画',
+    chooseSite: '按编号选择设施',
+    openRecord: '打开原设施记录 ↗',
+    closeSite: '关闭设施信息',
+    viewSite: '查看设施',
+    selectCluster: '选择重叠设施',
+    zoomIn: '放大本国地图',
+    zoomOut: '缩小本国地图',
+    fit: '适配本国地图',
+    note: '连续地理细图 · 原始坐标 · 推演细节，非测绘',
+    unavailable: '连续地理图暂不可用 · 保留原始插画',
+  },
+  en: {
+    country: 'Country',
+    switchCountry: 'Switch map country',
+    returnWorld: 'Return to world ↗',
+    returnGeography: 'Return to continuous geography',
+    showIllustration: 'View original scene illustration',
+    mapHelp: 'Country map: arrow keys to pan, plus/minus to zoom',
+    continuousMap: 'continuous geographic map',
+    originalIllustration: 'original independent illustration',
+    chooseSite: 'Select a facility by ID',
+    openRecord: 'Open original facility record ↗',
+    closeSite: 'Close facility information',
+    viewSite: 'View facility',
+    selectCluster: 'Select overlapping facilities',
+    zoomIn: 'Zoom in on country map',
+    zoomOut: 'Zoom out of country map',
+    fit: 'Fit country map',
+    note: 'Continuous geographic detail maps · Original coordinates · Illustrative, not surveyed',
+    unavailable:
+      'Continuous geography unavailable · Original illustration retained',
+  },
+};
+const homeMapLocale = () => {
+  if (typeof window === 'undefined') return 'zh';
+  try {
+    return window.localStorage.getItem('econmind-ui-language') === 'zh'
+      ? 'zh'
+      : 'en';
+  } catch {
+    return document.documentElement?.dataset.language === 'zh' ? 'zh' : 'en';
+  }
+};
+
 async function sourceBytes(relative, expected, label) {
   const response = await fetch(new URL(relative, sourceRoot));
   if (!response.ok) throw Error(`${label}_SOURCE_UNAVAILABLE`);
@@ -306,18 +362,44 @@ export async function mountCountrySurroundings(root, country) {
   root.dataset.surroundingsMounted = 'true';
   disposePrevious?.();
   disposePrevious = undefined;
+  let text = homeMapMessages[homeMapLocale()];
   const note = document.createElement('small');
   note.className = 'national-map-layer-note';
-  note.textContent =
-    'Continuous geographic detail maps · Original coordinates · 推演细节，非测绘';
+  note.textContent = text.note;
+  note.setAttribute('data-no-translate', '');
   root.querySelector('.national-edition').append(note);
+  let updateLocale = () => {
+    text = homeMapMessages[homeMapLocale()];
+    note.textContent = text.note;
+  };
+  const unsubscribeLocale = () => {
+    if (typeof window === 'undefined') return;
+    window.removeEventListener('econmind-language-change', languageChanged);
+    window.removeEventListener('storage', storageChanged);
+  };
+  const languageChanged = () => {
+    if (root.isConnected) updateLocale();
+    else unsubscribeLocale();
+  };
+  const storageChanged = (event) => {
+    if (event.key === 'econmind-ui-language' || event.key === null)
+      languageChanged();
+  };
+  if (typeof window !== 'undefined') {
+    window.addEventListener('econmind-language-change', languageChanged);
+    window.addEventListener('storage', storageChanged);
+  }
+  disposePrevious = unsubscribeLocale;
   try {
     const [partition, terrain, detailIndex] = await Promise.all([
       loadPartition(),
       loadTerrain(),
       loadDetailIndex(),
     ]);
-    if (!root.isConnected) return;
+    if (!root.isConnected) {
+      unsubscribeLocale();
+      return;
+    }
     const scene = root.querySelector('.national-world');
     const svg = regionalSvg(partition, country);
     if (!scene || !svg) throw Error('SURROUNDINGS_COUNTRY_MISSING');
@@ -409,7 +491,7 @@ export async function mountCountrySurroundings(root, country) {
     const viewport = document.createElement('div');
     viewport.className = 'national-geographic-viewport';
     viewport.tabIndex = 0;
-    viewport.setAttribute('aria-label', '本国地图：方向键平移，加减键缩放');
+    viewport.setAttribute('aria-label', text.mapHelp);
     viewport.append(svg);
     const markers = document.createElement('div');
     markers.className = 'national-geographic-markers';
@@ -417,14 +499,14 @@ export async function mountCountrySurroundings(root, country) {
     const toolbar = document.createElement('nav');
     toolbar.className = 'national-map-toolbar';
     const countries = document.createElement('select');
-    countries.setAttribute('aria-label', '切换地图国家');
+    countries.setAttribute('aria-label', text.switchCountry);
     for (const t of partition.territories) {
       const option = document.createElement('option');
       option.value = t.number;
       option.textContent =
         t.id === country.id
           ? `${t.number} · ${country.name}`
-          : `国家 ${t.number}`;
+          : `${text.country} ${t.number}`;
       countries.append(option);
     }
     countries.value = country.number;
@@ -437,12 +519,12 @@ export async function mountCountrySurroundings(root, country) {
     });
     const worldLink = document.createElement('a');
     worldLink.href = new URL('./?atlas=explorer', moduleUrl).href;
-    worldLink.textContent = '返回世界 ↗';
+    worldLink.textContent = text.returnWorld;
     toolbar.append(countries, worldLink);
     const mode = document.createElement('button');
     mode.type = 'button';
     mode.className = 'national-map-mode';
-    mode.textContent = '查看原场景插图';
+    mode.textContent = text.showIllustration;
     mode.setAttribute('aria-pressed', 'false');
     const controls = document.createElement('div');
     controls.className = 'national-map-camera';
@@ -453,7 +535,7 @@ export async function mountCountrySurroundings(root, country) {
     const chooser = document.createElement('details');
     chooser.className = 'national-map-sites';
     const summary = document.createElement('summary');
-    summary.textContent = '按编号选择设施';
+    summary.textContent = text.chooseSite;
     const choices = document.createElement('div');
     chooser.append(summary, choices);
     const sites = country.facilities.filter(
@@ -462,6 +544,8 @@ export async function mountCountrySurroundings(root, country) {
         projectPoint(site.point, country.frame, 1, 1),
     );
     let selectedId = '';
+    let inspectorDetail;
+    let inspectorClose;
     const openSite = (id) => {
       const site = sites.find((item) => item.id === id);
       if (!site) return;
@@ -475,10 +559,12 @@ export async function mountCountrySurroundings(root, country) {
       url.searchParams.set('country', country.number);
       url.hash = `facilities/${site.id}`;
       detail.href = url.href;
-      detail.textContent = '打开原设施记录 ↗';
+      detail.textContent = text.openRecord;
       const close = document.createElement('button');
       close.type = 'button';
-      close.textContent = '关闭设施信息';
+      close.textContent = text.closeSite;
+      inspectorDetail = detail;
+      inspectorClose = close;
       close.addEventListener('click', () => {
         inspector.hidden = true;
         render();
@@ -494,7 +580,10 @@ export async function mountCountrySurroundings(root, country) {
       button.type = 'button';
       button.className = className;
       button.dataset.homeSiteId = site.id;
-      button.setAttribute('aria-label', `查看设施 ${site.id} ${site.name}`);
+      button.setAttribute(
+        'aria-label',
+        `${text.viewSite} ${site.id} ${site.name}`,
+      );
       button.textContent = className ? site.id : `${site.id} · ${site.name}`;
       button.addEventListener('click', () => openSite(site.id));
       return button;
@@ -567,7 +656,7 @@ export async function mountCountrySurroundings(root, country) {
           button.dataset.homeClusterIds = group.ids.join(',');
           button.setAttribute(
             'aria-label',
-            `选择重叠设施 ${group.ids.join(' ')}`,
+            `${text.selectCluster} ${group.ids.join(' ')}`,
           );
           button.addEventListener('click', () => {
             choices.replaceChildren(
@@ -602,17 +691,19 @@ export async function mountCountrySurroundings(root, country) {
       box = homeCamera(box, scale, dx, dy, partition.width, partition.height);
       render();
     };
-    for (const [label, text, action] of [
-      ['放大本国地图', '+', () => change(0.75)],
-      ['缩小本国地图', '−', () => change(1.333333)],
-      ['适配本国地图', '⌖', fit],
+    const cameraButtons = [];
+    for (const [label, symbol, action] of [
+      ['zoomIn', '+', () => change(0.75)],
+      ['zoomOut', '−', () => change(1.333333)],
+      ['fit', '⌖', fit],
     ]) {
       const button = document.createElement('button');
       button.type = 'button';
-      button.textContent = text;
-      button.setAttribute('aria-label', label);
+      button.textContent = symbol;
+      button.setAttribute('aria-label', text[label]);
       button.addEventListener('click', action);
       controls.append(button);
+      cameraButtons.push({ button, label });
     }
     let drag;
     viewport.addEventListener('pointerdown', (e) => {
@@ -674,36 +765,99 @@ export async function mountCountrySurroundings(root, country) {
       },
       { passive: false },
     );
+    const localize = () => {
+      text = homeMapMessages[homeMapLocale()];
+      const illustrated =
+        root.dataset.mapPresentation === 'independent-illustration';
+      note.textContent = text.note;
+      viewport.setAttribute('aria-label', text.mapHelp);
+      countries.setAttribute('aria-label', text.switchCountry);
+      for (const [index, option] of Array.from(countries.children).entries()) {
+        const territory = partition.territories[index];
+        option.textContent =
+          territory.id === country.id
+            ? `${territory.number} · ${country.name}`
+            : `${text.country} ${territory.number}`;
+      }
+      worldLink.textContent = text.returnWorld;
+      mode.textContent = illustrated
+        ? text.returnGeography
+        : text.showIllustration;
+      summary.textContent = text.chooseSite;
+      scene.setAttribute(
+        'aria-label',
+        `${country.name} ${illustrated ? text.originalIllustration : text.continuousMap}`,
+      );
+      for (const { button, label } of cameraButtons)
+        button.setAttribute('aria-label', text[label]);
+      for (const button of scene.querySelectorAll('[data-home-site-id]')) {
+        const site = sites.find(
+          (item) => item.id === button.dataset.homeSiteId,
+        );
+        if (site)
+          button.setAttribute(
+            'aria-label',
+            `${text.viewSite} ${site.id} ${site.name}`,
+          );
+      }
+      for (const button of scene.querySelectorAll('[data-home-cluster-ids]')) {
+        button.setAttribute(
+          'aria-label',
+          `${text.selectCluster} ${button.dataset.homeClusterIds.split(',').join(' ')}`,
+        );
+      }
+      if (inspectorDetail) inspectorDetail.textContent = text.openRecord;
+      if (inspectorClose) inspectorClose.textContent = text.closeSite;
+    };
+    updateLocale = localize;
+    for (const element of [
+      scene,
+      viewport,
+      toolbar,
+      controls,
+      mode,
+      chooser,
+      inspector,
+    ])
+      element.setAttribute('data-no-translate', '');
     const present = (illustrated) => {
       root.dataset.mapPresentation = illustrated
         ? 'independent-illustration'
         : 'geographic';
-      mode.textContent = illustrated ? '返回连续地理图' : '查看原场景插图';
+      localize();
       mode.setAttribute('aria-pressed', String(illustrated));
       viewport.hidden = illustrated;
       controls.hidden = illustrated;
       chooser.hidden = illustrated;
       inspector.hidden = true;
-      scene.setAttribute(
-        'aria-label',
-        `${country.name} ${illustrated ? 'original independent illustration' : 'continuous geographic map'}`,
-      );
       if (!illustrated) render();
     };
     mode.addEventListener('click', () => {
       present(root.dataset.mapPresentation === 'geographic');
     });
     scene.append(viewport, toolbar, controls, mode, chooser, inspector);
-    const observer = new ResizeObserver(fit);
+    const observer = new ResizeObserver(() => {
+      if (root.isConnected) fit();
+      else {
+        observer.disconnect();
+        unsubscribeLocale();
+      }
+    });
     observer.observe(viewport);
     fit();
     // Restore the original asset and its own anchors, not a geographic warp.
     // The verified geographic layer remains available as a separate view.
     present(true);
-    disposePrevious = () => observer.disconnect();
+    disposePrevious = () => {
+      observer.disconnect();
+      unsubscribeLocale();
+    };
   } catch {
-    note.textContent =
-      'Continuous geography unavailable · Original illustration retained';
+    updateLocale = () => {
+      text = homeMapMessages[homeMapLocale()];
+      note.textContent = text.unavailable;
+    };
+    updateLocale();
   }
 }
 

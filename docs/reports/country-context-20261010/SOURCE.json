@@ -34,8 +34,8 @@
     },
     {
       "path": "apps/world-web/public/country-home-surroundings.js",
-      "bytes": 32119,
-      "sha256": "92aa39867412afd339f92d89d86ec0f931d1090687f42938297a8bc5043b4c32"
+      "bytes": 37307,
+      "sha256": "700c707c7d1a8eabe85504d9ac3592d9c33f65e6049f6bc183c6a2dc990eb60a"
     },
     {
       "path": "apps/world-web/src/map-explorer/WorldExplorer.tsx",
@@ -69,8 +69,8 @@
     },
     {
       "path": "apps/world-web/src/world-preview/locale.ts",
-      "bytes": 8210,
-      "sha256": "444911dc4544de9a96f8f55339ecc0bdcc172141fd4f650d7a90481a6d001423"
+      "bytes": 8967,
+      "sha256": "a505b2b3a9048af91194d1706724236c914f442570149a83e9f3380897aa8ebe"
     }
   ],
   "method": "Pinned world terrain and all 70 unchanged paths form geographic context only. Each original 1254px country scene remains a separate complete illustration, with original scene-anchor positions. Original country detail SVGs retain their geographic coordinates. Context uses the exact selected silhouette distance fade; it never replaces a country image or supplies illustration pin coordinates.",
