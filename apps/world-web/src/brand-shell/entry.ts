@@ -47,7 +47,9 @@ if (typeof document !== 'undefined') {
       new URL(import.meta.env.BASE_URL, window.location.origin),
     );
   }
-  if (/\/season1-immersive\/$/u.test(window.location.pathname)) {
+  if (
+    /\/season1-immersive\/(?:index\.html)?$/u.test(window.location.pathname)
+  ) {
     const mounts = new Map<HTMLElement, { host: HTMLElement; root: Root }>();
     const attach = () => {
       for (const [scene, mounted] of mounts) {

@@ -51,8 +51,8 @@
   "adaptedSources": [
     {
       "path": "apps/world-web/src/brand-shell/entry.ts",
-      "bytes": 4270,
-      "sha256": "a5237e8f08c415cb03a07557b0bbaf7f117b4ec881ad577e9580ddd17af80fed"
+      "bytes": 4294,
+      "sha256": "3131ae193c45dc5089d1100c746f541a419222788f54d152b0615eaec8059ad1"
     },
     {
       "path": "apps/world-web/src/brand-shell/brand-shell.css",
