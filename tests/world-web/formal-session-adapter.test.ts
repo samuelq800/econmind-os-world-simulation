@@ -343,7 +343,7 @@ function currentSeatPacket(
         capability: 'READ_AUTHORIZED_PROJECTION_AND_FINAL',
         seatRef: config.seatRef,
         seatState: 'ACTIVE',
-        identity: { ...config.identity },
+        identity: { ...config.identity, classification: 'OFFICE_PRIVATE' },
         seed: {
           worldId: config.world.worldId,
           seedRef: config.world.seedRef,
