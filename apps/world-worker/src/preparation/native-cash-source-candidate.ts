@@ -168,6 +168,21 @@ export function readNativeCashSourceCandidate(
       source.schemaVersion === 'native-cash-source-candidate-v1',
       'SOURCE_SCHEMA_MISMATCH',
     );
+    // The lossless source parser turns numeric tokens into lexemes. Check the
+    // raw version's string type separately; never use this parse for amounts.
+    for (const [value, field] of [
+      [input.expected.sourceVersion, 'expected.sourceVersion'],
+      [document.sourceVersion, 'document.sourceVersion'],
+      [
+        registryRow(JSON.parse(document.bytes), 'source').sourceVersion,
+        'source.sourceVersion',
+      ],
+    ] as const) {
+      demand(
+        /\S/u.test(registryString(value, field)),
+        'SOURCE_VERSION_REQUIRED',
+      );
+    }
     demand(
       document.sourceVersion === input.expected.sourceVersion &&
         document.asOf === input.expected.asOf &&

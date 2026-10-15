@@ -278,6 +278,104 @@ describe('offline native source -> existing Core account/snapshot -> candidate r
     value.sourceVersion = 'WRONG_VERSION';
     expect(() => read(value)).toThrow('SOURCE_SCOPE_VERSION_ASOF_MISMATCH');
   });
+  it('rejects three empty source versions even when they agree', () => {
+    const value = payload();
+    value.sourceVersion = '';
+    expect(() =>
+      readNativeCashSourceCandidate({
+        registry,
+        mappingsBytes,
+        document: { ...document(value), sourceVersion: '' },
+        expected: { ...expected, sourceVersion: '' },
+      }),
+    ).toThrow();
+  });
+  it('rejects three whitespace-only source versions even when they agree', () => {
+    const version = ' \t\n';
+    const value = payload();
+    value.sourceVersion = version;
+    expect(() =>
+      readNativeCashSourceCandidate({
+        registry,
+        mappingsBytes,
+        document: { ...document(value), sourceVersion: version },
+        expected: { ...expected, sourceVersion: version },
+      }),
+    ).toThrow();
+  });
+  it.each(['expected', 'document', 'snapshot'] as const)(
+    'rejects an empty, blank, missing or wrongly typed %s source version',
+    (location) => {
+      for (const invalid of ['', ' \t', undefined, null, 7, true]) {
+        const value = payload();
+        const doc = { ...document(value) };
+        const scope = { ...expected };
+        if (location === 'snapshot') {
+          const snapshot: Record<string, unknown> = { ...value };
+          if (invalid === undefined) delete snapshot.sourceVersion;
+          else snapshot.sourceVersion = invalid;
+          doc.bytes = JSON.stringify(snapshot);
+          doc.sha256 = sha(doc.bytes);
+        } else {
+          const target = location === 'expected' ? scope : doc;
+          const untrusted = target as unknown as Record<string, unknown>;
+          if (invalid === undefined) delete untrusted.sourceVersion;
+          else untrusted.sourceVersion = invalid;
+        }
+        expect(() =>
+          readNativeCashSourceCandidate({
+            registry,
+            mappingsBytes,
+            document: doc,
+            expected: scope,
+          }),
+        ).toThrow();
+      }
+    },
+  );
+  it('rejects a numeric snapshot version even if its lexeme matches string metadata', () => {
+    const snapshot = { ...payload(), sourceVersion: 7 };
+    const bytes = JSON.stringify(snapshot);
+    expect(() =>
+      readNativeCashSourceCandidate({
+        registry,
+        mappingsBytes,
+        document: {
+          ...document(),
+          sourceVersion: '7',
+          bytes,
+          sha256: sha(bytes),
+        },
+        expected: { ...expected, sourceVersion: '7' },
+      }),
+    ).toThrow();
+  });
+  it('preserves exact nonblank version strings without trimming or defaulting', () => {
+    for (const version of ['7', ' SYNTHETIC_NATIVE_V1 ']) {
+      const value = payload();
+      value.sourceVersion = version;
+      const doc = { ...document(value), sourceVersion: version };
+      const result = readNativeCashSourceCandidate({
+        registry,
+        mappingsBytes,
+        document: doc,
+        expected: { ...expected, sourceVersion: version },
+      });
+      expect(selected(result).candidateAvailable).toEqual({
+        amount: '88',
+        currency: 'XAA',
+      });
+      expect(result.candidateSource?.sourceVersion).toBe(version);
+      expect(() =>
+        readNativeCashSourceCandidate({
+          registry,
+          mappingsBytes,
+          document: doc,
+          expected: { ...expected, sourceVersion: version + ' ' },
+        }),
+      ).toThrow('SOURCE_SCOPE_VERSION_ASOF_MISMATCH');
+    }
+  });
   it('rejects wrong asOf rather than merging different valuation days', () => {
     const value = payload();
     value.balances[0]!.asOf = '2026-10-16T00:00:00.000Z';
