@@ -3,12 +3,11 @@ import {
   type OfficeProjectionBinding,
 } from './controller.js';
 import {
-  economicAvailabilityMessages,
   officeProjectionRoles,
   roleProjectionGaps,
   type OfficeProjectionView,
 } from './model.js';
-import { renderCurrentFinancialPosition } from './financial-position-view.js';
+import { renderOfficeReadout } from './readout-view.js';
 import { renderDecisionResult } from './decision-result-view.js';
 
 /** Additive drawer in the approved country shell. No map, opening HUD, source
@@ -84,48 +83,8 @@ export function installOfficeProjection(
       node('p', 'Server readout · Ledger positions are not spendable funds'),
     );
     if (state.model) {
-      const source = node('details', '');
-      source.append(
-        node(
-          'summary',
-          `Source head · World v${state.model.head.worldVersion} / event ${state.model.head.eventSequence}`,
-        ),
-      );
-      const list = document.createElement('dl');
-      for (const [key, value] of Object.entries(state.model.head))
-        list.append(node('dt', key), node('dd', value));
-      source.append(list);
-      dialog.append(source);
       dialog.append(renderDecisionResult(document, state.model.decisionResult));
-      dialog.append(
-        renderCurrentFinancialPosition(
-          document,
-          state.model.currentFinancialPosition,
-        ),
-        node('h3', 'Net Posting movement / activity'),
-      );
-      const fields = document.createElement('dl');
-      fields.setAttribute('aria-label', 'Exact authorized projection values');
-      for (const field of state.model.readouts)
-        fields.append(
-          node('dt', field.label),
-          node('dd', `${field.canonicalValue} ${field.unit}`),
-        );
-      dialog.append(fields);
-      for (const message of economicAvailabilityMessages(
-        state.model.economicAvailability,
-      ))
-        dialog.append(node('p', message));
-      if (
-        state.model.economicAvailability.financial === 'AVAILABLE' &&
-        state.model.readouts.length === 1
-      )
-        dialog.append(
-          node(
-            'p',
-            'No authorized financial movement entries. This is not a zero or spendable balance.',
-          ),
-        );
+      dialog.append(renderOfficeReadout(document, state.model));
     }
     if (state.receipt) {
       dialog.append(node('h3', `FINAL · ${state.receipt.outcome}`));
