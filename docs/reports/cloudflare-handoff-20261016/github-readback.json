@@ -1,0 +1,142 @@
+{
+  "observedAt": "2026-10-16T12:33:07.836Z",
+  "results": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "/pages",
+        "http": 200,
+        "value": {
+          "status": "built",
+          "html_url": "http://world.econmind.group/",
+          "cname": "world.econmind.group",
+          "build_type": "workflow",
+          "https_enforced": false,
+          "public": true
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "/pages/builds/latest",
+        "http": 200,
+        "value": {
+          "status": "built",
+          "commit": "0720a57b56394a577d34534356aa784a8bef9d22",
+          "updated_at": "2026-09-12T07:03:54Z",
+          "error": null
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "/actions/workflows/deploy-world-web.yml/runs?per_page=3",
+        "http": 200,
+        "value": [
+          {
+            "id": 38778045004,
+            "status": "completed",
+            "conclusion": "success",
+            "head_sha": "526c9e50228834491f6b7bd7238995b9ea38f2e9",
+            "updated_at": "2026-10-15T17:33:29Z",
+            "html_url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38778045004"
+          },
+          {
+            "id": 38768006056,
+            "status": "completed",
+            "conclusion": "success",
+            "head_sha": "1a4c557745c52ac9d2d53474b1e4dcd0a98c632a",
+            "updated_at": "2026-10-15T16:21:28Z",
+            "html_url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38768006056"
+          },
+          {
+            "id": 38414591725,
+            "status": "completed",
+            "conclusion": "success",
+            "head_sha": "acf0ddd9b1e729910ecd87fb4124687685669c0a",
+            "updated_at": "2026-10-13T14:37:09Z",
+            "html_url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38414591725"
+          }
+        ]
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "/actions/variables",
+        "http": 200,
+        "value": [
+          {
+            "name": "CLOUDFLARE_ACCOUNT_ID",
+            "value": "9bad0b638402dc39700132716e3b312c"
+          },
+          {
+            "name": "WORLD_OFFICIAL_READ_BASE_URL",
+            "value": "https://econmind-world-read.observer-lagesan.workers.dev/functions/v1/world-v2-official-read/"
+          }
+        ]
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "/actions/secrets",
+        "http": 200,
+        "value": [
+          {
+            "name": "CLOUDFLARE_API_TOKEN"
+          }
+        ]
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "/environments/world-cloudflare-hold",
+        "http": 200,
+        "value": {
+          "name": "world-cloudflare-hold",
+          "deployment_branch_policy": {
+            "protected_branches": false,
+            "custom_branch_policies": true
+          },
+          "protection_rules": [
+            {
+              "id": 68314295,
+              "node_id": "GA_kwDOURXM4M4EEmS3",
+              "type": "branch_policy"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "/environments/world-cloudflare-hold/deployment-branch-policies",
+        "http": 200,
+        "value": [
+          {
+            "name": "main",
+            "type": "branch"
+          }
+        ]
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "path": "/pulls/150",
+        "http": 200,
+        "value": {
+          "state": "open",
+          "merged": false,
+          "head": "b2e3c8830aa47b94c5c47ae094d97220e3dc045b",
+          "base": "526c9e50228834491f6b7bd7238995b9ea38f2e9"
+        }
+      }
+    }
+  ]
+}

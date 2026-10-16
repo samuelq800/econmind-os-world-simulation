@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "CLOUDFLARE_HANDOFF_VALIDATION_V1",
+  "sourceCommit": "526c9e50228834491f6b7bd7238995b9ea38f2e9",
+  "scope": "P3_NON_BEHAVIOURAL_READBACK_AND_HANDOFF_RECORD_ONLY",
+  "environment": {
+    "shell": "Windows PowerShell",
+    "node": "24.20.0",
+    "pnpm": "12.3.4",
+    "wrangler": "4.148.0",
+    "managedWorktree": true
+  },
+  "results": [
+    {
+      "command": "PowerShell here-string Node readback validation inspector",
+      "exitCode": 0,
+      "result": "PASS",
+      "checks": {
+        "existingVerifyExistingHoldGuard": "PASS_API_AND_EXECUTOR",
+        "publicReaderTopology": "PASS",
+        "actualHoldBundleHashesMatched": 2,
+        "expectedPublicStatusChecksPassed": 10,
+        "expectedPublicStatusChecksFailed": 0,
+        "publicObservationChecks": 2,
+        "readiness503WithInactiveFlags": "PASS_EXPECTED_HOLD",
+        "localMarkdownLinksChecked": 10,
+        "economicCommandPosts": 0
+      }
+    },
+    {
+      "command": "pnpm exec prettier --check changed runbooks and docs/reports/cloudflare-handoff-20261016",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "result": "PASS"
+    },
+    {
+      "command": "node scripts/check-repository-secrets.mjs",
+      "exitCode": 0,
+      "result": "PASS"
+    }
+  ],
+  "openObservations": {
+    "pagesHttpsEnforced": false,
+    "pagesHttpReturns200": true,
+    "currentPlanRead": "HTTP403_CODE10000_NOT_VERIFIED",
+    "providerHyperdriveConfigs": [],
+    "formalHost": "SOURCE_ONLY_UNMOUNTED_HOLD",
+    "formalUserSeatDatabaseClockAcceptance": "NOT_RUN",
+    "fullCi": "NOT_RUN_FOR_P3_METADATA_ONLY"
+  },
+  "externalConfigurationChanges": [],
+  "productionDatabaseMutation": false,
+  "economicActivation": false,
+  "globalGateAdvanced": false
+}
