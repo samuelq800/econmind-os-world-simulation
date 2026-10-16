@@ -1,0 +1,303 @@
+{
+  "observedAt": "2026-10-16T12:33:42.650Z",
+  "scope": "CREDENTIAL_FREE_GET_HEAD_OPTIONS_NO_ECONOMIC_COMMANDS",
+  "results": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "api-health",
+        "method": "GET",
+        "url": "https://econmind-world-api-staging.observer-lagesan.workers.dev/healthz",
+        "http": 200,
+        "expected": 200,
+        "result": "PASS",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "private, no-store",
+          "access-control-allow-origin": null,
+          "access-control-allow-methods": null,
+          "location": null,
+          "x-world-source-transport": null,
+          "x-world-runtime-mode": "HOLD"
+        },
+        "bytes": 206,
+        "bodySha256": "54b9ffdbe653f1c80321c1d0b5e3611abb1baf76fc6d4f01ff9447fe6c0de127",
+        "body": {
+          "service": "world-api",
+          "status": "ALIVE_NOT_ACTIVATED",
+          "runtimeMode": "HOLD",
+          "runtimeReady": false,
+          "simulationEnabled": false,
+          "clockEnabled": false,
+          "databaseConnected": false,
+          "authoritativeCommandsEnabled": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "api-ready-hold",
+        "method": "GET",
+        "url": "https://econmind-world-api-staging.observer-lagesan.workers.dev/readyz",
+        "http": 503,
+        "expected": 503,
+        "result": "PASS",
+        "headers": {
+          "content-type": "application/json",
+          "cache-control": "private, no-store",
+          "access-control-allow-origin": null,
+          "access-control-allow-methods": null,
+          "location": null,
+          "x-world-source-transport": null,
+          "x-world-runtime-mode": "HOLD"
+        },
+        "bytes": 208,
+        "bodySha256": "52cd764df9a06b0c491f216a82c2334145431f77041df40187c3ee6d8e35af02",
+        "body": {
+          "service": "world-api",
+          "runtimeMode": "HOLD",
+          "runtimeReady": false,
+          "executorTransport": "ALIVE_HOLD",
+          "databaseConnected": false,
+          "simulationEnabled": false,
+          "clockEnabled": false,
+          "authoritativeCommandsEnabled": false
+        }
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "executor-public-disabled",
+        "method": "HEAD",
+        "url": "https://econmind-world-executor-staging.observer-lagesan.workers.dev/healthz",
+        "http": 404,
+        "result": "OBSERVED",
+        "headers": {
+          "content-type": "text/html; charset=UTF-8",
+          "cache-control": "private, max-age=0, no-store, no-cache, must-revalidate, post-check=0, pre-check=0",
+          "access-control-allow-origin": null,
+          "access-control-allow-methods": null,
+          "location": null,
+          "x-world-source-transport": null,
+          "x-world-runtime-mode": null
+        },
+        "bytes": 0,
+        "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "office-preflight-https://world.econmind.group",
+        "method": "OPTIONS",
+        "url": "https://econmind-world-api-staging.observer-lagesan.workers.dev/v1/office-command",
+        "http": 204,
+        "expected": 204,
+        "result": "PASS",
+        "headers": {
+          "content-type": null,
+          "cache-control": "private, no-store",
+          "access-control-allow-origin": "https://world.econmind.group",
+          "access-control-allow-methods": "POST",
+          "location": null,
+          "x-world-source-transport": null,
+          "x-world-runtime-mode": null
+        },
+        "bytes": 0,
+        "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "office-preflight-https://samuelq800.github.io",
+        "method": "OPTIONS",
+        "url": "https://econmind-world-api-staging.observer-lagesan.workers.dev/v1/office-command",
+        "http": 204,
+        "expected": 204,
+        "result": "PASS",
+        "headers": {
+          "content-type": null,
+          "cache-control": "private, no-store",
+          "access-control-allow-origin": "https://samuelq800.github.io",
+          "access-control-allow-methods": "POST",
+          "location": null,
+          "x-world-source-transport": null,
+          "x-world-runtime-mode": null
+        },
+        "bytes": 0,
+        "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "office-preflight-https://example.com",
+        "method": "OPTIONS",
+        "url": "https://econmind-world-api-staging.observer-lagesan.workers.dev/v1/office-command",
+        "http": 403,
+        "expected": 403,
+        "result": "PASS",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "private, no-store",
+          "access-control-allow-origin": null,
+          "access-control-allow-methods": null,
+          "location": null,
+          "x-world-source-transport": null,
+          "x-world-runtime-mode": null
+        },
+        "bytes": 170,
+        "bodySha256": "d54e4463aafde9b6c7d2d904de74a81059c4aa2d170ba9e8cc54a0ed21ae8ae2"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "office-get-rejected",
+        "method": "GET",
+        "url": "https://econmind-world-api-staging.observer-lagesan.workers.dev/v1/office-command",
+        "http": 405,
+        "expected": 405,
+        "result": "PASS",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "private, no-store",
+          "access-control-allow-origin": "https://world.econmind.group",
+          "access-control-allow-methods": null,
+          "location": null,
+          "x-world-source-transport": null,
+          "x-world-runtime-mode": null
+        },
+        "bytes": 175,
+        "bodySha256": "d703cd37453da0d3b3e3a556cb3fcd57f46957b0c75f8e0d5362a26dfea865b9"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "public-reader-datasets",
+        "method": "GET",
+        "url": "https://econmind-world-read.observer-lagesan.workers.dev/functions/v1/world-v2-official-read/v1/world-data/datasets",
+        "http": 200,
+        "expected": 200,
+        "result": "PASS",
+        "headers": {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "no-store",
+          "access-control-allow-origin": "https://world.econmind.group",
+          "access-control-allow-methods": null,
+          "location": null,
+          "x-world-source-transport": "HASH_PINNED_IMMUTABLE_SOURCE_SNAPSHOT",
+          "x-world-runtime-mode": null
+        },
+        "bytes": 24955,
+        "bodySha256": "f50f71fb56220530b81e5b61e259e63ee8ee3137f74939f85e1a5bd07e74c07b",
+        "responseKeys": [
+          "ok",
+          "schemaVersion",
+          "dataNature",
+          "packageId",
+          "selectionChecksumSha256",
+          "datasetCount",
+          "databaseAvailability",
+          "liveWorldState",
+          "datasets"
+        ],
+        "sourceSnapshot": true,
+        "liveWorldState": "NOT_CLAIMED"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "reader-preflight",
+        "method": "OPTIONS",
+        "url": "https://econmind-world-read.observer-lagesan.workers.dev/functions/v1/world-v2-official-read/v1/world-data/datasets",
+        "http": 204,
+        "expected": 204,
+        "result": "PASS",
+        "headers": {
+          "content-type": null,
+          "cache-control": "no-store",
+          "access-control-allow-origin": "https://world.econmind.group",
+          "access-control-allow-methods": "GET, HEAD",
+          "location": null,
+          "x-world-source-transport": "HASH_PINNED_IMMUTABLE_SOURCE_SNAPSHOT",
+          "x-world-runtime-mode": null
+        },
+        "bytes": 0,
+        "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "reader-preflight-denied",
+        "method": "OPTIONS",
+        "url": "https://econmind-world-read.observer-lagesan.workers.dev/functions/v1/world-v2-official-read/v1/world-data/datasets",
+        "http": 403,
+        "expected": 403,
+        "result": "PASS",
+        "headers": {
+          "content-type": null,
+          "cache-control": "no-store",
+          "access-control-allow-origin": null,
+          "access-control-allow-methods": null,
+          "location": null,
+          "x-world-source-transport": "HASH_PINNED_IMMUTABLE_SOURCE_SNAPSHOT",
+          "x-world-runtime-mode": null
+        },
+        "bytes": 0,
+        "bodySha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "frontend-https",
+        "method": "GET",
+        "url": "https://world.econmind.group/",
+        "http": 200,
+        "expected": 200,
+        "result": "PASS",
+        "headers": {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "max-age=600",
+          "access-control-allow-origin": "*",
+          "access-control-allow-methods": null,
+          "location": null,
+          "x-world-source-transport": null,
+          "x-world-runtime-mode": null
+        },
+        "bytes": 1669,
+        "bodySha256": "9410a1e6d83d635d33ba3dbeaec82d2ce3ed3773d3ba9af422851e9d1882eff9",
+        "officialReadConfig": "{\"apiBaseUrl\":\"https://econmind-world-read.observer-lagesan.workers.dev/functions/v1/world-v2-official-read/\"}",
+        "title": "EconMind World · Asterra Atlas"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "frontend-http",
+        "method": "GET",
+        "url": "http://world.econmind.group/",
+        "http": 200,
+        "result": "OBSERVED",
+        "headers": {
+          "content-type": "text/html; charset=utf-8",
+          "cache-control": "max-age=600",
+          "access-control-allow-origin": "*",
+          "access-control-allow-methods": null,
+          "location": null,
+          "x-world-source-transport": null,
+          "x-world-runtime-mode": null
+        },
+        "bytes": 1669,
+        "bodySha256": "9410a1e6d83d635d33ba3dbeaec82d2ce3ed3773d3ba9af422851e9d1882eff9"
+      }
+    }
+  ]
+}

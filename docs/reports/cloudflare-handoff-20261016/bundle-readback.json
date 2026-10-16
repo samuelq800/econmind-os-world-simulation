@@ -1,0 +1,59 @@
+{
+  "observedAt": "2026-10-16T12:32:22.662Z",
+  "results": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-api-staging",
+        "http": 200,
+        "contentType": "multipart/form-data; boundary=bc61039014e42d6b8f7c914493f64d727e6459320bbbb00eaa44a2f69ea2",
+        "files": [
+          {
+            "field": "api.js",
+            "name": "api.js",
+            "bytes": 738288,
+            "sha256": "b7a07ec01d2f67818ee0753246eddf611543e7480e28c828f108018a2bb209d4"
+          }
+        ],
+        "expectedBundleSha256": "b7a07ec01d2f67818ee0753246eddf611543e7480e28c828f108018a2bb209d4",
+        "matchesReviewedHold": true
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-executor-staging",
+        "http": 200,
+        "contentType": "multipart/form-data; boundary=af269b647bed0feef897a88b098bd21626531974886bae37041a7066bf46",
+        "files": [
+          {
+            "field": "executor.js",
+            "name": "executor.js",
+            "bytes": 1248,
+            "sha256": "37e92b7229786e61f5b57acfc4c8cbb96b739ac3198a522b98dd688fab0468b9"
+          }
+        ],
+        "expectedBundleSha256": "37e92b7229786e61f5b57acfc4c8cbb96b739ac3198a522b98dd688fab0468b9",
+        "matchesReviewedHold": true
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-read",
+        "http": 200,
+        "contentType": "multipart/form-data; boundary=e8b260336de174053f75baa964186df59b2bba895337ad1fd9e75475f42a",
+        "files": [
+          {
+            "field": "cloudflare-official-read.js",
+            "name": "cloudflare-official-read.js",
+            "bytes": 108212,
+            "sha256": "2d39fd5576ea1dbc57a48783a8660cb5e9088975a23e196d47e895c238490e77"
+          }
+        ],
+        "expectedBundleSha256": "REFERENCE_NOT_AVAILABLE",
+        "matchesReviewedHold": "NOT_CLAIMED"
+      }
+    }
+  ]
+}
