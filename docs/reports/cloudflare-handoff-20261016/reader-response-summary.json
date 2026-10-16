@@ -1,0 +1,10 @@
+{
+  "observedAt": "2026-10-16T12:35:26.236Z",
+  "http": 200,
+  "bodySha256": "f50f71fb56220530b81e5b61e259e63ee8ee3137f74939f85e1a5bd07e74c07b",
+  "liveWorldState": false,
+  "dataNature": "OFFICIAL_SELECTED_SOURCE_DATASET",
+  "databaseAvailability": "VERIFY_PER_REQUEST",
+  "schemaVersion": "official-source-catalog-v1",
+  "datasetCount": 34
+}

@@ -1,5 +1,9 @@
 # World 运行服务的 GitHub Actions
 
+2026-10-16 已按技术交接附件完成当前 provider、构件和公开入口核对；
+当前 HOLD 参数符合批准范围，无云端配置变更。最新配置表、HTTPS 待办与正式
+接库缺口见 [Cloudflare 当前交接](CLOUDFLARE_HANDOFF_CURRENT.zh-CN.md)。
+
 采用与主仓库相同的 Actions + Secrets 方式。World 仓库负责 Cloudflare 的
 API/executor 托管验证与发布；正式 Supabase schema、账号授权和准入结构仍由
 `econmind-os` 唯一生产发布链管理。本流程不使用或复制主仓库数据库密码。

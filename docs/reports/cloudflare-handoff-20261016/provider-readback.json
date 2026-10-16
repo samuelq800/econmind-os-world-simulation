@@ -1,0 +1,331 @@
+{
+  "observedAt": "2026-10-16T12:30:52.812Z",
+  "account": "9bad0b638402dc39700132716e3b312c",
+  "workers": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-api-staging",
+        "resource": "settings",
+        "http": 200,
+        "success": true,
+        "value": {
+          "bindings": [
+            {
+              "name": "RUNTIME_MODE",
+              "type": "plain_text",
+              "text": "HOLD"
+            },
+            {
+              "name": "WORLD_EXECUTOR",
+              "type": "service",
+              "service": "econmind-world-executor-staging",
+              "environment": "production"
+            }
+          ],
+          "compatibility_date": "2026-10-09",
+          "compatibility_flags": ["nodejs_compat"],
+          "observability": {
+            "enabled": true,
+            "head_sampling_rate": 0.01,
+            "redact_query_string": false,
+            "logs": {
+              "enabled": true,
+              "head_sampling_rate": 0.01,
+              "persist": true,
+              "invocation_logs": true
+            },
+            "traces": {
+              "enabled": false,
+              "persist": true,
+              "head_sampling_rate": 0.01
+            }
+          },
+          "logpush": false,
+          "placement": {}
+        },
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-api-staging",
+        "resource": "subdomain",
+        "http": 200,
+        "success": true,
+        "value": {
+          "enabled": true,
+          "previews_enabled": false
+        },
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-api-staging",
+        "resource": "schedules",
+        "http": 200,
+        "success": true,
+        "value": {
+          "schedules": []
+        },
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-api-staging",
+        "resource": "deployments",
+        "http": 200,
+        "success": true,
+        "value": [
+          {
+            "id": "53a45ab3-9c3c-4d55-95b0-95bfbd6a719c",
+            "created_on": "2026-10-10T05:59:19.136709Z",
+            "source": "wrangler",
+            "strategy": "percentage",
+            "versions": [
+              {
+                "version_id": "96ef9651-3349-4aee-99fa-25df79860c36",
+                "percentage": 100
+              }
+            ]
+          },
+          {
+            "id": "2dd17f89-17c1-4a9d-b484-5f31a110c9f3",
+            "created_on": "2026-10-09T06:57:29.885956Z",
+            "source": "wrangler",
+            "strategy": "percentage",
+            "versions": [
+              {
+                "version_id": "dc5c245d-efc2-4905-a47d-4e7a75ea0902",
+                "percentage": 100
+              }
+            ]
+          }
+        ],
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-executor-staging",
+        "resource": "settings",
+        "http": 200,
+        "success": true,
+        "value": {
+          "bindings": [
+            {
+              "name": "RUNTIME_MODE",
+              "type": "plain_text",
+              "text": "HOLD"
+            }
+          ],
+          "compatibility_date": "2026-10-09",
+          "compatibility_flags": ["nodejs_compat"],
+          "observability": {
+            "enabled": true,
+            "head_sampling_rate": 0.01,
+            "redact_query_string": false,
+            "logs": {
+              "enabled": true,
+              "head_sampling_rate": 0.01,
+              "persist": true,
+              "invocation_logs": true
+            },
+            "traces": {
+              "enabled": false,
+              "persist": true,
+              "head_sampling_rate": 0.01
+            }
+          },
+          "logpush": false,
+          "placement": {}
+        },
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-executor-staging",
+        "resource": "subdomain",
+        "http": 200,
+        "success": true,
+        "value": {
+          "enabled": false,
+          "previews_enabled": false
+        },
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-executor-staging",
+        "resource": "schedules",
+        "http": 200,
+        "success": true,
+        "value": {
+          "schedules": []
+        },
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-executor-staging",
+        "resource": "deployments",
+        "http": 200,
+        "success": true,
+        "value": [
+          {
+            "id": "cded010f-6122-4e63-8438-05efff095559",
+            "created_on": "2026-10-10T05:59:15.787125Z",
+            "source": "wrangler",
+            "strategy": "percentage",
+            "versions": [
+              {
+                "version_id": "be51213f-96d4-4ade-af4d-cb8dc97fdfb0",
+                "percentage": 100
+              }
+            ]
+          },
+          {
+            "id": "182f470b-9814-46af-924a-9d2764da43d1",
+            "created_on": "2026-10-09T06:57:18.47693Z",
+            "source": "wrangler",
+            "strategy": "percentage",
+            "versions": [
+              {
+                "version_id": "69f347ce-ee0e-45a2-97cf-84e4fe7984bb",
+                "percentage": 100
+              }
+            ]
+          }
+        ],
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-read",
+        "resource": "settings",
+        "http": 200,
+        "success": true,
+        "value": {
+          "bindings": [],
+          "compatibility_date": "2026-10-08",
+          "compatibility_flags": ["nodejs_compat"],
+          "observability": {
+            "enabled": true,
+            "head_sampling_rate": 0.01,
+            "redact_query_string": false,
+            "logs": {
+              "enabled": true,
+              "head_sampling_rate": 0.01,
+              "persist": true,
+              "invocation_logs": true
+            },
+            "traces": {
+              "enabled": false,
+              "persist": true,
+              "head_sampling_rate": 0.01
+            }
+          },
+          "logpush": false,
+          "placement": {}
+        },
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-read",
+        "resource": "subdomain",
+        "http": 200,
+        "success": true,
+        "value": {
+          "enabled": true,
+          "previews_enabled": false
+        },
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-read",
+        "resource": "schedules",
+        "http": 200,
+        "success": true,
+        "value": {
+          "schedules": []
+        },
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "econmind-world-read",
+        "resource": "deployments",
+        "http": 200,
+        "success": true,
+        "value": [
+          {
+            "id": "9ca9ce4e-f1e8-449c-8f28-fb9bf12b2020",
+            "created_on": "2026-10-08T14:13:33.140674Z",
+            "source": "wrangler",
+            "strategy": "percentage",
+            "versions": [
+              {
+                "version_id": "7c90b4bc-6886-4cff-8c76-bb6e19f66417",
+                "percentage": 100
+              }
+            ]
+          }
+        ],
+        "errorCodes": []
+      }
+    }
+  ],
+  "accountMetadata": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "resource": "/hyperdrive/configs",
+        "http": 200,
+        "success": true,
+        "value": [],
+        "errorCodes": []
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "resource": "/subscriptions",
+        "http": 403,
+        "success": false,
+        "value": [],
+        "errorCodes": [10000]
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "resource": "/workers/domains",
+        "http": 200,
+        "success": true,
+        "value": []
+      }
+    }
+  ]
+}
