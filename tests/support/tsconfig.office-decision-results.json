@@ -1,6 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "types": ["node"], "lib": ["ES2024", "DOM"] },
+  "compilerOptions": {
+    "types": ["node", "emscripten"],
+    "lib": ["ES2024", "DOM"],
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": false
+  },
   "include": [
     "../../apps/world-api/src/integration/postgres-read-adapter.ts",
     "../../apps/world-api/src/integration/office-decision-result-validator.ts",
