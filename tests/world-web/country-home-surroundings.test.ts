@@ -8,6 +8,14 @@ const source = readFileSync(
   base + 'public/country-home-surroundings.js',
   'utf8',
 );
+const displayLanguageRead =
+  "window.localStorage.getItem('econmind-ui-language')";
+function readsOnlyDisplayLanguagePreference(code: string): boolean {
+  const parts = code.split(displayLanguageRead);
+  // Exactly one existing display-preference read; every other localStorage
+  // reference (including aliases, economic keys and all writes) stays banned.
+  return parts.length === 2 && !/localStorage/.test(parts.join(''));
+}
 const partitionBytes = readFileSync(base + 'src/map-lab/land-partition.json');
 const partition = JSON.parse(partitionBytes.toString());
 const terrainBytes = readFileSync(
@@ -131,7 +139,15 @@ function fixture(
     Set<(event: { key?: string | null }) => void>
   >();
   const localeWindow = {
-    localStorage: { getItem: () => locale, setItem: authority },
+    localStorage: {
+      getItem: (key: string) => {
+        if (key !== 'econmind-ui-language') return authority();
+        return locale ?? null;
+      },
+      setItem: authority,
+      removeItem: authority,
+      clear: authority,
+    },
     addEventListener: (
       name: string,
       callback: (event: { key?: string | null }) => void,
@@ -657,9 +673,8 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
       );
       expect(svg.attributes['aria-hidden']).toBe('true');
     }
-    expect(source).not.toMatch(
-      /localStorage|Command|eez|territorialCandidate|cloneNode/,
-    );
+    expect(readsOnlyDisplayLanguagePreference(source)).toBe(true);
+    expect(source).not.toMatch(/Command|eez|territorialCandidate|cloneNode/);
     // Context may observe native scrolling; it cannot add input/authority
     // handlers or foreign-country hit targets.
     expect(
@@ -867,16 +882,51 @@ describe('country HOME source-coordinate surroundings, not ownership', () => {
     expect(f.authority).not.toHaveBeenCalled();
   });
 
+  it('permits only the exact existing display-language read, never economic storage or preference writes', () => {
+    expect(readsOnlyDisplayLanguagePreference(source)).toBe(true);
+    for (const forbidden of [
+      "window.localStorage.getItem('economic-world-state')",
+      "window.localStorage.setItem('economic-world-state', '{}')",
+      "window.localStorage.setItem('econmind-ui-language', 'en')",
+      "window.localStorage.removeItem('econmind-ui-language')",
+      'window.localStorage.clear()',
+      "window['localStorage'].getItem('econmind-ui-language')",
+      'const { localStorage } = window',
+      "const store = window.localStorage; store.setItem('balance', '1')",
+    ]) {
+      expect(
+        readsOnlyDisplayLanguagePreference(`${source}\n${forbidden}`),
+      ).toBe(false);
+    }
+    expect(
+      readsOnlyDisplayLanguagePreference(
+        source.replace(
+          displayLanguageRead,
+          "window.localStorage.getItem('economic-world-state')",
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      readsOnlyDisplayLanguagePreference(`${source}\n${displayLanguageRead}`),
+    ).toBe(false);
+  });
+
   it.each(['http', 'hash', 'terrain-hash'] as const)(
     'fails closed on %s source failure without hiding the existing scene',
     async (failure) => {
-      const f = fixture(failure);
-      await f.api.mountCountrySurroundings(f.root, country('54'));
-      expect(f.scene.children).toHaveLength(0);
-      expect(f.scene.properties).toEqual({});
-      expect(f.mission.children[0].textContent).toContain('unavailable');
-      expect(f.observers).toHaveLength(0);
-      expect(f.authority).not.toHaveBeenCalled();
+      for (const locale of ['zh', 'en'] as const) {
+        const f = fixture(failure, locale);
+        await f.api.mountCountrySurroundings(f.root, country('54'));
+        expect(f.scene.children).toHaveLength(0);
+        expect(f.scene.properties).toEqual({});
+        expect(f.mission.children[0].textContent).toBe(
+          locale === 'zh'
+            ? '连续地理图暂不可用 · 保留原始插画'
+            : 'Continuous geography unavailable · Original illustration retained',
+        );
+        expect(f.observers).toHaveLength(0);
+        expect(f.authority).not.toHaveBeenCalled();
+      }
     },
   );
 
