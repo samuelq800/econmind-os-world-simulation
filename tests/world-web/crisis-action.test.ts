@@ -24,6 +24,7 @@ import {
 const requireWeb = createRequire(
   new URL('../../apps/world-web/package.json', import.meta.url),
 );
+const reactDomClientModule = requireWeb.resolve('react-dom/client');
 const { createElement } = requireWeb('react') as typeof import('react');
 const { renderToStaticMarkup } = requireWeb(
   'react-dom/server',
@@ -530,7 +531,7 @@ describe('legacy crisis summary stylesheet wiring', () => {
 
 describe('legacy country crisis summary route mount (offline DOM branch)', () => {
   afterEach(() => {
-    vi.doUnmock('react-dom/client');
+    vi.doUnmock(reactDomClientModule);
     vi.unstubAllGlobals();
     vi.unstubAllEnvs();
     vi.resetModules();
@@ -585,13 +586,17 @@ describe('legacy country crisis summary route mount (offline DOM branch)', () =>
     // Only the DOM renderer is recorded; all actual entry/route/component/
     // stylesheet/legacy source modules remain real imports. This is not a
     // browser-rendering claim. CrisisSummary is separately rendered below.
-    vi.doMock('react-dom/client', () => ({
-      createRoot: () => {
+    // Resolve from the same application package as entry.ts. A bare test-root
+    // mock misses this module when pnpm has no root react-dom dependency.
+    vi.doMock(reactDomClientModule, () => ({
+      createRoot: vi.fn(() => {
         const root = { render: vi.fn(), unmount: vi.fn() };
         roots.push(root);
         return root;
-      },
+      }),
     }));
+    const renderer = await import(reactDomClientModule);
+    expect(vi.isMockFunction(renderer.createRoot)).toBe(true);
     await import('../../apps/world-web/src/brand-shell/entry.js');
     return {
       hosts,
