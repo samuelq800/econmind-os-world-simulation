@@ -191,11 +191,25 @@ export function isBoundCrisisView(value: unknown): value is BoundCrisisView {
 
 export type CrisisReadState =
   | { readonly status: 'UNBOUND' | 'LOADING' | 'DENIED' }
+  | {
+      readonly status: 'UNAVAILABLE';
+      readonly reasons: readonly CrisisUnavailableReason[];
+    }
   | { readonly status: 'CURRENT'; readonly view: BoundCrisisView }
   | {
       readonly status: 'STALE' | 'ERROR';
       readonly view: BoundCrisisView | null;
     };
+
+export type CrisisUnavailableReason =
+  | 'ACTUAL_GAP_NOT_PROJECTED'
+  | 'VERIFIED_DELIVERY_NOT_PROJECTED'
+  | 'CONTRIBUTION_NOT_PROJECTED'
+  | 'CRISIS_CLOCK_NOT_PROJECTED'
+  | 'MODEL_NOT_ADMITTED'
+  | 'DISCLOSURE_UNAVAILABLE'
+  | 'FEEDBACK_UNAVAILABLE'
+  | 'PLAYER_CONTENT_NOT_PROJECTED';
 
 const sourced = (value: CrisisProvenance) =>
   value.sourceRef.trim().length > 0 &&
