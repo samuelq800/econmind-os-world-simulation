@@ -25,7 +25,19 @@ export function renderOfficeReadout(
   const provenance = document.createElement('dl');
   provenance.append(node('dt', 'source'), node('dd', model.source));
   for (const [key, value] of Object.entries(model.head))
-    provenance.append(node('dt', key), node('dd', value));
+    provenance.append(
+      node(
+        'dt',
+        key === 'generatedAt' ? '投影生成时间 / Projection generated at' : key,
+      ),
+      node('dd', value),
+    );
+  source.append(
+    node(
+      'p',
+      '投影生成时间仅为投影元数据，不是余额结算时点、serverNow、WorldClock 截止或浏览器读取时间。',
+    ),
+  );
   source.append(provenance);
   section.append(
     source,

@@ -1,4 +1,7 @@
-import type { ProjectionResult } from '../production-read/client.js';
+import {
+  isProjectionGeneratedAt,
+  type ProjectionResult,
+} from '../production-read/client.js';
 import {
   consumeDecisionResult,
   type DecisionResultView,
@@ -102,6 +105,8 @@ export interface OfficeProjectionModel {
     readonly classification: string;
     readonly worldVersion: string;
     readonly eventSequence: string;
+    /** Projection generation metadata only; never an economic as-of time. */
+    readonly generatedAt: string;
     readonly snapshotRef: string;
     readonly readbackRef: string;
     readonly seedRef: string;
@@ -300,6 +305,8 @@ export function consumeOfficeProjection(
     code: OfficeProjectionMissing['code'],
   ): OfficeProjectionMissing => ({ kind: 'MISSING', code });
   if (result.status !== 'PROJECTION') return missing('PROJECTION_UNAVAILABLE');
+  if (!isProjectionGeneratedAt(result.generatedAt))
+    return missing('PROJECTION_UNAVAILABLE');
   const authority = parseAuthority(result.authority, config);
   if (
     !authority ||
@@ -407,6 +414,7 @@ export function consumeOfficeProjection(
       classification: config.identity.classification,
       worldVersion: result.worldVersion,
       eventSequence: authority.readback.eventSequence,
+      generatedAt: result.generatedAt,
       snapshotRef: result.snapshotRef,
       readbackRef: authority.readback.readbackRef,
       seedRef: authority.seed.seedRef,
