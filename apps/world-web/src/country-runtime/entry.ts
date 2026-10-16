@@ -6,6 +6,10 @@ import {
   type TrustedCountryRuntimeConfig,
 } from './trusted-runtime.js';
 import { installOfficeProjection } from '../office-projection/view.js';
+import {
+  createCrisisReadBridge,
+  installCrisisReadSurface,
+} from '../crisis-action/authorized-read.js';
 import { installFinancialIntake } from '../financial-intake/view.js';
 import { installTrustedHost } from '../trusted-host/bootstrap.js';
 import { installOfficeCommand } from '../office-command/view.js';
@@ -304,7 +308,13 @@ declare global {
 
 if (typeof window !== 'undefined' && typeof document !== 'undefined') {
   window.EconMindCountryRuntime = installCountryRuntime(document, window);
-  window.EconMindOfficeProjection = installOfficeProjection(document, window);
+  const crisisRead = createCrisisReadBridge();
+  window.EconMindOfficeProjection = installOfficeProjection(
+    document,
+    window,
+    crisisRead.createController,
+  );
+  installCrisisReadSurface(document, window, crisisRead);
   window.EconMindFinancialIntake = installFinancialIntake(document, window);
   window.EconMindOfficeCommand = installOfficeCommand(document, window);
   window.EconMindTrustedHost = installTrustedHost(document, window, {

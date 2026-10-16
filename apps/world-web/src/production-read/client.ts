@@ -34,6 +34,8 @@ export type ProjectionResult =
       readonly source: 'DERIVED_SERVER_PROJECTION';
       readonly worldVersion: string;
       readonly snapshotRef: string;
+      /** Validated wire watermark, not settlement time, serverNow or Clock. */
+      readonly generatedAt: string;
       readonly payload: unknown;
       readonly authority: ServerReadAuthority;
     };
@@ -64,7 +66,7 @@ const disconnected: ProductionReadPort = Object.freeze({
   disconnect: () => undefined,
 });
 const maxBytes = 1024 * 1024;
-const timestamp = (v: unknown) =>
+export const isProjectionGeneratedAt = (v: unknown): v is string =>
   typeof v === 'string' &&
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u.test(v) &&
   !Number.isNaN(Date.parse(v)) &&
@@ -347,7 +349,7 @@ export function createProductionReadClient(
         data.scopeKey !== c.identity.scopeKey ||
         !version(watermark.worldVersion) ||
         !version(watermark.eventSequence) ||
-        !timestamp(watermark.generatedAt) ||
+        !isProjectionGeneratedAt(watermark.generatedAt) ||
         watermark.worldVersion !== response.authority.readback.worldVersion ||
         watermark.eventSequence !== response.authority.readback.eventSequence ||
         !Array.isArray(data.receipts) ||
@@ -382,6 +384,7 @@ export function createProductionReadClient(
         source: 'DERIVED_SERVER_PROJECTION',
         worldVersion: stored.worldVersion,
         snapshotRef: stored.snapshotRef,
+        generatedAt: watermark.generatedAt,
         payload: stored.payload,
         authority: response.authority,
       };

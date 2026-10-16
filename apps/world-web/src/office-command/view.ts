@@ -7,6 +7,7 @@ import {
   type OfficeProjectionView,
 } from '../office-projection/model.js';
 import { renderDecisionResult } from '../office-projection/decision-result-view.js';
+import { renderOfficeReadout } from '../office-projection/readout-view.js';
 
 /** Additive manual-intent drawer; no default economic payload or fixture data. */
 export function installOfficeCommand(
@@ -207,6 +208,7 @@ export function installOfficeCommand(
         node('p', `Authorized readback · v${state.model.head.worldVersion}`),
       );
       dialog.append(renderDecisionResult(document, state.model.decisionResult));
+      dialog.append(renderOfficeReadout(document, state.model));
       if (state.receipt && !state.completion)
         dialog.append(
           node(

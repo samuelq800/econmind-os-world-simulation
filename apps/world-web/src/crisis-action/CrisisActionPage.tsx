@@ -17,6 +17,7 @@ import {
   crisisWindow,
   type CrisisLocation,
   type CrisisReadState,
+  type CrisisUnavailableReason,
   type CrisisRoute,
 } from './model.js';
 import './crisis-action.css';
@@ -32,7 +33,63 @@ const stateLabels: Record<CrisisReadState['status'], string> = {
   CURRENT: '服务端授权只读投影',
   STALE: '数据已过期，请刷新后复核',
   ERROR: '读取失败',
+  UNAVAILABLE: '已读取授权投影，危机数据不可用',
 };
+
+const unavailableLabels: Record<
+  CrisisUnavailableReason,
+  readonly [string, string]
+> = {
+  ACTUAL_GAP_NOT_PROJECTED: [
+    '实际缺口：服务端尚未投影',
+    'Actual shortfall: not projected by the server',
+  ],
+  VERIFIED_DELIVERY_NOT_PROJECTED: [
+    '核验交付：服务端尚未投影',
+    'Verified delivery: not projected by the server',
+  ],
+  CONTRIBUTION_NOT_PROJECTED: [
+    '核验贡献：服务端尚未投影',
+    'Verified contributions: not projected by the server',
+  ],
+  CRISIS_CLOCK_NOT_PROJECTED: [
+    '危机时钟：服务端尚未投影',
+    'Crisis clock: not projected by the server',
+  ],
+  MODEL_NOT_ADMITTED: [
+    '民众声音 · 系统模拟：模型尚未准入',
+    'Citizen voices · System simulation: model not admitted',
+  ],
+  DISCLOSURE_UNAVAILABLE: [
+    '他国回应 · 系统模拟：披露不可用',
+    'Other governments · System simulation: disclosure unavailable',
+  ],
+  FEEDBACK_UNAVAILABLE: [
+    '系统反馈：暂无可验证的授权来源',
+    'System feedback: no verifiable authorized source',
+  ],
+  PLAYER_CONTENT_NOT_PROJECTED: [
+    '玩家内容 / 外交：服务端尚未投影',
+    'Player content / diplomacy: not projected by the server',
+  ],
+};
+function UnavailableReasons({
+  state,
+  locale = 'zh',
+}: {
+  readonly state: CrisisReadState;
+  readonly locale?: PreviewLocale;
+}) {
+  return state.status === 'UNAVAILABLE' ? (
+    <ul>
+      {state.reasons.map((reason) => (
+        <li key={reason}>
+          {unavailableLabels[reason][locale === 'zh' ? 0 : 1]} · {reason}
+        </li>
+      ))}
+    </ul>
+  ) : null;
+}
 
 const summaryZh = {
   aria: '危机行动与反馈摘要',
@@ -89,6 +146,7 @@ const summaryEn: typeof summaryZh = {
     CURRENT: 'Server-authorized read-only projection',
     STALE: 'Data is stale; refresh and verify',
     ERROR: 'Read failed',
+    UNAVAILABLE: 'Authorized projection read; crisis data unavailable',
   },
 };
 const summaryMessages = { zh: summaryZh, en: summaryEn };
@@ -109,7 +167,7 @@ function observedTime(value: string) {
 
 export interface CrisisSummaryProps {
   readonly state?: CrisisReadState;
-  readonly href?: string;
+  readonly href?: string | null;
   readonly countryLabel?: string;
   /** Display context only, never an authoritative country identity. */
   readonly countryNumber?: string;
@@ -156,6 +214,7 @@ export function CrisisSummary({
         </p>
       </div>
       <p role="status">{text.states[status]}</p>
+      <UnavailableReasons state={state} locale={locale} />
       <div className="crisis-summary__feeds">
         <span>
           {text.shortage}
@@ -187,7 +246,7 @@ export function CrisisSummary({
             text.noDiplomacy}
         </span>
       </div>
-      <a href={href}>{text.enter}</a>
+      {href !== null && <a href={href}>{text.enter}</a>}
     </section>
   );
 }
@@ -323,6 +382,7 @@ export function CrisisActionPage({
             ? ` · ${status === 'ERROR' || status === 'STALE' ? '最近可靠快照 · ' : ''}更新 ${view.effectiveAt}`
             : ' · 未知值不代表零'}
         </p>
+        <UnavailableReasons state={state} />
         {(status === 'ERROR' || status === 'STALE') && onRefresh && (
           <button type="button" onClick={onRefresh}>
             重新读取
