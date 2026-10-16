@@ -1,6 +1,7 @@
 export type PreviewLocale = 'zh' | 'en';
 // Reuse the existing immutable country-page preference, not its DOM translator.
 export const LANGUAGE_KEY = 'econmind-ui-language';
+export const LANGUAGE_EVENT = 'econmind-language-change';
 
 const zh = {
   overview: '世界总览',
@@ -216,4 +217,23 @@ export function applyPreviewLocale(locale: PreviewLocale) {
   } catch {
     /* UI remains usable without storage. */
   }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent(LANGUAGE_EVENT, { detail: { language: locale } }),
+    );
+  }
+}
+
+/** Subscribe to the immutable page's existing preference/change contract. */
+export function subscribePreviewLocale(onChange: () => void) {
+  if (typeof window === 'undefined') return () => {};
+  const storage = (event: StorageEvent) => {
+    if (event.key === LANGUAGE_KEY || event.key === null) onChange();
+  };
+  window.addEventListener(LANGUAGE_EVENT, onChange);
+  window.addEventListener('storage', storage);
+  return () => {
+    window.removeEventListener(LANGUAGE_EVENT, onChange);
+    window.removeEventListener('storage', storage);
+  };
 }

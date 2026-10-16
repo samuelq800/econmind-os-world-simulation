@@ -51,8 +51,8 @@
   "adaptedSources": [
     {
       "path": "apps/world-web/src/brand-shell/entry.ts",
-      "bytes": 4294,
-      "sha256": "3131ae193c45dc5089d1100c746f541a419222788f54d152b0615eaec8059ad1"
+      "bytes": 4283,
+      "sha256": "91e83455738e1f60e2305c6264398fa89140e9bce8784d04c44ac958b17636ac"
     },
     {
       "path": "apps/world-web/src/brand-shell/brand-shell.css",
@@ -101,8 +101,8 @@
     },
     {
       "path": "apps/world-web/src/crisis-action/CrisisActionPage.tsx",
-      "bytes": 18061,
-      "sha256": "cea74d7e8a7c9fbfcd18536c51394271eb14d58ef99c194f6ecf427713e19303"
+      "bytes": 21170,
+      "sha256": "eb8f8dd152c997bc0ab5e1eef0470d080de8b0a0047ffc38397878acdf1f9d33"
     },
     {
       "path": "apps/world-web/src/crisis-action/crisis-action.css",
@@ -141,8 +141,8 @@
     },
     {
       "path": "apps/world-web/src/world-preview/locale.ts",
-      "bytes": 8210,
-      "sha256": "444911dc4544de9a96f8f55339ecc0bdcc172141fd4f650d7a90481a6d001423"
+      "bytes": 8967,
+      "sha256": "a505b2b3a9048af91194d1706724236c914f442570149a83e9f3380897aa8ebe"
     },
     {
       "path": "apps/world-web/src/world-preview/public-route.ts",
@@ -162,7 +162,7 @@
     {
       "path": "docs/reports/public-world-overview-20261012/SOURCE.json",
       "bytes": 6103,
-      "sha256": "a6dce7250bcb30c556c21d09737f2e6480cbc7e74af8235cae9ced98b23dcb2d"
+      "sha256": "cb92da60d6e3bbd63040d493319b4140237de4a8655979ce2023f9eab81c64cb"
     }
   ],
   "immutablePageInputs": [

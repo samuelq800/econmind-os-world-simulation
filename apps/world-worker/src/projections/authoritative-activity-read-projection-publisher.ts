@@ -484,6 +484,7 @@ export class AuthoritativeActivityReadProjectionPublisher {
         absolute,
         decisions,
         decisionHead,
+        observedAtReal,
       );
 
       await transaction.query(
@@ -1160,6 +1161,7 @@ export class AuthoritativeActivityReadProjectionPublisher {
     absolute: ReadonlyMap<string, AuthoritativeFinancialPosition>,
     decisions: readonly CommittedOfficeDecisionTransition[],
     decisionHead: DecisionResultHead,
+    observedAtReal: string,
   ): readonly PreparedProjection[] {
     const decisionResults = projectOfficeDecisionResults({
       sourceHead: decisionHead,
@@ -1210,6 +1212,31 @@ export class AuthoritativeActivityReadProjectionPublisher {
             decisionResults.get(
               canonicalSerialize([scope.countryId, scope.officeId]),
             ) ?? null,
+          // No production feedback model/disclosure is admitted. Persist the
+          // explicit unavailable state, never unwrap the FB1 test projector.
+          feedback: {
+            schemaVersion: 'derived-system-feedback-v1',
+            classification: 'OFFICE_PRIVATE',
+            scopeKey: officePrivateReadProjectionScopeKey(scope),
+            countryId: scope.countryId,
+            officeId: scope.officeId,
+            sourceHead: {
+              worldId: decisionHead.worldId,
+              worldVersion: decisionHead.worldVersion,
+              eventSequence: decisionHead.eventSequence,
+            },
+            generatedAt: observedAtReal,
+            citizen: {
+              status: 'UNAVAILABLE',
+              reason: 'MODEL_NOT_ADMITTED',
+              items: [],
+            },
+            government: {
+              status: 'UNAVAILABLE',
+              reason: 'DISCLOSURE_UNAVAILABLE',
+              items: [],
+            },
+          },
           ledger: {
             ...(economics.get(officeKey(scope)) ??
               emptyLedgerEconomicSummary()),

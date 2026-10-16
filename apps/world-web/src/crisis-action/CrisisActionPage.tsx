@@ -1,4 +1,10 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useSyncExternalStore, type ReactNode } from 'react';
+
+import {
+  readPreviewLocale,
+  subscribePreviewLocale,
+  type PreviewLocale,
+} from '../world-preview/locale.js';
 
 import {
   crisisFeedbackLabels,
@@ -28,6 +34,68 @@ const stateLabels: Record<CrisisReadState['status'], string> = {
   ERROR: '读取失败',
 };
 
+const summaryZh = {
+  aria: '危机行动与反馈摘要',
+  eyebrow: '战后重建',
+  title: '危机行动',
+  country: '国家',
+  chooseCountry: '选择国家查看危机上下文',
+  shortage: '实际缺口：',
+  noData: '暂无数据',
+  effective: '生效',
+  contributions: '核验贡献：',
+  record: '条记录',
+  records: '条记录',
+  noContributions: '暂无核验记录',
+  citizen: '民众声音',
+  citizenSimulation: '民众声音 · 系统模拟',
+  citizenPlayer: '民众声音 · 玩家内容',
+  noCitizen: '暂无授权内容',
+  governmentSimulation: '他国回应 · 系统模拟',
+  noSimulation: '暂无模拟回应',
+  diplomacy: '玩家外交',
+  noDiplomacy: '暂无玩家外交记录',
+  colon: '：',
+  enter: '进入危机行动 →',
+  states: stateLabels,
+};
+const summaryEn: typeof summaryZh = {
+  aria: 'Crisis action and feedback summary',
+  eyebrow: 'Post-war reconstruction',
+  title: 'Crisis action',
+  country: 'Country',
+  chooseCountry: 'Select a country for crisis context',
+  shortage: 'Actual shortfall: ',
+  noData: 'No data',
+  effective: 'Effective',
+  contributions: 'Verified contributions: ',
+  record: 'record',
+  records: 'records',
+  noContributions: 'No verified records',
+  citizen: 'Citizen voices',
+  citizenSimulation: 'Citizen voices · System simulation',
+  citizenPlayer: 'Citizen voices · Player content',
+  noCitizen: 'No authorized content',
+  governmentSimulation: 'Other governments · System simulation',
+  noSimulation: 'No simulated responses',
+  diplomacy: 'Player diplomacy',
+  noDiplomacy: 'No player diplomacy records',
+  colon: ': ',
+  enter: 'Enter crisis action →',
+  states: {
+    UNBOUND: 'Official crisis data is not connected',
+    LOADING: 'Reading the authorized crisis projection',
+    DENIED: 'This identity is not authorized to read crisis details',
+    CURRENT: 'Server-authorized read-only projection',
+    STALE: 'Data is stale; refresh and verify',
+    ERROR: 'Read failed',
+  },
+};
+const summaryMessages = { zh: summaryZh, en: summaryEn };
+// Preserve the existing Chinese server-rendered fallback; browser preference
+// and same-page language changes use the existing locale contract above.
+const serverSummaryLocale = (): PreviewLocale => 'zh';
+
 function visibleStatus(state: CrisisReadState): CrisisReadState['status'] {
   // Retaining an old CURRENT string cannot resurrect a revoked/forged view.
   return 'view' in state && state.view !== null && !crisisPresentation(state)
@@ -43,6 +111,9 @@ export interface CrisisSummaryProps {
   readonly state?: CrisisReadState;
   readonly href?: string;
   readonly countryLabel?: string;
+  /** Display context only, never an authoritative country identity. */
+  readonly countryNumber?: string;
+  readonly locale?: PreviewLocale;
 }
 
 /** Reusable on World and Country first screens. Same read view, same facts;
@@ -51,50 +122,72 @@ export function CrisisSummary({
   state = UNBOUND_CRISIS_STATE,
   href = '#crisis',
   countryLabel,
+  countryNumber,
+  locale: requestedLocale,
 }: CrisisSummaryProps) {
+  const preference = useSyncExternalStore(
+    subscribePreviewLocale,
+    readPreviewLocale,
+    serverSummaryLocale,
+  );
+  const locale = requestedLocale ?? preference;
+  const text = summaryMessages[locale];
   const view = crisisPresentation(state);
   const status = visibleStatus(state);
   const contributions = crisisVerifiedContributions(view);
   const feedback = crisisSourcedFeedback(view);
   const citizen = feedback.find((item) => item.origin.startsWith('CITIZEN_'));
   return (
-    <section className="crisis-summary" aria-label="危机行动与反馈摘要">
+    <section
+      className="crisis-summary"
+      aria-label={text.aria}
+      lang={locale === 'zh' ? 'zh-CN' : 'en'}
+      data-no-translate=""
+    >
       <div>
-        <span className="crisis-eyebrow">战后重建</span>
-        <h2>{view?.eventLabel ?? '危机行动'}</h2>
-        <p>{view?.countryLabel ?? countryLabel ?? '选择国家查看危机上下文'}</p>
+        <span className="crisis-eyebrow">{text.eyebrow}</span>
+        <h2>{view?.eventLabel ?? text.title}</h2>
+        <p>
+          {view?.countryLabel ??
+            countryLabel ??
+            (countryNumber
+              ? `${text.country} ${countryNumber}`
+              : text.chooseCountry)}
+        </p>
       </div>
-      <p role="status">{stateLabels[status]}</p>
+      <p role="status">{text.states[status]}</p>
       <div className="crisis-summary__feeds">
         <span>
-          实际缺口：
+          {text.shortage}
           {view?.shortages[0]
-            ? `${view.shortages[0].label} ${view.shortages[0].gap ?? '暂无数据'} ${view.shortages[0].unit} · 生效 ${view.shortages[0].effectiveAt}`
-            : '暂无数据'}
+            ? `${view.shortages[0].label} ${view.shortages[0].gap ?? text.noData} ${view.shortages[0].unit} · ${text.effective} ${view.shortages[0].effectiveAt}`
+            : text.noData}
         </span>
         <span>
-          核验贡献：
+          {text.contributions}
           {contributions.length
-            ? `${contributions.length} 条记录`
-            : '暂无核验记录'}
+            ? `${contributions.length} ${contributions.length === 1 ? text.record : text.records}`
+            : text.noContributions}
         </span>
         <span>
           {citizen
-            ? `${crisisFeedbackLabels[citizen.origin]}：${citizen.text}`
-            : '民众声音：暂无授权内容'}
+            ? `${citizen.origin === 'CITIZEN_PLAYER' ? text.citizenPlayer : text.citizenSimulation}${text.colon}${citizen.text}`
+            : `${text.citizen}${text.colon}${text.noCitizen}`}
         </span>
         <span>
-          他国回应 · 系统模拟：
+          {text.governmentSimulation}
+          {text.colon}
           {feedback.find((item) => item.origin === 'GOVERNMENT_SIMULATION')
-            ?.text ?? '暂无模拟回应'}
+            ?.text ?? text.noSimulation}
         </span>
         <span>
-          玩家外交：
+          {text.diplomacy}
+          {text.colon}
           {feedback.find((item) => item.origin === 'PLAYER_DIPLOMACY')?.text ??
-            '暂无玩家外交记录'}
+            text.noDiplomacy}
         </span>
       </div>
-      <a href={href}>进入危机行动 →</a>
+      <a href={href}>{text.enter}</a>
     </section>
   );
 }

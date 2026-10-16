@@ -1,0 +1,36 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2024", "DOM"],
+    "types": ["node", "emscripten"],
+    "typeRoots": ["../../node_modules/@types"],
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": false,
+    "paths": {
+      "@econmind/core": ["../../packages/core/src/index.ts"],
+      "decimal.js": ["../../node_modules/decimal.js/decimal.d.ts"],
+      "@econmind/world-worker/runtime-read-binding-store": [
+        "../../apps/world-worker/src/persistence/runtime-read-binding-store.ts"
+      ],
+      "@econmind/world-worker/intake": [
+        "../../apps/world-worker/src/intake/postgres-narrow-transfer-intake.ts"
+      ],
+      "@econmind/world-worker/office-command-intake": [
+        "../../apps/world-worker/src/intake/postgres-office-command-intake.ts"
+      ],
+      "@econmind/world-worker/approval-store": [
+        "../../apps/world-worker/src/persistence/narrow-transfer-approval-store.ts"
+      ],
+      "@econmind/world-worker/runtime-command-host": [
+        "../../apps/world-worker/src/runtime-preparation/production-world-command-host-exports.ts"
+      ]
+    }
+  },
+  "files": [
+    "../../apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.ts",
+    "../world-core/v10-authoritative-activity-read-projection-publisher.test.ts"
+  ]
+}

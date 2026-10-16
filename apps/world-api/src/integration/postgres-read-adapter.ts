@@ -7,6 +7,7 @@ import {
 } from './contracts.js';
 import type { ReadProjectionRow } from './generated/world-v2-read-model.js';
 import { assertDecisionResultPayload } from './office-decision-result-validator.js';
+import { assertDerivedSystemFeedbackPayload } from './derived-system-feedback-validator.js';
 import {
   parseSupabaseAuthSubject,
   type SupabaseAuthSubject,
@@ -233,6 +234,20 @@ function mapProjectionRow(
     protocol('PostgreSQL projection row does not match the request scope');
   }
 
+  // The general DTO parser JSON-snapshots payloads. Preserve own presence and
+  // raw exact keys: undefined/hidden properties must not normalize to legacy.
+  const feedback =
+    row.payload && typeof row.payload === 'object'
+      ? Object.getOwnPropertyDescriptor(row.payload, 'feedback')
+      : undefined;
+  if (
+    feedback &&
+    (row.classification !== 'OFFICE_PRIVATE' ||
+      !feedback.enumerable ||
+      !Object.hasOwn(feedback, 'value'))
+  )
+    protocol('Feedback is outside its exact private Office field');
+
   try {
     const projection = parseWorldProjectionDto({
       schemaVersion: row.schema_version,
@@ -253,6 +268,13 @@ function mapProjectionRow(
       executorResult.verifiedProjectionAuthority,
       authSubject,
     );
+    if (feedback)
+      assertDerivedSystemFeedbackPayload({
+        value: feedback.value,
+        projection,
+        authority: executorResult.verifiedProjectionAuthority,
+        authSubject,
+      });
     if (
       Buffer.byteLength(JSON.stringify(projection), 'utf8') >
       MAX_WORLD_READ_RESPONSE_BYTES
@@ -274,6 +296,13 @@ function assertClassifiedActivityPayload(
   authority: unknown,
   authSubject: SupabaseAuthSubject,
 ): void {
+  const hasFeedback = Object.prototype.hasOwnProperty.call(
+    projection.payload,
+    'feedback',
+  );
+  // Reject private extensions before the original party early return.
+  if (hasFeedback && projection.classification !== 'OFFICE_PRIVATE')
+    protocol('Feedback is outside its private Office classification');
   if (projection.classification === 'NEGOTIATION_PARTY') return;
   function boundedObject(
     value: unknown,
@@ -299,6 +328,7 @@ function assertClassifiedActivityPayload(
     ...(Object.prototype.hasOwnProperty.call(projection.payload, resultField)
       ? [resultField]
       : []),
+    ...(hasFeedback ? ['feedback'] : []),
   ]);
   if (
     payload.schemaVersion !== 'world-activity-projection-v1' ||

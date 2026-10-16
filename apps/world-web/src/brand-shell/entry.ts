@@ -79,7 +79,7 @@ if (typeof document !== 'undefined') {
       mounts.set(scene, { host, root });
       root.render(
         createElement(CrisisSummary, {
-          ...(number ? { countryLabel: `国家 ${number}` } : {}),
+          ...(number ? { countryNumber: number } : {}),
           href: url.href,
         }),
       );

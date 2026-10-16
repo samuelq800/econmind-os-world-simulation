@@ -1,8 +1,6 @@
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, describe, expect, it } from 'vitest';
 
 import {
   acquireWorldWriterLease,
@@ -30,25 +28,12 @@ import {
   AtomicTransitionRepository,
   prepareAtomicTransitionCandidate,
 } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
-import { createPGliteV09AtomicTestDatabase } from '../support/v09-atomic-database.js';
+import {
+  createTestOnlyPersistedReadContextFixture,
+  protocolFixtureLifecycle,
+} from '../support/test-only-persisted-read-context-fixture.js';
 import type { V09AtomicTestDatabase } from '../support/v09-atomic-contract.js';
 
-const root = path.resolve(import.meta.dirname, '../..');
-const migrations = [
-  '0001_world_v2_namespace.sql',
-  '0002_world_v2_command_event_ledger.sql',
-  '0003_world_v2_command_receipts_outbox.sql',
-  '0004_world_v2_receipt_event_set_integrity.sql',
-  '0005_world_v2_writer_lease_fencing.sql',
-  '0006_world_v2_writer_lease_lineage_guard.sql',
-  '0007_world_v2_atomic_transition_facts.sql',
-  '0008_world_v2_materialization_recovery.sql',
-  '0009_world_v2_posting_payload_integrity.sql',
-  '0010_world_v2_command_claim_fencing.sql',
-  '0011_world_v2_current_commit_authorization.sql',
-  '0012_world_v2_command_claim_active_lease_guard.sql',
-  '0013_world_v2_read_projection_boundary.sql',
-] as const;
 const WORLD = worldId('WORLD_V10_COUNTRY_FLOW_TEST');
 const WORKER = workerId('WORKER_V10_COUNTRY_FLOW_TEST');
 const AT = '2026-09-14T00:00:00.000Z';
@@ -67,26 +52,30 @@ const policy = {
 } as const;
 
 const databases: V09AtomicTestDatabase[] = [];
+const executors = new WeakMap<
+  V09AtomicTestDatabase,
+  ParameterizedPgReadExecutor
+>();
+const lifecycleBefore = protocolFixtureLifecycle();
 
 afterEach(async () => {
   await Promise.all(databases.splice(0).map((database) => database.close()));
 });
+afterAll(() => {
+  expect(protocolFixtureLifecycle()).toMatchObject({
+    created: lifecycleBefore.created + 7,
+    closed: lifecycleBefore.closed + 7,
+    open: 0,
+    peakOpen: 1,
+  });
+});
 
 async function database(): Promise<V09AtomicTestDatabase> {
-  const result = createPGliteV09AtomicTestDatabase();
-  databases.push(result);
-  for (const migration of migrations) {
-    await result.executeScript(
-      await readFile(
-        path.join(root, 'database/migrations/artifacts', migration),
-        'utf8',
-      ),
-    );
-  }
-  await result.query('insert into world_v2.world_head (world_id) values ($1)', [
-    WORLD,
-  ]);
-  return result;
+  const fixture = await createTestOnlyPersistedReadContextFixture();
+  databases.push(fixture.database);
+  executors.set(fixture.database, fixture.executor);
+  await fixture.publishContext();
+  return fixture.database;
 }
 
 function assertion(expectedWorldVersion = '1') {
@@ -259,9 +248,9 @@ async function seedAuthoritativeCountryActivity(
 function executor(
   database: V09AtomicTestDatabase,
 ): ParameterizedPgReadExecutor {
-  return {
-    query: async ({ text, values }) => database.query(text, values),
-  };
+  const result = executors.get(database);
+  if (!result) throw new Error('TEST_PROTOCOL_FOREIGN_DATABASE_DENIED');
+  return result;
 }
 
 describe('V10.1 Country/Office source-to-query flow', () => {

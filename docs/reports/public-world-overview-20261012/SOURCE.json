@@ -80,8 +80,8 @@
     },
     {
       "path": "apps/world-web/src/world-preview/locale.ts",
-      "bytes": 8210,
-      "sha256": "444911dc4544de9a96f8f55339ecc0bdcc172141fd4f650d7a90481a6d001423"
+      "bytes": 8967,
+      "sha256": "a505b2b3a9048af91194d1706724236c914f442570149a83e9f3380897aa8ebe"
     },
     {
       "path": "apps/world-web/src/world-preview/public-route.ts",
@@ -105,8 +105,8 @@
     },
     {
       "path": "apps/world-web/src/brand-shell/entry.ts",
-      "bytes": 4270,
-      "sha256": "a5237e8f08c415cb03a07557b0bbaf7f117b4ec881ad577e9580ddd17af80fed"
+      "bytes": 4283,
+      "sha256": "91e83455738e1f60e2305c6264398fa89140e9bce8784d04c44ac958b17636ac"
     }
   ],
   "originalPublicSceneSelection20261013": {

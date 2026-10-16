@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.fb2-writer-strict.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": false
+  },
+  "files": [
+    "../integration/v10-1-country-office-read-flow.test.ts",
+    "../world-core/test-only-persisted-read-context.test.ts"
+  ]
+}

@@ -52,6 +52,7 @@
     "@econmind/core": "workspace:*",
     "@electric-sql/pglite": "0.5.8",
     "@eslint/js": "10.0.1",
+    "@types/emscripten": "1.41.1",
     "@types/node": "24.13.3",
     "@types/pg": "8.15.5",
     "@types/react": "19.2.18",
