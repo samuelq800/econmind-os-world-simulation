@@ -101,8 +101,8 @@
     },
     {
       "path": "apps/world-web/src/crisis-action/CrisisActionPage.tsx",
-      "bytes": 21170,
-      "sha256": "eb8f8dd152c997bc0ab5e1eef0470d080de8b0a0047ffc38397878acdf1f9d33"
+      "bytes": 23086,
+      "sha256": "3131842b852efcdd5a04359d61b66e96a0f286901bb87016db0c198bee0dafe7"
     },
     {
       "path": "apps/world-web/src/crisis-action/crisis-action.css",
@@ -116,8 +116,8 @@
     },
     {
       "path": "apps/world-web/src/crisis-action/model.ts",
-      "bytes": 11331,
-      "sha256": "5c3105ba007aa300f082a2c4421f030bf0484604d33cc73ac6609a154623d2dd"
+      "bytes": 11732,
+      "sha256": "9f0966f9810930b32acf8e7cdbbdb41805ae7b196b3e006cfdd1201331bb59c1"
     },
     {
       "path": "apps/world-web/src/world-preview/Loading.tsx",
