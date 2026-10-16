@@ -1,6 +1,7 @@
 import {
   validateFinanceBudgetReserveContract,
   type FinanceBudgetReserveInput,
+  type ReserveLineBalances,
 } from '@econmind/core';
 
 /**
@@ -14,7 +15,29 @@ import {
 export type FinanceBudgetReserveSourceEvidenceClass =
   FinanceBudgetReserveInput['evidenceClass'];
 
-export function inspectFinanceBudgetReserveSourceContract(input: unknown) {
+export type FinanceBudgetReserveSourceContractResult = Readonly<{
+  evidenceClass: FinanceBudgetReserveSourceEvidenceClass | null;
+  productionAuthority: false;
+  sourceAdmitted: false;
+  actualSourceObservation: 'NOT_CONSTRUCTED';
+  actualCacheObservation: 'NOT_CONSTRUCTED';
+}> &
+  (
+    | Readonly<{
+        status: 'INERT_REJECTED' | 'INERT_MISSING_INPUT';
+        reason: string;
+        diagnostic: string;
+      }>
+    | Readonly<{
+        status: 'INERT_CONSISTENT' | 'INERT_DUPLICATE';
+        cutoff: FinanceBudgetReserveInput['cutoff'];
+        balances: readonly ReserveLineBalances[];
+      }>
+  );
+
+export function inspectFinanceBudgetReserveSourceContract(
+  input: unknown,
+): FinanceBudgetReserveSourceContractResult {
   const result = validateFinanceBudgetReserveContract(input);
   const boundary = {
     evidenceClass: result.evidenceClass,
