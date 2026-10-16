@@ -49,12 +49,14 @@ export function App() {
       value && /^(0[1-9]|[1-6][0-9]|70)$/.test(value) ? value : null;
     return (
       <CrisisActionPage
-        {...(country ? { countryLabel: `国家 ${country}` } : {})}
+        {...(country ? { countryNumber: country } : {})}
         worldHref="?atlas=explorer"
         {...(country
           ? { countryHref: `?atlas=explorer&country=${country}` }
           : {})}
-        renderMap={() => <CrisisGeography countryNumber={country} />}
+        renderMap={({ locale }) => (
+          <CrisisGeography countryNumber={country} locale={locale} />
+        )}
       />
     );
   }

@@ -91,23 +91,23 @@
     },
     {
       "path": "apps/world-web/src/App.tsx",
-      "bytes": 3788,
-      "sha256": "9fde380c44d8a78e436a39d52b338e039a705dc1d7e54ce21a133ba777af5a66"
+      "bytes": 3825,
+      "sha256": "b6d76c308f4886c89e531e2c07aaa3fa695663ccd06d3ac0900fa182f73fb348"
     },
     {
       "path": "apps/world-web/src/map-explorer/CrisisGeography.tsx",
-      "bytes": 2869,
-      "sha256": "5cb8482f4be3226b80096a85a1265fbbdfaf1a8a4db0ca62365db802a7bff512"
+      "bytes": 2977,
+      "sha256": "186c79f326eaa361dd50e792af1e97c19339a0578542b45bd9b417d27cf34c95"
     },
     {
       "path": "apps/world-web/src/crisis-action/CrisisActionPage.tsx",
-      "bytes": 23086,
-      "sha256": "3131842b852efcdd5a04359d61b66e96a0f286901bb87016db0c198bee0dafe7"
+      "bytes": 25042,
+      "sha256": "88eff8bebaa00b0792df204b555e09a5e7107ddd55b8e99ef2e1395bd72b1c0e"
     },
     {
       "path": "apps/world-web/src/crisis-action/crisis-action.css",
-      "bytes": 8642,
-      "sha256": "0b34bbd407007424fa19655d6fe06f3a192939e3a2d52d9c61607953a1506cbf"
+      "bytes": 8881,
+      "sha256": "3a1a6b1aba82502a2b4508607c0169dfb1bba242bde8d8f223e7cf59bbbb077e"
     },
     {
       "path": "apps/world-web/src/crisis-action/index.ts",

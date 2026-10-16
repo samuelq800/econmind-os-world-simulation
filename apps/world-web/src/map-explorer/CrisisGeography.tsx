@@ -1,14 +1,19 @@
 import terrain from '../assets/asterra-satellite-terrain-v8.png';
 import detailMaps from '../assets/country-detail/index.json';
 import { partition } from '../map-lab/display-layers.js';
+import { crisisPageMessages } from '../crisis-action/locale.js';
+import type { PreviewLocale } from '../world-preview/locale.js';
 
 /** Reuse the immutable canonical display geography. No crisis point, route,
  * operating facility or supply quantity is inferred from this static layer. */
 export function CrisisGeography({
   countryNumber,
+  locale = 'zh',
 }: {
   countryNumber: string | null;
+  locale?: PreviewLocale;
 }) {
+  const text = crisisPageMessages[locale];
   const country = partition.territories.find((c) => c.number === countryNumber);
   const detail = detailMaps.find((c) => c.number === countryNumber);
   const box = detail?.viewBox;
@@ -39,7 +44,7 @@ export function CrisisGeography({
         viewBox={view.join(' ')}
         preserveAspectRatio="xMidYMid slice"
         role="img"
-        aria-label="连续地理底图：历史静态来源，未接危机点位或运输路线"
+        aria-label={text.geography}
       >
         <defs>
           <filter id="crisis-country-fade">
@@ -88,7 +93,7 @@ export function CrisisGeography({
           </>
         )}
       </svg>
-      <p>历史静态地理来源 · 危机点位与供给路线尚未接入</p>
+      <p>{text.geographyNote}</p>
     </div>
   );
 }
