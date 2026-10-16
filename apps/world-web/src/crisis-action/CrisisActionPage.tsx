@@ -1,10 +1,23 @@
-import { useState, useSyncExternalStore, type ReactNode } from 'react';
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react';
 
 import {
   readPreviewLocale,
   subscribePreviewLocale,
+  applyPreviewLocale,
+  messages,
   type PreviewLocale,
 } from '../world-preview/locale.js';
+import {
+  crisisPageMessages,
+  crisisEnglishOfficeLabels,
+  crisisEnglishStatusLabels,
+  crisisEnglishFeedbackLabels,
+} from './locale.js';
 
 import {
   crisisFeedbackLabels,
@@ -161,8 +174,8 @@ function visibleStatus(state: CrisisReadState): CrisisReadState['status'] {
     : state.status;
 }
 
-function observedTime(value: string) {
-  return `${value} · 服务端快照`;
+function observedTime(value: string, label: string) {
+  return `${value} · ${label}`;
 }
 
 export interface CrisisSummaryProps {
@@ -252,6 +265,7 @@ export function CrisisSummary({
 }
 
 export interface CrisisMapSlot {
+  readonly locale: PreviewLocale;
   readonly selectedLocationId: string | null;
   readonly selectedTaskId: string | null;
   readonly locations: readonly CrisisLocation[];
@@ -262,6 +276,7 @@ export interface CrisisActionPageProps {
   readonly state?: CrisisReadState;
   /** Display-only country context must not be interpreted as a server ID. */
   readonly countryLabel?: string;
+  readonly countryNumber?: string;
   readonly worldHref?: string;
   readonly countryHref?: string;
   readonly renderMap?: (slot: CrisisMapSlot) => ReactNode;
@@ -272,11 +287,34 @@ export interface CrisisActionPageProps {
 export function CrisisActionPage({
   state = UNBOUND_CRISIS_STATE,
   countryLabel,
+  countryNumber,
   worldHref = '/',
   countryHref,
   renderMap,
   onRefresh,
 }: CrisisActionPageProps) {
+  const [locale, setLocale] = useState<PreviewLocale>(() =>
+    typeof window === 'undefined' ? 'zh' : readPreviewLocale(),
+  );
+  useEffect(
+    () => subscribePreviewLocale(() => setLocale(readPreviewLocale())),
+    [],
+  );
+  useEffect(() => {
+    document.documentElement.lang = locale === 'zh' ? 'zh-CN' : 'en';
+    document.documentElement.dataset.language = locale;
+  }, [locale]);
+  const changeLocale = (next: PreviewLocale) => {
+    applyPreviewLocale(next);
+    setLocale(next);
+  };
+  const text = crisisPageMessages[locale];
+  const officeLabels =
+    locale === 'zh' ? crisisOfficeLabels : crisisEnglishOfficeLabels;
+  const taskStatusLabels =
+    locale === 'zh' ? crisisStatusLabels : crisisEnglishStatusLabels;
+  const feedbackLabels =
+    locale === 'zh' ? crisisFeedbackLabels : crisisEnglishFeedbackLabels;
   const view = crisisPresentation(state);
   const status = visibleStatus(state);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -297,7 +335,17 @@ export function CrisisActionPage({
   const tasks = (view?.tasks ?? []).filter(
     (item) => locationId === null || item.locationId === locationId,
   );
-  const window = crisisWindow(view?.clock ?? null);
+  const activityWindow = crisisWindow(view?.clock ?? null);
+  // Preserve the existing validated OPEN countdown and all server labels;
+  // locale selection never reads a device clock or changes a cutoff.
+  const remaining =
+    activityWindow.status === 'UNKNOWN'
+      ? text.noServerTime
+      : activityWindow.status === 'UPCOMING'
+        ? text.upcoming
+        : activityWindow.status === 'CLOSED'
+          ? text.ended
+          : activityWindow.remainingLabel;
   const contributions = crisisVerifiedContributions(view);
   const feedback = crisisSourcedFeedback(view);
   const selectLocation = (id: string) => {
@@ -314,51 +362,81 @@ export function CrisisActionPage({
     setDetailOpen(true);
   };
   return (
-    <main className="crisis-page" aria-label="战后重建危机行动">
-      <a
-        className="crisis-brand"
-        href={worldHref}
-        aria-label="EconMind 返回世界"
-      >
+    <main
+      className="crisis-page"
+      aria-label={text.page}
+      lang={locale === 'zh' ? 'zh-CN' : 'en'}
+      data-no-translate=""
+    >
+      <a className="crisis-brand" href={worldHref} aria-label={text.brand}>
         ECONMIND<span>WORLD</span>
       </a>
-      <nav className="crisis-context" aria-label="页面位置">
-        <a href={worldHref}>世界总览</a>
+      <nav className="crisis-context" aria-label={text.position}>
+        <a href={worldHref}>{text.overview}</a>
         <span>/</span>
         {countryHref ? (
           <a href={countryHref}>
-            {view?.countryLabel ?? countryLabel ?? '本国总览'}
+            {view?.countryLabel ??
+              countryLabel ??
+              (countryNumber ? `${text.country} ${countryNumber}` : text.home)}
           </a>
         ) : (
-          <span>{view?.countryLabel ?? countryLabel ?? '本国总览'}</span>
+          <span>
+            {view?.countryLabel ??
+              countryLabel ??
+              (countryNumber ? `${text.country} ${countryNumber}` : text.home)}
+          </span>
         )}
-        <span>/ 危机行动</span>
+        <span>/ {text.action}</span>
+        <span
+          className="crisis-language"
+          role="group"
+          aria-label={messages[locale].language}
+        >
+          <button
+            type="button"
+            lang="zh-CN"
+            aria-pressed={locale === 'zh'}
+            onClick={() => changeLocale('zh')}
+          >
+            中文
+          </button>
+          <button
+            type="button"
+            lang="en"
+            aria-pressed={locale === 'en'}
+            onClick={() => changeLocale('en')}
+          >
+            EN
+          </button>
+        </span>
       </nav>
-      <div className="crisis-clocks" aria-label="独立现实与世界时间">
+      <div className="crisis-clocks" aria-label={text.clocks}>
         <div>
-          <span>现实活动窗口 · 前14天（两周）</span>
-          <strong>{window.remainingLabel}</strong>
+          <span>{text.realWindow}</span>
+          <strong>{remaining}</strong>
           <small>
             {view?.clock
-              ? observedTime(view.clock.serverNow)
-              : '等待服务端现实窗口'}
+              ? observedTime(view.clock.serverNow, text.serverSnapshot)
+              : text.waitingWindow}
           </small>
         </div>
         <div>
-          <span>世界时间</span>
-          <strong>{view?.clock?.worldTimeLabel ?? '暂无服务端世界时间'}</strong>
+          <span>{text.worldTime}</span>
+          <strong>{view?.clock?.worldTimeLabel ?? text.noWorldTime}</strong>
           <small>
             {view?.clock
-              ? `${view.clock.worldRate}× · 服务端倍率`
-              : '目标 10× · 尚未绑定'}{' '}
-            · 与现实活动窗口独立
+              ? `${view.clock.worldRate}× · ${text.serverRate}`
+              : text.targetRate}{' '}
+            · {text.independentWindow}
           </small>
         </div>
       </div>
 
-      <div className="crisis-map" aria-label="危机行动地理地图">
+      <div className="crisis-map" aria-label={text.map}>
         {renderMap ? (
           renderMap({
+            locale,
             selectedLocationId: locationId,
             selectedTaskId: task?.taskId ?? null,
             locations: map.locations,
@@ -367,25 +445,25 @@ export function CrisisActionPage({
           })
         ) : (
           <div className="crisis-map-empty">
-            <span>连续国家地图</span>
-            <p>等待权威地理地图接入；尚无核验危机点位与供给路线。</p>
+            <span>{text.continuousMap}</span>
+            <p>{text.waitingMap}</p>
           </div>
         )}
       </div>
 
-      <section className="crisis-overview" aria-label="当前缺口">
-        <span className="crisis-eyebrow">战后重建 · 危机行动</span>
-        <h1>{view?.eventLabel ?? '从缺口到真实交付'}</h1>
+      <section className="crisis-overview" aria-label={text.gap}>
+        <span className="crisis-eyebrow">{text.eyebrow}</span>
+        <h1>{view?.eventLabel ?? text.title}</h1>
         <p className="crisis-read-status" role="status" aria-live="polite">
-          {stateLabels[status]}
+          {summaryMessages[locale].states[status]}
           {view
-            ? ` · ${status === 'ERROR' || status === 'STALE' ? '最近可靠快照 · ' : ''}更新 ${view.effectiveAt}`
-            : ' · 未知值不代表零'}
+            ? ` · ${status === 'ERROR' || status === 'STALE' ? `${text.reliable} · ` : ''}${text.updated} ${view.effectiveAt}`
+            : ` · ${text.unknownNotZero}`}
         </p>
-        <UnavailableReasons state={state} />
+        <UnavailableReasons state={state} locale={locale} />
         {(status === 'ERROR' || status === 'STALE') && onRefresh && (
           <button type="button" onClick={onRefresh}>
-            重新读取
+            {text.refresh}
           </button>
         )}
         {view && view.shortages.length ? (
@@ -397,46 +475,45 @@ export function CrisisActionPage({
                   <div>
                     <dt>
                       {shortage.basis === 'INVENTORY'
-                        ? '当前库存'
-                        : '累计核验交付'}
+                        ? text.inventory
+                        : text.delivery}
                     </dt>
                     <dd>
-                      {shortage.current ?? '暂无数据'} {shortage.unit}
+                      {shortage.current ?? text.noData} {shortage.unit}
                     </dd>
                   </div>
                   <div>
-                    <dt>目标</dt>
+                    <dt>{text.target}</dt>
                     <dd>
-                      {shortage.target ?? '暂无数据'} {shortage.unit}
+                      {shortage.target ?? text.noData} {shortage.unit}
                     </dd>
                   </div>
                   <div>
-                    <dt>实际缺口</dt>
+                    <dt>{text.shortfall}</dt>
                     <dd>
-                      {shortage.gap ?? '暂无数据'} {shortage.unit}
+                      {shortage.gap ?? text.noData} {shortage.unit}
                     </dd>
                   </div>
                 </dl>
                 <small>
-                  预估到货 {shortage.expectedArrival ?? '暂无数据'} ·
-                  不提前抵扣缺口
+                  {text.arrival} {shortage.expectedArrival ?? text.noData} ·{' '}
+                  {text.noAdvanceCredit}
                 </small>
                 <small>
-                  生效 {shortage.effectiveAt} · 来源 {shortage.sourceRef}
+                  {text.effective} {shortage.effectiveAt} · {text.source}{' '}
+                  {shortage.sourceRef}
                 </small>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="crisis-empty">
-            暂无权威缺口快照，等待库存或实际交付口径接入。
-          </p>
+          <p className="crisis-empty">{text.noSnapshot}</p>
         )}
       </section>
 
       <aside
         className={`crisis-panel${detailOpen ? ' is-open' : ''}`}
-        aria-label="任务与协作详情"
+        aria-label={text.collaboration}
       >
         <button
           className="crisis-drawer-toggle"
@@ -444,14 +521,14 @@ export function CrisisActionPage({
           aria-expanded={detailOpen}
           onClick={() => setDetailOpen(!detailOpen)}
         >
-          {detailOpen ? '收起任务面板' : '展开任务面板'}
+          {detailOpen ? text.collapse : text.expand}
         </button>
         <div className="crisis-panel__body">
-          <span className="crisis-eyebrow">本职行动与协作</span>
-          <h2>{view ? crisisOfficeLabels[view.officeId] : '职位尚未绑定'}</h2>
-          <p>六职位沿用既有授权；具体动作由服务端返回。</p>
-          <div className="crisis-offices" aria-label="六职位索引">
-            {Object.entries(crisisOfficeLabels).map(([office, label]) => (
+          <span className="crisis-eyebrow">{text.officeWork}</span>
+          <h2>{view ? officeLabels[view.officeId] : text.noOffice}</h2>
+          <p>{text.authorization}</p>
+          <div className="crisis-offices" aria-label={text.officeIndex}>
+            {Object.entries(officeLabels).map(([office, label]) => (
               <span
                 key={office}
                 aria-current={view?.officeId === office ? 'true' : undefined}
@@ -468,10 +545,10 @@ export function CrisisActionPage({
                 setSelectedTaskId(null);
               }}
             >
-              查看全部地点任务
+              {text.allLocations}
             </button>
           )}
-          <h3>任务列表</h3>
+          <h3>{text.tasks}</h3>
           {tasks.length ? (
             <ul className="crisis-tasks">
               {tasks.map((item) => (
@@ -482,67 +559,72 @@ export function CrisisActionPage({
                     onClick={() => selectTask(item.taskId)}
                   >
                     <span>{item.label}</span>
-                    <small>{crisisStatusLabels[item.status]}</small>
+                    <small>{taskStatusLabels[item.status]}</small>
                   </button>
                 </li>
               ))}
             </ul>
           ) : (
             <p className="crisis-empty">
-              {status === 'DENIED'
-                ? '当前身份没有授权任务。'
-                : '暂无授权任务；未生成示例任务或操作。'}
+              {status === 'DENIED' ? text.deniedTasks : text.emptyTasks}
             </p>
           )}
           {task ? (
-            <section className="crisis-task-detail" aria-label="选中任务详情">
+            <section
+              className="crisis-task-detail"
+              aria-label={text.selectedTask}
+            >
               <h3>{task.label}</h3>
               <span className="crisis-status">
-                {crisisStatusLabels[task.status]}
+                {taskStatusLabels[task.status]}
               </span>
               <dl>
                 <div>
-                  <dt>地点</dt>
+                  <dt>{text.location}</dt>
                   <dd>
                     {map.locations.find(
                       (item) => item.locationId === task.locationId,
-                    )?.label ?? '暂无核验地点'}
+                    )?.label ?? text.noLocation}
                   </dd>
                 </div>
                 <div>
-                  <dt>所需资源</dt>
-                  <dd>{task.resourcesLabel ?? '暂无数据'}</dd>
+                  <dt>{text.resources}</dt>
+                  <dd>{task.resourcesLabel ?? text.noData}</dd>
                 </div>
                 <div>
-                  <dt>负责人</dt>
-                  <dd>{task.ownerLabel ?? '待指定'}</dd>
+                  <dt>{text.owner}</dt>
+                  <dd>{task.ownerLabel ?? text.unassigned}</dd>
                 </div>
                 <div>
-                  <dt>协作办公室</dt>
+                  <dt>{text.offices}</dt>
                   <dd>
                     {task.requiredOffices
-                      .map((office) => crisisOfficeLabels[office])
-                      .join('、') || '待指定'}
+                      .map((office) => officeLabels[office])
+                      .join(text.separator) || text.unassigned}
                   </dd>
                 </div>
                 <div>
-                  <dt>下一步</dt>
-                  <dd>{task.nextStep ?? '待指定'}</dd>
+                  <dt>{text.next}</dt>
+                  <dd>{task.nextStep ?? text.unassigned}</dd>
                 </div>
                 <div>
-                  <dt>预计效果</dt>
-                  <dd>{task.expectedEffect ?? '暂无数据'} · 不计入实际交付</dd>
+                  <dt>{text.effect}</dt>
+                  <dd>
+                    {task.expectedEffect ?? text.noData} · {text.notDelivered}
+                  </dd>
                 </div>
                 <div>
-                  <dt>证据</dt>
-                  <dd>{task.evidenceRefs.join('、') || '暂无核验记录'}</dd>
+                  <dt>{text.evidence}</dt>
+                  <dd>
+                    {task.evidenceRefs.join(text.separator) || text.noVerified}
+                  </dd>
                 </div>
               </dl>
               <small>
-                来源 {task.sourceRef} · 版本 {task.version} · 生效{' '}
-                {task.effectiveAt}
+                {text.source} {task.sourceRef} · {text.version} {task.version} ·{' '}
+                {text.effective} {task.effectiveAt}
               </small>
-              <div className="crisis-actions" aria-label="服务端允许动作">
+              <div className="crisis-actions" aria-label={text.allowedActions}>
                 {task.allowedActions.length ? (
                   task.allowedActions.map((action) => (
                     <button type="button" disabled key={action.actionId}>
@@ -550,36 +632,34 @@ export function CrisisActionPage({
                     </button>
                   ))
                 ) : (
-                  <p>当前服务端未返回可用动作。</p>
+                  <p>{text.noActions}</p>
                 )}
               </div>
               <p className="crisis-empty">
-                {window.status === 'CLOSED'
-                  ? '现实活动窗口已关闭。'
+                {activityWindow.status === 'CLOSED'
+                  ? text.closed
                   : status !== 'CURRENT'
-                    ? '等待当前授权快照。'
-                    : '执行通道尚未绑定。'}{' '}
-                认领、批准和运输不代表完成；仅权威交付或投产可进入结算。
+                    ? text.waitingCurrent
+                    : text.noExecution}{' '}
+                {text.completion}
               </p>
             </section>
           ) : (
-            <p className="crisis-empty">
-              选择地点或任务查看负责人、协作与交付证据。
-            </p>
+            <p className="crisis-empty">{text.chooseTask}</p>
           )}
         </div>
       </aside>
 
-      <div className="crisis-legend" aria-label="地图图例">
-        <span>◇ 短缺</span>
-        <span>○ 供给</span>
-        <span>⇢ 运输</span>
-        <span>✓ 已交付</span>
-        <small>无权威点位或核验路线时不绘制。</small>
+      <div className="crisis-legend" aria-label={text.legend}>
+        <span>{text.shortageMark}</span>
+        <span>{text.supplyMark}</span>
+        <span>{text.transportMark}</span>
+        <span>{text.deliveredMark}</span>
+        <small>{text.noGeometry}</small>
       </div>
-      <section className="crisis-feedback" aria-label="贡献与反馈">
+      <section className="crisis-feedback" aria-label={text.feedback}>
         <div>
-          <h2>个人与团队贡献</h2>
+          <h2>{text.contributions}</h2>
           {contributions.length ? (
             <ul>
               {contributions.map((item) => (
@@ -588,13 +668,14 @@ export function CrisisActionPage({
                     {item.contributorLabel} · {item.resultLabel}
                   </button>
                   <small>
-                    已核验 {item.verifiedAt} · 证据 {item.evidenceRef}
+                    {text.verified} {item.verifiedAt} · {text.evidence}{' '}
+                    {item.evidenceRef}
                   </small>
                 </li>
               ))}
             </ul>
           ) : (
-            <p>暂无已核验交付或投产贡献。</p>
+            <p>{text.noContributions}</p>
           )}
         </div>
         {(
@@ -609,26 +690,26 @@ export function CrisisActionPage({
             <div key={group}>
               <h2>
                 {group === 'CITIZEN'
-                  ? '民众声音'
+                  ? text.citizen
                   : group === 'GOVERNMENT_SIMULATION'
-                    ? '他国回应 · 系统模拟'
-                    : '玩家外交'}
+                    ? text.government
+                    : text.diplomacy}
               </h2>
               {items.length ? (
                 <ul>
                   {items.map((item) => (
                     <li key={item.feedbackId}>
-                      <strong>{crisisFeedbackLabels[item.origin]}</strong>
+                      <strong>{feedbackLabels[item.origin]}</strong>
                       <p>{item.text}</p>
                       <small>
-                        {item.generatedAt} · 来源 {item.sourceRef}
+                        {item.generatedAt} · {text.source} {item.sourceRef}
                       </small>
                       {item.taskId && (
                         <button
                           type="button"
                           onClick={() => selectTask(item.taskId!)}
                         >
-                          查看相关任务
+                          {text.relatedTask}
                         </button>
                       )}
                       {!item.taskId && item.locationId && (
@@ -636,7 +717,7 @@ export function CrisisActionPage({
                           type="button"
                           onClick={() => selectLocation(item.locationId!)}
                         >
-                          定位相关地点
+                          {text.relatedLocation}
                         </button>
                       )}
                     </li>
@@ -645,8 +726,8 @@ export function CrisisActionPage({
               ) : (
                 <p>
                   {group === 'GOVERNMENT_SIMULATION'
-                    ? '暂无系统模拟回应。'
-                    : '暂无授权内容。'}
+                    ? text.noSimulation
+                    : text.noContent}
                 </p>
               )}
             </div>

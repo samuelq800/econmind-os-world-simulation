@@ -104,6 +104,19 @@
   gap: 8px;
   z-index: 2;
 }
+.crisis-language {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-basis: 100%;
+}
+.crisis-language button {
+  min-height: 44px;
+  padding: 4px 10px;
+}
+.crisis-language button[aria-pressed='true'] {
+  border-color: #d9c88c;
+}
 .crisis-clocks strong,
 .crisis-clocks span {
   display: block;
