@@ -2,11 +2,11 @@ import {
   BUDGET_INERT_FLAGS,
   checkBudgetAppropriationHistory,
   planBudgetAppropriation,
+  canonicalSerialize,
   type BudgetEvidenceClass,
   type BudgetInertResult,
   type BudgetRecordKind,
-} from '../../../../packages/core/src/commands/finance-budget-appropriation.js';
-import { canonicalSerialize } from '../../../../packages/core/src/serialization/canonical.js';
+} from '@econmind/core';
 
 /** Isolated carrier: no IO, source issuer, loader, runtime or production brand. */
 export type BudgetCarrierResult = typeof BUDGET_INERT_FLAGS &
