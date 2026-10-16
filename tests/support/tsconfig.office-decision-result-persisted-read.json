@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.test-only-persisted-read-context.json",
+  "compilerOptions": {
+    "types": ["node", "emscripten", "vite/client"],
+    "typeRoots": ["../../node_modules/@types", "../../node_modules"],
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "skipLibCheck": false,
+    "noEmit": true
+  },
+  "files": [
+    "../world-core/office-decision-result-projector.test.ts",
+    "../world-web/office-command-schema.test.ts",
+    "../world-web/office-decision-result-consumer.test.ts",
+    "../world-web/office-projection-closed-drawer.test.ts",
+    "../world-core/office-decision-result-persisted-read-context.test.ts",
+    "../integration/v10-1-country-office-read-flow.test.ts",
+    "../world-core/test-only-persisted-read-context.test.ts"
+  ]
+}

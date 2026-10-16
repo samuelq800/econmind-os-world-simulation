@@ -42,11 +42,7 @@ import {
 } from '../../apps/world-worker/src/projections/office-decision-result-projector.js';
 import { AuthoritativeActivityReadProjectionPublisher } from '../../apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.js';
 import type { EconomicReadVisibilitySnapshot } from '../../apps/world-worker/src/projections/economic-read-visibility-source.js';
-import {
-  createWorldReadRequest,
-  parseSupabaseAuthSubject,
-  readEntitledWorldProjection,
-} from '../../apps/world-api/src/index.js';
+import { parseSupabaseAuthSubject } from '../../apps/world-api/src/index.js';
 import type { ParameterizedPgReadRequest } from '../../apps/world-api/src/integration/postgres-read-adapter.js';
 import type {
   SqlDatabase,
@@ -56,6 +52,7 @@ import type {
 import { createProductionReadClient } from '../../apps/world-web/src/production-read/client.js';
 import type { OfficeRole } from '../../apps/world-web/src/office-projection/model.js';
 import { officeProjectionFixture } from '../world-web/office-projection-fixture.js';
+import { readPersistedDecisionTestRow } from './office-decision-result-persisted-read-fixture.js';
 const WORLD = 'WORLD_TEST_ONLY_DECISION_RESULTS',
   COUNTRY = 'COUNTRY_01',
   AT = '2026-10-08T00:00:00.000Z';
@@ -678,7 +675,8 @@ class HeldDatabase implements SqlDatabase {
 
 /** Canonical helpers/held SQL copied mechanically from E's reviewed
  * office-decision-result-projector.test.ts at 5e8a405 (b64a140 integration).
- * No economic fixtures are installed into any page or real database. */
+ * Business writer remains held SQL, not a PostgreSQL settlement witness. Its
+ * row is read through owned real TEST_ONLY SQL context, never formal admission. */
 export async function publishedDecisionFixture(
   role: OfficeRole,
   classification: 'COUNTRY' | 'OFFICE_PRIVATE' = 'OFFICE_PRIVATE',
@@ -718,20 +716,11 @@ export async function publishedDecisionFixture(
     )
       throw Error('Actual TEST_ONLY strict reader subject/scope query changed');
   };
-  const dto = await readEntitledWorldProjection({
-    executor: {
-      query: async (request) => {
-        assertQuery(request);
-        return { rows: db.active ? [structuredClone(stored)] : [] };
-      },
-    },
-    authSubject: subject,
-    request: createWorldReadRequest({
-      requestId: '11111111-1111-4111-8111-111111111112',
-      worldId: WORLD,
-      classification,
-      scopeKey: String(stored.scope_key),
-    }),
+  const dto = await readPersistedDecisionTestRow({
+    row: stored,
+    office: role.toUpperCase(),
+    active: db.active,
+    inspectRequest: assertQuery,
   });
   if (!dto) throw Error('Actual strict reader returned no TEST_ONLY DTO');
   const base = officeProjectionFixture(role);
@@ -815,29 +804,15 @@ export async function publishedDecisionFixture(
         worldVersion: result.sourceHead.worldVersion,
         eventSequence: result.sourceHead.eventSequence,
       });
-      const checked = await readEntitledWorldProjection({
-        executor: {
-          query: async (request) => {
-            assertQuery(request);
-            return {
-              rows: [
-                {
-                  ...stored,
-                  payload,
-                  world_version: wire.watermark.worldVersion,
-                  event_sequence: wire.watermark.eventSequence,
-                },
-              ],
-            };
-          },
+      const checked = await readPersistedDecisionTestRow({
+        row: {
+          ...stored,
+          payload,
+          world_version: wire.watermark.worldVersion,
+          event_sequence: wire.watermark.eventSequence,
         },
-        authSubject: subject,
-        request: createWorldReadRequest({
-          requestId: '11111111-1111-4111-8111-111111111112',
-          worldId: WORLD,
-          classification,
-          scopeKey: String(stored.scope_key),
-        }),
+        office: role.toUpperCase(),
+        inspectRequest: assertQuery,
       });
       if (!checked) throw Error('Strict domain DTO unavailable');
       return checked;

@@ -41,12 +41,10 @@ import {
 import { AuthoritativeActivityReadProjectionPublisher } from '../../apps/world-worker/src/projections/authoritative-activity-read-projection-publisher.js';
 import type { EconomicReadVisibilitySnapshot } from '../../apps/world-worker/src/projections/economic-read-visibility-source.js';
 import {
-  createWorldReadRequest,
   parseSupabaseAuthSubject,
   parseWorldProjectionDto,
-  readEntitledWorldProjection,
 } from '../../apps/world-api/src/index.js';
-import type { ParameterizedPgReadExecutor } from '../../apps/world-api/src/integration/postgres-read-adapter.js';
+import { readPersistedDecisionTestRow } from '../support/office-decision-result-persisted-read-fixture.js';
 import type {
   SqlDatabase,
   SqlExecutor,
@@ -1009,10 +1007,13 @@ describe('SHARED-4 existing sole replace writer integration (SQL double, not Pos
       row: Record<string, unknown>,
     ) => void,
   ) {
-    const copy = structuredClone(row);
-    edit?.(copy.payload as Record<string, unknown>, copy);
-    const executor: ParameterizedPgReadExecutor = {
-      query: async (request) => {
+    return readPersistedDecisionTestRow({
+      row,
+      office:
+        (row.payload as Record<string, unknown>).officeId ?? db.scopedOffice,
+      active: db.active,
+      ...(edit ? { edit } : {}),
+      inspectRequest(request) {
         expect(request.values.slice(0, 4)).toEqual([
           subject,
           WORLD,
@@ -1022,18 +1023,7 @@ describe('SHARED-4 existing sole replace writer integration (SQL double, not Pos
         expect(request.verifiedAuthSubject).toBe(subject);
         expect(request.text).toMatch(/entitlement.active/u);
         expect(request.text).toMatch(/entitlement.revoked_at is null/u);
-        return { rows: db.active ? [copy] : [] };
       },
-    };
-    return readEntitledWorldProjection({
-      executor,
-      authSubject: subject,
-      request: createWorldReadRequest({
-        requestId: '11111111-1111-4111-8111-111111111112',
-        worldId: WORLD,
-        classification: row.classification as 'COUNTRY' | 'OFFICE_PRIVATE',
-        scopeKey: String(row.scope_key),
-      }),
     });
   }
   it('delivers actual publisher country/private rows through strict reader and DTO; legacy bodies remain compatible', async () => {

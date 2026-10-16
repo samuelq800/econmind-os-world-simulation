@@ -22,6 +22,7 @@ import {
   teamId,
   worldId,
   type AuthorizationResolver,
+  type OfficeCapability,
 } from '@econmind/core';
 import {
   WORLD_V2_ENTITLED_PROJECTION_QUERY,
@@ -48,6 +49,58 @@ const OFFICE = officeId('TRADE');
 const TEAM = teamId('TEAM_SELLER');
 const REVISION = 'AUTH_SELLER_1';
 const AT = '2026-09-14T00:00:00.000Z';
+const decisionCapabilities = Object.freeze({
+  CAPTAIN: 'CAPTAIN_STRATEGY',
+  CENTRAL_BANK: 'CENTRAL_BANK_MONETARY_POLICY',
+  FINANCE: 'FINANCE_TREASURY',
+  INDUSTRY: 'INDUSTRY_PRODUCTION',
+  SOCIAL: 'SOCIAL_LABOUR',
+  TRADE: 'TRADE_POLICY',
+} as const);
+export type TestOnlyDecisionOffice = keyof typeof decisionCapabilities;
+export function isTestOnlyDecisionOffice(
+  value: unknown,
+): value is TestOnlyDecisionOffice {
+  return (
+    typeof value === 'string' && Object.hasOwn(decisionCapabilities, value)
+  );
+}
+interface ProtocolProfile {
+  world: ReturnType<typeof worldId>;
+  subject: ReturnType<typeof authSubject>;
+  country: ReturnType<typeof countryId>;
+  office: ReturnType<typeof officeId>;
+  team: ReturnType<typeof teamId>;
+  revision: string;
+  at: string;
+  capability: OfficeCapability;
+  decision: boolean;
+}
+function profileFor(office?: TestOnlyDecisionOffice): ProtocolProfile {
+  if (office === undefined)
+    return {
+      world: WORLD,
+      subject: SUBJECT,
+      country: COUNTRY,
+      office: OFFICE,
+      team: TEAM,
+      revision: REVISION,
+      at: AT,
+      capability: 'TRADE_POLICY',
+      decision: false,
+    };
+  return {
+    world: worldId('WORLD_TEST_ONLY_DECISION_RESULTS'),
+    subject: authSubject('11111111-1111-4111-8111-111111111111'),
+    country: countryId('COUNTRY_01'),
+    office: officeId(office),
+    team: teamId('TEAM_TEST_ONLY_DECISION_RESULTS'),
+    revision: 'AUTH_DECISION_CONTEXT_1',
+    at: '2026-10-08T00:00:00.000Z',
+    capability: decisionCapabilities[office],
+    decision: true,
+  };
+}
 const PUBLISHER = 'test_only_protocol_authz_publisher';
 const READER = 'test_only_protocol_reader';
 const sha = (text: string) => createHash('sha256').update(text).digest('hex');
@@ -104,13 +157,20 @@ function cancelled(signal?: AbortSignal): void {
       false,
     );
 }
-function opening() {
+function opening(profile: ProtocolProfile) {
+  const { world: WORLD, country: COUNTRY, office: OFFICE } = profile;
   const source = createOpeningSource(
     {
       schemaVersion: 'opening-source-v1',
-      sourceId: openingSourceId('SOURCE_V10_PROTOCOL_CONTEXT'),
+      sourceId: openingSourceId(
+        profile.decision
+          ? 'SOURCE_DECISION_PROTOCOL_CONTEXT'
+          : 'SOURCE_V10_PROTOCOL_CONTEXT',
+      ),
       sourceKind: 'TEST_FIXTURE',
-      locator: 'fixture://TEST_ONLY/v10-1-country-office-read-flow',
+      locator: profile.decision
+        ? 'fixture://TEST_ONLY/office-decision-result-read-context'
+        : 'fixture://TEST_ONLY/v10-1-country-office-read-flow',
       sourceVersion: 'test-protocol-context-v1',
       payload: {
         schemaVersion: 'test-protocol-source-v1',
@@ -118,7 +178,9 @@ function opening() {
         worldId: WORLD,
         countryId: COUNTRY,
         officeId: OFFICE,
-        purpose: 'COUNTRY_OFFICE_READ_PROTOCOL',
+        purpose: profile.decision
+          ? 'OFFICE_DECISION_READ_PROTOCOL'
+          : 'COUNTRY_OFFICE_READ_PROTOCOL',
       },
     },
     sha,
@@ -126,7 +188,11 @@ function opening() {
   const seed = createOpeningSeed(
     {
       schemaVersion: 'opening-seed-v1',
-      seedId: openingSeedId('SEED_V10_PROTOCOL_CONTEXT'),
+      seedId: openingSeedId(
+        profile.decision
+          ? 'SEED_DECISION_PROTOCOL_CONTEXT'
+          : 'SEED_V10_PROTOCOL_CONTEXT',
+      ),
       worldId: WORLD,
       openingWorldVersion: '0',
       replayBinding: CURRENT_REPLAY_BINDING,
@@ -255,7 +321,13 @@ create policy test_protocol_context_current_subject on test_protocol.persisted_r
  on s.world_id=a.world_id and s.auth_subject=a.auth_subject and s.country_id=a.country_id
  and s.office_id=a.office_id and s.team_id=a.team_id and s.authorization_revision=a.authorization_version
  where a.world_id=persisted_read_context.world_id and a.auth_subject::text=current_setting('request.jwt.claim.sub',true)
- and a.capability='TRADE_POLICY' and a.active)
+ and a.capability=case a.office_id
+   when 'CAPTAIN' then 'CAPTAIN_STRATEGY'
+   when 'CENTRAL_BANK' then 'CENTRAL_BANK_MONETARY_POLICY'
+   when 'FINANCE' then 'FINANCE_TREASURY'
+   when 'INDUSTRY' then 'INDUSTRY_PRODUCTION'
+   when 'SOCIAL' then 'SOCIAL_LABOUR'
+   when 'TRADE' then 'TRADE_POLICY' end and a.active)
 );`;
 
 function membershipRows(
@@ -280,7 +352,10 @@ function membershipRows(
 }
 
 export async function createTestOnlyPersistedReadContextFixture(
-  options: Readonly<{ faultPoint?: FaultPoint }> = {},
+  options: Readonly<{
+    faultPoint?: FaultPoint;
+    decisionOffice?: TestOnlyDecisionOffice;
+  }> = {},
 ): Promise<Readonly<TestOnlyPersistedReadContextFixture>> {
   const allowedFaults: readonly string[] = [
     'AFTER_CONTEXT_INSERT_BEFORE_COMMIT',
@@ -288,15 +363,34 @@ export async function createTestOnlyPersistedReadContextFixture(
     'READ_AFTER_FACTS_BEFORE_RETURN',
   ];
   if (
-    Object.keys(options).some((k) => k !== 'faultPoint') ||
+    Object.keys(options).some(
+      (k) => k !== 'faultPoint' && k !== 'decisionOffice',
+    ) ||
+    (options.decisionOffice !== undefined &&
+      !isTestOnlyDecisionOffice(options.decisionOffice)) ||
     (options.faultPoint !== undefined &&
       !allowedFaults.includes(options.faultPoint))
   )
     throw new Error('TEST_PROTOCOL_FACTORY_EXTERNAL_INPUT_DENIED');
+  const profile = profileFor(options.decisionOffice);
+  const {
+    world: WORLD,
+    subject: SUBJECT,
+    country: COUNTRY,
+    office: OFFICE,
+    team: TEAM,
+    revision: REVISION,
+    at: AT,
+    capability: CAPABILITY,
+  } = profile;
   const owned = createPGliteV09AtomicTestDatabase();
   lifecycle.created++;
   lifecycle.open++;
   lifecycle.peakOpen = Math.max(lifecycle.peakOpen, lifecycle.open);
+  console.info(
+    'TEST_PROTOCOL_INSTANCE_CREATED',
+    JSON.stringify(protocolFixtureLifecycle()),
+  );
   let tail: Promise<void> = Promise.resolve();
   let state: 'OPEN' | 'CLOSING' | 'POISONED' | 'CLOSED' = 'OPEN';
   let closing: Promise<void> | undefined;
@@ -356,7 +450,7 @@ export async function createTestOnlyPersistedReadContextFixture(
   });
   let fresh: ReturnType<typeof opening>;
   try {
-    fresh = opening();
+    fresh = opening(profile);
   } catch (error) {
     await close();
     throw error;
@@ -581,11 +675,11 @@ export async function createTestOnlyPersistedReadContextFixture(
                and e.authorization_version=a.authorization_version and e.active and e.revoked_at is null
              join world_v2.read_projection p on p.world_id=e.world_id and p.classification=e.classification and p.scope_key=e.scope_key
              join world_v2.world_head h on h.world_id=a.world_id
-             where a.world_id=$2 and a.auth_subject=$1::uuid and a.active and a.capability='TRADE_POLICY'
+             where a.world_id=$2 and a.auth_subject=$1::uuid and a.active and a.capability=$5
              and e.classification=$3 and e.scope_key=$4
              and ((e.classification='COUNTRY' and e.scope_key=a.country_id) or
               (e.classification='OFFICE_PRIVATE' and e.scope_key=('OFFICE_'||upper(encode(convert_to(a.country_id,'UTF8'),'hex'))||'_'||upper(encode(convert_to(a.office_id,'UTF8'),'hex')))))`,
-            request.values.slice(0, 4),
+            [...request.values.slice(0, 4), CAPABILITY],
           );
           cancelled(request.signal);
           if (facts.rows.length === 0) return { rows: [] };
@@ -681,8 +775,8 @@ export async function createTestOnlyPersistedReadContextFixture(
     await database.query(
       `insert into world_v2.current_commit_authorization
       (world_id,auth_subject,country_id,office_id,capability,team_id,authorization_version,active,refreshed_at_real)
-      values($1,$2::uuid,$3,$4,'TRADE_POLICY',$5,$6,true,$7)`,
-      [WORLD, SUBJECT, COUNTRY, OFFICE, TEAM, REVISION, AT],
+      values($1,$2::uuid,$3,$4,$5,$6,$7,true,$8)`,
+      [WORLD, SUBJECT, COUNTRY, OFFICE, CAPABILITY, TEAM, REVISION, AT],
     );
     const resolver: AuthorizationResolver = {
       async resolveCurrentIdentity(principal) {
@@ -691,9 +785,7 @@ export async function createTestOnlyPersistedReadContextFixture(
           principal.authSubject,
           WORLD,
         );
-        const canonical = found.rows.find(
-          (r) => r.capability === 'TRADE_POLICY',
-        );
+        const canonical = found.rows.find((r) => r.capability === CAPABILITY);
         return canonical ? authSubject(canonical.auth_subject) : null;
       },
       async resolveCurrentMembership(principal, world) {
@@ -702,7 +794,7 @@ export async function createTestOnlyPersistedReadContextFixture(
           principal.authSubject,
           world,
         );
-        const c = found.rows.find((r) => r.capability === 'TRADE_POLICY');
+        const c = found.rows.find((r) => r.capability === CAPABILITY);
         if (
           !c ||
           found.rows.some(
@@ -758,7 +850,7 @@ export async function createTestOnlyPersistedReadContextFixture(
       worldId: WORLD,
       requestedCountryId: COUNTRY,
       requestedOfficeId: OFFICE,
-      capability: 'TRADE_POLICY',
+      capability: CAPABILITY,
     });
     await seats.bindCurrentSeat({ authorization });
     return Object.freeze({ database, executor, publishContext, close });
