@@ -5,6 +5,14 @@ export * from './authorization/identity.js';
 export * from './authorization/offices.js';
 export * from './authorization/projections.js';
 export * from './commands/command.js';
+export {
+  BUDGET_INERT_FLAGS,
+  checkBudgetAppropriationHistory,
+  planBudgetAppropriation,
+  type BudgetEvidenceClass,
+  type BudgetInertResult,
+  type BudgetRecordKind,
+} from './commands/finance-budget-appropriation.js';
 export * from './commands/captain-political-capital-allocation.js';
 export * from './commands/receipt.js';
 export * from './commands/authenticated-financial-intake-contract.js';
