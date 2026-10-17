@@ -102,3 +102,11 @@ export {
 } from './authorization/economic-read-visibility-contract.js';
 export * from './commands/authenticated-current-seat-contract.js';
 export * from './commands/authenticated-command-recovery-contract.js';
+// Inert RF-D01 helpers only: not registered Command/Event/permission families.
+export {
+  validateFinanceBudgetReserveContract,
+  evaluateFinanceBudgetReserve,
+  type FinanceBudgetReserveInput,
+  type FinanceBudgetReserveResult,
+  type ReserveLineBalances,
+} from './commands/finance-budget-reserve.js';
