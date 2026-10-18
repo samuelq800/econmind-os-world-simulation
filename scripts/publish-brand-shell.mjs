@@ -15,9 +15,13 @@ export const brandRecordSha256 =
 export const countryRecordSha256 =
   '356cf7aabd1e5cd47bfbc60b6b0457c4edbda1c03e0b2f18807841b35b2c0855';
 const deltaRecordPath =
+  'docs/reports/G_SCENE_LAKE_REPAIR_20261018/BRAND_SOURCE_DELTA_V2.json';
+const previousDeltaRecordPath =
   'docs/reports/G_SCENE_LAKE_REPAIR_20261018/BRAND_SOURCE_DELTA.json';
-export const brandSourceDeltaSha256 =
+const previousDeltaRecordSha256 =
   '2b381e93354c1e50b6d7f8e5f97eb05401e02c9660bd73ddab5ef6c6f523ab89';
+export const brandSourceDeltaSha256 =
+  '047159060f16d5a9918925c8eedbbb9f28f99fe9824fbda654ee79b24af41ef1';
 const sourceDeltaProofs = new WeakMap();
 export const sha256 = (bytes) =>
   createHash('sha256').update(bytes).digest('hex');
@@ -40,7 +44,7 @@ export function verifyBrandRecord(bytes) {
   return JSON.parse(bytes.toString('utf8'));
 }
 
-// A separate fixed record preserves the old records and binds only four reviewed
+// A separate fixed record preserves the old records and binds five fixed
 // source postimages. It grants no changes to selected HTML, archives or map data.
 export function verifyBrandSourceDelta(bytes) {
   if (sha256(bytes) !== brandSourceDeltaSha256)
@@ -51,11 +55,13 @@ export function verifyBrandSourceDelta(bytes) {
     [recordPath, 'apps/world-web/src/world-preview/PublicWorldMap.tsx'],
     [recordPath, 'apps/world-web/src/world-preview/PublicWorldPreview.tsx'],
     [countryRecordPath, 'apps/world-web/src/map-explorer/WorldExplorer.tsx'],
+    [recordPath, 'apps/world-web/src/world-preview/public-world-preview.css'],
   ];
   if (
     delta.schemaVersion !== 'BRAND_REVIEWED_SOURCE_DELTA_V1' ||
     delta.historicalRecordPins[recordPath] !== brandRecordSha256 ||
     delta.historicalRecordPins[countryRecordPath] !== countryRecordSha256 ||
+    delta.previousDeltaRecordSha256 !== previousDeltaRecordSha256 ||
     JSON.stringify(delta.rows.map((r) => [r.sourceRecord, r.path])) !==
       JSON.stringify(expected)
   )
@@ -114,6 +120,11 @@ export async function publishBrandShell(root = repositoryRoot) {
   if (sha256(countryBytes) !== countryRecordSha256)
     throw new Error('COUNTRY_CONTEXT_RECORD_HASH_MISMATCH');
   const countryRecord = JSON.parse(countryBytes.toString('utf8'));
+  if (
+    sha256(await readFile(path.join(root, previousDeltaRecordPath))) !==
+    previousDeltaRecordSha256
+  )
+    throw new Error('BRAND_PREVIOUS_SOURCE_DELTA_HASH_MISMATCH');
   const deltaProof = verifyBrandSourceDelta(
     await readFile(path.join(root, deltaRecordPath)),
   );
@@ -150,6 +161,7 @@ export async function publishBrandShell(root = repositoryRoot) {
     sourceRecordSha256: brandRecordSha256,
     countryContextRecordSha256: countryRecordSha256,
     sourceDeltaRecordSha256: brandSourceDeltaSha256,
+    previousSourceDeltaRecordSha256: previousDeltaRecordSha256,
     sourceCommit: record.sourceCommit,
     worldBaseCommit: record.worldBaseCommit,
     phase: 'before existing official-source-read configuration',

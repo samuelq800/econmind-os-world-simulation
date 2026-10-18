@@ -22,6 +22,8 @@ const record = verifyBrandRecord(recordBytes);
 const countryRecordPath = 'docs/reports/country-context-20261010/SOURCE.json';
 const countryRecord = JSON.parse(await readFile(countryRecordPath, 'utf8'));
 const deltaRecordPath =
+  'docs/reports/G_SCENE_LAKE_REPAIR_20261018/BRAND_SOURCE_DELTA_V2.json';
+const previousDeltaRecordPath =
   'docs/reports/G_SCENE_LAKE_REPAIR_20261018/BRAND_SOURCE_DELTA.json';
 const deltaBytes = await readFile(deltaRecordPath);
 const owned: string[] = [];
@@ -41,6 +43,7 @@ async function fixture() {
   await copy(recordPath);
   await copy(countryRecordPath);
   await copy(deltaRecordPath);
+  await copy(previousDeltaRecordPath);
   for (const file of [
     ...countryRecord.immutableInputs,
     ...countryRecord.adaptedSources,
@@ -65,7 +68,10 @@ describe('pinned public brand shell derivation', () => {
   it('binds only exact fixed source postimages and retains the pinned historical records', async () => {
     const proof = verifyBrandSourceDelta(deltaBytes);
     const delta = JSON.parse(deltaBytes.toString('utf8'));
-    expect(delta.rows).toHaveLength(4);
+    expect(delta.rows).toHaveLength(5);
+    expect(sha256(await readFile(previousDeltaRecordPath))).toBe(
+      delta.previousDeltaRecordSha256,
+    );
     expect(sha256(recordBytes)).toBe(brandRecordSha256);
     expect(sha256(await readFile(countryRecordPath))).toBe(countryRecordSha256);
     const unchanged = record.adaptedSources.find(
@@ -182,6 +188,7 @@ describe('pinned public brand shell derivation', () => {
     'map-source',
     'map-record',
     'delta-record',
+    'previous-delta-record',
   ] as const)(
     'fails before writing either page when the %s input differs',
     async (kind) => {
@@ -201,7 +208,9 @@ describe('pinned public brand shell derivation', () => {
               ? countryRecordPath
               : kind === 'delta-record'
                 ? deltaRecordPath
-                : `apps/world-web/dist/${record.immutablePageInputs[1].path}`;
+                : kind === 'previous-delta-record'
+                  ? previousDeltaRecordPath
+                  : `apps/world-web/dist/${record.immutablePageInputs[1].path}`;
       await writeFile(path.join(root, changed), 'changed');
       await expect(publishBrandShell(root)).rejects.toThrow(
         kind === 'asset'
@@ -212,7 +221,9 @@ describe('pinned public brand shell derivation', () => {
               ? 'COUNTRY_CONTEXT_RECORD_HASH_MISMATCH'
               : kind === 'delta-record'
                 ? 'BRAND_SOURCE_DELTA_RECORD_HASH_MISMATCH'
-                : 'BRAND_BUILD_INPUT_NOT_SOURCE',
+                : kind === 'previous-delta-record'
+                  ? 'BRAND_PREVIOUS_SOURCE_DELTA_HASH_MISMATCH'
+                  : 'BRAND_BUILD_INPUT_NOT_SOURCE',
       );
       expect(await readFile(first)).toEqual(before);
     },
