@@ -1,4 +1,5 @@
 import type { Pool } from 'pg';
+import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
 import {
   DomainError,
   DOMAIN_ERROR_CODES,
@@ -161,6 +162,10 @@ export async function preflightManualOfficeIntakeRuntime(
   command: CanonicalCommand,
   observedAtReal: string,
 ): Promise<boolean> {
+  // A parser-positive intent is not a budget runtime/source. This early veto
+  // also prevents unrelated readers/candidate factories from being consulted.
+  if (command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND)
+    return false;
   // 3A installs no formal source constructor and cannot pass this branch.
   if (isProductionManualIntakeRuntime(runtime)) return false;
   const localRuntime = runtime as ManualOfficeIntakeRuntime;
