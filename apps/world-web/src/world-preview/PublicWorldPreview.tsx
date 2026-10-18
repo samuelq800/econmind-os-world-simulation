@@ -26,6 +26,7 @@ import {
 } from './locale.js';
 import sources from './source-catalog.json';
 import './public-world-preview.css';
+import { CountryOpeningFactsLoader } from '../map-explorer/CountryOpeningFacts.js';
 
 type Overlay = 'layers' | 'sources' | 'legend' | null;
 const initialSelection = () => {
@@ -596,26 +597,38 @@ export function PublicWorldPreview() {
               <small>{selected.number}</small>
               {selected.name}
             </h2>
-            <dl>
-              <dt>{text.number}</dt>
-              <dd>{selected.number}</dd>
-              <dt>{text.name}</dt>
-              <dd>{selected.name}</dd>
-              <dt>{text.group}</dt>
-              <dd>{text[selected.group]}</dd>
-              <dt>{text.coordinate}</dt>
-              <dd>
-                {selected.label.join(', ')} {text.sourcePixels}
-              </dd>
-              <dt>{text.outlinePixels}</dt>
-              <dd>
-                {selected.landPixels.toLocaleString(
-                  locale === 'zh' ? 'zh-CN' : 'en-US',
-                )}
-              </dd>
-            </dl>
-            <p>{text.countryNote}</p>
-            <p>{text.geographicNote}</p>
+            <CountryOpeningFactsLoader
+              reference={selected.number}
+              locale={locale}
+              onLocaleChange={setLocale}
+            />
+            <details className="opening-geography">
+              <summary>
+                {locale === 'en'
+                  ? 'Map & geographic records'
+                  : '地图与地理记录'}
+              </summary>
+              <dl>
+                <dt>{text.number}</dt>
+                <dd>{selected.number}</dd>
+                <dt>{text.name}</dt>
+                <dd>{selected.name}</dd>
+                <dt>{text.group}</dt>
+                <dd>{text[selected.group]}</dd>
+                <dt>{text.coordinate}</dt>
+                <dd>
+                  {selected.label.join(', ')} {text.sourcePixels}
+                </dd>
+                <dt>{text.outlinePixels}</dt>
+                <dd>
+                  {selected.landPixels.toLocaleString(
+                    locale === 'zh' ? 'zh-CN' : 'en-US',
+                  )}
+                </dd>
+              </dl>
+              <p>{text.countryNote}</p>
+              <p>{text.geographicNote}</p>
+            </details>
             <button
               className="preview-action"
               onClick={() => openOverlay('sources')}
