@@ -1,7 +1,6 @@
 import { createHash, webcrypto } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { createElement } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { createRequire } from 'node:module';
 import { describe, expect, it, vi } from 'vitest';
 import {
   CountryOpeningFacts,
@@ -21,6 +20,16 @@ import {
   type OfficialExplorerCountryLoadState,
 } from '../../apps/world-web/src/official-data/official-explorer-country.js';
 import { OFFICIAL_EXPLORER_COUNTRY_FILES } from '../../apps/world-web/src/official-data/official-explorer-country-manifest.js';
+
+// Resolve SSR helpers from the package that owns React. A frozen pnpm checkout
+// does not expose world-web's dependencies to tests at the repository root.
+const requireWorldWeb = createRequire(
+  new URL('../../apps/world-web/package.json', import.meta.url),
+);
+const { createElement } = requireWorldWeb('react') as typeof import('react');
+const { renderToStaticMarkup } = requireWorldWeb(
+  'react-dom/server',
+) as typeof import('react-dom/server');
 
 const dataRoot = new URL(
   '../../apps/world-web/public/season1-immersive/countries/data/',
