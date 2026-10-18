@@ -5,6 +5,21 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
+## Owner-authorized resumption (2026-10-18)
+
+负责人已直接恢复原 2544 缺口按既定 17 批的离线工具与权限工程；真实用户名单绑定
+单列待定，不虚构任命、权限或实际来源。下方 2026-10-17 的停止快照保留为历史，
+不再表示本轮所有工程必须停工；其旧检查、失败和证据边界不追溯改写。
+
+UI 公开预览的审查、合并与静态发布，数据/金融来源采用，以及运行准入分别验收。
+本说明不宣称 PR159 已发布，也不把 UI、fixture、工具或绿 CI 当作真实数据完成。
+来源尚缺时继续 `BLOCKED` / `null`，原字段不因离线工具通过而关闭。
+C300 后继候选的两项问题修复另行处理，未纳入本批已审工具集成。
+
+本轮不执行生产 seed、SQL 或 grants，不启动正式 World / Clock，不提升正式 gate。
+最终运行门槛仍只以 `status/progress.json` 及对应固定证据为准；后续集成与发布须
+分别核实实际候选、适用检查和授权，不能继承旧快照的通过结论。
+
 ## Current delivery and stop checkpoint (2026-10-17)
 
 当前已核实的功能主线是 PR156 合并提交
