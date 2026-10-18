@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "../..",
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "skipLibCheck": false
+  },
+  "include": [
+    "../../apps/world-worker/src/preparation/claim-scenario-source-*.ts",
+    "claim-scenario-source-fixture.ts",
+    "../world-core/claim-scenario-source.test.ts"
+  ]
+}
