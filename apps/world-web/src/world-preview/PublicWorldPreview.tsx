@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   PublicWorldMap,
   publicCountryScene,
-  publicSceneLabels,
+  publicSceneLabelsFor,
   type PublicPresentation,
   type MapMetrics,
   type PreviewMapApi,
@@ -52,7 +52,6 @@ export function PublicWorldPreview() {
   const [group, setGroup] = useState('all');
   const [selectedId, setSelectedId] = useState(initialSelection);
   const [presentation, setPresentation] = useState(initialPresentation);
-  const sceneText = publicSceneLabels[locale];
   const [layers, setLayers] = useState<PreviewLayers>(() => ({
     ...initialLayers,
   }));
@@ -72,6 +71,7 @@ export function PublicWorldPreview() {
   const recordMetrics = useCallback((next: MapMetrics) => setMetrics(next), []);
   const selected = countries.find((country) => country.id === selectedId);
   const selectedScene = publicCountryScene(selected);
+  const sceneText = publicSceneLabelsFor(locale, !!selectedScene?.correction);
   const matches = filterCountries(query, group);
   const allowed = new Set(matches.map((country) => country.id));
 
@@ -351,7 +351,11 @@ export function PublicWorldPreview() {
                 [countries.length, text.countryCount],
                 [publicGroups.length, text.groupCount],
                 [publicResources.length, text.resourceCount],
-                [sources.length + (selectedScene ? 2 : 0), text.sourceCount],
+                [
+                  sources.length +
+                    (selectedScene?.correction ? 3 : selectedScene ? 2 : 0),
+                  text.sourceCount,
+                ],
               ].map(([value, label]) => (
                 <div key={label}>
                   <dt>{label}</dt>
@@ -549,20 +553,42 @@ export function PublicWorldPreview() {
                           {selectedScene.name}
                         </summary>
                         <p>
-                          apps/world-web/src/assets/country-scenes/
-                          {selectedScene.file}
+                          {selectedScene.correction?.sourcePath ??
+                            `apps/world-web/src/assets/country-scenes/${selectedScene.file}`}
                         </p>
                         <p>
                           apps/world-web/src/assets/country-scenes/index.json
                         </p>
                         <p>{sceneText.note}</p>
+                        {selectedScene.correction && (
+                          <p>{selectedScene.correction.version}</p>
+                        )}
                         <a
                           href={selectedScene.url}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          {selectedScene.file} ↗
+                          {selectedScene.correction
+                            ? locale === 'zh'
+                              ? '查看修复版插画'
+                              : 'View corrected illustration'
+                            : selectedScene.file}{' '}
+                          ↗
                         </a>
+                        {selectedScene.correction && (
+                          <p>
+                            <a
+                              href={selectedScene.correction.originalUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {locale === 'zh'
+                                ? '查看原始选定插画'
+                                : 'View original selected illustration'}{' '}
+                              ↗
+                            </a>
+                          </p>
+                        )}
                       </details>
                     )}
                     {sources.map((source) => (

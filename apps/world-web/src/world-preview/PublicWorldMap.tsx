@@ -7,7 +7,10 @@ import {
 } from 'react';
 import terrain from '../assets/asterra-satellite-terrain-v8.png';
 import scenes from '../assets/country-scenes/index.json';
-import { countrySceneUrls } from '../map-explorer/country-scene-urls.js';
+import {
+  countrySceneUrls,
+  countrySceneDisplayRecord,
+} from '../map-explorer/country-scene-urls.js';
 import { countryDetailUrls } from '../map-explorer/country-detail-urls.js';
 import { shouldMountDetailTile } from '../map-explorer/detail-tile-visibility.js';
 import {
@@ -65,6 +68,30 @@ export const publicSceneLabels = {
     sourceStatus: 'Original illustrations and public geography',
   },
 } as const;
+export function publicSceneLabelsFor(
+  locale: PreviewLocale,
+  corrected: boolean,
+) {
+  const original = publicSceneLabels[locale];
+  if (!corrected) return original;
+  return locale === 'zh'
+    ? {
+        ...original,
+        illustration: '修复版场景',
+        note: '修复版国家插画 · 非地理比例',
+        error: '修复版插画暂不可用；可切换地理视图。',
+        sourceNote: '修复版插画与公开地理来源 · 非实时',
+        sourceStatus: '修复版插画与原始来源记录',
+      }
+    : {
+        ...original,
+        illustration: 'Corrected scene',
+        note: 'Corrected country illustration · Not to geographic scale',
+        error: 'Corrected scene unavailable; geography remains available.',
+        sourceNote: 'Corrected illustrations and public geography · Not live',
+        sourceStatus: 'Corrected illustrations and original source records',
+      };
+}
 export function publicCountryScene(country: PublicCountry | undefined) {
   if (!country) return null;
   const scene = scenes.find(
@@ -78,6 +105,7 @@ export function publicCountryScene(country: PublicCountry | undefined) {
         name: scene.name,
         file: scene.file,
         url,
+        correction: countrySceneDisplayRecord(scene.file),
       }
     : null;
 }
@@ -115,9 +143,9 @@ export function PublicWorldMap({
   apiRef: RefObject<PreviewMapApi | null>;
 }) {
   const text = messages[locale];
-  const sceneText = publicSceneLabels[locale];
   const sceneRequested = !!selected && presentation === 'illustration';
   const scene = publicCountryScene(selected);
+  const sceneText = publicSceneLabelsFor(locale, !!scene?.correction);
   const source = sceneRequested ? scene?.url : terrain;
   const defaultFit: ExplorerCameraFit = sceneRequested
     ? sceneFit
@@ -458,7 +486,12 @@ export function PublicWorldMap({
           >
             {scene && (
               <image
-                data-public-original-scene={selected?.number}
+                data-public-original-scene={
+                  scene.correction ? undefined : selected?.number
+                }
+                data-public-corrected-scene={
+                  scene.correction ? selected?.number : undefined
+                }
                 href={scene.url}
                 x={0}
                 y={0}

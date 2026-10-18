@@ -1,0 +1,153 @@
+{
+  "schemaVersion": "COUNTRY_SCENE_DISPLAY_CORRECTION_V1",
+  "version": "lake-repair-20261018-v1",
+  "nature": "DISPLAY_ONLY_IMAGE_CORRECTION_NOT_WORLD_STATE",
+  "RootAcceptedCandidateFreezeSha256": "158f527b7c1a37bf5a36cd2f555b092bda6c7bc700d25c0c88c9df24e9d96664",
+  "originalManifestSha256": "9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f",
+  "originalUiManifestSha256": "ed79cd79d2bf6a22a9fa2f57931f9bde89ee70fe30ae828fc87bba951a0a61dd",
+  "reviewSha256": "7051d650e2582f3c96f74e0f70e957ddc831f508da3cc92d1218d3b4ade768fc",
+  "originalBriefAndReviewsRetained": true,
+  "history": "Old COASTAL prompts and prior review judgments remain historical original bytes; these are newly edited display images",
+  "method": "Root built-in image_gen edits of original images; byte-for-byte candidate copy, no reencoding",
+  "sourceAdopted": false,
+  "seedImported": false,
+  "clockStarted": false,
+  "entries": [
+    {
+      "number": "11",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/lake-repair-20261018-v1/11.png",
+      "displayPath": "scene-corrections/lake-repair-20261018-v1/11.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/11.png",
+      "bytes": 4142159,
+      "sha256": "e6b2dc722dbdd2b2d8b8356936ae35d87279a1303af6a4f69b8d2ea8a0ae871f",
+      "width": 1254,
+      "height": 1254,
+      "rootCandidate": "candidates/11-lake-corrected.png",
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/11.png",
+        "bytes": 3466570,
+        "sha256": "db4c6e14fac6747423ff2d6a21c2fb2ebbd90926e0a97e798c551eeb85f2cc13",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/11.png"
+      }
+    },
+    {
+      "number": "12",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/lake-repair-20261018-v1/12.png",
+      "displayPath": "scene-corrections/lake-repair-20261018-v1/12.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/12.png",
+      "bytes": 3850334,
+      "sha256": "01a23fa7a762258ccb7adcba27700b74a59183a5228529e6be7d044f25c976d0",
+      "width": 1254,
+      "height": 1254,
+      "rootCandidate": "candidates/12-lake-corrected.png",
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/12.png",
+        "bytes": 3315175,
+        "sha256": "98a89d3f56d993eedd847350f4e565cf8df447b07f6b6122b8ca74a03d23d65c",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/12.png"
+      }
+    },
+    {
+      "number": "13",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/lake-repair-20261018-v1/13.png",
+      "displayPath": "scene-corrections/lake-repair-20261018-v1/13.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/13.png",
+      "bytes": 4127453,
+      "sha256": "46a7ab9d991aacf2accf81046dd261515bb98e829ac0d07205f9092ad2cf3f2c",
+      "width": 1254,
+      "height": 1254,
+      "rootCandidate": "candidates/13-lake-corrected.png",
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/13.png",
+        "bytes": 3345853,
+        "sha256": "4fdae8a72e85ac0a96a69b1ff9108c26aaee55e3ea8598cc7b92d620d523da6b",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/13.png"
+      }
+    },
+    {
+      "number": "14",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/lake-repair-20261018-v1/14.png",
+      "displayPath": "scene-corrections/lake-repair-20261018-v1/14.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/14.png",
+      "bytes": 4095865,
+      "sha256": "5147411c3faa9c82a1a4a8c232fe2f64f3a39cfdb5e16032ce0c68fd78baa9d3",
+      "width": 1254,
+      "height": 1254,
+      "rootCandidate": "candidates/14-lake-corrected.png",
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/14.png",
+        "bytes": 3396254,
+        "sha256": "c98d1f6285d561d3f0732b97c210e0ae990343259f3d2e65a992d96656c31e48",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/14.png"
+      }
+    },
+    {
+      "number": "21",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/lake-repair-20261018-v1/21.png",
+      "displayPath": "scene-corrections/lake-repair-20261018-v1/21.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/21.png",
+      "bytes": 3877430,
+      "sha256": "4a7bc8af23c7d42c0d779ebf1cee3370dce720427e09a48f91521db3e554782f",
+      "width": 1254,
+      "height": 1254,
+      "rootCandidate": "candidates/21-lake-corrected.png",
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/21.png",
+        "bytes": 3572157,
+        "sha256": "bdd7253d460ae74f87305c7087897f31e656791448965f9bfa751b9c7a6e1485",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/21.png"
+      }
+    },
+    {
+      "number": "22",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/lake-repair-20261018-v1/22.png",
+      "displayPath": "scene-corrections/lake-repair-20261018-v1/22.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/22.png",
+      "bytes": 3828858,
+      "sha256": "b3b84bb4acbbcb1d079966ce95399d269e2ded810bb96992b375071f3c3728a7",
+      "width": 1254,
+      "height": 1254,
+      "rootCandidate": "candidates/22-lake-corrected.png",
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/22.png",
+        "bytes": 3213619,
+        "sha256": "bb90441f1cec6aa52ad272f16dbfaf3d8e87bd4053a41239896015953f0332ea",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/22.png"
+      }
+    },
+    {
+      "number": "23",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/lake-repair-20261018-v1/23.png",
+      "displayPath": "scene-corrections/lake-repair-20261018-v1/23.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/23.png",
+      "bytes": 3881522,
+      "sha256": "d0aeca48376c7643b016ba16ec8693a9f9c432f46b27a3248da5adebe0ca16e6",
+      "width": 1254,
+      "height": 1254,
+      "rootCandidate": "candidates/23-lake-corrected.png",
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/23.png",
+        "bytes": 3163653,
+        "sha256": "50a4991006c5dae9d12be1c9d8736140f323c2896b919e4a4a0a919820fce79e",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/23.png"
+      }
+    },
+    {
+      "number": "41",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/lake-repair-20261018-v1/41.png",
+      "displayPath": "scene-corrections/lake-repair-20261018-v1/41.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/41.png",
+      "bytes": 4064127,
+      "sha256": "7f83aed023766367667318a0c786ffb44b3c9b43d6e46e725c4561de3bf4550b",
+      "width": 1254,
+      "height": 1254,
+      "rootCandidate": "candidates/41-lake-corrected.png",
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/41.png",
+        "bytes": 3564529,
+        "sha256": "fbb10b5161e57249b8be7bb981a163fca85f92df11eb7e2ee49d91f268725635",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/41.png"
+      }
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "COUNTRY_SCENE_DISPLAY_REVIEW_V1",
+  "initialThreeReportSha256": "b27c6452e12cf474c3c3e60d2ed92a0694dd9f318126a6eb7911c3b1bb76751b",
+  "additionalFiveReportSha256": "a1f464ed8a27a836f4f87ef258f2b5167764f20d1a67d97afe227f7454f9d72f",
+  "RootEightFreezeSha256": "158f527b7c1a37bf5a36cd2f555b092bda6c7bc700d25c0c88c9df24e9d96664",
+  "reviewMeaning": "Independent A actual full-image visual delta and illustrative subjects, not geographic coordinate alignment",
+  "exactPixelAnchorAlignment": "NOT_PROVEN",
+  "desktopMobileMarkerCompatibility": "REQUIRES_SEPARATE_RENDERED_QA",
+  "geographyOrEconomicDataModified": false,
+  "country12Caveat": "Lake is5 source-map units outside country12 boundary; nearby context, no shared shoreline or title assertion",
+  "original70AuditCounts": {
+    "CONFIRMED": 8,
+    "CANDIDATE": 13,
+    "NOT_PROVEN": 49
+  },
+  "original70AuditRetained": true,
+  "rows": [
+    {
+      "number": "11",
+      "sha256": "e6b2dc722dbdd2b2d8b8356936ae35d87279a1303af6a4f69b8d2ea8a0ae871f",
+      "verdict": "APPROVED_FOR_VISUAL_DELTA_ONLY",
+      "actualFullImageViewed": true,
+      "subjectsPreservedVisually": true,
+      "subjectIds": ["SF062", "SF063", "SF064"],
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "observation": "A original/corrected full-image comparison; original subject IDs retained"
+    },
+    {
+      "number": "12",
+      "sha256": "01a23fa7a762258ccb7adcba27700b74a59183a5228529e6be7d044f25c976d0",
+      "verdict": "APPROVED_FOR_VISUAL_DELTA_ONLY",
+      "actualFullImageViewed": true,
+      "subjectsPreservedVisually": true,
+      "subjectIds": ["H06", "SF065", "SF066", "SF067"],
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "observation": "A original/corrected full-image comparison; original subject IDs retained"
+    },
+    {
+      "number": "13",
+      "sha256": "46a7ab9d991aacf2accf81046dd261515bb98e829ac0d07205f9092ad2cf3f2c",
+      "verdict": "APPROVED_FOR_VISUAL_DELTA_ONLY",
+      "actualFullImageViewed": true,
+      "subjectsPreservedVisually": true,
+      "subjectIds": ["SF068", "SF069"],
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "observation": "A original/corrected full-image comparison; original subject IDs retained"
+    },
+    {
+      "number": "14",
+      "sha256": "5147411c3faa9c82a1a4a8c232fe2f64f3a39cfdb5e16032ce0c68fd78baa9d3",
+      "verdict": "APPROVED_FOR_VISUAL_DELTA_ONLY",
+      "actualFullImageViewed": true,
+      "subjectsPreservedVisually": true,
+      "subjectIds": ["SF070", "SF071", "SF072", "SF073", "SF074"],
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "observation": "NE小海湾保留，原东/南大段假海岸改陆地；锂矿/铜矿/气田/铀矿/太阳能5主体可辨，未见主体删除。"
+    },
+    {
+      "number": "21",
+      "sha256": "4a7bc8af23c7d42c0d779ebf1cee3370dce720427e09a48f91521db3e554782f",
+      "verdict": "APPROVED_FOR_VISUAL_DELTA_ONLY",
+      "actualFullImageViewed": true,
+      "subjectsPreservedVisually": true,
+      "subjectIds": ["SF101", "SF102", "SF103", "SF104", "SF105"],
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "observation": "北边连续海洋改为陆地，仅NE局部闭湖有对岸；铜矿/锂矿/油田/铁矿/太阳能5主体保留。"
+    },
+    {
+      "number": "22",
+      "sha256": "b3b84bb4acbbcb1d079966ce95399d269e2ded810bb96992b375071f3c3728a7",
+      "verdict": "APPROVED_FOR_VISUAL_DELTA_ONLY",
+      "actualFullImageViewed": true,
+      "subjectsPreservedVisually": true,
+      "subjectIds": ["SF106", "SF107", "SF108", "SF109"],
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "observation": "东北/东侧开阔海洋改成较窄河道且有连续可见远岸；铀矿/气田/铁矿/太阳能4主体保留。"
+    },
+    {
+      "number": "23",
+      "sha256": "d0aeca48376c7643b016ba16ec8693a9f9c432f46b27a3248da5adebe0ca16e6",
+      "verdict": "APPROVED_FOR_VISUAL_DELTA_ONLY",
+      "actualFullImageViewed": true,
+      "subjectsPreservedVisually": true,
+      "subjectIds": [
+        "H07",
+        "SF110",
+        "SF111",
+        "SF112",
+        "SF113",
+        "SF114",
+        "SF115"
+      ],
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "observation": "西/南大面积海洋改为有可见陆岸的河道；H07枢纽、锂矿/气田/铁矿/铜矿/太阳能/风能7主体保留。"
+    },
+    {
+      "number": "41",
+      "sha256": "7f83aed023766367667318a0c786ffb44b3c9b43d6e46e725c4561de3bf4550b",
+      "verdict": "APPROVED_FOR_VISUAL_DELTA_ONLY",
+      "actualFullImageViewed": true,
+      "subjectsPreservedVisually": true,
+      "subjectIds": ["SF181", "SF182", "SF183", "SF184", "SF185"],
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "observation": "东侧礁岛/海湾改为内陆河道并有对岸，西/南陆地延续；锂矿/油田/铁矿/太阳能/风能5主体保留。"
+    }
+  ]
+}
