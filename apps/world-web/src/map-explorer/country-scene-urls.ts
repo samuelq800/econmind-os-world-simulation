@@ -1,5 +1,4 @@
 // Explicit browser-owned asset references keep the atlas within the import boundary.
-import asset0 from '../assets/country-scenes/01.png';
 import asset1 from '../assets/country-scenes/02.png';
 import asset2 from '../assets/country-scenes/03.png';
 import asset3 from '../assets/country-scenes/04.png';
@@ -7,7 +6,6 @@ import asset4 from '../assets/country-scenes/05.png';
 import asset5 from '../assets/country-scenes/06.png';
 import asset6 from '../assets/country-scenes/07.png';
 import asset7 from '../assets/country-scenes/08.png';
-import asset8 from '../assets/country-scenes/09.png';
 import asset9 from '../assets/country-scenes/10.png';
 import asset14 from '../assets/country-scenes/15.png';
 import asset15 from '../assets/country-scenes/16.png';
@@ -29,10 +27,7 @@ import asset33 from '../assets/country-scenes/34.png';
 import asset34 from '../assets/country-scenes/35.png';
 import asset35 from '../assets/country-scenes/36.png';
 import asset36 from '../assets/country-scenes/37.png';
-import asset37 from '../assets/country-scenes/38.png';
 import asset38 from '../assets/country-scenes/39.png';
-import asset39 from '../assets/country-scenes/40.png';
-import asset41 from '../assets/country-scenes/42.png';
 import asset42 from '../assets/country-scenes/43.png';
 import asset43 from '../assets/country-scenes/44.png';
 import asset44 from '../assets/country-scenes/45.png';
@@ -62,15 +57,19 @@ import asset67 from '../assets/country-scenes/68.png';
 import asset68 from '../assets/country-scenes/69.png';
 import asset69 from '../assets/country-scenes/70.png';
 import corrections from '../assets/country-scene-corrections/lake-repair-20261018-v1/manifest.json';
+import followupCorrections from '../assets/country-scene-corrections/geography-followup-20261018-v1/manifest.json';
 
 // Fixed display metadata only; original source downloads keep their immutable URL.
 export function countrySceneDisplayRecord(file: string) {
-  const entry = corrections.entries.find((row) => `${row.number}.png` === file);
-  if (!entry) return null;
+  const catalogue = [corrections, followupCorrections].find((set) =>
+    set.entries.some((row) => `${row.number}.png` === file),
+  );
+  const entry = catalogue?.entries.find((row) => `${row.number}.png` === file);
+  if (!entry || !catalogue) return null;
   const base = import.meta.env.BASE_URL;
   return {
     corrected: true,
-    version: corrections.version,
+    version: catalogue.version,
     sourcePath: entry.sourcePath,
     displayUrl: `${base}${entry.displayPath}`,
     originalUrl: `${base}${entry.original.publicUrl}`,
@@ -86,7 +85,7 @@ const repaired = (file: string): string => {
 };
 
 export const countrySceneUrls: Readonly<Record<string, string>> = {
-  '01.png': asset0,
+  '01.png': repaired('01.png'),
   '02.png': asset1,
   '03.png': asset2,
   '04.png': asset3,
@@ -94,7 +93,7 @@ export const countrySceneUrls: Readonly<Record<string, string>> = {
   '06.png': asset5,
   '07.png': asset6,
   '08.png': asset7,
-  '09.png': asset8,
+  '09.png': repaired('09.png'),
   '10.png': asset9,
   '11.png': repaired('11.png'),
   '12.png': repaired('12.png'),
@@ -123,11 +122,11 @@ export const countrySceneUrls: Readonly<Record<string, string>> = {
   '35.png': asset34,
   '36.png': asset35,
   '37.png': asset36,
-  '38.png': asset37,
+  '38.png': repaired('38.png'),
   '39.png': asset38,
-  '40.png': asset39,
+  '40.png': repaired('40.png'),
   '41.png': repaired('41.png'),
-  '42.png': asset41,
+  '42.png': repaired('42.png'),
   '43.png': asset42,
   '44.png': asset43,
   '45.png': asset44,
