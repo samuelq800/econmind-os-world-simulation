@@ -640,6 +640,14 @@ async function readReceipt(
   return row === undefined ? null : parseReceiptRow(row, command);
 }
 
+/** Read-only reuse of the receipt parser on the caller's current executor. */
+export async function readFinalReceiptFrom(
+  executor: SqlExecutor,
+  command: CanonicalCommand,
+): Promise<Readonly<FinalCommandReceipt> | null> {
+  return readReceipt(executor, command);
+}
+
 function parseSubmissionRow(
   row: SubmissionRow,
   sha256Hex: Sha256Hex,
@@ -786,6 +794,13 @@ export class AtomicTransitionRepository {
     command: CanonicalCommand,
   ): Promise<Readonly<FinalCommandReceipt> | null> {
     return readReceipt(this.#database, command);
+  }
+
+  async readFinalReceiptFrom(
+    executor: SqlExecutor,
+    command: CanonicalCommand,
+  ): Promise<Readonly<FinalCommandReceipt> | null> {
+    return readFinalReceiptFrom(executor, command);
   }
 
   async recordZeroEffectReceipt(
