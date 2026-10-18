@@ -17,6 +17,7 @@ import {
   parseAuthoritativeEvent,
   parseCanonicalCommand,
   rebuildV08LedgersFromLineage,
+  validateFinalReceiptForCommand,
   worldId,
   Money,
   Quantity,
@@ -32,9 +33,14 @@ import {
 } from '@econmind/core';
 
 import { WorldOpeningSeedStore } from './opening-seed-store.js';
+import { readFinalReceiptFrom } from './atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import type { ValidatedCanonicalLineageData } from './validated-canonical-lineage.js';
 
 const NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/u;
+// Preparation capacity, not a truncated prefix or an economic/history rule.
+// Exceeding it denies this new view; the existing V08 rebuild is unchanged.
+const VALIDATED_LINEAGE_ROW_LIMIT = 10_000;
 const RFC3339_MILLISECONDS =
   /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d\.\d{3}Z$/u;
 
@@ -65,6 +71,7 @@ interface DurableCommandRow {
 }
 
 interface DurableTransitionRow extends DurableCommandRow {
+  readonly command_correlation_id?: unknown;
   readonly event_canonical_payload: unknown;
   readonly event_causation_command_id: unknown;
   readonly event_corrects_event_id: unknown;
@@ -528,6 +535,91 @@ export class DurableV08LedgerLineageReader {
     return parseCommand(row, this.#sha256Hex);
   }
 
+  /**
+   * New read-only preparation boundary. No source adoption, commit, lock or
+   * snapshot proof is issued here. A final writer may use it only AFTER its
+   * existing L/H acquisition, never to acquire H before L. All calls use the
+   * supplied executor; historical submissions are read without S row locks.
+   * Prefer the callback-scoped view in validated-canonical-lineage.ts.
+   */
+  async readValidatedLineageFrom(
+    transaction: SqlExecutor,
+    requestedWorldId: string,
+  ): Promise<Readonly<ValidatedCanonicalLineageData>> {
+    const canonicalWorldId = worldId(requestedWorldId);
+    const head = await this.#readHead(transaction, canonicalWorldId);
+    if (BigInt(head.eventSequence) > BigInt(VALIDATED_LINEAGE_ROW_LIMIT)) {
+      invalid('Validated lineage exceeds the bounded preparation capacity');
+    }
+    const seed = await this.#openingSeeds.loadFrom(
+      transaction,
+      canonicalWorldId,
+    );
+    const transitions = await this.#readTransitions(
+      transaction,
+      canonicalWorldId,
+      true,
+    );
+    const ledgers = rebuildV08LedgersFromLineage({
+      seed,
+      transitions,
+      sha256Hex: this.#sha256Hex,
+    });
+    if (
+      (transitions.at(-1)?.transition.events.at(-1)?.sequence ?? '0') !==
+        head.eventSequence ||
+      ledgers.worldVersion !== head.worldVersion
+    ) {
+      invalid('Validated lineage cursor does not match the durable World head');
+    }
+    const committed = await transaction.query<{ readonly command_id: unknown }>(
+      `select command_id from world_v2.command_receipt
+        where world_id = $1 and outcome = 'COMMITTED'
+        order by world_version_after, command_id
+        limit ${VALIDATED_LINEAGE_ROW_LIMIT + 1}`,
+      [canonicalWorldId],
+    );
+    const committedIds = committed.rows.map((row) =>
+      text(row.command_id, 'Committed receipt Command ID'),
+    );
+    const committedSet = new Set(committedIds);
+    if (
+      committedIds.length !== transitions.length ||
+      committedSet.size !== committedIds.length ||
+      transitions.some(({ command }) => !committedSet.has(command.commandId))
+    ) {
+      invalid(
+        'Committed receipt set does not match complete Event transitions',
+      );
+    }
+    const validated = [];
+    for (const value of transitions) {
+      const receipt = await readFinalReceiptFrom(transaction, value.command);
+      if (receipt === null || receipt.outcome !== 'COMMITTED') {
+        invalid('Every Event transition requires its COMMITTED final receipt');
+      }
+      validateFinalReceiptForCommand({ ...value, receipt });
+      if (
+        receipt.idempotencyKey !== value.command.idempotencyKey ||
+        receipt.reasonCode !== null ||
+        receipt.simTime.ticks !== value.command.simTime.ticks
+      ) {
+        invalid(
+          'Final receipt idempotency, reason or SimTime differs from its transition',
+        );
+      }
+      validated.push(Object.freeze({ ...value, receipt }));
+    }
+    return Object.freeze({
+      worldId: canonicalWorldId,
+      seed,
+      headEventSequence: head.eventSequence,
+      headWorldVersion: head.worldVersion,
+      ledgers,
+      transitions: Object.freeze(validated),
+    });
+  }
+
   async #readHead(
     transaction: SqlExecutor,
     requestedWorldId: string,
@@ -552,6 +644,7 @@ export class DurableV08LedgerLineageReader {
   async #readTransitions(
     transaction: SqlExecutor,
     requestedWorldId: string,
+    validated = false,
   ): Promise<readonly V08AuthoritativeLedgerTransition[]> {
     const transitions = await transaction.query<DurableTransitionRow>(
       `select command.actor_id as command_actor_id,
@@ -570,6 +663,7 @@ export class DurableV08LedgerLineageReader {
               command.command_type as command_type,
               command.world_id as command_world_id,
               event.correlation_id,
+              ${validated ? 'command.correlation_id as command_correlation_id,' : ''}
               event.canonical_payload as event_canonical_payload,
               event.causation_command_id as event_causation_command_id,
               event.corrects_event_id as event_corrects_event_id,
@@ -584,11 +678,12 @@ export class DurableV08LedgerLineageReader {
               event.world_id as event_world_id,
               event.world_version as event_world_version
          from world_v2.authoritative_event event
-         join world_v2.command_submission command
+         ${validated ? 'left join' : 'join'} world_v2.command_submission command
            on command.world_id = event.world_id
           and command.command_id = event.causation_command_id
         where event.world_id = $1
-        order by event.world_version, event.event_sequence`,
+        order by event.world_version, event.event_sequence
+        ${validated ? `limit ${VALIDATED_LINEAGE_ROW_LIMIT + 1}` : ''}`,
       [requestedWorldId],
     );
     const inventory = await transaction.query<PostingRow>(
@@ -596,7 +691,8 @@ export class DurableV08LedgerLineageReader {
               posting_fingerprint as fingerprint
          from world_v2.inventory_posting
         where world_id = $1
-        order by world_version_after, posting_id`,
+        order by world_version_after, posting_id
+        ${validated ? `limit ${VALIDATED_LINEAGE_ROW_LIMIT + 1}` : ''}`,
       [requestedWorldId],
     );
     const financial = await transaction.query<PostingRow>(
@@ -604,9 +700,18 @@ export class DurableV08LedgerLineageReader {
               batch_fingerprint as fingerprint
          from world_v2.financial_posting_batch
         where world_id = $1
-        order by world_version_after, batch_id`,
+        order by world_version_after, batch_id
+        ${validated ? `limit ${VALIDATED_LINEAGE_ROW_LIMIT + 1}` : ''}`,
       [requestedWorldId],
     );
+    if (
+      validated &&
+      [transitions, inventory, financial].some(
+        (result) => result.rows.length > VALIDATED_LINEAGE_ROW_LIMIT,
+      )
+    ) {
+      invalid('Validated lineage exceeds the bounded preparation capacity');
+    }
     const rowsByCommand = new Map<string, DurableTransitionRow[]>();
     for (const row of transitions.rows) {
       const commandId = text(row.command_id, 'Transition Command ID');
@@ -627,13 +732,29 @@ export class DurableV08LedgerLineageReader {
       const first = rows[0];
       if (first === undefined)
         invalid('Durable transition is unexpectedly empty');
-      const command = parseCommand(first, this.#sha256Hex);
+      const command = parseCommand(
+        validated
+          ? { ...first, correlation_id: first.command_correlation_id }
+          : first,
+        this.#sha256Hex,
+      );
       const events = rows.map((row) => {
         if (
           text(row.command_id, 'Transition Command ID') !== command.commandId
         ) {
           invalid('Durable transition joins more than one Command');
         }
+        if (
+          validated &&
+          parseCommand(
+            { ...row, correlation_id: row.command_correlation_id },
+            this.#sha256Hex,
+          ).fingerprint !== command.fingerprint
+        ) {
+          invalid('Durable joined Command differs from canonical intent');
+        }
+        // Command and Event traces are independently parsed and retained;
+        // trace grouping equality is not authoritative causation evidence.
         return parseEvent(row, this.#sha256Hex);
       });
       const worldVersionAfter = events[0]?.worldVersion;
