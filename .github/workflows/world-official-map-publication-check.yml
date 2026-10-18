@@ -12,6 +12,7 @@ on:
       - docs/reports/G_SCENE_LAKE_REPAIR_20261018/**
       - tests/world-web/brand-shell-publication.test.ts
       - tests/world-web/country-scene-display-corrections.test.ts
+      - tests/world-web/country-scene-followup-corrections.test.ts
       - tests/tsconfig.country-scene-display-corrections.json
       - tests/world-web/official-map-publication-*.test.ts
       - tests/world-web/official-map-publication.test.ts
@@ -45,11 +46,11 @@ jobs:
           node scripts/official-map-publication-generate.mjs --check
           node scripts/verify-world-map-file-package.mjs
           pnpm --filter @econmind/core build
-          pnpm exec vitest run tests/world-web/official-map-publication.test.ts tests/world-web/public-world-overview.test.ts tests/world-web/country-scene-display-corrections.test.ts tests/world-web/country-opening-facts.test.ts tests/world-web/brand-shell-publication.test.ts
+          pnpm exec vitest run tests/world-web/official-map-publication.test.ts tests/world-web/public-world-overview.test.ts tests/world-web/country-scene-display-corrections.test.ts tests/world-web/country-scene-followup-corrections.test.ts tests/world-web/country-opening-facts.test.ts tests/world-web/brand-shell-publication.test.ts
           pnpm exec tsc -p tests/tsconfig.official-map-publication.json
           pnpm exec tsc -p tests/tsconfig.country-scene-display-corrections.json
-          pnpm exec eslint scripts/country-scene-display-corrections.mjs tests/world-web/country-scene-display-corrections.test.ts scripts/publish-brand-shell.mjs tests/world-web/brand-shell-publication.test.ts
-          pnpm exec prettier --check scripts/country-scene-display-corrections.* tests/world-web/country-scene-display-corrections.test.ts tests/tsconfig.country-scene-display-corrections.json scripts/publish-brand-shell.mjs tests/world-web/brand-shell-publication.test.ts docs/reports/G_SCENE_LAKE_REPAIR_20261018/*.json
+          pnpm exec eslint scripts/country-scene-display-corrections.mjs tests/world-web/country-scene-display-corrections.test.ts tests/world-web/country-scene-followup-corrections.test.ts scripts/publish-brand-shell.mjs tests/world-web/brand-shell-publication.test.ts
+          pnpm exec prettier --check scripts/country-scene-display-corrections.* tests/world-web/country-scene-display-corrections.test.ts tests/world-web/country-scene-followup-corrections.test.ts tests/tsconfig.country-scene-display-corrections.json scripts/publish-brand-shell.mjs tests/world-web/brand-shell-publication.test.ts docs/reports/G_SCENE_LAKE_REPAIR_20261018/*.json
           pnpm exec eslint scripts/official-map-publication-*.mjs tests/world-web/official-map-publication.test.ts
           pnpm exec prettier --check scripts/official-map-publication-*.mjs scripts/official-map-publication-*.d.mts tests/world-web/official-map-publication.test.ts tests/tsconfig.official-map-publication.json apps/world-web/package.json .github/workflows/world-official-map-publication-check.yml
       - name: Browser and source-publication boundaries

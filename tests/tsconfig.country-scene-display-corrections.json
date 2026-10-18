@@ -10,5 +10,8 @@
     "rootDir": "..",
     "skipLibCheck": false
   },
-  "include": ["world-web/country-scene-display-corrections.test.ts"]
+  "include": [
+    "world-web/country-scene-display-corrections.test.ts",
+    "world-web/country-scene-followup-corrections.test.ts"
+  ]
 }

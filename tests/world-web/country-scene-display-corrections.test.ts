@@ -117,7 +117,9 @@ describe('fixed eight-country display correction source boundary', () => {
     for (const e of proof.manifest.entries) {
       const c = countrySceneDisplayRecord(`${e.number}.png`)!;
       expect(countrySceneUrls[`${e.number}.png`]).toBe(c.displayUrl);
-      expect(c.displayUrl).toBe(`${import.meta.env.BASE_URL}${e.displayPath}`);
+      expect(c.displayUrl).toBe(
+        `${import.meta.env.BASE_URL}${import.meta.env.DEV ? e.sourcePath.replace('apps/world-web/', '') : e.displayPath}`,
+      );
       expect(c.originalUrl).toBe(
         `${import.meta.env.BASE_URL}${e.original.publicUrl}`,
       );
@@ -128,14 +130,14 @@ describe('fixed eight-country display correction source boundary', () => {
     expect(countrySceneDisplayRecord('../11.png')).toBe(null);
     expect(correctedCountries).toHaveLength(8);
   });
-  it('keeps62 unchanged image imports and does not bundle corrected PNG duplicates', () => {
+  it('keeps57 unchanged image imports after the fixed followup and does not bundle corrected PNG duplicates', () => {
     const source = readFileSync(
       'apps/world-web/src/map-explorer/country-scene-urls.ts',
       'utf8',
     );
     expect([
       ...source.matchAll(/from '\.\.\/assets\/country-scenes\/\d{2}\.png'/g),
-    ]).toHaveLength(62);
+    ]).toHaveLength(57);
     expect(source).not.toMatch(
       /from '\.\.\/assets\/country-scene-corrections\/[^']+\.png'/,
     );
