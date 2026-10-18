@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   PublicWorldMap,
   publicCountryScene,
-  publicSceneLabels,
+  publicSceneLabelsFor,
   type PublicPresentation,
   type MapMetrics,
   type PreviewMapApi,
@@ -26,6 +26,7 @@ import {
 } from './locale.js';
 import sources from './source-catalog.json';
 import './public-world-preview.css';
+import { CountryOpeningFactsLoader } from '../map-explorer/CountryOpeningFacts.js';
 
 type Overlay = 'layers' | 'sources' | 'legend' | null;
 const initialSelection = () => {
@@ -51,7 +52,6 @@ export function PublicWorldPreview() {
   const [group, setGroup] = useState('all');
   const [selectedId, setSelectedId] = useState(initialSelection);
   const [presentation, setPresentation] = useState(initialPresentation);
-  const sceneText = publicSceneLabels[locale];
   const [layers, setLayers] = useState<PreviewLayers>(() => ({
     ...initialLayers,
   }));
@@ -71,6 +71,7 @@ export function PublicWorldPreview() {
   const recordMetrics = useCallback((next: MapMetrics) => setMetrics(next), []);
   const selected = countries.find((country) => country.id === selectedId);
   const selectedScene = publicCountryScene(selected);
+  const sceneText = publicSceneLabelsFor(locale, !!selectedScene?.correction);
   const matches = filterCountries(query, group);
   const allowed = new Set(matches.map((country) => country.id));
 
@@ -350,7 +351,11 @@ export function PublicWorldPreview() {
                 [countries.length, text.countryCount],
                 [publicGroups.length, text.groupCount],
                 [publicResources.length, text.resourceCount],
-                [sources.length + (selectedScene ? 2 : 0), text.sourceCount],
+                [
+                  sources.length +
+                    (selectedScene?.correction ? 3 : selectedScene ? 2 : 0),
+                  text.sourceCount,
+                ],
               ].map(([value, label]) => (
                 <div key={label}>
                   <dt>{label}</dt>
@@ -548,20 +553,42 @@ export function PublicWorldPreview() {
                           {selectedScene.name}
                         </summary>
                         <p>
-                          apps/world-web/src/assets/country-scenes/
-                          {selectedScene.file}
+                          {selectedScene.correction?.sourcePath ??
+                            `apps/world-web/src/assets/country-scenes/${selectedScene.file}`}
                         </p>
                         <p>
                           apps/world-web/src/assets/country-scenes/index.json
                         </p>
                         <p>{sceneText.note}</p>
+                        {selectedScene.correction && (
+                          <p>{selectedScene.correction.version}</p>
+                        )}
                         <a
                           href={selectedScene.url}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          {selectedScene.file} ↗
+                          {selectedScene.correction
+                            ? locale === 'zh'
+                              ? '查看修复版插画'
+                              : 'View corrected illustration'
+                            : selectedScene.file}{' '}
+                          ↗
                         </a>
+                        {selectedScene.correction && (
+                          <p>
+                            <a
+                              href={selectedScene.correction.originalUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {locale === 'zh'
+                                ? '查看原始选定插画'
+                                : 'View original selected illustration'}{' '}
+                              ↗
+                            </a>
+                          </p>
+                        )}
                       </details>
                     )}
                     {sources.map((source) => (
@@ -596,26 +623,38 @@ export function PublicWorldPreview() {
               <small>{selected.number}</small>
               {selected.name}
             </h2>
-            <dl>
-              <dt>{text.number}</dt>
-              <dd>{selected.number}</dd>
-              <dt>{text.name}</dt>
-              <dd>{selected.name}</dd>
-              <dt>{text.group}</dt>
-              <dd>{text[selected.group]}</dd>
-              <dt>{text.coordinate}</dt>
-              <dd>
-                {selected.label.join(', ')} {text.sourcePixels}
-              </dd>
-              <dt>{text.outlinePixels}</dt>
-              <dd>
-                {selected.landPixels.toLocaleString(
-                  locale === 'zh' ? 'zh-CN' : 'en-US',
-                )}
-              </dd>
-            </dl>
-            <p>{text.countryNote}</p>
-            <p>{text.geographicNote}</p>
+            <CountryOpeningFactsLoader
+              reference={selected.number}
+              locale={locale}
+              onLocaleChange={setLocale}
+            />
+            <details className="opening-geography">
+              <summary>
+                {locale === 'en'
+                  ? 'Map & geographic records'
+                  : '地图与地理记录'}
+              </summary>
+              <dl>
+                <dt>{text.number}</dt>
+                <dd>{selected.number}</dd>
+                <dt>{text.name}</dt>
+                <dd>{selected.name}</dd>
+                <dt>{text.group}</dt>
+                <dd>{text[selected.group]}</dd>
+                <dt>{text.coordinate}</dt>
+                <dd>
+                  {selected.label.join(', ')} {text.sourcePixels}
+                </dd>
+                <dt>{text.outlinePixels}</dt>
+                <dd>
+                  {selected.landPixels.toLocaleString(
+                    locale === 'zh' ? 'zh-CN' : 'en-US',
+                  )}
+                </dd>
+              </dl>
+              <p>{text.countryNote}</p>
+              <p>{text.geographicNote}</p>
+            </details>
             <button
               className="preview-action"
               onClick={() => openOverlay('sources')}

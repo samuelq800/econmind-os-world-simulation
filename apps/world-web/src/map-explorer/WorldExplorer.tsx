@@ -38,6 +38,15 @@ import './world-explorer.css';
 import { CrisisSummary } from '../crisis-action/index.js';
 import { navigateToPublicWorld } from '../world-preview/public-route.js';
 import { messages, readPreviewLocale } from '../world-preview/locale.js';
+import {
+  ExactOfficialValue,
+  OfficialSourceDetails,
+} from '../official-data/OfficialSourceValue.js';
+import { CountryOpeningFacts } from './CountryOpeningFacts.js';
+export {
+  ExactOfficialValue,
+  OfficialSourceDetails,
+} from '../official-data/OfficialSourceValue.js';
 
 type CountryScene = {
   id: string;
@@ -123,88 +132,6 @@ export function requestExplorerCountry(
     active = false;
     abort.abort();
   };
-}
-
-export function ExactOfficialValue({
-  data,
-  path,
-  showUnit = false,
-}: {
-  data: OfficialExplorerCountry;
-  path: string;
-  showUnit?: boolean;
-}) {
-  const source = data.officialSource;
-  const field = source?.fields?.[path];
-  const dataset = field && source?.datasets?.[field.dataset];
-  if (
-    !field ||
-    !dataset ||
-    typeof field.exact !== 'string' ||
-    !/^-?\d+(?:\.\d+)?$/.test(field.exact)
-  )
-    return <span data-source-field={path}>精确值缺失</span>;
-  return (
-    <span
-      data-source-field={path}
-      title={`${field.dataset} / ${field.rowId} / ${field.field}; ${field.sourcePointer}; raw=${field.rawToken}; ${dataset?.sha256 ?? '来源hash缺失'}; ${field.unit}; ${field.unitBasis}; ${field.nature}`}
-    >
-      {field.exact}
-      {showUnit &&
-        ` ${field.unit === 'UNIT_NOT_SPECIFIED_IN_SOURCE' ? '（源未注明单位）' : field.unit}`}
-    </span>
-  );
-}
-
-export function OfficialSourceDetails({
-  data,
-  prefix = '',
-}: {
-  data: OfficialExplorerCountry;
-  prefix?: string;
-}) {
-  const source = data.officialSource;
-  return (
-    <details className="official-source-details">
-      <summary>数字来源与版本 · 展开逐字段详情</summary>
-      <p>
-        STATIC_BASELINE · proposalFieldsAreExecuted:false · liveWorldState:false
-      </p>
-      <p>countries SHA256: {data.source.countriesSha256}</p>
-      <p>本国文件 SHA256: {data.source.countryFileSha256}</p>
-      <p>数值保留源十进制原文；以下详情可用触屏或键盘展开，不换算时间单位。</p>
-      {Object.entries(source?.fields ?? {})
-        .filter(([path]) => path.startsWith(prefix))
-        .map(([path, field]) => (
-          <details key={path} data-source-detail={path}>
-            <summary>{path}</summary>
-            <dl>
-              {[
-                ['dataset', field.dataset],
-                ['rowId', field.rowId],
-                ['field', field.field],
-                ['outputPointer', path],
-                ['sourcePointer', field.sourcePointer],
-                ['exact', field.exact],
-                ['rawToken', field.rawToken],
-                ['unit', field.unit],
-                ['unitBasis', field.unitBasis],
-                ['nature', field.nature],
-                [
-                  'SHA256',
-                  source?.datasets?.[field.dataset]?.sha256 ?? '来源hash缺失',
-                ],
-              ].map(([label, value]) => (
-                <div key={label}>
-                  <dt>{label}</dt>
-                  <dd>{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </details>
-        ))}
-    </details>
-  );
 }
 
 export function OfficialSourceState({
@@ -299,93 +226,7 @@ export function OfficialCountryFacts({
 }: {
   data: OfficialExplorerCountry;
 }) {
-  const metrics = (
-    base: string,
-    fields: readonly (readonly [string, string])[],
-  ) => (
-    <dl className="official-country-metrics">
-      {fields.map(([label, key]) => (
-        <div key={key}>
-          <dt>{label}</dt>
-          <dd>
-            <ExactOfficialValue data={data} path={`${base}/${key}`} showUnit />
-          </dd>
-        </div>
-      ))}
-    </dl>
-  );
-  return (
-    <div className="country-note official-country-facts">
-      <h3>官方开局条件</h3>
-      <p>
-        {data.source.packageId} · 选定来源，不是运行时 World
-        State；开局种子未提交。设施是完整源集合，历史开发选项只是子集。
-      </p>
-      {metrics('', [['国土面积', 'areaKm2']])}
-      {metrics('/profile', [
-        ['人口', 'population'],
-        ['劳动力', 'labourForce'],
-        ['就业分配提案', 'scenarioEmployed'],
-        ['未就业分配提案', 'scenarioUnemployed'],
-        ['粮食产出参考', 'foodProductionTonnesDay'],
-        ['粮食需求参考', 'foodDemandTonnesDay'],
-        ['粮食开局库存', 'foodAvailableStockTonnes'],
-      ])}
-      <h3>资源记录 · {data.resources.length}</h3>
-      {data.resources.map((resource, index) => (
-        <details key={resource.id} data-resource-id={resource.id}>
-          <summary>
-            {resource.type.name} · {resource.id}
-          </summary>
-          <p>{resource.visibility} · 不因显示而可交易或开采</p>
-          {metrics(`/resources/${index}/deposit`, [
-            ['初始地质储量', 'initialGeological'],
-            ['剩余地质储量', 'remainingGeological'],
-            ['已发现剩余', 'discoveredRemaining'],
-            ['可采剩余', 'recoverableRemaining'],
-            ['已开发剩余（有条件）', 'developedRemaining'],
-            ['能力提案', 'extractionCapacityPerDay'],
-            ['运行时开采量字段（非live）', 'runtimeExtractionPerDay'],
-            ['埋深', 'depthM'],
-          ])}
-        </details>
-      ))}
-      <h3>区域记录 · {data.regions.length}</h3>
-      {data.regions.map((region, index) => (
-        <details key={region.id} data-region-id={region.id}>
-          <summary>{region.id}</summary>
-          {metrics(`/regions/${index}`, [['区域面积', 'areaKm2']])}
-          {metrics(`/regions/${index}/initial`, [
-            ['区域人口', 'population'],
-            ['耕地', 'croplandHa'],
-            ['粮食产出参考', 'grainTonnesDay'],
-          ])}
-          {metrics(`/regions/${index}/natural`, [
-            ['平均海拔', 'meanElevationM'],
-            ['温度', 'temperatureC'],
-            ['年降水', 'annualRainMm'],
-            ['可分配水参考', 'allocatableWaterM3Day'],
-            ['旱季水参考', 'drySeasonWaterM3Day'],
-            ['太阳能条件', 'solarKwhM2Day'],
-            ['风速', 'windMps'],
-          ])}
-          <p>
-            月降水（源单位）：
-            {Array.from({ length: 12 }, (_, month) => (
-              <span key={month}>
-                {month > 0 ? ' / ' : ''}
-                <ExactOfficialValue
-                  data={data}
-                  path={`/regions/${index}/natural/monthlyRainMm/${month}`}
-                />
-              </span>
-            ))}
-          </p>
-        </details>
-      ))}
-      <OfficialSourceDetails data={data} />
-    </div>
-  );
+  return <CountryOpeningFacts key={data.number} data={data} />;
 }
 function sourceStatus(state: OfficialExplorerCountryLoadState) {
   switch (state.kind) {
@@ -915,6 +756,7 @@ export function WorldExplorer({
         </a>
         <a
           className="old-atlas explorer-national-link"
+          hidden
           href={`./season1-immersive/?role=finance&country=${country?.number ?? '01'}#country`}
           title={
             country ? `${country.name} · 国家操作` : '默认国家 01 · Avenor'
@@ -1691,6 +1533,7 @@ export function WorldExplorer({
         </div>
         {country && (
           <aside ref={inspector} className="explorer-sidebar">
+            {official && !selected && <OfficialCountryFacts data={official} />}
             <div className="sidebar-title">
               <span>COUNTRY DIRECTORY</span>
               <h2 ref={selectedHeading} tabIndex={-1}>
@@ -1776,7 +1619,6 @@ export function WorldExplorer({
                     </button>
                   ))}
                 </div>
-                {official && <OfficialCountryFacts data={official} />}
               </>
             )}
             <footer className="country-pager">

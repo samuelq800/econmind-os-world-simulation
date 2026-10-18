@@ -1,0 +1,239 @@
+.opening-facts {
+  --opening-ink: #183c38;
+  color: var(--opening-ink);
+  background: #f4efdc;
+  border: 1px solid #c9bb93;
+  border-radius: 6px;
+  padding: 16px;
+  margin: 12px;
+  min-width: 0;
+  font: inherit;
+}
+.opening-facts-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.opening-facts-heading > span {
+  font:
+    20px Georgia,
+    'Songti SC',
+    serif;
+}
+.opening-facts button {
+  font: inherit;
+  cursor: pointer;
+}
+.opening-facts-heading button {
+  border: 0;
+  padding: 6px;
+  background: transparent;
+  color: #42615a;
+  font-size: 11px;
+}
+.opening-facts-heading button[aria-pressed='true'] {
+  color: #143e34;
+  background: #dfd6b7;
+  border-radius: 3px;
+}
+.opening-facts .opening-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 10px;
+  padding: 16px 0;
+  margin: 0;
+}
+.opening-facts .opening-summary > div {
+  min-width: 0;
+}
+.opening-facts .opening-summary > div:first-child {
+  grid-column: 1 / -1;
+}
+.opening-facts .opening-summary dt {
+  font-size: 10px;
+  color: #50655c;
+  margin: 0 0 5px;
+  min-height: 28px;
+}
+.opening-facts .opening-summary > div:first-child dt {
+  min-height: 0;
+}
+.opening-facts .opening-summary dd {
+  margin: 0;
+  font:
+    24px Georgia,
+    'Songti SC',
+    serif;
+  color: #183c38;
+  overflow-wrap: anywhere;
+}
+.opening-facts p {
+  font-size: 11px;
+  line-height: 1.65;
+  color: #4a6056;
+  margin: 8px 0;
+}
+.opening-source-badge {
+  border-top: 1px solid #cabb94;
+  padding-top: 9px;
+}
+.opening-source-badge b {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 1.1px;
+  color: #7a6035;
+}
+.opening-package {
+  display: block;
+  font-size: 9px;
+  color: #65705b;
+  overflow-wrap: anywhere;
+}
+.opening-section-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  overflow-x: auto;
+  padding: 6px 0 10px;
+}
+.opening-section-nav button {
+  flex: 1;
+  border: 1px solid #c9bb93;
+  border-radius: 4px;
+  background: #eee6cc;
+  color: #34554c;
+  padding: 8px 5px;
+  font-size: 11px;
+  min-height: 36px;
+}
+.opening-section-nav button[aria-current='true'] {
+  background: #254f45;
+  border-color: #254f45;
+  color: #fff3ce;
+}
+.opening-facts .opening-metrics {
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+.opening-facts .opening-metrics > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid #d8ceb3;
+  padding: 9px 0;
+}
+.opening-facts .opening-metrics dt {
+  color: #53695e;
+  font-size: 11px;
+  margin: 0;
+}
+.opening-facts .opening-metrics dd {
+  color: #183c38;
+  font-size: 12px;
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.opening-facts h3 {
+  font:
+    16px Georgia,
+    'Songti SC',
+    serif;
+  margin: 14px 0 10px;
+}
+.opening-kind-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.opening-kind-list button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e7dfc5;
+  color: #254f45;
+  border: 1px solid #c9bb93;
+  border-radius: 4px;
+  padding: 7px 9px;
+  font-size: 11px;
+}
+.opening-kind-list b {
+  color: #80683d;
+}
+.opening-record {
+  padding: 10px 0;
+  border-bottom: 1px solid #c9bb93;
+  font-size: 12px;
+}
+.opening-record summary {
+  cursor: pointer;
+  color: #183c38;
+  line-height: 1.6;
+}
+.opening-record summary small {
+  color: #657569;
+  padding-left: 5px;
+}
+.opening-facts .opening-provenance {
+  padding: 8px 0 0;
+  border: 0;
+  background: none;
+  margin: 0;
+}
+.opening-provenance p {
+  overflow-wrap: anywhere;
+}
+.opening-facts .official-source-details {
+  font-size: 11px;
+  color: #36584d;
+  margin: 8px 0;
+  overflow-wrap: anywhere;
+}
+.opening-facts .official-source-details summary {
+  cursor: pointer;
+  line-height: 1.6;
+}
+.opening-facts .official-source-details dl {
+  display: block;
+  font-size: 10px;
+}
+.opening-facts .official-source-details dd {
+  overflow-wrap: anywhere;
+  color: #183c38;
+  margin: 2px 0 8px;
+}
+.opening-map-link {
+  display: block;
+  padding: 10px 0 0;
+  font-size: 12px;
+  color: #214e40;
+}
+.opening-facts :is(button, a, summary):focus-visible {
+  outline: 2px solid #8a6530;
+  outline-offset: 3px;
+}
+.preview-country-details .opening-facts {
+  margin: 12px 0;
+}
+.opening-geography {
+  margin: 14px 0;
+  font-size: 12px;
+  color: #57705f;
+}
+.opening-geography summary {
+  cursor: pointer;
+}
+@media (max-width: 600px) {
+  .opening-facts {
+    margin: 10px;
+    padding: 14px;
+  }
+  .preview-country-details .opening-facts {
+    margin: 10px 0;
+  }
+  .opening-facts .opening-summary dd {
+    font-size: 22px;
+  }
+}
