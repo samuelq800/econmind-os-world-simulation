@@ -9,19 +9,12 @@ import asset6 from '../assets/country-scenes/07.png';
 import asset7 from '../assets/country-scenes/08.png';
 import asset8 from '../assets/country-scenes/09.png';
 import asset9 from '../assets/country-scenes/10.png';
-import asset10 from '../assets/country-scenes/11.png';
-import asset11 from '../assets/country-scenes/12.png';
-import asset12 from '../assets/country-scenes/13.png';
-import asset13 from '../assets/country-scenes/14.png';
 import asset14 from '../assets/country-scenes/15.png';
 import asset15 from '../assets/country-scenes/16.png';
 import asset16 from '../assets/country-scenes/17.png';
 import asset17 from '../assets/country-scenes/18.png';
 import asset18 from '../assets/country-scenes/19.png';
 import asset19 from '../assets/country-scenes/20.png';
-import asset20 from '../assets/country-scenes/21.png';
-import asset21 from '../assets/country-scenes/22.png';
-import asset22 from '../assets/country-scenes/23.png';
 import asset23 from '../assets/country-scenes/24.png';
 import asset24 from '../assets/country-scenes/25.png';
 import asset25 from '../assets/country-scenes/26.png';
@@ -39,7 +32,6 @@ import asset36 from '../assets/country-scenes/37.png';
 import asset37 from '../assets/country-scenes/38.png';
 import asset38 from '../assets/country-scenes/39.png';
 import asset39 from '../assets/country-scenes/40.png';
-import asset40 from '../assets/country-scenes/41.png';
 import asset41 from '../assets/country-scenes/42.png';
 import asset42 from '../assets/country-scenes/43.png';
 import asset43 from '../assets/country-scenes/44.png';
@@ -69,6 +61,29 @@ import asset66 from '../assets/country-scenes/67.png';
 import asset67 from '../assets/country-scenes/68.png';
 import asset68 from '../assets/country-scenes/69.png';
 import asset69 from '../assets/country-scenes/70.png';
+import corrections from '../assets/country-scene-corrections/lake-repair-20261018-v1/manifest.json';
+
+// Fixed display metadata only; original source downloads keep their immutable URL.
+export function countrySceneDisplayRecord(file: string) {
+  const entry = corrections.entries.find((row) => `${row.number}.png` === file);
+  if (!entry) return null;
+  const base = import.meta.env.BASE_URL;
+  return {
+    corrected: true,
+    version: corrections.version,
+    sourcePath: entry.sourcePath,
+    displayUrl: `${base}${entry.displayPath}`,
+    originalUrl: `${base}${entry.original.publicUrl}`,
+    originalSourcePath: entry.original.sourcePath,
+    displaySha256: entry.sha256,
+    originalSha256: entry.original.sha256,
+  } as const;
+}
+const repaired = (file: string): string => {
+  const record = countrySceneDisplayRecord(file);
+  if (!record) throw new Error('Fixed corrected scene metadata missing');
+  return record.displayUrl;
+};
 
 export const countrySceneUrls: Readonly<Record<string, string>> = {
   '01.png': asset0,
@@ -81,19 +96,19 @@ export const countrySceneUrls: Readonly<Record<string, string>> = {
   '08.png': asset7,
   '09.png': asset8,
   '10.png': asset9,
-  '11.png': asset10,
-  '12.png': asset11,
-  '13.png': asset12,
-  '14.png': asset13,
+  '11.png': repaired('11.png'),
+  '12.png': repaired('12.png'),
+  '13.png': repaired('13.png'),
+  '14.png': repaired('14.png'),
   '15.png': asset14,
   '16.png': asset15,
   '17.png': asset16,
   '18.png': asset17,
   '19.png': asset18,
   '20.png': asset19,
-  '21.png': asset20,
-  '22.png': asset21,
-  '23.png': asset22,
+  '21.png': repaired('21.png'),
+  '22.png': repaired('22.png'),
+  '23.png': repaired('23.png'),
   '24.png': asset23,
   '25.png': asset24,
   '26.png': asset25,
@@ -111,7 +126,7 @@ export const countrySceneUrls: Readonly<Record<string, string>> = {
   '38.png': asset37,
   '39.png': asset38,
   '40.png': asset39,
-  '41.png': asset40,
+  '41.png': repaired('41.png'),
   '42.png': asset41,
   '43.png': asset42,
   '44.png': asset43,

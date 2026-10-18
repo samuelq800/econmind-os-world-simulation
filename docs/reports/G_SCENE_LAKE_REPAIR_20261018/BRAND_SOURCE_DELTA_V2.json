@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "BRAND_REVIEWED_SOURCE_DELTA_V1",
+  "nature": "DISPLAY_ONLY_SOURCE_DERIVATION_NOT_SOURCE_ARCHIVE_REPLACEMENT",
+  "baseMain": "1a40309601074fe37fa3526f66a0b5c0beedb308",
+  "stagedD": "a703ae6c7e08cf90833b8e2beb8e44bfaf9a6f2f",
+  "historicalRecordPins": {
+    "docs/reports/brand-shell-20261010/SOURCE.json": "6f18b13680d943d9de02d6d232de5f267629a7791d150a333e208a3ae21872c3",
+    "docs/reports/country-context-20261010/SOURCE.json": "356cf7aabd1e5cd47bfbc60b6b0457c4edbda1c03e0b2f18807841b35b2c0855"
+  },
+  "reason": "Forward source derivation for D-UI-01: only source-record link theme color, underline and visible focus are added; the four previously pinned D/G source postimages and all historical records remain unchanged.",
+  "rows": [
+    {
+      "sourceRecord": "docs/reports/brand-shell-20261010/SOURCE.json",
+      "path": "apps/world-web/package.json",
+      "before": {
+        "bytes": 828,
+        "sha256": "08df80946a5a66d4e13f768b17aae9da96ff9541054238f409dc235e287e7d6e"
+      },
+      "after": {
+        "bytes": 888,
+        "sha256": "44f9dae6cef11d3835bcd5fc52bcc50484737de1795b926ef8d2edfc02b02109"
+      }
+    },
+    {
+      "sourceRecord": "docs/reports/brand-shell-20261010/SOURCE.json",
+      "path": "apps/world-web/src/world-preview/PublicWorldMap.tsx",
+      "before": {
+        "bytes": 21442,
+        "sha256": "0f84538a738221eef18fd9a280bd970b3520a08cf8d88224c3d4bb0b5d19bdc6"
+      },
+      "after": {
+        "bytes": 22682,
+        "sha256": "9a0088aa7306c8c79c282cebf7220134ff8f3c198ce1608188fa6dd455b30a5b"
+      }
+    },
+    {
+      "sourceRecord": "docs/reports/brand-shell-20261010/SOURCE.json",
+      "path": "apps/world-web/src/world-preview/PublicWorldPreview.tsx",
+      "before": {
+        "bytes": 22218,
+        "sha256": "5a32dead331d43edaaaed0ceaff14d475ddcec49e35792e5276390f5439b3d56"
+      },
+      "after": {
+        "bytes": 23979,
+        "sha256": "71ed51599d34baa23cc427385023a72c393ccb117c899790c3ed9636455d956f"
+      }
+    },
+    {
+      "sourceRecord": "docs/reports/country-context-20261010/SOURCE.json",
+      "path": "apps/world-web/src/map-explorer/WorldExplorer.tsx",
+      "before": {
+        "bytes": 65217,
+        "sha256": "fb6dfba339ab80f4f6196fd59babb36e371164dbea99d9e41878ae2a48a2d68b"
+      },
+      "after": {
+        "bytes": 59542,
+        "sha256": "4e06c335493925bc86af1bcaed5254c9b8fe425473a730943b73289cb2549211"
+      }
+    },
+    {
+      "sourceRecord": "docs/reports/brand-shell-20261010/SOURCE.json",
+      "path": "apps/world-web/src/world-preview/public-world-preview.css",
+      "before": {
+        "bytes": 20344,
+        "sha256": "1909192284df3cc9cfcc035bf5955776dbc45f4cc77b7d4b8f5ca1d55cfe72f6"
+      },
+      "after": {
+        "bytes": 20611,
+        "sha256": "62dbe4146b3d0a18fa4e1d9c3ef369379397d6800ece03b4db1e2fa5cd0a2df7"
+      }
+    }
+  ],
+  "previousDeltaRecordSha256": "2b381e93354c1e50b6d7f8e5f97eb05401e02c9660bd73ddab5ef6c6f523ab89"
+}

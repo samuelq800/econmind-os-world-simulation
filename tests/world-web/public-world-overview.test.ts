@@ -303,4 +303,34 @@ describe('public homepage original country scenes', () => {
     expect(css).toContain('grid-template-rows: auto auto;');
     expect(css).toContain('grid-template-rows: 44px auto;');
   });
+  it('keeps source links legible on dark panels, underlined and visibly keyboard focused', async () => {
+    const css = await readFile(
+      'apps/world-web/src/world-preview/public-world-preview.css',
+      'utf8',
+    );
+    const links =
+      /\.preview-source-records a,\s*\.preview-source-records a:visited\s*\{([^}]+)\}/.exec(
+        css,
+      )![1]!;
+    expect(links).toContain('color: var(--preview-gold);');
+    expect(links).toContain('text-decoration: underline;');
+    const focus = /\.preview-source-records a:focus-visible\s*\{([^}]+)\}/.exec(
+      css,
+    )![1]!;
+    expect(focus).toContain('outline: 2px solid var(--preview-gold);');
+    expect(focus).toContain('outline-offset: 3px;');
+    const luminance = (token: string) => {
+      const hex = new RegExp(`${token}: (#\\w{6});`).exec(css)![1]!;
+      const rgb = [1, 3, 5].map((i) => {
+        const c = Number.parseInt(hex.slice(i, i + 2), 16) / 255;
+        return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      });
+      return rgb[0]! * 0.2126 + rgb[1]! * 0.7152 + rgb[2]! * 0.0722;
+    };
+    const foreground = luminance('--preview-gold');
+    for (const panel of ['--preview-panel', '--preview-nav'])
+      expect(
+        (foreground + 0.05) / (luminance(panel) + 0.05),
+      ).toBeGreaterThanOrEqual(4.5);
+  });
 });
