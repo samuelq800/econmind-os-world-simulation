@@ -461,13 +461,21 @@ async function assertDistPath(relative) {
   let current = dist;
   const top = await lstat(dist);
   demand(top.isDirectory() && !top.isSymbolicLink(), 'CORRECTION_DIST_INVALID');
-  for (const segment of relative.split('/')) {
+  const segments = relative.split('/');
+  for (const [index, segment] of segments.entries()) {
     current = path.join(current, segment);
     const stat = await lstat(current).catch((e) => {
       if (e.code === 'ENOENT') return null;
       throw e;
     });
     demand(!stat?.isSymbolicLink(), 'CORRECTION_OUTPUT_SYMLINK_DENIED');
+    demand(
+      !stat ||
+        (index === segments.length - 1 ? stat.isFile() : stat.isDirectory()),
+      index === segments.length - 1
+        ? 'CORRECTION_OUTPUT_REGULAR_FILE_REQUIRED'
+        : 'CORRECTION_OUTPUT_PARENT_DIRECTORY_REQUIRED',
+    );
   }
   return current;
 }

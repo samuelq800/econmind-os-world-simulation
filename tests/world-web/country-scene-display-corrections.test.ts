@@ -117,7 +117,9 @@ describe('fixed eight-country display correction source boundary', () => {
     for (const e of proof.manifest.entries) {
       const c = countrySceneDisplayRecord(`${e.number}.png`)!;
       expect(countrySceneUrls[`${e.number}.png`]).toBe(c.displayUrl);
-      expect(c.displayUrl).toBe(`${import.meta.env.BASE_URL}${e.displayPath}`);
+      expect(c.displayUrl).toBe(
+        `${import.meta.env.BASE_URL}${import.meta.env.DEV ? e.sourcePath.replace('apps/world-web/', '') : e.displayPath}`,
+      );
       expect(c.originalUrl).toBe(
         `${import.meta.env.BASE_URL}${e.original.publicUrl}`,
       );

@@ -67,11 +67,17 @@ export function countrySceneDisplayRecord(file: string) {
   const entry = catalogue?.entries.find((row) => `${row.number}.png` === file);
   if (!entry || !catalogue) return null;
   const base = import.meta.env.BASE_URL;
+  const devVersion =
+    catalogue === corrections
+      ? 'lake-repair-20261018-v1'
+      : 'geography-followup-20261018-v1';
   return {
     corrected: true,
     version: catalogue.version,
     sourcePath: entry.sourcePath,
-    displayUrl: `${base}${entry.displayPath}`,
+    displayUrl: import.meta.env.DEV
+      ? `${base}src/assets/country-scene-corrections/${devVersion}/${entry.number}.png`
+      : `${base}${entry.displayPath}`,
     originalUrl: `${base}${entry.original.publicUrl}`,
     originalSourcePath: entry.original.sourcePath,
     displaySha256: entry.sha256,
