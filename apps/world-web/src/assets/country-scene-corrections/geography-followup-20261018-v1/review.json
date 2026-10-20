@@ -1,0 +1,268 @@
+{
+  "schemaVersion": "COUNTRY_SCENE_FOLLOWUP_CANDIDATE_REVIEW_V1",
+  "version": "geography-followup-20261018-v1",
+  "scope": ["01", "09", "38", "40", "42"],
+  "reports": [
+    {
+      "markdown": "REVIEW_01_09_V1.md",
+      "markdownSha256": "d5b0dab22b4bc7d70314fde4669cee5630b07e85cc860c22af7a97cfebf323a2",
+      "json": "REVIEW_01_09_V1.json",
+      "jsonSha256": "c27d078ad1aa01c5ef5060e9c84a124ae5f1e618fb7a3cce9a501976aa342775",
+      "scope": ["01", "09"],
+      "actualImageViews": 6
+    },
+    {
+      "markdown": "REVIEW_38_40_42_V1.md",
+      "markdownSha256": "e6f36d32b10003daa96ffde73faa37bdce10eab9a194997582de28281ad815d4",
+      "json": "REVIEW_38_40_42_V1.json",
+      "jsonSha256": "8209b7a5788a4320d8c5ac9b83aa9e706dff68cd6a11eb2af878360aea5aa89d",
+      "scope": ["38", "40", "42"],
+      "actualImageViews": 9
+    }
+  ],
+  "decision": "APPROVED_FOR_ILLUSTRATIVE_ASSET_CANDIDATE_ONLY",
+  "codeApproval": false,
+  "mergeApproval": false,
+  "publicationApproval": false,
+  "geographyOrEconomicDataModified": false,
+  "exactPixelAnchorAlignment": "NOT_PROVEN",
+  "quantitativeSharpness": "NOT_RUN",
+  "all70Approved": false,
+  "rows": [
+    {
+      "number": "01",
+      "sha256": "9efd5fbf45d68ed01bd1789720bcfbbcbc259aa401231143bb8ac00197560816",
+      "originalSha256": "f613553b76fa708ab01972e44325574d92fa8ebd67b4e3afa662d6e941cafd00",
+      "reportMarkdownSha256": "d5b0dab22b4bc7d70314fde4669cee5630b07e85cc860c22af7a97cfebf323a2",
+      "reportJsonSha256": "c27d078ad1aa01c5ef5060e9c84a124ae5f1e618fb7a3cce9a501976aa342775",
+      "verdict": "APPROVED_FOR_ILLUSTRATIVE_ASSET_CANDIDATE_ONLY",
+      "actualOriginalCandidateReferenceViewed": true,
+      "principalLandmarksPreservedVisually": true,
+      "clarityVerdict": "NO_SIGNIFICANT_OVERALL_DEGRADATION_OBSERVED",
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "sourceContext": "D13 record number 01, geometry /territories/0: SW04 and S05 joins, legitimate NW/N bay, eastern mountain terrain. Reference visually shows continuous southern mainland.",
+      "findings": [
+        {
+          "check": "SW/S land continuity",
+          "result": "PASS_COARSE",
+          "observation": "Former broad SW/S water and lower harbour have been replaced by continuous mainland; no water band interrupts the lower developed landscape."
+        },
+        {
+          "check": "Preserve legitimate water and eastern terrain",
+          "result": "PASS_COARSE",
+          "observation": "Large NW/N bay remains, with the main waterside harbour and eastern mountain wall retained."
+        },
+        {
+          "check": "Existing principal landmarks",
+          "result": "PASS_VISUAL",
+          "observation": "Both mine pits and the tank/flare/solar landmark groups remain identifiable in their broad original arrangement. Mineral identity and productive capacity cannot be verified from appearance."
+        },
+        {
+          "check": "New geographic or industrial implausibility",
+          "result": "NO_OBVIOUS_NEW_DEFECT_OBSERVED",
+          "observation": "Added foreground reads as connected hills, woods, grassland and paths. No conspicuous new industrial complex or stranded/floating harbour was seen."
+        },
+        {
+          "check": "Clarity",
+          "result": "NO_SIGNIFICANT_OVERALL_DEGRADATION_OBSERVED",
+          "observation": "1254-square composition and recognizable fine scene details remain; some detail and texture were repainted, so this is not an unchanged-pixel claim."
+        }
+      ],
+      "uncertainties": [
+        "Exact shoreline position, national border and camera correspondence remain unregistered.",
+        "New local hills and paths are illustrative and not verified against a heightfield or road network.",
+        "Facility existence, ownership, resource type, reserves, production and runtime status are not established by the image."
+      ],
+      "requiredChanges": []
+    },
+    {
+      "number": "09",
+      "sha256": "f07098b15198587544868ba1a5029b6ce253925cbda285b8745ed9810fe35511",
+      "originalSha256": "411280534ce44755842803d8c07a7dddc9f45772e760316b999c9aa4e5d25854",
+      "reportMarkdownSha256": "d5b0dab22b4bc7d70314fde4669cee5630b07e85cc860c22af7a97cfebf323a2",
+      "reportJsonSha256": "c27d078ad1aa01c5ef5060e9c84a124ae5f1e618fb7a3cce9a501976aa342775",
+      "verdict": "APPROVED_FOR_ILLUSTRATIVE_ASSET_CANDIDATE_ONLY",
+      "actualOriginalCandidateReferenceViewed": true,
+      "principalLandmarksPreservedVisually": true,
+      "clarityVerdict": "NO_SIGNIFICANT_OVERALL_DEGRADATION_OBSERVED",
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "sourceContext": "D13 record number 09, geometry /territories/8: genuine W/NW coast and southern land joins to 19/20; no broad southern sea boundary.",
+      "findings": [
+        {
+          "check": "S19/20 land continuity",
+          "result": "PASS_COARSE",
+          "observation": "Continuous land reaches the full lower foreground; broad southern coastal wrapping is removed."
+        },
+        {
+          "check": "Preserve W/NW coast",
+          "result": "PASS_COARSE",
+          "observation": "Substantial western sea and the indented western shoreline remain. Repair did not erase the whole coast."
+        },
+        {
+          "check": "Existing principal landmarks",
+          "result": "PASS_VISUAL",
+          "observation": "Three readily identifiable pit complexes, the lower-central industrial group, central domed settlement and river/bridge sequence remain in their broad original arrangement. Appearance does not establish the four brief resource identities."
+        },
+        {
+          "check": "New geographic or industrial implausibility",
+          "result": "NO_OBVIOUS_NEW_DEFECT_OBSERVED",
+          "observation": "Added southern land blends as woodland, rock, grass and paths. Existing western harbour remains connected to sea; removed southern harbour leaves no obvious floating or landlocked pier remnant."
+        },
+        {
+          "check": "Clarity",
+          "result": "NO_SIGNIFICANT_OVERALL_DEGRADATION_OBSERVED",
+          "observation": "1254-square scene retains readable principal structures, fields, coast and terrain. Texture is somewhat repainted; exact sharpness equivalence is not claimed."
+        }
+      ],
+      "uncertainties": [
+        "Exact southern boundary and W-coast scale cannot be measured from the oblique illustration.",
+        "New foreground terrain/path detail is illustrative, not verified topographic or infrastructure data.",
+        "Facility existence, ownership, resource type, reserves, production and runtime status are not established by the image."
+      ],
+      "requiredChanges": []
+    },
+    {
+      "number": "38",
+      "sha256": "18699d3056480624a4bf0b263f7bfa537cdda87973832da2228b82f6309bd9f9",
+      "originalSha256": "f14b69c6585fdd3765bbd51ec6e10e3dab5b96b6b3a097ac28b189927bae2d62",
+      "reportMarkdownSha256": "e6f36d32b10003daa96ffde73faa37bdce10eab9a194997582de28281ad815d4",
+      "reportJsonSha256": "8209b7a5788a4320d8c5ac9b83aa9e706dff68cd6a11eb2af878360aea5aa89d",
+      "verdict": "APPROVED_FOR_ILLUSTRATIVE_ASSET_CANDIDATE_ONLY",
+      "actualOriginalCandidateReferenceViewed": true,
+      "principalLandmarksPreservedVisually": true,
+      "clarityVerdict": "NO_SIGNIFICANT_OVERALL_DEGRADATION_OBSERVED",
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "sourceContext": "D13 geometry /territories/37: real western island bodies; mainland S44 and SE45 joins, N/E mainland. Reference frame crosses map x=0; black padding is not sea.",
+      "findings": [
+        {
+          "check": "Southern mainland continuation",
+          "result": "PASS_COARSE",
+          "observation": "The former southern separating water band is replaced by continuous wooded/rocky mainland."
+        },
+        {
+          "check": "Western islands and sea",
+          "result": "PASS_COARSE",
+          "observation": "Both principal western island groups remain visibly water-separated; the broad western sea was not filled."
+        },
+        {
+          "check": "Principal landmarks",
+          "result": "PASS_VISUAL",
+          "observation": "Upper-right mine, central campus/town, upper-middle solar panels, gas-sphere complex, lower-right turbines and western oil/industrial island remain recognizable; island and mainland ports still meet water."
+        },
+        {
+          "check": "New implausible objects",
+          "result": "NO_OBVIOUS_NEW_DEFECT_OBSERVED",
+          "observation": "Added southern hills, fields, paths and small buildings read as contiguous terrain. No stranded pier or conspicuous new industrial complex was observed."
+        },
+        {
+          "check": "HD clarity",
+          "result": "NO_SIGNIFICANT_OVERALL_DEGRADATION_OBSERVED",
+          "observation": "Mine terraces/equipment, campus roofs, turbines, panels and shoreline detail remain readable. Textures and minor decorative detail changed, but no conspicuous scene-wide softening prevents approval."
+        }
+      ],
+      "uncertainties": [
+        "Exact southern boundary and camera correspondence remain unregistered.",
+        "Added local foreground terrain/buildings are illustrative, not verified infrastructure.",
+        "Black reference padding is excluded from geography interpretation."
+      ],
+      "requiredChanges": []
+    },
+    {
+      "number": "40",
+      "sha256": "3987a930d5eb0747531b75ef3422e830a86634c5d57979426b57fc5beea08bf8",
+      "originalSha256": "392c3b2b7809eb0bce51a2fa747c7d17e05c61b15b3d6359663ff92eba8489a9",
+      "reportMarkdownSha256": "e6f36d32b10003daa96ffde73faa37bdce10eab9a194997582de28281ad815d4",
+      "reportJsonSha256": "8209b7a5788a4320d8c5ac9b83aa9e706dff68cd6a11eb2af878360aea5aa89d",
+      "verdict": "APPROVED_FOR_ILLUSTRATIVE_ASSET_CANDIDATE_ONLY",
+      "actualOriginalCandidateReferenceViewed": true,
+      "principalLandmarksPreservedVisually": true,
+      "clarityVerdict": "NO_SIGNIFICANT_OVERALL_DEGRADATION_OBSERVED",
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "sourceContext": "D13 geometry /territories/39: local S water opening; SW45 and SE46 mainland joins; N/E mainland. Eleven grid coast edges do not specify photographic bay size.",
+      "findings": [
+        {
+          "check": "SW/SE mainland continuation",
+          "result": "PASS_COARSE",
+          "observation": "Substantial connected land now frames both sides of the southern harbour and continues off the image sides/bottom."
+        },
+        {
+          "check": "Local southern water opening",
+          "result": "PASS_COARSE",
+          "observation": "A single bounded harbour pocket and narrow southern exit remain. The valid opening was not removed, and broad SW/S sea wrapping is no longer present."
+        },
+        {
+          "check": "Principal landmarks",
+          "result": "PASS_VISUAL",
+          "observation": "Upper-left mine, lower-left tank/oil complex, right-middle rail hub, river/bridges, towns and the southern harbour are identifiable in their broad original arrangement."
+        },
+        {
+          "check": "New implausible objects",
+          "result": "NO_OBVIOUS_NEW_DEFECT_OBSERVED",
+          "observation": "Harbour boats and piers remain in water with an exit; no obvious stranded pier or new implausible industrial complex was seen."
+        },
+        {
+          "check": "HD clarity",
+          "result": "NO_SIGNIFICANT_OVERALL_DEGRADATION_OBSERVED",
+          "observation": "Rail-yard tracks/roofs, mine terraces, tank edges, field rows and harbour cranes remain legible. Some terrain detail is repainted/stylized, without conspicuous overall blur."
+        }
+      ],
+      "uncertainties": [
+        "Harbour pocket size and channel width are not camera-calibrated; approval is for a local opening with mainland flanks, not a measured match to 11 grid edges.",
+        "Harbour navigability, ship dimensions and actual port operation are not established.",
+        "The local southern water pocket does not assert ownership of neighboring land."
+      ],
+      "requiredChanges": []
+    },
+    {
+      "number": "42",
+      "sha256": "1e2cd39d7921f28552f8dc9a101a843497acf23a91deff110e21d54c7cd32235",
+      "originalSha256": "bf93f437aaf48a38ffc8034c7618f6f34f0a982eed52ff33ecd974f5d5df7ea4",
+      "reportMarkdownSha256": "e6f36d32b10003daa96ffde73faa37bdce10eab9a194997582de28281ad815d4",
+      "reportJsonSha256": "8209b7a5788a4320d8c5ac9b83aa9e706dff68cd6a11eb2af878360aea5aa89d",
+      "verdict": "APPROVED_FOR_ILLUSTRATIVE_ASSET_CANDIDATE_ONLY",
+      "actualOriginalCandidateReferenceViewed": true,
+      "principalLandmarksPreservedVisually": true,
+      "clarityVerdict": "NO_SIGNIFICANT_OVERALL_DEGRADATION_OBSERVED",
+      "exactPixelAnchorAlignment": "NOT_PROVEN",
+      "sourceContext": "D13 geometry /territories/41: NW/W/SW narrow watercourse with nearby opposing land, genuine SE sea, E43 mainland/mountain relation and a local S47 land join.",
+      "findings": [
+        {
+          "check": "NW/W/SW river morphology",
+          "result": "PASS_COARSE",
+          "observation": "A clear near opposite bank replaces the unbounded western sea; the water corridor is not erased."
+        },
+        {
+          "check": "Local S mainland continuation",
+          "result": "PASS_COARSE_WITH_REGISTRATION_LIMIT",
+          "observation": "The candidate has a visibly connected lower foreground land tongue rather than water isolating the full southern flank. The exact source S47 join cannot be positioned pixel-for-pixel."
+        },
+        {
+          "check": "SE sea and eastern mountains",
+          "result": "PASS_COARSE",
+          "observation": "The lower-right harbour and broad southeast water remain, while eastern mountain/mainland terrain is retained."
+        },
+        {
+          "check": "Principal landmarks",
+          "result": "PASS_VISUAL",
+          "observation": "Upper-left solar/turbine group, upper-right pit, middle-left mine/industrial group, lower-right turbines, lower gas-sphere complex, railway and southeast port remain identifiable. The small former upper-left dock is removed, with no stranded remnant; it is not one of the principal source-brief facilities."
+        },
+        {
+          "check": "New implausible objects",
+          "result": "NO_OBVIOUS_NEW_DEFECT_OBSERVED",
+          "observation": "Added western bank and southern terrain read as continuous forested/rocky land. Southeast port structures still meet water; no obvious floating or dry-land harbour was seen."
+        },
+        {
+          "check": "HD clarity",
+          "result": "NO_SIGNIFICANT_OVERALL_DEGRADATION_OBSERVED",
+          "observation": "Mine conveyors/terraces, solar-panel divisions, turbine blades, rail scene and harbour detail remain distinguishable. Fine decorative detail is repainted, but no conspicuous overall loss of clarity was observed."
+        }
+      ],
+      "uncertainties": [
+        "River width, camera orientation and exact S47 join placement remain unregistered.",
+        "The river route/near bank is approved as coarse morphology, not surveyed river geometry or navigability.",
+        "Added opposing-bank terrain does not establish country ownership or economic infrastructure."
+      ],
+      "requiredChanges": []
+    }
+  ]
+}

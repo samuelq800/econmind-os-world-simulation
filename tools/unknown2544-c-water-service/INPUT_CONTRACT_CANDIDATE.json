@@ -1,0 +1,184 @@
+{
+  "version": "C_COUNTRY01_WATER_SERVICE_INPUT_CONTRACT_20261018_V2_PROPOSED",
+  "status": "DESIGN_AND_SOURCE_RECOVERY_ONLY_PENDING_E_REVIEW",
+  "sourceKind": "CONSTRUCTED_SCENARIO_CANDIDATE_NOT_ADOPTED",
+  "slice": "COUNTRY_01 potable treatment plus distribution service; normalized per one raw m3 as a recipe coefficient basis, NOT an observed operating volume",
+  "owner": "C; D B02 owns the accepted service floor, F cash and D fiscal obligations are external and read-only",
+  "d69Frozen": "d69d5479f43dcf465f4e8d817f476e384d7141a2 remains unchanged; no 426-action re-extraction or old-model run",
+  "designBoundary": "No dependent service producer is implemented before E economic/units and B necessary engineering design review. This contract creates no authority, source issuer or second World truth.",
+  "candidateRecipeChoice": {
+    "proposedVersion": "exact r3Recipes /recipes/potableTreatmentOperationPerRawM3",
+    "basis": "The read fixed R3AM producer names this recipe and uses its three skill buckets, maintenance inputs, energy and net yield. Older WATER_GAME_PARAMETERS_PROPOSED has different labour and sale-price coefficients and is explicitly not adopted.",
+    "applicability": "Only a later explicitly adopted fictional fresh/filterable treatment-and-pipe scenario, with actual scoped facility/rights/operating-input evidence. Not a clinical water-safety standard, not all saline/contaminated water.",
+    "quantityBasis": "raw m3 input to treatment; treatment yield and distribution yield are applied once each",
+    "period": "caller supplies a specific positive simulation interval and its calendar binding; no Clock/epoch is started and no 24h staffed shift is inferred",
+    "nationalMinimum": "Not selected here. Earlier 20 L household + 2 L public proposal is not substituted for D B02 adopted normal/critical-service policy.",
+    "newPriceOrHoursChosen": false,
+    "financialValuation": "existing reference wage/commodity quotes can be recovered as proposed valuation inputs only; no legal wage, benefit, invoice or tariff admission is inferred"
+  },
+  "requiredInputs": [
+    {
+      "key": "serviceScope",
+      "owner": "D:B02",
+      "exactShape": "accepted service rule hash/version, COUNTRY_01 region/facility beneficiaries, DOMESTIC versus CRITICAL_PUBLIC demand, positive from/until interval, required net m3, quality class, coverage and payer; approval/readmission reference",
+      "why": "A unit recipe does not choose a national minimum or establish public medical coverage",
+      "currentlyBound": false
+    },
+    {
+      "key": "rawWaterAndRights",
+      "existingSeam": "WaterRight + WaterAllocationState",
+      "exactShape": "same basin/region/country/holder/source, quota with explicit raw-versus-net semantic basis, real grant validity covering the interval, seasonal runoff and ecological reserve, prior consumed lineage",
+      "why": "quota basis is not granted capacity or delivered potable water",
+      "currentlyBound": false
+    },
+    {
+      "key": "operatingCapacities",
+      "existingSeam": "WaterOperation.capacities",
+      "exactShape": "facilityRef and operatingEvidenceRef; abstractionPerDay and treatmentPerDay on raw m3/sim-day basis; networkPerDay on delivered net m3/sim-day basis; explicit same-period service constraints",
+      "why": "Source installed or repaired capacity cannot stand in for current effective capacity",
+      "currentlyBound": false
+    },
+    {
+      "key": "qualityAndLoss",
+      "exactShape": "raw quality applicability, treatment/quality evidence for that batch, treatment yield, distribution yield, storage loss/expiry if applicable, accepted delivered net quantity; no self-certified compliant flag",
+      "candidateLeaves": "r3 recipe quality is authored/actual unknown; yields 0.96 and 0.94 are candidates; no real quality evidence recovered",
+      "currentlyBound": false
+    },
+    {
+      "key": "skillHours",
+      "existingSeam": "existing E03 Labour positions/skill availability; no labour carrier replacement",
+      "exactShape": "LOW/MEDIUM/HIGH same-facility same-period available hours and actual occupied positions; explicitly accepted hours per recipe worker-day, with time basis and no double occupation",
+      "candidateLeaves": "three operation worker-day coefficients recovered, NOT converted to hours",
+      "currentlyBound": false
+    },
+    {
+      "key": "energyDelivery",
+      "existingSeam": "existing energy generation/storage/allocation fact, critical-public water load",
+      "exactShape": "required MWh from actual raw m3 and accepted operation coefficient; actual eligible delivered MWh in same interval with source/delivery binding; power MW and storage stock remain distinct",
+      "candidateLeaves": "electricityMWh coefficient recovered; old code reference 120 GCU/MWh is not actual tariff",
+      "currentlyBound": false
+    },
+    {
+      "key": "materialsAndMaintenance",
+      "exactShape": "actual same-owner usable STEEL tonnes and MACHINERY equipment units accepted for consumption, rights and period; quantities consumed once and native material/maintenance valuation provenance",
+      "candidateLeaves": "operation STEEL and MACHINERY coefficients plus reference commodity prices recovered; no free infinite parts",
+      "currentlyBound": false
+    },
+    {
+      "key": "transportAcceptance",
+      "existingSeam": "ShipmentTransitSnapshot/ShipmentOutcomeReport when freight is applicable; explicit local pipeline service evidence otherwise",
+      "exactShape": "accepted material cargo tonnes, verified route km, legal title, mode, accepted receipt and period for tonne-km; pipeline delivered m3 is not freight tonne-km",
+      "why": "This slice does not claim to resolve the national transport minimum or default it to zero for a local pipe",
+      "currentlyBound": false
+    },
+    {
+      "key": "completeNativeRecurringCost",
+      "exactShape": "explicit payer/native currency/period; every applicable component has source amount or accepted not-applicable/included relation; no unknown cost set to zero",
+      "components": [
+        "skill wages and legally applicable benefits/levies",
+        "energy tariff OR non-overlapping energy input cost",
+        "raw-water rights/abstraction charges",
+        "treatment chemicals and quality/monitoring",
+        "STEEL/MACHINERY maintenance or non-overlapping comprehensive contract",
+        "network/storage operation and maintenance",
+        "applicable freight/insurance",
+        "applicable fees and other contract-bound service items"
+      ],
+      "why": "Restoration capex, sale tariff and operating cost are distinct; 0.11 GCU/m3 sale reference is not cost. Component enumeration is a review checklist, not proof of an exhaustive legal-cost universe.",
+      "currentlyBound": false
+    }
+  ],
+  "D_B02Interface": {
+    "readOnlyRequest": [
+      "exact adopted protectedServiceFloor source/version and acceptance reference",
+      "beneficiary classes and normal/critical level",
+      "positive simulation interval and explicit calendar",
+      "required net potable quality/volume and country/region/facility scope",
+      "governance payer and cost boundary, without assuming a new payable"
+    ],
+    "CResponseAfterReview": [
+      "source-bound per-unit operation recipe",
+      "skill-hour and MWh/material demand with explicit dimensions",
+      "actual capacity/quality/delivery evidence or exact missing inputs",
+      "non-overlapping recurring native cost or incomplete components; no fiscal classification"
+    ],
+    "noNewDSourceWritten": true,
+    "noWaitingRequiredForSourceRecovery": true
+  },
+  "necessaryExistingSeamReport": [
+    {
+      "file": "packages/core/src/water/foundation.ts",
+      "issue": "Current rawCapacity is min(netRaw, abstraction, treatment), then deliveryEfficiency is applied before net network cap. For an approved two-yield recipe map the product once; do not put treatment yield into treatment capacity and multiply it again.",
+      "action": "No Core edit proposed; require source basis declarations and E/B review of mapping."
+    },
+    {
+      "file": "packages/core/src/water/foundation.ts",
+      "issue": "Right quota currently caps allocated delivered volume in the operation. Opening allocation source is raw/proposed water basis. Raw-versus-net grant semantics cannot be assumed equivalent.",
+      "action": "Keep original quantities; request exact adopted quota basis before any runtime mapping. No grant rewrite."
+    },
+    {
+      "file": "apps/world-worker/src/preparation/official-water-opening-adoption.ts",
+      "issue": "Existing grantValidity, treatmentFacility, networkCapacity, operatingPermission, pumpingPower and rawWaterQuality gaps are explicit and remain operative.",
+      "action": "Reuse existing constructors/consumer only after real input evidence; do not introduce a new source-admission mechanism."
+    }
+  ],
+  "originalFieldDifferences": [
+    {
+      "stableId": "U2544::COUNTRY::COUNTRY_01::waterPotableDeliveredMinimum",
+      "proposedDelta": "bind operation recipe/quality and raw-to-net definition; national minimum plus accepted delivery still required",
+      "originalValue": null
+    },
+    {
+      "stableId": "U2544::COUNTRY::COUNTRY_01::waterCompleteCostNative",
+      "proposedDelta": "recurring operation input and component scope replaces neither unknown complete cost nor legal payable",
+      "originalValue": null
+    },
+    {
+      "stableId": "U2544::COUNTRY::COUNTRY_01::labourMinimumHours",
+      "proposedDelta": "water-service skill worker-days recovered; hours conversion and other protected services remain separate",
+      "originalValue": null
+    },
+    {
+      "stableId": "U2544::COUNTRY::COUNTRY_01::labourPayrollNative",
+      "proposedDelta": "water-service native reference wage lead only; applicable lawful wage/benefits/period and national completeness remain required",
+      "originalValue": null
+    },
+    {
+      "stableId": "U2544::COUNTRY::COUNTRY_01::energyDeliveredMinimum",
+      "proposedDelta": "water-processing MWh demand coefficient only, not a national minimum or actual power delivery",
+      "originalValue": null
+    },
+    {
+      "stableId": "U2544::COUNTRY::COUNTRY_01::energyCompleteCostNative",
+      "proposedDelta": "water-load electricity quote lead, no complete generation cost or actual tariff",
+      "originalValue": null
+    },
+    {
+      "stableId": "U2544::COUNTRY::COUNTRY_01::transportMinimum",
+      "proposedDelta": "separate pipe-volume delivery from accepted material freight tonne-km; no zero inferred",
+      "originalValue": null
+    },
+    {
+      "stableId": "U2544::COUNTRY::COUNTRY_01::transportCompleteCostNative",
+      "proposedDelta": "freight/pipe cost inclusion must be explicit; no unrelated truck-repair subtotal reused",
+      "originalValue": null
+    }
+  ],
+  "reviewDecisionsRequested": [
+    "E: accept/revise exact R3 operation recipe choice as constructed candidate, never as observed/adopted fact",
+    "E/B: settle raw-versus-net quota and capacity semantic mapping without changing original source amounts",
+    "E/D: bind existing B02 normal/critical service definition; do not promote 20+2 L stress target",
+    "E: approve a sourced hours basis and recurring-cost inclusion contract before a dependent producer"
+  ],
+  "notAuthorized": [
+    "no national-rule default",
+    "no clinical quality assertion",
+    "no default-zero cost or transport",
+    "no source adoption",
+    "no runtime or grant construction",
+    "no World/Clock or production seed",
+    "no D/F source edits",
+    "no source flag as authority"
+  ],
+  "originalFieldsClosed": 0
+}

@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "G_FIXED_FIVE_SCENE_FOLLOWUP_SOURCE_V1",
+  "status": "IMPLEMENTED_UNVERIFIED_PREPARED_FOR_INDEPENDENT_CODE_REVIEW_NOT_PUBLISHED",
+  "baseMain": "3ac43bbaf1aea9e54c1aa84a79eb66eff065cf88",
+  "countries": ["01", "09", "38", "40", "42"],
+  "excludedUnapprovedCountries": ["15", "44", "56", "61", "63"],
+  "independentCandidateReviews": [
+    {
+      "markdown": "REVIEW_01_09_V1.md",
+      "markdownSha256": "d5b0dab22b4bc7d70314fde4669cee5630b07e85cc860c22af7a97cfebf323a2",
+      "json": "REVIEW_01_09_V1.json",
+      "jsonSha256": "c27d078ad1aa01c5ef5060e9c84a124ae5f1e618fb7a3cce9a501976aa342775",
+      "scope": ["01", "09"],
+      "actualImageViews": 6
+    },
+    {
+      "markdown": "REVIEW_38_40_42_V1.md",
+      "markdownSha256": "e6f36d32b10003daa96ffde73faa37bdce10eab9a194997582de28281ad815d4",
+      "json": "REVIEW_38_40_42_V1.json",
+      "jsonSha256": "8209b7a5788a4320d8c5ac9b83aa9e706dff68cd6a11eb2af878360aea5aa89d",
+      "scope": ["38", "40", "42"],
+      "actualImageViews": 9
+    }
+  ],
+  "candidateDecision": "APPROVED_FOR_ILLUSTRATIVE_ASSET_CANDIDATE_ONLY",
+  "codeReview": "PENDING_FIXED_COMMIT",
+  "finalExactHeadCI": "NOT_DISPATCHED",
+  "publicationAuthorization": "NOT_GIVEN",
+  "newManifest": {
+    "path": "apps/world-web/src/assets/country-scene-corrections/geography-followup-20261018-v1/manifest.json",
+    "sha256": "1916003f8e3fdfb38207712b6004a4f5fb73f97b57bf8880902ad2c840f906c7",
+    "reviewSha256": "e4d95c5eee4fdf65022b317d4739b700e876e6d09917caeb65c6bdb5a4e610ea"
+  },
+  "originalEightPreserved": {
+    "version": "lake-repair-20261018-v1",
+    "manifestSha256": "f94d25e60d0d3dd6d2e36093a17be456a1522db152e6e05ab8fb702156193833",
+    "reviewSha256": "7051d650e2582f3c96f74e0f70e957ddc831f508da3cc92d1218d3b4ade768fc",
+    "qualifiedVisualSubjects": 35
+  },
+  "newFiveVisualScope": "Coarse land/water and principal-landmark preservation with no obvious overall clarity degradation; no new resource identity, subject-count or production claim",
+  "exactPixelAnchorAlignment": "NOT_PROVEN",
+  "original203ManifestSha256": "9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f",
+  "publicationDesign": {
+    "immutableOriginals": "Original PNGs and 203-file catalogue unchanged",
+    "browser": "Only five former PNG imports become BASE_URL-relative fixed new-version display URLs;57 original imports and all70 keys remain",
+    "builder": "Original140 validation retained; two fixed private proof factories with distinct review meanings; all13 aliases and28 fixed destinations preflight before writes; original1GB final scan unchanged",
+    "callerOverrides": "None; CLI still only no-args or --check",
+    "webPackageAndHistoricalBrandPins": "Unchanged"
+  },
+  "budget": {
+    "status": "BOUND_ESTIMATES_NOT_ACTUAL_BUILD",
+    "actualBaselineStaticBytes": 947906353,
+    "baselinePagesRunId": 39118150655,
+    "newSourceBytes": 18369787,
+    "originalFiveBytes": 16583057,
+    "legacyAliasNetDelta": 1786730,
+    "metadataAllowanceBytes": 131072,
+    "absoluteBoundWithoutAnyReplacementOrDedupCredits": 984776999,
+    "conservativeBoundWithAliasReplacementButNoViteCredit": 968193942,
+    "plannedAssetDedupEstimate": 951610885,
+    "capBytes": 1000000000
+  },
+  "actualNewFullBuild": "NOT_RUN",
+  "newRenderedOverlayQA": "NOT_RUN",
+  "imageReencoding": false,
+  "originalImageOrGeometryOrEconomicDataModified": false,
+  "otherAuthorsSourceModified": false,
+  "productionSeedWorldClockActions": false
+}

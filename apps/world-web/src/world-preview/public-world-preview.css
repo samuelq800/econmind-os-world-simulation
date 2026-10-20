@@ -652,6 +652,16 @@ body[data-econmind-public-preview] {
   font-size: 10px;
   color: var(--preview-muted);
 }
+.preview-source-records a,
+.preview-source-records a:visited {
+  color: var(--preview-gold);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+.preview-source-records a:focus-visible {
+  outline: 2px solid var(--preview-gold);
+  outline-offset: 3px;
+}
 .preview-country-details {
   width: 304px;
   min-height: 0;

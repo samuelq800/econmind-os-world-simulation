@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "G_DISPLAY_SCENE_SOURCE_RELATION_V1",
+  "statusAtImplementation": "IMPLEMENTED_UNVERIFIED_NOT_PUBLISHED",
+  "baseMain": "1a40309601074fe37fa3526f66a0b5c0beedb308",
+  "stagedReviewedD": "a703ae6c7e08cf90833b8e2beb8e44bfaf9a6f2f",
+  "scope": "Eight fixed display illustrations plus shared display-provenance labels; D opening facts, asynchronous loading, geography and financial code retained",
+  "countries": ["11", "12", "13", "14", "21", "22", "23", "41"],
+  "rootAcceptedCandidateRecordSha256": "158f527b7c1a37bf5a36cd2f555b092bda6c7bc700d25c0c88c9df24e9d96664",
+  "independentReview": {
+    "initialThreeVisualSha256": "b27c6452e12cf474c3c3e60d2ed92a0694dd9f318126a6eb7911c3b1bb76751b",
+    "additionalFiveVisualSha256": "a1f464ed8a27a836f4f87ef258f2b5167764f20d1a67d97afe227f7454f9d72f",
+    "planSha256": "b5fef3faf8bda350fbc7bef04888d43a83412c98bbc7dbc7887102c2c4b4f478",
+    "planAddendumSha256": "f271cb15072c189b6853634a56a7e0742af683bc71b21db9f3556f130b68329c",
+    "verdict": "APPROVED_FOR_VISUAL_DELTA_ONLY",
+    "subjects": 35,
+    "exactPixelAnchorAlignment": "NOT_PROVEN",
+    "renderedMarkerCompatibility": "Separate implementation QA required; source review does not establish pixel coordinates",
+    "implementationAndPublicationReview": "PENDING_FIXED_COMMIT_B"
+  },
+  "newDisplayManifest": {
+    "path": "apps/world-web/src/assets/country-scene-corrections/lake-repair-20261018-v1/manifest.json",
+    "sha256": "f94d25e60d0d3dd6d2e36093a17be456a1522db152e6e05ab8fb702156193833",
+    "reviewSha256": "7051d650e2582f3c96f74e0f70e957ddc831f508da3cc92d1218d3b4ade768fc",
+    "nature": "DISPLAY_ONLY_IMAGE_CORRECTION_NOT_WORLD_STATE"
+  },
+  "brandSourceDerivation": {
+    "path": "docs/reports/G_SCENE_LAKE_REPAIR_20261018/BRAND_SOURCE_DELTA.json",
+    "sha256": "2b381e93354c1e50b6d7f8e5f97eb05401e02c9660bd73ddab5ef6c6f523ab89",
+    "fixedPostimages": 4,
+    "historicalBrandAndCountryContextRecordsRetained": true,
+    "reason": "Actual combined build rejected D/G changes to four historically pinned adapted sources; separate fixed before/after derivation preserves the original records and rejects unknown changes"
+  },
+  "originalSourceHistory": {
+    "selected203ManifestSha256": "9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f",
+    "originalImagesBriefIndexReviewsRetained": true,
+    "original140PublicationChecksRetained": true,
+    "originalSourceDownloadsRetained": true,
+    "oldCoastalPromptErrorsAreHistorical": true,
+    "all70AuditMeaning": "Original8 CONFIRMED,13 CANDIDATE,49 NOT_PROVEN retained; eight repaired visual candidates do not imply all70 verified",
+    "country12": "Nearby lake lies5 source-map units outside polygon with no shared shoreline; illustration grants no shoreline or title"
+  },
+  "publicationDesign": {
+    "react": "Fixed BASE_URL-relative corrected display URLs replace only eight imports; other62 scene images remain original",
+    "legacy": "Original publisher first verifies140 original assets; separately reviewed fixed dist aliases then display corrected bytes",
+    "versionedOutput": "scene-corrections/lake-repair-20261018-v1",
+    "sourceLabel": "Corrected display and immutable original downloads are separate and accurately labeled",
+    "packageBudgetBytes": 1000000000,
+    "realBuildDeploymentEvidence": "Recorded externally for exact implementation commit; this source record does not claim them"
+  },
+  "imagesReencoded": false,
+  "geographicCoordinatesModified": false,
+  "economicDataModified": false,
+  "sourceAdopted": false,
+  "productionSeedImported": false,
+  "clockStarted": false
+}

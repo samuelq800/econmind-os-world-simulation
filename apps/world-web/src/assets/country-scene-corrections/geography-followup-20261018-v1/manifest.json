@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "COUNTRY_SCENE_DISPLAY_CORRECTION_V1",
+  "version": "geography-followup-20261018-v1",
+  "nature": "DISPLAY_ONLY_IMAGE_CORRECTION_NOT_WORLD_STATE",
+  "baseCommit": "3ac43bbaf1aea9e54c1aa84a79eb66eff065cf88",
+  "originalManifestSha256": "9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f",
+  "originalUiManifestSha256": "ed79cd79d2bf6a22a9fa2f57931f9bde89ee70fe30ae828fc87bba951a0a61dd",
+  "previousCorrectionManifestSha256": "f94d25e60d0d3dd6d2e36093a17be456a1522db152e6e05ab8fb702156193833",
+  "reviewSha256": "e4d95c5eee4fdf65022b317d4739b700e876e6d09917caeb65c6bdb5a4e610ea",
+  "excludedCountries": ["15", "44", "56", "61", "63"],
+  "entries": [
+    {
+      "number": "01",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/geography-followup-20261018-v1/01.png",
+      "displayPath": "scene-corrections/geography-followup-20261018-v1/01.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/01.png",
+      "bytes": 3317120,
+      "sha256": "9efd5fbf45d68ed01bd1789720bcfbbcbc259aa401231143bb8ac00197560816",
+      "width": 1254,
+      "height": 1254,
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/01.png",
+        "bytes": 3114230,
+        "sha256": "f613553b76fa708ab01972e44325574d92fa8ebd67b4e3afa662d6e941cafd00",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/01.png"
+      }
+    },
+    {
+      "number": "09",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/geography-followup-20261018-v1/09.png",
+      "displayPath": "scene-corrections/geography-followup-20261018-v1/09.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/09.png",
+      "bytes": 3729664,
+      "sha256": "f07098b15198587544868ba1a5029b6ce253925cbda285b8745ed9810fe35511",
+      "width": 1254,
+      "height": 1254,
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/09.png",
+        "bytes": 3449556,
+        "sha256": "411280534ce44755842803d8c07a7dddc9f45772e760316b999c9aa4e5d25854",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/09.png"
+      }
+    },
+    {
+      "number": "38",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/geography-followup-20261018-v1/38.png",
+      "displayPath": "scene-corrections/geography-followup-20261018-v1/38.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/38.png",
+      "bytes": 3551188,
+      "sha256": "18699d3056480624a4bf0b263f7bfa537cdda87973832da2228b82f6309bd9f9",
+      "width": 1254,
+      "height": 1254,
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/38.png",
+        "bytes": 3345526,
+        "sha256": "f14b69c6585fdd3765bbd51ec6e10e3dab5b96b6b3a097ac28b189927bae2d62",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/38.png"
+      }
+    },
+    {
+      "number": "40",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/geography-followup-20261018-v1/40.png",
+      "displayPath": "scene-corrections/geography-followup-20261018-v1/40.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/40.png",
+      "bytes": 3888212,
+      "sha256": "3987a930d5eb0747531b75ef3422e830a86634c5d57979426b57fc5beea08bf8",
+      "width": 1254,
+      "height": 1254,
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/40.png",
+        "bytes": 3314281,
+        "sha256": "392c3b2b7809eb0bce51a2fa747c7d17e05c61b15b3d6359663ff92eba8489a9",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/40.png"
+      }
+    },
+    {
+      "number": "42",
+      "sourcePath": "apps/world-web/src/assets/country-scene-corrections/geography-followup-20261018-v1/42.png",
+      "displayPath": "scene-corrections/geography-followup-20261018-v1/42.png",
+      "legacyAlias": "season1-immersive/countries/assets/scenes/42.png",
+      "bytes": 3883603,
+      "sha256": "1e2cd39d7921f28552f8dc9a101a843497acf23a91deff110e21d54c7cd32235",
+      "width": 1254,
+      "height": 1254,
+      "original": {
+        "sourcePath": "apps/world-web/src/assets/country-scenes/42.png",
+        "bytes": 3359464,
+        "sha256": "bf93f437aaf48a38ffc8034c7618f6f34f0a982eed52ff33ecd974f5d5df7ea4",
+        "publicUrl": "official-map-source/9a83b2de3e0da39dae9e485e8de4be5bf236de26d68937c48c7941d7d50f795f/files/apps/world-web/src/assets/country-scenes/42.png"
+      }
+    }
+  ]
+}

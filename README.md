@@ -5,7 +5,77 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
-## Current preparation integration (2026-10-11)
+## Owner-authorized resumption (2026-10-18)
+
+负责人已直接恢复原 2544 缺口按既定 17 批的离线工具与权限工程；真实用户名单绑定
+单列待定，不虚构任命、权限或实际来源。下方 2026-10-17 的停止快照保留为历史，
+不再表示本轮所有工程必须停工；其旧检查、失败和证据边界不追溯改写。
+
+UI 公开预览的审查、合并与静态发布，数据/金融来源采用，以及运行准入分别验收。
+本说明不宣称 PR159 已发布，也不把 UI、fixture、工具或绿 CI 当作真实数据完成。
+来源尚缺时继续 `BLOCKED` / `null`，原字段不因离线工具通过而关闭。
+C300 后继候选的两项问题修复另行处理，未纳入本批已审工具集成。
+
+本轮不执行生产 seed、SQL 或 grants，不启动正式 World / Clock，不提升正式 gate。
+最终运行门槛仍只以 `status/progress.json` 及对应固定证据为准；后续集成与发布须
+分别核实实际候选、适用检查和授权，不能继承旧快照的通过结论。
+
+## Current delivery and stop checkpoint (2026-10-17)
+
+当前已核实的功能主线是 PR156 合并提交
+`27e7046cdd1e241ed53c9c41a7c020decda9e2d5`，tree 为
+`e5b80edff6b83c1df09d757e0c106f5d0045c9d0`。后续 README-only 提交不代表新增功能。
+下方更早日期的 checkpoint 均保留为历史证据，不作为当前运行或发布状态。
+正式 gate 仍只以 [`status/progress.json`](status/progress.json) 为准；本次说明不提升 gate。
+
+### 已交付与尚未合并
+
+| 范围                                                                         | 已核实结果                                                                                                  | 不代表什么                                                                |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| [PR154](https://github.com/samuelq800/econmind-os-world-simulation/pull/154) | 危机页语言连续性修复已独审、合并；适用 CI、限定桌面/手机检查及静态发布完成                                  | 不是全站翻译、70 国/420 视图或私人危机功能全验收                          |
+| [PR155](https://github.com/samuelq800/econmind-os-world-simulation/pull/155) | F 的 inert Reserve 阶段/生命周期协议已独审并合并为 `c1685db`；完整主测试 4236 PASS / 0 FAIL / 271 SKIP      | 不提供真实 source、SQL 观察、writer 权限或 UNKNOWN 恢复                   |
+| [PR156](https://github.com/samuelq800/econmind-os-world-simulation/pull/156) | D 的预算创建/批准纯域规划、历史一致性及未准入 carrier 已独审并合并为 `27e7046`；包出口/导入修复通过真实构建 | 不是实际受权批准记录、可支出预算或生产来源接入                            |
+| [PR157](https://github.com/samuelq800/econmind-os-world-simulation/pull/157) | C 的 Reserve 一致性/重放实现及两项修复已独审；Worker portable return-type 修复也获源码窄审接受              | 仍是草稿候选；最终组合 CI、main 合并及发布须分别核实，不继承 PR156 的结果 |
+
+PR156 的固定候选 `0b94442550e04d091112628635e8fe3f083ffd7f` 在
+[完整 CI 38934582536 的 attempt 2](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38934582536/attempts/2)
+完成成功：主测试 4262 PASS / 0 FAIL / 271 SKIP，292 个文件通过、24 个文件跳过。
+另有独立的 29 项 edge、40 项 boundary，以及两条各 1 PASS 的隔离 PostgreSQL 往返证据；
+这些分组不混加为一次全套运行，也不证明六职位生产闭环。
+attempt 1 超过 25 分钟被取消的记录、旧 TS6059/TS2883 构建失败及本地 pnpm
+非预期依赖准备事件均保留，不追溯改成 PASS。
+
+### 正式网站与数据连接边界
+
+[World 网站](https://world.econmind.group/) 的 PR156 自动
+[Pages 发布 38947590194](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/38947590194)
+已成功，部署源为精确 `27e7046`。A 已完成三项新的公开静态回读：入口 HTML、
+provenance 和 brand-shell JS 均为 HTTP 200，脚本字节与新 provenance 一致；
+来源记录固定值为 `6f18b13680d943d9de02d6d232de5f267629a7791d150a333e208a3ae21872c3`。
+这不是所有页面的现场遍历，也不是经济 API/Worker 发布或启用。
+
+- 70 国已选源包 `BALANCED_2026_09_28_V1` 与地图展示已有公开读取链；
+  34/34 数据集路由及目录的有限抽查通过，覆盖 HTTP/CORS、版本、声明 hash 与 DTO 结构。
+  数组只抽首条记录，geography 只核分节目录；未宣称全部记录、原始远端字节或经济正确性验收。
+- 公开源明确为 `liveWorldState=false`；源记录、proposal、静态 finance 和插图锚点
+  不能当作可支出余额、已建成设施、已执行合同或私人权限。
+- 主页保持公开世界预览，不公开操作台入口或私人经济状态；隐藏入口不是安全边界。
+  危机参与以受权职位操作台为主，公开未绑定状态不得显示伪造任务或可执行权限。
+- 仍缺真实受控 budget source 的创建/逐版本批准、来源定位与准入、完整同截止点 P/C/R、
+  实际 writer/事务/锁序接入，以及真实 seat 下六职位的读写闭环。
+  危机交付、贡献与系统模拟反馈仍需真实事件/回执支撑，计划和在途不计作已交付改善。
+- `UNADMITTED`、`TEST_ONLY`、纯函数、类型修复、fixture 或绿 CI 均不关闭真实 UNKNOWN，
+  不准入正式开局数据，也不产生真实 source/cache 观察或第二套权威经济状态。
+
+### 本轮停止点
+
+按负责人本轮指令：A、C 完成当前已分派交付并汇报后停工，不开启下一批。
+A 的 PR156 静态发布回读已完成并停止；C 仅收尾 PR157 最终组合提交、CI 派发与
+实际状态交接后停止。远端 CI 后续完成不自动授权继续合并、发布或施工。
+本轮不导入生产 seed、不改变生产 SQL/权限/凭据、不启动正式 World 或 Clock。
+这份停止快照不是删除尚未完成的产品需求；后续恢复须以固定交接与实际证据为起点。
+
+## Retained preparation integration (2026-10-11)
 
 PR135 已正常合并 G3A 修复与 B 审批锁序兼容，main 为 `5f104f1`，
 四项适用 CI 全部成功。完整主测试集 3326 PASS / 237 SKIP；另有独立原生往返通过。
@@ -65,7 +135,7 @@ executor 的 HOLD 部署入口、共用 Supabase 目标、无账号本机/CI验�
 Cloudflare 发布由项目负责人负责。该历史交接记录时 PR124 尚未合入；现已正常合并，
 更新 main 可取得已批准源码。下列历史 checkpoint 保留各自的证据范围。
 
-## Current opening-interface preparation (2026-10-09)
+## Retained opening-interface preparation (2026-10-09)
 
 The Owner resumed bounded preparation to accept a real opening package and wire
 existing interfaces. This is SOURCE_ONLY construction, not production startup.
