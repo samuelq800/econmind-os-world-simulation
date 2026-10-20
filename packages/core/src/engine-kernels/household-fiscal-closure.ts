@@ -1,4 +1,13 @@
 import {
+  stableReference,
+  immutableSourceSnapshotBinding,
+  sameLineage,
+  boundEvidence,
+  sameCurrency,
+  assertUniqueReferences,
+  assertFiscalReferenceMatch,
+} from './fiscal-budget-lineage-validation.js';
+import {
   decimal,
   kernelInvalid,
   maximum,
@@ -248,16 +257,6 @@ export interface FiscalTreasuryClosureResult {
   readonly replayProof: FoundationReplayProof;
 }
 
-const STABLE_REFERENCE = /^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u;
-const SHA256_HEX = /^[a-f0-9]{64}$/u;
-
-function stableReference(value: string, label: string): string {
-  if (!STABLE_REFERENCE.test(value)) {
-    kernelInvalid(`${label} must be a stable reference`);
-  }
-  return value;
-}
-
 function stableReferences(values: readonly string[], label: string) {
   if (values.length === 0)
     kernelInvalid(`${label} requires an input reference`);
@@ -266,64 +265,6 @@ function stableReferences(values: readonly string[], label: string) {
       stableReference(value, `${label} input reference ${index}`),
     ),
   );
-}
-
-function snapshotHash(value: string, label: string): string {
-  if (!SHA256_HEX.test(value)) {
-    kernelInvalid(`${label} must be a lowercase SHA-256 hex digest`);
-  }
-  return value;
-}
-
-function immutableSourceSnapshotBinding(
-  value: ImmutableSourceSnapshotBinding,
-  label: string,
-): ImmutableSourceSnapshotBinding {
-  return Object.freeze({
-    sourceRef: stableReference(value.sourceRef, `${label} source`),
-    sourceVersion: stableReference(value.sourceVersion, `${label} version`),
-    snapshotRef: stableReference(value.snapshotRef, `${label} snapshot`),
-    snapshotHash: snapshotHash(value.snapshotHash, `${label} snapshot hash`),
-    predecessorSnapshotHash:
-      value.predecessorSnapshotHash === null
-        ? null
-        : snapshotHash(
-            value.predecessorSnapshotHash,
-            `${label} predecessor snapshot hash`,
-          ),
-  });
-}
-
-function sameLineage(
-  expected: ImmutableSourceSnapshotBinding,
-  actual: ImmutableSourceSnapshotBinding,
-  label: string,
-): void {
-  if (
-    expected.sourceRef !== actual.sourceRef ||
-    expected.sourceVersion !== actual.sourceVersion ||
-    expected.snapshotRef !== actual.snapshotRef ||
-    expected.snapshotHash !== actual.snapshotHash ||
-    expected.predecessorSnapshotHash !== actual.predecessorSnapshotHash
-  ) {
-    kernelInvalid(`${label} must bind to the closure source snapshot lineage`);
-  }
-}
-
-function boundEvidence(
-  value: BoundFoundationEvidence,
-  expectedLineage: ImmutableSourceSnapshotBinding,
-  label: string,
-): BoundFoundationEvidence {
-  const lineage = immutableSourceSnapshotBinding(
-    value.lineage,
-    `${label} lineage`,
-  );
-  sameLineage(expectedLineage, lineage, label);
-  return Object.freeze({
-    evidenceRef: stableReference(value.evidenceRef, `${label} reference`),
-    lineage,
-  });
 }
 
 function replayProof(input: {
@@ -428,22 +369,6 @@ function quantityTrace(input: {
     delta: renderQuantity(delta.amount, before.unit),
     after: renderQuantity(after.amount, before.unit),
   });
-}
-
-function sameCurrency(expected: string, actual: string, label: string): void {
-  if (expected !== actual) kernelInvalid(`${label} currency must match`);
-}
-
-function assertUniqueReferences(
-  values: readonly string[],
-  label: string,
-): void {
-  const seen = new Set<string>();
-  for (const value of values) {
-    const canonical = stableReference(value, label);
-    if (seen.has(canonical)) kernelInvalid(`${label} must be unique`);
-    seen.add(canonical);
-  }
 }
 
 function settlementDelta(
@@ -551,11 +476,11 @@ function fiscalBudgetLineStates(
               submitted.predecessorCommitmentRef,
               'submitted budget commitment predecessor',
             );
-      if (predecessor !== expectedPredecessor) {
-        kernelInvalid(
-          'Submitted budget commitment predecessor does not match authoritative lineage',
-        );
-      }
+      assertFiscalReferenceMatch(
+        expectedPredecessor,
+        predecessor,
+        'Submitted budget commitment predecessor does not match authoritative lineage',
+      );
       const amount = nonNegativeMoney(
         submitted.amount,
         'submitted budget commitment amount',
@@ -590,11 +515,11 @@ function fiscalBudgetLineStates(
             snapshot.commitmentHeadRef,
             'fiscal budget-line commitment head',
           );
-    if (commitmentHeadRef !== expectedPredecessor) {
-      kernelInvalid(
-        'Fiscal budget-line commitment head does not match submitted lineage',
-      );
-    }
+    assertFiscalReferenceMatch(
+      expectedPredecessor,
+      commitmentHeadRef,
+      'Fiscal budget-line commitment head does not match submitted lineage',
+    );
     states.set(budgetLineRef, {
       budgetLineRef,
       appropriation: appropriation.amount,
@@ -1021,11 +946,11 @@ export function closeFiscalTreasury(
             commitment.predecessorCommitmentRef,
             'budget commitment predecessor',
           );
-    if (predecessor !== state.commitmentHeadRef) {
-      kernelInvalid(
-        'Budget commitment predecessor does not match submitted lineage',
-      );
-    }
+    assertFiscalReferenceMatch(
+      state.commitmentHeadRef,
+      predecessor,
+      'Budget commitment predecessor does not match submitted lineage',
+    );
     const newCommitment = nonNegativeMoney(
       commitment.newCommitment,
       'new budget commitment',
