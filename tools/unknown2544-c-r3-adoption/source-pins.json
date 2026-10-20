@@ -1,0 +1,52 @@
+{
+  "baseCommit": "08e59eeb1e9a08465c6c84942bb10d59350b99c8",
+  "originalReadContract": {
+    "commit": "0021320d660ad530b408dba5e313c5e52862385e",
+    "tree": "43f4412f89b8a4aa33b14e8c42cf1e4b43117fb6",
+    "schema": "C_ORIGINAL_16_REFERENCE_INPUT_BRIDGE_V1",
+    "meaning": "Reuse frozen original identity/unit/dependency rows; never rewrite pre-adoption C002"
+  },
+  "sources": {
+    "adoptionReceipt": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261020/OWNER_ADOPTION_20261020_R3_B02_G.json",
+      "bytes": 4136,
+      "sha256": "b20cc5abd5a11b78f6e7ff8cff64f145f240a115601fd631ef9f6f7dbb5cd558"
+    },
+    "recipe": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/R3_COST_AND_DEPENDENCY_RECIPES.json",
+      "bytes": 6948,
+      "sha256": "70cb4731e5b70bce15bffe2e9b2d9c1b092b0f8b6ff6baa0a54e463129054def"
+    },
+    "originalPacket": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261018/C/original-first16-08e-v1/CANDIDATE_16.json",
+      "bytes": 371499,
+      "sha256": "776dc13675036cbff0fa2278208bc81f203d35e5c1c31940d564f28f84e29b4e"
+    }
+  },
+  "readOnlyConsumers": [
+    {
+      "path": "tools/unknown2544-c-water-service/produce-candidate.mjs",
+      "bytes": 23691,
+      "sha256": "5ffb0af183378aecefff12533cae07ba3defa9dff871f3930e1465f9f0a8c3cf",
+      "fromLine": 81,
+      "throughLine": 116,
+      "meaning": "Existing real-source refusal stays unchanged; adopted parameters cannot issue actual operating facts"
+    },
+    {
+      "path": "packages/core/src/water/foundation.ts",
+      "bytes": 16573,
+      "sha256": "f03a2514ed6c24800c398e2729848d0d73d243051240812f82d2de6206fd5580",
+      "fromLine": 350,
+      "throughLine": 418,
+      "meaning": "Raw capacity times one combined delivery efficiency; grants and approved demands still required"
+    },
+    {
+      "path": "apps/world-worker/src/preparation/official-water-opening-adoption.ts",
+      "bytes": 18694,
+      "sha256": "844b8de2a3e137ea0e789b1e89a4fa5c97622f28e23f831a2a3739cf79880124",
+      "fromLine": 510,
+      "throughLine": 548,
+      "meaning": "Future actual consumer requires snapshot-bound FoundationFact operation; not called or changed here"
+    }
+  ]
+}
