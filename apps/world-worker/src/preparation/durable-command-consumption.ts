@@ -27,6 +27,8 @@ import {
   type ManualOfficeRuntimeReaders,
 } from './manual-office-command-composition.js';
 import type { AuthorizedOfficeContext } from '@econmind/core';
+import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import { validateManualOfficeCommandIntent } from '../intake/manual-office-command-intent.js';
 
 export const DURABLE_COMMAND_CONSUMPTION_STATUS =
   'PREPARATION_ONLY_NOT_RUNTIME_ACCEPTANCE' as const;
@@ -447,6 +449,10 @@ export function createDurableCommandConsumptionPreparation(input: {
         return blocked('COMMAND_NOT_DUE', command.commandId);
       if (row.queue_state === 'CLAIMED' && row.claimed_by !== holder)
         return blocked('CLAIM_REQUIRES_REVIEWED_RECOVERY', command.commandId);
+      if (command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND) {
+        validateManualOfficeCommandIntent(command);
+        return blocked('SOURCE_RUNTIME_UNAVAILABLE', command.commandId);
+      }
       if (manualCapability !== null) {
         const composition = createManualOfficeCommandComposition({
           command,

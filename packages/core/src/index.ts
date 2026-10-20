@@ -13,6 +13,7 @@ export {
   type BudgetInertResult,
   type BudgetRecordKind,
 } from './commands/finance-budget-appropriation.js';
+export { parseBudgetSourcePayload } from './commands/finance-budget-source-transition.js';
 export * from './commands/captain-political-capital-allocation.js';
 export * from './commands/receipt.js';
 export * from './commands/authenticated-financial-intake-contract.js';

@@ -28,7 +28,10 @@ export const officeFamilies = Object.freeze({
   CENTRAL_BANK: 'CORE_CENTRAL_BANK_OMO_V1',
   SOCIAL: 'CORE_SOCIAL_EMPLOYMENT_SERVICE_PLAN_V1',
 } as const satisfies Record<
-  ManualOfficeCommandRequestDto['officeId'],
+  Extract<
+    ManualOfficeCommandRequestDto['officeId'],
+    'CAPTAIN' | 'CENTRAL_BANK' | 'SOCIAL'
+  >,
   ManualOfficeCommandFamily
 >);
 export const exactKeys = (

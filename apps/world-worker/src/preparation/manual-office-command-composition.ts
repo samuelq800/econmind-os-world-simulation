@@ -42,6 +42,8 @@ import {
 } from '../persistence/social-job-match-candidate-source.js';
 import type { AtomicTransitionCandidateFactory } from '../persistence/atomic-transition-repository.js';
 import type { SqlDatabase } from '../persistence/sql-database.js';
+import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
+import { validateManualOfficeCommandIntent } from '../intake/manual-office-command-intent.js';
 
 /** Server constructor dependencies only. No request snapshot, prebuilt draft,
  * caller candidateFactory, readiness registry or automatic publisher port. */
@@ -57,11 +59,21 @@ export interface ManualOfficeRuntimeReaders {
 export function manualOfficeCapability(command: CanonicalCommand) {
   switch (command.commandType) {
     case CAPTAIN_POLITICAL_CAPITAL_COMMAND:
-      return CAPTAIN_POLITICAL_CAPITAL_CAPABILITY;
+      return command.officeId === 'CAPTAIN'
+        ? CAPTAIN_POLITICAL_CAPITAL_CAPABILITY
+        : null;
     case CENTRAL_BANK_OMO_COMMAND:
-      return CENTRAL_BANK_OMO_CAPABILITY;
+      return command.officeId === 'CENTRAL_BANK'
+        ? CENTRAL_BANK_OMO_CAPABILITY
+        : null;
     case SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND:
-      return SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY;
+      return command.officeId === 'SOCIAL'
+        ? SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY
+        : null;
+    case FINANCE_BUDGET_APPROPRIATION_COMMAND:
+      return command.officeId === 'FINANCE'
+        ? ('FINANCE_BUDGET' as const)
+        : null;
     default:
       return null;
   }
@@ -166,6 +178,10 @@ export function createManualOfficeCommandComposition(input: {
   const cap = manualOfficeCapability(command);
   if (cap === null) invalid('Manual factory requires a supported family');
   switch (command.commandType) {
+    case FINANCE_BUDGET_APPROPRIATION_COMMAND:
+      validateManualOfficeCommandIntent(command);
+      // Deliberately no budget reader/factory/guard port or positive source.
+      return null;
     case CAPTAIN_POLITICAL_CAPITAL_COMMAND: {
       parseCaptainPoliticalCapitalAllocation(command, digest);
       if (!input.readers.captain) return null;

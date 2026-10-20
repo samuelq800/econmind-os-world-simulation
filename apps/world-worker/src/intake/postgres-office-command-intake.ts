@@ -29,10 +29,11 @@ import {
   type CanonicalCommand,
 } from '@econmind/core';
 import type { FinancialIntakeBindingDto } from '@econmind/core/authenticated-financial-intake-contract';
-import type {
-  ManualOfficeSourceRejectionDto,
-  ManualOfficeQueueAcknowledgementDto,
-  ManualOfficeCommandRequestDto,
+import {
+  FINANCE_BUDGET_APPROPRIATION_COMMAND,
+  type ManualOfficeSourceRejectionDto,
+  type ManualOfficeQueueAcknowledgementDto,
+  type ManualOfficeCommandRequestDto,
 } from '@econmind/core/authenticated-office-command-contract';
 
 import {
@@ -73,7 +74,7 @@ function conflict(): never {
   );
 }
 
-/** Transport shape only: the three existing Core parsers validate economics. */
+/** Transport shape only: exact family parsers validate economic payloads. */
 export function parseManualOfficeCommandRequest(
   input: unknown,
 ): ManualOfficeCommandRequestDto {
@@ -114,18 +115,28 @@ export function parseManualOfficeCommandRequest(
     (row.officeId === 'CENTRAL_BANK' &&
       row.commandType === CENTRAL_BANK_OMO_COMMAND) ||
     (row.officeId === 'SOCIAL' &&
-      row.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND)
+      row.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND) ||
+    (row.officeId === 'FINANCE' &&
+      row.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND)
   ))
     invalid();
   return Object.freeze(row) as unknown as ManualOfficeCommandRequestDto;
 }
 
-const capability = (office: ManualOfficeCommandRequestDto['officeId']) =>
-  office === 'CAPTAIN'
-    ? CAPTAIN_POLITICAL_CAPITAL_CAPABILITY
-    : office === 'CENTRAL_BANK'
-      ? CENTRAL_BANK_OMO_CAPABILITY
-      : SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY;
+const capability = (office: ManualOfficeCommandRequestDto['officeId']) => {
+  switch (office) {
+    case 'CAPTAIN':
+      return CAPTAIN_POLITICAL_CAPITAL_CAPABILITY;
+    case 'CENTRAL_BANK':
+      return CENTRAL_BANK_OMO_CAPABILITY;
+    case 'SOCIAL':
+      return SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY;
+    case 'FINANCE':
+      return 'FINANCE_BUDGET' as const;
+    default:
+      return invalid();
+  }
+};
 
 export const OFFICE_COMMAND_CURRENT_BINDING_QUERY = `
 select seat.seat_ref, authz.team_id, authz.authorization_version,
@@ -214,11 +225,15 @@ export class PostgresOfficeCommandIntake {
     const request = parseManualOfficeCommandRequest(input.request);
     const b = input.binding;
     const runtime = this.config.runtime;
-    const positive = boundManualOfficeIntakeRuntime(runtime, {
-      pool: this.config.pool,
-      clock: this.config.clock,
-      worldId: request.worldId,
-    });
+    // No budget source/guard/consumer is installed. A runtime for another
+    // family cannot enable budget registration, including an existing-ID retry.
+    const positive =
+      request.commandType !== FINANCE_BUDGET_APPROPRIATION_COMMAND &&
+      boundManualOfficeIntakeRuntime(runtime, {
+        pool: this.config.pool,
+        clock: this.config.clock,
+        worldId: request.worldId,
+      });
     const rejected = (): ManualOfficeSourceRejectionDto =>
       Object.freeze({
         status: 'REJECTED',
