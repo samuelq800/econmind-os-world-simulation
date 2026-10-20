@@ -1,0 +1,51 @@
+{
+  "baseCommit": "08e59eeb1e9a08465c6c84942bb10d59350b99c8",
+  "sources": {
+    "ledger": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-13/task/unknown2544-completion-v1/UNKNOWN_LEDGER.json",
+      "bytes": 7255116,
+      "sha256": "cedd88979d3cd8dd148d151906ebf5ddee76a76c5c706659676796f58b3a9ccb"
+    },
+    "batches": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261018/input-approved17/execution_batches.json",
+      "bytes": 169396,
+      "sha256": "de8d1d9c52400d675b276f2e9df14ba79870647b579da29630a10746a28fa741"
+    },
+    "physical": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261018/C/v1-candidate/CANDIDATE.json",
+      "bytes": 984645,
+      "sha256": "14c087376857a6592d576fc293f92dfc92062a0f86c1a53faa32277493cb851f"
+    },
+    "waterRecovery": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261018/C/v2-water-design/SOURCE_DELTA.json",
+      "bytes": 28348,
+      "sha256": "3a8d709eb02d043b302830613f0be19677cca859c3b2cdd7e2992e5b274a48ac"
+    },
+    "repair": {
+      "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261018/C/repair-inputs-implementation-v1/run-2/REAL_SOURCE_OUTPUT.json",
+      "bytes": 18193,
+      "sha256": "5fcd035a6b174bf2ce8fa8fa96de02ca7c199ca6832c2aaa361b21968418f9d7"
+    },
+    "water": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2/inputs/water-allocations.json",
+      "bytes": 54600,
+      "sha256": "53b4d7cd0425f6a0789cad2e1bcd0800420a5010f38307e895742df1c0567841"
+    },
+    "trade": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2/inputs/trade-plans.json",
+      "bytes": 520880,
+      "sha256": "c3c8c74dc81d13c0115fd1b5fff1b6f886fd79b3b6ba60b9659b126b0db928cd"
+    },
+    "ownerReceipt": {
+      "path": "docs/governance/owner-inputs/2026-10-07/OWNER_NON_HOST_DECISION_RECEIPT.json",
+      "bytes": 4500,
+      "sha256": "2c06c4bd1157a2d245143190c4d17b0499b5d09f42159a414846d0f9bcb8d99e"
+    },
+    "owner": {
+      "path": "docs/governance/owner-inputs/2026-10-07/OWNER_NON_HOST_DECISIONS.original.md",
+      "bytes": 36506,
+      "sha256": "57bfdec38a9a400991cb26362a99d33d7a81c8e6258c03460185e51501fb5ac5",
+      "format": "text"
+    }
+  }
+}

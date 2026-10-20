@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "noEmit": true,
+    "skipLibCheck": false,
+    "paths": { "@econmind/core": ["../../packages/core/src/index.ts"] }
+  },
+  "files": [
+    "../../apps/world-worker/src/preparation/entity-native-cash-source-slice.ts",
+    "../world-core/entity-native-cash-source-slice.test.ts"
+  ]
+}
