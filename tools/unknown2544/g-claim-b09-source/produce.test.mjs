@@ -42,6 +42,68 @@ test('four real source associations preserve original nulls and eight opposite l
   assert.ok(Object.values(output.authority).every((v) => v === false));
 });
 
+test('serialized packet resolves all four local associations and preserves external source bases', () => {
+  const packet = JSON.parse(
+    JSON.stringify(produceB09Packet(raw, comparison, support)),
+  );
+  const resolvePointer = (document, pointer) =>
+    pointer
+      .split('/')
+      .slice(1)
+      .reduce(
+        (value, key) =>
+          value?.[key.replaceAll('~1', '/').replaceAll('~0', '~')],
+        document,
+      );
+  const documents = Object.fromEntries(
+    Object.entries(raw).map(([key, bytes]) => [key, JSON.parse(bytes)]),
+  );
+  for (const [index, row] of packet.rows.entries()) {
+    assert.equal(Object.hasOwn(row, 'scenarioTemplatePointer'), false);
+    assert.equal(row.candidateAssociationPointerBase, 'THIS_PACKET');
+    assert.equal(
+      row.candidateAssociationPointer,
+      `/rows/${index}/candidateAssociation`,
+    );
+    const association = resolvePointer(packet, row.candidateAssociationPointer);
+    assert.equal(association, row.candidateAssociation);
+    assert.ok(
+      association.legs.every(
+        (leg) => leg.proposedRegistration.canonicalClaimId === row.ownerId,
+      ),
+    );
+    assert.equal(
+      resolvePointer(
+        documents[row.originalRecord.source],
+        row.originalRecord.pointer,
+      ).stableId,
+      row.stableId,
+    );
+    assert.equal(
+      resolvePointer(documents[row.sourceField.source], row.sourceField.pointer)
+        .value,
+      null,
+    );
+    const terms = resolvePointer(
+      documents[association.instrument.source.source],
+      association.instrument.source.pointer,
+    );
+    assert.equal(terms.canonicalClaimId, row.ownerId);
+    assert.equal(terms.issuerCBEntityId, association.instrument.issuerId);
+    assert.equal(terms.creditorCBEntityId, association.instrument.holderId);
+    assert.equal(terms.nativePrincipal, association.instrument.principal);
+    assert.equal(
+      resolvePointer(JSON.parse(comparison), association.comparison.pointer)
+        .canonicalClaimId,
+      row.ownerId,
+    );
+    assert.equal(
+      resolvePointer(JSON.parse(support.d48), association.d48.pointer).stableId,
+      row.stableId,
+    );
+  }
+});
+
 const cases = [
   [
     'duplicate claim',

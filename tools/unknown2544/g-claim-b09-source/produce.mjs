@@ -173,7 +173,7 @@ export function produceB09Packet(rawSources, comparisonBytes, supportBytes) {
   validateD48Relations(candidate, support.d48, support.positions);
   const rows = candidate.fieldMappings
     .filter((r) => r.adoptedPlanBatch === 'B09')
-    .map((r) => {
+    .map((r, rowIndex) => {
       const scenario = candidate.scenarios.find(
         (s) => s.originalClaimSelector === r.ownerId,
       );
@@ -190,8 +190,13 @@ export function produceB09Packet(rawSources, comparisonBytes, supportBytes) {
           e.actualTitle === 'UNKNOWN',
         'ECONOMIC_COMPARISON_JOIN',
       );
+      // The compiler's /scenarios tree is not serialized in this packet.
+      const mapping = { ...r };
+      delete mapping.scenarioTemplatePointer;
       return {
-        ...r,
+        ...mapping,
+        candidateAssociationPointerBase: 'THIS_PACKET',
+        candidateAssociationPointer: `/rows/${rowIndex}/candidateAssociation`,
         candidateAssociation: {
           nature: 'CONSTRUCTED_PROPOSED_ROLES_NOT_ACTUAL_TITLE',
           instrument: scenario.proposedInstrument,
