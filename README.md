@@ -20,6 +20,42 @@ C300 后继候选的两项问题修复另行处理，未纳入本批已审工具
 最终运行门槛仍只以 `status/progress.json` 及对应固定证据为准；后续集成与发布须
 分别核实实际候选、适用检查和授权，不能继承旧快照的通过结论。
 
+### Offline construction checkpoint (2026-10-20)
+
+Verified main `c66ef3d65a2ea4b7f0601044425341df25a978f4` includes PR161, PR164,
+PR165 and PR166. This is an engineering checkpoint, not a deployment or actual-data
+adoption claim; older dated checkpoints retain their original evidence boundaries.
+
+- [Water-operation input contract](tools/unknown2544-c-water-service/README.md):
+  offline recovery and proposed service inputs, not adopted water quality,
+  a national service floor or a complete operating cost.
+- [Accepted-freight extractor](tools/unknown2544-c-transport-source/accepted-freight.mjs):
+  one pinned reference event, not a national transport floor or an actual World receipt.
+- [Two-case coupon extractor](tools/unknown2544/d-fiscal-source/extract-contract-coupon-fact.mjs):
+  exact quoted-source coupon facts, not adopted legal obligations, payment or settlement.
+- [Claim-source compiler](tools/g-claim-source-candidate.mjs) and
+  [native claim association](apps/world-worker/src/preparation/native-claim-source-link.ts):
+  source candidates and mirror/value links, not cash funding, admitted claims or spendable balances.
+- Budget [typed intake and payload validation](apps/world-worker/src/intake/manual-office-command-intent.ts)
+  are wired, but [consumption remains default-deny](apps/world-worker/src/preparation/durable-command-consumption.ts)
+  (`SOURCE_RUNTIME_UNAVAILABLE`), without a positive budget source/factory.
+  The [budget source domain](packages/core/src/commands/finance-budget-source-transition.ts)
+  remains unregistered `TEST_ONLY` semantics. The
+  [callback-scoped lineage view](apps/world-worker/src/persistence/validated-canonical-lineage.ts)
+  uses the existing Worker reader/executor and expires with its callback. It is read-only
+  preparation, not source admission, locks/isolation proof or permission to commit.
+
+C7 inert Reserve and the two offline repair additions are reviewed inputs to the
+current final candidate, composed by F. They belong to this final composition, not
+a separate future construction batch; final candidate checks and a normal merge
+remain separate gates. Their inert/offline scope is not actual source adoption or funding.
+Old guardrail, fixture and full-CI passes do not establish actual source completeness,
+cash, permissions or a production execution path. Original-field closures in the
+2,544-gap ledger remain **0**; missing actual inputs remain `BLOCKED` / `null`.
+Real user/office roster binding remains pending. Production seed, SQL/grants and the
+formal World / Clock are not enabled by these integrations; formal gate status remains
+owned by [`status/progress.json`](status/progress.json).
+
 ## Current delivery and stop checkpoint (2026-10-17)
 
 当前已核实的功能主线是 PR156 合并提交
