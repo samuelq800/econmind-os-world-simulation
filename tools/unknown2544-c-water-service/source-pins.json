@@ -1,0 +1,65 @@
+{
+  "sources": {
+    "waterV2": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/WATER_GAME_PARAMETERS_PROPOSED.json",
+      "sha256": "b0bd8dd0263bf1ff4ca3d0eab29a75b5a57fabc893c9783cb84e63a6bc023cbc"
+    },
+    "r3Recipes": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/R3_COST_AND_DEPENDENCY_RECIPES.json",
+      "sha256": "70cb4731e5b70bce15bffe2e9b2d9c1b092b0f8b6ff6baa0a54e463129054def"
+    },
+    "r3Scene": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/R3_SCENE_PARAMETERS.json",
+      "sha256": "7a50f0fc0002231431fc59f350e5850734bd77fc96adcc24d2a4fce044feb957"
+    },
+    "r6Effective": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/JOINT_R6_EFFECTIVE_PARAMETERS.json",
+      "sha256": "921bc10dd88553ce9dacdbbafe0535b5d6df09a9a4a38b2262ddbda3353eb747"
+    },
+    "r3FinalOverrides": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/R3AF_PERMANENT_PARAMETERS.json",
+      "sha256": "1249522ade07b5a8abf0d1be6bdfbd0d4837826a4440855065f88f469c8574a7"
+    },
+    "r3FinalProducer": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/regional_joint_r3am_startup.py",
+      "sha256": "7c058cb3ef12a333f9df5c48a04475bee1538de0161565d063a4213d954cf396",
+      "textOnly": true
+    },
+    "commodity": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2/inputs/commodity-catalog.json",
+      "sha256": "b1f9a100bdb80627e31801ffaf1b2c7863a2996cedba0344de8a899c616eff2b"
+    },
+    "finance": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2/inputs/finance.json",
+      "sha256": "4f30d7dd43aa2190604d4fb73c776a8d4aaa263653dc783def6f7c2c5cc80805"
+    },
+    "employment": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2/inputs/employment.json",
+      "sha256": "f5e5f79d9d0453f291c05840ee468fa71b7e021e29a79766cc75530a1986155f"
+    }
+  },
+  "repositoryTextSources": {
+    "adoptedOwner": {
+      "path": "docs/governance/owner-inputs/2026-10-07/OWNER_NON_HOST_DECISIONS.original.md",
+      "sha256": "57bfdec38a9a400991cb26362a99d33d7a81c8e6258c03460185e51501fb5ac5",
+      "ranges": [
+        [221, 231],
+        [233, 247],
+        [249, 261]
+      ]
+    },
+    "waterCore": {
+      "path": "packages/core/src/water/foundation.ts",
+      "sha256": "f03a2514ed6c24800c398e2729848d0d73d243051240812f82d2de6206fd5580",
+      "ranges": [
+        [67, 140],
+        [350, 419]
+      ]
+    },
+    "waterOpening": {
+      "path": "apps/world-worker/src/preparation/official-water-opening-adoption.ts",
+      "sha256": "844b8de2a3e137ea0e789b1e89a4fa5c97622f28e23f831a2a3739cf79880124",
+      "ranges": [[251, 301]]
+    }
+  }
+}
