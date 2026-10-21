@@ -273,6 +273,21 @@ function change(
 }
 const field = (input: FeeBufferDraftInput, index: number) =>
   build(input).rows[index]!;
+const sourceTraceEntry = (
+  document: DraftDocument,
+  pointer: string,
+  rawLeaf: unknown,
+) =>
+  expect.objectContaining({
+    documentId: document.documentId,
+    documentVersion: document.documentVersion,
+    sha256: document.sha256,
+    byteLength: document.byteLength,
+    sourceClass: document.sourceClass,
+    sourceCustody: 'NOT_VERIFIED',
+    pointer,
+    rawLeaf,
+  });
 const amount = (value: unknown) => obj(value).amount;
 const total = (input: FeeBufferDraftInput) =>
   build(input).diagnostics.feeTotalCandidate?.amount;
@@ -557,10 +572,55 @@ it('P01 fixed per-event candidate2, source trace and all actual/adoption false',
   expect(total(f)).toBe('2');
   expect(field(f, 0).candidateStatus).toBe('DRAFT_POLICY_COMPLETE');
   expect(field(f, 0).sourceTrace.length).toBeGreaterThan(1);
+  expect(field(f, 1).sourceTrace).toEqual(
+    expect.arrayContaining([
+      sourceTraceEntry(
+        f.documents[0]!,
+        '/payload',
+        expect.objectContaining({
+          precision: precision(),
+        }),
+      ),
+      sourceTraceEntry(
+        f.documents[0]!,
+        '/payload/chargeBasis/fixedNative',
+        '2',
+      ),
+      sourceTraceEntry(
+        f.documents[1]!,
+        '/payload/events/0/nativeBaseOrExplicitNotApplicable',
+        'NOT_APPLICABLE_FIXED',
+      ),
+      sourceTraceEntry(f.documents[1]!, '/assessedFee', '2'),
+    ]),
+  );
   noAuthority(f);
 });
 it('P02 exact fractional0.025*100=2.5 with inactive fixed null', () => {
-  expect(total(fixture({ kind: 'FRACTIONAL_NATIVE' }))).toBe('2.5');
+  const f = fixture({ kind: 'FRACTIONAL_NATIVE' });
+  expect(total(f)).toBe('2.5');
+  expect(field(f, 1).sourceTrace).toEqual(
+    expect.arrayContaining([
+      sourceTraceEntry(
+        f.documents[0]!,
+        '/payload',
+        expect.objectContaining({
+          precision: precision(),
+        }),
+      ),
+      sourceTraceEntry(
+        f.documents[0]!,
+        '/payload/chargeBasis/rateFraction',
+        '0.025',
+      ),
+      sourceTraceEntry(
+        f.documents[1]!,
+        '/payload/events/0/nativeBaseOrExplicitNotApplicable',
+        '100',
+      ),
+      sourceTraceEntry(f.documents[1]!, '/assessedFee', '2.5'),
+    ]),
+  );
 });
 it('P03 explicit mixed2+0.025*100=4.5', () => {
   expect(total(fixture({ kind: 'COMBINED_EXPLICIT' }))).toBe('4.5');
@@ -862,6 +922,7 @@ it('A01 caller flags/issuer reject; unrelated adoption locator stays unverified'
   };
   const r = noAuthority(f);
   expect(r.rows[0]!.adoptionDiagnostics.applied).toBe(false);
+  expect(r.rows[1]!.adoptionDiagnostics.locator).toBeNull();
   expect(r.rows[0]!.candidateValue).not.toBeNull();
   const draft = fixture();
   draft.mode = 'DRAFT_ONLY';

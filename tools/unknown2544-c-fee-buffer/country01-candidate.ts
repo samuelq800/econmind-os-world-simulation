@@ -968,6 +968,16 @@ export function buildCountry01FeeBufferCandidate(input: FeeBufferDraftInput) {
       : null,
   ];
   const contexts = [pc.value, ec.value, bc.value];
+  // feeTotal consumes the parsed policy as well as the event inventory. Keep
+  // that dependency trace separate from the row-owned adoption locator.
+  const sourceTraces = [
+    pc.value?.trace ?? [],
+    [
+      ...(ec.value && p.value ? p.value.context.trace : []),
+      ...(ec.value?.trace ?? []),
+    ],
+    bc.value?.trace ?? [],
+  ];
   const errors = [p.blockers, e.blockers, b.blockers];
   const statuses = [
     'DRAFT_POLICY_COMPLETE',
@@ -1009,7 +1019,7 @@ export function buildCountry01FeeBufferCandidate(input: FeeBufferDraftInput) {
             },
             evidenceClass: 'PINNED_HISTORICAL_UNKNOWN_NOT_ACTUAL_ADOPTION',
           },
-    sourceTrace: contexts[i]?.trace ?? [],
+    sourceTrace: sourceTraces[i]!,
     adoptionDiagnostics: {
       locator: contexts[i]?.adoptionLocator ?? null,
       verification: 'NOT_WIRED_TO_TRUSTED_ADOPTION_CONSUMER',
