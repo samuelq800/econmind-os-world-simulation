@@ -1,0 +1,52 @@
+{
+  "base": "0fdcb0d1411553cbeb1b8dc76bbf2e6a1a502613",
+  "baseTree": "2838c85a56f7bd20d99107cea0923cff0a239e3b",
+  "contract": {
+    "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261021/C/b03-b04-country01-contract-v1/CONTRACT_V1.json",
+    "sha256": "e2fbf6db1fa0d249419cdcf207540fc9d0f152b774d2c03eda8d9872cbe073a5"
+  },
+  "testPlan": {
+    "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261021/C/b03-b04-country01-contract-v2-e01/PLANNED_TESTS_V2.json",
+    "sha256": "835066dde903dc0615d3cf7cdee8b812d8f09a3c5d69db023faca1c1e8455b68"
+  },
+  "sources": {
+    "ledger": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-13/task/unknown2544-completion-v1/UNKNOWN_LEDGER.json",
+      "bytes": 7255116,
+      "sha256": "cedd88979d3cd8dd148d151906ebf5ddee76a76c5c706659676796f58b3a9ccb"
+    },
+    "gaps": {
+      "path": "/Users/samuel/Documents/econclub/artifacts/c-fiscal-settlement-gap-completion-20261014/COUNTRY_ENTITY_GAPS.json",
+      "bytes": 1251239,
+      "sha256": "90a9c723592423bef1c427c21109f8ca796444a730a6e1181df151022ee803c6"
+    },
+    "parameters": {
+      "path": "/Users/samuel/Documents/Codex/2026-10-13/task/fiscal-gcu-settlement-candidate-v1/PARAMETERS.json",
+      "bytes": 969,
+      "sha256": "fc31d682383540c5db2fa044d56bb78223f49635fcba395df6593560354a3ce3"
+    }
+  },
+  "fields": [
+    {
+      "field": "feePolicy",
+      "originalAcceptanceRule": "Explicit adopted fee policy; absent fee is UNKNOWN, not zero.",
+      "batch": "B03",
+      "unit": "VERSIONED_RULE",
+      "ledgerPointer": "/records/14"
+    },
+    {
+      "field": "feeTotalNative",
+      "originalAcceptanceRule": "All required sources and policies present; exact units/currency/time, disjoint components; otherwise UNKNOWN.",
+      "batch": "B03",
+      "unit": "NATIVE_MONEY",
+      "ledgerPointer": "/records/15"
+    },
+    {
+      "field": "minimumCashBufferNative",
+      "originalAcceptanceRule": "Exact adopted policy/source binding; no arbitrary zero, no new creditor or cash creation.",
+      "batch": "B04",
+      "unit": "NATIVE_MONEY",
+      "ledgerPointer": "/records/4"
+    }
+  ]
+}
