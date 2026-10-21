@@ -1,8 +1,9 @@
-/** Pure offline candidate only. REAL_SOURCE is always blocked in this version.
- * TEST_ONLY checks one supplied facility/interval ledger, not a water allocator.
+/** Pure offline candidate: adopted rules derive declared work requirements.
+ * TEST_ONLY checks a ledger; legacy REAL_SOURCE stays blocked, never actuals.
  * No fs/network/SQL, source issuer, grant constructor, runtime or World mutation.
  */
 import { canonicalToken } from './recover.mjs';
+import { createR3AdoptionReader } from '../unknown2544-c-r3-adoption/adoption-view.mjs';
 import { parseLossless, sha256 } from '../unknown2544-c-physical/candidate.mjs';
 import {
   exactDecimalAdd as add,
@@ -82,6 +83,241 @@ export function produceWaterServiceCandidate(input) {
   const diagnostics = [];
   const issue = (code, path, detail) =>
     diagnostics.push({ code, path, detail });
+  if (input?.mode === 'ADOPTED_RECIPE_INTERMEDIATES_ONLY') {
+    // This is a calculation request against fixed adopted rules, not an
+    // operating fact. It needs neither B02 nor a manufactured source issuer.
+    try {
+      const need = (ok, message) => {
+        if (!ok) throw new Error(message);
+      };
+      const keys = (value, allowed) => {
+        need(
+          value !== null && typeof value === 'object' && !Array.isArray(value),
+          'OBJECT_REQUIRED',
+        );
+        need(
+          Object.keys(value).every((key) => allowed.includes(key)),
+          'UNSUPPORTED_AUTHORITY_OR_WORKLOAD_OPTION',
+        );
+      };
+      const ref = (value) => {
+        need(
+          typeof value === 'string' && /^[A-Za-z0-9_.:-]{1,160}$/u.test(value),
+          'EXPLICIT_DECLARED_REFERENCE_REQUIRED',
+        );
+        return value;
+      };
+      keys(input, ['mode', 'originalRequest', 'adoptionSources', 'recipeWork']);
+      const work = input.recipeWork;
+      keys(work, [
+        'schema',
+        'role',
+        'requestRef',
+        'countryId',
+        'regionRef',
+        'facilityRef',
+        'interval',
+        'rawInput',
+      ]);
+      need(
+        work.schema === 'C_DECLARED_RECIPE_WORK_V1' &&
+          work.role === 'DECLARED_RECIPE_WORKLOAD_NOT_ACTUAL_OPERATION',
+        'DECLARED_WORKLOAD_ROLE_REQUIRED',
+      );
+      need(work.countryId === 'COUNTRY_01', 'COUNTRY01_WORKLOAD_ONLY');
+      keys(work.interval, ['basis', 'fromSimDay', 'untilSimDay']);
+      need(
+        work.interval.basis === 'DECLARED_SIM_DAY_INTERVAL_NOT_WORLD_TIME',
+        'DECLARED_INTERVAL_BASIS_REQUIRED',
+      );
+      const from = canonicalToken(work.interval.fromSimDay);
+      const until = canonicalToken(work.interval.untilSimDay);
+      need(less(from, until), 'POSITIVE_DECLARED_INTERVAL_REQUIRED');
+      keys(work.rawInput, ['amount', 'unit', 'basis']);
+      need(
+        work.rawInput.unit === 'raw-m3' &&
+          work.rawInput.basis === 'TOTAL_OVER_DECLARED_INTERVAL',
+        'TOTAL_RAW_INTERVAL_QUANTITY_REQUIRED',
+      );
+      const raw = canonicalToken(work.rawInput.amount);
+      const workloadTrace = {
+        kind: 'DECLARED_WORKLOAD_NOT_OBSERVED',
+        schema: work.schema,
+        role: work.role,
+        requestRef: ref(work.requestRef),
+        countryId: work.countryId,
+        regionRef: ref(work.regionRef),
+        facilityRef: ref(work.facilityRef),
+        interval: {
+          basis: work.interval.basis,
+          fromSimDay: from,
+          untilSimDay: until,
+        },
+        rawInput: {
+          amount: raw,
+          rawNumericToken: work.rawInput.amount,
+          unit: work.rawInput.unit,
+          basis: work.rawInput.basis,
+        },
+        WorldGenesisHead: null,
+        actualSourceAdmitted: false,
+      };
+      const adoptedRead = createR3AdoptionReader(input.adoptionSources).read(
+        input.originalRequest,
+      );
+      const parameters = adoptedRead.adoptedParameters;
+      need(
+        adoptedRead.stableId === input.originalRequest.stableId &&
+          parameters.countryId === work.countryId,
+        'ADOPTED_PARAMETER_WORKLOAD_SCOPE_MISMATCH',
+      );
+      const coefficient = (key, unit) => {
+        const c = parameters.coefficients.find((c) => c.key === key);
+        need(c && c.unit === unit, 'ADOPTED_COEFFICIENT_UNIT_MISMATCH');
+        return c;
+      };
+      const trace = (c) => ({
+        kind: 'FIXED_ADOPTED_RECIPE_COEFFICIENT',
+        key: c.key,
+        rawNumericToken: c.rawNumericToken,
+        canonicalDecimal: c.canonicalDecimal,
+        unit: c.unit,
+        sourceEvidence: {
+          ...c.sourceEvidence,
+          versionIdentity: c.sourceEvidence.sha256,
+        },
+        adoptionEvidence: {
+          ...c.adoptionEvidence,
+          versionIdentity: c.adoptionEvidence.sha256,
+        },
+      });
+      const quantity = (amount, unit, used) => ({
+        status: 'DERIVED_RECIPE_INTERMEDIATE_AVAILABLE',
+        amount,
+        unit,
+        meaning: 'DECLARED_WORK_REQUIREMENT_OR_THEORETICAL_YIELD_NOT_ACTUAL',
+        sourceTrace: [workloadTrace, ...used.map(trace)],
+      });
+      const workerDaysBySkill = Object.fromEntries(
+        SKILLS.map((skill, i) => {
+          const c = coefficient(`workerDaysBySkill/${i}`, 'worker-day/raw-m3');
+          return [
+            skill,
+            quantity(mul(raw, c.canonicalDecimal), 'worker-day', [c]),
+          ];
+        }),
+      );
+      const requiredInputs = Object.fromEntries(
+        [
+          ['ENERGY', 'electricityMWh', 'MWh/raw-m3', 'MWh'],
+          ['STEEL', 'STEEL_tonnes', 'tonne/raw-m3', 'tonne'],
+          [
+            'MACHINERY',
+            'MACHINERY_units',
+            'equipment-unit/raw-m3',
+            'equipment-unit',
+          ],
+        ].map(([name, key, coefficientUnit, unit]) => {
+          const c = coefficient(key, coefficientUnit);
+          return [name, quantity(mul(raw, c.canonicalDecimal), unit, [c])];
+        }),
+      );
+      const treatment = coefficient(
+        'yieldTreatment',
+        'treatment-net-m3/raw-m3',
+      );
+      const pipe = coefficient(
+        'pipeDeliveryYield',
+        'delivered-m3/treatment-net-m3',
+      );
+      const treated = mul(raw, treatment.canonicalDecimal);
+      // raw is already the interval TOTAL: do not multiply by interval days.
+      const parameterIntermediate = {
+        scope: workloadTrace,
+        workerDaysBySkill,
+        requiredInputs,
+        treatmentNetPotential: quantity(treated, 'treatment-net-m3', [
+          treatment,
+        ]),
+        theoreticalNetPotential: quantity(
+          mul(treated, pipe.canonicalDecimal),
+          'theoretical-delivered-m3',
+          [treatment, pipe],
+        ),
+        deliveryRatio: {
+          amount: mul(treatment.canonicalDecimal, pipe.canonicalDecimal),
+          unit: 'delivered-m3/raw-m3',
+          sourceTrace: [trace(treatment), trace(pipe)],
+        },
+      };
+      const unavailable = (reason, unit) => ({
+        status: reason,
+        value: null,
+        unit,
+      });
+      return envelope('ADOPTED_RECIPE_INTERMEDIATES_AVAILABLE', [], null, {
+        schema: 'C_WATER_ADOPTED_RECIPE_INTERMEDIATES_V1',
+        inputEvidenceClass: 'FIXED_ADOPTED_PARAMETERS_WITH_DECLARED_WORKLOAD',
+        parameterConnection: {
+          engineeringWired: true,
+          reader: 'createR3AdoptionReader.read:ADOPTED_PARAMETERS_ONLY',
+          arithmeticUsesReturnedCoefficients: true,
+        },
+        originalId: adoptedRead.stableId,
+        originalContract: adoptedRead.originalContract,
+        parameterAdoptionRead: adoptedRead,
+        parameterIntermediate,
+        sourceTrace: [workloadTrace, ...parameters.coefficients.map(trace)],
+        dependentResults: {
+          labourHours: unavailable(
+            'MISSING_APPLICABLE_ADOPTED_HOUR_CONVERSION',
+            'hour',
+          ),
+          nativePayroll: unavailable(
+            'MISSING_ACTUAL_WAGES_BENEFITS_PAYER_CURRENCY',
+            'NATIVE_MONEY',
+          ),
+          actualOperatingCapacity: unavailable(
+            'MISSING_ACTUAL_OPERATING_EVIDENCE',
+            null,
+          ),
+          actualGrant: unavailable('MISSING_SCOPED_VALID_GRANT', null),
+          actualQuality: unavailable(
+            'MISSING_ACTUAL_QUALITY_STANDARD_AND_ACCEPTANCE',
+            null,
+          ),
+          acceptedNetDelivery: unavailable(
+            'MISSING_ACTUAL_ACCEPTED_DELIVERY',
+            'delivered-m3',
+          ),
+          acceptedEnergyDelivery: unavailable(
+            'MISSING_ACTUAL_ACCEPTED_ENERGY_DELIVERY',
+            'MWh',
+          ),
+          actualTransport: unavailable(
+            'MISSING_ACCEPTED_CARGO_ROUTE_AND_PERIOD',
+            'tonne-km',
+          ),
+          nationalMinimum: unavailable('B02_DEFERRED', null),
+          nationalSufficiency: unavailable(
+            'B02_DEFERRED_AND_ACTUAL_SUPPLY_MISSING',
+            null,
+          ),
+          completeNativeCost: unavailable(
+            'MISSING_NATIVE_RATES_AND_COMPLETE_COST_COVERAGE',
+            'NATIVE_MONEY',
+          ),
+        },
+      });
+    } catch (error) {
+      issue('ADOPTED_PARAMETER_INPUT_INVALID', '/', error.message);
+      return envelope('BLOCKED_ADOPTED_PARAMETER_INPUT', diagnostics, null, {
+        schema: 'C_WATER_ADOPTED_RECIPE_INTERMEDIATES_V1',
+        parameterIntermediate: null,
+        parameterConnection: { engineeringWired: false },
+      });
+    }
+  }
   // No combination of caller flags, locators or complete-looking actual DTOs
   // authenticates an actual source through this offline tool.
   if (input?.mode !== 'TEST_ONLY') {
