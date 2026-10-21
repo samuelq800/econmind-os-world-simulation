@@ -45,3 +45,5 @@ artifacts/world-seed-delivery-v1/
 .seed-validation/
 artifacts/world-runtime-environment-2026-10-09/
 artifacts/world-runtime-postgres/
+# Preserve the exact adopted COUNTRY01 B06 definition receipt bytes; the preparation regression verifies its pinned SHA-256.
+docs/governance/owner-inputs/2026-10-21/OWNER_B06_C01_DEFINITION_ADOPTION.json
