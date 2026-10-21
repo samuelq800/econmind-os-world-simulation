@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "recordId": "OWNER_B06_C01_TYPED_REGISTER_DEFINITION_20261021_V1",
+  "date": "2026-10-21",
+  "timezone": "Asia/Shanghai",
+  "authorityKind": "DIRECT_HUMAN_MESSAGE_IN_ROOT_THREAD",
+  "rootThreadId": "01a08bf9-fe19-7440-88fa-159677b611bd",
+  "verbatim": "同意仅修订COUNTRY01这五个B06的结构接受定义，其他门槛保持不变。继续补齐账户来源和其余2544缺口，独审通过后正常合并main；不导入生产数据、不改生产权限、不启动World或Clock。",
+  "proposal": {
+    "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261020/B06_OWNER_DECISION_20261020.zh-CN.md",
+    "sha256": "6d90793aabfba968ecab329305d5caf1d9733fd53671998d8dc900db1524a6c8"
+  },
+  "adoptedDefinitionVersion": "B06_C01_TYPED_REGISTER_STRUCTURE_V1",
+  "definitionAdopted": true,
+  "exactStableIds": [
+    "U2544::ENTITY::ENTITY_GOVERNMENT_01::account",
+    "U2544::ENTITY::ENTITY_OPERATOR_01::account",
+    "U2544::ENTITY::ENTITY_HOUSEHOLDS_01::account",
+    "U2544::ENTITY::ENTITY_BANK_01::account",
+    "U2544::ENTITY::ENTITY_CENTRAL_BANK_01::account"
+  ],
+  "structuralAcceptance": "Independently reviewed and exactly source-admitted typed financial-account binding records/register references; do not require an additional claim-free native CASH asset for each of these five entities. Preserve existing Core account types, legal roles and reciprocal claim sides.",
+  "representationChange": "Single account value to versioned typed binding/register reference for these five IDs only; interface change requires independent review before use.",
+  "roles": {
+    "ENTITY_GOVERNMENT_01": ["TGA_ASSET"],
+    "ENTITY_OPERATOR_01": ["BUSINESS_DEPOSIT_ASSET"],
+    "ENTITY_HOUSEHOLDS_01": ["HOUSEHOLD_DEPOSIT_ASSET"],
+    "ENTITY_BANK_01": ["RESERVE_ASSET", "HOUSEHOLD_DEPOSIT_ISSUANCE_LIABILITY", "BUSINESS_DEPOSIT_ISSUANCE_LIABILITY"],
+    "ENTITY_CENTRAL_BANK_01": ["TGA_ISSUANCE_LIABILITY", "RESERVE_ISSUANCE_LIABILITY"]
+  },
+  "unchangedRequirements": [
+    "Immutable genuine source-record identity, version, full-byte hash and exact row/pointer",
+    "Source issuance/custody/admission authority appropriate to account type",
+    "Exact record-set adoption evidence, not this definition receipt",
+    "Existing lawful inactive-opening World/genesis/head/asOf/valueDate and admitted currency binding",
+    "Original stable IDs, ACCOUNT unit, 350 B06 denominator, 2544 total and historical pins",
+    "Other 345 B06 IDs retain the prior acceptance definition",
+    "B07 actual native funds, complete restrictions/obligations, spendability and legitimate settlement route remain independent",
+    "Current server-side authorization, independent review, applicable checks and normal head-matched merge"
+  ],
+  "notGranted": [
+    "Adoption or issuance of account aliases/source records/record sets",
+    "Balances, funding, loan, grant, gold, FX, equity plug or new B/R/H/D",
+    "Currency/XAA adoption or LC=GCU",
+    "Inactive opening/time anchor creation or adoption",
+    "CB liabilities as a funded payer asset or duplicate cash",
+    "Automatic closure of any original ID",
+    "New Core account class, second financial engine or closure truth",
+    "Production data import, production permission changes, World or Clock activation"
+  ],
+  "historicalApproved17": {
+    "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261018/input-approved17/execution_batches.json",
+    "sha256": "de8d1d9c52400d675b276f2e9df14ba79870647b579da29630a10746a28fa741",
+    "pointer": "/5",
+    "preserveOriginalBytes": true
+  },
+  "verifiedMainAtDispatch": "0fdcb0d1411553cbeb1b8dc76bbf2e6a1a502613",
+  "implementationStatusAtRecordCreation": "NOT_IMPLEMENTED",
+  "actualOriginalClosuresGranted": 0,
+  "sourceRecordAdmissionGranted": false,
+  "recordSetAdoptionGranted": false,
+  "productionMutationGranted": false,
+  "worldOrClockStartGranted": false
+}
