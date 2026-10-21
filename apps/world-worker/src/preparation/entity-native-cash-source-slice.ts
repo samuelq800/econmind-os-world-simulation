@@ -2,6 +2,10 @@
  * admission, permission resolver, writer, runtime registration or new ledger. */
 import { canonicalSerialize } from '@econmind/core';
 import {
+  inspectB06Country01TypedRegisterPreparation,
+  type B06TypedRegisterPreparationInput,
+} from './b06-country01-typed-register-preparation.js';
+import {
   isLoadedFinancialOpeningPackageRegistry,
   parseFinancialRegistrySourceJson,
   registryArray,
@@ -41,6 +45,11 @@ export interface EntityCashSliceInput {
   readonly originalFields: readonly OriginalEntityCashField[];
   /** Explicit candidate input only; null must not synthesize opening identity. */
   readonly declaredInput: EntityCashBuilderInput | null;
+  /** Explicit v2 declaration read only; never a source/admission provider. */
+  readonly typedRegisterPreparation?: Omit<
+    B06TypedRegisterPreparationInput,
+    'registry'
+  > | null;
 }
 
 export function readEntityCashCountrySourceSlice(input: EntityCashSliceInput) {
@@ -51,6 +60,12 @@ export function readEntityCashCountrySourceSlice(input: EntityCashSliceInput) {
   demand(
     /^COUNTRY_(0[1-9]|[1-6][0-9]|70)$/u.test(input.countryId),
     'COUNTRY_SCOPE_INVALID',
+  );
+  const typedInput = input.typedRegisterPreparation ?? null;
+  const typedMode = typedInput !== null;
+  demand(
+    !typedMode || input.countryId === 'COUNTRY_01',
+    'TYPED_COUNTRY01_SCOPE_REQUIRED',
   );
   demand(
     Buffer.byteLength(input.mappings.bytes) <= 1024 * 1024 &&
@@ -70,17 +85,27 @@ export function readEntityCashCountrySourceSlice(input: EntityCashSliceInput) {
     registryRow(r, 'mapping.row'),
   );
   demand(all.length <= 350, 'MAPPING_COUNT_BUDGET');
-  const selected = all.flatMap((row, index) =>
+  const countryMappings = all.flatMap((row, index) =>
     row.countryId === input.countryId ? [{ row, index }] : [],
   );
   const suffix = input.countryId.slice(-2);
   const owners = roles.map((role) => `ENTITY_${role}_${suffix}`);
+  const requestedOwners = typedMode
+    ? [...new Set(input.originalFields.map((r) => r.ownerId))]
+    : owners;
+  const selected = typedMode
+    ? countryMappings.filter(({ row }) =>
+        requestedOwners.includes(String(row.entityId)),
+      )
+    : countryMappings;
   demand(
-    selected.length === 5 &&
-      owners.every(
+    selected.length === requestedOwners.length &&
+      requestedOwners.every(
         (id) => selected.filter(({ row }) => row.entityId === id).length === 1,
       ),
-    'EXACT_FIVE_ENTITY_MAPPING_REQUIRED',
+    typedMode
+      ? 'REQUESTED_OWNER_MAPPING_REQUIRED'
+      : 'EXACT_FIVE_ENTITY_MAPPING_REQUIRED',
   );
   const country = input.registry.countries.filter(
     (c) => c.countryId === input.countryId,
@@ -114,7 +139,8 @@ export function readEntityCashCountrySourceSlice(input: EntityCashSliceInput) {
     'identityCrosswalk',
   ).legacyCountryId;
   demand(
-    new Set(selected.map(({ row }) => row.legacyEntityId)).size === 5,
+    new Set(selected.map(({ row }) => row.legacyEntityId)).size ===
+      (typedMode ? selected.length : 5),
     'DUPLICATE_LEGACY_ENTITY',
   );
   for (const { row } of selected)
@@ -133,8 +159,11 @@ export function readEntityCashCountrySourceSlice(input: EntityCashSliceInput) {
     ),
   );
   demand(
-    input.originalFields.length === 10 &&
-      new Set(input.originalFields.map((r) => r.stableId)).size === 10 &&
+    (typedMode
+      ? input.originalFields.length >= 1 && input.originalFields.length <= 10
+      : input.originalFields.length === 10) &&
+      new Set(input.originalFields.map((r) => r.stableId)).size ===
+        (typedMode ? input.originalFields.length : 10) &&
       input.originalFields.every(
         (r) =>
           expectedIds.includes(r.stableId) &&
@@ -143,12 +172,44 @@ export function readEntityCashCountrySourceSlice(input: EntityCashSliceInput) {
           ['account', 'availableNativeCash'].includes(r.missingField) &&
           r.stableId === `U2544::ENTITY::${r.ownerId}::${r.missingField}`,
       ),
-    'EXACT_TEN_ORIGINAL_IDS_REQUIRED',
+    typedMode
+      ? 'EXPLICIT_ORIGINAL_ID_SUBSET_REQUIRED'
+      : 'EXACT_TEN_ORIGINAL_IDS_REQUIRED',
   );
+  let typed: ReturnType<
+    typeof inspectB06Country01TypedRegisterPreparation
+  > | null = null;
+  if (typedInput !== null) {
+    demand(
+      Array.isArray(typedInput.requestedOriginalIds) &&
+        typedInput.requestedOriginalIds.every((id) =>
+          input.originalFields.some(
+            (r) => r.stableId === id && r.missingField === 'account',
+          ),
+        ),
+      'TYPED_REQUESTED_ID_OUTSIDE_READ_SUBSET',
+    );
+    // Select only the reviewed inspector inputs. Runtime extra registry/provider
+    // properties are neither read nor spread; only the outer genuine registry
+    // supplies integrity context. No capability is issued by this mapping.
+    typed = inspectB06Country01TypedRegisterPreparation({
+      registry: input.registry,
+      adoptedDefinitionVersion: typedInput.adoptedDefinitionVersion,
+      requestedOriginalIds: typedInput.requestedOriginalIds,
+      ...(typedInput.selectionMode === undefined
+        ? {}
+        : { selectionMode: typedInput.selectionMode }),
+      declaredNativeCurrency: typedInput.declaredNativeCurrency,
+      documents: typedInput.documents,
+      records: typedInput.records,
+      registers: typedInput.registers,
+    });
+  }
+  const typedRows = new Map(typed?.rows.map((r) => [r.stableId, r]));
   if (input.declaredInput !== null)
     for (const selection of input.declaredInput.selections)
       demand(
-        owners.includes(selection.entityId) &&
+        (typedMode ? requestedOwners : owners).includes(selection.entityId) &&
           selection.countryId === input.countryId &&
           selection.nativeCurrency === nativeCurrency,
         'SELECTION_NOT_ORIGINAL_NATIVE_ENTITY',
@@ -181,7 +242,7 @@ export function readEntityCashCountrySourceSlice(input: EntityCashSliceInput) {
     const candidate =
       candidates?.rows.find((r) => r.entityId === original.ownerId) ?? null;
     const accountField = original.missingField === 'account';
-    return {
+    const row = {
       stableId: original.stableId,
       ownerId: original.ownerId,
       countryId: original.countryId,
@@ -230,9 +291,18 @@ export function readEntityCashCountrySourceSlice(input: EntityCashSliceInput) {
       },
       currentPermission: 'UNKNOWN' as const,
     };
+    return typedMode && accountField
+      ? {
+          ...row,
+          // Original inspector row, not a CASH value or an accepted binding.
+          typedRegisterPreparation: typedRows.get(original.stableId) ?? null,
+        }
+      : row;
   });
   const result = freezeFinancialInput({
-    schemaVersion: 'entity-native-cash-country-source-slice-v1' as const,
+    schemaVersion: typedMode
+      ? ('entity-native-cash-country-source-slice-v2' as const)
+      : ('entity-native-cash-country-source-slice-v1' as const),
     status: 'IMPLEMENTED_UNVERIFIED' as const,
     mode: 'PREPARATION_ONLY_NOT_V09_2_STARTED' as const,
     classification: 'ISOLATED_SOURCE_READBACK_NOT_ADMISSION' as const,

@@ -1,6 +1,11 @@
 import { execFile, spawn, type ChildProcess } from 'node:child_process';
 import { access, readFile } from 'node:fs/promises';
-import { createServer, type Server } from 'node:http';
+import {
+  createServer,
+  request,
+  type IncomingHttpHeaders,
+  type Server,
+} from 'node:http';
 import { createConnection, type Socket } from 'node:net';
 import os from 'node:os';
 import path from 'node:path';
@@ -421,9 +426,177 @@ async function closeServer(server: Server) {
   });
 }
 
+// These tests exercise real HTTP and process lifecycle, not the fetch client.
+// Node 24.20.0's bundled undici can throw outside the fetch promise while
+// applying default socket ToS. Keep the test observer off that path without
+// changing the application's fetch, catching uncaught errors, or sharing pools.
+async function requestLoopback(
+  endpoint: string,
+  method: 'GET' | 'POST' | 'HEAD' = 'GET',
+  timeoutMs = 1_000,
+): Promise<{
+  readonly status: number;
+  readonly headers: IncomingHttpHeaders;
+  readonly body: string;
+}> {
+  const url = new URL(endpoint);
+  if (
+    url.protocol !== 'http:' ||
+    url.hostname !== '127.0.0.1' ||
+    url.username !== '' ||
+    url.password !== ''
+  ) {
+    throw new Error(
+      'Test HTTP observer requires an uncredentialed loopback URL',
+    );
+  }
+  const client = request(url, { agent: false, method });
+  const closed = new Promise<void>((resolve) => client.once('close', resolve));
+  const response = new Promise<{
+    status: number;
+    headers: IncomingHttpHeaders;
+    body: string;
+  }>((resolve, reject) => {
+    client.once('error', reject);
+    client.once('response', (incoming) => {
+      const chunks: Buffer[] = [];
+      let bytes = 0;
+      incoming.once('error', reject);
+      incoming.once('aborted', () =>
+        reject(new Error('Test HTTP response was aborted before completion')),
+      );
+      incoming.on('data', (chunk: Buffer) => {
+        bytes += chunk.byteLength;
+        if (bytes > 4_096) {
+          const error = new Error('Test HTTP response exceeded 4096 bytes');
+          reject(error);
+          client.destroy(error);
+        } else chunks.push(chunk);
+      });
+      incoming.once('end', () => {
+        if (!incoming.complete) {
+          reject(new Error('Test HTTP response was incomplete'));
+          return;
+        }
+        resolve({
+          status: incoming.statusCode ?? 0,
+          headers: incoming.headers,
+          body: Buffer.concat(chunks).toString('utf8'),
+        });
+      });
+    });
+  });
+  const timeout = setTimeout(
+    () => client.destroy(new Error('Test HTTP request timed out')),
+    timeoutMs,
+  );
+  client.end();
+  try {
+    return await response;
+  } finally {
+    clearTimeout(timeout);
+    client.destroy();
+    await closed;
+  }
+}
+
 describe.skipIf(process.platform === 'win32')(
   'V00.3 unified bootstrap public boundary',
   () => {
+    it('drains and closes its one-shot HTTP observer and rejects transport failures', async () => {
+      const connections = new Set<Socket>();
+      let connectionCount = 0;
+      const observed: { path: string; method: string; connection: string }[] =
+        [];
+      const server = createServer((incoming, response) => {
+        observed.push({
+          path: incoming.url ?? '',
+          method: incoming.method ?? '',
+          connection: incoming.headers.connection ?? '',
+        });
+        if (incoming.url === '/redirect') {
+          response.writeHead(302, { location: '/escaped' }).end('not followed');
+        } else if (incoming.url === '/truncated') {
+          response.writeHead(200, { 'content-length': '100' }).end('short');
+        } else if (incoming.url === '/stalled') {
+          response.writeHead(200).write('partial');
+        } else if (incoming.url === '/oversized') {
+          response.end('x'.repeat(4_097));
+        } else if (incoming.method === 'POST') {
+          response.writeHead(405).end('method rejected');
+        } else {
+          response.writeHead(200, { 'content-type': 'application/json' });
+          response.write('{"ready":');
+          response.end('true}');
+        }
+      });
+      server.on('connection', (socket) => {
+        connectionCount += 1;
+        connections.add(socket);
+        socket.once('close', () => connections.delete(socket));
+      });
+      await new Promise<void>((resolve, reject) => {
+        server.once('error', reject);
+        server.listen(0, '127.0.0.1', resolve);
+      });
+      const address = server.address();
+      if (address === null || typeof address === 'string') {
+        throw new Error('HTTP observer control did not bind loopback');
+      }
+      const origin = `http://127.0.0.1:${address.port}`;
+      try {
+        const complete = await requestLoopback(`${origin}/complete`);
+        expect(complete.status).toBe(200);
+        expect(complete.headers['content-type']).toBe('application/json');
+        expect(complete.body).toBe('{"ready":true}');
+        const redirect = await requestLoopback(`${origin}/redirect`);
+        expect(redirect.status).toBe(302);
+        expect(redirect.headers.location).toBe('/escaped');
+        expect(redirect.body).toBe('not followed');
+        expect((await requestLoopback(`${origin}/post`, 'POST')).status).toBe(
+          405,
+        );
+        const head = await requestLoopback(`${origin}/head`, 'HEAD');
+        expect(head.status).toBe(200);
+        expect(head.body).toBe('');
+        await expect(requestLoopback(`${origin}/truncated`)).rejects.toThrow(
+          /aborted|incomplete/u,
+        );
+        await expect(
+          requestLoopback(`${origin}/stalled`, 'GET', 50),
+        ).rejects.toThrow('Test HTTP request timed out');
+        await expect(requestLoopback(`${origin}/oversized`)).rejects.toThrow(
+          'Test HTTP response exceeded 4096 bytes',
+        );
+        expect(observed.map(({ path, method }) => [path, method])).toEqual([
+          ['/complete', 'GET'],
+          ['/redirect', 'GET'],
+          ['/post', 'POST'],
+          ['/head', 'HEAD'],
+          ['/truncated', 'GET'],
+          ['/stalled', 'GET'],
+          ['/oversized', 'GET'],
+        ]);
+        expect(observed.every(({ connection }) => connection === 'close')).toBe(
+          true,
+        );
+        expect(connectionCount).toBe(observed.length);
+        await waitUntil(
+          () => connections.size === 0,
+          1_000,
+          'observer sockets closed',
+        );
+        await expect(
+          requestLoopback('http://example.invalid/'),
+        ).rejects.toThrow('uncredentialed loopback URL');
+      } finally {
+        await closeServer(server);
+      }
+      await expect(requestLoopback(`${origin}/closed`)).rejects.toThrow(
+        'ECONNREFUSED',
+      );
+    });
+
     it(
       'bounds drain after parent exit while an owned child retains the pipe',
       { timeout: 10_000 },
@@ -653,10 +826,12 @@ describe.skipIf(process.platform === 'win32')(
           expect(runtimeProcess(captured, 'world-api')).toBeDefined();
           expect(runtimeProcess(captured, 'world-worker')).toBeDefined();
           const [web, api, worker, dependency] = await Promise.all([
-            fetch(`http://127.0.0.1:${ports.web}/readyz`),
-            fetch(`http://127.0.0.1:${ports.api}/readyz`),
-            fetch(`http://127.0.0.1:${ports.worker}/readyz`),
-            fetch(`http://127.0.0.1:${ports.web}/__bootstrap/api-health`),
+            requestLoopback(`http://127.0.0.1:${ports.web}/readyz`),
+            requestLoopback(`http://127.0.0.1:${ports.api}/readyz`),
+            requestLoopback(`http://127.0.0.1:${ports.worker}/readyz`),
+            requestLoopback(
+              `http://127.0.0.1:${ports.web}/__bootstrap/api-health`,
+            ),
           ]);
           expect([
             web.status,
@@ -664,7 +839,7 @@ describe.skipIf(process.platform === 'win32')(
             worker.status,
             dependency.status,
           ]).toEqual([200, 200, 200, 200]);
-          await expect(dependency.json()).resolves.toEqual({
+          expect(JSON.parse(dependency.body)).toEqual({
             dependency: 'world-api',
             service: 'world-web',
             status: 'ok',
@@ -750,10 +925,10 @@ describe.skipIf(process.platform === 'win32')(
         try {
           await waitUntil(
             async () => {
-              const response = await fetch(
+              const response = await requestLoopback(
                 `http://127.0.0.1:${ports.web}/readyz`,
               );
-              return response.ok;
+              return response.status === 200;
             },
             10_000,
             'web readiness',
@@ -761,16 +936,23 @@ describe.skipIf(process.platform === 'win32')(
           await captureCommand(web, captured);
           const endpoint = `http://127.0.0.1:${ports.web}/__bootstrap/api-health`;
           const beforeOk = apiHits;
-          const ok = await fetch(endpoint);
+          const ok = await requestLoopback(endpoint);
           expect(ok.status).toBe(200);
           expect(apiHits - beforeOk).toBe(1);
-          expect(ok.headers.get('cache-control')).toBe('no-store');
-          expect(ok.headers.get('access-control-allow-origin')).toBeNull();
+          expect(ok.headers['cache-control']).toBe('no-store');
+          expect(ok.headers['access-control-allow-origin']).toBeUndefined();
+          expect(JSON.parse(ok.body)).toEqual({
+            service: 'world-web',
+            dependency: 'world-api',
+            status: 'ok',
+          });
 
           behavior = 'error';
-          const unavailable = await fetch(endpoint);
+          const beforeError = apiHits;
+          const unavailable = await requestLoopback(endpoint);
           expect(unavailable.status).toBe(503);
-          const unavailableText = await unavailable.text();
+          expect(apiHits - beforeError).toBe(1);
+          const unavailableText = unavailable.body;
           expect(unavailableText).toBe(
             '{"service":"world-web","dependency":"world-api","status":"unavailable"}',
           );
@@ -778,13 +960,21 @@ describe.skipIf(process.platform === 'win32')(
 
           behavior = 'redirect';
           const beforeRedirect = apiHits;
-          const redirect = await fetch(endpoint);
+          const redirect = await requestLoopback(endpoint);
           expect(redirect.status).toBe(503);
           expect(apiHits - beforeRedirect).toBe(1);
           expect(redirectHits).toBe(0);
+          expect(redirect.body).toBe(unavailableText);
 
-          expect((await fetch(endpoint, { method: 'POST' })).status).toBe(405);
-          expect((await fetch(endpoint, { method: 'HEAD' })).status).toBe(503);
+          const beforePost = apiHits;
+          expect((await requestLoopback(endpoint, 'POST')).status).toBe(405);
+          expect(apiHits).toBe(beforePost);
+          const beforeHead = apiHits;
+          const head = await requestLoopback(endpoint, 'HEAD');
+          expect(head.status).toBe(503);
+          expect(head.body).toBe('');
+          expect(apiHits - beforeHead).toBe(1);
+          expect(redirectHits).toBe(0);
         } catch (error) {
           primaryFailure = error;
           throw error;
