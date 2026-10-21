@@ -73,13 +73,10 @@ function at(value, pointer) {
  * loading unrelated reference sources. Neither route admits operating facts.
  */
 export function createOriginalFieldConsumer(buffers) {
-  const readAdopted = (request) => {
+  const readAdopted = (callerRequest) => {
+    const requestKeys = Object.keys(callerRequest ?? {});
     requireThat(
-      request?.mode === 'ADOPTED_RECIPE_INTERMEDIATES_ONLY',
-      'ADOPTED_INTERMEDIATE_MODE_REQUIRED',
-    );
-    requireThat(
-      Object.keys(request).every((key) =>
+      requestKeys.every((key) =>
         [
           'mode',
           'stableId',
@@ -92,6 +89,32 @@ export function createOriginalFieldConsumer(buffers) {
         ].includes(key),
       ),
       'UNSUPPORTED_AUTHORITY_OR_ARITHMETIC_OPTION',
+    );
+    // Capture each caller property once. Copy each source view immediately,
+    // including Buffer/subarray/shared backing, before invoking other getters.
+    // Validation, producer operands and historical row reads share this snapshot.
+    const request = Object.fromEntries(
+      requestKeys.map((key) => {
+        const value = callerRequest[key];
+        if (key !== 'adoptionSources') return [key, structuredClone(value)];
+        if (value === null || typeof value !== 'object') return [key, value];
+        return [
+          key,
+          Object.fromEntries(
+            Object.keys(value).map((sourceKey) => {
+              const bytes = value[sourceKey];
+              return [
+                sourceKey,
+                bytes instanceof Uint8Array ? Buffer.from(bytes) : bytes,
+              ];
+            }),
+          ),
+        ];
+      }),
+    );
+    requireThat(
+      request.mode === 'ADOPTED_RECIPE_INTERMEDIATES_ONLY',
+      'ADOPTED_INTERMEDIATE_MODE_REQUIRED',
     );
     requireThat(
       ORIGINAL_IDS.includes(request.stableId),

@@ -435,6 +435,209 @@ test('R3-CONN-C06 replay/detachment preserves input ownership and original sourc
   }, TypeError);
   assert.deepEqual(consumer.snapshot(), packet);
 });
+test('B-C-R3-01 control fixed packet retains9.024/null/false', (t) => {
+  const r = adoptedConsumer.read(adoptedRequest());
+  t.diagnostic(
+    JSON.stringify({
+      status: r.status,
+      value: r.candidateMeasure.value,
+      stages: r.originalStages,
+      theoretical: r.recipeIntermediate.theoreticalNetPotential.amount,
+    }),
+  );
+  assert.equal(r.recipeIntermediate.theoreticalNetPotential.amount, '9.024');
+  assert.equal(r.candidateMeasure.value, null);
+  assert(Object.values(r.originalStages).every((v) => v === false));
+});
+function changedOriginalPacket() {
+  const changed = JSON.parse(adoptedSources.originalPacket.toString());
+  const row = changed.rows.find(
+    (r) =>
+      r.stableId === 'U2544::COUNTRY::COUNTRY_01::waterPotableDeliveredMinimum',
+  );
+  row.candidateMeasure.value = '999';
+  row.reportedStageFlags = {
+    sourceComplete: true,
+    engineeringWired: true,
+    validationPassed: true,
+    formallyAdopted: true,
+  };
+  return Buffer.from(JSON.stringify(changed));
+}
+test('B-C-R3-01 control stable changed packet rejects at fixed hash', (t) => {
+  const f = adoptedRequest();
+  f.adoptionSources.originalPacket = changedOriginalPacket();
+  const r = adoptedConsumer.read(f);
+  t.diagnostic(
+    JSON.stringify({ status: r.status, diagnostics: r.diagnostics }),
+  );
+  assert.equal(r.status, 'BLOCKED_ADOPTED_PARAMETER_INPUT');
+  assert.equal(r.candidateMeasure.value, null);
+  assert.equal(r.diagnostics[0].detail, 'FIXED_SOURCE_DRIFT:originalPacket');
+});
+test('B-C-R3-01 verified packet stays bound across dynamic source reread', (t) => {
+  const f = adoptedRequest(),
+    changed = changedOriginalPacket();
+  let reads = 0;
+  Object.defineProperty(f.adoptionSources, 'originalPacket', {
+    enumerable: true,
+    get() {
+      reads++;
+      return reads === 1 ? adoptedSources.originalPacket : changed;
+    },
+  });
+  const r = adoptedConsumer.read(f);
+  t.diagnostic(
+    JSON.stringify({
+      reads,
+      status: r.status,
+      value: r.candidateMeasure.value,
+      stages: r.originalStages,
+      verifiedHash:
+        r.parameterAdoptionRead.originalContract.sourceEvidence.sha256,
+      theoretical: r.recipeIntermediate.theoreticalNetPotential.amount,
+    }),
+  );
+  assert.equal(
+    r.candidateMeasure.value,
+    null,
+    'Returned original fields must come from the same verified bytes',
+  );
+  assert(Object.values(r.originalStages).every((v) => v === false));
+  assert.equal(reads, 1);
+  assert.equal(r.recipeIntermediate.theoreticalNetPotential.amount, '9.024');
+  assert.equal(
+    r.originalBinding.packet.sha256,
+    adoptedPins.sources.originalPacket.sha256,
+  );
+});
+
+test('B-C-R3-01 source-map and identity/workload getters are captured once on both read routes', () => {
+  for (const entry of [adoptedConsumer, consumer]) {
+    const f = adoptedRequest(),
+      changed = changedOriginalPacket();
+    let sourceReads = 0,
+      idReads = 0,
+      countryReads = 0,
+      unitReads = 0,
+      workReads = 0;
+    const initialWork = f.recipeWork,
+      stableId = f.stableId;
+    Object.defineProperty(f, 'adoptionSources', {
+      enumerable: true,
+      get() {
+        sourceReads++;
+        return {
+          ...adoptedSources,
+          originalPacket:
+            sourceReads === 1 ? adoptedSources.originalPacket : changed,
+        };
+      },
+    });
+    Object.defineProperty(f, 'stableId', {
+      enumerable: true,
+      get() {
+        idReads++;
+        return idReads === 1
+          ? stableId
+          : stableId.replace('COUNTRY_01', 'COUNTRY_53');
+      },
+    });
+    Object.defineProperty(f, 'countryId', {
+      enumerable: true,
+      get() {
+        countryReads++;
+        return countryReads === 1 ? 'COUNTRY_01' : 'COUNTRY_53';
+      },
+    });
+    Object.defineProperty(f, 'originalUnit', {
+      enumerable: true,
+      get() {
+        unitReads++;
+        return unitReads === 1 ? 'M3/PERIOD' : 'NATIVE_MONEY';
+      },
+    });
+    Object.defineProperty(initialWork, 'rawInput', {
+      enumerable: true,
+      get() {
+        workReads++;
+        return {
+          amount: workReads === 1 ? '10' : '100',
+          unit: 'raw-m3',
+          basis: 'TOTAL_OVER_DECLARED_INTERVAL',
+        };
+      },
+    });
+    const r = entry.read(f);
+    assert.deepEqual(
+      [sourceReads, idReads, countryReads, unitReads, workReads],
+      [1, 1, 1, 1, 1],
+    );
+    assert.equal(r.stableId, stableId);
+    assert.equal(r.countryId, 'COUNTRY_01');
+    assert.equal(r.candidateMeasure.unit, 'M3/PERIOD');
+    assert.equal(r.candidateMeasure.value, null);
+    assert(Object.values(r.originalStages).every((v) => v === false));
+    assert.equal(r.recipeIntermediate.theoreticalNetPotential.amount, '9.024');
+  }
+});
+test('B-C-R3-01 copied typed-array subview cannot be changed through caller backing during capture', () => {
+  for (const backing of [
+    new ArrayBuffer(adoptedSources.originalPacket.length + 2),
+    new SharedArrayBuffer(adoptedSources.originalPacket.length + 2),
+  ]) {
+    const packetView = new Uint8Array(
+      backing,
+      1,
+      adoptedSources.originalPacket.length,
+    );
+    packetView.set(adoptedSources.originalPacket);
+    const f = adoptedRequest(),
+      work = f.recipeWork;
+    f.adoptionSources.originalPacket = packetView;
+    Object.defineProperty(f, 'recipeWork', {
+      enumerable: true,
+      get() {
+        packetView.fill(32);
+        return work;
+      },
+    });
+    const r = adoptedConsumer.read(f);
+    assert.equal(
+      r.status,
+      'ADOPTED_RECIPE_INTERMEDIATES_AVAILABLE',
+      JSON.stringify(r.diagnostics),
+    );
+    assert.equal(r.candidateMeasure.value, null);
+    assert(Object.values(r.originalStages).every((v) => v === false));
+    assert.equal(r.recipeIntermediate.theoreticalNetPotential.amount, '9.024');
+    assert.equal(packetView[0], 32);
+    assert.equal(Object.isFrozen(work), false);
+    assert.throws(() => {
+      r.originalStages.formallyAdopted = true;
+    }, TypeError);
+  }
+});
+test('B-C-R3-01 invalid first capture cannot be rescued by a later valid getter value', () => {
+  const f = adoptedRequest();
+  let reads = 0;
+  Object.defineProperty(f.adoptionSources, 'originalPacket', {
+    enumerable: true,
+    get() {
+      reads++;
+      return reads === 1
+        ? changedOriginalPacket()
+        : adoptedSources.originalPacket;
+    },
+  });
+  const r = adoptedConsumer.read(f);
+  assert.equal(reads, 1);
+  assert.equal(r.status, 'BLOCKED_ADOPTED_PARAMETER_INPUT');
+  assert.equal(r.diagnostics[0].detail, 'FIXED_SOURCE_DRIFT:originalPacket');
+  assert.equal(r.candidateMeasure.value, null);
+  assert(Object.values(r.originalStages).every((v) => v === false));
+});
+
 after(() => {
   const out = process.env.C_R3_BRIDGE_EVIDENCE_DIR;
   if (!out) return;
