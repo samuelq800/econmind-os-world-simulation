@@ -727,6 +727,281 @@ test('all outcomes remain immutable/inert and original axes false; input unchang
   }
 });
 
+const r3Pins = JSON.parse(
+  readFileSync(
+    new URL('../unknown2544-c-r3-adoption/source-pins.json', import.meta.url),
+  ),
+);
+const adoptedSources = {
+  recipe: Buffer.from(recipeBytes),
+  adoptionReceipt: readPinned(
+    'adoptedReceipt',
+    r3Pins.sources.adoptionReceipt.path,
+    r3Pins.sources.adoptionReceipt.sha256,
+  ),
+  originalPacket: readPinned(
+    'originalC16',
+    r3Pins.sources.originalPacket.path,
+    r3Pins.sources.originalPacket.sha256,
+  ),
+};
+const adoptedCases = [];
+function adoptedInput() {
+  return {
+    mode: 'ADOPTED_RECIPE_INTERMEDIATES_ONLY',
+    originalRequest: {
+      mode: 'ADOPTED_PARAMETERS_ONLY',
+      stableId: 'U2544::COUNTRY::COUNTRY_01::waterPotableDeliveredMinimum',
+      countryId: 'COUNTRY_01',
+      originalUnit: 'M3/PERIOD',
+      currency: null,
+      periodOrValueDate: null,
+    },
+    adoptionSources: { ...adoptedSources },
+    recipeWork: {
+      schema: 'C_DECLARED_RECIPE_WORK_V1',
+      role: 'DECLARED_RECIPE_WORKLOAD_NOT_ACTUAL_OPERATION',
+      requestRef: 'TEST_DECLARED_WORK_10',
+      countryId: 'COUNTRY_01',
+      regionRef: 'TEST_DECLARED_REGION',
+      facilityRef: 'TEST_DECLARED_FACILITY',
+      interval: {
+        basis: 'DECLARED_SIM_DAY_INTERVAL_NOT_WORLD_TIME',
+        fromSimDay: '2',
+        untilSimDay: '5',
+      },
+      rawInput: {
+        amount: '10',
+        unit: 'raw-m3',
+        basis: 'TOTAL_OVER_DECLARED_INTERVAL',
+      },
+    },
+  };
+}
+function observeAdopted(name, input = adoptedInput()) {
+  const result = produceWaterServiceCandidate(input);
+  adoptedCases.push({
+    name,
+    input: {
+      ...input,
+      adoptionSources: Object.fromEntries(
+        Object.entries(input.adoptionSources ?? {}).map(([key, bytes]) => [
+          key,
+          bytes instanceof Uint8Array
+            ? { bytes: bytes.byteLength, sha256: sha256(bytes) }
+            : 'MISSING_OR_INVALID',
+        ]),
+      ),
+    },
+    result,
+  });
+  return result;
+}
+test('R3-CONN-P01 fixed adopted reader operands produce interval requirements without B02/actual bundle', () => {
+  const r = observeAdopted('positive_no_B02_no_actual_facts');
+  assert.equal(
+    r.status,
+    'ADOPTED_RECIPE_INTERMEDIATES_AVAILABLE',
+    JSON.stringify(r.diagnostics),
+  );
+  const m = r.parameterIntermediate;
+  assert.deepEqual(
+    Object.values(m.workerDaysBySkill).map((q) => q.amount),
+    ['0.003', '0.0015', '0.0005'],
+  );
+  assert.deepEqual(
+    Object.values(m.requiredInputs).map((q) => [q.amount, q.unit]),
+    [
+      ['0.005', 'MWh'],
+      ['0.000001', 'tonne'],
+      ['0.000002', 'equipment-unit'],
+    ],
+  );
+  assert.equal(m.treatmentNetPotential.amount, '9.6');
+  assert.equal(m.theoreticalNetPotential.amount, '9.024');
+  assert.equal(m.deliveryRatio.amount, '0.9024');
+  assert.equal(m.scope.interval.untilSimDay, '5'); // Three days, but10 is already TOTAL.
+  assert.equal(r.parameterConnection.arithmeticUsesReturnedCoefficients, true);
+  assert.equal(
+    r.parameterAdoptionRead.adoptedParameters.coefficients.length,
+    8,
+  );
+  for (const x of Object.values(r.dependentResults))
+    assert.equal(x.value, null);
+  assert.equal(r.dependentResults.nationalMinimum.status, 'B02_DEFERRED');
+  assert.match(r.dependentResults.labourHours.status, /HOUR_CONVERSION/u);
+});
+test('R3-CONN-P02 source/adoption/workload dependencies follow every used operand', () => {
+  const r = observeAdopted('exact_dependency_traces');
+  const traces = r.sourceTrace.filter(
+    (t) => t.kind === 'FIXED_ADOPTED_RECIPE_COEFFICIENT',
+  );
+  assert.equal(traces.length, 8);
+  for (const t of traces) {
+    assert.equal(t.sourceEvidence.sha256, R3_RECIPE_SHA256);
+    assert.equal(t.sourceEvidence.versionIdentity, R3_RECIPE_SHA256);
+    assert(
+      t.sourceEvidence.pointer.startsWith(
+        '/recipes/potableTreatmentOperationPerRawM3/',
+      ),
+    );
+    assert.equal(
+      t.adoptionEvidence.sha256,
+      r3Pins.sources.adoptionReceipt.sha256,
+    );
+    assert(t.adoptionEvidence.pointer.startsWith('/R3/perRawWaterCubicMetre/'));
+  }
+  const m = r.parameterIntermediate;
+  assert.deepEqual(
+    m.theoreticalNetPotential.sourceTrace.map((t) => t.key ?? t.kind),
+    ['DECLARED_WORKLOAD_NOT_OBSERVED', 'yieldTreatment', 'pipeDeliveryYield'],
+  );
+  assert.equal(
+    m.workerDaysBySkill.HIGH.sourceTrace[1].rawNumericToken,
+    '5e-05',
+  );
+  assert.equal(m.requiredInputs.ENERGY.sourceTrace[1].unit, 'MWh/raw-m3');
+  assert.equal(m.scope.rawInput.basis, 'TOTAL_OVER_DECLARED_INTERVAL');
+  assert.equal(m.scope.actualSourceAdmitted, false);
+});
+test('R3-CONN-P03 normalized replay, explicit zero and interval total are immutable/detached', () => {
+  const f = adoptedInput(),
+    r = observeAdopted('detached_total_interval', f);
+  assert.deepEqual(produceWaterServiceCandidate(f), r);
+  f.recipeWork.interval.untilSimDay = '100';
+  const later = observeAdopted('same_total_different_interval', f);
+  assert.equal(
+    later.parameterIntermediate.theoreticalNetPotential.amount,
+    '9.024',
+  );
+  assert.equal(r.parameterIntermediate.scope.interval.untilSimDay, '5');
+  assert.equal(Object.isFrozen(f.recipeWork), false);
+  assert.throws(() => {
+    r.parameterIntermediate.requiredInputs.ENERGY.amount = '999';
+  }, TypeError);
+  f.recipeWork.rawInput.amount = '0';
+  assert.equal(
+    observeAdopted('explicit_zero_not_missing', f).parameterIntermediate
+      .theoreticalNetPotential.amount,
+    '0',
+  );
+});
+test('R3-CONN-N01 missing/drifted fixed evidence rejects without numeric fallback', () => {
+  for (const key of Object.keys(adoptedSources))
+    for (const replacement of [undefined, Buffer.from('{}')]) {
+      const f = adoptedInput();
+      f.adoptionSources[key] = replacement;
+      const r = observeAdopted('invalid_fixed_source_' + key, f);
+      assert.equal(r.status, 'BLOCKED_ADOPTED_PARAMETER_INPUT');
+      assert.equal(r.parameterIntermediate, null);
+      assert.match(
+        r.diagnostics[0].detail,
+        /FIXED_(BYTES_REQUIRED|SOURCE_DRIFT)/u,
+      );
+    }
+});
+test('R3-CONN-N02 dimension/scope/interval and caller authority errors reject precisely', () => {
+  for (const [path, value] of [
+    [['countryId'], 'COUNTRY_53'],
+    [['facilityRef'], undefined],
+    [['rawInput', 'amount'], 10],
+    [['rawInput', 'amount'], undefined],
+    [['rawInput', 'unit'], 'delivered-m3'],
+    [['rawInput', 'basis'], 'PER_DAY'],
+    [['interval', 'untilSimDay'], '2'],
+    [['interval', 'fromSimDay'], '6'],
+    [['interval', 'basis'], 'WORLD_TIME'],
+    [['approved'], true],
+    [['hoursPerWorkerDay'], '8'],
+    [['nativeTariff'], '0.11'],
+  ]) {
+    const f = adoptedInput();
+    let node = f.recipeWork;
+    for (const k of path.slice(0, -1)) node = node[k];
+    node[path.at(-1)] = value;
+    assert.equal(
+      observeAdopted('invalid_work_' + path.join('.'), f).status,
+      'BLOCKED_ADOPTED_PARAMETER_INPUT',
+    );
+  }
+  for (const delta of [
+    { countryId: 'COUNTRY_53' },
+    { originalUnit: 'WORKER_DAY' },
+    { currency: 'XAA' },
+    { periodOrValueDate: 'ACTUAL_DAY' },
+  ]) {
+    const f = adoptedInput();
+    Object.assign(f.originalRequest, delta);
+    assert.equal(
+      observeAdopted('invalid_original_request_' + Object.keys(delta)[0], f)
+        .status,
+      'BLOCKED_ADOPTED_PARAMETER_INPUT',
+    );
+  }
+  const f = adoptedInput();
+  f.sourceAdmitted = true;
+  assert.equal(
+    observeAdopted('caller_source_flag', f).status,
+    'BLOCKED_ADOPTED_PARAMETER_INPUT',
+  );
+});
+test('R3-CONN-N03 new intermediates never upgrade actual or bypass old REAL_SOURCE refusal', () => {
+  const r = observeAdopted('all_actual_still_null');
+  for (const key of [
+    'actualQuantities',
+    'actualSkillHours',
+    'actualDeliveredEnergy',
+    'actualCompleteNativeCost',
+  ])
+    assert.equal(r[key], null);
+  assert.deepEqual(Object.values(r.originalStages), [
+    false,
+    false,
+    false,
+    false,
+  ]);
+  for (const key of [
+    'productionAuthority',
+    'sourceAdmitted',
+    'runtimeConnected',
+  ])
+    assert.equal(r[key], false);
+  assert.equal(r.originalFieldsClosed, 0);
+  const f = adoptedInput();
+  f.mode = 'REAL_SOURCE';
+  const legacy = produceWaterServiceCandidate(f);
+  assert.equal(legacy.status, 'BLOCKED_REAL_SOURCE');
+  assert.equal(legacy.conditional, null);
+  assert.equal(legacy.actualQuantities, null);
+});
+
+after(() => {
+  const out = process.env.C_R3_PRODUCER_EVIDENCE_DIR;
+  if (!out) return;
+  if (
+    !/^\/Users\/samuel\/Documents\/econclub\/\.econmind-artifacts\/unknown2544-resume-20261021\/C\/r3-consumer-connection-implementation-v1\/(?:focused|run-precommit|run-committed)\/producer$/u.test(
+      out,
+    ) ||
+    existsSync(out)
+  )
+    throw new Error('Exclusive C R3 producer evidence target required');
+  mkdirSync(out, { recursive: true });
+  writeFileSync(
+    `${out}/ACTUAL_CASES.json`,
+    JSON.stringify(
+      {
+        evidenceClass:
+          'PRIVATE_FIXED_ADOPTED_PARAMETERS_PLUS_TEST_DECLARED_WORK_NOT_ACTUAL_OPERATION',
+        sourceReceipts: receipt.map((r) => ({ ...r, path: String(r.path) })),
+        cases: adoptedCases,
+      },
+      null,
+      2,
+    ) + '\n',
+    { flag: 'wx' },
+  );
+});
+
 after(() => {
   const out = process.env.C_WATER_CANDIDATE_EVIDENCE_DIR;
   if (!out) return;

@@ -1,7 +1,8 @@
-/** Original-ID keyed, offline reference-input consumer. No runtime admission.
+/** Original-ID reference and explicit adopted-recipe read. No runtime admission.
  * Reuses frozen C outputs, not their large-source extractors or replay models.
  */
 import pins from './source-pins.json' with { type: 'json' };
+import { produceWaterServiceCandidate } from '../unknown2544-c-water-service/produce-candidate.mjs';
 import {
   FIELD_BATCH,
   parseLossless,
@@ -67,10 +68,158 @@ function at(value, pointer) {
     }, value);
 }
 
-/** Only exact pinned buffers enter this consumer; caller flags cannot adopt them.
- * Construct once, then read any of the 16 original IDs. No packet hydration API.
+/** Legacy pinned buffers retain the16 reference reads. The explicit adopted-only
+ * constructor defers fixed R3/C16 verification to each COUNTRY01 read, without
+ * loading unrelated reference sources. Neither route admits operating facts.
  */
 export function createOriginalFieldConsumer(buffers) {
+  const readAdopted = (request) => {
+    requireThat(
+      request?.mode === 'ADOPTED_RECIPE_INTERMEDIATES_ONLY',
+      'ADOPTED_INTERMEDIATE_MODE_REQUIRED',
+    );
+    requireThat(
+      Object.keys(request).every((key) =>
+        [
+          'mode',
+          'stableId',
+          'countryId',
+          'originalUnit',
+          'currency',
+          'periodOrValueDate',
+          'adoptionSources',
+          'recipeWork',
+        ].includes(key),
+      ),
+      'UNSUPPORTED_AUTHORITY_OR_ARITHMETIC_OPTION',
+    );
+    requireThat(
+      ORIGINAL_IDS.includes(request.stableId),
+      'OUTSIDE_EXACT_16_SUBSET',
+    );
+    requireThat(
+      request.stableId.startsWith('U2544::COUNTRY::COUNTRY_01::') &&
+        request.countryId === 'COUNTRY_01',
+      'COUNTRY01_ADOPTED_INTERMEDIATE_ONLY',
+    );
+    const field = request.stableId.split('::').at(-1);
+    requireThat(
+      request.originalUnit === UNITS[field],
+      'ORIGINAL_UNIT_MISMATCH',
+    );
+    requireThat(request.periodOrValueDate === null, 'NO_ACTUAL_PERIOD_BOUND');
+    requireThat(request.currency === null, 'NO_ACTUAL_CURRENCY_BOUND');
+    const result = produceWaterServiceCandidate({
+      mode: request.mode,
+      originalRequest: {
+        mode: 'ADOPTED_PARAMETERS_ONLY',
+        stableId: request.stableId,
+        countryId: request.countryId,
+        originalUnit: request.originalUnit,
+        currency: null,
+        periodOrValueDate: null,
+      },
+      adoptionSources: request.adoptionSources,
+      recipeWork: request.recipeWork,
+    });
+    // Parse the historical C16 row only after the genuine reader has verified
+    // these exact bytes. No unrelated COUNTRY53 reference sources are needed.
+    const adopted = result.parameterAdoptionRead;
+    const row = adopted
+      ? parseLossless(
+          Buffer.from(request.adoptionSources.originalPacket),
+        ).rows.find((r) => r.stableId === request.stableId)
+      : null;
+    const mid = result.parameterIntermediate;
+    const relevant =
+      mid === null
+        ? null
+        : FIELD_BATCH[field] === 'B10'
+          ? { workerDaysBySkill: mid.workerDaysBySkill }
+          : field === 'waterPotableDeliveredMinimum'
+            ? {
+                treatmentNetPotential: mid.treatmentNetPotential,
+                theoreticalNetPotential: mid.theoreticalNetPotential,
+                deliveryRatio: mid.deliveryRatio,
+              }
+            : field === 'waterCompleteCostNative'
+              ? mid
+              : FIELD_BATCH[field] === 'B12'
+                ? { energyInputRequirement: mid.requiredInputs.ENERGY }
+                : {
+                    steelRequirement: mid.requiredInputs.STEEL,
+                    machineryRequirement: mid.requiredInputs.MACHINERY,
+                  };
+    return freeze(
+      structuredClone({
+        schema: 'C_ORIGINAL_ID_ADOPTED_RECIPE_INTERMEDIATE_READ_V1',
+        status: result.status,
+        stableId: request.stableId,
+        countryId: request.countryId,
+        originalAcceptanceRule: row?.originalAcceptanceRule ?? null,
+        originalBinding: row
+          ? {
+              packet: adopted.originalContract.sourceEvidence,
+              ledger: row.originalLedger,
+              gap: row.originalGapSource,
+              parentBatch: row.parentBatch,
+            }
+          : null,
+        candidateMeasure: row?.candidateMeasure ?? {
+          status: 'BLOCKED_MISSING_SOURCE_OR_ADOPTION',
+          value: null,
+          unit: request.originalUnit,
+          currency: null,
+          periodOrValueDate: null,
+          applicableWorldGenesisHead: null,
+        },
+        originalDependencies: row?.dependencies ?? null,
+        originalStages: row?.reportedStageFlags ?? {
+          sourceComplete: false,
+          engineeringWired: false,
+          validationPassed: false,
+          formallyAdopted: false,
+        },
+        references: row?.references ?? null,
+        referencesMeaning: 'HISTORICAL_C16_REFERENCE_CONTEXT_UNCHANGED',
+        adoptionEvidence: null,
+        parameterAdoptionRead: adopted ?? null,
+        parameterConnection: result.parameterConnection,
+        recipeIntermediate: relevant,
+        sourceTrace: [
+          ...(row
+            ? [
+                {
+                  kind: 'ORIGINAL_C16_REFERENCE_BINDING',
+                  packetEvidence: adopted.originalContract.sourceEvidence,
+                  sourceEvidence: row.originalLedger,
+                },
+              ]
+            : []),
+          ...(result.sourceTrace ?? []),
+        ],
+        dependentResults: result.dependentResults ?? null,
+        diagnostics: result.diagnostics,
+        actualResultStatus: 'NOT_ORIGINAL_FIELD_ACCEPTANCE',
+        sourceAdmitted: false,
+        runtimeConnected: false,
+        productionAuthority: false,
+        originalFieldsClosed: 0,
+      }),
+    );
+  };
+  if (buffers?.mode === 'ADOPTED_RECIPE_INTERMEDIATES_ONLY') {
+    requireThat(
+      Object.keys(buffers).length === 1,
+      'ONLY_EXPLICIT_ADOPTED_CONSUMER_MODE',
+    );
+    return Object.freeze({
+      read: readAdopted,
+      snapshot() {
+        throw new Error('REFERENCE_SNAPSHOT_NOT_LOADED_IN_ADOPTED_ONLY_MODE');
+      },
+    });
+  }
   const sources = {};
   const receipts = [];
   for (const [key, pin] of Object.entries(SOURCE_PINS.sources)) {
@@ -370,6 +519,8 @@ export function createOriginalFieldConsumer(buffers) {
   return Object.freeze({
     snapshot: () => packet,
     read(request) {
+      if (request?.mode === 'ADOPTED_RECIPE_INTERMEDIATES_ONLY')
+        return readAdopted(request);
       requireThat(
         request?.mode === 'REFERENCE_INPUTS_ONLY',
         'ACTUAL_MINIMUM_OR_COST_READ_PROHIBITED',
