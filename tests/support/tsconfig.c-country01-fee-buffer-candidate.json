@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "noEmit": true,
+    "skipLibCheck": false,
+    "resolveJsonModule": true,
+    "paths": { "@econmind/core": ["../../packages/core/src/index.ts"] }
+  },
+  "files": [
+    "../../tools/unknown2544-c-fee-buffer/country01-candidate.ts",
+    "../world-core/c-country01-fee-buffer-candidate.test.ts"
+  ]
+}
