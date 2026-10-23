@@ -101,11 +101,9 @@ function decodeEntry(e: unknown, expected: { key: string } & Pin) {
   assert.equal(entry.sha256, expected.sha256);
   assert.equal(typeof entry.dataBase64, 'string');
   assert.equal(entry.dataBase64.length, 4 * Math.ceil(expected.bytes / 3));
-  assert(
-    /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/u.test(
-      entry.dataBase64,
-    ),
-  );
+  // Linear scan: repeated-group validation can exhaust V8's regex stack on
+  // the exact large ledger. Re-encoding below enforces padding/canonical bits.
+  assert(!/[^A-Za-z0-9+/=]/u.test(entry.dataBase64));
   const bytes = Buffer.from(entry.dataBase64, 'base64');
   assert.equal(bytes.toString('base64'), entry.dataBase64);
   pinned(bytes, expected);
