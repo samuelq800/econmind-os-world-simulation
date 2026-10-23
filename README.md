@@ -38,6 +38,27 @@ payment work. Neither interface grants production access, imports a seed, starts
 World / Clock or changes the formal gate. All six Offices remain in scope;
 Finance-only progress must not be reported as six-Office completion.
 
+### C02 water-reference and six-role regression follow-up
+
+The separately reviewed C02 implementation `ab12ef1ead17e59dec56d32dd597325ecad83787`
+adds one reference edge only:
+`createOriginalFieldConsumer({ mode: 'CONSTRUCTED_RECIPE_INTERMEDIATES_ONLY' })`
+in [the existing shared bridge](tools/unknown2544-c-original-fields/bridge.mjs).
+Its `read` accepts the exact COUNTRY_02 `waterPotableDeliveredMinimum` request
+and three pinned byte buffers; use the
+[bounded formal fixture](tests/world-core/c-country02-constructed-recipe-reference.test.ts)
+for the complete input contract. This is not an adopted floor, actual delivery,
+another country's applicability or an Industry/Social/Trade runtime consumer.
+
+The independently reviewed
+[six-role switch regression](tests/world-web/f-six-office-seat-switch-wiring.test.ts)
+at `b63c57aa4a223cf399ca2580333e24b6be84e2ea` adds 31 TEST_ONLY browser-controller
+checks covering every directed Office switch. It verifies old reviewed intents
+cannot revive after switching roles; it does not prove real JWT/seat changes or
+complete role business flows. Combined verification belongs to the successor
+head, not PR176's parent-code CI. Missing actual fields and formal authority
+remain unchanged.
+
 ## Owner-authorized resumption (2026-10-18)
 
 负责人已直接恢复原 2544 缺口按既定 17 批的离线工具与权限工程；真实用户名单绑定
