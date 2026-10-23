@@ -5,6 +5,39 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
+## Account and physical-reference publication (2026-10-23)
+
+The independently reviewed construction candidate is
+`bd3063821843c9eef432f21ad2db6fb2e4870817`, tree
+`cc4945f1753f53ef9a47a140936a01e6ce0a9d6d`, including exact A ancestor
+`9f995f35fc08d887d62cda063c67b159abf88c7a`. Its 23 paths supply offline
+account declarations and 70-country physical references, **not adopted opening
+state or completed six-Office operation**. Final verification is tracked by
+[PR176](https://github.com/samuelq800/econmind-os-world-simulation/pull/176) and
+[run 39971043026](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/39971043026);
+these links are not a claim that checks, merge or deployment have completed.
+
+- [Account construction V2](tools/unknown2544-a-accounts/README.md): run
+  `node tools/unknown2544-a-accounts/construct.mjs --check`, or import
+  `buildAccountOwnershipCandidateV2()` for the three exact UTF-8 documents.
+  Version `AW_SCENARIO_DECLARATIONS_20261023_V2` supplies declarations and
+  permission requirements, not real accounts, cash, subjects or grants.
+- [Physical reference selector](tools/unknown2544-g-physical-opening/README.md):
+  import `BUNDLE_REVISION` and `selectPhysicalReference` from
+  `tools/unknown2544-g-physical-opening/reference-bundle.mjs`; select
+  `{ bundleRevision: BUNDLE_REVISION, countryId: 'COUNTRY_02' }`.
+  Revision `G_PHYSICAL_CONSTRUCTION_POINTER_V3` verifies fixed source bytes and
+  reconstructs the selected ten-country chunk before returning one record.
+  Economic candidate version 2 and source-pointer revision 3 are distinct.
+
+The [handoff and six-Office dependency table](docs/reports/f-publication-20261023/README.md)
+identify the next real consumer and execution work. A constructed reference,
+method adoption, accepted original field, runtime admission, main merge and
+deployment are separate facts. C owns the shared reference bridge; D owns fiscal
+payment work. Neither interface grants production access, imports a seed, starts
+World / Clock or changes the formal gate. All six Offices remain in scope;
+Finance-only progress must not be reported as six-Office completion.
+
 ## Owner-authorized resumption (2026-10-18)
 
 负责人已直接恢复原 2544 缺口按既定 17 批的离线工具与权限工程；真实用户名单绑定
