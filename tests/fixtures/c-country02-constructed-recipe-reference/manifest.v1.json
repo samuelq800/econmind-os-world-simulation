@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "purpose": "C02_CONSTRUCTED_TEST_ONLY",
+  "bundle": {
+    "bytes": 120865,
+    "sha256": "aa1534e01f9401585acf1af17fc8fb603f2768097562f644147e58db6ac082bc",
+    "jsonBytes": 944830,
+    "jsonSha256": "6c990fae57974414b07c988372da8de8d035ecd576a720306a5dff6de407ad9e",
+    "compressedCap": 1048576,
+    "decodedJsonCap": 1048576
+  },
+  "sources": [
+    {
+      "key": "candidatePacketBytes",
+      "bytes": 706098,
+      "sha256": "5c8bc00d0243bb1bae67a7fbe632f7bbd26c27c3c67cd19d0070e9ce40bff942"
+    },
+    {
+      "key": "parameterProposalBytes",
+      "bytes": 2265,
+      "sha256": "ee4242d38ee4dd46eefdedaf13df51f8687f1967a063db80f340064309204d6f"
+    }
+  ],
+  "originalLedgerReuse": {
+    "path": "tests/fixtures/c-country13-transport-reference/source-bytes-v1.json.gz#ledger",
+    "bytes": 7255116,
+    "sha256": "cedd88979d3cd8dd148d151906ebf5ddee76a76c5c706659676796f58b3a9ccb"
+  },
+  "authority": "PROJECT_REPO_AND_CI_TEST_ONLY_NOT_SOURCE_ADOPTION_OR_RUNTIME_AUTHORITY"
+}
