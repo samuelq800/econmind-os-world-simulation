@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync, statSync } from 'node:fs';
+import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
-import { test } from 'vitest';
+import { afterAll, test } from 'vitest';
 import {
   createOriginalFieldConsumer,
   ORIGINAL_IDS,
@@ -184,9 +184,34 @@ const request = (): Obj => ({
 });
 const record = JSON.parse(sources.candidatePacketBytes!.toString('utf8'))
   .records[1];
+let capturedPositive: Result | null = null;
+afterAll(() => {
+  // Optional evidence output only, never an input fallback or replacement.
+  const output = process.env.C02_REFERENCE_READ_RESULT_PATH;
+  if (output && capturedPositive)
+    writeFileSync(
+      output,
+      JSON.stringify(
+        {
+          schema: 'C02_FORMAL_SUITE_ACTUAL_READ_CAPTURE_V1',
+          stableId,
+          inputPins: Object.fromEntries(
+            Object.entries(sources).map(([key, b]) => [
+              key,
+              { bytes: b.length, sha256: hash(b) },
+            ]),
+          ),
+          result: capturedPositive,
+        },
+        null,
+        2,
+      ) + '\n',
+    );
+});
 
 test('fixed Git-only bridge -> shared calculator recomputes C02, original field stays UNKNOWN', () => {
   const r = consumer.read(request());
+  capturedPositive = r;
   assert.equal(
     r.status,
     'CONSTRUCTED_RECIPE_INTERMEDIATES_AVAILABLE_NOT_ADOPTED',
