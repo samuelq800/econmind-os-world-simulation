@@ -89,7 +89,7 @@ export function projectIsolatedIndustryDecisionResultForTestOnly(input: {
     .at(-1);
   if (!row)
     return empty('SOURCE_UNAVAILABLE', 'NO_COMMITTED_PRODUCTION_RESULT');
-  if (source.correctedEventIds.includes(row.event.eventId))
+  if (source.correctedEventIds.includes(row.cause.eventId))
     return empty('SOURCE_UNAVAILABLE', 'PRODUCTION_CAUSE_CORRECTED');
   if (
     row.accounts.some(
@@ -104,18 +104,7 @@ export function projectIsolatedIndustryDecisionResultForTestOnly(input: {
     status: 'COMMITTED',
     reason: null,
     businessState: 'APPLIED',
-    cause: Object.freeze({
-      commandId: row.command.commandId,
-      commandFingerprint: row.command.fingerprint,
-      eventId: row.event.eventId,
-      eventFingerprint: row.event.fingerprint,
-      eventType: row.event.eventType,
-      eventSequence: row.event.sequence,
-      worldVersionBefore: row.transition.worldVersionBefore,
-      worldVersionAfter: row.transition.worldVersionAfter,
-      simTime: row.event.simTime.toCanonicalValue(),
-      planCommandId: null,
-    }),
+    cause: row.cause,
     metrics: Object.freeze([
       Object.freeze({
         key: 'PRODUCTION_OUTPUT',

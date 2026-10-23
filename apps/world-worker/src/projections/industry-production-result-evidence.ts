@@ -7,6 +7,9 @@ import {
   canonicalSerialize,
   createProductionConsumptionPosting,
   rebuildV08LedgersFromLineage,
+  validateAuthoritativeEvent,
+  validateCanonicalCommand,
+  type DecisionResultCause,
   type DecisionResultHead,
   type FinalCommandReceipt,
   type InventoryAccount,
@@ -26,9 +29,7 @@ export interface IsolatedIndustryResultHandle {
 }
 interface ProductionRow {
   readonly countryId: string;
-  readonly command: IndustryTestOnlyTransition['command'];
-  readonly transition: IndustryTestOnlyTransition['transition'];
-  readonly event: IndustryTestOnlyTransition['transition']['events'][number];
+  readonly cause: DecisionResultCause;
   readonly output: Readonly<{ amount: string; unit: string }>;
   readonly accounts: readonly InventoryAccount[];
 }
@@ -74,7 +75,11 @@ export function createIsolatedIndustryResultSourceForTestOnly(input: {
     invalid('Explicit TEST_FIXTURE opening sources required');
   if (input.transitions.length > 128)
     invalid('Bounded isolated prefix required');
-  const sourceHead = Object.freeze({ ...input.sourceHead });
+  const sourceHead = Object.freeze({
+    worldId: input.sourceHead.worldId,
+    worldVersion: input.sourceHead.worldVersion,
+    eventSequence: input.sourceHead.eventSequence,
+  });
   const transitions = input.transitions.map((row) =>
     Object.freeze({
       ...row,
@@ -127,14 +132,27 @@ export function createIsolatedIndustryResultSourceForTestOnly(input: {
     );
     if (canonicalSerialize(verified) !== canonicalSerialize(posting))
       invalid('Production posting differs from its existing Core constructor');
+    const command = validateCanonicalCommand(row.command, sha);
+    const canonicalEvent = validateAuthoritativeEvent(event, sha);
     // Full replay above also resolves actual applied cost batches and enforces
     // the source inventory snapshot/availability; rehydration alone cannot.
     rows.push(
       Object.freeze({
         countryId: verified.evidence.output.countryId,
-        command: row.command,
-        transition: row.transition,
-        event,
+        // Own scalar cause values, not caller command/transition/event objects.
+        // Validation may accept mutable canonical copies and return new objects.
+        cause: Object.freeze({
+          commandId: command.commandId,
+          commandFingerprint: command.fingerprint,
+          eventId: canonicalEvent.eventId,
+          eventFingerprint: canonicalEvent.fingerprint,
+          eventType: canonicalEvent.eventType,
+          eventSequence: canonicalEvent.sequence,
+          worldVersionBefore: verified.worldVersionBefore,
+          worldVersionAfter: verified.worldVersionAfter,
+          simTime: canonicalEvent.simTime.toCanonicalValue(),
+          planCommandId: null,
+        }),
         output: Object.freeze({ ...verified.result.actualOutput }),
         accounts: Object.freeze([
           verified.evidence.output,

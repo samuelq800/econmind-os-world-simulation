@@ -52,7 +52,10 @@ import {
   type InventoryAccount,
   type V08AuthoritativeLedgerTransition,
 } from '@econmind/core';
-import { createIsolatedIndustryResultSourceForTestOnly } from '../../apps/world-worker/src/projections/industry-production-result-evidence.js';
+import {
+  createIsolatedIndustryResultSourceForTestOnly,
+  readIsolatedIndustryResultSourceForTestOnly,
+} from '../../apps/world-worker/src/projections/industry-production-result-evidence.js';
 import { projectIsolatedIndustryDecisionResultForTestOnly } from '../../apps/world-worker/src/projections/industry-production-decision-result.js';
 import { projectOfficeDecisionResult } from '../../apps/world-worker/src/projections/office-decision-result-projector.js';
 import type { EconomicReadVisibilitySnapshot } from '../../apps/world-worker/src/projections/economic-read-visibility-source.js';
@@ -468,6 +471,108 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe('isolated Industry constructor, complete memory lineage and result projection', () => {
+  it('owns checked scalar cause when valid mutable caller copies change after construction', () => {
+    const source = complete();
+    source.transitions = source.transitions.map((row) => ({
+      ...row,
+      command: { ...row.command },
+      transition: {
+        ...row.transition,
+        events: row.transition.events.map((event) => ({ ...event })),
+      },
+    }));
+    const caller = source.transitions[1]!;
+    const callerEvent = caller.transition.events[0]!;
+    const handle = createIsolatedIndustryResultSourceForTestOnly(source);
+    const read = () =>
+      projectIsolatedIndustryDecisionResultForTestOnly({
+        handle,
+        countryId: COUNTRY,
+        visibility: visibility(),
+      });
+    const before = read();
+    expect(before.result.status).toBe('COMMITTED');
+    expect(Object.isFrozen(caller.command)).toBe(false);
+    expect(Object.isFrozen(callerEvent)).toBe(false);
+    Object.assign(caller.command, {
+      commandId: commandId('CALLER_CHANGED'),
+      fingerprint: `sha256:${'a'.repeat(64)}`,
+    });
+    Object.assign(caller.transition, {
+      worldVersionBefore: '998',
+      worldVersionAfter: '999',
+    });
+    Object.assign(callerEvent, {
+      eventId: eventId('CALLER_CHANGED_EVENT'),
+      sequence: '999',
+      fingerprint: `sha256:${'b'.repeat(64)}`,
+    });
+    Object.assign(source.sourceHead, {
+      worldVersion: '999',
+      eventSequence: '999',
+    });
+    const captured = readIsolatedIndustryResultSourceForTestOnly(handle);
+    expect(Reflect.set(captured.sourceHead, 'worldVersion', '999')).toBe(false);
+    expect(
+      Reflect.set(captured.rows[0]!.cause, 'eventId', 'PRIVATE_CHANGED'),
+    ).toBe(false);
+    expect(Reflect.set(captured.rows[0]!.output, 'amount', '999')).toBe(false);
+    expect(
+      Reflect.set(
+        captured.rows[0]!.accounts[0]!,
+        'titleHolderId',
+        'PRIVATE_CHANGED',
+      ),
+    ).toBe(false);
+    expect(
+      Reflect.set(captured.correctedEventIds, '0', 'PRIVATE_CHANGED'),
+    ).toBe(false);
+    expect(read()).toEqual(before);
+  });
+  it('keeps correction binding after valid mutable event copies are changed', () => {
+    const source = complete();
+    source.transitions = source.transitions.map((row) => ({
+      ...row,
+      command: { ...row.command },
+      transition: {
+        ...row.transition,
+        events: row.transition.events.map((event) => ({ ...event })),
+      },
+    }));
+    const callerEvent = source.transitions[1]!.transition.events[0]!;
+    const correction = transition(
+      2,
+      3,
+      'TEST_ONLY_CORRECTION',
+      {},
+      '1000',
+      callerEvent.eventId,
+    );
+    source.transitions.push(
+      withReceipt({
+        ...correction,
+        inventoryPostings: [],
+        financialPostingBatches: [],
+      }),
+    );
+    source.sourceHead.worldVersion = '3';
+    source.sourceHead.eventSequence = '3';
+    const handle = createIsolatedIndustryResultSourceForTestOnly(source);
+    Object.assign(callerEvent, {
+      eventId: eventId('CALLER_CORRECTION_ESCAPE'),
+    });
+    const captured = readIsolatedIndustryResultSourceForTestOnly(handle);
+    expect(
+      Reflect.set(captured.correctedEventIds, '0', 'CALLER_CORRECTION_ESCAPE'),
+    ).toBe(false);
+    expect(
+      projectIsolatedIndustryDecisionResultForTestOnly({
+        handle,
+        countryId: COUNTRY,
+        visibility: visibility(true, '3'),
+      }).result.reason,
+    ).toBe('PRODUCTION_CAUSE_CORRECTED');
+  });
   it('projects real Core-calculated bottleneck output inside an explicitly unadmitted test envelope', () => {
     const output = project();
     expect(output.admission).toBe('ISOLATED_TEST_ONLY_NOT_ADMITTED');
