@@ -9,3 +9,5 @@
 /status/world-data-selection.json -text
 /database/migrations/artifacts/*.sql -text
 /data/scenario-candidates/unknown2544/approved17/execution_batches.v1.json -text
+/data/physical-opening-candidates/2026-10-23-g-v2/source-evidence/OWNER_R3_BOUNDED_RECEIPT.json.txt -text
+/data/physical-opening-candidates/2026-10-23-g-v2/source-evidence/C01_METHOD_PROPOSAL_V2.json.txt -text
