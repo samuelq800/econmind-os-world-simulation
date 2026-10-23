@@ -20,6 +20,7 @@ import { diagnoseFinancialPackageGross } from '../../apps/world-worker/src/prepa
 import { readNativeCashSourceCandidate } from '../../apps/world-worker/src/preparation/native-cash-source-candidate.js';
 import { parseFinancialRegistrySourceJson } from '../../apps/world-worker/src/preparation/financial-opening-package-registry.js';
 import pins from './source-pins.json' with { type: 'json' };
+export { readAdoptedCountry01FeeMethod } from '../unknown2544-c-method-adoption/adoption-view.mjs';
 
 type Row = Record<string, unknown>;
 export interface DraftDocument {
