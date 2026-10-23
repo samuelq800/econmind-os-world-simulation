@@ -1,0 +1,13 @@
+{
+  "scope": "Existing source regional water availability/allocation arithmetic sums are reference proposals, not independently verified basin flow or rights-union balances. No new water or resources created.",
+  "sharedBasinOrCrossBorderWaterIndependence": "NOT_ESTABLISHED_BY_THIS_PACKET",
+  "actualNationalWithdrawableWater": null,
+  "physicalFeasibilityCertificate": null,
+  "geographyOrResourceBaseEdited": false,
+  "capacityMeansDelivery": false,
+  "netHypotheticalDifferenceMeansActualShortage": false,
+  "tonneKmPlanningDistanceIsSurveyed": false,
+  "energyReferenceMWIsMWh": false,
+  "workerDayIsAdoptedHours": false,
+  "roundingOfNonterminatingRequirements": "NONE_EXACT_RATIONAL_RETAINED"
+}

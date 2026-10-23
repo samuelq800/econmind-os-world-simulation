@@ -1,0 +1,985 @@
+{
+  "countries": [
+    {
+      "countryId": "COUNTRY_01",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "COUNTRY01_SCOPED_ADOPTED_COEFFICIENTS_ONLY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_02",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_03",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_04",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_05",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_06",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_07",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_08",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_09",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_10",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_11",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_12",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_13",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_14",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_15",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_16",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_17",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_18",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_19",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_20",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_21",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_22",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_23",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_24",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_25",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_26",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_27",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_28",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_29",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_30",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_31",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_32",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_33",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_34",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_35",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_36",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_37",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_38",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_39",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_40",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_41",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_42",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_43",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_44",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_45",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_46",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_47",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_48",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_49",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_50",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_51",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_52",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_53",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_54",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_55",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_56",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_57",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_58",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_59",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_60",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_61",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_62",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_63",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_64",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_65",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_66",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_67",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_68",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_69",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    },
+    {
+      "countryId": "COUNTRY_70",
+      "candidateCompleteness": "PARTIAL_REFERENCE_CONSTRUCTION_NOT_COMPLETE_PROTECTED_FLOOR_OR_ACTUAL_OPENING",
+      "residentReferenceParameterApplicability": "NEW_70_COUNTRY_PROPOSAL_NOT_ADOPTED",
+      "R3Applicability": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+      "missingTotalFloorComponents": [
+        "required medical due frontier",
+        "required public due frontier",
+        "adopted coverage/quality/period scope"
+      ],
+      "actualValueDate": null,
+      "worldClockAsOf": null,
+      "relativePeriodIsActualTime": false
+    }
+  ],
+  "sourceQuantityInterpretation": "Constructed reference workload, not permission to abstract water or actual facility dispatch"
+}

@@ -1,0 +1,764 @@
+{
+  "schemaVersion": "G_C01_B02_COMPLETE_FIVE_PARAMETER_PROPOSAL_V2",
+  "proposalId": "C01_POTABLE_SERVICE_FLOOR_20261023_V2",
+  "status": "PROSPECTIVE_SCENARIO_RULE_NOT_ADOPTED",
+  "originalId": "U2544::COUNTRY::COUNTRY_01::protectedServiceFloor",
+  "countryId": "COUNTRY_01",
+  "ownerB02Choice": "C_UNCHANGED",
+  "fiveParameterDefinitionCompleteAtDesignLevel": true,
+  "parameters": [
+    {
+      "parameter": 1,
+      "key": "normalCriticalRelationship",
+      "status": "PROSPECTIVE_SCENARIO_RULE_NOT_ADOPTED",
+      "normalLitresPerResidentSimDay": "50",
+      "criticalLitresPerResidentSimDay": "15",
+      "rateUnit": "L_OF_DRINKING_WATER_GRADE_DOMESTIC_SERVICE_PER_RESIDENT_SIM_DAY",
+      "notBodilyIntakeAdvice": true,
+      "basis": [
+        "WHO2020_QUANTITY",
+        "WHO_EMERGENCY"
+      ],
+      "newChoiceRationale": "Choose50 as explicit normal reconstruction domestic-service target informed by the intermediate-access reference;15 as emergency comparator. These are design quantities, not universal sufficiency/clinical law. No old20+2 auto-adoption.",
+      "relationship": "0 < critical15 < normal50. They are alternative targets for the same unique resident-time population, not additive entitlements. Public ordinary inpatient total remains60 in both mode calculations; total country critical <= normal because N>=B.",
+      "modeRule": "No shortage-triggered automatic emergency declaration. Any later actual mode requires its own lawful recorded decision; always display both deficits; quality criteria do not relax."
+    },
+    {
+      "parameter": 2,
+      "key": "coverageAndPublicPurpose",
+      "status": "PROSPECTIVE_SCENARIO_RULE_NOT_ADOPTED",
+      "countryId": "COUNTRY_01",
+      "regionAlias": "visual-territory-01-E1",
+      "basinAlias": "BASIN-HL23",
+      "planningResidentPopulation": "105506849",
+      "populationNature": "Retained constructed scenario denominator, not current census/World population or newly invented people.",
+      "planningBedCapacitySlots": "316521",
+      "planningVisitCapacitySlotsPerSimDay": "1266083",
+      "publicLoadSelection": "INDEPENDENT_SOURCE_OWNED_ELIGIBLE_REQUIRED_DUE_NEED_FRONTIER_WITH_PENDING_UNMET; COMPLETION_AND_CREDIT_SEPARATE; CAPACITY_ONLY_COUNTERFACTUAL_PRESSURE",
+      "scopeDesignChoice": "Protected targets use independently established need for the exact positive scope/interval/frontier, including required care not delivered because of shortages. Completed/accepted care is an outcome, not a demand denominator. N/B/V capacity examples are counterfactual load assumptions only, never need records or attendance.",
+      "publicDesignRows": [
+        {
+          "useId": "RESIDENT_PERSONAL_USE_ROUTED_TO_INSTITUTION",
+          "quantityFormula": "r*T_required demand subset; any actual shared-use credit must be independently routed/metered once",
+          "unit": "L_PER_DECLARED_POSITIVE_INTERVAL",
+          "relation": "SUBSET_OF_DOMESTIC_RESIDENT_BUDGET",
+          "reason": "Required resident patient-time is withinR, including due/pending unmet care; shared demand entitlement is not extra population or proof of treatment. Capacity B is used only as a labelled pressure-case value."
+        },
+        {
+          "useId": "ORDINARY_INPATIENT_WATER_PACKAGE",
+          "quantityFormula": "60*T_required;60*B only under explicit hypothetical need-load planning case",
+          "includesPersonalResidentSubset": true,
+          "reason": "New scenario package taking the upper40–60 contextual institutional range. Ordinary drinking-grade water only, not a clinical claim or specialized sterile/dialysis certification.",
+          "activeServiceUnit": "L per independently source-eligible/required/due covered inpatient-person simulation-day; completed care and water credit separate",
+          "netOrdinaryPotableLitresPerRequiredInpatientPersonSimDay": "60"
+        },
+        {
+          "useId": "NONPERSONAL_OUTPATIENT_SERVICE_HYGIENE",
+          "quantityFormula": "5*E_required;5*V only under explicit hypothetical need-load planning case",
+          "includesPersonalResidentSubset": false,
+          "reason": "Explicit NEW scenario non-personal/non-sterile service-cleaning allocation, with WHO/UNICEF5L total-setting reference only as scale context. The reference does NOT state this is additional net potable water. Patients/staff personal drinking/cooking/basic hygiene remain inside resident budget and cannot consume this tag twice.",
+          "activeServiceUnit": "L per independently source-eligible/required/due ordinary non-personal outpatient-use unit, including pending/unmet at the demand frontier; not completed-count demand",
+          "netOrdinaryPotableLitresPerRequiredOutpatientUse": "5"
+        }
+      ],
+      "publicQuantityReference": "WHO_UNICEF_JMP2019 Table6; all-use facility figures are contextual, not directly relabelled as a WHO net-potable requirement. The new end-use split is the proposal, not a recovered fact.",
+      "uniquePopulationPartition": "R=(R-T_required)+T_required unique covered resident-time demand. No completed care, occupied bed or visit capacity creates a new resident/demand record; current source membership is required. The N/B split is a pressure-case hypothesis only.",
+      "nationalFormulaLPerSimDay": "Need target:r*R+(60*T_required+5*E_required)-r*T_required. Prior numeric N/B/V figures are unchanged counterfactual need-load examples only; not actual need inferred from capacities.",
+      "overlapFormulaLPerSimDay": "r*T_required demand entitlement once; actual water-credit portions routed to that entitlement once, on their separate accepted-delivery frontier.",
+      "alternativeDisjointFormula": "(R-T_required)*r + 60*T_required + 5*E_required",
+      "deliveryAttributionKey": [
+        "needId",
+        "needComponentRevision",
+        "cohortOrResidentTimeSlice",
+        "useComponentId",
+        "facilityOrHouseholdRoute",
+        "positiveInterval",
+        "sourceBatchId",
+        "meterId",
+        "allocationLineId"
+      ],
+      "proofAtExecution": "Require independent need membership and pending/unmet status before computing total target. Require separate source-bound completion and quality-accepted metered allocations for credit. One water portion/target component receives credit once, even across household/institution aliases. Capacity, planned or completed-only records do not establish need or potable delivery.",
+      "notInThisPotableSubprofile": [
+        "Specialized sterile/surgical/dialysis and outbreak-specific process water; separate fit-for-purpose targets remain UNKNOWN, not0 or satisfied",
+        "Industrial/irrigation/fire-suppression and additional institutional non-personal demands not in the stated ordinary-potable component set",
+        "School/work/public-site personal uses stay within the one resident budget; additional cleaning/service water outside declared components is not implicitly covered or zero"
+      ],
+      "actualOccupancyAttendanceCohortMapping": null,
+      "serviceDeliveryRule": {
+        "inputGrain": "At one complete source-owned need frontier for a positive interval: R=unique covered resident-person simulation-days; T_required=resident inpatient-person simulation-days independently eligible/required/due within R; E_required=unique eligible/required/due outpatient ordinary-service-use units allocated to this interval. Include source-bound pending/unmet demand even when completed services=0. None is inferred from capacity or completion.",
+        "normalFormulaLitres": "50*(R-T_required) + 60*T_required + 5*E_required",
+        "criticalFormulaLitres": "15*(R-T_required) + 60*T_required + 5*E_required",
+        "unionEquivalentLitres": "r*R + (60*T_required+5*E_required) - r*T_required; shared personal entitlement once.",
+        "bounds": "0<=T_required<=R by nonoverlapping covered resident-time demand membership. Exact fractional required person-time is allowed only with source allocation; no8-hour or occupied-bed proxy. E_required uses canonical need/component/revision and due-scope allocation, not count of completed events. Do not cap T_required or E_required at beds, visit capacity, admitted/attended/completed workload or available water; unmet excess remains demand and shortage.",
+        "newComponentDefinition": "The60L ordinary inpatient package includes that same patient-time personal entitlement; remainder60-r is additional ordinary institutional use. The5L event allocation is a new non-personal/non-sterile service-use component, excluding all resident/staff personal uses and specialised clinical water. This split is authored design, not a WHO empirical end-use decomposition.",
+        "needInventoryRequired": [
+          "source owner/custody and scoped current entity",
+          "immutable membership/version/hash and completeness or competent same-scope absence witness",
+          "needId/componentId/current source-selected revision",
+          "eligible/required/due status with required quantity/use and source effective window",
+          "covered resident/cohort-time relation for T_required",
+          "pending/unmet/fulfilled/cancelled source state at exact demand frontier",
+          "same-interval allocation and remaining-need reconciliation; no duplicate carry-forward",
+          "legal existing World/period/frontier binding for actual execution"
+        ],
+        "needUnknown": "If independent eligible/required/due membership, pending/unmet status or scoped completeness is missing/conflicting, total protected target staysUNKNOWN. A known household-only subtotal may be shown as a lower bound, not a completed national target. A complete EMPTY completed-service list does not establish no required need.",
+        "legitimateZeroNeed": "Only a competent complete need-frontier inventory/absence witness for this exact family/entity/positive period can establish E_required=0 or T_required=0; not an empty completed list, unused capacity, no meter entry or unperformed assay.",
+        "pendingUnmetCarryForward": "Keep canonical need/component/revision and exact due/current frontier. A due need not met by shortage remains pending/unmet rather than disappearing with completed0. Later completion does not reduce the original interval target retroactively. Carry only source-reconciled residual need once to an applicable successor interval; do not recreate the full need alongside its residual, auto-roll deadlines, cancel it at policy expiry, or invent future attendance. Unknown remaining/expiry/cancellation state remainsUNKNOWN.",
+        "completionOutcomeSeparate": "Completed-service source frontier and any accepted-care outcome are independently recorded. Completion count alone earns no water-volume credit and never defines needed quantity. Missing completion does not erase an established need.",
+        "protectedWaterCreditRule": "Count only actually quality-accepted, same-scope metered delivery allocation portions matched to one required target component. Preserve batch/meter/allocation/need/component/revision/positive interval and quality-profile identity. Exact duplicate aliases count once; conflicting or cross-scope duplicates reject/leave credit unresolved. The personal entitlement shared across home/institution has one canonical component, not two credits. Credit cannot exceed the matched need component; disclose additional water separately, not as extra protected-service completion.",
+        "partialAndUnmet": "A qualified partial water allocation may reduce that component remaining water need without declaring its service/care episode completed. Requirement target, accepted water credit, completed care and remaining unmet quantity are distinct. If a necessary need or credit frontier is unknown, corresponding coverage/unmet remainsUNKNOWN rather than defaulting0 or full amount.",
+        "planningCaseOnly": {
+          "R": "retainedN as an explicit counterfactual one-day covered load",
+          "T_required": "hypothetical required resident-person-time set equal toB only for the pressure example, NOT inferred from bed capacity",
+          "E_required": "hypothetical complete required ordinary-use set equal toV only for pressure, NOT inferred from visit capacity",
+          "completedOrAcceptedSource": "None supplied or implied; no actual people/events/reports created"
+        },
+        "performanceBoundary": "Demand target first, separate completed-care and quality-accepted delivery matching second. Reserved capacity/planned/in-transit water earns no accepted-delivery credit; an empty completed list never satisfies the need frontier."
+      },
+      "populationPartitionForActualService": "Independent covered resident-time/required-care membership first; completion, qualified metered credit, and unmet state tracked separately. Unknown source need/frontier staysUNKNOWN.",
+      "actualRequiredNeedFrontier": null,
+      "actualCompletedServiceFrontier": null,
+      "actualQualityAcceptedCreditFrontier": null
+    },
+    {
+      "parameter": 3,
+      "key": "netPotableQuantityUnitsAndPhysicalRecipe",
+      "status": "PROSPECTIVE_SCENARIO_RULE_NOT_ADOPTED",
+      "boundary": "Quality-accepted net ordinary potable volume at recipient point of delivery, after treatment and distribution losses; raw extraction/pipe capacity/in-transit water is separate.",
+      "units": {
+        "planningRate": "L per declared resident/bed/visit capacity slot per SIM_DAY",
+        "netDelivered": "m3 at recipient point",
+        "exactLitresPerCubicMetre": "1000"
+      },
+      "arithmetic": "Apply0.96 treatment yield and0.94 distribution yield once each: net/raw=0.9024=564/625; rawRequired=netTarget*625/564. Nonterminating results stay exact rational, never rounded for acceptance.",
+      "recipeVersion": "R3_COST_AND_DEPENDENCY_RECIPES exact70cb4731…; bounded8 coefficients adopted only, not quality/operation/price.",
+      "eightCoefficientsPerRawM3": {
+        "workerDaysBySkillExactDecimal": [
+          "0.0003",
+          "0.00015",
+          "0.00005"
+        ],
+        "STEEL_tonnesExactDecimal": "0.0000001",
+        "MACHINERY_unitsExactDecimal": "0.0000002",
+        "electricityMWhExactDecimal": "0.0005",
+        "yieldTreatmentExactDecimal": "0.96",
+        "pipeDeliveryYieldExactDecimal": "0.94",
+        "eachYieldAppliedExactlyOnce": true
+      },
+      "excludedParameters": [
+        "0.11GCU/m3 sale-price reference",
+        "8-hour workday/hour conversion",
+        "generic FX1/native price assumption",
+        "quality certification from filterability or yield",
+        "new source water/grants/installed equipment/staff/energy to make targets feasible"
+      ],
+      "shortageRule": "For known same-scope usable supply compute signed resource gap and positive unmet quantity without changing targets or stock. Missing actual resource availability or quality remains UNKNOWN/null; a rejected known batch may earn no protected-potable credit but its physical water is not destroyed."
+    },
+    {
+      "parameter": 4,
+      "key": "qualityAcceptanceProfile",
+      "status": "PROSPECTIVE_SCENARIO_RULE_NOT_ADOPTED",
+      "profileId": "C01_POTABLE_DESIGN_ACCEPTANCE_20261023_V1",
+      "profileVersion": "1.0.0",
+      "profileDefinition": "Explicit local simulation DESIGN acceptance profile, not WHO endorsement, current legal standard or real/clinical safety certification.",
+      "referenceVersion": "WHO_GDWQ2017 official directly inspected thresholds; WHO2026 metadata confirms newer edition but itsPDF403 and unread numerical content is not attributed.",
+      "measurementStatus": "NOT_RUN",
+      "referenceClaim": "DESIGN_REFERENCE_NOT_CLINICAL_NOT_ACTUAL_MEASUREMENT",
+      "allOf": [
+        "source-to-meter/batch/positive interval identity complete",
+        "every declared mandatory criterion passes a suitable validated measurement method with capable detection/quantification and uncertainty assessment",
+        "source/process/bacterial-viral-protozoal/chemical/radiological/acceptability risk assessment has no unresolved applicable hazard or unselected limit",
+        "validated treatment/control-barrier evidence and independent verification are source-bound; Ecoli alone is insufficient",
+        "reports valid for exact supply source/plant/batch/delivery-zone and unchanged process/frontier; no stale report reused after contamination/change"
+      ],
+      "mandatoryCriteria": [
+        {
+          "id": "ECOLI",
+          "operator": "NOT_DETECTED",
+          "sampleVolumeMl": "100",
+          "unit": "CFU_OR_VALIDATED_DETECTION_PER100mL",
+          "limit": "0_detected",
+          "methodCapability": "validated detection of at least1 organism/100mL",
+          "reference": "WHO_GDWQ2017 Table7.10 PDF197; not sole sufficient safety condition"
+        },
+        {
+          "id": "TURBIDITY",
+          "operator": "LT",
+          "limit": "1",
+          "unit": "NTU",
+          "type": "operational local design criterion informed by WHO disinfection discussion PDF184, not universal health-based limit"
+        },
+        {
+          "id": "ARSENIC",
+          "operator": "LE",
+          "limit": "0.01",
+          "unit": "mg/L",
+          "reference": "WHO2017 TableA3.3 PDF552, provisional guideline context"
+        },
+        {
+          "id": "FLUORIDE",
+          "operator": "LE",
+          "limit": "1.5",
+          "unit": "mg/L",
+          "reference": "WHO2017 TableA3.3 PDF555; population exposure context not assessed here"
+        },
+        {
+          "id": "LEAD",
+          "operator": "LE",
+          "limit": "0.01",
+          "unit": "mg/L",
+          "reference": "WHO2017 TableA3.3 PDF555, provisional context; no safe-exposure guarantee"
+        },
+        {
+          "id": "NITRATE_AS_NO3",
+          "operator": "LE",
+          "limit": "50",
+          "unit": "mg/L_as_nitrate_ion",
+          "reference": "WHO2017 chemical factsheet PDF464"
+        },
+        {
+          "id": "NITRITE_AS_NO2",
+          "operator": "LE",
+          "limit": "3",
+          "unit": "mg/L_as_nitrite_ion",
+          "reference": "WHO2017 chemical factsheet PDF464"
+        },
+        {
+          "id": "NITRATE_NITRITE_COMBINED",
+          "operator": "LE",
+          "formula": "nitrate_mg_L/50 + nitrite_mg_L/3",
+          "limit": "1",
+          "unit": "dimensionless",
+          "reference": "WHO2017 factsheet PDF464/469"
+        },
+        {
+          "id": "GROSS_ALPHA_SCREEN",
+          "operator": "LT",
+          "limit": "0.5",
+          "unit": "Bq/L",
+          "type": "local conservative screening gate informed by WHO2017 PDF264–265; exceedance/open source risk requires radionuclide-specific assessment, not automatic general safety proof"
+        },
+        {
+          "id": "GROSS_BETA_SCREEN",
+          "operator": "LT",
+          "limit": "1",
+          "unit": "Bq/L",
+          "type": "local conservative screening gate; source-specific risk/dose conditions must also close"
+        }
+      ],
+      "additionalHazardRule": "Any plausible local hazard must be included in the versioned hazard/limit/method schedule or have competent source-owned not-applicable evidence. Uncharacterized hazard, unavailable criterion/method or unidentified verifier => UNKNOWN, cannot accept. This is a complete fail-closed rule, not a fabricated local risk assessment.",
+      "samplingDesign": {
+        "sourceCharacterization": "Before any first release in this7-SIM_DAY design window and after any source/process/contamination change; chemical/radiological baseline and applicable extra hazards all required.",
+        "microbialAndTurbidity": "Each release batch at plant outlet and each supplied delivery-zone endpoint within each daily delivery block; no single regional sample stands for all outlets.",
+        "maxMicrobialReportValiditySimDays": "1",
+        "maxBaselineChemicalRadiologyValiditySimDays": "7",
+        "frequencyNature": "Explicit simulation design/report-validity choices, not WHO-prescribed real-world lab schedule. Positive evidence-bound simulation/real-time mapping required for execution;10x never accelerates a real assay by assertion.",
+        "invalidation": "Any new hazard, source/process/batch identity change, failed reading or validity expiry removes acceptance until reverified; no carryover of daily surplus to cover earlier unsafe/missing service."
+      },
+      "reportSchemaRequired": [
+        "reportId",
+        "methodIdAndVersion",
+        "sampleId",
+        "samplingLocationId",
+        "sourceWaterId",
+        "plantId",
+        "batchId",
+        "meterOrZoneId",
+        "sampledAtTimeWithClockBinding",
+        "validFromAndUntil",
+        "analyte",
+        "result",
+        "unit",
+        "sampleVolumeForMicrobial",
+        "LOD_LOQ_orDetectionCapability",
+        "measurementUncertaintyOrConservativeUpperBound",
+        "validatedMethodSuitability",
+        "verifierIdentityAndSourceCustody",
+        "profileIdAndVersion",
+        "riskScheduleVersion"
+      ],
+      "decision": {
+        "anyConfirmedCriterionFail": "FAIL_NOT_ELIGIBLE_FOR_THIS_POTABLE_CREDIT",
+        "anyMissingUnknownStaleReportOrOpenHazard": "UNKNOWN_NOT_ACCEPTED",
+        "allCriteriaAndAllSourceBindingsSatisfied": "ELIGIBLE_CANDIDATE_ONLY_SUBJECT_TO_EXISTING_ADMISSION",
+        "actualResult": null
+      },
+      "realReportIds": null,
+      "actualVerifierIdentity": null,
+      "specializedClinicalWaterExcluded": true
+    },
+    {
+      "parameter": 5,
+      "key": "positiveProspectiveInterval",
+      "status": "PROSPECTIVE_SCENARIO_RULE_NOT_ADOPTED",
+      "intervalType": "DECLARED_RELATIVE_SIMULATION_DAY_INTERVAL_HALF_OPEN",
+      "fromRelativeSimDay": "0",
+      "untilRelativeSimDayExclusive": "7",
+      "durationSimDays": "7",
+      "intervalOrigin": "Relative origin of this proposed rule declaration only; not an existing World Day0/genesis/asOf or a scheduler trigger.",
+      "designRationale": "Explicit bounded seven-simulation-day review window, limiting stale planning and quality assumptions; not borrowed from30-day draft, real calendar, TIME360, financial replay or actual engine time.",
+      "evaluation": "Evaluate each daily positive subinterval[0,1)…[6,7) independently; no later surplus erases an earlier unmet quantity/quality/coverage deficit.",
+      "expiry": "No automatic renewal or mode switch; successor needs a separately adopted version. Expiry does not cancel people/rights/obligations or accumulated unmet-service records.",
+      "clock": "Existing10x semantics unchanged; no actual mapping, launch or real-day equivalence supplied.",
+      "actualWorldId": null,
+      "actualGenesisOrOpeningEpoch": null,
+      "actualEffectiveFromUntil": null,
+      "actualAsOf": null
+    }
+  ],
+  "planningDemandExamples": {
+    "normal": {
+      "residentRateL": "50",
+      "residentBudgetM3Day": {
+        "numerator": "105506849",
+        "denominator": "20",
+        "exactRational": "105506849/20",
+        "displayDecimalApprox": "5275342.45",
+        "displayNotUsedForArithmetic": true
+      },
+      "publicGrossOrdinaryPotableM3Day": {
+        "numerator": "1012867",
+        "denominator": "40",
+        "exactRational": "1012867/40",
+        "displayDecimalApprox": "25321.675",
+        "displayNotUsedForArithmetic": true
+      },
+      "sharedResidentInstitutionM3Day": {
+        "numerator": "316521",
+        "denominator": "20",
+        "exactRational": "316521/20",
+        "displayDecimalApprox": "15826.05",
+        "displayNotUsedForArithmetic": true
+      },
+      "netNationalPlanningRequestM3Day": {
+        "numerator": "211393523",
+        "denominator": "40",
+        "exactRational": "211393523/40",
+        "displayDecimalApprox": "5284838.075",
+        "displayNotUsedForArithmetic": true
+      },
+      "netNationalPlanningRequest7SimDays": {
+        "numerator": "1479754661",
+        "denominator": "40",
+        "exactRational": "1479754661/40",
+        "displayDecimalApprox": "36993866.525",
+        "displayNotUsedForArithmetic": true
+      },
+      "rawWaterNecessaryM3Day": {
+        "numerator": "26424190375",
+        "denominator": "4512",
+        "exactRational": "26424190375/4512",
+        "displayDecimalApprox": "5856425.171764184397163120567375886524823",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualDemandOrDelivery": null,
+      "planningCapacityNotOccupancy": true
+    },
+    "critical": {
+      "residentRateL": "15",
+      "residentBudgetM3Day": {
+        "numerator": "316520547",
+        "denominator": "200",
+        "exactRational": "316520547/200",
+        "displayDecimalApprox": "1582602.735",
+        "displayNotUsedForArithmetic": true
+      },
+      "publicGrossOrdinaryPotableM3Day": {
+        "numerator": "1012867",
+        "denominator": "40",
+        "exactRational": "1012867/40",
+        "displayDecimalApprox": "25321.675",
+        "displayNotUsedForArithmetic": true
+      },
+      "sharedResidentInstitutionM3Day": {
+        "numerator": "949563",
+        "denominator": "200",
+        "exactRational": "949563/200",
+        "displayDecimalApprox": "4747.815",
+        "displayNotUsedForArithmetic": true
+      },
+      "netNationalPlanningRequestM3Day": {
+        "numerator": "320635319",
+        "denominator": "200",
+        "exactRational": "320635319/200",
+        "displayDecimalApprox": "1603176.595",
+        "displayNotUsedForArithmetic": true
+      },
+      "netNationalPlanningRequest7SimDays": {
+        "numerator": "2244447233",
+        "denominator": "200",
+        "exactRational": "2244447233/200",
+        "displayDecimalApprox": "11222236.165",
+        "displayNotUsedForArithmetic": true
+      },
+      "rawWaterNecessaryM3Day": {
+        "numerator": "8015882975",
+        "denominator": "4512",
+        "exactRational": "8015882975/4512",
+        "displayDecimalApprox": "1776569.808289007092198581560283687943262",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualDemandOrDelivery": null,
+      "planningCapacityNotOccupancy": true
+    }
+  },
+  "physicalResourcePressure": [
+    {
+      "mode": "normal",
+      "resource": "rawWater",
+      "unit": "m3",
+      "necessaryPerSimDay": {
+        "numerator": "26424190375",
+        "denominator": "4512",
+        "exactRational": "26424190375/4512",
+        "displayDecimalApprox": "5856425.171764184397163120567375886524823",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "normal",
+      "resource": "workerDaysSkill0",
+      "unit": "worker-day",
+      "necessaryPerSimDay": {
+        "numerator": "211393523",
+        "denominator": "120320",
+        "exactRational": "211393523/120320",
+        "displayDecimalApprox": "1756.927551529255319148936170212765957447",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "normal",
+      "resource": "workerDaysSkill1",
+      "unit": "worker-day",
+      "necessaryPerSimDay": {
+        "numerator": "211393523",
+        "denominator": "240640",
+        "exactRational": "211393523/240640",
+        "displayDecimalApprox": "878.4637757646276595744680851063829787234",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "normal",
+      "resource": "workerDaysSkill2",
+      "unit": "worker-day",
+      "necessaryPerSimDay": {
+        "numerator": "211393523",
+        "denominator": "721920",
+        "exactRational": "211393523/721920",
+        "displayDecimalApprox": "292.8212585882092198581560283687943262411",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "normal",
+      "resource": "steel",
+      "unit": "tonne",
+      "necessaryPerSimDay": {
+        "numerator": "211393523",
+        "denominator": "360960000",
+        "exactRational": "211393523/360960000",
+        "displayDecimalApprox": "0.5856425171764184397163120567375886524823",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "normal",
+      "resource": "machineryOperatingInput",
+      "unit": "equipment-input-unit",
+      "necessaryPerSimDay": {
+        "numerator": "211393523",
+        "denominator": "180480000",
+        "exactRational": "211393523/180480000",
+        "displayDecimalApprox": "1.171285034352836879432624113475177304965",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "normal",
+      "resource": "electricity",
+      "unit": "MWh",
+      "necessaryPerSimDay": {
+        "numerator": "211393523",
+        "denominator": "72192",
+        "exactRational": "211393523/72192",
+        "displayDecimalApprox": "2928.212585882092198581560283687943262411",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "critical",
+      "resource": "rawWater",
+      "unit": "m3",
+      "necessaryPerSimDay": {
+        "numerator": "8015882975",
+        "denominator": "4512",
+        "exactRational": "8015882975/4512",
+        "displayDecimalApprox": "1776569.808289007092198581560283687943262",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "critical",
+      "resource": "workerDaysSkill0",
+      "unit": "worker-day",
+      "necessaryPerSimDay": {
+        "numerator": "320635319",
+        "denominator": "601600",
+        "exactRational": "320635319/601600",
+        "displayDecimalApprox": "532.9709424867021276595744680851063829787",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "critical",
+      "resource": "workerDaysSkill1",
+      "unit": "worker-day",
+      "necessaryPerSimDay": {
+        "numerator": "320635319",
+        "denominator": "1203200",
+        "exactRational": "320635319/1203200",
+        "displayDecimalApprox": "266.4854712433510638297872340425531914894",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "critical",
+      "resource": "workerDaysSkill2",
+      "unit": "worker-day",
+      "necessaryPerSimDay": {
+        "numerator": "320635319",
+        "denominator": "3609600",
+        "exactRational": "320635319/3609600",
+        "displayDecimalApprox": "88.82849041445035460992907801418439716312",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "critical",
+      "resource": "steel",
+      "unit": "tonne",
+      "necessaryPerSimDay": {
+        "numerator": "320635319",
+        "denominator": "1804800000",
+        "exactRational": "320635319/1804800000",
+        "displayDecimalApprox": "0.1776569808289007092198581560283687943262",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "critical",
+      "resource": "machineryOperatingInput",
+      "unit": "equipment-input-unit",
+      "necessaryPerSimDay": {
+        "numerator": "320635319",
+        "denominator": "902400000",
+        "exactRational": "320635319/902400000",
+        "displayDecimalApprox": "0.3553139616578014184397163120567375886525",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    },
+    {
+      "mode": "critical",
+      "resource": "electricity",
+      "unit": "MWh",
+      "necessaryPerSimDay": {
+        "numerator": "320635319",
+        "denominator": "360960",
+        "exactRational": "320635319/360960",
+        "displayDecimalApprox": "888.2849041445035460992907801418439716312",
+        "displayNotUsedForArithmetic": true
+      },
+      "actualUsableSameScopeAvailable": null,
+      "actualShortfall": null,
+      "actualAvailabilityStatus": "UNKNOWN_NOT_ZERO",
+      "sourceKind": "ADOPTED_RECIPE_PARAMETER_TIMES_NEW_UNADOPTED_DESIGN_REQUEST",
+      "capacityIsNotChargedStockOrActualProduction": true
+    }
+  ],
+  "resourceStressExample": {
+    "case": "CONSTRUCTED_RESOURCE_STRESS_NOT_ACTUAL",
+    "explicitRawInputCapM3PerSimDay": "1000000",
+    "allOtherInputAvailability": "NOT_ASSERTED; this is a raw-only theoretical upper bound even before other constraints",
+    "theoreticalNetQuantityUpperBoundM3PerSimDay": {
+      "numerator": "902400",
+      "denominator": "1",
+      "exactRational": "902400",
+      "displayDecimalApprox": "902400",
+      "displayNotUsedForArithmetic": true
+    },
+    "quality": "NO_PASS_CERTIFICATE_CREATED; actual accepted potable volume remainsnull",
+    "unmetPlanningNetQuantityByMode": {
+      "normal": {
+        "numerator": "175297523",
+        "denominator": "40",
+        "exactRational": "175297523/40",
+        "displayDecimalApprox": "4382438.075",
+        "displayNotUsedForArithmetic": true
+      },
+      "critical": {
+        "numerator": "140155319",
+        "denominator": "200",
+        "exactRational": "140155319/200",
+        "displayDecimalApprox": "700776.595",
+        "displayNotUsedForArithmetic": true
+      }
+    },
+    "actualResourceOrDeliveryChanged": false,
+    "supplyNotRaisedToMatchFloor": true
+  },
+  "actualResourceObservations": {
+    "waterAllocationReference": {
+      "regionId": "visual-territory-01-E1",
+      "countryId": "visual-territory-01",
+      "basinId": "BASIN-HL23",
+      "domesticM3Day": "19049847.736111112",
+      "agricultureM3Day": "201610686.18268055",
+      "industryM3Day": "779.622286",
+      "allocatedM3Day": "220661313.54107764",
+      "availableM3Day": 380268681,
+      "remainingM3Day": "159607367.45892236",
+      "drySeasonAvailableM3Day": 243210783,
+      "rightsStatus": "ALLOCATION_PROPOSAL_NOT_GRANTED"
+    },
+    "allocationReferenceMeaning": "ALLOCATION_PROPOSAL_NOT_GRANTED; raw/net basis unestablished, not same-scope usable water supply. Not used as granted/available resource in computations.",
+    "installedCapacityReferences": {
+      "solarCapacityMW": {
+        "amount": "205182.225894",
+        "unit": "MW",
+        "basis": "OPENING_CANDIDATE_CAPACITY_NOT_DELIVERY",
+        "sourceEvidence": {
+          "source": "physical",
+          "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261018/C/v1-candidate/CANDIDATE.json",
+          "sha256": "14c087376857a6592d576fc293f92dfc92062a0f86c1a53faa32277493cb851f",
+          "bytes": 984645,
+          "pointer": "/countryContexts/0/power/solarCapacityMW",
+          "exactLeaf": "205182.225894",
+          "sourceClass": "PINNED_DERIVED_REFERENCE_NOT_ACTUAL"
+        }
+      },
+      "windCapacityMW": {
+        "amount": "205182.225894",
+        "unit": "MW",
+        "basis": "OPENING_CANDIDATE_CAPACITY_NOT_DELIVERY",
+        "sourceEvidence": {
+          "source": "physical",
+          "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261018/C/v1-candidate/CANDIDATE.json",
+          "sha256": "14c087376857a6592d576fc293f92dfc92062a0f86c1a53faa32277493cb851f",
+          "bytes": 984645,
+          "pointer": "/countryContexts/0/power/windCapacityMW",
+          "exactLeaf": "205182.225894",
+          "sourceClass": "PINNED_DERIVED_REFERENCE_NOT_ACTUAL"
+        }
+      },
+      "storageCapacityMWh": {
+        "amount": "2540688.828687",
+        "unit": "MWH_CAPACITY_NOT_STORED_ENERGY",
+        "basis": "OPENING_CANDIDATE_CAPACITY_NOT_DELIVERY",
+        "sourceEvidence": {
+          "source": "physical",
+          "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261018/C/v1-candidate/CANDIDATE.json",
+          "sha256": "14c087376857a6592d576fc293f92dfc92062a0f86c1a53faa32277493cb851f",
+          "bytes": 984645,
+          "pointer": "/countryContexts/0/power/storageCapacityMWh",
+          "exactLeaf": "2540688.828687",
+          "sourceClass": "PINNED_DERIVED_REFERENCE_NOT_ACTUAL"
+        }
+      }
+    },
+    "meaning": "MW/energy-storage capacity is not generated/deliverable MWh or charged stock; worker headcount is not authorized worker-days/hours. No known actual resource vector or clinical testing is supplied.",
+    "actualResourceVector": null,
+    "actualNationalDemand": null,
+    "actualAcceptedNetDelivery": null,
+    "actualQualityResult": null
+  },
+  "scopeAndSafetyBoundary": {
+    "scope": "This fully specified B02 ordinary potable-water subprofile does not certify food, electricity, specialised health care or all national public-service delivery. It is not original-field completion.",
+    "publicCounts": "Retained unapproved asset/service capacity references used only as explicit prospective planning ceiling; not measured occupancy, staff, observed demand or runtime operation.",
+    "noNewResourcesOrPeople": true,
+    "R3EightOnly": true,
+    "nativePriceOrFeeOrFx": null,
+    "labAndIndependentVerificationResourceCosts": "NOT_ESTIMATED_NOT_ZERO; R3 treatment input recipe is not a complete lab/financial/clinical-cost model",
+    "executionNeeds": "Actual lawful identity/recordset/rights/operating capacity, meter/cohort/time/source custody and signed source/quality/authorization gates remain independent. Rule approval alone cannot create them.",
+    "newSourceIssuerOrAuthority": false,
+    "sourceAdmitted": false,
+    "adopted": false,
+    "measurement": "NOT_RUN",
+    "actualOriginalFieldValue": null,
+    "originalClosures": 0,
+    "productionImport": false,
+    "WorldClockStarted": false
+  },
+  "planningExamplesInterpretationV2": {
+    "status": "COUNTERFACTUAL_PRESSURE_NOT_ACTUAL_NEED_OR_COMPLETION",
+    "numericInputsAndResultsUnchanged": true,
+    "needHypothesis": "For arithmetic only, R=N, T_required=B, E_required=V are declared prospective load values. Bed/visit capacities do not supply eligible/due need evidence. Actual required, completed and accepted-water frontiers all remainnull.",
+    "R3Scope": "Only raw-water requirement plus six input dimensions derived from the original eight adopted coefficients. Both treatmentCapacityEquivalent raw/1000 rows removed; no replacement capacity or ninth coefficient introduced."
+  }
+}

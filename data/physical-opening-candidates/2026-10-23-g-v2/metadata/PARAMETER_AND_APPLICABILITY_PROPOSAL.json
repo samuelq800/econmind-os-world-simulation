@@ -1,0 +1,51 @@
+{
+  "version": "G_PHYSICAL_OPENING_PARAMETERS_V2",
+  "status": "CONSTRUCTED_NOT_ADOPTED_REQUIRES_SCOPED_B_E_AND_OWNER_APPLICABILITY_DECISION",
+  "period": {
+    "calendar": "SIM_TIME_RELATIVE_ONLY",
+    "from": "0",
+    "until": "1",
+    "unit": "SIM_DAY",
+    "quantityBasis": "TOTAL_OVER_DECLARED_INTERVAL",
+    "actualWorldId": null,
+    "epoch": null
+  },
+  "residentNormalReferenceLitrePerSimDay": "50",
+  "residentCriticalReferenceLitrePerSimDay": "15",
+  "referenceParameterOrigin": {
+    "methodHash": "97f4dbdd2c2950a9e3da8f2dd0552528790a2a189f2a57ac6b438a12c9d959a5",
+    "meaning": "Prior C01 design value only; applying a resident reference to70 countries is a new applicability proposal, not adopted B02"
+  },
+  "R3SourceCoefficientValues": {
+    "workerDaysBySkillExactDecimal": ["0.0003", "0.00015", "0.00005"],
+    "STEEL_tonnesExactDecimal": "0.0000001",
+    "MACHINERY_unitsExactDecimal": "0.0000002",
+    "electricityMWhExactDecimal": "0.0005",
+    "yieldTreatmentExactDecimal": "0.96",
+    "pipeDeliveryYieldExactDecimal": "0.94",
+    "eachYieldAppliedExactlyOnce": true
+  },
+  "R3FormalAdoptionScope": ["COUNTRY_01"],
+  "other69CopiedRecipeApplicability": "PROPOSED_NOT_ADOPTED",
+  "grainPolicy": "Existing lexical consumption reference only, no nutrition/edibility guarantee",
+  "decisionsForExistingEOwnerMD": [
+    "70-country applicability of50/15 resident reference, including actual eligible/due medical/public additions",
+    "69-country copied R3 coefficient applicability; cannot inherit COUNTRY01 formal adoption",
+    "normal/critical food policy and reviewed quality/edible unit definition"
+  ],
+  "forbiddenDefaults": [
+    "8hours/worker-day",
+    "24simulation-hours/SIM_DAY",
+    "FX1",
+    "missing_actual_equals_zero",
+    "capacity_equals_delivery",
+    "199.8TONNE_equals_TONNE_KM"
+  ],
+  "failureConditions": [
+    "Mismatched pinned source or country/region/population join",
+    "Missing source-owned eligible/due frontier or quality/rights evidence blocks actuals",
+    "No SimulationHour mapping blocks MW-to-MWh conversion",
+    "No accepted cargo/distance/mode/period blocks actual transport minimum",
+    "No native legal wages/tariff/cost-inclusion source blocks actual money"
+  ]
+}

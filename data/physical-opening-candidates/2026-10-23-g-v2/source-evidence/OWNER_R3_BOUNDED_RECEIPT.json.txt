@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "recordId": "OWNER_DIRECT_20261020_R3_A_B02_C_G_C",
+  "authority": {
+    "type": "DIRECT_HUMAN_MESSAGE_IN_ROOT_THREAD",
+    "rootThread": "01a08bf9-fe19-7440-88fa-159677b611bd",
+    "date": "2026-10-20",
+    "timezone": "Asia/Shanghai",
+    "verbatim": "R3：A，采用指定版本饮用水运营配方。\nB02：C，暂缓采用，要求补齐五项标准参数后重新提交。\nG：C，暂缓采用债权条款，要求提供偿债能力、资金及债权人需求依据。\n其他已经授权的工程、独审、验证及正常 main 合并继续执行。不得据此启动生产数据导入、生产权限变更或 World/Clock。"
+  },
+  "decisionDocument": {
+    "path": "/Users/samuel/Documents/econclub/.econmind-artifacts/unknown2544-resume-20261020/OWNER_DECISIONS_20261020.zh-CN.md",
+    "sha256AtHumanChoice": "37c55722babbb3f5417ca19f4fa623567607912fd4f5c910b3b0dca0ba954d29"
+  },
+  "R3": {
+    "choice": "A",
+    "adoptionStatus": "OWNER_ADOPTED_BOUNDED_SCENARIO_RECIPE_COEFFICIENTS",
+    "countryScope": ["COUNTRY_01"],
+    "sourcePath": "/Users/samuel/Documents/Codex/2026-10-10/task-3/world-opening-remnant-v2-revision/R3_COST_AND_DEPENDENCY_RECIPES.json",
+    "sourceSha256": "70cb4731e5b70bce15bffe2e9b2d9c1b092b0f8b6ff6baa0a54e463129054def",
+    "pointer": "/recipes/potableTreatmentOperationPerRawM3",
+    "perRawWaterCubicMetre": {
+      "workerDaysBySkillExactDecimal": ["0.0003", "0.00015", "0.00005"],
+      "STEEL_tonnesExactDecimal": "0.0000001",
+      "MACHINERY_unitsExactDecimal": "0.0000002",
+      "electricityMWhExactDecimal": "0.0005",
+      "yieldTreatmentExactDecimal": "0.96",
+      "pipeDeliveryYieldExactDecimal": "0.94",
+      "eachYieldAppliedExactlyOnce": true
+    },
+    "excludedSourceLeafKeys": ["potablePriceReferenceGcuPerM3", "performanceQuality"],
+    "notAdopted": [
+      "Other recipes or whole-file/global70-country adoption",
+      "Reference sale price0.11 GCU/m3 or any native fee/cost quotation",
+      "Clinical/safety quality certification, water rights or actual accepted delivery",
+      "An assumed8-hour workday or actual paid labour hours",
+      "World/seed/epoch/asOf identity or operating activation"
+    ],
+    "originalFieldClosure": false,
+    "meaning": "Adopts only specified scenario coefficients, not original observed facts or complete country supply/cost. Existing frozen sources and pre-adoption review artifacts are not rewritten."
+  },
+  "B02": {
+    "choice": "C",
+    "adoptionStatus": "DEFERRED_PENDING_COMPLETE_FIVE_PARAMETERS",
+    "requiredResubmission": [
+      "Normal level versus critical minimum relationship",
+      "Coverage population and public-use scope with no double counting",
+      "Net potable-water quantity and units per coverage scope",
+      "Verifiable acceptance quality standard and version",
+      "Explicit positive effective period; real World/epoch/asOf remains separate"
+    ],
+    "noDefaultAdoptionOfReference20Plus2Litres": true,
+    "originalFieldClosure": false
+  },
+  "G": {
+    "choice": "C",
+    "adoptionStatus": "DEFERRED_NO_140_OR_360_DAY_TERMS_ADOPTED",
+    "requiredResubmission": [
+      "Debtor repayment capacity with period-specific obligations and downside assumptions",
+      "Traceable legal available funding, account/currency/restrictions and no claim-to-cash conversion",
+      "Creditor needs, timing and priority basis, distinct from invented actual stakeholder consent"
+    ],
+    "noNewFundingNettingOrDuplicateCapitalisation": true,
+    "originalFieldClosure": false
+  },
+  "continuingEngineering": "Previously authorized implementation, independent review, combined verification and normal head-matched main merge continue. This receipt must not mutate already frozen reviewed15-file combined candidate; any subsequent adoption consumer delta requires exact scope and review.",
+  "prohibitions": {
+    "productionDataOrSeedImport": true,
+    "productionPermissionChanges": true,
+    "WorldOrClockStart": true,
+    "inventedMissingFactsOrDefaultZero": true
+  },
+  "closureRegisterModified": false,
+  "actualOriginalClosuresAtRecord": 0,
+  "originalDenominator": 2544
+}
