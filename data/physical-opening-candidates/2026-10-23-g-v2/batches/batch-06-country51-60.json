@@ -1,0 +1,2925 @@
+{
+  "countryIds": [
+    "COUNTRY_51",
+    "COUNTRY_52",
+    "COUNTRY_53",
+    "COUNTRY_54",
+    "COUNTRY_55",
+    "COUNTRY_56",
+    "COUNTRY_57",
+    "COUNTRY_58",
+    "COUNTRY_59",
+    "COUNTRY_60"
+  ],
+  "originalIdCount": 90,
+  "records": [
+    {
+      "schemaVersion": "G_PHYSICAL_OPENING_SCENARIO_CANDIDATE_V2",
+      "candidateVersion": "2",
+      "originClass": "CONSTRUCTED_NOT_ADOPTED",
+      "countryId": "COUNTRY_51",
+      "scenarioCountryId": "visual-territory-51",
+      "period": {
+        "calendar": "SIM_TIME_RELATIVE_ONLY",
+        "from": "0",
+        "until": "1",
+        "unit": "SIM_DAY",
+        "quantityBasis": "TOTAL_OVER_DECLARED_INTERVAL",
+        "actualWorldId": null,
+        "epoch": null
+      },
+      "geography": {
+        "countryPointer": "/50",
+        "scenarioRegionIds": [
+          "visual-territory-51-E1",
+          "visual-territory-51-E2"
+        ],
+        "climateMixPreserved": [
+          {
+            "id": 2,
+            "landPixels": 5061,
+            "sharePercent": "100.0"
+          }
+        ],
+        "population": "217385174",
+        "populationSourcePointer": "/50/population",
+        "resourceOrGeographyEdited": false
+      },
+      "originalIds": [
+        "U2544::COUNTRY::COUNTRY_51::protectedServiceFloor",
+        "U2544::COUNTRY::COUNTRY_51::labourMinimumHours",
+        "U2544::COUNTRY::COUNTRY_51::labourPayrollNative",
+        "U2544::COUNTRY::COUNTRY_51::waterPotableDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_51::waterCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_51::energyDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_51::energyCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_51::transportMinimum",
+        "U2544::COUNTRY::COUNTRY_51::transportCompleteCostNative"
+      ],
+      "B02": {
+        "residentOnlyNormalReference": {
+          "valueExactDecimal": "10869258.7",
+          "numerator": "108692587",
+          "denominator": "10",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentOnlyCriticalReference": {
+          "valueExactDecimal": "3260777.61",
+          "numerator": "326077761",
+          "denominator": "100",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "policyMeaning": "NEW_70_COUNTRY_APPLICABILITY_PROPOSAL_USING_PREVIOUS_C01_DESIGN_REFERENCE_NOT_ADOPTED_FLOOR",
+        "normalLitresPerResidentSimDay": "50",
+        "criticalLitresPerResidentSimDay": "15",
+        "requiredMedicalAndPublicDueAdditions": null,
+        "completeProtectedFloor": null,
+        "grainReferenceBasket": {
+          "valueExactDecimal": "144923.4493333333188409884",
+          "numerator": "362308623333333297102471",
+          "denominator": "2500000000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "grainSourcePointer": "/3/finalDemandPerPersonDay",
+        "foodNormalCriticalPolicy": null,
+        "qualityAndMembershipAdoption": null
+      },
+      "B10_B11_waterAndResourcePressure": {
+        "rawDeclaredPlanningWork": {
+          "valueExactDecimal": "39250100.861111112",
+          "numerator": "4906262607638889",
+          "denominator": "125000000",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "theoreticalNetPotential": {
+          "valueExactDecimal": "35419291.0170666674688",
+          "numerator": "691783027677083349",
+          "denominator": "19531250000",
+          "unit": "THEORETICAL_DELIVERED_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "workerDaysByUnboundSkillSlot": [
+          {
+            "valueExactDecimal": "11775.0302583333336",
+            "numerator": "14718787822916667",
+            "denominator": "1250000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "5887.5151291666668",
+            "numerator": "14718787822916667",
+            "denominator": "2500000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "1962.5050430555556",
+            "numerator": "4906262607638889",
+            "denominator": "2500000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          }
+        ],
+        "steel": {
+          "valueExactDecimal": "3.9250100861111112",
+          "numerator": "4906262607638889",
+          "denominator": "1250000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "machinery": {
+          "valueExactDecimal": "7.8500201722222224",
+          "numerator": "4906262607638889",
+          "denominator": "625000000000000",
+          "unit": "EQUIPMENT_UNIT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "electricityInput": {
+          "valueExactDecimal": "19625.050430555556",
+          "numerator": "4906262607638889",
+          "denominator": "250000000000",
+          "unit": "MWH_INPUT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "recipeAuthority": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+        "actualOperation": false,
+        "acceptedDelivery": null,
+        "actualLabourHours": null
+      },
+      "waterGeography": {
+        "regionAllocationPointers": ["/87", "/88"],
+        "rightsStatus": "ALLOCATION_PROPOSAL_NOT_GRANTED",
+        "referenceAvailableRaw": {
+          "valueExactDecimal": "616170665",
+          "numerator": "616170665",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceDrySeasonAvailableRaw": {
+          "valueExactDecimal": "551472745",
+          "numerator": "551472745",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceAllSectorAllocation": {
+          "valueExactDecimal": "39464970.18609711",
+          "numerator": "3946497018609711",
+          "denominator": "100000000",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "residentNormalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "13586573375",
+          "denominator": "1128",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentCriticalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "2717314675",
+          "denominator": "752",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "signedNormalDemandMinusTheoreticalDomesticNet": {
+          "valueExactDecimal": "-24550032.3170666674688",
+          "numerator": "-479492818692708349",
+          "denominator": "19531250000",
+          "unit": "M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "comparisonMeaning": "COUNTERFACTUAL_SAME_UNIT_REFERENCE_DIFFERENCE_NOT_ACTUAL_SHORTAGE_OR_SERVICE_ACCEPTANCE"
+      },
+      "B12": {
+        "sourcePointer": "/50",
+        "averageDemandMWLexeme": "100112.32686",
+        "averageDeliveredMWLexeme": "115129.175889",
+        "status": "CANDIDATE_NOT_ENERGIZED",
+        "hourlyDispatchValidated": false,
+        "actualMWh": null,
+        "simDayToSimulationHourRule": null,
+        "supplyOrDemandMWConvertedToMWh": false
+      },
+      "B13": {
+        "inboundUnsignedPlanPointers": [
+          "/45",
+          "/74",
+          "/105",
+          "/188",
+          "/190",
+          "/191",
+          "/282",
+          "/404",
+          "/542",
+          "/545",
+          "/583"
+        ],
+        "plannedFreightTonnes": {
+          "valueExactDecimal": "175847.187104",
+          "numerator": "5495224597",
+          "denominator": "31250",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "plannedFreightDistanceProduct": {
+          "valueExactDecimal": "979952404.118646678781",
+          "numerator": "979952404118646678781",
+          "denominator": "1000000000000",
+          "unit": "PLANNING_TONNE_KM/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "existingRouteIds": [
+          "ROUTE-0046",
+          "ROUTE-0074",
+          "ROUTE-0105",
+          "ROUTE-0185",
+          "ROUTE-0187",
+          "ROUTE-0188",
+          "ROUTE-0273",
+          "ROUTE-0382",
+          "ROUTE-0490",
+          "ROUTE-0185",
+          "ROUTE-0517"
+        ],
+        "distanceBasis": "EXISTING_SOURCE_DISTANCE_KM_ESTIMATE_NOT_NEW_SURVEY_OR_APPROVAL",
+        "actualTonneKm": null,
+        "acceptedDeliveryOrRights": null,
+        "C13FrozenTonnesRelabelled": false
+      },
+      "facilityReferencePointers": [
+        "/13",
+        "/242",
+        "/1082",
+        "/1083",
+        "/1084",
+        "/1085",
+        "/1086",
+        "/1087",
+        "/1088",
+        "/1089",
+        "/1090",
+        "/1091",
+        "/1092",
+        "/1093",
+        "/1094",
+        "/1095",
+        "/1096",
+        "/1097"
+      ],
+      "actual": {
+        "protectedServiceFloor": null,
+        "labourMinimumHours": null,
+        "labourPayrollNative": null,
+        "waterPotableDeliveredMinimum": null,
+        "waterCompleteCostNative": null,
+        "energyDeliveredMinimum": null,
+        "energyCompleteCostNative": null,
+        "transportMinimum": null,
+        "transportCompleteCostNative": null,
+        "period": null,
+        "currency": null,
+        "actualWorld": null
+      },
+      "stages": {
+        "sourceComplete": false,
+        "engineeringWired": false,
+        "validationPassed": false,
+        "formallyAdopted": false
+      },
+      "sourceAdmitted": false,
+      "runtimeConnected": false,
+      "productionAuthority": false,
+      "originalFieldsClosed": 0
+    },
+    {
+      "schemaVersion": "G_PHYSICAL_OPENING_SCENARIO_CANDIDATE_V2",
+      "candidateVersion": "2",
+      "originClass": "CONSTRUCTED_NOT_ADOPTED",
+      "countryId": "COUNTRY_52",
+      "scenarioCountryId": "visual-territory-52",
+      "period": {
+        "calendar": "SIM_TIME_RELATIVE_ONLY",
+        "from": "0",
+        "until": "1",
+        "unit": "SIM_DAY",
+        "quantityBasis": "TOTAL_OVER_DECLARED_INTERVAL",
+        "actualWorldId": null,
+        "epoch": null
+      },
+      "geography": {
+        "countryPointer": "/51",
+        "scenarioRegionIds": ["visual-territory-52-E1"],
+        "climateMixPreserved": [
+          {
+            "id": 2,
+            "landPixels": 3904,
+            "sharePercent": "100.0"
+          }
+        ],
+        "population": "161966472",
+        "populationSourcePointer": "/51/population",
+        "resourceOrGeographyEdited": false
+      },
+      "originalIds": [
+        "U2544::COUNTRY::COUNTRY_52::protectedServiceFloor",
+        "U2544::COUNTRY::COUNTRY_52::labourMinimumHours",
+        "U2544::COUNTRY::COUNTRY_52::labourPayrollNative",
+        "U2544::COUNTRY::COUNTRY_52::waterPotableDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_52::waterCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_52::energyDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_52::energyCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_52::transportMinimum",
+        "U2544::COUNTRY::COUNTRY_52::transportCompleteCostNative"
+      ],
+      "B02": {
+        "residentOnlyNormalReference": {
+          "valueExactDecimal": "8098323.6",
+          "numerator": "40491618",
+          "denominator": "5",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentOnlyCriticalReference": {
+          "valueExactDecimal": "2429497.08",
+          "numerator": "60737427",
+          "denominator": "25",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "policyMeaning": "NEW_70_COUNTRY_APPLICABILITY_PROPOSAL_USING_PREVIOUS_C01_DESIGN_REFERENCE_NOT_ADOPTED_FLOOR",
+        "normalLitresPerResidentSimDay": "50",
+        "criticalLitresPerResidentSimDay": "15",
+        "requiredMedicalAndPublicDueAdditions": null,
+        "completeProtectedFloor": null,
+        "grainReferenceBasket": {
+          "valueExactDecimal": "107977.6479999999892022352",
+          "numerator": "67486029999999993251397",
+          "denominator": "625000000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "grainSourcePointer": "/3/finalDemandPerPersonDay",
+        "foodNormalCriticalPolicy": null,
+        "qualityAndMembershipAdoption": null
+      },
+      "B10_B11_waterAndResourcePressure": {
+        "rawDeclaredPlanningWork": {
+          "valueExactDecimal": "29243946.333333332",
+          "numerator": "7310986583333333",
+          "denominator": "250000000",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "theoreticalNetPotential": {
+          "valueExactDecimal": "26389737.1711999987968",
+          "numerator": "1030849108249999953",
+          "denominator": "39062500000",
+          "unit": "THEORETICAL_DELIVERED_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "workerDaysByUnboundSkillSlot": [
+          {
+            "valueExactDecimal": "8773.1838999999996",
+            "numerator": "21932959749999999",
+            "denominator": "2500000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "4386.5919499999998",
+            "numerator": "21932959749999999",
+            "denominator": "5000000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "1462.1973166666666",
+            "numerator": "7310986583333333",
+            "denominator": "5000000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          }
+        ],
+        "steel": {
+          "valueExactDecimal": "2.9243946333333332",
+          "numerator": "7310986583333333",
+          "denominator": "2500000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "machinery": {
+          "valueExactDecimal": "5.8487892666666664",
+          "numerator": "7310986583333333",
+          "denominator": "1250000000000000",
+          "unit": "EQUIPMENT_UNIT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "electricityInput": {
+          "valueExactDecimal": "14621.973166666666",
+          "numerator": "7310986583333333",
+          "denominator": "500000000000",
+          "unit": "MWH_INPUT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "recipeAuthority": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+        "actualOperation": false,
+        "acceptedDelivery": null,
+        "actualLabourHours": null
+      },
+      "waterGeography": {
+        "regionAllocationPointers": ["/89"],
+        "rightsStatus": "ALLOCATION_PROPOSAL_NOT_GRANTED",
+        "referenceAvailableRaw": {
+          "valueExactDecimal": "466272812",
+          "numerator": "466272812",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceDrySeasonAvailableRaw": {
+          "valueExactDecimal": "417314167",
+          "numerator": "417314167",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceAllSectorAllocation": {
+          "valueExactDecimal": "29318057.49611933",
+          "numerator": "2931805749611933",
+          "denominator": "100000000",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "residentNormalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "843575375",
+          "denominator": "94",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentCriticalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "506145225",
+          "denominator": "188",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "signedNormalDemandMinusTheoreticalDomesticNet": {
+          "valueExactDecimal": "-18291413.5711999987968",
+          "numerator": "-714508342624999953",
+          "denominator": "39062500000",
+          "unit": "M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "comparisonMeaning": "COUNTERFACTUAL_SAME_UNIT_REFERENCE_DIFFERENCE_NOT_ACTUAL_SHORTAGE_OR_SERVICE_ACCEPTANCE"
+      },
+      "B12": {
+        "sourcePointer": "/51",
+        "averageDemandMWLexeme": "73373.658945",
+        "averageDeliveredMWLexeme": "84379.707787",
+        "status": "CANDIDATE_NOT_ENERGIZED",
+        "hourlyDispatchValidated": false,
+        "actualMWh": null,
+        "simDayToSimulationHourRule": null,
+        "supplyOrDemandMWConvertedToMWh": false
+      },
+      "B13": {
+        "inboundUnsignedPlanPointers": [
+          "/93",
+          "/211",
+          "/283",
+          "/335",
+          "/338",
+          "/411",
+          "/584"
+        ],
+        "plannedFreightTonnes": {
+          "valueExactDecimal": "146864.79388",
+          "numerator": "3671619847",
+          "denominator": "25000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "plannedFreightDistanceProduct": {
+          "valueExactDecimal": "780484256.173611985902",
+          "numerator": "390242128086805992951",
+          "denominator": "500000000000",
+          "unit": "PLANNING_TONNE_KM/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "existingRouteIds": [
+          "ROUTE-0093",
+          "ROUTE-0205",
+          "ROUTE-0274",
+          "ROUTE-0319",
+          "ROUTE-0322",
+          "ROUTE-0388",
+          "ROUTE-0518"
+        ],
+        "distanceBasis": "EXISTING_SOURCE_DISTANCE_KM_ESTIMATE_NOT_NEW_SURVEY_OR_APPROVAL",
+        "actualTonneKm": null,
+        "acceptedDeliveryOrRights": null,
+        "C13FrozenTonnesRelabelled": false
+      },
+      "facilityReferencePointers": [
+        "/1",
+        "/243",
+        "/1098",
+        "/1099",
+        "/1100",
+        "/1101",
+        "/1102",
+        "/1103",
+        "/1104",
+        "/1105",
+        "/1106",
+        "/1107",
+        "/1108",
+        "/1109",
+        "/1110",
+        "/1111"
+      ],
+      "actual": {
+        "protectedServiceFloor": null,
+        "labourMinimumHours": null,
+        "labourPayrollNative": null,
+        "waterPotableDeliveredMinimum": null,
+        "waterCompleteCostNative": null,
+        "energyDeliveredMinimum": null,
+        "energyCompleteCostNative": null,
+        "transportMinimum": null,
+        "transportCompleteCostNative": null,
+        "period": null,
+        "currency": null,
+        "actualWorld": null
+      },
+      "stages": {
+        "sourceComplete": false,
+        "engineeringWired": false,
+        "validationPassed": false,
+        "formallyAdopted": false
+      },
+      "sourceAdmitted": false,
+      "runtimeConnected": false,
+      "productionAuthority": false,
+      "originalFieldsClosed": 0
+    },
+    {
+      "schemaVersion": "G_PHYSICAL_OPENING_SCENARIO_CANDIDATE_V2",
+      "candidateVersion": "2",
+      "originClass": "CONSTRUCTED_NOT_ADOPTED",
+      "countryId": "COUNTRY_53",
+      "scenarioCountryId": "visual-territory-53",
+      "period": {
+        "calendar": "SIM_TIME_RELATIVE_ONLY",
+        "from": "0",
+        "until": "1",
+        "unit": "SIM_DAY",
+        "quantityBasis": "TOTAL_OVER_DECLARED_INTERVAL",
+        "actualWorldId": null,
+        "epoch": null
+      },
+      "geography": {
+        "countryPointer": "/52",
+        "scenarioRegionIds": [
+          "visual-territory-53-E1",
+          "visual-territory-53-E2"
+        ],
+        "climateMixPreserved": [
+          {
+            "id": 8,
+            "landPixels": 6863,
+            "sharePercent": "88.5"
+          },
+          {
+            "id": 13,
+            "landPixels": 618,
+            "sharePercent": "8.0"
+          },
+          {
+            "id": 2,
+            "landPixels": 272,
+            "sharePercent": "3.5"
+          }
+        ],
+        "population": "277522594",
+        "populationSourcePointer": "/52/population",
+        "resourceOrGeographyEdited": false
+      },
+      "originalIds": [
+        "U2544::COUNTRY::COUNTRY_53::protectedServiceFloor",
+        "U2544::COUNTRY::COUNTRY_53::labourMinimumHours",
+        "U2544::COUNTRY::COUNTRY_53::labourPayrollNative",
+        "U2544::COUNTRY::COUNTRY_53::waterPotableDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_53::waterCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_53::energyDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_53::energyCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_53::transportMinimum",
+        "U2544::COUNTRY::COUNTRY_53::transportCompleteCostNative"
+      ],
+      "B02": {
+        "residentOnlyNormalReference": {
+          "valueExactDecimal": "13876129.7",
+          "numerator": "138761297",
+          "denominator": "10",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentOnlyCriticalReference": {
+          "valueExactDecimal": "4162838.91",
+          "numerator": "416283891",
+          "denominator": "100",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "policyMeaning": "NEW_70_COUNTRY_APPLICABILITY_PROPOSAL_USING_PREVIOUS_C01_DESIGN_REFERENCE_NOT_ADOPTED_FLOOR",
+        "normalLitresPerResidentSimDay": "50",
+        "criticalLitresPerResidentSimDay": "15",
+        "requiredMedicalAndPublicDueAdditions": null,
+        "completeProtectedFloor": null,
+        "grainReferenceBasket": {
+          "valueExactDecimal": "185015.0626666666481651604",
+          "numerator": "462537656666666620412901",
+          "denominator": "2500000000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "grainSourcePointer": "/3/finalDemandPerPersonDay",
+        "foodNormalCriticalPolicy": null,
+        "qualityAndMembershipAdoption": null
+      },
+      "B10_B11_waterAndResourcePressure": {
+        "rawDeclaredPlanningWork": {
+          "valueExactDecimal": "50108246.138888892",
+          "numerator": "12527061534722223",
+          "denominator": "250000000",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "theoreticalNetPotential": {
+          "valueExactDecimal": "45217681.3157333361408",
+          "numerator": "1766315676395833443",
+          "denominator": "39062500000",
+          "unit": "THEORETICAL_DELIVERED_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "workerDaysByUnboundSkillSlot": [
+          {
+            "valueExactDecimal": "15032.4738416666676",
+            "numerator": "37581184604166669",
+            "denominator": "2500000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "7516.2369208333338",
+            "numerator": "37581184604166669",
+            "denominator": "5000000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "2505.4123069444446",
+            "numerator": "12527061534722223",
+            "denominator": "5000000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          }
+        ],
+        "steel": {
+          "valueExactDecimal": "5.0108246138888892",
+          "numerator": "12527061534722223",
+          "denominator": "2500000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "machinery": {
+          "valueExactDecimal": "10.0216492277777784",
+          "numerator": "12527061534722223",
+          "denominator": "1250000000000000",
+          "unit": "EQUIPMENT_UNIT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "electricityInput": {
+          "valueExactDecimal": "25054.123069444446",
+          "numerator": "12527061534722223",
+          "denominator": "500000000000",
+          "unit": "MWH_INPUT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "recipeAuthority": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+        "actualOperation": false,
+        "acceptedDelivery": null,
+        "actualLabourHours": null
+      },
+      "waterGeography": {
+        "regionAllocationPointers": ["/90", "/91"],
+        "rightsStatus": "ALLOCATION_PROPOSAL_NOT_GRANTED",
+        "referenceAvailableRaw": {
+          "valueExactDecimal": "892435445",
+          "numerator": "892435445",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceDrySeasonAvailableRaw": {
+          "valueExactDecimal": "513438886",
+          "numerator": "513438886",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceAllSectorAllocation": {
+          "valueExactDecimal": "344881965.21429123",
+          "numerator": "34488196521429123",
+          "denominator": "100000000",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "residentNormalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "17345162125",
+          "denominator": "1128",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentCriticalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "3469032425",
+          "denominator": "752",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "signedNormalDemandMinusTheoreticalDomesticNet": {
+          "valueExactDecimal": "-31341551.6157333361408",
+          "numerator": "-1224279359989583443",
+          "denominator": "39062500000",
+          "unit": "M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "comparisonMeaning": "COUNTERFACTUAL_SAME_UNIT_REFERENCE_DIFFERENCE_NOT_ACTUAL_SHORTAGE_OR_SERVICE_ACCEPTANCE"
+      },
+      "B12": {
+        "sourcePointer": "/52",
+        "averageDemandMWLexeme": "125512.286112",
+        "averageDeliveredMWLexeme": "144339.129028",
+        "status": "CANDIDATE_NOT_ENERGIZED",
+        "hourlyDispatchValidated": false,
+        "actualMWh": null,
+        "simDayToSimulationHourRule": null,
+        "supplyOrDemandMWConvertedToMWh": false
+      },
+      "B13": {
+        "inboundUnsignedPlanPointers": [
+          "/141",
+          "/339",
+          "/358",
+          "/427",
+          "/482",
+          "/492",
+          "/559",
+          "/585",
+          "/591"
+        ],
+        "plannedFreightTonnes": {
+          "valueExactDecimal": "66441.204964",
+          "numerator": "16610301241",
+          "denominator": "250000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "plannedFreightDistanceProduct": {
+          "valueExactDecimal": "712610013.598734383974",
+          "numerator": "356305006799367191987",
+          "denominator": "500000000000",
+          "unit": "PLANNING_TONNE_KM/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "existingRouteIds": [
+          "ROUTE-0141",
+          "ROUTE-0323",
+          "ROUTE-0339",
+          "ROUTE-0404",
+          "ROUTE-0444",
+          "ROUTE-0141",
+          "ROUTE-0444",
+          "ROUTE-0519",
+          "ROUTE-0525"
+        ],
+        "distanceBasis": "EXISTING_SOURCE_DISTANCE_KM_ESTIMATE_NOT_NEW_SURVEY_OR_APPROVAL",
+        "actualTonneKm": null,
+        "acceptedDeliveryOrRights": null,
+        "C13FrozenTonnesRelabelled": false
+      },
+      "facilityReferencePointers": [
+        "/244",
+        "/245",
+        "/246",
+        "/247",
+        "/248",
+        "/249",
+        "/250",
+        "/251",
+        "/1112",
+        "/1113",
+        "/1114",
+        "/1115",
+        "/1116",
+        "/1117",
+        "/1118",
+        "/1119",
+        "/1120",
+        "/1121",
+        "/1122",
+        "/1123",
+        "/1124",
+        "/1125",
+        "/1126"
+      ],
+      "actual": {
+        "protectedServiceFloor": null,
+        "labourMinimumHours": null,
+        "labourPayrollNative": null,
+        "waterPotableDeliveredMinimum": null,
+        "waterCompleteCostNative": null,
+        "energyDeliveredMinimum": null,
+        "energyCompleteCostNative": null,
+        "transportMinimum": null,
+        "transportCompleteCostNative": null,
+        "period": null,
+        "currency": null,
+        "actualWorld": null
+      },
+      "stages": {
+        "sourceComplete": false,
+        "engineeringWired": false,
+        "validationPassed": false,
+        "formallyAdopted": false
+      },
+      "sourceAdmitted": false,
+      "runtimeConnected": false,
+      "productionAuthority": false,
+      "originalFieldsClosed": 0
+    },
+    {
+      "schemaVersion": "G_PHYSICAL_OPENING_SCENARIO_CANDIDATE_V2",
+      "candidateVersion": "2",
+      "originClass": "CONSTRUCTED_NOT_ADOPTED",
+      "countryId": "COUNTRY_54",
+      "scenarioCountryId": "visual-territory-54",
+      "period": {
+        "calendar": "SIM_TIME_RELATIVE_ONLY",
+        "from": "0",
+        "until": "1",
+        "unit": "SIM_DAY",
+        "quantityBasis": "TOTAL_OVER_DECLARED_INTERVAL",
+        "actualWorldId": null,
+        "epoch": null
+      },
+      "geography": {
+        "countryPointer": "/53",
+        "scenarioRegionIds": [
+          "visual-territory-54-E1",
+          "visual-territory-54-E2"
+        ],
+        "climateMixPreserved": [
+          {
+            "id": 8,
+            "landPixels": 9616,
+            "sharePercent": "94.9"
+          },
+          {
+            "id": 4,
+            "landPixels": 343,
+            "sharePercent": "3.4"
+          },
+          {
+            "id": 2,
+            "landPixels": 170,
+            "sharePercent": "1.7"
+          }
+        ],
+        "population": "337593622",
+        "populationSourcePointer": "/53/population",
+        "resourceOrGeographyEdited": false
+      },
+      "originalIds": [
+        "U2544::COUNTRY::COUNTRY_54::protectedServiceFloor",
+        "U2544::COUNTRY::COUNTRY_54::labourMinimumHours",
+        "U2544::COUNTRY::COUNTRY_54::labourPayrollNative",
+        "U2544::COUNTRY::COUNTRY_54::waterPotableDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_54::waterCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_54::energyDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_54::energyCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_54::transportMinimum",
+        "U2544::COUNTRY::COUNTRY_54::transportCompleteCostNative"
+      ],
+      "B02": {
+        "residentOnlyNormalReference": {
+          "valueExactDecimal": "16879681.1",
+          "numerator": "168796811",
+          "denominator": "10",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentOnlyCriticalReference": {
+          "valueExactDecimal": "5063904.33",
+          "numerator": "506390433",
+          "denominator": "100",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "policyMeaning": "NEW_70_COUNTRY_APPLICABILITY_PROPOSAL_USING_PREVIOUS_C01_DESIGN_REFERENCE_NOT_ADOPTED_FLOOR",
+        "normalLitresPerResidentSimDay": "50",
+        "criticalLitresPerResidentSimDay": "15",
+        "requiredMedicalAndPublicDueAdditions": null,
+        "completeProtectedFloor": null,
+        "grainReferenceBasket": {
+          "valueExactDecimal": "225062.4146666666441604252",
+          "numerator": "562656036666666610401063",
+          "denominator": "2500000000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "grainSourcePointer": "/3/finalDemandPerPersonDay",
+        "foodNormalCriticalPolicy": null,
+        "qualityAndMembershipAdoption": null
+      },
+      "B10_B11_waterAndResourcePressure": {
+        "rawDeclaredPlanningWork": {
+          "valueExactDecimal": "60954403.972222224",
+          "numerator": "3809650248263889",
+          "denominator": "62500000",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "theoreticalNetPotential": {
+          "valueExactDecimal": "55005254.1445333349376",
+          "numerator": "537160685005208349",
+          "denominator": "9765625000",
+          "unit": "THEORETICAL_DELIVERED_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "workerDaysByUnboundSkillSlot": [
+          {
+            "valueExactDecimal": "18286.3211916666672",
+            "numerator": "11428950744791667",
+            "denominator": "625000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "9143.1605958333336",
+            "numerator": "11428950744791667",
+            "denominator": "1250000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "3047.7201986111112",
+            "numerator": "3809650248263889",
+            "denominator": "1250000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          }
+        ],
+        "steel": {
+          "valueExactDecimal": "6.0954403972222224",
+          "numerator": "3809650248263889",
+          "denominator": "625000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "machinery": {
+          "valueExactDecimal": "12.1908807944444448",
+          "numerator": "3809650248263889",
+          "denominator": "312500000000000",
+          "unit": "EQUIPMENT_UNIT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "electricityInput": {
+          "valueExactDecimal": "30477.201986111112",
+          "numerator": "3809650248263889",
+          "denominator": "125000000000",
+          "unit": "MWH_INPUT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "recipeAuthority": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+        "actualOperation": false,
+        "acceptedDelivery": null,
+        "actualLabourHours": null
+      },
+      "waterGeography": {
+        "regionAllocationPointers": ["/92", "/93"],
+        "rightsStatus": "ALLOCATION_PROPOSAL_NOT_GRANTED",
+        "referenceAvailableRaw": {
+          "valueExactDecimal": "977708941",
+          "numerator": "977708941",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceDrySeasonAvailableRaw": {
+          "valueExactDecimal": "543298208",
+          "numerator": "543298208",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceAllSectorAllocation": {
+          "valueExactDecimal": "678800991.8214086",
+          "numerator": "3394004959107043",
+          "denominator": "5000000",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "residentNormalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "21099601375",
+          "denominator": "1128",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentCriticalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "4219920275",
+          "denominator": "752",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "signedNormalDemandMinusTheoreticalDomesticNet": {
+          "valueExactDecimal": "-38125573.0445333349376",
+          "numerator": "-372320049263020849",
+          "denominator": "9765625000",
+          "unit": "M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "comparisonMeaning": "COUNTERFACTUAL_SAME_UNIT_REFERENCE_DIFFERENCE_NOT_ACTUAL_SHORTAGE_OR_SERVICE_ACCEPTANCE"
+      },
+      "B12": {
+        "sourcePointer": "/53",
+        "averageDemandMWLexeme": "152390.781578",
+        "averageDeliveredMWLexeme": "175249.398815",
+        "status": "CANDIDATE_NOT_ENERGIZED",
+        "hourlyDispatchValidated": false,
+        "actualMWh": null,
+        "simDayToSimulationHourRule": null,
+        "supplyOrDemandMWConvertedToMWh": false
+      },
+      "B13": {
+        "inboundUnsignedPlanPointers": ["/257", "/352", "/428", "/483", "/586"],
+        "plannedFreightTonnes": {
+          "valueExactDecimal": "94378.847259",
+          "numerator": "94378847259",
+          "denominator": "1000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "plannedFreightDistanceProduct": {
+          "valueExactDecimal": "666428390.432843181073",
+          "numerator": "666428390432843181073",
+          "denominator": "1000000000000",
+          "unit": "PLANNING_TONNE_KM/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "existingRouteIds": [
+          "ROUTE-0249",
+          "ROUTE-0334",
+          "ROUTE-0405",
+          "ROUTE-0445",
+          "ROUTE-0520"
+        ],
+        "distanceBasis": "EXISTING_SOURCE_DISTANCE_KM_ESTIMATE_NOT_NEW_SURVEY_OR_APPROVAL",
+        "actualTonneKm": null,
+        "acceptedDeliveryOrRights": null,
+        "C13FrozenTonnesRelabelled": false
+      },
+      "facilityReferencePointers": [
+        "/252",
+        "/253",
+        "/254",
+        "/255",
+        "/256",
+        "/257",
+        "/258",
+        "/259",
+        "/260",
+        "/1127",
+        "/1128",
+        "/1129",
+        "/1130",
+        "/1131",
+        "/1132",
+        "/1133",
+        "/1134",
+        "/1135",
+        "/1136",
+        "/1137",
+        "/1138",
+        "/1139",
+        "/1140",
+        "/1141"
+      ],
+      "actual": {
+        "protectedServiceFloor": null,
+        "labourMinimumHours": null,
+        "labourPayrollNative": null,
+        "waterPotableDeliveredMinimum": null,
+        "waterCompleteCostNative": null,
+        "energyDeliveredMinimum": null,
+        "energyCompleteCostNative": null,
+        "transportMinimum": null,
+        "transportCompleteCostNative": null,
+        "period": null,
+        "currency": null,
+        "actualWorld": null
+      },
+      "stages": {
+        "sourceComplete": false,
+        "engineeringWired": false,
+        "validationPassed": false,
+        "formallyAdopted": false
+      },
+      "sourceAdmitted": false,
+      "runtimeConnected": false,
+      "productionAuthority": false,
+      "originalFieldsClosed": 0
+    },
+    {
+      "schemaVersion": "G_PHYSICAL_OPENING_SCENARIO_CANDIDATE_V2",
+      "candidateVersion": "2",
+      "originClass": "CONSTRUCTED_NOT_ADOPTED",
+      "countryId": "COUNTRY_55",
+      "scenarioCountryId": "visual-territory-55",
+      "period": {
+        "calendar": "SIM_TIME_RELATIVE_ONLY",
+        "from": "0",
+        "until": "1",
+        "unit": "SIM_DAY",
+        "quantityBasis": "TOTAL_OVER_DECLARED_INTERVAL",
+        "actualWorldId": null,
+        "epoch": null
+      },
+      "geography": {
+        "countryPointer": "/54",
+        "scenarioRegionIds": ["visual-territory-55-E1"],
+        "climateMixPreserved": [
+          {
+            "id": 8,
+            "landPixels": 3316,
+            "sharePercent": "87.4"
+          },
+          {
+            "id": 2,
+            "landPixels": 477,
+            "sharePercent": "12.6"
+          }
+        ],
+        "population": "158398842",
+        "populationSourcePointer": "/54/population",
+        "resourceOrGeographyEdited": false
+      },
+      "originalIds": [
+        "U2544::COUNTRY::COUNTRY_55::protectedServiceFloor",
+        "U2544::COUNTRY::COUNTRY_55::labourMinimumHours",
+        "U2544::COUNTRY::COUNTRY_55::labourPayrollNative",
+        "U2544::COUNTRY::COUNTRY_55::waterPotableDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_55::waterCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_55::energyDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_55::energyCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_55::transportMinimum",
+        "U2544::COUNTRY::COUNTRY_55::transportCompleteCostNative"
+      ],
+      "B02": {
+        "residentOnlyNormalReference": {
+          "valueExactDecimal": "7919942.1",
+          "numerator": "79199421",
+          "denominator": "10",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentOnlyCriticalReference": {
+          "valueExactDecimal": "2375982.63",
+          "numerator": "237598263",
+          "denominator": "100",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "policyMeaning": "NEW_70_COUNTRY_APPLICABILITY_PROPOSAL_USING_PREVIOUS_C01_DESIGN_REFERENCE_NOT_ADOPTED_FLOOR",
+        "normalLitresPerResidentSimDay": "50",
+        "criticalLitresPerResidentSimDay": "15",
+        "requiredMedicalAndPublicDueAdditions": null,
+        "completeProtectedFloor": null,
+        "grainReferenceBasket": {
+          "valueExactDecimal": "105599.2279999999894400772",
+          "numerator": "263998069999999973600193",
+          "denominator": "2500000000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "grainSourcePointer": "/3/finalDemandPerPersonDay",
+        "foodNormalCriticalPolicy": null,
+        "qualityAndMembershipAdoption": null
+      },
+      "B10_B11_waterAndResourcePressure": {
+        "rawDeclaredPlanningWork": {
+          "valueExactDecimal": "28599790.916666668",
+          "numerator": "7149947729166667",
+          "denominator": "250000000",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "theoreticalNetPotential": {
+          "valueExactDecimal": "25808451.3232000012032",
+          "numerator": "1008142629812500047",
+          "denominator": "39062500000",
+          "unit": "THEORETICAL_DELIVERED_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "workerDaysByUnboundSkillSlot": [
+          {
+            "valueExactDecimal": "8579.9372750000004",
+            "numerator": "21449843187500001",
+            "denominator": "2500000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "4289.9686375000002",
+            "numerator": "21449843187500001",
+            "denominator": "5000000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "1429.9895458333334",
+            "numerator": "7149947729166667",
+            "denominator": "5000000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          }
+        ],
+        "steel": {
+          "valueExactDecimal": "2.8599790916666668",
+          "numerator": "7149947729166667",
+          "denominator": "2500000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "machinery": {
+          "valueExactDecimal": "5.7199581833333336",
+          "numerator": "7149947729166667",
+          "denominator": "1250000000000000",
+          "unit": "EQUIPMENT_UNIT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "electricityInput": {
+          "valueExactDecimal": "14299.895458333334",
+          "numerator": "7149947729166667",
+          "denominator": "500000000000",
+          "unit": "MWH_INPUT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "recipeAuthority": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+        "actualOperation": false,
+        "acceptedDelivery": null,
+        "actualLabourHours": null
+      },
+      "waterGeography": {
+        "regionAllocationPointers": ["/94"],
+        "rightsStatus": "ALLOCATION_PROPOSAL_NOT_GRANTED",
+        "referenceAvailableRaw": {
+          "valueExactDecimal": "364345218",
+          "numerator": "364345218",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceDrySeasonAvailableRaw": {
+          "valueExactDecimal": "214604905",
+          "numerator": "214604905",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceAllSectorAllocation": {
+          "valueExactDecimal": "177333646.16345713",
+          "numerator": "17733364616345713",
+          "denominator": "100000000",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "residentNormalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "3299975875",
+          "denominator": "376",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentCriticalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "1979985525",
+          "denominator": "752",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "signedNormalDemandMinusTheoreticalDomesticNet": {
+          "valueExactDecimal": "-17888509.2232000012032",
+          "numerator": "-698769891531250047",
+          "denominator": "39062500000",
+          "unit": "M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "comparisonMeaning": "COUNTERFACTUAL_SAME_UNIT_REFERENCE_DIFFERENCE_NOT_ACTUAL_SHORTAGE_OR_SERVICE_ACCEPTANCE"
+      },
+      "B12": {
+        "sourcePointer": "/54",
+        "averageDemandMWLexeme": "71549.371115",
+        "averageDeliveredMWLexeme": "82281.776782",
+        "status": "CANDIDATE_NOT_ENERGIZED",
+        "hourlyDispatchValidated": false,
+        "actualMWh": null,
+        "simDayToSimulationHourRule": null,
+        "supplyOrDemandMWConvertedToMWh": false
+      },
+      "B13": {
+        "inboundUnsignedPlanPointers": [
+          "/111",
+          "/258",
+          "/353",
+          "/359",
+          "/424",
+          "/484",
+          "/592"
+        ],
+        "plannedFreightTonnes": {
+          "valueExactDecimal": "37484.050666",
+          "numerator": "18742025333",
+          "denominator": "500000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "plannedFreightDistanceProduct": {
+          "valueExactDecimal": "308330448.972928205837",
+          "numerator": "308330448972928205837",
+          "denominator": "1000000000000",
+          "unit": "PLANNING_TONNE_KM/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "existingRouteIds": [
+          "ROUTE-0111",
+          "ROUTE-0250",
+          "ROUTE-0335",
+          "ROUTE-0340",
+          "ROUTE-0401",
+          "ROUTE-0446",
+          "ROUTE-0526"
+        ],
+        "distanceBasis": "EXISTING_SOURCE_DISTANCE_KM_ESTIMATE_NOT_NEW_SURVEY_OR_APPROVAL",
+        "actualTonneKm": null,
+        "acceptedDeliveryOrRights": null,
+        "C13FrozenTonnesRelabelled": false
+      },
+      "facilityReferencePointers": [
+        "/4",
+        "/261",
+        "/262",
+        "/263",
+        "/264",
+        "/265",
+        "/1142",
+        "/1143",
+        "/1144",
+        "/1145",
+        "/1146",
+        "/1147",
+        "/1148",
+        "/1149",
+        "/1150",
+        "/1151",
+        "/1152",
+        "/1153",
+        "/1154"
+      ],
+      "actual": {
+        "protectedServiceFloor": null,
+        "labourMinimumHours": null,
+        "labourPayrollNative": null,
+        "waterPotableDeliveredMinimum": null,
+        "waterCompleteCostNative": null,
+        "energyDeliveredMinimum": null,
+        "energyCompleteCostNative": null,
+        "transportMinimum": null,
+        "transportCompleteCostNative": null,
+        "period": null,
+        "currency": null,
+        "actualWorld": null
+      },
+      "stages": {
+        "sourceComplete": false,
+        "engineeringWired": false,
+        "validationPassed": false,
+        "formallyAdopted": false
+      },
+      "sourceAdmitted": false,
+      "runtimeConnected": false,
+      "productionAuthority": false,
+      "originalFieldsClosed": 0
+    },
+    {
+      "schemaVersion": "G_PHYSICAL_OPENING_SCENARIO_CANDIDATE_V2",
+      "candidateVersion": "2",
+      "originClass": "CONSTRUCTED_NOT_ADOPTED",
+      "countryId": "COUNTRY_56",
+      "scenarioCountryId": "visual-territory-56",
+      "period": {
+        "calendar": "SIM_TIME_RELATIVE_ONLY",
+        "from": "0",
+        "until": "1",
+        "unit": "SIM_DAY",
+        "quantityBasis": "TOTAL_OVER_DECLARED_INTERVAL",
+        "actualWorldId": null,
+        "epoch": null
+      },
+      "geography": {
+        "countryPointer": "/55",
+        "scenarioRegionIds": [
+          "visual-territory-56-E1",
+          "visual-territory-56-E2"
+        ],
+        "climateMixPreserved": [
+          {
+            "id": 2,
+            "landPixels": 7622,
+            "sharePercent": "84.8"
+          },
+          {
+            "id": 13,
+            "landPixels": 806,
+            "sharePercent": "9.0"
+          },
+          {
+            "id": 8,
+            "landPixels": 228,
+            "sharePercent": "2.5"
+          },
+          {
+            "id": 9,
+            "landPixels": 207,
+            "sharePercent": "2.3"
+          },
+          {
+            "id": 3,
+            "landPixels": 129,
+            "sharePercent": "1.4"
+          }
+        ],
+        "population": "326899872",
+        "populationSourcePointer": "/55/population",
+        "resourceOrGeographyEdited": false
+      },
+      "originalIds": [
+        "U2544::COUNTRY::COUNTRY_56::protectedServiceFloor",
+        "U2544::COUNTRY::COUNTRY_56::labourMinimumHours",
+        "U2544::COUNTRY::COUNTRY_56::labourPayrollNative",
+        "U2544::COUNTRY::COUNTRY_56::waterPotableDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_56::waterCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_56::energyDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_56::energyCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_56::transportMinimum",
+        "U2544::COUNTRY::COUNTRY_56::transportCompleteCostNative"
+      ],
+      "B02": {
+        "residentOnlyNormalReference": {
+          "valueExactDecimal": "16344993.6",
+          "numerator": "81724968",
+          "denominator": "5",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentOnlyCriticalReference": {
+          "valueExactDecimal": "4903498.08",
+          "numerator": "122587452",
+          "denominator": "25",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "policyMeaning": "NEW_70_COUNTRY_APPLICABILITY_PROPOSAL_USING_PREVIOUS_C01_DESIGN_REFERENCE_NOT_ADOPTED_FLOOR",
+        "normalLitresPerResidentSimDay": "50",
+        "criticalLitresPerResidentSimDay": "15",
+        "requiredMedicalAndPublicDueAdditions": null,
+        "completeProtectedFloor": null,
+        "grainReferenceBasket": {
+          "valueExactDecimal": "217933.2479999999782066752",
+          "numerator": "34052069999999996594793",
+          "denominator": "156250000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "grainSourcePointer": "/3/finalDemandPerPersonDay",
+        "foodNormalCriticalPolicy": null,
+        "qualityAndMembershipAdoption": null
+      },
+      "B10_B11_waterAndResourcePressure": {
+        "rawDeclaredPlanningWork": {
+          "valueExactDecimal": "59023588",
+          "numerator": "59023588",
+          "denominator": "1",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "theoreticalNetPotential": {
+          "valueExactDecimal": "53262885.8112",
+          "numerator": "33289303632",
+          "denominator": "625",
+          "unit": "THEORETICAL_DELIVERED_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "workerDaysByUnboundSkillSlot": [
+          {
+            "valueExactDecimal": "17707.0764",
+            "numerator": "44267691",
+            "denominator": "2500",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "8853.5382",
+            "numerator": "44267691",
+            "denominator": "5000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "2951.1794",
+            "numerator": "14755897",
+            "denominator": "5000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          }
+        ],
+        "steel": {
+          "valueExactDecimal": "5.9023588",
+          "numerator": "14755897",
+          "denominator": "2500000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "machinery": {
+          "valueExactDecimal": "11.8047176",
+          "numerator": "14755897",
+          "denominator": "1250000",
+          "unit": "EQUIPMENT_UNIT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "electricityInput": {
+          "valueExactDecimal": "29511.794",
+          "numerator": "14755897",
+          "denominator": "500",
+          "unit": "MWH_INPUT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "recipeAuthority": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+        "actualOperation": false,
+        "acceptedDelivery": null,
+        "actualLabourHours": null
+      },
+      "waterGeography": {
+        "regionAllocationPointers": ["/95", "/96"],
+        "rightsStatus": "ALLOCATION_PROPOSAL_NOT_GRANTED",
+        "referenceAvailableRaw": {
+          "valueExactDecimal": "1230204415",
+          "numerator": "1230204415",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceDrySeasonAvailableRaw": {
+          "valueExactDecimal": "1054780828",
+          "numerator": "1054780828",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceAllSectorAllocation": {
+          "valueExactDecimal": "59066297.457192",
+          "numerator": "7383287182149",
+          "denominator": "125000",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "residentNormalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "851301750",
+          "denominator": "47",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentCriticalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "255390525",
+          "denominator": "47",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "signedNormalDemandMinusTheoreticalDomesticNet": {
+          "valueExactDecimal": "-36917892.2112",
+          "numerator": "-23073682632",
+          "denominator": "625",
+          "unit": "M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "comparisonMeaning": "COUNTERFACTUAL_SAME_UNIT_REFERENCE_DIFFERENCE_NOT_ACTUAL_SHORTAGE_OR_SERVICE_ACCEPTANCE"
+      },
+      "B12": {
+        "sourcePointer": "/55",
+        "averageDemandMWLexeme": "147378.339524",
+        "averageDeliveredMWLexeme": "169485.090453",
+        "status": "CANDIDATE_NOT_ENERGIZED",
+        "hourlyDispatchValidated": false,
+        "actualMWh": null,
+        "simDayToSimulationHourRule": null,
+        "supplyOrDemandMWConvertedToMWh": false
+      },
+      "B13": {
+        "inboundUnsignedPlanPointers": [
+          "/139",
+          "/142",
+          "/156",
+          "/192",
+          "/193",
+          "/196",
+          "/259",
+          "/265",
+          "/287",
+          "/360",
+          "/429"
+        ],
+        "plannedFreightTonnes": {
+          "valueExactDecimal": "312068.5596",
+          "numerator": "780171399",
+          "denominator": "2500",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "plannedFreightDistanceProduct": {
+          "valueExactDecimal": "3245283898.84380969178",
+          "numerator": "162264194942190484589",
+          "denominator": "50000000000",
+          "unit": "PLANNING_TONNE_KM/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "existingRouteIds": [
+          "ROUTE-0139",
+          "ROUTE-0142",
+          "ROUTE-0156",
+          "ROUTE-0189",
+          "ROUTE-0190",
+          "ROUTE-0193",
+          "ROUTE-0251",
+          "ROUTE-0256",
+          "ROUTE-0278",
+          "ROUTE-0341",
+          "ROUTE-0406"
+        ],
+        "distanceBasis": "EXISTING_SOURCE_DISTANCE_KM_ESTIMATE_NOT_NEW_SURVEY_OR_APPROVAL",
+        "actualTonneKm": null,
+        "acceptedDeliveryOrRights": null,
+        "C13FrozenTonnesRelabelled": false
+      },
+      "facilityReferencePointers": [
+        "/3",
+        "/266",
+        "/267",
+        "/268",
+        "/1155",
+        "/1156",
+        "/1157",
+        "/1158",
+        "/1159",
+        "/1160",
+        "/1161",
+        "/1162",
+        "/1163",
+        "/1164",
+        "/1165",
+        "/1166",
+        "/1167",
+        "/1168",
+        "/1169",
+        "/1170"
+      ],
+      "actual": {
+        "protectedServiceFloor": null,
+        "labourMinimumHours": null,
+        "labourPayrollNative": null,
+        "waterPotableDeliveredMinimum": null,
+        "waterCompleteCostNative": null,
+        "energyDeliveredMinimum": null,
+        "energyCompleteCostNative": null,
+        "transportMinimum": null,
+        "transportCompleteCostNative": null,
+        "period": null,
+        "currency": null,
+        "actualWorld": null
+      },
+      "stages": {
+        "sourceComplete": false,
+        "engineeringWired": false,
+        "validationPassed": false,
+        "formallyAdopted": false
+      },
+      "sourceAdmitted": false,
+      "runtimeConnected": false,
+      "productionAuthority": false,
+      "originalFieldsClosed": 0
+    },
+    {
+      "schemaVersion": "G_PHYSICAL_OPENING_SCENARIO_CANDIDATE_V2",
+      "candidateVersion": "2",
+      "originClass": "CONSTRUCTED_NOT_ADOPTED",
+      "countryId": "COUNTRY_57",
+      "scenarioCountryId": "visual-territory-57",
+      "period": {
+        "calendar": "SIM_TIME_RELATIVE_ONLY",
+        "from": "0",
+        "until": "1",
+        "unit": "SIM_DAY",
+        "quantityBasis": "TOTAL_OVER_DECLARED_INTERVAL",
+        "actualWorldId": null,
+        "epoch": null
+      },
+      "geography": {
+        "countryPointer": "/56",
+        "scenarioRegionIds": [
+          "visual-territory-57-E1",
+          "visual-territory-57-E2"
+        ],
+        "climateMixPreserved": [
+          {
+            "id": 3,
+            "landPixels": 3474,
+            "sharePercent": "60.1"
+          },
+          {
+            "id": 2,
+            "landPixels": 1449,
+            "sharePercent": "25.1"
+          },
+          {
+            "id": 8,
+            "landPixels": 567,
+            "sharePercent": "9.8"
+          },
+          {
+            "id": 1,
+            "landPixels": 280,
+            "sharePercent": "4.8"
+          },
+          {
+            "id": 9,
+            "landPixels": 13,
+            "sharePercent": "0.2"
+          }
+        ],
+        "population": "221098517",
+        "populationSourcePointer": "/56/population",
+        "resourceOrGeographyEdited": false
+      },
+      "originalIds": [
+        "U2544::COUNTRY::COUNTRY_57::protectedServiceFloor",
+        "U2544::COUNTRY::COUNTRY_57::labourMinimumHours",
+        "U2544::COUNTRY::COUNTRY_57::labourPayrollNative",
+        "U2544::COUNTRY::COUNTRY_57::waterPotableDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_57::waterCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_57::energyDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_57::energyCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_57::transportMinimum",
+        "U2544::COUNTRY::COUNTRY_57::transportCompleteCostNative"
+      ],
+      "B02": {
+        "residentOnlyNormalReference": {
+          "valueExactDecimal": "11054925.85",
+          "numerator": "221098517",
+          "denominator": "20",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentOnlyCriticalReference": {
+          "valueExactDecimal": "3316477.755",
+          "numerator": "663295551",
+          "denominator": "200",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "policyMeaning": "NEW_70_COUNTRY_APPLICABILITY_PROPOSAL_USING_PREVIOUS_C01_DESIGN_REFERENCE_NOT_ADOPTED_FLOOR",
+        "normalLitresPerResidentSimDay": "50",
+        "criticalLitresPerResidentSimDay": "15",
+        "requiredMedicalAndPublicDueAdditions": null,
+        "completeProtectedFloor": null,
+        "grainReferenceBasket": {
+          "valueExactDecimal": "147399.0113333333185934322",
+          "numerator": "736995056666666592967161",
+          "denominator": "5000000000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "grainSourcePointer": "/3/finalDemandPerPersonDay",
+        "foodNormalCriticalPolicy": null,
+        "qualityAndMembershipAdoption": null
+      },
+      "B10_B11_waterAndResourcePressure": {
+        "rawDeclaredPlanningWork": {
+          "valueExactDecimal": "39920565.569444444",
+          "numerator": "9980141392361111",
+          "denominator": "250000000",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "theoreticalNetPotential": {
+          "valueExactDecimal": "36024318.3698666662656",
+          "numerator": "1407199936322916651",
+          "denominator": "39062500000",
+          "unit": "THEORETICAL_DELIVERED_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "workerDaysByUnboundSkillSlot": [
+          {
+            "valueExactDecimal": "11976.1696708333332",
+            "numerator": "29940424177083333",
+            "denominator": "2500000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "5988.0848354166666",
+            "numerator": "29940424177083333",
+            "denominator": "5000000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "1996.0282784722222",
+            "numerator": "9980141392361111",
+            "denominator": "5000000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          }
+        ],
+        "steel": {
+          "valueExactDecimal": "3.9920565569444444",
+          "numerator": "9980141392361111",
+          "denominator": "2500000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "machinery": {
+          "valueExactDecimal": "7.9841131138888888",
+          "numerator": "9980141392361111",
+          "denominator": "1250000000000000",
+          "unit": "EQUIPMENT_UNIT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "electricityInput": {
+          "valueExactDecimal": "19960.282784722222",
+          "numerator": "9980141392361111",
+          "denominator": "500000000000",
+          "unit": "MWH_INPUT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "recipeAuthority": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+        "actualOperation": false,
+        "acceptedDelivery": null,
+        "actualLabourHours": null
+      },
+      "waterGeography": {
+        "regionAllocationPointers": ["/97", "/98"],
+        "rightsStatus": "ALLOCATION_PROPOSAL_NOT_GRANTED",
+        "referenceAvailableRaw": {
+          "valueExactDecimal": "486159197",
+          "numerator": "486159197",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceDrySeasonAvailableRaw": {
+          "valueExactDecimal": "406889068",
+          "numerator": "406889068",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceAllSectorAllocation": {
+          "valueExactDecimal": "40170686.528919443",
+          "numerator": "40170686528919443",
+          "denominator": "1000000000",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "residentNormalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "27637314625",
+          "denominator": "2256",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentCriticalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "5527462925",
+          "denominator": "1504",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "signedNormalDemandMinusTheoreticalDomesticNet": {
+          "valueExactDecimal": "-24969392.5198666662656",
+          "numerator": "-975366895307291651",
+          "denominator": "39062500000",
+          "unit": "M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "comparisonMeaning": "COUNTERFACTUAL_SAME_UNIT_REFERENCE_DIFFERENCE_NOT_ACTUAL_SHORTAGE_OR_SERVICE_ACCEPTANCE"
+      },
+      "B12": {
+        "sourcePointer": "/56",
+        "averageDemandMWLexeme": "103091.60933",
+        "averageDeliveredMWLexeme": "118555.350729",
+        "status": "CANDIDATE_NOT_ENERGIZED",
+        "hourlyDispatchValidated": false,
+        "actualMWh": null,
+        "simDayToSimulationHourRule": null,
+        "supplyOrDemandMWConvertedToMWh": false
+      },
+      "B13": {
+        "inboundUnsignedPlanPointers": [
+          "/46",
+          "/131",
+          "/197",
+          "/234",
+          "/266",
+          "/430",
+          "/560",
+          "/605"
+        ],
+        "plannedFreightTonnes": {
+          "valueExactDecimal": "201182.688432",
+          "numerator": "12573918027",
+          "denominator": "62500",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "plannedFreightDistanceProduct": {
+          "valueExactDecimal": "1248631440.375614859863",
+          "numerator": "1248631440375614859863",
+          "denominator": "1000000000000",
+          "unit": "PLANNING_TONNE_KM/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "existingRouteIds": [
+          "ROUTE-0047",
+          "ROUTE-0131",
+          "ROUTE-0131",
+          "ROUTE-0227",
+          "ROUTE-0257",
+          "ROUTE-0407",
+          "ROUTE-0500",
+          "ROUTE-0534"
+        ],
+        "distanceBasis": "EXISTING_SOURCE_DISTANCE_KM_ESTIMATE_NOT_NEW_SURVEY_OR_APPROVAL",
+        "actualTonneKm": null,
+        "acceptedDeliveryOrRights": null,
+        "C13FrozenTonnesRelabelled": false
+      },
+      "facilityReferencePointers": [
+        "/269",
+        "/270",
+        "/271",
+        "/272",
+        "/273",
+        "/1171",
+        "/1172",
+        "/1173",
+        "/1174",
+        "/1175",
+        "/1176",
+        "/1177",
+        "/1178",
+        "/1179",
+        "/1180",
+        "/1181",
+        "/1182",
+        "/1183",
+        "/1184",
+        "/1185"
+      ],
+      "actual": {
+        "protectedServiceFloor": null,
+        "labourMinimumHours": null,
+        "labourPayrollNative": null,
+        "waterPotableDeliveredMinimum": null,
+        "waterCompleteCostNative": null,
+        "energyDeliveredMinimum": null,
+        "energyCompleteCostNative": null,
+        "transportMinimum": null,
+        "transportCompleteCostNative": null,
+        "period": null,
+        "currency": null,
+        "actualWorld": null
+      },
+      "stages": {
+        "sourceComplete": false,
+        "engineeringWired": false,
+        "validationPassed": false,
+        "formallyAdopted": false
+      },
+      "sourceAdmitted": false,
+      "runtimeConnected": false,
+      "productionAuthority": false,
+      "originalFieldsClosed": 0
+    },
+    {
+      "schemaVersion": "G_PHYSICAL_OPENING_SCENARIO_CANDIDATE_V2",
+      "candidateVersion": "2",
+      "originClass": "CONSTRUCTED_NOT_ADOPTED",
+      "countryId": "COUNTRY_58",
+      "scenarioCountryId": "visual-territory-58",
+      "period": {
+        "calendar": "SIM_TIME_RELATIVE_ONLY",
+        "from": "0",
+        "until": "1",
+        "unit": "SIM_DAY",
+        "quantityBasis": "TOTAL_OVER_DECLARED_INTERVAL",
+        "actualWorldId": null,
+        "epoch": null
+      },
+      "geography": {
+        "countryPointer": "/57",
+        "scenarioRegionIds": [
+          "visual-territory-58-E1",
+          "visual-territory-58-E2"
+        ],
+        "climateMixPreserved": [
+          {
+            "id": 8,
+            "landPixels": 5241,
+            "sharePercent": "57.3"
+          },
+          {
+            "id": 13,
+            "landPixels": 3201,
+            "sharePercent": "35.0"
+          },
+          {
+            "id": 2,
+            "landPixels": 515,
+            "sharePercent": "5.6"
+          },
+          {
+            "id": 4,
+            "landPixels": 187,
+            "sharePercent": "2.0"
+          }
+        ],
+        "population": "303860425",
+        "populationSourcePointer": "/57/population",
+        "resourceOrGeographyEdited": false
+      },
+      "originalIds": [
+        "U2544::COUNTRY::COUNTRY_58::protectedServiceFloor",
+        "U2544::COUNTRY::COUNTRY_58::labourMinimumHours",
+        "U2544::COUNTRY::COUNTRY_58::labourPayrollNative",
+        "U2544::COUNTRY::COUNTRY_58::waterPotableDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_58::waterCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_58::energyDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_58::energyCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_58::transportMinimum",
+        "U2544::COUNTRY::COUNTRY_58::transportCompleteCostNative"
+      ],
+      "B02": {
+        "residentOnlyNormalReference": {
+          "valueExactDecimal": "15193021.25",
+          "numerator": "60772085",
+          "denominator": "4",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentOnlyCriticalReference": {
+          "valueExactDecimal": "4557906.375",
+          "numerator": "36463251",
+          "denominator": "8",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "policyMeaning": "NEW_70_COUNTRY_APPLICABILITY_PROPOSAL_USING_PREVIOUS_C01_DESIGN_REFERENCE_NOT_ADOPTED_FLOOR",
+        "normalLitresPerResidentSimDay": "50",
+        "criticalLitresPerResidentSimDay": "15",
+        "requiredMedicalAndPublicDueAdditions": null,
+        "completeProtectedFloor": null,
+        "grainReferenceBasket": {
+          "valueExactDecimal": "202573.616666666646409305",
+          "numerator": "40514723333333329281861",
+          "denominator": "200000000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "grainSourcePointer": "/3/finalDemandPerPersonDay",
+        "foodNormalCriticalPolicy": null,
+        "qualityAndMembershipAdoption": null
+      },
+      "B10_B11_waterAndResourcePressure": {
+        "rawDeclaredPlanningWork": {
+          "valueExactDecimal": "54863687.847222224",
+          "numerator": "3428980490451389",
+          "denominator": "62500000",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "theoreticalNetPotential": {
+          "valueExactDecimal": "49508991.9133333349376",
+          "numerator": "483486249153645849",
+          "denominator": "9765625000",
+          "unit": "THEORETICAL_DELIVERED_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "workerDaysByUnboundSkillSlot": [
+          {
+            "valueExactDecimal": "16459.1063541666672",
+            "numerator": "10286941471354167",
+            "denominator": "625000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "8229.5531770833336",
+            "numerator": "10286941471354167",
+            "denominator": "1250000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "2743.1843923611112",
+            "numerator": "3428980490451389",
+            "denominator": "1250000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          }
+        ],
+        "steel": {
+          "valueExactDecimal": "5.4863687847222224",
+          "numerator": "3428980490451389",
+          "denominator": "625000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "machinery": {
+          "valueExactDecimal": "10.9727375694444448",
+          "numerator": "3428980490451389",
+          "denominator": "312500000000000",
+          "unit": "EQUIPMENT_UNIT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "electricityInput": {
+          "valueExactDecimal": "27431.843923611112",
+          "numerator": "3428980490451389",
+          "denominator": "125000000000",
+          "unit": "MWH_INPUT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "recipeAuthority": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+        "actualOperation": false,
+        "acceptedDelivery": null,
+        "actualLabourHours": null
+      },
+      "waterGeography": {
+        "regionAllocationPointers": ["/99", "/100"],
+        "rightsStatus": "ALLOCATION_PROPOSAL_NOT_GRANTED",
+        "referenceAvailableRaw": {
+          "valueExactDecimal": "1391420216",
+          "numerator": "1391420216",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceDrySeasonAvailableRaw": {
+          "valueExactDecimal": "874363072",
+          "numerator": "874363072",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceAllSectorAllocation": {
+          "valueExactDecimal": "652863261.47479936",
+          "numerator": "510049423027187",
+          "denominator": "781250",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "residentNormalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "37982553125",
+          "denominator": "2256",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentCriticalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "7596510625",
+          "denominator": "1504",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "signedNormalDemandMinusTheoreticalDomesticNet": {
+          "valueExactDecimal": "-34315970.6633333349376",
+          "numerator": "-335116901009114599",
+          "denominator": "9765625000",
+          "unit": "M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "comparisonMeaning": "COUNTERFACTUAL_SAME_UNIT_REFERENCE_DIFFERENCE_NOT_ACTUAL_SHORTAGE_OR_SERVICE_ACCEPTANCE"
+      },
+      "B12": {
+        "sourcePointer": "/57",
+        "averageDemandMWLexeme": "137372.52106",
+        "averageDeliveredMWLexeme": "157978.399219",
+        "status": "CANDIDATE_NOT_ENERGIZED",
+        "hourlyDispatchValidated": false,
+        "actualMWh": null,
+        "simDayToSimulationHourRule": null,
+        "supplyOrDemandMWConvertedToMWh": false
+      },
+      "B13": {
+        "inboundUnsignedPlanPointers": [
+          "/354",
+          "/356",
+          "/431",
+          "/485",
+          "/561",
+          "/587"
+        ],
+        "plannedFreightTonnes": {
+          "valueExactDecimal": "84923.215439",
+          "numerator": "84923215439",
+          "denominator": "1000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "plannedFreightDistanceProduct": {
+          "valueExactDecimal": "519016843.17188785648",
+          "numerator": "3243855269824299103",
+          "denominator": "6250000000",
+          "unit": "PLANNING_TONNE_KM/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "existingRouteIds": [
+          "ROUTE-0336",
+          "ROUTE-0337",
+          "ROUTE-0408",
+          "ROUTE-0447",
+          "ROUTE-0447",
+          "ROUTE-0521"
+        ],
+        "distanceBasis": "EXISTING_SOURCE_DISTANCE_KM_ESTIMATE_NOT_NEW_SURVEY_OR_APPROVAL",
+        "actualTonneKm": null,
+        "acceptedDeliveryOrRights": null,
+        "C13FrozenTonnesRelabelled": false
+      },
+      "facilityReferencePointers": [
+        "/14",
+        "/274",
+        "/275",
+        "/276",
+        "/277",
+        "/278",
+        "/279",
+        "/280",
+        "/281",
+        "/1186",
+        "/1187",
+        "/1188",
+        "/1189",
+        "/1190",
+        "/1191",
+        "/1192",
+        "/1193",
+        "/1194",
+        "/1195",
+        "/1196",
+        "/1197",
+        "/1198",
+        "/1199",
+        "/1200",
+        "/1201"
+      ],
+      "actual": {
+        "protectedServiceFloor": null,
+        "labourMinimumHours": null,
+        "labourPayrollNative": null,
+        "waterPotableDeliveredMinimum": null,
+        "waterCompleteCostNative": null,
+        "energyDeliveredMinimum": null,
+        "energyCompleteCostNative": null,
+        "transportMinimum": null,
+        "transportCompleteCostNative": null,
+        "period": null,
+        "currency": null,
+        "actualWorld": null
+      },
+      "stages": {
+        "sourceComplete": false,
+        "engineeringWired": false,
+        "validationPassed": false,
+        "formallyAdopted": false
+      },
+      "sourceAdmitted": false,
+      "runtimeConnected": false,
+      "productionAuthority": false,
+      "originalFieldsClosed": 0
+    },
+    {
+      "schemaVersion": "G_PHYSICAL_OPENING_SCENARIO_CANDIDATE_V2",
+      "candidateVersion": "2",
+      "originClass": "CONSTRUCTED_NOT_ADOPTED",
+      "countryId": "COUNTRY_59",
+      "scenarioCountryId": "visual-territory-59",
+      "period": {
+        "calendar": "SIM_TIME_RELATIVE_ONLY",
+        "from": "0",
+        "until": "1",
+        "unit": "SIM_DAY",
+        "quantityBasis": "TOTAL_OVER_DECLARED_INTERVAL",
+        "actualWorldId": null,
+        "epoch": null
+      },
+      "geography": {
+        "countryPointer": "/58",
+        "scenarioRegionIds": ["visual-territory-59-E1"],
+        "climateMixPreserved": [
+          {
+            "id": 3,
+            "landPixels": 2030,
+            "sharePercent": "100.0"
+          }
+        ],
+        "population": "73362124",
+        "populationSourcePointer": "/58/population",
+        "resourceOrGeographyEdited": false
+      },
+      "originalIds": [
+        "U2544::COUNTRY::COUNTRY_59::protectedServiceFloor",
+        "U2544::COUNTRY::COUNTRY_59::labourMinimumHours",
+        "U2544::COUNTRY::COUNTRY_59::labourPayrollNative",
+        "U2544::COUNTRY::COUNTRY_59::waterPotableDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_59::waterCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_59::energyDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_59::energyCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_59::transportMinimum",
+        "U2544::COUNTRY::COUNTRY_59::transportCompleteCostNative"
+      ],
+      "B02": {
+        "residentOnlyNormalReference": {
+          "valueExactDecimal": "3668106.2",
+          "numerator": "18340531",
+          "denominator": "5",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentOnlyCriticalReference": {
+          "valueExactDecimal": "1100431.86",
+          "numerator": "55021593",
+          "denominator": "50",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "policyMeaning": "NEW_70_COUNTRY_APPLICABILITY_PROPOSAL_USING_PREVIOUS_C01_DESIGN_REFERENCE_NOT_ADOPTED_FLOOR",
+        "normalLitresPerResidentSimDay": "50",
+        "criticalLitresPerResidentSimDay": "15",
+        "requiredMedicalAndPublicDueAdditions": null,
+        "completeProtectedFloor": null,
+        "grainReferenceBasket": {
+          "valueExactDecimal": "48908.0826666666617758584",
+          "numerator": "61135103333333327219823",
+          "denominator": "1250000000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "grainSourcePointer": "/3/finalDemandPerPersonDay",
+        "foodNormalCriticalPolicy": null,
+        "qualityAndMembershipAdoption": null
+      },
+      "B10_B11_waterAndResourcePressure": {
+        "rawDeclaredPlanningWork": {
+          "valueExactDecimal": "13245939.055555556",
+          "numerator": "3311484763888889",
+          "denominator": "250000000",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "theoreticalNetPotential": {
+          "valueExactDecimal": "11953135.4037333337344",
+          "numerator": "466919351708333349",
+          "denominator": "39062500000",
+          "unit": "THEORETICAL_DELIVERED_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "workerDaysByUnboundSkillSlot": [
+          {
+            "valueExactDecimal": "3973.7817166666668",
+            "numerator": "9934454291666667",
+            "denominator": "2500000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "1986.8908583333334",
+            "numerator": "9934454291666667",
+            "denominator": "5000000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "662.2969527777778",
+            "numerator": "3311484763888889",
+            "denominator": "5000000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          }
+        ],
+        "steel": {
+          "valueExactDecimal": "1.3245939055555556",
+          "numerator": "3311484763888889",
+          "denominator": "2500000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "machinery": {
+          "valueExactDecimal": "2.6491878111111112",
+          "numerator": "3311484763888889",
+          "denominator": "1250000000000000",
+          "unit": "EQUIPMENT_UNIT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "electricityInput": {
+          "valueExactDecimal": "6622.969527777778",
+          "numerator": "3311484763888889",
+          "denominator": "500000000000",
+          "unit": "MWH_INPUT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "recipeAuthority": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+        "actualOperation": false,
+        "acceptedDelivery": null,
+        "actualLabourHours": null
+      },
+      "waterGeography": {
+        "regionAllocationPointers": ["/101"],
+        "rightsStatus": "ALLOCATION_PROPOSAL_NOT_GRANTED",
+        "referenceAvailableRaw": {
+          "valueExactDecimal": "134994120",
+          "numerator": "134994120",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceDrySeasonAvailableRaw": {
+          "valueExactDecimal": "116094943",
+          "numerator": "116094943",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceAllSectorAllocation": {
+          "valueExactDecimal": "13339581.346954556",
+          "numerator": "3334895336738639",
+          "denominator": "250000000",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "residentNormalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "2292566375",
+          "denominator": "564",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentCriticalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "458513275",
+          "denominator": "376",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "signedNormalDemandMinusTheoreticalDomesticNet": {
+          "valueExactDecimal": "-8285029.2037333337344",
+          "numerator": "-323633953270833349",
+          "denominator": "39062500000",
+          "unit": "M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "comparisonMeaning": "COUNTERFACTUAL_SAME_UNIT_REFERENCE_DIFFERENCE_NOT_ACTUAL_SHORTAGE_OR_SERVICE_ACCEPTANCE"
+      },
+      "B12": {
+        "sourcePointer": "/58",
+        "averageDemandMWLexeme": "34379.840173",
+        "averageDeliveredMWLexeme": "39536.816198",
+        "status": "CANDIDATE_NOT_ENERGIZED",
+        "hourlyDispatchValidated": false,
+        "actualMWh": null,
+        "simDayToSimulationHourRule": null,
+        "supplyOrDemandMWConvertedToMWh": false
+      },
+      "B13": {
+        "inboundUnsignedPlanPointers": [
+          "/63",
+          "/132",
+          "/170",
+          "/267",
+          "/432",
+          "/562",
+          "/606"
+        ],
+        "plannedFreightTonnes": {
+          "valueExactDecimal": "60582.225914",
+          "numerator": "30291112957",
+          "denominator": "500000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "plannedFreightDistanceProduct": {
+          "valueExactDecimal": "561663212.242016441418",
+          "numerator": "280831606121008220709",
+          "denominator": "500000000000",
+          "unit": "PLANNING_TONNE_KM/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "existingRouteIds": [
+          "ROUTE-0063",
+          "ROUTE-0132",
+          "ROUTE-0170",
+          "ROUTE-0258",
+          "ROUTE-0409",
+          "ROUTE-0501",
+          "ROUTE-0535"
+        ],
+        "distanceBasis": "EXISTING_SOURCE_DISTANCE_KM_ESTIMATE_NOT_NEW_SURVEY_OR_APPROVAL",
+        "actualTonneKm": null,
+        "acceptedDeliveryOrRights": null,
+        "C13FrozenTonnesRelabelled": false
+      },
+      "facilityReferencePointers": [
+        "/282",
+        "/283",
+        "/284",
+        "/1202",
+        "/1203",
+        "/1204",
+        "/1205",
+        "/1206",
+        "/1207",
+        "/1208",
+        "/1209",
+        "/1210",
+        "/1211",
+        "/1212",
+        "/1213"
+      ],
+      "actual": {
+        "protectedServiceFloor": null,
+        "labourMinimumHours": null,
+        "labourPayrollNative": null,
+        "waterPotableDeliveredMinimum": null,
+        "waterCompleteCostNative": null,
+        "energyDeliveredMinimum": null,
+        "energyCompleteCostNative": null,
+        "transportMinimum": null,
+        "transportCompleteCostNative": null,
+        "period": null,
+        "currency": null,
+        "actualWorld": null
+      },
+      "stages": {
+        "sourceComplete": false,
+        "engineeringWired": false,
+        "validationPassed": false,
+        "formallyAdopted": false
+      },
+      "sourceAdmitted": false,
+      "runtimeConnected": false,
+      "productionAuthority": false,
+      "originalFieldsClosed": 0
+    },
+    {
+      "schemaVersion": "G_PHYSICAL_OPENING_SCENARIO_CANDIDATE_V2",
+      "candidateVersion": "2",
+      "originClass": "CONSTRUCTED_NOT_ADOPTED",
+      "countryId": "COUNTRY_60",
+      "scenarioCountryId": "visual-territory-60",
+      "period": {
+        "calendar": "SIM_TIME_RELATIVE_ONLY",
+        "from": "0",
+        "until": "1",
+        "unit": "SIM_DAY",
+        "quantityBasis": "TOTAL_OVER_DECLARED_INTERVAL",
+        "actualWorldId": null,
+        "epoch": null
+      },
+      "geography": {
+        "countryPointer": "/59",
+        "scenarioRegionIds": [
+          "visual-territory-60-E1",
+          "visual-territory-60-E2"
+        ],
+        "climateMixPreserved": [
+          {
+            "id": 2,
+            "landPixels": 3651,
+            "sharePercent": "45.1"
+          },
+          {
+            "id": 13,
+            "landPixels": 2572,
+            "sharePercent": "31.8"
+          },
+          {
+            "id": 3,
+            "landPixels": 1646,
+            "sharePercent": "20.4"
+          },
+          {
+            "id": 1,
+            "landPixels": 156,
+            "sharePercent": "1.9"
+          },
+          {
+            "id": 10,
+            "landPixels": 46,
+            "sharePercent": "0.6"
+          },
+          {
+            "id": 9,
+            "landPixels": 17,
+            "sharePercent": "0.2"
+          }
+        ],
+        "population": "281990929",
+        "populationSourcePointer": "/59/population",
+        "resourceOrGeographyEdited": false
+      },
+      "originalIds": [
+        "U2544::COUNTRY::COUNTRY_60::protectedServiceFloor",
+        "U2544::COUNTRY::COUNTRY_60::labourMinimumHours",
+        "U2544::COUNTRY::COUNTRY_60::labourPayrollNative",
+        "U2544::COUNTRY::COUNTRY_60::waterPotableDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_60::waterCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_60::energyDeliveredMinimum",
+        "U2544::COUNTRY::COUNTRY_60::energyCompleteCostNative",
+        "U2544::COUNTRY::COUNTRY_60::transportMinimum",
+        "U2544::COUNTRY::COUNTRY_60::transportCompleteCostNative"
+      ],
+      "B02": {
+        "residentOnlyNormalReference": {
+          "valueExactDecimal": "14099546.45",
+          "numerator": "281990929",
+          "denominator": "20",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentOnlyCriticalReference": {
+          "valueExactDecimal": "4229863.935",
+          "numerator": "845972787",
+          "denominator": "200",
+          "unit": "NET_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "policyMeaning": "NEW_70_COUNTRY_APPLICABILITY_PROPOSAL_USING_PREVIOUS_C01_DESIGN_REFERENCE_NOT_ADOPTED_FLOOR",
+        "normalLitresPerResidentSimDay": "50",
+        "criticalLitresPerResidentSimDay": "15",
+        "requiredMedicalAndPublicDueAdditions": null,
+        "completeProtectedFloor": null,
+        "grainReferenceBasket": {
+          "valueExactDecimal": "187993.9526666666478672714",
+          "numerator": "939969763333333239336357",
+          "denominator": "5000000000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "grainSourcePointer": "/3/finalDemandPerPersonDay",
+        "foodNormalCriticalPolicy": null,
+        "qualityAndMembershipAdoption": null
+      },
+      "B10_B11_waterAndResourcePressure": {
+        "rawDeclaredPlanningWork": {
+          "valueExactDecimal": "50915028.847222224",
+          "numerator": "3182189302951389",
+          "denominator": "62500000",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "theoreticalNetPotential": {
+          "valueExactDecimal": "45945722.0317333349376",
+          "numerator": "448688691716145849",
+          "denominator": "9765625000",
+          "unit": "THEORETICAL_DELIVERED_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "workerDaysByUnboundSkillSlot": [
+          {
+            "valueExactDecimal": "15274.5086541666672",
+            "numerator": "9546567908854167",
+            "denominator": "625000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "7637.2543270833336",
+            "numerator": "9546567908854167",
+            "denominator": "1250000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          },
+          {
+            "valueExactDecimal": "2545.7514423611112",
+            "numerator": "3182189302951389",
+            "denominator": "1250000000000",
+            "unit": "WORKER_DAY/DECLARED_PERIOD",
+            "roundingApplied": false
+          }
+        ],
+        "steel": {
+          "valueExactDecimal": "5.0915028847222224",
+          "numerator": "3182189302951389",
+          "denominator": "625000000000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "machinery": {
+          "valueExactDecimal": "10.1830057694444448",
+          "numerator": "3182189302951389",
+          "denominator": "312500000000000",
+          "unit": "EQUIPMENT_UNIT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "electricityInput": {
+          "valueExactDecimal": "25457.514423611112",
+          "numerator": "3182189302951389",
+          "denominator": "125000000000",
+          "unit": "MWH_INPUT/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "recipeAuthority": "NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY",
+        "actualOperation": false,
+        "acceptedDelivery": null,
+        "actualLabourHours": null
+      },
+      "waterGeography": {
+        "regionAllocationPointers": ["/102", "/103"],
+        "rightsStatus": "ALLOCATION_PROPOSAL_NOT_GRANTED",
+        "referenceAvailableRaw": {
+          "valueExactDecimal": "1257010551",
+          "numerator": "1257010551",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceDrySeasonAvailableRaw": {
+          "valueExactDecimal": "1040655336",
+          "numerator": "1040655336",
+          "denominator": "1",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "referenceAllSectorAllocation": {
+          "valueExactDecimal": "678872381.00165813",
+          "numerator": "67887238100165813",
+          "denominator": "100000000",
+          "unit": "RAW_M3/REFERENCE_SIM_DAY",
+          "roundingApplied": false
+        },
+        "residentNormalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": null,
+          "numerator": "749975875",
+          "denominator": "48",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "residentCriticalRawRequirementAtProposedRecipe": {
+          "valueExactDecimal": "4687349.21875",
+          "numerator": "149995175",
+          "denominator": "32",
+          "unit": "RAW_M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "signedNormalDemandMinusTheoreticalDomesticNet": {
+          "valueExactDecimal": "-31846175.5817333349376",
+          "numerator": "-310997808415364599",
+          "denominator": "9765625000",
+          "unit": "M3/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "comparisonMeaning": "COUNTERFACTUAL_SAME_UNIT_REFERENCE_DIFFERENCE_NOT_ACTUAL_SHORTAGE_OR_SERVICE_ACCEPTANCE"
+      },
+      "B12": {
+        "sourcePointer": "/59",
+        "averageDemandMWLexeme": "127343.145088",
+        "averageDeliveredMWLexeme": "146444.616851",
+        "status": "CANDIDATE_NOT_ENERGIZED",
+        "hourlyDispatchValidated": false,
+        "actualMWh": null,
+        "simDayToSimulationHourRule": null,
+        "supplyOrDemandMWConvertedToMWh": false
+      },
+      "B13": {
+        "inboundUnsignedPlanPointers": [
+          "/27",
+          "/362",
+          "/405",
+          "/467",
+          "/543",
+          "/633"
+        ],
+        "plannedFreightTonnes": {
+          "valueExactDecimal": "80767.393183",
+          "numerator": "80767393183",
+          "denominator": "1000000",
+          "unit": "TONNE/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "plannedFreightDistanceProduct": {
+          "valueExactDecimal": "317674658.739925140596",
+          "numerator": "79418664684981285149",
+          "denominator": "250000000000",
+          "unit": "PLANNING_TONNE_KM/DECLARED_PERIOD",
+          "roundingApplied": false
+        },
+        "existingRouteIds": [
+          "ROUTE-0028",
+          "ROUTE-0343",
+          "ROUTE-0383",
+          "ROUTE-0432",
+          "ROUTE-0491",
+          "ROUTE-0559"
+        ],
+        "distanceBasis": "EXISTING_SOURCE_DISTANCE_KM_ESTIMATE_NOT_NEW_SURVEY_OR_APPROVAL",
+        "actualTonneKm": null,
+        "acceptedDeliveryOrRights": null,
+        "C13FrozenTonnesRelabelled": false
+      },
+      "facilityReferencePointers": [
+        "/285",
+        "/286",
+        "/287",
+        "/288",
+        "/289",
+        "/290",
+        "/291",
+        "/292",
+        "/1214",
+        "/1215",
+        "/1216",
+        "/1217",
+        "/1218",
+        "/1219",
+        "/1220",
+        "/1221",
+        "/1222",
+        "/1223",
+        "/1224",
+        "/1225",
+        "/1226",
+        "/1227",
+        "/1228"
+      ],
+      "actual": {
+        "protectedServiceFloor": null,
+        "labourMinimumHours": null,
+        "labourPayrollNative": null,
+        "waterPotableDeliveredMinimum": null,
+        "waterCompleteCostNative": null,
+        "energyDeliveredMinimum": null,
+        "energyCompleteCostNative": null,
+        "transportMinimum": null,
+        "transportCompleteCostNative": null,
+        "period": null,
+        "currency": null,
+        "actualWorld": null
+      },
+      "stages": {
+        "sourceComplete": false,
+        "engineeringWired": false,
+        "validationPassed": false,
+        "formallyAdopted": false
+      },
+      "sourceAdmitted": false,
+      "runtimeConnected": false,
+      "productionAuthority": false,
+      "originalFieldsClosed": 0
+    }
+  ],
+  "status": "CONSTRUCTED_REFERENCE_INPUTS_NOT_ADOPTED"
+}

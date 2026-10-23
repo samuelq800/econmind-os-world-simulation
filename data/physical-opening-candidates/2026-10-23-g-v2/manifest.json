@@ -1,0 +1,249 @@
+{
+  "schemaVersion": "G_PHYSICAL_REFERENCE_BUNDLE_INDEX_DESIGN_V1",
+  "status": "DRAFT_DATA_AND_CONTRACT_ONLY_NOT_IMPLEMENTED_PUBLISHED_OR_ADOPTED",
+  "economicCandidateVersion": "2",
+  "sourcePointerArtifactRevision": "3",
+  "correctedSourceManifestSHA": "fef08eefe3ff9be6c0eb8698df2743a342a356275e535860011d5e13827ef395",
+  "sourceReviewState": "V3_POINTER_FIX_B_E_DELTA_PENDING_AT_PREPARATION",
+  "trackedInputs": [
+    {
+      "source": "countries",
+      "repoPath": "artifacts/world-balanced-candidate-v1/data/countries.json",
+      "bytes": 146348,
+      "sha256": "5d493e93dfab1425731191ba7491cce47949d176e4769b33fdca48d2d31dba89",
+      "matchesV2ExactBytes": true,
+      "gitBlobOid": "fe6aad9309fb4920a31bf1f05e6aeadf1e50890c"
+    },
+    {
+      "source": "population-services",
+      "repoPath": "artifacts/world-balanced-candidate-v1/data/population-services.json",
+      "bytes": 56412,
+      "sha256": "86e828a421346aecaa31c95a7805289a022c80df93399545aeea39f6ce361615",
+      "matchesV2ExactBytes": true,
+      "gitBlobOid": "5cb5a38eadcb7781f03df4cb27d0a5382e97a6f3"
+    },
+    {
+      "source": "water-allocations",
+      "repoPath": "artifacts/world-balanced-candidate-v1/data/water-allocations.json",
+      "bytes": 54600,
+      "sha256": "53b4d7cd0425f6a0789cad2e1bcd0800420a5010f38307e895742df1c0567841",
+      "matchesV2ExactBytes": true,
+      "gitBlobOid": "4f5c86d3dbf40b3012e6dbccab0624b8514474c2"
+    },
+    {
+      "source": "facilities",
+      "repoPath": "artifacts/world-balanced-candidate-v1/data/facilities.json",
+      "bytes": 1897241,
+      "sha256": "049e39330646048b95636d3a075fc1423ee62762999184a2326df161a198b485",
+      "matchesV2ExactBytes": true,
+      "gitBlobOid": "79fd16552325ff38f9cae9ad5f49381404452bbe"
+    },
+    {
+      "source": "power",
+      "repoPath": "artifacts/world-balanced-candidate-v1/data/power.json",
+      "bytes": 39232,
+      "sha256": "81e910b36558260e0372f6b00474147e431ed502387b78bfdcc0d8dd2f26713e",
+      "matchesV2ExactBytes": true,
+      "gitBlobOid": "0d93f9e2bd062c575a45779ec17bfbff06fee0ad"
+    },
+    {
+      "source": "trade-plans",
+      "repoPath": "artifacts/world-balanced-candidate-v1/data/trade-plans.json",
+      "bytes": 520880,
+      "sha256": "c3c8c74dc81d13c0115fd1b5fff1b6f886fd79b3b6ba60b9659b126b0db928cd",
+      "matchesV2ExactBytes": true,
+      "gitBlobOid": "b29bb21fb223ee8361f21f5656f32c33cb44ad28"
+    },
+    {
+      "source": "commodity-catalog",
+      "repoPath": "artifacts/world-balanced-candidate-v1/data/commodity-catalog.json",
+      "bytes": 1933,
+      "sha256": "b1f9a100bdb80627e31801ffaf1b2c7863a2996cedba0344de8a899c616eff2b",
+      "matchesV2ExactBytes": true,
+      "gitBlobOid": "e887b1cba5c8f86db6eaaf38a4e60a08b1101552"
+    }
+  ],
+  "sharedScopeInput": {
+    "owner": "A_ONLY",
+    "repoPath": "data/scenario-candidates/unknown2544/approved17/execution_batches.v1.json",
+    "bytes": 169396,
+    "sha256": "de8d1d9c52400d675b276f2e9df14ba79870647b579da29630a10746a28fa741",
+    "A_sharedPlanManifestSHA": "a26ce8fcaf6c34d6a16c31cdb3e950b537d63da0a109c0e7f295bbdcf1af90f8",
+    "distributionScope": "Root authorized same target repository and CI; no source-adoption upgrade"
+  },
+  "sharedIdentityCurrencyReferences": [
+    {
+      "id": "economic_entities",
+      "path": "artifacts/world-balanced-candidate-v1/data/entities.json",
+      "sha256": "d53e64a28110ea3615d42be03fc740a2fe72b55e6aeb5d4a584f5d2c117a6593",
+      "bytes": 82043,
+      "blob": "819d13310707fe6c31804291094ace147bf2179f",
+      "reachableInBaseTree": true,
+      "needsNewSourceDistribution": false
+    },
+    {
+      "id": "C01_definition",
+      "path": "docs/governance/owner-inputs/2026-10-21/OWNER_B06_C01_DEFINITION_ADOPTION.json",
+      "sha256": "968440af89bce122475915823336bbc11e6d481244424aa80bd72ac1bc3ab716",
+      "bytes": 3947,
+      "blob": "8c0e31edf5ede28601e2d257773a35e319ae91c5",
+      "reachableInBaseTree": true,
+      "needsNewSourceDistribution": false
+    },
+    {
+      "id": "nominal_dictionary",
+      "path": "tests/fixtures/financial-opening-package-v1/blobs/812e95994053837139afd6b8798a68d3ff4f4436fbd839dfb8f9568371c3e562",
+      "sha256": "812e95994053837139afd6b8798a68d3ff4f4436fbd839dfb8f9568371c3e562",
+      "bytes": 213759,
+      "blob": "edfa1dcf72d83f87554c5c96724a379caeeca417",
+      "reachableInBaseTree": true,
+      "needsNewSourceDistribution": false
+    }
+  ],
+  "generatedAndEvidenceData": [
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/batches/batch-01-country01-10.json",
+      "bytes": 99578,
+      "sha256": "942f78cfdaee3b2ce36a36e400ef6663a2fd7e8846f45dbf74df6c5e98ac4067",
+      "originalBytes": 99898,
+      "originalSha256": "310fc9245b391f2bbe124a133f5d55de5aa5466f1388d5b1fc49546bf8a1735d",
+      "semanticChange": false,
+      "representationOnly": true,
+      "originalProvenanceLocatorsAreInert": false
+    },
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/batches/batch-02-country11-20.json",
+      "bytes": 100777,
+      "sha256": "a139d7624d3c6be0754050a7a52a321f3ab8fbccf52a6c910d2d64fc3375497d",
+      "originalBytes": 101177,
+      "originalSha256": "8a93f30ecab5ceba907a158882cc8294402512b1b2b687b4c0319c6c6ab0e93c",
+      "semanticChange": false,
+      "representationOnly": true,
+      "originalProvenanceLocatorsAreInert": false
+    },
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/batches/batch-03-country21-30.json",
+      "bytes": 102387,
+      "sha256": "23ea82de6a0892cc637455d9e3f4ae50828d9b17bf86fd440f70074e65bac616",
+      "originalBytes": 102707,
+      "originalSha256": "9b3fe20a7a2dbbbd1a208ef32025709d0c47e626b508d744042cdb1a357f6f1c",
+      "semanticChange": false,
+      "representationOnly": true,
+      "originalProvenanceLocatorsAreInert": false
+    },
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/batches/batch-04-country31-40.json",
+      "bytes": 102448,
+      "sha256": "38ead42edde6d6337d9c66309da6f95f126164f814e7885991c9b97207bb6d98",
+      "originalBytes": 102828,
+      "originalSha256": "f40aa78718239371ddfa320e82de6ca7ee0dc1c551d8a9c2fda350d6510528f0",
+      "semanticChange": false,
+      "representationOnly": true,
+      "originalProvenanceLocatorsAreInert": false
+    },
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/batches/batch-05-country41-50.json",
+      "bytes": 100127,
+      "sha256": "99d1d944564d3a49d52e3c5e888d34014a8d71dc21f9aaeddb30e43b439abc70",
+      "originalBytes": 100457,
+      "originalSha256": "1ee641d3ceb1743585aaa61dca0e608e4753dcd6df891a1bf752ca6339e1fdb2",
+      "semanticChange": false,
+      "representationOnly": true,
+      "originalProvenanceLocatorsAreInert": false
+    },
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/batches/batch-06-country51-60.json",
+      "bytes": 99063,
+      "sha256": "da22f2bb298b358870cf37afb33344c22f534aa569cee294bc7556daaa8a164f",
+      "originalBytes": 99453,
+      "originalSha256": "4d451671d980a1c1e4c60905e328e299252ae859a7367ac2027de642dcf2b917",
+      "semanticChange": false,
+      "representationOnly": true,
+      "originalProvenanceLocatorsAreInert": false
+    },
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/batches/batch-07-country61-70.json",
+      "bytes": 101257,
+      "sha256": "349c972aa605bf355f6da1e4b5d8d3f4fee9ca799ac9fcaaf8dc170d6a7df437",
+      "originalBytes": 101577,
+      "originalSha256": "63b1c57bc63d43f214f436b56f43b42fcb9deeb84949ad0f092134757484bc8e",
+      "semanticChange": false,
+      "representationOnly": true,
+      "originalProvenanceLocatorsAreInert": false
+    },
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/metadata/PARAMETER_AND_APPLICABILITY_PROPOSAL.json",
+      "bytes": 2233,
+      "sha256": "a4e13ec85d6bd531f8abc16ea9629c42653f72818af324f8ee3a009b78776a25",
+      "originalBytes": 2265,
+      "originalSha256": "ee4242d38ee4dd46eefdedaf13df51f8687f1967a063db80f340064309204d6f",
+      "semanticChange": false,
+      "representationOnly": true,
+      "originalProvenanceLocatorsAreInert": false
+    },
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/metadata/APPLICABILITY_AND_COMPLETENESS.json",
+      "bytes": 43393,
+      "sha256": "95a0f4c657c60b22c53825bd296084379e99cafb1378ede747f5787223028b1c",
+      "originalBytes": 43393,
+      "originalSha256": "95a0f4c657c60b22c53825bd296084379e99cafb1378ede747f5787223028b1c",
+      "semanticChange": false,
+      "representationOnly": false,
+      "originalProvenanceLocatorsAreInert": false
+    },
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/metadata/SUPPLY_CONSERVATION_BOUNDARIES.json",
+      "bytes": 702,
+      "sha256": "7e6f5273d09a975a798f5d4bcbf38216dea44b1feed6ac786344bda6bcc8d42f",
+      "originalBytes": 702,
+      "originalSha256": "7e6f5273d09a975a798f5d4bcbf38216dea44b1feed6ac786344bda6bcc8d42f",
+      "semanticChange": false,
+      "representationOnly": false,
+      "originalProvenanceLocatorsAreInert": false
+    },
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/source-evidence/OWNER_R3_BOUNDED_RECEIPT.json.txt",
+      "bytes": 4136,
+      "sha256": "b20cc5abd5a11b78f6e7ff8cff64f145f240a115601fd631ef9f6f7dbb5cd558",
+      "originalBytes": 4136,
+      "originalSha256": "b20cc5abd5a11b78f6e7ff8cff64f145f240a115601fd631ef9f6f7dbb5cd558",
+      "semanticChange": false,
+      "representationOnly": false,
+      "originalProvenanceLocatorsAreInert": true
+    },
+    {
+      "repoPath": "data/physical-opening-candidates/2026-10-23-g-v2/source-evidence/C01_METHOD_PROPOSAL_V2.json.txt",
+      "bytes": 41218,
+      "sha256": "97f4dbdd2c2950a9e3da8f2dd0552528790a2a189f2a57ac6b438a12c9d959a5",
+      "originalBytes": 41218,
+      "originalSha256": "97f4dbdd2c2950a9e3da8f2dd0552528790a2a189f2a57ac6b438a12c9d959a5",
+      "semanticChange": false,
+      "representationOnly": false,
+      "originalProvenanceLocatorsAreInert": true
+    }
+  ],
+  "requestContract": {
+    "allowedKeys": ["bundleRevision", "countryId"],
+    "bundleRevision": "G_PHYSICAL_CONSTRUCTION_POINTER_V3",
+    "countryIdSet": "COUNTRY_01..COUNTRY_70",
+    "unknownKeysOrAuthorityOverrides": "REJECT",
+    "callerAmountsOrPolicyOrPeriodOverrides": "NOT_SUPPORTED"
+  },
+  "sourcePathPolicy": {
+    "executableIoLocators": "All explicit repository-relative fixed manifest paths; caller cannot supply arbitrary path/URL",
+    "archivalRawTxt": "Original provenance absolute strings may occur inside hash-fixed source archives; inert citation only, never dereferenced",
+    "sourceBytesVerifiedBeforeParse": true,
+    "noNetworkFallback": true
+  },
+  "authority": {
+    "constructedNotAdopted": true,
+    "actualFloor": null,
+    "actualValueDate": null,
+    "worldClock": null,
+    "sourceAdmitted": false,
+    "runtimeConnected": false,
+    "productionAuthority": false,
+    "originalFieldsClosed": 0
+  },
+  "countryBatchSelection": "index=(canonicalCountryNumber-1)//10; exact ten-row chunk, country ID and scope checked, no whole-file world snapshot/admission"
+}

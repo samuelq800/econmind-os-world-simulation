@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "aw-account-construction-source-pins-v1",
+  "constructionVersion": "AW_SCENARIO_DECLARATIONS_20261023_V2",
+  "classification": "CONSTRUCTED_CANDIDATE",
+  "sources": [
+    {
+      "id": "economic_entities",
+      "path": "artifacts/world-balanced-candidate-v1/data/entities.json",
+      "bytes": 82043,
+      "sha256": "d53e64a28110ea3615d42be03fc740a2fe72b55e6aeb5d4a584f5d2c117a6593"
+    },
+    {
+      "id": "C01_definition",
+      "path": "docs/governance/owner-inputs/2026-10-21/OWNER_B06_C01_DEFINITION_ADOPTION.json",
+      "bytes": 3947,
+      "sha256": "968440af89bce122475915823336bbc11e6d481244424aa80bd72ac1bc3ab716"
+    },
+    {
+      "id": "nominal_dictionary",
+      "path": "tests/fixtures/financial-opening-package-v1/blobs/812e95994053837139afd6b8798a68d3ff4f4436fbd839dfb8f9568371c3e562",
+      "bytes": 213759,
+      "sha256": "812e95994053837139afd6b8798a68d3ff4f4436fbd839dfb8f9568371c3e562"
+    },
+    {
+      "id": "17_batches",
+      "path": "data/scenario-candidates/unknown2544/approved17/execution_batches.v1.json",
+      "bytes": 169396,
+      "sha256": "de8d1d9c52400d675b276f2e9df14ba79870647b579da29630a10746a28fa741"
+    }
+  ],
+  "outputEncoding": "JSON.stringify(value,null,2)+LF; exact V2 insertion order",
+  "expectedOutputs": [
+    {
+      "name": "SCENARIO_ACCOUNT_RECORDS.json",
+      "bytes": 636524,
+      "sha256": "a8541201c67f51105d548e905a0e8395a2ee5028312e4d75aa9d62887faed3b5"
+    },
+    {
+      "name": "B06_COVERAGE_BY_ORIGINAL_ID.json",
+      "bytes": 629829,
+      "sha256": "e9945a0f0fcf14029d3e9f70614b8c2220886d90fd7f71fbbb73d357d0ee9ecd"
+    },
+    {
+      "name": "B16_ADMISSION_INPUT_REQUIREMENTS.json",
+      "bytes": 774988,
+      "sha256": "c65ee31247a815f1799b11be3508b72a3f8b22ca0f40da9b42a6ef86e5008a2d"
+    }
+  ],
+  "authorityGranted": false
+}
