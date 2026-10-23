@@ -74,6 +74,86 @@ function at(value, pointer) {
  * loading unrelated reference sources. Neither route admits operating facts.
  */
 export function createOriginalFieldConsumer(buffers) {
+  if (buffers?.mode === 'CONSTRUCTED_RECIPE_INTERMEDIATES_ONLY') {
+    requireThat(
+      Object.keys(buffers).length === 1,
+      'ONLY_EXPLICIT_CONSTRUCTED_CONSUMER_MODE',
+    );
+    return Object.freeze({
+      read(callerRequest) {
+        const allowed = [
+          'mode',
+          'stableId',
+          'countryId',
+          'originalUnit',
+          'currency',
+          'periodOrValueDate',
+          'proposalSources',
+        ];
+        requireThat(
+          callerRequest !== null &&
+            typeof callerRequest === 'object' &&
+            !Array.isArray(callerRequest),
+          'CONSTRUCTED_REQUEST_OBJECT_REQUIRED',
+        );
+        const keys = Object.keys(callerRequest);
+        requireThat(
+          keys.length === allowed.length &&
+            keys.every((key) => allowed.includes(key)),
+          'CONSTRUCTED_CLOSED_REQUEST_REQUIRED',
+        );
+        // Read each caller getter once and detach immediately, before reading
+        // the next property. The producer validates and uses these same bytes.
+        const request = Object.fromEntries(
+          keys.map((key) => {
+            const value = callerRequest[key];
+            if (key !== 'proposalSources') return [key, structuredClone(value)];
+            requireThat(
+              value !== null &&
+                typeof value === 'object' &&
+                !Array.isArray(value),
+              'CONSTRUCTED_SOURCE_OBJECT_REQUIRED',
+            );
+            const sourceKeys = Object.keys(value);
+            requireThat(
+              sourceKeys.length === 3 &&
+                sourceKeys.every((k) =>
+                  [
+                    'candidatePacketBytes',
+                    'parameterProposalBytes',
+                    'originalLedgerBytes',
+                  ].includes(k),
+                ),
+              'CONSTRUCTED_CLOSED_SOURCES_REQUIRED',
+            );
+            return [
+              key,
+              Object.fromEntries(
+                sourceKeys.map((sourceKey) => {
+                  const bytes = value[sourceKey];
+                  requireThat(
+                    bytes instanceof Uint8Array,
+                    `CONSTRUCTED_SOURCE_BYTES_REQUIRED:${sourceKey}`,
+                  );
+                  return [sourceKey, Buffer.from(bytes)];
+                }),
+              ),
+            ];
+          }),
+        );
+        requireThat(
+          request.mode === 'CONSTRUCTED_RECIPE_INTERMEDIATES_ONLY',
+          'CONSTRUCTED_INTERMEDIATE_MODE_REQUIRED',
+        );
+        return produceWaterServiceCandidate(request);
+      },
+      snapshot() {
+        throw new Error(
+          'REFERENCE_SNAPSHOT_NOT_LOADED_IN_CONSTRUCTED_ONLY_MODE',
+        );
+      },
+    });
+  }
   const readAdopted = (callerRequest) => {
     const requestKeys = Object.keys(callerRequest ?? {});
     requireThat(
