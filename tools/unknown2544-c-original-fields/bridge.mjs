@@ -86,6 +86,10 @@ export function createOriginalFieldConsumer(buffers) {
           'periodOrValueDate',
           'adoptionSources',
           'recipeWork',
+          'recordReadContract',
+          'recordOriginClass',
+          'recordKind',
+          'record',
         ].includes(key),
       ),
       'UNSUPPORTED_AUTHORITY_OR_ARITHMETIC_OPTION',
@@ -144,6 +148,11 @@ export function createOriginalFieldConsumer(buffers) {
       },
       adoptionSources: request.adoptionSources,
       recipeWork: request.recipeWork,
+      ...Object.fromEntries(
+        ['recordReadContract', 'recordOriginClass', 'recordKind', 'record']
+          .filter((key) => Object.hasOwn(request, key))
+          .map((key) => [key, request[key]]),
+      ),
     });
     // Parse the historical C16 row only after the genuine reader has verified
     // these exact bytes. No unrelated COUNTRY53 reference sources are needed.
@@ -209,6 +218,9 @@ export function createOriginalFieldConsumer(buffers) {
         parameterAdoptionRead: adopted ?? null,
         parameterConnection: result.parameterConnection,
         recipeIntermediate: relevant,
+        ...(result.declaredRecordRead
+          ? { declaredRecordRead: result.declaredRecordRead }
+          : {}),
         sourceTrace: [
           ...(row
             ? [

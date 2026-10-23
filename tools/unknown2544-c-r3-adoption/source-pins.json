@@ -26,10 +26,10 @@
   "readOnlyConsumers": [
     {
       "path": "tools/unknown2544-c-water-service/produce-candidate.mjs",
-      "bytes": 32218,
-      "sha256": "038ff505621539cd6f5d61bfc58e0786ee93798a7d8ddaaf5e7e118262032aa7",
-      "fromLine": 323,
-      "throughLine": 356,
+      "bytes": 39244,
+      "sha256": "32d53f97f7a29b5d4da4f44a23ee24b3b845b04b3c0bc02dbb083d31b8871715",
+      "fromLine": 545,
+      "throughLine": 570,
       "meaning": "Existing real-source refusal stays unchanged; adopted parameters cannot issue actual operating facts"
     },
     {

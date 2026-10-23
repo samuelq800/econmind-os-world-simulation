@@ -42,6 +42,202 @@ const SCOPE_KEYS = [
 const less = (a, b) => sub(a, b).startsWith('-');
 const minimum = (...values) => values.reduce((a, b) => (less(a, b) ? a : b));
 const sum = (values) => values.reduce((a, b) => add(a, b), '0');
+const RECORD_KEYS = [
+  'recordReadContract',
+  'recordOriginClass',
+  'recordKind',
+  'record',
+];
+
+// Partial authored-declaration projection only, not the full operational
+// schemas, an adopted floor/hour rule, source admission, or an event reader.
+function projectDeclaredRecord(input, work, from, until, { need, keys, ref }) {
+  const present = RECORD_KEYS.filter((key) => Object.hasOwn(input, key));
+  if (present.length === 0) return null;
+  need(present.length === 4, 'FOUR_RECORD_KEYS_REQUIRED');
+  const declaration = Object.fromEntries(
+    present.map((key) => [key, structuredClone(input[key])]),
+  );
+  need(
+    Object.values(declaration).every((v) => v !== undefined),
+    'UNDEFINED_RECORD_KEY_PROHIBITED',
+  );
+  need(
+    declaration.recordReadContract === 'C01_DECLARED_RECORD_PROJECTION_V1' &&
+      declaration.recordOriginClass === 'CONSTRUCTED_NOT_ADOPTED',
+    'DECLARED_RECORD_CONTRACT_AND_ORIGIN_REQUIRED',
+  );
+  const labour =
+    declaration.recordKind === 'C01_LABOUR_REQUIREMENT_DERIVATION_V1';
+  const water =
+    declaration.recordKind === 'C01_NET_POTABLE_MINIMUM_REQUIREMENT_V1';
+  need(labour || water, 'UNSUPPORTED_DECLARED_RECORD_KIND');
+  const field = labour ? 'labourMinimumHours' : 'waterPotableDeliveredMinimum';
+  need(
+    input.originalRequest?.stableId ===
+      `U2544::COUNTRY::COUNTRY_01::${field}` &&
+      input.originalRequest.countryId === 'COUNTRY_01' &&
+      input.originalRequest.originalUnit ===
+        (labour ? 'HOUR/PERIOD' : 'M3/PERIOD'),
+    'DECLARED_RECORD_ORIGINAL_ID_OR_UNIT_MISMATCH',
+  );
+  const exactKeys = (value, allowed) => {
+    keys(value, allowed);
+    need(
+      allowed.every((key) => Object.hasOwn(value, key)),
+      'DECLARED_RECORD_REQUIRED_LEAF_MISSING',
+    );
+  };
+  const record = declaration.record;
+  exactKeys(
+    record,
+    labour
+      ? [
+          'derivationId',
+          'quantityBasis',
+          'rawInputTotalM3',
+          'period',
+          'hoursConversions',
+          'floor',
+          'recipe',
+          'capacityAttestations',
+          'exactRoundingOrRationalPolicy',
+        ]
+      : [
+          'requirementId',
+          'netPotableMinimum',
+          'period',
+          'floor',
+          'coverage',
+          'recipe',
+          'rawWaterRightsEvidence',
+        ],
+  );
+  ref(record[labour ? 'derivationId' : 'requirementId']);
+  exactKeys(record.period, [
+    'periodId',
+    'axisId',
+    'axisUnit',
+    'start',
+    'endExclusive',
+    'timeBasisEvidence',
+  ]);
+  ref(record.period.periodId);
+  ref(record.period.axisId);
+  need(
+    record.period.axisUnit === 'SIM_DAY' &&
+      record.period.timeBasisEvidence === null,
+    'DECLARED_RECORD_TIME_AXIS_ONLY',
+  );
+  for (const [key, coordinate] of [
+    ['start', from],
+    ['endExclusive', until],
+  ]) {
+    const rational = record.period[key];
+    exactKeys(rational, ['numerator', 'denominator']);
+    need(
+      typeof rational.numerator === 'string' &&
+        /^(0|[1-9]\d*)$/u.test(rational.numerator),
+      'CANONICAL_RATIONAL_NUMERATOR_REQUIRED',
+    );
+    // Validate positive canonical denominator BEFORE multiplication, including
+    // for coordinate0. A 0/0 cross-product cannot satisfy this binding.
+    need(
+      typeof rational.denominator === 'string' &&
+        /^[1-9]\d*$/u.test(rational.denominator),
+      'POSITIVE_CANONICAL_RATIONAL_DENOMINATOR_REQUIRED',
+    );
+    const numerator = canonicalToken(rational.numerator);
+    const denominator = canonicalToken(rational.denominator);
+    need(
+      mul(coordinate, denominator) === numerator,
+      'DECLARED_RECORD_INTERVAL_MISMATCH',
+    );
+  }
+  need(
+    record.floor === null && record.recipe === null,
+    'PHASE1_UNVERIFIED_EVIDENCE_MUST_BE_NULL',
+  );
+  const pointer = labour
+    ? '/record/rawInputTotalM3'
+    : '/record/netPotableMinimum';
+  const q = labour ? record.rawInputTotalM3 : record.netPotableMinimum;
+  exactKeys(q, ['value', 'unit']);
+  const amount = canonicalToken(q.value);
+  need(
+    q.unit === (labour ? 'RAW_M3/PERIOD' : 'M3/PERIOD'),
+    'DECLARED_RECORD_QUANTITY_UNIT_MISMATCH',
+  );
+  if (labour) {
+    need(
+      record.quantityBasis === 'TOTAL_OVER_DECLARED_INTERVAL_NOT_RATE',
+      'DECLARED_RECORD_TOTAL_BASIS_REQUIRED',
+    );
+    need(
+      Array.isArray(record.hoursConversions) &&
+        record.hoursConversions.length === 0 &&
+        Array.isArray(record.capacityAttestations) &&
+        record.capacityAttestations.length === 0 &&
+        record.exactRoundingOrRationalPolicy === null,
+      'HOUR_CONVERSION_OR_CAPACITY_OUTSIDE_PHASE1',
+    );
+    if (Object.hasOwn(work, 'rawInput')) {
+      exactKeys(work.rawInput, ['amount', 'unit', 'basis']);
+      need(
+        work.rawInput.unit === 'raw-m3' &&
+          work.rawInput.basis === 'TOTAL_OVER_DECLARED_INTERVAL' &&
+          canonicalToken(work.rawInput.amount) === amount,
+        'CONFLICTING_DECLARED_RAW_OPERANDS',
+      );
+    } else
+      work.rawInput = {
+        amount,
+        unit: 'raw-m3',
+        basis: 'TOTAL_OVER_DECLARED_INTERVAL',
+      };
+  } else
+    need(
+      record.coverage === null && record.rawWaterRightsEvidence === null,
+      'QUALITY_RIGHTS_OR_COVERAGE_OUTSIDE_PHASE1',
+    );
+  const trace = {
+    kind: 'AUTHORED_DECLARED_RECORD_NOT_SOURCE_AUTHORITY',
+    recordKind: declaration.recordKind,
+    recordReadContract: declaration.recordReadContract,
+    originClass: declaration.recordOriginClass,
+    recordObjectSha256: sha256(Buffer.from(JSON.stringify(declaration))),
+    digestMeaning:
+      'DETACHED_REQUEST_OBJECT_IDENTITY_NOT_SOURCE_SIGNATURE_OR_ADOPTION',
+    pointer,
+    rawNumericToken: q.value,
+    canonicalDecimal: amount,
+    unit: q.unit,
+  };
+  return {
+    status:
+      'DECLARED_PARTIAL_RECORD_PROJECTION_NOT_FULL_SCHEMA_OR_SOURCE_VALIDATION',
+    recordKind: declaration.recordKind,
+    trace,
+    period: record.period,
+    rawInputReference: labour
+      ? { amount, unit: q.unit, basis: record.quantityBasis }
+      : null,
+    netPotableDemandCandidate: water
+      ? {
+          amount,
+          unit: q.unit,
+          adopted: false,
+          meaning: 'UNADOPTED_DEMAND_NOT_ACTUAL_DELIVERY_OR_B02_FLOOR',
+          sourceTrace: [trace],
+        }
+      : null,
+    requiredHours: null,
+    hoursStatus: 'HOURS_RULE_AND_SKILL_AVAILABILITY_UNBOUND',
+    actualValue: null,
+    sourceAdmitted: false,
+    originalFieldsClosed: 0,
+  };
+}
 function freeze(value) {
   if (value && typeof value === 'object') {
     for (const v of Object.values(value)) freeze(v);
@@ -107,8 +303,14 @@ export function produceWaterServiceCandidate(input) {
         );
         return value;
       };
-      keys(input, ['mode', 'originalRequest', 'adoptionSources', 'recipeWork']);
-      const work = input.recipeWork;
+      keys(input, [
+        'mode',
+        'originalRequest',
+        'adoptionSources',
+        'recipeWork',
+        ...RECORD_KEYS,
+      ]);
+      const work = structuredClone(input.recipeWork);
       keys(work, [
         'schema',
         'role',
@@ -133,6 +335,13 @@ export function produceWaterServiceCandidate(input) {
       const from = canonicalToken(work.interval.fromSimDay);
       const until = canonicalToken(work.interval.untilSimDay);
       need(less(from, until), 'POSITIVE_DECLARED_INTERVAL_REQUIRED');
+      const declaredRecordRead = projectDeclaredRecord(
+        input,
+        work,
+        from,
+        until,
+        { need, keys, ref },
+      );
       keys(work.rawInput, ['amount', 'unit', 'basis']);
       need(
         work.rawInput.unit === 'raw-m3' &&
@@ -196,7 +405,13 @@ export function produceWaterServiceCandidate(input) {
         amount,
         unit,
         meaning: 'DECLARED_WORK_REQUIREMENT_OR_THEORETICAL_YIELD_NOT_ACTUAL',
-        sourceTrace: [workloadTrace, ...used.map(trace)],
+        sourceTrace: [
+          workloadTrace,
+          ...(declaredRecordRead?.rawInputReference
+            ? [declaredRecordRead.trace]
+            : []),
+          ...used.map(trace),
+        ],
       });
       const workerDaysBySkill = Object.fromEntries(
         SKILLS.map((skill, i) => {
@@ -255,6 +470,8 @@ export function produceWaterServiceCandidate(input) {
         value: null,
         unit,
       });
+      if (declaredRecordRead?.rawInputReference)
+        declaredRecordRead.workerDaysBySkill = workerDaysBySkill;
       return envelope('ADOPTED_RECIPE_INTERMEDIATES_AVAILABLE', [], null, {
         schema: 'C_WATER_ADOPTED_RECIPE_INTERMEDIATES_V1',
         inputEvidenceClass: 'FIXED_ADOPTED_PARAMETERS_WITH_DECLARED_WORKLOAD',
@@ -267,7 +484,12 @@ export function produceWaterServiceCandidate(input) {
         originalContract: adoptedRead.originalContract,
         parameterAdoptionRead: adoptedRead,
         parameterIntermediate,
-        sourceTrace: [workloadTrace, ...parameters.coefficients.map(trace)],
+        ...(declaredRecordRead ? { declaredRecordRead } : {}),
+        sourceTrace: [
+          workloadTrace,
+          ...(declaredRecordRead ? [declaredRecordRead.trace] : []),
+          ...parameters.coefficients.map(trace),
+        ],
         dependentResults: {
           labourHours: unavailable(
             'MISSING_APPLICABLE_ADOPTED_HOUR_CONVERSION',
