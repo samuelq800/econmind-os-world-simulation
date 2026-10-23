@@ -9,6 +9,7 @@ import {
   SOURCE_PINS,
 } from '../../tools/unknown2544-c-original-fields/bridge.mjs';
 import { produceWaterServiceCandidate } from '../../tools/unknown2544-c-water-service/produce-candidate.mjs';
+import { parseLossless } from '../../tools/unknown2544-c-physical/candidate.mjs';
 
 type Obj = Record<string, unknown>;
 type Pin = { bytes: number; sha256: string };
@@ -213,8 +214,9 @@ test('fixed Git-only bridge -> shared calculator recomputes C02, original field 
   assert.equal(r.candidateMeasure.value, null);
   assert.equal(r.candidateMeasure.status, 'UNKNOWN');
   assert.equal(r.candidateMeasure.unit, 'M3/PERIOD');
-  const original = JSON.parse(sources.originalLedgerBytes!.toString('utf8'))
-    .records[44];
+  // Preserve ledger numeric lexemes, including provenance byte counts, just
+  // as the consumer does. Do not coerce the product's lossless result.
+  const original = parseLossless(sources.originalLedgerBytes!).records[44];
   assert.deepEqual(r.originalBinding.originalRecord, original);
   assert.equal(r.originalAcceptanceRule, original.acceptanceRule);
   assert.deepEqual(r.originalDependencies, original.dependencies);
