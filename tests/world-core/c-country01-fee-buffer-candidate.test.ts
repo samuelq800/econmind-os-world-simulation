@@ -316,11 +316,25 @@ let ownedFixture: OwnedFinancialOpeningPackageFixture;
 let registry: LoadedFinancialOpeningPackageRegistry;
 beforeAll(async () => {
   ownedFixture = await materializeFinancialOpeningPackageFixture();
+  console.info(
+    'F_FINANCIAL_FIXTURE_BEFORE_LOADER',
+    JSON.stringify({
+      fixtureRoot: ownedFixture.fixtureRoot,
+      io: ownedFixture.io,
+    }),
+  );
   registry = await (
     await createTestOnlyFinancialOpeningPackageRegistryLoader({
       fixtureRoot: ownedFixture.fixtureRoot,
     })
   ).load();
+  console.info(
+    'F_FINANCIAL_LOADER_RECEIPT',
+    JSON.stringify({
+      bytesRead: registry.bytesRead,
+      receipt: registry.testOnlyReadReceipt,
+    }),
+  );
 });
 afterAll(async () => {
   try {
@@ -351,7 +365,13 @@ afterAll(async () => {
       );
     }
   } finally {
-    if (ownedFixture) await disposeFinancialOpeningPackageFixture(ownedFixture);
+    if (ownedFixture) {
+      await disposeFinancialOpeningPackageFixture(ownedFixture);
+      console.info(
+        'F_FINANCIAL_FIXTURE_CLEANUP_COMPLETE',
+        ownedFixture.fixtureRoot,
+      );
+    }
   }
 });
 function fReader(): NativeReaderInput {
@@ -521,6 +541,7 @@ it.skipIf(!fixed)(
   () => {
     const r = readFixedCountry01FeeBufferInputs();
     fixedReadback = r;
+    console.info('F_FINANCIAL_FIXED_NULL_READBACK', JSON.stringify(r));
     const absent: FeeBufferDraftInput = {
       schema: 'c-country01-fee-buffer-draft-input-v1',
       mode: 'DRAFT_ONLY',
@@ -903,6 +924,77 @@ it('O06 missing cash/financing blocks optional diagnostic, not rows', () => {
   change(g, 'cashOverlap', ['explicitFeasibleFinancing'], undefined);
   expect(build(g).diagnostics.jointCapacity).toBeNull();
   expect(amount(field(g, 2).candidateValue)).toBe('10');
+});
+it('O07 joint calculation retains existing native cash provenance, never admission', () => {
+  const input = withCash();
+  const native = input.cashOverlap.existingFReaderInput!;
+  const result = build(input);
+  const joint = result.diagnostics.jointCapacity!;
+  expect(joint, result.diagnostics.jointBlockers.join(';')).not.toBeNull();
+  expect(joint.nativeCashCandidateSource).toEqual({
+    documentId: native.document!.documentId,
+    sourceVersion: native.document!.sourceVersion,
+    asOf: native.document!.asOf,
+    sha256: native.document!.sha256,
+    classification: 'SYNTHETIC_CANDIDATE',
+    signatureStatus: 'NOT_VERIFIED_HASH_IS_NOT_SIGNATURE',
+  });
+  expect(joint.nativeCashScope).toEqual(native.expected);
+  expect(joint.nativeCashReferenceMappingSha256).toBe(
+    digest(native.mappingsBytes),
+  );
+  expect(joint.nativeCashPackageManifestSha256).toBe(
+    registry.packageManifestSha256,
+  );
+  expect(joint.nativeCashRow).toMatchObject({
+    entityId: 'ENTITY_GOVERNMENT_01',
+    countryId: 'COUNTRY_01',
+    nativeCurrencyCandidate: 'XAA',
+    candidateAccount: { accountId: 'ACCOUNT_TEST_ONLY_FEE_BUFFER' },
+    candidateBalance: { amount: '100', currency: 'XAA' },
+    candidateRestricted: { amount: '4', currency: 'XAA' },
+    candidateAvailable: { amount: '96', currency: 'XAA' },
+    archiveMeaning: 'CONSTRUCTED_CLAIM_NEVER_ACTUAL_CASH',
+    actualAvailableCash: null,
+    currentPermission: 'UNKNOWN',
+  });
+  expect(joint.nativeCashFormalBlockers).toEqual([
+    'SOURCE_ADOPTION_UNBOUND',
+    'ACTUAL_WORLD_HEAD_AND_CLOCK_UNBOUND',
+    'CURRENT_AUTHORIZATION_UNAVAILABLE',
+  ]);
+  expect(joint.actualRetainedCash).toBeNull();
+  noAuthority(input);
+});
+it('O08 exact cash operand provenance is deterministic, detached and frozen', () => {
+  const input = withCash();
+  const native = input.cashOverlap.existingFReaderInput!;
+  const source = JSON.parse(native.document!.bytes);
+  source.balances[0].amount = '9007199254740993.000000000000000001';
+  const bytes = JSON.stringify(source);
+  input.cashOverlap.existingFReaderInput = {
+    ...native,
+    document: { ...native.document!, bytes, sha256: digest(bytes) },
+  };
+  change(
+    input,
+    'cashOverlap',
+    ['cashSnapshotBinding', 'documentSha256'],
+    digest(bytes),
+  );
+  const result = build(input);
+  const joint = result.diagnostics.jointCapacity!;
+  expect(joint, result.diagnostics.jointBlockers.join(';')).not.toBeNull();
+  expect(joint.nativeCashRow.candidateBalance?.amount).toBe(
+    '9007199254740993.000000000000000001',
+  );
+  expect(joint.capacity.amount).toBe('9007199254740977.000000000000000001');
+  expect(build(input)).toEqual(result);
+  expect(Object.isFrozen(joint.nativeCashRow)).toBe(true);
+  expect(Object.isFrozen(joint.nativeCashScope)).toBe(true);
+  Object.assign(native.expected, { worldVersion: '99' });
+  expect(joint.nativeCashScope.worldVersion).toBe('0');
+  expect(joint.nativeCashRow.actualAvailableCash).toBeNull();
 });
 it('A01 caller flags/issuer reject; unrelated adoption locator stays unverified', () => {
   const f = fixture();

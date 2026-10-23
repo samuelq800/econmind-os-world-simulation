@@ -908,6 +908,15 @@ function capacity(
     uncoveredPayments: { amount: mandatory, currency: s.nativeCurrency },
     uncoveredBuffer: { amount: uncoveredBuffer, currency: s.nativeCurrency },
     capacity: result,
+    // Preserve the existing reader's selected candidate and its byte/scope
+    // binding. The overlap document's trace alone cannot identify the cash
+    // operand. None of these consistency witnesses admits a source or cash.
+    nativeCashCandidateSource: f.candidateSource,
+    nativeCashScope: fInput.expected,
+    nativeCashReferenceMappingSha256: digest(fInput.mappingsBytes),
+    nativeCashPackageManifestSha256: f.packageManifestSha256,
+    nativeCashRow: selected,
+    nativeCashFormalBlockers: f.formalBlockers,
     sourceTrace: c.trace,
     actualRetainedCash: null,
   };
