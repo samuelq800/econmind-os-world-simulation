@@ -4,6 +4,7 @@
 import pins from './source-pins.json' with { type: 'json' };
 import { extractPinnedAcceptedFreight } from '../unknown2544-c-transport-source/accepted-freight.mjs';
 import { produceWaterServiceCandidate } from '../unknown2544-c-water-service/produce-candidate.mjs';
+import { readAdoptedCountry01Method } from '../unknown2544-c-method-adoption/adoption-view.mjs';
 import {
   FIELD_BATCH,
   parseLossless,
@@ -74,6 +75,20 @@ function at(value, pointer) {
  * loading unrelated reference sources. Neither route admits operating facts.
  */
 export function createOriginalFieldConsumer(buffers) {
+  if (buffers?.mode === 'ADOPTED_C01_METHODS_ONLY') {
+    requireThat(
+      Object.keys(buffers).length === 1,
+      'ONLY_EXPLICIT_C01_METHOD_CONSUMER_MODE',
+    );
+    return Object.freeze({
+      read: readAdoptedCountry01Method,
+      snapshot() {
+        throw new Error(
+          'REFERENCE_SNAPSHOT_NOT_LOADED_IN_C01_METHOD_ONLY_MODE',
+        );
+      },
+    });
+  }
   if (buffers?.mode === 'CONSTRUCTED_RECIPE_INTERMEDIATES_ONLY') {
     requireThat(
       Object.keys(buffers).length === 1,
