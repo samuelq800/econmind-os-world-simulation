@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "purpose": "C13_TEST_ONLY",
+  "bundle": {
+    "bytes": 994626,
+    "sha256": "887c2d6ad3e492fa5fc21caa241754576b86c6112aff44a3c40ee06543b5dc13",
+    "jsonBytes": 13719123,
+    "jsonSha256": "cbc42eaa0532d868aa2d16ee07c3ecc31bf8ca4498d8a65f7ed2f0c7d07bde5c"
+  },
+  "sources": [
+    {
+      "key": "ledger",
+      "bytes": 7255116,
+      "sha256": "cedd88979d3cd8dd148d151906ebf5ddee76a76c5c706659676796f58b3a9ccb",
+      "delivery": "BUNDLE",
+      "trackedPath": null
+    },
+    {
+      "key": "batches",
+      "bytes": 169396,
+      "sha256": "de8d1d9c52400d675b276f2e9df14ba79870647b579da29630a10746a28fa741",
+      "delivery": "BUNDLE",
+      "trackedPath": null
+    },
+    {
+      "key": "physical",
+      "bytes": 984645,
+      "sha256": "14c087376857a6592d576fc293f92dfc92062a0f86c1a53faa32277493cb851f",
+      "delivery": "BUNDLE",
+      "trackedPath": null
+    },
+    {
+      "key": "waterRecovery",
+      "bytes": 28348,
+      "sha256": "3a8d709eb02d043b302830613f0be19677cca859c3b2cdd7e2992e5b274a48ac",
+      "delivery": "BUNDLE",
+      "trackedPath": null
+    },
+    {
+      "key": "repair",
+      "bytes": 18193,
+      "sha256": "5fcd035a6b174bf2ce8fa8fa96de02ca7c199ca6832c2aaa361b21968418f9d7",
+      "delivery": "BUNDLE",
+      "trackedPath": null
+    },
+    {
+      "key": "water",
+      "bytes": 54600,
+      "sha256": "53b4d7cd0425f6a0789cad2e1bcd0800420a5010f38307e895742df1c0567841",
+      "delivery": "TRACKED",
+      "trackedPath": "artifacts/world-balanced-candidate-v1/data/water-allocations.json"
+    },
+    {
+      "key": "trade",
+      "bytes": 520880,
+      "sha256": "c3c8c74dc81d13c0115fd1b5fff1b6f886fd79b3b6ba60b9659b126b0db928cd",
+      "delivery": "TRACKED",
+      "trackedPath": "artifacts/world-balanced-candidate-v1/data/trade-plans.json"
+    },
+    {
+      "key": "ownerReceipt",
+      "bytes": 4500,
+      "sha256": "2c06c4bd1157a2d245143190c4d17b0499b5d09f42159a414846d0f9bcb8d99e",
+      "delivery": "TRACKED",
+      "trackedPath": "docs/governance/owner-inputs/2026-10-07/OWNER_NON_HOST_DECISION_RECEIPT.json"
+    },
+    {
+      "key": "owner",
+      "bytes": 36506,
+      "sha256": "57bfdec38a9a400991cb26362a99d33d7a81c8e6258c03460185e51501fb5ac5",
+      "delivery": "TRACKED",
+      "trackedPath": "docs/governance/owner-inputs/2026-10-07/OWNER_NON_HOST_DECISIONS.original.md"
+    },
+    {
+      "key": "transport",
+      "bytes": 1833026,
+      "sha256": "2781606115a9b74116814024995052560275386bbfe22a8df1b418de37b90e96",
+      "delivery": "BUNDLE",
+      "trackedPath": null
+    },
+    {
+      "key": "catalogue",
+      "bytes": 1933,
+      "sha256": "b1f9a100bdb80627e31801ffaf1b2c7863a2996cedba0344de8a899c616eff2b",
+      "delivery": "TRACKED",
+      "trackedPath": "artifacts/world-balanced-candidate-v1/data/commodity-catalog.json"
+    }
+  ]
+}

@@ -2,6 +2,7 @@
  * Reuses frozen C outputs, not their large-source extractors or replay models.
  */
 import pins from './source-pins.json' with { type: 'json' };
+import { extractPinnedAcceptedFreight } from '../unknown2544-c-transport-source/accepted-freight.mjs';
 import { produceWaterServiceCandidate } from '../unknown2544-c-water-service/produce-candidate.mjs';
 import {
   FIELD_BATCH,
@@ -254,6 +255,60 @@ export function createOriginalFieldConsumer(buffers) {
         throw new Error('REFERENCE_SNAPSHOT_NOT_LOADED_IN_ADOPTED_ONLY_MODE');
       },
     });
+  }
+  const extended = Object.hasOwn(buffers, 'country13Transport');
+  const extensionPin = SOURCE_PINS.referenceExtensions.country13Transport;
+  let extension = null;
+  if (extended) {
+    requireThat(
+      Object.keys(buffers).length ===
+        Object.keys(SOURCE_PINS.sources).length + 1 &&
+        Object.keys(buffers).every(
+          (key) =>
+            key === 'country13Transport' ||
+            Object.hasOwn(SOURCE_PINS.sources, key),
+        ),
+      'C13_CLOSED_CONSTRUCTOR_KEYS_REQUIRED',
+    );
+    const callerExtension = buffers.country13Transport;
+    const expectedKeys = ['contract', 'transportBytes', 'catalogueBytes'];
+    requireThat(
+      callerExtension !== null &&
+        typeof callerExtension === 'object' &&
+        Object.keys(callerExtension).length === 3 &&
+        expectedKeys.every((key) => Object.hasOwn(callerExtension, key)),
+      'C13_COMPLETE_EXTENSION_REQUIRED',
+    );
+    extension = Object.fromEntries(
+      expectedKeys.map((key) => {
+        const value = callerExtension[key];
+        return [key, value instanceof Uint8Array ? Buffer.from(value) : value];
+      }),
+    );
+    requireThat(
+      extension.contract === extensionPin.contract,
+      'C13_EXTENSION_CONTRACT_REQUIRED',
+    );
+    for (const [key, pinKey] of [
+      ['transportBytes', 'transport'],
+      ['catalogueBytes', 'catalogue'],
+    ]) {
+      const bytes = extension[key],
+        pin = extensionPin[pinKey];
+      requireThat(
+        bytes instanceof Uint8Array &&
+          bytes.byteLength === pin.bytes &&
+          sha256(bytes) === pin.sha256,
+        'C13_SOURCE_DRIFT:' + pinKey,
+      );
+    }
+    // Active path copies every legacy source once before validation/row use.
+    buffers = Object.fromEntries(
+      Object.keys(SOURCE_PINS.sources).map((key) => {
+        const value = buffers[key];
+        return [key, value instanceof Uint8Array ? Buffer.from(value) : value];
+      }),
+    );
   }
   const sources = {};
   const receipts = [];
@@ -511,18 +566,146 @@ export function createOriginalFieldConsumer(buffers) {
       isolatedReferenceConsumerWired: true,
     };
   });
+  if (extended) {
+    const rawRow = Buffer.from(buffers.ledger).subarray(
+      extensionPin.rowStartByte,
+      extensionPin.rowEndByteExclusive,
+    );
+    requireThat(
+      sha256(rawRow) === extensionPin.rowSha256,
+      'C13_ORIGINAL_ROW_BYTES_MISMATCH',
+    );
+    const original = sources.ledger.records[extensionPin.rowIndex];
+    requireThat(
+      JSON.stringify(parseLossless(rawRow)) === JSON.stringify(original) &&
+        sources.ledger.records.filter(
+          (row) => row.stableId === extensionPin.stableId,
+        ).length === 1 &&
+        original.stableId === extensionPin.stableId &&
+        original.countryId === 'COUNTRY_13' &&
+        original.ownerId === 'COUNTRY_13' &&
+        original.missingField === 'transportMinimum' &&
+        original.originalUnit === UNITS.transportMinimum &&
+        original.afterActualField.value === null,
+      'C13_ORIGINAL_ROW_SCOPE_MISMATCH',
+    );
+    const batch = sources.batches[12];
+    requireThat(
+      batch.batchId === 'B13' &&
+        batch.stableIds[24] === original.stableId &&
+        batch.stableIds.filter((id) => id === original.stableId).length === 1,
+      'C13_BATCH_MEMBERSHIP_REQUIRED',
+    );
+    // This is the missing real consumer edge. Never substitute a saved result.
+    const freight = extractPinnedAcceptedFreight({
+      transportBytes: extension.transportBytes,
+      catalogueBytes: extension.catalogueBytes,
+    });
+    requireThat(
+      freight.status === 'REFERENCE_ONLY' &&
+        freight.sourceBytesVerified === true &&
+        freight.identity.buyerCountryNumber === '13' &&
+        freight.identity.sellerCountryNumber === '24',
+      'C13_PINNED_REFERENCE_FREIGHT_REQUIRED',
+    );
+    rows.push({
+      stableId: original.stableId,
+      scope: original.scope,
+      ownerId: original.ownerId,
+      countryId: original.countryId,
+      missingField: original.missingField,
+      originalAcceptanceRule: original.acceptanceRule,
+      originalClosureStatus: original.closureStatus,
+      parentBatch: {
+        batchId: 'B13',
+        originalFieldCount: batch.originalFieldCount,
+        subsetCount: 1,
+      },
+      originalLedger: sourceRef('ledger', '/records/444/afterActualField'),
+      originalRowBinding: {
+        pointer: '/records/444',
+        sha256: extensionPin.rowSha256,
+      },
+      originalGapSource: structuredClone(original.originalSource),
+      targetKind: 'PROTECTED_SERVICE_MINIMUM_NOT_CAPACITY_OR_REFERENCE_WORK',
+      candidateMeasure: {
+        status: 'BLOCKED_MISSING_SOURCE_OR_ADOPTION',
+        value: null,
+        unit: original.originalUnit,
+        currency: null,
+        periodOrValueDate: null,
+        applicableWorldGenesisHead: null,
+      },
+      references: {
+        acceptedFreight: freight,
+        acceptedFreightOperand: {
+          amount: freight.derivedReferenceFreightTonnes,
+          unit: 'TONNE',
+          basis: 'SINGLE_RETAINED_REFERENCE_EVENT_NOT_PERIOD_TOTAL',
+          sourceEvidence: freight.provenance,
+        },
+        referenceTime: {
+          sourceReferenceSimDay: freight.identity.referenceSimDay,
+          meaning: 'LEGACY_REFERENCE_COORDINATE_NOT_WORLD_OR_ADOPTED_PERIOD',
+        },
+        distanceKm: null,
+        referenceTonneKm: null,
+        actualTonneKm: null,
+        periodMinimum: null,
+        completeNativeCost: null,
+      },
+      nativeCurrencyCandidate: null,
+      nativeCurrencyEvidence: null,
+      currencyMeaning: 'NOT_APPLICABLE_TO_PHYSICAL_MEASURE',
+      adoptionEvidence: null,
+      dependencies: original.dependencies.map((ref) => ({
+        originalIdOrFixedExternalRef: ref,
+        status: 'BLOCKED_NO_SAME_SCOPE_ACTUAL_OR_ADOPTION_RECEIPT',
+        receiptPin: null,
+      })),
+      blockers: [
+        'D:B02 protectedServiceFloor adoption and service scope unbound',
+        'Eligible same-trip title/route distance/mode and actual period/World/entity binding absent',
+        'Reference single-cargo tonnes are not a protected minimum or World receipt',
+      ],
+      reportedStageFlags: {
+        sourceComplete: false,
+        engineeringWired: false,
+        validationPassed: false,
+        formallyAdopted: false,
+      },
+      isolatedReferenceConsumerWired: true,
+      sourceAdmitted: false,
+      runtimeConnected: false,
+      productionAuthority: false,
+      originalFieldsClosed: 0,
+    });
+    for (const key of ['transport', 'catalogue'])
+      receipts.push({
+        key,
+        ...extensionPin[key],
+        verification: 'EXACT_BYTES_ONLY_NOT_ADOPTION',
+      });
+  }
   const packet = freeze({
-    schema: 'C_ORIGINAL_16_REFERENCE_INPUT_BRIDGE_V1',
+    schema: extended
+      ? 'C_ORIGINAL_17_REFERENCE_INPUT_BRIDGE_V1'
+      : 'C_ORIGINAL_16_REFERENCE_INPUT_BRIDGE_V1',
+    ...(extended
+      ? { rowParentBatchSubsetCountBasis: 'LEGACY16_OR_C13_EXTENSION1_COHORT' }
+      : {}),
     status: 'IMPLEMENTED_UNVERIFIED',
     intendedUse: 'ORIGINAL_ID_KEYED_ISOLATED_REFERENCE_READ_ONLY',
     subset: {
       originalUniverseCount: 2544,
       cOwnedCount: 560,
-      count: 16,
-      exactOriginalIds: [...ORIGINAL_IDS],
+      count: extended ? 17 : 16,
+      exactOriginalIds: extended
+        ? [...ORIGINAL_IDS, extensionPin.stableId]
+        : [...ORIGINAL_IDS],
       parentBatches: ['B10', 'B11', 'B12', 'B13'].map((batchId) => ({
         batchId,
-        subsetCount: 4,
+        subsetCount: extended && batchId === 'B13' ? 5 : 4,
       })),
     },
     sourceReceipts: receipts,
@@ -554,6 +737,13 @@ export function createOriginalFieldConsumer(buffers) {
   return Object.freeze({
     snapshot: () => packet,
     read(request) {
+      if (extended)
+        request = Object.fromEntries(
+          Object.keys(request ?? {}).map((key) => [
+            key,
+            structuredClone(request[key]),
+          ]),
+        );
       if (request?.mode === 'ADOPTED_RECIPE_INTERMEDIATES_ONLY')
         return readAdopted(request);
       requireThat(
@@ -562,6 +752,20 @@ export function createOriginalFieldConsumer(buffers) {
       );
       const row = rows.find((r) => r.stableId === request.stableId);
       requireThat(row !== undefined, 'OUTSIDE_EXACT_16_SUBSET');
+      if (extended && row.stableId === extensionPin.stableId)
+        requireThat(
+          [
+            'mode',
+            'stableId',
+            'countryId',
+            'originalUnit',
+            'periodOrValueDate',
+            'currency',
+          ].every(
+            (key) => Object.hasOwn(request, key) && request[key] !== undefined,
+          ),
+          'C13_COMPLETE_REQUEST_REQUIRED',
+        );
       requireThat(request.countryId === row.countryId, 'COUNTRY_MISMATCH');
       requireThat(
         request.originalUnit === row.candidateMeasure.unit,

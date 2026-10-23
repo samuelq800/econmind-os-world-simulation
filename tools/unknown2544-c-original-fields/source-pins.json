@@ -1,5 +1,23 @@
 {
   "baseCommit": "08e59eeb1e9a08465c6c84942bb10d59350b99c8",
+  "referenceExtensions": {
+    "country13Transport": {
+      "contract": "C13_PINNED_REFERENCE_FREIGHT_EXTENSION_V1",
+      "stableId": "U2544::COUNTRY::COUNTRY_13::transportMinimum",
+      "rowIndex": 444,
+      "rowStartByte": 1267018,
+      "rowEndByteExclusive": 1270129,
+      "rowSha256": "7cfe3c5f9926f4a68eaf4f9ec014e435eba4ae8a6c5b03aa88b81c9c8bf5367f",
+      "transport": {
+        "bytes": 1833026,
+        "sha256": "2781606115a9b74116814024995052560275386bbfe22a8df1b418de37b90e96"
+      },
+      "catalogue": {
+        "bytes": 1933,
+        "sha256": "b1f9a100bdb80627e31801ffaf1b2c7863a2996cedba0344de8a899c616eff2b"
+      }
+    }
+  },
   "sources": {
     "ledger": {
       "path": "/Users/samuel/Documents/Codex/2026-10-13/task/unknown2544-completion-v1/UNKNOWN_LEDGER.json",

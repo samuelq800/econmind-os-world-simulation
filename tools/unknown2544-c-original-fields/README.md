@@ -1,5 +1,29 @@
 # C original-field first-16 isolated bridge
 
+## Explicit COUNTRY13 reference extension
+
+The default sixteen-ID contract and COUNTRY01 adopted route are unchanged.
+An optional own constructor key `country13Transport` must contain exactly
+`contract: 'C13_PINNED_REFERENCE_FREIGHT_EXTENSION_V1'`, `transportBytes` and
+`catalogueBytes`. Missing, undefined, malformed or drifted inputs reject without
+falling back. It adds only COUNTRY13 `transportMinimum` to reference reads.
+The bridge calls the existing pinned accepted-freight extractor, returning
+199.8 reference TONNE from the single retained event. This never fills the
+original TONNE_KM/PERIOD minimum: distance, actual period, title, World receipt
+and service-floor admission remain unbound. No source adoption or closure.
+
+The active packet has seventeen rows and effective B13 subset count five.
+Historical row subset counts describe the legacy16 or extension1 cohort,
+as explicitly labelled; the old sixteen rows and their read outputs stay intact.
+
+The sole formal suite is `tests/world-core/c-country13-transport-reference.test.ts`.
+It decodes six exact historical byte buffers from a bounded inert gzip fixture
+and reuses five tracked files, all with original whole-byte hashes. No absolute
+source locator is followed, no network/extraction/mock/skip is permitted.
+Known internal provenance paths are retained under the Root exact-source
+distribution scope; this is not general privacy/copyright certification or
+permission for Web/API/runtime distribution.
+
 Status: IMPLEMENTED_UNVERIFIED. Original closures: **0**. This is a reference-input
 consumer, not runtime, source admission, economic adoption, or World construction.
 
