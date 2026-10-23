@@ -1,0 +1,167 @@
+{
+  "schemaVersion": "G_C01_FOOD_REFERENCE_SOURCE_PINS_V1",
+  "designBinding": {
+    "manifestSha256": "ea871296dbd0da36333d979c2a86db55a3b38efcc028a50eefd3547b33b27aa1",
+    "candidateSha256": "474cc569ba8e22cfcfc6d5f150c2612ec572fccee722ff0a55b43e3e07db7ef4",
+    "meaning": "Reviewed design identity only; neither source admission nor policy adoption"
+  },
+  "documents": [
+    {
+      "label": "countries",
+      "path": "artifacts/world-balanced-candidate-v1/data/countries.json",
+      "bytes": 146348,
+      "sha256": "5d493e93dfab1425731191ba7491cce47949d176e4769b33fdca48d2d31dba89"
+    },
+    {
+      "label": "population-services",
+      "path": "artifacts/world-balanced-candidate-v1/data/population-services.json",
+      "bytes": 56412,
+      "sha256": "86e828a421346aecaa31c95a7805289a022c80df93399545aeea39f6ce361615"
+    },
+    {
+      "label": "regions",
+      "path": "artifacts/world-balanced-candidate-v1/data/regions.json",
+      "bytes": 652112,
+      "sha256": "42ef418d90c3f448d390ad9e62971065eb29c3d96fdb4f3dde5fc33ae0cb2bdd"
+    },
+    {
+      "label": "facilities",
+      "path": "artifacts/world-balanced-candidate-v1/data/facilities.json",
+      "bytes": 1897241,
+      "sha256": "049e39330646048b95636d3a075fc1423ee62762999184a2326df161a198b485"
+    },
+    {
+      "label": "commodity-catalog",
+      "path": "artifacts/world-balanced-candidate-v1/data/commodity-catalog.json",
+      "bytes": 1933,
+      "sha256": "b1f9a100bdb80627e31801ffaf1b2c7863a2996cedba0344de8a899c616eff2b"
+    },
+    {
+      "label": "balanced-manifest",
+      "path": "artifacts/world-balanced-candidate-v1/data/manifest.json",
+      "bytes": 3319,
+      "sha256": "b1072645a6ade9eb48b0d105bf38b2c475a9b667f2f14224c805fef88be3befb"
+    }
+  ],
+  "fixedInput": {
+    "schemaVersion": "G_C01_FOOD_FLOOR_DEMAND_DESIGN_V1",
+    "recordKind": "G_C01_GRAIN_PLANNING_DEMAND_CANDIDATE_V1",
+    "recordVersion": "1",
+    "predecessor": null,
+    "status": "DESIGN_FROZEN_PENDING_B_E_REVIEW",
+    "originClass": "CONSTRUCTED_NOT_ADOPTED",
+    "originalId": "U2544::COUNTRY::COUNTRY_01::protectedServiceFloor",
+    "originalUnit": "VERSIONED_SERVICE_RULE",
+    "componentId": "GRAIN_REFERENCE_COMPONENT",
+    "countryId": "COUNTRY_01",
+    "scenarioCountryId": "visual-territory-01",
+    "scenarioRegionId": "visual-territory-01-E1",
+    "scenarioFacilityReferenceId": "OPEN-01-GRAIN",
+    "planningPeriod": {
+      "calendar": "SIM_TIME_RELATIVE_ONLY",
+      "from": "0",
+      "until": "1",
+      "unit": "SIM_DAY",
+      "basis": "TOTAL_OVER_DECLARED_INTERVAL",
+      "worldBinding": null
+    },
+    "planningCoverage": {
+      "class": "REFERENCE_POPULATION_TIMES_DECLARED_DURATION_NOT_ELIGIBLE_DUE_INVENTORY",
+      "population": "105506849",
+      "durationSimDays": "1",
+      "personDays": "105506849",
+      "sourceRefs": [
+        {
+          "label": "countries",
+          "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/g-claim-candidate-20261018/artifacts/world-balanced-candidate-v1/data/countries.json",
+          "bytes": 146348,
+          "sha256": "5d493e93dfab1425731191ba7491cce47949d176e4769b33fdca48d2d31dba89",
+          "pointer": "/0/population"
+        },
+        {
+          "label": "population-services",
+          "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/g-claim-candidate-20261018/artifacts/world-balanced-candidate-v1/data/population-services.json",
+          "bytes": 56412,
+          "sha256": "86e828a421346aecaa31c95a7805289a022c80df93399545aeea39f6ce361615",
+          "pointer": "/0/population"
+        },
+        {
+          "label": "regions",
+          "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/g-claim-candidate-20261018/artifacts/world-balanced-candidate-v1/data/regions.json",
+          "bytes": 652112,
+          "sha256": "42ef418d90c3f448d390ad9e62971065eb29c3d96fdb4f3dde5fc33ae0cb2bdd",
+          "pointer": "/0/initial/population"
+        }
+      ],
+      "actualMembershipEvidence": null,
+      "publicInstitutionExtraMultiplier": null
+    },
+    "referenceRate": {
+      "value": "0.0006666666666666666",
+      "unit": "TONNE/PERSON/SIM_DAY",
+      "source": {
+        "label": "commodity-catalog",
+        "path": "/Users/samuel/Documents/econclub/.econmind-worktrees/g-claim-candidate-20261018/artifacts/world-balanced-candidate-v1/data/commodity-catalog.json",
+        "bytes": 1933,
+        "sha256": "b1f9a100bdb80627e31801ffaf1b2c7863a2996cedba0344de8a899c616eff2b",
+        "pointer": "/3/finalDemandPerPersonDay"
+      },
+      "interpretation": "COPIED_REFERENCE_ONLY_NOT_AN_ADOPTED_OR_PROPOSED_NUMERIC_FLOOR"
+    },
+    "planningLoad": {
+      "value": "70337.8993333333262995434",
+      "unit": "TONNE",
+      "basis": "TOTAL_OVER_DECLARED_INTERVAL",
+      "exactRational": {
+        "numerator": "351689496666666631497717",
+        "denominator": "5000000000000000000"
+      },
+      "expression": "105506849 * 0.0006666666666666666 * 1",
+      "nature": "DETERMINISTIC_DERIVATION_OF_EXISTING_REFERENCE_WITH_NEW_RELATIVE_SCOPE",
+      "capacityClipping": false,
+      "normalFloorTarget": null,
+      "criticalFloorTarget": null
+    },
+    "policySelection": {
+      "normalRateOrBasket": null,
+      "criticalRateOrBasket": null,
+      "grainToEdibleFoodDefinition": null,
+      "eligibilityAndOverlapRule": null,
+      "qualityProfileAndApplicability": null,
+      "decisionOwner": "Human economic choice recorded by E in the existing owner MD; no G adoption"
+    },
+    "actual": {
+      "worldId": null,
+      "epoch": null,
+      "asOf": null,
+      "periodOrValueDate": null,
+      "adoptedFloorVersion": null,
+      "adoptionEvidence": null,
+      "eligibleDueCoverage": null,
+      "actualDuePersonDays": null,
+      "actualTargetTonnes": null,
+      "completedDeliveryTonnes": null,
+      "qualifiedCreditedTonnes": null,
+      "pendingDueCoverage": null,
+      "unmetTonnes": null,
+      "physicalRecipeOrEdibleConversion": null,
+      "qualityApplicability": null,
+      "qualityMeasurementOrAcceptance": null,
+      "titleRightsOrDispatchEvidence": null,
+      "actualSourceCustodian": null,
+      "actualPayerOrCurrency": null
+    },
+    "closure": {
+      "candidateOriginalValue": null,
+      "sourceComplete": false,
+      "engineeringWired": false,
+      "validationPassed": false,
+      "formallyAdopted": false,
+      "sourceAdmitted": false,
+      "runtimeConnected": false,
+      "productionAuthority": false,
+      "qualifiedImports": 0,
+      "originalFieldsClosed": 0
+    }
+  }
+}
