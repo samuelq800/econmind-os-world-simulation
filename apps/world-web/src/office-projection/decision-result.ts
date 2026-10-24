@@ -45,6 +45,9 @@ interface ResultPins {
   readonly worldVersion: string;
   readonly eventSequence: string;
   readonly financialDetail: unknown;
+  readonly activitySchema?: unknown;
+  readonly economicVisibilitySchema?: unknown;
+  readonly industryProductionResult?: unknown;
   readonly activity: {
     readonly eventCount: string;
     readonly eventSequence: string;
@@ -97,12 +100,68 @@ export function consumeDecisionResult(
   value: unknown,
   pins: ResultPins,
 ): DecisionResultView {
+  const industryV2 =
+    pins.classification === 'OFFICE_PRIVATE' &&
+    pins.officeId === 'INDUSTRY' &&
+    pins.activitySchema === 'world-activity-projection-v2' &&
+    pins.economicVisibilitySchema === 'economic-read-visibility-v2';
   if (
-    value === undefined ||
+    (value === undefined && !industryV2) ||
     (value === null && !offices.includes(pins.officeId))
   )
     return absent('UNAVAILABLE', 'RESULT_NOT_PROJECTED');
   try {
+    assertResult(
+      (pins.activitySchema === undefined &&
+        pins.economicVisibilitySchema === undefined) ||
+        industryV2 ||
+        (pins.activitySchema === 'world-activity-projection-v1' &&
+          pins.economicVisibilitySchema === 'economic-read-visibility-v1'),
+    );
+    assertResult(industryV2 || pins.industryProductionResult === undefined);
+    let disclosure: Record<string, unknown> | null = null;
+    if (industryV2) {
+      assertResult(pins.financialDetail === 'NOT_AUTHORIZED');
+      const raw = row(pins.industryProductionResult);
+      disclosure = exact(
+        raw,
+        raw?.status === 'NOT_AUTHORIZED'
+          ? ['status']
+          : ['status', 'purpose', 'sourceHead', 'causeBinding'],
+      );
+      if (disclosure.status !== 'NOT_AUTHORIZED') {
+        assertResult(
+          disclosure.status === 'AUTHORIZED_RESULT_ONLY' &&
+            disclosure.purpose ===
+              'INDUSTRY_COMMITTED_PRODUCTION_OUTPUT_AFTER_ONLY',
+        );
+        const h = exact(disclosure.sourceHead, [
+          'worldId',
+          'worldVersion',
+          'eventSequence',
+        ]);
+        assertResult(
+          canonicalId(h.worldId) &&
+            version(h.worldVersion) &&
+            version(h.eventSequence) &&
+            h.worldId === pins.worldId &&
+            h.worldVersion === pins.worldVersion &&
+            h.eventSequence === pins.eventSequence,
+        );
+        const binding = exact(disclosure.causeBinding, [
+          'commandId',
+          'commandFingerprint',
+          'eventId',
+          'eventFingerprint',
+        ]);
+        assertResult(
+          canonicalId(binding.commandId) &&
+            canonicalId(binding.eventId) &&
+            hash(binding.commandFingerprint) &&
+            hash(binding.eventFingerprint),
+        );
+      }
+    }
     const country = pins.classification === 'COUNTRY';
     if (!country) assertResult(offices.includes(pins.officeId));
     const result = exact(
@@ -163,6 +222,7 @@ export function consumeDecisionResult(
     );
     const metrics = result.metrics as unknown[];
     if (result.status !== 'COMMITTED') {
+      assertResult(!industryV2 || disclosure?.status === 'NOT_AUTHORIZED');
       assertResult(
         result.source === null &&
           result.businessState === null &&
@@ -171,7 +231,7 @@ export function consumeDecisionResult(
       );
       if (result.status === 'NOT_AUTHORIZED') {
         assertResult(
-          pins.officeId === 'CENTRAL_BANK' &&
+          (pins.officeId === 'CENTRAL_BANK' || industryV2) &&
             result.reason === 'SCOPE_NOT_AUTHORIZED',
         );
         return absent('NOT_AUTHORIZED', 'SCOPE_NOT_AUTHORIZED');
@@ -187,7 +247,8 @@ export function consumeDecisionResult(
       return absent('UNAVAILABLE', String(result.reason));
     }
     assertResult(
-      pins.officeId !== 'INDUSTRY' &&
+      (pins.officeId !== 'INDUSTRY' || industryV2) &&
+        (!industryV2 || disclosure?.status === 'AUTHORIZED_RESULT_ONLY') &&
         result.source === 'COMMITTED_EVENT_RESULT' &&
         (pins.officeId !== 'CENTRAL_BANK' ||
           pins.financialDetail === 'AUTHORIZED_FILTERED'),
@@ -226,6 +287,17 @@ export function consumeDecisionResult(
     );
     const social = pins.officeId === 'SOCIAL',
       due = social && cause.eventType === SOCIAL_JOB_MATCH_EVENT;
+    if (industryV2) {
+      const binding = exact(disclosure!.causeBinding, [
+        'commandId',
+        'commandFingerprint',
+        'eventId',
+        'eventFingerprint',
+      ]);
+      assertResult(
+        Object.keys(binding).every((key) => binding[key] === cause[key]),
+      );
+    }
     assertResult(
       version(pins.activity.eventCount) &&
         version(pins.activity.eventSequence) &&
@@ -258,7 +330,9 @@ export function consumeDecisionResult(
           cause.eventType ===
             (pins.officeId === 'CAPTAIN'
               ? CAPTAIN_POLITICAL_CAPITAL_EVENT
-              : CENTRAL_BANK_OMO_EVENT),
+              : industryV2
+                ? 'INDUSTRY_PRODUCTION_SETTLED'
+                : CENTRAL_BANK_OMO_EVENT),
       );
     const expected =
       pins.officeId === 'CAPTAIN'
@@ -276,10 +350,12 @@ export function consumeDecisionResult(
               `SOCIAL.${key}`,
               key === 'remainingFreeServiceSlots' ? 'service_slot' : 'person',
             ])
-          : [
-              ['CB_GOVERNMENT_SECURITIES', null],
-              ['CB_COMMERCIAL_BANK_RESERVES', null],
-            ];
+          : industryV2
+            ? [['PRODUCTION_OUTPUT', 'tonne']]
+            : [
+                ['CB_GOVERNMENT_SECURITIES', null],
+                ['CB_COMMERCIAL_BANK_RESERVES', null],
+              ];
     assertResult(metrics.length === expected.length);
     let currency: string | null = null;
     for (const [index, raw] of metrics.entries()) {
@@ -290,7 +366,7 @@ export function consumeDecisionResult(
         'before',
         'delta',
         'after',
-        ...(social ? ['reason'] : []),
+        ...(social || industryV2 ? ['reason'] : []),
       ]);
       const [key, unit] = expected[index]!;
       assertResult(
@@ -299,17 +375,28 @@ export function consumeDecisionResult(
           metric.unit.length <= 256 &&
           (unit === null || metric.unit === unit),
       );
-      if (social)
+      if (social || industryV2) {
         assertResult(
           metric.status === 'AFTER_ONLY' &&
             metric.before === null &&
             metric.delta === null &&
             metric.reason === 'PREDECESSOR_STATE_NOT_CARRIED' &&
-            typeof metric.after === 'string' &&
-            /^(?:0|[1-9]\d*)$/u.test(metric.after) &&
-            metric.after.length <= 256,
+            typeof metric.after === 'string',
         );
-      else {
+        if (industryV2) {
+          assertResult(
+            typeof metric.after === 'string' &&
+              metric.after !== '0' &&
+              /^(?:0|[1-9]\d*)(?:\.\d*[1-9])?$/u.test(metric.after) &&
+              metric.after.replace('.', '').length <= MAX_DECIMAL_DIGITS,
+          );
+        } else
+          assertResult(
+            typeof metric.after === 'string' &&
+              /^(?:0|[1-9]\d*)$/u.test(metric.after) &&
+              metric.after.length <= 256,
+          );
+      } else {
         assertResult(
           metric.status === 'EXACT_CHANGE' &&
             typeof metric.before === 'string' &&
@@ -332,7 +419,7 @@ export function consumeDecisionResult(
     Object.freeze(copy.metrics);
     Object.freeze(copy);
     return Object.freeze({
-      availability: social ? 'PARTIAL' : 'COMMITTED',
+      availability: social || industryV2 ? 'PARTIAL' : 'COMMITTED',
       reason: copy.reason,
       result: copy,
     });
