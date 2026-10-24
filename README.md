@@ -32,6 +32,31 @@ sampled main script/stylesheet returned HTTP 200. This is bounded availability
 evidence, not full visual/E2E acceptance, source adoption or World / Clock
 activation. The older dated checkpoints below retain their original limits.
 
+### Subsequent Industry and Social preparation merges
+
+[PR181](https://github.com/samuelq800/econmind-os-world-simulation/pull/181)
+merged Industry visibility types and result-consumer compatibility as
+`ffff72d346f6792ec696a86f1eb8666f42d7cea0`; actual admitted-source emission
+remains unprovided. [PR182](https://github.com/samuelq800/econmind-os-world-simulation/pull/182)
+then normally merged the six-addition Social candidate consumer as
+`f620e0fd21e31ab3c06aea75c66e06f716a3e516`, from tested candidate
+`240572e38b82fb8eb1416b672382b74efd09bdd2`. Its tree
+`1eac09cfb9315bf2201680252d1086ca9bcc16b7` equals both the tested and reviewed
+candidate trees.
+
+The [PR182 exact-head final run](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/40101814174)
+reports 5,472 PASS / 0 FAIL / 277 SKIP. The new Social 55 are included in 5,472;
+their nine Core date cases and eight separate CLI captures are not extra tests.
+Native authenticated and workerd/PostgreSQL checks each passed separately.
+The Worker consumer and fixed-file CLI are inert repository/CI previews, not
+model adoption, a formal Social reader or actual PLAN/MATCH. Actual facts remain
+null, readiness/authority flags false and the physical daily-attempt time gap
+OPEN; original closures, permissions, seed and World / Clock are unchanged.
+This Worker/data/test/tool-only merge did not trigger another static deployment:
+the prior [Pages run](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/40098554527)
+remains tied to `ffff72d346f6792ec696a86f1eb8666f42d7cea0`. This later
+documentation update does not claim that code CI ran its own commit.
+
 ## Account and physical-reference publication (2026-10-23)
 
 The independently reviewed construction candidate is
