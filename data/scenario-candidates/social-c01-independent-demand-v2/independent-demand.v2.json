@@ -1,0 +1,1010 @@
+{
+  "MODERATE": {
+    "RETAIL_CONSUMER_DISTRIBUTION": {
+      "activityId": "RETAIL_CONSUMER_DISTRIBUTION",
+      "employerRole": "OP",
+      "clientBoundary": "Individual consumers of unprepared goods",
+      "mutualExclusionBoundary": "Picking/replenishment/handoff/checkout and per-line audit of unprepared merchandise. Excludes prepared-meal service, repairs, wholesale gate/warehouse logistics and public records.",
+      "assumptionRationale": "Two versus three unprepared-goods handling lines/person/normalized360-day year and12 versus15 staff-minutes/line are new workload/productivity assumptions. They are line operations, not person store visits or empirical sales.",
+      "adoptionConditions": [
+        "New hypothetical retailer mandate/owner and merchandising access",
+        "Actually sourced or explicitly adopted candidate premises/stations/inputs",
+        "No actual merchandise or title is created by handling-demand arithmetic"
+      ],
+      "tasks": [
+        {
+          "id": "RETAIL_LINE",
+          "driver": "persons",
+          "annualFrequency": 720,
+          "skillMinutes": {
+            "LOW": 8,
+            "MEDIUM": 3,
+            "HIGH": 1
+          },
+          "station": "RETAIL_TERMINAL",
+          "energyKWh": "1/100",
+          "waterM3": "1/1000",
+          "materials": [
+            {
+              "id": "PACKAGING_SHEET",
+              "quantity": 1
+            }
+          ],
+          "annualDemandUnits": "75964931280",
+          "unit": "UNPREPARED_GOODS_LINE_HANDLING",
+          "unitVariableCostXAA": "4.29",
+          "fullAnnualEnergyKWh": "3798246564/5",
+          "fullAnnualWaterM3": "1899123282/25",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "PACKAGING_SHEET",
+              "quantity": "75964931280"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "607719450240",
+        "MEDIUM": "227894793840",
+        "HIGH": "75964931280"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "8440548",
+        "MEDIUM": "3165206",
+        "HIGH": "1055069"
+      },
+      "requiredStations": [
+        {
+          "stationType": "RETAIL_TERMINAL",
+          "requiredCount": "4220274",
+          "annualMinutesDemand": "303859725120",
+          "annualMinutesCapacity": "303859728000",
+          "floorAreaM2": "33762192",
+          "annualCoveredFixedInputCostXAA": "506432880000",
+          "oneTimeStationEquipmentXAA": "1012865760000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "325889555191.2",
+      "annualPlannedFixedInputCostXAA": "506432880000",
+      "plannedOneTimeStationEquipmentXAA": "1012865760000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    },
+    "HOUSEHOLD_MOVABLE_GOODS_REPAIR": {
+      "activityId": "HOUSEHOLD_MOVABLE_GOODS_REPAIR",
+      "employerRole": "OP",
+      "clientBoundary": "Hypothetical household movable-goods owners",
+      "mutualExclusionBoundary": "Portable appliances, movable furniture, bicycles and similar movable durables only. Excludes every fixed wall/roof/foundation/attached plumbing/wiring/fixture, building finishing, meals, grooming and clinical care.",
+      "assumptionRationale": "24 hypothetical movable items/household, two versus four independent service episodes/item/year and90 versus120 total staff-minutes/episode. New task/exposure assumptions, not actual owned items or observed breakdowns.",
+      "adoptionConditions": [
+        "New repair-service mandate and customer authority over movable goods",
+        "Actual adopted movable-goods exposure/endowment and parts/tool/energy access, not fabricated inventory"
+      ],
+      "tasks": [
+        {
+          "id": "MOVABLE_REPAIR",
+          "driver": "households",
+          "annualFrequency": 48,
+          "skillMinutes": {
+            "LOW": 15,
+            "MEDIUM": 60,
+            "HIGH": 15
+          },
+          "station": "MOVABLE_REPAIR_BENCH",
+          "energyKWh": "1/2",
+          "waterM3": "1/1000",
+          "materials": [
+            {
+              "id": "MOVABLE_REPAIR_PARTS_KIT",
+              "quantity": 1
+            }
+          ],
+          "annualDemandUnits": "1688109600",
+          "unit": "MOVABLE_GOOD_SERVICE_EPISODE",
+          "unitVariableCostXAA": "6012.54",
+          "fullAnnualEnergyKWh": "844054800",
+          "fullAnnualWaterM3": "8440548/5",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "MOVABLE_REPAIR_PARTS_KIT",
+              "quantity": "1688109600"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "25321644000",
+        "MEDIUM": "101286576000",
+        "HIGH": "25321644000"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "351690",
+        "MEDIUM": "1406758",
+        "HIGH": "351690"
+      },
+      "requiredStations": [
+        {
+          "stationType": "MOVABLE_REPAIR_BENCH",
+          "requiredCount": "1406758",
+          "annualMinutesDemand": "101286576000",
+          "annualMinutesCapacity": "101286576000",
+          "floorAreaM2": "16881096",
+          "annualCoveredFixedInputCostXAA": "253216440000",
+          "oneTimeStationEquipmentXAA": "675243840000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "10149826494384",
+      "annualPlannedFixedInputCostXAA": "253216440000",
+      "plannedOneTimeStationEquipmentXAA": "675243840000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    },
+    "BUSINESS_RECORDS_AND_ADMIN_SUPPORT": {
+      "activityId": "BUSINESS_RECORDS_AND_ADMIN_SUPPORT",
+      "employerRole": "OP",
+      "clientBoundary": "Hypothetical private enterprises only",
+      "mutualExclusionBoundary": "Private bookkeeping/HR/supplier administration file; excludes government tax/civil case adjudication, D employer-offer verification, banking credit authorization and clinical/education records.",
+      "assumptionRationale": "Six versus ten private files/enterprise/240 normalized productive days;30 staff-minutes/file split into clerical/bookkeeper/reviewer stages. Firm count is authored, not recovered from employment.",
+      "adoptionConditions": [
+        "Actual or adopted new enterprise count and lawful private processing mandate",
+        "Input and premises/privacy rights; no credit, tax or employment-service authority inferred"
+      ],
+      "tasks": [
+        {
+          "id": "BUSINESS_FILE",
+          "driver": "businesses",
+          "annualFrequency": 1440,
+          "skillMinutes": {
+            "LOW": 15,
+            "MEDIUM": 12,
+            "HIGH": 3
+          },
+          "station": "ADMIN_WORKSTATION",
+          "energyKWh": "1/100",
+          "waterM3": "1/1000",
+          "materials": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": 2
+            }
+          ],
+          "annualDemandUnits": "3038597280",
+          "unit": "PRIVATE_BUSINESS_ADMIN_FILE",
+          "unitVariableCostXAA": "12.29",
+          "fullAnnualEnergyKWh": "151929864/5",
+          "fullAnnualWaterM3": "75964932/25",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": "6077194560"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "45578959200",
+        "MEDIUM": "36463167360",
+        "HIGH": "9115791840"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "633042",
+        "MEDIUM": "506433",
+        "HIGH": "126609"
+      },
+      "requiredStations": [
+        {
+          "stationType": "ADMIN_WORKSTATION",
+          "requiredCount": "633042",
+          "annualMinutesDemand": "45578959200",
+          "annualMinutesCapacity": "45579024000",
+          "floorAreaM2": "3798252",
+          "annualCoveredFixedInputCostXAA": "60772032000",
+          "oneTimeStationEquipmentXAA": "151930080000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "37344360571.2",
+      "annualPlannedFixedInputCostXAA": "60772032000",
+      "plannedOneTimeStationEquipmentXAA": "151930080000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    },
+    "FIXED_BUILDING_FINISHING_AND_FABRIC_UPKEEP": {
+      "activityId": "FIXED_BUILDING_FINISHING_AND_FABRIC_UPKEEP",
+      "employerRole": "OP",
+      "clientBoundary": "Proposed lawful custodians of the fixed housing asset reference",
+      "mutualExclusionBoundary": "Fixed wall/roof/attached plumbing/wiring/fixture inspection, finishing and fabric repair only. Excludes every movable appliance/furniture repair, new housing construction, rent/occupancy creation and power/mining projects.",
+      "assumptionRationale": "12 explicitly proposed fabric-maintenance episodes per referenced dwelling asset/year,240 versus360 staff-minutes/episode. Maintenance demand is not a claim occupancy or service delivery already occurred.",
+      "adoptionConditions": [
+        "Exact building custodian work order/access rights and adopted fixed asset identity",
+        "Candidate trade qualifications and physical material/energy/water/tool access",
+        "No double booking with movable-goods work"
+      ],
+      "tasks": [
+        {
+          "id": "FIXED_FABRIC",
+          "driver": "dwellingAssetUnits",
+          "annualFrequency": 12,
+          "skillMinutes": {
+            "LOW": 120,
+            "MEDIUM": 100,
+            "HIGH": 20
+          },
+          "station": "FIXED_ASSET_TOOLSET",
+          "energyKWh": "1/5",
+          "waterM3": "2/1000",
+          "materials": [
+            {
+              "id": "FIXED_ASSET_SEALANT_KG",
+              "quantity": 10
+            },
+            {
+              "id": "FIXED_ASSET_FITTING_PACK",
+              "quantity": 1
+            }
+          ],
+          "annualDemandUnits": "397696116",
+          "unit": "FIXED_DWELLING_FABRIC_MAINTENANCE_EPISODE",
+          "unitVariableCostXAA": "6005.08",
+          "fullAnnualEnergyKWh": "397696116/5",
+          "fullAnnualWaterM3": "99424029/125",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "FIXED_ASSET_SEALANT_KG",
+              "quantity": "3976961160"
+            },
+            {
+              "id": "FIXED_ASSET_FITTING_PACK",
+              "quantity": "397696116"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "47723533920",
+        "MEDIUM": "39769611600",
+        "HIGH": "7953922320"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "662827",
+        "MEDIUM": "552356",
+        "HIGH": "110472"
+      },
+      "requiredStations": [
+        {
+          "stationType": "FIXED_ASSET_TOOLSET",
+          "requiredCount": "662827",
+          "annualMinutesDemand": "47723533920",
+          "annualMinutesCapacity": "47723544000",
+          "floorAreaM2": "2651308",
+          "annualCoveredFixedInputCostXAA": "51700506000",
+          "oneTimeStationEquipmentXAA": "238617720000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "2388196992269.28",
+      "annualPlannedFixedInputCostXAA": "51700506000",
+      "plannedOneTimeStationEquipmentXAA": "238617720000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    },
+    "FOOD_PREPARATION_AND_NONCLINICAL_PERSONAL_CARE": {
+      "activityId": "FOOD_PREPARATION_AND_NONCLINICAL_PERSONAL_CARE",
+      "employerRole": "OP",
+      "clientBoundary": "Individual meal/personal-care clients",
+      "mutualExclusionBoundary": "Prepared-food production/service and nonclinical grooming/basic hygiene visits are separate counted outputs. Excludes unprepared-goods retail handling, medical/nursing treatment, movable-goods and fixed-building repair.",
+      "assumptionRationale": "150 versus240 prepared portions/person/year and12 versus24 nonclinical care visits; task times are explicitly authored stage minutes. Not observed purchases, nutrition/health outcomes or affordable demand.",
+      "adoptionConditions": [
+        "Adopted hypothetical client demand, food safety and nonclinical service mandates",
+        "Actual/explicit candidate food/consumable stocks and separate kitchen/chair capacity",
+        "Do not count a meal or care visit as a retail line or medical treatment"
+      ],
+      "tasks": [
+        {
+          "id": "PREPARED_MEAL",
+          "driver": "persons",
+          "annualFrequency": 150,
+          "skillMinutes": {
+            "LOW": 8,
+            "MEDIUM": 3,
+            "HIGH": 1
+          },
+          "station": "KITCHEN_MODULE",
+          "energyKWh": "1/5",
+          "waterM3": "5/1000",
+          "materials": [
+            {
+              "id": "MEAL_INGREDIENT_PORTION",
+              "quantity": 1
+            }
+          ],
+          "annualDemandUnits": "15826027350",
+          "unit": "TWO_DISTINCT_OUTPUTS_MEAL_PORTION_AND_PERSONAL_CARE_VISIT",
+          "unitVariableCostXAA": "125.2",
+          "fullAnnualEnergyKWh": "3165205470",
+          "fullAnnualWaterM3": "316520547/4",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "MEAL_INGREDIENT_PORTION",
+              "quantity": "15826027350"
+            }
+          ]
+        },
+        {
+          "id": "PERSONAL_CARE",
+          "driver": "persons",
+          "annualFrequency": 12,
+          "skillMinutes": {
+            "LOW": 15,
+            "MEDIUM": 20,
+            "HIGH": 10
+          },
+          "station": "PERSONAL_CARE_CHAIR",
+          "energyKWh": "1/10",
+          "waterM3": "10/1000",
+          "materials": [
+            {
+              "id": "NONCLINICAL_HYGIENE_KIT",
+              "quantity": 1
+            }
+          ],
+          "annualDemandUnits": "1266082188",
+          "unit": "TWO_DISTINCT_OUTPUTS_MEAL_PORTION_AND_PERSONAL_CARE_VISIT",
+          "unitVariableCostXAA": "62.9",
+          "fullAnnualEnergyKWh": "633041094/5",
+          "fullAnnualWaterM3": "316520547/25",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "NONCLINICAL_HYGIENE_KIT",
+              "quantity": "1266082188"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "145599451620",
+        "MEDIUM": "72799725810",
+        "HIGH": "28486849230"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "2022215",
+        "MEDIUM": "1011108",
+        "HIGH": "395651"
+      },
+      "requiredStations": [
+        {
+          "stationType": "KITCHEN_MODULE",
+          "requiredCount": "1318836",
+          "annualMinutesDemand": "94956164100",
+          "annualMinutesCapacity": "94956192000",
+          "floorAreaM2": "13188360",
+          "annualCoveredFixedInputCostXAA": "221564448000",
+          "oneTimeStationEquipmentXAA": "949561920000",
+          "actualAvailability": null
+        },
+        {
+          "stationType": "PERSONAL_CARE_CHAIR",
+          "requiredCount": "791302",
+          "annualMinutesDemand": "56973698460",
+          "annualMinutesCapacity": "56973744000",
+          "floorAreaM2": "6330416",
+          "annualCoveredFixedInputCostXAA": "94956240000",
+          "oneTimeStationEquipmentXAA": "189912480000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "2061055193845.2",
+      "annualPlannedFixedInputCostXAA": "316520688000",
+      "plannedOneTimeStationEquipmentXAA": "1139474400000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    },
+    "CIVIL_REGISTRY_TAX_AND_COMMUNITY_ADMIN": {
+      "activityId": "CIVIL_REGISTRY_TAX_AND_COMMUNITY_ADMIN",
+      "employerRole": "GOV",
+      "clientBoundary": "Working-age case universe and population registry universe",
+      "mutualExclusionBoundary": "Government civil/tax/community application case and registry updates. Excludes private company files, clinical/education processing, D placement intake/counselling/verifier/QA, benefit payments and actual tax collection.",
+      "assumptionRationale": "12 versus24 hypothetical public-case files per working-age person and6 versus12 civil records per population person/year. This is a workload scenario, not observed eligibility/caseload/history.",
+      "adoptionConditions": [
+        "Actual governing legal mandate and purpose-specific data rights for each proposed public service",
+        "Actual funded input/custody capacity before operation",
+        "No citizen eligibility, tax or benefit event generated by this driver"
+      ],
+      "tasks": [
+        {
+          "id": "PUBLIC_CASE",
+          "driver": "workingAgePersons",
+          "annualFrequency": 12,
+          "skillMinutes": {
+            "LOW": 15,
+            "MEDIUM": 35,
+            "HIGH": 10
+          },
+          "station": "PUBLIC_CASE_STATION",
+          "energyKWh": "1/50",
+          "waterM3": "1/1000",
+          "materials": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": 4
+            }
+          ],
+          "annualDemandUnits": "777627684",
+          "unit": "TWO_DISTINCT_OUTPUTS_PUBLIC_CASE_AND_CIVIL_RECORD",
+          "unitVariableCostXAA": "24.54",
+          "fullAnnualEnergyKWh": "388813842/25",
+          "fullAnnualWaterM3": "194406921/250",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": "3110510736"
+            }
+          ]
+        },
+        {
+          "id": "CIVIL_RECORD",
+          "driver": "persons",
+          "annualFrequency": 6,
+          "skillMinutes": {
+            "LOW": 15,
+            "MEDIUM": 10,
+            "HIGH": 5
+          },
+          "station": "PUBLIC_CASE_STATION",
+          "energyKWh": "1/100",
+          "waterM3": "1/1000",
+          "materials": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": 2
+            }
+          ],
+          "annualDemandUnits": "633041094",
+          "unit": "TWO_DISTINCT_OUTPUTS_PUBLIC_CASE_AND_CIVIL_RECORD",
+          "unitVariableCostXAA": "12.29",
+          "fullAnnualEnergyKWh": "316520547/50",
+          "fullAnnualWaterM3": "316520547/500",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": "1266082188"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "21160031670",
+        "MEDIUM": "33547379880",
+        "HIGH": "10941482310"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "293890",
+        "MEDIUM": "465936",
+        "HIGH": "151966"
+      },
+      "requiredStations": [
+        {
+          "stationType": "PUBLIC_CASE_STATION",
+          "requiredCount": "391853",
+          "annualMinutesDemand": "28213375560",
+          "annualMinutesCapacity": "28213416000",
+          "floorAreaM2": "3134824",
+          "annualCoveredFixedInputCostXAA": "47022360000",
+          "oneTimeStationEquipmentXAA": "94044720000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "26863058410.62",
+      "annualPlannedFixedInputCostXAA": "47022360000",
+      "plannedOneTimeStationEquipmentXAA": "94044720000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    }
+  },
+  "HIGH_CONTACT_TIME": {
+    "RETAIL_CONSUMER_DISTRIBUTION": {
+      "activityId": "RETAIL_CONSUMER_DISTRIBUTION",
+      "employerRole": "OP",
+      "clientBoundary": "Individual consumers of unprepared goods",
+      "mutualExclusionBoundary": "Picking/replenishment/handoff/checkout and per-line audit of unprepared merchandise. Excludes prepared-meal service, repairs, wholesale gate/warehouse logistics and public records.",
+      "assumptionRationale": "Two versus three unprepared-goods handling lines/person/normalized360-day year and12 versus15 staff-minutes/line are new workload/productivity assumptions. They are line operations, not person store visits or empirical sales.",
+      "adoptionConditions": [
+        "New hypothetical retailer mandate/owner and merchandising access",
+        "Actually sourced or explicitly adopted candidate premises/stations/inputs",
+        "No actual merchandise or title is created by handling-demand arithmetic"
+      ],
+      "tasks": [
+        {
+          "id": "RETAIL_LINE",
+          "driver": "persons",
+          "annualFrequency": 1080,
+          "skillMinutes": {
+            "LOW": 10,
+            "MEDIUM": 4,
+            "HIGH": 1
+          },
+          "station": "RETAIL_TERMINAL",
+          "energyKWh": "1/100",
+          "waterM3": "1/1000",
+          "materials": [
+            {
+              "id": "PACKAGING_SHEET",
+              "quantity": 1
+            }
+          ],
+          "annualDemandUnits": "113947396920",
+          "unit": "UNPREPARED_GOODS_LINE_HANDLING",
+          "unitVariableCostXAA": "4.29",
+          "fullAnnualEnergyKWh": "5697369846/5",
+          "fullAnnualWaterM3": "2848684923/25",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "PACKAGING_SHEET",
+              "quantity": "113947396920"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "1139473969200",
+        "MEDIUM": "455789587680",
+        "HIGH": "113947396920"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "15826028",
+        "MEDIUM": "6330411",
+        "HIGH": "1582603"
+      },
+      "requiredStations": [
+        {
+          "stationType": "RETAIL_TERMINAL",
+          "requiredCount": "6330411",
+          "annualMinutesDemand": "455789587680",
+          "annualMinutesCapacity": "455789592000",
+          "floorAreaM2": "50643288",
+          "annualCoveredFixedInputCostXAA": "759649320000",
+          "oneTimeStationEquipmentXAA": "1519298640000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "488834332786.8",
+      "annualPlannedFixedInputCostXAA": "759649320000",
+      "plannedOneTimeStationEquipmentXAA": "1519298640000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    },
+    "HOUSEHOLD_MOVABLE_GOODS_REPAIR": {
+      "activityId": "HOUSEHOLD_MOVABLE_GOODS_REPAIR",
+      "employerRole": "OP",
+      "clientBoundary": "Hypothetical household movable-goods owners",
+      "mutualExclusionBoundary": "Portable appliances, movable furniture, bicycles and similar movable durables only. Excludes every fixed wall/roof/foundation/attached plumbing/wiring/fixture, building finishing, meals, grooming and clinical care.",
+      "assumptionRationale": "24 hypothetical movable items/household, two versus four independent service episodes/item/year and90 versus120 total staff-minutes/episode. New task/exposure assumptions, not actual owned items or observed breakdowns.",
+      "adoptionConditions": [
+        "New repair-service mandate and customer authority over movable goods",
+        "Actual adopted movable-goods exposure/endowment and parts/tool/energy access, not fabricated inventory"
+      ],
+      "tasks": [
+        {
+          "id": "MOVABLE_REPAIR",
+          "driver": "households",
+          "annualFrequency": 96,
+          "skillMinutes": {
+            "LOW": 20,
+            "MEDIUM": 80,
+            "HIGH": 20
+          },
+          "station": "MOVABLE_REPAIR_BENCH",
+          "energyKWh": "1/2",
+          "waterM3": "1/1000",
+          "materials": [
+            {
+              "id": "MOVABLE_REPAIR_PARTS_KIT",
+              "quantity": 1
+            }
+          ],
+          "annualDemandUnits": "3376219200",
+          "unit": "MOVABLE_GOOD_SERVICE_EPISODE",
+          "unitVariableCostXAA": "6012.54",
+          "fullAnnualEnergyKWh": "1688109600",
+          "fullAnnualWaterM3": "16881096/5",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "MOVABLE_REPAIR_PARTS_KIT",
+              "quantity": "3376219200"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "67524384000",
+        "MEDIUM": "270097536000",
+        "HIGH": "67524384000"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "937839",
+        "MEDIUM": "3751355",
+        "HIGH": "937839"
+      },
+      "requiredStations": [
+        {
+          "stationType": "MOVABLE_REPAIR_BENCH",
+          "requiredCount": "2813516",
+          "annualMinutesDemand": "202573152000",
+          "annualMinutesCapacity": "202573152000",
+          "floorAreaM2": "33762192",
+          "annualCoveredFixedInputCostXAA": "506432880000",
+          "oneTimeStationEquipmentXAA": "1350487680000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "20299652988768",
+      "annualPlannedFixedInputCostXAA": "506432880000",
+      "plannedOneTimeStationEquipmentXAA": "1350487680000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    },
+    "BUSINESS_RECORDS_AND_ADMIN_SUPPORT": {
+      "activityId": "BUSINESS_RECORDS_AND_ADMIN_SUPPORT",
+      "employerRole": "OP",
+      "clientBoundary": "Hypothetical private enterprises only",
+      "mutualExclusionBoundary": "Private bookkeeping/HR/supplier administration file; excludes government tax/civil case adjudication, D employer-offer verification, banking credit authorization and clinical/education records.",
+      "assumptionRationale": "Six versus ten private files/enterprise/240 normalized productive days;30 staff-minutes/file split into clerical/bookkeeper/reviewer stages. Firm count is authored, not recovered from employment.",
+      "adoptionConditions": [
+        "Actual or adopted new enterprise count and lawful private processing mandate",
+        "Input and premises/privacy rights; no credit, tax or employment-service authority inferred"
+      ],
+      "tasks": [
+        {
+          "id": "BUSINESS_FILE",
+          "driver": "businesses",
+          "annualFrequency": 2400,
+          "skillMinutes": {
+            "LOW": 15,
+            "MEDIUM": 12,
+            "HIGH": 3
+          },
+          "station": "ADMIN_WORKSTATION",
+          "energyKWh": "1/100",
+          "waterM3": "1/1000",
+          "materials": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": 2
+            }
+          ],
+          "annualDemandUnits": "5064328800",
+          "unit": "PRIVATE_BUSINESS_ADMIN_FILE",
+          "unitVariableCostXAA": "12.29",
+          "fullAnnualEnergyKWh": "50643288",
+          "fullAnnualWaterM3": "25321644/5",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": "10128657600"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "75964932000",
+        "MEDIUM": "60771945600",
+        "HIGH": "15192986400"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "1055069",
+        "MEDIUM": "844055",
+        "HIGH": "211014"
+      },
+      "requiredStations": [
+        {
+          "stationType": "ADMIN_WORKSTATION",
+          "requiredCount": "1055069",
+          "annualMinutesDemand": "75964932000",
+          "annualMinutesCapacity": "75964968000",
+          "floorAreaM2": "6330414",
+          "annualCoveredFixedInputCostXAA": "101286624000",
+          "oneTimeStationEquipmentXAA": "253216560000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "62240600952",
+      "annualPlannedFixedInputCostXAA": "101286624000",
+      "plannedOneTimeStationEquipmentXAA": "253216560000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    },
+    "FIXED_BUILDING_FINISHING_AND_FABRIC_UPKEEP": {
+      "activityId": "FIXED_BUILDING_FINISHING_AND_FABRIC_UPKEEP",
+      "employerRole": "OP",
+      "clientBoundary": "Proposed lawful custodians of the fixed housing asset reference",
+      "mutualExclusionBoundary": "Fixed wall/roof/attached plumbing/wiring/fixture inspection, finishing and fabric repair only. Excludes every movable appliance/furniture repair, new housing construction, rent/occupancy creation and power/mining projects.",
+      "assumptionRationale": "12 explicitly proposed fabric-maintenance episodes per referenced dwelling asset/year,240 versus360 staff-minutes/episode. Maintenance demand is not a claim occupancy or service delivery already occurred.",
+      "adoptionConditions": [
+        "Exact building custodian work order/access rights and adopted fixed asset identity",
+        "Candidate trade qualifications and physical material/energy/water/tool access",
+        "No double booking with movable-goods work"
+      ],
+      "tasks": [
+        {
+          "id": "FIXED_FABRIC",
+          "driver": "dwellingAssetUnits",
+          "annualFrequency": 12,
+          "skillMinutes": {
+            "LOW": 180,
+            "MEDIUM": 150,
+            "HIGH": 30
+          },
+          "station": "FIXED_ASSET_TOOLSET",
+          "energyKWh": "1/5",
+          "waterM3": "2/1000",
+          "materials": [
+            {
+              "id": "FIXED_ASSET_SEALANT_KG",
+              "quantity": 10
+            },
+            {
+              "id": "FIXED_ASSET_FITTING_PACK",
+              "quantity": 1
+            }
+          ],
+          "annualDemandUnits": "397696116",
+          "unit": "FIXED_DWELLING_FABRIC_MAINTENANCE_EPISODE",
+          "unitVariableCostXAA": "6005.08",
+          "fullAnnualEnergyKWh": "397696116/5",
+          "fullAnnualWaterM3": "99424029/125",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "FIXED_ASSET_SEALANT_KG",
+              "quantity": "3976961160"
+            },
+            {
+              "id": "FIXED_ASSET_FITTING_PACK",
+              "quantity": "397696116"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "71585300880",
+        "MEDIUM": "59654417400",
+        "HIGH": "11930883480"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "994241",
+        "MEDIUM": "828534",
+        "HIGH": "165707"
+      },
+      "requiredStations": [
+        {
+          "stationType": "FIXED_ASSET_TOOLSET",
+          "requiredCount": "662827",
+          "annualMinutesDemand": "47723533920",
+          "annualMinutesCapacity": "47723544000",
+          "floorAreaM2": "2651308",
+          "annualCoveredFixedInputCostXAA": "51700506000",
+          "oneTimeStationEquipmentXAA": "238617720000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "2388196992269.28",
+      "annualPlannedFixedInputCostXAA": "51700506000",
+      "plannedOneTimeStationEquipmentXAA": "238617720000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    },
+    "FOOD_PREPARATION_AND_NONCLINICAL_PERSONAL_CARE": {
+      "activityId": "FOOD_PREPARATION_AND_NONCLINICAL_PERSONAL_CARE",
+      "employerRole": "OP",
+      "clientBoundary": "Individual meal/personal-care clients",
+      "mutualExclusionBoundary": "Prepared-food production/service and nonclinical grooming/basic hygiene visits are separate counted outputs. Excludes unprepared-goods retail handling, medical/nursing treatment, movable-goods and fixed-building repair.",
+      "assumptionRationale": "150 versus240 prepared portions/person/year and12 versus24 nonclinical care visits; task times are explicitly authored stage minutes. Not observed purchases, nutrition/health outcomes or affordable demand.",
+      "adoptionConditions": [
+        "Adopted hypothetical client demand, food safety and nonclinical service mandates",
+        "Actual/explicit candidate food/consumable stocks and separate kitchen/chair capacity",
+        "Do not count a meal or care visit as a retail line or medical treatment"
+      ],
+      "tasks": [
+        {
+          "id": "PREPARED_MEAL",
+          "driver": "persons",
+          "annualFrequency": 240,
+          "skillMinutes": {
+            "LOW": 12,
+            "MEDIUM": 4,
+            "HIGH": 2
+          },
+          "station": "KITCHEN_MODULE",
+          "energyKWh": "1/5",
+          "waterM3": "5/1000",
+          "materials": [
+            {
+              "id": "MEAL_INGREDIENT_PORTION",
+              "quantity": 1
+            }
+          ],
+          "annualDemandUnits": "25321643760",
+          "unit": "TWO_DISTINCT_OUTPUTS_MEAL_PORTION_AND_PERSONAL_CARE_VISIT",
+          "unitVariableCostXAA": "125.2",
+          "fullAnnualEnergyKWh": "5064328752",
+          "fullAnnualWaterM3": "633041094/5",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "MEAL_INGREDIENT_PORTION",
+              "quantity": "25321643760"
+            }
+          ]
+        },
+        {
+          "id": "PERSONAL_CARE",
+          "driver": "persons",
+          "annualFrequency": 24,
+          "skillMinutes": {
+            "LOW": 20,
+            "MEDIUM": 30,
+            "HIGH": 10
+          },
+          "station": "PERSONAL_CARE_CHAIR",
+          "energyKWh": "1/10",
+          "waterM3": "10/1000",
+          "materials": [
+            {
+              "id": "NONCLINICAL_HYGIENE_KIT",
+              "quantity": 1
+            }
+          ],
+          "annualDemandUnits": "2532164376",
+          "unit": "TWO_DISTINCT_OUTPUTS_MEAL_PORTION_AND_PERSONAL_CARE_VISIT",
+          "unitVariableCostXAA": "62.9",
+          "fullAnnualEnergyKWh": "1266082188/5",
+          "fullAnnualWaterM3": "633041094/25",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "NONCLINICAL_HYGIENE_KIT",
+              "quantity": "2532164376"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "354503012640",
+        "MEDIUM": "177251506320",
+        "HIGH": "75964931280"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "4923653",
+        "MEDIUM": "2461827",
+        "HIGH": "1055069"
+      },
+      "requiredStations": [
+        {
+          "stationType": "KITCHEN_MODULE",
+          "requiredCount": "2110137",
+          "annualMinutesDemand": "151929862560",
+          "annualMinutesCapacity": "151929864000",
+          "floorAreaM2": "21101370",
+          "annualCoveredFixedInputCostXAA": "354503016000",
+          "oneTimeStationEquipmentXAA": "1519298640000",
+          "actualAvailability": null
+        },
+        {
+          "stationType": "PERSONAL_CARE_CHAIR",
+          "requiredCount": "1582603",
+          "annualMinutesDemand": "113947396920",
+          "annualMinutesCapacity": "113947416000",
+          "floorAreaM2": "12660824",
+          "annualCoveredFixedInputCostXAA": "189912360000",
+          "oneTimeStationEquipmentXAA": "379824720000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "3329542938002.4",
+      "annualPlannedFixedInputCostXAA": "544415376000",
+      "plannedOneTimeStationEquipmentXAA": "1899123360000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    },
+    "CIVIL_REGISTRY_TAX_AND_COMMUNITY_ADMIN": {
+      "activityId": "CIVIL_REGISTRY_TAX_AND_COMMUNITY_ADMIN",
+      "employerRole": "GOV",
+      "clientBoundary": "Working-age case universe and population registry universe",
+      "mutualExclusionBoundary": "Government civil/tax/community application case and registry updates. Excludes private company files, clinical/education processing, D placement intake/counselling/verifier/QA, benefit payments and actual tax collection.",
+      "assumptionRationale": "12 versus24 hypothetical public-case files per working-age person and6 versus12 civil records per population person/year. This is a workload scenario, not observed eligibility/caseload/history.",
+      "adoptionConditions": [
+        "Actual governing legal mandate and purpose-specific data rights for each proposed public service",
+        "Actual funded input/custody capacity before operation",
+        "No citizen eligibility, tax or benefit event generated by this driver"
+      ],
+      "tasks": [
+        {
+          "id": "PUBLIC_CASE",
+          "driver": "workingAgePersons",
+          "annualFrequency": 24,
+          "skillMinutes": {
+            "LOW": 20,
+            "MEDIUM": 55,
+            "HIGH": 15
+          },
+          "station": "PUBLIC_CASE_STATION",
+          "energyKWh": "1/50",
+          "waterM3": "1/1000",
+          "materials": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": 4
+            }
+          ],
+          "annualDemandUnits": "1555255368",
+          "unit": "TWO_DISTINCT_OUTPUTS_PUBLIC_CASE_AND_CIVIL_RECORD",
+          "unitVariableCostXAA": "24.54",
+          "fullAnnualEnergyKWh": "777627684/25",
+          "fullAnnualWaterM3": "194406921/125",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": "6221021472"
+            }
+          ]
+        },
+        {
+          "id": "CIVIL_RECORD",
+          "driver": "persons",
+          "annualFrequency": 12,
+          "skillMinutes": {
+            "LOW": 20,
+            "MEDIUM": 15,
+            "HIGH": 10
+          },
+          "station": "PUBLIC_CASE_STATION",
+          "energyKWh": "1/100",
+          "waterM3": "1/1000",
+          "materials": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": 2
+            }
+          ],
+          "annualDemandUnits": "1266082188",
+          "unit": "TWO_DISTINCT_OUTPUTS_PUBLIC_CASE_AND_CIVIL_RECORD",
+          "unitVariableCostXAA": "12.29",
+          "fullAnnualEnergyKWh": "316520547/25",
+          "fullAnnualWaterM3": "316520547/250",
+          "fullAnnualMaterialRequirements": [
+            {
+              "id": "PAPER_PAGE",
+              "quantity": "2532164376"
+            }
+          ]
+        }
+      ],
+      "annualRequiredMinutesBySkill": {
+        "LOW": "56426751120",
+        "MEDIUM": "104530278060",
+        "HIGH": "35989652400"
+      },
+      "requiredPostsBySkill": {
+        "LOW": "783705",
+        "MEDIUM": "1451810",
+        "HIGH": "499857"
+      },
+      "requiredStations": [
+        {
+          "stationType": "PUBLIC_CASE_STATION",
+          "requiredCount": "783705",
+          "annualMinutesDemand": "56426751120",
+          "annualMinutesCapacity": "56426760000",
+          "floorAreaM2": "6269640",
+          "annualCoveredFixedInputCostXAA": "94044600000",
+          "oneTimeStationEquipmentXAA": "188089200000",
+          "actualAvailability": null
+        }
+      ],
+      "fullDemandAnnualCoveredVariableInputsXAA": "53726116821.24",
+      "annualPlannedFixedInputCostXAA": "94044600000",
+      "plannedOneTimeStationEquipmentXAA": "188089200000",
+      "actualDemandOrOutput": null,
+      "actualSuppliedInputs": null
+    }
+  }
+}
