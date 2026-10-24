@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "mode": "ADOPTED_C01_METHODS_ONLY",
+  "sources": {
+    "adoptionReceiptBytes": {
+      "bytes": 9876,
+      "sha256": "8453256fb49e6ca4bf563ac6bf5a76e3f1f254d41d07aede2642ded84907baa7"
+    },
+    "B02": {
+      "bytes": 41218,
+      "sha256": "97f4dbdd2c2950a9e3da8f2dd0552528790a2a189f2a57ac6b438a12c9d959a5"
+    },
+    "B03": {
+      "bytes": 15240,
+      "sha256": "448c14fdeb70421af0a07bf1de429243c111d475ed92dd8458cf60ab2f4f1b1a"
+    },
+    "originalLedgerBytes": {
+      "bytes": 7255116,
+      "sha256": "cedd88979d3cd8dd148d151906ebf5ddee76a76c5c706659676796f58b3a9ccb"
+    }
+  },
+  "targets": {
+    "B02": {
+      "stableId": "U2544::COUNTRY::COUNTRY_01::protectedServiceFloor",
+      "originalUnit": "VERSIONED_SERVICE_RULE",
+      "ledgerIndex": 5,
+      "methodId": "C01_POTABLE_SERVICE_FLOOR_20261023_V2",
+      "methodPointer": "/parameters"
+    },
+    "B03": {
+      "stableId": "U2544::COUNTRY::COUNTRY_01::feePolicy",
+      "originalUnit": "VERSIONED_RULE",
+      "ledgerIndex": 14,
+      "methodId": "G-C01-B03-METHOD-V2",
+      "methodPointer": "/feePolicy"
+    }
+  }
+}

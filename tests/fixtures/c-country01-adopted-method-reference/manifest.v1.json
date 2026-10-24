@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "purpose": "C01_ADOPTED_METHOD_TEST_ONLY",
+  "bundle": {
+    "bytes": 31113,
+    "sha256": "24032eb946b4454ba08a0db560b30505124d0e7db5ff9cf820581de986399b35",
+    "jsonBytes": 88897,
+    "jsonSha256": "1bd57a966bab67b784f1a6643b42363a70556bd59a1a094332e859442e74ccdf",
+    "compressedCap": 131072,
+    "decodedJsonCap": 131072
+  },
+  "sources": [
+    {
+      "key": "adoptionReceiptBytes",
+      "bytes": 9876,
+      "sha256": "8453256fb49e6ca4bf563ac6bf5a76e3f1f254d41d07aede2642ded84907baa7"
+    },
+    {
+      "key": "B02",
+      "bytes": 41218,
+      "sha256": "97f4dbdd2c2950a9e3da8f2dd0552528790a2a189f2a57ac6b438a12c9d959a5"
+    },
+    {
+      "key": "B03",
+      "bytes": 15240,
+      "sha256": "448c14fdeb70421af0a07bf1de429243c111d475ed92dd8458cf60ab2f4f1b1a"
+    }
+  ],
+  "originalLedgerReuse": {
+    "path": "tests/fixtures/c-country13-transport-reference/source-bytes-v1.json.gz#ledger",
+    "bytes": 7255116,
+    "sha256": "cedd88979d3cd8dd148d151906ebf5ddee76a76c5c706659676796f58b3a9ccb"
+  },
+  "authority": "EXACT_66334B_THREE_HASH_PROJECT_REPO_CI_TEST_ONLY_NOT_PUBLIC_API_OR_SOURCE_ADMISSION"
+}
