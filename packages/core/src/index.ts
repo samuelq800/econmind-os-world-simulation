@@ -100,6 +100,9 @@ export {
   type EconomicReadDisclosure,
   type EconomicReadDenialReason,
   type EconomicReadVisibilitySummary,
+  type EconomicReadVisibilitySummaryV2,
+  type IndustryProductionResultCauseBinding,
+  type IndustryProductionResultDisclosure,
 } from './authorization/economic-read-visibility-contract.js';
 export * from './commands/authenticated-current-seat-contract.js';
 export * from './commands/authenticated-command-recovery-contract.js';
