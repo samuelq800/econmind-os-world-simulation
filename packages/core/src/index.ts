@@ -14,6 +14,17 @@ export {
   type BudgetRecordKind,
 } from './commands/finance-budget-appropriation.js';
 export { parseBudgetSourcePayload } from './commands/finance-budget-source-transition.js';
+// Unregistered, non-activated conditional coupon preparation only.
+export {
+  DOMESTIC_COUPON_MECHANISM,
+  parseDomesticCouponIntent,
+  prepareDomesticCouponPayment,
+  type DomesticCouponAccountRole,
+  type DomesticCouponScope,
+  type DomesticCouponIntent,
+  type DomesticCouponFacts,
+  type DomesticCouponSource,
+} from './commands/finance-domestic-coupon-payment.js';
 export * from './commands/captain-political-capital-allocation.js';
 export * from './commands/receipt.js';
 export * from './commands/authenticated-financial-intake-contract.js';
