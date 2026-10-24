@@ -1,0 +1,208 @@
+{
+  "schemaVersion": "a-social-c01-wage-currency-candidate-v1",
+  "classification": "DOCUMENTED_ASSUMPTION",
+  "packageInputOnly": true,
+  "authoredParameterHash": "5b2acb918cff60e18cfdaa1159272f186c80a34246259f2b3907febb7eea0e39",
+  "countryId": "COUNTRY_01",
+  "locationId": "REGION_01_E1",
+  "currency": "XAA",
+  "period": "SIM_YEAR",
+  "candidateWindow": {
+    "origin": "NEW_FICTIONAL_GENESIS_ONLY_IF_LATER_ADOPTED",
+    "validFromDayIndex": "0",
+    "validUntilDayIndex": "29",
+    "inclusiveEndpoints": true,
+    "durationE01Days": "30",
+    "absoluteSimTime": null,
+    "actualWorldId": null,
+    "activation": "NOT_ADOPTED_NOT_ACTIVE",
+    "renewal": "EXPLICIT_NEW_RULE_REVISION_REQUIRED_NO_AUTO_RENEWAL",
+    "notAnExistingWorldReset": true
+  },
+  "versions": [
+    {
+      "id": "C01_WAGE_BASELINE_V1_CANDIDATE",
+      "minimumRuleId": "C01_MINIMUM_ANNUAL_BASELINE_V1_CANDIDATE",
+      "minimumAmount": "360000",
+      "grid": [
+        {
+          "occupation": "GENERAL",
+          "skill": "LOW",
+          "amount": "432000"
+        },
+        {
+          "occupation": "GENERAL",
+          "skill": "MEDIUM",
+          "amount": "648000"
+        },
+        {
+          "occupation": "GENERAL",
+          "skill": "HIGH",
+          "amount": "1080000"
+        },
+        {
+          "occupation": "TEACHER",
+          "skill": "HIGH",
+          "amount": "1080000"
+        },
+        {
+          "occupation": "DOCTOR",
+          "skill": "HIGH",
+          "amount": "1512000"
+        },
+        {
+          "occupation": "NURSE",
+          "skill": "MEDIUM",
+          "amount": "756000"
+        },
+        {
+          "occupation": "NURSE",
+          "skill": "HIGH",
+          "amount": "1080000"
+        },
+        {
+          "occupation": "MEDICAL_TECHNICIAN",
+          "skill": "MEDIUM",
+          "amount": "648000"
+        },
+        {
+          "occupation": "SUPPORT",
+          "skill": "LOW",
+          "amount": "432000"
+        },
+        {
+          "occupation": "SUPPORT",
+          "skill": "MEDIUM",
+          "amount": "648000"
+        },
+        {
+          "priceRole": "CASEWORKER",
+          "occupation": "GENERAL",
+          "skill": "LOW",
+          "amount": "432000"
+        },
+        {
+          "priceRole": "CASEWORKER",
+          "occupation": "GENERAL",
+          "skill": "MEDIUM",
+          "amount": "648000"
+        },
+        {
+          "priceRole": "CASEWORKER",
+          "occupation": "GENERAL",
+          "skill": "HIGH",
+          "amount": "1080000"
+        }
+      ]
+    },
+    {
+      "id": "C01_WAGE_HIGHER_FLOOR_V1_CANDIDATE",
+      "minimumRuleId": "C01_MINIMUM_ANNUAL_HIGHER_FLOOR_V1_CANDIDATE",
+      "minimumAmount": "450000",
+      "grid": [
+        {
+          "occupation": "GENERAL",
+          "skill": "LOW",
+          "amount": "540000"
+        },
+        {
+          "occupation": "GENERAL",
+          "skill": "MEDIUM",
+          "amount": "756000"
+        },
+        {
+          "occupation": "GENERAL",
+          "skill": "HIGH",
+          "amount": "1188000"
+        },
+        {
+          "occupation": "TEACHER",
+          "skill": "HIGH",
+          "amount": "1188000"
+        },
+        {
+          "occupation": "DOCTOR",
+          "skill": "HIGH",
+          "amount": "1663200"
+        },
+        {
+          "occupation": "NURSE",
+          "skill": "MEDIUM",
+          "amount": "831600"
+        },
+        {
+          "occupation": "NURSE",
+          "skill": "HIGH",
+          "amount": "1188000"
+        },
+        {
+          "occupation": "MEDICAL_TECHNICIAN",
+          "skill": "MEDIUM",
+          "amount": "756000"
+        },
+        {
+          "occupation": "SUPPORT",
+          "skill": "LOW",
+          "amount": "540000"
+        },
+        {
+          "occupation": "SUPPORT",
+          "skill": "MEDIUM",
+          "amount": "756000"
+        },
+        {
+          "priceRole": "CASEWORKER",
+          "occupation": "GENERAL",
+          "skill": "LOW",
+          "amount": "540000"
+        },
+        {
+          "priceRole": "CASEWORKER",
+          "occupation": "GENERAL",
+          "skill": "MEDIUM",
+          "amount": "756000"
+        },
+        {
+          "priceRole": "CASEWORKER",
+          "occupation": "GENERAL",
+          "skill": "HIGH",
+          "amount": "1188000"
+        }
+      ]
+    }
+  ],
+  "caseworkerMapping": {
+    "activityLabel": "EMPLOYMENT_CASEWORKER",
+    "coreOccupation": "GENERAL",
+    "pricesBySkill": "CASEWORKER rows are exact aliases of GENERAL skill price rows in the same version",
+    "candidatePublicClassification": "PUBLIC_ADMINISTRATION",
+    "candidateEmployerRole": "GOV",
+    "actualPositionAndEmployerBinding": null,
+    "sourceOfQualificationAndHeadcount": "D staff proposal and G independent lawful activity demand, not this price grid",
+    "noLowSkillEligibilityApproval": true,
+    "noNewCoreOccupationOrPositions": true,
+    "countAndPayrollDeduplication": "D service staff and G employment-demand rows must name the SAME positions; add their payroll once, not both views"
+  },
+  "unmappedInput": "INCOMPLETE_OR_REJECT; no generic wage fallback or inferred legal job",
+  "missingCurrentBindings": {
+    "legalPositionRefs": null,
+    "payrollFundingRefs": null,
+    "actualCash": null,
+    "adoptedRuleRevision": null,
+    "currentHead": null,
+    "absoluteSimTime": null
+  },
+  "authority": {
+    "selectedVersion": null,
+    "actualWages": null,
+    "actualCash": null,
+    "actualPayrollFunding": null,
+    "historicalPayments": null,
+    "adopted": false,
+    "sourceAdmitted": false,
+    "runtimeReady": false,
+    "generatedHiringEvents": false,
+    "wagesPaid": false,
+    "WorldClock": false
+  }
+}
