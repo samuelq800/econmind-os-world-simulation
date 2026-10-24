@@ -56,11 +56,30 @@ export interface EconomicAvailability {
 }
 export function consumeEconomicAvailability(
   value: unknown,
-  identity: Readonly<{ classification: string; officeId: string }>,
+  identity: Readonly<{
+    classification: string;
+    officeId: string;
+    activitySchema?: unknown;
+  }>,
 ): EconomicAvailability {
   const visibility = row(value);
+  const industryV2 =
+    identity.classification === 'OFFICE_PRIVATE' &&
+    identity.officeId === 'INDUSTRY' &&
+    identity.activitySchema === 'world-activity-projection-v2';
   if (
-    visibility?.schemaVersion !== 'economic-read-visibility-v1' ||
+    !exact(visibility, [
+      'schemaVersion',
+      'financialDetail',
+      'inventoryDetail',
+      'countrySummary',
+      ...(industryV2 ? ['industryProductionResult'] : []),
+    ]) ||
+    visibility?.schemaVersion !==
+      (industryV2
+        ? 'economic-read-visibility-v2'
+        : 'economic-read-visibility-v1') ||
+    (industryV2 && visibility.financialDetail !== 'NOT_AUTHORIZED') ||
     (visibility.financialDetail !== 'AUTHORIZED_FILTERED' &&
       visibility.financialDetail !== 'NOT_AUTHORIZED') ||
     visibility.inventoryDetail !== 'NOT_AUTHORIZED' ||
@@ -320,6 +339,10 @@ export function consumeOfficeProjection(
   const payload = row(result.payload),
     activity = row(payload?.activity),
     ledger = row(payload?.ledger);
+  const industryV2 =
+    config.identity.classification === 'OFFICE_PRIVATE' &&
+    config.identity.officeId === 'INDUSTRY' &&
+    payload?.schemaVersion === 'world-activity-projection-v2';
   if (
     payload?.countryId !== config.identity.countryId ||
     (config.identity.classification === 'OFFICE_PRIVATE' &&
@@ -329,7 +352,30 @@ export function consumeOfficeProjection(
   )
     return missing('IDENTITY_MISMATCH');
   if (
-    payload.schemaVersion !== 'world-activity-projection-v1' ||
+    (!industryV2 && payload.schemaVersion !== 'world-activity-projection-v1') ||
+    (industryV2 &&
+      (!exact(payload, [
+        'schemaVersion',
+        'countryId',
+        'officeId',
+        'activity',
+        'ledger',
+        'decisionResult',
+        ...(Object.hasOwn(payload, 'feedback') ? ['feedback'] : []),
+      ]) ||
+        !exact(activity, [
+          'authoritativeEventCount',
+          'lastAuthoritativeEventSequence',
+          'lastAuthoritativeEventWorldVersion',
+        ]) ||
+        !exact(ledger, [
+          'visibility',
+          'financialPositions',
+          'inventoryPositions',
+          ...(ledger && Object.hasOwn(ledger, 'authoritativeFinancialPosition')
+            ? ['authoritativeFinancialPosition']
+            : []),
+        ]))) ||
     Object.hasOwn(
       payload,
       config.identity.classification === 'COUNTRY'
@@ -359,10 +405,17 @@ export function consumeOfficeProjection(
       nature: 'ACTIVITY_COUNT',
     },
   ];
-  const economicAvailability = consumeEconomicAvailability(
-    ledger.visibility,
-    config.identity,
-  );
+  const economicAvailability = consumeEconomicAvailability(ledger.visibility, {
+    ...config.identity,
+    activitySchema: payload.schemaVersion,
+  });
+  if (
+    industryV2 &&
+    (economicAvailability.financial === 'UNAVAILABLE' ||
+      ledger.financialPositions.length !== 0 ||
+      ledger.inventoryPositions.length !== 0)
+  )
+    return missing('INVALID_ACTIVITY_DTO');
   const keys = new Set<string>();
   for (const value of ledger.financialPositions) {
     const p = row(value);
@@ -403,6 +456,44 @@ export function consumeOfficeProjection(
     // The fixed carrier has no authorized inventory detail. Validate shape but
     // never expose, aggregate or reinterpret withheld / legacy raw positions.
   }
+  const decisionResult = consumeDecisionResult(
+    payload[
+      config.identity.classification === 'COUNTRY'
+        ? 'decisionResults'
+        : 'decisionResult'
+    ],
+    {
+      worldId: config.identity.worldId,
+      countryId: config.identity.countryId,
+      officeId: config.identity.officeId,
+      classification: config.identity.classification,
+      worldVersion: result.worldVersion,
+      eventSequence: authority.readback.eventSequence,
+      financialDetail:
+        economicAvailability.financial === 'AVAILABLE'
+          ? 'AUTHORIZED_FILTERED'
+          : 'NOT_AUTHORIZED',
+      activitySchema: payload.schemaVersion,
+      economicVisibilitySchema: row(ledger.visibility)?.schemaVersion,
+      ...(industryV2
+        ? {
+            industryProductionResult: row(ledger.visibility)
+              ?.industryProductionResult,
+          }
+        : {}),
+      activity: {
+        eventCount: activity.authoritativeEventCount,
+        eventSequence: activity.lastAuthoritativeEventSequence,
+        worldVersion: activity.lastAuthoritativeEventWorldVersion,
+      },
+    },
+  );
+  if (
+    industryV2 &&
+    (decisionResult.reason === 'DECISION_RESULT_INVALID' ||
+      decisionResult.reason === 'RESULT_NOT_PROJECTED')
+  )
+    return missing('INVALID_ACTIVITY_DTO');
   return {
     kind: 'CURRENT',
     role,
@@ -427,30 +518,7 @@ export function consumeOfficeProjection(
     },
     readouts,
     economicAvailability,
-    decisionResult: consumeDecisionResult(
-      payload[
-        config.identity.classification === 'COUNTRY'
-          ? 'decisionResults'
-          : 'decisionResult'
-      ],
-      {
-        worldId: config.identity.worldId,
-        countryId: config.identity.countryId,
-        officeId: config.identity.officeId,
-        classification: config.identity.classification,
-        worldVersion: result.worldVersion,
-        eventSequence: authority.readback.eventSequence,
-        financialDetail:
-          economicAvailability.financial === 'AVAILABLE'
-            ? 'AUTHORIZED_FILTERED'
-            : 'NOT_AUTHORIZED',
-        activity: {
-          eventCount: activity.authoritativeEventCount,
-          eventSequence: activity.lastAuthoritativeEventSequence,
-          worldVersion: activity.lastAuthoritativeEventWorldVersion,
-        },
-      },
-    ),
+    decisionResult,
     currentFinancialPosition: consumeCurrentFinancialPosition(
       ledger.authoritativeFinancialPosition,
       economicAvailability,

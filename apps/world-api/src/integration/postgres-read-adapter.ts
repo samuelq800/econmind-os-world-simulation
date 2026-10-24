@@ -321,6 +321,17 @@ function assertClassifiedActivityPayload(
   }
   const office = projection.classification === 'OFFICE_PRIVATE';
   const resultField = office ? 'decisionResult' : 'decisionResults';
+  if (
+    !projection.payload ||
+    typeof projection.payload !== 'object' ||
+    Array.isArray(projection.payload)
+  )
+    protocol('Classified activity projection is unavailable');
+  const rawPayload = projection.payload as Record<string, unknown>;
+  const industryV2 =
+    office &&
+    rawPayload.officeId === 'INDUSTRY' &&
+    rawPayload.schemaVersion === 'world-activity-projection-v2';
   const payload = boundedObject(projection.payload, [
     ...(office
       ? ['activity', 'countryId', 'officeId', 'ledger', 'schemaVersion']
@@ -331,7 +342,8 @@ function assertClassifiedActivityPayload(
     ...(hasFeedback ? ['feedback'] : []),
   ]);
   if (
-    payload.schemaVersion !== 'world-activity-projection-v1' ||
+    (!industryV2 && payload.schemaVersion !== 'world-activity-projection-v1') ||
+    (industryV2 && !Object.hasOwn(payload, 'decisionResult')) ||
     typeof payload.countryId !== 'string'
   )
     protocol('Classified activity projection is unavailable');
@@ -371,9 +383,13 @@ function assertClassifiedActivityPayload(
     'financialDetail',
     'inventoryDetail',
     'countrySummary',
+    ...(industryV2 ? ['industryProductionResult'] : []),
   ]);
   if (
-    visibility.schemaVersion !== ECONOMIC_READ_VISIBILITY_SCHEMA ||
+    visibility.schemaVersion !==
+      (industryV2
+        ? 'economic-read-visibility-v2'
+        : ECONOMIC_READ_VISIBILITY_SCHEMA) ||
     !['AUTHORIZED_FILTERED', 'NOT_AUTHORIZED'].includes(
       String(visibility.financialDetail),
     ) ||
@@ -450,6 +466,11 @@ function assertClassifiedActivityPayload(
       worldVersion: projection.watermark.worldVersion,
       eventSequence: projection.watermark.eventSequence,
       financialDetail: visibility.financialDetail,
+      activitySchema: payload.schemaVersion,
+      economicVisibilitySchema: visibility.schemaVersion,
+      ...(industryV2
+        ? { industryProductionResult: visibility.industryProductionResult }
+        : {}),
       lastOfficeActivity: {
         eventCount: String(activity.authoritativeEventCount),
         eventSequence: String(activity.lastAuthoritativeEventSequence),
