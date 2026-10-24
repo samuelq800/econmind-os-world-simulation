@@ -275,11 +275,365 @@ function envelope(status, diagnostics, conditional = null, extra = {}) {
   );
 }
 
+// One arithmetic implementation, with separate adopted/proposed evidence
+// adapters. raw is an interval TOTAL; neither adapter multiplies by days.
+function recipeIntermediates(raw, coefficient, quantity, trace, scope, slots) {
+  const workerDaysBySkill = Object.fromEntries(
+    slots.map((skill, i) => {
+      const c = coefficient(`workerDaysBySkill/${i}`, 'worker-day/raw-m3');
+      return [skill, quantity(mul(raw, c.canonicalDecimal), 'worker-day', [c])];
+    }),
+  );
+  const requiredInputs = Object.fromEntries(
+    [
+      ['ENERGY', 'electricityMWh', 'MWh/raw-m3', 'MWh'],
+      ['STEEL', 'STEEL_tonnes', 'tonne/raw-m3', 'tonne'],
+      [
+        'MACHINERY',
+        'MACHINERY_units',
+        'equipment-unit/raw-m3',
+        'equipment-unit',
+      ],
+    ].map(([name, key, coefficientUnit, unit]) => {
+      const c = coefficient(key, coefficientUnit);
+      return [name, quantity(mul(raw, c.canonicalDecimal), unit, [c])];
+    }),
+  );
+  const treatment = coefficient('yieldTreatment', 'treatment-net-m3/raw-m3');
+  const pipe = coefficient(
+    'pipeDeliveryYield',
+    'delivered-m3/treatment-net-m3',
+  );
+  const treated = mul(raw, treatment.canonicalDecimal);
+  return {
+    scope,
+    workerDaysBySkill,
+    requiredInputs,
+    treatmentNetPotential: quantity(treated, 'treatment-net-m3', [treatment]),
+    theoreticalNetPotential: quantity(
+      mul(treated, pipe.canonicalDecimal),
+      'theoretical-delivered-m3',
+      [treatment, pipe],
+    ),
+    deliveryRatio: {
+      amount: mul(treatment.canonicalDecimal, pipe.canonicalDecimal),
+      unit: 'delivered-m3/raw-m3',
+      sourceTrace: [trace(treatment), trace(pipe)],
+    },
+  };
+}
+
+const CONSTRUCTED_MODE = 'CONSTRUCTED_RECIPE_INTERMEDIATES_ONLY';
+const CONSTRUCTED_ID =
+  'U2544::COUNTRY::COUNTRY_02::waterPotableDeliveredMinimum';
+const CONSTRUCTED_PINS = freeze({
+  candidatePacketBytes: {
+    bytes: 706098,
+    sha256: '5c8bc00d0243bb1bae67a7fbe632f7bbd26c27c3c67cd19d0070e9ce40bff942',
+  },
+  parameterProposalBytes: {
+    bytes: 2265,
+    sha256: 'ee4242d38ee4dd46eefdedaf13df51f8687f1967a063db80f340064309204d6f',
+  },
+  originalLedgerBytes: {
+    bytes: 7255116,
+    sha256: 'cedd88979d3cd8dd148d151906ebf5ddee76a76c5c706659676796f58b3a9ccb',
+  },
+});
+
+function constructedReference(callerInput, capturedMode) {
+  const need = (ok, message) => {
+    if (!ok) throw new Error(message);
+  };
+  const closed = (value, allowed) => {
+    need(
+      value !== null && typeof value === 'object' && !Array.isArray(value),
+      'CONSTRUCTED_OBJECT_REQUIRED',
+    );
+    need(
+      Object.keys(value).length === allowed.length &&
+        allowed.every((key) => Object.hasOwn(value, key)),
+      'CONSTRUCTED_CLOSED_KEYS_REQUIRED',
+    );
+  };
+  const requestKeys = [
+    'mode',
+    'stableId',
+    'countryId',
+    'originalUnit',
+    'currency',
+    'periodOrValueDate',
+    'proposalSources',
+  ];
+  closed(callerInput, requestKeys);
+  // Also protect direct producer calls; no caller getter/source view is read
+  // twice. Each byte view is detached before invoking another property getter.
+  const input = Object.fromEntries(
+    Object.keys(callerInput).map((key) => {
+      const value = key === 'mode' ? capturedMode : callerInput[key];
+      if (key !== 'proposalSources') return [key, structuredClone(value)];
+      closed(value, Object.keys(CONSTRUCTED_PINS));
+      return [
+        key,
+        Object.fromEntries(
+          Object.keys(value).map((sourceKey) => {
+            const bytes = value[sourceKey];
+            need(
+              bytes instanceof Uint8Array,
+              `CONSTRUCTED_SOURCE_BYTES_REQUIRED:${sourceKey}`,
+            );
+            return [sourceKey, Buffer.from(bytes)];
+          }),
+        ),
+      ];
+    }),
+  );
+  need(
+    input.mode === CONSTRUCTED_MODE &&
+      input.stableId === CONSTRUCTED_ID &&
+      input.countryId === 'COUNTRY_02',
+    'CONSTRUCTED_C02_SINGLE_WATER_TARGET_ONLY',
+  );
+  need(input.originalUnit === 'M3/PERIOD', 'ORIGINAL_UNIT_MISMATCH');
+  need(
+    input.currency === null && input.periodOrValueDate === null,
+    'NO_ACTUAL_CURRENCY_OR_PERIOD_BOUND',
+  );
+  const sourceKeys = Object.keys(CONSTRUCTED_PINS);
+  closed(input.proposalSources, sourceKeys);
+  const sources = {};
+  for (const key of sourceKeys) {
+    const bytes = input.proposalSources[key];
+    const pin = CONSTRUCTED_PINS[key];
+    need(
+      bytes instanceof Uint8Array,
+      `CONSTRUCTED_SOURCE_BYTES_REQUIRED:${key}`,
+    );
+    need(
+      bytes.byteLength === pin.bytes && sha256(bytes) === pin.sha256,
+      `CONSTRUCTED_SOURCE_DRIFT:${key}`,
+    );
+    sources[key] = parseLossless(Buffer.from(bytes));
+  }
+  const packet = sources.candidatePacketBytes;
+  const row = packet.records[1];
+  need(
+    packet.records.filter((r) => r.countryId === 'COUNTRY_02').length === 1 &&
+      row.countryId === 'COUNTRY_02' &&
+      row.candidateVersion === '2' &&
+      row.originClass === 'CONSTRUCTED_NOT_ADOPTED',
+    'CONSTRUCTED_C02_RECORD_BINDING',
+  );
+  const fields = [
+    'protectedServiceFloor',
+    'labourMinimumHours',
+    'labourPayrollNative',
+    'waterPotableDeliveredMinimum',
+    'waterCompleteCostNative',
+    'energyDeliveredMinimum',
+    'energyCompleteCostNative',
+    'transportMinimum',
+    'transportCompleteCostNative',
+  ];
+  need(
+    JSON.stringify(row.originalIds) ===
+      JSON.stringify(
+        fields.map((field) => `U2544::COUNTRY::COUNTRY_02::${field}`),
+      ),
+    'CONSTRUCTED_NINE_ORIGINAL_MEMBERSHIP',
+  );
+  const ledger = sources.originalLedgerBytes;
+  const original = ledger.records[44];
+  need(
+    ledger.records.filter((r) => r.stableId === CONSTRUCTED_ID).length === 1 &&
+      original.stableId === CONSTRUCTED_ID &&
+      original.countryId === 'COUNTRY_02' &&
+      original.ownerId === 'COUNTRY_02' &&
+      original.missingField === 'waterPotableDeliveredMinimum' &&
+      original.originalUnit === 'M3/PERIOD' &&
+      original.afterActualField.value === null,
+    'CONSTRUCTED_ORIGINAL_LEDGER_BINDING',
+  );
+  const proposal = sources.parameterProposalBytes;
+  const period = {
+    calendar: 'SIM_TIME_RELATIVE_ONLY',
+    from: '0',
+    until: '1',
+    unit: 'SIM_DAY',
+    quantityBasis: 'TOTAL_OVER_DECLARED_INTERVAL',
+    actualWorldId: null,
+    epoch: null,
+  };
+  need(
+    JSON.stringify(row.period) === JSON.stringify(period) &&
+      JSON.stringify(proposal.period) === JSON.stringify(period),
+    'CONSTRUCTED_DECLARED_INTERVAL_TOTAL_REQUIRED',
+  );
+  need(
+    proposal.other69CopiedRecipeApplicability === 'PROPOSED_NOT_ADOPTED' &&
+      JSON.stringify(proposal.R3FormalAdoptionScope) === '["COUNTRY_01"]' &&
+      row.B10_B11_waterAndResourcePressure.recipeAuthority ===
+        'NEW_COPIED_R3_COEFFICIENT_PROPOSAL_NOT_ADOPTED_FOR_THIS_COUNTRY',
+    'CONSTRUCTED_NOT_ADOPTED_SCOPE_REQUIRED',
+  );
+  const work = row.B10_B11_waterAndResourcePressure.rawDeclaredPlanningWork;
+  closed(work, [
+    'valueExactDecimal',
+    'numerator',
+    'denominator',
+    'unit',
+    'roundingApplied',
+  ]);
+  // Check denominator before arithmetic, including before a cross-product.
+  need(
+    typeof work.denominator === 'string' &&
+      /^[1-9]\d*$/u.test(work.denominator),
+    'POSITIVE_CANONICAL_RATIONAL_DENOMINATOR_REQUIRED',
+  );
+  need(
+    typeof work.numerator === 'string' &&
+      /^(0|[1-9]\d*)$/u.test(work.numerator),
+    'CANONICAL_RATIONAL_NUMERATOR_REQUIRED',
+  );
+  const raw = canonicalToken(work.valueExactDecimal);
+  need(
+    raw === '24790575.513888888' &&
+      work.numerator === '3098821939236111' &&
+      work.denominator === '125000000' &&
+      mul(raw, work.denominator) === work.numerator &&
+      work.unit === 'RAW_M3/DECLARED_PERIOD' &&
+      work.roundingApplied === false,
+    'CONSTRUCTED_EXACT_RAW_TOTAL_BINDING',
+  );
+  const evidence = (key, pointer) => ({
+    ...CONSTRUCTED_PINS[key],
+    pointer,
+    verification: 'EXACT_BYTES_ONLY_NOT_ADOPTION',
+  });
+  const workloadTrace = {
+    kind: 'CONSTRUCTED_WORKLOAD_NOT_OBSERVED',
+    countryId: 'COUNTRY_02',
+    sourceEvidence: evidence(
+      'candidatePacketBytes',
+      '/records/1/B10_B11_waterAndResourcePressure/rawDeclaredPlanningWork',
+    ),
+    rawNumericToken: work.valueExactDecimal,
+    canonicalDecimal: raw,
+    rational: { numerator: work.numerator, denominator: work.denominator },
+    period,
+    adoptionEvidence: null,
+  };
+  const proposed = proposal.R3SourceCoefficientValues;
+  const coefficient = (key, unit) => {
+    const slot = /^workerDaysBySkill\/([012])$/u.exec(key);
+    const leaf = slot ? 'workerDaysBySkillExactDecimal' : `${key}ExactDecimal`;
+    const token = slot ? proposed[leaf][Number(slot[1])] : proposed[leaf];
+    return {
+      key,
+      unit,
+      rawNumericToken: token,
+      canonicalDecimal: canonicalToken(token),
+      sourceEvidence: evidence(
+        'parameterProposalBytes',
+        `/R3SourceCoefficientValues/${leaf}${slot ? `/${slot[1]}` : ''}`,
+      ),
+    };
+  };
+  const trace = (c) => ({
+    kind: 'CONSTRUCTED_PARAMETER_PROPOSAL_NOT_ADOPTED',
+    ...c,
+    adoptionEvidence: null,
+  });
+  const units = {
+    'worker-day': 'WORKER_DAY/DECLARED_PERIOD',
+    MWh: 'MWH_INPUT/DECLARED_PERIOD',
+    tonne: 'TONNE/DECLARED_PERIOD',
+    'equipment-unit': 'EQUIPMENT_UNIT/DECLARED_PERIOD',
+    'treatment-net-m3': 'TREATMENT_NET_M3/DECLARED_PERIOD',
+    'theoretical-delivered-m3': 'THEORETICAL_DELIVERED_M3/DECLARED_PERIOD',
+  };
+  const quantity = (amount, unit, used) => ({
+    status: 'CONSTRUCTED_RECIPE_INTERMEDIATE_NOT_ADOPTED',
+    amount,
+    unit: units[unit],
+    meaning: 'THEORETICAL_REQUIREMENT_OR_POTENTIAL_NOT_ACTUAL_DELIVERY',
+    sourceTrace: [workloadTrace, ...used.map(trace)],
+  });
+  const { workerDaysBySkill, ...intermediate } = recipeIntermediates(
+    raw,
+    coefficient,
+    quantity,
+    trace,
+    workloadTrace,
+    ['0', '1', '2'],
+  );
+  intermediate.workerDaysByUnboundSkillSlot = Object.entries(
+    workerDaysBySkill,
+  ).map(([slot, q]) => ({
+    slot,
+    ...q,
+    skillTaxonomy: null,
+    actualHours: null,
+  }));
+  return envelope(
+    'CONSTRUCTED_RECIPE_INTERMEDIATES_AVAILABLE_NOT_ADOPTED',
+    [],
+    null,
+    {
+      schema: 'C_ORIGINAL_ID_CONSTRUCTED_RECIPE_REFERENCE_READ_V1',
+      stableId: CONSTRUCTED_ID,
+      countryId: 'COUNTRY_02',
+      inputEvidenceClass: 'CONSTRUCTED_PARAMETER_PROPOSAL_NOT_ADOPTED',
+      originalAcceptanceRule: original.acceptanceRule,
+      originalDependencies: original.dependencies,
+      originalBinding: {
+        sourceEvidence: evidence('originalLedgerBytes', '/records/44'),
+        originalRecord: original,
+      },
+      candidateMeasure: {
+        ...original.afterActualField,
+        periodOrValueDate: null,
+        applicableWorldGenesisHead: null,
+      },
+      geographyLineage: {
+        countryPointer: row.geography.countryPointer,
+        verification: 'FIXED_G_PACKET_LINEAGE_ONLY_COUNTRIES_BYTES_NOT_READ',
+      },
+      recipeIntermediate: intermediate,
+      parameterAdoptionRead: null,
+      adoptionEvidence: null,
+      parameterConnection: {
+        engineeringWired: true,
+        reader: 'CONSTRUCTED_C02_PINNED_PROPOSAL',
+        arithmeticUsesReturnedCoefficients: true,
+        adopted: false,
+      },
+      sourceTrace: [
+        workloadTrace,
+        evidence('parameterProposalBytes', '/R3SourceCoefficientValues'),
+        evidence('originalLedgerBytes', '/records/44'),
+      ],
+      dependentResults: {
+        labourHours: null,
+        acceptedNetDelivery: null,
+        acceptedEnergyDelivery: null,
+        nationalMinimum: null,
+        nationalSufficiency: null,
+        completeNativeCost: null,
+      },
+      actualResultStatus: 'NOT_ORIGINAL_FIELD_ACCEPTANCE',
+    },
+  );
+}
+
 export function produceWaterServiceCandidate(input) {
   const diagnostics = [];
   const issue = (code, path, detail) =>
     diagnostics.push({ code, path, detail });
-  if (input?.mode === 'ADOPTED_RECIPE_INTERMEDIATES_ONLY') {
+  const requestedMode = input?.mode;
+  if (requestedMode === CONSTRUCTED_MODE)
+    return constructedReference(input, requestedMode);
+  if (requestedMode === 'ADOPTED_RECIPE_INTERMEDIATES_ONLY') {
     // This is a calculation request against fixed adopted rules, not an
     // operating fact. It needs neither B02 nor a manufactured source issuer.
     try {
@@ -413,58 +767,15 @@ export function produceWaterServiceCandidate(input) {
           ...used.map(trace),
         ],
       });
-      const workerDaysBySkill = Object.fromEntries(
-        SKILLS.map((skill, i) => {
-          const c = coefficient(`workerDaysBySkill/${i}`, 'worker-day/raw-m3');
-          return [
-            skill,
-            quantity(mul(raw, c.canonicalDecimal), 'worker-day', [c]),
-          ];
-        }),
+      const parameterIntermediate = recipeIntermediates(
+        raw,
+        coefficient,
+        quantity,
+        trace,
+        workloadTrace,
+        SKILLS,
       );
-      const requiredInputs = Object.fromEntries(
-        [
-          ['ENERGY', 'electricityMWh', 'MWh/raw-m3', 'MWh'],
-          ['STEEL', 'STEEL_tonnes', 'tonne/raw-m3', 'tonne'],
-          [
-            'MACHINERY',
-            'MACHINERY_units',
-            'equipment-unit/raw-m3',
-            'equipment-unit',
-          ],
-        ].map(([name, key, coefficientUnit, unit]) => {
-          const c = coefficient(key, coefficientUnit);
-          return [name, quantity(mul(raw, c.canonicalDecimal), unit, [c])];
-        }),
-      );
-      const treatment = coefficient(
-        'yieldTreatment',
-        'treatment-net-m3/raw-m3',
-      );
-      const pipe = coefficient(
-        'pipeDeliveryYield',
-        'delivered-m3/treatment-net-m3',
-      );
-      const treated = mul(raw, treatment.canonicalDecimal);
-      // raw is already the interval TOTAL: do not multiply by interval days.
-      const parameterIntermediate = {
-        scope: workloadTrace,
-        workerDaysBySkill,
-        requiredInputs,
-        treatmentNetPotential: quantity(treated, 'treatment-net-m3', [
-          treatment,
-        ]),
-        theoreticalNetPotential: quantity(
-          mul(treated, pipe.canonicalDecimal),
-          'theoretical-delivered-m3',
-          [treatment, pipe],
-        ),
-        deliveryRatio: {
-          amount: mul(treatment.canonicalDecimal, pipe.canonicalDecimal),
-          unit: 'delivered-m3/raw-m3',
-          sourceTrace: [trace(treatment), trace(pipe)],
-        },
-      };
+      const { workerDaysBySkill } = parameterIntermediate;
       const unavailable = (reason, unit) => ({
         status: reason,
         value: null,

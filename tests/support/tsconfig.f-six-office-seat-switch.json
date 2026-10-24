@@ -1,0 +1,7 @@
+{
+  "extends": "../world-web/office-command.tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals", "emscripten", "vite/client"]
+  },
+  "include": ["../world-web/f-six-office-seat-switch-wiring.test.ts"]
+}
