@@ -5,6 +5,7 @@ import {
   CENTRAL_BANK_OMO_EVENT,
   SOCIAL_SERVICE_PLAN_EVENT,
   SOCIAL_JOB_MATCH_EVENT,
+  WORLD_DECIMAL_OPERAND_MAX_DIGITS,
   Money,
   Quantity,
   SimTime,
@@ -54,6 +55,9 @@ export function assertDecisionResultPayload(input: {
   readonly worldVersion: string;
   readonly eventSequence: string;
   readonly financialDetail: unknown;
+  readonly activitySchema?: unknown;
+  readonly economicVisibilitySchema?: unknown;
+  readonly industryProductionResult?: unknown;
   readonly lastOfficeActivity: {
     readonly eventCount: string;
     readonly eventSequence: string;
@@ -61,6 +65,62 @@ export function assertDecisionResultPayload(input: {
   };
 }): void {
   const office = input.officeId;
+  const industryV2 =
+    office === 'INDUSTRY' &&
+    input.activitySchema === 'world-activity-projection-v2' &&
+    input.economicVisibilitySchema === 'economic-read-visibility-v2';
+  if (
+    (input.activitySchema !== undefined ||
+      input.economicVisibilitySchema !== undefined) &&
+    !industryV2 &&
+    (input.activitySchema !== 'world-activity-projection-v1' ||
+      input.economicVisibilitySchema !== 'economic-read-visibility-v1')
+  )
+    invalid();
+  if (!industryV2 && input.industryProductionResult !== undefined) invalid();
+  let disclosure: RecordValue | null = null;
+  if (industryV2) {
+    if (input.financialDetail !== 'NOT_AUTHORIZED') invalid();
+    const raw = input.industryProductionResult;
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) invalid();
+    disclosure = object(
+      raw,
+      (raw as RecordValue).status === 'NOT_AUTHORIZED'
+        ? ['status']
+        : ['status', 'purpose', 'sourceHead', 'causeBinding'],
+    );
+    if (disclosure.status !== 'NOT_AUTHORIZED') {
+      if (
+        disclosure.status !== 'AUTHORIZED_RESULT_ONLY' ||
+        disclosure.purpose !== 'INDUSTRY_COMMITTED_PRODUCTION_OUTPUT_AFTER_ONLY'
+      )
+        invalid();
+      const h = object(disclosure.sourceHead, [
+        'worldId',
+        'worldVersion',
+        'eventSequence',
+      ]);
+      if (
+        h.worldId !== input.worldId ||
+        h.worldVersion !== input.worldVersion ||
+        h.eventSequence !== input.eventSequence
+      )
+        invalid();
+      text(h.worldId, ID);
+      integer(h.worldVersion);
+      integer(h.eventSequence);
+      const binding = object(disclosure.causeBinding, [
+        'commandId',
+        'commandFingerprint',
+        'eventId',
+        'eventFingerprint',
+      ]);
+      text(binding.commandId, ID);
+      text(binding.eventId, ID);
+      text(binding.commandFingerprint, HASH);
+      text(binding.eventFingerprint, HASH);
+    }
+  }
   if (office !== null && !OFFICES.includes(office)) {
     // The sole publisher carries an explicit null for offices with no contract.
     if (input.value !== null) invalid();
@@ -128,6 +188,7 @@ export function assertDecisionResultPayload(input: {
   )
     invalid();
   if (value.status !== 'COMMITTED') {
+    if (industryV2 && disclosure?.status !== 'NOT_AUTHORIZED') invalid();
     if (
       value.source !== null ||
       value.businessState !== null ||
@@ -142,7 +203,7 @@ export function assertDecisionResultPayload(input: {
                 value.reason,
               ))) ||
         (value.status === 'NOT_AUTHORIZED' &&
-          office === 'CENTRAL_BANK' &&
+          (office === 'CENTRAL_BANK' || industryV2) &&
           value.reason === 'SCOPE_NOT_AUTHORIZED')
       )
     )
@@ -150,7 +211,8 @@ export function assertDecisionResultPayload(input: {
     return;
   }
   if (
-    office === 'INDUSTRY' ||
+    (office === 'INDUSTRY' && !industryV2) ||
+    (industryV2 && disclosure?.status !== 'AUTHORIZED_RESULT_ONLY') ||
     value.source !== 'COMMITTED_EVENT_RESULT' ||
     (office === 'CENTRAL_BANK' &&
       input.financialDetail !== 'AUTHORIZED_FILTERED')
@@ -184,6 +246,16 @@ export function assertDecisionResultPayload(input: {
   )
     invalid();
   const social = office === 'SOCIAL';
+  if (industryV2) {
+    const binding = object(disclosure!.causeBinding, [
+      'commandId',
+      'commandFingerprint',
+      'eventId',
+      'eventFingerprint',
+    ]);
+    for (const key of Object.keys(binding))
+      if (binding[key] !== cause[key]) invalid();
+  }
   const lastSequence = integer(input.lastOfficeActivity.eventSequence),
     lastVersion = integer(input.lastOfficeActivity.worldVersion);
   // System Social due commands have no human Office and are intentionally not
@@ -218,7 +290,9 @@ export function assertDecisionResultPayload(input: {
     cause.eventType !==
       (office === 'CAPTAIN'
         ? CAPTAIN_POLITICAL_CAPITAL_EVENT
-        : CENTRAL_BANK_OMO_EVENT)
+        : industryV2
+          ? 'INDUSTRY_PRODUCTION_SETTLED'
+          : CENTRAL_BANK_OMO_EVENT)
   )
     invalid();
   const expected =
@@ -237,10 +311,12 @@ export function assertDecisionResultPayload(input: {
             'SOCIAL.' + key,
             key === 'remainingFreeServiceSlots' ? 'service_slot' : 'person',
           ])
-        : [
-            ['CB_GOVERNMENT_SECURITIES', null],
-            ['CB_COMMERCIAL_BANK_RESERVES', null],
-          ];
+        : industryV2
+          ? [['PRODUCTION_OUTPUT', 'tonne']]
+          : [
+              ['CB_GOVERNMENT_SECURITIES', null],
+              ['CB_COMMERCIAL_BANK_RESERVES', null],
+            ];
   if (value.metrics.length !== expected.length) invalid();
   let currency: string | null = null;
   value.metrics.forEach((raw, index) => {
@@ -251,7 +327,7 @@ export function assertDecisionResultPayload(input: {
       'before',
       'delta',
       'after',
-      ...(social ? ['reason'] : []),
+      ...(social || industryV2 ? ['reason'] : []),
     ]);
     const [key, unit] = expected[index]!;
     if (
@@ -260,7 +336,7 @@ export function assertDecisionResultPayload(input: {
       (unit !== null && metric.unit !== unit)
     )
       invalid();
-    if (social) {
+    if (social || industryV2) {
       if (
         metric.status !== 'AFTER_ONLY' ||
         metric.before !== null ||
@@ -268,7 +344,14 @@ export function assertDecisionResultPayload(input: {
         metric.reason !== 'PREDECESSOR_STATE_NOT_CARRIED'
       )
         invalid();
-      text(metric.after, /^(?:0|[1-9]\d*)$/u);
+      if (industryV2) {
+        const amount = text(metric.after, /^(?:0|[1-9]\d*)(?:\.\d*[1-9])?$/u);
+        if (
+          amount === '0' ||
+          amount.replace('.', '').length > WORLD_DECIMAL_OPERAND_MAX_DIGITS
+        )
+          invalid();
+      } else text(metric.after, /^(?:0|[1-9]\d*)$/u);
     } else {
       if (
         metric.status !== 'EXACT_CHANGE' ||

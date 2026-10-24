@@ -33,7 +33,9 @@ export function renderDecisionResult(
         ? 'Plan committed · Matching pending'
         : result.businessState === 'MATCH_SETTLED'
           ? 'Matching settled · Partial result'
-          : 'Committed · Applied',
+          : result.officeId === 'INDUSTRY'
+            ? 'Production committed · Partial result'
+            : 'Committed · Applied',
     ),
   );
   if (model.availability === 'PARTIAL')
@@ -55,6 +57,7 @@ export function renderDecisionResult(
   const labels: Record<string, string> = {
     CB_GOVERNMENT_SECURITIES: 'Government securities',
     CB_COMMERCIAL_BANK_RESERVES: 'Commercial bank reserves',
+    PRODUCTION_OUTPUT: 'Production output',
     'SOCIAL.matched': 'Matched',
     'SOCIAL.remainingUnemployed': 'Remaining unemployed',
     'SOCIAL.remainingVacancies': 'Remaining vacancies',
