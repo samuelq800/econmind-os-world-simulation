@@ -5,6 +5,33 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
+## Verified preparation checkpoint (2026-10-24)
+
+`PREPARATION_ONLY_NOT_V09_2_STARTED`. [PR179](https://github.com/samuelq800/econmind-os-world-simulation/pull/179)
+was normally merged as `2bafe7ca546f07d06251400b44fd33f2d3c0b977`, tree
+`b368611d1adc39445a7eb264b1fb9bb667022a9c`, from tested candidate
+`b5e3a3f056195f8d6042720e5b7c741f3d7d13c0` on actual main
+`97b30b4a9c1ba23bc7e0db88dbd53f00bceab0cf`.
+
+The [new exact-head final run](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/40092445988)
+passed the complete official check: 5,330 tests passed, zero failed and 277
+remained skipped. Its five new suites account for 182 of those passes, not 182
+additional passes. Native authenticated and workerd/PostgreSQL roundtrips each
+passed separately; both applicable automatic PR checks also passed. This is not
+borrowed evidence from PR178 or the earlier 89-test isolated preview.
+
+The 17 reviewed paths add coupon Core preparation, TEST_ONLY budget causal
+correspondence, immutable Industry result evidence, an Industry historical-prefix
+source port and the bounded COUNTRY_01 adopted-method reference. They do not
+connect all six Offices to actual sources or production authority. See the
+[fixed publication and six-Office follow-up](docs/reports/f-publication-20261024/README.md).
+
+The existing automatic [static-preview deployment](https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/40094524213)
+succeeded for that merge. [World preview](https://world.econmind.group/) and its
+sampled main script/stylesheet returned HTTP 200. This is bounded availability
+evidence, not full visual/E2E acceptance, source adoption or World / Clock
+activation. The older dated checkpoints below retain their original limits.
+
 ## Account and physical-reference publication (2026-10-23)
 
 The independently reviewed construction candidate is
