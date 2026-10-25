@@ -76,6 +76,12 @@ export {
   type InventoryPostingResult,
 } from './inventory/inventory-ledger.js';
 export * from './inventory/production-consumption-posting.js';
+export {
+  parseProductionPersistenceAdmissionRequirement,
+  assertProductionPersistenceRequirementMatchesCandidate,
+  type ProductionPersistenceAdmissionRequirementV1,
+  type ProductionPersistenceSourceRequirementV1,
+} from './inventory/production-persistence-admission-contract.js';
 export * from './labour/labour-engine.js';
 export * from './labour/population-labour-invariants.js';
 export * from './labour/approved-opening-projection.js';

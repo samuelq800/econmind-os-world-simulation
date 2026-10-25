@@ -12,6 +12,11 @@ export const CANONICAL_HASH_ALGORITHM = 'SHA-256' as const;
 
 const NO_DOMAIN_ADAPTER = Symbol('NO_DOMAIN_ADAPTER');
 
+/** Native identity only; false does not imply safe data or source authority. */
+export function isCanonicalInputProxy(value: unknown): boolean {
+  return nodeTypes.isProxy(value);
+}
+
 function rejected(message: string): never {
   throw new DomainError(DOMAIN_ERROR_CODES.SERIALIZATION_REJECTED, message);
 }
