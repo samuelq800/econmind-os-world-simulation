@@ -1,7 +1,9 @@
+import { types as nodeTypes } from 'node:util';
 import {
   DOMAIN_ERROR_CODES,
   DomainError,
   NARROW_TREASURY_GCU_COMMAND_TYPE,
+  SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
   SimTime,
   bindAuthoritativeTransition,
   canonicalHashInput,
@@ -36,6 +38,14 @@ import {
 } from '@econmind/core';
 
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import {
+  SOCIAL_PLAN_SOURCE_EVALUATION_PURPOSE,
+  assertGoverningSourceCommitRequestConsistent,
+  calculateGoverningSourceCommitBindingFingerprints,
+  type GoverningSourceCommitRequestV1,
+  type SourceCommitCurrentnessAuditV1,
+  type SourceCommitProtectionPort,
+} from '../projections/governing-source-commit-boundary-contract.js';
 import type { AtomicNarrowTransferApprovalGuard } from './narrow-transfer-approval-store.js';
 import {
   assertCurrentMaterializationObservation,
@@ -71,6 +81,12 @@ export interface AtomicTransitionDraft {
   readonly authorityKind: QueueAuthorityKind;
   readonly commitAssertion: WorldWriterCommitAssertion;
   readonly observedAtReal: string;
+  readonly governingSourceReadBinding?: unknown;
+}
+
+interface DeferredGoverningSourceReadBinding {
+  readonly canonicalData: string | null;
+  readonly captureFailed: boolean;
 }
 
 declare const privateAtomicCandidate: unique symbol;
@@ -88,9 +104,101 @@ export interface PrivateAtomicTransitionCandidate {
   readonly commitAuthorization: CommitAuthorizationProof | null;
   readonly commitAssertion: WorldWriterCommitAssertion;
   readonly observedAtReal: string;
+  readonly deferredGoverningSourceReadBinding: Readonly<DeferredGoverningSourceReadBinding>;
 }
 
 const privateCandidates = new WeakSet<object>();
+
+/** Bounded inert capture only. C semantic/source checks belong AFTER receipt
+ * recovery. Malformed optional metadata must not obstruct an exact old receipt.
+ * This private string is data, never an authority/lock/preparation capability.
+ */
+function captureGoverningSourceReadBinding(draft: {
+  readonly governingSourceReadBinding?: unknown;
+}): Readonly<DeferredGoverningSourceReadBinding> {
+  const fail = () =>
+    Object.freeze({ canonicalData: null, captureFailed: true });
+  const empty = () =>
+    Object.freeze({ canonicalData: null, captureFailed: false });
+  try {
+    if (nodeTypes.isProxy(draft)) return fail();
+    const property = Object.getOwnPropertyDescriptor(
+      draft,
+      'governingSourceReadBinding',
+    );
+    if (!property) return empty();
+    if (!Object.hasOwn(property, 'value') || property.get || property.set)
+      return fail();
+    const value: unknown = property.value;
+    if (value === null) return empty();
+    let nodes = 0,
+      bytes = 0;
+    const ancestors = new Set<object>();
+    function reject(): never {
+      throw new Error('UNSAFE_DEFERRED_SOURCE_BINDING');
+    }
+    function countText(s: string): void {
+      if (s.length > 4194304) reject();
+      bytes += Buffer.byteLength(s, 'utf8');
+      if (bytes > 4194304) reject();
+    }
+    function inspect(v: unknown, depth: number): void {
+      if (++nodes > 1000000 || depth > 16) reject();
+      if (v === null || typeof v === 'boolean') return;
+      if (typeof v === 'string') {
+        countText(v);
+        return;
+      }
+      if (typeof v !== 'object' || nodeTypes.isProxy(v)) reject();
+      if (ancestors.has(v)) reject();
+      ancestors.add(v);
+      try {
+        const array = Array.isArray(v);
+        if (
+          Object.getPrototypeOf(v) !==
+          (array ? Array.prototype : Object.prototype)
+        )
+          reject();
+        if (array && v.length > 10000) reject();
+        const keys = Reflect.ownKeys(v);
+        if (keys.length > 1000000 || (array && keys.length !== v.length + 1))
+          reject();
+        for (const key of keys) {
+          if (typeof key !== 'string' || key.length > 512) reject();
+          const descriptor = Object.getOwnPropertyDescriptor(v, key);
+          if (
+            !descriptor ||
+            !Object.hasOwn(descriptor, 'value') ||
+            descriptor.get ||
+            descriptor.set
+          )
+            reject();
+          if (array && key === 'length') continue;
+          if (!descriptor.enumerable) reject();
+          countText(key);
+          if (
+            array &&
+            (!/^(?:0|[1-9]\d*)$/u.test(key) || BigInt(key) >= BigInt(v.length))
+          )
+            reject();
+          inspect(descriptor.value, depth + 1);
+        }
+        if (array) {
+          for (let n = 0; n < v.length; n++)
+            if (!Object.hasOwn(v, String(n))) reject();
+        }
+      } finally {
+        ancestors.delete(v);
+      }
+    }
+    inspect(value, 0);
+    const canonicalData = canonicalSerialize(value);
+    if (Buffer.byteLength(canonicalData, 'utf8') > 4194304) return fail();
+    return Object.freeze({ canonicalData, captureFailed: false });
+  } catch {
+    return fail();
+  }
+}
 
 function invalid(message: string): never {
   throw new DomainError(
@@ -399,6 +507,9 @@ export function prepareAtomicTransitionCandidate(input: {
     commitAuthorization: input.commitAuthorization,
     commitAssertion: input.draft.commitAssertion,
     observedAtReal: input.draft.observedAtReal,
+    deferredGoverningSourceReadBinding: captureGoverningSourceReadBinding(
+      input.draft,
+    ),
   }) as PrivateAtomicTransitionCandidate;
   privateCandidates.add(candidate);
   return candidate;
@@ -772,6 +883,7 @@ export class AtomicTransitionRepository {
   readonly #sha256Hex: Sha256Hex;
   readonly #faultInjector: AtomicCommitFaultInjector;
   readonly #narrowTransferApprovalGuard: AtomicNarrowTransferApprovalGuard | null;
+  readonly #sourceCommitProtectionPort: SourceCommitProtectionPort | null;
 
   constructor(input: {
     readonly database: SqlDatabase;
@@ -780,6 +892,7 @@ export class AtomicTransitionRepository {
     readonly sha256Hex: Sha256Hex;
     readonly faultInjector?: AtomicCommitFaultInjector;
     readonly narrowTransferApprovalGuard?: AtomicNarrowTransferApprovalGuard;
+    readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
   }) {
     this.#database = input.database;
     this.#authorizationGuard = input.authorizationGuard;
@@ -788,6 +901,7 @@ export class AtomicTransitionRepository {
     this.#faultInjector = input.faultInjector ?? noFaults;
     this.#narrowTransferApprovalGuard =
       input.narrowTransferApprovalGuard ?? null;
+    this.#sourceCommitProtectionPort = input.sourceCommitProtectionPort ?? null;
   }
 
   async readFinalReceipt(
@@ -920,6 +1034,7 @@ export class AtomicTransitionRepository {
           });
         }
         await this.#faultInjector.hit('AUTHORIZATION_RECHECKED');
+        await this.#assertPlanSourceCurrent(transaction, candidate, head);
         await this.#faultInjector.hit('BEFORE_EVENTS');
         await this.#insertEvents(transaction, candidate, head.eventSequence);
         await this.#faultInjector.hit('AFTER_EVENTS');
@@ -995,10 +1110,75 @@ export class AtomicTransitionRepository {
     return Object.freeze({ source, receipt, transition: candidate.transition });
   }
 
+  async #assertPlanSourceCurrent(
+    transaction: SqlExecutor,
+    candidate: PrivateAtomicTransitionCandidate,
+    head: { readonly worldVersion: string; readonly eventSequence: string },
+  ): Promise<void> {
+    // Command type, not office or caller metadata, selects the mandatory guard.
+    // Exact committed receipts have already returned before reaching this point.
+    if (
+      candidate.command.commandType !== SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND
+    )
+      return;
+    const captured = candidate.deferredGoverningSourceReadBinding;
+    if (
+      candidate.command.officeId !== 'SOCIAL' ||
+      candidate.authorityKind !== 'DISCRETIONARY_USER' ||
+      this.#sourceCommitProtectionPort === null ||
+      captured.captureFailed ||
+      captured.canonicalData === null
+    )
+      invalid(
+        'Fresh Social PLAN requires owned source binding and a server source protection port',
+      );
+    const request: Readonly<GoverningSourceCommitRequestV1> = Object.freeze({
+      phase: 'BEFORE_EVENTS',
+      purpose: SOCIAL_PLAN_SOURCE_EVALUATION_PURPOSE,
+      command: candidate.command,
+      transition: candidate.transition,
+      currentHead: Object.freeze({
+        worldId: candidate.command.worldId,
+        ...head,
+      }),
+      readBinding: JSON.parse(captured.canonicalData) as unknown,
+      observedAtReal: candidate.observedAtReal,
+    });
+    const binding = assertGoverningSourceCommitRequestConsistent(request);
+    const expected: Readonly<SourceCommitCurrentnessAuditV1> = Object.freeze({
+      status: 'CURRENT_SOURCE_RECHECKED_NOT_AUTHORITY',
+      purpose: SOCIAL_PLAN_SOURCE_EVALUATION_PURPOSE,
+      commandFingerprint: candidate.command.fingerprint,
+      currentHead: request.currentHead,
+      ...calculateGoverningSourceCommitBindingFingerprints(binding),
+      protectionMode: 'HELD_SOURCE_GUARDS',
+    });
+    // C returns an owned frozen binding. Use it rather than exposing mutable
+    // parsed input to an asynchronous verifier. Hashes are consistency, not locks.
+    const audit: unknown =
+      await this.#sourceCommitProtectionPort.assertCurrentFrom(
+        transaction,
+        Object.freeze({ ...request, readBinding: binding }),
+      );
+    // Reuse inert bounded preflight so an audit getter/Proxy/toJSON cannot run.
+    // Complete canonical equality enforces all eight keys, not a truthy result.
+    const capturedAudit = captureGoverningSourceReadBinding({
+      governingSourceReadBinding: audit,
+    });
+    if (
+      capturedAudit.captureFailed ||
+      capturedAudit.canonicalData !== canonicalSerialize(expected)
+    )
+      invalid('Source protection port returned a mismatched currentness audit');
+  }
+
   async #assertDatabaseCommitGuard(
     transaction: SqlExecutor,
     candidate: PrivateAtomicTransitionCandidate,
-  ): Promise<{ readonly eventSequence: string }> {
+  ): Promise<{
+    readonly worldVersion: string;
+    readonly eventSequence: string;
+  }> {
     const result = await transaction.query<CommitGuardRow>(
       `select world_version, event_sequence
          from world_v2.assert_world_writer_commit_guard($1, $2, $3, $4, $5)`,
@@ -1011,10 +1191,13 @@ export class AtomicTransitionRepository {
       ],
     );
     const row = result.rows[0];
+    const actualWorldVersion =
+      row === undefined
+        ? null
+        : databaseInteger(row.world_version, 'guard WorldVersion');
     if (
       row === undefined ||
-      databaseInteger(row.world_version, 'guard WorldVersion') !==
-        candidate.transition.worldVersionBefore
+      actualWorldVersion !== candidate.transition.worldVersionBefore
     ) {
       throw new DomainError(
         DOMAIN_ERROR_CODES.WORLD_VERSION_MISMATCH,
@@ -1022,6 +1205,7 @@ export class AtomicTransitionRepository {
       );
     }
     return Object.freeze({
+      worldVersion: actualWorldVersion!,
       eventSequence: databaseInteger(
         row.event_sequence,
         'guard Event sequence',

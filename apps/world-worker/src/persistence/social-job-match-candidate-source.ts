@@ -37,6 +37,7 @@ import type {
   AtomicTransitionDraft,
 } from './atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import { readIssuedSocialGoverningSourceBinding } from './social-employment-runtime-snapshot-reader.js';
 
 /** Root implements this inside its ONE admitted-opening + committed-event reader.
  * Materializations/projections are not allowed as authoritative inputs. TEST_ONLY
@@ -145,6 +146,7 @@ export interface SocialJobMatchPreparation {
   readonly command: CanonicalCommand;
   readonly state: SocialEmploymentServiceState;
   readonly readFacts: SocialEmploymentReadFacts;
+  readonly governingSourceReadBinding: unknown | null;
   readonly commitAssertion: WorldWriterCommitAssertion;
   readonly eventSequence: string;
   readonly observedAtReal: string;
@@ -283,15 +285,20 @@ export class SqlSocialJobMatchCandidateSource {
         BigInt(integer(q.available_at_sim_time)) > command.simTime.ticks
       )
         invalid('Wrong authority/claim/fence or unavailable SimTime');
-      const snapshot = frozenCopy(
-        await reader.readFrom({
-          transaction,
-          command,
-          headWorldVersion,
-          headEventSequence,
-          observedAtReal,
-        }),
+      const rawSnapshot = await reader.readFrom({
+        transaction,
+        command,
+        headWorldVersion,
+        headEventSequence,
+        observedAtReal,
+      });
+      // Capture the original object's inert binding before frozenCopy changes
+      // its identity. This association is never an admission or lock token.
+      const governingSourceReadBinding = readIssuedSocialGoverningSourceBinding(
+        reader,
+        rawSnapshot,
       );
+      const snapshot = frozenCopy(rawSnapshot);
       if (snapshot.status === 'MISSING_OPERATING_STATE')
         throw new SocialOperatingStateMissingError(this.#input.openingAdoption);
       if (
@@ -331,6 +338,7 @@ export class SqlSocialJobMatchCandidateSource {
         command,
         state: snapshot.state,
         readFacts: snapshot.readFacts,
+        governingSourceReadBinding,
         commitAssertion: createWorldWriterCommitAssertion(
           lease,
           headWorldVersion,
@@ -426,6 +434,7 @@ export function prepareSocialJobMatchAtomicDraft(input: {
       parsed.kind === 'PLAN' ? 'DISCRETIONARY_USER' : 'VERSIONED_AUTOMATIC',
     commitAssertion: p.commitAssertion,
     observedAtReal: p.observedAtReal,
+    governingSourceReadBinding: p.governingSourceReadBinding,
   });
 }
 

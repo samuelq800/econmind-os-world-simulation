@@ -20,6 +20,16 @@ import {
   type OpeningCanonicalSeedAssembly,
   type OpeningCountrySeedAssembly,
 } from '../preparation/opening-canonical-seed-bridge.js';
+import {
+  readIndustryProductionGoverningFrom,
+  type IndustryGoverningCustodyPort,
+  type IndustryProductionGoverningResult,
+} from './industry-production-governing-source.js';
+import type { IndustryProductionSelectors } from './industry-production-source-port.js';
+import {
+  readValidatedCanonicalLineageFrom,
+  type ValidatedCanonicalLineageView,
+} from '../persistence/validated-canonical-lineage.js';
 
 const sha = (value: string) =>
   createHash('sha256').update(value, 'utf8').digest('hex');
@@ -67,6 +77,11 @@ export interface EconomicReadVisibilitySnapshot {
     scope: EconomicReadScope,
   ): EconomicReadDisclosure;
   summary(scope: EconomicReadScope): EconomicReadVisibilitySummary;
+  productionResultFrom?(
+    view: ValidatedCanonicalLineageView,
+    selectors: IndustryProductionSelectors,
+    scope: EconomicReadScope,
+  ): Promise<IndustryProductionGoverningResult>;
 }
 export interface EconomicReadVisibilitySourcePort {
   loadFrom(
@@ -85,8 +100,15 @@ export interface EconomicReadVisibilitySourcePort {
  * TEST_ONLY/non-host sources do not become disclosure grants. */
 export class SqlEconomicReadVisibilitySource implements EconomicReadVisibilitySourcePort {
   readonly #opening: WorldOpeningSeedStore;
-  constructor(database: SqlDatabase) {
+  readonly #industryGoverningCustody: IndustryGoverningCustodyPort | undefined;
+  constructor(
+    database: SqlDatabase,
+    options?: Readonly<{
+      industryGoverningCustody?: IndustryGoverningCustodyPort;
+    }>,
+  ) {
     this.#opening = new WorldOpeningSeedStore({ database, sha256Hex: sha });
+    this.#industryGoverningCustody = options?.industryGoverningCustody;
   }
   async loadFrom(
     executor: SqlExecutor,
@@ -147,6 +169,7 @@ export class SqlEconomicReadVisibilitySource implements EconomicReadVisibilitySo
       }
     }
     const resolved = mapping;
+    const custody = this.#industryGoverningCustody;
     function financial(
       account: Readonly<Record<string, unknown>>,
       scope: EconomicReadScope,
@@ -190,6 +213,34 @@ export class SqlEconomicReadVisibilitySource implements EconomicReadVisibilitySo
       ...input,
       openingBinding,
       financial,
+      productionResultFrom: async (
+        view: ValidatedCanonicalLineageView,
+        selectors: IndustryProductionSelectors,
+        scope: EconomicReadScope,
+      ): Promise<IndustryProductionGoverningResult> => {
+        const data = readValidatedCanonicalLineageFrom(executor, view);
+        if (
+          data.worldId !== input.worldId ||
+          data.headWorldVersion !== input.worldVersion ||
+          data.headEventSequence !== input.eventSequence
+        )
+          throw new DomainError(
+            DOMAIN_ERROR_CODES.TRANSITION_EVIDENCE_INVALID,
+            'Visibility result differs from held snapshot head',
+          );
+        if (!custody)
+          return Object.freeze({
+            disclosure: deny('ADMITTED_SOURCE_UNAVAILABLE'),
+            resultSummary: Object.freeze({ status: 'NOT_AUTHORIZED' as const }),
+          });
+        return readIndustryProductionGoverningFrom(
+          executor,
+          view,
+          selectors,
+          scope,
+          custody,
+        );
+      },
       // No governing source binds raw stock-account rights to an Office. Never
       // infer Trade/Industry visibility from commodity, holder or capability.
       inventory: () => deny('OWNER_MAPPING_UNAVAILABLE'),
