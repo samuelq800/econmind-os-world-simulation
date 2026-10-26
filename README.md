@@ -12,7 +12,7 @@ and [command evidence](docs/reports/repository-audit-20261026/TEST_EVIDENCE.json
 describe the local maintenance candidate based on main `0b9178e0` (PR193).
 Status is `IMPLEMENTED_UNVERIFIED`: the architecture-gate repair requires
 independent review, and the Windows whole-suite failures remain recorded.
-This candidate has not been pushed, merged or deployed. It does not advance
+Review branch: `codex/repository-audit-20261026`; not merged or deployed. It does not advance
 `status/progress.json`, adopt opening sources or activate World / Clock.
 The dated checkpoints below retain their original scope and evidence.
 

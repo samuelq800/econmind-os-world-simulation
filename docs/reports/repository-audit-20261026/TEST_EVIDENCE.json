@@ -339,7 +339,7 @@
     "original_six_untracked_reports_preserved": true
   },
   "unresolved_gaps": [
-    "Independent P0 review remains pending; no push/merge/deployment.",
+    "Independent P0 review remains pending; review branch publication only, no merge/deployment.",
     "Whole Windows suite remains FAIL: safe-open POSIX initialization, UID/mode guards, graceful signals, default locale control, durable directory fsync and rendering timeout remain open.",
     "743 initial skips remain skips; 10 initialization failures remain failures.",
     "Eight initially failing assertions have passing scoped repair evidence; no synthetic revised whole-suite totals are claimed.",
