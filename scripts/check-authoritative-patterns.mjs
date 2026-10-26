@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -8,9 +8,27 @@ const defaultRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
 );
-const rootIndex = process.argv.indexOf('--root');
-const root =
-  rootIndex >= 0 ? path.resolve(process.argv[rootIndex + 1]) : defaultRoot;
+function scanRoot(args) {
+  try {
+    if (
+      args.length !== 0 &&
+      (args.length !== 2 || args[0] !== '--root' || args[1].trim().length === 0)
+    ) {
+      throw new Error('ARCHITECTURE_SCAN_ARGUMENTS_INVALID');
+    }
+    const root = args.length === 0 ? defaultRoot : path.resolve(args[1]);
+    if (!statSync(root, { throwIfNoEntry: false })?.isDirectory()) {
+      throw new Error('ARCHITECTURE_SCAN_ROOT_INVALID');
+    }
+    return root;
+  } catch (error) {
+    console.error(
+      JSON.stringify({ status: 'FAIL', configurationError: error.message }),
+    );
+    process.exit(1);
+  }
+}
+const root = scanRoot(process.argv.slice(2));
 const sourceExtensions = new Set([
   '.ts',
   '.tsx',
@@ -405,6 +423,15 @@ const coreFiles = filesUnder('packages/core/src');
 const governedFiles = [
   ...new Set([...filesUnder('apps'), ...filesUnder('packages')]),
 ];
+if (governedFiles.length === 0) {
+  console.error(
+    JSON.stringify({
+      status: 'FAIL',
+      configurationError: 'ARCHITECTURE_SCAN_EMPTY',
+    }),
+  );
+  process.exit(1);
+}
 for (const file of governedFiles) analyze(file);
 
 const result = {

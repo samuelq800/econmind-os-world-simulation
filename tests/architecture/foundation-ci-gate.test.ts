@@ -4,7 +4,7 @@ import { assessFoundationGate } from '../../scripts/foundation-gate-policy.mjs';
 
 const validScripts = {
   build: 'pnpm -r --if-present build',
-  'env:check': 'ECONMIND_ENV=local node scripts/assert-safe-environment.mjs',
+  'env:check': 'node scripts/assert-safe-environment.mjs --local',
   'format:check': 'prettier --check .',
   lint: 'eslint .',
   'migration:rehearse': 'node scripts/rehearse-migrations.mjs',

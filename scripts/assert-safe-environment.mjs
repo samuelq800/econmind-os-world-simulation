@@ -7,6 +7,12 @@ import { loadEnv } from 'vite';
 import { assertSafeEnvironment } from './environment-policy.mjs';
 import { findForbiddenBrowserVariables } from './vite-environment-policy.mjs';
 
+// Match the local check on every shell, including Windows cmd/PowerShell.
+// Only the environment name is selected; all credential and database guards run.
+if (process.argv.slice(2).includes('--local')) {
+  process.env.ECONMIND_ENV = 'local';
+}
+
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',

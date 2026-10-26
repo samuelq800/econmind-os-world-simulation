@@ -1,3 +1,6 @@
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
 import { describe, expect, it } from 'vitest';
 
 import { assessEnvironment } from '../../scripts/environment-policy.mjs';
@@ -6,6 +9,36 @@ import { classifySupabaseArguments } from '../../scripts/supabase-policy.mjs';
 import { findForbiddenBrowserVariables } from '../../scripts/vite-environment-policy.mjs';
 
 describe('environment safety policy', () => {
+  it('runs the local CLI on every shell and still rejects remote database targets', () => {
+    const script = fileURLToPath(
+      new URL('../../scripts/assert-safe-environment.mjs', import.meta.url),
+    );
+    const run = (extra: NodeJS.ProcessEnv = {}) =>
+      spawnSync(process.execPath, [script, '--local'], {
+        encoding: 'utf8',
+        env: {
+          PATH: process.env.PATH,
+          SystemRoot: process.env.SystemRoot,
+          ECONMIND_ENV: 'production',
+          ...extra,
+        },
+        timeout: 10_000,
+      });
+    const local = run();
+    expect(local.status, local.stderr).toBe(0);
+    expect(JSON.parse(local.stdout)).toMatchObject({
+      status: 'PASS',
+      environment: 'local',
+      databaseMutationAllowed: false,
+    });
+    const remote = run({
+      WORLD_DATABASE_URL: 'postgresql://example.invalid/world',
+      WORLD_DATABASE_FINGERPRINT: 'world-v2-local',
+    });
+    expect(remote.status).toBe(1);
+    expect(remote.stderr).toContain('loopback host');
+  });
+
   it('accepts loopback databases for local work', () => {
     expect(
       assessEnvironment({

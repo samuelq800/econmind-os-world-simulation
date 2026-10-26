@@ -1,4 +1,4 @@
-import { lstat, readdir, readFile } from 'node:fs/promises';
+import { lstat, readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,7 +22,11 @@ function parseArguments(arguments_) {
   if (arguments_.length === 0) {
     return { repositoryRoot: defaultRepositoryRoot };
   }
-  if (arguments_.length === 2 && arguments_[0] === '--root') {
+  if (
+    arguments_.length === 2 &&
+    arguments_[0] === '--root' &&
+    arguments_[1].trim().length > 0
+  ) {
     return { repositoryRoot: path.resolve(arguments_[1]) };
   }
   throw new Error('Usage: node scripts/check-boundaries.mjs [--root <path>]');
@@ -58,6 +62,10 @@ async function listSourceFiles(directory) {
 }
 
 export async function scanRepositoryBoundaries(repositoryRoot) {
+  const rootStat = await stat(repositoryRoot).catch(() => null);
+  if (!rootStat?.isDirectory()) {
+    throw new Error('ARCHITECTURE_SCAN_ROOT_INVALID');
+  }
   const context = createBoundaryContext(repositoryRoot);
   const files = [
     ...new Set(
@@ -70,6 +78,7 @@ export async function scanRepositoryBoundaries(repositoryRoot) {
       ).flat(),
     ),
   ];
+  if (files.length === 0) throw new Error('ARCHITECTURE_SCAN_EMPTY');
   const violations = [];
 
   for (const filePath of files) {

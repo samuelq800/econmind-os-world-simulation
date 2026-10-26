@@ -26,12 +26,18 @@ it('the actual pnpm test:boundaries command rejects the outside-src review bridg
     }
     // This file is outside boundaries.test.ts, so the script's focused suite
     // cannot recursively invoke this integration test.
+    // Windows cannot execute the pnpm .cmd shim directly with shell:false.
+    // The only shell argument is our quoted, mkdtemp-owned fixture path.
+    const windows = process.platform === 'win32';
     const result = spawnSync(
-      'pnpm',
-      ['test:boundaries', '--root', fixtureRoot],
+      windows ? (process.env.ComSpec ?? 'cmd.exe') : 'pnpm',
+      windows
+        ? ['/d', '/s', '/c', `pnpm test:boundaries --root "${fixtureRoot}"`]
+        : ['test:boundaries', '--root', fixtureRoot],
       {
         cwd: repositoryRoot,
         encoding: 'utf8',
+        windowsVerbatimArguments: windows,
         // The nested canonical suite can contend with the outer full-suite
         // worker pool; keep the fail-closed assertion but give it a bounded
         // budget that covers normal local/CI contention.

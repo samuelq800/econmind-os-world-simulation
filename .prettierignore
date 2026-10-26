@@ -1,4 +1,7 @@
 node_modules/
+**/.wrangler/
+.vite-env-test-*/
+artifacts/world-runtime-actions/
 dist/
 coverage/
 pnpm-lock.yaml

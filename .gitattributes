@@ -1,3 +1,11 @@
+* text=auto eol=lf
+
+# Published and hash-addressed source bytes are not normalizable code.
+/apps/world-web/public/** -text
+/artifacts/world-geography/** -text
+/data/country-candidates/2026-09-28-map-locked/** -text
+/tests/fixtures/** -text
+
 # Byte-pinned source bundles must survive Windows checkout without conversion.
 /artifacts/world-balanced-candidate-v1/** -text
 /artifacts/world-map-files-v1/** -text

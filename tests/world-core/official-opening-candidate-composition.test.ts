@@ -679,7 +679,7 @@ describe('acyclic deterministic V2 assembly intent, not authority', () => {
       blockers: result.blockers.map((b) => b.code),
     };
     for (const order of [true, false]) {
-      const code = `const root=${JSON.stringify(repositoryRoot)};const p=root+'/apps/world-worker/dist/';
+      const code = `import {pathToFileURL} from 'node:url';const root=${JSON.stringify(repositoryRoot)};const p=pathToFileURL(root+'/apps/world-worker/dist/').href;
         for(const f of ${JSON.stringify(order ? ['admission/official-opening-admission-publication.js', 'preparation/official-opening-bundle-preflight.js'] : ['preparation/official-opening-bundle-preflight.js', 'admission/official-opening-admission-publication.js'])}) await import(p+f);
         const {openingV2AssemblyIntentFingerprint:hash}=await import(p+'preparation/opening-canonical-seed-bridge.js');
         const {OfficialOpeningBundleLoader}=await import(p+'preparation/official-opening-bundle-loader.js');
