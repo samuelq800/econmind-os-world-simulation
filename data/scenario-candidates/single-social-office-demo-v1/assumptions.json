@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "G_SINGLE_SOCIAL_ASSUMPTIONS_V1",
+  "allNewNumericChoices": "DOCUMENTED_ASSUMPTION_SIMULATION_CANDIDATE_NOT_SELECTED",
+  "nonzeroHistoricalProgress": "None: original cohort begins at explicit fictional genesis day0 with elapsed0; no completed teaching/history is invented",
+  "explicitZeros": [
+    "No LOW/HIGH placement capacity in this small bureau",
+    "No outpatient beds",
+    "No dropout effects in this version",
+    "No prior command/event/action histories in new fictional opening",
+    "No actual world/source/admission/custodian supplied; those remain null not zero"
+  ],
+  "sharedConstraints": [
+    "same person/resource ID across institutions",
+    "new student cohort cannot inherit old duration",
+    "remaining students retained and cohortprocessed once",
+    "no rates/defaults taken from old TEST_ONLY values",
+    "sourcepurpose per action; MATCH not PLAN-purpose"
+  ],
+  "sensitivityAxes": [
+    "medicine0..14 doses -> exact deliveredmin/backlog/cost",
+    "care budget0..560 step40 -> exact deliveredmin/backlog",
+    "doctor0/120/240/300/420 minutes with all other bottlenecks held",
+    "caseworker0/55/110/180/360 minutes ->MEDIUM capacity0/1/2/3/6; actualsharedresources additionally bound",
+    "completion0/1/3/2/3/1 old3 ->0/1/2/3 graduates afterduration, no invented dropout status",
+    "requiredDuration10/20 with initial0 ->validday10/day20",
+    "A same-version wage baseline/highfloor and staff6/hire7 ->annual and conditionalannual/360 rate only"
+  ],
+  "notExecuted": "No second economy, model runtime, world/clock, payroll payment or production source is executed by candidate recomputation."
+}
