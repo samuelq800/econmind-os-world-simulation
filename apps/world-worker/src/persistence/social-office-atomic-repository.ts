@@ -123,6 +123,10 @@ export type SocialOfficeDueMatchContext = Readonly<
       kind: 'EXISTING_SETTLEMENT';
       existingSettlementCommand: C.CanonicalCommand;
     }
+  | {
+      kind: 'EXISTING_SUBMISSION';
+      existingSubmissionCommand: C.CanonicalCommand;
+    }
 >;
 const sha = (s: string) => createHash('sha256').update(s, 'utf8').digest('hex');
 function deny(message: string): never {
@@ -1164,7 +1168,7 @@ export function createSocialOfficeSimulatedAtomicRepository(
           // Recover actual old immutable work before new-use eligibility. No human
           // READ/capability is borrowed to authorize a distinct automatic publisher.
           const rows = await scope.executor.query<{ command_id: string }>(
-            `select s.command_id from world_v2.command_submission s join world_v2.command_receipt r on r.world_id=s.world_id and r.command_id=s.command_id where s.world_id=$1 and s.command_type=$2 and s.actor_id=$3 and s.auth_subject=$4 order by s.command_id limit 257`,
+            `select s.command_id from world_v2.command_submission s where s.world_id=$1 and s.command_type=$2 and s.actor_id=$3 and s.auth_subject=$4 order by s.command_id limit 257`,
             [
               identity.worldId,
               ORIGINAL.publisher.commandType,
@@ -1175,6 +1179,7 @@ export function createSocialOfficeSimulatedAtomicRepository(
           if (rows.rows.length > 256)
             throw Error('SOCIAL_ATOMIC: complete automatic prefix bound');
           let existing: C.CanonicalCommand | null = null;
+          let accepted: C.CanonicalCommand | null = null;
           for (const row of rows.rows) {
             const original = await reader.readCommandFrom(
               scope.executor,
@@ -1187,7 +1192,13 @@ export function createSocialOfficeSimulatedAtomicRepository(
             );
             if (await readFinalReceiptFrom(scope.executor, original))
               existing = original;
+            else if (accepted === null) accepted = original;
           }
+          if (accepted !== null)
+            return Object.freeze({
+              kind: 'EXISTING_SUBMISSION' as const,
+              existingSubmissionCommand: accepted,
+            });
           const old = (): SocialOfficeDueMatchContext | null =>
             existing === null
               ? null
