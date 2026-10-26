@@ -88,6 +88,7 @@ export interface SocialOfficeSimulatedProjection {
   readonly financial: C.FinancialLedgerState;
 }
 export interface SocialOfficeSimulatedAtomicRepository {
+  readDueMatchPlan(): Promise<SocialOfficeDueMatchContext | null>;
   submitManual(input: {
     command: C.CanonicalCommand;
     principal: C.AuthenticatedPrincipal;
@@ -111,6 +112,18 @@ export interface SocialOfficeSimulatedAtomicRepository {
     principal: C.AuthenticatedPrincipal;
   }): Promise<SocialOfficeSimulatedProjection>;
 }
+export type SocialOfficeDueMatchContext = Readonly<
+  | {
+      kind: 'PENDING_PLAN';
+      originalPlanCommand: C.CanonicalCommand;
+      headWorldVersion: string;
+      simTime: string;
+    }
+  | {
+      kind: 'EXISTING_SETTLEMENT';
+      existingSettlementCommand: C.CanonicalCommand;
+    }
+>;
 const sha = (s: string) => createHash('sha256').update(s, 'utf8').digest('hex');
 function deny(message: string): never {
   throw new C.DomainError(
@@ -421,7 +434,7 @@ export function createSocialOfficeSimulatedAtomicRepository(
   }
   async function automaticAuthority(
     tx: SqlExecutor,
-    c: C.CanonicalCommand,
+    simTime: C.SimTime,
   ): Promise<Authority> {
     const original = readSocialOfficeExecutionIdentity(tx, lineage).publisher;
     const result = await tx.query<{ snapshot: Record<string, unknown> | null }>(
@@ -449,7 +462,7 @@ export function createSocialOfficeSimulatedAtomicRepository(
       valid_from_day: original.validFromDay,
       valid_until_day: original.validUntilDay,
     };
-    const day = c.simTime.ticks / 86400000n;
+    const day = simTime.ticks / 86400000n;
     if (
       result.rows.length !== 1 ||
       !v ||
@@ -540,7 +553,7 @@ export function createSocialOfficeSimulatedAtomicRepository(
               k as keyof typeof ORIGINAL.manual.actionCapabilities
             ],
           ]);
-        else await automaticAuthority(scope.executor, c);
+        else await automaticAuthority(scope.executor, c.simTime);
         await scope.executor.query(
           `insert into world_v2.command_submission(world_id,command_id,idempotency_key,command_type,schema_version,canonical_payload,payload_sha256,command_fingerprint,auth_subject,actor_id,country_id,office_id,expected_world_version,sim_time,correlation_id,submitted_at_real) values($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) on conflict do nothing`,
           [
@@ -711,7 +724,7 @@ export function createSocialOfficeSimulatedAtomicRepository(
                   k as keyof typeof ORIGINAL.manual.actionCapabilities
                 ],
               ])
-            : await automaticAuthority(tx, c);
+            : await automaticAuthority(tx, c.simTime);
           const now = new Date().toISOString();
           const guard = await tx.query<{
             world_version: string;
@@ -936,7 +949,7 @@ export function createSocialOfficeSimulatedAtomicRepository(
                 await protection.assertCurrent();
                 const cutoff = p
                   ? await manualAuthority(tx, p, [authority.capability])
-                  : await automaticAuthority(tx, c);
+                  : await automaticAuthority(tx, c.simTime);
                 if (
                   C.canonicalSerialize(cutoff) !==
                   C.canonicalSerialize(authority)
@@ -1144,6 +1157,142 @@ export function createSocialOfficeSimulatedAtomicRepository(
     }
   }
   return Object.freeze({
+    readDueMatchPlan: async (): Promise<SocialOfficeDueMatchContext | null> =>
+      withSocialOfficeSimulatedTransaction(
+        { database, identity },
+        async (scope) => {
+          // Recover actual old immutable work before new-use eligibility. No human
+          // READ/capability is borrowed to authorize a distinct automatic publisher.
+          const rows = await scope.executor.query<{ command_id: string }>(
+            `select s.command_id from world_v2.command_submission s join world_v2.command_receipt r on r.world_id=s.world_id and r.command_id=s.command_id where s.world_id=$1 and s.command_type=$2 and s.actor_id=$3 and s.auth_subject=$4 order by s.command_id limit 257`,
+            [
+              identity.worldId,
+              ORIGINAL.publisher.commandType,
+              ORIGINAL.publisher.actorId,
+              ORIGINAL.publisher.authSubject,
+            ],
+          );
+          if (rows.rows.length > 256)
+            throw Error('SOCIAL_ATOMIC: complete automatic prefix bound');
+          let existing: C.CanonicalCommand | null = null;
+          for (const row of rows.rows) {
+            const original = await reader.readCommandFrom(
+              scope.executor,
+              identity.worldId,
+              row.command_id,
+            );
+            checkCommand(original, true);
+            C.parseSocialJobMatchDueIntent(
+              JSON.parse(original.canonicalPayload),
+            );
+            if (await readFinalReceiptFrom(scope.executor, original))
+              existing = original;
+          }
+          const old = (): SocialOfficeDueMatchContext | null =>
+            existing === null
+              ? null
+              : Object.freeze({
+                  kind: 'EXISTING_SETTLEMENT',
+                  existingSettlementCommand: existing,
+                });
+          try {
+            const raw = await scope.peekSource();
+            const asOf = raw.publication.records.filter(
+              (r) =>
+                r.recordId.startsWith('G_SOCIAL_ASOF_DAY_') &&
+                raw.publication.selectedRecordIds.includes(r.recordId),
+            );
+            if (asOf.length !== 1) deny('one automatic ASOF required');
+            const time = JSON.parse(asOf[0]!.rawUtf8) as {
+              simTime: string;
+              dayIndex: string;
+            };
+            if (time.dayIndex !== '1') return old();
+            await scope.protectSource({
+              purpose: 'EMPLOYMENT',
+              simTime: time.simTime,
+              expectedGeneration: raw.generation,
+              expectedManifestHash: raw.manifestHash,
+            });
+            await automaticAuthority(
+              scope.executor,
+              C.SimTime.fromTicks(time.simTime),
+            );
+            return await withValidatedCanonicalLineageFrom(
+              { reader, executor: scope.executor, worldId: identity.worldId },
+              async (view) => {
+                const data = readValidatedCanonicalLineageFrom(
+                  scope.executor,
+                  view,
+                );
+                const rebuilt = await replaySocialOfficeDurableGroups({
+                  executor: scope.executor,
+                  identity: lineage,
+                  seed: data.seed,
+                  groups: data.transitions.map((v) => ({
+                    ...v,
+                    inventoryPostings: v.inventoryPostings.filter(
+                      (x) => x.operation !== 'SERVICE_CONSUME',
+                    ),
+                    serviceConsumptionWire: v.inventoryPostings.find(
+                      (x) => x.operation === 'SERVICE_CONSUME',
+                    )
+                      ? C.canonicalSerialize(
+                          v.inventoryPostings.find(
+                            (x) => x.operation === 'SERVICE_CONSUME',
+                          ),
+                        )
+                      : null,
+                  })),
+                  sha256Hex: sha,
+                });
+                const pending = rebuilt.social.employment.plans
+                  .filter((p) => p.state === 'PENDING')
+                  .sort((a, b) =>
+                    a.planCommandId.localeCompare(b.planCommandId, 'en'),
+                  );
+                for (const plan of pending) {
+                  const original = await reader.readCommandFrom(
+                    scope.executor,
+                    identity.worldId,
+                    plan.planCommandId,
+                  );
+                  const parsed = C.parseSocialEmploymentServiceCommand(
+                    original,
+                    sha,
+                  );
+                  if (
+                    parsed.kind !== 'PLAN' ||
+                    parsed.intent.dueDayIndex !== time.dayIndex
+                  )
+                    continue;
+                  if (
+                    original.fingerprint !== plan.planFingerprint ||
+                    !data.transitions.some(
+                      (t) =>
+                        t.command.commandId === original.commandId &&
+                        t.command.fingerprint === original.fingerprint,
+                    )
+                  )
+                    throw Error(
+                      'SOCIAL_ATOMIC: due plan must be actual full-prefix command',
+                    );
+                  return Object.freeze({
+                    kind: 'PENDING_PLAN' as const,
+                    originalPlanCommand: original,
+                    headWorldVersion: data.headWorldVersion,
+                    simTime: time.simTime,
+                  });
+                }
+                return old();
+              },
+            );
+          } catch (error) {
+            if (existing !== null) return old();
+            throw error;
+          }
+        },
+      ),
     submitManual: async ({
       command,
       principal,

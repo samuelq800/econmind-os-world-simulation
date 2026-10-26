@@ -1,12 +1,10 @@
 /** Owned local fixture composition only, never an application dependency. */
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
+import { readFile, realpath } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import type { Pool } from 'pg';
 import * as C from '@econmind/core';
-// @ts-expect-error Test-only A tool input, no Worker -> tools import.
-import * as A from '../../tools/social-office-demo/check-opening-finance.mjs';
 import {
   loadSocialOfficeDemoScenario,
   type SocialOfficeDemoScenario,
@@ -20,6 +18,11 @@ export const digest = (s: string) =>
   createHash('sha256').update(s, 'utf8').digest('hex');
 export const ROOT = path.resolve(import.meta.dirname, '../..');
 export async function socialScenario() {
+  // Only test construction loads A's tool. A compiled host installer import does not.
+  const A = await import(
+    // @ts-expect-error Test-only fixed .mjs import; no application imports tools.
+    '../../tools/social-office-demo/check-opening-finance.mjs'
+  );
   const selected: unknown = A.selectOpeningFinanceCandidateData(
     A.readOpeningFinanceDistribution(),
     {
@@ -180,10 +183,27 @@ export function match(
     digest,
   );
 }
-export async function installFixture(admin: Pool, s: SocialOfficeDemoScenario) {
+export async function installFixture(
+  admin: Pool,
+  s: SocialOfficeDemoScenario,
+  host?: Readonly<{ sourceRoot: string }>,
+) {
+  // Trusted tool composition, never an HTTP/root/DSN selection endpoint. F verifies
+  // its owned checkout and complete build-input manifest before calling this port.
+  if (
+    host &&
+    (Object.getPrototypeOf(host) !== Object.prototype ||
+      Object.keys(host).join('|') !== 'sourceRoot' ||
+      typeof host.sourceRoot !== 'string' ||
+      !path.isAbsolute(host.sourceRoot))
+  )
+    throw Error('FIXED_HOST_SOURCE_ROOT_REQUIRED');
+  const sourceRoot = host?.sourceRoot ?? ROOT;
+  if ((await realpath(sourceRoot)) !== sourceRoot)
+    throw Error('CANONICAL_SOURCE_ROOT_REQUIRED');
   const manifest = JSON.parse(
     await readFile(
-      path.join(ROOT, 'database/migrations/manifest.json'),
+      path.join(sourceRoot, 'database/migrations/manifest.json'),
       'utf8',
     ),
   ) as {
@@ -198,11 +218,11 @@ export async function installFixture(admin: Pool, s: SocialOfficeDemoScenario) {
   if (manifest.migrations.length !== 23) throw Error('EXPECTED_CURRENT_23');
   const originals = [];
   for (const [i, m] of manifest.migrations.entries()) {
-    const bytes = await readFile(path.join(ROOT, m.path));
+    const bytes = await readFile(path.join(sourceRoot, m.path));
     const original = execFileSync(
       'git',
       ['--no-replace-objects', 'show', `${m.artifact_source_commit}:${m.path}`],
-      { cwd: ROOT, maxBuffer: 1048576 },
+      { cwd: sourceRoot, maxBuffer: 1048576 },
     );
     if (
       m.release_order !== i + 1 ||
@@ -239,7 +259,7 @@ export async function installFixture(admin: Pool, s: SocialOfficeDemoScenario) {
     'tests/support/social-office-simulated-source-schema.sql',
     'tests/support/social-office-simulated-atomic-schema.sql',
   ])
-    await admin.query(await readFile(path.join(ROOT, p), 'utf8'));
+    await admin.query(await readFile(path.join(sourceRoot, p), 'utf8'));
   await admin.query('insert into world_v2.world_head(world_id) values($1)', [
     s.scope.worldId,
   ]);
