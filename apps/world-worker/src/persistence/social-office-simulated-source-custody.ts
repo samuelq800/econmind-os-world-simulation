@@ -509,3 +509,89 @@ export async function readSocialOfficeSimulatedSourceFrom(
     publication: p,
   });
 }
+
+/** Retained raw revision, not permission. The permanent anchor also covers absence. */
+export async function readSocialOfficeSimulatedRevisionFrom(
+  executor: SqlExecutor,
+  identity: Readonly<{
+    simulationId: string;
+    worldId: string;
+    countryId: string;
+  }>,
+  pins: Readonly<{ generation: string; manifestHash: string }> | null = null,
+) {
+  const args = [
+    ref(identity.simulationId),
+    ref(identity.worldId),
+    ref(identity.countryId),
+  ];
+  const anchor = await executor.query<{
+    source_class: string;
+    schema_version: string;
+  }>(
+    'select source_class,schema_version from world_v2.social_demo_source_scope where simulation_id=$1 and world_id=$2 and country_id=$3 for share',
+    args,
+  );
+  if (
+    anchor.rows.length !== 1 ||
+    anchor.rows[0]!.source_class !== 'SIMULATED_OPENING' ||
+    anchor.rows[0]!.schema_version !== 'social-office-simulated-source-store-v1'
+  )
+    fail('permanent simulated anchor missing');
+  if (pins !== null) {
+    decimal(pins.generation);
+    digest(pins.manifestHash);
+  }
+  const result = await executor.query<{
+    generation: string;
+    manifest_hash: string;
+    publication_utf8: string;
+  }>(
+    `select generation::text,manifest_hash,publication_utf8 from world_v2.social_demo_source_revision where simulation_id=$1 and world_id=$2 and country_id=$3 ${pins === null ? 'order by generation desc limit 1' : 'and generation=$4 and manifest_hash=$5'}`,
+    pins === null ? args : [...args, pins.generation, pins.manifestHash],
+  );
+  if (result.rows.length !== 1) fail('retained source missing');
+  const value = result.rows[0]!,
+    generation = decimal(value.generation),
+    manifestHash = digest(value.manifest_hash);
+  if (sha(value.publication_utf8) !== manifestHash) fail('manifest bytes hash');
+  const publication = parseSocialOfficeSimulatedPublication(
+    JSON.parse(value.publication_utf8) as unknown,
+  );
+  if (
+    BigInt(generation) !== BigInt(publication.expectedGeneration) + 1n ||
+    ['simulationId', 'worldId', 'countryId'].some(
+      (k) =>
+        publication[k as keyof typeof publication] !==
+        identity[k as keyof typeof identity],
+    )
+  )
+    fail('retained scope/generation');
+  const originals = await executor.query<{
+    record_id: string;
+    revision: string;
+    role: string;
+    physical_group_key: string | null;
+    raw_utf8: string;
+    sha256: string;
+  }>(
+    'select record_id,revision,role,physical_group_key,raw_utf8,sha256 from world_v2.social_demo_source_record where simulation_id=$1 and world_id=$2 and country_id=$3 order by record_id collate "C"',
+    args,
+  );
+  const exact = originals.rows.map((o) => ({
+    recordId: o.record_id,
+    revision: o.revision,
+    role: o.role,
+    physicalGroupKey: o.physical_group_key,
+    rawUtf8: o.raw_utf8,
+    sha256: o.sha256,
+  }));
+  if (canonicalSerialize(exact) !== canonicalSerialize(publication.records))
+    fail('complete retained original set mismatch');
+  return freeze({
+    publicationUtf8: value.publication_utf8,
+    generation,
+    manifestHash,
+    publication,
+  });
+}
