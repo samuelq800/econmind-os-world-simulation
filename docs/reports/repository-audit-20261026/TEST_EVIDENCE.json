@@ -1,0 +1,634 @@
+{
+  "schema_version": "R2-101.1",
+  "step_id": "EXISTING_REPOSITORY_MAINTENANCE_AUDIT_20261026",
+  "status": "IMPLEMENTED_UNVERIFIED",
+  "effective_risk_class": "P0",
+  "highest_affected_boundary": "Fail-closed architecture merge gate",
+  "commit": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273",
+  "first_implementation_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+  "synchronized_baseline": "0b9178e0ae52016455557e6c1b0371c7e699b2e9",
+  "branch": "codex/repository-audit-20261026",
+  "independent_review_pending": true,
+  "owner_approval_claimed": false,
+  "environment": {
+    "name": "WINDOWS_LOCAL_DISPOSABLE_ONLY",
+    "platform": "win32",
+    "node": "v24.20.0",
+    "pnpm": "12.3.4",
+    "production_access": false,
+    "real_postgresql_executed": false,
+    "workerd_executed": false
+  },
+  "result_vocabulary": ["PASS", "FAIL", "NOT_RUN", "INSUFFICIENT_EVIDENCE"],
+  "commands": [
+    {
+      "command": "pnpm install --frozen-lockfile",
+      "exit_code": 0,
+      "result": "PASS",
+      "revision_context": "0b9178e0ae52016455557e6c1b0371c7e699b2e9",
+      "log": null,
+      "summary": "Observed tool output; frozen lockfile unchanged; pinned preinstall toolchain verified."
+    },
+    {
+      "command": "pnpm run lint",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:31:19.7784728+08:00",
+      "ended_at": "2026-10-26T21:31:44.0634829+08:00",
+      "log": "candidate-lint.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "ca80762d3cf6b606cd340775c222e5b229a5d4ba"
+    },
+    {
+      "command": "pnpm run format:check",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:31:44.1051637+08:00",
+      "ended_at": "2026-10-26T21:32:34.6830391+08:00",
+      "log": "candidate-format-check.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "ca80762d3cf6b606cd340775c222e5b229a5d4ba"
+    },
+    {
+      "command": "pnpm run typecheck",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:32:34.6899190+08:00",
+      "ended_at": "2026-10-26T21:32:57.3532650+08:00",
+      "log": "candidate-typecheck.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "ca80762d3cf6b606cd340775c222e5b229a5d4ba"
+    },
+    {
+      "command": "pnpm run test:architecture",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:32:57.3582176+08:00",
+      "ended_at": "2026-10-26T21:34:34.9455609+08:00",
+      "log": "candidate-test-architecture.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "The test-only V09 fixture path change landed during this architecture run; all architecture/product/scanner inputs are identical between the two commits."
+    },
+    {
+      "command": "pnpm run env:check",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:34:34.9490535+08:00",
+      "ended_at": "2026-10-26T21:34:35.3448660+08:00",
+      "log": "candidate-env-check.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273"
+    },
+    {
+      "command": "pnpm run migration:validate",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:34:35.3478117+08:00",
+      "ended_at": "2026-10-26T21:34:37.9062080+08:00",
+      "log": "candidate-migration-validate.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273"
+    },
+    {
+      "command": "pnpm run migration:rehearse",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:34:37.9092271+08:00",
+      "ended_at": "2026-10-26T21:34:45.0538526+08:00",
+      "log": "candidate-migration-rehearse.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273"
+    },
+    {
+      "command": "pnpm run foundation:policy",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:34:45.0565889+08:00",
+      "ended_at": "2026-10-26T21:34:45.3518642+08:00",
+      "log": "candidate-foundation-policy.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273"
+    },
+    {
+      "command": "pnpm run secrets:check",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:34:45.3542342+08:00",
+      "ended_at": "2026-10-26T21:34:53.6521244+08:00",
+      "log": "candidate-secrets-check.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273"
+    },
+    {
+      "command": "pnpm run test:balanced-candidate",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:34:53.6548029+08:00",
+      "ended_at": "2026-10-26T21:35:09.0125260+08:00",
+      "log": "candidate-test-balanced-candidate.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273"
+    },
+    {
+      "command": "pnpm run test:authoritative-ui",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:35:09.0153152+08:00",
+      "ended_at": "2026-10-26T21:35:10.7051109+08:00",
+      "log": "candidate-test-authoritative-ui.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273"
+    },
+    {
+      "command": "pnpm run types:world-read:check",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:35:10.7082831+08:00",
+      "ended_at": "2026-10-26T21:35:11.0572941+08:00",
+      "log": "candidate-types-world-read-check.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273"
+    },
+    {
+      "command": "pnpm run test:world-v2-official-edge",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:35:11.0598773+08:00",
+      "ended_at": "2026-10-26T21:35:15.6800354+08:00",
+      "log": "candidate-test-world-v2-official-edge.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273"
+    },
+    {
+      "command": "pnpm run build",
+      "exit_code": 0,
+      "started_at": "2026-10-26T21:35:15.6826367+08:00",
+      "ended_at": "2026-10-26T21:35:32.5213880+08:00",
+      "log": "candidate-build.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273"
+    },
+    {
+      "command": "pnpm exec vitest run tests/world-core/official-opening-candidate-composition.test.ts",
+      "exit_code": 0,
+      "log": "candidate-opening-composition.log",
+      "result": "PASS",
+      "runner_launch_commit": "ca80762d3cf6b606cd340775c222e5b229a5d4ba",
+      "revision_context": "Final code candidate; see final-scoped-tests for immutable repair verification."
+    },
+    {
+      "command": "pnpm secrets:check",
+      "commit": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273",
+      "exit_code": 0,
+      "log": "post-report-secrets.log",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm lint",
+      "commit": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273",
+      "exit_code": 0,
+      "log": "post-report-lint.log",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm format:check",
+      "commit": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273",
+      "exit_code": 0,
+      "log": "post-report-format.log",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm test",
+      "exit_code": 1,
+      "result": "FAIL",
+      "log": "test.log",
+      "revision_context": "Whole diagnostic started on synchronized baseline; repairs landed during execution. Not an immutable final-candidate pass.",
+      "tests": {
+        "passed": 5842,
+        "failed": 24,
+        "skipped": 743,
+        "total": 6609
+      },
+      "files": {
+        "passed": 332,
+        "failed": 17,
+        "skipped": 28,
+        "total": 377
+      },
+      "suite_initialization_errors": 10,
+      "seconds": 1561.13
+    },
+    {
+      "command": "pnpm exec vitest run tests/architecture tests/world-core/v09-disposable-postgres-evidence.test.ts tests/world-core/official-opening-candidate-composition.test.ts --reporter=json --outputFile=artifacts/world-runtime-actions/repository-audit-20261026/final-scoped-tests.json",
+      "commit": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273",
+      "exit_code": 0,
+      "log": "final-scoped-tests.log",
+      "result": "PASS"
+    },
+    {
+      "command": "pnpm exec vitest run tests/foundation/balanced-renderer-migration-compatibility.test.ts --testNamePattern 'renders identical'",
+      "commit": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273",
+      "exit_code": 1,
+      "result": "FAIL",
+      "log": "balanced-timeout-recheck.log",
+      "summary": "Existing 30000ms test timeout reproduced; 1 failed / 20 skipped. No timeout/assertion change."
+    },
+    {
+      "command": "pnpm exec tsc --noEmit --strict --skipLibCheck --allowJs --target ES2024 --module NodeNext --moduleResolution NodeNext --types node --lib 'ES2024,DOM' tests/architecture/scan-root-safety.test.ts tests/architecture/environment-safety.test.ts tests/architecture/boundary-command.test.ts tests/architecture/foundation-ci-gate.test.ts",
+      "exit_code": 0,
+      "result": "PASS",
+      "log": "test-types.log",
+      "summary": "Strict TS test-entry checking; allowJs reads existing JS imports, whose implementations are not checkJs-verified."
+    }
+  ],
+  "final_scoped_regression": {
+    "commit": "0919a99a3248ff7f5a0dedf0f2f3cc2377020273",
+    "result": "PASS",
+    "passed": 126,
+    "failed": 0,
+    "skipped": 0,
+    "total": 126,
+    "test_files": 19,
+    "log": "final-scoped-tests.json",
+    "counts_not_added_to_whole_suite": true
+  },
+  "revision_provenance": {
+    "runner_commit_field_is_launch_revision": true,
+    "note": "The loop records its launch commit, not a fresh HEAD per command. Timestamps and explicit revision_context above retain this distinction.",
+    "final_delta_after_first_candidate": [
+      "tests/world-core/v09-disposable-postgres-evidence.test.ts"
+    ]
+  },
+  "negative_cases": [
+    "Both scanners refuse missing, empty, non-directory, quoted, missing-value, blank-value, whitespace-value, unknown-option and extra-argument roots.",
+    "Both scanners actually scan one valid controlled source.",
+    "Existing forbidden browser/server imports still refuse through the canonical pnpm gate.",
+    "Portable --local CLI still refuses a non-loopback database target."
+  ],
+  "invariant_evidence": [
+    {
+      "result": "PASS",
+      "boundary_scanned_files": 410,
+      "authoritative_pattern_scanned_files": 405,
+      "authoritative_core_files": 99
+    },
+    {
+      "result": "PASS",
+      "summary": "Pinned UI/source publication checks and generated read types pass."
+    }
+  ],
+  "database_rls_evidence": [
+    {
+      "result": "PASS",
+      "scope": "Migration manifest/provenance validation and disposable embedded PGlite rehearsal only"
+    },
+    {
+      "result": "NOT_RUN",
+      "scope": "Candidate native PostgreSQL/concurrency/recovery/workerd and dedicated staging evidence"
+    }
+  ],
+  "external_baseline_evidence": {
+    "source": "SOURCE_REPORT_CHECK.json",
+    "url": "https://github.com/samuelq800/econmind-os-world-simulation/pull/193",
+    "head": "347b6b79ce5e3e335c60550171c37c19efdca383",
+    "merged_main": "0b9178e0ae52016455557e6c1b0371c7e699b2e9",
+    "matching_tree": "62ac6c3f10d0a56916e153b9ba24c61ab7c82f61",
+    "checks": [
+      {
+        "name": "official-and-native-postgres",
+        "conclusion": "success"
+      },
+      {
+        "name": "workerd",
+        "conclusion": "success"
+      },
+      {
+        "name": "workerd-native-postgres",
+        "conclusion": "success"
+      }
+    ],
+    "official_job_url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/40322911978/job/121572146104",
+    "platform": "macos-15-arm64",
+    "tests": {
+      "passed": 6330,
+      "failed": 0,
+      "skipped": 278,
+      "total": 6608
+    },
+    "files": {
+      "passed": 352,
+      "skipped": 25,
+      "total": 377
+    },
+    "captured_log_lines": [
+      "2026-10-26T12:29:26.5342830Z Image: macos-15-arm64",
+      "2026-10-26T12:52:16.8746650Z  Test Files  352 passed | 25 skipped (377)",
+      "2026-10-26T12:52:16.8787080Z       Tests  6330 passed | 278 skipped (6608)"
+    ],
+    "does_not_verify_local_candidate": true
+  },
+  "safety": {
+    "authoritative_application_trees_unchanged": true,
+    "production_mutation": false,
+    "migrations_changed": false,
+    "grants_changed": false,
+    "world_clock_started": false,
+    "formal_progress_or_decisions_changed": false,
+    "legacy_repository_changed": false,
+    "original_six_untracked_reports_preserved": true
+  },
+  "unresolved_gaps": [
+    "Independent P0 review remains pending; no push/merge/deployment.",
+    "Whole Windows suite remains FAIL: safe-open POSIX initialization, UID/mode guards, graceful signals, default locale control, durable directory fsync and rendering timeout remain open.",
+    "743 initial skips remain skips; 10 initialization failures remain failures.",
+    "Eight initially failing assertions have passing scoped repair evidence; no synthetic revised whole-suite totals are claimed.",
+    "Full immutable final-candidate whole-suite run on a supported environment remains NOT_RUN.",
+    "Social mixed production history still refuses unclassified internal funding/cost Event; no empty reducer was added.",
+    "Actual source/seat/seed/runtime and human-required ADR gaps remain open.",
+    "Mac-private Social handoff, closure ledger and unintegrated C/A/F candidate artifacts were not available for independent inspection."
+  ],
+  "archive": {
+    "path": "VALIDATION_LOGS.json.gz",
+    "sha256": "b0b769063b1e77abb7e4d5e24efa4867ed58e4c2c08ce5bb7e631213693c4000",
+    "bytes": 73977,
+    "format": "gzip JSON containing exact log text, byte length and SHA256 per file",
+    "files": [
+      {
+        "name": "authoritative-patterns.log",
+        "sha256": "f4c7376410638c13dd24a91e78aecd1d6dc838f3a178d7c302e4f0a4ae3762e5",
+        "bytes": 98
+      },
+      {
+        "name": "balanced-timeout-recheck.log",
+        "sha256": "75019c0b7a25a1f2d4cb7f5df61c264b734d0bced4b4a083b0a5734fd42a4905",
+        "bytes": 1365
+      },
+      {
+        "name": "boundaries-cli.log",
+        "sha256": "4a1c3dc55cb29820bd9f97350e94f3627fb3bb3397b9d48b6197ff2ca4764dfb",
+        "bytes": 487
+      },
+      {
+        "name": "boundaries-final.log",
+        "sha256": "749336c43c8f07130dd71b1c7d6178e1bb3e2579bfff93fa577247a9c94d10d3",
+        "bytes": 1013
+      },
+      {
+        "name": "build.log",
+        "sha256": "615715554f8bf207358df3ce66a3cb9bc907ece005c60b7c626dbb0425e237f4",
+        "bytes": 19992
+      },
+      {
+        "name": "candidate-build.log",
+        "sha256": "de2eaad6b45cd5da23b6bca79b884c0f52f84f099aa625ed79791d3358905728",
+        "bytes": 19379
+      },
+      {
+        "name": "candidate-checks.jsonl",
+        "sha256": "d328f0bf22f89cebaa288b97979528486e3028c9b4ea8bd7aad0990983a78c9e",
+        "bytes": 3578
+      },
+      {
+        "name": "candidate-env-check.log",
+        "sha256": "c997829c93aa5c529050079de2a807ece3a7e8eea8da32fe561c2057339b3476",
+        "bytes": 287
+      },
+      {
+        "name": "candidate-format-check.log",
+        "sha256": "0b95efe7a1df96aa81440f70658e5c8169546d284587f7ba2e8d268fd1aaea15",
+        "bytes": 90
+      },
+      {
+        "name": "candidate-foundation-policy.log",
+        "sha256": "b9695bd188266b66bd1117764fe1199c68f6ae0835029ae332012debdea7e91d",
+        "bytes": 90
+      },
+      {
+        "name": "candidate-lint.log",
+        "sha256": "cc5a0b39c7052d24c24888403c48018b4fcccc9d799f81be6c9c30c9e19c85fc",
+        "bytes": 12
+      },
+      {
+        "name": "candidate-migration-rehearse.log",
+        "sha256": "3ad57282bf56b37a44fd11437c3cfa062a1c3f88bb5ac013b082c63e60b99557",
+        "bytes": 588
+      },
+      {
+        "name": "candidate-migration-validate.log",
+        "sha256": "2105b815c3facc19c55f683822bb2456a720875058076b9d3b176aaff5afc843",
+        "bytes": 108
+      },
+      {
+        "name": "candidate-opening-composition.log",
+        "sha256": "eed500898fa6b5ef261073ea5c3a4adb8e45bcf0b9aa6c86c1e24ce299fbbd80",
+        "bytes": 200
+      },
+      {
+        "name": "candidate-secrets-check.log",
+        "sha256": "0a7f6b36d4fef2d62af00c808c0216edd40a0e9c2ef17812c230e62878f4070e",
+        "bytes": 96
+      },
+      {
+        "name": "candidate-test-architecture.log",
+        "sha256": "54e249810899437c8fefd6b0e32b336e40a25c3a69d612fae89c6be1b485013e",
+        "bytes": 892
+      },
+      {
+        "name": "candidate-test-authoritative-ui.log",
+        "sha256": "bb008a715a97ad5bba14b5361e7fa38a4fe9cf555a628b70f9c124fb870d6682",
+        "bytes": 567
+      },
+      {
+        "name": "candidate-test-balanced-candidate.log",
+        "sha256": "fc95f70ce1540538369e03828b212439480fe49713dc1db13017f19ef0555e69",
+        "bytes": 593
+      },
+      {
+        "name": "candidate-test-world-v2-official-edge.log",
+        "sha256": "b4f53105c15973a18decaa28edb62605e9739f6af77d413fcca097e128df712f",
+        "bytes": 548
+      },
+      {
+        "name": "candidate-typecheck.log",
+        "sha256": "22e0a206135a7f634c24f3171ff01a6b206898343dc0f4e3fd6106cd5b604fa8",
+        "bytes": 647
+      },
+      {
+        "name": "candidate-types-world-read-check.log",
+        "sha256": "2dc49d66358641d724b9ba53797874881f35180996684d3e63e5a990b86a4ede",
+        "bytes": 86
+      },
+      {
+        "name": "checks.jsonl",
+        "sha256": "fc440a93ff8c0330bd402be5570c75a6f292309512af5a592738b01058aa7e90",
+        "bytes": 1507
+      },
+      {
+        "name": "disposable-path-regression.log",
+        "sha256": "717118aa1f3ae4b406cc3ba6c5b3d9c62ceefa534e54c8a65e897f017717c3bb",
+        "bytes": 199
+      },
+      {
+        "name": "final-checks.jsonl",
+        "sha256": "80aaac3e61570eb7ac935bb46240fc11580d568cb890ef50c86d2f0a36cfcb17",
+        "bytes": 385
+      },
+      {
+        "name": "final-scoped-tests.json",
+        "sha256": "bb997a820c660791fd3ee9d275f66f80691de1b3c6e65089ccf4e7893f3a06d7",
+        "bytes": 52192
+      },
+      {
+        "name": "final-scoped-tests.log",
+        "sha256": "f0e7901941fa2bae3bbe37629c9248f82a7578497b37744559703a963014ee49",
+        "bytes": 147
+      },
+      {
+        "name": "focused-diagnostics.log",
+        "sha256": "d59173e95519e5fef611590e88bff8c4a107f7c09f6ed3a65bcacaf489901c2a",
+        "bytes": 3842
+      },
+      {
+        "name": "format-changed.log",
+        "sha256": "3244fa8fbcc661a6ef8e99a5f8f5e955811d8a77de013164d472d18aa69e0b14",
+        "bytes": 758
+      },
+      {
+        "name": "format-check-after.log",
+        "sha256": "0b95efe7a1df96aa81440f70658e5c8169546d284587f7ba2e8d268fd1aaea15",
+        "bytes": 90
+      },
+      {
+        "name": "format-check.log",
+        "sha256": "e726353a96c0ef2108eaafe482388407549488b01fc9f04b0d59d486c15b3728",
+        "bytes": 51241
+      },
+      {
+        "name": "format-final.log",
+        "sha256": "0b95efe7a1df96aa81440f70658e5c8169546d284587f7ba2e8d268fd1aaea15",
+        "bytes": 90
+      },
+      {
+        "name": "foundation-policy.log",
+        "sha256": "b9695bd188266b66bd1117764fe1199c68f6ae0835029ae332012debdea7e91d",
+        "bytes": 90
+      },
+      {
+        "name": "index-refresh.log",
+        "sha256": "c5c8be85b6e42f18ca246f3c2eb8ffbe1c864392bac04f9da7c875321c6f9eb5",
+        "bytes": 66361
+      },
+      {
+        "name": "lint-after.log",
+        "sha256": "cc5a0b39c7052d24c24888403c48018b4fcccc9d799f81be6c9c30c9e19c85fc",
+        "bytes": 12
+      },
+      {
+        "name": "lint-final.log",
+        "sha256": "cc5a0b39c7052d24c24888403c48018b4fcccc9d799f81be6c9c30c9e19c85fc",
+        "bytes": 12
+      },
+      {
+        "name": "lint.log",
+        "sha256": "aefd7ad8f82279c208cdc5389a87aa53b38c14813a651455421faff258949eeb",
+        "bytes": 181111
+      },
+      {
+        "name": "migration-rehearse.log",
+        "sha256": "3ad57282bf56b37a44fd11437c3cfa062a1c3f88bb5ac013b082c63e60b99557",
+        "bytes": 588
+      },
+      {
+        "name": "migration-validate.log",
+        "sha256": "2105b815c3facc19c55f683822bb2456a720875058076b9d3b176aaff5afc843",
+        "bytes": 108
+      },
+      {
+        "name": "official-edge.log",
+        "sha256": "f8c6866dd6494d401c9c62b452d743bb9ccc4889011c7ae856157fbe31109888",
+        "bytes": 548
+      },
+      {
+        "name": "post-report-checks.jsonl",
+        "sha256": "affb527b689e9fd8fb46344509ef7ad445efd57fc8081396356c28f9a3d76e15",
+        "bytes": 382
+      },
+      {
+        "name": "post-report-format.log",
+        "sha256": "0b95efe7a1df96aa81440f70658e5c8169546d284587f7ba2e8d268fd1aaea15",
+        "bytes": 90
+      },
+      {
+        "name": "post-report-lint.log",
+        "sha256": "cc5a0b39c7052d24c24888403c48018b4fcccc9d799f81be6c9c30c9e19c85fc",
+        "bytes": 12
+      },
+      {
+        "name": "post-report-secrets.log",
+        "sha256": "cfa17eb7d67a5887cf5e78bbafb4616f5340f8f22efe74b988eed5c6d1f60d80",
+        "bytes": 96
+      },
+      {
+        "name": "remote-readme.log",
+        "sha256": "f6593348c4b105c67911b1ac2d2bd827bd67f1500e456dbb5d2b17713d8793e0",
+        "bytes": 55799
+      },
+      {
+        "name": "secrets-check.log",
+        "sha256": "37ff2f75f3e4e1fee4b302246de9ce0650dd758b1f522fe6e1e2db583f9752ab",
+        "bytes": 96
+      },
+      {
+        "name": "test-architecture.log",
+        "sha256": "8962d573d6790aa1955081a143fd873025e6faa7409745ac0378fd22ec337fd8",
+        "bytes": 1324
+      },
+      {
+        "name": "test-authoritative-ui.log",
+        "sha256": "bb008a715a97ad5bba14b5361e7fa38a4fe9cf555a628b70f9c124fb870d6682",
+        "bytes": 567
+      },
+      {
+        "name": "test-balanced-candidate.log",
+        "sha256": "fc95f70ce1540538369e03828b212439480fe49713dc1db13017f19ef0555e69",
+        "bytes": 593
+      },
+      {
+        "name": "test-types.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      {
+        "name": "test.log",
+        "sha256": "dfe5c7c090d39cc4d6786807981b680e3a459fc9af624bc5dea60f9fece9065b",
+        "bytes": 33744
+      },
+      {
+        "name": "tooling-regressions-final.log",
+        "sha256": "071275f71ff3865aa34541418e3d3177edd54ee805c25779578acf997d0e8c85",
+        "bytes": 200
+      },
+      {
+        "name": "tooling-regressions.log",
+        "sha256": "2782d92d25646c6a187f941a5c7f7efaacb07dc164fa8c49c7ad464f99bdf546",
+        "bytes": 1429
+      },
+      {
+        "name": "typecheck.log",
+        "sha256": "ca39d14d37295039925de178d180235ed2d6f16100b4648ce4b591fcfbd89633",
+        "bytes": 647
+      },
+      {
+        "name": "types-world-read-check.log",
+        "sha256": "2dc49d66358641d724b9ba53797874881f35180996684d3e63e5a990b86a4ede",
+        "bytes": 86
+      },
+      {
+        "name": "ui-final.log",
+        "sha256": "bb008a715a97ad5bba14b5361e7fa38a4fe9cf555a628b70f9c124fb870d6682",
+        "bytes": 567
+      }
+    ]
+  }
+}

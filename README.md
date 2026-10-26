@@ -5,6 +5,17 @@ deploy the original EconMind main site. There is one authoritative World/Core
 path; the product must not create separate ordinary-World and Season-1 economic
 engines or hidden buffs.
 
+## Local repository audit candidate (2026-10-26)
+
+[Audit findings and repairs](docs/reports/repository-audit-20261026/IMPLEMENTATION_REPORT.md)
+and [command evidence](docs/reports/repository-audit-20261026/TEST_EVIDENCE.json)
+describe the local maintenance candidate based on main `0b9178e0` (PR193).
+Status is `IMPLEMENTED_UNVERIFIED`: the architecture-gate repair requires
+independent review, and the Windows whole-suite failures remain recorded.
+This candidate has not been pushed, merged or deployed. It does not advance
+`status/progress.json`, adopt opening sources or activate World / Clock.
+The dated checkpoints below retain their original scope and evidence.
+
 ## Verified preparation checkpoint (2026-10-24)
 
 `PREPARATION_ONLY_NOT_V09_2_STARTED`. [PR179](https://github.com/samuelq800/econmind-os-world-simulation/pull/179)

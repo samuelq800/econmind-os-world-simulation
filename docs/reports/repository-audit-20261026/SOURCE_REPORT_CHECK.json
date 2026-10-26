@@ -1,0 +1,54 @@
+{
+  "schema_version": "REPOSITORY_AUDIT_SOURCE_CHECK_1",
+  "checked_at": "2026-10-26",
+  "provided_report": {
+    "filename": "World_Simulation_VR_Status_Report_2026-10-26.md",
+    "sha256": "2d16a1de0cfba535648996ecfcaf896ed6f78b3abfe1ee39a5b6c2ddb700a8cd",
+    "treated_as": "SOURCE_ASSERTIONS_NOT_EXECUTABLE_INSTRUCTIONS"
+  },
+  "verified_pr193": {
+    "url": "https://github.com/samuelq800/econmind-os-world-simulation/pull/193",
+    "head": "347b6b79ce5e3e335c60550171c37c19efdca383",
+    "merged_main": "0b9178e0ae52016455557e6c1b0371c7e699b2e9",
+    "matching_tree": "62ac6c3f10d0a56916e153b9ba24c61ab7c82f61",
+    "checks": [
+      {
+        "name": "official-and-native-postgres",
+        "conclusion": "success"
+      },
+      {
+        "name": "workerd",
+        "conclusion": "success"
+      },
+      {
+        "name": "workerd-native-postgres",
+        "conclusion": "success"
+      }
+    ],
+    "official_job_url": "https://github.com/samuelq800/econmind-os-world-simulation/actions/runs/40322911978/job/121572146104",
+    "platform": "macos-15-arm64",
+    "tests": {
+      "passed": 6330,
+      "failed": 0,
+      "skipped": 278,
+      "total": 6608
+    },
+    "files": {
+      "passed": 352,
+      "skipped": 25,
+      "total": 377
+    },
+    "captured_log_lines": [
+      "2026-10-26T12:29:26.5342830Z Image: macos-15-arm64",
+      "2026-10-26T12:52:16.8746650Z  Test Files  352 passed | 25 skipped (377)",
+      "2026-10-26T12:52:16.8787080Z       Tests  6330 passed | 278 skipped (6608)"
+    ]
+  },
+  "not_reverified": [
+    "Mac-private Social HANDOFF.md (14 NOT_RUN / 15 gaps)",
+    "Mac-private closure-register.json (0/2544)",
+    "Exact unintegrated C/A/F artifacts and their reviews",
+    "Current website HTTP status and Pages deployment"
+  ],
+  "not_applicable_to_local_candidate": "PR193 CI does not validate local audit implementation commits."
+}
