@@ -18,6 +18,20 @@ import {
   PostgresSqlDatabase,
   PostgresTransactionError,
 } from '../persistence/postgres-sql-database.js';
+import { readGov01PrivateAccountInTransaction } from './gov01-private-source-host.js';
+
+/** Controlled Node24 private application entry; never a Command/HTTP installer.
+ * The existing server-owned adapter is the only connector input. The fixed host
+ * loads independently enrolled trust/current binding, or refuses without data. */
+export async function readInstalledGov01AccountInTransaction(
+  input: Readonly<{
+    database: PostgresSqlDatabase;
+    context: Gov01ReceiverContext;
+    request: Gov01ReadRequest;
+  }>,
+) {
+  return readGov01PrivateAccountInTransaction(input);
+}
 
 function demand(value: unknown, code: string): asserts value {
   if (!value) throw new NativeCashCandidateInvalid(code);

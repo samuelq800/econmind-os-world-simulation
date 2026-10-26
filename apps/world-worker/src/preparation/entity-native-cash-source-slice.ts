@@ -11,6 +11,7 @@ import {
   type Gov01TypedRegisterBindingData,
 } from './b06-gov01-adopted-record-source.js';
 import type { SqlExecutor } from '../persistence/sql-database.js';
+import { isGov01PrivateNativeRecordSource } from './gov01-private-source-host.js';
 import {
   inspectB06Country01TypedRegisterPreparation,
   type B06TypedRegisterPreparationInput,
@@ -248,25 +249,62 @@ export interface Gov01TestOnlyAccountSourceSlice {
 }
 
 /**
- * Actual-source receiving guard. No actual installer/control mapping is
- * supplied in this change. A structural port or fixture is never invoked as
- * actual authority; implementing that private installed edge needs its own
- * concrete reviewed custody/target/current-control contract.
+ * Fixed private installed edge only. Recognition never invokes an unknown
+ * structural port; no fixture or caller callback can enroll a source.
  */
 export async function readGov01AdoptedAccountCountrySourceSliceFrom(
   context: Gov01ReceiverContext,
   installedSource: unknown,
-  _executor: SqlExecutor,
-  request: Gov01ReadRequest,
-): Promise<never> {
-  captureGov01ReceiverContext(context);
-  parseGov01ReadRequest(request);
+  executor: SqlExecutor,
+  requestValue: Gov01ReadRequest,
+) {
+  const captured = captureGov01ReceiverContext(context);
+  const request = parseGov01ReadRequest(requestValue);
   demand(
     !isTestOnlyGov01RecordSource(installedSource),
     'GOV01_TEST_ONLY_NOT_ACTUAL_SOURCE',
   );
-  throw new NativeCashCandidateInvalid(
+  demand(
+    isGov01PrivateNativeRecordSource(installedSource),
     'GOV01_ACTUAL_INSTALLATION_NOT_SUPPLIED',
+  );
+  return installedSource.withCurrentBindingFrom(
+    executor,
+    request,
+    async (value, use) => {
+      const binding = parseGov01TypedRegisterBindingData(value, request);
+      demand(
+        binding.currency.code === captured.observedNativeCurrencyCandidate,
+        'GOV01_REFERENCE_CURRENCY_CONTEXT_CONFLICT',
+      );
+      await use.assertCurrentFrom(executor, request);
+      // No await/unowned action after the immediate use check and assembly.
+      return freezeFinancialInput({
+        schemaVersion: 'gov01-installed-account-source-read-v1' as const,
+        readStatus:
+          'QUALIFIED_INSTALLED_RECORD_READ_NOT_WORLD_ADOPTION' as const,
+        stableId: GOV01_ORIGINAL_ID,
+        ownerId: 'ENTITY_GOVERNMENT_01' as const,
+        countryId: 'COUNTRY_01' as const,
+        batchId: 'B06' as const,
+        unit: 'ACCOUNT' as const,
+        actualTypedRegisterBinding: binding,
+        actualAvailableNativeCash: null,
+        currentPermission: 'UNKNOWN' as const,
+        originalFieldStages: {
+          sourceComplete: false,
+          engineeringWired: false,
+          validationPassed: false,
+          formallyAdopted: false,
+        },
+        originalIdsClosed: 0 as const,
+        accountIdsIssued: 0 as const,
+        productionAuthority: false as const,
+        admissionAllowed: false as const,
+        activationAllowed: false as const,
+        runtimeConnected: false as const,
+      });
+    },
   );
 }
 
