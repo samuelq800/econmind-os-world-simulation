@@ -11,6 +11,8 @@ import {
 } from '../../apps/world-worker/dist/social-office-demo/consumer.js';
 // @ts-expect-error -- Test-only A .mjs data bridge; applications do not import tools.
 import * as A from '../../tools/social-office-demo/check-opening-finance.mjs';
+// @ts-expect-error -- Test-only .mjs report helper; no host is started by importing it.
+import { serializeSocialOfficeDemoEvidence } from '../../tools/social-office-demo/run.mjs';
 import {
   loadSocialOfficeDemoScenario,
   type SocialOfficeDemoScenario,
@@ -109,6 +111,41 @@ describe('G canonical identity successor, Core construction only, no native inst
       sha,
     );
   }
+  it('diagnostic serialization preserves actual Core FINAL SimTime and numeric HTTP/cleanup metadata together', () => {
+    const command = plan(),
+      receipt = C.createFinalCommandReceipt({
+        command,
+        outcome: 'REJECTED',
+        reasonCode: 'PROGRAMME_DURATION_NOT_MET',
+        transition: null,
+        simTime: C.SimTime.fromTicks('86400000'),
+        recordedAtReal: '2026-10-27T00:00:00.000Z',
+      }),
+      automatic = { status: 'FINAL', receipt },
+      originalCanonical = C.canonicalSerialize(automatic);
+    expect(
+      Object.getOwnPropertyDescriptor(receipt.simTime, 'ticks')?.value,
+    ).toBe(86400000n);
+    const wire = JSON.parse(
+      serializeSocialOfficeDemoEvidence({
+        httpStatus: 200,
+        cleanup: { activeSessions: 0 },
+        automatic,
+      }),
+    ) as {
+      httpStatus: number;
+      cleanup: { activeSessions: number };
+      automatic: { receipt: { simTime: string } };
+    };
+    expect(wire.httpStatus).toBe(200);
+    expect(wire.cleanup.activeSessions).toBe(0);
+    expect(wire.automatic).toEqual(JSON.parse(originalCanonical));
+    expect(wire.automatic.receipt.simTime).toBe('86400000');
+    expect(C.canonicalSerialize(automatic)).toBe(originalCanonical);
+    expect(() =>
+      serializeSocialOfficeDemoEvidence({ unadapted: 1n, httpStatus: 200 }),
+    ).toThrow();
+  });
   it('canonical identity maps alphabetic UUIDs consistently through actual Core construction and receipt lookup', () => {
     const original = 'abcdefab-cdef-4abc-8def-abcdefabcdef',
       command = plan();
