@@ -30,6 +30,95 @@ beforeAll(async () => {
     openingFinanceCandidateUtf8: C.canonicalSerialize(f),
   });
 });
+
+describe('G execution identity original successor, documentary not native grant', () => {
+  it('execution identity retains stable manual/publisher tuples without a current grant or extra person', () => {
+    const r = scenario.initialPublication.records.find(
+      (x) => x.recordId === 'G_SOCIAL_EXECUTION_IDENTITY_V1',
+    )!;
+    const value = JSON.parse(r.rawUtf8) as {
+      manual: Record<string, unknown>;
+      publisher: Record<string, unknown>;
+    };
+    expect(r.role).toBe('CURRENT_AUTHORIZATION');
+    expect(scenario.initialPublication.selectedRecordIds).toContain(r.recordId);
+    expect(value.manual.actorId).toBe(scenario.actorId);
+    expect(value.manual.authSubject).toBe(scenario.authSubject);
+    expect(value.publisher.commandType).toBe(C.SOCIAL_JOB_MATCH_DUE_COMMAND);
+    expect(value.publisher.ruleVersion).toBe(C.SOCIAL_JOB_MATCH_RULE_VERSION);
+    expect(value.publisher.validFromDay).toBe('1');
+    expect(value.publisher.validUntilDay).toBe('2');
+    for (const part of [value.manual, value.publisher]) {
+      expect(part).not.toHaveProperty('active');
+      expect(part).not.toHaveProperty('authorizationVersion');
+    }
+    const catalog = JSON.parse(
+      scenario.initialPublication.records.find(
+        (x) => x.recordId === 'COMMON_RF_RESOURCE_CATALOG_V1',
+      )!.rawUtf8,
+    ) as { resources: { resourceId: string }[] };
+    expect(
+      catalog.resources.some(
+        (x) =>
+          x.resourceId === value.manual.actorId ||
+          x.resourceId === value.publisher.actorId,
+      ),
+    ).toBe(false);
+  });
+  it('execution identity original hash is bound inside the genuine seed source and changes its fingerprint', () => {
+    const identity = scenario.initialPublication.records.find(
+      (x) => x.recordId === 'G_SOCIAL_EXECUTION_IDENTITY_V1',
+    )!;
+    const payload = JSON.parse(scenario.seed.sources[0]!.canonicalPayload) as {
+      executionIdentitySHA256: string;
+    };
+    expect(payload.executionIdentitySHA256).toBe(identity.sha256);
+    expect(scenario.seed.fingerprint).not.toBe(
+      'sha256:75ad9f48846a605b4c5eafb8d56927ec240a8c62b567ce38291c6eed53c425c3',
+    );
+    expect(scenario.initialPublication.records).toHaveLength(19);
+    expect(opening().openingReadFacts.sourceBinding.purpose).toBeNull();
+  });
+  it('execution identity refuses a rehashed replacement of the original manual actor', () => {
+    const p = mutate('G_SOCIAL_EXECUTION_IDENTITY_V1', (v) => {
+      (v.manual as { actorId: string }).actorId = 'ACTOR_REPLACEMENT';
+    });
+    expect(() => opening(p)).toThrow('execution identity original mismatch');
+  });
+  it('execution identity refuses a rehashed publisher rule or mutable current eligibility field', () => {
+    const p = mutate('G_SOCIAL_EXECUTION_IDENTITY_V1', (v) => {
+      (v.publisher as { ruleVersion: string }).ruleVersion = 'OTHER_RULE';
+    });
+    expect(() => opening(p)).toThrow('execution identity original mismatch');
+    const q = mutate('G_SOCIAL_EXECUTION_IDENTITY_V1', (v) => {
+      (v.manual as Record<string, unknown>).active = 'true';
+    });
+    expect(() => opening(q)).toThrow('execution identity original mismatch');
+  });
+  it('execution identity must be selected, not merely present among retained raw records', () => {
+    const p = {
+      ...scenario.initialPublication,
+      selectedRecordIds: scenario.initialPublication.selectedRecordIds.filter(
+        (id) => id !== 'G_SOCIAL_EXECUTION_IDENTITY_V1',
+      ),
+    };
+    expect(() => opening(p)).toThrow(
+      'original selected G_SOCIAL_EXECUTION_IDENTITY_V1',
+    );
+  });
+  it('execution identity successor cannot reuse the old seed fingerprint as its native opening identity', () => {
+    expect(() =>
+      bindSocialOfficeSimulatedOpening({
+        ...binding(),
+        expectedWorldId: scenario.scope.worldId,
+        expectedCountryId: scenario.scope.countryId,
+        expectedSeedId: scenario.seed.seedId,
+        expectedSeedFingerprint:
+          'sha256:75ad9f48846a605b4c5eafb8d56927ec240a8c62b567ce38291c6eed53c425c3' as C.CanonicalSha256,
+      }),
+    ).toThrow('retained opening seed mismatch');
+  });
+});
 function binding(p = scenario.initialPublication, generation = '1') {
   const publicationUtf8 = C.canonicalSerialize(p);
   return { publicationUtf8, generation, manifestHash: digest(publicationUtf8) };

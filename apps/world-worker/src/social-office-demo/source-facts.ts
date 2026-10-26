@@ -29,7 +29,47 @@ export const SOCIAL_DEMO_RECORD_IDS = Object.freeze({
   domain: 'G_SOCIAL_DOMAIN_FACTS_V1',
   policy: 'G_SOCIAL_ACTION_POLICY_V1',
   catalog: 'COMMON_RF_RESOURCE_CATALOG_V1',
+  identity: 'G_SOCIAL_EXECUTION_IDENTITY_V1',
 });
+/** Documentary identity only: current grants, seats, active/version and locks remain native. */
+export const SOCIAL_DEMO_EXECUTION_IDENTITY_V1 = freeze({
+  schemaVersion: 'g-social-office-execution-identity-v1',
+  sourceClass: 'SIMULATED_OPENING',
+  simulationId: 'SINGLE_SOCIAL_OFFICE_SIM_V1',
+  worldId: 'WORLD_SOCIAL_SINGLE_DEMO_V1',
+  countryId: 'COUNTRY_01',
+  locationId: 'REGION_01_E1',
+  selectionFingerprint:
+    'sha256:b7ff5facc4e3301d265279762d18cec18a5258dfa061ea88cffb4a03693e8036',
+  manual: {
+    authSubject: '7f1c4f94-75b4-4876-a741-50bd31e14b21',
+    actorId: 'ACTOR_SOCIAL_SINGLE_DEMO_V1',
+    teamId: 'TEAM_SOCIAL_SINGLE_DEMO_V1',
+    officeId: 'SOCIAL',
+    capabilities: [
+      'READ_AUTHORIZED_PROJECTION_AND_FINAL',
+      'SOCIAL_DEVELOPMENT',
+      'SOCIAL_EDUCATION',
+      'SOCIAL_LABOUR',
+    ],
+    actionCapabilities: {
+      PLAN: 'SOCIAL_LABOUR',
+      ADMIT: 'SOCIAL_EDUCATION',
+      GRADUATE: 'SOCIAL_EDUCATION',
+      SERVE: 'SOCIAL_DEVELOPMENT',
+    },
+  },
+  publisher: {
+    issuerRef: 'SIMULATED_DUE_MATCH_PUBLISHER_V1',
+    publisherVersion: 'SIM_SOCIAL_DUE_PUBLISHER_VERSION_V1',
+    actorId: 'ACTOR_SOCIAL_DUE_MATCH_PUBLISHER_V1',
+    authSubject: '7f1c4f94-75b4-4876-a741-50bd31e14b21',
+    commandType: 'CORE_SOCIAL_JOB_MATCH_SETTLEMENT_V1',
+    ruleVersion: 'SOCIAL_JOB_MATCH_RULE_V1',
+    validFromDay: '1',
+    validUntilDay: '2',
+  },
+} as const);
 type Kind = NonNullable<SocialOfficeReadFactsV1['sourceBinding']['purpose']>;
 type FixedFacts = Omit<
   SocialOfficeReadFactsV1,
@@ -249,6 +289,17 @@ function read(input: BindingInput) {
   const policy = body(
     one(p, SOCIAL_DEMO_RECORD_IDS.policy, 'CURRENT_AUTHORIZATION'),
   );
+  const identityRecord = one(
+    p,
+    SOCIAL_DEMO_RECORD_IDS.identity,
+    'CURRENT_AUTHORIZATION',
+  );
+  const identity = body(identityRecord);
+  if (
+    canonicalSerialize(identity) !==
+    canonicalSerialize(SOCIAL_DEMO_EXECUTION_IDENTITY_V1)
+  )
+    fail('selected execution identity original mismatch');
   object(policy, [
     'schemaVersion',
     'worldId',
@@ -321,6 +372,7 @@ function read(input: BindingInput) {
     opening: opening as unknown as SocialDemoOpeningRecordV1,
     physicalRecords,
     catalogRecord,
+    identityRecord,
     resources,
     policy,
     day,
@@ -416,6 +468,7 @@ export function bindSocialOfficeSimulatedOpening(
       sha256,
     })),
     catalogSHA256: r.catalogRecord.sha256,
+    executionIdentitySHA256: r.identityRecord.sha256,
   };
   if (
     seed.sources[0]!.sourceKind !== 'DOCUMENTED_ASSUMPTION' ||
