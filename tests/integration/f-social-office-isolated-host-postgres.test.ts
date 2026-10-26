@@ -1,5 +1,5 @@
 /** New owned infrastructure controls, not the future three-function demo. */
-import { chmod, lstat, readFile } from 'node:fs/promises';
+import { chmod, lstat, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { createOwnedSocialOfficeDatabase } from '../support/f-social-office-isolated-host.js';
@@ -51,6 +51,39 @@ native('F Social isolated host — actual owned PG16 empty fixture', () => {
       } finally {
         await chmod(markerPath, 0o600);
       }
+      const instance = JSON.parse(
+        await readFile(
+          path.join(database.marker.root, 'server-instance.json'),
+          'utf8',
+        ),
+      );
+      expect(instance.postmasterPID).toBe(actual.postmasterPID);
+      const pidPath = path.join(database.marker.data, 'postmaster.pid');
+      const originalPIDFile = await readFile(pidPath, 'utf8');
+      const wrongPID = originalPIDFile.split('\n');
+      wrongPID[0] = '2147483647'; // Positive sentinel; never queried/signalled.
+      await writeFile(pidPath, wrongPID.join('\n'));
+      try {
+        await expect(database.close()).rejects.toMatchObject({
+          code: 'SOCIAL_HOST_CLEANUP_INCOMPLETE',
+          cause: { code: 'SOCIAL_HOST_PID_INSTANCE_MISMATCH' },
+        });
+        expect((await readFile(pidPath, 'utf8')).split('\n')[0]).toBe(
+          '2147483647',
+        );
+        console.log(
+          JSON.stringify({
+            case: 'WRONG_CURRENT_PID_REFUSED_BEFORE_PROCESS_CONTROL',
+            originalPostmaster: instance,
+            foreignProcessTouched: false,
+          }),
+        );
+      } finally {
+        await writeFile(pidPath, originalPIDFile);
+      }
+      expect((await database.inspect()).postmasterPID).toBe(
+        instance.postmasterPID,
+      );
       // A deliberate new, verified cleanup attempt can recover; no automatic
       // retry or stop of a foreign target was made after the custody refusal.
       const closes = await Promise.all([database.close(), database.close()]);
