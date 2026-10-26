@@ -180,7 +180,9 @@ suite('D native Social atomic/sole-reader exact simulation', () => {
       ).rows,
     ).toHaveLength(0);
     scenario = await socialScenario();
-    await installFixture(admin, scenario);
+    await installFixture(admin, scenario, {
+      sourceRoot: path.resolve(import.meta.dirname, '../..'),
+    });
     await grantFixtureRoles(admin);
     settler = new Pool({ ...settings, user: 'd_social_settler' });
     reader = new Pool({ ...settings, user: 'd_social_reader' });
@@ -311,6 +313,7 @@ suite('D native Social atomic/sole-reader exact simulation', () => {
     expect((await counts()).events).toBe(0);
   });
   it('commits a real plan exactly once under two simultaneous same-ID requests', async () => {
+    expect(await repo.readDueMatchPlan()).toBeNull();
     plan = command(scenario, 'PLAN');
     const p = principal();
     const results = await Promise.all([
@@ -507,6 +510,7 @@ suite('D native Social atomic/sole-reader exact simulation', () => {
       'update world_v2.social_demo_automatic_authorization set active=false',
     );
     const before = await counts();
+    await expect(repo.readDueMatchPlan()).rejects.toThrow('ROLLED_BACK');
     await expect(repo.executeDueMatch({ command: due })).rejects.toThrow(
       'ROLLED_BACK',
     );
@@ -526,10 +530,35 @@ suite('D native Social atomic/sole-reader exact simulation', () => {
         }),
       ],
     );
+    await admin.query(
+      'update world_v2.current_commit_authorization set active=false',
+    );
+    const context = await repo.readDueMatchPlan();
+    expect(context).toMatchObject({
+      kind: 'PENDING_PLAN',
+      headWorldVersion: '3',
+      simTime: '86400000',
+      originalPlanCommand: { fingerprint: plan.fingerprint },
+    });
     const result = await repo.executeDueMatch({ command: due });
     expect(result.status).toBe('FINAL');
     if (result.status === 'FINAL')
       expect(result.receipt.outcome).toBe('COMMITTED');
+    await authority.query(
+      'select world_v2.social_demo_revise_manual_authority($1::jsonb)',
+      [
+        C.canonicalSerialize({
+          simulationId: scenario.scope.simulationId,
+          worldId: scenario.scope.worldId,
+          countryId: scenario.scope.countryId,
+          authSubject: scenario.authSubject,
+          expectedAuthorizationVersion: 'SOCIAL_AUTH_V2',
+          nextAuthorizationVersion: 'SOCIAL_AUTH_V3',
+          active: true,
+          observedAtReal: new Date().toISOString(),
+        }),
+      ],
+    );
     expect(
       (await readRepo.readProjection({ principal: principal() })).head
         .worldVersion,
@@ -581,6 +610,15 @@ suite('D native Social atomic/sole-reader exact simulation', () => {
       'update world_v2.social_demo_automatic_authorization set active=false',
     );
     const recovered = await repo.executeDueMatch({ command: due });
+    const retainedContext = await repo.readDueMatchPlan();
+    expect(retainedContext).toMatchObject({
+      kind: 'EXISTING_SETTLEMENT',
+      existingSettlementCommand: {
+        fingerprint: due.fingerprint,
+        expectedWorldVersion: '3',
+        simTime: due.simTime,
+      },
+    });
     expect(recovered.status).toBe('FINAL');
     if (recovered.status === 'FINAL')
       expect(recovered.receipt.outcome).toBe('COMMITTED');
