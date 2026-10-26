@@ -190,6 +190,8 @@ export async function startIsolatedSocialOfficeHost(...args) {
     dayIndex = '0';
   let readPool, publisherPool, authorityPool, leasePool, admin;
   let boundFence;
+  let responseLossArmed = false,
+    lostResponse = null;
   const requests = new Set(),
     controls = new Set();
   const close = () => {
@@ -383,7 +385,7 @@ export async function startIsolatedSocialOfficeHost(...args) {
         .filter((x) => x.toLowerCase() === 'host');
       if (
         closing ||
-        requests.size > support.ISOLATED_SOCIAL_HOST_LIMITS.inFlightRequests ||
+        requests.size >= support.ISOLATED_SOCIAL_HOST_LIMITS.inFlightRequests ||
         req.socket.remoteAddress !== '127.0.0.1' ||
         hostHeaders.length !== 1 ||
         req.headers.host !== origin.slice(7)
@@ -394,6 +396,32 @@ export async function startIsolatedSocialOfficeHost(...args) {
       }
       await assertLive();
       await renewLease();
+      if (
+        responseLossArmed &&
+        req.method === 'POST' &&
+        req.url === '/isolated/v1/social-office/command'
+      ) {
+        const end = res.end.bind(res);
+        res.end = function (chunk, ...rest) {
+          responseLossArmed = false;
+          const body =
+            typeof chunk === 'string' || Buffer.isBuffer(chunk)
+              ? JSON.parse(chunk.toString())
+              : null;
+          if (res.statusCode === 200 && body?.status === 'FINAL') {
+            // G has returned only after its genuine native final receipt. This
+            // one controlled response is lost; the browser must recover that
+            // original ID. No transaction acknowledgement fault is simulated.
+            lostResponse = support.redactIsolatedSocialEvidence({
+              kind: 'CONTROLLED_RESPONSE_LOSS_AFTER_FINAL',
+              body,
+            });
+            res.destroy();
+            return res;
+          }
+          return end(chunk, ...rest);
+        };
+      }
       if (await transport.handle(req, res)) return;
       const selected = staticFiles.get(req.url);
       if (req.method !== 'GET' || !selected) {
@@ -503,6 +531,14 @@ export async function startIsolatedSocialOfficeHost(...args) {
       authorityPool,
       identity,
       getDay: () => dayIndex,
+      armResponseLoss: () => {
+        assert(
+          !responseLossArmed && !lostResponse,
+          'SOCIAL_HOST_RESPONSE_LOSS_ALREADY_USED',
+        );
+        responseLossArmed = true;
+      },
+      responseLossEvidence: () => lostResponse,
     });
     return publicHandle;
   } catch (cause) {
@@ -517,6 +553,24 @@ export async function startIsolatedSocialOfficeHost(...args) {
     }
     throw cause;
   }
+}
+
+/** A single fixed local response-loss injection, never a database fault hook. */
+export function armIsolatedSocialOfficeResponseLoss(...args) {
+  assert.equal(
+    process.env.ECONMIND_SOCIAL_OFFICE_NATIVE_TESTS,
+    '1',
+    'SOCIAL_HOST_NATIVE_CONTROL_OPT_IN',
+  );
+  assert.equal(args.length, 1, 'SOCIAL_HOST_CONTROL_ARGUMENTS');
+  const state = liveHosts.get(args[0]);
+  assert(state, 'SOCIAL_HOST_GENUINE_HANDLE_REQUIRED');
+  assert.equal(state.getDay(), '0', 'SOCIAL_HOST_CONTROL_PHASE_REQUIRED');
+  state.armResponseLoss();
+  return Object.freeze({
+    status: 'ARMED_ONE_FINAL_RESPONSE',
+    effectsCommitted: false,
+  });
 }
 
 /** Native opt-in controls for this genuine live handle only. No HTTP control route. */
@@ -534,6 +588,7 @@ export async function runIsolatedSocialOfficeNegativeControl(...args) {
     typeof kind === 'string' &&
       [
         'AUTHORITY_REVOKED',
+        'SOURCE_MISSING_DOMAIN',
         'SOURCE_REVOKED',
         'SOURCE_EXPIRED',
         'WRONG_VERSION',
@@ -585,6 +640,14 @@ export async function runIsolatedSocialOfficeNegativeControl(...args) {
           ...publication,
           operationId: `F_SOCIAL_${kind}_${disposition}_${current.generation}`,
           disposition,
+          ...(kind === 'SOURCE_MISSING_DOMAIN' && disposition === 'REVOKED'
+            ? {
+                disposition: 'ACTIVE',
+                selectedRecordIds: publication.selectedRecordIds.filter(
+                  (id) => id !== 'G_SOCIAL_DOMAIN_FACTS_V1',
+                ),
+              }
+            : {}),
           ...(expired
             ? { validUntilSimTime: (10n * 86400000n).toString() }
             : {}),
@@ -621,9 +684,15 @@ export async function runIsolatedSocialOfficeNegativeControl(...args) {
             'F_SOCIAL_AUTH_RESTORED_V1',
             true,
           );
-      } else if (kind === 'SOURCE_REVOKED' || kind === 'SOURCE_EXPIRED') {
+      } else if (
+        kind === 'SOURCE_REVOKED' ||
+        kind === 'SOURCE_EXPIRED' ||
+        kind === 'SOURCE_MISSING_DOMAIN'
+      ) {
         await publish(
-          kind === 'SOURCE_REVOKED' ? 'REVOKED' : 'ACTIVE',
+          kind === 'SOURCE_REVOKED' || kind === 'SOURCE_MISSING_DOMAIN'
+            ? 'REVOKED'
+            : 'ACTIVE',
           kind === 'SOURCE_EXPIRED',
         );
         restore = () => publish('ACTIVE');
@@ -675,6 +744,96 @@ export async function runIsolatedSocialOfficeNegativeControl(...args) {
     } finally {
       if (restore) await restore();
     }
+  });
+}
+
+/** Fixed native evidence checkpoint, private to the same genuine host handle. */
+export async function preserveIsolatedSocialOfficeCheckpoint(...args) {
+  assert.equal(
+    process.env.ECONMIND_SOCIAL_OFFICE_NATIVE_TESTS,
+    '1',
+    'SOCIAL_HOST_NATIVE_CONTROL_OPT_IN',
+  );
+  assert.equal(args.length, 2, 'SOCIAL_HOST_CONTROL_ARGUMENTS');
+  const state = liveHosts.get(args[0]);
+  assert(state, 'SOCIAL_HOST_GENUINE_HANDLE_REQUIRED');
+  const checkpoint = args[1];
+  assert(
+    typeof checkpoint === 'string' &&
+      ['OPENING', 'DAY0', 'DAY1', 'FINAL'].includes(checkpoint),
+    'SOCIAL_HOST_FIXED_CHECKPOINT_REQUIRED',
+  );
+  assert.equal(
+    state.getDay(),
+    checkpoint === 'FINAL' ? '10' : checkpoint === 'DAY1' ? '1' : '0',
+    'SOCIAL_HOST_CHECKPOINT_PHASE_REQUIRED',
+  );
+  const host = args[0];
+  return state.withControl(async () => {
+    const tables = {};
+    // Identifiers are fixed tool source, never caller-controlled SQL.
+    for (const name of [
+      'schema_release',
+      'world_head',
+      'opening_seed',
+      'command_submission',
+      'command_queue',
+      'authoritative_event',
+      'inventory_posting',
+      'financial_posting_batch',
+      'command_receipt',
+      'authoritative_commit_authorization',
+      'notification_outbox',
+      'social_demo_source_scope',
+      'social_demo_source_record',
+      'social_demo_source_revision',
+      'current_commit_authorization',
+      'runtime_read_seat',
+      'social_demo_automatic_authorization',
+      'runtime_opening_admission',
+    ]) {
+      tables[name] = (
+        await state.admin.query(
+          `select to_jsonb(t) as row from world_v2.${name} t order by to_jsonb(t)::text`,
+        )
+      ).rows.map((r) => r.row);
+    }
+    const response = await fetch(
+      host.origin + '/isolated/v1/social-office/projection',
+      {
+        headers: { authorization: state.identity.authorization },
+        signal: AbortSignal.timeout(15_000),
+      },
+    );
+    const projection = { status: response.status, body: await response.json() };
+    assert.equal(
+      projection.status,
+      200,
+      'SOCIAL_HOST_CHECKPOINT_PROJECTION_REQUIRED',
+    );
+    const evidence = {
+      classification: 'PREPARATION_ONLY_NOT_V09_2_STARTED',
+      checkpoint,
+      inspection: host.inspection(),
+      tables,
+      projection,
+      responseLoss: state.responseLossEvidence(),
+      sourceAdmitted: false,
+      WorldClock: false,
+    };
+    const raw = state.core.canonicalSerialize(evidence) + '\n';
+    const file = path.join(
+      host.inspection().nativeRoot,
+      `checkpoint-${checkpoint}.json`,
+    );
+    await fs.writeFile(file, raw, { flag: 'wx', mode: 0o600 });
+    return Object.freeze({
+      path: file,
+      bytes: Buffer.byteLength(raw),
+      sha256: createHash('sha256').update(raw).digest('hex'),
+      projection: projection.body,
+      responseLoss: state.responseLossEvidence(),
+    });
   });
 }
 
