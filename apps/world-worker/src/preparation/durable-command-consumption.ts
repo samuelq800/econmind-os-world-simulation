@@ -468,6 +468,12 @@ export function createDurableCommandConsumptionPreparation(input: {
           workerId: holder,
           sha256Hex: input.sha256Hex,
           candidateFactory: composition.factory,
+          ...(composition.sourceCommitProtectionPort === undefined
+            ? {}
+            : {
+                sourceCommitProtectionPort:
+                  composition.sourceCommitProtectionPort,
+              }),
         });
         const existing = await execution.repository.readFinalReceipt(command);
         if (existing !== null)
