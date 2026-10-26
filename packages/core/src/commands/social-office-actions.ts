@@ -1850,7 +1850,9 @@ export function prepareSocialOfficeOperation(
         s = obligation.state;
         budget = obligation.budget;
         financial = obligation.financial;
-        const selected = applicants.slice(0, Number(admitted));
+        const selected = applicants.filter(
+          (_id, index) => BigInt(index) < admitted,
+        );
         s = {
           ...s,
           cohorts: [
