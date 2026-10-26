@@ -124,6 +124,7 @@ export function createSocialDemoController(
         }
       } catch (e) {
         emit({
+          projection: null,
           phase: state.pending ? 'UNKNOWN' : 'ERROR',
           message: errorText(e),
         });
@@ -162,11 +163,17 @@ export function createSocialDemoController(
         emit(
           submitted
             ? {
+                projection: null,
                 pending,
                 phase: 'UNKNOWN',
                 message: `${errorText(e)}. Looking up only the original request receipt.`,
               }
-            : { pending: null, phase: 'ERROR', message: errorText(e) },
+            : {
+                projection: null,
+                pending: null,
+                phase: 'ERROR',
+                message: errorText(e),
+              },
         );
       } finally {
         busy = false;
@@ -181,6 +188,7 @@ export function createSocialDemoController(
         else await refresh();
       } catch (e) {
         emit({
+          projection: null,
           phase: state.pending ? 'UNKNOWN' : 'ERROR',
           message: errorText(e),
         });

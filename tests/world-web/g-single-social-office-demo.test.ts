@@ -7,7 +7,9 @@ import {
 import {
   createSocialDemoController,
   type SocialDemoPendingStore,
+  type SocialDemoScreenState,
 } from '../../apps/world-web/src/social-office-demo/controller.js';
+import { createSocialDemoView } from '../../apps/world-web/src/social-office-demo/view.js';
 import {
   parseSocialDemoProjection,
   parseSocialDemoRequest,
@@ -110,6 +112,65 @@ function rig() {
   return { client, store, make, nextId, render };
 }
 describe('isolated Social browser wire and receipt recovery', () => {
+  it('render successor clears the previous confirmation when another original request is pending or unknown', () => {
+    // Real view.render calls with output sinks; this is not a browser/DOM acceptance.
+    const sinks = new Map<
+      string,
+      { textContent: string; replaceChildren(): void; addEventListener(): void }
+    >();
+    const sink = (selector: string) => {
+      if (!sinks.has(selector))
+        sinks.set(selector, {
+          textContent: '',
+          replaceChildren() {},
+          addEventListener() {},
+        });
+      return sinks.get(selector)!;
+    };
+    const root = {
+      innerHTML: '',
+      dataset: {},
+      querySelector: sink,
+      querySelectorAll: () => [],
+      addEventListener() {},
+    } as unknown as HTMLElement;
+    const view = createSocialDemoView(
+      root,
+      () => {},
+      () => {},
+    );
+    const confirmed: SocialDemoScreenState = {
+      phase: 'FINAL',
+      projection: null,
+      pending: null,
+      receipt: receipt('FINAL'),
+      message: 'Confirmed original A',
+    };
+    view.render(confirmed);
+    expect(sink('#receipt-status').textContent).toBe('Durably confirmed');
+    expect(sink('#receipt-version').textContent).toBe('1');
+    const next = parseSocialDemoRequest({
+      requestId: 'abcdefab-cdef-4abc-8def-abcdefabcdef',
+      action: 'SERVE',
+      expectedWorldVersion: '1',
+    });
+    for (const phase of ['SUBMITTING', 'UNKNOWN'] as const) {
+      view.render({ ...confirmed, phase, receipt: null, pending: next });
+      expect(sink('#receipt-status').textContent).toBe(
+        'Awaiting original request',
+      );
+      expect(sink('#receipt-version').textContent).toBe('Not yet confirmed');
+      expect(sink('#receipt-message').textContent).toBe(
+        'This original request is not yet confirmed.',
+      );
+      expect(sink('#trace-command').textContent).toBe(
+        `Original request ${next.requestId}`,
+      );
+    }
+    view.render(confirmed);
+    expect(sink('#receipt-status').textContent).toBe('Durably confirmed');
+    expect(sink('#receipt-version').textContent).toBe('1');
+  });
   it('refuses injected authority, time, foreign scope and unknown response fields', () => {
     expect(() =>
       parseSocialDemoProjection({ ...fixture, sourceAdmitted: true }),
@@ -202,6 +263,24 @@ describe('isolated Social browser wire and receipt recovery', () => {
     expect(c.snapshot().phase).toBe('FINAL');
     expect(c.snapshot().projection).toBe(after);
     expect(r.store.read()).toBeNull();
+  });
+  it('wipes a pending private view on receipt refusal while retaining the original identity without resubmitting', async () => {
+    const r = rig(),
+      c = r.make();
+    await c.start();
+    await c.submit('PLAN');
+    expect(c.snapshot().projection).not.toBeNull();
+    vi.mocked(r.client.receipt).mockRejectedValueOnce(
+      Error('current read permission revoked'),
+    );
+    await c.poll();
+    expect(c.snapshot().projection).toBeNull();
+    expect(c.snapshot().phase).toBe('UNKNOWN');
+    expect(c.snapshot().pending?.requestId).toBe(ID);
+    expect(r.store.read()).toContain(ID);
+    expect(r.client.receipt).toHaveBeenLastCalledWith(ID);
+    expect(r.client.command).toHaveBeenCalledTimes(1);
+    expect(r.nextId).toHaveBeenCalledTimes(1);
   });
   it('retains confirmed status but wipes the projection if its fresh authorized read fails', async () => {
     const r = rig(),
