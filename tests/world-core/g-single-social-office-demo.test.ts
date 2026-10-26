@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import { beforeAll, describe, expect, it } from 'vitest';
 import * as C from '@econmind/core';
+// @ts-expect-error -- Test-only bridge to A's reviewed data-only .mjs reader; no application imports tools.
+import * as A from '../../tools/social-office-demo/check-opening-finance.mjs';
 import {
   loadSocialOfficeDemoScenario,
   type SocialOfficeDemoScenario,
@@ -16,7 +18,17 @@ const digest = (s: string) => createHash('sha256').update(s).digest('hex');
 const clone = <T>(v: T): T => JSON.parse(C.canonicalSerialize(v)) as T;
 let scenario: Readonly<SocialOfficeDemoScenario>;
 beforeAll(async () => {
-  scenario = await loadSocialOfficeDemoScenario();
+  const f: unknown = A.selectOpeningFinanceCandidateData(
+    A.readOpeningFinanceDistribution(),
+    {
+      meaning: 'ACCRUAL',
+      domainVariant: 'G_DOMAIN_BASELINE_PROPOSAL',
+      financeOptionId: 'SIM_SOCIAL_OPENING_BASELINE_V1_PROPOSAL',
+    },
+  );
+  scenario = await loadSocialOfficeDemoScenario({
+    openingFinanceCandidateUtf8: C.canonicalSerialize(f),
+  });
 });
 function binding(p = scenario.initialPublication, generation = '1') {
   const publicationUtf8 = C.canonicalSerialize(p);
@@ -139,6 +151,30 @@ function prepared(kind: 'PLAN' | 'ADMIT' | 'GRADUATE' | 'SERVE', day = '0') {
 }
 
 describe('G selected simulated source construction and original document binding, no installation', () => {
+  it('accepts no caller-authored finance before-state or activation flag in place of exact A query bytes', async () => {
+    await expect(
+      loadSocialOfficeDemoScenario({
+        openingFinanceCandidateUtf8: C.canonicalSerialize({
+          financialBefore: scenario.financeData.financialOpening,
+          activationAuthorized: true,
+        }),
+      }),
+    ).rejects.toThrow('exact selected A query');
+    let invoked = false;
+    const input = new Proxy(
+      { openingFinanceCandidateUtf8: '' },
+      {
+        getPrototypeOf() {
+          invoked = true;
+          throw Error('trap');
+        },
+      },
+    );
+    await expect(loadSocialOfficeDemoScenario(input)).rejects.toThrow(
+      'fixed packaged',
+    );
+    expect(invoked).toBe(false);
+  });
   it('reconstructs genuine seed and both ledgers without admitting or activating the candidate', () => {
     const r = C.rebuildV08LedgersFromLineage({
       seed: scenario.seed,

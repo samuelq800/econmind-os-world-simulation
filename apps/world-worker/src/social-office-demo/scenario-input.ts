@@ -1,9 +1,8 @@
 /** One explicitly selected prospective scenario. Loading it performs no installation. */
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { types } from 'node:util';
 import * as C from '@econmind/core';
-// @ts-expect-error -- A owns the reviewed .mjs reader without a declaration file; FinanceModule bounds this data-only bridge.
-import * as OpeningFinanceData from '../../../../tools/social-office-demo/check-opening-finance.mjs';
 import {
   parseSocialOfficeSimulatedPublication,
   type SocialOfficeSimulatedPublication,
@@ -19,6 +18,8 @@ const ROOT_SHA =
   'b7ff5facc4e3301d265279762d18cec18a5258dfa061ea88cffb4a03693e8036';
 const DOMAIN_SHA =
   '46b552733f652a41277ee0e16ec5588f88609f0cae20859c67ba4d294b8d2113';
+const FINANCE_SHA =
+  '4d2e337914a281ed19ba0a35049d842f2bdb6a0f880f1f7c0f1bdb71f4393a82';
 const DAY = 86400000n;
 const digest = (s: string) =>
   createHash('sha256').update(s, 'utf8').digest('hex');
@@ -136,17 +137,6 @@ interface FinanceCandidate {
     readonly collegeGraduation: C.SocialOfficeCostRuleV1;
   };
 }
-interface FinanceModule {
-  readOpeningFinanceDistribution(): string;
-  selectOpeningFinanceCandidateData(
-    utf8: string,
-    selector: Readonly<{
-      meaning: string;
-      domainVariant: string;
-      financeOptionId: string;
-    }>,
-  ): FinanceCandidate;
-}
 export interface SocialOfficeDemoScenario {
   readonly sourceClass: 'SIMULATED_OPENING';
   readonly sourceAdmitted: false;
@@ -236,11 +226,29 @@ function financialOpening(
   ];
 }
 
-/** No arguments or path overrides. A's explicit selector remains a data query. */
-export async function loadSocialOfficeDemoScenario(): Promise<
-  Readonly<SocialOfficeDemoScenario>
-> {
-  if (arguments.length !== 0) fail('fixed packaged inputs only');
+/** Fixed packaged G inputs plus exact canonical A query data. No path or callback overrides. */
+export async function loadSocialOfficeDemoScenario(
+  input: Readonly<{ openingFinanceCandidateUtf8: string }>,
+): Promise<Readonly<SocialOfficeDemoScenario>> {
+  if (
+    arguments.length !== 1 ||
+    !input ||
+    types.isProxy(input) ||
+    Object.getPrototypeOf(input) !== Object.prototype
+  )
+    fail('fixed packaged inputs and exact A data only');
+  const fields = Object.getOwnPropertyDescriptors(input);
+  if (
+    Reflect.ownKeys(fields).length !== 1 ||
+    !fields.openingFinanceCandidateUtf8 ||
+    !Object.hasOwn(fields.openingFinanceCandidateUtf8, 'value') ||
+    !fields.openingFinanceCandidateUtf8.enumerable
+  )
+    fail('closed A data input required');
+  const financeUtf8: unknown = fields.openingFinanceCandidateUtf8.value;
+  if (typeof financeUtf8 !== 'string' || digest(financeUtf8) !== FINANCE_SHA)
+    fail('exact selected A query data required');
+  const finance = JSON.parse(financeUtf8 as string) as FinanceCandidate;
   const [domainUtf8, optionsUtf8] = await Promise.all([
     readFile(
       new URL(
@@ -298,15 +306,6 @@ export async function loadSocialOfficeDemoScenario(): Promise<
     fail('one separately recorded demo choice required');
   const candidate = selected[0]!,
     { worldId, countryId, locationId, simulationId } = candidate.scope;
-  const a: FinanceModule = OpeningFinanceData;
-  const finance = a.selectOpeningFinanceCandidateData(
-    a.readOpeningFinanceDistribution(),
-    {
-      meaning: selection.selected.aMeaning,
-      domainVariant: selection.selected.aDomainVariant,
-      financeOptionId: selection.selected.aFinanceOptionId,
-    },
-  );
   if (
     finance.classification !== 'DATA_NOT_AUTHENTICATED' ||
     finance.ownerSelectedOption !== null ||
