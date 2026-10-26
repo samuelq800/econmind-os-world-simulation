@@ -144,6 +144,8 @@ export function createSocialDemoView(
         );
       } else if (state.pending) {
         set('receipt-status', 'Awaiting original request');
+        set('receipt-message', 'This original request is not yet confirmed.');
+        set('receipt-version', 'Not yet confirmed');
         set('trace-command', `Original request ${state.pending.requestId}`);
       }
     },

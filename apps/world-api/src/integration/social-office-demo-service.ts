@@ -110,7 +110,29 @@ function requestId(value: unknown): string {
   return value;
 }
 export function socialOfficeDemoCommandId(value: unknown): string {
-  return `COMMAND_SOCIAL_DEMO_${requestId(value).replaceAll('-', '_')}`;
+  return socialOfficeDemoCanonicalIdentity('MANUAL', value).commandId;
+}
+/** Pure identifier projection only; it grants no source or execution authority. */
+export function socialOfficeDemoCanonicalIdentity(
+  kind: 'MANUAL' | 'DUE',
+  value: unknown,
+) {
+  let suffix: string;
+  if (kind === 'MANUAL') suffix = requestId(value).replaceAll('-', '_');
+  else if (
+    kind === 'DUE' &&
+    typeof value === 'string' &&
+    /^[a-f0-9]{64}$/u.test(value)
+  )
+    suffix = value;
+  else throw new RequestError(400, 'Invalid original command identity');
+  const namespace = kind === 'MANUAL' ? 'SOCIAL_DEMO' : 'SOCIAL_DUE';
+  suffix = suffix.toUpperCase();
+  return Object.freeze({
+    commandId: C.commandId(`COMMAND_${namespace}_${suffix}`),
+    idempotencyKey: C.idempotencyKey(`IDEMPOTENCY_${namespace}_${suffix}`),
+    correlationId: C.correlationId(`TRACE_${namespace}_${suffix}`),
+  });
 }
 function request(value: unknown): RequestData {
   const r = closed(value, ['requestId', 'action', 'expectedWorldVersion']);
@@ -484,7 +506,7 @@ export function createSocialOfficeDemoService(
     const c = C.parseCanonicalCommand(
       {
         schemaVersion: C.COMMAND_SCHEMA_VERSION,
-        commandId: socialOfficeDemoCommandId(r.requestId),
+        ...socialOfficeDemoCanonicalIdentity('MANUAL', r.requestId),
         commandType,
         worldId: identity.worldId,
         countryId: identity.countryId,
@@ -492,8 +514,6 @@ export function createSocialOfficeDemoService(
         authSubject: p.authSubject,
         officeId: 'SOCIAL',
         expectedWorldVersion: r.expectedWorldVersion,
-        idempotencyKey: `IDEMPOTENCY_SOCIAL_DEMO_${r.requestId.replaceAll('-', '_')}`,
-        correlationId: `TRACE_SOCIAL_DEMO_${r.requestId.replaceAll('-', '_')}`,
         simTime,
         submittedAtReal: new Date().toISOString(),
         payload,
@@ -553,7 +573,7 @@ export function createSocialOfficeDemoService(
       const command = C.parseCanonicalCommand(
         {
           schemaVersion: C.COMMAND_SCHEMA_VERSION,
-          commandId: `COMMAND_SOCIAL_DUE_${suffix}`,
+          ...socialOfficeDemoCanonicalIdentity('DUE', suffix),
           commandType: C.SOCIAL_JOB_MATCH_DUE_COMMAND,
           worldId: identity.worldId,
           countryId: identity.countryId,
@@ -561,8 +581,6 @@ export function createSocialOfficeDemoService(
           authSubject: publisher.authSubject,
           officeId: null,
           expectedWorldVersion: context.headWorldVersion,
-          idempotencyKey: `IDEMPOTENCY_SOCIAL_DUE_${suffix}`,
-          correlationId: `TRACE_SOCIAL_DUE_${suffix}`,
           simTime: context.simTime,
           submittedAtReal: new Date().toISOString(),
           payload: {

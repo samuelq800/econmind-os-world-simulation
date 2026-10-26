@@ -18,6 +18,8 @@ import {
 import { createIsolatedSocialOfficeIdentity } from '../support/f-social-office-isolated-host.js';
 import {
   createSocialOfficeDemoService,
+  socialOfficeDemoCanonicalIdentity,
+  socialOfficeDemoCommandId,
   type SocialOfficeDemoService,
   type SocialOfficeDemoServiceConfig,
 } from '../../apps/world-api/src/integration/social-office-demo-service.js';
@@ -74,6 +76,83 @@ const valid = () => ({
   requestId: ID,
   action: 'PLAN',
   expectedWorldVersion: '0',
+});
+
+describe('G canonical identity successor, Core construction only, no native installation', () => {
+  function plan() {
+    return C.parseCanonicalCommand(
+      {
+        schemaVersion: C.COMMAND_SCHEMA_VERSION,
+        ...socialOfficeDemoCanonicalIdentity(
+          'MANUAL',
+          'abcdefab-cdef-4abc-8def-abcdefabcdef',
+        ),
+        commandType: C.SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+        worldId: scenario.scope.worldId,
+        countryId: scenario.scope.countryId,
+        actorId: scenario.executionIdentity.manual.actorId,
+        authSubject: scenario.executionIdentity.manual.authSubject,
+        officeId: 'SOCIAL',
+        expectedWorldVersion: '0',
+        simTime: '0',
+        submittedAtReal: '2026-10-27T00:00:00.000Z',
+        payload: {
+          schemaVersion: 'social-employment-service-plan-v1',
+          locationId: scenario.scope.locationId,
+          skill: 'MEDIUM',
+          positionId: 'POSITION_SIM_CLINIC_NURSE_02',
+          servicePoolId: 'SIM_EMP_POOL_MEDIUM_D1',
+          requestedMatches: '1',
+          dueDayIndex: '1',
+        },
+      },
+      sha,
+    );
+  }
+  it('canonical identity maps alphabetic UUIDs consistently through actual Core construction and receipt lookup', () => {
+    const original = 'abcdefab-cdef-4abc-8def-abcdefabcdef',
+      command = plan();
+    expect(command.commandId).toBe(socialOfficeDemoCommandId(original));
+    expect(command.commandId).toContain('ABCDEFAB_CDEF_4ABC_8DEF_ABCDEFABCDEF');
+    expect(C.parseSocialEmploymentServiceCommand(command, sha).kind).toBe(
+      'PLAN',
+    );
+    expect(original).toBe('abcdefab-cdef-4abc-8def-abcdefabcdef');
+  });
+  it('canonical identity maps a real lowercase digest deterministically for actual Core automatic construction', () => {
+    const original = plan(),
+      digest = sha(C.canonicalSerialize({ original: original.fingerprint })),
+      identity = socialOfficeDemoCanonicalIdentity('DUE', digest);
+    const automatic = C.parseCanonicalCommand(
+      {
+        schemaVersion: C.COMMAND_SCHEMA_VERSION,
+        ...identity,
+        commandType: C.SOCIAL_JOB_MATCH_DUE_COMMAND,
+        worldId: scenario.scope.worldId,
+        countryId: scenario.scope.countryId,
+        actorId: scenario.executionIdentity.publisher.actorId,
+        authSubject: scenario.executionIdentity.publisher.authSubject,
+        officeId: null,
+        expectedWorldVersion: '1',
+        simTime: '86400000',
+        submittedAtReal: '2026-10-27T00:00:00.000Z',
+        payload: {
+          schemaVersion: 'social-job-match-settlement-v1',
+          planCommandId: original.commandId,
+          planFingerprint: original.fingerprint,
+          dueDayIndex: '1',
+          ruleVersion: C.SOCIAL_JOB_MATCH_RULE_VERSION,
+        },
+      },
+      sha,
+    );
+    expect(identity).toEqual(socialOfficeDemoCanonicalIdentity('DUE', digest));
+    expect(automatic.commandId).toContain(digest.toUpperCase());
+    expect(C.parseSocialEmploymentServiceCommand(automatic, sha).kind).toBe(
+      'MATCH',
+    );
+    expect(original.fingerprint).toMatch(/^sha256:[a-f0-9]{64}$/u);
+  });
 });
 
 describe('G fixed service crypto and refusal boundary, no native installation', () => {
