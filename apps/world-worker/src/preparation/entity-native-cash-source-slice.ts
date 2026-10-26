@@ -1,6 +1,16 @@
 /** B06/B07 bounded source intake/readback only. No account issuer, funds,
  * admission, permission resolver, writer, runtime registration or new ledger. */
+import { types as nodeTypes } from 'node:util';
 import { canonicalSerialize } from '@econmind/core';
+import {
+  isTestOnlyGov01RecordSource,
+  parseGov01ReadRequest,
+  parseGov01TypedRegisterBindingData,
+  readGov01PinnedJsonDocument,
+  type Gov01ReadRequest,
+  type Gov01TypedRegisterBindingData,
+} from './b06-gov01-adopted-record-source.js';
+import type { SqlExecutor } from '../persistence/sql-database.js';
 import {
   inspectB06Country01TypedRegisterPreparation,
   type B06TypedRegisterPreparationInput,
@@ -32,6 +42,290 @@ const roles = ['GOVERNMENT', 'OPERATOR', 'HOUSEHOLDS', 'BANK', 'CENTRAL_BANK'];
 const slices = new WeakSet<object>();
 function demand(value: unknown, code: string): asserts value {
   if (!value) throw new NativeCashCandidateInvalid(code);
+}
+
+/** Context integrity only; it cannot appoint or install an account source. */
+export interface Gov01ReceiverContext {
+  readonly registry: LoadedFinancialOpeningPackageRegistry;
+  readonly countryId: 'COUNTRY_01';
+  readonly mappings: Readonly<{
+    documentId: string;
+    bytes: string;
+    sha256: string;
+  }>;
+  readonly originalField: OriginalEntityCashField;
+}
+
+const GOV01_ORIGINAL_ID =
+  'U2544::ENTITY::ENTITY_GOVERNMENT_01::account' as const;
+
+function gov01Closed(
+  value: unknown,
+  keys: readonly string[],
+): Record<string, unknown> {
+  demand(
+    value !== null &&
+      typeof value === 'object' &&
+      !nodeTypes.isProxy(value) &&
+      [Object.prototype, null].includes(Object.getPrototypeOf(value)),
+    'GOV01_CLOSED_DATA_REQUIRED',
+  );
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const actualKeys = Reflect.ownKeys(descriptors);
+  demand(
+    actualKeys.length === keys.length &&
+      actualKeys.every((key) => typeof key === 'string' && keys.includes(key)),
+    'GOV01_EXACT_KEYS_REQUIRED',
+  );
+  const result: Record<string, unknown> = Object.create(null);
+  for (const key of keys) {
+    const descriptor = descriptors[key];
+    demand(
+      descriptor !== undefined &&
+        Object.hasOwn(descriptor, 'value') &&
+        descriptor.enumerable,
+      'GOV01_ACCESSOR_DENIED',
+    );
+    result[key] = descriptor.value;
+  }
+  return result;
+}
+
+export function captureGov01ReceiverContext(value: Gov01ReceiverContext) {
+  const context = gov01Closed(value, [
+    'registry',
+    'countryId',
+    'mappings',
+    'originalField',
+  ]);
+  demand(
+    isLoadedFinancialOpeningPackageRegistry(context.registry),
+    'GENUINE_REGISTRY_REQUIRED',
+  );
+  demand(context.countryId === 'COUNTRY_01', 'GOV01_COUNTRY_REQUIRED');
+  const original = gov01Closed(context.originalField, [
+    'stableId',
+    'ownerId',
+    'countryId',
+    'missingField',
+  ]);
+  demand(
+    original.stableId === GOV01_ORIGINAL_ID &&
+      original.ownerId === 'ENTITY_GOVERNMENT_01' &&
+      original.countryId === 'COUNTRY_01' &&
+      original.missingField === 'account',
+    'GOV01_EXACT_ACCOUNT_FIELD_REQUIRED',
+  );
+  const mappings = gov01Closed(context.mappings, [
+    'documentId',
+    'bytes',
+    'sha256',
+  ]);
+  demand(
+    typeof mappings.documentId === 'string' &&
+      mappings.documentId.trim() === mappings.documentId &&
+      Buffer.byteLength(mappings.documentId) >= 1 &&
+      Buffer.byteLength(mappings.documentId) <= 512 &&
+      typeof mappings.bytes === 'string' &&
+      Buffer.byteLength(mappings.bytes) <= 1024 * 1024 &&
+      typeof mappings.sha256 === 'string' &&
+      /^[a-f0-9]{64}$/u.test(mappings.sha256) &&
+      financialInputSha256(mappings.bytes) === mappings.sha256,
+    'MAPPING_PIN_MISMATCH',
+  );
+  const mapping = registryRow(
+    readGov01PinnedJsonDocument({
+      pin: {
+        documentId: mappings.documentId,
+        // Integrity-only classification, never an adopted source-set version.
+        sourceVersion: 'REFERENCE_CROSSWALK_ONLY_NOT_ADOPTED_SOURCE',
+        byteLength: String(Buffer.byteLength(mappings.bytes)),
+        sha256: mappings.sha256,
+        pointer: '',
+      },
+      utf8: mappings.bytes,
+    }),
+    'mapping',
+  );
+  demand(
+    mapping.status === 'REFERENCE_CROSSWALK_NOT_ACCOUNT_BINDING',
+    'REFERENCE_MAPPING_REQUIRED',
+  );
+  const rows = registryArray(mapping.rows, 'mapping.rows').map((row) =>
+    registryRow(row, 'mapping.row'),
+  );
+  demand(rows.length <= 350, 'MAPPING_COUNT_BUDGET');
+  const selected = rows.flatMap((row, index) =>
+    row.countryId === 'COUNTRY_01' && row.entityId === 'ENTITY_GOVERNMENT_01'
+      ? [{ row, index }]
+      : [],
+  );
+  demand(selected.length === 1, 'REQUESTED_OWNER_MAPPING_REQUIRED');
+  const country = context.registry.countries.filter(
+    (row) => row.countryId === 'COUNTRY_01',
+  );
+  demand(country.length === 1, 'REGISTRY_COUNTRY_REQUIRED');
+  const native = resolveFinancialRegistrySource(context.registry, {
+    sourceId: 'native_lc',
+    selector: { kind: 'JSON_POINTER', pointer: '/countries' },
+  });
+  demand(native.status === 'VERIFIED_LEAF', 'NATIVE_SOURCE_UNAVAILABLE');
+  const nativeRows = registryArray(native.value, 'native.countries')
+    .map((row) => registryRow(row, 'native.country'))
+    .filter((row) => row.countryId === 'COUNTRY_01');
+  demand(nativeRows.length === 1, 'NATIVE_COUNTRY_UNIQUE_REQUIRED');
+  const nativeCurrency = country[0]!.nativeCurrency;
+  demand(
+    typeof nativeCurrency === 'string' &&
+      nativeCurrency === nativeRows[0]!.currencyCode,
+    'NATIVE_CURRENCY_CROSSWALK_MISMATCH',
+  );
+  const mapped = selected[0]!;
+  demand(
+    mapped.row.sourceClass ===
+      'REFERENCE_MAPPING_NOT_LEGAL_ACCOUNT_OR_CURRENT_AUTHORITY' &&
+      mapped.row.actualAccount === null &&
+      mapped.row.actualHolderAdmission === null &&
+      mapped.row.actualCurrentAuthorization === null &&
+      typeof mapped.row.legacyEntityId === 'string' &&
+      mapped.row.legacyEntityId.length > 0 &&
+      mapped.row.legacyCountryId ===
+        registryRow(country[0]!.identityCrosswalk, 'identityCrosswalk')
+          .legacyCountryId,
+    'MAPPING_IS_NOT_REFERENCE_ONLY',
+  );
+  return Object.freeze({
+    context: Object.freeze({
+      registry: context.registry,
+      countryId: 'COUNTRY_01' as const,
+      mappings: Object.freeze({
+        documentId: mappings.documentId,
+        bytes: mappings.bytes,
+        sha256: mappings.sha256,
+      }),
+      originalField: Object.freeze({
+        stableId: GOV01_ORIGINAL_ID,
+        ownerId: 'ENTITY_GOVERNMENT_01',
+        countryId: 'COUNTRY_01',
+        missingField: 'account' as const,
+      }),
+    }),
+    registry: context.registry,
+    observedNativeCurrencyCandidate: nativeCurrency,
+    mapping: Object.freeze({
+      documentId: mappings.documentId,
+      sha256: mappings.sha256,
+      pointer: `/rows/${mapped.index}`,
+    }),
+  });
+}
+
+/** Separate output: a fixture observation can never populate the actual slot. */
+export interface Gov01TestOnlyAccountSourceSlice {
+  readonly schemaVersion: 'gov01-test-only-account-source-read-v1';
+  readonly readStatus: 'TEST_ONLY_GOV01_BINDING_READ';
+  readonly stableId: typeof GOV01_ORIGINAL_ID;
+  readonly ownerId: 'ENTITY_GOVERNMENT_01';
+  readonly countryId: 'COUNTRY_01';
+  readonly batchId: 'B06';
+  readonly unit: 'ACCOUNT';
+  readonly testOnlyBinding: Gov01TypedRegisterBindingData;
+  readonly actualTypedRegisterBinding: null;
+  readonly actualAvailableNativeCash: null;
+  readonly currentPermission: 'UNKNOWN';
+  readonly originalFieldStages: Readonly<{
+    sourceComplete: false;
+    engineeringWired: false;
+    validationPassed: false;
+    formallyAdopted: false;
+  }>;
+  readonly originalIdsClosed: 0;
+  readonly accountIdsIssued: 0;
+  readonly productionAuthority: false;
+  readonly admissionAllowed: false;
+  readonly activationAllowed: false;
+  readonly runtimeConnected: false;
+}
+
+/**
+ * Actual-source receiving guard. No actual installer/control mapping is
+ * supplied in this change. A structural port or fixture is never invoked as
+ * actual authority; implementing that private installed edge needs its own
+ * concrete reviewed custody/target/current-control contract.
+ */
+export async function readGov01AdoptedAccountCountrySourceSliceFrom(
+  context: Gov01ReceiverContext,
+  installedSource: unknown,
+  _executor: SqlExecutor,
+  request: Gov01ReadRequest,
+): Promise<never> {
+  captureGov01ReceiverContext(context);
+  parseGov01ReadRequest(request);
+  demand(
+    !isTestOnlyGov01RecordSource(installedSource),
+    'GOV01_TEST_ONLY_NOT_ACTUAL_SOURCE',
+  );
+  throw new NativeCashCandidateInvalid(
+    'GOV01_ACTUAL_INSTALLATION_NOT_SUPPLIED',
+  );
+}
+
+/** Actual A algorithm -> scoped-use -> F assembler, with TEST_ONLY output. */
+export async function readTestOnlyGov01AccountCountrySourceSliceFrom(
+  context: Gov01ReceiverContext,
+  source: unknown,
+  executor: SqlExecutor,
+  requestValue: Gov01ReadRequest,
+): Promise<Readonly<Gov01TestOnlyAccountSourceSlice>> {
+  const captured = captureGov01ReceiverContext(context);
+  const request = parseGov01ReadRequest(requestValue);
+  demand(
+    isTestOnlyGov01RecordSource(source),
+    'GOV01_GUARDED_FIXTURE_SOURCE_REQUIRED',
+  );
+  return source.withCurrentBindingFrom(executor, request, async (read, use) => {
+    const binding = parseGov01TypedRegisterBindingData(
+      read.testOnlyBinding,
+      request,
+    );
+    demand(
+      read.readStatus === 'TEST_ONLY_GOV01_BINDING_READ' &&
+        read.actualTypedRegisterBinding === null &&
+        read.sourceAdmitted === false,
+      'GOV01_TEST_ONLY_CLASSIFICATION_REQUIRED',
+    );
+    demand(
+      binding.currency.code === captured.observedNativeCurrencyCandidate,
+      'GOV01_REFERENCE_CURRENCY_CONTEXT_CONFLICT',
+    );
+    await use.assertCurrentFrom(executor, request);
+    // No await or external effect between the use-check and owned assembly.
+    return freezeFinancialInput({
+      schemaVersion: 'gov01-test-only-account-source-read-v1' as const,
+      readStatus: 'TEST_ONLY_GOV01_BINDING_READ' as const,
+      stableId: GOV01_ORIGINAL_ID,
+      ownerId: 'ENTITY_GOVERNMENT_01' as const,
+      countryId: 'COUNTRY_01' as const,
+      batchId: 'B06' as const,
+      unit: 'ACCOUNT' as const,
+      testOnlyBinding: binding,
+      actualTypedRegisterBinding: null,
+      actualAvailableNativeCash: null,
+      currentPermission: 'UNKNOWN' as const,
+      originalFieldStages: {
+        sourceComplete: false as const,
+        engineeringWired: false as const,
+        validationPassed: false as const,
+        formallyAdopted: false as const,
+      },
+      originalIdsClosed: 0 as const,
+      accountIdsIssued: 0 as const,
+      productionAuthority: false as const,
+      admissionAllowed: false as const,
+      activationAllowed: false as const,
+      runtimeConnected: false as const,
+    });
+  });
 }
 
 export interface EntityCashSliceInput {
