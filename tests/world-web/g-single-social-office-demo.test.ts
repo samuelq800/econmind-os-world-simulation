@@ -203,6 +203,24 @@ describe('isolated Social browser wire and receipt recovery', () => {
     expect(c.snapshot().projection).toBe(after);
     expect(r.store.read()).toBeNull();
   });
+  it('wipes a pending private view on receipt refusal while retaining the original identity without resubmitting', async () => {
+    const r = rig(),
+      c = r.make();
+    await c.start();
+    await c.submit('PLAN');
+    expect(c.snapshot().projection).not.toBeNull();
+    vi.mocked(r.client.receipt).mockRejectedValueOnce(
+      Error('current read permission revoked'),
+    );
+    await c.poll();
+    expect(c.snapshot().projection).toBeNull();
+    expect(c.snapshot().phase).toBe('UNKNOWN');
+    expect(c.snapshot().pending?.requestId).toBe(ID);
+    expect(r.store.read()).toContain(ID);
+    expect(r.client.receipt).toHaveBeenLastCalledWith(ID);
+    expect(r.client.command).toHaveBeenCalledTimes(1);
+    expect(r.nextId).toHaveBeenCalledTimes(1);
+  });
   it('retains confirmed status but wipes the projection if its fresh authorized read fails', async () => {
     const r = rig(),
       c = r.make();
