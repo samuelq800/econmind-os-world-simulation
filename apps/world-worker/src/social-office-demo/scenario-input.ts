@@ -11,6 +11,7 @@ import {
 import {
   bindSocialOfficeSimulatedOpening,
   SOCIAL_DEMO_RECORD_IDS as IDS,
+  SOCIAL_DEMO_EXECUTION_IDENTITY_V1,
   type SocialDemoDomainRecordV1,
 } from './source-facts.js';
 
@@ -150,6 +151,7 @@ export interface SocialOfficeDemoScenario {
   readonly financeData: FinanceCandidate;
   readonly actorId: string;
   readonly authSubject: string;
+  readonly executionIdentity: typeof SOCIAL_DEMO_EXECUTION_IDENTITY_V1;
   publicationForPreset(
     input: Readonly<{
       dayIndex: string;
@@ -642,6 +644,9 @@ export async function loadSocialOfficeDemoScenario(
           sha256,
         })),
         catalogSHA256: catalogRecord.sha256,
+        executionIdentitySHA256: digest(
+          C.canonicalSerialize(SOCIAL_DEMO_EXECUTION_IDENTITY_V1),
+        ),
       },
     },
     digest,
@@ -687,6 +692,11 @@ export async function loadSocialOfficeDemoScenario(
       presets: ['0', '1', '10'],
       rootSelectionSHA256: ROOT_SHA,
     }),
+    original(
+      IDS.identity,
+      'CURRENT_AUTHORIZATION',
+      SOCIAL_DEMO_EXECUTION_IDENTITY_V1,
+    ),
     ...['0', '1', '10'].map((dayIndex) =>
       original(`G_SOCIAL_ASOF_DAY_${dayIndex}`, 'CURRENT_AUTHORIZATION', {
         schemaVersion: 'g-social-office-simulated-asof-v1',
@@ -765,8 +775,9 @@ export async function loadSocialOfficeDemoScenario(
     ...opening,
     initialPublication,
     financeData: finance,
-    actorId: 'ACTOR_SOCIAL_SINGLE_DEMO_V1',
-    authSubject: selection.isolatedAuthorization.authSubject,
+    actorId: SOCIAL_DEMO_EXECUTION_IDENTITY_V1.manual.actorId,
+    authSubject: SOCIAL_DEMO_EXECUTION_IDENTITY_V1.manual.authSubject,
+    executionIdentity: SOCIAL_DEMO_EXECUTION_IDENTITY_V1,
     publicationForPreset,
   });
 }
