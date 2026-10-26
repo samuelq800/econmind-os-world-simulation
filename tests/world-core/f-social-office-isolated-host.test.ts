@@ -1,4 +1,7 @@
 import { request } from 'node:http';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   assertIsolatedSocialOfficeEnvironment,
@@ -14,6 +17,56 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 const opted = { ECONMIND_ENV: 'local', ECONMIND_SOCIAL_OFFICE_DEMO: '1' };
+const runBridge = async (code: string) => {
+  const result = await promisify(execFile)(
+    process.execPath,
+    ['--input-type=module', '--eval', code],
+    {
+      cwd: fileURLToPath(new URL('../..', import.meta.url)),
+      env: { PATH: process.env.PATH, ECONMIND_ENV: 'local' },
+      timeout: 15_000,
+      maxBuffer: 1024 * 1024,
+    },
+  );
+  expect(result.stderr).toBe('');
+  return JSON.parse(result.stdout) as unknown;
+};
+describe('F fixed selected Social scenario bridge', () => {
+  it('passes the fixed A query into the actual G constructor and original Core rebuild', async () => {
+    const result = await runBridge(`
+      import {loadFixedSelectedSocialOfficeScenario} from './tools/social-office-demo/host.mjs';
+      import {rebuildV08LedgersFromLineage} from '@econmind/core';
+      import {createHash} from 'node:crypto';
+      const scenario=await loadFixedSelectedSocialOfficeScenario();
+      const ledgers=rebuildV08LedgersFromLineage({seed:scenario.seed,sha256Hex:value=>createHash('sha256').update(value).digest('hex')});
+      console.log(JSON.stringify({seedId:scenario.seed.seedId,seedFingerprint:scenario.seed.fingerprint,rootSelection:scenario.rootSelectionSHA256,sourceClass:scenario.sourceClass,sourceAdmitted:scenario.sourceAdmitted,openingPurpose:scenario.openingReadFacts.sourceBinding.purpose,worldVersion:ledgers.worldVersion}));
+    `);
+    expect(result).toEqual({
+      seedId: 'SEED_SOCIAL_SINGLE_DEMO_V1',
+      seedFingerprint:
+        'sha256:75ad9f48846a605b4c5eafb8d56927ec240a8c62b567ce38291c6eed53c425c3',
+      rootSelection:
+        'b7ff5facc4e3301d265279762d18cec18a5258dfa061ea88cffb4a03693e8036',
+      sourceClass: 'SIMULATED_OPENING',
+      sourceAdmitted: false,
+      openingPurpose: null,
+      worldVersion: '0',
+    });
+  });
+  it('refuses caller paths, selectors and behavioral arguments before use', async () => {
+    const result = await runBridge(`
+      import assert from 'node:assert/strict';
+      import {loadFixedSelectedSocialOfficeScenario} from './tools/social-office-demo/host.mjs';
+      let calls=0;
+      const proxy=new Proxy({}, {ownKeys(){calls++;throw Error('not callable');},get(){calls++;throw Error('not callable');}});
+      for(const value of [undefined,{path:'/foreign'},{meaning:'VALUATION_ONLY'},proxy]) {
+        await assert.rejects(()=>loadFixedSelectedSocialOfficeScenario(value),/SOCIAL_HOST_SCENARIO_NO_ARGUMENTS/);
+      }
+      console.log(JSON.stringify({refused:4,calls}));
+    `);
+    expect(result).toEqual({ refused: 4, calls: 0 });
+  });
+});
 describe('F isolated Social infrastructure — no domain/readiness substitute', () => {
   it('requires explicit local/CI opt-in and refuses external database configuration', () => {
     expect(() => assertIsolatedSocialOfficeEnvironment(opted)).not.toThrow();

@@ -1,7 +1,38 @@
 // PREPARATION_ONLY_NOT_V09_2_STARTED. Never mounts the production application.
+import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { inspectSocialOfficeHostBuild } from './build-host.mjs';
+
+/** Fixed tool-owned data bridge. This constructs data; it installs no state. */
+export async function loadFixedSelectedSocialOfficeScenario(...args) {
+  assert.equal(args.length, 0, 'SOCIAL_HOST_SCENARIO_NO_ARGUMENTS');
+  inspectSocialOfficeHostBuild();
+  const [financeModule, core, scenarioModule] = await Promise.all([
+    import('./check-opening-finance.mjs'),
+    import('@econmind/core'),
+    import('../../apps/world-worker/dist/social-office-demo/scenario-input.js'),
+  ]);
+  const finance = financeModule.selectOpeningFinanceCandidateData(
+    financeModule.readOpeningFinanceDistribution(),
+    {
+      meaning: 'ACCRUAL',
+      domainVariant: 'G_DOMAIN_BASELINE_PROPOSAL',
+      financeOptionId: 'SIM_SOCIAL_OPENING_BASELINE_V1_PROPOSAL',
+    },
+  );
+  const scenario = await scenarioModule.loadSocialOfficeDemoScenario({
+    openingFinanceCandidateUtf8: core.canonicalSerialize(finance),
+  });
+  assert.equal(
+    scenario.rootSelectionSHA256,
+    'b7ff5facc4e3301d265279762d18cec18a5258dfa061ea88cffb4a03693e8036',
+    'SOCIAL_HOST_SELECTED_RECORD_CHANGED',
+  );
+  assert.equal(scenario.sourceClass, 'SIMULATED_OPENING');
+  assert.equal(scenario.sourceAdmitted, false);
+  return scenario;
+}
 
 export function inspectIsolatedSocialOfficeLaunch(
   args = process.argv.slice(2),
