@@ -205,19 +205,25 @@ begin
     raise exception 'GOV01_H_MISMATCH';
   end if;
   if kind = 'REGISTER' then
-    if parent.world_id is not null or b->'expected' <> 'null'::jsonb then raise exception 'GOV01_EXPECTED_ABSENCE'; end if;
+    if parent.world_id is not null or b->'expected' is distinct from 'null'::jsonb then raise exception 'GOV01_EXPECTED_ABSENCE'; end if;
     next_generation := 1; previous_digest := repeat('0',64);
   else
     if parent.world_id is null or not world_v2.gov01_closed_keys(b->'expected', array['generation','headDigest']) then
       raise exception 'GOV01_PARENT_OR_EXPECTATION_ABSENT';
+    end if;
+    if jsonb_typeof(b->'expected'->'generation') is distinct from 'string' or
+      jsonb_typeof(b->'expected'->'headDigest') is distinct from 'string' or
+      b->'expected'->>'generation' !~ '^[1-9][0-9]{0,63}$' or
+      b->'expected'->>'headDigest' !~ '^[a-f0-9]{64}$' then
+      raise exception 'GOV01_EXPECTATION_SHAPE';
     end if;
     select x.* into strict current_row from world_v2.gov01_control_head n
       join world_v2.gov01_control_history x using(world_id,original_id,generation,head_digest)
       join world_v2.gov01_control_checkpoint c using(world_id,original_id)
       where n.world_id = world and n.original_id = original
         and c.generation = n.generation and c.head_digest = n.head_digest;
-    if current_row.generation::text <> b->'expected'->>'generation' or
-      current_row.head_digest <> b->'expected'->>'headDigest' then raise exception 'GOV01_CAS_MISMATCH'; end if;
+    if current_row.generation::text is distinct from b->'expected'->>'generation' or
+      current_row.head_digest is distinct from b->'expected'->>'headDigest' then raise exception 'GOV01_CAS_MISMATCH'; end if;
     if current_row.state_json->>'retired' = 'true' then raise exception 'GOV01_SCOPE_RETIRED'; end if;
     next_generation := current_row.generation + 1; previous_digest := current_row.head_digest;
   end if;

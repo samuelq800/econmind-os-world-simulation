@@ -539,6 +539,60 @@ native(
         expect(await footprints()).toEqual(before);
       }
     });
+    it('refuses malformed native CAS expectations with no persistence and preserves exact receipt recovery', async () => {
+      // Independently selectable delta control; no reliance on preceding tests.
+      if ((await snapshot()).status === 'ABSENT') {
+        await applyGov01NativeControlOperation(
+          operatorDB,
+          await operation('REGISTER', payload(), null),
+        );
+      }
+      const valid = await operation('REVOKE', { dependency: 'registration' });
+      const at = valid.expected!;
+      const before = await footprints();
+      const malformed = [
+        null,
+        {},
+        { generation: null, headDigest: at.headDigest },
+        { generation: at.generation, headDigest: null },
+        { generation: null, headDigest: null },
+        { generation: 1, headDigest: at.headDigest },
+        { generation: [at.generation], headDigest: at.headDigest },
+        { generation: '0' + at.generation, headDigest: at.headDigest },
+        { generation: '1'.repeat(65), headDigest: at.headDigest },
+        { generation: at.generation, headDigest: 123 },
+        { generation: at.generation, headDigest: 'g'.repeat(64) },
+      ];
+      for (const expectedValue of malformed) {
+        const body = JSON.stringify({ ...valid, expected: expectedValue });
+        await expect(
+          operatorDB.transaction((tx) =>
+            tx.query('select world_v2.gov01_apply_control_operation($1,$2)', [
+              body,
+              sha('GOV01_CONTROL_OPERATION_V1\n' + body),
+            ]),
+          ),
+        ).rejects.toMatchObject({ outcome: 'ROLLED_BACK' });
+        expect(await footprints()).toEqual(before);
+      }
+      const committed = await applyGov01NativeControlOperation(
+        operatorDB,
+        valid,
+      );
+      expect(committed.result.generation).toBe(
+        String(BigInt(at.generation) + 1n),
+      );
+      const after = await footprints();
+      const recovered = await applyGov01NativeControlOperation(
+        operatorDB,
+        valid,
+      );
+      expect(recovered.result).toEqual({
+        ...committed.result,
+        source: 'EXISTING_CONTROL_OPERATION',
+      });
+      expect(await footprints()).toEqual(after);
+    });
     it('recovers an exact historical operation before NEW CAS, and rejects conflicting reuse', async () => {
       const op = await operation('REPLACE_RECORD_SET', payload());
       const first = await applyGov01NativeControlOperation(operatorDB, op);
