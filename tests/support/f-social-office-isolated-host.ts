@@ -254,6 +254,56 @@ interface OwnedMarker {
     }>[];
   }>;
 }
+interface NativeServerInstance {
+  readonly postmasterPID: string;
+  readonly pidFileEpoch: string;
+  readonly ownerUID: string;
+  readonly osStart: string;
+  readonly postgresStartEpoch: string;
+}
+async function pidFields(marker: OwnedMarker) {
+  await ownedDirectory(marker.data, marker.uid);
+  const file = await open(
+    path.join(marker.data, 'postmaster.pid'),
+    constants.O_RDONLY | constants.O_NOFOLLOW,
+  );
+  try {
+    const s = await file.stat();
+    demand(
+      s.isFile() &&
+        s.uid === marker.uid &&
+        s.nlink === 1 &&
+        (s.mode & 0o022) === 0,
+      'SOCIAL_HOST_PID_CUSTODY',
+    );
+    const fields = (await file.readFile('utf8')).split('\n');
+    demand(
+      /^[1-9][0-9]*$/u.test(fields[0] ?? '') &&
+        /^[1-9][0-9]*$/u.test(fields[2] ?? '') &&
+        fields[1] === marker.data &&
+        fields[3] === String(marker.port) &&
+        fields[4] === marker.socket,
+      'SOCIAL_HOST_PID_IDENTITY',
+    );
+    return { pid: fields[0]!, epoch: fields[2]! };
+  } finally {
+    await file.close();
+  }
+}
+async function osIdentity(pid: string) {
+  demand(/^[1-9][0-9]*$/u.test(pid), 'SOCIAL_HOST_EXPECTED_PID_REQUIRED');
+  const result = await run(
+    '/bin/ps',
+    ['-p', pid, '-o', 'uid=', '-o', 'lstart='],
+    { env: CHILD_ENV, timeout: 5_000 },
+  );
+  const [uid, ...start] = result.stdout.trim().split(/\s+/u);
+  demand(
+    uid && /^[0-9]+$/u.test(uid) && start.length >= 5,
+    'SOCIAL_HOST_PROCESS_IDENTITY_UNAVAILABLE',
+  );
+  return { uid, start: start.join(' ') };
+}
 async function hostCodeBinding(): Promise<OwnedMarker['codeBinding']> {
   const core = await realpath(
     fileURLToPath(import.meta.resolve('@econmind/core')),
@@ -370,6 +420,7 @@ async function assertMarker(
   marker: OwnedMarker,
   original: string,
   checkPID: boolean,
+  instance?: NativeServerInstance,
 ) {
   demand(
     process.getuid?.() === marker.uid &&
@@ -395,20 +446,21 @@ async function assertMarker(
     await file.close();
   }
   if (!checkPID) return;
-  await ownedDirectory(marker.data, marker.uid);
-  const pidPath = path.join(marker.data, 'postmaster.pid');
-  const s = await lstat(pidPath);
+  const current = await pidFields(marker);
   demand(
-    s.isFile() && !s.isSymbolicLink() && s.uid === marker.uid,
-    'SOCIAL_HOST_PID_CUSTODY',
+    instance &&
+      current.pid === instance.postmasterPID &&
+      current.epoch === instance.pidFileEpoch,
+    'SOCIAL_HOST_PID_INSTANCE_MISMATCH',
   );
-  const pid = (await readFile(pidPath, 'utf8')).split('\n');
+  // Never use a changed PID file as an OS-command target. Only the original
+  // independently bound postmaster PID reaches this inspection or pg_ctl.
+  const processIdentity = await osIdentity(instance.postmasterPID);
   demand(
-    /^[1-9][0-9]*$/u.test(pid[0] ?? '') &&
-      pid[1] === marker.data &&
-      pid[3] === String(marker.port) &&
-      pid[4] === marker.socket,
-    'SOCIAL_HOST_PID_IDENTITY',
+    processIdentity.uid === instance.ownerUID &&
+      processIdentity.uid === String(marker.uid) &&
+      processIdentity.start === instance.osStart,
+    'SOCIAL_HOST_PROCESS_INSTANCE_MISMATCH',
   );
 }
 
@@ -447,6 +499,8 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
     started = false,
     startRequested = false,
     closed = false;
+  let instance: Readonly<NativeServerInstance> | undefined;
+  let bindingAttempted = false;
   const pool = (database: string) =>
     new Pool({
       host: marker.socket,
@@ -457,16 +511,16 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
       options: '-c lock_timeout=2000 -c statement_timeout=10000',
       connectionTimeoutMillis: 3_000,
     });
-  const native = async () => {
-    demand(!closed && started, 'SOCIAL_HOST_DATABASE_SCOPE_CLOSED');
-    await assertMarker(marker, original, true);
+  const nativeRow = async () => {
     const result = await control!.query<{
       data: string;
       listen: string;
       database: string;
       version: string;
+      backend_pid: string;
+      postmaster_start_epoch: string;
     }>(
-      "select current_setting('data_directory') as data,current_setting('listen_addresses') as listen,current_database() as database,current_setting('server_version') as version",
+      "select current_setting('data_directory') as data,current_setting('listen_addresses') as listen,current_database() as database,current_setting('server_version') as version,pg_backend_pid()::text as backend_pid,extract(epoch from pg_postmaster_start_time())::text as postmaster_start_epoch",
     );
     const row = result.rows[0];
     demand(
@@ -476,11 +530,63 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
         row.version.startsWith(PG_VERSION),
       'SOCIAL_HOST_NATIVE_IDENTITY',
     );
+    return row;
+  };
+  const bindInstance = async () => {
+    if (instance) return;
+    demand(!bindingAttempted, 'SOCIAL_HOST_SERVER_INSTANCE_NOT_VERIFIED');
+    bindingAttempted = true;
+    await assertMarker(marker, original, false);
+    const current = await pidFields(marker);
+    control ??= pool('postgres');
+    const row = await nativeRow();
+    demand(
+      /^[1-9][0-9]*$/u.test(row.backend_pid),
+      'SOCIAL_HOST_BACKEND_PID_REQUIRED',
+    );
+    const backend = await run(
+      '/bin/ps',
+      ['-p', row.backend_pid, '-o', 'ppid=', '-o', 'uid='],
+      { env: CHILD_ENV, timeout: 5_000 },
+    );
+    const [actualParent, actualUID] = backend.stdout.trim().split(/\s+/u);
+    demand(
+      actualParent === current.pid && actualUID === String(marker.uid),
+      'SOCIAL_HOST_ACTUAL_POSTMASTER_PARENT_MISMATCH',
+    );
+    const processIdentity = await osIdentity(current.pid);
+    demand(
+      processIdentity.uid === String(marker.uid),
+      'SOCIAL_HOST_ACTUAL_POSTMASTER_OWNER_MISMATCH',
+    );
+    instance = Object.freeze({
+      postmasterPID: current.pid,
+      pidFileEpoch: current.epoch,
+      ownerUID: processIdentity.uid,
+      osStart: processIdentity.start,
+      postgresStartEpoch: row.postmaster_start_epoch,
+    });
+    await assertMarker(marker, original, true, instance);
+    await writeFile(
+      path.join(root, 'server-instance.json'),
+      JSON.stringify(instance, null, 2) + '\n',
+      { flag: 'wx', mode: 0o600 },
+    );
+  };
+  const native = async () => {
+    demand(!closed && started && instance, 'SOCIAL_HOST_DATABASE_SCOPE_CLOSED');
+    await assertMarker(marker, original, true, instance);
+    const row = await nativeRow();
+    demand(
+      row.postmaster_start_epoch === instance.postgresStartEpoch,
+      'SOCIAL_HOST_POSTGRES_INSTANCE_CHANGED',
+    );
     return Object.freeze({
       ...ISOLATED_SOCIAL_CLASSIFICATION,
       ...row,
       ownedDatabase: marker.database,
       status: 'EMPTY_FIXTURE_NOT_READY' as const,
+      postmasterPID: instance.postmasterPID,
     });
   };
   const performClose = async () => {
@@ -489,8 +595,26 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
     try {
       await Promise.all(pools.splice(0).map((p) => p.end()));
       await assertMarker(marker, original, false);
+      const hasPIDFile =
+        startRequested &&
+        (await lstat(path.join(marker.data, 'postmaster.pid')).then(
+          () => true,
+          () => false,
+        ));
+      if (hasPIDFile) {
+        // A failed pg_ctl start may have created a server. Bind it through the
+        // fixed native connection and OS parent only once, or refuse control.
+        await bindInstance();
+        await assertMarker(marker, original, true, instance);
+      }
       let roleSessions: number | null = null;
       if (control) {
+        if (instance)
+          demand(
+            (await nativeRow()).postmaster_start_epoch ===
+              instance.postgresStartEpoch,
+            'SOCIAL_HOST_POSTGRES_INSTANCE_CHANGED',
+          );
         roleSessions = Number(
           (
             await control.query<{ count: string }>(
@@ -511,7 +635,7 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
           () => false,
         );
         if (pidPresent) {
-          await assertMarker(marker, original, true);
+          await assertMarker(marker, original, true, instance);
           await run(
             path.join(marker.bin, 'pg_ctl'),
             ['-D', marker.data, '-m', 'fast', '-w', '-t', '30', 'stop'],
@@ -604,8 +728,7 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
       { env: CHILD_ENV, timeout: 35_000 },
     );
     started = true;
-    await assertMarker(marker, original, true);
-    control = pool('postgres');
+    await bindInstance();
     await native();
     await control.query(`create database ${marker.database}`);
     const bootstrapPool = pool(marker.database);
