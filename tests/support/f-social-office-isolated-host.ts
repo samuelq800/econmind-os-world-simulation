@@ -730,6 +730,7 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
     started = true;
     await bindInstance();
     await native();
+    demand(control, 'SOCIAL_HOST_VERIFIED_CONTROL_REQUIRED');
     await control.query(`create database ${marker.database}`);
     const bootstrapPool = pool(marker.database);
     pools.push(bootstrapPool);
