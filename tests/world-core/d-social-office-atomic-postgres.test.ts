@@ -540,6 +540,75 @@ suite('D native Social atomic/sole-reader exact simulation', () => {
       simTime: '86400000',
       originalPlanCommand: { fingerprint: plan.fingerprint },
     });
+    await admin.query(
+      "create function world_v2.d_fail_auto_event() returns trigger language plpgsql as $$ begin if new.causation_command_id='D_SOCIAL_MATCH_A' then raise exception 'D_NATIVE_AUTO_AFTER_EVENT'; end if; return new; end $$; create trigger d_fail_auto_event after insert on world_v2.authoritative_event for each row execute function world_v2.d_fail_auto_event()",
+    );
+    await expect(repo.executeDueMatch({ command: due })).rejects.toThrow(
+      'ROLLED_BACK',
+    );
+    expect(await counts()).toEqual(before);
+    const latest = (
+      await admin.query(
+        'select generation::text,manifest_hash,publication_utf8 from world_v2.social_demo_source_revision order by generation desc limit 1',
+      )
+    ).rows[0] as {
+      generation: string;
+      manifest_hash: string;
+      publication_utf8: string;
+    };
+    const revoked = await publishSocialOfficeSimulatedSource(
+      new PostgresSqlDatabase(publisher),
+      {
+        ...JSON.parse(latest.publication_utf8),
+        operationId: 'D_AUTO_PENDING_SOURCE_REVOKED',
+        expectedGeneration: latest.generation,
+        expectedManifestHash: latest.manifest_hash,
+        disposition: 'REVOKED',
+      },
+    );
+    await admin.query(
+      'update world_v2.social_demo_automatic_authorization set active=false',
+    );
+    expect(await repo.readDueMatchPlan()).toMatchObject({
+      kind: 'EXISTING_SUBMISSION',
+      existingSubmissionCommand: {
+        fingerprint: due.fingerprint,
+        commandId: due.commandId,
+        expectedWorldVersion: '3',
+      },
+    });
+    await expect(repo.executeDueMatch({ command: due })).rejects.toThrow(
+      'ROLLED_BACK',
+    );
+    expect(await counts()).toEqual(before);
+    await publishSocialOfficeSimulatedSource(
+      new PostgresSqlDatabase(publisher),
+      {
+        ...JSON.parse(latest.publication_utf8),
+        operationId: 'D_AUTO_PENDING_SOURCE_RESTORED',
+        expectedGeneration: revoked.generation,
+        expectedManifestHash: revoked.manifestHash,
+        disposition: 'ACTIVE',
+      },
+    );
+    await authority.query(
+      'select world_v2.social_demo_revise_automatic_authority($1::jsonb)',
+      [
+        C.canonicalSerialize({
+          simulationId: scenario.scope.simulationId,
+          worldId: scenario.scope.worldId,
+          countryId: scenario.scope.countryId,
+          issuerRef: scenario.executionIdentity.publisher.issuerRef,
+          expectedAuthorizationVersion: 'SOCIAL_AUTO_V2',
+          nextAuthorizationVersion: 'SOCIAL_AUTO_V3',
+          active: true,
+          observedAtReal: new Date().toISOString(),
+        }),
+      ],
+    );
+    await admin.query(
+      'drop trigger d_fail_auto_event on world_v2.authoritative_event; drop function world_v2.d_fail_auto_event()',
+    );
     const result = await repo.executeDueMatch({ command: due });
     expect(result.status).toBe('FINAL');
     if (result.status === 'FINAL')
