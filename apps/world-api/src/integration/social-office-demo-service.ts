@@ -116,7 +116,11 @@ export function socialOfficeDemoCommandId(value: unknown): string {
 export function socialOfficeDemoCanonicalIdentity(
   kind: 'MANUAL' | 'DUE',
   value: unknown,
-) {
+): Readonly<{
+  commandId: string;
+  idempotencyKey: string;
+  correlationId: string;
+}> {
   let suffix: string;
   if (kind === 'MANUAL') suffix = requestId(value).replaceAll('-', '_');
   else if (
