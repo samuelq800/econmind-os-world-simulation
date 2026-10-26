@@ -42,6 +42,8 @@ import {
 } from '../persistence/social-job-match-candidate-source.js';
 import type { AtomicTransitionCandidateFactory } from '../persistence/atomic-transition-repository.js';
 import type { SqlDatabase } from '../persistence/sql-database.js';
+import { createSocialEmploymentCommitSourceGuard } from '../persistence/social-employment-runtime-snapshot-reader.js';
+import type { SourceCommitProtectionPort } from '../projections/governing-source-commit-boundary-contract.js';
 import { FINANCE_BUDGET_APPROPRIATION_COMMAND } from '@econmind/core/authenticated-office-command-contract';
 import { validateManualOfficeCommandIntent } from '../intake/manual-office-command-intent.js';
 
@@ -171,6 +173,7 @@ export function createManualOfficeCommandComposition(input: {
   readonly readers: ManualOfficeRuntimeReaders;
 }): {
   readonly factory: AtomicTransitionCandidateFactory;
+  readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
   assertSourceBeforeClaim(observedAtReal: string): Promise<void>;
 } | null {
   const command = input.command,
@@ -275,6 +278,15 @@ export function createManualOfficeCommandComposition(input: {
       });
       return {
         factory,
+        sourceCommitProtectionPort: Object.freeze({
+          async assertCurrentFrom(executor, request) {
+            // Resolve only when the repository requires a new guarded effect.
+            // Exact receipt recovery and legacy snapshots never probe identity.
+            return createSocialEmploymentCommitSourceGuard(
+              reader,
+            ).assertCurrentFrom(executor, request);
+          },
+        } satisfies SourceCommitProtectionPort),
         async assertSourceBeforeClaim(observedAtReal) {
           // Social's real source requires a CLAIMED row. Peek through its same
           // trusted snapshot reader first so MISSING operating state never leaves

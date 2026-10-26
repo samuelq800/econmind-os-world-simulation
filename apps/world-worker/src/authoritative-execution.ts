@@ -18,6 +18,7 @@ import {
 } from './persistence/atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './persistence/sql-database.js';
 import type { AtomicNarrowTransferApprovalGuard } from './persistence/narrow-transfer-approval-store.js';
+import type { SourceCommitProtectionPort } from './projections/governing-source-commit-boundary-contract.js';
 
 interface CurrentCommitAuthorization {
   readonly authSubject: string;
@@ -232,6 +233,8 @@ export function createAuthoritativeWorkerExecution(input: {
   readonly sha256Hex: Sha256Hex;
   readonly candidateFactory: AtomicTransitionCandidateFactory;
   readonly narrowTransferApprovalGuard?: AtomicNarrowTransferApprovalGuard;
+  /** Fixed server source guard; current authorization is still independently held. */
+  readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
 }): Readonly<AuthoritativeWorkerExecution> {
   const repository = new AtomicTransitionRepository({
     database: input.database,
@@ -241,6 +244,9 @@ export function createAuthoritativeWorkerExecution(input: {
     ...(input.narrowTransferApprovalGuard === undefined
       ? {}
       : { narrowTransferApprovalGuard: input.narrowTransferApprovalGuard }),
+    ...(input.sourceCommitProtectionPort === undefined
+      ? {}
+      : { sourceCommitProtectionPort: input.sourceCommitProtectionPort }),
   });
   return Object.freeze({
     repository,
