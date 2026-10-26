@@ -301,7 +301,8 @@ export async function verifySocialOfficeDemo() {
         primaryError ??= error;
       }
     }
-    const transcript = canonicalSerialize({
+    // Evidence contains actual HTTP/native numeric metadata; it is not a Core business fingerprint.
+    const transcript = JSON.stringify({
       classification: 'ACTUAL_ISOLATED_HTTP_AND_PRIVATE_CONTROLLER_EVIDENCE',
       evidence,
       assertions,

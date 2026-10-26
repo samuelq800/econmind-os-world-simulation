@@ -2,7 +2,6 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline/promises';
-import { canonicalSerialize } from '@econmind/core';
 import { startIsolatedSocialOfficeHost } from './host.mjs';
 
 export async function startSocialOfficeDemo() {
@@ -25,7 +24,7 @@ async function main() {
     closePromise = (async () => {
       const result = await host.close();
       process.stdout.write(
-        `${canonicalSerialize({ event: 'OWNED_CLOSE_RETURNED', report: result ?? null })}\n`,
+        `${JSON.stringify({ event: 'OWNED_CLOSE_RETURNED', report: result ?? null })}\n`,
       );
     })();
     return closePromise;
@@ -39,22 +38,22 @@ async function main() {
   process.once('SIGTERM', interrupt);
   try {
     process.stdout.write(
-      `${canonicalSerialize({ event: 'ISOLATED_SOCIAL_HOST', origin: host.origin, commands: ['next', 'due', 'close'], scope: 'ONE_SELECTED_SOCIAL_SIMULATION_NOT_ADOPTED_WORLD_POLICY' })}\n`,
+      `${JSON.stringify({ event: 'ISOLATED_SOCIAL_HOST', origin: host.origin, commands: ['next', 'due', 'close'], scope: 'ONE_SELECTED_SOCIAL_SIMULATION_NOT_ADOPTED_WORLD_POLICY' })}\n`,
     );
     for await (const line of lines) {
       if (closing) break;
       if (line === 'close') break;
       if (line === 'next')
         process.stdout.write(
-          `${canonicalSerialize({ event: 'ACTUAL_SOURCE_PRESET', result: await host.advanceToNextPreset() })}\n`,
+          `${JSON.stringify({ event: 'ACTUAL_SOURCE_PRESET', result: await host.advanceToNextPreset() })}\n`,
         );
       else if (line === 'due')
         process.stdout.write(
-          `${canonicalSerialize({ event: 'ACTUAL_AUTOMATIC_RESULT', result: await host.processDueBoundary() })}\n`,
+          `${JSON.stringify({ event: 'ACTUAL_AUTOMATIC_RESULT', result: await host.processDueBoundary() })}\n`,
         );
       else
         process.stdout.write(
-          `${canonicalSerialize({ event: 'COMMAND_REFUSED', allowed: ['next', 'due', 'close'] })}\n`,
+          `${JSON.stringify({ event: 'COMMAND_REFUSED', allowed: ['next', 'due', 'close'] })}\n`,
         );
     }
   } finally {
