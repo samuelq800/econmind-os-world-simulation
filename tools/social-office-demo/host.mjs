@@ -11,6 +11,29 @@ import { inspectSocialOfficeHostBuild } from './build-host.mjs';
 
 const liveHosts = new WeakMap();
 
+// Native inspection JSON includes small SQL integers and byte counts. It is
+// evidence, not a Core command intent; preserve numbers and sort all record keys.
+function serializeNativeEvidence(value) {
+  const order = (v) => {
+    if (typeof v === 'number') {
+      assert(Number.isSafeInteger(v), 'SOCIAL_HOST_EVIDENCE_INTEGER_REQUIRED');
+      return v;
+    }
+    if (v === null || typeof v === 'string' || typeof v === 'boolean') return v;
+    if (Array.isArray(v)) return v.map(order);
+    assert(
+      v && Object.getPrototypeOf(v) === Object.prototype,
+      'SOCIAL_HOST_EVIDENCE_JSON_REQUIRED',
+    );
+    return Object.fromEntries(
+      Object.keys(v)
+        .sort()
+        .map((k) => [k, order(v[k])]),
+    );
+  };
+  return JSON.stringify(order(value));
+}
+
 function ownedOutput(build, relative) {
   assert(
     build.manifest.outputs.some((p) => p.path === relative),
@@ -604,9 +627,7 @@ export async function runIsolatedSocialOfficeNegativeControl(...args) {
       'SOCIAL_HOST_CONTROL_PHASE_REQUIRED',
     );
     const digest = (value) =>
-      createHash('sha256')
-        .update(state.core.canonicalSerialize(value))
-        .digest('hex');
+      createHash('sha256').update(serializeNativeEvidence(value)).digest('hex');
     const snapshot = async () => {
       const row = (
         await state.admin.query(`select jsonb_build_object(
@@ -821,7 +842,7 @@ export async function preserveIsolatedSocialOfficeCheckpoint(...args) {
       sourceAdmitted: false,
       WorldClock: false,
     };
-    const raw = state.core.canonicalSerialize(evidence) + '\n';
+    const raw = serializeNativeEvidence(evidence) + '\n';
     const file = path.join(
       host.inspection().nativeRoot,
       `checkpoint-${checkpoint}.json`,
