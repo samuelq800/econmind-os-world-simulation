@@ -6,7 +6,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import { canonicalSerialize } from '@econmind/core';
-import { startSocialOfficeDemo } from './run.mjs';
+import {
+  startSocialOfficeDemo,
+  serializeSocialOfficeDemoEvidence,
+} from './run.mjs';
 
 const repository = fileURLToPath(new URL('../..', import.meta.url));
 const sha = (s) => createHash('sha256').update(s).digest('hex');
@@ -302,7 +305,7 @@ export async function verifySocialOfficeDemo() {
       }
     }
     // Evidence contains actual HTTP/native numeric metadata; it is not a Core business fingerprint.
-    const transcript = JSON.stringify({
+    const transcript = serializeSocialOfficeDemoEvidence({
       classification: 'ACTUAL_ISOLATED_HTTP_AND_PRIVATE_CONTROLLER_EVIDENCE',
       evidence,
       assertions,
