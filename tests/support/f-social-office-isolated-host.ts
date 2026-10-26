@@ -32,6 +32,14 @@ const CHILD_ENV = Object.freeze({
 const PG_VERSION = '16.15';
 const PG_PORT = 6543; // Unique private Unix directory, no TCP listener.
 const BOOTSTRAP = 'f_social_demo_bootstrap';
+const ROLE_USERS = Object.freeze({
+  installer: BOOTSTRAP,
+  reader: 'd_social_reader',
+  settler: 'd_social_settler',
+  publisher: 'd_social_publisher',
+  authority: 'd_social_authority',
+  lease: 'd_social_lease',
+});
 const MARKER = 'owned-postgres.json';
 export const ISOLATED_SOCIAL_CLASSIFICATION = Object.freeze({
   runtimeClass: 'ISOLATED_SIMULATED' as const,
@@ -501,11 +509,11 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
     closed = false;
   let instance: Readonly<NativeServerInstance> | undefined;
   let bindingAttempted = false;
-  const pool = (database: string) =>
+  const pool = (database: string, user = BOOTSTRAP) =>
     new Pool({
       host: marker.socket,
       port: PG_PORT,
-      user: BOOTSTRAP,
+      user,
       database,
       max: 2,
       options: '-c lock_timeout=2000 -c statement_timeout=10000',
@@ -742,10 +750,34 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
       ).rows[0]?.schema === null,
       'SOCIAL_HOST_REQUIRES_EMPTY_DATABASE',
     );
+    const rolePools = new Map<keyof typeof ROLE_USERS, Pool>([
+      ['installer', bootstrapPool],
+    ]);
+    const rolePool = async (...args: unknown[]) => {
+      demand(
+        args.length === 1 &&
+          typeof args[0] === 'string' &&
+          Object.hasOwn(ROLE_USERS, args[0]),
+        'SOCIAL_HOST_FIXED_ROLE_REQUIRED',
+      );
+      const role = args[0] as keyof typeof ROLE_USERS;
+      demand(started && !closed && !closing, 'SOCIAL_HOST_ROLE_POOL_CLOSED');
+      await native();
+      demand(started && !closed && !closing, 'SOCIAL_HOST_ROLE_POOL_CLOSED');
+      let selected = rolePools.get(role);
+      if (!selected) {
+        selected = pool(marker.database, ROLE_USERS[role]);
+        rolePools.set(role, selected);
+        pools.push(selected);
+      }
+      // The owner alone ends these pools; G receives only database wrappers.
+      return selected;
+    };
     return Object.freeze({
       ...ISOLATED_SOCIAL_CLASSIFICATION,
       marker,
       inspect: native,
+      rolePool,
       close,
     });
   } catch (cause) {

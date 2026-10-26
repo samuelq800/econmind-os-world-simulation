@@ -1,5 +1,6 @@
 import { request } from 'node:http';
 import { execFile } from 'node:child_process';
+import path from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -31,6 +32,59 @@ const runBridge = async (code: string) => {
   expect(result.stderr).toBe('');
   return JSON.parse(result.stdout) as unknown;
 };
+describe('F owned installer preflight wiring', () => {
+  it('loads the relocated compiled installer without a SQL query or connection', async () => {
+    const result = await runBridge(`
+      import pg from 'pg';
+      import {inspectIsolatedSocialOfficeHostPreflight} from './tools/social-office-demo/host.mjs';
+      let calls=0;
+      const query=pg.Pool.prototype.query,connect=pg.Pool.prototype.connect;
+      pg.Pool.prototype.query=function(){calls++;throw Error('preflight must not query');};
+      pg.Pool.prototype.connect=function(){calls++;throw Error('preflight must not connect');};
+      try {
+        const result=await inspectIsolatedSocialOfficeHostPreflight();
+        console.log(JSON.stringify({result,calls}));
+      } finally {
+        pg.Pool.prototype.query=query;
+        pg.Pool.prototype.connect=connect;
+      }
+    `);
+    expect(result).toMatchObject({
+      calls: 0,
+      result: {
+        status: 'PREFLIGHT_ONLY_NOT_INSTALLED',
+        sourceClass: 'SIMULATED_OPENING',
+        sourceAdmitted: false,
+        sourceRoot: path.resolve(fileURLToPath(new URL('../..', import.meta.url))),
+        seedFingerprint:
+          'sha256:c50eb02adc46021db162ecf51fb8d734a986ce8bdadc7aef3adfe3cea2312200',
+        nativeResourcesStarted: false,
+        SQLInstalled: false,
+        currentAuthorityVerified: false,
+        completeOffice: false,
+        WorldClock: false,
+        schemaSources: [
+          { path: 'database/proposals/runtime-read-binding-storage.sql' },
+          { path: 'tests/support/social-office-simulated-source-schema.sql' },
+          { path: 'tests/support/social-office-simulated-atomic-schema.sql' },
+        ],
+      },
+    });
+  });
+  it('refuses all caller preflight arguments without reading behavior', async () => {
+    const result = await runBridge(`
+      import assert from 'node:assert/strict';
+      import {inspectIsolatedSocialOfficeHostPreflight} from './tools/social-office-demo/host.mjs';
+      let calls=0;
+      const proxy=new Proxy({}, {get(){calls++;throw Error('not callable');},ownKeys(){calls++;throw Error('not callable');}});
+      for(const value of [undefined,{sourceRoot:'/foreign'},proxy]) {
+        await assert.rejects(()=>inspectIsolatedSocialOfficeHostPreflight(value),/SOCIAL_HOST_PREFLIGHT_NO_ARGUMENTS/);
+      }
+      console.log(JSON.stringify({refused:3,calls}));
+    `);
+    expect(result).toEqual({ refused: 3, calls: 0 });
+  });
+});
 describe('F fixed selected Social scenario bridge', () => {
   it('passes the fixed A query into the actual G constructor and original Core rebuild', async () => {
     const result = await runBridge(`

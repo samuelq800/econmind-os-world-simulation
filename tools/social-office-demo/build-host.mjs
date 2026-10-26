@@ -65,6 +65,8 @@ function inputs() {
     'data/scenario-candidates/single-social-office-demo-v1',
     'tools/social-office-demo',
     'database/migrations',
+    'database/proposals/runtime-read-binding-storage.sql',
+    'tests/support/social-office-atomic-fixture.ts',
     'tests/support/social-office-simulated-source-schema.sql',
     'tests/support/social-office-simulated-atomic-schema.sql',
     'tsconfig.base.json',

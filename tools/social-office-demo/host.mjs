@@ -1,7 +1,7 @@
 // PREPARATION_ONLY_NOT_V09_2_STARTED. Never mounts the production application.
 import assert from 'node:assert/strict';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { inspectSocialOfficeHostBuild } from './build-host.mjs';
 
 /** Fixed tool-owned data bridge. This constructs data; it installs no state. */
@@ -32,6 +32,50 @@ export async function loadFixedSelectedSocialOfficeScenario(...args) {
   assert.equal(scenario.sourceClass, 'SIMULATED_OPENING');
   assert.equal(scenario.sourceAdmitted, false);
   return scenario;
+}
+
+/** Loads the owned installer without invoking it or creating native resources. */
+export async function inspectIsolatedSocialOfficeHostPreflight(...args) {
+  assert.equal(args.length, 0, 'SOCIAL_HOST_PREFLIGHT_NO_ARGUMENTS');
+  const build = inspectSocialOfficeHostBuild();
+  const scenario = await loadFixedSelectedSocialOfficeScenario();
+  const installerPath = path.join(
+    build.directory,
+    'server/tests/support/social-office-atomic-fixture.js',
+  );
+  const installerRelative = path.relative(build.manifest.root, installerPath);
+  assert(
+    build.manifest.outputs.some((p) => p.path === installerRelative),
+    'SOCIAL_HOST_INSTALLER_OUTPUT_NOT_BOUND',
+  );
+  const schemas = [
+    'database/proposals/runtime-read-binding-storage.sql',
+    'tests/support/social-office-simulated-source-schema.sql',
+    'tests/support/social-office-simulated-atomic-schema.sql',
+  ].map((name) => {
+    const pinned = build.manifest.inputs.find((p) => p.path === name);
+    assert(pinned, 'SOCIAL_HOST_SCHEMA_SOURCE_NOT_BOUND');
+    return Object.freeze({ ...pinned });
+  });
+  const installer = await import(pathToFileURL(installerPath).href);
+  assert.equal(typeof installer.installFixture, 'function');
+  assert.equal(typeof installer.grantFixtureRoles, 'function');
+  return Object.freeze({
+    status: 'PREFLIGHT_ONLY_NOT_INSTALLED',
+    sourceClass: 'SIMULATED_OPENING',
+    sourceAdmitted: false,
+    sourceRoot: build.manifest.root,
+    seedId: scenario.seed.seedId,
+    seedFingerprint: scenario.seed.fingerprint,
+    manifest: build.manifestPin,
+    installerOutput: installerRelative,
+    schemaSources: Object.freeze(schemas),
+    nativeResourcesStarted: false,
+    SQLInstalled: false,
+    currentAuthorityVerified: false,
+    completeOffice: false,
+    WorldClock: false,
+  });
 }
 
 export function inspectIsolatedSocialOfficeLaunch(

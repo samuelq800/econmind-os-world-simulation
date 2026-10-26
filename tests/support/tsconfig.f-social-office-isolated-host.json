@@ -8,5 +8,8 @@
     "lib": ["ES2024", "DOM"],
     "skipLibCheck": false
   },
-  "include": ["./f-social-office-isolated-host.ts"]
+  "include": [
+    "./f-social-office-isolated-host.ts",
+    "./social-office-atomic-fixture.ts"
+  ]
 }
