@@ -277,6 +277,8 @@ function validateInventoryPosting(input: {
   readonly transition: AuthoritativeTransition;
   readonly sha256Hex: Sha256Hex;
 }): Readonly<InventoryLedgerPosting> {
+  if (input.posting.schemaVersion === 'inventory-social-service-consumption-v1')
+    invalid('SOCIAL_SERVICE_PERSISTENCE_SCHEMA_NOT_ADMITTED');
   if (input.posting.schemaVersion === PRODUCTION_CONSUMPTION_SCHEMA_VERSION) {
     const verified = createProductionConsumptionPosting(
       {

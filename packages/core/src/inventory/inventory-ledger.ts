@@ -48,6 +48,10 @@ import {
 } from '../finance/financial-ledger.js';
 import { isSimTime, type SimTime } from '../numeric/sim-time.js';
 import {
+  isValidatedSocialServicePosting,
+  assertSocialServiceConsumptionContext,
+} from './social-service-consumption-posting.js';
+import {
   canonicalHashInput,
   canonicalSerialize,
 } from '../serialization/canonical.js';
@@ -123,6 +127,11 @@ export interface InventoryBalance {
 export interface AppliedInventoryPosting {
   readonly postingId: InventoryPostingId;
   readonly fingerprint: CanonicalSha256;
+  readonly socialService?: Readonly<{
+    serviceEventId: string;
+    clinicId: string;
+    careWindowId: string;
+  }>;
   readonly production?: Readonly<{
     runId: string;
     outcomeRef: string;
@@ -481,9 +490,28 @@ export function parseInventoryLedgerSnapshot(input: {
           !Array.isArray(posting.production.inputBatchIds))
       )
         invalid('Invalid hydrated production recognition');
+      if (posting.socialService !== undefined) {
+        const s = posting.socialService;
+        if (
+          posting.production !== undefined ||
+          Object.keys(s).sort().join(',') !==
+            'careWindowId,clinicId,serviceEventId' ||
+          ![s.serviceEventId, s.clinicId, s.careWindowId].every(
+            (id) =>
+              typeof id === 'string' &&
+              /^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u.test(id),
+          )
+        )
+          invalid('Invalid hydrated Social service recognition');
+      }
       return Object.freeze({
         postingId: inventoryPostingId(posting.postingId),
         fingerprint: posting.fingerprint,
+        ...(posting.socialService === undefined
+          ? {}
+          : {
+              socialService: Object.freeze({ ...posting.socialService }),
+            }),
         ...(posting.production === undefined
           ? {}
           : {
@@ -509,6 +537,11 @@ export function parseInventoryLedgerSnapshot(input: {
   ) {
     invalid('Hydrated applied postings contain duplicate identities');
   }
+  const serviceIds = postings.flatMap((p) =>
+    p.socialService ? [p.socialService.serviceEventId] : [],
+  );
+  if (new Set(serviceIds).size !== serviceIds.length)
+    invalid('Hydrated service Event recognized more than once');
   const state = Object.freeze({
     schemaVersion: INVENTORY_LEDGER_SCHEMA_VERSION,
     worldId: canonicalWorldId,
@@ -554,7 +587,12 @@ export function applyInventoryPosting(
     );
   }
   const production = isValidatedProductionPosting(posting);
-  if (!inventoryPostingInstances.has(posting) && !production) {
+  const socialService = isValidatedSocialServicePosting(posting);
+  if (
+    !inventoryPostingInstances.has(posting) &&
+    !production &&
+    !socialService
+  ) {
     invalid('Inventory writer accepts validated canonical postings only');
   }
   const existing = state.appliedPostings.find(
@@ -580,6 +618,16 @@ export function applyInventoryPosting(
       DOMAIN_ERROR_CODES.INVENTORY_POSTING_CONFLICT,
       'Inventory posting does not extend the current World ledger version',
     );
+  }
+  if (socialService) {
+    assertSocialServiceConsumptionContext(posting, state, productionContext);
+    if (
+      state.appliedPostings.some(
+        (p) =>
+          p.socialService?.serviceEventId === posting.evidence.serviceEventId,
+      )
+    )
+      invalid('Social service Event has already consumed Inventory');
   }
   if (production) {
     if (!productionContext)
@@ -676,6 +724,15 @@ export function applyInventoryPosting(
       Object.freeze({
         postingId: posting.postingId,
         fingerprint: posting.fingerprint,
+        ...(socialService
+          ? {
+              socialService: Object.freeze({
+                serviceEventId: posting.evidence.serviceEventId,
+                clinicId: posting.evidence.clinicId,
+                careWindowId: posting.evidence.careWindowId,
+              }),
+            }
+          : {}),
         ...(production
           ? {
               production: Object.freeze({

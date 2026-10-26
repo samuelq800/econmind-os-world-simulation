@@ -42,6 +42,7 @@ import {
   type FinancialLedgerState,
 } from '../finance/financial-ledger.js';
 import { isAuthoritativeFinancialLedgerState } from '../opening/ledger-authority.js';
+import type { SocialServiceConsumptionPostingV1 } from './social-service-consumption-posting.js';
 
 export const PRODUCTION_CONSUMPTION_SCHEMA_VERSION =
   'inventory-production-consumption-v1' as const;
@@ -106,7 +107,9 @@ export interface InventoryProductionPosting extends Omit<
   readonly result: V13ProductionResult;
 }
 export type InventoryLedgerPosting =
-  InventoryPosting | InventoryProductionPosting;
+  | InventoryPosting
+  | InventoryProductionPosting
+  | SocialServiceConsumptionPostingV1;
 const instances = new WeakSet<object>();
 const REF = /^[A-Za-z][A-Za-z0-9._:-]{0,127}$/u;
 function invalid(message: string): never {
