@@ -1099,3 +1099,166 @@ export async function createTestOnlyGov01RecordSource(
   fixtureSources.add(source);
   return source;
 }
+
+export interface Gov01RetainedRecordSetData {
+  readonly classification: 'RETAINED_RECORD_SET_DATA_NOT_AUTHENTICATED';
+  readonly binding: Readonly<Gov01TypedRegisterBindingData>;
+  readonly documentSetIdentity: Readonly<{
+    readonly manifestPin: Gov01RawPin;
+    readonly members: readonly Gov01RawPin[];
+    readonly pinSetSha256: string;
+  }>;
+}
+
+/** Neutral full-record data validation only. No source, signer, qualification,
+ * currentness, installation or read capability is issued here. Authority raw
+ * originals remain unchanged; F's independently enrolled role attestations and
+ * protected native store own their actual meaning/qualification/currentness. */
+export function inspectGov01RetainedRecordSetData(
+  value: unknown,
+  requestValue: unknown,
+): Readonly<Gov01RetainedRecordSetData> {
+  const request = parseGov01ReadRequest(requestValue);
+  const input = row(capture(value), ['binding', 'documents']);
+  const binding = parseGov01TypedRegisterBindingData(input.binding, request);
+  demand(
+    Array.isArray(input.documents) &&
+      input.documents.length > 0 &&
+      input.documents.length <= 32,
+    'DOCUMENT_SET_INVALID',
+  );
+  const documents = new Map<
+    string,
+    Readonly<{ pin: Gov01RawPin; utf8: string }>
+  >();
+  let totalBytes = 0;
+  for (const value of input.documents) {
+    const document = row(value, ['pin', 'utf8']);
+    const fullPin = pin(document.pin);
+    demand(fullPin.pointer === '', 'FULL_DOCUMENT_ROOT_PIN_REQUIRED');
+    demand(!documents.has(fullPin.documentId), 'DUPLICATE_DOCUMENT');
+    demand(
+      typeof document.utf8 === 'string' &&
+        !/[\ud800-\udfff]/u.test(document.utf8),
+      'UTF8_INVALID',
+    );
+    const bytes = Buffer.from(document.utf8, 'utf8');
+    totalBytes += bytes.length;
+    demand(totalBytes <= MAX_BYTES, 'CAP_EXCEEDED');
+    demand(
+      bytes.length <= 1024 * 1024 &&
+        String(bytes.length) === fullPin.byteLength &&
+        sha(bytes) === fullPin.sha256,
+      'RAW_PIN_MISMATCH',
+    );
+    documents.set(
+      fullPin.documentId,
+      Object.freeze({ pin: fullPin, utf8: document.utf8 }),
+    );
+  }
+  const documentFor = (reference: Gov01RawPin) => {
+    const document = documents.get(reference.documentId);
+    demand(
+      document && same(document.pin, { ...reference, pointer: '' }),
+      'DOCUMENT_MEMBERSHIP_MISMATCH',
+    );
+    return document;
+  };
+  const selectedJson = (reference: Gov01RawPin): unknown => {
+    const document = documentFor(reference);
+    return readGov01PinnedJsonDocument({
+      pin: reference,
+      utf8: document.utf8,
+    });
+  };
+  const primaryPins = [
+    binding.asset.sourcePin,
+    binding.necessaryMirror.sourcePin,
+    binding.ownRegister.sourcePin,
+    binding.opening.openingPin,
+    binding.currency.currencyPin,
+  ];
+  const authorityPins = [
+    binding.currency.adoptionEvidencePin,
+    ...Object.values(binding.authorityEvidence),
+  ];
+  const memberIds = new Set<string>();
+  for (const reference of [...primaryPins, ...authorityPins]) {
+    documentFor(reference);
+    memberIds.add(reference.documentId);
+  }
+  demand(
+    !memberIds.has(binding.sourceManifestPin.documentId) &&
+      documents.size === memberIds.size + 1,
+    'EXACT_DOCUMENT_SET_REQUIRED',
+  );
+  documentFor(binding.sourceManifestPin);
+  // Exact unsigned UTF8 byte ordering, not JS UTF16 sort or locale collation.
+  const members = Object.freeze(
+    [...memberIds]
+      .sort((a, b) =>
+        Buffer.compare(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8')),
+      )
+      .map((id) => documents.get(id)!.pin),
+  );
+  const manifest = row(selectedJson(binding.sourceManifestPin), [
+    'schemaVersion',
+    'sourceSetVersion',
+    'originalId',
+    'members',
+  ]);
+  demand(
+    manifest.schemaVersion === 'gov01-retained-record-set-v1' &&
+      manifest.sourceSetVersion === request.sourceSetVersion &&
+      manifest.originalId === GOV01_ORIGINAL_ID &&
+      Array.isArray(manifest.members) &&
+      same(manifest.members, members),
+    'EXACT_MANIFEST_MISMATCH',
+  );
+  demand(
+    same(
+      selectedJson(binding.asset.sourcePin),
+      without(binding.asset, ['sourcePin']),
+    ) &&
+      same(
+        selectedJson(binding.necessaryMirror.sourcePin),
+        without(binding.necessaryMirror, ['sourcePin']),
+      ) &&
+      same(
+        selectedJson(binding.ownRegister.sourcePin),
+        without(binding.ownRegister, ['sourcePin']),
+      ),
+    'SOURCE_RECORD_BODY_MISMATCH',
+  );
+  demand(
+    same(selectedJson(binding.opening.openingPin), {
+      ...(without(binding.opening, ['openingPin']) as Row),
+      lifecycle: 'INACTIVE_NOT_ACTIVATED',
+    }),
+    'LAWFUL_OPENING_BODY_MISMATCH',
+  );
+  demand(
+    same(selectedJson(binding.currency.currencyPin), {
+      code: binding.currency.code,
+      unit: binding.currency.unit,
+    }),
+    'CURRENCY_BODY_MISMATCH',
+  );
+  // A root authority reference is complete raw data, which need not be JSON.
+  // Non-root selection must be supported strict JSON; neither case authenticates
+  // the document or interprets a claimed ACTIVE status as authority.
+  for (const reference of authorityPins) {
+    if (reference.pointer !== '') selectedJson(reference);
+  }
+  return Object.freeze({
+    classification: 'RETAINED_RECORD_SET_DATA_NOT_AUTHENTICATED',
+    binding,
+    documentSetIdentity: Object.freeze({
+      manifestPin: binding.sourceManifestPin,
+      members,
+      // EXACT named data domain: GOV01_RETAINED_FULL_DOCUMENT_PIN_COLLECTION_ONLY.
+      // No prefix, wrapper, role selectors or raw-body concatenation in preimage.
+      pinSetSha256: sha(canonicalSerialize(members)),
+    }),
+  });
+}

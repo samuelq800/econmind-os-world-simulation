@@ -16,6 +16,7 @@ import {
   GOV01_ORIGINAL_ID,
   createTestOnlyGov01RecordSource,
   inspectTestOnlyGov01Observation,
+  inspectGov01RetainedRecordSetData,
   isTestOnlyGov01RecordSource,
   parseGov01ReadRequest,
   parseGov01TypedRegisterBindingData,
@@ -916,6 +917,471 @@ describe('guarded TEST_ONLY shared source lifecycle', () => {
         request,
         expectation,
       ),
+    ).toThrow();
+  });
+});
+
+// New synthetic retained-transport vectors only. No genuine source/signature
+// or current native state is created by this neutral, unauthenticated grammar.
+interface NeutralInput {
+  binding: Binding;
+  documents: Document[];
+}
+function neutralReferences(binding: Binding): Gov01RawPin[] {
+  return [
+    binding.asset.sourcePin,
+    binding.necessaryMirror.sourcePin,
+    binding.ownRegister.sourcePin,
+    binding.opening.openingPin,
+    binding.currency.currencyPin,
+    binding.currency.adoptionEvidencePin,
+    ...Object.values(binding.authorityEvidence),
+  ];
+}
+function neutralRaw(input: NeutralInput, id: string, utf8: string): void {
+  const document = input.documents.find((d) => d.pin.documentId === id)!;
+  const fullPin = {
+    ...document.pin,
+    byteLength: String(Buffer.byteLength(utf8)),
+    sha256: sha(utf8),
+    pointer: '',
+  };
+  for (const reference of [
+    input.binding.sourceManifestPin,
+    ...neutralReferences(input.binding),
+  ]) {
+    if (reference.documentId === id) {
+      const pointer = reference.pointer;
+      Object.assign(reference, fullPin, { pointer });
+    }
+  }
+  document.pin = fullPin;
+  document.utf8 = utf8;
+}
+function neutralMembers(input: NeutralInput): Gov01RawPin[] {
+  const ids = new Set(
+    neutralReferences(input.binding).map((p) => p.documentId),
+  );
+  return [...ids]
+    .sort((a, b) => Buffer.compare(Buffer.from(a), Buffer.from(b)))
+    .map((id) => input.documents.find((d) => d.pin.documentId === id)!.pin);
+}
+function neutralManifest(
+  input: NeutralInput,
+  members = neutralMembers(input),
+): void {
+  neutralRaw(
+    input,
+    input.binding.sourceManifestPin.documentId,
+    JSON.stringify({
+      schemaVersion: 'gov01-retained-record-set-v1',
+      sourceSetVersion: request.sourceSetVersion,
+      originalId: GOV01_ORIGINAL_ID,
+      members,
+    }),
+  );
+}
+function neutralFixture(): NeutralInput {
+  const f = fixture();
+  const binding = structuredClone(f.binding);
+  const documents = f.documents.map((d) => ({
+    pin: { ...d.pin, pointer: '' },
+    utf8: d.utf8,
+  }));
+  // One actual raw JSON identity supplies two explicit selected account rows.
+  const asset = JSON.parse(
+    documents.find((d) => d.pin.documentId === 'asset')!.utf8,
+  ) as unknown;
+  const mirror = JSON.parse(
+    documents.find((d) => d.pin.documentId === 'mirror')!.utf8,
+  ) as unknown;
+  const utf8 = JSON.stringify({ records: [asset, mirror] });
+  const pairPin = {
+    documentId: 'pair-original',
+    sourceVersion: request.sourceSetVersion,
+    byteLength: String(Buffer.byteLength(utf8)),
+    sha256: sha(utf8),
+    pointer: '',
+  };
+  binding.asset.sourcePin = { ...pairPin, pointer: '/records/0' };
+  binding.necessaryMirror.sourcePin = { ...pairPin, pointer: '/records/1' };
+  const input = {
+    binding,
+    documents: [
+      ...documents.filter(
+        (d) => !['asset', 'mirror'].includes(d.pin.documentId),
+      ),
+      { pin: pairPin, utf8 },
+    ],
+  };
+  neutralManifest(input);
+  return input;
+}
+function sharedAuthority(
+  input: NeutralInput,
+  utf8: string,
+  pointer = '',
+): void {
+  const keys = [
+    'cbIssuerCustodyAppointmentPin',
+    'govRegisterCustodyAppointmentPin',
+    'holderConcurrencePin',
+  ] as const;
+  const oldIds = keys.map((k) => input.binding.authorityEvidence[k].documentId);
+  input.documents = input.documents.filter(
+    (d) => !oldIds.includes(d.pin.documentId),
+  );
+  const pin = {
+    documentId: 'shared-authority-original',
+    sourceVersion: request.sourceSetVersion,
+    byteLength: String(Buffer.byteLength(utf8)),
+    sha256: sha(utf8),
+    pointer: '',
+  };
+  input.documents.push({ pin, utf8 });
+  for (const key of keys)
+    input.binding.authorityEvidence[key] = { ...pin, pointer };
+  neutralManifest(input);
+}
+
+describe('GOV01 retained neutral delta', () => {
+  it('returns owned full-set DATA only, with no source/grant/currentness fields', () => {
+    const input = neutralFixture();
+    const result = inspectGov01RetainedRecordSetData(input, request);
+    expect(Object.keys(result).sort()).toEqual([
+      'binding',
+      'classification',
+      'documentSetIdentity',
+    ]);
+    expect(result.classification).toBe(
+      'RETAINED_RECORD_SET_DATA_NOT_AUTHENTICATED',
+    );
+    expect(Object.isFrozen(result.binding.asset.account)).toBe(true);
+    expect(Object.isFrozen(result.documentSetIdentity.members)).toBe(true);
+    input.binding.currency.unit = 'caller mutation';
+    input.documents[0]!.utf8 = 'changed';
+    expect(result.binding.currency.unit).toBe(
+      'one Avenor national accounting unit',
+    );
+    expect(isTestOnlyGov01RecordSource(result)).toBe(false);
+    expect('withCurrentBindingFrom' in result).toBe(false);
+  });
+  it('accepts two exact primary selectors in one raw document, not alias files', () => {
+    const result = inspectGov01RetainedRecordSetData(neutralFixture(), request);
+    expect(result.binding.asset.sourcePin.documentId).toBe(
+      result.binding.necessaryMirror.sourcePin.documentId,
+    );
+    expect(result.binding.asset.sourcePin.pointer).toBe('/records/0');
+    expect(result.binding.necessaryMirror.sourcePin.pointer).toBe('/records/1');
+    expect(
+      result.documentSetIdentity.members.filter(
+        (p) => p.documentId === 'pair-original',
+      ),
+    ).toHaveLength(1);
+    expect(
+      result.documentSetIdentity.members.every((p) => p.pointer === ''),
+    ).toBe(true);
+  });
+  it('accepts an unchanged non-JSON authority original used by several roles', () => {
+    const input = neutralFixture(),
+      raw =
+        'Original authority letter.\nNot JSON. No invented ACTIVE object.\n';
+    sharedAuthority(input, raw);
+    const before = structuredClone(input.documents);
+    const result = inspectGov01RetainedRecordSetData(input, request);
+    expect(input.documents).toEqual(before);
+    const pins = result.binding.authorityEvidence;
+    expect(pins.cbIssuerCustodyAppointmentPin).toEqual(
+      pins.govRegisterCustodyAppointmentPin,
+    );
+    expect(pins.holderConcurrencePin.sha256).toBe(sha(raw));
+    expect(
+      result.documentSetIdentity.members.filter(
+        (p) => p.documentId === 'shared-authority-original',
+      ),
+    ).toHaveLength(1);
+  });
+  it('preserves the original fixed definition receipt bytes and pin', () => {
+    const input = neutralFixture();
+    const result = inspectGov01RetainedRecordSetData(input, request);
+    const p = result.binding.authorityEvidence.definitionAdoptionPin;
+    expect(p.sha256).toBe(
+      '968440af89bce122475915823336bbc11e6d481244424aa80bd72ac1bc3ab716',
+    );
+    expect(
+      input.documents.find((d) => d.pin.documentId === p.documentId)!.utf8,
+    ).toBe(definitionUtf8);
+  });
+  it('supports strict JSON authority selectors without interpreting authority meaning', () => {
+    const input = neutralFixture();
+    sharedAuthority(
+      input,
+      '{"signed":{"assertion":"data, not authentication"}}',
+      '/signed',
+    );
+    expect(
+      inspectGov01RetainedRecordSetData(input, request).classification,
+    ).toBe('RETAINED_RECORD_SET_DATA_NOT_AUTHENTICATED');
+  });
+  it.each([
+    ['non-JSON non-root', 'Authority letter', '/signed'],
+    ['duplicate decoded authority keys', '{"x":"a","\\u0078":"b"}', '/x'],
+    ['missing authority selector', '{"signed":"body"}', '/absent'],
+  ])('refuses unsupported authority projection: %s', (_name, utf8, pointer) => {
+    const input = neutralFixture();
+    sharedAuthority(input, utf8, pointer);
+    expect(() => inspectGov01RetainedRecordSetData(input, request)).toThrow();
+  });
+  it('has exact unsigned-UTF8 ordering and the agreed unprefixed pin hash preimage', () => {
+    const input = neutralFixture();
+    for (const [key, id] of [
+      ['retainedOriginPin', '😀'],
+      ['installationPin', '\ue000'],
+    ] as const) {
+      const reference = input.binding.authorityEvidence[key];
+      const d = input.documents.find(
+        (d) => d.pin.documentId === reference.documentId,
+      )!;
+      Object.assign(reference, { documentId: id });
+      d.pin = { ...d.pin, documentId: id };
+    }
+    neutralManifest(input);
+    const result = inspectGov01RetainedRecordSetData(input, request),
+      members = result.documentSetIdentity.members;
+    const ids = members.map((p) => p.documentId);
+    expect(ids.indexOf('\ue000')).toBeLessThan(ids.indexOf('😀'));
+    expect(['\ue000', '😀'].sort()).toEqual(['😀', '\ue000']);
+    expect(result.documentSetIdentity.pinSetSha256).toBe(
+      sha(canonicalSerialize(members)),
+    );
+    expect(result.documentSetIdentity.pinSetSha256).not.toBe(
+      sha(
+        'GOV01_RETAINED_FULL_DOCUMENT_PIN_COLLECTION_ONLY\n' +
+          canonicalSerialize(members),
+      ),
+    );
+    expect(result.documentSetIdentity.pinSetSha256).not.toBe(
+      sha(canonicalSerialize({ members })),
+    );
+  });
+  it('does not authenticate an internally claimed current control revision', () => {
+    const input = neutralFixture();
+    input.binding.control.generation = '999';
+    input.binding.control.headDigest = 'e'.repeat(64);
+    const result = inspectGov01RetainedRecordSetData(input, request);
+    expect(result.classification).toBe(
+      'RETAINED_RECORD_SET_DATA_NOT_AUTHENTICATED',
+    );
+    expect('current' in result).toBe(false);
+    expect('sourceAdmitted' in result).toBe(false);
+  });
+  it.each(['sourceVersion', 'byteLength', 'sha256'])(
+    'refuses same-id conflicting role raw identity: %s',
+    (key) => {
+      const input = neutralFixture();
+      Object.assign(input.binding.necessaryMirror.sourcePin, {
+        [key]:
+          key === 'sha256'
+            ? 'a'.repeat(64)
+            : key === 'byteLength'
+              ? '1'
+              : 'OTHER_VERSION',
+      });
+      // Reach the independent same-file raw identity comparison after the
+      // record-local version guard; both refusals must remain effective.
+      if (key === 'sourceVersion')
+        input.binding.necessaryMirror.sourceVersion = 'OTHER_VERSION';
+      expect(() => inspectGov01RetainedRecordSetData(input, request)).toThrow(
+        'DOCUMENT_MEMBERSHIP_MISMATCH',
+      );
+    },
+  );
+  it.each(['duplicate', 'missing', 'extra'])(
+    'refuses %s supplied raw document',
+    (mode) => {
+      const input = neutralFixture();
+      if (mode === 'duplicate')
+        input.documents.push(structuredClone(input.documents[0]!));
+      if (mode === 'missing')
+        input.documents = input.documents.filter(
+          (d) => d.pin.documentId !== input.binding.asset.sourcePin.documentId,
+        );
+      if (mode === 'extra') {
+        const utf8 = 'not authorized as member';
+        input.documents.push({
+          pin: {
+            documentId: 'unreferenced',
+            sourceVersion: 'v1',
+            byteLength: String(Buffer.byteLength(utf8)),
+            sha256: sha(utf8),
+            pointer: '',
+          },
+          utf8,
+        });
+      }
+      expect(() => inspectGov01RetainedRecordSetData(input, request)).toThrow();
+    },
+  );
+  it('refuses supplied document pins with a selected subtree instead of whole root', () => {
+    const input = neutralFixture();
+    input.documents[0]!.pin = {
+      ...input.documents[0]!.pin,
+      pointer: '/subtree',
+    };
+    expect(() => inspectGov01RetainedRecordSetData(input, request)).toThrow(
+      'FULL_DOCUMENT_ROOT_PIN_REQUIRED',
+    );
+  });
+  it.each(['length', 'hash', 'invalid Unicode'])(
+    'refuses incorrect full raw bytes: %s',
+    (mode) => {
+      const input = neutralFixture(),
+        d = input.documents[0]!;
+      if (mode === 'length') d.pin = { ...d.pin, byteLength: '0' };
+      if (mode === 'hash') d.utf8 += ' ';
+      if (mode === 'invalid Unicode') d.utf8 = '\ud800';
+      expect(() => inspectGov01RetainedRecordSetData(input, request)).toThrow();
+    },
+  );
+  it.each([
+    'order',
+    'missing',
+    'extra',
+    'nonroot',
+    'isolated schema',
+    'wrong source set',
+  ])('refuses manifest mismatch: %s', (mode) => {
+    const input = neutralFixture();
+    const p = input.binding.sourceManifestPin;
+    const manifest = JSON.parse(
+      input.documents.find((d) => d.pin.documentId === p.documentId)!.utf8,
+    ) as {
+      schemaVersion: string;
+      sourceSetVersion: string;
+      members: Gov01RawPin[];
+    };
+    if (mode === 'order') manifest.members.reverse();
+    if (mode === 'missing') manifest.members.pop();
+    if (mode === 'extra') manifest.members.push(manifest.members[0]!);
+    if (mode === 'nonroot')
+      manifest.members[0] = { ...manifest.members[0]!, pointer: '/selected' };
+    if (mode === 'isolated schema')
+      manifest.schemaVersion = 'gov01-isolated-record-set-v1';
+    if (mode === 'wrong source set') manifest.sourceSetVersion = 'FOREIGN';
+    neutralRaw(input, p.documentId, JSON.stringify(manifest));
+    expect(() => inspectGov01RetainedRecordSetData(input, request)).toThrow(
+      'EXACT_MANIFEST_MISMATCH',
+    );
+  });
+  it('refuses manifest self-inclusion in any source role', () => {
+    const input = neutralFixture();
+    input.binding.currency.adoptionEvidencePin = {
+      ...input.binding.sourceManifestPin,
+    };
+    expect(() => inspectGov01RetainedRecordSetData(input, request)).toThrow(
+      'EXACT_DOCUMENT_SET_REQUIRED',
+    );
+  });
+  it.each([
+    'non-JSON',
+    'duplicate key',
+    'wrong selected body',
+    'missing selector',
+  ])('refuses unsupported primary projection: %s', (mode) => {
+    const input = neutralFixture(),
+      id = input.binding.asset.sourcePin.documentId;
+    const current = input.documents.find((d) => d.pin.documentId === id)!;
+    if (mode === 'non-JSON')
+      neutralRaw(
+        input,
+        id,
+        'Original account prose is not supported typed JSON',
+      );
+    if (mode === 'duplicate key')
+      neutralRaw(input, id, '{"records":[],"records":[]}');
+    if (mode === 'wrong selected body')
+      neutralRaw(input, id, current.utf8.replace('TGA_ASSET', 'FOREIGN_ROLE'));
+    if (mode === 'missing selector')
+      input.binding.asset.sourcePin.pointer = '/records/9';
+    neutralManifest(input);
+    expect(() => inspectGov01RetainedRecordSetData(input, request)).toThrow();
+  });
+  it.each(['owner', 'claim', 'register', 'opening', 'currency'])(
+    'retains typed binding rejection: %s',
+    (mode) => {
+      const input = neutralFixture();
+      if (mode === 'owner')
+        input.binding.asset.account.ownerId = 'FOREIGN' as never;
+      if (mode === 'claim')
+        input.binding.necessaryMirror.account.claimId = 'OTHER_CLAIM' as never;
+      if (mode === 'register')
+        input.binding.ownRegister.members[0].accountId =
+          input.binding.necessaryMirror.account.accountId;
+      if (mode === 'opening') input.binding.opening.heldHead.worldVersion = '1';
+      if (mode === 'currency')
+        input.binding.necessaryMirror.account.currency = 'GCU';
+      expect(() => inspectGov01RetainedRecordSetData(input, request)).toThrow();
+    },
+  );
+  it('rejects accessor/proxy/extra authority-shaped input before reading it', () => {
+    let invoked = 0;
+    const input = neutralFixture();
+    const bad = Object.defineProperty({ ...input }, 'documents', {
+      enumerable: true,
+      get() {
+        invoked++;
+        return input.documents;
+      },
+    });
+    expect(() => inspectGov01RetainedRecordSetData(bad, request)).toThrow();
+    expect(invoked).toBe(0);
+    expect(() =>
+      inspectGov01RetainedRecordSetData(
+        new Proxy(input, {
+          ownKeys() {
+            invoked++;
+            throw Error('trap');
+          },
+        }),
+        request,
+      ),
+    ).toThrow();
+    expect(invoked).toBe(0);
+    expect(() =>
+      inspectGov01RetainedRecordSetData(
+        { ...input, sourceAdmitted: true },
+        request,
+      ),
+    ).toThrow('CLOSED_KEYS_REQUIRED');
+  });
+  it('rejects finite document-count/byte overflow without a partial set', () => {
+    const input = neutralFixture();
+    while (input.documents.length < 33)
+      input.documents.push(structuredClone(input.documents[0]!));
+    expect(() => inspectGov01RetainedRecordSetData(input, request)).toThrow(
+      'DOCUMENT_SET_INVALID',
+    );
+    const oversized = neutralFixture();
+    oversized.documents[0]!.utf8 = 'x'.repeat(1024 * 1024 + 1);
+    expect(() => inspectGov01RetainedRecordSetData(oversized, request)).toThrow(
+      'CAP_EXCEEDED',
+    );
+  });
+  it('does not upgrade the old isolated manifest or fixture-source provenance', () => {
+    const old = fixture();
+    expect(() =>
+      inspectGov01RetainedRecordSetData(
+        { binding: old.binding, documents: old.documents },
+        request,
+      ),
+    ).toThrow('EXACT_MANIFEST_MISMATCH');
+    const neutral = inspectGov01RetainedRecordSetData(
+      neutralFixture(),
+      request,
+    );
+    expect(isTestOnlyGov01RecordSource(neutral)).toBe(false);
+    expect(() =>
+      inspectTestOnlyGov01Observation(neutral, request, expectation),
     ).toThrow();
   });
 });
