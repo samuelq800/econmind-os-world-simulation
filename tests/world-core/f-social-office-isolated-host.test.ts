@@ -55,7 +55,9 @@ describe('F owned installer preflight wiring', () => {
         status: 'PREFLIGHT_ONLY_NOT_INSTALLED',
         sourceClass: 'SIMULATED_OPENING',
         sourceAdmitted: false,
-        sourceRoot: path.resolve(fileURLToPath(new URL('../..', import.meta.url))),
+        sourceRoot: path.resolve(
+          fileURLToPath(new URL('../..', import.meta.url)),
+        ),
         seedFingerprint:
           'sha256:c50eb02adc46021db162ecf51fb8d734a986ce8bdadc7aef3adfe3cea2312200',
         nativeResourcesStarted: false,
