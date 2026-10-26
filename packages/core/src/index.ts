@@ -131,3 +131,14 @@ export {
   type FinanceBudgetReserveResult,
   type ReserveLineBalances,
 } from './commands/finance-budget-reserve.js';
+// Industry boundary data only; native/source admission remains independent.
+export {
+  parseIndustryPersistenceSchemaBoundaryContext,
+  classifyInventoryPersistenceSchemaPair,
+  assertIndustryPersistenceSchemaBoundaryMatchesActual,
+  type IndustryPersistenceSchemaReadContextV1,
+  type IndustryPersistenceSchemaCommitContextV1,
+  type IndustryPersistenceSchemaBoundaryContextV1,
+  type IndustryPersistenceSchemaPostingIdentityV1,
+  type IndustryPersistenceSchemaBoundaryActualInputV1,
+} from './inventory/industry-persistence-boundary-contract.js';

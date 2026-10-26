@@ -14,6 +14,7 @@ import {
   createInventoryPosting,
   createProductionConsumptionPosting,
   assertInventoryPersistenceSchemaAdmitted,
+  classifyInventoryPersistenceSchemaPair,
   PRODUCTION_CONSUMPTION_SCHEMA_VERSION,
   eventId,
   idempotencyKey,
@@ -38,6 +39,10 @@ import {
 } from '@econmind/core';
 
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import {
+  assertIndustryProductionCutoffObservation,
+  type IndustryProductionCutoffGuard,
+} from './industry-production-source-cutoff.js';
 import {
   SOCIAL_PLAN_SOURCE_EVALUATION_PURPOSE,
   assertGoverningSourceCommitRequestConsistent,
@@ -884,6 +889,7 @@ export class AtomicTransitionRepository {
   readonly #faultInjector: AtomicCommitFaultInjector;
   readonly #narrowTransferApprovalGuard: AtomicNarrowTransferApprovalGuard | null;
   readonly #sourceCommitProtectionPort: SourceCommitProtectionPort | null;
+  readonly #industryProductionCutoffGuard: IndustryProductionCutoffGuard | null;
 
   constructor(input: {
     readonly database: SqlDatabase;
@@ -893,6 +899,7 @@ export class AtomicTransitionRepository {
     readonly faultInjector?: AtomicCommitFaultInjector;
     readonly narrowTransferApprovalGuard?: AtomicNarrowTransferApprovalGuard;
     readonly sourceCommitProtectionPort?: SourceCommitProtectionPort;
+    readonly industryProductionCutoffGuard?: IndustryProductionCutoffGuard;
   }) {
     this.#database = input.database;
     this.#authorizationGuard = input.authorizationGuard;
@@ -902,6 +909,8 @@ export class AtomicTransitionRepository {
     this.#narrowTransferApprovalGuard =
       input.narrowTransferApprovalGuard ?? null;
     this.#sourceCommitProtectionPort = input.sourceCommitProtectionPort ?? null;
+    this.#industryProductionCutoffGuard =
+      input.industryProductionCutoffGuard ?? null;
   }
 
   async readFinalReceipt(
@@ -980,8 +989,25 @@ export class AtomicTransitionRepository {
     if (!privateCandidates.has(candidate)) {
       invalid('Atomic repository accepts a validated private candidate only');
     }
-    // Explicit schema gate BEFORE opening a database transaction or writing any fact.
-    assertInventoryPersistenceSchemaAdmitted(candidate.inventoryPostings);
+    // Structural classification only. Exact production may recover its durable
+    // receipt before CURRENT new-use eligibility. The original Core deny body is
+    // unchanged and remains the nonproduction path, not caught or overridden.
+    const production = candidate.inventoryPostings.some((posting) => {
+      return (
+        classifyInventoryPersistenceSchemaPair({
+          schemaVersion: posting.schemaVersion,
+          operation: posting.operation,
+        }).family === 'INDUSTRY_PRODUCTION'
+      );
+    });
+    // Classify EVERY posting, including those after the first production.
+    for (const posting of candidate.inventoryPostings)
+      classifyInventoryPersistenceSchemaPair({
+        schemaVersion: posting.schemaVersion,
+        operation: posting.operation,
+      });
+    if (!production)
+      assertInventoryPersistenceSchemaAdmitted(candidate.inventoryPostings);
     if (candidate.commitAssertion.holderId !== this.#workerId) {
       throw new DomainError(
         DOMAIN_ERROR_CODES.WRITER_FENCE_STALE,
@@ -1035,6 +1061,12 @@ export class AtomicTransitionRepository {
         }
         await this.#faultInjector.hit('AUTHORIZATION_RECHECKED');
         await this.#assertPlanSourceCurrent(transaction, candidate, head);
+        if (production)
+          await this.#assertIndustryProductionCurrent(
+            transaction,
+            candidate,
+            head,
+          );
         await this.#faultInjector.hit('BEFORE_EVENTS');
         await this.#insertEvents(transaction, candidate, head.eventSequence);
         await this.#faultInjector.hit('AFTER_EVENTS');
@@ -1108,6 +1140,45 @@ export class AtomicTransitionRepository {
       transition: candidate.transition,
     });
     return Object.freeze({ source, receipt, transition: candidate.transition });
+  }
+
+  async #assertIndustryProductionCurrent(
+    transaction: SqlExecutor,
+    candidate: PrivateAtomicTransitionCandidate,
+    head: Readonly<{ worldVersion: string; eventSequence: string }>,
+  ): Promise<void> {
+    const posting = candidate.inventoryPostings[0];
+    if (
+      this.#industryProductionCutoffGuard === null ||
+      candidate.inventoryPostings.length !== 1 ||
+      candidate.financialPostingBatches.length !== 0 ||
+      candidate.transition.events.length !== 1 ||
+      posting?.schemaVersion !== PRODUCTION_CONSUMPTION_SCHEMA_VERSION ||
+      posting.operation !== 'PRODUCE_AND_CONSUME'
+    )
+      invalid(
+        'New Industry production requires the fixed source guard and the complete supported prior-funded candidate',
+      );
+    const op = posting.evidence.operating.payload;
+    const request = Object.freeze({
+      command: candidate.command,
+      transition: candidate.transition,
+      posting,
+      expectedHead: Object.freeze({ ...head }),
+      fundingBatchId: op.fundingBatchId,
+      fundingFingerprint: op.fundingFingerprint,
+      costLegId: op.costLegId,
+    });
+    const observed =
+      await this.#industryProductionCutoffGuard.assertCurrentFrom(
+        transaction,
+        request,
+      );
+    assertIndustryProductionCutoffObservation(
+      request,
+      observed,
+      this.#sha256Hex,
+    );
   }
 
   async #assertPlanSourceCurrent(

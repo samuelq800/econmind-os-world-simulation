@@ -2,6 +2,7 @@ import {
   DOMAIN_ERROR_CODES,
   DomainError,
   type FinalCommandReceipt,
+  type IndustryPersistenceSchemaReadContextV1,
   type OpeningSeed,
   type RebuiltV08Ledgers,
   type V08AuthoritativeLedgerTransition,
@@ -63,6 +64,7 @@ export async function withValidatedCanonicalLineageFrom<Result>(
     readonly reader: DurableV08LedgerLineageReader;
     readonly executor: SqlExecutor;
     readonly worldId: string;
+    readonly industryReadContext?: Readonly<IndustryPersistenceSchemaReadContextV1>;
   },
   consume: (view: ValidatedCanonicalLineageView) => Promise<Result>,
 ): Promise<Result> {
@@ -73,6 +75,7 @@ export async function withValidatedCanonicalLineageFrom<Result>(
       input.reader,
       input.executor,
       input.worldId,
+      input.industryReadContext,
     );
   freezeData(data);
   const view = Object.freeze({}) as ValidatedCanonicalLineageView;

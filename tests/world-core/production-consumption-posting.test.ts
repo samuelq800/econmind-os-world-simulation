@@ -14,6 +14,7 @@ import {
   PRODUCTION_PERSISTENCE_SCHEMA_NOT_ADMITTED,
   PRODUCTION_SETTLED_EVENT_TYPE,
   acquireWorldWriterLease,
+  assertInventoryPersistenceSchemaAdmitted,
   canonicalHashInput,
   canonicalSha256,
   canonicalSerialize,
@@ -60,7 +61,10 @@ import {
   AtomicTransitionRepository,
   prepareAtomicTransitionCandidate,
 } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
-import type { SqlDatabase } from '../../apps/world-worker/src/persistence/sql-database.js';
+import type {
+  SqlDatabase,
+  SqlExecutor,
+} from '../../apps/world-worker/src/persistence/sql-database.js';
 
 const sha256 = (input: string) =>
   createHash('sha256').update(input).digest('hex');
@@ -846,7 +850,7 @@ describe('TEST_ONLY real V13 → sole E08 writer → opening lineage', () => {
       }),
     ).toThrow('already recognized');
   });
-  it('prepares an actual Atomic draft but refuses production persistence before any DB call', async () => {
+  it('retains Core refusal while recovering exact receipts and refusing unguarded new production', async () => {
     const f = fixture();
     const { command, transition: executed, posting } = f.make();
     const worker = workerId('WORKER_TEST_ONLY');
@@ -882,19 +886,125 @@ describe('TEST_ONLY real V13 → sole E08 writer → opening lineage', () => {
         observedAtReal: NOW,
       },
     });
-    const transaction = vi.fn();
-    const query = vi.fn();
-    const database: SqlDatabase = { transaction, query };
-    const repository = new AtomicTransitionRepository({
-      database,
-      workerId: worker,
-      sha256Hex: sha256,
-      authorizationGuard: { assertCurrent: vi.fn() },
-    });
-    await expect(repository.commit(candidate)).rejects.toThrow(
-      PRODUCTION_PERSISTENCE_SCHEMA_NOT_ADMITTED,
-    );
-    expect(transaction).not.toHaveBeenCalled();
-    expect(query).not.toHaveBeenCalled();
+    for (const hasExactReceipt of [false, true]) {
+      const statements: string[] = [];
+      // Unlike an empty vi.fn(), the SqlDatabase contract runs the callback.
+      // These are read/outcome doubles, not native locks or source admission.
+      const executor: SqlExecutor = {
+        async query<Row extends object>(
+          sql: string,
+          parameters?: readonly unknown[],
+        ) {
+          statements.push(sql);
+          expect(parameters?.[0]).toBe(WORLD);
+          let rows: readonly object[];
+          if (sql.includes('from world_v2.command_submission')) {
+            rows = [
+              {
+                actor_id: command.actorId,
+                auth_subject: command.authSubject,
+                command_id: command.commandId,
+                command_fingerprint: command.fingerprint,
+                command_type: command.commandType,
+                canonical_payload: command.canonicalPayload,
+                correlation_id: command.correlationId,
+                country_id: command.countryId,
+                idempotency_key: command.idempotencyKey,
+                expected_world_version: command.expectedWorldVersion,
+                office_id: command.officeId,
+                payload_sha256: command.payloadHash,
+                schema_version: command.schemaVersion,
+                sim_time: command.simTime.toCanonicalValue(),
+                submitted_at_real: command.submittedAtReal,
+                world_id: command.worldId,
+              },
+            ];
+          } else if (sql.includes('from world_v2.command_receipt')) {
+            const r = candidate.receipt;
+            rows = hasExactReceipt
+              ? [
+                  {
+                    world_id: r.worldId,
+                    command_id: r.commandId,
+                    idempotency_key: r.idempotencyKey,
+                    schema_version: r.schemaVersion,
+                    command_fingerprint: r.commandFingerprint,
+                    outcome: r.outcome,
+                    reason_code: r.reasonCode,
+                    transition_id: r.transitionId,
+                    world_version_before: r.worldVersionBefore,
+                    world_version_after: r.worldVersionAfter,
+                    sim_time: r.simTime.toCanonicalValue(),
+                    event_ids: r.eventIds,
+                    recorded_at_real: r.recordedAtReal,
+                  },
+                ]
+              : [];
+          } else if (
+            sql.includes('world_v2.assert_world_writer_commit_guard')
+          ) {
+            if (hasExactReceipt) throw Error('NO_FRESH_GUARD_AFTER_RECEIPT');
+            rows = [{ world_version: '1', event_sequence: '1' }];
+          } else {
+            throw Error('UNEXPECTED_PERSISTENCE_WRITE_OR_QUERY');
+          }
+          return { rows: rows as readonly Row[], rowCount: rows.length };
+        },
+      };
+      const transaction = vi.fn();
+      const query = vi.fn();
+      const authorization = vi.fn(async (tx: SqlExecutor) => {
+        expect(tx).toBe(executor);
+        if (hasExactReceipt) throw Error('NO_FRESH_AUTH_AFTER_RECEIPT');
+      });
+      const database: SqlDatabase = {
+        async transaction<Result>(
+          operation: (tx: SqlExecutor) => Promise<Result>,
+        ) {
+          transaction();
+          return operation(executor);
+        },
+        async query<Row extends object>(sql: string) {
+          query(sql);
+          // Missing-guard failure retains the exact receipt recovery probe.
+          // No receipt is manufactured and this probe may not write.
+          expect(sql).toContain('from world_v2.command_receipt');
+          return { rows: [] as readonly Row[], rowCount: 0 };
+        },
+      };
+      const repository = new AtomicTransitionRepository({
+        database,
+        workerId: worker,
+        sha256Hex: sha256,
+        authorizationGuard: { assertCurrent: authorization },
+      });
+      // The old pure Core gate is unchanged: it still refuses before ANY DB.
+      expect(() => assertInventoryPersistenceSchemaAdmitted([posting])).toThrow(
+        PRODUCTION_PERSISTENCE_SCHEMA_NOT_ADMITTED,
+      );
+      expect(transaction).not.toHaveBeenCalled();
+      expect(query).not.toHaveBeenCalled();
+      expect(statements).toEqual([]);
+
+      if (hasExactReceipt) {
+        const recovered = await repository.commit(candidate);
+        expect(recovered.source).toBe('EXISTING_COMMIT');
+        expect(recovered.receipt).toEqual(candidate.receipt);
+        expect(authorization).not.toHaveBeenCalled();
+        expect(query).not.toHaveBeenCalled();
+        expect(statements).toHaveLength(2); // S, exact receipt; no L/H/A/source.
+      } else {
+        await expect(repository.commit(candidate)).rejects.toThrow(
+          'New Industry production requires the fixed source guard',
+        );
+        expect(authorization).toHaveBeenCalledOnce();
+        expect(query).toHaveBeenCalledOnce(); // Exact durable recovery probe.
+        expect(statements).toHaveLength(3); // S, no receipt, actual L/H guard.
+      }
+      expect(transaction).toHaveBeenCalledOnce();
+      expect(
+        statements.every((sql) => sql.trimStart().startsWith('select')),
+      ).toBe(true);
+    }
   });
 });

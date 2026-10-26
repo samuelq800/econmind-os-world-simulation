@@ -20,6 +20,10 @@ import {
   type WorldWriterCommitAssertion,
   type DecisionResultHead,
   PRODUCTION_SETTLED_EVENT_TYPE,
+  parseIndustryPersistenceSchemaBoundaryContext,
+  classifyInventoryPersistenceSchemaPair,
+  type IndustryPersistenceSchemaReadContextV1,
+  type InventoryLedgerPosting,
 } from '@econmind/core';
 import {
   projectCountryDecisionResultSummary,
@@ -33,7 +37,13 @@ import type { IndustryGoverningCustodyPort } from './industry-production-governi
 import {
   withValidatedCanonicalLineageFrom,
   readValidatedCanonicalLineageFrom,
+  type ValidatedCanonicalLineageView,
 } from '../persistence/validated-canonical-lineage.js';
+import type { IndustryProductionHistoricalReadGuard } from '../persistence/industry-production-source-cutoff.js';
+import {
+  copyIndustrySourceData,
+  industryClosedRecord,
+} from '../persistence/industry-production-row-decoder.js';
 
 import { DurableV08LedgerLineageReader } from '../persistence/durable-v08-ledger-lineage-reader.js';
 import type { SqlDatabase, SqlExecutor } from '../persistence/sql-database.js';
@@ -90,6 +100,19 @@ interface CountRow {
 interface CanonicalPostingRow {
   readonly canonical_payload: unknown;
   readonly world_version_after: unknown;
+}
+
+/** Only called with complete postings obtained from the real active view.
+ * Uses the same Core canonical body as the durable writer, not a new decoder. */
+function constructorPostingRow(
+  posting: Readonly<{ fingerprint: unknown; worldVersionAfter: string }>,
+): CanonicalPostingRow {
+  const { fingerprint, ...body } = posting;
+  void fingerprint;
+  return {
+    canonical_payload: canonicalSerialize(body),
+    world_version_after: posting.worldVersionAfter,
+  };
 }
 
 interface CountryOfficeScope {
@@ -421,15 +444,54 @@ export class AuthoritativeActivityReadProjectionPublisher {
   readonly #lineage: DurableV08LedgerLineageReader;
   readonly #workerId: ReturnType<typeof workerId>;
   readonly #industryCustody: IndustryGoverningCustodyPort | null;
+  readonly #industryProtectedProfile: Readonly<{
+    target: unknown;
+    build: unknown;
+  }> | null;
 
   constructor(input: {
     readonly database: SqlDatabase;
     readonly workerId: string;
     /** Server dependency only. No actual adapter/default/host registration here. */
     readonly industryGoverningCustody?: IndustryGoverningCustodyPort;
+    /** Fixed server dependencies only. The expected profile is data, not admission.
+     * Real guard/custody must share the complete native plan through outer commit. */
+    readonly industryProtectedRead?: Readonly<{
+      historicalReadGuard: IndustryProductionHistoricalReadGuard;
+      target: IndustryPersistenceSchemaReadContextV1['target'];
+      build: IndustryPersistenceSchemaReadContextV1['build'];
+    }>;
   }) {
     this.#database = input.database;
     this.#industryCustody = input.industryGoverningCustody ?? null;
+    let historicalReadGuard: IndustryProductionHistoricalReadGuard | undefined;
+    if (input.industryProtectedRead !== undefined) {
+      const binding = industryClosedRecord(input.industryProtectedRead, [
+        'historicalReadGuard',
+        'target',
+        'build',
+      ]);
+      historicalReadGuard = input.industryProtectedRead.historicalReadGuard;
+      if (
+        !this.#industryCustody ||
+        !historicalReadGuard ||
+        typeof historicalReadGuard.assertReadFrom !== 'function'
+      )
+        invalid(
+          'Protected Industry publication requires fixed guard and custody',
+        );
+      const profile = industryClosedRecord(
+        copyIndustrySourceData({
+          target: binding.target,
+          build: binding.build,
+        }),
+        ['target', 'build'],
+      );
+      this.#industryProtectedProfile = Object.freeze({
+        target: profile.target,
+        build: profile.build,
+      });
+    } else this.#industryProtectedProfile = null;
     this.#visibility = new SqlEconomicReadVisibilitySource(
       input.database,
       input.industryGoverningCustody
@@ -440,6 +502,9 @@ export class AuthoritativeActivityReadProjectionPublisher {
       database: input.database,
       sha256Hex: (value) =>
         createHash('sha256').update(value, 'utf8').digest('hex'),
+      ...(historicalReadGuard === undefined
+        ? {}
+        : { industryReadGuard: historicalReadGuard }),
     });
     this.#workerId = workerId(input.workerId);
   }
@@ -474,61 +539,92 @@ export class AuthoritativeActivityReadProjectionPublisher {
         worldId: input.assertion.worldId,
         ...watermark,
       });
-      const economics = await this.#readLedgerEconomics(
-        transaction,
-        input.assertion.worldId,
-        watermark,
-        scopes.offices,
-        visibility,
-      );
-      const absolute = await this.#readAuthoritativeFinancialPosition(
-        transaction,
-        scopes.offices,
-        visibility,
-      );
       const decisionHead = Object.freeze({
         worldId: input.assertion.worldId,
         ...watermark,
       });
-      const decisions = await this.#readCommittedDecisions(
-        transaction,
-        decisionHead,
-      );
-      const industry = await this.#readIndustryDecisions(
-        transaction,
-        decisionHead,
-        scopes.offices,
-        visibility,
-      );
-      const offices = new Map(activity.offices);
-      for (const [key, added] of industry.automatic) {
-        const existing = offices.get(key);
-        offices.set(
-          key,
-          existing ? this.#combineActivity(existing, added) : added,
+      const publish = async (view?: ValidatedCanonicalLineageView) => {
+        const original =
+          view === undefined
+            ? undefined
+            : this.#assertPublicationView(
+                transaction,
+                view,
+                decisionHead,
+                visibility,
+              );
+        const checkView = () => {
+          if (
+            view !== undefined &&
+            this.#assertPublicationView(
+              transaction,
+              view,
+              decisionHead,
+              visibility,
+            ) !== original
+          )
+            invalid('Protected publication view changed');
+        };
+        const economics = await this.#readLedgerEconomics(
+          transaction,
+          input.assertion.worldId,
+          watermark,
+          scopes.offices,
+          visibility,
+          view,
         );
-      }
-      const projections = this.#deriveProjections(
-        scopes,
-        { countries: activity.countries, offices },
-        economics,
-        visibility,
-        absolute,
-        decisions,
-        decisionHead,
-        observedAtReal,
-        industry.results,
-      );
+        checkView();
+        const absolute = await this.#readAuthoritativeFinancialPosition(
+          transaction,
+          scopes.offices,
+          visibility,
+          view,
+        );
+        checkView();
+        const decisions = await this.#readCommittedDecisions(
+          transaction,
+          decisionHead,
+          view,
+        );
+        checkView();
+        const industry = await this.#readIndustryDecisions(
+          transaction,
+          decisionHead,
+          scopes.offices,
+          visibility,
+          view,
+        );
+        checkView();
+        const offices = new Map(activity.offices);
+        for (const [key, added] of industry.automatic) {
+          const existing = offices.get(key);
+          offices.set(
+            key,
+            existing ? this.#combineActivity(existing, added) : added,
+          );
+        }
+        const projections = this.#deriveProjections(
+          scopes,
+          { countries: activity.countries, offices },
+          economics,
+          visibility,
+          absolute,
+          decisions,
+          decisionHead,
+          observedAtReal,
+          industry.results,
+        );
 
-      await transaction.query(
-        `delete from world_v2.read_projection
+        checkView();
+        await transaction.query(
+          `delete from world_v2.read_projection
           where world_id = $1
             and classification in ('COUNTRY', 'OFFICE_PRIVATE')`,
-        [input.assertion.worldId],
-      );
-      for (const projection of projections) {
-        await transaction.query(
-          `insert into world_v2.read_projection
+          [input.assertion.worldId],
+        );
+        for (const projection of projections) {
+          await transaction.query(
+            `insert into world_v2.read_projection
              (world_id, classification, scope_key, schema_version, world_version,
               event_sequence, payload, generated_at)
            values ($1, $2, $3, $4, $5::bigint, $6::bigint, $7::jsonb, $8::timestamptz)
@@ -538,52 +634,99 @@ export class AuthoritativeActivityReadProjectionPublisher {
                  event_sequence = excluded.event_sequence,
                  payload = excluded.payload,
                  generated_at = excluded.generated_at`,
-          [
-            input.assertion.worldId,
-            projection.classification,
-            projection.scopeKey,
-            WORLD_READ_PROJECTION_SCHEMA_VERSION,
-            watermark.worldVersion,
-            watermark.eventSequence,
-            projection.canonicalPayload,
-            observedAtReal,
-          ],
-        );
-      }
-      const verification = await transaction.query<CountRow>(
-        `select count(*) as count
+            [
+              input.assertion.worldId,
+              projection.classification,
+              projection.scopeKey,
+              WORLD_READ_PROJECTION_SCHEMA_VERSION,
+              watermark.worldVersion,
+              watermark.eventSequence,
+              projection.canonicalPayload,
+              observedAtReal,
+            ],
+          );
+        }
+        const verification = await transaction.query<CountRow>(
+          `select count(*) as count
            from world_v2.read_projection
           where world_id = $1
             and classification in ('COUNTRY', 'OFFICE_PRIVATE')
             and (world_version <> $2::bigint or event_sequence <> $3::bigint)`,
-        [
-          input.assertion.worldId,
-          watermark.worldVersion,
-          watermark.eventSequence,
-        ],
-      );
-      if (
-        databaseInteger(
-          verification.rows[0]?.count,
-          'activity watermark mismatch count',
-        ) !== '0'
-      ) {
-        invalid(
-          'Activity projection publication produced a non-head watermark',
+          [
+            input.assertion.worldId,
+            watermark.worldVersion,
+            watermark.eventSequence,
+          ],
         );
-      }
+        if (
+          databaseInteger(
+            verification.rows[0]?.count,
+            'activity watermark mismatch count',
+          ) !== '0'
+        ) {
+          invalid(
+            'Activity projection publication produced a non-head watermark',
+          );
+        }
 
-      return Object.freeze({
-        countryProjections: projections.filter(
-          (projection) => projection.classification === 'COUNTRY',
-        ).length,
-        eventSequence: watermark.eventSequence,
-        officePrivateProjections: projections.filter(
-          (projection) => projection.classification === 'OFFICE_PRIVATE',
-        ).length,
-        worldVersion: watermark.worldVersion,
+        checkView();
+        return Object.freeze({
+          countryProjections: projections.filter(
+            (projection) => projection.classification === 'COUNTRY',
+          ).length,
+          eventSequence: watermark.eventSequence,
+          officePrivateProjections: projections.filter(
+            (projection) => projection.classification === 'OFFICE_PRIVATE',
+          ).length,
+          worldVersion: watermark.worldVersion,
+        });
+      };
+      const profile = this.#industryProtectedProfile;
+      if (profile === null) return publish();
+      const context = parseIndustryPersistenceSchemaBoundaryContext({
+        schemaVersion: 'industry-persistence-schema-read-context-v1',
+        purpose: 'INDUSTRY_PRODUCTION_CANONICAL_HISTORY_READ',
+        worldId: decisionHead.worldId,
+        expectedHead: {
+          worldVersion: decisionHead.worldVersion,
+          eventSequence: decisionHead.eventSequence,
+        },
+        target: profile.target,
+        build: profile.build,
       });
+      if (
+        context.schemaVersion !== 'industry-persistence-schema-read-context-v1'
+      )
+        invalid('Protected publication requires historical read context');
+      return withValidatedCanonicalLineageFrom(
+        {
+          reader: this.#lineage,
+          executor: transaction,
+          worldId: decisionHead.worldId,
+          industryReadContext: context,
+        },
+        publish,
+      );
     });
+  }
+
+  #assertPublicationView(
+    transaction: SqlExecutor,
+    view: ValidatedCanonicalLineageView,
+    head: DecisionResultHead,
+    visibility: EconomicReadVisibilitySnapshot,
+  ) {
+    const data = readValidatedCanonicalLineageFrom(transaction, view);
+    if (
+      data.worldId !== head.worldId ||
+      data.headWorldVersion !== head.worldVersion ||
+      data.headEventSequence !== head.eventSequence ||
+      visibility.worldId !== head.worldId ||
+      visibility.worldVersion !== head.worldVersion ||
+      visibility.eventSequence !== head.eventSequence
+    )
+      invalid('Protected publication lineage/visibility/guarded head differs');
+    return data;
   }
 
   async #assertCommitGuard(
@@ -724,7 +867,42 @@ export class AuthoritativeActivityReadProjectionPublisher {
     watermark: Readonly<{ eventSequence: string; worldVersion: string }>,
     scopes: readonly CountryOfficeScope[],
     visibility: EconomicReadVisibilitySnapshot,
+    view?: ValidatedCanonicalLineageView,
   ): Promise<ReadonlyMap<string, LedgerEconomicSummary>> {
+    if (view !== undefined) {
+      const data = this.#assertPublicationView(
+        transaction,
+        view,
+        { worldId, ...watermark },
+        visibility,
+      );
+      const countries = new Map<string, LedgerEconomicAccumulator>();
+      for (const group of data.transitions) {
+        for (const posting of group.inventoryPostings)
+          this.#accumulateProtectedInventoryPosting(
+            countries,
+            posting,
+            worldId,
+            watermark.worldVersion,
+            scopes,
+            visibility,
+          );
+        for (const batch of group.financialPostingBatches)
+          this.#accumulateFinancialPosting(
+            countries,
+            constructorPostingRow(batch),
+            worldId,
+            watermark.worldVersion,
+            scopes,
+            visibility,
+          );
+      }
+      return new Map(
+        [...countries.entries()].map(([key, accumulator]) =>
+          Object.freeze([key, finalizeLedgerEconomicSummary(accumulator)]),
+        ),
+      );
+    }
     const [inventory, financial] = await Promise.all([
       transaction.query<CanonicalPostingRow>(
         `select canonical_payload, world_version_after
@@ -797,7 +975,70 @@ export class AuthoritativeActivityReadProjectionPublisher {
         'Inventory posting source is ahead of the guarded World watermark',
       );
     }
-    for (const entry of array(payload.entries, 'Inventory posting entries')) {
+    this.#accumulateInventoryEntries(
+      countries,
+      payload.entries,
+      worldId,
+      scopes,
+      visibility,
+    );
+  }
+
+  #accumulateProtectedInventoryPosting(
+    countries: Map<string, LedgerEconomicAccumulator>,
+    posting: InventoryLedgerPosting,
+    worldId: string,
+    watermarkWorldVersion: string,
+    scopes: readonly CountryOfficeScope[],
+    visibility: EconomicReadVisibilitySnapshot,
+  ): void {
+    const pair = classifyInventoryPersistenceSchemaPair({
+      schemaVersion: posting.schemaVersion,
+      operation: posting.operation,
+    });
+    const row = constructorPostingRow(posting);
+    if (pair.family === 'V08_MOVEMENT') {
+      this.#accumulateInventoryPosting(
+        countries,
+        row,
+        worldId,
+        watermarkWorldVersion,
+        scopes,
+        visibility,
+      );
+      return;
+    }
+    const payload = canonicalPostingPayload(
+      row.canonical_payload,
+      'Inventory posting',
+    );
+    canonicalWorldId(payload, worldId, 'Inventory posting');
+    const version = canonicalWorldVersion(
+      payload,
+      row.world_version_after,
+      'Inventory posting',
+    );
+    if (BigInt(version) > BigInt(watermarkWorldVersion))
+      invalid(
+        'Inventory posting source is ahead of the guarded World watermark',
+      );
+    this.#accumulateInventoryEntries(
+      countries,
+      payload.entries,
+      worldId,
+      scopes,
+      visibility,
+    );
+  }
+
+  #accumulateInventoryEntries(
+    countries: Map<string, LedgerEconomicAccumulator>,
+    entries: unknown,
+    worldId: string,
+    scopes: readonly CountryOfficeScope[],
+    visibility: EconomicReadVisibilitySnapshot,
+  ): void {
+    for (const entry of array(entries, 'Inventory posting entries')) {
       const entryValue = object(entry, 'Inventory posting entry');
       const account = object(entryValue.account, 'Inventory posting account');
       const delta = object(entryValue.delta, 'Inventory posting delta');
@@ -961,6 +1202,7 @@ export class AuthoritativeActivityReadProjectionPublisher {
     transaction: SqlExecutor,
     scopes: readonly CountryOfficeScope[],
     visibility: EconomicReadVisibilitySnapshot,
+    view?: ValidatedCanonicalLineageView,
   ): Promise<ReadonlyMap<string, AuthoritativeFinancialPosition>> {
     const binding = visibility.openingBinding;
     const allowed = scopes.filter(
@@ -969,10 +1211,10 @@ export class AuthoritativeActivityReadProjectionPublisher {
           .financialDetail === 'AUTHORIZED_FILTERED',
     );
     if (binding === null || allowed.length === 0) return new Map();
-    const replay = await this.#lineage.rebuildFrom(
-      transaction,
-      visibility.worldId,
-    );
+    const replay =
+      view === undefined
+        ? await this.#lineage.rebuildFrom(transaction, visibility.worldId)
+        : readValidatedCanonicalLineageFrom(transaction, view);
     if (
       replay.headWorldVersion !== visibility.worldVersion ||
       replay.headEventSequence !== visibility.eventSequence ||
@@ -1030,7 +1272,21 @@ export class AuthoritativeActivityReadProjectionPublisher {
   async #readCommittedDecisions(
     transaction: SqlExecutor,
     head: DecisionResultHead,
+    view?: ValidatedCanonicalLineageView,
   ): Promise<readonly CommittedOfficeDecisionTransition[]> {
+    if (view !== undefined) {
+      const data = readValidatedCanonicalLineageFrom(transaction, view);
+      const transitions = data.transitions.map(
+        ({ command, transition, receipt }) =>
+          Object.freeze({ command, transition, receipt }),
+      );
+      validateCommittedDecisionLineage({
+        sourceHead: head,
+        transitions,
+        sha256Hex: (s) => createHash('sha256').update(s, 'utf8').digest('hex'),
+      });
+      return Object.freeze(transitions);
+    }
     const result = await transaction.query<{
       event_row: unknown;
       receipt_row: unknown;
@@ -1181,12 +1437,13 @@ export class AuthoritativeActivityReadProjectionPublisher {
   }
 
   /** Actual source/classification read stays inside this publication executor/H.
-   * The legacy inventory parser above is deliberately not bypassed. */
+   * The selected protected branch reuses its existing genuine view. */
   async #readIndustryDecisions(
     transaction: SqlExecutor,
     head: DecisionResultHead,
     scopes: readonly CountryOfficeScope[],
     visibility: EconomicReadVisibilitySnapshot,
+    existingView?: ValidatedCanonicalLineageView,
   ): Promise<
     Readonly<{
       results: ReadonlyMap<string, IndustryDecisionProjectionData>;
@@ -1205,84 +1462,91 @@ export class AuthoritativeActivityReadProjectionPublisher {
       visibility.eventSequence !== head.eventSequence
     )
       invalid('Industry visibility/publication head differs');
-    return withValidatedCanonicalLineageFrom(
-      { reader: this.#lineage, executor: transaction, worldId: head.worldId },
-      async (view) => {
-        const data = readValidatedCanonicalLineageFrom(transaction, view);
+    const consume = async (view: ValidatedCanonicalLineageView) => {
+      const data = readValidatedCanonicalLineageFrom(transaction, view);
+      if (
+        data.worldId !== head.worldId ||
+        data.headWorldVersion !== head.worldVersion ||
+        data.headEventSequence !== head.eventSequence
+      )
+        invalid('Industry genuine lineage/publication head differs');
+      for (const scope of industryScopes) {
+        const projected = await readIndustryOfficeDecisionResultFrom({
+          executor: transaction,
+          view,
+          scope: readScope(head.worldId, scope),
+          custody,
+          sha256Hex: (s) =>
+            createHash('sha256').update(s, 'utf8').digest('hex'),
+        });
+        if (readValidatedCanonicalLineageFrom(transaction, view) !== data)
+          invalid('Industry view changed after source read');
+        results.set(officeKey(scope), projected);
+      }
+      const allowed = new Set(
+          industryScopes.map((s) => countryKey(s.countryId)),
+        ),
+        seen = new Map<string, string>();
+      // This is a display count of constructor-validated Events, not output or
+      // resource accounting. COUNTRY SQL already counts them; only add to office.
+      for (const row of data.transitions) {
         if (
-          data.worldId !== head.worldId ||
-          data.headWorldVersion !== head.worldVersion ||
-          data.headEventSequence !== head.eventSequence
+          row.command.officeId !== null ||
+          !allowed.has(countryKey(row.command.countryId))
         )
-          invalid('Industry genuine lineage/publication head differs');
-        for (const scope of industryScopes) {
-          const projected = await readIndustryOfficeDecisionResultFrom({
+          continue;
+        const events = row.transition.events.filter(
+          (e) => e.eventType === PRODUCTION_SETTLED_EVENT_TYPE,
+        );
+        if (!events.length) continue;
+        const postings = row.inventoryPostings.filter(
+          (p) => p.operation === 'PRODUCE_AND_CONSUME',
+        );
+        if (
+          events.length !== 1 ||
+          postings.length !== 1 ||
+          postings[0]!.operation !== 'PRODUCE_AND_CONSUME' ||
+          postings[0]!.evidence.output.countryId !== row.command.countryId
+        )
+          invalid(
+            'Industry automatic activity lacks exact constructor posting',
+          );
+        const event = events[0]!,
+          prior = seen.get(event.eventId);
+        if (prior !== undefined) {
+          if (prior !== event.fingerprint)
+            invalid('Industry activity Event identity conflict');
+          continue;
+        }
+        seen.set(event.eventId, event.fingerprint);
+        const key = officeKey({
+          countryId: row.command.countryId,
+          officeId: officeId('INDUSTRY'),
+        });
+        const next = {
+          authoritativeEventCount: '1',
+          lastAuthoritativeEventSequence: event.sequence,
+          lastAuthoritativeEventWorldVersion: event.worldVersion,
+        };
+        const previous = automatic.get(key);
+        automatic.set(
+          key,
+          previous ? this.#combineActivity(previous, next) : next,
+        );
+      }
+      readValidatedCanonicalLineageFrom(transaction, view);
+      return { results, automatic };
+    };
+    return existingView === undefined
+      ? withValidatedCanonicalLineageFrom(
+          {
+            reader: this.#lineage,
             executor: transaction,
-            view,
-            scope: readScope(head.worldId, scope),
-            custody,
-            sha256Hex: (s) =>
-              createHash('sha256').update(s, 'utf8').digest('hex'),
-          });
-          if (readValidatedCanonicalLineageFrom(transaction, view) !== data)
-            invalid('Industry view changed after source read');
-          results.set(officeKey(scope), projected);
-        }
-        const allowed = new Set(
-            industryScopes.map((s) => countryKey(s.countryId)),
-          ),
-          seen = new Map<string, string>();
-        // This is a display count of constructor-validated Events, not output or
-        // resource accounting. COUNTRY SQL already counts them; only add to office.
-        for (const row of data.transitions) {
-          if (
-            row.command.officeId !== null ||
-            !allowed.has(countryKey(row.command.countryId))
-          )
-            continue;
-          const events = row.transition.events.filter(
-            (e) => e.eventType === PRODUCTION_SETTLED_EVENT_TYPE,
-          );
-          if (!events.length) continue;
-          const postings = row.inventoryPostings.filter(
-            (p) => p.operation === 'PRODUCE_AND_CONSUME',
-          );
-          if (
-            events.length !== 1 ||
-            postings.length !== 1 ||
-            postings[0]!.operation !== 'PRODUCE_AND_CONSUME' ||
-            postings[0]!.evidence.output.countryId !== row.command.countryId
-          )
-            invalid(
-              'Industry automatic activity lacks exact constructor posting',
-            );
-          const event = events[0]!,
-            prior = seen.get(event.eventId);
-          if (prior !== undefined) {
-            if (prior !== event.fingerprint)
-              invalid('Industry activity Event identity conflict');
-            continue;
-          }
-          seen.set(event.eventId, event.fingerprint);
-          const key = officeKey({
-            countryId: row.command.countryId,
-            officeId: officeId('INDUSTRY'),
-          });
-          const next = {
-            authoritativeEventCount: '1',
-            lastAuthoritativeEventSequence: event.sequence,
-            lastAuthoritativeEventWorldVersion: event.worldVersion,
-          };
-          const previous = automatic.get(key);
-          automatic.set(
-            key,
-            previous ? this.#combineActivity(previous, next) : next,
-          );
-        }
-        readValidatedCanonicalLineageFrom(transaction, view);
-        return { results, automatic };
-      },
-    );
+            worldId: head.worldId,
+          },
+          consume,
+        )
+      : consume(existingView);
   }
 
   #deriveProjections(
