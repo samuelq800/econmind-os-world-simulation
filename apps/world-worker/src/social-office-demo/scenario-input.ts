@@ -2,6 +2,8 @@
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import * as C from '@econmind/core';
+// @ts-expect-error -- A owns the reviewed .mjs reader without a declaration file; FinanceModule bounds this data-only bridge.
+import * as OpeningFinanceData from '../../../../tools/social-office-demo/check-opening-finance.mjs';
 import {
   parseSocialOfficeSimulatedPublication,
   type SocialOfficeSimulatedPublication,
@@ -296,12 +298,7 @@ export async function loadSocialOfficeDemoScenario(): Promise<
     fail('one separately recorded demo choice required');
   const candidate = selected[0]!,
     { worldId, countryId, locationId, simulationId } = candidate.scope;
-  const a = (await import(
-    new URL(
-      '../../../../tools/social-office-demo/check-opening-finance.mjs',
-      import.meta.url,
-    ).href
-  )) as FinanceModule;
+  const a: FinanceModule = OpeningFinanceData;
   const finance = a.selectOpeningFinanceCandidateData(
     a.readOpeningFinanceDistribution(),
     {
