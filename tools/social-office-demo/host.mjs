@@ -826,7 +826,17 @@ export async function preserveIsolatedSocialOfficeCheckpoint(...args) {
       host.inspection().nativeRoot,
       `checkpoint-${checkpoint}.json`,
     );
-    await fs.writeFile(file, raw, { flag: 'wx', mode: 0o600 });
+    const temporary = file + '.' + randomUUID() + '.partial';
+    const output = await fs.open(temporary, 'wx', 0o600);
+    try {
+      await output.writeFile(raw);
+      await output.sync();
+    } finally {
+      await output.close();
+    }
+    // Publish a complete inode atomically without replacing an earlier original.
+    await fs.link(temporary, file);
+    await fs.unlink(temporary);
     return Object.freeze({
       path: file,
       bytes: Buffer.byteLength(raw),
