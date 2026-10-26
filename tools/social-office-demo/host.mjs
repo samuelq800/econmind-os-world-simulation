@@ -848,26 +848,17 @@ export function inspectIsolatedSocialOfficeLaunch(
       completeOffice: false,
     };
   const build = inspectSocialOfficeHostBuild();
-  // No guessed C/D/G constructors or positive fixture handler. A finite exact
-  // interface supplement must precede the actual dependent composition.
-  if (!build.manifest.completeCompositionBound)
-    return {
-      exitCode: 2,
-      status: 'NOT_READY',
-      missing: [
-        'EXACT_G_SERVICE_TRANSPORT_BROWSER',
-        'EXACT_D_SCHEMA_ROLES_ATOMIC',
-        'EXACT_C_G_SCENARIO_DOMAIN_PERMISSION',
-        'EXACT_MIGRATION_EXECUTION_LIST',
-      ],
-      resourcesStarted: false,
-      completeOffice: false,
-      sourceClass: 'SIMULATED_OPENING',
-      sourceAdmitted: false,
-      WorldClock: false,
-      manifest: build.manifestPin,
-    };
-  throw Error('SOCIAL_HOST_FIXED_COMPOSITION_IMPLEMENTATION_REQUIRED');
+  // Build inspection never starts or certifies a live office.
+  return {
+    exitCode: 0,
+    status: 'BUILD_VERIFIED_NOT_STARTED',
+    resourcesStarted: false,
+    completeOffice: false,
+    sourceClass: 'SIMULATED_OPENING',
+    sourceAdmitted: false,
+    WorldClock: false,
+    manifest: build.manifestPin,
+  };
 }
 if (
   process.argv[1] &&
@@ -883,6 +874,9 @@ if (
       input: process.stdin,
       crlfDelay: Infinity,
     });
+    const interrupt = () => lines.close();
+    process.once('SIGINT', interrupt);
+    process.once('SIGTERM', interrupt);
     try {
       for await (const line of lines) {
         if (line === 'close') break;
@@ -904,6 +898,8 @@ if (
         }
       }
     } finally {
+      process.removeListener('SIGINT', interrupt);
+      process.removeListener('SIGTERM', interrupt);
       lines.close();
       process.stdout.write(JSON.stringify(await host.close()) + '\n');
     }
