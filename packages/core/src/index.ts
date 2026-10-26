@@ -142,3 +142,38 @@ export {
   type IndustryPersistenceSchemaPostingIdentityV1,
   type IndustryPersistenceSchemaBoundaryActualInputV1,
 } from './inventory/industry-persistence-boundary-contract.js';
+// Single Social office: deterministic data/effects, no source or publisher grant.
+export {
+  SOCIAL_COLLEGE_ADMIT_COMMAND,
+  SOCIAL_COLLEGE_GRADUATE_COMMAND,
+  SOCIAL_CLINIC_SERVE_COMMAND,
+  SOCIAL_OFFICE_ACTION_EVENT,
+  parseSocialOfficeActionIntent,
+  validateSocialOfficeState,
+  prepareSocialOfficeOperation,
+  reduceSocialOfficeEvent,
+  type SocialOfficeMoneyV1,
+  type SocialOfficeRationalV1,
+  type SocialOfficeResourceV1,
+  type SocialOfficeResourceWindowV1,
+  type SocialOfficeRecipeV1,
+  type SocialOfficeFinancialLegRuleV1,
+  type SocialOfficeCostRuleV1,
+  type SocialOfficeProgrammeRuleV1,
+  type SocialOfficeCohortV1,
+  type SocialOfficeClinicRuleV1,
+  type SocialOfficeReadFactsV1,
+  type SocialOfficeOutcomeV1,
+  type SocialOfficeStateV1,
+  type SocialOfficeActionIntentV1,
+  type SocialOfficePreparationInputV1,
+  type SocialOfficePreparedOperationV1,
+} from './commands/social-office-actions.js';
+export {
+  SOCIAL_SERVICE_CONSUMPTION_SCHEMA_VERSION,
+  createSocialServiceConsumptionPosting,
+  assertSocialOfficeActualEffects,
+  replaySocialOfficeJoinedLineage,
+  type SocialServiceConsumptionPostingV1,
+  type SocialOfficeJoinedLineageRowV1,
+} from './inventory/social-service-consumption-posting.js';
