@@ -44,7 +44,7 @@ describe('F fixed selected Social scenario bridge', () => {
     expect(result).toEqual({
       seedId: 'SEED_SOCIAL_SINGLE_DEMO_V1',
       seedFingerprint:
-        'sha256:75ad9f48846a605b4c5eafb8d56927ec240a8c62b567ce38291c6eed53c425c3',
+        'sha256:c50eb02adc46021db162ecf51fb8d734a986ce8bdadc7aef3adfe3cea2312200',
       rootSelection:
         'b7ff5facc4e3301d265279762d18cec18a5258dfa061ea88cffb4a03693e8036',
       sourceClass: 'SIMULATED_OPENING',
