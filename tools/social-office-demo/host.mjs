@@ -8,8 +8,29 @@ import { createInterface } from 'node:readline';
 import { randomUUID, createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { inspectSocialOfficeHostBuild } from './build-host.mjs';
+import { serializeSocialOfficeDemoEvidence } from './run.mjs';
 
 const liveHosts = new WeakMap();
+const nativeTables = Object.freeze([
+  'schema_release',
+  'world_head',
+  'opening_seed',
+  'command_submission',
+  'command_queue',
+  'authoritative_event',
+  'inventory_posting',
+  'financial_posting_batch',
+  'command_receipt',
+  'authoritative_commit_authorization',
+  'notification_outbox',
+  'social_demo_source_scope',
+  'social_demo_source_record',
+  'social_demo_source_revision',
+  'current_commit_authorization',
+  'runtime_read_seat',
+  'social_demo_automatic_authorization',
+  'runtime_opening_admission',
+]);
 
 // Native inspection JSON includes small SQL integers and byte counts. It is
 // evidence, not a Core command intent; preserve numbers and sort all record keys.
@@ -136,6 +157,16 @@ export async function inspectIsolatedSocialOfficeHostPreflight(...args) {
 /** One owned simulation. No caller-selected database, time, principal or handler. */
 export async function startIsolatedSocialOfficeHost(...args) {
   assert.equal(args.length, 0, 'SOCIAL_HOST_START_NO_ARGUMENTS');
+  return openIsolatedSocialOfficeHost(false);
+}
+
+/** Explicit Root-authorized same-PGDATA continuation. No target overrides. */
+export async function reopenIsolatedSocialOfficeHost(...args) {
+  assert.equal(args.length, 0, 'SOCIAL_HOST_RECOVERY_NO_ARGUMENTS');
+  return openIsolatedSocialOfficeHost(true);
+}
+
+async function openIsolatedSocialOfficeHost(recovery) {
   const build = inspectSocialOfficeHostBuild();
   assert.equal(
     build.manifest.gitStatus,
@@ -325,14 +356,69 @@ export async function startIsolatedSocialOfficeHost(...args) {
     res.end(body);
   };
   try {
-    database = await support.createOwnedSocialOfficeDatabase();
+    database = recovery
+      ? await support.reopenOwnedSocialOfficeDatabase()
+      : await support.createOwnedSocialOfficeDatabase();
     admin = await database.rolePool('installer');
     await database.inspect();
     // Original D installer verifies all 23 original migration bytes before DDL.
-    await installer.installFixture(admin, scenario, {
-      sourceRoot: build.manifest.root,
-    });
-    await installer.grantFixtureRoles(admin);
+    if (recovery) {
+      const prior = JSON.parse(
+        await fs.readFile(
+          path.join(database.marker.root, 'checkpoint-DAY0.json'),
+          'utf8',
+        ),
+      );
+      assert.equal(
+        createHash('sha256')
+          .update(
+            await fs.readFile(
+              path.join(database.marker.root, 'checkpoint-DAY0.json'),
+            ),
+          )
+          .digest('hex'),
+        support.ISOLATED_SOCIAL_RECOVERY.day0SHA256,
+      );
+      const actual = {};
+      for (const name of nativeTables)
+        actual[name] = (
+          await admin.query(
+            `select to_jsonb(t) as row from world_v2.${name} t order by to_jsonb(t)::text`,
+          )
+        ).rows.map((r) => r.row);
+      assert.equal(
+        serializeNativeEvidence(actual),
+        serializeNativeEvidence(prior.tables),
+        'SOCIAL_RECOVERY_NATIVE_STATE_CHANGED',
+      );
+      assert.equal(prior.projection.body.worldVersion, '3');
+      assert.equal(prior.projection.body.dayIndex, '0');
+      assert.equal(prior.inspection.seedFingerprint, scenario.seed.fingerprint);
+      dayIndex = prior.projection.body.dayIndex;
+      lostResponse = Object.freeze({
+        ...prior.responseLoss,
+        preservedFromDAY0: support.ISOLATED_SOCIAL_RECOVERY.day0SHA256,
+      });
+      await fs.writeFile(
+        path.join(database.metadataRoot, 'readonly-continuity.json'),
+        serializeNativeEvidence({
+          originalDAY0: support.ISOLATED_SOCIAL_RECOVERY.day0SHA256,
+          tableSet: nativeTables,
+          allOriginalNativeJSONRowsEqual: true,
+          stateSHA256: createHash('sha256')
+            .update(serializeNativeEvidence(actual))
+            .digest('hex'),
+          originalWorldVersion: '3',
+          noInstallSeedGrantOrEconomicWrites: true,
+        }) + '\n',
+        { flag: 'wx', mode: 0o600 },
+      );
+    } else {
+      await installer.installFixture(admin, scenario, {
+        sourceRoot: build.manifest.root,
+      });
+      await installer.grantFixtureRoles(admin);
+    }
     readPool = await database.rolePool('reader');
     const writerPool = await database.rolePool('settler');
     publisherPool = await database.rolePool('publisher');
@@ -462,6 +548,9 @@ export async function startIsolatedSocialOfficeHost(...args) {
       send(res, 200, await fs.readFile(selected), mime);
     };
     server = createServer((req, res) => {
+      // Idle browser keep-alive sockets must not occupy the two active request
+      // slots indefinitely. The transport's actual responses close normally.
+      res.shouldKeepAlive = false;
       const operation = handle(req, res).catch(() => {
         req.resume();
         send(
@@ -478,6 +567,7 @@ export async function startIsolatedSocialOfficeHost(...args) {
       support.ISOLATED_SOCIAL_HOST_LIMITS.requestTimeoutMs;
     server.maxConnections =
       support.ISOLATED_SOCIAL_HOST_LIMITS.inFlightRequests;
+    server.keepAliveTimeout = 1_000;
     await new Promise((resolve, reject) => {
       server.once('error', reject);
       server.listen(0, '127.0.0.1', resolve);
@@ -535,6 +625,8 @@ export async function startIsolatedSocialOfficeHost(...args) {
           tree: build.manifest.tree,
           manifest: build.manifestPin,
           nativeRoot: database.marker.root,
+          metadataRoot: database.metadataRoot,
+          resumedSamePhysicalWorld: database.resumed,
           dayIndex,
           seedFingerprint: scenario.seed.fingerprint,
           workerFence: boundFence,
@@ -793,26 +885,7 @@ export async function preserveIsolatedSocialOfficeCheckpoint(...args) {
   return state.withControl(async () => {
     const tables = {};
     // Identifiers are fixed tool source, never caller-controlled SQL.
-    for (const name of [
-      'schema_release',
-      'world_head',
-      'opening_seed',
-      'command_submission',
-      'command_queue',
-      'authoritative_event',
-      'inventory_posting',
-      'financial_posting_batch',
-      'command_receipt',
-      'authoritative_commit_authorization',
-      'notification_outbox',
-      'social_demo_source_scope',
-      'social_demo_source_record',
-      'social_demo_source_revision',
-      'current_commit_authorization',
-      'runtime_read_seat',
-      'social_demo_automatic_authorization',
-      'runtime_opening_admission',
-    ]) {
+    for (const name of nativeTables) {
       tables[name] = (
         await state.admin.query(
           `select to_jsonb(t) as row from world_v2.${name} t order by to_jsonb(t)::text`,
@@ -919,7 +992,7 @@ if (
                 ? await host.processDueBoundary()
                 : { status: 'INVALID_CONTROL' };
           process.stdout.write(
-            JSON.stringify({
+            serializeSocialOfficeDemoEvidence({
               control: line === 'next' || line === 'due' ? line : 'invalid',
               result,
             }) + '\n',

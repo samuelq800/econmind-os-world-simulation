@@ -40,6 +40,26 @@ const ROLE_USERS = Object.freeze({
   lease: 'd_social_lease',
 });
 const MARKER = 'owned-postgres.json';
+/** One explicit Root-authorized continuation, never a caller-selected target. */
+export const ISOLATED_SOCIAL_RECOVERY = Object.freeze({
+  root: '/private/tmp/econmind-f-social-demo-dNOXbr',
+  device: '16777233',
+  rootInode: '118091768',
+  dataInode: '118091771',
+  uid: '501',
+  priorHead: '49300823b1602db5cfb6d2cb6801d26928bbc3fb',
+  markerSHA256:
+    '8c37b49da7e2ab1b9141971040334009cfd350fcef02331cd185db57b76eb142',
+  instanceSHA256:
+    '1761e86fe708779c62a5e18fa937a906c6d942462e280f0c2ab831ef4612e441',
+  cleanupSHA256:
+    '00087ef582f863f071b5b2b584a8b6bff69678aeecb2840e697b70ecdd67cfe4',
+  day0SHA256:
+    'c374c8b5116da3cb921cf7b9db86b0ef8b9f16243cf5e46abe806e02b858343d',
+  systemIdentifier: '7701038810727212443',
+  rootAuthorizationSHA256:
+    '837144b1607bae9793fa03b56b38bb89aed4807adac5d46eb2a4594e89d33e4d',
+});
 export const ISOLATED_SOCIAL_CLASSIFICATION = Object.freeze({
   runtimeClass: 'ISOLATED_SIMULATED' as const,
   sourceClass: 'SIMULATED_OPENING' as const,
@@ -422,6 +442,166 @@ async function tools(uid: number) {
   return { bin, versions };
 }
 
+async function recoveryInodes() {
+  const r = ISOLATED_SOCIAL_RECOVERY;
+  demand(String(process.getuid?.()) === r.uid, 'SOCIAL_RECOVERY_UID');
+  for (const [location, inode] of [
+    [r.root, r.rootInode],
+    [path.join(r.root, 'data'), r.dataInode],
+  ]) {
+    const s = await lstat(location!, { bigint: true });
+    demand(
+      s.isDirectory() &&
+        !s.isSymbolicLink() &&
+        String(s.uid) === r.uid &&
+        String(s.dev) === r.device &&
+        String(s.ino) === inode &&
+        (s.mode & 0o777n) === 0o700n &&
+        (await realpath(location!)) === location,
+      'SOCIAL_RECOVERY_DIRECTORY_IDENTITY',
+    );
+  }
+}
+
+async function recoveryOriginal(name: string, expected: string) {
+  const file = await open(
+    path.join(ISOLATED_SOCIAL_RECOVERY.root, name),
+    constants.O_RDONLY | constants.O_NOFOLLOW,
+  );
+  try {
+    const s = await file.stat(),
+      bytes = await file.readFile();
+    demand(
+      s.isFile() &&
+        s.uid === process.getuid?.() &&
+        s.nlink === 1 &&
+        (s.mode & 0o777) === 0o600 &&
+        hash(bytes) === expected,
+      'SOCIAL_RECOVERY_ORIGINAL_CHANGED',
+    );
+    return bytes.toString('utf8');
+  } finally {
+    await file.close();
+  }
+}
+
+/** Read-only precondition checks. A historical marker is never live authority. */
+export async function inspectOwnedSocialOfficeRecovery(...args: unknown[]) {
+  demand(args.length === 0, 'SOCIAL_RECOVERY_NO_ARGUMENTS');
+  assertIsolatedSocialOfficeEnvironment();
+  demand(
+    process.env.ECONMIND_SOCIAL_OFFICE_NATIVE_TESTS === '1',
+    'SOCIAL_RECOVERY_NATIVE_OPT_IN',
+  );
+  await recoveryInodes();
+  const r = ISOLATED_SOCIAL_RECOVERY;
+  const original = await recoveryOriginal(MARKER, r.markerSHA256);
+  const marker = JSON.parse(original) as OwnedMarker;
+  demand(
+    marker.uid === Number(r.uid) &&
+      marker.root === r.root &&
+      marker.data === path.join(r.root, 'data') &&
+      marker.socket === path.join(r.root, 'socket') &&
+      marker.port === PG_PORT &&
+      /^econmind_v09_f_social_demo_[a-f0-9]{32}$/u.test(marker.database) &&
+      marker.codeBinding.head === r.priorHead &&
+      marker.sourceClass === 'SIMULATED_OPENING',
+    'SOCIAL_RECOVERY_FIXED_TARGET',
+  );
+  await ownedDirectory(marker.socket, marker.uid);
+  const instance = JSON.parse(
+    await recoveryOriginal('server-instance.json', r.instanceSHA256),
+  ) as NativeServerInstance;
+  const cleanup = JSON.parse(
+    await recoveryOriginal('cleanup.json', r.cleanupSHA256),
+  ) as Record<string, unknown>;
+  demand(
+    cleanup.status === 'STOPPED' &&
+      cleanup.root === r.root &&
+      cleanup.roleSessions === 0 &&
+      cleanup.pgStatus === 3,
+    'SOCIAL_RECOVERY_PRIOR_STOP_REQUIRED',
+  );
+  demand(
+    !(await lstat(path.join(marker.data, 'postmaster.pid')).then(
+      () => true,
+      () => false,
+    )),
+    'SOCIAL_RECOVERY_PID_STILL_PRESENT',
+  );
+  for (const name of [`.s.PGSQL.${PG_PORT}`, `.s.PGSQL.${PG_PORT}.lock`])
+    demand(
+      !(await lstat(path.join(marker.socket, name)).then(
+        () => true,
+        () => false,
+      )),
+      'SOCIAL_RECOVERY_SOCKET_STILL_PRESENT',
+    );
+  const priorOS = await osIdentity(instance.postmasterPID).catch(
+    (e: unknown) => {
+      const failure = e as { code?: unknown; stdout?: unknown };
+      demand(
+        failure.code === 1 && String(failure.stdout ?? '').trim() === '',
+        'SOCIAL_RECOVERY_PROCESS_STATE_UNKNOWN',
+      );
+      return null;
+    },
+  );
+  demand(
+    !priorOS ||
+      priorOS.uid !== instance.ownerUID ||
+      priorOS.start !== instance.osStart,
+    'SOCIAL_RECOVERY_OLD_PROCESS_STILL_PRESENT',
+  );
+  const verified = await tools(marker.uid);
+  demand(marker.bin === verified.bin, 'SOCIAL_RECOVERY_PG_BINARY_CHANGED');
+  const executable = path.join(verified.bin, 'pg_controldata'),
+    stat = await lstat(executable);
+  demand(
+    stat.isFile() &&
+      !stat.isSymbolicLink() &&
+      [0, marker.uid].includes(stat.uid) &&
+      (stat.mode & 0o022) === 0 &&
+      (stat.mode & 0o111) !== 0,
+    'SOCIAL_RECOVERY_CONTROL_BINARY',
+  );
+  const control = await run(executable, [marker.data], {
+    env: CHILD_ENV,
+    timeout: 5_000,
+  });
+  demand(
+    control.stdout.includes(
+      'Database cluster state:               shut down',
+    ) &&
+      control.stdout.includes(
+        `Database system identifier:           ${r.systemIdentifier}`,
+      ),
+    'SOCIAL_RECOVERY_CONTROL_STATE',
+  );
+  const status = await run(
+    path.join(verified.bin, 'pg_ctl'),
+    ['-D', marker.data, 'status'],
+    { env: CHILD_ENV, timeout: 5_000 },
+  ).then(
+    () => 0,
+    (e: unknown) => Number((e as { code?: unknown }).code),
+  );
+  demand(status === 3, 'SOCIAL_RECOVERY_SERVER_STILL_RUNNING');
+  const checkpointUtf8 = await recoveryOriginal(
+    'checkpoint-DAY0.json',
+    r.day0SHA256,
+  );
+  return Object.freeze({
+    marker,
+    original,
+    priorInstance: instance,
+    priorCleanup: cleanup,
+    checkpointUtf8,
+    controlBefore: control.stdout,
+    liveAuthorityVerified: false as const,
+  });
+}
+
 /** Marker validation is ownership only, never an economic/source authority. */
 async function assertMarker(
   marker: OwnedMarker,
@@ -475,6 +655,20 @@ async function assertMarker(
  * initialized until the separately frozen C/D/G composition is bound. */
 export async function createOwnedSocialOfficeDatabase(input?: unknown) {
   demand(input === undefined, 'SOCIAL_HOST_NO_DATABASE_ARGUMENTS');
+  return openOwnedSocialOfficeDatabase();
+}
+
+/** Continues only the exact stopped original physical simulation. No bootstrap. */
+export async function reopenOwnedSocialOfficeDatabase(...args: unknown[]) {
+  demand(args.length === 0, 'SOCIAL_RECOVERY_NO_ARGUMENTS');
+  return openOwnedSocialOfficeDatabase(
+    await inspectOwnedSocialOfficeRecovery(),
+  );
+}
+
+async function openOwnedSocialOfficeDatabase(
+  recovery?: Awaited<ReturnType<typeof inspectOwnedSocialOfficeRecovery>>,
+) {
   assertIsolatedSocialOfficeEnvironment();
   const uid = process.getuid!(),
     verified = await tools(uid);
@@ -484,32 +678,68 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
   // the existing UID/mode/marker checks still establish private ownership.
   const temp = await realpath('/tmp');
   demand(/^[A-Za-z0-9_./-]+$/u.test(temp), 'SOCIAL_HOST_SAFE_NATIVE_TEMP_PATH');
-  const root = await mkdtemp(path.join(temp, 'econmind-f-social-demo-'));
-  await chmod(root, 0o700);
-  const marker: OwnedMarker = Object.freeze({
-    schemaVersion: 'F_SOCIAL_OFFICE_OWNED_PG16_V1',
-    uid,
-    root,
-    data: path.join(root, 'data'),
-    socket: path.join(root, 'socket'),
-    port: PG_PORT,
-    database: 'econmind_v09_f_social_demo_' + randomUUID().replaceAll('-', ''),
-    ...verified,
-    sourceClass: 'SIMULATED_OPENING',
-    codeBinding,
-  });
-  await mkdir(marker.socket, { mode: 0o700 });
-  const original = JSON.stringify(marker, null, 2) + '\n';
-  await writeFile(path.join(root, MARKER), original, {
-    flag: 'wx',
-    mode: 0o600,
-  });
+  const root =
+    recovery?.marker.root ??
+    (await mkdtemp(path.join(temp, 'econmind-f-social-demo-')));
+  if (!recovery) await chmod(root, 0o700);
+  const marker: OwnedMarker =
+    recovery?.marker ??
+    Object.freeze({
+      schemaVersion: 'F_SOCIAL_OFFICE_OWNED_PG16_V1',
+      uid,
+      root,
+      data: path.join(root, 'data'),
+      socket: path.join(root, 'socket'),
+      port: PG_PORT,
+      database:
+        'econmind_v09_f_social_demo_' + randomUUID().replaceAll('-', ''),
+      ...verified,
+      sourceClass: 'SIMULATED_OPENING',
+      codeBinding,
+    });
+  const original = recovery?.original ?? JSON.stringify(marker, null, 2) + '\n';
+  const metadataRoot = recovery ? path.join(root, 'recovery-run-01') : root;
+  if (recovery) {
+    await mkdir(metadataRoot, { mode: 0o700 });
+    await writeFile(
+      path.join(metadataRoot, 'recovery-binding.json'),
+      JSON.stringify(
+        {
+          descriptor: ISOLATED_SOCIAL_RECOVERY,
+          priorInstance: recovery.priorInstance,
+          priorCleanup: recovery.priorCleanup,
+          newCodeBinding: codeBinding,
+          noBootstrap: true,
+          sourceAdmitted: false,
+          WorldClock: false,
+        },
+        null,
+        2,
+      ) + '\n',
+      { flag: 'wx', mode: 0o600 },
+    );
+    await writeFile(
+      path.join(metadataRoot, 'control-before.txt'),
+      recovery.controlBefore,
+      { flag: 'wx', mode: 0o600 },
+    );
+  } else {
+    await mkdir(marker.socket, { mode: 0o700 });
+    await writeFile(path.join(root, MARKER), original, {
+      flag: 'wx',
+      mode: 0o600,
+    });
+  }
   const pools: Pool[] = [];
   let control: Pool | undefined,
     started = false,
     startRequested = false,
     closed = false;
   let instance: Readonly<NativeServerInstance> | undefined;
+  const assertOwned = async (checkPID: boolean) => {
+    if (recovery) await recoveryInodes();
+    await assertMarker(marker, original, checkPID, instance);
+  };
   let bindingAttempted = false;
   const pool = (database: string, user = BOOTSTRAP) =>
     new Pool({
@@ -546,7 +776,7 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
     if (instance) return;
     demand(!bindingAttempted, 'SOCIAL_HOST_SERVER_INSTANCE_NOT_VERIFIED');
     bindingAttempted = true;
-    await assertMarker(marker, original, false);
+    await assertOwned(false);
     const current = await pidFields(marker);
     control ??= pool('postgres');
     const row = await nativeRow();
@@ -576,16 +806,16 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
       osStart: processIdentity.start,
       postgresStartEpoch: row.postmaster_start_epoch,
     });
-    await assertMarker(marker, original, true, instance);
+    await assertOwned(true);
     await writeFile(
-      path.join(root, 'server-instance.json'),
+      path.join(metadataRoot, 'server-instance.json'),
       JSON.stringify(instance, null, 2) + '\n',
       { flag: 'wx', mode: 0o600 },
     );
   };
   const native = async () => {
     demand(!closed && started && instance, 'SOCIAL_HOST_DATABASE_SCOPE_CLOSED');
-    await assertMarker(marker, original, true, instance);
+    await assertOwned(true);
     const row = await nativeRow();
     demand(
       row.postmaster_start_epoch === instance.postgresStartEpoch,
@@ -604,7 +834,7 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
       return Object.freeze({ status: 'ALREADY_STOPPED' as const, root });
     try {
       await Promise.all(pools.splice(0).map((p) => p.end()));
-      await assertMarker(marker, original, false);
+      await assertOwned(false);
       const hasPIDFile =
         startRequested &&
         (await lstat(path.join(marker.data, 'postmaster.pid')).then(
@@ -615,7 +845,7 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
         // A failed pg_ctl start may have created a server. Bind it through the
         // fixed native connection and OS parent only once, or refuse control.
         await bindInstance();
-        await assertMarker(marker, original, true, instance);
+        await assertOwned(true);
       }
       let roleSessions: number | null = null;
       if (control) {
@@ -645,7 +875,7 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
           () => false,
         );
         if (pidPresent) {
-          await assertMarker(marker, original, true, instance);
+          await assertOwned(true);
           await run(
             path.join(marker.bin, 'pg_ctl'),
             ['-D', marker.data, '-m', 'fast', '-w', '-t', '30', 'stop'],
@@ -678,7 +908,7 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
         pgStatus: startRequested ? 3 : null,
       });
       await writeFile(
-        path.join(root, 'cleanup.json'),
+        path.join(metadataRoot, 'cleanup.json'),
         JSON.stringify(evidence, null, 2) + '\n',
         { flag: 'wx', mode: 0o600 },
       );
@@ -705,21 +935,22 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
     return operation;
   };
   try {
-    await assertMarker(marker, original, false);
-    await run(
-      path.join(marker.bin, 'initdb'),
-      [
-        '-D',
-        marker.data,
-        '-U',
-        BOOTSTRAP,
-        '--no-locale',
-        '--encoding=UTF8',
-        '--auth-local=trust',
-        '--auth-host=reject',
-      ],
-      { env: CHILD_ENV, timeout: 30_000 },
-    );
+    await assertOwned(false);
+    if (!recovery)
+      await run(
+        path.join(marker.bin, 'initdb'),
+        [
+          '-D',
+          marker.data,
+          '-U',
+          BOOTSTRAP,
+          '--no-locale',
+          '--encoding=UTF8',
+          '--auth-local=trust',
+          '--auth-host=reject',
+        ],
+        { env: CHILD_ENV, timeout: 30_000 },
+      );
     startRequested = true;
     await run(
       path.join(marker.bin, 'pg_ctl'),
@@ -727,7 +958,7 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
         '-D',
         marker.data,
         '-l',
-        path.join(root, 'server.log'),
+        path.join(metadataRoot, 'server.log'),
         '-o',
         `-k ${marker.socket} -p ${PG_PORT} -c listen_addresses=''`,
         '-w',
@@ -741,7 +972,7 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
     await bindInstance();
     await native();
     demand(control, 'SOCIAL_HOST_VERIFIED_CONTROL_REQUIRED');
-    await control.query(`create database ${marker.database}`);
+    if (!recovery) await control.query(`create database ${marker.database}`);
     const bootstrapPool = pool(marker.database);
     pools.push(bootstrapPool);
     demand(
@@ -749,8 +980,10 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
         await bootstrapPool.query<{ schema: string | null }>(
           "select to_regnamespace('world_v2')::text as schema",
         )
-      ).rows[0]?.schema === null,
-      'SOCIAL_HOST_REQUIRES_EMPTY_DATABASE',
+      ).rows[0]?.schema === (recovery ? 'world_v2' : null),
+      recovery
+        ? 'SOCIAL_RECOVERY_WORLD_SCHEMA_REQUIRED'
+        : 'SOCIAL_HOST_REQUIRES_EMPTY_DATABASE',
     );
     const rolePools = new Map<keyof typeof ROLE_USERS, Pool>([
       ['installer', bootstrapPool],
@@ -778,6 +1011,8 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
     return Object.freeze({
       ...ISOLATED_SOCIAL_CLASSIFICATION,
       marker,
+      metadataRoot,
+      resumed: Boolean(recovery),
       inspect: native,
       rolePool,
       close,
