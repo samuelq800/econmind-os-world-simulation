@@ -21,12 +21,16 @@ import {
   worldId,
   Money,
   Quantity,
+  classifyInventoryPersistenceSchemaPair,
+  parseIndustryPersistenceSchemaBoundaryContext,
   type AuthoritativeTransition,
   type CanonicalCommand,
   type FinancialPostingBatch,
   type FinancialPostingDirection,
   type InventoryLedgerPosting,
   type InventoryPostingEntry,
+  type IndustryPersistenceSchemaReadContextV1,
+  type DecisionResultHead,
   type RebuiltV08Ledgers,
   type Sha256Hex,
   type V08AuthoritativeLedgerTransition,
@@ -36,6 +40,12 @@ import { WorldOpeningSeedStore } from './opening-seed-store.js';
 import { readFinalReceiptFrom } from './atomic-transition-repository.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import type { ValidatedCanonicalLineageData } from './validated-canonical-lineage.js';
+import {
+  assertIndustryHistoricalReadObservation,
+  industryPostingIdentity,
+  type IndustryProductionHistoricalReadGuard,
+} from './industry-production-source-cutoff.js';
+import { decodeIndustryProductionRow } from './industry-production-row-decoder.js';
 
 const NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/u;
 // Preparation capacity, not a truncated prefix or an economic/history rule.
@@ -443,14 +453,17 @@ export class DurableV08LedgerLineageReader {
   readonly #database: SqlDatabase;
   readonly #openingSeeds: WorldOpeningSeedStore;
   readonly #sha256Hex: Sha256Hex;
+  readonly #industryReadGuard: IndustryProductionHistoricalReadGuard | null;
 
   constructor(input: {
     readonly database: SqlDatabase;
     readonly sha256Hex: Sha256Hex;
+    readonly industryReadGuard?: IndustryProductionHistoricalReadGuard;
   }) {
     this.#database = input.database;
     this.#sha256Hex = input.sha256Hex;
     this.#openingSeeds = new WorldOpeningSeedStore(input);
+    this.#industryReadGuard = input.industryReadGuard ?? null;
   }
 
   async rebuild(
@@ -545,9 +558,21 @@ export class DurableV08LedgerLineageReader {
   async readValidatedLineageFrom(
     transaction: SqlExecutor,
     requestedWorldId: string,
+    industryReadContext?: Readonly<IndustryPersistenceSchemaReadContextV1>,
   ): Promise<Readonly<ValidatedCanonicalLineageData>> {
     const canonicalWorldId = worldId(requestedWorldId);
     const head = await this.#readHead(transaction, canonicalWorldId);
+    const context =
+      industryReadContext === undefined
+        ? undefined
+        : parseIndustryPersistenceSchemaBoundaryContext(industryReadContext);
+    if (
+      context !== undefined &&
+      (context.purpose !== 'INDUSTRY_PRODUCTION_CANONICAL_HISTORY_READ' ||
+        context.worldId !== canonicalWorldId ||
+        canonicalSerialize(context.expectedHead) !== canonicalSerialize(head))
+    )
+      invalid('Industry history context differs from actual World/head');
     if (BigInt(head.eventSequence) > BigInt(VALIDATED_LINEAGE_ROW_LIMIT)) {
       invalid('Validated lineage exceeds the bounded preparation capacity');
     }
@@ -559,6 +584,13 @@ export class DurableV08LedgerLineageReader {
       transaction,
       canonicalWorldId,
       true,
+      context === undefined
+        ? undefined
+        : {
+            context:
+              context as Readonly<IndustryPersistenceSchemaReadContextV1>,
+            head: Object.freeze({ worldId: canonicalWorldId, ...head }),
+          },
     );
     const ledgers = rebuildV08LedgersFromLineage({
       seed,
@@ -645,6 +677,10 @@ export class DurableV08LedgerLineageReader {
     transaction: SqlExecutor,
     requestedWorldId: string,
     validated = false,
+    industry?: Readonly<{
+      context: Readonly<IndustryPersistenceSchemaReadContextV1>;
+      head: Readonly<DecisionResultHead>;
+    }>,
   ): Promise<readonly V08AuthoritativeLedgerTransition[]> {
     const transitions = await transaction.query<DurableTransitionRow>(
       `select command.actor_id as command_actor_id,
@@ -727,7 +763,12 @@ export class DurableV08LedgerLineageReader {
       financial.rows,
       'Financial Posting',
     );
-    const rebuilt: V08AuthoritativeLedgerTransition[] = [];
+    const pending: {
+      command: CanonicalCommand;
+      transition: AuthoritativeTransition;
+      inventoryRows: readonly PostingRow[];
+      financialPostingBatches: readonly FinancialPostingBatch[];
+    }[] = [];
     for (const rows of rowsByCommand.values()) {
       const first = rows[0];
       if (first === undefined)
@@ -776,20 +817,11 @@ export class DurableV08LedgerLineageReader {
         worldVersionAfter,
         events,
       });
-      rebuilt.push(
+      pending.push(
         Object.freeze({
           command,
           transition,
-          inventoryPostings: Object.freeze(
-            (inventoryByCommand.get(command.commandId) ?? []).map((row) =>
-              parseInventoryPosting({
-                command,
-                row,
-                sha256Hex: this.#sha256Hex,
-                transition,
-              }),
-            ),
-          ),
+          inventoryRows: inventoryByCommand.get(command.commandId) ?? [],
           financialPostingBatches: Object.freeze(
             (financialByCommand.get(command.commandId) ?? []).map((row) =>
               parseFinancialPosting({
@@ -811,6 +843,81 @@ export class DurableV08LedgerLineageReader {
         invalid('Durable Posting has no authoritative Event transition');
       }
     }
+    if (industry !== undefined) {
+      // Canonical Command/Event groups and ALL their headers precede any
+      // controlled production decode. No view has been issued at this point.
+      const groups = pending
+        .map((group) => ({
+          command: group.command,
+          transition: group.transition,
+          postingIdentities: Object.freeze(
+            group.inventoryRows.map((row) =>
+              industryPostingIdentity(
+                canonicalObject(row.canonical_payload, 'Inventory Posting'),
+                row.fingerprint,
+              ),
+            ),
+          ),
+        }))
+        .filter((group) =>
+          group.postingIdentities.some(
+            (p) => p.schemaVersion === PRODUCTION_CONSUMPTION_SCHEMA_VERSION,
+          ),
+        );
+      if (this.#industryReadGuard === null)
+        invalid(
+          'Industry history requires a fixed server historical read guard',
+        );
+      const request = Object.freeze({
+        context: industry.context,
+        actualHeldHead: industry.head,
+        groups: Object.freeze(groups.map((group) => Object.freeze(group))),
+      });
+      // Mandatory even for groups=[]: no fake Command or default permission.
+      const observed = await this.#industryReadGuard.assertReadFrom(
+        transaction,
+        request,
+      );
+      assertIndustryHistoricalReadObservation(
+        request,
+        observed,
+        this.#sha256Hex,
+      );
+    }
+    const rebuilt: V08AuthoritativeLedgerTransition[] = pending.map((group) =>
+      Object.freeze({
+        command: group.command,
+        transition: group.transition,
+        financialPostingBatches: group.financialPostingBatches,
+        inventoryPostings: Object.freeze(
+          group.inventoryRows.map((row) => {
+            if (industry !== undefined) {
+              const p = canonicalObject(
+                row.canonical_payload,
+                'Inventory Posting',
+              );
+              const pair = classifyInventoryPersistenceSchemaPair({
+                schemaVersion: p.schemaVersion,
+                operation: p.operation,
+              });
+              if (pair.family === 'INDUSTRY_PRODUCTION')
+                return decodeIndustryProductionRow({
+                  row,
+                  command: group.command,
+                  transition: group.transition,
+                  sha256Hex: this.#sha256Hex,
+                });
+            }
+            return parseInventoryPosting({
+              row,
+              command: group.command,
+              transition: group.transition,
+              sha256Hex: this.#sha256Hex,
+            });
+          }),
+        ),
+      }),
+    );
     return Object.freeze(rebuilt);
   }
 
