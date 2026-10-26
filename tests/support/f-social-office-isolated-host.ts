@@ -13,7 +13,6 @@ import {
   writeFile,
 } from 'node:fs/promises';
 import { createServer, type Server } from 'node:http';
-import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
@@ -480,7 +479,10 @@ export async function createOwnedSocialOfficeDatabase(input?: unknown) {
   const uid = process.getuid!(),
     verified = await tools(uid);
   const codeBinding = await hostCodeBinding();
-  const temp = await realpath(tmpdir());
+  // macOS's ambient TMPDIR can exceed PostgreSQL's Unix socket path bound.
+  // Always allocate below the fixed canonical system temp root; mkdtemp and
+  // the existing UID/mode/marker checks still establish private ownership.
+  const temp = await realpath('/tmp');
   demand(/^[A-Za-z0-9_./-]+$/u.test(temp), 'SOCIAL_HOST_SAFE_NATIVE_TEMP_PATH');
   const root = await mkdtemp(path.join(temp, 'econmind-f-social-demo-'));
   await chmod(root, 0o700);
