@@ -32,6 +32,26 @@ const runBridge = async (code: string) => {
   expect(result.stderr).toBe('');
   return JSON.parse(result.stdout) as unknown;
 };
+describe('F complete host composition boundaries', () => {
+  it('refuses caller configuration and forged live handles before native work', async () => {
+    const result = await runBridge(`
+      import assert from 'node:assert/strict';
+      import pg from 'pg';
+      import {startIsolatedSocialOfficeHost,runIsolatedSocialOfficeNegativeControl} from './tools/social-office-demo/host.mjs';
+      let calls=0,traps=0;
+      pg.Pool.prototype.query=pg.Pool.prototype.connect=function(){calls++;throw Error('native work forbidden');};
+      const foreign=new Proxy({},{get(){traps++;throw Error('proxy');},ownKeys(){traps++;throw Error('proxy');}});
+      for(const value of [{},foreign,'http://foreign.invalid']) {
+        await assert.rejects(startIsolatedSocialOfficeHost(value),/SOCIAL_HOST_START_NO_ARGUMENTS/);
+      }
+      process.env.ECONMIND_SOCIAL_OFFICE_NATIVE_TESTS='1';
+      await assert.rejects(runIsolatedSocialOfficeNegativeControl(foreign,'SOURCE_REVOKED'),/SOCIAL_HOST_GENUINE_HANDLE_REQUIRED/);
+      await assert.rejects(runIsolatedSocialOfficeNegativeControl({},'WRONG_VERSION'),/SOCIAL_HOST_GENUINE_HANDLE_REQUIRED/);
+      console.log(JSON.stringify({calls,traps}));
+    `);
+    expect(result).toEqual({ calls: 0, traps: 0 });
+  });
+});
 describe('F owned installer preflight wiring', () => {
   it('loads the relocated compiled installer without a SQL query or connection', async () => {
     const result = await runBridge(`
