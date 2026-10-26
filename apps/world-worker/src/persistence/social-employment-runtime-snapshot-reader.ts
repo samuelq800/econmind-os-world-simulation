@@ -13,6 +13,10 @@ import {
   createSocialEmploymentServiceReplayReducers,
   SOCIAL_SERVICE_PLAN_EVENT,
   parseCanonicalCommand,
+  parseIndustryPersistenceSchemaBoundaryContext,
+  PRODUCTION_CONSUMPTION_SCHEMA_VERSION,
+  PRODUCTION_SETTLED_EVENT_TYPE,
+  productionConsumptionEventPayload,
   parseSocialEmploymentServiceCommand,
   prepareSocialEmploymentServiceOperation,
   replayAuthoritativeEvents,
@@ -23,6 +27,7 @@ import {
   type SocialEmploymentReadFacts,
   type SocialEmploymentServiceState,
   type Sha256Hex,
+  type IndustryPersistenceSchemaReadContextV1,
 } from '@econmind/core';
 import {
   parseGoverningSourceReadBinding,
@@ -50,6 +55,7 @@ import {
 } from './validated-canonical-lineage.js';
 import type { SocialEmploymentRuntimeSnapshotReader } from './social-job-match-candidate-source.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
+import type { IndustryProductionHistoricalReadGuard } from './industry-production-source-cutoff.js';
 
 type Row = Readonly<Record<string, unknown>>;
 const PURPOSE = 'SOCIAL_EMPLOYMENT_SERVICE_PLAN_SOURCE_EVALUATION_V1' as const;
@@ -866,6 +872,41 @@ function validateCapturedSocialOriginalsFrom(
   });
 }
 
+/** The generic genuine view validates postings, not every domain Event's meaning.
+ * Admit only the exact single-Event correspondence proved by the real constructor.
+ * Scan the whole prefix before any reducer runs, including foreign-country events. */
+function productionEventIds(lineage: BoundSocialSourceData['lineage']) {
+  const ids = new Set(
+    lineage.transitions.flatMap(({ transition }) =>
+      transition.events
+        .filter((event) => event.eventType === PRODUCTION_SETTLED_EVENT_TYPE)
+        .map((event) => event.eventId),
+    ),
+  );
+  for (const entry of lineage.transitions) {
+    for (const event of entry.transition.events) {
+      if (event.correctsEventId !== null && ids.has(event.correctsEventId))
+        invalid('unsupported correction of production source event');
+      if (event.eventType !== PRODUCTION_SETTLED_EVENT_TYPE) continue;
+      if (event.correctsEventId !== null)
+        invalid('unsupported production source correction');
+      const matches = entry.inventoryPostings.filter(
+        (posting) =>
+          posting.schemaVersion === PRODUCTION_CONSUMPTION_SCHEMA_VERSION &&
+          posting.operation === 'PRODUCE_AND_CONSUME' &&
+          canonicalSerialize(
+            productionConsumptionEventPayload(posting.evidence),
+          ) === event.canonicalPayload,
+      );
+      if (matches.length !== 1)
+        invalid(
+          'production event requires exactly one same-transition posting',
+        );
+    }
+  }
+  return ids;
+}
+
 function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
   state: SocialEmploymentServiceState;
   readFacts: SocialEmploymentReadFacts;
@@ -875,7 +916,15 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
   const { data, lineage, command } = verified.bound;
   if (data.historyCoverage.taxonomyRevision !== TAXONOMY)
     invalid('unsupported domain effect taxonomy');
+  const productionIds = productionEventIds(lineage);
   const reducers = { ...createSocialEmploymentServiceReplayReducers(digest) };
+  reducers[PRODUCTION_SETTLED_EVENT_TYPE] = ({ state, event }) => {
+    if (!productionIds.has(event.eventId))
+      invalid('unpaired production source event');
+    // Only this domain's local state is unchanged. All ledger/resource facts and
+    // all sibling Events remain in the genuine prefix and normal replay.
+    return state;
+  };
   const planReducer = reducers[SOCIAL_SERVICE_PLAN_EVENT]!;
   reducers[SOCIAL_SERVICE_PLAN_EVENT] = (input) => {
     // Replay operands remain historical. Check each committed PLAN against its
@@ -1142,6 +1191,15 @@ export interface SocialEmploymentRuntimeSnapshotReaderConstruction {
   /** Actual trusted server custodian/guard adapter requires independent evidence.
    * No implementation or registration is supplied by this module. */
   readonly custody: SocialOperatingCustodyPort;
+  /** Fixed server dependencies only. Historical representation-read does not
+   * authorize Social use. The actual initial native plan must already cover all
+   * later Social originals, eligibility, predicates and cooperating actors until
+   * outer commit/rollback; custody may only recheck that same held protection. */
+  readonly industryProtectedRead?: Readonly<{
+    historicalReadGuard: IndustryProductionHistoricalReadGuard;
+    target: IndustryPersistenceSchemaReadContextV1['target'];
+    build: IndustryPersistenceSchemaReadContextV1['build'];
+  }>;
 }
 function auditTimestamp(value: unknown): string {
   if (
@@ -1173,9 +1231,38 @@ export function createSocialEmploymentRuntimeSnapshotReader(
     invalid('incompatible SHA256 adapter');
   // Subsequent identities use the fixed real SHA256 implementation, never a
   // caller-controlled alternate hash function.
+  let historicalReadGuard: IndustryProductionHistoricalReadGuard | undefined;
+  let industryProfile:
+    | Readonly<{
+        target: IndustryPersistenceSchemaReadContextV1['target'];
+        build: IndustryPersistenceSchemaReadContextV1['build'];
+      }>
+    | undefined;
+  if (input.industryProtectedRead !== undefined) {
+    const binding = row(input.industryProtectedRead, [
+      'historicalReadGuard',
+      'target',
+      'build',
+    ]);
+    historicalReadGuard = input.industryProtectedRead.historicalReadGuard;
+    if (
+      !historicalReadGuard ||
+      typeof historicalReadGuard.assertReadFrom !== 'function'
+    )
+      invalid('fixed Industry historical read guard required');
+    industryProfile = freeze(
+      ownJson({
+        target: binding.target,
+        build: binding.build,
+      }) as NonNullable<typeof industryProfile>,
+    );
+  }
   const lineageReader = new DurableV08LedgerLineageReader({
     database: input.database,
     sha256Hex: digest,
+    ...(historicalReadGuard === undefined
+      ? {}
+      : { industryReadGuard: historicalReadGuard }),
   });
   const mode = input.mode,
     custody = input.custody,
@@ -1196,11 +1283,34 @@ export function createSocialEmploymentRuntimeSnapshotReader(
       command.expectedWorldVersion !== headWorldVersion
     )
       invalid('exact manual SOCIAL PLAN/read head required');
+    // D independently locks/reads the actual H and compares both coordinates
+    // before the fixed guard runs; supplied coordinates cannot establish H.
+    const industryReadContext =
+      industryProfile === undefined
+        ? undefined
+        : parseIndustryPersistenceSchemaBoundaryContext({
+            schemaVersion: 'industry-persistence-schema-read-context-v1',
+            purpose: 'INDUSTRY_PRODUCTION_CANONICAL_HISTORY_READ',
+            worldId: command.worldId,
+            expectedHead: {
+              worldVersion: headWorldVersion,
+              eventSequence: headEventSequence,
+            },
+            target: industryProfile.target,
+            build: industryProfile.build,
+          });
+    if (
+      industryReadContext !== undefined &&
+      industryReadContext.schemaVersion !==
+        'industry-persistence-schema-read-context-v1'
+    )
+      invalid('Industry historical read context required');
     return withValidatedCanonicalLineageFrom(
       {
         reader: lineageReader,
         executor: transaction,
         worldId: command.worldId,
+        ...(industryReadContext === undefined ? {} : { industryReadContext }),
       },
       async (view) => {
         const lineage = readValidatedCanonicalLineageFrom(transaction, view);
