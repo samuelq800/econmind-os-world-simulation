@@ -19,13 +19,21 @@ import {
   type OfficeId,
   type WorldWriterCommitAssertion,
   type DecisionResultHead,
+  PRODUCTION_SETTLED_EVENT_TYPE,
 } from '@econmind/core';
 import {
   projectCountryDecisionResultSummary,
   projectOfficeDecisionResults,
   validateCommittedDecisionLineage,
   type CommittedOfficeDecisionTransition,
+  readIndustryOfficeDecisionResultFrom,
+  type IndustryDecisionProjectionData,
 } from './office-decision-result-projector.js';
+import type { IndustryGoverningCustodyPort } from './industry-production-governing-source.js';
+import {
+  withValidatedCanonicalLineageFrom,
+  readValidatedCanonicalLineageFrom,
+} from '../persistence/validated-canonical-lineage.js';
 
 import { DurableV08LedgerLineageReader } from '../persistence/durable-v08-ledger-lineage-reader.js';
 import type { SqlDatabase, SqlExecutor } from '../persistence/sql-database.js';
@@ -48,6 +56,7 @@ type ActivityProjectionClassification = 'COUNTRY' | 'OFFICE_PRIVATE';
 
 export const WORLD_ACTIVITY_PROJECTION_SCHEMA_VERSION =
   'world-activity-projection-v1' as const;
+const INDUSTRY_ACTIVITY_V2 = 'world-activity-projection-v2' as const;
 
 export interface AuthoritativeActivityProjectionPublicationResult {
   readonly countryProjections: number;
@@ -411,13 +420,22 @@ export class AuthoritativeActivityReadProjectionPublisher {
   readonly #visibility: SqlEconomicReadVisibilitySource;
   readonly #lineage: DurableV08LedgerLineageReader;
   readonly #workerId: ReturnType<typeof workerId>;
+  readonly #industryCustody: IndustryGoverningCustodyPort | null;
 
   constructor(input: {
     readonly database: SqlDatabase;
     readonly workerId: string;
+    /** Server dependency only. No actual adapter/default/host registration here. */
+    readonly industryGoverningCustody?: IndustryGoverningCustodyPort;
   }) {
     this.#database = input.database;
-    this.#visibility = new SqlEconomicReadVisibilitySource(input.database);
+    this.#industryCustody = input.industryGoverningCustody ?? null;
+    this.#visibility = new SqlEconomicReadVisibilitySource(
+      input.database,
+      input.industryGoverningCustody
+        ? { industryGoverningCustody: input.industryGoverningCustody }
+        : undefined,
+    );
     this.#lineage = new DurableV08LedgerLineageReader({
       database: input.database,
       sha256Hex: (value) =>
@@ -476,15 +494,30 @@ export class AuthoritativeActivityReadProjectionPublisher {
         transaction,
         decisionHead,
       );
+      const industry = await this.#readIndustryDecisions(
+        transaction,
+        decisionHead,
+        scopes.offices,
+        visibility,
+      );
+      const offices = new Map(activity.offices);
+      for (const [key, added] of industry.automatic) {
+        const existing = offices.get(key);
+        offices.set(
+          key,
+          existing ? this.#combineActivity(existing, added) : added,
+        );
+      }
       const projections = this.#deriveProjections(
         scopes,
-        activity,
+        { countries: activity.countries, offices },
         economics,
         visibility,
         absolute,
         decisions,
         decisionHead,
         observedAtReal,
+        industry.results,
       );
 
       await transaction.query(
@@ -1147,6 +1180,111 @@ export class AuthoritativeActivityReadProjectionPublisher {
     });
   }
 
+  /** Actual source/classification read stays inside this publication executor/H.
+   * The legacy inventory parser above is deliberately not bypassed. */
+  async #readIndustryDecisions(
+    transaction: SqlExecutor,
+    head: DecisionResultHead,
+    scopes: readonly CountryOfficeScope[],
+    visibility: EconomicReadVisibilitySnapshot,
+  ): Promise<
+    Readonly<{
+      results: ReadonlyMap<string, IndustryDecisionProjectionData>;
+      automatic: ReadonlyMap<string, ActivitySummary>;
+    }>
+  > {
+    const custody = this.#industryCustody,
+      industryScopes = scopes.filter((scope) => scope.officeId === 'INDUSTRY');
+    const results = new Map<string, IndustryDecisionProjectionData>(),
+      automatic = new Map<string, ActivitySummary>();
+    if (custody === null || !industryScopes.length)
+      return { results, automatic };
+    if (
+      visibility.worldId !== head.worldId ||
+      visibility.worldVersion !== head.worldVersion ||
+      visibility.eventSequence !== head.eventSequence
+    )
+      invalid('Industry visibility/publication head differs');
+    return withValidatedCanonicalLineageFrom(
+      { reader: this.#lineage, executor: transaction, worldId: head.worldId },
+      async (view) => {
+        const data = readValidatedCanonicalLineageFrom(transaction, view);
+        if (
+          data.worldId !== head.worldId ||
+          data.headWorldVersion !== head.worldVersion ||
+          data.headEventSequence !== head.eventSequence
+        )
+          invalid('Industry genuine lineage/publication head differs');
+        for (const scope of industryScopes) {
+          const projected = await readIndustryOfficeDecisionResultFrom({
+            executor: transaction,
+            view,
+            scope: readScope(head.worldId, scope),
+            custody,
+            sha256Hex: (s) =>
+              createHash('sha256').update(s, 'utf8').digest('hex'),
+          });
+          if (readValidatedCanonicalLineageFrom(transaction, view) !== data)
+            invalid('Industry view changed after source read');
+          results.set(officeKey(scope), projected);
+        }
+        const allowed = new Set(
+            industryScopes.map((s) => countryKey(s.countryId)),
+          ),
+          seen = new Map<string, string>();
+        // This is a display count of constructor-validated Events, not output or
+        // resource accounting. COUNTRY SQL already counts them; only add to office.
+        for (const row of data.transitions) {
+          if (
+            row.command.officeId !== null ||
+            !allowed.has(countryKey(row.command.countryId))
+          )
+            continue;
+          const events = row.transition.events.filter(
+            (e) => e.eventType === PRODUCTION_SETTLED_EVENT_TYPE,
+          );
+          if (!events.length) continue;
+          const postings = row.inventoryPostings.filter(
+            (p) => p.operation === 'PRODUCE_AND_CONSUME',
+          );
+          if (
+            events.length !== 1 ||
+            postings.length !== 1 ||
+            postings[0]!.operation !== 'PRODUCE_AND_CONSUME' ||
+            postings[0]!.evidence.output.countryId !== row.command.countryId
+          )
+            invalid(
+              'Industry automatic activity lacks exact constructor posting',
+            );
+          const event = events[0]!,
+            prior = seen.get(event.eventId);
+          if (prior !== undefined) {
+            if (prior !== event.fingerprint)
+              invalid('Industry activity Event identity conflict');
+            continue;
+          }
+          seen.set(event.eventId, event.fingerprint);
+          const key = officeKey({
+            countryId: row.command.countryId,
+            officeId: officeId('INDUSTRY'),
+          });
+          const next = {
+            authoritativeEventCount: '1',
+            lastAuthoritativeEventSequence: event.sequence,
+            lastAuthoritativeEventWorldVersion: event.worldVersion,
+          };
+          const previous = automatic.get(key);
+          automatic.set(
+            key,
+            previous ? this.#combineActivity(previous, next) : next,
+          );
+        }
+        readValidatedCanonicalLineageFrom(transaction, view);
+        return { results, automatic };
+      },
+    );
+  }
+
   #deriveProjections(
     scopes: Readonly<{
       countries: readonly CountryId[];
@@ -1162,6 +1300,7 @@ export class AuthoritativeActivityReadProjectionPublisher {
     decisions: readonly CommittedOfficeDecisionTransition[],
     decisionHead: DecisionResultHead,
     observedAtReal: string,
+    industry: ReadonlyMap<string, IndustryDecisionProjectionData>,
   ): readonly PreparedProjection[] {
     const decisionResults = projectOfficeDecisionResults({
       sourceHead: decisionHead,
@@ -1209,9 +1348,11 @@ export class AuthoritativeActivityReadProjectionPublisher {
           activity: activity.offices.get(officeKey(scope)) ?? emptyActivity(),
           countryId: scope.countryId,
           decisionResult:
+            industry.get(officeKey(scope))?.decisionResult ??
             decisionResults.get(
               canonicalSerialize([scope.countryId, scope.officeId]),
-            ) ?? null,
+            ) ??
+            null,
           // No production feedback model/disclosure is admitted. Persist the
           // explicit unavailable state, never unwrap the FB1 test projector.
           feedback: {
@@ -1248,12 +1389,19 @@ export class AuthoritativeActivityReadProjectionPublisher {
                   ? 'ADMITTED_SOURCE_UNAVAILABLE'
                   : 'SCOPE_NOT_AUTHORIZED',
             },
-            visibility: visibility.summary(
-              readScope(visibility.worldId, scope),
-            ),
+            visibility: industry.has(officeKey(scope))
+              ? {
+                  ...visibility.summary(readScope(visibility.worldId, scope)),
+                  schemaVersion: 'economic-read-visibility-v2',
+                  industryProductionResult: industry.get(officeKey(scope))!
+                    .industryProductionResult,
+                }
+              : visibility.summary(readScope(visibility.worldId, scope)),
           },
           officeId: scope.officeId,
-          schemaVersion: WORLD_ACTIVITY_PROJECTION_SCHEMA_VERSION,
+          schemaVersion: industry.has(officeKey(scope))
+            ? INDUSTRY_ACTIVITY_V2
+            : WORLD_ACTIVITY_PROJECTION_SCHEMA_VERSION,
         },
       }),
     );

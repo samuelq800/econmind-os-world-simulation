@@ -3,6 +3,8 @@ import {
   CENTRAL_BANK_OMO_EVENT,
   SOCIAL_SERVICE_PLAN_EVENT,
   SOCIAL_JOB_MATCH_EVENT,
+  PRODUCTION_SETTLED_EVENT_TYPE,
+  WORLD_DECIMAL_OPERAND_MAX_DIGITS,
   OFFICE_DECISION_RESULT_SCHEMA,
   DOMAIN_ERROR_CODES,
   DomainError,
@@ -32,8 +34,23 @@ import {
   type DecisionResultMetric,
   type OfficeDecisionResult,
   type CountryDecisionResultSummary,
+  type EconomicReadScope,
+  type IndustryProductionResultDisclosure,
+  type DecisionResultCause,
 } from '@econmind/core';
 import type { EconomicReadVisibilitySnapshot } from './economic-read-visibility-source.js';
+import type { SqlExecutor } from '../persistence/sql-database.js';
+import {
+  readValidatedCanonicalLineageFrom,
+  type ValidatedCanonicalLineageView,
+} from '../persistence/validated-canonical-lineage.js';
+import { readIndustryProductionSourceFrom } from './industry-production-source-port.js';
+import {
+  readIndustryProductionGoverningFrom,
+  type IndustryGoverningCustodyPort,
+  type IndustryProductionGoverningResult,
+} from './industry-production-governing-source.js';
+import { requireIndustryIsolatedTestRuntime } from './industry-production-result-evidence.js';
 
 export interface CommittedOfficeDecisionTransition {
   readonly command: CanonicalCommand;
@@ -167,6 +184,490 @@ export function projectCountryDecisionResultSummary(
     sourceHead: { ...sourceHead },
     status: 'NOT_AUTHORIZED',
     reason: 'OFFICE_DECISION_DETAIL_PRIVATE',
+  });
+}
+
+const INDUSTRY_PURPOSE =
+  'INDUSTRY_COMMITTED_PRODUCTION_OUTPUT_AFTER_ONLY' as const;
+export interface IndustryDecisionProjectionData {
+  readonly decisionResult: OfficeDecisionResult;
+  readonly industryProductionResult: IndustryProductionResultDisclosure;
+}
+interface IndustryMapperSource {
+  readonly countryId: string;
+  readonly head: DecisionResultHead;
+  readonly cause: DecisionResultCause;
+  readonly output: Readonly<{ amount: string; unit: string }>;
+}
+function industryHead(value: unknown): DecisionResultHead {
+  const r = record(value);
+  keys(r, ['worldId', 'worldVersion', 'eventSequence']);
+  if (
+    typeof r.worldId !== 'string' ||
+    !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(r.worldId) ||
+    r.worldId.length > 128
+  )
+    invalid('Industry World required');
+  for (const key of ['worldVersion', 'eventSequence']) {
+    const v = integer(r[key]);
+    if (v.length > 19 || BigInt(v) > 9_223_372_036_854_775_807n)
+      invalid('Industry bounded head required');
+  }
+  return {
+    worldId: r.worldId,
+    worldVersion: r.worldVersion as string,
+    eventSequence: r.eventSequence as string,
+  };
+}
+function industryScope(
+  value: unknown,
+  head: DecisionResultHead,
+): EconomicReadScope {
+  const r = record(value);
+  keys(r, ['worldId', 'countryId', 'officeId', 'classification']);
+  if (
+    r.worldId !== head.worldId ||
+    typeof r.countryId !== 'string' ||
+    !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(r.countryId) ||
+    r.countryId.length > 128 ||
+    r.officeId !== 'INDUSTRY' ||
+    r.classification !== 'OFFICE_PRIVATE'
+  )
+    invalid('Exact private Industry scope required');
+  return freeze({
+    worldId: head.worldId,
+    countryId: r.countryId,
+    officeId: 'INDUSTRY',
+    classification: 'OFFICE_PRIVATE',
+  });
+}
+function industryEqual(
+  actual: unknown,
+  expected: unknown,
+  message: string,
+): void {
+  if (canonicalSerialize(actual) !== canonicalSerialize(expected))
+    invalid(message);
+}
+function industryEmpty(
+  head: DecisionResultHead,
+  scope: EconomicReadScope,
+  unauthorized = false,
+): IndustryDecisionProjectionData {
+  return freeze({
+    decisionResult: {
+      schemaVersion: OFFICE_DECISION_RESULT_SCHEMA,
+      classification: 'OFFICE_PRIVATE',
+      countryId: scope.countryId,
+      officeId: 'INDUSTRY',
+      sourceHead: { ...head },
+      semantics: 'COMMITTED_EVENT_RESULT_NOT_CURRENT_POSITION',
+      source: null,
+      afterState: null,
+      status: unauthorized ? 'NOT_AUTHORIZED' : 'SOURCE_UNAVAILABLE',
+      reason: unauthorized
+        ? 'SCOPE_NOT_AUTHORIZED'
+        : 'COMMITTED_PRODUCTION_SOURCE_UNAVAILABLE',
+      businessState: null,
+      cause: null,
+      metrics: [],
+    },
+    industryProductionResult: { status: 'NOT_AUTHORIZED' },
+  });
+}
+function industryGoverningShape(value: IndustryProductionGoverningResult): {
+  disclosure: RecordValue;
+  summary: RecordValue;
+} {
+  const r = record(value);
+  keys(r, ['disclosure', 'resultSummary']);
+  const disclosure = record(r.disclosure),
+    summary = record(r.resultSummary);
+  if (disclosure.status === 'NOT_AUTHORIZED') {
+    keys(disclosure, ['status', 'reason']);
+    keys(summary, ['status']);
+    if (
+      summary.status !== 'NOT_AUTHORIZED' ||
+      ![
+        'ADMITTED_SOURCE_UNAVAILABLE',
+        'OWNER_MAPPING_UNAVAILABLE',
+        'SCOPE_NOT_AUTHORIZED',
+      ].includes(String(disclosure.reason))
+    )
+      invalid('Industry denied pair differs');
+  } else {
+    keys(disclosure, ['status', 'sourceUnits']);
+    keys(summary, ['status', 'purpose', 'sourceHead', 'causeBinding']);
+    if (
+      disclosure.status !== 'AUTHORIZED' ||
+      !Array.isArray(disclosure.sourceUnits) ||
+      !disclosure.sourceUnits.length ||
+      disclosure.sourceUnits.length > 10000 ||
+      disclosure.sourceUnits.some(
+        (u) => typeof u !== 'string' || !u.length || u.length > 512,
+      ) ||
+      new Set(disclosure.sourceUnits).size !== disclosure.sourceUnits.length
+    )
+      invalid('Industry actual disclosure required');
+    if (
+      summary.status !== 'AUTHORIZED_RESULT_ONLY' ||
+      summary.purpose !== INDUSTRY_PURPOSE
+    )
+      invalid('Industry result-only purpose required');
+    industryHead(summary.sourceHead);
+    const binding = record(summary.causeBinding);
+    keys(binding, [
+      'commandId',
+      'commandFingerprint',
+      'eventId',
+      'eventFingerprint',
+    ]);
+    for (const key of ['commandId', 'eventId'])
+      if (
+        typeof binding[key] !== 'string' ||
+        !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(binding[key] as string) ||
+        (binding[key] as string).length > 128
+      )
+        invalid('Industry cause identity required');
+    for (const key of ['commandFingerprint', 'eventFingerprint'])
+      if (
+        typeof binding[key] !== 'string' ||
+        !/^sha256:[0-9a-f]{64}$/u.test(binding[key] as string)
+      )
+        invalid('Industry cause fingerprint required');
+  }
+  return { disclosure, summary };
+}
+/** Finite display mapper only. Real callers have already run A and C; the
+ * isolated test entry below supplies explicitly untrusted inert mechanism data. */
+function mapIndustryDecision(
+  source: IndustryMapperSource | null,
+  head: DecisionResultHead,
+  scope: EconomicReadScope,
+  governing: IndustryProductionGoverningResult | null,
+): IndustryDecisionProjectionData {
+  const parsedGoverning = governing ? industryGoverningShape(governing) : null;
+  if (source === null) return industryEmpty(head, scope);
+  if (source.countryId !== scope.countryId)
+    invalid('Industry source/scope country differs');
+  industryEqual(source.head, head, 'Industry source/publication head differs');
+  const c = source.cause;
+  if (
+    c.eventType !== PRODUCTION_SETTLED_EVENT_TYPE ||
+    c.planCommandId !== null ||
+    BigInt(integer(c.worldVersionBefore)) + 1n !==
+      BigInt(integer(c.worldVersionAfter)) ||
+    BigInt(c.worldVersionAfter) > BigInt(head.worldVersion) ||
+    BigInt(integer(c.eventSequence)) > BigInt(head.eventSequence)
+  )
+    invalid('Industry cause/version differs');
+  if (integer(c.simTime).length > 120)
+    invalid('Industry bounded SimTime required');
+  for (const key of ['commandId', 'eventId'] as const)
+    if (
+      !/^[A-Z][A-Z0-9]*(?:[_-][A-Z0-9]+)*$/u.test(c[key]) ||
+      c[key].length > 128
+    )
+      invalid('Industry cause identity required');
+  for (const key of ['commandFingerprint', 'eventFingerprint'] as const)
+    if (!/^sha256:[0-9a-f]{64}$/u.test(c[key]))
+      invalid('Industry cause fingerprint required');
+  if (!parsedGoverning) return industryEmpty(head, scope);
+  const { disclosure, summary } = parsedGoverning;
+  if (disclosure.status === 'NOT_AUTHORIZED') {
+    return industryEmpty(
+      head,
+      scope,
+      disclosure.reason !== 'ADMITTED_SOURCE_UNAVAILABLE',
+    );
+  }
+  industryEqual(
+    industryHead(summary.sourceHead),
+    head,
+    'Industry governing/publication head differs',
+  );
+  industryEqual(
+    summary.causeBinding,
+    {
+      commandId: c.commandId,
+      commandFingerprint: c.commandFingerprint,
+      eventId: c.eventId,
+      eventFingerprint: c.eventFingerprint,
+    },
+    'Industry four-cause differs',
+  );
+  if (
+    source.output.unit !== 'tonne' ||
+    typeof source.output.amount !== 'string' ||
+    !/^(?:0|[1-9]\d*)(?:\.\d*[1-9])?$/u.test(source.output.amount) ||
+    source.output.amount === '0' ||
+    source.output.amount.replace('.', '').length >
+      WORLD_DECIMAL_OPERAND_MAX_DIGITS
+  )
+    invalid('Industry finite canonical positive tonne result required');
+  return freeze({
+    decisionResult: {
+      schemaVersion: OFFICE_DECISION_RESULT_SCHEMA,
+      classification: 'OFFICE_PRIVATE',
+      countryId: scope.countryId,
+      officeId: 'INDUSTRY',
+      sourceHead: { ...head },
+      semantics: 'COMMITTED_EVENT_RESULT_NOT_CURRENT_POSITION',
+      source: 'COMMITTED_EVENT_RESULT',
+      afterState: null,
+      status: 'COMMITTED',
+      reason: null,
+      businessState: 'APPLIED',
+      cause: { ...c },
+      metrics: [
+        {
+          key: 'PRODUCTION_OUTPUT',
+          unit: 'tonne',
+          status: 'AFTER_ONLY',
+          before: null,
+          delta: null,
+          after: source.output.amount,
+          reason: 'PREDECESSOR_STATE_NOT_CARRIED',
+        },
+      ],
+    },
+    industryProductionResult: {
+      status: 'AUTHORIZED_RESULT_ONLY',
+      purpose: INDUSTRY_PURPOSE,
+      sourceHead: { ...head },
+      causeBinding: {
+        commandId: c.commandId,
+        commandFingerprint: c.commandFingerprint,
+        eventId: c.eventId,
+        eventFingerprint: c.eventFingerprint,
+      },
+    },
+  });
+}
+
+/** Official server reader; no source/output/disclosure callback or fixture DTO.
+ * Actual C custody and its native protection require separate adapter evidence. */
+export async function readIndustryOfficeDecisionResultFrom(input: {
+  readonly executor: SqlExecutor;
+  readonly view: ValidatedCanonicalLineageView;
+  readonly scope: EconomicReadScope;
+  readonly custody: IndustryGoverningCustodyPort;
+  readonly sha256Hex: Sha256Hex;
+}): Promise<Readonly<IndustryDecisionProjectionData>> {
+  const data = readValidatedCanonicalLineageFrom(input.executor, input.view);
+  const head = {
+    worldId: data.worldId,
+    worldVersion: data.headWorldVersion,
+    eventSequence: data.headEventSequence,
+  };
+  const scope = industryScope(
+    JSON.parse(canonicalSerialize(input.scope)) as unknown,
+    head,
+  );
+  if (!input.custody || typeof input.custody.withSnapshotFrom !== 'function')
+    invalid('Actual Industry custody dependency required');
+  // Preserve the source port's correction refusal before a later manual
+  // activity can take the ordinary nonprojectable/unavailable branch.
+  const productionEventIds = new Set(
+    data.transitions
+      .filter((row) => row.command.countryId === scope.countryId)
+      .flatMap((row) => row.transition.events)
+      .filter((event) => event.eventType === PRODUCTION_SETTLED_EVENT_TYPE)
+      .map((event) => event.eventId),
+  );
+  for (const row of data.transitions) {
+    for (const event of row.transition.events) {
+      if (
+        event.correctsEventId !== null &&
+        (productionEventIds.has(event.correctsEventId) ||
+          (row.command.countryId === scope.countryId &&
+            event.eventType === PRODUCTION_SETTLED_EVENT_TYPE))
+      )
+        invalid('Industry production correction is unsupported');
+    }
+  }
+  // Latest recognized Industry activity, not the latest old success. The actual
+  // reader has constructor-validated every posting and rebuilt the full prefix.
+  let selected:
+    | {
+        row: (typeof data.transitions)[number];
+        event: (typeof data.transitions)[number]['transition']['events'][number];
+      }
+    | undefined;
+  for (const row of data.transitions) {
+    if (row.command.countryId !== scope.countryId) continue;
+    for (const event of row.transition.events) {
+      const manual = row.command.officeId === 'INDUSTRY';
+      const automatic =
+        row.command.officeId === null &&
+        event.eventType === PRODUCTION_SETTLED_EVENT_TYPE;
+      if (manual || automatic) selected = { row, event };
+    }
+  }
+  if (!selected || selected.event.eventType !== PRODUCTION_SETTLED_EVENT_TYPE)
+    return industryEmpty(head, scope);
+  const postings = selected.row.inventoryPostings.filter(
+    (p) => p.operation === 'PRODUCE_AND_CONSUME',
+  );
+  if (postings.length !== 1)
+    invalid('Industry exact production posting required');
+  const selectors = {
+    worldId: selected.row.command.worldId,
+    countryId: selected.row.command.countryId,
+    commandId: selected.row.command.commandId,
+    eventId: selected.event.eventId,
+    postingId: postings[0]!.postingId,
+    expectedPublicationHead: head,
+  };
+  const source = readIndustryProductionSourceFrom(
+    input.executor,
+    input.view,
+    selectors,
+    input.sha256Hex,
+  );
+  if (source.kind === 'SOURCE_UNAVAILABLE') return industryEmpty(head, scope);
+  const governing = await readIndustryProductionGoverningFrom(
+    input.executor,
+    input.view,
+    selectors,
+    scope,
+    input.custody,
+  );
+  if (readValidatedCanonicalLineageFrom(input.executor, input.view) !== data)
+    invalid('Industry lineage changed after governing read');
+  return mapIndustryDecision(
+    {
+      countryId: source.targetCommand.countryId,
+      head: source.publicationHead,
+      cause: source.immutableSourceWitnesses.cause,
+      output: source.immutableSourceWitnesses.actualOutput,
+    },
+    head,
+    scope,
+    governing,
+  );
+}
+
+/** Inert TEST_ONLY mapper acceptance, never a genuine-view/source entry. */
+export function evaluateIndustryDecisionProjectionForTestOnly(input: unknown) {
+  requireIndustryIsolatedTestRuntime();
+  const serialized = canonicalSerialize(input);
+  if (Buffer.byteLength(serialized, 'utf8') > 1_000_000)
+    invalid('Industry test mechanism capacity exceeded');
+  const r = record(JSON.parse(serialized) as unknown);
+  keys(r, ['schemaVersion', 'scope', 'sourceCandidate', 'governingCandidate']);
+  if (r.schemaVersion !== 'g-industry-decision-test-input-v1')
+    invalid('Industry test schema required');
+  const a = record(r.sourceCandidate);
+  keys(a, [
+    'schemaVersion',
+    'kind',
+    'admission',
+    'productionAuthority',
+    'sourceAdmitted',
+    'runtimeConnected',
+    'result',
+  ]);
+  if (
+    a.schemaVersion !== 'industry-production-prefix-test-candidate-v1' ||
+    a.kind !== 'INDUSTRY_PREFIX_TEST_CANDIDATE' ||
+    a.admission !== 'ISOLATED_TEST_ONLY_NOT_ADMITTED' ||
+    a.productionAuthority !== false ||
+    a.sourceAdmitted !== false ||
+    a.runtimeConnected !== false
+  )
+    invalid('Inert A test candidate required');
+  const g = record(r.governingCandidate);
+  keys(g, ['kind', 'sourceAdmitted', 'productionAuthority', 'result']);
+  if (
+    g.kind !== 'EVALUATED_TEST_ONLY' ||
+    g.sourceAdmitted !== false ||
+    g.productionAuthority !== false
+  )
+    invalid('Inert C test candidate required');
+  const cr = record(g.result);
+  keys(cr, ['disclosure', 'resultSummary']);
+  const s = record(a.result),
+    head = industryHead(s.publicationHead),
+    scope = industryScope(r.scope, head);
+  let source: IndustryMapperSource | null = null;
+  if (s.status === 'SOURCE_UNAVAILABLE') {
+    keys(s, ['status', 'reason', 'publicationHead']);
+    if (s.reason !== 'PRODUCTION_TARGET_NOT_FOUND')
+      invalid('A missing test source reason differs');
+  } else {
+    keys(s, [
+      'status',
+      'publicationHead',
+      'targetCutoff',
+      'cause',
+      'actualOutput',
+      'inventoryAccountWitnesses',
+    ]);
+    if (s.status !== 'EVALUATED_TEST_ONLY')
+      invalid('A test-only evaluation required');
+    industryHead(s.targetCutoff);
+    const c = record(s.cause);
+    keys(c, [
+      'commandId',
+      'commandFingerprint',
+      'eventId',
+      'eventFingerprint',
+      'eventType',
+      'eventSequence',
+      'worldVersionBefore',
+      'worldVersionAfter',
+      'simTime',
+      'planCommandId',
+    ]);
+    const output = record(s.actualOutput);
+    keys(output, ['amount', 'unit']);
+    if (
+      !Array.isArray(s.inventoryAccountWitnesses) ||
+      s.inventoryAccountWitnesses.length < 1 ||
+      s.inventoryAccountWitnesses.length > 10000
+    )
+      invalid('Bounded test witness array required');
+    for (const account of s.inventoryAccountWitnesses) {
+      const row = record(account);
+      keys(row, [
+        'worldId',
+        'countryId',
+        'commodityId',
+        'batchId',
+        'physicalLocationId',
+        'titleHolderId',
+        'riskBearerId',
+        'bucket',
+        'unit',
+        'economicRecognitionId',
+        'reservationId',
+        'shipmentId',
+      ]);
+      if (Object.values(row).some((v) => v !== null && typeof v !== 'string'))
+        invalid('Inert tuple scalar required');
+    }
+    // No cast to A's official source type or genuine-view wrapper is made.
+    source = {
+      countryId: record(s.inventoryAccountWitnesses[0]).countryId as string,
+      head,
+      cause: c as unknown as DecisionResultCause,
+      output: output as unknown as { amount: string; unit: string },
+    };
+  }
+  const result = mapIndustryDecision(
+    source,
+    head,
+    scope,
+    cr as unknown as IndustryProductionGoverningResult,
+  );
+  return freeze({
+    schemaVersion: 'g-industry-decision-test-evaluation-v1' as const,
+    kind: 'G_INDUSTRY_DECISION_PROJECTION_TEST_ONLY' as const,
+    sourceAdmitted: false as const,
+    productionAuthority: false as const,
+    runtimeConnected: false as const,
+    result,
   });
 }
 
