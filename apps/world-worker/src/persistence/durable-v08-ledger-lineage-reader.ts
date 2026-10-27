@@ -46,6 +46,12 @@ import {
   type IndustryProductionHistoricalReadGuard,
 } from './industry-production-source-cutoff.js';
 import { decodeIndustryProductionRow } from './industry-production-row-decoder.js';
+import {
+  replaySocialOfficeDurableGroups,
+  socialOfficeServiceWire,
+  type SocialOfficeLineageIdentity,
+} from './social-office-simulated-lineage.js';
+import { requireSocialOfficeProtectedSource } from './social-office-resource-protection.js';
 
 const NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/u;
 // Preparation capacity, not a truncated prefix or an economic/history rule.
@@ -454,16 +460,24 @@ export class DurableV08LedgerLineageReader {
   readonly #openingSeeds: WorldOpeningSeedStore;
   readonly #sha256Hex: Sha256Hex;
   readonly #industryReadGuard: IndustryProductionHistoricalReadGuard | null;
+  readonly #social: Readonly<SocialOfficeLineageIdentity> | null;
 
   constructor(input: {
     readonly database: SqlDatabase;
     readonly sha256Hex: Sha256Hex;
     readonly industryReadGuard?: IndustryProductionHistoricalReadGuard;
+    readonly socialSimulation?: Readonly<SocialOfficeLineageIdentity>;
   }) {
     this.#database = input.database;
     this.#sha256Hex = input.sha256Hex;
     this.#openingSeeds = new WorldOpeningSeedStore(input);
     this.#industryReadGuard = input.industryReadGuard ?? null;
+    this.#social =
+      input.socialSimulation === undefined
+        ? null
+        : Object.freeze({ ...input.socialSimulation });
+    if (this.#social !== null && this.#industryReadGuard !== null)
+      invalid('Mutually exclusive isolated lineage modes');
   }
 
   async rebuild(
@@ -656,6 +670,15 @@ export class DurableV08LedgerLineageReader {
     transaction: SqlExecutor,
     requestedWorldId: string,
   ): Promise<Readonly<{ worldVersion: string; eventSequence: string }>> {
+    if (this.#social !== null) {
+      if (requestedWorldId !== this.#social.worldId)
+        invalid('Social lineage World mismatch');
+      requireSocialOfficeProtectedSource(transaction, {
+        simulationId: this.#social.simulationId,
+        worldId: this.#social.worldId,
+        countryId: this.#social.countryId,
+      });
+    }
     const result = await transaction.query<HeadRow>(
       `select world_version, event_sequence
          from world_v2.world_head
@@ -842,6 +865,51 @@ export class DurableV08LedgerLineageReader {
       if (!rowsByCommand.has(commandId)) {
         invalid('Durable Posting has no authoritative Event transition');
       }
+    }
+    if (this.#social !== null) {
+      if (industry !== undefined || pending.length > 256)
+        invalid('Unsupported Social lineage scope or complete-prefix bound');
+      const groups = pending.map((group) => {
+        const services = group.inventoryRows.filter((row) => {
+          const p = canonicalObject(row.canonical_payload, 'Inventory Posting');
+          return (
+            p.schemaVersion === 'inventory-social-service-consumption-v1' ||
+            p.operation === 'SERVICE_CONSUME'
+          );
+        });
+        if (services.length > 1)
+          invalid('Multiple service rows in one transition');
+        return {
+          ...group,
+          inventoryPostings: Object.freeze(
+            group.inventoryRows
+              .filter((row) => !services.includes(row))
+              .map((row) =>
+                parseInventoryPosting({
+                  row,
+                  command: group.command,
+                  transition: group.transition,
+                  sha256Hex: this.#sha256Hex,
+                }),
+              ),
+          ),
+          serviceConsumptionWire:
+            services.length === 0
+              ? null
+              : socialOfficeServiceWire(
+                  services[0]!.canonical_payload,
+                  services[0]!.fingerprint,
+                ),
+        };
+      });
+      const replayed = await replaySocialOfficeDurableGroups({
+        executor: transaction,
+        identity: this.#social,
+        seed: await this.#openingSeeds.loadFrom(transaction, requestedWorldId),
+        groups,
+        sha256Hex: this.#sha256Hex,
+      });
+      return replayed.decodedTransitions;
     }
     if (industry !== undefined) {
       // Canonical Command/Event groups and ALL their headers precede any

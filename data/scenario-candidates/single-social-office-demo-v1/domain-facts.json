@@ -1,0 +1,2005 @@
+{
+  "schemaVersion": "G_SINGLE_SOCIAL_DOMAIN_CANDIDATES_V1",
+  "scope": {
+    "simulationId": "SINGLE_SOCIAL_OFFICE_SIM_V1",
+    "worldId": "WORLD_SOCIAL_SINGLE_DEMO_V1",
+    "countryId": "COUNTRY_01",
+    "locationId": "REGION_01_E1",
+    "sourceClass": "SIMULATED_OPENING",
+    "actualWorldId": null,
+    "actualAdmissionRef": null,
+    "actualCustodian": "SUPPLIER_UNCONFIRMED",
+    "maxWorlds": 1,
+    "maxEconomies": 1,
+    "worldClockEnabled": false
+  },
+  "selection": null,
+  "options": [
+    {
+      "id": "G_SOCIAL_SMALL_BASELINE_V1",
+      "selected": false,
+      "sourceClassification": "NEW_AUTHORED_SIMULATION_CANDIDATE",
+      "scope": {
+        "simulationId": "SINGLE_SOCIAL_OFFICE_SIM_V1",
+        "worldId": "WORLD_SOCIAL_SINGLE_DEMO_V1",
+        "countryId": "COUNTRY_01",
+        "locationId": "REGION_01_E1",
+        "sourceClass": "SIMULATED_OPENING",
+        "actualWorldId": null,
+        "actualAdmissionRef": null,
+        "actualCustodian": "SUPPLIER_UNCONFIRMED",
+        "maxWorlds": 1,
+        "maxEconomies": 1,
+        "worldClockEnabled": false
+      },
+      "people": [
+        {
+          "personId": "SIM_L001",
+          "skill": "LOW",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_CLINIC_SUPPORT_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L002",
+          "skill": "LOW",
+          "labourStatus": "STUDENT",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L003",
+          "skill": "LOW",
+          "labourStatus": "STUDENT",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L004",
+          "skill": "LOW",
+          "labourStatus": "STUDENT",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L005",
+          "skill": "LOW",
+          "labourStatus": "STUDENT",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L006",
+          "skill": "LOW",
+          "labourStatus": "STUDENT",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L007",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L008",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L009",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L010",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L011",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L012",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M001",
+          "skill": "MEDIUM",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_BUREAU_CASEWORKER_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M002",
+          "skill": "MEDIUM",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_CLINIC_NURSE_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M003",
+          "skill": "MEDIUM",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_CLINIC_TECHNICIAN_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M004",
+          "skill": "MEDIUM",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M005",
+          "skill": "MEDIUM",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M006",
+          "skill": "MEDIUM",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M007",
+          "skill": "MEDIUM",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M008",
+          "skill": "MEDIUM",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_H001",
+          "skill": "HIGH",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_COLLEGE_TEACHER_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_H002",
+          "skill": "HIGH",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_CLINIC_DOCTOR_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_H003",
+          "skill": "HIGH",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_H004",
+          "skill": "HIGH",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        }
+      ],
+      "positions": [
+        {
+          "personId": "SIM_M001",
+          "positionId": "POSITION_SIM_BUREAU_CASEWORKER_01",
+          "occupation": "GENERAL",
+          "priceRole": "CASEWORKER",
+          "skill": "MEDIUM",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "PUBLIC_ADMINISTRATION",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "BUREAU",
+          "dailyAvailableMinutes": "360",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": "SIM_H001",
+          "positionId": "POSITION_SIM_COLLEGE_TEACHER_01",
+          "occupation": "TEACHER",
+          "priceRole": null,
+          "skill": "HIGH",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "EDUCATION",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "COLLEGE",
+          "dailyAvailableMinutes": "360",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": "SIM_H002",
+          "positionId": "POSITION_SIM_CLINIC_DOCTOR_01",
+          "occupation": "DOCTOR",
+          "priceRole": null,
+          "skill": "HIGH",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "HEALTHCARE",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "CLINIC",
+          "dailyAvailableMinutes": "300",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": "SIM_M002",
+          "positionId": "POSITION_SIM_CLINIC_NURSE_01",
+          "occupation": "NURSE",
+          "priceRole": null,
+          "skill": "MEDIUM",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "HEALTHCARE",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "CLINIC",
+          "dailyAvailableMinutes": "300",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": "SIM_M003",
+          "positionId": "POSITION_SIM_CLINIC_TECHNICIAN_01",
+          "occupation": "MEDICAL_TECHNICIAN",
+          "priceRole": null,
+          "skill": "MEDIUM",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "HEALTHCARE",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "CLINIC",
+          "dailyAvailableMinutes": "240",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": "SIM_L001",
+          "positionId": "POSITION_SIM_CLINIC_SUPPORT_01",
+          "occupation": "SUPPORT",
+          "priceRole": null,
+          "skill": "LOW",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "HEALTHCARE",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "CLINIC",
+          "dailyAvailableMinutes": "360",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": null,
+          "positionId": "POSITION_SIM_CLINIC_NURSE_02",
+          "occupation": "NURSE",
+          "priceRole": null,
+          "skill": "MEDIUM",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "HEALTHCARE",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "0",
+          "institution": "CLINIC",
+          "dailyAvailableMinutes": "300",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null,
+          "candidateHirePersonId": "SIM_M004"
+        }
+      ],
+      "employmentGenesis": {
+        "schemaVersion": "social-employment-service-state-v1",
+        "worldId": "WORLD_SOCIAL_SINGLE_DEMO_V1",
+        "labour": {
+          "aggregates": [
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "LOW",
+              "status": "EMPLOYED",
+              "count": "1"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "LOW",
+              "status": "STUDENT",
+              "count": "5"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "LOW",
+              "status": "UNEMPLOYED_SEARCHING",
+              "count": "6"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "LOW",
+              "status": "NOT_IN_LABOUR_FORCE",
+              "count": "0"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "MEDIUM",
+              "status": "EMPLOYED",
+              "count": "3"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "MEDIUM",
+              "status": "STUDENT",
+              "count": "0"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "MEDIUM",
+              "status": "UNEMPLOYED_SEARCHING",
+              "count": "5"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "MEDIUM",
+              "status": "NOT_IN_LABOUR_FORCE",
+              "count": "0"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "HIGH",
+              "status": "EMPLOYED",
+              "count": "2"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "HIGH",
+              "status": "STUDENT",
+              "count": "0"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "HIGH",
+              "status": "UNEMPLOYED_SEARCHING",
+              "count": "2"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "HIGH",
+              "status": "NOT_IN_LABOUR_FORCE",
+              "count": "0"
+            }
+          ],
+          "positions": [
+            {
+              "positionId": "POSITION_SIM_BUREAU_CASEWORKER_01",
+              "skill": "MEDIUM",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "PUBLIC_ADMINISTRATION",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_COLLEGE_TEACHER_01",
+              "skill": "HIGH",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "EDUCATION",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_CLINIC_DOCTOR_01",
+              "skill": "HIGH",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "HEALTHCARE",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_CLINIC_NURSE_01",
+              "skill": "MEDIUM",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "HEALTHCARE",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_CLINIC_TECHNICIAN_01",
+              "skill": "MEDIUM",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "HEALTHCARE",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_CLINIC_SUPPORT_01",
+              "skill": "LOW",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "HEALTHCARE",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_CLINIC_NURSE_02",
+              "skill": "MEDIUM",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "HEALTHCARE",
+              "requiredCount": "1",
+              "employedCount": "0",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            }
+          ],
+          "wageAssertionsBinding": "Same explicitly selected A finance wageVersion; not guessed here",
+          "appliedFactBindings": []
+        },
+        "servicePools": [
+          {
+            "poolId": "SIM_EMP_POOL_LOW_D1",
+            "skill": "LOW",
+            "dayIndex": "1",
+            "capacitySlots": "0",
+            "usedSlots": "0",
+            "reservedSlots": "0",
+            "countryId": "COUNTRY_01",
+            "locationId": "REGION_01_E1",
+            "ruleVersion": "SOCIAL_JOB_MATCH_RULE_V1"
+          },
+          {
+            "poolId": "SIM_EMP_POOL_MEDIUM_D1",
+            "skill": "MEDIUM",
+            "dayIndex": "1",
+            "capacitySlots": "6",
+            "usedSlots": "0",
+            "reservedSlots": "0",
+            "countryId": "COUNTRY_01",
+            "locationId": "REGION_01_E1",
+            "ruleVersion": "SOCIAL_JOB_MATCH_RULE_V1"
+          },
+          {
+            "poolId": "SIM_EMP_POOL_HIGH_D1",
+            "skill": "HIGH",
+            "dayIndex": "1",
+            "capacitySlots": "0",
+            "usedSlots": "0",
+            "reservedSlots": "0",
+            "countryId": "COUNTRY_01",
+            "locationId": "REGION_01_E1",
+            "ruleVersion": "SOCIAL_JOB_MATCH_RULE_V1"
+          }
+        ],
+        "plans": [],
+        "appliedOperations": []
+      },
+      "employmentCurrent": {
+        "wageVersionSelectionRef": null,
+        "sameVersionMinimumAndOffer": true,
+        "offerTargetPositionId": "POSITION_SIM_CLINIC_NURSE_02",
+        "minimumWindowHalfOpen": ["0", "30"],
+        "offerWindowHalfOpen": ["0", "30"],
+        "wagePeriod": "SIM_YEAR",
+        "currency": "XAA",
+        "populationAvailability": [
+          {
+            "countryId": "COUNTRY_01",
+            "locationId": "REGION_01_E1",
+            "workingAgeAvailable": "24"
+          }
+        ],
+        "plan": {
+          "requestedMatches": "1",
+          "dueDayIndex": "1",
+          "skill": "MEDIUM",
+          "poolId": "SIM_EMP_POOL_MEDIUM_D1"
+        },
+        "physicalStage": {
+          "resourceKey": "SIM_PERSON_SIM_M001_DAY_1",
+          "availableMinutes": "360",
+          "minutesPerOpportunity": {
+            "LOW": "45",
+            "MEDIUM": "55",
+            "HIGH": "65"
+          }
+        },
+        "actualQualificationRef": null,
+        "simulatedQualification": "Only MEDIUM placement lane enabled; LOW/HIGH zero capacity is an explicit scenario restriction, not a ruling about those skills.",
+        "candidateStaffAfterMatch": {
+          "personId": "SIM_M004",
+          "positionId": "POSITION_SIM_CLINIC_NURSE_02",
+          "minimumPrerequisite": "Actual original due-MATCH finalreceipt and employment state; never from an offer alone",
+          "effectiveDayCandidate": "1",
+          "availableMinutesNextServiceWindow": "300",
+          "payrollEffectiveRuleRef": null
+        }
+      },
+      "education": {
+        "institutionId": "FACILITY_SIM_TECHNICAL_COLLEGE_01",
+        "programmeId": "SIM_VOCATIONAL_PROGRAMME_V1",
+        "level": "VOCATIONAL",
+        "sourceSkill": "LOW",
+        "targetSkill": "MEDIUM",
+        "specialisationId": "GENERAL_TECHNICAL_SIM",
+        "teacherPersonIds": ["SIM_H001"],
+        "teacherSupportedSeats": "6",
+        "facilityId": "SIM_COLLEGE_ROOMS_01",
+        "facilitySeats": "6",
+        "budgetSupportedSeats": "6",
+        "availableCapacity": "6",
+        "ratioCandidate": {
+          "teachers": "1",
+          "supportedSeats": "6",
+          "notCoreDefault": true
+        },
+        "oldCohort": {
+          "cohortId": "SIM_COHORT_RETURNING_01",
+          "studentIds": ["SIM_L002", "SIM_L003", "SIM_L004"],
+          "enrolled": "3",
+          "cumulativeGraduates": "0",
+          "initialElapsedDuration": {
+            "amount": "0",
+            "unit": "sim_day"
+          },
+          "requiredDuration": {
+            "amount": "10",
+            "unit": "sim_day"
+          },
+          "dropoutRate": {
+            "numerator": "0",
+            "denominator": "1"
+          },
+          "completionRate": {
+            "numerator": "1",
+            "denominator": "3"
+          },
+          "graduates": "1",
+          "graduatingStudentIds": ["SIM_L002"],
+          "retainedStudentIds": ["SIM_L003", "SIM_L004"],
+          "postAssessmentState": "GRADUATION_PROCESSED",
+          "repeatedGraduation": "REJECT",
+          "retainedStudentsKeepSeatAndStatus": true,
+          "remedialOrExitRules": "NOT_SUPPORTED_IN_THIS_VERSION",
+          "assessmentParticipantIds": ["SIM_L002", "SIM_L003", "SIM_L004"],
+          "originalStartDayIndex": "0"
+        },
+        "newCohort": {
+          "cohortId": "SIM_COHORT_NEW_01",
+          "beforeEnrolled": "0",
+          "beforeElapsedDuration": {
+            "amount": "0",
+            "unit": "sim_day"
+          },
+          "applicantIds": ["SIM_L005", "SIM_L006"],
+          "applicantLabourStatus": "STUDENT",
+          "admitted": "2",
+          "admittedIds": ["SIM_L005", "SIM_L006"],
+          "mustNotInheritOldElapsed": true,
+          "graduationInThisDemo": "OWN_START_DAY0_ELAPSED0; NO_INHERITED_ELAPSED; at own due day 10 require original complete teaching reservations and separate assessment; selected FLOOR yields0 retained/processed or EXACT rejects fraction. If assessment not executed, OPEN with real pending commitments; never claim completed from elapsed only.",
+          "originalStartDayIndex": "0"
+        },
+        "budget": {
+          "allocatedAllowance": "300",
+          "currency": "XAA",
+          "financialPolicyCandidate": "EDUCATION_FULL_COURSE_OBLIGATION_AT_ADMISSION_V1",
+          "fullCoursePerStudent": "50",
+          "componentsPerStudent": {
+            "operating": "20",
+            "scholarshipObligation": "5",
+            "facility": "25"
+          },
+          "openingOldCohortCommitted": "150",
+          "openingOldCohortRecognizedUnpaidObligation": "150",
+          "openingOldCohortPaid": "0",
+          "openingRemainingAllowance": "150",
+          "admissionRecognizesFullCourseOnce": true,
+          "graduationAdditionalExpense": "0",
+          "nonGraduateRefund": "NOT_SUPPORTED_NO_AUTOMATIC_REFUND",
+          "wageCosts": "Separate common A staff-day policy; once per person, not charged twice",
+          "financialRecognition": "Candidate accrued full-course obligation; exact A accounts/counterpart and E/Root selection required",
+          "actualCashPayment": "0",
+          "financeDependency": "A exact option, never a generic string or missing-counterpart default"
+        },
+        "resourceEffects": {
+          "admission2": {
+            "SIM_PERSON_SIM_M001_DAY_0": "20",
+            "SIM_PERSON_SIM_H001_DAY_0": "30",
+            "SIM_PERSON_SIM_L001_DAY_0": "20"
+          },
+          "assessmentOld3": {
+            "SIM_PERSON_SIM_H001_DAY_10": "90",
+            "SIM_PERSON_SIM_M001_DAY_10": "30",
+            "SIM_PERSON_SIM_L001_DAY_10": "30"
+          },
+          "assessmentNewCohortIfDueAndSelectedPolicyPermits": {
+            "SIM_PERSON_SIM_H001_DAY_10": "60",
+            "SIM_PERSON_SIM_M001_DAY_10": "20",
+            "SIM_PERSON_SIM_L001_DAY_10": "20"
+          }
+        },
+        "integerPolicySelection": null,
+        "supportedIntegerPolicies": [
+          "SOCIAL_COMPLETION_FLOOR_RETAIN_V1",
+          "SOCIAL_COMPLETION_EXACT_OR_REJECT_V1"
+        ],
+        "courseTeaching": {
+          "minutesPerStudentPerSimDay": "60",
+          "qualifiedTeacherResourceId": "SIM_H001",
+          "dailyTeacherCapacityMinutes": "360",
+          "openingOldCohortCompletedTeacherMinutes": "0",
+          "openingOldCohortFutureReservations": [
+            {
+              "dayIndex": "0",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "1",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "2",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "3",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "4",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "5",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "6",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "7",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "8",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "9",
+              "reservedTeacherMinutes": "180"
+            }
+          ],
+          "newCohortReservations": [
+            {
+              "dayIndex": "0",
+              "reservedTeacherMinutes": "120"
+            },
+            {
+              "dayIndex": "1",
+              "reservedTeacherMinutes": "120"
+            },
+            {
+              "dayIndex": "2",
+              "reservedTeacherMinutes": "120"
+            },
+            {
+              "dayIndex": "3",
+              "reservedTeacherMinutes": "120"
+            },
+            {
+              "dayIndex": "4",
+              "reservedTeacherMinutes": "120"
+            },
+            {
+              "dayIndex": "5",
+              "reservedTeacherMinutes": "120"
+            },
+            {
+              "dayIndex": "6",
+              "reservedTeacherMinutes": "120"
+            },
+            {
+              "dayIndex": "7",
+              "reservedTeacherMinutes": "120"
+            },
+            {
+              "dayIndex": "8",
+              "reservedTeacherMinutes": "120"
+            },
+            {
+              "dayIndex": "9",
+              "reservedTeacherMinutes": "120"
+            }
+          ],
+          "newCohortTotalReservedMinutes": "1200",
+          "oldRemainingMinutes": "1800",
+          "commitmentModeCandidate": "RESERVE_EXACT_DAILY_COURSE_WINDOWS_THEN_AT_DUE_GRADUATION_CONSUME_ORIGINAL_PAST_RESERVATIONS",
+          "doesNotProveTeachingFromElapsedAlone": true,
+          "externalPhysicalActivity": false,
+          "noSecondClock": true,
+          "newCohortAtEnd": "Either actual separate assessment at its own due day under selected integer policy, or OPEN with real pending commitments; never assume completed"
+        }
+      },
+      "healthcare": {
+        "institutionId": "FACILITY_SIM_COMMUNITY_CLINIC_01",
+        "serviceId": "SIM_PRIMARY_CARE_V1",
+        "episodeId": "SIM_CLINIC_EPISODE_D0_V1",
+        "window": {
+          "dayIndex": "0",
+          "startSimDay": "0",
+          "untilExclusiveSimDay": "1",
+          "assessmentOnce": true
+        },
+        "priorBacklog": "4",
+        "newDemand": "10",
+        "patientCaseIds": [
+          "SIM_CARE_CASE_001",
+          "SIM_CARE_CASE_002",
+          "SIM_CARE_CASE_003",
+          "SIM_CARE_CASE_004",
+          "SIM_CARE_CASE_005",
+          "SIM_CARE_CASE_006",
+          "SIM_CARE_CASE_007",
+          "SIM_CARE_CASE_008",
+          "SIM_CARE_CASE_009",
+          "SIM_CARE_CASE_010",
+          "SIM_CARE_CASE_011",
+          "SIM_CARE_CASE_012",
+          "SIM_CARE_CASE_013",
+          "SIM_CARE_CASE_014"
+        ],
+        "selectionRuleCandidate": "Previously queued first, then stable canonical case ID; no diagnostic or real clinical standard claim",
+        "staff": [
+          {
+            "personId": "SIM_H002",
+            "role": "DOCTOR",
+            "availableMinutes": "300",
+            "minutesPerCase": "30"
+          },
+          {
+            "personId": "SIM_M002",
+            "role": "NURSE",
+            "availableMinutes": "300",
+            "minutesPerCase": "20"
+          },
+          {
+            "personId": "SIM_M003",
+            "role": "MEDICAL_TECHNICIAN",
+            "availableMinutes": "240",
+            "minutesPerCase": "15"
+          },
+          {
+            "personId": "SIM_L001",
+            "role": "SUPPORT",
+            "availableMinutes": "360",
+            "minutesPerCase": "10"
+          }
+        ],
+        "facility": {
+          "facilityId": "SIM_CLINIC_ROOM_01",
+          "availableMinutes": "360",
+          "minutesPerCase": "20",
+          "totalBeds": "0",
+          "occupiedBeds": "0",
+          "careType": "OUTPATIENT_ONLY_EXPLICIT_NO_BEDS"
+        },
+        "medicine": {
+          "account": {
+            "worldId": "WORLD_SOCIAL_SINGLE_DEMO_V1",
+            "countryId": "COUNTRY_01",
+            "commodityId": "MEDICINE_SIM_V1",
+            "batchId": "SIM_MEDICINE_BATCH_V1",
+            "unit": "medical_dose",
+            "physicalLocationId": "SIM_CLINIC_STORE_V1",
+            "bucket": "AVAILABLE",
+            "titleHolderId": "ENTITY_GOVERNMENT_01",
+            "riskBearerId": "ENTITY_GOVERNMENT_01",
+            "reservationId": null,
+            "shipmentId": null,
+            "economicRecognitionId": null
+          },
+          "openingQuantity": "5",
+          "dosesPerCase": "1",
+          "unitBookCost": "20",
+          "currency": "XAA",
+          "actualSupplierRef": null,
+          "financialAssetAccountRef": null,
+          "requiresRealServiceConsumePosting": true,
+          "noSocialMedicineShadowBalance": true,
+          "canonicalOwnerProposalFromA": true
+        },
+        "budget": {
+          "allocatedAllowance": "400",
+          "currency": "XAA",
+          "costPerCase": "40",
+          "medicineBookCostPerCase": "20",
+          "otherOperatingServicePerCase": "20",
+          "centralPayrollExcludedToAvoidDoubleCount": true,
+          "costStatus": "ACTUAL_INCURRED_OBLIGATION_NOT_CASH_PAYMENT",
+          "expenseAccountRef": null,
+          "creditorRef": null,
+          "payableAccountRef": null
+        },
+        "newHire": "SIM_M004 becomes nurse only after actual MATCH; no automatic increase of clinic whole capacity. Existing doctor/medicine/budget bottlenecks retained."
+      },
+      "sharedPeopleAndResources": {
+        "resourceKeyDomain": "Person physical ID plus actual day; D once-origin tuple and alias checks, not renamed per institution",
+        "minutesAreExplicitNewScenarioAssumptions": true,
+        "annualWageDoesNotSetMinuteBudget": true,
+        "staffWagesOnce": true,
+        "allNewUsageFromAuthoritativeEventPrefix": true,
+        "notAQuotaTable": true,
+        "attemptAccountingSelection": null,
+        "supportedAttemptAccountingChoice": "SIMULATED_ATOMIC_COMPLETED_SERVICE_V1 (no external physical activity); BEGIN/SETTLE future recipe outside current ready scope"
+      },
+      "plannedSequence": [
+        {
+          "id": "EMP_PLAN",
+          "day": "0",
+          "effect": "Reserve 1 MEDIUM opportunity for day1; future-day full physical attempt encumbered"
+        },
+        {
+          "id": "EDU_ADMIT",
+          "day": "0",
+          "effect": "Already-STUDENT applicants2 enter separate new cohort"
+        },
+        {
+          "id": "CLINIC_SERVE",
+          "day": "0",
+          "effect": "Actual inventory/time/allocated-budget consumption and expense obligation"
+        },
+        {
+          "id": "DUE_BOUNDARY",
+          "day": "1",
+          "effect": "Explicit fixed simulation boundary only if reviewed authority choice is selected; no WorldClock daemon"
+        },
+        {
+          "id": "EMP_MATCH",
+          "day": "1",
+          "effect": "Separate fixed due publisher/grant and MATCH-specific source purpose; match1"
+        },
+        {
+          "id": "EDU_GRADUATE",
+          "day": "10",
+          "effect": "Old cohort exact duration+original reserved teaching windows; LOW STUDENT to MEDIUM UNEMPLOYED once; all original learners assessment/time charged"
+        },
+        {
+          "id": "NEW_COHORT_ASSESSMENT_OR_EXACT_NEGATIVE",
+          "day": "10",
+          "effect": "Own original duration and integer policy only; floor gives0 retained/processed, exact policy rejects fraction. No population or seat disappears."
+        }
+      ],
+      "actualAuthority": {
+        "sourceAdmitted": false,
+        "actualInstall": false,
+        "actualSourceRecords": null,
+        "actualReadPurpose": null,
+        "actualAutomaticGrant": null,
+        "WorldClock": false
+      },
+      "financeDependency": {
+        "owner": "A",
+        "financeOptionId": null,
+        "exactManifest": null,
+        "currentStatus": "A_COMPLETE_OPTION_IN_CONSTRUCTION",
+        "paymentMustNotBeInvented": true
+      },
+      "employmentInstitutionId": "FACILITY_SIM_EMPLOYMENT_BUREAU_01"
+    },
+    {
+      "id": "G_SOCIAL_SMALL_CONSTRAINED_ALTERNATIVE_V1",
+      "selected": false,
+      "sourceClassification": "NEW_AUTHORED_SIMULATION_CANDIDATE",
+      "scope": {
+        "simulationId": "SINGLE_SOCIAL_OFFICE_SIM_V1",
+        "worldId": "WORLD_SOCIAL_SINGLE_DEMO_V1",
+        "countryId": "COUNTRY_01",
+        "locationId": "REGION_01_E1",
+        "sourceClass": "SIMULATED_OPENING",
+        "actualWorldId": null,
+        "actualAdmissionRef": null,
+        "actualCustodian": "SUPPLIER_UNCONFIRMED",
+        "maxWorlds": 1,
+        "maxEconomies": 1,
+        "worldClockEnabled": false
+      },
+      "people": [
+        {
+          "personId": "SIM_L001",
+          "skill": "LOW",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_CLINIC_SUPPORT_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L002",
+          "skill": "LOW",
+          "labourStatus": "STUDENT",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L003",
+          "skill": "LOW",
+          "labourStatus": "STUDENT",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L004",
+          "skill": "LOW",
+          "labourStatus": "STUDENT",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L005",
+          "skill": "LOW",
+          "labourStatus": "STUDENT",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L006",
+          "skill": "LOW",
+          "labourStatus": "STUDENT",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L007",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L008",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L009",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L010",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L011",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_L012",
+          "skill": "LOW",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M001",
+          "skill": "MEDIUM",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_BUREAU_CASEWORKER_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M002",
+          "skill": "MEDIUM",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_CLINIC_NURSE_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M003",
+          "skill": "MEDIUM",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_CLINIC_TECHNICIAN_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M004",
+          "skill": "MEDIUM",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M005",
+          "skill": "MEDIUM",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M006",
+          "skill": "MEDIUM",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M007",
+          "skill": "MEDIUM",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_M008",
+          "skill": "MEDIUM",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_H001",
+          "skill": "HIGH",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_COLLEGE_TEACHER_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_H002",
+          "skill": "HIGH",
+          "labourStatus": "EMPLOYED",
+          "positionId": "POSITION_SIM_CLINIC_DOCTOR_01",
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_H003",
+          "skill": "HIGH",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        },
+        {
+          "personId": "SIM_H004",
+          "skill": "HIGH",
+          "labourStatus": "UNEMPLOYED_SEARCHING",
+          "positionId": null,
+          "fictionalPerson": true,
+          "actualPersonRef": null
+        }
+      ],
+      "positions": [
+        {
+          "personId": "SIM_M001",
+          "positionId": "POSITION_SIM_BUREAU_CASEWORKER_01",
+          "occupation": "GENERAL",
+          "priceRole": "CASEWORKER",
+          "skill": "MEDIUM",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "PUBLIC_ADMINISTRATION",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "BUREAU",
+          "dailyAvailableMinutes": "360",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": "SIM_H001",
+          "positionId": "POSITION_SIM_COLLEGE_TEACHER_01",
+          "occupation": "TEACHER",
+          "priceRole": null,
+          "skill": "HIGH",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "EDUCATION",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "COLLEGE",
+          "dailyAvailableMinutes": "360",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": "SIM_H002",
+          "positionId": "POSITION_SIM_CLINIC_DOCTOR_01",
+          "occupation": "DOCTOR",
+          "priceRole": null,
+          "skill": "HIGH",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "HEALTHCARE",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "CLINIC",
+          "dailyAvailableMinutes": "300",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": "SIM_M002",
+          "positionId": "POSITION_SIM_CLINIC_NURSE_01",
+          "occupation": "NURSE",
+          "priceRole": null,
+          "skill": "MEDIUM",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "HEALTHCARE",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "CLINIC",
+          "dailyAvailableMinutes": "300",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": "SIM_M003",
+          "positionId": "POSITION_SIM_CLINIC_TECHNICIAN_01",
+          "occupation": "MEDICAL_TECHNICIAN",
+          "priceRole": null,
+          "skill": "MEDIUM",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "HEALTHCARE",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "CLINIC",
+          "dailyAvailableMinutes": "240",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": "SIM_L001",
+          "positionId": "POSITION_SIM_CLINIC_SUPPORT_01",
+          "occupation": "SUPPORT",
+          "priceRole": null,
+          "skill": "LOW",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "HEALTHCARE",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "1",
+          "institution": "CLINIC",
+          "dailyAvailableMinutes": "360",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null
+        },
+        {
+          "personId": null,
+          "positionId": "POSITION_SIM_CLINIC_NURSE_02",
+          "occupation": "NURSE",
+          "priceRole": null,
+          "skill": "MEDIUM",
+          "owner": "PUBLIC_SERVICE",
+          "classificationId": "HEALTHCARE",
+          "simulatedEmployerRole": "GOV",
+          "financeEmployerLookupKey": "GOV",
+          "requiredCount": "1",
+          "employedCount": "0",
+          "institution": "CLINIC",
+          "dailyAvailableMinutes": "300",
+          "actualLegalPositionRef": null,
+          "actualPayrollFundingRef": null,
+          "candidateHirePersonId": "SIM_M004"
+        }
+      ],
+      "employmentGenesis": {
+        "schemaVersion": "social-employment-service-state-v1",
+        "worldId": "WORLD_SOCIAL_SINGLE_DEMO_V1",
+        "labour": {
+          "aggregates": [
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "LOW",
+              "status": "EMPLOYED",
+              "count": "1"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "LOW",
+              "status": "STUDENT",
+              "count": "5"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "LOW",
+              "status": "UNEMPLOYED_SEARCHING",
+              "count": "6"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "LOW",
+              "status": "NOT_IN_LABOUR_FORCE",
+              "count": "0"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "MEDIUM",
+              "status": "EMPLOYED",
+              "count": "3"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "MEDIUM",
+              "status": "STUDENT",
+              "count": "0"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "MEDIUM",
+              "status": "UNEMPLOYED_SEARCHING",
+              "count": "5"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "MEDIUM",
+              "status": "NOT_IN_LABOUR_FORCE",
+              "count": "0"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "HIGH",
+              "status": "EMPLOYED",
+              "count": "2"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "HIGH",
+              "status": "STUDENT",
+              "count": "0"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "HIGH",
+              "status": "UNEMPLOYED_SEARCHING",
+              "count": "2"
+            },
+            {
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1",
+              "skill": "HIGH",
+              "status": "NOT_IN_LABOUR_FORCE",
+              "count": "0"
+            }
+          ],
+          "positions": [
+            {
+              "positionId": "POSITION_SIM_BUREAU_CASEWORKER_01",
+              "skill": "MEDIUM",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "PUBLIC_ADMINISTRATION",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_COLLEGE_TEACHER_01",
+              "skill": "HIGH",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "EDUCATION",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_CLINIC_DOCTOR_01",
+              "skill": "HIGH",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "HEALTHCARE",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_CLINIC_NURSE_01",
+              "skill": "MEDIUM",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "HEALTHCARE",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_CLINIC_TECHNICIAN_01",
+              "skill": "MEDIUM",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "HEALTHCARE",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_CLINIC_SUPPORT_01",
+              "skill": "LOW",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "HEALTHCARE",
+              "requiredCount": "1",
+              "employedCount": "1",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            },
+            {
+              "positionId": "POSITION_SIM_CLINIC_NURSE_02",
+              "skill": "MEDIUM",
+              "owner": "PUBLIC_SERVICE",
+              "classificationId": "HEALTHCARE",
+              "requiredCount": "1",
+              "employedCount": "0",
+              "countryId": "COUNTRY_01",
+              "locationId": "REGION_01_E1"
+            }
+          ],
+          "wageAssertionsBinding": "Same explicitly selected A finance wageVersion; not guessed here",
+          "appliedFactBindings": []
+        },
+        "servicePools": [
+          {
+            "poolId": "SIM_EMP_POOL_LOW_D1",
+            "skill": "LOW",
+            "dayIndex": "1",
+            "capacitySlots": "0",
+            "usedSlots": "0",
+            "reservedSlots": "0",
+            "countryId": "COUNTRY_01",
+            "locationId": "REGION_01_E1",
+            "ruleVersion": "SOCIAL_JOB_MATCH_RULE_V1"
+          },
+          {
+            "poolId": "SIM_EMP_POOL_MEDIUM_D1",
+            "skill": "MEDIUM",
+            "dayIndex": "1",
+            "capacitySlots": "3",
+            "usedSlots": "0",
+            "reservedSlots": "0",
+            "countryId": "COUNTRY_01",
+            "locationId": "REGION_01_E1",
+            "ruleVersion": "SOCIAL_JOB_MATCH_RULE_V1"
+          },
+          {
+            "poolId": "SIM_EMP_POOL_HIGH_D1",
+            "skill": "HIGH",
+            "dayIndex": "1",
+            "capacitySlots": "0",
+            "usedSlots": "0",
+            "reservedSlots": "0",
+            "countryId": "COUNTRY_01",
+            "locationId": "REGION_01_E1",
+            "ruleVersion": "SOCIAL_JOB_MATCH_RULE_V1"
+          }
+        ],
+        "plans": [],
+        "appliedOperations": []
+      },
+      "employmentCurrent": {
+        "wageVersionSelectionRef": null,
+        "sameVersionMinimumAndOffer": true,
+        "offerTargetPositionId": "POSITION_SIM_CLINIC_NURSE_02",
+        "minimumWindowHalfOpen": ["0", "30"],
+        "offerWindowHalfOpen": ["0", "30"],
+        "wagePeriod": "SIM_YEAR",
+        "currency": "XAA",
+        "populationAvailability": [
+          {
+            "countryId": "COUNTRY_01",
+            "locationId": "REGION_01_E1",
+            "workingAgeAvailable": "24"
+          }
+        ],
+        "plan": {
+          "requestedMatches": "1",
+          "dueDayIndex": "1",
+          "skill": "MEDIUM",
+          "poolId": "SIM_EMP_POOL_MEDIUM_D1"
+        },
+        "physicalStage": {
+          "resourceKey": "SIM_PERSON_SIM_M001_DAY_1",
+          "availableMinutes": "180",
+          "minutesPerOpportunity": {
+            "LOW": "45",
+            "MEDIUM": "55",
+            "HIGH": "65"
+          }
+        },
+        "actualQualificationRef": null,
+        "simulatedQualification": "Only MEDIUM placement lane enabled; LOW/HIGH zero capacity is an explicit scenario restriction, not a ruling about those skills.",
+        "servicePoolsNote": "Only patch MEDIUM pool capacity to3 using180minute capacity; same person and physical key, not a second person",
+        "candidateStaffAfterMatch": {
+          "personId": "SIM_M004",
+          "positionId": "POSITION_SIM_CLINIC_NURSE_02",
+          "minimumPrerequisite": "Actual original due-MATCH finalreceipt and employment state; never from an offer alone",
+          "effectiveDayCandidate": "1",
+          "availableMinutesNextServiceWindow": "300",
+          "payrollEffectiveRuleRef": null
+        }
+      },
+      "education": {
+        "institutionId": "FACILITY_SIM_TECHNICAL_COLLEGE_01",
+        "programmeId": "SIM_VOCATIONAL_PROGRAMME_V1",
+        "level": "VOCATIONAL",
+        "sourceSkill": "LOW",
+        "targetSkill": "MEDIUM",
+        "specialisationId": "GENERAL_TECHNICAL_SIM",
+        "teacherPersonIds": ["SIM_H001"],
+        "teacherSupportedSeats": "4",
+        "facilityId": "SIM_COLLEGE_ROOMS_01",
+        "facilitySeats": "6",
+        "budgetSupportedSeats": "6",
+        "availableCapacity": "4",
+        "ratioCandidate": {
+          "teachers": "1",
+          "supportedSeats": "4",
+          "notCoreDefault": true
+        },
+        "oldCohort": {
+          "cohortId": "SIM_COHORT_RETURNING_01",
+          "studentIds": ["SIM_L002", "SIM_L003", "SIM_L004"],
+          "enrolled": "3",
+          "cumulativeGraduates": "0",
+          "initialElapsedDuration": {
+            "amount": "0",
+            "unit": "sim_day"
+          },
+          "requiredDuration": {
+            "amount": "20",
+            "unit": "sim_day"
+          },
+          "dropoutRate": {
+            "numerator": "0",
+            "denominator": "1"
+          },
+          "completionRate": {
+            "numerator": "2",
+            "denominator": "3"
+          },
+          "graduates": "2",
+          "graduatingStudentIds": ["SIM_L002", "SIM_L003"],
+          "retainedStudentIds": ["SIM_L004"],
+          "postAssessmentState": "GRADUATION_PROCESSED",
+          "repeatedGraduation": "REJECT",
+          "retainedStudentsKeepSeatAndStatus": true,
+          "remedialOrExitRules": "NOT_SUPPORTED_IN_THIS_VERSION",
+          "assessmentParticipantIds": ["SIM_L002", "SIM_L003", "SIM_L004"],
+          "originalStartDayIndex": "0"
+        },
+        "newCohort": {
+          "cohortId": "SIM_COHORT_NEW_01",
+          "beforeEnrolled": "0",
+          "beforeElapsedDuration": {
+            "amount": "0",
+            "unit": "sim_day"
+          },
+          "applicantIds": ["SIM_L005", "SIM_L006"],
+          "applicantLabourStatus": "STUDENT",
+          "admitted": "1",
+          "admittedIds": ["SIM_L005"],
+          "mustNotInheritOldElapsed": true,
+          "notAdmittedStillStudentApplicant": ["SIM_L006"],
+          "graduationInThisDemo": "OWN_START_DAY0_ELAPSED0; NO_INHERITED_ELAPSED; at own due day 20 require original complete teaching reservations and separate assessment; selected FLOOR yields0 retained/processed or EXACT rejects fraction. If assessment not executed, OPEN with real pending commitments; never claim completed from elapsed only.",
+          "originalStartDayIndex": "0"
+        },
+        "budget": {
+          "allocatedAllowance": "300",
+          "currency": "XAA",
+          "financialPolicyCandidate": "EDUCATION_FULL_COURSE_OBLIGATION_AT_ADMISSION_V1",
+          "fullCoursePerStudent": "50",
+          "componentsPerStudent": {
+            "operating": "20",
+            "scholarshipObligation": "5",
+            "facility": "25"
+          },
+          "openingOldCohortCommitted": "150",
+          "openingOldCohortRecognizedUnpaidObligation": "150",
+          "openingOldCohortPaid": "0",
+          "openingRemainingAllowance": "150",
+          "admissionRecognizesFullCourseOnce": true,
+          "graduationAdditionalExpense": "0",
+          "nonGraduateRefund": "NOT_SUPPORTED_NO_AUTOMATIC_REFUND",
+          "wageCosts": "Separate common A staff-day policy; once per person, not charged twice",
+          "financialRecognition": "Candidate accrued full-course obligation; exact A accounts/counterpart and E/Root selection required",
+          "actualCashPayment": "0",
+          "financeDependency": "A exact option, never a generic string or missing-counterpart default"
+        },
+        "resourceEffects": {
+          "admission1": {
+            "SIM_PERSON_SIM_M001_DAY_0": "10",
+            "SIM_PERSON_SIM_H001_DAY_0": "15",
+            "SIM_PERSON_SIM_L001_DAY_0": "10"
+          },
+          "assessmentOld3": {
+            "SIM_PERSON_SIM_H001_DAY_20": "90",
+            "SIM_PERSON_SIM_M001_DAY_20": "30",
+            "SIM_PERSON_SIM_L001_DAY_20": "30"
+          },
+          "assessmentNewCohortIfDueAndSelectedPolicyPermits": {
+            "SIM_PERSON_SIM_H001_DAY_20": "30",
+            "SIM_PERSON_SIM_M001_DAY_20": "10",
+            "SIM_PERSON_SIM_L001_DAY_20": "10"
+          }
+        },
+        "integerPolicySelection": null,
+        "supportedIntegerPolicies": [
+          "SOCIAL_COMPLETION_FLOOR_RETAIN_V1",
+          "SOCIAL_COMPLETION_EXACT_OR_REJECT_V1"
+        ],
+        "courseTeaching": {
+          "minutesPerStudentPerSimDay": "60",
+          "qualifiedTeacherResourceId": "SIM_H001",
+          "dailyTeacherCapacityMinutes": "360",
+          "openingOldCohortCompletedTeacherMinutes": "0",
+          "openingOldCohortFutureReservations": [
+            {
+              "dayIndex": "0",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "1",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "2",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "3",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "4",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "5",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "6",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "7",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "8",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "9",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "10",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "11",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "12",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "13",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "14",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "15",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "16",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "17",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "18",
+              "reservedTeacherMinutes": "180"
+            },
+            {
+              "dayIndex": "19",
+              "reservedTeacherMinutes": "180"
+            }
+          ],
+          "newCohortReservations": [
+            {
+              "dayIndex": "0",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "1",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "2",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "3",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "4",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "5",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "6",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "7",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "8",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "9",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "10",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "11",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "12",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "13",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "14",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "15",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "16",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "17",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "18",
+              "reservedTeacherMinutes": "60"
+            },
+            {
+              "dayIndex": "19",
+              "reservedTeacherMinutes": "60"
+            }
+          ],
+          "newCohortTotalReservedMinutes": "1200",
+          "oldRemainingMinutes": "3600",
+          "commitmentModeCandidate": "RESERVE_EXACT_DAILY_COURSE_WINDOWS_THEN_AT_DUE_GRADUATION_CONSUME_ORIGINAL_PAST_RESERVATIONS",
+          "doesNotProveTeachingFromElapsedAlone": true,
+          "externalPhysicalActivity": false,
+          "noSecondClock": true,
+          "newCohortAtEnd": "Either actual separate assessment at its own due day under selected integer policy, or OPEN with real pending commitments; never assume completed"
+        }
+      },
+      "healthcare": {
+        "institutionId": "FACILITY_SIM_COMMUNITY_CLINIC_01",
+        "serviceId": "SIM_PRIMARY_CARE_V1",
+        "episodeId": "SIM_CLINIC_EPISODE_D0_V1",
+        "window": {
+          "dayIndex": "0",
+          "startSimDay": "0",
+          "untilExclusiveSimDay": "1",
+          "assessmentOnce": true
+        },
+        "priorBacklog": "4",
+        "newDemand": "10",
+        "patientCaseIds": [
+          "SIM_CARE_CASE_001",
+          "SIM_CARE_CASE_002",
+          "SIM_CARE_CASE_003",
+          "SIM_CARE_CASE_004",
+          "SIM_CARE_CASE_005",
+          "SIM_CARE_CASE_006",
+          "SIM_CARE_CASE_007",
+          "SIM_CARE_CASE_008",
+          "SIM_CARE_CASE_009",
+          "SIM_CARE_CASE_010",
+          "SIM_CARE_CASE_011",
+          "SIM_CARE_CASE_012",
+          "SIM_CARE_CASE_013",
+          "SIM_CARE_CASE_014"
+        ],
+        "selectionRuleCandidate": "Previously queued first, then stable canonical case ID; no diagnostic or real clinical standard claim",
+        "staff": [
+          {
+            "personId": "SIM_H002",
+            "role": "DOCTOR",
+            "availableMinutes": "240",
+            "minutesPerCase": "30"
+          },
+          {
+            "personId": "SIM_M002",
+            "role": "NURSE",
+            "availableMinutes": "300",
+            "minutesPerCase": "20"
+          },
+          {
+            "personId": "SIM_M003",
+            "role": "MEDICAL_TECHNICIAN",
+            "availableMinutes": "240",
+            "minutesPerCase": "15"
+          },
+          {
+            "personId": "SIM_L001",
+            "role": "SUPPORT",
+            "availableMinutes": "360",
+            "minutesPerCase": "10"
+          }
+        ],
+        "facility": {
+          "facilityId": "SIM_CLINIC_ROOM_01",
+          "availableMinutes": "360",
+          "minutesPerCase": "20",
+          "totalBeds": "0",
+          "occupiedBeds": "0",
+          "careType": "OUTPATIENT_ONLY_EXPLICIT_NO_BEDS"
+        },
+        "medicine": {
+          "account": {
+            "worldId": "WORLD_SOCIAL_SINGLE_DEMO_V1",
+            "countryId": "COUNTRY_01",
+            "commodityId": "MEDICINE_SIM_V1",
+            "batchId": "SIM_MEDICINE_BATCH_V1",
+            "unit": "medical_dose",
+            "physicalLocationId": "SIM_CLINIC_STORE_V1",
+            "bucket": "AVAILABLE",
+            "titleHolderId": "ENTITY_GOVERNMENT_01",
+            "riskBearerId": "ENTITY_GOVERNMENT_01",
+            "reservationId": null,
+            "shipmentId": null,
+            "economicRecognitionId": null
+          },
+          "openingQuantity": "10",
+          "dosesPerCase": "1",
+          "unitBookCost": "20",
+          "currency": "XAA",
+          "actualSupplierRef": null,
+          "financialAssetAccountRef": null,
+          "requiresRealServiceConsumePosting": true,
+          "noSocialMedicineShadowBalance": true,
+          "canonicalOwnerProposalFromA": true
+        },
+        "budget": {
+          "allocatedAllowance": "240",
+          "currency": "XAA",
+          "costPerCase": "40",
+          "medicineBookCostPerCase": "20",
+          "otherOperatingServicePerCase": "20",
+          "centralPayrollExcludedToAvoidDoubleCount": true,
+          "costStatus": "ACTUAL_INCURRED_OBLIGATION_NOT_CASH_PAYMENT",
+          "expenseAccountRef": null,
+          "creditorRef": null,
+          "payableAccountRef": null
+        },
+        "newHire": "SIM_M004 becomes nurse only after actual MATCH; no automatic increase of clinic whole capacity. Existing doctor/medicine/budget bottlenecks retained."
+      },
+      "sharedPeopleAndResources": {
+        "resourceKeyDomain": "Person physical ID plus actual day; D once-origin tuple and alias checks, not renamed per institution",
+        "minutesAreExplicitNewScenarioAssumptions": true,
+        "annualWageDoesNotSetMinuteBudget": true,
+        "staffWagesOnce": true,
+        "allNewUsageFromAuthoritativeEventPrefix": true,
+        "notAQuotaTable": true,
+        "attemptAccountingSelection": null,
+        "supportedAttemptAccountingChoice": "SIMULATED_ATOMIC_COMPLETED_SERVICE_V1 (no external physical activity); BEGIN/SETTLE future recipe outside current ready scope"
+      },
+      "plannedSequence": [
+        {
+          "id": "EMP_PLAN",
+          "day": "0",
+          "effect": "Reserve 1 MEDIUM opportunity for day1; future-day full physical attempt encumbered"
+        },
+        {
+          "id": "EDU_ADMIT",
+          "day": "0",
+          "effect": "Already-STUDENT applicant1 enters separate new cohort; the other applicant remains STUDENT outside cohort"
+        },
+        {
+          "id": "CLINIC_SERVE",
+          "day": "0",
+          "effect": "Actual inventory/time/allocated-budget consumption and expense obligation"
+        },
+        {
+          "id": "DUE_BOUNDARY",
+          "day": "1",
+          "effect": "Explicit fixed simulation boundary only if reviewed authority choice is selected; no WorldClock daemon"
+        },
+        {
+          "id": "EMP_MATCH",
+          "day": "1",
+          "effect": "Separate fixed due publisher/grant and MATCH-specific source purpose; match1"
+        },
+        {
+          "id": "EDU_EARLY_GRADUATE_NEGATIVE",
+          "day": "1",
+          "effect": "Reject: actual elapsed1 < original required20; no side effect/duplicate refund"
+        },
+        {
+          "id": "EDU_GRADUATE",
+          "day": "20",
+          "effect": "Old cohort exact duration+original reserved teaching windows; LOW STUDENT to MEDIUM UNEMPLOYED once; all original learners assessment/time charged"
+        },
+        {
+          "id": "NEW_COHORT_ASSESSMENT_OR_EXACT_NEGATIVE",
+          "day": "20",
+          "effect": "Own original duration and integer policy only; floor gives0 retained/processed, exact policy rejects fraction. No population or seat disappears."
+        }
+      ],
+      "actualAuthority": {
+        "sourceAdmitted": false,
+        "actualInstall": false,
+        "actualSourceRecords": null,
+        "actualReadPurpose": null,
+        "actualAutomaticGrant": null,
+        "WorldClock": false
+      },
+      "financeDependency": {
+        "owner": "A",
+        "financeOptionId": null,
+        "exactManifest": null,
+        "currentStatus": "A_COMPLETE_OPTION_IN_CONSTRUCTION",
+        "paymentMustNotBeInvented": true
+      },
+      "employmentInstitutionId": "FACILITY_SIM_EMPLOYMENT_BUREAU_01"
+    }
+  ],
+  "allInputs": "Newly authored explicit simulated facts, not empirical data or adopted legal/medical standards; financial dependency actual option must be sealed before executable readiness."
+}

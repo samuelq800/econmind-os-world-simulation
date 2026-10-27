@@ -23,6 +23,10 @@
     "./runtime-read-binding-store": {
       "types": "./dist/persistence/runtime-read-binding-store.d.ts",
       "default": "./dist/persistence/runtime-read-binding-store.js"
+    },
+    "./social-office-demo": {
+      "types": "./dist/social-office-demo/consumer.d.ts",
+      "default": "./dist/social-office-demo/consumer.js"
     }
   },
   "scripts": {

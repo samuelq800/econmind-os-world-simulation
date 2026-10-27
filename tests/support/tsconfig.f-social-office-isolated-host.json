@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "../..",
+    "outDir": "../../node_modules/.cache/f-social-office-demo/server",
+    "types": ["node"],
+    "lib": ["ES2024", "DOM"],
+    "skipLibCheck": false
+  },
+  "include": [
+    "./f-social-office-isolated-host.ts",
+    "./social-office-atomic-fixture.ts"
+  ]
+}

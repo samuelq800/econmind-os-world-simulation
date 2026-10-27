@@ -26,8 +26,9 @@ import {
   type InventoryAccount,
   type InventoryLedgerSnapshot,
   type InventoryLedgerState,
+  type InventoryLedgerPosting,
 } from '../inventory/inventory-ledger.js';
-import { type InventoryLedgerPosting } from '../inventory/production-consumption-posting.js';
+import {} from '../inventory/production-consumption-posting.js';
 import { isMoney, Money } from '../numeric/money.js';
 import { isQuantity, Quantity } from '../numeric/quantity.js';
 import {

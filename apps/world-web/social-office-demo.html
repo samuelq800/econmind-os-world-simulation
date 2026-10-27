@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Social Office · Isolated Demonstration</title>
+    <style>
+      :root {
+        font-family: Inter, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        color: #e9efea;
+        background: #0b1815;
+        font-synthesis: none;
+        font-weight: 400;
+        line-height: 1.6;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: radial-gradient(
+          ellipse at 80% 0,
+          #1d3b30 0,
+          transparent 55%
+        );
+        min-height: 100vh;
+      }
+      main {
+        max-width: 1240px;
+        margin: auto;
+        padding: 64px 40px 32px;
+      }
+      .demo-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 28px;
+        align-items: flex-start;
+      }
+      .eyebrow,
+      .card-number {
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        color: #a5bfae;
+        font-weight: 600;
+        margin: 0 0 14px;
+      }
+      h1 {
+        font-size: clamp(25px, 3vw, 38px);
+        font-weight: 500;
+        letter-spacing: -0.04em;
+        line-height: 1.35;
+        margin: 0;
+      }
+      h2 {
+        font-size: 25px;
+        font-weight: 500;
+        margin: 0 0 14px;
+      }
+      .intro {
+        font-size: 14px;
+        color: #9fb0a7;
+        margin: 18px 0 32px;
+      }
+      .scope-tag {
+        color: #e6cf99;
+        white-space: nowrap;
+        border: 1px solid #655c3f;
+        border-radius: 4px;
+        padding: 7px 11px;
+        font-size: 11px;
+      }
+      .status-strip {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-top: 1px solid #2c4036;
+        border-bottom: 1px solid #2c4036;
+        padding: 13px 0;
+        font-size: 12px;
+      }
+      .status-strip p {
+        flex: 1;
+        margin: 0;
+      }
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #bdce91;
+      }
+      .status-strip > span:last-child {
+        color: #c7d4ca;
+        white-space: nowrap;
+      }
+      .population {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        padding: 31px 0;
+      }
+      .population > div {
+        display: flex;
+        flex-direction: column;
+      }
+      .population span {
+        font-size: 11px;
+        color: #9fb0a7;
+      }
+      .population strong {
+        font-size: 31px;
+        line-height: 1.4;
+        font-weight: 400;
+        font-variant-numeric: tabular-nums;
+      }
+      .population p {
+        grid-column: 1/-1;
+        margin: 3px 0 0;
+        font-size: 11px;
+        color: #8ba194;
+      }
+      .office-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+      .office-card {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(140deg, #172a22, #112019);
+        border: 1px solid #304337;
+        border-radius: 5px;
+        padding: 25px;
+        min-height: 390px;
+      }
+      .card-number {
+        font-size: 9px;
+        color: #aac3af;
+      }
+      .card-copy {
+        font-size: 12px;
+        color: #9eafa4;
+        min-height: 59px;
+        max-width: 270px;
+      }
+      .office-symbol {
+        font-family: Georgia, serif;
+        font-size: 76px;
+        color: #b6bf92;
+        line-height: 1.3;
+        margin: 3px 0 19px;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+        border: 1px solid #bbd1a0;
+        background: #c5d7ac;
+        color: #142217;
+        border-radius: 3px;
+        padding: 10px 14px;
+        font-size: 11px;
+        font-weight: 600;
+        transition: background 0.15s;
+      }
+      button:hover:not(:disabled) {
+        background: #dbe6c8;
+      }
+      button:disabled {
+        cursor: default;
+        opacity: 0.38;
+      }
+      button:focus-visible {
+        outline: 2px solid #f2d9a1;
+        outline-offset: 3px;
+      }
+      .office-card > button {
+        width: 100%;
+      }
+      .quiet {
+        padding: 5px 9px;
+        background: transparent;
+        border-color: #405649;
+        color: #c2d4c4;
+        font-weight: 400;
+      }
+      .quiet:hover:not(:disabled) {
+        background: #294432;
+      }
+      .secondary {
+        background: transparent;
+        border-color: #526a54;
+        color: #c2d4c4;
+        font-weight: 400;
+        padding: 8px 4px;
+      }
+      .secondary:hover:not(:disabled) {
+        background: #294432;
+      }
+      .button-pair {
+        display: flex;
+        gap: 7px;
+        margin-top: 8px;
+      }
+      .button-pair button {
+        flex: 1;
+      }
+      .footnote {
+        overflow-wrap: anywhere;
+        color: #8e9e91;
+        font-size: 10px;
+        margin: 13px 0 0;
+      }
+      .card-metrics {
+        display: flex;
+        gap: 23px;
+        margin: 27px 0 14px;
+      }
+      dt {
+        font-size: 10px;
+        color: #91a797;
+      }
+      dd {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 400;
+        font-variant-numeric: tabular-nums;
+      }
+      .budget {
+        font-size: 10px;
+        color: #b0bda7;
+        margin: 12px 0 18px;
+      }
+      .cohorts {
+        font-size: 10px;
+        list-style: none;
+        padding: 0;
+        margin: 13px 0 0;
+        color: #9aafa0;
+      }
+      .cohorts li + li {
+        margin-top: 5px;
+      }
+      .receipt-panel {
+        display: flex;
+        justify-content: space-between;
+        gap: 30px;
+        border: 1px solid #304337;
+        margin-top: 26px;
+        padding: 24px;
+        background: #102019;
+        border-radius: 5px;
+      }
+      .receipt-panel h2 {
+        font-size: 19px;
+        margin-bottom: 8px;
+      }
+      .receipt-panel p:not(.eyebrow) {
+        font-size: 11px;
+        color: #a4b9a9;
+        margin: 0;
+      }
+      .receipt-panel .eyebrow {
+        font-size: 9px;
+        margin-bottom: 9px;
+      }
+      .receipt-panel dl {
+        display: flex;
+        gap: 32px;
+        min-width: 240px;
+        margin: 10px 0;
+      }
+      .receipt-panel dd {
+        font-size: 12px;
+        margin-top: 6px;
+      }
+      .trace {
+        color: #849e8c;
+        margin-top: 22px;
+        font-size: 10px;
+      }
+      .trace summary {
+        cursor: pointer;
+      }
+      .trace p {
+        overflow-wrap: anywhere;
+      }
+      footer {
+        font-size: 10px;
+        color: #6f8b78;
+        margin-top: 25px;
+        line-height: 1.8;
+      }
+      [data-phase='UNKNOWN'] .status-dot,
+      [data-phase='ERROR'] .status-dot {
+        background: #deb779;
+      }
+      @media (max-width: 900px) {
+        main {
+          padding: 36px 22px;
+        }
+        .office-grid {
+          grid-template-columns: 1fr;
+        }
+        .office-card {
+          min-height: 0;
+        }
+        .card-copy {
+          max-width: none;
+          min-height: 0;
+        }
+        .office-symbol {
+          font-size: 50px;
+          margin-bottom: 12px;
+        }
+        .demo-header {
+          flex-direction: column;
+          gap: 0;
+        }
+        .scope-tag {
+          margin-bottom: 22px;
+        }
+        .receipt-panel {
+          flex-direction: column;
+          gap: 10px;
+        }
+        .receipt-panel dl {
+          min-width: 0;
+        }
+        .status-strip {
+          flex-wrap: wrap;
+        }
+        .status-strip p {
+          min-width: 200px;
+        }
+        .population {
+          gap: 8px;
+        }
+        .population strong {
+          font-size: 26px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="social-office-demo"></main>
+    <script type="module" src="/src/social-office-demo/entry.ts"></script>
+  </body>
+</html>

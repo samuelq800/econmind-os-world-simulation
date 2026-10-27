@@ -95,12 +95,16 @@ interface DeferredGoverningSourceReadBinding {
 }
 
 declare const privateAtomicCandidate: unique symbol;
+type LegacyInventoryLedgerPosting = Exclude<
+  InventoryLedgerPosting,
+  { readonly schemaVersion: 'inventory-social-service-consumption-v1' }
+>;
 
 export interface PrivateAtomicTransitionCandidate {
   readonly [privateAtomicCandidate]: true;
   readonly command: CanonicalCommand;
   readonly transition: AuthoritativeTransition;
-  readonly inventoryPostings: readonly InventoryLedgerPosting[];
+  readonly inventoryPostings: readonly LegacyInventoryLedgerPosting[];
   readonly financialPostingBatches: readonly FinancialPostingBatch[];
   readonly receipt: FinalCommandReceipt;
   readonly outboxMessages: readonly OutboxMessage[];
@@ -276,7 +280,9 @@ function validateInventoryPosting(input: {
   readonly command: CanonicalCommand;
   readonly transition: AuthoritativeTransition;
   readonly sha256Hex: Sha256Hex;
-}): Readonly<InventoryLedgerPosting> {
+}): Readonly<LegacyInventoryLedgerPosting> {
+  if (input.posting.schemaVersion === 'inventory-social-service-consumption-v1')
+    invalid('SOCIAL_SERVICE_PERSISTENCE_SCHEMA_NOT_ADMITTED');
   if (input.posting.schemaVersion === PRODUCTION_CONSUMPTION_SCHEMA_VERSION) {
     const verified = createProductionConsumptionPosting(
       {
