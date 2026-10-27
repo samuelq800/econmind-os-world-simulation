@@ -1,5 +1,5 @@
 import { request } from 'node:http';
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
@@ -18,6 +18,103 @@ afterEach(() => {
   vi.unstubAllEnvs();
 });
 const opted = { ECONMIND_ENV: 'local', ECONMIND_SOCIAL_OFFICE_DEMO: '1' };
+// Compilation is a prerequisite to collecting the runtime tests. A fresh
+// checkout has no ignored host artifacts. Build the fixed inputs once with
+// its own finite budget, without installing SQL or starting a native World;
+// the existing runtime test, hook and bridge limits remain unchanged.
+const compiler = spawn(
+  process.execPath,
+  ['tools/social-office-demo/build-host.mjs', '--build'],
+  {
+    cwd: fileURLToPath(new URL('../..', import.meta.url)),
+    env: { PATH: process.env.PATH, ECONMIND_ENV: 'local' },
+    detached: true,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  },
+);
+let compilationFailure: Error | undefined;
+let compilationLog = '';
+let compilerGroupAbsent = compiler.pid === undefined;
+const processGroupGone = (error: unknown) =>
+  error instanceof Error && 'code' in error && error.code === 'ESRCH';
+function stopOwnedCompiler(error: Error) {
+  compilationFailure ??= error;
+  if (compiler.pid === undefined) return;
+  try {
+    // Only the dedicated group created above; includes its compiler children.
+    process.kill(-compiler.pid, 'SIGKILL');
+  } catch (signalError) {
+    if (!processGroupGone(signalError))
+      compilationFailure = new AggregateError(
+        [compilationFailure, signalError],
+        'SOCIAL_TEST_COMPILER_CLEANUP_INCOMPLETE',
+      );
+  }
+}
+for (const stream of [compiler.stdout, compiler.stderr])
+  stream.on('data', (chunk: Buffer) => {
+    if (Buffer.byteLength(compilationLog) + chunk.length > 1024 * 1024) {
+      stopOwnedCompiler(Error('SOCIAL_TEST_COMPILER_OUTPUT_LIMIT'));
+      return;
+    }
+    compilationLog += chunk.toString();
+  });
+const compilationBudget = setTimeout(
+  () => stopOwnedCompiler(Error('SOCIAL_TEST_COMPILER_BUDGET_EXHAUSTED')),
+  300_000,
+);
+try {
+  const [code, signal] = await new Promise<
+    [number | null, NodeJS.Signals | null]
+  >((resolve, reject) => {
+    compiler.once('error', reject);
+    compiler.once('close', (code, signal) => resolve([code, signal]));
+  });
+  if (code !== 0 || signal !== null)
+    stopOwnedCompiler(
+      Error(
+        `SOCIAL_TEST_COMPILATION_FAILED ${code}/${signal}\n${compilationLog}`,
+      ),
+    );
+} catch (error) {
+  stopOwnedCompiler(error instanceof Error ? error : Error(String(error)));
+} finally {
+  clearTimeout(compilationBudget);
+  const cleanupDeadline = Date.now() + 5_000;
+  while (compiler.pid !== undefined) {
+    try {
+      process.kill(-compiler.pid, 0);
+    } catch (error) {
+      if (processGroupGone(error)) {
+        compilerGroupAbsent = true;
+        break;
+      }
+      compilationFailure = new AggregateError(
+        [compilationFailure, error],
+        'SOCIAL_TEST_COMPILER_CLEANUP_INCOMPLETE',
+      );
+      break;
+    }
+    stopOwnedCompiler(Error('SOCIAL_TEST_COMPILER_GROUP_SURVIVED'));
+    if (Date.now() >= cleanupDeadline) {
+      compilationFailure = Error('SOCIAL_TEST_COMPILER_CLEANUP_INCOMPLETE');
+      break;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+}
+process.stderr.write(
+  JSON.stringify({
+    classification: 'SOCIAL_TEST_COMPILATION_PREPARATION_ONLY',
+    compilerPid: compiler.pid,
+    dedicatedProcessGroup: compiler.pid,
+    exitCode: compiler.exitCode,
+    signal: compiler.signalCode,
+    processGroupAbsent: compilerGroupAbsent,
+    failure: compilationFailure?.message ?? null,
+  }) + '\n',
+);
+if (compilationFailure) throw compilationFailure;
 const runBridge = async (code: string) => {
   const result = await promisify(execFile)(
     process.execPath,

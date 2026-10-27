@@ -177,3 +177,5 @@ export {
   type SocialServiceConsumptionPostingV1,
   type SocialOfficeJoinedLineageRowV1,
 } from './inventory/social-service-consumption-posting.js';
+// Preserve the original production guard value exports; extend only the joint writer type.
+export type { InventoryLedgerPosting } from './inventory/inventory-ledger.js';

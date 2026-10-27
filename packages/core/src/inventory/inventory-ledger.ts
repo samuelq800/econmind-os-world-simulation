@@ -40,7 +40,7 @@ import { Quantity } from '../numeric/quantity.js';
 import {
   assertProductionFunding,
   isValidatedProductionPosting,
-  type InventoryLedgerPosting,
+  type InventoryLedgerPosting as LegacyInventoryLedgerPosting,
 } from './production-consumption-posting.js';
 import {
   type FinancialPostingBatch,
@@ -50,6 +50,7 @@ import { isSimTime, type SimTime } from '../numeric/sim-time.js';
 import {
   isValidatedSocialServicePosting,
   assertSocialServiceConsumptionContext,
+  type SocialServiceConsumptionPostingV1,
 } from './social-service-consumption-posting.js';
 import {
   canonicalHashInput,
@@ -68,6 +69,9 @@ export const INVENTORY_AUTHORITATIVE_WRITER =
 
 export type InventoryBucket = 'AVAILABLE' | 'RESERVED' | 'IN_TRANSIT';
 export type InventoryOperation = 'RESERVE' | 'RELEASE' | 'SHIP' | 'DELIVER';
+/** Joint writer type; the immutable legacy production guard owns its old union. */
+export type InventoryLedgerPosting =
+  LegacyInventoryLedgerPosting | SocialServiceConsumptionPostingV1;
 
 const NON_NEGATIVE_INTEGER = /^(?:0|[1-9]\d*)$/u;
 const BUCKETS: readonly InventoryBucket[] = Object.freeze([
@@ -586,8 +590,8 @@ export function applyInventoryPosting(
       'Unsupported inventory ledger schema version',
     );
   }
-  const production = isValidatedProductionPosting(posting);
   const socialService = isValidatedSocialServicePosting(posting);
+  const production = !socialService && isValidatedProductionPosting(posting);
   if (
     !inventoryPostingInstances.has(posting) &&
     !production &&

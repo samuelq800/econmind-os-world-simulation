@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import * as C from '@econmind/core';
 // Match the Worker's package instance; the writer stays internal, never a public export.
 import { applyInventoryPosting } from '../../packages/core/dist/inventory/inventory-ledger.js';
+import { assertInventoryPersistenceSchemaAdmitted as originalIndustryGuard } from '../../packages/core/dist/inventory/production-consumption-posting.js';
 import { prepareAtomicTransitionCandidate } from '../../apps/world-worker/src/persistence/atomic-transition-repository.js';
 
 const digest = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -469,6 +470,21 @@ function fixture(
   };
 }
 describe('actual Social consumption through the unique Core ledgers (TEST_ONLY)', () => {
+  it('keeps the joint public type additive and the public Industry guard the original function', () => {
+    const posting: C.InventoryLedgerPosting = fixture().construct();
+    type LegacyPosting = Parameters<typeof originalIndustryGuard>[0][number];
+    const legacyExcludesService: Extract<
+      LegacyPosting,
+      C.SocialServiceConsumptionPostingV1
+    > extends never
+      ? true
+      : false = true;
+    expect(legacyExcludesService).toBe(true);
+    expect(posting.operation).toBe('SERVICE_CONSUME');
+    expect(C.assertInventoryPersistenceSchemaAdmitted).toBe(
+      originalIndustryGuard,
+    );
+  });
   it('consumes real medicine, recognizes cost once and retains unpaid opening purchase liability', () => {
     const f = fixture(),
       posting = f.construct();

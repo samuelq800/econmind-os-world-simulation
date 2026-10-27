@@ -26,6 +26,7 @@ import {
 import {
   createInventoryAccount,
   type InventoryLedgerState,
+  type InventoryLedgerPosting,
   type InventoryPosting,
   type InventoryPostingEntry,
 } from './inventory-ledger.js';
@@ -41,7 +42,6 @@ import {
   isAuthoritativeFinancialLedgerState,
   isAuthoritativeInventoryLedgerState,
 } from '../opening/ledger-authority.js';
-import type { InventoryLedgerPosting } from './production-consumption-posting.js';
 import {
   rebuildV08LedgersFromLineage,
   type OpeningSeed,
