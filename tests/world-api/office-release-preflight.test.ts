@@ -1,4 +1,4 @@
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -8,7 +8,7 @@ import {
 } from '../../tools/office-connection/release-preflight.mjs';
 
 describe('offline office release preflight', () => {
-  it('reports actual formal host and Finance budget implementation gaps', async () => {
+  it('keeps release blocked while the implemented budget intake requires runtime review', async () => {
     const report = await planOfficeRelease({ env: {} });
     expect(report.status).toBe('BLOCKED');
     expect(report.productionReady).toBe(false);
@@ -27,7 +27,7 @@ describe('offline office release preflight', () => {
       report.blockers.find(
         (b) => b.code === 'FINANCE_BUDGET_SOURCE_AND_CONSUMER_UNAVAILABLE',
       )?.observation,
-    ).toBe('SOURCE_BLOCK_CONFIRMED');
+    ).toBe('REQUIRES_REVIEW');
     expect(report.controlledPaths.database.callerRegistration).toBe(
       'NOT_REGISTERED',
     );
@@ -35,6 +35,78 @@ describe('offline office release preflight', () => {
       'CONDITIONAL_WIRE_PRODUCTION_INTAKE_REJECTED',
     );
   });
+
+  it.each([false, true])(
+    'does not admit release from implemented budget source with unverified host/bindings (host-shaped text: %s)',
+    async (hostShapedText) => {
+      const root = await mkdtemp(
+        path.join(os.tmpdir(), 'office-preflight-binding-'),
+      );
+      try {
+        // Copy the actual current Finance intake, not an obsolete unconditional
+        // rejection. Other files are explicitly TEST_ONLY source observations;
+        // none supplies a real host, provider binding, admission or authority.
+        const finance =
+          'apps/world-worker/src/intake/manual-office-intake-runtime.ts';
+        await mkdir(path.dirname(path.join(root, finance)), {
+          recursive: true,
+        });
+        await writeFile(
+          path.join(root, finance),
+          await readFile(new URL(`../../${finance}`, import.meta.url), 'utf8'),
+        );
+        if (hostShapedText) {
+          const host =
+            'apps/world-worker/src/runtime-preparation/production-world-command-host.ts';
+          await mkdir(path.dirname(path.join(root, host)), { recursive: true });
+          await writeFile(
+            path.join(root, host),
+            '// TEST_ONLY pattern, no executable host\nexport function createServerCommandHostBinding() {}\n',
+          );
+          const api = 'apps/world-api/cloudflare/runtime-api.mjs';
+          await mkdir(path.dirname(path.join(root, api)), { recursive: true });
+          await writeFile(
+            path.join(root, api),
+            '// TEST_ONLY unverified flag, not runtime capability\nexport const authoritativeCommandsEnabled = true;\n',
+          );
+        }
+        const { exitCode, report } = await runReleasePreflight(['--check'], {
+          root,
+          env: {},
+        });
+        expect(exitCode).toBe(2);
+        expect(
+          report.blockers.find(
+            (b) => b.code === 'FINANCE_BUDGET_SOURCE_AND_CONSUMER_UNAVAILABLE',
+          )?.observation,
+        ).toBe('REQUIRES_REVIEW');
+        expect(
+          report.blockers.find(
+            (b) => b.code === 'FORMAL_RUNTIME_HOST_UNAVAILABLE',
+          )?.observation,
+        ).toBe(hostShapedText ? 'REQUIRES_REVIEW' : 'UNAVAILABLE');
+        expect(report.implementationObservations.readOnlyPreflight).toBe(
+          'UNAVAILABLE',
+        );
+        expect(report.runtimeConnections.providerBindings).toBe(
+          'NOT_READ_BACK',
+        );
+        expect(report.runtimeConnections.leastPrivilegeApproval).toBe(
+          'NOT_VERIFIED',
+        );
+        expect(report.status).toBe('BLOCKED');
+        expect(report.productionReady).toBe(false);
+        expect(report.executionSupported).toBe(false);
+        expect(report.worldStarted).toBe(false);
+        expect(report.clockStarted).toBe(false);
+        expect(report.controlledPaths.holdHosting.scope).toBe(
+          'REVIEWED_HOLD_HOSTING_ONLY',
+        );
+      } finally {
+        await rm(root, { recursive: true, force: true });
+      }
+    },
+  );
 
   it('separates historical gates from actionable engineering and final-candidate review', async () => {
     const report = await planOfficeRelease({ env: {} });
