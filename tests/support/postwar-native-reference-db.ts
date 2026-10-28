@@ -47,6 +47,12 @@ export interface PostwarNativeReferenceMarker {
   markerPath: string;
   ownedContainer: string;
   ownershipNonce: string;
+  pgDataStorage: Readonly<{
+    kind: 'DOCKER_NAMED_VOLUME';
+    name: string;
+    mountPath: '/var/lib/postgresql/data';
+    ownershipNonce: string;
+  }>;
   image: string;
   socket: string;
   port: 5432;
@@ -70,6 +76,7 @@ export interface PostwarNativeReferenceMarker {
   verification: Record<string, boolean | string>;
   installedArtifacts: readonly { path: string; sha256: string }[];
   cleanupCommand: readonly string[];
+  cleanupStorageCommand: readonly string[];
 }
 const idleConnectionFailures: { code: string; message: string }[] = [];
 function pool(
@@ -108,6 +115,15 @@ async function owned(marker: PostwarNativeReferenceMarker) {
   )
     throw Error('REFERENCE_MARKER_SCOPE_DENIED');
   identifier(marker.database);
+  if (
+    marker.pgDataStorage?.kind !== 'DOCKER_NAMED_VOLUME' ||
+    !/^econmind-postwar-reference-data-[a-f0-9]{8}$/u.test(
+      marker.pgDataStorage.name,
+    ) ||
+    marker.pgDataStorage.mountPath !== '/var/lib/postgresql/data' ||
+    marker.pgDataStorage.ownershipNonce !== marker.ownershipNonce
+  )
+    throw Error('REFERENCE_PERSISTENT_PGDATA_REQUIRED_OLD_TMPFS_UNUSABLE');
   const inspected = JSON.parse(
     (
       await run('docker', ['inspect', marker.ownedContainer], {
@@ -122,6 +138,26 @@ async function owned(marker: PostwarNativeReferenceMarker) {
       marker.ownershipNonce
   )
     throw Error('REFERENCE_OWNERSHIP_OR_NETWORK_CHANGED');
+  const dataMount = inspected.Mounts?.find(
+    (mount: { Destination?: string }) =>
+      mount.Destination === marker.pgDataStorage.mountPath,
+  );
+  const volume = JSON.parse(
+    (
+      await run('docker', ['volume', 'inspect', marker.pgDataStorage.name], {
+        maxBuffer: 1048576,
+      })
+    ).stdout,
+  )[0];
+  if (
+    dataMount?.Type !== 'volume' ||
+    dataMount.Name !== marker.pgDataStorage.name ||
+    dataMount.RW !== true ||
+    inspected.HostConfig.Tmpfs?.[marker.pgDataStorage.mountPath] !==
+      undefined ||
+    volume.Labels?.['econmind.reference.nonce'] !== marker.ownershipNonce
+  )
+    throw Error('REFERENCE_PERSISTENT_VOLUME_OWNERSHIP_OR_MOUNT_CHANGED');
 }
 export async function loadPostwarNativeReferenceMarker(
   markerPath: string,
@@ -245,7 +281,14 @@ export async function createPostwarNativeReferenceDatabase(
   }
   const nonce = randomUUID(),
     container = `econmind-postwar-reference-${nonce.slice(0, 8)}`,
+    storageVolume = `econmind-postwar-reference-data-${nonce.slice(0, 8)}`,
     database = `postwar_reference_${nonce.replaceAll('-', '').slice(0, 12)}`;
+  const pgDataStorage = Object.freeze({
+    kind: 'DOCKER_NAMED_VOLUME' as const,
+    name: storageVolume,
+    mountPath: '/var/lib/postgresql/data' as const,
+    ownershipNonce: nonce,
+  });
   const socket = path.join(
       input.evidenceDirectory,
       `socket-${nonce.slice(0, 8)}`,
@@ -262,8 +305,10 @@ export async function createPostwarNativeReferenceDatabase(
         ownedContainer: container,
         ownershipNonce: nonce,
         image: POSTWAR_REFERENCE_IMAGE,
+        pgDataStorage,
         socket,
         cleanupCommand: ['docker', 'rm', '--force', container],
+        cleanupStorageCommand: ['docker', 'volume', 'rm', storageVolume],
       },
       null,
       2,
@@ -271,6 +316,19 @@ export async function createPostwarNativeReferenceDatabase(
   );
   // --pull=never pins the already cached image; network=none and an empty TCP
   // listener protect this helper even when the host has production env vars.
+  await run(
+    'docker',
+    [
+      'volume',
+      'create',
+      '--label',
+      `econmind.reference.nonce=${nonce}`,
+      '--label',
+      'econmind.reference.classification=TEST_ONLY',
+      storageVolume,
+    ],
+    { maxBuffer: 1048576 },
+  );
   await run(
     'docker',
     [
@@ -290,8 +348,8 @@ export async function createPostwarNativeReferenceDatabase(
       '--shm-size',
       '256m',
       '--read-only',
-      '--tmpfs',
-      '/var/lib/postgresql/data:rw,uid=999,gid=999,mode=0700',
+      '--mount',
+      `type=volume,src=${storageVolume},dst=/var/lib/postgresql/data`,
       '--tmpfs',
       '/tmp:rw,nosuid,size=128m',
       '--mount',
@@ -677,6 +735,7 @@ export async function createPostwarNativeReferenceDatabase(
         markerPath,
         ownedContainer: container,
         ownershipNonce: nonce,
+        pgDataStorage,
         image: POSTWAR_REFERENCE_IMAGE,
         socket,
         port: 5432,
@@ -703,6 +762,7 @@ export async function createPostwarNativeReferenceDatabase(
         verification,
         installedArtifacts: artifacts,
         cleanupCommand: ['docker', 'rm', '--force', container],
+        cleanupStorageCommand: ['docker', 'volume', 'rm', storageVolume],
       };
       await phase('SEALING_CLONEABLE_BASELINE');
     } finally {
@@ -713,10 +773,14 @@ export async function createPostwarNativeReferenceDatabase(
       `alter database ${identifier(database)} with is_template true allow_connections false`,
     );
     marker.baselineSealed = true;
+    await owned(marker);
+    marker.verification.persistentPgDataMountVerified = true;
+    marker.verification.restartPersistenceVerified =
+      'NOT_RUN_OFFICE_ACCEPTANCE_REQUIRED';
     await writeFile(markerPath, JSON.stringify(marker, null, 2) + '\n');
     await writeFile(
       path.join(input.evidenceDirectory, 'README.txt'),
-      `TEST_ONLY isolated PG16 reference; baseline disallows connections. Clone via helper before tests. Cluster roles are global: role/membership mutations must be transactionally rolled back or coordinated; never revoke shared roles outside a rollback. No production admission or Owner signature. Cleanup: docker rm --force ${container}\n`,
+      `TEST_ONLY isolated PG16 reference; baseline disallows connections. Persistent PGDATA: named volume ${storageVolume}, ownership nonce ${nonce}. This fixes the former tmpfs restart-loss defect; initial READY is not itself a restart/readback PASS. Clone via helper before tests. Cluster roles are global: role/membership mutations must be transactionally rolled back or coordinated; never revoke shared roles outside a rollback. No production admission or Owner signature or signing-key persistence. After all consumers stop, cleanup container first: docker rm --force ${container}; then owned volume: docker volume rm ${storageVolume}\n`,
     );
     return marker;
   } catch (error) {
@@ -728,6 +792,7 @@ export async function createPostwarNativeReferenceDatabase(
           message: error instanceof Error ? error.message : String(error),
           at: new Date().toISOString(),
           ownedContainer: container,
+          pgDataStorage,
           database,
           socket,
           status: durableBootstrapCompleted
@@ -735,6 +800,7 @@ export async function createPostwarNativeReferenceDatabase(
             : 'FAILED_CLEANED',
           verification: stageVerification,
           cleanupCommand: ['docker', 'rm', '--force', container],
+          cleanupStorageCommand: ['docker', 'volume', 'rm', storageVolume],
         },
         null,
         2,
@@ -743,10 +809,14 @@ export async function createPostwarNativeReferenceDatabase(
     throw error;
   } finally {
     await admin.end();
-    if (!marker?.baselineSealed && !durableBootstrapCompleted)
+    if (!marker?.baselineSealed && !durableBootstrapCompleted) {
       await run('docker', ['rm', '--force', container], {
         maxBuffer: 1048576,
       }).catch(() => undefined);
+      await run('docker', ['volume', 'rm', storageVolume], {
+        maxBuffer: 1048576,
+      }).catch(() => undefined);
+    }
   }
 }
 

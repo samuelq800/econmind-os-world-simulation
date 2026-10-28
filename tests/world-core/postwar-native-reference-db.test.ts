@@ -16,10 +16,16 @@ gated('isolated shared PG16.15 reference', () => {
     const marker = await createPostwarNativeReferenceDatabase({
       repositoryRoot: path.resolve(import.meta.dirname, '../..'),
       evidenceDirectory:
-        '/workspace/.cloud-setup/evidence/postwar-reference-20261028',
+        process.env.ECONMIND_POSTWAR_REFERENCE_EVIDENCE_DIRECTORY ??
+        '/workspace/.cloud-setup/evidence/postwar-reference-persistent-20261028',
       seedFile: '/tmp/econmind-postwar-cli-20261028T1602/final-seed.json',
     });
     expect(marker.baselineSealed).toBe(true);
+    expect(marker.pgDataStorage.kind).toBe('DOCKER_NAMED_VOLUME');
+    expect(marker.pgDataStorage.ownershipNonce).toBe(marker.ownershipNonce);
+    expect(marker.seedFingerprint).toBe(
+      'sha256:c42757599f51fe7e21ff52c152387c1f6a27649ff0cd199dd39b7d2205386589',
+    );
     const clone = await clonePostwarNativeReference(marker, 'smoke');
     try {
       const h = await clone.installer.query(

@@ -14,7 +14,8 @@ import {
   POSTWAR_OFFICE_RUNTIME_READ_PATH,
 } from '../../apps/world-api/src/runtime-preparation/postwar-office-runtime-fetch-handler.js';
 const descriptor =
-  '/workspace/.cloud-setup/evidence/postwar-reference-20261028/reference-db.json';
+  process.env.POSTWAR_NATIVE_REFERENCE_MARKER ??
+  '/workspace/.cloud-setup/evidence/postwar-reference-persistent-20261028/reference-db.json';
 let marker: PostwarNativeReferenceMarker;
 let clone: Awaited<ReturnType<typeof clonePostwarNativeReference>>;
 let pool: Pool;
