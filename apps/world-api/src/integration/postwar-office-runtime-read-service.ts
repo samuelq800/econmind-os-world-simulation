@@ -19,7 +19,10 @@ import {
   POSTWAR_FINANCIAL_CURRENT_DATASETS,
   type PostwarFinancialCurrentSource,
 } from '@econmind/world-worker/postwar-financial-current-read';
-import { createPostwarPhysicalOpeningHeadReader } from '@econmind/world-worker/postwar-physical-opening-facts-read';
+import {
+  createPostwarPhysicalOpeningHeadReader,
+  createPostwarPhysicalInventoryProvenanceReader,
+} from '@econmind/world-worker/postwar-physical-opening-facts-read';
 import {
   explicitReadConfig,
   matchesReadPins,
@@ -294,7 +297,16 @@ function pageBody(
         pageHash: page.source.pageHash,
         returnedRowsHash: page.source.returnedRowsHash,
         hashAlgorithm: page.source.hashAlgorithm,
-        sourcePointer: page.source.sourcePointer,
+        sourcePointer:
+          request.dataset === 'opening-inventory-entries' &&
+          page.source.sourcePointer.schemaVersion !==
+            'postwar-inventory-source-pointer-v2'
+            ? {
+                ...page.source.sourcePointer,
+                sourceRole:
+                  'LEGACY_OPERATING_ADOPTION_CONTEXT_NOT_DIRECT_ROW_SOURCE',
+              }
+            : page.source.sourcePointer,
         ...(page.source.currentStateBinding === undefined
           ? {}
           : { currentStateBinding: page.source.currentStateBinding }),
@@ -344,6 +356,13 @@ export function createPostwarOfficeRuntimeReadService(
     : null;
   const physicalStore = c
     ? createPostwarPhysicalOpeningHeadReader({
+        runtimeReaderRole: c.readerRole,
+        authorizationPublisherRole: c.authorizationPublisherRole,
+        expectedSeedFingerprint: c.admittedWorldPins.contentHash,
+      })
+    : null;
+  const inventoryStore = c
+    ? createPostwarPhysicalInventoryProvenanceReader({
         runtimeReaderRole: c.readerRole,
         authorizationPublisherRole: c.authorizationPublisherRole,
         expectedSeedFingerprint: c.admittedWorldPins.contentHash,
@@ -478,7 +497,11 @@ export function createPostwarOfficeRuntimeReadService(
                           request.office === 'TRADE' ||
                           request.office === 'CAPTAIN') &&
                         head.worldVersion !== '0'
-                      ? await physicalStore!.readPageFrom(read, {
+                      ? await (
+                          request.dataset === 'opening-inventory-entries'
+                            ? inventoryStore!
+                            : physicalStore!
+                        ).readPageFrom(read, {
                           ...pageRequest,
                           officeId: request.office,
                         })

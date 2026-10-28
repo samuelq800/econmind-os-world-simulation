@@ -16,10 +16,13 @@ import {
   POSTWAR_OFFICE_RUNTIME_READ_PATH,
 } from '../../apps/world-api/src/runtime-preparation/postwar-office-runtime-fetch-handler.js';
 import type { ExplicitReadPreparationConfig } from '../../apps/world-api/src/runtime-preparation/explicit-read-preparation-config.js';
-import { createPhysicalOpeningHttpNativeFixture } from '../support/postwar-physical-opening-http-native-fixture.js';
+import { createPreparedPhysicalOpeningHttpNativeFixture } from '../support/postwar-physical-opening-http-native-fixture.js';
 const h3 = process.env.ECONMIND_POSTWAR_PHYSICAL_HTTP_H3_TEMPLATE;
 const h0 = process.env.ECONMIND_POSTWAR_PHYSICAL_HTTP_H0_TEMPLATE;
-const requested = h3 !== undefined || h0 !== undefined;
+const prepared =
+  process.env.ECONMIND_POSTWAR_PHYSICAL_HTTP_PREPARED_V2_TEMPLATE;
+const requested =
+  prepared !== undefined || h3 !== undefined || h0 !== undefined;
 describe('physical historical HTTP remains closed without a server composition', () => {
   it('does not create a connected read endpoint from request selectors', async () => {
     const handler = createPostwarOfficeRuntimeFetchHandler();
@@ -40,13 +43,16 @@ describe.skipIf(!requested)(
   'actual physical H3 historical source over JWT HTTP and Chromium',
   () => {
     it('preserves five original datasets and current authorization without presenting historical quantities as current state', async () => {
-      if (!h3 || !h0)
-        throw Error('BOTH_PHYSICAL_HTTP_H3_AND_H0_DESCRIPTORS_REQUIRED');
+      if (!prepared || h3 || h0)
+        throw Error(
+          'EXPLICIT_PREPARED_V2_TEMPLATE_REQUIRED_LEGACY_H3_IS_NOT_REPAIRED',
+        );
       const out =
         process.env.ECONMIND_POSTWAR_PHYSICAL_HTTP_EVIDENCE_DIR ??
         `/tmp/postwar-physical-http-${Date.now()}`;
       await mkdir(out, { recursive: true });
-      const fixture = await createPhysicalOpeningHttpNativeFixture(h3, h0);
+      const fixture =
+        await createPreparedPhysicalOpeningHttpNativeFixture(prepared);
       const { marker, clone } = fixture;
       const keys = generateKeyPairSync('ec', { namedCurve: 'prime256v1' }),
         jwk = {
@@ -242,6 +248,31 @@ describe.skipIf(!requested)(
           expect(r.body.authority.readback.worldVersion).toBe('3');
           expect(r.body.authority.readback.eventSequence).toBe('3');
           expect(r.body.source.sourcePointer).toBeTypeOf('object');
+          const legacy = fixture.legacyDocuments.get(`${office}/${dataset}`)!;
+          if (dataset === 'opening-inventory-entries') {
+            const provenance = fixture.inventoryProvenance.get(office)!;
+            expect(r.body.source.sourceVersion).toBe(provenance.source_version);
+            expect(r.body.source.sourceVersion).not.toBe(legacy.source_version);
+            expect(r.body.source.sourcePointer).toEqual(
+              provenance.source_pointer,
+            );
+            expect(r.body.source.sourcePointer).toMatchObject({
+              schemaVersion: 'postwar-inventory-source-pointer-v2',
+              sourceRole: 'DIRECT_ROW_SOURCE',
+              sourceId: 'SOURCE_POSTWAR_FINANCIAL_V1',
+              adoptionContextSourceId: 'SOURCE_POSTWAR_OPERATING_V1',
+              legacySourceVersion: legacy.source_version,
+            });
+            expect(
+              r.body.rows.every(
+                (row: { sourceId: string }) =>
+                  row.sourceId === r.body.source.sourcePointer.sourceId,
+              ),
+            ).toBe(true);
+          } else {
+            expect(r.body.source.sourceVersion).toBe(legacy.source_version);
+            expect(r.body.source.sourcePointer).toEqual(legacy.source_pointer);
+          }
           for (const key of ['pageHash', 'returnedRowsHash'])
             expect(r.body.source[key]).toMatch(/^[0-9a-f]{64}$/u);
           expect(r.body.source.hashAlgorithm).toBe(
@@ -276,6 +307,10 @@ describe.skipIf(!requested)(
             const next = await call(nextQuery);
             expect(next.response.status).toBe(200);
             expect(next.body.rows).toEqual(original.slice(1, 2));
+            if (dataset === 'opening-inventory-entries') {
+              nextQuery.page.sourceVersion = String(legacy.source_version);
+              expect((await call(nextQuery)).response.status).toBe(409);
+            }
             nextQuery.page.sourceVersion = 'sha256:' + '0'.repeat(64);
             expect((await call(nextQuery)).response.status).toBe(409);
           }

@@ -6,3 +6,4 @@ export {
   type PostwarPhysicalOpeningRequest,
   type PostwarPhysicalOpeningHeadPage,
 } from '../persistence/postwar-physical-opening-head-read.js';
+export { createPostwarPhysicalInventoryProvenanceReader } from '../persistence/postwar-physical-inventory-provenance.js';
