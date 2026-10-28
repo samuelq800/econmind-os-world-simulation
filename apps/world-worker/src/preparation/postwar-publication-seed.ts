@@ -29,7 +29,10 @@ export function validatePostwarOpeningPublicationSeed(input: {
 }): OpeningSeed {
   if (input.loaded.bundle !== input.bundle)
     throw Error('POSTWAR_PUBLICATION_LOADER_BINDING_REQUIRED');
-  const financial = parseOpeningSeed(input.financialSeed, sha);
+  const financial = parseOpeningSeed(
+    JSON.parse(canonicalSerialize(input.financialSeed)),
+    sha,
+  );
   const seed = parseOpeningSeed(
     decodePostwarSeedDocument(input.bundle.operating.finalSeedBytes),
     sha,

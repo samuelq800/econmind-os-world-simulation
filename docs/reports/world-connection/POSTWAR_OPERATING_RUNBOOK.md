@@ -56,7 +56,9 @@ They do not return a whole-world private source to a country client. H0-only
 readers reject advanced heads until the corresponding event replay is supported.
 
 The V3 fixed-file incoming manifest pins `incoming/operating/final-seed.json`
-in addition to the original V2 financial package. Publication re-runs the
+in addition to the original V2 financial package. That file uses a bounded
+Brotli transport envelope with decoded byte count and checksum; the canonical
+seed and its source pointers remain unchanged. Publication re-runs the
 original financial producer and verifies that the complete operating seed extends
 that exact financial lineage with the same finite supplies and operating source.
 Signed publication authorization must name the **final** seed fingerprint and

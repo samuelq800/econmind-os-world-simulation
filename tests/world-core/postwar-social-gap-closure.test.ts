@@ -40,6 +40,46 @@ const overlay = auditPostwarSocialGapClosure({
   finalSeed: assembly.finalSeed,
 });
 
+// Full immutable seed/physical/E03 revalidation belongs to the source fixture;
+// keep the expensive negative fixture out of the per-assertion timer.
+const partialPrepared = {
+  ...prepared,
+  housing: { ...prepared.housing, regions: [] },
+};
+const partialOverlay = auditPostwarSocialGapClosure({
+  prepared: partialPrepared,
+  finalSeed: assembly.finalSeed,
+});
+if (process.env.ECONMIND_SOCIAL_GAP_OVERLAY_EVIDENCE_DIR) {
+  const { mkdir, writeFile } = await import('node:fs/promises');
+  const directory = path.resolve(
+    process.env.ECONMIND_SOCIAL_GAP_OVERLAY_EVIDENCE_DIR,
+  );
+  await mkdir(directory, { recursive: true });
+  await writeFile(
+    path.join(directory, 'summary.json'),
+    JSON.stringify(
+      {
+        schemaVersion: overlay.schemaVersion,
+        worldId: overlay.worldId,
+        seedId: overlay.seedId,
+        sourceChecksumsSha256: overlay.sourceChecksumsSha256,
+        finalSeedFingerprint: overlay.finalSeedFingerprint,
+        validation: overlay.validation,
+        summary: overlay.summary,
+        sourceAdmitted: overlay.sourceAdmitted,
+        executionAuthorized: overlay.executionAuthorized,
+      },
+      null,
+      2,
+    ) + '\n',
+  );
+  await writeFile(
+    path.join(directory, 'full-overlay.json'),
+    JSON.stringify(overlay, null, 2) + '\n',
+  );
+}
+
 describe('immutable 1066 composite-gap source/runtime closure overlay', () => {
   it('keeps exact 700 country and 366 facility denominator and reports only whole checked composites', () => {
     expect(overlay.rows).toHaveLength(1066);
@@ -99,14 +139,7 @@ describe('immutable 1066 composite-gap source/runtime closure overlay', () => {
     expect(notRun.summary.runtimeClosedCompositeGaps).toBe(0);
   });
   it('requires complete source documents even when partial prepared mappings exist', () => {
-    const changed = {
-      ...prepared,
-      housing: { ...prepared.housing, regions: [] },
-    };
-    const partial = auditPostwarSocialGapClosure({
-      prepared: changed,
-      finalSeed: assembly.finalSeed,
-    });
+    const partial = partialOverlay;
     expect(partial.summary.byField.titleAndTenure.sourcePolicyCovered).toBe(0);
     expect(
       partial.summary.byField.housingOccupancyHabitabilityAndRent
