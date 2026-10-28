@@ -4,6 +4,8 @@ import {
   CAPTAIN_POLITICAL_CAPITAL_COMMAND,
   CENTRAL_BANK_OMO_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  parseSocialPositionOfferCreateIntent,
   DomainError,
   DOMAIN_ERROR_CODES,
   actorId,
@@ -108,6 +110,17 @@ export function validateManualOfficeCommandIntent(
         parseSocialEmploymentServiceCommand(command, sha).kind !== 'PLAN'
       )
         invalid();
+      return;
+    case SOCIAL_POSITION_OFFER_CREATE_COMMAND:
+      if (
+        command.officeId !== 'SOCIAL' ||
+        command.expectedWorldVersion === null ||
+        command.idempotencyKey === null
+      )
+        invalid();
+      parseSocialPositionOfferCreateIntent(
+        JSON.parse(command.canonicalPayload),
+      );
       return;
     case FINANCE_BUDGET_APPROPRIATION_COMMAND: {
       if (

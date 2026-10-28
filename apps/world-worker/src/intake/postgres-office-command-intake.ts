@@ -15,6 +15,7 @@ import {
   CENTRAL_BANK_OMO_COMMAND,
   CENTRAL_BANK_OMO_CAPABILITY,
   SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
   SOCIAL_EMPLOYMENT_SERVICE_CAPABILITY,
   DomainError,
   DOMAIN_ERROR_CODES,
@@ -115,7 +116,8 @@ export function parseManualOfficeCommandRequest(
     (row.officeId === 'CENTRAL_BANK' &&
       row.commandType === CENTRAL_BANK_OMO_COMMAND) ||
     (row.officeId === 'SOCIAL' &&
-      row.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND) ||
+      (row.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND ||
+        row.commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND)) ||
     (row.officeId === 'FINANCE' &&
       row.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND)
   ))

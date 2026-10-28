@@ -29,6 +29,10 @@ import {
   type InventoryLedgerPosting,
 } from '../inventory/inventory-ledger.js';
 import {} from '../inventory/production-consumption-posting.js';
+import {
+  bindOpeningProductionDepositInstruments,
+  inheritProductionDepositInstruments,
+} from '../finance/production-deposit-funding.js';
 import { isMoney, Money } from '../numeric/money.js';
 import { isQuantity, Quantity } from '../numeric/quantity.js';
 import {
@@ -606,8 +610,13 @@ export function createOpeningSeed(
   return seed;
 }
 
+/** @internal Pure identity check; does not authorize an untrusted seed. */
+export function isValidatedOpeningSeed(value: object): value is OpeningSeed {
+  return openingSeedInstances.has(value);
+}
 function openingFinancialState(
   seed: OpeningSeed,
+  sha256Hex: Sha256Hex,
 ): Readonly<FinancialLedgerState> {
   const accounts = new Map<string, Readonly<FinancialAccount>>();
   const balances = new Map<string, Money>();
@@ -631,7 +640,7 @@ function openingFinancialState(
       );
     }
   }
-  return authorizeFinancialLedgerState(
+  const state = authorizeFinancialLedgerState(
     parseFinancialLedgerSnapshot({
       worldId: seed.worldId,
       worldVersion: seed.openingWorldVersion,
@@ -646,6 +655,8 @@ function openingFinancialState(
         }),
     }),
   );
+  bindOpeningProductionDepositInstruments(seed, state, sha256Hex);
+  return state;
 }
 
 function openingInventoryState(
@@ -681,7 +692,7 @@ function financialStateAtVersion(
   state: FinancialLedgerState,
   worldVersion: string,
 ): Readonly<FinancialLedgerState> {
-  return authorizeFinancialLedgerState(
+  const next = authorizeFinancialLedgerState(
     parseFinancialLedgerSnapshot({
       worldId: state.worldId,
       worldVersion,
@@ -690,6 +701,8 @@ function financialStateAtVersion(
       appliedBatches: state.appliedBatches,
     }),
   );
+  inheritProductionDepositInstruments(next, state);
+  return next;
 }
 
 function assertInventoryPostingBinding(
@@ -729,7 +742,7 @@ export function rebuildV08LedgersFromLineage(input: {
   }
   let worldVersion: string = input.seed.openingWorldVersion;
   let inventory = openingInventoryState(input.seed);
-  let financial = openingFinancialState(input.seed);
+  let financial = openingFinancialState(input.seed, input.sha256Hex);
   const transitionIds = new Set<string>();
   const eventIds = new Set<string>();
   const idempotencyCommands = new Map<string, string>();

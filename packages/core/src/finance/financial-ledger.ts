@@ -1,3 +1,4 @@
+import { inheritProductionDepositInstruments } from './production-deposit-funding.js';
 import {
   canonicalSha256,
   type CanonicalCommand,
@@ -593,6 +594,7 @@ export function applyFinancialPostingBatch(
     ]),
   });
   const authoritativeNextState = authorizeFinancialLedgerState(nextState);
+  inheritProductionDepositInstruments(authoritativeNextState, state);
   return Object.freeze({
     state: authoritativeNextState,
     receipt: receipt(batch, 'APPLIED'),

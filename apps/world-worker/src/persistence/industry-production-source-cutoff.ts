@@ -1,6 +1,7 @@
 import {
   Money,
   assertProductionFunding,
+  selectSettledProductionFundingPayment,
   bindAuthoritativeTransition,
   canonicalSerialize,
   rebuildV08LedgersFromLineage,
@@ -349,15 +350,11 @@ export function bindIndustryPriorFundingCutoffFrom(input: {
     sha256Hex: input.sha256Hex,
   });
   const expense = batch.legs.find((l) => l.legId === op.costLegId)!;
-  const cash = batch.legs.filter(
-    (l) =>
-      l.direction === 'CREDIT' &&
-      ['CASH', 'DEPOSIT'].includes(l.account.accountClass) &&
-      l.account.ownerId === op.operatorId &&
-      l.account.countryId === posting.evidence.output.countryId &&
-      l.amount.currency === op.settledCost.currency,
+  const cash = selectSettledProductionFundingPayment(
+    posting,
+    batch,
+    current.financial,
   );
-  if (cash.length !== 1) industryInputInvalid('EXACT_FUNDING_CASH_REQUIRED');
   const events = row.transition.events;
   equal(source.original, {
     worldId: data.worldId,
@@ -368,7 +365,7 @@ export function bindIndustryPriorFundingCutoffFrom(input: {
     batchId: batch.batchId,
     batchFingerprint: batch.fingerprint,
     costLegId: op.costLegId,
-    cashAccountId: cash[0]!.account.accountId,
+    cashAccountId: cash.account.accountId,
     expenseAccountId: expense.account.accountId,
     amount: op.settledCost.amount,
     currency: op.settledCost.currency,
@@ -410,7 +407,7 @@ export function bindIndustryPriorFundingCutoffFrom(input: {
       costLegId: op.costLegId,
       amount: op.settledCost.amount,
       currency: op.settledCost.currency,
-      cashAccountId: cash[0]!.account.accountId,
+      cashAccountId: cash.account.accountId,
       expenseAccountId: expense.account.accountId,
     },
     originalCutoff: {
