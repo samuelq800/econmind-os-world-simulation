@@ -40,6 +40,15 @@ import {
 } from './worker-authorization-sql.js';
 import type { SqlDatabase, SqlExecutor } from './sql-database.js';
 import type { AtomicTransitionCandidateFactory } from './atomic-transition-repository.js';
+import {
+  readPreparedFinanceBudgetSourceFrom,
+  type PreparedFinanceBudgetSource,
+} from './prepared-finance-budget-source.js';
+import { replayPostwarSharedOfficePrefix } from './postwar-shared-office-prefix.js';
+import {
+  readPostgresFinanceBudgetCapacitySourceFrom,
+  type PostgresFinanceBudgetCapacitySource,
+} from './postgres-finance-budget-capacity-source.js';
 
 export const FINANCE_BUDGET_NATIVE_SOURCE_COMMIT_PURPOSE =
   'FINANCE_NATIVE_BUDGET_SOURCE_COMMIT_V1' as const;
@@ -108,6 +117,8 @@ export function createPostgresFinanceBudgetNativeRuntime(config: {
   readonly database: SqlDatabase;
   readonly workerId: string;
   readonly sha256Hex: Sha256Hex;
+  readonly preparedSource?: PreparedFinanceBudgetSource;
+  readonly capacitySource?: PostgresFinanceBudgetCapacitySource;
 }) {
   if (!/^[A-Z][A-Z0-9_]*$/u.test(config.workerId))
     invalid('FIXED_WORKER_REQUIRED');
@@ -190,6 +201,40 @@ export function createPostgresFinanceBudgetNativeRuntime(config: {
     ) => Promise<Result>,
   ) {
     const original = await lock(tx, command, observedAtReal);
+    if (config.capacitySource) {
+      if (config.preparedSource) invalid('ONE_EXACT_SOURCE_MODE_REQUIRED');
+      const source = await readPostgresFinanceBudgetCapacitySourceFrom({
+        source: config.capacitySource,
+        executor: tx,
+        database: config.database,
+        command,
+        policy: original.policy,
+        sourceRow: original.row,
+        workerId: config.workerId,
+        observedAtReal,
+      });
+      const value = await consume(source, original.lease, original.row);
+      const after = await lock(tx, command, observedAtReal);
+      if (canonicalSerialize(after.row) !== canonicalSerialize(original.row))
+        invalid('SOURCE_CHANGED_DURING_READ');
+      return value;
+    }
+    if (config.preparedSource) {
+      const source = await readPreparedFinanceBudgetSourceFrom({
+        prepared: config.preparedSource,
+        executor: tx,
+        database: config.database,
+        command,
+        policy: original.policy,
+        sourceRow: original.row,
+        sha256Hex: config.sha256Hex,
+      });
+      const value = await consume(source, original.lease, original.row);
+      const after = await lock(tx, command, observedAtReal);
+      if (canonicalSerialize(after.row) !== canonicalSerialize(original.row))
+        invalid('SOURCE_CHANGED_DURING_READ');
+      return value;
+    }
     return withValidatedCanonicalLineageFrom(
       { reader: lineage, executor: tx, worldId: command.worldId },
       async (view) => {
@@ -269,17 +314,26 @@ export function createPostgresFinanceBudgetNativeRuntime(config: {
           command: t.command,
           events: t.transition.events,
         }));
-        const state = replayFinanceNativeBudgetHistory(
-          command.worldId,
-          frames,
-          config.sha256Hex,
-        );
+        const operating = readPostwarOperatingGenesisFromSeed(seed);
+        const shared =
+          operating.socialEmployment === null
+            ? null
+            : replayPostwarSharedOfficePrefix({
+                lineage: canonical,
+                document: operating.socialEmployment,
+              });
+        const state =
+          shared?.budget.state ??
+          replayFinanceNativeBudgetHistory(
+            command.worldId,
+            frames,
+            config.sha256Hex,
+          );
         if (
           state.worldVersion !== canonical.headWorldVersion ||
           state.eventSequence !== canonical.headEventSequence
         )
           invalid('COMPLETE_NATIVE_BUDGET_PREFIX_REQUIRED');
-        const operating = readPostwarOperatingGenesisFromSeed(seed);
         const openingEncumbrances = operating.facts.funding
           .filter(
             (f) =>
@@ -293,11 +347,33 @@ export function createPostgresFinanceBudgetNativeRuntime(config: {
             amount: f.ceilingAmount,
             currency: f.currency,
           }))
+          .concat(
+            (shared?.social.reservations ?? [])
+              .filter(
+                (r) =>
+                  r.countryId === command.countryId &&
+                  r.accountId === asset.account.accountId,
+              )
+              .map((r) => {
+                if (
+                  r.employerId !== original.policy.governmentEntityId ||
+                  r.currency !== original.policy.currency
+                )
+                  invalid('ACTUAL_SOCIAL_RESERVATION_SCOPE_MISMATCH');
+                return {
+                  reference: r.reservationId,
+                  accountId: r.accountId,
+                  amount: r.amount,
+                  currency: r.currency,
+                };
+              }),
+          )
           .sort((a, b) =>
             a.reference < b.reference ? -1 : a.reference > b.reference ? 1 : 0,
           );
         const source: FinanceNativeBudgetSource = {
           policy: original.policy,
+          ...(shared === null ? {} : { mixedPrefixEvidence: shared.evidence }),
           binding: {
             seedRef: seed.seedId,
             seedFingerprint: seed.fingerprint,

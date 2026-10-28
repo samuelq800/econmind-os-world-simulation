@@ -31,6 +31,14 @@
     "./economic-read-visibility-contract": {
       "types": "./dist/authorization/economic-read-visibility-contract.d.ts",
       "default": "./dist/authorization/economic-read-visibility-contract.js"
+    },
+    "./finance-budget-prepared-ledger": {
+      "types": "./dist/commands/finance-budget-prepared-ledger.d.ts",
+      "default": "./dist/commands/finance-budget-prepared-ledger.js"
+    },
+    "./finance-budget-capacity-data": {
+      "types": "./dist/commands/finance-budget-capacity-data.d.ts",
+      "default": "./dist/commands/finance-budget-capacity-data.js"
     }
   },
   "scripts": {

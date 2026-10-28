@@ -961,39 +961,20 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
   )
     invalid('unsupported domain effect taxonomy');
   const productionIds = productionEventIds(lineage);
-  const currentLifecycle = hasPositionEvents
-    ? (() => {
-        const original = readPostwarOperatingGenesisFromSeed(
-          lineage.seed,
-        ).socialEmployment;
-        if (!original)
-          invalid(
-            'actual admitted full E03 is required for position lifecycle replay',
-          );
-        return replayPostwarSocialEmploymentLineage({
-          document: original,
-          lineage,
-        });
-      })()
+  const currentDocument = hasPositionEvents
+    ? readPostwarOperatingGenesisFromSeed(lineage.seed).socialEmployment
+    : undefined;
+  if (hasPositionEvents && !currentDocument)
+    invalid(
+      'actual admitted full E03 is required for position lifecycle replay',
+    );
+  const currentLifecycle = currentDocument
+    ? replayPostwarSocialEmploymentLineage({
+        document: currentDocument,
+        lineage,
+      })
     : undefined;
   const reducers = { ...createSocialEmploymentServiceReplayReducers(digest) };
-  if (currentLifecycle)
-    reducers[SOCIAL_POSITION_OFFER_CREATED_EVENT] = ({ state, event }) => {
-      const checkpoint = currentLifecycle.checkpoints.find(
-        (c) => c.eventId === event.eventId,
-      );
-      if (!checkpoint)
-        invalid('canonical position event was not strictly replayed');
-      if (checkpoint.countryId !== data.scope.countryId) return state;
-      if (
-        canonicalSerialize(state) !==
-        canonicalSerialize(checkpoint.beforeEmployment)
-      )
-        invalid(
-          'local employment differs from full-prefix lifecycle predecessor',
-        );
-      return checkpoint.afterEmployment;
-    };
   reducers[PRODUCTION_SETTLED_EVENT_TYPE] = ({ state, event }) => {
     if (!productionIds.has(event.eventId))
       invalid('unpaired production source event');
@@ -1056,22 +1037,92 @@ function replaySocialSource(verified: VerifiedOriginalData): Readonly<{
     digest,
   );
   const binding = lineage.seed.replayBinding;
-  const replay = replayAuthoritativeEvents({
-    origin: createReplayOrigin({
-      worldId: lineage.seed.worldId,
-      lastSequence: '0',
-      worldVersion: '0',
-      state: data.admittedGenesis.state,
-      seed,
-      binding,
-      sha256Hex: digest,
-    }),
-    seed,
-    binding,
-    registry: createReplayReducerRegistry({ binding, reducers }),
-    transitions: lineage.transitions.map((v) => v.transition),
-    sha256Hex: digest,
-  });
+  const replay =
+    currentLifecycle && currentDocument
+      ? (() => {
+          // The genuine shared Core cursor already replayed every Budget and
+          // every country's Social group. Validate each historical PLAN against
+          // its own immutable source body and its actual Core predecessor,
+          // then crop the fully replayed state to this country's source scope.
+          for (const entry of lineage.transitions) {
+            for (const event of entry.transition.events) {
+              if (event.eventType !== SOCIAL_SERVICE_PLAN_EVENT) continue;
+              const payload = JSON.parse(event.canonicalPayload) as Row;
+              const historical = parseCanonicalCommand(payload.command, digest);
+              const parsed = parseSocialEmploymentServiceCommand(
+                historical,
+                digest,
+              );
+              const checkpoint = currentLifecycle.checkpoints.find(
+                (c) => c.eventId === event.eventId,
+              );
+              const country = currentDocument.countries.find(
+                (c) => c.countryId === entry.command.countryId,
+              );
+              if (
+                parsed.kind !== 'PLAN' ||
+                !checkpoint ||
+                !country ||
+                checkpoint.countryId !== country.countryId
+              )
+                invalid(
+                  'actual complete-prefix historical PLAN checkpoint required',
+                );
+              const bodies = country.physicalOriginalBodies.filter(
+                (body) =>
+                  body.locationId === parsed.intent.locationId &&
+                  body.dayIndex === parsed.intent.dueDayIndex &&
+                  body.pools.some(
+                    (pool) =>
+                      pool.poolId === parsed.intent.servicePoolId &&
+                      pool.skill === parsed.intent.skill,
+                  ),
+              );
+              if (bodies.length !== 1)
+                missing(
+                  'historical PLAN actual country physical body absent/ambiguous',
+                );
+              assertSocialPhysicalAttemptEnvelope({
+                command: historical,
+                state: checkpoint.beforeEmployment,
+                readFacts:
+                  payload.readFacts as unknown as SocialEmploymentReadFacts,
+                sourceEnvelope: {
+                  ...bodies[0]!,
+                  headWorldVersion: entry.transition.worldVersionBefore,
+                  headEventSequence: (BigInt(event.sequence) - 1n).toString(),
+                },
+                sha256Hex: digest,
+              });
+            }
+          }
+          const country = currentLifecycle.countries.find(
+            (c) => c.countryId === data.scope.countryId,
+          );
+          if (!country)
+            invalid('actual complete-prefix current country absent');
+          return {
+            worldVersion: lineage.headWorldVersion,
+            lastSequence: lineage.headEventSequence,
+            state: country.lifecycle.employment,
+          };
+        })()
+      : replayAuthoritativeEvents({
+          origin: createReplayOrigin({
+            worldId: lineage.seed.worldId,
+            lastSequence: '0',
+            worldVersion: '0',
+            state: data.admittedGenesis.state,
+            seed,
+            binding,
+            sha256Hex: digest,
+          }),
+          seed,
+          binding,
+          registry: createReplayReducerRegistry({ binding, reducers }),
+          transitions: lineage.transitions.map((v) => v.transition),
+          sha256Hex: digest,
+        });
   if (
     replay.worldVersion !== lineage.headWorldVersion ||
     replay.lastSequence !== lineage.headEventSequence

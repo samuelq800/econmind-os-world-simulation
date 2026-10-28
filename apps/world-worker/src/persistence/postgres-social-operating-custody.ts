@@ -700,7 +700,9 @@ export function createPostgresSocialOperatingCustody(configuration: {
             worldVersion: lineage.headWorldVersion,
             eventSequence: lineage.headEventSequence,
           },
-          taxonomyRevision: fullLifecycle.checkpoints.length
+          taxonomyRevision: fullLifecycle.countries.some(
+            (c) => c.offerOrigins.length > 0,
+          )
             ? 'SOCIAL_SOURCE_EFFECTS_V2'
             : 'SOCIAL_SOURCE_EFFECTS_V1',
           completePrefixBinding: hash({

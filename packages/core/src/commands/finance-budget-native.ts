@@ -9,6 +9,7 @@ import {
 } from '../serialization/canonical.js';
 import {
   canonicalSha256,
+  parseCanonicalCommand,
   validateCanonicalCommand,
   type CanonicalCommand,
   type Sha256Hex,
@@ -30,10 +31,38 @@ import {
   createFinalCommandReceipt,
   isCommitAuthorizationProof,
   reauthorizeCommitAuthorizationProof,
+  validateFinalReceiptForCommand,
+  type AuthoritativeTransition,
+  type FinalCommandReceipt,
   type CommitAuthorizationProof,
 } from './receipt.js';
 import { isAuthoritativeFinancialLedgerState } from '../opening/ledger-authority.js';
-import type { FinancialLedgerState } from '../finance/financial-ledger.js';
+import type {
+  FinancialLedgerState,
+  FinancialPosition,
+} from '../finance/financial-ledger.js';
+import {
+  readFinanceBudgetCapacityData,
+  type FinanceBudgetCapacityData,
+} from './finance-budget-capacity-data.js';
+import {
+  SOCIAL_POSITION_OFFER_CREATE_COMMAND,
+  SOCIAL_POSITION_OFFER_CREATED_EVENT,
+  createSocialPositionOfferLifecycleState,
+  reduceSocialPositionOfferCreatedEvent,
+  type SocialPositionOfferLifecycleState,
+  type SocialPositionPayrollReservation,
+} from './social-employment-position-lifecycle.js';
+import {
+  SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND,
+  SOCIAL_JOB_MATCH_DUE_COMMAND,
+  SOCIAL_SERVICE_PLAN_EVENT,
+  SOCIAL_JOB_MATCH_EVENT,
+  reduceSocialEmploymentServiceEvent,
+  type SocialEmploymentServiceState,
+  type SocialEmploymentWageOffer,
+} from './social-employment-service.js';
+import type { ReplayReducerEvent } from '../replay/replay.js';
 
 export const FINANCE_NATIVE_BUDGET_RULE =
   'FINANCE_ORDINARY_SELF_ADMINISTRATION_FULL_V1' as const;
@@ -74,6 +103,7 @@ export interface FinanceNativeBudgetBinding {
   readonly treasuryAccountId: string;
   readonly treasuryClaimId: string;
   readonly openingEncumbranceHash: string;
+  readonly capacityProjectionFingerprint?: string;
 }
 export interface FinanceNativeBudgetLine {
   readonly lineRef: string;
@@ -100,10 +130,68 @@ export interface FinanceNativeBudgetFrame {
   readonly command: CanonicalCommand;
   readonly events: readonly AuthoritativeEvent[];
 }
-export interface FinanceNativeBudgetSource {
+export interface FinanceNativeBudgetCanonicalFrame extends FinanceNativeBudgetFrame {
+  readonly transition: AuthoritativeTransition;
+  readonly receipt: FinalCommandReceipt;
+  readonly inventoryPostings: readonly unknown[];
+  readonly financialPostingBatches: readonly unknown[];
+}
+export interface FinanceNativeBudgetCapacityEncumbrance {
+  readonly reference: string;
+  readonly accountId: string;
+  readonly claimId: string;
+  readonly countryId: string;
+  readonly governmentEntityId: string;
+  readonly currency: string;
+  readonly amount: string;
+  readonly envelopeRef: string;
+  readonly effectivePeriodRef: string;
+  readonly eventId: string;
+  readonly policyHash: string;
+}
+export interface FinanceNativeBudgetMixedSocialCountry {
+  readonly countryId: string;
+  readonly lifecycle: SocialPositionOfferLifecycleState;
+  readonly offerOrigins: readonly {
+    readonly positionId: string;
+    readonly eventId: string;
+    readonly payloadHash: string;
+    readonly pointer: '/offer';
+    readonly fromSimTime: string;
+    readonly fromHead: {
+      readonly worldVersion: string;
+      readonly eventSequence: string;
+    };
+  }[];
+}
+export interface FinanceNativeBudgetMixedPrefixResult {
+  readonly budgetState: FinanceNativeBudgetState;
+  readonly budgetEncumbrances: readonly FinanceNativeBudgetCapacityEncumbrance[];
+  readonly socialCountries: readonly FinanceNativeBudgetMixedSocialCountry[];
+  readonly socialReservations: readonly SocialPositionPayrollReservation[];
+  readonly checkpoints: readonly {
+    readonly eventId: string;
+    readonly countryId: string;
+    readonly beforeEmployment: SocialEmploymentServiceState;
+    readonly afterEmployment: SocialEmploymentServiceState;
+  }[];
+}
+declare const mixedPrefixBrand: unique symbol;
+/** Core replay/lifetime evidence only. Never source admission or commit authority. */
+export interface FinanceNativeBudgetMixedPrefixEvidence {
+  readonly [mixedPrefixBrand]: true;
+}
+const mixedPrefixes = new WeakMap<
+  object,
+  {
+    readonly worldId: string;
+    readonly framesHash: string;
+    readonly result: Readonly<FinanceNativeBudgetMixedPrefixResult>;
+  }
+>();
+interface FinanceNativeBudgetSourceBase {
   readonly policy: FinanceNativeBudgetPolicy;
   readonly binding: FinanceNativeBudgetBinding;
-  readonly financialState: FinancialLedgerState;
   readonly openingEncumbrances: readonly {
     readonly reference: string;
     readonly accountId: string;
@@ -115,7 +203,19 @@ export interface FinanceNativeBudgetSource {
   readonly frames: readonly FinanceNativeBudgetFrame[];
   readonly worldVersion: string;
   readonly eventSequence: string;
+  readonly mixedPrefixEvidence?: FinanceNativeBudgetMixedPrefixEvidence;
 }
+export type FinanceNativeBudgetSource = FinanceNativeBudgetSourceBase &
+  (
+    | {
+        readonly financialState: FinancialLedgerState;
+        readonly capacityData?: never;
+      }
+    | {
+        readonly capacityData: FinanceBudgetCapacityData;
+        readonly financialState?: never;
+      }
+  );
 function invalid(code: string): never {
   throw new DomainError(
     DOMAIN_ERROR_CODES.TRANSITION_EVIDENCE_INVALID,
@@ -329,11 +429,350 @@ function kinds(p: BudgetPayload) {
     ? [FINANCE_NATIVE_BUDGET_EVENT_TYPES[0]]
     : FINANCE_NATIVE_BUDGET_EVENT_TYPES.slice(1);
 }
+function replayBudgetFrame(
+  state: FinanceNativeBudgetState,
+  frame: FinanceNativeBudgetFrame,
+  sha: Sha256Hex,
+): FinanceNativeBudgetState {
+  const c = frame.command,
+    p = payload(c, sha);
+  if (
+    c.worldId !== state.worldId ||
+    c.expectedWorldVersion !== state.worldVersion
+  )
+    invalid('COMPLETE_UNIQUE_BUDGET_PREFIX_REQUIRED');
+  const after = next(state, p),
+    types = kinds(p);
+  if (frame.events.length !== types.length)
+    invalid('COMPLETE_EVENT_GROUP_REQUIRED');
+  for (const [i, event] of frame.events.entries()) {
+    validateAuthoritativeEvent(event, sha);
+    const body = JSON.parse(event.canonicalPayload) as ReturnType<
+      typeof eventPayload
+    >;
+    checkedPolicy(c, p, body.policy, body.binding, sha);
+    if (
+      event.worldId !== c.worldId ||
+      event.causationCommandId !== c.commandId ||
+      event.correlationId !== c.correlationId ||
+      event.eventType !== types[i] ||
+      event.worldVersion !== after.worldVersion ||
+      event.sequence !==
+        (BigInt(state.eventSequence) + BigInt(i) + 1n).toString() ||
+      event.simTime.ticks !== c.simTime.ticks ||
+      !same(
+        body,
+        eventPayload(
+          c,
+          p,
+          body.policy,
+          body.binding,
+          state,
+          after,
+          i,
+          types.length,
+          sha,
+        ),
+      )
+    )
+      invalid('CANONICAL_BUDGET_EVENT_REPLAY_MISMATCH');
+  }
+  return freeze(after);
+}
+function frameHash(
+  frames: readonly FinanceNativeBudgetFrame[],
+  sha: Sha256Hex,
+) {
+  return hash(
+    frames.map((f) => ({ command: f.command, events: f.events })),
+    sha,
+  );
+}
+export function readFinanceNativeBudgetMixedPrefix(
+  evidence: FinanceNativeBudgetMixedPrefixEvidence,
+  worldId: string,
+  frames: readonly FinanceNativeBudgetFrame[],
+  sha: Sha256Hex,
+): Readonly<FinanceNativeBudgetMixedPrefixResult> {
+  const issued = mixedPrefixes.get(evidence);
+  if (
+    !issued ||
+    issued.worldId !== worldId ||
+    issued.framesHash !== frameHash(frames, sha)
+  )
+    invalid('GENUINE_EXACT_MIXED_PREFIX_EVIDENCE_REQUIRED');
+  return issued.result;
+}
+/** Whole ordered canonical groups only. The existing Budget/Social reducers
+ * establish effects; no caller no-effect classification or filtered/rebased
+ * budget prefix exists. All foreign families remain unsupported. */
+export function prepareFinanceNativeBudgetMixedPrefix(
+  input: {
+    readonly worldId: string;
+    readonly frames: readonly FinanceNativeBudgetCanonicalFrame[];
+    readonly socialCountries: readonly {
+      readonly countryId: string;
+      readonly state: SocialEmploymentServiceState;
+      readonly offers: readonly SocialEmploymentWageOffer[];
+    }[];
+  },
+  sha: Sha256Hex,
+): FinanceNativeBudgetMixedPrefixEvidence {
+  let budget: FinanceNativeBudgetState = {
+    worldId: input.worldId,
+    worldVersion: '0',
+    eventSequence: '0',
+    envelopes: [],
+  };
+  const countries = new Map<
+    string,
+    {
+      countryId: string;
+      lifecycle: SocialPositionOfferLifecycleState;
+      offerOrigins: FinanceNativeBudgetMixedSocialCountry['offerOrigins'][number][];
+    }
+  >();
+  const positionCountries = new Map<string, string>(),
+    poolCountries = new Map<string, string>();
+  for (const c of input.socialCountries) {
+    if (countries.has(c.countryId) || c.state.worldId !== input.worldId)
+      invalid('UNIQUE_SAME_WORLD_SOCIAL_ORIGINALS_REQUIRED');
+    for (const p of c.state.labour.positions) {
+      if (p.countryId !== c.countryId || positionCountries.has(p.positionId))
+        invalid('UNIQUE_COUNTRY_POSITION_ORIGINALS_REQUIRED');
+      positionCountries.set(p.positionId, c.countryId);
+    }
+    for (const p of c.state.servicePools) {
+      if (p.countryId !== c.countryId || poolCountries.has(p.poolId))
+        invalid('UNIQUE_COUNTRY_POOL_ORIGINALS_REQUIRED');
+      poolCountries.set(p.poolId, c.countryId);
+    }
+    if (
+      c.state.labour.aggregates.some((a) => a.countryId !== c.countryId) ||
+      c.offers.some(
+        (o) =>
+          o.countryId !== c.countryId ||
+          positionCountries.get(o.positionId) !== c.countryId,
+      )
+    )
+      invalid('COUNTRY_LABOUR_OFFER_ORIGINALS_REQUIRED');
+    countries.set(c.countryId, {
+      countryId: c.countryId,
+      lifecycle: createSocialPositionOfferLifecycleState(c.state, c.offers),
+      offerOrigins: [],
+    });
+  }
+  const caps = new Map<string, FinanceNativeBudgetCapacityEncumbrance>();
+  const checkpoints: FinanceNativeBudgetMixedPrefixResult['checkpoints'][number][] =
+    [];
+  const commandIds = new Set<string>(),
+    keys = new Set<string>(),
+    eventIds = new Set<string>();
+  let lastSimTime = 0n;
+  for (const frame of input.frames) {
+    const command = validateCanonicalCommand(frame.command, sha);
+    if (
+      command.worldId !== input.worldId ||
+      command.expectedWorldVersion !== budget.worldVersion ||
+      commandIds.has(command.commandId) ||
+      (command.idempotencyKey !== null && keys.has(command.idempotencyKey)) ||
+      command.simTime.ticks < lastSimTime
+    )
+      invalid('COMPLETE_UNIQUE_ORDERED_MIXED_PREFIX_REQUIRED');
+    if (
+      frame.inventoryPostings.length !== 0 ||
+      frame.financialPostingBatches.length !== 0
+    )
+      invalid('UNSUPPORTED_MIXED_PREFIX_POSTING_EFFECT');
+    const transition = createAuthoritativeTransition({
+      command,
+      worldVersionBefore: budget.worldVersion,
+      worldVersionAfter: (BigInt(budget.worldVersion) + 1n).toString(),
+      events: frame.events,
+    });
+    if (
+      !same(transition, frame.transition) ||
+      frame.receipt.outcome !== 'COMMITTED'
+    )
+      invalid('ACTUAL_CANONICAL_TRANSITION_RECEIPT_REQUIRED');
+    validateFinalReceiptForCommand({
+      command,
+      transition,
+      receipt: frame.receipt,
+    });
+    for (const [i, event] of frame.events.entries()) {
+      validateAuthoritativeEvent(event, sha);
+      if (
+        event.correctsEventId !== null ||
+        eventIds.has(event.eventId) ||
+        event.sequence !==
+          (BigInt(budget.eventSequence) + BigInt(i) + 1n).toString() ||
+        event.simTime.ticks !== command.simTime.ticks ||
+        event.correlationId !== command.correlationId
+      )
+        invalid('COMPLETE_UNIQUE_MIXED_EVENT_SEQUENCE_REQUIRED');
+      eventIds.add(event.eventId);
+    }
+    if (command.commandType === FINANCE_BUDGET_APPROPRIATION_COMMAND) {
+      budget = replayBudgetFrame(budget, frame, sha);
+      const body = JSON.parse(frame.events[0]!.canonicalPayload) as {
+        payload: BudgetPayload;
+        binding: FinanceNativeBudgetBinding;
+      };
+      const p = body.payload,
+        previous = caps.get(p.scope.envelopeRef);
+      if (p.operation === 'SET_ENVELOPE') {
+        caps.set(p.scope.envelopeRef, {
+          reference: `BUDGET_CAPACITY_${hash(p.scope, sha).slice(7).toUpperCase()}`,
+          accountId: body.binding.treasuryAccountId,
+          claimId: body.binding.treasuryClaimId,
+          countryId: p.scope.countryId,
+          governmentEntityId: p.scope.entityRef,
+          currency: p.currency,
+          amount: p.amount,
+          envelopeRef: p.scope.envelopeRef,
+          effectivePeriodRef: p.scope.effectivePeriodRef,
+          eventId: frame.events[0]!.eventId,
+          policyHash: body.binding.policyHash,
+        });
+      } else if (
+        !previous ||
+        previous.accountId !== body.binding.treasuryAccountId ||
+        previous.claimId !== body.binding.treasuryClaimId ||
+        previous.currency !== p.currency ||
+        previous.countryId !== p.scope.countryId
+      )
+        invalid('BUDGET_LINE_DIFFERS_FROM_REAL_CAPACITY_ACCOUNT');
+    } else {
+      const country = countries.get(command.countryId);
+      if (!country) invalid('SOCIAL_COUNTRY_ORIGINALS_REQUIRED');
+      const type =
+        command.commandType === SOCIAL_POSITION_OFFER_CREATE_COMMAND
+          ? SOCIAL_POSITION_OFFER_CREATED_EVENT
+          : command.commandType === SOCIAL_EMPLOYMENT_SERVICE_PLAN_COMMAND
+            ? SOCIAL_SERVICE_PLAN_EVENT
+            : command.commandType === SOCIAL_JOB_MATCH_DUE_COMMAND
+              ? SOCIAL_JOB_MATCH_EVENT
+              : null;
+      const event = frame.events[0];
+      if (
+        type === null ||
+        !event ||
+        frame.events.length !== 1 ||
+        event.eventType !== type
+      )
+        invalid('UNSUPPORTED_MIXED_PREFIX_FAMILY');
+      const payload = JSON.parse(event.canonicalPayload);
+      if (!same(parseCanonicalCommand(payload.command, sha), command))
+        invalid('SOCIAL_EMBEDDED_CANONICAL_COMMAND_DIFFERS');
+      const replayEvent: ReplayReducerEvent = {
+        transitionId: command.commandId,
+        worldId: event.worldId,
+        eventId: event.eventId,
+        causationCommandId: event.causationCommandId,
+        correctsEventId: event.correctsEventId,
+        eventType: event.eventType,
+        sequence: event.sequence,
+        worldVersionBefore: transition.worldVersionBefore,
+        worldVersionAfter: transition.worldVersionAfter,
+        simTime: event.simTime,
+        payload,
+      };
+      const beforeEmployment = country.lifecycle.employment;
+      if (type === SOCIAL_POSITION_OFFER_CREATED_EVENT) {
+        if (positionCountries.has(payload.offer?.positionId))
+          invalid('GLOBAL_POSITION_ID_ALREADY_OCCUPIED');
+        const funding = payload.readFacts?.funding;
+        if (!funding || !Array.isArray(funding.priorReservations))
+          invalid('SOCIAL_ACTUAL_PRIOR_CAPACITY_REQUIRED');
+        for (const cap of caps.values())
+          if (
+            cap.countryId === command.countryId &&
+            cap.accountId === funding.accountId
+          ) {
+            if (
+              cap.currency !== funding.currency ||
+              cap.governmentEntityId !== funding.ownerId ||
+              funding.priorReservations.filter(
+                (r: { reservationId: string; amount: string }) =>
+                  r.reservationId === cap.reference && r.amount === cap.amount,
+              ).length !== 1
+            )
+              invalid('SOCIAL_OMITS_EXISTING_BUDGET_CAPACITY');
+          }
+        country.lifecycle = reduceSocialPositionOfferCreatedEvent({
+          state: country.lifecycle,
+          event: replayEvent,
+          sha256Hex: sha,
+        });
+        positionCountries.set(payload.offer.positionId, country.countryId);
+        country.offerOrigins.push({
+          positionId: payload.offer.positionId,
+          eventId: event.eventId,
+          payloadHash: event.payloadHash,
+          pointer: '/offer',
+          fromSimTime: event.simTime.toCanonicalValue(),
+          fromHead: {
+            worldVersion: event.worldVersion,
+            eventSequence: event.sequence,
+          },
+        });
+      } else
+        country.lifecycle = freeze({
+          ...country.lifecycle,
+          employment: reduceSocialEmploymentServiceEvent({
+            state: beforeEmployment,
+            event: replayEvent,
+            sha256Hex: sha,
+          }),
+        });
+      checkpoints.push({
+        eventId: event.eventId,
+        countryId: country.countryId,
+        beforeEmployment,
+        afterEmployment: country.lifecycle.employment,
+      });
+      budget = freeze({
+        ...budget,
+        worldVersion: transition.worldVersionAfter,
+        eventSequence: event.sequence,
+      });
+    }
+    commandIds.add(command.commandId);
+    if (command.idempotencyKey !== null) keys.add(command.idempotencyKey);
+    lastSimTime = command.simTime.ticks;
+  }
+  const socialCountries = [...countries.values()];
+  const result = freeze({
+    budgetState: budget,
+    budgetEncumbrances: [...caps.values()],
+    socialCountries,
+    socialReservations: socialCountries.flatMap(
+      (c) => c.lifecycle.reservations,
+    ),
+    checkpoints,
+  });
+  const evidence = Object.freeze({}) as FinanceNativeBudgetMixedPrefixEvidence;
+  mixedPrefixes.set(evidence, {
+    worldId: input.worldId,
+    framesHash: frameHash(input.frames, sha),
+    result,
+  });
+  return evidence;
+}
 export function replayFinanceNativeBudgetHistory(
   worldId: string,
   frames: readonly FinanceNativeBudgetFrame[],
   sha: Sha256Hex,
+  mixedEvidence?: FinanceNativeBudgetMixedPrefixEvidence,
 ): FinanceNativeBudgetState {
+  if (mixedEvidence !== undefined)
+    return readFinanceNativeBudgetMixedPrefix(
+      mixedEvidence,
+      worldId,
+      frames,
+      sha,
+    ).budgetState;
   let state: FinanceNativeBudgetState = {
     worldId,
     worldVersion: '0',
@@ -343,54 +782,14 @@ export function replayFinanceNativeBudgetHistory(
   const ids = new Set<string>(),
     keys = new Set<string>();
   for (const frame of frames) {
-    const c = frame.command,
-      p = payload(c, sha);
     if (
-      c.worldId !== worldId ||
-      c.expectedWorldVersion !== state.worldVersion ||
-      ids.has(c.commandId) ||
-      keys.has(c.idempotencyKey!)
+      ids.has(frame.command.commandId) ||
+      keys.has(frame.command.idempotencyKey!)
     )
       invalid('COMPLETE_UNIQUE_BUDGET_PREFIX_REQUIRED');
-    const after = next(state, p),
-      types = kinds(p);
-    if (frame.events.length !== types.length)
-      invalid('COMPLETE_EVENT_GROUP_REQUIRED');
-    for (const [i, event] of frame.events.entries()) {
-      validateAuthoritativeEvent(event, sha);
-      const body = JSON.parse(event.canonicalPayload) as ReturnType<
-        typeof eventPayload
-      >;
-      checkedPolicy(c, p, body.policy, body.binding, sha);
-      if (
-        event.worldId !== c.worldId ||
-        event.causationCommandId !== c.commandId ||
-        event.correlationId !== c.correlationId ||
-        event.eventType !== types[i] ||
-        event.worldVersion !== after.worldVersion ||
-        event.sequence !==
-          (BigInt(state.eventSequence) + BigInt(i) + 1n).toString() ||
-        event.simTime.ticks !== c.simTime.ticks ||
-        !same(
-          body,
-          eventPayload(
-            c,
-            p,
-            body.policy,
-            body.binding,
-            state,
-            after,
-            i,
-            types.length,
-            sha,
-          ),
-        )
-      )
-        invalid('CANONICAL_BUDGET_EVENT_REPLAY_MISMATCH');
-    }
-    ids.add(c.commandId);
-    keys.add(c.idempotencyKey!);
-    state = after;
+    state = replayBudgetFrame(state, frame, sha);
+    ids.add(frame.command.commandId);
+    keys.add(frame.command.idempotencyKey!);
   }
   return freeze(state);
 }
@@ -405,23 +804,81 @@ export function evaluateFinanceNativeBudgetSource(input: {
   const { command, source, sha256Hex: sha } = input,
     p = payload(command, sha);
   checkedPolicy(command, p, source.policy, source.binding, sha);
+  if (
+    source.frames.some(
+      (frame) =>
+        frame.command.simTime.ticks > command.simTime.ticks ||
+        frame.events.some(
+          (event) => event.simTime.ticks > command.simTime.ticks,
+        ),
+    )
+  )
+    invalid('COMMAND_PRECEDES_ACTUAL_PREFIX');
   const before = replayFinanceNativeBudgetHistory(
     command.worldId,
     source.frames,
     sha,
+    source.mixedPrefixEvidence,
   );
   if (
     before.worldVersion !== command.expectedWorldVersion ||
     before.worldVersion !== source.worldVersion ||
-    before.eventSequence !== source.eventSequence ||
-    !isAuthoritativeFinancialLedgerState(source.financialState) ||
-    source.financialState.worldId !== command.worldId ||
-    source.financialState.worldVersion !== before.worldVersion
+    before.eventSequence !== source.eventSequence
   )
     invalid('ACTUAL_CANONICAL_SOURCE_HEAD_REQUIRED');
-  const treasury = source.financialState.positions.find(
-    (v) => v.account.accountId === source.binding.treasuryAccountId,
-  );
+  let treasury: FinancialPosition | undefined;
+  if (source.capacityData !== undefined) {
+    if (
+      source.financialState !== undefined ||
+      source.mixedPrefixEvidence !== undefined
+    )
+      invalid('CAPACITY_DATA_REQUIRES_COMPLETE_ZERO_POSTING_BUDGET_PREFIX');
+    const capacity = readFinanceBudgetCapacityData(source.capacityData);
+    if (
+      capacity.worldId !== command.worldId ||
+      capacity.countryId !== command.countryId ||
+      capacity.seedId !== source.binding.seedRef ||
+      capacity.seedFingerprint !== source.binding.seedFingerprint ||
+      capacity.admissionRef !== source.binding.admissionRef ||
+      capacity.governmentEntityId !== source.policy.governmentEntityId ||
+      capacity.financialSourceId !== source.binding.financialSourceId ||
+      capacity.financialOriginalsSha256 !== source.binding.originalsSHA256 ||
+      hash(capacity, sha) !== source.binding.capacityProjectionFingerprint
+    )
+      invalid('CAPACITY_DATA_PROTECTED_SOURCE_MISMATCH');
+    const reference =
+      'OPENING_FUNDING_TOTAL_' +
+      capacity.openingFunding.recordsSha256.slice(7).toUpperCase();
+    if (
+      !same(source.openingEncumbrances, [
+        {
+          reference,
+          accountId: capacity.treasury.assetAccount.accountId,
+          amount: capacity.openingFunding.totalAmount,
+          currency: capacity.treasury.assetAccount.currency,
+        },
+      ])
+    )
+      invalid('COMPLETE_PUBLISHED_OPENING_FUNDING_REQUIRED');
+    treasury = {
+      account: capacity.treasury.assetAccount,
+      netDebitBalance: Money.from(
+        capacity.treasury.assetAmount,
+        capacity.treasury.assetAccount.currency,
+      ),
+    };
+  } else {
+    if (
+      !source.financialState ||
+      !isAuthoritativeFinancialLedgerState(source.financialState) ||
+      source.financialState.worldId !== command.worldId ||
+      source.financialState.worldVersion !== before.worldVersion
+    )
+      invalid('ACTUAL_CANONICAL_SOURCE_HEAD_REQUIRED');
+    treasury = source.financialState.positions.find(
+      (v) => v.account.accountId === source.binding.treasuryAccountId,
+    );
+  }
   if (
     !treasury ||
     treasury.account.countryId !== command.countryId ||
@@ -438,6 +895,32 @@ export function evaluateFinanceNativeBudgetSource(input: {
       source.openingEncumbrances.length
   )
     invalid('EXACT_OPENING_ENCUMBRANCE_COVERAGE_REQUIRED');
+  if (source.mixedPrefixEvidence !== undefined) {
+    const mixed = readFinanceNativeBudgetMixedPrefix(
+      source.mixedPrefixEvidence,
+      command.worldId,
+      source.frames,
+      sha,
+    );
+    for (const r of mixed.socialReservations)
+      if (
+        r.countryId === command.countryId &&
+        r.accountId === source.binding.treasuryAccountId
+      ) {
+        if (
+          r.employerId !== source.policy.governmentEntityId ||
+          r.currency !== p.currency ||
+          source.openingEncumbrances.filter(
+            (v) =>
+              v.reference === r.reservationId &&
+              v.accountId === r.accountId &&
+              v.currency === r.currency &&
+              v.amount === r.amount,
+          ).length !== 1
+        )
+          invalid('SOURCE_OMITS_ACTUAL_SOCIAL_PAYROLL_RESERVATION');
+      }
+  }
   let protectedAmount = Money.from('0', p.currency);
   for (const item of source.openingEncumbrances) {
     if (

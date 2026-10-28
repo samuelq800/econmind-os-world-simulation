@@ -31,6 +31,18 @@
     "./postwar-office-runtime": {
       "types": "./dist/runtime-preparation/postwar-office-runtime-exports.d.ts",
       "default": "./dist/runtime-preparation/postwar-office-runtime-exports.js"
+    },
+    "./finance-budget-runtime": {
+      "types": "./dist/runtime-preparation/finance-budget-runtime-exports.d.ts",
+      "default": "./dist/runtime-preparation/finance-budget-runtime-exports.js"
+    },
+    "./postwar-financial-current-read": {
+      "types": "./dist/runtime-preparation/postwar-financial-current-exports.d.ts",
+      "default": "./dist/runtime-preparation/postwar-financial-current-exports.js"
+    },
+    "./postwar-physical-opening-facts-read": {
+      "types": "./dist/runtime-preparation/postwar-physical-opening-exports.d.ts",
+      "default": "./dist/runtime-preparation/postwar-physical-opening-exports.js"
     }
   },
   "scripts": {

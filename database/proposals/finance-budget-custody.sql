@@ -89,6 +89,9 @@ begin
  perform set_config('econmind.finance_budget_source_world',p_world,true);
  select * into l from world_v2.world_writer_lease x where x.world_id=p_world and x.holder_id=p_worker and x.acquired_at_real<=p_at and x.renewed_at_real<=p_at and x.lease_expires_at_real>p_at and x.lease_expires_at_real>clock_timestamp() for share;
  if not found then raise exception 'BUDGET_CURRENT_WRITER_LEASE_REQUIRED'using errcode='42501';end if;
+ -- Keep the existing lease→H→authority order even during intake preflight;
+ -- authority/entitlement publishers serialize their changes through H.
+ perform 1 from world_v2.world_head x where x.world_id=p_world for share;
  select * into o from world_v2.finance_budget_policy_original x where x.world_id=p_world and x.country_id=p_country and x.envelope_ref=p_envelope and x.period_ref=p_period for share;
  if not found then raise exception 'BUDGET_ADOPTED_POLICY_AND_PERIOD_MISSING'using errcode='23503';end if;
  if exists(select 1 from world_v2.finance_budget_policy_revocation x where x.policy_ref=o.policy_ref)then raise exception 'BUDGET_SOURCE_POLICY_REVOKED'using errcode='42501';end if;

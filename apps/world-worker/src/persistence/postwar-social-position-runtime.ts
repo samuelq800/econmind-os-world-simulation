@@ -46,6 +46,7 @@ import type {
   AtomicTransitionCandidateFactory,
   AtomicTransitionDraft,
 } from './atomic-transition-repository.js';
+import type { FinanceNativeBudgetCapacityEncumbrance } from '@econmind/core/finance-budget-native';
 export const SOCIAL_POSITION_SOURCE_PURPOSE =
   'SOCIAL_EMPLOYMENT_POSITION_OFFER_CREATE_SOURCE_EVALUATION_V1' as const;
 const digest = (s: string) => createHash('sha256').update(s).digest('hex');
@@ -333,6 +334,47 @@ export function createPostwarSocialSourceRoleScope(configuration: {
     },
   });
 }
+/** Pure DTO projection only, never source admission or a budget grant. The
+ * caller is the held-originals runtime after complete shared Core replay.
+ * A LINE spends its envelope's capacity and creates no additional cap here. */
+export function projectPostwarSocialBudgetReservations(
+  caps: readonly FinanceNativeBudgetCapacityEncumbrance[],
+  funding: Readonly<{
+    accountRef: string;
+    countryId: string;
+    claimId: string;
+    payerEntityId: string;
+    payerRole: string;
+    currency: string;
+  }>,
+) {
+  if (funding.payerRole !== 'GOV')
+    invalid('actual GOV Budget capacity required');
+  const seen = new Set<string>();
+  return Object.freeze(
+    caps
+      .filter((cap) => cap.accountId === funding.accountRef)
+      .map((cap) => {
+        if (
+          cap.countryId !== funding.countryId ||
+          cap.claimId !== funding.claimId ||
+          cap.governmentEntityId !== funding.payerEntityId ||
+          cap.currency !== funding.currency ||
+          seen.has(cap.reference)
+        )
+          invalid(
+            'exact unique canonical Budget capacity account and owner required',
+          );
+        seen.add(cap.reference);
+        return Object.freeze({
+          reservationId: cap.reference,
+          sourceRef: cap.eventId,
+          amount: Money.from(cap.amount, cap.currency).toCanonicalValue()
+            .amount,
+        });
+      }),
+  );
+}
 export function createPostwarSocialPositionRuntime(configuration: {
   readonly database: SqlDatabase;
   readonly workerId: string;
@@ -408,6 +450,10 @@ export function createPostwarSocialPositionRuntime(configuration: {
       (p) => p.account.accountId === funding.accountRef,
     );
     if (!position) invalid('actual canonical TGA asset missing');
+    const budgetReservations = projectPostwarSocialBudgetReservations(
+      replay.budgetEncumbrances,
+      funding,
+    );
     const { offer: _validationOnlyOffer, ...employment } =
       originalCountry.validationReadFacts.facts;
     void _validationOnlyOffer;
@@ -454,6 +500,7 @@ export function createPostwarSocialPositionRuntime(configuration: {
               funding.currency,
             ).toCanonicalValue().amount,
           },
+          ...budgetReservations,
         ],
       },
     };
