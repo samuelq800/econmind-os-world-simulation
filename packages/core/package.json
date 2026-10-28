@@ -24,6 +24,10 @@
       "types": "./dist/commands/finance-budget-event-wire-contract.d.ts",
       "default": "./dist/commands/finance-budget-event-wire-contract.js"
     },
+    "./finance-budget-native": {
+      "types": "./dist/commands/finance-budget-native.d.ts",
+      "default": "./dist/commands/finance-budget-native.js"
+    },
     "./economic-read-visibility-contract": {
       "types": "./dist/authorization/economic-read-visibility-contract.d.ts",
       "default": "./dist/authorization/economic-read-visibility-contract.js"
