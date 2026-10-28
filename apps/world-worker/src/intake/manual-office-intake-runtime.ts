@@ -211,14 +211,21 @@ export async function preflightManualOfficeIntakeRuntime(
     );
     return ['PREPARED', 'READY'].includes(localRuntime.consumer.state());
   } catch (error) {
+    // Only a confirmed database rollback can expose its semantic source
+    // denial. An unknown COMMIT outcome or cleanup failure stays operational.
+    const semantic =
+      error instanceof PostgresTransactionError &&
+      error.outcome === 'ROLLED_BACK'
+        ? error.cause
+        : error;
     if (
       isManualOfficeSourceMissing(error) ||
       (error instanceof PostgresTransactionError &&
         error.outcome === 'ROLLED_BACK' &&
         isManualOfficeSourceMissing(error.cause)) ||
-      (error instanceof DomainError &&
-        (error.code === DOMAIN_ERROR_CODES.TRANSITION_EVIDENCE_INVALID ||
-          error.code === DOMAIN_ERROR_CODES.OPENING_SEED_INVALID))
+      (semantic instanceof DomainError &&
+        (semantic.code === DOMAIN_ERROR_CODES.TRANSITION_EVIDENCE_INVALID ||
+          semantic.code === DOMAIN_ERROR_CODES.OPENING_SEED_INVALID))
     )
       return false;
     throw error;

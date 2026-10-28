@@ -1,8 +1,11 @@
 /** Fixed SQL issuer/reader protocol over admitted canonical full-E03 originals.
  * No snapshot/request facts, admission signature, registry or production install. */
 import { createHash } from 'node:crypto';
+import { DatabaseError } from 'pg';
 import {
   canonicalSerialize,
+  DomainError,
+  DOMAIN_ERROR_CODES,
   canonicalHashInput,
   canonicalSha256,
   type OpeningSeed,
@@ -40,6 +43,83 @@ const hash = (value: unknown) =>
 type Row = Record<string, unknown>;
 function invalid(reason: string): never {
   throw Error(`SOCIAL_OPERATING_CUSTODY: ${reason}`);
+}
+const SOURCE_REGISTRATION_LOCK_QUERY =
+  'select world_id,country_id,registration_ref,seed_fingerprint,source_id,source_payload_hash,admission_ref,issuer_role,revision::text from world_v2.lock_social_operating_source($1,$2)';
+type SourceDenialReason =
+  | 'REGISTERED_SOURCE_UNAVAILABLE'
+  | 'OPENING_ADMISSION_UNAVAILABLE'
+  | 'OPENING_ADMISSION_REVOKED';
+class SocialOperatingSourceUnavailable extends DomainError {
+  override readonly cause: DatabaseError;
+  constructor(
+    readonly reason: SourceDenialReason,
+    cause: DatabaseError,
+  ) {
+    super(
+      DOMAIN_ERROR_CODES.TRANSITION_EVIDENCE_INVALID,
+      `SOCIAL_OPERATING_SOURCE_UNAVAILABLE:${reason}`,
+    );
+    this.name = 'SocialOperatingSourceUnavailable';
+    this.cause = cause;
+  }
+}
+function sourceDenial(error: unknown): SourceDenialReason | null {
+  // Interpret only actual PostgreSQL RAISE evidence from this fixed lock call.
+  // Caller-shaped objects, ordinary errors, permission/network failures and
+  // other SQLSTATE 55000 conditions remain operational failures.
+  if (
+    !(error instanceof DatabaseError) ||
+    error.code !== '55000' ||
+    error.severity !== 'ERROR'
+  )
+    return null;
+  const known = {
+    SOCIAL_SOURCE_NOT_REGISTERED_OR_REVOKED: [
+      'REGISTERED_SOURCE_UNAVAILABLE',
+      'lock_social_operating_source\\(text,text\\)',
+    ],
+    SOCIAL_REAL_IMMUTABLE_ADMISSION_REQUIRED: [
+      'OPENING_ADMISSION_UNAVAILABLE',
+      'social_source_admission\\(text\\)',
+    ],
+    SOCIAL_REAL_SIGNED_ADMISSION_REVOKED_OR_MISSING: [
+      'OPENING_ADMISSION_REVOKED',
+      'social_source_admission\\(text\\)',
+    ],
+  } as const;
+  if (!Object.hasOwn(known, error.message)) return null;
+  const [reason, routine] = known[error.message as keyof typeof known];
+  return new RegExp(
+    `(?:^|\\n)PL/pgSQL function (?:world_v2\\.)?${routine} line [0-9]+ at RAISE(?:\\n|$)`,
+    'u',
+  ).test(error.where ?? '')
+    ? reason
+    : null;
+}
+async function lockRegisteredSourceFrom(
+  tx: SqlExecutor,
+  world: string,
+  country: string,
+) {
+  await tx.query('savepoint social_operating_source_lock');
+  try {
+    const result = await tx.query<Row>(SOURCE_REGISTRATION_LOCK_QUERY, [
+      world,
+      country,
+    ]);
+    await tx.query('release savepoint social_operating_source_lock');
+    return result;
+  } catch (error) {
+    const reason = sourceDenial(error);
+    if (reason === null || !(error instanceof DatabaseError)) throw error;
+    // A PostgreSQL exception aborts its subtransaction. Recover that exact
+    // lock scope so RoleScope can genuinely restore the writer before the
+    // outer adapter confirms rollback and exposes the semantic denial.
+    await tx.query('rollback to savepoint social_operating_source_lock');
+    await tx.query('release savepoint social_operating_source_lock');
+    throw new SocialOperatingSourceUnavailable(reason, error);
+  }
 }
 function freeze<T>(value: T): T {
   if (value && typeof value === 'object' && !ArrayBuffer.isView(value)) {
@@ -251,10 +331,7 @@ export function createPostgresSocialOperatingOriginalReader(configuration: {
       const world = ref(selection.worldId),
         country = ref(selection.countryId);
       const lock = async () => {
-        const result = await tx.query<Row>(
-          'select world_id,country_id,registration_ref,seed_fingerprint,source_id,source_payload_hash,admission_ref,issuer_role,revision::text from world_v2.lock_social_operating_source($1,$2)',
-          [world, country],
-        );
+        const result = await lockRegisteredSourceFrom(tx, world, country);
         if (
           result.rows.length !== 1 ||
           !result.rows[0] ||
@@ -350,12 +427,10 @@ export function createPostgresSocialOperatingCustody(configuration: {
         !same(request.requiredMaterialPaths, SOCIAL_SOURCE_MATERIAL_PATHS)
       )
         invalid('closed Social material purpose required');
-      const locked = await tx.query<Row>(
-          'select world_id,country_id,registration_ref,seed_fingerprint,source_id,source_payload_hash,admission_ref,issuer_role,revision::text from world_v2.lock_social_operating_source($1,$2)',
-          [
-            ref(request.publicationHead.worldId),
-            ref(request.commandBinding.countryId),
-          ],
+      const locked = await lockRegisteredSourceFrom(
+          tx,
+          ref(request.publicationHead.worldId),
+          ref(request.commandBinding.countryId),
         ),
         registration = locked.rows[0];
       if (
