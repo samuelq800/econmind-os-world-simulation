@@ -55,6 +55,10 @@ export interface TrustedHostConsumers {
   readonly projection: ReturnType<typeof installOfficeProjection>;
   readonly financial: ReturnType<typeof installFinancialIntake>;
   readonly office?: ReturnType<typeof installOfficeCommand>;
+  readonly mainFields?: Readonly<{
+    connect(binding: OfficeProjectionBinding): void;
+    disconnect(): void;
+  }>;
   readonly localTrade: Pick<
     ReturnType<typeof installCountryRuntime>,
     'disconnect'
@@ -132,8 +136,8 @@ function validFinancial(
   );
 }
 
-/** SOURCE_ONLY composition of already-installed consumers. Connecting never
- * reads, inspects, creates an original request, submits, replays or starts Clock. */
+/** Explicit composition of installed consumers. A main-field consumer may
+ * refresh bounded readouts; connecting never creates or submits a command. */
 export function installTrustedHost(
   document: Document,
   host: Window,
@@ -165,6 +169,7 @@ export function installTrustedHost(
     consumers.projection.disconnect();
     consumers.financial.disconnect();
     consumers.office?.disconnect();
+    consumers.mainFields?.disconnect();
   }
   function disconnect(code = 'HOST_DISCONNECTED') {
     const previous = active;
@@ -303,6 +308,7 @@ export function installTrustedHost(
         });
         connecting = true;
         consumers.projection.connect({ ...p, read: session.read });
+        consumers.mainFields?.connect({ ...p, read: session.read });
         if (active !== session || !session.isCurrent()) return false;
         if (f && original) {
           financialConfigured = true;
